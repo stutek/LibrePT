@@ -41,3 +41,12 @@ Every response and tool action must drive measurable, continuous progress toward
 To prevent drift and redundant documentation, agents MUST NOT duplicate feature lists or domain specifications in this rules file. Always reference the canonical sources of truth:
 - **System Architecture & Features**: See [README.md](file:///home/simon/Projects/OpenPT/README.md).
 - **Functional Workflows & Use Cases**: See [use_cases/](file:///home/simon/Projects/OpenPT/use_cases/).
+
+---
+
+## 4. Open Knowledge Format (OKF v0.1) Documentation Standards
+
+All specifications, architectural documentation, and use cases in this repository must strictly adhere to Google's **Open Knowledge Format (OKF v0.1)**:
+1. **Mandatory YAML Frontmatter**: Every Markdown file MUST begin with YAML frontmatter containing at minimum the `type` field (`overview`, `guidelines`, `use_case`, `index`), along with `title`, `description`, `status`, and `tags`.
+2. **Directory Indexing (`INDEX.md`)**: Every directory containing knowledge files MUST maintain an `INDEX.md` catalog table listing its files, their `type`, and clickable Markdown links.
+3. **Graph Interconnectivity**: Use explicit Markdown links (`[label](file:///path)`) to connect related concepts across files so AI agents can traverse the repository knowledge graph reliably.
