@@ -1,0 +1,14 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor configurations
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Cache and local databases
+.gemini/
+.agents/
+*.log

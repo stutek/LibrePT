@@ -1,0 +1,171 @@
+// mockData.js - Default exercises, clients, and history for OpenPT
+
+export const DEFAULT_EXERCISES = [
+  // Chest
+  { id: 'ex-bench-barbell', name: 'Barbell Bench Press', category: 'Chest', instructions: 'Lie flat on a bench, grip the barbell slightly wider than shoulder width, lower it to mid-chest, and push up.' },
+  { id: 'ex-bench-dumbbell', name: 'Dumbbell Bench Press', category: 'Chest', instructions: 'Lie on a flat bench with a dumbbell in each hand, lower the dumbbells to chest level, then press them up.' },
+  { id: 'ex-incline-db', name: 'Incline Dumbbell Press', category: 'Chest', instructions: 'Set bench to a 30-45 degree incline. Press dumbbells upwards from chest height.' },
+  { id: 'ex-cable-fly', name: 'Cable Chest Fly', category: 'Chest', instructions: 'Position pulleys at shoulder height, grab handles, and bring hands together in a wide hugging motion.' },
+  { id: 'ex-pushups', name: 'Push-Ups', category: 'Chest', instructions: 'Keep body in a straight plank, lower chest to floor, and push back up.' },
+
+  // Back
+  { id: 'ex-pullups', name: 'Pull-Ups', category: 'Back', instructions: 'Hang from a bar with palms facing away. Pull chest up to the bar.' },
+  { id: 'ex-lat-pulldown', name: 'Lat Pulldown', category: 'Back', instructions: 'Sit at pulldown station, pull bar down to upper chest, engaging the lats.' },
+  { id: 'ex-barbell-row', name: 'Barbell Row', category: 'Back', instructions: 'Hinge at hips, pull barbell towards lower abdomen keeping back straight.' },
+  { id: 'ex-dumbbell-row', name: 'Single-Arm Dumbbell Row', category: 'Back', instructions: 'Place one knee/hand on bench, pull dumbbell to hip with other arm.' },
+  { id: 'ex-facepull', name: 'Face Pulls', category: 'Back', instructions: 'Pull rope attachment from high pulley towards forehead, pulling elbows wide.' },
+
+  // Legs
+  { id: 'ex-barbell-squat', name: 'Barbell Back Squat', category: 'Legs', instructions: 'Rest bar on upper back, squat down until thighs are parallel to floor, push back up.' },
+  { id: 'ex-romanian-deadlift', name: 'Romanian Deadlift (RDL)', category: 'Legs', instructions: 'Hinge at hips with micro-bend in knees, lower weight down shins, squeeze glutes to stand.' },
+  { id: 'ex-leg-press', name: 'Leg Press', category: 'Legs', instructions: 'Sit in machine, unlock platform, lower knees toward chest, press back up without locking knees.' },
+  { id: 'ex-goblet-squat', name: 'Dumbbell Goblet Squat', category: 'Legs', instructions: 'Hold a single dumbbell vertically at chest height, squat deep.' },
+  { id: 'ex-leg-extension', name: 'Leg Extension', category: 'Legs', instructions: 'Sit in machine, extend legs fully, pause at top, and lower slowly.' },
+  { id: 'ex-lying-leg-curl', name: 'Lying Leg Curl', category: 'Legs', instructions: 'Lie face down, curl roller pad towards glutes, control return.' },
+  { id: 'ex-calf-raise', name: 'Standing Calf Raise', category: 'Legs', instructions: 'Raise heels as high as possible on a block, stretch down deep.' },
+
+  // Shoulders
+  { id: 'ex-overhead-barbell', name: 'Barbell Overhead Press', category: 'Shoulders', instructions: 'Press barbell from shoulder height overhead to full lockout, head through at top.' },
+  { id: 'ex-lateral-raise', name: 'Dumbbell Lateral Raise', category: 'Shoulders', instructions: 'Stand tall, raise dumbbells out to sides until arms are parallel to the floor.' },
+  { id: 'ex-shoulder-db', name: 'Dumbbell Shoulder Press', category: 'Shoulders', instructions: 'Sit or stand, press dumbbells from ear level overhead.' },
+
+  // Arms
+  { id: 'ex-bicep-db-curl', name: 'Dumbbell Bicep Curl', category: 'Arms', instructions: 'Rotate palms up as you curl dumbbells towards shoulders, keeping elbows locked at sides.' },
+  { id: 'ex-hammer-curl', name: 'Dumbbell Hammer Curl', category: 'Arms', instructions: 'Curl dumbbells with neutral grip (palms facing each other).' },
+  { id: 'ex-tricep-pushdown', name: 'Cable Tricep Pushdown', category: 'Arms', instructions: 'Push rope or bar attachment down by extending elbows, keeping upper arms still.' },
+  { id: 'ex-skull-crusher', name: 'EZ-Bar Skull Crusher', category: 'Arms', instructions: 'Lie on bench, lower bar to forehead by bending elbows, then extend.' },
+
+  // Core
+  { id: 'ex-plank', name: 'Plank', category: 'Core', instructions: 'Hold straight body line resting on forearms and toes. Squeeze core and glutes.' },
+  { id: 'ex-hanging-raise', name: 'Hanging Knee Raise', category: 'Core', instructions: 'Hang from pull-up bar, raise knees to chest height slowly without swinging.' },
+  { id: 'ex-ab-mat-situp', name: 'Abmat Sit-up', category: 'Core', instructions: 'Sit with soles of feet together, touch floor behind head, sit up and touch toes.' },
+  { id: 'ex-russian-twist', name: 'Russian Twist', category: 'Core', instructions: 'Sit, lean back slightly, lift feet, rotate torso tapping hands side-to-side.' }
+];
+
+export const DEFAULT_CLIENTS = [
+  {
+    id: 'client-jane-doe',
+    name: 'Jane Doe',
+    avatar: 'JD',
+    joinedDate: '2026-03-15',
+    goals: 'Strength gain, building shoulder mobility, and improving squat form.',
+    weightHistory: [
+      { date: '2026-03-15', value: 66.2 },
+      { date: '2026-04-15', value: 65.5 },
+      { date: '2026-05-15', value: 64.9 },
+      { date: '2026-06-15', value: 64.8 },
+      { date: '2026-07-01', value: 64.6 }
+    ],
+    notes: 'Slight left shoulder tightness during overhead movements. Keep warmups thorough. Enjoys tracking RPE (Rate of Perceived Exertion).',
+    active: true
+  },
+  {
+    id: 'client-john-smith',
+    name: 'John Smith',
+    avatar: 'JS',
+    joinedDate: '2026-05-01',
+    goals: 'Fat loss, cardiovascular endurance, and recovering functional knee strength.',
+    weightHistory: [
+      { date: '2026-05-01', value: 89.4 },
+      { date: '2026-06-01', value: 87.2 },
+      { date: '2026-07-01', value: 85.8 }
+    ],
+    notes: 'Knee reconstruction surgery in 2024. Keep back squats at moderate load and monitor depth. Avoid high-impact jumping.',
+    active: true
+  },
+  {
+    id: 'client-sarah-jenkins',
+    name: 'Sarah Jenkins',
+    avatar: 'SJ',
+    joinedDate: '2026-06-10',
+    goals: 'General conditioning, consistency, and core activation.',
+    weightHistory: [
+      { date: '2026-06-10', value: 71.0 },
+      { date: '2026-07-05', value: 70.3 }
+    ],
+    notes: 'Prefers high-intensity interval formats. Enjoys kettlebell workouts. Heart rate spikes quickly; monitor recovery times.',
+    active: true
+  }
+];
+
+export const DEFAULT_ROUTINES = [
+  {
+    id: 'routine-upper-a',
+    name: 'Upper Body A',
+    description: 'Strength-focused upper body session prioritizing compound presses and rows.',
+    exercises: [
+      { id: 'ex-bench-barbell', sets: 4, reps: 6, rest: 120, weight: 60 },
+      { id: 'ex-barbell-row', sets: 4, reps: 8, rest: 90, weight: 50 },
+      { id: 'ex-shoulder-db', sets: 3, reps: 10, rest: 90, weight: 16 },
+      { id: 'ex-lat-pulldown', sets: 3, reps: 12, rest: 75, weight: 45 },
+      { id: 'ex-tricep-pushdown', sets: 3, reps: 12, rest: 60, weight: 20 },
+      { id: 'ex-bicep-db-curl', sets: 3, reps: 12, rest: 60, weight: 12 }
+    ]
+  },
+  {
+    id: 'routine-legs-core',
+    name: 'Legs & Core B',
+    description: 'Squat and hinge focus with direct core work.',
+    exercises: [
+      { id: 'ex-barbell-squat', sets: 4, reps: 8, rest: 120, weight: 70 },
+      { id: 'ex-romanian-deadlift', sets: 3, reps: 10, rest: 90, weight: 60 },
+      { id: 'ex-leg-press', sets: 3, reps: 12, rest: 90, weight: 120 },
+      { id: 'ex-plank', sets: 3, reps: 60, rest: 60, weight: 0 },
+      { id: 'ex-hanging-raise', sets: 3, reps: 12, rest: 60, weight: 0 }
+    ]
+  }
+];
+
+export const DEFAULT_HISTORY = [
+  {
+    id: 'log-1',
+    clientId: 'client-jane-doe',
+    clientName: 'Jane Doe',
+    routineName: 'Upper Body A',
+    date: '2026-07-06T10:15:00.000Z',
+    duration: 3420,
+    exercises: [
+      {
+        id: 'ex-bench-barbell',
+        name: 'Barbell Bench Press',
+        sets: [
+          { reps: 6, weight: 60, completed: true, note: 'RPE 8' },
+          { reps: 6, weight: 60, completed: true, note: 'RPE 8.5' },
+          { reps: 6, weight: 60, completed: true, note: 'RPE 9' },
+          { reps: 5, weight: 60, completed: true, note: 'Failed 6th rep' }
+        ]
+      },
+      {
+        id: 'ex-barbell-row',
+        name: 'Barbell Row',
+        sets: [
+          { reps: 8, weight: 50, completed: true },
+          { reps: 8, weight: 50, completed: true },
+          { reps: 8, weight: 50, completed: true },
+          { reps: 8, weight: 50, completed: true, note: 'Strict form' }
+        ]
+      }
+    ]
+  }
+];
+
+export const DEFAULT_PLAN_UPDATES = [
+  {
+    id: 'u-1',
+    clientId: 'client-jane-doe',
+    clientName: 'Jane Doe',
+    date: '2026-07-06T11:00:00.000Z',
+    exerciseName: 'Barbell Bench Press',
+    tag: 'Too Easy - Increase Load',
+    resolved: false
+  },
+  {
+    id: 'u-2',
+    clientId: 'client-john-smith',
+    clientName: 'John Smith',
+    date: '2026-07-08T17:30:00.000Z',
+    exerciseName: 'Barbell Back Squat',
+    tag: 'Form Break - Depth Alert',
+    resolved: false
+  }
+];

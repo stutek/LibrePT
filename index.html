@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>OpenPT - Personal Trainer Dashboard</title>
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="OpenPT is a mobile-friendly group & individual exercise tracking web app for personal trainers with instant client switching, scroll-free logging, and async feedback loops.">
+  <meta name="theme-color" content="#09090b">
+  
+  <!-- PWA Manifest & Icons -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Outfit:wght@100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="index.css">
+</head>
+<body class="dark-theme">
+
+  <!-- Top Header Bar -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="logo-area">
+        <i class="fa-solid fa-dumbbell logo-icon"></i>
+        <h1>OpenPT</h1>
+      </div>
+      <div class="header-actions">
+        <button id="theme-toggle" class="icon-btn" aria-label="Toggle light/dark theme">
+          <i class="fa-solid fa-moon"></i>
+        </button>
+        <button id="backup-btn" class="icon-btn" aria-label="Database Backup & Restore">
+          <i class="fa-solid fa-cloud-arrow-up"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main View Container -->
+  <main id="main-content">
+    
+    <!-- VIEW: Clients Dashboard & Pending Plan Adjustments -->
+    <section id="view-clients" class="app-view active">
+      <!-- Section A: Pending plan modifications (Feedback Loop) -->
+      <div class="section-title">
+        <h3><i class="fa-solid fa-bell-concierge text-emerald mr-1"></i> Pending Plan Adjustments</h3>
+        <span class="badge" id="badge-adjustments-count">2</span>
+      </div>
+      <div id="dashboard-adjustments-list" class="stack-list mb-6">
+        <!-- Injected via JS - cards with feedback tags to update programs -->
+      </div>
+
+      <hr class="view-divider">
+
+      <div class="view-header">
+        <h2>Client Directory</h2>
+        <button id="btn-add-client" class="btn primary-btn btn-sm">
+          <i class="fa-solid fa-user-plus"></i> Add Client
+        </button>
+      </div>
+      
+      <div class="search-bar-container">
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        <input type="text" id="search-clients" placeholder="Search clients..." class="search-input">
+      </div>
+      
+      <div id="clients-list" class="grid-list">
+        <!-- Injected via JS -->
+      </div>
+    </section>
+
+    <!-- VIEW: Client Detail -->
+    <section id="view-client-detail" class="app-view">
+      <div class="view-header-back">
+        <button id="btn-back-to-clients" class="back-btn">
+          <i class="fa-solid fa-arrow-left"></i> Back
+        </button>
+        <h2 id="detail-client-name">Client Details</h2>
+        <button id="btn-edit-client" class="btn secondary-btn btn-sm">
+          <i class="fa-solid fa-pen"></i> Edit
+        </button>
+      </div>
+      
+      <div class="client-detail-card card glassmorphic">
+        <div class="client-profile-header">
+          <div id="detail-client-avatar" class="avatar-large">JD</div>
+          <div class="profile-meta">
+            <h3 id="profile-name">Jane Doe</h3>
+            <p id="profile-joined-date">Joined March 15, 2026</p>
+          </div>
+        </div>
+        
+        <div class="profile-info-grid">
+          <div class="info-block">
+            <label>Current Goals</label>
+            <p id="profile-goals">Goals details go here.</p>
+          </div>
+          <div class="info-block">
+            <label>Health & Injury Notes</label>
+            <p id="profile-notes">Notes details go here.</p>
+          </div>
+        </div>
+
+        <div class="quick-workout-action">
+          <button id="btn-start-client-workout" class="btn primary-btn w-full">
+            <i class="fa-solid fa-play"></i> Start Custom or Group Session
+          </button>
+        </div>
+      </div>
+
+      <div class="section-title">
+        <h3>Weight Tracking</h3>
+        <button id="btn-add-weight" class="btn secondary-btn btn-xs">
+          <i class="fa-solid fa-plus"></i> Log Weight
+        </button>
+      </div>
+      
+      <div class="weight-chart-container card glassmorphic">
+        <div id="weight-history-chart" class="simple-chart">
+          <!-- Rendered via JS -->
+        </div>
+        <div id="weight-history-table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Weight</th>
+                <th>Change</th>
+              </tr>
+            </thead>
+            <tbody id="weight-history-tbody">
+              <!-- Injected via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section-title">
+        <h3>Client Session Logs</h3>
+      </div>
+      <div id="client-history-list" class="stack-list">
+        <!-- Injected via JS -->
+      </div>
+    </section>
+
+    <!-- VIEW: Routines -->
+    <section id="view-routines" class="app-view">
+      <div class="view-header">
+        <h2>Routines</h2>
+        <button id="btn-add-routine" class="btn primary-btn btn-sm">
+          <i class="fa-solid fa-circle-plus"></i> New Routine
+        </button>
+      </div>
+      <p class="view-desc">Select or edit workout routines. Launch them with individual or group sessions.</p>
+      
+      <div id="routines-list" class="grid-list">
+        <!-- Injected via JS -->
+      </div>
+    </section>
+
+    <!-- VIEW: Exercises -->
+    <section id="view-exercises" class="app-view">
+      <div class="view-header">
+        <h2>Exercise Library</h2>
+        <button id="btn-add-exercise" class="btn primary-btn btn-sm">
+          <i class="fa-solid fa-plus"></i> Add Custom
+        </button>
+      </div>
+      
+      <div class="search-bar-container">
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        <input type="text" id="search-exercises" placeholder="Search exercises..." class="search-input">
+      </div>
+      
+      <div class="filter-chips">
+        <button class="chip active" data-filter="All">All</button>
+        <button class="chip" data-filter="Chest">Chest</button>
+        <button class="chip" data-filter="Back">Back</button>
+        <button class="chip" data-filter="Legs">Legs</button>
+        <button class="chip" data-filter="Shoulders">Shoulders</button>
+        <button class="chip" data-filter="Arms">Arms</button>
+        <button class="chip" data-filter="Core">Core</button>
+      </div>
+      
+      <div id="exercises-list" class="stack-list">
+        <!-- Injected via JS -->
+      </div>
+    </section>
+
+    <!-- VIEW: History -->
+    <section id="view-history" class="app-view">
+      <div class="view-header">
+        <h2>Global History</h2>
+      </div>
+      <p class="view-desc">Log of all completed sessions across all clients.</p>
+      
+      <div id="global-history-list" class="stack-list">
+        <!-- Injected via JS -->
+      </div>
+    </section>
+  </main>
+
+  <!-- Bottom Navigation Bar -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-view="clients" aria-label="Clients View">
+      <i class="fa-solid fa-users"></i>
+      <span>Clients</span>
+    </button>
+    <button class="nav-item" data-view="routines" aria-label="Routines View">
+      <i class="fa-solid fa-clipboard-list"></i>
+      <span>Routines</span>
+    </button>
+    <button class="nav-item" data-view="exercises" aria-label="Exercises View">
+      <i class="fa-solid fa-dumbbell"></i>
+      <span>Exercises</span>
+    </button>
+    <button class="nav-item" data-view="history" aria-label="History View">
+      <i class="fa-solid fa-clock-rotate-left"></i>
+      <span>History</span>
+    </button>
+  </nav>
+
+  <!-- BOTTOM PANEL: Active Workout Status Bar (Minimised) -->
+  <div id="active-session-bar" class="active-session-bar hidden">
+    <div class="session-bar-content">
+      <div class="session-bar-info">
+        <span class="pulse-indicator"></span>
+        <span id="session-bar-title">Active Workout</span>
+      </div>
+      <div class="session-bar-timer" id="session-bar-duration">00:00</div>
+      <div class="session-bar-actions">
+        <button id="btn-timer-trigger" class="icon-btn inline-timer-btn" aria-label="Rest Timer">
+          <i class="fa-solid fa-stopwatch"></i>
+        </button>
+        <button id="btn-expand-session" class="icon-btn" aria-label="Expand Session Details">
+          <i class="fa-solid fa-chevron-up"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FULL SCREEN OVERLAY: Active Workout Clipboard Dashboard -->
+  <div id="active-session-overlay" class="active-session-overlay hidden">
+    <div class="session-overlay-header">
+      <button id="btn-collapse-session" class="collapse-btn" aria-label="Minimize Active Session">
+        <i class="fa-solid fa-chevron-down"></i>
+      </button>
+      <div class="session-title-block">
+        <h3 id="overlay-session-title">Live Tracking clipboard</h3>
+      </div>
+      <div class="session-timer-block">
+        <span id="overlay-session-duration">00:00</span>
+      </div>
+    </div>
+
+    <!-- Client selector tabs for sub-second plan switching -->
+    <div id="active-session-client-tabs" class="client-tabs-bar">
+      <!-- Injected via JS: [Jane Doe] [John Smith] [Sarah Jenkins] -->
+    </div>
+
+    <!-- Active Client Clipboard Content (Budgeted height, scroll-free design) -->
+    <div class="clipboard-body">
+      <!-- Health Caveat Banner (crucial for PT awareness) -->
+      <div id="clipboard-client-alert" class="client-caveat-banner">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span id="clipboard-client-notes-text">Notes go here</span>
+      </div>
+
+      <!-- Current Exercise Paging Navigator -->
+      <div class="active-exercise-navigator card glassmorphic">
+        <button type="button" id="btn-prev-exercise" class="nav-arrow-btn" aria-label="Previous Exercise">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <div class="current-exercise-display">
+          <span class="exercise-index-label" id="active-ex-index">Exercise 1 of 5</span>
+          <h4 id="active-ex-name">Squats</h4>
+          <p class="exercise-instructions-sub" id="active-ex-desc">Hinge at hips, keep chest up...</p>
+        </div>
+        <button type="button" id="btn-next-exercise" class="nav-arrow-btn" aria-label="Next Exercise">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+      </div>
+
+      <!-- Scroll-Free Logging Grid for Active Client's active exercise -->
+      <div class="section-title text-sm mt-3">
+        <span>Log Sets</span>
+        <div class="title-actions">
+          <button id="btn-trigger-group-timer" class="btn secondary-btn btn-xs">
+            <i class="fa-solid fa-stopwatch"></i> Rest Timer
+          </button>
+          <button id="btn-log-feedback" class="btn danger-btn btn-xs">
+            <i class="fa-solid fa-message"></i> Log Feedback
+          </button>
+        </div>
+      </div>
+
+      <div id="clipboard-logger-container" class="clipboard-grid-card card glassmorphic">
+        <!-- Dynamic sets table with steppers injected via JS -->
+      </div>
+
+      <!-- Active Client Level Controls -->
+      <div class="clipboard-actions-row">
+        <button id="btn-add-session-set" class="btn secondary-btn btn-sm">
+          <i class="fa-solid fa-plus"></i> Add Set
+        </button>
+        <button id="btn-add-exercise-to-session" class="btn secondary-btn btn-sm">
+          <i class="fa-solid fa-circle-plus"></i> Inject Exercise
+        </button>
+      </div>
+
+      <!-- Session Completion Drawer -->
+      <div class="session-actions-footer mt-auto">
+        <div class="session-finish-row">
+          <button id="btn-cancel-session" class="btn danger-btn btn-sm">Cancel</button>
+          <button id="btn-finish-session" class="btn success-btn btn-sm flex-1">Complete Workout Session</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLOATING ELEMENT: Rest Timer Panel -->
+  <div id="floating-rest-timer" class="floating-timer card glassmorphic hidden">
+    <div class="timer-header">
+      <span><i class="fa-solid fa-stopwatch text-emerald"></i> Rest Timer</span>
+      <button id="btn-close-timer" class="close-btn-xs" aria-label="Close rest timer"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="timer-body">
+      <div class="timer-seconds" id="timer-countdown">90s</div>
+      <div class="timer-controls">
+        <button id="btn-timer-minus" class="timer-btn-sm">-15s</button>
+        <button id="btn-timer-toggle" class="timer-btn-sm"><i class="fa-solid fa-pause"></i></button>
+        <button id="btn-timer-plus" class="timer-btn-sm">+15s</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIALOG MODAL: Add / Edit Client -->
+  <dialog id="dialog-client" class="dialog-modal card glassmorphic">
+    <div class="modal-header">
+      <h3 id="client-modal-title">Add New Client</h3>
+      <button class="modal-close-btn" aria-label="Close modal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form id="form-client" method="dialog" class="modal-form">
+      <input type="hidden" id="client-form-id">
+      
+      <div class="form-group">
+        <label for="client-name">Full Name *</label>
+        <input type="text" id="client-name" required placeholder="e.g. Jane Doe" class="form-control">
+      </div>
+      
+      <div class="form-group">
+        <label for="client-weight">Current Weight (kg)</label>
+        <input type="number" step="0.1" id="client-weight" placeholder="e.g. 68.5" class="form-control">
+      </div>
+      
+      <div class="form-group">
+        <label for="client-goals">Fitness Goals</label>
+        <textarea id="client-goals" rows="2" placeholder="e.g. Strength gain, consistency..." class="form-control"></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label for="client-notes">Trainer Notes & Injuries (Alert banner shows during workout)</label>
+        <textarea id="client-notes" rows="3" placeholder="e.g. Left knee issue; monitor squat depth..." class="form-control"></textarea>
+      </div>
+      
+      <div class="modal-actions">
+        <button type="button" class="btn secondary-btn modal-cancel">Cancel</button>
+        <button type="submit" class="btn primary-btn">Save Client</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- DIALOG MODAL: Log Weight -->
+  <dialog id="dialog-weight" class="dialog-modal card glassmorphic">
+    <div class="modal-header">
+      <h3>Log Client Weight</h3>
+      <button class="modal-close-btn" aria-label="Close weight modal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form id="form-weight" method="dialog" class="modal-form">
+      <div class="form-group">
+        <label for="weight-log-value">Weight (kg) *</label>
+        <input type="number" step="0.1" id="weight-log-value" required class="form-control" autofocus>
+      </div>
+      
+      <div class="form-group">
+        <label for="weight-log-date">Date</label>
+        <input type="date" id="weight-log-date" required class="form-control">
+      </div>
+      
+      <div class="modal-actions">
+        <button type="button" class="btn secondary-btn modal-cancel">Cancel</button>
+        <button type="submit" class="btn primary-btn">Save Entry</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- DIALOG MODAL: Add / Edit Routine -->
+  <dialog id="dialog-routine" class="dialog-modal card glassmorphic wide-modal">
+    <div class="modal-header">
+      <h3 id="routine-modal-title">Create Routine Template</h3>
+      <button class="modal-close-btn" aria-label="Close routine modal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form id="form-routine" method="dialog" class="modal-form">
+      <input type="hidden" id="routine-form-id">
+      
+      <div class="form-group">
+        <label for="routine-name">Routine Name *</label>
+        <input type="text" id="routine-name" required placeholder="e.g. Upper Body A" class="form-control">
+      </div>
+      
+      <div class="form-group">
+        <label for="routine-desc">Description</label>
+        <input type="text" id="routine-desc" placeholder="e.g. Strength compound focus" class="form-control">
+      </div>
+      
+      <div class="routine-builder-section">
+        <div class="section-sub-title">
+          <h4>Routine Exercises</h4>
+          <button type="button" id="btn-routine-add-ex" class="btn secondary-btn btn-xs">
+            <i class="fa-solid fa-plus"></i> Add Exercise
+          </button>
+        </div>
+        
+        <div id="routine-exercises-list" class="routine-builder-list">
+          <!-- Selection rows injected via JS -->
+        </div>
+      </div>
+      
+      <div class="modal-actions">
+        <button type="button" class="btn secondary-btn modal-cancel">Cancel</button>
+        <button type="submit" class="btn primary-btn">Save Routine</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- DIALOG MODAL: Create Custom Exercise -->
+  <dialog id="dialog-exercise" class="dialog-modal card glassmorphic">
+    <div class="modal-header">
+      <h3>Create Custom Exercise</h3>
+      <button class="modal-close-btn" aria-label="Close exercise modal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form id="form-exercise" method="dialog" class="modal-form">
+      <div class="form-group">
+        <label for="exercise-name">Exercise Name *</label>
+        <input type="text" id="exercise-name" required placeholder="e.g. Bulgarian Split Squat" class="form-control">
+      </div>
+      
+      <div class="form-group">
+        <label for="exercise-category">Category *</label>
+        <select id="exercise-category" required class="form-control">
+          <option value="Chest">Chest</option>
+          <option value="Back">Back</option>
+          <option value="Legs">Legs</option>
+          <option value="Shoulders">Shoulders</option>
+          <option value="Arms">Arms</option>
+          <option value="Core">Core</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="exercise-instructions">Instructions</label>
+        <textarea id="exercise-instructions" rows="2" placeholder="Form cues..." class="form-control"></textarea>
+      </div>
+      
+      <div class="modal-actions">
+        <button type="button" class="btn secondary-btn modal-cancel">Cancel</button>
+        <button type="submit" class="btn primary-btn">Save Exercise</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- DIALOG MODAL: Start Group/Individual Workout Session Setup -->
+  <dialog id="dialog-workout-setup" class="dialog-modal card glassmorphic wide-modal">
+    <div class="modal-header">
+      <h3>Start Workout Session</h3>
+      <button class="modal-close-btn" aria-label="Close setup modal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form id="form-workout-setup" method="dialog" class="modal-form">
+      
+      <div class="form-group">
+        <p class="dialog-desc">Check clients to select participants (2–6). You can assign a distinct routine template to each individual, or select a shared routine.</p>
+        
+        <label>Selected Participants & Assigned Routines *</label>
+        <div id="setup-participants-assignment-list" class="participant-setup-list">
+          <!-- Injected via JS: [Checkbox] Name | [Dropdown Select Routine] -->
+        </div>
+      </div>
+      
+      <div class="modal-actions">
+        <button type="button" class="btn secondary-btn modal-cancel">Cancel</button>
+        <button type="submit" class="btn success-btn">Launch Clipboard <i class="fa-solid fa-circle-play ml-1"></i></button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- DIALOG MODAL: Add Exercise directly to Active Client Session -->
+  <dialog id="dialog-add-session-exercise" class="dialog-modal card glassmorphic">
+    <div class="modal-header">
+      <h3>Inject Exercise to Active Plan</h3>
+      <button class="modal-close-btn" aria-label="Close add exercise modal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form id="form-add-session-exercise" method="dialog" class="modal-form">
+      <div class="form-group">
+        <label for="session-add-select-ex">Select Exercise *</label>
+        <select id="session-add-select-ex" required class="form-control">
+          <!-- Injected via JS -->
+        </select>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group col">
+          <label for="session-add-sets">Sets</label>
+          <input type="number" id="session-add-sets" min="1" value="3" required class="form-control">
+        </div>
+        <div class="form-group col">
+          <label for="session-add-reps">Reps</label>
+          <input type="number" id="session-add-reps" min="1" value="10" required class="form-control">
+        </div>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group col">
+          <label for="session-add-weight">Weight (kg)</label>
+          <input type="number" step="0.5" id="session-add-weight" value="0" class="form-control">
+        </div>
+        <div class="form-group col">
+          <label for="session-add-rest">Rest (sec)</label>
+          <input type="number" id="session-add-rest" min="0" value="60" class="form-control">
+        </div>
+      </div>
+      
+      <div class="modal-actions">
+        <button type="button" class="btn secondary-btn modal-cancel">Cancel</button>
+        <button type="submit" class="btn primary-btn">Inject Exercise</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- DIALOG MODAL: Quick Feedback Loop (Asynchronous program logs) -->
+  <dialog id="dialog-feedback" class="dialog-modal card glassmorphic">
+    <div class="modal-header">
+      <h3>Log Client Feedback</h3>
+      <button class="modal-close-btn" aria-label="Close feedback modal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form id="form-feedback" method="dialog" class="modal-form">
+      <input type="hidden" id="feedback-client-id">
+      <input type="hidden" id="feedback-exercise-name">
+      
+      <div class="form-group">
+        <label>Feedback for <span id="feedback-client-display-name" class="text-emerald font-semibold">Jane Doe</span> on <span id="feedback-ex-display-name" class="text-emerald font-semibold">Bench Press</span></label>
+        
+        <div class="feedback-chips-selector">
+          <label class="feedback-chip-option">
+            <input type="radio" name="feedback-tag" value="Too Easy - Increase Load" checked>
+            <span>🚀 Too Easy - Increase Load</span>
+          </label>
+          <label class="feedback-chip-option">
+            <input type="radio" name="feedback-tag" value="Too Hard - Reduce Load">
+            <span>⚠️ Too Hard - Reduce Load</span>
+          </label>
+          <label class="feedback-chip-option">
+            <input type="radio" name="feedback-tag" value="Form Break - Watch Position">
+            <span>🔬 Form Break - Focus Required</span>
+          </label>
+          <label class="feedback-chip-option">
+            <input type="radio" name="feedback-tag" value="Joint Pain / Discomfort">
+            <span>🔥 Joint Pain / Discomfort</span>
+          </label>
+          <label class="feedback-chip-option">
+            <input type="radio" name="feedback-tag" value="Completed reps easily">
+            <span>💪 Good Progression</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="feedback-custom-note">Custom Details / Notes</label>
+        <input type="text" id="feedback-custom-note" placeholder="e.g. Left knee clicks, reduced load..." class="form-control">
+      </div>
+      
+      <div class="modal-actions">
+        <button type="button" class="btn secondary-btn modal-cancel">Cancel</button>
+        <button type="submit" class="btn primary-btn">Log Alert</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- DIALOG MODAL: Database Import/Export -->
+  <dialog id="dialog-backup" class="dialog-modal card glassmorphic">
+    <div class="modal-header">
+      <h3>Data Backup Center</h3>
+      <button class="modal-close-btn" aria-label="Close backup modal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body-scroll">
+      <p class="dialog-desc">OpenPT stores your logs directly on this device. You can download a backup file to keep your history safe, or import it to sync with another phone.</p>
+      
+      <div class="backup-actions">
+        <div class="action-card card">
+          <i class="fa-solid fa-file-export backup-icon-large text-emerald"></i>
+          <h4>Export Data Backup</h4>
+          <p>Download your clients, routines, and workout logs as a single JSON file.</p>
+          <button id="btn-export-db" class="btn primary-btn w-full">Export JSON</button>
+        </div>
+        
+        <div class="action-card card">
+          <i class="fa-solid fa-file-import backup-icon-large text-indigo"></i>
+          <h4>Import Data Backup</h4>
+          <p>Load an existing `.json` backup file. This will merge or overwrite your current database.</p>
+          <div class="file-upload-wrapper">
+            <button type="button" class="btn secondary-btn w-full file-trigger">Select JSON File</button>
+            <input type="file" id="import-db-file" accept=".json" class="file-input-hidden">
+          </div>
+          <p id="import-status" class="status-msg"></p>
+        </div>
+      </div>
+
+      <div class="danger-zone">
+        <h4>Reset Application</h4>
+        <p>This permanently deletes all client tracking history and custom exercises. Make sure you have exported a copy first.</p>
+        <button id="btn-reset-db" class="btn danger-btn w-full">Reset All Database Data</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Application Logic Scripts -->
+  <script type="module" src="app.js"></script>
+</body>
+</html>
