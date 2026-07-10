@@ -1,4 +1,15 @@
-# Use Case 4: Asynchronous Program Updates & Client Progression
+---
+type: use_case
+title: UC2 - Asynchronous Plan Adjustments & Progression Review
+description: Specification for back-office review of logged session signals, voice notes, and progressive overload adjustments.
+status: active
+tags:
+  - back-office
+  - progression
+  - workout-planning
+---
+
+# Use Case 2: Asynchronous Program Updates & Client Progression
 
 This use case describes the desk-side workflow where the Personal Trainer (PT) reviews exercise feedback and voice notes logged during live sessions to adjust client routines and plan future progressive overload trajectories asynchronously.
 

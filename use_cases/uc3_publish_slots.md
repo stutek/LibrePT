@@ -1,4 +1,15 @@
-# Use Case 1: Trainer Publishes Repeatable Group Slots (via Google Calendar)
+---
+type: use_case
+title: UC3 - Publish Recurring Session Slots via Google Calendar
+description: Specification for personal trainers creating recurring training availability slots using Google Calendar Appointment Schedules.
+status: active
+tags:
+  - scheduling
+  - google-calendar
+  - trainer-backoffice
+---
+
+# Use Case 3: Trainer Publishes Repeatable Group Slots (via Google Calendar)
 
 This use case describes how the Personal Trainer (PT) schedules and publishes training slots directly within their Google Calendar interface, making them available for client self-booking.
 

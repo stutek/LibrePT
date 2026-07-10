@@ -1,4 +1,15 @@
-# Use Case 2: Client Self-Subscribes to a Session (via Google Calendar)
+---
+type: use_case
+title: UC4 - Client Self-Subscription & Booking
+description: Specification for clients booking training slots via Google-hosted scheduling pages and receiving calendar invitations.
+status: active
+tags:
+  - booking
+  - client-portal
+  - google-calendar
+---
+
+# Use Case 4: Client Self-Subscribes to a Session (via Google Calendar)
 
 This use case describes how clients book their training slots directly through the trainer's Google-hosted booking page, receiving automated email invitations.
 
