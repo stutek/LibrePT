@@ -1,3 +1,14 @@
+---
+type: guidelines
+title: OpenPT Agent Interaction & Development Rules
+description: Mandatory interaction protocols, direct execution rules, and single-source-of-truth pointers for AI agents working on OpenPT.
+status: active
+tags:
+  - agent-rules
+  - workflow
+  - okf
+---
+
 # AI Agent Operating Rules (`AGENT_RULES.md`)
 
 This document defines universal behavioral and interaction rules for any AI coding assistant or agent (Gemini, Claude, Codex/OpenAI, Cursor, etc.) contributing to the **OpenPT** repository.
@@ -12,30 +23,21 @@ Every response and tool action must drive measurable, continuous progress toward
 
 ---
 
-## 2. Mandatory Interaction Protocol: Detect, Evaluate, and Identify Gaps
+## 2. Mandatory Interaction Protocol: Direct Execution, Evaluation & Gap Calling
 
-For every interaction and turn, the agent MUST follow this analytical workflow:
+### A. Direct Execution & Git Flow
+1. **Direct Application**: Apply edits directly and cleanly, always choosing the best architectural option without asking questions or waiting for clarification.
+2. **Git Commit Control**: Allow the user to control review and baseline checkpoints via git status/diff and commits.
 
-### A. Detect & Evaluate User Changes
-1. **Monitor Workspace Edits**: Inspect any user modifications made to documentation, markdown files, diagrams, or source code since the last turn.
-2. **Evaluate Intent & Impact**: Explicitly acknowledge significant user edits, explain how they refine the system architecture or domain model, and align subsequent actions with the user's updated direction.
-
-### B. Proactive Gap Identification & Proposed Improvements
-1. **Spot Edge Cases & Ambiguities**: Actively evaluate current workflows against real-world gym conditions (e.g., basement gym offline states, sweaty hands, group session interruptions, client cancellations).
-2. **Propose Actionable Enhancements**: When a design or architectural gap is identified, propose specific, low-interaction improvements rather than asking open-ended questions.
+### B. Evaluate Changes, Call Out Gaps & Propose Opportunities
+1. **Evaluate User Changes**: Explicitly evaluate user modifications and input, highlighting how they refine the OpenPT domain model or improve real-world gym ergonomics.
+2. **Call Out Gaps & Edge Cases**: Actively identify real-world training friction (e.g., basement gym offline states, sweaty hands, quick equipment pivots, group session distractions).
+3. **Propose Opportunities**: Proactively call out architectural opportunities and enhancements that make the system more robust and frictionless.
 
 ---
 
-## 3. Core Domain & Architectural Guardrails for OpenPT
+## 3. Single Source of Truth Reference
 
-Whenever writing or reviewing specifications and code for OpenPT, agents must adhere to these established system principles:
-
-1. **Gym Floor UX (The PT Clipboard Dashboard)**:
-   - **Single-Exercise Focus Card**: Active session views display only the current exercise in focus—zero vertical scrolling across past or future exercises.
-   - **Frictionless Participant Switching**: Sub-second tab transitions with as few clicks and scrolls as possible.
-   - **Low-Interaction Signals**: Rely on one-tap progression/safety buttons (`[ ⬆ Load Up Next ]`, `[ ⬇ Step Back ]`, `[ ⚠️ Pain/Injury Flag ]`) and hold-to-record **Voice Notes** rather than mobile keyboard typing.
-2. **Google Calendar-First Scheduling**:
-   - Do **not** build custom client booking web apps or auth forms.
-   - Use **Google Calendar Appointment Schedules** as the canonical engine for slot publishing, client self-subscription, capacity enforcement, and automated email invites.
-3. **Local-First & Offline Resilience**:
-   - Session execution tracking must function 100% offline via local caching, syncing asynchronously to the cloud backend when connectivity returns.
+To prevent drift and redundant documentation, agents MUST NOT duplicate feature lists or domain specifications in this rules file. Always reference the canonical sources of truth:
+- **System Architecture & Features**: See [README.md](file:///home/simon/Projects/OpenPT/README.md).
+- **Functional Workflows & Use Cases**: See [use_cases/](file:///home/simon/Projects/OpenPT/use_cases/).
