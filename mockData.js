@@ -39,7 +39,8 @@ export const DEFAULT_EXERCISES = [
   { id: 'ex-plank', name: 'Plank', category: 'Core', instructions: 'Hold straight body line resting on forearms and toes. Squeeze core and glutes.' },
   { id: 'ex-hanging-raise', name: 'Hanging Knee Raise', category: 'Core', instructions: 'Hang from pull-up bar, raise knees to chest height slowly without swinging.' },
   { id: 'ex-ab-mat-situp', name: 'Abmat Sit-up', category: 'Core', instructions: 'Sit with soles of feet together, touch floor behind head, sit up and touch toes.' },
-  { id: 'ex-russian-twist', name: 'Russian Twist', category: 'Core', instructions: 'Sit, lean back slightly, lift feet, rotate torso tapping hands side-to-side.' }
+  { id: 'ex-russian-twist', name: 'Russian Twist', category: 'Core', instructions: 'Sit, lean back slightly, lift feet, rotate torso tapping hands side-to-side.' },
+  { id: 'ex-walking-lunges', name: 'Walking Lunges', category: 'Legs', instructions: 'Step forward lunging down, alternating legs.' }
 ];
 
 export const DEFAULT_CLIENTS = [
@@ -118,6 +119,16 @@ export const DEFAULT_ROUTINES = [
       { id: 'ex-leg-press', sets: 3, reps: 12, rest: 90, weight: 120 },
       { id: 'ex-plank', sets: 3, reps: 60, rest: 60, weight: 0 },
       { id: 'ex-hanging-raise', sets: 3, reps: 12, rest: 60, weight: 0 }
+    ]
+  },
+  {
+    id: 'routine-triple-combo',
+    name: 'Triple Combo Challenge',
+    description: 'A linked 3-exercise superset combo for muscular endurance.',
+    exercises: [
+      { id: 'ex-dumbbell-row', sets: 3, reps: 10, rest: 0, weight: 18, comboGroupId: 'combo-1' },
+      { id: 'ex-pushups', sets: 3, reps: 'Max', rest: 0, weight: 0, comboGroupId: 'combo-1' },
+      { id: 'ex-walking-lunges', sets: 3, reps: 40, rest: 60, weight: 0, comboGroupId: 'combo-1' }
     ]
   }
 ];
@@ -303,6 +314,15 @@ export const DEFAULT_SESSIONS = [
     day: 'today'
   },
   {
+    id: 'b-3-2',
+    time: '04:00 PM - 05:00 PM',
+    title: 'Mobility Flow',
+    participants: ['client-jane-doe'],
+    routineId: 'routine-triple-combo',
+    maxCapacity: 2,
+    day: 'today'
+  },
+  {
     id: 'b-4',
     time: '09:00 AM - 10:00 AM',
     title: 'Morning Conditioning',
@@ -318,6 +338,24 @@ export const DEFAULT_SESSIONS = [
     participants: ['client-john-smith'],
     routineId: 'routine-upper-a',
     maxCapacity: 4,
+    day: 'tomorrow'
+  },
+  {
+    id: 'b-6',
+    time: '11:30 AM - 12:30 PM',
+    title: 'Lunch Blast Workout',
+    participants: ['client-sarah-jenkins'],
+    routineId: '',
+    maxCapacity: 3,
+    day: 'tomorrow'
+  },
+  {
+    id: 'b-7',
+    time: '05:30 PM - 06:30 PM',
+    title: 'Post-Work Cardio',
+    participants: ['client-john-smith'],
+    routineId: 'routine-legs-core',
+    maxCapacity: 2,
     day: 'tomorrow'
   }
 ];

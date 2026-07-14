@@ -60,8 +60,26 @@
           <i class="fa-solid fa-rotate"></i> <span id="btn-sync-calendar-text">Sync Sessions</span>
         </button>
       </div>
-      <div id="calendar-sessions-list" class="stack-list mb-6">
-        <!-- Injected via JS -->
+      <div class="sessions-categories-grid mb-6">
+        <!-- Today's Category Column -->
+        <div class="sessions-category-column">
+          <h4 class="sessions-column-header text-cyan">
+            <i class="fa-solid fa-calendar-day"></i> <span id="label-sessions-today" data-i18n="today">Today</span>
+          </h4>
+          <div id="today-sessions-list" class="stack-list">
+            <!-- Injected via JS -->
+          </div>
+        </div>
+        
+        <!-- Tomorrow's Category Column -->
+        <div class="sessions-category-column">
+          <h4 class="sessions-column-header text-muted">
+            <i class="fa-solid fa-calendar-plus"></i> <span id="label-sessions-tomorrow" data-i18n="tomorrow">Tomorrow</span>
+          </h4>
+          <div id="tomorrow-sessions-list" class="stack-list">
+            <!-- Injected via JS -->
+          </div>
+        </div>
       </div>
 
       <hr class="view-divider">
@@ -648,6 +666,77 @@
       <div class="modal-actions">
         <button type="button" class="btn secondary-btn modal-cancel">Cancel</button>
         <button type="submit" class="btn primary-btn">Log Alert</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- DIALOG MODAL: Program Adjustment Wizard -->
+  <dialog id="dialog-apply-adjustment" class="dialog-modal card glassmorphic">
+    <div class="modal-header">
+      <h3>Apply Program Adjustment</h3>
+      <button class="modal-close-btn" aria-label="Close adjustment modal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form id="form-apply-adjustment" method="dialog" class="modal-form">
+      <input type="hidden" id="adjust-update-id">
+      <input type="hidden" id="adjust-client-id">
+      <input type="hidden" id="adjust-routine-id">
+      <input type="hidden" id="adjust-exercise-id">
+      
+      <div class="form-group" style="background: rgba(0,0,0,0.15); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 16px;">
+        <div style="font-size: 13px; margin-bottom: 6px;">
+          <strong style="color: var(--text-muted);">Client:</strong> <span id="adjust-client-name" class="font-semibold text-emerald"></span>
+        </div>
+        <div style="font-size: 13px; margin-bottom: 6px;">
+          <strong style="color: var(--text-muted);">Feedback:</strong> <span id="adjust-feedback-tag" class="font-semibold text-cyan"></span>
+        </div>
+        <div id="adjust-voice-player-container" class="hidden" style="margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+          <strong style="color: var(--text-muted); font-size: 13px;">Voice:</strong>
+          <button type="button" id="adjust-btn-play-voice" style="background: none; border: none; color: var(--accent-cyan); cursor: pointer; padding: 0; line-height: 1;"><i class="fa-solid fa-circle-play" style="font-size: 16px;"></i></button>
+          <span style="font-size: 11px; font-family: monospace;">voice_memo.wav (0:04)</span>
+        </div>
+        <div style="font-size: 13px;">
+          <strong style="color: var(--text-muted);">Details:</strong> <span id="adjust-details" class="italic text-color"></span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="adjust-action-type">Adjustment Action</label>
+        <select id="adjust-action-type" class="form-control" style="margin-bottom: 12px;">
+          <option value="modify">Modify Target Load & Reps</option>
+          <option value="swap">Swap Exercise (Regression/Progression)</option>
+          <option value="dismiss">Dismiss Alert Only (No Changes)</option>
+        </select>
+      </div>
+
+      <!-- PANEL: Modify load & reps -->
+      <div id="adjust-panel-modify" class="adjust-action-panel">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+          <div class="form-group">
+            <label for="adjust-weight">Target Weight (kg)</label>
+            <input type="number" step="0.5" id="adjust-weight" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="adjust-reps">Target Reps</label>
+            <input type="text" id="adjust-reps" class="form-control">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="adjust-sets">Target Sets Count</label>
+          <input type="number" id="adjust-sets" class="form-control">
+        </div>
+      </div>
+
+      <!-- PANEL: Swap exercise -->
+      <div id="adjust-panel-swap" class="adjust-action-panel hidden">
+        <div class="form-group">
+          <label for="adjust-exercise-swap">Select Replacement Exercise</label>
+          <select id="adjust-exercise-swap" class="form-control"></select>
+        </div>
+      </div>
+
+      <div class="modal-actions" style="margin-top: 20px;">
+        <button type="button" class="btn secondary-btn modal-cancel">Cancel</button>
+        <button type="submit" class="btn primary-btn">Apply & Resolve</button>
       </div>
     </form>
   </dialog>

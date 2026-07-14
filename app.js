@@ -131,7 +131,8 @@ const TRANSLATIONS = {
     program_not_defined: "Program Not Defined",
     today: "Today",
     tomorrow: "Tomorrow",
-    undefined: "Undefined"
+    undefined: "Undefined",
+    combo_round_title: "Linked Combo Round"
   },
   sl: {
     logo_title: "LibrePT",
@@ -261,7 +262,8 @@ const TRANSLATIONS = {
     program_not_defined: "Program ni določen",
     today: "Danes",
     tomorrow: "Jutri",
-    undefined: "Nedoločen"
+    undefined: "Nedoločen",
+    combo_round_title: "Povezana kombinirana serija"
   }
 };
 
@@ -346,6 +348,8 @@ function applyTranslations(lang = state.lang || 'en') {
     '#label-voice-note': 'voice_note_label',
     '#voice-record-status': 'voice_ready',
     '#label-up-next': 'up_next_label',
+    '#label-sessions-today': 'today',
+    '#label-sessions-tomorrow': 'tomorrow',
     
     '#dialog-backup .modal-header h3': 'backup_center',
     '#dialog-backup .dialog-desc': 'backup_desc',
@@ -658,10 +662,10 @@ function renderPendingPlanAdjustments() {
     `;
     
     const btn = document.createElement('button');
-    btn.className = 'btn primary-btn btn-xs';
+    btn.className = 'btn primary-btn btn-xs btn-resolve-alert';
     btn.innerHTML = `<i class="fa-solid fa-check"></i> ${t('btn_resolve')}`;
     btn.addEventListener('click', () => {
-      resolvePendingAdjustment(u.id);
+      openAdjustmentWizard(u.id);
     });
     
     card.appendChild(info);
@@ -702,6 +706,159 @@ function resolvePendingAdjustment(id) {
     saveToLocalStorage();
     renderPendingPlanAdjustments();
   }
+}
+
+function openAdjustmentWizard(updateId) {
+  const update = state.planUpdates.find(u => u.id === updateId);
+  if (!update) return;
+
+  const dialog = document.getElementById('dialog-apply-adjustment');
+  if (!dialog) return;
+
+  // Set inputs
+  document.getElementById('adjust-update-id').value = updateId;
+  document.getElementById('adjust-client-id').value = update.clientId;
+  
+  // Set text labels
+  document.getElementById('adjust-client-name').textContent = update.clientName;
+  document.getElementById('adjust-feedback-tag').textContent = update.tag;
+  
+  // Parse note details for display
+  let cleanNote = update.tag;
+  if (update.tag.includes(' - ')) {
+    const parts = update.tag.split(' - ');
+    document.getElementById('adjust-feedback-tag').textContent = parts[0];
+    cleanNote = parts.slice(1).join(' - ');
+  }
+  document.getElementById('adjust-details').textContent = cleanNote;
+
+  // Voice note player handling
+  const voiceContainer = document.getElementById('adjust-voice-player-container');
+  if (update.hasVoiceNote) {
+    voiceContainer.classList.remove('hidden');
+    const playBtn = document.getElementById('adjust-btn-play-voice');
+    // reset listener
+    playBtn.replaceWith(playBtn.cloneNode(true));
+    const newPlayBtn = document.getElementById('adjust-btn-play-voice');
+    newPlayBtn.addEventListener('click', () => {
+      const icon = newPlayBtn.querySelector('i');
+      if (icon.classList.contains('fa-circle-play')) {
+        icon.className = 'fa-solid fa-circle-pause';
+        setTimeout(() => {
+          icon.className = 'fa-solid fa-circle-play';
+        }, 3000);
+      } else {
+        icon.className = 'fa-solid fa-circle-play';
+      }
+    });
+  } else {
+    voiceContainer.classList.add('hidden');
+  }
+
+  // Find target exercise & routine database links
+  const exercise = state.exercises.find(e => e.name === update.exerciseName);
+  const exerciseId = exercise ? exercise.id : '';
+  const routine = state.routines.find(r => r.exercises.some(ex => ex.id === exerciseId));
+  const exMapping = routine ? routine.exercises.find(ex => ex.id === exerciseId) : null;
+
+  document.getElementById('adjust-routine-id').value = routine ? routine.id : '';
+  document.getElementById('adjust-exercise-id').value = exerciseId;
+
+  // Default panel action setup
+  document.getElementById('adjust-action-type').value = 'modify';
+  document.getElementById('adjust-panel-modify').classList.remove('hidden');
+  document.getElementById('adjust-panel-swap').classList.add('hidden');
+
+  // Pre-fill parameters
+  document.getElementById('adjust-weight').value = exMapping ? exMapping.weight : 0;
+  document.getElementById('adjust-reps').value = exMapping ? exMapping.reps : 10;
+  document.getElementById('adjust-sets').value = exMapping ? exMapping.sets : 3;
+
+  // Pre-fill smart load offsets (recommend 2.5kg increase if tag is "Too Easy", decrease if "Too Hard")
+  if (update.tag.includes('Easy')) {
+    document.getElementById('adjust-weight').value = exMapping ? exMapping.weight + 2.5 : 2.5;
+  } else if (update.tag.includes('Hard')) {
+    document.getElementById('adjust-weight').value = exMapping ? Math.max(0, exMapping.weight - 2.5) : 0;
+  }
+
+  // Fill swap select options
+  const swapSelect = document.getElementById('adjust-exercise-swap');
+  swapSelect.innerHTML = '';
+  state.exercises.forEach(ex => {
+    if (ex.id !== exerciseId) {
+      const opt = document.createElement('option');
+      opt.value = ex.id;
+      opt.textContent = `${ex.name} (${ex.category})`;
+      swapSelect.appendChild(opt);
+    }
+  });
+
+  // Action select toggle listeners
+  const actionTypeSelect = document.getElementById('adjust-action-type');
+  actionTypeSelect.replaceWith(actionTypeSelect.cloneNode(true));
+  const newActionTypeSelect = document.getElementById('adjust-action-type');
+  newActionTypeSelect.addEventListener('change', () => {
+    const action = newActionTypeSelect.value;
+    if (action === 'modify') {
+      document.getElementById('adjust-panel-modify').classList.remove('hidden');
+      document.getElementById('adjust-panel-swap').classList.add('hidden');
+    } else if (action === 'swap') {
+      document.getElementById('adjust-panel-modify').classList.add('hidden');
+      document.getElementById('adjust-panel-swap').classList.remove('hidden');
+    } else {
+      document.getElementById('adjust-panel-modify').classList.add('hidden');
+      document.getElementById('adjust-panel-swap').classList.add('hidden');
+    }
+  });
+
+  // Close modals listeners
+  dialog.querySelectorAll('.modal-cancel, .modal-close-btn').forEach(btn => {
+    btn.replaceWith(btn.cloneNode(true));
+  });
+  dialog.querySelectorAll('.modal-cancel, .modal-close-btn').forEach(btn => {
+    btn.addEventListener('click', () => dialog.close());
+  });
+
+  // Form submit handler
+  const form = document.getElementById('form-apply-adjustment');
+  form.replaceWith(form.cloneNode(true));
+  const newForm = document.getElementById('form-apply-adjustment');
+  newForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const action = newActionTypeSelect.value;
+    const rId = document.getElementById('adjust-routine-id').value;
+    const exId = document.getElementById('adjust-exercise-id').value;
+
+    const targetRoutine = state.routines.find(r => r.id === rId);
+
+    if (action === 'modify' && targetRoutine) {
+      const targetEx = targetRoutine.exercises.find(ex => ex.id === exId);
+      if (targetEx) {
+        targetEx.weight = parseFloat(document.getElementById('adjust-weight').value) || 0;
+        targetEx.reps = document.getElementById('adjust-reps').value;
+        targetEx.sets = parseInt(document.getElementById('adjust-sets').value) || 3;
+      }
+    } else if (action === 'swap' && targetRoutine) {
+      const idx = targetRoutine.exercises.findIndex(ex => ex.id === exId);
+      if (idx !== -1) {
+        const swapExId = swapSelect.value;
+        targetRoutine.exercises[idx].id = swapExId;
+      }
+    }
+
+    // Resolve alert
+    const updateIdx = state.planUpdates.findIndex(u => u.id === updateId);
+    if (updateIdx !== -1) {
+      state.planUpdates[updateIdx].resolved = true;
+    }
+
+    saveToLocalStorage();
+    renderPendingPlanAdjustments();
+    renderRoutinesList();
+    dialog.close();
+  });
+
+  dialog.showModal();
 }
 
 
@@ -1738,6 +1895,198 @@ function renderActiveGroupBoard() {
   const currentExIdx = activeClientState.activeExerciseIndex;
   const currentEx = activeClientState.exercises[currentExIdx];
 
+  // --- GROUP COMBO EXERCISE CHECK ---
+  const comboGroupId = currentEx.comboGroupId;
+  if (comboGroupId) {
+    const comboExercises = activeClientState.exercises.filter(ex => ex.comboGroupId === comboGroupId);
+    
+    // Update navigation details
+    document.getElementById('active-ex-index').textContent = t('combo_round_title') || 'Linked Combo Round';
+    document.getElementById('active-ex-name').textContent = 'Superset Circuit';
+    document.getElementById('active-ex-desc').textContent = comboExercises.map(ex => ex.name).join(' → ');
+    
+    // Disable/enable navigation arrows by bounds of this combo
+    const firstExIdx = activeClientState.exercises.findIndex(ex => ex.comboGroupId === comboGroupId);
+    const lastExIdx = activeClientState.exercises.findLastIndex(ex => ex.comboGroupId === comboGroupId);
+    document.getElementById('btn-prev-exercise').disabled = (firstExIdx === 0);
+    document.getElementById('btn-next-exercise').disabled = (lastExIdx === activeClientState.exercises.length - 1);
+    
+    // Shared rest duration
+    const comboRest = Math.max(...comboExercises.map(ex => ex.rest || 0));
+
+    // Render Rounds (typically 3)
+    const roundsHTML = [];
+    const maxRounds = 3;
+    
+    for (let rIdx = 0; rIdx < maxRounds; rIdx++) {
+      const exerciseRows = [];
+      comboExercises.forEach(ex => {
+        const logsList = activeClientState.logs[ex.id] || [];
+        if (!logsList[rIdx]) {
+          logsList[rIdx] = { reps: ex.reps || 10, weight: ex.weight || 0, completed: false };
+          activeClientState.logs[ex.id] = logsList;
+        }
+        const log = logsList[rIdx];
+        const checkedClass = log.completed ? 'checked' : '';
+        
+        exerciseRows.push(`
+          <div class="active-set-row" data-ex-id="${ex.id}" data-round="${rIdx}" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 140px;">
+              <span style="font-weight: 600; font-size: 13px; color: var(--text-color);">${escapeHTML(ex.name)}</span>
+            </div>
+            
+            <!-- Weight Stepper -->
+            <div class="stepper-control-group" style="display: flex; align-items: center; gap: 4px;">
+              <span class="stepper-label" style="font-size: 10px; color: var(--text-muted);">${t('kg')}</span>
+              <div class="stepper-input-wrapper" style="display: flex; align-items: center; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; height: 32px;">
+                <button type="button" class="step-btn btn-weight-minus" style="width: 24px; font-size: 12px; padding: 0;">-</button>
+                <input type="number" step="0.5" class="input-set-weight" value="${log.weight}" style="width: 42px; font-size: 11px; text-align: center; background: none; border: none; color: #fff;" aria-label="Set weight in kilograms">
+                <button type="button" class="step-btn btn-weight-plus" style="width: 24px; font-size: 12px; padding: 0;">+</button>
+              </div>
+            </div>
+            
+            <!-- Reps Stepper -->
+            <div class="stepper-control-group" style="display: flex; align-items: center; gap: 4px;">
+              <span class="stepper-label" style="font-size: 10px; color: var(--text-muted);">${t('reps_label')}</span>
+              <div class="stepper-input-wrapper" style="display: flex; align-items: center; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; height: 32px;">
+                <button type="button" class="step-btn btn-reps-minus" style="width: 24px; font-size: 12px; padding: 0;">-</button>
+                <input type="text" class="input-set-reps" value="${log.reps}" style="width: 42px; font-size: 11px; text-align: center; background: none; border: none; color: #fff;" aria-label="Set reps quantity">
+                <button type="button" class="step-btn btn-reps-plus" style="width: 24px; font-size: 12px; padding: 0;">+</button>
+              </div>
+            </div>
+            
+            <!-- Completed Checkbox -->
+            <div class="set-check-col" style="margin-left: auto;">
+              <button type="button" class="set-checkbox-btn ${checkedClass}" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;" aria-label="Mark set completed">
+                <i class="fa-solid fa-check" style="${log.completed ? 'display: block' : 'display: none'}"></i>
+              </button>
+            </div>
+          </div>
+        `);
+      });
+      
+      roundsHTML.push(`
+        <div class="combo-round-card" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 14px; margin-bottom: 12px;">
+          <h4 style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--accent-cyan); letter-spacing: 0.5px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; margin-bottom: 12px; margin-top: 0;">Round ${rIdx + 1}</h4>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            ${exerciseRows.join('')}
+          </div>
+        </div>
+      `);
+    }
+    
+    container.innerHTML = `
+      <div class="participant-set-rows" style="display: flex; flex-direction: column; gap: 6px; padding: 12px;">
+        ${roundsHTML.join('')}
+      </div>
+    `;
+
+    // Bind event handlers for all elements inside this combo container
+    container.querySelectorAll('.active-set-row').forEach(row => {
+      const exId = row.getAttribute('data-ex-id');
+      const rIdx = parseInt(row.getAttribute('data-round'));
+      const logsList = activeClientState.logs[exId];
+      const log = logsList[rIdx];
+      
+      const weightInput = row.querySelector('.input-set-weight');
+      const repsInput = row.querySelector('.input-set-reps');
+      const checkBtn = row.querySelector('.set-checkbox-btn');
+      const checkIcon = checkBtn.querySelector('i');
+      
+      const updateWeight = (val) => {
+        if (isNaN(val) || val < 0) val = 0;
+        log.weight = val;
+        weightInput.value = val;
+        saveActiveSessionToCache();
+      };
+      
+      const updateReps = (val) => {
+        log.reps = val;
+        repsInput.value = val;
+        saveActiveSessionToCache();
+      };
+      
+      row.querySelector('.btn-weight-minus').addEventListener('click', () => {
+        const current = parseFloat(weightInput.value) || 0;
+        updateWeight(Math.max(0, current - 2.5));
+      });
+      row.querySelector('.btn-weight-plus').addEventListener('click', () => {
+        const current = parseFloat(weightInput.value) || 0;
+        updateWeight(current + 2.5);
+      });
+      weightInput.addEventListener('change', (e) => {
+        updateWeight(parseFloat(e.target.value));
+      });
+      
+      row.querySelector('.btn-reps-minus').addEventListener('click', () => {
+        const current = parseInt(repsInput.value) || 0;
+        updateReps(Math.max(0, current - 1));
+      });
+      row.querySelector('.btn-reps-plus').addEventListener('click', () => {
+        const current = parseInt(repsInput.value) || 0;
+        updateReps(current + 1);
+      });
+      repsInput.addEventListener('change', (e) => {
+        updateReps(e.target.value);
+      });
+      
+      checkBtn.addEventListener('click', () => {
+        const isChecked = log.completed;
+        log.completed = !isChecked;
+        
+        if (!isChecked) {
+          checkBtn.style.background = 'var(--accent-cyan)';
+          checkBtn.style.color = '#000';
+          checkIcon.style.display = 'block';
+          
+          const allCompletedInRound = comboExercises.every(ex => activeClientState.logs[ex.id][rIdx]?.completed);
+          if (allCompletedInRound && comboRest > 0 && !restTimer.isActive) {
+            triggerRestTimer(comboRest);
+          }
+        } else {
+          checkBtn.style.background = 'transparent';
+          checkBtn.style.color = 'var(--text-muted)';
+          checkIcon.style.display = 'none';
+        }
+        
+        saveActiveSessionToCache();
+      });
+    });
+
+    // Foreshadowing Up Next mapping for Combo round
+    const nextExCard = document.getElementById('foreshadowing-card');
+    const nextExName = document.getElementById('foreshadowing-name');
+    const nextExTarget = document.getElementById('foreshadowing-target');
+    
+    if (nextExCard && nextExName && nextExTarget) {
+      const lastComboIdx = activeClientState.exercises.findLastIndex(ex => ex.comboGroupId === comboGroupId);
+      const nextExIdx = lastComboIdx + 1;
+      
+      if (nextExIdx < activeClientState.exercises.length) {
+        const nextEx = activeClientState.exercises[nextExIdx];
+        const nextExLogs = activeClientState.logs[nextEx.id] || [];
+        const numSets = nextEx.setsTargetCount || nextExLogs.length || 3;
+        const targetReps = nextEx.repsTarget || (nextExLogs[0] ? nextExLogs[0].reps : 10);
+        const targetWeight = nextEx.weightTarget || (nextExLogs[0] ? nextExLogs[0].weight : 0);
+        
+        let targetText = `${numSets} sets`;
+        if (targetReps > 0) targetText += ` × ${targetReps}`;
+        if (targetWeight > 0) targetText += ` (${targetWeight}kg)`;
+        
+        nextExName.textContent = nextEx.name;
+        nextExTarget.textContent = targetText;
+        nextExCard.classList.remove('hidden');
+      } else {
+        nextExName.textContent = t('last_exercise');
+        nextExTarget.textContent = '';
+        nextExCard.classList.remove('hidden');
+      }
+    }
+    
+    return;
+  }
+
+  // --- NORMAL SEQUENTIAL RENDER FLOW ---
   // Update navigation details
   document.getElementById('active-ex-index').textContent = `${t('exercise_of')} ${currentExIdx + 1} of ${activeClientState.exercises.length}`;
   document.getElementById('active-ex-name').textContent = currentEx.name;
@@ -1902,7 +2251,17 @@ function setupActiveSession() {
     if (!activeSession) return;
     const clientState = activeSession.clientRoutines[activeSession.activeClientId];
     if (clientState && clientState.activeExerciseIndex > 0) {
+      const currentEx = clientState.exercises[clientState.activeExerciseIndex];
+      const currentComboId = currentEx.comboGroupId;
+      
       clientState.activeExerciseIndex--;
+      
+      if (currentComboId) {
+        while (clientState.activeExerciseIndex > 0 && 
+               clientState.exercises[clientState.activeExerciseIndex].comboGroupId === currentComboId) {
+          clientState.activeExerciseIndex--;
+        }
+      }
       renderActiveGroupBoard();
     }
   });
@@ -1911,7 +2270,17 @@ function setupActiveSession() {
     if (!activeSession) return;
     const clientState = activeSession.clientRoutines[activeSession.activeClientId];
     if (clientState && clientState.activeExerciseIndex < clientState.exercises.length - 1) {
+      const currentEx = clientState.exercises[clientState.activeExerciseIndex];
+      const currentComboId = currentEx.comboGroupId;
+      
       clientState.activeExerciseIndex++;
+      
+      if (currentComboId) {
+        while (clientState.activeExerciseIndex < clientState.exercises.length - 1 && 
+               clientState.exercises[clientState.activeExerciseIndex].comboGroupId === currentComboId) {
+          clientState.activeExerciseIndex++;
+        }
+      }
       renderActiveGroupBoard();
     }
   });
@@ -2667,115 +3036,110 @@ function setupCalendarBookings() {
 }
 
 function renderSessions() {
-  const container = document.getElementById('calendar-sessions-list');
-  if (!container) return;
+  const todayContainer = document.getElementById('today-sessions-list');
+  const tomorrowContainer = document.getElementById('tomorrow-sessions-list');
+  if (!todayContainer || !tomorrowContainer) return;
   
-  container.innerHTML = '';
+  todayContainer.innerHTML = '';
+  tomorrowContainer.innerHTML = '';
   
   const bookings = state.bookings || [];
-  if (bookings.length === 0) {
-    container.innerHTML = `
-      <div class="card glassmorphic text-center text-muted" style="padding: 24px;">
-        <i class="fa-regular fa-calendar-xmark" style="font-size: 24px; margin-bottom: 8px; color: var(--text-muted);"></i>
-        <p style="font-size: 13px;">${t('no_bookings_today')}</p>
-      </div>
-    `;
-    return;
-  }
-
-  const renderDayGroup = (dayName, dayLabel, sessionsList) => {
-    if (sessionsList.length === 0) return;
-
-    // Day Header
-    const groupHeader = document.createElement('div');
-    groupHeader.className = 'booking-day-header';
-    const isToday = (dayName === 'today');
-    groupHeader.style.cssText = `font-size: 11px; font-weight: 700; text-transform: uppercase; color: ${isToday ? 'var(--accent-cyan)' : 'var(--text-muted)'}; letter-spacing: 0.5px; margin: 16px 0 8px 0; display: flex; align-items: center; gap: 8px;`;
-    groupHeader.innerHTML = `
-      <span>${escapeHTML(dayLabel)}</span>
-      <span style="flex: 1; height: 1px; background: ${isToday ? 'rgba(0,255,255,0.15)' : 'rgba(255,255,255,0.05)'};"></span>
-    `;
-    container.appendChild(groupHeader);
-
-    sessionsList.forEach(b => {
-      const card = document.createElement('div');
-      card.className = 'booking-card card glassmorphic';
-      card.style.cssText = 'display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px; margin-bottom: 12px; border-left: 4px solid var(--accent-cyan); cursor: pointer; transition: background 0.2s, transform 0.2s;';
-      
-      // Hover feedback style
-      card.addEventListener('mouseenter', () => {
-        card.style.background = 'rgba(255, 255, 255, 0.05)';
-        card.style.transform = 'translateY(-1px)';
-      });
-      card.addEventListener('mouseleave', () => {
-        card.style.background = '';
-        card.style.transform = '';
-      });
-      
-      const info = document.createElement('div');
-      info.style.flex = '1';
-      
-      // Resolve participants with injury checking
-      const clients = b.participants.map(pId => state.clients.find(c => c.id === pId)).filter(Boolean);
-      const clientHTMLs = clients.map(c => {
-        let injuryIcon = '';
-        if (c.hasInjury) {
-          injuryIcon = ` <i class="fa-solid fa-triangle-exclamation text-red" style="font-size: 10px; color: #ef4444;" title="Has recorded injury"></i>`;
-        }
-        return `<span style="font-weight: 600; color: var(--text-color);">${escapeHTML(c.name)}${injuryIcon}</span>`;
-      });
-      const clientNamesStr = clientHTMLs.join(', ');
-      
-      // Find routine name
-      const routine = state.routines.find(r => r.id === b.routineId);
-      const routineName = routine ? routine.name : '';
-
-      // Program undefined warning tag
-      let warningHTML = '';
-      if (!routineName) {
-        warningHTML = `
-          <div class="booking-warning-pill" style="display: inline-flex; align-items: center; gap: 4px; background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; margin-top: 6px;">
-            <i class="fa-solid fa-triangle-exclamation"></i>
-            <span>${t('program_not_defined')}</span>
-          </div>
-        `;
-      }
-      
-      info.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px;">
-          <span class="badge badge-cyan" style="font-size: 10px; padding: 2px 6px; font-weight: 700; font-family: monospace;">${escapeHTML(b.time)}</span>
-          <strong style="color: var(--text-color); font-size: 13px;">${escapeHTML(b.title)}</strong>
-        </div>
-        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">
-          <i class="fa-solid fa-users" style="margin-right: 4px; font-size: 10px;"></i> ${clientNamesStr} 
-          <span style="margin-left: 4px; color: var(--accent-cyan); font-weight: 600;">(${clients.length}/${b.maxCapacity} ${t('spots_filled')})</span>
-        </div>
-        <div style="font-size: 11px; color: var(--text-muted);">
-          <i class="fa-solid fa-clipboard-list" style="margin-right: 4px; font-size: 10px;"></i> Program: <span class="font-semibold">${routineName ? escapeHTML(routineName) : `<span style="color: #ef4444; font-weight: 600;">${t('undefined')}</span>`}</span>
-        </div>
-        ${warningHTML}
-      `;
-      
-      const btn = document.createElement('button');
-      btn.className = 'btn primary-btn btn-xs';
-      btn.style.cssText = 'display: flex; align-items: center; gap: 6px; pointer-events: none;';
-      btn.innerHTML = `<i class="fa-solid fa-circle-play"></i> ${t('btn_launch_clipboard_short')}`;
-      
-      card.addEventListener('click', () => {
-        openWorkoutSetupModal(null, null, b.id);
-      });
-      
-      card.appendChild(info);
-      card.appendChild(btn);
-      container.appendChild(card);
+  
+  const renderSessionCard = (b, colContainer) => {
+    const card = document.createElement('div');
+    card.className = 'booking-card card glassmorphic';
+    card.style.cssText = 'display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px; margin-bottom: 4px; border-left: 4px solid var(--accent-cyan); cursor: pointer; transition: background 0.2s, transform 0.2s;';
+    
+    // Hover feedback style
+    card.addEventListener('mouseenter', () => {
+      card.style.background = 'rgba(255, 255, 255, 0.05)';
+      card.style.transform = 'translateY(-1px)';
     });
+    card.addEventListener('mouseleave', () => {
+      card.style.background = '';
+      card.style.transform = '';
+    });
+    
+    const info = document.createElement('div');
+    info.style.flex = '1';
+    
+    // Resolve participants with injury checking
+    const clients = b.participants.map(pId => state.clients.find(c => c.id === pId)).filter(Boolean);
+    const clientHTMLs = clients.map(c => {
+      let injuryIcon = '';
+      if (c.hasInjury) {
+        injuryIcon = ` <i class="fa-solid fa-triangle-exclamation text-red" style="font-size: 10px; color: #ef4444;" title="Has recorded injury"></i>`;
+      }
+      return `<span style="font-weight: 600; color: var(--text-color);">${escapeHTML(c.name)}${injuryIcon}</span>`;
+    });
+    const clientNamesStr = clientHTMLs.join(', ');
+    
+    // Find routine name
+    const routine = state.routines.find(r => r.id === b.routineId);
+    const routineName = routine ? routine.name : '';
+
+    // Program undefined warning tag
+    let warningHTML = '';
+    if (!routineName) {
+      warningHTML = `
+        <div class="booking-warning-pill" style="display: inline-flex; align-items: center; gap: 4px; background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; margin-top: 6px;">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span>${t('program_not_defined')}</span>
+        </div>
+      `;
+    }
+    
+    info.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px;">
+        <span class="badge badge-cyan" style="font-size: 10px; padding: 2px 6px; font-weight: 700; font-family: monospace;">${escapeHTML(b.time)}</span>
+        <strong style="color: var(--text-color); font-size: 13px;">${escapeHTML(b.title)}</strong>
+      </div>
+      <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">
+        <i class="fa-solid fa-users" style="margin-right: 4px; font-size: 10px;"></i> ${clientNamesStr} 
+        <span style="margin-left: 4px; color: var(--accent-cyan); font-weight: 600;">(${clients.length}/${b.maxCapacity} ${t('spots_filled')})</span>
+      </div>
+      <div style="font-size: 11px; color: var(--text-muted);">
+        <i class="fa-solid fa-clipboard-list" style="margin-right: 4px; font-size: 10px;"></i> Program: <span class="font-semibold">${routineName ? escapeHTML(routineName) : `<span style="color: #ef4444; font-weight: 600;">${t('undefined')}</span>`}</span>
+      </div>
+      ${warningHTML}
+    `;
+    
+    const btn = document.createElement('button');
+    btn.className = 'btn primary-btn btn-xs';
+    btn.style.cssText = 'display: flex; align-items: center; gap: 6px; pointer-events: none;';
+    btn.innerHTML = `<i class="fa-solid fa-circle-play"></i> ${t('btn_launch_clipboard_short')}`;
+    
+    card.addEventListener('click', () => {
+      openWorkoutSetupModal(null, null, b.id);
+    });
+    
+    card.appendChild(info);
+    card.appendChild(btn);
+    colContainer.appendChild(card);
   };
 
   const todaySessions = bookings.filter(b => b.day === 'today');
   const tomorrowSessions = bookings.filter(b => b.day === 'tomorrow');
 
-  renderDayGroup('today', t('today'), todaySessions);
-  renderDayGroup('tomorrow', t('tomorrow'), tomorrowSessions);
+  if (todaySessions.length === 0) {
+    todayContainer.innerHTML = `
+      <div class="card glassmorphic text-center text-muted" style="padding: 16px; font-size: 12px;">
+        ${t('no_bookings_today')}
+      </div>
+    `;
+  } else {
+    todaySessions.forEach(s => renderSessionCard(s, todayContainer));
+  }
+
+  if (tomorrowSessions.length === 0) {
+    tomorrowContainer.innerHTML = `
+      <div class="card glassmorphic text-center text-muted" style="padding: 16px; font-size: 12px;">
+        ${t('no_bookings_today')}
+      </div>
+    `;
+  } else {
+    tomorrowSessions.forEach(s => renderSessionCard(s, tomorrowContainer));
+  }
 }
 
 // Register Service Worker for offline PWA support

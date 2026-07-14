@@ -135,3 +135,16 @@ def test_interactive_dashboard_flow(page, local_server):
     # Verify the new adjustment alert card on the dashboard displays the play audio button
     page.wait_for_selector(".btn-play-adjustment-audio", state="visible")
     assert page.locator(".btn-play-adjustment-audio").is_visible()
+
+    # Click Resolve Alert button to trigger the adjustment wizard modal
+    page.locator(".btn-resolve-alert").first.click()
+    page.wait_for_selector("#dialog-apply-adjustment", state="visible")
+    assert page.locator("#dialog-apply-adjustment").is_visible()
+
+    # Modify parameters and submit
+    page.locator("#adjust-action-type").select_option("modify")
+    page.locator("#adjust-weight").fill("62.5")
+    page.locator("#dialog-apply-adjustment button[type='submit']").click()
+
+    # Verify wizard modal closes
+    page.wait_for_selector("#dialog-apply-adjustment", state="hidden")
