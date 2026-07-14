@@ -271,8 +271,7 @@ function applyTranslations(lang = state.lang || 'en') {
     '#view-client-detail .client-profile-card h4:nth-of-type(2)': 'goals',
     '#view-client-detail .client-profile-card h4:nth-of-type(3)': 'routine_plans',
     '#btn-edit-client': 'btn_edit_profile',
-    '#btn-start-client-session': 'btn_log_workout',
-    '#btn-add-client-adjustment': 'btn_add_plan',
+    '#btn-start-client-workout': 'btn_log_workout',
     '#view-client-detail .history-section h5': 'client_history_header',
     '#btn-back-to-clients': 'btn_back',
     
