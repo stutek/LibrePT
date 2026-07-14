@@ -57,6 +57,8 @@ export const DEFAULT_CLIENTS = [
       { date: '2026-07-01', value: 64.6 }
     ],
     notes: 'Slight left shoulder tightness during overhead movements. Keep warmups thorough. Enjoys tracking RPE (Rate of Perceived Exertion).',
+    hasInjury: true,
+    injury: 'Slight left shoulder tightness during overhead movements',
     active: true
   },
   {
@@ -71,6 +73,8 @@ export const DEFAULT_CLIENTS = [
       { date: '2026-07-01', value: 85.8 }
     ],
     notes: 'Knee reconstruction surgery in 2024. Keep back squats at moderate load and monitor depth. Avoid high-impact jumping.',
+    hasInjury: true,
+    injury: 'Knee reconstruction surgery in 2024',
     active: true
   },
   {
@@ -84,6 +88,8 @@ export const DEFAULT_CLIENTS = [
       { date: '2026-07-05', value: 70.3 }
     ],
     notes: 'Prefers high-intensity interval formats. Enjoys kettlebell workouts. Heart rate spikes quickly; monitor recovery times.',
+    hasInjury: false,
+    injury: '',
     active: true
   }
 ];
@@ -268,21 +274,50 @@ export const DEFAULT_PLAN_UPDATES = [
   }
 ];
 
-export const DEFAULT_BOOKINGS = [
+export const DEFAULT_SESSIONS = [
   {
     id: 'b-1',
-    time: '10:00 AM',
+    time: '10:00 AM - 11:30 AM',
     title: 'Group Strength & Conditioning',
     participants: ['client-jane-doe', 'client-john-smith'],
     routineId: 'routine-upper-a',
-    maxCapacity: 4
+    maxCapacity: 4,
+    day: 'today'
   },
   {
     id: 'b-2',
-    time: '02:00 PM',
+    time: '10:30 AM - 11:30 AM',
     title: 'Individual Focus Session',
     participants: ['client-sarah-jenkins'],
     routineId: 'routine-legs-core',
-    maxCapacity: 1
+    maxCapacity: 1,
+    day: 'today'
+  },
+  {
+    id: 'b-3',
+    time: '02:00 PM - 03:00 PM',
+    title: 'Express Core HIIT',
+    participants: ['client-sarah-jenkins'],
+    routineId: '',
+    maxCapacity: 2,
+    day: 'today'
+  },
+  {
+    id: 'b-4',
+    time: '09:00 AM - 10:00 AM',
+    title: 'Morning Conditioning',
+    participants: ['client-jane-doe'],
+    routineId: '',
+    maxCapacity: 3,
+    day: 'tomorrow'
+  },
+  {
+    id: 'b-5',
+    time: '09:30 AM - 11:00 AM',
+    title: 'Tomorrow Strength',
+    participants: ['client-john-smith'],
+    routineId: 'routine-upper-a',
+    maxCapacity: 4,
+    day: 'tomorrow'
   }
 ];

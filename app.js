@@ -1,5 +1,5 @@
 // app.js - LibrePT Application Controller Logic
-import { DEFAULT_EXERCISES, DEFAULT_CLIENTS, DEFAULT_ROUTINES, DEFAULT_HISTORY, DEFAULT_PLAN_UPDATES, DEFAULT_BOOKINGS } from './mockData.js';
+import { DEFAULT_EXERCISES, DEFAULT_CLIENTS, DEFAULT_ROUTINES, DEFAULT_HISTORY, DEFAULT_PLAN_UPDATES, DEFAULT_SESSIONS } from './mockData.js';
 
 // --- TRANSLATION / i18n SYSTEM ---
 const TRANSLATIONS = {
@@ -111,12 +111,27 @@ const TRANSLATIONS = {
     filter_all: "All",
     history_desc: "Log of all completed sessions across all clients.",
     todays_bookings: "Today's Calendar Bookings",
+    todays_sessions: "Today's & Tomorrow's Sessions",
     btn_sync_calendar: "Sync Calendar",
+    btn_sync_sessions: "Sync Sessions",
     booking_spots: "spots booked",
+    spots_filled: "spots filled",
     btn_launch_clipboard_short: "Launch Clipboard",
     syncing_calendar: "Syncing...",
     calendar_synced: "Calendar synchronized successfully!",
-    no_bookings_today: "No bookings found for today."
+    no_bookings_today: "No bookings found for today.",
+    voice_note_label: "Privacy-First Voice Note",
+    voice_ready: "Tap mic to record voice note",
+    voice_recording: "Recording... Tap again to save",
+    voice_transcribing: "Transcribing audio locally...",
+    voice_transcription_done: "On-device transcription completed!",
+    voice_playing: "Playing voice note...",
+    up_next_label: "Up Next",
+    last_exercise: "Last Exercise",
+    program_not_defined: "Program Not Defined",
+    today: "Today",
+    tomorrow: "Tomorrow",
+    undefined: "Undefined"
   },
   sl: {
     logo_title: "LibrePT",
@@ -226,12 +241,27 @@ const TRANSLATIONS = {
     filter_all: "Vse",
     history_desc: "Dnevnik vseh zaključenih vadb za vse stranke.",
     todays_bookings: "Današnje rezervacije koledarja",
+    todays_sessions: "Današnje in jutrišnje seje",
     btn_sync_calendar: "Sinhroniziraj",
+    btn_sync_sessions: "Sinhroniziraj seje",
     booking_spots: "mest zasedenih",
+    spots_filled: "mest zasedenih",
     btn_launch_clipboard_short: "Začni sledenje",
     syncing_calendar: "Sinhronizacija...",
     calendar_synced: "Koledar je bil uspešno sinhroniziran!",
-    no_bookings_today: "Za danes ni najdenih rezervacij."
+    no_bookings_today: "Za danes ni najdenih rezervacij.",
+    voice_note_label: "Glasovna opomba (zasebnost-prva)",
+    voice_ready: "Tapnite mikrofon za snemanje opombe",
+    voice_recording: "Snemanje... Tapnite ponovno za shranitev",
+    voice_transcribing: "Lokalno prepisovanje zvoka...",
+    voice_transcription_done: "Prepis v napravi je zaključen!",
+    voice_playing: "Predvajanje opombe...",
+    up_next_label: "Naslednja vaja",
+    last_exercise: "Zadnja vaja",
+    program_not_defined: "Program ni določen",
+    today: "Danes",
+    tomorrow: "Jutri",
+    undefined: "Nedoločen"
   }
 };
 
@@ -263,8 +293,8 @@ function applyTranslations(lang = state.lang || 'en') {
     '#view-clients .section-title h3': 'pending_adjustments',
     '#view-clients .view-header h2': 'clients_title',
     '#btn-add-client': 'btn_add_client',
-    '#calendar-title': 'todays_bookings',
-    '#btn-sync-calendar-text': 'btn_sync_calendar',
+    '#calendar-title': 'todays_sessions',
+    '#btn-sync-calendar-text': 'btn_sync_sessions',
     
     // Client Detail view
     '#view-client-detail .client-profile-card h4:nth-of-type(1)': 'notes_injuries',
@@ -313,6 +343,9 @@ function applyTranslations(lang = state.lang || 'en') {
     '#dialog-feedback .modal-header h3': 'log_client_feedback',
     '#dialog-feedback label[for="feedback-custom-note"]': 'custom_details',
     '#dialog-feedback button[type="submit"]': 'btn_log_alert',
+    '#label-voice-note': 'voice_note_label',
+    '#voice-record-status': 'voice_ready',
+    '#label-up-next': 'up_next_label',
     
     '#dialog-backup .modal-header h3': 'backup_center',
     '#dialog-backup .dialog-desc': 'backup_desc',
@@ -453,7 +486,7 @@ function init() {
       renderExercisesList();
       renderGlobalHistory();
       renderPendingPlanAdjustments();
-      renderTodayBookings();
+      renderSessions();
       populateDropdownSelectors();
       if (activeSession) {
         renderActiveGroupBoard();
@@ -470,7 +503,7 @@ function init() {
   renderExercisesList();
   renderGlobalHistory();
   renderPendingPlanAdjustments();
-  renderTodayBookings();
+  renderSessions();
   populateDropdownSelectors();
 
   // Check if there was an active session saved (session recovery)
@@ -484,7 +517,7 @@ function seedMockData() {
   state.routines = [...DEFAULT_ROUTINES];
   state.history = [...DEFAULT_HISTORY];
   state.planUpdates = [...DEFAULT_PLAN_UPDATES];
-  state.bookings = [...DEFAULT_BOOKINGS];
+  state.bookings = [...DEFAULT_SESSIONS];
   state.lang = currentLang;
   saveToLocalStorage();
 }
@@ -502,6 +535,14 @@ function setupNavigation() {
       switchView(viewTarget);
     });
   });
+
+  // Logo Area home click handler
+  const logoArea = document.getElementById('logo-area');
+  if (logoArea) {
+    logoArea.addEventListener('click', () => {
+      switchView('clients');
+    });
+  }
 
   // Theme Toggle Controller
   const themeToggle = document.getElementById('theme-toggle');
@@ -595,6 +636,16 @@ function renderPendingPlanAdjustments() {
     else if (u.tag.includes('Hard')) badgeClass = 'badge-warning';
     else if (u.tag.includes('Easy') || u.tag.includes('Progression')) badgeClass = 'badge-success';
     
+    let voiceNoteHTML = '';
+    if (u.hasVoiceNote) {
+      voiceNoteHTML = `
+        <div class="mini-audio-note" style="display: flex; align-items: center; gap: 6px; margin-top: 6px; background: rgba(0,255,255,0.05); padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(0,255,255,0.15); width: fit-content;">
+          <button type="button" class="btn-play-adjustment-audio" data-id="${u.id}" style="background: none; border: none; color: var(--accent-cyan); cursor: pointer; padding: 0; display: inline-flex; align-items: center;"><i class="fa-solid fa-circle-play" style="font-size: 14px;"></i></button>
+          <span class="audio-status-label" style="font-size: 9px; color: var(--text-muted); font-family: monospace;">voice_memo.wav (0:04)</span>
+        </div>
+      `;
+    }
+
     info.innerHTML = `
       <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px;">
         <strong style="color: var(--text-color); font-size: 13px;">${escapeHTML(u.clientName)}</strong>
@@ -603,6 +654,7 @@ function renderPendingPlanAdjustments() {
       <div style="font-size: 11px; color: var(--text-muted);">
         ${t('exercise_of')}: <span class="font-semibold" style="color: var(--accent-cyan);">${escapeHTML(u.exerciseName)}</span>
       </div>
+      ${voiceNoteHTML}
     `;
     
     const btn = document.createElement('button');
@@ -614,6 +666,31 @@ function renderPendingPlanAdjustments() {
     
     card.appendChild(info);
     card.appendChild(btn);
+
+    // Bind event to play audio preview
+    if (u.hasVoiceNote) {
+      const playBtn = card.querySelector('.btn-play-adjustment-audio');
+      const audioStatus = card.querySelector('.audio-status-label');
+      if (playBtn && audioStatus) {
+        playBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const playIcon = playBtn.querySelector('i');
+          if (playIcon.classList.contains('fa-circle-play')) {
+            playIcon.className = 'fa-solid fa-circle-pause';
+            audioStatus.textContent = t('voice_playing');
+            
+            setTimeout(() => {
+              playIcon.className = 'fa-solid fa-circle-play';
+              audioStatus.textContent = 'voice_memo.wav (0:04)';
+            }, 3000);
+          } else {
+            playIcon.className = 'fa-solid fa-circle-play';
+            audioStatus.textContent = 'voice_memo.wav (0:04)';
+          }
+        });
+      }
+    }
+
     container.appendChild(card);
   });
 }
@@ -654,7 +731,7 @@ function renderClientsList(filterQuery = '') {
       <div class="client-info-block">
         <div class="avatar">${client.avatar || getInitials(client.name)}</div>
         <div class="client-name-meta">
-          <h3>${escapeHTML(client.name)}</h3>
+          <h3>${getClientDisplayNameHTML(client)}</h3>
           <p>${escapeHTML(truncateString(client.goals, 45))}</p>
         </div>
       </div>
@@ -676,9 +753,9 @@ function showClientDetails(clientId) {
   if (!client) return;
 
   activeDetailClientId = clientId;
-  document.getElementById('detail-client-name').textContent = client.name;
+  document.getElementById('detail-client-name').innerHTML = getClientDisplayNameHTML(client);
   document.getElementById('detail-client-avatar').textContent = client.avatar || getInitials(client.name);
-  document.getElementById('profile-name').textContent = client.name;
+  document.getElementById('profile-name').innerHTML = getClientDisplayNameHTML(client);
   document.getElementById('profile-joined-date').textContent = `${t('joined')} ${formatDateStr(client.joinedDate)}`;
   document.getElementById('profile-goals').textContent = client.goals || t('no_goals_specified');
   document.getElementById('profile-notes').textContent = client.notes || t('no_notes_specified');
@@ -1443,7 +1520,7 @@ function openWorkoutSetupModal(preselectedClientId = null, preselectedRoutineId 
     
     const nameLabel = document.createElement('label');
     nameLabel.htmlFor = `setup-cb-${client.id}`;
-    nameLabel.textContent = client.name;
+    nameLabel.innerHTML = getClientDisplayNameHTML(client);
     nameLabel.style.fontWeight = '600';
     nameLabel.style.cursor = 'pointer';
     nameLabel.style.fontSize = '13px';
@@ -1619,7 +1696,7 @@ function renderActiveGroupBoard() {
         <div class="avatar" style="width:20px; height:20px; font-size:9px; background: ${pId === activeClientId ? '#000' : 'var(--accent-cyan)'}; color: ${pId === activeClientId ? 'var(--accent-cyan)' : '#000'}">
           ${client.avatar || getInitials(client.name)}
         </div>
-        <span>${escapeHTML(client.name.split(' ')[0])}</span>
+        <span>${getClientDisplayNameHTML(client, true)}</span>
       `;
       
       tab.addEventListener('click', () => {
@@ -1789,6 +1866,34 @@ function renderActiveGroupBoard() {
       saveActiveSessionToCache();
     });
   });
+
+  // --- FORESHADOWING ("UP NEXT") COMPONENT ---
+  const nextExCard = document.getElementById('foreshadowing-card');
+  const nextExName = document.getElementById('foreshadowing-name');
+  const nextExTarget = document.getElementById('foreshadowing-target');
+  
+  if (nextExCard && nextExName && nextExTarget) {
+    const nextExIdx = currentExIdx + 1;
+    if (nextExIdx < activeClientState.exercises.length) {
+      const nextEx = activeClientState.exercises[nextExIdx];
+      const nextExLogs = activeClientState.logs[nextEx.id] || [];
+      const numSets = nextEx.setsTargetCount || nextExLogs.length || 3;
+      const targetReps = nextEx.repsTarget || (nextExLogs[0] ? nextExLogs[0].reps : 10);
+      const targetWeight = nextEx.weightTarget || (nextExLogs[0] ? nextExLogs[0].weight : 0);
+      
+      let targetText = `${numSets} sets`;
+      if (targetReps > 0) targetText += ` × ${targetReps}`;
+      if (targetWeight > 0) targetText += ` (${targetWeight}kg)`;
+      
+      nextExName.textContent = nextEx.name;
+      nextExTarget.textContent = targetText;
+      nextExCard.classList.remove('hidden');
+    } else {
+      nextExName.textContent = t('last_exercise');
+      nextExTarget.textContent = '';
+      nextExCard.classList.remove('hidden');
+    }
+  }
 }
 
 function setupActiveSession() {
@@ -1917,9 +2022,12 @@ function setupActiveSession() {
     addExModal.close();
   });
 
-  // Feedback modal
+  // Feedback modal with voice note integration
   const fbModal = document.getElementById('dialog-feedback');
   const fbForm = document.getElementById('form-feedback');
+  
+  let isRecording = false;
+  let hasVoiceNote = false;
   
   document.getElementById('btn-log-feedback').addEventListener('click', () => {
     if (!activeSession) return;
@@ -1936,10 +2044,120 @@ function setupActiveSession() {
     document.getElementById('feedback-ex-display-name').textContent = curEx.name;
     document.getElementById('feedback-custom-note').value = '';
     
+    // Reset voice recorder state
+    isRecording = false;
+    hasVoiceNote = false;
+    const audioWave = document.getElementById('voice-audio-wave');
+    const audioPlayer = document.getElementById('voice-audio-player');
+    const recordIcon = document.getElementById('voice-record-icon');
+    const recordStatus = document.getElementById('voice-record-status');
+    
+    if (audioWave) {
+      audioWave.classList.add('hidden');
+      audioWave.classList.remove('recording');
+    }
+    if (audioPlayer) {
+      audioPlayer.classList.add('hidden');
+    }
+    if (recordStatus) {
+      recordStatus.textContent = t('voice_ready');
+    }
+    if (recordIcon) {
+      recordIcon.className = 'fa-solid fa-microphone';
+      recordIcon.style.color = '';
+    }
+    
     // Reset radios
     fbForm.reset();
     fbModal.showModal();
   });
+
+  // Voice recording mock handlers
+  const recordBtn = document.getElementById('btn-voice-record');
+  if (recordBtn) {
+    recordBtn.addEventListener('click', () => {
+      const recordIcon = document.getElementById('voice-record-icon');
+      const recordStatus = document.getElementById('voice-record-status');
+      const audioWave = document.getElementById('voice-audio-wave');
+      const audioPlayer = document.getElementById('voice-audio-player');
+      
+      if (!isRecording) {
+        // Start snemanje / record
+        isRecording = true;
+        hasVoiceNote = false;
+        if (recordIcon) {
+          recordIcon.className = 'fa-solid fa-microphone-slash';
+          recordIcon.style.color = '#ef4444';
+        }
+        if (recordStatus) recordStatus.textContent = t('voice_recording');
+        if (audioWave) {
+          audioWave.classList.remove('hidden');
+          audioWave.classList.add('recording');
+        }
+        if (audioPlayer) audioPlayer.classList.add('hidden');
+      } else {
+        // Stop snemanje
+        isRecording = false;
+        hasVoiceNote = true;
+        if (recordIcon) {
+          recordIcon.className = 'fa-solid fa-microphone';
+          recordIcon.style.color = '';
+        }
+        if (recordStatus) recordStatus.textContent = t('voice_transcribing');
+        if (audioWave) {
+          audioWave.classList.add('hidden');
+          audioWave.classList.remove('recording');
+        }
+        
+        // Simulate local on-device speech-to-text transcription latency
+        setTimeout(() => {
+          if (recordStatus) recordStatus.textContent = t('voice_transcription_done');
+          if (audioPlayer) audioPlayer.classList.remove('hidden');
+          
+          const exName = document.getElementById('feedback-exercise-name').value || 'exercise';
+          const clientName = document.getElementById('feedback-client-display-name').textContent || 'Client';
+          
+          let generatedTranscript = "";
+          if (state.lang === 'sl') {
+            generatedTranscript = `Glasovna opomba (lokalno): ${clientName} poroča o dobrem počutju pri vaji ${exName}.`;
+          } else {
+            generatedTranscript = `Voice note (local): ${clientName} reported good form and speed on ${exName}.`;
+          }
+          
+          const currentNoteInput = document.getElementById('feedback-custom-note');
+          if (currentNoteInput) {
+            if (currentNoteInput.value) {
+              currentNoteInput.value += ` (${generatedTranscript})`;
+            } else {
+              currentNoteInput.value = generatedTranscript;
+            }
+          }
+        }, 1200);
+      }
+    });
+  }
+
+  const playPreviewBtn = document.getElementById('btn-play-voice-preview');
+  if (playPreviewBtn) {
+    playPreviewBtn.addEventListener('click', () => {
+      const playIcon = playPreviewBtn.querySelector('i');
+      const recordStatus = document.getElementById('voice-record-status');
+      if (playIcon) {
+        if (playIcon.classList.contains('fa-circle-play')) {
+          playIcon.className = 'fa-solid fa-circle-pause';
+          if (recordStatus) recordStatus.textContent = t('voice_playing');
+          
+          setTimeout(() => {
+            playIcon.className = 'fa-solid fa-circle-play';
+            if (recordStatus) recordStatus.textContent = t('voice_transcription_done');
+          }, 3000);
+        } else {
+          playIcon.className = 'fa-solid fa-circle-play';
+          if (recordStatus) recordStatus.textContent = t('voice_transcription_done');
+        }
+      }
+    });
+  }
   
   fbModal.querySelector('.modal-cancel').addEventListener('click', () => fbModal.close());
   fbModal.querySelector('.modal-close-btn').addEventListener('click', () => fbModal.close());
@@ -1960,11 +2178,12 @@ function setupActiveSession() {
       date: new Date().toISOString(),
       exerciseName: exName,
       tag: tagVal + (customNote ? ` - ${customNote}` : ''),
+      hasVoiceNote: hasVoiceNote,
       resolved: false
     };
     
     state.planUpdates.push(newFeedback);
-
+ 
     // Save to active session so it carries into client history log
     if (activeSession) {
       if (!activeSession.feedback) {
@@ -1975,11 +2194,12 @@ function setupActiveSession() {
         clientId: clientId,
         exerciseName: exName,
         tag: tagVal,
-        note: customNote
+        note: customNote,
+        hasVoiceNote: hasVoiceNote
       });
       saveActiveSessionToCache();
     }
-
+ 
     saveToLocalStorage();
     renderPendingPlanAdjustments();
     fbModal.close();
@@ -2404,7 +2624,16 @@ function escapeHTML(str) {
     .replace(/'/g, '&#039;');
 }
 
-// --- GOOGLE CALENDAR APPOINTMENT BOOKINGS INTEGRATION (UC3 & UC4) ---
+function getClientDisplayNameHTML(client, isShort = false) {
+  if (!client) return '';
+  const nameText = isShort ? client.name.split(' ')[0] : client.name;
+  if (client.hasInjury) {
+    return `<span class="client-name-with-injury" style="display: inline-flex; align-items: center; gap: 4px;">${escapeHTML(nameText)} <i class="fa-solid fa-triangle-exclamation text-red" style="font-size: 11px; color: #ef4444;" title="Has recorded injury: ${escapeHTML(client.injury || client.notes || '')}"></i></span>`;
+  }
+  return escapeHTML(nameText);
+}
+
+// --- GOOGLE CALENDAR APPOINTMENT SESSIONS INTEGRATION (UC3 & UC4) ---
 function setupCalendarBookings() {
   const syncBtn = document.getElementById('btn-sync-calendar');
   if (syncBtn) {
@@ -2419,17 +2648,16 @@ function setupCalendarBookings() {
       syncBtn.disabled = true;
       
       setTimeout(() => {
-        // Simulate query to Google Calendar Appointment Schedules
-        // If there are no bookings, we seed them.
+        // Load default sessions if empty
         if (!state.bookings || state.bookings.length === 0) {
-          state.bookings = [...DEFAULT_BOOKINGS];
+          state.bookings = [...DEFAULT_SESSIONS];
         }
         
         saveToLocalStorage();
-        renderTodayBookings();
+        renderSessions();
         
         if (icon) icon.classList.remove('fa-spin');
-        if (btnText) btnText.textContent = t('btn_sync_calendar');
+        if (btnText) btnText.textContent = t('btn_sync_sessions');
         syncBtn.disabled = false;
         
         alert(t('calendar_synced'));
@@ -2438,8 +2666,8 @@ function setupCalendarBookings() {
   }
 }
 
-function renderTodayBookings() {
-  const container = document.getElementById('calendar-bookings-list');
+function renderSessions() {
+  const container = document.getElementById('calendar-sessions-list');
   if (!container) return;
   
   container.innerHTML = '';
@@ -2454,58 +2682,100 @@ function renderTodayBookings() {
     `;
     return;
   }
-  
-  bookings.forEach(b => {
-    const card = document.createElement('div');
-    card.className = 'booking-card card glassmorphic';
-    card.style.display = 'flex';
-    card.style.justifyContent = 'space-between';
-    card.style.alignItems = 'center';
-    card.style.gap = '12px';
-    card.style.padding = '14px';
-    card.style.marginBottom = '12px';
-    card.style.borderLeft = '4px solid var(--accent-cyan)';
-    
-    const info = document.createElement('div');
-    info.style.flex = '1';
-    
-    // Resolve participants
-    const clients = b.participants.map(pId => state.clients.find(c => c.id === pId)).filter(Boolean);
-    const clientNamesStr = clients.map(c => c.name).join(', ');
-    
-    // Find routine name
-    const routine = state.routines.find(r => r.id === b.routineId);
-    const routineName = routine ? routine.name : 'Custom Routine';
-    
-    info.innerHTML = `
-      <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px;">
-        <span class="badge badge-cyan" style="font-size: 10px; padding: 2px 6px; font-weight: 700; font-family: monospace;">${escapeHTML(b.time)}</span>
-        <strong style="color: var(--text-color); font-size: 13px;">${escapeHTML(b.title)}</strong>
-      </div>
-      <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">
-        <i class="fa-solid fa-users" style="margin-right: 4px; font-size: 10px;"></i> ${escapeHTML(clientNamesStr)} 
-        <span style="margin-left: 4px; color: var(--accent-cyan); font-weight: 600;">(${clients.length}/${b.maxCapacity} ${t('booking_spots')})</span>
-      </div>
-      <div style="font-size: 11px; color: var(--text-muted);">
-        <i class="fa-solid fa-clipboard-list" style="margin-right: 4px; font-size: 10px;"></i> Program: <span class="font-semibold">${escapeHTML(routineName)}</span>
-      </div>
+
+  const renderDayGroup = (dayName, dayLabel, sessionsList) => {
+    if (sessionsList.length === 0) return;
+
+    // Day Header
+    const groupHeader = document.createElement('div');
+    groupHeader.className = 'booking-day-header';
+    const isToday = (dayName === 'today');
+    groupHeader.style.cssText = `font-size: 11px; font-weight: 700; text-transform: uppercase; color: ${isToday ? 'var(--accent-cyan)' : 'var(--text-muted)'}; letter-spacing: 0.5px; margin: 16px 0 8px 0; display: flex; align-items: center; gap: 8px;`;
+    groupHeader.innerHTML = `
+      <span>${escapeHTML(dayLabel)}</span>
+      <span style="flex: 1; height: 1px; background: ${isToday ? 'rgba(0,255,255,0.15)' : 'rgba(255,255,255,0.05)'};"></span>
     `;
-    
-    const btn = document.createElement('button');
-    btn.className = 'btn primary-btn btn-xs';
-    btn.style.display = 'flex';
-    btn.style.alignItems = 'center';
-    btn.style.gap = '6px';
-    btn.innerHTML = `<i class="fa-solid fa-circle-play"></i> ${t('btn_launch_clipboard_short')}`;
-    
-    btn.addEventListener('click', () => {
-      openWorkoutSetupModal(null, null, b.id);
+    container.appendChild(groupHeader);
+
+    sessionsList.forEach(b => {
+      const card = document.createElement('div');
+      card.className = 'booking-card card glassmorphic';
+      card.style.cssText = 'display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px; margin-bottom: 12px; border-left: 4px solid var(--accent-cyan); cursor: pointer; transition: background 0.2s, transform 0.2s;';
+      
+      // Hover feedback style
+      card.addEventListener('mouseenter', () => {
+        card.style.background = 'rgba(255, 255, 255, 0.05)';
+        card.style.transform = 'translateY(-1px)';
+      });
+      card.addEventListener('mouseleave', () => {
+        card.style.background = '';
+        card.style.transform = '';
+      });
+      
+      const info = document.createElement('div');
+      info.style.flex = '1';
+      
+      // Resolve participants with injury checking
+      const clients = b.participants.map(pId => state.clients.find(c => c.id === pId)).filter(Boolean);
+      const clientHTMLs = clients.map(c => {
+        let injuryIcon = '';
+        if (c.hasInjury) {
+          injuryIcon = ` <i class="fa-solid fa-triangle-exclamation text-red" style="font-size: 10px; color: #ef4444;" title="Has recorded injury"></i>`;
+        }
+        return `<span style="font-weight: 600; color: var(--text-color);">${escapeHTML(c.name)}${injuryIcon}</span>`;
+      });
+      const clientNamesStr = clientHTMLs.join(', ');
+      
+      // Find routine name
+      const routine = state.routines.find(r => r.id === b.routineId);
+      const routineName = routine ? routine.name : '';
+
+      // Program undefined warning tag
+      let warningHTML = '';
+      if (!routineName) {
+        warningHTML = `
+          <div class="booking-warning-pill" style="display: inline-flex; align-items: center; gap: 4px; background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; margin-top: 6px;">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span>${t('program_not_defined')}</span>
+          </div>
+        `;
+      }
+      
+      info.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px;">
+          <span class="badge badge-cyan" style="font-size: 10px; padding: 2px 6px; font-weight: 700; font-family: monospace;">${escapeHTML(b.time)}</span>
+          <strong style="color: var(--text-color); font-size: 13px;">${escapeHTML(b.title)}</strong>
+        </div>
+        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">
+          <i class="fa-solid fa-users" style="margin-right: 4px; font-size: 10px;"></i> ${clientNamesStr} 
+          <span style="margin-left: 4px; color: var(--accent-cyan); font-weight: 600;">(${clients.length}/${b.maxCapacity} ${t('spots_filled')})</span>
+        </div>
+        <div style="font-size: 11px; color: var(--text-muted);">
+          <i class="fa-solid fa-clipboard-list" style="margin-right: 4px; font-size: 10px;"></i> Program: <span class="font-semibold">${routineName ? escapeHTML(routineName) : `<span style="color: #ef4444; font-weight: 600;">${t('undefined')}</span>`}</span>
+        </div>
+        ${warningHTML}
+      `;
+      
+      const btn = document.createElement('button');
+      btn.className = 'btn primary-btn btn-xs';
+      btn.style.cssText = 'display: flex; align-items: center; gap: 6px; pointer-events: none;';
+      btn.innerHTML = `<i class="fa-solid fa-circle-play"></i> ${t('btn_launch_clipboard_short')}`;
+      
+      card.addEventListener('click', () => {
+        openWorkoutSetupModal(null, null, b.id);
+      });
+      
+      card.appendChild(info);
+      card.appendChild(btn);
+      container.appendChild(card);
     });
-    
-    card.appendChild(info);
-    card.appendChild(btn);
-    container.appendChild(card);
-  });
+  };
+
+  const todaySessions = bookings.filter(b => b.day === 'today');
+  const tomorrowSessions = bookings.filter(b => b.day === 'tomorrow');
+
+  renderDayGroup('today', t('today'), todaySessions);
+  renderDayGroup('tomorrow', t('tomorrow'), tomorrowSessions);
 }
 
 // Register Service Worker for offline PWA support

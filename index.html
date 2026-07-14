@@ -29,7 +29,7 @@
   <!-- Top Header Bar -->
   <header class="app-header">
     <div class="header-container">
-      <div class="logo-area">
+      <div class="logo-area" id="logo-area" style="cursor: pointer;">
         <i class="fa-solid fa-dumbbell logo-icon"></i>
         <h1>LibrePT</h1>
       </div>
@@ -53,26 +53,26 @@
     
     <!-- VIEW: Clients Dashboard & Pending Plan Adjustments -->
     <section id="view-clients" class="app-view active">
-      <!-- Section A: Pending plan modifications (Feedback Loop) -->
+      <!-- Section B: Today's & Tomorrow's Sessions -->
       <div class="section-title">
+        <h3 id="calendar-title"><i class="fa-solid fa-calendar-days text-cyan mr-1"></i> Today's & Tomorrow's Sessions</h3>
+        <button id="btn-sync-calendar" class="btn secondary-btn btn-xs" style="margin-left: auto; gap: 6px; display: inline-flex; align-items: center;">
+          <i class="fa-solid fa-rotate"></i> <span id="btn-sync-calendar-text">Sync Sessions</span>
+        </button>
+      </div>
+      <div id="calendar-sessions-list" class="stack-list mb-6">
+        <!-- Injected via JS -->
+      </div>
+
+      <hr class="view-divider">
+
+      <!-- Section A: Pending plan modifications (Feedback Loop) -->
+      <div class="section-title" style="margin-top: 24px;">
         <h3><i class="fa-solid fa-bell-concierge text-emerald mr-1"></i> Pending Plan Adjustments</h3>
         <span class="badge" id="badge-adjustments-count">2</span>
       </div>
       <div id="dashboard-adjustments-list" class="stack-list mb-6">
         <!-- Injected via JS - cards with feedback tags to update programs -->
-      </div>
-
-      <hr class="view-divider">
-
-      <!-- Section B: Today's Google Calendar Bookings -->
-      <div class="section-title" style="margin-top: 24px;">
-        <h3 id="calendar-title"><i class="fa-solid fa-calendar-days text-cyan mr-1"></i> Today's Calendar Bookings</h3>
-        <button id="btn-sync-calendar" class="btn secondary-btn btn-xs" style="margin-left: auto; gap: 6px; display: inline-flex; align-items: center;">
-          <i class="fa-solid fa-rotate"></i> <span id="btn-sync-calendar-text">Sync Calendar</span>
-        </button>
-      </div>
-      <div id="calendar-bookings-list" class="stack-list mb-6">
-        <!-- Injected via JS -->
       </div>
 
       <hr class="view-divider">
@@ -321,6 +321,17 @@
 
       <div id="clipboard-logger-container" class="clipboard-grid-card card glassmorphic">
         <!-- Dynamic sets table with steppers injected via JS -->
+      </div>
+
+      <!-- Up Next Foreshadowing Card -->
+      <div id="foreshadowing-card" class="foreshadowing-card card glassmorphic hidden" style="margin-top: 12px; padding: 12px; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-left: 4px solid var(--accent-cyan); background: rgba(255, 255, 255, 0.02);">
+        <div style="flex: 1;">
+          <span id="label-up-next" style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;" data-i18n="up_next_label">Up Next</span>
+          <h5 id="foreshadowing-name" style="margin: 2px 0 0 0; font-size: 13px; color: var(--text-color); font-weight: 600;">Up Next Exercise</h5>
+        </div>
+        <div id="foreshadowing-target" style="font-size: 11px; color: var(--text-muted); text-align: right; font-weight: 600;">
+          Sets & Reps
+        </div>
       </div>
 
       <!-- Active Client Level Controls -->
@@ -595,6 +606,37 @@
             <input type="radio" name="feedback-tag" value="Completed reps easily">
             <span>💪 Good Progression</span>
           </label>
+        </div>
+      </div>
+
+      <!-- Privacy-First Voice Note Group -->
+      <div class="form-group" style="margin-top: 16px;">
+        <label style="display: flex; align-items: center; justify-content: space-between;">
+          <span id="label-voice-note" data-i18n="voice_note_label">Privacy-First Voice Note</span>
+          <span class="badge badge-emerald" style="font-size: 8px; padding: 1px 4px;">Local Only</span>
+        </label>
+        <div class="voice-recorder-widget" style="display: flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.15); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color); margin-top: 4px;">
+          <button type="button" id="btn-voice-record" class="btn secondary-btn" style="width: 40px; height: 40px; border-radius: 50%; padding: 0; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; background: rgba(255,255,255,0.05); color: var(--accent-cyan); border-color: var(--border-color); flex-shrink: 0;">
+            <i class="fa-solid fa-microphone" id="voice-record-icon" style="font-size: 16px;"></i>
+          </button>
+          <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+            <div id="voice-record-status" style="font-size: 11px; font-weight: 600; color: var(--text-muted);" data-i18n="voice_ready">Ready to record voice memo</div>
+            <!-- Mock audio wave visualization -->
+            <div id="voice-audio-wave" class="audio-wave-container hidden" style="display: flex; align-items: center; gap: 2px; height: 16px; margin-top: 4px;">
+              <span class="wave-bar"></span>
+              <span class="wave-bar"></span>
+              <span class="wave-bar"></span>
+              <span class="wave-bar"></span>
+              <span class="wave-bar"></span>
+              <span class="wave-bar"></span>
+              <span class="wave-bar"></span>
+            </div>
+            <!-- Audio player review if recorded -->
+            <div id="voice-audio-player" class="audio-player-mini hidden" style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+              <button type="button" id="btn-play-voice-preview" style="background: none; border: none; color: var(--accent-cyan); cursor: pointer; padding: 0;"><i class="fa-solid fa-circle-play" style="font-size: 16px;"></i></button>
+              <div style="font-size: 10px; color: var(--text-color); font-family: monospace;">voice_memo.wav (0:04)</div>
+            </div>
+          </div>
         </div>
       </div>
 

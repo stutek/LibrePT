@@ -48,12 +48,12 @@ def test_interactive_dashboard_flow(page, local_server):
     lang_switcher.select_option("sl")
     
     # Verify dashboard header translates dynamically
-    assert page.locator("#calendar-title").inner_text().strip().upper() == "DANAŠNJE REZERVACIJE KOLEDARJA"
-    assert page.locator("#btn-sync-calendar-text").inner_text().strip().upper() == "SINHRONIZIRAJ"
+    assert page.locator("#calendar-title").inner_text().strip().upper() == "DANAŠNJE IN JUTRIŠNJE SEJE"
+    assert page.locator("#btn-sync-calendar-text").inner_text().strip().upper() == "SINHRONIZIRAJ SEJE"
     
     # Switch back to English (EN)
     lang_switcher.select_option("en")
-    assert page.locator("#calendar-title").inner_text().strip().upper() == "TODAY'S CALENDAR BOOKINGS"
+    assert page.locator("#calendar-title").inner_text().strip().upper() == "TODAY'S & TOMORROW'S SESSIONS"
     
     # --- STEP 2: GOOGLE CALENDAR SYNC ---
     # Tap the Sync Calendar button
@@ -70,10 +70,9 @@ def test_interactive_dashboard_flow(page, local_server):
     assert "Group Strength & Conditioning" in booking_titles
     
     # --- STEP 3: WORKOUT SETUP CLIPBOARD LAUNCH ---
-    # Find the "Launch Clipboard" button inside the Group Strength card and click it
+    # Click the entire Group Strength card to verify clickability
     group_strength_card = page.locator(".booking-card", has_text="Group Strength & Conditioning")
-    launch_btn = group_strength_card.locator("button")
-    launch_btn.click()
+    group_strength_card.click()
     
     # Verify the setup modal opens
     modal = page.locator("#dialog-workout-setup")
@@ -104,3 +103,35 @@ def test_interactive_dashboard_flow(page, local_server):
     tabs = page.locator("#active-session-client-tabs button").all_inner_texts()
     assert any("Jane" in t for t in tabs)
     assert any("John" in t for t in tabs)
+
+    # Verify Foreshadowing ("Up Next") card is visible
+    assert page.locator("#foreshadowing-card").is_visible()
+    assert "UP NEXT" in page.locator("#label-up-next").inner_text().strip().upper()
+
+    # --- STEP 5: PRIVACY-FIRST VOICE NOTE RECORDING ---
+    # Open the Log Feedback modal
+    page.locator("#btn-log-feedback").click()
+    page.wait_for_selector("#dialog-feedback", state="visible")
+
+    # Tap record mic button to start recording
+    page.locator("#btn-voice-record").click()
+    page.wait_for_timeout(1000)
+
+    # Tap record mic button again to stop and trigger mock on-device transcription
+    page.locator("#btn-voice-record").click()
+    page.wait_for_timeout(1500) # wait for transcription timeout to append note
+
+    # Assert transcription text was generated and appended locally
+    custom_note_val = page.locator("#feedback-custom-note").input_value()
+    assert "Voice note" in custom_note_val or "Glasovna opomba" in custom_note_val
+
+    # Log/Submit the feedback
+    page.locator("#dialog-feedback button[type='submit']").click()
+    page.wait_for_selector("#dialog-feedback", state="hidden")
+
+    # Minimize active tracking overlay
+    page.locator("#btn-collapse-session").click()
+
+    # Verify the new adjustment alert card on the dashboard displays the play audio button
+    page.wait_for_selector(".btn-play-adjustment-audio", state="visible")
+    assert page.locator(".btn-play-adjustment-audio").is_visible()

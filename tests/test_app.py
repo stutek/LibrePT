@@ -119,4 +119,4 @@ def test_mock_data_structure():
     assert 'export const DEFAULT_ROUTINES' in content
     assert 'export const DEFAULT_HISTORY' in content
     assert 'export const DEFAULT_PLAN_UPDATES' in content
-    assert 'export const DEFAULT_BOOKINGS' in content
+    assert 'export const DEFAULT_SESSIONS' in content
