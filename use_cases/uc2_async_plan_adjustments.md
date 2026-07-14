@@ -27,7 +27,7 @@ graph TD
         EditTemplate --> ResolveAlert[5. Click 'Resolve Card']
     end
     
-    subgraph System["OpenPT System Lane"]
+    subgraph System["LibrePT System Lane"]
         ReviewAdjustments --> QueryDB[6. Query Local Database for Unresolved Session Feedback & Audio Logs]
         QueryDB --> OpenDashboard
         
@@ -47,7 +47,7 @@ graph TD
 - Granular exercise feedback tags or on-the-fly voice notes were recorded during those sessions.
 
 ### 2. Main Flow of Events
-1. **Access Back-Office**: The PT opens the OpenPT app on their computer or tablet.
+1. **Access Back-Office**: The PT opens the LibrePT app on their computer or tablet.
 2. **Review Feedback Deck**: The system queries the database and displays the **Pending Plan Adjustments** deck on the home screen.
 3. **Analyze Alert**: The PT reviews an alert card:
    - e.g., *"Jane Doe - Barbell Back Squat - Form Break (Depth Alert)"*

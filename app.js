@@ -1,12 +1,374 @@
-// app.js - OpenPT Application Controller Logic
-import { DEFAULT_EXERCISES, DEFAULT_CLIENTS, DEFAULT_ROUTINES, DEFAULT_HISTORY } from './mockData.js';
+// app.js - LibrePT Application Controller Logic
+import { DEFAULT_EXERCISES, DEFAULT_CLIENTS, DEFAULT_ROUTINES, DEFAULT_HISTORY, DEFAULT_PLAN_UPDATES } from './mockData.js';
+
+// --- TRANSLATION / i18n SYSTEM ---
+const TRANSLATIONS = {
+  en: {
+    logo_title: "LibrePT",
+    tab_clients: "Clients",
+    tab_routines: "Routines",
+    tab_exercises: "Exercises",
+    tab_history: "History",
+    pending_adjustments: "Pending Plan Adjustments",
+    btn_start_session: "Start Custom or Group Session",
+    no_pending_adjustments: "No pending plan adjustments. Floor signals are all synced!",
+    clients_title: "Clients Directory",
+    placeholder_search_clients: "Search clients...",
+    btn_add_client: "Add Client",
+    notes_injuries: "Pre-existing Injuries & Notes",
+    goals: "Training Goals",
+    routine_plans: "Routine Plans & History",
+    btn_edit_profile: "Edit Profile",
+    btn_log_workout: "Log Workout Session",
+    btn_add_plan: "Add Plan Adjustment",
+    client_history_header: "Logged Session History",
+    no_history_yet: "No history logged yet.",
+    routines_title: "Routine Templates",
+    placeholder_search_routines: "Search routines...",
+    btn_create_routine: "Create Routine",
+    exercises_count: "exercises",
+    exercises_title: "Exercise Library",
+    placeholder_search_exercises: "Search exercises...",
+    btn_add_exercise: "Add Exercise",
+    history_title: "Global Training History",
+    no_workouts_history: "No logged workouts in global history.",
+    live_tracking_clipboard: "Live Tracking Clipboard",
+    btn_collapse: "Minimize",
+    exercise_of: "Exercise",
+    btn_add_set: "Add Set",
+    btn_inject_exercise: "Inject Exercise",
+    btn_cancel: "Cancel",
+    btn_complete: "Complete Workout Session",
+    btn_log_feedback: "Log Feedback",
+    alert_no_sets: "No completed sets were logged. Are you sure you want to finish and save an empty session?",
+    confirm_cancel: "Cancel active workout? All logged sets for this session will be permanently lost.",
+    warning_banner_title: "Client Safety Advisory",
+    workout_setup_title: "Workout Session Setup",
+    select_participants: "Select Participants & Assign Routines",
+    btn_launch_clipboard: "Launch Clipboard",
+    err_select_client: "You must select at least one participant client.",
+    err_assign_routine: "Please assign a routine template to all selected participants.",
+    add_ex_session_title: "Inject Exercise on Gym Floor",
+    select_exercise: "Select Exercise",
+    sets: "Sets",
+    reps: "Reps",
+    weight: "Weight (kg)",
+    rest_seconds: "Rest (sec)",
+    btn_inject: "Inject Exercise",
+    log_client_feedback: "Log Client Feedback",
+    feedback_for: "Feedback for",
+    feedback_on: "on",
+    custom_details: "Custom Details / Notes",
+    btn_log_alert: "Log Alert",
+    theme_light: "Light Mode",
+    theme_dark: "Dark Mode",
+    backup_center: "Data Backup Center",
+    backup_desc: "LibrePT stores your logs directly on this device. You can download a backup file to keep your history safe, or import it to sync with another phone.",
+    btn_download_backup: "Download JSON Backup",
+    btn_import_backup: "Import JSON Backup",
+    danger_zone: "Danger Zone",
+    danger_desc: "Resetting will permanently erase all custom client logs, routines, and exercises, replacing them with default mock data.",
+    btn_reset_db: "Reset All Database Data",
+    confirm_reset: "Are you sure you want to reset the database? All custom clients, history, and routines will be lost.",
+    btn_resolve: "Resolve",
+    no_exercises_injected: "No Exercises Injected",
+    no_exercises_desc: "Please tap \"Inject Exercise\" below to add an exercise for this client.",
+    rest_timer: "Rest Timer",
+    trainer_set_notes: "Trainer Set Notes",
+    kg: "kg",
+    reps_label: "reps",
+    add_new_client: "Add New Client",
+    edit_client_profile: "Edit Client Profile",
+    client_name: "Client Name",
+    current_weight: "Current Weight (kg)",
+    goals_placeholder: "e.g. Muscle gain, fat loss...",
+    save_client: "Save Client",
+    create_routine_title: "Create Routine Template",
+    edit_routine_title: "Edit Routine Template",
+    routine_name: "Routine Name",
+    routine_desc: "Description",
+    btn_save_routine: "Save Routine Template",
+    joined: "Joined",
+    no_goals_specified: "No goals specified.",
+    no_notes_specified: "No health issues or custom caveats noted.",
+    no_weight_records: "No weight records.",
+    log_weights_progression: "Log weights to see progression.",
+    need_two_entries: "Need at least 2 entries for chart layout.",
+    no_workouts_logged: "No workouts logged yet.",
+    no_routines_found: "No routine templates found. Click \"New Routine\" to design one.",
+    no_description: "No description.",
+    btn_start_group_session: "Start Group Session",
+    no_exercises_matched: "No exercises match filter criteria.",
+    no_instructions: "No instructions.",
+    min_session: "min session",
+    less_than_minute: "< 1 min",
+    set_label: "Set",
+    no_details_specified: "No details specified.",
+    no_clients_found: "No clients found. Click \"Add Client\" to create one.",
+    no_weight_logged: "No weight logged",
+    btn_back: "Back",
+    routines_desc: "Select or edit workout routines. Launch them with individual or group sessions.",
+    filter_all: "All",
+    history_desc: "Log of all completed sessions across all clients."
+  },
+  sl: {
+    logo_title: "LibrePT",
+    tab_clients: "Stranke",
+    tab_routines: "Rutine",
+    tab_exercises: "Vaje",
+    tab_history: "Zgodovina",
+    pending_adjustments: "Čakajoče prilagoditve načrta",
+    btn_start_session: "Začni sejo po meri ali skupinsko sejo",
+    no_pending_adjustments: "Ni čakajočih prilagoditev načrta. Vsi signali s tal so usklajeni!",
+    clients_title: "Imenik strank",
+    placeholder_search_clients: "Išči stranke...",
+    btn_add_client: "Dodaj stranko",
+    notes_injuries: "Predhodne poškodbe in opombe",
+    goals: "Cilji treninga",
+    routine_plans: "Načrti rutine in zgodovina",
+    btn_edit_profile: "Uredi profil",
+    btn_log_workout: "Zabeleži vadbo",
+    btn_add_plan: "Dodaj prilagoditev načrta",
+    client_history_header: "Zgodovina zabeleženih vadb",
+    no_history_yet: "Zgodovina še ni zabeležena.",
+    routines_title: "Predloge rutine",
+    placeholder_search_routines: "Išči rutine...",
+    btn_create_routine: "Ustvari rutino",
+    exercises_count: "vaje",
+    exercises_title: "Knjižnica vaj",
+    placeholder_search_exercises: "Išči vaje...",
+    btn_add_exercise: "Dodaj vajo",
+    history_title: "Splošna zgodovina vadb",
+    no_workouts_history: "V splošni zgodovini ni zabeleženih vadb.",
+    live_tracking_clipboard: "Sledenje vadbi v živo",
+    btn_collapse: "Minimiziraj",
+    exercise_of: "Vaja",
+    btn_add_set: "Dodaj serijo",
+    btn_inject_exercise: "Vstavi vajo",
+    btn_cancel: "Prekliči",
+    btn_complete: "Zaključi vadbo",
+    btn_log_feedback: "Zabeleži povratne informacije",
+    alert_no_sets: "Ni zabeleženih zaključenih serij. Ali ste prepričani, da želite zaključiti in shraniti prazno vadbo?",
+    confirm_cancel: "Prekliči aktivno vadbo? Vse zabeležene serije za to sejo bodo trajno izgubljene.",
+    warning_banner_title: "Varnostno opozorilo za stranko",
+    workout_setup_title: "Nastavitev seje vadbe",
+    select_participants: "Izberi udeležence in dodeli rutine",
+    btn_launch_clipboard: "Začni sledenje",
+    err_select_client: "Izbrati morate vsaj eno stranko.",
+    err_assign_routine: "Prosimo, dodelite predlogo rutine vsem izbranim strankam.",
+    add_ex_session_title: "Vstavi vajo na vadbišču",
+    select_exercise: "Izberi vajo",
+    sets: "Serije",
+    reps: "Ponovitve",
+    weight: "Teža (kg)",
+    rest_seconds: "Premor (sek)",
+    btn_inject: "Vstavi vajo",
+    log_client_feedback: "Zabeleži povratne informacije",
+    feedback_for: "Povratne informacije za",
+    feedback_on: "pri",
+    custom_details: "Opombe po meri",
+    btn_log_alert: "Zapiši opozorilo",
+    theme_light: "Svetla tema",
+    theme_dark: "Temna tema",
+    backup_center: "Središče za varnostno kopiranje",
+    backup_desc: "LibrePT hrani vaše podatke neposredno v tej napravi. Prenesete lahko datoteko z varnostno kopijo ali jo uvozite za sinhronizacijo z drugim telefonom.",
+    btn_download_backup: "Prenesi varnostno kopijo JSON",
+    btn_import_backup: "Uvozi varnostno kopijo JSON",
+    danger_zone: "Nevarno območje",
+    danger_desc: "Ponastavitev bo trajno izbrisala vse podatke strank, rutine in vaje ter jih nadomestila s privzetimi demo podatki.",
+    btn_reset_db: "Ponastavi vse podatke",
+    confirm_reset: "Ali ste prepričani, da želite ponastaviti zbirko podatkov? Vse stranke po meri, zgodovina in rutine bodo izgubljene.",
+    btn_resolve: "Razreši",
+    no_exercises_injected: "Ni vstavljenih vaj",
+    no_exercises_desc: "Prosimo, tapnite \"Vstavi vajo\" spodaj, da dodate vajo za to stranko.",
+    rest_timer: "Časomer premora",
+    trainer_set_notes: "Trenerjeve opombe serije",
+    kg: "kg",
+    reps_label: "pon.",
+    add_new_client: "Dodaj novo stranko",
+    edit_client_profile: "Uredi profil stranke",
+    client_name: "Ime stranke",
+    current_weight: "Trenutna teža (kg)",
+    goals_placeholder: "npr. Pridobivanje mišične mase, izguba maščobe...",
+    save_client: "Shrani stranko",
+    create_routine_title: "Ustvari predlogo rutine",
+    edit_routine_title: "Uredi predlogo rutine",
+    routine_name: "Ime rutine",
+    routine_desc: "Opis",
+    btn_save_routine: "Shrani predlogo rutine",
+    joined: "Pridružil se",
+    no_goals_specified: "Cilji niso določeni.",
+    no_notes_specified: "Brez zabeleženih zdravstvenih težav ali posebnosti.",
+    no_weight_records: "Ni zapisov teže.",
+    log_weights_progression: "Zabeležite teže za spremljanje napredka.",
+    need_two_entries: "Za grafikon potrebujete vsaj 2 zapisa.",
+    no_workouts_logged: "Ni še zabeleženih vadb.",
+    no_routines_found: "Predlog rutine ni mogoče najti. Kliknite \"Ustvari rutino\", da jo oblikujete.",
+    no_description: "Brez opisa.",
+    btn_start_group_session: "Začni skupinsko sejo",
+    no_exercises_matched: "Nobena vaja ne ustreza kriterijem filtra.",
+    no_instructions: "Brez navodil.",
+    min_session: "min vadba",
+    less_than_minute: "< 1 min",
+    set_label: "Serija",
+    no_details_specified: "Podrobnosti niso navedene.",
+    no_clients_found: "Strank ni mogoče najti. Kliknite \"Dodaj stranko\", da jo ustvarite.",
+    no_weight_logged: "Teža ni zabeležena",
+    btn_back: "Nazaj",
+    routines_desc: "Izberite ali uredite vadbene rutine. Zaženite jih za posameznike ali skupine.",
+    filter_all: "Vse",
+    history_desc: "Dnevnik vseh zaključenih vadb za vse stranke."
+  }
+};
+
+function t(key) {
+  const lang = state.lang || 'en';
+  const dict = TRANSLATIONS[lang] || TRANSLATIONS['en'];
+  return dict[key] || key;
+}
+
+function applyTranslations(lang = state.lang || 'en') {
+  state.lang = lang;
+  
+  // Set dropdown switcher value
+  const switcher = document.getElementById('lang-switcher');
+  if (switcher) switcher.value = lang;
+  
+  const tDict = TRANSLATIONS[lang];
+  if (!tDict) return;
+  
+  // Map of selector to translation key
+  const staticMappings = {
+    '.logo-area h1': 'logo_title',
+    'button[data-view="clients"] span': 'tab_clients',
+    'button[data-view="routines"] span': 'tab_routines',
+    'button[data-view="exercises"] span': 'tab_exercises',
+    'button[data-view="history"] span': 'tab_history',
+    
+    // Dashboard / Clients view
+    '#view-clients .section-title h3': 'pending_adjustments',
+    '#view-clients .view-header h2': 'clients_title',
+    '#btn-add-client': 'btn_add_client',
+    
+    // Client Detail view
+    '#view-client-detail .client-profile-card h4:nth-of-type(1)': 'notes_injuries',
+    '#view-client-detail .client-profile-card h4:nth-of-type(2)': 'goals',
+    '#view-client-detail .client-profile-card h4:nth-of-type(3)': 'routine_plans',
+    '#btn-edit-client': 'btn_edit_profile',
+    '#btn-start-client-session': 'btn_log_workout',
+    '#btn-add-client-adjustment': 'btn_add_plan',
+    '#view-client-detail .history-section h5': 'client_history_header',
+    '#btn-back-to-clients': 'btn_back',
+    
+    // Routines View
+    '#view-routines .view-header h2': 'routines_title',
+    '#btn-add-routine': 'btn_create_routine',
+    '#view-routines .view-desc': 'routines_desc',
+    
+    // Exercises View
+    '#view-exercises .view-header h2': 'exercises_title',
+    '#btn-add-exercise': 'btn_add_exercise',
+    '.filter-chips button[data-filter="All"]': 'filter_all',
+    
+    // History View
+    '#view-history .view-header h2': 'history_title',
+    '#view-history .view-desc': 'history_desc',
+    
+    // Active session clipboard overlay
+    '#overlay-session-title': 'live_tracking_clipboard',
+    '#btn-add-session-set': 'btn_add_set',
+    '#btn-add-exercise-to-session': 'btn_inject_exercise',
+    '#btn-cancel-session': 'btn_cancel',
+    '#btn-finish-session': 'btn_complete',
+    '#btn-log-feedback': 'btn_log_feedback',
+    
+    // Dialog setups
+    '#dialog-workout-setup .modal-header h3': 'workout_setup_title',
+    '#dialog-workout-setup label[for="setup-participants-assignment-list"]': 'select_participants',
+    '#dialog-workout-setup button[type="submit"]': 'btn_launch_clipboard',
+    
+    '#dialog-add-session-exercise .modal-header h3': 'add_ex_session_title',
+    '#dialog-add-session-exercise label[for="session-add-select-ex"]': 'select_exercise',
+    '#dialog-add-session-exercise label[for="session-add-sets"]': 'sets',
+    '#dialog-add-session-exercise label[for="session-add-reps"]': 'reps',
+    '#dialog-add-session-exercise label[for="session-add-weight"]': 'weight',
+    '#dialog-add-session-exercise label[for="session-add-rest"]': 'rest_seconds',
+    '#dialog-add-session-exercise button[type="submit"]': 'btn_inject',
+    
+    '#dialog-feedback .modal-header h3': 'log_client_feedback',
+    '#dialog-feedback label[for="feedback-custom-note"]': 'custom_details',
+    '#dialog-feedback button[type="submit"]': 'btn_log_alert',
+    
+    '#dialog-backup .modal-header h3': 'backup_center',
+    '#dialog-backup .dialog-desc': 'backup_desc',
+    '#dialog-backup #btn-download-backup': 'btn_download_backup',
+    '#dialog-backup label[for="input-import-backup"]': 'btn_import_backup',
+    '#dialog-backup .danger-zone h4': 'danger_zone',
+    '#dialog-backup .danger-zone p': 'danger_desc',
+    '#dialog-backup #btn-reset-db': 'btn_reset_db',
+    
+    // Add Client modal
+    '#client-modal-title': 'add_new_client',
+    '#dialog-client label[for="client-name"]': 'client_name',
+    '#dialog-client label[for="client-weight"]': 'current_weight',
+    '#dialog-client label[for="client-goals"]': 'goals',
+    '#dialog-client button[type="submit"]': 'save_client',
+    
+    // Routine Template modal
+    '#routine-modal-title': 'create_routine_title',
+    '#dialog-routine label[for="routine-name"]': 'routine_name',
+    '#dialog-routine label[for="routine-desc"]': 'routine_desc',
+    '#dialog-routine button[type="submit"]': 'btn_save_routine'
+  };
+  
+  for (const selector in staticMappings) {
+    const el = document.querySelector(selector);
+    if (el) {
+      const key = staticMappings[selector];
+      const val = tDict[key];
+      if (val) {
+        // preserve icons if any
+        const icon = el.querySelector('i');
+        if (icon) {
+          el.innerHTML = '';
+          el.appendChild(icon);
+          el.appendChild(document.createTextNode(' ' + val));
+        } else {
+          el.textContent = val;
+        }
+      }
+    }
+  }
+
+  // Update input placeholders
+  const placeholderMappings = {
+    '#search-clients': 'placeholder_search_clients',
+    '#search-routines': 'placeholder_search_routines',
+    '#search-exercises': 'placeholder_search_exercises',
+    '#client-goals': 'goals_placeholder',
+    '#feedback-custom-note': 'custom_details'
+  };
+
+  for (const selector in placeholderMappings) {
+    const el = document.querySelector(selector);
+    if (el) {
+      const key = placeholderMappings[selector];
+      const val = tDict[key];
+      if (val) {
+        el.placeholder = val;
+      }
+    }
+  }
+}
 
 // --- STATE MANAGEMENT ---
 let state = {
   clients: [],
   exercises: [],
   routines: [],
-  history: []
+  history: [],
+  planUpdates: [],
+  lang: 'en'
 };
 
 let activeSession = null;
@@ -20,7 +382,22 @@ let restTimer = {
 // --- INITIALIZE APPLICATION ---
 function init() {
   // Load data from LocalStorage or initialize with Mock Data
-  const savedData = localStorage.getItem('openpt_db');
+  let savedData = localStorage.getItem('librept_db');
+  if (!savedData) {
+    // Migrate data from old OpenPT key if it exists
+    savedData = localStorage.getItem('openpt_db');
+    if (savedData) {
+      localStorage.setItem('librept_db', savedData);
+      localStorage.removeItem('openpt_db');
+      
+      const activeSessionData = localStorage.getItem('openpt_active_session');
+      if (activeSessionData) {
+        localStorage.setItem('librept_active_session', activeSessionData);
+        localStorage.removeItem('openpt_active_session');
+      }
+    }
+  }
+
   if (savedData) {
     try {
       state = JSON.parse(savedData);
@@ -32,6 +409,8 @@ function init() {
     seedMockData();
   }
 
+  if (!state.lang) state.lang = 'en';
+
   // Set up Event Listeners
   setupNavigation();
   setupClientForms();
@@ -42,11 +421,37 @@ function init() {
   setupRestTimer();
   setupBackupRestore();
 
+  // Set up language switcher listener
+  const switcher = document.getElementById('lang-switcher');
+  if (switcher) {
+    switcher.value = state.lang;
+    switcher.addEventListener('change', (e) => {
+      state.lang = e.target.value;
+      saveToLocalStorage();
+      applyTranslations(state.lang);
+      
+      // Re-render views to apply translations
+      renderClientsList();
+      renderRoutinesList();
+      renderExercisesList();
+      renderGlobalHistory();
+      renderPendingPlanAdjustments();
+      populateDropdownSelectors();
+      if (activeSession) {
+        renderActiveGroupBoard();
+      }
+    });
+  }
+
+  // Apply translations initially
+  applyTranslations(state.lang);
+
   // Render Initial Views
   renderClientsList();
   renderRoutinesList();
   renderExercisesList();
   renderGlobalHistory();
+  renderPendingPlanAdjustments();
   populateDropdownSelectors();
 
   // Check if there was an active session saved (session recovery)
@@ -54,15 +459,18 @@ function init() {
 }
 
 function seedMockData() {
+  const currentLang = state.lang || 'en';
   state.clients = [...DEFAULT_CLIENTS];
   state.exercises = [...DEFAULT_EXERCISES];
   state.routines = [...DEFAULT_ROUTINES];
   state.history = [...DEFAULT_HISTORY];
+  state.planUpdates = [...DEFAULT_PLAN_UPDATES];
+  state.lang = currentLang;
   saveToLocalStorage();
 }
 
 function saveToLocalStorage() {
-  localStorage.setItem('openpt_db', JSON.stringify(state));
+  localStorage.setItem('librept_db', JSON.stringify(state));
 }
 
 // --- VIEW ROUTER ---
@@ -124,6 +532,82 @@ function switchView(viewId) {
 
 // --- RENDER FUNCTIONS ---
 
+function renderPendingPlanAdjustments() {
+  const container = document.getElementById('dashboard-adjustments-list');
+  const countBadge = document.getElementById('badge-adjustments-count');
+  
+  if (!container) return;
+  container.innerHTML = '';
+  
+  const unresolved = (state.planUpdates || []).filter(u => !u.resolved);
+  
+  if (countBadge) {
+    countBadge.textContent = unresolved.length;
+    if (unresolved.length === 0) {
+      countBadge.style.display = 'none';
+    } else {
+      countBadge.style.display = 'inline-block';
+    }
+  }
+  
+  if (unresolved.length === 0) {
+    container.innerHTML = `<div class="card glassmorphic text-center text-muted" style="padding: 16px;">${t('no_pending_adjustments')}</div>`;
+    return;
+  }
+  
+  unresolved.forEach(u => {
+    const card = document.createElement('div');
+    card.className = 'adjustment-card card glassmorphic';
+    card.style.display = 'flex';
+    card.style.justifyContent = 'space-between';
+    card.style.alignItems = 'center';
+    card.style.gap = '12px';
+    card.style.padding = '12px';
+    card.style.marginBottom = '8px';
+    card.style.borderLeft = '4px solid var(--accent-cyan)';
+    
+    const info = document.createElement('div');
+    info.style.flex = '1';
+    
+    // Format tag badge color based on severity
+    let badgeClass = 'badge-cyan';
+    if (u.tag.includes('Pain') || u.tag.includes('Discomfort')) badgeClass = 'badge-danger';
+    else if (u.tag.includes('Hard')) badgeClass = 'badge-warning';
+    else if (u.tag.includes('Easy') || u.tag.includes('Progression')) badgeClass = 'badge-success';
+    
+    info.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px;">
+        <strong style="color: var(--text-color); font-size: 13px;">${escapeHTML(u.clientName)}</strong>
+        <span class="badge ${badgeClass}" style="font-size: 9px; padding: 2px 6px;">${escapeHTML(u.tag)}</span>
+      </div>
+      <div style="font-size: 11px; color: var(--text-muted);">
+        ${t('exercise_of')}: <span class="font-semibold" style="color: var(--accent-cyan);">${escapeHTML(u.exerciseName)}</span>
+      </div>
+    `;
+    
+    const btn = document.createElement('button');
+    btn.className = 'btn primary-btn btn-xs';
+    btn.innerHTML = `<i class="fa-solid fa-check"></i> ${t('btn_resolve')}`;
+    btn.addEventListener('click', () => {
+      resolvePendingAdjustment(u.id);
+    });
+    
+    card.appendChild(info);
+    card.appendChild(btn);
+    container.appendChild(card);
+  });
+}
+
+function resolvePendingAdjustment(id) {
+  const index = state.planUpdates.findIndex(u => u.id === id);
+  if (index !== -1) {
+    state.planUpdates[index].resolved = true;
+    saveToLocalStorage();
+    renderPendingPlanAdjustments();
+  }
+}
+
+
 // Clients View
 function renderClientsList(filterQuery = '') {
   const container = document.getElementById('clients-list');
@@ -135,14 +619,14 @@ function renderClientsList(filterQuery = '') {
   );
 
   if (filtered.length === 0) {
-    container.innerHTML = `<div class="card glassmorphic text-center text-muted" style="grid-column: 1/-1;">No clients found. Click "Add Client" to create one.</div>`;
+    container.innerHTML = `<div class="card glassmorphic text-center text-muted" style="grid-column: 1/-1;">${t('no_clients_found')}</div>`;
     return;
   }
 
   filtered.forEach(client => {
     const latestWeight = client.weightHistory.length > 0 
       ? client.weightHistory[client.weightHistory.length - 1].value + ' kg'
-      : 'No weight logged';
+      : t('no_weight_logged');
 
     const card = document.createElement('div');
     card.className = 'client-card card glassmorphic';
@@ -175,9 +659,9 @@ function showClientDetails(clientId) {
   document.getElementById('detail-client-name').textContent = client.name;
   document.getElementById('detail-client-avatar').textContent = client.avatar || getInitials(client.name);
   document.getElementById('profile-name').textContent = client.name;
-  document.getElementById('profile-joined-date').textContent = `Joined ${formatDateStr(client.joinedDate)}`;
-  document.getElementById('profile-goals').textContent = client.goals || 'No goals specified.';
-  document.getElementById('profile-notes').textContent = client.notes || 'No health issues or custom caveats noted.';
+  document.getElementById('profile-joined-date').textContent = `${t('joined')} ${formatDateStr(client.joinedDate)}`;
+  document.getElementById('profile-goals').textContent = client.goals || t('no_goals_specified');
+  document.getElementById('profile-notes').textContent = client.notes || t('no_notes_specified');
 
   // Start workout from detail
   const startBtn = document.getElementById('btn-start-client-workout');
@@ -201,8 +685,8 @@ function renderClientWeightHistory(client) {
   const weights = [...client.weightHistory].sort((a,b) => new Date(b.date) - new Date(a.date));
   
   if (weights.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted">No weight records.</td></tr>`;
-    chartContainer.innerHTML = `<span class="text-muted text-sm m-auto">Log weights to see progression.</span>`;
+    tbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted">${t('no_weight_records')}</td></tr>`;
+    chartContainer.innerHTML = `<span class="text-muted text-sm m-auto">${t('log_weights_progression')}</span>`;
     return;
   }
 
@@ -254,7 +738,7 @@ function renderClientWeightHistory(client) {
       chartContainer.appendChild(barWrapper);
     });
   } else {
-    chartContainer.innerHTML = `<span class="text-muted text-sm m-auto">Need at least 2 entries for chart layout.</span>`;
+    chartContainer.innerHTML = `<span class="text-muted text-sm m-auto">${t('need_two_entries')}</span>`;
   }
 }
 
@@ -267,7 +751,7 @@ function renderClientWorkoutHistory(client) {
     .sort((a,b) => new Date(b.date) - new Date(a.date));
 
   if (clientHistory.length === 0) {
-    container.innerHTML = `<div class="card glassmorphic text-center text-muted text-sm">No workouts logged yet.</div>`;
+    container.innerHTML = `<div class="card glassmorphic text-center text-muted text-sm">${t('no_workouts_logged')}</div>`;
     return;
   }
 
@@ -280,7 +764,7 @@ function renderRoutinesList() {
   container.innerHTML = '';
 
   if (state.routines.length === 0) {
-    container.innerHTML = `<div class="card glassmorphic text-center text-muted" style="grid-column: 1/-1;">No routine templates found. Click "New Routine" to design one.</div>`;
+    container.innerHTML = `<div class="card glassmorphic text-center text-muted" style="grid-column: 1/-1;">${t('no_routines_found')}</div>`;
     return;
   }
 
@@ -299,14 +783,14 @@ function renderRoutinesList() {
     card.innerHTML = `
       <div class="routine-title-info">
         <h3>${escapeHTML(routine.name)}</h3>
-        <p>${escapeHTML(routine.description || 'No description.')}</p>
+        <p>${escapeHTML(routine.description || t('no_description'))}</p>
         <div class="routine-exercise-preview-tags">
           ${tags}
           ${moreCount ? `<span class="preview-tag" style="background:var(--primary-light); color:var(--primary); font-weight:700">${moreCount}</span>` : ''}
         </div>
       </div>
       <button class="btn secondary-btn btn-sm w-full btn-launch-routine">
-        <i class="fa-solid fa-circle-play"></i> Start Group Session
+        <i class="fa-solid fa-circle-play"></i> ${t('btn_start_group_session')}
       </button>
     `;
 
@@ -349,7 +833,7 @@ function renderExercisesList(filterQuery = '', categoryFilter = 'All') {
   filtered.sort((a,b) => a.name.localeCompare(b.name));
 
   if (filtered.length === 0) {
-    container.innerHTML = `<div class="card glassmorphic text-center text-muted">No exercises match filter criteria.</div>`;
+    container.innerHTML = `<div class="card glassmorphic text-center text-muted">${t('no_exercises_matched')}</div>`;
     return;
   }
 
@@ -361,7 +845,7 @@ function renderExercisesList(filterQuery = '', categoryFilter = 'All') {
         <h3>${escapeHTML(ex.name)}</h3>
         <span class="muscle-badge">${ex.category}</span>
       </div>
-      <p class="exercise-instructions">${escapeHTML(ex.instructions || 'No instructions.')}</p>
+      <p class="exercise-instructions">${escapeHTML(ex.instructions || t('no_instructions'))}</p>
     `;
     container.appendChild(card);
   });
@@ -376,7 +860,7 @@ function renderGlobalHistory() {
   const sorted = [...state.history].sort((a,b) => new Date(b.date) - new Date(a.date));
 
   if (sorted.length === 0) {
-    container.innerHTML = `<div class="card glassmorphic text-center text-muted">No logged workouts in global history.</div>`;
+    container.innerHTML = `<div class="card glassmorphic text-center text-muted">${t('no_workouts_history')}</div>`;
     return;
   }
 
@@ -393,19 +877,72 @@ function renderHistoryItems(historyList, container) {
     card.className = 'history-card card glassmorphic';
     
     const minutes = Math.floor(log.duration / 60);
-    const durationText = minutes > 0 ? `${minutes} min session` : '< 1 min';
+    const durationText = minutes > 0 ? `${minutes} ${t('min_session')}` : t('less_than_minute');
 
     // Render exercises completed list
     let exercisesLogHTML = '';
     log.exercises.forEach(ex => {
       const setsText = ex.sets.map(s => {
-        const checkIcon = s.completed ? '✓' : 'x';
         return `${s.weight}kg×${s.reps}${s.note ? ` (${s.note})` : ''}`;
       }).join(', ');
       
+      // Determine feedback icons to show
+      const feedbackItems = (log.feedback || []).filter(f => f.exerciseName === ex.name);
+      let feedbackIconsHTML = '';
+      
+      feedbackItems.forEach(f => {
+        let iconClass = 'fa-solid fa-comment-dots text-cyan';
+        let title = f.tag;
+        
+        if (f.tag.includes('Too Easy') || f.tag.includes('Increase Load')) {
+          iconClass = 'fa-solid fa-rocket text-emerald';
+        } else if (f.tag.includes('Too Hard') || f.tag.includes('Reduce Load')) {
+          iconClass = 'fa-solid fa-triangle-exclamation text-warning';
+        } else if (f.tag.includes('Form Break') || f.tag.includes('Focus') || f.tag.includes('Form')) {
+          iconClass = 'fa-solid fa-microscope text-warning';
+        } else if (f.tag.includes('Pain') || f.tag.includes('Discomfort')) {
+          iconClass = 'fa-solid fa-fire text-danger';
+        } else if (f.tag.includes('easily') || f.tag.includes('Progression') || f.tag.includes('Completed reps')) {
+          iconClass = 'fa-solid fa-dumbbell text-success';
+        }
+        
+        const tooltipTitle = title;
+        const tooltipBody = f.note ? escapeHTML(f.note) : t('no_details_specified');
+        
+        feedbackIconsHTML += `
+          <span class="history-feedback-icon" onclick="this.classList.toggle('active'); event.stopPropagation();">
+            <i class="${iconClass}"></i>
+            <span class="tooltip-content">
+              <div class="tooltip-title">${escapeHTML(tooltipTitle)}</div>
+              <div class="tooltip-body">${tooltipBody}</div>
+            </span>
+          </span>
+        `;
+      });
+      
+      // Check if any sets have notes and render notes icon
+      const setNotes = ex.sets.filter(s => s.note);
+      if (setNotes.length > 0) {
+        let notesListHTML = setNotes.map((s, idx) => `<div><strong>${t('set_label')} ${idx + 1}:</strong> ${escapeHTML(s.note)}</div>`).join('');
+        feedbackIconsHTML += `
+          <span class="history-feedback-icon" onclick="this.classList.toggle('active'); event.stopPropagation();">
+            <i class="fa-solid fa-sticky-note text-cyan"></i>
+            <span class="tooltip-content">
+              <div class="tooltip-title">${t('trainer_set_notes')}</div>
+              <div class="tooltip-body">${notesListHTML}</div>
+            </span>
+          </span>
+        `;
+      }
+
       exercisesLogHTML += `
-        <div class="history-ex-row">
-          <strong>${escapeHTML(ex.name)}</strong>: <span>${escapeHTML(setsText)}</span>
+        <div class="history-ex-row" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 4px; margin-bottom: 6px;">
+          <div>
+            <strong>${escapeHTML(ex.name)}</strong>: <span>${escapeHTML(setsText)}</span>
+          </div>
+          <div style="display: flex; gap: 6px; flex-shrink: 0;">
+            ${feedbackIconsHTML}
+          </div>
         </div>
       `;
     });
@@ -764,36 +1301,39 @@ function setupExerciseForms() {
 
 // Populate selectors across forms
 function populateDropdownSelectors() {
-  // Workout setup routines drop down
+  // Workout setup routines drop down (legacy guard)
   const routineSelect = document.getElementById('setup-select-routine');
-  routineSelect.innerHTML = '<option value="" disabled selected>Select Routine Template</option>';
-  
-  state.routines.sort((a,b) => a.name.localeCompare(b.name)).forEach(r => {
-    const opt = document.createElement('option');
-    opt.value = r.id;
-    opt.textContent = r.name;
-    routineSelect.appendChild(opt);
-  });
+  if (routineSelect) {
+    routineSelect.innerHTML = `<option value="" disabled selected>${t('select_exercise')}</option>`;
+    state.routines.sort((a,b) => a.name.localeCompare(b.name)).forEach(r => {
+      const opt = document.createElement('option');
+      opt.value = r.id;
+      opt.textContent = r.name;
+      routineSelect.appendChild(opt);
+    });
+  }
 
   // Add exercise to active session drop down
   const sessionExSelect = document.getElementById('session-add-select-ex');
-  sessionExSelect.innerHTML = '<option value="" disabled selected>Select Exercise</option>';
-  
-  state.exercises.sort((a,b) => a.name.localeCompare(b.name)).forEach(e => {
-    const opt = document.createElement('option');
-    opt.value = e.id;
-    opt.textContent = `${e.name} (${e.category})`;
-    sessionExSelect.appendChild(opt);
-  });
+  if (sessionExSelect) {
+    sessionExSelect.innerHTML = `<option value="" disabled selected>${t('select_exercise')}</option>`;
+    
+    state.exercises.sort((a,b) => a.name.localeCompare(b.name)).forEach(e => {
+      const opt = document.createElement('option');
+      opt.value = e.id;
+      opt.textContent = `${e.name} (${e.category})`;
+      sessionExSelect.appendChild(opt);
+    });
+  }
 }
 
 // --- WORKOUT SESSION LOGIC ---
 
 // 1. Session Setup Modal
+// 1. Session Setup Modal
 function setupWorkoutSetup() {
   const dialog = document.getElementById('dialog-workout-setup');
   const form = document.getElementById('form-workout-setup');
-  const clientsChecklist = document.getElementById('setup-clients-checklist');
   const cancelBtn = dialog.querySelector('.modal-cancel');
   const closeBtn = dialog.querySelector('.modal-close-btn');
 
@@ -803,102 +1343,176 @@ function setupWorkoutSetup() {
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-    const routineId = document.getElementById('setup-select-routine').value;
     
-    // Collect active clients checked
-    const participantIds = [];
-    clientsChecklist.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
-      participantIds.push(cb.value);
+    // Collect active clients checked and their selected routines
+    const clientRoutines = [];
+    const rows = document.getElementById('setup-participants-assignment-list').querySelectorAll('.participant-setup-row');
+    
+    rows.forEach(row => {
+      const cb = row.querySelector('input[type="checkbox"]');
+      if (cb && cb.checked) {
+        const clientId = cb.value;
+        const select = row.querySelector('select');
+        const routineId = select ? select.value : '';
+        clientRoutines.push({ clientId, routineId });
+      }
     });
 
-    if (participantIds.length === 0) {
+    if (clientRoutines.length === 0) {
       alert('You must select at least one participant client.');
       return;
     }
 
-    if (!routineId) {
-      alert('Please select a routine template.');
+    const missingRoutine = clientRoutines.find(cr => !cr.routineId);
+    if (missingRoutine) {
+      alert('Please assign a routine template to all selected participants.');
       return;
     }
 
-    startWorkoutSession(routineId, participantIds);
+    startWorkoutSession(clientRoutines);
     dialog.close();
   });
 }
 
 function openWorkoutSetupModal(preselectedClientId = null, preselectedRoutineId = null) {
   const dialog = document.getElementById('dialog-workout-setup');
-  const clientsChecklist = document.getElementById('setup-clients-checklist');
+  const participantsList = document.getElementById('setup-participants-assignment-list');
   
-  // Render clients checklist dynamically
-  clientsChecklist.innerHTML = '';
+  if (!participantsList) return;
+  participantsList.innerHTML = '';
+  
   state.clients.sort((a,b) => a.name.localeCompare(b.name)).forEach(client => {
-    const item = document.createElement('label');
-    item.className = 'checklist-item';
-    const isChecked = (preselectedClientId === client.id) ? 'checked' : '';
-    item.innerHTML = `
-      <input type="checkbox" value="${client.id}" ${isChecked}>
-      <span>${escapeHTML(client.name)}</span>
-    `;
-    clientsChecklist.appendChild(item);
+    const row = document.createElement('div');
+    row.className = 'participant-setup-row';
+    row.style.display = 'flex';
+    row.style.alignItems = 'center';
+    row.style.justifyContent = 'space-between';
+    row.style.gap = '10px';
+    row.style.marginBottom = '12px';
+    row.style.padding = '8px';
+    row.style.background = 'rgba(255,255,255,0.03)';
+    row.style.borderRadius = '6px';
+    row.style.border = '1px solid var(--border-color)';
+    
+    const left = document.createElement('div');
+    left.style.display = 'flex';
+    left.style.alignItems = 'center';
+    left.style.gap = '10px';
+    
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.value = client.id;
+    cb.id = `setup-cb-${client.id}`;
+    cb.style.width = '18px';
+    cb.style.height = '18px';
+    cb.style.cursor = 'pointer';
+    
+    if (preselectedClientId === client.id) {
+      cb.checked = true;
+    } else if (!preselectedClientId && client.id !== 'client-sarah-jenkins') {
+      // Default to checking first couple clients if none specified (like Jane and John)
+      cb.checked = true;
+    }
+    
+    const nameLabel = document.createElement('label');
+    nameLabel.htmlFor = `setup-cb-${client.id}`;
+    nameLabel.textContent = client.name;
+    nameLabel.style.fontWeight = '600';
+    nameLabel.style.cursor = 'pointer';
+    nameLabel.style.fontSize = '13px';
+    
+    left.appendChild(cb);
+    left.appendChild(nameLabel);
+    
+    const right = document.createElement('div');
+    
+    const select = document.createElement('select');
+    select.className = 'form-control select-routine-dropdown';
+    select.style.padding = '4px 8px';
+    select.style.fontSize = '12px';
+    select.style.width = '160px';
+    select.style.height = '32px';
+    
+    select.innerHTML = '<option value="" disabled>Select Routine</option>';
+    state.routines.forEach(r => {
+      const opt = document.createElement('option');
+      opt.value = r.id;
+      opt.textContent = r.name;
+      select.appendChild(opt);
+    });
+    
+    // Attempt default selections
+    if (preselectedRoutineId && preselectedClientId === client.id) {
+      select.value = preselectedRoutineId;
+    } else if (client.id === 'client-jane-doe') {
+      select.value = 'routine-upper-a';
+    } else if (client.id === 'client-john-smith') {
+      select.value = 'routine-legs-core';
+    } else if (state.routines.length > 0) {
+      select.value = state.routines[0].id;
+    }
+    
+    right.appendChild(select);
+    
+    row.appendChild(left);
+    row.appendChild(right);
+    participantsList.appendChild(row);
   });
-
-  // Pre-select routine if passed
-  const routineSelect = document.getElementById('setup-select-routine');
-  if (preselectedRoutineId) {
-    routineSelect.value = preselectedRoutineId;
-  } else {
-    routineSelect.value = '';
-  }
 
   dialog.showModal();
 }
 
 // 2. Active Session Core
-function startWorkoutSession(routineId, participantIds) {
-  const routine = state.routines.find(r => r.id === routineId);
-  if (!routine) return;
-
+function startWorkoutSession(clientRoutines) {
   // Initialize session state
+  const participantIds = clientRoutines.map(cr => cr.clientId);
+  
   activeSession = {
-    routineId: routine.id,
-    routineName: routine.name,
     startTime: Date.now(),
     duration: 0,
     participants: participantIds,
-    exercises: [], // copy exercise definitions
-    logs: {}, // logs mapping
-    activeExerciseIndex: 0
+    clientRoutines: {},
+    activeClientId: participantIds[0]
   };
 
-  // Populate active exercises
-  routine.exercises.forEach(item => {
-    const ex = state.exercises.find(e => e.id === item.id);
-    if (ex) {
-      activeSession.exercises.push({
-        id: item.id,
-        name: ex.name,
-        category: ex.category,
-        instructions: ex.instructions,
-        setsTargetCount: item.sets,
-        repsTarget: item.reps,
-        weightTarget: item.weight,
-        rest: item.rest
-      });
+  // Populate active exercises and logs per client
+  clientRoutines.forEach(cr => {
+    const routine = state.routines.find(r => r.id === cr.routineId);
+    if (!routine) return;
+    
+    const clientState = {
+      routineId: routine.id,
+      routineName: routine.name,
+      activeExerciseIndex: 0,
+      exercises: [],
+      logs: {}
+    };
 
-      // Initialize logs for all sets for all participants for this exercise
-      participantIds.forEach(pId => {
-        for (let sIdx = 0; sIdx < item.sets; sIdx++) {
-          const key = `${item.id}_${pId}_${sIdx}`;
-          activeSession.logs[key] = {
-            reps: item.reps,
-            weight: item.weight,
-            completed: false,
-            note: ''
-          };
-        }
-      });
-    }
+    routine.exercises.forEach(item => {
+      const ex = state.exercises.find(e => e.id === item.id);
+      if (ex) {
+        clientState.exercises.push({
+          id: item.id,
+          name: ex.name,
+          category: ex.category,
+          instructions: ex.instructions,
+          setsTargetCount: item.sets,
+          repsTarget: item.reps,
+          weightTarget: item.weight,
+          rest: item.rest
+        });
+
+        // Initialize logs: exerciseId -> array of sets logs
+        clientState.logs[item.id] = Array.from({ length: item.sets }, () => ({
+          reps: item.reps,
+          weight: item.weight,
+          completed: false,
+          note: ''
+        }));
+      }
+    });
+
+    activeSession.clientRoutines[cr.clientId] = clientState;
   });
 
   // Save session state to localStorage for persistence recovery
@@ -909,7 +1523,6 @@ function startWorkoutSession(routineId, participantIds) {
   document.getElementById('active-session-overlay').classList.remove('hidden');
   
   // Set labels
-  document.getElementById('overlay-routine-name').textContent = routine.name;
   document.getElementById('session-bar-title').textContent = `Active: ${participantIds.length} Clients`;
 
   // Start timer interval
@@ -933,180 +1546,238 @@ function startSessionTimer() {
   }, 1000);
 }
 
-function renderActiveGroupBoard() {
-  if (!activeSession || activeSession.exercises.length === 0) return;
+function getActiveExercise() {
+  if (!activeSession) return null;
+  const activeClientId = activeSession.activeClientId;
+  const activeClientState = activeSession.clientRoutines[activeClientId];
+  if (!activeClientState || activeClientState.exercises.length === 0) return null;
+  return activeClientState.exercises[activeClientState.activeExerciseIndex];
+}
 
-  const currentExIdx = activeSession.activeExerciseIndex;
-  const currentEx = activeSession.exercises[currentExIdx];
+function renderActiveGroupBoard() {
+  if (!activeSession) return;
+
+  const activeClientId = activeSession.activeClientId || activeSession.participants[0];
+  activeSession.activeClientId = activeClientId;
+  const activeClientState = activeSession.clientRoutines[activeClientId];
+
+  // 1. Render Client Tabs
+  const tabsContainer = document.getElementById('active-session-client-tabs');
+  if (tabsContainer) {
+    tabsContainer.innerHTML = '';
+    activeSession.participants.forEach(pId => {
+      const client = state.clients.find(c => c.id === pId);
+      if (!client) return;
+      
+      const tab = document.createElement('button');
+      tab.className = `client-tab-btn ${pId === activeClientId ? 'active' : ''}`;
+      
+      // Inline styles to match a premium layout
+      tab.style.display = 'flex';
+      tab.style.alignItems = 'center';
+      tab.style.gap = '8px';
+      tab.style.padding = '10px 20px';
+      tab.style.borderRadius = '24px';
+      tab.style.border = '1px solid var(--border-color)';
+      tab.style.background = pId === activeClientId ? 'var(--accent-cyan)' : 'rgba(255,255,255,0.05)';
+      tab.style.color = pId === activeClientId ? '#000' : 'var(--text-color)';
+      tab.style.fontWeight = '700';
+      tab.style.cursor = 'pointer';
+      tab.style.transition = 'all 0.2s';
+      tab.style.minHeight = '44px';
+      
+      tab.innerHTML = `
+        <div class="avatar" style="width:20px; height:20px; font-size:9px; background: ${pId === activeClientId ? '#000' : 'var(--accent-cyan)'}; color: ${pId === activeClientId ? 'var(--accent-cyan)' : '#000'}">
+          ${client.avatar || getInitials(client.name)}
+        </div>
+        <span>${escapeHTML(client.name.split(' ')[0])}</span>
+      `;
+      
+      tab.addEventListener('click', () => {
+        activeSession.activeClientId = pId;
+        saveActiveSessionToCache();
+        renderActiveGroupBoard();
+      });
+      
+      tabsContainer.appendChild(tab);
+    });
+  }
+
+  // 2. Client Injury warning banner
+  const alertBanner = document.getElementById('clipboard-client-alert');
+  const alertText = document.getElementById('clipboard-client-notes-text');
+  const activeClient = state.clients.find(c => c.id === activeClientId);
+  if (alertBanner && activeClient) {
+    if (activeClient.notes) {
+      alertText.textContent = activeClient.notes;
+      alertBanner.classList.remove('hidden');
+    } else {
+      alertBanner.classList.add('hidden');
+    }
+  }
+
+  const container = document.getElementById('clipboard-logger-container');
+  if (!container) return;
+  container.innerHTML = '';
+
+  if (!activeClientState || activeClientState.exercises.length === 0) {
+    document.getElementById('active-ex-index').textContent = `${t('exercise_of')} 0 of 0`;
+    document.getElementById('active-ex-name').textContent = t('no_exercises_injected');
+    document.getElementById('active-ex-desc').textContent = t('no_exercises_desc');
+    document.getElementById('btn-prev-exercise').disabled = true;
+    document.getElementById('btn-next-exercise').disabled = true;
+    return;
+  }
+
+  const currentExIdx = activeClientState.activeExerciseIndex;
+  const currentEx = activeClientState.exercises[currentExIdx];
 
   // Update navigation details
-  document.getElementById('active-ex-index').textContent = `Exercise ${currentExIdx + 1} of ${activeSession.exercises.length}`;
+  document.getElementById('active-ex-index').textContent = `${t('exercise_of')} ${currentExIdx + 1} of ${activeClientState.exercises.length}`;
   document.getElementById('active-ex-name').textContent = currentEx.name;
-  document.getElementById('active-ex-desc').textContent = currentEx.instructions || 'No instructions provided.';
+  document.getElementById('active-ex-desc').textContent = currentEx.instructions || t('no_instructions');
 
   // Disable/enable arrows
   document.getElementById('btn-prev-exercise').disabled = (currentExIdx === 0);
-  document.getElementById('btn-next-exercise').disabled = (currentExIdx === activeSession.exercises.length - 1);
+  document.getElementById('btn-next-exercise').disabled = (currentExIdx === activeClientState.exercises.length - 1);
 
-  // Render client card logs
-  const matrixContainer = document.getElementById('active-session-group-matrix');
-  matrixContainer.innerHTML = '';
+  // Render sets table
+  const setsHTML = [];
+  const logsList = activeClientState.logs[currentEx.id] || [];
 
-  activeSession.participants.forEach(pId => {
-    const client = state.clients.find(c => c.id === pId);
-    if (!client) return;
-
-    // Check if client has finished all sets for current exercise
-    let allSetsDone = true;
-    const setsHTML = [];
-
-    for (let sIdx = 0; sIdx < currentEx.setsTargetCount; sIdx++) {
-      const key = `${currentEx.id}_${pId}_${sIdx}`;
-      const log = activeSession.logs[key] || { reps: 10, weight: 0, completed: false, note: '' };
-
-      if (!log.completed) {
-        allSetsDone = false;
-      }
-
-      const checkedClass = log.completed ? 'checked' : '';
-
-      setsHTML.push(`
-        <div class="active-set-row" data-client="${pId}" data-set="${sIdx}">
-          <span class="set-index-col">S${sIdx + 1}</span>
-          
-          <!-- Weight Stepper -->
-          <div class="stepper-control-group">
-            <span class="stepper-label">kg</span>
-            <div class="stepper-input-wrapper">
-              <button type="button" class="step-btn btn-weight-minus" aria-label="Decrease weight">-</button>
-              <input type="number" step="0.5" class="input-set-weight" value="${log.weight}" aria-label="Set weight in kilograms">
-              <button type="button" class="step-btn btn-weight-plus" aria-label="Increase weight">+</button>
-            </div>
-          </div>
-          
-          <!-- Reps Stepper -->
-          <div class="stepper-control-group">
-            <span class="stepper-label">reps</span>
-            <div class="stepper-input-wrapper">
-              <button type="button" class="step-btn btn-reps-minus" aria-label="Decrease reps">-</button>
-              <input type="number" class="input-set-reps" value="${log.reps}" aria-label="Set reps quantity">
-              <button type="button" class="step-btn btn-reps-plus" aria-label="Increase reps">+</button>
-            </div>
-          </div>
-          
-          <!-- Completed Checkbox -->
-          <div class="set-check-col">
-            <button type="button" class="set-checkbox-btn ${checkedClass}" aria-label="Mark set completed">
-              <i class="fa-solid fa-check"></i>
-            </button>
+  logsList.forEach((log, sIdx) => {
+    const checkedClass = log.completed ? 'checked' : '';
+    setsHTML.push(`
+      <div class="active-set-row" data-set="${sIdx}">
+        <span class="set-index-col" style="font-weight: bold; width: 24px;">S${sIdx + 1}</span>
+        
+        <!-- Weight Stepper -->
+        <div class="stepper-control-group" style="display: flex; align-items: center; gap: 4px;">
+          <span class="stepper-label" style="font-size: 11px; color: var(--text-muted);">${t('kg')}</span>
+          <div class="stepper-input-wrapper" style="display: flex; align-items: center; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden;">
+            <button type="button" class="step-btn btn-weight-minus">-</button>
+            <input type="number" step="0.5" class="input-set-weight" value="${log.weight}" aria-label="Set weight in kilograms">
+            <button type="button" class="step-btn btn-weight-plus">+</button>
           </div>
         </div>
-      `);
-    }
-
-    const card = document.createElement('div');
-    card.className = `participant-log-card card ${allSetsDone ? 'completed' : ''}`;
-    card.innerHTML = `
-      <div class="participant-card-header ${allSetsDone ? 'completed-all' : ''}">
-        <h5>
-          <div class="avatar" style="width:28px; height:28px; font-size:11px">${client.avatar || getInitials(client.name)}</div>
-          <span>${escapeHTML(client.name)}</span>
-        </h5>
-        <span class="participant-header-status">${allSetsDone ? '<i class="fa-solid fa-circle-check text-emerald"></i> All Done' : 'Remaining'}</span>
-      </div>
-      <div class="participant-set-rows">
-        ${setsHTML.join('')}
-      </div>
-    `;
-
-    // Add event bindings to the steppers and buttons
-    card.querySelectorAll('.active-set-row').forEach(row => {
-      const clientId = row.getAttribute('data-client');
-      const setIdx = parseInt(row.getAttribute('data-set'));
-      const key = `${currentEx.id}_${clientId}_${setIdx}`;
-
-      const weightInput = row.querySelector('.input-set-weight');
-      const repsInput = row.querySelector('.input-set-reps');
-      const checkBtn = row.querySelector('.set-checkbox-btn');
-
-      // Functions to sync state and DOM
-      const updateWeight = (val) => {
-        if (isNaN(val) || val < 0) val = 0;
-        activeSession.logs[key].weight = val;
-        weightInput.value = val;
-        saveActiveSessionToCache();
-      };
-
-      const updateReps = (val) => {
-        if (isNaN(val) || val < 0) val = 0;
-        activeSession.logs[key].reps = val;
-        repsInput.value = val;
-        saveActiveSessionToCache();
-      };
-
-      // Weight stepper
-      row.querySelector('.btn-weight-minus').addEventListener('click', () => {
-        const current = parseFloat(weightInput.value) || 0;
-        updateWeight(Math.max(0, current - 2.5));
-      });
-      row.querySelector('.btn-weight-plus').addEventListener('click', () => {
-        const current = parseFloat(weightInput.value) || 0;
-        updateWeight(current + 2.5);
-      });
-      weightInput.addEventListener('change', (e) => {
-        updateWeight(parseFloat(e.target.value));
-      });
-
-      // Reps stepper
-      row.querySelector('.btn-reps-minus').addEventListener('click', () => {
-        const current = parseInt(repsInput.value) || 0;
-        updateReps(Math.max(0, current - 1));
-      });
-      row.querySelector('.btn-reps-plus').addEventListener('click', () => {
-        const current = parseInt(repsInput.value) || 0;
-        updateReps(current + 1);
-      });
-      repsInput.addEventListener('change', (e) => {
-        updateReps(parseInt(e.target.value));
-      });
-
-      // Checkbox click
-      checkBtn.addEventListener('click', () => {
-        const isChecked = activeSession.logs[key].completed;
-        activeSession.logs[key].completed = !isChecked;
         
-        if (!isChecked) {
-          checkBtn.classList.add('checked');
-          // If Rest Timer duration is specified, trigger timer
-          if (currentEx.rest > 0 && !restTimer.isActive) {
-            triggerRestTimer(currentEx.rest);
-          }
-        } else {
-          checkBtn.classList.remove('checked');
-        }
+        <!-- Reps Stepper -->
+        <div class="stepper-control-group" style="display: flex; align-items: center; gap: 4px;">
+          <span class="stepper-label" style="font-size: 11px; color: var(--text-muted);">${t('reps_label')}</span>
+          <div class="stepper-input-wrapper" style="display: flex; align-items: center; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden;">
+            <button type="button" class="step-btn btn-reps-minus">-</button>
+            <input type="number" class="input-set-reps" value="${log.reps}" aria-label="Set reps quantity">
+            <button type="button" class="step-btn btn-reps-plus">+</button>
+          </div>
+        </div>
+        
+        <!-- Completed Checkbox -->
+        <div class="set-check-col" style="margin-left: auto;">
+          <button type="button" class="set-checkbox-btn ${checkedClass}" aria-label="Mark set completed">
+            <i class="fa-solid fa-check" style="${log.completed ? 'display: block' : 'display: none'}"></i>
+          </button>
+        </div>
+      </div>
+    `);
+  });
 
-        saveActiveSessionToCache();
-        // Re-render group board to update card backgrounds and indicators
-        renderActiveGroupBoard();
-      });
+  container.innerHTML = `
+    <div class="participant-set-rows" style="display: flex; flex-direction: column; gap: 6px; padding: 12px;">
+      ${setsHTML.join('')}
+    </div>
+  `;
+
+  // Bind events to steppers and checkmark buttons
+  container.querySelectorAll('.active-set-row').forEach(row => {
+    const setIdx = parseInt(row.getAttribute('data-set'));
+    const log = logsList[setIdx];
+
+    const weightInput = row.querySelector('.input-set-weight');
+    const repsInput = row.querySelector('.input-set-reps');
+    const checkBtn = row.querySelector('.set-checkbox-btn');
+    const checkIcon = checkBtn.querySelector('i');
+
+    const updateWeight = (val) => {
+      if (isNaN(val) || val < 0) val = 0;
+      log.weight = val;
+      weightInput.value = val;
+      saveActiveSessionToCache();
+    };
+
+    const updateReps = (val) => {
+      if (isNaN(val) || val < 0) val = 0;
+      log.reps = val;
+      repsInput.value = val;
+      saveActiveSessionToCache();
+    };
+
+    // Weight stepper clicks
+    row.querySelector('.btn-weight-minus').addEventListener('click', () => {
+      const current = parseFloat(weightInput.value) || 0;
+      updateWeight(Math.max(0, current - 2.5));
+    });
+    row.querySelector('.btn-weight-plus').addEventListener('click', () => {
+      const current = parseFloat(weightInput.value) || 0;
+      updateWeight(current + 2.5);
+    });
+    weightInput.addEventListener('change', (e) => {
+      updateWeight(parseFloat(e.target.value));
     });
 
-    matrixContainer.appendChild(card);
+    // Reps stepper clicks
+    row.querySelector('.btn-reps-minus').addEventListener('click', () => {
+      const current = parseInt(repsInput.value) || 0;
+      updateReps(Math.max(0, current - 1));
+    });
+    row.querySelector('.btn-reps-plus').addEventListener('click', () => {
+      const current = parseInt(repsInput.value) || 0;
+      updateReps(current + 1);
+    });
+    repsInput.addEventListener('change', (e) => {
+      updateReps(parseInt(e.target.value));
+    });
+
+    // Checkbox button toggle
+    checkBtn.addEventListener('click', () => {
+      const isChecked = log.completed;
+      log.completed = !isChecked;
+      
+      if (!isChecked) {
+        checkBtn.style.background = 'var(--accent-cyan)';
+        checkBtn.style.color = '#000';
+        checkIcon.style.display = 'block';
+        
+        // Trigger rest timer if not already active
+        if (currentEx.rest > 0 && !restTimer.isActive) {
+          triggerRestTimer(currentEx.rest);
+        }
+      } else {
+        checkBtn.style.background = 'transparent';
+        checkBtn.style.color = 'var(--text-muted)';
+        checkIcon.style.display = 'none';
+      }
+
+      saveActiveSessionToCache();
+    });
   });
 }
 
 function setupActiveSession() {
   // Navigation Arrows
   document.getElementById('btn-prev-exercise').addEventListener('click', () => {
-    if (activeSession && activeSession.activeExerciseIndex > 0) {
-      activeSession.activeExerciseIndex--;
+    if (!activeSession) return;
+    const clientState = activeSession.clientRoutines[activeSession.activeClientId];
+    if (clientState && clientState.activeExerciseIndex > 0) {
+      clientState.activeExerciseIndex--;
       renderActiveGroupBoard();
     }
   });
 
   document.getElementById('btn-next-exercise').addEventListener('click', () => {
-    if (activeSession && activeSession.activeExerciseIndex < activeSession.exercises.length - 1) {
-      activeSession.activeExerciseIndex++;
+    if (!activeSession) return;
+    const clientState = activeSession.clientRoutines[activeSession.activeClientId];
+    if (clientState && clientState.activeExerciseIndex < clientState.exercises.length - 1) {
+      clientState.activeExerciseIndex++;
       renderActiveGroupBoard();
     }
   });
@@ -1123,7 +1794,7 @@ function setupActiveSession() {
 
   // Cancel workout
   document.getElementById('btn-cancel-session').addEventListener('click', () => {
-    if (confirm('Cancel active workout? All logged sets for this session will be permanently lost.')) {
+    if (confirm(t('confirm_cancel'))) {
       cancelWorkoutSession();
     }
   });
@@ -1131,6 +1802,32 @@ function setupActiveSession() {
   // Finish workout
   document.getElementById('btn-finish-session').addEventListener('click', () => {
     finishWorkoutSession();
+  });
+
+  // Add set on the fly
+  document.getElementById('btn-add-session-set').addEventListener('click', () => {
+    if (!activeSession) return;
+    const activeClientId = activeSession.activeClientId;
+    const clientState = activeSession.clientRoutines[activeClientId];
+    if (!clientState || clientState.exercises.length === 0) return;
+    
+    const curEx = clientState.exercises[clientState.activeExerciseIndex];
+    
+    // Add set to target count
+    curEx.setsTargetCount++;
+    
+    // Push new log set
+    const logsList = clientState.logs[curEx.id] || [];
+    const lastLog = logsList[logsList.length - 1] || { reps: 10, weight: 0 };
+    logsList.push({
+      reps: lastLog.reps,
+      weight: lastLog.weight,
+      completed: false,
+      note: ''
+    });
+    
+    saveActiveSessionToCache();
+    renderActiveGroupBoard();
   });
 
   // Setup Add Exercise to Session modal trigger
@@ -1158,7 +1855,10 @@ function setupActiveSession() {
     const baseEx = state.exercises.find(e => e.id === exId);
     if (!baseEx) return;
 
-    // Append exercise to active session routine list
+    const activeClientId = activeSession.activeClientId;
+    const clientState = activeSession.clientRoutines[activeClientId];
+
+    // Append exercise to active client routine list
     const newEx = {
       id: exId,
       name: baseEx.name,
@@ -1170,27 +1870,90 @@ function setupActiveSession() {
       rest: rest
     };
 
-    activeSession.exercises.push(newEx);
+    clientState.exercises.push(newEx);
 
-    // Initialize logs for all participants
-    activeSession.participants.forEach(pId => {
-      for (let sIdx = 0; sIdx < sets; sIdx++) {
-        const key = `${exId}_${pId}_${sIdx}`;
-        activeSession.logs[key] = {
-          reps: reps,
-          weight: weight,
-          completed: false,
-          note: ''
-        };
-      }
-    });
+    // Initialize logs for active client for this exercise
+    clientState.logs[exId] = Array.from({ length: sets }, () => ({
+      reps: reps,
+      weight: weight,
+      completed: false,
+      note: ''
+    }));
 
     // Jump to the newly added exercise
-    activeSession.activeExerciseIndex = activeSession.exercises.length - 1;
+    clientState.activeExerciseIndex = clientState.exercises.length - 1;
     
     saveActiveSessionToCache();
     renderActiveGroupBoard();
     addExModal.close();
+  });
+
+  // Feedback modal
+  const fbModal = document.getElementById('dialog-feedback');
+  const fbForm = document.getElementById('form-feedback');
+  
+  document.getElementById('btn-log-feedback').addEventListener('click', () => {
+    if (!activeSession) return;
+    const activeClientId = activeSession.activeClientId;
+    const clientState = activeSession.clientRoutines[activeClientId];
+    if (!clientState || clientState.exercises.length === 0) return;
+    
+    const curEx = clientState.exercises[clientState.activeExerciseIndex];
+    const client = state.clients.find(c => c.id === activeClientId);
+    
+    document.getElementById('feedback-client-id').value = activeClientId;
+    document.getElementById('feedback-exercise-name').value = curEx.name;
+    document.getElementById('feedback-client-display-name').textContent = client.name;
+    document.getElementById('feedback-ex-display-name').textContent = curEx.name;
+    document.getElementById('feedback-custom-note').value = '';
+    
+    // Reset radios
+    fbForm.reset();
+    fbModal.showModal();
+  });
+  
+  fbModal.querySelector('.modal-cancel').addEventListener('click', () => fbModal.close());
+  fbModal.querySelector('.modal-close-btn').addEventListener('click', () => fbModal.close());
+  
+  fbForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const clientId = document.getElementById('feedback-client-id').value;
+    const exName = document.getElementById('feedback-exercise-name').value;
+    const customNote = document.getElementById('feedback-custom-note').value;
+    const tagVal = fbForm.querySelector('input[name="feedback-tag"]:checked').value;
+    
+    const client = state.clients.find(c => c.id === clientId);
+    
+    const newFeedback = {
+      id: 'u-' + Date.now(),
+      clientId: clientId,
+      clientName: client ? client.name : 'Unknown Client',
+      date: new Date().toISOString(),
+      exerciseName: exName,
+      tag: tagVal + (customNote ? ` - ${customNote}` : ''),
+      resolved: false
+    };
+    
+    state.planUpdates.push(newFeedback);
+
+    // Save to active session so it carries into client history log
+    if (activeSession) {
+      if (!activeSession.feedback) {
+        activeSession.feedback = [];
+      }
+      activeSession.feedback.push({
+        id: newFeedback.id,
+        clientId: clientId,
+        exerciseName: exName,
+        tag: tagVal,
+        note: customNote
+      });
+      saveActiveSessionToCache();
+    }
+
+    saveToLocalStorage();
+    renderPendingPlanAdjustments();
+    fbModal.close();
   });
 }
 
@@ -1199,7 +1962,7 @@ function cancelWorkoutSession() {
     clearInterval(activeSession.timerIntervalId);
   }
   activeSession = null;
-  localStorage.removeItem('openpt_active_session');
+  localStorage.removeItem('librept_active_session');
   document.getElementById('active-session-bar').classList.add('hidden');
   document.getElementById('active-session-overlay').classList.add('hidden');
 }
@@ -1210,37 +1973,43 @@ function finishWorkoutSession() {
   // Verify if any sets were logged
   let totalSets = 0;
   let completedSets = 0;
-  for (const k in activeSession.logs) {
-    totalSets++;
-    if (activeSession.logs[k].completed) completedSets++;
-  }
+  
+  activeSession.participants.forEach(pId => {
+    const clientState = activeSession.clientRoutines[pId];
+    if (clientState) {
+      for (const exId in clientState.logs) {
+        clientState.logs[exId].forEach(log => {
+          totalSets++;
+          if (log.completed) completedSets++;
+        });
+      }
+    }
+  });
 
   if (completedSets === 0) {
-    if (!confirm('No completed sets were logged. Are you sure you want to finish and save an empty session?')) {
+    if (!confirm(t('alert_no_sets'))) {
       return;
     }
   }
 
-  // constructed date ISO string
   const sessionDateISO = new Date(activeSession.startTime).toISOString();
   const sessionDuration = activeSession.duration;
 
   // Split history into individual records for each participant
   activeSession.participants.forEach(pId => {
     const client = state.clients.find(c => c.id === pId);
-    if (!client) return;
+    const clientState = activeSession.clientRoutines[pId];
+    if (!client || !clientState) return;
 
-    // Build array of exercises completed by this specific client
     const clientCompletedExercises = [];
 
-    activeSession.exercises.forEach(ex => {
+    clientState.exercises.forEach(ex => {
+      const logsList = clientState.logs[ex.id] || [];
       const clientSetsLogged = [];
-      for (let sIdx = 0; sIdx < ex.setsTargetCount; sIdx++) {
-        const key = `${ex.id}_${pId}_${sIdx}`;
-        const log = activeSession.logs[key];
-        
+      
+      logsList.forEach((log, sIdx) => {
         // Save set if completed (or if trainer logged a custom load)
-        if (log && (log.completed || log.weight > 0)) {
+        if (log.completed || log.weight > 0) {
           clientSetsLogged.push({
             reps: log.reps,
             weight: log.weight,
@@ -1248,7 +2017,7 @@ function finishWorkoutSession() {
             note: log.note || ''
           });
         }
-      }
+      });
 
       if (clientSetsLogged.length > 0) {
         clientCompletedExercises.push({
@@ -1265,17 +2034,14 @@ function finishWorkoutSession() {
         id: `log-${Date.now()}-${pId}`,
         clientId: pId,
         clientName: client.name,
-        routineName: activeSession.routineName,
+        routineName: clientState.routineName,
         date: sessionDateISO,
         duration: sessionDuration,
-        exercises: clientCompletedExercises
+        exercises: clientCompletedExercises,
+        feedback: (activeSession.feedback || []).filter(f => f.clientId === pId)
       };
       
       state.history.push(clientLog);
-
-      // Extract weights from the exercise log to potentially add to client weightHistory
-      // We don't automatically update bodyweight from exercise logs unless it's a bodyweight metric,
-      // but let's keep client weight tracking separate.
     }
   });
 
@@ -1302,11 +2068,11 @@ function saveActiveSessionToCache() {
     ...activeSession,
     timerIntervalId: null
   };
-  localStorage.setItem('openpt_active_session', JSON.stringify(cacheObj));
+  localStorage.setItem('librept_active_session', JSON.stringify(cacheObj));
 }
 
 function recoverActiveSession() {
-  const cached = localStorage.getItem('openpt_active_session');
+  const cached = localStorage.getItem('librept_active_session');
   if (!cached) return;
 
   try {
@@ -1336,12 +2102,12 @@ function setupRestTimer() {
   const toggleBtn = document.getElementById('btn-timer-toggle');
   
   document.getElementById('btn-timer-trigger').addEventListener('click', () => {
-    const currentEx = activeSession ? activeSession.exercises[activeSession.activeExerciseIndex] : null;
+    const currentEx = getActiveExercise();
     triggerRestTimer(currentEx ? currentEx.rest : 60);
   });
 
   document.getElementById('btn-trigger-group-timer').addEventListener('click', () => {
-    const currentEx = activeSession ? activeSession.exercises[activeSession.activeExerciseIndex] : null;
+    const currentEx = getActiveExercise();
     triggerRestTimer(currentEx ? currentEx.rest : 60);
   });
 
@@ -1491,7 +2257,7 @@ function setupBackupRestore() {
     
     const dlAnchor = document.createElement('a');
     dlAnchor.href = url;
-    dlAnchor.download = `openpt_backup_${new Date().toISOString().substring(0, 10)}.json`;
+    dlAnchor.download = `librept_backup_${new Date().toISOString().substring(0, 10)}.json`;
     document.body.appendChild(dlAnchor);
     dlAnchor.click();
     document.body.removeChild(dlAnchor);
@@ -1547,7 +2313,7 @@ function setupBackupRestore() {
   // Wipe database
   document.getElementById('btn-reset-db').addEventListener('click', () => {
     if (confirm('CRITICAL WARNING: This permanently wipes all workout logs and custom records. Are you absolutely sure?')) {
-      localStorage.removeItem('openpt_db');
+      localStorage.removeItem('librept_db');
       cancelWorkoutSession();
       seedMockData();
       

@@ -1,7 +1,7 @@
 ---
 type: overview
-title: OpenPT System Overview & Architecture
-description: Core architectural overview, subsystems, and functional specification for the OpenPT Personal Trainer Management & Scheduling System.
+title: LibrePT System Overview & Architecture
+description: Core architectural overview, subsystems, and functional specification for the LibrePT Personal Trainer Management & Scheduling System.
 status: active
 tags:
   - architecture
@@ -10,17 +10,17 @@ tags:
   - google-calendar-sync
 ---
 
-# OpenPT - Personal Trainer Management & Scheduling System
+# LibrePT - Personal Trainer Management & Scheduling System
 
-OpenPT is a comprehensive, client-centric, and business-enabling software ecosystem designed for personal trainers (PTs) to manage schedules, publish slots, handle client bookings, orchestrate workout sessions, track execution, create and manage asynchronous session scenarios, capture on-the-fly voice notes, and collect granular exercise feedback to enable planning of client progression. 
+LibrePT is a comprehensive, client-centric, and business-enabling software ecosystem designed for personal trainers (PTs) to manage schedules, publish slots, handle client bookings, orchestrate workout sessions, track execution, create and manage asynchronous session scenarios, capture on-the-fly voice notes, and collect granular exercise feedback to enable planning of client progression. 
 
-While the **mobile-first, offline PWA Gym Clipboard** is the core real-time tracking interface used on the gym floor, OpenPT is built as an end-to-end system that connects the trainer's scheduling back-office, client calendar invites, and program adjustments into a single unified database.
+While the **mobile-first, offline PWA Gym Clipboard** is the core real-time tracking interface used on the gym floor, LibrePT is built as an end-to-end system that connects the trainer's scheduling back-office, client calendar invites, and program adjustments into a single unified database.
 
 ---
 
 ## 🏗️ System Architecture & Subsystems
 
-OpenPT is comprised of three major subsystems:
+LibrePT is comprised of three major subsystems:
 
 1. **The PT Clipboard Dashboard (Mobile Web/Native PWA)**
    - The trainer's core gym-floor interface.
@@ -32,10 +32,10 @@ OpenPT is comprised of three major subsystems:
    - **Reversible Plan Pivot & Placeholder Injection**: Low friction session wipe/pivot with full undo capability. Low friction ability to inject generic placeholder cards when client fatigue or equipment delays force a sudden plan change.
 
 2. **Google Calendar Booking & Sync Integration (Cloud APIs)**
-   - **No Custom Client Web App Needed**: Rather than building and hosting a custom booking portal, OpenPT leverages **Google Calendar Appointment Schedules** out of the box.
+   - **No Custom Client Web App Needed**: Rather than building and hosting a custom booking portal, LibrePT leverages **Google Calendar Appointment Schedules** out of the box.
    - **For Trainers**: PT publishes slots/schedules directly via Google Calendar (supporting recurring slot rules and guest capacity limits).
    - **For Clients**: Clients self-subscribe to slots via the standard Google-hosted scheduling page.
-   - **Active Sync**: The OpenPT app queries the Google Calendar API to fetch session participant guest lists, automatically pre-loading the active clipboard with checked-in clients.
+   - **Active Sync**: The LibrePT app queries the Google Calendar API to fetch session participant guest lists, automatically pre-loading the active clipboard with checked-in clients.
 
 3. **Trainer Program Adjustments Deck (Back-Office)**
    - The desk-side workspace where feedback alerts and audio notes are reviewed to asynchronously edit client routine templates and plan progressive overload trajectories.
@@ -60,7 +60,7 @@ OpenPT is comprised of three major subsystems:
 *   **No Custom Web Hosting**: The PT creates recurring training slots directly in Google Calendar (using Appointment Schedules). Google auto-generates the public scheduling page.
 *   **Self-Subscription**: Clients visit the Google-hosted page to book slots, entering their name and email.
 *   **Automated Invitations**: Booking a slot adds the client to the Google Calendar event guest list, triggering a formal invite sent directly to their email inbox.
-*   **Participant Lock Guard**: The OpenPT app queries the Google Calendar API to fetch the guest list, pre-loading the active session clipboard and locking client selection strictly to checked-in participants.
+*   **Participant Lock Guard**: The LibrePT app queries the Google Calendar API to fetch the guest list, pre-loading the active session clipboard and locking client selection strictly to checked-in participants.
 
 ### 3. Closed-Loop Plan Feedback & Client Progression
 *   **Granular Signal Processing**: Signals recorded on the gym floor (`Load Up`, `Step Back`, `Pain/Injury`) flow directly into the trainer's back-office review queue.
@@ -73,7 +73,7 @@ OpenPT is comprised of three major subsystems:
 The system is configured as a single codebase running on Web, iOS, and Android:
 
 ```
-OpenPT/
+LibrePT/
 ├── index.html          # Main application templates (Dashboard, Modals, Booking pages)
 ├── index.css           # Custom HSL-color variables, glassmorphic layouts, and mobile viewport limits
 ├── app.js              # State manager, views router, Google API hooks, and split-sync databases

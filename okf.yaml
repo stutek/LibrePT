@@ -1,5 +1,5 @@
 spec_version: "0.1"
-name: "OpenPT Knowledge Catalog"
-description: "OKF-compliant specification and architectural knowledge graph for the OpenPT Personal Trainer Management & Scheduling System."
+name: "LibrePT Knowledge Catalog"
+description: "OKF-compliant specification and architectural knowledge graph for the LibrePT Personal Trainer Management & Scheduling System."
 root: "."
 entrypoint: "README.md"

@@ -1,6 +1,6 @@
 {
-  "name": "OpenPT - Personal Trainer Tracker",
-  "short_name": "OpenPT",
+  "name": "LibrePT - Personal Trainer Tracker",
+  "short_name": "LibrePT",
   "description": "Mobile-first group workout tracker designed for personal trainers.",
   "start_url": "index.html",
   "display": "standalone",

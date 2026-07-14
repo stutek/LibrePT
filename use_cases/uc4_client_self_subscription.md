@@ -54,4 +54,4 @@ graph TD
 5. **Attendee Registration**: Google adds the client's email address to the event's attendee list.
 6. **Send Invitation**: Google Calendar automatically sends a calendar invitation email (ics attachment) to the client's email inbox.
 7. **PT Calendar Sync**: The event updates on the PT's calendar grid, listing the client as an attendee.
-8. **App Sync (Passive)**: When the PT opens the OpenPT app, the app queries the Google Calendar API (`events.list` or `events.get`) to read the guest email lists for today's session event, automatically checking them into the active tracking clipboard.
+8. **App Sync (Passive)**: When the PT opens the LibrePT app, the app queries the Google Calendar API (`events.list` or `events.get`) to read the guest email lists for today's session event, automatically checking them into the active tracking clipboard.

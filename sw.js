@@ -1,5 +1,5 @@
-// sw.js - OpenPT Service Worker for Offline Functionality
-const CACHE_NAME = 'openpt-v1';
+// sw.js - LibrePT Service Worker for Offline Functionality
+const CACHE_NAME = 'librept-v1';
 const ASSETS = [
   './',
   './index.html',

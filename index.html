@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>OpenPT - Personal Trainer Dashboard</title>
+  <title>LibrePT - Personal Trainer Dashboard</title>
   
   <!-- SEO Meta Tags -->
-  <meta name="description" content="OpenPT is a mobile-friendly group & individual exercise tracking web app for personal trainers with instant client switching, scroll-free logging, and async feedback loops.">
+  <meta name="description" content="LibrePT is a mobile-friendly group & individual exercise tracking web app for personal trainers with instant client switching, scroll-free logging, and async feedback loops.">
   <meta name="theme-color" content="#09090b">
   
   <!-- PWA Manifest & Icons -->
@@ -31,9 +31,13 @@
     <div class="header-container">
       <div class="logo-area">
         <i class="fa-solid fa-dumbbell logo-icon"></i>
-        <h1>OpenPT</h1>
+        <h1>LibrePT</h1>
       </div>
       <div class="header-actions">
+        <select id="lang-switcher" class="form-control" style="width: 70px; height: 36px; padding: 2px 6px; font-size: 13px; font-weight: 700; border-radius: 6px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); color: var(--text-color); cursor: pointer;" aria-label="Switch Language / Zamenjaj jezik">
+          <option value="en">EN</option>
+          <option value="sl">SL</option>
+        </select>
         <button id="theme-toggle" class="icon-btn" aria-label="Toggle light/dark theme">
           <i class="fa-solid fa-moon"></i>
         </button>
@@ -600,7 +604,7 @@
       <button class="modal-close-btn" aria-label="Close backup modal"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div class="modal-body-scroll">
-      <p class="dialog-desc">OpenPT stores your logs directly on this device. You can download a backup file to keep your history safe, or import it to sync with another phone.</p>
+      <p class="dialog-desc">LibrePT stores your logs directly on this device. You can download a backup file to keep your history safe, or import it to sync with another phone.</p>
       
       <div class="backup-actions">
         <div class="action-card card">

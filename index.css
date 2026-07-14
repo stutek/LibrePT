@@ -1,4 +1,4 @@
-/* index.css - OpenPT Modern UI Style Guide & Design System */
+/* index.css - LibrePT Modern UI Style Guide & Design System */
 
 /* Global Variable Declarations (Dark & Light Themes) */
 :root {
@@ -1491,3 +1491,201 @@ textarea.form-control {
   margin-bottom: 12px;
   line-height: 1.4;
 }
+
+/* Utility classes */
+.hidden {
+  display: none !important;
+}
+
+/* History Feedback Icon and Tooltip CSS */
+.history-feedback-icon {
+  position: relative;
+  cursor: pointer;
+  margin-left: 6px;
+  display: inline-block;
+  font-size: 13px;
+  transition: transform 0.2s;
+  vertical-align: middle;
+}
+
+.history-feedback-icon:hover {
+  transform: scale(1.2);
+}
+
+.history-feedback-icon .tooltip-content {
+  visibility: hidden;
+  width: 220px;
+  background-color: rgba(18, 18, 24, 0.98);
+  color: var(--text-color);
+  text-align: left;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px 14px;
+  position: absolute;
+  z-index: 100;
+  bottom: 135%; /* Position above the icon */
+  right: 0;     /* Align to the right of the icon to keep within screen limits */
+  opacity: 0;
+  transition: opacity 0.2s, visibility 0.2s;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
+  pointer-events: none;
+  font-size: 11px;
+  line-height: 1.5;
+  font-weight: normal;
+}
+
+.history-feedback-icon .tooltip-content::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  right: 12px; /* Position the pointer arrow to align with the right-positioned icon */
+  border-width: 6px;
+  border-style: solid;
+  border-color: rgba(18, 18, 24, 0.98) transparent transparent transparent;
+}
+
+.history-feedback-icon:hover .tooltip-content,
+.history-feedback-icon.active .tooltip-content {
+  visibility: visible;
+  opacity: 1;
+}
+
+.tooltip-title {
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: var(--accent-cyan);
+}
+
+.tooltip-body {
+  color: var(--text-muted);
+}
+
+/* Sets tracking row style tweaks */
+.active-set-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  padding-bottom: 8px;
+}
+
+.active-set-row .step-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  width: 32px;
+  height: 32px;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.active-set-row .input-set-weight,
+.active-set-row .input-set-reps {
+  background: none;
+  border: none;
+  color: #fff;
+  text-align: center;
+  font-size: 13px;
+  height: 32px;
+}
+
+.active-set-row .input-set-weight {
+  width: 50px;
+}
+
+.active-set-row .input-set-reps {
+  width: 40px;
+}
+
+.active-set-row .set-checkbox-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.active-set-row .set-checkbox-btn.checked {
+  background: var(--accent-cyan) !important;
+  color: #000 !important;
+}
+
+/* Mobile responsive scaling */
+@media (max-width: 600px) {
+  /* Scale buttons for thumb-friendly interaction */
+  .btn, .btn-sm {
+    padding: 12px 18px !important;
+    font-size: 14px !important;
+    min-height: 44px !important;
+  }
+  
+  /* Increase margins and size of feedback/note icons in global history to prevent misclicks */
+  .history-feedback-icon {
+    font-size: 20px !important;
+    padding: 10px !important; /* Extremely easy to click/tap */
+    margin-left: 14px !important;
+  }
+  
+  /* Active session footer adjustments */
+  .session-finish-row {
+    gap: 16px !important;
+  }
+  
+  .session-finish-row button {
+    flex: 1 !important;
+    min-height: 48px !important;
+  }
+  
+  /* Form input controls spacing */
+  .form-control, select {
+    min-height: 44px !important;
+    font-size: 14px !important;
+  }
+
+  .active-set-row {
+    gap: 12px !important;
+    padding-top: 4px;
+    padding-bottom: 10px !important;
+  }
+  
+  .active-set-row .step-btn {
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 18px !important;
+  }
+  
+  .active-set-row .input-set-weight,
+  .active-set-row .input-set-reps {
+    height: 38px !important;
+    font-size: 15px !important;
+  }
+  
+  .active-set-row .input-set-weight {
+    width: 58px !important;
+  }
+  
+  .active-set-row .input-set-reps {
+    width: 48px !important;
+  }
+  
+  .active-set-row .set-checkbox-btn {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 8px !important;
+  }
+}
+
+

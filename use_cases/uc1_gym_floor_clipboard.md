@@ -19,118 +19,161 @@ This use case outlines how the Personal Trainer (PT) orchestrates a live trainin
 
 ## BPMN Horizontal Multi-Client Gym Floor Scenarios
 
-### Scenario 1: Clean Completion & Multi-Client Rotation (Client B -> Client C -> Return to Client B)
-Horizontal flow modeling how the PT opens the app, inspects Client B's Focus Card (`Exercise`, `Load`, `Series`, `Rest`, `Reps`), cues initial reps, rotates attention to Client C while Client B completes remaining sets autonomously, and returns to log a single-click clean completion.
+### Scenario 1: Clean Completion & Multi-Client Floor Rotation
+BPMN swimlane choreography modeling physical gym-floor coaching, multi-client attention rotation, and sub-50ms PWA focus card updates.
 
 ```mermaid
 graph LR
-    subgraph TrainerLane["PT Orchestration Lane"]
-        T1["1. Open App & Select Tab: Client B<br/>Focus Card: Barbell Bench Press<br/>Load: 80kg | Series: Set 1/3 | Rest: 90s | Reps: 8"]
-        T2["2. Observe Client B Reps 1-3:<br/>Form solid, RPE 7 -> Give verbal cue"]
-        T3["3. Switch Context to Client C:<br/>Mentor Client C on Squat rack"]
-        T4["5. Return to Client B Tab:<br/>Client B completed Sets 2 & 3 cleanly"]
-        T5["6. Single Click:<br/>Tap '[ ✓ Clean / Load Up Next ]'"]
+    subgraph PWALane ["📱 LibrePT PWA Clipboard Lane"]
+        PWA1["Retrieve Roster & Active Focus Cards"]
+        PWA2["Execute <50ms Tab Switch to Client C Workspace"]
+        PWA3["Lock Set 1 Completion Log & Advance Card to Set 2"]
+        End1(("End"))
     end
 
-    subgraph ClientBLane["Client B Physical Gym Floor"]
-        CB1["Performs Reps 1-3 under PT observation"]
-        CB2["4. Autonomously completes remaining reps,<br/>observes 90s rests, finishes Sets 2 & 3"]
+    subgraph TrainerLane ["🏋️ Personal Trainer Orchestration Lane"]
+        Start1(("Start"))
+        T1["Check station setup (safety pins, bench angle)<br/>Select Tab: Client B (Bench Press | 80kg | Set 1/3 | 90s Rest | 8 Reps)"]
+        T2["Physical Spotting & Coaching:<br/>Cue 'Drive feet into floor!' -> Assess bar velocity & RPE ~7"]
+        T3["Step across gym floor to Client C -> Spot Squat set"]
+        T4["Walk back to Client B -> Check recovery & give high-five<br/>Single Click: Tap '[ ✓ Clean / Load Up Next ]'"]
     end
 
-    subgraph PWALane["OpenPT PWA Clipboard"]
-        P1["7. Locks Bench Press Set Log<br/>Advances Client B Card to Next Exercise"]
+    subgraph ClientLane ["💪 Client B Physical Gym Floor Lane"]
+        CB1["Lifts 80kg x 8 reps cleanly under PT spotting"]
+        CB2["Autonomously hydrates, rests 90s & completes Sets 2 & 3"]
     end
 
+    Start1 -- "Session Check-In" --> PWA1
+    PWA1 --> T1
     T1 --> CB1
     CB1 --> T2
-    T2 --> T3
+    T2 --> PWA2
+    PWA2 --> T3
     T3 --> CB2
     CB2 --> T4
-    T4 --> T5
-    T5 --> P1
+    T4 --> PWA3
+    PWA3 -- "Set 1 Logged" --> End1
+
+    style Start1 fill:#d4edda,stroke:#28a745,stroke-width:3px,color:#155724
+    style End1 fill:#f8d7da,stroke:#dc3545,stroke-width:4px,color:#721c24
 ```
 
-### Scenario 2: Load Too Easy (Split: In-Session Stepper Bump + Future Session Overload)
-Horizontal flow showing how the PT adjusts load on the fly when Client B reports low RPE on Set 1, bumping remaining sets today while flagging progression for next week before rotating to Client C.
+### Scenario 2: Load Too Easy (Physical Pin Adjustment, In-Session Bump & Future Overload)
+BPMN swimlane modeling verbal dialogue on the gym floor, physical cable machine pin adjustments, and split in-session vs. future overload controls.
 
 ```mermaid
 graph LR
-    subgraph TrainerLane["PT Orchestration Lane"]
-        T21["1. Focus Card: Lat Pulldown<br/>Load: 50kg | Series: Set 1/3 | Rest: 60s | Reps: 10"]
-        T22["3. Split Decision & Action:<br/>• Tap '[ + Set Load Today ]' -> Bump Sets 2-3 to 55kg<br/>• Tap '[ 📈 Too Easy / Progression Next Session ]'"]
-        T23["4. Switch Tab to Client C:<br/>Mentor Client C while Client B pulls 55kg"]
+    subgraph PWALane ["📱 LibrePT PWA Clipboard Lane"]
+        PWA21["Render Focus Card: Lat Pulldown | 50kg | Set 1/3 | 60s Rest | 10 Reps"]
+        PWA22["Immediately update active card load to 55kg for Sets 2-3"]
+        PWA23["Attach Progression Flag for next session overload"]
+        End2(("End"))
     end
 
-    subgraph ClientBLane["Client B Physical Gym Floor"]
-        CB21["2. Completes Set 1 easily:<br/>Reports 'Felt light, RPE ~6'"]
-        CB22["5. Performs Sets 2 & 3 at adjusted 55kg load"]
+    subgraph TrainerLane ["🏋️ Personal Trainer Orchestration Lane"]
+        T21["Verbal & Tactile Check:<br/>Inspect posture -> Confirm low fatigue (RPE ~6)"]
+        T22["Physical & Digital Action:<br/>• Move machine weight stack pin from 50kg to 55kg<br/>• Tap UI Stepper '[ + Set Load Today ]' (+5kg)<br/>• Tap '[ 📈 Progression Next Session ]'"]
+        T23["Walk across gym floor to mentor Client C"]
     end
 
-    subgraph PWALane["OpenPT PWA Clipboard"]
-        P21["Persists In-Session Load Modification (55kg)<br/>Queues Next-Session Overload Flag"]
+    subgraph ClientLane ["💪 Client B Physical Gym Floor Lane"]
+        Start2(("Start"))
+        CB21["Pulls Set 1 explosively -> Tells PT: 'That felt way too light!'"]
+        CB22["Performs Sets 2 & 3 at physically & digitally adjusted 55kg target"]
     end
 
-    T21 --> CB21
-    CB21 --> T22
-    T22 --> T23
-    T23 --> CB22
-    CB22 --> P21
+    Start2 -- "Set 1 Complete" --> PWA21
+    PWA21 --> CB21
+    CB21 --> T21
+    T21 --> T22
+    T22 --> PWA22
+    T22 --> PWA23
+    PWA22 --> CB22
+    PWA23 --> T23
+    T23 -- "Load Bumped & Queued" --> End2
+
+    style Start2 fill:#d4edda,stroke:#28a745,stroke-width:3px,color:#155724
+    style End2 fill:#f8d7da,stroke:#dc3545,stroke-width:4px,color:#721c24
 ```
 
-### Scenario 3: Rep Failure (Intended AMRAP/Max-Reps vs. Unintended Premature Failure)
-Horizontal flow modeling how the PT evaluates failure on Client B's final set—distinguishing intentional AMRAP sets from premature technique breakdown.
+### Scenario 3: Rep Failure (Physical Spotting: Intended AMRAP vs Premature Form Breakdown)
+BPMN swimlane modeling physical barbell spotting, gateway decision logic distinguishing intended AMRAP effort from premature form breakdown, and volume PR tracking.
 
 ```mermaid
 graph LR
-    subgraph TrainerLane["PT Orchestration Lane"]
-        T31["1. Focus Card: Barbell Back Squat<br/>Load: 100kg | Series: Set 3/3 | Rest: 120s | Reps: AMRAP / 8"]
-        T32{"3. Evaluate Failure Type"}
-        T3Intended["Intended AMRAP Failure:<br/>Input actual reps hit -> Tap '[ ✓ Target Met ]'"]
-        T3Unintended["Unintended Premature Failure:<br/>Single Click '[ ⬇ Step Back ]'"]
+    subgraph PWALane ["📱 LibrePT PWA Clipboard Lane"]
+        PWA31["Render Focus Card: Barbell Back Squat | 100kg | Set 3/3 | 120s Rest | AMRAP / 8"]
+        PWA32["Log AMRAP Reps & Evaluate Volume PR"]
+        PWA33["Flag Downward Load Adjustment Card for Back-Office"]
+        End3A(("End"))
+        End3B(("End"))
     end
 
-    subgraph ClientBLane["Client B Physical Gym Floor"]
-        CB31["2. Reaches muscle failure at Rep 7"]
+    subgraph TrainerLane ["🏋️ Personal Trainer Orchestration Lane"]
+        T31["Stand behind client spotting Squat bar closely"]
+        GW3{"Evaluate Physical Execution & Safety"}
+        T3Intended["Intended AMRAP Effort:<br/>Encourage rep 8 lockout -> Assist racking bar safely<br/>Input actual reps hit -> Tap '[ ✓ Target Met ]'"]
+        T3Unintended["Unintended Technique Breakdown:<br/>Physically step in at rep 5 to arrest spinal rounding/knee cave<br/>Assist bar rack -> Check client fatigue -> Tap '[ ⬇ Step Back ]'"]
     end
 
-    subgraph PWALane["OpenPT PWA Clipboard"]
-        P31["Persist Volume PR / AMRAP Log"]
-        P32["Queue Regression Flag for Back-Office"]
+    subgraph ClientLane ["💪 Client B Physical Gym Floor Lane"]
+        Start3(("Start"))
+        CB31["Performs heavy Squats to muscular failure under PT spot"]
     end
 
+    Start3 -- "Final Set Active" --> PWA31
+    PWA31 --> T31
     T31 --> CB31
-    CB31 --> T32
-    T32 -- "AMRAP / Max Effort" --> T3Intended
-    T3Intended --> P31
-    T32 -- "Premature Fatigue / Breakdown" --> T3Unintended
-    T3Unintended --> P32
+    CB31 --> GW3
+    GW3 -- "Safe AMRAP Grinding Effort" --> T3Intended
+    T3Intended --> PWA32
+    PWA32 -- "AMRAP PR Saved" --> End3A
+    GW3 -- "Premature Form Breakdown / Risk" --> T3Unintended
+    T3Unintended --> PWA33
+    PWA33 -- "Regression Queued" --> End3B
+
+    style Start3 fill:#d4edda,stroke:#28a745,stroke-width:3px,color:#155724
+    style End3A fill:#f8d7da,stroke:#dc3545,stroke-width:4px,color:#721c24
+    style End3B fill:#f8d7da,stroke:#dc3545,stroke-width:4px,color:#721c24
 ```
 
-### Scenario 4: Acute Pain / Injury Report (One-Tap Flag, Local Voice Note & Placeholder Pivot)
-Horizontal flow modeling how the PT immediately flags pain on Client B's card, records a privacy-protected local voice note, and pivots Client B to a generic placeholder flow before rotating to Client C.
+### Scenario 4: Acute Pain / Injury Report (Physical Intervention, Clinical Audio Note & Rehab Pivot)
+BPMN swimlane modeling physical injury intervention, tactile assessment, clinical voice note recording, and setting up rehab equipment on the floor.
 
 ```mermaid
 graph LR
-    subgraph TrainerLane["PT Orchestration Lane"]
-        T41["1. Focus Card: Romanian Deadlift<br/>Load: 90kg | Series: Set 2/3 | Rest: 90s | Reps: 8"]
-        T42["3. Single Click: Tap '[ ⚠️ Pain / Injury Flag ]'<br/>Hold Mic Icon -> Record local voice note"]
-        T43["4. One-Tap Pivot:<br/>Inject '[ Mobility & Rehab Placeholder Card ]'<br/>Switch context to Client C"]
+    subgraph PWALane ["📱 LibrePT PWA Clipboard Lane"]
+        PWA41["Render Focus Card: Romanian Deadlift | 90kg | Set 2/3 | 90s Rest | 8 Reps"]
+        PWA42["Highlight Exercise Red | Encrypt Local Audio File & Map Metadata"]
+        PWA43["Wipe Active Routine & Inject '[ Mobility & Rehab Placeholder Card ]'"]
+        End4(("End"))
     end
 
-    subgraph ClientBLane["Client B Physical Gym Floor"]
-        CB41["2. Stops rep 3 reporting acute knee/hamstring strain"]
-        CB42["5. Performs safe mobility flow autonomously"]
+    subgraph TrainerLane ["🏋️ Personal Trainer Orchestration Lane"]
+        T41["Immediate Physical Safety Check:<br/>Seat client safely on box -> Assess pull location & sharpness"]
+        T42["Tap '[ ⚠️ Pain / Injury Flag ]' & hold Mic Icon -> Dictate:<br/>'Left hamstring strain near insertion on eccentric rep 3 @ 90kg'"]
+        T43["Setup Rehab Floor Station:<br/>Tap '[ 🔄 Pivot Plan ]' -> Fetch foam roller & resistance band<br/>Demonstrate gentle isometric drill -> Switch tab to Client C"]
     end
 
-    subgraph PWALane["OpenPT PWA Clipboard"]
-        P41["Highlights Movement Red | Encrypts Local Audio File<br/>Auto-Maps Metadata (client_id, exercise_id)"]
+    subgraph ClientLane ["💪 Client B Physical Gym Floor Lane"]
+        Start4(("Start"))
+        CB41["Drops bar safely at rep 3 holding back of left hamstring"]
+        CB42["Performs prescribed gentle mobility & rehab flow safely"]
     end
 
-    T41 --> CB41
-    CB41 --> T42
-    T42 --> P41
+    Start4 -- "Set 2 Active" --> PWA41
+    PWA41 --> CB41
+    CB41 --> T41
+    T41 --> T42
+    T42 --> PWA42
     T42 --> T43
-    T43 --> CB42
+    T43 --> PWA43
+    PWA43 --> CB42
+    CB42 -- "Injury Logged & Pivoted" --> End4
+
+    style Start4 fill:#d4edda,stroke:#28a745,stroke-width:3px,color:#155724
+    style End4 fill:#f8d7da,stroke:#dc3545,stroke-width:4px,color:#721c24
 ```
 
 ---
