@@ -464,6 +464,12 @@ function init() {
 
   if (!state.lang) state.lang = 'en';
 
+  // Ensure new bookings/sessions mock data is loaded
+  if (!state.bookings || state.bookings.length < DEFAULT_SESSIONS.length) {
+    state.bookings = [...DEFAULT_SESSIONS];
+    saveToLocalStorage();
+  }
+
   // Set up Event Listeners
   setupNavigation();
   setupClientForms();
@@ -3017,10 +3023,8 @@ function setupCalendarBookings() {
       syncBtn.disabled = true;
       
       setTimeout(() => {
-        // Load default sessions if empty
-        if (!state.bookings || state.bookings.length === 0) {
-          state.bookings = [...DEFAULT_SESSIONS];
-        }
+        // Load/Reset default sessions mock feed
+        state.bookings = [...DEFAULT_SESSIONS];
         
         saveToLocalStorage();
         renderSessions();
