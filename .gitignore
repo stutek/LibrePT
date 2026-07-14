@@ -12,6 +12,8 @@ Thumbs.db
 .gemini/
 .agents/
 *.log
+__pycache__/
+*.pyc
 
 # Python Environments
 .venv/
