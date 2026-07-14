@@ -267,3 +267,22 @@ export const DEFAULT_PLAN_UPDATES = [
     resolved: false
   }
 ];
+
+export const DEFAULT_BOOKINGS = [
+  {
+    id: 'b-1',
+    time: '10:00 AM',
+    title: 'Group Strength & Conditioning',
+    participants: ['client-jane-doe', 'client-john-smith'],
+    routineId: 'routine-upper-a',
+    maxCapacity: 4
+  },
+  {
+    id: 'b-2',
+    time: '02:00 PM',
+    title: 'Individual Focus Session',
+    participants: ['client-sarah-jenkins'],
+    routineId: 'routine-legs-core',
+    maxCapacity: 1
+  }
+];

@@ -64,6 +64,19 @@
 
       <hr class="view-divider">
 
+      <!-- Section B: Today's Google Calendar Bookings -->
+      <div class="section-title" style="margin-top: 24px;">
+        <h3 id="calendar-title"><i class="fa-solid fa-calendar-days text-cyan mr-1"></i> Today's Calendar Bookings</h3>
+        <button id="btn-sync-calendar" class="btn secondary-btn btn-xs" style="margin-left: auto; gap: 6px; display: inline-flex; align-items: center;">
+          <i class="fa-solid fa-rotate"></i> <span id="btn-sync-calendar-text">Sync Calendar</span>
+        </button>
+      </div>
+      <div id="calendar-bookings-list" class="stack-list mb-6">
+        <!-- Injected via JS -->
+      </div>
+
+      <hr class="view-divider">
+
       <div class="view-header">
         <h2>Client Directory</h2>
         <button id="btn-add-client" class="btn primary-btn btn-sm">

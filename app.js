@@ -1,5 +1,5 @@
 // app.js - LibrePT Application Controller Logic
-import { DEFAULT_EXERCISES, DEFAULT_CLIENTS, DEFAULT_ROUTINES, DEFAULT_HISTORY, DEFAULT_PLAN_UPDATES } from './mockData.js';
+import { DEFAULT_EXERCISES, DEFAULT_CLIENTS, DEFAULT_ROUTINES, DEFAULT_HISTORY, DEFAULT_PLAN_UPDATES, DEFAULT_BOOKINGS } from './mockData.js';
 
 // --- TRANSLATION / i18n SYSTEM ---
 const TRANSLATIONS = {
@@ -109,7 +109,14 @@ const TRANSLATIONS = {
     btn_back: "Back",
     routines_desc: "Select or edit workout routines. Launch them with individual or group sessions.",
     filter_all: "All",
-    history_desc: "Log of all completed sessions across all clients."
+    history_desc: "Log of all completed sessions across all clients.",
+    todays_bookings: "Today's Calendar Bookings",
+    btn_sync_calendar: "Sync Calendar",
+    booking_spots: "spots booked",
+    btn_launch_clipboard_short: "Launch Clipboard",
+    syncing_calendar: "Syncing...",
+    calendar_synced: "Calendar synchronized successfully!",
+    no_bookings_today: "No bookings found for today."
   },
   sl: {
     logo_title: "LibrePT",
@@ -217,7 +224,14 @@ const TRANSLATIONS = {
     btn_back: "Nazaj",
     routines_desc: "Izberite ali uredite vadbene rutine. Zaženite jih za posameznike ali skupine.",
     filter_all: "Vse",
-    history_desc: "Dnevnik vseh zaključenih vadb za vse stranke."
+    history_desc: "Dnevnik vseh zaključenih vadb za vse stranke.",
+    todays_bookings: "Današnje rezervacije koledarja",
+    btn_sync_calendar: "Sinhroniziraj",
+    booking_spots: "mest zasedenih",
+    btn_launch_clipboard_short: "Začni sledenje",
+    syncing_calendar: "Sinhronizacija...",
+    calendar_synced: "Koledar je bil uspešno sinhroniziran!",
+    no_bookings_today: "Za danes ni najdenih rezervacij."
   }
 };
 
@@ -249,6 +263,8 @@ function applyTranslations(lang = state.lang || 'en') {
     '#view-clients .section-title h3': 'pending_adjustments',
     '#view-clients .view-header h2': 'clients_title',
     '#btn-add-client': 'btn_add_client',
+    '#calendar-title': 'todays_bookings',
+    '#btn-sync-calendar-text': 'btn_sync_calendar',
     
     // Client Detail view
     '#view-client-detail .client-profile-card h4:nth-of-type(1)': 'notes_injuries',
@@ -368,6 +384,7 @@ let state = {
   routines: [],
   history: [],
   planUpdates: [],
+  bookings: [],
   lang: 'en'
 };
 
@@ -420,6 +437,7 @@ function init() {
   setupActiveSession();
   setupRestTimer();
   setupBackupRestore();
+  setupCalendarBookings();
 
   // Set up language switcher listener
   const switcher = document.getElementById('lang-switcher');
@@ -436,6 +454,7 @@ function init() {
       renderExercisesList();
       renderGlobalHistory();
       renderPendingPlanAdjustments();
+      renderTodayBookings();
       populateDropdownSelectors();
       if (activeSession) {
         renderActiveGroupBoard();
@@ -452,6 +471,7 @@ function init() {
   renderExercisesList();
   renderGlobalHistory();
   renderPendingPlanAdjustments();
+  renderTodayBookings();
   populateDropdownSelectors();
 
   // Check if there was an active session saved (session recovery)
@@ -465,6 +485,7 @@ function seedMockData() {
   state.routines = [...DEFAULT_ROUTINES];
   state.history = [...DEFAULT_HISTORY];
   state.planUpdates = [...DEFAULT_PLAN_UPDATES];
+  state.bookings = [...DEFAULT_BOOKINGS];
   state.lang = currentLang;
   saveToLocalStorage();
 }
@@ -1374,12 +1395,17 @@ function setupWorkoutSetup() {
   });
 }
 
-function openWorkoutSetupModal(preselectedClientId = null, preselectedRoutineId = null) {
+function openWorkoutSetupModal(preselectedClientId = null, preselectedRoutineId = null, preselectedBookingId = null) {
   const dialog = document.getElementById('dialog-workout-setup');
   const participantsList = document.getElementById('setup-participants-assignment-list');
   
   if (!participantsList) return;
   participantsList.innerHTML = '';
+  
+  let targetBooking = null;
+  if (preselectedBookingId && state.bookings) {
+    targetBooking = state.bookings.find(b => b.id === preselectedBookingId);
+  }
   
   state.clients.sort((a,b) => a.name.localeCompare(b.name)).forEach(client => {
     const row = document.createElement('div');
@@ -1407,7 +1433,9 @@ function openWorkoutSetupModal(preselectedClientId = null, preselectedRoutineId 
     cb.style.height = '18px';
     cb.style.cursor = 'pointer';
     
-    if (preselectedClientId === client.id) {
+    if (targetBooking) {
+      cb.checked = targetBooking.participants.includes(client.id);
+    } else if (preselectedClientId === client.id) {
       cb.checked = true;
     } else if (!preselectedClientId && client.id !== 'client-sarah-jenkins') {
       // Default to checking first couple clients if none specified (like Jane and John)
@@ -1433,7 +1461,7 @@ function openWorkoutSetupModal(preselectedClientId = null, preselectedRoutineId 
     select.style.width = '160px';
     select.style.height = '32px';
     
-    select.innerHTML = '<option value="" disabled>Select Routine</option>';
+    select.innerHTML = `<option value="" disabled>${t('select_exercise')}</option>`;
     state.routines.forEach(r => {
       const opt = document.createElement('option');
       opt.value = r.id;
@@ -1442,7 +1470,9 @@ function openWorkoutSetupModal(preselectedClientId = null, preselectedRoutineId 
     });
     
     // Attempt default selections
-    if (preselectedRoutineId && preselectedClientId === client.id) {
+    if (targetBooking && targetBooking.participants.includes(client.id)) {
+      select.value = targetBooking.routineId;
+    } else if (preselectedRoutineId && preselectedClientId === client.id) {
       select.value = preselectedRoutineId;
     } else if (client.id === 'client-jane-doe') {
       select.value = 'routine-upper-a';
@@ -2373,6 +2403,110 @@ function escapeHTML(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+}
+
+// --- GOOGLE CALENDAR APPOINTMENT BOOKINGS INTEGRATION (UC3 & UC4) ---
+function setupCalendarBookings() {
+  const syncBtn = document.getElementById('btn-sync-calendar');
+  if (syncBtn) {
+    syncBtn.addEventListener('click', () => {
+      // Animate rotation to simulate active query sync
+      const icon = syncBtn.querySelector('i');
+      if (icon) icon.classList.add('fa-spin');
+      
+      const btnText = document.getElementById('btn-sync-calendar-text');
+      if (btnText) btnText.textContent = t('syncing_calendar');
+      
+      syncBtn.disabled = true;
+      
+      setTimeout(() => {
+        // Simulate query to Google Calendar Appointment Schedules
+        // If there are no bookings, we seed them.
+        if (!state.bookings || state.bookings.length === 0) {
+          state.bookings = [...DEFAULT_BOOKINGS];
+        }
+        
+        saveToLocalStorage();
+        renderTodayBookings();
+        
+        if (icon) icon.classList.remove('fa-spin');
+        if (btnText) btnText.textContent = t('btn_sync_calendar');
+        syncBtn.disabled = false;
+        
+        alert(t('calendar_synced'));
+      }, 1200);
+    });
+  }
+}
+
+function renderTodayBookings() {
+  const container = document.getElementById('calendar-bookings-list');
+  if (!container) return;
+  
+  container.innerHTML = '';
+  
+  const bookings = state.bookings || [];
+  if (bookings.length === 0) {
+    container.innerHTML = `
+      <div class="card glassmorphic text-center text-muted" style="padding: 24px;">
+        <i class="fa-regular fa-calendar-xmark" style="font-size: 24px; margin-bottom: 8px; color: var(--text-muted);"></i>
+        <p style="font-size: 13px;">${t('no_bookings_today')}</p>
+      </div>
+    `;
+    return;
+  }
+  
+  bookings.forEach(b => {
+    const card = document.createElement('div');
+    card.className = 'booking-card card glassmorphic';
+    card.style.display = 'flex';
+    card.style.justifyContent = 'space-between';
+    card.style.alignItems = 'center';
+    card.style.gap = '12px';
+    card.style.padding = '14px';
+    card.style.marginBottom = '12px';
+    card.style.borderLeft = '4px solid var(--accent-cyan)';
+    
+    const info = document.createElement('div');
+    info.style.flex = '1';
+    
+    // Resolve participants
+    const clients = b.participants.map(pId => state.clients.find(c => c.id === pId)).filter(Boolean);
+    const clientNamesStr = clients.map(c => c.name).join(', ');
+    
+    // Find routine name
+    const routine = state.routines.find(r => r.id === b.routineId);
+    const routineName = routine ? routine.name : 'Custom Routine';
+    
+    info.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px;">
+        <span class="badge badge-cyan" style="font-size: 10px; padding: 2px 6px; font-weight: 700; font-family: monospace;">${escapeHTML(b.time)}</span>
+        <strong style="color: var(--text-color); font-size: 13px;">${escapeHTML(b.title)}</strong>
+      </div>
+      <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">
+        <i class="fa-solid fa-users" style="margin-right: 4px; font-size: 10px;"></i> ${escapeHTML(clientNamesStr)} 
+        <span style="margin-left: 4px; color: var(--accent-cyan); font-weight: 600;">(${clients.length}/${b.maxCapacity} ${t('booking_spots')})</span>
+      </div>
+      <div style="font-size: 11px; color: var(--text-muted);">
+        <i class="fa-solid fa-clipboard-list" style="margin-right: 4px; font-size: 10px;"></i> Program: <span class="font-semibold">${escapeHTML(routineName)}</span>
+      </div>
+    `;
+    
+    const btn = document.createElement('button');
+    btn.className = 'btn primary-btn btn-xs';
+    btn.style.display = 'flex';
+    btn.style.alignItems = 'center';
+    btn.style.gap = '6px';
+    btn.innerHTML = `<i class="fa-solid fa-circle-play"></i> ${t('btn_launch_clipboard_short')}`;
+    
+    btn.addEventListener('click', () => {
+      openWorkoutSetupModal(null, null, b.id);
+    });
+    
+    card.appendChild(info);
+    card.appendChild(btn);
+    container.appendChild(card);
+  });
 }
 
 // Register Service Worker for offline PWA support
