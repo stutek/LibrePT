@@ -131,6 +131,8 @@ const TRANSLATIONS = {
     program_not_defined: "Program Not Defined",
     today: "Today",
     tomorrow: "Tomorrow",
+    yesterday: "Yesterday",
+    upcoming: "Upcoming",
     undefined: "Undefined",
     combo_round_title: "Linked Combo Round"
   },
@@ -262,6 +264,8 @@ const TRANSLATIONS = {
     program_not_defined: "Program ni določen",
     today: "Danes",
     tomorrow: "Jutri",
+    yesterday: "Včeraj",
+    upcoming: "Prihodnje",
     undefined: "Nedoločen",
     combo_round_title: "Povezana kombinirana serija"
   }
@@ -349,6 +353,8 @@ function applyTranslations(lang = state.lang || 'en') {
     '#label-up-next': 'up_next_label',
     '#label-sessions-today': 'today',
     '#label-sessions-tomorrow': 'tomorrow',
+    '#label-sessions-yesterday': 'yesterday',
+    '#label-sessions-upcoming': 'upcoming',
     
     '#dialog-backup .modal-header h3': 'backup_center',
     '#dialog-backup .dialog-desc': 'backup_desc',
@@ -3223,12 +3229,17 @@ function setupCalendarBookings() {
 }
 
 function renderSessions() {
+  const yesterdayContainer = document.getElementById('yesterday-sessions-list');
   const todayContainer = document.getElementById('today-sessions-list');
   const tomorrowContainer = document.getElementById('tomorrow-sessions-list');
+  const upcomingContainer = document.getElementById('upcoming-sessions-list');
+  
   if (!todayContainer || !tomorrowContainer) return;
   
+  if (yesterdayContainer) yesterdayContainer.innerHTML = '';
   todayContainer.innerHTML = '';
   tomorrowContainer.innerHTML = '';
+  if (upcomingContainer) upcomingContainer.innerHTML = '';
   
   const bookings = state.bookings || [];
   
@@ -3305,8 +3316,18 @@ function renderSessions() {
     colContainer.appendChild(card);
   };
 
+  const yesterdaySessions = bookings.filter(b => b.day === 'yesterday');
   const todaySessions = bookings.filter(b => b.day === 'today');
   const tomorrowSessions = bookings.filter(b => b.day === 'tomorrow');
+  const upcomingSessions = bookings.filter(b => b.day === 'upcoming');
+
+  if (yesterdayContainer) {
+    if (yesterdaySessions.length === 0) {
+      yesterdayContainer.innerHTML = `<div class="card glassmorphic text-center text-muted" style="padding: 16px; font-size: 12px;">No past sessions.</div>`;
+    } else {
+      yesterdaySessions.forEach(s => renderSessionCard(s, yesterdayContainer));
+    }
+  }
 
   if (todaySessions.length === 0) {
     todayContainer.innerHTML = `
@@ -3327,6 +3348,22 @@ function renderSessions() {
   } else {
     tomorrowSessions.forEach(s => renderSessionCard(s, tomorrowContainer));
   }
+
+  if (upcomingContainer) {
+    if (upcomingSessions.length === 0) {
+      upcomingContainer.innerHTML = `<div class="card glassmorphic text-center text-muted" style="padding: 16px; font-size: 12px;">No upcoming sessions.</div>`;
+    } else {
+      upcomingSessions.forEach(s => renderSessionCard(s, upcomingContainer));
+    }
+  }
+
+  // Auto-scroll Today's column in center on load
+  setTimeout(() => {
+    const todayCol = document.getElementById('today-sessions-column');
+    if (todayCol) {
+      todayCol.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'center' });
+    }
+  }, 100);
 }
 function showPastExerciseInFocus(item) {
   // Deselect all active cards visually

@@ -285,77 +285,125 @@ export const DEFAULT_PLAN_UPDATES = [
   }
 ];
 
-export const DEFAULT_SESSIONS = [
-  {
-    id: 'b-1',
-    time: '10:00 AM - 11:30 AM',
-    title: 'Group Strength & Conditioning',
-    participants: ['client-jane-doe', 'client-john-smith'],
-    routineId: 'routine-upper-a',
-    maxCapacity: 4,
-    day: 'today'
-  },
-  {
-    id: 'b-2',
-    time: '10:30 AM - 11:30 AM',
-    title: 'Individual Focus Session',
-    participants: ['client-sarah-jenkins'],
-    routineId: 'routine-legs-core',
-    maxCapacity: 1,
-    day: 'today'
-  },
-  {
-    id: 'b-3',
-    time: '02:00 PM - 03:00 PM',
-    title: 'Express Core HIIT',
-    participants: ['client-sarah-jenkins'],
-    routineId: '',
-    maxCapacity: 2,
-    day: 'today'
-  },
-  {
-    id: 'b-3-2',
-    time: '04:00 PM - 05:00 PM',
-    title: 'Mobility Flow',
-    participants: ['client-jane-doe'],
-    routineId: 'routine-triple-combo',
-    maxCapacity: 2,
-    day: 'today'
-  },
-  {
-    id: 'b-4',
-    time: '09:00 AM - 10:00 AM',
-    title: 'Morning Conditioning',
-    participants: ['client-jane-doe'],
-    routineId: '',
-    maxCapacity: 3,
-    day: 'tomorrow'
-  },
-  {
-    id: 'b-5',
-    time: '09:30 AM - 11:00 AM',
-    title: 'Tomorrow Strength',
-    participants: ['client-john-smith'],
-    routineId: 'routine-upper-a',
-    maxCapacity: 4,
-    day: 'tomorrow'
-  },
-  {
-    id: 'b-6',
-    time: '11:30 AM - 12:30 PM',
-    title: 'Lunch Blast Workout',
-    participants: ['client-sarah-jenkins'],
-    routineId: '',
-    maxCapacity: 3,
-    day: 'tomorrow'
-  },
-  {
-    id: 'b-7',
-    time: '05:30 PM - 06:30 PM',
-    title: 'Post-Work Cardio',
-    participants: ['client-john-smith'],
-    routineId: 'routine-legs-core',
-    maxCapacity: 2,
-    day: 'tomorrow'
-  }
-];
+export const DEFAULT_SESSIONS = (() => {
+  const now = new Date();
+  const currentHour = now.getHours();
+  
+  const formatHour = (h) => {
+    const rawH = (h + 24) % 24;
+    const hr = rawH % 12 || 12;
+    const ampm = rawH >= 12 ? 'PM' : 'AM';
+    return `${hr.toString().padStart(2, '0')}:00 ${ampm}`;
+  };
+
+  return [
+    {
+      id: 'b-1',
+      time: `${formatHour(currentHour - 1)} - ${formatHour(currentHour + 1)}`,
+      title: 'Group Strength & Conditioning',
+      participants: ['client-jane-doe', 'client-john-smith'],
+      routineId: 'routine-upper-a',
+      maxCapacity: 4,
+      day: 'today'
+    },
+    {
+      id: 'b-2',
+      time: `${formatHour(currentHour)} - ${formatHour(currentHour + 2)}`,
+      title: 'Individual Focus Session',
+      participants: ['client-sarah-jenkins'],
+      routineId: 'routine-legs-core',
+      maxCapacity: 1,
+      day: 'today'
+    },
+    {
+      id: 'b-3',
+      time: `${formatHour(currentHour + 2)} - ${formatHour(currentHour + 3)}`,
+      title: 'Express Core HIIT',
+      participants: ['client-sarah-jenkins'],
+      routineId: '',
+      maxCapacity: 2,
+      day: 'today'
+    },
+    {
+      id: 'b-3-2',
+      time: `${formatHour(currentHour + 3)} - ${formatHour(currentHour + 4)}`,
+      title: 'Mobility Flow',
+      participants: ['client-jane-doe'],
+      routineId: 'routine-triple-combo',
+      maxCapacity: 2,
+      day: 'today'
+    },
+    {
+      id: 'b-4',
+      time: '09:00 AM - 10:00 AM',
+      title: 'Morning Conditioning',
+      participants: ['client-jane-doe'],
+      routineId: '',
+      maxCapacity: 3,
+      day: 'tomorrow'
+    },
+    {
+      id: 'b-5',
+      time: '10:30 AM - 11:30 AM',
+      title: 'Tomorrow Strength',
+      participants: ['client-john-smith'],
+      routineId: 'routine-upper-a',
+      maxCapacity: 4,
+      day: 'tomorrow'
+    },
+    {
+      id: 'b-6',
+      time: '11:30 AM - 12:30 PM',
+      title: 'Lunch Blast Workout',
+      participants: ['client-sarah-jenkins'],
+      routineId: '',
+      maxCapacity: 3,
+      day: 'tomorrow'
+    },
+    {
+      id: 'b-7',
+      time: '05:30 PM - 06:30 PM',
+      title: 'Post-Work Cardio',
+      participants: ['client-john-smith'],
+      routineId: 'routine-legs-core',
+      maxCapacity: 2,
+      day: 'tomorrow'
+    },
+    {
+      id: 'b-yesterday-1',
+      time: '09:00 AM - 10:30 AM',
+      title: 'Yesterday Core',
+      participants: ['client-jane-doe'],
+      routineId: 'routine-upper-a',
+      maxCapacity: 2,
+      day: 'yesterday'
+    },
+    {
+      id: 'b-yesterday-2',
+      time: '04:00 PM - 05:00 PM',
+      title: 'Yesterday Mobility',
+      participants: ['client-john-smith'],
+      routineId: 'routine-legs-core',
+      maxCapacity: 3,
+      day: 'yesterday'
+    },
+    {
+      id: 'b-upcoming-1',
+      time: '08:00 AM - 09:30 AM',
+      title: 'Future Strength',
+      participants: ['client-sarah-jenkins'],
+      routineId: 'routine-legs-core',
+      maxCapacity: 2,
+      day: 'upcoming'
+    },
+    {
+      id: 'b-upcoming-2',
+      time: '10:00 AM - 11:00 AM',
+      title: 'Future HIIT Conditioning',
+      participants: ['client-jane-doe', 'client-john-smith'],
+      routineId: 'routine-upper-a',
+      maxCapacity: 4,
+      day: 'upcoming'
+    }
+  ];
+})();
