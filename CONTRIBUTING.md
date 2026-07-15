@@ -72,9 +72,26 @@ Run the full suite before opening a pull request:
 .venv/bin/python -m pdb pipeline.py   # step-by-step
 ```
 
+### Verifying swipe gestures by hand
+
+The session day deck is scrolled with **touch**, so **a mouse drag will not swipe it** — that is standard browser behaviour, not a bug: dragging never scrolls an `overflow-x` container. To exercise swipes in a desktop browser:
+
+| Method | How |
+| :--- | :--- |
+| **Chrome/Edge DevTools** (best) | `F12`, then toggle the device toolbar (`Ctrl+Shift+M` / `Cmd+Shift+M`). Touch emulation turns mouse drags into real swipes. |
+| **Firefox** | `F12`, then Responsive Design Mode (`Ctrl+Shift+M`) and enable the touch simulation button. |
+| **Trackpad** | Two-finger horizontal swipe works on the desktop site with no emulation. |
+| **Mouse wheel** | Hold `Shift` and scroll to pan horizontally. |
+| **Real device** | Serve over your LAN (`python3 -m http.server 8081 --bind 0.0.0.0`) and open the page from your phone. |
+
+The deck's scrollbar is hidden by design, so the title-bar arrows are the intended affordance for mouse-only desktop users.
+
+Swipes are also covered automatically by `test_touch_swipe_between_days`.
+
 **Testing notes:**
 
 - The browser suite serves the repository root on port 8081 and reuses an already-running server if one is bound. A stale server left over from an earlier session will silently serve outdated files — kill it if results look impossible.
+- CDP's `Input.synthesizeScrollGesture` does **not** scroll overflow containers in this headless setup — it silently does nothing, which reads as a broken swipe. Build gestures from raw `Input.dispatchTouchEvent` sequences instead (see `_touch_swipe`), and calibrate against a plain control deck before concluding the app is at fault.
 - The Service Worker serves same-origin app code network-first, so a normal reload picks up your edits while the app stays fully usable offline. If the server is down or unreachable, the SW falls back to its cache and you will be looking at the last build it saw — check the server before trusting what you see.
 - Bump `CACHE_NAME` in `sw.js` when releasing: `activate` purges every cache that does not match it.
 
