@@ -114,6 +114,8 @@ Rename **"Launch Clipboard"** / **"Začni sledenje"** to something closer to **"
 ### 5.1 Tabbed client view
 Clicking an individual client opens a **tabbed** view (today it opens a single flat profile screen, `view-client-detail`):
 
+NOTE: keep the goals and health & injury notes as is, remove "log workout session" button.
+
 | Tab | Content |
 | :--- | :--- |
 | **1 — Sessions** | The sessions this person attended. |
