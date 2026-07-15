@@ -463,8 +463,9 @@ function init() {
 
   if (!state.lang) state.lang = 'en';
 
-  // Ensure new bookings/sessions mock data is loaded
-  if (!state.bookings || state.bookings.length < DEFAULT_SESSIONS.length) {
+  // Ensure new bookings/sessions mock data is loaded and has the modern today/tomorrow schema
+  const hasTodayOrTomorrow = (state.bookings || []).some(b => b.day === 'today' || b.day === 'tomorrow');
+  if (!state.bookings || state.bookings.length < DEFAULT_SESSIONS.length || !hasTodayOrTomorrow) {
     state.bookings = [...DEFAULT_SESSIONS];
     saveToLocalStorage();
   }
