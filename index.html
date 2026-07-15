@@ -287,17 +287,23 @@
 
   <!-- FULL SCREEN OVERLAY: Active Workout Clipboard Dashboard -->
   <div id="active-session-overlay" class="active-session-overlay hidden">
-    <div class="session-overlay-header">
-      <button id="btn-collapse-session" class="collapse-btn" aria-label="Minimize Active Session">
-        <i class="fa-solid fa-chevron-down"></i>
-      </button>
-      <div class="session-title-block">
-        <h3 id="overlay-session-title">Live Tracking clipboard</h3>
+    <header class="app-header session-overlay-header" style="border-bottom: 1px solid var(--border-color); width: 100%; box-sizing: border-box;">
+      <div class="header-container" style="display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 16px; box-sizing: border-box;">
+        <div class="logo-area" id="logo-area-clipboard" style="cursor: pointer;">
+          <i class="fa-solid fa-dumbbell logo-icon"></i>
+          <h1>LibrePT</h1>
+        </div>
+        <div class="session-timer-block" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <i class="fa-solid fa-stopwatch text-cyan"></i>
+          <span id="overlay-session-duration" style="font-weight: 700; font-family: monospace; font-size: 15px; color: var(--accent-cyan);">00:00</span>
+        </div>
+        <div class="header-actions">
+          <button id="btn-collapse-session" class="icon-btn" style="background: rgba(255,255,255,0.05);" aria-label="Minimize Active Session">
+            <i class="fa-solid fa-chevron-down"></i>
+          </button>
+        </div>
       </div>
-      <div class="session-timer-block">
-        <span id="overlay-session-duration">00:00</span>
-      </div>
-    </div>
+    </header>
 
     <!-- Client selector tabs for sub-second plan switching -->
     <div id="active-session-client-tabs" class="client-tabs-bar">
@@ -313,18 +319,28 @@
       </div>
 
       <!-- Current Exercise Paging Navigator -->
-      <div class="active-exercise-navigator card glassmorphic">
-        <button type="button" id="btn-prev-exercise" class="nav-arrow-btn" aria-label="Previous Exercise">
-          <i class="fa-solid fa-chevron-left"></i>
-        </button>
-        <div class="current-exercise-display">
-          <span class="exercise-index-label" id="active-ex-index">Exercise 1 of 5</span>
-          <h4 id="active-ex-name">Squats</h4>
-          <p class="exercise-instructions-sub" id="active-ex-desc">Hinge at hips, keep chest up...</p>
+      <div class="active-exercise-navigator card glassmorphic" style="display: flex; flex-direction: column; gap: 10px; padding: 12px; align-items: stretch;">
+        <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
+          <button type="button" id="btn-prev-exercise" class="nav-arrow-btn" style="flex-shrink: 0;" aria-label="Previous Exercise">
+            <i class="fa-solid fa-chevron-left"></i>
+          </button>
+          
+          <!-- Horizontal Scroll Deck -->
+          <div id="active-exercise-scroll-deck" class="exercise-scroll-deck" style="flex: 1;">
+            <!-- Dynamically populated card elements: Past Session Exercises, Current Exercises (Completed/In-Focus/Upcoming) -->
+          </div>
+          
+          <button type="button" id="btn-next-exercise" class="nav-arrow-btn" style="flex-shrink: 0;" aria-label="Next Exercise">
+            <i class="fa-solid fa-chevron-right"></i>
+          </button>
         </div>
-        <button type="button" id="btn-next-exercise" class="nav-arrow-btn" aria-label="Next Exercise">
-          <i class="fa-solid fa-chevron-right"></i>
-        </button>
+        
+        <!-- Details of the currently highlighted exercise -->
+        <div class="current-exercise-display" style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px; text-align: center;">
+          <span class="exercise-index-label" id="active-ex-index">Exercise 1 of 5</span>
+          <h4 id="active-ex-name" style="margin: 4px 0;">Squats</h4>
+          <p class="exercise-instructions-sub" id="active-ex-desc" style="margin: 0; font-size: 11px; color: var(--text-muted);">Hinge at hips, keep chest up...</p>
+        </div>
       </div>
 
       <!-- Scroll-Free Logging Grid for Active Client's active exercise -->

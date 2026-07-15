@@ -322,7 +322,6 @@ function applyTranslations(lang = state.lang || 'en') {
     '#view-history .view-desc': 'history_desc',
     
     // Active session clipboard overlay
-    '#overlay-session-title': 'live_tracking_clipboard',
     '#btn-add-session-set': 'btn_add_set',
     '#btn-add-exercise-to-session': 'btn_inject_exercise',
     '#btn-cancel-session': 'btn_cancel',
@@ -551,6 +550,13 @@ function setupNavigation() {
   if (logoArea) {
     logoArea.addEventListener('click', () => {
       switchView('clients');
+    });
+  }
+
+  const logoAreaClipboard = document.getElementById('logo-area-clipboard');
+  if (logoAreaClipboard) {
+    logoAreaClipboard.addEventListener('click', () => {
+      document.getElementById('active-session-overlay').classList.add('hidden');
     });
   }
 
@@ -1885,6 +1891,126 @@ function renderActiveGroupBoard() {
     }
   }
 
+  // 3. Render Horizontal Exercise Scroll Deck (UC5 & Custom layout)
+  const deckContainer = document.getElementById('active-exercise-scroll-deck');
+  if (deckContainer && activeClientState) {
+    deckContainer.innerHTML = '';
+    
+    // Format localized date
+    const formatDateStr = (dateIso) => {
+      if (!dateIso) return '';
+      const d = new Date(dateIso);
+      return d.toLocaleDateString(state.lang === 'sl' ? 'sl-SI' : 'en-US', { month: 'short', day: 'numeric' });
+    };
+
+    // Past session exercises
+    const clientHistory = (state.history || []).filter(h => h.clientId === activeClientId);
+    clientHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
+    
+    const pastExList = [];
+    if (clientHistory.length > 0) {
+      const pastSession = clientHistory[0];
+      const dateStr = formatDateStr(pastSession.date);
+      pastSession.exercises.forEach((ex, pIdx) => {
+        pastExList.push({
+          id: `past-${pastSession.id}-${ex.id}-${pIdx}`,
+          name: ex.name,
+          type: 'past',
+          sessionDate: dateStr,
+          sets: ex.sets,
+          routineName: pastSession.routineName
+        });
+      });
+    }
+
+    // Current routine exercises
+    const currentExIdx = activeClientState.activeExerciseIndex;
+    const currentExList = activeClientState.exercises.map((ex, idx) => {
+      const logsList = activeClientState.logs[ex.id] || [];
+      const isCompleted = logsList.length > 0 && logsList.every(l => l.completed);
+      const isInFocus = (idx === currentExIdx);
+      
+      return {
+        id: ex.id,
+        index: idx,
+        name: ex.name,
+        type: 'current',
+        isCompleted,
+        isInFocus,
+        instructions: ex.instructions,
+        setsTarget: ex.setsTargetCount || ex.sets || 3,
+        repsTarget: ex.repsTarget || ex.reps || 10,
+        weightTarget: ex.weightTarget || ex.weight || 0
+      };
+    });
+
+    const allDeckItems = [...pastExList, ...currentExList];
+    allDeckItems.forEach(item => {
+      const card = document.createElement('div');
+      
+      if (item.type === 'past') {
+        card.className = 'exercise-deck-card past-session';
+        const setsSummary = item.sets.map(s => `${s.weight}kg x ${s.reps}`).join(', ');
+        card.innerHTML = `
+          <div style="display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
+            <div>
+              <span class="badge" style="font-size: 8px; padding: 2px 4px; background: rgba(139, 92, 246, 0.2); color: #c084fc; font-weight: 700; margin-bottom: 4px; display: inline-block;">Past: ${item.sessionDate}</span>
+              <h5 style="margin: 0; font-size: 11px; color: var(--text-color); font-weight: 600; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${escapeHTML(item.name)}</h5>
+            </div>
+            <div style="font-size: 9px; color: var(--text-muted); text-overflow: ellipsis; overflow: hidden; white-space: nowrap; margin-top: 4px;">
+              ${escapeHTML(setsSummary)}
+            </div>
+          </div>
+        `;
+        card.addEventListener('click', () => {
+          showPastExerciseInFocus(item);
+        });
+      } else {
+        const checkedClass = item.isInFocus ? 'in-focus' : (item.isCompleted ? 'completed' : '');
+        card.className = `exercise-deck-card ${checkedClass}`;
+        
+        let targetText = `${item.setsTarget} sets`;
+        if (item.repsTarget) targetText += ` × ${item.repsTarget}`;
+        if (item.weightTarget > 0) targetText += ` (${item.weightTarget}kg)`;
+        
+        let statusBadge = '';
+        if (item.isInFocus) {
+          statusBadge = `<span class="badge badge-cyan" style="font-size: 8px; padding: 2px 4px; font-weight: 700; margin-bottom: 4px; display: inline-block;">In Focus</span>`;
+        } else if (item.isCompleted) {
+          statusBadge = `<span class="badge badge-emerald" style="font-size: 8px; padding: 2px 4px; font-weight: 700; margin-bottom: 4px; display: inline-block;">Completed</span>`;
+        } else {
+          statusBadge = `<span class="badge" style="font-size: 8px; padding: 2px 4px; background: rgba(255,255,255,0.05); color: var(--text-muted); font-weight: 700; margin-bottom: 4px; display: inline-block;">Upcoming</span>`;
+        }
+        
+        card.innerHTML = `
+          <div style="display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
+            <div>
+              ${statusBadge}
+              <h5 style="margin: 0; font-size: 11px; color: var(--text-color); font-weight: 600; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${escapeHTML(item.name)}</h5>
+            </div>
+            <div style="font-size: 9px; color: var(--text-muted); text-overflow: ellipsis; overflow: hidden; white-space: nowrap; margin-top: 4px;">
+              Target: ${targetText}
+            </div>
+          </div>
+        `;
+        card.addEventListener('click', () => {
+          activeClientState.activeExerciseIndex = item.index;
+          saveActiveSessionToCache();
+          renderActiveGroupBoard();
+        });
+      }
+      deckContainer.appendChild(card);
+    });
+
+    // Center active focus
+    setTimeout(() => {
+      const activeCardEl = deckContainer.querySelector('.exercise-deck-card.in-focus');
+      if (activeCardEl) {
+        activeCardEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
+    }, 100);
+  }
+
   const container = document.getElementById('clipboard-logger-container');
   if (!container) return;
   container.innerHTML = '';
@@ -3007,6 +3133,62 @@ function getClientDisplayNameHTML(client, isShort = false) {
   }
   return escapeHTML(nameText);
 }
+function parseTimeRange(timeStr) {
+  const parts = timeStr.split('-');
+  if (parts.length !== 2) return null;
+  const parseTime = (s) => {
+    const tParts = s.trim().split(':');
+    if (tParts.length !== 2) return 0;
+    return parseInt(tParts[0], 10) * 60 + parseInt(tParts[1], 10);
+  };
+  return {
+    start: parseTime(parts[0]),
+    end: parseTime(parts[1])
+  };
+}
+
+function isTimeOverlapping(rangeA, rangeB) {
+  if (!rangeA || !rangeB) return false;
+  return rangeA.start < rangeB.end && rangeB.start < rangeA.end;
+}
+
+function launchClipboardDirectly(bookingId) {
+  if (!state.bookings) return;
+  const booking = state.bookings.find(b => b.id === bookingId);
+  if (!booking) return;
+
+  const targetRange = parseTimeRange(booking.time);
+  
+  // Find all bookings on the same day that overlap in time
+  const overlappingBookings = state.bookings.filter(b => {
+    if (b.day !== booking.day) return false;
+    const r = parseTimeRange(b.time);
+    return isTimeOverlapping(targetRange, r);
+  });
+
+  // Aggregate participant clientRoutines ensuring no duplicates
+  const clientRoutinesMap = new Map();
+  overlappingBookings.forEach(ob => {
+    ob.participants.forEach(pId => {
+      let routineId = ob.routineId;
+      if (!routineId || !state.routines.some(r => r.id === routineId)) {
+        routineId = state.routines.length > 0 ? state.routines[0].id : 'routine-upper-a';
+      }
+      if (!clientRoutinesMap.has(pId)) {
+        clientRoutinesMap.set(pId, routineId);
+      }
+    });
+  });
+
+  const clientRoutines = Array.from(clientRoutinesMap.entries()).map(([clientId, routineId]) => ({
+    clientId,
+    routineId
+  }));
+
+  if (clientRoutines.length === 0) return;
+
+  startWorkoutSession(clientRoutines);
+}
 
 // --- GOOGLE CALENDAR APPOINTMENT SESSIONS INTEGRATION (UC3 & UC4) ---
 function setupCalendarBookings() {
@@ -3114,7 +3296,7 @@ function renderSessions() {
     btn.innerHTML = `<i class="fa-solid fa-circle-play"></i> ${t('btn_launch_clipboard_short')}`;
     
     card.addEventListener('click', () => {
-      openWorkoutSetupModal(null, null, b.id);
+      launchClipboardDirectly(b.id);
     });
     
     card.appendChild(info);
@@ -3143,6 +3325,53 @@ function renderSessions() {
     `;
   } else {
     tomorrowSessions.forEach(s => renderSessionCard(s, tomorrowContainer));
+  }
+}
+function showPastExerciseInFocus(item) {
+  // Deselect all active cards visually
+  document.querySelectorAll('.exercise-deck-card').forEach(el => el.classList.remove('in-focus'));
+  
+  // Find card matching past item id and add visual highlight
+  const cards = document.querySelectorAll('.exercise-deck-card');
+  cards.forEach(card => {
+    if (card.querySelector('.badge')?.textContent?.includes(item.sessionDate) &&
+        card.querySelector('h5')?.textContent === item.name) {
+      card.classList.add('in-focus');
+    }
+  });
+
+  document.getElementById('active-ex-index').textContent = 'Historical Review';
+  document.getElementById('active-ex-name').textContent = item.name;
+  document.getElementById('active-ex-desc').textContent = `Routine: ${item.routineName || 'Completed Session'} (${item.sessionDate})`;
+
+  const container = document.getElementById('clipboard-logger-container');
+  if (!container) return;
+
+  const rows = item.sets.map((s, idx) => `
+    <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 13px;">
+      <strong style="color: var(--accent-cyan); width: 30px;">S${idx + 1}</strong>
+      <span style="color: var(--text-color); font-weight: 600;">${s.weight} kg</span>
+      <span style="color: var(--text-muted); font-weight: 600;">${s.reps} reps</span>
+      <span style="color: var(--text-muted); font-style: italic; font-size: 11px;">${s.note || ''}</span>
+      <span style="color: #10b981; font-weight: 700;"><i class="fa-solid fa-circle-check"></i> Logged</span>
+    </div>
+  `).join('');
+
+  container.innerHTML = `
+    <div style="padding: 16px; background: rgba(139, 92, 246, 0.03); border: 1px dashed rgba(139, 92, 246, 0.15); border-radius: 8px; margin: 12px; box-sizing: border-box;">
+      <h4 style="font-size: 12px; font-weight: 700; color: #c084fc; text-transform: uppercase; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; margin-top: 0;">
+        <i class="fa-solid fa-clock-rotate-left"></i> Reviewing Historical Logs
+      </h4>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        ${rows}
+      </div>
+    </div>
+  `;
+  
+  // Hide foreshadowing card for past exercises
+  const nextExCard = document.getElementById('foreshadowing-card');
+  if (nextExCard) {
+    nextExCard.classList.add('hidden');
   }
 }
 

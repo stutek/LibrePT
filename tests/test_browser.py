@@ -37,7 +37,7 @@ def test_interactive_dashboard_flow(page, local_server):
     page.goto(local_server)
     
     # 1. Assert logo title is present
-    assert page.locator(".logo-area h1").text_content() == "LibrePT"
+    assert page.locator(".logo-area h1").first.text_content() == "LibrePT"
     
     # --- STEP 1: INTERACTIVE LANGUAGE TRANSLATION ---
     # Locate language switcher select dropdown
@@ -74,29 +74,8 @@ def test_interactive_dashboard_flow(page, local_server):
     group_strength_card = page.locator(".booking-card", has_text="Group Strength & Conditioning")
     group_strength_card.click()
     
-    # Verify the setup modal opens
-    modal = page.locator("#dialog-workout-setup")
-    assert modal.is_visible()
-    
-    # Verify Jane Doe and John Smith checkbox elements are checked by default
-    jane_checkbox = page.locator("#setup-cb-client-jane-doe")
-    john_checkbox = page.locator("#setup-cb-client-john-smith")
-    assert jane_checkbox.is_checked()
-    assert john_checkbox.is_checked()
-    
-    # Check that they have their respective routines assigned
-    # Jane -> Upper Body A (routine-upper-a)
-    jane_row = page.locator(".participant-setup-row", has_text="Jane Doe")
-    jane_select = jane_row.locator("select")
-    assert jane_select.input_value() == "routine-upper-a"
-
-    # --- STEP 4: INTERACTIVE INSPECTION ---
-    # Uncomment the line below to launch the Playwright Inspector debugger and pause execution
-    # page.pause()
-    
-    # Click 'Launch Clipboard' inside the modal to start tracking
-    start_session_btn = page.locator("#dialog-workout-setup button[type='submit']")
-    start_session_btn.click()
+    # Verify the clipboard overlay directly opens and displaying client tabs
+    page.wait_for_selector("#active-session-client-tabs")
     
     # Confirm clipboard overlay is active and displaying client tabs
     page.wait_for_selector("#active-session-client-tabs")
