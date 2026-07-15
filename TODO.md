@@ -85,7 +85,13 @@ The **title/header line should stay constant** when switching between the clipbo
 
 - **Note**: the original request trailed off mid-sentence ("...clipboard, session management and"). Confirm the full list of views this must hold across.
 
-### 4.3 Rename the session launch action
+### 4.3 Horizontal client names in the clipboard
+Lay the client/participant names out **horizontally in the clipboard to save vertical space**, rather than stacking them.
+
+- Must not cost sub-second participant switching — the tap targets stay gym-floor sized.
+- Interacts with **[1.2 Simultaneous sessions merged into one clipboard](#12-simultaneous-sessions-merged-into-one-clipboard)**: a merged view carries more participants, so decide the two layouts together.
+
+### 4.4 Rename the session launch action
 Rename **"Launch Clipboard"** / **"Začni sledenje"** to something closer to **"Podrobnosti seje"** (session details).
 
 - Affects `btn_launch_clipboard`, `btn_launch_clipboard_short`, and `btn_start_session` — EN + SL dictionaries must stay at parity.
