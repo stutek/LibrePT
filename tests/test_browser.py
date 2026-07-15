@@ -35,10 +35,10 @@ def test_sessions_day_navigation(page, local_server):
     tag = page.locator("#calendar-title-tag")
     today = datetime.date.today()
 
-    # Dashboard opens focused on today: weekday, date and the (Today) tag are all present
+    # Dashboard opens focused on today: ISO date, weekday and the (Today) tag are all present
     page.wait_for_selector("#calendar-title-weekday")
     assert weekday.inner_text().strip().upper() == today.strftime("%A").upper()
-    assert page.locator("#calendar-title-date").inner_text().strip() != ""
+    assert page.locator("#calendar-title-date").inner_text().strip() == today.strftime("%Y-%m-%d")
     assert tag.is_visible()
 
     # Left arrow steps back to yesterday and drops the (Today) tag
@@ -67,6 +67,39 @@ def test_sessions_day_navigation(page, local_server):
     page.wait_for_timeout(900)
     assert weekday.inner_text().strip().upper() == today.strftime("%A").upper()
     assert tag.is_visible()
+
+    # A swipe of the deck itself (rather than the arrows) must retitle to the day it lands on
+    page.evaluate("""() => {
+      const grid = document.getElementById('sessions-categories-grid');
+      const col = document.getElementById('tomorrow-sessions-column');
+      grid.scrollTo({
+        left: grid.scrollLeft + (col.getBoundingClientRect().left - grid.getBoundingClientRect().left),
+        behavior: 'auto'
+      });
+    }""")
+    page.wait_for_timeout(900)
+    assert weekday.inner_text().strip().upper() == tomorrow.strftime("%A").upper()
+    assert page.locator("#calendar-title-date").inner_text().strip() == tomorrow.strftime("%Y-%m-%d")
+    assert tag.is_hidden()
+
+
+def test_single_column_deck_at_every_viewport(page, local_server):
+    """Exactly one day column may occupy the deck viewport, on phone and desktop alike."""
+    visible_columns = """() => {
+      const grid = document.getElementById('sessions-categories-grid');
+      const gr = grid.getBoundingClientRect();
+      return ['yesterday','today','tomorrow','upcoming'].filter(d => {
+        const r = document.getElementById(d + '-sessions-column').getBoundingClientRect();
+        return r.left < gr.right - 1 && r.right > gr.left + 1;
+      });
+    }"""
+
+    for width, height in [(390, 844), (868, 843), (1280, 800)]:
+        page.set_viewport_size({"width": width, "height": height})
+        page.goto(local_server)
+        page.wait_for_selector("#today-sessions-column")
+        page.wait_for_timeout(700)
+        assert page.evaluate(visible_columns) == ["today"], f"expected only today's column at {width}px"
 
 
 def test_interactive_dashboard_flow(page, local_server):

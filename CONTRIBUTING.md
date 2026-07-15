@@ -75,7 +75,8 @@ Run the full suite before opening a pull request:
 **Testing notes:**
 
 - The browser suite serves the repository root on port 8081 and reuses an already-running server if one is bound. A stale server left over from an earlier session will silently serve outdated files — kill it if results look impossible.
-- The app registers a Service Worker that caches assets. When verifying front-end changes manually, hard-reload or use a fresh browser profile.
+- The Service Worker serves same-origin app code network-first, so a normal reload picks up your edits while the app stays fully usable offline. If the server is down or unreachable, the SW falls back to its cache and you will be looking at the last build it saw — check the server before trusting what you see.
+- Bump `CACHE_NAME` in `sw.js` when releasing: `activate` purges every cache that does not match it.
 
 ---
 

@@ -1,5 +1,6 @@
 // sw.js - LibrePT Service Worker for Offline Functionality
-const CACHE_NAME = 'librept-v1';
+// Bump CACHE_NAME on release: `activate` purges every cache that does not match it.
+const CACHE_NAME = 'librept-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -34,20 +35,35 @@ self.addEventListener('activate', (e) => {
   );
 });
 
+function cachePut(request, response) {
+  if (response && response.status === 200 && response.type !== 'opaque') {
+    const copy = response.clone();
+    caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+  }
+  return response;
+}
+
 self.addEventListener('fetch', (e) => {
+  if (e.request.method !== 'GET') return;
+
+  const isSameOrigin = new URL(e.request.url).origin === self.location.origin;
+
+  if (isSameOrigin) {
+    // Network-first for our own app shell. A stale-while-revalidate cache serves the previous
+    // build on every load after a deploy, which silently hides shipped changes from trainers.
+    // Falling back to cache keeps a basement gym with no signal fully offline-capable.
+    e.respondWith(
+      fetch(e.request)
+        .then((response) => cachePut(e.request, response))
+        .catch(() => caches.match(e.request).then((cached) => cached || Response.error()))
+    );
+    return;
+  }
+
+  // Cache-first for immutable third-party assets (Font Awesome CSS and its webfonts)
   e.respondWith(
-    caches.match(e.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        // Return cached version, but fetch fresh version in background to update cache (stale-while-revalidate)
-        fetch(e.request).then(response => {
-          if (response.status === 200) {
-            caches.open(CACHE_NAME).then(cache => cache.put(e.request, response));
-          }
-        }).catch(err => console.log('Offline: using cached fallback asset.', err));
-        
-        return cachedResponse;
-      }
-      return fetch(e.request);
+    caches.match(e.request).then((cached) => {
+      return cached || fetch(e.request).then((response) => cachePut(e.request, response));
     })
   );
 });

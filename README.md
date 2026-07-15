@@ -92,9 +92,9 @@ LibrePT is comprised of three major subsystems:
 
 ### 1. The PT Clipboard Dashboard (Main Gym Use Case)
 *   **Single-Column Session Day Deck**: The dashboard schedule is a horizontally swipeable deck of day columns (`Yesterday → Today → Tomorrow → Upcoming`), showing exactly one day at a time at every viewport so the gym-floor phone view and the desk view stay identical. The deck is driven three ways, all kept in sync:
-    *   **Swipe**: Scroll-snapped left/right swiping between days.
-    *   **Title Arrows**: `[ ‹ ]` / `[ › ]` in the title bar step to the previous/next day and disable at the ends of the deck.
-    *   **Day Title Bar**: Always names the day currently in focus by weekday and date (e.g. `Wednesday · 15 Jul`), flagging the current day with a `(Today)` tag. Weekday and date strings are locale-aware (EN/SL), and the open-ended `Upcoming` bucket is labelled with its start date instead of a weekday.
+    *   **Swipe**: Scroll-snapped left/right swiping between days, which retitles the bar to whichever day it lands on.
+    *   **Title Arrows**: `[ ‹ ]` / `[ › ]` in the title bar step to the previous/next day and disable at the ends of the deck. They are sized as wide tap targets for sweaty, one-handed use.
+    *   **Day Title Bar**: Always names the day currently in focus by ISO date and weekday — `2026-07-15 Wednesday (Today)` — flagging the current day with a `(Today)` tag. The weekday is locale-aware (EN/SL) and abbreviates on narrow screens so the date and tag always stay readable on one line; the open-ended `Upcoming` bucket reads `Upcoming From 2026-07-17` instead of naming a weekday.
 *   **Home Returns to Today**: Navigating home (LibrePT logo or the Clients tab) always pulls the deck back into focus on today, so the trainer never lands on a stale day left over from earlier browsing.
 *   **Sub-Second Participant Switching**: Tapping participant tabs swaps views in under 50ms.
 *   **Primary Focus Card with Foreshadowing**: Centers the current active exercise (directions, target load/reps, and action buttons) while offering a compact "Up Next" foreshadowing card (visible on larger screens or via a quick scroll) so the PT can prep equipment for smooth transitions.

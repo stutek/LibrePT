@@ -3276,6 +3276,13 @@ function getSessionDayLocale() {
   return (state.lang || 'en') === 'sl' ? 'sl-SI' : 'en-US';
 }
 
+// Built from local parts on purpose: toISOString() converts to UTC and can report the wrong day
+function formatSessionDayISO(date) {
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${date.getFullYear()}-${month}-${day}`;
+}
+
 function renderSessionsTitleBar() {
   const weekdayEl = document.getElementById('calendar-title-weekday');
   const weekdayShortEl = document.getElementById('calendar-title-weekday-short');
@@ -3286,10 +3293,13 @@ function renderSessionsTitleBar() {
   const locale = getSessionDayLocale();
   const day = focusedSessionDay;
   const date = getSessionDayDate(day);
-  const dateStr = date.toLocaleDateString(locale, { day: 'numeric', month: 'short' });
+  const dateStr = formatSessionDayISO(date);
 
-  if (day === 'upcoming') {
-    // Upcoming is an open-ended bucket, so it gets a start date rather than a single weekday
+  // Upcoming is an open-ended bucket: it reads "Upcoming From <date>" instead of naming a weekday
+  const isUpcoming = day === 'upcoming';
+  document.getElementById('calendar-title').classList.toggle('is-upcoming', isUpcoming);
+
+  if (isUpcoming) {
     weekdayEl.textContent = t('upcoming');
     weekdayShortEl.textContent = t('upcoming');
     dateEl.textContent = `${t('from_date')} ${dateStr}`;

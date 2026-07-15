@@ -1755,6 +1755,15 @@ textarea.form-control {
 #calendar-title-weekday-short {
   display: none;
 }
+/* The open-ended bucket reads "Upcoming From 2026-07-17" rather than a weekday trailing a date */
+#calendar-title.is-upcoming #calendar-title-weekday,
+#calendar-title.is-upcoming #calendar-title-weekday-short {
+  order: -1;
+}
+/* Keep the calendar icon leading the title, ahead of any reordered label */
+.sessions-title-bar h3 > i {
+  order: -2;
+}
 #calendar-title-date {
   flex: 0 0 auto;
   color: var(--text-muted);
