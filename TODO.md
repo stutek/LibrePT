@@ -85,13 +85,23 @@ The **title/header line should stay constant** when switching between the clipbo
 
 - **Note**: the original request trailed off mid-sentence ("...clipboard, session management and"). Confirm the full list of views this must hold across.
 
-### 4.3 Horizontal client names in the clipboard
+### 4.3 Collapse the duplicated session header into one row, with a date picker
+There are currently **two title rows** above the session list. The second row — the per-column header with the calendar icon and the `Today` label (`.sessions-column-header`) — is redundant now that the deck shows a single column and the title bar already names the day.
+
+- **Remove** the second row (the column header with the icon and `Today`/`Yesterday`/`Tomorrow`/`Upcoming` label).
+- In the remaining title row, make the **calendar icon clickable**, opening an overlay with a **date picker**.
+- The picker **must accept a typed date** — no scrolling back through years to reach a past date.
+- Note: the removed header is what colour-codes each bucket (purple/cyan/muted/emerald). If that signal is worth keeping, it has to move into the title bar.
+
+> **⚠ Blocking design gap — settle before implementing.** Bookings currently have **no date**. They carry a relative bucket only (`day: 'yesterday' | 'today' | 'tomorrow' | 'upcoming'`, see `mockData.js`), and the title bar *derives* dates live from `new Date()`. That is exactly why the demo keeps working on any day without reseeding. A date picker implies **jumping to an arbitrary date**, which the four-bucket model cannot represent — picking `2025-03-04` would have nothing to show. Choosing a real date field is a **data-model migration** (existing `localStorage` databases included) and it would end the self-following demo behaviour. Decide the model first: real dates, or a picker restricted to the four buckets?
+
+### 4.4 Horizontal client names in the clipboard
 Lay the client/participant names out **horizontally in the clipboard to save vertical space**, rather than stacking them.
 
 - Must not cost sub-second participant switching — the tap targets stay gym-floor sized.
 - Interacts with **[1.2 Simultaneous sessions merged into one clipboard](#12-simultaneous-sessions-merged-into-one-clipboard)**: a merged view carries more participants, so decide the two layouts together.
 
-### 4.4 Rename the session launch action
+### 4.5 Rename the session launch action
 Rename **"Launch Clipboard"** / **"Začni sledenje"** to something closer to **"Podrobnosti seje"** (session details).
 
 - Affects `btn_launch_clipboard`, `btn_launch_clipboard_short`, and `btn_start_session` — EN + SL dictionaries must stay at parity.
@@ -99,9 +109,26 @@ Rename **"Launch Clipboard"** / **"Začni sledenje"** to something closer to **"
 
 ---
 
-## 5. Feedback Loop
+## 5. Client Detail
 
-### 5.1 [Brainstorm] One-click resolve for pending plan adjustments
+### 5.1 Tabbed client view
+Clicking an individual client opens a **tabbed** view (today it opens a single flat profile screen, `view-client-detail`):
+
+| Tab | Content |
+| :--- | :--- |
+| **1 — Sessions** | The sessions this person attended. |
+| **2 — Exercises** | A **chronologically ordered** list of every exercise the person **has done or will do**, with **no grouping or restriction by session** — one continuous timeline across their whole history and future plan. |
+| **3 — Next session prep** | Where the trainer **creates new cards** for the next planned session, **or** for a generic **"placeholder session" that is not yet on the calendar**. |
+
+- Tab 2 is a genuinely new projection of the data: exercises currently only exist *inside* sessions/routines, so this needs a flattened, date-ordered view spanning logged history **and** planned future work.
+- Tab 3 introduces a **session that exists without a calendar entry**. Decide where such a placeholder session lives in the data model, and what happens when it is later attached to a real booking.
+- Reuses the existing placeholder-card concept from [uc1_gym_floor_clipboard.md](file:///home/simon/Projects/LibrePT/use_cases/uc1_gym_floor_clipboard.md), but at the desk rather than on the gym floor — closes the loop with [uc2_async_plan_adjustments.md](file:///home/simon/Projects/LibrePT/use_cases/uc2_async_plan_adjustments.md).
+
+---
+
+## 6. Feedback Loop
+
+### 6.1 [Brainstorm] One-click resolve for pending plan adjustments
 Pending plan adjustment reminders — **do we allow a 1-click resolve?**
 
 - Tension to resolve: one-tap resolution fits the low-interaction principle, but plan adjustments are exactly the decisions that deserve deliberate review at the desk ([uc2_async_plan_adjustments.md](file:///home/simon/Projects/LibrePT/use_cases/uc2_async_plan_adjustments.md)).
