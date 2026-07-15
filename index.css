@@ -1718,6 +1718,89 @@ textarea.form-control {
   100% { height: 100%; }
 }
 
+/* --- SESSION BOOKING CARD --- */
+.booking-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  margin-bottom: 4px;
+  border-left: 4px solid var(--accent-cyan);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+/* --- SESSIONS DAY TITLE BAR --- */
+.sessions-title-bar {
+  gap: 10px;
+}
+/* Shrink-to-fit so the arrows stay tight against the weekday/date instead of drifting apart */
+.sessions-title-bar h3 {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+}
+/* Only the weekday truncates — the date and Today tag must always stay readable */
+#calendar-title-weekday,
+#calendar-title-weekday-short {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Narrow screens swap the full weekday for its abbreviation (see mobile media query) */
+#calendar-title-weekday-short {
+  display: none;
+}
+#calendar-title-date {
+  flex: 0 0 auto;
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: 0;
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+.sessions-today-tag {
+  flex: 0 0 auto;
+  background: rgba(6, 182, 212, 0.12);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  color: var(--accent-cyan);
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  text-transform: uppercase;
+}
+.sessions-nav-arrow {
+  flex: 0 0 auto;
+  width: 46px;
+  height: 34px;
+  border-radius: 999px;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  font-size: 13px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+.sessions-nav-arrow:hover:not(:disabled) {
+  background: var(--border-color);
+  color: var(--accent-cyan);
+  border-color: var(--accent-cyan);
+}
+.sessions-nav-arrow:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+
 /* --- SESSIONS CATEGORIES GRID --- */
 .sessions-categories-grid {
   display: flex;
@@ -1740,9 +1823,10 @@ textarea.form-control {
 }
 
 .sessions-category-column {
-  flex: 0 0 calc(50% - 10px); /* 2 columns visible on desktop */
+  /* Single column at every viewport: the visible day always matches the day named in the title bar */
+  flex: 0 0 100%;
   scroll-snap-align: start;
-  min-width: 320px;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   background: rgba(255, 255, 255, 0.01);
@@ -1769,9 +1853,49 @@ textarea.form-control {
   .sessions-categories-grid {
     gap: 16px;
   }
+  /* Reclaim width so arrows + day title + Today tag stay on one gym-floor-readable row */
+  .sessions-title-bar {
+    gap: 6px;
+  }
+  .sessions-title-bar h3 {
+    font-size: 13px;
+    gap: 6px;
+  }
+  .sessions-title-bar h3 > i {
+    display: none; /* the arrows already read as calendar navigation */
+  }
+  /* "Wed" instead of "Wednesday" keeps the date and Today tag from being squeezed out */
+  #calendar-title-weekday {
+    display: none;
+  }
+  #calendar-title-weekday-short {
+    display: inline;
+  }
+  #calendar-title-date {
+    font-size: 11px;
+  }
+  #btn-sync-calendar-text {
+    display: none; /* icon-only sync on mobile */
+  }
+  /* Sweaty-hands tap target: wide enough to hit without looking */
+  .sessions-nav-arrow {
+    width: 52px;
+    height: 44px;
+  }
+
+  /* Stack card contents into a single column so times and names stop wrapping mid-word */
+  .booking-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .booking-card .btn {
+    width: 100%;
+    justify-content: center;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
   .sessions-category-column {
-    flex: 0 0 100% !important; /* 1 column visible on mobile */
-    scroll-snap-align: center;
     padding: 10px !important;
   }
   

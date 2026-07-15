@@ -21,8 +21,8 @@
   <!-- FontAwesome for Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
-  <!-- Inline SVG favicon for browser tab -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏋️</text></svg>">
+  <!-- Inline SVG favicon: the Font Awesome dumbbell path in --primary emerald, matching the header logo mark -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%20-64%20640%20640'%3E%3Cpath%20fill='%2310b981'%20d='M96%2064c0-17.7%2014.3-32%2032-32h32c17.7%200%2032%2014.3%2032%2032V224v64V448c0%2017.7-14.3%2032-32%2032H128c-17.7%200-32-14.3-32-32V384H64c-17.7%200-32-14.3-32-32V288c-17.7%200-32-14.3-32-32s14.3-32%2032-32V160c0-17.7%2014.3-32%2032-32H96V64zm448%200v64h32c17.7%200%2032%2014.3%2032%2032v64c17.7%200%2032%2014.3%2032%2032s-14.3%2032-32%2032v64c0%2017.7-14.3%2032-32%2032H544v64c0%2017.7-14.3%2032-32%2032H480c-17.7%200-32-14.3-32-32V288%20224%2064c0-17.7%2014.3-32%2032-32h32c17.7%200%2032%2014.3%2032%2032zM416%20224v64H224V224H416z'/%3E%3C/svg%3E">
 
   <!-- Custom Styles -->
   <link rel="stylesheet" href="index.css">
@@ -57,13 +57,25 @@
     <!-- VIEW: Clients Dashboard & Pending Plan Adjustments -->
     <section id="view-clients" class="app-view active">
       <!-- Section B: Today's & Tomorrow's Sessions -->
-      <div class="section-title">
-        <h3 id="calendar-title"><i class="fa-solid fa-calendar-days text-cyan mr-1"></i> Today's & Tomorrow's Sessions</h3>
+      <div class="section-title sessions-title-bar">
+        <button id="btn-sessions-prev" class="sessions-nav-arrow" type="button" aria-label="Yesterday" title="Yesterday">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <h3 id="calendar-title">
+          <i class="fa-solid fa-calendar-days text-cyan"></i>
+          <span id="calendar-title-weekday">Today</span>
+          <span id="calendar-title-weekday-short">Today</span>
+          <span id="calendar-title-date"></span>
+          <span id="calendar-title-tag" class="sessions-today-tag hidden">(Today)</span>
+        </h3>
+        <button id="btn-sessions-next" class="sessions-nav-arrow" type="button" aria-label="Tomorrow" title="Tomorrow">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
         <button id="btn-sync-calendar" class="btn secondary-btn btn-xs" style="margin-left: auto; gap: 6px; display: inline-flex; align-items: center;">
           <i class="fa-solid fa-rotate"></i> <span id="btn-sync-calendar-text">Sync Sessions</span>
         </button>
       </div>
-      <div class="sessions-categories-grid mb-6">
+      <div class="sessions-categories-grid mb-6" id="sessions-categories-grid" role="region" aria-label="Sessions Schedule">
         <!-- Yesterday's Category Column -->
         <div class="sessions-category-column" id="yesterday-sessions-column">
           <h4 class="sessions-column-header text-purple" style="color: #c084fc;">
@@ -109,7 +121,7 @@
 
       <!-- Section A: Pending plan modifications (Feedback Loop) -->
       <div class="section-title" style="margin-top: 24px;">
-        <h3><i class="fa-solid fa-bell-concierge text-emerald mr-1"></i> Pending Plan Adjustments</h3>
+        <h3 id="pending-adjustments-title"><i class="fa-solid fa-bell-concierge text-emerald mr-1"></i> Pending Plan Adjustments</h3>
         <span class="badge" id="badge-adjustments-count">2</span>
       </div>
       <div id="dashboard-adjustments-list" class="stack-list mb-6">

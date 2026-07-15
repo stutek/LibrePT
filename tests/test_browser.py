@@ -1,6 +1,7 @@
 import os
 import time
 import socket
+import datetime
 import subprocess
 import pytest
 from playwright.sync_api import sync_playwright
@@ -22,6 +23,51 @@ def local_server():
     if proc:
         proc.terminate()
         proc.wait()
+
+def test_sessions_day_navigation(page, local_server):
+    """
+    Verifies the sessions title bar reports the focused day (weekday + date + Today tag),
+    that the title arrows step across the day deck, and that going home re-focuses today.
+    """
+    page.goto(local_server)
+
+    weekday = page.locator("#calendar-title-weekday")
+    tag = page.locator("#calendar-title-tag")
+    today = datetime.date.today()
+
+    # Dashboard opens focused on today: weekday, date and the (Today) tag are all present
+    page.wait_for_selector("#calendar-title-weekday")
+    assert weekday.inner_text().strip().upper() == today.strftime("%A").upper()
+    assert page.locator("#calendar-title-date").inner_text().strip() != ""
+    assert tag.is_visible()
+
+    # Left arrow steps back to yesterday and drops the (Today) tag
+    page.locator("#btn-sessions-prev").click()
+    page.wait_for_timeout(900)
+    yesterday = today - datetime.timedelta(days=1)
+    assert weekday.inner_text().strip().upper() == yesterday.strftime("%A").upper()
+    assert tag.is_hidden()
+
+    # Yesterday is the first column, so stepping further back is a dead end
+    assert page.locator("#btn-sessions-prev").is_disabled()
+
+    # Right arrow returns to today, then steps on to tomorrow
+    page.locator("#btn-sessions-next").click()
+    page.wait_for_timeout(900)
+    assert tag.is_visible()
+
+    page.locator("#btn-sessions-next").click()
+    page.wait_for_timeout(900)
+    tomorrow = today + datetime.timedelta(days=1)
+    assert weekday.inner_text().strip().upper() == tomorrow.strftime("%A").upper()
+    assert tag.is_hidden()
+
+    # Going home via the logo pulls focus back to today
+    page.locator("#logo-area").click()
+    page.wait_for_timeout(900)
+    assert weekday.inner_text().strip().upper() == today.strftime("%A").upper()
+    assert tag.is_visible()
+
 
 def test_interactive_dashboard_flow(page, local_server):
     """
@@ -48,12 +94,12 @@ def test_interactive_dashboard_flow(page, local_server):
     lang_switcher.select_option("sl")
     
     # Verify dashboard header translates dynamically
-    assert page.locator("#calendar-title").inner_text().strip().upper() == "DANAŠNJE IN JUTRIŠNJE SEJE"
     assert page.locator("#btn-sync-calendar-text").inner_text().strip().upper() == "SINHRONIZIRAJ SEJE"
-    
+    assert page.locator("#calendar-title-tag").inner_text().strip().upper() == "(DANES)"
+
     # Switch back to English (EN)
     lang_switcher.select_option("en")
-    assert page.locator("#calendar-title").inner_text().strip().upper() == "TODAY'S & TOMORROW'S SESSIONS"
+    assert page.locator("#calendar-title-tag").inner_text().strip().upper() == "(TODAY)"
     
     # --- STEP 2: GOOGLE CALENDAR SYNC ---
     # Tap the Sync Calendar button

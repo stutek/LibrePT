@@ -71,7 +71,17 @@ def run_build():
             print(f"  Copied {filename} -> {dist_dir}/{filename}")
         else:
             print(f"  Warning: {filename} not found!")
-            
+
+    # Asset directories referenced by manifest.json and the Service Worker cache
+    dirs_to_copy = ['icons']
+
+    for dirname in dirs_to_copy:
+        if os.path.isdir(dirname):
+            shutil.copytree(dirname, os.path.join(dist_dir, dirname))
+            print(f"  Copied {dirname}/ -> {dist_dir}/{dirname}/")
+        else:
+            print(f"  Warning: {dirname}/ not found!")
+
     print(f"  ✓ Build complete. Bundle stored in: {os.path.abspath(dist_dir)}")
 
 def run_deploy():

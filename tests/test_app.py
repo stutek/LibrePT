@@ -28,6 +28,17 @@ def test_file_structure():
     assert os.path.exists('app.js')
     assert os.path.exists('index.css')
     assert os.path.exists('mockData.js')
+    assert os.path.exists('LICENSE')
+
+def test_manifest_icons_exist():
+    """Every icon the PWA manifest advertises must actually ship, or installation renders a blank tile."""
+    import json
+    with open('manifest.json', 'r', encoding='utf-8') as f:
+        manifest = json.load(f)
+
+    assert manifest['icons'], "manifest.json declares no icons"
+    for icon in manifest['icons']:
+        assert os.path.exists(icon['src']), f"manifest.json references missing icon: {icon['src']}"
 
 def test_translation_dictionaries_parity():
     with open('app.js', 'r', encoding='utf-8') as f:

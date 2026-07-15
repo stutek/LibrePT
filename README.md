@@ -12,9 +12,55 @@ tags:
 
 # LibrePT - Personal Trainer Management & Scheduling System
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-10b981.svg)](LICENSE)
+[![PWA](https://img.shields.io/badge/PWA-offline--first-06b6d4.svg)](manifest.json)
+[![Stack](https://img.shields.io/badge/stack-vanilla%20JS%20%7C%20HTML5%20%7C%20CSS-f7df1e.svg)](#-technical-stack)
+[![Tests](https://img.shields.io/badge/tests-pytest%20%2B%20playwright-10b981.svg)](tests/)
+
 LibrePT is a comprehensive, client-centric, and business-enabling software ecosystem designed for personal trainers (PTs) to manage schedules, publish slots, handle client bookings, orchestrate workout sessions, track execution, create and manage asynchronous session scenarios, capture on-the-fly voice notes, and collect granular exercise feedback to enable planning of client progression. 
 
 While the **mobile-first, offline PWA Gym Clipboard** is the core real-time tracking interface used on the gym floor, LibrePT is built as an end-to-end system that connects the trainer's scheduling back-office, client calendar invites, and program adjustments into a single unified database.
+
+---
+
+## 🚦 Quick Start
+
+LibrePT is a dependency-free static PWA — no bundler, no install step, no build required to run it. Any static file server will do:
+
+```bash
+git clone https://github.com/stutek/LibrePT.git
+cd LibrePT
+python3 -m http.server 8081
+```
+
+Then open <http://localhost:8081>. The app seeds itself with mock clients, routines, and sessions on first load, so the dashboard is immediately explorable.
+
+> **Note**: Serve the folder over HTTP rather than opening `index.html` via `file://` — the app loads ES modules and registers a Service Worker, both of which require an HTTP origin.
+
+**Data & privacy**: all state lives in the browser's `localStorage` under the `librept_db` key, and voice notes never leave the device. Use the ☁ **Backup** button in the header to export or restore the database as JSON.
+
+---
+
+## 🧪 Development & Testing
+
+The test suite runs static structure checks (`tests/test_app.py`) plus a Playwright end-to-end gym-floor flow (`tests/test_browser.py`) that drives a real Chromium browser against a local server.
+
+```bash
+# One-time environment setup
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+.venv/bin/playwright install chromium
+
+# Run the whole suite
+.venv/bin/python -m pytest tests/ -v
+```
+
+`pipeline.py` orchestrates the full verify → build → deploy chain (environment check, tests, bundling into `dist/`) and is designed to be stepped through in a debugger:
+
+```bash
+.venv/bin/python pipeline.py          # full pipeline
+.venv/bin/python -m pdb pipeline.py   # step-by-step debugging
+```
 
 ---
 
@@ -45,6 +91,11 @@ LibrePT is comprised of three major subsystems:
 ## 🚀 Key Functional Features
 
 ### 1. The PT Clipboard Dashboard (Main Gym Use Case)
+*   **Single-Column Session Day Deck**: The dashboard schedule is a horizontally swipeable deck of day columns (`Yesterday → Today → Tomorrow → Upcoming`), showing exactly one day at a time at every viewport so the gym-floor phone view and the desk view stay identical. The deck is driven three ways, all kept in sync:
+    *   **Swipe**: Scroll-snapped left/right swiping between days.
+    *   **Title Arrows**: `[ ‹ ]` / `[ › ]` in the title bar step to the previous/next day and disable at the ends of the deck.
+    *   **Day Title Bar**: Always names the day currently in focus by weekday and date (e.g. `Wednesday · 15 Jul`), flagging the current day with a `(Today)` tag. Weekday and date strings are locale-aware (EN/SL), and the open-ended `Upcoming` bucket is labelled with its start date instead of a weekday.
+*   **Home Returns to Today**: Navigating home (LibrePT logo or the Clients tab) always pulls the deck back into focus on today, so the trainer never lands on a stale day left over from earlier browsing.
 *   **Sub-Second Participant Switching**: Tapping participant tabs swaps views in under 50ms.
 *   **Primary Focus Card with Foreshadowing**: Centers the current active exercise (directions, target load/reps, and action buttons) while offering a compact "Up Next" foreshadowing card (visible on larger screens or via a quick scroll) so the PT can prep equipment for smooth transitions.
 *   **One-Tap Progression & Safety Signals**: Instant, low-interaction buttons to record outcome signals without opening a phone keyboard:
@@ -79,7 +130,16 @@ LibrePT/
 ├── app.js              # State manager, views router, Google API hooks, and split-sync databases
 ├── mockData.js         # Default database (Exercises, client profiles, historical logs, and adjustments)
 ├── manifest.json       # Web App Manifest for mobile PWA standalone styling
-└── sw.js               # Service Worker for offline asset caching (PWA logic)
+├── sw.js               # Service Worker for offline asset caching (PWA logic)
+├── icons/              # PWA install icons (dumbbell mark, matching the in-app logo and favicon)
+├── pipeline.py         # Debuggable CI/CD orchestrator (environment → tests → build → deploy)
+├── requirements.txt    # Python test toolchain (pytest, playwright)
+├── tests/              # Static structure checks + Playwright end-to-end gym-floor flow
+├── use_cases/          # OKF functional workflow specifications (see use_cases/INDEX.md)
+├── INDEX.md            # Master knowledge index for agents and contributors
+├── AGENT_RULES.md      # Operating rules for AI agents contributing to this repository
+├── okf.yaml            # OKF v0.1 catalog manifest
+└── LICENSE             # MIT License
 ```
 
 ---
@@ -87,6 +147,37 @@ LibrePT/
 ## ⚡ Technical Stack
 
 *   **Core**: HTML5, Vanilla JavaScript (ES6+), and Vanilla CSS Variables (Emerald & Zinc themes).
+*   **Internationalization**: Built-in EN/SL dictionaries with locale-aware date formatting via `Intl`.
 *   **Data Sync**: Serverless Google Firebase (Firestore Database + Firebase Hosting) for real-time bookings.
 *   **Third-Party APIs**: Google Calendar API (OAuth 2.0).
 *   **Native Wrap**: **Capacitor** to wrap the HTML/CSS/JS code into native Android (.apk) and iOS (.ipa) app packages.
+
+---
+
+## 📚 Documentation Map
+
+This repository follows Google's **Open Knowledge Format (OKF v0.1)**: every Markdown file carries YAML frontmatter, and every directory of knowledge files is catalogued by an `INDEX.md`.
+
+| Document | Purpose |
+| :--- | :--- |
+| [INDEX.md](INDEX.md) | Master knowledge index — the navigation entrypoint for the whole catalog. |
+| [use_cases/](use_cases/) | Functional workflow specifications, one file per actor-facing use case. |
+| [AGENT_RULES.md](AGENT_RULES.md) | Operating rules for AI coding agents contributing to this repository. |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | How to set up, test, and submit changes. |
+| [okf.yaml](okf.yaml) | OKF catalog manifest declaring the spec version and entrypoint. |
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) for the development setup, testing expectations, and documentation standards before opening a pull request.
+
+Because LibrePT is used one-handed on a gym floor, changes are evaluated against real-world training friction: offline basement gyms, sweaty hands, sub-second participant switches, and sudden equipment pivots. Keep interactions low-tap and keyboard-free.
+
+---
+
+## 📄 License
+
+LibrePT is released under the [MIT License](LICENSE).
+
+Copyright (c) 2026 Simon Tutek.

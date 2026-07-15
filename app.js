@@ -110,8 +110,8 @@ const TRANSLATIONS = {
     routines_desc: "Select or edit workout routines. Launch them with individual or group sessions.",
     filter_all: "All",
     history_desc: "Log of all completed sessions across all clients.",
-    todays_bookings: "Today's Calendar Bookings",
-    todays_sessions: "Today's & Tomorrow's Sessions",
+    sessions_schedule: "Sessions Schedule",
+    from_date: "From",
     btn_sync_calendar: "Sync Calendar",
     btn_sync_sessions: "Sync Sessions",
     booking_spots: "spots booked",
@@ -243,8 +243,8 @@ const TRANSLATIONS = {
     routines_desc: "Izberite ali uredite vadbene rutine. Zaženite jih za posameznike ali skupine.",
     filter_all: "Vse",
     history_desc: "Dnevnik vseh zaključenih vadb za vse stranke.",
-    todays_bookings: "Današnje rezervacije koledarja",
-    todays_sessions: "Današnje in jutrišnje seje",
+    sessions_schedule: "Urnik sej",
+    from_date: "Od",
     btn_sync_calendar: "Sinhroniziraj",
     btn_sync_sessions: "Sinhroniziraj seje",
     booking_spots: "mest zasedenih",
@@ -296,10 +296,9 @@ function applyTranslations(lang = state.lang || 'en') {
     'button[data-view="history"] span': 'tab_history',
     
     // Dashboard / Clients view
-    '#view-clients .section-title h3': 'pending_adjustments',
+    '#pending-adjustments-title': 'pending_adjustments',
     '#view-clients .view-header h2': 'clients_title',
     '#btn-add-client': 'btn_add_client',
-    '#calendar-title': 'todays_sessions',
     '#btn-sync-calendar-text': 'btn_sync_sessions',
     
     // Client Detail view
@@ -416,6 +415,24 @@ function applyTranslations(lang = state.lang || 'en') {
       }
     }
   }
+
+  // Update screen-reader region labels
+  const ariaMappings = {
+    '#sessions-categories-grid': 'sessions_schedule'
+  };
+
+  for (const selector in ariaMappings) {
+    const el = document.querySelector(selector);
+    if (el) {
+      const val = tDict[ariaMappings[selector]];
+      if (val) {
+        el.setAttribute('aria-label', val);
+      }
+    }
+  }
+
+  // The day title bar is data-driven (weekday/date/arrows), so it re-renders rather than map statically
+  renderSessionsTitleBar();
 }
 
 // --- STATE MANAGEMENT ---
@@ -583,6 +600,8 @@ function setupNavigation() {
   document.getElementById('btn-back-to-clients').addEventListener('click', () => {
     switchView('clients');
   });
+
+  setupSessionsDayNav();
 }
 
 function switchView(viewId) {
@@ -612,6 +631,11 @@ function switchView(viewId) {
 
   // Scroll to top
   document.getElementById('main-content').scrollTop = 0;
+
+  // Coming home always re-focuses today, so the trainer never lands on a stale day
+  if (viewId === 'clients') {
+    requestAnimationFrame(() => focusSessionsColumn('today', 'smooth'));
+  }
 }
 
 // --- RENDER FUNCTIONS ---
@@ -3228,6 +3252,139 @@ function setupCalendarBookings() {
   }
 }
 
+// --- SESSIONS DAY NAVIGATION ---
+// The dashboard grid is a horizontal deck of day columns. `focusedSessionDay` is the
+// single source of truth for which column the title bar and arrows describe.
+const SESSION_DAY_ORDER = ['yesterday', 'today', 'tomorrow', 'upcoming'];
+const SESSION_DAY_OFFSETS = { yesterday: -1, today: 0, tomorrow: 1, upcoming: 2 };
+const SESSION_SCROLL_SETTLE_MS = 700;
+let focusedSessionDay = 'today';
+let sessionsProgrammaticScrollUntil = 0;
+
+function getSessionsGrid() {
+  return document.getElementById('sessions-categories-grid');
+}
+
+function getSessionDayDate(day) {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() + (SESSION_DAY_OFFSETS[day] ?? 0));
+  return d;
+}
+
+function getSessionDayLocale() {
+  return (state.lang || 'en') === 'sl' ? 'sl-SI' : 'en-US';
+}
+
+function renderSessionsTitleBar() {
+  const weekdayEl = document.getElementById('calendar-title-weekday');
+  const weekdayShortEl = document.getElementById('calendar-title-weekday-short');
+  const dateEl = document.getElementById('calendar-title-date');
+  const tagEl = document.getElementById('calendar-title-tag');
+  if (!weekdayEl || !weekdayShortEl || !dateEl || !tagEl) return;
+
+  const locale = getSessionDayLocale();
+  const day = focusedSessionDay;
+  const date = getSessionDayDate(day);
+  const dateStr = date.toLocaleDateString(locale, { day: 'numeric', month: 'short' });
+
+  if (day === 'upcoming') {
+    // Upcoming is an open-ended bucket, so it gets a start date rather than a single weekday
+    weekdayEl.textContent = t('upcoming');
+    weekdayShortEl.textContent = t('upcoming');
+    dateEl.textContent = `${t('from_date')} ${dateStr}`;
+  } else {
+    // Both forms are rendered; CSS picks the one that fits the viewport
+    weekdayEl.textContent = date.toLocaleDateString(locale, { weekday: 'long' });
+    weekdayShortEl.textContent = date.toLocaleDateString(locale, { weekday: 'short' });
+    dateEl.textContent = dateStr;
+  }
+
+  // The tag marks "you are here now" — showing it on every column would make it meaningless
+  tagEl.textContent = `(${t('today')})`;
+  tagEl.classList.toggle('hidden', day !== 'today');
+
+  const idx = SESSION_DAY_ORDER.indexOf(day);
+  const arrows = [
+    { el: document.getElementById('btn-sessions-prev'), target: SESSION_DAY_ORDER[idx - 1] },
+    { el: document.getElementById('btn-sessions-next'), target: SESSION_DAY_ORDER[idx + 1] }
+  ];
+  arrows.forEach(({ el, target }) => {
+    if (!el) return;
+    el.disabled = !target;
+    const label = target ? t(target) : '';
+    el.setAttribute('aria-label', label);
+    el.title = label;
+  });
+}
+
+function focusSessionsColumn(day, behavior = 'smooth') {
+  const grid = getSessionsGrid();
+  const col = document.getElementById(`${day}-sessions-column`);
+  if (!grid || !col) return;
+
+  focusedSessionDay = day;
+  renderSessionsTitleBar();
+
+  // Dashboard may be hidden (display:none) when navigating in — no layout to scroll yet
+  if (grid.offsetParent === null) return;
+
+  // Align the column to the grid's start edge without scrolling any ancestor
+  const left = grid.scrollLeft + (col.getBoundingClientRect().left - grid.getBoundingClientRect().left);
+
+  // A smooth scroll emits intermediate scroll events whose closest column is not the target yet,
+  // so hold off scroll-driven detection until the animation has settled on `day`.
+  sessionsProgrammaticScrollUntil = Date.now() + SESSION_SCROLL_SETTLE_MS;
+  grid.scrollTo({ left, behavior });
+}
+
+function stepSessionsColumn(delta) {
+  const target = SESSION_DAY_ORDER[SESSION_DAY_ORDER.indexOf(focusedSessionDay) + delta];
+  if (target) focusSessionsColumn(target);
+}
+
+function detectFocusedSessionsColumn() {
+  const grid = getSessionsGrid();
+  if (!grid || grid.offsetParent === null) return;
+
+  const gridLeft = grid.getBoundingClientRect().left;
+  let closest = focusedSessionDay;
+  let closestDist = Infinity;
+  SESSION_DAY_ORDER.forEach(day => {
+    const col = document.getElementById(`${day}-sessions-column`);
+    if (!col) return;
+    const dist = Math.abs(col.getBoundingClientRect().left - gridLeft);
+    if (dist < closestDist) {
+      closestDist = dist;
+      closest = day;
+    }
+  });
+
+  if (closest !== focusedSessionDay) {
+    focusedSessionDay = closest;
+    renderSessionsTitleBar();
+  }
+}
+
+function setupSessionsDayNav() {
+  const prevBtn = document.getElementById('btn-sessions-prev');
+  const nextBtn = document.getElementById('btn-sessions-next');
+  if (prevBtn) prevBtn.addEventListener('click', () => stepSessionsColumn(-1));
+  if (nextBtn) nextBtn.addEventListener('click', () => stepSessionsColumn(1));
+
+  // Keep the title in sync when the trainer swipes the deck directly
+  const grid = getSessionsGrid();
+  if (grid) {
+    let scrollSettleTimer = null;
+    grid.addEventListener('scroll', () => {
+      clearTimeout(scrollSettleTimer);
+      // Re-read the deck only once both the swipe and any in-flight arrow scroll have settled
+      const delay = Math.max(80, sessionsProgrammaticScrollUntil - Date.now() + 20);
+      scrollSettleTimer = setTimeout(detectFocusedSessionsColumn, delay);
+    }, { passive: true });
+  }
+}
+
 function renderSessions() {
   const yesterdayContainer = document.getElementById('yesterday-sessions-list');
   const todayContainer = document.getElementById('today-sessions-list');
@@ -3245,9 +3402,9 @@ function renderSessions() {
   
   const renderSessionCard = (b, colContainer) => {
     const card = document.createElement('div');
+    // Layout lives in .booking-card (index.css) so it can stack to a single column on mobile
     card.className = 'booking-card card glassmorphic';
-    card.style.cssText = 'display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px; margin-bottom: 4px; border-left: 4px solid var(--accent-cyan); cursor: pointer; transition: background 0.2s, transform 0.2s;';
-    
+
     // Hover feedback style
     card.addEventListener('mouseenter', () => {
       card.style.background = 'rgba(255, 255, 255, 0.05)';
@@ -3357,13 +3514,8 @@ function renderSessions() {
     }
   }
 
-  // Auto-scroll Today's column in center on load
-  setTimeout(() => {
-    const todayCol = document.getElementById('today-sessions-column');
-    if (todayCol) {
-      todayCol.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'center' });
-    }
-  }, 100);
+  // Re-anchor the deck on the focused day (today on first load) after cards are injected
+  requestAnimationFrame(() => focusSessionsColumn(focusedSessionDay, 'auto'));
 }
 function showPastExerciseInFocus(item) {
   // Deselect all active cards visually
