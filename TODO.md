@@ -126,9 +126,30 @@ Clicking an individual client opens a **tabbed** view (today it opens a single f
 
 ---
 
-## 6. Feedback Loop
+## 6. Housekeeping
 
-### 6.1 [Brainstorm] One-click resolve for pending plan adjustments
+### 6.1 Remove body-weight tracking (for now)
+Strip **client body-weight tracking** from the app for the time being.
+
+> **⚠ Do not confuse the two kinds of "weight".** The codebase uses `weight` for **two unrelated things**, and only the first is in scope here:
+> - **Body weight (in scope — remove)**: `weightHistory` on clients (`mockData.js`), the weight chart (`.weight-chart-container`, `index.html`), the `client-weight` input and its `current_weight` label (EN + SL), and the `client-weight-pill` on the client profile (`app.js`).
+> - **Exercise load (out of scope — keep)**: target load per set, `session-add-weight`, `adjust-weight`, and the "Load Up Next / Step Back" progression signals. These are core to [uc1_gym_floor_clipboard.md](file:///home/simon/Projects/LibrePT/use_cases/uc1_gym_floor_clipboard.md) and [uc2_async_plan_adjustments.md](file:///home/simon/Projects/LibrePT/use_cases/uc2_async_plan_adjustments.md) and **must not be touched** (~16 call sites).
+
+- Removing `current_weight` means dropping it from **both** dictionaries — the test suite enforces EN/SL key parity.
+- **Open**: is this a removal or a hide? Existing `localStorage` databases already hold `weightHistory`. Decide whether to migrate it away (destructive, loses real client data) or simply stop rendering it, so the data survives if the feature returns. "For now" argues for hiding rather than deleting.
+
+### 6.2 Extract use cases and usage scenarios from the tests
+The Playwright suite already drives real end-to-end flows (gym-floor clipboard launch, voice notes, feedback → adjustment wizard, day-deck navigation, swipes). Those flows are **executable usage scenarios** that are currently documented nowhere.
+
+- Extract the scenarios the tests actually exercise and **document them properly** in [use_cases/](file:///home/simon/Projects/LibrePT/use_cases/), following OKF (frontmatter + `INDEX.md` row + graph links).
+- Reconcile against the existing UC1–UC4: some tested behaviour is already specified, some (the session day deck) is not, and some specified behaviour has no test — the gaps in **both** directions are the interesting output.
+- Goal: tests and use cases describe the same system, so a scenario can be traced from spec to the test that proves it.
+
+---
+
+## 7. Feedback Loop
+
+### 7.1 [Brainstorm] One-click resolve for pending plan adjustments
 Pending plan adjustment reminders — **do we allow a 1-click resolve?**
 
 - Tension to resolve: one-tap resolution fits the low-interaction principle, but plan adjustments are exactly the decisions that deserve deliberate review at the desk ([uc2_async_plan_adjustments.md](file:///home/simon/Projects/LibrePT/use_cases/uc2_async_plan_adjustments.md)).
