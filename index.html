@@ -333,6 +333,18 @@
           <span id="overlay-session-duration" style="font-weight: 700; font-family: monospace; font-size: 15px; color: var(--accent-cyan);">00:00</span>
         </div>
         <div class="header-actions">
+          <!-- Destructive Delete Session lives behind an overflow menu, away from the
+               primary Complete action, so it can't be mis-tapped mid-set. -->
+          <div class="session-menu-wrap">
+            <button id="btn-session-menu" class="icon-btn" style="background: rgba(255,255,255,0.05);" aria-label="Session options" aria-haspopup="true" aria-expanded="false">
+              <i class="fa-solid fa-ellipsis-vertical"></i>
+            </button>
+            <div id="session-menu" class="session-menu hidden" role="menu">
+              <button id="btn-delete-session" class="session-menu-item session-menu-item-danger" role="menuitem">
+                <i class="fa-solid fa-trash-can"></i> Delete Session
+              </button>
+            </div>
+          </div>
           <button id="btn-collapse-session" class="icon-btn" style="background: rgba(255,255,255,0.05);" aria-label="Minimize Active Session">
             <i class="fa-solid fa-chevron-down"></i>
           </button>
@@ -377,7 +389,6 @@
       <!-- Session Completion Drawer -->
       <div class="session-actions-footer mt-auto">
         <div class="session-finish-row">
-          <button id="btn-cancel-session" class="btn danger-btn btn-sm">Cancel</button>
           <button id="btn-finish-session" class="btn success-btn btn-sm flex-1">Complete Workout Session</button>
         </div>
       </div>

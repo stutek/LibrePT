@@ -38,10 +38,11 @@ const TRANSLATIONS = {
     btn_add_set: "Add Set",
     btn_inject_exercise: "Inject Exercise",
     btn_cancel: "Cancel",
+    btn_delete_session: "Delete Session",
     btn_complete: "Complete Workout Session",
     btn_log_feedback: "Log Feedback",
     alert_no_sets: "No completed sets were logged. Are you sure you want to finish and save an empty session?",
-    confirm_cancel: "Cancel active workout? All logged sets for this session will be permanently lost.",
+    confirm_cancel: "Delete this session? Its logged progress and feedback will be permanently discarded.",
     warning_banner_title: "Client Safety Advisory",
     workout_setup_title: "Workout Session Setup",
     select_participants: "Select Participants & Assign Routines",
@@ -178,10 +179,11 @@ const TRANSLATIONS = {
     btn_add_set: "Dodaj serijo",
     btn_inject_exercise: "Vstavi vajo",
     btn_cancel: "Prekliči",
+    btn_delete_session: "Izbriši sejo",
     btn_complete: "Zaključi vadbo",
     btn_log_feedback: "Zabeleži povratne informacije",
     alert_no_sets: "Ni zabeleženih zaključenih serij. Ali ste prepričani, da želite zaključiti in shraniti prazno vadbo?",
-    confirm_cancel: "Prekliči aktivno vadbo? Vse zabeležene serije za to sejo bodo trajno izgubljene.",
+    confirm_cancel: "Izbriši to sejo? Zabeležen napredek in povratne informacije bodo trajno izgubljeni.",
     warning_banner_title: "Varnostno opozorilo za stranko",
     workout_setup_title: "Nastavitev seje vadbe",
     select_participants: "Izberi udeležence in dodeli rutine",
@@ -340,7 +342,7 @@ function applyTranslations(lang = state.lang || 'en') {
     
     // Active session clipboard overlay
     '#btn-add-exercise-to-session': 'btn_inject_exercise',
-    '#btn-cancel-session': 'btn_cancel',
+    '#btn-delete-session': 'btn_delete_session',
     '#btn-finish-session': 'btn_complete',
 
     // Dialog setups
@@ -2136,6 +2138,21 @@ function logQuickSignal(tag) {
   renderActiveGroupBoard();
 }
 
+// Colour an exercise card's title by the feedback logged against it for this client,
+// matching the card action buttons: green = Too Easy, amber = Too Hard, red = a note /
+// voice memo / safety flag (the Feedback button). Returns null when there's no feedback.
+function getExerciseSignalColor(clientId, exerciseName) {
+  const fb = ((activeSession && activeSession.feedback) || [])
+    .filter(f => f.clientId === clientId && f.exerciseName === exerciseName);
+  if (fb.length === 0) return null;
+  // A written note / voice memo is the richest signal — red, like the Feedback button
+  if (fb.some(f => (f.note && f.note.trim()) || f.hasVoiceNote)) return 'var(--danger)';
+  if (fb.some(f => /too hard|reduce load/i.test(f.tag))) return '#f59e0b';
+  if (fb.some(f => /too easy|increase load/i.test(f.tag))) return 'var(--success)';
+  // Any other tagged feedback (pain, form break, …) also warrants the red flag
+  return 'var(--danger)';
+}
+
 function renderActiveGroupBoard() {
   if (!activeSession) return;
 
@@ -2289,6 +2306,10 @@ function renderActiveGroupBoard() {
         const weightValue = item.weightTarget > 0 ? item.weightTarget : '—';
         const counter = `${item.index + 1}/${currentExList.length}`;
 
+        // Tint the title by any feedback logged for this exercise (see getExerciseSignalColor)
+        const signalColor = getExerciseSignalColor(activeClientId, item.name);
+        const nameStyle = signalColor ? ` style="color: ${signalColor};"` : '';
+
         if (item.isInFocus) {
           // Expanded focus card is the primary logging surface: target stats plus the
           // one-tap outcome signals that replaced the per-set stepper grid
@@ -2297,7 +2318,7 @@ function renderActiveGroupBoard() {
               <span class="deck-card-counter">${counter}</span>
               ${statusBadge}
             </div>
-            <h5 class="deck-card-name">${escapeHTML(item.name)}</h5>
+            <h5 class="deck-card-name"${nameStyle}>${escapeHTML(item.name)}</h5>
             <div class="deck-card-stats">
               <div class="deck-stat">
                 <span class="deck-stat-value">${escapeHTML(String(item.setsTarget))}</span>
@@ -2345,7 +2366,7 @@ function renderActiveGroupBoard() {
           card.innerHTML = `
             <div class="deck-card-compact">
               <span class="deck-card-counter">${counter}</span>
-              <span class="deck-card-name deck-card-name-inline">${escapeHTML(item.name)}</span>
+              <span class="deck-card-name deck-card-name-inline"${nameStyle}>${escapeHTML(item.name)}</span>
               <span class="deck-card-compact-target">${compactTarget}</span>
               ${statusBadge}
             </div>
@@ -2429,8 +2450,30 @@ function setupActiveSession() {
     }
   });
 
-  // Cancel workout
-  document.getElementById('btn-cancel-session').addEventListener('click', () => {
+  // Session overflow menu (holds the destructive Delete Session action)
+  const sessionMenuBtn = document.getElementById('btn-session-menu');
+  const sessionMenu = document.getElementById('session-menu');
+  const closeSessionMenu = () => {
+    sessionMenu.classList.add('hidden');
+    sessionMenuBtn.setAttribute('aria-expanded', 'false');
+  };
+  sessionMenuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isOpen = !sessionMenu.classList.contains('hidden');
+    sessionMenu.classList.toggle('hidden', isOpen);
+    sessionMenuBtn.setAttribute('aria-expanded', String(!isOpen));
+  });
+  // Dismiss the menu on any outside click
+  document.addEventListener('click', (e) => {
+    if (!sessionMenu.classList.contains('hidden') && !e.target.closest('.session-menu-wrap')) {
+      closeSessionMenu();
+    }
+  });
+
+  // Delete (discard) the active session — destructive, so it is confirmed and tucked
+  // away in the overflow menu rather than sitting beside Complete Workout Session.
+  document.getElementById('btn-delete-session').addEventListener('click', () => {
+    closeSessionMenu();
     if (confirm(t('confirm_cancel'))) {
       cancelWorkoutSession();
     }

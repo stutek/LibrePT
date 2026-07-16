@@ -1213,6 +1213,46 @@ body {
   gap: 12px;
 }
 
+/* Overflow menu in the clipboard header — home for destructive Delete Session */
+.session-menu-wrap {
+  position: relative;
+}
+.session-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 180px;
+  background: var(--card-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--box-shadow);
+  padding: 6px;
+  z-index: 130;
+}
+.session-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 14px;
+  border: none;
+  background: transparent;
+  border-radius: var(--border-radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--text-main);
+  text-align: left;
+}
+.session-menu-item-danger {
+  color: var(--danger);
+}
+.session-menu-item-danger:hover {
+  background: var(--danger-light);
+}
+
 /* FLOATING REST TIMER */
 .floating-timer {
   position: fixed;
