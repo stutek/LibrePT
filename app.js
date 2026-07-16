@@ -3,6 +3,7 @@ import { DEFAULT_EXERCISES, DEFAULT_CLIENTS, DEFAULT_ROUTINES, DEFAULT_HISTORY, 
 import { renderSessionCard } from './components/sessionCard.js';
 import { renderExerciseCard } from './components/exerciseCard.js';
 import { renderCircuitCard } from './components/circuitCard.js';
+import { initSessionBar, updateSessionBarTimer, renderActiveSessionBarLabels, renderIdleSessionBar } from './components/sessionBar.js';
 
 // --- TRANSLATION / i18n SYSTEM ---
 const TRANSLATIONS = {
@@ -583,6 +584,19 @@ function init() {
       }
     });
   }
+
+  // Wire the session-bar component with accessors (state/activeSession are reassigned) and
+  // the app-level helpers it renders from, before any render that touches the bar.
+  initSessionBar({
+    getState: () => state,
+    getActiveSession: () => activeSession,
+    t,
+    formatSignedDuration,
+    formatDuration,
+    parseTimeRange,
+    getOverlappingBookings,
+    buildBookingMeta
+  });
 
   // Apply translations initially
   applyTranslations(state.lang);
@@ -2064,41 +2078,8 @@ function updateOverlaySessionTimer() {
   }
 }
 
-// The bar's countdown derives from the booking's scheduled end when one is known
-// (may run negative once a session overruns); ad-hoc sessions with no booking fall
-// back to an elapsed count-up, since there is no schedule to count down against.
-function updateSessionBarTimer() {
-  if (!activeSession) return;
-  const durationEl = document.getElementById('session-bar-duration');
-  if (!durationEl) return;
-
-  const endDate = activeSession.booking && activeSession.booking.endDate;
-  if (endDate) {
-    const remainingSec = Math.round((endDate.getTime() - Date.now()) / 1000);
-    durationEl.textContent = formatSignedDuration(remainingSec);
-    durationEl.classList.toggle('overtime', remainingSec < 0);
-  } else {
-    durationEl.textContent = formatDuration(activeSession.duration);
-    durationEl.classList.remove('overtime');
-  }
-}
-
-// Session name, participant count, and scheduled time range for the active bar.
-// Ad-hoc sessions (started without a booking) fall back to a generic label — there
-// is no scheduled title or time range to show.
-function renderActiveSessionBarLabels() {
-  if (!activeSession) return;
-  const titleEl = document.getElementById('session-bar-title');
-  const metaEl = document.getElementById('session-bar-meta');
-  if (!titleEl || !metaEl) return;
-
-  const booking = activeSession.booking;
-  const count = activeSession.participants.length;
-  const clientsLabel = `${count} ${t('bar_clients_label')}`;
-
-  titleEl.textContent = booking ? booking.titles.join(' + ') : t('live_tracking_clipboard');
-  metaEl.textContent = booking ? `${clientsLabel} · ${booking.timeLabel}` : clientsLabel;
-}
+// The active/idle session bar render lives in components/sessionBar.js
+// (updateSessionBarTimer, renderActiveSessionBarLabels, renderIdleSessionBar).
 
 function getActiveExercise() {
   if (!activeSession) return null;
@@ -3324,68 +3305,7 @@ function getOverlappingBookings(booking) {
   });
 }
 
-// The next session the idle bar should refer to: the earliest slot today that hasn't
-// finished yet (covers both "not started" and "in progress but not launched"), or —
-// if today has nothing left — the earliest slot tomorrow. Returns null when there's
-// nothing scheduled in either bucket.
-function getNextUpcomingBookingGroup() {
-  const bookings = state.bookings || [];
-  const now = new Date();
-  const nowMinutes = now.getHours() * 60 + now.getMinutes();
-
-  const pickEarliest = (list) => {
-    let best = null;
-    let bestStart = Infinity;
-    list.forEach(b => {
-      const r = parseTimeRange(b.time);
-      if (r && r.start < bestStart) {
-        bestStart = r.start;
-        best = b;
-      }
-    });
-    return best;
-  };
-
-  const todayCandidates = bookings.filter(b => {
-    if (b.day !== 'today') return false;
-    const r = parseTimeRange(b.time);
-    return r && r.end >= nowMinutes;
-  });
-
-  const anchor = pickEarliest(todayCandidates) || pickEarliest(bookings.filter(b => b.day === 'tomorrow'));
-  if (!anchor) return null;
-
-  return { day: anchor.day, bookings: getOverlappingBookings(anchor) };
-}
-
-// Idle bar: colour-distinct from the active state, names the next upcoming session(s)
-// (merged when several run in the same slot), and its click target opens that same
-// clipboard directly (TODO 2.2). Hides entirely when nothing is scheduled to show.
-function renderIdleSessionBar() {
-  if (activeSession) return;
-  const bar = document.getElementById('active-session-bar');
-  if (!bar) return;
-
-  const next = getNextUpcomingBookingGroup();
-  if (!next || next.bookings.length === 0) {
-    bar.classList.add('hidden');
-    delete bar.dataset.nextBookingId;
-    return;
-  }
-
-  const meta = buildBookingMeta(next.bookings, next.day);
-  const participantCount = new Set(next.bookings.flatMap(b => b.participants)).size;
-  const startsInSec = Math.round((meta.startDate.getTime() - Date.now()) / 1000);
-
-  bar.classList.remove('hidden');
-  bar.classList.add('is-idle');
-  bar.dataset.nextBookingId = next.bookings[0].id;
-
-  document.getElementById('session-bar-title').textContent = `${t('next_session_label')}: ${meta.titles.join(' + ')}`;
-  document.getElementById('session-bar-meta').textContent = `${participantCount} ${t('bar_clients_label')} · ${meta.timeLabel}`;
-  document.getElementById('session-bar-duration').textContent = formatSignedDuration(startsInSec);
-  document.getElementById('session-bar-duration').classList.remove('overtime');
-}
+// getNextUpcomingBookingGroup + renderIdleSessionBar moved to components/sessionBar.js.
 
 function launchClipboardDirectly(bookingId) {
   if (!state.bookings) return;
