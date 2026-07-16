@@ -178,7 +178,7 @@ def test_interactive_dashboard_flow(page, local_server):
     lang_switcher.select_option("sl")
     
     # Verify dashboard header translates dynamically
-    assert page.locator("#btn-sync-calendar-text").inner_text().strip().upper() == "SINHRONIZIRAJ SEJE"
+    assert page.locator("#btn-sync-calendar-text").inner_text().strip().upper() == "SINHRONIZIRAJ PODATKE"
     assert page.locator("#calendar-title-tag").inner_text().strip().upper() == "(DANES)"
 
     # Switch back to English (EN)
@@ -213,12 +213,8 @@ def test_interactive_dashboard_flow(page, local_server):
     assert any("Jane" in t for t in tabs)
     assert any("John" in t for t in tabs)
 
-    # Verify Foreshadowing ("Up Next") card is visible
-    assert page.locator("#foreshadowing-card").is_visible()
-    assert "UP NEXT" in page.locator("#label-up-next").inner_text().strip().upper()
-
     # --- STEP 5: PRIVACY-FIRST VOICE NOTE RECORDING ---
-    # Open the Log Feedback modal
+    # Log Feedback now lives on the in-focus exercise card
     page.locator("#btn-log-feedback").click()
     page.wait_for_selector("#dialog-feedback", state="visible")
 

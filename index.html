@@ -72,7 +72,7 @@
           <i class="fa-solid fa-chevron-right"></i>
         </button>
         <button id="btn-sync-calendar" class="btn secondary-btn btn-xs" style="margin-left: auto; gap: 6px; display: inline-flex; align-items: center;">
-          <i class="fa-solid fa-rotate"></i> <span id="btn-sync-calendar-text">Sync Sessions</span>
+          <i class="fa-solid fa-rotate"></i> <span id="btn-sync-calendar-text">Sync Data</span>
         </button>
       </div>
       <div class="sessions-categories-grid mb-6" id="sessions-categories-grid" role="region" aria-label="Sessions Schedule">
@@ -298,12 +298,15 @@
     </button>
   </nav>
 
-  <!-- BOTTOM PANEL: Active Workout Status Bar (Minimised) -->
-  <div id="active-session-bar" class="active-session-bar hidden">
+  <!-- BOTTOM PANEL: Session Status Bar — active workout, or (when idle) the next upcoming session -->
+  <div id="active-session-bar" class="active-session-bar hidden" role="button" tabindex="0" aria-label="Open session">
     <div class="session-bar-content">
-      <div class="session-bar-info">
-        <span class="pulse-indicator"></span>
-        <span id="session-bar-title">Active Workout</span>
+      <div class="session-bar-main">
+        <div class="session-bar-info">
+          <span class="pulse-indicator"></span>
+          <span id="session-bar-title">Active Workout</span>
+        </div>
+        <div class="session-bar-meta" id="session-bar-meta"></div>
       </div>
       <div class="session-bar-timer" id="session-bar-duration">00:00</div>
       <div class="session-bar-actions">
@@ -350,63 +353,21 @@
         <span id="clipboard-client-notes-text">Notes go here</span>
       </div>
 
-      <!-- Current Exercise Paging Navigator -->
-      <div class="active-exercise-navigator card glassmorphic" style="display: flex; flex-direction: column; gap: 10px; padding: 12px; align-items: stretch;">
-        <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
-          <button type="button" id="btn-prev-exercise" class="nav-arrow-btn" style="flex-shrink: 0;" aria-label="Previous Exercise">
-            <i class="fa-solid fa-chevron-left"></i>
-          </button>
-          
-          <!-- Horizontal Scroll Deck -->
-          <div id="active-exercise-scroll-deck" class="exercise-scroll-deck" style="flex: 1;">
-            <!-- Dynamically populated card elements: Past Session Exercises, Current Exercises (Completed/In-Focus/Upcoming) -->
-          </div>
-          
-          <button type="button" id="btn-next-exercise" class="nav-arrow-btn" style="flex-shrink: 0;" aria-label="Next Exercise">
-            <i class="fa-solid fa-chevron-right"></i>
-          </button>
-        </div>
-        
-        <!-- Details of the currently highlighted exercise -->
-        <div class="current-exercise-display" style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px; text-align: center;">
-          <span class="exercise-index-label" id="active-ex-index">Exercise 1 of 5</span>
-          <h4 id="active-ex-name" style="margin: 4px 0;">Squats</h4>
-          <p class="exercise-instructions-sub" id="active-ex-desc" style="margin: 0; font-size: 11px; color: var(--text-muted);">Hinge at hips, keep chest up...</p>
-        </div>
+      <!-- Vertical Exercise List: the in-focus card is the primary logging surface
+           (stats + one-tap Too Easy / Too Hard / Feedback), upcoming exercises stack below -->
+      <div id="active-exercise-scroll-deck" class="exercise-vertical-list">
+        <!-- Dynamically populated card elements: Past Session Exercises, Current Exercises (Completed/In-Focus/Upcoming) -->
       </div>
 
-      <!-- Scroll-Free Logging Grid for Active Client's active exercise -->
-      <div class="section-title text-sm mt-3">
-        <span>Log Sets</span>
-        <div class="title-actions">
-          <button id="btn-trigger-group-timer" class="btn secondary-btn btn-xs">
-            <i class="fa-solid fa-stopwatch"></i> Rest Timer
-          </button>
-          <button id="btn-log-feedback" class="btn danger-btn btn-xs">
-            <i class="fa-solid fa-message"></i> Log Feedback
-          </button>
-        </div>
-      </div>
-
-      <div id="clipboard-logger-container" class="clipboard-grid-card card glassmorphic">
-        <!-- Dynamic sets table with steppers injected via JS -->
-      </div>
-
-      <!-- Up Next Foreshadowing Card -->
-      <div id="foreshadowing-card" class="foreshadowing-card card glassmorphic hidden" style="margin-top: 12px; padding: 12px; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-left: 4px solid var(--accent-cyan); background: rgba(255, 255, 255, 0.02);">
-        <div style="flex: 1;">
-          <span id="label-up-next" style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;" data-i18n="up_next_label">Up Next</span>
-          <h5 id="foreshadowing-name" style="margin: 2px 0 0 0; font-size: 13px; color: var(--text-color); font-weight: 600;">Up Next Exercise</h5>
-        </div>
-        <div id="foreshadowing-target" style="font-size: 11px; color: var(--text-muted); text-align: right; font-weight: 600;">
-          Sets & Reps
-        </div>
+      <!-- Historical review panel: only shown when a past-session card is tapped -->
+      <div id="clipboard-logger-container" class="clipboard-grid-card card glassmorphic hidden">
+        <!-- Populated by showPastExerciseInFocus() -->
       </div>
 
       <!-- Active Client Level Controls -->
       <div class="clipboard-actions-row">
-        <button id="btn-add-session-set" class="btn secondary-btn btn-sm">
-          <i class="fa-solid fa-plus"></i> Add Set
+        <button id="btn-trigger-group-timer" class="btn secondary-btn btn-sm">
+          <i class="fa-solid fa-stopwatch"></i> Rest Timer
         </button>
         <button id="btn-add-exercise-to-session" class="btn secondary-btn btn-sm">
           <i class="fa-solid fa-circle-plus"></i> Inject Exercise
@@ -593,7 +554,7 @@
       
       <div class="modal-actions">
         <button type="button" class="btn secondary-btn modal-cancel">Cancel</button>
-        <button type="submit" class="btn success-btn">Launch Clipboard <i class="fa-solid fa-circle-play ml-1"></i></button>
+        <button type="submit" class="btn success-btn">Session Details <i class="fa-solid fa-circle-play ml-1"></i></button>
       </div>
     </form>
   </dialog>

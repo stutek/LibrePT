@@ -1,6 +1,6 @@
 // sw.js - LibrePT Service Worker for Offline Functionality
 // Bump CACHE_NAME on release: `activate` purges every cache that does not match it.
-const CACHE_NAME = 'librept-v2';
+const CACHE_NAME = 'librept-v3';
 const ASSETS = [
   './',
   './index.html',
@@ -52,8 +52,11 @@ self.addEventListener('fetch', (e) => {
     // Network-first for our own app shell. A stale-while-revalidate cache serves the previous
     // build on every load after a deploy, which silently hides shipped changes from trainers.
     // Falling back to cache keeps a basement gym with no signal fully offline-capable.
+    // no-store is required here: a plain fetch() still consults the browser's own HTTP cache,
+    // and a dev server with no Cache-Control header (python -m http.server) lets that cache
+    // silently serve a stale build even though this handler looks network-first.
     e.respondWith(
-      fetch(e.request)
+      fetch(e.request, { cache: 'no-store' })
         .then((response) => cachePut(e.request, response))
         .catch(() => caches.match(e.request).then((cached) => cached || Response.error()))
     );

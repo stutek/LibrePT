@@ -45,7 +45,7 @@ const TRANSLATIONS = {
     warning_banner_title: "Client Safety Advisory",
     workout_setup_title: "Workout Session Setup",
     select_participants: "Select Participants & Assign Routines",
-    btn_launch_clipboard: "Launch Clipboard",
+    btn_launch_clipboard: "Session Details",
     err_select_client: "You must select at least one participant client.",
     err_assign_routine: "Please assign a routine template to all selected participants.",
     add_ex_session_title: "Inject Exercise on Gym Floor",
@@ -113,10 +113,10 @@ const TRANSLATIONS = {
     sessions_schedule: "Sessions Schedule",
     from_date: "From",
     btn_sync_calendar: "Sync Calendar",
-    btn_sync_sessions: "Sync Sessions",
+    btn_sync_data: "Sync Data",
     booking_spots: "spots booked",
     spots_filled: "spots filled",
-    btn_launch_clipboard_short: "Launch Clipboard",
+    btn_launch_clipboard_short: "Session Details",
     syncing_calendar: "Syncing...",
     calendar_synced: "Calendar synchronized successfully!",
     no_bookings_today: "No bookings found for today.",
@@ -134,7 +134,12 @@ const TRANSLATIONS = {
     yesterday: "Yesterday",
     upcoming: "Upcoming",
     undefined: "Undefined",
-    combo_round_title: "Linked Combo Round"
+    combo_round_title: "Linked Combo Round",
+    bar_clients_label: "clients",
+    next_session_label: "Next",
+    signal_too_easy: "Too Easy",
+    signal_too_hard: "Too Hard",
+    feedback_short: "Feedback"
   },
   sl: {
     logo_title: "LibrePT",
@@ -178,7 +183,7 @@ const TRANSLATIONS = {
     warning_banner_title: "Varnostno opozorilo za stranko",
     workout_setup_title: "Nastavitev seje vadbe",
     select_participants: "Izberi udeležence in dodeli rutine",
-    btn_launch_clipboard: "Začni sledenje",
+    btn_launch_clipboard: "Podrobnosti seje",
     err_select_client: "Izbrati morate vsaj eno stranko.",
     err_assign_routine: "Prosimo, dodelite predlogo rutine vsem izbranim strankam.",
     add_ex_session_title: "Vstavi vajo na vadbišču",
@@ -246,10 +251,10 @@ const TRANSLATIONS = {
     sessions_schedule: "Urnik sej",
     from_date: "Od",
     btn_sync_calendar: "Sinhroniziraj",
-    btn_sync_sessions: "Sinhroniziraj seje",
+    btn_sync_data: "Sinhroniziraj podatke",
     booking_spots: "mest zasedenih",
     spots_filled: "mest zasedenih",
-    btn_launch_clipboard_short: "Začni sledenje",
+    btn_launch_clipboard_short: "Podrobnosti seje",
     syncing_calendar: "Sinhronizacija...",
     calendar_synced: "Koledar je bil uspešno sinhroniziran!",
     no_bookings_today: "Za danes ni najdenih rezervacij.",
@@ -267,7 +272,12 @@ const TRANSLATIONS = {
     yesterday: "Včeraj",
     upcoming: "Prihodnje",
     undefined: "Nedoločen",
-    combo_round_title: "Povezana kombinirana serija"
+    combo_round_title: "Povezana kombinirana serija",
+    bar_clients_label: "strank",
+    next_session_label: "Naslednja",
+    signal_too_easy: "Prelahko",
+    signal_too_hard: "Pretežko",
+    feedback_short: "Opomba"
   }
 };
 
@@ -299,7 +309,7 @@ function applyTranslations(lang = state.lang || 'en') {
     '#pending-adjustments-title': 'pending_adjustments',
     '#view-clients .view-header h2': 'clients_title',
     '#btn-add-client': 'btn_add_client',
-    '#btn-sync-calendar-text': 'btn_sync_sessions',
+    '#btn-sync-calendar-text': 'btn_sync_data',
     
     // Client Detail view
     '#view-client-detail .client-profile-card h4:nth-of-type(1)': 'notes_injuries',
@@ -325,12 +335,10 @@ function applyTranslations(lang = state.lang || 'en') {
     '#view-history .view-desc': 'history_desc',
     
     // Active session clipboard overlay
-    '#btn-add-session-set': 'btn_add_set',
     '#btn-add-exercise-to-session': 'btn_inject_exercise',
     '#btn-cancel-session': 'btn_cancel',
     '#btn-finish-session': 'btn_complete',
-    '#btn-log-feedback': 'btn_log_feedback',
-    
+
     // Dialog setups
     '#dialog-workout-setup .modal-header h3': 'workout_setup_title',
     '#dialog-workout-setup label[for="setup-participants-assignment-list"]': 'select_participants',
@@ -349,7 +357,6 @@ function applyTranslations(lang = state.lang || 'en') {
     '#dialog-feedback button[type="submit"]': 'btn_log_alert',
     '#label-voice-note': 'voice_note_label',
     '#voice-record-status': 'voice_ready',
-    '#label-up-next': 'up_next_label',
     '#label-sessions-today': 'today',
     '#label-sessions-tomorrow': 'tomorrow',
     '#label-sessions-yesterday': 'yesterday',
@@ -447,6 +454,10 @@ let state = {
 };
 
 let activeSession = null;
+// Voice-note recorder state for the feedback modal — module-scoped so the card's
+// Log Feedback button (openFeedbackModal) and the modal's own handlers share it.
+let feedbackIsRecording = false;
+let feedbackHasVoiceNote = false;
 let restTimer = {
   intervalId: null,
   secondsRemaining: 0,
@@ -455,7 +466,24 @@ let restTimer = {
 };
 
 // --- INITIALIZE APPLICATION ---
+// Best-effort: size the browser window itself to a phone viewport on load/reload, so
+// the gym-floor phone view is what you see without manually opening DevTools' device
+// toolbar every time. Browsers only honor resizeTo() on a window the page itself opened
+// via script with a single tab/history entry (e.g. `chrome --app=<url>`, or a
+// window.open() popup) — on an ordinary browser tab this is a documented no-op, not a bug.
+function resizeToPhoneViewport() {
+  const targetWidth = 412;
+  const targetHeight = 915;
+  try {
+    window.resizeTo(targetWidth, targetHeight);
+  } catch (e) {
+    // Disallowed by the browser — silently ignored, nothing else on the page depends on it
+  }
+}
+
 function init() {
+  resizeToPhoneViewport();
+
   // Load data from LocalStorage or initialize with Mock Data
   let savedData = localStorage.getItem('librept_db');
   if (!savedData) {
@@ -493,6 +521,22 @@ function init() {
     saveToLocalStorage();
   }
 
+  // Demo-data version guard. Clients and bookings are seeded reference data, but they were
+  // only ever re-seeded on a completely empty database — so editing mockData.js left anyone
+  // with an existing localStorage db seeing the old demo roster. Bump SEED_VERSION whenever
+  // DEFAULT_CLIENTS or DEFAULT_SESSIONS change to force those two back to current, while
+  // leaving user-owned routines, exercises, history, and plan updates untouched.
+  const SEED_VERSION = 4;
+  const storedSeed = parseInt(localStorage.getItem('librept_seed_version') || '0', 10);
+  if (storedSeed < SEED_VERSION) {
+    state.clients = [...DEFAULT_CLIENTS];
+    state.bookings = [...DEFAULT_SESSIONS];
+    localStorage.setItem('librept_seed_version', String(SEED_VERSION));
+    saveToLocalStorage();
+    // Demo: open on session 1 already in progress, participants at varied completion
+    seedDemoActiveSession();
+  }
+
   // Set up Event Listeners
   setupNavigation();
   setupClientForms();
@@ -523,6 +567,7 @@ function init() {
       populateDropdownSelectors();
       if (activeSession) {
         renderActiveGroupBoard();
+        renderActiveSessionBarLabels();
       }
     });
   }
@@ -541,6 +586,10 @@ function init() {
 
   // Check if there was an active session saved (session recovery)
   recoverActiveSession();
+
+  // Keep the idle bar's "next session" + starts-in countdown fresh even with no other
+  // trigger firing (an active session's own 1s tick handles the bar while one is running)
+  setInterval(renderIdleSessionBar, 30000);
 }
 
 function seedMockData() {
@@ -557,6 +606,89 @@ function seedMockData() {
 
 function saveToLocalStorage() {
   localStorage.setItem('librept_db', JSON.stringify(state));
+}
+
+// Demo-only: seeds session 1 (b-1) as a live, half-finished workout so the prototype
+// opens on a running session rather than an empty dashboard. Each participant is parked
+// at a different exercise so the clipboard shows a spread of card-completion counts.
+// Written straight to the active-session cache; recoverActiveSession() picks it up on init.
+function seedDemoActiveSession() {
+  const booking = (state.bookings || []).find(b => b.id === 'b-1');
+  if (!booking) return;
+
+  const participantIds = booking.participants.filter(pid => state.clients.some(c => c.id === pid));
+  if (participantIds.length === 0) return;
+
+  const routine = state.routines.find(r => r.id === booking.routineId) || state.routines[0];
+  if (!routine) return;
+
+  const now = Date.now();
+  const HOUR = 60 * 60 * 1000;
+  // Backdate the start by an hour and end an hour out: the session sits at its midpoint,
+  // so the bar's countdown reads ~1h remaining of a 2h slot ("half done").
+  const startTime = now - HOUR;
+
+  const session = {
+    startTime,
+    duration: Math.floor((now - startTime) / 1000),
+    participants: participantIds,
+    clientRoutines: {},
+    activeClientId: participantIds[0],
+    booking: {
+      titles: [booking.title],
+      day: booking.day,
+      startDate: new Date(now - HOUR).toISOString(),
+      endDate: new Date(now + HOUR).toISOString(),
+      timeLabel: booking.time
+    },
+    feedback: []
+  };
+
+  // Different completed-exercise count per participant (clamped to the routine length)
+  const completedCounts = [4, 2, 5, 3, 1, 3, 0];
+
+  participantIds.forEach((pid, i) => {
+    const clientState = {
+      routineId: routine.id,
+      routineName: routine.name,
+      activeExerciseIndex: 0,
+      exercises: [],
+      logs: {}
+    };
+
+    routine.exercises.forEach(item => {
+      const ex = state.exercises.find(e => e.id === item.id);
+      if (!ex) return;
+      clientState.exercises.push({
+        id: item.id,
+        name: ex.name,
+        category: ex.category,
+        instructions: ex.instructions,
+        setsTargetCount: item.sets,
+        repsTarget: item.reps,
+        weightTarget: item.weight,
+        rest: item.rest
+      });
+      clientState.logs[item.id] = Array.from({ length: item.sets }, () => ({
+        reps: item.reps,
+        weight: item.weight,
+        completed: false,
+        note: ''
+      }));
+    });
+
+    const doneCount = Math.min(completedCounts[i % completedCounts.length], clientState.exercises.length);
+    clientState.exercises.forEach((ex, exIdx) => {
+      if (exIdx < doneCount) {
+        (clientState.logs[ex.id] || []).forEach(l => { l.completed = true; });
+      }
+    });
+    clientState.activeExerciseIndex = Math.min(doneCount, Math.max(0, clientState.exercises.length - 1));
+
+    session.clientRoutines[pid] = clientState;
+  });
+
+  localStorage.setItem('librept_active_session', JSON.stringify(session));
 }
 
 // --- VIEW ROUTER ---
@@ -1069,10 +1201,12 @@ function renderRoutinesList() {
     const card = document.createElement('div');
     card.className = 'routine-card card glassmorphic';
     
-    // Make tags of exercises
+    // Make tags of exercises, including the target sets/reps/weight for each
     const tags = routine.exercises.map(item => {
       const ex = state.exercises.find(e => e.id === item.id);
-      return `<span class="preview-tag">${ex ? ex.name : 'Unknown Exercise'}</span>`;
+      const name = escapeHTML(ex ? ex.name : 'Unknown Exercise');
+      const detail = `${item.sets}×${item.reps}${item.weight > 0 ? ` · ${item.weight}${t('kg')}` : ''}`;
+      return `<span class="preview-tag">${name} <span class="preview-tag-detail">${escapeHTML(detail)}</span></span>`;
     }).slice(0, 4).join('');
 
     const moreCount = routine.exercises.length > 4 ? `+${routine.exercises.length - 4} more` : '';
@@ -1769,16 +1903,17 @@ function openWorkoutSetupModal(preselectedClientId = null, preselectedRoutineId 
 }
 
 // 2. Active Session Core
-function startWorkoutSession(clientRoutines) {
+function startWorkoutSession(clientRoutines, bookingMeta = null) {
   // Initialize session state
   const participantIds = clientRoutines.map(cr => cr.clientId);
-  
+
   activeSession = {
     startTime: Date.now(),
     duration: 0,
     participants: participantIds,
     clientRoutines: {},
-    activeClientId: participantIds[0]
+    activeClientId: participantIds[0],
+    booking: bookingMeta
   };
 
   // Populate active exercises and logs per client
@@ -1825,11 +1960,13 @@ function startWorkoutSession(clientRoutines) {
   saveActiveSessionToCache();
 
   // Open overlay and bar
-  document.getElementById('active-session-bar').classList.remove('hidden');
+  const bar = document.getElementById('active-session-bar');
+  bar.classList.remove('hidden', 'is-idle');
+  delete bar.dataset.nextBookingId;
   document.getElementById('active-session-overlay').classList.remove('hidden');
-  
+
   // Set labels
-  document.getElementById('session-bar-title').textContent = `Active: ${participantIds.length} Clients`;
+  renderActiveSessionBarLabels();
 
   // Start timer interval
   startSessionTimer();
@@ -1840,16 +1977,54 @@ function startWorkoutSession(clientRoutines) {
 
 function startSessionTimer() {
   if (activeSession.timerIntervalId) clearInterval(activeSession.timerIntervalId);
-  
-  activeSession.timerIntervalId = setInterval(() => {
+
+  const tick = () => {
     activeSession.duration = Math.floor((Date.now() - activeSession.startTime) / 1000);
-    const timeStr = formatDuration(activeSession.duration);
-    document.getElementById('session-bar-duration').textContent = timeStr;
-    document.getElementById('overlay-session-duration').textContent = timeStr;
-    
+    document.getElementById('overlay-session-duration').textContent = formatDuration(activeSession.duration);
+    updateSessionBarTimer();
+
     // Save periodically
     saveActiveSessionToCache();
-  }, 1000);
+  };
+
+  activeSession.timerIntervalId = setInterval(tick, 1000);
+  tick();
+}
+
+// The bar's countdown derives from the booking's scheduled end when one is known
+// (may run negative once a session overruns); ad-hoc sessions with no booking fall
+// back to an elapsed count-up, since there is no schedule to count down against.
+function updateSessionBarTimer() {
+  if (!activeSession) return;
+  const durationEl = document.getElementById('session-bar-duration');
+  if (!durationEl) return;
+
+  const endDate = activeSession.booking && activeSession.booking.endDate;
+  if (endDate) {
+    const remainingSec = Math.round((endDate.getTime() - Date.now()) / 1000);
+    durationEl.textContent = formatSignedDuration(remainingSec);
+    durationEl.classList.toggle('overtime', remainingSec < 0);
+  } else {
+    durationEl.textContent = formatDuration(activeSession.duration);
+    durationEl.classList.remove('overtime');
+  }
+}
+
+// Session name, participant count, and scheduled time range for the active bar.
+// Ad-hoc sessions (started without a booking) fall back to a generic label — there
+// is no scheduled title or time range to show.
+function renderActiveSessionBarLabels() {
+  if (!activeSession) return;
+  const titleEl = document.getElementById('session-bar-title');
+  const metaEl = document.getElementById('session-bar-meta');
+  if (!titleEl || !metaEl) return;
+
+  const booking = activeSession.booking;
+  const count = activeSession.participants.length;
+  const clientsLabel = `${count} ${t('bar_clients_label')}`;
+
+  titleEl.textContent = booking ? booking.titles.join(' + ') : t('live_tracking_clipboard');
+  metaEl.textContent = booking ? `${clientsLabel} · ${booking.timeLabel}` : clientsLabel;
 }
 
 function getActiveExercise() {
@@ -1858,6 +2033,99 @@ function getActiveExercise() {
   const activeClientState = activeSession.clientRoutines[activeClientId];
   if (!activeClientState || activeClientState.exercises.length === 0) return null;
   return activeClientState.exercises[activeClientState.activeExerciseIndex];
+}
+
+// Fades whichever edge(s) still have participant tabs scrolled off past them, so a
+// merged session with more clients than fit on a gym-floor phone reads as "swipe for
+// more" instead of looking like names got cut off (see .client-tabs-bar in index.css).
+function updateClientTabsFadeState() {
+  const el = document.getElementById('active-session-client-tabs');
+  if (!el) return;
+
+  const hasOverflow = el.scrollWidth > el.clientWidth + 1;
+  el.classList.toggle('no-overflow', !hasOverflow);
+  if (!hasOverflow) return;
+
+  const atStart = el.scrollLeft <= 1;
+  const atEnd = el.scrollLeft >= el.scrollWidth - el.clientWidth - 1;
+  el.classList.toggle('at-start', atStart);
+  el.classList.toggle('at-end', atEnd);
+}
+
+// Opens the full feedback modal for the active client's current exercise, prefilled and
+// with the voice recorder reset. Invoked by the Log Feedback button on the focus card.
+function openFeedbackModal() {
+  if (!activeSession) return;
+  const activeClientId = activeSession.activeClientId;
+  const clientState = activeSession.clientRoutines[activeClientId];
+  if (!clientState || clientState.exercises.length === 0) return;
+
+  const curEx = clientState.exercises[clientState.activeExerciseIndex];
+  const client = state.clients.find(c => c.id === activeClientId);
+
+  document.getElementById('feedback-client-id').value = activeClientId;
+  document.getElementById('feedback-exercise-name').value = curEx.name;
+  document.getElementById('feedback-client-display-name').textContent = client.name;
+  document.getElementById('feedback-ex-display-name').textContent = curEx.name;
+  document.getElementById('feedback-custom-note').value = '';
+
+  // Reset voice recorder state
+  feedbackIsRecording = false;
+  feedbackHasVoiceNote = false;
+  const audioWave = document.getElementById('voice-audio-wave');
+  const audioPlayer = document.getElementById('voice-audio-player');
+  const recordIcon = document.getElementById('voice-record-icon');
+  const recordStatus = document.getElementById('voice-record-status');
+  if (audioWave) { audioWave.classList.add('hidden'); audioWave.classList.remove('recording'); }
+  if (audioPlayer) audioPlayer.classList.add('hidden');
+  if (recordStatus) recordStatus.textContent = t('voice_ready');
+  if (recordIcon) { recordIcon.className = 'fa-solid fa-microphone'; recordIcon.style.color = ''; }
+
+  document.getElementById('form-feedback').reset();
+  document.getElementById('dialog-feedback').showModal();
+}
+
+// One-tap outcome signal (Too Easy / Too Hard) from the focus card. Records the same
+// kind of feedback the modal would, marks the exercise's target sets as completed so it
+// carries into the saved session history, and re-renders. Replaces per-set stepper logging.
+function logQuickSignal(tag) {
+  if (!activeSession) return;
+  const clientId = activeSession.activeClientId;
+  const clientState = activeSession.clientRoutines[clientId];
+  if (!clientState || clientState.exercises.length === 0) return;
+
+  const curEx = clientState.exercises[clientState.activeExerciseIndex];
+  const client = state.clients.find(c => c.id === clientId);
+
+  const newFeedback = {
+    id: 'u-' + Date.now(),
+    clientId,
+    clientName: client ? client.name : 'Unknown Client',
+    date: new Date().toISOString(),
+    exerciseName: curEx.name,
+    tag,
+    hasVoiceNote: false,
+    resolved: false
+  };
+  state.planUpdates.push(newFeedback);
+
+  if (!activeSession.feedback) activeSession.feedback = [];
+  activeSession.feedback.push({
+    id: newFeedback.id,
+    clientId,
+    exerciseName: curEx.name,
+    tag,
+    note: '',
+    hasVoiceNote: false
+  });
+
+  // Tapping an outcome marks the exercise done, so "Complete Workout Session" still logs it
+  (clientState.logs[curEx.id] || []).forEach(l => { l.completed = true; });
+
+  saveActiveSessionToCache();
+  saveToLocalStorage();
+  renderPendingPlanAdjustments();
+  renderActiveGroupBoard();
 }
 
 function renderActiveGroupBoard() {
@@ -1907,6 +2175,8 @@ function renderActiveGroupBoard() {
       
       tabsContainer.appendChild(tab);
     });
+
+    updateClientTabsFadeState();
   }
 
   // 2. Client Injury warning banner
@@ -1978,19 +2248,17 @@ function renderActiveGroupBoard() {
     const allDeckItems = [...pastExList, ...currentExList];
     allDeckItems.forEach(item => {
       const card = document.createElement('div');
-      
+
       if (item.type === 'past') {
         card.className = 'exercise-deck-card past-session';
+        // Logged history, not a target: every set is listed as-is rather than reduced to
+        // one sets/reps/weight triplet, since loads and reps often vary across the sets
         const setsSummary = item.sets.map(s => `${s.weight}kg x ${s.reps}`).join(', ');
         card.innerHTML = `
-          <div style="display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
-            <div>
-              <span class="badge" style="font-size: 8px; padding: 2px 4px; background: rgba(139, 92, 246, 0.2); color: #c084fc; font-weight: 700; margin-bottom: 4px; display: inline-block;">Past: ${item.sessionDate}</span>
-              <h5 style="margin: 0; font-size: 11px; color: var(--text-color); font-weight: 600; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${escapeHTML(item.name)}</h5>
-            </div>
-            <div style="font-size: 9px; color: var(--text-muted); text-overflow: ellipsis; overflow: hidden; white-space: nowrap; margin-top: 4px;">
-              ${escapeHTML(setsSummary)}
-            </div>
+          <div class="deck-card-compact">
+            <span class="badge deck-card-status deck-card-status-past">Past: ${item.sessionDate}</span>
+            <span class="deck-card-name deck-card-name-inline">${escapeHTML(item.name)}</span>
+            <span class="deck-card-compact-target">${escapeHTML(setsSummary)}</span>
           </div>
         `;
         card.addEventListener('click', () => {
@@ -1999,454 +2267,131 @@ function renderActiveGroupBoard() {
       } else {
         const checkedClass = item.isInFocus ? 'in-focus' : (item.isCompleted ? 'completed' : '');
         card.className = `exercise-deck-card ${checkedClass}`;
-        
-        let targetText = `${item.setsTarget} sets`;
-        if (item.repsTarget) targetText += ` × ${item.repsTarget}`;
-        if (item.weightTarget > 0) targetText += ` (${item.weightTarget}kg)`;
-        
+
         let statusBadge = '';
         if (item.isInFocus) {
-          statusBadge = `<span class="badge badge-cyan" style="font-size: 8px; padding: 2px 4px; font-weight: 700; margin-bottom: 4px; display: inline-block;">In Focus</span>`;
+          statusBadge = `<span class="badge badge-cyan deck-card-status">In Focus</span>`;
         } else if (item.isCompleted) {
-          statusBadge = `<span class="badge badge-emerald" style="font-size: 8px; padding: 2px 4px; font-weight: 700; margin-bottom: 4px; display: inline-block;">Completed</span>`;
+          statusBadge = `<span class="badge badge-emerald deck-card-status">Completed</span>`;
         } else {
-          statusBadge = `<span class="badge" style="font-size: 8px; padding: 2px 4px; background: rgba(255,255,255,0.05); color: var(--text-muted); font-weight: 700; margin-bottom: 4px; display: inline-block;">Upcoming</span>`;
+          statusBadge = `<span class="badge deck-card-status deck-card-status-upcoming">Upcoming</span>`;
         }
-        
-        card.innerHTML = `
-          <div style="display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
-            <div>
+
+        // Bodyweight/timed work has no load to show — a bare "0" reads as a missing value
+        const weightValue = item.weightTarget > 0 ? item.weightTarget : '—';
+        const counter = `${item.index + 1}/${currentExList.length}`;
+
+        if (item.isInFocus) {
+          // Expanded focus card is the primary logging surface: target stats plus the
+          // one-tap outcome signals that replaced the per-set stepper grid
+          card.innerHTML = `
+            <div class="deck-card-top">
+              <span class="deck-card-counter">${counter}</span>
               ${statusBadge}
-              <h5 style="margin: 0; font-size: 11px; color: var(--text-color); font-weight: 600; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${escapeHTML(item.name)}</h5>
             </div>
-            <div style="font-size: 9px; color: var(--text-muted); text-overflow: ellipsis; overflow: hidden; white-space: nowrap; margin-top: 4px;">
-              Target: ${targetText}
+            <h5 class="deck-card-name">${escapeHTML(item.name)}</h5>
+            <div class="deck-card-stats">
+              <div class="deck-stat">
+                <span class="deck-stat-value">${escapeHTML(String(item.setsTarget))}</span>
+                <span class="deck-stat-label">${t('sets')}</span>
+              </div>
+              <div class="deck-stat">
+                <span class="deck-stat-value">${escapeHTML(String(item.repsTarget))}</span>
+                <span class="deck-stat-label">${t('reps_label')}</span>
+              </div>
+              <div class="deck-stat">
+                <span class="deck-stat-value">${escapeHTML(String(weightValue))}</span>
+                <span class="deck-stat-label">${t('kg')}</span>
+              </div>
             </div>
-          </div>
-        `;
-        card.addEventListener('click', () => {
-          activeClientState.activeExerciseIndex = item.index;
-          saveActiveSessionToCache();
-          renderActiveGroupBoard();
-        });
+            <div class="deck-card-actions">
+              <button type="button" class="deck-action-btn deck-action-easy" aria-label="${t('signal_too_easy')}">
+                <i class="fa-solid fa-arrow-up"></i><span>${t('signal_too_easy')}</span>
+              </button>
+              <button type="button" class="deck-action-btn deck-action-hard" aria-label="${t('signal_too_hard')}">
+                <i class="fa-solid fa-arrow-down"></i><span>${t('signal_too_hard')}</span>
+              </button>
+              <button type="button" id="btn-log-feedback" class="deck-action-btn deck-action-feedback" aria-label="${t('btn_log_feedback')}">
+                <i class="fa-solid fa-message"></i><span>${t('feedback_short')}</span>
+              </button>
+            </div>
+          `;
+          card.querySelector('.deck-action-easy').addEventListener('click', (e) => {
+            e.stopPropagation();
+            logQuickSignal('Too Easy - Increase Load');
+          });
+          card.querySelector('.deck-action-hard').addEventListener('click', (e) => {
+            e.stopPropagation();
+            logQuickSignal('Too Hard - Reduce Load');
+          });
+          card.querySelector('.deck-action-feedback').addEventListener('click', (e) => {
+            e.stopPropagation();
+            openFeedbackModal();
+          });
+        } else {
+          // Compact row for the rest of the plan — tap to bring into focus. The target
+          // is labelled S(ets) × R(eps) × weight so a collapsed, single-line card still
+          // reads unambiguously (e.g. "S4 × R6 × 60kg").
+          const compactTarget = `S${escapeHTML(String(item.setsTarget))} × R${escapeHTML(String(item.repsTarget))}` +
+            (item.weightTarget > 0 ? ` × ${escapeHTML(String(item.weightTarget))}${t('kg')}` : '');
+          card.innerHTML = `
+            <div class="deck-card-compact">
+              <span class="deck-card-counter">${counter}</span>
+              <span class="deck-card-name deck-card-name-inline">${escapeHTML(item.name)}</span>
+              <span class="deck-card-compact-target">${compactTarget}</span>
+              ${statusBadge}
+            </div>
+          `;
+          card.addEventListener('click', () => {
+            activeClientState.activeExerciseIndex = item.index;
+            saveActiveSessionToCache();
+            renderActiveGroupBoard();
+          });
+        }
       }
       deckContainer.appendChild(card);
     });
 
-    // Center active focus
+    // Bring the in-focus card into view within the vertical list
     setTimeout(() => {
       const activeCardEl = deckContainer.querySelector('.exercise-deck-card.in-focus');
       if (activeCardEl) {
-        activeCardEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        activeCardEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }
     }, 100);
   }
 
   const container = document.getElementById('clipboard-logger-container');
   if (!container) return;
-  container.innerHTML = '';
 
   if (!activeClientState || activeClientState.exercises.length === 0) {
-    document.getElementById('active-ex-index').textContent = `${t('exercise_of')} 0 of 0`;
-    document.getElementById('active-ex-name').textContent = t('no_exercises_injected');
-    document.getElementById('active-ex-desc').textContent = t('no_exercises_desc');
-    document.getElementById('btn-prev-exercise').disabled = true;
-    document.getElementById('btn-next-exercise').disabled = true;
-    return;
-  }
-
-  const currentExIdx = activeClientState.activeExerciseIndex;
-  const currentEx = activeClientState.exercises[currentExIdx];
-
-  // --- GROUP COMBO EXERCISE CHECK ---
-  const comboGroupId = currentEx.comboGroupId;
-  if (comboGroupId) {
-    const comboExercises = activeClientState.exercises.filter(ex => ex.comboGroupId === comboGroupId);
-    
-    // Update navigation details
-    document.getElementById('active-ex-index').textContent = t('combo_round_title') || 'Linked Combo Round';
-    document.getElementById('active-ex-name').textContent = 'Superset Circuit';
-    document.getElementById('active-ex-desc').textContent = comboExercises.map(ex => ex.name).join(' → ');
-    
-    // Disable/enable navigation arrows by bounds of this combo
-    const firstExIdx = activeClientState.exercises.findIndex(ex => ex.comboGroupId === comboGroupId);
-    const lastExIdx = activeClientState.exercises.findLastIndex(ex => ex.comboGroupId === comboGroupId);
-    document.getElementById('btn-prev-exercise').disabled = (firstExIdx === 0);
-    document.getElementById('btn-next-exercise').disabled = (lastExIdx === activeClientState.exercises.length - 1);
-    
-    // Shared rest duration
-    const comboRest = Math.max(...comboExercises.map(ex => ex.rest || 0));
-
-    // Render Rounds (typically 3)
-    const roundsHTML = [];
-    const maxRounds = 3;
-    
-    for (let rIdx = 0; rIdx < maxRounds; rIdx++) {
-      const exerciseRows = [];
-      comboExercises.forEach(ex => {
-        const logsList = activeClientState.logs[ex.id] || [];
-        if (!logsList[rIdx]) {
-          logsList[rIdx] = { reps: ex.reps || 10, weight: ex.weight || 0, completed: false };
-          activeClientState.logs[ex.id] = logsList;
-        }
-        const log = logsList[rIdx];
-        const checkedClass = log.completed ? 'checked' : '';
-        
-        exerciseRows.push(`
-          <div class="active-set-row" data-ex-id="${ex.id}" data-round="${rIdx}" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; flex-wrap: wrap;">
-            <div style="flex: 1; min-width: 140px;">
-              <span style="font-weight: 600; font-size: 13px; color: var(--text-color);">${escapeHTML(ex.name)}</span>
-            </div>
-            
-            <!-- Weight Stepper -->
-            <div class="stepper-control-group" style="display: flex; align-items: center; gap: 4px;">
-              <span class="stepper-label" style="font-size: 10px; color: var(--text-muted);">${t('kg')}</span>
-              <div class="stepper-input-wrapper" style="display: flex; align-items: center; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; height: 32px;">
-                <button type="button" class="step-btn btn-weight-minus" style="width: 24px; font-size: 12px; padding: 0;">-</button>
-                <input type="number" step="0.5" class="input-set-weight" value="${log.weight}" style="width: 42px; font-size: 11px; text-align: center; background: none; border: none; color: #fff;" aria-label="Set weight in kilograms">
-                <button type="button" class="step-btn btn-weight-plus" style="width: 24px; font-size: 12px; padding: 0;">+</button>
-              </div>
-            </div>
-            
-            <!-- Reps Stepper -->
-            <div class="stepper-control-group" style="display: flex; align-items: center; gap: 4px;">
-              <span class="stepper-label" style="font-size: 10px; color: var(--text-muted);">${t('reps_label')}</span>
-              <div class="stepper-input-wrapper" style="display: flex; align-items: center; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; height: 32px;">
-                <button type="button" class="step-btn btn-reps-minus" style="width: 24px; font-size: 12px; padding: 0;">-</button>
-                <input type="text" class="input-set-reps" value="${log.reps}" style="width: 42px; font-size: 11px; text-align: center; background: none; border: none; color: #fff;" aria-label="Set reps quantity">
-                <button type="button" class="step-btn btn-reps-plus" style="width: 24px; font-size: 12px; padding: 0;">+</button>
-              </div>
-            </div>
-            
-            <!-- Completed Checkbox -->
-            <div class="set-check-col" style="margin-left: auto;">
-              <button type="button" class="set-checkbox-btn ${checkedClass}" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;" aria-label="Mark set completed">
-                <i class="fa-solid fa-check" style="${log.completed ? 'display: block' : 'display: none'}"></i>
-              </button>
-            </div>
-          </div>
-        `);
-      });
-      
-      roundsHTML.push(`
-        <div class="combo-round-card" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 14px; margin-bottom: 12px;">
-          <h4 style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--accent-cyan); letter-spacing: 0.5px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; margin-bottom: 12px; margin-top: 0;">Round ${rIdx + 1}</h4>
-          <div style="display: flex; flex-direction: column; gap: 8px;">
-            ${exerciseRows.join('')}
-          </div>
-        </div>
-      `);
-    }
-    
+    // No exercises for this client — the logger area carries the explanation
+    container.classList.remove('hidden');
     container.innerHTML = `
-      <div class="participant-set-rows" style="display: flex; flex-direction: column; gap: 6px; padding: 12px;">
-        ${roundsHTML.join('')}
+      <div class="clipboard-empty-state">
+        <h4>${t('no_exercises_injected')}</h4>
+        <p>${t('no_exercises_desc')}</p>
       </div>
     `;
-
-    // Bind event handlers for all elements inside this combo container
-    container.querySelectorAll('.active-set-row').forEach(row => {
-      const exId = row.getAttribute('data-ex-id');
-      const rIdx = parseInt(row.getAttribute('data-round'));
-      const logsList = activeClientState.logs[exId];
-      const log = logsList[rIdx];
-      
-      const weightInput = row.querySelector('.input-set-weight');
-      const repsInput = row.querySelector('.input-set-reps');
-      const checkBtn = row.querySelector('.set-checkbox-btn');
-      const checkIcon = checkBtn.querySelector('i');
-      
-      const updateWeight = (val) => {
-        if (isNaN(val) || val < 0) val = 0;
-        log.weight = val;
-        weightInput.value = val;
-        saveActiveSessionToCache();
-      };
-      
-      const updateReps = (val) => {
-        log.reps = val;
-        repsInput.value = val;
-        saveActiveSessionToCache();
-      };
-      
-      row.querySelector('.btn-weight-minus').addEventListener('click', () => {
-        const current = parseFloat(weightInput.value) || 0;
-        updateWeight(Math.max(0, current - 2.5));
-      });
-      row.querySelector('.btn-weight-plus').addEventListener('click', () => {
-        const current = parseFloat(weightInput.value) || 0;
-        updateWeight(current + 2.5);
-      });
-      weightInput.addEventListener('change', (e) => {
-        updateWeight(parseFloat(e.target.value));
-      });
-      
-      row.querySelector('.btn-reps-minus').addEventListener('click', () => {
-        const current = parseInt(repsInput.value) || 0;
-        updateReps(Math.max(0, current - 1));
-      });
-      row.querySelector('.btn-reps-plus').addEventListener('click', () => {
-        const current = parseInt(repsInput.value) || 0;
-        updateReps(current + 1);
-      });
-      repsInput.addEventListener('change', (e) => {
-        updateReps(e.target.value);
-      });
-      
-      checkBtn.addEventListener('click', () => {
-        const isChecked = log.completed;
-        log.completed = !isChecked;
-        
-        if (!isChecked) {
-          checkBtn.style.background = 'var(--accent-cyan)';
-          checkBtn.style.color = '#000';
-          checkIcon.style.display = 'block';
-          
-          const allCompletedInRound = comboExercises.every(ex => activeClientState.logs[ex.id][rIdx]?.completed);
-          if (allCompletedInRound && comboRest > 0 && !restTimer.isActive) {
-            triggerRestTimer(comboRest);
-          }
-        } else {
-          checkBtn.style.background = 'transparent';
-          checkBtn.style.color = 'var(--text-muted)';
-          checkIcon.style.display = 'none';
-        }
-        
-        saveActiveSessionToCache();
-      });
-    });
-
-    // Foreshadowing Up Next mapping for Combo round
-    const nextExCard = document.getElementById('foreshadowing-card');
-    const nextExName = document.getElementById('foreshadowing-name');
-    const nextExTarget = document.getElementById('foreshadowing-target');
-    
-    if (nextExCard && nextExName && nextExTarget) {
-      const lastComboIdx = activeClientState.exercises.findLastIndex(ex => ex.comboGroupId === comboGroupId);
-      const nextExIdx = lastComboIdx + 1;
-      
-      if (nextExIdx < activeClientState.exercises.length) {
-        const nextEx = activeClientState.exercises[nextExIdx];
-        const nextExLogs = activeClientState.logs[nextEx.id] || [];
-        const numSets = nextEx.setsTargetCount || nextExLogs.length || 3;
-        const targetReps = nextEx.repsTarget || (nextExLogs[0] ? nextExLogs[0].reps : 10);
-        const targetWeight = nextEx.weightTarget || (nextExLogs[0] ? nextExLogs[0].weight : 0);
-        
-        let targetText = `${numSets} sets`;
-        if (targetReps > 0) targetText += ` × ${targetReps}`;
-        if (targetWeight > 0) targetText += ` (${targetWeight}kg)`;
-        
-        nextExName.textContent = nextEx.name;
-        nextExTarget.textContent = targetText;
-        nextExCard.classList.remove('hidden');
-      } else {
-        nextExName.textContent = t('last_exercise');
-        nextExTarget.textContent = '';
-        nextExCard.classList.remove('hidden');
-      }
-    }
-    
     return;
   }
 
-  // --- NORMAL SEQUENTIAL RENDER FLOW ---
-  // Update navigation details
-  document.getElementById('active-ex-index').textContent = `${t('exercise_of')} ${currentExIdx + 1} of ${activeClientState.exercises.length}`;
-  document.getElementById('active-ex-name').textContent = currentEx.name;
-  document.getElementById('active-ex-desc').textContent = currentEx.instructions || t('no_instructions');
-
-  // Disable/enable arrows
-  document.getElementById('btn-prev-exercise').disabled = (currentExIdx === 0);
-  document.getElementById('btn-next-exercise').disabled = (currentExIdx === activeClientState.exercises.length - 1);
-
-  // Render sets table
-  const setsHTML = [];
-  const logsList = activeClientState.logs[currentEx.id] || [];
-
-  logsList.forEach((log, sIdx) => {
-    const checkedClass = log.completed ? 'checked' : '';
-    setsHTML.push(`
-      <div class="active-set-row" data-set="${sIdx}">
-        <span class="set-index-col" style="font-weight: bold; width: 24px;">S${sIdx + 1}</span>
-        
-        <!-- Weight Stepper -->
-        <div class="stepper-control-group" style="display: flex; align-items: center; gap: 4px;">
-          <span class="stepper-label" style="font-size: 11px; color: var(--text-muted);">${t('kg')}</span>
-          <div class="stepper-input-wrapper" style="display: flex; align-items: center; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden;">
-            <button type="button" class="step-btn btn-weight-minus">-</button>
-            <input type="number" step="0.5" class="input-set-weight" value="${log.weight}" aria-label="Set weight in kilograms">
-            <button type="button" class="step-btn btn-weight-plus">+</button>
-          </div>
-        </div>
-        
-        <!-- Reps Stepper -->
-        <div class="stepper-control-group" style="display: flex; align-items: center; gap: 4px;">
-          <span class="stepper-label" style="font-size: 11px; color: var(--text-muted);">${t('reps_label')}</span>
-          <div class="stepper-input-wrapper" style="display: flex; align-items: center; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden;">
-            <button type="button" class="step-btn btn-reps-minus">-</button>
-            <input type="number" class="input-set-reps" value="${log.reps}" aria-label="Set reps quantity">
-            <button type="button" class="step-btn btn-reps-plus">+</button>
-          </div>
-        </div>
-        
-        <!-- Completed Checkbox -->
-        <div class="set-check-col" style="margin-left: auto;">
-          <button type="button" class="set-checkbox-btn ${checkedClass}" aria-label="Mark set completed">
-            <i class="fa-solid fa-check" style="${log.completed ? 'display: block' : 'display: none'}"></i>
-          </button>
-        </div>
-      </div>
-    `);
-  });
-
-  container.innerHTML = `
-    <div class="participant-set-rows" style="display: flex; flex-direction: column; gap: 6px; padding: 12px;">
-      ${setsHTML.join('')}
-    </div>
-  `;
-
-  // Bind events to steppers and checkmark buttons
-  container.querySelectorAll('.active-set-row').forEach(row => {
-    const setIdx = parseInt(row.getAttribute('data-set'));
-    const log = logsList[setIdx];
-
-    const weightInput = row.querySelector('.input-set-weight');
-    const repsInput = row.querySelector('.input-set-reps');
-    const checkBtn = row.querySelector('.set-checkbox-btn');
-    const checkIcon = checkBtn.querySelector('i');
-
-    const updateWeight = (val) => {
-      if (isNaN(val) || val < 0) val = 0;
-      log.weight = val;
-      weightInput.value = val;
-      saveActiveSessionToCache();
-    };
-
-    const updateReps = (val) => {
-      if (isNaN(val) || val < 0) val = 0;
-      log.reps = val;
-      repsInput.value = val;
-      saveActiveSessionToCache();
-    };
-
-    // Weight stepper clicks
-    row.querySelector('.btn-weight-minus').addEventListener('click', () => {
-      const current = parseFloat(weightInput.value) || 0;
-      updateWeight(Math.max(0, current - 2.5));
-    });
-    row.querySelector('.btn-weight-plus').addEventListener('click', () => {
-      const current = parseFloat(weightInput.value) || 0;
-      updateWeight(current + 2.5);
-    });
-    weightInput.addEventListener('change', (e) => {
-      updateWeight(parseFloat(e.target.value));
-    });
-
-    // Reps stepper clicks
-    row.querySelector('.btn-reps-minus').addEventListener('click', () => {
-      const current = parseInt(repsInput.value) || 0;
-      updateReps(Math.max(0, current - 1));
-    });
-    row.querySelector('.btn-reps-plus').addEventListener('click', () => {
-      const current = parseInt(repsInput.value) || 0;
-      updateReps(current + 1);
-    });
-    repsInput.addEventListener('change', (e) => {
-      updateReps(parseInt(e.target.value));
-    });
-
-    // Checkbox button toggle
-    checkBtn.addEventListener('click', () => {
-      const isChecked = log.completed;
-      log.completed = !isChecked;
-      
-      if (!isChecked) {
-        checkBtn.style.background = 'var(--accent-cyan)';
-        checkBtn.style.color = '#000';
-        checkIcon.style.display = 'block';
-        
-        // Trigger rest timer if not already active
-        if (currentEx.rest > 0 && !restTimer.isActive) {
-          triggerRestTimer(currentEx.rest);
-        }
-      } else {
-        checkBtn.style.background = 'transparent';
-        checkBtn.style.color = 'var(--text-muted)';
-        checkIcon.style.display = 'none';
-      }
-
-      saveActiveSessionToCache();
-    });
-  });
-
-  // --- FORESHADOWING ("UP NEXT") COMPONENT ---
-  const nextExCard = document.getElementById('foreshadowing-card');
-  const nextExName = document.getElementById('foreshadowing-name');
-  const nextExTarget = document.getElementById('foreshadowing-target');
-  
-  if (nextExCard && nextExName && nextExTarget) {
-    const nextExIdx = currentExIdx + 1;
-    if (nextExIdx < activeClientState.exercises.length) {
-      const nextEx = activeClientState.exercises[nextExIdx];
-      const nextExLogs = activeClientState.logs[nextEx.id] || [];
-      const numSets = nextEx.setsTargetCount || nextExLogs.length || 3;
-      const targetReps = nextEx.repsTarget || (nextExLogs[0] ? nextExLogs[0].reps : 10);
-      const targetWeight = nextEx.weightTarget || (nextExLogs[0] ? nextExLogs[0].weight : 0);
-      
-      let targetText = `${numSets} sets`;
-      if (targetReps > 0) targetText += ` × ${targetReps}`;
-      if (targetWeight > 0) targetText += ` (${targetWeight}kg)`;
-      
-      nextExName.textContent = nextEx.name;
-      nextExTarget.textContent = targetText;
-      nextExCard.classList.remove('hidden');
-    } else {
-      nextExName.textContent = t('last_exercise');
-      nextExTarget.textContent = '';
-      nextExCard.classList.remove('hidden');
-    }
-  }
+  // Logging now happens through one-tap outcome signals on the focus card, so there is
+  // no inline set grid during live logging. The container is reserved for historical
+  // review (populated by showPastExerciseInFocus); keep it hidden while logging.
+  container.classList.add('hidden');
+  container.innerHTML = '';
 }
 
 function setupActiveSession() {
-  // Navigation Arrows
-  document.getElementById('btn-prev-exercise').addEventListener('click', () => {
-    if (!activeSession) return;
-    const clientState = activeSession.clientRoutines[activeSession.activeClientId];
-    if (clientState && clientState.activeExerciseIndex > 0) {
-      const currentEx = clientState.exercises[clientState.activeExerciseIndex];
-      const currentComboId = currentEx.comboGroupId;
-      
-      clientState.activeExerciseIndex--;
-      
-      if (currentComboId) {
-        while (clientState.activeExerciseIndex > 0 && 
-               clientState.exercises[clientState.activeExerciseIndex].comboGroupId === currentComboId) {
-          clientState.activeExerciseIndex--;
-        }
-      }
-      renderActiveGroupBoard();
-    }
-  });
+  // Keep the participant tab strip's scroll-fade in sync as the trainer swipes through it
+  const clientTabsBar = document.getElementById('active-session-client-tabs');
+  if (clientTabsBar) {
+    clientTabsBar.addEventListener('scroll', updateClientTabsFadeState);
+  }
 
-  document.getElementById('btn-next-exercise').addEventListener('click', () => {
-    if (!activeSession) return;
-    const clientState = activeSession.clientRoutines[activeSession.activeClientId];
-    if (clientState && clientState.activeExerciseIndex < clientState.exercises.length - 1) {
-      const currentEx = clientState.exercises[clientState.activeExerciseIndex];
-      const currentComboId = currentEx.comboGroupId;
-      
-      clientState.activeExerciseIndex++;
-      
-      if (currentComboId) {
-        while (clientState.activeExerciseIndex < clientState.exercises.length - 1 && 
-               clientState.exercises[clientState.activeExerciseIndex].comboGroupId === currentComboId) {
-          clientState.activeExerciseIndex++;
-        }
-      }
-      renderActiveGroupBoard();
-    }
-  });
+  // Exercise navigation is now driven by tapping the stacked cards directly
+  // (see the card click handlers in renderActiveGroupBoard).
 
   // Minimize panel trigger
   document.getElementById('btn-collapse-session').addEventListener('click', () => {
@@ -2454,8 +2399,26 @@ function setupActiveSession() {
   });
 
   // Expand panel trigger
-  document.getElementById('btn-expand-session').addEventListener('click', () => {
+  document.getElementById('btn-expand-session').addEventListener('click', (e) => {
+    e.stopPropagation();
     document.getElementById('active-session-overlay').classList.remove('hidden');
+  });
+
+  // The entire bar is the primary tap target — not just the chevron. Active sessions
+  // open straight into the clipboard; an idle bar jumps into the next upcoming session.
+  const sessionBar = document.getElementById('active-session-bar');
+  sessionBar.addEventListener('click', () => {
+    if (activeSession) {
+      document.getElementById('active-session-overlay').classList.remove('hidden');
+    } else if (sessionBar.dataset.nextBookingId) {
+      launchClipboardDirectly(sessionBar.dataset.nextBookingId);
+    }
+  });
+  sessionBar.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      sessionBar.click();
+    }
   });
 
   // Cancel workout
@@ -2471,31 +2434,6 @@ function setupActiveSession() {
   });
 
   // Add set on the fly
-  document.getElementById('btn-add-session-set').addEventListener('click', () => {
-    if (!activeSession) return;
-    const activeClientId = activeSession.activeClientId;
-    const clientState = activeSession.clientRoutines[activeClientId];
-    if (!clientState || clientState.exercises.length === 0) return;
-    
-    const curEx = clientState.exercises[clientState.activeExerciseIndex];
-    
-    // Add set to target count
-    curEx.setsTargetCount++;
-    
-    // Push new log set
-    const logsList = clientState.logs[curEx.id] || [];
-    const lastLog = logsList[logsList.length - 1] || { reps: 10, weight: 0 };
-    logsList.push({
-      reps: lastLog.reps,
-      weight: lastLog.weight,
-      completed: false,
-      note: ''
-    });
-    
-    saveActiveSessionToCache();
-    renderActiveGroupBoard();
-  });
-
   // Setup Add Exercise to Session modal trigger
   const addExModal = document.getElementById('dialog-add-session-exercise');
   const addExForm = document.getElementById('form-add-session-exercise');
@@ -2554,55 +2492,10 @@ function setupActiveSession() {
     addExModal.close();
   });
 
-  // Feedback modal with voice note integration
+  // Feedback modal with voice note integration. The Log Feedback trigger now lives on
+  // the active exercise card (renderActiveGroupBoard), which calls openFeedbackModal().
   const fbModal = document.getElementById('dialog-feedback');
   const fbForm = document.getElementById('form-feedback');
-  
-  let isRecording = false;
-  let hasVoiceNote = false;
-  
-  document.getElementById('btn-log-feedback').addEventListener('click', () => {
-    if (!activeSession) return;
-    const activeClientId = activeSession.activeClientId;
-    const clientState = activeSession.clientRoutines[activeClientId];
-    if (!clientState || clientState.exercises.length === 0) return;
-    
-    const curEx = clientState.exercises[clientState.activeExerciseIndex];
-    const client = state.clients.find(c => c.id === activeClientId);
-    
-    document.getElementById('feedback-client-id').value = activeClientId;
-    document.getElementById('feedback-exercise-name').value = curEx.name;
-    document.getElementById('feedback-client-display-name').textContent = client.name;
-    document.getElementById('feedback-ex-display-name').textContent = curEx.name;
-    document.getElementById('feedback-custom-note').value = '';
-    
-    // Reset voice recorder state
-    isRecording = false;
-    hasVoiceNote = false;
-    const audioWave = document.getElementById('voice-audio-wave');
-    const audioPlayer = document.getElementById('voice-audio-player');
-    const recordIcon = document.getElementById('voice-record-icon');
-    const recordStatus = document.getElementById('voice-record-status');
-    
-    if (audioWave) {
-      audioWave.classList.add('hidden');
-      audioWave.classList.remove('recording');
-    }
-    if (audioPlayer) {
-      audioPlayer.classList.add('hidden');
-    }
-    if (recordStatus) {
-      recordStatus.textContent = t('voice_ready');
-    }
-    if (recordIcon) {
-      recordIcon.className = 'fa-solid fa-microphone';
-      recordIcon.style.color = '';
-    }
-    
-    // Reset radios
-    fbForm.reset();
-    fbModal.showModal();
-  });
 
   // Voice recording mock handlers
   const recordBtn = document.getElementById('btn-voice-record');
@@ -2613,10 +2506,10 @@ function setupActiveSession() {
       const audioWave = document.getElementById('voice-audio-wave');
       const audioPlayer = document.getElementById('voice-audio-player');
       
-      if (!isRecording) {
+      if (!feedbackIsRecording) {
         // Start snemanje / record
-        isRecording = true;
-        hasVoiceNote = false;
+        feedbackIsRecording = true;
+        feedbackHasVoiceNote = false;
         if (recordIcon) {
           recordIcon.className = 'fa-solid fa-microphone-slash';
           recordIcon.style.color = '#ef4444';
@@ -2629,8 +2522,8 @@ function setupActiveSession() {
         if (audioPlayer) audioPlayer.classList.add('hidden');
       } else {
         // Stop snemanje
-        isRecording = false;
-        hasVoiceNote = true;
+        feedbackIsRecording = false;
+        feedbackHasVoiceNote = true;
         if (recordIcon) {
           recordIcon.className = 'fa-solid fa-microphone';
           recordIcon.style.color = '';
@@ -2710,7 +2603,7 @@ function setupActiveSession() {
       date: new Date().toISOString(),
       exerciseName: exName,
       tag: tagVal + (customNote ? ` - ${customNote}` : ''),
-      hasVoiceNote: hasVoiceNote,
+      hasVoiceNote: feedbackHasVoiceNote,
       resolved: false
     };
     
@@ -2727,7 +2620,7 @@ function setupActiveSession() {
         exerciseName: exName,
         tag: tagVal,
         note: customNote,
-        hasVoiceNote: hasVoiceNote
+        hasVoiceNote: feedbackHasVoiceNote
       });
       saveActiveSessionToCache();
     }
@@ -2744,8 +2637,9 @@ function cancelWorkoutSession() {
   }
   activeSession = null;
   localStorage.removeItem('librept_active_session');
-  document.getElementById('active-session-bar').classList.add('hidden');
   document.getElementById('active-session-overlay').classList.add('hidden');
+  // Bar drops back to idle — referring to whatever is next up — rather than disappearing
+  renderIdleSessionBar();
 }
 
 function finishWorkoutSession() {
@@ -2862,10 +2756,18 @@ function recoverActiveSession() {
       activeSession = parsed;
       // Recalculate duration offset
       activeSession.duration = Math.floor((Date.now() - activeSession.startTime) / 1000);
-      
+
+      // Booking dates survive the cache round-trip as ISO strings — revive them
+      if (activeSession.booking) {
+        activeSession.booking.startDate = new Date(activeSession.booking.startDate);
+        activeSession.booking.endDate = new Date(activeSession.booking.endDate);
+      }
+
       // Open panel widgets
-      document.getElementById('active-session-bar').classList.remove('hidden');
-      document.getElementById('session-bar-title').textContent = `Active: ${activeSession.participants.length} Clients`;
+      const bar = document.getElementById('active-session-bar');
+      bar.classList.remove('hidden', 'is-idle');
+      delete bar.dataset.nextBookingId;
+      renderActiveSessionBarLabels();
 
       // Start elapsed timer ticking
       startSessionTimer();
@@ -2882,7 +2784,8 @@ function setupRestTimer() {
   const timerLabel = document.getElementById('timer-countdown');
   const toggleBtn = document.getElementById('btn-timer-toggle');
   
-  document.getElementById('btn-timer-trigger').addEventListener('click', () => {
+  document.getElementById('btn-timer-trigger').addEventListener('click', (e) => {
+    e.stopPropagation();
     const currentEx = getActiveExercise();
     triggerRestTimer(currentEx ? currentEx.rest : 60);
   });
@@ -3146,6 +3049,21 @@ function formatDuration(totalSeconds) {
   return `${paddedMins}:${paddedSecs}`;
 }
 
+// Same as formatDuration, but prefixes a minus sign once the count goes negative
+// (a session running past its scheduled end) instead of wrapping/going nonsensical.
+function formatSignedDuration(totalSeconds) {
+  const negative = totalSeconds < 0;
+  return (negative ? '-' : '') + formatDuration(Math.abs(totalSeconds));
+}
+
+function formatClockFromMinutes(totalMinutes) {
+  const h = Math.floor(totalMinutes / 60) % 24;
+  const m = ((totalMinutes % 60) + 60) % 60;
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  const h12 = h % 12 || 12;
+  return `${h12}:${m.toString().padStart(2, '0')} ${ampm}`;
+}
+
 function escapeHTML(str) {
   if (!str) return '';
   return str
@@ -3183,19 +3101,106 @@ function isTimeOverlapping(rangeA, rangeB) {
   return rangeA.start < rangeB.end && rangeB.start < rangeA.end;
 }
 
+// Session name(s), scheduled start/end, and a display time range for a group of
+// same-slot bookings — feeds the active/idle session bar (TODO 2.1/2.2).
+function buildBookingMeta(bookings, day) {
+  const titles = [...new Set(bookings.map(b => b.title))];
+  const ranges = bookings.map(b => parseTimeRange(b.time)).filter(Boolean);
+  const startMin = Math.min(...ranges.map(r => r.start));
+  const endMin = Math.max(...ranges.map(r => r.end));
+  const dayDate = getSessionDayDate(day);
+  const startDate = new Date(dayDate);
+  startDate.setMinutes(startDate.getMinutes() + startMin);
+  const endDate = new Date(dayDate);
+  endDate.setMinutes(endDate.getMinutes() + endMin);
+
+  return {
+    titles,
+    day,
+    startDate,
+    endDate,
+    timeLabel: `${formatClockFromMinutes(startMin)} - ${formatClockFromMinutes(endMin)}`
+  };
+}
+
+function getOverlappingBookings(booking) {
+  const targetRange = parseTimeRange(booking.time);
+  return state.bookings.filter(b => {
+    if (b.day !== booking.day) return false;
+    return isTimeOverlapping(targetRange, parseTimeRange(b.time));
+  });
+}
+
+// The next session the idle bar should refer to: the earliest slot today that hasn't
+// finished yet (covers both "not started" and "in progress but not launched"), or —
+// if today has nothing left — the earliest slot tomorrow. Returns null when there's
+// nothing scheduled in either bucket.
+function getNextUpcomingBookingGroup() {
+  const bookings = state.bookings || [];
+  const now = new Date();
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
+  const pickEarliest = (list) => {
+    let best = null;
+    let bestStart = Infinity;
+    list.forEach(b => {
+      const r = parseTimeRange(b.time);
+      if (r && r.start < bestStart) {
+        bestStart = r.start;
+        best = b;
+      }
+    });
+    return best;
+  };
+
+  const todayCandidates = bookings.filter(b => {
+    if (b.day !== 'today') return false;
+    const r = parseTimeRange(b.time);
+    return r && r.end >= nowMinutes;
+  });
+
+  const anchor = pickEarliest(todayCandidates) || pickEarliest(bookings.filter(b => b.day === 'tomorrow'));
+  if (!anchor) return null;
+
+  return { day: anchor.day, bookings: getOverlappingBookings(anchor) };
+}
+
+// Idle bar: colour-distinct from the active state, names the next upcoming session(s)
+// (merged when several run in the same slot), and its click target opens that same
+// clipboard directly (TODO 2.2). Hides entirely when nothing is scheduled to show.
+function renderIdleSessionBar() {
+  if (activeSession) return;
+  const bar = document.getElementById('active-session-bar');
+  if (!bar) return;
+
+  const next = getNextUpcomingBookingGroup();
+  if (!next || next.bookings.length === 0) {
+    bar.classList.add('hidden');
+    delete bar.dataset.nextBookingId;
+    return;
+  }
+
+  const meta = buildBookingMeta(next.bookings, next.day);
+  const participantCount = new Set(next.bookings.flatMap(b => b.participants)).size;
+  const startsInSec = Math.round((meta.startDate.getTime() - Date.now()) / 1000);
+
+  bar.classList.remove('hidden');
+  bar.classList.add('is-idle');
+  bar.dataset.nextBookingId = next.bookings[0].id;
+
+  document.getElementById('session-bar-title').textContent = `${t('next_session_label')}: ${meta.titles.join(' + ')}`;
+  document.getElementById('session-bar-meta').textContent = `${participantCount} ${t('bar_clients_label')} · ${meta.timeLabel}`;
+  document.getElementById('session-bar-duration').textContent = formatSignedDuration(startsInSec);
+  document.getElementById('session-bar-duration').classList.remove('overtime');
+}
+
 function launchClipboardDirectly(bookingId) {
   if (!state.bookings) return;
   const booking = state.bookings.find(b => b.id === bookingId);
   if (!booking) return;
 
-  const targetRange = parseTimeRange(booking.time);
-  
   // Find all bookings on the same day that overlap in time
-  const overlappingBookings = state.bookings.filter(b => {
-    if (b.day !== booking.day) return false;
-    const r = parseTimeRange(b.time);
-    return isTimeOverlapping(targetRange, r);
-  });
+  const overlappingBookings = getOverlappingBookings(booking);
 
   // Aggregate participant clientRoutines ensuring no duplicates
   const clientRoutinesMap = new Map();
@@ -3218,7 +3223,7 @@ function launchClipboardDirectly(bookingId) {
 
   if (clientRoutines.length === 0) return;
 
-  startWorkoutSession(clientRoutines);
+  startWorkoutSession(clientRoutines, buildBookingMeta(overlappingBookings, booking.day));
 }
 
 // --- GOOGLE CALENDAR APPOINTMENT SESSIONS INTEGRATION (UC3 & UC4) ---
@@ -3243,7 +3248,7 @@ function setupCalendarBookings() {
         renderSessions();
         
         if (icon) icon.classList.remove('fa-spin');
-        if (btnText) btnText.textContent = t('btn_sync_sessions');
+        if (btnText) btnText.textContent = t('btn_sync_data');
         syncBtn.disabled = false;
         
         alert(t('calendar_synced'));
@@ -3526,6 +3531,9 @@ function renderSessions() {
 
   // Re-anchor the deck on the focused day (today on first load) after cards are injected
   requestAnimationFrame(() => focusSessionsColumn(focusedSessionDay, 'auto'));
+
+  // Booking data just changed — refresh which "next session" the idle bar points to
+  renderIdleSessionBar();
 }
 function showPastExerciseInFocus(item) {
   // Deselect all active cards visually
@@ -3540,12 +3548,10 @@ function showPastExerciseInFocus(item) {
     }
   });
 
-  document.getElementById('active-ex-index').textContent = 'Historical Review';
-  document.getElementById('active-ex-name').textContent = item.name;
-  document.getElementById('active-ex-desc').textContent = `Routine: ${item.routineName || 'Completed Session'} (${item.sessionDate})`;
-
   const container = document.getElementById('clipboard-logger-container');
   if (!container) return;
+  // Reveal the review panel (hidden during live one-tap logging)
+  container.classList.remove('hidden');
 
   const rows = item.sets.map((s, idx) => `
     <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 13px;">
@@ -3559,20 +3565,16 @@ function showPastExerciseInFocus(item) {
 
   container.innerHTML = `
     <div style="padding: 16px; background: rgba(139, 92, 246, 0.03); border: 1px dashed rgba(139, 92, 246, 0.15); border-radius: 8px; margin: 12px; box-sizing: border-box;">
-      <h4 style="font-size: 12px; font-weight: 700; color: #c084fc; text-transform: uppercase; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; margin-top: 0;">
+      <h4 style="font-size: 12px; font-weight: 700; color: #c084fc; text-transform: uppercase; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; margin-top: 0;">
         <i class="fa-solid fa-clock-rotate-left"></i> Reviewing Historical Logs
       </h4>
+      <div style="font-size: 15px; font-weight: 700; color: var(--text-color); margin-bottom: 2px;">${escapeHTML(item.name)}</div>
+      <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">${escapeHTML(`${item.routineName || 'Completed Session'} (${item.sessionDate})`)}</div>
       <div style="display: flex; flex-direction: column; gap: 6px;">
         ${rows}
       </div>
     </div>
   `;
-  
-  // Hide foreshadowing card for past exercises
-  const nextExCard = document.getElementById('foreshadowing-card');
-  if (nextExCard) {
-    nextExCard.classList.add('hidden');
-  }
 }
 
 // Register Service Worker for offline PWA support
