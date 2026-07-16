@@ -526,7 +526,7 @@ function init() {
   // with an existing localStorage db seeing the old demo roster. Bump SEED_VERSION whenever
   // DEFAULT_CLIENTS or DEFAULT_SESSIONS change to force those two back to current, while
   // leaving user-owned routines, exercises, history, and plan updates untouched.
-  const SEED_VERSION = 4;
+  const SEED_VERSION = 5;
   const storedSeed = parseInt(localStorage.getItem('librept_seed_version') || '0', 10);
   if (storedSeed < SEED_VERSION) {
     state.clients = [...DEFAULT_CLIENTS];
@@ -3059,9 +3059,8 @@ function formatSignedDuration(totalSeconds) {
 function formatClockFromMinutes(totalMinutes) {
   const h = Math.floor(totalMinutes / 60) % 24;
   const m = ((totalMinutes % 60) + 60) % 60;
-  const ampm = h >= 12 ? 'PM' : 'AM';
-  const h12 = h % 12 || 12;
-  return `${h12}:${m.toString().padStart(2, '0')} ${ampm}`;
+  // 24-hour HH:MM (ISO-style)
+  return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
 }
 
 function escapeHTML(str) {
@@ -3085,10 +3084,18 @@ function getClientDisplayNameHTML(client, isShort = false) {
 function parseTimeRange(timeStr) {
   const parts = timeStr.split('-');
   if (parts.length !== 2) return null;
+  // Times are 12-hour with an AM/PM suffix (e.g. "02:00 PM"). AM/PM must be honoured or
+  // an afternoon end time parses smaller than its start (2:00 < 12:00), inverting the range
+  // and breaking overlap detection — which silently makes afternoon session cards un-openable.
   const parseTime = (s) => {
-    const tParts = s.trim().split(':');
-    if (tParts.length !== 2) return 0;
-    return parseInt(tParts[0], 10) * 60 + parseInt(tParts[1], 10);
+    const m = s.trim().match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
+    if (!m) return 0;
+    let hour = parseInt(m[1], 10);
+    const min = parseInt(m[2], 10);
+    const ampm = m[3] ? m[3].toUpperCase() : null;
+    if (ampm === 'PM' && hour !== 12) hour += 12;
+    if (ampm === 'AM' && hour === 12) hour = 0;
+    return hour * 60 + min;
   };
   return {
     start: parseTime(parts[0]),

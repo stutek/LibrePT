@@ -352,11 +352,10 @@ export const DEFAULT_SESSIONS = (() => {
   const now = new Date();
   const currentHour = now.getHours();
   
+  // 24-hour HH:MM (ISO-style), e.g. "14:00"
   const formatHour = (h) => {
     const rawH = (h + 24) % 24;
-    const hr = rawH % 12 || 12;
-    const ampm = rawH >= 12 ? 'PM' : 'AM';
-    return `${hr.toString().padStart(2, '0')}:00 ${ampm}`;
+    return `${rawH.toString().padStart(2, '0')}:00`;
   };
 
   return [
@@ -398,7 +397,7 @@ export const DEFAULT_SESSIONS = (() => {
     },
     {
       id: 'b-4',
-      time: '09:00 AM - 10:00 AM',
+      time: '09:00 - 10:00',
       title: 'Morning Conditioning',
       participants: ['client-jane-doe'],
       routineId: '',
@@ -407,7 +406,7 @@ export const DEFAULT_SESSIONS = (() => {
     },
     {
       id: 'b-5',
-      time: '10:30 AM - 11:30 AM',
+      time: '10:30 - 11:30',
       title: 'Tomorrow Strength',
       participants: ['client-john-smith'],
       routineId: 'routine-upper-a',
@@ -416,7 +415,7 @@ export const DEFAULT_SESSIONS = (() => {
     },
     {
       id: 'b-6',
-      time: '11:30 AM - 12:30 PM',
+      time: '11:30 - 12:30',
       title: 'Lunch Blast Workout',
       participants: ['client-sarah-jenkins'],
       routineId: '',
@@ -425,7 +424,7 @@ export const DEFAULT_SESSIONS = (() => {
     },
     {
       id: 'b-7',
-      time: '05:30 PM - 06:30 PM',
+      time: '17:30 - 18:30',
       title: 'Post-Work Cardio',
       participants: ['client-john-smith'],
       routineId: 'routine-legs-core',
@@ -434,7 +433,7 @@ export const DEFAULT_SESSIONS = (() => {
     },
     {
       id: 'b-yesterday-1',
-      time: '09:00 AM - 10:30 AM',
+      time: '09:00 - 10:30',
       title: 'Yesterday Core',
       participants: ['client-jane-doe'],
       routineId: 'routine-upper-a',
@@ -443,7 +442,7 @@ export const DEFAULT_SESSIONS = (() => {
     },
     {
       id: 'b-yesterday-2',
-      time: '04:00 PM - 05:00 PM',
+      time: '16:00 - 17:00',
       title: 'Yesterday Mobility',
       participants: ['client-john-smith'],
       routineId: 'routine-legs-core',
@@ -452,7 +451,7 @@ export const DEFAULT_SESSIONS = (() => {
     },
     {
       id: 'b-upcoming-1',
-      time: '08:00 AM - 09:30 AM',
+      time: '08:00 - 09:30',
       title: 'Future Strength',
       participants: ['client-sarah-jenkins'],
       routineId: 'routine-legs-core',
@@ -461,7 +460,7 @@ export const DEFAULT_SESSIONS = (() => {
     },
     {
       id: 'b-upcoming-2',
-      time: '10:00 AM - 11:00 AM',
+      time: '10:00 - 11:00',
       title: 'Future HIIT Conditioning',
       participants: ['client-jane-doe', 'client-john-smith'],
       routineId: 'routine-upper-a',
