@@ -931,9 +931,14 @@ body {
 .active-session-overlay {
   position: fixed;
   top: 0;
-  bottom: 0;
   left: 0;
   right: 0;
+  /* Height tracks the *visual* viewport (dvh), not the layout viewport. With `bottom: 0`
+     the overlay sized to the layout viewport, so on mobile the footer and the last exercise
+     card sat behind the browser's URL bar — unreachable once an expanded card made the deck
+     tall enough to reach that zone. 100vh is the fallback for browsers without dvh support. */
+  height: 100vh;
+  height: 100dvh;
   background: var(--bg-color);
   z-index: 120;
   display: flex;
