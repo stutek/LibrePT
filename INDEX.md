@@ -45,3 +45,4 @@ injection: `app.js` passes the app-level helpers they need (`state`, `t`, `escap
 | [app.js](file:///home/simon/Projects/LibrePT/app.js) | `entry` | Application entry: i18n, state, view router, render orchestration, session logic, and wiring of the component modules below. |
 | [mockData.js](file:///home/simon/Projects/LibrePT/mockData.js) | `data` | Default seed data (exercises, clients, routines, history, plan updates, sessions). |
 | [components/sessionCard.js](file:///home/simon/Projects/LibrePT/components/sessionCard.js) | `component` | Dashboard session-booking card (time, participants, program, readiness warnings, temporal tint) that launches the clipboard on tap. |
+| [components/exerciseCard.js](file:///home/simon/Projects/LibrePT/components/exerciseCard.js) | `component` | Standalone (non-circuit) exercise card in the clipboard deck: the in-focus logging card (target stats + Too Easy / Too Hard / Feedback) and its compact tap-to-focus row. |
