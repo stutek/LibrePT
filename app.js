@@ -743,7 +743,7 @@ function setupNavigation() {
 // to dark just means clearing the other theme classes.
 const THEME_BODY_CLASS = { dark: 'dark-theme', light: 'light-theme', red: 'red-theme' };
 // The address-bar / PWA chrome colour per theme, kept in step with each theme's --bg-color.
-const THEME_META_COLOR = { dark: '#09090b', light: '#f8fafc', red: '#12080a' };
+const THEME_META_COLOR = { dark: '#09090b', light: '#f8fafc', red: '#0a0a0b' };
 // Compact, localized labels for the dropdown (the long theme_* i18n strings don't fit).
 const THEME_SWITCHER_LABELS = {
   en: { dark: 'Dark', light: 'Light', red: 'Red' },
