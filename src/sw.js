@@ -1,13 +1,25 @@
 // sw.js - LibrePT Service Worker for Offline Functionality
 // Bump CACHE_NAME on release: `activate` purges every cache that does not match it.
-const CACHE_NAME = 'librept-v3';
+const CACHE_NAME = 'librept-v4';
 const ASSETS = [
   './',
   './index.html',
   './index.css',
   './app.js',
-  './mockData.js',
   './manifest.json',
+  // Seed data (split per entity under data/)
+  './data/index.js',
+  './data/exercises.js',
+  './data/clients.js',
+  './data/routines.js',
+  './data/history.js',
+  './data/planUpdates.js',
+  './data/sessions.js',
+  // UI component modules
+  './components/sessionCard.js',
+  './components/exerciseCard.js',
+  './components/circuitCard.js',
+  './components/sessionBar.js',
   './icons/icon-192.png',
   './icons/icon-512.png',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'

@@ -1,5 +1,5 @@
 // app.js - LibrePT Application Controller Logic
-import { DEFAULT_EXERCISES, DEFAULT_CLIENTS, DEFAULT_ROUTINES, DEFAULT_HISTORY, DEFAULT_PLAN_UPDATES, DEFAULT_SESSIONS } from './mockData.js';
+import { DEFAULT_EXERCISES, DEFAULT_CLIENTS, DEFAULT_ROUTINES, DEFAULT_HISTORY, DEFAULT_PLAN_UPDATES, DEFAULT_SESSIONS } from './data/index.js';
 import { renderSessionCard } from './components/sessionCard.js';
 import { renderExerciseCard } from './components/exerciseCard.js';
 import { renderCircuitCard } from './components/circuitCard.js';

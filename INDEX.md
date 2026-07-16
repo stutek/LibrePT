@@ -33,18 +33,20 @@ This index provides AI agents and contributors with a structured navigation map 
 | [uc3_publish_slots.md](file:///home/simon/Projects/LibrePT/use_cases/uc3_publish_slots.md) | `use_case` | Personal Trainer | Publishing recurring training availability slots via Google Calendar Appointment Schedules. |
 | [uc4_client_self_subscription.md](file:///home/simon/Projects/LibrePT/use_cases/uc4_client_self_subscription.md) | `use_case` | Client | Self-service slot booking via Google-hosted scheduling pages and automated calendar invites. |
 
-## 3. Source Modules & UI Components (`components/`)
+## 3. Source Modules & UI Components (`src/`)
 
-The front-end is a native ES-module app (`<script type="module" src="app.js">`). `app.js` is being
-incrementally split into focused component modules under `components/` so each concern can be
-found and edited without loading the whole file. Components are decoupled via dependency
-injection: `app.js` passes the app-level helpers they need (`state`, `t`, `escapeHTML`, …).
+The runtime app lives under `src/` (served as the web root locally and flattened into `dist/`
+on deploy). It's a native ES-module app (`<script type="module" src="app.js">`). `src/app.js`
+is being incrementally split into focused modules — seed data under `src/data/` and UI
+components under `src/components/` — so each concern can be found and edited without loading the
+whole file. Components are decoupled via dependency injection: `app.js` passes the app-level
+helpers they need (`state`, `t`, `escapeHTML`, …).
 
 | Module | Type | Description |
 | :--- | :--- | :--- |
-| [app.js](file:///home/simon/Projects/LibrePT/app.js) | `entry` | Application entry: i18n, state, view router, render orchestration, session logic, and wiring of the component modules below. |
-| [mockData.js](file:///home/simon/Projects/LibrePT/mockData.js) | `data` | Default seed data (exercises, clients, routines, history, plan updates, sessions). |
-| [components/sessionCard.js](file:///home/simon/Projects/LibrePT/components/sessionCard.js) | `component` | Dashboard session-booking card (time, participants, program, readiness warnings, temporal tint) that launches the clipboard on tap. |
-| [components/exerciseCard.js](file:///home/simon/Projects/LibrePT/components/exerciseCard.js) | `component` | Standalone (non-circuit) exercise card in the clipboard deck: the in-focus logging card (target stats + Too Easy / Too Hard / Feedback) and its compact tap-to-focus row. |
-| [components/circuitCard.js](file:///home/simon/Projects/LibrePT/components/circuitCard.js) | `component` | Circuit card: a grouped block of exercises with a round counter, per-exercise feedback trio, rest breaks, and a Complete-round button that advances/finishes the circuit. |
-| [components/sessionBar.js](file:///home/simon/Projects/LibrePT/components/sessionBar.js) | `component` | Bottom active/next-session bar: live-session labels + scheduled-end countdown, and the idle "next session" state with a starts-in countdown. |
+| [src/app.js](file:///home/simon/Projects/LibrePT/src/app.js) | `entry` | Application entry: i18n, state, view router, render orchestration, session logic, and wiring of the component modules below. |
+| [src/data/index.js](file:///home/simon/Projects/LibrePT/src/data/index.js) | `data` | Barrel for the seed/demo data, split per entity: `exercises.js`, `clients.js`, `routines.js`, `history.js`, `planUpdates.js`, `sessions.js`. Entities reference each other by string id only. |
+| [src/components/sessionCard.js](file:///home/simon/Projects/LibrePT/src/components/sessionCard.js) | `component` | Dashboard session-booking card (time, participants, program, readiness warnings, temporal tint) that launches the clipboard on tap. |
+| [src/components/exerciseCard.js](file:///home/simon/Projects/LibrePT/src/components/exerciseCard.js) | `component` | Standalone (non-circuit) exercise card in the clipboard deck: the in-focus logging card (target stats + Too Easy / Too Hard / Feedback) and its compact tap-to-focus row. |
+| [src/components/circuitCard.js](file:///home/simon/Projects/LibrePT/src/components/circuitCard.js) | `component` | Circuit card: a grouped block of exercises with a round counter, per-exercise feedback trio, rest breaks, and a Complete-round button that advances/finishes the circuit. |
+| [src/components/sessionBar.js](file:///home/simon/Projects/LibrePT/src/components/sessionBar.js) | `component` | Bottom active/next-session bar: live-session labels + scheduled-end countdown, and the idle "next session" state with a starts-in countdown. |
