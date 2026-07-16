@@ -941,6 +941,17 @@ body {
   animation: slideUpFullscreen 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
+/* The header and participant tabs stay pinned; the rest of the clipboard scrolls.
+   Without this the overlay clips any content past the fold (tall stacks, the historical
+   review panel, the Complete/Delete actions) with no way to reach it. */
+.clipboard-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
 @keyframes slideUp {
   from { transform: translateY(100px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }

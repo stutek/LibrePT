@@ -3607,12 +3607,12 @@ function renderSessions() {
 function showPastExerciseInFocus(item) {
   // Deselect all active cards visually
   document.querySelectorAll('.exercise-deck-card').forEach(el => el.classList.remove('in-focus'));
-  
-  // Find card matching past item id and add visual highlight
-  const cards = document.querySelectorAll('.exercise-deck-card');
-  cards.forEach(card => {
-    if (card.querySelector('.badge')?.textContent?.includes(item.sessionDate) &&
-        card.querySelector('h5')?.textContent === item.name) {
+
+  // Highlight the clicked past card. Its name lives in .deck-card-name (not an <h5>
+  // since the vertical-card redesign), so match on that class + the "Past: <date>" badge.
+  document.querySelectorAll('.exercise-deck-card.past-session').forEach(card => {
+    if (card.querySelector('.deck-card-status-past')?.textContent?.includes(item.sessionDate) &&
+        card.querySelector('.deck-card-name')?.textContent === item.name) {
       card.classList.add('in-focus');
     }
   });
@@ -3644,6 +3644,10 @@ function showPastExerciseInFocus(item) {
       </div>
     </div>
   `;
+
+  // Bring the review into view — it renders below the live card stack, which can sit
+  // past the fold now that the clipboard body scrolls.
+  container.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 // Register Service Worker for offline PWA support
