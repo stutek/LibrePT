@@ -2935,6 +2935,20 @@ function recoverActiveSession() {
         activeSession.booking.endDate = new Date(activeSession.booking.endDate);
       }
 
+      // A cached session whose scheduled end is well in the past is stale — e.g. the demo's
+      // seeded "live" session revisited hours later, or a session abandoned without finishing.
+      // Don't resurrect it as a running session (that showed a bar for a workout that ended
+      // hours ago); drop it and let the idle bar point at the next upcoming session instead.
+      const STALE_AFTER_MS = 2 * 60 * 60 * 1000; // 2h past the scheduled end
+      const endTime = activeSession.booking && activeSession.booking.endDate
+        ? activeSession.booking.endDate.getTime() : null;
+      if (endTime && Date.now() > endTime + STALE_AFTER_MS) {
+        activeSession = null;
+        localStorage.removeItem('librept_active_session');
+        renderIdleSessionBar();
+        return;
+      }
+
       // Open panel widgets
       const bar = document.getElementById('active-session-bar');
       bar.classList.remove('hidden', 'is-idle');
