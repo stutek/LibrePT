@@ -164,12 +164,12 @@ export const DEFAULT_ROUTINES = [
     name: 'Upper Body A',
     description: 'Strength-focused upper body session prioritizing compound presses and rows.',
     exercises: [
-      { id: 'ex-bench-barbell', sets: 4, reps: 6, rest: 120, weight: 60 },
-      { id: 'ex-barbell-row', sets: 4, reps: 8, rest: 90, weight: 50 },
-      { id: 'ex-shoulder-db', sets: 3, reps: 10, rest: 90, weight: 16 },
-      { id: 'ex-lat-pulldown', sets: 3, reps: 12, rest: 75, weight: 45 },
-      { id: 'ex-tricep-pushdown', sets: 3, reps: 12, rest: 60, weight: 20 },
-      { id: 'ex-bicep-db-curl', sets: 3, reps: 12, rest: 60, weight: 12 }
+      { id: 'ex-bench-barbell', sets: 5, reps: 5, rest: 150, weight: 62.5 },
+      { id: 'ex-barbell-row', sets: 4, reps: 8, rest: 90, weight: 55 },
+      { id: 'ex-shoulder-db', sets: 3, reps: 10, rest: 90, weight: 18 },
+      { id: 'ex-lat-pulldown', sets: 3, reps: 12, rest: 75, weight: 48 },
+      { id: 'ex-tricep-pushdown', sets: 4, reps: 15, rest: 60, weight: 25 },
+      { id: 'ex-bicep-db-curl', sets: 3, reps: 14, rest: 45, weight: 14 }
     ]
   },
   {
@@ -177,11 +177,11 @@ export const DEFAULT_ROUTINES = [
     name: 'Legs & Core B',
     description: 'Squat and hinge focus with direct core work.',
     exercises: [
-      { id: 'ex-barbell-squat', sets: 4, reps: 8, rest: 120, weight: 70 },
-      { id: 'ex-romanian-deadlift', sets: 3, reps: 10, rest: 90, weight: 60 },
-      { id: 'ex-leg-press', sets: 3, reps: 12, rest: 90, weight: 120 },
-      { id: 'ex-plank', sets: 3, reps: 60, rest: 60, weight: 0 },
-      { id: 'ex-hanging-raise', sets: 3, reps: 12, rest: 60, weight: 0 }
+      { id: 'ex-barbell-squat', sets: 5, reps: 5, rest: 180, weight: 80 },
+      { id: 'ex-romanian-deadlift', sets: 4, reps: 8, rest: 120, weight: 65 },
+      { id: 'ex-leg-press', sets: 3, reps: 12, rest: 90, weight: 140 },
+      { id: 'ex-plank', sets: 3, reps: 45, rest: 60, weight: 0 },
+      { id: 'ex-hanging-raise', sets: 3, reps: 15, rest: 60, weight: 0 }
     ]
   },
   {
@@ -242,22 +242,35 @@ export const DEFAULT_HISTORY = [
     clientName: 'Jane Doe',
     routineName: 'Upper Body A',
     date: '2026-07-10T09:00:00.000Z',
-    duration: 3600,
+    duration: 3540,
     exercises: [
       {
         id: 'ex-bench-barbell',
         name: 'Barbell Bench Press',
-        sets: [ { reps: 6, weight: 62.5, completed: true } ]
+        sets: [
+          { reps: 5, weight: 60, completed: true, note: 'RPE 7' },
+          { reps: 5, weight: 60, completed: true, note: 'RPE 8' },
+          { reps: 5, weight: 60, completed: true, note: 'RPE 8.5' },
+          { reps: 4, weight: 60, completed: true, note: 'RPE 9, last rep grind' }
+        ]
       },
       {
         id: 'ex-barbell-row',
         name: 'Barbell Row',
-        sets: [ { reps: 8, weight: 52.5, completed: true } ]
+        sets: [
+          { reps: 8, weight: 52.5, completed: true },
+          { reps: 8, weight: 52.5, completed: true },
+          { reps: 7, weight: 52.5, completed: true, note: 'Strict, paused' }
+        ]
       },
       {
         id: 'ex-shoulder-db',
         name: 'Dumbbell Shoulder Press',
-        sets: [ { reps: 10, weight: 16, completed: true } ]
+        sets: [
+          { reps: 10, weight: 16, completed: true },
+          { reps: 9, weight: 16, completed: true },
+          { reps: 8, weight: 16, completed: true, note: 'Left side fatigued' }
+        ]
       }
     ],
     feedback: [
@@ -290,22 +303,34 @@ export const DEFAULT_HISTORY = [
     clientName: 'John Smith',
     routineName: 'Upper Body A',
     date: '2026-07-10T09:00:00.000Z',
-    duration: 3600,
+    duration: 3720,
     exercises: [
       {
         id: 'ex-bench-barbell',
         name: 'Barbell Bench Press',
-        sets: [ { reps: 6, weight: 70, completed: true } ]
+        sets: [
+          { reps: 5, weight: 67.5, completed: true, note: 'RPE 8' },
+          { reps: 5, weight: 67.5, completed: true, note: 'RPE 8.5' },
+          { reps: 5, weight: 67.5, completed: true, note: 'RPE 9' }
+        ]
       },
       {
         id: 'ex-barbell-row',
         name: 'Barbell Row',
-        sets: [ { reps: 8, weight: 60, completed: true } ]
+        sets: [
+          { reps: 8, weight: 57.5, completed: true },
+          { reps: 8, weight: 57.5, completed: true },
+          { reps: 8, weight: 57.5, completed: true },
+          { reps: 7, weight: 57.5, completed: true }
+        ]
       },
       {
         id: 'ex-shoulder-db',
         name: 'Dumbbell Shoulder Press',
-        sets: [ { reps: 10, weight: 18, completed: true, note: 'Left arm weaker on last set' } ]
+        sets: [
+          { reps: 10, weight: 18, completed: true },
+          { reps: 9, weight: 18, completed: true, note: 'Left arm weaker on last set' }
+        ]
       }
     ],
     feedback: [
@@ -360,6 +385,16 @@ export const DEFAULT_SESSIONS = (() => {
 
   return [
     {
+      id: 'b-today-done',
+      time: `${formatHour(currentHour - 3)} - ${formatHour(currentHour - 2)}`,
+      title: 'Early Bird Strength',
+      participants: ['client-mike-chen', 'client-tom-walker'],
+      routineId: 'routine-upper-a',
+      maxCapacity: 4,
+      day: 'today',
+      completed: true
+    },
+    {
       id: 'b-1',
       time: `${formatHour(currentHour - 1)} - ${formatHour(currentHour + 1)}`,
       title: 'Group Strength & Conditioning',
@@ -371,7 +406,7 @@ export const DEFAULT_SESSIONS = (() => {
     {
       id: 'b-2',
       time: `${formatHour(currentHour)} - ${formatHour(currentHour + 2)}`,
-      title: 'Individual Focus Session',
+      title: '1:1 Personal Training',
       participants: ['client-sarah-jenkins'],
       routineId: 'routine-legs-core',
       maxCapacity: 1,
@@ -396,6 +431,15 @@ export const DEFAULT_SESSIONS = (() => {
       day: 'today'
     },
     {
+      id: 'b-today-open',
+      time: `${formatHour(currentHour + 4)} - ${formatHour(currentHour + 5)}`,
+      title: 'Open Slot (Drop-in)',
+      participants: [],
+      routineId: 'routine-legs-core',
+      maxCapacity: 3,
+      day: 'today'
+    },
+    {
       id: 'b-4',
       time: '09:00 - 10:00',
       title: 'Morning Conditioning',
@@ -407,7 +451,7 @@ export const DEFAULT_SESSIONS = (() => {
     {
       id: 'b-5',
       time: '10:30 - 11:30',
-      title: 'Tomorrow Strength',
+      title: 'Upper Body Strength',
       participants: ['client-john-smith'],
       routineId: 'routine-upper-a',
       maxCapacity: 4,
@@ -416,7 +460,7 @@ export const DEFAULT_SESSIONS = (() => {
     {
       id: 'b-6',
       time: '11:30 - 12:30',
-      title: 'Lunch Blast Workout',
+      title: 'Lunch Express HIIT',
       participants: ['client-sarah-jenkins'],
       routineId: '',
       maxCapacity: 3,
@@ -434,7 +478,7 @@ export const DEFAULT_SESSIONS = (() => {
     {
       id: 'b-yesterday-1',
       time: '09:00 - 10:30',
-      title: 'Yesterday Core',
+      title: 'Core & Stability',
       participants: ['client-jane-doe'],
       routineId: 'routine-upper-a',
       maxCapacity: 2,
@@ -443,7 +487,7 @@ export const DEFAULT_SESSIONS = (() => {
     {
       id: 'b-yesterday-2',
       time: '16:00 - 17:00',
-      title: 'Yesterday Mobility',
+      title: 'Mobility & Recovery',
       participants: ['client-john-smith'],
       routineId: 'routine-legs-core',
       maxCapacity: 3,
@@ -452,7 +496,7 @@ export const DEFAULT_SESSIONS = (() => {
     {
       id: 'b-upcoming-1',
       time: '08:00 - 09:30',
-      title: 'Future Strength',
+      title: 'Lower Body Strength',
       participants: ['client-sarah-jenkins'],
       routineId: 'routine-legs-core',
       maxCapacity: 2,
@@ -461,7 +505,7 @@ export const DEFAULT_SESSIONS = (() => {
     {
       id: 'b-upcoming-2',
       time: '10:00 - 11:00',
-      title: 'Future HIIT Conditioning',
+      title: 'HIIT Conditioning',
       participants: ['client-jane-doe', 'client-john-smith'],
       routineId: 'routine-upper-a',
       maxCapacity: 4,

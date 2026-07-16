@@ -1768,6 +1768,12 @@ textarea.form-control {
   transition: background 0.2s, transform 0.2s;
 }
 
+/* A finished session is muted and marked with a green edge — done, not up-next */
+.booking-card.booking-completed {
+  border-left-color: var(--success);
+  opacity: 0.6;
+}
+
 /* --- SESSIONS DAY TITLE BAR --- */
 .sessions-title-bar {
   gap: 10px;

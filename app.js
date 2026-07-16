@@ -129,6 +129,8 @@ const TRANSLATIONS = {
     up_next_label: "Up Next",
     last_exercise: "Last Exercise",
     program_not_defined: "Program Not Defined",
+    no_members_assigned: "No Participants",
+    session_completed: "Completed",
     today: "Today",
     tomorrow: "Tomorrow",
     yesterday: "Yesterday",
@@ -267,6 +269,8 @@ const TRANSLATIONS = {
     up_next_label: "Naslednja vaja",
     last_exercise: "Zadnja vaja",
     program_not_defined: "Program ni določen",
+    no_members_assigned: "Ni udeležencev",
+    session_completed: "Zaključeno",
     today: "Danes",
     tomorrow: "Jutri",
     yesterday: "Včeraj",
@@ -521,15 +525,19 @@ function init() {
     saveToLocalStorage();
   }
 
-  // Demo-data version guard. Clients and bookings are seeded reference data, but they were
-  // only ever re-seeded on a completely empty database — so editing mockData.js left anyone
-  // with an existing localStorage db seeing the old demo roster. Bump SEED_VERSION whenever
-  // DEFAULT_CLIENTS or DEFAULT_SESSIONS change to force those two back to current, while
-  // leaving user-owned routines, exercises, history, and plan updates untouched.
-  const SEED_VERSION = 5;
+  // Demo-data version guard. Editing mockData.js otherwise leaves anyone with an existing
+  // localStorage db seeing the old demo data (collections are only seeded on an empty db).
+  // Bump SEED_VERSION whenever the demo dataset changes to force a full refresh of every
+  // reference collection, then re-seed session 1 as a live workout. This is demo behaviour:
+  // it does discard in-session test edits, which is the intent for a reshapeable prototype.
+  const SEED_VERSION = 6;
   const storedSeed = parseInt(localStorage.getItem('librept_seed_version') || '0', 10);
   if (storedSeed < SEED_VERSION) {
     state.clients = [...DEFAULT_CLIENTS];
+    state.exercises = [...DEFAULT_EXERCISES];
+    state.routines = [...DEFAULT_ROUTINES];
+    state.history = [...DEFAULT_HISTORY];
+    state.planUpdates = [...DEFAULT_PLAN_UPDATES];
     state.bookings = [...DEFAULT_SESSIONS];
     localStorage.setItem('librept_seed_version', String(SEED_VERSION));
     saveToLocalStorage();
@@ -2312,7 +2320,7 @@ function renderActiveGroupBoard() {
                 <i class="fa-solid fa-arrow-down"></i><span>${t('signal_too_hard')}</span>
               </button>
               <button type="button" id="btn-log-feedback" class="deck-action-btn deck-action-feedback" aria-label="${t('btn_log_feedback')}">
-                <i class="fa-solid fa-message"></i><span>${t('feedback_short')}</span>
+                <i class="fa-solid fa-file-lines"></i><span>${t('feedback_short')}</span>
               </button>
             </div>
           `;
@@ -3455,24 +3463,33 @@ function renderSessions() {
     const routine = state.routines.find(r => r.id === b.routineId);
     const routineName = routine ? routine.name : '';
 
-    // Program undefined warning tag
-    let warningHTML = '';
-    if (!routineName) {
-      warningHTML = `
-        <div class="booking-warning-pill" style="display: inline-flex; align-items: center; gap: 4px; background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; margin-top: 6px;">
-          <i class="fa-solid fa-triangle-exclamation"></i>
-          <span>${t('program_not_defined')}</span>
-        </div>
-      `;
-    }
-    
+    // Readiness warnings — a session needs both a program and at least one participant
+    const pill = (label) => `
+      <div class="booking-warning-pill" style="display: inline-flex; align-items: center; gap: 4px; background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700;">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span>${label}</span>
+      </div>`;
+    const warnings = [];
+    if (!routineName) warnings.push(pill(t('program_not_defined')));
+    if (clients.length === 0) warnings.push(pill(t('no_members_assigned')));
+    const warningHTML = warnings.length
+      ? `<div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;">${warnings.join('')}</div>`
+      : '';
+
+    // A finished session is badged and de-emphasised rather than shown as launchable
+    const completedBadge = b.completed
+      ? `<span class="badge badge-emerald" style="font-size: 9px; padding: 2px 6px; font-weight: 700;"><i class="fa-solid fa-circle-check" style="margin-right:3px;"></i>${t('session_completed')}</span>`
+      : '';
+    if (b.completed) card.classList.add('booking-completed');
+
     info.innerHTML = `
       <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px;">
         <span class="badge badge-cyan" style="font-size: 10px; padding: 2px 6px; font-weight: 700; font-family: monospace;">${escapeHTML(b.time)}</span>
         <strong style="color: var(--text-color); font-size: 13px;">${escapeHTML(b.title)}</strong>
+        ${completedBadge}
       </div>
       <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">
-        <i class="fa-solid fa-users" style="margin-right: 4px; font-size: 10px;"></i> ${clientNamesStr} 
+        <i class="fa-solid fa-users" style="margin-right: 4px; font-size: 10px;"></i> ${clientNamesStr || `<span style="color: #ef4444;">—</span>`}
         <span style="margin-left: 4px; color: var(--accent-cyan); font-weight: 600;">(${clients.length}/${b.maxCapacity} ${t('spots_filled')})</span>
       </div>
       <div style="font-size: 11px; color: var(--text-muted);">
@@ -3480,12 +3497,14 @@ function renderSessions() {
       </div>
       ${warningHTML}
     `;
-    
+
     const btn = document.createElement('button');
-    btn.className = 'btn primary-btn btn-xs';
+    btn.className = b.completed ? 'btn secondary-btn btn-xs' : 'btn primary-btn btn-xs';
     btn.style.cssText = 'display: flex; align-items: center; gap: 6px; pointer-events: none;';
-    btn.innerHTML = `<i class="fa-solid fa-circle-play"></i> ${t('btn_launch_clipboard_short')}`;
-    
+    btn.innerHTML = b.completed
+      ? `<i class="fa-solid fa-clock-rotate-left"></i> ${t('session_completed')}`
+      : `<i class="fa-solid fa-circle-play"></i> ${t('btn_launch_clipboard_short')}`;
+
     card.addEventListener('click', () => {
       launchClipboardDirectly(b.id);
     });

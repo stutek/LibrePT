@@ -34,6 +34,15 @@ When several sessions run in **the same time slot with different programmes**, t
 - Relates to the existing "Asynchronous Session Scenarios" capability in [uc1_gym_floor_clipboard.md](file:///home/simon/Projects/LibrePT/use_cases/uc1_gym_floor_clipboard.md).
 - The distinguishing signal must survive the gym-floor constraints: glanceable, no reading required.
 
+### 1.3 Session list must model partial overlaps and other PTs' room usage
+The session list can no longer assume one session per time slot. Model and display:
+
+- **Partially overlapping sessions** (not just same-slot): sessions that share *part* of a time window — e.g. 10:00–11:00 and 10:30–11:30 — must both render, visibly showing the overlap rather than stacking as if sequential. The current relative-bucket model (`day: today/tomorrow/…`) and the same-day time-overlap merge in `launchClipboardDirectly` only handle full-slot collisions; partial overlaps need a real start/end time model.
+  - **Render overlaps the way calendar apps do**: a vertical **time grid** with sessions as blocks whose **top/height map to start/end**, and overlapping blocks placed **side by side** (columns) within the shared span, each narrowed to fit. This replaces the single-column stacked card idea *for time-conflicted ranges* — a session's horizontal position/width encodes its overlap, its vertical position encodes when. Non-overlapping parts of the day can still collapse to save space, but any overlap expands into the aligned grid.
+- **Shaded sessions from other PTs sharing the gym/room**: show *other trainers'* bookings for the **same gym/room** as read-only, visually **shaded/muted** context, so a PT sees when a room is already occupied and avoids double-booking equipment. These are not the PT's own sessions — not launchable, no participant detail, just occupancy.
+- Implies a **room/resource** dimension on bookings (which room, which trainer) that the data model does not have yet, and a scheduling/availability source for other PTs' bookings (shared calendar or backend).
+- Feeds directly into the planned **date-grouped, scrollable session card stack** ([4.3](#43-collapse-the-duplicated-session-header-into-one-row-with-a-date-picker) and the sessions-view redesign): overlaps and shaded external sessions must be legible within that stacked layout.
+
 ---
 
 ## 2. Active Session Bar (bottom green row)
@@ -155,3 +164,21 @@ The Playwright suite already drives real end-to-end flows (gym-floor clipboard l
 Pending plan adjustment reminders — **do we allow a 1-click resolve?**
 
 - Tension to resolve: one-tap resolution fits the low-interaction principle, but plan adjustments are exactly the decisions that deserve deliberate review at the desk ([uc2_async_plan_adjustments.md](file:///home/simon/Projects/LibrePT/use_cases/uc2_async_plan_adjustments.md)).
+
+---
+
+## 8. Clipboard Interactions
+
+### 8.1 Bind multiple clients to one shared set of exercises
+Allow **two or more participants to be bound to the same set of exercises**, merging their tabs into a **single combined view** in the clipboard (they train the identical programme in lockstep, so the trainer logs the shared plan once instead of switching tabs per person).
+
+- The **exercise cards are shared** across the bound clients; navigating/logging the plan advances it for the whole group.
+- **Feedback stays per-person**: `Too Easy` / `Too Hard` / voice notes must still record against the **individual** client, not the group — one client can find a shared set too hard while another finds it too easy.
+- Decide the data model: a per-client `clientRoutines[clientId]` today owns its own `exercises` + `logs`. Binding needs either a shared exercise reference with per-client log/feedback overlays, or a "group" pseudo-participant that fans feedback back out to members.
+- Interacts with the merged-session view ([1.2](#12-simultaneous-sessions-merged-into-one-clipboard)) and the horizontal participant tabs — a bound group should read as one tab, expandable to its members.
+
+### 8.2 Rename "Cancel" → "Delete Session" and make it harder to reach
+The clipboard's **Cancel** button (bottom-left) discards the active session with no history saved. Rename it to **"Delete Session"** to say what it actually does.
+
+- It is currently **too easily accessible** for a destructive, unrecoverable action sitting next to "Complete Workout Session". Move it out of the primary action row (e.g. behind an overflow/⋯ menu, a long-press, or a secondary confirm step) so it can't be hit by accident mid-set.
+- Keep the existing confirm dialog, but tighten the wording now that logging is one-tap (no per-set grid): it discards the session's completions and feedback.
