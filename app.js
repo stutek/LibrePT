@@ -363,11 +363,7 @@ function applyTranslations(lang = state.lang || 'en') {
     '#dialog-feedback button[type="submit"]': 'btn_log_alert',
     '#label-voice-note': 'voice_note_label',
     '#voice-record-status': 'voice_ready',
-    '#label-sessions-today': 'today',
-    '#label-sessions-tomorrow': 'tomorrow',
-    '#label-sessions-yesterday': 'yesterday',
-    '#label-sessions-upcoming': 'upcoming',
-    
+
     '#dialog-backup .modal-header h3': 'backup_center',
     '#dialog-backup .dialog-desc': 'backup_desc',
     '#dialog-backup #btn-download-backup': 'btn_download_backup',
@@ -1990,7 +1986,7 @@ function startSessionTimer() {
 
   const tick = () => {
     activeSession.duration = Math.floor((Date.now() - activeSession.startTime) / 1000);
-    document.getElementById('overlay-session-duration').textContent = formatDuration(activeSession.duration);
+    updateOverlaySessionTimer();
     updateSessionBarTimer();
 
     // Save periodically
@@ -1999,6 +1995,26 @@ function startSessionTimer() {
 
   activeSession.timerIntervalId = setInterval(tick, 1000);
   tick();
+}
+
+// The clipboard header shows time remaining against the session's scheduled end, counting
+// down (and into the negative once it overruns) rather than a stopwatch that restarts from
+// zero each time the session is reopened. Ad-hoc sessions with no scheduled end fall back to
+// an elapsed count-up, since there is nothing to count down against.
+function updateOverlaySessionTimer() {
+  if (!activeSession) return;
+  const el = document.getElementById('overlay-session-duration');
+  if (!el) return;
+
+  const endDate = activeSession.booking && activeSession.booking.endDate;
+  if (endDate) {
+    const remainingSec = Math.round((new Date(endDate).getTime() - Date.now()) / 1000);
+    el.textContent = formatSignedDuration(remainingSec);
+    el.style.color = remainingSec < 0 ? 'var(--danger)' : 'var(--accent-cyan)';
+  } else {
+    el.textContent = formatDuration(activeSession.duration);
+    el.style.color = 'var(--accent-cyan)';
+  }
 }
 
 // The bar's countdown derives from the booking's scheduled end when one is known
@@ -2221,7 +2237,17 @@ function renderActiveGroupBoard() {
   const deckContainer = document.getElementById('active-exercise-scroll-deck');
   if (deckContainer && activeClientState) {
     deckContainer.innerHTML = '';
-    
+
+    // A launched future-day session is a plan, not a live workout — its exercises get the
+    // same amber tint the dashboard uses for future days (mirrors the purple past history).
+    const launchedDay = activeSession.booking ? activeSession.booking.day : null;
+    const isFutureSession = launchedDay === 'tomorrow' || launchedDay === 'upcoming';
+
+    // Single focus across the whole deck: while a past log is open, the live exercise card
+    // collapses too, so exactly one card is ever expanded (the active-exercise pointer is
+    // untouched, so it re-expands the moment the past card is closed).
+    const pastExpanded = !!activeSession.expandedPastId;
+
     // Format localized date
     const formatDateStr = (dateIso) => {
       if (!dateIso) return '';
@@ -2275,26 +2301,50 @@ function renderActiveGroupBoard() {
       const card = document.createElement('div');
 
       if (item.type === 'past') {
-        card.className = 'exercise-deck-card past-session';
-        // Logged history, not a target: every set is listed as-is rather than reduced to
-        // one sets/reps/weight triplet, since loads and reps often vary across the sets
-        const setsSummary = item.sets.map(s => `${s.weight}kg x ${s.reps}`).join(', ');
-        card.innerHTML = `
-          <div class="deck-card-compact">
-            <span class="badge deck-card-status deck-card-status-past">Past: ${item.sessionDate}</span>
-            <span class="deck-card-name deck-card-name-inline">${escapeHTML(item.name)}</span>
-            <span class="deck-card-compact-target">${escapeHTML(setsSummary)}</span>
-          </div>
-        `;
+        // Tap toggles the card open in place, right in the deck — no separate review panel
+        const isExpanded = activeSession.expandedPastId === item.id;
+        card.className = 'exercise-deck-card past-session' + (isExpanded ? ' past-expanded' : '');
+        if (isExpanded) {
+          // Logged history, not a target: every set is listed as-is rather than reduced to
+          // one sets/reps/weight triplet, since loads and reps often vary across the sets
+          const setRows = item.sets.map((s, sIdx) => `
+            <div class="deck-history-set-row">
+              <strong>S${sIdx + 1}</strong>
+              <span class="deck-history-load">${escapeHTML(String(s.weight))} kg</span>
+              <span class="deck-history-reps">${escapeHTML(String(s.reps))} reps</span>
+              ${s.note ? `<span class="deck-history-note">${escapeHTML(s.note)}</span>` : ''}
+            </div>`).join('');
+          card.innerHTML = `
+            <div class="deck-card-top">
+              <span class="badge deck-card-status deck-card-status-past">Past: ${escapeHTML(item.sessionDate)}</span>
+              <i class="fa-solid fa-chevron-up deck-history-collapse" aria-hidden="true"></i>
+            </div>
+            <h5 class="deck-card-name">${escapeHTML(item.name)}</h5>
+            <div class="deck-history-sets">${setRows}</div>
+            <div class="deck-history-meta">${escapeHTML(item.routineName || 'Completed Session')}</div>
+          `;
+        } else {
+          const setsSummary = item.sets.map(s => `${s.weight}kg x ${s.reps}`).join(', ');
+          card.innerHTML = `
+            <div class="deck-card-compact">
+              <span class="badge deck-card-status deck-card-status-past">Past: ${escapeHTML(item.sessionDate)}</span>
+              <span class="deck-card-name deck-card-name-inline">${escapeHTML(item.name)}</span>
+              <span class="deck-card-compact-target">${escapeHTML(setsSummary)}</span>
+            </div>
+          `;
+        }
         card.addEventListener('click', () => {
-          showPastExerciseInFocus(item);
+          activeSession.expandedPastId = isExpanded ? null : item.id;
+          renderActiveGroupBoard();
         });
       } else {
-        const checkedClass = item.isInFocus ? 'in-focus' : (item.isCompleted ? 'completed' : '');
-        card.className = `exercise-deck-card ${checkedClass}`;
+        // An open past log defocuses the live card, so the active exercise renders compact too
+        const showInFocus = item.isInFocus && !pastExpanded;
+        const checkedClass = showInFocus ? 'in-focus' : (item.isCompleted ? 'completed' : '');
+        card.className = `exercise-deck-card ${checkedClass}${isFutureSession ? ' future-session' : ''}`;
 
         let statusBadge = '';
-        if (item.isInFocus) {
+        if (showInFocus) {
           statusBadge = `<span class="badge badge-cyan deck-card-status">In Focus</span>`;
         } else if (item.isCompleted) {
           statusBadge = `<span class="badge badge-emerald deck-card-status">Completed</span>`;
@@ -2310,7 +2360,7 @@ function renderActiveGroupBoard() {
         const signalColor = getExerciseSignalColor(activeClientId, item.name);
         const nameStyle = signalColor ? ` style="color: ${signalColor};"` : '';
 
-        if (item.isInFocus) {
+        if (showInFocus) {
           // Expanded focus card is the primary logging surface: target stats plus the
           // one-tap outcome signals that replaced the per-set stepper grid
           card.innerHTML = `
@@ -2373,6 +2423,7 @@ function renderActiveGroupBoard() {
           `;
           card.addEventListener('click', () => {
             activeClientState.activeExerciseIndex = item.index;
+            activeSession.expandedPastId = null;
             saveActiveSessionToCache();
             renderActiveGroupBoard();
           });
@@ -2381,11 +2432,13 @@ function renderActiveGroupBoard() {
       deckContainer.appendChild(card);
     });
 
-    // Bring the in-focus card into view within the vertical list
+    // Bring whatever the trainer just acted on into view: a freshly expanded past card if
+    // there is one, otherwise the in-focus current exercise.
     setTimeout(() => {
-      const activeCardEl = deckContainer.querySelector('.exercise-deck-card.in-focus');
-      if (activeCardEl) {
-        activeCardEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      const focusEl = deckContainer.querySelector('.exercise-deck-card.past-expanded')
+        || deckContainer.querySelector('.exercise-deck-card.in-focus');
+      if (focusEl) {
+        focusEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }
     }, 100);
   }
@@ -3320,6 +3373,15 @@ function setupCalendarBookings() {
 // single source of truth for which column the title bar and arrows describe.
 const SESSION_DAY_ORDER = ['yesterday', 'today', 'tomorrow', 'upcoming'];
 const SESSION_DAY_OFFSETS = { yesterday: -1, today: 0, tomorrow: 1, upcoming: 2 };
+
+// Temporal bucket that drives the schedule's colour coding: past = purple, today = default,
+// future = amber. The day-selection title bar, the session cards and the launched-session
+// exercise deck all key their tint off this so a day always reads the same colour.
+function sessionDayTemporal(day) {
+  if (day === 'yesterday') return 'past';
+  if (day === 'tomorrow' || day === 'upcoming') return 'future';
+  return 'today';
+}
 const SESSION_SCROLL_SETTLE_MS = 700;
 let focusedSessionDay = 'today';
 let sessionsProgrammaticScrollUntil = 0;
@@ -3360,7 +3422,13 @@ function renderSessionsTitleBar() {
 
   // Upcoming is an open-ended bucket: it reads "Upcoming From <date>" instead of naming a weekday
   const isUpcoming = day === 'upcoming';
-  document.getElementById('calendar-title').classList.toggle('is-upcoming', isUpcoming);
+  const calTitle = document.getElementById('calendar-title');
+  calTitle.classList.toggle('is-upcoming', isUpcoming);
+
+  // Tint the whole day-selection line by how the focused day sits relative to now
+  const temporal = sessionDayTemporal(day);
+  calTitle.classList.toggle('is-past', temporal === 'past');
+  calTitle.classList.toggle('is-future', temporal === 'future');
 
   if (isUpcoming) {
     weekdayEl.textContent = t('upcoming');
@@ -3475,8 +3543,10 @@ function renderSessions() {
   
   const renderSessionCard = (b, colContainer) => {
     const card = document.createElement('div');
-    // Layout lives in .booking-card (index.css) so it can stack to a single column on mobile
-    card.className = 'booking-card card glassmorphic';
+    // Layout lives in .booking-card (index.css) so it can stack to a single column on mobile.
+    // The temporal class tints the title to match the day-selection line (past/future).
+    const temporal = sessionDayTemporal(b.day);
+    card.className = 'booking-card card glassmorphic' + (temporal !== 'today' ? ` booking-${temporal}` : '');
 
     // Hover feedback style
     card.addEventListener('mouseenter', () => {
@@ -3528,7 +3598,7 @@ function renderSessions() {
     info.innerHTML = `
       <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px;">
         <span class="badge badge-cyan" style="font-size: 10px; padding: 2px 6px; font-weight: 700; font-family: monospace;">${escapeHTML(b.time)}</span>
-        <strong style="color: var(--text-color); font-size: 13px;">${escapeHTML(b.title)}</strong>
+        <strong class="booking-card-title" style="font-size: 13px;">${escapeHTML(b.title)}</strong>
         ${completedBadge}
       </div>
       <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">
@@ -3603,51 +3673,6 @@ function renderSessions() {
 
   // Booking data just changed — refresh which "next session" the idle bar points to
   renderIdleSessionBar();
-}
-function showPastExerciseInFocus(item) {
-  // Deselect all active cards visually
-  document.querySelectorAll('.exercise-deck-card').forEach(el => el.classList.remove('in-focus'));
-
-  // Highlight the clicked past card. Its name lives in .deck-card-name (not an <h5>
-  // since the vertical-card redesign), so match on that class + the "Past: <date>" badge.
-  document.querySelectorAll('.exercise-deck-card.past-session').forEach(card => {
-    if (card.querySelector('.deck-card-status-past')?.textContent?.includes(item.sessionDate) &&
-        card.querySelector('.deck-card-name')?.textContent === item.name) {
-      card.classList.add('in-focus');
-    }
-  });
-
-  const container = document.getElementById('clipboard-logger-container');
-  if (!container) return;
-  // Reveal the review panel (hidden during live one-tap logging)
-  container.classList.remove('hidden');
-
-  const rows = item.sets.map((s, idx) => `
-    <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 13px;">
-      <strong style="color: var(--accent-cyan); width: 30px;">S${idx + 1}</strong>
-      <span style="color: var(--text-color); font-weight: 600;">${s.weight} kg</span>
-      <span style="color: var(--text-muted); font-weight: 600;">${s.reps} reps</span>
-      <span style="color: var(--text-muted); font-style: italic; font-size: 11px;">${s.note || ''}</span>
-      <span style="color: #10b981; font-weight: 700;"><i class="fa-solid fa-circle-check"></i> Logged</span>
-    </div>
-  `).join('');
-
-  container.innerHTML = `
-    <div style="padding: 16px; background: rgba(139, 92, 246, 0.03); border: 1px dashed rgba(139, 92, 246, 0.15); border-radius: 8px; margin: 12px; box-sizing: border-box;">
-      <h4 style="font-size: 12px; font-weight: 700; color: #c084fc; text-transform: uppercase; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; margin-top: 0;">
-        <i class="fa-solid fa-clock-rotate-left"></i> Reviewing Historical Logs
-      </h4>
-      <div style="font-size: 15px; font-weight: 700; color: var(--text-color); margin-bottom: 2px;">${escapeHTML(item.name)}</div>
-      <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">${escapeHTML(`${item.routineName || 'Completed Session'} (${item.sessionDate})`)}</div>
-      <div style="display: flex; flex-direction: column; gap: 6px;">
-        ${rows}
-      </div>
-    </div>
-  `;
-
-  // Bring the review into view — it renders below the live card stack, which can sit
-  // past the fold now that the clipboard body scrolls.
-  container.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 // Register Service Worker for offline PWA support
