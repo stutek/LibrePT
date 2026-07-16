@@ -189,9 +189,11 @@ export const DEFAULT_ROUTINES = [
     name: 'Triple Combo Challenge',
     description: 'A linked 3-exercise superset combo for muscular endurance.',
     exercises: [
-      { id: 'ex-dumbbell-row', sets: 3, reps: 10, rest: 0, weight: 18, comboGroupId: 'combo-1' },
-      { id: 'ex-pushups', sets: 3, reps: 'Max', rest: 0, weight: 0, comboGroupId: 'combo-1' },
-      { id: 'ex-walking-lunges', sets: 3, reps: 40, rest: 60, weight: 0, comboGroupId: 'combo-1' }
+      // circuitId groups these three into one card; circuitSeries is the round counter (do the
+      // whole trio 3 times). comboGroupId is a separate, older concept and is left untouched.
+      { id: 'ex-dumbbell-row', sets: 3, reps: 10, rest: 0, weight: 18, comboGroupId: 'combo-1', circuitId: 'circuit-triple', circuitTitle: 'Triple Combo', circuitSeries: 3 },
+      { id: 'ex-pushups', sets: 3, reps: 'Max', rest: 0, weight: 0, comboGroupId: 'combo-1', circuitId: 'circuit-triple', circuitTitle: 'Triple Combo', circuitSeries: 3 },
+      { id: 'ex-walking-lunges', sets: 3, reps: 40, rest: 60, weight: 0, comboGroupId: 'combo-1', circuitId: 'circuit-triple', circuitTitle: 'Triple Combo', circuitSeries: 3 }
     ]
   }
 ];

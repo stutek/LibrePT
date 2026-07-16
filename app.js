@@ -676,7 +676,10 @@ function seedDemoActiveSession() {
         setsTargetCount: item.sets,
         repsTarget: item.reps,
         weightTarget: item.weight,
-        rest: item.rest
+        rest: item.rest,
+        circuitId: item.circuitId || null,
+        circuitTitle: item.circuitTitle || '',
+        circuitSeries: item.circuitSeries || 1
       });
       clientState.logs[item.id] = Array.from({ length: item.sets }, () => ({
         reps: item.reps,
@@ -1982,7 +1985,12 @@ function startWorkoutSession(clientRoutines, bookingMeta = null) {
           setsTargetCount: item.sets,
           repsTarget: item.reps,
           weightTarget: item.weight,
-          rest: item.rest
+          rest: item.rest,
+          // Circuit grouping: exercises sharing a circuitId render as one card, repeated
+          // circuitSeries times (see renderActiveGroupBoard / buildCircuitUnits).
+          circuitId: item.circuitId || null,
+          circuitTitle: item.circuitTitle || '',
+          circuitSeries: item.circuitSeries || 1
         });
 
         // Initialize logs: exerciseId -> array of sets logs
@@ -2116,13 +2124,16 @@ function updateClientTabsFadeState() {
 
 // Opens the full feedback modal for the active client's current exercise, prefilled and
 // with the voice recorder reset. Invoked by the Log Feedback button on the focus card.
-function openFeedbackModal() {
+// exId targets a specific exercise (a circuit row passes its own id); without it the modal
+// falls back to the active exercise, which is how the single-card Feedback button calls it.
+function openFeedbackModal(exId) {
   if (!activeSession) return;
   const activeClientId = activeSession.activeClientId;
   const clientState = activeSession.clientRoutines[activeClientId];
   if (!clientState || clientState.exercises.length === 0) return;
 
-  const curEx = clientState.exercises[clientState.activeExerciseIndex];
+  const curEx = (exId && clientState.exercises.find(e => e.id === exId))
+    || clientState.exercises[clientState.activeExerciseIndex];
   const client = state.clients.find(c => c.id === activeClientId);
 
   document.getElementById('feedback-client-id').value = activeClientId;
@@ -2150,13 +2161,16 @@ function openFeedbackModal() {
 // One-tap outcome signal (Too Easy / Too Hard) from the focus card. Records the same
 // kind of feedback the modal would, marks the exercise's target sets as completed so it
 // carries into the saved session history, and re-renders. Replaces per-set stepper logging.
-function logQuickSignal(tag) {
+function logQuickSignal(tag, exId) {
   if (!activeSession) return;
   const clientId = activeSession.activeClientId;
   const clientState = activeSession.clientRoutines[clientId];
   if (!clientState || clientState.exercises.length === 0) return;
 
-  const curEx = clientState.exercises[clientState.activeExerciseIndex];
+  // A circuit row passes exId so its signal is logged against that exercise; the single
+  // focus card omits it and the active exercise is used.
+  const curEx = (exId && clientState.exercises.find(e => e.id === exId))
+    || clientState.exercises[clientState.activeExerciseIndex];
   const client = state.clients.find(c => c.id === clientId);
 
   const newFeedback = {
@@ -2203,6 +2217,60 @@ function getExerciseSignalColor(clientId, exerciseName) {
   if (fb.some(f => /too easy|increase load/i.test(f.tag))) return 'var(--success)';
   // Any other tagged feedback (pain, form break, …) also warrants the red flag
   return 'var(--danger)';
+}
+
+// Fold the flat current-exercise list into render units: consecutive exercises sharing a
+// circuitId collapse into one { type:'circuit', ... } unit (a circuit is in focus / completed
+// if any / all of its exercises are), while ungrouped exercises pass through untouched.
+function buildCircuitUnits(list) {
+  const units = [];
+  list.forEach(item => {
+    if (item.circuitId) {
+      const last = units[units.length - 1];
+      if (last && last.type === 'circuit' && last.circuitId === item.circuitId) {
+        last.items.push(item);
+        last.isInFocus = last.isInFocus || item.isInFocus;
+        last.isCompleted = last.isCompleted && item.isCompleted;
+      } else {
+        units.push({
+          type: 'circuit',
+          circuitId: item.circuitId,
+          title: item.circuitTitle,
+          series: item.circuitSeries || 1,
+          items: [item],
+          isInFocus: item.isInFocus,
+          isCompleted: item.isCompleted
+        });
+      }
+    } else {
+      units.push(item);
+    }
+  });
+  return units;
+}
+
+// The circuit card's "Complete round" button: advance the round counter until the last round,
+// then mark every exercise in the circuit done and move the active pointer past the group.
+function completeCircuitRound(circuitId) {
+  if (!activeSession) return;
+  const cs = activeSession.clientRoutines[activeSession.activeClientId];
+  if (!cs) return;
+  if (!cs.circuitRounds) cs.circuitRounds = {};
+  const groupExs = cs.exercises.filter(e => e.circuitId === circuitId);
+  if (groupExs.length === 0) return;
+  const series = groupExs[0].circuitSeries || 1;
+  const cur = cs.circuitRounds[circuitId] || 1;
+  if (cur < series) {
+    cs.circuitRounds[circuitId] = cur + 1;
+  } else {
+    groupExs.forEach(ex => (cs.logs[ex.id] || []).forEach(l => { l.completed = true; }));
+    let lastIdx = -1;
+    cs.exercises.forEach((ex, idx) => { if (ex.circuitId === circuitId) lastIdx = idx; });
+    cs.activeExerciseIndex = Math.min(lastIdx + 1, cs.exercises.length - 1);
+  }
+  saveActiveSessionToCache();
+  saveToLocalStorage();
+  renderActiveGroupBoard();
 }
 
 function renderActiveGroupBoard() {
@@ -2328,11 +2396,18 @@ function renderActiveGroupBoard() {
         instructions: ex.instructions,
         setsTarget: ex.setsTargetCount || ex.sets || 3,
         repsTarget: ex.repsTarget || ex.reps || 10,
-        weightTarget: ex.weightTarget || ex.weight || 0
+        weightTarget: ex.weightTarget || ex.weight || 0,
+        rest: ex.rest || 0,
+        circuitId: ex.circuitId || null,
+        circuitTitle: ex.circuitTitle || '',
+        circuitSeries: ex.circuitSeries || 1
       };
     });
 
-    const allDeckItems = [...pastExList, ...currentExList];
+    // Fold consecutive exercises that share a circuitId into a single circuit unit; ungrouped
+    // exercises stay as their own 'current' cards. Circuits render one card per group.
+    const renderUnits = buildCircuitUnits(currentExList);
+    const allDeckItems = [...pastExList, ...renderUnits];
     allDeckItems.forEach(item => {
       const card = document.createElement('div');
 
@@ -2373,6 +2448,72 @@ function renderActiveGroupBoard() {
           activeSession.expandedPastId = isExpanded ? null : item.id;
           renderActiveGroupBoard();
         });
+      } else if (item.type === 'circuit') {
+        // A circuit card is one grouped block: an optional title, a round counter over
+        // circuitSeries rounds, every exercise (and any rest break) listed, a Complete-round
+        // button that advances the counter, and a feedback trio on each exercise row. Feedback
+        // stays tied to the exercise (logQuickSignal/openFeedbackModal take that exercise's id).
+        const round = (activeClientState.circuitRounds && activeClientState.circuitRounds[item.circuitId]) || 1;
+        const showInFocus = item.isInFocus && !pastExpanded;
+        card.className = `exercise-deck-card circuit-card ${showInFocus ? 'in-focus' : (item.isCompleted ? 'completed' : '')}${isFutureSession ? ' future-session' : ''}`;
+        const title = item.title ? escapeHTML(item.title) : t('combo_round_title');
+
+        if (showInFocus) {
+          const rows = [];
+          item.items.forEach(ex => {
+            const sig = getExerciseSignalColor(activeClientId, ex.name);
+            const nameStyle = sig ? ` style="color:${sig};"` : '';
+            const repLabel = `${escapeHTML(String(ex.repsTarget))}${ex.weightTarget > 0 ? ` · ${escapeHTML(String(ex.weightTarget))}${t('kg')}` : ''}`;
+            rows.push(`
+              <div class="circuit-ex-row" data-ex-id="${escapeHTML(ex.id)}">
+                <div class="circuit-ex-head">
+                  <span class="circuit-ex-name"${nameStyle}>${escapeHTML(ex.name)}</span>
+                  <span class="circuit-ex-reps">${repLabel}</span>
+                </div>
+                <div class="circuit-ex-actions">
+                  <button type="button" class="circuit-sig easy" data-sig="easy" aria-label="${t('signal_too_easy')}"><i class="fa-solid fa-arrow-up"></i></button>
+                  <button type="button" class="circuit-sig hard" data-sig="hard" aria-label="${t('signal_too_hard')}"><i class="fa-solid fa-arrow-down"></i></button>
+                  <button type="button" class="circuit-sig note" data-sig="note" aria-label="${t('btn_log_feedback')}"><i class="fa-solid fa-file-lines"></i></button>
+                </div>
+              </div>`);
+            if (ex.rest > 0) rows.push(`<div class="circuit-break-row"><i class="fa-solid fa-hourglass-half"></i> Rest ${ex.rest}s</div>`);
+          });
+          const isLastRound = round >= item.series;
+          const footer = item.isCompleted
+            ? `<div class="circuit-done"><i class="fa-solid fa-circle-check"></i> ${t('session_completed')}</div>`
+            : `<button type="button" class="btn success-btn btn-sm circuit-complete-btn"><i class="fa-solid fa-check"></i> ${isLastRound ? 'Finish circuit' : `Complete round ${round} of ${item.series}`}</button>`;
+          card.innerHTML = `
+            <div class="deck-card-top">
+              <span class="circuit-title"><i class="fa-solid fa-layer-group"></i> ${title}</span>
+              <span class="circuit-round-badge">Round ${round}/${item.series}</span>
+            </div>
+            <div class="circuit-ex-list">${rows.join('')}</div>
+            ${footer}
+          `;
+          card.querySelectorAll('.circuit-ex-row').forEach(rowEl => {
+            const exId = rowEl.getAttribute('data-ex-id');
+            rowEl.querySelector('.circuit-sig.easy').addEventListener('click', (e) => { e.stopPropagation(); logQuickSignal('Too Easy - Increase Load', exId); });
+            rowEl.querySelector('.circuit-sig.hard').addEventListener('click', (e) => { e.stopPropagation(); logQuickSignal('Too Hard - Reduce Load', exId); });
+            rowEl.querySelector('.circuit-sig.note').addEventListener('click', (e) => { e.stopPropagation(); openFeedbackModal(exId); });
+          });
+          const completeBtn = card.querySelector('.circuit-complete-btn');
+          if (completeBtn) completeBtn.addEventListener('click', (e) => { e.stopPropagation(); completeCircuitRound(item.circuitId); });
+        } else {
+          card.innerHTML = `
+            <div class="deck-card-compact">
+              <span class="deck-card-counter"><i class="fa-solid fa-layer-group"></i></span>
+              <span class="deck-card-name deck-card-name-inline">${title}</span>
+              <span class="deck-card-compact-target">${item.items.length} ex · R${round}/${item.series}</span>
+              ${item.isCompleted ? `<span class="badge badge-emerald deck-card-status">${t('session_completed')}</span>` : `<span class="badge deck-card-status deck-card-status-upcoming">Circuit</span>`}
+            </div>`;
+          card.addEventListener('click', () => {
+            // Focus the circuit by pointing the active index at its first exercise
+            activeClientState.activeExerciseIndex = item.items[0].index;
+            activeSession.expandedPastId = null;
+            saveActiveSessionToCache();
+            renderActiveGroupBoard();
+          });
+        }
       } else {
         // An open past log defocuses the live card, so the active exercise renders compact too
         const showInFocus = item.isInFocus && !pastExpanded;
