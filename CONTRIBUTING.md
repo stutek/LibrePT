@@ -37,7 +37,7 @@ The app itself needs no install — only a static server:
 ```bash
 git clone https://github.com/stutek/LibrePT.git
 cd LibrePT
-python3 -m http.server 8081   # then open http://localhost:8081
+python3 -m http.server -d src 8081   # the app is in src/; then open http://localhost:8081
 ```
 
 The Python toolchain is needed only to run the tests:
@@ -82,7 +82,7 @@ The session day deck is scrolled with **touch**, so **a mouse drag will not swip
 | **Firefox** | `F12`, then Responsive Design Mode (`Ctrl+Shift+M`) and enable the touch simulation button. |
 | **Trackpad** | Two-finger horizontal swipe works on the desktop site with no emulation. |
 | **Mouse wheel** | Hold `Shift` and scroll to pan horizontally. |
-| **Real device** | Serve over your LAN (`python3 -m http.server 8081 --bind 0.0.0.0`) and open the page from your phone. |
+| **Real device** | Serve over your LAN (`python3 -m http.server -d src 8081 --bind 0.0.0.0`) and open the page from your phone. |
 
 The deck's scrollbar is hidden by design, so the title-bar arrows are the intended affordance for mouse-only desktop users.
 

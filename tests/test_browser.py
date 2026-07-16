@@ -15,12 +15,12 @@ def local_server():
     """Starts a local Python HTTP server on port 8081 if not already running."""
     proc = None
     if not is_port_open(8081):
-        # Run python server from workspace root
-        proc = subprocess.Popen(["python3", "-m", "http.server", "8081"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        # The runtime app lives under src/, so serve that directory AS the web root
+        # (`-d src`). Then localhost:8081/ is the app — matching how it deploys (dist = src).
+        proc = subprocess.Popen(["python3", "-m", "http.server", "-d", "src", "8081"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         # Give it a second to bind
         time.sleep(1.5)
-    # The runtime app lives under src/, so the served entry point is /src/.
-    yield "http://localhost:8081/src/"
+    yield "http://localhost:8081"
     if proc:
         proc.terminate()
         proc.wait()

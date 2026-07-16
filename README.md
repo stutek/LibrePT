@@ -30,7 +30,7 @@ LibrePT is a dependency-free static PWA — no bundler, no install step, no buil
 ```bash
 git clone https://github.com/stutek/LibrePT.git
 cd LibrePT
-python3 -m http.server 8081
+python3 -m http.server -d src 8081   # the app lives in src/; serve it as the web root
 ```
 
 Then open <http://localhost:8081>. The app seeds itself with mock clients, routines, and sessions on first load, so the dashboard is immediately explorable.
