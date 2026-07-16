@@ -61,29 +61,29 @@ body.light-theme {
   --box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
 }
 
-/* "Red" theme — modelled on manutd.com's look: bold red on black with white text (no gold).
-   Every accent (primary, secondary, and the normally-cyan accent) is red red so the UI
-   reads red+black+white. --success stays green so "completed" keeps its semantic meaning. */
+/* "Red" theme — Red's identity is red, so the page background itself is a deep
+   red red (not black), with white text, brighter-red buttons that pop against it, and white
+   highlights. --success stays green so "completed" keeps its semantic meaning. */
 body.red-theme {
-  --bg-color: #0a0a0b;                     /* black base, like the site's dark sections */
-  --card-bg: rgba(22, 22, 24, 0.72);       /* near-black cards on the black page */
-  --card-border: rgba(255, 255, 255, 0.09);
+  --bg-color: #45060b;                     /* deep red red page background */
+  --card-bg: rgba(98, 15, 21, 0.55);       /* slightly lifted red cards */
+  --card-border: rgba(255, 255, 255, 0.15);
   --text-main: #ffffff;
-  --text-muted: #b4b4b9;
-  --border-color: #2b2b2f;
-  --input-bg: #161618;
-  --primary: #da020e;                      /* Red red */
-  --primary-hover: #b00009;
-  --primary-light: rgba(218, 2, 14, 0.18);
-  --secondary: #da020e;
-  --secondary-hover: #b00009;
-  --secondary-light: rgba(218, 2, 14, 0.15);
-  --accent-cyan: #da020e;                  /* accents are red, not cyan */
-  --danger: #ef4444;
-  --danger-hover: #dc2626;
-  --success: #22b45c;                      /* keep completed states green */
-  --success-hover: #16913f;
-  --box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.8);
+  --text-muted: #eec2c6;
+  --border-color: #7c141b;
+  --input-bg: #57090f;
+  --primary: #ee1522;                      /* brighter red so buttons stand out on the red bg */
+  --primary-hover: #c60f1b;
+  --primary-light: rgba(238, 21, 34, 0.22);
+  --secondary: #ee1522;
+  --secondary-hover: #c60f1b;
+  --secondary-light: rgba(238, 21, 34, 0.2);
+  --accent-cyan: #ffffff;                  /* white highlights (focus rings, counters, badges) */
+  --danger: #ffcf33;                       /* amber warning — red-on-red would vanish */
+  --danger-hover: #f5c012;
+  --success: #4ade80;                      /* completed stays green, brightened for the red bg */
+  --success-hover: #22c55e;
+  --box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.55);
 }
 
 /* Reset & Base Setup */
