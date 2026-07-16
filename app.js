@@ -1786,16 +1786,16 @@ function populateDropdownSelectors() {
     });
   }
 
-  // Add exercise to active session drop down
-  const sessionExSelect = document.getElementById('session-add-select-ex');
-  if (sessionExSelect) {
-    sessionExSelect.innerHTML = `<option value="" disabled selected>${t('select_exercise')}</option>`;
-    
-    state.exercises.sort((a,b) => a.name.localeCompare(b.name)).forEach(e => {
+  // Add-exercise combobox: the datalist backs a free-text input, so the trainer can type any
+  // name and see matching library exercises filtered live, or enter one that isn't in the list.
+  const sessionExList = document.getElementById('session-ex-datalist');
+  if (sessionExList) {
+    sessionExList.innerHTML = '';
+    state.exercises.slice().sort((a,b) => a.name.localeCompare(b.name)).forEach(e => {
       const opt = document.createElement('option');
-      opt.value = e.id;
-      opt.textContent = `${e.name} (${e.category})`;
-      sessionExSelect.appendChild(opt);
+      opt.value = e.name;      // the value is the plain name so free-text matching stays clean
+      opt.label = e.category;  // shown as a hint alongside the name where the browser supports it
+      sessionExList.appendChild(opt);
     });
   }
 }
@@ -2588,16 +2588,21 @@ function setupActiveSession() {
 
   addExForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    const exId = document.getElementById('session-add-select-ex').value;
+    const typed = document.getElementById('session-add-select-ex').value.trim();
     const sets = parseInt(document.getElementById('session-add-sets').value);
     const reps = parseInt(document.getElementById('session-add-reps').value);
     const weight = parseFloat(document.getElementById('session-add-weight').value);
     const rest = parseInt(document.getElementById('session-add-rest').value);
 
-    if (!activeSession || !exId || isNaN(sets)) return;
+    if (!activeSession || !typed || isNaN(sets)) return;
 
-    const baseEx = state.exercises.find(e => e.id === exId);
-    if (!baseEx) return;
+    // Resolve the typed text to a library exercise by name (case-insensitive). A name that
+    // isn't in the library is a free-text entry — inject it as an ad-hoc, session-only exercise.
+    let baseEx = state.exercises.find(e => e.name.toLowerCase() === typed.toLowerCase());
+    if (!baseEx) {
+      baseEx = { id: 'ex-custom-' + Date.now(), name: typed, category: 'Custom', instructions: '' };
+    }
+    const exId = baseEx.id;
 
     const activeClientId = activeSession.activeClientId;
     const clientState = activeSession.clientRoutines[activeClientId];

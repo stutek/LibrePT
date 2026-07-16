@@ -572,9 +572,11 @@
     <form id="form-add-session-exercise" method="dialog" class="modal-form">
       <div class="form-group">
         <label for="session-add-select-ex">Select Exercise *</label>
-        <select id="session-add-select-ex" required class="form-control">
-          <!-- Injected via JS -->
-        </select>
+        <!-- Free-text combobox: type any name (matching library exercises are offered in the
+             datalist as you type; a name that isn't in the library is injected as-is). -->
+        <input id="session-add-select-ex" list="session-ex-datalist" required class="form-control"
+               autocomplete="off" placeholder="Type to search or add a new exercise…">
+        <datalist id="session-ex-datalist"><!-- Injected via JS --></datalist>
       </div>
       
       <div class="form-row">
