@@ -61,6 +61,32 @@ body.light-theme {
   --box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
 }
 
+/* "Red" theme — a Red-inspired red & gold skin on near-black. The primary
+   action colour becomes club red and the accent (normally cyan) becomes gold, so highlights
+   read red+gold rather than emerald/cyan. --success stays green so "completed" keeps its
+   semantic meaning instead of clashing with the red primary. */
+body.red-theme {
+  --bg-color: #12080a;                    /* near-black with a warm red undertone */
+  --card-bg: rgba(38, 14, 16, 0.68);
+  --card-border: rgba(255, 255, 255, 0.07);
+  --text-main: #fdf4f4;
+  --text-muted: #cba7ab;
+  --border-color: #3d2024;
+  --input-bg: #1c0d10;
+  --primary: #da291c;                     /* club red */
+  --primary-hover: #b31217;
+  --primary-light: rgba(218, 41, 28, 0.16);
+  --secondary: #f0b429;                   /* gold */
+  --secondary-hover: #d99e14;
+  --secondary-light: rgba(240, 180, 41, 0.15);
+  --accent-cyan: #f0b429;                 /* re-point the accent to gold */
+  --danger: #ef4444;
+  --danger-hover: #dc2626;
+  --success: #22b45c;                     /* keep completed states green */
+  --success-hover: #16913f;
+  --box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.75);
+}
+
 /* Reset & Base Setup */
 * {
   box-sizing: border-box;

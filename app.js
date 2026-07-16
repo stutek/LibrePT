@@ -299,7 +299,10 @@ function applyTranslations(lang = state.lang || 'en') {
   // Set dropdown switcher value
   const switcher = document.getElementById('lang-switcher');
   if (switcher) switcher.value = lang;
-  
+
+  // Theme dropdown labels are localized outside the staticMappings table (compact forms)
+  applyThemeSwitcherLabels();
+
   const tDict = TRANSLATIONS[lang];
   if (!tDict) return;
   
@@ -722,17 +725,11 @@ function setupNavigation() {
     });
   }
 
-  // Theme Toggle Controller
-  const themeToggle = document.getElementById('theme-toggle');
-  themeToggle.addEventListener('click', () => {
-    document.body.classList.toggle('light-theme');
-    const icon = themeToggle.querySelector('i');
-    if (document.body.classList.contains('light-theme')) {
-      icon.className = 'fa-solid fa-sun';
-    } else {
-      icon.className = 'fa-solid fa-moon';
-    }
-  });
+  // Theme controller: dark (default), light, and "Red" — a Red-inspired
+  // red/gold skin. The pick is a dropdown (not a toggle) and is persisted so it survives
+  // reloads. Each theme is a single body class; the CSS vars for dark live on :root, so the
+  // dark-theme class is just a marker while light-theme/red-theme override those vars.
+  setupThemeSwitcher();
 
   // Client Details back button
   document.getElementById('btn-back-to-clients').addEventListener('click', () => {
@@ -740,6 +737,45 @@ function setupNavigation() {
   });
 
   setupSessionsDayNav();
+}
+
+// Each theme maps to exactly one body class. Dark's variables live on :root, so switching
+// to dark just means clearing the other theme classes.
+const THEME_BODY_CLASS = { dark: 'dark-theme', light: 'light-theme', red: 'red-theme' };
+// The address-bar / PWA chrome colour per theme, kept in step with each theme's --bg-color.
+const THEME_META_COLOR = { dark: '#09090b', light: '#f8fafc', red: '#12080a' };
+// Compact, localized labels for the dropdown (the long theme_* i18n strings don't fit).
+const THEME_SWITCHER_LABELS = {
+  en: { dark: 'Dark', light: 'Light', red: 'Red' },
+  sl: { dark: 'Temna', light: 'Svetla', red: 'Rdeča' }
+};
+
+function applyTheme(theme) {
+  const cls = THEME_BODY_CLASS[theme] || THEME_BODY_CLASS.dark;
+  Object.values(THEME_BODY_CLASS).forEach(c => document.body.classList.remove(c));
+  document.body.classList.add(cls);
+  localStorage.setItem('librept-theme', theme);
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', THEME_META_COLOR[theme] || THEME_META_COLOR.dark);
+}
+
+// Refresh the dropdown option text for the active language (also called on language switch).
+function applyThemeSwitcherLabels() {
+  const sel = document.getElementById('theme-switcher');
+  if (!sel) return;
+  const labels = THEME_SWITCHER_LABELS[state.lang] || THEME_SWITCHER_LABELS.en;
+  Array.from(sel.options).forEach(opt => { if (labels[opt.value]) opt.textContent = labels[opt.value]; });
+}
+
+function setupThemeSwitcher() {
+  const saved = localStorage.getItem('librept-theme') || 'dark';
+  applyTheme(saved);
+  const sel = document.getElementById('theme-switcher');
+  if (sel) {
+    sel.value = saved;
+    sel.addEventListener('change', () => applyTheme(sel.value));
+  }
+  applyThemeSwitcherLabels();
 }
 
 function switchView(viewId) {
