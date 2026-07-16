@@ -54,33 +54,19 @@ def run_build():
     # Clean output dir
     if os.path.exists(dist_dir):
         shutil.rmtree(dist_dir)
-    os.makedirs(dist_dir)
-    
-    files_to_copy = [
-        'index.html',
-        'index.css',
-        'app.js',
-        'mockData.js',
-        'manifest.json',
-        'sw.js'
-    ]
-    
-    for filename in files_to_copy:
-        if os.path.exists(filename):
-            shutil.copy(filename, dist_dir)
-            print(f"  Copied {filename} -> {dist_dir}/{filename}")
-        else:
-            print(f"  Warning: {filename} not found!")
 
-    # Asset directories referenced by manifest.json and the Service Worker cache
-    dirs_to_copy = ['icons']
+    # The runtime app lives under src/. Publish that whole tree (index.html, app.js,
+    # index.css, mockData.js, manifest.json, sw.js, components/, icons/) flattened to the
+    # dist root so relative paths resolve the same as in local dev. Mirrors deploy.yml.
+    src_dir = 'src'
+    if not os.path.isdir(src_dir):
+        print(f"  Warning: {src_dir}/ not found!")
+        os.makedirs(dist_dir)
+        return
 
-    for dirname in dirs_to_copy:
-        if os.path.isdir(dirname):
-            shutil.copytree(dirname, os.path.join(dist_dir, dirname))
-            print(f"  Copied {dirname}/ -> {dist_dir}/{dirname}/")
-        else:
-            print(f"  Warning: {dirname}/ not found!")
+    shutil.copytree(src_dir, dist_dir)
+    for path in sorted(os.listdir(dist_dir)):
+        print(f"  Copied src/{path} -> {dist_dir}/{path}")
 
     print(f"  ✓ Build complete. Bundle stored in: {os.path.abspath(dist_dir)}")
 

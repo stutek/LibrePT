@@ -19,7 +19,8 @@ def local_server():
         proc = subprocess.Popen(["python3", "-m", "http.server", "8081"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         # Give it a second to bind
         time.sleep(1.5)
-    yield "http://localhost:8081"
+    # The runtime app lives under src/, so the served entry point is /src/.
+    yield "http://localhost:8081/src/"
     if proc:
         proc.terminate()
         proc.wait()
