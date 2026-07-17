@@ -9,6 +9,7 @@ import { renderPendingPlanAdjustmentsComponent, openAdjustmentWizardComponent } 
 import { initDaySelector, focusSessionsColumn, getFocusedSessionDay, setFocusedSessionDay, sessionDayTemporal, setupSessionsDayNav, renderSessionsTitleBar, getSessionDayDate } from './components/daySelector.js';
 import { initSessionTitleBar, renderSessionTitle } from './components/sessionTitleBar.js';
 import { renderActiveUsersList, updateClientTabsFadeState } from './components/activeUsersList.js';
+import { initApplicationHeader, setupApplicationHeader, incrementLocalSync, resetSyncState, setSyncTrackingReady, renderSyncBadge, applyThemeSwitcherLabels } from './components/applicationHeader.js';
 
 // Helper to generate short UUIDs for all entity types (clients, sessions, exercises, supersets/combos, etc.)
 function generateShortUUID() {
@@ -612,29 +613,27 @@ function init() {
   setupBackupRestore();
   setupCalendarBookings();
 
-  // Set up language switcher listener
-  const switcher = document.getElementById('lang-switcher');
-  if (switcher) {
-    switcher.value = state.lang;
-    switcher.addEventListener('change', (e) => {
-      state.lang = e.target.value;
-      saveToLocalStorage();
-      applyTranslations(state.lang);
-      
-      // Re-render views to apply translations
-      renderClientsList();
-      renderRoutinesList();
-      renderExercisesList();
-      renderGlobalHistory();
-      renderPendingPlanAdjustments();
-      renderSessions();
-      populateDropdownSelectors();
-      if (activeSession) {
-        renderActiveGroupBoard();
-        renderActiveSessionBarLabels();
-      }
-    });
-  }
+  // Initialize Application Header component
+  initApplicationHeader({
+    getState: () => state,
+    t,
+    saveToLocalStorage,
+    applyTranslations,
+    navigateToPath,
+    renderClientsList,
+    renderRoutinesList,
+    renderExercisesList,
+    renderGlobalHistory,
+    renderPendingPlanAdjustments,
+    renderSessions,
+    populateDropdownSelectors,
+    getActiveSession: () => activeSession,
+    renderActiveGroupBoard,
+    renderActiveSessionBarLabels
+  });
+
+  // Wire event listeners for the header and themes
+  setupApplicationHeader();
 
   // Initialize Day Selector component
   initDaySelector({
@@ -688,10 +687,9 @@ function init() {
   // trigger firing (an active session's own 1s tick handles the bar while one is running)
   setInterval(renderIdleSessionBar, 30000);
 
-  // Show the (mock) sync counters, then start counting on-device edits from here — after the
-  // initial seed/render so their saves don't pre-inflate the "ahead" count.
+  // Show the (mock) sync counters, then start counting on-device edits from here
   renderSyncBadge();
-  syncTrackingReady = true;
+  setSyncTrackingReady(true);
 }
 
 function seedMockData() {
@@ -710,35 +708,7 @@ function saveToLocalStorage() {
   localStorage.setItem('librept_db', JSON.stringify(state));
   // Each on-device edit is one more local change "ahead" of the (mock) remote. Seeding runs
   // before syncTrackingReady flips on, so the initial data load doesn't inflate the count.
-  if (syncTrackingReady) {
-    mockSyncState.local += 1;
-    renderSyncBadge();
-  }
-}
-
-// Mock GitHub-style sync counters for the header cloud button. `local` = edits made on this
-// device not yet pushed (ahead); `remote` = changes waiting on the server (behind). There is
-// no real backend — these are seeded for the demo and reset to "in sync" once a Sync runs.
-let mockSyncState = { local: 2, remote: 1 };
-let syncTrackingReady = false;
-
-function renderSyncBadge() {
-  const badge = document.getElementById('sync-badge');
-  if (!badge) return;
-  const { local, remote } = mockSyncState;
-  if (local === 0 && remote === 0) {
-    badge.classList.add('hidden');
-    badge.textContent = '';
-    badge.removeAttribute('aria-label');
-    return;
-  }
-  const fmt = (n) => (n > 9 ? '9+' : String(n));
-  badge.classList.remove('hidden');
-  badge.innerHTML =
-    `<span class="sync-ahead"><i class="fa-solid fa-arrow-up"></i>${fmt(local)}</span>` +
-    `<span class="sync-behind"><i class="fa-solid fa-arrow-down"></i>${fmt(remote)}</span>`;
-  badge.setAttribute('aria-label',
-    `${local} local change${local === 1 ? '' : 's'} to push, ${remote} remote change${remote === 1 ? '' : 's'} to pull`);
+  incrementLocalSync();
 }
 
 // Demo-only: seeds session 1 (b-1) as a live, half-finished workout so the prototype
@@ -856,11 +826,7 @@ function setupNavigation() {
     });
   }
 
-  // Theme controller: five themes (Midnight, Daylight, Red, Blossom, Nebula). The pick is a
-  // dropdown (not a toggle) and is persisted so it survives reloads. Each theme is a single body
-  // class; the CSS vars for Midnight live on :root, so the dark-theme class is just a marker
-  // while the other *-theme classes override those vars.
-  setupThemeSwitcher();
+  // Theme setup and initialization has been moved to components/applicationHeader.js
 
   // Client Details back button
   document.getElementById('btn-back-to-clients').addEventListener('click', () => {
@@ -870,49 +836,7 @@ function setupNavigation() {
   setupSessionsDayNav();
 }
 
-// Each theme maps to exactly one body class. Midnight (dark) lives on :root, so switching to it
-// just means clearing the other theme classes. Each theme carries its own colours, gradient
-// background and shape language (see index.css).
-const THEME_BODY_CLASS = {
-  dark: 'dark-theme', light: 'light-theme', red: 'red-theme', rose: 'rose-theme', violet: 'violet-theme'
-};
-// The address-bar / PWA chrome colour per theme, kept in step with each theme's --bg-color.
-const THEME_META_COLOR = {
-  dark: '#09090b', light: '#f6f7fb', red: '#2a0407', rose: '#fdf2f8', violet: '#0b0a1f'
-};
-// Compact, localized labels for the dropdown (the long theme_* i18n strings don't fit).
-const THEME_SWITCHER_LABELS = {
-  en: { dark: 'Midnight', light: 'Daylight', red: 'Red', rose: 'Blossom', violet: 'Nebula' },
-  sl: { dark: 'Polnoč', light: 'Dan', red: 'Rdeča', rose: 'Cvet', violet: 'Nebula' }
-};
-
-function applyTheme(theme) {
-  const cls = THEME_BODY_CLASS[theme] || THEME_BODY_CLASS.dark;
-  Object.values(THEME_BODY_CLASS).forEach(c => document.body.classList.remove(c));
-  document.body.classList.add(cls);
-  localStorage.setItem('librept-theme', theme);
-  const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', THEME_META_COLOR[theme] || THEME_META_COLOR.dark);
-}
-
-// Refresh the dropdown option text for the active language (also called on language switch).
-function applyThemeSwitcherLabels() {
-  const sel = document.getElementById('theme-switcher');
-  if (!sel) return;
-  const labels = THEME_SWITCHER_LABELS[state.lang] || THEME_SWITCHER_LABELS.en;
-  Array.from(sel.options).forEach(opt => { if (labels[opt.value]) opt.textContent = labels[opt.value]; });
-}
-
-function setupThemeSwitcher() {
-  const saved = localStorage.getItem('librept-theme') || 'dark';
-  applyTheme(saved);
-  const sel = document.getElementById('theme-switcher');
-  if (sel) {
-    sel.value = saved;
-    sel.addEventListener('change', () => applyTheme(sel.value));
-  }
-  applyThemeSwitcherLabels();
-}
+// Theme controller and switcher logic moved to components/applicationHeader.js
 
 function switchView(viewId) {
   // Hide all views
@@ -3320,8 +3244,7 @@ function setupCalendarBookings() {
       renderSessions();
 
       // Pushed local edits and pulled remote changes — the device is now in sync.
-      mockSyncState = { local: 0, remote: 0 };
-      renderSyncBadge();
+      resetSyncState();
 
       if (icon) icon.classList.remove('fa-spin');
       if (btnText) btnText.textContent = t('btn_sync_data');
