@@ -1,6 +1,7 @@
 // app.js - LibrePT Application Controller Logic
 import { DEFAULT_EXERCISES, DEFAULT_CLIENTS, DEFAULT_ROUTINES, DEFAULT_HISTORY, DEFAULT_PLAN_UPDATES, DEFAULT_SESSIONS } from './data/index.js';
 import { renderSessionCard } from './components/sessionCard.js';
+import { renderSessionList } from './components/sessionList.js';
 import { renderExerciseCard } from './components/exerciseCard.js';
 import { renderSupersetCard } from './components/supersetCard.js';
 import { initSessionBar, updateSessionBarTimer, renderActiveSessionBarLabels, renderIdleSessionBar } from './components/sessionBar.js';
@@ -3566,11 +3567,6 @@ function renderSessions() {
   
   renderSessionsTitleBar();
   
-  if (yesterdayContainer) yesterdayContainer.innerHTML = '';
-  todayContainer.innerHTML = '';
-  tomorrowContainer.innerHTML = '';
-  if (upcomingContainer) upcomingContainer.innerHTML = '';
-  
   const bookings = state.bookings || [];
   
   // The session-card render lives in components/sessionCard.js; these are the app-level
@@ -3583,39 +3579,27 @@ function renderSessions() {
   const upcomingSessions = bookings.filter(b => b.day === 'upcoming');
 
   if (yesterdayContainer) {
-    if (yesterdaySessions.length === 0) {
-      yesterdayContainer.innerHTML = `<div class="card glassmorphic text-center text-muted" style="padding: 16px; font-size: 12px;">No past sessions.</div>`;
-    } else {
-      yesterdaySessions.forEach(s => renderSessionCard(s, yesterdayContainer, cardDeps));
-    }
+    renderSessionList(yesterdayContainer, yesterdaySessions, {
+      emptyMessage: 'No past sessions.',
+      cardDeps
+    });
   }
 
-  if (todaySessions.length === 0) {
-    todayContainer.innerHTML = `
-      <div class="card glassmorphic text-center text-muted" style="padding: 16px; font-size: 12px;">
-        ${t('no_bookings_today')}
-      </div>
-    `;
-  } else {
-    todaySessions.forEach(s => renderSessionCard(s, todayContainer, cardDeps));
-  }
+  renderSessionList(todayContainer, todaySessions, {
+    emptyMessage: t('no_bookings_today'),
+    cardDeps
+  });
 
-  if (tomorrowSessions.length === 0) {
-    tomorrowContainer.innerHTML = `
-      <div class="card glassmorphic text-center text-muted" style="padding: 16px; font-size: 12px;">
-        ${t('no_bookings_today')}
-      </div>
-    `;
-  } else {
-    tomorrowSessions.forEach(s => renderSessionCard(s, tomorrowContainer, cardDeps));
-  }
+  renderSessionList(tomorrowContainer, tomorrowSessions, {
+    emptyMessage: t('no_bookings_today'),
+    cardDeps
+  });
 
   if (upcomingContainer) {
-    if (upcomingSessions.length === 0) {
-      upcomingContainer.innerHTML = `<div class="card glassmorphic text-center text-muted" style="padding: 16px; font-size: 12px;">No upcoming sessions.</div>`;
-    } else {
-      upcomingSessions.forEach(s => renderSessionCard(s, upcomingContainer, cardDeps));
-    }
+    renderSessionList(upcomingContainer, upcomingSessions, {
+      emptyMessage: 'No upcoming sessions.',
+      cardDeps
+    });
   }
 
   // Re-anchor the deck on the focused day (today on first load) after cards are injected
