@@ -7,6 +7,7 @@ import { renderSupersetCard } from './components/supersetCard.js';
 import { initSessionBar, updateSessionBarTimer, renderActiveSessionBarLabels, renderIdleSessionBar } from './components/sessionBar.js';
 import { renderPendingPlanAdjustmentsComponent, openAdjustmentWizardComponent } from './components/planAdjustments.js';
 import { initDaySelector, focusSessionsColumn, getFocusedSessionDay, setFocusedSessionDay, sessionDayTemporal, setupSessionsDayNav, renderSessionsTitleBar, getSessionDayDate } from './components/daySelector.js';
+import { initSessionTitleBar, renderSessionTitle } from './components/sessionTitleBar.js';
 
 // Helper to generate short UUIDs for all entity types (clients, sessions, exercises, supersets/combos, etc.)
 function generateShortUUID() {
@@ -643,6 +644,13 @@ function init() {
     getISODateForColumn
   });
 
+  // Initialize Session Title Bar component
+  initSessionTitleBar({
+    getActiveSession: () => activeSession,
+    getISODateString,
+    formatClockFromMinutes
+  });
+
   // Wire the session-bar component with accessors (state/activeSession are reassigned) and
   // the app-level helpers it renders from, before any render that touches the bar.
   initSessionBar({
@@ -1175,17 +1183,7 @@ function focusExerciseByIndex(index) {
 // "2026-07-17 10:00 Trib gym base"). Derived from the booking the session was launched
 // from; an ad-hoc session started without a booking shows just its actual date and start
 // time, since it has no scheduled slot or location.
-function renderSessionTitle() {
-  const el = document.getElementById('session-title-text');
-  if (!el || !activeSession) return;
-
-  const booking = activeSession.booking;
-  const start = new Date(booking && booking.startDate ? booking.startDate : activeSession.startTime);
-  const datePart = getISODateString(start);
-  const timePart = formatClockFromMinutes(start.getHours() * 60 + start.getMinutes());
-  const location = booking && booking.location ? ` ${booking.location}` : '';
-  el.textContent = `${datePart} ${timePart}${location}`;
-}
+// Active session title bar logic moved to components/sessionTitleBar.js
 
 // --- RENDER FUNCTIONS ---
 
