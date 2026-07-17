@@ -73,10 +73,21 @@ const TRANSLATIONS = {
     btn_log_alert: "Log Alert",
     theme_light: "Light Mode",
     theme_dark: "Dark Mode",
-    backup_center: "Data Backup Center",
-    backup_desc: "LibrePT stores your logs directly on this device. You can download a backup file to keep your history safe, or import it to sync with another phone.",
+    backup_center: "Sync & Backup Center",
+    backup_desc: "LibrePT stores your logs directly on this device. Sync the latest session schedule, download a backup file to keep your history safe, or import it to move to another phone.",
     btn_download_backup: "Download JSON Backup",
     btn_import_backup: "Import JSON Backup",
+    sync_session_title: "Sync Session Data",
+    sync_session_desc: "Pull the latest bookings and session schedule from your connected calendar.",
+    backup_export_title: "Export Data Backup",
+    backup_export_desc: "Download your clients, routines, and workout logs as a single JSON file.",
+    btn_export_json: "Export JSON",
+    backup_import_title: "Import Data Backup",
+    backup_import_desc: "Load an existing .json backup file. This will merge or overwrite your current database.",
+    btn_select_json: "Select JSON File",
+    error_title: "Page not found",
+    error_desc: "This link doesn't point to a session, client or view in LibrePT.",
+    btn_error_home: "Back to dashboard",
     danger_zone: "Danger Zone",
     danger_desc: "Resetting will permanently erase all custom client logs, routines, and exercises, replacing them with default mock data.",
     btn_reset_db: "Reset All Database Data",
@@ -214,8 +225,19 @@ const TRANSLATIONS = {
     btn_log_alert: "Zapiši opozorilo",
     theme_light: "Svetla tema",
     theme_dark: "Temna tema",
-    backup_center: "Središče za varnostno kopiranje",
-    backup_desc: "LibrePT hrani vaše podatke neposredno v tej napravi. Prenesete lahko datoteko z varnostno kopijo ali jo uvozite za sinhronizacijo z drugim telefonom.",
+    backup_center: "Središče za sinhronizacijo in varnostne kopije",
+    backup_desc: "LibrePT hrani vaše podatke neposredno v tej napravi. Sinhronizirajte najnovejši urnik sej, prenesite varnostno kopijo ali jo uvozite za prenos na drug telefon.",
+    sync_session_title: "Sinhroniziraj podatke o sejah",
+    sync_session_desc: "Pridobi najnovejše rezervacije in urnik sej iz povezanega koledarja.",
+    backup_export_title: "Izvozi varnostno kopijo",
+    backup_export_desc: "Prenesi svoje stranke, rutine in dnevnike vadb kot eno JSON datoteko.",
+    btn_export_json: "Izvozi JSON",
+    backup_import_title: "Uvozi varnostno kopijo",
+    backup_import_desc: "Naloži obstoječo .json datoteko. To bo združilo ali prepisalo trenutno bazo.",
+    btn_select_json: "Izberi JSON datoteko",
+    error_title: "Stran ni najdena",
+    error_desc: "Ta povezava ne vodi do seje, stranke ali pogleda v LibrePT.",
+    btn_error_home: "Nazaj na nadzorno ploščo",
     btn_download_backup: "Prenesi varnostno kopijo JSON",
     btn_import_backup: "Uvozi varnostno kopijo JSON",
     danger_zone: "Nevarno območje",
@@ -379,11 +401,22 @@ function applyTranslations(lang = state.lang || 'en') {
 
     '#dialog-backup .modal-header h3': 'backup_center',
     '#dialog-backup .dialog-desc': 'backup_desc',
-    '#dialog-backup #btn-download-backup': 'btn_download_backup',
-    '#dialog-backup label[for="input-import-backup"]': 'btn_import_backup',
+    '#sync-data-title': 'sync_session_title',
+    '#sync-data-desc': 'sync_session_desc',
+    '#backup-export-title': 'backup_export_title',
+    '#backup-export-desc': 'backup_export_desc',
+    '#btn-export-db': 'btn_export_json',
+    '#backup-import-title': 'backup_import_title',
+    '#backup-import-desc': 'backup_import_desc',
+    '#btn-select-json': 'btn_select_json',
     '#dialog-backup .danger-zone h4': 'danger_zone',
     '#dialog-backup .danger-zone p': 'danger_desc',
     '#dialog-backup #btn-reset-db': 'btn_reset_db',
+
+    // Not-found (error) view
+    '#error-view-title': 'error_title',
+    '#view-error .view-desc': 'error_desc',
+    '#btn-error-home': 'btn_error_home',
     
     // Add Client modal
     '#client-modal-title': 'add_new_client',
@@ -795,10 +828,10 @@ function setupNavigation() {
     });
   }
 
-  // Theme controller: dark (default), light, and "Red" — a Red-inspired
-  // red/gold skin. The pick is a dropdown (not a toggle) and is persisted so it survives
-  // reloads. Each theme is a single body class; the CSS vars for dark live on :root, so the
-  // dark-theme class is just a marker while light-theme/red-theme override those vars.
+  // Theme controller: five themes (Midnight, Daylight, Red, Blossom, Nebula). The pick is a
+  // dropdown (not a toggle) and is persisted so it survives reloads. Each theme is a single body
+  // class; the CSS vars for Midnight live on :root, so the dark-theme class is just a marker
+  // while the other *-theme classes override those vars.
   setupThemeSwitcher();
 
   // Client Details back button
@@ -809,15 +842,20 @@ function setupNavigation() {
   setupSessionsDayNav();
 }
 
-// Each theme maps to exactly one body class. Dark's variables live on :root, so switching
-// to dark just means clearing the other theme classes.
-const THEME_BODY_CLASS = { dark: 'dark-theme', light: 'light-theme', red: 'red-theme' };
+// Each theme maps to exactly one body class. Midnight (dark) lives on :root, so switching to it
+// just means clearing the other theme classes. Each theme carries its own colours, gradient
+// background and shape language (see index.css).
+const THEME_BODY_CLASS = {
+  dark: 'dark-theme', light: 'light-theme', red: 'red-theme', rose: 'rose-theme', violet: 'violet-theme'
+};
 // The address-bar / PWA chrome colour per theme, kept in step with each theme's --bg-color.
-const THEME_META_COLOR = { dark: '#09090b', light: '#f8fafc', red: '#45060b' };
+const THEME_META_COLOR = {
+  dark: '#09090b', light: '#f6f7fb', red: '#2a0407', rose: '#fdf2f8', violet: '#0b0a1f'
+};
 // Compact, localized labels for the dropdown (the long theme_* i18n strings don't fit).
 const THEME_SWITCHER_LABELS = {
-  en: { dark: 'Dark', light: 'Light', red: 'Red' },
-  sl: { dark: 'Temna', light: 'Svetla', red: 'Rdeča' }
+  en: { dark: 'Midnight', light: 'Daylight', red: 'Red', rose: 'Blossom', violet: 'Nebula' },
+  sl: { dark: 'Polnoč', light: 'Dan', red: 'Rdeča', rose: 'Cvet', violet: 'Nebula' }
 };
 
 function applyTheme(theme) {
@@ -945,19 +983,13 @@ function navigateToPath(targetPath) {
   }
 }
 
-function setHeaderState(isSessionActive) {
+// The header is identical in every view — logo + language/theme/sync-backup. An active session's
+// own controls (options menu, minimize) live in its title bar, not the header, so nothing swaps
+// here; this just guarantees the shared actions stay visible. The argument is ignored (kept so
+// existing call sites read as "entering/leaving a session").
+function setHeaderState() {
   const normalActions = document.querySelector('.normal-header-actions');
-  const activeActions = document.querySelector('.active-session-header-actions');
-
-  if (normalActions && activeActions) {
-    if (isSessionActive) {
-      normalActions.classList.add('hidden');
-      activeActions.classList.remove('hidden');
-    } else {
-      normalActions.classList.remove('hidden');
-      activeActions.classList.add('hidden');
-    }
-  }
+  if (normalActions) normalActions.classList.remove('hidden');
 }
 
 function handlePathChange() {

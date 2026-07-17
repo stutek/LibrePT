@@ -41,14 +41,16 @@
       <div class="header-actions">
         <!-- Normal view actions -->
         <div class="normal-header-actions" style="display: flex; align-items: center; gap: 8px;">
-          <select id="lang-switcher" class="form-control" style="width: 70px; height: 36px; padding: 2px 6px; font-size: 13px; font-weight: 700; border-radius: 6px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); color: var(--text-color); cursor: pointer;" aria-label="Switch Language / Zamenjaj jezik">
+          <select id="lang-switcher" class="form-control header-select" style="width: 70px; height: 36px; padding: 2px 6px; font-size: 13px; font-weight: 700; cursor: pointer;" aria-label="Switch Language / Zamenjaj jezik">
             <option value="en">EN</option>
             <option value="sl">SL</option>
           </select>
-          <select id="theme-switcher" class="form-control" style="width: 82px; height: 36px; padding: 2px 6px; font-size: 13px; font-weight: 700; border-radius: 6px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); color: var(--text-main); cursor: pointer;" aria-label="Theme / Tema">
-            <option value="dark">Dark</option>
-            <option value="light">Light</option>
+          <select id="theme-switcher" class="form-control header-select" style="width: 104px; height: 36px; padding: 2px 6px; font-size: 13px; font-weight: 700; cursor: pointer;" aria-label="Theme / Tema">
+            <option value="dark">Midnight</option>
+            <option value="light">Daylight</option>
             <option value="red">Red</option>
+            <option value="rose">Blossom</option>
+            <option value="violet">Nebula</option>
           </select>
           <button id="backup-btn" class="icon-btn sync-backup-btn" aria-label="Sync & Backup Data">
             <!-- Cloud + recycle: this one control now covers both syncing session data and
@@ -60,23 +62,6 @@
             <!-- Mock GitHub-style ahead/behind counters (local edits to push / remote to pull),
                  filled in by renderSyncBadge(); hidden once fully in sync. -->
             <span id="sync-badge" class="sync-badge hidden"></span>
-          </button>
-        </div>
-
-        <!-- Active Session actions -->
-        <div class="active-session-header-actions hidden" style="display: flex; align-items: center; gap: 8px;">
-          <div class="session-menu-wrap">
-            <button id="btn-session-menu" class="icon-btn" style="background: rgba(255,255,255,0.05);" aria-label="Session options" aria-haspopup="true" aria-expanded="false">
-              <i class="fa-solid fa-ellipsis-vertical"></i>
-            </button>
-            <div id="session-menu" class="session-menu hidden" role="menu">
-              <button id="btn-delete-session" class="session-menu-item session-menu-item-danger" role="menuitem">
-                <i class="fa-solid fa-trash-can"></i> Delete Session
-              </button>
-            </div>
-          </div>
-          <button id="btn-collapse-session" class="icon-btn" style="background: rgba(255,255,255,0.05);" aria-label="Minimize Active Session">
-            <i class="fa-solid fa-chevron-down"></i>
           </button>
         </div>
       </div>
@@ -322,16 +307,31 @@
   <!-- FULL SCREEN OVERLAY: Active Workout Clipboard Dashboard -->
   <div id="active-session-overlay" class="active-session-overlay hidden">
     <!-- Session context line: scheduled date, start time and location (e.g.
-         "2026-07-17 10:00 Trib gym base"), plus the live countdown to the session's end.
-         The session's own controls (minimize, delete) live in the omnipresent .app-header
-         above; the overlay no longer carries a duplicate header of its own. -->
+         "2026-07-17 10:00 Trib gym base"), the live countdown, and the session's own controls
+         (options menu + minimize). The .app-header above stays identical to the landing page
+         (logo + language/theme/sync-backup), so session-specific controls live here instead. -->
     <div class="session-title-bar">
       <div class="session-title-block">
         <h3 id="session-title-text">Live Session</h3>
       </div>
-      <div class="session-timer-block">
-        <i class="fa-solid fa-stopwatch text-cyan"></i>
-        <span id="overlay-session-duration">00:00</span>
+      <div class="session-title-actions">
+        <div class="session-timer-block">
+          <i class="fa-solid fa-stopwatch text-cyan"></i>
+          <span id="overlay-session-duration">00:00</span>
+        </div>
+        <div class="session-menu-wrap">
+          <button id="btn-session-menu" class="icon-btn" aria-label="Session options" aria-haspopup="true" aria-expanded="false">
+            <i class="fa-solid fa-ellipsis-vertical"></i>
+          </button>
+          <div id="session-menu" class="session-menu hidden" role="menu">
+            <button id="btn-delete-session" class="session-menu-item session-menu-item-danger" role="menuitem">
+              <i class="fa-solid fa-trash-can"></i> Delete Session
+            </button>
+          </div>
+        </div>
+        <button id="btn-collapse-session" class="icon-btn" aria-label="Minimize Active Session">
+          <i class="fa-solid fa-chevron-down"></i>
+        </button>
       </div>
     </div>
 
@@ -736,8 +736,8 @@
       <div class="backup-actions">
         <div class="action-card card">
           <i class="fa-solid fa-arrows-rotate backup-icon-large text-cyan"></i>
-          <h4>Sync Session Data</h4>
-          <p>Pull the latest bookings and session schedule from your connected calendar.</p>
+          <h4 id="sync-data-title">Sync Session Data</h4>
+          <p id="sync-data-desc">Pull the latest bookings and session schedule from your connected calendar.</p>
           <button id="btn-sync-data" class="btn primary-btn w-full">
             <i class="fa-solid fa-arrows-rotate"></i> <span id="btn-sync-data-text">Sync Data</span>
           </button>
@@ -746,17 +746,17 @@
 
         <div class="action-card card">
           <i class="fa-solid fa-file-export backup-icon-large text-emerald"></i>
-          <h4>Export Data Backup</h4>
-          <p>Download your clients, routines, and workout logs as a single JSON file.</p>
+          <h4 id="backup-export-title">Export Data Backup</h4>
+          <p id="backup-export-desc">Download your clients, routines, and workout logs as a single JSON file.</p>
           <button id="btn-export-db" class="btn primary-btn w-full">Export JSON</button>
         </div>
-        
+
         <div class="action-card card">
           <i class="fa-solid fa-file-import backup-icon-large text-indigo"></i>
-          <h4>Import Data Backup</h4>
-          <p>Load an existing `.json` backup file. This will merge or overwrite your current database.</p>
+          <h4 id="backup-import-title">Import Data Backup</h4>
+          <p id="backup-import-desc">Load an existing `.json` backup file. This will merge or overwrite your current database.</p>
           <div class="file-upload-wrapper">
-            <button type="button" class="btn secondary-btn w-full file-trigger">Select JSON File</button>
+            <button type="button" id="btn-select-json" class="btn secondary-btn w-full file-trigger">Select JSON File</button>
             <input type="file" id="import-db-file" accept=".json" class="file-input-hidden">
           </div>
           <p id="import-status" class="status-msg"></p>

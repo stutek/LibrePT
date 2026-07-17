@@ -64,13 +64,13 @@ export function renderExerciseCard(card, item, ctx) {
       </div>
       <div class="deck-card-actions">
         <button type="button" class="deck-action-btn deck-action-easy" aria-label="${t('signal_too_easy')}">
-          <i class="fa-solid fa-arrow-up"></i><span>${t('signal_too_easy')}</span>
+          <i class="fa-solid fa-feather"></i><span>${t('signal_too_easy')}</span>
         </button>
         <button type="button" class="deck-action-btn deck-action-hard" aria-label="${t('signal_too_hard')}">
-          <i class="fa-solid fa-arrow-down"></i><span>${t('signal_too_hard')}</span>
+          <i class="fa-solid fa-weight-hanging"></i><span>${t('signal_too_hard')}</span>
         </button>
         <button type="button" id="btn-log-feedback" class="deck-action-btn deck-action-feedback" aria-label="${t('btn_log_feedback')}">
-          <i class="fa-solid fa-file-lines"></i><span>${t('feedback_short')}</span>
+          <i class="fa-solid fa-triangle-exclamation"></i><span>${t('feedback_short')}</span>
         </button>
       </div>
     `;

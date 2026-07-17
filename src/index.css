@@ -1,89 +1,200 @@
 /* index.css - LibrePT Modern UI Style Guide & Design System */
 
-/* Global Variable Declarations (Dark & Light Themes) */
+/* Design system. Five themes, each a body class (dark lives on :root). Every theme sets not
+   just colours but its own SHAPE personality (--border-radius-*, --btn-radius) and a fitting
+   --bg-gradient, so switching themes restyles the whole app from these variables alone.
+   Shared, non-theme tokens (fonts, layout heights, blur) stay on :root and are not overridden. */
 :root {
+  /* Typography — geometric display headers, humanist body, mono for numbers */
   --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-header: 'Outfit', var(--font-sans);
   --font-mono: 'JetBrains Mono', monospace;
 
-  /* HSL Colors - Zinc Scale */
-  --bg-color: #09090b; /* zinc-950 */
-  --card-bg: rgba(24, 24, 27, 0.65); /* zinc-900 with transparency */
-  --card-border: rgba(255, 255, 255, 0.08);
-  --text-main: #fafafa; /* zinc-50 */
-  --text-muted: #a1a1aa; /* zinc-400 */
-  --text-dark: #09090b;
-  --border-color: #27272a; /* zinc-800 */
-  --input-bg: #18181b; /* zinc-900 */
-  
-  /* Primary & Accent Colors */
-  --primary: #10b981; /* emerald-500 */
-  --primary-hover: #059669; /* emerald-600 */
-  --primary-light: rgba(16, 185, 129, 0.15);
-  
-  --secondary: #4f46e5; /* indigo-600 */
-  --secondary-hover: #4338ca; /* indigo-700 */
-  --secondary-light: rgba(79, 70, 229, 0.15);
-
-  --accent-cyan: #06b6d4; /* cyan-500 */
-  
-  --danger: #ef4444; /* red-500 */
-  --danger-hover: #dc2626; /* red-600 */
-  --danger-light: rgba(239, 68, 68, 0.15);
-  
-  --success: #10b981;
-  --success-hover: #059669;
-  
-  /* Layout tokens */
+  /* Layout tokens (shared across themes) */
   --hdr-height: 60px;
   --nav-height: 70px;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --glass-blur: blur(16px);
+  --text-dark: #09090b;
+
+  /* ============ THEME: Midnight (default dark) — sleek zinc + emerald, medium shapes ======= */
+  --bg-color: #09090b; /* zinc-950 */
+  --bg-gradient:
+    radial-gradient(1100px 720px at 12% -8%, rgba(16, 185, 129, 0.16), transparent 60%),
+    radial-gradient(900px 640px at 108% 4%, rgba(34, 211, 238, 0.12), transparent 55%),
+    radial-gradient(760px 720px at 50% 118%, rgba(79, 70, 229, 0.12), transparent 60%);
+  --card-bg: rgba(22, 22, 26, 0.92); /* near-opaque so deck cards stay readable over the gradient */
+  --card-border: rgba(255, 255, 255, 0.09);
+  --text-main: #fafafa; /* zinc-50 */
+  --text-muted: #a1a1aa; /* zinc-400 */
+  --border-color: #27272a; /* zinc-800 */
+  --input-bg: #18181b; /* zinc-900 */
+
+  --primary: #10b981; /* emerald-500 */
+  --primary-hover: #059669;
+  --primary-light: rgba(16, 185, 129, 0.15);
+  --primary-gradient: linear-gradient(135deg, #10b981 0%, #0ea5a4 100%);
+  --on-primary: #052e22; /* text on primary buttons */
+
+  --secondary: #4f46e5; /* indigo-600 */
+  --secondary-hover: #4338ca;
+  --secondary-light: rgba(79, 70, 229, 0.15);
+
+  --accent-cyan: #22d3ee; /* highlight accent (counters, focus, timers) */
+
+  --danger: #ef4444;
+  --danger-hover: #dc2626;
+  --danger-light: rgba(239, 68, 68, 0.15);
+  --success: #10b981;
+  --success-hover: #059669;
+
+  /* Shape personality — medium, balanced */
   --border-radius-lg: 16px;
   --border-radius-md: 12px;
   --border-radius-sm: 8px;
-  
-  /* Shadows & Glassmorphism */
-  --glass-blur: blur(16px);
-  --box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.7);
+  --btn-radius: 10px;
+
+  --box-shadow: 0 14px 34px -14px rgba(0, 0, 0, 0.72);
 }
 
-/* Light Theme Variables overrides */
+/* ============ THEME: Daylight (light) — airy slate + emerald, soft rounded shapes ========== */
 body.light-theme {
-  --bg-color: #f8fafc; /* slate-50 */
-  --card-bg: rgba(255, 255, 255, 0.75);
-  --card-border: rgba(0, 0, 0, 0.08);
+  --bg-color: #f6f7fb;
+  --bg-gradient:
+    radial-gradient(1000px 700px at 8% -10%, rgba(16, 185, 129, 0.12), transparent 60%),
+    radial-gradient(920px 640px at 112% -2%, rgba(56, 189, 248, 0.16), transparent 55%),
+    linear-gradient(180deg, #ffffff 0%, #eef2f9 100%);
+  --card-bg: rgba(255, 255, 255, 0.96);
+  --card-border: rgba(15, 23, 42, 0.08);
   --text-main: #0f172a; /* slate-900 */
   --text-muted: #64748b; /* slate-500 */
   --border-color: #e2e8f0; /* slate-200 */
   --input-bg: #ffffff;
-  --primary-light: rgba(16, 185, 129, 0.1);
+  --primary: #059669; /* slightly deeper emerald reads better on light */
+  --primary-hover: #047857;
+  --primary-light: rgba(5, 150, 105, 0.12);
+  --primary-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  --on-primary: #ffffff;
   --secondary-light: rgba(79, 70, 229, 0.1);
-  --box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
+  --accent-cyan: #0891b2;
+  --box-shadow: 0 16px 34px -18px rgba(15, 23, 42, 0.22);
+  /* Shape personality — soft and friendly */
+  --border-radius-lg: 20px;
+  --border-radius-md: 15px;
+  --border-radius-sm: 11px;
+  --btn-radius: 999px;
 }
 
-/* "Red" theme — Red's identity is red, so the page background itself is a deep
-   red red (not black), with white text, brighter-red buttons that pop against it, and white
-   highlights. --success stays green so "completed" keeps its semantic meaning. */
+/* ============ THEME: Red — bold red/gold/white on a deep red field, EDGY sharp shapes ====== */
+/* A sporty, aggressive red skin: red (#DA291C) and gold (#FBE122) on a deep red field, white
+   text, sharp near-square corners. --success stays green so "completed" keeps its meaning;
+   --danger is gold since red-on-red would vanish. */
 body.red-theme {
-  --bg-color: #45060b;                     /* deep red red page background */
-  --card-bg: rgba(98, 15, 21, 0.55);       /* slightly lifted red cards */
-  --card-border: rgba(255, 255, 255, 0.15);
+  --bg-color: #2a0407;
+  --bg-gradient:
+    radial-gradient(1050px 720px at 12% -10%, rgba(218, 41, 28, 0.60), transparent 58%),
+    radial-gradient(820px 560px at 112% 4%, rgba(251, 225, 34, 0.12), transparent 55%),
+    linear-gradient(180deg, #3d060b 0%, #1e0305 100%);
+  --card-bg: rgba(74, 10, 15, 0.90);
+  --card-border: rgba(255, 255, 255, 0.16);
   --text-main: #ffffff;
-  --text-muted: #eec2c6;
+  --text-muted: #f0b6ba;
   --border-color: #7c141b;
-  --input-bg: #57090f;
-  --primary: #ee1522;                      /* brighter red so buttons stand out on the red bg */
-  --primary-hover: #c60f1b;
-  --primary-light: rgba(238, 21, 34, 0.22);
-  --secondary: #ee1522;
-  --secondary-hover: #c60f1b;
-  --secondary-light: rgba(238, 21, 34, 0.2);
-  --accent-cyan: #ffffff;                  /* white highlights (focus rings, counters, badges) */
-  --danger: #ffcf33;                       /* amber warning — red-on-red would vanish */
-  --danger-hover: #f5c012;
-  --success: #4ade80;                      /* completed stays green, brightened for the red bg */
+  --input-bg: #4a080d;
+  --primary: #da291c;                      /* red */
+  --primary-hover: #b51e13;
+  --primary-light: rgba(218, 41, 28, 0.24);
+  --primary-gradient: linear-gradient(135deg, #e11d2a 0%, #a30f18 100%);
+  --on-primary: #ffffff;
+  --secondary: #da291c;
+  --secondary-hover: #b51e13;
+  --secondary-light: rgba(218, 41, 28, 0.2);
+  --accent-cyan: #fbe122;                  /* gold highlights */
+  --danger: #fbe122;                       /* gold warning — red-on-red would vanish */
+  --danger-hover: #eacb0f;
+  --danger-light: rgba(251, 225, 34, 0.18);
+  --success: #4ade80;
   --success-hover: #22c55e;
-  --box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.55);
+  --box-shadow: 0 14px 30px -14px rgba(0, 0, 0, 0.6);
+  /* Shape personality — edgy, near-square */
+  --border-radius-lg: 6px;
+  --border-radius-md: 4px;
+  --border-radius-sm: 3px;
+  --btn-radius: 3px;
+}
+
+/* ============ THEME: Blossom (rose) — soft pink/lavender, VERY rounded/pill shapes ========= */
+/* A gentle, soft palette on a light blush field with the roundest shapes (pill buttons), the
+   counterpoint to the Red theme's hard edges. */
+body.rose-theme {
+  --bg-color: #fdf2f8;
+  --bg-gradient:
+    radial-gradient(1000px 720px at 6% -10%, rgba(244, 114, 182, 0.30), transparent 60%),
+    radial-gradient(900px 640px at 114% 0%, rgba(167, 139, 250, 0.26), transparent 58%),
+    radial-gradient(780px 700px at 50% 122%, rgba(251, 191, 36, 0.16), transparent 60%),
+    linear-gradient(180deg, #fff5fa 0%, #fdeaf3 100%);
+  --card-bg: rgba(255, 255, 255, 0.94);
+  --card-border: rgba(190, 24, 93, 0.12);
+  --text-main: #4a1d3f; /* deep plum */
+  --text-muted: #9d6b8a;
+  --border-color: #f6d6e6;
+  --input-bg: #fff7fb;
+  --primary: #ec4899;
+  --primary-hover: #db2777;
+  --primary-light: rgba(236, 72, 153, 0.14);
+  --primary-gradient: linear-gradient(135deg, #f472b6 0%, #ec4899 55%, #a855f7 100%);
+  --on-primary: #ffffff;
+  --secondary: #a855f7;
+  --secondary-hover: #9333ea;
+  --secondary-light: rgba(168, 85, 247, 0.12);
+  --accent-cyan: #a855f7; /* lavender highlights */
+  --danger: #e11d48;
+  --danger-hover: #be123c;
+  --danger-light: rgba(225, 29, 72, 0.12);
+  --success: #10b981;
+  --success-hover: #059669;
+  --box-shadow: 0 18px 36px -18px rgba(190, 24, 93, 0.30);
+  /* Shape personality — very soft, pill buttons */
+  --border-radius-lg: 24px;
+  --border-radius-md: 18px;
+  --border-radius-sm: 14px;
+  --btn-radius: 999px;
+}
+
+/* ============ THEME: Nebula (violet) — deep indigo, violet/fuchsia/cyan, crisp shapes ====== */
+/* Premium "cosmic tech" dark theme with a rich mesh gradient and tight, crisp corners. */
+body.violet-theme {
+  --bg-color: #0b0a1f;
+  --bg-gradient:
+    radial-gradient(1050px 700px at 8% -8%, rgba(139, 92, 246, 0.34), transparent 58%),
+    radial-gradient(900px 640px at 114% 4%, rgba(217, 70, 239, 0.24), transparent 55%),
+    radial-gradient(840px 720px at 50% 122%, rgba(34, 211, 238, 0.18), transparent 60%);
+  --card-bg: rgba(24, 21, 52, 0.90);
+  --card-border: rgba(196, 181, 253, 0.16);
+  --text-main: #ede9fe;
+  --text-muted: #a99fd0;
+  --border-color: #2a2450;
+  --input-bg: #171334;
+  --primary: #8b5cf6;
+  --primary-hover: #7c3aed;
+  --primary-light: rgba(139, 92, 246, 0.18);
+  --primary-gradient: linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%);
+  --on-primary: #ffffff;
+  --secondary: #d946ef;
+  --secondary-hover: #c026d3;
+  --secondary-light: rgba(217, 70, 239, 0.16);
+  --accent-cyan: #22d3ee;
+  --danger: #fb7185;
+  --danger-hover: #f43f5e;
+  --danger-light: rgba(251, 113, 133, 0.16);
+  --success: #34d399;
+  --success-hover: #10b981;
+  --box-shadow: 0 16px 36px -16px rgba(0, 0, 0, 0.66);
+  /* Shape personality — crisp, tight */
+  --border-radius-lg: 12px;
+  --border-radius-md: 9px;
+  --border-radius-sm: 6px;
+  --btn-radius: 8px;
 }
 
 /* Reset & Base Setup */
@@ -97,12 +208,22 @@ body.red-theme {
 body {
   font-family: var(--font-sans);
   background-color: var(--bg-color);
+  background-image: var(--bg-gradient);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
   color: var(--text-main);
   transition: background-color 0.3s ease, color 0.3s ease;
   overflow-x: hidden;
   height: 100vh;
   display: flex;
   flex-direction: column;
+}
+
+/* All headings use the geometric display face with tight tracking for a clear hierarchy. */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-header);
+  letter-spacing: -0.015em;
+  line-height: 1.15;
 }
 
 /* Scrollbar customizations */
@@ -166,6 +287,15 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+/* Language / theme dropdowns follow the active theme's colours and shape (not a hardcoded
+   dark pill), so they restyle with every theme like the rest of the header. */
+.header-select {
+  background: var(--input-bg);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: var(--btn-radius);
 }
 
 /* Main View Controller styling */
@@ -271,7 +401,7 @@ body {
   gap: 6px;
   font-family: var(--font-sans);
   font-weight: 600;
-  border-radius: var(--border-radius-sm);
+  border-radius: var(--btn-radius);
   border: none;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -292,34 +422,40 @@ body {
 }
 
 .primary-btn {
-  background-color: var(--primary);
-  color: var(--text-dark);
+  background: var(--primary-gradient);
+  color: var(--on-primary);
+  box-shadow: 0 6px 16px -9px rgba(0, 0, 0, 0.55);
 }
 .primary-btn:hover {
-  background-color: var(--primary-hover);
+  filter: brightness(1.07);
 }
 
 .secondary-btn {
   background-color: var(--primary-light);
   color: var(--primary);
-  border: 1px solid rgba(16, 185, 129, 0.2);
+  border: 1px solid color-mix(in srgb, var(--primary) 32%, transparent);
 }
 .secondary-btn:hover {
-  background-color: rgba(16, 185, 129, 0.25);
+  background-color: color-mix(in srgb, var(--primary) 22%, transparent);
 }
 
 .danger-btn {
   background-color: var(--danger-light);
   color: var(--danger);
-  border: 1px solid rgba(239, 68, 68, 0.2);
+  border: 1px solid color-mix(in srgb, var(--danger) 32%, transparent);
 }
 .danger-btn:hover {
-  background-color: rgba(239, 68, 68, 0.25);
+  background-color: color-mix(in srgb, var(--danger) 24%, transparent);
 }
 
+/* Success (e.g. "Complete Workout") stays semantically green regardless of theme primary. */
 .success-btn {
-  background-color: var(--primary);
+  background-color: var(--success);
   color: var(--text-dark);
+  box-shadow: 0 6px 16px -9px rgba(0, 0, 0, 0.5);
+}
+.success-btn:hover {
+  filter: brightness(1.06);
 }
 
 .icon-btn {
@@ -1088,6 +1224,14 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+}
+
+/* Countdown + the session's own controls (options menu, minimize), right-aligned in the bar. */
+.session-title-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
 .collapse-btn {

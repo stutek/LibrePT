@@ -61,13 +61,13 @@ export function renderSupersetCard(card, item, ctx) {
           </div>
           <div class="superset-ex-actions">
             <button type="button" class="superset-sig easy" data-sig="easy" aria-label="${t('signal_too_easy')}">
-              <i class="fa-solid fa-arrow-up"></i><span>Easy</span>
+              <i class="fa-solid fa-feather"></i><span>Easy</span>
             </button>
             <button type="button" class="superset-sig hard" data-sig="hard" aria-label="${t('signal_too_hard')}">
-              <i class="fa-solid fa-arrow-down"></i><span>Hard</span>
+              <i class="fa-solid fa-weight-hanging"></i><span>Hard</span>
             </button>
             <button type="button"${idAttr} class="superset-sig note" data-sig="note" aria-label="${t('btn_log_feedback')}">
-              <i class="fa-solid fa-file-lines"></i><span>Note</span>
+              <i class="fa-solid fa-triangle-exclamation"></i><span>Note</span>
             </button>
           </div>
         </div>`);
