@@ -2420,12 +2420,12 @@ textarea.form-control {
 
 /* --- Superset card: a grouped block of exercises with a round counter --- */
 .superset-title {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--text-color);
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   text-transform: uppercase;
   letter-spacing: 0.4px;
 }
@@ -2451,30 +2451,33 @@ textarea.form-control {
 .superset-ex-row {
   display: flex;
   flex-direction: column;
-  padding: 10px 0;
+  padding: 8px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 .superset-ex-head {
-  font-size: 12px;
+  font-size: 15px;
   margin-bottom: 8px;
 }
 .superset-ex-name {
   font-weight: 700;
+  font-size: 15px;
 }
 .superset-ex-reps {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-muted);
 }
+/* The feedback trio stretches across the full row so there's no empty right-hand gutter and
+   the buttons stay gym-floor sized. */
 .superset-ex-actions {
   display: flex;
   gap: 8px;
-  flex-shrink: 0;
 }
 /* Labeled per-exercise feedback trio (Easy / Hard / Note) */
 .superset-sig {
-  height: 28px;
-  border-radius: 14px;
+  flex: 1;
+  height: 38px;
+  border-radius: var(--btn-radius);
   border: 1px solid var(--border-color);
   background: rgba(255, 255, 255, 0.04);
   color: var(--text-muted);
@@ -2482,21 +2485,24 @@ textarea.form-control {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 700;
-  padding: 0 10px;
-  gap: 5px;
+  padding: 0 12px;
+  gap: 6px;
   transition: all 0.15s ease;
 }
 .superset-sig > span {
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 700;
+}
+.superset-sig > i {
+  font-size: 14px;
 }
 .superset-sig.easy:hover { color: var(--success); border-color: var(--success); background: rgba(16, 185, 129, 0.12); }
 .superset-sig.hard:hover { color: #f59e0b; border-color: #f59e0b; background: rgba(245, 158, 11, 0.12); }
 .superset-sig.note:hover { color: var(--danger); border-color: var(--danger); background: rgba(239, 68, 68, 0.12); }
 .superset-break-row {
-  font-size: 11px;
+  font-size: 13px;
   font-family: var(--font-mono);
   color: var(--text-muted);
   padding: 4px 10px;
@@ -2505,7 +2511,7 @@ textarea.form-control {
   gap: 6px;
   opacity: 0.85;
 }
-.superset-break-row > i { font-size: 10px; }
+.superset-break-row > i { font-size: 12px; }
 .superset-complete-btn { width: 100%; justify-content: center; }
 .superset-done {
   display: flex;
