@@ -6,6 +6,7 @@ import { renderExerciseCard } from './components/exerciseCard.js';
 import { renderSupersetCard } from './components/supersetCard.js';
 import { initSessionBar, updateSessionBarTimer, renderActiveSessionBarLabels, renderIdleSessionBar } from './components/sessionBar.js';
 import { renderPendingPlanAdjustmentsComponent, openAdjustmentWizardComponent } from './components/planAdjustments.js';
+import { initDaySelector, focusSessionsColumn, getFocusedSessionDay, setFocusedSessionDay, sessionDayTemporal, setupSessionsDayNav, renderSessionsTitleBar, getSessionDayDate } from './components/daySelector.js';
 
 // Helper to generate short UUIDs for all entity types (clients, sessions, exercises, supersets/combos, etc.)
 function generateShortUUID() {
@@ -632,6 +633,15 @@ function init() {
       }
     });
   }
+
+  // Initialize Day Selector component
+  initDaySelector({
+    getState: () => state,
+    t,
+    toRoute,
+    toUrl,
+    getISODateForColumn
+  });
 
   // Wire the session-bar component with accessors (state/activeSession are reassigned) and
   // the app-level helpers it renders from, before any render that touches the bar.
@@ -3369,193 +3379,7 @@ function setupCalendarBookings() {
   });
 }
 
-// --- SESSIONS DAY NAVIGATION ---
-// The dashboard grid is a horizontal deck of day columns. `focusedSessionDay` is the
-// single source of truth for which column the title bar and arrows describe.
-const SESSION_DAY_ORDER = ['yesterday', 'today', 'tomorrow', 'upcoming'];
-const SESSION_DAY_OFFSETS = { yesterday: -1, today: 0, tomorrow: 1, upcoming: 2 };
-
-// Temporal bucket that drives the schedule's colour coding: past = purple, today = default,
-// future = amber. The day-selection title bar, the session cards and the launched-session
-// exercise deck all key their tint off this so a day always reads the same colour.
-function sessionDayTemporal(day) {
-  if (day === 'yesterday') return 'past';
-  if (day === 'tomorrow' || day === 'upcoming') return 'future';
-  return 'today';
-}
-const SESSION_SCROLL_SETTLE_MS = 700;
-let focusedSessionDay = 'today';
-let sessionsProgrammaticScrollUntil = 0;
-
-function getSessionsGrid() {
-  return document.getElementById('sessions-categories-grid');
-}
-
-function getSessionDayDate(day) {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  d.setDate(d.getDate() + (SESSION_DAY_OFFSETS[day] ?? 0));
-  return d;
-}
-
-function getSessionDayLocale() {
-  return (state.lang || 'en') === 'sl' ? 'sl-SI' : 'en-US';
-}
-
-// Built from local parts on purpose: toISOString() converts to UTC and can report the wrong day
-function formatSessionDayISO(date) {
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${date.getFullYear()}-${month}-${day}`;
-}
-
-function renderSessionsTitleBar() {
-  const weekdayEl = document.getElementById('calendar-title-weekday');
-  const weekdayShortEl = document.getElementById('calendar-title-weekday-short');
-  const dateEl = document.getElementById('calendar-title-date');
-  const tagEl = document.getElementById('calendar-title-tag');
-  if (!weekdayEl || !weekdayShortEl || !dateEl || !tagEl) return;
-
-  const locale = getSessionDayLocale();
-  const day = focusedSessionDay;
-  const date = getSessionDayDate(day);
-  const dateStr = formatSessionDayISO(date);
-
-  // Upcoming is an open-ended bucket: it reads "Upcoming From <date>" instead of naming a weekday
-  const isUpcoming = day === 'upcoming';
-  const calTitle = document.getElementById('calendar-title');
-  calTitle.classList.toggle('is-upcoming', isUpcoming);
-
-  // Tint the whole day-selection line by how the focused day sits relative to now
-  const temporal = sessionDayTemporal(day);
-  calTitle.classList.toggle('is-past', temporal === 'past');
-  calTitle.classList.toggle('is-future', temporal === 'future');
-
-  if (isUpcoming) {
-    weekdayEl.textContent = t('upcoming');
-    weekdayShortEl.textContent = t('upcoming');
-    dateEl.textContent = `${t('from_date')} ${dateStr}`;
-  } else {
-    // Both forms are rendered; CSS picks the one that fits the viewport
-    weekdayEl.textContent = date.toLocaleDateString(locale, { weekday: 'long' });
-    weekdayShortEl.textContent = date.toLocaleDateString(locale, { weekday: 'short' });
-    dateEl.textContent = dateStr;
-  }
-
-  const separatorEl = document.querySelector('.calendar-title-separator');
-  if (separatorEl) {
-    separatorEl.style.display = isUpcoming ? 'none' : 'inline';
-  }
-
-  // The tag marks "you are here now" — showing it on every column would make it meaningless
-  tagEl.textContent = `(${t('today')})`;
-  tagEl.classList.toggle('hidden', day !== 'today');
-
-  const idx = SESSION_DAY_ORDER.indexOf(day);
-  const arrows = [
-    { el: document.getElementById('btn-sessions-prev'), target: SESSION_DAY_ORDER[idx - 1] },
-    { el: document.getElementById('btn-sessions-next'), target: SESSION_DAY_ORDER[idx + 1] }
-  ];
-  arrows.forEach(({ el, target }) => {
-    if (!el) return;
-    el.disabled = !target;
-    const label = target ? t(target) : '';
-    el.setAttribute('aria-label', label);
-    el.title = label;
-  });
-}
-
-function focusSessionsColumn(day, behavior = 'smooth') {
-  const grid = getSessionsGrid();
-  const col = document.getElementById(`${day}-sessions-column`);
-  if (!grid || !col) return;
-
-  focusedSessionDay = day;
-  renderSessionsTitleBar();
-
-  // Update URL path to reflect the focused day's ISO date string
-  const isoDate = getISODateForColumn(day);
-  const targetPath = `/sessions/${isoDate}`;
-  if (toRoute(window.location.pathname) !== targetPath) {
-    window.history.pushState(null, '', toUrl(targetPath));
-  }
-
-  // Dashboard may be hidden (display:none) when navigating in — no layout to scroll yet
-  if (grid.offsetParent === null) {
-    setTimeout(() => {
-      const g = getSessionsGrid();
-      const c = document.getElementById(`${day}-sessions-column`);
-      if (g && c && g.offsetParent !== null) {
-        const left = g.scrollLeft + (c.getBoundingClientRect().left - g.getBoundingClientRect().left);
-        sessionsProgrammaticScrollUntil = Date.now() + SESSION_SCROLL_SETTLE_MS;
-        g.scrollTo({ left, behavior });
-      }
-    }, 50);
-    return;
-  }
-
-  // Align the column to the grid's start edge without scrolling any ancestor
-  const left = grid.scrollLeft + (col.getBoundingClientRect().left - grid.getBoundingClientRect().left);
-
-  // A smooth scroll emits intermediate scroll events whose closest column is not the target yet,
-  // so hold off scroll-driven detection until the animation has settled on `day`.
-  sessionsProgrammaticScrollUntil = Date.now() + SESSION_SCROLL_SETTLE_MS;
-  grid.scrollTo({ left, behavior });
-}
-
-function stepSessionsColumn(delta) {
-  const target = SESSION_DAY_ORDER[SESSION_DAY_ORDER.indexOf(focusedSessionDay) + delta];
-  if (target) focusSessionsColumn(target);
-}
-
-function detectFocusedSessionsColumn() {
-  const grid = getSessionsGrid();
-  if (!grid || grid.offsetParent === null) return;
-
-  const gridLeft = grid.getBoundingClientRect().left;
-  let closest = focusedSessionDay;
-  let closestDist = Infinity;
-  SESSION_DAY_ORDER.forEach(day => {
-    const col = document.getElementById(`${day}-sessions-column`);
-    if (!col) return;
-    const dist = Math.abs(col.getBoundingClientRect().left - gridLeft);
-    if (dist < closestDist) {
-      closestDist = dist;
-      closest = day;
-    }
-  });
-
-  if (closest !== focusedSessionDay) {
-    focusedSessionDay = closest;
-    renderSessionsTitleBar();
-
-    // Update URL path to reflect the swiped-to day's ISO date string
-    const isoDate = getISODateForColumn(closest);
-    const targetPath = `/sessions/${isoDate}`;
-    if (toRoute(window.location.pathname) !== targetPath) {
-      window.history.pushState(null, '', toUrl(targetPath));
-    }
-  }
-}
-
-function setupSessionsDayNav() {
-  const prevBtn = document.getElementById('btn-sessions-prev');
-  const nextBtn = document.getElementById('btn-sessions-next');
-  if (prevBtn) prevBtn.addEventListener('click', () => stepSessionsColumn(-1));
-  if (nextBtn) nextBtn.addEventListener('click', () => stepSessionsColumn(1));
-
-  // Keep the title in sync when the trainer swipes the deck directly
-  const grid = getSessionsGrid();
-  if (grid) {
-    let scrollSettleTimer = null;
-    grid.addEventListener('scroll', () => {
-      clearTimeout(scrollSettleTimer);
-      // Re-read the deck only once both the swipe and any in-flight arrow scroll have settled
-      const delay = Math.max(80, sessionsProgrammaticScrollUntil - Date.now() + 20);
-      scrollSettleTimer = setTimeout(detectFocusedSessionsColumn, delay);
-    }, { passive: true });
-  }
-}
+// Day navigation logic moved to components/daySelector.js
 
 function renderSessions() {
   const yesterdayContainer = document.getElementById('yesterday-sessions-list');
@@ -3603,7 +3427,7 @@ function renderSessions() {
   }
 
   // Re-anchor the deck on the focused day (today on first load) after cards are injected
-  requestAnimationFrame(() => focusSessionsColumn(focusedSessionDay, 'auto'));
+  requestAnimationFrame(() => focusSessionsColumn(getFocusedSessionDay(), 'auto'));
 
   // Booking data just changed — refresh which "next session" the idle bar points to
   renderIdleSessionBar();
