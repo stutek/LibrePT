@@ -52,12 +52,9 @@ export function renderSupersetCard(card, item, ctx) {
       
       rows.push(`
         <div class="superset-ex-row" data-ex-id="${escapeHTML(ex.id)}">
-          <div class="superset-ex-head" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;">
+          <div class="superset-ex-head">
             <span class="superset-ex-name"${nameStyle}>${escapeHTML(ex.name)}</span>
-            <div style="display: inline-flex; align-items: center; gap: 6px; margin-left: auto;">
-              ${repsHTML}
-              ${repLabel ? `<span class="superset-ex-reps">${repLabel}</span>` : ''}
-            </div>
+            <span class="superset-ex-target">${repsHTML}${repLabel ? `<span class="superset-ex-reps">${repLabel}</span>` : ''}</span>
           </div>
           <div class="superset-ex-actions">
             <button type="button" class="superset-sig easy" data-sig="easy" aria-label="${t('signal_too_easy')}">
@@ -134,7 +131,6 @@ export function renderSupersetCard(card, item, ctx) {
       <div class="deck-card-compact">
         <span class="deck-card-counter"><i class="fa-solid fa-layer-group"></i></span>
         <span class="deck-card-name deck-card-name-inline">${title}</span>
-        <span class="deck-card-compact-target">${item.items.length} ex</span>
         ${item.isCompleted ? `<span class="badge badge-emerald deck-card-status">${t('session_completed')}</span>` : `<span class="badge deck-card-status deck-card-status-upcoming">Round ${round} of ${item.series}</span>`}
       </div>`;
     // Focus the circuit by pointing the active index at its first exercise
