@@ -8,6 +8,7 @@ import { initSessionBar, updateSessionBarTimer, renderActiveSessionBarLabels, re
 import { renderPendingPlanAdjustmentsComponent, openAdjustmentWizardComponent } from './components/planAdjustments.js';
 import { initDaySelector, focusSessionsColumn, getFocusedSessionDay, setFocusedSessionDay, sessionDayTemporal, setupSessionsDayNav, renderSessionsTitleBar, getSessionDayDate } from './components/daySelector.js';
 import { initSessionTitleBar, renderSessionTitle } from './components/sessionTitleBar.js';
+import { renderActiveUsersList, updateClientTabsFadeState } from './components/activeUsersList.js';
 
 // Helper to generate short UUIDs for all entity types (clients, sessions, exercises, supersets/combos, etc.)
 function generateShortUUID() {
@@ -2079,22 +2080,7 @@ function getActiveExercise() {
   return activeClientState.exercises[activeClientState.activeExerciseIndex];
 }
 
-// Fades whichever edge(s) still have participant tabs scrolled off past them, so a
-// merged session with more clients than fit on a gym-floor phone reads as "swipe for
-// more" instead of looking like names got cut off (see .client-tabs-bar in index.css).
-function updateClientTabsFadeState() {
-  const el = document.getElementById('active-session-client-tabs');
-  if (!el) return;
-
-  const hasOverflow = el.scrollWidth > el.clientWidth + 1;
-  el.classList.toggle('no-overflow', !hasOverflow);
-  if (!hasOverflow) return;
-
-  const atStart = el.scrollLeft <= 1;
-  const atEnd = el.scrollLeft >= el.scrollWidth - el.clientWidth - 1;
-  el.classList.toggle('at-start', atStart);
-  el.classList.toggle('at-end', atEnd);
-}
+// Participant tabs scroll fade logic moved to components/activeUsersList.js
 
 // Opens the full feedback modal for the active client's current exercise, prefilled and
 // with the voice recorder reset. Invoked by the Log Feedback button on the focus card.
@@ -2260,45 +2246,13 @@ function renderActiveGroupBoard() {
   // 1. Render Client Tabs
   const tabsContainer = document.getElementById('active-session-client-tabs');
   if (tabsContainer) {
-    tabsContainer.innerHTML = '';
-    activeSession.participants.forEach(pId => {
-      const client = state.clients.find(c => c.id === pId);
-      if (!client) return;
-      
-      const isActive = pId === activeClientId;
-      const tab = document.createElement('button');
-      tab.className = `client-tab-btn ${isActive ? 'active' : ''}`;
-
-      // Selected tab: an accent-tinted pill with accent border + bright accent text — clearly
-      // emphasised, but softer than a solid accent block so the label keeps strong contrast.
-      tab.style.display = 'flex';
-      tab.style.alignItems = 'center';
-      tab.style.gap = '8px';
-      tab.style.padding = '10px 20px';
-      tab.style.borderRadius = '24px';
-      tab.style.border = isActive ? '1px solid var(--accent-cyan)' : '1px solid var(--border-color)';
-      tab.style.background = isActive ? 'color-mix(in srgb, var(--accent-cyan) 20%, transparent)' : 'rgba(255,255,255,0.05)';
-      tab.style.color = isActive ? 'var(--accent-cyan)' : 'var(--text-main)';
-      tab.style.fontWeight = '700';
-      tab.style.cursor = 'pointer';
-      tab.style.transition = 'all 0.2s';
-      tab.style.minHeight = '44px';
-
-      tab.innerHTML = `
-        <div class="avatar" style="width:20px; height:20px; font-size:9px; background: var(--accent-cyan); color: var(--bg-color);">
-          ${client.avatar || getInitials(client.name)}
-        </div>
-        <span>${getClientDisplayNameHTML(client, true)}</span>
-      `;
-      
-      tab.addEventListener('click', () => {
-        navigateToPath(`/session/${activeSession.id}/client/${pId}`);
-      });
-      
-      tabsContainer.appendChild(tab);
+    renderActiveUsersList(tabsContainer, activeSession, {
+      clients: state.clients,
+      activeClientId,
+      getInitials,
+      getClientDisplayNameHTML,
+      navigateToPath
     });
-
-    updateClientTabsFadeState();
   }
 
   // 2. Client Injury warning banner
