@@ -3,16 +3,20 @@
 // launches the clipboard). Dependencies are injected by the caller (renderSessions in app.js)
 // so this component stays decoupled from app.js internals and is easy to relocate/test.
 //
-// deps: { state, t, escapeHTML, launchClipboardDirectly, sessionDayTemporal }
+// deps: { state, t, escapeHTML, launchClipboardDirectly, sessionDayTemporal, activeId }
 
 export function renderSessionCard(b, colContainer, deps) {
-  const { state, t, escapeHTML, launchClipboardDirectly, sessionDayTemporal } = deps;
+  const { state, t, escapeHTML, launchClipboardDirectly, sessionDayTemporal, activeId } = deps;
 
   const card = document.createElement('div');
   // Layout lives in .booking-card (index.css) so it can stack to a single column on mobile.
   // The temporal class tints the title to match the day-selection line (past/future).
   const temporal = sessionDayTemporal(b.day);
   card.className = 'booking-card card glassmorphic' + (temporal !== 'today' ? ` booking-${temporal}` : '');
+  // The session currently in progress is emphasised (accent tint + border), the same visual
+  // language as a selected participant, so it stands out from the rest of the day.
+  const isLive = activeId && b.id === activeId && !b.completed;
+  if (isLive) card.classList.add('booking-live');
 
   // Hover feedback style
   card.addEventListener('mouseenter', () => {
@@ -63,6 +67,7 @@ export function renderSessionCard(b, colContainer, deps) {
 
   info.innerHTML = `
     <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px;">
+      ${isLive ? '<span class="pulse-indicator" title="In progress"></span>' : ''}
       <span class="badge badge-cyan" style="font-size: 10px; padding: 2px 6px; font-weight: 700; font-family: monospace;">${escapeHTML(b.time)}</span>
       <strong class="booking-card-title" style="font-size: 13px;">${escapeHTML(b.title)}</strong>
       ${completedBadge}
@@ -77,18 +82,12 @@ export function renderSessionCard(b, colContainer, deps) {
     ${warningHTML}
   `;
 
-  const btn = document.createElement('button');
-  btn.className = b.completed ? 'btn secondary-btn btn-xs' : 'btn primary-btn btn-xs';
-  btn.style.cssText = 'display: flex; align-items: center; gap: 6px; pointer-events: none;';
-  btn.innerHTML = b.completed
-    ? `<i class="fa-solid fa-clock-rotate-left"></i> ${t('session_completed')}`
-    : `<i class="fa-solid fa-circle-play"></i> ${t('btn_launch_clipboard_short')}`;
-
+  // No launch/completed button: the whole card is the tap target, and completion already shows
+  // as a badge — the button just duplicated that and ate horizontal space.
   card.addEventListener('click', () => {
     launchClipboardDirectly(b.id);
   });
 
   card.appendChild(info);
-  card.appendChild(btn);
   colContainer.appendChild(card);
 }

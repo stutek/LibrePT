@@ -58,26 +58,26 @@ export function renderSupersetCard(card, item, ctx) {
           </div>
           <div class="superset-ex-actions">
             <button type="button" class="superset-sig easy" data-sig="easy" aria-label="${t('signal_too_easy')}">
-              <i class="fa-solid fa-feather"></i><span>Easy</span>
+              <i class="fa-solid fa-feather"></i><span>${t('signal_too_easy')}</span>
             </button>
             <button type="button" class="superset-sig hard" data-sig="hard" aria-label="${t('signal_too_hard')}">
-              <i class="fa-solid fa-weight-hanging"></i><span>Hard</span>
+              <i class="fa-solid fa-weight-hanging"></i><span>${t('signal_too_hard')}</span>
             </button>
             <button type="button"${idAttr} class="superset-sig note" data-sig="note" aria-label="${t('btn_log_feedback')}">
-              <i class="fa-solid fa-triangle-exclamation"></i><span>Note</span>
+              <i class="fa-solid fa-triangle-exclamation"></i><span>${t('feedback_short')}</span>
             </button>
           </div>
         </div>`);
-      if (ex.rest > 0) rows.push(`<div class="superset-break-row"><i class="fa-solid fa-hourglass-half"></i> Rest ${ex.rest}s</div>`);
+      if (ex.rest > 0) rows.push(`<div class="superset-break-row"><i class="fa-solid fa-hourglass-half"></i> <span class="superset-break-label">${t('rest_label')}</span> <span class="superset-ex-reps">${ex.rest}s</span></div>`);
     });
     const isLastRound = round >= item.series;
     const footer = item.isCompleted
       ? `<div class="superset-done"><i class="fa-solid fa-circle-check"></i> ${t('session_completed')}</div>`
-      : `<button type="button" class="btn success-btn btn-sm superset-complete-btn"><i class="fa-solid fa-check"></i> ${isLastRound ? 'Finish superset' : `Complete round ${round} of ${item.series}`}</button>`;
+      : `<button type="button" class="btn success-btn btn-sm superset-complete-btn"><i class="fa-solid fa-check"></i> ${isLastRound ? t('finish_superset') : `${t('complete_round')} ${round} / ${item.series}`}</button>`;
     card.innerHTML = `
       <div class="deck-card-top" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
         <span class="superset-title" style="font-weight: 700; font-size: 13px;"><i class="fa-solid fa-layer-group"></i> ${title}</span>
-        <span class="superset-round-badge">Round ${round} of ${item.series}</span>
+        <span class="superset-round-badge">${t('round_label')} ${round} / ${item.series}</span>
       </div>
       <div class="superset-ex-list">${rows.join('')}</div>
       ${footer}

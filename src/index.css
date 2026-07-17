@@ -2087,6 +2087,17 @@ textarea.form-control {
   opacity: 0.6;
 }
 
+/* The session in progress is emphasised with an accent-tinted fill + accent ring — the same
+   "selected/active" language as a chosen participant tab, so it clearly stands out. */
+.booking-live {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-cyan) 45%, transparent), var(--box-shadow);
+  background-color: var(--bg-color);
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--accent-cyan) 15%, transparent), color-mix(in srgb, var(--accent-cyan) 15%, transparent)),
+    linear-gradient(var(--card-bg), var(--card-bg));
+}
+
 /* Session title tint by day, matching the day-selection line: past = purple, future = amber,
    today = default. Set here (not inline) so the temporal class on the card can override it. */
 .booking-card-title { color: var(--text-color); }
@@ -2433,13 +2444,15 @@ textarea.form-control {
   letter-spacing: 0.4px;
 }
 .superset-title > i { color: var(--accent-cyan); }
+/* Subtle accent-tinted pill with bright accent text — emphasised but not a loud solid block,
+   so the label keeps strong contrast against the badge. */
 .superset-round-badge {
   font-family: var(--font-sans);
   font-size: 12px;
   font-weight: 800;
-  color: #000;
-  background: var(--accent-cyan);
-  border: 1px solid var(--accent-cyan);
+  color: var(--accent-cyan);
+  background: color-mix(in srgb, var(--accent-cyan) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-cyan) 45%, transparent);
   padding: 3px 10px;
   border-radius: 999px;
   white-space: nowrap;
@@ -2515,11 +2528,10 @@ textarea.form-control {
 .superset-sig.easy:hover { color: var(--success); border-color: var(--success); background: rgba(16, 185, 129, 0.12); }
 .superset-sig.hard:hover { color: #f59e0b; border-color: #f59e0b; background: rgba(245, 158, 11, 0.12); }
 .superset-sig.note:hover { color: var(--danger); border-color: var(--danger); background: rgba(239, 68, 68, 0.12); }
-/* Rest is part of the work — give it the same weight as an exercise row (not a dim footnote):
-   a subtle pill, full-strength text, accent icon. */
+/* Rest is part of the work — the "Rest" label reads like an exercise name and the duration
+   like a rep count (mono, accent), in a subtle pill so it's as visible as an exercise row. */
 .superset-break-row {
   font-size: 15px;
-  font-family: var(--font-mono);
   font-weight: 700;
   color: var(--text-main);
   padding: 8px 12px;

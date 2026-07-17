@@ -163,7 +163,11 @@ const TRANSLATIONS = {
     next_session_label: "Next",
     signal_too_easy: "Too Easy",
     signal_too_hard: "Too Hard",
-    feedback_short: "Feedback"
+    feedback_short: "Feedback",
+    round_label: "Round",
+    complete_round: "Complete round",
+    finish_superset: "Finish superset",
+    rest_label: "Rest"
   },
   sl: {
     logo_title: "LibrePT",
@@ -315,7 +319,11 @@ const TRANSLATIONS = {
     next_session_label: "Naslednja",
     signal_too_easy: "Prelahko",
     signal_too_hard: "Pretežko",
-    feedback_short: "Opomba"
+    feedback_short: "Opomba",
+    round_label: "Krog",
+    complete_round: "Zaključi krog",
+    finish_superset: "Zaključi superserijo",
+    rest_label: "Počitek"
   }
 };
 
@@ -2248,25 +2256,27 @@ function renderActiveGroupBoard() {
       const client = state.clients.find(c => c.id === pId);
       if (!client) return;
       
+      const isActive = pId === activeClientId;
       const tab = document.createElement('button');
-      tab.className = `client-tab-btn ${pId === activeClientId ? 'active' : ''}`;
-      
-      // Inline styles to match a premium layout
+      tab.className = `client-tab-btn ${isActive ? 'active' : ''}`;
+
+      // Selected tab: an accent-tinted pill with accent border + bright accent text — clearly
+      // emphasised, but softer than a solid accent block so the label keeps strong contrast.
       tab.style.display = 'flex';
       tab.style.alignItems = 'center';
       tab.style.gap = '8px';
       tab.style.padding = '10px 20px';
       tab.style.borderRadius = '24px';
-      tab.style.border = '1px solid var(--border-color)';
-      tab.style.background = pId === activeClientId ? 'var(--accent-cyan)' : 'rgba(255,255,255,0.05)';
-      tab.style.color = pId === activeClientId ? '#000' : 'var(--text-color)';
+      tab.style.border = isActive ? '1px solid var(--accent-cyan)' : '1px solid var(--border-color)';
+      tab.style.background = isActive ? 'color-mix(in srgb, var(--accent-cyan) 20%, transparent)' : 'rgba(255,255,255,0.05)';
+      tab.style.color = isActive ? 'var(--accent-cyan)' : 'var(--text-main)';
       tab.style.fontWeight = '700';
       tab.style.cursor = 'pointer';
       tab.style.transition = 'all 0.2s';
       tab.style.minHeight = '44px';
-      
+
       tab.innerHTML = `
-        <div class="avatar" style="width:20px; height:20px; font-size:9px; background: ${pId === activeClientId ? '#000' : 'var(--accent-cyan)'}; color: ${pId === activeClientId ? 'var(--accent-cyan)' : '#000'}">
+        <div class="avatar" style="width:20px; height:20px; font-size:9px; background: var(--accent-cyan); color: var(--bg-color);">
           ${client.avatar || getInitials(client.name)}
         </div>
         <span>${getClientDisplayNameHTML(client, true)}</span>
@@ -3565,7 +3575,7 @@ function renderSessions() {
   
   // The session-card render lives in components/sessionCard.js; these are the app-level
   // dependencies it needs (kept as a bundle so the call sites below stay tidy).
-  const cardDeps = { state, t, escapeHTML, launchClipboardDirectly, sessionDayTemporal };
+  const cardDeps = { state, t, escapeHTML, launchClipboardDirectly, sessionDayTemporal, activeId: activeSession ? activeSession.id : null };
 
   const yesterdaySessions = bookings.filter(b => b.day === 'yesterday');
   const todaySessions = bookings.filter(b => b.day === 'today');
