@@ -44,8 +44,9 @@ helpers they need (`state`, `t`, `escapeHTML`, …).
 
 | Module | Type | Description |
 | :--- | :--- | :--- |
-| [src/app.js](file:///home/simon/Projects/LibrePT/src/app.js) | `entry` | Application entry: i18n, state, view router, render orchestration, session logic, and wiring of the component modules below. |
+| [src/app.js](file:///home/simon/Projects/LibrePT/src/app.js) | `entry` | Application entry: state, view router, render orchestration, session logic, translation lookup (`t`), and wiring of the component modules below. |
 | [src/data/index.js](file:///home/simon/Projects/LibrePT/src/data/index.js) | `data` | Barrel for the seed/demo data, split per entity: `exercises.js`, `clients.js`, `routines.js`, `history.js`, `planUpdates.js`, `sessions.js`. Entities reference each other by string id only. |
+| [src/i18n/index.js](file:///home/simon/Projects/LibrePT/src/i18n/index.js) | `i18n` | Translation registry: one flat key→string map per locale (`en.js`, `sl.js`). Adding a language is a new file listed here; key parity across locales is enforced by `tests/unit/test_i18n_parity.py`. |
 | [src/components/sessionCard.js](file:///home/simon/Projects/LibrePT/src/components/sessionCard.js) | `component` | Dashboard session-booking card (time, participants, program, readiness warnings, temporal tint) that launches the clipboard on tap. |
 | [src/components/exerciseCard.js](file:///home/simon/Projects/LibrePT/src/components/exerciseCard.js) | `component` | Standalone (non-superset) exercise card in the clipboard deck: the in-focus logging card (target stats + Too Easy / Too Hard / Feedback) and its compact tap-to-focus row. |
 | [src/components/supersetCard.js](file:///home/simon/Projects/LibrePT/src/components/supersetCard.js) | `component` | Superset / Giant Set card: a grouped block of exercises with a round counter, per-exercise feedback trio, rest breaks, and a Complete-round button that advances/finishes the superset. |

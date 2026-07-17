@@ -41,36 +41,8 @@ def test_manifest_icons_exist():
         icon_path = os.path.join('src', icon['src'].lstrip('./'))
         assert os.path.exists(icon_path), f"manifest.json references missing icon: {icon_path}"
 
-def test_translation_dictionaries_parity():
-    with open('src/app.js', 'r', encoding='utf-8') as f:
-        content = f.read()
-
-    # Find the TRANSLATIONS object content
-    translations_match = re.search(r'const TRANSLATIONS = \{(.*?)\n\};', content, re.DOTALL)
-    assert translations_match, "TRANSLATIONS object not found in app.js"
-    translations_block = translations_match.group(1)
-
-    # Extract English keys
-    en_match = re.search(r'en:\s*\{(.*?)\n\s*\},', translations_block, re.DOTALL)
-    assert en_match, "English translations block not found"
-    en_block = en_match.group(1)
-    en_keys = set(re.findall(r'^\s*([a-zA-Z0-9_]+)\s*:', en_block, re.MULTILINE))
-
-    # Extract Slovenian keys
-    sl_match = re.search(r'sl:\s*\{(.*?)\n\s*\}', translations_block, re.DOTALL)
-    assert sl_match, "Slovenian translations block not found"
-    sl_block = sl_match.group(1)
-    sl_keys = set(re.findall(r'^\s*([a-zA-Z0-9_]+)\s*:', sl_block, re.MULTILINE))
-
-    assert len(en_keys) > 0, "No English keys found"
-    assert len(sl_keys) > 0, "No Slovenian keys found"
-
-    # Assert matching keys in both dictionaries
-    missing_in_sl = en_keys - sl_keys
-    missing_in_en = sl_keys - en_keys
-
-    assert not missing_in_sl, f"Keys defined in English but missing in Slovenian: {missing_in_sl}"
-    assert not missing_in_en, f"Keys defined in Slovenian but missing in English: {missing_in_en}"
+# Translation parity now lives in tests/unit/test_i18n_parity.py, which checks every locale
+# file under src/i18n/ data-drivenly (the dictionaries moved out of app.js into that folder).
 
 def test_static_mappings_selectors():
     # Parse index.html to gather all DOM elements

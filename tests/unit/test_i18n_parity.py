@@ -1,29 +1,39 @@
 # tests/unit/test_i18n_parity.py
-# The EN and SL translation dictionaries in src/app.js must define exactly the same keys, or
-# switching language leaves gaps. (When i18n is extracted to its own module, point this at it.)
+# Every locale under src/i18n/ must define exactly the same keys, or switching language leaves
+# untranslated gaps. This is data-driven: it discovers every locale file and compares them all
+# against the union of keys, so adding a new language is covered automatically and any missing
+# translation (a key present in one locale but absent in another) fails the test.
 
 import re
 
 
-def test_translation_dictionaries_parity(src_dir):
-    content = (src_dir / "app.js").read_text(encoding="utf-8")
+def _locale_files(src_dir):
+    """Every locale file in src/i18n/ (the registry index.js is not a locale)."""
+    return sorted(p for p in (src_dir / "i18n").glob("*.js") if p.name != "index.js")
 
-    translations_match = re.search(r"const TRANSLATIONS = \{(.*?)\n\};", content, re.DOTALL)
-    assert translations_match, "TRANSLATIONS object not found in app.js"
-    translations_block = translations_match.group(1)
 
-    en_match = re.search(r"en:\s*\{(.*?)\n\s*\},", translations_block, re.DOTALL)
-    assert en_match, "English translations block not found"
-    en_keys = set(re.findall(r"^\s*([a-zA-Z0-9_]+)\s*:", en_match.group(1), re.MULTILINE))
+def _keys(path):
+    text = path.read_text(encoding="utf-8")
+    body = re.search(r"\{(.*)\}", text, re.DOTALL)
+    assert body, f"no object literal found in {path.name}"
+    return set(re.findall(r"^\s*([a-zA-Z0-9_]+)\s*:", body.group(1), re.MULTILINE))
 
-    sl_match = re.search(r"sl:\s*\{(.*?)\n\s*\}", translations_block, re.DOTALL)
-    assert sl_match, "Slovenian translations block not found"
-    sl_keys = set(re.findall(r"^\s*([a-zA-Z0-9_]+)\s*:", sl_match.group(1), re.MULTILINE))
 
-    assert en_keys, "No English keys found"
-    assert sl_keys, "No Slovenian keys found"
+def test_locales_present_and_registered(src_dir):
+    files = _locale_files(src_dir)
+    assert files, "no locale files found under src/i18n/"
+    index = (src_dir / "i18n" / "index.js").read_text(encoding="utf-8")
+    for f in files:
+        assert f.stem in index, f"locale '{f.stem}' is not registered in src/i18n/index.js"
 
-    missing_in_sl = en_keys - sl_keys
-    missing_in_en = sl_keys - en_keys
-    assert not missing_in_sl, f"Keys in English but missing in Slovenian: {missing_in_sl}"
-    assert not missing_in_en, f"Keys in Slovenian but missing in English: {missing_in_en}"
+
+def test_all_locales_have_the_same_keys(src_dir):
+    files = _locale_files(src_dir)
+    keysets = {f.stem: _keys(f) for f in files}
+    for name, ks in keysets.items():
+        assert ks, f"no keys parsed from locale '{name}'"
+
+    all_keys = set().union(*keysets.values())
+    # For each locale, list the keys it is missing (present in some other locale but not here).
+    missing = {name: sorted(all_keys - ks) for name, ks in keysets.items() if all_keys - ks}
+    assert not missing, f"locales with missing translations: {missing}"

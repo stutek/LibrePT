@@ -1,6 +1,6 @@
 // sw.js - LibrePT Service Worker for Offline Functionality
 // Bump CACHE_NAME on release: `activate` purges every cache that does not match it.
-const CACHE_NAME = 'librept-v5';
+const CACHE_NAME = 'librept-v6';
 const ASSETS = [
   './',
   './index.html',
@@ -15,11 +15,21 @@ const ASSETS = [
   './data/history.js',
   './data/planUpdates.js',
   './data/sessions.js',
+  // Translations (one file per locale, registered in i18n/index.js)
+  './i18n/index.js',
+  './i18n/en.js',
+  './i18n/sl.js',
   // UI component modules
   './components/sessionCard.js',
+  './components/sessionList.js',
   './components/exerciseCard.js',
   './components/supersetCard.js',
   './components/sessionBar.js',
+  './components/daySelector.js',
+  './components/sessionTitleBar.js',
+  './components/activeUsersList.js',
+  './components/applicationHeader.js',
+  './components/planAdjustments.js',
   './icons/icon-192.png',
   './icons/icon-512.png',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
