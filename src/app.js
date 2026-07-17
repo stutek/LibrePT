@@ -2,6 +2,7 @@
 import { DEFAULT_EXERCISES, DEFAULT_CLIENTS, DEFAULT_ROUTINES, DEFAULT_HISTORY, DEFAULT_PLAN_UPDATES, DEFAULT_SESSIONS } from './data/index.js';
 import { renderSessionCard } from './components/sessionCard.js';
 import { renderSessionList } from './components/sessionList.js';
+import { renderClientsDirectory } from './components/clientsDirectory.js';
 import { renderExerciseCard } from './components/exerciseCard.js';
 import { renderSupersetCard } from './components/supersetCard.js';
 import { initSessionBar, updateSessionBarTimer, renderActiveSessionBarLabels, renderIdleSessionBar } from './components/sessionBar.js';
@@ -824,37 +825,11 @@ function openAdjustmentWizard(updateId) {
 
 // Clients View
 function renderClientsList(filterQuery = '') {
-  const container = document.getElementById('clients-list');
-  container.innerHTML = '';
-
-  const filtered = state.clients.filter(c => 
-    c.name.toLowerCase().includes(filterQuery.toLowerCase()) ||
-    c.goals.toLowerCase().includes(filterQuery.toLowerCase())
-  );
-
-  if (filtered.length === 0) {
-    container.innerHTML = `<div class="card glassmorphic text-center text-muted" style="grid-column: 1/-1;">${t('no_clients_found')}</div>`;
-    return;
-  }
-
-  filtered.forEach(client => {
-    const card = document.createElement('div');
-    card.className = 'client-card card glassmorphic';
-    card.innerHTML = `
-      <div class="client-info-block">
-        <div class="avatar">${client.avatar || getInitials(client.name)}</div>
-        <div class="client-name-meta">
-          <h3>${getClientDisplayNameHTML(client)}</h3>
-          <p>${escapeHTML(truncateString(client.goals, 45))}</p>
-        </div>
-      </div>
-    `;
-
-    card.addEventListener('click', () => {
-      navigateToPath(`/clients/${client.id}`);
-    });
-
-    container.appendChild(card);
+  renderClientsDirectory(document.getElementById('clients-list'), {
+    clients: state.clients,
+    filterQuery,
+    t, escapeHTML, getInitials, getClientDisplayNameHTML, truncateString,
+    onOpenClient: (id) => navigateToPath(`/clients/${id}`)
   });
 }
 

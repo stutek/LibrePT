@@ -22,6 +22,7 @@ const ASSETS = [
   // UI component modules
   './components/sessionCard.js',
   './components/sessionList.js',
+  './components/clientsDirectory.js',
   './components/exerciseCard.js',
   './components/supersetCard.js',
   './components/sessionBar.js',
