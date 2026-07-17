@@ -1,5 +1,5 @@
 // components/exerciseCard.js
-// Renders one standalone (non-circuit) exercise card inside the clipboard deck. It has two
+// Renders one standalone (non-superset) exercise card inside the clipboard deck. It has two
 // states: the in-focus card is the live logging surface (target sets/reps/weight plus the
 // one-tap Too Easy / Too Hard / Feedback signals), and the compact row is a collapsed peek
 // that taps to bring the exercise into focus.

@@ -18,7 +18,7 @@ const ASSETS = [
   // UI component modules
   './components/sessionCard.js',
   './components/exerciseCard.js',
-  './components/circuitCard.js',
+  './components/supersetCard.js',
   './components/sessionBar.js',
   './icons/icon-192.png',
   './icons/icon-512.png',
@@ -61,6 +61,17 @@ self.addEventListener('fetch', (e) => {
   const isSameOrigin = new URL(e.request.url).origin === self.location.origin;
 
   if (isSameOrigin) {
+    // Intercept page navigation requests and respond with the cached index.html
+    // shell to support clean URL paths in a client-side SPA.
+    if (e.request.mode === 'navigate') {
+      e.respondWith(
+        fetch('./index.html', { cache: 'no-store' })
+          .then((response) => cachePut(new Request('./index.html'), response))
+          .catch(() => caches.match('./index.html').then((cached) => cached || Response.error()))
+      );
+      return;
+    }
+
     // Network-first for our own app shell. A stale-while-revalidate cache serves the previous
     // build on every load after a deploy, which silently hides shipped changes from trainers.
     // Falling back to cache keeps a basement gym with no signal fully offline-capable.

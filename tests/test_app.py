@@ -24,24 +24,25 @@ class ElementCollector(HTMLParser):
         })
 
 def test_file_structure():
-    assert os.path.exists('index.html')
-    assert os.path.exists('app.js')
-    assert os.path.exists('index.css')
-    assert os.path.exists('mockData.js')
+    assert os.path.exists('src/index.html')
+    assert os.path.exists('src/app.js')
+    assert os.path.exists('src/index.css')
+    assert os.path.exists('src/data/index.js')
     assert os.path.exists('LICENSE')
 
 def test_manifest_icons_exist():
     """Every icon the PWA manifest advertises must actually ship, or installation renders a blank tile."""
     import json
-    with open('manifest.json', 'r', encoding='utf-8') as f:
+    with open('src/manifest.json', 'r', encoding='utf-8') as f:
         manifest = json.load(f)
 
     assert manifest['icons'], "manifest.json declares no icons"
     for icon in manifest['icons']:
-        assert os.path.exists(icon['src']), f"manifest.json references missing icon: {icon['src']}"
+        icon_path = os.path.join('src', icon['src'].lstrip('./'))
+        assert os.path.exists(icon_path), f"manifest.json references missing icon: {icon_path}"
 
 def test_translation_dictionaries_parity():
-    with open('app.js', 'r', encoding='utf-8') as f:
+    with open('src/app.js', 'r', encoding='utf-8') as f:
         content = f.read()
 
     # Find the TRANSLATIONS object content
@@ -73,14 +74,14 @@ def test_translation_dictionaries_parity():
 
 def test_static_mappings_selectors():
     # Parse index.html to gather all DOM elements
-    with open('index.html', 'r', encoding='utf-8') as f:
+    with open('src/index.html', 'r', encoding='utf-8') as f:
         html_content = f.read()
     
     collector = ElementCollector()
     collector.feed(html_content)
 
     # Read app.js
-    with open('app.js', 'r', encoding='utf-8') as f:
+    with open('src/app.js', 'r', encoding='utf-8') as f:
         js_content = f.read()
 
     # Extract staticMappings block
@@ -121,13 +122,13 @@ def test_static_mappings_selectors():
                 assert has_element, f"Element matching 'button[data-view=\"{view_val}\"]' not found in index.html"
 
 def test_mock_data_structure():
-    with open('mockData.js', 'r', encoding='utf-8') as f:
+    with open('src/data/index.js', 'r', encoding='utf-8') as f:
         content = f.read()
 
     # Basic exports presence checks
-    assert 'export const DEFAULT_EXERCISES' in content
-    assert 'export const DEFAULT_CLIENTS' in content
-    assert 'export const DEFAULT_ROUTINES' in content
-    assert 'export const DEFAULT_HISTORY' in content
-    assert 'export const DEFAULT_PLAN_UPDATES' in content
-    assert 'export const DEFAULT_SESSIONS' in content
+    assert 'export { DEFAULT_EXERCISES }' in content
+    assert 'export { DEFAULT_CLIENTS }' in content
+    assert 'export { DEFAULT_ROUTINES }' in content
+    assert 'export { DEFAULT_HISTORY }' in content
+    assert 'export { DEFAULT_PLAN_UPDATES }' in content
+    assert 'export { DEFAULT_SESSIONS }' in content

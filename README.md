@@ -104,7 +104,7 @@ LibrePT is comprised of three major subsystems:
     *   `[ ⚠️ Pain / Injury ]`: Immediately flag joint pain or acute discomfort on this movement.
 *   **Privacy-First Voice Notes (Local-Only & Auto-Mapped)**: Triggered directly from the feedback UI, voice recordings automatically attach to the current exercise and client. All audio is stored locally on the device and transcribed asynchronously using local, on-device libraries only—preventing PII exposure to cloud transcription services.
 *   **Reversible Plan Pivot & Session Wipe**: Low-friction action to wipe or pivot a client's planned session on the fly when fatigue, injury, or equipment delays occur. Fully undoable (`[ ↩ Undo ]`) and preserved in the audit history for later desk review.
-*   **Generic Placeholder Card Injection**: When a session is wiped or pivoted, the PT can instantly inject low-friction placeholder cards (`[ Mobility & Core Flow ]`, `[ Machine Circuit ]`, `[ Freestyle Block ]`) to continue tracking effort without typing new exercises from scratch and using voice notes on the new card too.
+*   **Generic Placeholder Card Injection**: When a session is wiped or pivoted, the PT can instantly inject low-friction placeholder cards (`[ Mobility & Core Flow ]`, `[ Machine Superset/Giant Set ]`, `[ Freestyle Block ]`) to continue tracking effort without typing new exercises from scratch and using voice notes on the new card too.
 *   **Asynchronous Session Scenarios**: Guide multiple participants through separate, distinct individual routines in the same session slot.
 
 ### 2. Google Calendar Appointment Booking & Integration

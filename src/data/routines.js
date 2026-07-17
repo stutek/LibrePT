@@ -1,40 +1,91 @@
 // src/data/routines.js — seed routines/programs (exercises + optional circuit groups).
 export const DEFAULT_ROUTINES = [
   {
-    id: 'routine-upper-a',
+    id: 'r10d5e6f',
     name: 'Upper Body A',
     description: 'Strength-focused upper body session prioritizing compound presses and rows.',
     exercises: [
-      { id: 'ex-bench-barbell', sets: 5, reps: 5, rest: 150, weight: 62.5 },
-      { id: 'ex-barbell-row', sets: 4, reps: 8, rest: 90, weight: 55 },
-      { id: 'ex-shoulder-db', sets: 3, reps: 10, rest: 90, weight: 18 },
-      { id: 'ex-lat-pulldown', sets: 3, reps: 12, rest: 75, weight: 48 },
-      { id: 'ex-tricep-pushdown', sets: 4, reps: 15, rest: 60, weight: 25 },
-      { id: 'ex-bicep-db-curl', sets: 3, reps: 14, rest: 45, weight: 14 }
+      // Superset 1: Chest & Back Strength Complex
+      { id: 'e10a2b3c', sets: 3, reps: 5, rest: 0, weight: 62.5, comboGroupId: 'g01a2b3c', circuitId: 'z01a2b3c', circuitTitle: 'Chest & Back Strength Complex', circuitSeries: 3 },
+      { id: 'e17a2b3c', sets: 3, reps: 8, rest: 90, weight: 55, comboGroupId: 'g01a2b3c', circuitId: 'z01a2b3c', circuitTitle: 'Chest & Back Strength Complex', circuitSeries: 3 },
+      
+      // Superset 2: Shoulder & Lat Density Superset
+      { id: 'e29b3c4d', sets: 3, reps: 10, rest: 0, weight: 18, comboGroupId: 'g02a2b3c', circuitId: 'z02a2b3c', circuitTitle: 'Shoulder & Lat Density Superset', circuitSeries: 3 },
+      { id: 'e16a2b3c', sets: 3, reps: 12, rest: 90, weight: 48, comboGroupId: 'g02a2b3c', circuitId: 'z02a2b3c', circuitTitle: 'Shoulder & Lat Density Superset', circuitSeries: 3 },
+      
+      // Superset 3: Arm Finisher Circuit
+      { id: 'e32c4d5e', sets: 3, reps: 15, rest: 0, weight: 25, comboGroupId: 'g03a2b3c', circuitId: 'z03a2b3c', circuitTitle: 'Arm Finisher Circuit', circuitSeries: 3 },
+      { id: 'e30c4d5e', sets: 3, reps: 14, rest: 60, weight: 14, comboGroupId: 'g03a2b3c', circuitId: 'z03a2b3c', circuitTitle: 'Arm Finisher Circuit', circuitSeries: 3 }
     ]
   },
   {
-    id: 'routine-legs-core',
+    id: 'r11d5e6f',
     name: 'Legs & Core B',
     description: 'Squat and hinge focus with direct core work.',
     exercises: [
-      { id: 'ex-barbell-squat', sets: 5, reps: 5, rest: 180, weight: 80 },
-      { id: 'ex-romanian-deadlift', sets: 4, reps: 8, rest: 120, weight: 65 },
-      { id: 'ex-leg-press', sets: 3, reps: 12, rest: 90, weight: 140 },
-      { id: 'ex-plank', sets: 3, reps: 45, rest: 60, weight: 0 },
-      { id: 'ex-hanging-raise', sets: 3, reps: 15, rest: 60, weight: 0 }
+      // Superset 1: Lower Body Strength Superset
+      { id: 'e20b3c4d', sets: 3, reps: 5, rest: 0, weight: 80, comboGroupId: 'g04a2b3c', circuitId: 'z04a2b3c', circuitTitle: 'Lower Body Strength Superset', circuitSeries: 3 },
+      { id: 'e21b3c4d', sets: 3, reps: 8, rest: 120, weight: 65, comboGroupId: 'g04a2b3c', circuitId: 'z04a2b3c', circuitTitle: 'Lower Body Strength Superset', circuitSeries: 3 },
+      
+      // Superset 2: Hypertrophy & Core Trio
+      { id: 'e22b3c4d', sets: 3, reps: 12, rest: 0, weight: 140, comboGroupId: 'g05a2b3c', circuitId: 'z05a2b3c', circuitTitle: 'Hypertrophy & Core Trio', circuitSeries: 3 },
+      { id: 'e34c4d5e', sets: 3, reps: 45, rest: 0, weight: 0, comboGroupId: 'g05a2b3c', circuitId: 'z05a2b3c', circuitTitle: 'Hypertrophy & Core Trio', circuitSeries: 3 },
+      { id: 'e35c4d5e', sets: 3, reps: 15, rest: 90, weight: 0, comboGroupId: 'g05a2b3c', circuitId: 'z05a2b3c', circuitTitle: 'Hypertrophy & Core Trio', circuitSeries: 3 }
     ]
   },
   {
-    id: 'routine-triple-combo',
-    name: 'Triple Combo Challenge',
-    description: 'A linked 3-exercise superset combo for muscular endurance.',
+    id: 'r12d5e6f',
+    name: 'Tri-Set Metabolic Conditioning',
+    description: 'A comprehensive 5-phase session featuring a dynamic warmup, metabolic strength tri-sets, core work, and a longevity cooldown.',
     exercises: [
-      // circuitId groups these three into one card; circuitSeries is the round counter (do the
-      // whole trio 3 times). comboGroupId is a separate, older concept and is left untouched.
-      { id: 'ex-dumbbell-row', sets: 3, reps: 10, rest: 0, weight: 18, comboGroupId: 'combo-1', circuitId: 'circuit-triple', circuitTitle: 'Triple Combo', circuitSeries: 3 },
-      { id: 'ex-pushups', sets: 3, reps: 'Max', rest: 0, weight: 0, comboGroupId: 'combo-1', circuitId: 'circuit-triple', circuitTitle: 'Triple Combo', circuitSeries: 3 },
-      { id: 'ex-walking-lunges', sets: 3, reps: 40, rest: 60, weight: 0, comboGroupId: 'combo-1', circuitId: 'circuit-triple', circuitTitle: 'Triple Combo', circuitSeries: 3 }
+      // 1. Warmup Superset
+      { id: 'e19a2b3c', sets: 1, reps: '10 reps (light)', rest: 0, weight: 5, comboGroupId: 'g06a2b3c', circuitId: 'z06a2b3c', circuitTitle: 'Dynamic Warmup', circuitSeries: 1 },
+      { id: 'e38c4d5e', sets: 1, reps: '10 reps', rest: 30, weight: 0, comboGroupId: 'g06a2b3c', circuitId: 'z06a2b3c', circuitTitle: 'Dynamic Warmup', circuitSeries: 1 },
+      
+      // 2. Strength A: metabolic trio
+      { id: 'e18a2b3c', sets: 3, reps: '10 per arm', rest: 0, weight: 18, comboGroupId: 'g07a2b3c', circuitId: 'z07a2b3c', circuitTitle: 'Tri-Set Metabolic Circuit', circuitSeries: 3 },
+      { id: 'e14a2b3c', sets: 3, reps: 'Max', rest: 0, weight: 0, comboGroupId: 'g07a2b3c', circuitId: 'z07a2b3c', circuitTitle: 'Tri-Set Metabolic Circuit', circuitSeries: 3 },
+      { id: 'e38c4d5e', sets: 3, reps: 40, rest: 60, weight: 0, comboGroupId: 'g07a2b3c', circuitId: 'z07a2b3c', circuitTitle: 'Tri-Set Metabolic Circuit', circuitSeries: 3 },
+      
+      // 3. Strength B: leg focus
+      { id: 'e23b3c4d', sets: 3, reps: '12 reps', rest: 0, weight: 16, comboGroupId: 'g08a2b3c', circuitId: 'z08a2b3c', circuitTitle: 'Leg & Hinge Superset', circuitSeries: 3 },
+      { id: 'e21b3c4d', sets: 3, reps: '10 reps', rest: 90, weight: 45, comboGroupId: 'g08a2b3c', circuitId: 'z08a2b3c', circuitTitle: 'Leg & Hinge Superset', circuitSeries: 3 },
+      
+      // 4. Core Finisher
+      { id: 'e34c4d5e', sets: 3, reps: '45 seconds', rest: 0, weight: 0, comboGroupId: 'g09a2b3c', circuitId: 'z09a2b3c', circuitTitle: 'Core Finish Burner', circuitSeries: 3 },
+      { id: 'e37c4d5e', sets: 3, reps: '20 per side', rest: 60, weight: 0, comboGroupId: 'g09a2b3c', circuitId: 'z09a2b3c', circuitTitle: 'Core Finish Burner', circuitSeries: 3 },
+      
+      // 5. Cooldown/Stretching
+      { id: 'e39c4d5e', sets: 1, reps: '30s hold', rest: 0, weight: 0, comboGroupId: 'g10a2b3c', circuitId: 'z10a2b3c', circuitTitle: 'Longevity Cooldown & Stretching', circuitSeries: 1 },
+      { id: 'e40c4d5e', sets: 1, reps: '30s hold', rest: 0, weight: 0, comboGroupId: 'g10a2b3c', circuitId: 'z10a2b3c', circuitTitle: 'Longevity Cooldown & Stretching', circuitSeries: 1 }
+    ]
+  },
+  {
+    id: 'r13d5e6f',
+    name: 'Postpartum Core & Mobility',
+    description: 'Gentle core activation and mobility exercises focused on deep abdominal breathing, posture, and light functional strength.',
+    exercises: [
+      // Superset 1: Core & Ankle Alignment
+      { id: 'e34c4d5e', sets: 3, reps: '30s hold', rest: 0, weight: 0, comboGroupId: 'g11a2b3c', circuitId: 'z11a2b3c', circuitTitle: 'Core & Ankle Alignment', circuitSeries: 3 },
+      { id: 'e26b3c4d', sets: 3, reps: 15, rest: 60, weight: 0, comboGroupId: 'g11a2b3c', circuitId: 'z11a2b3c', circuitTitle: 'Core & Ankle Alignment', circuitSeries: 3 },
+      
+      // Superset 2: Posture & Leg Strength
+      { id: 'e23b3c4d', sets: 3, reps: 10, rest: 0, weight: 8, comboGroupId: 'g12a2b3c', circuitId: 'z12a2b3c', circuitTitle: 'Posture & Leg Strength Superset', circuitSeries: 3 },
+      { id: 'e19a2b3c', sets: 3, reps: 12, rest: 90, weight: 10, comboGroupId: 'g12a2b3c', circuitId: 'z12a2b3c', circuitTitle: 'Posture & Leg Strength Superset', circuitSeries: 3 }
+    ]
+  },
+  {
+    id: 'r14d5e6f',
+    name: 'Strength & Longevity Focus',
+    description: 'Compound strength lifts paired with posture and core stability work optimized for long-term joint health.',
+    exercises: [
+      // Superset 1: Press & Hinge Longevity Superset
+      { id: 'e11a2b3c', sets: 3, reps: 8, rest: 0, weight: 24, comboGroupId: 'g13a2b3c', circuitId: 'z13a2b3c', circuitTitle: 'Press & Hinge Longevity Superset', circuitSeries: 3 },
+      { id: 'e21b3c4d', sets: 3, reps: 10, rest: 120, weight: 70, comboGroupId: 'g13a2b3c', circuitId: 'z13a2b3c', circuitTitle: 'Press & Hinge Longevity Superset', circuitSeries: 3 },
+      
+      // Superset 2: Posture & Core Stability
+      { id: 'e19a2b3c', sets: 3, reps: 15, rest: 0, weight: 14, comboGroupId: 'g14a2b3c', circuitId: 'z14a2b3c', circuitTitle: 'Posture & Core Stability Superset', circuitSeries: 3 },
+      { id: 'e34c4d5e', sets: 3, reps: '60s hold', rest: 60, weight: 0, comboGroupId: 'g14a2b3c', circuitId: 'z14a2b3c', circuitTitle: 'Posture & Core Stability Superset', circuitSeries: 3 }
     ]
   }
 ];

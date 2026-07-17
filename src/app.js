@@ -2,8 +2,14 @@
 import { DEFAULT_EXERCISES, DEFAULT_CLIENTS, DEFAULT_ROUTINES, DEFAULT_HISTORY, DEFAULT_PLAN_UPDATES, DEFAULT_SESSIONS } from './data/index.js';
 import { renderSessionCard } from './components/sessionCard.js';
 import { renderExerciseCard } from './components/exerciseCard.js';
-import { renderCircuitCard } from './components/circuitCard.js';
+import { renderSupersetCard } from './components/supersetCard.js';
 import { initSessionBar, updateSessionBarTimer, renderActiveSessionBarLabels, renderIdleSessionBar } from './components/sessionBar.js';
+import { renderPendingPlanAdjustmentsComponent, openAdjustmentWizardComponent } from './components/planAdjustments.js';
+
+// Helper to generate short UUIDs for all entity types (clients, sessions, exercises, supersets/combos, etc.)
+function generateShortUUID() {
+  return Math.random().toString(36).substring(2, 10);
+}
 
 // --- TRANSLATION / i18n SYSTEM ---
 const TRANSLATIONS = {
@@ -535,7 +541,7 @@ function init() {
   // Bump SEED_VERSION whenever the demo dataset changes to force a full refresh of every
   // reference collection, then re-seed session 1 as a live workout. This is demo behaviour:
   // it does discard in-session test edits, which is the intent for a reshapeable prototype.
-  const SEED_VERSION = 6;
+  const SEED_VERSION = 12;
   const storedSeed = parseInt(localStorage.getItem('librept_seed_version') || '0', 10);
   if (storedSeed < SEED_VERSION) {
     state.clients = [...DEFAULT_CLIENTS];
@@ -613,6 +619,10 @@ function init() {
   // Check if there was an active session saved (session recovery)
   recoverActiveSession();
 
+  // Set up view routing based on URL path
+  window.addEventListener('popstate', handlePathChange);
+  handlePathChange();
+
   // Keep the idle bar's "next session" + starts-in countdown fresh even with no other
   // trigger firing (an active session's own 1s tick handles the bar while one is running)
   setInterval(renderIdleSessionBar, 30000);
@@ -639,7 +649,7 @@ function saveToLocalStorage() {
 // at a different exercise so the clipboard shows a spread of card-completion counts.
 // Written straight to the active-session cache; recoverActiveSession() picks it up on init.
 function seedDemoActiveSession() {
-  const booking = (state.bookings || []).find(b => b.id === 'b-1');
+  const booking = (state.bookings || []).find(b => b.id === 's01f2e3d');
   if (!booking) return;
 
   const participantIds = booking.participants.filter(pid => state.clients.some(c => c.id === pid));
@@ -655,12 +665,14 @@ function seedDemoActiveSession() {
   const startTime = now - HOUR;
 
   const session = {
+    id: booking.id,
     startTime,
     duration: Math.floor((now - startTime) / 1000),
     participants: participantIds,
     clientRoutines: {},
     activeClientId: participantIds[0],
     booking: {
+      id: booking.id,
       titles: [booking.title],
       day: booking.day,
       startDate: new Date(now - HOUR).toISOString(),
@@ -726,7 +738,7 @@ function setupNavigation() {
   navItems.forEach(item => {
     item.addEventListener('click', () => {
       const viewTarget = item.getAttribute('data-view');
-      switchView(viewTarget);
+      navigateToPath(`/${viewTarget}`);
     });
   });
 
@@ -734,14 +746,15 @@ function setupNavigation() {
   const logoArea = document.getElementById('logo-area');
   if (logoArea) {
     logoArea.addEventListener('click', () => {
-      switchView('clients');
+      navigateToPath('/clients');
     });
   }
 
   const logoAreaClipboard = document.getElementById('logo-area-clipboard');
   if (logoAreaClipboard) {
     logoAreaClipboard.addEventListener('click', () => {
-      document.getElementById('active-session-overlay').classList.add('hidden');
+      navigateToPath('/clients');
+      focusSessionsColumn('today', 'smooth');
     });
   }
 
@@ -753,7 +766,7 @@ function setupNavigation() {
 
   // Client Details back button
   document.getElementById('btn-back-to-clients').addEventListener('click', () => {
-    switchView('clients');
+    navigateToPath('/clients');
   });
 
   setupSessionsDayNav();
@@ -832,271 +845,182 @@ function switchView(viewId) {
   }
 }
 
+function getISODateString(date) {
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function getISODateForColumn(day) {
+  const now = Date.now();
+  if (day === 'yesterday') return getISODateString(now - 24 * 60 * 60 * 1000);
+  if (day === 'today') return getISODateString(now);
+  if (day === 'tomorrow') return getISODateString(now + 24 * 60 * 60 * 1000);
+  if (day === 'upcoming') return getISODateString(now + 2 * 24 * 60 * 60 * 1000);
+  return getISODateString(now);
+}
+
+function getColumnForISODate(isoDate) {
+  if (isoDate === getISODateForColumn('yesterday')) return 'yesterday';
+  if (isoDate === getISODateForColumn('today')) return 'today';
+  if (isoDate === getISODateForColumn('tomorrow')) return 'tomorrow';
+  return 'upcoming';
+}
+
+function navigateToPath(targetPath) {
+  if (window.location.pathname === targetPath) {
+    handlePathChange();
+  } else {
+    window.history.pushState(null, '', targetPath);
+    handlePathChange();
+  }
+}
+
+function setHeaderState(isSessionActive) {
+  const normalActions = document.querySelector('.normal-header-actions');
+  const activeActions = document.querySelector('.active-session-header-actions');
+  const timerBlock = document.getElementById('header-session-timer-block');
+  
+  if (normalActions && activeActions && timerBlock) {
+    if (isSessionActive) {
+      normalActions.classList.add('hidden');
+      activeActions.classList.remove('hidden');
+      timerBlock.classList.remove('hidden');
+    } else {
+      normalActions.classList.remove('hidden');
+      activeActions.classList.add('hidden');
+      timerBlock.classList.add('hidden');
+    }
+  }
+}
+
+function handlePathChange() {
+  const path = window.location.pathname;
+
+  // Match patterns:
+  // 1. /session/{sessionId}/client/{clientId}
+  const sessionClientMatch = path.match(/^\/session\/([A-Za-z0-9_-]+)\/client\/([A-Za-z0-9_-]+)$/);
+  // 2. /session/{sessionId}
+  const sessionMatch = path.match(/^\/session\/([A-Za-z0-9_-]+)$/);
+  // 3. /clients/{clientId}
+  const clientDetailMatch = path.match(/^\/clients\/([A-Za-z0-9_-]+)$/);
+  // 4. /sessions/{isoDate}
+  const sessionsDateMatch = path.match(/^\/sessions\/([0-9]{4}-[0-9]{2}-[0-9]{2})$/);
+
+  if (sessionClientMatch) {
+    const sessionId = sessionClientMatch[1];
+    const clientId = sessionClientMatch[2];
+    setHeaderState(true);
+    showSessionView(sessionId, clientId);
+  } else if (sessionMatch) {
+    const sessionId = sessionMatch[1];
+    setHeaderState(true);
+    showSessionView(sessionId, null);
+  } else if (clientDetailMatch) {
+    const clientId = clientDetailMatch[1];
+    setHeaderState(false);
+    document.getElementById('active-session-overlay').classList.add('hidden');
+    showClientDetails(clientId);
+  } else if (sessionsDateMatch) {
+    const isoDate = sessionsDateMatch[1];
+    const column = getColumnForISODate(isoDate);
+    setHeaderState(false);
+    document.getElementById('active-session-overlay').classList.add('hidden');
+    switchView('clients');
+    requestAnimationFrame(() => focusSessionsColumn(column, 'auto'));
+  } else if (path === '/clients' || path === '/' || path === '/index.html') {
+    const todayDate = getISODateForColumn('today');
+    setHeaderState(false);
+    window.history.replaceState(null, '', `/sessions/${todayDate}`);
+    document.getElementById('active-session-overlay').classList.add('hidden');
+    switchView('clients');
+    requestAnimationFrame(() => focusSessionsColumn('today', 'auto'));
+  } else if (path === '/routines') {
+    setHeaderState(false);
+    document.getElementById('active-session-overlay').classList.add('hidden');
+    switchView('routines');
+  } else if (path === '/exercises') {
+    setHeaderState(false);
+    document.getElementById('active-session-overlay').classList.add('hidden');
+    switchView('exercises');
+  } else if (path === '/history') {
+    setHeaderState(false);
+    document.getElementById('active-session-overlay').classList.add('hidden');
+    switchView('history');
+  } else {
+    // Default fallback
+    const todayDate = getISODateForColumn('today');
+    setHeaderState(false);
+    window.history.replaceState(null, '', `/sessions/${todayDate}`);
+    document.getElementById('active-session-overlay').classList.add('hidden');
+    switchView('clients');
+  }
+}
+
+function showSessionView(sessionId, clientId) {
+  if (activeSession) {
+    // Show active tracking clipboard overlay
+    const bar = document.getElementById('active-session-bar');
+    bar.classList.remove('hidden', 'is-idle');
+    delete bar.dataset.nextBookingId;
+    renderActiveSessionBarLabels();
+    
+    // Ensure timer is ticking if not already
+    if (!activeSession.timerIntervalId) {
+      startSessionTimer();
+    }
+    
+    document.getElementById('active-session-overlay').classList.remove('hidden');
+    
+    if (clientId && activeSession.participants.includes(clientId)) {
+      activeSession.activeClientId = clientId;
+    }
+    renderActiveGroupBoard();
+  } else {
+    // No active session in memory. Check if we can recover it
+    const cached = localStorage.getItem('librept_active_session');
+    if (cached) {
+      recoverActiveSession();
+      if (activeSession) {
+        // Retry
+        showSessionView(sessionId, clientId);
+        return;
+      }
+    }
+    
+    // Fall back to clients dashboard but open the workout setup modal for this client
+    document.getElementById('active-session-overlay').classList.add('hidden');
+    switchView('clients');
+    openWorkoutSetupModal(clientId);
+  }
+}
+
 // --- RENDER FUNCTIONS ---
 
 function renderPendingPlanAdjustments() {
   const container = document.getElementById('dashboard-adjustments-list');
   const countBadge = document.getElementById('badge-adjustments-count');
-  
-  if (!container) return;
-  container.innerHTML = '';
-  
-  const unresolved = (state.planUpdates || []).filter(u => !u.resolved);
-  
-  if (countBadge) {
-    countBadge.textContent = unresolved.length;
-    if (unresolved.length === 0) {
-      countBadge.style.display = 'none';
-    } else {
-      countBadge.style.display = 'inline-block';
-    }
-  }
-  
-  if (unresolved.length === 0) {
-    container.innerHTML = `<div class="card glassmorphic text-center text-muted" style="padding: 16px;">${t('no_pending_adjustments')}</div>`;
-    return;
-  }
-  
-  unresolved.forEach(u => {
-    const card = document.createElement('div');
-    card.className = 'adjustment-card card glassmorphic';
-    card.style.display = 'flex';
-    card.style.justifyContent = 'space-between';
-    card.style.alignItems = 'center';
-    card.style.gap = '12px';
-    card.style.padding = '12px';
-    card.style.marginBottom = '8px';
-    card.style.borderLeft = '4px solid var(--accent-cyan)';
-    
-    const info = document.createElement('div');
-    info.style.flex = '1';
-    
-    // Format tag badge color based on severity
-    let badgeClass = 'badge-cyan';
-    if (u.tag.includes('Pain') || u.tag.includes('Discomfort')) badgeClass = 'badge-danger';
-    else if (u.tag.includes('Hard')) badgeClass = 'badge-warning';
-    else if (u.tag.includes('Easy') || u.tag.includes('Progression')) badgeClass = 'badge-success';
-    
-    let voiceNoteHTML = '';
-    if (u.hasVoiceNote) {
-      voiceNoteHTML = `
-        <div class="mini-audio-note" style="display: flex; align-items: center; gap: 6px; margin-top: 6px; background: rgba(0,255,255,0.05); padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(0,255,255,0.15); width: fit-content;">
-          <button type="button" class="btn-play-adjustment-audio" data-id="${u.id}" style="background: none; border: none; color: var(--accent-cyan); cursor: pointer; padding: 0; display: inline-flex; align-items: center;"><i class="fa-solid fa-circle-play" style="font-size: 14px;"></i></button>
-          <span class="audio-status-label" style="font-size: 9px; color: var(--text-muted); font-family: monospace;">voice_memo.wav (0:04)</span>
-        </div>
-      `;
-    }
-
-    info.innerHTML = `
-      <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px;">
-        <strong style="color: var(--text-color); font-size: 13px;">${escapeHTML(u.clientName)}</strong>
-        <span class="badge ${badgeClass}" style="font-size: 9px; padding: 2px 6px;">${escapeHTML(u.tag)}</span>
-      </div>
-      <div style="font-size: 11px; color: var(--text-muted);">
-        ${t('exercise_of')}: <span class="font-semibold" style="color: var(--accent-cyan);">${escapeHTML(u.exerciseName)}</span>
-      </div>
-      ${voiceNoteHTML}
-    `;
-    
-    const btn = document.createElement('button');
-    btn.className = 'btn primary-btn btn-xs btn-resolve-alert';
-    btn.innerHTML = `<i class="fa-solid fa-check"></i> ${t('btn_resolve')}`;
-    btn.addEventListener('click', () => {
-      openAdjustmentWizard(u.id);
-    });
-    
-    card.appendChild(info);
-    card.appendChild(btn);
-
-    // Bind event to play audio preview
-    if (u.hasVoiceNote) {
-      const playBtn = card.querySelector('.btn-play-adjustment-audio');
-      const audioStatus = card.querySelector('.audio-status-label');
-      if (playBtn && audioStatus) {
-        playBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const playIcon = playBtn.querySelector('i');
-          if (playIcon.classList.contains('fa-circle-play')) {
-            playIcon.className = 'fa-solid fa-circle-pause';
-            audioStatus.textContent = t('voice_playing');
-            
-            setTimeout(() => {
-              playIcon.className = 'fa-solid fa-circle-play';
-              audioStatus.textContent = 'voice_memo.wav (0:04)';
-            }, 3000);
-          } else {
-            playIcon.className = 'fa-solid fa-circle-play';
-            audioStatus.textContent = 'voice_memo.wav (0:04)';
-          }
-        });
-      }
-    }
-
-    container.appendChild(card);
+  renderPendingPlanAdjustmentsComponent(container, countBadge, {
+    state,
+    t,
+    escapeHTML,
+    openAdjustmentWizard
   });
-}
-
-function resolvePendingAdjustment(id) {
-  const index = state.planUpdates.findIndex(u => u.id === id);
-  if (index !== -1) {
-    state.planUpdates[index].resolved = true;
-    saveToLocalStorage();
-    renderPendingPlanAdjustments();
-  }
 }
 
 function openAdjustmentWizard(updateId) {
-  const update = state.planUpdates.find(u => u.id === updateId);
-  if (!update) return;
-
-  const dialog = document.getElementById('dialog-apply-adjustment');
-  if (!dialog) return;
-
-  // Set inputs
-  document.getElementById('adjust-update-id').value = updateId;
-  document.getElementById('adjust-client-id').value = update.clientId;
-  
-  // Set text labels
-  document.getElementById('adjust-client-name').textContent = update.clientName;
-  document.getElementById('adjust-feedback-tag').textContent = update.tag;
-  
-  // Parse note details for display
-  let cleanNote = update.tag;
-  if (update.tag.includes(' - ')) {
-    const parts = update.tag.split(' - ');
-    document.getElementById('adjust-feedback-tag').textContent = parts[0];
-    cleanNote = parts.slice(1).join(' - ');
-  }
-  document.getElementById('adjust-details').textContent = cleanNote;
-
-  // Voice note player handling
-  const voiceContainer = document.getElementById('adjust-voice-player-container');
-  if (update.hasVoiceNote) {
-    voiceContainer.classList.remove('hidden');
-    const playBtn = document.getElementById('adjust-btn-play-voice');
-    // reset listener
-    playBtn.replaceWith(playBtn.cloneNode(true));
-    const newPlayBtn = document.getElementById('adjust-btn-play-voice');
-    newPlayBtn.addEventListener('click', () => {
-      const icon = newPlayBtn.querySelector('i');
-      if (icon.classList.contains('fa-circle-play')) {
-        icon.className = 'fa-solid fa-circle-pause';
-        setTimeout(() => {
-          icon.className = 'fa-solid fa-circle-play';
-        }, 3000);
-      } else {
-        icon.className = 'fa-solid fa-circle-play';
-      }
-    });
-  } else {
-    voiceContainer.classList.add('hidden');
-  }
-
-  // Find target exercise & routine database links
-  const exercise = state.exercises.find(e => e.name === update.exerciseName);
-  const exerciseId = exercise ? exercise.id : '';
-  const routine = state.routines.find(r => r.exercises.some(ex => ex.id === exerciseId));
-  const exMapping = routine ? routine.exercises.find(ex => ex.id === exerciseId) : null;
-
-  document.getElementById('adjust-routine-id').value = routine ? routine.id : '';
-  document.getElementById('adjust-exercise-id').value = exerciseId;
-
-  // Default panel action setup
-  document.getElementById('adjust-action-type').value = 'modify';
-  document.getElementById('adjust-panel-modify').classList.remove('hidden');
-  document.getElementById('adjust-panel-swap').classList.add('hidden');
-
-  // Pre-fill parameters
-  document.getElementById('adjust-weight').value = exMapping ? exMapping.weight : 0;
-  document.getElementById('adjust-reps').value = exMapping ? exMapping.reps : 10;
-  document.getElementById('adjust-sets').value = exMapping ? exMapping.sets : 3;
-
-  // Pre-fill smart load offsets (recommend 2.5kg increase if tag is "Too Easy", decrease if "Too Hard")
-  if (update.tag.includes('Easy')) {
-    document.getElementById('adjust-weight').value = exMapping ? exMapping.weight + 2.5 : 2.5;
-  } else if (update.tag.includes('Hard')) {
-    document.getElementById('adjust-weight').value = exMapping ? Math.max(0, exMapping.weight - 2.5) : 0;
-  }
-
-  // Fill swap select options
-  const swapSelect = document.getElementById('adjust-exercise-swap');
-  swapSelect.innerHTML = '';
-  state.exercises.forEach(ex => {
-    if (ex.id !== exerciseId) {
-      const opt = document.createElement('option');
-      opt.value = ex.id;
-      opt.textContent = `${ex.name} (${ex.category})`;
-      swapSelect.appendChild(opt);
-    }
+  openAdjustmentWizardComponent(updateId, {
+    state,
+    t,
+    escapeHTML,
+    saveToLocalStorage,
+    renderRoutinesList,
+    renderPendingPlanAdjustments
   });
-
-  // Action select toggle listeners
-  const actionTypeSelect = document.getElementById('adjust-action-type');
-  actionTypeSelect.replaceWith(actionTypeSelect.cloneNode(true));
-  const newActionTypeSelect = document.getElementById('adjust-action-type');
-  newActionTypeSelect.addEventListener('change', () => {
-    const action = newActionTypeSelect.value;
-    if (action === 'modify') {
-      document.getElementById('adjust-panel-modify').classList.remove('hidden');
-      document.getElementById('adjust-panel-swap').classList.add('hidden');
-    } else if (action === 'swap') {
-      document.getElementById('adjust-panel-modify').classList.add('hidden');
-      document.getElementById('adjust-panel-swap').classList.remove('hidden');
-    } else {
-      document.getElementById('adjust-panel-modify').classList.add('hidden');
-      document.getElementById('adjust-panel-swap').classList.add('hidden');
-    }
-  });
-
-  // Close modals listeners
-  dialog.querySelectorAll('.modal-cancel, .modal-close-btn').forEach(btn => {
-    btn.replaceWith(btn.cloneNode(true));
-  });
-  dialog.querySelectorAll('.modal-cancel, .modal-close-btn').forEach(btn => {
-    btn.addEventListener('click', () => dialog.close());
-  });
-
-  // Form submit handler
-  const form = document.getElementById('form-apply-adjustment');
-  form.replaceWith(form.cloneNode(true));
-  const newForm = document.getElementById('form-apply-adjustment');
-  newForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const action = newActionTypeSelect.value;
-    const rId = document.getElementById('adjust-routine-id').value;
-    const exId = document.getElementById('adjust-exercise-id').value;
-
-    const targetRoutine = state.routines.find(r => r.id === rId);
-
-    if (action === 'modify' && targetRoutine) {
-      const targetEx = targetRoutine.exercises.find(ex => ex.id === exId);
-      if (targetEx) {
-        targetEx.weight = parseFloat(document.getElementById('adjust-weight').value) || 0;
-        targetEx.reps = document.getElementById('adjust-reps').value;
-        targetEx.sets = parseInt(document.getElementById('adjust-sets').value) || 3;
-      }
-    } else if (action === 'swap' && targetRoutine) {
-      const idx = targetRoutine.exercises.findIndex(ex => ex.id === exId);
-      if (idx !== -1) {
-        const swapExId = swapSelect.value;
-        targetRoutine.exercises[idx].id = swapExId;
-      }
-    }
-
-    // Resolve alert
-    const updateIdx = state.planUpdates.findIndex(u => u.id === updateId);
-    if (updateIdx !== -1) {
-      state.planUpdates[updateIdx].resolved = true;
-    }
-
-    saveToLocalStorage();
-    renderPendingPlanAdjustments();
-    renderRoutinesList();
-    dialog.close();
-  });
-
-  dialog.showModal();
 }
+
 
 
 // Clients View
@@ -1115,10 +1039,6 @@ function renderClientsList(filterQuery = '') {
   }
 
   filtered.forEach(client => {
-    const latestWeight = client.weightHistory.length > 0 
-      ? client.weightHistory[client.weightHistory.length - 1].value + ' kg'
-      : t('no_weight_logged');
-
     const card = document.createElement('div');
     card.className = 'client-card card glassmorphic';
     card.innerHTML = `
@@ -1129,11 +1049,10 @@ function renderClientsList(filterQuery = '') {
           <p>${escapeHTML(truncateString(client.goals, 45))}</p>
         </div>
       </div>
-      <div class="client-weight-pill">${latestWeight}</div>
     `;
 
     card.addEventListener('click', () => {
-      showClientDetails(client.id);
+      navigateToPath(`/clients/${client.id}`);
     });
 
     container.appendChild(card);
@@ -1162,76 +1081,11 @@ function showClientDetails(clientId) {
     openWorkoutSetupModal(clientId);
   });
 
-  renderClientWeightHistory(client);
   renderClientWorkoutHistory(client);
   switchView('client-detail');
 }
 
-function renderClientWeightHistory(client) {
-  const tbody = document.getElementById('weight-history-tbody');
-  const chartContainer = document.getElementById('weight-history-chart');
-  tbody.innerHTML = '';
-  chartContainer.innerHTML = '';
 
-  const weights = [...client.weightHistory].sort((a,b) => new Date(b.date) - new Date(a.date));
-  
-  if (weights.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted">${t('no_weight_records')}</td></tr>`;
-    chartContainer.innerHTML = `<span class="text-muted text-sm m-auto">${t('log_weights_progression')}</span>`;
-    return;
-  }
-
-  // Render Table rows
-  weights.forEach((entry, idx) => {
-    let diffText = '-';
-    let diffClass = '';
-    if (idx < weights.length - 1) {
-      const prevVal = weights[idx + 1].value;
-      const diff = (entry.value - prevVal).toFixed(1);
-      if (diff > 0) {
-        diffText = `+${diff} kg`;
-        diffClass = 'text-danger';
-      } else if (diff < 0) {
-        diffText = `${diff} kg`;
-        diffClass = 'text-emerald';
-      } else {
-        diffText = '0.0 kg';
-      }
-    }
-
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td>${formatDateStr(entry.date)}</td>
-      <td class="font-mono font-semibold">${entry.value} kg</td>
-      <td class="${diffClass} font-mono">${diffText}</td>
-    `;
-    tbody.appendChild(row);
-  });
-
-  // Render simple visual chart bars (up to 8 elements chronologically)
-  const chartData = [...client.weightHistory].sort((a,b) => new Date(a.date) - new Date(b.date)).slice(-8);
-  if (chartData.length > 1) {
-    const values = chartData.map(d => d.value);
-    const minVal = Math.min(...values) - 2; // leave margin at bottom
-    const maxVal = Math.max(...values) + 2; // margin at top
-    const range = maxVal - minVal;
-
-    chartData.forEach(entry => {
-      const heightPercent = range > 0 ? ((entry.value - minVal) / range) * 100 : 50;
-      const barWrapper = document.createElement('div');
-      barWrapper.className = 'chart-bar-wrapper';
-      barWrapper.innerHTML = `
-        <div class="chart-bar" style="height: ${Math.max(10, heightPercent)}%">
-          <div class="chart-tooltip">${entry.value} kg</div>
-        </div>
-        <span class="chart-label">${entry.date.substring(5, 10)}</span>
-      `;
-      chartContainer.appendChild(barWrapper);
-    });
-  } else {
-    chartContainer.innerHTML = `<span class="text-muted text-sm m-auto">${t('need_two_entries')}</span>`;
-  }
-}
 
 function renderClientWorkoutHistory(client) {
   const container = document.getElementById('client-history-list');
@@ -1480,9 +1334,6 @@ function setupClientForms() {
     document.getElementById('client-modal-title').textContent = 'Edit Client Profile';
     document.getElementById('client-form-id').value = client.id;
     document.getElementById('client-name').value = client.name;
-    document.getElementById('client-weight').value = client.weightHistory.length > 0 
-      ? client.weightHistory[client.weightHistory.length - 1].value 
-      : '';
     document.getElementById('client-goals').value = client.goals || '';
     document.getElementById('client-notes').value = client.notes || '';
     
@@ -1497,7 +1348,6 @@ function setupClientForms() {
     e.preventDefault();
     const id = document.getElementById('client-form-id').value;
     const name = document.getElementById('client-name').value.trim();
-    const weightVal = parseFloat(document.getElementById('client-weight').value);
     const goals = document.getElementById('client-goals').value.trim();
     const notes = document.getElementById('client-notes').value.trim();
 
@@ -1512,19 +1362,10 @@ function setupClientForms() {
         client.name = name;
         client.goals = goals;
         client.notes = notes;
-        
-        // If weight changed or is new, add it
-        if (!isNaN(weightVal)) {
-          const lastWeight = client.weightHistory.length > 0 ? client.weightHistory[client.weightHistory.length - 1].value : null;
-          if (lastWeight !== weightVal) {
-            client.weightHistory.push({ date: todayStr, value: weightVal });
-          }
-        }
       }
     } else {
       // Add mode
-      const newId = 'client-' + Date.now();
-      const weightHistory = !isNaN(weightVal) ? [{ date: todayStr, value: weightVal }] : [];
+      const newId = generateShortUUID();
       
       const newClient = {
         id: newId,
@@ -1532,7 +1373,7 @@ function setupClientForms() {
         avatar: getInitials(name),
         joinedDate: todayStr,
         goals: goals,
-        weightHistory: weightHistory,
+        weightHistory: [],
         notes: notes,
         active: true
       };
@@ -1555,41 +1396,6 @@ function setupClientForms() {
     renderClientsList(e.target.value);
   });
 
-  // Log Weight Dialog Submitter
-  const weightDialog = document.getElementById('dialog-weight');
-  const weightForm = document.getElementById('form-weight');
-  
-  document.getElementById('btn-add-weight').addEventListener('click', () => {
-    document.getElementById('weight-log-value').value = '';
-    document.getElementById('weight-log-date').value = new Date().toISOString().substring(0, 10);
-    weightDialog.showModal();
-  });
-
-  weightDialog.querySelector('.modal-cancel').addEventListener('click', () => weightDialog.close());
-  weightDialog.querySelector('.modal-close-btn').addEventListener('click', () => weightDialog.close());
-
-  weightForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const value = parseFloat(document.getElementById('weight-log-value').value);
-    const date = document.getElementById('weight-log-date').value;
-    
-    if (isNaN(value) || !date) return;
-
-    const client = state.clients.find(c => c.id === activeDetailClientId);
-    if (client) {
-      // Remove any existing entry for that specific date to prevent duplicates
-      client.weightHistory = client.weightHistory.filter(w => w.date !== date);
-      client.weightHistory.push({ date: date, value: value });
-      // Sort weight history chronologically
-      client.weightHistory.sort((a,b) => new Date(a.date) - new Date(b.date));
-      
-      saveToLocalStorage();
-      renderClientsList();
-      showClientDetails(client.id); // refresh
-    }
-    
-    weightDialog.close();
-  });
 }
 
 // 2. Routine Template Modal
@@ -1661,7 +1467,7 @@ function setupRoutineForms() {
     } else {
       // Add
       const newRoutine = {
-        id: 'routine-' + Date.now(),
+        id: generateShortUUID(),
         name: name,
         description: description,
         exercises: exercises
@@ -1761,7 +1567,7 @@ function setupExerciseForms() {
     if (!name || !category) return;
 
     const newEx = {
-      id: 'ex-' + Date.now(),
+      id: generateShortUUID(),
       name: name,
       category: category,
       instructions: instructions
@@ -1909,7 +1715,7 @@ function openWorkoutSetupModal(preselectedClientId = null, preselectedRoutineId 
       cb.checked = targetBooking.participants.includes(client.id);
     } else if (preselectedClientId === client.id) {
       cb.checked = true;
-    } else if (!preselectedClientId && client.id !== 'client-sarah-jenkins') {
+    } else if (!preselectedClientId && client.id !== 'c3c7d2c4') {
       // Default to checking first couple clients if none specified (like Jane and John)
       cb.checked = true;
     }
@@ -1946,10 +1752,10 @@ function openWorkoutSetupModal(preselectedClientId = null, preselectedRoutineId 
       select.value = targetBooking.routineId;
     } else if (preselectedRoutineId && preselectedClientId === client.id) {
       select.value = preselectedRoutineId;
-    } else if (client.id === 'client-jane-doe') {
-      select.value = 'routine-upper-a';
-    } else if (client.id === 'client-john-smith') {
-      select.value = 'routine-legs-core';
+    } else if (client.id === 'c1a9f0e2') {
+      select.value = 'r10d5e6f';
+    } else if (client.id === 'c2b8e1d3') {
+      select.value = 'r11d5e6f';
     } else if (state.routines.length > 0) {
       select.value = state.routines[0].id;
     }
@@ -1969,7 +1775,10 @@ function startWorkoutSession(clientRoutines, bookingMeta = null) {
   // Initialize session state
   const participantIds = clientRoutines.map(cr => cr.clientId);
 
+  const sessionId = bookingMeta ? bookingMeta.id : generateShortUUID();
+
   activeSession = {
+    id: sessionId,
     startTime: Date.now(),
     duration: 0,
     participants: participantIds,
@@ -2003,8 +1812,8 @@ function startWorkoutSession(clientRoutines, bookingMeta = null) {
           repsTarget: item.reps,
           weightTarget: item.weight,
           rest: item.rest,
-          // Circuit grouping: exercises sharing a circuitId render as one card, repeated
-          // circuitSeries times (see renderActiveGroupBoard / buildCircuitUnits).
+          // Superset grouping: exercises sharing a circuitId render as one card, repeated
+          // circuitSeries times (see renderActiveGroupBoard / buildSupersetUnits).
           circuitId: item.circuitId || null,
           circuitTitle: item.circuitTitle || '',
           circuitSeries: item.circuitSeries || 1
@@ -2026,20 +1835,9 @@ function startWorkoutSession(clientRoutines, bookingMeta = null) {
   // Save session state to localStorage for persistence recovery
   saveActiveSessionToCache();
 
-  // Open overlay and bar
-  const bar = document.getElementById('active-session-bar');
-  bar.classList.remove('hidden', 'is-idle');
-  delete bar.dataset.nextBookingId;
-  document.getElementById('active-session-overlay').classList.remove('hidden');
-
-  // Set labels
-  renderActiveSessionBarLabels();
-
-  // Start timer interval
-  startSessionTimer();
-
-  // Render group board
-  renderActiveGroupBoard();
+  // Set URL path to open the session overlay and active client tab
+  const sId = activeSession.id || generateShortUUID();
+  navigateToPath(`/session/${sId}/client/${activeSession.activeClientId}`);
 }
 
 function startSessionTimer() {
@@ -2158,7 +1956,7 @@ function logQuickSignal(tag, exId) {
   const client = state.clients.find(c => c.id === clientId);
 
   const newFeedback = {
-    id: 'u-' + Date.now(),
+    id: generateShortUUID(),
     clientId,
     clientName: client ? client.name : 'Unknown Client',
     date: new Date().toISOString(),
@@ -2204,9 +2002,9 @@ function getExerciseSignalColor(clientId, exerciseName) {
 }
 
 // Fold the flat current-exercise list into render units: consecutive exercises sharing a
-// circuitId collapse into one { type:'circuit', ... } unit (a circuit is in focus / completed
+// circuitId collapse into one { type:'circuit', ... } unit (a superset is in focus / completed
 // if any / all of its exercises are), while ungrouped exercises pass through untouched.
-function buildCircuitUnits(list) {
+function buildSupersetUnits(list) {
   const units = [];
   list.forEach(item => {
     if (item.circuitId) {
@@ -2233,9 +2031,9 @@ function buildCircuitUnits(list) {
   return units;
 }
 
-// The circuit card's "Complete round" button: advance the round counter until the last round,
-// then mark every exercise in the circuit done and move the active pointer past the group.
-function completeCircuitRound(circuitId) {
+// The superset card's "Complete round" button: advance the round counter until the last round,
+// then mark every exercise in the superset done and move the active pointer past the group.
+function completeSupersetRound(circuitId) {
   if (!activeSession) return;
   const cs = activeSession.clientRoutines[activeSession.activeClientId];
   if (!cs) return;
@@ -2297,9 +2095,7 @@ function renderActiveGroupBoard() {
       `;
       
       tab.addEventListener('click', () => {
-        activeSession.activeClientId = pId;
-        saveActiveSessionToCache();
-        renderActiveGroupBoard();
+        navigateToPath(`/session/${activeSession.id}/client/${pId}`);
       });
       
       tabsContainer.appendChild(tab);
@@ -2313,8 +2109,8 @@ function renderActiveGroupBoard() {
   const alertText = document.getElementById('clipboard-client-notes-text');
   const activeClient = state.clients.find(c => c.id === activeClientId);
   if (alertBanner && activeClient) {
-    if (activeClient.notes) {
-      alertText.textContent = activeClient.notes;
+    if (activeClient.hasInjury && (activeClient.injury || activeClient.notes)) {
+      alertText.textContent = activeClient.injury || activeClient.notes;
       alertBanner.classList.remove('hidden');
     } else {
       alertBanner.classList.add('hidden');
@@ -2388,9 +2184,9 @@ function renderActiveGroupBoard() {
       };
     });
 
-    // Fold consecutive exercises that share a circuitId into a single circuit unit; ungrouped
-    // exercises stay as their own 'current' cards. Circuits render one card per group.
-    const renderUnits = buildCircuitUnits(currentExList);
+    // Fold consecutive exercises that share a circuitId into a single superset/giantset unit; ungrouped
+    // exercises stay as their own 'current' cards. Supersets render one card per group.
+    const renderUnits = buildSupersetUnits(currentExList);
     const allDeckItems = [...pastExList, ...renderUnits];
     allDeckItems.forEach(item => {
       const card = document.createElement('div');
@@ -2433,11 +2229,12 @@ function renderActiveGroupBoard() {
           renderActiveGroupBoard();
         });
       } else if (item.type === 'circuit') {
-        // Circuit card render lives in components/circuitCard.js
+        // Superset / Giant Set card render lives in components/supersetCard.js
         const round = (activeClientState.circuitRounds && activeClientState.circuitRounds[item.circuitId]) || 1;
-        renderCircuitCard(card, item, {
+        renderSupersetCard(card, item, {
           round,
           activeClientId,
+          activeClientState,
           pastExpanded,
           isFutureSession,
           t,
@@ -2445,7 +2242,12 @@ function renderActiveGroupBoard() {
           getExerciseSignalColor,
           logQuickSignal,
           openFeedbackModal,
-          completeCircuitRound,
+          completeSupersetRound,
+          saveSessionState: () => {
+            saveActiveSessionToCache();
+            saveToLocalStorage();
+            renderActiveGroupBoard();
+          },
           onFocus: (index) => {
             activeClientState.activeExerciseIndex = index;
             activeSession.expandedPastId = null;
@@ -2521,13 +2323,16 @@ function setupActiveSession() {
 
   // Minimize panel trigger
   document.getElementById('btn-collapse-session').addEventListener('click', () => {
-    document.getElementById('active-session-overlay').classList.add('hidden');
+    navigateToPath('/clients');
+    focusSessionsColumn('today', 'smooth');
   });
 
   // Expand panel trigger
   document.getElementById('btn-expand-session').addEventListener('click', (e) => {
     e.stopPropagation();
-    document.getElementById('active-session-overlay').classList.remove('hidden');
+    const activeClientId = activeSession ? activeSession.activeClientId || activeSession.participants[0] : '';
+    const sessionId = activeSession ? activeSession.id || 'session' : 'session';
+    navigateToPath(`/session/${sessionId}/client/${activeClientId}`);
   });
 
   // The entire bar is the primary tap target — not just the chevron. Active sessions
@@ -2535,7 +2340,9 @@ function setupActiveSession() {
   const sessionBar = document.getElementById('active-session-bar');
   sessionBar.addEventListener('click', () => {
     if (activeSession) {
-      document.getElementById('active-session-overlay').classList.remove('hidden');
+      const activeClientId = activeSession.activeClientId || activeSession.participants[0];
+      const sessionId = activeSession.id || 'session';
+      navigateToPath(`/session/${sessionId}/client/${activeClientId}`);
     } else if (sessionBar.dataset.nextBookingId) {
       launchClipboardDirectly(sessionBar.dataset.nextBookingId);
     }
@@ -2608,7 +2415,7 @@ function setupActiveSession() {
     // isn't in the library is a free-text entry — inject it as an ad-hoc, session-only exercise.
     let baseEx = state.exercises.find(e => e.name.toLowerCase() === typed.toLowerCase());
     if (!baseEx) {
-      baseEx = { id: 'ex-custom-' + Date.now(), name: typed, category: 'Custom', instructions: '' };
+      baseEx = { id: generateShortUUID(), name: typed, category: 'Custom', instructions: '' };
     }
     const exId = baseEx.id;
 
@@ -2750,7 +2557,7 @@ function setupActiveSession() {
     const client = state.clients.find(c => c.id === clientId);
     
     const newFeedback = {
-      id: 'u-' + Date.now(),
+      id: generateShortUUID(),
       clientId: clientId,
       clientName: client ? client.name : 'Unknown Client',
       date: new Date().toISOString(),
@@ -2790,9 +2597,13 @@ function cancelWorkoutSession() {
   }
   activeSession = null;
   localStorage.removeItem('librept_active_session');
-  document.getElementById('active-session-overlay').classList.add('hidden');
+  
   // Bar drops back to idle — referring to whatever is next up — rather than disappearing
   renderIdleSessionBar();
+
+  // Redirect to clients view
+  navigateToPath('/clients');
+  focusSessionsColumn('today', 'smooth');
 }
 
 function finishWorkoutSession() {
@@ -2859,7 +2670,7 @@ function finishWorkoutSession() {
     // Save individual history entry if client actually did exercises
     if (clientCompletedExercises.length > 0) {
       const clientLog = {
-        id: `log-${Date.now()}-${pId}`,
+        id: generateShortUUID(),
         clientId: pId,
         clientName: client.name,
         routineName: clientState.routineName,
@@ -2885,7 +2696,7 @@ function finishWorkoutSession() {
   renderGlobalHistory();
 
   // Direct to History view to show logged training
-  switchView('history');
+  navigateToPath('/history');
 }
 
 // --- LOCAL STORAGE SESSION RECOVERY ---
@@ -3443,6 +3254,11 @@ function renderSessionsTitleBar() {
     dateEl.textContent = dateStr;
   }
 
+  const separatorEl = document.querySelector('.calendar-title-separator');
+  if (separatorEl) {
+    separatorEl.style.display = isUpcoming ? 'none' : 'inline';
+  }
+
   // The tag marks "you are here now" — showing it on every column would make it meaningless
   tagEl.textContent = `(${t('today')})`;
   tagEl.classList.toggle('hidden', day !== 'today');
@@ -3469,8 +3285,26 @@ function focusSessionsColumn(day, behavior = 'smooth') {
   focusedSessionDay = day;
   renderSessionsTitleBar();
 
+  // Update URL path to reflect the focused day's ISO date string
+  const isoDate = getISODateForColumn(day);
+  const targetPath = `/sessions/${isoDate}`;
+  if (window.location.pathname !== targetPath) {
+    window.history.pushState(null, '', targetPath);
+  }
+
   // Dashboard may be hidden (display:none) when navigating in — no layout to scroll yet
-  if (grid.offsetParent === null) return;
+  if (grid.offsetParent === null) {
+    setTimeout(() => {
+      const g = getSessionsGrid();
+      const c = document.getElementById(`${day}-sessions-column`);
+      if (g && c && g.offsetParent !== null) {
+        const left = g.scrollLeft + (c.getBoundingClientRect().left - g.getBoundingClientRect().left);
+        sessionsProgrammaticScrollUntil = Date.now() + SESSION_SCROLL_SETTLE_MS;
+        g.scrollTo({ left, behavior });
+      }
+    }, 50);
+    return;
+  }
 
   // Align the column to the grid's start edge without scrolling any ancestor
   const left = grid.scrollLeft + (col.getBoundingClientRect().left - grid.getBoundingClientRect().left);
@@ -3506,6 +3340,13 @@ function detectFocusedSessionsColumn() {
   if (closest !== focusedSessionDay) {
     focusedSessionDay = closest;
     renderSessionsTitleBar();
+
+    // Update URL path to reflect the swiped-to day's ISO date string
+    const isoDate = getISODateForColumn(closest);
+    const targetPath = `/sessions/${isoDate}`;
+    if (window.location.pathname !== targetPath) {
+      window.history.pushState(null, '', targetPath);
+    }
   }
 }
 
@@ -3535,6 +3376,8 @@ function renderSessions() {
   const upcomingContainer = document.getElementById('upcoming-sessions-list');
   
   if (!todayContainer || !tomorrowContainer) return;
+  
+  renderSessionsTitleBar();
   
   if (yesterdayContainer) yesterdayContainer.innerHTML = '';
   todayContainer.innerHTML = '';

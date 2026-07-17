@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <base href="/">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>LibrePT - Personal Trainer Dashboard</title>
@@ -36,19 +37,46 @@
         <i class="fa-solid fa-dumbbell logo-icon"></i>
         <h1>LibrePT</h1>
       </div>
+      
+      <!-- Session Timer (only visible when session is active) -->
+      <div id="header-session-timer-block" class="session-timer-block hidden" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+        <i class="fa-solid fa-stopwatch text-cyan"></i>
+        <span id="overlay-session-duration" style="font-weight: 700; font-family: monospace; font-size: 15px; color: var(--accent-cyan);">00:00</span>
+      </div>
+
       <div class="header-actions">
-        <select id="lang-switcher" class="form-control" style="width: 70px; height: 36px; padding: 2px 6px; font-size: 13px; font-weight: 700; border-radius: 6px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); color: var(--text-color); cursor: pointer;" aria-label="Switch Language / Zamenjaj jezik">
-          <option value="en">EN</option>
-          <option value="sl">SL</option>
-        </select>
-        <select id="theme-switcher" class="form-control" style="width: 82px; height: 36px; padding: 2px 6px; font-size: 13px; font-weight: 700; border-radius: 6px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); color: var(--text-main); cursor: pointer;" aria-label="Theme / Tema">
-          <option value="dark">Dark</option>
-          <option value="light">Light</option>
-          <option value="red">Red</option>
-        </select>
-        <button id="backup-btn" class="icon-btn" aria-label="Database Backup & Restore">
-          <i class="fa-solid fa-cloud-arrow-up"></i>
-        </button>
+        <!-- Normal view actions -->
+        <div class="normal-header-actions" style="display: flex; align-items: center; gap: 8px;">
+          <select id="lang-switcher" class="form-control" style="width: 70px; height: 36px; padding: 2px 6px; font-size: 13px; font-weight: 700; border-radius: 6px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); color: var(--text-color); cursor: pointer;" aria-label="Switch Language / Zamenjaj jezik">
+            <option value="en">EN</option>
+            <option value="sl">SL</option>
+          </select>
+          <select id="theme-switcher" class="form-control" style="width: 82px; height: 36px; padding: 2px 6px; font-size: 13px; font-weight: 700; border-radius: 6px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); color: var(--text-main); cursor: pointer;" aria-label="Theme / Tema">
+            <option value="dark">Dark</option>
+            <option value="light">Light</option>
+            <option value="red">Red</option>
+          </select>
+          <button id="backup-btn" class="icon-btn" aria-label="Database Backup & Restore">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+          </button>
+        </div>
+
+        <!-- Active Session actions -->
+        <div class="active-session-header-actions hidden" style="display: flex; align-items: center; gap: 8px;">
+          <div class="session-menu-wrap">
+            <button id="btn-session-menu" class="icon-btn" style="background: rgba(255,255,255,0.05);" aria-label="Session options" aria-haspopup="true" aria-expanded="false">
+              <i class="fa-solid fa-ellipsis-vertical"></i>
+            </button>
+            <div id="session-menu" class="session-menu hidden" role="menu">
+              <button id="btn-delete-session" class="session-menu-item session-menu-item-danger" role="menuitem">
+                <i class="fa-solid fa-trash-can"></i> Delete Session
+              </button>
+            </div>
+          </div>
+          <button id="btn-collapse-session" class="icon-btn" style="background: rgba(255,255,255,0.05);" aria-label="Minimize Active Session">
+            <i class="fa-solid fa-chevron-down"></i>
+          </button>
+        </div>
       </div>
     </div>
   </header>
@@ -66,6 +94,7 @@
         <h3 id="calendar-title">
           <i class="fa-solid fa-calendar-days text-cyan"></i>
           <span id="calendar-title-date"></span>
+          <span class="calendar-title-separator">, </span>
           <span id="calendar-title-weekday">Today</span>
           <span id="calendar-title-weekday-short">Today</span>
           <span id="calendar-title-tag" class="sessions-today-tag hidden">(Today)</span>
@@ -77,36 +106,31 @@
           <i class="fa-solid fa-rotate"></i> <span id="btn-sync-calendar-text">Sync Data</span>
         </button>
       </div>
+      
       <div class="sessions-categories-grid mb-6" id="sessions-categories-grid" role="region" aria-label="Sessions Schedule">
-        <!-- Yesterday's Category Column -->
         <div class="sessions-category-column" id="yesterday-sessions-column">
-          <div id="yesterday-sessions-list" class="stack-list">
-            <!-- Injected via JS -->
-          </div>
-        </div>
-
-        <!-- Today's Category Column -->
-        <div class="sessions-category-column" id="today-sessions-column">
-          <div id="today-sessions-list" class="stack-list">
-            <!-- Injected via JS -->
-          </div>
-        </div>
-        
-        <!-- Tomorrow's Category Column -->
-        <div class="sessions-category-column" id="tomorrow-sessions-column">
-          <div id="tomorrow-sessions-list" class="stack-list">
-            <!-- Injected via JS -->
-          </div>
-        </div>
-
-        <!-- Upcoming Category Column -->
-        <div class="sessions-category-column" id="upcoming-sessions-column">
-          <h4 class="sessions-column-header text-emerald" style="color: #34d399;">
-            <i class="fa-solid fa-calendar-days"></i> <span id="label-sessions-upcoming" data-i18n="upcoming">Upcoming</span>
+          <h4 class="sessions-column-header text-muted">
+            <i class="fa-solid fa-history"></i> Yesterday
           </h4>
-          <div id="upcoming-sessions-list" class="stack-list">
-            <!-- Injected via JS -->
-          </div>
+          <div id="yesterday-sessions-list" class="stack-list"></div>
+        </div>
+        <div class="sessions-category-column" id="today-sessions-column">
+          <h4 class="sessions-column-header text-emerald" style="color: #34d399;">
+            <i class="fa-solid fa-calendar-check"></i> Today
+          </h4>
+          <div id="today-sessions-list" class="stack-list"></div>
+        </div>
+        <div class="sessions-category-column" id="tomorrow-sessions-column">
+          <h4 class="sessions-column-header text-cyan">
+            <i class="fa-solid fa-calendar-plus"></i> Tomorrow
+          </h4>
+          <div id="tomorrow-sessions-list" class="stack-list"></div>
+        </div>
+        <div class="sessions-category-column" id="upcoming-sessions-column">
+          <h4 class="sessions-column-header text-purple">
+            <i class="fa-solid fa-forward"></i> Upcoming
+          </h4>
+          <div id="upcoming-sessions-list" class="stack-list"></div>
         </div>
       </div>
 
@@ -115,7 +139,7 @@
       <!-- Section A: Pending plan modifications (Feedback Loop) -->
       <div class="section-title" style="margin-top: 24px;">
         <h3 id="pending-adjustments-title"><i class="fa-solid fa-bell-concierge text-emerald mr-1"></i> Pending Plan Adjustments</h3>
-        <span class="badge" id="badge-adjustments-count">2</span>
+        <span class="badge" id="badge-adjustments-count">0</span>
       </div>
       <div id="dashboard-adjustments-list" class="stack-list mb-6">
         <!-- Injected via JS - cards with feedback tags to update programs -->
@@ -129,21 +153,21 @@
           <i class="fa-solid fa-user-plus"></i> Add Client
         </button>
       </div>
-      
+
       <div class="search-bar-container">
         <i class="fa-solid fa-magnifying-glass search-icon"></i>
         <input type="text" id="search-clients" placeholder="Search clients..." class="search-input">
       </div>
-      
+
       <div id="clients-list" class="grid-list">
         <!-- Injected via JS -->
       </div>
     </section>
 
-    <!-- VIEW: Client Detail -->
+    <!-- VIEW: Client Detail View -->
     <section id="view-client-detail" class="app-view">
       <div class="view-header-back">
-        <button id="btn-back-to-clients" class="back-btn">
+        <button id="btn-back-to-clients" class="btn secondary-btn btn-sm">
           <i class="fa-solid fa-arrow-left"></i> Back
         </button>
         <h2 id="detail-client-name">Client Details</h2>
@@ -179,62 +203,31 @@
         </div>
       </div>
 
-      <div class="section-title">
-        <h3>Weight Tracking</h3>
-        <button id="btn-add-weight" class="btn secondary-btn btn-xs">
-          <i class="fa-solid fa-plus"></i> Log Weight
-        </button>
-      </div>
-      
-      <div class="weight-chart-container card glassmorphic">
-        <div id="weight-history-chart" class="simple-chart">
-          <!-- Rendered via JS -->
-        </div>
-        <div id="weight-history-table-container">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Weight</th>
-                <th>Change</th>
-              </tr>
-            </thead>
-            <tbody id="weight-history-tbody">
-              <!-- Injected via JS -->
-            </tbody>
-          </table>
-        </div>
-      </div>
+
 
       <div class="section-title">
-        <h3>Client Session Logs</h3>
+        <h3>Training History</h3>
       </div>
-      <div id="client-history-list" class="stack-list">
-        <!-- Injected via JS -->
-      </div>
+      <div class="history-list" id="client-history-list"></div>
     </section>
 
-    <!-- VIEW: Routines -->
+    <!-- VIEW: Routines Listing -->
     <section id="view-routines" class="app-view">
       <div class="view-header">
-        <h2>Routines</h2>
+        <h2>Routines Database</h2>
         <button id="btn-add-routine" class="btn primary-btn btn-sm">
-          <i class="fa-solid fa-circle-plus"></i> New Routine
+          <i class="fa-solid fa-plus"></i> Create Template
         </button>
       </div>
-      <p class="view-desc">Select or edit workout routines. Launch them with individual or group sessions.</p>
-      
-      <div id="routines-list" class="grid-list">
-        <!-- Injected via JS -->
-      </div>
+      <div class="routines-grid" id="routines-list"></div>
     </section>
 
-    <!-- VIEW: Exercises -->
+    <!-- VIEW: Exercises Listing -->
     <section id="view-exercises" class="app-view">
       <div class="view-header">
         <h2>Exercise Library</h2>
         <button id="btn-add-exercise" class="btn primary-btn btn-sm">
-          <i class="fa-solid fa-plus"></i> Add Custom
+          <i class="fa-solid fa-plus"></i> Add Exercise
         </button>
       </div>
       
@@ -418,10 +411,7 @@
         <input type="text" id="client-name" required placeholder="e.g. Jane Doe" class="form-control">
       </div>
       
-      <div class="form-group">
-        <label for="client-weight">Current Weight (kg)</label>
-        <input type="number" step="0.1" id="client-weight" placeholder="e.g. 68.5" class="form-control">
-      </div>
+
       
       <div class="form-group">
         <label for="client-goals">Fitness Goals</label>
@@ -440,29 +430,7 @@
     </form>
   </dialog>
 
-  <!-- DIALOG MODAL: Log Weight -->
-  <dialog id="dialog-weight" class="dialog-modal card glassmorphic">
-    <div class="modal-header">
-      <h3>Log Client Weight</h3>
-      <button class="modal-close-btn" aria-label="Close weight modal"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-    <form id="form-weight" method="dialog" class="modal-form">
-      <div class="form-group">
-        <label for="weight-log-value">Weight (kg) *</label>
-        <input type="number" step="0.1" id="weight-log-value" required class="form-control" autofocus>
-      </div>
-      
-      <div class="form-group">
-        <label for="weight-log-date">Date</label>
-        <input type="date" id="weight-log-date" required class="form-control">
-      </div>
-      
-      <div class="modal-actions">
-        <button type="button" class="btn secondary-btn modal-cancel">Cancel</button>
-        <button type="submit" class="btn primary-btn">Save Entry</button>
-      </div>
-    </form>
-  </dialog>
+
 
   <!-- DIALOG MODAL: Add / Edit Routine -->
   <dialog id="dialog-routine" class="dialog-modal card glassmorphic wide-modal">
