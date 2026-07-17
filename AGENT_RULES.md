@@ -29,6 +29,8 @@ Every response and tool action must drive measurable, continuous progress toward
 ### A. Direct Execution & Git Flow
 1. **Direct Application**: Apply edits directly and cleanly, always choosing the best architectural option without asking questions or waiting for clarification.
 2. **Git Commit Control**: Allow the user to control review and baseline checkpoints via git status/diff and commits.
+3. **Trunk-based development**: Work directly on `main` — it is the trunk. Do **not** create feature branches; make small, coherent, verified commits straight to `main`. `main` must stay releasable, because the GitHub Pages deploy (`.github/workflows/deploy.yml`) runs on every push to `main`.
+4. **Never push — the user pushes manually.** Commit to the trunk, then stop; the user always does the `git push` themselves (their push is the continuous-deployment trigger). Do not run `git push`.
 
 ### B. Evaluate Changes, Call Out Gaps & Propose Opportunities
 1. **Evaluate User Changes**: Explicitly evaluate user modifications and input, highlighting how they refine the LibrePT domain model or improve real-world gym ergonomics.
