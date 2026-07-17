@@ -58,6 +58,10 @@ def run_build():
     # The runtime app lives under src/. Publish that whole tree (index.html, app.js,
     # index.css, mockData.js, manifest.json, sw.js, components/, icons/) flattened to the
     # dist root so relative paths resolve the same as in local dev. Mirrors deploy.yml.
+    #
+    # Note: this local dist keeps <base href="/"> because it is served at the domain root.
+    # The GitHub Pages deploy (deploy.yml) additionally rewrites <base> to the /<repo>/
+    # sub-path, since a project site is served under stutek.github.io/<repo>/, not the root.
     src_dir = 'src'
     if not os.path.isdir(src_dir):
         print(f"  Warning: {src_dir}/ not found!")

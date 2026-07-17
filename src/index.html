@@ -38,12 +38,6 @@
         <h1>LibrePT</h1>
       </div>
       
-      <!-- Session Timer (only visible when session is active) -->
-      <div id="header-session-timer-block" class="session-timer-block hidden" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
-        <i class="fa-solid fa-stopwatch text-cyan"></i>
-        <span id="overlay-session-duration" style="font-weight: 700; font-family: monospace; font-size: 15px; color: var(--accent-cyan);">00:00</span>
-      </div>
-
       <div class="header-actions">
         <!-- Normal view actions -->
         <div class="normal-header-actions" style="display: flex; align-items: center; gap: 8px;">
@@ -56,8 +50,16 @@
             <option value="light">Light</option>
             <option value="red">Red</option>
           </select>
-          <button id="backup-btn" class="icon-btn" aria-label="Database Backup & Restore">
-            <i class="fa-solid fa-cloud-arrow-up"></i>
+          <button id="backup-btn" class="icon-btn sync-backup-btn" aria-label="Sync & Backup Data">
+            <!-- Cloud + recycle: this one control now covers both syncing session data and
+                 backup/restore (the separate home-page Sync button was merged in here). -->
+            <span class="cloud-sync-icon" aria-hidden="true">
+              <i class="fa-solid fa-cloud"></i>
+              <i class="fa-solid fa-arrows-rotate"></i>
+            </span>
+            <!-- Mock GitHub-style ahead/behind counters (local edits to push / remote to pull),
+                 filled in by renderSyncBadge(); hidden once fully in sync. -->
+            <span id="sync-badge" class="sync-badge hidden"></span>
           </button>
         </div>
 
@@ -101,9 +103,6 @@
         </h3>
         <button id="btn-sessions-next" class="sessions-nav-arrow" type="button" aria-label="Tomorrow" title="Tomorrow">
           <i class="fa-solid fa-chevron-right"></i>
-        </button>
-        <button id="btn-sync-calendar" class="btn secondary-btn btn-xs" style="margin-left: auto; gap: 6px; display: inline-flex; align-items: center;">
-          <i class="fa-solid fa-rotate"></i> <span id="btn-sync-calendar-text">Sync Data</span>
         </button>
       </div>
       
@@ -262,6 +261,20 @@
         <!-- Injected via JS -->
       </div>
     </section>
+
+    <!-- VIEW: Not Found — shown for deep-link URLs that match no route. Lives inside
+         #main-content like every other view, so the omnipresent header stays in place. -->
+    <section id="view-error" class="app-view">
+      <div class="error-view">
+        <i class="fa-solid fa-compass error-view-icon"></i>
+        <h2 id="error-view-title">Page not found</h2>
+        <p class="view-desc">This link doesn't point to a session, client or view in LibrePT.</p>
+        <p class="error-view-path"><code id="error-view-path"></code></p>
+        <button id="btn-error-home" class="btn primary-btn btn-sm">
+          <i class="fa-solid fa-house"></i> Back to dashboard
+        </button>
+      </div>
+    </section>
   </main>
 
   <!-- Bottom Navigation Bar -->
@@ -308,35 +321,19 @@
 
   <!-- FULL SCREEN OVERLAY: Active Workout Clipboard Dashboard -->
   <div id="active-session-overlay" class="active-session-overlay hidden">
-    <header class="app-header session-overlay-header" style="border-bottom: 1px solid var(--border-color); width: 100%; box-sizing: border-box;">
-      <div class="header-container" style="display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 16px; box-sizing: border-box;">
-        <div class="logo-area" id="logo-area-clipboard" style="cursor: pointer;">
-          <i class="fa-solid fa-dumbbell logo-icon"></i>
-          <h1>LibrePT</h1>
-        </div>
-        <div class="session-timer-block" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
-          <i class="fa-solid fa-stopwatch text-cyan"></i>
-          <span id="overlay-session-duration" style="font-weight: 700; font-family: monospace; font-size: 15px; color: var(--accent-cyan);">00:00</span>
-        </div>
-        <div class="header-actions">
-          <!-- Destructive Delete Session lives behind an overflow menu, away from the
-               primary Complete action, so it can't be mis-tapped mid-set. -->
-          <div class="session-menu-wrap">
-            <button id="btn-session-menu" class="icon-btn" style="background: rgba(255,255,255,0.05);" aria-label="Session options" aria-haspopup="true" aria-expanded="false">
-              <i class="fa-solid fa-ellipsis-vertical"></i>
-            </button>
-            <div id="session-menu" class="session-menu hidden" role="menu">
-              <button id="btn-delete-session" class="session-menu-item session-menu-item-danger" role="menuitem">
-                <i class="fa-solid fa-trash-can"></i> Delete Session
-              </button>
-            </div>
-          </div>
-          <button id="btn-collapse-session" class="icon-btn" style="background: rgba(255,255,255,0.05);" aria-label="Minimize Active Session">
-            <i class="fa-solid fa-chevron-down"></i>
-          </button>
-        </div>
+    <!-- Session context line: scheduled date, start time and location (e.g.
+         "2026-07-17 10:00 Trib gym base"), plus the live countdown to the session's end.
+         The session's own controls (minimize, delete) live in the omnipresent .app-header
+         above; the overlay no longer carries a duplicate header of its own. -->
+    <div class="session-title-bar">
+      <div class="session-title-block">
+        <h3 id="session-title-text">Live Session</h3>
       </div>
-    </header>
+      <div class="session-timer-block">
+        <i class="fa-solid fa-stopwatch text-cyan"></i>
+        <span id="overlay-session-duration">00:00</span>
+      </div>
+    </div>
 
     <!-- Client selector tabs for sub-second plan switching -->
     <div id="active-session-client-tabs" class="client-tabs-bar">
@@ -730,13 +727,23 @@
   <!-- DIALOG MODAL: Database Import/Export -->
   <dialog id="dialog-backup" class="dialog-modal card glassmorphic">
     <div class="modal-header">
-      <h3>Data Backup Center</h3>
-      <button class="modal-close-btn" aria-label="Close backup modal"><i class="fa-solid fa-xmark"></i></button>
+      <h3>Sync &amp; Backup Center</h3>
+      <button class="modal-close-btn" aria-label="Close sync & backup modal"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div class="modal-body-scroll">
-      <p class="dialog-desc">LibrePT stores your logs directly on this device. You can download a backup file to keep your history safe, or import it to sync with another phone.</p>
-      
+      <p class="dialog-desc">LibrePT stores your logs directly on this device. Sync the latest session schedule, download a backup file to keep your history safe, or import it to move to another phone.</p>
+
       <div class="backup-actions">
+        <div class="action-card card">
+          <i class="fa-solid fa-arrows-rotate backup-icon-large text-cyan"></i>
+          <h4>Sync Session Data</h4>
+          <p>Pull the latest bookings and session schedule from your connected calendar.</p>
+          <button id="btn-sync-data" class="btn primary-btn w-full">
+            <i class="fa-solid fa-arrows-rotate"></i> <span id="btn-sync-data-text">Sync Data</span>
+          </button>
+          <p id="sync-status" class="status-msg"></p>
+        </div>
+
         <div class="action-card card">
           <i class="fa-solid fa-file-export backup-icon-large text-emerald"></i>
           <h4>Export Data Backup</h4>

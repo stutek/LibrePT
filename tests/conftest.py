@@ -2,6 +2,7 @@
 # Fixtures live here so both the e2e (browser) tests and the unit (static) tests can use them
 # without duplicating setup. Applies to every test under tests/ (including subfolders).
 
+import sys
 import socket
 import time
 import subprocess
@@ -27,16 +28,17 @@ def is_port_open(port):
 
 @pytest.fixture(scope="session")
 def local_server():
-    """Serve src/ AS the web root on :8081 for the browser tests (matches the flattened deploy).
-    Only started when an e2e test requests it; reuses an already-running server if present."""
+    """Serve the app on :8081 via serve.py, which mounts src/ under the /LibrePT/ sub-path just
+    like GitHub Pages (base rewrite + SPA fallback). Browser tests therefore run against the real
+    production base path. Only started when an e2e test requests it; reuses a running server."""
     proc = None
     if not is_port_open(8081):
         proc = subprocess.Popen(
-            ["python3", "-m", "http.server", "-d", str(SRC_DIR), "8081"],
+            [sys.executable, str(REPO_ROOT / "serve.py"), "--port", "8081"],
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
         )
         time.sleep(1.5)  # give it a moment to bind
-    yield "http://localhost:8081"
+    yield "http://localhost:8081/LibrePT/"
     if proc:
         proc.terminate()
         proc.wait()

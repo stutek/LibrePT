@@ -192,6 +192,42 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* Not-found (404) view — centred in the content area, below the omnipresent header. */
+.error-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  padding: 48px 16px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.error-view-icon {
+  font-size: 44px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.error-view-path {
+  margin: 0;
+  word-break: break-all;
+}
+
+.error-view-path code {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent-cyan);
+  background: rgba(0, 0, 0, 0.3);
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.error-view .btn {
+  margin-top: 8px;
+}
+
 .view-header {
   display: flex;
   align-items: center;
@@ -302,6 +338,56 @@ body {
 .icon-btn:hover {
   background: var(--border-color);
 }
+
+/* Cloud + recycle composite for the merged Sync & Backup button: a cloud with small sync
+   arrows overlaid on its body, so one control reads as both "cloud backup" and "sync". */
+.cloud-sync-icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.cloud-sync-icon .fa-cloud {
+  font-size: 18px;
+}
+.cloud-sync-icon .fa-arrows-rotate {
+  position: absolute;
+  left: 50%;
+  top: 58%;
+  transform: translate(-50%, -50%);
+  font-size: 9px;
+  color: var(--accent-cyan);
+}
+
+/* When there are pending changes the cloud button grows into a pill to seat the ahead/behind
+   counters beside the icon; fully synced, the badge hides and it reads as a round icon again. */
+.sync-backup-btn {
+  width: auto;
+  min-width: 38px;
+  border-radius: 999px;
+  padding: 0 10px;
+  gap: 6px;
+}
+.sync-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+.sync-badge.hidden { display: none; }
+.sync-badge .sync-ahead,
+.sync-badge .sync-behind {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.sync-badge .sync-ahead { color: var(--success); }     /* local edits to push (ahead) */
+.sync-badge .sync-behind { color: var(--accent-cyan); } /* remote changes to pull (behind) */
+.sync-badge i { font-size: 9px; }
 
 .back-btn {
   background: transparent;
@@ -955,15 +1041,17 @@ body {
 /* Fullscreen Active Workout Overlay Sheet */
 .active-session-overlay {
   position: fixed;
-  top: 0;
+  /* Start below the omnipresent app header so it stays visible in the session view too,
+     rather than being covered by a full-screen overlay. */
+  top: var(--hdr-height);
   left: 0;
   right: 0;
   /* Height tracks the *visual* viewport (dvh), not the layout viewport. With `bottom: 0`
      the overlay sized to the layout viewport, so on mobile the footer and the last exercise
      card sat behind the browser's URL bar — unreachable once an expanded card made the deck
      tall enough to reach that zone. 100vh is the fallback for browsers without dvh support. */
-  height: 100vh;
-  height: 100dvh;
+  height: calc(100vh - var(--hdr-height));
+  height: calc(100dvh - var(--hdr-height));
   background: var(--bg-color);
   z-index: 120;
   display: flex;
@@ -992,13 +1080,13 @@ body {
   to { transform: translateY(0); }
 }
 
-.session-overlay-header {
-  padding: 16px;
-  padding-top: calc(16px + env(safe-area-inset-top, 0px));
+.session-title-bar {
+  padding: 12px 16px;
   background: var(--card-bg);
   border-bottom: 1px solid var(--card-border);
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 16px;
 }
 
@@ -2006,9 +2094,6 @@ textarea.form-control {
   #calendar-title-date {
     font-size: 11px;
   }
-  #btn-sync-calendar-text {
-    display: none; /* icon-only sync on mobile */
-  }
   /* Sweaty-hands tap target: wide enough to hit without looking */
   .sessions-nav-arrow {
     width: 52px;
@@ -2203,7 +2288,7 @@ textarea.form-control {
 .superset-title > i { color: var(--accent-cyan); }
 .superset-round-badge {
   font-family: var(--font-sans);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 800;
   color: #000;
   background: var(--accent-cyan);
@@ -2306,7 +2391,7 @@ textarea.form-control {
 }
 .deck-card-compact-target {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--accent-cyan);
   font-weight: 700;
   flex-shrink: 0;
@@ -2327,8 +2412,8 @@ textarea.form-control {
   color: var(--accent-cyan);
 }
 .deck-card-status {
-  font-size: 8px;
-  padding: 2px 5px;
+  font-size: 11px;
+  padding: 2px 7px;
   font-weight: 700;
 }
 .deck-card-status-upcoming {

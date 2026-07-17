@@ -1,8 +1,17 @@
 // src/data/sessions.js — seed bookings; times are generated relative to "now" so the demo always looks live.
+
+// The three venues this trainer runs sessions at. Referenced by every booking so the
+// session view can show a "date time location" context line (e.g. "2026-07-17 10:00 Trib gym base").
+export const LOCATIONS = {
+  GYM: 'Trib gym base',
+  PLAYGROUND: 'playground outside',
+  PARK: 'city park'
+};
+
 export const DEFAULT_SESSIONS = (() => {
   const now = new Date();
   const currentHour = Math.min(18, Math.max(3, now.getHours()));
-  
+
   // 24-hour HH:MM (ISO-style), e.g. "14:00"
   const formatHour = (h) => {
     const rawH = (h + 24) % 24;
@@ -14,6 +23,7 @@ export const DEFAULT_SESSIONS = (() => {
       id: 's00f2e3d',
       time: `${formatHour(currentHour - 3)} - ${formatHour(currentHour - 2)}`,
       title: 'Early Bird Strength',
+      location: LOCATIONS.GYM,
       participants: ['c4d6c3b5', 'c6f4a597'],
       routineId: 'r10d5e6f',
       maxCapacity: 4,
@@ -24,6 +34,7 @@ export const DEFAULT_SESSIONS = (() => {
       id: 's01f2e3d',
       time: `${formatHour(currentHour - 1)} - ${formatHour(currentHour + 1)}`,
       title: 'Group Strength & Conditioning',
+      location: LOCATIONS.GYM,
       participants: ['c1a9f0e2', 'c2b8e1d3'],
       routineId: 'r12d5e6f',
       maxCapacity: 7,
@@ -33,6 +44,7 @@ export const DEFAULT_SESSIONS = (() => {
       id: 's07f2e3d',
       time: `${formatHour(currentHour - 2)} - ${formatHour(currentHour - 1)}`,
       title: 'Strength & Longevity Focus',
+      location: LOCATIONS.GYM,
       participants: ['c8b28799'],
       routineId: 'r14d5e6f',
       maxCapacity: 1,
@@ -43,6 +55,7 @@ export const DEFAULT_SESSIONS = (() => {
       id: 's02f2e3d',
       time: `${formatHour(currentHour)} - ${formatHour(currentHour + 2)}`,
       title: '1:1 Personal Training',
+      location: LOCATIONS.GYM,
       participants: ['c5e5b4a6'],
       routineId: 'r11d5e6f',
       maxCapacity: 1,
@@ -52,6 +65,7 @@ export const DEFAULT_SESSIONS = (() => {
       id: 's03f2e3d',
       time: `${formatHour(currentHour + 2)} - ${formatHour(currentHour + 3)}`,
       title: 'Express Core HIIT',
+      location: LOCATIONS.PLAYGROUND,
       participants: ['c3c7d2c4'],
       routineId: 'r11d5e6f',
       maxCapacity: 2,
@@ -61,6 +75,7 @@ export const DEFAULT_SESSIONS = (() => {
       id: 's08f2e3d',
       time: `${formatHour(currentHour + 3)} - ${formatHour(currentHour + 4)}`,
       title: 'Mobility Flow',
+      location: LOCATIONS.PARK,
       participants: ['c7a39688'],
       routineId: 'r13d5e6f',
       maxCapacity: 2,
@@ -70,6 +85,7 @@ export const DEFAULT_SESSIONS = (() => {
       id: 's09f2e3d',
       time: `${formatHour(currentHour + 4)} - ${formatHour(currentHour + 5)}`,
       title: 'Open Slot (Drop-in)',
+      location: LOCATIONS.GYM,
       participants: [],
       routineId: 'r11d5e6f',
       maxCapacity: 3,
@@ -79,6 +95,7 @@ export const DEFAULT_SESSIONS = (() => {
       id: 's04f2e3d',
       time: '09:00 - 10:00',
       title: 'Morning Conditioning',
+      location: LOCATIONS.PARK,
       participants: ['c1a9f0e2'],
       routineId: 'r12d5e6f',
       maxCapacity: 3,
@@ -88,6 +105,7 @@ export const DEFAULT_SESSIONS = (() => {
       id: 's05f2e3d',
       time: '10:30 - 11:30',
       title: 'Upper Body Strength',
+      location: LOCATIONS.GYM,
       participants: ['c2b8e1d3'],
       routineId: 'r10d5e6f',
       maxCapacity: 4,
@@ -97,6 +115,7 @@ export const DEFAULT_SESSIONS = (() => {
       id: 's06f2e3d',
       time: '11:30 - 12:30',
       title: 'Lunch Express HIIT',
+      location: LOCATIONS.PLAYGROUND,
       participants: ['c3c7d2c4'],
       routineId: 'r12d5e6f',
       maxCapacity: 3,
@@ -106,6 +125,7 @@ export const DEFAULT_SESSIONS = (() => {
       id: 's10f2e3d',
       time: '17:30 - 18:30',
       title: 'Post-Work Cardio',
+      location: LOCATIONS.PARK,
       participants: ['c4d6c3b5'],
       routineId: 'r11d5e6f',
       maxCapacity: 2,
@@ -115,6 +135,7 @@ export const DEFAULT_SESSIONS = (() => {
       id: 's11f2e3d',
       time: '14:00 - 15:00',
       title: 'Strength & Longevity Focus',
+      location: LOCATIONS.GYM,
       participants: ['c8b28799'],
       routineId: 'r14d5e6f',
       maxCapacity: 1,
@@ -124,6 +145,7 @@ export const DEFAULT_SESSIONS = (() => {
       id: 's12f2e3d',
       time: '09:00 - 10:30',
       title: 'Core & Stability',
+      location: LOCATIONS.GYM,
       participants: ['c1a9f0e2'],
       routineId: 'r10d5e6f',
       maxCapacity: 2,
@@ -133,6 +155,7 @@ export const DEFAULT_SESSIONS = (() => {
       id: 's13f2e3d',
       time: '16:00 - 17:00',
       title: 'Mobility & Recovery',
+      location: LOCATIONS.PARK,
       participants: ['c2b8e1d3'],
       routineId: 'r11d5e6f',
       maxCapacity: 3,
@@ -142,6 +165,7 @@ export const DEFAULT_SESSIONS = (() => {
       id: 's14f2e3d',
       time: '15:00 - 16:00',
       title: 'Strength & Longevity Focus',
+      location: LOCATIONS.GYM,
       participants: ['c8b28799'],
       routineId: 'r14d5e6f',
       maxCapacity: 1,
@@ -152,6 +176,7 @@ export const DEFAULT_SESSIONS = (() => {
       id: 's15f2e3d',
       time: '08:00 - 09:30',
       title: 'Lower Body Strength',
+      location: LOCATIONS.GYM,
       participants: ['c3c7d2c4'],
       routineId: 'r11d5e6f',
       maxCapacity: 2,
@@ -161,6 +186,7 @@ export const DEFAULT_SESSIONS = (() => {
       id: 's16f2e3d',
       time: '10:00 - 11:00',
       title: 'HIIT Conditioning',
+      location: LOCATIONS.PLAYGROUND,
       participants: ['c1a9f0e2', 'c2b8e1d3'],
       routineId: 'r10d5e6f',
       maxCapacity: 4,

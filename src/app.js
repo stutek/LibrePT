@@ -328,7 +328,7 @@ function applyTranslations(lang = state.lang || 'en') {
     '#pending-adjustments-title': 'pending_adjustments',
     '#view-clients .view-header h2': 'clients_title',
     '#btn-add-client': 'btn_add_client',
-    '#btn-sync-calendar-text': 'btn_sync_data',
+    '#btn-sync-data-text': 'btn_sync_data',
     
     // Client Detail view
     '#view-client-detail .client-profile-card h4:nth-of-type(1)': 'notes_injuries',
@@ -626,6 +626,11 @@ function init() {
   // Keep the idle bar's "next session" + starts-in countdown fresh even with no other
   // trigger firing (an active session's own 1s tick handles the bar while one is running)
   setInterval(renderIdleSessionBar, 30000);
+
+  // Show the (mock) sync counters, then start counting on-device edits from here — after the
+  // initial seed/render so their saves don't pre-inflate the "ahead" count.
+  renderSyncBadge();
+  syncTrackingReady = true;
 }
 
 function seedMockData() {
@@ -642,6 +647,37 @@ function seedMockData() {
 
 function saveToLocalStorage() {
   localStorage.setItem('librept_db', JSON.stringify(state));
+  // Each on-device edit is one more local change "ahead" of the (mock) remote. Seeding runs
+  // before syncTrackingReady flips on, so the initial data load doesn't inflate the count.
+  if (syncTrackingReady) {
+    mockSyncState.local += 1;
+    renderSyncBadge();
+  }
+}
+
+// Mock GitHub-style sync counters for the header cloud button. `local` = edits made on this
+// device not yet pushed (ahead); `remote` = changes waiting on the server (behind). There is
+// no real backend — these are seeded for the demo and reset to "in sync" once a Sync runs.
+let mockSyncState = { local: 2, remote: 1 };
+let syncTrackingReady = false;
+
+function renderSyncBadge() {
+  const badge = document.getElementById('sync-badge');
+  if (!badge) return;
+  const { local, remote } = mockSyncState;
+  if (local === 0 && remote === 0) {
+    badge.classList.add('hidden');
+    badge.textContent = '';
+    badge.removeAttribute('aria-label');
+    return;
+  }
+  const fmt = (n) => (n > 9 ? '9+' : String(n));
+  badge.classList.remove('hidden');
+  badge.innerHTML =
+    `<span class="sync-ahead"><i class="fa-solid fa-arrow-up"></i>${fmt(local)}</span>` +
+    `<span class="sync-behind"><i class="fa-solid fa-arrow-down"></i>${fmt(remote)}</span>`;
+  badge.setAttribute('aria-label',
+    `${local} local change${local === 1 ? '' : 's'} to push, ${remote} remote change${remote === 1 ? '' : 's'} to pull`);
 }
 
 // Demo-only: seeds session 1 (b-1) as a live, half-finished workout so the prototype
@@ -675,6 +711,7 @@ function seedDemoActiveSession() {
       id: booking.id,
       titles: [booking.title],
       day: booking.day,
+      location: booking.location || '',
       startDate: new Date(now - HOUR).toISOString(),
       endDate: new Date(now + HOUR).toISOString(),
       timeLabel: booking.time
@@ -750,11 +787,11 @@ function setupNavigation() {
     });
   }
 
-  const logoAreaClipboard = document.getElementById('logo-area-clipboard');
-  if (logoAreaClipboard) {
-    logoAreaClipboard.addEventListener('click', () => {
+  // Not-found view: return to the dashboard.
+  const errorHomeBtn = document.getElementById('btn-error-home');
+  if (errorHomeBtn) {
+    errorHomeBtn.addEventListener('click', () => {
       navigateToPath('/clients');
-      focusSessionsColumn('today', 'smooth');
     });
   }
 
@@ -845,6 +882,17 @@ function switchView(viewId) {
   }
 }
 
+// Not-found view for deep-link URLs that match no route (or reference a deleted entity).
+// The URL is left untouched so the bad link stays visible; the omnipresent header stays put
+// because #view-error lives inside #main-content like every other view.
+function showErrorView(attemptedPath) {
+  setHeaderState(false);
+  document.getElementById('active-session-overlay').classList.add('hidden');
+  const pathEl = document.getElementById('error-view-path');
+  if (pathEl) pathEl.textContent = attemptedPath;
+  switchView('error');
+}
+
 function getISODateString(date) {
   const d = new Date(date);
   const year = d.getFullYear();
@@ -869,11 +917,30 @@ function getColumnForISODate(isoDate) {
   return 'upcoming';
 }
 
+// The app root path: "/" in local dev (served at the domain root) and "/LibrePT/" on
+// GitHub Pages (a project site served under /<repo>/). Derived from this module's own URL
+// so the router works under any deploy sub-path without hardcoding it. The deploy step
+// rewrites <base href> to the same sub-path so assets resolve there too.
+const BASE_PATH = new URL('.', import.meta.url).pathname;
+
+// window.location.pathname (which includes BASE_PATH) -> the root-relative route the
+// matchers below expect (e.g. "/LibrePT/sessions/2026-07-17" -> "/sessions/2026-07-17").
+function toRoute(pathname) {
+  return pathname.startsWith(BASE_PATH) ? '/' + pathname.slice(BASE_PATH.length) : pathname;
+}
+
+// A root-relative route -> a full path under BASE_PATH for pushState/replaceState
+// (e.g. "/sessions/2026-07-17" -> "/LibrePT/sessions/2026-07-17").
+function toUrl(route) {
+  return BASE_PATH + route.replace(/^\//, '');
+}
+
 function navigateToPath(targetPath) {
-  if (window.location.pathname === targetPath) {
+  const url = toUrl(targetPath);
+  if (window.location.pathname === url) {
     handlePathChange();
   } else {
-    window.history.pushState(null, '', targetPath);
+    window.history.pushState(null, '', url);
     handlePathChange();
   }
 }
@@ -881,25 +948,24 @@ function navigateToPath(targetPath) {
 function setHeaderState(isSessionActive) {
   const normalActions = document.querySelector('.normal-header-actions');
   const activeActions = document.querySelector('.active-session-header-actions');
-  const timerBlock = document.getElementById('header-session-timer-block');
-  
-  if (normalActions && activeActions && timerBlock) {
+
+  if (normalActions && activeActions) {
     if (isSessionActive) {
       normalActions.classList.add('hidden');
       activeActions.classList.remove('hidden');
-      timerBlock.classList.remove('hidden');
     } else {
       normalActions.classList.remove('hidden');
       activeActions.classList.add('hidden');
-      timerBlock.classList.add('hidden');
     }
   }
 }
 
 function handlePathChange() {
-  const path = window.location.pathname;
+  const path = toRoute(window.location.pathname);
 
   // Match patterns:
+  // 0. /session/{sessionId}/client/{clientId}/exercise|superset/{cardId}  (in-focus card)
+  const sessionFocusMatch = path.match(/^\/session\/([A-Za-z0-9_-]+)\/client\/([A-Za-z0-9_-]+)\/(exercise|superset)\/([A-Za-z0-9_-]+)$/);
   // 1. /session/{sessionId}/client/{clientId}
   const sessionClientMatch = path.match(/^\/session\/([A-Za-z0-9_-]+)\/client\/([A-Za-z0-9_-]+)$/);
   // 2. /session/{sessionId}
@@ -909,7 +975,11 @@ function handlePathChange() {
   // 4. /sessions/{isoDate}
   const sessionsDateMatch = path.match(/^\/sessions\/([0-9]{4}-[0-9]{2}-[0-9]{2})$/);
 
-  if (sessionClientMatch) {
+  if (sessionFocusMatch) {
+    const [, sessionId, clientId, focusType, focusId] = sessionFocusMatch;
+    setHeaderState(true);
+    showSessionView(sessionId, clientId, { type: focusType, id: focusId });
+  } else if (sessionClientMatch) {
     const sessionId = sessionClientMatch[1];
     const clientId = sessionClientMatch[2];
     setHeaderState(true);
@@ -933,7 +1003,7 @@ function handlePathChange() {
   } else if (path === '/clients' || path === '/' || path === '/index.html') {
     const todayDate = getISODateForColumn('today');
     setHeaderState(false);
-    window.history.replaceState(null, '', `/sessions/${todayDate}`);
+    window.history.replaceState(null, '', toUrl(`/sessions/${todayDate}`));
     document.getElementById('active-session-overlay').classList.add('hidden');
     switchView('clients');
     requestAnimationFrame(() => focusSessionsColumn('today', 'auto'));
@@ -950,32 +1020,37 @@ function handlePathChange() {
     document.getElementById('active-session-overlay').classList.add('hidden');
     switchView('history');
   } else {
-    // Default fallback
-    const todayDate = getISODateForColumn('today');
-    setHeaderState(false);
-    window.history.replaceState(null, '', `/sessions/${todayDate}`);
-    document.getElementById('active-session-overlay').classList.add('hidden');
-    switchView('clients');
+    // Unknown route — show the not-found view rather than silently bouncing to today.
+    // The bad URL is left in the address bar so it stays visible and copyable.
+    showErrorView(window.location.pathname);
   }
 }
 
-function showSessionView(sessionId, clientId) {
+// focusRef (optional) = { type: 'exercise'|'superset', id } from a deep link, selecting which
+// card starts in focus. A stale/unknown id is ignored, leaving the client's default focus.
+function showSessionView(sessionId, clientId, focusRef = null) {
   if (activeSession) {
     // Show active tracking clipboard overlay
     const bar = document.getElementById('active-session-bar');
     bar.classList.remove('hidden', 'is-idle');
     delete bar.dataset.nextBookingId;
     renderActiveSessionBarLabels();
-    
+
     // Ensure timer is ticking if not already
     if (!activeSession.timerIntervalId) {
       startSessionTimer();
     }
-    
+
     document.getElementById('active-session-overlay').classList.remove('hidden');
-    
+    renderSessionTitle();
+
     if (clientId && activeSession.participants.includes(clientId)) {
       activeSession.activeClientId = clientId;
+    }
+    if (focusRef) {
+      const cs = activeSession.clientRoutines[activeSession.activeClientId];
+      const idx = focusIndexFromRef(cs, focusRef);
+      if (idx >= 0) cs.activeExerciseIndex = idx;
     }
     renderActiveGroupBoard();
   } else {
@@ -985,7 +1060,7 @@ function showSessionView(sessionId, clientId) {
       recoverActiveSession();
       if (activeSession) {
         // Retry
-        showSessionView(sessionId, clientId);
+        showSessionView(sessionId, clientId, focusRef);
         return;
       }
     }
@@ -995,6 +1070,70 @@ function showSessionView(sessionId, clientId) {
     switchView('clients');
     openWorkoutSetupModal(clientId);
   }
+}
+
+// Resolve a deep-link focus reference to an index into the client's exercise list. A superset
+// ref matches the first member of that circuit (the whole superset renders as one card); an
+// exercise ref matches a standalone (non-superset) exercise. Returns -1 when nothing matches.
+function focusIndexFromRef(clientState, focusRef) {
+  if (!clientState || !clientState.exercises || !focusRef) return -1;
+  if (focusRef.type === 'superset') {
+    return clientState.exercises.findIndex(e => e.circuitId === focusRef.id);
+  }
+  return clientState.exercises.findIndex(e => !e.circuitId && e.id === focusRef.id);
+}
+
+// The canonical deep-link path for whatever card is currently in focus, so the address bar
+// stays a copy-able link: /session/{s}/client/{c}/(exercise|superset)/{cardId}.
+function sessionFocusPath() {
+  if (!activeSession) return null;
+  const clientId = activeSession.activeClientId || activeSession.participants[0];
+  const base = `/session/${activeSession.id}/client/${clientId}`;
+  const cs = activeSession.clientRoutines[clientId];
+  const ex = cs && cs.exercises && cs.exercises[cs.activeExerciseIndex];
+  if (!ex) return base;
+  return ex.circuitId ? `${base}/superset/${ex.circuitId}` : `${base}/exercise/${ex.id}`;
+}
+
+// While the session view is open, mirror the in-focus card into the URL (replaceState, so
+// tapping through cards doesn't spam history). No-op unless we're actually on a /session route,
+// so a background re-render while minimized can't hijack the dashboard URL.
+function syncSessionFocusUrl() {
+  if (!activeSession) return;
+  const current = toRoute(window.location.pathname);
+  if (!current.startsWith('/session/')) return;
+  const target = sessionFocusPath();
+  if (target && current !== target) {
+    window.history.replaceState(null, '', toUrl(target));
+  }
+}
+
+// Single funnel for card-tap focus changes: update the focused card, drop any expanded past
+// card, persist, and re-render (which mirrors the new focus into the URL).
+function focusExerciseByIndex(index) {
+  if (!activeSession) return;
+  const cs = activeSession.clientRoutines[activeSession.activeClientId];
+  if (!cs) return;
+  cs.activeExerciseIndex = index;
+  activeSession.expandedPastId = null;
+  saveActiveSessionToCache();
+  renderActiveGroupBoard();
+}
+
+// The session view's context line — "YYYY-MM-DD HH:MM Location" (e.g.
+// "2026-07-17 10:00 Trib gym base"). Derived from the booking the session was launched
+// from; an ad-hoc session started without a booking shows just its actual date and start
+// time, since it has no scheduled slot or location.
+function renderSessionTitle() {
+  const el = document.getElementById('session-title-text');
+  if (!el || !activeSession) return;
+
+  const booking = activeSession.booking;
+  const start = new Date(booking && booking.startDate ? booking.startDate : activeSession.startTime);
+  const datePart = getISODateString(start);
+  const timePart = formatClockFromMinutes(start.getHours() * 60 + start.getMinutes());
+  const location = booking && booking.location ? ` ${booking.location}` : '';
+  el.textContent = `${datePart} ${timePart}${location}`;
 }
 
 // --- RENDER FUNCTIONS ---
@@ -1063,7 +1202,11 @@ function renderClientsList(filterQuery = '') {
 let activeDetailClientId = null;
 function showClientDetails(clientId) {
   const client = state.clients.find(c => c.id === clientId);
-  if (!client) return;
+  if (!client) {
+    // Deep link to a client that no longer exists — treat as a not-found route.
+    showErrorView(window.location.pathname);
+    return;
+  }
 
   activeDetailClientId = clientId;
   document.getElementById('detail-client-name').innerHTML = getClientDisplayNameHTML(client);
@@ -2062,6 +2205,9 @@ function renderActiveGroupBoard() {
   activeSession.activeClientId = activeClientId;
   const activeClientState = activeSession.clientRoutines[activeClientId];
 
+  // Keep the URL pointed at the client + in-focus card so it stays a copy-able deep link.
+  syncSessionFocusUrl();
+
   // 1. Render Client Tabs
   const tabsContainer = document.getElementById('active-session-client-tabs');
   if (tabsContainer) {
@@ -2248,12 +2394,7 @@ function renderActiveGroupBoard() {
             saveToLocalStorage();
             renderActiveGroupBoard();
           },
-          onFocus: (index) => {
-            activeClientState.activeExerciseIndex = index;
-            activeSession.expandedPastId = null;
-            saveActiveSessionToCache();
-            renderActiveGroupBoard();
-          }
+          onFocus: (index) => focusExerciseByIndex(index)
         });
       } else {
         // Standalone exercise card render lives in components/exerciseCard.js
@@ -2267,12 +2408,7 @@ function renderActiveGroupBoard() {
           getExerciseSignalColor,
           logQuickSignal,
           openFeedbackModal,
-          onFocus: (index) => {
-            activeClientState.activeExerciseIndex = index;
-            activeSession.expandedPastId = null;
-            saveActiveSessionToCache();
-            renderActiveGroupBoard();
-          }
+          onFocus: (index) => focusExerciseByIndex(index)
         });
       }
       deckContainer.appendChild(card);
@@ -3090,6 +3226,7 @@ function isTimeOverlapping(rangeA, rangeB) {
 // same-slot bookings — feeds the active/idle session bar (TODO 2.1/2.2).
 function buildBookingMeta(bookings, day) {
   const titles = [...new Set(bookings.map(b => b.title))];
+  const locations = [...new Set(bookings.map(b => b.location).filter(Boolean))];
   const ranges = bookings.map(b => parseTimeRange(b.time)).filter(Boolean);
   const startMin = Math.min(...ranges.map(r => r.start));
   const endMin = Math.max(...ranges.map(r => r.end));
@@ -3104,6 +3241,8 @@ function buildBookingMeta(bookings, day) {
     day,
     startDate,
     endDate,
+    // Overlapping bookings almost always share a location; join the rare exceptions.
+    location: locations.join(' / '),
     timeLabel: `${formatClockFromMinutes(startMin)} - ${formatClockFromMinutes(endMin)}`
   };
 }
@@ -3151,34 +3290,40 @@ function launchClipboardDirectly(bookingId) {
 }
 
 // --- GOOGLE CALENDAR APPOINTMENT SESSIONS INTEGRATION (UC3 & UC4) ---
+// The former home-page "Sync Data" button was merged into the header cloud (Sync & Backup)
+// control; the sync action now lives inside that modal alongside export/import/reset.
 function setupCalendarBookings() {
-  const syncBtn = document.getElementById('btn-sync-calendar');
-  if (syncBtn) {
-    syncBtn.addEventListener('click', () => {
-      // Animate rotation to simulate active query sync
-      const icon = syncBtn.querySelector('i');
-      if (icon) icon.classList.add('fa-spin');
-      
-      const btnText = document.getElementById('btn-sync-calendar-text');
-      if (btnText) btnText.textContent = t('syncing_calendar');
-      
-      syncBtn.disabled = true;
-      
-      setTimeout(() => {
-        // Load/Reset default sessions mock feed
-        state.bookings = [...DEFAULT_SESSIONS];
-        
-        saveToLocalStorage();
-        renderSessions();
-        
-        if (icon) icon.classList.remove('fa-spin');
-        if (btnText) btnText.textContent = t('btn_sync_data');
-        syncBtn.disabled = false;
-        
-        alert(t('calendar_synced'));
-      }, 1200);
-    });
-  }
+  const syncBtn = document.getElementById('btn-sync-data');
+  if (!syncBtn) return;
+
+  syncBtn.addEventListener('click', () => {
+    // Animate rotation to simulate an active query sync
+    const icon = syncBtn.querySelector('i');
+    const btnText = document.getElementById('btn-sync-data-text');
+    const status = document.getElementById('sync-status');
+
+    if (icon) icon.classList.add('fa-spin');
+    if (btnText) btnText.textContent = t('syncing_calendar');
+    if (status) { status.textContent = ''; status.className = 'status-msg'; }
+    syncBtn.disabled = true;
+
+    setTimeout(() => {
+      // Load/Reset default sessions mock feed
+      state.bookings = [...DEFAULT_SESSIONS];
+
+      saveToLocalStorage();
+      renderSessions();
+
+      // Pushed local edits and pulled remote changes — the device is now in sync.
+      mockSyncState = { local: 0, remote: 0 };
+      renderSyncBadge();
+
+      if (icon) icon.classList.remove('fa-spin');
+      if (btnText) btnText.textContent = t('btn_sync_data');
+      syncBtn.disabled = false;
+      if (status) { status.textContent = t('calendar_synced'); status.className = 'status-msg text-emerald'; }
+    }, 1200);
+  });
 }
 
 // --- SESSIONS DAY NAVIGATION ---
@@ -3288,8 +3433,8 @@ function focusSessionsColumn(day, behavior = 'smooth') {
   // Update URL path to reflect the focused day's ISO date string
   const isoDate = getISODateForColumn(day);
   const targetPath = `/sessions/${isoDate}`;
-  if (window.location.pathname !== targetPath) {
-    window.history.pushState(null, '', targetPath);
+  if (toRoute(window.location.pathname) !== targetPath) {
+    window.history.pushState(null, '', toUrl(targetPath));
   }
 
   // Dashboard may be hidden (display:none) when navigating in — no layout to scroll yet
@@ -3344,8 +3489,8 @@ function detectFocusedSessionsColumn() {
     // Update URL path to reflect the swiped-to day's ISO date string
     const isoDate = getISODateForColumn(closest);
     const targetPath = `/sessions/${isoDate}`;
-    if (window.location.pathname !== targetPath) {
-      window.history.pushState(null, '', targetPath);
+    if (toRoute(window.location.pathname) !== targetPath) {
+      window.history.pushState(null, '', toUrl(targetPath));
     }
   }
 }
@@ -3441,7 +3586,7 @@ function renderSessions() {
 // Register Service Worker for offline PWA support
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
+    navigator.serviceWorker.register(`${BASE_PATH}sw.js`)
       .then(reg => console.log('PWA Service Worker registered:', reg.scope))
       .catch(err => console.error('PWA Service Worker registration failed:', err));
   });

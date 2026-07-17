@@ -89,10 +89,11 @@ Data should sync **periodically to Google Drive** and remain **editable directly
 - **Dark theme** should be improved in the same pass.
 - Constraint: both themes must keep working from the CSS custom properties in `index.css` — no hard-coded theme colours.
 
-### 4.2 [ ] Constant header line
+### 4.2 [x] Constant header line
 The **title/header line should stay constant** when switching between the clipboard, session management, and other views — it should not jump or re-flow between contexts.
 
-- **Note**: the original request trailed off mid-sentence ("...clipboard, session management and"). Confirm the full list of views this must hold across.
+- **Done**: the active-session overlay no longer carries its own duplicate `.app-header`; the single `.app-header` is now omnipresent (the overlay starts below it via `top: var(--hdr-height)`). The clipboard gained a `.session-title-bar` context line — `date time location` (e.g. `2026-07-17 10:00 Trib gym base`) — and the countdown timer moved onto it. This also removed the duplicate element IDs (`btn-collapse-session`, `overlay-session-duration`, …) the two headers shared.
+- Deep-link URLs that match no route now show an in-app not-found view (`#view-error`) that keeps this header in place, rather than silently redirecting to today.
 
 ### 4.3 [ ] Collapse the duplicated session header into one row, with a date picker
 There are currently **two title rows** above the session list. The second row — the per-column header with the calendar icon and the `Today` label (`.sessions-column-header`) — is redundant now that the deck shows a single column and the title bar already names the day.

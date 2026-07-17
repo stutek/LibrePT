@@ -1,29 +1,7 @@
-import os
-import time
-import socket
+# Browser E2E tests. The `local_server` fixture lives in tests/conftest.py and serves the app
+# under the /LibrePT/ sub-path (mirrors GitHub Pages); `page`/`browser` come from pytest-playwright.
 import datetime
-import subprocess
-import pytest
-from playwright.sync_api import sync_playwright
 
-def is_port_open(port):
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        return s.connect_ex(('localhost', port)) == 0
-
-@pytest.fixture(scope="session", autouse=True)
-def local_server():
-    """Starts a local Python HTTP server on port 8081 if not already running."""
-    proc = None
-    if not is_port_open(8081):
-        # The runtime app lives under src/, so serve that directory AS the web root
-        # (`-d src`). Then localhost:8081/ is the app — matching how it deploys (dist = src).
-        proc = subprocess.Popen(["python3", "-m", "http.server", "-d", "src", "8081"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        # Give it a second to bind
-        time.sleep(1.5)
-    yield "http://localhost:8081"
-    if proc:
-        proc.terminate()
-        proc.wait()
 
 def test_sessions_day_navigation(page, local_server):
     """
@@ -177,24 +155,24 @@ def test_interactive_dashboard_flow(page, local_server):
     
     # Toggle language to Slovenian (SL)
     lang_switcher.select_option("sl")
-    
-    # Verify dashboard header translates dynamically
-    assert page.locator("#btn-sync-calendar-text").inner_text().strip().upper() == "SINHRONIZIRAJ PODATKE"
     assert page.locator("#calendar-title-tag").inner_text().strip().upper() == "(DANES)"
+
+    # The sync control now lives in the header cloud (Sync & Backup) modal; open it and
+    # confirm its label translated too.
+    page.locator("#backup-btn").click()
+    page.wait_for_selector("#dialog-backup[open]")
+    assert page.locator("#btn-sync-data-text").inner_text().strip().upper() == "SINHRONIZIRAJ PODATKE"
+
+    # --- STEP 2: SESSION DATA SYNC (merged into the header cloud button) ---
+    page.locator("#btn-sync-data").click()
+    page.wait_for_selector("#sync-status.text-emerald")  # sync reports success in the modal
+    page.locator("#dialog-backup .modal-close-btn").click()
+    page.wait_for_selector("#dialog-backup", state="hidden")
 
     # Switch back to English (EN)
     lang_switcher.select_option("en")
     assert page.locator("#calendar-title-tag").inner_text().strip().upper() == "(TODAY)"
-    
-    # --- STEP 2: GOOGLE CALENDAR SYNC ---
-    # Tap the Sync Calendar button
-    sync_btn = page.locator("#btn-sync-calendar")
-    sync_btn.click()
-    
-    # Handle the window alert dialog
-    # Playwright automatically handles dialogs, but we can hook into it
-    # to verify the message "Calendar synchronized successfully!"
-    
+
     # Verify bookings list cards appear on the dashboard
     page.wait_for_selector(".booking-card")
     booking_titles = page.locator(".booking-card strong").all_inner_texts()

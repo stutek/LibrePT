@@ -25,19 +25,19 @@ While the **mobile-first, offline PWA Gym Clipboard** is the core real-time trac
 
 ## 🚦 Quick Start
 
-LibrePT is a dependency-free static PWA — no bundler, no install step, no build required to run it. Any static file server will do:
+LibrePT is a dependency-free static PWA — no bundler, no install step, no build required to run it.
 
 ```bash
 git clone https://github.com/stutek/LibrePT.git
 cd LibrePT
-python3 -m http.server -d src 8081   # the app lives in src/; serve it as the web root
+python3 serve.py            # dev server on http://localhost:8081
 ```
 
-Then open <http://localhost:8081>. The app seeds itself with mock clients, routines, and sessions on first load, so the dashboard is immediately explorable.
+Then open <http://localhost:8081>; it redirects to <http://localhost:8081/LibrePT/>. `serve.py` deliberately serves `src/` under the **same `/LibrePT/` sub-path GitHub Pages uses** (rewriting `<base>` and adding a deep-link SPA fallback), so local dev exercises the real production base path instead of hiding sub-path bugs behind a domain-root server. The app seeds itself with mock clients, routines, and sessions on first load, so the dashboard is immediately explorable.
 
-> **Note**: Serve the folder over HTTP rather than opening `index.html` via `file://` — the app loads ES modules and registers a Service Worker, both of which require an HTTP origin.
+> **Note**: Serve over HTTP rather than opening `index.html` via `file://` — the app loads ES modules and registers a Service Worker, both of which require an HTTP origin. A plain `python3 -m http.server -d src 8081` also works if you don't need the Pages sub-path, but then deep-link refreshes 404 locally.
 
-**Data & privacy**: all state lives in the browser's `localStorage` under the `librept_db` key, and voice notes never leave the device. Use the ☁ **Backup** button in the header to export or restore the database as JSON.
+**Data & privacy**: all state lives in the browser's `localStorage` under the `librept_db` key, and voice notes never leave the device. Use the header's cloud **Sync & Backup** button (cloud + ↻, with mock ahead/behind change counters) to sync session data or export/restore the database as JSON.
 
 ---
 
@@ -116,6 +116,18 @@ LibrePT is comprised of three major subsystems:
 ### 3. Closed-Loop Plan Feedback & Client Progression
 *   **Granular Signal Processing**: Signals recorded on the gym floor (`Load Up`, `Step Back`, `Pain/Injury`) flow directly into the trainer's back-office review queue.
 *   **Pending Program Adjustments Deck**: Feedback and voice notes compile into a desk workspace for the PT to review, allowing them to asynchronously plan client progression and update routine templates before the next session.
+
+### 4. Deep-Linkable Clean URLs (App Routing)
+*   **Every view and record is addressable by a clean URL**, so links are shareable and bookmarkable and restore the same screen on load:
+    *   `/sessions/{YYYY-MM-DD}` — the day deck focused on a given day
+    *   `/session/{sessionId}` and `/session/{sessionId}/client/{clientId}` — the active-session clipboard, optionally on a specific participant
+    *   `/session/{sessionId}/client/{clientId}/exercise/{exerciseId}` and `…/superset/{circuitId}` — the clipboard with a specific card in focus. Opening the session upgrades the URL to whatever card is focused, and tapping a card updates it, so the address bar is always a copy-able link to the exact card on screen.
+    *   `/clients/{clientId}` — a client detail page
+    *   `/routines`, `/exercises`, `/history` — the primary views
+*   **Omnipresent header**: the app header stays fixed in place across every view — dashboard, client detail, and the active-session clipboard — so it never jumps or re-flows between contexts. The active session view adds a context line beneath it reading `date time location` (e.g. `2026-07-17 10:00 Trib gym base`) with the live countdown.
+*   **In-app Not-Found view**: a deep link that matches no route — or points at a deleted client — renders a not-found (404) view *inside* the content area, keeping the header and bottom navigation in place, with the bad path shown and a one-tap return to the dashboard. Unknown links are never silently redirected.
+*   **Offline PWA shell**: the service worker serves the cached app shell for any in-scope navigation, so clean-URL deep links keep working offline (a basement gym with no signal).
+*   **GitHub Pages sub-path support**: the public demo is served from a project sub-path (`stutek.github.io/LibrePT/`), not a domain root. The deploy step rewrites the HTML `<base>` to the repo sub-path and ships the shell as `404.html` (GitHub Pages' SPA fallback), while the router derives that same base from its own module URL — so assets load and deep links resolve wherever the app is mounted, with no code changes. The local dev server (`serve.py`) mounts the app under the same `/LibrePT/` sub-path (with an equivalent base rewrite + SPA fallback), so development and the test suite run against the real production base path rather than masking sub-path bugs behind a domain-root server.
 
 ---
 

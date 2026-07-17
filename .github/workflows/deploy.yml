@@ -38,6 +38,18 @@ jobs:
           mkdir -p dist
           cp -r src/. dist/
           touch dist/.nojekyll   # disable Jekyll processing on the published site
+          # GitHub Pages serves a project site under /<repo>/, but the source assumes the
+          # domain root (<base href="/">) so it works when src/ is served at localhost:8081/.
+          # Rewrite the base to the repo sub-path so index.css, manifest.json, icons and the
+          # service worker resolve on Pages. app.js derives the same sub-path from its own URL.
+          base="/${GITHUB_REPOSITORY##*/}/"
+          sed -i "s#<base href=\"/\">#<base href=\"${base}\">#" dist/index.html
+          echo "Rewrote <base> to ${base}"
+          # SPA deep-link fallback: GitHub Pages serves 404.html for any path with no file.
+          # Shipping the app shell as 404.html lets a direct visit to a clean route
+          # (e.g. /LibrePT/sessions/2026-07-17) boot the app, which then resolves the route
+          # client-side — or shows the in-app not-found view for an unknown one.
+          cp dist/index.html dist/404.html
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
