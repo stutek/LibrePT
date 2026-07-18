@@ -183,3 +183,89 @@ The clipboard's **Cancel** button (bottom-left) discards the active session with
 
 - It is currently **too easily accessible** for a destructive, unrecoverable action sitting next to "Complete Workout Session". Move it out of the primary action row (e.g. behind an overflow/⋯ menu, a long-press, or a secondary confirm step) so it can't be hit by accident mid-set.
 - Keep the existing confirm dialog, but tighten the wording now that logging is one-tap (no per-set grid): it discards the session's completions and feedback.
+
+---
+
+## 9. Interactive Demo / Guided Onboarding
+
+The big new feature: a first-run onboarding that walks a new user through the app end-to-end with a simulated finger, instead of seeding demo data silently. Build in the phases below; each is committable on its own.
+
+### 9.1 [ ] App starts with NO data
+On a fresh install the app must contain **no test/demo data at all** — empty client directory, no sessions, no active session. Today `seedMockData()` / `SEED_VERSION` auto-seeds on first load; that seeding must move behind the demo activation (9.2).
+
+- **Blocking ripple:** every browser test (`tests/test_browser.py`, `tests/e2e/*`) currently depends on the seeded active session, clients and bookings. With an empty start they all fail. Keep the suite green by having the tests **explicitly load the demo data** first (expose a small `loadDemoData()` the tests call, or a `?demo=1` / `localStorage` bootstrap the test fixture sets). Decide this before flipping the default.
+- Empty state should render cleanly (the not-found/empty views already exist for some lists) and surface the "Run the demo" message (9.3).
+
+### 9.2 [ ] Demo-data loader (subset of the seed data)
+A `loadDemoData()` that populates a **subset** of the current `src/data/` seed (a few clients, one or two routines, today's sessions, and the seeded in-progress session) on demand — invoked when the user activates the demo. Keep it a real subset, not the whole fixture, so the walkthrough stays focused.
+
+### 9.3 [ ] "Run the demo" message / invitation
+A message/notification (the first real use of the planned message area — see [11.1](#111--replace-the-footer-nav-with-a-message--status-area)) that **invites the user to run the demo end-to-end**.
+
+- Shown **only when the app is empty** (9.1). Activating it loads the demo data (9.2) and starts the walkthrough (9.5).
+- When the app already has data, don't offer the in-place demo — instead **offer to open the demo on the GitHub Pages instance** (`stutek.github.io/LibrePT/`).
+
+### 9.4 [ ] `src/demo/` — simulated finger / touch controller
+Create a **separate `src/demo/` folder** for the demo controls. First module: a **touch indicator** that simulates a user's finger — an on-screen pointer that **moves to a target element and taps it**, visibly executing the action (animated move + tap ripple), then dispatches the real click/interaction on the target.
+
+### 9.5 [ ] Guided walkthrough engine (step overlay)
+An overlay component that drives the demo one action at a time:
+
+- The overlay **explains the next action to be performed**, with buttons **Back**, **"Show me"**, and **Next**.
+- **"Show me"** triggers the simulated finger (9.4) to move + tap and execute the action. Once the action has executed, **"Show me" hides and the button becomes "Next"**.
+- Clicking **Next** advances: the overlay explains the upcoming action and **waits for the user to click "Show me"** again.
+- **Back** steps to the previous action.
+- Each step binds to a real DOM target + a short explanation; the sequence covers the core flows (open a session, switch client, log a signal, complete a round, review a pending adjustment, etc.).
+
+### 9.6 [ ] [TBD] Install as an offline Android / iOS app
+Figure out how to have the app installed as an Android/iOS application on the phone **without any mandatory dependency on internet connectivity**. It's already a PWA (manifest + service worker precache); open questions: install prompt/A2HS UX, fully-offline first load, and whether the GitHub Pages origin is acceptable or a packaged (TWA / Capacitor / bare PWA) wrapper is needed.
+
+---
+
+## 10. Application Header Menu & First-Run Agreement
+
+### 10.1 [ ] Hamburger (☰) menu in the header
+Add a hamburger/overflow menu to the app header (next to the Sync & Backup cloud button) with **placeholder** items:
+
+- **Connect cloud storage** (placeholder → "coming soon").
+- **Export all data as a file** (can open the existing Sync & Backup modal, which already has JSON export).
+- **GitHub project** (link to `github.com/stutek/LibrePT`, opens in a new tab).
+- **About** (modal: short app description + repo link).
+- **Terms & disclaimer** (opens the modal from 10.2).
+
+Wire it in `components/applicationHeader.js` following the existing `.session-menu` dropdown pattern (toggle + close-on-outside-click). Add i18n keys (EN + SL) for every label — the parity test enforces it. (A partial HTML draft was made and reverted; redo cleanly.)
+
+### 10.2 [ ] First-run no-liability disclaimer + user agreement
+A modal with a **no-liability disclaimer and user agreement**, shown **once on first run** (persist acceptance in `localStorage`, e.g. `librept_terms_accepted`), and also reachable from the header menu (10.1) any time. Keep the text concise ("provided as is, no warranty, not medical/professional advice, data stays local, use at your own risk") and translated to SL. First-run modal requires an "I agree" action.
+
+---
+
+## 11. Navigation & Layout Redesign
+
+### 11.1 [ ] Replace the footer nav with a message / status area
+Replace the bottom navigation bar with the session-bar contents evolved into a **general message area**: current/upcoming session, client spot reservations in slots, customers cancelling their spot on a session, and the "run the demo" invite (9.3).
+
+- Navigation (Clients / Routines / Exercises / History) needs a new home — proposal: a compact tab row **in the omnipresent header**.
+- The message feed is priority-ordered: live session → next upcoming session → notifications (reservations / cancellations, tappable to the affected session).
+
+### 11.2 [ ] Active-session overlay → a normal `#view`
+Fold the full-screen active-session overlay (`#active-session-overlay`) into a normal `#view-session` inside `#main-content`, like the other views — now that the header is omnipresent and sits above it, the fixed-overlay special-casing is redundant. Consistent view/router handling; simplifies the deck/tabs/title-bar wiring.
+
+---
+
+## 12. Documentation, Tests, OKF & Housekeeping
+
+### 12.1 [ ] OKF review (`okf.yaml`)
+Review and update the Open Knowledge Format descriptor to reflect the current architecture (i18n externalized to `src/i18n/`, the component split under `src/components/`, `build/`+`deploy/` packages, the deep-link routing, the 5-theme system).
+
+### 12.2 [ ] Documentation pass
+Sweep README / CONTRIBUTING / INDEX / AGENT_RULES for staleness after the recent refactors (e.g. README's codebase tree still lists `mockData.js`; ensure all features — themes, deep links, sync/backup, dev server, build/deploy — are documented and accurate).
+
+### 12.3 [ ] Test completeness
+Broaden coverage: themes (switch + persistence), the Sync & Backup modal + mock counters, the header menu + first-run agreement (10.x), the not-found view is covered but the demo walkthrough (9.x) will need its own tests. Confirm every extracted component has at least one exercised path.
+
+### 12.4 [ ] TODO.md contents review
+Reconcile this file with what actually shipped (e.g. **3.2 Git-style change counters** is effectively done via the mock ahead/behind sync badge; **4.2 Constant header line** is done and the active-session overlay no longer duplicates the header). Tick off completed items and prune stale ones.
+
+### 12.5 [ ] Local git housekeeping (trademark refs)
+The trademark was scrubbed from history and force-pushed (remote is clean). Still pending **locally**: expire the reflog and `git gc --prune=now` the old pre-rewrite objects (`refs/original/…` and any leftover backup branch) so the old blobs are purged from the local clone.
