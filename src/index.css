@@ -20,6 +20,10 @@
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --glass-blur: blur(16px);
   --text-dark: #09090b;
+  /* Temporal session tinting (past = cool/history, future = warm/plan). Neutral fallback only;
+     each theme overrides these with palette-tuned values (see src/themes/*.css). */
+  --temporal-past: #c084fc;
+  --temporal-future: #fbbf24;
 }
 
 /* ==========================================================================
@@ -39,10 +43,11 @@
 }
 
 /* Shared Flex Between (Horizontal Row with Space Between) */
-.view-header, .modal-header, .session-title-block, .client-card-header, .history-header,
-.routine-header, .deck-header, .superset-header, .booking-header, .header-container,
-.section-title, .exercise-item-header, .session-bar-content, .active-exercise-navigator,
-.participant-card-header, .active-set-row, .timer-header, .deck-card-top, .form-row {
+.view-header, .modal-header, .session-title-block, .client-card-header,
+.history-header, .routine-header, .deck-header, .superset-header, .booking-header,
+.header-container, .section-title, .exercise-item-header, .session-bar-content,
+.active-exercise-navigator, .participant-card-header, .active-set-row, .timer-header,
+.deck-card-top, .form-row, .session-title-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -52,7 +57,8 @@
 .btn, .icon-btn, .avatar, .avatar-large, .nav-item, .nav-arrow-btn, .step-btn,
 .set-checkbox-btn, .timer-btn-sm, .superset-done, .deck-action-btn, .collapse-btn,
 .close-btn-xs, .modal-close-btn, .btn-remove-row, .primary-btn, .secondary-btn,
-.danger-btn, .success-btn {
+.danger-btn, .success-btn, .active-set-row .set-checkbox-btn,
+.active-set-row .step-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -62,15 +68,16 @@
 .error-view, .stack-list, .profile-info-grid, .chart-bar-wrapper, .routine-card,
 .exercise-item, .history-exercise-log, .active-session-overlay, .clipboard-body,
 .session-overlay-body, .group-matrix-grid, .session-actions-footer, .modal-form,
-.client-card, .client-detail-card, .superset-ex-list, .superset-ex-row, .deck-history-sets,
-.form-group {
+.client-card, .client-detail-card, .superset-ex-list, .superset-ex-row,
+.deck-history-sets, .form-group, .backup-actions, .deck-stat,
+.sessions-category-column, .stack-list {
   display: flex;
   flex-direction: column;
 }
 
 /* Shared Button & Interactive Foundation */
 .btn, .icon-btn, .nav-arrow-btn, .step-btn, .set-checkbox-btn, .timer-btn-sm,
-.deck-action-btn, .session-menu-item, .pill-btn, .superset-sig {
+.deck-action-btn, .session-menu-item, .pill-btn, .superset-sig, .nav-item {
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -254,30 +261,23 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 11px;
   font-weight: 700;
   line-height: 1.2;
-}
-.badge-primary, .badge-cyan {
+}.badge-primary, .badge-cyan {
   background: var(--primary-light);
   color: var(--primary);
   border: 1px solid color-mix(in srgb, var(--primary) 35%, transparent);
-}
-.badge-success, .badge-emerald {
+}.badge-success, .badge-emerald {
   background: rgba(16, 185, 129, 0.15);
   color: var(--success);
   border: 1px solid rgba(16, 185, 129, 0.35);
-}
-.badge-danger {
+}.badge-danger {
   background: var(--danger-light);
   color: var(--danger);
   border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent);
-}
-.badge-warning {
+}.badge-warning {
   background: rgba(245, 158, 11, 0.15);
   color: #f59e0b;
   border: 1px solid rgba(245, 158, 11, 0.35);
-}
-.text-primary, .text-cyan {
-  color: var(--primary) !important;
-}/* Cloud + recycle composite for the merged Sync & Backup button: a cloud with small sync
+}.text-primary, .text-cyan { color: var(--primary) !important; }/* Cloud + recycle composite for the merged Sync & Backup button: a cloud with small sync
    arrows overlaid on its body, so one control reads as both "cloud backup" and "sync". */
 .cloud-sync-icon {
   position: relative;
@@ -308,8 +308,7 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 11px;
   font-weight: 700;
   line-height: 1;
-}.sync-badge.hidden { display: none; }.sync-badge .sync-ahead,
-.sync-badge .sync-behind {
+}.sync-badge.hidden { display: none; }.sync-badge .sync-ahead, .sync-badge .sync-behind {
   display: inline-flex;
   align-items: center;
   gap: 2px;
@@ -386,13 +385,7 @@ h1, h2, h3, h4, h5, h6 {
 @media(min-width: 480px) {
   .grid-list {
     grid-template-columns: 1fr 1fr;
-  }}
-
-.stack-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}/* Client Card Components */
+  }} .stack-list { gap: 12px; }/* Client Card Components */
 .client-card {
   display: flex;
   justify-content: space-between;
@@ -586,15 +579,11 @@ h1, h2, h3, h4, h5, h6 {
   z-index: 90;
 }.nav-item {
   background: transparent;
-  border: none;
   color: var(--text-muted);
   flex-direction: column;
   gap: 4px;
-  cursor: pointer;
   flex: 1;
   height: 100%;
-  font-family: var(--font-sans);
-  transition: all 0.2s ease;
 }.nav-item i { font-size: 18px; }.nav-item span { font-size: 10px; font-weight: 500; }.nav-item.active { color: var(--primary); }.nav-item.active i { filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.3)); }/* BOTTOM PANEL: Session Status Bar (active workout, or idle "next up" state) */
 .active-session-bar {
   position: fixed;
@@ -639,9 +628,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 @keyframes pulse {
-  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(9, 9, 11, 0.7); }70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(9, 9, 11, 0); }100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(9, 9, 11, 0); }}
-
-.session-bar-timer {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(9, 9, 11, 0.7); }70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(9, 9, 11, 0); }100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(9, 9, 11, 0); }} .session-bar-timer {
   font-family: var(--font-mono);
   font-weight: 700;
   font-size: 14px;
@@ -692,15 +679,10 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 @keyframes slideUpFullscreen {
-  from { transform: translateY(100%); }to { transform: translateY(0); }}
-
-.session-title-bar {
+  from { transform: translateY(100%); }to { transform: translateY(0); }} .session-title-bar {
   padding: 12px 16px;
   background: var(--card-bg);
   border-bottom: 1px solid var(--card-border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   gap: 16px;
 }/* Countdown + the session's own controls (options menu, minimize), right-aligned in the bar. */
 .session-title-actions {
@@ -763,9 +745,7 @@ h1, h2, h3, h4, h5, h6 {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
-  }}
-
-.participant-log-card {
+  }} .participant-log-card {
   padding: 12px;
   border-radius: var(--border-radius-md);
   background: rgba(39, 39, 42, 0.3);
@@ -932,11 +912,7 @@ h1, h2, h3, h4, h5, h6 {
   width: 90%;
   box-shadow: 0 20px 50px rgba(0,0,0,0.5);
   color: var(--text-main);
-}.dialog-modal::backdrop { background: rgba(9, 9, 11, 0.7); backdrop-filter: blur(8px); }.wide-modal { max-width: 600px; }.modal-header { margin-bottom: 16px; }.modal-header h3 {
-  font-family: var(--font-header);
-  font-size: 18px;
-  font-weight: 700;
-}.modal-close-btn {
+}.dialog-modal::backdrop { background: rgba(9, 9, 11, 0.7); backdrop-filter: blur(8px); }.wide-modal { max-width: 600px; }.modal-header { margin-bottom: 16px; }.modal-close-btn {
   background: transparent;
   border: none;
   color: var(--text-muted);
@@ -1018,12 +994,7 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--text-muted);
   line-height: 1.4;
   margin-bottom: 16px;
-}.backup-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-bottom: 20px;
-}.action-card { text-align: center; padding: 20px; }.backup-icon-large { font-size: 32px; margin-bottom: 12px; }.action-card h4 {
+}.backup-actions { gap: 16px; margin-bottom: 20px; }.action-card { text-align: center; padding: 20px; }.backup-icon-large { font-size: 32px; margin-bottom: 12px; }.action-card h4 {
   font-size: 15px;
   margin-bottom: 4px;
   font-weight: 600;
@@ -1123,11 +1094,7 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: bold;
   font-size: 14px;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}.active-set-row .input-set-weight,
-.active-set-row .input-set-reps {
+}.active-set-row .input-set-weight, .active-set-row .input-set-reps {
   background: none;
   border: none;
   color: #fff;
@@ -1139,9 +1106,6 @@ h1, h2, h3, h4, h5, h6 {
   height: 32px;
   border-radius: 6px;
   border: 1px solid var(--border-color);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   background: transparent;
   color: var(--text-muted);
   cursor: pointer;
@@ -1176,8 +1140,7 @@ h1, h2, h3, h4, h5, h6 {
   width: 38px !important;
   height: 38px !important;
   font-size: 18px !important;
-}.active-set-row .input-set-weight,
-  .active-set-row .input-set-reps { height: 38px !important; font-size: 15px !important; }.active-set-row .input-set-weight { width: 58px !important; }.active-set-row .input-set-reps { width: 48px !important; }.active-set-row .set-checkbox-btn {
+}.active-set-row .input-set-weight, .active-set-row .input-set-reps { height: 38px !important; font-size: 15px !important; }.active-set-row .input-set-weight { width: 58px !important; }.active-set-row .input-set-reps { width: 48px !important; }.active-set-row .set-checkbox-btn {
   width: 40px !important;
   height: 40px !important;
   border-radius: 8px !important;
@@ -1224,7 +1187,7 @@ h1, h2, h3, h4, h5, h6 {
     linear-gradient(var(--card-bg), var(--card-bg));
 }/* Session title tint by day, matching the day-selection line: past = purple, future = amber,
    today = default. Set here (not inline) so the temporal class on the card can override it. */
-.booking-card-title { color: var(--text-color); }.booking-card.booking-past .booking-card-title { color: #c084fc; }.booking-card.booking-future .booking-card-title { color: #fbbf24; }/* --- SESSIONS DAY TITLE BAR --- */
+.booking-card-title { color: var(--text-color); }.booking-card.booking-past .booking-card-title { color: var(--temporal-past); }.booking-card.booking-future .booking-card-title { color: var(--temporal-future); }/* --- SESSIONS DAY TITLE BAR --- */
 .sessions-title-bar { gap: 10px; }/* Shrink-to-fit so the arrows stay tight against the weekday/date instead of drifting apart */
 .sessions-title-bar h3 {
   display: inline-flex;
@@ -1253,7 +1216,7 @@ h1, h2, h3, h4, h5, h6 {
 }/* Temporal tint of the whole day-selection line: past = purple, today = default, future =
    amber. The weekday span and calendar icon inherit the h3 colour; the date sets its own
    muted colour, so it needs an explicit override. Mirrors the session-card title colours. */
-#calendar-title.is-past { color: #c084fc; }#calendar-title.is-past #calendar-title-date { color: #c084fc; }#calendar-title.is-future { color: #fbbf24; }#calendar-title.is-future #calendar-title-date { color: #fbbf24; }.sessions-today-tag {
+#calendar-title.is-past { color: var(--temporal-past); }#calendar-title.is-past #calendar-title-date { color: var(--temporal-past); }#calendar-title.is-future { color: var(--temporal-future); }#calendar-title.is-future #calendar-title-date { color: var(--temporal-future); }.sessions-today-tag {
   flex: 0 0 auto;
   background: rgba(6, 182, 212, 0.12);
   border: 1px solid rgba(6, 182, 212, 0.3);
@@ -1304,8 +1267,6 @@ h1, h2, h3, h4, h5, h6 {
   flex: 0 0 100%;
   scroll-snap-align: start;
   min-width: 0;
-  display: flex;
-  flex-direction: column;
   background: rgba(255, 255, 255, 0.01);
   border: 1px solid rgba(255, 255, 255, 0.03);
   border-radius: 12px;
@@ -1393,9 +1354,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 /* Each navigation re-renders the focus card, so this entrance plays on every switch */
 @keyframes cardFocusIn {
-  from { transform: translateY(12px) rotateX(-14deg); opacity: 0; }to { transform: translateY(0) rotateX(0); opacity: 1; }}
-
-.exercise-deck-card.completed:not(.in-focus) { border-color: rgba(16, 185, 129, 0.3); }.exercise-deck-card.past-session { border-color: rgba(139, 92, 246, 0.3); background-image: linear-gradient(rgba(139, 92, 246, 0.14), rgba(139, 92, 246, 0.14)), linear-gradient(var(--card-bg), var(--card-bg)); }/* Tapped past card expands in place — pops forward like the focus card (overriding the
+  from { transform: translateY(12px) rotateX(-14deg); opacity: 0; }to { transform: translateY(0) rotateX(0); opacity: 1; }} .exercise-deck-card.completed:not(.in-focus) { border-color: rgba(16, 185, 129, 0.3); }.exercise-deck-card.past-session { border-color: rgba(139, 92, 246, 0.3); background-image: linear-gradient(rgba(139, 92, 246, 0.14), rgba(139, 92, 246, 0.14)), linear-gradient(var(--card-bg), var(--card-bg)); }/* Tapped past card expands in place — pops forward like the focus card (overriding the
    collapsed-stack transform), but keeps its purple identity instead of the cyan live-focus
    treatment. Higher specificity than .exercise-deck-card:not(.in-focus) so the pop wins. */
 .exercise-deck-card.past-session.past-expanded {
@@ -1409,7 +1368,7 @@ h1, h2, h3, h4, h5, h6 {
   animation: cardFocusIn 0.34s cubic-bezier(0.22, 1, 0.36, 1);
 }.deck-history-collapse {
   margin-left: auto;
-  color: #c084fc;
+  color: var(--temporal-past);
   font-size: 12px;
 }.deck-history-sets { gap: 4px; margin-top: 4px; }.deck-history-set-row {
   display: flex;
@@ -1421,13 +1380,13 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.02);
 }.deck-history-set-row strong {
-  color: #c084fc;
+  color: var(--temporal-past);
   width: 26px;
   flex-shrink: 0;
 }.deck-history-load { color: var(--text-color); font-weight: 600; }.deck-history-note { font-style: italic; margin-left: auto; }.deck-history-meta { margin-top: 8px; font-size: 11px; }/* A launched future-day session is a plan, not a live workout — tint its exercise names amber
    to match the future colour coding on the dashboard (mirrors the purple past history). */
 .exercise-deck-card.future-session .deck-card-name,
-.exercise-deck-card.future-session .deck-card-name-inline { color: #fbbf24; }.exercise-deck-card.future-session:not(.in-focus) { background: rgba(251, 191, 36, 0.04); }/* --- Superset card: a grouped block of exercises with a round counter --- */
+.exercise-deck-card.future-session .deck-card-name-inline { color: var(--temporal-future); }.exercise-deck-card.future-session:not(.in-focus) { background: rgba(251, 191, 36, 0.04); }/* --- Superset card: a grouped block of exercises with a round counter --- */
 .superset-title {
   font-size: 15px;
   font-weight: 700;
@@ -1553,7 +1512,7 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 11px;
   padding: 2px 7px;
   font-weight: 700;
-}.deck-card-status-upcoming { background: rgba(255, 255, 255, 0.05); color: var(--text-muted); }.deck-card-status-past { background: rgba(139, 92, 246, 0.2); color: #c084fc; }.deck-card-name {
+}.deck-card-status-upcoming { background: rgba(255, 255, 255, 0.05); color: var(--text-muted); }.deck-card-status-past { background: rgba(139, 92, 246, 0.2); color: var(--temporal-past); }.deck-card-name {
   margin: 0 0 10px 0;
   font-size: 16px;
   color: var(--text-color);
@@ -1564,8 +1523,6 @@ h1, h2, h3, h4, h5, h6 {
   white-space: nowrap;
 }.deck-card-stats { display: flex; gap: 8px; }.deck-stat {
   flex: 1;
-  display: flex;
-  flex-direction: column;
   align-items: center;
   gap: 2px;
   padding: 8px 2px;

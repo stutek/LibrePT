@@ -26,6 +26,9 @@ body.nebula-theme {
   --danger-light: rgba(251, 113, 133, 0.16);
   --success: #34d399;
   --success-hover: #10b981;
+  /* Light violet past / warm amber future — cool-vs-warm split reads against the indigo field */
+  --temporal-past: #c4b5fd;
+  --temporal-future: #fcd34d;
   --box-shadow: 0 16px 36px -16px rgba(0, 0, 0, 0.66);
   /* Shape personality — crisp, tight */
   --border-radius-lg: 12px;

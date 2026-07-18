@@ -18,6 +18,9 @@ body.daylight-theme {
   --on-primary: #ffffff;
   --secondary-light: rgba(79, 70, 229, 0.1);
   --accent-cyan: #0891b2;
+  /* Deeper violet/amber so temporal tints stay legible on the light slate field */
+  --temporal-past: #7c3aed;
+  --temporal-future: #d97706;
   --box-shadow: 0 16px 34px -18px rgba(15, 23, 42, 0.22);
   /* Shape personality — soft and friendly */
   --border-radius-lg: 20px;

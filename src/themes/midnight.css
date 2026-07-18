@@ -31,6 +31,10 @@ body.midnight-theme {
   --success: #10b981;
   --success-hover: #059669;
 
+  /* Session temporal tint — violet past / amber future on the zinc field */
+  --temporal-past: #c084fc;
+  --temporal-future: #fbbf24;
+
   /* Shape personality — medium, balanced */
   --border-radius-lg: 16px;
   --border-radius-md: 12px;

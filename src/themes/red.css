@@ -28,6 +28,9 @@ body.red-theme {
   --danger-light: rgba(251, 225, 34, 0.18);
   --success: #4ade80;
   --success-hover: #22c55e;
+  /* Cool violet past / warm orange future — kept off the red primary and gold danger */
+  --temporal-past: #c4b5fd;
+  --temporal-future: #fdba74;
   --box-shadow: 0 14px 30px -14px rgba(0, 0, 0, 0.6);
   /* Shape personality — edgy, near-square */
   --border-radius-lg: 6px;
