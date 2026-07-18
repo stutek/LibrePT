@@ -71,8 +71,10 @@ When no session is active:
 ### 3.1 [x] "Sync Sessions" → "Sync Data"
 Rename the dashboard action from **Sync Sessions** to **Sync Data** (`btn_sync_sessions` → new key; update EN + SL dictionaries together).
 
-### 3.2 [ ] Git-style change counters
+### 3.2 [x] Git-style change counters
 Show a **count of local changes and remote changes**, in the spirit of git's ahead/behind indicator, so the PT can see at a glance whether their device is in sync.
+
+- **Done**: the header's Sync & Backup control carries a `sync-badge` (`renderSyncBadge` in `components/applicationHeader.js`) with an ahead (↑ local edits to push) and behind (↓ remote changes to pull) count, styled as a git-style pill (`.sync-ahead`/`.sync-behind` in `index.css`). Each on-device edit increments the local count; the badge hides at 0/0 and caps at `9+`.
 
 ### 3.3 [ ] [Brainstorm] Google Drive periodic sync
 Data should sync **periodically to Google Drive** and remain **editable directly in the Google Drive view**.
@@ -264,8 +266,16 @@ Sweep README / CONTRIBUTING / INDEX / AGENT_RULES for staleness after the recent
 ### 12.3 [ ] Test completeness
 Broaden coverage: themes (switch + persistence), the Sync & Backup modal + mock counters, the header menu + first-run agreement (10.x), the not-found view is covered but the demo walkthrough (9.x) will need its own tests. Confirm every extracted component has at least one exercised path.
 
-### 12.4 [ ] TODO.md contents review
+### 12.4 [x] TODO.md contents review
 Reconcile this file with what actually shipped (e.g. **3.2 Git-style change counters** is effectively done via the mock ahead/behind sync badge; **4.2 Constant header line** is done and the active-session overlay no longer duplicates the header). Tick off completed items and prune stale ones.
+
+- **Done (this pass)**: ticked **3.2** (the ahead/behind sync badge ships). Verified the remaining `[ ]` items are genuinely outstanding: 1.x scheduling, 4.1 theme redesign, 4.3 date-picker (blocked on the dated-bookings data-model decision), 5.1 tabbed client view, 6.1 body-weight removal, 7.1/3.3 brainstorms, 8.1 bound clients, 9.x demo, 10.x header menu, 11.x nav redesign, 12.1–12.3/12.5. No further silently-shipped items found.
 
 ### 12.5 [ ] Local git housekeeping (trademark refs)
 The trademark was scrubbed from history and force-pushed (remote is clean). Still pending **locally**: expire the reflog and `git gc --prune=now` the old pre-rewrite objects (`refs/original/…` and any leftover backup branch) so the old blobs are purged from the local clone.
+
+- **Status**: no `refs/original/…` refs and no leftover backup branch remain (only `main` / `origin/main`); the old blobs survive only via reflog entries. The purge is a single command the maintainer should run manually — it was blocked when attempted from the agent because reflog expiry is irreversible:
+
+  ```bash
+  git reflog expire --expire=now --all && git gc --prune=now
+  ```
