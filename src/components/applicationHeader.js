@@ -68,11 +68,16 @@ export function renderSyncBadge() {
     badge.removeAttribute('aria-label');
     return;
   }
-  const fmt = (n) => (n > 9 ? '9+' : String(n));
+  // Past 9, a second arrow stands in for the digit (↑↑ / ↓↓) so the pill stays narrow and reads
+  // as "lots to sync"; the exact counts still ride along in the aria-label below.
+  const cell = (n, dir) => {
+    const arrow = `<i class="fa-solid fa-arrow-${dir}"></i>`;
+    return n > 9 ? arrow + arrow : arrow + String(n);
+  };
   badge.classList.remove('hidden');
   badge.innerHTML =
-    `<span class="sync-ahead"><i class="fa-solid fa-arrow-up"></i>${fmt(local)}</span>` +
-    `<span class="sync-behind"><i class="fa-solid fa-arrow-down"></i>${fmt(remote)}</span>`;
+    `<span class="sync-ahead">${cell(local, 'up')}</span>` +
+    `<span class="sync-behind">${cell(remote, 'down')}</span>`;
   badge.setAttribute('aria-label',
     `${local} local change${local === 1 ? '' : 's'} to push, ${remote} remote change${remote === 1 ? '' : 's'} to pull`);
 }

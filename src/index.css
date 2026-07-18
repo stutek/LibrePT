@@ -189,11 +189,14 @@ h1, h2, h3, h4, h5, h6 {
    home target) and compact the controls so every action stays visible, tappable, and un-clipped. */
 @media (max-width: 480px) {
   .logo-area h1 { display: none; }
-  .header-actions { gap: 6px; }
-  .header-select { height: 40px !important; min-height: 40px !important; padding: 0 8px !important; font-size: 13px !important; }
-  #lang-switcher { width: 56px; }
-  #theme-switcher { width: 96px; }
+  .header-actions { gap: 5px; }
+  .header-select { height: 40px !important; min-height: 40px !important; padding: 0 6px !important; font-size: 13px !important; }
+  #lang-switcher { width: 50px; }
+  #theme-switcher { width: 82px; }
   .header-actions .icon-btn { width: 40px; height: 40px; font-size: 16px; }
+  /* The sync pill (cloud + ahead/behind counts) is the widest control; trim its padding so the
+     whole row still fits alongside the two selects on the narrowest phones. */
+  .sync-backup-btn { padding: 0 9px; gap: 6px; }
 }
 /* Main View Controller styling */
 #main-content {
@@ -389,7 +392,14 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: 999px;
   padding: 0 12px;
   gap: 8px;
-}.sync-badge {
+}
+/* `.header-actions .icon-btn` pins a fixed 44/40px width that beats the width:auto above, so the
+   button stayed a cramped circle and clipped the ahead/behind counts. This higher-specificity
+   override lets it grow into a pill that seats the cloud + both counters. */
+.header-actions .icon-btn.sync-backup-btn { width: auto; }
+/* Fully synced (badge hidden): drop the side padding so it reads as a round icon again. */
+.sync-backup-btn:has(.sync-badge.hidden) { padding-left: 0; padding-right: 0; }
+.sync-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
