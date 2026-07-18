@@ -120,7 +120,6 @@ function applyTranslations(lang = state.lang || 'en') {
     // Add Client modal
     '#client-modal-title': 'add_new_client',
     '#dialog-client label[for="client-name"]': 'client_name',
-    '#dialog-client label[for="client-weight"]': 'current_weight',
     '#dialog-client label[for="client-goals"]': 'goals',
     '#dialog-client button[type="submit"]': 'save_client',
     

@@ -142,8 +142,11 @@ NOTE: keep the goals and health & injury notes as is, remove "log workout sessio
 
 ## 6. Housekeeping
 
-### 6.1 [ ] Remove body-weight tracking (for now)
+### 6.1 [x] Remove body-weight tracking (for now)
 Strip **client body-weight tracking** from the app for the time being.
+
+- **Done (hide, not delete)**: the open question is resolved in favour of *hiding*. The body-weight **UI** is fully gone — the weight chart, the `client-weight` input, and the `client-weight-pill` were removed from `index.html`/`app.js` in an earlier pass; this pass swept the remaining dead artifacts: the stale `staticMappings` entry for `label[for="client-weight"]` (`app.js`), the now-unused `current_weight` label from **both** dictionaries (EN + SL parity preserved), and the orphaned `.client-weight-pill` CSS rule.
+- The `weightHistory` field is left **dormant** on the client model (seed + new-client creation) rather than deleted. Nothing reads or writes it now, so no body weight can be entered, but existing `localStorage` records keep their data and re-enabling the feature stays a UI-only change. Exercise **load** (`session-add-weight`, `adjust-weight`, `weightTarget`, Load Up/Step Back) is untouched, as required.
 
 > **⚠ Do not confuse the two kinds of "weight".** The codebase uses `weight` for **two unrelated things**, and only the first is in scope here:
 > - **Body weight (in scope — remove)**: `weightHistory` on clients (`mockData.js`), the weight chart (`.weight-chart-container`, `index.html`), the `client-weight` input and its `current_weight` label (EN + SL), and the `client-weight-pill` on the client profile (`app.js`).

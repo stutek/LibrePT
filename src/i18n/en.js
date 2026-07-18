@@ -90,7 +90,6 @@ export const en = {
     add_new_client: "Add New Client",
     edit_client_profile: "Edit Client Profile",
     client_name: "Client Name",
-    current_weight: "Current Weight (kg)",
     goals_placeholder: "e.g. Muscle gain, fat loss...",
     save_client: "Save Client",
     create_routine_title: "Create Routine Template",

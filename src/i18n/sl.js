@@ -89,7 +89,6 @@ export const sl = {
     add_new_client: "Dodaj novo stranko",
     edit_client_profile: "Uredi profil stranke",
     client_name: "Ime stranke",
-    current_weight: "Trenutna teža (kg)",
     goals_placeholder: "npr. Pridobivanje mišične mase, izguba maščobe...",
     save_client: "Shrani stranko",
     create_routine_title: "Ustvari predlogo rutine",
