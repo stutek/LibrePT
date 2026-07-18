@@ -52,13 +52,13 @@ def test_static_mappings_selectors():
     collector = ElementCollector()
     collector.feed(html_content)
 
-    # Read app.js
-    with open('src/app.js', 'r', encoding='utf-8') as f:
+    # Read domMappings.js (where staticMappings moved from app.js)
+    with open('src/i18n/domMappings.js', 'r', encoding='utf-8') as f:
         js_content = f.read()
 
     # Extract staticMappings block
     mappings_match = re.search(r'const staticMappings = \{(.*?)\};', js_content, re.DOTALL)
-    assert mappings_match, "staticMappings object not found in app.js"
+    assert mappings_match, "staticMappings object not found in domMappings.js"
     mappings_block = mappings_match.group(1)
 
     # Find all mapping selectors (e.g. '#btn-add-client': 'btn_add_client')

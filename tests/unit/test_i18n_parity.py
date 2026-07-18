@@ -8,8 +8,8 @@ import re
 
 
 def _locale_files(src_dir):
-    """Every locale file in src/i18n/ (the registry index.js is not a locale)."""
-    return sorted(p for p in (src_dir / "i18n").glob("*.js") if p.name != "index.js")
+    """Every locale file in src/i18n/ (the registry index.js and domMappings.js are not locales)."""
+    return sorted(p for p in (src_dir / "i18n").glob("*.js") if p.name not in ("index.js", "domMappings.js"))
 
 
 def _keys(path):

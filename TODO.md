@@ -337,15 +337,15 @@ Define and build towards the three concrete ways a personal trainer actually int
 
 ## 14. Phase 5 Refactoring: DRY & Complexity Reduction
 
-### 14.1 [ ] Extract Touch/Swipe Gestures (`src/controllers/gestureController.js`)
+### 14.1 [x] Extract Touch/Swipe Gestures (`src/controllers/gestureController.js`)
 - `src/app.js` currently holds **196 lines** of touch/swipe gesture handlers (`touchstart`, `touchmove`, `touchend`, `handleSwipeBetweenDays`) for navigating the sessions day deck and title bar actions.
 - Extract this self-contained subsystem into a dedicated controller module (`src/controllers/gestureController.js`) to decouple touch input logic from the application entrypoint.
 
-### 14.2 [ ] Extract DOM i18n Static Mappings (`src/i18n/domMappings.js`)
+### 14.2 [x] Extract DOM i18n Static Mappings (`src/i18n/domMappings.js`)
 - `src/app.js` contains a **160-line** static lookup table (`staticMappings`) that binds CSS selectors (`'button[data-view="history"] span': 'tab_history'`, `#sessions-view-title`, etc.) to localization keys.
 - Move `staticMappings` into a dedicated file under `src/i18n/domMappings.js` and import it during boot (`applyTranslations`) so `app.js` stays strictly focused on initialization and routing.
 
-### 14.3 [ ] Drop Legacy `window` Bridge Wrappers in `src/app.js`
+### 14.3 [x] Drop Legacy `window` Bridge Wrappers in `src/app.js`
 - `app.js` retains **122 lines** of global wrapper proxies (`window.openRoutineEditorModal`, `renderSessions`, etc.) created during the transition to modular views.
 - Now that `src/views/` and `src/controllers/` are clean ES modules, directly import and wire their callbacks in event listeners and drop the redundant proxy wrappers entirely. Combining 14.1, 14.2, and 14.3 will reduce `app.js` from 925 lines down to ~447 lines.
 

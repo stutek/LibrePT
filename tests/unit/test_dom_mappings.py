@@ -29,9 +29,9 @@ def test_static_mappings_selectors(src_dir):
     collector = ElementCollector()
     collector.feed((src_dir / "index.html").read_text(encoding="utf-8"))
 
-    js_content = (src_dir / "app.js").read_text(encoding="utf-8")
+    js_content = (src_dir / "i18n" / "domMappings.js").read_text(encoding="utf-8")
     mappings_match = re.search(r"const staticMappings = \{(.*?)\};", js_content, re.DOTALL)
-    assert mappings_match, "staticMappings object not found in app.js"
+    assert mappings_match, "staticMappings object not found in domMappings.js"
 
     mappings = re.findall(r"'\s*([^']+)\s*':\s*'([^']+)'", mappings_match.group(1))
     assert mappings, "No static mappings parsed"

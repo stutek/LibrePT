@@ -32,20 +32,16 @@ import {
 } from './helper/utils.js';
 import {
   renderClientsList as clientsViewRender,
-  showClientDetails as clientsViewShowDetails,
-  renderClientWorkoutHistory as clientsViewHistory
+  showClientDetails as clientsViewShowDetails
 } from './views/clientsView.js';
 import {
-  renderRoutinesList as routinesViewRender,
-  openRoutineEditorModal as routinesViewOpenEditor,
-  addRoutineExerciseRow as routinesViewAddRow
+  renderRoutinesList as routinesViewRender
 } from './views/routinesView.js';
 import {
   renderExercisesList as exercisesViewRender
 } from './views/exercisesView.js';
 import {
-  renderGlobalHistory as historyViewRender,
-  renderHistoryItems as historyViewItems
+  renderGlobalHistory as historyViewRender
 } from './views/historyView.js';
 import {
   renderSessions as sessionsViewRender,
@@ -65,19 +61,19 @@ import {
   startSessionTimer,
   setupActiveSession as setupActiveSessionController,
   cancelWorkoutSession as cancelWorkoutSessionController,
-  finishWorkoutSession as finishWorkoutSessionController,
   saveActiveSessionToCache as saveActiveSessionToCacheController,
   recoverActiveSession as recoverActiveSessionController,
   getActiveSession,
   setActiveSession,
   getActiveExercise as getActiveExerciseController,
-  buildSupersetUnits as buildSupersetUnitsController,
   renderActiveGroupBoard as renderActiveGroupBoardController,
   focusIndexFromRef,
   sessionFocusPath,
   syncSessionFocusUrl,
   focusExerciseByIndex
 } from './controllers/activeSessionController.js';
+import { applyStaticDOMMappings } from './i18n/domMappings.js';
+import { setupViewDismiss } from './controllers/gestureController.js';
 
 
 function t(key) {
@@ -96,168 +92,7 @@ function applyTranslations(lang = state.lang || 'en') {
   // Theme dropdown labels are localized outside the staticMappings table (compact forms)
   applyThemeSwitcherLabels();
 
-  const tDict = TRANSLATIONS[lang];
-  if (!tDict) return;
-  
-  // Map of selector to translation key
-  const staticMappings = {
-    '.logo-area h1': 'logo_title',
-    // Application (☰) header menu + About / Terms modals
-    '#menu-connect-cloud': 'menu_connect_cloud',
-    '#menu-export-data': 'menu_export_data',
-    '#menu-github': 'menu_github',
-    '#menu-about': 'menu_about',
-    '#menu-terms': 'menu_terms',
-    '#about-title': 'about_title',
-    '#about-body': 'about_body',
-    '#about-repo-link': 'about_repo',
-    '#terms-title': 'terms_title',
-    '#terms-body': 'terms_body',
-    '#btn-terms-agree': 'terms_agree',
-    'button[data-view="clients"] span': 'tab_clients',
-    'button[data-view="routines"] span': 'tab_routines',
-    'button[data-view="exercises"] span': 'tab_exercises',
-    'button[data-view="history"] span': 'tab_history',
-    
-    // Dashboard / Clients view
-    '#sessions-view-title': 'sessions_schedule',
-    '#pending-adjustments-title': 'pending_adjustments',
-    '#view-clients .view-header h2': 'clients_title',
-    '#btn-add-client': 'btn_add_client',
-    '#btn-sync-data-text': 'btn_sync_data',
-    
-    // Client Detail view
-    '#view-client-detail .client-profile-card h4:nth-of-type(1)': 'notes_injuries',
-    '#view-client-detail .client-profile-card h4:nth-of-type(2)': 'goals',
-    '#view-client-detail .client-profile-card h4:nth-of-type(3)': 'routine_plans',
-    '#btn-edit-client': 'btn_edit_profile',
-    '#btn-start-client-workout': 'btn_log_workout',
-    '#view-client-detail .history-section h5': 'client_history_header',
-    '#btn-back-to-clients': 'btn_back',
-    
-    // Routines View
-    '#view-routines .view-header h2': 'routines_title',
-    '#btn-add-routine': 'btn_create_routine',
-    '#view-routines .view-desc': 'routines_desc',
-    
-    // Exercises View
-    '#view-exercises .view-header h2': 'exercises_title',
-    '#btn-add-exercise': 'btn_add_exercise',
-    '.filter-chips button[data-filter="All"]': 'filter_all',
-    
-    // History View
-    '#view-history .view-header h2': 'history_title',
-    '#view-history .view-desc': 'history_desc',
-    
-    // Active session clipboard overlay
-    '#btn-add-exercise-to-session': 'btn_inject_exercise',
-    '#btn-delete-session': 'btn_delete_session',
-    '#btn-finish-session': 'btn_complete',
-
-    // Dialog setups
-    '#dialog-workout-setup .modal-header h3': 'workout_setup_title',
-    '#dialog-workout-setup label[for="setup-participants-assignment-list"]': 'select_participants',
-    '#dialog-workout-setup button[type="submit"]': 'btn_launch_clipboard',
-    
-    '#dialog-add-session-exercise .modal-header h3': 'add_ex_session_title',
-    '#dialog-add-session-exercise label[for="session-add-select-ex"]': 'select_exercise',
-    '#dialog-add-session-exercise label[for="session-add-sets"]': 'sets',
-    '#dialog-add-session-exercise label[for="session-add-reps"]': 'reps',
-    '#dialog-add-session-exercise label[for="session-add-weight"]': 'weight',
-    '#dialog-add-session-exercise label[for="session-add-rest"]': 'rest_seconds',
-    '#dialog-add-session-exercise button[type="submit"]': 'btn_inject',
-    
-    '#dialog-feedback .modal-header h3': 'log_client_feedback',
-    '#dialog-feedback label[for="feedback-custom-note"]': 'custom_details',
-    '#dialog-feedback button[type="submit"]': 'btn_log_alert',
-    '#label-voice-note': 'voice_note_label',
-    '#voice-record-status': 'voice_ready',
-
-    '#dialog-backup .modal-header h3': 'backup_center',
-    '#dialog-backup .dialog-desc': 'backup_desc',
-    '#sync-data-title': 'sync_session_title',
-    '#sync-data-desc': 'sync_session_desc',
-    '#backup-export-title': 'backup_export_title',
-    '#backup-export-desc': 'backup_export_desc',
-    '#btn-export-db': 'btn_export_json',
-    '#backup-import-title': 'backup_import_title',
-    '#backup-import-desc': 'backup_import_desc',
-    '#btn-select-json': 'btn_select_json',
-    '#dialog-backup .danger-zone h4': 'danger_zone',
-    '#dialog-backup .danger-zone p': 'danger_desc',
-    '#dialog-backup #btn-reset-db': 'btn_reset_db',
-
-    // Not-found (error) view
-    '#error-view-title': 'error_title',
-    '#view-error .view-desc': 'error_desc',
-    '#btn-error-home': 'btn_error_home',
-    
-    // Add Client modal
-    '#client-modal-title': 'add_new_client',
-    '#dialog-client label[for="client-name"]': 'client_name',
-    '#dialog-client label[for="client-goals"]': 'goals',
-    '#dialog-client button[type="submit"]': 'save_client',
-    
-    // Routine Template modal
-    '#routine-modal-title': 'create_routine_title',
-    '#dialog-routine label[for="routine-name"]': 'routine_name',
-    '#dialog-routine label[for="routine-desc"]': 'routine_desc',
-    '#dialog-routine button[type="submit"]': 'btn_save_routine'
-  };
-  
-  for (const selector in staticMappings) {
-    const el = document.querySelector(selector);
-    if (el) {
-      const key = staticMappings[selector];
-      const val = tDict[key];
-      if (val) {
-        // preserve icons if any
-        const icon = el.querySelector('i');
-        if (icon) {
-          el.innerHTML = '';
-          el.appendChild(icon);
-          el.appendChild(document.createTextNode(' ' + val));
-        } else {
-          el.textContent = val;
-        }
-      }
-    }
-  }
-
-  // Update input placeholders
-  const placeholderMappings = {
-    '#search-clients': 'placeholder_search_clients',
-    '#search-routines': 'placeholder_search_routines',
-    '#search-exercises': 'placeholder_search_exercises',
-    '#client-goals': 'goals_placeholder',
-    '#feedback-custom-note': 'custom_details'
-  };
-
-  for (const selector in placeholderMappings) {
-    const el = document.querySelector(selector);
-    if (el) {
-      const key = placeholderMappings[selector];
-      const val = tDict[key];
-      if (val) {
-        el.placeholder = val;
-      }
-    }
-  }
-
-  // Update screen-reader region labels
-  const ariaMappings = {
-    '#sessions-categories-grid': 'sessions_schedule'
-  };
-
-  for (const selector in ariaMappings) {
-    const el = document.querySelector(selector);
-    if (el) {
-      const val = tDict[ariaMappings[selector]];
-      if (val) {
-        el.setAttribute('aria-label', val);
-      }
-    }
-  }
+  applyStaticDOMMappings(TRANSLATIONS[lang]);
 
   // The day title bar is data-driven (weekday/date/arrows), so it re-renders rather than map statically
   renderSessionsTitleBar();
@@ -472,7 +307,7 @@ function init() {
 
   // Every view (and the active-session clipboard) can be dismissed to the home dashboard the same
   // way: tap the grab handle, or swipe its title bar down. The app-name logo is the third way home.
-  setupViewDismiss();
+  setupViewDismiss({ navigateToPath, getActiveSession, launchClipboardDirectly });
 
   // Keep the idle bar's "next session" + starts-in countdown fresh even with no other
   // trigger firing (an active session's own 1s tick handles the bar while one is running)
@@ -654,76 +489,6 @@ function setHeaderState() {
   if (normalActions) normalActions.classList.remove('hidden');
 }
 
-// --- SHARED TITLE-BAR HANDLE / SWIPE GESTURE ---
-// Returns to the home dashboard (which hides the active-session overlay and re-focuses today) —
-// the same destination as the app-name logo, so a title-bar swipe / handle tap reads as "close".
-function goHome() {
-  navigateToPath('/clients');
-}
-
-// The home dashboard's handle "pulls down" the session clipboard instead of dismissing: resume a
-// running session, or launch the first upcoming scheduled session (the idle bar's next-up). No-op
-// if nothing is scheduled. Mirrors clicking the idle session bar.
-function openActiveOrNextSession() {
-  const active = getActiveSession();
-  if (active) {
-    const clientId = active.activeClientId || active.participants[0];
-    navigateToPath(`/session/${active.id || 'session'}/client/${clientId}`);
-    return;
-  }
-  const bar = document.getElementById('active-session-bar');
-  const nextId = bar && bar.dataset.nextBookingId;
-  if (nextId) launchClipboardDirectly(nextId);
-}
-
-// Every .view-titlebar (each view's header + the active-session clipboard) responds to its
-// .view-grabber handle the same way: tap it, or swipe the bar down. On the home dashboard the
-// gesture opens the session clipboard; everywhere else it dismisses back to home (the clipboard
-// slides out like a sheet first). Taps on the bar's own controls (nav arrows, options menu,
-// back/edit) are left alone so only the bar background / handle triggers the gesture.
-function setupViewDismiss() {
-  const SWIPE_PX = 70; // vertical distance that commits the gesture
-  document.querySelectorAll('.view-titlebar').forEach(bar => {
-    const isHome = bar.classList.contains('sessions-title-bar');
-    const activate = isHome ? openActiveOrNextSession : goHome;
-
-    const grab = bar.querySelector('.view-grabber');
-    if (grab) grab.addEventListener('click', (e) => { e.stopPropagation(); activate(); });
-
-    let startY = null, startX = null;
-    bar.addEventListener('touchstart', (e) => {
-      if (e.target.closest('button:not(.view-grabber), a, input, select')) { startY = null; return; }
-      startY = e.touches[0].clientY;
-      startX = e.touches[0].clientX;
-    }, { passive: true });
-
-    bar.addEventListener('touchend', (e) => {
-      if (startY === null) return;
-      const t = e.changedTouches[0];
-      const dy = t.clientY - startY;
-      const dx = t.clientX - startX;
-      startY = null; startX = null;
-      // Commit only on a clearly downward, vertical-dominant swipe
-      if (dy < SWIPE_PX || Math.abs(dx) > dy * 0.6) return;
-
-      const overlay = bar.closest('.active-session-overlay');
-      if (overlay) {
-        overlay.style.animation = 'none';
-        overlay.style.transition = 'transform 0.24s ease';
-        overlay.style.transform = 'translateY(100%)';
-        setTimeout(() => {
-          goHome();
-          overlay.style.transition = '';
-          overlay.style.transform = '';
-          overlay.style.animation = '';
-        }, 230);
-      } else {
-        activate();
-      }
-    }, { passive: true });
-  });
-}
-
 function handlePathChange() {
   const path = toRoute(window.location.pathname);
 
@@ -756,7 +521,7 @@ function handlePathChange() {
     const clientId = clientDetailMatch[1];
     setHeaderState(false);
     document.getElementById('active-session-overlay').classList.add('hidden');
-    showClientDetails(clientId);
+    clientsViewShowDetails({ clientId, state, t, showErrorView, switchView, openWorkoutSetupModal });
   } else if (sessionsDateMatch) {
     const isoDate = sessionsDateMatch[1];
     const column = getColumnForISODate(isoDate);
@@ -883,25 +648,9 @@ function renderClientsList(filterQuery = '') {
   clientsViewRender({ state, t, navigateToPath, filterQuery });
 }
 
-function showClientDetails(clientId) {
-  clientsViewShowDetails({ clientId, state, t, showErrorView, switchView, openWorkoutSetupModal });
-}
-
-function renderClientWorkoutHistory(client) {
-  return clientsViewHistory({ client, state, t });
-}
-
 // Routines View
 function renderRoutinesList() {
   routinesViewRender({ state, t, openWorkoutSetupModal });
-}
-
-function openRoutineEditorModal(routineId) {
-  routinesViewOpenEditor({ routineId, state });
-}
-
-function addRoutineExerciseRow(preset = null) {
-  routinesViewAddRow({ preset, state });
 }
 
 // Exercise Library View
@@ -912,10 +661,6 @@ function renderExercisesList(filterQuery = '', categoryFilter = 'All') {
 // Global History View
 function renderGlobalHistory() {
   historyViewRender({ state, t });
-}
-
-function renderHistoryItems(historyList, container) {
-  historyViewItems({ historyList, container, t });
 }
 
 // Form Controllers
@@ -949,10 +694,6 @@ function cancelWorkoutSession() {
   cancelWorkoutSessionController({ state, t, navigateToPath });
 }
 
-function finishWorkoutSession() {
-  finishWorkoutSessionController({ state, t });
-}
-
 function saveActiveSessionToCache() {
   saveActiveSessionToCacheController();
 }
@@ -963,10 +704,6 @@ function recoverActiveSession() {
 
 function getActiveExercise() {
   return getActiveExerciseController();
-}
-
-function buildSupersetUnits(items, activeIndex) {
-  return buildSupersetUnitsController(items, activeIndex);
 }
 
 function renderActiveGroupBoard() {
