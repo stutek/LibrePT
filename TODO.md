@@ -297,3 +297,33 @@ The trademark was scrubbed from history and force-pushed (remote is clean). Stil
   ```bash
   git reflog expire --expire=now --all && git gc --prune=now
   ```
+
+---
+
+## 13. Exercise Library & Movement Taxonomy (Call to Action & Vision)
+
+### 13.1 [ ] [Brainstorm / Call to Action] Repurpose `exercisesView` from "Beginner Encyclopedia" to "Professional Movement Taxonomy"
+**The Core Insight:** A certified, professional Personal Trainer (`LibrePT`) knows all exercises by heart. They do not need lengthy `"instructions"` paragraphs, beginner descriptions, or how-to tutorials on their screen, nor do they ever hand their working device over to a client mid-session.
+- **Call to Action**: Remove/deprecate bulky instructional text blocks from `exercisesView.js` (`ex.instructions`) and exercise cards. The UI must pivot from an "encyclopedia for gym beginners" into a **high-density, professional movement taxonomy inspector and fast-selection tool**.
+- **The True Purpose (Referential Integrity)**: The Exercise Catalog exists in software to provide immutable IDs (`exerciseId`), equipment tags (`Barbell`, `Cable`, `Dumbbell`, `Bodyweight`), and anatomical/biomechanical categories (`Primary/Secondary Muscle Groups`, `Horizontal Push/Pull`, `Hip Hinge`). Without strict taxonomy, aggregating long-term volume load or plotting estimated 1RM curves across months of client history is impossible.
+- **Adopt Open Standards**: Map or seed the base catalog from an established, open-source sports science taxonomy (e.g., **wger Workout Manager API / dataset** or **ExRx** classifications) to guarantee that LibrePT exports (`.json`/`.csv`) are universally interchangeable with external research, performance tracking, and coaching tools.
+
+### 13.2 [ ] Usage Scenarios for the Professional Exercise Catalog
+Define and build towards the three concrete ways a personal trainer actually interacts with the exercise catalog:
+
+1. **Scenario A: Rapid Routine & Program Builder (Template Assembly)**
+   - **Context**: The PT is at their desk or preparing next week's block for a client (`routinesView.js` or Next Session Prep).
+   - **Action**: Instead of typing free-text names (`"DB Bench"` vs `"Dumbbell Bench Press"`), the PT filters the catalog by *Equipment* and *Muscle Group* and clicks to drop standardized movement IDs into the workout template.
+   - **Benefit**: Zero string-matching errors; clean, automated long-term historical analytics across all clients and routines.
+
+2. **Scenario B: On-the-Fly Equipment & Injury Substitution (Gym Floor)**
+   - **Context**: During a live session on the gym floor (`launchClipboardDirectly`), the cable station is occupied, or the client feels shoulder discomfort on a Barbell Overhead Press.
+   - **Action**: The PT opens the quick-substitute picker (`exercisesView`), filters for *Target = Shoulders* and *Equipment = Dumbbell / Machine*, and swaps the movement in under 3 seconds.
+   - **Benefit**: Session momentum is preserved without breaking historical tracking (the substitute inherits the correct muscle-group volume bucket).
+
+3. **Scenario C: Custom Exercise Creation vs. Taxonomy Integrity**
+   - **Context**: The PT coaches a proprietary rehab drill or specialized variation (*"Landmine Curtsy Lunge with Isometric Hold"*).
+   - **Action**: To prevent ad-hoc text from destroying data hygiene, custom creation enforces one of two strict rules:
+     - *(Option 1 - Modifiers)*: Select a standard parent movement (`Base: Lunge`) and attach specific **Modifiers** (`Tempo: 3-1-X-0`, `Stance: Curtsy`, `Attachment: Landmine`).
+     - *(Option 2 - Strict Inheritance)*: If creating a brand-new entity ID, the PT is required to tag its **Target Muscle Group** and **Biomechanical Movement Pattern** so high-level volume analytics continue working seamlessly across the whole client roster.
+
