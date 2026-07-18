@@ -139,20 +139,27 @@ The system is configured as a single codebase running on Web, iOS, and Android:
 
 ```
 LibrePT/
-├── index.html          # Main application templates (Dashboard, Modals, Booking pages)
-├── index.css           # Custom HSL-color variables, glassmorphic layouts, and mobile viewport limits
-├── app.js              # State manager, views router, Google API hooks, and split-sync databases
-├── mockData.js         # Default database (Exercises, client profiles, historical logs, and adjustments)
-├── manifest.json       # Web App Manifest for mobile PWA standalone styling
-├── sw.js               # Service Worker for offline asset caching (PWA logic)
-├── icons/              # PWA install icons (dumbbell mark, matching the in-app logo and favicon)
+├── src/                # The runtime PWA (served as web root locally, flattened into dist/ on deploy)
+│   ├── index.html      # Application templates (dashboard, active-session overlay, modals, views)
+│   ├── index.css       # Themed CSS custom properties, glassmorphic layouts, mobile viewport limits
+│   ├── app.js          # State manager, view router, session logic, translation lookup, component wiring
+│   ├── sw.js           # Service Worker for offline app-shell caching (PWA logic)
+│   ├── manifest.json   # Web App Manifest for mobile PWA standalone styling
+│   ├── data/           # Default database, split per entity (exercises, clients, routines, history, planUpdates, sessions)
+│   ├── i18n/           # EN/SL translation dictionaries (key parity enforced by the test suite)
+│   ├── components/     # Extracted UI components (session cards, exercise deck, header, plan adjustments, …)
+│   └── icons/          # PWA install icons (dumbbell mark, matching the in-app logo and favicon)
 ├── build/              # Build steps (verify → build): env check, tests, bundle src/ → dist/ (python -m build)
 ├── deploy/             # Deploy step + local dev server (local_http_server.py) — python -m deploy
+├── dist/               # Build output: flattened, base-rewritten app shell for GitHub Pages
 ├── requirements.txt    # Python test toolchain (pytest, playwright)
 ├── tests/              # Static structure checks + Playwright end-to-end gym-floor flow
 ├── use_cases/          # OKF functional workflow specifications (see use_cases/INDEX.md)
 ├── INDEX.md            # Master knowledge index for agents and contributors
 ├── AGENT_RULES.md      # Operating rules for AI agents contributing to this repository
+├── CONTRIBUTING.md     # Development setup, testing, and documentation standards
+├── CHANGELOG.md        # Notable changes, newest first
+├── TODO.md             # Planned work & open questions backlog
 ├── okf.yaml            # OKF v0.1 catalog manifest
 └── LICENSE             # MIT License
 ```
@@ -161,7 +168,7 @@ LibrePT/
 
 ## ⚡ Technical Stack
 
-*   **Core**: HTML5, Vanilla JavaScript (ES6+), and Vanilla CSS Variables (Emerald & Zinc themes).
+*   **Core**: HTML5, Vanilla JavaScript (ES6+ ES modules), and Vanilla CSS custom properties driving a 5-theme system (Midnight, Daylight, Red, Blossom, Nebula) — no hard-coded theme colours.
 *   **Internationalization**: Built-in EN/SL dictionaries with locale-aware date formatting via `Intl`.
 *   **Data Sync**: Serverless Google Firebase (Firestore Database + Firebase Hosting) for real-time bookings.
 *   **Third-Party APIs**: Google Calendar API (OAuth 2.0).

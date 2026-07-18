@@ -62,8 +62,10 @@ Run the full suite before opening a pull request:
 
 | Suite | Covers |
 | :--- | :--- |
-| [tests/test_app.py](file:///home/simon/Projects/LibrePT/tests/test_app.py) | Static integrity: file structure, EN/SL translation key parity, `staticMappings` selectors resolving against `index.html`, mock data exports. |
-| [tests/test_browser.py](file:///home/simon/Projects/LibrePT/tests/test_browser.py) | Playwright end-to-end flows in real Chromium: sessions day navigation, language switching, calendar sync, clipboard launch, voice notes, and the adjustment wizard. |
+| [tests/test_app.py](file:///home/simon/Projects/LibrePT/tests/test_app.py) | Static integrity: file structure, manifest icons, `staticMappings` selectors resolving against `index.html`, and seed data structure. |
+| [tests/unit/](file:///home/simon/Projects/LibrePT/tests/unit/) | Non-browser structural checks: EN/SL translation key parity (`test_i18n_parity.py`), DOM id/selector mappings (`test_dom_mappings.py`), and project layout (`test_project_layout.py`). |
+| [tests/test_browser.py](file:///home/simon/Projects/LibrePT/tests/test_browser.py) | Playwright end-to-end flows in real Chromium: sessions day navigation, touch swipes between days, single-column deck at every viewport, and the interactive dashboard flow. |
+| [tests/e2e/](file:///home/simon/Projects/LibrePT/tests/e2e/) | Playwright deep-flow suites: the sessions dashboard, clipboard launch, session deep-link routing, and the not-found/error view. |
 
 The verify → build → deploy chain lives in the `build/` and `deploy/` packages, each runnable on its own and debuggable:
 
@@ -103,8 +105,8 @@ Swipes are also covered automatically by `test_touch_swipe_between_days`.
 
 - **Vanilla only**: No frameworks, no bundlers, no CDN runtime dependencies on the critical path.
 - **State**: `state` in `app.js` is the single source of truth, persisted to `localStorage` under `librept_db`. Route all mutations through it and call `saveToLocalStorage()`.
-- **Styling**: Use the CSS custom properties defined at the top of `index.css` (`--text-main`, `--text-muted`, `--border-color`, `--accent-cyan`, …). Do not hard-code theme colors — both dark and light themes must work.
-- **Internationalization**: Every user-facing string goes in both the `en` and `sl` dictionaries in `app.js` and is read via `t('key')`. Key parity is enforced by the test suite. Prefer `Intl` / `toLocaleDateString` for dates rather than hand-written month or weekday names.
+- **Styling**: Use the CSS custom properties defined at the top of `index.css` (`--text-main`, `--text-muted`, `--border-color`, `--accent-cyan`, …). Do not hard-code theme colors — all five themes (Midnight, Daylight, Red, Blossom, Nebula) must work from the same properties.
+- **Internationalization**: Every user-facing string goes in both the `en` and `sl` dictionaries under `src/i18n/` (`en.js` / `sl.js`, registered in `src/i18n/index.js`) and is read via `t('key')`. Key parity is enforced by the test suite (`tests/unit/test_i18n_parity.py`). Prefer `Intl` / `toLocaleDateString` for dates rather than hand-written month or weekday names.
 - **Static translations**: Selectors in `staticMappings` overwrite an element's text content. Give a translated element its own `id` rather than relying on a positional selector — a positional selector will silently retarget when markup is reordered, and the tests only verify that the selector's root exists.
 
 ---
