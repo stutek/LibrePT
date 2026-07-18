@@ -345,10 +345,8 @@ export function setupActiveSession(deps) {
     clientTabsBar.addEventListener('scroll', updateClientTabsFadeState);
   }
 
-  document.getElementById('btn-collapse-session').addEventListener('click', () => {
-    if (navigateToPath) navigateToPath('/clients');
-    if (focusSessionsColumn) focusSessionsColumn('today', 'smooth');
-  });
+  // Leaving the clipboard is handled globally by the title-bar grab handle + swipe-down gesture
+  // (setupViewDismiss in app.js), shared with every other view; and the app-name logo also goes home.
 
   document.getElementById('btn-expand-session').addEventListener('click', (e) => {
     e.stopPropagation();

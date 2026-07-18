@@ -120,6 +120,7 @@ function applyTranslations(lang = state.lang || 'en') {
     'button[data-view="history"] span': 'tab_history',
     
     // Dashboard / Clients view
+    '#sessions-view-title': 'sessions_schedule',
     '#pending-adjustments-title': 'pending_adjustments',
     '#view-clients .view-header h2': 'clients_title',
     '#btn-add-client': 'btn_add_client',
@@ -469,6 +470,10 @@ function init() {
   window.addEventListener('popstate', handlePathChange);
   handlePathChange();
 
+  // Every view (and the active-session clipboard) can be dismissed to the home dashboard the same
+  // way: tap the grab handle, or swipe its title bar down. The app-name logo is the third way home.
+  setupViewDismiss();
+
   // Keep the idle bar's "next session" + starts-in countdown fresh even with no other
   // trigger firing (an active session's own 1s tick handles the bar while one is running)
   setInterval(renderIdleSessionBar, 30000);
@@ -647,6 +652,57 @@ function navigateToPath(targetPath) {
 function setHeaderState() {
   const normalActions = document.querySelector('.normal-header-actions');
   if (normalActions) normalActions.classList.remove('hidden');
+}
+
+// --- SHARED "DISMISS VIEW → HOME" GESTURE ---
+// Returns to the home dashboard (which hides the active-session overlay and re-focuses today) —
+// the same destination as the app-name logo, so a title-bar swipe / handle tap reads as "close".
+function goHome() {
+  navigateToPath('/clients');
+}
+
+// Every .view-titlebar (each view's header + the active-session clipboard) can be dismissed the
+// same way: tap its .view-grabber handle, or swipe the bar down. The clipboard slides out like a
+// sheet first; regular views just navigate. Taps on the bar's own controls (nav arrows, options
+// menu, back/edit) are left alone so only the bar background / handle triggers a dismiss.
+function setupViewDismiss() {
+  const SWIPE_CLOSE_PX = 70; // downward distance that commits the dismissal
+  document.querySelectorAll('.view-titlebar').forEach(bar => {
+    const grab = bar.querySelector('.view-grabber');
+    if (grab) grab.addEventListener('click', (e) => { e.stopPropagation(); goHome(); });
+
+    let startY = null, startX = null;
+    bar.addEventListener('touchstart', (e) => {
+      if (e.target.closest('button:not(.view-grabber), a, input, select')) { startY = null; return; }
+      startY = e.touches[0].clientY;
+      startX = e.touches[0].clientX;
+    }, { passive: true });
+
+    bar.addEventListener('touchend', (e) => {
+      if (startY === null) return;
+      const t = e.changedTouches[0];
+      const dy = t.clientY - startY;
+      const dx = t.clientX - startX;
+      startY = null; startX = null;
+      // Commit only on a clearly downward, vertical-dominant swipe
+      if (dy < SWIPE_CLOSE_PX || Math.abs(dx) > dy * 0.6) return;
+
+      const overlay = bar.closest('.active-session-overlay');
+      if (overlay) {
+        overlay.style.animation = 'none';
+        overlay.style.transition = 'transform 0.24s ease';
+        overlay.style.transform = 'translateY(100%)';
+        setTimeout(() => {
+          goHome();
+          overlay.style.transition = '';
+          overlay.style.transform = '';
+          overlay.style.animation = '';
+        }, 230);
+      } else {
+        goHome();
+      }
+    }, { passive: true });
+  });
 }
 
 function handlePathChange() {

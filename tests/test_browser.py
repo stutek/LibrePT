@@ -216,8 +216,8 @@ def test_interactive_dashboard_flow(page, local_server):
     page.locator("#dialog-feedback button[type='submit']").click()
     page.wait_for_selector("#dialog-feedback", state="hidden")
 
-    # Minimize active tracking overlay
-    page.locator("#btn-collapse-session").click()
+    # Leave the clipboard via the title-bar grab handle (replaces the old minimize chevron)
+    page.locator("#active-session-overlay .view-grabber").click()
 
     # Verify the new adjustment alert card on the dashboard displays the play audio button
     page.wait_for_selector(".btn-play-adjustment-audio", state="visible")

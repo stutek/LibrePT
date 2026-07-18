@@ -98,21 +98,25 @@
     <!-- VIEW: Clients Dashboard & Pending Plan Adjustments -->
     <section id="view-clients" class="app-view active">
       <!-- Section B: Today's & Tomorrow's Sessions -->
-      <div class="section-title sessions-title-bar">
-        <button id="btn-sessions-prev" class="sessions-nav-arrow" type="button" aria-label="Yesterday" title="Yesterday">
-          <i class="fa-solid fa-chevron-left"></i>
-        </button>
-        <h3 id="calendar-title">
-          <i class="fa-solid fa-calendar-days text-primary"></i>
-          <span id="calendar-title-date"></span>
-          <span class="calendar-title-separator">, </span>
-          <span id="calendar-title-weekday">Today</span>
-          <span id="calendar-title-weekday-short">Today</span>
-          <span id="calendar-title-tag" class="sessions-today-tag hidden">(Today)</span>
-        </h3>
-        <button id="btn-sessions-next" class="sessions-nav-arrow" type="button" aria-label="Tomorrow" title="Tomorrow">
-          <i class="fa-solid fa-chevron-right"></i>
-        </button>
+      <div class="section-title sessions-title-bar view-titlebar">
+        <button class="view-grabber" type="button" aria-label="Return to home"></button>
+        <h2 class="view-title-label" id="sessions-view-title">Sessions Schedule</h2>
+        <div class="sessions-date-picker">
+          <button id="btn-sessions-prev" class="sessions-nav-arrow" type="button" aria-label="Yesterday" title="Yesterday">
+            <i class="fa-solid fa-chevron-left"></i>
+          </button>
+          <h3 id="calendar-title">
+            <i class="fa-solid fa-calendar-days text-primary"></i>
+            <span id="calendar-title-date"></span>
+            <span class="calendar-title-separator">, </span>
+            <span id="calendar-title-weekday">Today</span>
+            <span id="calendar-title-weekday-short">Today</span>
+            <span id="calendar-title-tag" class="sessions-today-tag hidden">(Today)</span>
+          </h3>
+          <button id="btn-sessions-next" class="sessions-nav-arrow" type="button" aria-label="Tomorrow" title="Tomorrow">
+            <i class="fa-solid fa-chevron-right"></i>
+          </button>
+        </div>
       </div>
       
       <!-- One day-column is shown at a time and the title bar above already names the day, so the
@@ -164,7 +168,8 @@
 
     <!-- VIEW: Client Detail View -->
     <section id="view-client-detail" class="app-view">
-      <div class="view-header-back">
+      <div class="view-header-back view-titlebar">
+        <button class="view-grabber" type="button" aria-label="Return to home"></button>
         <button id="btn-back-to-clients" class="btn secondary-btn btn-sm">
           <i class="fa-solid fa-arrow-left"></i> Back
         </button>
@@ -211,7 +216,8 @@
 
     <!-- VIEW: Routines Listing -->
     <section id="view-routines" class="app-view">
-      <div class="view-header">
+      <div class="view-header view-titlebar">
+        <button class="view-grabber" type="button" aria-label="Return to home"></button>
         <h2>Routines Database</h2>
         <button id="btn-add-routine" class="btn primary-btn btn-sm">
           <i class="fa-solid fa-plus"></i> Create Template
@@ -222,7 +228,8 @@
 
     <!-- VIEW: Exercises Listing -->
     <section id="view-exercises" class="app-view">
-      <div class="view-header">
+      <div class="view-header view-titlebar">
+        <button class="view-grabber" type="button" aria-label="Return to home"></button>
         <h2>Exercise Library</h2>
         <button id="btn-add-exercise" class="btn primary-btn btn-sm">
           <i class="fa-solid fa-plus"></i> Add Exercise
@@ -251,7 +258,8 @@
 
     <!-- VIEW: History -->
     <section id="view-history" class="app-view">
-      <div class="view-header">
+      <div class="view-header view-titlebar">
+        <button class="view-grabber" type="button" aria-label="Return to home"></button>
         <h2>Global History</h2>
       </div>
       <p class="view-desc">Log of all completed sessions across all clients.</p>
@@ -324,7 +332,8 @@
          "2026-07-17 10:00 Trib gym base"), the live countdown, and the session's own controls
          (options menu + minimize). The .app-header above stays identical to the landing page
          (logo + language/theme/sync-backup), so session-specific controls live here instead. -->
-    <div class="session-title-bar">
+    <div class="session-title-bar view-titlebar">
+      <button class="view-grabber" type="button" aria-label="Close session and return to home"></button>
       <div class="session-title-block">
         <h3 id="session-title-text">Live Session</h3>
       </div>
@@ -343,9 +352,6 @@
             </button>
           </div>
         </div>
-        <button id="btn-collapse-session" class="icon-btn" aria-label="Minimize Active Session">
-          <i class="fa-solid fa-chevron-down"></i>
-        </button>
       </div>
     </div>
 
