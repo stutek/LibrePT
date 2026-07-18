@@ -55,13 +55,13 @@ python3 -m venv .venv
 .venv/bin/python -m pytest tests/ -v
 ```
 
-The build and deploy steps live in the `build/` and `deploy/` packages; `pipeline.py` is a thin orchestrator that runs the full verify → build → deploy chain and is debuggable end-to-end:
+The verify → build → deploy chain lives in the `build/` and `deploy/` packages, each runnable on its own and debuggable:
 
 ```bash
-.venv/bin/python -m build             # env check → tests → bundle src/ into dist/
-.venv/bin/python -m deploy            # publish the built dist/
-.venv/bin/python pipeline.py          # the whole chain
-.venv/bin/python -m pdb pipeline.py   # step-by-step debugging
+.venv/bin/python -m build                # env check → tests → bundle src/ into dist/
+.venv/bin/python -m deploy               # publish the built dist/
+.venv/bin/python -m build && .venv/bin/python -m deploy   # the whole chain
+.venv/bin/python -m pdb -m build         # step-by-step debugging
 ```
 
 ---
@@ -146,8 +146,7 @@ LibrePT/
 ├── manifest.json       # Web App Manifest for mobile PWA standalone styling
 ├── sw.js               # Service Worker for offline asset caching (PWA logic)
 ├── icons/              # PWA install icons (dumbbell mark, matching the in-app logo and favicon)
-├── pipeline.py         # Thin CI/CD orchestrator: runs build/ then deploy/ (verify → build → deploy)
-├── build/              # Build steps: environment check, tests, bundle src/ → dist/ (python -m build)
+├── build/              # Build steps (verify → build): env check, tests, bundle src/ → dist/ (python -m build)
 ├── deploy/             # Deploy step + local dev server (local_http_server.py) — python -m deploy
 ├── requirements.txt    # Python test toolchain (pytest, playwright)
 ├── tests/              # Static structure checks + Playwright end-to-end gym-floor flow

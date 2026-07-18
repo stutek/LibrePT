@@ -1,8 +1,8 @@
 name: Deploy demo to GitHub Pages
 
 # Publishes ONLY the runtime app (a freshly assembled dist/) to GitHub Pages on every
-# push to main. Publishes only src/, so tests/, use_cases/, build/, deploy/, pipeline.py, and the
-# Markdown docs stay out of the public demo, and avoids committing a dist/ folder or a gh-pages branch.
+# push to main. Publishes only src/, so tests/, use_cases/, build/, deploy/, and the Markdown docs
+# stay out of the public demo, and avoids committing a dist/ folder or a gh-pages branch.
 #
 # One-time setup in the repo: Settings -> Pages -> Build and deployment -> Source:
 # "GitHub Actions". After that this workflow is the deploy path.
