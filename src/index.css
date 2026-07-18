@@ -335,21 +335,21 @@ h1, h2, h3, h4, h5, h6 {
   align-items: center;
   justify-content: center;
   line-height: 1;
-}.cloud-sync-icon .fa-cloud, .session-menu-item .fa-cloud-arrow-up { font-size: 18px; color: var(--cloud-icon-color, #0284c7); }.cloud-sync-icon .fa-arrows-rotate {
+}.cloud-sync-icon .fa-cloud, .session-menu-item .fa-cloud-arrow-up { font-size: 24px; color: var(--cloud-icon-color, #0284c7); }.cloud-sync-icon .fa-arrows-rotate {
   position: absolute;
   left: 50%;
-  top: 58%;
+  top: 56%;
   transform: translate(-50%, -50%);
-  font-size: 9px;
+  font-size: 13px;
   color: var(--primary);
 }/* When there are pending changes the cloud button grows into a pill to seat the ahead/behind
    counters beside the icon; fully synced, the badge hides and it reads as a round icon again. */
 .sync-backup-btn {
   width: auto;
-  min-width: 38px;
+  min-width: 42px;
   border-radius: 999px;
-  padding: 0 10px;
-  gap: 6px;
+  padding: 0 12px;
+  gap: 8px;
 }.sync-badge {
   display: inline-flex;
   align-items: center;
