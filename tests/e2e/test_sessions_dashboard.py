@@ -8,27 +8,27 @@ import datetime
 
 def test_sessions_day_navigation(page, local_server):
     """
-    Verifies the sessions title bar reports the focused day (weekday + date + Today tag),
-    that the title arrows step across the day deck, and that going home re-focuses today.
+    Verifies the sessions title bar reports the focused day (weekday + date + a Today reset
+    button), that the title arrows step across the day deck, and that going home re-focuses today.
     """
     page.goto(local_server)
 
     weekday = page.locator("#calendar-title-weekday")
-    tag = page.locator("#calendar-title-tag")
+    today_btn = page.locator("#btn-sessions-today")
     today = datetime.date.today()
 
-    # Dashboard opens focused on today: ISO date, weekday and the (Today) tag are all present
+    # Dashboard opens focused on today: ISO date + weekday show today, Today button is disabled
     page.wait_for_selector("#calendar-title-weekday")
     assert weekday.inner_text().strip().upper() == today.strftime("%A").upper()
     assert page.locator("#calendar-title-date").inner_text().strip() == today.strftime("%Y-%m-%d")
-    assert tag.is_visible()
+    assert today_btn.is_disabled()  # disabled == the deck is already on today
 
-    # Left arrow steps back to yesterday and drops the (Today) tag
+    # Left arrow steps back to yesterday and enables the Today reset button
     page.locator("#btn-sessions-prev").click()
     page.wait_for_timeout(900)
     yesterday = today - datetime.timedelta(days=1)
     assert weekday.inner_text().strip().upper() == yesterday.strftime("%A").upper()
-    assert tag.is_hidden()
+    assert today_btn.is_enabled()  # enabled == not on today, so it can reset
 
     # Yesterday is the first column, so stepping further back is a dead end
     assert page.locator("#btn-sessions-prev").is_disabled()
@@ -36,19 +36,25 @@ def test_sessions_day_navigation(page, local_server):
     # Right arrow returns to today, then steps on to tomorrow
     page.locator("#btn-sessions-next").click()
     page.wait_for_timeout(900)
-    assert tag.is_visible()
+    assert today_btn.is_disabled()  # disabled == the deck is already on today
 
     page.locator("#btn-sessions-next").click()
     page.wait_for_timeout(900)
     tomorrow = today + datetime.timedelta(days=1)
     assert weekday.inner_text().strip().upper() == tomorrow.strftime("%A").upper()
-    assert tag.is_hidden()
+    assert today_btn.is_enabled()  # enabled == not on today, so it can reset
+
+    # The Today reset button jumps the deck straight back to today from any other day
+    today_btn.click()
+    page.wait_for_timeout(900)
+    assert page.locator("#calendar-title-date").inner_text().strip() == today.strftime("%Y-%m-%d")
+    assert today_btn.is_disabled()
 
     # Going home via the logo pulls focus back to today
     page.locator("#logo-area").click()
     page.wait_for_timeout(900)
     assert weekday.inner_text().strip().upper() == today.strftime("%A").upper()
-    assert tag.is_visible()
+    assert today_btn.is_disabled()  # disabled == the deck is already on today
 
     # A swipe of the deck itself (rather than the arrows) must retitle to the day it lands on
     page.evaluate("""() => {
@@ -62,7 +68,7 @@ def test_sessions_day_navigation(page, local_server):
     page.wait_for_timeout(900)
     assert weekday.inner_text().strip().upper() == tomorrow.strftime("%A").upper()
     assert page.locator("#calendar-title-date").inner_text().strip() == tomorrow.strftime("%Y-%m-%d")
-    assert tag.is_hidden()
+    assert today_btn.is_enabled()  # enabled == not on today, so it can reset
 
 
 def _touch_swipe(cdp, page, x, y, dx, steps=12):
@@ -96,11 +102,11 @@ def test_touch_swipe_between_days(browser, local_server):
 
     cdp = context.new_cdp_session(page)
     weekday = page.locator("#calendar-title-weekday-short")
-    tag = page.locator("#calendar-title-tag")
+    today_btn = page.locator("#btn-sessions-today")
     today = datetime.date.today()
 
     assert weekday.inner_text().strip().upper() == today.strftime("%a").upper()
-    assert tag.is_visible()
+    assert today_btn.is_disabled()  # disabled == the deck is already on today
 
     # Swiping left walks forward to tomorrow
     _touch_swipe(cdp, page, 195, 300, -300)
@@ -108,13 +114,13 @@ def test_touch_swipe_between_days(browser, local_server):
     tomorrow = today + datetime.timedelta(days=1)
     assert weekday.inner_text().strip().upper() == tomorrow.strftime("%a").upper()
     assert page.locator("#calendar-title-date").inner_text().strip() == tomorrow.strftime("%Y-%m-%d")
-    assert tag.is_hidden()
+    assert today_btn.is_enabled()  # enabled == not on today, so it can reset
 
-    # Swiping right walks back to today, tag and all
+    # Swiping right walks back to today
     _touch_swipe(cdp, page, 195, 300, 300)
     page.wait_for_timeout(1200)
     assert weekday.inner_text().strip().upper() == today.strftime("%a").upper()
-    assert tag.is_visible()
+    assert today_btn.is_disabled()  # disabled == the deck is already on today
 
     context.close()
 

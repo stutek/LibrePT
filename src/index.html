@@ -57,11 +57,11 @@
       <div class="header-actions">
         <!-- Normal view actions -->
         <div class="normal-header-actions" style="display: flex; align-items: center; gap: 8px;">
-          <select id="lang-switcher" class="form-control header-select" style="width: 74px; cursor: pointer;" aria-label="Switch Language / Zamenjaj jezik">
+          <select id="lang-switcher" class="form-control header-select" style="cursor: pointer;" aria-label="Switch Language / Zamenjaj jezik">
             <option value="en">EN</option>
             <option value="sl">SL</option>
           </select>
-          <select id="theme-switcher" class="form-control header-select" style="width: 114px; cursor: pointer;" aria-label="Theme / Tema">
+          <select id="theme-switcher" class="form-control header-select" style="cursor: pointer;" aria-label="Theme / Tema">
             <option value="midnight">Midnight</option>
             <option value="daylight">Daylight</option>
             <option value="red">Red</option>
@@ -118,6 +118,10 @@
         <button class="view-grabber" type="button" aria-label="Open session clipboard"></button>
         <h2 class="view-title-label" id="sessions-view-title">Sessions</h2>
         <div class="sessions-date-picker">
+          <button id="btn-sessions-today" class="sessions-today-btn" type="button" aria-label="Jump to today">
+            <i class="fa-solid fa-calendar-day" aria-hidden="true"></i>
+            <span class="today-btn-label">Today</span>
+          </button>
           <button id="btn-sessions-prev" class="sessions-nav-arrow" type="button" aria-label="Yesterday" title="Yesterday">
             <i class="fa-solid fa-chevron-left"></i>
           </button>
@@ -127,7 +131,6 @@
             <span class="calendar-title-separator">, </span>
             <span id="calendar-title-weekday">Today</span>
             <span id="calendar-title-weekday-short">Today</span>
-            <span id="calendar-title-tag" class="sessions-today-tag hidden">(Today)</span>
           </h3>
           <button id="btn-sessions-next" class="sessions-nav-arrow" type="button" aria-label="Tomorrow" title="Tomorrow">
             <i class="fa-solid fa-chevron-right"></i>

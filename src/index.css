@@ -180,7 +180,22 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
   display: inline-flex;
   align-items: center;
-}/* Main View Controller styling */
+}
+/* Select widths live here (not inline) so the mobile query below can compact them. */
+#lang-switcher { width: 74px; }
+#theme-switcher { width: 114px; }
+/* Narrow phones: the logo wordmark + two selects + two icon buttons together overflow the bar,
+   pushing the sync/menu buttons off-screen. Drop the wordmark (the dumbbell icon stays as the
+   home target) and compact the controls so every action stays visible, tappable, and un-clipped. */
+@media (max-width: 480px) {
+  .logo-area h1 { display: none; }
+  .header-actions { gap: 6px; }
+  .header-select { height: 40px !important; min-height: 40px !important; padding: 0 8px !important; font-size: 13px !important; }
+  #lang-switcher { width: 56px; }
+  #theme-switcher { width: 96px; }
+  .header-actions .icon-btn { width: 40px; height: 40px; font-size: 16px; }
+}
+/* Main View Controller styling */
 #main-content {
   flex: 1;
   overflow-y: auto;
@@ -250,25 +265,33 @@ h1, h2, h3, h4, h5, h6 {
   background: rgba(0, 0, 0, 0.3);
   padding: 4px 8px;
   border-radius: 6px;
-}.error-view .btn { margin-top: 8px; }.view-header { margin-bottom: 16px; }/* Unified view-title type — same across every view header, the home "Sessions Schedule" label,
-   and the active-session title, so all views read as one system. */
-.view-header h2, .view-title-label, .session-title-block h3 {
+}.error-view .btn { margin-top: 8px; }.view-header { margin-bottom: 16px; }
+/* Single source of truth for view-title type — every view reads as one system: the view headers,
+   the client-detail back header, the home "Sessions" label, the day-stepper date, the
+   active-session title, and the 404 title all share this one definition. The
+   `.section-title.sessions-title-bar h3` selector is specific enough to win over the generic
+   `.section-title h3` rule regardless of source order; `#error-view-title` (id) beats the base
+   heading rule. Change title size/weight/face here and nowhere else. */
+.view-header h2,
+.view-header-back h2,
+.view-title-label,
+.session-title-block h3,
+.section-title.sessions-title-bar h3,
+#error-view-title {
   font-family: var(--font-header);
   font-size: 22px;
   font-weight: 800;
   letter-spacing: -0.5px;
-}.view-title-label { flex: 0 0 auto; }.view-header-back {
+}
+.view-title-label { flex: 0 0 auto; }
+.view-header-back {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-bottom: 16px;
-}.view-header-back h2 {
-  font-family: var(--font-header);
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  flex: 1;
-}.view-desc {
+}
+.view-header-back h2 { flex: 1; }
+.view-desc {
   font-size: 14px;
   color: var(--text-muted);
   margin-top: -8px;
@@ -1265,15 +1288,17 @@ h1, h2, h3, h4, h5, h6 {
 .sessions-title-bar h3 {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  flex: 0 1 auto;
+  /* Fixed-width box so the ‹ › arrows and the Today reset button never shift as the
+     weekday/date text changes length. The weekday truncates within this width if needed; the
+     date always stays readable. Title type comes from the shared view-title rule above. */
+  width: 310px;
+  max-width: 100%;
+  flex: 0 0 auto;
   min-width: 0;
   white-space: nowrap;
-  font-family: var(--font-header);
-  font-size: 22px;
-  font-weight: 800;
   text-transform: none;
-  letter-spacing: -0.5px;
 }/* Only the weekday truncates — the date and Today tag must always stay readable */
 #calendar-title-weekday,
 #calendar-title-weekday-short {
@@ -1287,26 +1312,43 @@ h1, h2, h3, h4, h5, h6 {
 .sessions-title-bar h3 > i { order: -2; }#calendar-title-date {
   flex: 0 0 auto;
   color: var(--text-muted);
-  font-family: var(--font-header);
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  font-size: inherit;
+  /* Type (family/size/weight/letter-spacing) is inherited from #calendar-title; only the muted
+     colour and its temporal-tint overrides are set here. */
 }/* Temporal tint of the whole day-selection line: past = purple, today = default, future =
    amber. The weekday span and calendar icon inherit the h3 colour; the date sets its own
    muted colour, so it needs an explicit override. Mirrors the session-card title colours. */
-#calendar-title.is-past { color: var(--temporal-past); }#calendar-title.is-past #calendar-title-date { color: var(--temporal-past); }#calendar-title.is-future { color: var(--temporal-future); }#calendar-title.is-future #calendar-title-date { color: var(--temporal-future); }.sessions-today-tag {
+#calendar-title.is-past { color: var(--temporal-past); }#calendar-title.is-past #calendar-title-date { color: var(--temporal-past); }#calendar-title.is-future { color: var(--temporal-future); }#calendar-title.is-future #calendar-title-date { color: var(--temporal-future); }
+/* "Today" reset control: jumps the deck back to today. Always occupies its slot (disabled while
+   already on today) so the stepper's width — and therefore the arrows — never shift. */
+.sessions-today-btn {
   flex: 0 0 auto;
-  background: rgba(6, 182, 212, 0.12);
-  border: 1px solid rgba(6, 182, 212, 0.3);
-  color: var(--primary);
-  font-family: var(--font-sans);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  padding: 2px 7px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 12px;
+  white-space: nowrap;
   border-radius: 999px;
-  text-transform: uppercase;
-}.sessions-nav-arrow {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.sessions-today-btn:hover:not(:disabled) {
+  background: var(--border-color);
+  color: var(--primary);
+  border-color: var(--primary);
+}
+.sessions-today-btn:disabled { opacity: 0.35; cursor: default; }
+/* Desktop shows the text label; the icon takes its place only on phones (see mobile query). */
+.sessions-today-btn > i { display: none; }
+.sessions-nav-arrow {
   flex: 0 0 auto;
   width: 46px;
   height: 34px;
@@ -1354,14 +1396,13 @@ h1, h2, h3, h4, h5, h6 {
 @media (max-width: 600px) {
   .sessions-categories-grid {
     gap: 16px;
-  }/* Reclaim width so arrows + day title + Today tag stay on one gym-floor-readable row */
-  /* The label is the view title (takes remaining width, truncates if needed); the date stepper
-     keeps its full content on the right so the day + Today tag stay readable. */
-  /* Stack on phones: the "Sessions Schedule" title (same 22px type as every other view title)
-     sits above a full-width date stepper, so the weekday + date + Today tag never get squeezed
-     off a single row. The label type stays consistent; only the date control wraps below. */
-  .sessions-title-bar { flex-direction: row; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap; }.sessions-date-picker { display: inline-flex; align-items: center; justify-content: flex-end; width: auto; gap: 4px; }.sessions-title-bar h3 { font-size: 22px; font-family: var(--font-header); font-weight: 800; gap: 6px; }.sessions-title-bar h3 > i { display: none; }/* "Wed" instead of "Wednesday" keeps the date and Today tag from being squeezed out */
-  #calendar-title-weekday { display: none; }#calendar-title-weekday-short { display: inline; }#calendar-title-date { font-size: inherit; font-family: var(--font-header); font-weight: inherit; }/* Sweaty-hands tap target: wide enough to hit without looking */
+  }/* Phones keep the "Sessions" label and the date stepper on a single row (no wrap): the label
+     stays put on the left, the stepper takes the remaining width on the right, and the date
+     title truncates its weekday if space runs short. The Today button + arrows keep fixed widths
+     so they stay put; only the flexible title absorbs any change, so nothing shifts. */
+  .sessions-title-bar { flex-direction: row; align-items: center; justify-content: space-between; flex-wrap: nowrap; gap: 8px; }.sessions-date-picker { display: flex; align-items: center; justify-content: flex-end; flex: 1 1 auto; width: auto; min-width: 0; gap: 6px; }.sessions-title-bar h3 { width: auto; flex: 1 1 auto; min-width: 0; justify-content: flex-start; gap: 6px; overflow: hidden; }.sessions-title-bar h3 > i { display: none; }/* Icon-only Today button reclaims width so the date + arrows fit one row; the date leads and only the weekday truncates */
+  .sessions-today-btn { width: 36px; height: 36px; padding: 0; font-size: 15px; }.sessions-today-btn > i { display: inline; }.sessions-today-btn .today-btn-label { display: none; }/* "Wed" instead of "Wednesday" keeps the date readable on one row */
+  #calendar-title-weekday { display: none; }#calendar-title-weekday-short { display: inline; }/* Sweaty-hands tap target: wide enough to hit without looking */
   .sessions-nav-arrow { width: 38px; height: 36px; }/* Stack card contents into a single column so times and names stop wrapping mid-word */
   .booking-card {
   flex-direction: column;

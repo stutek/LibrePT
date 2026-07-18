@@ -61,8 +61,8 @@ export function renderSessionsTitleBar() {
   const weekdayEl = document.getElementById('calendar-title-weekday');
   const weekdayShortEl = document.getElementById('calendar-title-weekday-short');
   const dateEl = document.getElementById('calendar-title-date');
-  const tagEl = document.getElementById('calendar-title-tag');
-  if (!weekdayEl || !weekdayShortEl || !dateEl || !tagEl) return;
+  const todayBtn = document.getElementById('btn-sessions-today');
+  if (!weekdayEl || !weekdayShortEl || !dateEl) return;
 
   const locale = getSessionDayLocale();
   const day = focusedSessionDay;
@@ -92,8 +92,15 @@ export function renderSessionsTitleBar() {
     separatorEl.style.display = isUpcoming ? 'none' : 'inline';
   }
 
-  tagEl.textContent = `(${deps.t('today')})`;
-  tagEl.classList.toggle('hidden', day !== 'today');
+  // The Today control doubles as the "current day" indicator: it resets the deck to today, and
+  // is disabled while today is already focused. It always keeps its slot so the stepper's arrows
+  // never shift as the date text changes width.
+  if (todayBtn) {
+    // Only the text label is localized; the icon (shown in its place on phones) stays put.
+    const todayLabel = todayBtn.querySelector('.today-btn-label');
+    if (todayLabel) todayLabel.textContent = deps.t('today');
+    todayBtn.disabled = day === 'today';
+  }
 
   const idx = SESSION_DAY_ORDER.indexOf(day);
   const arrows = [
@@ -181,6 +188,9 @@ export function setupSessionsDayNav() {
   const nextBtn = document.getElementById('btn-sessions-next');
   if (prevBtn) prevBtn.addEventListener('click', () => stepSessionsColumn(-1));
   if (nextBtn) nextBtn.addEventListener('click', () => stepSessionsColumn(1));
+
+  const todayBtn = document.getElementById('btn-sessions-today');
+  if (todayBtn) todayBtn.addEventListener('click', () => focusSessionsColumn('today'));
 
   const grid = getSessionsGrid();
   if (grid) {
