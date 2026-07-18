@@ -1,0 +1,37 @@
+/* themes/blossom.css - Blossom — soft pink/lavender, VERY rounded/pill shapes */
+/* A gentle, soft palette on a light blush field with the roundest shapes (pill buttons), the
+   counterpoint to the Red theme's hard edges. */
+body.blossom-theme {
+  --bg-color: #fdf2f8;
+  --bg-gradient:
+    radial-gradient(1000px 720px at 6% -10%, rgba(244, 114, 182, 0.30), transparent 60%),
+    radial-gradient(900px 640px at 114% 0%, rgba(167, 139, 250, 0.26), transparent 58%),
+    radial-gradient(780px 700px at 50% 122%, rgba(251, 191, 36, 0.16), transparent 60%),
+    linear-gradient(180deg, #fff5fa 0%, #fdeaf3 100%);
+  --card-bg: rgba(255, 255, 255, 0.94);
+  --card-border: rgba(190, 24, 93, 0.12);
+  --text-main: #4a1d3f; /* deep plum */
+  --text-muted: #9d6b8a;
+  --border-color: #f6d6e6;
+  --input-bg: #fff7fb;
+  --primary: #ec4899;
+  --primary-hover: #db2777;
+  --primary-light: rgba(236, 72, 153, 0.14);
+  --primary-gradient: linear-gradient(135deg, #f472b6 0%, #ec4899 55%, #c084fc 100%);
+  --on-primary: #ffffff;
+  --secondary: #c084fc;
+  --secondary-hover: #a855f7;
+  --secondary-light: rgba(192, 132, 252, 0.12);
+  --accent-cyan: #f472b6; /* soft pink highlights */
+  --danger: #e11d48;
+  --danger-hover: #be123c;
+  --danger-light: rgba(225, 29, 72, 0.12);
+  --success: #10b981;
+  --success-hover: #059669;
+  --box-shadow: 0 18px 36px -18px rgba(190, 24, 93, 0.30);
+  /* Shape personality — very soft, pill buttons */
+  --border-radius-lg: 24px;
+  --border-radius-md: 18px;
+  --border-radius-sm: 14px;
+  --btn-radius: 999px;
+}

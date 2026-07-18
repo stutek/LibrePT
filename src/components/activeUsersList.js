@@ -28,23 +28,23 @@ export function renderActiveUsersList(tabsContainer, activeSession, ctx) {
     const tab = document.createElement('button');
     tab.className = `client-tab-btn ${isActive ? 'active' : ''}`;
 
-    // Selected tab: an accent-tinted pill with accent border + bright accent text — clearly
-    // emphasised, but softer than a solid accent block so the label keeps strong contrast.
+    // Selected tab: uses unified primary gradient with on-primary text for clear, vibrant emphasis.
     tab.style.display = 'flex';
     tab.style.alignItems = 'center';
     tab.style.gap = '8px';
     tab.style.padding = '10px 20px';
     tab.style.borderRadius = '24px';
-    tab.style.border = isActive ? '1px solid var(--accent-cyan)' : '1px solid var(--border-color)';
-    tab.style.background = isActive ? 'color-mix(in srgb, var(--accent-cyan) 20%, transparent)' : 'rgba(255,255,255,0.05)';
-    tab.style.color = isActive ? 'var(--accent-cyan)' : 'var(--text-main)';
+    tab.style.border = isActive ? '1px solid transparent' : '1px solid var(--border-color)';
+    tab.style.background = isActive ? 'var(--primary-gradient)' : 'rgba(255,255,255,0.05)';
+    tab.style.color = isActive ? 'var(--on-primary)' : 'var(--text-main)';
+    tab.style.boxShadow = isActive ? '0 4px 14px -4px rgba(0, 0, 0, 0.45)' : 'none';
     tab.style.fontWeight = '700';
     tab.style.cursor = 'pointer';
     tab.style.transition = 'all 0.2s';
     tab.style.minHeight = '44px';
 
     tab.innerHTML = `
-      <div class="avatar" style="width:20px; height:20px; font-size:9px; background: var(--accent-cyan); color: var(--bg-color);">
+      <div class="avatar" style="width:20px; height:20px; font-size:9px; background: ${isActive ? 'rgba(255, 255, 255, 0.25)' : 'var(--primary-light)'}; color: ${isActive ? '#fff' : 'var(--primary)'};">
         ${client.avatar || getInitials(client.name)}
       </div>
       <span>${getClientDisplayNameHTML(client, true)}</span>

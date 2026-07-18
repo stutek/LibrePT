@@ -24,9 +24,9 @@ export function renderExerciseCard(card, item, ctx) {
 
   let statusBadge = '';
   if (showInFocus) {
-    statusBadge = `<span class="badge badge-cyan deck-card-status">In Focus</span>`;
+    statusBadge = `<span class="badge badge-primary deck-card-status">In Focus</span>`;
   } else if (item.isCompleted) {
-    statusBadge = `<span class="badge badge-emerald deck-card-status">Completed</span>`;
+    statusBadge = `<span class="badge badge-success deck-card-status">Completed</span>`;
   } else {
     statusBadge = `<span class="badge deck-card-status deck-card-status-upcoming">Upcoming</span>`;
   }

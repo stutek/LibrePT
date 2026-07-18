@@ -1,0 +1,37 @@
+/* themes/red.css - Red — bold red/gold/white on a deep red field, EDGY sharp shapes */
+/* A sporty, aggressive red skin: red (#DA291C) and gold (#FBE122) on a deep red field, white
+   text, sharp near-square corners. --success stays green so "completed" keeps its meaning;
+   --danger is gold since red-on-red would vanish. */
+body.red-theme {
+  --bg-color: #2a0407;
+  --bg-gradient:
+    radial-gradient(1050px 720px at 12% -10%, rgba(218, 41, 28, 0.60), transparent 58%),
+    radial-gradient(820px 560px at 112% 4%, rgba(251, 225, 34, 0.12), transparent 55%),
+    linear-gradient(180deg, #3d060b 0%, #1e0305 100%);
+  --card-bg: rgba(74, 10, 15, 0.90);
+  --card-border: rgba(255, 255, 255, 0.16);
+  --text-main: #ffffff;
+  --text-muted: #f0b6ba;
+  --border-color: #7c141b;
+  --input-bg: #4a080d;
+  --primary: #da291c;                      /* red */
+  --primary-hover: #b51e13;
+  --primary-light: rgba(218, 41, 28, 0.24);
+  --primary-gradient: linear-gradient(135deg, #e11d2a 0%, #a30f18 100%);
+  --on-primary: #ffffff;
+  --secondary: #da291c;
+  --secondary-hover: #b51e13;
+  --secondary-light: rgba(218, 41, 28, 0.2);
+  --accent-cyan: #fbe122;                  /* gold highlights */
+  --danger: #fbe122;                       /* gold warning — red-on-red would vanish */
+  --danger-hover: #eacb0f;
+  --danger-light: rgba(251, 225, 34, 0.18);
+  --success: #4ade80;
+  --success-hover: #22c55e;
+  --box-shadow: 0 14px 30px -14px rgba(0, 0, 0, 0.6);
+  /* Shape personality — edgy, near-square */
+  --border-radius-lg: 6px;
+  --border-radius-md: 4px;
+  --border-radius-sm: 3px;
+  --btn-radius: 3px;
+}

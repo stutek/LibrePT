@@ -1,0 +1,41 @@
+/* themes/midnight.css - Midnight (default dark) — sleek zinc + emerald, medium shapes */
+:root,
+body.midnight-theme {
+  --bg-color: #09090b; /* zinc-950 */
+  --bg-gradient:
+    radial-gradient(1100px 720px at 12% -8%, rgba(16, 185, 129, 0.16), transparent 60%),
+    radial-gradient(900px 640px at 108% 4%, rgba(34, 211, 238, 0.12), transparent 55%),
+    radial-gradient(760px 720px at 50% 118%, rgba(79, 70, 229, 0.12), transparent 60%);
+  --card-bg: rgba(22, 22, 26, 0.92); /* near-opaque so deck cards stay readable over the gradient */
+  --card-border: rgba(255, 255, 255, 0.09);
+  --text-main: #fafafa; /* zinc-50 */
+  --text-muted: #a1a1aa; /* zinc-400 */
+  --border-color: #27272a; /* zinc-800 */
+  --input-bg: #18181b; /* zinc-900 */
+
+  --primary: #10b981; /* emerald-500 */
+  --primary-hover: #059669;
+  --primary-light: rgba(16, 185, 129, 0.15);
+  --primary-gradient: linear-gradient(135deg, #10b981 0%, #0ea5a4 100%);
+  --on-primary: #052e22; /* text on primary buttons */
+
+  --secondary: #4f46e5; /* indigo-600 */
+  --secondary-hover: #4338ca;
+  --secondary-light: rgba(79, 70, 229, 0.15);
+
+  --accent-cyan: #22d3ee; /* highlight accent (counters, focus, timers) */
+
+  --danger: #ef4444;
+  --danger-hover: #dc2626;
+  --danger-light: rgba(239, 68, 68, 0.15);
+  --success: #10b981;
+  --success-hover: #059669;
+
+  /* Shape personality — medium, balanced */
+  --border-radius-lg: 16px;
+  --border-radius-md: 12px;
+  --border-radius-sm: 8px;
+  --btn-radius: 10px;
+
+  --box-shadow: 0 14px 34px -14px rgba(0, 0, 0, 0.72);
+}

@@ -39,13 +39,13 @@ export function renderPendingPlanAdjustmentsComponent(container, countBadge, ctx
     card.style.gap = '12px';
     card.style.padding = '12px';
     card.style.marginBottom = '8px';
-    card.style.borderLeft = '4px solid var(--accent-cyan)';
+    card.style.borderLeft = '4px solid var(--primary)';
     
     const info = document.createElement('div');
     info.style.flex = '1';
     
     // Format tag badge color based on severity
-    let badgeClass = 'badge-cyan';
+    let badgeClass = 'badge-primary';
     if (u.tag.includes('Pain') || u.tag.includes('Discomfort')) badgeClass = 'badge-danger';
     else if (u.tag.includes('Hard')) badgeClass = 'badge-warning';
     else if (u.tag.includes('Easy') || u.tag.includes('Progression')) badgeClass = 'badge-success';
@@ -53,8 +53,8 @@ export function renderPendingPlanAdjustmentsComponent(container, countBadge, ctx
     let voiceNoteHTML = '';
     if (u.hasVoiceNote) {
       voiceNoteHTML = `
-        <div class="mini-audio-note" style="display: flex; align-items: center; gap: 6px; margin-top: 6px; background: rgba(0,255,255,0.05); padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(0,255,255,0.15); width: fit-content;">
-          <button type="button" class="btn-play-adjustment-audio" data-id="${u.id}" style="background: none; border: none; color: var(--accent-cyan); cursor: pointer; padding: 0; display: inline-flex; align-items: center;"><i class="fa-solid fa-circle-play" style="font-size: 14px;"></i></button>
+        <div class="mini-audio-note" style="display: flex; align-items: center; gap: 6px; margin-top: 6px; background: var(--primary-light); padding: 4px 8px; border-radius: 4px; border: 1px solid color-mix(in srgb, var(--primary) 25%, transparent); width: fit-content;">
+          <button type="button" class="btn-play-adjustment-audio" data-id="${u.id}" style="background: none; border: none; color: var(--primary); cursor: pointer; padding: 0; display: inline-flex; align-items: center;"><i class="fa-solid fa-circle-play" style="font-size: 14px;"></i></button>
           <span class="audio-status-label" style="font-size: 9px; color: var(--text-muted); font-family: monospace;">voice_memo.wav (0:04)</span>
         </div>
       `;
@@ -66,7 +66,7 @@ export function renderPendingPlanAdjustmentsComponent(container, countBadge, ctx
         <span class="badge ${badgeClass}" style="font-size: 9px; padding: 2px 6px;">${escapeHTML(u.tag)}</span>
       </div>
       <div style="font-size: 11px; color: var(--text-muted);">
-        ${t('exercise_of')}: <span class="font-semibold" style="color: var(--accent-cyan);">${escapeHTML(u.exerciseName)}</span>
+        ${t('exercise_of')}: <span class="font-semibold" style="color: var(--primary);">${escapeHTML(u.exerciseName)}</span>
       </div>
       ${voiceNoteHTML}
     `;

@@ -1,0 +1,27 @@
+/* themes/daylight.css - Daylight (light) — airy slate + emerald, soft rounded shapes */
+body.daylight-theme {
+  --bg-color: #f6f7fb;
+  --bg-gradient:
+    radial-gradient(1000px 700px at 8% -10%, rgba(16, 185, 129, 0.12), transparent 60%),
+    radial-gradient(920px 640px at 112% -2%, rgba(56, 189, 248, 0.16), transparent 55%),
+    linear-gradient(180deg, #ffffff 0%, #eef2f9 100%);
+  --card-bg: rgba(255, 255, 255, 0.96);
+  --card-border: rgba(15, 23, 42, 0.08);
+  --text-main: #0f172a; /* slate-900 */
+  --text-muted: #64748b; /* slate-500 */
+  --border-color: #e2e8f0; /* slate-200 */
+  --input-bg: #ffffff;
+  --primary: #059669; /* slightly deeper emerald reads better on light */
+  --primary-hover: #047857;
+  --primary-light: rgba(5, 150, 105, 0.12);
+  --primary-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  --on-primary: #ffffff;
+  --secondary-light: rgba(79, 70, 229, 0.1);
+  --accent-cyan: #0891b2;
+  --box-shadow: 0 16px 34px -18px rgba(15, 23, 42, 0.22);
+  /* Shape personality — soft and friendly */
+  --border-radius-lg: 20px;
+  --border-radius-md: 15px;
+  --border-radius-sm: 11px;
+  --btn-radius: 999px;
+}

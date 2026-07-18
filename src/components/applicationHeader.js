@@ -25,14 +25,17 @@ let mockSyncState = { local: 2, remote: 1 };
 let syncTrackingReady = false;
 
 const THEME_BODY_CLASS = {
-  dark: 'dark-theme', light: 'light-theme', red: 'red-theme', rose: 'rose-theme', violet: 'violet-theme'
+  midnight: 'midnight-theme', daylight: 'daylight-theme', red: 'red-theme', blossom: 'blossom-theme', nebula: 'nebula-theme'
 };
 const THEME_META_COLOR = {
-  dark: '#09090b', light: '#f6f7fb', red: '#2a0407', rose: '#fdf2f8', violet: '#0b0a1f'
+  midnight: '#09090b', daylight: '#f6f7fb', red: '#2a0407', blossom: '#fdf2f8', nebula: '#0b0a1f'
 };
 const THEME_SWITCHER_LABELS = {
-  en: { dark: 'Midnight', light: 'Daylight', red: 'Red', rose: 'Blossom', violet: 'Nebula' },
-  sl: { dark: 'Polnoč', light: 'Dan', red: 'Rdeča', rose: 'Cvet', violet: 'Nebula' }
+  en: { midnight: 'Midnight', daylight: 'Daylight', red: 'Red', blossom: 'Blossom', nebula: 'Nebula' },
+  sl: { midnight: 'Polnoč', daylight: 'Dan', red: 'Rdeča', blossom: 'Cvet', nebula: 'Nebula' }
+};
+const LEGACY_THEME_MAP = {
+  dark: 'midnight', light: 'daylight', rose: 'blossom', violet: 'nebula'
 };
 
 export function initApplicationHeader(d) {
@@ -75,12 +78,13 @@ export function renderSyncBadge() {
 }
 
 function applyTheme(theme) {
-  const cls = THEME_BODY_CLASS[theme] || THEME_BODY_CLASS.dark;
+  theme = LEGACY_THEME_MAP[theme] || theme;
+  const cls = THEME_BODY_CLASS[theme] || THEME_BODY_CLASS.midnight;
   Object.values(THEME_BODY_CLASS).forEach(c => document.body.classList.remove(c));
   document.body.classList.add(cls);
   localStorage.setItem('librept-theme', theme);
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', THEME_META_COLOR[theme] || THEME_META_COLOR.dark);
+  if (meta) meta.setAttribute('content', THEME_META_COLOR[theme] || THEME_META_COLOR.midnight);
 }
 
 export function applyThemeSwitcherLabels() {
@@ -91,7 +95,8 @@ export function applyThemeSwitcherLabels() {
 }
 
 function setupThemeSwitcher() {
-  const saved = localStorage.getItem('librept-theme') || 'light';
+  let saved = localStorage.getItem('librept-theme') || 'daylight';
+  saved = LEGACY_THEME_MAP[saved] || saved;
   applyTheme(saved);
   const sel = document.getElementById('theme-switcher');
   if (sel) {

@@ -28,7 +28,7 @@
   <!-- Custom Styles -->
   <link rel="stylesheet" href="index.css">
 </head>
-<body class="light-theme">
+<body class="daylight-theme">
 
   <!-- Top Header Bar -->
   <header class="app-header">
@@ -46,11 +46,11 @@
             <option value="sl">SL</option>
           </select>
           <select id="theme-switcher" class="form-control header-select" style="width: 104px; height: 36px; padding: 2px 6px; font-size: 13px; font-weight: 700; cursor: pointer;" aria-label="Theme / Tema">
-            <option value="dark">Midnight</option>
-            <option value="light">Daylight</option>
+            <option value="midnight">Midnight</option>
+            <option value="daylight">Daylight</option>
             <option value="red">Red</option>
-            <option value="rose">Blossom</option>
-            <option value="violet">Nebula</option>
+            <option value="blossom">Blossom</option>
+            <option value="nebula">Nebula</option>
           </select>
           <button id="backup-btn" class="icon-btn sync-backup-btn" aria-label="Sync & Backup Data">
             <!-- Cloud + recycle: this one control now covers both syncing session data and
@@ -103,7 +103,7 @@
           <i class="fa-solid fa-chevron-left"></i>
         </button>
         <h3 id="calendar-title">
-          <i class="fa-solid fa-calendar-days text-cyan"></i>
+          <i class="fa-solid fa-calendar-days text-primary"></i>
           <span id="calendar-title-date"></span>
           <span class="calendar-title-separator">, </span>
           <span id="calendar-title-weekday">Today</span>
@@ -330,7 +330,7 @@
       </div>
       <div class="session-title-actions">
         <div class="session-timer-block">
-          <i class="fa-solid fa-stopwatch text-cyan"></i>
+          <i class="fa-solid fa-stopwatch text-primary"></i>
           <span id="overlay-session-duration">00:00</span>
         </div>
         <div class="session-menu-wrap">
@@ -631,7 +631,7 @@
           <span class="badge badge-emerald" style="font-size: 8px; padding: 1px 4px;">Local Only</span>
         </label>
         <div class="voice-recorder-widget" style="display: flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.15); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color); margin-top: 4px;">
-          <button type="button" id="btn-voice-record" class="btn secondary-btn" style="width: 40px; height: 40px; border-radius: 50%; padding: 0; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; background: rgba(255,255,255,0.05); color: var(--accent-cyan); border-color: var(--border-color); flex-shrink: 0;">
+          <button type="button" id="btn-voice-record" class="btn secondary-btn" style="width: 40px; height: 40px; border-radius: 50%; padding: 0; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; background: rgba(255,255,255,0.05); color: var(--primary); border-color: var(--border-color); flex-shrink: 0;">
             <i class="fa-solid fa-microphone" id="voice-record-icon" style="font-size: 16px;"></i>
           </button>
           <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
@@ -648,7 +648,7 @@
             </div>
             <!-- Audio player review if recorded -->
             <div id="voice-audio-player" class="audio-player-mini hidden" style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
-              <button type="button" id="btn-play-voice-preview" style="background: none; border: none; color: var(--accent-cyan); cursor: pointer; padding: 0;"><i class="fa-solid fa-circle-play" style="font-size: 16px;"></i></button>
+              <button type="button" id="btn-play-voice-preview" style="background: none; border: none; color: var(--primary); cursor: pointer; padding: 0;"><i class="fa-solid fa-circle-play" style="font-size: 16px;"></i></button>
               <div style="font-size: 10px; color: var(--text-color); font-family: monospace;">voice_memo.wav (0:04)</div>
             </div>
           </div>
@@ -684,11 +684,11 @@
           <strong style="color: var(--text-muted);">Client:</strong> <span id="adjust-client-name" class="font-semibold text-emerald"></span>
         </div>
         <div style="font-size: 13px; margin-bottom: 6px;">
-          <strong style="color: var(--text-muted);">Feedback:</strong> <span id="adjust-feedback-tag" class="font-semibold text-cyan"></span>
+          <strong style="color: var(--text-muted);">Feedback:</strong> <span id="adjust-feedback-tag" class="font-semibold text-primary"></span>
         </div>
         <div id="adjust-voice-player-container" class="hidden" style="margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
           <strong style="color: var(--text-muted); font-size: 13px;">Voice:</strong>
-          <button type="button" id="adjust-btn-play-voice" style="background: none; border: none; color: var(--accent-cyan); cursor: pointer; padding: 0; line-height: 1;"><i class="fa-solid fa-circle-play" style="font-size: 16px;"></i></button>
+          <button type="button" id="adjust-btn-play-voice" style="background: none; border: none; color: var(--primary); cursor: pointer; padding: 0; line-height: 1;"><i class="fa-solid fa-circle-play" style="font-size: 16px;"></i></button>
           <span style="font-size: 11px; font-family: monospace;">voice_memo.wav (0:04)</span>
         </div>
         <div style="font-size: 13px;">
@@ -749,7 +749,7 @@
 
       <div class="backup-actions">
         <div class="action-card card">
-          <i class="fa-solid fa-arrows-rotate backup-icon-large text-cyan"></i>
+          <i class="fa-solid fa-arrows-rotate backup-icon-large text-primary"></i>
           <h4 id="sync-data-title">Sync Session Data</h4>
           <p id="sync-data-desc">Pull the latest bookings and session schedule from your connected calendar.</p>
           <button id="btn-sync-data" class="btn primary-btn w-full">

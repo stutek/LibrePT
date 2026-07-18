@@ -1069,11 +1069,11 @@ function renderHistoryItems(historyList, container) {
       let feedbackIconsHTML = '';
       
       feedbackItems.forEach(f => {
-        let iconClass = 'fa-solid fa-comment-dots text-cyan';
+        let iconClass = 'fa-solid fa-comment-dots text-primary';
         let title = f.tag;
         
         if (f.tag.includes('Too Easy') || f.tag.includes('Increase Load')) {
-          iconClass = 'fa-solid fa-rocket text-emerald';
+          iconClass = 'fa-solid fa-rocket text-success';
         } else if (f.tag.includes('Too Hard') || f.tag.includes('Reduce Load')) {
           iconClass = 'fa-solid fa-triangle-exclamation text-warning';
         } else if (f.tag.includes('Form Break') || f.tag.includes('Focus') || f.tag.includes('Form')) {
@@ -1104,7 +1104,7 @@ function renderHistoryItems(historyList, container) {
         let notesListHTML = setNotes.map((s, idx) => `<div><strong>${t('set_label')} ${idx + 1}:</strong> ${escapeHTML(s.note)}</div>`).join('');
         feedbackIconsHTML += `
           <span class="history-feedback-icon" onclick="this.classList.toggle('active'); event.stopPropagation();">
-            <i class="fa-solid fa-sticky-note text-cyan"></i>
+            <i class="fa-solid fa-sticky-note text-primary"></i>
             <span class="tooltip-content">
               <div class="tooltip-title">${t('trainer_set_notes')}</div>
               <div class="tooltip-body">${notesListHTML}</div>
@@ -1560,10 +1560,10 @@ function updateOverlaySessionTimer() {
   if (endDate) {
     const remainingSec = Math.round((new Date(endDate).getTime() - Date.now()) / 1000);
     el.textContent = formatSignedDuration(remainingSec);
-    el.style.color = remainingSec < 0 ? 'var(--danger)' : 'var(--accent-cyan)';
+    el.style.color = remainingSec < 0 ? 'var(--danger)' : 'var(--primary)';
   } else {
     el.textContent = formatDuration(activeSession.duration);
-    el.style.color = 'var(--accent-cyan)';
+    el.style.color = 'var(--primary)';
   }
 }
 

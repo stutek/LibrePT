@@ -39,7 +39,7 @@ export function renderSupersetCard(card, item, ctx) {
           <div class="superset-failure-stepper" data-ex-id="${escapeHTML(ex.id)}" style="display: inline-flex; align-items: center; gap: 4px;">
             <span style="font-size: 10px; color: var(--text-muted); font-weight: 700;">Fail Reps:</span>
             <button type="button" class="stepper-btn minus" style="width: 22px; height: 22px; border-radius: 4px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.05); color: var(--text-color); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; cursor: pointer; user-select: none;">-</button>
-            <input type="number" class="superset-failure-input" value="${actualReps}" placeholder="Max" style="width: 38px; height: 22px; padding: 0; border-radius: 4px; border: 1px solid var(--border-color); background: rgba(0,0,0,0.3); color: var(--accent-cyan); font-size: 11px; font-weight: 700; text-align: center;">
+            <input type="number" class="superset-failure-input" value="${actualReps}" placeholder="Max" style="width: 38px; height: 22px; padding: 0; border-radius: 4px; border: 1px solid var(--border-color); background: rgba(0,0,0,0.3); color: var(--primary); font-size: 11px; font-weight: 700; text-align: center;">
             <button type="button" class="stepper-btn plus" style="width: 22px; height: 22px; border-radius: 4px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.05); color: var(--text-color); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; cursor: pointer; user-select: none;">+</button>
           </div>
         `;

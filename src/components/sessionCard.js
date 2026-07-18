@@ -61,20 +61,20 @@ export function renderSessionCard(b, colContainer, deps) {
 
   // A finished session is badged and de-emphasised rather than shown as launchable
   const completedBadge = b.completed
-    ? `<span class="badge badge-emerald" style="font-size: 9px; padding: 2px 6px; font-weight: 700;"><i class="fa-solid fa-circle-check" style="margin-right:3px;"></i>${t('session_completed')}</span>`
+    ? `<span class="badge badge-success" style="font-size: 9px; padding: 2px 6px; font-weight: 700;"><i class="fa-solid fa-circle-check" style="margin-right:3px;"></i>${t('session_completed')}</span>`
     : '';
   if (b.completed) card.classList.add('booking-completed');
 
   info.innerHTML = `
     <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px;">
       ${isLive ? '<span class="pulse-indicator" title="In progress"></span>' : ''}
-      <span class="badge badge-cyan" style="font-size: 10px; padding: 2px 6px; font-weight: 700; font-family: monospace;">${escapeHTML(b.time)}</span>
+      <span class="badge badge-primary" style="font-size: 10px; padding: 2px 6px; font-weight: 700; font-family: monospace;">${escapeHTML(b.time)}</span>
       <strong class="booking-card-title" style="font-size: 13px;">${escapeHTML(b.title)}</strong>
       ${completedBadge}
     </div>
     <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">
       <i class="fa-solid fa-users" style="margin-right: 4px; font-size: 10px;"></i> ${clientNamesStr || `<span style="color: #ef4444;">—</span>`}
-      <span style="margin-left: 4px; color: var(--accent-cyan); font-weight: 600;">(${clients.length}/${b.maxCapacity} ${t('spots_filled')})</span>
+      <span style="margin-left: 4px; color: var(--primary); font-weight: 600;">(${clients.length}/${b.maxCapacity} ${t('spots_filled')})</span>
     </div>
     <div style="font-size: 11px; color: var(--text-muted);">
       <i class="fa-solid fa-clipboard-list" style="margin-right: 4px; font-size: 10px;"></i> Program: <span class="font-semibold">${routineName ? escapeHTML(routineName) : `<span style="color: #ef4444; font-weight: 600;">${t('undefined')}</span>`}</span>
