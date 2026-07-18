@@ -118,7 +118,7 @@ export const sl = {
     routines_desc: "Izberite ali uredite vadbene rutine. Zaženite jih za posameznike ali skupine.",
     filter_all: "Vse",
     history_desc: "Dnevnik vseh zaključenih vadb za vse stranke.",
-    sessions_schedule: "Urnik sej",
+    sessions_schedule: "Seje",
     from_date: "Od",
     btn_sync_calendar: "Sinhroniziraj",
     btn_sync_data: "Sinhroniziraj podatke",

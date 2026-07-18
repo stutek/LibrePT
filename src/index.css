@@ -339,9 +339,17 @@ h1, h2, h3, h4, h5, h6 {
   position: absolute;
   left: 50%;
   top: 56%;
-  font-size: 13px;
+  transform: translate(-50%, -50%);
+  font-size: 11px;
   color: var(--cloud-arrows-color, var(--success, #10b981));
-  filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.45));
+  background: var(--card-bg, #ffffff);
+  border-radius: 50%;
+  width: 14px;
+  height: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 2.5px rgba(0, 0, 0, 0.4);
 }/* When there are pending changes the cloud button grows into a pill to seat the ahead/behind
    counters beside the icon; fully synced, the badge hides and it reads as a round icon again. */
 .sync-backup-btn {
@@ -1343,7 +1351,7 @@ h1, h2, h3, h4, h5, h6 {
   /* Stack on phones: the "Sessions Schedule" title (same 22px type as every other view title)
      sits above a full-width date stepper, so the weekday + date + Today tag never get squeezed
      off a single row. The label type stays consistent; only the date control wraps below. */
-  .sessions-title-bar { flex-direction: column; align-items: stretch; gap: 8px; }.sessions-date-picker { display: flex; justify-content: space-between; width: 100%; gap: 6px; }.sessions-title-bar h3 { font-size: 13px; gap: 6px; }.sessions-title-bar h3 > i { display: none; }/* "Wed" instead of "Wednesday" keeps the date and Today tag from being squeezed out */
+  .sessions-title-bar { flex-direction: row; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap; }.sessions-date-picker { display: inline-flex; align-items: center; justify-content: flex-end; width: auto; gap: 4px; }.sessions-title-bar h3 { font-size: 13px; gap: 6px; }.sessions-title-bar h3 > i { display: none; }/* "Wed" instead of "Wednesday" keeps the date and Today tag from being squeezed out */
   #calendar-title-weekday { display: none; }#calendar-title-weekday-short { display: inline; }#calendar-title-date { font-size: 11px; }/* Sweaty-hands tap target: wide enough to hit without looking */
   .sessions-nav-arrow { width: 38px; height: 36px; }/* Stack card contents into a single column so times and names stop wrapping mid-word */
   .booking-card {

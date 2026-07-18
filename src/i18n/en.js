@@ -119,7 +119,7 @@ export const en = {
     routines_desc: "Select or edit workout routines. Launch them with individual or group sessions.",
     filter_all: "All",
     history_desc: "Log of all completed sessions across all clients.",
-    sessions_schedule: "Sessions Schedule",
+    sessions_schedule: "Sessions",
     from_date: "From",
     btn_sync_calendar: "Sync Calendar",
     btn_sync_data: "Sync Data",
