@@ -1,5 +1,16 @@
+# OKF v0.1 catalog manifest. Declares the spec version and the entrypoint into
+# the knowledge graph; INDEX.md is the full navigation index for the catalog,
+# and README.md is the architectural overview it points at.
 spec_version: "0.1"
 name: "LibrePT Knowledge Catalog"
-description: "OKF-compliant specification and architectural knowledge graph for the LibrePT Personal Trainer Management & Scheduling System."
+description: >-
+  OKF-compliant specification and architectural knowledge graph for LibrePT, an
+  offline-first personal-trainer PWA. The runtime is a dependency-free vanilla
+  ES-module app under src/, with the entry (app.js) split into per-entity seed
+  data (src/data/), externalized EN/SL dictionaries (src/i18n/), and extracted UI
+  components (src/components/); a 5-theme system driven entirely by CSS custom
+  properties; deep-linkable clean-URL routing; and a verify -> build -> deploy
+  chain packaged under build/ and deploy/. Functional workflows live in
+  use_cases/; INDEX.md is the master navigation index.
 root: "."
 entrypoint: "README.md"
