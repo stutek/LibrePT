@@ -22,7 +22,7 @@ body.daylight-theme {
   --temporal-past: #7c3aed;
   --temporal-future: #d97706;
   --cloud-icon-color: #0284c7; /* sky-600 blue, crisp and airy instead of dark slate/black */
-  --cloud-arrows-color: #ffffff; /* crisp white arrows on blue cloud for max contrast */
+  --cloud-arrows-color: var(--success, #10b981); /* standard green sync arrows inside cloud */
   --box-shadow: 0 16px 34px -18px rgba(15, 23, 42, 0.22);
   /* Shape personality — soft and friendly */
   --border-radius-lg: 20px;

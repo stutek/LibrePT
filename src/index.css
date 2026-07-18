@@ -24,7 +24,7 @@
      each theme overrides these with palette-tuned values (see src/themes/*.css). */
   --temporal-past: #c084fc;
   --cloud-icon-color: #0284c7;
-  --cloud-arrows-color: #ffffff;
+  --cloud-arrows-color: var(--success, #10b981);
 }
 
 /* ==========================================================================
@@ -340,7 +340,8 @@ h1, h2, h3, h4, h5, h6 {
   left: 50%;
   top: 56%;
   font-size: 13px;
-  color: var(--cloud-arrows-color, #ffffff);
+  color: var(--cloud-arrows-color, var(--success, #10b981));
+  filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.45));
 }/* When there are pending changes the cloud button grows into a pill to seat the ahead/behind
    counters beside the icon; fully synced, the badge hides and it reads as a round icon again. */
 .sync-backup-btn {
@@ -361,8 +362,8 @@ h1, h2, h3, h4, h5, h6 {
   display: inline-flex;
   align-items: center;
   gap: 2px;
-}.sync-badge .sync-ahead { color: var(--success); }/* local edits to push (ahead) */
-.sync-badge .sync-behind { color: var(--primary); }/* remote changes to pull (behind) */
+}.sync-badge .sync-ahead { color: var(--success, #10b981); }/* local edits to push (ahead, green) */
+.sync-badge .sync-behind { color: #ef4444; }/* remote changes to pull (behind, red) */
 .sync-badge i { font-size: 9px; }.back-btn {
   background: transparent;
   border: none;
