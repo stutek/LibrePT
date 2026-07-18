@@ -12,6 +12,8 @@
 //   renderPendingPlanAdjustments()
 // }
 
+import { $id, openModal, closeModal } from '../helper/dom.js';
+
 let deps = null;
 
 let feedbackIsRecording = false;
@@ -34,43 +36,42 @@ export function openFeedbackModal(exId) {
   const client = state.clients.find(c => c.id === activeClientId);
   const { t } = deps;
 
-  document.getElementById('feedback-client-id').value = activeClientId;
-  document.getElementById('feedback-exercise-name').value = curEx.name;
-  document.getElementById('feedback-client-display-name').textContent = client.name;
-  document.getElementById('feedback-ex-display-name').textContent = curEx.name;
-  document.getElementById('feedback-custom-note').value = '';
+  $id('feedback-client-id').value = activeClientId;
+  $id('feedback-exercise-name').value = curEx.name;
+  $id('feedback-client-display-name').textContent = client.name;
+  $id('feedback-ex-display-name').textContent = curEx.name;
+  $id('feedback-custom-note').value = '';
 
   // Reset voice recorder state
   feedbackIsRecording = false;
   feedbackHasVoiceNote = false;
-  const audioWave = document.getElementById('voice-audio-wave');
-  const audioPlayer = document.getElementById('voice-audio-player');
-  const recordIcon = document.getElementById('voice-record-icon');
-  const recordStatus = document.getElementById('voice-record-status');
+  const audioWave = $id('voice-audio-wave');
+  const audioPlayer = $id('voice-audio-player');
+  const recordIcon = $id('voice-record-icon');
+  const recordStatus = $id('voice-record-status');
   if (audioWave) { audioWave.classList.add('hidden'); audioWave.classList.remove('recording'); }
   if (audioPlayer) audioPlayer.classList.add('hidden');
   if (recordStatus) recordStatus.textContent = t('voice_ready');
   if (recordIcon) { recordIcon.className = 'fa-solid fa-microphone'; recordIcon.style.color = ''; }
 
-  document.getElementById('form-feedback').reset();
-  document.getElementById('dialog-feedback').showModal();
+  openModal('dialog-feedback', { resetForm: true, formId: 'form-feedback' });
 }
 
 export function setupFeedbackForms() {
-  const fbModal = document.getElementById('dialog-feedback');
+  const fbModal = $id('dialog-feedback');
   if (!fbModal) return;
 
-  const fbForm = document.getElementById('form-feedback');
+  const fbForm = $id('form-feedback');
   const { t, generateShortUUID, saveActiveSessionToCache, saveToLocalStorage, renderPendingPlanAdjustments } = deps;
 
   // Voice recording mock handlers
-  const recordBtn = document.getElementById('btn-voice-record');
+  const recordBtn = $id('btn-voice-record');
   if (recordBtn) {
     recordBtn.addEventListener('click', () => {
-      const recordIcon = document.getElementById('voice-record-icon');
-      const recordStatus = document.getElementById('voice-record-status');
-      const audioWave = document.getElementById('voice-audio-wave');
-      const audioPlayer = document.getElementById('voice-audio-player');
+      const recordIcon = $id('voice-record-icon');
+      const recordStatus = $id('voice-record-status');
+      const audioWave = $id('voice-audio-wave');
+      const audioPlayer = $id('voice-audio-player');
       const state = deps.getState();
       
       if (!feedbackIsRecording) {
@@ -78,8 +79,8 @@ export function setupFeedbackForms() {
         feedbackIsRecording = true;
         feedbackHasVoiceNote = false;
         if (recordIcon) {
-          recordIcon.className = 'fa-solid fa-microphone-slash';
-          recordIcon.style.color = '#ef4444';
+          recordIcon.className = 'fa-solid fa-stop';
+          recordIcon.style.color = '#ef4444'; // red indicating recording active
         }
         if (recordStatus) recordStatus.textContent = t('voice_recording');
         if (audioWave) {
@@ -88,26 +89,26 @@ export function setupFeedbackForms() {
         }
         if (audioPlayer) audioPlayer.classList.add('hidden');
       } else {
-        // Stop snemanje
+        // Stop recording
         feedbackIsRecording = false;
         feedbackHasVoiceNote = true;
         if (recordIcon) {
           recordIcon.className = 'fa-solid fa-microphone';
           recordIcon.style.color = '';
         }
-        if (recordStatus) recordStatus.textContent = t('voice_transcribing');
+        if (recordStatus) recordStatus.textContent = t('voice_processing');
         if (audioWave) {
-          audioWave.classList.add('hidden');
           audioWave.classList.remove('recording');
+          audioWave.classList.add('hidden');
         }
         
-        // Simulate local on-device speech-to-text transcription latency
+        // Mock speech transcription after delay
         setTimeout(() => {
           if (recordStatus) recordStatus.textContent = t('voice_transcription_done');
           if (audioPlayer) audioPlayer.classList.remove('hidden');
           
-          const exName = document.getElementById('feedback-exercise-name').value || 'exercise';
-          const clientName = document.getElementById('feedback-client-display-name').textContent || 'Client';
+          const exName = $id('feedback-exercise-name').value || 'exercise';
+          const clientName = $id('feedback-client-display-name').textContent || 'Client';
           
           let generatedTranscript = "";
           if (state.lang === 'sl') {
@@ -116,7 +117,7 @@ export function setupFeedbackForms() {
             generatedTranscript = `Voice note (local): ${clientName} reported good form and speed on ${exName}.`;
           }
           
-          const currentNoteInput = document.getElementById('feedback-custom-note');
+          const currentNoteInput = $id('feedback-custom-note');
           if (currentNoteInput) {
             if (currentNoteInput.value) {
               currentNoteInput.value += ` (${generatedTranscript})`;
@@ -129,11 +130,11 @@ export function setupFeedbackForms() {
     });
   }
 
-  const playPreviewBtn = document.getElementById('btn-play-voice-preview');
+  const playPreviewBtn = $id('btn-play-voice-preview');
   if (playPreviewBtn) {
     playPreviewBtn.addEventListener('click', () => {
       const playIcon = playPreviewBtn.querySelector('i');
-      const recordStatus = document.getElementById('voice-record-status');
+      const recordStatus = $id('voice-record-status');
       if (playIcon) {
         if (playIcon.classList.contains('fa-circle-play')) {
           playIcon.className = 'fa-solid fa-circle-pause';
@@ -153,17 +154,17 @@ export function setupFeedbackForms() {
   
   const cancelBtn = fbModal.querySelector('.modal-cancel');
   const closeBtn = fbModal.querySelector('.modal-close-btn');
-  if (cancelBtn) cancelBtn.addEventListener('click', () => fbModal.close());
-  if (closeBtn) closeBtn.addEventListener('click', () => fbModal.close());
+  if (cancelBtn) cancelBtn.addEventListener('click', () => closeModal('dialog-feedback'));
+  if (closeBtn) closeBtn.addEventListener('click', () => closeModal('dialog-feedback'));
   
   if (fbForm) {
     fbForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const state = deps.getState();
       const activeSession = deps.getActiveSession();
-      const clientId = document.getElementById('feedback-client-id').value;
-      const exName = document.getElementById('feedback-exercise-name').value;
-      const customNote = document.getElementById('feedback-custom-note').value;
+      const clientId = $id('feedback-client-id').value;
+      const exName = $id('feedback-exercise-name').value;
+      const customNote = $id('feedback-custom-note').value;
       const tagVal = fbForm.querySelector('input[name="feedback-tag"]:checked').value;
       
       const client = state.clients.find(c => c.id === clientId);
@@ -199,7 +200,7 @@ export function setupFeedbackForms() {
    
       saveToLocalStorage();
       renderPendingPlanAdjustments();
-      fbModal.close();
+      closeModal('dialog-feedback');
     });
   }
 }

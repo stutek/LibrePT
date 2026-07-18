@@ -641,88 +641,38 @@ function openAdjustmentWizard(updateId) {
 
 
 
-// --- BRIDGE WRAPPERS FOR EXTRACTED VIEWS & CONTROLLERS ---
+// --- BOUND VIEW & CONTROLLER ACTIONS ---
+function renderClientsList(filterQuery = '') { clientsViewRender({ state, t, navigateToPath, filterQuery }); }
+function renderRoutinesList() { routinesViewRender({ state, t, openWorkoutSetupModal }); }
+function renderExercisesList(filterQuery = '', categoryFilter = 'All') { exercisesViewRender({ state, t, filterQuery, categoryFilter }); }
+function renderGlobalHistory() { historyViewRender({ state, t }); }
 
-// Clients View
-function renderClientsList(filterQuery = '') {
-  clientsViewRender({ state, t, navigateToPath, filterQuery });
-}
+function setupClientForms() { setupClientFormsController({ state, t, saveToLocalStorage, populateDropdownSelectors, showErrorView, switchView, openWorkoutSetupModal }); }
+function setupRoutineForms() { setupRoutineFormsController({ state, t, saveToLocalStorage, populateDropdownSelectors, openWorkoutSetupModal }); }
+function setupExerciseForms() { setupExerciseFormsController({ state, t, saveToLocalStorage, populateDropdownSelectors }); }
+function populateDropdownSelectors() { populateDropdownsController({ state, t }); }
 
-// Routines View
-function renderRoutinesList() {
-  routinesViewRender({ state, t, openWorkoutSetupModal });
-}
-
-// Exercise Library View
-function renderExercisesList(filterQuery = '', categoryFilter = 'All') {
-  exercisesViewRender({ state, t, filterQuery, categoryFilter });
-}
-
-// Global History View
-function renderGlobalHistory() {
-  historyViewRender({ state, t });
-}
-
-// Form Controllers
-function setupClientForms() {
-  setupClientFormsController({ state, t, saveToLocalStorage, populateDropdownSelectors, showErrorView, switchView, openWorkoutSetupModal });
-}
-
-function setupRoutineForms() {
-  setupRoutineFormsController({ state, t, saveToLocalStorage, populateDropdownSelectors, openWorkoutSetupModal });
-}
-
-function setupExerciseForms() {
-  setupExerciseFormsController({ state, t, saveToLocalStorage, populateDropdownSelectors });
-}
-
-function populateDropdownSelectors() {
-  populateDropdownsController({ state, t });
-}
-
-// Active Session & Workout Lifecycle Controller
 function startWorkoutSession(clientRoutines, bookingMeta = null) {
   startWorkoutSessionController(clientRoutines, bookingMeta, { state, generateShortUUID, navigateToPath, toRoute, toUrl, focusSessionsColumn, launchClipboardDirectly, renderIdleSessionBar, saveToLocalStorage });
 }
-
 function setupActiveSession() {
   initActiveSessionController({ state, t, navigateToPath, toRoute, toUrl, focusSessionsColumn, launchClipboardDirectly, generateShortUUID, renderIdleSessionBar, saveToLocalStorage });
   setupActiveSessionController({ state, t, navigateToPath, focusSessionsColumn, launchClipboardDirectly, generateShortUUID, renderIdleSessionBar });
 }
-
-function cancelWorkoutSession() {
-  cancelWorkoutSessionController({ state, t, navigateToPath });
-}
-
-function saveActiveSessionToCache() {
-  saveActiveSessionToCacheController();
-}
-
+function cancelWorkoutSession() { cancelWorkoutSessionController({ state, t, navigateToPath }); }
+function saveActiveSessionToCache() { saveActiveSessionToCacheController(); }
 function recoverActiveSession() {
   recoverActiveSessionController({ state, t, generateShortUUID, navigateToPath, focusSessionsColumn, toRoute, toUrl, launchClipboardDirectly, renderIdleSessionBar, saveToLocalStorage });
 }
+function getActiveExercise() { return getActiveExerciseController(); }
+function renderActiveGroupBoard() { renderActiveGroupBoardController({ state, t, navigateToPath, toRoute, toUrl, openFeedbackModal, generateShortUUID, saveToLocalStorage }); }
 
-function getActiveExercise() {
-  return getActiveExerciseController();
-}
-
-function renderActiveGroupBoard() {
-  renderActiveGroupBoardController({ state, t, navigateToPath, toRoute, toUrl, openFeedbackModal, generateShortUUID, saveToLocalStorage });
-}
-
-// Sessions Dashboard & Calendar Integration View
 function launchClipboardDirectly(arg) {
   const bookingId = (arg && typeof arg === 'object') ? arg.bookingId : arg;
   sessionsViewLaunchClipboard({ bookingId, state, startWorkoutSession });
 }
-
-function setupCalendarBookings() {
-  sessionsViewSetupBookings({ state, t, saveToLocalStorage, renderSessions });
-}
-
-function renderSessions() {
-  sessionsViewRender({ state, t, getActiveSession, launchClipboardDirectly });
-}
+function setupCalendarBookings() { sessionsViewSetupBookings({ state, t, saveToLocalStorage, renderSessions }); }
+function renderSessions() { sessionsViewRender({ state, t, getActiveSession, launchClipboardDirectly }); }
 
 // Register Service Worker for offline PWA support
 if ('serviceWorker' in navigator) {

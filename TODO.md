@@ -349,8 +349,31 @@ Define and build towards the three concrete ways a personal trainer actually int
 - `app.js` retains **122 lines** of global wrapper proxies (`window.openRoutineEditorModal`, `renderSessions`, etc.) created during the transition to modular views.
 - Now that `src/views/` and `src/controllers/` are clean ES modules, directly import and wire their callbacks in event listeners and drop the redundant proxy wrappers entirely. Combining 14.1, 14.2, and 14.3 will reduce `app.js` from 925 lines down to ~447 lines.
 
-### 14.4 [ ] Create DOM/Modal Helper Utility (`src/helper/dom.js`)
+### 14.4 [x] Create DOM/Modal Helper Utility (`src/helper/dom.js`)
 - Across `src/`, there are **227 occurrences** of `document.getElementById` and repeated boilerplate for opening, resetting, and closing `<dialog>` modals (especially dense in `formsController.js` with 51 queries and `feedbackModal.js` with 30 queries).
 - Introduce a lightweight DOM utility (`openModal(id, { reset: true })`, `closeModal(id)`, `$id(id)`) to eliminate null-check boilerplate and unify dialog lifecycle management across all controllers and components.
+
+---
+
+## 15. Phase 6: PWA Resilience, Mobile UX & Performance Optimizations
+
+### 15.1 [x] Update Service Worker Caching & Offline Resilience (`src/sw.js`)
+- Add newly extracted core modules (`./controllers/gestureController.js`, `./helper/dom.js`, `./i18n/domMappings.js`, `./helper/utils.js`) to `ASSETS` in `src/sw.js`.
+- Add Font Awesome `.woff2` font files to `ASSETS` (or local cache rules) so icons never fail when requested offline in a gym without cellular signal.
+- Bump `CACHE_NAME` to `'librept-v10'` to trigger the `activate` event and purge stale caches across client devices.
+
+### 15.2 [x] Integrate Screen Wake Lock API (`navigator.wakeLock`)
+- In `src/controllers/activeSessionController.js`, request `navigator.wakeLock.request('screen')` when `startWorkoutSession` initiates or resumes an active workout.
+- Release the screen lock automatically during `finishWorkoutSession` or `cancelWorkoutSession`, preventing mobile screens from dimming or locking mid-workout while PTs are coaching.
+
+### 15.3 [x] Add Module Preloading & Rendering Optimizations (`src/index.html` & `src/index.css`)
+- In `src/index.html`, add `<link rel="modulepreload" href="./app.js">` and `<link rel="modulepreload" href="./views/sessionsView.js">` inside `<head>` to parallelize module fetching during cold boot.
+- In `src/index.css`, add `content-visibility: auto` to off-screen view containers (`.view-container.hidden`) and long scroll decks to skip off-screen layout calculations on mobile devices.
+
+### 15.4 [x] Batch DOM Operations with DocumentFragments
+- In `src/views/exercisesView.js`, `src/views/historyView.js`, and `src/components/clientsDirectory.js` (used by `src/views/clientsView.js`), construct list and table rows inside `DocumentFragment` instances before appending to live containers to prevent layout reflow bottlenecks on low-end mobile devices.
+
+### 15.5 [x] Adopt DOM Helper Utility Across Controllers (`src/helper/dom.js` adoption)
+- Complete task 14.4 by migrating repeated `document.getElementById` and `<dialog>` `showModal()`/`close()` checks across `src/controllers/formsController.js` and `src/components/feedbackModal.js` to use `$id`, `openModal`, and `closeModal`.
 
 

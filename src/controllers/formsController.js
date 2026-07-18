@@ -1,47 +1,46 @@
-// src/controllers/formsController.js - Domain module for client, routine, and exercise CRUD modal forms
+import { $id, openModal, closeModal } from '../helper/dom.js';
 import { getActiveDetailClientId, showClientDetails, renderClientsList } from '../views/clientsView.js';
 import { renderRoutinesList, addRoutineExerciseRow } from '../views/routinesView.js';
 import { renderExercisesList } from '../views/exercisesView.js';
 import { generateShortUUID, getInitials } from '../helper/utils.js';
 
 export function setupClientForms({ state, t, saveToLocalStorage, populateDropdownSelectors, showErrorView, switchView, openWorkoutSetupModal }) {
-  const dialog = document.getElementById('dialog-client');
-  const form = document.getElementById('form-client');
+  const dialog = $id('dialog-client');
+  const form = $id('form-client');
   if (!dialog || !form) return;
   const cancelBtn = dialog.querySelector('.modal-cancel');
   const closeBtn = dialog.querySelector('.modal-close-btn');
 
-  document.getElementById('btn-add-client').addEventListener('click', () => {
-    document.getElementById('client-modal-title').textContent = 'Add New Client';
-    form.reset();
-    document.getElementById('client-form-id').value = '';
-    dialog.showModal();
+  $id('btn-add-client').addEventListener('click', () => {
+    $id('client-modal-title').textContent = 'Add New Client';
+    $id('client-form-id').value = '';
+    openModal('dialog-client', { resetForm: true, formId: 'form-client' });
   });
 
-  document.getElementById('btn-edit-client').addEventListener('click', () => {
+  $id('btn-edit-client').addEventListener('click', () => {
     const activeId = getActiveDetailClientId();
     const client = state.clients.find(c => c.id === activeId);
     if (!client) return;
 
-    document.getElementById('client-modal-title').textContent = 'Edit Client Profile';
-    document.getElementById('client-form-id').value = client.id;
-    document.getElementById('client-name').value = client.name;
-    document.getElementById('client-goals').value = client.goals || '';
-    document.getElementById('client-notes').value = client.notes || '';
+    $id('client-modal-title').textContent = 'Edit Client Profile';
+    $id('client-form-id').value = client.id;
+    $id('client-name').value = client.name;
+    $id('client-goals').value = client.goals || '';
+    $id('client-notes').value = client.notes || '';
     
-    dialog.showModal();
+    openModal('dialog-client');
   });
 
-  const closeModal = () => dialog.close();
-  if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
-  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  const handleClose = () => closeModal('dialog-client');
+  if (cancelBtn) cancelBtn.addEventListener('click', handleClose);
+  if (closeBtn) closeBtn.addEventListener('click', handleClose);
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-    const id = document.getElementById('client-form-id').value;
-    const name = document.getElementById('client-name').value.trim();
-    const goals = document.getElementById('client-goals').value.trim();
-    const notes = document.getElementById('client-notes').value.trim();
+    const id = $id('client-form-id').value;
+    const name = $id('client-name').value.trim();
+    const goals = $id('client-goals').value.trim();
+    const notes = $id('client-notes').value.trim();
 
     if (!name) return;
 
@@ -78,10 +77,10 @@ export function setupClientForms({ state, t, saveToLocalStorage, populateDropdow
       showClientDetails({ clientId: id, state, t, showErrorView, switchView, openWorkoutSetupModal });
     }
     
-    dialog.close();
+    closeModal('dialog-client');
   });
 
-  const searchClientsEl = document.getElementById('search-clients');
+  const searchClientsEl = $id('search-clients');
   if (searchClientsEl) {
     searchClientsEl.addEventListener('input', (e) => {
       renderClientsList({ state, t, filterQuery: e.target.value });
@@ -90,38 +89,37 @@ export function setupClientForms({ state, t, saveToLocalStorage, populateDropdow
 }
 
 export function setupRoutineForms({ state, t, saveToLocalStorage, populateDropdownSelectors, openWorkoutSetupModal }) {
-  const dialog = document.getElementById('dialog-routine');
-  const form = document.getElementById('form-routine');
-  const builderList = document.getElementById('routine-exercises-list');
+  const dialog = $id('dialog-routine');
+  const form = $id('form-routine');
+  const builderList = $id('routine-exercises-list');
   if (!dialog || !form || !builderList) return;
   const cancelBtn = dialog.querySelector('.modal-cancel');
   const closeBtn = dialog.querySelector('.modal-close-btn');
 
-  document.getElementById('btn-add-routine').addEventListener('click', () => {
-    document.getElementById('routine-modal-title').textContent = 'Create Routine Template';
-    form.reset();
-    document.getElementById('routine-form-id').value = '';
+  $id('btn-add-routine').addEventListener('click', () => {
+    $id('routine-modal-title').textContent = 'Create Routine Template';
+    $id('routine-form-id').value = '';
     builderList.innerHTML = '';
     addRoutineExerciseRow({ state });
-    dialog.showModal();
+    openModal('dialog-routine', { resetForm: true, formId: 'form-routine' });
   });
 
-  const btnRoutineAddEx = document.getElementById('btn-routine-add-ex');
+  const btnRoutineAddEx = $id('btn-routine-add-ex');
   if (btnRoutineAddEx) {
     btnRoutineAddEx.addEventListener('click', () => {
       addRoutineExerciseRow({ state });
     });
   }
 
-  const closeModal = () => dialog.close();
-  if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
-  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  const handleClose = () => closeModal('dialog-routine');
+  if (cancelBtn) cancelBtn.addEventListener('click', handleClose);
+  if (closeBtn) closeBtn.addEventListener('click', handleClose);
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-    const id = document.getElementById('routine-form-id').value;
-    const name = document.getElementById('routine-name').value.trim();
-    const description = document.getElementById('routine-desc').value.trim();
+    const id = $id('routine-form-id').value;
+    const name = $id('routine-name').value.trim();
+    const description = $id('routine-desc').value.trim();
 
     if (!name) return;
 
@@ -169,34 +167,33 @@ export function setupRoutineForms({ state, t, saveToLocalStorage, populateDropdo
     saveToLocalStorage();
     renderRoutinesList({ state, t, openWorkoutSetupModal });
     populateDropdownSelectors();
-    dialog.close();
+    closeModal('dialog-routine');
   });
 }
 
 export function setupExerciseForms({ state, t, saveToLocalStorage, populateDropdownSelectors }) {
-  const dialog = document.getElementById('dialog-exercise');
-  const form = document.getElementById('form-exercise');
+  const dialog = $id('dialog-exercise');
+  const form = $id('form-exercise');
   if (!dialog || !form) return;
   const cancelBtn = dialog.querySelector('.modal-cancel');
   const closeBtn = dialog.querySelector('.modal-close-btn');
 
-  const btnAddExercise = document.getElementById('btn-add-exercise');
+  const btnAddExercise = $id('btn-add-exercise');
   if (btnAddExercise) {
     btnAddExercise.addEventListener('click', () => {
-      form.reset();
-      dialog.showModal();
+      openModal('dialog-exercise', { resetForm: true, formId: 'form-exercise' });
     });
   }
 
-  const closeModal = () => dialog.close();
-  if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
-  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  const handleClose = () => closeModal('dialog-exercise');
+  if (cancelBtn) cancelBtn.addEventListener('click', handleClose);
+  if (closeBtn) closeBtn.addEventListener('click', handleClose);
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-    const name = document.getElementById('exercise-name').value.trim();
-    const category = document.getElementById('exercise-category').value;
-    const instructions = document.getElementById('exercise-instructions').value.trim();
+    const name = $id('exercise-name').value.trim();
+    const category = $id('exercise-category').value;
+    const instructions = $id('exercise-instructions').value.trim();
 
     if (!name || !category) return;
 
@@ -211,10 +208,10 @@ export function setupExerciseForms({ state, t, saveToLocalStorage, populateDropd
     saveToLocalStorage();
     renderExercisesList({ state, t });
     populateDropdownSelectors();
-    dialog.close();
+    closeModal('dialog-exercise');
   });
 
-  const searchExercisesEl = document.getElementById('search-exercises');
+  const searchExercisesEl = $id('search-exercises');
   if (searchExercisesEl) {
     searchExercisesEl.addEventListener('input', (e) => {
       const activeChip = document.querySelector('.filter-chips .chip.active');
@@ -227,14 +224,14 @@ export function setupExerciseForms({ state, t, saveToLocalStorage, populateDropd
       document.querySelectorAll('.filter-chips .chip').forEach(c => c.classList.remove('active'));
       chip.classList.add('active');
       const cat = chip.getAttribute('data-filter');
-      const searchVal = document.getElementById('search-exercises').value;
+      const searchVal = $id('search-exercises').value;
       renderExercisesList({ state, t, filterQuery: searchVal, categoryFilter: cat });
     });
   });
 }
 
 export function populateDropdownSelectors({ state, t }) {
-  const routineSelect = document.getElementById('setup-select-routine');
+  const routineSelect = $id('setup-select-routine');
   if (routineSelect && state.routines) {
     routineSelect.innerHTML = `<option value="" disabled selected>${t('select_exercise')}</option>`;
     state.routines.slice().sort((a, b) => a.name.localeCompare(b.name)).forEach(r => {
@@ -245,7 +242,7 @@ export function populateDropdownSelectors({ state, t }) {
     });
   }
 
-  const sessionExList = document.getElementById('session-ex-datalist');
+  const sessionExList = $id('session-ex-datalist');
   if (sessionExList && state.exercises) {
     sessionExList.innerHTML = '';
     state.exercises.slice().sort((a, b) => a.name.localeCompare(b.name)).forEach(e => {

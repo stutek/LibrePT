@@ -44,6 +44,12 @@
   box-shadow: var(--box-shadow);
 }
 
+/* Off-screen rendering optimization: skip layout and painting for out-of-viewport cards */
+.client-card, .routine-card, .history-card, .exercise-item {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 120px;
+}
+
 /* Shared Flex Between (Horizontal Row with Space Between) */
 .view-header, .modal-header, .session-title-block, .client-card-header,
 .history-header, .routine-header, .deck-header, .superset-header, .booking-header,

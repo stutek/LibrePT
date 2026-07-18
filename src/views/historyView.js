@@ -17,6 +17,7 @@ export function renderGlobalHistory({ state, t }) {
 }
 
 export function renderHistoryItems({ historyList, container, t }) {
+  const fragment = document.createDocumentFragment();
   historyList.forEach(log => {
     const card = document.createElement('div');
     card.className = 'history-card card glassmorphic';
@@ -102,6 +103,7 @@ export function renderHistoryItems({ historyList, container, t }) {
       </div>
     `;
 
-    container.appendChild(card);
+    fragment.appendChild(card);
   });
+  container.appendChild(fragment);
 }

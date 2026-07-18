@@ -28,6 +28,7 @@ export function renderClientsDirectory(container, deps) {
     return;
   }
 
+  const fragment = document.createDocumentFragment();
   filtered.forEach(client => {
     const card = document.createElement('div');
     card.className = 'client-card card glassmorphic';
@@ -41,6 +42,7 @@ export function renderClientsDirectory(container, deps) {
       </div>
     `;
     card.addEventListener('click', () => onOpenClient(client.id));
-    container.appendChild(card);
+    fragment.appendChild(card);
   });
+  container.appendChild(fragment);
 }

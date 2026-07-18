@@ -1,12 +1,21 @@
 // sw.js - LibrePT Service Worker for Offline Functionality
 // Bump CACHE_NAME on release: `activate` purges every cache that does not match it.
-const CACHE_NAME = 'librept-v9';
+const CACHE_NAME = 'librept-v10';
 const ASSETS = [
   './',
   './index.html',
   './index.css',
   './app.js',
   './manifest.json',
+  // Themes
+  './themes/blossom.css',
+  './themes/daylight.css',
+  './themes/midnight.css',
+  './themes/nebula.css',
+  './themes/red.css',
+  // Helpers
+  './helper/utils.js',
+  './helper/dom.js',
   // Seed data (split per entity under data/)
   './data/index.js',
   './data/exercises.js',
@@ -19,6 +28,7 @@ const ASSETS = [
   './i18n/index.js',
   './i18n/en.js',
   './i18n/sl.js',
+  './i18n/domMappings.js',
   // UI component modules
   './components/sessionCard.js',
   './components/sessionList.js',
@@ -45,9 +55,13 @@ const ASSETS = [
   // Domain controllers
   './controllers/formsController.js',
   './controllers/activeSessionController.js',
+  './controllers/gestureController.js',
+  // Icons & Fonts
   './icons/icon-192.png',
   './icons/icon-512.png',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-solid-900.woff2',
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-regular-400.woff2'
 ];
 
 self.addEventListener('install', (e) => {

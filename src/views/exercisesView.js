@@ -28,6 +28,7 @@ export function renderExercisesList({ state, t, filterQuery = '', categoryFilter
     return;
   }
 
+  const fragment = document.createDocumentFragment();
   filtered.forEach(ex => {
     const card = document.createElement('div');
     card.className = 'exercise-item card glassmorphic';
@@ -38,6 +39,7 @@ export function renderExercisesList({ state, t, filterQuery = '', categoryFilter
       </div>
       <p class="exercise-instructions">${escapeHTML(ex.instructions || t('no_instructions'))}</p>
     `;
-    container.appendChild(card);
+    fragment.appendChild(card);
   });
+  container.appendChild(fragment);
 }

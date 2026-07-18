@@ -10,6 +10,42 @@ import { renderGlobalHistory } from '../views/historyView.js';
 
 let activeSession = null;
 let appDeps = {};
+let screenWakeLock = null;
+let wakeLockVisibilityAttached = false;
+
+async function requestScreenWakeLock() {
+  if (typeof navigator !== 'undefined' && 'wakeLock' in navigator) {
+    try {
+      if (!screenWakeLock) {
+        screenWakeLock = await navigator.wakeLock.request('screen');
+        screenWakeLock.addEventListener('release', () => {
+          screenWakeLock = null;
+        });
+      }
+      if (!wakeLockVisibilityAttached && typeof document !== 'undefined') {
+        wakeLockVisibilityAttached = true;
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible' && activeSession !== null) {
+            requestScreenWakeLock();
+          }
+        });
+      }
+    } catch (err) {
+      console.debug('WakeLock request failed or disallowed:', err);
+    }
+  }
+}
+
+async function releaseScreenWakeLock() {
+  if (screenWakeLock !== null && typeof screenWakeLock.release === 'function') {
+    try {
+      await screenWakeLock.release();
+      screenWakeLock = null;
+    } catch (err) {
+      console.debug('WakeLock release failed:', err);
+    }
+  }
+}
 
 export function initActiveSessionController(deps) {
   appDeps = { ...appDeps, ...deps };
@@ -123,6 +159,7 @@ export function startWorkoutSession(clientRoutines, bookingMeta = null, deps = {
   });
 
   saveActiveSessionToCache();
+  requestScreenWakeLock();
 
   const sId = activeSession.id || generateShortUUID();
   if (navigateToPath) {
@@ -481,6 +518,7 @@ export function cancelWorkoutSession() {
   if (activeSession && activeSession.timerIntervalId) {
     clearInterval(activeSession.timerIntervalId);
   }
+  releaseScreenWakeLock();
   activeSession = null;
   localStorage.removeItem('librept_active_session');
   
@@ -620,6 +658,7 @@ export function recoverActiveSession() {
 
       startSessionTimer();
       renderActiveGroupBoard();
+      requestScreenWakeLock();
     }
   } catch (e) {
     console.error('Error recovering active session cache:', e);
