@@ -152,10 +152,12 @@ def test_interactive_dashboard_flow(page, local_server):
     assert page.locator(".logo-area h1").first.text_content() == "LibrePT"
     
     # --- STEP 1: INTERACTIVE LANGUAGE TRANSLATION ---
-    # Locate language switcher select dropdown
+    # Language + theme now live inside the ☰ menu; open it to reach the switcher.
+    page.locator("#btn-app-menu").click()
+    page.wait_for_selector("#app-menu:not(.hidden)")
     lang_switcher = page.locator("#lang-switcher")
     assert lang_switcher.is_visible()
-    
+
     # Toggle language to Slovenian (SL)
     lang_switcher.select_option("sl")
     assert page.locator("#btn-sessions-today").inner_text().strip().upper() == "DANES"
@@ -172,7 +174,9 @@ def test_interactive_dashboard_flow(page, local_server):
     page.locator("#dialog-backup .modal-close-btn").click()
     page.wait_for_selector("#dialog-backup", state="hidden")
 
-    # Switch back to English (EN)
+    # Switch back to English (EN) — reopen the ☰ menu to reach the switcher again.
+    page.locator("#btn-app-menu").click()
+    page.wait_for_selector("#app-menu:not(.hidden)")
     lang_switcher.select_option("en")
     assert page.locator("#btn-sessions-today").inner_text().strip().upper() == "TODAY"
 

@@ -7,6 +7,8 @@ export function applyStaticDOMMappings(tDict) {
   const staticMappings = {
     '.logo-area h1': 'logo_title',
     // Application (☰) header menu + About / Terms modals
+    '#menu-label-lang': 'menu_language',
+    '#menu-label-theme': 'menu_theme',
     '#menu-connect-cloud': 'menu_connect_cloud',
     '#menu-export-data': 'menu_export_data',
     '#menu-github': 'menu_github',

@@ -157,6 +157,8 @@ export const en = {
     rest_label: "Rest",
 
     // Application (☰) header menu + About / Terms modals
+    menu_language: "Language",
+    menu_theme: "Theme",
     menu_connect_cloud: "Connect cloud storage",
     menu_coming_soon: "Cloud storage isn't available yet — coming soon.",
     menu_export_data: "Export data as a file",

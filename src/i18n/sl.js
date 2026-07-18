@@ -156,6 +156,8 @@ export const sl = {
     rest_label: "Počitek",
 
     // Application (☰) header menu + About / Terms modals
+    menu_language: "Jezik",
+    menu_theme: "Tema",
     menu_connect_cloud: "Poveži shrambo v oblaku",
     menu_coming_soon: "Shramba v oblaku še ni na voljo — kmalu.",
     menu_export_data: "Izvozi podatke v datoteko",

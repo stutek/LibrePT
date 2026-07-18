@@ -57,17 +57,6 @@
       <div class="header-actions">
         <!-- Normal view actions -->
         <div class="normal-header-actions" style="display: flex; align-items: center; gap: 8px;">
-          <select id="lang-switcher" class="form-control header-select" style="cursor: pointer;" aria-label="Switch Language / Zamenjaj jezik">
-            <option value="en">EN</option>
-            <option value="sl">SL</option>
-          </select>
-          <select id="theme-switcher" class="form-control header-select" style="cursor: pointer;" aria-label="Theme / Tema">
-            <option value="midnight">Midnight</option>
-            <option value="daylight">Daylight</option>
-            <option value="red">Red</option>
-            <option value="blossom">Blossom</option>
-            <option value="nebula">Nebula</option>
-          </select>
           <button id="backup-btn" class="icon-btn sync-backup-btn" aria-label="Sync & Backup Data">
             <!-- Cloud + recycle: this one control now covers both syncing session data and
                  backup/restore (the separate home-page Sync button was merged in here). -->
@@ -86,6 +75,26 @@
               <i class="fa-solid fa-bars"></i>
             </button>
             <div id="app-menu" class="session-menu hidden" role="menu">
+              <!-- Language + theme controls live here (same view on desktop and mobile) so the
+                   header bar stays compact. Same <select> elements as before, just relocated. -->
+              <div class="menu-control-row">
+                <label class="menu-control-label" for="lang-switcher"><i class="fa-solid fa-language" aria-hidden="true"></i> <span id="menu-label-lang">Language</span></label>
+                <select id="lang-switcher" class="form-control menu-select" style="cursor: pointer;" aria-label="Switch Language / Zamenjaj jezik">
+                  <option value="en">EN</option>
+                  <option value="sl">SL</option>
+                </select>
+              </div>
+              <div class="menu-control-row">
+                <label class="menu-control-label" for="theme-switcher"><i class="fa-solid fa-palette" aria-hidden="true"></i> <span id="menu-label-theme">Theme</span></label>
+                <select id="theme-switcher" class="form-control menu-select" style="cursor: pointer;" aria-label="Theme / Tema">
+                  <option value="daylight" selected>Daylight</option>
+                  <option value="midnight">Midnight</option>
+                  <option value="red">Red</option>
+                  <option value="blossom">Blossom</option>
+                  <option value="nebula">Nebula</option>
+                </select>
+              </div>
+              <div class="menu-divider" role="separator"></div>
               <button id="menu-connect-cloud" class="session-menu-item" role="menuitem">
                 <i class="fa-solid fa-cloud-arrow-up"></i> Connect cloud storage
               </button>

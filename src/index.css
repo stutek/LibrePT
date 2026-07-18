@@ -166,37 +166,44 @@ h1, h2, h3, h4, h5, h6 {
   width: 44px;
   height: 44px;
   font-size: 18px;
-}/* Language / theme dropdowns follow the active theme's colours and shape (not a hardcoded
-   dark pill), so they restyle with every theme like the rest of the header. */
-.header-select {
+}/* Language + theme selectors live inside the ☰ menu (identical layout on desktop and mobile), so
+   the header bar stays compact — just the logo, the sync pill and the menu button. They appear as
+   labeled rows at the top of the dropdown; the selects follow the active theme like every input. */
+.menu-control-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 14px;
+}
+.menu-control-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+  white-space: nowrap;
+}
+.menu-control-label i { width: 16px; text-align: center; color: var(--text-muted); }
+.menu-select {
   background: var(--input-bg);
   color: var(--text-main);
   border: 1px solid var(--border-color);
   border-radius: var(--btn-radius);
-  height: 44px !important;
-  min-height: 44px !important;
-  padding: 0 10px !important;
-  font-size: 14px !important;
+  height: 34px;
+  padding: 0 10px;
+  font-size: 13px;
   font-weight: 700;
-  display: inline-flex;
-  align-items: center;
+  cursor: pointer;
+  flex: 0 0 auto;
+  min-width: 104px;
 }
-/* Select widths live here (not inline) so the mobile query below can compact them. */
-#lang-switcher { width: 74px; }
-#theme-switcher { width: 114px; }
-/* Narrow phones: the logo wordmark + two selects + two icon buttons together overflow the bar,
-   pushing the sync/menu buttons off-screen. Drop the wordmark (the dumbbell icon stays as the
-   home target) and compact the controls so every action stays visible, tappable, and un-clipped. */
+.menu-divider { height: 1px; background: var(--border-color); margin: 6px 4px; }
+/* Narrow phones: only the logo, sync pill and menu button remain in the bar; keep the icon
+   buttons a comfortable 40px. */
 @media (max-width: 480px) {
-  .logo-area h1 { display: none; }
-  .header-actions { gap: 5px; }
-  .header-select { height: 40px !important; min-height: 40px !important; padding: 0 6px !important; font-size: 13px !important; }
-  #lang-switcher { width: 50px; }
-  #theme-switcher { width: 82px; }
   .header-actions .icon-btn { width: 40px; height: 40px; font-size: 16px; }
-  /* The sync pill (cloud + ahead/behind counts) is the widest control; trim its padding so the
-     whole row still fits alongside the two selects on the narrowest phones. */
-  .sync-backup-btn { padding: 0 9px; gap: 6px; }
 }
 /* Main View Controller styling */
 #main-content {

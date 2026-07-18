@@ -104,8 +104,12 @@ def test_menu_labels_translate_to_slovenian(page, local_server):
     page.goto(local_server)
     page.wait_for_selector("#view-clients.active")
 
-    page.locator("#lang-switcher").select_option("sl")
+    # The language switcher now lives inside the ☰ menu, so open it first, then switch.
     _open_menu(page)
+    page.locator("#lang-switcher").select_option("sl")
 
     assert "Poveži shrambo" in page.locator("#menu-connect-cloud").inner_text()
     assert "O aplikaciji" in page.locator("#menu-about").inner_text()
+    # The relocated control labels translate too.
+    assert page.locator("#menu-label-lang").inner_text().strip() == "Jezik"
+    assert page.locator("#menu-label-theme").inner_text().strip() == "Tema"

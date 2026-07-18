@@ -84,7 +84,7 @@ export function renderSyncBadge() {
 
 function applyTheme(theme) {
   theme = LEGACY_THEME_MAP[theme] || theme;
-  const cls = THEME_BODY_CLASS[theme] || THEME_BODY_CLASS.midnight;
+  const cls = THEME_BODY_CLASS[theme] || THEME_BODY_CLASS.daylight;
   Object.values(THEME_BODY_CLASS).forEach(c => document.body.classList.remove(c));
   document.body.classList.add(cls);
   localStorage.setItem('librept-theme', theme);
