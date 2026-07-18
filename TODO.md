@@ -193,6 +193,12 @@ The clipboard's **Cancel** button (bottom-left) discards the active session with
 - It is currently **too easily accessible** for a destructive, unrecoverable action sitting next to "Complete Workout Session". Move it out of the primary action row (e.g. behind an overflow/⋯ menu, a long-press, or a secondary confirm step) so it can't be hit by accident mid-set.
 - Keep the existing confirm dialog, but tighten the wording now that logging is one-tap (no per-set grid): it discards the session's completions and feedback.
 
+### 8.3 [ ] Inline Clipboard Editor (Saved Patch: `patches/inline_clipboard_editor.patch`)
+An on-the-fly edit mode for the active session clipboard (`src/components/clipboardEditor.js`), saved as an unstaged patch (`patches/inline_clipboard_editor.patch`) so it can be cleanly reviewed/applied after core refactoring passes.
+- When the trainer taps a card's edit (✎) affordance (`.deck-card-edit`), the deck flips into an inline editable list (`renderClipboardEditor`).
+- Allows swapping exercises, retargeting sets/reps/weight, reordering rows via tap or drag (`.editor-reorder`), adding new exercises, and adjusting rest breaks directly inside the live session without leaving the gym floor.
+- To apply later: `git apply patches/inline_clipboard_editor.patch`.
+
 ---
 
 ## 9. Interactive Demo / Guided Onboarding
@@ -326,4 +332,25 @@ Define and build towards the three concrete ways a personal trainer actually int
    - **Action**: To prevent ad-hoc text from destroying data hygiene, custom creation enforces one of two strict rules:
      - *(Option 1 - Modifiers)*: Select a standard parent movement (`Base: Lunge`) and attach specific **Modifiers** (`Tempo: 3-1-X-0`, `Stance: Curtsy`, `Attachment: Landmine`).
      - *(Option 2 - Strict Inheritance)*: If creating a brand-new entity ID, the PT is required to tag its **Target Muscle Group** and **Biomechanical Movement Pattern** so high-level volume analytics continue working seamlessly across the whole client roster.
+
+---
+
+## 14. Phase 5 Refactoring: DRY & Complexity Reduction
+
+### 14.1 [ ] Extract Touch/Swipe Gestures (`src/controllers/gestureController.js`)
+- `src/app.js` currently holds **196 lines** of touch/swipe gesture handlers (`touchstart`, `touchmove`, `touchend`, `handleSwipeBetweenDays`) for navigating the sessions day deck and title bar actions.
+- Extract this self-contained subsystem into a dedicated controller module (`src/controllers/gestureController.js`) to decouple touch input logic from the application entrypoint.
+
+### 14.2 [ ] Extract DOM i18n Static Mappings (`src/i18n/domMappings.js`)
+- `src/app.js` contains a **160-line** static lookup table (`staticMappings`) that binds CSS selectors (`'button[data-view="history"] span': 'tab_history'`, `#sessions-view-title`, etc.) to localization keys.
+- Move `staticMappings` into a dedicated file under `src/i18n/domMappings.js` and import it during boot (`applyTranslations`) so `app.js` stays strictly focused on initialization and routing.
+
+### 14.3 [ ] Drop Legacy `window` Bridge Wrappers in `src/app.js`
+- `app.js` retains **122 lines** of global wrapper proxies (`window.openRoutineEditorModal`, `renderSessions`, etc.) created during the transition to modular views.
+- Now that `src/views/` and `src/controllers/` are clean ES modules, directly import and wire their callbacks in event listeners and drop the redundant proxy wrappers entirely. Combining 14.1, 14.2, and 14.3 will reduce `app.js` from 925 lines down to ~447 lines.
+
+### 14.4 [ ] Create DOM/Modal Helper Utility (`src/helper/dom.js`)
+- Across `src/`, there are **227 occurrences** of `document.getElementById` and repeated boilerplate for opening, resetting, and closing `<dialog>` modals (especially dense in `formsController.js` with 51 queries and `feedbackModal.js` with 30 queries).
+- Introduce a lightweight DOM utility (`openModal(id, { reset: true })`, `closeModal(id)`, `$id(id)`) to eliminate null-check boilerplate and unify dialog lifecycle management across all controllers and components.
+
 
