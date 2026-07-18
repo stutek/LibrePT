@@ -30,6 +30,54 @@ import {
   getOverlappingBookings,
   buildBookingMeta
 } from './helper/utils.js';
+import {
+  renderClientsList as clientsViewRender,
+  showClientDetails as clientsViewShowDetails,
+  renderClientWorkoutHistory as clientsViewHistory
+} from './views/clientsView.js';
+import {
+  renderRoutinesList as routinesViewRender,
+  openRoutineEditorModal as routinesViewOpenEditor,
+  addRoutineExerciseRow as routinesViewAddRow
+} from './views/routinesView.js';
+import {
+  renderExercisesList as exercisesViewRender
+} from './views/exercisesView.js';
+import {
+  renderGlobalHistory as historyViewRender,
+  renderHistoryItems as historyViewItems
+} from './views/historyView.js';
+import {
+  renderSessions as sessionsViewRender,
+  setupCalendarBookings as sessionsViewSetupBookings,
+  launchClipboardDirectly as sessionsViewLaunchClipboard,
+  seedDemoActiveSession as sessionsViewSeedDemo
+} from './views/sessionsView.js';
+import {
+  setupClientForms as setupClientFormsController,
+  setupRoutineForms as setupRoutineFormsController,
+  setupExerciseForms as setupExerciseFormsController,
+  populateDropdownSelectors as populateDropdownsController
+} from './controllers/formsController.js';
+import {
+  initActiveSessionController,
+  startWorkoutSession as startWorkoutSessionController,
+  startSessionTimer,
+  setupActiveSession as setupActiveSessionController,
+  cancelWorkoutSession as cancelWorkoutSessionController,
+  finishWorkoutSession as finishWorkoutSessionController,
+  saveActiveSessionToCache as saveActiveSessionToCacheController,
+  recoverActiveSession as recoverActiveSessionController,
+  getActiveSession,
+  setActiveSession,
+  getActiveExercise as getActiveExerciseController,
+  buildSupersetUnits as buildSupersetUnitsController,
+  renderActiveGroupBoard as renderActiveGroupBoardController,
+  focusIndexFromRef,
+  sessionFocusPath,
+  syncSessionFocusUrl,
+  focusExerciseByIndex
+} from './controllers/activeSessionController.js';
 
 
 function t(key) {
@@ -225,8 +273,6 @@ let state = {
   lang: 'en'
 };
 
-let activeSession = null;
-
 // --- INITIALIZE APPLICATION ---
 // Best-effort: size the browser window itself to a phone viewport on load/reload, so
 // the gym-floor phone view is what you see without manually opening DevTools' device
@@ -321,7 +367,7 @@ function init() {
   // Initialize Feedback Modal Component
   initFeedbackModal({
     getState: () => state,
-    getActiveSession: () => activeSession,
+    getActiveSession: () => getActiveSession(),
     t,
     generateShortUUID,
     saveActiveSessionToCache,
@@ -366,7 +412,7 @@ function init() {
     renderPendingPlanAdjustments,
     renderSessions,
     populateDropdownSelectors,
-    getActiveSession: () => activeSession,
+    getActiveSession: () => getActiveSession(),
     renderActiveGroupBoard,
     renderActiveSessionBarLabels
   });
@@ -385,7 +431,7 @@ function init() {
 
   // Initialize Session Title Bar component
   initSessionTitleBar({
-    getActiveSession: () => activeSession,
+    getActiveSession: () => getActiveSession(),
     getISODateString,
     formatClockFromMinutes
   });
@@ -394,7 +440,7 @@ function init() {
   // the app-level helpers it renders from, before any render that touches the bar.
   initSessionBar({
     getState: () => state,
-    getActiveSession: () => activeSession,
+    getActiveSession: () => getActiveSession(),
     t,
     formatSignedDuration,
     formatDuration,
@@ -456,88 +502,7 @@ function saveToLocalStorage() {
 // at a different exercise so the clipboard shows a spread of card-completion counts.
 // Written straight to the active-session cache; recoverActiveSession() picks it up on init.
 function seedDemoActiveSession() {
-  const booking = (state.bookings || []).find(b => b.id === 's01f2e3d');
-  if (!booking) return;
-
-  const participantIds = booking.participants.filter(pid => state.clients.some(c => c.id === pid));
-  if (participantIds.length === 0) return;
-
-  const routine = state.routines.find(r => r.id === booking.routineId) || state.routines[0];
-  if (!routine) return;
-
-  const now = Date.now();
-  const HOUR = 60 * 60 * 1000;
-  // Backdate the start by an hour and end an hour out: the session sits at its midpoint,
-  // so the bar's countdown reads ~1h remaining of a 2h slot ("half done").
-  const startTime = now - HOUR;
-
-  const session = {
-    id: booking.id,
-    startTime,
-    duration: Math.floor((now - startTime) / 1000),
-    participants: participantIds,
-    clientRoutines: {},
-    activeClientId: participantIds[0],
-    booking: {
-      id: booking.id,
-      titles: [booking.title],
-      day: booking.day,
-      location: booking.location || '',
-      startDate: new Date(now - HOUR).toISOString(),
-      endDate: new Date(now + HOUR).toISOString(),
-      timeLabel: booking.time
-    },
-    feedback: []
-  };
-
-  // Different completed-exercise count per participant (clamped to the routine length)
-  const completedCounts = [4, 2, 5, 3, 1, 3, 0];
-
-  participantIds.forEach((pid, i) => {
-    const clientState = {
-      routineId: routine.id,
-      routineName: routine.name,
-      activeExerciseIndex: 0,
-      exercises: [],
-      logs: {}
-    };
-
-    routine.exercises.forEach(item => {
-      const ex = state.exercises.find(e => e.id === item.id);
-      if (!ex) return;
-      clientState.exercises.push({
-        id: item.id,
-        name: ex.name,
-        category: ex.category,
-        instructions: ex.instructions,
-        setsTargetCount: item.sets,
-        repsTarget: item.reps,
-        weightTarget: item.weight,
-        rest: item.rest,
-        circuitId: item.circuitId || null,
-        circuitTitle: item.circuitTitle || '',
-        circuitSeries: item.circuitSeries || 1
-      });
-      clientState.logs[item.id] = Array.from({ length: item.sets }, () => ({
-        reps: item.reps,
-        weight: item.weight,
-        completed: false,
-        note: ''
-      }));
-    });
-
-    const doneCount = Math.min(completedCounts[i % completedCounts.length], clientState.exercises.length);
-    clientState.exercises.forEach((ex, exIdx) => {
-      if (exIdx < doneCount) {
-        (clientState.logs[ex.id] || []).forEach(l => { l.completed = true; });
-      }
-    });
-    clientState.activeExerciseIndex = Math.min(doneCount, Math.max(0, clientState.exercises.length - 1));
-
-    session.clientRoutines[pid] = clientState;
-  });
-
-  localStorage.setItem('librept_active_session', JSON.stringify(session));
+  sessionsViewSeedDemo({ state });
 }
 
 // --- VIEW ROUTER ---
@@ -753,6 +718,7 @@ function handlePathChange() {
 // focusRef (optional) = { type: 'exercise'|'superset', id } from a deep link, selecting which
 // card starts in focus. A stale/unknown id is ignored, leaving the client's default focus.
 function showSessionView(sessionId, clientId, focusRef = null) {
+  const activeSession = getActiveSession();
   if (activeSession) {
     // Show active tracking clipboard overlay
     const bar = document.getElementById('active-session-bar');
@@ -777,12 +743,13 @@ function showSessionView(sessionId, clientId, focusRef = null) {
       if (idx >= 0) cs.activeExerciseIndex = idx;
     }
     renderActiveGroupBoard();
+    syncSessionFocusUrl();
   } else {
     // No active session in memory. Check if we can recover it
     const cached = localStorage.getItem('librept_active_session');
     if (cached) {
       recoverActiveSession();
-      if (activeSession) {
+      if (getActiveSession()) {
         // Retry
         showSessionView(sessionId, clientId, focusRef);
         return;
@@ -799,50 +766,8 @@ function showSessionView(sessionId, clientId, focusRef = null) {
 // Resolve a deep-link focus reference to an index into the client's exercise list. A superset
 // ref matches the first member of that circuit (the whole superset renders as one card); an
 // exercise ref matches a standalone (non-superset) exercise. Returns -1 when nothing matches.
-function focusIndexFromRef(clientState, focusRef) {
-  if (!clientState || !clientState.exercises || !focusRef) return -1;
-  if (focusRef.type === 'superset') {
-    return clientState.exercises.findIndex(e => e.circuitId === focusRef.id);
-  }
-  return clientState.exercises.findIndex(e => !e.circuitId && e.id === focusRef.id);
-}
-
-// The canonical deep-link path for whatever card is currently in focus, so the address bar
-// stays a copy-able link: /session/{s}/client/{c}/(exercise|superset)/{cardId}.
-function sessionFocusPath() {
-  if (!activeSession) return null;
-  const clientId = activeSession.activeClientId || activeSession.participants[0];
-  const base = `/session/${activeSession.id}/client/${clientId}`;
-  const cs = activeSession.clientRoutines[clientId];
-  const ex = cs && cs.exercises && cs.exercises[cs.activeExerciseIndex];
-  if (!ex) return base;
-  return ex.circuitId ? `${base}/superset/${ex.circuitId}` : `${base}/exercise/${ex.id}`;
-}
-
-// While the session view is open, mirror the in-focus card into the URL (replaceState, so
-// tapping through cards doesn't spam history). No-op unless we're actually on a /session route,
-// so a background re-render while minimized can't hijack the dashboard URL.
-function syncSessionFocusUrl() {
-  if (!activeSession) return;
-  const current = toRoute(window.location.pathname);
-  if (!current.startsWith('/session/')) return;
-  const target = sessionFocusPath();
-  if (target && current !== target) {
-    window.history.replaceState(null, '', toUrl(target));
-  }
-}
-
-// Single funnel for card-tap focus changes: update the focused card, drop any expanded past
-// card, persist, and re-render (which mirrors the new focus into the URL).
-function focusExerciseByIndex(index) {
-  if (!activeSession) return;
-  const cs = activeSession.clientRoutines[activeSession.activeClientId];
-  if (!cs) return;
-  cs.activeExerciseIndex = index;
-  activeSession.expandedPastId = null;
-  saveActiveSessionToCache();
-  renderActiveGroupBoard();
-}
+// focusIndexFromRef, sessionFocusPath, syncSessionFocusUrl, and focusExerciseByIndex
+// are imported from controllers/activeSessionController.js
 
 // The session view's context line — "YYYY-MM-DD HH:MM Location" (e.g.
 // "2026-07-17 10:00 Trib gym base"). Derived from the booking the session was launched
@@ -876,1329 +801,115 @@ function openAdjustmentWizard(updateId) {
 
 
 
+// --- BRIDGE WRAPPERS FOR EXTRACTED VIEWS & CONTROLLERS ---
+
 // Clients View
 function renderClientsList(filterQuery = '') {
-  renderClientsDirectory(document.getElementById('clients-list'), {
-    clients: state.clients,
-    filterQuery,
-    t, escapeHTML, getInitials, getClientDisplayNameHTML, truncateString,
-    onOpenClient: (id) => navigateToPath(`/clients/${id}`)
-  });
+  clientsViewRender({ state, t, navigateToPath, filterQuery });
 }
 
-// Client Detail View
-let activeDetailClientId = null;
 function showClientDetails(clientId) {
-  const client = state.clients.find(c => c.id === clientId);
-  if (!client) {
-    // Deep link to a client that no longer exists — treat as a not-found route.
-    showErrorView(window.location.pathname);
-    return;
-  }
-
-  activeDetailClientId = clientId;
-  document.getElementById('detail-client-name').innerHTML = getClientDisplayNameHTML(client);
-  document.getElementById('detail-client-avatar').textContent = client.avatar || getInitials(client.name);
-  document.getElementById('profile-name').innerHTML = getClientDisplayNameHTML(client);
-  document.getElementById('profile-joined-date').textContent = `${t('joined')} ${formatDateStr(client.joinedDate)}`;
-  document.getElementById('profile-goals').textContent = client.goals || t('no_goals_specified');
-  document.getElementById('profile-notes').textContent = client.notes || t('no_notes_specified');
-
-  // Start workout from detail
-  const startBtn = document.getElementById('btn-start-client-workout');
-  // Re-bind click event
-  startBtn.replaceWith(startBtn.cloneNode(true));
-  document.getElementById('btn-start-client-workout').addEventListener('click', () => {
-    openWorkoutSetupModal(clientId);
-  });
-
-  renderClientWorkoutHistory(client);
-  switchView('client-detail');
+  clientsViewShowDetails({ clientId, state, t, showErrorView, switchView, openWorkoutSetupModal });
 }
-
-
 
 function renderClientWorkoutHistory(client) {
-  const container = document.getElementById('client-history-list');
-  container.innerHTML = '';
-
-  const clientHistory = state.history
-    .filter(log => log.clientId === client.id)
-    .sort((a,b) => new Date(b.date) - new Date(a.date));
-
-  if (clientHistory.length === 0) {
-    container.innerHTML = `<div class="card glassmorphic text-center text-muted text-sm">${t('no_workouts_logged')}</div>`;
-    return;
-  }
-
-  renderHistoryItems(clientHistory, container);
+  return clientsViewHistory({ client, state, t });
 }
 
 // Routines View
 function renderRoutinesList() {
-  const container = document.getElementById('routines-list');
-  container.innerHTML = '';
+  routinesViewRender({ state, t, openWorkoutSetupModal });
+}
 
-  if (state.routines.length === 0) {
-    container.innerHTML = `<div class="card glassmorphic text-center text-muted" style="grid-column: 1/-1;">${t('no_routines_found')}</div>`;
-    return;
-  }
+function openRoutineEditorModal(routineId) {
+  routinesViewOpenEditor({ routineId, state });
+}
 
-  state.routines.forEach(routine => {
-    const card = document.createElement('div');
-    card.className = 'routine-card card glassmorphic';
-    
-    // Make tags of exercises, including the target sets/reps/weight for each
-    const tags = routine.exercises.map(item => {
-      const ex = state.exercises.find(e => e.id === item.id);
-      const name = escapeHTML(ex ? ex.name : 'Unknown Exercise');
-      const detail = `${item.sets}×${item.reps}${item.weight > 0 ? ` · ${item.weight}${t('kg')}` : ''}`;
-      return `<span class="preview-tag">${name} <span class="preview-tag-detail">${escapeHTML(detail)}</span></span>`;
-    }).slice(0, 4).join('');
-
-    const moreCount = routine.exercises.length > 4 ? `+${routine.exercises.length - 4} more` : '';
-
-    card.innerHTML = `
-      <div class="routine-title-info">
-        <h3>${escapeHTML(routine.name)}</h3>
-        <p>${escapeHTML(routine.description || t('no_description'))}</p>
-        <div class="routine-exercise-preview-tags">
-          ${tags}
-          ${moreCount ? `<span class="preview-tag" style="background:var(--primary-light); color:var(--primary); font-weight:700">${moreCount}</span>` : ''}
-        </div>
-      </div>
-      <button class="btn secondary-btn btn-sm w-full btn-launch-routine">
-        <i class="fa-solid fa-circle-play"></i> ${t('btn_start_group_session')}
-      </button>
-    `;
-
-    // Routine launcher action
-    card.querySelector('.btn-launch-routine').addEventListener('click', (e) => {
-      e.stopPropagation();
-      openWorkoutSetupModal(null, routine.id);
-    });
-
-    // Tap card to edit
-    card.addEventListener('click', () => {
-      openRoutineEditorModal(routine.id);
-    });
-
-    container.appendChild(card);
-  });
+function addRoutineExerciseRow(preset = null) {
+  routinesViewAddRow({ preset, state });
 }
 
 // Exercise Library View
 function renderExercisesList(filterQuery = '', categoryFilter = 'All') {
-  const container = document.getElementById('exercises-list');
-  container.innerHTML = '';
-
-  let filtered = state.exercises;
-
-  if (categoryFilter !== 'All') {
-    filtered = filtered.filter(e => e.category === categoryFilter);
-  }
-
-  if (filterQuery) {
-    const q = filterQuery.toLowerCase();
-    filtered = filtered.filter(e => 
-      e.name.toLowerCase().includes(q) || 
-      e.category.toLowerCase().includes(q) ||
-      (e.instructions && e.instructions.toLowerCase().includes(q))
-    );
-  }
-
-  // Sort alphabetically
-  filtered.sort((a,b) => a.name.localeCompare(b.name));
-
-  if (filtered.length === 0) {
-    container.innerHTML = `<div class="card glassmorphic text-center text-muted">${t('no_exercises_matched')}</div>`;
-    return;
-  }
-
-  filtered.forEach(ex => {
-    const card = document.createElement('div');
-    card.className = 'exercise-item card glassmorphic';
-    card.innerHTML = `
-      <div class="exercise-item-header">
-        <h3>${escapeHTML(ex.name)}</h3>
-        <span class="muscle-badge">${ex.category}</span>
-      </div>
-      <p class="exercise-instructions">${escapeHTML(ex.instructions || t('no_instructions'))}</p>
-    `;
-    container.appendChild(card);
-  });
+  exercisesViewRender({ state, t, filterQuery, categoryFilter });
 }
 
 // Global History View
 function renderGlobalHistory() {
-  const container = document.getElementById('global-history-list');
-  container.innerHTML = '';
-
-  // Sort history newest first
-  const sorted = [...state.history].sort((a,b) => new Date(b.date) - new Date(a.date));
-
-  if (sorted.length === 0) {
-    container.innerHTML = `<div class="card glassmorphic text-center text-muted">${t('no_workouts_history')}</div>`;
-    return;
-  }
-
-  renderHistoryItems(sorted, container);
+  historyViewRender({ state, t });
 }
 
-// Helper to render lists of history items
 function renderHistoryItems(historyList, container) {
-  // We can group consecutive logs that were done together (same date, routine, and participants)
-  // to display them as a neat group session log or individually.
-  // For simplicity, let's render them as cards. If multiple people did it together, let's keep it clean.
-  historyList.forEach(log => {
-    const card = document.createElement('div');
-    card.className = 'history-card card glassmorphic';
-    
-    const minutes = Math.floor(log.duration / 60);
-    const durationText = minutes > 0 ? `${minutes} ${t('min_session')}` : t('less_than_minute');
-
-    // Render exercises completed list
-    let exercisesLogHTML = '';
-    log.exercises.forEach(ex => {
-      const setsText = ex.sets.map(s => {
-        return `${s.weight}kg×${s.reps}${s.note ? ` (${s.note})` : ''}`;
-      }).join(', ');
-      
-      // Determine feedback icons to show
-      const feedbackItems = (log.feedback || []).filter(f => f.exerciseName === ex.name);
-      let feedbackIconsHTML = '';
-      
-      feedbackItems.forEach(f => {
-        let iconClass = 'fa-solid fa-comment-dots text-primary';
-        let title = f.tag;
-        
-        if (f.tag.includes('Too Easy') || f.tag.includes('Increase Load')) {
-          iconClass = 'fa-solid fa-rocket text-success';
-        } else if (f.tag.includes('Too Hard') || f.tag.includes('Reduce Load')) {
-          iconClass = 'fa-solid fa-triangle-exclamation text-warning';
-        } else if (f.tag.includes('Form Break') || f.tag.includes('Focus') || f.tag.includes('Form')) {
-          iconClass = 'fa-solid fa-microscope text-warning';
-        } else if (f.tag.includes('Pain') || f.tag.includes('Discomfort')) {
-          iconClass = 'fa-solid fa-fire text-danger';
-        } else if (f.tag.includes('easily') || f.tag.includes('Progression') || f.tag.includes('Completed reps')) {
-          iconClass = 'fa-solid fa-dumbbell text-success';
-        }
-        
-        const tooltipTitle = title;
-        const tooltipBody = f.note ? escapeHTML(f.note) : t('no_details_specified');
-        
-        feedbackIconsHTML += `
-          <span class="history-feedback-icon" onclick="this.classList.toggle('active'); event.stopPropagation();">
-            <i class="${iconClass}"></i>
-            <span class="tooltip-content">
-              <div class="tooltip-title">${escapeHTML(tooltipTitle)}</div>
-              <div class="tooltip-body">${tooltipBody}</div>
-            </span>
-          </span>
-        `;
-      });
-      
-      // Check if any sets have notes and render notes icon
-      const setNotes = ex.sets.filter(s => s.note);
-      if (setNotes.length > 0) {
-        let notesListHTML = setNotes.map((s, idx) => `<div><strong>${t('set_label')} ${idx + 1}:</strong> ${escapeHTML(s.note)}</div>`).join('');
-        feedbackIconsHTML += `
-          <span class="history-feedback-icon" onclick="this.classList.toggle('active'); event.stopPropagation();">
-            <i class="fa-solid fa-sticky-note text-primary"></i>
-            <span class="tooltip-content">
-              <div class="tooltip-title">${t('trainer_set_notes')}</div>
-              <div class="tooltip-body">${notesListHTML}</div>
-            </span>
-          </span>
-        `;
-      }
-
-      exercisesLogHTML += `
-        <div class="history-ex-row" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 4px; margin-bottom: 6px;">
-          <div>
-            <strong>${escapeHTML(ex.name)}</strong>: <span>${escapeHTML(setsText)}</span>
-          </div>
-          <div style="display: flex; gap: 6px; flex-shrink: 0;">
-            ${feedbackIconsHTML}
-          </div>
-        </div>
-      `;
-    });
-
-    card.innerHTML = `
-      <div class="history-card-header">
-        <div class="history-header-meta">
-          <h4>${escapeHTML(log.clientName)}</h4>
-          <p>${escapeHTML(log.routineName)} • ${durationText}</p>
-        </div>
-        <div class="history-date">${formatDateStr(log.date)}</div>
-      </div>
-      <div class="history-exercise-log">
-        ${exercisesLogHTML}
-      </div>
-    `;
-
-    container.appendChild(card);
-  });
+  historyViewItems({ historyList, container, t });
 }
 
-// --- FORM CONTROLLERS ---
-
-// 1. Client Add/Edit Modal
+// Form Controllers
 function setupClientForms() {
-  const dialog = document.getElementById('dialog-client');
-  const form = document.getElementById('form-client');
-  const cancelBtn = dialog.querySelector('.modal-cancel');
-  const closeBtn = dialog.querySelector('.modal-close-btn');
-
-  document.getElementById('btn-add-client').addEventListener('click', () => {
-    document.getElementById('client-modal-title').textContent = 'Add New Client';
-    form.reset();
-    document.getElementById('client-form-id').value = '';
-    dialog.showModal();
-  });
-
-  document.getElementById('btn-edit-client').addEventListener('click', () => {
-    const client = state.clients.find(c => c.id === activeDetailClientId);
-    if (!client) return;
-
-    document.getElementById('client-modal-title').textContent = 'Edit Client Profile';
-    document.getElementById('client-form-id').value = client.id;
-    document.getElementById('client-name').value = client.name;
-    document.getElementById('client-goals').value = client.goals || '';
-    document.getElementById('client-notes').value = client.notes || '';
-    
-    dialog.showModal();
-  });
-
-  const closeModal = () => dialog.close();
-  cancelBtn.addEventListener('click', closeModal);
-  closeBtn.addEventListener('click', closeModal);
-
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const id = document.getElementById('client-form-id').value;
-    const name = document.getElementById('client-name').value.trim();
-    const goals = document.getElementById('client-goals').value.trim();
-    const notes = document.getElementById('client-notes').value.trim();
-
-    if (!name) return;
-
-    const todayStr = new Date().toISOString().substring(0, 10);
-
-    if (id) {
-      // Edit mode
-      const client = state.clients.find(c => c.id === id);
-      if (client) {
-        client.name = name;
-        client.goals = goals;
-        client.notes = notes;
-      }
-    } else {
-      // Add mode
-      const newId = generateShortUUID();
-      
-      const newClient = {
-        id: newId,
-        name: name,
-        avatar: getInitials(name),
-        joinedDate: todayStr,
-        goals: goals,
-        weightHistory: [],
-        notes: notes,
-        active: true
-      };
-      state.clients.push(newClient);
-    }
-
-    saveToLocalStorage();
-    renderClientsList();
-    populateDropdownSelectors();
-
-    if (id && activeDetailClientId === id) {
-      showClientDetails(id); // reload details
-    }
-    
-    dialog.close();
-  });
-
-  // Client Search
-  document.getElementById('search-clients').addEventListener('input', (e) => {
-    renderClientsList(e.target.value);
-  });
-
+  setupClientFormsController({ state, t, saveToLocalStorage, populateDropdownSelectors, showErrorView, switchView, openWorkoutSetupModal });
 }
 
-// 2. Routine Template Modal
 function setupRoutineForms() {
-  const dialog = document.getElementById('dialog-routine');
-  const form = document.getElementById('form-routine');
-  const builderList = document.getElementById('routine-exercises-list');
-  const cancelBtn = dialog.querySelector('.modal-cancel');
-  const closeBtn = dialog.querySelector('.modal-close-btn');
-
-  document.getElementById('btn-add-routine').addEventListener('click', () => {
-    document.getElementById('routine-modal-title').textContent = 'Create Routine Template';
-    form.reset();
-    document.getElementById('routine-form-id').value = '';
-    builderList.innerHTML = '';
-    addRoutineExerciseRow(); // start with one blank exercise
-    dialog.showModal();
-  });
-
-  document.getElementById('btn-routine-add-ex').addEventListener('click', () => {
-    addRoutineExerciseRow();
-  });
-
-  const closeModal = () => dialog.close();
-  cancelBtn.addEventListener('click', closeModal);
-  closeBtn.addEventListener('click', closeModal);
-
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const id = document.getElementById('routine-form-id').value;
-    const name = document.getElementById('routine-name').value.trim();
-    const description = document.getElementById('routine-desc').value.trim();
-
-    if (!name) return;
-
-    // Collect routine rows
-    const exercises = [];
-    builderList.querySelectorAll('.routine-builder-row').forEach(row => {
-      const selectEx = row.querySelector('.select-ex');
-      const inputSets = parseInt(row.querySelector('.input-sets').value);
-      const inputReps = parseInt(row.querySelector('.input-reps').value);
-      const inputWeight = parseFloat(row.querySelector('.input-weight').value);
-      const inputRest = parseInt(row.querySelector('.input-rest').value);
-
-      if (selectEx.value && !isNaN(inputSets)) {
-        exercises.push({
-          id: selectEx.value,
-          sets: inputSets,
-          reps: isNaN(inputReps) ? 10 : inputReps,
-          weight: isNaN(inputWeight) ? 0 : inputWeight,
-          rest: isNaN(inputRest) ? 60 : inputRest
-        });
-      }
-    });
-
-    if (exercises.length === 0) {
-      alert('Routines must include at least one exercise.');
-      return;
-    }
-
-    if (id) {
-      // Edit
-      const routine = state.routines.find(r => r.id === id);
-      if (routine) {
-        routine.name = name;
-        routine.description = description;
-        routine.exercises = exercises;
-      }
-    } else {
-      // Add
-      const newRoutine = {
-        id: generateShortUUID(),
-        name: name,
-        description: description,
-        exercises: exercises
-      };
-      state.routines.push(newRoutine);
-    }
-
-    saveToLocalStorage();
-    renderRoutinesList();
-    populateDropdownSelectors();
-    dialog.close();
-  });
+  setupRoutineFormsController({ state, t, saveToLocalStorage, populateDropdownSelectors, openWorkoutSetupModal });
 }
 
-function openRoutineEditorModal(routineId) {
-  const routine = state.routines.find(r => r.id === routineId);
-  if (!routine) return;
-
-  const dialog = document.getElementById('dialog-routine');
-  const builderList = document.getElementById('routine-exercises-list');
-
-  document.getElementById('routine-modal-title').textContent = 'Edit Routine Template';
-  document.getElementById('routine-form-id').value = routine.id;
-  document.getElementById('routine-name').value = routine.name;
-  document.getElementById('routine-desc').value = routine.description || '';
-  
-  builderList.innerHTML = '';
-  routine.exercises.forEach(item => {
-    addRoutineExerciseRow(item);
-  });
-
-  dialog.showModal();
-}
-
-function addRoutineExerciseRow(preset = null) {
-  const builderList = document.getElementById('routine-exercises-list');
-  const row = document.createElement('div');
-  row.className = 'routine-builder-row';
-  
-  // Build Options of Exercises
-  const optionsHTML = state.exercises
-    .sort((a,b) => a.name.localeCompare(b.name))
-    .map(ex => `<option value="${ex.id}" ${preset && preset.id === ex.id ? 'selected' : ''}>${escapeHTML(ex.name)} (${ex.category})</option>`)
-    .join('');
-
-  row.innerHTML = `
-    <select class="form-control select-ex" required>
-      <option value="" disabled ${!preset ? 'selected' : ''}>Select Exercise</option>
-      ${optionsHTML}
-    </select>
-    <div class="form-group" style="gap:2px">
-      <input type="number" min="1" placeholder="Sets" class="form-control input-sets" value="${preset ? preset.sets : '3'}" required aria-label="Sets quantity">
-    </div>
-    <div class="form-group" style="gap:2px">
-      <input type="number" min="1" placeholder="Reps" class="form-control input-reps" value="${preset ? preset.reps : '10'}" required aria-label="Reps quantity">
-    </div>
-    <div class="form-group" style="gap:2px">
-      <input type="number" step="0.5" placeholder="kg" class="form-control input-weight" value="${preset ? preset.weight : '0'}" required aria-label="Starting weight in kilograms">
-    </div>
-    <div class="form-group" style="gap:2px">
-      <input type="number" min="0" step="5" placeholder="Rest" class="form-control input-rest" value="${preset ? preset.rest : '60'}" required aria-label="Rest duration in seconds">
-    </div>
-    <button type="button" class="btn-remove-row" aria-label="Remove exercise from routine"><i class="fa-solid fa-trash-can"></i></button>
-  `;
-
-  row.querySelector('.btn-remove-row').addEventListener('click', () => {
-    row.remove();
-  });
-
-  builderList.appendChild(row);
-  // Auto scroll to bottom of builder list
-  builderList.scrollTop = builderList.scrollHeight;
-}
-
-// 3. Custom Exercise creation
 function setupExerciseForms() {
-  const dialog = document.getElementById('dialog-exercise');
-  const form = document.getElementById('form-exercise');
-  const cancelBtn = dialog.querySelector('.modal-cancel');
-  const closeBtn = dialog.querySelector('.modal-close-btn');
-
-  document.getElementById('btn-add-exercise').addEventListener('click', () => {
-    form.reset();
-    dialog.showModal();
-  });
-
-  const closeModal = () => dialog.close();
-  cancelBtn.addEventListener('click', closeModal);
-  closeBtn.addEventListener('click', closeModal);
-
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const name = document.getElementById('exercise-name').value.trim();
-    const category = document.getElementById('exercise-category').value;
-    const instructions = document.getElementById('exercise-instructions').value.trim();
-
-    if (!name || !category) return;
-
-    const newEx = {
-      id: generateShortUUID(),
-      name: name,
-      category: category,
-      instructions: instructions
-    };
-
-    state.exercises.push(newEx);
-    saveToLocalStorage();
-    renderExercisesList();
-    populateDropdownSelectors();
-    dialog.close();
-  });
-
-  // Search Exercises
-  document.getElementById('search-exercises').addEventListener('input', (e) => {
-    const activeChip = document.querySelector('.filter-chips .chip.active');
-    renderExercisesList(e.target.value, activeChip ? activeChip.getAttribute('data-filter') : 'All');
-  });
-
-  // Category chips filtering
-  document.querySelectorAll('.filter-chips .chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      document.querySelectorAll('.filter-chips .chip').forEach(c => c.classList.remove('active'));
-      chip.classList.add('active');
-      const cat = chip.getAttribute('data-filter');
-      const searchVal = document.getElementById('search-exercises').value;
-      renderExercisesList(searchVal, cat);
-    });
-  });
+  setupExerciseFormsController({ state, t, saveToLocalStorage, populateDropdownSelectors });
 }
 
-// Populate selectors across forms
 function populateDropdownSelectors() {
-  // Workout setup routines drop down (legacy guard)
-  const routineSelect = document.getElementById('setup-select-routine');
-  if (routineSelect) {
-    routineSelect.innerHTML = `<option value="" disabled selected>${t('select_exercise')}</option>`;
-    state.routines.sort((a,b) => a.name.localeCompare(b.name)).forEach(r => {
-      const opt = document.createElement('option');
-      opt.value = r.id;
-      opt.textContent = r.name;
-      routineSelect.appendChild(opt);
-    });
-  }
-
-  // Add-exercise combobox: the datalist backs a free-text input, so the trainer can type any
-  // name and see matching library exercises filtered live, or enter one that isn't in the list.
-  const sessionExList = document.getElementById('session-ex-datalist');
-  if (sessionExList) {
-    sessionExList.innerHTML = '';
-    state.exercises.slice().sort((a,b) => a.name.localeCompare(b.name)).forEach(e => {
-      const opt = document.createElement('option');
-      opt.value = e.name;      // the value is the plain name so free-text matching stays clean
-      opt.label = e.category;  // shown as a hint alongside the name where the browser supports it
-      sessionExList.appendChild(opt);
-    });
-  }
+  populateDropdownsController({ state, t });
 }
 
-// --- WORKOUT SESSION LOGIC ---
-
-
-
-// 2. Active Session Core
+// Active Session & Workout Lifecycle Controller
 function startWorkoutSession(clientRoutines, bookingMeta = null) {
-  // Initialize session state
-  const participantIds = clientRoutines.map(cr => cr.clientId);
-
-  const sessionId = bookingMeta ? bookingMeta.id : generateShortUUID();
-
-  activeSession = {
-    id: sessionId,
-    startTime: Date.now(),
-    duration: 0,
-    participants: participantIds,
-    clientRoutines: {},
-    activeClientId: participantIds[0],
-    booking: bookingMeta
-  };
-
-  // Populate active exercises and logs per client
-  clientRoutines.forEach(cr => {
-    const routine = state.routines.find(r => r.id === cr.routineId);
-    if (!routine) return;
-    
-    const clientState = {
-      routineId: routine.id,
-      routineName: routine.name,
-      activeExerciseIndex: 0,
-      exercises: [],
-      logs: {}
-    };
-
-    routine.exercises.forEach(item => {
-      const ex = state.exercises.find(e => e.id === item.id);
-      if (ex) {
-        clientState.exercises.push({
-          id: item.id,
-          name: ex.name,
-          category: ex.category,
-          instructions: ex.instructions,
-          setsTargetCount: item.sets,
-          repsTarget: item.reps,
-          weightTarget: item.weight,
-          rest: item.rest,
-          // Superset grouping: exercises sharing a circuitId render as one card, repeated
-          // circuitSeries times (see renderActiveGroupBoard / buildSupersetUnits).
-          circuitId: item.circuitId || null,
-          circuitTitle: item.circuitTitle || '',
-          circuitSeries: item.circuitSeries || 1
-        });
-
-        // Initialize logs: exerciseId -> array of sets logs
-        clientState.logs[item.id] = Array.from({ length: item.sets }, () => ({
-          reps: item.reps,
-          weight: item.weight,
-          completed: false,
-          note: ''
-        }));
-      }
-    });
-
-    activeSession.clientRoutines[cr.clientId] = clientState;
-  });
-
-  // Save session state to localStorage for persistence recovery
-  saveActiveSessionToCache();
-
-  // Set URL path to open the session overlay and active client tab
-  const sId = activeSession.id || generateShortUUID();
-  navigateToPath(`/session/${sId}/client/${activeSession.activeClientId}`);
-}
-
-function startSessionTimer() {
-  if (activeSession.timerIntervalId) clearInterval(activeSession.timerIntervalId);
-
-  const tick = () => {
-    activeSession.duration = Math.floor((Date.now() - activeSession.startTime) / 1000);
-    updateOverlaySessionTimer();
-    updateSessionBarTimer();
-
-    // Save periodically
-    saveActiveSessionToCache();
-  };
-
-  activeSession.timerIntervalId = setInterval(tick, 1000);
-  tick();
-}
-
-// The clipboard header shows time remaining against the session's scheduled end, counting
-// down (and into the negative once it overruns) rather than a stopwatch that restarts from
-// zero each time the session is reopened. Ad-hoc sessions with no scheduled end fall back to
-// an elapsed count-up, since there is nothing to count down against.
-function updateOverlaySessionTimer() {
-  if (!activeSession) return;
-  const el = document.getElementById('overlay-session-duration');
-  if (!el) return;
-
-  const endDate = activeSession.booking && activeSession.booking.endDate;
-  if (endDate) {
-    const remainingSec = Math.round((new Date(endDate).getTime() - Date.now()) / 1000);
-    el.textContent = formatSignedDuration(remainingSec);
-    el.style.color = remainingSec < 0 ? 'var(--danger)' : 'var(--primary)';
-  } else {
-    el.textContent = formatDuration(activeSession.duration);
-    el.style.color = 'var(--primary)';
-  }
-}
-
-// The active/idle session bar render lives in components/sessionBar.js
-// (updateSessionBarTimer, renderActiveSessionBarLabels, renderIdleSessionBar).
-
-function getActiveExercise() {
-  if (!activeSession) return null;
-  const activeClientId = activeSession.activeClientId;
-  const activeClientState = activeSession.clientRoutines[activeClientId];
-  if (!activeClientState || activeClientState.exercises.length === 0) return null;
-  return activeClientState.exercises[activeClientState.activeExerciseIndex];
-}
-
-// Participant tabs scroll fade logic moved to components/activeUsersList.js
-
-
-
-// One-tap outcome signal (Too Easy / Too Hard) from the focus card. Records the same
-// kind of feedback the modal would, marks the exercise's target sets as completed so it
-// carries into the saved session history, and re-renders. Replaces per-set stepper logging.
-function logQuickSignal(tag, exId) {
-  if (!activeSession) return;
-  const clientId = activeSession.activeClientId;
-  const clientState = activeSession.clientRoutines[clientId];
-  if (!clientState || clientState.exercises.length === 0) return;
-
-  // A circuit row passes exId so its signal is logged against that exercise; the single
-  // focus card omits it and the active exercise is used.
-  const curEx = (exId && clientState.exercises.find(e => e.id === exId))
-    || clientState.exercises[clientState.activeExerciseIndex];
-  const client = state.clients.find(c => c.id === clientId);
-
-  const newFeedback = {
-    id: generateShortUUID(),
-    clientId,
-    clientName: client ? client.name : 'Unknown Client',
-    date: new Date().toISOString(),
-    exerciseName: curEx.name,
-    tag,
-    hasVoiceNote: false,
-    resolved: false
-  };
-  state.planUpdates.push(newFeedback);
-
-  if (!activeSession.feedback) activeSession.feedback = [];
-  activeSession.feedback.push({
-    id: newFeedback.id,
-    clientId,
-    exerciseName: curEx.name,
-    tag,
-    note: '',
-    hasVoiceNote: false
-  });
-
-  // Tapping an outcome marks the exercise done, so "Complete Workout Session" still logs it
-  (clientState.logs[curEx.id] || []).forEach(l => { l.completed = true; });
-
-  saveActiveSessionToCache();
-  saveToLocalStorage();
-  renderPendingPlanAdjustments();
-  renderActiveGroupBoard();
-}
-
-// Colour an exercise card's title by the feedback logged against it for this client,
-// matching the card action buttons: green = Too Easy, amber = Too Hard, red = a note /
-// voice memo / safety flag (the Feedback button). Returns null when there's no feedback.
-function getExerciseSignalColor(clientId, exerciseName) {
-  const fb = ((activeSession && activeSession.feedback) || [])
-    .filter(f => f.clientId === clientId && f.exerciseName === exerciseName);
-  if (fb.length === 0) return null;
-  // A written note / voice memo is the richest signal — red, like the Feedback button
-  if (fb.some(f => (f.note && f.note.trim()) || f.hasVoiceNote)) return 'var(--danger)';
-  if (fb.some(f => /too hard|reduce load/i.test(f.tag))) return '#f59e0b';
-  if (fb.some(f => /too easy|increase load/i.test(f.tag))) return 'var(--success)';
-  // Any other tagged feedback (pain, form break, …) also warrants the red flag
-  return 'var(--danger)';
-}
-
-// Fold the flat current-exercise list into render units: consecutive exercises sharing a
-// circuitId collapse into one { type:'circuit', ... } unit (a superset is in focus / completed
-// if any / all of its exercises are), while ungrouped exercises pass through untouched.
-function buildSupersetUnits(list) {
-  const units = [];
-  list.forEach(item => {
-    if (item.circuitId) {
-      const last = units[units.length - 1];
-      if (last && last.type === 'circuit' && last.circuitId === item.circuitId) {
-        last.items.push(item);
-        last.isInFocus = last.isInFocus || item.isInFocus;
-        last.isCompleted = last.isCompleted && item.isCompleted;
-      } else {
-        units.push({
-          type: 'circuit',
-          circuitId: item.circuitId,
-          title: item.circuitTitle,
-          series: item.circuitSeries || 1,
-          items: [item],
-          isInFocus: item.isInFocus,
-          isCompleted: item.isCompleted
-        });
-      }
-    } else {
-      units.push(item);
-    }
-  });
-  return units;
-}
-
-// The superset card's "Complete round" button: advance the round counter until the last round,
-// then mark every exercise in the superset done and move the active pointer past the group.
-function completeSupersetRound(circuitId) {
-  if (!activeSession) return;
-  const cs = activeSession.clientRoutines[activeSession.activeClientId];
-  if (!cs) return;
-  if (!cs.circuitRounds) cs.circuitRounds = {};
-  const groupExs = cs.exercises.filter(e => e.circuitId === circuitId);
-  if (groupExs.length === 0) return;
-  const series = groupExs[0].circuitSeries || 1;
-  const cur = cs.circuitRounds[circuitId] || 1;
-  if (cur < series) {
-    cs.circuitRounds[circuitId] = cur + 1;
-  } else {
-    groupExs.forEach(ex => (cs.logs[ex.id] || []).forEach(l => { l.completed = true; }));
-    let lastIdx = -1;
-    cs.exercises.forEach((ex, idx) => { if (ex.circuitId === circuitId) lastIdx = idx; });
-    cs.activeExerciseIndex = Math.min(lastIdx + 1, cs.exercises.length - 1);
-  }
-  saveActiveSessionToCache();
-  saveToLocalStorage();
-  renderActiveGroupBoard();
-}
-
-function renderActiveGroupBoard() {
-  if (!activeSession) return;
-
-  const activeClientId = activeSession.activeClientId || activeSession.participants[0];
-  activeSession.activeClientId = activeClientId;
-  const activeClientState = activeSession.clientRoutines[activeClientId];
-
-  // Keep the URL pointed at the client + in-focus card so it stays a copy-able deep link.
-  syncSessionFocusUrl();
-
-  // 1. Render Client Tabs
-  const tabsContainer = document.getElementById('active-session-client-tabs');
-  if (tabsContainer) {
-    renderActiveUsersList(tabsContainer, activeSession, {
-      clients: state.clients,
-      activeClientId,
-      getInitials,
-      getClientDisplayNameHTML,
-      navigateToPath
-    });
-  }
-
-  // 2. Client Injury warning banner
-  const alertBanner = document.getElementById('clipboard-client-alert');
-  const alertText = document.getElementById('clipboard-client-notes-text');
-  const activeClient = state.clients.find(c => c.id === activeClientId);
-  if (alertBanner && activeClient) {
-    if (activeClient.hasInjury && (activeClient.injury || activeClient.notes)) {
-      alertText.textContent = activeClient.injury || activeClient.notes;
-      alertBanner.classList.remove('hidden');
-    } else {
-      alertBanner.classList.add('hidden');
-    }
-  }
-
-  // 3. Render the vertical exercise scroll deck (components/exerciseDeck.js)
-  const deckContainer = document.getElementById('active-exercise-scroll-deck');
-  if (deckContainer && activeClientState) {
-    renderExerciseDeck(deckContainer, {
-      activeSession, activeClientState, activeClientId, state,
-      t, escapeHTML, buildSupersetUnits, getExerciseSignalColor,
-      logQuickSignal, openFeedbackModal, completeSupersetRound, focusExerciseByIndex,
-      saveActiveSessionToCache, saveToLocalStorage,
-      onRerender: renderActiveGroupBoard
-    });
-  }
-
-  const container = document.getElementById('clipboard-logger-container');
-  if (!container) return;
-
-  if (!activeClientState || activeClientState.exercises.length === 0) {
-    // No exercises for this client — the logger area carries the explanation
-    container.classList.remove('hidden');
-    container.innerHTML = `
-      <div class="clipboard-empty-state">
-        <h4>${t('no_exercises_injected')}</h4>
-        <p>${t('no_exercises_desc')}</p>
-      </div>
-    `;
-    return;
-  }
-
-  // Logging now happens through one-tap outcome signals on the focus card, so there is
-  // no inline set grid during live logging. The container is reserved for historical
-  // review (populated by showPastExerciseInFocus); keep it hidden while logging.
-  container.classList.add('hidden');
-  container.innerHTML = '';
+  startWorkoutSessionController(clientRoutines, bookingMeta, { state, generateShortUUID, navigateToPath, toRoute, toUrl, focusSessionsColumn, launchClipboardDirectly, renderIdleSessionBar, saveToLocalStorage });
 }
 
 function setupActiveSession() {
-  // Keep the participant tab strip's scroll-fade in sync as the trainer swipes through it
-  const clientTabsBar = document.getElementById('active-session-client-tabs');
-  if (clientTabsBar) {
-    clientTabsBar.addEventListener('scroll', updateClientTabsFadeState);
-  }
-
-  // Exercise navigation is now driven by tapping the stacked cards directly
-  // (see the card click handlers in renderActiveGroupBoard).
-
-  // Minimize panel trigger
-  document.getElementById('btn-collapse-session').addEventListener('click', () => {
-    navigateToPath('/clients');
-    focusSessionsColumn('today', 'smooth');
-  });
-
-  // Expand panel trigger
-  document.getElementById('btn-expand-session').addEventListener('click', (e) => {
-    e.stopPropagation();
-    const activeClientId = activeSession ? activeSession.activeClientId || activeSession.participants[0] : '';
-    const sessionId = activeSession ? activeSession.id || 'session' : 'session';
-    navigateToPath(`/session/${sessionId}/client/${activeClientId}`);
-  });
-
-  // The entire bar is the primary tap target — not just the chevron. Active sessions
-  // open straight into the clipboard; an idle bar jumps into the next upcoming session.
-  const sessionBar = document.getElementById('active-session-bar');
-  sessionBar.addEventListener('click', () => {
-    if (activeSession) {
-      const activeClientId = activeSession.activeClientId || activeSession.participants[0];
-      const sessionId = activeSession.id || 'session';
-      navigateToPath(`/session/${sessionId}/client/${activeClientId}`);
-    } else if (sessionBar.dataset.nextBookingId) {
-      launchClipboardDirectly(sessionBar.dataset.nextBookingId);
-    }
-  });
-  sessionBar.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      sessionBar.click();
-    }
-  });
-
-  // Session overflow menu (holds the destructive Delete Session action)
-  const sessionMenuBtn = document.getElementById('btn-session-menu');
-  const sessionMenu = document.getElementById('session-menu');
-  const closeSessionMenu = () => {
-    sessionMenu.classList.add('hidden');
-    sessionMenuBtn.setAttribute('aria-expanded', 'false');
-  };
-  sessionMenuBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const isOpen = !sessionMenu.classList.contains('hidden');
-    sessionMenu.classList.toggle('hidden', isOpen);
-    sessionMenuBtn.setAttribute('aria-expanded', String(!isOpen));
-  });
-  // Dismiss the menu on any outside click
-  document.addEventListener('click', (e) => {
-    if (!sessionMenu.classList.contains('hidden') && !e.target.closest('.session-menu-wrap')) {
-      closeSessionMenu();
-    }
-  });
-
-  // Delete (discard) the active session — destructive, so it is confirmed and tucked
-  // away in the overflow menu rather than sitting beside Complete Workout Session.
-  document.getElementById('btn-delete-session').addEventListener('click', () => {
-    closeSessionMenu();
-    if (confirm(t('confirm_cancel'))) {
-      cancelWorkoutSession();
-    }
-  });
-
-  // Finish workout
-  document.getElementById('btn-finish-session').addEventListener('click', () => {
-    finishWorkoutSession();
-  });
-
-  // Add set on the fly
-  // Setup Add Exercise to Session modal trigger
-  const addExModal = document.getElementById('dialog-add-session-exercise');
-  const addExForm = document.getElementById('form-add-session-exercise');
-  
-  document.getElementById('btn-add-exercise-to-session').addEventListener('click', () => {
-    addExForm.reset();
-    addExModal.showModal();
-  });
-
-  addExModal.querySelector('.modal-cancel').addEventListener('click', () => addExModal.close());
-  addExModal.querySelector('.modal-close-btn').addEventListener('click', () => addExModal.close());
-
-  addExForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const typed = document.getElementById('session-add-select-ex').value.trim();
-    const sets = parseInt(document.getElementById('session-add-sets').value);
-    const reps = parseInt(document.getElementById('session-add-reps').value);
-    const weight = parseFloat(document.getElementById('session-add-weight').value);
-    const rest = parseInt(document.getElementById('session-add-rest').value);
-
-    if (!activeSession || !typed || isNaN(sets)) return;
-
-    // Resolve the typed text to a library exercise by name (case-insensitive). A name that
-    // isn't in the library is a free-text entry — inject it as an ad-hoc, session-only exercise.
-    let baseEx = state.exercises.find(e => e.name.toLowerCase() === typed.toLowerCase());
-    if (!baseEx) {
-      baseEx = { id: generateShortUUID(), name: typed, category: 'Custom', instructions: '' };
-    }
-    const exId = baseEx.id;
-
-    const activeClientId = activeSession.activeClientId;
-    const clientState = activeSession.clientRoutines[activeClientId];
-
-    // Append exercise to active client routine list
-    const newEx = {
-      id: exId,
-      name: baseEx.name,
-      category: baseEx.category,
-      instructions: baseEx.instructions,
-      setsTargetCount: sets,
-      repsTarget: reps,
-      weightTarget: weight,
-      rest: rest
-    };
-
-    clientState.exercises.push(newEx);
-
-    // Initialize logs for active client for this exercise
-    clientState.logs[exId] = Array.from({ length: sets }, () => ({
-      reps: reps,
-      weight: weight,
-      completed: false,
-      note: ''
-    }));
-
-    // Jump to the newly added exercise
-    clientState.activeExerciseIndex = clientState.exercises.length - 1;
-    
-    saveActiveSessionToCache();
-    renderActiveGroupBoard();
-    addExModal.close();
-  });
-
-
+  initActiveSessionController({ state, t, navigateToPath, toRoute, toUrl, focusSessionsColumn, launchClipboardDirectly, generateShortUUID, renderIdleSessionBar, saveToLocalStorage });
+  setupActiveSessionController({ state, t, navigateToPath, focusSessionsColumn, launchClipboardDirectly, generateShortUUID, renderIdleSessionBar });
 }
 
 function cancelWorkoutSession() {
-  if (activeSession) {
-    clearInterval(activeSession.timerIntervalId);
-  }
-  activeSession = null;
-  localStorage.removeItem('librept_active_session');
-  
-  // Bar drops back to idle — referring to whatever is next up — rather than disappearing
-  renderIdleSessionBar();
-
-  // Redirect to clients view
-  navigateToPath('/clients');
-  focusSessionsColumn('today', 'smooth');
+  cancelWorkoutSessionController({ state, t, navigateToPath });
 }
 
 function finishWorkoutSession() {
-  if (!activeSession) return;
-
-  // Verify if any sets were logged
-  let totalSets = 0;
-  let completedSets = 0;
-  
-  activeSession.participants.forEach(pId => {
-    const clientState = activeSession.clientRoutines[pId];
-    if (clientState) {
-      for (const exId in clientState.logs) {
-        clientState.logs[exId].forEach(log => {
-          totalSets++;
-          if (log.completed) completedSets++;
-        });
-      }
-    }
-  });
-
-  if (completedSets === 0) {
-    if (!confirm(t('alert_no_sets'))) {
-      return;
-    }
-  }
-
-  const sessionDateISO = new Date(activeSession.startTime).toISOString();
-  const sessionDuration = activeSession.duration;
-
-  // Split history into individual records for each participant
-  activeSession.participants.forEach(pId => {
-    const client = state.clients.find(c => c.id === pId);
-    const clientState = activeSession.clientRoutines[pId];
-    if (!client || !clientState) return;
-
-    const clientCompletedExercises = [];
-
-    clientState.exercises.forEach(ex => {
-      const logsList = clientState.logs[ex.id] || [];
-      const clientSetsLogged = [];
-      
-      logsList.forEach((log, sIdx) => {
-        // Save set if completed (or if trainer logged a custom load)
-        if (log.completed || log.weight > 0) {
-          clientSetsLogged.push({
-            reps: log.reps,
-            weight: log.weight,
-            completed: log.completed,
-            note: log.note || ''
-          });
-        }
-      });
-
-      if (clientSetsLogged.length > 0) {
-        clientCompletedExercises.push({
-          id: ex.id,
-          name: ex.name,
-          sets: clientSetsLogged
-        });
-      }
-    });
-
-    // Save individual history entry if client actually did exercises
-    if (clientCompletedExercises.length > 0) {
-      const clientLog = {
-        id: generateShortUUID(),
-        clientId: pId,
-        clientName: client.name,
-        routineName: clientState.routineName,
-        date: sessionDateISO,
-        duration: sessionDuration,
-        exercises: clientCompletedExercises,
-        feedback: (activeSession.feedback || []).filter(f => f.clientId === pId)
-      };
-      
-      state.history.push(clientLog);
-    }
-  });
-
-  // Save changes
-  saveToLocalStorage();
-
-  // Clear session caches
-  cancelWorkoutSession();
-
-  // Refresh data listings
-  renderClientsList();
-  renderRoutinesList();
-  renderGlobalHistory();
-
-  // Direct to History view to show logged training
-  navigateToPath('/history');
+  finishWorkoutSessionController({ state, t });
 }
 
-// --- LOCAL STORAGE SESSION RECOVERY ---
 function saveActiveSessionToCache() {
-  if (!activeSession) return;
-  // Create cache copy without timer interval ID handle
-  const cacheObj = {
-    ...activeSession,
-    timerIntervalId: null
-  };
-  localStorage.setItem('librept_active_session', JSON.stringify(cacheObj));
+  saveActiveSessionToCacheController();
 }
 
 function recoverActiveSession() {
-  const cached = localStorage.getItem('librept_active_session');
-  if (!cached) return;
-
-  try {
-    const parsed = JSON.parse(cached);
-    if (parsed && parsed.startTime) {
-      activeSession = parsed;
-      // Recalculate duration offset
-      activeSession.duration = Math.floor((Date.now() - activeSession.startTime) / 1000);
-
-      // Booking dates survive the cache round-trip as ISO strings — revive them
-      if (activeSession.booking) {
-        activeSession.booking.startDate = new Date(activeSession.booking.startDate);
-        activeSession.booking.endDate = new Date(activeSession.booking.endDate);
-      }
-
-      // A cached session whose scheduled end is well in the past is stale — e.g. the demo's
-      // seeded "live" session revisited hours later, or a session abandoned without finishing.
-      // Don't resurrect it as a running session (that showed a bar for a workout that ended
-      // hours ago); drop it and let the idle bar point at the next upcoming session instead.
-      const STALE_AFTER_MS = 2 * 60 * 60 * 1000; // 2h past the scheduled end
-      const endTime = activeSession.booking && activeSession.booking.endDate
-        ? activeSession.booking.endDate.getTime() : null;
-      if (endTime && Date.now() > endTime + STALE_AFTER_MS) {
-        activeSession = null;
-        localStorage.removeItem('librept_active_session');
-        renderIdleSessionBar();
-        return;
-      }
-
-      // Open panel widgets
-      const bar = document.getElementById('active-session-bar');
-      bar.classList.remove('hidden', 'is-idle');
-      delete bar.dataset.nextBookingId;
-      renderActiveSessionBarLabels();
-
-      // Start elapsed timer ticking
-      startSessionTimer();
-      renderActiveGroupBoard();
-    }
-  } catch (e) {
-    console.error('Error recovering active session cache:', e);
-  }
+  recoverActiveSessionController({ state, t, generateShortUUID, navigateToPath, focusSessionsColumn, toRoute, toUrl, launchClipboardDirectly, renderIdleSessionBar, saveToLocalStorage });
 }
 
-
-
-// getNextUpcomingBookingGroup + renderIdleSessionBar moved to components/sessionBar.js.
-
-function launchClipboardDirectly(bookingId) {
-  if (!state.bookings) return;
-  const booking = state.bookings.find(b => b.id === bookingId);
-  if (!booking) return;
-
-  // Find all bookings on the same day that overlap in time
-  const overlappingBookings = getOverlappingBookings(booking, state.bookings);
-
-  // Aggregate participant clientRoutines ensuring no duplicates
-  const clientRoutinesMap = new Map();
-  overlappingBookings.forEach(ob => {
-    ob.participants.forEach(pId => {
-      let routineId = ob.routineId;
-      if (!routineId || !state.routines.some(r => r.id === routineId)) {
-        routineId = state.routines.length > 0 ? state.routines[0].id : 'routine-upper-a';
-      }
-      if (!clientRoutinesMap.has(pId)) {
-        clientRoutinesMap.set(pId, routineId);
-      }
-    });
-  });
-
-  const clientRoutines = Array.from(clientRoutinesMap.entries()).map(([clientId, routineId]) => ({
-    clientId,
-    routineId
-  }));
-
-  if (clientRoutines.length === 0) return;
-
-  startWorkoutSession(clientRoutines, buildBookingMeta(overlappingBookings, booking.day, getSessionDayDate));
+function getActiveExercise() {
+  return getActiveExerciseController();
 }
 
-// --- GOOGLE CALENDAR APPOINTMENT SESSIONS INTEGRATION (UC3 & UC4) ---
-// The former home-page "Sync Data" button was merged into the header cloud (Sync & Backup)
-// control; the sync action now lives inside that modal alongside export/import/reset.
+function buildSupersetUnits(items, activeIndex) {
+  return buildSupersetUnitsController(items, activeIndex);
+}
+
+function renderActiveGroupBoard() {
+  renderActiveGroupBoardController({ state, t, navigateToPath, toRoute, toUrl, openFeedbackModal, generateShortUUID, saveToLocalStorage });
+}
+
+// Sessions Dashboard & Calendar Integration View
+function launchClipboardDirectly(arg) {
+  const bookingId = (arg && typeof arg === 'object') ? arg.bookingId : arg;
+  sessionsViewLaunchClipboard({ bookingId, state, startWorkoutSession });
+}
+
 function setupCalendarBookings() {
-  const syncBtn = document.getElementById('btn-sync-data');
-  if (!syncBtn) return;
-
-  syncBtn.addEventListener('click', () => {
-    // Animate rotation to simulate an active query sync
-    const icon = syncBtn.querySelector('i');
-    const btnText = document.getElementById('btn-sync-data-text');
-    const status = document.getElementById('sync-status');
-
-    if (icon) icon.classList.add('fa-spin');
-    if (btnText) btnText.textContent = t('syncing_calendar');
-    if (status) { status.textContent = ''; status.className = 'status-msg'; }
-    syncBtn.disabled = true;
-
-    setTimeout(() => {
-      // Load/Reset default sessions mock feed
-      state.bookings = [...DEFAULT_SESSIONS];
-
-      saveToLocalStorage();
-      renderSessions();
-
-      // Pushed local edits and pulled remote changes — the device is now in sync.
-      resetSyncState();
-
-      if (icon) icon.classList.remove('fa-spin');
-      if (btnText) btnText.textContent = t('btn_sync_data');
-      syncBtn.disabled = false;
-      if (status) { status.textContent = t('calendar_synced'); status.className = 'status-msg text-emerald'; }
-    }, 1200);
-  });
+  sessionsViewSetupBookings({ state, t, saveToLocalStorage, renderSessions });
 }
-
-// Day navigation logic moved to components/daySelector.js
 
 function renderSessions() {
-  const yesterdayContainer = document.getElementById('yesterday-sessions-list');
-  const todayContainer = document.getElementById('today-sessions-list');
-  const tomorrowContainer = document.getElementById('tomorrow-sessions-list');
-  const upcomingContainer = document.getElementById('upcoming-sessions-list');
-  
-  if (!todayContainer || !tomorrowContainer) return;
-  
-  renderSessionsTitleBar();
-  
-  const bookings = state.bookings || [];
-  
-  // The session-card render lives in components/sessionCard.js; these are the app-level
-  // dependencies it needs (kept as a bundle so the call sites below stay tidy).
-  const cardDeps = { state, t, escapeHTML, launchClipboardDirectly, sessionDayTemporal, activeId: activeSession ? activeSession.id : null };
-
-  const yesterdaySessions = bookings.filter(b => b.day === 'yesterday');
-  const todaySessions = bookings.filter(b => b.day === 'today');
-  const tomorrowSessions = bookings.filter(b => b.day === 'tomorrow');
-  const upcomingSessions = bookings.filter(b => b.day === 'upcoming');
-
-  if (yesterdayContainer) {
-    renderSessionList(yesterdayContainer, yesterdaySessions, {
-      emptyMessage: 'No past sessions.',
-      cardDeps
-    });
-  }
-
-  renderSessionList(todayContainer, todaySessions, {
-    emptyMessage: t('no_bookings_today'),
-    cardDeps
-  });
-
-  renderSessionList(tomorrowContainer, tomorrowSessions, {
-    emptyMessage: t('no_bookings_today'),
-    cardDeps
-  });
-
-  if (upcomingContainer) {
-    renderSessionList(upcomingContainer, upcomingSessions, {
-      emptyMessage: 'No upcoming sessions.',
-      cardDeps
-    });
-  }
-
-  // Re-anchor the deck on the focused day (today on first load) after cards are injected
-  requestAnimationFrame(() => focusSessionsColumn(getFocusedSessionDay(), 'auto'));
-
-  // Booking data just changed — refresh which "next session" the idle bar points to
-  renderIdleSessionBar();
+  sessionsViewRender({ state, t, getActiveSession, launchClipboardDirectly });
 }
 
 // Register Service Worker for offline PWA support
