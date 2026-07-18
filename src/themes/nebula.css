@@ -29,6 +29,7 @@ body.nebula-theme {
   /* Light violet past / warm amber future — cool-vs-warm split reads against the indigo field */
   --temporal-past: #c4b5fd;
   --temporal-future: #fcd34d;
+  --cloud-icon-color: #38bdf8; /* sky-400 blue cloud on dark cosmic field */
   --box-shadow: 0 16px 36px -16px rgba(0, 0, 0, 0.66);
   /* Shape personality — crisp, tight */
   --border-radius-lg: 12px;

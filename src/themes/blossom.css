@@ -31,6 +31,7 @@ body.blossom-theme {
   /* Deep violet past / amber future — legible on the light blush field, distinct from the pink primary */
   --temporal-past: #9333ea;
   --temporal-future: #d97706;
+  --cloud-icon-color: #a855f7; /* soft violet/lavender cloud instead of dark plum */
   --box-shadow: 0 18px 36px -18px rgba(190, 24, 93, 0.30);
   /* Shape personality — very soft, pill buttons */
   --border-radius-lg: 24px;

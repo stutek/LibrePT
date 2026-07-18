@@ -24,6 +24,7 @@
      each theme overrides these with palette-tuned values (see src/themes/*.css). */
   --temporal-past: #c084fc;
   --temporal-future: #fbbf24;
+  --cloud-icon-color: #0284c7;
 }
 
 /* ==========================================================================
@@ -334,7 +335,7 @@ h1, h2, h3, h4, h5, h6 {
   align-items: center;
   justify-content: center;
   line-height: 1;
-}.cloud-sync-icon .fa-cloud { font-size: 18px; }.cloud-sync-icon .fa-arrows-rotate {
+}.cloud-sync-icon .fa-cloud, .session-menu-item .fa-cloud-arrow-up { font-size: 18px; color: var(--cloud-icon-color, #0284c7); }.cloud-sync-icon .fa-arrows-rotate {
   position: absolute;
   left: 50%;
   top: 58%;
