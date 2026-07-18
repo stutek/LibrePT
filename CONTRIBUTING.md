@@ -65,10 +65,12 @@ Run the full suite before opening a pull request:
 | [tests/test_app.py](file:///home/simon/Projects/LibrePT/tests/test_app.py) | Static integrity: file structure, EN/SL translation key parity, `staticMappings` selectors resolving against `index.html`, mock data exports. |
 | [tests/test_browser.py](file:///home/simon/Projects/LibrePT/tests/test_browser.py) | Playwright end-to-end flows in real Chromium: sessions day navigation, language switching, calendar sync, clipboard launch, voice notes, and the adjustment wizard. |
 
-`pipeline.py` runs the whole verify → build → deploy chain and can be stepped through in a debugger:
+The build and deploy steps live in the `build/` and `deploy/` packages; `pipeline.py` runs the whole verify → build → deploy chain and can be stepped through in a debugger:
 
 ```bash
-.venv/bin/python pipeline.py          # full pipeline
+.venv/bin/python -m build             # env check → tests → bundle into dist/
+.venv/bin/python -m deploy            # publish the built dist/
+.venv/bin/python pipeline.py          # full chain
 .venv/bin/python -m pdb pipeline.py   # step-by-step
 ```
 

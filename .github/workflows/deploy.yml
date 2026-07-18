@@ -1,8 +1,8 @@
 name: Deploy demo to GitHub Pages
 
 # Publishes ONLY the runtime app (a freshly assembled dist/) to GitHub Pages on every
-# push to main. Keeps tests/, use_cases/, pipeline.py, and the Markdown docs out of the
-# public demo, and avoids committing a dist/ folder or maintaining a gh-pages branch.
+# push to main. Publishes only src/, so tests/, use_cases/, build/, deploy/, pipeline.py, and the
+# Markdown docs stay out of the public demo, and avoids committing a dist/ folder or a gh-pages branch.
 #
 # One-time setup in the repo: Settings -> Pages -> Build and deployment -> Source:
 # "GitHub Actions". After that this workflow is the deploy path.
@@ -30,9 +30,9 @@ jobs:
       - uses: actions/checkout@v4
 
       # The runtime app lives under src/. Publish that whole tree (index.html + app.js +
-      # index.css + mockData.js + manifest.json + sw.js + components/ + icons/) flattened to
-      # the dist root, so relative paths resolve the same as in local dev. This mirrors
-      # pipeline.py's run_build() — keep the two in sync.
+      # index.css + manifest.json + sw.js + i18n/ + components/ + icons/) flattened to the dist
+      # root, so relative paths resolve the same as in local dev. This mirrors build/run_build()
+      # (build/__init__.py) — keep the two in sync.
       - name: Assemble dist
         run: |
           mkdir -p dist

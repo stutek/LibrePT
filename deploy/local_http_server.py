@@ -18,7 +18,7 @@ Behaviour (BASE = "/LibrePT"):
                                    boots the app, which resolves the route client-side or shows
                                    the in-app not-found view.
 
-Run:  python3 serve.py [--port 8081]
+Run:  python3 -m deploy.local_http_server [--port 8081]   (or: python3 deploy/local_http_server.py)
 Then open http://localhost:8081/  (it redirects to /LibrePT/).
 """
 import argparse
@@ -28,7 +28,8 @@ from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlsplit
 
-REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
+# This file lives in deploy/, so the repo root (which holds src/) is one level up.
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC_DIR = os.path.join(REPO_ROOT, "src")
 BASE = "/LibrePT"  # mirror the GitHub Pages project sub-path (the repo name)
 

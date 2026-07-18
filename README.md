@@ -30,10 +30,10 @@ LibrePT is a dependency-free static PWA — no bundler, no install step, no buil
 ```bash
 git clone https://github.com/stutek/LibrePT.git
 cd LibrePT
-python3 serve.py            # dev server on http://localhost:8081
+python3 deploy/local_http_server.py     # dev server on http://localhost:8081
 ```
 
-Then open <http://localhost:8081>; it redirects to <http://localhost:8081/LibrePT/>. `serve.py` deliberately serves `src/` under the **same `/LibrePT/` sub-path GitHub Pages uses** (rewriting `<base>` and adding a deep-link SPA fallback), so local dev exercises the real production base path instead of hiding sub-path bugs behind a domain-root server. The app seeds itself with mock clients, routines, and sessions on first load, so the dashboard is immediately explorable.
+Then open <http://localhost:8081>; it redirects to <http://localhost:8081/LibrePT/>. `deploy/local_http_server.py` deliberately serves `src/` under the **same `/LibrePT/` sub-path GitHub Pages uses** (rewriting `<base>` and adding a deep-link SPA fallback), so local dev exercises the real production base path instead of hiding sub-path bugs behind a domain-root server. The app seeds itself with mock clients, routines, and sessions on first load, so the dashboard is immediately explorable.
 
 > **Note**: Serve over HTTP rather than opening `index.html` via `file://` — the app loads ES modules and registers a Service Worker, both of which require an HTTP origin. A plain `python3 -m http.server -d src 8081` also works if you don't need the Pages sub-path, but then deep-link refreshes 404 locally.
 
@@ -55,10 +55,12 @@ python3 -m venv .venv
 .venv/bin/python -m pytest tests/ -v
 ```
 
-`pipeline.py` orchestrates the full verify → build → deploy chain (environment check, tests, bundling into `dist/`) and is designed to be stepped through in a debugger:
+The build and deploy steps live in the `build/` and `deploy/` packages; `pipeline.py` is a thin orchestrator that runs the full verify → build → deploy chain and is debuggable end-to-end:
 
 ```bash
-.venv/bin/python pipeline.py          # full pipeline
+.venv/bin/python -m build             # env check → tests → bundle src/ into dist/
+.venv/bin/python -m deploy            # publish the built dist/
+.venv/bin/python pipeline.py          # the whole chain
 .venv/bin/python -m pdb pipeline.py   # step-by-step debugging
 ```
 
@@ -127,7 +129,7 @@ LibrePT is comprised of three major subsystems:
 *   **Omnipresent header**: the app header stays fixed in place across every view — dashboard, client detail, and the active-session clipboard — so it never jumps or re-flows between contexts. The active session view adds a context line beneath it reading `date time location` (e.g. `2026-07-17 10:00 Trib gym base`) with the live countdown.
 *   **In-app Not-Found view**: a deep link that matches no route — or points at a deleted client — renders a not-found (404) view *inside* the content area, keeping the header and bottom navigation in place, with the bad path shown and a one-tap return to the dashboard. Unknown links are never silently redirected.
 *   **Offline PWA shell**: the service worker serves the cached app shell for any in-scope navigation, so clean-URL deep links keep working offline (a basement gym with no signal).
-*   **GitHub Pages sub-path support**: the public demo is served from a project sub-path (`stutek.github.io/LibrePT/`), not a domain root. The deploy step rewrites the HTML `<base>` to the repo sub-path and ships the shell as `404.html` (GitHub Pages' SPA fallback), while the router derives that same base from its own module URL — so assets load and deep links resolve wherever the app is mounted, with no code changes. The local dev server (`serve.py`) mounts the app under the same `/LibrePT/` sub-path (with an equivalent base rewrite + SPA fallback), so development and the test suite run against the real production base path rather than masking sub-path bugs behind a domain-root server.
+*   **GitHub Pages sub-path support**: the public demo is served from a project sub-path (`stutek.github.io/LibrePT/`), not a domain root. The deploy step rewrites the HTML `<base>` to the repo sub-path and ships the shell as `404.html` (GitHub Pages' SPA fallback), while the router derives that same base from its own module URL — so assets load and deep links resolve wherever the app is mounted, with no code changes. The local dev server (`deploy/local_http_server.py`) mounts the app under the same `/LibrePT/` sub-path (with an equivalent base rewrite + SPA fallback), so development and the test suite run against the real production base path rather than masking sub-path bugs behind a domain-root server.
 
 ---
 
@@ -144,7 +146,9 @@ LibrePT/
 ├── manifest.json       # Web App Manifest for mobile PWA standalone styling
 ├── sw.js               # Service Worker for offline asset caching (PWA logic)
 ├── icons/              # PWA install icons (dumbbell mark, matching the in-app logo and favicon)
-├── pipeline.py         # Debuggable CI/CD orchestrator (environment → tests → build → deploy)
+├── pipeline.py         # Thin CI/CD orchestrator: runs build/ then deploy/ (verify → build → deploy)
+├── build/              # Build steps: environment check, tests, bundle src/ → dist/ (python -m build)
+├── deploy/             # Deploy step + local dev server (local_http_server.py) — python -m deploy
 ├── requirements.txt    # Python test toolchain (pytest, playwright)
 ├── tests/              # Static structure checks + Playwright end-to-end gym-floor flow
 ├── use_cases/          # OKF functional workflow specifications (see use_cases/INDEX.md)
