@@ -100,6 +100,7 @@ The **title/header line should stay constant** when switching between the clipbo
 ### 4.3 [ ] Collapse the duplicated session header into one row, with a date picker
 There are currently **two title rows** above the session list. The second row — the per-column header with the calendar icon and the `Today` label (`.sessions-column-header`) — is redundant now that the deck shows a single column and the title bar already names the day.
 
+- **Done**: the redundant second row is **removed** — all four `.sessions-column-header` `<h4>`s (Yesterday/Today/Tomorrow/Upcoming) were static HTML with no JS regenerating them, so deleting them from `index.html` drops the row permanently; the day-column now starts directly with the first session card below the title bar. (This also cleared the untranslated "Today" label the row showed under the SL locale.) The **date-picker** half below is still open and blocked on the dated-bookings data-model decision.
 - **Remove** the second row (the column header with the icon and `Today`/`Yesterday`/`Tomorrow`/`Upcoming` label).
 - In the remaining title row, make the **calendar icon clickable**, opening an overlay with a **date picker**.
 - The picker **must accept a typed date** — no scrolling back through years to reach a past date.

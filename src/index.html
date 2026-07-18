@@ -115,29 +115,19 @@
         </button>
       </div>
       
+      <!-- One day-column is shown at a time and the title bar above already names the day, so the
+           per-column header row (calendar icon + Today/Yesterday/Tomorrow/Upcoming) is omitted. -->
       <div class="sessions-categories-grid mb-6" id="sessions-categories-grid" role="region" aria-label="Sessions Schedule">
         <div class="sessions-category-column" id="yesterday-sessions-column">
-          <h4 class="sessions-column-header text-muted">
-            <i class="fa-solid fa-history"></i> Yesterday
-          </h4>
           <div id="yesterday-sessions-list" class="stack-list"></div>
         </div>
         <div class="sessions-category-column" id="today-sessions-column">
-          <h4 class="sessions-column-header text-emerald" style="color: #34d399;">
-            <i class="fa-solid fa-calendar-check"></i> Today
-          </h4>
           <div id="today-sessions-list" class="stack-list"></div>
         </div>
         <div class="sessions-category-column" id="tomorrow-sessions-column">
-          <h4 class="sessions-column-header text-cyan">
-            <i class="fa-solid fa-calendar-plus"></i> Tomorrow
-          </h4>
           <div id="tomorrow-sessions-list" class="stack-list"></div>
         </div>
         <div class="sessions-category-column" id="upcoming-sessions-column">
-          <h4 class="sessions-column-header text-purple">
-            <i class="fa-solid fa-forward"></i> Upcoming
-          </h4>
           <div id="upcoming-sessions-list" class="stack-list"></div>
         </div>
       </div>
