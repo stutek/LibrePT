@@ -35,7 +35,7 @@ body.midnight-theme {
   --temporal-past: #c084fc;
   --temporal-future: #fbbf24;
   --cloud-icon-color: #38bdf8; /* sky-400 blue cloud on dark zinc field */
-  --cloud-arrows-color: var(--success, #10b981); /* standard green sync arrows inside cloud */
+  --cloud-arrows-color: #052e16; /* green-950 deep forest green arrows for 6.7:1 contrast over light blue cloud */
 
   /* Shape personality — medium, balanced */
   --border-radius-lg: 16px;

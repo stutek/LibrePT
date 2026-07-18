@@ -30,7 +30,7 @@ body.nebula-theme {
   --temporal-past: #c4b5fd;
   --temporal-future: #fcd34d;
   --cloud-icon-color: #38bdf8; /* sky-400 blue cloud on dark cosmic field */
-  --cloud-arrows-color: var(--success, #10b981); /* standard green sync arrows inside cloud */
+  --cloud-arrows-color: #052e16; /* green-950 deep forest green arrows for 6.7:1 contrast over light blue cloud */
   --box-shadow: 0 16px 36px -16px rgba(0, 0, 0, 0.66);
   /* Shape personality — crisp, tight */
   --border-radius-lg: 12px;

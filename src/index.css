@@ -340,16 +340,9 @@ h1, h2, h3, h4, h5, h6 {
   left: 50%;
   top: 56%;
   transform: translate(-50%, -50%);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--cloud-arrows-color, var(--success, #10b981));
-  background: var(--card-bg, #ffffff);
-  border-radius: 50%;
-  width: 14px;
-  height: 14px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 1px 2.5px rgba(0, 0, 0, 0.4);
+  filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.45));
 }/* When there are pending changes the cloud button grows into a pill to seat the ahead/behind
    counters beside the icon; fully synced, the badge hides and it reads as a round icon again. */
 .sync-backup-btn {
