@@ -142,12 +142,12 @@ body.rose-theme {
   --primary: #ec4899;
   --primary-hover: #db2777;
   --primary-light: rgba(236, 72, 153, 0.14);
-  --primary-gradient: linear-gradient(135deg, #f472b6 0%, #ec4899 55%, #a855f7 100%);
+  --primary-gradient: linear-gradient(135deg, #f472b6 0%, #ec4899 55%, #c084fc 100%);
   --on-primary: #ffffff;
-  --secondary: #a855f7;
-  --secondary-hover: #9333ea;
-  --secondary-light: rgba(168, 85, 247, 0.12);
-  --accent-cyan: #a855f7; /* lavender highlights */
+  --secondary: #c084fc;
+  --secondary-hover: #a855f7;
+  --secondary-light: rgba(192, 132, 252, 0.12);
+  --accent-cyan: #c084fc; /* lavender highlights */
   --danger: #e11d48;
   --danger-hover: #be123c;
   --danger-light: rgba(225, 29, 72, 0.12);

@@ -91,7 +91,7 @@ export function applyThemeSwitcherLabels() {
 }
 
 function setupThemeSwitcher() {
-  const saved = localStorage.getItem('librept-theme') || 'dark';
+  const saved = localStorage.getItem('librept-theme') || 'light';
   applyTheme(saved);
   const sel = document.getElementById('theme-switcher');
   if (sel) {

@@ -11,11 +11,25 @@ import { initSessionTitleBar, renderSessionTitle } from './components/sessionTit
 import { renderActiveUsersList, updateClientTabsFadeState } from './components/activeUsersList.js';
 import { initApplicationHeader, setupApplicationHeader, incrementLocalSync, resetSyncState, setSyncTrackingReady, renderSyncBadge, applyThemeSwitcherLabels } from './components/applicationHeader.js';
 import { TRANSLATIONS } from './i18n/index.js';
-
-// Helper to generate short UUIDs for all entity types (clients, sessions, exercises, supersets/combos, etc.)
-function generateShortUUID() {
-  return Math.random().toString(36).substring(2, 10);
-}
+import { initRestTimer, setupRestTimer } from './components/restTimer.js';
+import { initBackupRestore, setupBackupRestore } from './components/backupRestore.js';
+import { initWorkoutSetup, openWorkoutSetupModal, setupWorkoutSetup } from './components/workoutSetup.js';
+import { initFeedbackModal, openFeedbackModal, setupFeedbackForms } from './components/feedbackModal.js';
+import {
+  generateShortUUID,
+  getInitials,
+  truncateString,
+  formatDateStr,
+  formatDuration,
+  formatSignedDuration,
+  formatClockFromMinutes,
+  escapeHTML,
+  getClientDisplayNameHTML,
+  parseTimeRange,
+  isTimeOverlapping,
+  getOverlappingBookings,
+  buildBookingMeta
+} from './helper/utils.js';
 
 
 function t(key) {
@@ -212,16 +226,6 @@ let state = {
 };
 
 let activeSession = null;
-// Voice-note recorder state for the feedback modal — module-scoped so the card's
-// Log Feedback button (openFeedbackModal) and the modal's own handlers share it.
-let feedbackIsRecording = false;
-let feedbackHasVoiceNote = false;
-let restTimer = {
-  intervalId: null,
-  secondsRemaining: 0,
-  isActive: false,
-  originalDuration: 60
-};
 
 // --- INITIALIZE APPLICATION ---
 // Best-effort: size the browser window itself to a phone viewport on load/reload, so
@@ -304,9 +308,47 @@ function init() {
   setupClientForms();
   setupRoutineForms();
   setupExerciseForms();
+  // Initialize Workout Setup Component
+  initWorkoutSetup({
+    getState: () => state,
+    t,
+    getClientDisplayNameHTML,
+    startWorkoutSession
+  });
   setupWorkoutSetup();
   setupActiveSession();
+
+  // Initialize Feedback Modal Component
+  initFeedbackModal({
+    getState: () => state,
+    getActiveSession: () => activeSession,
+    t,
+    generateShortUUID,
+    saveActiveSessionToCache,
+    saveToLocalStorage,
+    renderPendingPlanAdjustments
+  });
+  setupFeedbackForms();
+  // Initialize Rest Timer component
+  initRestTimer({
+    getActiveExercise
+  });
   setupRestTimer();
+
+  // Initialize Backup & Restore component
+  initBackupRestore({
+    getState: () => state,
+    setState: (newState) => { state = newState; },
+    saveToLocalStorage,
+    cancelWorkoutSession,
+    seedMockData,
+    renderClientsList,
+    renderRoutinesList,
+    renderExercisesList,
+    renderGlobalHistory,
+    populateDropdownSelectors,
+    t
+  });
   setupBackupRestore();
   setupCalendarBookings();
 
@@ -358,7 +400,8 @@ function init() {
     formatDuration,
     parseTimeRange,
     getOverlappingBookings,
-    buildBookingMeta
+    buildBookingMeta,
+    getSessionDayDate
   });
 
   // Apply translations initially
@@ -1416,147 +1459,7 @@ function populateDropdownSelectors() {
 
 // --- WORKOUT SESSION LOGIC ---
 
-// 1. Session Setup Modal
-// 1. Session Setup Modal
-function setupWorkoutSetup() {
-  const dialog = document.getElementById('dialog-workout-setup');
-  const form = document.getElementById('form-workout-setup');
-  const cancelBtn = dialog.querySelector('.modal-cancel');
-  const closeBtn = dialog.querySelector('.modal-close-btn');
 
-  const closeModal = () => dialog.close();
-  cancelBtn.addEventListener('click', closeModal);
-  closeBtn.addEventListener('click', closeModal);
-
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    
-    // Collect active clients checked and their selected routines
-    const clientRoutines = [];
-    const rows = document.getElementById('setup-participants-assignment-list').querySelectorAll('.participant-setup-row');
-    
-    rows.forEach(row => {
-      const cb = row.querySelector('input[type="checkbox"]');
-      if (cb && cb.checked) {
-        const clientId = cb.value;
-        const select = row.querySelector('select');
-        const routineId = select ? select.value : '';
-        clientRoutines.push({ clientId, routineId });
-      }
-    });
-
-    if (clientRoutines.length === 0) {
-      alert('You must select at least one participant client.');
-      return;
-    }
-
-    const missingRoutine = clientRoutines.find(cr => !cr.routineId);
-    if (missingRoutine) {
-      alert('Please assign a routine template to all selected participants.');
-      return;
-    }
-
-    startWorkoutSession(clientRoutines);
-    dialog.close();
-  });
-}
-
-function openWorkoutSetupModal(preselectedClientId = null, preselectedRoutineId = null, preselectedBookingId = null) {
-  const dialog = document.getElementById('dialog-workout-setup');
-  const participantsList = document.getElementById('setup-participants-assignment-list');
-  
-  if (!participantsList) return;
-  participantsList.innerHTML = '';
-  
-  let targetBooking = null;
-  if (preselectedBookingId && state.bookings) {
-    targetBooking = state.bookings.find(b => b.id === preselectedBookingId);
-  }
-  
-  state.clients.sort((a,b) => a.name.localeCompare(b.name)).forEach(client => {
-    const row = document.createElement('div');
-    row.className = 'participant-setup-row';
-    row.style.display = 'flex';
-    row.style.alignItems = 'center';
-    row.style.justifyContent = 'space-between';
-    row.style.gap = '10px';
-    row.style.marginBottom = '12px';
-    row.style.padding = '8px';
-    row.style.background = 'rgba(255,255,255,0.03)';
-    row.style.borderRadius = '6px';
-    row.style.border = '1px solid var(--border-color)';
-    
-    const left = document.createElement('div');
-    left.style.display = 'flex';
-    left.style.alignItems = 'center';
-    left.style.gap = '10px';
-    
-    const cb = document.createElement('input');
-    cb.type = 'checkbox';
-    cb.value = client.id;
-    cb.id = `setup-cb-${client.id}`;
-    cb.style.width = '18px';
-    cb.style.height = '18px';
-    cb.style.cursor = 'pointer';
-    
-    if (targetBooking) {
-      cb.checked = targetBooking.participants.includes(client.id);
-    } else if (preselectedClientId === client.id) {
-      cb.checked = true;
-    } else if (!preselectedClientId && client.id !== 'c3c7d2c4') {
-      // Default to checking first couple clients if none specified (like Jane and John)
-      cb.checked = true;
-    }
-    
-    const nameLabel = document.createElement('label');
-    nameLabel.htmlFor = `setup-cb-${client.id}`;
-    nameLabel.innerHTML = getClientDisplayNameHTML(client);
-    nameLabel.style.fontWeight = '600';
-    nameLabel.style.cursor = 'pointer';
-    nameLabel.style.fontSize = '13px';
-    
-    left.appendChild(cb);
-    left.appendChild(nameLabel);
-    
-    const right = document.createElement('div');
-    
-    const select = document.createElement('select');
-    select.className = 'form-control select-routine-dropdown';
-    select.style.padding = '4px 8px';
-    select.style.fontSize = '12px';
-    select.style.width = '160px';
-    select.style.height = '32px';
-    
-    select.innerHTML = `<option value="" disabled>${t('select_exercise')}</option>`;
-    state.routines.forEach(r => {
-      const opt = document.createElement('option');
-      opt.value = r.id;
-      opt.textContent = r.name;
-      select.appendChild(opt);
-    });
-    
-    // Attempt default selections
-    if (targetBooking && targetBooking.participants.includes(client.id)) {
-      select.value = targetBooking.routineId;
-    } else if (preselectedRoutineId && preselectedClientId === client.id) {
-      select.value = preselectedRoutineId;
-    } else if (client.id === 'c1a9f0e2') {
-      select.value = 'r10d5e6f';
-    } else if (client.id === 'c2b8e1d3') {
-      select.value = 'r11d5e6f';
-    } else if (state.routines.length > 0) {
-      select.value = state.routines[0].id;
-    }
-    
-    right.appendChild(select);
-    
-    row.appendChild(left);
-    row.appendChild(right);
-    participantsList.appendChild(row);
-  });
-
-  dialog.showModal();
-}
 
 // 2. Active Session Core
 function startWorkoutSession(clientRoutines, bookingMeta = null) {
@@ -1677,41 +1580,7 @@ function getActiveExercise() {
 
 // Participant tabs scroll fade logic moved to components/activeUsersList.js
 
-// Opens the full feedback modal for the active client's current exercise, prefilled and
-// with the voice recorder reset. Invoked by the Log Feedback button on the focus card.
-// exId targets a specific exercise (a circuit row passes its own id); without it the modal
-// falls back to the active exercise, which is how the single-card Feedback button calls it.
-function openFeedbackModal(exId) {
-  if (!activeSession) return;
-  const activeClientId = activeSession.activeClientId;
-  const clientState = activeSession.clientRoutines[activeClientId];
-  if (!clientState || clientState.exercises.length === 0) return;
 
-  const curEx = (exId && clientState.exercises.find(e => e.id === exId))
-    || clientState.exercises[clientState.activeExerciseIndex];
-  const client = state.clients.find(c => c.id === activeClientId);
-
-  document.getElementById('feedback-client-id').value = activeClientId;
-  document.getElementById('feedback-exercise-name').value = curEx.name;
-  document.getElementById('feedback-client-display-name').textContent = client.name;
-  document.getElementById('feedback-ex-display-name').textContent = curEx.name;
-  document.getElementById('feedback-custom-note').value = '';
-
-  // Reset voice recorder state
-  feedbackIsRecording = false;
-  feedbackHasVoiceNote = false;
-  const audioWave = document.getElementById('voice-audio-wave');
-  const audioPlayer = document.getElementById('voice-audio-player');
-  const recordIcon = document.getElementById('voice-record-icon');
-  const recordStatus = document.getElementById('voice-record-status');
-  if (audioWave) { audioWave.classList.add('hidden'); audioWave.classList.remove('recording'); }
-  if (audioPlayer) audioPlayer.classList.add('hidden');
-  if (recordStatus) recordStatus.textContent = t('voice_ready');
-  if (recordIcon) { recordIcon.className = 'fa-solid fa-microphone'; recordIcon.style.color = ''; }
-
-  document.getElementById('form-feedback').reset();
-  document.getElementById('dialog-feedback').showModal();
-}
 
 // One-tap outcome signal (Too Easy / Too Hard) from the focus card. Records the same
 // kind of feedback the modal would, marks the exercise's target sets as completed so it
@@ -2038,143 +1907,7 @@ function setupActiveSession() {
     addExModal.close();
   });
 
-  // Feedback modal with voice note integration. The Log Feedback trigger now lives on
-  // the active exercise card (renderActiveGroupBoard), which calls openFeedbackModal().
-  const fbModal = document.getElementById('dialog-feedback');
-  const fbForm = document.getElementById('form-feedback');
 
-  // Voice recording mock handlers
-  const recordBtn = document.getElementById('btn-voice-record');
-  if (recordBtn) {
-    recordBtn.addEventListener('click', () => {
-      const recordIcon = document.getElementById('voice-record-icon');
-      const recordStatus = document.getElementById('voice-record-status');
-      const audioWave = document.getElementById('voice-audio-wave');
-      const audioPlayer = document.getElementById('voice-audio-player');
-      
-      if (!feedbackIsRecording) {
-        // Start snemanje / record
-        feedbackIsRecording = true;
-        feedbackHasVoiceNote = false;
-        if (recordIcon) {
-          recordIcon.className = 'fa-solid fa-microphone-slash';
-          recordIcon.style.color = '#ef4444';
-        }
-        if (recordStatus) recordStatus.textContent = t('voice_recording');
-        if (audioWave) {
-          audioWave.classList.remove('hidden');
-          audioWave.classList.add('recording');
-        }
-        if (audioPlayer) audioPlayer.classList.add('hidden');
-      } else {
-        // Stop snemanje
-        feedbackIsRecording = false;
-        feedbackHasVoiceNote = true;
-        if (recordIcon) {
-          recordIcon.className = 'fa-solid fa-microphone';
-          recordIcon.style.color = '';
-        }
-        if (recordStatus) recordStatus.textContent = t('voice_transcribing');
-        if (audioWave) {
-          audioWave.classList.add('hidden');
-          audioWave.classList.remove('recording');
-        }
-        
-        // Simulate local on-device speech-to-text transcription latency
-        setTimeout(() => {
-          if (recordStatus) recordStatus.textContent = t('voice_transcription_done');
-          if (audioPlayer) audioPlayer.classList.remove('hidden');
-          
-          const exName = document.getElementById('feedback-exercise-name').value || 'exercise';
-          const clientName = document.getElementById('feedback-client-display-name').textContent || 'Client';
-          
-          let generatedTranscript = "";
-          if (state.lang === 'sl') {
-            generatedTranscript = `Glasovna opomba (lokalno): ${clientName} poroča o dobrem počutju pri vaji ${exName}.`;
-          } else {
-            generatedTranscript = `Voice note (local): ${clientName} reported good form and speed on ${exName}.`;
-          }
-          
-          const currentNoteInput = document.getElementById('feedback-custom-note');
-          if (currentNoteInput) {
-            if (currentNoteInput.value) {
-              currentNoteInput.value += ` (${generatedTranscript})`;
-            } else {
-              currentNoteInput.value = generatedTranscript;
-            }
-          }
-        }, 1200);
-      }
-    });
-  }
-
-  const playPreviewBtn = document.getElementById('btn-play-voice-preview');
-  if (playPreviewBtn) {
-    playPreviewBtn.addEventListener('click', () => {
-      const playIcon = playPreviewBtn.querySelector('i');
-      const recordStatus = document.getElementById('voice-record-status');
-      if (playIcon) {
-        if (playIcon.classList.contains('fa-circle-play')) {
-          playIcon.className = 'fa-solid fa-circle-pause';
-          if (recordStatus) recordStatus.textContent = t('voice_playing');
-          
-          setTimeout(() => {
-            playIcon.className = 'fa-solid fa-circle-play';
-            if (recordStatus) recordStatus.textContent = t('voice_transcription_done');
-          }, 3000);
-        } else {
-          playIcon.className = 'fa-solid fa-circle-play';
-          if (recordStatus) recordStatus.textContent = t('voice_transcription_done');
-        }
-      }
-    });
-  }
-  
-  fbModal.querySelector('.modal-cancel').addEventListener('click', () => fbModal.close());
-  fbModal.querySelector('.modal-close-btn').addEventListener('click', () => fbModal.close());
-  
-  fbForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const clientId = document.getElementById('feedback-client-id').value;
-    const exName = document.getElementById('feedback-exercise-name').value;
-    const customNote = document.getElementById('feedback-custom-note').value;
-    const tagVal = fbForm.querySelector('input[name="feedback-tag"]:checked').value;
-    
-    const client = state.clients.find(c => c.id === clientId);
-    
-    const newFeedback = {
-      id: generateShortUUID(),
-      clientId: clientId,
-      clientName: client ? client.name : 'Unknown Client',
-      date: new Date().toISOString(),
-      exerciseName: exName,
-      tag: tagVal + (customNote ? ` - ${customNote}` : ''),
-      hasVoiceNote: feedbackHasVoiceNote,
-      resolved: false
-    };
-    
-    state.planUpdates.push(newFeedback);
- 
-    // Save to active session so it carries into client history log
-    if (activeSession) {
-      if (!activeSession.feedback) {
-        activeSession.feedback = [];
-      }
-      activeSession.feedback.push({
-        id: newFeedback.id,
-        clientId: clientId,
-        exerciseName: exName,
-        tag: tagVal,
-        note: customNote,
-        hasVoiceNote: feedbackHasVoiceNote
-      });
-      saveActiveSessionToCache();
-    }
- 
-    saveToLocalStorage();
-    renderPendingPlanAdjustments();
-    fbModal.close();
-  });
 }
 
 function cancelWorkoutSession() {
@@ -2342,368 +2075,7 @@ function recoverActiveSession() {
   }
 }
 
-// --- REST TIMER CONTROLLER ---
-function setupRestTimer() {
-  const panel = document.getElementById('floating-rest-timer');
-  const timerLabel = document.getElementById('timer-countdown');
-  const toggleBtn = document.getElementById('btn-timer-toggle');
-  
-  document.getElementById('btn-timer-trigger').addEventListener('click', (e) => {
-    e.stopPropagation();
-    const currentEx = getActiveExercise();
-    triggerRestTimer(currentEx ? currentEx.rest : 60);
-  });
 
-  document.getElementById('btn-trigger-group-timer').addEventListener('click', () => {
-    const currentEx = getActiveExercise();
-    triggerRestTimer(currentEx ? currentEx.rest : 60);
-  });
-
-  document.getElementById('btn-close-timer').addEventListener('click', () => {
-    panel.classList.add('hidden');
-  });
-
-  toggleBtn.addEventListener('click', () => {
-    if (restTimer.isActive) {
-      pauseRestTimer();
-    } else {
-      resumeRestTimer();
-    }
-  });
-
-  document.getElementById('btn-timer-plus').addEventListener('click', () => {
-    adjustRestTimer(15);
-  });
-
-  document.getElementById('btn-timer-minus').addEventListener('click', () => {
-    adjustRestTimer(-15);
-  });
-}
-
-function triggerRestTimer(durationSeconds) {
-  if (restTimer.intervalId) clearInterval(restTimer.intervalId);
-  
-  restTimer.secondsRemaining = durationSeconds;
-  restTimer.originalDuration = durationSeconds;
-  restTimer.isActive = true;
-  
-  const panel = document.getElementById('floating-rest-timer');
-  panel.classList.remove('hidden');
-  
-  updateTimerUI();
-  
-  restTimer.intervalId = setInterval(tickRestTimer, 1000);
-}
-
-function tickRestTimer() {
-  if (restTimer.secondsRemaining > 0) {
-    restTimer.secondsRemaining--;
-    updateTimerUI();
-  } else {
-    // Rest Complete Beep & Vibrations
-    clearInterval(restTimer.intervalId);
-    restTimer.isActive = false;
-    restTimer.intervalId = null;
-    updateTimerUI();
-    
-    playTimerAlert();
-    document.getElementById('timer-countdown').textContent = 'DONE!';
-  }
-}
-
-function updateTimerUI() {
-  const timerLabel = document.getElementById('timer-countdown');
-  const toggleBtn = document.getElementById('btn-timer-toggle');
-  
-  timerLabel.textContent = `${restTimer.secondsRemaining}s`;
-  
-  if (restTimer.isActive) {
-    toggleBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
-  } else {
-    toggleBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
-  }
-}
-
-function pauseRestTimer() {
-  if (restTimer.intervalId) {
-    clearInterval(restTimer.intervalId);
-    restTimer.intervalId = null;
-  }
-  restTimer.isActive = false;
-  updateTimerUI();
-}
-
-function resumeRestTimer() {
-  if (restTimer.secondsRemaining <= 0) return;
-  restTimer.isActive = true;
-  updateTimerUI();
-  restTimer.intervalId = setInterval(tickRestTimer, 1000);
-}
-
-function adjustRestTimer(seconds) {
-  restTimer.secondsRemaining += seconds;
-  if (restTimer.secondsRemaining < 0) restTimer.secondsRemaining = 0;
-  updateTimerUI();
-}
-
-function playTimerAlert() {
-  // Mobile Haptic Vibration
-  if (navigator.vibrate) {
-    navigator.vibrate([200, 100, 200, 100, 300]);
-  }
-
-  // Synthesized audio beep via Web Audio API (cross-browser offline friendly)
-  try {
-    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContextClass) return;
-
-    const ctx = new AudioContextClass();
-    
-    // Play double beep
-    const playBeep = (time, frequency, duration) => {
-      const osc = ctx.createOscillator();
-      const gainNode = ctx.createGain();
-      osc.connect(gainNode);
-      gainNode.connect(ctx.destination);
-      
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(frequency, time);
-      gainNode.gain.setValueAtTime(0.2, time);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, time + duration);
-      
-      osc.start(time);
-      osc.stop(time + duration);
-    };
-
-    const now = ctx.currentTime;
-    playBeep(now, 880, 0.25); // high A tone
-    playBeep(now + 0.3, 880, 0.4); // slightly longer tone
-  } catch (e) {
-    console.error('Error synthesizing rest timer alert sound:', e);
-  }
-}
-
-// --- DATA IMPORT/EXPORT ---
-function setupBackupRestore() {
-  const dialog = document.getElementById('dialog-backup');
-  const importFile = document.getElementById('import-db-file');
-  const importStatus = document.getElementById('import-status');
-
-  document.getElementById('backup-btn').addEventListener('click', () => {
-    importStatus.textContent = '';
-    importStatus.className = 'status-msg';
-    dialog.showModal();
-  });
-
-  dialog.querySelector('.modal-close-btn').addEventListener('click', () => dialog.close());
-
-  // Export JSON
-  document.getElementById('btn-export-db').addEventListener('click', () => {
-    const dataStr = JSON.stringify(state, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    
-    const dlAnchor = document.createElement('a');
-    dlAnchor.href = url;
-    dlAnchor.download = `librept_backup_${new Date().toISOString().substring(0, 10)}.json`;
-    document.body.appendChild(dlAnchor);
-    dlAnchor.click();
-    document.body.removeChild(dlAnchor);
-    URL.revokeObjectURL(url);
-  });
-
-  // Trigger file click
-  dialog.querySelector('.file-trigger').addEventListener('click', () => {
-    importFile.click();
-  });
-
-  // Import JSON File
-  importFile.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = function(evt) {
-      try {
-        const importedData = JSON.parse(evt.target.result);
-        
-        // Simple verification schema
-        if (importedData && Array.isArray(importedData.clients) && Array.isArray(importedData.exercises)) {
-          state = {
-            clients: importedData.clients || [],
-            exercises: importedData.exercises || [],
-            routines: importedData.routines || [],
-            history: importedData.history || []
-          };
-          saveToLocalStorage();
-          
-          // Re-render
-          renderClientsList();
-          renderRoutinesList();
-          renderExercisesList();
-          renderGlobalHistory();
-          populateDropdownSelectors();
-
-          importStatus.textContent = 'Import successful! Database synchronized.';
-          importStatus.className = 'status-msg text-emerald';
-        } else {
-          throw new Error('Missing core structure validation.');
-        }
-      } catch (err) {
-        importStatus.textContent = 'Error: Invalid backup file format.';
-        importStatus.className = 'status-msg text-danger';
-        console.error('Import file parse error:', err);
-      }
-    };
-    reader.readAsText(file);
-  });
-
-  // Wipe database
-  document.getElementById('btn-reset-db').addEventListener('click', () => {
-    if (confirm('CRITICAL WARNING: This permanently wipes all workout logs and custom records. Are you absolutely sure?')) {
-      localStorage.removeItem('librept_db');
-      cancelWorkoutSession();
-      seedMockData();
-      
-      renderClientsList();
-      renderRoutinesList();
-      renderExercisesList();
-      renderGlobalHistory();
-      populateDropdownSelectors();
-      
-      importStatus.textContent = 'Database reset successfully to factory defaults.';
-      importStatus.className = 'status-msg text-emerald';
-    }
-  });
-}
-
-// --- UTILITY HELPER FUNCTIONS ---
-function getInitials(name) {
-  if (!name) return 'PT';
-  const parts = name.trim().split(' ');
-  if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-}
-
-function truncateString(str, num) {
-  if (!str) return '';
-  if (str.length <= num) return str;
-  return str.slice(0, num) + '...';
-}
-
-function formatDateStr(dateStr) {
-  if (!dateStr) return '';
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return '';
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
-}
-
-function formatDuration(totalSeconds) {
-  const hrs = Math.floor(totalSeconds / 3600);
-  const mins = Math.floor((totalSeconds % 3600) / 60);
-  const secs = totalSeconds % 60;
-  
-  const paddedMins = mins.toString().padStart(2, '0');
-  const paddedSecs = secs.toString().padStart(2, '0');
-  
-  if (hrs > 0) {
-    return `${hrs}:${paddedMins}:${paddedSecs}`;
-  }
-  return `${paddedMins}:${paddedSecs}`;
-}
-
-// Same as formatDuration, but prefixes a minus sign once the count goes negative
-// (a session running past its scheduled end) instead of wrapping/going nonsensical.
-function formatSignedDuration(totalSeconds) {
-  const negative = totalSeconds < 0;
-  return (negative ? '-' : '') + formatDuration(Math.abs(totalSeconds));
-}
-
-function formatClockFromMinutes(totalMinutes) {
-  const h = Math.floor(totalMinutes / 60) % 24;
-  const m = ((totalMinutes % 60) + 60) % 60;
-  // 24-hour HH:MM (ISO-style)
-  return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-}
-
-function escapeHTML(str) {
-  if (!str) return '';
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
-
-function getClientDisplayNameHTML(client, isShort = false) {
-  if (!client) return '';
-  const nameText = isShort ? client.name.split(' ')[0] : client.name;
-  if (client.hasInjury) {
-    return `<span class="client-name-with-injury" style="display: inline-flex; align-items: center; gap: 4px;">${escapeHTML(nameText)} <i class="fa-solid fa-triangle-exclamation text-red" style="font-size: 11px; color: #ef4444;" title="Has recorded injury: ${escapeHTML(client.injury || client.notes || '')}"></i></span>`;
-  }
-  return escapeHTML(nameText);
-}
-function parseTimeRange(timeStr) {
-  const parts = timeStr.split('-');
-  if (parts.length !== 2) return null;
-  // Times are 12-hour with an AM/PM suffix (e.g. "02:00 PM"). AM/PM must be honoured or
-  // an afternoon end time parses smaller than its start (2:00 < 12:00), inverting the range
-  // and breaking overlap detection — which silently makes afternoon session cards un-openable.
-  const parseTime = (s) => {
-    const m = s.trim().match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
-    if (!m) return 0;
-    let hour = parseInt(m[1], 10);
-    const min = parseInt(m[2], 10);
-    const ampm = m[3] ? m[3].toUpperCase() : null;
-    if (ampm === 'PM' && hour !== 12) hour += 12;
-    if (ampm === 'AM' && hour === 12) hour = 0;
-    return hour * 60 + min;
-  };
-  return {
-    start: parseTime(parts[0]),
-    end: parseTime(parts[1])
-  };
-}
-
-function isTimeOverlapping(rangeA, rangeB) {
-  if (!rangeA || !rangeB) return false;
-  return rangeA.start < rangeB.end && rangeB.start < rangeA.end;
-}
-
-// Session name(s), scheduled start/end, and a display time range for a group of
-// same-slot bookings — feeds the active/idle session bar (TODO 2.1/2.2).
-function buildBookingMeta(bookings, day) {
-  const titles = [...new Set(bookings.map(b => b.title))];
-  const locations = [...new Set(bookings.map(b => b.location).filter(Boolean))];
-  const ranges = bookings.map(b => parseTimeRange(b.time)).filter(Boolean);
-  const startMin = Math.min(...ranges.map(r => r.start));
-  const endMin = Math.max(...ranges.map(r => r.end));
-  const dayDate = getSessionDayDate(day);
-  const startDate = new Date(dayDate);
-  startDate.setMinutes(startDate.getMinutes() + startMin);
-  const endDate = new Date(dayDate);
-  endDate.setMinutes(endDate.getMinutes() + endMin);
-
-  return {
-    titles,
-    day,
-    startDate,
-    endDate,
-    // Overlapping bookings almost always share a location; join the rare exceptions.
-    location: locations.join(' / '),
-    timeLabel: `${formatClockFromMinutes(startMin)} - ${formatClockFromMinutes(endMin)}`
-  };
-}
-
-function getOverlappingBookings(booking) {
-  const targetRange = parseTimeRange(booking.time);
-  return state.bookings.filter(b => {
-    if (b.day !== booking.day) return false;
-    return isTimeOverlapping(targetRange, parseTimeRange(b.time));
-  });
-}
 
 // getNextUpcomingBookingGroup + renderIdleSessionBar moved to components/sessionBar.js.
 
@@ -2713,7 +2085,7 @@ function launchClipboardDirectly(bookingId) {
   if (!booking) return;
 
   // Find all bookings on the same day that overlap in time
-  const overlappingBookings = getOverlappingBookings(booking);
+  const overlappingBookings = getOverlappingBookings(booking, state.bookings);
 
   // Aggregate participant clientRoutines ensuring no duplicates
   const clientRoutinesMap = new Map();
@@ -2736,7 +2108,7 @@ function launchClipboardDirectly(bookingId) {
 
   if (clientRoutines.length === 0) return;
 
-  startWorkoutSession(clientRoutines, buildBookingMeta(overlappingBookings, booking.day));
+  startWorkoutSession(clientRoutines, buildBookingMeta(overlappingBookings, booking.day, getSessionDayDate));
 }
 
 // --- GOOGLE CALENDAR APPOINTMENT SESSIONS INTEGRATION (UC3 & UC4) ---

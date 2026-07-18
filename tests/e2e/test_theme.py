@@ -20,15 +20,15 @@ def _body_classes(page):
     return page.evaluate("() => Array.from(document.body.classList)")
 
 
-def test_default_theme_is_dark(page, local_server):
+def test_default_theme_is_light(page, local_server):
     page.goto(local_server)
     page.wait_for_selector("#view-clients.active")
 
-    assert "dark-theme" in _body_classes(page)
-    assert page.locator("#theme-switcher").input_value() == "dark"
+    assert "light-theme" in _body_classes(page)
+    assert page.locator("#theme-switcher").input_value() == "light"
 
 
-@pytest.mark.parametrize("value", ["light", "red", "rose", "violet"])
+@pytest.mark.parametrize("value", ["dark", "red", "rose", "violet"])
 def test_selecting_a_theme_swaps_the_single_body_class(page, local_server, value):
     page.goto(local_server)
     page.wait_for_selector("#view-clients.active")
@@ -55,7 +55,7 @@ def test_theme_persists_across_reload(page, local_server):
     page.reload()
     page.wait_for_selector("#view-clients.active")
 
-    # Restored from localStorage, not reset to the dark default.
+    # Restored from localStorage, not reset to the light default.
     assert "violet-theme" in _body_classes(page)
-    assert "dark-theme" not in _body_classes(page)
+    assert "light-theme" not in _body_classes(page)
     assert page.locator("#theme-switcher").input_value() == "violet"

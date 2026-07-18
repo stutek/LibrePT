@@ -90,7 +90,7 @@ function getNextUpcomingBookingGroup() {
   const anchor = pickEarliest(todayCandidates) || pickEarliest(bookings.filter(b => b.day === 'tomorrow'));
   if (!anchor) return null;
 
-  return { day: anchor.day, bookings: getOverlappingBookings(anchor) };
+  return { day: anchor.day, bookings: getOverlappingBookings(anchor, bookings) };
 }
 
 // Idle bar: colour-distinct from the active state, names the next upcoming session(s)
@@ -100,7 +100,7 @@ export function renderIdleSessionBar() {
   if (deps.getActiveSession()) return;
   const bar = document.getElementById('active-session-bar');
   if (!bar) return;
-  const { t, buildBookingMeta, formatSignedDuration } = deps;
+  const { t, buildBookingMeta, formatSignedDuration, getSessionDayDate } = deps;
 
   const next = getNextUpcomingBookingGroup();
   if (!next || next.bookings.length === 0) {
@@ -109,7 +109,7 @@ export function renderIdleSessionBar() {
     return;
   }
 
-  const meta = buildBookingMeta(next.bookings, next.day);
+  const meta = buildBookingMeta(next.bookings, next.day, getSessionDayDate);
   const participantCount = new Set(next.bookings.flatMap(b => b.participants)).size;
   const startsInSec = Math.round((meta.startDate.getTime() - Date.now()) / 1000);
 
