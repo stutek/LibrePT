@@ -139,4 +139,55 @@ export function setupApplicationHeader() {
 
   // Theme switcher setup
   setupThemeSwitcher();
+
+  // Application overflow (☰) menu
+  setupAppMenu();
+}
+
+// Wires the ☰ header menu: toggle + close-on-outside-click (mirrors the .session-menu
+// pattern), plus each placeholder/real action and its About / Terms modals.
+function setupAppMenu() {
+  const menuBtn = document.getElementById('btn-app-menu');
+  const menu = document.getElementById('app-menu');
+  if (!menuBtn || !menu) return;
+
+  const closeMenu = () => {
+    menu.classList.add('hidden');
+    menuBtn.setAttribute('aria-expanded', 'false');
+  };
+  menuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isOpen = !menu.classList.contains('hidden');
+    menu.classList.toggle('hidden', isOpen);
+    menuBtn.setAttribute('aria-expanded', String(!isOpen));
+  });
+  // Dismiss on any outside click.
+  document.addEventListener('click', (e) => {
+    if (!menu.classList.contains('hidden') && !e.target.closest('.app-menu-wrap')) {
+      closeMenu();
+    }
+  });
+
+  const openDialog = (id) => { const d = document.getElementById(id); if (d) d.showModal(); };
+  const on = (id, handler) => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('click', handler);
+  };
+
+  // Connect cloud storage — placeholder, no backend yet.
+  on('menu-connect-cloud', () => { closeMenu(); alert(deps.t('menu_coming_soon')); });
+  // Export data — reuse the existing Sync & Backup modal (it holds JSON export/restore).
+  on('menu-export-data', () => { closeMenu(); const b = document.getElementById('backup-btn'); if (b) b.click(); });
+  // GitHub project is a real <a target="_blank">; just dismiss the menu.
+  on('menu-github', () => closeMenu());
+  // About / Terms open their modals.
+  on('menu-about', () => { closeMenu(); openDialog('dialog-about'); });
+  on('menu-terms', () => { closeMenu(); openDialog('dialog-terms'); });
+
+  // Modal close (×) buttons for the About / Terms dialogs.
+  document.querySelectorAll('#dialog-about .modal-close-btn, #dialog-terms .modal-close-btn')
+    .forEach(btn => btn.addEventListener('click', () => btn.closest('dialog').close()));
+
+  // "I agree" dismisses the Terms modal (first-run acceptance persistence is added in 10.2).
+  on('btn-terms-agree', () => { const d = document.getElementById('dialog-terms'); if (d) d.close(); });
 }

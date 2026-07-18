@@ -153,5 +153,19 @@ export const sl = {
     round_label: "Krog",
     complete_round: "Zaključi krog",
     finish_superset: "Zaključi superserijo",
-    rest_label: "Počitek"
+    rest_label: "Počitek",
+
+    // Application (☰) header menu + About / Terms modals
+    menu_connect_cloud: "Poveži shrambo v oblaku",
+    menu_coming_soon: "Shramba v oblaku še ni na voljo — kmalu.",
+    menu_export_data: "Izvozi podatke v datoteko",
+    menu_github: "Projekt na GitHubu",
+    menu_about: "O aplikaciji",
+    menu_terms: "Pogoji in izjava o odgovornosti",
+    about_title: "O aplikaciji LibrePT",
+    about_body: "LibrePT je brezplačen odprtokoden pripomoček za osebne trenerje, ki deluje brez povezave — načrtujte seje, jih izvajajte v telovadnici in spremljajte napredek strank. Vsi podatki ostanejo na vaši napravi.",
+    about_repo: "Oglejte si projekt na GitHubu",
+    terms_title: "Pogoji in izjava o odgovornosti",
+    terms_body: "LibrePT je na voljo \"kakršen je\", brez kakršnega koli jamstva. Ne predstavlja zdravstvenega ali strokovnega nasveta za treniranje. Vaši podatki ostanejo na vaši napravi in zanje ste odgovorni sami. Uporaba je na lastno odgovornost.",
+    terms_agree: "Se strinjam"
 };

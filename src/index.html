@@ -63,6 +63,30 @@
                  filled in by renderSyncBadge(); hidden once fully in sync. -->
             <span id="sync-badge" class="sync-badge hidden"></span>
           </button>
+          <!-- Application overflow menu (☰): app-level actions, mirrors the .session-menu
+               dropdown pattern (toggle + close-on-outside-click), wired in applicationHeader.js. -->
+          <div class="app-menu-wrap">
+            <button id="btn-app-menu" class="icon-btn" aria-label="Menu / Meni" aria-haspopup="true" aria-expanded="false">
+              <i class="fa-solid fa-bars"></i>
+            </button>
+            <div id="app-menu" class="session-menu hidden" role="menu">
+              <button id="menu-connect-cloud" class="session-menu-item" role="menuitem">
+                <i class="fa-solid fa-cloud-arrow-up"></i> Connect cloud storage
+              </button>
+              <button id="menu-export-data" class="session-menu-item" role="menuitem">
+                <i class="fa-solid fa-file-export"></i> Export data as a file
+              </button>
+              <a id="menu-github" class="session-menu-item" role="menuitem" href="https://github.com/stutek/LibrePT" target="_blank" rel="noopener noreferrer">
+                <i class="fa-brands fa-github"></i> GitHub project
+              </a>
+              <button id="menu-about" class="session-menu-item" role="menuitem">
+                <i class="fa-solid fa-circle-info"></i> About
+              </button>
+              <button id="menu-terms" class="session-menu-item" role="menuitem">
+                <i class="fa-solid fa-shield-halved"></i> Terms &amp; disclaimer
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -768,6 +792,34 @@
         <p>This permanently deletes all client tracking history and custom exercises. Make sure you have exported a copy first.</p>
         <button id="btn-reset-db" class="btn danger-btn w-full">Reset All Database Data</button>
       </div>
+    </div>
+  </dialog>
+
+  <!-- DIALOG MODAL: About (opened from the ☰ header menu) -->
+  <dialog id="dialog-about" class="dialog-modal card glassmorphic">
+    <div class="modal-header">
+      <h3 id="about-title">About LibrePT</h3>
+      <button class="modal-close-btn" aria-label="Close about modal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body-scroll">
+      <p id="about-body" class="dialog-desc">LibrePT is a free, open-source, offline-first clipboard for personal trainers — schedule sessions, run them on the gym floor, and track client progress. All data stays on your device.</p>
+      <a id="about-repo-link" class="btn secondary-btn w-full" href="https://github.com/stutek/LibrePT" target="_blank" rel="noopener noreferrer">
+        <i class="fa-brands fa-github"></i> View the project on GitHub
+      </a>
+    </div>
+  </dialog>
+
+  <!-- DIALOG MODAL: Terms & disclaimer (reachable from the ☰ menu; also shown once on first run) -->
+  <dialog id="dialog-terms" class="dialog-modal card glassmorphic">
+    <div class="modal-header">
+      <h3 id="terms-title">Terms &amp; Disclaimer</h3>
+      <button class="modal-close-btn" aria-label="Close terms modal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body-scroll">
+      <p id="terms-body" class="dialog-desc">LibrePT is provided "as is", without warranty of any kind. It is not medical, health, or professional training advice. Your data stays on your device and you are responsible for backing it up. Use at your own risk.</p>
+    </div>
+    <div class="modal-actions">
+      <button id="btn-terms-agree" class="btn primary-btn w-full">I agree</button>
     </div>
   </dialog>
 

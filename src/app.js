@@ -40,6 +40,18 @@ function applyTranslations(lang = state.lang || 'en') {
   // Map of selector to translation key
   const staticMappings = {
     '.logo-area h1': 'logo_title',
+    // Application (☰) header menu + About / Terms modals
+    '#menu-connect-cloud': 'menu_connect_cloud',
+    '#menu-export-data': 'menu_export_data',
+    '#menu-github': 'menu_github',
+    '#menu-about': 'menu_about',
+    '#menu-terms': 'menu_terms',
+    '#about-title': 'about_title',
+    '#about-body': 'about_body',
+    '#about-repo-link': 'about_repo',
+    '#terms-title': 'terms_title',
+    '#terms-body': 'terms_body',
+    '#btn-terms-agree': 'terms_agree',
     'button[data-view="clients"] span': 'tab_clients',
     'button[data-view="routines"] span': 'tab_routines',
     'button[data-view="exercises"] span': 'tab_exercises',

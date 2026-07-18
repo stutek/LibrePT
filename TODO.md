@@ -229,7 +229,7 @@ Figure out how to have the app installed as an Android/iOS application on the ph
 
 ## 10. Application Header Menu & First-Run Agreement
 
-### 10.1 [ ] Hamburger (☰) menu in the header
+### 10.1 [x] Hamburger (☰) menu in the header
 Add a hamburger/overflow menu to the app header (next to the Sync & Backup cloud button) with **placeholder** items:
 
 - **Connect cloud storage** (placeholder → "coming soon").
@@ -239,6 +239,8 @@ Add a hamburger/overflow menu to the app header (next to the Sync & Backup cloud
 - **Terms & disclaimer** (opens the modal from 10.2).
 
 Wire it in `components/applicationHeader.js` following the existing `.session-menu` dropdown pattern (toggle + close-on-outside-click). Add i18n keys (EN + SL) for every label — the parity test enforces it. (A partial HTML draft was made and reverted; redo cleanly.)
+
+- **Done**: the ☰ button + `#app-menu` dropdown ship next to the Sync & Backup control, wired in `setupAppMenu()` in `applicationHeader.js` (toggle + close-on-outside-click, mirroring `.session-menu`). Items: **Connect cloud storage** → "coming soon" placeholder; **Export data as a file** → opens the existing Sync & Backup modal; **GitHub project** → real new-tab link to the repo; **About** → `#dialog-about` (description + repo link); **Terms & disclaimer** → `#dialog-terms`. All labels are i18n keys (EN + SL, parity-clean) applied through `staticMappings`. Covered by `tests/e2e/test_header_menu.py`. The first-run auto-show + acceptance persistence is 10.2.
 
 ### 10.2 [ ] First-run no-liability disclaimer + user agreement
 A modal with a **no-liability disclaimer and user agreement**, shown **once on first run** (persist acceptance in `localStorage`, e.g. `librept_terms_accepted`), and also reachable from the header menu (10.1) any time. Keep the text concise ("provided as is, no warranty, not medical/professional advice, data stays local, use at your own risk") and translated to SL. First-run modal requires an "I agree" action.

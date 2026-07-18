@@ -154,5 +154,19 @@ export const en = {
     round_label: "Round",
     complete_round: "Complete round",
     finish_superset: "Finish superset",
-    rest_label: "Rest"
+    rest_label: "Rest",
+
+    // Application (☰) header menu + About / Terms modals
+    menu_connect_cloud: "Connect cloud storage",
+    menu_coming_soon: "Cloud storage isn't available yet — coming soon.",
+    menu_export_data: "Export data as a file",
+    menu_github: "GitHub project",
+    menu_about: "About",
+    menu_terms: "Terms & disclaimer",
+    about_title: "About LibrePT",
+    about_body: "LibrePT is a free, open-source, offline-first clipboard for personal trainers — schedule sessions, run them on the gym floor, and track client progress. All data stays on your device.",
+    about_repo: "View the project on GitHub",
+    terms_title: "Terms & Disclaimer",
+    terms_body: "LibrePT is provided \"as is\", without warranty of any kind. It is not medical, health, or professional training advice. Your data stays on your device and you are responsible for backing it up. Use at your own risk.",
+    terms_agree: "I agree"
 };
