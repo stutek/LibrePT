@@ -23,8 +23,8 @@
   /* Temporal session tinting (past = cool/history, future = warm/plan). Neutral fallback only;
      each theme overrides these with palette-tuned values (see src/themes/*.css). */
   --temporal-past: #c084fc;
-  --temporal-future: #fbbf24;
   --cloud-icon-color: #0284c7;
+  --cloud-arrows-color: #ffffff;
 }
 
 /* ==========================================================================
@@ -339,9 +339,8 @@ h1, h2, h3, h4, h5, h6 {
   position: absolute;
   left: 50%;
   top: 56%;
-  transform: translate(-50%, -50%);
   font-size: 13px;
-  color: var(--primary);
+  color: var(--cloud-arrows-color, #ffffff);
 }/* When there are pending changes the cloud button grows into a pill to seat the ahead/behind
    counters beside the icon; fully synced, the badge hides and it reads as a round icon again. */
 .sync-backup-btn {

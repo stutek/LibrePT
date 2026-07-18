@@ -32,6 +32,7 @@ body.red-theme {
   --temporal-past: #c4b5fd;
   --temporal-future: #fdba74;
   --cloud-icon-color: #ffffff; /* crisp white cloud on red field */
+  --cloud-arrows-color: #da291c; /* bold red arrows inside white cloud */
   --box-shadow: 0 14px 30px -14px rgba(0, 0, 0, 0.6);
   /* Shape personality — edgy, near-square */
   --border-radius-lg: 6px;
