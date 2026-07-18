@@ -268,14 +268,21 @@ Fold the full-screen active-session overlay (`#active-session-overlay`) into a n
 
 ## 12. Documentation, Tests, OKF & Housekeeping
 
-### 12.1 [ ] OKF review (`okf.yaml`)
+### 12.1 [x] OKF review (`okf.yaml`)
 Review and update the Open Knowledge Format descriptor to reflect the current architecture (i18n externalized to `src/i18n/`, the component split under `src/components/`, `build/`+`deploy/` packages, the deep-link routing, the 5-theme system).
 
-### 12.2 [ ] Documentation pass
+- **Done**: `okf.yaml`'s `description` now reflects the vanilla ES-module app under `src/` (per-entity `src/data/`, externalized `src/i18n/`, extracted `src/components/`), the 5-theme CSS-custom-property system, deep-link routing, and the `build/`+`deploy/` chain, with a header comment pointing at `INDEX.md`. Kept schema-minimal (no invented OKF fields, since the spec's optional field set wasn't verifiable).
+
+### 12.2 [x] Documentation pass
 Sweep README / CONTRIBUTING / INDEX / AGENT_RULES for staleness after the recent refactors (e.g. README's codebase tree still lists `mockData.js`; ensure all features — themes, deep links, sync/backup, dev server, build/deploy — are documented and accurate).
 
-### 12.3 [ ] Test completeness
+- **Done**: README codebase tree rewritten for the `src/` layout (dropped the removed root files and `mockData.js`, added `data/`/`i18n/`/`components/`); README + CONTRIBUTING now describe the 5-theme system (was "Emerald & Zinc"); CONTRIBUTING points i18n at `src/i18n/` (was `app.js`) and its test table reflects the `tests/unit/` + `tests/e2e/` split. INDEX/AGENT_RULES had no `mockData` staleness. (Deeper API-vision lines like the aspirational Firebase/Capacitor stack left as-is.)
+
+### 12.3 [~] Test completeness
 Broaden coverage: themes (switch + persistence), the Sync & Backup modal + mock counters, the header menu + first-run agreement (10.x), the not-found view is covered but the demo walkthrough (9.x) will need its own tests. Confirm every extracted component has at least one exercised path.
+
+- **Done**: added `tests/e2e/` suites for themes (`test_theme.py`), the Sync & Backup badge + modal (`test_sync_backup.py`), the ☰ header menu (`test_header_menu.py`), the first-run terms agreement (`test_first_run_terms.py`), the plan-adjustments deck + Apply wizard (`test_plan_adjustments.py` → covers `planAdjustments.js`), and the Client Directory grid + live search (`test_clients_directory.py` → covers `clientsDirectory.js`). Suite is 22 → 46 tests, all green.
+- **Still open**: the demo walkthrough (9.x) isn't built yet, so it has no tests; and a couple of components (e.g. voice-note capture inside the clipboard) are still only exercised by the legacy `tests/test_browser.py` rather than a focused `tests/e2e/` suite.
 
 ### 12.4 [x] TODO.md contents review
 Reconcile this file with what actually shipped (e.g. **3.2 Git-style change counters** is effectively done via the mock ahead/behind sync badge; **4.2 Constant header line** is done and the active-session overlay no longer duplicates the header). Tick off completed items and prune stale ones.
