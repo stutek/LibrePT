@@ -654,22 +654,41 @@ function setHeaderState() {
   if (normalActions) normalActions.classList.remove('hidden');
 }
 
-// --- SHARED "DISMISS VIEW → HOME" GESTURE ---
+// --- SHARED TITLE-BAR HANDLE / SWIPE GESTURE ---
 // Returns to the home dashboard (which hides the active-session overlay and re-focuses today) —
 // the same destination as the app-name logo, so a title-bar swipe / handle tap reads as "close".
 function goHome() {
   navigateToPath('/clients');
 }
 
-// Every .view-titlebar (each view's header + the active-session clipboard) can be dismissed the
-// same way: tap its .view-grabber handle, or swipe the bar down. The clipboard slides out like a
-// sheet first; regular views just navigate. Taps on the bar's own controls (nav arrows, options
-// menu, back/edit) are left alone so only the bar background / handle triggers a dismiss.
+// The home dashboard's handle "pulls down" the session clipboard instead of dismissing: resume a
+// running session, or launch the first upcoming scheduled session (the idle bar's next-up). No-op
+// if nothing is scheduled. Mirrors clicking the idle session bar.
+function openActiveOrNextSession() {
+  const active = getActiveSession();
+  if (active) {
+    const clientId = active.activeClientId || active.participants[0];
+    navigateToPath(`/session/${active.id || 'session'}/client/${clientId}`);
+    return;
+  }
+  const bar = document.getElementById('active-session-bar');
+  const nextId = bar && bar.dataset.nextBookingId;
+  if (nextId) launchClipboardDirectly(nextId);
+}
+
+// Every .view-titlebar (each view's header + the active-session clipboard) responds to its
+// .view-grabber handle the same way: tap it, or swipe the bar down. On the home dashboard the
+// gesture opens the session clipboard; everywhere else it dismisses back to home (the clipboard
+// slides out like a sheet first). Taps on the bar's own controls (nav arrows, options menu,
+// back/edit) are left alone so only the bar background / handle triggers the gesture.
 function setupViewDismiss() {
-  const SWIPE_CLOSE_PX = 70; // downward distance that commits the dismissal
+  const SWIPE_PX = 70; // vertical distance that commits the gesture
   document.querySelectorAll('.view-titlebar').forEach(bar => {
+    const isHome = bar.classList.contains('sessions-title-bar');
+    const activate = isHome ? openActiveOrNextSession : goHome;
+
     const grab = bar.querySelector('.view-grabber');
-    if (grab) grab.addEventListener('click', (e) => { e.stopPropagation(); goHome(); });
+    if (grab) grab.addEventListener('click', (e) => { e.stopPropagation(); activate(); });
 
     let startY = null, startX = null;
     bar.addEventListener('touchstart', (e) => {
@@ -685,7 +704,7 @@ function setupViewDismiss() {
       const dx = t.clientX - startX;
       startY = null; startX = null;
       // Commit only on a clearly downward, vertical-dominant swipe
-      if (dy < SWIPE_CLOSE_PX || Math.abs(dx) > dy * 0.6) return;
+      if (dy < SWIPE_PX || Math.abs(dx) > dy * 0.6) return;
 
       const overlay = bar.closest('.active-session-overlay');
       if (overlay) {
@@ -699,7 +718,7 @@ function setupViewDismiss() {
           overlay.style.animation = '';
         }, 230);
       } else {
-        goHome();
+        activate();
       }
     }, { passive: true });
   });

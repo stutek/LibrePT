@@ -198,10 +198,15 @@ h1, h2, h3, h4, h5, h6 {
 }
 .view-grabber::before { content: ''; position: absolute; inset: -9px -22px; }
 .view-grabber:hover { background: var(--text-muted); }
-.view-grabber:active { cursor: grabbing; }.app-view { display: none; }.app-view.active { display: block; animation: fadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }to { opacity: 1; transform: translateY(0); }}
+.view-grabber:active { cursor: grabbing; }.app-view { display: none; }.app-view.active { display: block; animation: viewSwitch 0.32s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+/* Each view switch (bottom-nav tab, client detail, back home) plays this: the incoming view
+   rises and settles with a subtle scale + fade, so navigation reads as a deliberate transition. */
+@keyframes viewSwitch {
+  from { opacity: 0; transform: translateY(16px) scale(0.985); }to { opacity: 1; transform: translateY(0) scale(1); }}
+/* Users who prefer reduced motion get the destination immediately, no slide. */
+@media (prefers-reduced-motion: reduce) {
+  .app-view.active { animation-duration: 0.001s; }
+}
 
 /* Not-found (404) view — centred in the content area, below the omnipresent header. */
 .error-view {
