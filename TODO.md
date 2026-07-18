@@ -120,6 +120,12 @@ Rename **"Launch Clipboard"** / **"Začni sledenje"** to something closer to **"
 - Affects `btn_launch_clipboard`, `btn_launch_clipboard_short`, and `btn_start_session` — EN + SL dictionaries must stay at parity.
 - The label should read as opening the session's details, not as starting a stopwatch.
 
+### 4.6 [x] Header control height harmonization
+Make all header interactive elements (`.sync-backup-btn` cloud button, `#btn-app-menu` hamburger button, `.header-select` language and theme dropdowns, and `.logo-area` app brand) share a consistent `height: 44px` across both desktop and mobile views.
+
+### 4.7 [x] Sessions title and date picker typography alignment
+Ensure `#calendar-title` and `#calendar-title-date` within the `.sessions-date-picker` match the `font-family: var(--font-header)` (`Outfit`), weight (`800`), and letter-spacing (`-0.5px`) of the `Sessions` view header (`h2.view-title-label`) across both desktop and mobile layouts.
+
 ---
 
 ## 5. Client Detail
