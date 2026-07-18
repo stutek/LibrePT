@@ -21,6 +21,23 @@ def src_dir():
     return SRC_DIR
 
 
+# Script that pre-accepts the first-run Terms & disclaimer modal (10.2) before the app boots,
+# so the one-time mandatory agreement doesn't overlay the UI a browser test is driving. Runs in
+# a fresh document via add_init_script, i.e. before app.js reads the flag.
+ACCEPT_TERMS_SCRIPT = "window.localStorage.setItem('librept_terms_accepted', '1');"
+
+
+@pytest.fixture(autouse=True)
+def accept_first_run_terms(request):
+    """Auto-accept the first-run Terms modal for browser tests that use the shared `page`
+    fixture. Tests that exercise the first-run agreement itself build their own context (via the
+    `browser` fixture) and deliberately skip this so the modal appears. Unit tests never request
+    `page`, so this never starts a browser for them."""
+    if "page" in request.fixturenames:
+        request.getfixturevalue("page").add_init_script(ACCEPT_TERMS_SCRIPT)
+    yield
+
+
 def is_port_open(port):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         return s.connect_ex(("localhost", port)) == 0

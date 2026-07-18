@@ -83,6 +83,9 @@ def _touch_swipe(cdp, page, x, y, dx, steps=12):
 def test_touch_swipe_between_days(browser, local_server):
     """A real one-finger swipe on the deck must advance exactly one day and retitle the bar."""
     context = browser.new_context(viewport={"width": 390, "height": 844}, has_touch=True, is_mobile=True)
+    # This test builds its own context, so it opts into the first-run Terms auto-accept manually
+    # (the autouse conftest fixture only covers the shared `page` fixture).
+    context.add_init_script("window.localStorage.setItem('librept_terms_accepted', '1');")
     page = context.new_page()
     page.goto(local_server)
     page.wait_for_selector("#today-sessions-column")

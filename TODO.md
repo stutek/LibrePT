@@ -242,8 +242,10 @@ Wire it in `components/applicationHeader.js` following the existing `.session-me
 
 - **Done**: the ☰ button + `#app-menu` dropdown ship next to the Sync & Backup control, wired in `setupAppMenu()` in `applicationHeader.js` (toggle + close-on-outside-click, mirroring `.session-menu`). Items: **Connect cloud storage** → "coming soon" placeholder; **Export data as a file** → opens the existing Sync & Backup modal; **GitHub project** → real new-tab link to the repo; **About** → `#dialog-about` (description + repo link); **Terms & disclaimer** → `#dialog-terms`. All labels are i18n keys (EN + SL, parity-clean) applied through `staticMappings`. Covered by `tests/e2e/test_header_menu.py`. The first-run auto-show + acceptance persistence is 10.2.
 
-### 10.2 [ ] First-run no-liability disclaimer + user agreement
+### 10.2 [x] First-run no-liability disclaimer + user agreement
 A modal with a **no-liability disclaimer and user agreement**, shown **once on first run** (persist acceptance in `localStorage`, e.g. `librept_terms_accepted`), and also reachable from the header menu (10.1) any time. Keep the text concise ("provided as is, no warranty, not medical/professional advice, data stays local, use at your own risk") and translated to SL. First-run modal requires an "I agree" action.
+
+- **Done**: `setupFirstRunTerms()` in `applicationHeader.js` shows `#dialog-terms` once when no `librept_terms_accepted` flag is stored. On first run the modal is **mandatory** — the ✕ is hidden (`.first-run` CSS) and Escape is blocked (`cancel` preventDefault) — so the only exit is **I agree**, which persists the flag and dismisses it. Concise disclaimer text is translated (EN + SL). Reopening from the ☰ menu behaves as a normal dismissable modal. Browser tests pre-accept via a conftest autouse fixture (`accept_first_run_terms`) so the overlay doesn't block other flows; `tests/e2e/test_first_run_terms.py` covers the first-run behaviour in its own context.
 
 ---
 

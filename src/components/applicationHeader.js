@@ -142,6 +142,9 @@ export function setupApplicationHeader() {
 
   // Application overflow (☰) menu
   setupAppMenu();
+
+  // First-run disclaimer + user agreement
+  setupFirstRunTerms();
 }
 
 // Wires the ☰ header menu: toggle + close-on-outside-click (mirrors the .session-menu
@@ -187,7 +190,31 @@ function setupAppMenu() {
   // Modal close (×) buttons for the About / Terms dialogs.
   document.querySelectorAll('#dialog-about .modal-close-btn, #dialog-terms .modal-close-btn')
     .forEach(btn => btn.addEventListener('click', () => btn.closest('dialog').close()));
+}
 
-  // "I agree" dismisses the Terms modal (first-run acceptance persistence is added in 10.2).
-  on('btn-terms-agree', () => { const d = document.getElementById('dialog-terms'); if (d) d.close(); });
+const TERMS_ACCEPTED_KEY = 'librept_terms_accepted';
+
+// First-run no-liability disclaimer + agreement (10.2). Shown once when no acceptance is
+// stored; "I agree" persists it. On first run the modal is made mandatory — the ✕ is hidden
+// (via .first-run in CSS) and Escape is blocked — so the user must agree to dismiss it. When
+// later reopened from the ☰ menu it behaves as a normal, dismissable modal.
+function setupFirstRunTerms() {
+  const dlg = document.getElementById('dialog-terms');
+  const agreeBtn = document.getElementById('btn-terms-agree');
+  if (!dlg || !agreeBtn) return;
+
+  agreeBtn.addEventListener('click', () => {
+    localStorage.setItem(TERMS_ACCEPTED_KEY, '1');
+    dlg.classList.remove('first-run');
+    if (dlg.open) dlg.close();
+  });
+  // Block Escape/cancel while the agreement is mandatory.
+  dlg.addEventListener('cancel', (e) => {
+    if (dlg.classList.contains('first-run')) e.preventDefault();
+  });
+
+  if (!localStorage.getItem(TERMS_ACCEPTED_KEY)) {
+    dlg.classList.add('first-run');
+    if (!dlg.open) dlg.showModal();
+  }
 }

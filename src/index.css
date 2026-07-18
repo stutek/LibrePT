@@ -1480,6 +1480,10 @@ h1, h2, h3, h4, h5, h6 {
 .app-menu-wrap {
   position: relative;
 }
+/* First-run Terms modal is mandatory: hide its dismiss (✕) so the only exit is "I agree". */
+#dialog-terms.first-run .modal-close-btn {
+  display: none;
+}
 .session-menu {
   position: absolute;
   top: calc(100% + 6px);
