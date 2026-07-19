@@ -14,7 +14,7 @@
 export function renderExerciseCard(card, item, ctx) {
   const {
     currentCount, activeClientId, pastExpanded, isFutureSession,
-    t, escapeHTML, getExerciseSignalColor, logQuickSignal, openFeedbackModal, onFocus
+    t, escapeHTML, getExerciseSignalColor, logQuickSignal, openFeedbackModal, onFocus, onEdit
   } = ctx;
 
   // An open past log defocuses the live card, so the active exercise renders compact too
@@ -45,7 +45,10 @@ export function renderExerciseCard(card, item, ctx) {
     card.innerHTML = `
       <div class="deck-card-top">
         <span class="deck-card-counter">${counter}</span>
-        ${statusBadge}
+        <span class="deck-card-top-right">
+          ${statusBadge}
+          <button type="button" class="deck-card-edit" aria-label="${t('edit_plan')}"><i class="fa-solid fa-pen-to-square"></i></button>
+        </span>
       </div>
       <h5 class="deck-card-name"${nameStyle}>${escapeHTML(item.name)}</h5>
       <div class="deck-card-stats">
@@ -86,6 +89,8 @@ export function renderExerciseCard(card, item, ctx) {
       e.stopPropagation();
       openFeedbackModal();
     });
+    const editBtn = card.querySelector('.deck-card-edit');
+    if (editBtn && onEdit) editBtn.addEventListener('click', (e) => { e.stopPropagation(); onEdit(); });
   } else {
     // Compact row for the rest of the plan — tap to bring into focus. The target
     // is labelled S(ets) × R(eps) × weight so a collapsed, single-line card still

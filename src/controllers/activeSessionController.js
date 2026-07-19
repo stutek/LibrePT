@@ -3,6 +3,7 @@ import { generateShortUUID, formatDuration, formatSignedDuration, getInitials, g
 import { updateSessionBarTimer, renderActiveSessionBarLabels, renderIdleSessionBar } from '../components/sessionBar.js';
 import { renderActiveUsersList, updateClientTabsFadeState } from '../components/activeUsersList.js';
 import { renderExerciseDeck } from '../components/exerciseDeck.js';
+import { renderClipboardEditor } from '../components/clipboardEditor.js';
 import { openFeedbackModal } from '../components/feedbackModal.js';
 import { renderClientsList } from '../views/clientsView.js';
 import { renderRoutinesList } from '../views/routinesView.js';
@@ -45,6 +46,21 @@ async function releaseScreenWakeLock() {
       console.debug('WakeLock release failed:', err);
     }
   }
+}
+
+// Inline clipboard edit mode: when on, the deck renders the editable plan list instead of the
+// live logging deck. editorCleanup detaches the editor's document listeners on the next render.
+let clipboardEditMode = false;
+let editorCleanup = null;
+
+export function enterClipboardEditMode() {
+  clipboardEditMode = true;
+  renderActiveGroupBoard();
+}
+
+export function exitClipboardEditMode() {
+  clipboardEditMode = false;
+  renderActiveGroupBoard();
 }
 
 export function initActiveSessionController(deps) {
@@ -310,6 +326,15 @@ export function completeSupersetRound(circuitId) {
   renderActiveGroupBoard();
 }
 
+// Opens the existing "add exercise to session" dialog (also used by the in-clipboard editor).
+function openAddSessionExerciseDialog() {
+  const modal = document.getElementById('dialog-add-session-exercise');
+  const form = document.getElementById('form-add-session-exercise');
+  if (!modal || !form) return;
+  form.reset();
+  modal.showModal();
+}
+
 export function renderActiveGroupBoard() {
   if (!activeSession) return;
   const { state, t, navigateToPath } = appDeps;
@@ -344,14 +369,29 @@ export function renderActiveGroupBoard() {
     }
   }
 
+  // Detach any previous editor's document listeners before this render replaces the deck DOM.
+  if (editorCleanup) { editorCleanup(); editorCleanup = null; }
+
   const deckContainer = document.getElementById('active-exercise-scroll-deck');
-  if (deckContainer && activeClientState) {
+  if (deckContainer && activeClientState && clipboardEditMode) {
+    const persist = () => { saveActiveSessionToCache(); if (appDeps.saveToLocalStorage) appDeps.saveToLocalStorage(); };
+    editorCleanup = renderClipboardEditor(deckContainer, {
+      activeClientState,
+      allExerciseNames: (state.exercises || []).map(e => e.name),
+      t, escapeHTML,
+      save: persist,
+      rerender: renderActiveGroupBoard,
+      openAddExercise: openAddSessionExerciseDialog,
+      exit: exitClipboardEditMode
+    });
+  } else if (deckContainer && activeClientState) {
     renderExerciseDeck(deckContainer, {
       activeSession, activeClientState, activeClientId, state,
       t, escapeHTML, buildSupersetUnits, getExerciseSignalColor,
       logQuickSignal, openFeedbackModal, completeSupersetRound, focusExerciseByIndex,
       saveActiveSessionToCache, saveToLocalStorage: appDeps.saveToLocalStorage,
-      onRerender: renderActiveGroupBoard
+      onRerender: renderActiveGroupBoard,
+      onEdit: enterClipboardEditMode
     });
   }
 

@@ -24,7 +24,7 @@ export function renderExerciseDeck(deckContainer, deps) {
     activeSession, activeClientState, activeClientId, state,
     t, escapeHTML, buildSupersetUnits, getExerciseSignalColor,
     logQuickSignal, openFeedbackModal, completeSupersetRound, focusExerciseByIndex,
-    saveActiveSessionToCache, saveToLocalStorage, onRerender
+    saveActiveSessionToCache, saveToLocalStorage, onRerender, onEdit
   } = deps;
 
   deckContainer.innerHTML = '';
@@ -149,6 +149,7 @@ export function renderExerciseDeck(deckContainer, deps) {
         logQuickSignal,
         openFeedbackModal,
         completeSupersetRound,
+        onEdit,
         saveSessionState: () => {
           saveActiveSessionToCache();
           saveToLocalStorage();
@@ -168,6 +169,7 @@ export function renderExerciseDeck(deckContainer, deps) {
         getExerciseSignalColor,
         logQuickSignal,
         openFeedbackModal,
+        onEdit,
         onFocus: (index) => focusExerciseByIndex(index)
       });
     }

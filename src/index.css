@@ -836,7 +836,94 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 12px;
   color: var(--text-muted);
   line-height: 1.4;
-}/* Group Matrix Grid for Active Session */
+}/* ===== Inline clipboard editor (on-the-fly plan editing) ===== */
+.clipboard-editor { display: flex; flex-direction: column; gap: 12px; }
+.clipboard-editor-head { display: flex; align-items: center; justify-content: space-between; }
+.clipboard-editor-title { font-family: var(--font-header); font-size: 16px; font-weight: 800; }
+.editor-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.editor-empty { color: var(--text-muted); font-size: 13px; padding: 12px 0; }
+.editor-row {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  padding: 10px;
+  border-radius: var(--border-radius-md);
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+}
+.editor-row-dragging { opacity: 0.6; box-shadow: 0 8px 24px rgba(0,0,0,0.35); }
+/* Combined reorder control: tap the top half to move up / bottom half to move down; drag to
+   reorder freely. Sized as a tall two-zone target so both taps and drags are easy on touch. */
+.editor-reorder {
+  flex: 0 0 auto;
+  width: 34px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--input-bg);
+  color: var(--text-muted);
+  cursor: grab;
+  touch-action: none;
+  overflow: hidden;
+}
+.editor-reorder:active { cursor: grabbing; }
+.editor-reorder-up, .editor-reorder-down { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+.editor-reorder-up { border-bottom: 1px solid var(--border-color); }
+.editor-reorder:hover { color: var(--primary); border-color: var(--primary); }
+.editor-row-main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.editor-row-name-wrap { display: flex; align-items: center; gap: 6px; }
+.editor-row-circuit { color: var(--secondary, var(--primary)); font-size: 12px; flex: 0 0 auto; }
+.editor-row-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 34px;
+  padding: 0 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--input-bg);
+  color: var(--text-main);
+  font-family: var(--font-header);
+  font-size: 14px;
+  font-weight: 700;
+}
+.editor-row-fields { display: flex; flex-wrap: wrap; gap: 8px; }
+.editor-field { display: flex; flex-direction: column; gap: 2px; }
+.editor-field > span { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-muted); }
+.editor-field > input {
+  width: 62px;
+  height: 30px;
+  padding: 0 6px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--input-bg);
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+}
+.editor-remove {
+  flex: 0 0 auto;
+  align-self: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid var(--danger-light);
+  background: transparent;
+  color: var(--danger);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+.editor-remove:hover { background: var(--danger-light); }
+.clipboard-editor-actions { display: flex; gap: 8px; }
+.clipboard-editor-hint { font-size: 11px; color: var(--text-muted); text-align: center; margin: 0; }
+/* Group Matrix Grid for Active Session */
 .group-matrix-grid {
   display: flex;
   flex-direction: column;
@@ -1644,7 +1731,18 @@ h1, h2, h3, h4, h5, h6 {
   justify-content: space-between;
   gap: 6px;
   margin-bottom: 8px;
-}.deck-card-counter {
+}.deck-card-top-right { display: inline-flex; align-items: center; gap: 8px; }
+/* Per-card edit (✎) affordance — taps into the inline clipboard editor */
+.deck-card-edit {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px;
+  border-radius: 6px;
+  transition: color 0.2s ease, background 0.2s ease;
+}.deck-card-edit:hover { color: var(--primary); background: var(--primary-light); }.deck-card-counter {
   font-family: var(--font-mono);
   font-size: 12px;
   font-weight: 700;

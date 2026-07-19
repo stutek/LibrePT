@@ -17,7 +17,7 @@ export function renderSupersetCard(card, item, ctx) {
   const {
     round, activeClientId, activeClientState, pastExpanded, isFutureSession,
     t, escapeHTML, getExerciseSignalColor, logQuickSignal, openFeedbackModal,
-    completeSupersetRound, saveSessionState, onFocus
+    completeSupersetRound, saveSessionState, onFocus, onEdit
   } = ctx;
 
   const showInFocus = item.isInFocus && !pastExpanded;
@@ -77,7 +77,10 @@ export function renderSupersetCard(card, item, ctx) {
     card.innerHTML = `
       <div class="deck-card-top" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
         <span class="superset-title" style="font-weight: 700; font-size: 13px;"><i class="fa-solid fa-layer-group"></i> ${title}</span>
-        <span class="superset-round-badge">${t('round_label')} ${round} / ${item.series}</span>
+        <span class="deck-card-top-right">
+          <span class="superset-round-badge">${t('round_label')} ${round} / ${item.series}</span>
+          <button type="button" class="deck-card-edit" aria-label="${t('edit_plan')}"><i class="fa-solid fa-pen-to-square"></i></button>
+        </span>
       </div>
       <div class="superset-ex-list">${rows.join('')}</div>
       ${footer}
@@ -126,6 +129,8 @@ export function renderSupersetCard(card, item, ctx) {
     });
     const completeBtn = card.querySelector('.superset-complete-btn');
     if (completeBtn) completeBtn.addEventListener('click', (e) => { e.stopPropagation(); completeSupersetRound(item.circuitId); });
+    const editBtn = card.querySelector('.deck-card-edit');
+    if (editBtn && onEdit) editBtn.addEventListener('click', (e) => { e.stopPropagation(); onEdit(); });
   } else {
     card.innerHTML = `
       <div class="deck-card-compact">
