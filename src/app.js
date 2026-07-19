@@ -125,8 +125,21 @@ function resizeToPhoneViewport() {
   }
 }
 
+// Keep the app portrait. The manifest's "orientation": "portrait-primary" covers the installed
+// PWA; this is the best-effort runtime complement (Screen Orientation API only resolves in an
+// installed/standalone or fullscreen context and rejects otherwise, so failures are swallowed).
+// Re-applied on orientationchange because some engines drop the lock when the device rotates.
+function lockPortraitOrientation() {
+  const orientation = (typeof screen !== 'undefined') && screen.orientation;
+  if (!orientation || typeof orientation.lock !== 'function') return;
+  const apply = () => { try { const p = orientation.lock('portrait'); if (p && p.catch) p.catch(() => {}); } catch (_) {} };
+  apply();
+  orientation.addEventListener('change', apply);
+}
+
 function init() {
   resizeToPhoneViewport();
+  lockPortraitOrientation();
 
   // Load data from LocalStorage or initialize with Mock Data
   let savedData = localStorage.getItem('librept_db');
