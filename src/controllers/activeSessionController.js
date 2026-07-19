@@ -382,7 +382,8 @@ export function renderActiveGroupBoard() {
       save: persist,
       rerender: renderActiveGroupBoard,
       openAddExercise: openAddSessionExerciseDialog,
-      exit: exitClipboardEditMode
+      exit: exitClipboardEditMode,
+      genId: generateShortUUID
     });
   } else if (deckContainer && activeClientState) {
     renderExerciseDeck(deckContainer, {

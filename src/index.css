@@ -928,6 +928,87 @@ select.menu-select {
 .editor-remove:hover { background: var(--danger-light); }
 .clipboard-editor-actions { display: flex; gap: 8px; }
 .clipboard-editor-hint { font-size: 11px; color: var(--text-muted); text-align: center; margin: 0; }
+/* Superset membership <select> that sits in each row's field strip. */
+.editor-field-superset > span { display: inline-flex; align-items: center; gap: 4px; }
+.editor-row-superset {
+  height: 30px;
+  max-width: 130px;
+  padding: 0 6px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--input-bg);
+  color: var(--text-main);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+/* Superset block: members grouped in a tinted, layer-group-accented card. */
+.editor-circuit {
+  border: 1px solid var(--secondary, var(--primary));
+  border-radius: var(--border-radius-md);
+  background: color-mix(in srgb, var(--secondary, var(--primary)) 8%, var(--card-bg));
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.editor-circuit-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.editor-circuit-icon { color: var(--secondary, var(--primary)); flex: 0 0 auto; }
+.editor-circuit-title {
+  flex: 1 1 120px;
+  min-width: 0;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--input-bg);
+  color: var(--text-main);
+  font-family: var(--font-header);
+  font-size: 13px;
+  font-weight: 800;
+}
+.editor-circuit-rounds { display: inline-flex; align-items: center; gap: 6px; flex: 0 0 auto; }
+.editor-circuit-rounds > span { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-muted); }
+.editor-circuit-series {
+  width: 52px;
+  height: 30px;
+  padding: 0 6px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--input-bg);
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+}
+.editor-circuit-ungroup {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.editor-circuit-ungroup:hover { color: var(--danger); border-color: var(--danger-light); background: var(--danger-light); }
+.editor-circuit-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.editor-circuit-add {
+  align-self: flex-start;
+  background: transparent;
+  border: 1px dashed var(--secondary, var(--primary));
+  color: var(--secondary, var(--primary));
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.editor-circuit-add:hover { background: color-mix(in srgb, var(--secondary, var(--primary)) 14%, transparent); }
 /* Group Matrix Grid for Active Session */
 .group-matrix-grid {
   display: flex;
