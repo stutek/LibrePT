@@ -126,7 +126,11 @@ export function focusSessionsColumn(day, behavior = 'smooth') {
 
   const isoDate = deps.getISODateForColumn(day);
   const targetPath = `/sessions/${isoDate}`;
-  if (deps.toRoute(window.location.pathname) !== targetPath) {
+  const currentRoute = deps.toRoute(window.location.pathname);
+  // Only reflect the focused day in the URL while the sessions list is the active route. A
+  // background renderSessions() (e.g. right after launching a session) must not bounce the URL off
+  // the /session/... view it just navigated to.
+  if (!currentRoute.startsWith('/session/') && currentRoute !== targetPath) {
     window.history.pushState(null, '', deps.toUrl(targetPath));
   }
 

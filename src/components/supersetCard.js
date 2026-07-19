@@ -17,8 +17,9 @@ export function renderSupersetCard(card, item, ctx) {
   const {
     round, activeClientId, activeClientState, pastExpanded, isFutureSession,
     t, escapeHTML, getExerciseSignalColor, logQuickSignal, openFeedbackModal,
-    completeSupersetRound, saveSessionState, onFocus
+    completeSupersetRound, saveSessionState, onFocus, startRestTimer
   } = ctx;
+  const WORK_TIMER_DEFAULT = 60; // seconds, when timing a superset (no work-duration field yet)
 
   const showInFocus = item.isInFocus && !pastExpanded;
   card.className = `exercise-deck-card superset-card ${showInFocus ? 'in-focus' : (item.isCompleted ? 'completed' : '')}${isFutureSession ? ' future-session' : ''}`;
@@ -31,7 +32,7 @@ export function renderSupersetCard(card, item, ctx) {
       // A rest is a first-class item inside the circuit — render it as a break row and skip the
       // exercise markup/wiring below.
       if (ex.type === 'rest') {
-        rows.push(`<div class="superset-break-row"><i class="fa-solid fa-hourglass-half"></i> <span class="superset-break-label">${t('rest_label')}</span> <span class="superset-ex-reps">${ex.rest}s</span></div>`);
+        rows.push(`<button type="button" class="superset-break-row" data-rest="${ex.rest}"><i class="fa-solid fa-hourglass-half"></i> <span class="superset-break-label">${t('rest_label')}</span> <span class="superset-ex-reps">${ex.rest}s</span> <i class="fa-solid fa-play superset-break-play"></i></button>`);
         return;
       }
       const isFirstExercise = !firstExerciseSeen;
@@ -85,7 +86,10 @@ export function renderSupersetCard(card, item, ctx) {
     card.innerHTML = `
       <div class="deck-card-top" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
         <span class="superset-title" style="font-weight: 700; font-size: 13px;"><i class="fa-solid fa-layer-group"></i> ${title}</span>
-        <span class="superset-round-badge">${t('round_label')} ${round} / ${item.series}</span>
+        <span class="deck-card-top-right">
+          <span class="superset-round-badge">${t('round_label')} ${round} / ${item.series}</span>
+          <button type="button" class="deck-card-timer" aria-label="${t('rest_timer')}" title="${t('rest_timer')}"><i class="fa-solid fa-stopwatch"></i></button>
+        </span>
       </div>
       <div class="superset-ex-list">${rows.join('')}</div>
       ${footer}
@@ -134,6 +138,14 @@ export function renderSupersetCard(card, item, ctx) {
     });
     const completeBtn = card.querySelector('.superset-complete-btn');
     if (completeBtn) completeBtn.addEventListener('click', (e) => { e.stopPropagation(); completeSupersetRound(item.circuitId); });
+    // Timing is a card feature: the ⏱ header button times the circuit; each rest row runs its own duration.
+    if (startRestTimer) {
+      const timerBtn = card.querySelector('.deck-card-timer');
+      if (timerBtn) timerBtn.addEventListener('click', (e) => { e.stopPropagation(); startRestTimer(WORK_TIMER_DEFAULT); });
+      card.querySelectorAll('.superset-break-row').forEach(br => {
+        br.addEventListener('click', (e) => { e.stopPropagation(); startRestTimer(parseInt(br.dataset.rest, 10) || 0); });
+      });
+    }
   } else {
     card.innerHTML = `
       <div class="deck-card-compact">

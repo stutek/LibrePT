@@ -14,8 +14,9 @@
 export function renderExerciseCard(card, item, ctx) {
   const {
     currentCount, activeClientId, pastExpanded, isFutureSession,
-    t, escapeHTML, getExerciseSignalColor, logQuickSignal, openFeedbackModal, onFocus
+    t, escapeHTML, getExerciseSignalColor, logQuickSignal, openFeedbackModal, onFocus, startRestTimer
   } = ctx;
+  const WORK_TIMER_DEFAULT = 60; // seconds, when timing an exercise (no work-duration field yet)
 
   // An open past log defocuses the live card, so the active exercise renders compact too
   const showInFocus = item.isInFocus && !pastExpanded;
@@ -45,7 +46,10 @@ export function renderExerciseCard(card, item, ctx) {
     card.innerHTML = `
       <div class="deck-card-top">
         <span class="deck-card-counter">${counter}</span>
-        ${statusBadge}
+        <span class="deck-card-top-right">
+          ${statusBadge}
+          <button type="button" class="deck-card-timer" aria-label="${t('rest_timer')}" title="${t('rest_timer')}"><i class="fa-solid fa-stopwatch"></i></button>
+        </span>
       </div>
       <h5 class="deck-card-name"${nameStyle}>${escapeHTML(item.name)}</h5>
       <div class="deck-card-stats">
@@ -86,6 +90,8 @@ export function renderExerciseCard(card, item, ctx) {
       e.stopPropagation();
       openFeedbackModal();
     });
+    const timerBtn = card.querySelector('.deck-card-timer');
+    if (timerBtn && startRestTimer) timerBtn.addEventListener('click', (e) => { e.stopPropagation(); startRestTimer(WORK_TIMER_DEFAULT); });
   } else {
     // Compact row for the rest of the plan — tap to bring into focus. The target
     // is labelled S(ets) × R(eps) × weight so a collapsed, single-line card still

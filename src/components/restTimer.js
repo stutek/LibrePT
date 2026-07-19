@@ -23,23 +23,9 @@ export function setupRestTimer() {
   const timerLabel = document.getElementById('timer-countdown');
   const toggleBtn = document.getElementById('btn-timer-toggle');
   
-  const triggerBtn = document.getElementById('btn-timer-trigger');
-  if (triggerBtn) {
-    triggerBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const currentEx = deps.getActiveExercise();
-      triggerRestTimer(currentEx ? currentEx.rest : 60);
-    });
-  }
-
-  const groupTimerBtn = document.getElementById('btn-trigger-group-timer');
-  if (groupTimerBtn) {
-    groupTimerBtn.addEventListener('click', () => {
-      const currentEx = deps.getActiveExercise();
-      triggerRestTimer(currentEx ? currentEx.rest : 60);
-    });
-  }
-
+  // Timing is a per-card action now (a rest card runs its own duration; an exercise/superset card
+  // has a ⏱ button) — there is no session-global "start timer" button. The panel below is just the
+  // running-countdown UI (pause / ±15s / close); cards call triggerRestTimer() to open it.
   const closeBtn = document.getElementById('btn-close-timer');
   if (closeBtn) {
     closeBtn.addEventListener('click', () => {

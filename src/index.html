@@ -95,6 +95,9 @@
                 </select>
               </div>
               <div class="menu-divider" role="separator"></div>
+              <button id="menu-clients-register" class="session-menu-item" role="menuitem">
+                <i class="fa-solid fa-users"></i> <span id="menu-clients-register-text" data-i18n="menu_clients_register">Clients Directory</span>
+              </button>
               <button id="menu-connect-cloud" class="session-menu-item" role="menuitem">
                 <i class="fa-solid fa-cloud-arrow-up"></i> Connect cloud storage
               </button>
@@ -118,6 +121,24 @@
         </div>
       </div>
     </div>
+    <nav class="header-nav">
+      <button class="nav-item active" data-view="clients" aria-label="Clients View">
+        <i class="fa-solid fa-users"></i>
+        <span>Clients</span>
+      </button>
+      <button class="nav-item" data-view="routines" aria-label="Routines View">
+        <i class="fa-solid fa-clipboard-list"></i>
+        <span>Routines</span>
+      </button>
+      <button class="nav-item" data-view="exercises" aria-label="Exercises View">
+        <i class="fa-solid fa-dumbbell"></i>
+        <span>Exercises</span>
+      </button>
+      <button class="nav-item" data-view="history" aria-label="History View">
+        <i class="fa-solid fa-clock-rotate-left"></i>
+        <span>History</span>
+      </button>
+    </nav>
   </header>
 
   <!-- Main View Container -->
@@ -315,47 +336,48 @@
     </section>
   </main>
 
-  <!-- Bottom Navigation Bar -->
-  <nav class="bottom-nav">
-    <button class="nav-item active" data-view="clients" aria-label="Clients View">
-      <i class="fa-solid fa-users"></i>
-      <span>Clients</span>
-    </button>
-    <button class="nav-item" data-view="routines" aria-label="Routines View">
-      <i class="fa-solid fa-clipboard-list"></i>
-      <span>Routines</span>
-    </button>
-    <button class="nav-item" data-view="exercises" aria-label="Exercises View">
-      <i class="fa-solid fa-dumbbell"></i>
-      <span>Exercises</span>
-    </button>
-    <button class="nav-item" data-view="history" aria-label="History View">
-      <i class="fa-solid fa-clock-rotate-left"></i>
-      <span>History</span>
-    </button>
-  </nav>
-
-  <!-- BOTTOM PANEL: Session Status Bar — active workout, or (when idle) the next upcoming session -->
-  <div id="active-session-bar" class="active-session-bar hidden" role="button" tabindex="0" aria-label="Open session">
-    <div class="session-bar-content">
-      <div class="session-bar-main">
-        <div class="session-bar-info">
-          <span class="pulse-indicator"></span>
-          <span id="session-bar-title">Active Workout</span>
+  <!-- Omnipresent Notification Area (replaces old footer & bottom-nav) -->
+  <aside id="notification-area" class="notification-area" aria-label="Notification Center and Active Session">
+    <div class="notification-handle-bar view-titlebar" id="notification-handle-bar">
+      <button class="view-grabber notification-grabber" id="notification-grabber-btn" type="button" aria-label="Toggle notifications drawer"></button>
+      
+      <!-- Collapsed status summary preview when no active session bar -->
+      <div class="notification-summary-preview" id="notification-summary-preview">
+        <div class="notification-summary-header">
+          <div class="notification-summary-title-wrap">
+            <i class="fa-solid fa-bell notification-bell-icon" id="notification-summary-icon"></i>
+            <span id="notification-summary-title" class="notification-summary-title">Welcome to LibrePT</span>
+          </div>
+          <div class="notification-summary-badges">
+            <span id="notification-summary-count" class="notification-count-pill">3 unread / 3 all</span>
+            <button class="icon-btn notification-toggle-btn" id="btn-toggle-notifications" aria-label="Toggle Notifications">
+              <i class="fa-solid fa-chevron-up toggle-chevron"></i>
+            </button>
+          </div>
         </div>
-        <div class="session-bar-meta" id="session-bar-meta"></div>
+        <p id="notification-summary-desc" class="notification-summary-desc">LibrePT is your privacy-first, buildless personal trainer app...</p>
       </div>
-      <div class="session-bar-timer" id="session-bar-duration">00:00</div>
-      <div class="session-bar-actions">
-        <button id="btn-timer-trigger" class="icon-btn inline-timer-btn" aria-label="Rest Timer">
-          <i class="fa-solid fa-stopwatch"></i>
-        </button>
-        <button id="btn-expand-session" class="icon-btn" aria-label="Expand Session Details">
-          <i class="fa-solid fa-chevron-up"></i>
-        </button>
+
+    </div>
+
+    <div class="notification-drawer-feed" id="notification-drawer-feed">
+      <div class="notification-feed-header">
+        <div class="notification-feed-title">
+          <i class="fa-solid fa-bell"></i>
+          <span id="notification-feed-title-text">Notifications &amp; Status Feed</span>
+        </div>
+        <div class="notification-feed-actions">
+          <button type="button" class="btn btn-xs secondary-btn" id="btn-mark-all-read" title="Mark all as read">
+            <i class="fa-solid fa-check-double"></i> <span id="btn-mark-all-read-text">Mark all as read</span>
+          </button>
+          <span class="notification-count-pill" id="notification-feed-count">3 unread / 3 all</span>
+        </div>
+      </div>
+      <div class="notification-list" id="notification-list-container">
+        <!-- Dynamically populated by notificationArea.js with Welcome Demo, reservations, and alerts -->
       </div>
     </div>
-  </div>
+  </aside>
 
   <!-- FULL SCREEN OVERLAY: Active Workout Clipboard Dashboard -->
   <div id="active-session-overlay" class="active-session-overlay hidden">
@@ -415,9 +437,6 @@
 
       <!-- Active Client Level Controls -->
       <div class="clipboard-actions-row">
-        <button id="btn-trigger-group-timer" class="btn secondary-btn btn-sm">
-          <i class="fa-solid fa-stopwatch"></i> Rest Timer
-        </button>
         <button id="btn-add-exercise-to-session" class="btn secondary-btn btn-sm">
           <i class="fa-solid fa-circle-plus"></i> Inject Exercise
         </button>

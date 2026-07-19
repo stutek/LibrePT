@@ -24,7 +24,7 @@ export function renderExerciseDeck(deckContainer, deps) {
     activeSession, activeClientState, activeClientId, state,
     t, escapeHTML, buildSupersetUnits, getExerciseSignalColor,
     logQuickSignal, openFeedbackModal, completeSupersetRound, focusExerciseByIndex,
-    saveActiveSessionToCache, saveToLocalStorage, onRerender
+    saveActiveSessionToCache, saveToLocalStorage, onRerender, startRestTimer
   } = deps;
 
   deckContainer.innerHTML = '';
@@ -146,14 +146,20 @@ export function renderExerciseDeck(deckContainer, deps) {
         onRerender();
       });
     } else if (item.type === 'rest') {
-      // Standalone rest between movements — a non-interactive marker card.
+      // Standalone rest between movements — tap to start its countdown on the floating timer.
       card.className = 'exercise-deck-card rest-card' + (isFutureSession ? ' future-session' : '');
       card.innerHTML = `
         <div class="deck-card-compact rest-card-inner">
           <span class="deck-card-counter"><i class="fa-solid fa-hourglass-half"></i></span>
           <span class="deck-card-name deck-card-name-inline">${t('rest_label')}</span>
           <span class="deck-card-compact-target">${escapeHTML(String(item.rest))}s</span>
+          <span class="rest-card-play" aria-hidden="true"><i class="fa-solid fa-play"></i></span>
         </div>`;
+      if (startRestTimer && !isFutureSession) {
+        card.setAttribute('role', 'button');
+        card.setAttribute('aria-label', `${t('rest_label')} ${item.rest}s`);
+        card.addEventListener('click', () => startRestTimer(item.rest));
+      }
     } else if (item.type === 'circuit') {
       // Superset / Giant Set card render lives in components/supersetCard.js
       const round = (activeClientState.circuitRounds && activeClientState.circuitRounds[item.circuitId]) || 1;
@@ -169,6 +175,7 @@ export function renderExerciseDeck(deckContainer, deps) {
         logQuickSignal,
         openFeedbackModal,
         completeSupersetRound,
+        startRestTimer,
         saveSessionState: () => {
           saveActiveSessionToCache();
           saveToLocalStorage();
@@ -188,6 +195,7 @@ export function renderExerciseDeck(deckContainer, deps) {
         getExerciseSignalColor,
         logQuickSignal,
         openFeedbackModal,
+        startRestTimer,
         onFocus: (index) => focusExerciseByIndex(index)
       });
     }

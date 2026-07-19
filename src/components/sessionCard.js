@@ -15,7 +15,13 @@ export function renderSessionCard(b, colContainer, deps) {
   card.className = 'booking-card card glassmorphic' + (temporal !== 'today' ? ` booking-${temporal}` : '');
   // The session currently in progress is emphasised (accent tint + border), the same visual
   // language as a selected participant, so it stands out from the rest of the day.
-  const isLive = activeId && b.id === activeId && !b.completed;
+  const activeSession = deps.getActiveSession ? deps.getActiveSession() : null;
+  const isLive = !b.completed && (
+    (activeId && b.id === activeId) ||
+    (activeSession && activeSession.id === b.id) ||
+    (activeSession && activeSession.booking && activeSession.booking.id === b.id) ||
+    (activeSession && activeSession.booking && activeSession.booking.ids && activeSession.booking.ids.includes(b.id))
+  );
   if (isLive) card.classList.add('booking-live');
 
   // Hover feedback style
@@ -65,11 +71,34 @@ export function renderSessionCard(b, colContainer, deps) {
     : '';
   if (b.completed) card.classList.add('booking-completed');
 
+  let timerInitialText = '00:00';
+  let timerIsOvertime = false;
+  if (isLive && activeSession) {
+    const endDate = activeSession.booking && activeSession.booking.endDate;
+    if (endDate && deps.formatSignedDuration) {
+      const remainingSec = Math.round((new Date(endDate).getTime() - Date.now()) / 1000);
+      timerInitialText = deps.formatSignedDuration(remainingSec);
+      timerIsOvertime = remainingSec < 0;
+    } else if (deps.formatDuration) {
+      timerInitialText = deps.formatDuration(activeSession.duration || 0);
+    }
+  }
+
+  const liveMarkerHTML = isLive ? `
+    <span class="badge badge-live session-card-live-marker" style="background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); font-size: 10px; padding: 2px 6px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+      <span class="pulse-indicator" style="margin: 0; width: 6px; height: 6px;"></span>
+      <span>${escapeHTML(t('live_tracking_clipboard') || 'Active Workout')}</span>
+    </span>` : '';
+
+  const liveTimerHTML = isLive ? `
+    <span id="session-card-timer-${escapeHTML(b.id)}" class="session-card-timer badge ${timerIsOvertime ? 'overtime' : ''}" style="background: var(--card-bg); border: 1px solid ${timerIsOvertime ? '#ef4444' : 'var(--primary)'}; color: ${timerIsOvertime ? '#ef4444' : 'var(--primary)'}; font-size: 11px; font-family: monospace; font-weight: 700; padding: 2px 8px; margin-left: auto;">${escapeHTML(timerInitialText)}</span>` : '';
+
   info.innerHTML = `
     <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px;">
-      ${isLive ? '<span class="pulse-indicator" title="In progress"></span>' : ''}
+      ${liveMarkerHTML}
       <span class="badge badge-primary" style="font-size: 10px; padding: 2px 6px; font-weight: 700; font-family: monospace;">${escapeHTML(b.time)}</span>
       <strong class="booking-card-title" style="font-size: 13px;">${escapeHTML(b.title)}</strong>
+      ${liveTimerHTML}
       ${completedBadge}
     </div>
     <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">

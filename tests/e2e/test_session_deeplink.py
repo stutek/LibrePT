@@ -32,7 +32,7 @@ def _nav(page, path):
 def _open_session(page, local_server):
     page.goto(local_server)
     page.wait_for_timeout(700)  # let the seeded active session recover
-    page.eval_on_selector("#active-session-bar", "el => el.click()")
+    page.locator(".booking-card.booking-live, .booking-card:has-text('Group Strength & Conditioning')").first.click()
     page.wait_for_selector("#active-session-overlay:not(.hidden)")
     page.wait_for_timeout(400)
 

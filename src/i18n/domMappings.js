@@ -9,6 +9,7 @@ export function applyStaticDOMMappings(tDict) {
     // Application (☰) header menu + About / Terms modals
     '#menu-label-lang': 'menu_language',
     '#menu-label-theme': 'menu_theme',
+    '#menu-clients-register': 'menu_clients_register',
     '#menu-connect-cloud': 'menu_connect_cloud',
     '#menu-export-data': 'menu_export_data',
     '#menu-github': 'menu_github',
@@ -21,6 +22,8 @@ export function applyStaticDOMMappings(tDict) {
     '#terms-title': 'terms_title',
     '#terms-body': 'terms_body',
     '#btn-terms-agree': 'terms_agree',
+    '#notification-feed-title-text': 'notif_summary_title',
+    '#btn-mark-all-read-text': 'notif_mark_all_read',
     'button[data-view="clients"] span': 'tab_clients',
     'button[data-view="routines"] span': 'tab_routines',
     'button[data-view="exercises"] span': 'tab_exercises',

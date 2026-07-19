@@ -175,6 +175,7 @@ export const sl = {
     // Application (☰) header menu + About / Terms modals
     menu_language: "Jezik",
     menu_theme: "Tema",
+    menu_clients_register: "Seznam strank (klientov)",
     menu_connect_cloud: "Poveži shrambo v oblaku",
     menu_coming_soon: "Shramba v oblaku še ni na voljo — kmalu.",
     menu_export_data: "Izvozi podatke v datoteko",
@@ -187,5 +188,18 @@ export const sl = {
     about_repo: "Oglejte si projekt na GitHubu",
     terms_title: "Pogoji in izjava o odgovornosti",
     terms_body: "LibrePT je na voljo \"kakršen je\", brez kakršnega koli jamstva. Ne predstavlja zdravstvenega ali strokovnega nasveta za treniranje. Vaši podatki ostanejo na vaši napravi in zanje ste odgovorni sami. Uporaba je na lastno odgovornost.",
-    terms_agree: "Se strinjam"
+    terms_agree: "Se strinjam",
+
+    // Notification Area & Welcome Demo
+    notif_summary_title: "Obvestila in pregled stanja",
+    notif_welcome_title: "👋 Dobrodošli v LibrePT: Interaktivni predstavitvi",
+    notif_welcome_desc: "Povabilo k zagonu celovite predstavitve: Preizkusite vodenje osebnih seans. Ker vaša aplikacija že vsebuje aktivne podatke, si oglejte dokumentacijo z navodili ali odprite interaktivno predstavitev na stutek.github.io/LibrePT/.",
+    notif_demo_btn: "Odpri predstavitev v živo",
+    notif_walkthrough_btn: "Oglej si navodila",
+    notif_spot_res_title: "📅 Rezervacija mesta za stranko",
+    notif_spot_res_desc: "Alex Smith je rezerviral mesto za petkov HIIT.",
+    notif_spot_cancel_title: "⚠️ Odpoved rezervacije",
+    notif_spot_cancel_desc: "Mike Johnson je odpovedal mesto za jutri ob 10:00.",
+    notif_count_badge: "{unread} neprebranih / {all} vseh",
+    notif_mark_all_read: "Označi vse kot prebrano"
 };

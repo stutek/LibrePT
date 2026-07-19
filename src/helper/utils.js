@@ -131,6 +131,8 @@ export function buildBookingMeta(bookings, day, getSessionDayDate) {
   endDate.setMinutes(endDate.getMinutes() + endMin);
 
   return {
+    id: bookings.length > 0 ? bookings[0].id : null,
+    ids: bookings.map(b => b.id),
     titles,
     day,
     startDate,

@@ -187,6 +187,17 @@ function setupAppMenu() {
     if (el) el.addEventListener('click', handler);
   };
 
+  // Customer register / Clients directory
+  on('menu-clients-register', () => {
+    closeMenu();
+    if (deps && deps.navigateToPath) {
+      deps.navigateToPath('/clients');
+      setTimeout(() => {
+        const clientsHeader = document.querySelector('#view-clients .view-header');
+        if (clientsHeader) clientsHeader.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 50);
+    }
+  });
   // Connect cloud storage — placeholder, no backend yet.
   on('menu-connect-cloud', () => { closeMenu(); alert(deps.t('menu_coming_soon')); });
   // Export data — reuse the existing Sync & Backup modal (it holds JSON export/restore).

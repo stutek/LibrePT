@@ -176,6 +176,7 @@ export const en = {
     // Application (☰) header menu + About / Terms modals
     menu_language: "Language",
     menu_theme: "Theme",
+    menu_clients_register: "Clients Directory",
     menu_connect_cloud: "Connect cloud storage",
     menu_coming_soon: "Cloud storage isn't available yet — coming soon.",
     menu_export_data: "Export data as a file",
@@ -188,5 +189,18 @@ export const en = {
     about_repo: "View the project on GitHub",
     terms_title: "Terms & Disclaimer",
     terms_body: "LibrePT is provided \"as is\", without warranty of any kind. It is not medical, health, or professional training advice. Your data stays on your device and you are responsible for backing it up. Use at your own risk.",
-    terms_agree: "I agree"
+    terms_agree: "I agree",
+
+    // Notification Area & Welcome Demo
+    notif_summary_title: "Notifications & Status Feed",
+    notif_welcome_title: "👋 Welcome to LibrePT: Interactive Demo",
+    notif_welcome_desc: "Invite to run the demo end-to-end: Experience personal training orchestration. Since your workspace is preloaded with live training data, explore the interactive walkthrough documentation or open the live interactive demo at stutek.github.io/LibrePT/.",
+    notif_demo_btn: "Open Live Demo",
+    notif_walkthrough_btn: "Explore Walkthrough",
+    notif_spot_res_title: "📅 Client Spot Reservation",
+    notif_spot_res_desc: "Alex Smith booked a spot in Friday HIIT session.",
+    notif_spot_cancel_title: "⚠️ Spot Cancellation",
+    notif_spot_cancel_desc: "Mike Johnson cancelled spot for Tomorrow 10:00 AM.",
+    notif_count_badge: "{unread} unread / {all} all",
+    notif_mark_all_read: "Mark all as read"
 };

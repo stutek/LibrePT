@@ -25,17 +25,36 @@ export function updateSessionBarTimer() {
   const activeSession = deps.getActiveSession();
   if (!activeSession) return;
   const durationEl = document.getElementById('session-bar-duration');
-  if (!durationEl) return;
-
   const endDate = activeSession.booking && activeSession.booking.endDate;
+  let text = '';
+  let isOvertime = false;
+
   if (endDate) {
-    const remainingSec = Math.round((endDate.getTime() - Date.now()) / 1000);
-    durationEl.textContent = deps.formatSignedDuration(remainingSec);
-    durationEl.classList.toggle('overtime', remainingSec < 0);
+    const endMs = new Date(endDate).getTime();
+    const remainingSec = Math.round((endMs - Date.now()) / 1000);
+    text = deps.formatSignedDuration(remainingSec);
+    isOvertime = remainingSec < 0;
   } else {
-    durationEl.textContent = deps.formatDuration(activeSession.duration);
-    durationEl.classList.remove('overtime');
+    text = deps.formatDuration(activeSession.duration || 0);
   }
+
+  if (durationEl) {
+    durationEl.textContent = text;
+    durationEl.classList.toggle('overtime', isOvertime);
+  }
+
+  document.querySelectorAll('.session-card-timer').forEach(el => {
+    el.textContent = text;
+    if (isOvertime) {
+      el.classList.add('overtime');
+      el.style.borderColor = '#ef4444';
+      el.style.color = '#ef4444';
+    } else {
+      el.classList.remove('overtime');
+      el.style.borderColor = 'var(--primary)';
+      el.style.color = 'var(--primary)';
+    }
+  });
 }
 
 // Session name, participant count, and scheduled time range for the active bar.

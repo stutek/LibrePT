@@ -4,6 +4,7 @@ import { updateSessionBarTimer, renderActiveSessionBarLabels, renderIdleSessionB
 import { renderActiveUsersList, updateClientTabsFadeState } from '../components/activeUsersList.js';
 import { renderExerciseDeck } from '../components/exerciseDeck.js';
 import { renderClipboardEditor } from '../components/clipboardEditor.js';
+import { triggerRestTimer } from '../components/restTimer.js';
 import { openFeedbackModal } from '../components/feedbackModal.js';
 import { renderClientsList } from '../views/clientsView.js';
 import { renderRoutinesList } from '../views/routinesView.js';
@@ -452,7 +453,8 @@ export function renderActiveGroupBoard() {
       t, escapeHTML, buildSupersetUnits, getExerciseSignalColor,
       logQuickSignal, openFeedbackModal, completeSupersetRound, focusExerciseByIndex,
       saveActiveSessionToCache, saveToLocalStorage: appDeps.saveToLocalStorage,
-      onRerender: renderActiveGroupBoard
+      onRerender: renderActiveGroupBoard,
+      startRestTimer: triggerRestTimer
     });
   }
 
@@ -486,12 +488,15 @@ export function setupActiveSession(deps) {
   // Leaving the clipboard is handled globally by the title-bar grab handle + swipe-down gesture
   // (setupViewDismiss in app.js), shared with every other view; and the app-name logo also goes home.
 
-  document.getElementById('btn-expand-session').addEventListener('click', (e) => {
-    e.stopPropagation();
-    const activeClientId = activeSession ? activeSession.activeClientId || activeSession.participants[0] : '';
-    const sessionId = activeSession ? activeSession.id || 'session' : 'session';
-    if (navigateToPath) navigateToPath(`/session/${sessionId}/client/${activeClientId}`);
-  });
+  const btnExpandSession = document.getElementById('btn-expand-session');
+  if (btnExpandSession) {
+    btnExpandSession.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const activeClientId = activeSession ? activeSession.activeClientId || activeSession.participants[0] : '';
+      const sessionId = activeSession ? activeSession.id || 'session' : 'session';
+      if (navigateToPath) navigateToPath(`/session/${sessionId}/client/${activeClientId}`);
+    });
+  }
 
   const sessionBar = document.getElementById('active-session-bar');
   if (sessionBar) {

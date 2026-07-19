@@ -10,6 +10,7 @@ import { initDaySelector, focusSessionsColumn, getFocusedSessionDay, setFocusedS
 import { initSessionTitleBar, renderSessionTitle } from './components/sessionTitleBar.js';
 import { renderActiveUsersList, updateClientTabsFadeState } from './components/activeUsersList.js';
 import { initApplicationHeader, setupApplicationHeader, incrementLocalSync, resetSyncState, setSyncTrackingReady, renderSyncBadge, applyThemeSwitcherLabels } from './components/applicationHeader.js';
+import { initNotificationArea, renderNotificationArea, setupNotificationGestures } from './components/notificationArea.js';
 import { TRANSLATIONS } from './i18n/index.js';
 import { initRestTimer, setupRestTimer } from './components/restTimer.js';
 import { initBackupRestore, setupBackupRestore } from './components/backupRestore.js';
@@ -96,6 +97,7 @@ function applyTranslations(lang = state.lang || 'en') {
 
   // The day title bar is data-driven (weekday/date/arrows), so it re-renders rather than map statically
   renderSessionsTitleBar();
+  renderNotificationArea();
 }
 
 // --- STATE MANAGEMENT ---
@@ -299,6 +301,15 @@ function init() {
     getSessionDayDate
   });
 
+  initNotificationArea({
+    getState: () => state,
+    getActiveSession: () => getActiveSession(),
+    t,
+    escapeHTML,
+    navigateToPath
+  });
+  setupNotificationGestures();
+
   // Apply translations initially
   applyTranslations(state.lang);
 
@@ -309,6 +320,7 @@ function init() {
   renderGlobalHistory();
   renderPendingPlanAdjustments();
   renderSessions();
+  renderNotificationArea();
   populateDropdownSelectors();
 
   // Check if there was an active session saved (session recovery)
@@ -360,7 +372,7 @@ function seedDemoActiveSession() {
 
 // --- VIEW ROUTER ---
 function setupNavigation() {
-  const navItems = document.querySelectorAll('.bottom-nav .nav-item');
+  const navItems = document.querySelectorAll('.header-nav .nav-item, .bottom-nav .nav-item');
   navItems.forEach(item => {
     item.addEventListener('click', () => {
       const viewTarget = item.getAttribute('data-view');
@@ -403,7 +415,7 @@ function switchView(viewId) {
   });
 
   // Deactivate all nav items
-  document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
+  document.querySelectorAll('.header-nav .nav-item, .bottom-nav .nav-item').forEach(item => {
     item.classList.remove('active');
   });
 
@@ -416,7 +428,7 @@ function switchView(viewId) {
   // Highlight bottom nav matching tab
   // Handles secondary screens (like client detail) which don't map to bottom nav
   const mainTab = viewId.split('-')[0]; // handles 'client-detail' -> 'client' or matches 'clients'
-  const tabItem = document.querySelector(`.bottom-nav .nav-item[data-view^="${mainTab}"]`);
+  const tabItem = document.querySelector(`.header-nav .nav-item[data-view^="${mainTab}"], .bottom-nav .nav-item[data-view^="${mainTab}"]`);
   if (tabItem) {
     tabItem.classList.add('active');
   }
@@ -575,8 +587,10 @@ function showSessionView(sessionId, clientId, focusRef = null) {
   if (activeSession) {
     // Show active tracking clipboard overlay
     const bar = document.getElementById('active-session-bar');
-    bar.classList.remove('hidden', 'is-idle');
-    delete bar.dataset.nextBookingId;
+    if (bar) {
+      bar.classList.remove('hidden', 'is-idle');
+      delete bar.dataset.nextBookingId;
+    }
     renderActiveSessionBarLabels();
 
     // Ensure timer is ticking if not already
@@ -667,15 +681,20 @@ function populateDropdownSelectors() { populateDropdownsController({ state, t })
 
 function startWorkoutSession(clientRoutines, bookingMeta = null) {
   startWorkoutSessionController(clientRoutines, bookingMeta, { state, generateShortUUID, navigateToPath, toRoute, toUrl, focusSessionsColumn, launchClipboardDirectly, renderIdleSessionBar, saveToLocalStorage });
+  renderSessions();
 }
 function setupActiveSession() {
   initActiveSessionController({ state, t, navigateToPath, toRoute, toUrl, focusSessionsColumn, launchClipboardDirectly, generateShortUUID, renderIdleSessionBar, saveToLocalStorage });
   setupActiveSessionController({ state, t, navigateToPath, focusSessionsColumn, launchClipboardDirectly, generateShortUUID, renderIdleSessionBar });
 }
-function cancelWorkoutSession() { cancelWorkoutSessionController({ state, t, navigateToPath }); }
+function cancelWorkoutSession() {
+  cancelWorkoutSessionController({ state, t, navigateToPath });
+  renderSessions();
+}
 function saveActiveSessionToCache() { saveActiveSessionToCacheController(); }
 function recoverActiveSession() {
   recoverActiveSessionController({ state, t, generateShortUUID, navigateToPath, focusSessionsColumn, toRoute, toUrl, launchClipboardDirectly, renderIdleSessionBar, saveToLocalStorage });
+  renderSessions();
 }
 function getActiveExercise() { return getActiveExerciseController(); }
 function renderActiveGroupBoard() { renderActiveGroupBoardController({ state, t, navigateToPath, toRoute, toUrl, openFeedbackModal, generateShortUUID, saveToLocalStorage }); }
@@ -685,7 +704,7 @@ function launchClipboardDirectly(arg) {
   sessionsViewLaunchClipboard({ bookingId, state, startWorkoutSession });
 }
 function setupCalendarBookings() { sessionsViewSetupBookings({ state, t, saveToLocalStorage, renderSessions }); }
-function renderSessions() { sessionsViewRender({ state, t, getActiveSession, launchClipboardDirectly }); }
+function renderSessions() { sessionsViewRender({ state, t, getActiveSession, launchClipboardDirectly, formatDuration, formatSignedDuration }); }
 
 // Register Service Worker for offline PWA support
 if ('serviceWorker' in navigator) {

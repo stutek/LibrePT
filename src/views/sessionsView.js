@@ -2,8 +2,8 @@
 import { DEFAULT_SESSIONS } from '../data/index.js';
 import { renderSessionList } from '../components/sessionList.js';
 import { renderSessionsTitleBar, focusSessionsColumn, getFocusedSessionDay, sessionDayTemporal, getSessionDayDate } from '../components/daySelector.js';
-import { renderIdleSessionBar } from '../components/sessionBar.js';
-import { getOverlappingBookings, buildBookingMeta, escapeHTML } from '../helper/utils.js';
+import { renderIdleSessionBar, updateSessionBarTimer } from '../components/sessionBar.js';
+import { getOverlappingBookings, buildBookingMeta, escapeHTML, formatDuration, formatSignedDuration } from '../helper/utils.js';
 import { resetSyncState } from '../components/applicationHeader.js';
 
 export function seedDemoActiveSession({ state }) {
@@ -167,7 +167,10 @@ export function renderSessions({ state, t, getActiveSession, launchClipboardDire
     escapeHTML, 
     launchClipboardDirectly: (bookingId) => launchClipboardDirectly(bookingId), 
     sessionDayTemporal, 
-    activeId: activeSession ? activeSession.id : null 
+    activeId: activeSession ? activeSession.id : null,
+    getActiveSession,
+    formatDuration,
+    formatSignedDuration
   };
 
   const yesterdaySessions = bookings.filter(b => b.day === 'yesterday');
@@ -201,4 +204,5 @@ export function renderSessions({ state, t, getActiveSession, launchClipboardDire
 
   requestAnimationFrame(() => focusSessionsColumn(getFocusedSessionDay(), 'auto'));
   renderIdleSessionBar();
+  updateSessionBarTimer();
 }
