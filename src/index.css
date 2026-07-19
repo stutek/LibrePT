@@ -136,7 +136,9 @@ h1, h2, h3, h4, h5, h6 {
   border-bottom: 1px solid var(--card-border);
   position: sticky;
   top: 0;
-  z-index: 100;
+  /* Above the fullscreen active-session overlay (z-index 120), which shares this stacking
+     context — otherwise the overlay paints over the ☰ dropdown that drops down into it. */
+  z-index: 125;
 }.header-container {
   max-width: 800px;
   margin: 0 auto;
@@ -1737,13 +1739,18 @@ select.menu-select {
 }.deck-card-top-right { display: inline-flex; align-items: center; gap: 8px; }
 /* Per-card edit (✎) affordance — taps into the inline clipboard editor */
 .deck-card-edit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
   background: transparent;
   border: none;
   color: var(--text-muted);
   cursor: pointer;
-  font-size: 14px;
-  padding: 4px;
-  border-radius: 6px;
+  font-size: 18px;
+  padding: 0;
+  border-radius: 8px;
   transition: color 0.2s ease, background 0.2s ease;
 }.deck-card-edit:hover { color: var(--primary); background: var(--primary-light); }.deck-card-counter {
   font-family: var(--font-mono);
