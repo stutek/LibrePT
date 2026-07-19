@@ -82,6 +82,13 @@ Data should sync **periodically to Google Drive** and remain **editable directly
 - **Open question**: does it make sense to store the data in **Google's new OKF format**, using it to get concurrent editing and versioning for free?
 - No approach is chosen yet — decide in a dedicated brainstorm before implementing.
 
+### 3.4 [ ] [Brainstorm] GDPR Client Consent Tracking & Email Trigger
+To support cloud sync and GDPR Article 9 compliance, personal trainers (as Data Controllers) need verifiable client consent before syncing health and training notes to external storage.
+- **Client Profile Checkbox:** Add a `gdprConsent: { cloudSync: boolean, timestamp: string }` flag to the `Client` data model and a simple `[ ] Client consented to cloud sync` checkbox inside the client profile modal (`clientsView.js` / `formsController.js`).
+- **Sync Safety Lock:** If `cloudSync` is false, exclude that client's profile and session logs from cloud backup payloads (or warn the PT).
+- **Email Consent Trigger (`mailto:`):** Add a `✉ Send Consent Form` button on the client profile that launches a pre-populated `mailto:` link (`client.email`) with a standardized informative consent letter explaining data storage, encryption, and GDPR rights, requesting an "I CONSENT" email reply.
+- **AI / LLM Safe Copy Button:** Add an `AI Safe Copy (Anonymized)` action on client history/routine views that copies a PII-stripped Markdown summary (swapping name/email for `Client #UUID`) to the clipboard so PTs can safely query LLMs without leaking personal data.
+
 ---
 
 ## 4. UI / UX
@@ -309,6 +316,12 @@ The trademark was scrubbed from history and force-pushed (remote is clean). Stil
   ```bash
   git reflog expire --expire=now --all && git gc --prune=now
   ```
+
+### 12.6 [ ] Web Documentation for GDPR, AI Safety & Consent Templates
+Delegate lengthy legal explanations and templates to external web documentation (`docs/` or `stutek.github.io`), keeping the in-app UI clutter-free.
+- **PT Data Controller Guide:** Create a concise guide explaining why PTs are Data Controllers under GDPR Art. 4(7)/Art. 9, how client-side E2EE works during cloud sync (`PBKDF2` + `AES-GCM`), and why pasting identifiable client health notes into LLMs violates privacy laws.
+- **Downloadable/Printable Intake Templates:** Host the full text of the Informative Consent Letter (`docs/templates/Client_Consent_Form.md`) for physical paper signing or custom adaptations.
+- **In-App Footnote Links:** Link to this web guide from `#dialog-terms`, the About modal, and the Cloud Sync setup screen.
 
 ---
 

@@ -191,8 +191,9 @@ function setupAppMenu() {
   on('menu-connect-cloud', () => { closeMenu(); alert(deps.t('menu_coming_soon')); });
   // Export data — reuse the existing Sync & Backup modal (it holds JSON export/restore).
   on('menu-export-data', () => { closeMenu(); const b = document.getElementById('backup-btn'); if (b) b.click(); });
-  // GitHub project is a real <a target="_blank">; just dismiss the menu.
+  // GitHub project and Privacy statement are real <a target="_blank">; just dismiss the menu.
   on('menu-github', () => closeMenu());
+  on('menu-privacy', () => closeMenu());
   // About / Terms open their modals.
   on('menu-about', () => { closeMenu(); openDialog('dialog-about'); });
   on('menu-terms', () => { closeMenu(); openDialog('dialog-terms'); });

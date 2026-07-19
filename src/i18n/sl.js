@@ -171,6 +171,7 @@ export const sl = {
     menu_github: "Projekt na GitHubu",
     menu_about: "O aplikaciji",
     menu_terms: "Pogoji in izjava o odgovornosti",
+    menu_privacy: "Izjava o zasebnosti in GDPR",
     about_title: "O aplikaciji LibrePT",
     about_body: "LibrePT je brezplačen odprtokoden pripomoček za osebne trenerje, ki deluje brez povezave — načrtujte seje, jih izvajajte v telovadnici in spremljajte napredek strank. Vsi podatki ostanejo na vaši napravi.",
     about_repo: "Oglejte si projekt na GitHubu",

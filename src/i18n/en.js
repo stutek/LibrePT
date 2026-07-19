@@ -172,6 +172,7 @@ export const en = {
     menu_github: "GitHub project",
     menu_about: "About",
     menu_terms: "Terms & disclaimer",
+    menu_privacy: "Privacy & GDPR Statement",
     about_title: "About LibrePT",
     about_body: "LibrePT is a free, open-source, offline-first clipboard for personal trainers — schedule sessions, run them on the gym floor, and track client progress. All data stays on your device.",
     about_repo: "View the project on GitHub",

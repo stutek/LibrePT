@@ -38,6 +38,7 @@ def test_menu_items_present_and_github_link(page, local_server):
         ("#menu-github", "GitHub project"),
         ("#menu-about", "About"),
         ("#menu-terms", "Terms & disclaimer"),
+        ("#menu-privacy", "Privacy & GDPR Statement"),
     ]:
         el = page.locator(item_id)
         assert el.is_visible()
@@ -46,6 +47,10 @@ def test_menu_items_present_and_github_link(page, local_server):
     github = page.locator("#menu-github")
     assert github.get_attribute("href") == "https://github.com/stutek/LibrePT"
     assert github.get_attribute("target") == "_blank"
+
+    privacy = page.locator("#menu-privacy")
+    assert privacy.get_attribute("href") == "https://github.com/stutek/LibrePT/blob/main/PRIVACY.md"
+    assert privacy.get_attribute("target") == "_blank"
 
 
 def test_export_item_opens_backup_modal(page, local_server):

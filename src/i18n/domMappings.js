@@ -14,6 +14,7 @@ export function applyStaticDOMMappings(tDict) {
     '#menu-github': 'menu_github',
     '#menu-about': 'menu_about',
     '#menu-terms': 'menu_terms',
+    '#menu-privacy': 'menu_privacy',
     '#about-title': 'about_title',
     '#about-body': 'about_body',
     '#about-repo-link': 'about_repo',
