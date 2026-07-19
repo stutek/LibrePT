@@ -7,11 +7,11 @@
 
 let deps = null;
 
-let restTimer = {
+const restTimer = {
   intervalId: null,
   secondsRemaining: 0,
   isActive: false,
-  originalDuration: 60
+  originalDuration: 60,
 };
 
 export function initRestTimer(d) {
@@ -19,22 +19,22 @@ export function initRestTimer(d) {
 }
 
 export function setupRestTimer() {
-  const panel = document.getElementById('floating-rest-timer');
-  const timerLabel = document.getElementById('timer-countdown');
-  const toggleBtn = document.getElementById('btn-timer-toggle');
-  
+  const panel = document.getElementById("floating-rest-timer");
+  const timerLabel = document.getElementById("timer-countdown");
+  const toggleBtn = document.getElementById("btn-timer-toggle");
+
   // Timing is a per-card action now (a rest card runs its own duration; an exercise/superset card
   // has a ⏱ button) — there is no session-global "start timer" button. The panel below is just the
   // running-countdown UI (pause / ±15s / close); cards call triggerRestTimer() to open it.
-  const closeBtn = document.getElementById('btn-close-timer');
+  const closeBtn = document.getElementById("btn-close-timer");
   if (closeBtn) {
-    closeBtn.addEventListener('click', () => {
-      panel.classList.add('hidden');
+    closeBtn.addEventListener("click", () => {
+      panel.classList.add("hidden");
     });
   }
 
   if (toggleBtn) {
-    toggleBtn.addEventListener('click', () => {
+    toggleBtn.addEventListener("click", () => {
       if (restTimer.isActive) {
         pauseRestTimer();
       } else {
@@ -43,16 +43,16 @@ export function setupRestTimer() {
     });
   }
 
-  const plusBtn = document.getElementById('btn-timer-plus');
+  const plusBtn = document.getElementById("btn-timer-plus");
   if (plusBtn) {
-    plusBtn.addEventListener('click', () => {
+    plusBtn.addEventListener("click", () => {
       adjustRestTimer(15);
     });
   }
 
-  const minusBtn = document.getElementById('btn-timer-minus');
+  const minusBtn = document.getElementById("btn-timer-minus");
   if (minusBtn) {
-    minusBtn.addEventListener('click', () => {
+    minusBtn.addEventListener("click", () => {
       adjustRestTimer(-15);
     });
   }
@@ -60,16 +60,16 @@ export function setupRestTimer() {
 
 export function triggerRestTimer(durationSeconds) {
   if (restTimer.intervalId) clearInterval(restTimer.intervalId);
-  
+
   restTimer.secondsRemaining = durationSeconds;
   restTimer.originalDuration = durationSeconds;
   restTimer.isActive = true;
-  
-  const panel = document.getElementById('floating-rest-timer');
-  if (panel) panel.classList.remove('hidden');
-  
+
+  const panel = document.getElementById("floating-rest-timer");
+  if (panel) panel.classList.remove("hidden");
+
   updateTimerUI();
-  
+
   restTimer.intervalId = setInterval(tickRestTimer, 1000);
 }
 
@@ -83,19 +83,19 @@ function tickRestTimer() {
     restTimer.isActive = false;
     restTimer.intervalId = null;
     updateTimerUI();
-    
+
     playTimerAlert();
-    const timerLabel = document.getElementById('timer-countdown');
-    if (timerLabel) timerLabel.textContent = 'DONE!';
+    const timerLabel = document.getElementById("timer-countdown");
+    if (timerLabel) timerLabel.textContent = "DONE!";
   }
 }
 
 function updateTimerUI() {
-  const timerLabel = document.getElementById('timer-countdown');
-  const toggleBtn = document.getElementById('btn-timer-toggle');
-  
+  const timerLabel = document.getElementById("timer-countdown");
+  const toggleBtn = document.getElementById("btn-timer-toggle");
+
   if (timerLabel) timerLabel.textContent = `${restTimer.secondsRemaining}s`;
-  
+
   if (toggleBtn) {
     if (restTimer.isActive) {
       toggleBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
@@ -139,19 +139,19 @@ function playTimerAlert() {
     if (!AudioContextClass) return;
 
     const ctx = new AudioContextClass();
-    
+
     // Play double beep
     const playBeep = (time, frequency, duration) => {
       const osc = ctx.createOscillator();
       const gainNode = ctx.createGain();
       osc.connect(gainNode);
       gainNode.connect(ctx.destination);
-      
-      osc.type = 'sine';
+
+      osc.type = "sine";
       osc.frequency.setValueAtTime(frequency, time);
       gainNode.gain.setValueAtTime(0.2, time);
       gainNode.gain.exponentialRampToValueAtTime(0.01, time + duration);
-      
+
       osc.start(time);
       osc.stop(time + duration);
     };
@@ -160,6 +160,6 @@ function playTimerAlert() {
     playBeep(now, 880, 0.25); // high A tone
     playBeep(now + 0.3, 880, 0.4); // slightly longer tone
   } catch (e) {
-    console.error('Error synthesizing rest timer alert sound:', e);
+    console.error("Error synthesizing rest timer alert sound:", e);
   }
 }

@@ -29,6 +29,32 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Cache Virtual Environment & Biome
+        id: cache-venv
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: ${{ runner.os }}-venv-${{ hashFiles('requirements.txt') }}-biome-v1.9.4
+
+      - name: Install Dependencies
+        if: steps.cache-venv.outputs.cache-hit != 'true'
+        run: |
+          python -m venv .venv
+          .venv/bin/pip install --upgrade pip
+          .venv/bin/pip install -r requirements.txt
+
+      - name: Run Linting (Ruff & Biome)
+        env:
+          CI: "true"
+        run: |
+          .venv/bin/python -c "from build import run_lint; run_lint()"
+
       # The runtime app lives under src/. Publish that whole tree (index.html + app.js +
       # index.css + manifest.json + sw.js + i18n/ + components/ + icons/) flattened to the dist
       # root, so relative paths resolve the same as in local dev. This mirrors build/run_build()

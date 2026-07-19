@@ -11,11 +11,11 @@
 
 let deps = null;
 
-export const SESSION_DAY_ORDER = ['yesterday', 'today', 'tomorrow', 'upcoming'];
+export const SESSION_DAY_ORDER = ["yesterday", "today", "tomorrow", "upcoming"];
 const SESSION_DAY_OFFSETS = { yesterday: -1, today: 0, tomorrow: 1, upcoming: 2 };
 const SESSION_SCROLL_SETTLE_MS = 700;
 
-let focusedSessionDay = 'today';
+let focusedSessionDay = "today";
 let sessionsProgrammaticScrollUntil = 0;
 
 export function initDaySelector(d) {
@@ -31,13 +31,13 @@ export function setFocusedSessionDay(day) {
 }
 
 export function sessionDayTemporal(day) {
-  if (day === 'yesterday') return 'past';
-  if (day === 'tomorrow' || day === 'upcoming') return 'future';
-  return 'today';
+  if (day === "yesterday") return "past";
+  if (day === "tomorrow" || day === "upcoming") return "future";
+  return "today";
 }
 
 function getSessionsGrid() {
-  return document.getElementById('sessions-categories-grid');
+  return document.getElementById("sessions-categories-grid");
 }
 
 export function getSessionDayDate(day) {
@@ -48,20 +48,20 @@ export function getSessionDayDate(day) {
 }
 
 function getSessionDayLocale() {
-  return (deps.getState().lang || 'en') === 'sl' ? 'sl-SI' : 'en-US';
+  return (deps.getState().lang || "en") === "sl" ? "sl-SI" : "en-US";
 }
 
 function formatSessionDayISO(date) {
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
   return `${date.getFullYear()}-${month}-${day}`;
 }
 
 export function renderSessionsTitleBar() {
-  const weekdayEl = document.getElementById('calendar-title-weekday');
-  const weekdayShortEl = document.getElementById('calendar-title-weekday-short');
-  const dateEl = document.getElementById('calendar-title-date');
-  const todayBtn = document.getElementById('btn-sessions-today');
+  const weekdayEl = document.getElementById("calendar-title-weekday");
+  const weekdayShortEl = document.getElementById("calendar-title-weekday-short");
+  const dateEl = document.getElementById("calendar-title-date");
+  const todayBtn = document.getElementById("btn-sessions-today");
   if (!weekdayEl || !weekdayShortEl || !dateEl) return;
 
   const locale = getSessionDayLocale();
@@ -69,27 +69,27 @@ export function renderSessionsTitleBar() {
   const date = getSessionDayDate(day);
   const dateStr = formatSessionDayISO(date);
 
-  const isUpcoming = day === 'upcoming';
-  const calTitle = document.getElementById('calendar-title');
-  calTitle.classList.toggle('is-upcoming', isUpcoming);
+  const isUpcoming = day === "upcoming";
+  const calTitle = document.getElementById("calendar-title");
+  calTitle.classList.toggle("is-upcoming", isUpcoming);
 
   const temporal = sessionDayTemporal(day);
-  calTitle.classList.toggle('is-past', temporal === 'past');
-  calTitle.classList.toggle('is-future', temporal === 'future');
+  calTitle.classList.toggle("is-past", temporal === "past");
+  calTitle.classList.toggle("is-future", temporal === "future");
 
   if (isUpcoming) {
-    weekdayEl.textContent = deps.t('upcoming');
-    weekdayShortEl.textContent = deps.t('upcoming');
-    dateEl.textContent = `${deps.t('from_date')} ${dateStr}`;
+    weekdayEl.textContent = deps.t("upcoming");
+    weekdayShortEl.textContent = deps.t("upcoming");
+    dateEl.textContent = `${deps.t("from_date")} ${dateStr}`;
   } else {
-    weekdayEl.textContent = date.toLocaleDateString(locale, { weekday: 'long' });
-    weekdayShortEl.textContent = date.toLocaleDateString(locale, { weekday: 'short' });
+    weekdayEl.textContent = date.toLocaleDateString(locale, { weekday: "long" });
+    weekdayShortEl.textContent = date.toLocaleDateString(locale, { weekday: "short" });
     dateEl.textContent = dateStr;
   }
 
-  const separatorEl = document.querySelector('.calendar-title-separator');
+  const separatorEl = document.querySelector(".calendar-title-separator");
   if (separatorEl) {
-    separatorEl.style.display = isUpcoming ? 'none' : 'inline';
+    separatorEl.style.display = isUpcoming ? "none" : "inline";
   }
 
   // The Today control doubles as the "current day" indicator: it resets the deck to today, and
@@ -97,26 +97,26 @@ export function renderSessionsTitleBar() {
   // never shift as the date text changes width.
   if (todayBtn) {
     // Only the text label is localized; the icon (shown in its place on phones) stays put.
-    const todayLabel = todayBtn.querySelector('.today-btn-label');
-    if (todayLabel) todayLabel.textContent = deps.t('today');
-    todayBtn.disabled = day === 'today';
+    const todayLabel = todayBtn.querySelector(".today-btn-label");
+    if (todayLabel) todayLabel.textContent = deps.t("today");
+    todayBtn.disabled = day === "today";
   }
 
   const idx = SESSION_DAY_ORDER.indexOf(day);
   const arrows = [
-    { el: document.getElementById('btn-sessions-prev'), target: SESSION_DAY_ORDER[idx - 1] },
-    { el: document.getElementById('btn-sessions-next'), target: SESSION_DAY_ORDER[idx + 1] }
+    { el: document.getElementById("btn-sessions-prev"), target: SESSION_DAY_ORDER[idx - 1] },
+    { el: document.getElementById("btn-sessions-next"), target: SESSION_DAY_ORDER[idx + 1] },
   ];
-  arrows.forEach(({ el, target }) => {
-    if (!el) return;
+  for (const { el, target } of arrows) {
+    if (!el) continue;
     el.disabled = !target;
-    const label = target ? deps.t(target) : '';
-    el.setAttribute('aria-label', label);
+    const label = target ? deps.t(target) : "";
+    el.setAttribute("aria-label", label);
     el.title = label;
-  });
+  }
 }
 
-export function focusSessionsColumn(day, behavior = 'smooth') {
+export function focusSessionsColumn(day, behavior = "smooth") {
   const grid = getSessionsGrid();
   const col = document.getElementById(`${day}-sessions-column`);
   if (!grid || !col) return;
@@ -130,8 +130,8 @@ export function focusSessionsColumn(day, behavior = 'smooth') {
   // Only reflect the focused day in the URL while the sessions list is the active route. A
   // background renderSessions() (e.g. right after launching a session) must not bounce the URL off
   // the /session/... view it just navigated to.
-  if (!currentRoute.startsWith('/session/') && currentRoute !== targetPath) {
-    window.history.pushState(null, '', deps.toUrl(targetPath));
+  if (!currentRoute.startsWith("/session/") && currentRoute !== targetPath) {
+    window.history.pushState(null, "", deps.toUrl(targetPath));
   }
 
   if (grid.offsetParent === null) {
@@ -139,7 +139,8 @@ export function focusSessionsColumn(day, behavior = 'smooth') {
       const g = getSessionsGrid();
       const c = document.getElementById(`${day}-sessions-column`);
       if (g && c && g.offsetParent !== null) {
-        const left = g.scrollLeft + (c.getBoundingClientRect().left - g.getBoundingClientRect().left);
+        const left =
+          g.scrollLeft + (c.getBoundingClientRect().left - g.getBoundingClientRect().left);
         sessionsProgrammaticScrollUntil = Date.now() + SESSION_SCROLL_SETTLE_MS;
         g.scrollTo({ left, behavior });
       }
@@ -147,7 +148,8 @@ export function focusSessionsColumn(day, behavior = 'smooth') {
     return;
   }
 
-  const left = grid.scrollLeft + (col.getBoundingClientRect().left - grid.getBoundingClientRect().left);
+  const left =
+    grid.scrollLeft + (col.getBoundingClientRect().left - grid.getBoundingClientRect().left);
 
   sessionsProgrammaticScrollUntil = Date.now() + SESSION_SCROLL_SETTLE_MS;
   grid.scrollTo({ left, behavior });
@@ -165,15 +167,15 @@ export function detectFocusedSessionsColumn() {
   const gridLeft = grid.getBoundingClientRect().left;
   let closest = focusedSessionDay;
   let closestDist = Infinity;
-  SESSION_DAY_ORDER.forEach(day => {
+  for (const day of SESSION_DAY_ORDER) {
     const col = document.getElementById(`${day}-sessions-column`);
-    if (!col) return;
+    if (!col) continue;
     const dist = Math.abs(col.getBoundingClientRect().left - gridLeft);
     if (dist < closestDist) {
       closestDist = dist;
       closest = day;
     }
-  });
+  }
 
   if (closest !== focusedSessionDay) {
     focusedSessionDay = closest;
@@ -182,27 +184,31 @@ export function detectFocusedSessionsColumn() {
     const isoDate = deps.getISODateForColumn(closest);
     const targetPath = `/sessions/${isoDate}`;
     if (deps.toRoute(window.location.pathname) !== targetPath) {
-      window.history.pushState(null, '', deps.toUrl(targetPath));
+      window.history.pushState(null, "", deps.toUrl(targetPath));
     }
   }
 }
 
 export function setupSessionsDayNav() {
-  const prevBtn = document.getElementById('btn-sessions-prev');
-  const nextBtn = document.getElementById('btn-sessions-next');
-  if (prevBtn) prevBtn.addEventListener('click', () => stepSessionsColumn(-1));
-  if (nextBtn) nextBtn.addEventListener('click', () => stepSessionsColumn(1));
+  const prevBtn = document.getElementById("btn-sessions-prev");
+  const nextBtn = document.getElementById("btn-sessions-next");
+  if (prevBtn) prevBtn.addEventListener("click", () => stepSessionsColumn(-1));
+  if (nextBtn) nextBtn.addEventListener("click", () => stepSessionsColumn(1));
 
-  const todayBtn = document.getElementById('btn-sessions-today');
-  if (todayBtn) todayBtn.addEventListener('click', () => focusSessionsColumn('today'));
+  const todayBtn = document.getElementById("btn-sessions-today");
+  if (todayBtn) todayBtn.addEventListener("click", () => focusSessionsColumn("today"));
 
   const grid = getSessionsGrid();
   if (grid) {
     let scrollSettleTimer = null;
-    grid.addEventListener('scroll', () => {
-      clearTimeout(scrollSettleTimer);
-      const delay = Math.max(80, sessionsProgrammaticScrollUntil - Date.now() + 20);
-      scrollSettleTimer = setTimeout(detectFocusedSessionsColumn, delay);
-    }, { passive: true });
+    grid.addEventListener(
+      "scroll",
+      () => {
+        clearTimeout(scrollSettleTimer);
+        const delay = Math.max(80, sessionsProgrammaticScrollUntil - Date.now() + 20);
+        scrollSettleTimer = setTimeout(detectFocusedSessionsColumn, delay);
+      },
+      { passive: true },
+    );
   }
 }

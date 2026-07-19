@@ -16,7 +16,11 @@ def _base(page):
 
 
 def _focus_re(base):
-    return re.compile("^" + re.escape(base) + r"/session/([^/]+)/client/([^/]+)/(exercise|superset)/([^/]+)$")
+    return re.compile(
+        "^"
+        + re.escape(base)
+        + r"/session/([^/]+)/client/([^/]+)/(exercise|superset)/([^/]+)$"
+    )
 
 
 def _nav(page, path):
@@ -32,7 +36,9 @@ def _nav(page, path):
 def _open_session(page, local_server):
     page.goto(local_server)
     page.wait_for_timeout(700)  # let the seeded active session recover
-    page.locator(".booking-card.booking-live, .booking-card:has-text('Group Strength & Conditioning')").first.click()
+    page.locator(
+        ".booking-card.booking-live, .booking-card:has-text('Group Strength & Conditioning')"
+    ).first.click()
     page.wait_for_selector("#active-session-overlay:not(.hidden)")
     page.wait_for_timeout(400)
 
@@ -50,13 +56,17 @@ def test_session_view_deep_links_to_focused_card(page, local_server):
 
     # A seeded superset circuit id (different from whatever is focused now) resolves on navigation:
     # the app keeps the URL on that card (it would rewrite it away if the id didn't resolve).
-    cache = page.evaluate("() => JSON.parse(localStorage.getItem('librept_active_session'))")
+    cache = page.evaluate(
+        "() => JSON.parse(localStorage.getItem('librept_active_session'))"
+    )
     circuits = []
     for ex in cache["clientRoutines"][client_id]["exercises"]:
         if ex.get("circuitId") and ex["circuitId"] not in circuits:
             circuits.append(ex["circuitId"])
     assert len(circuits) >= 2, "expected the seeded routine to have multiple supersets"
-    target_superset = f"{base}/session/{session_id}/client/{client_id}/superset/{circuits[-1]}"
+    target_superset = (
+        f"{base}/session/{session_id}/client/{client_id}/superset/{circuits[-1]}"
+    )
     _nav(page, target_superset)
     assert page.evaluate("() => location.pathname") == target_superset
 
@@ -71,7 +81,9 @@ def test_session_view_deep_links_to_focused_card(page, local_server):
 
     url_injected = page.evaluate("() => location.pathname")
     m2 = focus_re.match(url_injected)
-    assert m2 and m2.group(3) == "exercise", f"inject did not focus an exercise route: {url_injected}"
+    assert m2 and m2.group(3) == "exercise", (
+        f"inject did not focus an exercise route: {url_injected}"
+    )
 
     # Navigate away to the superset, then back to the injected exercise deep link: both resolve.
     _nav(page, target_superset)
@@ -84,7 +96,9 @@ def test_session_view_deep_links_to_focused_card(page, local_server):
     bogus = f"{base}/session/{session_id}/client/{client_id}/exercise/nonexistent-id"
     _nav(page, bogus)
     after = page.evaluate("() => location.pathname")
-    assert after != bogus and focus_re.match(after), f"stale id was not ignored: {after}"
+    assert after != bogus and focus_re.match(after), (
+        f"stale id was not ignored: {after}"
+    )
 
 
 def test_tapping_a_card_updates_the_deep_link(page, local_server):
@@ -105,4 +119,6 @@ def test_tapping_a_card_updates_the_deep_link(page, local_server):
     assert tapped, "no tappable upcoming card found in the deck"
     page.wait_for_timeout(300)
     after = page.evaluate("() => location.pathname")
-    assert after != before and focus_re.match(after), f"tap did not update the deep link: {after}"
+    assert after != before and focus_re.match(after), (
+        f"tap did not update the deep link: {after}"
+    )

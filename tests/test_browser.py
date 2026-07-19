@@ -17,7 +17,9 @@ def test_sessions_day_navigation(page, local_server):
     # Dashboard opens focused on today: ISO date + weekday show today, Today button is disabled
     page.wait_for_selector("#calendar-title-weekday")
     assert weekday.inner_text().strip().upper() == today.strftime("%A").upper()
-    assert page.locator("#calendar-title-date").inner_text().strip() == today.strftime("%Y-%m-%d")
+    assert page.locator("#calendar-title-date").inner_text().strip() == today.strftime(
+        "%Y-%m-%d"
+    )
     assert today_btn.is_disabled()  # disabled == the deck is already on today
 
     # Left arrow steps back to yesterday and enables the Today reset button
@@ -58,7 +60,9 @@ def test_sessions_day_navigation(page, local_server):
     }""")
     page.wait_for_timeout(900)
     assert weekday.inner_text().strip().upper() == tomorrow.strftime("%A").upper()
-    assert page.locator("#calendar-title-date").inner_text().strip() == tomorrow.strftime("%Y-%m-%d")
+    assert page.locator(
+        "#calendar-title-date"
+    ).inner_text().strip() == tomorrow.strftime("%Y-%m-%d")
     assert today_btn.is_enabled()  # enabled == not on today, so it can reset
 
 
@@ -70,22 +74,32 @@ def _touch_swipe(cdp, page, x, y, dx, steps=12):
     headless setup (verified against a plain scroll-snap control deck), so the gesture is
     built from raw touch events instead.
     """
-    cdp.send("Input.dispatchTouchEvent", {"type": "touchStart", "touchPoints": [{"x": x, "y": y}]})
+    cdp.send(
+        "Input.dispatchTouchEvent",
+        {"type": "touchStart", "touchPoints": [{"x": x, "y": y}]},
+    )
     for i in range(1, steps + 1):
-        cdp.send("Input.dispatchTouchEvent", {
-            "type": "touchMove",
-            "touchPoints": [{"x": x + dx * i / steps, "y": y}],
-        })
+        cdp.send(
+            "Input.dispatchTouchEvent",
+            {
+                "type": "touchMove",
+                "touchPoints": [{"x": x + dx * i / steps, "y": y}],
+            },
+        )
         page.wait_for_timeout(16)
     cdp.send("Input.dispatchTouchEvent", {"type": "touchEnd", "touchPoints": []})
 
 
 def test_touch_swipe_between_days(browser, local_server):
     """A real one-finger swipe on the deck must advance exactly one day and retitle the bar."""
-    context = browser.new_context(viewport={"width": 390, "height": 844}, has_touch=True, is_mobile=True)
+    context = browser.new_context(
+        viewport={"width": 390, "height": 844}, has_touch=True, is_mobile=True
+    )
     # This test builds its own context, so it opts into the first-run Terms auto-accept manually
     # (the autouse conftest fixture only covers the shared `page` fixture).
-    context.add_init_script("window.localStorage.setItem('librept_terms_accepted', '1');")
+    context.add_init_script(
+        "window.localStorage.setItem('librept_terms_accepted', '1');"
+    )
     page = context.new_page()
     page.goto(local_server)
     page.wait_for_selector("#today-sessions-column")
@@ -104,7 +118,9 @@ def test_touch_swipe_between_days(browser, local_server):
     page.wait_for_timeout(1200)
     tomorrow = today + datetime.timedelta(days=1)
     assert weekday.inner_text().strip().upper() == tomorrow.strftime("%a").upper()
-    assert page.locator("#calendar-title-date").inner_text().strip() == tomorrow.strftime("%Y-%m-%d")
+    assert page.locator(
+        "#calendar-title-date"
+    ).inner_text().strip() == tomorrow.strftime("%Y-%m-%d")
     assert today_btn.is_enabled()  # enabled == not on today, so it can reset
 
     # Swiping right walks back to today
@@ -132,25 +148,27 @@ def test_single_column_deck_at_every_viewport(page, local_server):
         page.goto(local_server)
         page.wait_for_selector("#today-sessions-column")
         page.wait_for_timeout(700)
-        assert page.evaluate(visible_columns) == ["today"], f"expected only today's column at {width}px"
+        assert page.evaluate(visible_columns) == ["today"], (
+            f"expected only today's column at {width}px"
+        )
 
 
 def test_interactive_dashboard_flow(page, local_server):
     """
     LibrePT Gym-Floor E2E Test.
-    
+
     You can observe the browser state and step through this test using:
-    
+
     1. standard breakpoints in VSCode/PyCharm
     2. Playwright Inspector by uncommenting `page.pause()`
     """
-    
+
     # Go to the local dashboard
     page.goto(local_server)
-    
+
     # 1. Assert logo title is present
     assert page.locator(".logo-area h1").first.text_content() == "LibrePT"
-    
+
     # --- STEP 1: INTERACTIVE LANGUAGE TRANSLATION ---
     # Language + theme now live inside the ☰ menu; open it to reach the switcher.
     page.locator("#btn-app-menu").click()
@@ -166,11 +184,16 @@ def test_interactive_dashboard_flow(page, local_server):
     # confirm its label translated too.
     page.locator("#backup-btn").click()
     page.wait_for_selector("#dialog-backup[open]")
-    assert page.locator("#btn-sync-data-text").inner_text().strip().upper() == "SINHRONIZIRAJ PODATKE"
+    assert (
+        page.locator("#btn-sync-data-text").inner_text().strip().upper()
+        == "SINHRONIZIRAJ PODATKE"
+    )
 
     # --- STEP 2: SESSION DATA SYNC (merged into the header cloud button) ---
     page.locator("#btn-sync-data").click()
-    page.wait_for_selector("#sync-status.text-emerald")  # sync reports success in the modal
+    page.wait_for_selector(
+        "#sync-status.text-emerald"
+    )  # sync reports success in the modal
     page.locator("#dialog-backup .modal-close-btn").click()
     page.wait_for_selector("#dialog-backup", state="hidden")
 
@@ -184,15 +207,17 @@ def test_interactive_dashboard_flow(page, local_server):
     page.wait_for_selector(".booking-card")
     booking_titles = page.locator(".booking-card strong").all_inner_texts()
     assert "Group Strength & Conditioning" in booking_titles
-    
+
     # --- STEP 3: WORKOUT SETUP CLIPBOARD LAUNCH ---
     # Click the entire Group Strength card to verify clickability
-    group_strength_card = page.locator(".booking-card", has_text="Group Strength & Conditioning")
+    group_strength_card = page.locator(
+        ".booking-card", has_text="Group Strength & Conditioning"
+    )
     group_strength_card.click()
-    
+
     # Verify the clipboard overlay directly opens and displaying client tabs
     page.wait_for_selector("#active-session-client-tabs")
-    
+
     # Confirm clipboard overlay is active and displaying client tabs
     page.wait_for_selector("#active-session-client-tabs")
     tabs = page.locator("#active-session-client-tabs button").all_inner_texts()
@@ -210,7 +235,7 @@ def test_interactive_dashboard_flow(page, local_server):
 
     # Tap record mic button again to stop and trigger mock on-device transcription
     page.locator("#btn-voice-record").click()
-    page.wait_for_timeout(1500) # wait for transcription timeout to append note
+    page.wait_for_timeout(1500)  # wait for transcription timeout to append note
 
     # Assert transcription text was generated and appended locally
     custom_note_val = page.locator("#feedback-custom-note").input_value()

@@ -16,7 +16,9 @@
 
 let deps = null;
 
-export function initSessionBar(d) { deps = d; }
+export function initSessionBar(d) {
+  deps = d;
+}
 
 // The bar's countdown derives from the booking's scheduled end when one is known
 // (may run negative once a session overruns); ad-hoc sessions with no booking fall
@@ -24,9 +26,9 @@ export function initSessionBar(d) { deps = d; }
 export function updateSessionBarTimer() {
   const activeSession = deps.getActiveSession();
   if (!activeSession) return;
-  const durationEl = document.getElementById('session-bar-duration');
-  const endDate = activeSession.booking && activeSession.booking.endDate;
-  let text = '';
+  const durationEl = document.getElementById("session-bar-duration");
+  const endDate = activeSession.booking?.endDate;
+  let text = "";
   let isOvertime = false;
 
   if (endDate) {
@@ -40,15 +42,15 @@ export function updateSessionBarTimer() {
 
   if (durationEl) {
     durationEl.textContent = text;
-    durationEl.classList.toggle('overtime', isOvertime);
+    durationEl.classList.toggle("overtime", isOvertime);
   }
 
-  document.querySelectorAll('.session-card-timer').forEach(el => {
+  for (const el of document.querySelectorAll(".session-card-timer")) {
     el.textContent = text;
-    el.classList.toggle('overtime', isOvertime); // colours come from CSS, not inline styles
-    const bar = el.closest('.booking-live-bar');
-    if (bar) bar.classList.toggle('overtime', isOvertime); // warn the whole bar on overtime
-  });
+    el.classList.toggle("overtime", isOvertime); // colours come from CSS, not inline styles
+    const bar = el.closest(".booking-live-bar");
+    if (bar) bar.classList.toggle("overtime", isOvertime); // warn the whole bar on overtime
+  }
 }
 
 // Session name, participant count, and scheduled time range for the active bar.
@@ -57,16 +59,16 @@ export function updateSessionBarTimer() {
 export function renderActiveSessionBarLabels() {
   const activeSession = deps.getActiveSession();
   if (!activeSession) return;
-  const titleEl = document.getElementById('session-bar-title');
-  const metaEl = document.getElementById('session-bar-meta');
+  const titleEl = document.getElementById("session-bar-title");
+  const metaEl = document.getElementById("session-bar-meta");
   if (!titleEl || !metaEl) return;
   const { t } = deps;
 
   const booking = activeSession.booking;
   const count = activeSession.participants.length;
-  const clientsLabel = `${count} ${t('bar_clients_label')}`;
+  const clientsLabel = `${count} ${t("bar_clients_label")}`;
 
-  titleEl.textContent = booking ? booking.titles.join(' + ') : t('live_tracking_clipboard');
+  titleEl.textContent = booking ? booking.titles.join(" + ") : t("live_tracking_clipboard");
   metaEl.textContent = booking ? `${clientsLabel} · ${booking.timeLabel}` : clientsLabel;
 }
 
@@ -84,23 +86,24 @@ function getNextUpcomingBookingGroup() {
   const pickEarliest = (list) => {
     let best = null;
     let bestStart = Infinity;
-    list.forEach(b => {
+    for (const b of list) {
       const r = parseTimeRange(b.time);
       if (r && r.start < bestStart) {
         bestStart = r.start;
         best = b;
       }
-    });
+    }
     return best;
   };
 
-  const todayCandidates = bookings.filter(b => {
-    if (b.day !== 'today') return false;
+  const todayCandidates = bookings.filter((b) => {
+    if (b.day !== "today") return false;
     const r = parseTimeRange(b.time);
     return r && r.end >= nowMinutes;
   });
 
-  const anchor = pickEarliest(todayCandidates) || pickEarliest(bookings.filter(b => b.day === 'tomorrow'));
+  const anchor =
+    pickEarliest(todayCandidates) || pickEarliest(bookings.filter((b) => b.day === "tomorrow"));
   if (!anchor) return null;
 
   return { day: anchor.day, bookings: getOverlappingBookings(anchor, bookings) };
@@ -111,27 +114,29 @@ function getNextUpcomingBookingGroup() {
 // clipboard directly. Hides entirely when nothing is scheduled to show.
 export function renderIdleSessionBar() {
   if (deps.getActiveSession()) return;
-  const bar = document.getElementById('active-session-bar');
+  const bar = document.getElementById("active-session-bar");
   if (!bar) return;
   const { t, buildBookingMeta, formatSignedDuration, getSessionDayDate } = deps;
 
   const next = getNextUpcomingBookingGroup();
   if (!next || next.bookings.length === 0) {
-    bar.classList.add('hidden');
+    bar.classList.add("hidden");
     delete bar.dataset.nextBookingId;
     return;
   }
 
   const meta = buildBookingMeta(next.bookings, next.day, getSessionDayDate);
-  const participantCount = new Set(next.bookings.flatMap(b => b.participants)).size;
+  const participantCount = new Set(next.bookings.flatMap((b) => b.participants)).size;
   const startsInSec = Math.round((meta.startDate.getTime() - Date.now()) / 1000);
 
-  bar.classList.remove('hidden');
-  bar.classList.add('is-idle');
+  bar.classList.remove("hidden");
+  bar.classList.add("is-idle");
   bar.dataset.nextBookingId = next.bookings[0].id;
 
-  document.getElementById('session-bar-title').textContent = `${t('next_session_label')}: ${meta.titles.join(' + ')}`;
-  document.getElementById('session-bar-meta').textContent = `${participantCount} ${t('bar_clients_label')} · ${meta.timeLabel}`;
-  document.getElementById('session-bar-duration').textContent = formatSignedDuration(startsInSec);
-  document.getElementById('session-bar-duration').classList.remove('overtime');
+  document.getElementById("session-bar-title").textContent =
+    `${t("next_session_label")}: ${meta.titles.join(" + ")}`;
+  document.getElementById("session-bar-meta").textContent =
+    `${participantCount} ${t("bar_clients_label")} · ${meta.timeLabel}`;
+  document.getElementById("session-bar-duration").textContent = formatSignedDuration(startsInSec);
+  document.getElementById("session-bar-duration").classList.remove("overtime");
 }

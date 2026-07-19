@@ -12,26 +12,32 @@
 export function renderClientsDirectory(container, deps) {
   if (!container) return;
   const {
-    clients, filterQuery = '', t, escapeHTML, getInitials,
-    getClientDisplayNameHTML, truncateString, onOpenClient
+    clients,
+    filterQuery = "",
+    t,
+    escapeHTML,
+    getInitials,
+    getClientDisplayNameHTML,
+    truncateString,
+    onOpenClient,
   } = deps;
 
-  container.innerHTML = '';
+  container.innerHTML = "";
 
   const q = filterQuery.toLowerCase();
-  const filtered = clients.filter(c =>
-    c.name.toLowerCase().includes(q) || c.goals.toLowerCase().includes(q)
+  const filtered = clients.filter(
+    (c) => c.name.toLowerCase().includes(q) || c.goals.toLowerCase().includes(q),
   );
 
   if (filtered.length === 0) {
-    container.innerHTML = `<div class="card glassmorphic text-center text-muted" style="grid-column: 1/-1;">${t('no_clients_found')}</div>`;
+    container.innerHTML = `<div class="card glassmorphic text-center text-muted" style="grid-column: 1/-1;">${t("no_clients_found")}</div>`;
     return;
   }
 
   const fragment = document.createDocumentFragment();
-  filtered.forEach(client => {
-    const card = document.createElement('div');
-    card.className = 'client-card card glassmorphic';
+  for (const client of filtered) {
+    const card = document.createElement("div");
+    card.className = "client-card card glassmorphic";
     card.innerHTML = `
       <div class="client-info-block">
         <div class="avatar">${client.avatar || getInitials(client.name)}</div>
@@ -41,8 +47,8 @@ export function renderClientsDirectory(container, deps) {
         </div>
       </div>
     `;
-    card.addEventListener('click', () => onOpenClient(client.id));
+    card.addEventListener("click", () => onOpenClient(client.id));
     fragment.appendChild(card);
-  });
+  }
   container.appendChild(fragment);
 }

@@ -30,29 +30,39 @@ def test_static_mappings_selectors(src_dir):
     collector.feed((src_dir / "index.html").read_text(encoding="utf-8"))
 
     js_content = (src_dir / "i18n" / "domMappings.js").read_text(encoding="utf-8")
-    mappings_match = re.search(r"const staticMappings = \{(.*?)\};", js_content, re.DOTALL)
+    mappings_match = re.search(
+        r"const staticMappings = \{(.*?)\};", js_content, re.DOTALL
+    )
     assert mappings_match, "staticMappings object not found in domMappings.js"
 
-    mappings = re.findall(r"'\s*([^']+)\s*':\s*'([^']+)'", mappings_match.group(1))
+    mappings = re.findall(
+        r"['\"]\s*([^'\"]+)\s*['\"]\s*:\s*['\"]([^'\"]+)['\"]", mappings_match.group(1)
+    )
     assert mappings, "No static mappings parsed"
 
     for selector, key in mappings:
         # Simple ID check (e.g. #btn-add-client)
         if selector.startswith("#") and " " not in selector and "[" not in selector:
             element_id = selector[1:]
-            assert element_id in collector.ids, f"Selector ID '{element_id}' in app.js mappings not in index.html"
+            assert element_id in collector.ids, (
+                f"Selector ID '{element_id}' in app.js mappings not in index.html"
+            )
 
         # Simple class check (e.g. .logo-area)
         elif selector.startswith(".") and " " not in selector:
             class_name = selector[1:]
-            assert class_name in collector.classes, f"Selector class '{class_name}' in app.js mappings not in index.html"
+            assert class_name in collector.classes, (
+                f"Selector class '{class_name}' in app.js mappings not in index.html"
+            )
 
         # Descendant selector (e.g. '#view-clients .section-title h3')
         elif " " in selector:
             root_id = selector.split()[0]
             if root_id.startswith("#"):
                 element_id = root_id[1:]
-                assert element_id in collector.ids, f"Root selector ID '{element_id}' in '{selector}' not in index.html"
+                assert element_id in collector.ids, (
+                    f"Root selector ID '{element_id}' in '{selector}' not in index.html"
+                )
 
         # Attribute selector (e.g. 'button[data-view="clients"] span')
         elif "data-view" in selector:
@@ -63,4 +73,6 @@ def test_static_mappings_selectors(src_dir):
                     el["tag"] == "button" and el["attrs"].get("data-view") == view_val
                     for el in collector.elements
                 )
-                assert has_element, f'Element matching button[data-view="{view_val}"] not found in index.html'
+                assert has_element, (
+                    f'Element matching button[data-view="{view_val}"] not found in index.html'
+                )

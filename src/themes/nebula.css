@@ -2,11 +2,10 @@
 /* Premium "cosmic tech" dark theme with a rich mesh gradient and tight, crisp corners. */
 body.nebula-theme {
   --bg-color: #0b0a1f;
-  --bg-gradient:
-    radial-gradient(1050px 700px at 8% -8%, rgba(139, 92, 246, 0.34), transparent 58%),
+  --bg-gradient: radial-gradient(1050px 700px at 8% -8%, rgba(139, 92, 246, 0.34), transparent 58%),
     radial-gradient(900px 640px at 114% 4%, rgba(217, 70, 239, 0.24), transparent 55%),
     radial-gradient(840px 720px at 50% 122%, rgba(34, 211, 238, 0.18), transparent 60%);
-  --card-bg: rgba(24, 21, 52, 0.90);
+  --card-bg: rgba(24, 21, 52, 0.9);
   --card-border: rgba(196, 181, 253, 0.16);
   --text-main: #ede9fe;
   --text-muted: #a99fd0;

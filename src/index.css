@@ -1,18 +1,19 @@
 /* index.css - LibrePT Modern UI Style Guide & Design System */
 
 /* Themes & Look & Feel Selections */
-@import url('./themes/midnight.css');
-@import url('./themes/daylight.css');
-@import url('./themes/red.css');
-@import url('./themes/blossom.css');
-@import url('./themes/nebula.css');
+@import url("./themes/midnight.css");
+@import url("./themes/daylight.css");
+@import url("./themes/red.css");
+@import url("./themes/blossom.css");
+@import url("./themes/nebula.css");
 
 /* Design system shared, non-theme tokens (fonts, layout heights, blur) */
 :root {
   /* Typography — geometric display headers, humanist body, mono for numbers */
-  --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-header: 'Outfit', var(--font-sans);
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-sans: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+  --font-header: "Outfit", var(--font-sans);
+  --font-mono: "JetBrains Mono", monospace;
 
   /* Layout tokens (shared across themes) */
   --hdr-height: 64px;
@@ -35,9 +36,20 @@
 /* Shared Glassmorphism Cards & Containers.
    The app header and session/view title bars are deliberately NOT in this list: they are flat
    full-width bars (sharp corners, no shadow, just a bottom divider), not floating cards. */
-.glassmorphic, .exercise-item, .bottom-nav, .session-menu,
-.client-card, .client-detail-card, .chart-box, .routine-card, .history-card, .exercise-deck-card,
-.modal-content, .floating-timer, .history-exercise-log, .info-block {
+.glassmorphic,
+.exercise-item,
+.bottom-nav,
+.session-menu,
+.client-card,
+.client-detail-card,
+.chart-box,
+.routine-card,
+.history-card,
+.exercise-deck-card,
+.modal-content,
+.floating-timer,
+.history-exercise-log,
+.info-block {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: var(--border-radius-lg);
@@ -46,27 +58,61 @@
 }
 
 /* Off-screen rendering optimization: skip layout and painting for out-of-viewport cards */
-.client-card, .routine-card, .history-card, .exercise-item {
+.client-card,
+.routine-card,
+.history-card,
+.exercise-item {
   content-visibility: auto;
   contain-intrinsic-size: auto 120px;
 }
 
 /* Shared Flex Between (Horizontal Row with Space Between) */
-.view-header, .modal-header, .session-title-block, .client-card-header,
-.history-header, .routine-header, .deck-header, .superset-header, .booking-header,
-.header-container, .section-title, .exercise-item-header, .session-bar-content,
-.active-exercise-navigator, .participant-card-header, .active-set-row, .timer-header,
-.deck-card-top, .form-row, .session-title-bar {
+.view-header,
+.modal-header,
+.session-title-block,
+.client-card-header,
+.history-header,
+.routine-header,
+.deck-header,
+.superset-header,
+.booking-header,
+.header-container,
+.section-title,
+.exercise-item-header,
+.session-bar-content,
+.active-exercise-navigator,
+.participant-card-header,
+.active-set-row,
+.timer-header,
+.deck-card-top,
+.form-row,
+.session-title-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
 /* Shared Flex Center (Centered Row or Button Icon Layout) */
-.btn, .icon-btn, .avatar, .avatar-large, .nav-item, .nav-arrow-btn, .step-btn,
-.set-checkbox-btn, .timer-btn-sm, .superset-done, .deck-action-btn, .collapse-btn,
-.close-btn-xs, .modal-close-btn, .btn-remove-row, .primary-btn, .secondary-btn,
-.danger-btn, .success-btn, .active-set-row .set-checkbox-btn,
+.btn,
+.icon-btn,
+.avatar,
+.avatar-large,
+.nav-item,
+.nav-arrow-btn,
+.step-btn,
+.set-checkbox-btn,
+.timer-btn-sm,
+.superset-done,
+.deck-action-btn,
+.collapse-btn,
+.close-btn-xs,
+.modal-close-btn,
+.btn-remove-row,
+.primary-btn,
+.secondary-btn,
+.danger-btn,
+.success-btn,
+.active-set-row .set-checkbox-btn,
 .active-set-row .step-btn {
   display: flex;
   align-items: center;
@@ -74,19 +120,45 @@
 }
 
 /* Shared Flex Column (Vertical Stack) */
-.error-view, .stack-list, .profile-info-grid, .chart-bar-wrapper, .routine-card,
-.exercise-item, .history-exercise-log, .active-session-overlay, .clipboard-body,
-.session-overlay-body, .group-matrix-grid, .session-actions-footer, .modal-form,
-.client-card, .client-detail-card, .superset-ex-list, .superset-ex-row,
-.deck-history-sets, .form-group, .backup-actions, .deck-stat,
-.sessions-category-column, .stack-list {
+.error-view,
+.stack-list,
+.profile-info-grid,
+.chart-bar-wrapper,
+.routine-card,
+.exercise-item,
+.history-exercise-log,
+.active-session-overlay,
+.clipboard-body,
+.session-overlay-body,
+.group-matrix-grid,
+.session-actions-footer,
+.modal-form,
+.client-card,
+.client-detail-card,
+.superset-ex-list,
+.superset-ex-row,
+.deck-history-sets,
+.form-group,
+.backup-actions,
+.deck-stat,
+.sessions-category-column,
+.stack-list {
   display: flex;
   flex-direction: column;
 }
 
 /* Shared Button & Interactive Foundation */
-.btn, .icon-btn, .nav-arrow-btn, .step-btn, .set-checkbox-btn, .timer-btn-sm,
-.deck-action-btn, .session-menu-item, .pill-btn, .superset-sig, .nav-item {
+.btn,
+.icon-btn,
+.nav-arrow-btn,
+.step-btn,
+.set-checkbox-btn,
+.timer-btn-sm,
+.deck-action-btn,
+.session-menu-item,
+.pill-btn,
+.superset-sig,
+.nav-item {
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -95,10 +167,22 @@
 }
 
 /* Shared Muted Text Utilities */
-.client-name-meta p, .profile-meta p, .info-block label, .data-table th, .chart-label,
-.routine-title-info p, .preview-tag, .exercise-instructions, .history-header-meta p,
-.history-date, .history-ex-row span, .participant-header-status, .deck-history-reps,
-.deck-history-note, .deck-history-meta, .set-last-meta {
+.client-name-meta p,
+.profile-meta p,
+.info-block label,
+.data-table th,
+.chart-label,
+.routine-title-info p,
+.preview-tag,
+.exercise-instructions,
+.history-header-meta p,
+.history-date,
+.history-ex-row span,
+.participant-header-status,
+.deck-history-reps,
+.deck-history-note,
+.deck-history-meta,
+.set-last-meta {
   color: var(--text-muted);
 }
 /* Reset & Base Setup */
@@ -107,7 +191,8 @@
   margin: 0;
   padding: 0;
   -webkit-tap-highlight-color: transparent;
-}body {
+}
+body {
   font-family: var(--font-sans);
   background-color: var(--bg-color);
   background-image: var(--bg-gradient);
@@ -119,13 +204,31 @@
   height: 100vh;
   display: flex;
   flex-direction: column;
-}/* All headings use the geometric display face with tight tracking for a clear hierarchy. */
-h1, h2, h3, h4, h5, h6 {
+} /* All headings use the geometric display face with tight tracking for a clear hierarchy. */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-header);
   letter-spacing: -0.015em;
   line-height: 1.15;
-}/* Scrollbar customizations */
-::-webkit-scrollbar { width: 6px; height: 6px; }::-webkit-scrollbar-track { background: transparent; }::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }/* Header Styling */
+} /* Scrollbar customizations */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+} /* Header Styling */
 .app-header {
   min-height: var(--hdr-height);
   background: var(--card-bg);
@@ -150,8 +253,12 @@ h1, h2, h3, h4, h5, h6 {
   overflow-x: auto;
   scrollbar-width: none;
 }
-.header-nav::-webkit-scrollbar { display: none; }
-body:has(#active-session-overlay:not(.hidden)) .header-nav { display: none; }
+.header-nav::-webkit-scrollbar {
+  display: none;
+}
+body:has(#active-session-overlay:not(.hidden)) .header-nav {
+  display: none;
+}
 .header-nav .nav-item {
   background: transparent;
   color: var(--text-muted);
@@ -168,21 +275,32 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav { display: none; }
   transition: all 0.2s ease;
   white-space: nowrap;
 }
-.header-nav .nav-item i { font-size: 14px; }
-.header-nav .nav-item span { font-size: 13px; font-weight: 600; }
-.header-nav .nav-item:hover { background: var(--bg-surface); color: var(--text-main); }
+.header-nav .nav-item i {
+  font-size: 14px;
+}
+.header-nav .nav-item span {
+  font-size: 13px;
+  font-weight: 600;
+}
+.header-nav .nav-item:hover {
+  background: var(--bg-surface);
+  color: var(--text-main);
+}
 .header-nav .nav-item.active {
   background: color-mix(in srgb, var(--primary) 15%, transparent);
   color: var(--primary);
   font-weight: 700;
 }
-.header-nav .nav-item.active i { filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.3)); }
+.header-nav .nav-item.active i {
+  filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.3));
+}
 .header-container {
   max-width: 800px;
   margin: 0 auto;
   padding: 0 16px;
   height: var(--hdr-height);
-}.logo-area {
+}
+.logo-area {
   height: 44px;
   display: flex;
   align-items: center;
@@ -202,22 +320,25 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav { display: none; }
   font-size: 26px;
   color: var(--primary);
   filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.4));
-}.logo-area h1 {
+}
+.logo-area h1 {
   font-family: var(--font-header);
   font-size: 26px;
   font-weight: 800;
   line-height: 1;
   margin: 0;
   letter-spacing: -0.5px;
-}.header-actions {
+}
+.header-actions {
   display: flex;
   align-items: center;
   gap: 8px;
-}.header-actions .icon-btn {
+}
+.header-actions .icon-btn {
   width: 44px;
   height: 44px;
   font-size: 18px;
-}/* Language + theme selectors live inside the ☰ menu (identical layout on desktop and mobile), so
+} /* Language + theme selectors live inside the ☰ menu (identical layout on desktop and mobile), so
    the header bar stays compact — just the logo, the sync pill and the menu button. They appear as
    labeled rows at the top of the dropdown; the selects follow the active theme like every input. */
 .menu-control-row {
@@ -236,7 +357,11 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav { display: none; }
   color: var(--text-main);
   white-space: nowrap;
 }
-.menu-control-label i { width: 16px; text-align: center; color: var(--text-muted); }
+.menu-control-label i {
+  width: 16px;
+  text-align: center;
+  color: var(--text-muted);
+}
 /* select.menu-select (element+class) outspecifies the later .form-control rule, whose
    10px vertical padding would otherwise combine with the fixed height and clip the text. */
 select.menu-select {
@@ -253,11 +378,19 @@ select.menu-select {
   flex: 0 0 auto;
   min-width: 104px;
 }
-.menu-divider { height: 1px; background: var(--border-color); margin: 6px 4px; }
+.menu-divider {
+  height: 1px;
+  background: var(--border-color);
+  margin: 6px 4px;
+}
 /* Narrow phones: only the logo, sync pill and menu button remain in the bar; keep the icon
    buttons a comfortable 40px. */
 @media (max-width: 480px) {
-  .header-actions .icon-btn { width: 40px; height: 40px; font-size: 16px; }
+  .header-actions .icon-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
 }
 /* Main View Controller styling */
 #main-content {
@@ -279,7 +412,10 @@ select.menu-select {
   border-bottom: 1px solid var(--card-border);
   margin-bottom: 16px;
 }
-#main-content .view-titlebar { margin-left: -16px; margin-right: -16px; }
+#main-content .view-titlebar {
+  margin-left: -16px;
+  margin-right: -16px;
+}
 /* Grab handle: a centered pill that signals "swipe down to close" and doubles as a tap/click
    target (desktop, where the app-name logo is the other way home). Enlarged hit area via ::before. */
 .view-grabber {
@@ -296,16 +432,41 @@ select.menu-select {
   cursor: grab;
   transition: background 0.2s ease;
 }
-.view-grabber::before { content: ''; position: absolute; inset: -9px -22px; }
-.view-grabber:hover { background: var(--text-muted); }
-.view-grabber:active { cursor: grabbing; }.app-view { display: none; }.app-view.active { display: block; animation: viewSwitch 0.32s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.view-grabber::before {
+  content: "";
+  position: absolute;
+  inset: -9px -22px;
+}
+.view-grabber:hover {
+  background: var(--text-muted);
+}
+.view-grabber:active {
+  cursor: grabbing;
+}
+.app-view {
+  display: none;
+}
+.app-view.active {
+  display: block;
+  animation: viewSwitch 0.32s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
 /* Each view switch (bottom-nav tab, client detail, back home) plays this: the incoming view
    rises and settles with a subtle scale + fade, so navigation reads as a deliberate transition. */
 @keyframes viewSwitch {
-  from { opacity: 0; transform: translateY(16px) scale(0.985); }to { opacity: 1; transform: translateY(0) scale(1); }}
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
 /* Users who prefer reduced motion get the destination immediately, no slide. */
 @media (prefers-reduced-motion: reduce) {
-  .app-view.active { animation-duration: 0.001s; }
+  .app-view.active {
+    animation-duration: 0.001s;
+  }
 }
 
 /* Not-found (404) view — centred in the content area, below the omnipresent header. */
@@ -318,18 +479,30 @@ select.menu-select {
   padding: 48px 16px;
   max-width: 480px;
   margin: 0 auto;
-}.error-view-icon {
+}
+.error-view-icon {
   font-size: 44px;
   color: var(--text-muted);
   margin-bottom: 4px;
-}.error-view-path { margin: 0; word-break: break-all; }.error-view-path code {
+}
+.error-view-path {
+  margin: 0;
+  word-break: break-all;
+}
+.error-view-path code {
   font-family: var(--font-mono);
   font-size: 13px;
   color: var(--primary);
   background: rgba(0, 0, 0, 0.3);
   padding: 4px 8px;
   border-radius: 6px;
-}.error-view .btn { margin-top: 8px; }.view-header { margin-bottom: 16px; }
+}
+.error-view .btn {
+  margin-top: 8px;
+}
+.view-header {
+  margin-bottom: 16px;
+}
 /* Single source of truth for view-title type — every view reads as one system: the view headers,
    the client-detail back header, the home "Sessions" label, the day-stepper date, the
    active-session title, and the 404 title all share this one definition. The
@@ -347,20 +520,24 @@ select.menu-select {
   font-weight: 800;
   letter-spacing: -0.5px;
 }
-.view-title-label { flex: 0 0 auto; }
+.view-title-label {
+  flex: 0 0 auto;
+}
 .view-header-back {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-bottom: 16px;
 }
-.view-header-back h2 { flex: 1; }
+.view-header-back h2 {
+  flex: 1;
+}
 .view-desc {
   font-size: 14px;
   color: var(--text-muted);
   margin-top: -8px;
   margin-bottom: 20px;
-}/* Button UI Components */
+} /* Button UI Components */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -375,35 +552,59 @@ select.menu-select {
   padding: 10px 16px;
   font-size: 14px;
   user-select: none;
-}.btn-sm { padding: 8px 12px; font-size: 13px; }.btn-xs {
+}
+.btn-sm {
+  padding: 8px 12px;
+  font-size: 13px;
+}
+.btn-xs {
   padding: 6px 10px;
   font-size: 12px;
   border-radius: 6px;
-}.primary-btn {
+}
+.primary-btn {
   background: var(--primary-gradient);
   color: var(--on-primary);
   box-shadow: 0 6px 16px -9px rgba(0, 0, 0, 0.55);
-}.primary-btn:hover { filter: brightness(1.07); }.secondary-btn {
+}
+.primary-btn:hover {
+  filter: brightness(1.07);
+}
+.secondary-btn {
   background-color: var(--primary-light);
   color: var(--primary);
   border: 1px solid color-mix(in srgb, var(--primary) 32%, transparent);
-}.secondary-btn:hover { background-color: color-mix(in srgb, var(--primary) 22%, transparent); }.danger-btn {
+}
+.secondary-btn:hover {
+  background-color: color-mix(in srgb, var(--primary) 22%, transparent);
+}
+.danger-btn {
   background-color: var(--danger-light);
   color: var(--danger);
   border: 1px solid color-mix(in srgb, var(--danger) 32%, transparent);
-}.danger-btn:hover { background-color: color-mix(in srgb, var(--danger) 24%, transparent); }/* Success (e.g. "Complete Workout") stays semantically green regardless of theme primary. */
+}
+.danger-btn:hover {
+  background-color: color-mix(in srgb, var(--danger) 24%, transparent);
+} /* Success (e.g. "Complete Workout") stays semantically green regardless of theme primary. */
 .success-btn {
   background-color: var(--success);
   color: var(--text-dark);
   box-shadow: 0 6px 16px -9px rgba(0, 0, 0, 0.5);
-}.success-btn:hover { filter: brightness(1.06); }.icon-btn {
+}
+.success-btn:hover {
+  filter: brightness(1.06);
+}
+.icon-btn {
   background: transparent;
   border: 1px solid var(--border-color);
   color: var(--text-main);
   width: 38px;
   height: 38px;
   border-radius: 50%;
-}.icon-btn:hover { background: var(--border-color); }/* Theme-aware Badge & Text Utility Classes */
+}
+.icon-btn:hover {
+  background: var(--border-color);
+} /* Theme-aware Badge & Text Utility Classes */
 .badge {
   display: inline-flex;
   align-items: center;
@@ -412,23 +613,33 @@ select.menu-select {
   font-size: 11px;
   font-weight: 700;
   line-height: 1.2;
-}.badge-primary, .badge-cyan {
+}
+.badge-primary,
+.badge-cyan {
   background: var(--primary-light);
   color: var(--primary);
   border: 1px solid color-mix(in srgb, var(--primary) 35%, transparent);
-}.badge-success, .badge-emerald {
+}
+.badge-success,
+.badge-emerald {
   background: rgba(16, 185, 129, 0.15);
   color: var(--success);
   border: 1px solid rgba(16, 185, 129, 0.35);
-}.badge-danger {
+}
+.badge-danger {
   background: var(--danger-light);
   color: var(--danger);
   border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent);
-}.badge-warning {
+}
+.badge-warning {
   background: rgba(245, 158, 11, 0.15);
   color: #f59e0b;
   border: 1px solid rgba(245, 158, 11, 0.35);
-}.text-primary, .text-cyan { color: var(--primary) !important; }/* Cloud + recycle composite for the merged Sync & Backup button: a cloud with small sync
+}
+.text-primary,
+.text-cyan {
+  color: var(--primary) !important;
+} /* Cloud + recycle composite for the merged Sync & Backup button: a cloud with small sync
    arrows overlaid on its body, so one control reads as both "cloud backup" and "sync". */
 .cloud-sync-icon {
   position: relative;
@@ -436,7 +647,13 @@ select.menu-select {
   align-items: center;
   justify-content: center;
   line-height: 1;
-}.cloud-sync-icon .fa-cloud, .session-menu-item .fa-cloud-arrow-up { font-size: 24px; color: var(--cloud-icon-color, #0284c7); }.cloud-sync-icon .fa-arrows-rotate {
+}
+.cloud-sync-icon .fa-cloud,
+.session-menu-item .fa-cloud-arrow-up {
+  font-size: 24px;
+  color: var(--cloud-icon-color, #0284c7);
+}
+.cloud-sync-icon .fa-arrows-rotate {
   position: absolute;
   left: 50%;
   top: 56%;
@@ -444,7 +661,7 @@ select.menu-select {
   font-size: 13px;
   color: var(--cloud-arrows-color, var(--success, #10b981));
   filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.45));
-}/* When there are pending changes the cloud button grows into a pill to seat the ahead/behind
+} /* When there are pending changes the cloud button grows into a pill to seat the ahead/behind
    counters beside the icon; fully synced, the badge hides and it reads as a round icon again. */
 .sync-backup-btn {
   width: auto;
@@ -457,9 +674,14 @@ select.menu-select {
 /* `.header-actions .icon-btn` pins a fixed 44/40px width that beats the width:auto above, so the
    button stayed a cramped circle and clipped the ahead/behind counts. This higher-specificity
    override lets it grow into a pill that seats the cloud + both counters. */
-.header-actions .icon-btn.sync-backup-btn { width: auto; }
+.header-actions .icon-btn.sync-backup-btn {
+  width: auto;
+}
 /* Fully synced (badge hidden): drop the side padding so it reads as a round icon again. */
-.sync-backup-btn:has(.sync-badge.hidden) { padding-left: 0; padding-right: 0; }
+.sync-backup-btn:has(.sync-badge.hidden) {
+  padding-left: 0;
+  padding-right: 0;
+}
 .sync-badge {
   display: inline-flex;
   align-items: center;
@@ -468,13 +690,26 @@ select.menu-select {
   font-size: 11px;
   font-weight: 700;
   line-height: 1;
-}.sync-badge.hidden { display: none; }.sync-badge .sync-ahead, .sync-badge .sync-behind {
+}
+.sync-badge.hidden {
+  display: none;
+}
+.sync-badge .sync-ahead,
+.sync-badge .sync-behind {
   display: inline-flex;
   align-items: center;
   gap: 2px;
-}.sync-badge .sync-ahead { color: var(--success, #10b981); }/* local edits to push (ahead, green) */
-.sync-badge .sync-behind { color: #ef4444; }/* remote changes to pull (behind, red) */
-.sync-badge i { font-size: 9px; }.back-btn {
+}
+.sync-badge .sync-ahead {
+  color: var(--success, #10b981);
+} /* local edits to push (ahead, green) */
+.sync-badge .sync-behind {
+  color: #ef4444;
+} /* remote changes to pull (behind, red) */
+.sync-badge i {
+  font-size: 9px;
+}
+.back-btn {
   background: transparent;
   border: none;
   color: var(--primary);
@@ -484,7 +719,25 @@ select.menu-select {
   display: flex;
   align-items: center;
   gap: 4px;
-}.w-full { width: 100%; }.flex-1 { flex: 1; }.ml-1 { margin-left: 4px; }.text-emerald { color: var(--primary) !important; }.text-indigo { color: var(--secondary) !important; }.text-sm { font-size: 14px !important; }/* Cards & Glassmorphism styling */
+}
+.w-full {
+  width: 100%;
+}
+.flex-1 {
+  flex: 1;
+}
+.ml-1 {
+  margin-left: 4px;
+}
+.text-emerald {
+  color: var(--primary) !important;
+}
+.text-indigo {
+  color: var(--secondary) !important;
+}
+.text-sm {
+  font-size: 14px !important;
+} /* Cards & Glassmorphism styling */
 .card {
   background-color: var(--card-bg);
   border: 1px solid var(--card-border);
@@ -492,15 +745,23 @@ select.menu-select {
   padding: 16px;
   box-shadow: var(--box-shadow);
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-}.glassmorphic { -webkit-backdrop-filter: var(--glass-blur); }/* Search Bars & Inputs */
-.search-bar-container { position: relative; margin-bottom: 16px; }.search-icon {
+}
+.glassmorphic {
+  -webkit-backdrop-filter: var(--glass-blur);
+} /* Search Bars & Inputs */
+.search-bar-container {
+  position: relative;
+  margin-bottom: 16px;
+}
+.search-icon {
   position: absolute;
   left: 12px;
   top: 50%;
   transform: translateY(-50%);
   color: var(--text-muted);
   font-size: 14px;
-}.search-input {
+}
+.search-input {
   width: 100%;
   padding: 12px 12px 12px 38px;
   background-color: var(--input-bg);
@@ -511,7 +772,10 @@ select.menu-select {
   font-size: 14px;
   outline: none;
   transition: border-color 0.2s ease;
-}.search-input:focus { border-color: var(--primary); }/* Chips Filter Container */
+}
+.search-input:focus {
+  border-color: var(--primary);
+} /* Chips Filter Container */
 .filter-chips {
   display: flex;
   gap: 8px;
@@ -519,7 +783,11 @@ select.menu-select {
   padding-bottom: 8px;
   margin-bottom: 16px;
   scrollbar-width: none;
-}.filter-chips::-webkit-scrollbar { display: none; }.chip {
+}
+.filter-chips::-webkit-scrollbar {
+  display: none;
+}
+.chip {
   background: var(--input-bg);
   border: 1px solid var(--border-color);
   color: var(--text-muted);
@@ -531,31 +799,41 @@ select.menu-select {
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.2s ease;
-}.chip.active {
+}
+.chip.active {
   background: var(--primary-light);
   color: var(--primary);
   border-color: rgba(16, 185, 129, 0.4);
-}/* Lists styling (Grid vs Stack) */
+} /* Lists styling (Grid vs Stack) */
 .grid-list {
   display: grid;
   grid-template-columns: 1fr;
   gap: 12px;
 }
 
-@media(min-width: 480px) {
+@media (min-width: 480px) {
   .grid-list {
     grid-template-columns: 1fr 1fr;
-  }} .stack-list { gap: 12px; }/* Client Card Components */
+  }
+}
+.stack-list {
+  gap: 12px;
+} /* Client Card Components */
 .client-card {
   display: flex;
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
-}.client-card:hover { border-color: rgba(16, 185, 129, 0.3); }.client-info-block {
+}
+.client-card:hover {
+  border-color: rgba(16, 185, 129, 0.3);
+}
+.client-info-block {
   display: flex;
   align-items: center;
   gap: 12px;
-}.avatar {
+}
+.avatar {
   width: 42px;
   height: 42px;
   border-radius: 50%;
@@ -564,18 +842,26 @@ select.menu-select {
   font-family: var(--font-header);
   font-weight: 700;
   font-size: 15px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-}.client-name-meta h3 {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+.client-name-meta h3 {
   font-size: 16px;
   font-weight: 600;
   margin-bottom: 2px;
-}.client-name-meta p { font-size: 12px; }/* Client Detail Layout */
-.client-detail-card { margin-bottom: 20px; }.client-profile-header {
+}
+.client-name-meta p {
+  font-size: 12px;
+} /* Client Detail Layout */
+.client-detail-card {
+  margin-bottom: 20px;
+}
+.client-profile-header {
   display: flex;
   align-items: center;
   gap: 16px;
   margin-bottom: 16px;
-}.avatar-large {
+}
+.avatar-large {
   width: 64px;
   height: 64px;
   border-radius: 50%;
@@ -584,36 +870,70 @@ select.menu-select {
   font-family: var(--font-header);
   font-weight: 700;
   font-size: 22px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-}.profile-meta h3 {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+.profile-meta h3 {
   font-family: var(--font-header);
   font-size: 20px;
   font-weight: 700;
-}.profile-meta p { font-size: 12px; }.profile-info-grid { gap: 12px; margin-bottom: 16px; }.info-block label {
+}
+.profile-meta p {
+  font-size: 12px;
+}
+.profile-info-grid {
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.info-block label {
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   font-weight: 700;
   margin-bottom: 4px;
   display: block;
-}.info-block p { font-size: 14px; line-height: 1.5; }.quick-workout-action { border-top: 1px solid var(--border-color); padding-top: 16px; }.section-title { margin-top: 24px; margin-bottom: 12px; }.section-title h3 {
+}
+.info-block p {
+  font-size: 14px;
+  line-height: 1.5;
+}
+.quick-workout-action {
+  border-top: 1px solid var(--border-color);
+  padding-top: 16px;
+}
+.section-title {
+  margin-top: 24px;
+  margin-bottom: 12px;
+}
+.section-title h3 {
   font-family: var(--font-header);
   font-size: 16px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-}/* Table Design */
+} /* Table Design */
 .data-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
   margin-top: 10px;
-}.data-table th, .data-table td { padding: 8px 12px; text-align: left; }.data-table th {
+}
+.data-table th,
+.data-table td {
+  padding: 8px 12px;
+  text-align: left;
+}
+.data-table th {
   border-bottom: 1px solid var(--border-color);
   font-weight: 600;
   font-size: 11px;
   text-transform: uppercase;
-}.data-table td { border-bottom: 1px dashed var(--border-color); }.data-table tr:last-child td { border-bottom: none; }/* Weight History Chart Box */
+}
+.data-table td {
+  border-bottom: 1px dashed var(--border-color);
+}
+.data-table tr:last-child td {
+  border-bottom: none;
+} /* Weight History Chart Box */
 .simple-chart {
   height: 100px;
   width: 100%;
@@ -625,19 +945,25 @@ select.menu-select {
   border-bottom: 1px solid var(--border-color);
   padding-bottom: 4px;
   position: relative;
-}.chart-bar-wrapper {
+}
+.chart-bar-wrapper {
   flex: 1;
   align-items: center;
   height: 100%;
   justify-content: flex-end;
-}.chart-bar {
+}
+.chart-bar {
   width: 100%;
   background: linear-gradient(to top, var(--primary-hover), var(--primary));
   border-radius: 4px 4px 0 0;
   min-height: 4px;
   transition: height 0.4s ease;
   position: relative;
-}.chart-bar:hover .chart-tooltip { opacity: 1; }.chart-tooltip {
+}
+.chart-bar:hover .chart-tooltip {
+  opacity: 1;
+}
+.chart-tooltip {
   position: absolute;
   bottom: 100%;
   left: 50%;
@@ -655,38 +981,50 @@ select.menu-select {
   transition: opacity 0.15s ease;
   white-space: nowrap;
   z-index: 10;
-}.chart-label { font-size: 9px; margin-top: 4px; }/* Routine Template Card components */
+}
+.chart-label {
+  font-size: 9px;
+  margin-top: 4px;
+} /* Routine Template Card components */
 .routine-card {
   cursor: pointer;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   height: 100%;
-}.routine-card:hover { border-color: rgba(79, 70, 229, 0.4); }.routine-title-info h3 {
+}
+.routine-card:hover {
+  border-color: rgba(79, 70, 229, 0.4);
+}
+.routine-title-info h3 {
   font-size: 18px;
   font-weight: 700;
   font-family: var(--font-header);
   margin-bottom: 4px;
-}.routine-title-info p {
+}
+.routine-title-info p {
   font-size: 13px;
   line-height: 1.4;
   margin-bottom: 12px;
-}.routine-exercise-preview-tags {
+}
+.routine-exercise-preview-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
   margin-bottom: 16px;
-}.preview-tag {
-  background: rgba(255,255,255,0.04);
+}
+.preview-tag {
+  background: rgba(255, 255, 255, 0.04);
   border: 1px solid var(--border-color);
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 10px;
-}.preview-tag-detail {
+}
+.preview-tag-detail {
   color: var(--primary);
   font-weight: 700;
   font-family: var(--font-mono);
-}/* Exercise Database Library card items */
+} /* Exercise Database Library card items */
 .exercise-item {
   display: flex;
   flex-direction: column;
@@ -695,7 +1033,12 @@ select.menu-select {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: var(--border-radius-md);
-}.exercise-item-header h3 { font-size: 15px; font-weight: 600; }.muscle-badge {
+}
+.exercise-item-header h3 {
+  font-size: 15px;
+  font-weight: 600;
+}
+.muscle-badge {
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -705,23 +1048,36 @@ select.menu-select {
   padding: 2px 8px;
   border-radius: 12px;
   font-weight: 700;
-}.exercise-instructions {
+}
+.exercise-instructions {
   font-size: 12px;
   line-height: 1.4;
   margin-top: 4px;
-}/* History Card items */
-.history-card { padding: 14px; position: relative; }.history-card-header {
+} /* History Card items */
+.history-card {
+  padding: 14px;
+  position: relative;
+}
+.history-card-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 10px;
   border-bottom: 1px dashed var(--border-color);
   padding-bottom: 8px;
-}.history-header-meta h4 {
+}
+.history-header-meta h4 {
   font-size: 15px;
   font-weight: 600;
   margin-bottom: 2px;
-}.history-header-meta p { font-size: 11px; }.history-date { font-size: 11px; font-family: var(--font-mono); } /* Omnipresent bottom notification & status area (replaces old bottom-nav) */
+}
+.history-header-meta p {
+  font-size: 11px;
+}
+.history-date {
+  font-size: 11px;
+  font-family: var(--font-mono);
+} /* Omnipresent bottom notification & status area (replaces old bottom-nav) */
 .notification-area {
   --notif-handle-height: calc(92px + var(--safe-bottom));
   position: fixed;
@@ -784,7 +1140,9 @@ body:has(#active-session-overlay:not(.hidden)) .notification-area .active-sessio
 .notification-area.is-expanded .notification-summary-preview {
   display: none;
 }
-body:has(#active-session-overlay:not(.hidden)) .notification-area.has-active-session:not(.is-expanded) .notification-summary-preview {
+body:has(#active-session-overlay:not(.hidden))
+  .notification-area.has-active-session:not(.is-expanded)
+  .notification-summary-preview {
   display: flex !important;
 }
 .notification-summary-header {
@@ -870,8 +1228,13 @@ body:has(#active-session-overlay:not(.hidden)) .notification-area.has-active-ses
   animation: none;
   opacity: 0.5;
 }
-.session-bar-content { gap: 10px; }
-.session-bar-main { min-width: 0; flex: 1; }
+.session-bar-content {
+  gap: 10px;
+}
+.session-bar-main {
+  min-width: 0;
+  flex: 1;
+}
 .session-bar-info {
   display: flex;
   align-items: center;
@@ -903,9 +1266,18 @@ body:has(#active-session-overlay:not(.hidden)) .notification-area.has-active-ses
 }
 
 @keyframes pulse {
-  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
-  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
 }
 .session-bar-timer {
   font-family: var(--font-mono);
@@ -913,7 +1285,9 @@ body:has(#active-session-overlay:not(.hidden)) .notification-area.has-active-ses
   font-size: 14px;
   flex-shrink: 0;
 }
-.session-bar-timer.overtime { color: #7f1d1d; }
+.session-bar-timer.overtime {
+  color: #7f1d1d;
+}
 .session-bar-actions {
   display: flex;
   gap: 6px;
@@ -925,8 +1299,12 @@ body:has(#active-session-overlay:not(.hidden)) .notification-area.has-active-ses
   width: 30px;
   height: 30px;
 }
-.session-bar-actions .icon-btn:hover { background: rgba(9, 9, 11, 0.1); }
-.active-session-bar.is-idle .inline-timer-btn { display: none; }
+.session-bar-actions .icon-btn:hover {
+  background: rgba(9, 9, 11, 0.1);
+}
+.active-session-bar.is-idle .inline-timer-btn {
+  display: none;
+}
 
 /* Expanded Drawer Feed */
 .notification-drawer-feed {
@@ -1092,7 +1470,7 @@ body:has(#active-session-overlay:not(.hidden)) .notification-area.has-active-ses
   display: flex;
   flex-direction: column;
   animation: slideUpFullscreen 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}/* The header and participant tabs stay pinned; the rest of the clipboard scrolls.
+} /* The header and participant tabs stay pinned; the rest of the clipboard scrolls.
    Without this the overlay clips any content past the fold (tall stacks, the historical
    review panel, the Complete/Delete actions) with no way to reach it. */
 .clipboard-body {
@@ -1107,64 +1485,113 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
 }
 
 @keyframes slideUp {
-  from { transform: translateY(100px); opacity: 0; }to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 @keyframes slideUpFullscreen {
-  from { transform: translateY(100%); }to { transform: translateY(0); }} .session-title-bar {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+.session-title-bar {
   /* Flat-bar look (padding, divider, grab handle) comes from .view-titlebar; the client tabs
      follow immediately, so no bottom margin here. */
   gap: 16px;
   margin-bottom: 0;
-}/* Countdown + the session's own controls (options menu, minimize), right-aligned in the bar. */
+} /* Countdown + the session's own controls (options menu, minimize), right-aligned in the bar. */
 .session-title-actions {
   display: flex;
   align-items: center;
   gap: 10px;
   flex-shrink: 0;
-}.collapse-btn {
+}
+.collapse-btn {
   background: transparent;
   border: none;
   color: var(--primary);
   font-size: 18px;
   cursor: pointer;
-}.session-title-block { flex: 1; min-width: 0; }/* h3 type comes from the unified view-title rule */
-.session-title-block h3 { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }.session-title-block p { font-size: 12px; color: var(--text-muted); }.session-timer-block span {
+}
+.session-title-block {
+  flex: 1;
+  min-width: 0;
+} /* h3 type comes from the unified view-title rule */
+.session-title-block h3 {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.session-title-block p {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.session-timer-block span {
   font-family: var(--font-mono);
   font-weight: 700;
   font-size: 18px;
   color: var(--primary);
-}.session-overlay-body {
+}
+.session-overlay-body {
   flex: 1;
   overflow-y: auto;
   padding: 16px;
   gap: 16px;
   padding-bottom: calc(40px + var(--safe-bottom));
-}/* Current Exercise Navigator */
+} /* Current Exercise Navigator */
 .active-exercise-navigator {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 12px;
-}.nav-arrow-btn {
+}
+.nav-arrow-btn {
   background: var(--input-bg);
   border: 1px solid var(--border-color);
   color: var(--primary);
   width: 44px;
   height: 44px;
   border-radius: 50%;
-}.nav-arrow-btn:hover { background: var(--border-color); }.clipboard-empty-state { padding: 32px 16px; text-align: center; }.clipboard-empty-state h4 {
+}
+.nav-arrow-btn:hover {
+  background: var(--border-color);
+}
+.clipboard-empty-state {
+  padding: 32px 16px;
+  text-align: center;
+}
+.clipboard-empty-state h4 {
   font-family: var(--font-header);
   font-size: 16px;
   font-weight: 700;
   margin-bottom: 6px;
-}.clipboard-empty-state p {
+}
+.clipboard-empty-state p {
   font-size: 12px;
   color: var(--text-muted);
   line-height: 1.4;
-}/* ===== Inline clipboard editor (on-the-fly plan editing) ===== */
-.clipboard-editor { display: flex; flex-direction: column; gap: 12px; }
-.clipboard-editor-head { display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; }
+} /* ===== Inline clipboard editor (on-the-fly plan editing) ===== */
+.clipboard-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.clipboard-editor-head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
 .clipboard-editor-title {
   display: inline-flex;
   align-items: center;
@@ -1174,10 +1601,26 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   font-weight: 800;
   color: var(--text-main);
 }
-.clipboard-editor-title i { color: var(--primary); }
-.clipboard-editor-title strong { color: var(--primary); font-weight: 800; }
-.editor-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
-.editor-empty { color: var(--text-muted); font-size: 13px; padding: 12px 0; }
+.clipboard-editor-title i {
+  color: var(--primary);
+}
+.clipboard-editor-title strong {
+  color: var(--primary);
+  font-weight: 800;
+}
+.editor-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.editor-empty {
+  color: var(--text-muted);
+  font-size: 13px;
+  padding: 12px 0;
+}
 .editor-row {
   display: flex;
   align-items: stretch;
@@ -1187,7 +1630,10 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
 }
-.editor-row-dragging { opacity: 0.6; box-shadow: 0 8px 24px rgba(0,0,0,0.35); }
+.editor-row-dragging {
+  opacity: 0.6;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
 /* Combined reorder control: tap the top half to move up / bottom half to move down; drag to
    reorder freely. Sized as a tall two-zone target so both taps and drags are easy on touch. */
 .editor-reorder {
@@ -1205,13 +1651,41 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   touch-action: none;
   overflow: hidden;
 }
-.editor-reorder:active { cursor: grabbing; }
-.editor-reorder-up, .editor-reorder-down { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 12px; }
-.editor-reorder-up { border-bottom: 1px solid var(--border-color); }
-.editor-reorder:hover { color: var(--primary); border-color: var(--primary); }
-.editor-row-main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
-.editor-row-name-wrap { display: flex; align-items: center; gap: 6px; }
-.editor-row-circuit { color: var(--secondary, var(--primary)); font-size: 12px; flex: 0 0 auto; }
+.editor-reorder:active {
+  cursor: grabbing;
+}
+.editor-reorder-up,
+.editor-reorder-down {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+.editor-reorder-up {
+  border-bottom: 1px solid var(--border-color);
+}
+.editor-reorder:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+}
+.editor-row-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.editor-row-name-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.editor-row-circuit {
+  color: var(--secondary, var(--primary));
+  font-size: 12px;
+  flex: 0 0 auto;
+}
 .editor-row-name {
   flex: 1 1 auto;
   min-width: 0;
@@ -1225,9 +1699,23 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   font-size: 14px;
   font-weight: 700;
 }
-.editor-row-fields { display: flex; flex-wrap: wrap; gap: 8px; }
-.editor-field { display: flex; flex-direction: column; gap: 2px; }
-.editor-field > span { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-muted); }
+.editor-row-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.editor-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.editor-field > span {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-muted);
+}
 .editor-field > input {
   width: 62px;
   height: 30px;
@@ -1256,11 +1744,25 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   justify-content: center;
   transition: background 0.2s ease;
 }
-.editor-remove:hover { background: var(--danger-light); }
-.clipboard-editor-actions { display: flex; gap: 8px; }
-.clipboard-editor-hint { font-size: 11px; color: var(--text-muted); text-align: center; margin: 0; }
+.editor-remove:hover {
+  background: var(--danger-light);
+}
+.clipboard-editor-actions {
+  display: flex;
+  gap: 8px;
+}
+.clipboard-editor-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: center;
+  margin: 0;
+}
 /* Superset membership <select> that sits in each row's field strip. */
-.editor-field-superset > span { display: inline-flex; align-items: center; gap: 4px; }
+.editor-field-superset > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
 .editor-row-superset {
   height: 30px;
   max-width: 130px;
@@ -1283,8 +1785,16 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   flex-direction: column;
   gap: 8px;
 }
-.editor-circuit-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.editor-circuit-icon { color: var(--secondary, var(--primary)); flex: 0 0 auto; }
+.editor-circuit-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.editor-circuit-icon {
+  color: var(--secondary, var(--primary));
+  flex: 0 0 auto;
+}
 .editor-circuit-title {
   flex: 1 1 120px;
   min-width: 0;
@@ -1298,8 +1808,19 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   font-size: 13px;
   font-weight: 800;
 }
-.editor-circuit-rounds { display: inline-flex; align-items: center; gap: 6px; flex: 0 0 auto; }
-.editor-circuit-rounds > span { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-muted); }
+.editor-circuit-rounds {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+.editor-circuit-rounds > span {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-muted);
+}
 .editor-circuit-series {
   width: 52px;
   height: 30px;
@@ -1326,8 +1847,19 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   align-items: center;
   justify-content: center;
 }
-.editor-circuit-ungroup:hover { color: var(--danger); border-color: var(--danger-light); background: var(--danger-light); }
-.editor-circuit-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.editor-circuit-ungroup:hover {
+  color: var(--danger);
+  border-color: var(--danger-light);
+  background: var(--danger-light);
+}
+.editor-circuit-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 .editor-circuit-add {
   align-self: flex-start;
   background: transparent;
@@ -1339,7 +1871,9 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   font-weight: 700;
   cursor: pointer;
 }
-.editor-circuit-add:hover { background: color-mix(in srgb, var(--secondary, var(--primary)) 14%, transparent); }
+.editor-circuit-add:hover {
+  background: color-mix(in srgb, var(--secondary, var(--primary)) 14%, transparent);
+}
 /* Rest is a first-class, movable plan row in the editor. */
 .editor-rest-row {
   display: flex;
@@ -1350,9 +1884,20 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   background: color-mix(in srgb, var(--primary) 7%, var(--card-bg));
   border: 1px dashed var(--border-color);
 }
-.editor-rest-row .editor-reorder { height: 34px; }
-.editor-rest-label { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: var(--text-main); }
-.editor-rest-label i { color: var(--primary); }
+.editor-rest-row .editor-reorder {
+  height: 34px;
+}
+.editor-rest-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+.editor-rest-label i {
+  color: var(--primary);
+}
 .editor-rest-secs {
   width: 64px;
   height: 30px;
@@ -1366,7 +1911,11 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   font-weight: 700;
   text-align: center;
 }
-.editor-rest-unit { font-size: 12px; color: var(--text-muted); margin-left: -4px; }
+.editor-rest-unit {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-left: -4px;
+}
 .editor-rest-remove {
   margin-left: auto;
   width: 30px;
@@ -1380,7 +1929,9 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   align-items: center;
   justify-content: center;
 }
-.editor-rest-remove:hover { background: var(--danger-light); }
+.editor-rest-remove:hover {
+  background: var(--danger-light);
+}
 /* Insert bar in every gap: inject an exercise / superset / rest at that position. */
 .editor-insert {
   display: flex;
@@ -1390,8 +1941,15 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   opacity: 0.55;
   transition: opacity 0.15s ease;
 }
-.editor-insert:hover, .editor-insert:focus-within { opacity: 1; }
-.editor-insert-line { flex: 1; height: 1px; background: var(--border-color); }
+.editor-insert:hover,
+.editor-insert:focus-within {
+  opacity: 1;
+}
+.editor-insert-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border-color);
+}
 .ins-btn {
   display: inline-flex;
   align-items: center;
@@ -1406,14 +1964,37 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   cursor: pointer;
   white-space: nowrap;
 }
-.ins-btn:hover { color: var(--primary); border-color: var(--primary); }
-.ins-btn.ins-ss:hover { color: var(--secondary, var(--primary)); border-color: var(--secondary, var(--primary)); }
+.ins-btn:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+}
+.ins-btn.ins-ss:hover {
+  color: var(--secondary, var(--primary));
+  border-color: var(--secondary, var(--primary));
+}
 /* Standalone rest marker card in the live deck. */
-.exercise-deck-card.rest-card { border-style: dashed; opacity: 0.9; cursor: pointer; }
-.exercise-deck-card.rest-card:hover { opacity: 1; border-color: var(--primary); }
-.rest-card-inner { display: flex; align-items: center; gap: 10px; }
-.rest-card-inner .deck-card-counter { color: var(--primary); }
-.rest-card-play { margin-left: auto; color: var(--primary); font-size: 13px; }
+.exercise-deck-card.rest-card {
+  border-style: dashed;
+  opacity: 0.9;
+  cursor: pointer;
+}
+.exercise-deck-card.rest-card:hover {
+  opacity: 1;
+  border-color: var(--primary);
+}
+.rest-card-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.rest-card-inner .deck-card-counter {
+  color: var(--primary);
+}
+.rest-card-play {
+  margin-left: auto;
+  color: var(--primary);
+  font-size: 13px;
+}
 /* Group Matrix Grid for Active Session */
 .group-matrix-grid {
   display: flex;
@@ -1421,44 +2002,65 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   gap: 16px;
 }
 
-@media(min-width: 600px) {
+@media (min-width: 600px) {
   .group-matrix-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
-  }} .participant-log-card {
+  }
+}
+.participant-log-card {
   padding: 12px;
   border-radius: var(--border-radius-md);
   background: rgba(39, 39, 42, 0.3);
   border: 1px solid var(--border-color);
-}.participant-log-card.completed { border-color: rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.03); }.participant-card-header {
+}
+.participant-log-card.completed {
+  border-color: rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.03);
+}
+.participant-card-header {
   margin-bottom: 10px;
   border-bottom: 1px dashed var(--border-color);
   padding-bottom: 6px;
-}.participant-card-header h5 {
+}
+.participant-card-header h5 {
   font-size: 15px;
   font-weight: 600;
   display: flex;
   align-items: center;
   gap: 8px;
-}.participant-header-status { font-size: 11px; }.participant-card-header.completed-all .participant-header-status { color: var(--primary); font-weight: 600; }/* Set Rows styling for the touch steppers */
+}
+.participant-header-status {
+  font-size: 11px;
+}
+.participant-card-header.completed-all .participant-header-status {
+  color: var(--primary);
+  font-weight: 600;
+} /* Set Rows styling for the touch steppers */
 .active-set-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 6px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.03);
-}.active-set-row:last-child { border-bottom: none; }.set-index-col {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+.active-set-row:last-child {
+  border-bottom: none;
+}
+.set-index-col {
   width: 24px;
   font-size: 12px;
   font-family: var(--font-mono);
   font-weight: 700;
   color: var(--text-muted);
-}.stepper-control-group {
+}
+.stepper-control-group {
   display: flex;
   align-items: center;
   gap: 4px;
-}.stepper-input-wrapper {
+}
+.stepper-input-wrapper {
   display: flex;
   align-items: center;
   background: var(--input-bg);
@@ -1466,7 +2068,8 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   border-radius: 6px;
   overflow: hidden;
   height: 30px;
-}.stepper-input-wrapper input {
+}
+.stepper-input-wrapper input {
   width: 46px;
   border: none;
   background: transparent;
@@ -1476,24 +2079,32 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   font-size: 13px;
   font-weight: 600;
   outline: none;
-}.step-btn {
+}
+.step-btn {
   background: transparent;
   color: var(--text-muted);
   width: 24px;
   height: 100%;
   font-size: 11px;
   transition: background 0.1s ease;
-}.step-btn:hover { background: var(--border-color); color: var(--text-main); }.stepper-label {
+}
+.step-btn:hover {
+  background: var(--border-color);
+  color: var(--text-main);
+}
+.stepper-label {
   font-size: 9px;
   color: var(--text-muted);
   text-transform: uppercase;
   margin-right: 4px;
   font-weight: 600;
-}.set-check-col {
+}
+.set-check-col {
   width: 32px;
   display: flex;
   justify-content: flex-end;
-}.set-checkbox-btn {
+}
+.set-checkbox-btn {
   background: transparent;
   border: 1.5px solid var(--text-muted);
   color: transparent;
@@ -1502,12 +2113,13 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   border-radius: 4px;
   font-size: 11px;
   transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-}.set-checkbox-btn.checked {
+}
+.set-checkbox-btn.checked {
   background: var(--primary-gradient);
   border-color: transparent;
   color: var(--on-primary);
   box-shadow: 0 4px 12px -4px rgba(0, 0, 0, 0.45);
-}/* Footer layout for session overlay */
+} /* Footer layout for session overlay */
 .session-actions-footer {
   border-top: 1px solid var(--border-color);
   padding-top: 16px;
@@ -1515,10 +2127,19 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   flex-direction: column;
   gap: 12px;
   margin-top: auto;
-}.session-finish-row { display: flex; gap: 12px; }/* Overflow menu in the clipboard header — home for destructive Delete Session */
+}
+.session-finish-row {
+  display: flex;
+  gap: 12px;
+} /* Overflow menu in the clipboard header — home for destructive Delete Session */
 .session-menu-wrap,
-.app-menu-wrap { position: relative; }/* First-run Terms modal is mandatory: hide its dismiss (✕) so the only exit is "I agree". */
-#dialog-terms.first-run .modal-close-btn { display: none; }.session-menu {
+.app-menu-wrap {
+  position: relative;
+} /* First-run Terms modal is mandatory: hide its dismiss (✕) so the only exit is "I agree". */
+#dialog-terms.first-run .modal-close-btn {
+  display: none;
+}
+.session-menu {
   position: absolute;
   top: calc(100% + 6px);
   right: 0;
@@ -1528,7 +2149,8 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   border-radius: var(--border-radius-md);
   padding: 6px;
   z-index: 130;
-}.session-menu-item {
+}
+.session-menu-item {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -1541,7 +2163,16 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   color: var(--text-main);
   text-align: left;
   text-decoration: none;
-}.session-menu-item:hover { background: var(--input-bg); }.session-menu-item-danger { color: var(--danger); }.session-menu-item-danger:hover { background: var(--danger-light); }/* FLOATING REST TIMER */
+}
+.session-menu-item:hover {
+  background: var(--input-bg);
+}
+.session-menu-item-danger {
+  color: var(--danger);
+}
+.session-menu-item-danger:hover {
+  background: var(--danger-light);
+} /* FLOATING REST TIMER */
 .floating-timer {
   position: fixed;
   bottom: calc(var(--nav-height) + var(--safe-bottom) + 16px);
@@ -1550,30 +2181,38 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   z-index: 150;
   padding: 10px 14px;
   animation: slideUp 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}.timer-header {
+}
+.timer-header {
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 6px;
-}.close-btn-xs {
+}
+.close-btn-xs {
   background: transparent;
   border: none;
   color: var(--text-muted);
   cursor: pointer;
   font-size: 12px;
-}.timer-body { text-align: center; }.timer-seconds {
+}
+.timer-body {
+  text-align: center;
+}
+.timer-seconds {
   font-family: var(--font-header);
   font-size: 32px;
   font-weight: 800;
   color: var(--primary);
   margin-bottom: 6px;
   line-height: 1;
-}.timer-controls {
+}
+.timer-controls {
   display: flex;
   justify-content: space-between;
   gap: 4px;
-}.timer-btn-sm {
+}
+.timer-btn-sm {
   background: var(--input-bg);
   border: 1px solid var(--border-color);
   color: var(--text-main);
@@ -1582,7 +2221,10 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   font-size: 10px;
   font-weight: 600;
   flex: 1;
-}.timer-btn-sm:hover { background: var(--border-color); }/* MODAL DIALOGS */
+}
+.timer-btn-sm:hover {
+  background: var(--border-color);
+} /* MODAL DIALOGS */
 .dialog-modal {
   border: 1px solid var(--card-border);
   background-color: var(--card-bg);
@@ -1591,19 +2233,44 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   margin: auto;
   max-width: 440px;
   width: 90%;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
   color: var(--text-main);
-}.dialog-modal::backdrop { background: rgba(9, 9, 11, 0.7); backdrop-filter: blur(8px); }.wide-modal { max-width: 600px; }.modal-header { margin-bottom: 16px; }.modal-close-btn {
+}
+.dialog-modal::backdrop {
+  background: rgba(9, 9, 11, 0.7);
+  backdrop-filter: blur(8px);
+}
+.wide-modal {
+  max-width: 600px;
+}
+.modal-header {
+  margin-bottom: 16px;
+}
+.modal-close-btn {
   background: transparent;
   border: none;
   color: var(--text-muted);
   font-size: 16px;
   cursor: pointer;
-}.modal-form { gap: 14px; }.form-group { gap: 6px; }.form-row { gap: 12px; }.form-group.col { flex: 1; }.form-group label {
+}
+.modal-form {
+  gap: 14px;
+}
+.form-group {
+  gap: 6px;
+}
+.form-row {
+  gap: 12px;
+}
+.form-group.col {
+  flex: 1;
+}
+.form-group label {
   font-size: 12px;
   font-weight: 600;
   color: var(--text-muted);
-}.form-control {
+}
+.form-control {
   background-color: var(--input-bg);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius-sm);
@@ -1613,7 +2280,13 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   font-size: 14px;
   outline: none;
   transition: border-color 0.2s ease;
-}.form-control:focus { border-color: var(--primary); }textarea.form-control { resize: vertical; }/* Multi-select check checklist inside setup */
+}
+.form-control:focus {
+  border-color: var(--primary);
+}
+textarea.form-control {
+  resize: vertical;
+} /* Multi-select check checklist inside setup */
 .checkbox-checklist {
   max-height: 150px;
   overflow-y: auto;
@@ -1621,26 +2294,29 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   flex-direction: column;
   gap: 8px;
   padding: 10px;
-}.checklist-item {
+}
+.checklist-item {
   display: flex;
   align-items: center;
   gap: 10px;
   cursor: pointer;
   font-size: 14px;
   user-select: none;
-}.checklist-item input[type="checkbox"] {
+}
+.checklist-item input[type="checkbox"] {
   accent-color: var(--primary);
   width: 16px;
   height: 16px;
   cursor: pointer;
-}.modal-actions {
+}
+.modal-actions {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
   margin-top: 10px;
   border-top: 1px solid var(--border-color);
   padding-top: 14px;
-}/* Routine builder items */
+} /* Routine builder items */
 .routine-builder-list {
   display: flex;
   flex-direction: column;
@@ -1650,41 +2326,69 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   padding-right: 4px;
   margin-top: 10px;
   margin-bottom: 10px;
-}.routine-builder-row {
+}
+.routine-builder-row {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(255,255,255,0.02);
+  background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--border-color);
   padding: 8px;
   border-radius: var(--border-radius-sm);
-}.routine-builder-row select { flex: 2; min-width: 120px; }.routine-builder-row input { width: 50px; }.btn-remove-row {
+}
+.routine-builder-row select {
+  flex: 2;
+  min-width: 120px;
+}
+.routine-builder-row input {
+  width: 50px;
+}
+.btn-remove-row {
   background: transparent;
   border: none;
   color: var(--danger);
   cursor: pointer;
   font-size: 14px;
   padding: 4px;
-}/* Data backup view options */
+} /* Data backup view options */
 .modal-body-scroll {
   max-height: 70vh;
   overflow-y: auto;
   padding-right: 4px;
-}.dialog-desc {
+}
+.dialog-desc {
   font-size: 13px;
   color: var(--text-muted);
   line-height: 1.4;
   margin-bottom: 16px;
-}.backup-actions { gap: 16px; margin-bottom: 20px; }.action-card { text-align: center; padding: 20px; }.backup-icon-large { font-size: 32px; margin-bottom: 12px; }.action-card h4 {
+}
+.backup-actions {
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.action-card {
+  text-align: center;
+  padding: 20px;
+}
+.backup-icon-large {
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+.action-card h4 {
   font-size: 15px;
   margin-bottom: 4px;
   font-weight: 600;
-}.action-card p {
+}
+.action-card p {
   font-size: 12px;
   color: var(--text-muted);
   margin-bottom: 16px;
   line-height: 1.4;
-}.file-upload-wrapper { position: relative; }.file-input-hidden {
+}
+.file-upload-wrapper {
+  position: relative;
+}
+.file-input-hidden {
   position: absolute;
   left: 0;
   top: 0;
@@ -1692,26 +2396,32 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   height: 100%;
   opacity: 0;
   cursor: pointer;
-}.status-msg {
+}
+.status-msg {
   font-size: 11px;
   margin-top: 6px;
   font-weight: 600;
-}.danger-zone {
+}
+.danger-zone {
   border-top: 1px solid var(--danger-light);
   padding-top: 16px;
   margin-top: 16px;
-}.danger-zone h4 {
+}
+.danger-zone h4 {
   color: var(--danger);
   font-size: 14px;
   font-weight: 700;
   margin-bottom: 4px;
-}.danger-zone p {
+}
+.danger-zone p {
   font-size: 12px;
   color: var(--text-muted);
   margin-bottom: 12px;
   line-height: 1.4;
-}/* Utility classes */
-.hidden { display: none !important; }/* History Feedback Icon and Tooltip CSS */
+} /* Utility classes */
+.hidden {
+  display: none !important;
+} /* History Feedback Icon and Tooltip CSS */
 .history-feedback-icon {
   position: relative;
   cursor: pointer;
@@ -1720,7 +2430,11 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   font-size: 13px;
   transition: transform 0.2s;
   vertical-align: middle;
-}.history-feedback-icon:hover { transform: scale(1.2); }.history-feedback-icon .tooltip-content {
+}
+.history-feedback-icon:hover {
+  transform: scale(1.2);
+}
+.history-feedback-icon .tooltip-content {
   visibility: hidden;
   width: 220px;
   background-color: rgba(18, 18, 24, 0.98);
@@ -1743,7 +2457,8 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   font-size: 11px;
   line-height: 1.5;
   font-weight: normal;
-}.history-feedback-icon .tooltip-content::after {
+}
+.history-feedback-icon .tooltip-content::after {
   content: "";
   position: absolute;
   top: 100%;
@@ -1752,21 +2467,30 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   border-width: 6px;
   border-style: solid;
   border-color: rgba(18, 18, 24, 0.98) transparent transparent transparent;
-}.history-feedback-icon:hover .tooltip-content,
-.history-feedback-icon.active .tooltip-content { visibility: visible; opacity: 1; }.tooltip-title {
+}
+.history-feedback-icon:hover .tooltip-content,
+.history-feedback-icon.active .tooltip-content {
+  visibility: visible;
+  opacity: 1;
+}
+.tooltip-title {
   font-weight: 700;
   margin-bottom: 4px;
   color: var(--primary);
-}.tooltip-body { color: var(--text-muted); }/* Sets tracking row style tweaks */
+}
+.tooltip-body {
+  color: var(--text-muted);
+} /* Sets tracking row style tweaks */
 .active-set-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
   margin-bottom: 8px;
-  border-bottom: 1px solid rgba(255,255,255,0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
   padding-bottom: 8px;
-}.active-set-row .step-btn {
+}
+.active-set-row .step-btn {
   background: none;
   border: none;
   color: #fff;
@@ -1775,14 +2499,23 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   font-weight: bold;
   font-size: 14px;
   cursor: pointer;
-}.active-set-row .input-set-weight, .active-set-row .input-set-reps {
+}
+.active-set-row .input-set-weight,
+.active-set-row .input-set-reps {
   background: none;
   border: none;
   color: #fff;
   text-align: center;
   font-size: 13px;
   height: 32px;
-}.active-set-row .input-set-weight { width: 50px; }.active-set-row .input-set-reps { width: 40px; }.active-set-row .set-checkbox-btn {
+}
+.active-set-row .input-set-weight {
+  width: 50px;
+}
+.active-set-row .input-set-reps {
+  width: 40px;
+}
+.active-set-row .set-checkbox-btn {
   width: 32px;
   height: 32px;
   border-radius: 6px;
@@ -1791,7 +2524,8 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   color: var(--text-muted);
   cursor: pointer;
   transition: all 0.2s;
-}.active-set-row .set-checkbox-btn.checked {
+}
+.active-set-row .set-checkbox-btn.checked {
   background: var(--primary-gradient) !important;
   color: var(--on-primary) !important;
   border-color: transparent !important;
@@ -1801,31 +2535,57 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
 /* Mobile responsive scaling */
 @media (max-width: 600px) {
   /* Scale buttons for thumb-friendly interaction */
-  .btn, .btn-sm {
+  .btn,
+  .btn-sm {
     padding: 12px 18px !important;
     font-size: 14px !important;
     min-height: 44px !important;
-  }/* Increase margins and size of feedback/note icons in global history to prevent misclicks */
+  } /* Increase margins and size of feedback/note icons in global history to prevent misclicks */
   .history-feedback-icon {
-  font-size: 20px !important;
-  padding: 10px !important;
-  /* Extremely easy to click/tap */
+    font-size: 20px !important;
+    padding: 10px !important;
+    /* Extremely easy to click/tap */
     margin-left: 14px !important;
-}/* Active session footer adjustments */
-  .session-finish-row { gap: 16px !important; }.session-finish-row button { flex: 1 !important; min-height: 48px !important; }/* Form input controls spacing */
-  .form-control, select { min-height: 44px !important; font-size: 14px !important; }.active-set-row {
-  gap: 12px !important;
-  padding-top: 4px;
-  padding-bottom: 10px !important;
-}.active-set-row .step-btn {
-  width: 38px !important;
-  height: 38px !important;
-  font-size: 18px !important;
-}.active-set-row .input-set-weight, .active-set-row .input-set-reps { height: 38px !important; font-size: 15px !important; }.active-set-row .input-set-weight { width: 58px !important; }.active-set-row .input-set-reps { width: 48px !important; }.active-set-row .set-checkbox-btn {
-  width: 40px !important;
-  height: 40px !important;
-  border-radius: 8px !important;
-}}
+  } /* Active session footer adjustments */
+  .session-finish-row {
+    gap: 16px !important;
+  }
+  .session-finish-row button {
+    flex: 1 !important;
+    min-height: 48px !important;
+  } /* Form input controls spacing */
+  .form-control,
+  select {
+    min-height: 44px !important;
+    font-size: 14px !important;
+  }
+  .active-set-row {
+    gap: 12px !important;
+    padding-top: 4px;
+    padding-bottom: 10px !important;
+  }
+  .active-set-row .step-btn {
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 18px !important;
+  }
+  .active-set-row .input-set-weight,
+  .active-set-row .input-set-reps {
+    height: 38px !important;
+    font-size: 15px !important;
+  }
+  .active-set-row .input-set-weight {
+    width: 58px !important;
+  }
+  .active-set-row .input-set-reps {
+    width: 48px !important;
+  }
+  .active-set-row .set-checkbox-btn {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 8px !important;
+  }
+}
 
 /* --- VOICE MEMO WAVEFORM ANIMATION --- */
 .audio-wave-container {
@@ -1834,16 +2594,44 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   gap: 2px;
   height: 16px;
   margin-top: 4px;
-}.wave-bar {
+}
+.wave-bar {
   display: inline-block;
   width: 3px;
   height: 60%;
   background: var(--primary);
   border-radius: 2px;
-}.audio-wave-container.recording .wave-bar { animation: bounce 0.8s ease-in-out infinite alternate; }.wave-bar:nth-child(2) { animation-delay: 0.1s; }.wave-bar:nth-child(3) { animation-delay: 0.25s; }.wave-bar:nth-child(4) { animation-delay: 0.15s; }.wave-bar:nth-child(5) { animation-delay: 0.3s; }.wave-bar:nth-child(6) { animation-delay: 0.2s; }.wave-bar:nth-child(7) { animation-delay: 0.35s; }
+}
+.audio-wave-container.recording .wave-bar {
+  animation: bounce 0.8s ease-in-out infinite alternate;
+}
+.wave-bar:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.wave-bar:nth-child(3) {
+  animation-delay: 0.25s;
+}
+.wave-bar:nth-child(4) {
+  animation-delay: 0.15s;
+}
+.wave-bar:nth-child(5) {
+  animation-delay: 0.3s;
+}
+.wave-bar:nth-child(6) {
+  animation-delay: 0.2s;
+}
+.wave-bar:nth-child(7) {
+  animation-delay: 0.35s;
+}
 
 @keyframes bounce {
-  10% { height: 30%; }100% { height: 100%; }}
+  10% {
+    height: 30%;
+  }
+  100% {
+    height: 100%;
+  }
+}
 
 /* --- SESSION BOOKING CARD --- */
 .booking-card {
@@ -1856,8 +2644,11 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   border-left: 4px solid var(--primary);
   cursor: pointer;
   transition: background 0.2s, transform 0.2s;
-}/* A finished session is muted and marked with a green edge — done, not up-next */
-.booking-card.booking-completed { border-left-color: var(--success); opacity: 0.6; }/* The session in progress is emphasised with an accent-tinted fill + accent ring — the same
+} /* A finished session is muted and marked with a green edge — done, not up-next */
+.booking-card.booking-completed {
+  border-left-color: var(--success);
+  opacity: 0.6;
+} /* The session in progress is emphasised with an accent-tinted fill + accent ring — the same
    "selected/active" language as a chosen participant tab, so it clearly stands out. */
 .booking-live {
   /* Stack so the green left bracket can spill into a full-width bottom bar. */
@@ -1866,9 +2657,10 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   justify-content: flex-start;
   border-left-color: var(--primary);
   overflow: hidden;
-  background-image:
-    linear-gradient(color-mix(in srgb, var(--primary) 8%, transparent), color-mix(in srgb, var(--primary) 8%, transparent)),
-    linear-gradient(var(--card-bg), var(--card-bg));
+  background-image: linear-gradient(
+      color-mix(in srgb, var(--primary) 8%, transparent),
+      color-mix(in srgb, var(--primary) 8%, transparent)
+    ), linear-gradient(var(--card-bg), var(--card-bg));
 }
 /* Bottom bar: the left bracket's green wrapping along the bottom, with the Active-session tag + timer. */
 .booking-live-bar {
@@ -1876,16 +2668,27 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  margin: 12px -14px -14px -14px;   /* bleed to the card's padded edges so it meets the left border */
+  margin: 12px -14px -14px -14px; /* bleed to the card's padded edges so it meets the left border */
   padding: 9px 14px;
   background: var(--primary);
-  color: #06251a;                    /* dark, high-contrast on the accent-green bar */
+  color: #06251a; /* dark, high-contrast on the accent-green bar */
 }
 /* Overtime: the session ran past its scheduled end without being closed — warn in amber, and turn
    the card's left bracket amber too so it reads as a warning at a glance (follows the bar's state). */
-.booking-live-bar.overtime { background: var(--warning, #f59e0b); color: #3d2600; }
-.booking-card.booking-live:has(.booking-live-bar.overtime) { border-left-color: var(--warning, #f59e0b); }
-.booking-live-tag { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 800; }
+.booking-live-bar.overtime {
+  background: var(--warning, #f59e0b);
+  color: #3d2600;
+}
+.booking-card.booking-live:has(.booking-live-bar.overtime) {
+  border-left-color: var(--warning, #f59e0b);
+}
+.booking-live-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 800;
+}
 .booking-live-timer {
   font-family: var(--font-mono, monospace);
   font-size: 13px;
@@ -1893,21 +2696,32 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   letter-spacing: 0.3px;
   padding: 1px 6px;
   border-radius: 5px;
-  background: rgba(255, 255, 255, 0.28);   /* chip keeps the countdown legible on any accent */
-}/* Session title tint by day, matching the day-selection line: past = purple, future = amber,
+  background: rgba(255, 255, 255, 0.28); /* chip keeps the countdown legible on any accent */
+} /* Session title tint by day, matching the day-selection line: past = purple, future = amber,
    today = default. Set here (not inline) so the temporal class on the card can override it. */
-.booking-card-title { color: var(--text-color); }.booking-card.booking-past .booking-card-title { color: var(--temporal-past); }.booking-card.booking-future .booking-card-title { color: var(--temporal-future); }/* --- SESSIONS DAY TITLE BAR --- */
+.booking-card-title {
+  color: var(--text-color);
+}
+.booking-card.booking-past .booking-card-title {
+  color: var(--temporal-past);
+}
+.booking-card.booking-future .booking-card-title {
+  color: var(--temporal-future);
+} /* --- SESSIONS DAY TITLE BAR --- */
 /* Home view title bar. The "Sessions Schedule" label (.view-title-label) is the conceptual view
    title on the left; the date stepper (‹ weekday date ›) is the control on the right. The flush,
    flat-bar look + grab handle come from .view-titlebar; override .section-title's 24px top margin. */
-.sessions-title-bar { gap: 10px; margin-top: 0; }
+.sessions-title-bar {
+  gap: 10px;
+  margin-top: 0;
+}
 .sessions-date-picker {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   flex: 0 1 auto;
   min-width: 0;
-}/* The date reads as a secondary control now that the label carries the title */
+} /* The date reads as a secondary control now that the label carries the title */
 .sessions-title-bar h3 {
   display: inline-flex;
   align-items: center;
@@ -1922,25 +2736,43 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   min-width: 0;
   white-space: nowrap;
   text-transform: none;
-}/* Only the weekday truncates — the date and Today tag must always stay readable */
+} /* Only the weekday truncates — the date and Today tag must always stay readable */
 #calendar-title-weekday,
 #calendar-title-weekday-short {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
-}/* Narrow screens swap the full weekday for its abbreviation (see mobile media query) */
-#calendar-title-weekday-short { display: none; }/* The open-ended bucket reads "Upcoming From 2026-07-17" rather than a weekday trailing a date */
+} /* Narrow screens swap the full weekday for its abbreviation (see mobile media query) */
+#calendar-title-weekday-short {
+  display: none;
+} /* The open-ended bucket reads "Upcoming From 2026-07-17" rather than a weekday trailing a date */
 #calendar-title.is-upcoming #calendar-title-weekday,
-#calendar-title.is-upcoming #calendar-title-weekday-short { order: -1; }/* Keep the calendar icon leading the title, ahead of any reordered label */
-.sessions-title-bar h3 > i { order: -2; }#calendar-title-date {
+#calendar-title.is-upcoming #calendar-title-weekday-short {
+  order: -1;
+} /* Keep the calendar icon leading the title, ahead of any reordered label */
+.sessions-title-bar h3 > i {
+  order: -2;
+}
+#calendar-title-date {
   flex: 0 0 auto;
   color: var(--text-muted);
   /* Type (family/size/weight/letter-spacing) is inherited from #calendar-title; only the muted
      colour and its temporal-tint overrides are set here. */
-}/* Temporal tint of the whole day-selection line: past = purple, today = default, future =
+} /* Temporal tint of the whole day-selection line: past = purple, today = default, future =
    amber. The weekday span and calendar icon inherit the h3 colour; the date sets its own
    muted colour, so it needs an explicit override. Mirrors the session-card title colours. */
-#calendar-title.is-past { color: var(--temporal-past); }#calendar-title.is-past #calendar-title-date { color: var(--temporal-past); }#calendar-title.is-future { color: var(--temporal-future); }#calendar-title.is-future #calendar-title-date { color: var(--temporal-future); }
+#calendar-title.is-past {
+  color: var(--temporal-past);
+}
+#calendar-title.is-past #calendar-title-date {
+  color: var(--temporal-past);
+}
+#calendar-title.is-future {
+  color: var(--temporal-future);
+}
+#calendar-title.is-future #calendar-title-date {
+  color: var(--temporal-future);
+}
 /* "Today" reset control: jumps the deck back to today. Always occupies its slot (disabled while
    already on today) so the stepper's width — and therefore the arrows — never shift. */
 .sessions-today-btn {
@@ -1968,9 +2800,14 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   color: var(--primary);
   border-color: var(--primary);
 }
-.sessions-today-btn:disabled { opacity: 0.35; cursor: default; }
+.sessions-today-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
 /* Desktop shows the text label; the icon takes its place only on phones (see mobile query). */
-.sessions-today-btn > i { display: none; }
+.sessions-today-btn > i {
+  display: none;
+}
 .sessions-nav-arrow {
   flex: 0 0 auto;
   width: 46px;
@@ -1985,11 +2822,16 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
-}.sessions-nav-arrow:hover:not(:disabled) {
+}
+.sessions-nav-arrow:hover:not(:disabled) {
   background: var(--border-color);
   color: var(--primary);
   border-color: var(--primary);
-}.sessions-nav-arrow:disabled { opacity: 0.25; cursor: default; }/* --- SESSIONS CATEGORIES GRID --- */
+}
+.sessions-nav-arrow:disabled {
+  opacity: 0.25;
+  cursor: default;
+} /* --- SESSIONS CATEGORIES GRID --- */
 .sessions-categories-grid {
   display: flex;
   gap: 20px;
@@ -2000,12 +2842,16 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   width: 100%;
   padding-bottom: 8px;
   box-sizing: border-box;
-}/* Hide scrollbar */
-.sessions-categories-grid::-webkit-scrollbar { display: none; }.sessions-categories-grid {
+} /* Hide scrollbar */
+.sessions-categories-grid::-webkit-scrollbar {
+  display: none;
+}
+.sessions-categories-grid {
   -ms-overflow-style: none;
   /* IE and Edge */
   scrollbar-width: none;
-}.sessions-category-column {
+}
+.sessions-category-column {
   /* Single column at every viewport: the visible day always matches the day named in the title bar */
   flex: 0 0 100%;
   scroll-snap-align: start;
@@ -2019,32 +2865,92 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
 @media (max-width: 600px) {
   .sessions-categories-grid {
     gap: 16px;
-  }/* Phones keep the "Sessions" label and the date stepper on a single row (no wrap): the label
+  } /* Phones keep the "Sessions" label and the date stepper on a single row (no wrap): the label
      stays put on the left, the stepper takes the remaining width on the right, and the date
      title truncates its weekday if space runs short. The Today button + arrows keep fixed widths
      so they stay put; only the flexible title absorbs any change, so nothing shifts. */
-  .sessions-title-bar { flex-direction: row; align-items: center; justify-content: space-between; flex-wrap: nowrap; gap: 8px; }.sessions-date-picker { display: flex; align-items: center; justify-content: flex-end; flex: 1 1 auto; width: auto; min-width: 0; gap: 6px; }.sessions-title-bar h3 { width: auto; flex: 1 1 auto; min-width: 0; justify-content: flex-start; gap: 6px; overflow: hidden; }.sessions-title-bar h3 > i { display: none; }/* Icon-only Today button reclaims width so the date + arrows fit one row; the date leads and only the weekday truncates */
-  .sessions-today-btn { width: 36px; height: 36px; padding: 0; font-size: 15px; }.sessions-today-btn > i { display: inline; }.sessions-today-btn .today-btn-label { display: none; }/* "Wed" instead of "Wednesday" keeps the date readable on one row */
-  #calendar-title-weekday { display: none; }#calendar-title-weekday-short { display: inline; }/* Sweaty-hands tap target: wide enough to hit without looking */
-  .sessions-nav-arrow { width: 38px; height: 36px; }/* Stack card contents into a single column so times and names stop wrapping mid-word */
+  .sessions-title-bar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+  .sessions-date-picker {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
+    gap: 6px;
+  }
+  .sessions-title-bar h3 {
+    width: auto;
+    flex: 1 1 auto;
+    min-width: 0;
+    justify-content: flex-start;
+    gap: 6px;
+    overflow: hidden;
+  }
+  .sessions-title-bar h3 > i {
+    display: none;
+  } /* Icon-only Today button reclaims width so the date + arrows fit one row; the date leads and only the weekday truncates */
+  .sessions-today-btn {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    font-size: 15px;
+  }
+  .sessions-today-btn > i {
+    display: inline;
+  }
+  .sessions-today-btn .today-btn-label {
+    display: none;
+  } /* "Wed" instead of "Wednesday" keeps the date readable on one row */
+  #calendar-title-weekday {
+    display: none;
+  }
+  #calendar-title-weekday-short {
+    display: inline;
+  } /* Sweaty-hands tap target: wide enough to hit without looking */
+  .sessions-nav-arrow {
+    width: 38px;
+    height: 36px;
+  } /* Stack card contents into a single column so times and names stop wrapping mid-word */
   .booking-card {
-  flex-direction: column;
-  align-items: stretch;
-  gap: 10px;
-}.booking-card .btn {
-  width: 100%;
-  justify-content: center;
-  padding-top: 10px;
-  padding-bottom: 10px;
-}.sessions-category-column { padding: 10px !important; }/* Combo active set row mobile adjustments */
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .booking-card .btn {
+    width: 100%;
+    justify-content: center;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+  .sessions-category-column {
+    padding: 10px !important;
+  } /* Combo active set row mobile adjustments */
   .active-set-row[data-ex-id] {
-  flex-direction: column !important;
-  align-items: flex-start !important;
-  gap: 10px !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  padding-bottom: 12px !important;
-  margin-bottom: 6px;
-}.active-set-row[data-ex-id] > div:first-child { width: 100% !important; margin-bottom: 2px; }.active-set-row[data-ex-id] .stepper-control-group { margin-bottom: 2px; }.active-set-row[data-ex-id] .set-check-col { margin-left: auto !important; }}
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 12px !important;
+    margin-bottom: 6px;
+  }
+  .active-set-row[data-ex-id] > div:first-child {
+    width: 100% !important;
+    margin-bottom: 2px;
+  }
+  .active-set-row[data-ex-id] .stepper-control-group {
+    margin-bottom: 2px;
+  }
+  .active-set-row[data-ex-id] .set-check-col {
+    margin-left: auto !important;
+  }
+}
 
 /* --- CLIENT/PARTICIPANT TABS (wrap to multiple rows) --- */
 /* Participants wrap onto new rows once the row fills, like text line-breaks, so a merged
@@ -2055,7 +2961,11 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   align-items: center;
   gap: 8px;
   padding: 10px 16px;
-}.client-tab-btn { flex: 0 0 auto; white-space: nowrap; }/* --- VERTICAL EXERCISE CARD STACK --- */
+}
+.client-tab-btn {
+  flex: 0 0 auto;
+  white-space: nowrap;
+} /* --- VERTICAL EXERCISE CARD STACK --- */
 /* Cards stack vertically and overlap: the in-focus card is full-size (stats + one-tap
    signals), while the rest collapse to a peeking top row. This keeps a long plan compact
    on a gym-floor phone — as many upcoming cards as fit show their name + count. */
@@ -2064,7 +2974,8 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   flex-direction: column;
   padding: 12px 6px 20px;
   perspective: 1400px;
-}.exercise-deck-card {
+}
+.exercise-deck-card {
   width: 100%;
   box-sizing: border-box;
   padding: 12px 14px;
@@ -2076,9 +2987,10 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   background-image: linear-gradient(var(--card-bg), var(--card-bg));
   cursor: pointer;
   transform-origin: center top;
-  transition: transform 0.3s cubic-bezier(0.34, 1.4, 0.5, 1), box-shadow 0.3s ease,
-              background 0.2s, margin 0.3s ease, opacity 0.3s ease;
-}/* Collapsed cards slide up over the one below (negative margin) so only the top row peeks,
+  transition:
+    transform 0.3s cubic-bezier(0.34, 1.4, 0.5, 1), box-shadow 0.3s ease,
+    background 0.2s, margin 0.3s ease, opacity 0.3s ease;
+} /* Collapsed cards slide up over the one below (negative margin) so only the top row peeks,
    tilted back for a physical-deck depth cue. The depth comes from the scale/tilt/shadow, not
    from element opacity — a translucent card here let the overlapped card below bleed through. */
 .exercise-deck-card:not(.in-focus) {
@@ -2087,21 +2999,45 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   box-shadow: 0 -3px 10px rgba(0, 0, 0, 0.18);
   position: relative;
   z-index: 1;
-}.exercise-deck-card:not(.in-focus):hover { opacity: 1; transform: scale(0.975) rotateX(3deg); }.exercise-deck-card:last-child { margin-bottom: 0; }/* The in-focus card pops forward, full-size, with breathing room around it */
+}
+.exercise-deck-card:not(.in-focus):hover {
+  opacity: 1;
+  transform: scale(0.975) rotateX(3deg);
+}
+.exercise-deck-card:last-child {
+  margin-bottom: 0;
+} /* The in-focus card pops forward, full-size, with breathing room around it */
 .exercise-deck-card.in-focus {
   margin: 12px 0 16px;
   transform: none;
   opacity: 1;
   position: relative;
   z-index: 5;
-  background-image: linear-gradient(var(--primary-light), var(--primary-light)), linear-gradient(var(--card-bg), var(--card-bg));
+  background-image: linear-gradient(var(--primary-light), var(--primary-light)),
+    linear-gradient(var(--card-bg), var(--card-bg));
   border-color: var(--primary);
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35), 0 0 16px var(--primary-light);
   animation: cardFocusIn 0.34s cubic-bezier(0.22, 1, 0.36, 1);
 }
 /* Each navigation re-renders the focus card, so this entrance plays on every switch */
 @keyframes cardFocusIn {
-  from { transform: translateY(12px) rotateX(-14deg); opacity: 0; }to { transform: translateY(0) rotateX(0); opacity: 1; }} .exercise-deck-card.completed:not(.in-focus) { border-color: rgba(16, 185, 129, 0.3); }.exercise-deck-card.past-session { border-color: rgba(139, 92, 246, 0.3); background-image: linear-gradient(rgba(139, 92, 246, 0.14), rgba(139, 92, 246, 0.14)), linear-gradient(var(--card-bg), var(--card-bg)); }/* Tapped past card expands in place — pops forward like the focus card (overriding the
+  from {
+    transform: translateY(12px) rotateX(-14deg);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) rotateX(0);
+    opacity: 1;
+  }
+}
+.exercise-deck-card.completed:not(.in-focus) {
+  border-color: rgba(16, 185, 129, 0.3);
+}
+.exercise-deck-card.past-session {
+  border-color: rgba(139, 92, 246, 0.3);
+  background-image: linear-gradient(rgba(139, 92, 246, 0.14), rgba(139, 92, 246, 0.14)),
+    linear-gradient(var(--card-bg), var(--card-bg));
+} /* Tapped past card expands in place — pops forward like the focus card (overriding the
    collapsed-stack transform), but keeps its purple identity instead of the cyan live-focus
    treatment. Higher specificity than .exercise-deck-card:not(.in-focus) so the pop wins. */
 .exercise-deck-card.past-session.past-expanded {
@@ -2110,14 +3046,21 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   opacity: 1;
   z-index: 5;
   border-color: rgba(139, 92, 246, 0.5);
-  background-image: linear-gradient(rgba(139, 92, 246, 0.16), rgba(139, 92, 246, 0.16)), linear-gradient(var(--card-bg), var(--card-bg));
+  background-image: linear-gradient(rgba(139, 92, 246, 0.16), rgba(139, 92, 246, 0.16)),
+    linear-gradient(var(--card-bg), var(--card-bg));
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35), 0 0 14px rgba(139, 92, 246, 0.18);
   animation: cardFocusIn 0.34s cubic-bezier(0.22, 1, 0.36, 1);
-}.deck-history-collapse {
+}
+.deck-history-collapse {
   margin-left: auto;
   color: var(--temporal-past);
   font-size: 12px;
-}.deck-history-sets { gap: 4px; margin-top: 4px; }.deck-history-set-row {
+}
+.deck-history-sets {
+  gap: 4px;
+  margin-top: 4px;
+}
+.deck-history-set-row {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -2126,14 +3069,32 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   padding: 6px 8px;
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.02);
-}.deck-history-set-row strong {
+}
+.deck-history-set-row strong {
   color: var(--temporal-past);
   width: 26px;
   flex-shrink: 0;
-}.deck-history-load { color: var(--text-color); font-weight: 600; }.deck-history-note { font-style: italic; margin-left: auto; }.deck-history-meta { margin-top: 8px; font-size: 11px; }/* A launched future-day session is a plan, not a live workout — tint its exercise names amber
+}
+.deck-history-load {
+  color: var(--text-color);
+  font-weight: 600;
+}
+.deck-history-note {
+  font-style: italic;
+  margin-left: auto;
+}
+.deck-history-meta {
+  margin-top: 8px;
+  font-size: 11px;
+} /* A launched future-day session is a plan, not a live workout — tint its exercise names amber
    to match the future colour coding on the dashboard (mirrors the purple past history). */
 .exercise-deck-card.future-session .deck-card-name,
-.exercise-deck-card.future-session .deck-card-name-inline { color: var(--temporal-future); }.exercise-deck-card.future-session:not(.in-focus) { background: rgba(251, 191, 36, 0.04); }/* --- Superset card: a grouped block of exercises with a round counter --- */
+.exercise-deck-card.future-session .deck-card-name-inline {
+  color: var(--temporal-future);
+}
+.exercise-deck-card.future-session:not(.in-focus) {
+  background: rgba(251, 191, 36, 0.04);
+} /* --- Superset card: a grouped block of exercises with a round counter --- */
 .superset-title {
   font-size: 15px;
   font-weight: 700;
@@ -2143,7 +3104,10 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   gap: 8px;
   text-transform: uppercase;
   letter-spacing: 0.4px;
-}.superset-title > i { color: var(--primary); }/* Subtle accent-tinted pill with bright accent text — emphasised but not a loud solid block,
+}
+.superset-title > i {
+  color: var(--primary);
+} /* Subtle accent-tinted pill with bright accent text — emphasised but not a loud solid block,
    so the label keeps strong contrast against the badge. */
 .superset-round-badge {
   font-family: var(--font-sans);
@@ -2157,26 +3121,41 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   white-space: nowrap;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-}.superset-ex-list { gap: 6px; }.superset-ex-row { padding: 8px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }/* Name + target on one line, sitting right next to each other. */
+}
+.superset-ex-list {
+  gap: 6px;
+}
+.superset-ex-row {
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+} /* Name + target on one line, sitting right next to each other. */
 .superset-ex-head {
   display: flex;
   align-items: baseline;
   flex-wrap: wrap;
   gap: 10px;
   margin-bottom: 8px;
-}.superset-ex-name { font-weight: 700; font-size: 15px; }.superset-ex-target {
+}
+.superset-ex-name {
+  font-weight: 700;
+  font-size: 15px;
+}
+.superset-ex-target {
   display: inline-flex;
   align-items: baseline;
   gap: 6px;
-}/* Reps/weight read at the same size as the name and in the accent colour so they pop. */
+} /* Reps/weight read at the same size as the name and in the accent colour so they pop. */
 .superset-ex-reps {
   font-family: var(--font-mono);
   font-size: 15px;
   font-weight: 700;
   color: var(--primary);
-}/* The feedback trio stretches across the full row so there's no empty right-hand gutter and
+} /* The feedback trio stretches across the full row so there's no empty right-hand gutter and
    the buttons stay gym-floor sized. */
-.superset-ex-actions { display: flex; gap: 8px; }/* Labeled per-exercise feedback trio (Easy / Hard / Note) */
+.superset-ex-actions {
+  display: flex;
+  gap: 8px;
+} /* Labeled per-exercise feedback trio (Easy / Hard / Note) */
 .superset-sig {
   flex: 1;
   height: 38px;
@@ -2193,19 +3172,29 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   padding: 0 12px;
   gap: 6px;
   transition: all 0.15s ease;
-}.superset-sig > span { font-size: 13px; font-weight: 700; }.superset-sig > i { font-size: 14px; }.superset-sig.easy:hover {
+}
+.superset-sig > span {
+  font-size: 13px;
+  font-weight: 700;
+}
+.superset-sig > i {
+  font-size: 14px;
+}
+.superset-sig.easy:hover {
   color: var(--success);
   border-color: var(--success);
   background: rgba(16, 185, 129, 0.12);
-}.superset-sig.hard:hover {
+}
+.superset-sig.hard:hover {
   color: #f59e0b;
   border-color: #f59e0b;
   background: rgba(245, 158, 11, 0.12);
-}.superset-sig.note:hover {
+}
+.superset-sig.note:hover {
   color: var(--danger);
   border-color: var(--danger);
   background: rgba(239, 68, 68, 0.12);
-}/* Rest is part of the work — the "Rest" label reads like an exercise name and the duration
+} /* Rest is part of the work — the "Rest" label reads like an exercise name and the duration
    like a rep count (mono, accent), in a subtle pill so it's as visible as an exercise row. */
 .superset-break-row {
   width: 100%;
@@ -2223,7 +3212,24 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   border-radius: var(--border-radius-sm);
   cursor: pointer;
   text-align: left;
-}.superset-break-row:hover { border-color: var(--primary); }.superset-break-play { margin-left: auto; font-size: 12px; color: var(--primary); }.superset-break-row > i { font-size: 14px; color: var(--primary); }.superset-complete-btn { width: 100%; justify-content: center; }.superset-done {
+}
+.superset-break-row:hover {
+  border-color: var(--primary);
+}
+.superset-break-play {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--primary);
+}
+.superset-break-row > i {
+  font-size: 14px;
+  color: var(--primary);
+}
+.superset-complete-btn {
+  width: 100%;
+  justify-content: center;
+}
+.superset-done {
   gap: 8px;
   padding: 10px;
   font-size: 13px;
@@ -2231,31 +3237,38 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   color: var(--success);
   border: 1px dashed rgba(16, 185, 129, 0.3);
   border-radius: 8px;
-}/* Compact (collapsed) card: single peeking row — counter, name, target, status */
+} /* Compact (collapsed) card: single peeking row — counter, name, target, status */
 .deck-card-compact {
   display: flex;
   align-items: center;
   gap: 8px;
   min-height: 20px;
-}.deck-card-name-inline {
+}
+.deck-card-name-inline {
   flex: 1;
   min-width: 0;
   margin: 0;
   font-size: 13px;
-}.deck-card-compact-target {
+}
+.deck-card-compact-target {
   font-family: var(--font-mono);
   font-size: 13px;
   color: var(--primary);
   font-weight: 700;
   flex-shrink: 0;
-}/* Focus card internals: counter + status on top, name, sets/reps/weight, action buttons */
+} /* Focus card internals: counter + status on top, name, sets/reps/weight, action buttons */
 .deck-card-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 6px;
   margin-bottom: 8px;
-}.deck-card-top-right { display: inline-flex; align-items: center; gap: 8px; }
+}
+.deck-card-top-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
 /* Per-card ⏱ timer affordance — starts the floating countdown for this exercise/superset */
 .deck-card-timer {
   display: inline-flex;
@@ -2271,16 +3284,31 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   padding: 0;
   border-radius: 8px;
   transition: color 0.2s ease, background 0.2s ease;
-}.deck-card-timer:hover { color: var(--primary); background: var(--primary-light); }.deck-card-counter {
+}
+.deck-card-timer:hover {
+  color: var(--primary);
+  background: var(--primary-light);
+}
+.deck-card-counter {
   font-family: var(--font-mono);
   font-size: 12px;
   font-weight: 700;
   color: var(--primary);
-}.deck-card-status {
+}
+.deck-card-status {
   font-size: 11px;
   padding: 2px 7px;
   font-weight: 700;
-}.deck-card-status-upcoming { background: rgba(255, 255, 255, 0.05); color: var(--text-muted); }.deck-card-status-past { background: rgba(139, 92, 246, 0.2); color: var(--temporal-past); }.deck-card-name {
+}
+.deck-card-status-upcoming {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+}
+.deck-card-status-past {
+  background: rgba(139, 92, 246, 0.2);
+  color: var(--temporal-past);
+}
+.deck-card-name {
   margin: 0 0 10px 0;
   font-size: 16px;
   color: var(--text-color);
@@ -2289,31 +3317,39 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
-}.deck-card-stats { display: flex; gap: 8px; }.deck-stat {
+}
+.deck-card-stats {
+  display: flex;
+  gap: 8px;
+}
+.deck-stat {
   flex: 1;
   align-items: center;
   gap: 2px;
   padding: 8px 2px;
   background: rgba(0, 0, 0, 0.2);
   border-radius: 8px;
-}.deck-stat-value {
+}
+.deck-stat-value {
   font-family: var(--font-mono);
   font-size: 18px;
   font-weight: 700;
   color: var(--primary);
   line-height: 1;
-}.deck-stat-label {
+}
+.deck-stat-label {
   font-size: 8px;
   text-transform: uppercase;
   letter-spacing: 0.3px;
   color: var(--text-muted);
   font-weight: 600;
-}/* One-tap outcome signals on the focus card — gym-floor tap targets */
+} /* One-tap outcome signals on the focus card — gym-floor tap targets */
 .deck-card-actions {
   display: flex;
   gap: 8px;
   margin-top: 12px;
-}.deck-action-btn {
+}
+.deck-action-btn {
   flex: 1;
   gap: 6px;
   min-height: 46px;
@@ -2324,7 +3360,35 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   font-weight: 700;
   font-size: 12px;
   transition: transform 0.12s ease, background 0.2s, border-color 0.2s;
-}.deck-action-btn i { font-size: 12px; }.deck-action-btn:active { transform: scale(0.93); }.deck-action-easy { border-color: rgba(16, 185, 129, 0.4); color: var(--success); }.deck-action-easy:hover { background: rgba(16, 185, 129, 0.12); }.deck-action-hard { border-color: rgba(245, 158, 11, 0.4); color: #f59e0b; }.deck-action-hard:hover { background: rgba(245, 158, 11, 0.12); }.deck-action-feedback { border-color: rgba(239, 68, 68, 0.35); color: var(--danger); }.deck-action-feedback:hover { background: rgba(239, 68, 68, 0.12); }.deck-card-past-summary {
+}
+.deck-action-btn i {
+  font-size: 12px;
+}
+.deck-action-btn:active {
+  transform: scale(0.93);
+}
+.deck-action-easy {
+  border-color: rgba(16, 185, 129, 0.4);
+  color: var(--success);
+}
+.deck-action-easy:hover {
+  background: rgba(16, 185, 129, 0.12);
+}
+.deck-action-hard {
+  border-color: rgba(245, 158, 11, 0.4);
+  color: #f59e0b;
+}
+.deck-action-hard:hover {
+  background: rgba(245, 158, 11, 0.12);
+}
+.deck-action-feedback {
+  border-color: rgba(239, 68, 68, 0.35);
+  color: var(--danger);
+}
+.deck-action-feedback:hover {
+  background: rgba(239, 68, 68, 0.12);
+}
+.deck-card-past-summary {
   font-family: var(--font-mono);
   font-size: 10px;
   color: var(--text-muted);
@@ -2334,4 +3398,3 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   text-overflow: ellipsis;
   max-width: 45%;
 }
-

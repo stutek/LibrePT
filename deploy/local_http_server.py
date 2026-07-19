@@ -21,6 +21,7 @@ Behaviour (BASE = "/LibrePT"):
 Run:  python3 -m deploy.local_http_server [--port 8081]   (or: python3 deploy/local_http_server.py)
 Then open http://localhost:8081/  (it redirects to /LibrePT/).
 """
+
 import argparse
 import io
 import os
@@ -44,7 +45,7 @@ class SubPathHandler(SimpleHTTPRequestHandler):
         if p == BASE:
             p = "/"
         elif p.startswith(BASE + "/"):
-            p = p[len(BASE):]
+            p = p[len(BASE) :]
         return super().translate_path(p)
 
     def send_head(self):
@@ -63,12 +64,16 @@ class SubPathHandler(SimpleHTTPRequestHandler):
             self.send_error(HTTPStatus.NOT_FOUND, "App is served under %s/" % BASE)
             return None
 
-        rel = raw[len(BASE):].lstrip("/")
-        is_navigation = os.path.splitext(rel)[1] == ""  # a clean-URL route has no extension
+        rel = raw[len(BASE) :].lstrip("/")
+        is_navigation = (
+            os.path.splitext(rel)[1] == ""
+        )  # a clean-URL route has no extension
 
         # App root, an explicit index request, or a client-side route with no backing file:
         # serve the base-rewritten shell (this is the SPA fallback / "error page").
-        if rel in ("", "index.html") or (is_navigation and not os.path.isfile(self.translate_path(self.path))):
+        if rel in ("", "index.html") or (
+            is_navigation and not os.path.isfile(self.translate_path(self.path))
+        ):
             return self._send_index_shell()
 
         return super().send_head()
@@ -80,7 +85,9 @@ class SubPathHandler(SimpleHTTPRequestHandler):
         except OSError:
             self.send_error(HTTPStatus.NOT_FOUND)
             return None
-        body = body.replace(b'<base href="/">', ('<base href="%s/">' % BASE).encode("ascii"))
+        body = body.replace(
+            b'<base href="/">', ('<base href="%s/">' % BASE).encode("ascii")
+        )
         self.send_response(HTTPStatus.OK)
         self.send_header("Content-Type", "text/html; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
@@ -89,12 +96,19 @@ class SubPathHandler(SimpleHTTPRequestHandler):
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--port", type=int, default=8081, help="port to listen on (default: 8081)")
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    parser.add_argument(
+        "--port", type=int, default=8081, help="port to listen on (default: 8081)"
+    )
     args = parser.parse_args()
 
     server = ThreadingHTTPServer(("", args.port), SubPathHandler)
-    print("LibrePT dev server: http://localhost:%d%s/  (root redirects here)" % (args.port, BASE))
+    print(
+        "LibrePT dev server: http://localhost:%d%s/  (root redirects here)"
+        % (args.port, BASE)
+    )
     try:
         server.serve_forever()
     except KeyboardInterrupt:

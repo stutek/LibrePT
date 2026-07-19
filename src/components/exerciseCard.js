@@ -13,17 +13,26 @@
 
 export function renderExerciseCard(card, item, ctx) {
   const {
-    currentCount, activeClientId, pastExpanded, isFutureSession,
-    t, escapeHTML, getExerciseSignalColor, logQuickSignal, openFeedbackModal, onFocus, startRestTimer
+    currentCount,
+    activeClientId,
+    pastExpanded,
+    isFutureSession,
+    t,
+    escapeHTML,
+    getExerciseSignalColor,
+    logQuickSignal,
+    openFeedbackModal,
+    onFocus,
+    startRestTimer,
   } = ctx;
   const WORK_TIMER_DEFAULT = 60; // seconds, when timing an exercise (no work-duration field yet)
 
   // An open past log defocuses the live card, so the active exercise renders compact too
   const showInFocus = item.isInFocus && !pastExpanded;
-  const checkedClass = showInFocus ? 'in-focus' : (item.isCompleted ? 'completed' : '');
-  card.className = `exercise-deck-card ${checkedClass}${isFutureSession ? ' future-session' : ''}`;
+  const checkedClass = showInFocus ? "in-focus" : item.isCompleted ? "completed" : "";
+  card.className = `exercise-deck-card ${checkedClass}${isFutureSession ? " future-session" : ""}`;
 
-  let statusBadge = '';
+  let statusBadge = "";
   if (showInFocus) {
     statusBadge = `<span class="badge badge-primary deck-card-status">In Focus</span>`;
   } else if (item.isCompleted) {
@@ -33,12 +42,12 @@ export function renderExerciseCard(card, item, ctx) {
   }
 
   // Bodyweight/timed work has no load to show — a bare "0" reads as a missing value
-  const weightValue = item.weightTarget > 0 ? item.weightTarget : '—';
+  const weightValue = item.weightTarget > 0 ? item.weightTarget : "—";
   const counter = `${item.index + 1}/${currentCount}`;
 
   // Tint the title by any feedback logged for this exercise (see getExerciseSignalColor)
   const signalColor = getExerciseSignalColor(activeClientId, item.name);
-  const nameStyle = signalColor ? ` style="color: ${signalColor};"` : '';
+  const nameStyle = signalColor ? ` style="color: ${signalColor};"` : "";
 
   if (showInFocus) {
     // Expanded focus card is the primary logging surface: target stats plus the
@@ -48,56 +57,59 @@ export function renderExerciseCard(card, item, ctx) {
         <span class="deck-card-counter">${counter}</span>
         <span class="deck-card-top-right">
           ${statusBadge}
-          <button type="button" class="deck-card-timer" aria-label="${t('rest_timer')}" title="${t('rest_timer')}"><i class="fa-solid fa-stopwatch"></i></button>
+          <button type="button" class="deck-card-timer" aria-label="${t("rest_timer")}" title="${t("rest_timer")}"><i class="fa-solid fa-stopwatch"></i></button>
         </span>
       </div>
       <h5 class="deck-card-name"${nameStyle}>${escapeHTML(item.name)}</h5>
       <div class="deck-card-stats">
         <div class="deck-stat">
           <span class="deck-stat-value">${escapeHTML(String(item.setsTarget))}</span>
-          <span class="deck-stat-label">${t('sets')}</span>
+          <span class="deck-stat-label">${t("sets")}</span>
         </div>
         <div class="deck-stat">
           <span class="deck-stat-value">${escapeHTML(String(item.repsTarget))}</span>
-          <span class="deck-stat-label">${t('reps_label')}</span>
+          <span class="deck-stat-label">${t("reps_label")}</span>
         </div>
         <div class="deck-stat">
           <span class="deck-stat-value">${escapeHTML(String(weightValue))}</span>
-          <span class="deck-stat-label">${t('kg')}</span>
+          <span class="deck-stat-label">${t("kg")}</span>
         </div>
       </div>
       <div class="deck-card-actions">
-        <button type="button" class="deck-action-btn deck-action-easy" aria-label="${t('signal_too_easy')}">
-          <i class="fa-solid fa-feather"></i><span>${t('signal_too_easy')}</span>
+        <button type="button" class="deck-action-btn deck-action-easy" aria-label="${t("signal_too_easy")}">
+          <i class="fa-solid fa-feather"></i><span>${t("signal_too_easy")}</span>
         </button>
-        <button type="button" class="deck-action-btn deck-action-hard" aria-label="${t('signal_too_hard')}">
-          <i class="fa-solid fa-weight-hanging"></i><span>${t('signal_too_hard')}</span>
+        <button type="button" class="deck-action-btn deck-action-hard" aria-label="${t("signal_too_hard")}">
+          <i class="fa-solid fa-weight-hanging"></i><span>${t("signal_too_hard")}</span>
         </button>
-        <button type="button" id="btn-log-feedback" class="deck-action-btn deck-action-feedback" aria-label="${t('btn_log_feedback')}">
-          <i class="fa-solid fa-triangle-exclamation"></i><span>${t('feedback_short')}</span>
+        <button type="button" id="btn-log-feedback" class="deck-action-btn deck-action-feedback" aria-label="${t("btn_log_feedback")}">
+          <i class="fa-solid fa-triangle-exclamation"></i><span>${t("feedback_short")}</span>
         </button>
       </div>
     `;
-    card.querySelector('.deck-action-easy').addEventListener('click', (e) => {
+    card.querySelector(".deck-action-easy").addEventListener("click", (e) => {
       e.stopPropagation();
-      logQuickSignal('Too Easy - Increase Load');
+      logQuickSignal("Too Easy - Increase Load");
     });
-    card.querySelector('.deck-action-hard').addEventListener('click', (e) => {
+    card.querySelector(".deck-action-hard").addEventListener("click", (e) => {
       e.stopPropagation();
-      logQuickSignal('Too Hard - Reduce Load');
+      logQuickSignal("Too Hard - Reduce Load");
     });
-    card.querySelector('.deck-action-feedback').addEventListener('click', (e) => {
+    card.querySelector(".deck-action-feedback").addEventListener("click", (e) => {
       e.stopPropagation();
       openFeedbackModal();
     });
-    const timerBtn = card.querySelector('.deck-card-timer');
-    if (timerBtn && startRestTimer) timerBtn.addEventListener('click', (e) => { e.stopPropagation(); startRestTimer(WORK_TIMER_DEFAULT); });
+    const timerBtn = card.querySelector(".deck-card-timer");
+    if (timerBtn && startRestTimer)
+      timerBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        startRestTimer(WORK_TIMER_DEFAULT);
+      });
   } else {
     // Compact row for the rest of the plan — tap to bring into focus. The target
     // is labelled S(ets) × R(eps) × weight so a collapsed, single-line card still
     // reads unambiguously (e.g. "S4 × R6 × 60kg").
-    const compactTarget = `S${escapeHTML(String(item.setsTarget))} × R${escapeHTML(String(item.repsTarget))}` +
-      (item.weightTarget > 0 ? ` × ${escapeHTML(String(item.weightTarget))}${t('kg')}` : '');
+    const compactTarget = `S${escapeHTML(String(item.setsTarget))} × R${escapeHTML(String(item.repsTarget))}${item.weightTarget > 0 ? ` × ${escapeHTML(String(item.weightTarget))}${t("kg")}` : ""}`;
     card.innerHTML = `
       <div class="deck-card-compact">
         <span class="deck-card-counter">${counter}</span>
@@ -106,6 +118,6 @@ export function renderExerciseCard(card, item, ctx) {
         ${statusBadge}
       </div>
     `;
-    card.addEventListener('click', () => onFocus(item.index));
+    card.addEventListener("click", () => onFocus(item.index));
   }
 }

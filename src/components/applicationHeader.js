@@ -25,17 +25,34 @@ let mockSyncState = { local: 2, remote: 1 };
 let syncTrackingReady = false;
 
 const THEME_BODY_CLASS = {
-  midnight: 'midnight-theme', daylight: 'daylight-theme', red: 'red-theme', blossom: 'blossom-theme', nebula: 'nebula-theme'
+  midnight: "midnight-theme",
+  daylight: "daylight-theme",
+  red: "red-theme",
+  blossom: "blossom-theme",
+  nebula: "nebula-theme",
 };
 const THEME_META_COLOR = {
-  midnight: '#09090b', daylight: '#f6f7fb', red: '#2a0407', blossom: '#fdf2f8', nebula: '#0b0a1f'
+  midnight: "#09090b",
+  daylight: "#f6f7fb",
+  red: "#2a0407",
+  blossom: "#fdf2f8",
+  nebula: "#0b0a1f",
 };
 const THEME_SWITCHER_LABELS = {
-  en: { midnight: 'Midnight', daylight: 'Daylight', red: 'Red', blossom: 'Blossom', nebula: 'Nebula' },
-  sl: { midnight: 'Polnoč', daylight: 'Dan', red: 'Rdeča', blossom: 'Cvet', nebula: 'Nebula' }
+  en: {
+    midnight: "Midnight",
+    daylight: "Daylight",
+    red: "Red",
+    blossom: "Blossom",
+    nebula: "Nebula",
+  },
+  sl: { midnight: "Polnoč", daylight: "Dan", red: "Rdeča", blossom: "Cvet", nebula: "Nebula" },
 };
 const LEGACY_THEME_MAP = {
-  dark: 'midnight', light: 'daylight', rose: 'blossom', violet: 'nebula'
+  dark: "midnight",
+  light: "daylight",
+  rose: "blossom",
+  violet: "nebula",
 };
 
 export function initApplicationHeader(d) {
@@ -59,13 +76,13 @@ export function setSyncTrackingReady(val) {
 }
 
 export function renderSyncBadge() {
-  const badge = document.getElementById('sync-badge');
+  const badge = document.getElementById("sync-badge");
   if (!badge) return;
   const { local, remote } = mockSyncState;
   if (local === 0 && remote === 0) {
-    badge.classList.add('hidden');
-    badge.textContent = '';
-    badge.removeAttribute('aria-label');
+    badge.classList.add("hidden");
+    badge.textContent = "";
+    badge.removeAttribute("aria-label");
     return;
   }
   // Past 9, a second arrow stands in for the digit (↑↑ / ↓↓) so the pill stays narrow and reads
@@ -74,62 +91,69 @@ export function renderSyncBadge() {
     const arrow = `<i class="fa-solid fa-arrow-${dir}"></i>`;
     return n > 9 ? arrow + arrow : arrow + String(n);
   };
-  badge.classList.remove('hidden');
+  badge.classList.remove("hidden");
   badge.innerHTML =
-    `<span class="sync-ahead">${cell(local, 'up')}</span>` +
-    `<span class="sync-behind">${cell(remote, 'down')}</span>`;
-  badge.setAttribute('aria-label',
-    `${local} local change${local === 1 ? '' : 's'} to push, ${remote} remote change${remote === 1 ? '' : 's'} to pull`);
+    `<span class="sync-ahead">${cell(local, "up")}</span>` +
+    `<span class="sync-behind">${cell(remote, "down")}</span>`;
+  badge.setAttribute(
+    "aria-label",
+    `${local} local change${local === 1 ? "" : "s"} to push, ${remote} remote change${remote === 1 ? "" : "s"} to pull`,
+  );
 }
 
 function applyTheme(theme) {
-  theme = LEGACY_THEME_MAP[theme] || theme;
-  const cls = THEME_BODY_CLASS[theme] || THEME_BODY_CLASS.daylight;
-  Object.values(THEME_BODY_CLASS).forEach(c => document.body.classList.remove(c));
+  const activeTheme = LEGACY_THEME_MAP[theme] || theme;
+  const cls = THEME_BODY_CLASS[activeTheme] || THEME_BODY_CLASS.daylight;
+  for (const c of Object.values(THEME_BODY_CLASS)) {
+    document.body.classList.remove(c);
+  }
   document.body.classList.add(cls);
-  localStorage.setItem('librept-theme', theme);
+  localStorage.setItem("librept-theme", activeTheme);
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', THEME_META_COLOR[theme] || THEME_META_COLOR.midnight);
+  if (meta)
+    meta.setAttribute("content", THEME_META_COLOR[activeTheme] || THEME_META_COLOR.midnight);
 }
 
 export function applyThemeSwitcherLabels() {
-  const sel = document.getElementById('theme-switcher');
+  const sel = document.getElementById("theme-switcher");
   if (!sel) return;
   const labels = THEME_SWITCHER_LABELS[deps.getState().lang] || THEME_SWITCHER_LABELS.en;
-  Array.from(sel.options).forEach(opt => { if (labels[opt.value]) opt.textContent = labels[opt.value]; });
+  for (const opt of Array.from(sel.options)) {
+    if (labels[opt.value]) opt.textContent = labels[opt.value];
+  }
 }
 
 function setupThemeSwitcher() {
-  let saved = localStorage.getItem('librept-theme') || 'daylight';
+  let saved = localStorage.getItem("librept-theme") || "daylight";
   saved = LEGACY_THEME_MAP[saved] || saved;
   applyTheme(saved);
-  const sel = document.getElementById('theme-switcher');
+  const sel = document.getElementById("theme-switcher");
   if (sel) {
     sel.value = saved;
-    sel.addEventListener('change', () => applyTheme(sel.value));
+    sel.addEventListener("change", () => applyTheme(sel.value));
   }
   applyThemeSwitcherLabels();
 }
 
 export function setupApplicationHeader() {
   // Logo Area home click handler
-  const logoArea = document.getElementById('logo-area');
+  const logoArea = document.getElementById("logo-area");
   if (logoArea) {
-    logoArea.addEventListener('click', () => {
-      deps.navigateToPath('/clients');
+    logoArea.addEventListener("click", () => {
+      deps.navigateToPath("/clients");
     });
   }
 
   // Language switcher setup
-  const langSwitcher = document.getElementById('lang-switcher');
+  const langSwitcher = document.getElementById("lang-switcher");
   if (langSwitcher) {
     langSwitcher.value = deps.getState().lang;
-    langSwitcher.addEventListener('change', (e) => {
+    langSwitcher.addEventListener("change", (e) => {
       const newLang = e.target.value;
       deps.getState().lang = newLang;
       deps.saveToLocalStorage();
       deps.applyTranslations(newLang);
-      
+
       // Re-render views to apply translations
       deps.renderClientsList();
       deps.renderRoutinesList();
@@ -138,7 +162,7 @@ export function setupApplicationHeader() {
       deps.renderPendingPlanAdjustments();
       deps.renderSessions();
       deps.populateDropdownSelectors();
-      
+
       const activeSession = deps.getActiveSession();
       if (activeSession) {
         deps.renderActiveGroupBoard();
@@ -160,88 +184,110 @@ export function setupApplicationHeader() {
 // Wires the ☰ header menu: toggle + close-on-outside-click (mirrors the .session-menu
 // pattern), plus each placeholder/real action and its About / Terms modals.
 function setupAppMenu() {
-  const menuBtn = document.getElementById('btn-app-menu');
-  const menu = document.getElementById('app-menu');
+  const menuBtn = document.getElementById("btn-app-menu");
+  const menu = document.getElementById("app-menu");
   if (!menuBtn || !menu) return;
 
   const closeMenu = () => {
-    menu.classList.add('hidden');
-    menuBtn.setAttribute('aria-expanded', 'false');
+    menu.classList.add("hidden");
+    menuBtn.setAttribute("aria-expanded", "false");
   };
-  menuBtn.addEventListener('click', (e) => {
+  menuBtn.addEventListener("click", (e) => {
     e.stopPropagation();
-    const isOpen = !menu.classList.contains('hidden');
-    menu.classList.toggle('hidden', isOpen);
-    menuBtn.setAttribute('aria-expanded', String(!isOpen));
+    const isOpen = !menu.classList.contains("hidden");
+    menu.classList.toggle("hidden", isOpen);
+    menuBtn.setAttribute("aria-expanded", String(!isOpen));
   });
   // Dismiss on any outside click.
-  document.addEventListener('click', (e) => {
-    if (!menu.classList.contains('hidden') && !e.target.closest('.app-menu-wrap')) {
+  document.addEventListener("click", (e) => {
+    if (!menu.classList.contains("hidden") && !e.target.closest(".app-menu-wrap")) {
       closeMenu();
     }
   });
 
-  const openDialog = (id) => { const d = document.getElementById(id); if (d) d.showModal(); };
+  const openDialog = (id) => {
+    const d = document.getElementById(id);
+    if (d) d.showModal();
+  };
   const on = (id, handler) => {
     const el = document.getElementById(id);
-    if (el) el.addEventListener('click', handler);
+    if (el) el.addEventListener("click", handler);
   };
 
   // Customer register / Clients directory
-  on('menu-clients-register', () => {
+  on("menu-clients-register", () => {
     closeMenu();
-    if (deps && deps.navigateToPath) {
-      deps.navigateToPath('/clients');
+    if (deps?.navigateToPath) {
+      deps.navigateToPath("/clients");
       setTimeout(() => {
-        const clientsHeader = document.querySelector('#view-clients .view-header');
-        if (clientsHeader) clientsHeader.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const clientsHeader = document.querySelector("#view-clients .view-header");
+        if (clientsHeader) clientsHeader.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 50);
     }
   });
   // Routines / Exercises / History — moved out of the header bar into this menu.
-  const goto = (route) => { closeMenu(); if (deps && deps.navigateToPath) deps.navigateToPath(route); };
-  on('menu-routines', () => goto('/routines'));
-  on('menu-exercises', () => goto('/exercises'));
-  on('menu-history', () => goto('/history'));
+  const goto = (route) => {
+    closeMenu();
+    if (deps?.navigateToPath) deps.navigateToPath(route);
+  };
+  on("menu-routines", () => goto("/routines"));
+  on("menu-exercises", () => goto("/exercises"));
+  on("menu-history", () => goto("/history"));
   // Connect cloud storage — placeholder, no backend yet.
-  on('menu-connect-cloud', () => { closeMenu(); alert(deps.t('menu_coming_soon')); });
+  on("menu-connect-cloud", () => {
+    closeMenu();
+    alert(deps.t("menu_coming_soon"));
+  });
   // Export data — reuse the existing Sync & Backup modal (it holds JSON export/restore).
-  on('menu-export-data', () => { closeMenu(); const b = document.getElementById('backup-btn'); if (b) b.click(); });
+  on("menu-export-data", () => {
+    closeMenu();
+    const b = document.getElementById("backup-btn");
+    if (b) b.click();
+  });
   // GitHub project and Privacy statement are real <a target="_blank">; just dismiss the menu.
-  on('menu-github', () => closeMenu());
-  on('menu-privacy', () => closeMenu());
+  on("menu-github", () => closeMenu());
+  on("menu-privacy", () => closeMenu());
   // About / Terms open their modals.
-  on('menu-about', () => { closeMenu(); openDialog('dialog-about'); });
-  on('menu-terms', () => { closeMenu(); openDialog('dialog-terms'); });
+  on("menu-about", () => {
+    closeMenu();
+    openDialog("dialog-about");
+  });
+  on("menu-terms", () => {
+    closeMenu();
+    openDialog("dialog-terms");
+  });
 
   // Modal close (×) buttons for the About / Terms dialogs.
-  document.querySelectorAll('#dialog-about .modal-close-btn, #dialog-terms .modal-close-btn')
-    .forEach(btn => btn.addEventListener('click', () => btn.closest('dialog').close()));
+  for (const btn of document.querySelectorAll(
+    "#dialog-about .modal-close-btn, #dialog-terms .modal-close-btn",
+  )) {
+    btn.addEventListener("click", () => btn.closest("dialog").close());
+  }
 }
 
-const TERMS_ACCEPTED_KEY = 'librept_terms_accepted';
+const TERMS_ACCEPTED_KEY = "librept_terms_accepted";
 
 // First-run no-liability disclaimer + agreement (10.2). Shown once when no acceptance is
 // stored; "I agree" persists it. On first run the modal is made mandatory — the ✕ is hidden
 // (via .first-run in CSS) and Escape is blocked — so the user must agree to dismiss it. When
 // later reopened from the ☰ menu it behaves as a normal, dismissable modal.
 function setupFirstRunTerms() {
-  const dlg = document.getElementById('dialog-terms');
-  const agreeBtn = document.getElementById('btn-terms-agree');
+  const dlg = document.getElementById("dialog-terms");
+  const agreeBtn = document.getElementById("btn-terms-agree");
   if (!dlg || !agreeBtn) return;
 
-  agreeBtn.addEventListener('click', () => {
-    localStorage.setItem(TERMS_ACCEPTED_KEY, '1');
-    dlg.classList.remove('first-run');
+  agreeBtn.addEventListener("click", () => {
+    localStorage.setItem(TERMS_ACCEPTED_KEY, "1");
+    dlg.classList.remove("first-run");
     if (dlg.open) dlg.close();
   });
   // Block Escape/cancel while the agreement is mandatory.
-  dlg.addEventListener('cancel', (e) => {
-    if (dlg.classList.contains('first-run')) e.preventDefault();
+  dlg.addEventListener("cancel", (e) => {
+    if (dlg.classList.contains("first-run")) e.preventDefault();
   });
 
   if (!localStorage.getItem(TERMS_ACCEPTED_KEY)) {
-    dlg.classList.add('first-run');
+    dlg.classList.add("first-run");
     if (!dlg.open) dlg.showModal();
   }
 }

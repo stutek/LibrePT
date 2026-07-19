@@ -2,6 +2,7 @@
 # End-to-end flow for launching the gym-floor clipboard from the dashboard, including the
 # language switch and the calendar-sync entry point that precede it.
 
+
 def test_clipboard_launch_flow(page, local_server):
     """
     LibrePT gym-floor E2E: translate the UI, sync the calendar, then tap a session card and
@@ -29,11 +30,16 @@ def test_clipboard_launch_flow(page, local_server):
     # confirm the label translated too.
     page.locator("#backup-btn").click()
     page.wait_for_selector("#dialog-backup[open]")
-    assert page.locator("#btn-sync-data-text").inner_text().strip().upper() == "SINHRONIZIRAJ PODATKE"
+    assert (
+        page.locator("#btn-sync-data-text").inner_text().strip().upper()
+        == "SINHRONIZIRAJ PODATKE"
+    )
 
     # --- STEP 2: SESSION DATA SYNC (merged into the header cloud button) ---
     page.locator("#btn-sync-data").click()
-    page.wait_for_selector("#sync-status.text-emerald")  # sync reports success in the modal
+    page.wait_for_selector(
+        "#sync-status.text-emerald"
+    )  # sync reports success in the modal
     page.locator("#dialog-backup .modal-close-btn").click()
     page.wait_for_selector("#dialog-backup", state="hidden")
 
@@ -50,7 +56,9 @@ def test_clipboard_launch_flow(page, local_server):
 
     # --- STEP 3: WORKOUT CLIPBOARD LAUNCH ---
     # Click the entire Group Strength card to verify clickability
-    group_strength_card = page.locator(".booking-card", has_text="Group Strength & Conditioning")
+    group_strength_card = page.locator(
+        ".booking-card", has_text="Group Strength & Conditioning"
+    )
     group_strength_card.click()
 
     # Confirm the clipboard overlay opens and shows the merged-session client tabs

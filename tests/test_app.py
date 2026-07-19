@@ -2,6 +2,7 @@ import os
 import re
 from html.parser import HTMLParser
 
+
 class ElementCollector(HTMLParser):
     def __init__(self):
         super().__init__()
@@ -13,94 +14,114 @@ class ElementCollector(HTMLParser):
     def handle_starttag(self, tag, attrs):
         attrs_dict = dict(attrs)
         self.tags.add(tag)
-        if 'id' in attrs_dict:
-            self.ids.add(attrs_dict['id'])
-        if 'class' in attrs_dict:
-            for c in attrs_dict['class'].split():
+        if "id" in attrs_dict:
+            self.ids.add(attrs_dict["id"])
+        if "class" in attrs_dict:
+            for c in attrs_dict["class"].split():
                 self.classes.add(c)
-        self.elements.append({
-            'tag': tag,
-            'attrs': attrs_dict
-        })
+        self.elements.append({"tag": tag, "attrs": attrs_dict})
+
 
 def test_file_structure():
-    assert os.path.exists('src/index.html')
-    assert os.path.exists('src/app.js')
-    assert os.path.exists('src/index.css')
-    assert os.path.exists('src/data/index.js')
-    assert os.path.exists('LICENSE')
+    assert os.path.exists("src/index.html")
+    assert os.path.exists("src/app.js")
+    assert os.path.exists("src/index.css")
+    assert os.path.exists("src/data/index.js")
+    assert os.path.exists("LICENSE")
+
 
 def test_manifest_icons_exist():
     """Every icon the PWA manifest advertises must actually ship, or installation renders a blank tile."""
     import json
-    with open('src/manifest.json', 'r', encoding='utf-8') as f:
+
+    with open("src/manifest.json", "r", encoding="utf-8") as f:
         manifest = json.load(f)
 
-    assert manifest['icons'], "manifest.json declares no icons"
-    for icon in manifest['icons']:
-        icon_path = os.path.join('src', icon['src'].lstrip('./'))
-        assert os.path.exists(icon_path), f"manifest.json references missing icon: {icon_path}"
+    assert manifest["icons"], "manifest.json declares no icons"
+    for icon in manifest["icons"]:
+        icon_path = os.path.join("src", icon["src"].lstrip("./"))
+        assert os.path.exists(icon_path), (
+            f"manifest.json references missing icon: {icon_path}"
+        )
+
 
 # Translation parity now lives in tests/unit/test_i18n_parity.py, which checks every locale
 # file under src/i18n/ data-drivenly (the dictionaries moved out of app.js into that folder).
 
+
 def test_static_mappings_selectors():
     # Parse index.html to gather all DOM elements
-    with open('src/index.html', 'r', encoding='utf-8') as f:
+    with open("src/index.html", "r", encoding="utf-8") as f:
         html_content = f.read()
-    
+
     collector = ElementCollector()
     collector.feed(html_content)
 
     # Read domMappings.js (where staticMappings moved from app.js)
-    with open('src/i18n/domMappings.js', 'r', encoding='utf-8') as f:
+    with open("src/i18n/domMappings.js", "r", encoding="utf-8") as f:
         js_content = f.read()
 
     # Extract staticMappings block
-    mappings_match = re.search(r'const staticMappings = \{(.*?)\};', js_content, re.DOTALL)
+    mappings_match = re.search(
+        r"const staticMappings = \{(.*?)\};", js_content, re.DOTALL
+    )
     assert mappings_match, "staticMappings object not found in domMappings.js"
     mappings_block = mappings_match.group(1)
 
     # Find all mapping selectors (e.g. '#btn-add-client': 'btn_add_client')
-    mappings = re.findall(r"'\s*([^']+)\s*':\s*'([^']+)'", mappings_block)
+    mappings = re.findall(
+        r"['\"]\s*([^'\"]+)\s*['\"]\s*:\s*['\"]([^'\"]+)['\"]", mappings_block
+    )
     assert len(mappings) > 0, "No static mappings parsed"
 
     # Parse and validate each selector against the index.html DOM collector
     for selector, key in mappings:
         # Simple ID check (e.g., #btn-add-client)
-        if selector.startswith('#') and ' ' not in selector and '[' not in selector:
+        if selector.startswith("#") and " " not in selector and "[" not in selector:
             element_id = selector[1:]
-            assert element_id in collector.ids, f"Selector ID '{element_id}' referenced in app.js mappings does not exist in index.html"
-        
+            assert element_id in collector.ids, (
+                f"Selector ID '{element_id}' referenced in app.js mappings does not exist in index.html"
+            )
+
         # Simple Class check (e.g., .logo-area)
-        elif selector.startswith('.') and ' ' not in selector:
+        elif selector.startswith(".") and " " not in selector:
             class_name = selector[1:]
-            assert class_name in collector.classes, f"Selector Class '{class_name}' referenced in app.js mappings does not exist in index.html"
-        
+            assert class_name in collector.classes, (
+                f"Selector Class '{class_name}' referenced in app.js mappings does not exist in index.html"
+            )
+
         # Sub-selector with spaces (e.g., '#view-clients .section-title h3')
-        elif ' ' in selector:
+        elif " " in selector:
             parts = selector.split()
             root_id = parts[0]
-            if root_id.startswith('#'):
+            if root_id.startswith("#"):
                 element_id = root_id[1:]
-                assert element_id in collector.ids, f"Root selector ID '{element_id}' in '{selector}' does not exist in index.html"
-        
+                assert element_id in collector.ids, (
+                    f"Root selector ID '{element_id}' in '{selector}' does not exist in index.html"
+                )
+
         # Attributes check (e.g., 'button[data-view="clients"] span')
-        elif 'data-view' in selector:
+        elif "data-view" in selector:
             view_match = re.search(r'data-view="([^"]+)"', selector)
             if view_match:
                 view_val = view_match.group(1)
-                has_element = any(el['tag'] == 'button' and el['attrs'].get('data-view') == view_val for el in collector.elements)
-                assert has_element, f"Element matching 'button[data-view=\"{view_val}\"]' not found in index.html"
+                has_element = any(
+                    el["tag"] == "button" and el["attrs"].get("data-view") == view_val
+                    for el in collector.elements
+                )
+                assert has_element, (
+                    f"Element matching 'button[data-view=\"{view_val}\"]' not found in index.html"
+                )
+
 
 def test_mock_data_structure():
-    with open('src/data/index.js', 'r', encoding='utf-8') as f:
+    with open("src/data/index.js", "r", encoding="utf-8") as f:
         content = f.read()
 
     # Basic exports presence checks
-    assert 'export { DEFAULT_EXERCISES }' in content
-    assert 'export { DEFAULT_CLIENTS }' in content
-    assert 'export { DEFAULT_ROUTINES }' in content
-    assert 'export { DEFAULT_HISTORY }' in content
-    assert 'export { DEFAULT_PLAN_UPDATES }' in content
-    assert 'export { DEFAULT_SESSIONS }' in content
+    assert "export { DEFAULT_EXERCISES }" in content
+    assert "export { DEFAULT_CLIENTS }" in content
+    assert "export { DEFAULT_ROUTINES }" in content
+    assert "export { DEFAULT_HISTORY }" in content
+    assert "export { DEFAULT_PLAN_UPDATES }" in content
+    assert "export { DEFAULT_SESSIONS }" in content

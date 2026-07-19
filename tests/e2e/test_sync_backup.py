@@ -37,7 +37,9 @@ def test_sync_badge_caps_over_nine_with_second_arrow(page, local_server):
     assert ahead.inner_text().strip() == ""
     assert ahead.locator("i").count() == 2
     # ...while the exact count still rides along in the aria-label for screen readers.
-    assert "local changes to push" in (page.locator("#sync-badge").get_attribute("aria-label") or "")
+    assert "local changes to push" in (
+        page.locator("#sync-badge").get_attribute("aria-label") or ""
+    )
 
 
 def test_backup_modal_opens_and_closes(page, local_server):

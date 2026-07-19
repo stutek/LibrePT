@@ -3,6 +3,6 @@
 // GitHub Pages deploy (.github/workflows/deploy.yml) overwrite dist/version.js with the real short
 // commit SHA and a UTC build timestamp. Keep those two writers in sync with this shape.
 export const BUILD_INFO = {
-  commit: 'dev',
-  builtAt: ''
+  commit: "dev",
+  builtAt: "",
 };

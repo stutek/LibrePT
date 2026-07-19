@@ -2,8 +2,7 @@
 :root,
 body.midnight-theme {
   --bg-color: #09090b; /* zinc-950 */
-  --bg-gradient:
-    radial-gradient(1100px 720px at 12% -8%, rgba(16, 185, 129, 0.16), transparent 60%),
+  --bg-gradient: radial-gradient(1100px 720px at 12% -8%, rgba(16, 185, 129, 0.16), transparent 60%),
     radial-gradient(900px 640px at 108% 4%, rgba(34, 211, 238, 0.12), transparent 55%),
     radial-gradient(760px 720px at 50% 118%, rgba(79, 70, 229, 0.12), transparent 60%);
   --card-bg: rgba(22, 22, 26, 0.92); /* near-opaque so deck cards stay readable over the gradient */

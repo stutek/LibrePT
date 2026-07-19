@@ -4,6 +4,7 @@ Run with `python -m deploy` (after a build), or import run_deploy (used by pipel
 a local simulation of the deploy; the real GitHub Pages deploy is .github/workflows/deploy.yml.
 Paths are relative to the current working directory, so run this from the repository root.
 """
+
 import os
 import sys
 
@@ -11,7 +12,7 @@ import sys
 def run_deploy():
     """Simulates deployment of the bundled app to a target environment."""
     print("\n>>> Step 4: Simulating Deployment...")
-    dist_dir = 'dist'
+    dist_dir = "dist"
 
     if not os.path.exists(dist_dir) or not os.listdir(dist_dir):
         print("  ✗ Deployment failed: Build folder is empty or not found.")

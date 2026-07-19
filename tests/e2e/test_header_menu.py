@@ -23,7 +23,9 @@ def test_menu_toggles_and_closes_on_outside_click(page, local_server):
 
     # Clicking a neutral element outside the menu dismisses it.
     page.locator("#view-clients .view-header h2").click()
-    page.wait_for_function("() => document.getElementById('app-menu').classList.contains('hidden')")
+    page.wait_for_function(
+        "() => document.getElementById('app-menu').classList.contains('hidden')"
+    )
     assert page.locator("#btn-app-menu").get_attribute("aria-expanded") == "false"
 
 
@@ -49,7 +51,10 @@ def test_menu_items_present_and_github_link(page, local_server):
     assert github.get_attribute("target") == "_blank"
 
     privacy = page.locator("#menu-privacy")
-    assert privacy.get_attribute("href") == "https://github.com/stutek/LibrePT/blob/main/PRIVACY.md"
+    assert (
+        privacy.get_attribute("href")
+        == "https://github.com/stutek/LibrePT/blob/main/PRIVACY.md"
+    )
     assert privacy.get_attribute("target") == "_blank"
 
 
@@ -72,7 +77,10 @@ def test_about_modal_opens_and_closes(page, local_server):
     page.locator("#menu-about").click()
     about = page.locator("#dialog-about")
     assert about.get_attribute("open") is not None
-    assert page.locator("#about-repo-link").get_attribute("href") == "https://github.com/stutek/LibrePT"
+    assert (
+        page.locator("#about-repo-link").get_attribute("href")
+        == "https://github.com/stutek/LibrePT"
+    )
 
     page.locator("#dialog-about .modal-close-btn").click()
     assert about.get_attribute("open") is None

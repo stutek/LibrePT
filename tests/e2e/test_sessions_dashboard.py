@@ -20,7 +20,9 @@ def test_sessions_day_navigation(page, local_server):
     # Dashboard opens focused on today: ISO date + weekday show today, Today button is disabled
     page.wait_for_selector("#calendar-title-weekday")
     assert weekday.inner_text().strip().upper() == today.strftime("%A").upper()
-    assert page.locator("#calendar-title-date").inner_text().strip() == today.strftime("%Y-%m-%d")
+    assert page.locator("#calendar-title-date").inner_text().strip() == today.strftime(
+        "%Y-%m-%d"
+    )
     assert today_btn.is_disabled()  # disabled == the deck is already on today
 
     # Left arrow steps back to yesterday and enables the Today reset button
@@ -47,7 +49,9 @@ def test_sessions_day_navigation(page, local_server):
     # The Today reset button jumps the deck straight back to today from any other day
     today_btn.click()
     page.wait_for_timeout(900)
-    assert page.locator("#calendar-title-date").inner_text().strip() == today.strftime("%Y-%m-%d")
+    assert page.locator("#calendar-title-date").inner_text().strip() == today.strftime(
+        "%Y-%m-%d"
+    )
     assert today_btn.is_disabled()
 
     # Going home via the logo pulls focus back to today
@@ -67,7 +71,9 @@ def test_sessions_day_navigation(page, local_server):
     }""")
     page.wait_for_timeout(900)
     assert weekday.inner_text().strip().upper() == tomorrow.strftime("%A").upper()
-    assert page.locator("#calendar-title-date").inner_text().strip() == tomorrow.strftime("%Y-%m-%d")
+    assert page.locator(
+        "#calendar-title-date"
+    ).inner_text().strip() == tomorrow.strftime("%Y-%m-%d")
     assert today_btn.is_enabled()  # enabled == not on today, so it can reset
 
 
@@ -79,22 +85,32 @@ def _touch_swipe(cdp, page, x, y, dx, steps=12):
     headless setup (verified against a plain scroll-snap control deck), so the gesture is
     built from raw touch events instead.
     """
-    cdp.send("Input.dispatchTouchEvent", {"type": "touchStart", "touchPoints": [{"x": x, "y": y}]})
+    cdp.send(
+        "Input.dispatchTouchEvent",
+        {"type": "touchStart", "touchPoints": [{"x": x, "y": y}]},
+    )
     for i in range(1, steps + 1):
-        cdp.send("Input.dispatchTouchEvent", {
-            "type": "touchMove",
-            "touchPoints": [{"x": x + dx * i / steps, "y": y}],
-        })
+        cdp.send(
+            "Input.dispatchTouchEvent",
+            {
+                "type": "touchMove",
+                "touchPoints": [{"x": x + dx * i / steps, "y": y}],
+            },
+        )
         page.wait_for_timeout(16)
     cdp.send("Input.dispatchTouchEvent", {"type": "touchEnd", "touchPoints": []})
 
 
 def test_touch_swipe_between_days(browser, local_server):
     """A real one-finger swipe on the deck must advance exactly one day and retitle the bar."""
-    context = browser.new_context(viewport={"width": 390, "height": 844}, has_touch=True, is_mobile=True)
+    context = browser.new_context(
+        viewport={"width": 390, "height": 844}, has_touch=True, is_mobile=True
+    )
     # This test builds its own context, so it opts into the first-run Terms auto-accept manually
     # (the autouse conftest fixture only covers the shared `page` fixture).
-    context.add_init_script("window.localStorage.setItem('librept_terms_accepted', '1');")
+    context.add_init_script(
+        "window.localStorage.setItem('librept_terms_accepted', '1');"
+    )
     page = context.new_page()
     page.goto(local_server)
     page.wait_for_selector("#today-sessions-column")
@@ -113,7 +129,9 @@ def test_touch_swipe_between_days(browser, local_server):
     page.wait_for_timeout(1200)
     tomorrow = today + datetime.timedelta(days=1)
     assert weekday.inner_text().strip().upper() == tomorrow.strftime("%a").upper()
-    assert page.locator("#calendar-title-date").inner_text().strip() == tomorrow.strftime("%Y-%m-%d")
+    assert page.locator(
+        "#calendar-title-date"
+    ).inner_text().strip() == tomorrow.strftime("%Y-%m-%d")
     assert today_btn.is_enabled()  # enabled == not on today, so it can reset
 
     # Swiping right walks back to today
@@ -141,4 +159,6 @@ def test_single_column_deck_at_every_viewport(page, local_server):
         page.goto(local_server)
         page.wait_for_selector("#today-sessions-column")
         page.wait_for_timeout(700)
-        assert page.evaluate(visible_columns) == ["today"], f"expected only today's column at {width}px"
+        assert page.evaluate(visible_columns) == ["today"], (
+            f"expected only today's column at {width}px"
+        )

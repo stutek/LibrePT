@@ -52,8 +52,14 @@ def local_server():
     proc = None
     if not is_port_open(8081):
         proc = subprocess.Popen(
-            [sys.executable, str(REPO_ROOT / "deploy" / "local_http_server.py"), "--port", "8081"],
-            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            [
+                sys.executable,
+                str(REPO_ROOT / "deploy" / "local_http_server.py"),
+                "--port",
+                "8081",
+            ],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
         )
         time.sleep(1.5)  # give it a moment to bind
     yield "http://localhost:8081/LibrePT/"

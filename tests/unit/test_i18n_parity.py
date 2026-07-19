@@ -9,7 +9,11 @@ import re
 
 def _locale_files(src_dir):
     """Every locale file in src/i18n/ (the registry index.js and domMappings.js are not locales)."""
-    return sorted(p for p in (src_dir / "i18n").glob("*.js") if p.name not in ("index.js", "domMappings.js"))
+    return sorted(
+        p
+        for p in (src_dir / "i18n").glob("*.js")
+        if p.name not in ("index.js", "domMappings.js")
+    )
 
 
 def _keys(path):
@@ -24,7 +28,9 @@ def test_locales_present_and_registered(src_dir):
     assert files, "no locale files found under src/i18n/"
     index = (src_dir / "i18n" / "index.js").read_text(encoding="utf-8")
     for f in files:
-        assert f.stem in index, f"locale '{f.stem}' is not registered in src/i18n/index.js"
+        assert f.stem in index, (
+            f"locale '{f.stem}' is not registered in src/i18n/index.js"
+        )
 
 
 def test_all_locales_have_the_same_keys(src_dir):
@@ -35,5 +41,7 @@ def test_all_locales_have_the_same_keys(src_dir):
 
     all_keys = set().union(*keysets.values())
     # For each locale, list the keys it is missing (present in some other locale but not here).
-    missing = {name: sorted(all_keys - ks) for name, ks in keysets.items() if all_keys - ks}
+    missing = {
+        name: sorted(all_keys - ks) for name, ks in keysets.items() if all_keys - ks
+    }
     assert not missing, f"locales with missing translations: {missing}"

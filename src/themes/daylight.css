@@ -1,8 +1,7 @@
 /* themes/daylight.css - Daylight (light) — airy slate + emerald, soft rounded shapes */
 body.daylight-theme {
   --bg-color: #f6f7fb;
-  --bg-gradient:
-    radial-gradient(1000px 700px at 8% -10%, rgba(16, 185, 129, 0.12), transparent 60%),
+  --bg-gradient: radial-gradient(1000px 700px at 8% -10%, rgba(16, 185, 129, 0.12), transparent 60%),
     radial-gradient(920px 640px at 112% -2%, rgba(56, 189, 248, 0.16), transparent 55%),
     linear-gradient(180deg, #ffffff 0%, #eef2f9 100%);
   --card-bg: rgba(255, 255, 255, 0.96);

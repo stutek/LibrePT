@@ -10,7 +10,9 @@
 def _fresh_page(browser, local_server, accepted=False):
     context = browser.new_context()
     if accepted:
-        context.add_init_script("window.localStorage.setItem('librept_terms_accepted', '1');")
+        context.add_init_script(
+            "window.localStorage.setItem('librept_terms_accepted', '1');"
+        )
     page = context.new_page()
     page.goto(local_server)
     page.wait_for_selector("#view-clients.active")
@@ -30,10 +32,15 @@ def test_terms_shown_and_mandatory_on_first_run(browser, local_server):
 
         page.keyboard.press("Escape")
         page.wait_for_timeout(150)
-        assert terms.get_attribute("open") is not None, "Escape must not dismiss the first-run terms"
+        assert terms.get_attribute("open") is not None, (
+            "Escape must not dismiss the first-run terms"
+        )
 
         # Not accepted until the user agrees.
-        assert page.evaluate("() => localStorage.getItem('librept_terms_accepted')") is None
+        assert (
+            page.evaluate("() => localStorage.getItem('librept_terms_accepted')")
+            is None
+        )
     finally:
         context.close()
 
@@ -46,7 +53,9 @@ def test_agree_persists_and_survives_reload(browser, local_server):
         terms = page.locator("#dialog-terms")
         assert terms.get_attribute("open") is None
         assert "first-run" not in (terms.get_attribute("class") or "")
-        assert page.evaluate("() => localStorage.getItem('librept_terms_accepted')") == "1"
+        assert (
+            page.evaluate("() => localStorage.getItem('librept_terms_accepted')") == "1"
+        )
 
         # A returning load does not re-show the modal.
         page.reload()

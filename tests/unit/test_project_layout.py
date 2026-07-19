@@ -17,7 +17,9 @@ def test_manifest_icons_exist(src_dir):
     assert manifest["icons"], "manifest.json declares no icons"
     for icon in manifest["icons"]:
         # icon['src'] is relative to the manifest, which lives in src/
-        assert (src_dir / icon["src"]).exists(), f"manifest.json references missing icon: {icon['src']}"
+        assert (src_dir / icon["src"]).exists(), (
+            f"manifest.json references missing icon: {icon['src']}"
+        )
 
 
 def test_seed_data_exports(src_dir):
@@ -33,7 +35,9 @@ def test_seed_data_exports(src_dir):
     }
     for filename, export in expected.items():
         content = (data / filename).read_text(encoding="utf-8")
-        assert f"export const {export}" in content, f"src/data/{filename} should export {export}"
+        assert f"export const {export}" in content, (
+            f"src/data/{filename} should export {export}"
+        )
     barrel = (data / "index.js").read_text(encoding="utf-8")
     for export in expected.values():
         assert export in barrel, f"src/data/index.js should re-export {export}"

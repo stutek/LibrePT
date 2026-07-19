@@ -35,7 +35,9 @@ def test_apply_adjustment_wizard_opens_prefilled(page, local_server):
     assert page.locator("#adjust-feedback-tag").inner_text().strip() == "Too Easy"
 
     # The modify panel is the default; swap is hidden.
-    assert "hidden" not in (page.locator("#adjust-panel-modify").get_attribute("class") or "")
+    assert "hidden" not in (
+        page.locator("#adjust-panel-modify").get_attribute("class") or ""
+    )
     assert "hidden" in (page.locator("#adjust-panel-swap").get_attribute("class") or "")
 
     # A "Too Easy" tag pre-fills a positive target weight (the +2.5 kg smart default).

@@ -1,13 +1,13 @@
 // src/views/clientsView.js - Domain module for client directory and detail views
-import { renderClientsDirectory } from '../components/clientsDirectory.js';
-import { renderHistoryItems } from './historyView.js';
+import { renderClientsDirectory } from "../components/clientsDirectory.js";
 import {
   escapeHTML,
-  getInitials,
+  formatDateStr,
   getClientDisplayNameHTML,
+  getInitials,
   truncateString,
-  formatDateStr
-} from '../helper/utils.js';
+} from "../helper/utils.js";
+import { renderHistoryItems } from "./historyView.js";
 
 let activeDetailClientId = null;
 
@@ -19,55 +19,68 @@ export function setActiveDetailClientId(id) {
   activeDetailClientId = id;
 }
 
-export function renderClientsList({ state, t, navigateToPath, filterQuery = '' }) {
-  const container = document.getElementById('clients-list');
+export function renderClientsList({ state, t, navigateToPath, filterQuery = "" }) {
+  const container = document.getElementById("clients-list");
   if (!container) return;
   renderClientsDirectory(container, {
     clients: state.clients,
     filterQuery,
-    t, escapeHTML, getInitials, getClientDisplayNameHTML, truncateString,
-    onOpenClient: (id) => navigateToPath(`/clients/${id}`)
+    t,
+    escapeHTML,
+    getInitials,
+    getClientDisplayNameHTML,
+    truncateString,
+    onOpenClient: (id) => navigateToPath(`/clients/${id}`),
   });
 }
 
-export function showClientDetails({ clientId, state, t, showErrorView, switchView, openWorkoutSetupModal }) {
-  const client = state.clients.find(c => c.id === clientId);
+export function showClientDetails({
+  clientId,
+  state,
+  t,
+  showErrorView,
+  switchView,
+  openWorkoutSetupModal,
+}) {
+  const client = state.clients.find((c) => c.id === clientId);
   if (!client) {
     showErrorView(window.location.pathname);
     return;
   }
 
   activeDetailClientId = clientId;
-  document.getElementById('detail-client-name').innerHTML = getClientDisplayNameHTML(client);
-  document.getElementById('detail-client-avatar').textContent = client.avatar || getInitials(client.name);
-  document.getElementById('profile-name').innerHTML = getClientDisplayNameHTML(client);
-  document.getElementById('profile-joined-date').textContent = `${t('joined')} ${formatDateStr(client.joinedDate)}`;
-  document.getElementById('profile-goals').textContent = client.goals || t('no_goals_specified');
-  document.getElementById('profile-notes').textContent = client.notes || t('no_notes_specified');
+  document.getElementById("detail-client-name").innerHTML = getClientDisplayNameHTML(client);
+  document.getElementById("detail-client-avatar").textContent =
+    client.avatar || getInitials(client.name);
+  document.getElementById("profile-name").innerHTML = getClientDisplayNameHTML(client);
+  document.getElementById("profile-joined-date").textContent =
+    `${t("joined")} ${formatDateStr(client.joinedDate)}`;
+  document.getElementById("profile-goals").textContent = client.goals || t("no_goals_specified");
+  document.getElementById("profile-notes").textContent = client.notes || t("no_notes_specified");
 
-  const startBtn = document.getElementById('btn-start-client-workout');
+  const startBtn = document.getElementById("btn-start-client-workout");
   if (startBtn) {
     startBtn.replaceWith(startBtn.cloneNode(true));
-    document.getElementById('btn-start-client-workout').addEventListener('click', () => {
+    document.getElementById("btn-start-client-workout").addEventListener("click", () => {
       openWorkoutSetupModal(clientId);
     });
   }
 
   renderClientWorkoutHistory({ client, state, t });
-  switchView('client-detail');
+  switchView("client-detail");
 }
 
 export function renderClientWorkoutHistory({ client, state, t }) {
-  const container = document.getElementById('client-history-list');
+  const container = document.getElementById("client-history-list");
   if (!container) return;
-  container.innerHTML = '';
+  container.innerHTML = "";
 
   const clientHistory = state.history
-    .filter(log => log.clientId === client.id)
+    .filter((log) => log.clientId === client.id)
     .sort((a, b) => new Date(b.date) - new Date(a.date));
 
   if (clientHistory.length === 0) {
-    container.innerHTML = `<div class="card glassmorphic text-center text-muted text-sm">${t('no_workouts_logged')}</div>`;
+    container.innerHTML = `<div class="card glassmorphic text-center text-muted text-sm">${t("no_workouts_logged")}</div>`;
     return;
   }
 

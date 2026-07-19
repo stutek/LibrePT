@@ -9,7 +9,7 @@
 //   cardDeps: { state, t, escapeHTML, launchClipboardDirectly, sessionDayTemporal, activeId }
 // }
 
-import { renderSessionCard } from './sessionCard.js';
+import { renderSessionCard } from "./sessionCard.js";
 
 function getMinutesOfDay(b) {
   if (b.time) {
@@ -34,12 +34,14 @@ function compareBookingsByStartTime(a, b) {
 
 export function renderSessionList(container, sessions, ctx) {
   if (!container) return;
-  container.innerHTML = '';
-  
+  container.innerHTML = "";
+
   if (sessions.length === 0) {
     container.innerHTML = `<div class="card glassmorphic text-center text-muted" style="padding: 16px; font-size: 12px;">${ctx.emptyMessage}</div>`;
   } else {
     const sorted = [...sessions].sort(compareBookingsByStartTime);
-    sorted.forEach(s => renderSessionCard(s, container, ctx.cardDeps));
+    for (const s of sorted) {
+      renderSessionCard(s, container, ctx.cardDeps);
+    }
   }
 }

@@ -42,7 +42,9 @@ def test_selecting_a_theme_swaps_the_single_body_class(page, local_server, value
     # Exactly the chosen theme class is present; no other theme class lingers.
     assert THEME_BODY_CLASS[value] in classes
     others = {c for c in THEME_BODY_CLASS.values() if c != THEME_BODY_CLASS[value]}
-    assert others.isdisjoint(classes), f"stale theme class left on body: {others & set(classes)}"
+    assert others.isdisjoint(classes), (
+        f"stale theme class left on body: {others & set(classes)}"
+    )
 
     # The choice is persisted.
     assert page.evaluate("() => localStorage.getItem('librept-theme')") == value
