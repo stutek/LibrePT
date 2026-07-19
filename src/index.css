@@ -1849,13 +1849,30 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
 .booking-card.booking-completed { border-left-color: var(--success); opacity: 0.6; }/* The session in progress is emphasised with an accent-tinted fill + accent ring — the same
    "selected/active" language as a chosen participant tab, so it clearly stands out. */
 .booking-live {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 45%, transparent), var(--box-shadow);
-  background-color: var(--bg-color);
+  /* Stack so the green left bracket can spill into a full-width bottom bar. */
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  border-left-color: var(--primary);
+  overflow: hidden;
   background-image:
-    linear-gradient(color-mix(in srgb, var(--primary) 15%, transparent), color-mix(in srgb, var(--primary) 15%, transparent)),
+    linear-gradient(color-mix(in srgb, var(--primary) 8%, transparent), color-mix(in srgb, var(--primary) 8%, transparent)),
     linear-gradient(var(--card-bg), var(--card-bg));
-}/* Session title tint by day, matching the day-selection line: past = purple, future = amber,
+}
+/* Bottom bar: the left bracket's green wrapping along the bottom, with the Active-session tag + timer. */
+.booking-live-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 12px -14px -14px -14px;   /* bleed to the card's padded edges so it meets the left border */
+  padding: 8px 14px;
+  background: var(--primary);
+  color: #08130e;
+}
+.booking-live-tag { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 800; }
+.booking-live-timer { font-family: var(--font-mono, monospace); font-size: 12px; font-weight: 800; letter-spacing: 0.3px; }
+.booking-live-timer.overtime { color: #7f1d1d; }/* Session title tint by day, matching the day-selection line: past = purple, future = amber,
    today = default. Set here (not inline) so the temporal class on the card can override it. */
 .booking-card-title { color: var(--text-color); }.booking-card.booking-past .booking-card-title { color: var(--temporal-past); }.booking-card.booking-future .booking-card-title { color: var(--temporal-future); }/* --- SESSIONS DAY TITLE BAR --- */
 /* Home view title bar. The "Sessions Schedule" label (.view-title-label) is the conceptual view

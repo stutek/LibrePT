@@ -45,15 +45,7 @@ export function updateSessionBarTimer() {
 
   document.querySelectorAll('.session-card-timer').forEach(el => {
     el.textContent = text;
-    if (isOvertime) {
-      el.classList.add('overtime');
-      el.style.borderColor = '#ef4444';
-      el.style.color = '#ef4444';
-    } else {
-      el.classList.remove('overtime');
-      el.style.borderColor = 'var(--primary)';
-      el.style.color = 'var(--primary)';
-    }
+    el.classList.toggle('overtime', isOvertime); // colours come from CSS, not inline styles
   });
 }
 

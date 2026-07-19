@@ -16,11 +16,14 @@ export function renderSessionCard(b, colContainer, deps) {
   // The session currently in progress is emphasised (accent tint + border), the same visual
   // language as a selected participant, so it stands out from the rest of the day.
   const activeSession = deps.getActiveSession ? deps.getActiveSession() : null;
-  const isLive = !b.completed && (
+  const sb = activeSession && activeSession.booking;
+  // A card is the active session only when it's one of the bookings that session was launched from
+  // (booking.ids lists every merged booking; activeId/id cover the single-booking case).
+  const isLive = !b.completed && !!activeSession && (
     (activeId && b.id === activeId) ||
-    (activeSession && activeSession.id === b.id) ||
-    (activeSession && activeSession.booking && activeSession.booking.id === b.id) ||
-    (activeSession && activeSession.booking && activeSession.booking.ids && activeSession.booking.ids.includes(b.id))
+    (activeSession.id === b.id) ||
+    (sb && sb.id === b.id) ||
+    (sb && Array.isArray(sb.ids) && sb.ids.includes(b.id))
   );
   if (isLive) card.classList.add('booking-live');
 
@@ -84,21 +87,10 @@ export function renderSessionCard(b, colContainer, deps) {
     }
   }
 
-  const liveMarkerHTML = isLive ? `
-    <span class="badge badge-live session-card-live-marker" style="background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); font-size: 10px; padding: 2px 6px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
-      <span class="pulse-indicator" style="margin: 0; width: 6px; height: 6px;"></span>
-      <span>${escapeHTML(t('live_tracking_clipboard') || 'Active Workout')}</span>
-    </span>` : '';
-
-  const liveTimerHTML = isLive ? `
-    <span id="session-card-timer-${escapeHTML(b.id)}" class="session-card-timer badge ${timerIsOvertime ? 'overtime' : ''}" style="background: var(--card-bg); border: 1px solid ${timerIsOvertime ? '#ef4444' : 'var(--primary)'}; color: ${timerIsOvertime ? '#ef4444' : 'var(--primary)'}; font-size: 11px; font-family: monospace; font-weight: 700; padding: 2px 8px; margin-left: auto;">${escapeHTML(timerInitialText)}</span>` : '';
-
   info.innerHTML = `
     <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px;">
-      ${liveMarkerHTML}
       <span class="badge badge-primary" style="font-size: 10px; padding: 2px 6px; font-weight: 700; font-family: monospace;">${escapeHTML(b.time)}</span>
       <strong class="booking-card-title" style="font-size: 13px;">${escapeHTML(b.title)}</strong>
-      ${liveTimerHTML}
       ${completedBadge}
     </div>
     <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">
@@ -111,6 +103,14 @@ export function renderSessionCard(b, colContainer, deps) {
     ${warningHTML}
   `;
 
+  // The active session is marked by the card's green left bracket spilling into a full-width bottom
+  // bar carrying an "Active session" tag and the live timer (no red anywhere).
+  const liveBarHTML = isLive ? `
+    <div class="booking-live-bar">
+      <span class="booking-live-tag"><i class="fa-solid fa-person-running"></i> ${escapeHTML(t('active_session') || 'Active session')}</span>
+      <span id="session-card-timer-${escapeHTML(b.id)}" class="session-card-timer booking-live-timer${timerIsOvertime ? ' overtime' : ''}">${escapeHTML(timerInitialText)}</span>
+    </div>` : '';
+
   // No launch/completed button: the whole card is the tap target, and completion already shows
   // as a badge — the button just duplicated that and ate horizontal space.
   card.addEventListener('click', () => {
@@ -118,5 +118,6 @@ export function renderSessionCard(b, colContainer, deps) {
   });
 
   card.appendChild(info);
+  if (liveBarHTML) card.insertAdjacentHTML('beforeend', liveBarHTML);
   colContainer.appendChild(card);
 }

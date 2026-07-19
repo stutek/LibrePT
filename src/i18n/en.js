@@ -31,6 +31,7 @@ export const en = {
     history_title: "Global Training History",
     no_workouts_history: "No logged workouts in global history.",
     live_tracking_clipboard: "Live Tracking Clipboard",
+    active_session: "Active session",
     btn_collapse: "Minimize",
     exercise_of: "Exercise",
     btn_add_set: "Add Set",

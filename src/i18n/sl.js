@@ -30,6 +30,7 @@ export const sl = {
     history_title: "Splošna zgodovina vadb",
     no_workouts_history: "V splošni zgodovini ni zabeleženih vadb.",
     live_tracking_clipboard: "Sledenje vadbi v živo",
+    active_session: "Aktivna seja",
     btn_collapse: "Minimiziraj",
     exercise_of: "Vaja",
     btn_add_set: "Dodaj serijo",
