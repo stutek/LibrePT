@@ -89,7 +89,8 @@ export const en = {
     "Are you sure you want to reset the database? All custom clients, history, and routines will be lost.",
   btn_resolve: "Resolve",
   no_exercises_injected: "No Exercises Injected",
-  no_exercises_desc: 'Please tap "Inject Exercise" below to add an exercise for this client.',
+  no_exercises_desc:
+    "Please tap the edit icon (✎) above to plan and add exercises for this client.",
   edit_plan: "Edit plan",
   editing_plan_for: "Editing plan for",
   editing_plan_session: "Editing session plan",

@@ -235,6 +235,15 @@ export function openSessionFromHistory(log) {
     },
     activeClientId: log.clientId,
     feedback: log.feedback || [],
+    booking: log.isPlanning
+      ? {
+          id: `plan-${log.id}`,
+          isPlanning: true,
+          titles: [t("planned_program") || "Planned Program"],
+          timeLabel: t("date_unknown") || "Date Unknown",
+          location: "",
+        }
+      : null,
   };
 
   if (log.isPlanning) {
@@ -597,6 +606,7 @@ export function renderActiveGroupBoard() {
       saveToLocalStorage: appDeps.saveToLocalStorage,
       onRerender: renderActiveGroupBoard,
       startRestTimer: triggerRestTimer,
+      enterEditMode: enterClipboardEditMode,
     });
   }
 

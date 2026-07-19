@@ -15,6 +15,7 @@
 //   onRerender()   // re-render the whole board (past-card toggle / superset save)
 // }
 
+import { generateShortUUID } from "../helper/utils.js";
 import { renderExerciseCard } from "./exerciseCard.js";
 import { renderSupersetCard } from "./supersetCard.js";
 
@@ -37,6 +38,7 @@ export function renderExerciseDeck(deckContainer, deps) {
     saveToLocalStorage,
     onRerender,
     startRestTimer,
+    enterEditMode,
   } = deps;
 
   deckContainer.innerHTML = "";
@@ -229,6 +231,118 @@ export function renderExerciseDeck(deckContainer, deps) {
       });
     }
     deckContainer.appendChild(card);
+
+    if (item.isInFocus && !isFutureSession) {
+      const insertFastAdjustment = (type, activeItem) => {
+        let insertIndex = -1;
+        if (activeItem.type === "circuit") {
+          const circuitId = activeItem.circuitId;
+          let idx = 0;
+          for (const ex of activeClientState.exercises) {
+            if (ex.circuitId === circuitId) {
+              insertIndex = idx;
+            }
+            idx++;
+          }
+        } else {
+          insertIndex = activeItem.index;
+        }
+
+        const newIdx = insertIndex + 1;
+        const cid = activeItem.type === "circuit" ? activeItem.circuitId : null;
+        const circuitTitle = activeItem.type === "circuit" ? activeItem.title : "";
+        const circuitSeries = activeItem.type === "circuit" ? activeItem.series : 1;
+
+        if (type === "rest") {
+          activeClientState.exercises.splice(newIdx, 0, {
+            id: `rest-${generateShortUUID()}`,
+            type: "rest",
+            rest: 30,
+            circuitId: cid,
+            circuitTitle: circuitTitle,
+            circuitSeries: circuitSeries,
+          });
+        } else if (type === "superset") {
+          const newCircuitId = `c-${generateShortUUID()}`;
+          const id = generateShortUUID();
+          activeClientState.logs[id] = Array.from({ length: 3 }, () => ({
+            reps: 10,
+            weight: 0,
+            completed: false,
+            note: "",
+          }));
+          activeClientState.exercises.splice(newIdx, 0, {
+            id,
+            name: "",
+            setsTargetCount: 3,
+            repsTarget: 10,
+            weightTarget: 0,
+            circuitId: newCircuitId,
+            circuitTitle: "",
+            circuitSeries: 3,
+          });
+        } else {
+          // exercise
+          const id = generateShortUUID();
+          activeClientState.logs[id] = Array.from({ length: 3 }, () => ({
+            reps: 10,
+            weight: 0,
+            completed: false,
+            note: "",
+          }));
+          activeClientState.exercises.splice(newIdx, 0, {
+            id,
+            name: "",
+            setsTargetCount: 3,
+            repsTarget: 10,
+            weightTarget: 0,
+            circuitId: cid,
+            circuitTitle: circuitTitle,
+            circuitSeries: circuitSeries,
+          });
+        }
+
+        activeClientState.activeExerciseIndex = newIdx;
+
+        saveActiveSessionToCache();
+        if (saveToLocalStorage) saveToLocalStorage();
+
+        if (enterEditMode) {
+          enterEditMode();
+        } else {
+          onRerender();
+        }
+      };
+
+      const adjustBar = document.createElement("div");
+      adjustBar.className = "fast-adjust-bar";
+      adjustBar.innerHTML = `
+        <button type="button" class="btn btn-sm secondary-btn fast-adj-ex">
+          <i class="fa-solid fa-plus"></i> ${t("exercise") || "Exercise"}
+        </button>
+        <button type="button" class="btn btn-sm secondary-btn fast-adj-ss">
+          <i class="fa-solid fa-plus"></i><i class="fa-solid fa-layer-group"></i> ${t("superset") || "Superset"}
+        </button>
+        <button type="button" class="btn btn-sm secondary-btn fast-adj-rest">
+          <i class="fa-solid fa-plus"></i><i class="fa-solid fa-hourglass-half"></i> ${t("rest_label") || "Rest"}
+        </button>
+      `;
+
+      adjustBar.querySelector(".fast-adj-ex").addEventListener("click", (e) => {
+        e.stopPropagation();
+        insertFastAdjustment("exercise", item);
+      });
+      adjustBar.querySelector(".fast-adj-ss").addEventListener("click", (e) => {
+        e.stopPropagation();
+        insertFastAdjustment("superset", item);
+      });
+      adjustBar.querySelector(".fast-adj-rest").addEventListener("click", (e) => {
+        e.stopPropagation();
+        insertFastAdjustment("rest", item);
+      });
+
+      deckContainer.appendChild(adjustBar);
+    }
   }
 
   // Bring whatever the trainer just acted on into view: a freshly expanded past card if

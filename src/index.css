@@ -3405,3 +3405,26 @@ textarea.form-control {
   text-overflow: ellipsis;
   max-width: 45%;
 }
+
+/* Fast Adjust plan bar styling */
+.fast-adjust-bar {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  margin: 10px 0;
+}
+.body-daylight .fast-adjust-bar {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+.fast-adjust-bar button {
+  font-size: 11px !important;
+  padding: 6px 12px !important;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}

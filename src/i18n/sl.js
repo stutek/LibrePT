@@ -88,7 +88,8 @@ export const sl = {
     "Ali ste prepričani, da želite ponastaviti zbirko podatkov? Vse stranke po meri, zgodovina in rutine bodo izgubljene.",
   btn_resolve: "Razreši",
   no_exercises_injected: "Ni vstavljenih vaj",
-  no_exercises_desc: 'Prosimo, tapnite "Vstavi vajo" spodaj, da dodate vajo za to stranko.',
+  no_exercises_desc:
+    "Prosimo, tapnite ikono za urejanje (✎) zgoraj za načrtovanje in dodajanje vaj za to stranko.",
   edit_plan: "Uredi načrt",
   editing_plan_for: "Urejanje načrta za",
   editing_plan_session: "Urejanje načrta seje",
