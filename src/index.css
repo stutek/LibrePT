@@ -1881,8 +1881,10 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   background: var(--primary);
   color: #06251a;                    /* dark, high-contrast on the accent-green bar */
 }
-/* Overtime: the session ran past its scheduled end without being closed — warn in amber. */
+/* Overtime: the session ran past its scheduled end without being closed — warn in amber, and turn
+   the card's left bracket amber too so it reads as a warning at a glance (follows the bar's state). */
 .booking-live-bar.overtime { background: var(--warning, #f59e0b); color: #3d2600; }
+.booking-card.booking-live:has(.booking-live-bar.overtime) { border-left-color: var(--warning, #f59e0b); }
 .booking-live-tag { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 800; }
 .booking-live-timer {
   font-family: var(--font-mono, monospace);
