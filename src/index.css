@@ -186,12 +186,15 @@ h1, h2, h3, h4, h5, h6 {
   white-space: nowrap;
 }
 .menu-control-label i { width: 16px; text-align: center; color: var(--text-muted); }
-.menu-select {
+/* select.menu-select (element+class) outspecifies the later .form-control rule, whose
+   10px vertical padding would otherwise combine with the fixed height and clip the text. */
+select.menu-select {
   background: var(--input-bg);
   color: var(--text-main);
   border: 1px solid var(--border-color);
   border-radius: var(--btn-radius);
   height: 34px;
+  line-height: 32px;
   padding: 0 10px;
   font-size: 13px;
   font-weight: 700;
