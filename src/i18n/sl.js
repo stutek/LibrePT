@@ -212,4 +212,7 @@ export const sl = {
   notif_spot_cancel_desc: "Mike Johnson je odpovedal mesto za jutri ob 10:00.",
   notif_count_badge: "{unread} neprebranih / {all} vseh",
   notif_mark_all_read: "Označi vse kot prebrano",
+  client_email: "E-pošta",
+  client_phone: "Telefonska številka",
+  not_specified: "Ni navedeno",
 };

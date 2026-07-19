@@ -104,8 +104,12 @@ export function applyStaticDOMMappings(tDict) {
     // Add Client modal
     "#client-modal-title": "add_new_client",
     '#dialog-client label[for="client-name"]': "client_name",
+    '#dialog-client label[for="client-email"]': "client_email",
+    '#dialog-client label[for="client-phone"]': "client_phone",
     '#dialog-client label[for="client-goals"]': "goals",
     '#dialog-client button[type="submit"]': "save_client",
+    "#label-profile-email": "client_email",
+    "#label-profile-phone": "client_phone",
 
     // Routine Template modal
     "#routine-modal-title": "create_routine_title",

@@ -37,6 +37,8 @@ export function setupClientForms({
     $id("client-modal-title").textContent = "Edit Client Profile";
     $id("client-form-id").value = client.id;
     $id("client-name").value = client.name;
+    $id("client-email").value = client.email || "";
+    $id("client-phone").value = client.phone || "";
     $id("client-goals").value = client.goals || "";
     $id("client-notes").value = client.notes || "";
 
@@ -51,6 +53,8 @@ export function setupClientForms({
     e.preventDefault();
     const id = $id("client-form-id").value;
     const name = $id("client-name").value.trim();
+    const email = $id("client-email").value.trim();
+    const phone = $id("client-phone").value.trim();
     const goals = $id("client-goals").value.trim();
     const notes = $id("client-notes").value.trim();
 
@@ -62,6 +66,8 @@ export function setupClientForms({
       const client = state.clients.find((c) => c.id === id);
       if (client) {
         client.name = name;
+        client.email = email;
+        client.phone = phone;
         client.goals = goals;
         client.notes = notes;
       }
@@ -72,6 +78,8 @@ export function setupClientForms({
         name: name,
         avatar: getInitials(name),
         joinedDate: todayStr,
+        email: email,
+        phone: phone,
         goals: goals,
         weightHistory: [],
         notes: notes,

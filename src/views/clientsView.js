@@ -57,6 +57,8 @@ export function showClientDetails({
     `${t("joined")} ${formatDateStr(client.joinedDate)}`;
   document.getElementById("profile-goals").textContent = client.goals || t("no_goals_specified");
   document.getElementById("profile-notes").textContent = client.notes || t("no_notes_specified");
+  document.getElementById("profile-email").textContent = client.email || t("not_specified");
+  document.getElementById("profile-phone").textContent = client.phone || t("not_specified");
 
   const startBtn = document.getElementById("btn-start-client-workout");
   if (startBtn) {

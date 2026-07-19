@@ -213,4 +213,7 @@ export const en = {
   notif_spot_cancel_desc: "Mike Johnson cancelled spot for Tomorrow 10:00 AM.",
   notif_count_badge: "{unread} unread / {all} all",
   notif_mark_all_read: "Mark all as read",
+  client_email: "Email",
+  client_phone: "Phone Number",
+  not_specified: "Not specified",
 };
