@@ -26,7 +26,16 @@ export function renderSupersetCard(card, item, ctx) {
 
   if (showInFocus) {
     const rows = [];
+    let firstExerciseSeen = false;
     item.items.forEach((ex, idx) => {
+      // A rest is a first-class item inside the circuit — render it as a break row and skip the
+      // exercise markup/wiring below.
+      if (ex.type === 'rest') {
+        rows.push(`<div class="superset-break-row"><i class="fa-solid fa-hourglass-half"></i> <span class="superset-break-label">${t('rest_label')}</span> <span class="superset-ex-reps">${ex.rest}s</span></div>`);
+        return;
+      }
+      const isFirstExercise = !firstExerciseSeen;
+      firstExerciseSeen = true;
       const sig = getExerciseSignalColor(activeClientId, ex.name);
       const nameStyle = sig ? ` style="color:${sig};"` : '';
       const isMax = String(ex.repsTarget).toLowerCase() === 'max';
@@ -48,7 +57,7 @@ export function renderSupersetCard(card, item, ctx) {
       }
       
       const repLabel = ex.weightTarget > 0 ? ` · ${escapeHTML(String(ex.weightTarget))}${t('kg')}` : '';
-      const idAttr = idx === 0 ? ' id="btn-log-feedback"' : '';
+      const idAttr = isFirstExercise ? ' id="btn-log-feedback"' : '';
       
       rows.push(`
         <div class="superset-ex-row" data-ex-id="${escapeHTML(ex.id)}">
@@ -68,7 +77,6 @@ export function renderSupersetCard(card, item, ctx) {
             </button>
           </div>
         </div>`);
-      if (ex.rest > 0) rows.push(`<div class="superset-break-row"><i class="fa-solid fa-hourglass-half"></i> <span class="superset-break-label">${t('rest_label')}</span> <span class="superset-ex-reps">${ex.rest}s</span></div>`);
     });
     const isLastRound = round >= item.series;
     const footer = item.isCompleted
@@ -138,7 +146,8 @@ export function renderSupersetCard(card, item, ctx) {
         <span class="deck-card-name deck-card-name-inline">${title}</span>
         ${item.isCompleted ? `<span class="badge badge-emerald deck-card-status">${t('session_completed')}</span>` : `<span class="badge deck-card-status deck-card-status-upcoming">Round ${round} of ${item.series}</span>`}
       </div>`;
-    // Focus the circuit by pointing the active index at its first exercise
-    card.addEventListener('click', () => onFocus(item.items[0].index));
+    // Focus the circuit by pointing the active index at its first exercise (skip any leading rest)
+    const firstEx = item.items.find(it => it.type !== 'rest') || item.items[0];
+    card.addEventListener('click', () => onFocus(firstEx.index));
   }
 }

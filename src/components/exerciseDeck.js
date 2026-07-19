@@ -68,6 +68,17 @@ export function renderExerciseDeck(deckContainer, deps) {
   // Current routine exercises
   const currentExIdx = activeClientState.activeExerciseIndex;
   const currentExList = activeClientState.exercises.map((ex, idx) => {
+    // A rest is a first-class plan item (never focusable/loggable). It renders as a break row inside
+    // its superset, or a standalone rest card in the deck. isCompleted:true keeps it from blocking a
+    // circuit's "all members complete" aggregation in buildSupersetUnits.
+    if (ex.type === 'rest') {
+      return {
+        id: ex.id, index: idx, type: 'rest', rest: ex.rest || 0,
+        circuitId: ex.circuitId || null, circuitTitle: ex.circuitTitle || '', circuitSeries: ex.circuitSeries || 1,
+        isInFocus: false, isCompleted: true
+      };
+    }
+
     const logsList = activeClientState.logs[ex.id] || [];
     const isCompleted = logsList.length > 0 && logsList.every(l => l.completed);
     const isInFocus = (idx === currentExIdx);
@@ -134,6 +145,15 @@ export function renderExerciseDeck(deckContainer, deps) {
         activeSession.expandedPastId = isExpanded ? null : item.id;
         onRerender();
       });
+    } else if (item.type === 'rest') {
+      // Standalone rest between movements — a non-interactive marker card.
+      card.className = 'exercise-deck-card rest-card' + (isFutureSession ? ' future-session' : '');
+      card.innerHTML = `
+        <div class="deck-card-compact rest-card-inner">
+          <span class="deck-card-counter"><i class="fa-solid fa-hourglass-half"></i></span>
+          <span class="deck-card-name deck-card-name-inline">${t('rest_label')}</span>
+          <span class="deck-card-compact-target">${escapeHTML(String(item.rest))}s</span>
+        </div>`;
     } else if (item.type === 'circuit') {
       // Superset / Giant Set card render lives in components/supersetCard.js
       const round = (activeClientState.circuitRounds && activeClientState.circuitRounds[item.circuitId]) || 1;

@@ -1009,6 +1009,77 @@ select.menu-select {
   cursor: pointer;
 }
 .editor-circuit-add:hover { background: color-mix(in srgb, var(--secondary, var(--primary)) 14%, transparent); }
+/* Rest is a first-class, movable plan row in the editor. */
+.editor-rest-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--border-radius-md);
+  background: color-mix(in srgb, var(--primary) 7%, var(--card-bg));
+  border: 1px dashed var(--border-color);
+}
+.editor-rest-row .editor-reorder { height: 34px; }
+.editor-rest-label { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: var(--text-main); }
+.editor-rest-label i { color: var(--primary); }
+.editor-rest-secs {
+  width: 64px;
+  height: 30px;
+  padding: 0 6px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--input-bg);
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+}
+.editor-rest-unit { font-size: 12px; color: var(--text-muted); margin-left: -4px; }
+.editor-rest-remove {
+  margin-left: auto;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid var(--danger-light);
+  background: transparent;
+  color: var(--danger);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.editor-rest-remove:hover { background: var(--danger-light); }
+/* Insert bar in every gap: inject an exercise / superset / rest at that position. */
+.editor-insert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 0;
+  opacity: 0.55;
+  transition: opacity 0.15s ease;
+}
+.editor-insert:hover, .editor-insert:focus-within { opacity: 1; }
+.editor-insert-line { flex: 1; height: 1px; background: var(--border-color); }
+.ins-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.ins-btn:hover { color: var(--primary); border-color: var(--primary); }
+.ins-btn.ins-ss:hover { color: var(--secondary, var(--primary)); border-color: var(--secondary, var(--primary)); }
+/* Standalone rest marker card in the live deck. */
+.exercise-deck-card.rest-card { border-style: dashed; opacity: 0.9; }
+.rest-card-inner .deck-card-counter { color: var(--primary); }
 /* Group Matrix Grid for Active Session */
 .group-matrix-grid {
   display: flex;

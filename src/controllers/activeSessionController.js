@@ -53,6 +53,57 @@ async function releaseScreenWakeLock() {
 let clipboardEditMode = false;
 let editorCleanup = null;
 
+// ---- Rest as a first-class plan item ----------------------------------------------------------
+// The plan (clientState.exercises) is an ordered mix of exercise items and rest items. A rest item
+// is { id, type:'rest', rest:<seconds>, circuitId, circuitTitle, circuitSeries } — it carries the
+// circuit fields so a rest inside a superset stays grouped with it. Exercise items have no `type`.
+export const isRestItem = (it) => !!it && it.type === 'rest';
+
+// Legacy plans (routines, recovered/demo sessions) carried rest as a number on the exercise. Turn
+// any such `rest>0` into a following rest item. Idempotent: it zeroes the exercise's rest as it
+// migrates, so re-running is a no-op. Keeps the focus pointer on the same exercise object.
+function ensureRestItems(cs) {
+  if (!cs || !Array.isArray(cs.exercises)) return;
+  const focused = cs.exercises[cs.activeExerciseIndex];
+  let changed = false;
+  const out = [];
+  cs.exercises.forEach(it => {
+    out.push(it);
+    if (!isRestItem(it) && it.rest > 0) {
+      out.push({
+        id: `rest-${it.id}`,
+        type: 'rest',
+        rest: it.rest,
+        circuitId: it.circuitId || null,
+        circuitTitle: it.circuitTitle || '',
+        circuitSeries: it.circuitSeries || 1
+      });
+      it.rest = 0;
+      changed = true;
+    }
+  });
+  if (changed) {
+    cs.exercises = out;
+    const ai = out.indexOf(focused);
+    cs.activeExerciseIndex = ai >= 0 ? ai : 0;
+    clampFocusToExercise(cs);
+  }
+}
+
+// The active-exercise pointer must never land on a rest item (rests aren't focusable/loggable).
+// Snap it to the nearest exercise, searching forward first, then backward.
+function clampFocusToExercise(cs) {
+  if (!cs || !cs.exercises || !cs.exercises.length) return;
+  if (!isRestItem(cs.exercises[cs.activeExerciseIndex])) return;
+  for (let i = cs.activeExerciseIndex; i < cs.exercises.length; i++) {
+    if (!isRestItem(cs.exercises[i])) { cs.activeExerciseIndex = i; return; }
+  }
+  for (let i = cs.activeExerciseIndex - 1; i >= 0; i--) {
+    if (!isRestItem(cs.exercises[i])) { cs.activeExerciseIndex = i; return; }
+  }
+  cs.activeExerciseIndex = 0;
+}
+
 export function enterClipboardEditMode() {
   clipboardEditMode = true;
   renderActiveGroupBoard();
@@ -78,9 +129,9 @@ export function setActiveSession(session) {
 export function focusIndexFromRef(clientState, focusRef) {
   if (!clientState || !clientState.exercises || !focusRef) return -1;
   if (focusRef.type === 'superset') {
-    return clientState.exercises.findIndex(e => e.circuitId === focusRef.id);
+    return clientState.exercises.findIndex(e => !isRestItem(e) && e.circuitId === focusRef.id);
   }
-  return clientState.exercises.findIndex(e => !e.circuitId && e.id === focusRef.id);
+  return clientState.exercises.findIndex(e => !isRestItem(e) && !e.circuitId && e.id === focusRef.id);
 }
 
 export function sessionFocusPath() {
@@ -309,7 +360,7 @@ export function completeSupersetRound(circuitId) {
   const cs = activeSession.clientRoutines[activeSession.activeClientId];
   if (!cs) return;
   if (!cs.circuitRounds) cs.circuitRounds = {};
-  const groupExs = cs.exercises.filter(e => e.circuitId === circuitId);
+  const groupExs = cs.exercises.filter(e => e.circuitId === circuitId && !isRestItem(e));
   if (groupExs.length === 0) return;
   const series = groupExs[0].circuitSeries || 1;
   const cur = cs.circuitRounds[circuitId] || 1;
@@ -317,9 +368,13 @@ export function completeSupersetRound(circuitId) {
     cs.circuitRounds[circuitId] = cur + 1;
   } else {
     groupExs.forEach(ex => (cs.logs[ex.id] || []).forEach(l => { l.completed = true; }));
+    // End of the circuit block includes any trailing rest items; land focus on the next exercise.
     let lastIdx = -1;
-    cs.exercises.forEach((ex, idx) => { if (ex.circuitId === circuitId) lastIdx = idx; });
-    cs.activeExerciseIndex = Math.min(lastIdx + 1, cs.exercises.length - 1);
+    cs.exercises.forEach((it, idx) => { if (it.circuitId === circuitId) lastIdx = idx; });
+    let next = lastIdx + 1;
+    while (next < cs.exercises.length && isRestItem(cs.exercises[next])) next++;
+    cs.activeExerciseIndex = Math.min(next, cs.exercises.length - 1);
+    clampFocusToExercise(cs);
   }
   saveActiveSessionToCache();
   if (saveToLocalStorage) saveToLocalStorage();
@@ -343,6 +398,10 @@ export function renderActiveGroupBoard() {
   const activeClientId = activeSession.activeClientId || activeSession.participants[0];
   activeSession.activeClientId = activeClientId;
   const activeClientState = activeSession.clientRoutines[activeClientId];
+
+  // Rest is a first-class plan item: migrate any legacy exercise-level rest and keep focus off rests.
+  ensureRestItems(activeClientState);
+  clampFocusToExercise(activeClientState);
 
   syncSessionFocusUrl();
 
