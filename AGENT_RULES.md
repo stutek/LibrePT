@@ -28,14 +28,19 @@ Every response and tool action must drive measurable, continuous progress toward
 
 ### A. Direct Execution & Git Flow
 1. **Direct Application**: Apply edits directly and cleanly, always choosing the best architectural option without asking questions or waiting for clarification.
-2. **Git Commit Control**: Allow the user to control review and baseline checkpoints via git status/diff and commits.
+2. **Auto-commit coherent changes**: Commit your own work automatically — do **not** wait to be asked. As soon as a change is coherent and verified, stage exactly the files you touched and commit them to `main` with a clear message. Keep commits small and focused (one logical change each) so the user can review and, if needed, roll back via git history/diff. Never sweep unrelated or concurrently-edited files into your commit.
 3. **Trunk-based development**: Work directly on `main` — it is the trunk. Do **not** create feature branches; make small, coherent, verified commits straight to `main`. `main` must stay releasable, because the GitHub Pages deploy (`.github/workflows/deploy.yml`) runs on every push to `main`.
-4. **Never push — the user pushes manually.** Commit to the trunk, then stop; the user always does the `git push` themselves (their push is the continuous-deployment trigger). Do not run `git push`.
+4. **Never push — the user pushes manually.** Auto-commit to the trunk, then stop; the user always does the `git push` themselves (their push is the continuous-deployment trigger). Do not run `git push`.
 
 ### B. Evaluate Changes, Call Out Gaps & Propose Opportunities
 1. **Evaluate User Changes**: Explicitly evaluate user modifications and input, highlighting how they refine the LibrePT domain model or improve real-world gym ergonomics.
 2. **Call Out Gaps & Edge Cases**: Actively identify real-world training friction (e.g., basement gym offline states, sweaty hands, quick equipment pivots, group session distractions).
 3. **Propose Opportunities**: Proactively call out architectural opportunities and enhancements that make the system more robust and frictionless.
+
+### C. Local Dev Server: Leave It Running
+1. **Keep it up.** Once the local dev server (`python -m deploy.local_http_server --port 8081`, served under `/LibrePT/`) is started, leave it running across tasks — the user relies on it to test changes in the browser. Do **not** kill it as an end-of-task tidy-up.
+2. **The user kills it, not the agent.** Stopping the server is the user's call. Only stop or restart it when the user asks, or when a change genuinely requires a restart (and say so first).
+3. **Reuse before starting.** Check whether it is already listening on `:8081` and reuse it rather than spawning a duplicate.
 
 ---
 
