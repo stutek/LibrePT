@@ -452,8 +452,7 @@ export function renderActiveGroupBoard() {
       t, escapeHTML, buildSupersetUnits, getExerciseSignalColor,
       logQuickSignal, openFeedbackModal, completeSupersetRound, focusExerciseByIndex,
       saveActiveSessionToCache, saveToLocalStorage: appDeps.saveToLocalStorage,
-      onRerender: renderActiveGroupBoard,
-      onEdit: enterClipboardEditMode
+      onRerender: renderActiveGroupBoard
     });
   }
 
@@ -531,6 +530,11 @@ export function setupActiveSession(deps) {
         closeSessionMenu();
       }
     });
+  }
+
+  const btnEditPlan = document.getElementById('btn-edit-plan');
+  if (btnEditPlan) {
+    btnEditPlan.addEventListener('click', (e) => { e.stopPropagation(); enterClipboardEditMode(); });
   }
 
   const btnDeleteSession = document.getElementById('btn-delete-session');
