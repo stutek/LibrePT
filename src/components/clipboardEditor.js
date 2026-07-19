@@ -94,7 +94,7 @@ export function renderClipboardEditor(container, deps) {
             <label class="editor-field editor-field-superset"><span><i class="fa-solid fa-layer-group"></i></span>${supersetSelect(ex)}</label>
           </div>
         </div>
-        <button type="button" class="editor-remove" aria-label="${tr('remove', 'Remove')}"><i class="fa-solid fa-xmark"></i></button>
+        <button type="button" class="editor-remove" aria-label="${tr('remove', 'Remove')}"><i class="fa-solid fa-trash-can"></i></button>
       </li>`;
   };
 
@@ -104,7 +104,7 @@ export function renderClipboardEditor(container, deps) {
       <span class="editor-rest-label"><i class="fa-solid fa-hourglass-half"></i> ${tr('rest_label', 'Rest')}</span>
       <input type="number" min="0" step="5" class="editor-rest-secs" value="${escapeHTML(String(rest.rest ?? 0))}" aria-label="${tr('rest_label', 'Rest')}">
       <span class="editor-rest-unit">s</span>
-      <button type="button" class="editor-rest-remove" aria-label="${tr('remove', 'Remove')}"><i class="fa-solid fa-xmark"></i></button>
+      <button type="button" class="editor-rest-remove" aria-label="${tr('remove', 'Remove')}"><i class="fa-solid fa-trash-can"></i></button>
     </li>`;
 
   const anyRow = (it, idx) => (isRest(it) ? restRow(it, idx) : exerciseRow(it, idx));
@@ -117,8 +117,8 @@ export function renderClipboardEditor(container, deps) {
       <li class="editor-insert" data-at="${at}"${cidAttr}>
         <span class="editor-insert-line"></span>
         <button type="button" class="ins-btn ins-ex"><i class="fa-solid fa-plus"></i> ${tr('exercise', 'Exercise')}</button>
-        ${allowSuperset ? `<button type="button" class="ins-btn ins-ss"><i class="fa-solid fa-layer-group"></i> ${tr('superset', 'Superset')}</button>` : ''}
-        <button type="button" class="ins-btn ins-rest"><i class="fa-solid fa-hourglass-half"></i> ${tr('rest_label', 'Rest')}</button>
+        ${allowSuperset ? `<button type="button" class="ins-btn ins-ss"><i class="fa-solid fa-plus"></i><i class="fa-solid fa-layer-group"></i> ${tr('superset', 'Superset')}</button>` : ''}
+        <button type="button" class="ins-btn ins-rest"><i class="fa-solid fa-plus"></i><i class="fa-solid fa-hourglass-half"></i> ${tr('rest_label', 'Rest')}</button>
         <span class="editor-insert-line"></span>
       </li>`;
   };
