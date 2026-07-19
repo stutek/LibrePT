@@ -41,6 +41,7 @@ export function applyStaticDOMMappings(tDict) {
     "#view-client-detail .client-profile-card h4:nth-of-type(3)": "routine_plans",
     "#btn-edit-client": "btn_edit_profile",
     "#btn-start-client-workout": "btn_log_workout",
+    "#btn-plan-client-program": "btn_plan_program",
     "#view-client-detail .history-section h5": "client_history_header",
     "#btn-back-to-clients": "btn_back",
 

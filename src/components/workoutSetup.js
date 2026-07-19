@@ -10,6 +10,7 @@
 // }
 
 let deps = null;
+let isPlanningModeActive = false;
 
 export function initWorkoutSetup(d) {
   deps = d;
@@ -60,7 +61,18 @@ export function setupWorkoutSetup() {
         return;
       }
 
-      deps.startWorkoutSession(clientRoutines);
+      let bookingMeta = null;
+      if (isPlanningModeActive) {
+        bookingMeta = {
+          id: `plan-${Date.now()}`,
+          isPlanning: true,
+          titles: [t("planned_program") || "Planned Program"],
+          timeLabel: t("date_unknown") || "Date Unknown",
+          location: "",
+        };
+      }
+
+      deps.startWorkoutSession(clientRoutines, bookingMeta);
       dialog.close();
     });
   }
@@ -70,7 +82,9 @@ export function openWorkoutSetupModal(
   preselectedClientId = null,
   preselectedRoutineId = null,
   preselectedBookingId = null,
+  isPlanning = false,
 ) {
+  isPlanningModeActive = isPlanning;
   const dialog = document.getElementById("dialog-workout-setup");
   if (!dialog) return;
 
@@ -80,6 +94,13 @@ export function openWorkoutSetupModal(
 
   const state = deps.getState();
   const { t, getClientDisplayNameHTML } = deps;
+
+  const titleEl = dialog.querySelector(".modal-header h3");
+  if (titleEl) {
+    titleEl.textContent = isPlanning
+      ? t("plan_program_title") || "Plan Upcoming Program"
+      : t("workout_setup_title") || "Start Workout Session";
+  }
 
   let targetBooking = null;
   if (preselectedBookingId && state.bookings) {
@@ -141,6 +162,11 @@ export function openWorkoutSetupModal(
     select.style.height = "32px";
 
     select.innerHTML = `<option value="" disabled>${t("select_exercise")}</option>`;
+    const emptyOpt = document.createElement("option");
+    emptyOpt.value = "empty_plan";
+    emptyOpt.textContent = t("custom_empty_plan") || "Custom / Empty Plan";
+    select.appendChild(emptyOpt);
+
     for (const r of state.routines) {
       const opt = document.createElement("option");
       opt.value = r.id;
@@ -149,7 +175,9 @@ export function openWorkoutSetupModal(
     }
 
     // Attempt default selections
-    if (targetBooking?.participants.includes(client.id)) {
+    if (isPlanningModeActive) {
+      select.value = "empty_plan";
+    } else if (targetBooking?.participants.includes(client.id)) {
       select.value = targetBooking.routineId;
     } else if (preselectedRoutineId && preselectedClientId === client.id) {
       select.value = preselectedRoutineId;

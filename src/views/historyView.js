@@ -1,4 +1,5 @@
 // src/views/historyView.js - Domain module for global and client workout history logs
+import { openSessionFromHistory } from "../controllers/activeSessionController.js";
 import { escapeHTML, formatDateStr } from "../helper/utils.js";
 
 export function renderGlobalHistory({ state, t }) {
@@ -109,14 +110,18 @@ export function renderHistoryItems({ historyList, container, t }) {
       <div class="history-card-header">
         <div class="history-header-meta">
           <h4>${escapeHTML(log.clientName)}</h4>
-          <p>${escapeHTML(log.routineName)} • ${durationText}</p>
+          <p>${escapeHTML(log.routineName)}${log.isPlanning ? "" : ` • ${durationText}`}</p>
         </div>
-        <div class="history-date">${formatDateStr(log.date)}</div>
+        <div class="history-date">${log.isPlanning ? t("planned_program") || "Planned Program" : formatDateStr(log.date)}</div>
       </div>
       <div class="history-exercise-log">
         ${exercisesLogHTML}
       </div>
     `;
+
+    card.addEventListener("click", () => {
+      openSessionFromHistory(log);
+    });
 
     fragment.appendChild(card);
   }

@@ -68,6 +68,14 @@ export function showClientDetails({
     });
   }
 
+  const planBtn = document.getElementById("btn-plan-client-program");
+  if (planBtn) {
+    planBtn.replaceWith(planBtn.cloneNode(true));
+    document.getElementById("btn-plan-client-program").addEventListener("click", () => {
+      openWorkoutSetupModal(clientId, null, null, true);
+    });
+  }
+
   renderClientWorkoutHistory({ client, state, t });
   switchView("client-detail");
 }

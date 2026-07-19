@@ -20,6 +20,10 @@ export function renderSessionTitle() {
   if (!activeSession) return;
 
   const booking = activeSession.booking;
+  if (booking?.isPlanning) {
+    el.textContent = `${booking.titles[0]} · ${booking.timeLabel}`;
+    return;
+  }
   const start = new Date(booking?.startDate ? booking.startDate : activeSession.startTime);
   const datePart = deps.getISODateString(start);
   const timePart = deps.formatClockFromMinutes(start.getHours() * 60 + start.getMinutes());

@@ -31,7 +31,9 @@ export function updateSessionBarTimer() {
   let text = "";
   let isOvertime = false;
 
-  if (endDate) {
+  if (activeSession.booking?.isPlanning) {
+    text = deps.t("planning") || "Planning";
+  } else if (endDate) {
     const endMs = new Date(endDate).getTime();
     const remainingSec = Math.round((endMs - Date.now()) / 1000);
     text = deps.formatSignedDuration(remainingSec);

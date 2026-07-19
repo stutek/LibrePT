@@ -215,4 +215,10 @@ export const sl = {
   client_email: "E-pošta",
   client_phone: "Telefonska številka",
   not_specified: "Ni navedeno",
+  custom_empty_plan: "Poljuben / Prazen načrt",
+  plan_program_title: "Načrtuj prihodnji program",
+  planned_program: "Načrtovan program",
+  date_unknown: "Neznan datum",
+  planning: "Načrtovanje",
+  btn_plan_program: "Načrtuj program",
 };

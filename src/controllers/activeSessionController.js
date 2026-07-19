@@ -186,9 +186,76 @@ export function focusExerciseByIndex(index) {
   renderActiveGroupBoard();
 }
 
+export function openSessionFromHistory(log) {
+  const { state, t, navigateToPath } = appDeps;
+  if (!state || !t) return;
+
+  const clientState = {
+    routineId: log.routineId || "",
+    routineName: log.routineName,
+    activeExerciseIndex: 0,
+    exercises: [],
+    logs: {},
+  };
+
+  for (const item of log.exercises) {
+    const ex = state.exercises.find((e) => e.id === item.id || e.name === item.name);
+    const setsTargetCount = item.sets.length;
+    const repsTarget = item.sets[0]?.reps || 0;
+    const weightTarget = item.sets[0]?.weight || 0;
+    clientState.exercises.push({
+      id: item.id,
+      name: item.name,
+      category: ex ? ex.category : "Recovery",
+      instructions: ex ? ex.instructions : "",
+      setsTargetCount: setsTargetCount,
+      repsTarget: repsTarget,
+      weightTarget: weightTarget,
+      rest: item.rest || 0,
+      circuitId: item.circuitId || null,
+      circuitTitle: item.circuitTitle || "",
+      circuitSeries: item.circuitSeries || 1,
+    });
+
+    clientState.logs[item.id] = item.sets.map((s) => ({
+      reps: s.reps,
+      weight: s.weight,
+      completed: s.completed,
+      note: s.note || "",
+    }));
+  }
+
+  activeSession = {
+    id: log.id,
+    startTime: new Date(log.date).getTime(),
+    duration: log.duration || 0,
+    participants: [log.clientId],
+    clientRoutines: {
+      [log.clientId]: clientState,
+    },
+    activeClientId: log.clientId,
+    feedback: log.feedback || [],
+  };
+
+  saveActiveSessionToCache();
+  requestScreenWakeLock();
+
+  const bar = document.getElementById("active-session-bar");
+  if (bar) {
+    bar.classList.remove("hidden", "is-idle");
+    delete bar.dataset.nextBookingId;
+  }
+  renderActiveSessionBarLabels();
+  startSessionTimer();
+
+  if (navigateToPath) {
+    navigateToPath(`/session/${log.id}/client/${log.clientId}`);
+  }
+}
+
 export function startWorkoutSession(clientRoutines, bookingMeta = null, deps = {}) {
   if (deps) appDeps = { ...appDeps, ...deps };
-  const { state, navigateToPath } = appDeps;
+  const { state, navigateToPath, t } = appDeps;
   if (!state) return;
 
   const participantIds = clientRoutines.map((cr) => cr.clientId);
@@ -206,39 +273,39 @@ export function startWorkoutSession(clientRoutines, bookingMeta = null, deps = {
 
   for (const cr of clientRoutines) {
     const routine = state.routines.find((r) => r.id === cr.routineId);
-    if (!routine) continue;
-
     const clientState = {
-      routineId: routine.id,
-      routineName: routine.name,
+      routineId: routine ? routine.id : "",
+      routineName: routine ? routine.name : t("custom_empty_plan") || "Custom / Empty Plan",
       activeExerciseIndex: 0,
       exercises: [],
       logs: {},
     };
 
-    for (const item of routine.exercises) {
-      const ex = state.exercises.find((e) => e.id === item.id);
-      if (ex) {
-        clientState.exercises.push({
-          id: item.id,
-          name: ex.name,
-          category: ex.category,
-          instructions: ex.instructions,
-          setsTargetCount: item.sets,
-          repsTarget: item.reps,
-          weightTarget: item.weight,
-          rest: item.rest,
-          circuitId: item.circuitId || null,
-          circuitTitle: item.circuitTitle || "",
-          circuitSeries: item.circuitSeries || 1,
-        });
+    if (routine) {
+      for (const item of routine.exercises) {
+        const ex = state.exercises.find((e) => e.id === item.id);
+        if (ex) {
+          clientState.exercises.push({
+            id: item.id,
+            name: ex.name,
+            category: ex.category,
+            instructions: ex.instructions,
+            setsTargetCount: item.sets,
+            repsTarget: item.reps,
+            weightTarget: item.weight,
+            rest: item.rest,
+            circuitId: item.circuitId || null,
+            circuitTitle: item.circuitTitle || "",
+            circuitSeries: item.circuitSeries || 1,
+          });
 
-        clientState.logs[item.id] = Array.from({ length: item.sets }, () => ({
-          reps: item.reps,
-          weight: item.weight,
-          completed: false,
-          note: "",
-        }));
+          clientState.logs[item.id] = Array.from({ length: item.sets }, () => ({
+            reps: item.reps,
+            weight: item.weight,
+            completed: false,
+            note: "",
+          }));
+        }
       }
     }
 
@@ -260,6 +327,11 @@ export function startSessionTimer() {
 
   const tick = () => {
     if (!activeSession) return;
+    if (activeSession.booking?.isPlanning) {
+      updateOverlaySessionTimer();
+      updateSessionBarTimer();
+      return;
+    }
     activeSession.duration = Math.floor((Date.now() - activeSession.startTime) / 1000);
     updateOverlaySessionTimer();
     updateSessionBarTimer();
@@ -274,6 +346,14 @@ export function updateOverlaySessionTimer() {
   if (!activeSession) return;
   const el = document.getElementById("overlay-session-duration");
   if (!el) return;
+
+  const { t } = appDeps;
+
+  if (activeSession.booking?.isPlanning) {
+    el.textContent = t("planning") || "Planning";
+    el.style.color = "var(--primary)";
+    return;
+  }
 
   const endDate = activeSession.booking?.endDate;
   if (endDate) {
@@ -714,7 +794,7 @@ export function finishWorkoutSession() {
     }
   }
 
-  if (completedSets === 0) {
+  if (completedSets === 0 && !activeSession.booking?.isPlanning) {
     if (!confirm(t("alert_no_sets"))) {
       return;
     }
@@ -735,7 +815,7 @@ export function finishWorkoutSession() {
       const clientSetsLogged = [];
 
       for (const log of logsList) {
-        if (log.completed || log.weight > 0) {
+        if (log.completed || log.weight > 0 || activeSession.booking?.isPlanning) {
           clientSetsLogged.push({
             reps: log.reps,
             weight: log.weight,
@@ -745,7 +825,7 @@ export function finishWorkoutSession() {
         }
       }
 
-      if (clientSetsLogged.length > 0) {
+      if (clientSetsLogged.length > 0 || activeSession.booking?.isPlanning) {
         clientCompletedExercises.push({
           id: ex.id,
           name: ex.name,
@@ -754,7 +834,7 @@ export function finishWorkoutSession() {
       }
     }
 
-    if (clientCompletedExercises.length > 0) {
+    if (clientCompletedExercises.length > 0 || activeSession.booking?.isPlanning) {
       const clientLog = {
         id: generateShortUUID(),
         clientId: pId,
@@ -765,6 +845,9 @@ export function finishWorkoutSession() {
         exercises: clientCompletedExercises,
         feedback: (activeSession.feedback || []).filter((f) => f.clientId === pId),
       };
+      if (activeSession.booking?.isPlanning) {
+        clientLog.isPlanning = true;
+      }
 
       state.history.push(clientLog);
     }

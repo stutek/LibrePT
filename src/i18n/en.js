@@ -216,4 +216,10 @@ export const en = {
   client_email: "Email",
   client_phone: "Phone Number",
   not_specified: "Not specified",
+  custom_empty_plan: "Custom / Empty Plan",
+  plan_program_title: "Plan Upcoming Program",
+  planned_program: "Planned Program",
+  date_unknown: "Date Unknown",
+  planning: "Planning",
+  btn_plan_program: "Plan Program",
 };
