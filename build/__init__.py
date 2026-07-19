@@ -65,4 +65,22 @@ def run_build():
     for path in sorted(os.listdir(dist_dir)):
         print(f"  Copied src/{path} -> {dist_dir}/{path}")
 
+    stamp_build_version(dist_dir)
+
     print(f"  ✓ Build complete. Bundle stored in: {os.path.abspath(dist_dir)}")
+
+
+def stamp_build_version(dist_dir):
+    """Overwrite dist/version.js with the real short commit SHA + UTC build time (the header build
+    stamp). Mirrors the Pages deploy (.github/workflows/deploy.yml) — keep the two writers in sync."""
+    import subprocess
+    from datetime import datetime, timezone
+    try:
+        commit = subprocess.check_output(
+            ['git', 'rev-parse', '--short', 'HEAD'], stderr=subprocess.DEVNULL).decode().strip()
+    except Exception:
+        commit = 'local'
+    built_at = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%MZ')
+    with open(os.path.join(dist_dir, 'version.js'), 'w') as f:
+        f.write(f'export const BUILD_INFO = {{ commit: "{commit}", builtAt: "{built_at}" }};\n')
+    print(f"  Stamped build {commit} ({built_at})")

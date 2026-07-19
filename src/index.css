@@ -187,7 +187,18 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav { display: none; }
   display: flex;
   align-items: center;
   gap: 12px;
-}.logo-icon {
+}
+/* Build stamp next to the wordmark — small, muted, monospace. */
+.app-version {
+  align-self: flex-end;
+  margin: 0 0 5px -8px;
+  font-family: var(--font-mono, monospace);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.3px;
+}
+.logo-icon {
   font-size: 26px;
   color: var(--primary);
   filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.4));

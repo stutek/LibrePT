@@ -38,6 +38,12 @@ jobs:
           mkdir -p dist
           cp -r src/. dist/
           touch dist/.nojekyll   # disable Jekyll processing on the published site
+          # Build stamp: overwrite version.js with the real short commit SHA + UTC build time, so the
+          # header shows which build is live and a client screenshot pins a bug report to a commit.
+          commit="${GITHUB_SHA::7}"
+          builtAt="$(date -u +%Y-%m-%dT%H:%MZ)"
+          printf 'export const BUILD_INFO = { commit: "%s", builtAt: "%s" };\n' "${commit}" "${builtAt}" > dist/version.js
+          echo "Stamped build ${commit} (${builtAt})"
           # GitHub Pages serves a project site under /<repo>/, but the source assumes the
           # domain root (<base href="/">) so it works when src/ is served at localhost:8081/.
           # Rewrite the base to the repo sub-path so index.css, manifest.json, icons and the

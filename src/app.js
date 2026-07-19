@@ -75,6 +75,7 @@ import {
 } from './controllers/activeSessionController.js';
 import { applyStaticDOMMappings } from './i18n/domMappings.js';
 import { setupViewDismiss } from './controllers/gestureController.js';
+import { BUILD_INFO } from './version.js';
 
 
 function t(key) {
@@ -127,6 +128,16 @@ function resizeToPhoneViewport() {
   }
 }
 
+// Show the build stamp (commit SHA) in the header so a client screenshot ties a bug report to an
+// exact build. 'dev' locally; the deploy/build overwrite version.js with the real short SHA.
+function renderBuildStamp() {
+  const el = document.getElementById('app-version');
+  if (!el) return;
+  const commit = (BUILD_INFO && BUILD_INFO.commit) || 'dev';
+  el.textContent = commit === 'dev' ? 'dev' : `#${commit}`;
+  if (BUILD_INFO && BUILD_INFO.builtAt) el.title = `Built ${BUILD_INFO.builtAt}`;
+}
+
 // Keep the app portrait. The manifest's "orientation": "portrait-primary" covers the installed
 // PWA; this is the best-effort runtime complement (Screen Orientation API only resolves in an
 // installed/standalone or fullscreen context and rejects otherwise, so failures are swallowed).
@@ -142,6 +153,7 @@ function lockPortraitOrientation() {
 function init() {
   resizeToPhoneViewport();
   lockPortraitOrientation();
+  renderBuildStamp();
 
   // Load data from LocalStorage or initialize with Mock Data
   let savedData = localStorage.getItem('librept_db');
