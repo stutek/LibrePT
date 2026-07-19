@@ -3,28 +3,32 @@
 // launches the clipboard). Dependencies are injected by the caller (renderSessions in app.js)
 // so this component stays decoupled from app.js internals and is easy to relocate/test.
 //
-// deps: { state, t, escapeHTML, launchClipboardDirectly, sessionDayTemporal, activeId }
+// deps: { state, t, escapeHTML, launchClipboardDirectly, sessionDayTemporal, activeId, nowActiveId }
+
+import { parseTimeRange } from '../helper/utils.js';
 
 export function renderSessionCard(b, colContainer, deps) {
-  const { state, t, escapeHTML, launchClipboardDirectly, sessionDayTemporal, activeId } = deps;
+  const { state, t, escapeHTML, launchClipboardDirectly, sessionDayTemporal, activeId, nowActiveId } = deps;
 
   const card = document.createElement('div');
   // Layout lives in .booking-card (index.css) so it can stack to a single column on mobile.
   // The temporal class tints the title to match the day-selection line (past/future).
   const temporal = sessionDayTemporal(b.day);
   card.className = 'booking-card card glassmorphic' + (temporal !== 'today' ? ` booking-${temporal}` : '');
-  // The session currently in progress is emphasised (accent tint + border), the same visual
-  // language as a selected participant, so it stands out from the rest of the day.
+  // A card is marked "Active session" when it's the launched clipboard session (matched by the
+  // booking id(s) it was launched from) OR the session currently in progress by wall-clock
+  // (nowActiveId, computed once by renderSessions). The clock case means the card is highlighted
+  // even before a trainer opens the clipboard.
   const activeSession = deps.getActiveSession ? deps.getActiveSession() : null;
   const sb = activeSession && activeSession.booking;
-  // A card is the active session only when it's one of the bookings that session was launched from
-  // (booking.ids lists every merged booking; activeId/id cover the single-booking case).
-  const isLive = !b.completed && !!activeSession && (
+  const isLaunched = !b.completed && !!activeSession && (
     (activeId && b.id === activeId) ||
     (activeSession.id === b.id) ||
     (sb && sb.id === b.id) ||
     (sb && Array.isArray(sb.ids) && sb.ids.includes(b.id))
   );
+  const isNow = !b.completed && !!nowActiveId && b.id === nowActiveId;
+  const isLive = isLaunched || isNow;
   if (isLive) card.classList.add('booking-live');
 
   // Hover feedback style
@@ -74,16 +78,26 @@ export function renderSessionCard(b, colContainer, deps) {
     : '';
   if (b.completed) card.classList.add('booking-completed');
 
-  let timerInitialText = '00:00';
+  // The live clipboard session shows a ticking timer (updated by sessionBar). A session that is only
+  // in-progress by the clock (not launched) shows its static scheduled time remaining instead.
+  let timerText = '';
   let timerIsOvertime = false;
-  if (isLive && activeSession) {
+  let timerLive = false;
+  if (isLaunched && activeSession) {
+    timerLive = true;
     const endDate = activeSession.booking && activeSession.booking.endDate;
     if (endDate && deps.formatSignedDuration) {
       const remainingSec = Math.round((new Date(endDate).getTime() - Date.now()) / 1000);
-      timerInitialText = deps.formatSignedDuration(remainingSec);
+      timerText = deps.formatSignedDuration(remainingSec);
       timerIsOvertime = remainingSec < 0;
     } else if (deps.formatDuration) {
-      timerInitialText = deps.formatDuration(activeSession.duration || 0);
+      timerText = deps.formatDuration(activeSession.duration || 0);
+    }
+  } else if (isNow) {
+    const r = parseTimeRange(b.time);
+    if (r && deps.formatDuration) {
+      const nowMin = new Date().getHours() * 60 + new Date().getMinutes();
+      timerText = deps.formatDuration(Math.max(0, r.end - nowMin) * 60);
     }
   }
 
@@ -105,10 +119,13 @@ export function renderSessionCard(b, colContainer, deps) {
 
   // The active session is marked by the card's green left bracket spilling into a full-width bottom
   // bar carrying an "Active session" tag and the live timer (no red anywhere).
+  const timerCls = (timerLive ? 'session-card-timer ' : '') + 'booking-live-timer' + (timerIsOvertime ? ' overtime' : '');
+  const timerId = timerLive ? ` id="session-card-timer-${escapeHTML(b.id)}"` : '';
+  const timerSpan = timerText ? `<span${timerId} class="${timerCls}">${escapeHTML(timerText)}</span>` : '';
   const liveBarHTML = isLive ? `
     <div class="booking-live-bar">
       <span class="booking-live-tag"><i class="fa-solid fa-person-running"></i> ${escapeHTML(t('active_session') || 'Active session')}</span>
-      <span id="session-card-timer-${escapeHTML(b.id)}" class="session-card-timer booking-live-timer${timerIsOvertime ? ' overtime' : ''}">${escapeHTML(timerInitialText)}</span>
+      ${timerSpan}
     </div>` : '';
 
   // No launch/completed button: the whole card is the tap target, and completion already shows

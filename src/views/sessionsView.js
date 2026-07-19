@@ -3,7 +3,7 @@ import { DEFAULT_SESSIONS } from '../data/index.js';
 import { renderSessionList } from '../components/sessionList.js';
 import { renderSessionsTitleBar, focusSessionsColumn, getFocusedSessionDay, sessionDayTemporal, getSessionDayDate } from '../components/daySelector.js';
 import { renderIdleSessionBar, updateSessionBarTimer } from '../components/sessionBar.js';
-import { getOverlappingBookings, buildBookingMeta, escapeHTML, formatDuration, formatSignedDuration } from '../helper/utils.js';
+import { getOverlappingBookings, buildBookingMeta, escapeHTML, formatDuration, formatSignedDuration, parseTimeRange } from '../helper/utils.js';
 import { resetSyncState } from '../components/applicationHeader.js';
 
 export function seedDemoActiveSession({ state }) {
@@ -160,14 +160,26 @@ export function renderSessions({ state, t, getActiveSession, launchClipboardDire
   
   const bookings = state.bookings || [];
   const activeSession = getActiveSession();
-  
-  const cardDeps = { 
-    state, 
-    t, 
-    escapeHTML, 
-    launchClipboardDirectly: (bookingId) => launchClipboardDirectly(bookingId), 
-    sessionDayTemporal, 
+
+  // "Active right now" = today's non-completed booking whose scheduled window contains the current
+  // wall-clock time. If several overlap, the one that started earliest is the primary ongoing one.
+  // This marks the current session on the homepage even when no clipboard has been launched.
+  const nowMin = new Date().getHours() * 60 + new Date().getMinutes();
+  const nowActive = bookings
+    .filter(b => b.day === 'today' && !b.completed)
+    .map(b => ({ b, r: parseTimeRange(b.time) }))
+    .filter(x => x.r && nowMin >= x.r.start && nowMin < x.r.end)
+    .sort((a, c) => a.r.start - c.r.start)[0];
+  const nowActiveId = nowActive ? nowActive.b.id : null;
+
+  const cardDeps = {
+    state,
+    t,
+    escapeHTML,
+    launchClipboardDirectly: (bookingId) => launchClipboardDirectly(bookingId),
+    sessionDayTemporal,
     activeId: activeSession ? activeSession.id : null,
+    nowActiveId,
     getActiveSession,
     formatDuration,
     formatSignedDuration
