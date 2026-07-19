@@ -19,9 +19,40 @@ export function setupViewDismiss({ navigateToPath, getActiveSession, launchClipb
     if (nextId) launchClipboardDirectly(nextId);
   }
 
+  // Close the fullscreen clipboard by sliding it back down (the reverse of its slide-up open),
+  // then navigate home once the slide finishes. Used by both the grabber tap and the swipe-down so
+  // clicking and swiping animate identically.
+  function slideOverlayDownThenHome(overlay) {
+    if (overlay.dataset.closing) return;
+    overlay.dataset.closing = '1';
+    // Pin the current (open) position and force a reflow BEFORE transitioning to the down state —
+    // otherwise dropping the slide-up animation and setting the target transform in one frame gives
+    // the transition no start point and the overlay just snaps down.
+    overlay.style.animation = 'none';
+    overlay.style.transform = 'translateY(0)';
+    void overlay.offsetHeight; // reflow
+    overlay.style.transition = 'transform 0.24s ease';
+    overlay.style.transform = 'translateY(100%)';
+    setTimeout(() => {
+      goHome();
+      overlay.style.transition = '';
+      overlay.style.transform = '';
+      overlay.style.animation = '';
+      delete overlay.dataset.closing;
+    }, 230);
+  }
+
   document.querySelectorAll('.view-titlebar').forEach(bar => {
     const isHome = bar.classList.contains('sessions-title-bar');
-    const activate = isHome ? openActiveOrNextSession : goHome;
+
+    // Tapping the grabber: the home bar opens the clipboard (which slides up via CSS); the clipboard
+    // bar slides itself down and then goes home.
+    const activate = () => {
+      const overlay = bar.closest('.active-session-overlay');
+      if (overlay) slideOverlayDownThenHome(overlay);
+      else if (isHome) openActiveOrNextSession();
+      else goHome();
+    };
 
     const grab = bar.querySelector('.view-grabber');
     if (grab) grab.addEventListener('click', (e) => { e.stopPropagation(); activate(); });
@@ -43,19 +74,8 @@ export function setupViewDismiss({ navigateToPath, getActiveSession, launchClipb
       if (dy < SWIPE_PX || Math.abs(dx) > dy * 0.6) return;
 
       const overlay = bar.closest('.active-session-overlay');
-      if (overlay) {
-        overlay.style.animation = 'none';
-        overlay.style.transition = 'transform 0.24s ease';
-        overlay.style.transform = 'translateY(100%)';
-        setTimeout(() => {
-          goHome();
-          overlay.style.transition = '';
-          overlay.style.transform = '';
-          overlay.style.animation = '';
-        }, 230);
-      } else {
-        activate();
-      }
+      if (overlay) slideOverlayDownThenHome(overlay);
+      else activate();
     }, { passive: true });
   });
 }
