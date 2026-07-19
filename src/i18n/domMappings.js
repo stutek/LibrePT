@@ -10,6 +10,9 @@ export function applyStaticDOMMappings(tDict) {
     '#menu-label-lang': 'menu_language',
     '#menu-label-theme': 'menu_theme',
     '#menu-clients-register': 'menu_clients_register',
+    '#menu-routines': 'tab_routines',
+    '#menu-exercises': 'tab_exercises',
+    '#menu-history': 'tab_history',
     '#menu-connect-cloud': 'menu_connect_cloud',
     '#menu-export-data': 'menu_export_data',
     '#menu-github': 'menu_github',
@@ -24,11 +27,7 @@ export function applyStaticDOMMappings(tDict) {
     '#btn-terms-agree': 'terms_agree',
     '#notification-feed-title-text': 'notif_summary_title',
     '#btn-mark-all-read-text': 'notif_mark_all_read',
-    'button[data-view="clients"] span': 'tab_clients',
-    'button[data-view="routines"] span': 'tab_routines',
-    'button[data-view="exercises"] span': 'tab_exercises',
-    'button[data-view="history"] span': 'tab_history',
-    
+
     // Dashboard / Clients view
     '#sessions-view-title': 'sessions_schedule',
     '#pending-adjustments-title': 'pending_adjustments',

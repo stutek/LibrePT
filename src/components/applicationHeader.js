@@ -198,6 +198,11 @@ function setupAppMenu() {
       }, 50);
     }
   });
+  // Routines / Exercises / History — moved out of the header bar into this menu.
+  const goto = (route) => { closeMenu(); if (deps && deps.navigateToPath) deps.navigateToPath(route); };
+  on('menu-routines', () => goto('/routines'));
+  on('menu-exercises', () => goto('/exercises'));
+  on('menu-history', () => goto('/history'));
   // Connect cloud storage — placeholder, no backend yet.
   on('menu-connect-cloud', () => { closeMenu(); alert(deps.t('menu_coming_soon')); });
   // Export data — reuse the existing Sync & Backup modal (it holds JSON export/restore).
