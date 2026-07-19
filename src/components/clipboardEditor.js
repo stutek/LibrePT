@@ -35,7 +35,7 @@ const isRest = (it) => !!it && it.type === 'rest';
 let detachDocListeners = null;
 
 export function renderClipboardEditor(container, deps) {
-  const { activeClientState, allExerciseNames, t, escapeHTML, save, rerender, openAddExercise, exit, genId } = deps;
+  const { activeClientState, clientName, allExerciseNames, t, escapeHTML, save, rerender, openAddExercise, exit, genId } = deps;
   const items = activeClientState.exercises;
   const tr = (key, fallback) => t(key) || fallback;
   const newId = () => (genId ? genId() : `x${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`);
@@ -164,7 +164,9 @@ export function renderClipboardEditor(container, deps) {
   container.innerHTML = `
     <div class="clipboard-editor" role="region" aria-label="${tr('edit_plan', 'Edit plan')}">
       <div class="clipboard-editor-head">
-        <span class="clipboard-editor-title"><i class="fa-solid fa-pen-to-square"></i> ${tr('edit_plan', 'Edit plan')}</span>
+        <span class="clipboard-editor-title"><i class="fa-solid fa-pen-to-square"></i> ${clientName
+          ? `${tr('editing_plan_for', 'Editing plan for')} <strong>${escapeHTML(clientName)}</strong>`
+          : tr('editing_plan_session', 'Editing session plan')}</span>
         <button type="button" class="btn primary-btn btn-sm editor-done"><i class="fa-solid fa-check"></i> ${tr('done', 'Done')}</button>
       </div>
       <ul class="editor-list">${items.length ? unitsHtml : `<li class="editor-empty">${tr('no_exercises_injected', 'No exercises yet.')}</li>${insertBar(0, { allowSuperset: true })}`}</ul>

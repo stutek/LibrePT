@@ -843,8 +843,18 @@ select.menu-select {
   line-height: 1.4;
 }/* ===== Inline clipboard editor (on-the-fly plan editing) ===== */
 .clipboard-editor { display: flex; flex-direction: column; gap: 12px; }
-.clipboard-editor-head { display: flex; align-items: center; justify-content: space-between; }
-.clipboard-editor-title { font-family: var(--font-header); font-size: 16px; font-weight: 800; }
+.clipboard-editor-head { display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; }
+.clipboard-editor-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-header);
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--text-main);
+}
+.clipboard-editor-title i { color: var(--primary); }
+.clipboard-editor-title strong { color: var(--primary); font-weight: 800; }
 .editor-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
 .editor-empty { color: var(--text-muted); font-size: 13px; padding: 12px 0; }
 .editor-row {

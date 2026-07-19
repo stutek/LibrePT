@@ -84,6 +84,8 @@ export const en = {
     no_exercises_injected: "No Exercises Injected",
     no_exercises_desc: "Please tap \"Inject Exercise\" below to add an exercise for this client.",
     edit_plan: "Edit plan",
+    editing_plan_for: "Editing plan for",
+    editing_plan_session: "Editing session plan",
     add_exercise: "Add exercise",
     reorder: "Reorder",
     exercise: "Exercise",

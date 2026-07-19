@@ -434,8 +434,10 @@ export function renderActiveGroupBoard() {
   const deckContainer = document.getElementById('active-exercise-scroll-deck');
   if (deckContainer && activeClientState && clipboardEditMode) {
     const persist = () => { saveActiveSessionToCache(); if (appDeps.saveToLocalStorage) appDeps.saveToLocalStorage(); };
+    const editClient = state.clients.find(c => c.id === activeClientId);
     editorCleanup = renderClipboardEditor(deckContainer, {
       activeClientState,
+      clientName: editClient ? editClient.name : '',
       allExerciseNames: (state.exercises || []).map(e => e.name),
       t, escapeHTML,
       save: persist,

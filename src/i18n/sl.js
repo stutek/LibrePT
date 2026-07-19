@@ -83,6 +83,8 @@ export const sl = {
     no_exercises_injected: "Ni vstavljenih vaj",
     no_exercises_desc: "Prosimo, tapnite \"Vstavi vajo\" spodaj, da dodate vajo za to stranko.",
     edit_plan: "Uredi načrt",
+    editing_plan_for: "Urejanje načrta za",
+    editing_plan_session: "Urejanje načrta seje",
     add_exercise: "Dodaj vajo",
     reorder: "Prerazporedi",
     exercise: "Vaja",
