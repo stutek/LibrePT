@@ -3,12 +3,30 @@
 // launches the clipboard). Dependencies are injected by the caller (renderSessions in app.js)
 // so this component stays decoupled from app.js internals and is easy to relocate/test.
 //
-// deps: { state, t, escapeHTML, launchClipboardDirectly, sessionDayTemporal, activeId, nowActiveId }
+// deps: { state, t, escapeHTML, launchClipboardDirectly, sessionDayTemporal, activeId }
 
-import { parseTimeRange } from '../helper/utils.js';
+import { parseTimeRange, formatSignedDuration } from '../helper/utils.js';
+
+// A single interval counts down the clock-based ongoing-session timers (cards not driven by the
+// launched-clipboard timer). Each such timer carries data-end (epoch ms of its scheduled end); the
+// ticker updates the text, flips the "overtime" state, and warns the bar once it crosses zero.
+let cardTicker = null;
+function ensureCardTicker() {
+  if (cardTicker) return;
+  cardTicker = setInterval(() => {
+    document.querySelectorAll('.booking-live-timer[data-end]').forEach(el => {
+      const remSec = Math.round((parseInt(el.dataset.end, 10) - Date.now()) / 1000);
+      el.textContent = formatSignedDuration(remSec);
+      const over = remSec < 0;
+      el.classList.toggle('overtime', over);
+      const bar = el.closest('.booking-live-bar');
+      if (bar) bar.classList.toggle('overtime', over);
+    });
+  }, 1000);
+}
 
 export function renderSessionCard(b, colContainer, deps) {
-  const { state, t, escapeHTML, launchClipboardDirectly, sessionDayTemporal, activeId, nowActiveId } = deps;
+  const { state, t, escapeHTML, launchClipboardDirectly, sessionDayTemporal, activeId } = deps;
 
   const card = document.createElement('div');
   // Layout lives in .booking-card (index.css) so it can stack to a single column on mobile.
@@ -16,9 +34,9 @@ export function renderSessionCard(b, colContainer, deps) {
   const temporal = sessionDayTemporal(b.day);
   card.className = 'booking-card card glassmorphic' + (temporal !== 'today' ? ` booking-${temporal}` : '');
   // A card is marked "Active session" when it's the launched clipboard session (matched by the
-  // booking id(s) it was launched from) OR the session currently in progress by wall-clock
-  // (nowActiveId, computed once by renderSessions). The clock case means the card is highlighted
-  // even before a trainer opens the clipboard.
+  // booking id(s) it launched from) OR a session that has started by wall-clock today and isn't
+  // closed. Every applicable card is marked, so overlapping sessions all show as ongoing. Once a
+  // non-closed session runs past its end (negative remaining), the marker turns a warning colour.
   const activeSession = deps.getActiveSession ? deps.getActiveSession() : null;
   const sb = activeSession && activeSession.booking;
   const isLaunched = !b.completed && !!activeSession && (
@@ -27,7 +45,9 @@ export function renderSessionCard(b, colContainer, deps) {
     (sb && sb.id === b.id) ||
     (sb && Array.isArray(sb.ids) && sb.ids.includes(b.id))
   );
-  const isNow = !b.completed && !!nowActiveId && b.id === nowActiveId;
+  const range = parseTimeRange(b.time);
+  const nowMin = new Date().getHours() * 60 + new Date().getMinutes();
+  const isNow = !b.completed && b.day === 'today' && !!range && nowMin >= range.start;
   const isLive = isLaunched || isNow;
   if (isLive) card.classList.add('booking-live');
 
@@ -78,27 +98,29 @@ export function renderSessionCard(b, colContainer, deps) {
     : '';
   if (b.completed) card.classList.add('booking-completed');
 
-  // The live clipboard session shows a ticking timer (updated by sessionBar). A session that is only
-  // in-progress by the clock (not launched) shows its static scheduled time remaining instead.
+  // The live clipboard session's timer ticks via sessionBar (.session-card-timer). A session that is
+  // only in-progress by the clock counts down via the shared card ticker (data-end). Both go
+  // "overtime" (warning) once remaining time is negative.
   let timerText = '';
   let timerIsOvertime = false;
-  let timerLive = false;
+  let timerLive = false;   // driven by the launched clipboard timer
+  let timerEndMs = null;   // scheduled end (epoch) for the clock-based countdown
   if (isLaunched && activeSession) {
     timerLive = true;
     const endDate = activeSession.booking && activeSession.booking.endDate;
-    if (endDate && deps.formatSignedDuration) {
+    if (endDate) {
       const remainingSec = Math.round((new Date(endDate).getTime() - Date.now()) / 1000);
-      timerText = deps.formatSignedDuration(remainingSec);
+      timerText = formatSignedDuration(remainingSec);
       timerIsOvertime = remainingSec < 0;
     } else if (deps.formatDuration) {
       timerText = deps.formatDuration(activeSession.duration || 0);
     }
-  } else if (isNow) {
-    const r = parseTimeRange(b.time);
-    if (r && deps.formatDuration) {
-      const nowMin = new Date().getHours() * 60 + new Date().getMinutes();
-      timerText = deps.formatDuration(Math.max(0, r.end - nowMin) * 60);
-    }
+  } else if (isNow && range) {
+    const end = new Date(); end.setHours(0, 0, 0, 0); end.setMinutes(range.end);
+    timerEndMs = end.getTime();
+    const remSec = Math.round((timerEndMs - Date.now()) / 1000);
+    timerText = formatSignedDuration(remSec);
+    timerIsOvertime = remSec < 0;
   }
 
   info.innerHTML = `
@@ -117,16 +139,17 @@ export function renderSessionCard(b, colContainer, deps) {
     ${warningHTML}
   `;
 
-  // The active session is marked by the card's green left bracket spilling into a full-width bottom
-  // bar carrying an "Active session" tag and the live timer (no red anywhere).
+  // Green left bracket spills into a full-width bottom bar with the Active-session tag + countdown;
+  // the bar turns a warning colour when the session has run past its end (overtime).
   const timerCls = (timerLive ? 'session-card-timer ' : '') + 'booking-live-timer' + (timerIsOvertime ? ' overtime' : '');
-  const timerId = timerLive ? ` id="session-card-timer-${escapeHTML(b.id)}"` : '';
-  const timerSpan = timerText ? `<span${timerId} class="${timerCls}">${escapeHTML(timerText)}</span>` : '';
+  const timerAttrs = timerLive ? ` id="session-card-timer-${escapeHTML(b.id)}"` : (timerEndMs != null ? ` data-end="${timerEndMs}"` : '');
+  const timerSpan = timerText ? `<span${timerAttrs} class="${timerCls}">${escapeHTML(timerText)}</span>` : '';
   const liveBarHTML = isLive ? `
-    <div class="booking-live-bar">
+    <div class="booking-live-bar${timerIsOvertime ? ' overtime' : ''}">
       <span class="booking-live-tag"><i class="fa-solid fa-person-running"></i> ${escapeHTML(t('active_session') || 'Active session')}</span>
       ${timerSpan}
     </div>` : '';
+  if (timerEndMs != null) ensureCardTicker();
 
   // No launch/completed button: the whole card is the tap target, and completion already shows
   // as a badge — the button just duplicated that and ate horizontal space.

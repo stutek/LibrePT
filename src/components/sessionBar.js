@@ -46,6 +46,8 @@ export function updateSessionBarTimer() {
   document.querySelectorAll('.session-card-timer').forEach(el => {
     el.textContent = text;
     el.classList.toggle('overtime', isOvertime); // colours come from CSS, not inline styles
+    const bar = el.closest('.booking-live-bar');
+    if (bar) bar.classList.toggle('overtime', isOvertime); // warn the whole bar on overtime
   });
 }
 

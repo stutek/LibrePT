@@ -1866,13 +1866,22 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   justify-content: space-between;
   gap: 10px;
   margin: 12px -14px -14px -14px;   /* bleed to the card's padded edges so it meets the left border */
-  padding: 8px 14px;
+  padding: 9px 14px;
   background: var(--primary);
-  color: #08130e;
+  color: #06251a;                    /* dark, high-contrast on the accent-green bar */
 }
-.booking-live-tag { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 800; }
-.booking-live-timer { font-family: var(--font-mono, monospace); font-size: 12px; font-weight: 800; letter-spacing: 0.3px; }
-.booking-live-timer.overtime { color: #7f1d1d; }/* Session title tint by day, matching the day-selection line: past = purple, future = amber,
+/* Overtime: the session ran past its scheduled end without being closed — warn in amber. */
+.booking-live-bar.overtime { background: var(--warning, #f59e0b); color: #3d2600; }
+.booking-live-tag { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 800; }
+.booking-live-timer {
+  font-family: var(--font-mono, monospace);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.28);   /* chip keeps the countdown legible on any accent */
+}/* Session title tint by day, matching the day-selection line: past = purple, future = amber,
    today = default. Set here (not inline) so the temporal class on the card can override it. */
 .booking-card-title { color: var(--text-color); }.booking-card.booking-past .booking-card-title { color: var(--temporal-past); }.booking-card.booking-future .booking-card-title { color: var(--temporal-future); }/* --- SESSIONS DAY TITLE BAR --- */
 /* Home view title bar. The "Sessions Schedule" label (.view-title-label) is the conceptual view
