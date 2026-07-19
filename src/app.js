@@ -526,6 +526,16 @@ function setHeaderState() {
   if (normalActions) normalActions.classList.remove('hidden');
 }
 
+// On entering the sessions dashboard, bring the ongoing session into view (it may be below the fold
+// after the completed ones). Only called on view-entry — never on the timer re-renders — so it
+// never yanks a trainer who has scrolled away. inline:'nearest' keeps the horizontal day focus.
+function focusActiveSessionCard() {
+  requestAnimationFrame(() => {
+    const card = document.querySelector('#today-sessions-list .booking-card.booking-live');
+    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+  });
+}
+
 function handlePathChange() {
   const path = toRoute(window.location.pathname);
 
@@ -566,6 +576,7 @@ function handlePathChange() {
     document.getElementById('active-session-overlay').classList.add('hidden');
     switchView('clients');
     requestAnimationFrame(() => focusSessionsColumn(column, 'auto'));
+    focusActiveSessionCard();
   } else if (path === '/clients' || path === '/' || path === '/index.html') {
     const todayDate = getISODateForColumn('today');
     setHeaderState(false);
@@ -573,6 +584,7 @@ function handlePathChange() {
     document.getElementById('active-session-overlay').classList.add('hidden');
     switchView('clients');
     requestAnimationFrame(() => focusSessionsColumn('today', 'auto'));
+    focusActiveSessionCard();
   } else if (path === '/routines') {
     setHeaderState(false);
     document.getElementById('active-session-overlay').classList.add('hidden');
