@@ -237,6 +237,12 @@ export function openSessionFromHistory(log) {
     feedback: log.feedback || [],
   };
 
+  if (log.isPlanning) {
+    clipboardEditMode = true;
+  } else {
+    clipboardEditMode = false;
+  }
+
   saveActiveSessionToCache();
   requestScreenWakeLock();
 
@@ -310,6 +316,12 @@ export function startWorkoutSession(clientRoutines, bookingMeta = null, deps = {
     }
 
     activeSession.clientRoutines[cr.clientId] = clientState;
+  }
+
+  if (bookingMeta?.isPlanning) {
+    clipboardEditMode = true;
+  } else {
+    clipboardEditMode = false;
   }
 
   saveActiveSessionToCache();
@@ -766,6 +778,7 @@ export function cancelWorkoutSession() {
   }
   releaseScreenWakeLock();
   activeSession = null;
+  clipboardEditMode = false;
   localStorage.removeItem("librept_active_session");
 
   renderIdleSessionBar();
@@ -897,6 +910,10 @@ export function recoverActiveSession() {
         localStorage.removeItem("librept_active_session");
         renderIdleSessionBar();
         return;
+      }
+
+      if (activeSession.booking?.isPlanning) {
+        clipboardEditMode = true;
       }
 
       const bar = document.getElementById("active-session-bar");
