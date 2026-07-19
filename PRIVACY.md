@@ -9,18 +9,18 @@
 **LibrePT** is a free, open-source, local-first personal training dashboard designed to help certified trainers schedule sessions, track client progress on the gym floor, and log workout performance without friction.
 
 We believe that data privacy and data ownership are fundamental rights:
-- **Zero Central Backend:** LibrePT does not operate a central database, API server, or analytics pipeline.
+- **Zero Central Backend:** LibrePT by default does not operate a central database, API server, or analytics pipeline. Optional cloud integrations connect directly to your personal cloud storage.
 - **Zero Telemetry & Cookies:** We collect no usage statistics, tracking cookies, IP addresses, or personal information when you use the app.
-- **Local-First Architecture:** All client profiles, training routines, exercise histories, and session logs reside strictly on your local device (in your web browser's `localStorage` or `IndexedDB`).
+- **Local-First Architecture:** By default, all client profiles, training routines, exercise histories, and session logs reside strictly on your local device (in your web browser's `localStorage` or `IndexedDB`), with support for optional personal cloud storage and database synchronization integrations.
 
 ---
 
-## 2. Cloud Synchronization & Data Security ("Bring Your Own Cloud")
+## 2. Cloud Synchronization & Data Security (Optional Cloud Storage & Backups)
 
-When using cloud synchronization or backup features (`Sync & Backup Center`):
-- Data is transmitted directly from your local device to your personal cloud storage provider (e.g., Google Drive AppData folder, iCloud, or WebDAV) using standard client-side authentication.
-- **No Third-Party Interception:** The LibrePT maintainers and developers (`@stutek`) do not have access to, host, process, or view any data you sync to your personal cloud.
-- **End-to-End Security:** We strongly recommend securing your device with a passcode/biometrics and utilizing client-side encryption (`Web Crypto API`) where applicable so that synced cloud snapshots remain opaque and secure at rest.
+When using cloud synchronization, remote database hosting, or backup features (`Sync & Backup Center`):
+- Data is transmitted directly from your local device to your personal cloud storage provider (e.g., Google Drive AppData folder, iCloud, or WebDAV) or integrated remote databases using standard client-side authentication.
+- **No Third-Party Interception:** The LibrePT maintainers and developers do not host, access, process, or view any data you sync to your personal cloud storage or remote databases.
+- **End-to-End Security:** We strongly recommend securing your device with a passcode/biometrics and utilizing client-side encryption (`Web Crypto API`) where applicable so that synced cloud snapshots and backups remain opaque and secure at rest.
 
 ---
 
