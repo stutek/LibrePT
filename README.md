@@ -33,11 +33,27 @@ cd LibrePT
 python3 deploy/local_http_server.py     # dev server on http://localhost:8081
 ```
 
-Then open <http://localhost:8081>; it redirects to <http://localhost:8081/LibrePT/>. `deploy/local_http_server.py` deliberately serves `src/` under the **same `/LibrePT/` sub-path GitHub Pages uses** (rewriting `<base>` and adding a deep-link SPA fallback), so local dev exercises the real production base path instead of hiding sub-path bugs behind a domain-root server. The app seeds itself with mock clients, routines, and sessions on first load, so the dashboard is immediately explorable.
+Then open <http://localhost:8081>; it redirects to <http://localhost:8081/LibrePT/>. `deploy/local_http_server.py` deliberately serves `src/` under the **same `/LibrePT/` sub-path GitHub Pages uses** (rewriting `<base>` and adding a deep-link SPA fallback), so local dev exercises the real production base path instead of hiding sub-path bugs behind a domain-root server. The app boots to a **clean, empty slate** — to explore it pre-loaded with the demo dataset, open it with the demo deep-link instead: <http://localhost:8081/LibrePT/?init=demo_data_load>.
 
 > **Note**: Serve over HTTP rather than opening `index.html` via `file://` — the app loads ES modules and registers a Service Worker, both of which require an HTTP origin. A plain `python3 -m http.server -d src 8081` also works if you don't need the Pages sub-path, but then deep-link refreshes 404 locally.
 
-**Data & privacy**: all state lives in the browser's `localStorage` under the `librept_db` key, and voice notes never leave the device. Use the header's cloud **Sync & Backup** button (cloud + ↻, with mock ahead/behind change counters) to sync session data or export/restore the database as JSON.
+**Data & privacy**: all state lives in the browser's `localStorage` under the `librept_db` key, and voice notes never leave the device. Use the header's cloud **Sync & Backup** button (cloud + ↻, with mock ahead/behind change counters) to export/restore the database as JSON.
+
+### Resetting to a clean state
+
+There is **no in-app "reset" button** — by design, the app never wipes data on your behalf (it also never auto-seeds; see [clean-slate boot](#-key-functional-features)). All state is browser storage, so returning to a first-run clean slate means clearing that storage. Any of these work:
+
+- **Fastest (DevTools console)** — paste this on the app's tab and it wipes every LibrePT key and reloads:
+  ```js
+  Object.keys(localStorage)
+    .filter((k) => k.startsWith("librept") || k.startsWith("openpt"))
+    .forEach((k) => localStorage.removeItem(k));
+  location.reload();
+  ```
+- **Browser UI** — DevTools → **Application** (Chrome/Edge) or **Storage** (Firefox) → **Local storage** → select the origin → delete the `librept_*` keys, or use **Clear site data**. Then reload.
+- **A private/incognito window** — always starts clean and discards everything on close (handy for demos, but not a way to *reset* an existing profile).
+
+To land on demo data instead of an empty app after clearing, reopen with `?init=demo_data_load`. For reference, the app writes these `localStorage` keys: `librept_db` (all data), `librept_active_session` (live session cache), `librept_read_notifications`, `librept-theme`, and `librept_terms_accepted` (first-run agreement); `openpt_*` are legacy keys migrated on first load.
 
 ---
 
@@ -129,6 +145,8 @@ LibrePT is comprised of three major subsystems:
 *   **Omnipresent header**: the app header stays fixed in place across every view — dashboard, client detail, and the active-session clipboard — so it never jumps or re-flows between contexts. The active session view adds a context line beneath it reading `date time location` (e.g. `2026-07-17 10:00 Trib gym base`) with the live countdown.
 *   **In-app Not-Found view**: a deep link that matches no route — or points at a deleted client — renders a not-found (404) view *inside* the content area, keeping the header and bottom navigation in place, with the bad path shown and a one-tap return to the dashboard. Unknown links are never silently redirected.
 *   **Offline PWA shell**: the service worker serves the cached app shell for any in-scope navigation, so clean-URL deep links keep working offline (a basement gym with no signal).
+*   **Clean-slate boot**: the app starts **empty** — no clients, exercises, routines, history, or sessions are auto-populated on a fresh visit. Demo data is opt-in (see the promo deep-link below), so a real trainer's instance never has sample records injected under their own. Existing local data is always loaded as-is and never overwritten.
+*   **Promo deep-links (preselected language + theme + demo data)**: any URL may carry `?lang=`, `?theme=`, and/or `?init=` in the query string to open the demo in a chosen language and colour theme, optionally pre-loaded with the sample dataset — handy for promoting the instance to a specific audience. Example: `https://stutek.github.io/LibrePT/?lang=sl&theme=nebula&init=demo_data_load`. `lang` takes any shipped language code (`en`, `sl`); `theme` takes any theme (`daylight`, `midnight`, `red`, `blossom`, `nebula`) or a legacy alias; `init=demo_data_load` populates the full demo dataset. All params are optional and independent. An unknown language falls through to the saved/default; an unknown or since-renamed theme reverts to the default theme, so old links never break the UI. `init` only ever populates a **genuinely empty** app — if any data is already present it is ignored, so it can't clobber a returning user's records. The params are read once on startup (`src/helper/shareLink.js`) and then applied like any manual language/theme choice.
 *   **GitHub Pages sub-path support**: the public demo is served from a project sub-path (`stutek.github.io/LibrePT/`), not a domain root. The deploy step rewrites the HTML `<base>` to the repo sub-path and ships the shell as `404.html` (GitHub Pages' SPA fallback), while the router derives that same base from its own module URL — so assets load and deep links resolve wherever the app is mounted, with no code changes. The local dev server (`deploy/local_http_server.py`) mounts the app under the same `/LibrePT/` sub-path (with an equivalent base rewrite + SPA fallback), so development and the test suite run against the real production base path rather than masking sub-path bugs behind a domain-root server.
 
 ---

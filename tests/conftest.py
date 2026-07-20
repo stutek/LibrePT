@@ -38,6 +38,52 @@ def accept_first_run_terms(request):
     yield
 
 
+# Init script that opts a browser context into the demo dataset. The app no longer autoloads demo
+# data — it boots to a clean, empty slate — and the dataset is populated only via the
+# ?init=demo_data_load deep-link param (see src/helper/shareLink.js). This rewrites the URL to
+# carry that param before app.js reads it, so a test sees the populated demo state exactly as a
+# promo deep-link visitor would. Idempotent, and a no-op once the param is already present.
+SEED_DEMO_DATA_SCRIPT = """
+(() => {
+  try {
+    const u = new URL(window.location.href);
+    if (u.searchParams.get('init') !== 'demo_data_load') {
+      u.searchParams.set('init', 'demo_data_load');
+      window.history.replaceState(null, '', u);
+    }
+  } catch (e) {}
+})();
+"""
+
+
+@pytest.fixture
+def demo_data_script():
+    """The SEED_DEMO_DATA_SCRIPT string, for tests that build their OWN context (via `browser`)
+    and need the demo dataset — they add it to their context manually, the way they already opt
+    into the Terms auto-accept."""
+    return SEED_DEMO_DATA_SCRIPT
+
+
+@pytest.fixture(autouse=True)
+def seed_demo_data(request):
+    """Populate the demo dataset for browser tests that rely on it. The app boots empty; the demo
+    dataset is opt-in via ?init=demo_data_load. This injects that param for every test using the
+    shared `page` fixture, EXCEPT those marked `clean_start` — which exercise the empty-boot /
+    init-gating behaviour and must control the param themselves. Tests with their own context use
+    the `demo_data_script` fixture instead. Unit tests never request `page`, so this is a no-op
+    for them."""
+    if "page" in request.fixturenames and "clean_start" not in request.keywords:
+        request.getfixturevalue("page").add_init_script(SEED_DEMO_DATA_SCRIPT)
+    yield
+
+
+def pytest_configure(config):
+    config.addinivalue_line(
+        "markers",
+        "clean_start: boot the app to an empty slate (skip the demo-data seed injection)",
+    )
+
+
 def is_port_open(port):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         return s.connect_ex(("localhost", port)) == 0

@@ -40,45 +40,26 @@ export function renderNotificationArea() {
     readIds = [];
   }
 
-  // Build the priority-ordered notification items list
-  const items = [];
-
-  // 1. Welcome to LibrePT / Run the Demo message (TODO 9.3 & 11.1)
-  items.push({
-    id: "demo-welcome",
-    type: "welcome",
-    icon: "fa-solid fa-sparkles",
-    title: t("notif_welcome_title"),
-    description: t("notif_welcome_desc"),
-    actions: [
-      { label: t("notif_demo_btn"), url: "https://stutek.github.io/LibrePT/", primary: true },
-      { label: t("notif_walkthrough_btn"), view: "/clients", primary: false },
-    ],
-  });
-
-  // 2. Client Spot Reservation sample notification (TODO 11.1)
-  items.push({
-    id: "spot-reservation-1",
-    type: "reservation",
-    icon: "fa-solid fa-calendar-check",
-    title: t("notif_spot_res_title"),
-    description: t("notif_spot_res_desc"),
-    actions: [],
-  });
-
-  // 3. Spot Cancellation sample notification (TODO 11.1)
-  items.push({
-    id: "spot-cancellation-1",
-    type: "cancellation",
-    icon: "fa-solid fa-calendar-xmark",
-    title: t("notif_spot_cancel_title"),
-    description: t("notif_spot_cancel_desc"),
-    actions: [],
-  });
-
-  for (const item of items) {
-    item.read = readIds.includes(item.id);
-  }
+  // Notifications are data-driven: they come from state.notifications, which is seeded together
+  // with the demo dataset (?init=demo_data_load) — so a genuinely clean install shows an empty
+  // feed, while a demo instance surfaces its messages (including the demo-mode clean-up notice).
+  // Stored records carry i18n *keys* (titleKey/descKey/labelKey), resolved here so the feed
+  // re-localizes on a language switch; `url`/`view`/`primary`/`icon`/`type` pass through.
+  const rawItems = deps.getState?.().notifications || [];
+  const items = rawItems.map((n) => ({
+    id: n.id,
+    type: n.type,
+    icon: n.icon,
+    title: n.titleKey ? t(n.titleKey) : n.title || "",
+    description: n.descKey ? t(n.descKey) : n.description || "",
+    actions: (n.actions || []).map((a) => ({
+      label: a.labelKey ? t(a.labelKey) : a.label || "",
+      url: a.url,
+      view: a.view,
+      primary: a.primary,
+    })),
+    read: readIds.includes(n.id),
+  }));
 
   const allCount = items.length;
   const unreadCount = items.filter((i) => !i.read).length;
@@ -106,6 +87,17 @@ export function renderNotificationArea() {
     if (summaryDescEl) summaryDescEl.textContent = firstItem.description;
     if (summaryIconEl && firstItem.icon)
       summaryIconEl.className = `${firstItem.icon} notification-bell-icon`;
+  } else {
+    // Empty feed (a clean, non-demo install): neutral placeholder, no stale demo copy.
+    if (summaryTitleEl) summaryTitleEl.textContent = t("notif_empty_title");
+    if (summaryDescEl) summaryDescEl.textContent = t("notif_empty_desc");
+    if (summaryIconEl) summaryIconEl.className = "fa-solid fa-bell notification-bell-icon";
+  }
+
+  if (items.length === 0) {
+    container.innerHTML = `<div class="notification-empty">${escapeHTML(t("notif_empty_desc"))}</div>`;
+    syncNotificationBarState();
+    return;
   }
 
   container.innerHTML = items
@@ -240,8 +232,8 @@ export function setupNotificationGestures() {
       } catch (e) {
         readIds = [];
       }
-      for (const id of ["demo-welcome", "spot-reservation-1", "spot-cancellation-1"]) {
-        if (!readIds.includes(id)) readIds.push(id);
+      for (const n of deps.getState?.().notifications || []) {
+        if (!readIds.includes(n.id)) readIds.push(n.id);
       }
       try {
         localStorage.setItem("librept_read_notifications", JSON.stringify(readIds));

@@ -57,6 +57,7 @@ import {
   getActiveExercise as getActiveExerciseController,
   getActiveSession,
   initActiveSessionController,
+  openSessionFromHistory,
   recoverActiveSession as recoverActiveSessionController,
   renderActiveGroupBoard as renderActiveGroupBoardController,
   saveActiveSessionToCache as saveActiveSessionToCacheController,
@@ -79,6 +80,7 @@ import {
   DEFAULT_CLIENTS,
   DEFAULT_EXERCISES,
   DEFAULT_HISTORY,
+  DEFAULT_MESSAGES,
   DEFAULT_PLAN_UPDATES,
   DEFAULT_ROUTINES,
   DEFAULT_SESSIONS,
@@ -98,6 +100,7 @@ import {
   parseTimeRange,
   truncateString,
 } from "./helper/utils.js";
+import { getShareParams, INIT_DEMO_DATA } from "./helper/shareLink.js";
 import { applyStaticDOMMappings } from "./i18n/domMappings.js";
 import { TRANSLATIONS } from "./i18n/index.js";
 import { BUILD_INFO } from "./version.js";
@@ -146,6 +149,7 @@ let state = {
   history: [],
   planUpdates: [],
   bookings: [],
+  notifications: [],
   lang: "en",
 };
 
@@ -197,7 +201,8 @@ function init() {
   lockPortraitOrientation();
   renderBuildStamp();
 
-  // Load data from LocalStorage or initialize with Mock Data
+  // Load data from LocalStorage (migrating the legacy OpenPT key if present). No data means a
+  // clean, empty boot — demo data is only ever populated on request via ?init=demo_data_load.
   let savedData = localStorage.getItem("librept_db");
   if (!savedData) {
     // Migrate data from old OpenPT key if it exists
@@ -214,46 +219,38 @@ function init() {
     }
   }
 
+  // The app boots to a clean, empty slate. Existing local data is loaded as-is; a corrupt db is
+  // discarded (reset to empty) rather than silently re-seeded with demo data.
   if (savedData) {
     try {
       state = JSON.parse(savedData);
     } catch (e) {
-      console.error("Error parsing local storage database. Re-seeding...", e);
-      seedMockData();
+      console.error("Error parsing local storage database. Starting empty.", e);
+      state = emptyState();
     }
   } else {
-    seedMockData();
+    state = emptyState();
   }
 
   if (!state.lang) state.lang = "en";
 
-  // Ensure new bookings/sessions mock data is loaded and has the modern today/tomorrow schema
-  const hasTodayOrTomorrow = (state.bookings || []).some(
-    (b) => b.day === "today" || b.day === "tomorrow",
-  );
-  if (!state.bookings || state.bookings.length < DEFAULT_SESSIONS.length || !hasTodayOrTomorrow) {
-    state.bookings = [...DEFAULT_SESSIONS];
-    saveToLocalStorage();
-  }
+  // A promo/share link's ?lang= preselects the UI language for this visit, overriding the saved
+  // preference so the recipient sees the app in the shared language. Unknown codes are ignored
+  // (falls through to the existing value), mirroring the theme param's revert-to-default rule.
+  const { lang: shareLang, init: shareInit } = getShareParams();
+  if (shareLang && TRANSLATIONS[shareLang]) state.lang = shareLang;
 
-  // Demo-data version guard. Editing mockData.js otherwise leaves anyone with an existing
-  // localStorage db seeing the old demo data (collections are only seeded on an empty db).
-  // Bump SEED_VERSION whenever the demo dataset changes to force a full refresh of every
-  // reference collection, then re-seed session 1 as a live workout. This is demo behaviour:
-  // it does discard in-session test edits, which is the intent for a reshapeable prototype.
-  const SEED_VERSION = 12;
-  const storedSeed = parseInt(localStorage.getItem("librept_seed_version") || "0", 10);
-  if (storedSeed < SEED_VERSION) {
-    state.clients = [...DEFAULT_CLIENTS];
-    state.exercises = [...DEFAULT_EXERCISES];
-    state.routines = [...DEFAULT_ROUTINES];
-    state.history = [...DEFAULT_HISTORY];
-    state.planUpdates = [...DEFAULT_PLAN_UPDATES];
-    state.bookings = [...DEFAULT_SESSIONS];
-    localStorage.setItem("librept_seed_version", String(SEED_VERSION));
-    saveToLocalStorage();
-    // Demo: open on session 1 already in progress, participants at varied completion
+  // Demo-data initializer (?init=demo_data_load). The demo dataset is opt-in — populated only on
+  // an explicit request AND only when the app is genuinely empty. If any data is already present
+  // (a returning user, or a real trainer's records) the param is ignored so nothing is clobbered.
+  if (shareInit === INIT_DEMO_DATA && !stateHasData(state)) {
+    seedMockData();
+    // Demo: open on session 1 already in progress, participants at varied completion.
     seedDemoActiveSession();
+  } else if (!stateHasData(state)) {
+    // Genuinely empty app: drop any stale active-session cache (e.g. from a prior demo) so a
+    // clean start can't recover a session that references data no longer present.
+    localStorage.removeItem("librept_active_session");
   }
 
   // Set up Event Listeners
@@ -295,8 +292,6 @@ function init() {
       state = newState;
     },
     saveToLocalStorage,
-    cancelWorkoutSession,
-    seedMockData,
     renderClientsList,
     renderRoutinesList,
     renderExercisesList,
@@ -401,6 +396,29 @@ function init() {
   setSyncTrackingReady(true);
 }
 
+// A fresh, empty database — the default the app boots into when there's nothing stored and no
+// demo-data initializer. Lang defaults here too; the caller may override it from ?lang=.
+function emptyState() {
+  return {
+    clients: [],
+    exercises: [],
+    routines: [],
+    history: [],
+    planUpdates: [],
+    bookings: [],
+    notifications: [],
+    lang: "en",
+  };
+}
+
+// Whether the app already holds any real data. Used to gate the ?init=demo_data_load initializer
+// so it never overwrites existing records — the demo dataset only lands on a genuinely empty app.
+function stateHasData(s) {
+  return ["clients", "exercises", "routines", "history", "planUpdates", "bookings"].some(
+    (k) => Array.isArray(s[k]) && s[k].length > 0,
+  );
+}
+
 function seedMockData() {
   const currentLang = state.lang || "en";
   state.clients = [...DEFAULT_CLIENTS];
@@ -409,6 +427,7 @@ function seedMockData() {
   state.history = [...DEFAULT_HISTORY];
   state.planUpdates = [...DEFAULT_PLAN_UPDATES];
   state.bookings = [...DEFAULT_SESSIONS];
+  state.notifications = [...DEFAULT_MESSAGES];
   state.lang = currentLang;
   saveToLocalStorage();
 }
@@ -664,8 +683,17 @@ function handlePathChange() {
 // focusRef (optional) = { type: 'exercise'|'superset', id } from a deep link, selecting which
 // card starts in focus. A stale/unknown id is ignored, leaving the client's default focus.
 function showSessionView(sessionId, clientId, focusRef = null) {
+  // A deep link must follow the id in the URL. The in-memory session is gone after a reload, so
+  // first rehydrate it from the persisted cache — but only treat it as a match when its id is the
+  // one the URL names. We never render whatever session happens to be cached under a different id.
+  if (!getActiveSession()) {
+    const cached = localStorage.getItem("librept_active_session");
+    if (cached) recoverActiveSession();
+  }
+
   const activeSession = getActiveSession();
-  if (activeSession) {
+
+  if (activeSession && activeSession.id === sessionId) {
     // Show active tracking clipboard overlay
     const bar = document.getElementById("active-session-bar");
     if (bar) {
@@ -692,23 +720,35 @@ function showSessionView(sessionId, clientId, focusRef = null) {
     }
     renderActiveGroupBoard();
     syncSessionFocusUrl();
-  } else {
-    // No active session in memory. Check if we can recover it
-    const cached = localStorage.getItem("librept_active_session");
-    if (cached) {
-      recoverActiveSession();
-      if (getActiveSession()) {
-        // Retry
-        showSessionView(sessionId, clientId, focusRef);
-        return;
-      }
-    }
-
-    // Fall back to clients dashboard but open the workout setup modal for this client
-    document.getElementById("active-session-overlay").classList.add("hidden");
-    switchView("clients");
-    openWorkoutSetupModal(clientId);
+    return;
   }
+
+  // The URL names a session that isn't the one live in memory (e.g. a cold reload after the cache
+  // expired, or a shared link). Resolve its id against known data so the deep link lands on the
+  // session it names. Each launcher rebuilds the active session with id === sessionId and navigates,
+  // which re-enters this view; we retry once more only to re-apply the URL's client/focus.
+  const booking = state.bookings?.find((b) => b.id === sessionId);
+  if (booking) {
+    launchClipboardDirectly({ bookingId: sessionId });
+    if (getActiveSession() && (clientId || focusRef)) {
+      showSessionView(sessionId, clientId, focusRef);
+    }
+    return;
+  }
+
+  const log = state.history?.find((h) => h.id === sessionId);
+  if (log) {
+    openSessionFromHistory(log);
+    if (getActiveSession() && (clientId || focusRef)) {
+      showSessionView(sessionId, clientId, focusRef);
+    }
+    return;
+  }
+
+  // Unknown session id — the deep link names nothing we can open. Show the not-found view rather
+  // than a blank setup modal, leaving the bad URL in the address bar so it stays visible.
+  document.getElementById("active-session-overlay").classList.add("hidden");
+  showErrorView(window.location.pathname);
 }
 
 // Resolve a deep-link focus reference to an index into the client's exercise list. A superset

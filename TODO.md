@@ -218,14 +218,16 @@ An on-the-fly edit mode for the active session clipboard (`src/components/clipbo
 
 The big new feature: a first-run onboarding that walks a new user through the app end-to-end with a simulated finger, instead of seeding demo data silently. Build in the phases below; each is committable on its own.
 
-### 9.1 [ ] App starts with NO data
-On a fresh install the app must contain **no test/demo data at all** — empty client directory, no sessions, no active session. Today `seedMockData()` / `SEED_VERSION` auto-seeds on first load; that seeding must move behind the demo activation (9.2).
+### 9.1 [x] App starts with NO data — DONE
+On a fresh install the app now contains **no test/demo data at all** — empty client directory, no sessions, no active session. The old `seedMockData()`-on-empty fallback and the `SEED_VERSION` auto-seed guard were removed from `app.js init()`; seeding is now opt-in via the demo deep-link (9.2). Existing local data is loaded as-is and never overwritten.
 
-- **Blocking ripple:** every browser test (`tests/test_browser.py`, `tests/e2e/*`) currently depends on the seeded active session, clients and bookings. With an empty start they all fail. Keep the suite green by having the tests **explicitly load the demo data** first (expose a small `loadDemoData()` the tests call, or a `?demo=1` / `localStorage` bootstrap the test fixture sets). Decide this before flipping the default.
-- Empty state should render cleanly (the not-found/empty views already exist for some lists) and surface the "Run the demo" message (9.3).
+- **Blocking ripple — resolved:** the suite stays green via a conftest bootstrap. `tests/conftest.py` autouse `seed_demo_data` injects `?init=demo_data_load` for `page`-fixture tests; own-context tests add the `demo_data_script` fixture; tests that verify the empty/clean boot opt out with `@pytest.mark.clean_start` (see `tests/e2e/test_share_deeplink.py`).
+- Empty state renders cleanly. Still TODO: surface the "Run the demo" invitation on the empty dashboard (9.3).
+- The in-app "Reset database" button (which re-seeded demo data) was removed as part of this — the Backup & Restore modal now offers only export/import. Returning to a clean slate is a manual storage clear (documented in README → *Resetting to a clean state*).
 
-### 9.2 [ ] Demo-data loader (subset of the seed data)
-A `loadDemoData()` that populates a **subset** of the current `src/data/` seed (a few clients, one or two routines, today's sessions, and the seeded in-progress session) on demand — invoked when the user activates the demo. Keep it a real subset, not the whole fixture, so the walkthrough stays focused.
+### 9.2 [~] Demo-data loader — PARTIAL
+A demo loader exists: opening `?init=demo_data_load` (parsed in `src/helper/shareLink.js`, applied in `app.js init()`) populates the demo dataset, but **only when the app is genuinely empty** — it's ignored if any data is already present, so it never clobbers real records. It currently loads the **full** `src/data/` fixture via `seedMockData()` + `seedDemoActiveSession()`.
+- **Still TODO:** narrow it to a focused **subset** (a few clients, one or two routines, today's sessions, the in-progress session) for the guided walkthrough, and expose it as a callable `loadDemoData()` invoked by the in-app demo activation (9.3) rather than only via the URL param.
 
 ### 9.3 [ ] "Run the demo" message / invitation
 A message/notification (the first real use of the planned message area — see [11.1](#111--replace-the-footer-nav-with-a-message--status-area)) that **invites the user to run the demo end-to-end**.

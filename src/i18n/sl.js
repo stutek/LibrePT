@@ -41,6 +41,8 @@ export const sl = {
   btn_log_feedback: "Zabeleži povratne informacije",
   alert_no_sets:
     "Ni zabeleženih zaključenih serij. Ali ste prepričani, da želite zaključiti in shraniti prazno vadbo?",
+  confirm_finish_early:
+    "Do konca te seje je še približno {min} minut. Ali jo želite vseeno zaključiti zdaj?",
   confirm_cancel:
     "Izbriši to sejo? Zabeležen napredek in povratne informacije bodo trajno izgubljeni.",
   warning_banner_title: "Varnostno opozorilo za stranko",
@@ -80,12 +82,6 @@ export const sl = {
   btn_error_home: "Nazaj na nadzorno ploščo",
   btn_download_backup: "Prenesi varnostno kopijo JSON",
   btn_import_backup: "Uvozi varnostno kopijo JSON",
-  danger_zone: "Nevarno območje",
-  danger_desc:
-    "Ponastavitev bo trajno izbrisala vse podatke strank, rutine in vaje ter jih nadomestila s privzetimi demo podatki.",
-  btn_reset_db: "Ponastavi vse podatke",
-  confirm_reset:
-    "Ali ste prepričani, da želite ponastaviti zbirko podatkov? Vse stranke po meri, zgodovina in rutine bodo izgubljene.",
   btn_resolve: "Razreši",
   no_exercises_injected: "Ni vstavljenih vaj",
   no_exercises_desc:
@@ -202,6 +198,12 @@ export const sl = {
 
   // Notification Area & Welcome Demo
   notif_summary_title: "Obvestila in pregled stanja",
+  notif_empty_title: "Ni obvestil",
+  notif_empty_desc: "Vse je pregledano — trenutno tukaj ni ničesar.",
+  notif_demo_mode_title: "⚠️ Predstavitveni način — naloženi vzorčni podatki",
+  notif_demo_mode_desc:
+    "Aplikacija deluje v predstavitvenem načinu, vnaprej napolnjena z vzorčnimi strankami, rutinami in sejami. Preden jo začnete uporabljati za resnično, poklicno delo, vam močno priporočamo, da najprej počistite predstavitvene podatke — sledite postopku za čiščenje v dokumentaciji.",
+  notif_demo_mode_btn: "Kako počistiti predstavitvene podatke",
   notif_welcome_title: "👋 Dobrodošli v LibrePT: Interaktivni predstavitvi",
   notif_welcome_desc:
     "Povabilo k zagonu celovite predstavitve: Preizkusite vodenje osebnih seans. Ker vaša aplikacija že vsebuje aktivne podatke, si oglejte dokumentacijo z navodili ali odprite interaktivno predstavitev na stutek.github.io/LibrePT/.",

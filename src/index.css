@@ -1412,6 +1412,20 @@ body:has(#active-session-overlay:not(.hidden))
   background: color-mix(in srgb, #ef4444 15%, transparent);
   color: #ef4444;
 }
+.notification-card.demo-mode {
+  background: color-mix(in srgb, #f59e0b 8%, var(--card-bg));
+  border-color: color-mix(in srgb, #f59e0b 40%, var(--card-border));
+}
+.notification-card.demo-mode .notification-card-icon {
+  background: color-mix(in srgb, #f59e0b 18%, transparent);
+  color: #f59e0b;
+}
+.notification-empty {
+  padding: 24px 16px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+}
 .notification-card-content {
   flex: 1;
   min-width: 0;
@@ -2409,23 +2423,7 @@ textarea.form-control {
   margin-top: 6px;
   font-weight: 600;
 }
-.danger-zone {
-  border-top: 1px solid var(--danger-light);
-  padding-top: 16px;
-  margin-top: 16px;
-}
-.danger-zone h4 {
-  color: var(--danger);
-  font-size: 14px;
-  font-weight: 700;
-  margin-bottom: 4px;
-}
-.danger-zone p {
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-bottom: 12px;
-  line-height: 1.4;
-} /* Utility classes */
+/* Utility classes */
 .hidden {
   display: none !important;
 } /* History Feedback Icon and Tooltip CSS */
@@ -2756,9 +2754,6 @@ textarea.form-control {
 #calendar-title.is-upcoming #calendar-title-weekday,
 #calendar-title.is-upcoming #calendar-title-weekday-short {
   order: -1;
-} /* Keep the calendar icon leading the title, ahead of any reordered label */
-.sessions-title-bar h3 > i {
-  order: -2;
 }
 #calendar-title-date {
   flex: 0 0 auto;
@@ -2900,9 +2895,7 @@ textarea.form-control {
     gap: 6px;
     overflow: hidden;
   }
-  .sessions-title-bar h3 > i {
-    display: none;
-  } /* Icon-only Today button reclaims width so the date + arrows fit one row; the date leads and only the weekday truncates */
+  /* Icon-only Today button reclaims width so the date + arrows fit one row; the date leads and only the weekday truncates */
   .sessions-today-btn {
     width: 36px;
     height: 36px;

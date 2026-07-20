@@ -483,18 +483,11 @@ export function renderClipboardEditor(container, deps) {
     let startY = 0;
     let moved = false;
 
-    handle.addEventListener("pointerdown", (e) => {
-      dragging = true;
-      moved = false;
-      startY = e.clientY;
-      try {
-        handle.setPointerCapture(e.pointerId);
-      } catch (_) {}
-      moveEl.classList.add("editor-row-dragging");
-      e.preventDefault();
-    });
-    handle.addEventListener("pointermove", (e) => {
-      if (!dragging) return;
+    // The drag reorders moveEl within its list live (insertBefore). Relocating the element in the
+    // DOM makes the browser drop any pointer capture on the handle, so we must NOT rely on capture:
+    // the move/up/cancel listeners live on `document` for the drag's duration instead, guaranteeing
+    // the drag is always finalized (rebuildFromDom + commit) even after the element has moved.
+    const onMove = (e) => {
       if (Math.abs(e.clientY - startY) > 6) moved = true;
       if (!moved) return;
       const sibs = [...parentList.children].filter((c) => c !== moveEl && isMovable(c));
@@ -503,14 +496,14 @@ export function renderClipboardEditor(container, deps) {
       );
       if (after) parentList.insertBefore(moveEl, after);
       else parentList.appendChild(moveEl);
-    });
+    };
     const endDrag = (e) => {
       if (!dragging) return;
       dragging = false;
+      document.removeEventListener("pointermove", onMove);
+      document.removeEventListener("pointerup", endDrag);
+      document.removeEventListener("pointercancel", endDrag);
       moveEl.classList.remove("editor-row-dragging");
-      try {
-        handle.releasePointerCapture(e.pointerId);
-      } catch (_) {}
       if (moved) {
         rebuildFromDom();
         commit();
@@ -526,8 +519,17 @@ export function renderClipboardEditor(container, deps) {
         commit();
       }
     };
-    handle.addEventListener("pointerup", endDrag);
-    handle.addEventListener("pointercancel", endDrag);
+
+    handle.addEventListener("pointerdown", (e) => {
+      dragging = true;
+      moved = false;
+      startY = e.clientY;
+      moveEl.classList.add("editor-row-dragging");
+      document.addEventListener("pointermove", onMove);
+      document.addEventListener("pointerup", endDrag);
+      document.addEventListener("pointercancel", endDrag);
+      e.preventDefault();
+    });
   }
 
   // ---------- exits (zero friction): Done button, Esc, tap outside the editor ----------

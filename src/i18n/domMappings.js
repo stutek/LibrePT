@@ -93,9 +93,6 @@ export function applyStaticDOMMappings(tDict) {
     "#backup-import-title": "backup_import_title",
     "#backup-import-desc": "backup_import_desc",
     "#btn-select-json": "btn_select_json",
-    "#dialog-backup .danger-zone h4": "danger_zone",
-    "#dialog-backup .danger-zone p": "danger_desc",
-    "#dialog-backup #btn-reset-db": "btn_reset_db",
 
     // Not-found (error) view
     "#error-view-title": "error_title",

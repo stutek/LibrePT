@@ -42,6 +42,8 @@ export const en = {
   btn_log_feedback: "Log Feedback",
   alert_no_sets:
     "No completed sets were logged. Are you sure you want to finish and save an empty session?",
+  confirm_finish_early:
+    "This session still has about {min} minutes left. Finish it now anyway?",
   confirm_cancel:
     "Delete this session? Its logged progress and feedback will be permanently discarded.",
   warning_banner_title: "Client Safety Advisory",
@@ -81,12 +83,6 @@ export const en = {
   error_title: "Page not found",
   error_desc: "This link doesn't point to a session, client or view in LibrePT.",
   btn_error_home: "Back to dashboard",
-  danger_zone: "Danger Zone",
-  danger_desc:
-    "Resetting will permanently erase all custom client logs, routines, and exercises, replacing them with default mock data.",
-  btn_reset_db: "Reset All Database Data",
-  confirm_reset:
-    "Are you sure you want to reset the database? All custom clients, history, and routines will be lost.",
   btn_resolve: "Resolve",
   no_exercises_injected: "No Exercises Injected",
   no_exercises_desc:
@@ -203,6 +199,12 @@ export const en = {
 
   // Notification Area & Welcome Demo
   notif_summary_title: "Notifications & Status Feed",
+  notif_empty_title: "No notifications",
+  notif_empty_desc: "You're all caught up — there's nothing here right now.",
+  notif_demo_mode_title: "⚠️ Demo mode — sample data loaded",
+  notif_demo_mode_desc:
+    "This app is running in demo mode, preloaded with sample clients, routines, and sessions. Before you start using it for real, professional work, we strongly recommend clearing the demo data first — follow the clean-up procedure in the documentation.",
+  notif_demo_mode_btn: "How to clean up demo data",
   notif_welcome_title: "👋 Welcome to LibrePT: Interactive Demo",
   notif_welcome_desc:
     "Invite to run the demo end-to-end: Experience personal training orchestration. Since your workspace is preloaded with live training data, explore the interactive walkthrough documentation or open the live interactive demo at stutek.github.io/LibrePT/.",

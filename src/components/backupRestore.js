@@ -1,12 +1,10 @@
 // components/backupRestore.js
-// Component that manages the data backup, JSON export, JSON file import, and factory reset actions.
+// Component that manages the data backup, JSON export, and JSON file import actions.
 //
 // deps: {
 //   getState(),
 //   setState(newState),
 //   saveToLocalStorage(),
-//   cancelWorkoutSession(),
-//   seedMockData(),
 //   renderClientsList(),
 //   renderRoutinesList(),
 //   renderExercisesList(),
@@ -122,30 +120,4 @@ export function setupBackupRestore() {
     });
   }
 
-  // Wipe database
-  const resetBtn = document.getElementById("btn-reset-db");
-  if (resetBtn) {
-    resetBtn.addEventListener("click", () => {
-      if (
-        confirm(
-          "CRITICAL WARNING: This permanently wipes all workout logs and custom records. Are you absolutely sure?",
-        )
-      ) {
-        localStorage.removeItem("librept_db");
-        deps.cancelWorkoutSession();
-        deps.seedMockData();
-
-        deps.renderClientsList();
-        deps.renderRoutinesList();
-        deps.renderExercisesList();
-        deps.renderGlobalHistory();
-        deps.populateDropdownSelectors();
-
-        if (importStatus) {
-          importStatus.textContent = "Database reset successfully to factory defaults.";
-          importStatus.className = "status-msg text-emerald";
-        }
-      }
-    });
-  }
 }

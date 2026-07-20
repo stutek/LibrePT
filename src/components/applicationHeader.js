@@ -19,11 +19,14 @@
 //   renderActiveSessionBarLabels()
 // }
 
+import { getShareParams } from "../helper/shareLink.js";
+
 let deps = null;
 
 let mockSyncState = { local: 2, remote: 1 };
 let syncTrackingReady = false;
 
+const DEFAULT_THEME = "daylight";
 const THEME_BODY_CLASS = {
   midnight: "midnight-theme",
   daylight: "daylight-theme",
@@ -101,17 +104,24 @@ export function renderSyncBadge() {
   );
 }
 
+// Map any incoming theme name (current, legacy alias, or unknown) onto a theme that actually
+// exists. Unknown names — including a theme that was later renamed and lives on only in an old
+// share link or a stale localStorage value — resolve to the default so the app never lands in a
+// broken/no-theme state.
+function resolveTheme(theme) {
+  const mapped = LEGACY_THEME_MAP[theme] || theme;
+  return THEME_BODY_CLASS[mapped] ? mapped : DEFAULT_THEME;
+}
+
 function applyTheme(theme) {
-  const activeTheme = LEGACY_THEME_MAP[theme] || theme;
-  const cls = THEME_BODY_CLASS[activeTheme] || THEME_BODY_CLASS.daylight;
+  const activeTheme = resolveTheme(theme);
   for (const c of Object.values(THEME_BODY_CLASS)) {
     document.body.classList.remove(c);
   }
-  document.body.classList.add(cls);
+  document.body.classList.add(THEME_BODY_CLASS[activeTheme]);
   localStorage.setItem("librept-theme", activeTheme);
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta)
-    meta.setAttribute("content", THEME_META_COLOR[activeTheme] || THEME_META_COLOR.midnight);
+  if (meta) meta.setAttribute("content", THEME_META_COLOR[activeTheme]);
 }
 
 export function applyThemeSwitcherLabels() {
@@ -124,12 +134,14 @@ export function applyThemeSwitcherLabels() {
 }
 
 function setupThemeSwitcher() {
-  let saved = localStorage.getItem("librept-theme") || "daylight";
-  saved = LEGACY_THEME_MAP[saved] || saved;
-  applyTheme(saved);
+  // A promo/share link's ?theme= wins over the saved preference on this visit, so the recipient
+  // sees the app as it was shared. resolveTheme() reverts a renamed/unknown theme to the default.
+  const shareTheme = getShareParams().theme;
+  const active = resolveTheme(shareTheme || localStorage.getItem("librept-theme") || DEFAULT_THEME);
+  applyTheme(active);
   const sel = document.getElementById("theme-switcher");
   if (sel) {
-    sel.value = saved;
+    sel.value = active;
     sel.addEventListener("change", () => applyTheme(sel.value));
   }
   applyThemeSwitcherLabels();

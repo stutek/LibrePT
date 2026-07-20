@@ -802,6 +802,17 @@ export function finishWorkoutSession() {
   const { state, t, saveToLocalStorage, navigateToPath } = appDeps;
   if (!state || !t) return;
 
+  // Confirm only when finishing meaningfully early — more than 10 minutes still on the
+  // countdown. Near the scheduled end or in overrun (<=10 min or negative), complete silently.
+  const endDate = activeSession.booking?.endDate;
+  if (endDate && !activeSession.booking?.isPlanning) {
+    const remainingMin = (new Date(endDate).getTime() - Date.now()) / 60000;
+    if (remainingMin > 10) {
+      const msg = t("confirm_finish_early").replace("{min}", String(Math.round(remainingMin)));
+      if (!confirm(msg)) return;
+    }
+  }
+
   let totalSets = 0;
   let completedSets = 0;
 
