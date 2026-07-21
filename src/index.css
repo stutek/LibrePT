@@ -2340,7 +2340,7 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
 /* Per-client timer stack: a column of compact labelled countdowns floating over the clipboard. */
 .timer-stack {
   position: fixed;
-  bottom: calc(var(--nav-height) + var(--safe-bottom) + 16px);
+  bottom: calc(92px + var(--safe-bottom) + 12px);
   right: 16px;
   z-index: 150;
   display: flex;
