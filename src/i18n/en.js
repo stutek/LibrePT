@@ -9,6 +9,7 @@ export const en = {
   tab_history: "History",
   pending_adjustments: "Pending Plan Adjustments",
   btn_start_session: "Start Custom or Group Session",
+  btn_create_session: "Create Session",
   no_pending_adjustments: "No pending plan adjustments. Floor signals are all synced!",
   clients_title: "Clients Directory",
   placeholder_search_clients: "Search clients...",

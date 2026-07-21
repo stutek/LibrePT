@@ -514,6 +514,14 @@ function setupNavigation() {
     navigateToPath("/");
   });
 
+  // Create Session button (floating action button on sessions view)
+  const createSessionBtn = document.getElementById("btn-create-session");
+  if (createSessionBtn) {
+    createSessionBtn.addEventListener("click", () => {
+      openWorkoutSetupModal();
+    });
+  }
+
   setupSessionsDayNav();
 }
 

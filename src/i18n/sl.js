@@ -8,6 +8,7 @@ export const sl = {
   tab_history: "Zgodovina",
   pending_adjustments: "Čakajoče prilagoditve načrta",
   btn_start_session: "Začni sejo po meri ali skupinsko sejo",
+  btn_create_session: "Ustvari sejo",
   no_pending_adjustments: "Ni čakajočih prilagoditev načrta. Vsi signali s tal so usklajeni!",
   clients_title: "Imenik strank",
   placeholder_search_clients: "Išči stranke...",

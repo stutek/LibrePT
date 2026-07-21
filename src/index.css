@@ -3712,3 +3712,16 @@ textarea.form-control {
   align-items: center;
   gap: 4px;
 }
+
+/* Floating Action Button (Create Session) — stays visible while scrolling the sessions list */
+.floating-action-btn {
+  position: fixed;
+  bottom: calc(92px + var(--safe-bottom) + 12px);
+  right: 12px;
+  z-index: 140;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  padding: 12px 16px;
+}
+.floating-action-btn:hover {
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+}
