@@ -10,7 +10,7 @@ export const LOCATIONS = {
 
 export const DEFAULT_SESSIONS = (() => {
   const now = new Date();
-  const currentHour = Math.min(18, Math.max(3, now.getHours()));
+  const currentHour = Math.max(3, now.getHours());
 
   // 24-hour HH:MM (ISO-style), e.g. "14:00"
   const formatHour = (h) => {
