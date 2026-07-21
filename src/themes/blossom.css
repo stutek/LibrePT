@@ -27,9 +27,10 @@ body.blossom-theme {
   --danger-light: rgba(225, 29, 72, 0.12);
   --success: #10b981;
   --success-hover: #059669;
-  /* Deep violet past / amber future — legible on the light blush field, distinct from the pink primary */
+  /* Deep violet past / rose-coral future — legible on the light blush field, distinct from the
+     pink primary; future was a muddy amber-brown that clashed with the soft pink/lavender palette. */
   --temporal-past: #9333ea;
-  --temporal-future: #d97706;
+  --temporal-future: #fb7185;
   --cloud-icon-color: #6b21a8; /* deep violet/purple for strong contrast against light blush background */
   --cloud-arrows-color: #4ade80; /* green-400 bright standard green arrows for 5:1 contrast over deep violet cloud */
   --box-shadow: 0 18px 36px -18px rgba(190, 24, 93, 0.3);

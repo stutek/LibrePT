@@ -2880,7 +2880,7 @@ textarea.form-control {
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  padding: 14px;
+  padding: 8px 14px;
   margin-bottom: 4px;
   border-left: 4px solid var(--primary);
   cursor: pointer;
@@ -2909,10 +2909,10 @@ textarea.form-control {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  margin: 12px -14px -14px -14px; /* bleed to the card's padded edges so it meets the left border */
-  padding: 9px 14px;
+  margin: 4px -14px -8px -14px; /* bleed to the card's padded edges (must match .booking-card's padding) */
+  padding: 5px 14px;
   background: var(--primary);
-  color: #06251a; /* dark, high-contrast on the accent-green bar */
+  color: var(--text-dark); /* near-black — better contrast on the accent bar than the previous dark green */
 }
 /* Overtime: the session ran past its scheduled end without being closed — warn in amber, and turn
    the card's left bracket amber too so it reads as a warning at a glance (follows the bar's state). */
@@ -2932,16 +2932,29 @@ textarea.form-control {
   justify-content: flex-start;
   overflow: hidden;
 }
-/* Upcoming: countdown to the scheduled start, tinted with the same amber used for future-dated
-   session titles elsewhere (sessionDayTemporal). Past: elapsed time, tinted with the same violet
-   used for past-dated titles — its value chip is editable (see .booking-status-value below). */
+/* Upcoming/past bars share their identity color with the left bracket (see the :has() rules
+   below), but lightened toward white at the point of use — the raw --temporal-future/past tokens
+   are saturated enough that --text-dark on top of them fell short of WCAG AA (measured ~3.5:1 for
+   violet, ~3.8:1 for blue). Lightening only the bar fill (not the border, and not the shared
+   variable, which also tints past/future session titles elsewhere) keeps the bracket a strong
+   accent while giving the bar's text room to read clearly — same approach the flash-warning/
+   flash-ack keyframes already use for tinting a neutral surface toward a color. */
 .booking-live-bar.upcoming {
-  background: var(--temporal-future, #f59e0b);
+  background: color-mix(in srgb, var(--temporal-future, #f59e0b) 55%, white);
   color: var(--text-dark);
 }
 .booking-live-bar.past {
-  background: var(--temporal-past, #c084fc);
+  background: color-mix(in srgb, var(--temporal-past, #c084fc) 55%, white);
   color: var(--text-dark);
+}
+/* The left bracket always matches whichever status bar the card is showing (live already does via
+   .booking-live's own border-left-color, and the overtime override above it) — carry the same rule
+   to the other two states so the border reads as one continuous accent with the bar beneath it. */
+.booking-card:has(.booking-live-bar.upcoming) {
+  border-left-color: var(--temporal-future);
+}
+.booking-card:has(.booking-live-bar.past) {
+  border-left-color: var(--temporal-past);
 }
 .booking-status-value {
   cursor: pointer;

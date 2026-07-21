@@ -214,12 +214,12 @@ export function renderSessionCard(b, colContainer, deps) {
   }
 
   info.innerHTML = `
-    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px;">
+    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 3px;">
       <span class="badge badge-primary" style="font-size: 10px; padding: 2px 6px; font-weight: 700; font-family: monospace;">${escapeHTML(b.time)}</span>
       <strong class="booking-card-title" style="font-size: 13px;">${escapeHTML(b.title)}</strong>
       ${completedBadge}
     </div>
-    <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">
+    <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 2px;">
       <i class="fa-solid fa-users" style="margin-right: 4px; font-size: 10px;"></i> ${clientNamesStr || `<span style="color: #ef4444;">—</span>`}
       <span style="margin-left: 4px; color: var(--primary); font-weight: 600;">(${clients.length}/${b.maxCapacity} ${t("spots_filled")})</span>
     </div>
