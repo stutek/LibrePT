@@ -201,7 +201,24 @@ function lockPortraitOrientation() {
   orientation.addEventListener("change", apply);
 }
 
+// Dev/debug console helper (see README "Resetting to a clean state"): wipes every LibrePT-owned
+// localStorage key and reloads. Defaults to landing back on the demo dataset — call
+// resetLibrePTData({ demo: false }) for the empty first-run state instead.
+function resetLibrePTData({ demo = true } = {}) {
+  for (const k of Object.keys(localStorage)) {
+    if (k.startsWith("librept") || k.startsWith("openpt")) localStorage.removeItem(k);
+  }
+  const url = new URL(window.location.href);
+  if (demo) {
+    url.searchParams.set("init", "demo_data_load");
+  } else {
+    url.searchParams.delete("init");
+  }
+  window.location.href = url.toString();
+}
+
 function init() {
+  window.resetLibrePTData = resetLibrePTData;
   resizeToPhoneViewport();
   lockPortraitOrientation();
   renderBuildStamp();

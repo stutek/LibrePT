@@ -43,12 +43,10 @@ Then open <http://localhost:8081>; it redirects to <http://localhost:8081/LibreP
 
 There is **no in-app "reset" button** — by design, the app never wipes data on your behalf (it also never auto-seeds; see [clean-slate boot](#-key-functional-features)). All state is browser storage, so returning to a first-run clean slate means clearing that storage. Any of these work:
 
-- **Fastest (DevTools console)** — paste this on the app's tab and it wipes every LibrePT key and reloads:
+- **Fastest (DevTools console)** — call the console helper `app.js` registers on every load:
   ```js
-  Object.keys(localStorage)
-    .filter((k) => k.startsWith("librept") || k.startsWith("openpt"))
-    .forEach((k) => localStorage.removeItem(k));
-  location.reload();
+  resetLibrePTData();              // wipes every LibrePT key, reloads back onto the demo dataset
+  resetLibrePTData({ demo: false }); // same, but reloads to the empty first-run state instead
   ```
 - **Browser UI** — DevTools → **Application** (Chrome/Edge) or **Storage** (Firefox) → **Local storage** → select the origin → delete the `librept_*` keys, or use **Clear site data**. Then reload.
 - **A private/incognito window** — always starts clean and discards everything on close (handy for demos, but not a way to *reset* an existing profile).
