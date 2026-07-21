@@ -116,7 +116,12 @@ def test_init_param_loads_demo_data(page, local_server):
     # including the demo-mode clean-up notice.
     assert len(db["notifications"]) > 0
     assert any(n["id"] == "demo-mode-notice" for n in db["notifications"])
-    assert page.locator("#notification-list-container .notification-card.demo-mode").count() == 1
+    assert (
+        page.locator(
+            "#notification-list-container .notification-card.demo-mode"
+        ).count()
+        == 1
+    )
 
 
 def test_clean_start_has_no_notifications(page, local_server):

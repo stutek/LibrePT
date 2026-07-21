@@ -32,7 +32,9 @@ def _open_session(page, local_server):
     page.wait_for_timeout(400)
 
 
-def test_reload_with_expired_cache_relaunches_from_the_url_session_id(page, local_server):
+def test_reload_with_expired_cache_relaunches_from_the_url_session_id(
+    page, local_server
+):
     _open_session(page, local_server)
     base = _base(page)
 
@@ -50,9 +52,12 @@ def test_reload_with_expired_cache_relaunches_from_the_url_session_id(page, loca
     # The deep link followed the id: the session was re-launched from its booking, so the clipboard
     # overlay is showing — NOT the blank workout-setup modal the old fallback opened.
     assert page.locator("#active-session-overlay").is_visible()
-    assert page.evaluate(
-        "() => document.getElementById('dialog-workout-setup')?.open === true"
-    ) is False, "an expired session URL wrongly opened the Workout Session Setup modal"
+    assert (
+        page.evaluate(
+            "() => document.getElementById('dialog-workout-setup')?.open === true"
+        )
+        is False
+    ), "an expired session URL wrongly opened the Workout Session Setup modal"
     # The URL still names the session it was asked for.
     assert page.evaluate("() => location.pathname").startswith(m.group(0))
 
@@ -66,6 +71,9 @@ def test_unknown_session_id_shows_not_found_not_setup_modal(page, local_server):
 
     # An id that resolves to nothing lands on the not-found view, and never the setup modal.
     assert page.locator("#view-error").is_visible()
-    assert page.evaluate(
-        "() => document.getElementById('dialog-workout-setup')?.open === true"
-    ) is False, "an unknown session URL wrongly opened the Workout Session Setup modal"
+    assert (
+        page.evaluate(
+            "() => document.getElementById('dialog-workout-setup')?.open === true"
+        )
+        is False
+    ), "an unknown session URL wrongly opened the Workout Session Setup modal"

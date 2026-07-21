@@ -59,12 +59,24 @@ def test_timer_survives_reload_and_goes_overtime(page, local_server):
     page.wait_for_timeout(200)
 
     card = page.locator("#clipboard-timer-stack .timer-card").first
-    assert "overtime" in (card.get_attribute("class") or ""), "past zero should be overtime"
-    assert page.text_content("#clipboard-timer-stack .timer-card-time").strip().startswith("-")
+    assert "overtime" in (card.get_attribute("class") or ""), (
+        "past zero should be overtime"
+    )
+    assert (
+        page.text_content("#clipboard-timer-stack .timer-card-time")
+        .strip()
+        .startswith("-")
+    )
 
     # A start on an OVERTIME timer resets it (back to a positive countdown, no longer overtime).
     page.locator("#active-exercise-scroll-deck .deck-card-timer").first.click()
     page.wait_for_timeout(150)
     card = page.locator("#clipboard-timer-stack .timer-card").first
-    assert "overtime" not in (card.get_attribute("class") or ""), "reset should clear overtime"
-    assert not page.text_content("#clipboard-timer-stack .timer-card-time").strip().startswith("-")
+    assert "overtime" not in (card.get_attribute("class") or ""), (
+        "reset should clear overtime"
+    )
+    assert (
+        not page.text_content("#clipboard-timer-stack .timer-card-time")
+        .strip()
+        .startswith("-")
+    )

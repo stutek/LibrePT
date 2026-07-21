@@ -63,8 +63,14 @@ def test_reps_and_load_helpers(page, local_server):
     # a bodyweight vertical pull (pull-up) stays strength; core = endurance; mobility = time; loaded
     # isolation = hypertrophy; no-pattern falls back to load (bw → endurance, else strength).
     assert r["tier"] == [
-        "strength", "endurance", "strength", "endurance",
-        "time", "hypertrophy", "endurance", "strength",
+        "strength",
+        "endurance",
+        "strength",
+        "endurance",
+        "time",
+        "hypertrophy",
+        "endurance",
+        "strength",
     ]
     assert r["presetList"] == ["reps-presets", "reps-presets-time"]
     assert r["presetsFor"] == ["3", "5", "8", "10", "max"]

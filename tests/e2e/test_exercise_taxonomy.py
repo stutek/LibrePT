@@ -42,7 +42,10 @@ def test_routine_builder_picker_drops_a_movement(page, local_server):
     page.wait_for_timeout(150)
 
     # The picker offers filter chips over a single-tap movement list.
-    assert page.locator("#routine-ex-picker .picker-chips[data-axis='equipment']").count() == 1
+    assert (
+        page.locator("#routine-ex-picker .picker-chips[data-axis='equipment']").count()
+        == 1
+    )
     assert page.locator("#routine-ex-picker .picker-item").count() > 0
     assert page.locator("#routine-exercises-list > *").count() == 0
 
@@ -62,8 +65,14 @@ def test_custom_exercise_requires_taxonomy(page, local_server):
     page.wait_for_selector("#dialog-exercise[open]")
 
     # Strict inheritance (Scenario C): equipment + movement pattern are mandatory.
-    assert page.evaluate("() => document.getElementById('exercise-equipment').required") is True
-    assert page.evaluate("() => document.getElementById('exercise-pattern').required") is True
+    assert (
+        page.evaluate("() => document.getElementById('exercise-equipment').required")
+        is True
+    )
+    assert (
+        page.evaluate("() => document.getElementById('exercise-pattern').required")
+        is True
+    )
     # Options are seeded canonical taxonomy enums.
     assert page.locator("#exercise-equipment option[value='Barbell']").count() == 1
     assert page.locator("#exercise-pattern option[value='Hinge']").count() == 1

@@ -33,7 +33,9 @@ def _assert_well_formed(seq):
     # A clean render alternates BAR / unit / BAR — never two adjacent insert bars.
     adjacent = [(a, b) for a, b in zip(seq, seq[1:]) if a == "BAR" and b == "BAR"]
     assert not adjacent, f"orphaned/duplicate adjacent insert bars: {seq}"
-    assert seq and seq[0] == "BAR" and seq[-1] == "BAR", f"list must be bar-bounded: {seq}"
+    assert seq and seq[0] == "BAR" and seq[-1] == "BAR", (
+        f"list must be bar-bounded: {seq}"
+    )
 
 
 def _enter_editor_with_new_superset(page, local_server):
@@ -77,15 +79,23 @@ def test_dragging_new_superset_keeps_editor_well_formed(page, local_server):
     before = _top_level_seq(page)
     _assert_well_formed(before)
 
-    _drag_circuit(page, from_last=True, dy=-600)  # drag the new superset decisively upward
+    _drag_circuit(
+        page, from_last=True, dy=-600
+    )  # drag the new superset decisively upward
 
     after = _top_level_seq(page)
     # Edit mode stays open and the structure is still clean (the reported bug left it corrupted).
-    assert page.locator(".clipboard-editor").count() == 1, "drag wrongly exited edit mode"
+    assert page.locator(".clipboard-editor").count() == 1, (
+        "drag wrongly exited edit mode"
+    )
     _assert_well_formed(after)
     # Same number of units before/after — nothing lost or duplicated.
-    assert after.count("BAR") == before.count("BAR"), f"unit count changed: {before} -> {after}"
-    assert sorted(after) == sorted(before), f"units changed identity: {before} -> {after}"
+    assert after.count("BAR") == before.count("BAR"), (
+        f"unit count changed: {before} -> {after}"
+    )
+    assert sorted(after) == sorted(before), (
+        f"units changed identity: {before} -> {after}"
+    )
 
 
 def test_dragging_reorders_the_circuit(page, local_server):
@@ -96,7 +106,9 @@ def test_dragging_reorders_the_circuit(page, local_server):
     _drag_circuit(page, from_last=True, dy=-600)  # move the last circuit toward the top
 
     circuits_after = [u for u in _top_level_seq(page) if u.startswith("CIRCUIT")]
-    assert set(circuits_after) == set(circuits_before), "a circuit was lost/duplicated by the drag"
+    assert set(circuits_after) == set(circuits_before), (
+        "a circuit was lost/duplicated by the drag"
+    )
     assert circuits_after.index(new_id) < circuits_before.index(new_id), (
         f"drag did not move the circuit up: {circuits_before} -> {circuits_after}"
     )

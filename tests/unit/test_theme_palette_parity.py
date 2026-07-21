@@ -21,7 +21,13 @@ def _defined_vars(path):
 
 def test_themes_present(src_dir):
     files = _theme_files(src_dir)
-    assert {f.stem for f in files} >= {"midnight", "daylight", "red", "blossom", "nebula"}
+    assert {f.stem for f in files} >= {
+        "midnight",
+        "daylight",
+        "red",
+        "blossom",
+        "nebula",
+    }
 
 
 def test_every_theme_defines_the_core_palette(src_dir):

@@ -45,7 +45,9 @@ def test_edit_mode_deeplinks_and_survives_reload(page, local_server):
     page.wait_for_timeout(900)
 
     # We land back in the editor (not the live logging deck)...
-    assert page.locator(".clipboard-editor").is_visible(), "reload should restore the inline editor"
+    assert page.locator(".clipboard-editor").is_visible(), (
+        "reload should restore the inline editor"
+    )
     assert page.evaluate(
         "() => document.getElementById('active-session-overlay').classList.contains('editing-plan')"
     ), "overlay should still be in editing-plan mode after reload"
@@ -79,4 +81,6 @@ def test_edit_deeplink_typed_directly_restores_editor(page, local_server):
         edit_url,
     )
     page.wait_for_timeout(400)
-    assert page.locator(".clipboard-editor").is_visible(), "edit deep link should reopen the editor"
+    assert page.locator(".clipboard-editor").is_visible(), (
+        "edit deep link should reopen the editor"
+    )
