@@ -1171,7 +1171,9 @@ select.menu-select {
   font-family: var(--font-mono);
 } /* Omnipresent bottom notification & status area (replaces old bottom-nav) */
 .notification-area {
-  --notif-handle-height: calc(92px + var(--safe-bottom));
+  /* Collapsed peek is a single text line (the summary title row) — .notification-summary-desc is
+     hidden below, which is what used to push this to 92px for two lines. */
+  --notif-handle-height: calc(56px + var(--safe-bottom));
   position: fixed;
   bottom: 0;
   left: 0;
@@ -1186,19 +1188,27 @@ select.menu-select {
   flex-direction: column;
   transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.28s ease;
   transform: translateY(calc(100% - var(--notif-handle-height)));
-  max-height: 82vh;
+  /* Expanded, the drawer covers the whole area below the omnipresent header (not just 82vh, which
+     used to leave a visible gap at the top even fully expanded). */
+  max-height: calc(100vh - var(--hdr-height));
+  max-height: calc(100dvh - var(--hdr-height));
 }
 .notification-area.has-active-session {
   --notif-handle-height: calc(64px + var(--safe-bottom));
 }
 body:has(#active-session-overlay:not(.hidden)) .notification-area.has-active-session {
-  --notif-handle-height: calc(92px + var(--safe-bottom));
+  --notif-handle-height: calc(56px + var(--safe-bottom));
 }
 body:has(#active-session-overlay:not(.hidden)) .notification-area .active-session-bar {
   display: none !important;
 }
 .notification-area.is-expanded {
   transform: translateY(0);
+  /* max-height above only caps growth to fit short content; force the actual height so the drawer
+     fills the whole area below the header regardless of how much content it holds — the feed
+     list itself (flex: 1; overflow-y: auto) scrolls internally instead. */
+  height: calc(100vh - var(--hdr-height));
+  height: calc(100dvh - var(--hdr-height));
 }
 .notification-handle-bar {
   min-height: var(--notif-handle-height);
@@ -1271,16 +1281,10 @@ body:has(#active-session-overlay:not(.hidden))
   gap: 8px;
   flex-shrink: 0;
 }
+/* Collapsed peek is one line only (the summary title row above) — this description used to add a
+   second, taking the handle from a single line up to 92px tall. */
 .notification-summary-desc {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  font-size: 13px;
-  color: var(--text-muted);
-  line-height: 1.4;
-  margin: 0;
-  padding-right: 28px;
+  display: none;
 }
 .notification-toggle-btn {
   transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
