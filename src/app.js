@@ -94,6 +94,7 @@ import {
   formatClockFromMinutes,
   formatDateStr,
   formatDuration,
+  formatDurationHM,
   formatSignedDuration,
   generateShortUUID,
   getClientDisplayNameHTML,
@@ -376,6 +377,7 @@ function init() {
     t,
     formatSignedDuration,
     formatDuration,
+    formatDurationHM,
     parseTimeRange,
     getOverlappingBookings,
     buildBookingMeta,
@@ -493,7 +495,7 @@ function setupNavigation() {
   const logoArea = document.getElementById("logo-area");
   if (logoArea) {
     logoArea.addEventListener("click", () => {
-      navigateToPath("/clients");
+      navigateToPath("/");
     });
   }
 
@@ -501,7 +503,7 @@ function setupNavigation() {
   const errorHomeBtn = document.getElementById("btn-error-home");
   if (errorHomeBtn) {
     errorHomeBtn.addEventListener("click", () => {
-      navigateToPath("/clients");
+      navigateToPath("/");
     });
   }
 
@@ -509,7 +511,7 @@ function setupNavigation() {
 
   // Client Details back button
   document.getElementById("btn-back-to-clients").addEventListener("click", () => {
-    navigateToPath("/clients");
+    navigateToPath("/");
   });
 
   setupSessionsDayNav();
@@ -693,7 +695,7 @@ function handlePathChange() {
     switchView("clients");
     requestAnimationFrame(() => focusSessionsColumn(column, "auto"));
     focusActiveSessionCard();
-  } else if (path === "/clients" || path === "/" || path === "/index.html") {
+  } else if (path === "/" || path === "/index.html") {
     const todayDate = getISODateForColumn("today");
     setHeaderState(false);
     window.history.replaceState(null, "", toUrl(`/sessions/${todayDate}`));
@@ -701,6 +703,14 @@ function handlePathChange() {
     switchView("clients");
     requestAnimationFrame(() => focusSessionsColumn("today", "auto"));
     focusActiveSessionCard();
+  } else if (path === "/clients") {
+    setHeaderState(false);
+    document.getElementById("active-session-overlay").classList.add("hidden");
+    switchView("client-directory");
+  } else if (path === "/adjustments") {
+    setHeaderState(false);
+    document.getElementById("active-session-overlay").classList.add("hidden");
+    switchView("adjustments");
   } else if (path === "/routines") {
     setHeaderState(false);
     document.getElementById("active-session-overlay").classList.add("hidden");

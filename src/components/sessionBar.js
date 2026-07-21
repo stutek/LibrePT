@@ -10,7 +10,7 @@
 //
 // deps: {
 //   getState(), getActiveSession(), t,
-//   formatSignedDuration, formatDuration,
+//   formatSignedDuration, formatDuration, formatDurationHM,
 //   parseTimeRange, getOverlappingBookings, buildBookingMeta
 // }
 
@@ -28,18 +28,25 @@ export function updateSessionBarTimer() {
   if (!activeSession) return;
   const durationEl = document.getElementById("session-bar-duration");
   const endDate = activeSession.booking?.endDate;
+  // The bottom active-session bar keeps second-level precision (a separate surface from the
+  // dashboard's session-card status lines, TODO 2.3); .session-card-timer is that dashboard
+  // card's own live timer and must render H:MM only, same as its non-launched countdown states.
   let text = "";
+  let cardText = "";
   let isOvertime = false;
 
   if (activeSession.booking?.isPlanning) {
     text = deps.t("planning") || "Planning";
+    cardText = text;
   } else if (endDate) {
     const endMs = new Date(endDate).getTime();
     const remainingSec = Math.round((endMs - Date.now()) / 1000);
     text = deps.formatSignedDuration(remainingSec);
+    cardText = deps.formatDurationHM(remainingSec);
     isOvertime = remainingSec < 0;
   } else {
     text = deps.formatDuration(activeSession.duration || 0);
+    cardText = deps.formatDurationHM(activeSession.duration || 0);
   }
 
   if (durationEl) {
@@ -48,7 +55,7 @@ export function updateSessionBarTimer() {
   }
 
   for (const el of document.querySelectorAll(".session-card-timer")) {
-    el.textContent = text;
+    el.textContent = cardText;
     el.classList.toggle("overtime", isOvertime); // colours come from CSS, not inline styles
     const bar = el.closest(".booking-live-bar");
     if (bar) bar.classList.toggle("overtime", isOvertime); // warn the whole bar on overtime

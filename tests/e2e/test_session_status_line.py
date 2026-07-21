@@ -13,9 +13,11 @@ def test_upcoming_card_shows_a_starts_in_countdown(page, local_server):
     page.goto(local_server)
     page.wait_for_selector("#view-clients.active")
 
-    # "Mobility Flow" is seeded currentHour+3..+4 (src/data/sessions.js) — always in the future
-    # relative to whenever the suite runs, so this doesn't depend on wall-clock time of day.
-    card = page.locator(".booking-card", has_text="Mobility Flow").first
+    # "Morning Conditioning" is in the "tomorrow" bucket (src/data/sessions.js) — always in the
+    # future regardless of wall-clock time of day, unlike a same-day currentHour-relative slot
+    # (currentHour is clamped to at most 18, so a +3/+4 offset can itself have already started
+    # once real time passes ~21:00).
+    card = page.locator(".booking-card", has_text="Morning Conditioning").first
     bar = card.locator(".booking-live-bar.upcoming")
     assert bar.count() == 1
     assert "fa-forward-fast" in bar.locator("i").first.get_attribute("class")
