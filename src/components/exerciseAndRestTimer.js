@@ -219,11 +219,22 @@ function renderStack() {
   if (!stack) return;
   const list = Object.values(timers);
   stack.classList.toggle("hidden", list.length === 0);
-  // Newest on top so a just-started timer is where the trainer looks.
+  // Remember which clients already had a visible card so we only animate new arrivals.
+  const prevIds = new Set([...stack.querySelectorAll(".timer-card[data-client]")]
+    .map((el) => el.dataset.client));
+  // Newest on top so a just-started timer is where the trainer looks.  Count-up timers use
+  // startTime instead of endTime, so normalise with a fallback.
   stack.innerHTML = list
-    .sort((a, b) => b.endTime - a.endTime)
+    .sort((a, b) => (b.endTime || b.startTime) - (a.endTime || a.startTime))
     .map(timerCardHTML)
     .join("");
+  // Slide-in entrance only for cards that weren't already on screen.
+  for (const card of stack.querySelectorAll(".timer-card[data-client]")) {
+    if (!prevIds.has(card.dataset.client)) {
+      card.classList.add("timer-card-enter");
+      card.addEventListener("animationend", () => card.classList.remove("timer-card-enter"), { once: true });
+    }
+  }
 }
 
 // Lightweight per-second update: only the time text + overtime state, so we don't rebuild the DOM

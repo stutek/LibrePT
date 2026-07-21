@@ -2354,6 +2354,8 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
 .timer-card {
   pointer-events: auto;
   padding: 8px 12px;
+}
+.timer-card.timer-card-enter {
   animation: slideUp 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 .timer-card-head {
