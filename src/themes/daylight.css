@@ -15,7 +15,12 @@ body.daylight-theme {
   --primary-light: rgba(5, 150, 105, 0.12);
   --primary-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
   --on-primary: #ffffff;
-  --secondary-light: rgba(79, 70, 229, 0.1);
+  /* Daylight was the only theme not defining --secondary, so it inherited midnight's indigo
+     (#4f46e5) from that file's :root default — a violet that clashed with the emerald/slate palette
+     (e.g. the superset accent in the plan editor). A clean blue pairs with the emerald primary and
+     the sky accents below without reading as violet. */
+  --secondary: #2563eb; /* blue-600 */
+  --secondary-light: rgba(37, 99, 235, 0.1);
   --accent-cyan: #0891b2;
   /* Deeper violet/amber so temporal tints stay legible on the light slate field */
   --temporal-past: #7c3aed;
