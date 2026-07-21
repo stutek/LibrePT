@@ -401,6 +401,18 @@ Priority feature request by Simon: *"can you keep active timers on all views? an
 - Timers now carry `sessionId` + `focusRef` (`{ type: 'exercise'|'superset', id }`); tapping a timer card navigates to that card's deep link (`/session/{id}/client/{id}/exercise|superset/{id}`) and the existing exercise-deck auto-scroll brings it into focus.
 - Follow-up from the same conversation: finishing a superset now **freezes** (not closes) any timer still running against it — held at its final value, dimmed, green ack-blink — so the trainer must still dismiss it via ✕ rather than it vanishing or ticking into overtime for finished work (`stopTimerIfMatches` in the same file).
 
+### 13.5 [ ] [Defect] `test_timer_survives_reload_and_goes_overtime` fails — pre-existing, not caused by 13.4
+`tests/e2e/test_timer_stack.py::test_timer_survives_reload_and_goes_overtime` fails on current `main`. Confirmed **pre-existing**: reproduces identically on the commit immediately before the 13.4 work started (checked via an isolated worktree), so this predates today's session.
+
+- **Symptom**: after rewinding a timer's `endTime` into the past and reloading, the card never gets the `.overtime` class (`assert 'overtime' in 'timer-card count-up'` fails).
+- **Root cause**: `_start_a_timer()` clicks `#active-exercise-scroll-deck .deck-card-timer` — the first exercise in current demo data (`routines.js`, the Tri-Set Metabolic Conditioning superset's first item) has `workDuration: 0`/no prescribed duration, so it now starts a **count-up** (stopwatch) timer, not a countdown. Count-up timers have no "past zero" state — `overtime` is countdown-only — so the test's premise no longer matches what that button starts. Likely went stale when the count-up timer feature (commit `301bc08`) shipped without updating this test or picking a different demo exercise with a real duration.
+- **Fix shape**: either point the test at an exercise/control with a real `workDuration`/`rest` (so it starts a countdown timer), or add a dedicated helper that starts a countdown explicitly rather than relying on whichever exercise happens to be first in focus.
+
+### 13.6 [ ] [Defect] Nebula theme: timer protected-warning flash reads faster than in other themes
+The `.timer-card.flash-warning` "still running, refused reset" blink (`timerFlashWarn` keyframe, `index.css`) is a fixed `1s` animation — same declared duration in every theme — but under the **Nebula** theme it visually reads as noticeably faster/shorter than in the others.
+
+- Not yet root-caused (not investigated this pass, logged as reported). Prime suspect: the keyframe blends to `color-mix(in srgb, #f59e0b 35%, var(--card-bg))` — Nebula's `--card-bg` (`rgba(24, 21, 52, 0.9)`, a dark violet) may sit close enough to the amber warning color, or close enough to Nebula's base card tone, that the mid-animation peak is less perceptually distinct, making the *whole* 1s blink feel like it flashes and resolves faster even though the timing is identical across themes. Needs a side-by-side capture across all 5 themes to confirm before touching the animation/color-mix values.
+
 ---
 
 ## 14. Phase 5 Refactoring: DRY & Complexity Reduction
