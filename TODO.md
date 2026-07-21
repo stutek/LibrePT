@@ -64,11 +64,15 @@ When no session is active:
 - Content and click target refer to the **next upcoming session**.
 - If **multiple sessions run in parallel**, list them all in the same row — they all open the same clipboard.
 
-### 2.3 [ ] Countdown timer on upcoming session cards
-Feature request by Simon: similar to the **active session's duration timer** (`.booking-live-bar` / `.booking-live-timer` on live cards, [sessionCard.js](file:///home/simon/Projects/LibrePT/src/components/sessionCard.js)), give **upcoming (not-yet-started)** session cards a live countdown to their scheduled start time.
+### 2.3 [ ] Every session card gets a status line (live / upcoming countdown / past elapsed, editable)
+Feature request by Simon, expanding the earlier "countdown for upcoming cards" ask into a unified status line **every** session card carries, not just live ones — `.booking-live-bar` / `.booking-live-timer` in [sessionCard.js](file:///home/simon/Projects/LibrePT/src/components/sessionCard.js) is currently the only session state with an on-card timer.
 
-- Mirrors `.booking-live-timer`'s per-second tick pattern, but counts down to `startTime` instead of counting up from it.
-- **Open**: what happens at `00:00` — flip straight into the existing live/`booking-live` state, or hold a brief "starting now" beat first?
+- **Active** (today, exists): the `.booking-live-bar` duration timer — no change to the state itself, only to its **format** (see below).
+- **Upcoming** (not yet started): a live countdown to the scheduled `startTime`, mirroring `.booking-live-timer`'s per-second tick pattern but counting down instead of up.
+  - **Open**: what happens at `00:00` — flip straight into the live/`booking-live` state, or hold a brief "starting now" beat first?
+- **Past** (completed): an elapsed-time status line with an icon that reads as "past" (distinct from the live/upcoming icons), showing how long the session actually ran.
+  - **Editable**: the trainer can correct the recorded elapsed time after the fact (e.g. forgot to end the session on time) — needs an inline edit affordance and a data-model field this writes back to (today's `activeSession.duration`/history log is captured at finish time, not touched after).
+- **Formatting constraint**: every one of these session-list-level status timers displays **`HH:MM` only, no seconds** — this changes the *current* active-session timer too, which today renders via `formatSignedDuration`/`formatDuration` ([helper/utils.js](file:///home/simon/Projects/LibrePT/src/helper/utils.js)), both of which include seconds (`h:mm:ss`). Needs either a new minutes-only formatter or a variant param, used consistently across all three states. (The floating clipboard timer stack and the overlay's own session-duration readout are a separate surface — not in scope here unless later said otherwise.)
 
 ---
 
