@@ -1691,24 +1691,6 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   flex-direction: column;
   gap: 12px;
 }
-.clipboard-editor-head {
-  position: sticky;
-  top: 0;
-  z-index: 5;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  flex-wrap: wrap;
-  padding: 8px 2px;
-  margin: -4px 0 0;
-  background: var(--bg-color);
-  border-bottom: 1px solid var(--border-color);
-}
-.clipboard-editor-head .editor-done {
-  flex-shrink: 0;
-}
-
 /* Edit-mode chrome: the session title bar is repurposed to show WHICH plan is being edited and
    its temporal mode, so the trainer always knows if they're changing the live session or a future one. */
 .active-session-overlay.editing-plan .session-title-bar {
@@ -1784,22 +1766,6 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   background: var(--primary-light);
   color: var(--primary);
   border: 1px solid color-mix(in srgb, var(--primary) 40%, transparent);
-}
-.clipboard-editor-title {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-family: var(--font-header);
-  font-size: 17px;
-  font-weight: 800;
-  color: var(--text-main);
-}
-.clipboard-editor-title i {
-  color: var(--primary);
-}
-.clipboard-editor-title strong {
-  color: var(--primary);
-  font-weight: 800;
 }
 .editor-list {
   list-style: none;

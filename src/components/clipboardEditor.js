@@ -214,12 +214,10 @@ export function renderClipboardEditor(container, deps) {
     unitsHtml += insertBar(i, { allowSuperset: true });
   }
 
+  // The edit-mode title, ✎ icon, and Done button live on the session title bar (rendered by the
+  // controller), so the editor body carries no header of its own — just the list and the exit hint.
   container.innerHTML = `
     <div class="clipboard-editor" role="region" aria-label="${tr("edit_plan", "Edit plan")}">
-      <div class="clipboard-editor-head">
-        <span class="clipboard-editor-title"><i class="fa-solid fa-pen-to-square"></i> ${tr("edit_plan", "Edit plan")}</span>
-        <button type="button" class="btn primary-btn btn-sm editor-done"><i class="fa-solid fa-check"></i> ${tr("done", "Done")}</button>
-      </div>
       <ul class="editor-list">${items.length ? unitsHtml : `<li class="editor-empty">${tr("no_exercises_injected", "No exercises yet.")}</li>${insertBar(0, { allowSuperset: true })}`}</ul>
       <p class="clipboard-editor-hint">${tr("edit_exit_hint", "Tap Done, press Esc, or tap outside to finish.")}</p>
       <datalist id="${datalistId}">${options}</datalist>
@@ -579,12 +577,6 @@ export function renderClipboardEditor(container, deps) {
     });
   }
 
-  // ---------- exits (zero friction): Done button, Esc, tap outside the editor ----------
-  container.querySelector(".editor-done").addEventListener("click", (e) => {
-    e.stopPropagation();
-    doExit();
-  });
-
   // Drop any exercise left with a blank name (e.g. an injected row never filled in). Rests are kept.
   const pruneBlanks = () => {
     let changed = false;
@@ -606,17 +598,27 @@ export function renderClipboardEditor(container, deps) {
     exit();
   };
 
+  // The Done button lives on the session title bar (outside this container). The editor adopts it as
+  // its exit trigger while mounted and releases it on cleanup, so all exit logic stays in one place.
+  const doneBtn = document.getElementById("btn-done-edit");
+  const onDoneClick = (e) => {
+    e.stopPropagation();
+    doExit();
+  };
+  if (doneBtn) doneBtn.addEventListener("click", onDoneClick);
+
   const onKey = (e) => {
     if (e.key === "Escape") doExit();
   };
   const onOutside = (e) => {
-    // Ignore taps inside the editor itself, inside any open modal dialog (e.g. Add exercise), or on
-    // the session ⋯ menu — its "Delete Plan" action is edit-mode-only, so opening it must not trip
-    // the tap-outside exit and flip us back to the live deck first.
+    // Ignore taps inside the editor itself, inside any open modal dialog (e.g. Add exercise), on the
+    // session ⋯ menu (its "Delete Plan" action is edit-mode-only), or on the title-bar Done button —
+    // its own click handler already exits, so tap-outside must not race it.
     if (
       editorEl.contains(e.target) ||
       e.target.closest?.("dialog") ||
-      e.target.closest?.(".session-menu-wrap")
+      e.target.closest?.(".session-menu-wrap") ||
+      e.target.closest?.("#btn-done-edit")
     )
       return;
     doExit();
@@ -625,6 +627,7 @@ export function renderClipboardEditor(container, deps) {
     clearTimeout(outsideTimer); // if we're torn down before the deferred add fires, never add it
     document.removeEventListener("keydown", onKey);
     document.removeEventListener("pointerdown", onOutside, true);
+    if (doneBtn) doneBtn.removeEventListener("click", onDoneClick);
     if (detachDocListeners === cleanup) detachDocListeners = null;
   }
 

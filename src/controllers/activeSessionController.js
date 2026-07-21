@@ -622,7 +622,8 @@ export function renderActiveGroupBoard() {
         chipLabel = parts.join(" · ") || (t("live") || "Live");
       }
       const clientNm = activeClient ? escapeHTML(activeClient.name) : "";
-      titleEl.innerHTML = `${escapeHTML(t("editing") || "Editing")}${
+      // The ✎ icon rides up here as the mode indicator (the editor body no longer has its own header).
+      titleEl.innerHTML = `<i class="fa-solid fa-pen-to-square"></i> ${escapeHTML(t("editing") || "Editing")}${
         clientNm ? ` · <strong>${clientNm}</strong>` : ""
       } <span class="edit-mode-chip ${mode}">${escapeHTML(chipLabel)}</span>`;
       overlay.classList.add("editing-plan");
@@ -633,9 +634,11 @@ export function renderActiveGroupBoard() {
       }
       overlay.classList.remove("editing-plan");
     }
-    // The ✎ trigger is redundant while editing (the sticky Done bar exits), and leaving it live would
-    // race the tap-outside handler; hide it for the duration of edit mode.
+    // The ✎ trigger is redundant while editing (the ✎ mode icon now rides on the title, and Done
+    // exits), and leaving it live would race the tap-outside handler; hide it during edit mode and
+    // surface the title-bar Done button in its place.
     document.getElementById("btn-edit-plan")?.classList.toggle("hidden", clipboardEditMode);
+    document.getElementById("btn-done-edit")?.classList.toggle("hidden", !clipboardEditMode);
 
     // In edit mode the ⋯ menu's destructive action targets the PLAN (clear its exercises), not the
     // whole session — relabel it so the trainer knows which one they're deleting. Preserve the icon.
