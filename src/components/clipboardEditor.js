@@ -114,9 +114,9 @@ export function renderClipboardEditor(container, deps) {
     const name = escapeHTML(ex.name || "");
     const reps = escapeHTML(String(ex.repsTarget ?? ex.reps ?? 10));
     const unit = ex.loadUnit || "kg";
-    // Bodyweight movements cluster at high reps (10/20/50/max); loaded ones stay low — point the
-    // reps combobox at the matching preset list so an empty field suggests sensible values.
-    const repsListId = repsPresetListId(unit);
+    // Point the reps combobox at the preset tier suited to this movement's pattern + load, so an
+    // empty field suggests sensible values (the PT can still type any count/range/hold/"max").
+    const repsListId = repsPresetListId(ex.pattern, unit);
     // A superset member's set count IS the circuit's round count, so we drop the redundant per-row
     // Sets field for members — the circuit header's Rounds control is the single source of truth.
     const setsField = ex.circuitId

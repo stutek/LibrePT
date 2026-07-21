@@ -102,6 +102,7 @@ import {
   truncateString,
 } from "./helper/utils.js";
 import { getShareParams, INIT_DEMO_DATA } from "./helper/shareLink.js";
+import { repsPresetsDatalistHTML } from "./helper/repsAndLoad.js";
 import { applyStaticDOMMappings } from "./i18n/domMappings.js";
 import { TRANSLATIONS } from "./i18n/index.js";
 import { BUILD_INFO } from "./version.js";
@@ -366,6 +367,10 @@ function init() {
 
   // Apply translations initially
   applyTranslations(state.lang);
+
+  // Reps-preset datalists are data-driven — build them from the taxonomy tiers once at boot.
+  const repsPresetHost = document.getElementById("reps-preset-datalists");
+  if (repsPresetHost) repsPresetHost.innerHTML = repsPresetsDatalistHTML();
 
   // Render Initial Views
   renderClientsList();

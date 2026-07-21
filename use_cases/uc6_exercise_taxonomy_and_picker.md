@@ -83,6 +83,15 @@ A set is not always "3 × 10 × 40 kg". Reps and load are **polymorphic**, resol
   (cable), a resistance **band** label, or **bodyweight** (± added kg). The authored value is stored
   raw and its meaning derived at render time, so one authoring control serves every surface.
 
+**Taxonomy-driven reps presets.** The reps combobox suggests values from the movement's **pattern ×
+load**, not equipment alone: loaded compounds → *strength* (`3/5/8/10/max`), lunges/isolation →
+*hypertrophy* (`8/10/12/15/max`), core & most bodyweight movements → *endurance* (`10/20/50/max`),
+mobility → *time* (`20s/30s/45s/60s`) — with a bodyweight override that keeps vertical pulls
+(pull-ups) at *strength*. The tiers live only in
+[repsAndLoad.js](file:///home/simon/Projects/LibrePT/src/helper/repsAndLoad.js) (`REPS_TIERS`); the
+`<datalist>`s are **generated from them at boot**, so nothing is hardcoded in markup, and the PT can
+always type any value regardless of the suggestion.
+
 ---
 
 ## 5. Traceability (spec ↔ tests)

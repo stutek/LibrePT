@@ -28,8 +28,15 @@ def _load_helpers(page, local_server):
                 m.hasLoad(0, 'bw'), m.hasLoad(0, 'kg'), m.hasLoad(5, 'kg'),
                 m.hasLoad('', 'band'), m.hasLoad('Light', 'band'),
               ],
-              presetList: [m.repsPresetListId('bw'), m.repsPresetListId('kg'), m.repsPresetListId('level')],
-              presets: [m.REPS_PRESETS, m.REPS_PRESETS_BODYWEIGHT],
+              tier: [
+                m.repsTier('Squat', 'kg'), m.repsTier('Squat', 'bw'),
+                m.repsTier('Vertical Pull', 'bw'), m.repsTier('Core', 'kg'),
+                m.repsTier('Mobility', 'kg'), m.repsTier('Isolation', 'kg'),
+                m.repsTier(undefined, 'bw'), m.repsTier(undefined, 'kg'),
+              ],
+              presetList: [m.repsPresetListId('Squat', 'kg'), m.repsPresetListId('Mobility', 'kg')],
+              presetsFor: m.repsPresetsFor('Squat', 'kg'),
+              tiers: m.REPS_TIERS,
             };
         }"""
     )
@@ -52,6 +59,29 @@ def test_reps_and_load_helpers(page, local_server):
     # Visibility: bodyweight always shows; kg needs a positive value; band needs a label.
     assert r["hasLoad"] == [True, False, True, False, True]
 
-    # Reps combobox presets: bodyweight rows point at the high-rep datalist, loaded rows at the low one.
-    assert r["presetList"] == ["reps-presets-bw", "reps-presets", "reps-presets"]
-    assert r["presets"] == [["3", "5", "8", "10", "max"], ["10", "20", "50", "max"]]
+    # Reps tier tracks pattern × load: loaded squat = strength; bodyweight squat shifts to endurance;
+    # a bodyweight vertical pull (pull-up) stays strength; core = endurance; mobility = time; loaded
+    # isolation = hypertrophy; no-pattern falls back to load (bw → endurance, else strength).
+    assert r["tier"] == [
+        "strength", "endurance", "strength", "endurance",
+        "time", "hypertrophy", "endurance", "strength",
+    ]
+    assert r["presetList"] == ["reps-presets", "reps-presets-time"]
+    assert r["presetsFor"] == ["3", "5", "8", "10", "max"]
+    assert r["tiers"]["endurance"] == ["10", "20", "50", "max"]
+
+
+def test_reps_preset_datalists_are_data_driven(page, local_server):
+    # The datalists are generated from REPS_TIERS at boot, not hardcoded in index.html.
+    page.goto(local_server)
+    page.wait_for_timeout(500)
+    counts = page.evaluate(
+        """() => ({
+            total: document.querySelectorAll('#reps-preset-datalists datalist').length,
+            time: [...document.querySelectorAll('#reps-presets-time option')].map(o => o.value),
+            strength: [...document.querySelectorAll('#reps-presets option')].map(o => o.value),
+        })"""
+    )
+    assert counts["total"] == 4, "one datalist per tier should be generated"
+    assert counts["time"] == ["20s", "30s", "45s", "60s"]
+    assert counts["strength"] == ["3", "5", "8", "10", "max"]

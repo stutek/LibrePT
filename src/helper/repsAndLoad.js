@@ -6,15 +6,67 @@
 //     LEVEL for cables, a resistance BAND label, or bodyweight (± added kg). We keep the raw
 //     `weight`/`weightTarget` value as authored and derive its meaning from equipment at render time.
 
-// Common reps offered by the reps combobox (datalists in index.html mirror these). Loaded
-// movements cluster low (strength/hypertrophy); bodyweight movements cluster high. "max" = to failure.
-export const REPS_PRESETS = ["3", "5", "8", "10", "max"];
-export const REPS_PRESETS_BODYWEIGHT = ["10", "20", "50", "max"];
 export const BAND_LEVELS = ["Light", "Medium", "Heavy"];
 
-// The datalist id whose presets suit a load unit — bodyweight rows get the high-rep set.
-export function repsPresetListId(unit) {
-  return unit === "bw" ? "reps-presets-bw" : "reps-presets";
+// ---- Reps presets from the movement taxonomy -------------------------------------------------
+// The reps a movement is programmed for tracks its biomechanical PATTERN and whether it carries
+// external load — not equipment alone. Four tiers cover the space; each has a matching <datalist>
+// in index.html (id below) that the authoring comboboxes point at. "max" = to failure.
+export const REPS_TIERS = {
+  strength: ["3", "5", "8", "10", "max"],
+  hypertrophy: ["8", "10", "12", "15", "max"],
+  endurance: ["10", "20", "50", "max"],
+  time: ["20s", "30s", "45s", "60s"],
+};
+const TIER_DATALIST = {
+  strength: "reps-presets",
+  hypertrophy: "reps-presets-hyp",
+  endurance: "reps-presets-end",
+  time: "reps-presets-time",
+};
+// Loaded-movement tier by pattern (the enum from data/exercises.js). Bodyweight shifts most of these
+// up a tier below; the fallback (no pattern) is load-based.
+const PATTERN_TIER = {
+  Squat: "strength",
+  Hinge: "strength",
+  "Horizontal Push": "strength",
+  "Vertical Push": "strength",
+  "Horizontal Pull": "strength",
+  "Vertical Pull": "strength",
+  Lunge: "hypertrophy",
+  Isolation: "hypertrophy",
+  Core: "endurance",
+  Mobility: "time",
+};
+
+// Resolve a movement's reps tier from its pattern + load unit.
+export function repsTier(pattern, unit) {
+  const base = PATTERN_TIER[pattern] || (unit === "bw" ? "endurance" : "strength");
+  // Bodyweight turns most loaded movements into higher-rep work — except vertical pulls
+  // (pull-ups/chin-ups, still hard at low reps) and time-based mobility, which keep their tier.
+  if (unit === "bw" && base === "strength" && pattern !== "Vertical Pull") return "endurance";
+  return base;
+}
+
+// The reps presets suited to a movement (pattern + load unit).
+export function repsPresetsFor(pattern, unit) {
+  return REPS_TIERS[repsTier(pattern, unit)];
+}
+
+// The datalist id whose presets suit a movement, for an input's `list=` attribute.
+export function repsPresetListId(pattern, unit) {
+  return TIER_DATALIST[repsTier(pattern, unit)];
+}
+
+// One <datalist> per tier, built from REPS_TIERS so the option lists live only here (data-driven,
+// not duplicated in index.html). Injected once at boot into #reps-preset-datalists.
+export function repsPresetsDatalistHTML() {
+  return Object.entries(TIER_DATALIST)
+    .map(([tier, id]) => {
+      const opts = REPS_TIERS[tier].map((v) => `<option value="${v}"></option>`).join("");
+      return `<datalist id="${id}">${opts}</datalist>`;
+    })
+    .join("");
 }
 
 // Equipment → how its load is expressed. Anything unlisted (incl. Barbell/Dumbbell/Machine) is kg.
