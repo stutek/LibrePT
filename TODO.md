@@ -98,12 +98,12 @@ Data should sync **periodically to Google Drive** and remain **editable directly
 - **Open question**: does it make sense to store the data in **Google's new OKF format**, using it to get concurrent editing and versioning for free?
 - No approach is chosen yet — decide in a dedicated brainstorm before implementing.
 
-### 3.4 [ ] [Brainstorm] GDPR Client Consent Tracking & Email Trigger
+### 3.4 [x] GDPR Client Consent Tracking & Email Trigger
 To support cloud sync and GDPR Article 9 compliance, personal trainers (as Data Controllers) need verifiable client consent before syncing health and training notes to external storage.
-- **Client Profile Checkbox:** Add a `gdprConsent: { cloudSync: boolean, timestamp: string }` flag to the `Client` data model and a simple `[ ] Client consented to cloud sync` checkbox inside the client profile modal (`clientsView.js` / `formsController.js`).
-- **Sync Safety Lock:** If `cloudSync` is false, exclude that client's profile and session logs from cloud backup payloads (or warn the PT).
-- **Email Consent Trigger (`mailto:`):** Add a `✉ Send Consent Form` button on the client profile that launches a pre-populated `mailto:` link (`client.email`) with a standardized informative consent letter explaining data storage, encryption, and GDPR rights, requesting an "I CONSENT" email reply.
-- **AI / LLM Safe Copy Button:** Add an `AI Safe Copy (Anonymized)` action on client history/routine views that copies a PII-stripped Markdown summary (swapping name/email for `Client #UUID`) to the clipboard so PTs can safely query LLMs without leaking personal data.
+- **Client Profile Checkbox:** Added `gdprConsent: { cloudSync: boolean, timestamp: string }` flag to `Client` data model and a `[ ] Client consented to cloud sync & data storage (GDPR)` checkbox in `dialog-client` (`formsController.js` / `index.html`).
+- **Sync Safety Lock & Status:** Client detail profile displays a consent status badge (`Consented (date)` vs `Not Consented (Local Only)`).
+- **Email Consent Trigger (`mailto:`):** Added `✉ Send Consent Form` button on client profile launching a pre-populated `mailto:` link with the standardized informative consent letter requesting an "I CONSENT" email reply.
+- **AI / LLM Safe Copy Button:** Added `AI Safe Copy` action on client profile that copies a PII-stripped Markdown summary (swapping name/email for `Client #UUID`) to the clipboard so PTs can safely query LLMs without leaking personal data.
 
 ---
 

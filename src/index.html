@@ -263,11 +263,21 @@
             <label id="label-profile-phone">Phone Number</label>
             <p id="profile-phone">Phone goes here.</p>
           </div>
+          <div class="info-block">
+            <label>GDPR Cloud Sync Consent</label>
+            <p id="profile-gdpr-status"><span class="badge">Checking...</span></p>
+          </div>
         </div>
 
         <div class="quick-workout-action" style="display: flex; gap: 8px; flex-wrap: wrap;">
-          <button id="btn-plan-client-program" class="btn primary-btn" style="flex: 1; min-width: 160px;">
+          <button id="btn-plan-client-program" class="btn primary-btn" style="flex: 1; min-width: 150px;">
             <i class="fa-solid fa-calendar-plus"></i> Plan Program
+          </button>
+          <a id="btn-send-consent-email" class="btn secondary-btn" style="flex: 1; min-width: 150px; text-decoration: none; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+            <i class="fa-solid fa-envelope"></i> Send Consent Form
+          </a>
+          <button id="btn-ai-safe-copy" class="btn secondary-btn" style="flex: 1; min-width: 150px;">
+            <i class="fa-solid fa-user-shield"></i> AI Safe Copy
           </button>
         </div>
       </div>
@@ -529,6 +539,13 @@
       <div class="form-group">
         <label for="client-notes">Trainer Notes & Injuries (Alert banner shows during workout)</label>
         <textarea id="client-notes" rows="3" placeholder="e.g. Left knee issue; monitor squat depth..." class="form-control"></textarea>
+      </div>
+
+      <div class="form-group checkbox-group" style="display: flex; align-items: center; gap: 8px;">
+        <input type="checkbox" id="client-gdpr-consent" class="form-checkbox">
+        <label for="client-gdpr-consent" style="margin-bottom: 0; font-weight: normal; cursor: pointer;">
+          Client consented to cloud sync & data storage (GDPR)
+        </label>
       </div>
       
       <div class="modal-actions">

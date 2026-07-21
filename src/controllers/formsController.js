@@ -43,6 +43,7 @@ export function setupClientForms({
     $id("client-phone").value = client.phone || "";
     $id("client-goals").value = client.goals || "";
     $id("client-notes").value = client.notes || "";
+    $id("client-gdpr-consent").checked = Boolean(client.gdprConsent?.cloudSync);
 
     openModal("dialog-client");
   });
@@ -59,10 +60,12 @@ export function setupClientForms({
     const phone = $id("client-phone").value.trim();
     const goals = $id("client-goals").value.trim();
     const notes = $id("client-notes").value.trim();
+    const gdprConsentChecked = $id("client-gdpr-consent").checked;
+    const nowIso = new Date().toISOString();
 
     if (!name) return;
 
-    const todayStr = new Date().toISOString().substring(0, 10);
+    const todayStr = nowIso.substring(0, 10);
 
     if (id) {
       const client = state.clients.find((c) => c.id === id);
@@ -72,6 +75,10 @@ export function setupClientForms({
         client.phone = phone;
         client.goals = goals;
         client.notes = notes;
+        client.gdprConsent = {
+          cloudSync: gdprConsentChecked,
+          timestamp: gdprConsentChecked ? client.gdprConsent?.timestamp || nowIso : "",
+        };
       }
     } else {
       const newId = generateShortUUID();
@@ -85,6 +92,10 @@ export function setupClientForms({
         goals: goals,
         weightHistory: [],
         notes: notes,
+        gdprConsent: {
+          cloudSync: gdprConsentChecked,
+          timestamp: gdprConsentChecked ? nowIso : "",
+        },
         active: true,
       };
       state.clients.push(newClient);
