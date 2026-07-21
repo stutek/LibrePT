@@ -26,6 +26,10 @@
   --temporal-past: #c084fc;
   --cloud-icon-color: #0284c7;
   --cloud-arrows-color: var(--success, #10b981);
+  /* Timer warning animation peak color — computed as color-mix in each theme with theme-specific
+     amber blend percentage; fallback is a neutral brownish tone. Each theme defines this after
+     --card-bg to ensure proper color-mix evaluation. */
+  --timer-warn-peak-color: #c97a2a;
 }
 
 /* ==========================================================================
@@ -2457,7 +2461,7 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
     border-color: var(--card-border);
   }
   35% {
-    background: color-mix(in srgb, #f59e0b 35%, var(--card-bg));
+    background: var(--timer-warn-peak-color);
     border-color: #f59e0b;
   }
 }
