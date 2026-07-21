@@ -1,6 +1,7 @@
 // components/planAdjustments.js
 // Logic for displaying the pending plan adjustments widget on the dashboard,
 // as well as launching and submitting the interactive Apply Plan Adjustment Dialog wizard.
+import { mountExercisePicker } from "./exercisePicker.js";
 
 /**
  * Renders the pending plan adjustments alert cards.
@@ -198,24 +199,17 @@ export function openAdjustmentWizardComponent(updateId, ctx) {
       : 0;
   }
 
-  // Fill swap select options
-  const swapSelect = document.getElementById("adjust-exercise-swap");
-  swapSelect.innerHTML = "";
-  for (const ex of state.exercises) {
-    if (ex.id !== exerciseId) {
-      const opt = document.createElement("option");
-      opt.value = ex.id;
-      opt.textContent = `${ex.name} (${ex.category})`;
-      swapSelect.appendChild(opt);
-    }
-  }
+  // Reset all stale listeners in one shot by cloning the form, THEN wire every interactive
+  // element against the fresh DOM. (The action select, cancel button, and swap picker all live
+  // inside the form, so any listener attached before this clone would be silently dropped.)
+  const form = document.getElementById("form-apply-adjustment");
+  form.replaceWith(form.cloneNode(true));
+  const newForm = document.getElementById("form-apply-adjustment");
 
-  // Action select toggle listeners
+  // Action select toggles which panel is shown.
   const actionTypeSelect = document.getElementById("adjust-action-type");
-  actionTypeSelect.replaceWith(actionTypeSelect.cloneNode(true));
-  const newActionTypeSelect = document.getElementById("adjust-action-type");
-  newActionTypeSelect.addEventListener("change", () => {
-    const action = newActionTypeSelect.value;
+  actionTypeSelect.addEventListener("change", () => {
+    const action = actionTypeSelect.value;
     if (action === "modify") {
       document.getElementById("adjust-panel-modify").classList.remove("hidden");
       document.getElementById("adjust-panel-swap").classList.add("hidden");
@@ -228,7 +222,8 @@ export function openAdjustmentWizardComponent(updateId, ctx) {
     }
   });
 
-  // Close modals listeners
+  // Cancel / close buttons (close-btn sits outside the form, so clone it to avoid stacking
+  // listeners across repeat opens; the in-form cancel button is already fresh from the clone).
   for (const btn of dialog.querySelectorAll(".modal-cancel, .modal-close-btn")) {
     btn.replaceWith(btn.cloneNode(true));
   }
@@ -236,13 +231,24 @@ export function openAdjustmentWizardComponent(updateId, ctx) {
     btn.addEventListener("click", () => dialog.close());
   }
 
-  // Form submit handler
-  const form = document.getElementById("form-apply-adjustment");
-  form.replaceWith(form.cloneNode(true));
-  const newForm = document.getElementById("form-apply-adjustment");
+  // Swap picker — pre-filtered to the same muscle group so the replacement inherits the correct
+  // volume bucket (TODO §13.2 Scenario B). The chosen id lands in the hidden #adjust-exercise-swap.
+  const swapSelect = document.getElementById("adjust-exercise-swap");
+  swapSelect.value = "";
+  mountExercisePicker(document.getElementById("adjust-swap-picker"), {
+    state,
+    excludeId: exerciseId,
+    defaultCategory: exercise ? exercise.category : "All",
+    autoSelectFirst: true,
+    keepSelection: true,
+    onSelect: (ex) => {
+      swapSelect.value = ex ? ex.id : "";
+    },
+  });
+
   newForm.addEventListener("submit", (e) => {
     e.preventDefault();
-    const action = newActionTypeSelect.value;
+    const action = actionTypeSelect.value;
     const rId = document.getElementById("adjust-routine-id").value;
     const exId = document.getElementById("adjust-exercise-id").value;
 

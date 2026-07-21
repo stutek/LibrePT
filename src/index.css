@@ -1053,6 +1053,91 @@ select.menu-select {
   font-size: 12px;
   line-height: 1.4;
   margin-top: 4px;
+}
+.exercise-item-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.taxonomy-badge {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: rgba(148, 163, 184, 0.12);
+  color: var(--text-muted);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 700;
+}
+
+/* Reusable filtered exercise picker (routine builder + gym-floor swap) */
+.exercise-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.picker-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.chip-sm {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+.picker-count {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.picker-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+.picker-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--input-bg);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+}
+.picker-item:hover {
+  border-color: var(--primary);
+}
+.picker-item.selected {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+.picker-item.just-added {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  transform: scale(0.98);
+}
+.picker-item-name {
+  font-size: 13px;
+  font-weight: 600;
+}
+.picker-item-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.picker-empty {
+  font-size: 12px;
+  padding: 12px;
+  text-align: center;
 } /* History Card items */
 .history-card {
   padding: 14px;
@@ -1607,11 +1692,98 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   gap: 12px;
 }
 .clipboard-editor-head {
+  position: sticky;
+  top: 0;
+  z-index: 5;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   gap: 14px;
   flex-wrap: wrap;
+  padding: 8px 2px;
+  margin: -4px 0 0;
+  background: var(--bg-color);
+  border-bottom: 1px solid var(--border-color);
+}
+.clipboard-editor-head .editor-done {
+  flex-shrink: 0;
+}
+
+/* Edit-mode chrome: the session title bar is repurposed to show WHICH plan is being edited and
+   its temporal mode, so the trainer always knows if they're changing the live session or a future one. */
+.active-session-overlay.editing-plan .session-title-bar {
+  border-bottom: 2px solid var(--primary);
+}
+/* While editing the plan, the live-session chrome (member tabs, running timer, injury caveat)
+   steps aside so the client's goals + notes take focus. */
+.active-session-overlay.editing-plan #active-session-client-tabs,
+.active-session-overlay.editing-plan .session-timer-block,
+.active-session-overlay.editing-plan #clipboard-client-alert {
+  display: none;
+}
+
+/* Client focus panel: only visible while editing the plan. */
+.client-focus-panel {
+  display: none;
+}
+.active-session-overlay.editing-plan .client-focus-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  border: 1px solid var(--border-color);
+  border-left: 3px solid var(--primary);
+  border-radius: 10px;
+  background: var(--primary-light);
+}
+.client-focus-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.client-focus-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--primary);
+}
+.client-focus-item p {
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-main);
+}
+.edit-mode-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  vertical-align: middle;
+  margin-left: 8px;
+}
+.edit-mode-chip.live {
+  background: color-mix(in srgb, var(--danger) 15%, transparent);
+  color: var(--danger);
+  border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent);
+}
+.edit-mode-chip.future {
+  background: color-mix(in srgb, #f59e0b 15%, transparent);
+  color: #f59e0b;
+  border: 1px solid color-mix(in srgb, #f59e0b 40%, transparent);
+}
+.edit-mode-chip.planning {
+  background: var(--primary-light);
+  color: var(--primary);
+  border: 1px solid color-mix(in srgb, var(--primary) 40%, transparent);
 }
 .clipboard-editor-title {
   display: inline-flex;

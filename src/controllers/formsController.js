@@ -5,6 +5,8 @@ import {
   renderClientsList,
   showClientDetails,
 } from "../views/clientsView.js";
+import { mountExercisePicker } from "../components/exercisePicker.js";
+import { parseLoad, parseReps } from "../helper/repsAndLoad.js";
 import { renderExercisesList } from "../views/exercisesView.js";
 import { addRoutineExerciseRow, renderRoutinesList } from "../views/routinesView.js";
 
@@ -128,19 +130,39 @@ export function setupRoutineForms({
   if (!dialog || !form || !builderList) return;
   const cancelBtn = dialog.querySelector(".modal-cancel");
   const closeBtn = dialog.querySelector(".modal-close-btn");
+  const pickerEl = $id("routine-ex-picker");
+
+  const hideRoutinePicker = () => pickerEl?.classList.add("hidden");
+
+  // Mount a fresh filtered picker; each tap drops a configured row into the template
+  // (TODO §13.2 Scenario A). Stays open for rapid multi-add.
+  const openRoutinePicker = () => {
+    if (!pickerEl) return;
+    mountExercisePicker(pickerEl, {
+      state,
+      onSelect: (ex) => {
+        addRoutineExerciseRow({
+          preset: { id: ex.id, sets: 3, reps: 10, weight: 0, rest: 60 },
+          state,
+        });
+      },
+    });
+    pickerEl.classList.remove("hidden");
+  };
 
   $id("btn-add-routine").addEventListener("click", () => {
     $id("routine-modal-title").textContent = "Create Routine Template";
     $id("routine-form-id").value = "";
     builderList.innerHTML = "";
-    addRoutineExerciseRow({ state });
     openModal("dialog-routine", { resetForm: true, formId: "form-routine" });
+    openRoutinePicker();
   });
 
   const btnRoutineAddEx = $id("btn-routine-add-ex");
   if (btnRoutineAddEx) {
     btnRoutineAddEx.addEventListener("click", () => {
-      addRoutineExerciseRow({ state });
+      if (pickerEl?.classList.contains("hidden")) openRoutinePicker();
+      else hideRoutinePicker();
     });
   }
 
@@ -160,16 +182,14 @@ export function setupRoutineForms({
     for (const row of builderList.querySelectorAll(".routine-builder-row")) {
       const selectEx = row.querySelector(".select-ex");
       const inputSets = parseInt(row.querySelector(".input-sets").value);
-      const inputReps = parseInt(row.querySelector(".input-reps").value);
-      const inputWeight = parseFloat(row.querySelector(".input-weight").value);
       const inputRest = parseInt(row.querySelector(".input-rest").value);
 
       if (selectEx?.value && !isNaN(inputSets)) {
         exercises.push({
           id: selectEx.value,
           sets: inputSets,
-          reps: isNaN(inputReps) ? 10 : inputReps,
-          weight: isNaN(inputWeight) ? 0 : inputWeight,
+          reps: parseReps(row.querySelector(".input-reps").value),
+          weight: parseLoad(row.querySelector(".input-weight")?.value),
           rest: isNaN(inputRest) ? 60 : inputRest,
         });
       }
@@ -226,14 +246,20 @@ export function setupExerciseForms({ state, t, saveToLocalStorage, populateDropd
     e.preventDefault();
     const name = $id("exercise-name").value.trim();
     const category = $id("exercise-category").value;
+    const equipment = $id("exercise-equipment").value;
+    const pattern = $id("exercise-pattern").value;
     const instructions = $id("exercise-instructions").value.trim();
 
-    if (!name || !category) return;
+    // Strict taxonomy inheritance (TODO §13.2 Scenario C): a new movement ID must carry its
+    // muscle group, equipment, and biomechanical pattern so volume analytics stay consistent.
+    if (!name || !category || !equipment || !pattern) return;
 
     const newEx = {
       id: generateShortUUID(),
       name: name,
       category: category,
+      equipment: equipment,
+      pattern: pattern,
       instructions: instructions,
     };
 

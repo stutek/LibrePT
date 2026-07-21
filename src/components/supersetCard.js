@@ -13,6 +13,8 @@
 //   completeSupersetRound(circuitId), onFocus(firstExerciseIndex)
 // }
 
+import { formatLoad, hasLoad, isFailureReps } from "../helper/repsAndLoad.js";
+
 export function renderSupersetCard(card, item, ctx) {
   const {
     round,
@@ -54,7 +56,7 @@ export function renderSupersetCard(card, item, ctx) {
         firstExerciseSeen = true;
         const sig = getExerciseSignalColor(activeClientId, ex.name);
         const nameStyle = sig ? ` style="color:${sig};"` : "";
-        const isMax = String(ex.repsTarget).toLowerCase() === "max";
+        const isMax = isFailureReps(ex.repsTarget);
 
         let repsHTML = "";
         if (isMax) {
@@ -74,8 +76,9 @@ export function renderSupersetCard(card, item, ctx) {
           repsHTML = `<span class="superset-ex-reps">${escapeHTML(String(ex.repsTarget))}</span>`;
         }
 
-        const repLabel =
-          ex.weightTarget > 0 ? ` · ${escapeHTML(String(ex.weightTarget))}${t("kg")}` : "";
+        const repLabel = hasLoad(ex.weightTarget, ex.loadUnit)
+          ? ` · ${escapeHTML(formatLoad(ex.weightTarget, ex.loadUnit))}`
+          : "";
         const idAttr = isFirstExercise ? ' id="btn-log-feedback"' : "";
 
         rows.push(`

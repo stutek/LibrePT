@@ -11,6 +11,8 @@
 //   logQuickSignal(tag), openFeedbackModal(), onFocus(index)
 // }
 
+import { formatLoad, formatReps, hasLoad, loadParts } from "../helper/repsAndLoad.js";
+
 export function renderExerciseCard(card, item, ctx) {
   const {
     currentCount,
@@ -41,8 +43,8 @@ export function renderExerciseCard(card, item, ctx) {
     statusBadge = `<span class="badge deck-card-status deck-card-status-upcoming">Upcoming</span>`;
   }
 
-  // Bodyweight/timed work has no load to show — a bare "0" reads as a missing value
-  const weightValue = item.weightTarget > 0 ? item.weightTarget : "—";
+  // Load renders per equipment (kg / stack level / band / bodyweight).
+  const load = loadParts(item.weightTarget, item.loadUnit);
   const counter = `${item.index + 1}/${currentCount}`;
 
   // Tint the title by any feedback logged for this exercise (see getExerciseSignalColor)
@@ -67,12 +69,12 @@ export function renderExerciseCard(card, item, ctx) {
           <span class="deck-stat-label">${t("sets")}</span>
         </div>
         <div class="deck-stat">
-          <span class="deck-stat-value">${escapeHTML(String(item.repsTarget))}</span>
+          <span class="deck-stat-value">${escapeHTML(formatReps(item.repsTarget))}</span>
           <span class="deck-stat-label">${t("reps_label")}</span>
         </div>
         <div class="deck-stat">
-          <span class="deck-stat-value">${escapeHTML(String(weightValue))}</span>
-          <span class="deck-stat-label">${t("kg")}</span>
+          <span class="deck-stat-value">${escapeHTML(load.value)}</span>
+          <span class="deck-stat-label">${escapeHTML(load.label)}</span>
         </div>
       </div>
       <div class="deck-card-actions">
@@ -109,7 +111,10 @@ export function renderExerciseCard(card, item, ctx) {
     // Compact row for the rest of the plan — tap to bring into focus. The target
     // is labelled S(ets) × R(eps) × weight so a collapsed, single-line card still
     // reads unambiguously (e.g. "S4 × R6 × 60kg").
-    const compactTarget = `S${escapeHTML(String(item.setsTarget))} × R${escapeHTML(String(item.repsTarget))}${item.weightTarget > 0 ? ` × ${escapeHTML(String(item.weightTarget))}${t("kg")}` : ""}`;
+    const compactLoad = hasLoad(item.weightTarget, item.loadUnit)
+      ? ` × ${escapeHTML(formatLoad(item.weightTarget, item.loadUnit))}`
+      : "";
+    const compactTarget = `S${escapeHTML(String(item.setsTarget))} × R${escapeHTML(formatReps(item.repsTarget))}${compactLoad}`;
     card.innerHTML = `
       <div class="deck-card-compact">
         <span class="deck-card-counter">${counter}</span>

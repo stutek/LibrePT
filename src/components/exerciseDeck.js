@@ -15,6 +15,7 @@
 //   onRerender()   // re-render the whole board (past-card toggle / superset save)
 // }
 
+import { formatLoad, formatReps } from "../helper/repsAndLoad.js";
 import { generateShortUUID } from "../helper/utils.js";
 import { renderExerciseCard } from "./exerciseCard.js";
 import { renderSupersetCard } from "./supersetCard.js";
@@ -79,6 +80,7 @@ export function renderExerciseDeck(deckContainer, deps) {
           type: "past",
           sessionDate: dateStr,
           sets: ex.sets,
+          loadUnit: ex.loadUnit || "kg",
           routineName: pastSession.routineName,
         });
         pIdx++;
@@ -119,8 +121,9 @@ export function renderExerciseDeck(deckContainer, deps) {
       isInFocus,
       instructions: ex.instructions,
       setsTarget: ex.setsTargetCount || ex.sets || 3,
-      repsTarget: ex.repsTarget || ex.reps || 10,
-      weightTarget: ex.weightTarget || ex.weight || 0,
+      repsTarget: ex.repsTarget ?? ex.reps ?? 10,
+      weightTarget: ex.weightTarget ?? ex.weight ?? 0,
+      loadUnit: ex.loadUnit || "kg",
       rest: ex.rest || 0,
       circuitId: ex.circuitId || null,
       circuitTitle: ex.circuitTitle || "",
@@ -147,8 +150,8 @@ export function renderExerciseDeck(deckContainer, deps) {
             (s, sIdx) => `
             <div class="deck-history-set-row">
               <strong>S${sIdx + 1}</strong>
-              <span class="deck-history-load">${escapeHTML(String(s.weight))} kg</span>
-              <span class="deck-history-reps">${escapeHTML(String(s.reps))} reps</span>
+              <span class="deck-history-load">${escapeHTML(formatLoad(s.weight, item.loadUnit) || "—")}</span>
+              <span class="deck-history-reps">${escapeHTML(formatReps(s.reps))} reps</span>
               ${s.note ? `<span class="deck-history-note">${escapeHTML(s.note)}</span>` : ""}
             </div>`,
           )
@@ -163,7 +166,12 @@ export function renderExerciseDeck(deckContainer, deps) {
             <div class="deck-history-meta">${escapeHTML(item.routineName || "Completed Session")}</div>
           `;
       } else {
-        const setsSummary = item.sets.map((s) => `${s.weight}kg x ${s.reps}`).join(", ");
+        const setsSummary = item.sets
+          .map((s) => {
+            const load = formatLoad(s.weight, item.loadUnit);
+            return `${load ? `${load} x ` : ""}${formatReps(s.reps)}`;
+          })
+          .join(", ");
         card.innerHTML = `
             <div class="deck-card-compact">
               <span class="badge deck-card-status deck-card-status-past">Past: ${escapeHTML(item.sessionDate)}</span>

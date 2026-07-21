@@ -10,6 +10,7 @@ import { renderIdleSessionBar, updateSessionBarTimer } from "../components/sessi
 import { renderSessionList } from "../components/sessionList.js";
 // src/views/sessionsView.js - Domain module for sessions dashboard, calendar sync, and clipboard launching
 import { DEFAULT_SESSIONS } from "../data/index.js";
+import { loadUnitForEquipment } from "../helper/repsAndLoad.js";
 import {
   buildBookingMeta,
   escapeHTML,
@@ -77,6 +78,7 @@ export function seedDemoActiveSession({ state }) {
           setsTargetCount: item.sets,
           repsTarget: item.reps,
           weightTarget: item.weight,
+          loadUnit: loadUnitForEquipment(ex.equipment),
           rest: item.rest,
           circuitId: item.circuitId || null,
           circuitTitle: item.circuitTitle || "",

@@ -87,6 +87,7 @@ screen; navigating within the app keeps the address bar in step.
 | `/session/{sessionId}/client/{clientId}` | the clipboard on a specific participant |
 | `/session/{sessionId}/client/{clientId}/exercise/{exerciseId}` | the clipboard with that card in focus |
 | `/session/{sessionId}/client/{clientId}/superset/{circuitId}` | the clipboard with that superset in focus |
+| `/session/{sessionId}/client/{clientId}/edit` | the **inline plan editor** open on that participant's plan |
 | `/clients/{clientId}` | a client detail page |
 | `/routines`, `/exercises`, `/history` | the primary list views |
 
@@ -95,6 +96,12 @@ screen; navigating within the app keeps the address bar in step.
   card, so the address bar is always a copy-able link to the exact card on screen.
 - **Stale card ids fall back**: a card id that no longer resolves is ignored — the URL falls back
   to the real focus rather than erroring.
+- **Edit mode is a deep-linkable, reload-proof state**: opening the inline plan editor (the ✎ on
+  the clipboard) **upgrades** the URL to `…/edit`; exiting (Done / Esc / tap-outside) drops it back
+  to the focused card. Because the state lives in the URL, a **page reload lands back in the
+  editor** rather than the live logging deck. Plan edits are **persisted on every keystroke** (not
+  just on blur), so nothing typed is lost across the reload — see
+  [UC1 — Gym-Floor Clipboard](file:///home/simon/Projects/LibrePT/use_cases/uc1_gym_floor_clipboard.md).
 
 ---
 
@@ -121,6 +128,8 @@ enforces it:
 | Single-finger swipe retitles to the landed day | `test_touch_swipe_between_days` (same file; also `tests/test_browser.py`) |
 | Single-column invariant at every viewport | `test_single_column_deck_at_every_viewport` |
 | Deep link to the in-focus clipboard card; stale card id fallback | [tests/e2e/test_session_deeplink.py](file:///home/simon/Projects/LibrePT/tests/e2e/test_session_deeplink.py) |
+| Edit mode deep-links to `…/edit`, survives reload, keeps typed-but-uncommitted edits; direct `/edit` link reopens the editor | [tests/e2e/test_edit_mode_deeplink_reload.py](file:///home/simon/Projects/LibrePT/tests/e2e/test_edit_mode_deeplink_reload.py) |
+| Edit mode hides the member tabs + live timer and surfaces the client's goals + notes | [tests/e2e/test_edit_mode_client_focus.py](file:///home/simon/Projects/LibrePT/tests/e2e/test_edit_mode_client_focus.py) |
 | Not-found view for unknown route / deleted client; header stays; URL kept | [tests/e2e/test_error_view.py](file:///home/simon/Projects/LibrePT/tests/e2e/test_error_view.py) |
 | Launch the clipboard from a session card (with language switch + calendar sync) | [tests/e2e/test_clipboard.py](file:///home/simon/Projects/LibrePT/tests/e2e/test_clipboard.py) · `test_clipboard_launch_flow` |
 

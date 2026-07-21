@@ -18,6 +18,8 @@ export function renderExercisesList({ state, t, filterQuery = "", categoryFilter
       (e) =>
         e.name.toLowerCase().includes(q) ||
         e.category.toLowerCase().includes(q) ||
+        e.equipment?.toLowerCase().includes(q) ||
+        e.pattern?.toLowerCase().includes(q) ||
         e.instructions?.toLowerCase().includes(q),
     );
   }
@@ -33,12 +35,16 @@ export function renderExercisesList({ state, t, filterQuery = "", categoryFilter
   for (const ex of filtered) {
     const card = document.createElement("div");
     card.className = "exercise-item card glassmorphic";
+    const meta = [ex.equipment, ex.pattern]
+      .filter(Boolean)
+      .map((v) => `<span class="taxonomy-badge">${escapeHTML(v)}</span>`)
+      .join("");
     card.innerHTML = `
       <div class="exercise-item-header">
         <h3>${escapeHTML(ex.name)}</h3>
         <span class="muscle-badge">${ex.category}</span>
       </div>
-      <p class="exercise-instructions">${escapeHTML(ex.instructions || t("no_instructions"))}</p>
+      <div class="exercise-item-meta">${meta}</div>
     `;
     fragment.appendChild(card);
   }

@@ -63,6 +63,7 @@ import {
   saveActiveSessionToCache as saveActiveSessionToCacheController,
   sessionFocusPath,
   setActiveSession,
+  setClipboardEditMode,
   setupActiveSession as setupActiveSessionController,
   startSessionTimer,
   startWorkoutSession as startWorkoutSessionController,
@@ -611,6 +612,10 @@ function handlePathChange() {
   const sessionFocusMatch = path.match(
     /^\/session\/([A-Za-z0-9_-]+)\/client\/([A-Za-z0-9_-]+)\/(exercise|superset)\/([A-Za-z0-9_-]+)$/,
   );
+  // 0b. /session/{sessionId}/client/{clientId}/edit  (inline plan editor — survives reloads)
+  const sessionEditMatch = path.match(
+    /^\/session\/([A-Za-z0-9_-]+)\/client\/([A-Za-z0-9_-]+)\/edit$/,
+  );
   // 1. /session/{sessionId}/client/{clientId}
   const sessionClientMatch = path.match(/^\/session\/([A-Za-z0-9_-]+)\/client\/([A-Za-z0-9_-]+)$/);
   // 2. /session/{sessionId}
@@ -620,7 +625,11 @@ function handlePathChange() {
   // 4. /sessions/{isoDate}
   const sessionsDateMatch = path.match(/^\/sessions\/([0-9]{4}-[0-9]{2}-[0-9]{2})$/);
 
-  if (sessionFocusMatch) {
+  if (sessionEditMatch) {
+    const [, sessionId, clientId] = sessionEditMatch;
+    setHeaderState(true);
+    showSessionView(sessionId, clientId, null, { edit: true });
+  } else if (sessionFocusMatch) {
     const [, sessionId, clientId, focusType, focusId] = sessionFocusMatch;
     setHeaderState(true);
     showSessionView(sessionId, clientId, { type: focusType, id: focusId });
@@ -682,7 +691,7 @@ function handlePathChange() {
 
 // focusRef (optional) = { type: 'exercise'|'superset', id } from a deep link, selecting which
 // card starts in focus. A stale/unknown id is ignored, leaving the client's default focus.
-function showSessionView(sessionId, clientId, focusRef = null) {
+function showSessionView(sessionId, clientId, focusRef = null, opts = {}) {
   // A deep link must follow the id in the URL. The in-memory session is gone after a reload, so
   // first rehydrate it from the persisted cache — but only treat it as a match when its id is the
   // one the URL names. We never render whatever session happens to be cached under a different id.
@@ -718,6 +727,10 @@ function showSessionView(sessionId, clientId, focusRef = null) {
       const idx = focusIndexFromRef(cs, focusRef);
       if (idx >= 0) cs.activeExerciseIndex = idx;
     }
+    // An /edit deep link (typed, shared, or hit on reload) restores the inline plan editor. We only
+    // ENTER edit mode from the URL — never force-exit — so a planning session that forces edit mode
+    // isn't dropped when its plain URL is visited before syncSessionFocusUrl upgrades it to /edit.
+    if (opts.edit) setClipboardEditMode(true);
     renderActiveGroupBoard();
     syncSessionFocusUrl();
     return;
@@ -730,8 +743,8 @@ function showSessionView(sessionId, clientId, focusRef = null) {
   const booking = state.bookings?.find((b) => b.id === sessionId);
   if (booking) {
     launchClipboardDirectly({ bookingId: sessionId });
-    if (getActiveSession() && (clientId || focusRef)) {
-      showSessionView(sessionId, clientId, focusRef);
+    if (getActiveSession() && (clientId || focusRef || opts.edit)) {
+      showSessionView(sessionId, clientId, focusRef, opts);
     }
     return;
   }
@@ -739,8 +752,8 @@ function showSessionView(sessionId, clientId, focusRef = null) {
   const log = state.history?.find((h) => h.id === sessionId);
   if (log) {
     openSessionFromHistory(log);
-    if (getActiveSession() && (clientId || focusRef)) {
-      showSessionView(sessionId, clientId, focusRef);
+    if (getActiveSession() && (clientId || focusRef || opts.edit)) {
+      showSessionView(sessionId, clientId, focusRef, opts);
     }
     return;
   }

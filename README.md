@@ -140,6 +140,7 @@ LibrePT is comprised of three major subsystems:
     *   `/sessions/{YYYY-MM-DD}` — the day deck focused on a given day
     *   `/session/{sessionId}` and `/session/{sessionId}/client/{clientId}` — the active-session clipboard, optionally on a specific participant
     *   `/session/{sessionId}/client/{clientId}/exercise/{exerciseId}` and `…/superset/{circuitId}` — the clipboard with a specific card in focus. Opening the session upgrades the URL to whatever card is focused, and tapping a card updates it, so the address bar is always a copy-able link to the exact card on screen.
+    *   `/session/{sessionId}/client/{clientId}/edit` — the **inline plan editor** open on that participant's plan. Entering edit mode (the ✎ on the clipboard) upgrades the URL to `…/edit`; exiting drops it back to the focused card. Because the state lives in the URL, a **page reload lands back in the editor**, and plan edits are persisted on every keystroke, so nothing typed is lost across the reload.
     *   `/clients/{clientId}` — a client detail page
     *   `/routines`, `/exercises`, `/history` — the primary views
 *   **Omnipresent header**: the app header stays fixed in place across every view — dashboard, client detail, and the active-session clipboard — so it never jumps or re-flows between contexts. The active session view adds a context line beneath it reading `date time location` (e.g. `2026-07-17 10:00 Trib gym base`) with the live countdown.

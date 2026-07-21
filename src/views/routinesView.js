@@ -1,4 +1,10 @@
 // src/views/routinesView.js - Domain module for routines catalog and template editor builder
+import {
+  formatLoad,
+  formatReps,
+  loadInputHTML,
+  loadUnitForEquipment,
+} from "../helper/repsAndLoad.js";
 import { escapeHTML } from "../helper/utils.js";
 
 export function renderRoutinesList({ state, t, openWorkoutSetupModal }) {
@@ -19,7 +25,8 @@ export function renderRoutinesList({ state, t, openWorkoutSetupModal }) {
       .map((item) => {
         const ex = state.exercises.find((e) => e.id === item.id);
         const name = escapeHTML(ex ? ex.name : "Unknown Exercise");
-        const detail = `${item.sets}×${item.reps}${item.weight > 0 ? ` · ${item.weight}${t("kg")}` : ""}`;
+        const load = formatLoad(item.weight, loadUnitForEquipment(ex?.equipment));
+        const detail = `${item.sets}×${formatReps(item.reps)}${load ? ` · ${load}` : ""}`;
         return `<span class="preview-tag">${name} <span class="preview-tag-detail">${escapeHTML(detail)}</span></span>`;
       })
       .slice(0, 4)
@@ -67,6 +74,9 @@ export function openRoutineEditorModal({ routineId, state }) {
   document.getElementById("routine-name").value = routine.name;
   document.getElementById("routine-desc").value = routine.description || "";
 
+  // Collapse the add-exercise picker; edit starts from the existing rows.
+  document.getElementById("routine-ex-picker")?.classList.add("hidden");
+
   builderList.innerHTML = "";
   for (const item of routine.exercises) {
     addRoutineExerciseRow({ preset: item, state });
@@ -82,12 +92,15 @@ export function addRoutineExerciseRow({ preset = null, state }) {
   row.className = "routine-builder-row";
 
   const optionsHTML = state.exercises
+    .slice()
     .sort((a, b) => a.name.localeCompare(b.name))
     .map(
       (ex) =>
         `<option value="${ex.id}" ${preset && preset.id === ex.id ? "selected" : ""}>${escapeHTML(ex.name)} (${ex.category})</option>`,
     )
     .join("");
+
+  const presetEx = preset ? state.exercises.find((e) => e.id === preset.id) : null;
 
   row.innerHTML = `
     <select class="form-control select-ex" required>
@@ -98,16 +111,34 @@ export function addRoutineExerciseRow({ preset = null, state }) {
       <input type="number" min="1" placeholder="Sets" class="form-control input-sets" value="${preset ? preset.sets : "3"}" required aria-label="Sets quantity">
     </div>
     <div class="form-group" style="gap:2px">
-      <input type="number" min="1" placeholder="Reps" class="form-control input-reps" value="${preset ? preset.reps : "10"}" required aria-label="Reps quantity">
+      <input type="text" placeholder="Reps" class="form-control input-reps" list="reps-presets" value="${preset ? escapeHTML(String(preset.reps)) : "10"}" required aria-label="Reps target (number, range like 8-12, time like 30s, or 'max' to failure)">
     </div>
-    <div class="form-group" style="gap:2px">
-      <input type="number" step="0.5" placeholder="kg" class="form-control input-weight" value="${preset ? preset.weight : "0"}" required aria-label="Starting weight in kilograms">
-    </div>
+    <div class="form-group load-cell" style="gap:2px"></div>
     <div class="form-group" style="gap:2px">
       <input type="number" min="0" step="5" placeholder="Rest" class="form-control input-rest" value="${preset ? preset.rest : "60"}" required aria-label="Rest duration in seconds">
     </div>
     <button type="button" class="btn-remove-row" aria-label="Remove exercise from routine"><i class="fa-solid fa-trash-can"></i></button>
   `;
+
+  // The load control adapts to the selected movement's equipment: kg for free weights/machines,
+  // a stack level for cables, a resistance-band strength, or bodyweight (+ optional added kg).
+  const loadCell = row.querySelector(".load-cell");
+  const renderLoad = (unit, value) => {
+    loadCell.innerHTML = loadInputHTML({
+      unit,
+      value,
+      cls: "form-control input-weight",
+      escapeHTML,
+      ariaLabel: "Load",
+    });
+  };
+  renderLoad(loadUnitForEquipment(presetEx?.equipment), preset ? preset.weight : "");
+
+  const sel = row.querySelector(".select-ex");
+  sel.addEventListener("change", () => {
+    const chosen = state.exercises.find((e) => e.id === sel.value);
+    renderLoad(loadUnitForEquipment(chosen?.equipment), "");
+  });
 
   row.querySelector(".btn-remove-row").addEventListener("click", () => {
     row.remove();

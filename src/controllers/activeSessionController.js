@@ -3,6 +3,7 @@ import { renderClipboardEditor } from "../components/clipboardEditor.js";
 import { renderExerciseDeck } from "../components/exerciseDeck.js";
 import { openFeedbackModal } from "../components/feedbackModal.js";
 import { triggerRestTimer } from "../components/restTimer.js";
+import { hasLoad, loadUnitForEquipment } from "../helper/repsAndLoad.js";
 import {
   renderActiveSessionBarLabels,
   renderIdleSessionBar,
@@ -64,6 +65,17 @@ async function releaseScreenWakeLock() {
 // live logging deck. editorCleanup detaches the editor's document listeners on the next render.
 let clipboardEditMode = false;
 let editorCleanup = null;
+// Holds the session title bar's normal content while edit mode repurposes it, so exiting restores it.
+let savedSessionTitleHTML = null;
+
+// Temporal mode of the plan currently loaded, used to label edit mode so the trainer always knows
+// whether they're reshaping the LIVE session, an UPCOMING one, or a date-less PLANNING program.
+function currentPlanMode() {
+  const b = activeSession?.booking;
+  if (b?.isPlanning) return "planning";
+  if (b?.day === "tomorrow" || b?.day === "upcoming") return "future";
+  return "live";
+}
 
 // ---- Rest as a first-class plan item ----------------------------------------------------------
 // The plan (clientState.exercises) is an ordered mix of exercise items and rest items. A rest item
@@ -158,10 +170,21 @@ export function sessionFocusPath() {
   if (!activeSession) return null;
   const clientId = activeSession.activeClientId || activeSession.participants[0];
   const base = `/session/${activeSession.id}/client/${clientId}`;
+  // Edit mode is a first-class, deep-linkable state: its URL survives a reload so the trainer lands
+  // back in the editor (not the live deck), and the plan edits — persisted on every keystroke — are
+  // intact. The client segment names WHOSE plan is open so the right participant is restored.
+  if (clipboardEditMode) return `${base}/edit`;
   const cs = activeSession.clientRoutines[clientId];
   const ex = cs?.exercises?.[cs.activeExerciseIndex];
   if (!ex) return base;
   return ex.circuitId ? `${base}/superset/${ex.circuitId}` : `${base}/exercise/${ex.id}`;
+}
+
+// Set the edit-mode flag WITHOUT re-rendering — for the router restoring edit mode from an `/edit`
+// deep link, where the caller (showSessionView) already renders the board once afterwards. Use
+// enter/exitClipboardEditMode for in-app toggles that must render immediately.
+export function setClipboardEditMode(on) {
+  clipboardEditMode = !!on;
 }
 
 export function syncSessionFocusUrl() {
@@ -211,6 +234,7 @@ export function openSessionFromHistory(log) {
       setsTargetCount: setsTargetCount,
       repsTarget: repsTarget,
       weightTarget: weightTarget,
+      loadUnit: loadUnitForEquipment(ex?.equipment),
       rest: item.rest || 0,
       circuitId: item.circuitId || null,
       circuitTitle: item.circuitTitle || "",
@@ -308,6 +332,7 @@ export function startWorkoutSession(clientRoutines, bookingMeta = null, deps = {
             setsTargetCount: item.sets,
             repsTarget: item.reps,
             weightTarget: item.weight,
+            loadUnit: loadUnitForEquipment(ex.equipment),
             rest: item.rest,
             circuitId: item.circuitId || null,
             circuitTitle: item.circuitTitle || "",
@@ -563,6 +588,67 @@ export function renderActiveGroupBoard() {
     }
   }
 
+  // Client focus panel (goals + notes): only shown while editing the plan (CSS-gated by
+  // .editing-plan), so it's cheap to keep populated on every render.
+  if (activeClient) {
+    const goalsLabel = document.getElementById("client-focus-goals-label");
+    const notesLabel = document.getElementById("client-focus-notes-label");
+    const goalsEl = document.getElementById("client-focus-goals");
+    const notesEl = document.getElementById("client-focus-notes");
+    if (goalsLabel) goalsLabel.textContent = t("goals") || "Training Goals";
+    if (notesLabel) notesLabel.textContent = t("notes_injuries") || "Notes";
+    if (goalsEl) goalsEl.textContent = activeClient.goals || t("no_goals_specified") || "";
+    if (notesEl) notesEl.textContent = activeClient.notes || t("no_notes_specified") || "";
+  }
+
+  // Repurpose the session title bar for edit mode: show WHICH client's plan is open and its temporal
+  // mode (Live / Upcoming / Planning). Restored verbatim on exit from the saved snapshot.
+  const titleEl = document.getElementById("session-title-text");
+  const overlay = document.getElementById("active-session-overlay");
+  if (titleEl && overlay) {
+    if (clipboardEditMode) {
+      if (savedSessionTitleHTML === null) savedSessionTitleHTML = titleEl.innerHTML;
+      const mode = currentPlanMode();
+      const b = activeSession.booking;
+      // Concrete schedule beats a vague "Live": show the day + time of the booked session, or
+      // "Unscheduled" for a date-less planning program. The chip's colour still encodes urgency.
+      let chipLabel;
+      if (mode === "planning") {
+        chipLabel = t("unscheduled") || "Unscheduled";
+      } else {
+        const parts = [b?.day ? t(b.day) || b.day : "", b?.timeLabel || ""].filter(Boolean);
+        chipLabel = parts.join(" · ") || (t("live") || "Live");
+      }
+      const clientNm = activeClient ? escapeHTML(activeClient.name) : "";
+      titleEl.innerHTML = `${escapeHTML(t("editing") || "Editing")}${
+        clientNm ? ` · <strong>${clientNm}</strong>` : ""
+      } <span class="edit-mode-chip ${mode}">${escapeHTML(chipLabel)}</span>`;
+      overlay.classList.add("editing-plan");
+    } else {
+      if (savedSessionTitleHTML !== null) {
+        titleEl.innerHTML = savedSessionTitleHTML;
+        savedSessionTitleHTML = null;
+      }
+      overlay.classList.remove("editing-plan");
+    }
+    // The ✎ trigger is redundant while editing (the sticky Done bar exits), and leaving it live would
+    // race the tap-outside handler; hide it for the duration of edit mode.
+    document.getElementById("btn-edit-plan")?.classList.toggle("hidden", clipboardEditMode);
+
+    // In edit mode the ⋯ menu's destructive action targets the PLAN (clear its exercises), not the
+    // whole session — relabel it so the trainer knows which one they're deleting. Preserve the icon.
+    const delBtn = document.getElementById("btn-delete-session");
+    if (delBtn) {
+      const label = clipboardEditMode
+        ? t("btn_delete_plan") || "Delete Plan"
+        : t("btn_delete_session") || "Delete Session";
+      const icon = delBtn.querySelector("i");
+      delBtn.innerHTML = "";
+      if (icon) delBtn.appendChild(icon);
+      delBtn.appendChild(document.createTextNode(` ${label}`));
+    }
+  }
+
   // Detach any previous editor's document listeners before this render replaces the deck DOM.
   if (editorCleanup) {
     editorCleanup();
@@ -703,7 +789,13 @@ export function setupActiveSession(deps) {
   if (btnDeleteSession) {
     btnDeleteSession.addEventListener("click", () => {
       closeSessionMenu();
-      if (confirm(t("confirm_cancel"))) {
+      // While editing, this button deletes the PLAN (clears its exercises) and stays in the session;
+      // otherwise it cancels the whole session. The label is swapped to match in renderActiveGroupBoard.
+      if (clipboardEditMode) {
+        if (confirm(t("confirm_delete_plan"))) {
+          clearActivePlan();
+        }
+      } else if (confirm(t("confirm_cancel"))) {
         cancelWorkoutSession();
       }
     });
@@ -781,6 +873,21 @@ export function setupActiveSession(deps) {
   }
 }
 
+// Edit-mode "Delete Plan": empty the active client's plan (exercises + their logs + circuit rounds)
+// so the trainer can rebuild from scratch, keeping the session itself open and still in edit mode.
+export function clearActivePlan() {
+  if (!activeSession) return;
+  const cs = activeSession.clientRoutines[activeSession.activeClientId];
+  if (!cs) return;
+  cs.exercises = [];
+  cs.logs = {};
+  cs.circuitRounds = {};
+  cs.activeExerciseIndex = 0;
+  saveActiveSessionToCache();
+  if (appDeps.saveToLocalStorage) appDeps.saveToLocalStorage();
+  renderActiveGroupBoard();
+}
+
 export function cancelWorkoutSession() {
   const { navigateToPath, focusSessionsColumn } = appDeps;
   if (activeSession?.timerIntervalId) {
@@ -849,7 +956,7 @@ export function finishWorkoutSession() {
       const clientSetsLogged = [];
 
       for (const log of logsList) {
-        if (log.completed || log.weight > 0 || activeSession.booking?.isPlanning) {
+        if (log.completed || hasLoad(log.weight, ex.loadUnit) || activeSession.booking?.isPlanning) {
           clientSetsLogged.push({
             reps: log.reps,
             weight: log.weight,
@@ -863,6 +970,7 @@ export function finishWorkoutSession() {
         clientCompletedExercises.push({
           id: ex.id,
           name: ex.name,
+          loadUnit: ex.loadUnit || "kg",
           sets: clientSetsLogged,
         });
       }
@@ -934,6 +1042,13 @@ export function recoverActiveSession() {
       }
 
       if (activeSession.booking?.isPlanning) {
+        clipboardEditMode = true;
+      }
+      // Restore inline edit mode from an /edit deep link BEFORE the first render, so recovery renders
+      // the editor (not the live deck) and syncSessionFocusUrl keeps /edit instead of downgrading it
+      // to a focus card. Recovery runs before the router, so we read the URL here directly.
+      const path = typeof window !== "undefined" ? window.location.pathname : "";
+      if (path.includes(`/session/${activeSession.id}/`) && path.endsWith("/edit")) {
         clipboardEditMode = true;
       }
 

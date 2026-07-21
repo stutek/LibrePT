@@ -306,6 +306,7 @@
         <button class="chip" data-filter="Shoulders">Shoulders</button>
         <button class="chip" data-filter="Arms">Arms</button>
         <button class="chip" data-filter="Core">Core</button>
+        <button class="chip" data-filter="Recovery">Recovery</button>
       </div>
       
       <div id="exercises-list" class="stack-list">
@@ -429,6 +430,26 @@
         <span id="clipboard-client-notes-text">Notes go here</span>
       </div>
 
+      <!-- Client focus panel: personal goals + notes, surfaced while editing the plan
+           (with the active-member tabs and live timer hidden) so the trainer shapes the
+           program against the client's aims rather than the running session. -->
+      <div id="clipboard-client-focus" class="client-focus-panel">
+        <div class="client-focus-item">
+          <span class="client-focus-label">
+            <i class="fa-solid fa-bullseye"></i>
+            <span id="client-focus-goals-label">Training Goals</span>
+          </span>
+          <p id="client-focus-goals"></p>
+        </div>
+        <div class="client-focus-item">
+          <span class="client-focus-label">
+            <i class="fa-solid fa-notes-medical"></i>
+            <span id="client-focus-notes-label">Notes</span>
+          </span>
+          <p id="client-focus-notes"></p>
+        </div>
+      </div>
+
       <!-- Vertical Exercise List: the in-focus card is the primary logging surface
            (stats + one-tap Too Easy / Too Hard / Feedback), upcoming exercises stack below -->
       <div id="active-exercise-scroll-deck" class="exercise-vertical-list">
@@ -541,7 +562,17 @@
             <i class="fa-solid fa-plus"></i> Add Exercise
           </button>
         </div>
-        
+
+        <datalist id="reps-presets">
+          <option value="8"></option>
+          <option value="10"></option>
+          <option value="12"></option>
+          <option value="15"></option>
+          <option value="max"></option>
+        </datalist>
+
+        <div id="routine-ex-picker" class="exercise-picker hidden"></div>
+
         <div id="routine-exercises-list" class="routine-builder-list">
           <!-- Selection rows injected via JS -->
         </div>
@@ -567,7 +598,7 @@
       </div>
       
       <div class="form-group">
-        <label for="exercise-category">Category *</label>
+        <label for="exercise-category">Target Muscle Group *</label>
         <select id="exercise-category" required class="form-control">
           <option value="Chest">Chest</option>
           <option value="Back">Back</option>
@@ -575,9 +606,38 @@
           <option value="Shoulders">Shoulders</option>
           <option value="Arms">Arms</option>
           <option value="Core">Core</option>
+          <option value="Recovery">Recovery</option>
         </select>
       </div>
-      
+
+      <div class="form-group">
+        <label for="exercise-equipment">Equipment *</label>
+        <select id="exercise-equipment" required class="form-control">
+          <option value="Barbell">Barbell</option>
+          <option value="Dumbbell">Dumbbell</option>
+          <option value="Cable">Cable</option>
+          <option value="Machine">Machine</option>
+          <option value="Band">Band</option>
+          <option value="Bodyweight">Bodyweight</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="exercise-pattern">Movement Pattern *</label>
+        <select id="exercise-pattern" required class="form-control">
+          <option value="Horizontal Push">Horizontal Push</option>
+          <option value="Horizontal Pull">Horizontal Pull</option>
+          <option value="Vertical Push">Vertical Push</option>
+          <option value="Vertical Pull">Vertical Pull</option>
+          <option value="Squat">Squat</option>
+          <option value="Hinge">Hinge</option>
+          <option value="Lunge">Lunge</option>
+          <option value="Isolation">Isolation</option>
+          <option value="Core">Core</option>
+          <option value="Mobility">Mobility</option>
+        </select>
+      </div>
+
       <div class="form-group">
         <label for="exercise-instructions">Instructions</label>
         <textarea id="exercise-instructions" rows="2" placeholder="Form cues..." class="form-control"></textarea>
@@ -798,8 +858,9 @@
       <!-- PANEL: Swap exercise -->
       <div id="adjust-panel-swap" class="adjust-action-panel hidden">
         <div class="form-group">
-          <label for="adjust-exercise-swap">Select Replacement Exercise</label>
-          <select id="adjust-exercise-swap" class="form-control"></select>
+          <label>Replacement Exercise <span class="swap-hint text-muted">— same muscle group keeps volume tracking intact</span></label>
+          <input type="hidden" id="adjust-exercise-swap">
+          <div id="adjust-swap-picker" class="exercise-picker"></div>
         </div>
       </div>
 

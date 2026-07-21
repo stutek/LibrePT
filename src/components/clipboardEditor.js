@@ -22,6 +22,8 @@
 //   genId()        // fresh short id for new exercises/rests/circuits
 // }
 
+import { loadFieldMeta, loadInputHTML, parseLoad, parseReps } from "../helper/repsAndLoad.js";
+
 const DEFAULT_SERIES = 3;
 const DEFAULT_REST = 30; // seconds, when injecting a fresh rest
 
@@ -37,7 +39,6 @@ let detachDocListeners = null;
 export function renderClipboardEditor(container, deps) {
   const {
     activeClientState,
-    clientName,
     allExerciseNames,
     t,
     escapeHTML,
@@ -105,9 +106,16 @@ export function renderClipboardEditor(container, deps) {
 
   const exerciseRow = (ex, idx) => {
     const name = escapeHTML(ex.name || "");
-    const sets = escapeHTML(String(ex.setsTargetCount ?? ex.sets ?? 3));
     const reps = escapeHTML(String(ex.repsTarget ?? ex.reps ?? 10));
-    const weight = escapeHTML(String(ex.weightTarget ?? ex.weight ?? 0));
+    const unit = ex.loadUnit || "kg";
+    // A superset member's set count IS the circuit's round count, so we drop the redundant per-row
+    // Sets field for members — the circuit header's Rounds control is the single source of truth.
+    const setsField = ex.circuitId
+      ? ""
+      : `<label class="editor-field"><span>${tr("sets", "Sets")}</span><input type="number" min="0" class="editor-f-sets" value="${escapeHTML(String(ex.setsTargetCount ?? ex.sets ?? 3))}"></label>`;
+    const loadField = `<label class="editor-field"><span>${escapeHTML(loadFieldMeta(unit).label)}</span>${loadInputHTML(
+      { unit, value: ex.weightTarget ?? ex.weight ?? 0, cls: "editor-f-weight", escapeHTML, ariaLabel: "Load" },
+    )}</label>`;
     return `
       <li class="editor-row" data-rowkey="${idx}">
         ${reorderHandle()}
@@ -116,9 +124,9 @@ export function renderClipboardEditor(container, deps) {
             <input class="editor-row-name" type="text" list="${datalistId}" value="${name}" aria-label="${tr("exercise", "Exercise")}" placeholder="${tr("exercise", "Exercise")}">
           </div>
           <div class="editor-row-fields">
-            <label class="editor-field"><span>${tr("sets", "Sets")}</span><input type="number" min="0" class="editor-f-sets" value="${sets}"></label>
-            <label class="editor-field"><span>${tr("reps_label", "Reps")}</span><input type="number" min="0" class="editor-f-reps" value="${reps}"></label>
-            <label class="editor-field"><span>${tr("kg", "kg")}</span><input type="number" min="0" step="0.5" class="editor-f-weight" value="${weight}"></label>
+            ${setsField}
+            <label class="editor-field"><span>${tr("reps_label", "Reps")}</span><input type="text" list="reps-presets" class="editor-f-reps" value="${reps}"></label>
+            ${loadField}
             <label class="editor-field editor-field-superset"><span><i class="fa-solid fa-layer-group"></i></span>${supersetSelect(ex)}</label>
           </div>
         </div>
@@ -151,6 +159,11 @@ export function renderClipboardEditor(container, deps) {
       </li>`;
   };
 
+  // Consistent auto-name for an untitled circuit: "Superset N" by first-appearance order — the SAME
+  // ordinal the membership dropdown uses, so the header placeholder and the dropdown never disagree.
+  const circuitAutoName = (cid) =>
+    `${tr("superset", "Superset")} ${circuits.findIndex((c) => c.id === cid) + 1}`;
+
   const circuitBlock = (cid, members) => {
     const meta = circuitMetaOf(cid);
     const title = escapeHTML(meta.title);
@@ -165,7 +178,7 @@ export function renderClipboardEditor(container, deps) {
         <div class="editor-circuit-head">
           ${reorderHandle()}
           <span class="editor-circuit-icon"><i class="fa-solid fa-layer-group"></i></span>
-          <input class="editor-circuit-title" type="text" value="${title}" placeholder="${tr("superset", "Superset")}" aria-label="${tr("superset_title", "Superset title")}">
+          <input class="editor-circuit-title" type="text" value="${title}" placeholder="${escapeHTML(circuitAutoName(cid))}" aria-label="${tr("superset_title", "Superset title")}">
           <label class="editor-circuit-rounds"><span>${tr("rounds", "Rounds")}</span><input type="number" min="1" class="editor-circuit-series" value="${series}"></label>
           <button type="button" class="editor-circuit-ungroup" title="${tr("ungroup", "Break up superset")}"><i class="fa-solid fa-link-slash"></i></button>
         </div>
@@ -195,11 +208,7 @@ export function renderClipboardEditor(container, deps) {
   container.innerHTML = `
     <div class="clipboard-editor" role="region" aria-label="${tr("edit_plan", "Edit plan")}">
       <div class="clipboard-editor-head">
-        <span class="clipboard-editor-title"><i class="fa-solid fa-pen-to-square"></i> ${
-          clientName
-            ? `${tr("editing_plan_for", "Editing plan for")} <strong>${escapeHTML(clientName)}</strong>`
-            : tr("editing_plan_session", "Editing session plan")
-        }</span>
+        <span class="clipboard-editor-title"><i class="fa-solid fa-pen-to-square"></i> ${tr("edit_plan", "Edit plan")}</span>
         <button type="button" class="btn primary-btn btn-sm editor-done"><i class="fa-solid fa-check"></i> ${tr("done", "Done")}</button>
       </div>
       <ul class="editor-list">${items.length ? unitsHtml : `<li class="editor-empty">${tr("no_exercises_injected", "No exercises yet.")}</li>${insertBar(0, { allowSuperset: true })}`}</ul>
@@ -229,6 +238,16 @@ export function renderClipboardEditor(container, deps) {
       for (const m of members) {
         m.circuitTitle = title;
         m.circuitSeries = series;
+        // Rounds drive a member's set count: keep its target and log rows aligned to the series.
+        if (!isRest(m)) {
+          m.setsTargetCount = series;
+          const logs = activeClientState.logs[m.id];
+          if (Array.isArray(logs)) {
+            while (logs.length < series)
+              logs.push({ reps: m.repsTarget ?? 0, weight: m.weightTarget ?? 0, completed: false, note: "" });
+            logs.length = series;
+          }
+        }
       }
       result.push(...members);
     }
@@ -256,14 +275,18 @@ export function renderClipboardEditor(container, deps) {
   };
 
   // ---------- exercise field edits: mutate live session without a re-render (keeps focus/caret) ----------
+  // Persist on every keystroke (input) AND on commit (change): edit mode is deep-linked, so a reload
+  // mid-typing must restore the exact in-progress value — save() only writes the cache, never renders.
   const bindField = (selector, apply) => {
     for (const input of listEl.querySelectorAll(selector)) {
-      input.addEventListener("change", () => {
+      const handler = () => {
         const ex = items[rowKeyOf(input.closest(".editor-row"))];
         if (!ex) return;
         apply(ex, input.value);
         save();
-      });
+      };
+      input.addEventListener("input", handler);
+      input.addEventListener("change", handler);
       input.addEventListener("click", (e) => e.stopPropagation());
     }
   };
@@ -284,34 +307,38 @@ export function renderClipboardEditor(container, deps) {
     logs.length = n;
   });
   bindField(".editor-f-reps", (ex, v) => {
-    ex.repsTarget = v === "" ? ex.repsTarget : parseInt(v, 10) || 0;
+    ex.repsTarget = v === "" ? ex.repsTarget : parseReps(v);
   });
   bindField(".editor-f-weight", (ex, v) => {
-    ex.weightTarget = parseFloat(v) || 0;
+    ex.weightTarget = parseLoad(v);
   });
 
   // --- swap the movement in place via the name field (autocompletes from the catalog) ---
   for (const input of listEl.querySelectorAll(".editor-row-name")) {
     input.addEventListener("click", (e) => e.stopPropagation());
-    input.addEventListener("change", () => {
+    const applyName = () => {
       const ex = items[rowKeyOf(input.closest(".editor-row"))];
       if (!ex) return;
       const newName = input.value.trim();
       if (!newName || newName === ex.name) return;
       ex.name = newName; // keep the same slot/id/logs — a swap retargets the movement, not the sets
       save();
-    });
+    };
+    input.addEventListener("input", applyName); // persist per keystroke so a reload keeps typing intact
+    input.addEventListener("change", applyName);
   }
 
   // ---------- rest rows: edit seconds (live) / remove ----------
   for (const input of listEl.querySelectorAll(".editor-rest-secs")) {
     input.addEventListener("click", (e) => e.stopPropagation());
-    input.addEventListener("change", () => {
+    const applyRest = () => {
       const it = items[rowKeyOf(input.closest(".editor-rest-row"))];
       if (!it) return;
       it.rest = Math.max(0, parseInt(input.value, 10) || 0);
       save();
-    });
+    };
+    input.addEventListener("input", applyRest);
+    input.addEventListener("change", applyRest);
   }
   for (const btn of listEl.querySelectorAll(".editor-rest-remove")) {
     btn.addEventListener("click", (e) => {
@@ -354,9 +381,20 @@ export function renderClipboardEditor(container, deps) {
     const seriesInput = block.querySelector(".editor-circuit-series");
     titleInput.addEventListener("click", (e) => e.stopPropagation());
     seriesInput.addEventListener("click", (e) => e.stopPropagation());
-    titleInput.addEventListener("change", () => {
+    const applyTitle = () => {
       for (const m of membersOf()) {
         m.circuitTitle = titleInput.value.trim();
+      }
+      save();
+    };
+    titleInput.addEventListener("input", applyTitle); // persist per keystroke for reload safety
+    titleInput.addEventListener("change", applyTitle);
+    // Series persists live on input (so a reload keeps the number); the heavier normalize + rerender
+    // that clamps the round counter and resizes logs stays on change/blur to avoid caret loss.
+    seriesInput.addEventListener("input", () => {
+      const n = Math.max(1, parseInt(seriesInput.value, 10) || 1);
+      for (const m of membersOf()) {
+        m.circuitSeries = n;
       }
       save();
     });
@@ -563,8 +601,15 @@ export function renderClipboardEditor(container, deps) {
     if (e.key === "Escape") doExit();
   };
   const onOutside = (e) => {
-    // Ignore taps inside the editor itself or inside any open modal dialog (e.g. Add exercise)
-    if (editorEl.contains(e.target) || e.target.closest?.("dialog")) return;
+    // Ignore taps inside the editor itself, inside any open modal dialog (e.g. Add exercise), or on
+    // the session ⋯ menu — its "Delete Plan" action is edit-mode-only, so opening it must not trip
+    // the tap-outside exit and flip us back to the live deck first.
+    if (
+      editorEl.contains(e.target) ||
+      e.target.closest?.("dialog") ||
+      e.target.closest?.(".session-menu-wrap")
+    )
+      return;
     doExit();
   };
   function cleanup() {

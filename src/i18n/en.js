@@ -38,6 +38,7 @@ export const en = {
   btn_inject_exercise: "Inject Exercise",
   btn_cancel: "Cancel",
   btn_delete_session: "Delete Session",
+  btn_delete_plan: "Delete Plan",
   btn_complete: "Complete Workout Session",
   btn_log_feedback: "Log Feedback",
   alert_no_sets:
@@ -46,6 +47,8 @@ export const en = {
     "This session still has about {min} minutes left. Finish it now anyway?",
   confirm_cancel:
     "Delete this session? Its logged progress and feedback will be permanently discarded.",
+  confirm_delete_plan:
+    "Delete every exercise from this plan? You can rebuild it from scratch or exit editing.",
   warning_banner_title: "Client Safety Advisory",
   workout_setup_title: "Workout Session Setup",
   select_participants: "Select Participants & Assign Routines",
@@ -165,6 +168,9 @@ export const en = {
   tomorrow: "Tomorrow",
   yesterday: "Yesterday",
   upcoming: "Upcoming",
+  live: "Live",
+  editing: "Editing",
+  unscheduled: "Unscheduled",
   undefined: "Undefined",
   combo_round_title: "Linked Combo Round",
   bar_clients_label: "clients",

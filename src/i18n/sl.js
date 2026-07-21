@@ -37,6 +37,7 @@ export const sl = {
   btn_inject_exercise: "Vstavi vajo",
   btn_cancel: "Prekliči",
   btn_delete_session: "Izbriši sejo",
+  btn_delete_plan: "Izbriši plan",
   btn_complete: "Zaključi vadbo",
   btn_log_feedback: "Zabeleži povratne informacije",
   alert_no_sets:
@@ -45,6 +46,8 @@ export const sl = {
     "Do konca te seje je še približno {min} minut. Ali jo želite vseeno zaključiti zdaj?",
   confirm_cancel:
     "Izbriši to sejo? Zabeležen napredek in povratne informacije bodo trajno izgubljeni.",
+  confirm_delete_plan:
+    "Izbrišem vse vaje iz tega plana? Lahko ga sestaviš znova ali zapustiš urejanje.",
   warning_banner_title: "Varnostno opozorilo za stranko",
   workout_setup_title: "Nastavitev seje vadbe",
   select_participants: "Izberi udeležence in dodeli rutine",
@@ -164,6 +167,9 @@ export const sl = {
   tomorrow: "Jutri",
   yesterday: "Včeraj",
   upcoming: "Prihodnje",
+  live: "V živo",
+  editing: "Urejanje",
+  unscheduled: "Nenačrtovano",
   undefined: "Nedoločen",
   combo_round_title: "Povezana kombinirana serija",
   bar_clients_label: "strank",
