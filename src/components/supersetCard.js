@@ -32,7 +32,7 @@ export function renderSupersetCard(card, item, ctx) {
     onFocus,
     startRestTimer,
   } = ctx;
-  const WORK_TIMER_DEFAULT = 60; // seconds, when timing a superset (no work-duration field yet)
+
 
   const showInFocus = item.isInFocus && !pastExpanded;
   card.className = `exercise-deck-card superset-card ${showInFocus ? "in-focus" : item.isCompleted ? "completed" : ""}${isFutureSession ? " future-session" : ""}`;
@@ -180,7 +180,8 @@ export function renderSupersetCard(card, item, ctx) {
       if (timerBtn)
         timerBtn.addEventListener("click", (e) => {
           e.stopPropagation();
-          startRestTimer(WORK_TIMER_DEFAULT, "exercise", item.title || "");
+          // Use the item's prescribed duration for countdown; if none, count up (elapsed stopwatch).
+          startRestTimer(item.workDuration || 0, "exercise", item.title || "");
         });
       for (const br of card.querySelectorAll(".superset-break-row")) {
         br.addEventListener("click", (e) => {

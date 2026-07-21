@@ -27,7 +27,7 @@ export function renderExerciseCard(card, item, ctx) {
     onFocus,
     startRestTimer,
   } = ctx;
-  const WORK_TIMER_DEFAULT = 60; // seconds, when timing an exercise (no work-duration field yet)
+
 
   // An open past log defocuses the live card, so the active exercise renders compact too
   const showInFocus = item.isInFocus && !pastExpanded;
@@ -105,7 +105,7 @@ export function renderExerciseCard(card, item, ctx) {
     if (timerBtn && startRestTimer)
       timerBtn.addEventListener("click", (e) => {
         e.stopPropagation();
-        startRestTimer(WORK_TIMER_DEFAULT, "exercise", item.name);
+        startRestTimer(item.workDuration || 0, "exercise", item.name);
       });
   } else {
     // Compact row for the rest of the plan — tap to bring into focus. The target

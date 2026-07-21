@@ -5,6 +5,8 @@
 // Design (per product requirements):
 //   • Rest AND exercise timers are labelled with the CLIENT NAME + what's being timed, so a trainer
 //     running several people at once can tell the stacked timers apart.
+//   • Count-up (elapsed) timers: when seconds is 0 the timer counts UP from zero (a stopwatch)
+//     instead of counting down — useful for warmups/cooldowns with no prescribed duration.
 //   • ONE active timer per client — starting a new one for a client replaces theirs.
 //   • At zero a timer does NOT stop at "DONE": it keeps counting into NEGATIVE (overtime, shown red),
 //     beeping once as it crosses zero.
@@ -18,8 +20,12 @@
 const STORE_KEY = "librept_active_timers";
 
 let deps = {};
-// clientId -> timer: { clientId, clientName, label, type:'rest'|'exercise', endTime, originalDuration, beeped }
-// Timers always run; the live remaining is derived from (endTime - now) and may be negative.
+// clientId -> timer: { clientId, clientName, label, type:'rest'|'exercise',
+//   endTime, originalDuration, beeped,        — countdown mode (seconds > 0)
+//   startTime, countUp                        — count-up mode (seconds === 0)
+// }
+// Countdown timers derive remaining from (endTime - now) and may go negative.
+// Count-up timers derive elapsed from (now - startTime) and never beep.
 let timers = {};
 let tickIntervalId = null;
 
@@ -45,22 +51,29 @@ export function setupRestTimer() {
 // Start the timer for a client. One active timer per client, so a start button guards an existing
 // one: if it still has time left (>= 0) we do NOT reset it — the card flashes a warning instead; if
 // it has already run into overtime (< 0) we reset it to the new duration and blink an acknowledge.
+// When seconds is 0 (or falsy) the timer runs in count-UP mode — an elapsed stopwatch with no
+// target, useful for dynamic warmups and cooldowns where no countdown value is prescribed.
 export function startTimer({ clientId, clientName = "", label = "", type = "rest", seconds }) {
-  if (!clientId || !(seconds > 0)) return;
+  if (!clientId) return;
+  const countUp = !seconds || seconds <= 0;
   const existing = timers[clientId];
-  if (existing && remainingOf(existing) >= 0) {
+  if (existing && !existing.countUp && remainingOf(existing) >= 0) {
     flashCard(clientId, "flash-warning"); // still counting down — refuse to restart
     return;
   }
-  timers[clientId] = {
-    clientId,
-    clientName,
-    label,
-    type,
-    endTime: Date.now() + seconds * 1000,
-    originalDuration: seconds,
-    beeped: false,
-  };
+  if (countUp) {
+    timers[clientId] = { clientId, clientName, label, type, startTime: Date.now(), countUp: true };
+  } else {
+    timers[clientId] = {
+      clientId,
+      clientName,
+      label,
+      type,
+      endTime: Date.now() + seconds * 1000,
+      originalDuration: seconds,
+      beeped: false,
+    };
+  }
   persist();
   renderStack();
   ensureTicking();
@@ -120,7 +133,10 @@ function closeTimer(clientId) {
 
 // ---- ticking ---------------------------------------------------------------------------------
 
-const remainingOf = (timer) => Math.round((timer.endTime - Date.now()) / 1000);
+const remainingOf = (timer) =>
+  timer.countUp ? null : Math.round((timer.endTime - Date.now()) / 1000);
+const elapsedOf = (timer) =>
+  timer.countUp ? Math.round((Date.now() - timer.startTime) / 1000) : null;
 
 function ensureTicking() {
   if (tickIntervalId || Object.keys(timers).length === 0) return;
@@ -138,6 +154,7 @@ function tick() {
   }
   let crossedZero = false;
   for (const timer of Object.values(timers)) {
+    if (timer.countUp) continue; // count-up timers never beep
     if (!timer.beeped && remainingOf(timer) <= 0) {
       timer.beeped = true;
       crossedZero = true;
@@ -178,13 +195,14 @@ function escapeHTML(str) {
 const t = (key, fallback) => (deps.t ? deps.t(key) || fallback : fallback);
 
 function timerCardHTML(timer) {
-  const rem = remainingOf(timer);
-  const overtime = rem < 0;
+  const isUp = timer.countUp;
+  const display = isUp ? fmt(elapsedOf(timer)) : fmt(remainingOf(timer));
+  const overtime = !isUp && remainingOf(timer) < 0;
   const icon = timer.type === "exercise" ? "fa-dumbbell" : "fa-hourglass-half";
   const typeLabel =
     timer.label || (timer.type === "exercise" ? t("exercise", "Exercise") : t("rest_label", "Rest"));
   return `
-    <div class="timer-card${overtime ? " overtime" : ""}" data-client="${escapeHTML(timer.clientId)}">
+    <div class="timer-card${overtime ? " overtime" : ""}${isUp ? " count-up" : ""}" data-client="${escapeHTML(timer.clientId)}">
       <div class="timer-card-head">
         <span class="timer-card-label">
           <span class="timer-card-who"><i class="fa-solid ${icon}"></i> <strong>${escapeHTML(timer.clientName || "")}</strong></span>
@@ -192,7 +210,7 @@ function timerCardHTML(timer) {
         </span>
         <button type="button" class="timer-close" data-act="close" aria-label="${t("close", "Close")}"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <div class="timer-card-time">${fmt(rem)}</div>
+      <div class="timer-card-time">${display}</div>
     </div>`;
 }
 
@@ -216,10 +234,14 @@ function updateTimes() {
   for (const card of stack.querySelectorAll(".timer-card")) {
     const timer = timers[card.dataset.client];
     if (!timer) continue;
-    const rem = remainingOf(timer);
     const timeEl = card.querySelector(".timer-card-time");
-    if (timeEl) timeEl.textContent = fmt(rem);
-    card.classList.toggle("overtime", rem < 0);
+    if (timer.countUp) {
+      if (timeEl) timeEl.textContent = fmt(elapsedOf(timer));
+    } else {
+      const rem = remainingOf(timer);
+      if (timeEl) timeEl.textContent = fmt(rem);
+      card.classList.toggle("overtime", rem < 0);
+    }
   }
 }
 
