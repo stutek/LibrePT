@@ -229,9 +229,9 @@ def run_lint():
 
 def run_tests():
     """Runs the test suite programmatically. Allows a debugger to step directly into test setup."""
-    print("\n>>> Step 2: Running Automated Test Suite...")
+    print("\n>>> Step 2: Running Automated Test Suite (parallel)...")
 
-    exit_code = pytest.main(["-v", "tests/"])
+    exit_code = pytest.main(["-n", "auto", "-v", "tests/"])
 
     if exit_code != 0:
         print(f"\n  ✗ Test suite failed with exit code: {exit_code}")

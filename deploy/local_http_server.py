@@ -104,6 +104,7 @@ def main():
     )
     args = parser.parse_args()
 
+    ThreadingHTTPServer.allow_reuse_address = True
     server = ThreadingHTTPServer(("", args.port), SubPathHandler)
     print(
         "LibrePT dev server: http://localhost:%d%s/  (root redirects here)"
