@@ -192,7 +192,7 @@ export function renderExerciseDeck(deckContainer, deps) {
           <span class="deck-card-counter"><i class="fa-solid fa-hourglass-half"></i></span>
           <span class="deck-card-name deck-card-name-inline">${t("rest_label")}</span>
           <span class="deck-card-compact-target">${escapeHTML(String(item.rest))}s</span>
-          <span class="rest-card-play" aria-hidden="true"><i class="fa-solid fa-play"></i></span>
+          <span class="rest-card-play" aria-hidden="true"><i class="fa-solid fa-stopwatch"></i></span>
         </div>`;
       if (startRestTimer && !isFutureSession) {
         card.setAttribute("role", "button");

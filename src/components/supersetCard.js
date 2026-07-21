@@ -48,7 +48,7 @@ export function renderSupersetCard(card, item, ctx) {
         // exercise markup/wiring below.
         if (ex.type === "rest") {
           rows.push(
-            `<button type="button" class="superset-break-row" data-rest="${ex.rest}"><i class="fa-solid fa-hourglass-half"></i> <span class="superset-break-label">${t("rest_label")}</span> <span class="superset-ex-reps">${ex.rest}s</span> <i class="fa-solid fa-play superset-break-play"></i></button>`,
+            `<button type="button" class="superset-break-row" data-rest="${ex.rest}"><i class="fa-solid fa-hourglass-half"></i> <span class="superset-break-label">${t("rest_label")}</span> <span class="superset-ex-reps">${ex.rest}s</span> <i class="fa-solid fa-stopwatch superset-break-play"></i></button>`,
           );
           continue;
         }
