@@ -503,6 +503,12 @@ select.menu-select {
 .view-header {
   margin-bottom: 16px;
 }
+/* The Client Directory header sits right after a .view-divider, same as the Pending Plan
+   Adjustments .section-title above it — match that section's top margin so both read with
+   identical spacing off the divider instead of the header sitting noticeably closer to it. */
+#view-clients .view-header {
+  margin-top: 24px;
+}
 /* Single source of truth for view-title type — every view reads as one system: the view headers,
    the client-detail back header, the home "Sessions" label, the day-stepper date, the
    active-session title, and the 404 title all share this one definition. The
