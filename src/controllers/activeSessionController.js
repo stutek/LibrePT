@@ -6,6 +6,7 @@ import {
   clearAllTimers,
   restoreSessionTimers,
   startTimer,
+  stopTimerIfMatches,
 } from "../components/exerciseAndRestTimer.js";
 import { hasLoad, loadUnitForEquipment } from "../helper/repsAndLoad.js";
 import {
@@ -543,6 +544,10 @@ export function completeSupersetRound(circuitId) {
     while (next < cs.exercises.length && isRestItem(cs.exercises[next])) next++;
     cs.activeExerciseIndex = Math.min(next, cs.exercises.length - 1);
     clampFocusToExercise(cs);
+    // The block is fully done — a rest/exercise timer still running against it is now stale.
+    // Freeze it rather than silently dropping it: the trainer sees it held at its final value
+    // and clears it themselves with ✕.
+    stopTimerIfMatches(activeSession.activeClientId, { type: "superset", id: circuitId });
   }
   saveActiveSessionToCache();
   if (saveToLocalStorage) saveToLocalStorage();
@@ -555,12 +560,21 @@ function startClientTimer(seconds, type = "rest", label = "") {
   if (!activeSession) return;
   const clientId = activeSession.activeClientId;
   const client = appDeps.state?.clients?.find((c) => c.id === clientId);
+  const cs = activeSession.clientRoutines[clientId];
+  const ex = cs?.exercises?.[cs.activeExerciseIndex];
+  const focusRef = ex
+    ? ex.circuitId
+      ? { type: "superset", id: ex.circuitId }
+      : { type: "exercise", id: ex.id }
+    : null;
   startTimer({
     clientId,
     clientName: client ? client.name : "",
     type,
     label,
     seconds,
+    sessionId: activeSession.id,
+    focusRef,
   });
 }
 

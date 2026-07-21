@@ -480,12 +480,13 @@
         </div>
       </div>
     </div>
-
-    <!-- Per-client timer stack: one labelled countdown per client (client name + Rest/Exercise),
-         stacked on the clipboard. Counts into negative overtime; dismiss-only (✕). Populated and
-         persisted by components/exerciseAndRestTimer.js; lives inside the overlay so it shows only here. -->
-    <div id="clipboard-timer-stack" class="timer-stack hidden"></div>
   </div>
+
+  <!-- Per-client timer stack: one labelled countdown per client (client name + Rest/Exercise),
+       stacked on the clipboard. Counts into negative overtime; dismiss-only (✕). Populated and
+       persisted by components/exerciseAndRestTimer.js; a global fixed overlay shown on every view
+       whenever any client has an active timer, not just while the live session overlay is open. -->
+  <div id="clipboard-timer-stack" class="timer-stack hidden"></div>
 
   <!-- DIALOG MODAL: Add / Edit Client -->
   <dialog id="dialog-client" class="dialog-modal card glassmorphic">

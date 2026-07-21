@@ -2354,6 +2354,7 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
 .timer-card {
   pointer-events: auto;
   padding: 8px 12px;
+  cursor: pointer;
 }
 .timer-card.timer-card-enter {
   animation: slideUp 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
@@ -2423,6 +2424,16 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
 .timer-card.overtime .timer-card-time,
 .timer-card.overtime .timer-card-label i {
   color: var(--danger);
+}
+/* Stopped: the owning exercise/superset finished, so the timer is frozen at its final value and
+   dimmed to read as "done, awaiting dismissal" rather than something still needing attention —
+   deliberately NOT a warning color, which stays reserved for a still-running overtime timer. */
+.timer-card.stopped {
+  opacity: 0.6;
+}
+.timer-card.stopped .timer-card-time,
+.timer-card.stopped .timer-card-label i {
+  color: var(--text-muted);
 }
 /* Start-button feedback: a warning flash when a start is refused (timer still has time left), and
    an acknowledge blink when an overtime timer is reset. Neither disturbs the running countdown. */

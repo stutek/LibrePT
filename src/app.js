@@ -284,6 +284,12 @@ function init() {
   // Initialize the per-client timer stack component
   initRestTimer({
     t,
+    onFocusTimer: (timer) => {
+      if (!timer.sessionId || !timer.clientId) return;
+      let path = `/session/${timer.sessionId}/client/${timer.clientId}`;
+      if (timer.focusRef) path += `/${timer.focusRef.type}/${timer.focusRef.id}`;
+      navigateToPath(path);
+    },
   });
   setupRestTimer();
 

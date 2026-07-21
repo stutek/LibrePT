@@ -20,12 +20,17 @@
 const STORE_KEY = "librept_active_timers";
 
 let deps = {};
-// clientId -> timer: { clientId, clientName, label, type:'rest'|'exercise',
+// clientId -> timer: { clientId, clientName, label, type:'rest'|'exercise', sessionId, focusRef,
 //   endTime, originalDuration, beeped,        — countdown mode (seconds > 0)
 //   startTime, countUp                        — count-up mode (seconds === 0)
+//   stopped, frozenSeconds                    — set once the owning exercise/superset is finished
 // }
+// sessionId identifies the owning live session; focusRef (null | { type: 'exercise'|'superset', id })
+// identifies the exercise/superset card the timer was started from, so a card click can navigate back.
 // Countdown timers derive remaining from (endTime - now) and may go negative.
 // Count-up timers derive elapsed from (now - startTime) and never beep.
+// A stopped timer no longer ticks — it holds at frozenSeconds (whatever remaining/elapsed was at the
+// moment it was stopped) — but stays in the stack, dismiss-only, until the trainer taps ✕.
 let timers = {};
 let tickIntervalId = null;
 
@@ -39,10 +44,15 @@ export function setupRestTimer() {
   const stack = document.getElementById("clipboard-timer-stack");
   if (!stack) return;
   stack.addEventListener("click", (e) => {
-    const btn = e.target.closest("button[data-act='close']");
-    if (!btn) return;
-    const card = btn.closest("[data-client]");
-    if (card) closeTimer(card.dataset.client);
+    const card = e.target.closest(".timer-card[data-client]");
+    if (!card) return;
+    const clientId = card.dataset.client;
+    if (e.target.closest("button[data-act='close']")) {
+      closeTimer(clientId);
+      return;
+    }
+    const timer = timers[clientId];
+    if (timer && deps.onFocusTimer) deps.onFocusTimer(timer);
   });
 }
 
@@ -53,22 +63,41 @@ export function setupRestTimer() {
 // it has already run into overtime (< 0) we reset it to the new duration and blink an acknowledge.
 // When seconds is 0 (or falsy) the timer runs in count-UP mode — an elapsed stopwatch with no
 // target, useful for dynamic warmups and cooldowns where no countdown value is prescribed.
-export function startTimer({ clientId, clientName = "", label = "", type = "rest", seconds }) {
+export function startTimer({
+  clientId,
+  clientName = "",
+  label = "",
+  type = "rest",
+  seconds,
+  sessionId = null,
+  focusRef = null,
+}) {
   if (!clientId) return;
   const countUp = !seconds || seconds <= 0;
   const existing = timers[clientId];
-  if (existing && !existing.countUp && remainingOf(existing) >= 0) {
+  if (existing && !existing.countUp && !existing.stopped && remainingOf(existing) >= 0) {
     flashCard(clientId, "flash-warning"); // still counting down — refuse to restart
     return;
   }
   if (countUp) {
-    timers[clientId] = { clientId, clientName, label, type, startTime: Date.now(), countUp: true };
+    timers[clientId] = {
+      clientId,
+      clientName,
+      label,
+      type,
+      sessionId,
+      focusRef,
+      startTime: Date.now(),
+      countUp: true,
+    };
   } else {
     timers[clientId] = {
       clientId,
       clientName,
       label,
       type,
+      sessionId,
+      focusRef,
       endTime: Date.now() + seconds * 1000,
       originalDuration: seconds,
       beeped: false,
@@ -131,12 +160,37 @@ function closeTimer(clientId) {
   if (Object.keys(timers).length === 0) stopTicking();
 }
 
+// Freeze a client's timer in place — e.g. once the exercise/superset it belongs to is marked
+// finished, so a rest timer for work that's already done doesn't keep ticking (or counting into
+// overtime) for a card the trainer has already moved past. Unlike closeTimer this does NOT remove
+// it from the stack: the trainer still sees it (dimmed, holding its final value) and must tap ✕
+// to actually dismiss it, so nothing about the session's timing history disappears silently.
+export function stopTimer(clientId) {
+  const timer = timers[clientId];
+  if (!timer || timer.stopped) return;
+  timer.frozenSeconds = timer.countUp ? elapsedOf(timer) : remainingOf(timer);
+  timer.stopped = true;
+  persist();
+  renderStack();
+  flashCard(clientId, "flash-ack");
+}
+
+// Only stop the client's active timer if it was started against this exact exercise/superset — so
+// finishing one card doesn't freeze an unrelated timer already running for something else.
+export function stopTimerIfMatches(clientId, focusRef) {
+  const timer = timers[clientId];
+  if (!timer || !timer.focusRef || !focusRef) return;
+  if (timer.focusRef.type === focusRef.type && timer.focusRef.id === focusRef.id) {
+    stopTimer(clientId);
+  }
+}
+
 // ---- ticking ---------------------------------------------------------------------------------
 
 const remainingOf = (timer) =>
-  timer.countUp ? null : Math.round((timer.endTime - Date.now()) / 1000);
+  timer.countUp ? null : timer.stopped ? timer.frozenSeconds : Math.round((timer.endTime - Date.now()) / 1000);
 const elapsedOf = (timer) =>
-  timer.countUp ? Math.round((Date.now() - timer.startTime) / 1000) : null;
+  timer.countUp ? (timer.stopped ? timer.frozenSeconds : Math.round((Date.now() - timer.startTime) / 1000)) : null;
 
 function ensureTicking() {
   if (tickIntervalId || Object.keys(timers).length === 0) return;
@@ -197,12 +251,12 @@ const t = (key, fallback) => (deps.t ? deps.t(key) || fallback : fallback);
 function timerCardHTML(timer) {
   const isUp = timer.countUp;
   const display = isUp ? fmt(elapsedOf(timer)) : fmt(remainingOf(timer));
-  const overtime = !isUp && remainingOf(timer) < 0;
-  const icon = timer.type === "exercise" ? "fa-dumbbell" : "fa-hourglass-half";
+  const overtime = !isUp && !timer.stopped && remainingOf(timer) < 0;
+  const icon = timer.stopped ? "fa-check" : timer.type === "exercise" ? "fa-dumbbell" : "fa-hourglass-half";
   const typeLabel =
     timer.label || (timer.type === "exercise" ? t("exercise", "Exercise") : t("rest_label", "Rest"));
   return `
-    <div class="timer-card${overtime ? " overtime" : ""}${isUp ? " count-up" : ""}" data-client="${escapeHTML(timer.clientId)}">
+    <div class="timer-card${overtime ? " overtime" : ""}${isUp ? " count-up" : ""}${timer.stopped ? " stopped" : ""}" data-client="${escapeHTML(timer.clientId)}">
       <div class="timer-card-head">
         <span class="timer-card-label">
           <span class="timer-card-who"><i class="fa-solid ${icon}"></i> <strong>${escapeHTML(timer.clientName || "")}</strong></span>
