@@ -31,7 +31,7 @@ function ensureCardTicker() {
   }, 1000);
 }
 
-// Turn a past session's elapsed-time chip into an inline "H:MM" edit field on click/Enter — commits
+// Turn a past session's elapsed-time chip into an inline "HH:MM" edit field on click/Enter — commits
 // on blur/Enter (parsed via parseDurationHM), discards on Escape. Persists onto the booking object
 // itself (b.duration, seconds) since that's the only place a finished ad-hoc/seed session's actual
 // elapsed time is recorded (state.history logs a duration per client, not per booking).
@@ -178,7 +178,7 @@ export function renderSessionCard(b, colContainer, deps) {
       : null;
   const isUpcoming = startMs != null && startMs > Date.now();
 
-  // Status-line timer text. Three mutually exclusive drivers, all rendered H:MM only (session-list
+  // Status-line timer text. Three mutually exclusive drivers, all rendered HH:MM only (session-list
   // status lines never show seconds):
   //  - the launched clipboard's own timer (ticks elsewhere, via sessionBar)
   //  - a clock-driven countdown to the scheduled END (in progress, not launched) — the only one
@@ -264,7 +264,7 @@ export function renderSessionCard(b, colContainer, deps) {
     card.classList.add("booking-status-stack");
     statusBarHTML = `
     <div class="booking-live-bar upcoming">
-      <span class="booking-live-tag"><i class="fa-solid fa-hourglass-start"></i> ${escapeHTML(t("starts_in") || "Starts in")}</span>
+      <span class="booking-live-tag"><i class="fa-solid fa-forward-fast"></i> ${escapeHTML(t("starts_in") || "Starts in")}</span>
       ${timerSpan}
     </div>`;
   }

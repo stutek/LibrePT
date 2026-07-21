@@ -67,17 +67,17 @@ export function formatSignedDuration(totalSeconds) {
   return (negative ? "-" : "") + formatDuration(Math.abs(totalSeconds));
 }
 
-// Whole-minutes duration, H:MM only (no seconds) — used by session-list-level status lines
+// Whole-minutes duration, HH:MM only (no seconds) — used by session-list-level status lines
 // (sessionCard.js: live/upcoming/past), which read at a glance and don't need second precision.
 export function formatDurationHM(totalSeconds) {
   const negative = totalSeconds < 0;
   const totalMin = Math.floor(Math.abs(totalSeconds) / 60);
   const hrs = Math.floor(totalMin / 60);
   const mins = totalMin % 60;
-  return `${negative ? "-" : ""}${hrs}:${String(mins).padStart(2, "0")}`;
+  return `${negative ? "-" : ""}${String(hrs).padStart(2, "0")}:${String(mins).padStart(2, "0")}`;
 }
 
-// Inverse of formatDurationHM, for reading back a trainer-edited "H:MM" elapsed-time value.
+// Inverse of formatDurationHM, for reading back a trainer-edited "HH:MM" elapsed-time value.
 // Returns null (not 0) for unparseable input so a bad edit can be rejected rather than silently
 // zeroing the recorded duration.
 export function parseDurationHM(text) {
