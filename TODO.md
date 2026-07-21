@@ -139,6 +139,13 @@ Make all header interactive elements (`.sync-backup-btn` cloud button, `#btn-app
 ### 4.7 [x] Sessions title and date picker typography alignment
 Ensure `#calendar-title` and `#calendar-title-date` within the `.sessions-date-picker` match the `font-family: var(--font-header)` (`Outfit`), weight (`800`), and letter-spacing (`-0.5px`) of the `Sessions` view header (`h2.view-title-label`) across both desktop and mobile layouts.
 
+### 4.8 [ ] Split `#view-clients` into three first-class views (Sessions / Pending Adjustments / Client Directory)
+Feature request by Simon, triggered by a report that the `<hr class="view-divider">` spacing between "Client Directory ↔ Pending Plan Adjustments" still doesn't match "Pending Plan Adjustments ↔ session list" even after the [13.4](#134-x-timer-stack-global-visibility--click-to-focus--freeze-on-finish)-adjacent top-margin fix. Rather than keep chasing per-divider spacing parity, **stop merging the three into one view**:
+
+- Today `#view-clients` (`src/index.html` ~line 143) bundles: the session list (`#sessions-categories-grid`), **Pending Plan Adjustments** (`#dashboard-adjustments-list`), and **Client Directory** (`#clients-list` + search). Two `<hr class="view-divider">`s currently seam them together.
+- **Target**: the **homepage keeps only the session list**. Pending Plan Adjustments and Client Directory each become their own top-level `<section class="app-view">` with their own route (today `/clients` is a legacy alias that just redirects to `/sessions/{today}` — it needs to become the real Client Directory route instead), reachable from the ☰ menu the same way Routines/Exercises/History already are (`menu-routines`/`menu-exercises`/`menu-history` in `src/components/applicationHeader.js`).
+- **Status**: not started — a reconnaissance pass was run (routing in `app.js` `handlePathChange()`, the `menu-clients-register` scroll-into-view hack in `applicationHeader.js`, every `#view-clients` CSS rule in `index.css`, and e2e coverage in `tests/e2e/test_clients_directory.py` / `test_plan_adjustments.py` / `test_sessions_dashboard.py` / `test_header_menu.py`) but the split itself was paused before implementation. Resume by re-running that survey before touching code — routing/menu behavior for `/clients` is the main thing that changes shape.
+
 ---
 
 ## 5. Client Detail
