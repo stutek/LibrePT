@@ -54,7 +54,13 @@ python3 -m venv .venv
 
 ## 3. Testing
 
-Run the full suite before opening a pull request:
+Run the full suite (linting + automated tests) before opening a pull request:
+
+```bash
+.venv/bin/python -m build check
+```
+
+Or run the test suite directly:
 
 ```bash
 .venv/bin/python -m pytest tests/ -v
