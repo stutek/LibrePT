@@ -344,10 +344,10 @@ The trademark was scrubbed from history and force-pushed (remote is clean). Stil
   git reflog expire --expire=now --all && git gc --prune=now
   ```
 
-### 12.6 [ ] Web Documentation for GDPR, AI Safety & Consent Templates
+### 12.6 [x] Web Documentation for GDPR, AI Safety & Consent Templates
 Delegate lengthy legal explanations and templates to external web documentation (`docs/` or `stutek.github.io`), keeping the in-app UI clutter-free.
-- **PT Data Controller Guide:** Create a concise guide explaining why PTs are Data Controllers under GDPR Art. 4(7)/Art. 9, how client-side E2EE works during cloud sync (`PBKDF2` + `AES-GCM`), and why pasting identifiable client health notes into LLMs violates privacy laws.
-- **Downloadable/Printable Intake Templates:** Host the full text of the Informative Consent Letter (`docs/templates/Client_Consent_Form.md`) for physical paper signing or custom adaptations.
+- **PT Data Controller Guide:** Created concise guide and legal statement in `PRIVACY.md` explaining why PTs are Data Controllers under GDPR Art. 4(7)/Art. 9, how E2EE/local storage works, and why pasting identifiable client health notes into LLMs violates privacy laws.
+- **Downloadable/Printable Intake Templates:** Hosted the full text of the Informative Consent Letter in `docs/templates/Client_Consent_Form.md` (and cataloged in `docs/INDEX.md`) for physical paper signing or custom adaptations.
 - **In-App Footnote Links:** Link to this web guide from `#dialog-terms`, the About modal, and the Cloud Sync setup screen.
 
 ### 12.7 [ ] Unify local runs and CI so lint/format failures surface locally, not just on push
