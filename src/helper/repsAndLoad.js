@@ -6,8 +6,16 @@
 //     LEVEL for cables, a resistance BAND label, or bodyweight (± added kg). We keep the raw
 //     `weight`/`weightTarget` value as authored and derive its meaning from equipment at render time.
 
-export const REPS_PRESETS = ["8", "10", "12", "15", "max"];
+// Common reps offered by the reps combobox (datalists in index.html mirror these). Loaded
+// movements cluster low (strength/hypertrophy); bodyweight movements cluster high. "max" = to failure.
+export const REPS_PRESETS = ["3", "5", "8", "10", "max"];
+export const REPS_PRESETS_BODYWEIGHT = ["10", "20", "50", "max"];
 export const BAND_LEVELS = ["Light", "Medium", "Heavy"];
+
+// The datalist id whose presets suit a load unit — bodyweight rows get the high-rep set.
+export function repsPresetListId(unit) {
+  return unit === "bw" ? "reps-presets-bw" : "reps-presets";
+}
 
 // Equipment → how its load is expressed. Anything unlisted (incl. Barbell/Dumbbell/Machine) is kg.
 const LOAD_UNIT_BY_EQUIPMENT = {

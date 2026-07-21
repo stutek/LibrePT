@@ -22,7 +22,13 @@
 //   genId()        // fresh short id for new exercises/rests/circuits
 // }
 
-import { loadFieldMeta, loadInputHTML, parseLoad, parseReps } from "../helper/repsAndLoad.js";
+import {
+  loadFieldMeta,
+  loadInputHTML,
+  parseLoad,
+  parseReps,
+  repsPresetListId,
+} from "../helper/repsAndLoad.js";
 
 const DEFAULT_SERIES = 3;
 const DEFAULT_REST = 30; // seconds, when injecting a fresh rest
@@ -108,6 +114,9 @@ export function renderClipboardEditor(container, deps) {
     const name = escapeHTML(ex.name || "");
     const reps = escapeHTML(String(ex.repsTarget ?? ex.reps ?? 10));
     const unit = ex.loadUnit || "kg";
+    // Bodyweight movements cluster at high reps (10/20/50/max); loaded ones stay low — point the
+    // reps combobox at the matching preset list so an empty field suggests sensible values.
+    const repsListId = repsPresetListId(unit);
     // A superset member's set count IS the circuit's round count, so we drop the redundant per-row
     // Sets field for members — the circuit header's Rounds control is the single source of truth.
     const setsField = ex.circuitId
@@ -125,7 +134,7 @@ export function renderClipboardEditor(container, deps) {
           </div>
           <div class="editor-row-fields">
             ${setsField}
-            <label class="editor-field"><span>${tr("reps_label", "Reps")}</span><input type="text" list="reps-presets" class="editor-f-reps" value="${reps}"></label>
+            <label class="editor-field"><span>${tr("reps_label", "Reps")}</span><input type="text" list="${repsListId}" class="editor-f-reps" value="${reps}"></label>
             ${loadField}
             <label class="editor-field editor-field-superset"><span><i class="fa-solid fa-layer-group"></i></span>${supersetSelect(ex)}</label>
           </div>

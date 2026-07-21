@@ -1922,6 +1922,11 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   font-weight: 700;
   text-align: center;
 }
+/* Reps is polymorphic — ranges ("8-12"), holds ("30s"), or "max" — so it needs more room than the
+   numeric sets/load fields to show the whole token without clipping. */
+.editor-field > input.editor-f-reps {
+  width: 84px;
+}
 .editor-remove {
   flex: 0 0 auto;
   align-self: center;

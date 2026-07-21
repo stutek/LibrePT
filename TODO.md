@@ -329,13 +329,20 @@ Delegate lengthy legal explanations and templates to external web documentation 
 
 ## 13. Exercise Library & Movement Taxonomy (Call to Action & Vision)
 
-### 13.1 [ ] [Brainstorm / Call to Action] Repurpose `exercisesView` from "Beginner Encyclopedia" to "Professional Movement Taxonomy"
+> **Status (2026-07-21):** the taxonomy pivot and all three §13.2 selection scenarios are **built** and
+> covered by [UC6](use_cases/uc6_exercise_taxonomy_and_picker.md) / `tests/e2e/test_exercise_taxonomy.py`
+> + `tests/e2e/test_reps_and_load.py`. Exercises carry `equipment` + `pattern`; the catalog shows
+> taxonomy badges (no instructions); the filtered picker powers routine building and gym-floor swaps;
+> custom creation enforces muscle group + equipment + pattern; reps/load are polymorphic. **Still open:**
+> seeding/mapping from an open standard (wger / ExRx) for interchangeable exports (§13.1 last bullet).
+
+### 13.1 [~] [Brainstorm / Call to Action] Repurpose `exercisesView` from "Beginner Encyclopedia" to "Professional Movement Taxonomy"
 **The Core Insight:** A certified, professional Personal Trainer (`LibrePT`) knows all exercises by heart. They do not need lengthy `"instructions"` paragraphs, beginner descriptions, or how-to tutorials on their screen, nor do they ever hand their working device over to a client mid-session.
 - **Call to Action**: Remove/deprecate bulky instructional text blocks from `exercisesView.js` (`ex.instructions`) and exercise cards. The UI must pivot from an "encyclopedia for gym beginners" into a **high-density, professional movement taxonomy inspector and fast-selection tool**.
 - **The True Purpose (Referential Integrity)**: The Exercise Catalog exists in software to provide immutable IDs (`exerciseId`), equipment tags (`Barbell`, `Cable`, `Dumbbell`, `Bodyweight`), and anatomical/biomechanical categories (`Primary/Secondary Muscle Groups`, `Horizontal Push/Pull`, `Hip Hinge`). Without strict taxonomy, aggregating long-term volume load or plotting estimated 1RM curves across months of client history is impossible.
 - **Adopt Open Standards**: Map or seed the base catalog from an established, open-source sports science taxonomy (e.g., **wger Workout Manager API / dataset** or **ExRx** classifications) to guarantee that LibrePT exports (`.json`/`.csv`) are universally interchangeable with external research, performance tracking, and coaching tools.
 
-### 13.2 [ ] Usage Scenarios for the Professional Exercise Catalog
+### 13.2 [x] Usage Scenarios for the Professional Exercise Catalog
 Define and build towards the three concrete ways a personal trainer actually interacts with the exercise catalog:
 
 1. **Scenario A: Rapid Routine & Program Builder (Template Assembly)**

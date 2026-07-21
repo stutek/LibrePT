@@ -135,7 +135,13 @@ LibrePT is comprised of three major subsystems:
 *   **Granular Signal Processing**: Signals recorded on the gym floor (`Load Up`, `Step Back`, `Pain/Injury`) flow directly into the trainer's back-office review queue.
 *   **Pending Program Adjustments Deck**: Feedback and voice notes compile into a desk workspace for the PT to review, allowing them to asynchronously plan client progression and update routine templates before the next session.
 
-### 4. Deep-Linkable Clean URLs (App Routing)
+### 4. Professional Movement Taxonomy & Fast Selection
+*   **Taxonomy catalog, not an encyclopedia**: exercises carry an immutable ID plus an **equipment** tag and a **biomechanical movement pattern**; the catalog view shows these as compact taxonomy badges instead of beginner instructions, keeping long-term volume/1RM analytics consistent.
+*   **Filtered exercise picker**: muscle-group + equipment filter chips over a single-tap movement list, reused to **build routine templates** (drop standardized IDs) and to **swap movements on the gym floor** or in the adjustment wizard — no free-text, no string-matching errors.
+*   **Strict-inheritance custom exercises**: creating a bespoke movement requires a target muscle group, equipment, and pattern, so ad-hoc entries never break analytics.
+*   **Polymorphic reps & load**: reps can be a count, a range (`8-12`), a hold (`30s`), or `max`-to-failure; load is equipment-derived (kg / cable level / band / bodyweight ± kg). The reps combobox suggests equipment-appropriate presets (loaded movements cluster low, bodyweight high). See [UC6](use_cases/uc6_exercise_taxonomy_and_picker.md).
+
+### 5. Deep-Linkable Clean URLs (App Routing)
 *   **Every view and record is addressable by a clean URL**, so links are shareable and bookmarkable and restore the same screen on load:
     *   `/sessions/{YYYY-MM-DD}` — the day deck focused on a given day
     *   `/session/{sessionId}` and `/session/{sessionId}/client/{clientId}` — the active-session clipboard, optionally on a specific participant

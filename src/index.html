@@ -563,11 +563,20 @@
           </button>
         </div>
 
+        <!-- Reps presets surfaced when the reps combobox is focused/emptied. Two sets: loaded
+             movements cluster low (strength/hypertrophy), bodyweight movements cluster high. The
+             editor points each row's reps input at the set matching the movement's equipment. -->
         <datalist id="reps-presets">
+          <option value="3"></option>
+          <option value="5"></option>
           <option value="8"></option>
           <option value="10"></option>
-          <option value="12"></option>
-          <option value="15"></option>
+          <option value="max"></option>
+        </datalist>
+        <datalist id="reps-presets-bw">
+          <option value="10"></option>
+          <option value="20"></option>
+          <option value="50"></option>
           <option value="max"></option>
         </datalist>
 
