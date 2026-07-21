@@ -1,11 +1,12 @@
 ---
 type: use_case
 title: UC5 - Session Day-Deck Navigation & Deep-Linkable Views
-description: Specification for the dashboard day deck (yesterday→upcoming), single-finger day swipes, clean deep-linkable URLs down to the in-focus clipboard card, and the in-app not-found view.
+description: Specification for the dashboard day deck (yesterday→upcoming), single-finger day swipes, each session card's live/upcoming/past status line, clean deep-linkable URLs down to the in-focus clipboard card, and the in-app not-found view.
 status: active
 tags:
   - dashboard
   - day-deck
+  - status-line
   - deep-links
   - routing
   - not-found
@@ -16,8 +17,9 @@ tags:
 This use case specifies how the Personal Trainer (PT) moves across their scheduled days on the
 dashboard and how every screen is addressable by a clean, shareable URL. It documents behaviour
 the Playwright suite already drives end-to-end but that UC1–UC4 did not previously specify — most
-notably the **session day deck** and the **deep-link router**. See also the deep-link routing
-overview in [README.md](file:///home/simon/Projects/LibrePT/README.md) (§ *Deep-Linkable Clean URLs*).
+notably the **session day deck**, each card's **status line** (§ 3), and the **deep-link router**.
+See also the deep-link routing overview in
+[README.md](file:///home/simon/Projects/LibrePT/README.md) (§ *Deep-Linkable Clean URLs*).
 
 ---
 
@@ -74,7 +76,31 @@ graph LR
 
 ---
 
-## 3. Deep-Linkable Clean URLs
+## 3. Session Card Status Line
+
+Every session card in the day deck carries a status line reflecting exactly one of three mutually
+exclusive states, so the PT reads a card's state at a glance without opening it:
+
+| State | When | Shows |
+| :--- | :--- | :--- |
+| **Live** | the clipboard is launched for this booking, or it has started by wall clock and isn't closed | a running duration/remaining-time readout with a 🏃 tag, turning amber ("overtime") if it runs past its scheduled end |
+| **Upcoming** | not yet started (today, tomorrow, or the `upcoming` bucket) | a live countdown to the scheduled start, ⏩ tag |
+| **Past** | `completed: true` | the recorded elapsed time, 🕐 tag — **editable**: tapping the value swaps in an inline field (commit on Enter/blur, discard on Escape) |
+
+- **All three render `H:MM` only** — no seconds — distinct from the clipboard's own overlay timer
+  and the floating per-client timer stack (`exerciseAndRestTimer.js`), which are a separate
+  surface and keep second-level precision.
+- **The left bracket always matches the status bar's color** for whichever state is showing.
+- **Finishing a session stamps the booking itself** (`completed: true` + the actual elapsed
+  `duration`) so a session finished just now immediately shows the past state on the dashboard —
+  not only sessions pre-marked completed in seed data.
+- **Editable elapsed time exists because bookings carry no authoritative record of actual elapsed
+  time** beyond what the trainer confirms; a fallback (the scheduled slot length) covers completed
+  bookings from before this recording existed.
+
+---
+
+## 4. Deep-Linkable Clean URLs
 
 Every view and record is addressable by a clean URL under the app's base path (`/LibrePT` on
 GitHub Pages, derived from `<base>` locally). Opening or typing such a URL restores the same
@@ -105,7 +131,7 @@ screen; navigating within the app keeps the address bar in step.
 
 ---
 
-## 4. In-App Not-Found (404) View
+## 5. In-App Not-Found (404) View
 
 A deep link that matches **no route**, or points at a **deleted client**, renders an in-app
 not-found view (`#view-error`) *inside* the content area:
@@ -117,7 +143,7 @@ not-found view (`#view-error`) *inside* the content area:
 
 ---
 
-## 5. Traceability (spec ↔ tests)
+## 6. Traceability (spec ↔ tests)
 
 Each scenario above is proven by an executable test, so the spec can be traced to the test that
 enforces it:
@@ -132,10 +158,11 @@ enforces it:
 | Edit mode hides the member tabs + live timer and surfaces the client's goals + notes | [tests/e2e/test_edit_mode_client_focus.py](file:///home/simon/Projects/LibrePT/tests/e2e/test_edit_mode_client_focus.py) |
 | Not-found view for unknown route / deleted client; header stays; URL kept | [tests/e2e/test_error_view.py](file:///home/simon/Projects/LibrePT/tests/e2e/test_error_view.py) |
 | Launch the clipboard from a session card (with language switch + calendar sync) | [tests/e2e/test_clipboard.py](file:///home/simon/Projects/LibrePT/tests/e2e/test_clipboard.py) · `test_clipboard_launch_flow` |
+| Upcoming countdown, past elapsed + inline edit (persists across reload), finishing a session stamps the booking completed/duration | [tests/e2e/test_session_status_line.py](file:///home/simon/Projects/LibrePT/tests/e2e/test_session_status_line.py) |
 
 ---
 
-## 6. Related Use Cases
+## 7. Related Use Cases
 
 - **[UC1 — Gym-Floor Clipboard](file:///home/simon/Projects/LibrePT/use_cases/uc1_gym_floor_clipboard.md)**: this deck is where the PT **launches** the clipboard UC1 specifies; the deep links in § 3 address that clipboard down to the focused card.
 - **[UC2 — Asynchronous Plan Adjustments](file:///home/simon/Projects/LibrePT/use_cases/uc2_async_plan_adjustments.md)**: the same dashboard hosts the pending-adjustments deck reviewed at the desk.
