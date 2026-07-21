@@ -112,7 +112,10 @@ import {
 } from "./views/clientsView.js";
 import { renderExercisesList as exercisesViewRender } from "./views/exercisesView.js";
 import { renderGlobalHistory as historyViewRender } from "./views/historyView.js";
-import { renderRoutinesList as routinesViewRender } from "./views/routinesView.js";
+import {
+  renderRoutinesList as routinesViewRender,
+  openRoutineEditorModal,
+} from "./views/routinesView.js";
 import {
   launchClipboardDirectly as sessionsViewLaunchClipboard,
   renderSessions as sessionsViewRender,
@@ -797,6 +800,7 @@ function renderPendingPlanAdjustments() {
     t,
     escapeHTML,
     openAdjustmentWizard,
+    openRoutineEditorModal,
   });
 }
 

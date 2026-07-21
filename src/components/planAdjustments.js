@@ -10,7 +10,7 @@ import { mountExercisePicker } from "./exercisePicker.js";
  * @param {Object} ctx - Context holding state, translation, and navigation helpers.
  */
 export function renderPendingPlanAdjustmentsComponent(container, countBadge, ctx) {
-  const { state, t, escapeHTML, openAdjustmentWizard } = ctx;
+  const { state, t, escapeHTML, openAdjustmentWizard, openRoutineEditorModal } = ctx;
 
   if (!container) return;
   container.innerHTML = "";
@@ -72,15 +72,44 @@ export function renderPendingPlanAdjustmentsComponent(container, countBadge, ctx
       ${voiceNoteHTML}
     `;
 
-    const btn = document.createElement("button");
-    btn.className = "btn primary-btn btn-xs btn-resolve-alert";
-    btn.innerHTML = `<i class="fa-solid fa-check"></i> ${t("btn_resolve")}`;
-    btn.addEventListener("click", () => {
+    // Icon-only actions (matching the clipboard's own compact .icon-btn edit control) — a card
+    // per unresolved alert already carries client name + tag + exercise, so labelled buttons here
+    // were pure repetition; the icon + tooltip says enough.
+    const actions = document.createElement("div");
+    actions.style.display = "flex";
+    actions.style.gap = "4px";
+    actions.style.flex = "0 0 auto";
+
+    const editBtn = document.createElement("button");
+    editBtn.type = "button";
+    editBtn.className = "icon-btn btn-edit-plan-alert";
+    editBtn.title = t("edit_plan");
+    editBtn.setAttribute("aria-label", t("edit_plan"));
+    editBtn.innerHTML = `<i class="fa-solid fa-pen-to-square"></i>`;
+    editBtn.addEventListener("click", () => {
+      if (!openRoutineEditorModal) return;
+      const exercise = state.exercises.find((e) => e.name === u.exerciseName);
+      const routine = exercise
+        ? state.routines.find((r) => r.exercises.some((ex) => ex.id === exercise.id))
+        : null;
+      if (routine) openRoutineEditorModal({ routineId: routine.id, state });
+    });
+
+    const resolveBtn = document.createElement("button");
+    resolveBtn.type = "button";
+    resolveBtn.className = "icon-btn btn-resolve-alert";
+    resolveBtn.title = t("btn_resolve");
+    resolveBtn.setAttribute("aria-label", t("btn_resolve"));
+    resolveBtn.innerHTML = `<i class="fa-solid fa-check"></i>`;
+    resolveBtn.addEventListener("click", () => {
       openAdjustmentWizard(u.id);
     });
 
+    actions.appendChild(editBtn);
+    actions.appendChild(resolveBtn);
+
     card.appendChild(info);
-    card.appendChild(btn);
+    card.appendChild(actions);
 
     // Bind event to play audio preview
     if (u.hasVoiceNote) {
