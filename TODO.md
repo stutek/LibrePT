@@ -64,6 +64,12 @@ When no session is active:
 - Content and click target refer to the **next upcoming session**.
 - If **multiple sessions run in parallel**, list them all in the same row — they all open the same clipboard.
 
+### 2.3 [ ] Countdown timer on upcoming session cards
+Feature request by Simon: similar to the **active session's duration timer** (`.booking-live-bar` / `.booking-live-timer` on live cards, [sessionCard.js](file:///home/simon/Projects/LibrePT/src/components/sessionCard.js)), give **upcoming (not-yet-started)** session cards a live countdown to their scheduled start time.
+
+- Mirrors `.booking-live-timer`'s per-second tick pattern, but counts down to `startTime` instead of counting up from it.
+- **Open**: what happens at `00:00` — flip straight into the existing live/`booking-live` state, or hold a brief "starting now" beat first?
+
 ---
 
 ## 3. Data Sync
@@ -364,8 +370,12 @@ Define and build towards the three concrete ways a personal trainer actually int
 ### 13.3 [ ] Conditioning metrics: extend the reps/load model beyond sets × reps × kg
 Some movements are not `sets × reps × load`. A **conditioning/cardio machine** (assault bike, rower, ski-erg) is **time-bound** (go for 60s), **calorie-bound** (20 cal), or **power-bound** (hold 200 W) — often a mix. Today [helper/repsAndLoad.js](file:///home/simon/Projects/LibrePT/src/helper/repsAndLoad.js) already makes reps polymorphic (count / range / `30s` time / `max`) and load equipment-derived (kg / level / band / bw), so the seam exists. Extend it with a **metric type** per exercise (derived from equipment/pattern, e.g. `Cardio` → target is `time | calories | watts | distance`) so the focus card and the plan editor author and log the right unit, and the **exercise timer** (see the clipboard timer stack in [exerciseAndRestTimer.js](file:///home/simon/Projects/LibrePT/src/components/exerciseAndRestTimer.js) / UC1) can be the primary logging surface for time-bound work. Keep the raw authored value stored and derive meaning at render time, as reps/load already do. Relates to UC6 and the timer stack.
 
-TBD: Priority feature request by Simon:
-can you keep active timers on all views? and clicking the timer should bring focus back to the specific card owning the timer
+### 13.4 [x] Timer stack: global visibility + click-to-focus + freeze-on-finish
+Priority feature request by Simon: *"can you keep active timers on all views? and clicking the timer should bring focus back to the specific card owning the timer"*
+
+- **Done**: `#clipboard-timer-stack` moved out from inside `#active-session-overlay` to a `<body>`-level sibling ([exerciseAndRestTimer.js](file:///home/simon/Projects/LibrePT/src/components/exerciseAndRestTimer.js)), so active timers now stay visible on every view, not just the live clipboard.
+- Timers now carry `sessionId` + `focusRef` (`{ type: 'exercise'|'superset', id }`); tapping a timer card navigates to that card's deep link (`/session/{id}/client/{id}/exercise|superset/{id}`) and the existing exercise-deck auto-scroll brings it into focus.
+- Follow-up from the same conversation: finishing a superset now **freezes** (not closes) any timer still running against it — held at its final value, dimmed, green ack-blink — so the trainer must still dismiss it via ✕ rather than it vanishing or ticking into overtime for finished work (`stopTimerIfMatches` in the same file).
 
 ---
 
