@@ -103,6 +103,7 @@ export const en = {
   add_exercise: "Add exercise",
   reorder: "Reorder",
   exercise: "Exercise",
+  close: "Close",
   remove: "Remove",
   done: "Done",
   edit_exit_hint: "Tap Done, press Esc, or tap outside to finish.",

@@ -102,6 +102,7 @@ export const sl = {
   add_exercise: "Dodaj vajo",
   reorder: "Prerazporedi",
   exercise: "Vaja",
+  close: "Zapri",
   remove: "Odstrani",
   done: "Končano",
   edit_exit_hint: "Tapnite Končano, pritisnite Esc ali tapnite zunaj za zaključek.",

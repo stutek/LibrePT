@@ -197,7 +197,7 @@ export function renderExerciseDeck(deckContainer, deps) {
       if (startRestTimer && !isFutureSession) {
         card.setAttribute("role", "button");
         card.setAttribute("aria-label", `${t("rest_label")} ${item.rest}s`);
-        card.addEventListener("click", () => startRestTimer(item.rest));
+        card.addEventListener("click", () => startRestTimer(item.rest, "rest"));
       }
     } else if (item.type === "circuit") {
       // Superset / Giant Set card render lives in components/supersetCard.js

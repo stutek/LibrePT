@@ -180,12 +180,12 @@ export function renderSupersetCard(card, item, ctx) {
       if (timerBtn)
         timerBtn.addEventListener("click", (e) => {
           e.stopPropagation();
-          startRestTimer(WORK_TIMER_DEFAULT);
+          startRestTimer(WORK_TIMER_DEFAULT, "exercise", item.title || "");
         });
       for (const br of card.querySelectorAll(".superset-break-row")) {
         br.addEventListener("click", (e) => {
           e.stopPropagation();
-          startRestTimer(parseInt(br.dataset.rest, 10) || 0);
+          startRestTimer(parseInt(br.dataset.rest, 10) || 0, "rest");
         });
       }
     }

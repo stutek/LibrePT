@@ -105,7 +105,7 @@ export function renderExerciseCard(card, item, ctx) {
     if (timerBtn && startRestTimer)
       timerBtn.addEventListener("click", (e) => {
         e.stopPropagation();
-        startRestTimer(WORK_TIMER_DEFAULT);
+        startRestTimer(WORK_TIMER_DEFAULT, "exercise", item.name);
       });
   } else {
     // Compact row for the rest of the plan — tap to bring into focus. The target

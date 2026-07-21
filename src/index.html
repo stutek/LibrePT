@@ -480,22 +480,11 @@
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- FLOATING ELEMENT: Rest Timer Panel -->
-  <div id="floating-rest-timer" class="floating-timer card glassmorphic hidden">
-    <div class="timer-header">
-      <span><i class="fa-solid fa-stopwatch text-emerald"></i> Rest Timer</span>
-      <button id="btn-close-timer" class="close-btn-xs" aria-label="Close rest timer"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-    <div class="timer-body">
-      <div class="timer-seconds" id="timer-countdown">90s</div>
-      <div class="timer-controls">
-        <button id="btn-timer-minus" class="timer-btn-sm">-15s</button>
-        <button id="btn-timer-toggle" class="timer-btn-sm"><i class="fa-solid fa-pause"></i></button>
-        <button id="btn-timer-plus" class="timer-btn-sm">+15s</button>
-      </div>
-    </div>
+    <!-- Per-client timer stack: one labelled countdown per client (client name + Rest/Exercise),
+         stacked on the clipboard. Counts into negative overtime; dismiss-only (✕). Populated and
+         persisted by components/exerciseAndRestTimer.js; lives inside the overlay so it shows only here. -->
+    <div id="clipboard-timer-stack" class="timer-stack hidden"></div>
   </div>
 
   <!-- DIALOG MODAL: Add / Edit Client -->

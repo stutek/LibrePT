@@ -35,7 +35,7 @@ import {
   openAdjustmentWizardComponent,
   renderPendingPlanAdjustmentsComponent,
 } from "./components/planAdjustments.js";
-import { initRestTimer, setupRestTimer } from "./components/restTimer.js";
+import { initRestTimer, setupRestTimer } from "./components/exerciseAndRestTimer.js";
 import {
   initSessionBar,
   renderActiveSessionBarLabels,
@@ -281,9 +281,9 @@ function init() {
     renderPendingPlanAdjustments,
   });
   setupFeedbackForms();
-  // Initialize Rest Timer component
+  // Initialize the per-client timer stack component
   initRestTimer({
-    getActiveExercise,
+    t,
   });
   setupRestTimer();
 

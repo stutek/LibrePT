@@ -1,6 +1,6 @@
 // sw.js - LibrePT Service Worker for Offline Functionality
 // Bump CACHE_NAME on release: `activate` purges every cache that does not match it.
-const CACHE_NAME = "librept-v12";
+const CACHE_NAME = "librept-v13";
 const ASSETS = [
   "./",
   "./index.html",
@@ -44,7 +44,7 @@ const ASSETS = [
   "./components/applicationHeader.js",
   "./components/planAdjustments.js",
   "./components/exercisePicker.js",
-  "./components/restTimer.js",
+  "./components/exerciseAndRestTimer.js",
   "./components/backupRestore.js",
   "./components/workoutSetup.js",
   "./components/feedbackModal.js",

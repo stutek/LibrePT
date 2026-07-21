@@ -1,0 +1,252 @@
+// components/exerciseAndRestTimer.js
+// The gym-floor timer stack: one labelled countdown per client, stacked on the clipboard, with
+// synthesized audio + haptic alerts. Replaces the old single floating rest timer.
+//
+// Design (per product requirements):
+//   • Rest AND exercise timers are labelled with the CLIENT NAME + what's being timed, so a trainer
+//     running several people at once can tell the stacked timers apart.
+//   • ONE active timer per client — starting a new one for a client replaces theirs.
+//   • At zero a timer does NOT stop at "DONE": it keeps counting into NEGATIVE (overtime, shown red),
+//     beeping once as it crosses zero.
+//   • Timers PERSIST across clipboard reloads (localStorage). Each stores its absolute end time, so
+//     after a reload the remaining time is recomputed from the wall clock — elapsed time while away
+//     still counts (and can already be negative).
+//   • The only control is dismiss (✕); there is no pause / ±15s — a running timer just runs.
+//
+// deps: { t } (translator; the controller resolves client name/id and passes them to startTimer)
+
+const STORE_KEY = "librept_active_timers";
+
+let deps = {};
+// clientId -> timer: { clientId, clientName, label, type:'rest'|'exercise', endTime, originalDuration, beeped }
+// Timers always run; the live remaining is derived from (endTime - now) and may be negative.
+let timers = {};
+let tickIntervalId = null;
+
+export function initRestTimer(d) {
+  deps = d || {};
+}
+
+// Wire the stack's delegated dismiss control once. Restoration of persisted timers is driven by the
+// session lifecycle (see restoreSessionTimers, called from recoverActiveSession).
+export function setupRestTimer() {
+  const stack = document.getElementById("clipboard-timer-stack");
+  if (!stack) return;
+  stack.addEventListener("click", (e) => {
+    const btn = e.target.closest("button[data-act='close']");
+    if (!btn) return;
+    const card = btn.closest("[data-client]");
+    if (card) closeTimer(card.dataset.client);
+  });
+}
+
+// ---- lifecycle -------------------------------------------------------------------------------
+
+// Start the timer for a client. One active timer per client, so a start button guards an existing
+// one: if it still has time left (>= 0) we do NOT reset it — the card flashes a warning instead; if
+// it has already run into overtime (< 0) we reset it to the new duration and blink an acknowledge.
+export function startTimer({ clientId, clientName = "", label = "", type = "rest", seconds }) {
+  if (!clientId || !(seconds > 0)) return;
+  const existing = timers[clientId];
+  if (existing && remainingOf(existing) >= 0) {
+    flashCard(clientId, "flash-warning"); // still counting down — refuse to restart
+    return;
+  }
+  timers[clientId] = {
+    clientId,
+    clientName,
+    label,
+    type,
+    endTime: Date.now() + seconds * 1000,
+    originalDuration: seconds,
+    beeped: false,
+  };
+  persist();
+  renderStack();
+  ensureTicking();
+  if (existing) flashCard(clientId, "flash-ack"); // acknowledged the overtime and reset
+}
+
+// Play a brief (~1s) attention animation on a timer card without disturbing its countdown.
+function flashCard(clientId, cls) {
+  const card = document.querySelector(
+    `#clipboard-timer-stack .timer-card[data-client="${cssEscape(clientId)}"]`,
+  );
+  if (!card) return;
+  card.classList.remove("flash-warning", "flash-ack");
+  void card.offsetWidth; // restart the animation if the same class was just applied
+  card.classList.add(cls);
+  setTimeout(() => card.classList.remove(cls), 1000);
+}
+
+const cssEscape = (s) =>
+  window.CSS && CSS.escape ? CSS.escape(s) : String(s).replace(/["\\]/g, "\\$&");
+
+export function clearAllTimers() {
+  timers = {};
+  stopTicking();
+  persist();
+  renderStack();
+}
+
+// Rehydrate the stack from localStorage (called when a session is recovered on reload). Each timer
+// recomputes its remaining time from the stored absolute end time.
+export function restoreSessionTimers() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    timers = {};
+    if (raw) {
+      const list = JSON.parse(raw);
+      if (Array.isArray(list)) {
+        for (const timer of list) {
+          if (timer && timer.clientId) timers[timer.clientId] = timer;
+        }
+      }
+    }
+  } catch (e) {
+    console.warn("Could not restore timers:", e);
+    timers = {};
+  }
+  renderStack();
+  ensureTicking();
+}
+
+function closeTimer(clientId) {
+  delete timers[clientId];
+  persist();
+  renderStack();
+  if (Object.keys(timers).length === 0) stopTicking();
+}
+
+// ---- ticking ---------------------------------------------------------------------------------
+
+const remainingOf = (timer) => Math.round((timer.endTime - Date.now()) / 1000);
+
+function ensureTicking() {
+  if (tickIntervalId || Object.keys(timers).length === 0) return;
+  tickIntervalId = setInterval(tick, 1000);
+}
+function stopTicking() {
+  if (tickIntervalId) clearInterval(tickIntervalId);
+  tickIntervalId = null;
+}
+
+function tick() {
+  if (Object.keys(timers).length === 0) {
+    stopTicking();
+    return;
+  }
+  let crossedZero = false;
+  for (const timer of Object.values(timers)) {
+    if (!timer.beeped && remainingOf(timer) <= 0) {
+      timer.beeped = true;
+      crossedZero = true;
+    }
+  }
+  if (crossedZero) {
+    persist(); // remember the beep so a reload past zero doesn't re-alert
+    playTimerAlert();
+  }
+  updateTimes();
+}
+
+// ---- rendering -------------------------------------------------------------------------------
+
+function persist() {
+  try {
+    localStorage.setItem(STORE_KEY, JSON.stringify(Object.values(timers)));
+  } catch (e) {
+    console.warn("Could not persist timers:", e);
+  }
+}
+
+function fmt(seconds) {
+  const neg = seconds < 0;
+  const abs = Math.abs(seconds);
+  const m = Math.floor(abs / 60);
+  const s = abs % 60;
+  return `${neg ? "-" : ""}${m}:${String(s).padStart(2, "0")}`;
+}
+
+function escapeHTML(str) {
+  return String(str).replace(
+    /[&<>"']/g,
+    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c],
+  );
+}
+
+const t = (key, fallback) => (deps.t ? deps.t(key) || fallback : fallback);
+
+function timerCardHTML(timer) {
+  const rem = remainingOf(timer);
+  const overtime = rem < 0;
+  const icon = timer.type === "exercise" ? "fa-dumbbell" : "fa-hourglass-half";
+  const typeLabel =
+    timer.label || (timer.type === "exercise" ? t("exercise", "Exercise") : t("rest_label", "Rest"));
+  return `
+    <div class="timer-card${overtime ? " overtime" : ""}" data-client="${escapeHTML(timer.clientId)}">
+      <div class="timer-card-head">
+        <span class="timer-card-label">
+          <span class="timer-card-who"><i class="fa-solid ${icon}"></i> <strong>${escapeHTML(timer.clientName || "")}</strong></span>
+          <span class="timer-card-type">${escapeHTML(typeLabel)}</span>
+        </span>
+        <button type="button" class="timer-close" data-act="close" aria-label="${t("close", "Close")}"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="timer-card-time">${fmt(rem)}</div>
+    </div>`;
+}
+
+function renderStack() {
+  const stack = document.getElementById("clipboard-timer-stack");
+  if (!stack) return;
+  const list = Object.values(timers);
+  stack.classList.toggle("hidden", list.length === 0);
+  // Newest on top so a just-started timer is where the trainer looks.
+  stack.innerHTML = list
+    .sort((a, b) => b.endTime - a.endTime)
+    .map(timerCardHTML)
+    .join("");
+}
+
+// Lightweight per-second update: only the time text + overtime state, so we don't rebuild the DOM
+// every tick.
+function updateTimes() {
+  const stack = document.getElementById("clipboard-timer-stack");
+  if (!stack) return;
+  for (const card of stack.querySelectorAll(".timer-card")) {
+    const timer = timers[card.dataset.client];
+    if (!timer) continue;
+    const rem = remainingOf(timer);
+    const timeEl = card.querySelector(".timer-card-time");
+    if (timeEl) timeEl.textContent = fmt(rem);
+    card.classList.toggle("overtime", rem < 0);
+  }
+}
+
+// ---- alerts ----------------------------------------------------------------------------------
+
+function playTimerAlert() {
+  if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 300]);
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return;
+    const ctx = new AudioContextClass();
+    const playBeep = (time, frequency, duration) => {
+      const osc = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+      osc.connect(gainNode);
+      gainNode.connect(ctx.destination);
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(frequency, time);
+      gainNode.gain.setValueAtTime(0.2, time);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, time + duration);
+      osc.start(time);
+      osc.stop(time + duration);
+    };
+    const now = ctx.currentTime;
+    playBeep(now, 880, 0.25);
+    playBeep(now + 0.3, 880, 0.4);
+  } catch (e) {
+    console.error("Error synthesizing timer alert sound:", e);
+  }
+}

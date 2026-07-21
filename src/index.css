@@ -47,7 +47,7 @@
 .history-card,
 .exercise-deck-card,
 .modal-content,
-.floating-timer,
+.timer-card,
 .history-exercise-log,
 .info-block {
   background: var(--card-bg);
@@ -83,7 +83,7 @@
 .active-exercise-navigator,
 .participant-card-header,
 .active-set-row,
-.timer-header,
+.timer-card-head,
 .deck-card-top,
 .form-row,
 .session-title-bar {
@@ -101,7 +101,7 @@
 .nav-arrow-btn,
 .step-btn,
 .set-checkbox-btn,
-.timer-btn-sm,
+.timer-close,
 .superset-done,
 .deck-action-btn,
 .collapse-btn,
@@ -2337,57 +2337,122 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
 .session-menu-item-danger:hover {
   background: var(--danger-light);
 } /* FLOATING REST TIMER */
-.floating-timer {
+/* Per-client timer stack: a column of compact labelled countdowns floating over the clipboard. */
+.timer-stack {
   position: fixed;
   bottom: calc(var(--nav-height) + var(--safe-bottom) + 16px);
   right: 16px;
-  width: 180px;
   z-index: 150;
-  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 190px;
+  max-height: 60vh;
+  overflow-y: auto;
+  pointer-events: none; /* let taps fall through the gaps between cards */
+}
+.timer-card {
+  pointer-events: auto;
+  padding: 8px 12px;
   animation: slideUp 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
-.timer-header {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 6px;
+.timer-card-head {
+  margin-bottom: 2px;
+  gap: 8px;
 }
-.close-btn-xs {
+.timer-card-label {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  overflow: hidden;
+}
+.timer-card-who {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  font-size: 13px;
+  color: var(--text-main);
+}
+.timer-card-who i {
+  color: var(--primary);
+  flex: 0 0 auto;
+}
+.timer-card-who strong {
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.timer-card-type {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.timer-close {
   background: transparent;
   border: none;
   color: var(--text-muted);
   cursor: pointer;
-  font-size: 12px;
+  font-size: 13px;
+  flex: 0 0 auto;
 }
-.timer-body {
-  text-align: center;
+.timer-close:hover {
+  color: var(--text-main);
 }
-.timer-seconds {
+.timer-card-time {
   font-family: var(--font-header);
-  font-size: 32px;
+  font-size: 30px;
   font-weight: 800;
   color: var(--primary);
-  margin-bottom: 6px;
   line-height: 1;
+  font-variant-numeric: tabular-nums;
 }
-.timer-controls {
-  display: flex;
-  justify-content: space-between;
-  gap: 4px;
+/* Overtime: past zero the countdown goes negative and turns red to demand attention. */
+.timer-card.overtime {
+  border-color: color-mix(in srgb, var(--danger) 55%, transparent);
 }
-.timer-btn-sm {
-  background: var(--input-bg);
-  border: 1px solid var(--border-color);
-  color: var(--text-main);
-  padding: 4px 6px;
-  border-radius: 4px;
-  font-size: 10px;
-  font-weight: 600;
-  flex: 1;
+.timer-card.overtime .timer-card-time,
+.timer-card.overtime .timer-card-label i {
+  color: var(--danger);
 }
-.timer-btn-sm:hover {
-  background: var(--border-color);
+/* Start-button feedback: a warning flash when a start is refused (timer still has time left), and
+   an acknowledge blink when an overtime timer is reset. Neither disturbs the running countdown. */
+@keyframes timerFlashWarn {
+  0%,
+  100% {
+    background: var(--card-bg);
+    border-color: var(--card-border);
+  }
+  35% {
+    background: color-mix(in srgb, #f59e0b 35%, var(--card-bg));
+    border-color: #f59e0b;
+  }
+}
+.timer-card.flash-warning {
+  animation: timerFlashWarn 1s ease;
+}
+@keyframes timerBlinkAck {
+  0%,
+  40%,
+  100% {
+    background: var(--card-bg);
+    border-color: var(--card-border);
+  }
+  20%,
+  60% {
+    background: color-mix(in srgb, var(--success) 38%, var(--card-bg));
+    border-color: var(--success);
+  }
+}
+.timer-card.flash-ack {
+  animation: timerBlinkAck 1s ease;
 } /* MODAL DIALOGS */
 .dialog-modal {
   border: 1px solid var(--card-border);

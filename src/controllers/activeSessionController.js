@@ -2,7 +2,11 @@ import { renderActiveUsersList, updateClientTabsFadeState } from "../components/
 import { renderClipboardEditor } from "../components/clipboardEditor.js";
 import { renderExerciseDeck } from "../components/exerciseDeck.js";
 import { openFeedbackModal } from "../components/feedbackModal.js";
-import { triggerRestTimer } from "../components/restTimer.js";
+import {
+  clearAllTimers,
+  restoreSessionTimers,
+  startTimer,
+} from "../components/exerciseAndRestTimer.js";
 import { hasLoad, loadUnitForEquipment } from "../helper/repsAndLoad.js";
 import {
   renderActiveSessionBarLabels,
@@ -212,6 +216,7 @@ export function focusExerciseByIndex(index) {
 export function openSessionFromHistory(log) {
   const { state, t, navigateToPath } = appDeps;
   if (!state || !t) return;
+  clearAllTimers(); // fresh session — never inherit a previous session's timers
 
   const clientState = {
     routineId: log.routineId || "",
@@ -297,6 +302,7 @@ export function startWorkoutSession(clientRoutines, bookingMeta = null, deps = {
   if (deps) appDeps = { ...appDeps, ...deps };
   const { state, navigateToPath, t } = appDeps;
   if (!state) return;
+  clearAllTimers(); // fresh session — never inherit a previous session's timers
 
   const participantIds = clientRoutines.map((cr) => cr.clientId);
   const sessionId = bookingMeta ? bookingMeta.id : generateShortUUID();
@@ -543,6 +549,21 @@ export function completeSupersetRound(circuitId) {
   renderActiveGroupBoard();
 }
 
+// Start a timer for the ACTIVE client (rest or exercise), labelled with their name so it's clear in
+// the stacked, multi-client timer overlay. Deck cards call this with just seconds + type + label.
+function startClientTimer(seconds, type = "rest", label = "") {
+  if (!activeSession) return;
+  const clientId = activeSession.activeClientId;
+  const client = appDeps.state?.clients?.find((c) => c.id === clientId);
+  startTimer({
+    clientId,
+    clientName: client ? client.name : "",
+    type,
+    label,
+    seconds,
+  });
+}
+
 // Opens the existing "add exercise to session" dialog (also used by the in-clipboard editor).
 function openAddSessionExerciseDialog() {
   const modal = document.getElementById("dialog-add-session-exercise");
@@ -696,7 +717,7 @@ export function renderActiveGroupBoard() {
       saveActiveSessionToCache,
       saveToLocalStorage: appDeps.saveToLocalStorage,
       onRerender: renderActiveGroupBoard,
-      startRestTimer: triggerRestTimer,
+      startRestTimer: startClientTimer,
       enterEditMode: enterClipboardEditMode,
     });
   }
@@ -904,6 +925,7 @@ export function cancelWorkoutSession() {
   activeSession = null;
   clipboardEditMode = false;
   localStorage.removeItem("librept_active_session");
+  clearAllTimers(); // timers are session-scoped
 
   renderIdleSessionBar();
 
@@ -1068,6 +1090,7 @@ export function recoverActiveSession() {
 
       startSessionTimer();
       renderActiveGroupBoard();
+      restoreSessionTimers(); // rehydrate the per-client timer stack from its own cache
       requestScreenWakeLock();
     }
   } catch (e) {
