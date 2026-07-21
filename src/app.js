@@ -944,8 +944,8 @@ function renderSessions() {
     t,
     getActiveSession,
     launchClipboardDirectly,
-    formatDuration,
-    formatSignedDuration,
+    saveToLocalStorage,
+    rerenderSessions: renderSessions,
   });
 }
 

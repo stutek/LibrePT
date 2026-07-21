@@ -11,13 +11,7 @@ import { renderSessionList } from "../components/sessionList.js";
 // src/views/sessionsView.js - Domain module for sessions dashboard, calendar sync, and clipboard launching
 import { DEFAULT_SESSIONS } from "../data/index.js";
 import { loadUnitForEquipment } from "../helper/repsAndLoad.js";
-import {
-  buildBookingMeta,
-  escapeHTML,
-  formatDuration,
-  formatSignedDuration,
-  getOverlappingBookings,
-} from "../helper/utils.js";
+import { buildBookingMeta, escapeHTML, getOverlappingBookings } from "../helper/utils.js";
 
 export function seedDemoActiveSession({ state }) {
   const booking = (state.bookings || []).find((b) => b.id === "s01f2e3d");
@@ -189,7 +183,14 @@ export function setupCalendarBookings({ state, t, saveToLocalStorage, renderSess
   });
 }
 
-export function renderSessions({ state, t, getActiveSession, launchClipboardDirectly }) {
+export function renderSessions({
+  state,
+  t,
+  getActiveSession,
+  launchClipboardDirectly,
+  saveToLocalStorage,
+  rerenderSessions,
+}) {
   const yesterdayContainer = document.getElementById("yesterday-sessions-list");
   const todayContainer = document.getElementById("today-sessions-list");
   const tomorrowContainer = document.getElementById("tomorrow-sessions-list");
@@ -210,8 +211,8 @@ export function renderSessions({ state, t, getActiveSession, launchClipboardDire
     sessionDayTemporal,
     activeId: activeSession ? activeSession.id : null,
     getActiveSession,
-    formatDuration,
-    formatSignedDuration,
+    saveToLocalStorage,
+    rerenderSessions,
   };
 
   const yesterdaySessions = bookings.filter((b) => b.day === "yesterday");

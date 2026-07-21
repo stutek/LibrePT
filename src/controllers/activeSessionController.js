@@ -987,6 +987,19 @@ export function finishWorkoutSession() {
   const sessionDateISO = new Date(activeSession.startTime).toISOString();
   const sessionDuration = activeSession.duration;
 
+  // Stamp completion + elapsed time onto the booking(s) this session launched from, so the
+  // dashboard's past-session status line (2.3) has something to show — previously finishing a
+  // session never touched state.bookings at all, only state.history.
+  const sb = activeSession.booking;
+  if (sb && !sb.isPlanning && Array.isArray(state.bookings)) {
+    for (const booking of state.bookings) {
+      if (booking.id === sb.id || (Array.isArray(sb.ids) && sb.ids.includes(booking.id))) {
+        booking.completed = true;
+        booking.duration = sessionDuration;
+      }
+    }
+  }
+
   for (const pId of activeSession.participants) {
     const client = state.clients.find((c) => c.id === pId);
     const clientState = activeSession.clientRoutines[pId];

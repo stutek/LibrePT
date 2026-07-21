@@ -2923,6 +2923,46 @@ textarea.form-control {
 .booking-card.booking-live:has(.booking-live-bar.overtime) {
   border-left-color: var(--warning, #f59e0b);
 }
+/* Same stacked-card + bottom-bar structure as .booking-live, for the two other status-line states
+   (2.3: upcoming countdown, past elapsed) — deliberately no tinted background, so a finished or
+   not-yet-started card never reads as "currently active" the way .booking-live's green wash does. */
+.booking-status-stack {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  overflow: hidden;
+}
+/* Upcoming: countdown to the scheduled start, tinted with the same amber used for future-dated
+   session titles elsewhere (sessionDayTemporal). Past: elapsed time, tinted with the same violet
+   used for past-dated titles — its value chip is editable (see .booking-status-value below). */
+.booking-live-bar.upcoming {
+  background: var(--temporal-future, #f59e0b);
+  color: var(--text-dark);
+}
+.booking-live-bar.past {
+  background: var(--temporal-past, #c084fc);
+  color: var(--text-dark);
+}
+.booking-status-value {
+  cursor: pointer;
+}
+.booking-status-value:hover,
+.booking-status-value:focus-visible {
+  background: rgba(255, 255, 255, 0.45);
+  outline: none;
+}
+.booking-status-edit-input {
+  font-family: var(--font-mono, monospace);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  width: 52px;
+  padding: 1px 6px;
+  border-radius: 5px;
+  border: 1px solid var(--text-dark);
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--text-dark);
+}
 .booking-live-tag {
   display: inline-flex;
   align-items: center;
