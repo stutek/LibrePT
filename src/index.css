@@ -2361,6 +2361,15 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   pointer-events: auto;
   padding: 8px 12px;
   cursor: pointer;
+  /* Force full opacity regardless of theme: --card-bg carries a translucent alpha (for the
+     glassmorphic look other cards use sitting on the page background), but the timer stack now
+     floats over arbitrary view content (13.4), so any see-through would blend with whatever's
+     underneath. Paint the theme's card tint over an opaque backing instead of using --card-bg
+     directly, and drop the blur since there's nothing left behind it to blur. */
+  background-image: linear-gradient(var(--card-bg), var(--card-bg));
+  background-color: var(--bg-color);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 .timer-card.timer-card-enter {
   animation: slideUp 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
