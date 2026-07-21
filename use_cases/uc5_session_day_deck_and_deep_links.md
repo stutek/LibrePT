@@ -115,6 +115,8 @@ screen; navigating within the app keeps the address bar in step.
 | `/session/{sessionId}/client/{clientId}/superset/{circuitId}` | the clipboard with that superset in focus |
 | `/session/{sessionId}/client/{clientId}/edit` | the **inline plan editor** open on that participant's plan |
 | `/clients/{clientId}` | a client detail page |
+| `/clients` | the Client Directory (its own view since TODO 4.8; the homepage keeps only the session list) |
+| `/adjustments` | the Pending Plan Adjustments deck (its own view since TODO 4.8) |
 | `/routines`, `/exercises`, `/history` | the primary list views |
 
 - **Focus follows the URL and vice-versa**: opening a session **upgrades** the bare
@@ -159,13 +161,14 @@ enforces it:
 | Not-found view for unknown route / deleted client; header stays; URL kept | [tests/e2e/test_error_view.py](file:///home/simon/Projects/LibrePT/tests/e2e/test_error_view.py) |
 | Launch the clipboard from a session card (with language switch + calendar sync) | [tests/e2e/test_clipboard.py](file:///home/simon/Projects/LibrePT/tests/e2e/test_clipboard.py) · `test_clipboard_launch_flow` |
 | Upcoming countdown, past elapsed + inline edit (persists across reload), finishing a session stamps the booking completed/duration | [tests/e2e/test_session_status_line.py](file:///home/simon/Projects/LibrePT/tests/e2e/test_session_status_line.py) |
+| Homepage keeps only the session list; ☰-menu navigation and direct deep links to `/clients` and `/adjustments`; logo returns home; the moved menu badge | [tests/e2e/test_view_split_navigation.py](file:///home/simon/Projects/LibrePT/tests/e2e/test_view_split_navigation.py) |
 
 ---
 
 ## 7. Related Use Cases
 
-- **[UC1 — Gym-Floor Clipboard](file:///home/simon/Projects/LibrePT/use_cases/uc1_gym_floor_clipboard.md)**: this deck is where the PT **launches** the clipboard UC1 specifies; the deep links in § 3 address that clipboard down to the focused card.
-- **[UC2 — Asynchronous Plan Adjustments](file:///home/simon/Projects/LibrePT/use_cases/uc2_async_plan_adjustments.md)**: the same dashboard hosts the pending-adjustments deck reviewed at the desk.
+- **[UC1 — Gym-Floor Clipboard](file:///home/simon/Projects/LibrePT/use_cases/uc1_gym_floor_clipboard.md)**: this deck is where the PT **launches** the clipboard UC1 specifies; the deep links in § 4 address that clipboard down to the focused card.
+- **[UC2 — Asynchronous Plan Adjustments](file:///home/simon/Projects/LibrePT/use_cases/uc2_async_plan_adjustments.md)**: the Pending Plan Adjustments deck reviewed at the desk is its own view (§ 3), reachable from the ☰ menu — it was part of this same dashboard before TODO 4.8 split it out.
 - **[UC4 — Client Self-Subscription](file:///home/simon/Projects/LibrePT/use_cases/uc4_client_self_subscription.md)**: bookings surfaced in the day deck originate from the self-subscription flow.
 
 > **Open gap (both directions).** The day deck still models days as **relative buckets**
