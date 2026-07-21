@@ -2341,7 +2341,7 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
 .timer-stack {
   position: fixed;
   bottom: calc(92px + var(--safe-bottom) + 12px);
-  right: 16px;
+  right: 6px;
   z-index: 150;
   display: flex;
   flex-direction: column;
