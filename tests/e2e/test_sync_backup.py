@@ -23,8 +23,8 @@ def test_sync_badge_shows_mock_ahead_behind_counts(page, local_server):
 
 
 def test_sync_badge_caps_over_nine_with_second_arrow(page, local_server):
-    page.goto(local_server)
-    page.wait_for_selector("#view-clients.active")
+    page.goto(local_server + "clients")
+    page.wait_for_selector("#view-client-directory.active")
 
     # Each saved edit bumps the local "ahead" count; from the seed's 2, eight adds pushes it to 10.
     for i in range(8):

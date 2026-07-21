@@ -197,6 +197,7 @@ export const sl = {
   menu_language: "Jezik",
   menu_theme: "Tema",
   menu_clients_register: "Seznam strank (klientov)",
+  menu_adjustments: "Čakajoče prilagoditve",
   menu_connect_cloud: "Poveži shrambo v oblaku",
   menu_coming_soon: "Shramba v oblaku še ni na voljo — kmalu.",
   menu_export_data: "Izvozi podatke v datoteko",

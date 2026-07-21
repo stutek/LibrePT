@@ -10,6 +10,9 @@ export function applyStaticDOMMappings(tDict) {
     "#menu-label-lang": "menu_language",
     "#menu-label-theme": "menu_theme",
     "#menu-clients-register": "menu_clients_register",
+    // Targets the text span, not the button: the button also carries a count badge sibling that
+    // the icon-preserving replacement below would otherwise wipe out along with the icon+text.
+    "#menu-adjustments-text": "menu_adjustments",
     "#menu-routines": "tab_routines",
     "#menu-exercises": "tab_exercises",
     "#menu-history": "tab_history",
@@ -31,7 +34,7 @@ export function applyStaticDOMMappings(tDict) {
     // Dashboard / Clients view
     "#sessions-view-title": "sessions_schedule",
     "#pending-adjustments-title": "pending_adjustments",
-    "#view-clients .view-header h2": "clients_title",
+    "#view-client-directory .view-header h2": "clients_title",
     "#btn-add-client": "btn_add_client",
     "#btn-sync-data-text": "btn_sync_data",
 

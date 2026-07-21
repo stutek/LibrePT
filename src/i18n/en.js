@@ -197,6 +197,7 @@ export const en = {
   menu_language: "Language",
   menu_theme: "Theme",
   menu_clients_register: "Clients Directory",
+  menu_adjustments: "Pending Adjustments",
   menu_connect_cloud: "Connect cloud storage",
   menu_coming_soon: "Cloud storage isn't available yet — coming soon.",
   menu_export_data: "Export data as a file",

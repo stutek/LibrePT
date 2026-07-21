@@ -246,10 +246,20 @@ def test_interactive_dashboard_flow(page, local_server):
     page.locator("#dialog-feedback button[type='submit']").click()
     page.wait_for_selector("#dialog-feedback", state="hidden")
 
-    # Leave the clipboard via the title-bar grab handle (replaces the old minimize chevron)
+    # Leave the clipboard via the title-bar grab handle (replaces the old minimize chevron). The
+    # overlay slides down over ~230ms (slideOverlayDownThenHome, gestureController.js) before
+    # goHome() actually fires -- wait for it to fully close rather than racing the next interaction
+    # against that transition under load.
     page.locator("#active-session-overlay .view-grabber").click()
+    page.wait_for_selector("#active-session-overlay.hidden", state="attached")
 
-    # Verify the new adjustment alert card on the dashboard displays the play audio button
+    # Pending Plan Adjustments is its own view/route now (TODO 4.8), not part of the dashboard.
+    page.locator("#btn-app-menu").click()
+    page.wait_for_selector("#app-menu:not(.hidden)")
+    page.locator("#menu-adjustments").click()
+    page.wait_for_selector("#view-adjustments.active")
+
+    # Verify the new adjustment alert card displays the play audio button
     page.wait_for_selector(".btn-play-adjustment-audio", state="visible")
     assert page.locator(".btn-play-adjustment-audio").is_visible()
 

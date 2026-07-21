@@ -4,7 +4,7 @@ export function setupViewDismiss({ navigateToPath, getActiveSession, launchClipb
   const SWIPE_PX = 70; // vertical distance that commits the gesture
 
   function goHome() {
-    navigateToPath("/clients");
+    navigateToPath("/");
   }
 
   function openActiveOrNextSession() {

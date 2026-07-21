@@ -1,8 +1,9 @@
 # tests/e2e/test_plan_adjustments.py
 # End-to-end coverage of the pending plan-adjustments deck and the Apply-Adjustment wizard
-# (components/planAdjustments.js): the dashboard renders the seeded unresolved feedback as cards
-# with a count badge, the wizard opens pre-filled from a card, and "Apply & Resolve" resolves the
-# item and updates the count. Closes the UC2 (feedback -> adjustment) loop under test.
+# (components/planAdjustments.js), its own first-class view/route since TODO 4.8: the view renders
+# the seeded unresolved feedback as cards with a count badge, the wizard opens pre-filled from a
+# card, and "Apply & Resolve" resolves the item and updates the count. Closes the UC2 (feedback ->
+# adjustment) loop under test.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
 
@@ -11,8 +12,8 @@ def _cards(page):
 
 
 def test_pending_adjustments_deck_renders_seeded_cards(page, local_server):
-    page.goto(local_server)
-    page.wait_for_selector("#view-clients.active")
+    page.goto(local_server + "adjustments")
+    page.wait_for_selector("#view-adjustments.active")
 
     # Three seeded plan updates start unresolved (src/data/planUpdates.js).
     assert page.locator("#badge-adjustments-count").inner_text().strip() == "3"
@@ -21,8 +22,8 @@ def test_pending_adjustments_deck_renders_seeded_cards(page, local_server):
 
 
 def test_apply_adjustment_wizard_opens_prefilled(page, local_server):
-    page.goto(local_server)
-    page.wait_for_selector("#view-clients.active")
+    page.goto(local_server + "adjustments")
+    page.wait_for_selector("#view-adjustments.active")
 
     card = _cards(page).first
     card.scroll_into_view_if_needed()
@@ -45,8 +46,8 @@ def test_apply_adjustment_wizard_opens_prefilled(page, local_server):
 
 
 def test_apply_adjustment_resolves_and_drops_the_count(page, local_server):
-    page.goto(local_server)
-    page.wait_for_selector("#view-clients.active")
+    page.goto(local_server + "adjustments")
+    page.wait_for_selector("#view-adjustments.active")
 
     card = _cards(page).first
     card.scroll_into_view_if_needed()

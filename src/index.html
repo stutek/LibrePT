@@ -101,6 +101,10 @@
               <button id="menu-clients-register" class="session-menu-item" role="menuitem">
                 <i class="fa-solid fa-users"></i> <span id="menu-clients-register-text" data-i18n="menu_clients_register">Clients Directory</span>
               </button>
+              <button id="menu-adjustments" class="session-menu-item" role="menuitem">
+                <i class="fa-solid fa-bell-concierge"></i> <span id="menu-adjustments-text" data-i18n="menu_adjustments">Pending Adjustments</span>
+                <span class="badge hidden" id="menu-badge-adjustments-count" style="margin-left: auto;">0</span>
+              </button>
               <button id="menu-routines" class="session-menu-item" role="menuitem">
                 <i class="fa-solid fa-clipboard-list"></i> Routines
               </button>
@@ -139,7 +143,7 @@
   <!-- Main View Container -->
   <main id="main-content">
     
-    <!-- VIEW: Clients Dashboard & Pending Plan Adjustments -->
+    <!-- VIEW: Sessions Dashboard (home) -->
     <section id="view-clients" class="app-view active">
       <!-- Section B: Today's & Tomorrow's Sessions -->
       <div class="section-title sessions-title-bar view-titlebar">
@@ -164,7 +168,7 @@
           </button>
         </div>
       </div>
-      
+
       <!-- One day-column is shown at a time and the title bar above already names the day, so the
            per-column header row (calendar icon + Today/Yesterday/Tomorrow/Upcoming) is omitted. -->
       <div class="sessions-categories-grid mb-6" id="sessions-categories-grid" role="region" aria-label="Sessions">
@@ -181,21 +185,24 @@
           <div id="upcoming-sessions-list" class="stack-list"></div>
         </div>
       </div>
+    </section>
 
-      <hr class="view-divider">
-
-      <!-- Section A: Pending plan modifications (Feedback Loop) -->
-      <div class="section-title" style="margin-top: 24px;">
-        <h3 id="pending-adjustments-title"><i class="fa-solid fa-bell-concierge text-emerald mr-1"></i> Pending Plan Adjustments</h3>
+    <!-- VIEW: Pending Plan Adjustments -->
+    <section id="view-adjustments" class="app-view">
+      <div class="view-header view-titlebar">
+        <button class="view-grabber" type="button" aria-label="Return to home"></button>
+        <h2 id="pending-adjustments-title"><i class="fa-solid fa-bell-concierge text-emerald mr-1"></i> Pending Plan Adjustments</h2>
         <span class="badge" id="badge-adjustments-count">0</span>
       </div>
       <div id="dashboard-adjustments-list" class="stack-list mb-6">
         <!-- Injected via JS - cards with feedback tags to update programs -->
       </div>
+    </section>
 
-      <hr class="view-divider">
-
-      <div class="view-header">
+    <!-- VIEW: Client Directory -->
+    <section id="view-client-directory" class="app-view">
+      <div class="view-header view-titlebar">
+        <button class="view-grabber" type="button" aria-label="Return to home"></button>
         <h2>Client Directory</h2>
         <button id="btn-add-client" class="btn primary-btn btn-sm">
           <i class="fa-solid fa-user-plus"></i> Add Client

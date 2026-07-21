@@ -829,6 +829,15 @@ function renderPendingPlanAdjustments() {
     openAdjustmentWizard,
     openRoutineEditorModal,
   });
+
+  // The ☰ menu's "Pending Adjustments" entry carries its own count badge, since the view itself
+  // is no longer visible from the dashboard by default (TODO 4.8).
+  const menuBadge = document.getElementById("menu-badge-adjustments-count");
+  if (menuBadge) {
+    const unresolved = (state.planUpdates || []).filter((u) => !u.resolved).length;
+    menuBadge.textContent = unresolved;
+    menuBadge.classList.toggle("hidden", unresolved === 0);
+  }
 }
 
 function openAdjustmentWizard(updateId) {

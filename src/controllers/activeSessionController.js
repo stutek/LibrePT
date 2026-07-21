@@ -943,7 +943,7 @@ export function cancelWorkoutSession() {
 
   renderIdleSessionBar();
 
-  if (navigateToPath) navigateToPath("/clients");
+  if (navigateToPath) navigateToPath("/");
   if (focusSessionsColumn) focusSessionsColumn("today", "smooth");
 }
 

@@ -152,7 +152,7 @@ export function setupApplicationHeader() {
   const logoArea = document.getElementById("logo-area");
   if (logoArea) {
     logoArea.addEventListener("click", () => {
-      deps.navigateToPath("/clients");
+      deps.navigateToPath("/");
     });
   }
 
@@ -226,22 +226,14 @@ function setupAppMenu() {
     if (el) el.addEventListener("click", handler);
   };
 
-  // Customer register / Clients directory
-  on("menu-clients-register", () => {
-    closeMenu();
-    if (deps?.navigateToPath) {
-      deps.navigateToPath("/clients");
-      setTimeout(() => {
-        const clientsHeader = document.querySelector("#view-clients .view-header");
-        if (clientsHeader) clientsHeader.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 50);
-    }
-  });
-  // Routines / Exercises / History — moved out of the header bar into this menu.
+  // Client Directory / Pending Adjustments / Routines / Exercises / History — each its own
+  // first-class view+route (see TODO 4.8); moved out of the header bar into this menu.
   const goto = (route) => {
     closeMenu();
     if (deps?.navigateToPath) deps.navigateToPath(route);
   };
+  on("menu-clients-register", () => goto("/clients"));
+  on("menu-adjustments", () => goto("/adjustments"));
   on("menu-routines", () => goto("/routines"));
   on("menu-exercises", () => goto("/exercises"));
   on("menu-history", () => goto("/history"));

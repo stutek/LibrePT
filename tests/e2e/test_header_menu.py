@@ -22,7 +22,7 @@ def test_menu_toggles_and_closes_on_outside_click(page, local_server):
     assert page.locator("#btn-app-menu").get_attribute("aria-expanded") == "true"
 
     # Clicking a neutral element outside the menu dismisses it.
-    page.locator("#view-clients .view-header h2").click()
+    page.locator("#sessions-view-title").click()
     page.wait_for_function(
         "() => document.getElementById('app-menu').classList.contains('hidden')"
     )
