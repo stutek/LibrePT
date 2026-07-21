@@ -349,6 +349,12 @@ Delegate lengthy legal explanations and templates to external web documentation 
 - **Downloadable/Printable Intake Templates:** Host the full text of the Informative Consent Letter (`docs/templates/Client_Consent_Form.md`) for physical paper signing or custom adaptations.
 - **In-App Footnote Links:** Link to this web guide from `#dialog-terms`, the About modal, and the Cloud Sync setup screen.
 
+### 12.7 [ ] Unify local runs and CI so lint/format failures surface locally, not just on push
+Discovered live: the GitHub Pages deploy (`.github/workflows/deploy.yml`) had been **failing silently for 3 pushes / 2 days** because `run_lint()` (`build/__init__.py`) failed its Ruff format-check step on 8 already-committed `tests/` files, and Biome flagged formatting/import-order issues in `src/` from the same session — none of it visible until Simon checked the Actions log by hand.
+
+- **Root cause**: `pytest` (what gets run locally to check behaviour) and `run_lint()` (Ruff + Biome, what CI runs to gate the build) are two totally disconnected commands — running the test suite green gives no signal about lint/format state, and nothing prompts running `run_lint()` before a push. Compounding it: `deploy.yml`'s `build` job never runs `pytest` at all, only lints `tests/` as text — so there is currently **no CI step that actually executes the test suite**.
+- **Fix shape**: (a) a single local command (`make check` / `python -m build check` / a documented one-liner in CONTRIBUTING.md) that runs `run_lint()` + `pytest` together, so "did I break anything" has one answer instead of two; (b) consider a pre-commit or pre-push git hook running the same; (c) decide whether `deploy.yml` should also run `pytest` before `Assemble dist` — right now a red test suite would still deploy successfully as long as lint passes.
+
 ---
 
 ## 13. Exercise Library & Movement Taxonomy (Call to Action & Vision)
