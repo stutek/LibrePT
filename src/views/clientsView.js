@@ -60,14 +60,6 @@ export function showClientDetails({
   document.getElementById("profile-email").textContent = client.email || t("not_specified");
   document.getElementById("profile-phone").textContent = client.phone || t("not_specified");
 
-  const startBtn = document.getElementById("btn-start-client-workout");
-  if (startBtn) {
-    startBtn.replaceWith(startBtn.cloneNode(true));
-    document.getElementById("btn-start-client-workout").addEventListener("click", () => {
-      openWorkoutSetupModal(clientId);
-    });
-  }
-
   const planBtn = document.getElementById("btn-plan-client-program");
   if (planBtn) {
     planBtn.replaceWith(planBtn.cloneNode(true));

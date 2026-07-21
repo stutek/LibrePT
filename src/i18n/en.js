@@ -25,7 +25,6 @@ export const en = {
   btn_save_exercise: "Save Exercise",
   routine_plans: "Routine Plans & History",
   btn_edit_profile: "Edit Profile",
-  btn_log_workout: "Log Workout Session",
   btn_add_plan: "Add Plan Adjustment",
   client_history_header: "Logged Session History",
   no_history_yet: "No history logged yet.",

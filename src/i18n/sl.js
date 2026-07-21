@@ -24,7 +24,6 @@ export const sl = {
   btn_save_exercise: "Shrani vajo",
   routine_plans: "Načrti rutine in zgodovina",
   btn_edit_profile: "Uredi profil",
-  btn_log_workout: "Zabeleži vadbo",
   btn_add_plan: "Dodaj prilagoditev načrta",
   client_history_header: "Zgodovina zabeleženih vadb",
   no_history_yet: "Zgodovina še ni zabeležena.",

@@ -165,7 +165,7 @@ Feature request by Simon, triggered by a report that the `<hr class="view-divide
 ### 5.1 [ ] Tabbed client view
 Clicking an individual client opens a **tabbed** view (today it opens a single flat profile screen, `view-client-detail`):
 
-NOTE: keep the goals and health & injury notes as is, remove "log workout session" button.
+NOTE: keep the goals and health & injury notes as is. (Done: removed "log workout session" button `btn-start-client-workout` from `view-client-detail` in `index.html`/`clientsView.js`, leaving only "Plan Program").
 
 | Tab | Content |
 | :--- | :--- |
