@@ -1,12 +1,12 @@
+import { mountExercisePicker } from "../components/exercisePicker.js";
 import { $id, closeModal, openModal } from "../helper/dom.js";
+import { parseLoad, parseReps } from "../helper/repsAndLoad.js";
 import { generateShortUUID, getInitials } from "../helper/utils.js";
 import {
   getActiveDetailClientId,
   renderClientsList,
   showClientDetails,
 } from "../views/clientsView.js";
-import { mountExercisePicker } from "../components/exercisePicker.js";
-import { parseLoad, parseReps } from "../helper/repsAndLoad.js";
 import { renderExercisesList } from "../views/exercisesView.js";
 import { addRoutineExerciseRow, renderRoutinesList } from "../views/routinesView.js";
 

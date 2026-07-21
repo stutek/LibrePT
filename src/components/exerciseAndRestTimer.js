@@ -141,7 +141,7 @@ export function restoreSessionTimers() {
       const list = JSON.parse(raw);
       if (Array.isArray(list)) {
         for (const timer of list) {
-          if (timer && timer.clientId) timers[timer.clientId] = timer;
+          if (timer?.clientId) timers[timer.clientId] = timer;
         }
       }
     }
@@ -188,9 +188,17 @@ export function stopTimerIfMatches(clientId, focusRef) {
 // ---- ticking ---------------------------------------------------------------------------------
 
 const remainingOf = (timer) =>
-  timer.countUp ? null : timer.stopped ? timer.frozenSeconds : Math.round((timer.endTime - Date.now()) / 1000);
+  timer.countUp
+    ? null
+    : timer.stopped
+      ? timer.frozenSeconds
+      : Math.round((timer.endTime - Date.now()) / 1000);
 const elapsedOf = (timer) =>
-  timer.countUp ? (timer.stopped ? timer.frozenSeconds : Math.round((Date.now() - timer.startTime) / 1000)) : null;
+  timer.countUp
+    ? timer.stopped
+      ? timer.frozenSeconds
+      : Math.round((Date.now() - timer.startTime) / 1000)
+    : null;
 
 function ensureTicking() {
   if (tickIntervalId || Object.keys(timers).length === 0) return;
@@ -252,9 +260,14 @@ function timerCardHTML(timer) {
   const isUp = timer.countUp;
   const display = isUp ? fmt(elapsedOf(timer)) : fmt(remainingOf(timer));
   const overtime = !isUp && !timer.stopped && remainingOf(timer) < 0;
-  const icon = timer.stopped ? "fa-check" : timer.type === "exercise" ? "fa-dumbbell" : "fa-hourglass-half";
+  const icon = timer.stopped
+    ? "fa-check"
+    : timer.type === "exercise"
+      ? "fa-dumbbell"
+      : "fa-hourglass-half";
   const typeLabel =
-    timer.label || (timer.type === "exercise" ? t("exercise", "Exercise") : t("rest_label", "Rest"));
+    timer.label ||
+    (timer.type === "exercise" ? t("exercise", "Exercise") : t("rest_label", "Rest"));
   return `
     <div class="timer-card${overtime ? " overtime" : ""}${isUp ? " count-up" : ""}${timer.stopped ? " stopped" : ""}" data-client="${escapeHTML(timer.clientId)}">
       <div class="timer-card-head">
@@ -274,8 +287,9 @@ function renderStack() {
   const list = Object.values(timers);
   stack.classList.toggle("hidden", list.length === 0);
   // Remember which clients already had a visible card so we only animate new arrivals.
-  const prevIds = new Set([...stack.querySelectorAll(".timer-card[data-client]")]
-    .map((el) => el.dataset.client));
+  const prevIds = new Set(
+    [...stack.querySelectorAll(".timer-card[data-client]")].map((el) => el.dataset.client),
+  );
   // Newest on top so a just-started timer is where the trainer looks.  Count-up timers use
   // startTime instead of endTime, so normalise with a fallback.
   stack.innerHTML = list
@@ -286,7 +300,9 @@ function renderStack() {
   for (const card of stack.querySelectorAll(".timer-card[data-client]")) {
     if (!prevIds.has(card.dataset.client)) {
       card.classList.add("timer-card-enter");
-      card.addEventListener("animationend", () => card.classList.remove("timer-card-enter"), { once: true });
+      card.addEventListener("animationend", () => card.classList.remove("timer-card-enter"), {
+        once: true,
+      });
     }
   }
 }

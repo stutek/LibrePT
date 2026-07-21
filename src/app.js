@@ -20,6 +20,7 @@ import {
   setFocusedSessionDay,
   setupSessionsDayNav,
 } from "./components/daySelector.js";
+import { initRestTimer, setupRestTimer } from "./components/exerciseAndRestTimer.js";
 import { renderExerciseDeck } from "./components/exerciseDeck.js";
 import {
   initFeedbackModal,
@@ -35,7 +36,6 @@ import {
   openAdjustmentWizardComponent,
   renderPendingPlanAdjustmentsComponent,
 } from "./components/planAdjustments.js";
-import { initRestTimer, setupRestTimer } from "./components/exerciseAndRestTimer.js";
 import {
   initSessionBar,
   renderActiveSessionBarLabels,
@@ -86,6 +86,8 @@ import {
   DEFAULT_ROUTINES,
   DEFAULT_SESSIONS,
 } from "./data/index.js";
+import { repsPresetsDatalistHTML } from "./helper/repsAndLoad.js";
+import { INIT_DEMO_DATA, getShareParams } from "./helper/shareLink.js";
 import {
   buildBookingMeta,
   escapeHTML,
@@ -101,8 +103,6 @@ import {
   parseTimeRange,
   truncateString,
 } from "./helper/utils.js";
-import { getShareParams, INIT_DEMO_DATA } from "./helper/shareLink.js";
-import { repsPresetsDatalistHTML } from "./helper/repsAndLoad.js";
 import { applyStaticDOMMappings } from "./i18n/domMappings.js";
 import { TRANSLATIONS } from "./i18n/index.js";
 import { BUILD_INFO } from "./version.js";
@@ -113,8 +113,8 @@ import {
 import { renderExercisesList as exercisesViewRender } from "./views/exercisesView.js";
 import { renderGlobalHistory as historyViewRender } from "./views/historyView.js";
 import {
-  renderRoutinesList as routinesViewRender,
   openRoutineEditorModal,
+  renderRoutinesList as routinesViewRender,
 } from "./views/routinesView.js";
 import {
   launchClipboardDirectly as sessionsViewLaunchClipboard,

@@ -1,19 +1,19 @@
 import { renderActiveUsersList, updateClientTabsFadeState } from "../components/activeUsersList.js";
 import { renderClipboardEditor } from "../components/clipboardEditor.js";
-import { renderExerciseDeck } from "../components/exerciseDeck.js";
-import { openFeedbackModal } from "../components/feedbackModal.js";
 import {
   clearAllTimers,
   restoreSessionTimers,
   startTimer,
   stopTimerIfMatches,
 } from "../components/exerciseAndRestTimer.js";
-import { hasLoad, loadUnitForEquipment } from "../helper/repsAndLoad.js";
+import { renderExerciseDeck } from "../components/exerciseDeck.js";
+import { openFeedbackModal } from "../components/feedbackModal.js";
 import {
   renderActiveSessionBarLabels,
   renderIdleSessionBar,
   updateSessionBarTimer,
 } from "../components/sessionBar.js";
+import { hasLoad, loadUnitForEquipment } from "../helper/repsAndLoad.js";
 // src/controllers/activeSessionController.js - Domain module for active workout session state, timers, signals, and lifecycle
 import {
   escapeHTML,
@@ -654,7 +654,7 @@ export function renderActiveGroupBoard() {
         chipLabel = t("unscheduled") || "Unscheduled";
       } else {
         const parts = [b?.day ? t(b.day) || b.day : "", b?.timeLabel || ""].filter(Boolean);
-        chipLabel = parts.join(" · ") || (t("live") || "Live");
+        chipLabel = parts.join(" · ") || t("live") || "Live";
       }
       const clientNm = activeClient ? escapeHTML(activeClient.name) : "";
       // The ✎ icon rides up here as the mode indicator (the editor body no longer has its own header).
@@ -999,7 +999,11 @@ export function finishWorkoutSession() {
       const clientSetsLogged = [];
 
       for (const log of logsList) {
-        if (log.completed || hasLoad(log.weight, ex.loadUnit) || activeSession.booking?.isPlanning) {
+        if (
+          log.completed ||
+          hasLoad(log.weight, ex.loadUnit) ||
+          activeSession.booking?.isPlanning
+        ) {
           clientSetsLogged.push({
             reps: log.reps,
             weight: log.weight,

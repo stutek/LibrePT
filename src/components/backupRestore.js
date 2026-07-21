@@ -119,5 +119,4 @@ export function setupBackupRestore() {
       reader.readAsText(file);
     });
   }
-
 }

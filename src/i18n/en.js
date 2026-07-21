@@ -50,8 +50,7 @@ export const en = {
   btn_log_feedback: "Log Feedback",
   alert_no_sets:
     "No completed sets were logged. Are you sure you want to finish and save an empty session?",
-  confirm_finish_early:
-    "This session still has about {min} minutes left. Finish it now anyway?",
+  confirm_finish_early: "This session still has about {min} minutes left. Finish it now anyway?",
   confirm_cancel:
     "Delete this session? Its logged progress and feedback will be permanently discarded.",
   confirm_delete_plan:

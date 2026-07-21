@@ -28,7 +28,6 @@ export function renderExerciseCard(card, item, ctx) {
     startRestTimer,
   } = ctx;
 
-
   // An open past log defocuses the live card, so the active exercise renders compact too
   const showInFocus = item.isInFocus && !pastExpanded;
   const checkedClass = showInFocus ? "in-focus" : item.isCompleted ? "completed" : "";

@@ -33,7 +33,6 @@ export function renderSupersetCard(card, item, ctx) {
     startRestTimer,
   } = ctx;
 
-
   const showInFocus = item.isInFocus && !pastExpanded;
   card.className = `exercise-deck-card superset-card ${showInFocus ? "in-focus" : item.isCompleted ? "completed" : ""}${isFutureSession ? " future-session" : ""}`;
   const title = item.title ? escapeHTML(item.title) : t("combo_round_title");

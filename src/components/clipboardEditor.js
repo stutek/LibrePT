@@ -123,7 +123,13 @@ export function renderClipboardEditor(container, deps) {
       ? ""
       : `<label class="editor-field"><span>${tr("sets", "Sets")}</span><input type="number" min="0" class="editor-f-sets" value="${escapeHTML(String(ex.setsTargetCount ?? ex.sets ?? 3))}"></label>`;
     const loadField = `<label class="editor-field"><span>${escapeHTML(loadFieldMeta(unit).label)}</span>${loadInputHTML(
-      { unit, value: ex.weightTarget ?? ex.weight ?? 0, cls: "editor-f-weight", escapeHTML, ariaLabel: "Load" },
+      {
+        unit,
+        value: ex.weightTarget ?? ex.weight ?? 0,
+        cls: "editor-f-weight",
+        escapeHTML,
+        ariaLabel: "Load",
+      },
     )}</label>`;
     return `
       <li class="editor-row" data-rowkey="${idx}">
@@ -251,7 +257,12 @@ export function renderClipboardEditor(container, deps) {
           const logs = activeClientState.logs[m.id];
           if (Array.isArray(logs)) {
             while (logs.length < series)
-              logs.push({ reps: m.repsTarget ?? 0, weight: m.weightTarget ?? 0, completed: false, note: "" });
+              logs.push({
+                reps: m.repsTarget ?? 0,
+                weight: m.weightTarget ?? 0,
+                completed: false,
+                note: "",
+              });
             logs.length = series;
           }
         }

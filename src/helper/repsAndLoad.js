@@ -82,7 +82,9 @@ export function loadUnitForEquipment(equipment) {
 
 // A reps token is "to failure" when it reads as the engine's max/failure marker.
 export function isFailureReps(reps) {
-  const s = String(reps ?? "").trim().toLowerCase();
+  const s = String(reps ?? "")
+    .trim()
+    .toLowerCase();
   return s === "max" || s === "f" || s === "amrap";
 }
 
@@ -141,7 +143,9 @@ export function loadParts(value, unit = "kg") {
     case "level":
       return { value: num > 0 ? String(num) : "—", label: "Level" };
     case "bw":
-      return num > 0 ? { value: `+${num}`, label: "kg (BW)" } : { value: "BW", label: "Bodyweight" };
+      return num > 0
+        ? { value: `+${num}`, label: "kg (BW)" }
+        : { value: "BW", label: "Bodyweight" };
     default:
       return { value: num > 0 ? String(num) : "—", label: "kg" };
   }
