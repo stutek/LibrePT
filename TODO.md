@@ -364,6 +364,9 @@ Define and build towards the three concrete ways a personal trainer actually int
 ### 13.3 [ ] Conditioning metrics: extend the reps/load model beyond sets × reps × kg
 Some movements are not `sets × reps × load`. A **conditioning/cardio machine** (assault bike, rower, ski-erg) is **time-bound** (go for 60s), **calorie-bound** (20 cal), or **power-bound** (hold 200 W) — often a mix. Today [helper/repsAndLoad.js](file:///home/simon/Projects/LibrePT/src/helper/repsAndLoad.js) already makes reps polymorphic (count / range / `30s` time / `max`) and load equipment-derived (kg / level / band / bw), so the seam exists. Extend it with a **metric type** per exercise (derived from equipment/pattern, e.g. `Cardio` → target is `time | calories | watts | distance`) so the focus card and the plan editor author and log the right unit, and the **exercise timer** (see the clipboard timer stack in [exerciseAndRestTimer.js](file:///home/simon/Projects/LibrePT/src/components/exerciseAndRestTimer.js) / UC1) can be the primary logging surface for time-bound work. Keep the raw authored value stored and derive meaning at render time, as reps/load already do. Relates to UC6 and the timer stack.
 
+TBD: Priority feature request by Simon:
+can you keep active timers on all views? and clicking the timer should bring focus back to the specific card owning the timer
+
 ---
 
 ## 14. Phase 5 Refactoring: DRY & Complexity Reduction
