@@ -461,4 +461,24 @@ The `.timer-card.flash-warning` "still running, refused reset" blink (`timerFlas
 ### 15.5 [x] Adopt DOM Helper Utility Across Controllers (`src/helper/dom.js` adoption)
 - Complete task 14.4 by migrating repeated `document.getElementById` and `<dialog>` `showModal()`/`close()` checks across `src/controllers/formsController.js` and `src/components/feedbackModal.js` to use `$id`, `openModal`, and `closeModal`.
 
+---
+
+## 16. Zero-Downtime Deploys & PT-Controlled Version Switching
+
+### 16.1 [ ] [Brainstorm] Zero-downtime re-deploys with PT-controlled upgrade timing and rollback
+Feature request by Simon. A deploy/upgrade must never force-interrupt a PT mid-session, and a PT must be able to defer, accept, or reverse an upgrade on their own schedule:
+
+- **Zero-downtime re-deploys**: publishing a new build must not disrupt whoever is currently mid-session on the old one.
+- **Routing config is separate from app loading and data migrations**: which build/version a client is currently running, and how it resolves its own routes, must be decoupled from (a) the app-shell loading process and (b) any data-migration step a new version's schema requires — these are three distinct concerns today conflated into one PWA update flow (`src/sw.js`'s cache-bump-on-deploy).
+- **Opt-in upgrade timing**: when a new version is available, the PT sees a **non-dismissable** message in the message/notification area (`components/notificationArea.js`) inviting them to switch — but the switch itself is **their choice of moment**, not forced on next load, bounded by a **supportability EOL deadline** (the old version isn't kept alive forever).
+- **Rollback anytime (within terms)**: a PT can switch back to the previous version **at any time**, also via a **non-dismissable** message in the message area — but doing so **after** the initial upgrade moment carries a **data-loss warning** (changes made under the newer version's schema/format may not round-trip cleanly back to the old one).
+- **No fixes ever land on a "maintenance mode" (old) version** — once superseded, an old version is kept *available* (for rollback, until its EOL) but never *patched*. All fix/feature work happens forward-only on the current version.
+
+**Open question, Simon's own framing — not yet decided:** this implies keeping **multiple versions of the app simultaneously deployable**, which is a "huge toll" on this repo's workflow. Do we solve that via:
+  - **git tags** per released version (deploy workflow parameterized to build/publish a specific tag on demand),
+  - **long-lived branches** (one per supported version), or
+  - **duplicated code** (each supported version literally vendored as its own copy under the deploy target)?
+
+  Each has very different implications for this repo's trunk-based, single-`main`, no-feature-branches workflow (`AGENT_RULES.md`) — this needs a real design pass before any implementation starts. Also unresolved: where multiple simultaneously-live versions actually get *hosted* (GitHub Pages currently serves one `dist/` per push to `main`; serving N versions at once is a deploy-infrastructure question in its own right, separate from the git-history question above).
+
 
