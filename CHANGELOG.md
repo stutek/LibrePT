@@ -17,6 +17,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-07-23 — Fixes
+
+### Fixed
+- **Late-evening session cards silently failed to launch.** The demo generates session times relative to now, so after ~21:00 a live session's range crossed midnight (e.g. `"22:00 - 00:00"`); `parseTimeRange` read it as inverted (`end < start`), so `isTimeOverlapping` matched nothing — not even itself — `getOverlappingBookings` returned `[]`, and clicking the card did nothing. `parseTimeRange` now treats an end at/before the start as crossing into the next day. This was exposed when the 18:00 demo-hours clamp was dropped (TODO 1.4). Guarded by a clock-mocked regression test (`test_session_launch_time_of_day.py`) so it's no longer time-of-day dependent.
+
+---
+
 ## 2026-07-22 — Session setup view, security headers, resilience hardening
 
 ### Added

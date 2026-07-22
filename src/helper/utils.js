@@ -130,10 +130,14 @@ export function parseTimeRange(timeStr) {
     if (ampm === "AM" && hour === 12) hour = 0;
     return hour * 60 + min;
   };
-  return {
-    start: parseTime(parts[0]),
-    end: parseTime(parts[1]),
-  };
+  const start = parseTime(parts[0]);
+  let end = parseTime(parts[1]);
+  // A range whose end is at or before its start crosses midnight (e.g. "22:00 - 00:00"): treat the
+  // end as the next day so overlap and duration maths stay correct. Without this a late-evening
+  // session reads as an inverted range and overlaps nothing — not even itself — so its card
+  // silently fails to launch (getOverlappingBookings returns []).
+  if (end <= start) end += 24 * 60;
+  return { start, end };
 }
 
 // Check if two time ranges overlap
