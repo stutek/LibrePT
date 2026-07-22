@@ -106,7 +106,7 @@ def test_touch_swipe_between_days(browser, local_server, demo_data_script):
     assert weekday.inner_text().strip().upper() == today.strftime("%a").upper()
 
     # Swiping left walks forward to tomorrow
-    _touch_swipe(cdp, page, 195, 300, -300)
+    _touch_swipe(cdp, page, 300, 300, -240)
     page.wait_for_timeout(1200)
     tomorrow = today + datetime.timedelta(days=1)
     assert weekday.inner_text().strip().upper() == tomorrow.strftime("%a").upper()
@@ -115,7 +115,7 @@ def test_touch_swipe_between_days(browser, local_server, demo_data_script):
     ).inner_text().strip() == tomorrow.strftime("%Y-%m-%d")
 
     # Swiping right walks back to today
-    _touch_swipe(cdp, page, 195, 300, 300)
+    _touch_swipe(cdp, page, 50, 300, 240)
     page.wait_for_timeout(1200)
     assert weekday.inner_text().strip().upper() == today.strftime("%a").upper()
 

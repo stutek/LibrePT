@@ -1,105 +1,195 @@
 // components/workoutSetup.js
-// Manages the workout setup modal dialog (#dialog-workout-setup), allowing
+// Manages the workout setup view (#view-workout-setup), allowing
 // selection of participants and assigning routine plans before launching the clipboard.
-//
-// deps: {
-//   getState(),
-//   t,
-//   getClientDisplayNameHTML,
-//   startWorkoutSession(clientRoutines)
-// }
+// Auto-persists form drafts to localStorage so user data survives page reloads.
 
 let deps = null;
 let isPlanningModeActive = false;
+const DRAFT_KEY = "librept_workout_setup_draft";
 
 export function initWorkoutSetup(d) {
   deps = d;
 }
 
+export function saveSetupDraft() {
+  const nameInput = document.getElementById("setup-session-name");
+  const dateInput = document.getElementById("setup-session-date");
+  const startInput = document.getElementById("setup-start-time");
+  const endInput = document.getElementById("setup-end-time");
+  const locInput = document.getElementById("setup-location");
+
+  const clientRoutines = {};
+  const checkedClients = [];
+  const rows =
+    document
+      .getElementById("setup-participants-assignment-list")
+      ?.querySelectorAll(".participant-setup-row") || [];
+
+  for (const row of rows) {
+    const cb = row.querySelector('input[type="checkbox"]');
+    const select = row.querySelector("select");
+    if (cb?.checked) {
+      checkedClients.push(cb.value);
+    }
+    if (cb && select) {
+      clientRoutines[cb.value] = select.value;
+    }
+  }
+
+  const draft = {
+    sessionName: nameInput?.value || "",
+    date: dateInput?.value || "",
+    startTime: startInput?.value || "",
+    endTime: endInput?.value || "",
+    location: locInput?.value || "",
+    checkedClients,
+    clientRoutines,
+    isPlanningModeActive,
+  };
+
+  try {
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+  } catch (e) {
+    console.warn("Failed to save workout setup draft to localStorage", e);
+  }
+}
+
+export function clearSetupDraft() {
+  try {
+    localStorage.removeItem(DRAFT_KEY);
+  } catch (e) {}
+}
+
+export function getSetupDraft() {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+let editingBookingId = null;
+
 export function setupWorkoutSetup() {
-  const dialog = document.getElementById("dialog-workout-setup");
-  if (!dialog) return;
-
   const form = document.getElementById("form-workout-setup");
-  const cancelBtn = dialog.querySelector(".modal-cancel");
-  const closeBtn = dialog.querySelector(".modal-close-btn");
+  if (!form) return;
 
-  const closeModal = () => dialog.close();
-  if (cancelBtn) cancelBtn.addEventListener("click", closeModal);
-  if (closeBtn) closeBtn.addEventListener("click", closeModal);
+  const cancelBtns = document.querySelectorAll(
+    ".setup-cancel-btn, #view-workout-setup .view-grabber",
+  );
 
-  if (form) {
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
+  const handleCancel = () => {
+    clearSetupDraft();
+    editingBookingId = null;
+    const todayDate = deps.getISODateForColumn("today");
+    window.history.pushState(null, "", deps.toUrl(`/sessions/${todayDate}`));
+    deps.switchView("clients");
+    requestAnimationFrame(() => deps.focusSessionsColumn("today", "auto"));
+  };
 
-      // Collect active clients checked and their selected routines
-      const clientRoutines = [];
-      const rows = document
-        .getElementById("setup-participants-assignment-list")
-        .querySelectorAll(".participant-setup-row");
+  for (const btn of cancelBtns) {
+    btn.addEventListener("click", handleCancel);
+  }
 
-      for (const row of rows) {
-        const cb = row.querySelector('input[type="checkbox"]');
-        if (cb?.checked) {
-          const clientId = cb.value;
-          const select = row.querySelector("select");
-          const routineId = select ? select.value : "";
-          clientRoutines.push({ clientId, routineId });
+  // Auto-save draft on any input change
+  form.addEventListener("input", saveSetupDraft);
+  form.addEventListener("change", saveSetupDraft);
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    // Collect active clients checked and their selected routines
+    const clientRoutines = [];
+    const rows = document
+      .getElementById("setup-participants-assignment-list")
+      .querySelectorAll(".participant-setup-row");
+
+    for (const row of rows) {
+      const cb = row.querySelector('input[type="checkbox"]');
+      if (cb?.checked) {
+        const clientId = cb.value;
+        const select = row.querySelector("select");
+        const routineId = select ? select.value : "";
+        clientRoutines.push({ clientId, routineId });
+      }
+    }
+
+    const { t } = deps;
+
+    if (clientRoutines.length === 0) {
+      alert("You must select at least one participant client.");
+      return;
+    }
+
+    const missingRoutine = clientRoutines.find((cr) => !cr.routineId);
+    if (missingRoutine) {
+      alert("Please assign a routine template to all selected participants.");
+      return;
+    }
+
+    // Warning when editing a session and removing a participant who has recorded feedback data
+    if (editingBookingId) {
+      const state = deps.getState();
+      const existingBooking = (state.bookings || []).find((b) => b.id === editingBookingId);
+      if (existingBooking?.participants) {
+        const selectedClientIds = clientRoutines.map((cr) => cr.clientId);
+        const removedParticipants = existingBooking.participants.filter(
+          (pid) => !selectedClientIds.includes(pid),
+        );
+        if (
+          removedParticipants.length > 0 &&
+          (existingBooking.status === "completed" ||
+            existingBooking.loggedHistory ||
+            existingBooking.hasFeedback)
+        ) {
+          const confirmed = confirm(
+            "Warning: You are removing a participant from a session with recorded feedback data. Removing a client from the session will update session details, but all exercise history logs already recorded for this client will be preserved in their client history. Do you wish to proceed?",
+          );
+          if (!confirmed) return;
         }
       }
+    }
 
-      const { t } = deps;
+    const sessionName = document.getElementById("setup-session-name")?.value.trim() || "";
+    const sessionDate = document.getElementById("setup-session-date")?.value || "";
+    const startTime = document.getElementById("setup-start-time")?.value || "";
+    const endTime = document.getElementById("setup-end-time")?.value || "";
+    const location = document.getElementById("setup-location")?.value.trim() || "";
 
-      if (clientRoutines.length === 0) {
-        alert("You must select at least one participant client.");
-        return;
-      }
+    let bookingMeta = null;
+    let timeLabel = "";
+    if (startTime && endTime) {
+      timeLabel = `${startTime} - ${endTime}`;
+    } else if (startTime) {
+      timeLabel = startTime;
+    } else {
+      timeLabel = t("date_unknown") || "Date Unknown";
+    }
 
-      const missingRoutine = clientRoutines.find((cr) => !cr.routineId);
-      if (missingRoutine) {
-        alert("Please assign a routine template to all selected participants.");
-        return;
-      }
+    if (isPlanningModeActive) {
+      bookingMeta = {
+        id: editingBookingId || `plan-${Date.now()}`,
+        isPlanning: true,
+        titles: [sessionName || t("planned_program") || "Planned Program"],
+        date: sessionDate,
+        timeLabel,
+        location,
+      };
+    } else {
+      bookingMeta = {
+        id: editingBookingId || `session-${Date.now()}`,
+        titles: [sessionName || t("workout_setup_title") || "Workout Session"],
+        date: sessionDate,
+        timeLabel,
+        location,
+      };
+    }
 
-      const sessionName = document.getElementById("setup-session-name")?.value.trim() || "";
-      const sessionDate = document.getElementById("setup-session-date")?.value || "";
-      const startTime = document.getElementById("setup-start-time")?.value || "";
-      const endTime = document.getElementById("setup-end-time")?.value || "";
-      const location = document.getElementById("setup-location")?.value.trim() || "";
-
-      let bookingMeta = null;
-      let timeLabel = "";
-      if (startTime && endTime) {
-        timeLabel = `${startTime} - ${endTime}`;
-      } else if (startTime) {
-        timeLabel = startTime;
-      } else {
-        timeLabel = t("date_unknown") || "Date Unknown";
-      }
-
-      if (isPlanningModeActive) {
-        bookingMeta = {
-          id: `plan-${Date.now()}`,
-          isPlanning: true,
-          titles: [sessionName || t("planned_program") || "Planned Program"],
-          date: sessionDate,
-          timeLabel,
-          location,
-        };
-      } else {
-        bookingMeta = {
-          id: `session-${Date.now()}`,
-          titles: [sessionName || t("workout_setup_title") || "Workout Session"],
-          date: sessionDate,
-          timeLabel,
-          location,
-        };
-      }
-
-      deps.startWorkoutSession(clientRoutines, bookingMeta);
-      dialog.close();
-    });
-  }
+    clearSetupDraft();
+    editingBookingId = null;
+    deps.startWorkoutSession(clientRoutines, bookingMeta);
+  });
 }
 
 export function openWorkoutSetupModal(
@@ -109,8 +199,10 @@ export function openWorkoutSetupModal(
   isPlanning = false,
 ) {
   isPlanningModeActive = isPlanning;
-  const dialog = document.getElementById("dialog-workout-setup");
-  if (!dialog) return;
+  editingBookingId = preselectedBookingId || null;
+  if (deps.switchView) {
+    deps.switchView("workout-setup");
+  }
 
   const participantsList = document.getElementById("setup-participants-assignment-list");
   if (!participantsList) return;
@@ -119,7 +211,7 @@ export function openWorkoutSetupModal(
   const state = deps.getState();
   const { t, getClientDisplayNameHTML } = deps;
 
-  const titleEl = dialog.querySelector(".modal-header h3");
+  const titleEl = document.getElementById("workout-setup-view-title");
   if (titleEl) {
     titleEl.textContent = isPlanning
       ? t("plan_program_title") || "Plan Upcoming Program"
@@ -130,6 +222,8 @@ export function openWorkoutSetupModal(
   if (preselectedBookingId && state.bookings) {
     targetBooking = state.bookings.find((b) => b.id === preselectedBookingId);
   }
+
+  const draft = getSetupDraft();
 
   // Calculate default start time rounded up to next :00 or :30 mark, and end time (+1h)
   const now = new Date();
@@ -157,10 +251,14 @@ export function openWorkoutSetupModal(
   const endInput = document.getElementById("setup-end-time");
   const locInput = document.getElementById("setup-location");
 
-  if (nameInput) nameInput.value = targetBooking?.title || targetBooking?.titles?.[0] || "";
-  if (dateInput) dateInput.value = targetBooking?.date || defaultDate;
+  if (nameInput)
+    nameInput.value =
+      draft?.sessionName ?? (targetBooking?.title || targetBooking?.titles?.[0] || "");
+  if (dateInput) dateInput.value = draft?.date || targetBooking?.date || defaultDate;
   if (startInput) {
-    if (targetBooking?.timeLabel) {
+    if (draft?.startTime) {
+      startInput.value = draft.startTime;
+    } else if (targetBooking?.timeLabel) {
       const parts = targetBooking.timeLabel.split("-").map((s) => s.trim());
       startInput.value = parts[0] || defaultStartTime;
     } else {
@@ -168,17 +266,19 @@ export function openWorkoutSetupModal(
     }
   }
   if (endInput) {
-    if (targetBooking?.timeLabel) {
+    if (draft?.endTime) {
+      endInput.value = draft.endTime;
+    } else if (targetBooking?.timeLabel) {
       const parts = targetBooking.timeLabel.split("-").map((s) => s.trim());
       endInput.value = parts[1] || defaultEndTime;
     } else {
       endInput.value = defaultEndTime;
     }
   }
-  // Leave empty by default so focusing/clicking shows all datalist selections
-  if (locInput) locInput.value = targetBooking?.location || "";
+  if (locInput) locInput.value = draft?.location ?? (targetBooking?.location || "");
 
-  for (const client of state.clients.sort((a, b) => a.name.localeCompare(b.name))) {
+  const clientsList = state?.clients || [];
+  for (const client of [...clientsList].sort((a, b) => a.name.localeCompare(b.name))) {
     const row = document.createElement("div");
     row.className = "participant-setup-row";
 
@@ -195,12 +295,13 @@ export function openWorkoutSetupModal(
     cb.style.height = "16px";
     cb.style.cursor = "pointer";
 
-    if (targetBooking) {
+    if (draft?.checkedClients) {
+      cb.checked = draft.checkedClients.includes(client.id);
+    } else if (targetBooking) {
       cb.checked = targetBooking.participants.includes(client.id);
     } else if (preselectedClientId === client.id) {
       cb.checked = true;
     } else if (!preselectedClientId && client.id !== "c3c7d2c4") {
-      // Default to checking first couple clients if none specified (like Jane and John)
       cb.checked = true;
     }
 
@@ -236,8 +337,10 @@ export function openWorkoutSetupModal(
       select.appendChild(opt);
     }
 
-    // Attempt default selections
-    if (isPlanningModeActive) {
+    // Restore selected routine from draft, target booking, or defaults
+    if (draft?.clientRoutines?.[client.id]) {
+      select.value = draft.clientRoutines[client.id];
+    } else if (isPlanningModeActive) {
       select.value = "empty_plan";
     } else if (targetBooking?.participants.includes(client.id)) {
       select.value = targetBooking.routineId;
@@ -257,6 +360,4 @@ export function openWorkoutSetupModal(
     row.appendChild(right);
     participantsList.appendChild(row);
   }
-
-  dialog.showModal();
 }

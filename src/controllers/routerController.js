@@ -8,11 +8,18 @@ export function getBasePath() {
 }
 
 export function toRoute(pathname) {
-  return pathname.startsWith(BASE_PATH) ? `/${pathname.slice(BASE_PATH.length)}` : pathname;
+  const baseNoSlash = BASE_PATH.endsWith("/") ? BASE_PATH.slice(0, -1) : BASE_PATH;
+  if (pathname === baseNoSlash || pathname === `${baseNoSlash}/`) return "/";
+  if (pathname.startsWith(`${baseNoSlash}/`)) {
+    return pathname.slice(baseNoSlash.length);
+  }
+  return pathname;
 }
 
 export function toUrl(route) {
-  return BASE_PATH + route.replace(/^\//, "");
+  const baseNoSlash = BASE_PATH.endsWith("/") ? BASE_PATH.slice(0, -1) : BASE_PATH;
+  const rel = route.startsWith("/") ? route : `/${route}`;
+  return baseNoSlash + rel;
 }
 
 export function switchView(viewId, { focusSessionsColumn } = {}) {

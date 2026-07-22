@@ -201,6 +201,8 @@ export function renderSessions({
   launchClipboardDirectly,
   saveToLocalStorage,
   rerenderSessions,
+  navigateToPath,
+  toUrl,
 }) {
   const yesterdayContainer = document.getElementById("yesterday-sessions-list");
   const todayContainer = document.getElementById("today-sessions-list");
@@ -224,6 +226,8 @@ export function renderSessions({
     getActiveSession,
     saveToLocalStorage,
     rerenderSessions,
+    navigateToPath,
+    toUrl,
   };
 
   const yesterdaySessions = bookings.filter((b) => b.day === "yesterday");

@@ -299,6 +299,10 @@ function init() {
     t,
     getClientDisplayNameHTML,
     startWorkoutSession,
+    switchView,
+    toUrl,
+    getISODateForColumn,
+    focusSessionsColumn,
   });
   setupWorkoutSetup();
   setupActiveSession();
@@ -533,6 +537,7 @@ function setupNavigation() {
   const createSessionBtn = document.getElementById("btn-create-session");
   if (createSessionBtn) {
     createSessionBtn.addEventListener("click", () => {
+      window.history.pushState(null, "", toUrl("/session/new"));
       openWorkoutSetupModal();
     });
   }
@@ -590,7 +595,18 @@ function handlePathChange() {
   // 4. /sessions/{isoDate}
   const sessionsDateMatch = path.match(/^\/sessions\/([0-9]{4}-[0-9]{2}-[0-9]{2})$/);
 
-  if (sessionEditMatch) {
+  if (path === "/session/new" || path === "/sessions/new") {
+    setHeaderState(false);
+    document.getElementById("active-session-overlay").classList.add("hidden");
+    switchView("workout-setup");
+    openWorkoutSetupModal(null, null, null, false);
+  } else if (path.startsWith("/session/setup/")) {
+    const bookingId = path.split("/session/setup/")[1];
+    setHeaderState(false);
+    document.getElementById("active-session-overlay").classList.add("hidden");
+    switchView("workout-setup");
+    openWorkoutSetupModal(null, null, bookingId, false);
+  } else if (sessionEditMatch) {
     const [, sessionId, clientId] = sessionEditMatch;
     setHeaderState(true);
     showSessionView(sessionId, clientId, null, { edit: true });
@@ -630,7 +646,7 @@ function handlePathChange() {
   } else if (path === "/" || path === "/index.html") {
     const todayDate = getISODateForColumn("today");
     setHeaderState(false);
-    window.history.replaceState(null, "", toUrl(`/sessions/${todayDate}`));
+    window.history.replaceState(null, "", toUrl(`/sessions/${todayDate}`) + window.location.search);
     document.getElementById("active-session-overlay").classList.add("hidden");
     switchView("clients");
     requestAnimationFrame(() => focusSessionsColumn("today", "auto"));
@@ -639,6 +655,7 @@ function handlePathChange() {
     setHeaderState(false);
     document.getElementById("active-session-overlay").classList.add("hidden");
     switchView("client-directory");
+    renderClientsList();
   } else if (path === "/adjustments") {
     setHeaderState(false);
     document.getElementById("active-session-overlay").classList.add("hidden");
@@ -914,6 +931,8 @@ function renderSessions() {
     launchClipboardDirectly,
     saveToLocalStorage,
     rerenderSessions: renderSessions,
+    navigateToPath,
+    toUrl,
   });
 }
 

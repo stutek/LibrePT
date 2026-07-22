@@ -174,7 +174,12 @@ export function syncSessionFocusUrl() {
   const { toRoute, toUrl } = appDeps;
   if (!toRoute || !toUrl) return;
   const current = toRoute(window.location.pathname);
-  if (!current.startsWith("/session/")) return;
+  if (
+    !current.startsWith("/session/") ||
+    current.startsWith("/session/new") ||
+    current.startsWith("/session/setup/")
+  )
+    return;
   const target = sessionFocusPath();
   if (target && current !== target) {
     window.history.replaceState(null, "", toUrl(target));

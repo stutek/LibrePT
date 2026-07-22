@@ -218,6 +218,9 @@ export function renderSessionCard(b, colContainer, deps) {
       <span class="badge badge-primary" style="font-size: 10px; padding: 2px 6px; font-weight: 700; font-family: monospace;">${escapeHTML(b.time)}</span>
       <strong class="booking-card-title" style="font-size: 13px;">${escapeHTML(b.title)}</strong>
       ${completedBadge}
+      <button class="btn-edit-booking icon-btn text-muted" title="${t("edit") || "Edit"}" style="margin-left: auto; padding: 2px 6px; font-size: 11px;" aria-label="Edit session">
+        <i class="fa-solid fa-pen"></i>
+      </button>
     </div>
     <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 2px;">
       <i class="fa-solid fa-users" style="margin-right: 4px; font-size: 10px;"></i> ${clientNamesStr || `<span style="color: #ef4444;">—</span>`}
@@ -228,6 +231,19 @@ export function renderSessionCard(b, colContainer, deps) {
     </div>
     ${warningHTML}
   `;
+
+  const editBtn = info.querySelector(".btn-edit-booking");
+  if (editBtn) {
+    editBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const { toUrl, navigateToPath } = deps;
+      if (navigateToPath) {
+        navigateToPath(`/session/setup/${b.id}`);
+      } else if (toUrl) {
+        window.history.pushState(null, "", toUrl(`/session/setup/${b.id}`));
+      }
+    });
+  }
 
   // Green left bracket spills into a full-width bottom bar with the Active-session tag + countdown;
   // the bar turns a warning colour when the session has run past its end (overtime, live-only).
