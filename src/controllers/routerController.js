@@ -276,21 +276,29 @@ export function handlePathChange() {
     }
   } else if (sessionsDateMatch) {
     const isoDate = sessionsDateMatch[1];
-    const column = routerDeps?.getColumnForISODate ? routerDeps.getColumnForISODate(isoDate) : "today";
+    const column = routerDeps?.getColumnForISODate
+      ? routerDeps.getColumnForISODate(isoDate)
+      : "today";
     setHeaderState(false);
     const overlay = document.getElementById("active-session-overlay");
     if (overlay) overlay.classList.add("hidden");
     switchView("clients");
-    requestAnimationFrame(() => routerDeps?.focusSessionsColumn ? routerDeps.focusSessionsColumn(column, "auto") : null);
+    requestAnimationFrame(() =>
+      routerDeps?.focusSessionsColumn ? routerDeps.focusSessionsColumn(column, "auto") : null,
+    );
     focusActiveSessionCard();
   } else if (path === "/" || path === "/index.html") {
-    const todayDate = routerDeps?.getISODateForColumn ? routerDeps.getISODateForColumn("today") : "";
+    const todayDate = routerDeps?.getISODateForColumn
+      ? routerDeps.getISODateForColumn("today")
+      : "";
     setHeaderState(false);
     window.history.replaceState(null, "", toUrl(`/sessions/${todayDate}`) + window.location.search);
     const overlay = document.getElementById("active-session-overlay");
     if (overlay) overlay.classList.add("hidden");
     switchView("clients");
-    requestAnimationFrame(() => routerDeps?.focusSessionsColumn ? routerDeps.focusSessionsColumn("today", "auto") : null);
+    requestAnimationFrame(() =>
+      routerDeps?.focusSessionsColumn ? routerDeps.focusSessionsColumn("today", "auto") : null,
+    );
     focusActiveSessionCard();
   } else if (path === "/clients") {
     setHeaderState(false);

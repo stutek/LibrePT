@@ -24,6 +24,14 @@ import {
   setFocusedSessionDay,
   setupSessionsDayNav,
 } from "./components/daySelector.js";
+import {
+  initEditSessionControl,
+  initWorkoutSetup,
+  openEditSessionControlModal,
+  openWorkoutSetupModal,
+  setupEditSessionControl,
+  setupWorkoutSetup,
+} from "./components/editSessionControl.js";
 import { initRestTimer, setupRestTimer } from "./components/exerciseAndRestTimer.js";
 import { renderExerciseDeck } from "./components/exerciseDeck.js";
 import {
@@ -49,14 +57,6 @@ import {
 import { renderSessionCard } from "./components/sessionCard.js";
 import { renderSessionList } from "./components/sessionList.js";
 import { initSessionTitleBar, renderSessionTitle } from "./components/sessionTitleBar.js";
-import {
-  initEditSessionControl,
-  initWorkoutSetup,
-  openEditSessionControlModal,
-  openWorkoutSetupModal,
-  setupEditSessionControl,
-  setupWorkoutSetup,
-} from "./components/editSessionControl.js";
 import {
   cancelWorkoutSession as cancelWorkoutSessionController,
   focusExerciseByIndex,
@@ -135,6 +135,7 @@ import {
   renderClientsList as clientsViewRender,
   showClientDetails as clientsViewShowDetails,
 } from "./views/clientsView.js";
+import { renderEditSessionView, renderWorkoutSetupView } from "./views/editSessionView.js";
 import { renderExercisesList as exercisesViewRender } from "./views/exercisesView.js";
 import { renderGlobalHistory as historyViewRender } from "./views/historyView.js";
 import {
@@ -147,7 +148,6 @@ import {
   seedDemoActiveSession as sessionsViewSeedDemo,
   setupCalendarBookings as sessionsViewSetupBookings,
 } from "./views/sessionsView.js";
-import { renderEditSessionView, renderWorkoutSetupView } from "./views/editSessionView.js";
 
 function t(key) {
   const lang = getState().lang || "en";
@@ -184,7 +184,7 @@ function init() {
     setOfflineCachedState,
   });
 
-  let state = loadSavedState();
+  const state = loadSavedState();
 
   const { lang: shareLang, init: shareInit } = getShareParams();
   if (shareLang && TRANSLATIONS[shareLang]) state.lang = shareLang;
@@ -431,7 +431,12 @@ function setupRoutineForms() {
   });
 }
 function setupExerciseForms() {
-  setupExerciseFormsController({ state: getState(), t, saveToLocalStorage: saveState, populateDropdownSelectors });
+  setupExerciseFormsController({
+    state: getState(),
+    t,
+    saveToLocalStorage: saveState,
+    populateDropdownSelectors,
+  });
 }
 function populateDropdownSelectors() {
   populateDropdownsController({ state: getState(), t });
@@ -524,7 +529,12 @@ function launchClipboardDirectly(arg) {
 }
 
 function setupCalendarBookings() {
-  sessionsViewSetupBookings({ state: getState(), t, saveToLocalStorage: saveState, renderSessions });
+  sessionsViewSetupBookings({
+    state: getState(),
+    t,
+    saveToLocalStorage: saveState,
+    renderSessions,
+  });
 }
 
 function renderSessions() {

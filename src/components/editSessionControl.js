@@ -101,9 +101,10 @@ export function setupEditSessionControl() {
   if (searchInput) {
     searchInput.addEventListener("input", (e) => {
       const q = e.target.value.toLowerCase().trim();
-      const rows = document
-        .getElementById("setup-participants-assignment-list")
-        ?.querySelectorAll(".participant-setup-row") || [];
+      const rows =
+        document
+          .getElementById("setup-participants-assignment-list")
+          ?.querySelectorAll(".participant-setup-row") || [];
       for (const row of rows) {
         const text = row.textContent.toLowerCase();
         row.style.display = !q || text.includes(q) ? "flex" : "none";

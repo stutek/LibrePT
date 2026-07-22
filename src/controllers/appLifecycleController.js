@@ -39,7 +39,11 @@ export function registerServiceWorker(basePath, setOfflineCachedState) {
   if (!("serviceWorker" in navigator)) return;
 
   navigator.serviceWorker.addEventListener("message", (event) => {
-    if (event.data && event.data.type === "OFFLINE_CACHE_USED" && typeof setOfflineCachedState === "function") {
+    if (
+      event.data &&
+      event.data.type === "OFFLINE_CACHE_USED" &&
+      typeof setOfflineCachedState === "function"
+    ) {
       setOfflineCachedState(true);
     }
   });
