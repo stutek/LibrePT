@@ -99,16 +99,28 @@ self.addEventListener("activate", (e) => {
 });
 
 function cachePut(request, response) {
+  let url;
   try {
-    const url = new URL(request.url);
-    if (url.protocol !== "http:" && url.protocol !== "https:") return response;
-
-    if (response && response.status === 200 && response.type !== "opaque") {
-      const copy = response.clone();
-      caches.open(CACHE_NAME).then((cache) => cache.put(request, copy)).catch(() => {});
-    }
+    url = new URL(request.url);
   } catch (err) {
-    // Ignore unsupported request schemes or caching failures
+    console.warn("ServiceWorker: Unable to parse request URL for caching:", request.url, err);
+    return response;
+  }
+
+  // Cache Storage API only supports http: and https: schemes.
+  // Non-HTTP requests (e.g. chrome-extension://, moz-extension://, data:, blob:) are skipped.
+  if (url.protocol !== "http:" && url.protocol !== "https:") {
+    return response;
+  }
+
+  if (response && response.status === 200 && response.type !== "opaque") {
+    const copy = response.clone();
+    caches
+      .open(CACHE_NAME)
+      .then((cache) => cache.put(request, copy))
+      .catch((err) => {
+        console.warn("ServiceWorker: Failed to write to cache for", request.url, err);
+      });
   }
   return response;
 }
