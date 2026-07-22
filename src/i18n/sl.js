@@ -230,6 +230,9 @@ export const sl = {
   notif_demo_mode_desc:
     "Aplikacija deluje v predstavitvenem načinu, vnaprej napolnjena z vzorčnimi strankami, rutinami in sejami. Preden jo začnete uporabljati za resnično, poklicno delo, vam močno priporočamo, da najprej počistite predstavitvene podatke — sledite postopku za čiščenje v dokumentaciji.",
   notif_demo_mode_btn: "Kako počistiti predstavitvene podatke",
+  notif_demo_mode_reset_btn: "Počisti podatke in zapusti predstavitveni način",
+  confirm_reset_demo_data:
+    "Počistim vse vzorčne predstavitvene podatke in ponastavim na prazno stanje?",
   notif_welcome_title: "👋 Dobrodošli v LibrePT: Interaktivni predstavitvi",
   notif_welcome_desc:
     "Povabilo k zagonu celovite predstavitve: Preizkusite vodenje osebnih seans. Ker vaša aplikacija že vsebuje aktivne podatke, si oglejte dokumentacijo z navodili ali odprite interaktivno predstavitev na stutek.github.io/LibrePT/.",

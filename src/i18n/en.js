@@ -230,6 +230,8 @@ export const en = {
   notif_demo_mode_desc:
     "This app is running in demo mode, preloaded with sample clients, routines, and sessions. Before you start using it for real, professional work, we strongly recommend clearing the demo data first — follow the clean-up procedure in the documentation.",
   notif_demo_mode_btn: "How to clean up demo data",
+  notif_demo_mode_reset_btn: "Clear Demo Data & Exit Demo Mode",
+  confirm_reset_demo_data: "Clear all sample demo data and reset to a clean, empty slate?",
   notif_welcome_title: "👋 Welcome to LibrePT: Interactive Demo",
   notif_welcome_desc:
     "Invite to run the demo end-to-end: Experience personal training orchestration. Since your workspace is preloaded with live training data, explore the interactive walkthrough documentation or open the live interactive demo at stutek.github.io/LibrePT/.",

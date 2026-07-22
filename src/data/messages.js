@@ -19,9 +19,14 @@ export const DEFAULT_MESSAGES = [
     descKey: "notif_demo_mode_desc",
     actions: [
       {
+        labelKey: "notif_demo_mode_reset_btn",
+        resetDemo: true,
+        primary: true,
+      },
+      {
         labelKey: "notif_demo_mode_btn",
         url: "https://github.com/stutek/LibrePT/blob/main/README.md#resetting-to-a-clean-state",
-        primary: true,
+        primary: false,
       },
     ],
   },

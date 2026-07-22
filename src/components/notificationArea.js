@@ -56,6 +56,7 @@ export function renderNotificationArea() {
       label: a.labelKey ? t(a.labelKey) : a.label || "",
       url: a.url,
       view: a.view,
+      resetDemo: a.resetDemo,
       primary: a.primary,
     })),
     read: readIds.includes(n.id),
@@ -132,6 +133,9 @@ export function renderNotificationArea() {
           ? `<div class="notification-actions">
           ${item.actions
             .map((act) => {
+              if (act.resetDemo) {
+                return `<button type="button" class="notification-btn ${act.primary ? "primary" : ""}" data-action-reset="true" data-action-id="${escapeHTML(item.id)}">${escapeHTML(act.label)}</button>`;
+              }
               if (act.url) {
                 return `<a href="${escapeHTML(act.url)}" target="_blank" rel="noopener noreferrer" class="notification-btn ${act.primary ? "primary" : ""}" data-action-id="${escapeHTML(item.id)}">${escapeHTML(act.label)}</a>`;
               }
@@ -157,6 +161,21 @@ export function renderNotificationArea() {
     `;
     })
     .join("");
+
+  // Attach reset demo data listeners
+  for (const btn of container.querySelectorAll("button[data-action-reset]")) {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const msg =
+        t("confirm_reset_demo_data") ||
+        "Clear all sample demo data and reset to a clean, empty slate?";
+      if (window.confirm(msg)) {
+        if (typeof window.resetLibrePTData === "function") {
+          window.resetLibrePTData({ demo: false });
+        }
+      }
+    });
+  }
 
   // Attach navigation action listeners and mark-read listeners inside the notification cards
   for (const btn of container.querySelectorAll("button[data-nav-target]")) {
