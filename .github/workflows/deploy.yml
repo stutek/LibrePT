@@ -49,15 +49,15 @@ jobs:
           .venv/bin/pip install --upgrade pip
           .venv/bin/pip install -r requirements.txt
 
-      - name: Run Linting (Ruff & Biome)
+      - name: Install Playwright Browsers & OS Dependencies
+        run: |
+          .venv/bin/playwright install chromium --with-deps
+
+      - name: Run Full Build Validation Check (Linting & Tests)
         env:
           CI: "true"
         run: |
-          .venv/bin/python -c "from build import run_lint; run_lint()"
-
-      - name: Run Automated Test Suite
-        run: |
-          .venv/bin/python -c "from build import run_tests; run_tests()"
+          .venv/bin/python -m build check
 
       # The runtime app lives under src/. Publish that whole tree (index.html + app.js +
       # index.css + manifest.json + sw.js + i18n/ + components/ + icons/) flattened to the dist
