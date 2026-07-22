@@ -76,6 +76,10 @@
         <!-- Build stamp (commit SHA) — visible so a client screenshot pins a bug report to a build.
              Filled from version.js by app.js; the deploy/build overwrite version.js with the real SHA. -->
         <span id="app-version" class="app-version" aria-label="Build version"></span>
+        <!-- Pre-release marker: this build is a PREVIEW, not for production use. A deliberately
+             loud, always-visible cue so no screenshot or bug report is ambiguous about the stage.
+             Standalone for now; the fuller multi-version /preview/ + beta ribbon is TODO 16.2. -->
+        <span id="preview-ribbon" class="preview-ribbon" role="status" aria-label="Preview build — pre-release, not for production use">PREVIEW</span>
       </div>
       
       <div class="header-actions">

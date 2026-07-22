@@ -2,6 +2,7 @@
 // Keep keys in parity with every other locale in this folder.
 export const sl = {
   logo_title: "LibrePT",
+  preview_ribbon: "Predogled",
   tab_clients: "Stranke",
   tab_routines: "Rutine",
   tab_exercises: "Vaje",

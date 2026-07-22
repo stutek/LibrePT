@@ -3,6 +3,7 @@
 // tests/unit/test_i18n_parity.py, which iterates the registry in ./index.js).
 export const en = {
   logo_title: "LibrePT",
+  preview_ribbon: "Preview",
   tab_clients: "Clients",
   tab_routines: "Routines",
   tab_exercises: "Exercises",

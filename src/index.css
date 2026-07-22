@@ -325,6 +325,51 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav {
   color: var(--primary);
   filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.4));
 }
+/* Pre-release PREVIEW marker (see index.html / TODO 16.2). Amber is a warning cue, so it stays
+   theme-independent by design — a warning that changed colour per theme would read as decoration. */
+.preview-ribbon {
+  align-self: center;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: #f59e0b;
+  color: #1a1206;
+  font-family: var(--font-header, sans-serif);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  line-height: 1.4;
+  white-space: nowrap;
+  cursor: default;
+  box-shadow:
+    0 0 0 1px rgba(245, 158, 11, 0.5),
+    0 2px 8px rgba(245, 158, 11, 0.35);
+}
+/* A gentle glow pulse, never a flash — and only for viewers who haven't asked to reduce motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .preview-ribbon {
+    animation: previewPulse 2.4s ease-in-out infinite;
+  }
+  @keyframes previewPulse {
+    0%,
+    100% {
+      box-shadow:
+        0 0 0 1px rgba(245, 158, 11, 0.5),
+        0 2px 8px rgba(245, 158, 11, 0.3);
+    }
+    50% {
+      box-shadow:
+        0 0 0 1px rgba(245, 158, 11, 0.85),
+        0 2px 14px rgba(245, 158, 11, 0.6);
+    }
+  }
+}
+/* Phones: keep the ribbon, drop the numeric build stamp so the header can't overflow. */
+@media (max-width: 600px) {
+  .app-version {
+    display: none;
+  }
+}
 .logo-area h1 {
   font-family: var(--font-header);
   font-size: 26px;
