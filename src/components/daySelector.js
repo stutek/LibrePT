@@ -17,6 +17,13 @@ const SESSION_SCROLL_SETTLE_MS = 700;
 
 let focusedSessionDay = "today";
 let sessionsProgrammaticScrollUntil = 0;
+// The day focused when the current touch swipe began, or null when no user swipe is in flight.
+// A hard flick's momentum can carry the native snap deck past the next column; clamping the
+// settled column to within one step of this origin keeps one swipe to exactly one day.
+let swipeOriginDay = null;
+// True while a finger is down on the deck. Column detection is deferred until the finger lifts so a
+// mid-drag scroll-settle can't consume the swipe origin before the post-release fling settles.
+let sessionsTouchActive = false;
 
 export function initDaySelector(d) {
   deps = d;
@@ -163,6 +170,8 @@ function stepSessionsColumn(delta) {
 export function detectFocusedSessionsColumn() {
   const grid = getSessionsGrid();
   if (!grid || grid.offsetParent === null) return;
+  // Wait for the finger to lift so the swipe origin survives until the release fling settles.
+  if (sessionsTouchActive) return;
 
   const gridLeft = grid.getBoundingClientRect().left;
   let closest = focusedSessionDay;
@@ -175,6 +184,20 @@ export function detectFocusedSessionsColumn() {
       closestDist = dist;
       closest = day;
     }
+  }
+
+  // A user swipe advances at most one day: if fling momentum overshot the neighbouring column,
+  // clamp back and let focusSessionsColumn re-snap the deck to the allowed day.
+  if (swipeOriginDay !== null) {
+    const originIdx = SESSION_DAY_ORDER.indexOf(swipeOriginDay);
+    const closestIdx = SESSION_DAY_ORDER.indexOf(closest);
+    const clampedIdx = Math.max(originIdx - 1, Math.min(originIdx + 1, closestIdx));
+    swipeOriginDay = null;
+    if (clampedIdx !== closestIdx) {
+      focusSessionsColumn(SESSION_DAY_ORDER[clampedIdx]);
+      return;
+    }
+    closest = SESSION_DAY_ORDER[clampedIdx];
   }
 
   if (closest !== focusedSessionDay) {
@@ -200,6 +223,24 @@ export function setupSessionsDayNav() {
 
   const grid = getSessionsGrid();
   if (grid) {
+    // Remember the focused day at the start of a finger drag so the settle handler can hold the
+    // deck to a single day's advance even when the browser's fling momentum overshoots.
+    grid.addEventListener(
+      "touchstart",
+      () => {
+        sessionsTouchActive = true;
+        swipeOriginDay = focusedSessionDay;
+      },
+      { passive: true },
+    );
+    grid.addEventListener(
+      "touchend",
+      () => {
+        sessionsTouchActive = false;
+      },
+      { passive: true },
+    );
+
     let scrollSettleTimer = null;
     grid.addEventListener(
       "scroll",
