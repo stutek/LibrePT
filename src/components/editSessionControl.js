@@ -59,7 +59,9 @@ export const saveSetupDraft = saveEditSessionDraft;
 export function clearEditSessionDraft() {
   try {
     localStorage.removeItem(DRAFT_KEY);
-  } catch (e) {}
+  } catch (e) {
+    console.warn("Failed to clear edit session draft from localStorage:", e);
+  }
 }
 export const clearSetupDraft = clearEditSessionDraft;
 
@@ -68,6 +70,7 @@ export function getEditSessionDraft() {
     const raw = localStorage.getItem(DRAFT_KEY);
     return raw ? JSON.parse(raw) : null;
   } catch (e) {
+    console.warn("Failed to retrieve edit session draft from localStorage:", e);
     return null;
   }
 }

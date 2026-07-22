@@ -59,7 +59,9 @@
         var resolved = map[t] || t;
         var themeClass = valid[resolved] || 'daylight-theme';
         document.documentElement.className = themeClass;
-      } catch (e) {}
+      } catch (e) {
+        console.warn("Theme bootstrap script error:", e);
+      }
     })();
   </script>
 </head>

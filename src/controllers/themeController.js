@@ -55,7 +55,8 @@ export function getInitialTheme() {
     const paramTheme = params.get("theme");
     const storedTheme = localStorage.getItem("librept-theme");
     return resolveTheme(paramTheme || storedTheme);
-  } catch (_) {
+  } catch (err) {
+    console.warn("Failed to retrieve initial theme from localStorage or query params:", err);
     return DEFAULT_THEME;
   }
 }
@@ -81,7 +82,9 @@ export function applyTheme(themeKey) {
 
   try {
     localStorage.setItem("librept-theme", resolved);
-  } catch (_) {}
+  } catch (err) {
+    console.warn("Failed to persist theme choice to localStorage:", err);
+  }
 
   return resolved;
 }

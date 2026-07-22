@@ -187,7 +187,9 @@ export function renderNotificationArea() {
         readIds.push(itemId);
         try {
           localStorage.setItem("librept_read_notifications", JSON.stringify(readIds));
-        } catch (e) {}
+        } catch (e) {
+          console.warn("Failed to persist read notifications to localStorage:", e);
+        }
       }
       if (target && deps.navigateToPath) {
         deps.navigateToPath(target);
@@ -205,7 +207,9 @@ export function renderNotificationArea() {
         readIds.push(itemId);
         try {
           localStorage.setItem("librept_read_notifications", JSON.stringify(readIds));
-        } catch (e) {}
+        } catch (e) {
+          console.warn("Failed to persist read notifications to localStorage:", e);
+        }
         renderNotificationArea();
       }
     });
@@ -219,7 +223,9 @@ export function renderNotificationArea() {
         readIds.push(itemId);
         try {
           localStorage.setItem("librept_read_notifications", JSON.stringify(readIds));
-        } catch (e) {}
+        } catch (e) {
+          console.warn("Failed to persist read notifications to localStorage:", e);
+        }
         renderNotificationArea();
       }
     });
@@ -273,6 +279,7 @@ export function setupNotificationGestures() {
       try {
         readIds = JSON.parse(localStorage.getItem("librept_read_notifications") || "[]");
       } catch (e) {
+        console.warn("Failed to parse read notifications from localStorage:", e);
         readIds = [];
       }
       for (const n of deps.getState?.().notifications || []) {
@@ -280,7 +287,9 @@ export function setupNotificationGestures() {
       }
       try {
         localStorage.setItem("librept_read_notifications", JSON.stringify(readIds));
-      } catch (e) {}
+      } catch (e) {
+        console.warn("Failed to persist read notifications to localStorage:", e);
+      }
       renderNotificationArea();
     });
   }

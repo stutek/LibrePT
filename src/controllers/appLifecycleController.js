@@ -9,8 +9,8 @@ export function resizeToPhoneViewport() {
   const targetHeight = 915;
   try {
     window.resizeTo(targetWidth, targetHeight);
-  } catch (e) {
-    // Disallowed by browser on ordinary tabs — silently ignored
+  } catch (err) {
+    console.debug("window.resizeTo ignored by browser:", err);
   }
 }
 
@@ -28,8 +28,10 @@ export function lockPortraitOrientation() {
   const apply = () => {
     try {
       const p = orientation.lock("portrait");
-      if (p?.catch) p.catch(() => {});
-    } catch (_) {}
+      if (p?.catch) p.catch((err) => console.debug("Screen orientation lock rejected:", err));
+    } catch (err) {
+      console.debug("Screen orientation lock unsupported or rejected:", err);
+    }
   };
   apply();
   orientation.addEventListener("change", apply);
@@ -66,7 +68,7 @@ export function setupOnlineOfflineListeners(basePath, setOfflineCachedState) {
         .then((res) => {
           if (res.ok) setOfflineCachedState(false);
         })
-        .catch(() => {});
+        .catch((err) => console.warn("Failed to reach server during online check:", err));
     }
   });
 }
