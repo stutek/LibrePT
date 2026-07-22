@@ -76,6 +76,14 @@ import {
   setupRoutineForms as setupRoutineFormsController,
 } from "./controllers/formsController.js";
 import { setupViewDismiss } from "./controllers/gestureController.js";
+import {
+  focusActiveSessionCard,
+  getBasePath,
+  showErrorView as showErrorViewController,
+  switchView as switchViewController,
+  toRoute,
+  toUrl,
+} from "./controllers/routerController.js";
 // app.js - LibrePT Application Controller Logic
 import {
   DEFAULT_CLIENTS,
@@ -98,6 +106,9 @@ import {
   formatSignedDuration,
   generateShortUUID,
   getClientDisplayNameHTML,
+  getColumnForISODate,
+  getISODateForColumn,
+  getISODateString,
   getInitials,
   getOverlappingBookings,
   isTimeOverlapping,
@@ -528,92 +539,11 @@ function setupNavigation() {
 // Theme controller and switcher logic moved to components/applicationHeader.js
 
 function switchView(viewId) {
-  // Hide all views
-  for (const view of document.querySelectorAll(".app-view")) {
-    view.classList.remove("active");
-  }
-
-  // Deactivate all nav items
-  for (const item of document.querySelectorAll(".header-nav .nav-item, .bottom-nav .nav-item")) {
-    item.classList.remove("active");
-  }
-
-  // Show target view
-  const targetView = document.getElementById(`view-${viewId}`);
-  if (targetView) {
-    targetView.classList.add("active");
-  }
-
-  // Highlight bottom nav matching tab
-  // Handles secondary screens (like client detail) which don't map to bottom nav
-  const mainTab = viewId.split("-")[0]; // handles 'client-detail' -> 'client' or matches 'clients'
-  const tabItem = document.querySelector(
-    `.header-nav .nav-item[data-view^="${mainTab}"], .bottom-nav .nav-item[data-view^="${mainTab}"]`,
-  );
-  if (tabItem) {
-    tabItem.classList.add("active");
-  }
-
-  // Scroll to top
-  document.getElementById("main-content").scrollTop = 0;
-
-  // Coming home always re-focuses today, so the trainer never lands on a stale day
-  if (viewId === "clients") {
-    requestAnimationFrame(() => focusSessionsColumn("today", "smooth"));
-  }
+  switchViewController(viewId, { focusSessionsColumn });
 }
 
-// Not-found view for deep-link URLs that match no route (or reference a deleted entity).
-// The URL is left untouched so the bad link stays visible; the omnipresent header stays put
-// because #view-error lives inside #main-content like every other view.
 function showErrorView(attemptedPath) {
-  setHeaderState(false);
-  document.getElementById("active-session-overlay").classList.add("hidden");
-  const pathEl = document.getElementById("error-view-path");
-  if (pathEl) pathEl.textContent = attemptedPath;
-  switchView("error");
-}
-
-function getISODateString(date) {
-  const d = new Date(date);
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
-function getISODateForColumn(day) {
-  const now = Date.now();
-  if (day === "yesterday") return getISODateString(now - 24 * 60 * 60 * 1000);
-  if (day === "today") return getISODateString(now);
-  if (day === "tomorrow") return getISODateString(now + 24 * 60 * 60 * 1000);
-  if (day === "upcoming") return getISODateString(now + 2 * 24 * 60 * 60 * 1000);
-  return getISODateString(now);
-}
-
-function getColumnForISODate(isoDate) {
-  if (isoDate === getISODateForColumn("yesterday")) return "yesterday";
-  if (isoDate === getISODateForColumn("today")) return "today";
-  if (isoDate === getISODateForColumn("tomorrow")) return "tomorrow";
-  return "upcoming";
-}
-
-// The app root path: "/" in local dev (served at the domain root) and "/LibrePT/" on
-// GitHub Pages (a project site served under /<repo>/). Derived from this module's own URL
-// so the router works under any deploy sub-path without hardcoding it. The deploy step
-// rewrites <base href> to the same sub-path so assets resolve there too.
-const BASE_PATH = new URL(".", import.meta.url).pathname;
-
-// window.location.pathname (which includes BASE_PATH) -> the root-relative route the
-// matchers below expect (e.g. "/LibrePT/sessions/2026-07-17" -> "/sessions/2026-07-17").
-function toRoute(pathname) {
-  return pathname.startsWith(BASE_PATH) ? `/${pathname.slice(BASE_PATH.length)}` : pathname;
-}
-
-// A root-relative route -> a full path under BASE_PATH for pushState/replaceState
-// (e.g. "/sessions/2026-07-17" -> "/LibrePT/sessions/2026-07-17").
-function toUrl(route) {
-  return BASE_PATH + route.replace(/^\//, "");
+  showErrorViewController(attemptedPath, { switchView, setHeaderState });
 }
 
 function navigateToPath(targetPath) {
@@ -633,16 +563,6 @@ function navigateToPath(targetPath) {
 function setHeaderState() {
   const normalActions = document.querySelector(".normal-header-actions");
   if (normalActions) normalActions.classList.remove("hidden");
-}
-
-// On entering the sessions dashboard, bring the ongoing session into view (it may be below the fold
-// after the completed ones). Only called on view-entry — never on the timer re-renders — so it
-// never yanks a trainer who has scrolled away. inline:'nearest' keeps the horizontal day focus.
-function focusActiveSessionCard() {
-  requestAnimationFrame(() => {
-    const card = document.querySelector("#today-sessions-list .booking-card.booking-live");
-    if (card) card.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
-  });
 }
 
 function handlePathChange() {

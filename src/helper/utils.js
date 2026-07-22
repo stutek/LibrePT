@@ -175,3 +175,27 @@ export function buildBookingMeta(bookings, day, getSessionDayDate) {
     timeLabel: `${formatClockFromMinutes(startMin)} - ${formatClockFromMinutes(endMin)}`,
   };
 }
+
+export function getISODateString(date) {
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+export function getISODateForColumn(day) {
+  const now = Date.now();
+  if (day === "yesterday") return getISODateString(now - 24 * 60 * 60 * 1000);
+  if (day === "today") return getISODateString(now);
+  if (day === "tomorrow") return getISODateString(now + 24 * 60 * 60 * 1000);
+  if (day === "upcoming") return getISODateString(now + 2 * 24 * 60 * 60 * 1000);
+  return getISODateString(now);
+}
+
+export function getColumnForISODate(isoDate) {
+  if (isoDate === getISODateForColumn("yesterday")) return "yesterday";
+  if (isoDate === getISODateForColumn("today")) return "today";
+  if (isoDate === getISODateForColumn("tomorrow")) return "tomorrow";
+  return "upcoming";
+}
