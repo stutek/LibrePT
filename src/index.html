@@ -78,8 +78,15 @@
         <span id="app-version" class="app-version" aria-label="Build version"></span>
         <!-- Pre-release marker: this build is a PREVIEW, not for production use. A deliberately
              loud, always-visible cue so no screenshot or bug report is ambiguous about the stage.
-             Standalone for now; the fuller multi-version /preview/ + beta ribbon is TODO 16.2. -->
-        <span id="preview-ribbon" class="preview-ribbon" role="status" aria-label="Preview build — pre-release, not for production use">PREVIEW</span>
+             Clickable → the risks & data-loss notice in the repo. Standalone for now; the fuller
+             multi-version /preview/ + beta ribbon is TODO 16.2. -->
+        <a id="preview-ribbon" class="preview-ribbon"
+           href="https://github.com/stutek/LibrePT/blob/main/docs/PREVIEW.md"
+           target="_blank" rel="noopener noreferrer"
+           aria-label="Preview build — pre-release, may lose data. Open the risks & data-loss notice.">
+          <span id="preview-ribbon-label">PREVIEW</span>
+          <i class="fa-solid fa-circle-question" aria-hidden="true"></i>
+        </a>
       </div>
       
       <div class="header-actions">

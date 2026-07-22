@@ -309,6 +309,9 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav {
   display: flex;
   align-items: center;
   gap: 12px;
+  /* Allow the cluster to shrink on narrow phones so only the wordmark truncates — the stamp,
+     PREVIEW tag, and action buttons keep their size (see .logo-area h1 / .header-actions). */
+  min-width: 0;
 }
 /* Build stamp next to the wordmark — small, muted, monospace. */
 .app-version {
@@ -328,6 +331,9 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav {
 /* Pre-release PREVIEW marker (see index.html / TODO 16.2). Amber is a warning cue, so it stays
    theme-independent by design — a warning that changed colour per theme would read as decoration. */
 .preview-ribbon {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   align-self: center;
   padding: 2px 9px;
   border-radius: 999px;
@@ -340,34 +346,71 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav {
   text-transform: uppercase;
   line-height: 1.4;
   white-space: nowrap;
-  cursor: default;
+  cursor: pointer;
+  text-decoration: none;
   box-shadow:
     0 0 0 1px rgba(245, 158, 11, 0.5),
     0 2px 8px rgba(245, 158, 11, 0.35);
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
 }
-/* A gentle glow pulse, never a flash — and only for viewers who haven't asked to reduce motion. */
+.preview-ribbon:hover,
+.preview-ribbon:focus-visible {
+  transform: translateY(-1px);
+  box-shadow:
+    0 0 0 1px rgba(245, 158, 11, 0.9),
+    0 3px 14px rgba(245, 158, 11, 0.6);
+  outline: none;
+}
+.preview-ribbon .fa-circle-question {
+  font-size: 11px;
+  opacity: 0.85;
+}
+/* A gentle but clearly-visible pulse (opacity + glow), never a flash — and only for viewers who
+   haven't asked to reduce motion, who keep a steady pill instead. */
 @media (prefers-reduced-motion: no-preference) {
   .preview-ribbon {
-    animation: previewPulse 2.4s ease-in-out infinite;
+    animation: previewPulse 1.8s ease-in-out infinite;
   }
   @keyframes previewPulse {
     0%,
     100% {
+      opacity: 1;
       box-shadow:
         0 0 0 1px rgba(245, 158, 11, 0.5),
         0 2px 8px rgba(245, 158, 11, 0.3);
     }
     50% {
+      opacity: 0.55;
       box-shadow:
         0 0 0 1px rgba(245, 158, 11, 0.85),
-        0 2px 14px rgba(245, 158, 11, 0.6);
+        0 2px 16px rgba(245, 158, 11, 0.7);
     }
   }
 }
-/* Phones: keep the ribbon, drop the numeric build stamp so the header can't overflow. */
+/* Phones: keep BOTH the build stamp (pins a bug report to a build — matters most in preview) and
+   the PREVIEW tag by shrinking the logo cluster + padding so the header still fits, rather than
+   dropping either signal. */
 @media (max-width: 600px) {
+  .header-container {
+    padding: 0 10px;
+  }
+  .logo-area {
+    gap: 6px;
+  }
+  .logo-icon {
+    font-size: 22px;
+  }
+  .logo-area h1 {
+    font-size: 19px;
+  }
   .app-version {
-    display: none;
+    margin-left: -3px;
+  }
+  .preview-ribbon {
+    padding: 2px 7px;
+    letter-spacing: 0.5px;
   }
 }
 .logo-area h1 {
@@ -377,12 +420,19 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav {
   line-height: 1;
   margin: 0;
   letter-spacing: -0.5px;
+  /* Truncates instead of forcing header overflow when space is tight (icon still carries the brand). */
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .header-actions,
 .normal-header-actions {
   display: flex;
   align-items: center;
   gap: 8px;
+  /* Never shrink the controls; the wordmark yields first. */
+  flex-shrink: 0;
 }
 .header-actions .icon-btn {
   width: 44px;

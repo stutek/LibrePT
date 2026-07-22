@@ -6,7 +6,7 @@ export function applyStaticDOMMappings(tDict) {
   // Map of selector to translation key
   const staticMappings = {
     ".logo-area h1": "logo_title",
-    "#preview-ribbon": "preview_ribbon",
+    "#preview-ribbon-label": "preview_ribbon",
     // Application (☰) header menu + About / Terms modals
     "#menu-label-lang": "menu_language",
     "#menu-label-theme": "menu_theme",

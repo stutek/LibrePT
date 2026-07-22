@@ -179,6 +179,13 @@ export function setupApplicationHeader() {
     });
   }
 
+  // The PREVIEW tag lives inside the logo area but is its own link (risks/data-loss notice).
+  // Stop its click from bubbling to the logo's home-navigation so it only opens the notice.
+  const previewRibbon = document.getElementById("preview-ribbon");
+  if (previewRibbon) {
+    previewRibbon.addEventListener("click", (e) => e.stopPropagation());
+  }
+
   // Language switcher setup
   const langSwitcher = document.getElementById("lang-switcher");
   if (langSwitcher) {

@@ -20,7 +20,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 ## 2026-07-22 — Session setup view, security headers, resilience hardening
 
 ### Added
-- **PREVIEW ribbon** — an always-visible amber pre-release marker next to the logo (`#preview-ribbon`, i18n `preview_ribbon`), theme-independent, pulsing only under `prefers-reduced-motion: no-preference`; the build stamp hides on phones to avoid header overflow. Standalone, decoupled from the multi-version `/preview/` machinery (TODO 16.2).
+- **PREVIEW ribbon** — an always-visible amber pre-release marker next to the logo (`#preview-ribbon`, i18n `preview_ribbon`), theme-independent, gently pulsing under `prefers-reduced-motion: no-preference`. It's a **clickable link with a help (?) icon** opening the risks & data-loss notice ([docs/PREVIEW.md](docs/PREVIEW.md)). On phones the logo wordmark truncates so the tag, build stamp, and controls all stay visible. Standalone, decoupled from the multi-version `/preview/` machinery (TODO 16.2).
 - **Session setup as a first-class view** (`editSessionView.js`), reached from an edit (✎) icon on each session card: configure a session's **start time, end time, date, name, location** (combobox), and **assigned program** up-front instead of discovering them after booking (TODO 1.5). Start time rounds to the next `:00`/`:30`, end defaults to +1h, with data-loss warnings and a discard-changes action.
 - **Interactive demo invitation** shown on the empty dashboard (TODO 9.3), with reset/reload demo data callable straight from the notification card.
 - **Security headers**: Content-Security-Policy and related `<meta>` tags in `index.html`; HTTPS redirect enforced for non-localhost HTTP requests.
