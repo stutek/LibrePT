@@ -61,9 +61,9 @@ export const en = {
   workout_setup_desc:
     "Configure session details and check clients to select participants (2–6). You can assign a distinct routine template to each individual, or select a shared routine.",
   label_session_name: "Session Name",
-  label_session_date: "Date",
-  label_start_time: "Start Time",
-  label_end_time: "End Time",
+  label_session_date: "Date (YYYY-MM-DD)",
+  label_start_time: "Start Time (24h)",
+  label_end_time: "End Time (24h)",
   label_location: "Location",
   select_participants: "Select Participants & Assign Routines",
   btn_launch_clipboard: "Session Details",
@@ -229,7 +229,8 @@ export const en = {
   notif_demo_mode_title: "⚠️ Demo mode — sample data loaded",
   notif_demo_mode_desc:
     "This app is running in demo mode, preloaded with sample clients, routines, and sessions. Before you start using it for real, professional work, we strongly recommend clearing the demo data first — follow the clean-up procedure in the documentation.",
-  notif_demo_mode_btn: "How to clean up demo data",
+  notif_demo_mode_btn: "About demo data",
+  filter_participants_placeholder: "Filter clients...",
   notif_demo_mode_reset_btn: "Clear Demo Data & Exit Demo Mode",
   confirm_reset_demo_data: "Clear all sample demo data and reset to a clean, empty slate?",
   notif_welcome_title: "👋 Welcome to LibrePT: Interactive Demo",

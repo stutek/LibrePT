@@ -137,7 +137,7 @@ export function renderNotificationArea() {
                 return `<button type="button" class="notification-btn ${act.primary ? "primary" : ""}" data-action-reset="true" data-action-id="${escapeHTML(item.id)}">${escapeHTML(act.label)}</button>`;
               }
               if (act.url) {
-                return `<a href="${escapeHTML(act.url)}" target="_blank" rel="noopener noreferrer" class="notification-btn ${act.primary ? "primary" : ""}" data-action-id="${escapeHTML(item.id)}">${escapeHTML(act.label)}</a>`;
+                return `<a href="${escapeHTML(act.url)}" target="_blank" rel="noopener noreferrer" class="notification-link" data-action-id="${escapeHTML(item.id)}">${escapeHTML(act.label)} <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 11px; margin-left: 2px;"></i></a>`;
               }
               return `<button type="button" class="notification-btn ${act.primary ? "primary" : ""}" data-nav-target="${escapeHTML(act.view || "")}" data-action-id="${escapeHTML(item.id)}">${escapeHTML(act.label)}</button>`;
             })

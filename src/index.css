@@ -1577,6 +1577,22 @@ body:has(#active-session-overlay:not(.hidden))
 .notification-btn.primary:hover {
   filter: brightness(1.1);
 }
+.notification-link {
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 0;
+  transition: opacity 0.2s ease;
+}
+.notification-link:hover {
+  opacity: 0.85;
+  text-decoration: none;
+}
 /* Fullscreen Active Workout Overlay Sheet */
 .active-session-overlay {
   position: fixed;

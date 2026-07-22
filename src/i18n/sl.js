@@ -61,9 +61,9 @@ export const sl = {
   workout_setup_desc:
     "Nastavite podrobnosti seje in izberite stranke (2–6). Posameznikom lahko dodelite ločene ali skupne predloge rutin.",
   label_session_name: "Ime seje",
-  label_session_date: "Datum",
-  label_start_time: "Začetni čas",
-  label_end_time: "Končni čas",
+  label_session_date: "Datum (YYYY-MM-DD)",
+  label_start_time: "Začetni čas (24h)",
+  label_end_time: "Končni čas (24h)",
   label_location: "Lokacija",
   select_participants: "Izberi udeležence in dodeli rutine",
   btn_launch_clipboard: "Podrobnosti seje",
@@ -229,7 +229,8 @@ export const sl = {
   notif_demo_mode_title: "⚠️ Predstavitveni način — naloženi vzorčni podatki",
   notif_demo_mode_desc:
     "Aplikacija deluje v predstavitvenem načinu, vnaprej napolnjena z vzorčnimi strankami, rutinami in sejami. Preden jo začnete uporabljati za resnično, poklicno delo, vam močno priporočamo, da najprej počistite predstavitvene podatke — sledite postopku za čiščenje v dokumentaciji.",
-  notif_demo_mode_btn: "Kako počistiti predstavitvene podatke",
+  notif_demo_mode_btn: "O predstavitvenih podatkih",
+  filter_participants_placeholder: "Filtriraj stranke...",
   notif_demo_mode_reset_btn: "Počisti podatke in zapusti predstavitveni način",
   confirm_reset_demo_data:
     "Počistim vse vzorčne predstavitvene podatke in ponastavim na prazno stanje?",

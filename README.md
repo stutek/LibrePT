@@ -39,6 +39,14 @@ Then open <http://localhost:8081>; it redirects to <http://localhost:8081/LibreP
 
 **Data & privacy**: all state lives in the browser's `localStorage` under the `librept_db` key, and voice notes never leave the device. Use the header's cloud **Sync & Backup** button (cloud + ↻, with mock ahead/behind change counters) to export/restore the database as JSON.
 
+### About Demo Data
+
+LibrePT boots to a clean, empty state by default. To explore the platform pre-loaded with sample clients, routines, and workout sessions, open LibrePT with the demo deep-link: `<http://localhost:8081/LibrePT/?init=demo_data_load>` (or append `?init=demo_data_load` to any URL).
+
+- **Sample Dataset**: Includes sample clients, pre-configured routines, and multi-set history.
+- **Safety Guard**: `?init=demo_data_load` only populates a **genuinely empty** app — if any client data is already present, it is ignored so it never overwrites existing records.
+- **Clearing Demo Data**: Follow the clean-up procedure below to return to a clean slate before starting real client work.
+
 ### Resetting to a clean state
 
 LibrePT can be reset from sample demo data back to a first-run clean slate at any time:

@@ -92,6 +92,21 @@ export function setupWorkoutSetup() {
     btn.addEventListener("click", handleCancel);
   }
 
+  // Real-time participant filtering by client name
+  const searchInput = document.getElementById("setup-participant-search");
+  if (searchInput) {
+    searchInput.addEventListener("input", (e) => {
+      const q = e.target.value.toLowerCase().trim();
+      const rows = document
+        .getElementById("setup-participants-assignment-list")
+        ?.querySelectorAll(".participant-setup-row") || [];
+      for (const row of rows) {
+        const text = row.textContent.toLowerCase();
+        row.style.display = !q || text.includes(q) ? "flex" : "none";
+      }
+    });
+  }
+
   // Auto-save draft on any input change
   form.addEventListener("input", saveSetupDraft);
   form.addEventListener("change", saveSetupDraft);
@@ -207,6 +222,9 @@ export function openWorkoutSetupModal(
   const participantsList = document.getElementById("setup-participants-assignment-list");
   if (!participantsList) return;
   participantsList.innerHTML = "";
+
+  const searchInput = document.getElementById("setup-participant-search");
+  if (searchInput) searchInput.value = "";
 
   const state = deps.getState();
   const { t, getClientDisplayNameHTML } = deps;
