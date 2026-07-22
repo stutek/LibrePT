@@ -19,6 +19,7 @@ We believe that data privacy and data ownership are fundamental rights:
 
 When using cloud synchronization, remote database hosting, or backup features (`Sync & Backup Center`):
 - Data is transmitted directly from your local device to your personal cloud storage provider (e.g., Google Drive AppData folder, iCloud, or WebDAV) or integrated remote databases using standard client-side authentication.
+- **HTTPS Only Protocol Enforcement:** All remote network communications and Web PWA assets are strictly restricted to TLS-encrypted HTTPS endpoints. Non-localhost HTTP connections are automatically redirected to `https://` before application initialization, guaranteeing that client records, authentication tokens, and backup payloads are never exposed over unencrypted HTTP channels.
 - **No Third-Party Interception:** The LibrePT maintainers and developers do not host, access, process, or view any data you sync to your personal cloud storage or remote databases.
 - **End-to-End Security:** We strongly recommend securing your device with a passcode/biometrics and utilizing client-side encryption (`Web Crypto API`) where applicable so that synced cloud snapshots and backups remain opaque and secure at rest.
 
