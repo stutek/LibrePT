@@ -1,6 +1,7 @@
 /* themes/blossom.css - Blossom — soft pink/lavender, VERY rounded/pill shapes */
 /* A gentle, soft palette on a light blush field with the roundest shapes (pill buttons), the
    counterpoint to the Red theme's hard edges. */
+html.blossom-theme,
 body.blossom-theme {
   --bg-color: #fdf2f8;
   --bg-gradient: radial-gradient(1000px 720px at 6% -10%, rgba(244, 114, 182, 0.3), transparent 60%),

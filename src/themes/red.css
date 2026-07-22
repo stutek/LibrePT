@@ -2,6 +2,7 @@
 /* A sporty, aggressive red skin: red (#DA291C) and gold (#FBE122) on a deep red field, white
    text, sharp near-square corners. --success stays green so "completed" keeps its meaning;
    --danger is gold since red-on-red would vanish. */
+html.red-theme,
 body.red-theme {
   --bg-color: #2a0407;
   --bg-gradient: radial-gradient(1050px 720px at 12% -10%, rgba(218, 41, 28, 0.6), transparent 58%),

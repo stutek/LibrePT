@@ -42,7 +42,19 @@
   <link rel="modulepreload" href="views/clientsView.js">
   <link rel="modulepreload" href="views/routinesView.js">
   <link rel="modulepreload" href="views/exercisesView.js">
-  <link rel="modulepreload" href="views/historyView.js">
+  <script>
+    (function() {
+      try {
+        var params = new URLSearchParams(window.location.search);
+        var t = params.get('theme') || localStorage.getItem('librept-theme') || 'daylight';
+        var map = { dark: 'midnight', light: 'daylight', rose: 'blossom', violet: 'nebula' };
+        var valid = { midnight: 'midnight-theme', daylight: 'daylight-theme', red: 'red-theme', blossom: 'blossom-theme', nebula: 'nebula-theme' };
+        var resolved = map[t] || t;
+        var themeClass = valid[resolved] || 'daylight-theme';
+        document.documentElement.className = themeClass;
+      } catch (e) {}
+    })();
+  </script>
 </head>
 <body class="daylight-theme">
 
@@ -150,10 +162,6 @@
         <button class="view-grabber" type="button" aria-label="Open session clipboard"></button>
         <h2 class="view-title-label" id="sessions-view-title">Sessions</h2>
         <div class="sessions-date-picker">
-          <button id="btn-sessions-today" class="sessions-today-btn" type="button" aria-label="Jump to today">
-            <i class="fa-solid fa-calendar-day" aria-hidden="true"></i>
-            <span class="today-btn-label">Today</span>
-          </button>
           <button id="btn-sessions-prev" class="sessions-nav-arrow" type="button" aria-label="Yesterday" title="Yesterday">
             <i class="fa-solid fa-chevron-left"></i>
           </button>

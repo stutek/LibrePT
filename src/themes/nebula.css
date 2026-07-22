@@ -1,5 +1,6 @@
 /* themes/nebula.css - Nebula — deep indigo, violet/fuchsia/cyan, crisp shapes */
 /* Premium "cosmic tech" dark theme with a rich mesh gradient and tight, crisp corners. */
+html.nebula-theme,
 body.nebula-theme {
   --bg-color: #0b0a1f;
   --bg-gradient: radial-gradient(1050px 700px at 8% -8%, rgba(139, 92, 246, 0.34), transparent 58%),

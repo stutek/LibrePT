@@ -1,5 +1,6 @@
 /* themes/midnight.css - Midnight (default dark) — sleek zinc + emerald, medium shapes */
 :root,
+html.midnight-theme,
 body.midnight-theme {
   --bg-color: #09090b; /* zinc-950 */
   --bg-gradient: radial-gradient(1100px 720px at 12% -8%, rgba(16, 185, 129, 0.16), transparent 60%),

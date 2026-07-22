@@ -1,4 +1,5 @@
 /* themes/daylight.css - Daylight (light) — airy slate + emerald, soft rounded shapes */
+html.daylight-theme,
 body.daylight-theme {
   --bg-color: #f6f7fb;
   --bg-gradient: radial-gradient(1000px 700px at 8% -10%, rgba(16, 185, 129, 0.12), transparent 60%),
