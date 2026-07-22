@@ -13,5 +13,5 @@ tags:
 
 | Document / Template | Type | Description |
 | :--- | :--- | :--- |
-| [PRIVACY.md](file:///home/simon/Projects/LibrePT/PRIVACY.md) | `guidelines` | Core Privacy Policy & GDPR Data Controller Statement |
-| [templates/Client_Consent_Form.md](file:///home/simon/Projects/LibrePT/docs/templates/Client_Consent_Form.md) | `template` | Downloadable/Printable Informative Client Consent Letter |
+| [PRIVACY.md](../PRIVACY.md) | `guidelines` | Core Privacy Policy & GDPR Data Controller Statement |
+| [templates/Client_Consent_Form.md](templates/Client_Consent_Form.md) | `template` | Downloadable/Printable Informative Client Consent Letter |

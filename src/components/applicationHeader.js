@@ -78,9 +78,31 @@ export function setSyncTrackingReady(val) {
   syncTrackingReady = val;
 }
 
+let isOfflineCached = false;
+
+export function setOfflineCachedState(val) {
+  isOfflineCached = val;
+  renderSyncBadge();
+}
+
+export function isOfflineCachedActive() {
+  return isOfflineCached;
+}
+
 export function renderSyncBadge() {
   const badge = document.getElementById("sync-badge");
   if (!badge) return;
+
+  if (isOfflineCached) {
+    badge.classList.remove("hidden");
+    badge.innerHTML = `<span class="sync-offline" title="${deps?.t ? deps.t("offline_cached_desc") : "HTTP server unreachable. Running on cached code."}"><i class="fa-solid fa-wifi-slash"></i> Offline</span>`;
+    badge.setAttribute(
+      "aria-label",
+      deps?.t ? deps.t("offline_cached_desc") : "HTTP server unreachable. Running on cached code.",
+    );
+    return;
+  }
+
   const { local, remote } = mockSyncState;
   if (local === 0 && remote === 0) {
     badge.classList.add("hidden");

@@ -11,7 +11,7 @@ tags:
 
 # LibrePT Changelog
 
-Shipped changes, newest first. Backlog and open questions live in [TODO.md](file:///home/simon/Projects/LibrePT/TODO.md); completed backlog items graduate here once they are older than a week.
+Shipped changes, newest first. Backlog and open questions live in [TODO.md](TODO.md); completed backlog items graduate here once they are older than a week.
 
 Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Added**, **Changed**, **Fixed**.
 

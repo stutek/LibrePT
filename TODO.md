@@ -14,7 +14,7 @@ tags:
 
 Captured backlog. Nothing here is implemented yet. Items marked **[Brainstorm]** are unresolved design questions to settle before any code is written.
 
-Canonical context: [README.md](file:///home/simon/Projects/LibrePT/README.md) (architecture & features), [use_cases/](file:///home/simon/Projects/LibrePT/use_cases/) (workflows), [CONTRIBUTING.md](file:///home/simon/Projects/LibrePT/CONTRIBUTING.md) (conventions).
+Canonical context: [README.md](README.md) (architecture & features), [use_cases/](use_cases/) (workflows), [CONTRIBUTING.md](CONTRIBUTING.md) (conventions).
 
 ---
 
@@ -25,13 +25,13 @@ The session card on the home dashboard must let the **PT assign clients to a ses
 
 - Assignment happens from the session card on the dashboard.
 - Assigned clients are **notified by a calendar invite email**, when an email address exists for them in the database.
-- Complements, does not replace, the existing self-subscription flow ([uc4_client_self_subscription.md](file:///home/simon/Projects/LibrePT/use_cases/uc4_client_self_subscription.md)).
+- Complements, does not replace, the existing self-subscription flow ([uc4_client_self_subscription.md](use_cases/uc4_client_self_subscription.md)).
 - **Open**: clients with no email on record — assign silently, or prompt for an address?
 
 ### 1.2 [ ] Simultaneous sessions merged into one clipboard: multi-line titles + per-participant tags
 When several sessions run in **the same time slot with different programmes**, the clipboard must merge **all participants into a single view**, with enough visual separation to tell which participant belongs to which session/programme.
 
-- Relates to the existing "Asynchronous Session Scenarios" capability in [uc1_gym_floor_clipboard.md](file:///home/simon/Projects/LibrePT/use_cases/uc1_gym_floor_clipboard.md).
+- Relates to the existing "Asynchronous Session Scenarios" capability in [uc1_gym_floor_clipboard.md](use_cases/uc1_gym_floor_clipboard.md).
 - The distinguishing signal must survive the gym-floor constraints: glanceable, no reading required.
 - **Confirmed not a bug**: this merge already happens today — `getOverlappingBookings`/`launchClipboardDirectly` (`src/helper/utils.js`, `src/views/sessionsView.js`) merge any bookings whose time ranges overlap on the same day into one `startWorkoutSession` call. What's missing is purely the "who's from which booking" visual separation this item has always been about.
 - **The data gap**: `buildBookingMeta` already collects a deduplicated `titles` array (and `ids`) across merged bookings — that part is close to free. What's actually discarded is **per-participant origin**: `launchClipboardDirectly`'s merge loop builds a flat `clientId → routineId` map with no record of which source booking each client came from. Needs a parallel `clientId → sourceBookingId` (or `sourceBookingTitle`) map threaded through into the session/`clientRoutines` data so the UI can look it up per person.
@@ -51,12 +51,13 @@ The session list can no longer assume one session per time slot. Model and displ
 `src/data/sessions.js`'s `currentHour = Math.min(18, Math.max(3, now.getHours()))` capped demo session times at 6pm with no documented reasoning (traced via `git log -S` to a large unrelated refactor, `03381c9`, that introduced it silently — before that it was uncapped `now.getHours()`). Simon: most gyms run well past 18:00, some to 23:00 or later. **Done**: dropped the upper clamp — `currentHour = Math.max(3, now.getHours())` — keeping only the lower floor so demo sessions never generate at 2am. Incidentally reduces (but doesn't eliminate) how often [13.5](#135-x-defect-test_timer_survives_reload_and_goes_overtime-fails--pre-existing-not-caused-by-134)'s session-staleness gotcha bites.
 
 ### 1.5 [ ] Session creation form is missing key fields
-"Create session" currently does not expose: **start time**, **end time**, **date**, **session name**, or **program/routine assignment**. The PT has no way to configure a session before it goes live — all of those must be set up-front, not discovered after booking.
+"Create session" currently does not expose: **start time**, **end time**, **date**, **session name**, **location** (combo box), or **program/routine assignment**. The PT has no way to configure a session before it goes live — all of those must be set up-front, not discovered after booking.
 
-- Start & end time: the obvious gym-floor fields — missing from the creation dialog entirely.
-- Date: a session can only be created for the implicit current day; needs an explicit date picker so the PT can schedule ahead.
+- Start & end time: explicit start and end time pickers.
+- Date: explicit date picker defaulting to today so the PT can schedule ahead.
 - Session name: free-text label for the session (e.g. "Morning Strength", "Evening Mobility").
-- Program / routine: PT must be able to assign a saved routine/programme to the session at creation time, not only after launching the clipboard.
+- Location: combo box (select / input with `<datalist>`) for choosing standard gym locations (e.g., "Main Floor", "Studio A", "Rack 1") or typing a custom location.
+- Program / routine: PT must be able to assign a saved routine/programme to the session at creation time.
 - Relates to [1.3](#13--session-list-must-model-partial-overlaps-and-other-pts-room-usage) (time model) and [4.3](#43-collapse-the-duplicated-session-header-into-one-row-with-a-date-picker) (session header / date picker).
 
 ---
@@ -83,10 +84,10 @@ When no session is active:
 ### 2.3 [x] Every session card gets a status line (live / upcoming countdown / past elapsed, editable)
 Feature request by Simon, expanding the earlier "countdown for upcoming cards" ask into a unified status line **every** session card carries, not just live ones.
 
-- **Done — Upcoming**: a live HH:MM countdown to the scheduled start (`isUpcoming`/`startMs` in [sessionCard.js](file:///home/simon/Projects/LibrePT/src/components/sessionCard.js)), reusing the same per-second ticker as the existing countdown-to-end, aimed at the other end of the slot. `getSessionDayDate` (daySelector.js) maps each relative day bucket to a real date so this stays consistent with the rest of the dashboard despite bookings having no real date of their own (TODO 4.3). **Resolved open question**: no special "starting now" beat — it just keeps ticking; past `00:00` it reads a small negative H:MM until the next natural re-render reclassifies the card as live.
+- **Done — Upcoming**: a live HH:MM countdown to the scheduled start (`isUpcoming`/`startMs` in [sessionCard.js](src/components/sessionCard.js)), reusing the same per-second ticker as the existing countdown-to-end, aimed at the other end of the slot. `getSessionDayDate` (daySelector.js) maps each relative day bucket to a real date so this stays consistent with the rest of the dashboard despite bookings having no real date of their own (TODO 4.3). **Resolved open question**: no special "starting now" beat — it just keeps ticking; past `00:00` it reads a small negative H:MM until the next natural re-render reclassifies the card as live.
 - **Done — Past**: an elapsed-time status line with a `fa-clock-rotate-left` icon (violet `--temporal-past` tint, matching the existing past-title color language), showing `b.duration` if known or a scheduled-slot-length fallback for seed data. **Editable**: click the value to swap in an inline `H:MM` input — Enter/blur commits via `parseDurationHM`, Escape cancels — persisted onto `b.duration` (seconds) and `saveToLocalStorage`d.
 - **Done — plumbing that was missing**: `finishWorkoutSession` (activeSessionController.js) previously never touched `state.bookings` at all — only `state.history` — so a dynamically-finished session could never show a past status line. It now stamps `completed: true` + `duration` onto the matching booking(s).
-- **Done — HH:MM-only formatting**: new `formatDurationHM`/`parseDurationHM` pair in [helper/utils.js](file:///home/simon/Projects/LibrePT/src/helper/utils.js), used by all three states including the existing live-session timer (previously `formatSignedDuration`, `h:mm:ss`). The floating clipboard timer stack and the overlay's own session-duration readout were left untouched, as scoped.
+- **Done — HH:MM-only formatting**: new `formatDurationHM`/`parseDurationHM` pair in [helper/utils.js](src/helper/utils.js), used by all three states including the existing live-session timer (previously `formatSignedDuration`, `h:mm:ss`). The floating clipboard timer stack and the overlay's own session-duration readout were left untouched, as scoped.
 - New i18n keys `starts_in`/`elapsed`/`edit_elapsed_time` (EN+SL). Verified in-browser (all three states, the inline edit surviving a reload, and a real dynamic finish→past-bar round trip) and via the full e2e suite (77 passed, only the pre-existing [13.5](#135--defect-test_timer_survives_reload_and_goes_overtime-fails--pre-existing-not-caused-by-134) failure, unrelated).
 
 ---
@@ -206,11 +207,8 @@ Strip **client body-weight tracking** from the app for the time being.
 ### 6.2 [~] Extract use cases and usage scenarios from the tests
 The Playwright suite already drives real end-to-end flows (gym-floor clipboard launch, voice notes, feedback → adjustment wizard, day-deck navigation, swipes). Those flows are **executable usage scenarios** that are currently documented nowhere.
 
-- Extract the scenarios the tests actually exercise and **document them properly** in [use_cases/](file:///home/simon/Projects/LibrePT/use_cases/), following OKF (frontmatter + `INDEX.md` row + graph links).
-- Reconcile against the existing UC1–UC4: some tested behaviour is already specified, some (the session day deck) is not, and some specified behaviour has no test — the gaps in **both** directions are the interesting output.
-- Goal: tests and use cases describe the same system, so a scenario can be traced from spec to the test that proves it.
-
-- **Partly done**: the biggest gap the tests exercised but no UC specified — the **session day deck, deep-linkable views, and the not-found flow** — is now written up as **[UC5](file:///home/simon/Projects/LibrePT/use_cases/uc5_session_day_deck_and_deep_links.md)** (OKF frontmatter + both INDEX rows + graph links to UC1/UC2/UC4), including a **spec↔test traceability table** mapping each scenario to `test_sessions_dashboard.py` / `test_session_deeplink.py` / `test_error_view.py` / `test_clipboard.py`.
+- Extract the scenarios the tests actually exercise and **document them properly** in [use_cases/](use_cases/), following OKF (frontmatter + `INDEX.md` row + graph links).
+- **Partly done**: the biggest gap the tests exercised but no UC specified — the **session day deck, deep-linkable views, and the not-found flow** — is now written up as **[UC5](use_cases/uc5_session_day_deck_and_deep_links.md)** (OKF frontmatter + both INDEX rows + graph links to UC1/UC2/UC4), including a **spec↔test traceability table** mapping each scenario to `test_sessions_dashboard.py` / `test_session_deeplink.py` / `test_error_view.py` / `test_clipboard.py`.
 - **Still open**: (a) the reverse gaps — UC1/UC2 behaviour (voice notes, the feedback→adjustment wizard, plan pivots) that has partial or no test coverage; (b) whether the newer app-surface flows (themes, header menu, first-run terms, sync/backup) each deserve a UC or belong in README feature docs. The interesting reconciliation of *specified-but-untested* is not yet complete.
 
 ---

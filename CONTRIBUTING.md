@@ -14,7 +14,7 @@ tags:
 
 Thanks for your interest in LibrePT. This guide covers how to set the project up, how to verify changes, and the conventions a pull request is expected to follow.
 
-For the system architecture and feature specification, see [README.md](file:///home/simon/Projects/LibrePT/README.md). If you are an AI coding agent, read [AGENT_RULES.md](file:///home/simon/Projects/LibrePT/AGENT_RULES.md) first.
+For the system architecture and feature specification, see [README.md](README.md). If you are an AI coding agent, read [AGENT_RULES.md](AGENT_RULES.md) first.
 
 ---
 
@@ -68,10 +68,10 @@ Or run the test suite directly:
 
 | Suite | Covers |
 | :--- | :--- |
-| [tests/test_app.py](file:///home/simon/Projects/LibrePT/tests/test_app.py) | Static integrity: file structure, manifest icons, `staticMappings` selectors resolving against `index.html`, and seed data structure. |
-| [tests/unit/](file:///home/simon/Projects/LibrePT/tests/unit/) | Non-browser structural checks: EN/SL translation key parity (`test_i18n_parity.py`), DOM id/selector mappings (`test_dom_mappings.py`), and project layout (`test_project_layout.py`). |
-| [tests/test_browser.py](file:///home/simon/Projects/LibrePT/tests/test_browser.py) | Playwright end-to-end flows in real Chromium: sessions day navigation, touch swipes between days, single-column deck at every viewport, and the interactive dashboard flow. |
-| [tests/e2e/](file:///home/simon/Projects/LibrePT/tests/e2e/) | Playwright deep-flow suites: the sessions dashboard, clipboard launch, session deep-link routing, and the not-found/error view. |
+| [tests/test_app.py](tests/test_app.py) | Static integrity: file structure, manifest icons, `staticMappings` selectors resolving against `index.html`, and seed data structure. |
+| [tests/unit/](tests/unit/) | Non-browser structural checks: EN/SL translation key parity (`test_i18n_parity.py`), DOM id/selector mappings (`test_dom_mappings.py`), and project layout (`test_project_layout.py`). |
+| [tests/test_browser.py](tests/test_browser.py) | Playwright end-to-end flows in real Chromium: sessions day navigation, touch swipes between days, single-column deck at every viewport, and the interactive dashboard flow. |
+| [tests/e2e/](tests/e2e/) | Playwright deep-flow suites: the sessions dashboard, clipboard launch, session deep-link routing, and the not-found/error view. |
 
 The verify → build → deploy chain lives in the `build/` and `deploy/` packages, each runnable on its own and debuggable:
 
@@ -124,7 +124,7 @@ All Markdown in this repository follows Google's **Open Knowledge Format (OKF v0
 1. **Frontmatter**: Every Markdown file begins with YAML frontmatter containing at minimum `type` (`overview`, `guidelines`, `use_case`, `index`), plus `title`, `description`, `status`, and `tags`.
 2. **Directory indexing**: Every directory containing knowledge files maintains an `INDEX.md` catalog table listing each file, its `type`, and a clickable link. Adding a document means adding its index row in the same change.
 3. **Graph interconnectivity**: Link related concepts with explicit Markdown links so the knowledge graph stays traversable.
-4. **Single source of truth**: Do not duplicate feature specifications across files. Architecture and features live in [README.md](file:///home/simon/Projects/LibrePT/README.md); workflows live in [use_cases/](file:///home/simon/Projects/LibrePT/use_cases/). Link to them instead of restating them.
+4. **Single source of truth**: Do not duplicate feature specifications across files. Architecture and features live in [README.md](README.md); workflows live in [use_cases/](use_cases/). Link to them instead of restating them.
 
 ---
 
@@ -135,4 +135,4 @@ All Markdown in this repository follows Google's **Open Knowledge Format (OKF v0
 3. Run the test suite, and add coverage for new user-facing behavior.
 4. Describe the gym-floor problem the change solves — the ergonomics rationale matters as much as the diff.
 
-By contributing, you agree that your contributions are licensed under the [MIT License](file:///home/simon/Projects/LibrePT/LICENSE).
+By contributing, you agree that your contributions are licensed under the [MIT License](LICENSE).

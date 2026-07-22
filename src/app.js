@@ -5,6 +5,7 @@ import {
   initApplicationHeader,
   renderSyncBadge,
   resetSyncState,
+  setOfflineCachedState,
   setSyncTrackingReady,
   setupApplicationHeader,
 } from "./components/applicationHeader.js";
@@ -916,13 +917,33 @@ function renderSessions() {
   });
 }
 
-// Register Service Worker for offline PWA support
+// Service Worker offline signal listener & online/offline browser events
 if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.addEventListener("message", (event) => {
+    if (event.data && event.data.type === "OFFLINE_CACHE_USED") {
+      setOfflineCachedState(true);
+    }
+  });
+
   window.addEventListener("load", () => {
     navigator.serviceWorker
       .register(`${getBasePath()}sw.js`)
       .then((reg) => console.log("PWA Service Worker registered:", reg.scope))
       .catch((err) => console.error("PWA Service Worker registration failed:", err));
+  });
+}
+
+// Window online/offline status monitoring
+if (typeof window !== "undefined") {
+  window.addEventListener("offline", () => setOfflineCachedState(true));
+  window.addEventListener("online", () => {
+    if (navigator.onLine) {
+      fetch(`${getBasePath()}version.js?check=${Date.now()}`, { cache: "no-store" })
+        .then((res) => {
+          if (res.ok) setOfflineCachedState(false);
+        })
+        .catch(() => {});
+    }
   });
 }
 

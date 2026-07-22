@@ -21,8 +21,8 @@ analytics stay consistent across months of client history. This use case specifi
 professional pivot and the three concrete ways a trainer selects movements. It realises TODO §13.
 
 See also the deep-link routing overview in
-[UC5](file:///home/simon/Projects/LibrePT/use_cases/uc5_session_day_deck_and_deep_links.md) and the
-gym-floor clipboard in [UC1](file:///home/simon/Projects/LibrePT/use_cases/uc1_gym_floor_clipboard.md).
+[UC5](uc5_session_day_deck_and_deep_links.md) and the
+gym-floor clipboard in [UC1](uc1_gym_floor_clipboard.md).
 
 ---
 
@@ -75,7 +75,7 @@ whole roster.
 ## 4. Polymorphic Reps & Load
 
 A set is not always "3 × 10 × 40 kg". Reps and load are **polymorphic**, resolved by
-[helper/repsAndLoad.js](file:///home/simon/Projects/LibrePT/src/helper/repsAndLoad.js):
+[../src/helper/repsAndLoad.js](../src/helper/repsAndLoad.js):
 
 - **Reps**: a count (`10`), a range (`8-12`), a hold/time (`30s`), or **to-failure** (`max`, the
   engine's failure token).
@@ -88,27 +88,31 @@ load**, not equipment alone: loaded compounds → *strength* (`3/5/8/10/max`), l
 *hypertrophy* (`8/10/12/15/max`), core & most bodyweight movements → *endurance* (`10/20/50/max`),
 mobility → *time* (`20s/30s/45s/60s`) — with a bodyweight override that keeps vertical pulls
 (pull-ups) at *strength*. The tiers live only in
-[repsAndLoad.js](file:///home/simon/Projects/LibrePT/src/helper/repsAndLoad.js) (`REPS_TIERS`); the
+[../src/helper/repsAndLoad.js](../src/helper/repsAndLoad.js) (`REPS_TIERS`); the
 `<datalist>`s are **generated from them at boot**, so nothing is hardcoded in markup, and the PT can
 always type any value regardless of the suggestion.
 
 ---
 
-## 5. Traceability (spec ↔ tests)
+## 7. Spec ↔ Code & Test Traceability
 
-| Scenario | Test |
+| Specification Requirement | Target Implementation / Test |
 | :--- | :--- |
-| Catalog shows equipment/pattern badges, not instructions | [tests/e2e/test_exercise_taxonomy.py](file:///home/simon/Projects/LibrePT/tests/e2e/test_exercise_taxonomy.py) · `test_catalog_shows_taxonomy_badges_not_instructions` |
-| Scenario A — routine-builder picker drops a standardized movement | `test_routine_builder_picker_drops_a_movement` (same file) |
-| Scenario C — custom-exercise creation requires muscle group + equipment + pattern | `test_custom_exercise_requires_taxonomy` (same file) |
-| Polymorphic reps/load parse, format & equipment-derived units | [tests/e2e/test_reps_and_load.py](file:///home/simon/Projects/LibrePT/tests/e2e/test_reps_and_load.py) · `test_reps_and_load_helpers` |
+| Taxonomy catalog (equipment + pattern badges) | [../src/data/exercises.js](../src/data/exercises.js) · `EXERCISES` |
+| Filtered movement picker modal (Scenario A/B) | [../src/components/exercisePicker.js](../src/components/exercisePicker.js) · `renderExercisePicker` |
+| Polymorphic reps/load parse, format & equipment-derived units | [../src/helper/repsAndLoad.js](../src/helper/repsAndLoad.js) · `parseRepsTarget` / `formatRepsTarget` / `getLoadUnitForEquipment` |
+| Custom movement creation (strict inheritance) | [../src/components/exercisePicker.js](../src/components/exercisePicker.js) · `renderCustomMovementForm` |
+| Catalog shows equipment/pattern badges, not instructions | [../tests/e2e/test_exercise_taxonomy.py](../tests/e2e/test_exercise_taxonomy.py) · `test_catalog_shows_taxonomy_badges_not_instructions` |
+| Filter chips constrain list & search narrows dynamically | [../tests/e2e/test_exercise_taxonomy.py](../tests/e2e/test_exercise_taxonomy.py) · `test_picker_filters_and_search` |
+| Custom movement form enforces name + equipment + pattern | [../tests/e2e/test_exercise_taxonomy.py](../tests/e2e/test_exercise_taxonomy.py) · `test_custom_movement_creation_flow` |
+| Polymorphic reps/load parse, format & equipment-derived units | [../tests/e2e/test_reps_and_load.py](../tests/e2e/test_reps_and_load.py) · `test_reps_and_load_helpers` |
 
 ---
 
-## 6. Related Use Cases
+## 8. Related Use Cases
 
-- **[UC1 — Gym-Floor Clipboard](file:///home/simon/Projects/LibrePT/use_cases/uc1_gym_floor_clipboard.md)**: Scenario B's live swap happens inside the clipboard; the inline editor authors reps/load with the same polymorphic controls.
-- **[UC2 — Asynchronous Plan Adjustments](file:///home/simon/Projects/LibrePT/use_cases/uc2_async_plan_adjustments.md)**: the desk-side adjustment wizard reuses the picker to swap a flagged movement.
+- **[UC1 — Gym-Floor Clipboard](uc1_gym_floor_clipboard.md)**: Scenario B's live swap happens inside the clipboard; the inline editor authors reps/load with the same polymorphic controls.
+- **[UC2 — Asynchronous Plan Adjustments](uc2_async_plan_adjustments.md)**: the desk-side adjustment wizard reuses the picker to swap a flagged movement.
 
 > **Open gap.** Seeding/mapping the base catalog from an established open taxonomy (e.g. wger / ExRx)
 > for universally interchangeable exports remains future work (TODO §13.1).

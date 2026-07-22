@@ -57,6 +57,13 @@ export const en = {
     "Delete every exercise from this plan? You can rebuild it from scratch or exit editing.",
   warning_banner_title: "Client Safety Advisory",
   workout_setup_title: "Workout Session Setup",
+  workout_setup_desc:
+    "Configure session details and check clients to select participants (2–6). You can assign a distinct routine template to each individual, or select a shared routine.",
+  label_session_name: "Session Name",
+  label_session_date: "Date",
+  label_start_time: "Start Time",
+  label_end_time: "End Time",
+  label_location: "Location",
   select_participants: "Select Participants & Assign Routines",
   btn_launch_clipboard: "Session Details",
   err_select_client: "You must select at least one participant client.",
@@ -242,4 +249,8 @@ export const en = {
   date_unknown: "Date Unknown",
   planning: "Planning",
   btn_plan_program: "Plan Program",
+  offline_cached_badge: "Offline (Cached Code)",
+  offline_cached_desc:
+    "HTTP server unreachable. Running off cached code; unable to check for updates.",
+  offline_cached_status: "HTTP server is currently unreachable. You are running off cached code.",
 };

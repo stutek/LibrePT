@@ -140,7 +140,7 @@ def test_single_column_deck_at_every_viewport(page, local_server):
         page.set_viewport_size({"width": width, "height": height})
         page.goto(local_server)
         page.wait_for_selector("#today-sessions-column")
-        page.wait_for_timeout(700)
+        page.wait_for_timeout(1000)
         assert page.evaluate(visible_columns) == ["today"], (
             f"expected only today's column at {width}px"
         )

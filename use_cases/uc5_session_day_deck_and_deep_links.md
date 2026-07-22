@@ -19,7 +19,7 @@ dashboard and how every screen is addressable by a clean, shareable URL. It docu
 the Playwright suite already drives end-to-end but that UC1–UC4 did not previously specify — most
 notably the **session day deck**, each card's **status line** (§ 3), and the **deep-link router**.
 See also the deep-link routing overview in
-[README.md](file:///home/simon/Projects/LibrePT/README.md) (§ *Deep-Linkable Clean URLs*).
+[README.md](../README.md) (§ *Deep-Linkable Clean URLs*).
 
 ---
 
@@ -129,7 +129,7 @@ screen; navigating within the app keeps the address bar in step.
   to the focused card. Because the state lives in the URL, a **page reload lands back in the
   editor** rather than the live logging deck. Plan edits are **persisted on every keystroke** (not
   just on blur), so nothing typed is lost across the reload — see
-  [UC1 — Gym-Floor Clipboard](file:///home/simon/Projects/LibrePT/use_cases/uc1_gym_floor_clipboard.md).
+  [UC1 — Gym-Floor Clipboard](uc1_gym_floor_clipboard.md).
 
 ---
 
@@ -145,31 +145,28 @@ not-found view (`#view-error`) *inside* the content area:
 
 ---
 
-## 6. Traceability (spec ↔ tests)
+## 6. Spec ↔ Code & Test Traceability
 
-Each scenario above is proven by an executable test, so the spec can be traced to the test that
-enforces it:
-
-| Scenario | Test |
+| Specification Requirement | Target Implementation / Test |
 | :--- | :--- |
-| Open-on-today, arrow steps, `(Today)` tag, prev-disabled bound, logo-home | [tests/e2e/test_sessions_dashboard.py](file:///home/simon/Projects/LibrePT/tests/e2e/test_sessions_dashboard.py) · `test_sessions_day_navigation` |
-| Single-finger swipe retitles to the landed day | `test_touch_swipe_between_days` (same file; also `tests/test_browser.py`) |
-| Single-column invariant at every viewport | `test_single_column_deck_at_every_viewport` |
-| Deep link to the in-focus clipboard card; stale card id fallback | [tests/e2e/test_session_deeplink.py](file:///home/simon/Projects/LibrePT/tests/e2e/test_session_deeplink.py) |
-| Edit mode deep-links to `…/edit`, survives reload, keeps typed-but-uncommitted edits; direct `/edit` link reopens the editor | [tests/e2e/test_edit_mode_deeplink_reload.py](file:///home/simon/Projects/LibrePT/tests/e2e/test_edit_mode_deeplink_reload.py) |
-| Edit mode hides the member tabs + live timer and surfaces the client's goals + notes | [tests/e2e/test_edit_mode_client_focus.py](file:///home/simon/Projects/LibrePT/tests/e2e/test_edit_mode_client_focus.py) |
-| Not-found view for unknown route / deleted client; header stays; URL kept | [tests/e2e/test_error_view.py](file:///home/simon/Projects/LibrePT/tests/e2e/test_error_view.py) |
-| Launch the clipboard from a session card (with language switch + calendar sync) | [tests/e2e/test_clipboard.py](file:///home/simon/Projects/LibrePT/tests/e2e/test_clipboard.py) · `test_clipboard_launch_flow` |
-| Upcoming countdown, past elapsed + inline edit (persists across reload), finishing a session stamps the booking completed/duration | [tests/e2e/test_session_status_line.py](file:///home/simon/Projects/LibrePT/tests/e2e/test_session_status_line.py) |
-| Homepage keeps only the session list; ☰-menu navigation and direct deep links to `/clients` and `/adjustments`; logo returns home; the moved menu badge | [tests/e2e/test_view_split_navigation.py](file:///home/simon/Projects/LibrePT/tests/e2e/test_view_split_navigation.py) |
+| Open-on-today, arrow steps, `(Today)` tag, prev-disabled bound, logo-home | [../tests/e2e/test_sessions_dashboard.py](../tests/e2e/test_sessions_dashboard.py) · `test_sessions_day_navigation` |
+| Single-finger swipe retitles to the landed day | [../tests/e2e/test_sessions_dashboard.py](../tests/e2e/test_sessions_dashboard.py) · `test_touch_swipe_between_days` |
+| Single-column invariant at every viewport | [../tests/e2e/test_sessions_dashboard.py](../tests/e2e/test_sessions_dashboard.py) · `test_single_column_deck_at_every_viewport` |
+| Deep link to the in-focus clipboard card; stale card id fallback | [../tests/e2e/test_session_deeplink.py](../tests/e2e/test_session_deeplink.py) |
+| Edit mode deep-links to `…/edit`, survives reload, keeps typed-but-uncommitted edits; direct `/edit` link reopens the editor | [../tests/e2e/test_edit_mode_deeplink_reload.py](../tests/e2e/test_edit_mode_deeplink_reload.py) |
+| Edit mode hides the member tabs + live timer and surfaces the client's goals + notes | [../tests/e2e/test_edit_mode_client_focus.py](../tests/e2e/test_edit_mode_client_focus.py) |
+| Not-found view for unknown route / deleted client; header stays; URL kept | [../tests/e2e/test_error_view.py](../tests/e2e/test_error_view.py) |
+| Launch the clipboard from a session card (with language switch + calendar sync) | [../tests/e2e/test_clipboard.py](../tests/e2e/test_clipboard.py) · `test_clipboard_launch_flow` |
+| Upcoming countdown, past elapsed + inline edit (persists across reload), finishing a session stamps the booking completed/duration | [../tests/e2e/test_session_status_line.py](../tests/e2e/test_session_status_line.py) |
+| Homepage keeps only the session list; ☰-menu navigation and direct deep links to `/clients` and `/adjustments`; logo returns home; the moved menu badge | [../tests/e2e/test_view_split_navigation.py](../tests/e2e/test_view_split_navigation.py) |
 
 ---
 
 ## 7. Related Use Cases
 
-- **[UC1 — Gym-Floor Clipboard](file:///home/simon/Projects/LibrePT/use_cases/uc1_gym_floor_clipboard.md)**: this deck is where the PT **launches** the clipboard UC1 specifies; the deep links in § 4 address that clipboard down to the focused card.
-- **[UC2 — Asynchronous Plan Adjustments](file:///home/simon/Projects/LibrePT/use_cases/uc2_async_plan_adjustments.md)**: the Pending Plan Adjustments deck reviewed at the desk is its own view (§ 3), reachable from the ☰ menu — it was part of this same dashboard before TODO 4.8 split it out.
-- **[UC4 — Client Self-Subscription](file:///home/simon/Projects/LibrePT/use_cases/uc4_client_self_subscription.md)**: bookings surfaced in the day deck originate from the self-subscription flow.
+- **[UC1 — Gym-Floor Clipboard](uc1_gym_floor_clipboard.md)**: this deck is where the PT **launches** the clipboard UC1 specifies; the deep links in § 4 address that clipboard down to the focused card.
+- **[UC2 — Asynchronous Plan Adjustments](uc2_async_plan_adjustments.md)**: the Pending Plan Adjustments deck reviewed at the desk is its own view (§ 3), reachable from the ☰ menu — it was part of this same dashboard before TODO 4.8 split it out.
+- **[UC4 — Client Self-Subscription](uc4_client_self_subscription.md)**: bookings surfaced in the day deck originate from the self-subscription flow.
 
 > **Open gap (both directions).** The day deck still models days as **relative buckets**
 > (`yesterday | today | tomorrow | upcoming`), not real dates, so `/sessions/{YYYY-MM-DD}` can only

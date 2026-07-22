@@ -57,6 +57,13 @@ export const sl = {
     "Izbrišem vse vaje iz tega plana? Lahko ga sestaviš znova ali zapustiš urejanje.",
   warning_banner_title: "Varnostno opozorilo za stranko",
   workout_setup_title: "Nastavitev seje vadbe",
+  workout_setup_desc:
+    "Nastavite podrobnosti seje in izberite stranke (2–6). Posameznikom lahko dodelite ločene ali skupne predloge rutin.",
+  label_session_name: "Ime seje",
+  label_session_date: "Datum",
+  label_start_time: "Začetni čas",
+  label_end_time: "Končni čas",
+  label_location: "Lokacija",
   select_participants: "Izberi udeležence in dodeli rutine",
   btn_launch_clipboard: "Podrobnosti seje",
   err_select_client: "Izbrati morate vsaj eno stranko.",
@@ -242,4 +249,8 @@ export const sl = {
   date_unknown: "Neznan datum",
   planning: "Načrtovanje",
   btn_plan_program: "Načrtuj program",
+  offline_cached_badge: "Brez povezave (predpomnjena koda)",
+  offline_cached_desc:
+    "Strežnik HTTP ni dosegljiv. Zagon iz predpomnjene kode; preverjanje posodobitev ni mogoče.",
+  offline_cached_status: "Strežnik HTTP trenutno ni dosegljiv. Delujete v predpomnjeni kodi.",
 };

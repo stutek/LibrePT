@@ -61,14 +61,38 @@ export function setupWorkoutSetup() {
         return;
       }
 
+      const sessionName = document.getElementById("setup-session-name")?.value.trim() || "";
+      const sessionDate = document.getElementById("setup-session-date")?.value || "";
+      const startTime = document.getElementById("setup-start-time")?.value || "";
+      const endTime = document.getElementById("setup-end-time")?.value || "";
+      const location = document.getElementById("setup-location")?.value.trim() || "";
+
       let bookingMeta = null;
+      let timeLabel = "";
+      if (startTime && endTime) {
+        timeLabel = `${startTime} - ${endTime}`;
+      } else if (startTime) {
+        timeLabel = startTime;
+      } else {
+        timeLabel = t("date_unknown") || "Date Unknown";
+      }
+
       if (isPlanningModeActive) {
         bookingMeta = {
           id: `plan-${Date.now()}`,
           isPlanning: true,
-          titles: [t("planned_program") || "Planned Program"],
-          timeLabel: t("date_unknown") || "Date Unknown",
-          location: "",
+          titles: [sessionName || t("planned_program") || "Planned Program"],
+          date: sessionDate,
+          timeLabel,
+          location,
+        };
+      } else {
+        bookingMeta = {
+          id: `session-${Date.now()}`,
+          titles: [sessionName || t("workout_setup_title") || "Workout Session"],
+          date: sessionDate,
+          timeLabel,
+          location,
         };
       }
 
@@ -106,6 +130,39 @@ export function openWorkoutSetupModal(
   if (preselectedBookingId && state.bookings) {
     targetBooking = state.bookings.find((b) => b.id === preselectedBookingId);
   }
+
+  // Pre-fill metadata fields
+  const now = new Date();
+  const defaultDate = now.toISOString().split("T")[0];
+  const startHour = now.getHours().toString().padStart(2, "0");
+  const startMin = now.getMinutes().toString().padStart(2, "0");
+  const endHour = ((now.getHours() + 1) % 24).toString().padStart(2, "0");
+
+  const nameInput = document.getElementById("setup-session-name");
+  const dateInput = document.getElementById("setup-session-date");
+  const startInput = document.getElementById("setup-start-time");
+  const endInput = document.getElementById("setup-end-time");
+  const locInput = document.getElementById("setup-location");
+
+  if (nameInput) nameInput.value = targetBooking?.title || targetBooking?.titles?.[0] || "";
+  if (dateInput) dateInput.value = targetBooking?.date || defaultDate;
+  if (startInput) {
+    if (targetBooking?.timeLabel) {
+      const parts = targetBooking.timeLabel.split("-").map((s) => s.trim());
+      startInput.value = parts[0] || `${startHour}:${startMin}`;
+    } else {
+      startInput.value = `${startHour}:${startMin}`;
+    }
+  }
+  if (endInput) {
+    if (targetBooking?.timeLabel) {
+      const parts = targetBooking.timeLabel.split("-").map((s) => s.trim());
+      endInput.value = parts[1] || `${endHour}:${startMin}`;
+    } else {
+      endInput.value = `${endHour}:${startMin}`;
+    }
+  }
+  if (locInput) locInput.value = targetBooking?.location || "Trib gym base";
 
   for (const client of state.clients.sort((a, b) => a.name.localeCompare(b.name))) {
     const row = document.createElement("div");

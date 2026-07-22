@@ -715,6 +715,12 @@ select.menu-select {
 .sync-badge .sync-behind {
   color: #ef4444;
 } /* remote changes to pull (behind, red) */
+.sync-badge .sync-offline {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #f59e0b;
+} /* offline cached code (amber warning) */
 .sync-badge i {
   font-size: 9px;
 }

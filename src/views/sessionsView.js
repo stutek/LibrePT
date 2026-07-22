@@ -1,4 +1,4 @@
-import { resetSyncState } from "../components/applicationHeader.js";
+import { isOfflineCachedActive, resetSyncState } from "../components/applicationHeader.js";
 import {
   focusSessionsColumn,
   getFocusedSessionDay,
@@ -163,6 +163,17 @@ export function setupCalendarBookings({ state, t, saveToLocalStorage, renderSess
       status.className = "status-msg";
     }
     syncBtn.disabled = true;
+
+    if (isOfflineCachedActive() || !navigator.onLine) {
+      if (status) {
+        status.textContent = t("offline_cached_desc");
+        status.className = "status-msg text-danger";
+      }
+      if (icon) icon.classList.remove("fa-spin");
+      if (btnText) btnText.textContent = t("btn_sync_data");
+      syncBtn.disabled = false;
+      return;
+    }
 
     setTimeout(() => {
       state.bookings = [...DEFAULT_SESSIONS];

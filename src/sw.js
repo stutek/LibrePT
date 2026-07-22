@@ -120,7 +120,19 @@ self.addEventListener("fetch", (e) => {
       e.respondWith(
         fetch("./index.html", { cache: "no-store" })
           .then((response) => cachePut(new Request("./index.html"), response))
-          .catch(() => caches.match("./index.html").then((cached) => cached || Response.error())),
+          .catch(() =>
+            caches.match("./index.html").then((cached) => {
+              if (cached) {
+                self.clients.matchAll().then((clients) => {
+                  for (const client of clients) {
+                    client.postMessage({ type: "OFFLINE_CACHE_USED" });
+                  }
+                });
+                return cached;
+              }
+              return Response.error();
+            }),
+          ),
       );
       return;
     }
@@ -128,13 +140,22 @@ self.addEventListener("fetch", (e) => {
     // Network-first for our own app shell. A stale-while-revalidate cache serves the previous
     // build on every load after a deploy, which silently hides shipped changes from trainers.
     // Falling back to cache keeps a basement gym with no signal fully offline-capable.
-    // no-store is required here: a plain fetch() still consults the browser's own HTTP cache,
-    // and a dev server with no Cache-Control header (python -m http.server) lets that cache
-    // silently serve a stale build even though this handler looks network-first.
     e.respondWith(
       fetch(e.request, { cache: "no-store" })
         .then((response) => cachePut(e.request, response))
-        .catch(() => caches.match(e.request).then((cached) => cached || Response.error())),
+        .catch(() =>
+          caches.match(e.request).then((cached) => {
+            if (cached) {
+              self.clients.matchAll().then((clients) => {
+                for (const client of clients) {
+                  client.postMessage({ type: "OFFLINE_CACHE_USED" });
+                }
+              });
+              return cached;
+            }
+            return Response.error();
+          }),
+        ),
     );
     return;
   }

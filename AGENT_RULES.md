@@ -48,8 +48,8 @@ Every response and tool action must drive measurable, continuous progress toward
 ## 3. Single Source of Truth Reference
 
 To prevent drift and redundant documentation, agents MUST NOT duplicate feature lists or domain specifications in this rules file. Always reference the canonical sources of truth:
-- **System Architecture & Features**: See [README.md](file:///home/simon/Projects/LibrePT/README.md).
-- **Functional Workflows & Use Cases**: See [use_cases/](file:///home/simon/Projects/LibrePT/use_cases/).
+- **System Architecture & Features**: See [README.md](README.md).
+- **Functional Workflows & Use Cases**: See [use_cases/](use_cases/).
 
 ---
 
@@ -58,7 +58,7 @@ To prevent drift and redundant documentation, agents MUST NOT duplicate feature 
 All specifications, architectural documentation, and use cases in this repository must strictly adhere to Google's **Open Knowledge Format (OKF v0.1)**:
 1. **Mandatory YAML Frontmatter**: Every Markdown file MUST begin with YAML frontmatter containing at minimum the `type` field (`overview`, `guidelines`, `use_case`, `index`), along with `title`, `description`, `status`, and `tags`.
 2. **Directory Indexing (`INDEX.md`)**: Every directory containing knowledge files MUST maintain an `INDEX.md` catalog table listing its files, their `type`, and clickable Markdown links.
-3. **Graph Interconnectivity**: Use explicit Markdown links (`[label](file:///path)`) to connect related concepts across files so AI agents can traverse the repository knowledge graph reliably.
+3. **Graph Interconnectivity**: Use explicit Markdown links (`[label](path/to/file)`) to connect related concepts across files so AI agents can traverse the repository knowledge graph reliably. Relative links must be used to avoid local machine dependencies.
 
 ---
 
@@ -74,5 +74,5 @@ parallel without collisions, and make the directory tree itself act as documenta
 3. **Decouple with dependency injection, not cross-imports.** Extracted components receive the app-level helpers they need as parameters (`state`, `t`, `escapeHTML`, launch callbacks). For globals that get reassigned (`activeSession`, `state`), pass an *accessor* (`getActiveSession()`) so the module always reads the current value. This avoids circular imports and keeps modules independently testable.
 4. **Self-document at the top of every module.** Begin each file with a short comment naming its single responsibility and listing its injected dependencies. Choose descriptive names over clever ones — a reader should understand a file without opening its call site.
 5. **Keep the runtime app in `src/`; keep the root clean.** Only the app entry, its modules, and its assets live under `src/`. Dev tooling, docs, and CI configuration stay out of the app tree. Source files must never sit loose at the repository root.
-6. **Update the catalog when the module map changes.** When you add, move, or remove a module, update the *Source Modules & UI Components* table in [INDEX.md](file:///home/simon/Projects/LibrePT/INDEX.md) in the same change, so the knowledge graph stays a reliable map of the codebase.
+6. **Update the catalog when the module map changes.** When you add, move, or remove a module, update the *Source Modules & UI Components* table in [INDEX.md](INDEX.md) in the same change, so the knowledge graph stays a reliable map of the codebase.
 7. **Write self-documenting code inside each module, too.** Let names carry the intent — prefer descriptive functions and variables (`toRoute`, `renderSessionTitle`, `BASE_PATH`) over abbreviations or clever one-liners, so a reader rarely needs a comment to follow *what* the code does. Reserve comments for the *why*: the constraint, edge case, or decision the code cannot state itself (e.g. why the router derives its base from `import.meta.url`, or why an unknown route renders a view instead of redirecting). Don't restate mechanics the next line already shows, and delete dead code rather than leaving commented-out or unreachable branches behind.
