@@ -30,6 +30,11 @@ import { renderRoutinesList } from "../views/routinesView.js";
 let activeSession = null;
 let appDeps = {};
 import {
+  clearActiveSessionCache,
+  readActiveSessionCache,
+  saveActiveSessionToCache as saveActiveSessionToCacheHelper,
+} from "../helper/sessionCache.js";
+import {
   releaseScreenWakeLock,
   requestScreenWakeLock as requestScreenWakeLockHelper,
 } from "../helper/wakeLock.js";
@@ -910,7 +915,7 @@ export function cancelWorkoutSession() {
   releaseScreenWakeLock();
   activeSession = null;
   clipboardEditMode = false;
-  localStorage.removeItem("librept_active_session");
+  clearActiveSessionCache();
   clearAllTimers(); // timers are session-scoped
 
   renderIdleSessionBar();
@@ -1039,63 +1044,50 @@ export function finishWorkoutSession() {
 }
 
 export function saveActiveSessionToCache() {
-  if (!activeSession) return;
-  const cacheObj = {
-    ...activeSession,
-    timerIntervalId: null,
-  };
-  localStorage.setItem("librept_active_session", JSON.stringify(cacheObj));
+  saveActiveSessionToCacheHelper(activeSession);
 }
 
 export function recoverActiveSession() {
-  const cached = localStorage.getItem("librept_active_session");
-  if (!cached) return;
+  const parsed = readActiveSessionCache();
+  if (!parsed) return;
 
   try {
-    const parsed = JSON.parse(cached);
-    if (parsed?.startTime) {
-      activeSession = parsed;
-      activeSession.duration = Math.floor((Date.now() - activeSession.startTime) / 1000);
+    activeSession = parsed;
+    activeSession.duration = Math.floor((Date.now() - activeSession.startTime) / 1000);
 
-      if (activeSession.booking) {
-        activeSession.booking.startDate = new Date(activeSession.booking.startDate);
-        activeSession.booking.endDate = new Date(activeSession.booking.endDate);
-      }
-
-      const STALE_AFTER_MS = 2 * 60 * 60 * 1000;
-      const endTime = activeSession.booking?.endDate
-        ? activeSession.booking.endDate.getTime()
-        : null;
-      if (endTime && Date.now() > endTime + STALE_AFTER_MS) {
-        activeSession = null;
-        localStorage.removeItem("librept_active_session");
-        renderIdleSessionBar();
-        return;
-      }
-
-      if (activeSession.booking?.isPlanning) {
-        clipboardEditMode = true;
-      }
-      // Restore inline edit mode from an /edit deep link BEFORE the first render, so recovery renders
-      // the editor (not the live deck) and syncSessionFocusUrl keeps /edit instead of downgrading it
-      // to a focus card. Recovery runs before the router, so we read the URL here directly.
-      const path = typeof window !== "undefined" ? window.location.pathname : "";
-      if (path.includes(`/session/${activeSession.id}/`) && path.endsWith("/edit")) {
-        clipboardEditMode = true;
-      }
-
-      const bar = document.getElementById("active-session-bar");
-      if (bar) {
-        bar.classList.remove("hidden", "is-idle");
-        delete bar.dataset.nextBookingId;
-      }
-      renderActiveSessionBarLabels();
-
-      startSessionTimer();
-      renderActiveGroupBoard();
-      restoreSessionTimers(); // rehydrate the per-client timer stack from its own cache
-      requestScreenWakeLock();
+    if (activeSession.booking) {
+      activeSession.booking.startDate = new Date(activeSession.booking.startDate);
+      activeSession.booking.endDate = new Date(activeSession.booking.endDate);
     }
+
+    const STALE_AFTER_MS = 2 * 60 * 60 * 1000;
+    const endTime = activeSession.booking?.endDate ? activeSession.booking.endDate.getTime() : null;
+    if (endTime && Date.now() > endTime + STALE_AFTER_MS) {
+      activeSession = null;
+      clearActiveSessionCache();
+      renderIdleSessionBar();
+      return;
+    }
+
+    if (activeSession.booking?.isPlanning) {
+      clipboardEditMode = true;
+    }
+    const path = typeof window !== "undefined" ? window.location.pathname : "";
+    if (path.includes(`/session/${activeSession.id}/`) && path.endsWith("/edit")) {
+      clipboardEditMode = true;
+    }
+
+    const bar = document.getElementById("active-session-bar");
+    if (bar) {
+      bar.classList.remove("hidden", "is-idle");
+      delete bar.dataset.nextBookingId;
+    }
+    renderActiveSessionBarLabels();
+
+    startSessionTimer();
+    renderActiveGroupBoard();
+    restoreSessionTimers();
+    requestScreenWakeLock();
   } catch (e) {
     console.error("Error recovering active session cache:", e);
   }
