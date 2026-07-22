@@ -3,13 +3,16 @@
 Run the whole build (env -> tests -> bundle) with `python -m build`, or import the individual
 steps (used by the root pipeline.py orchestrator). Paths are relative to the current working
 directory, so run these from the repository root.
+
+Always invoke via `.venv/bin/python -m build` or the venv Python so that pytest-xdist
+(-n flag) and all other test dependencies are available. Running with system python3 is
+also safe — run_tests() always shells out to the venv python explicitly.
 """
 
 import os
 import sys
 import shutil
-
-import pytest
+import subprocess
 
 
 def check_environment():
@@ -28,16 +31,12 @@ def check_environment():
         print(
             "  Virtual environment '.venv' not found. Creating and installing dependencies..."
         )
-        import subprocess
-
         subprocess.run([sys.executable, "-m", "venv", ".venv"], check=True)
         subprocess.run([pip_path, "install", "-r", "requirements.txt"], check=True)
         subprocess.run([playwright_path, "install", "chromium"], check=True)
     else:
         print("  ✓ Virtual environment '.venv' verified.")
         # Ensure dependencies from requirements.txt are up to date
-        import subprocess
-
         subprocess.run([pip_path, "install", "-r", "requirements.txt"], check=True)
 
 
@@ -191,7 +190,6 @@ def ensure_biome_binary():
 def run_lint():
     """Runs Python static analysis (Ruff) and frontend static analysis (Biome)."""
     print("\n>>> Step 1.5: Running Static Code Analysis...")
-    import subprocess
 
     if os.name == "nt":
         ruff_path = os.path.join(".venv", "Scripts", "ruff.exe")
@@ -242,14 +240,29 @@ def run_lint():
 
 
 def run_tests():
-    """Runs the test suite programmatically. Allows a debugger to step directly into test setup."""
+    """Runs the test suite via the venv Python so pytest-xdist (-n) is always available.
+
+    Shells out to `<venv>/python -m pytest` rather than calling pytest.main() directly, which
+    would use whichever pytest was imported — potentially the system one that lacks xdist.
+    """
     print("\n>>> Step 2: Running Automated Test Suite (parallel)...")
 
-    exit_code = pytest.main(["-n", "auto", "-v", "tests/"])
+    if os.name == "nt":
+        venv_python = os.path.join(".venv", "Scripts", "python.exe")
+    else:
+        venv_python = os.path.join(".venv", "bin", "python")
 
-    if exit_code != 0:
-        print(f"\n  ✗ Test suite failed with exit code: {exit_code}")
-        sys.exit(exit_code)
+    if not os.path.exists(venv_python):
+        print(
+            f"  ✗ Venv Python not found at {venv_python}. Run check_environment first."
+        )
+        sys.exit(1)
+
+    result = subprocess.run([venv_python, "-m", "pytest", "-n", "auto", "-v", "tests/"])
+
+    if result.returncode != 0:
+        print(f"\n  ✗ Test suite failed with exit code: {result.returncode}")
+        sys.exit(result.returncode)
     print("  ✓ All tests passed successfully!")
 
 
@@ -286,7 +299,6 @@ def run_build():
 def stamp_build_version(dist_dir):
     """Overwrite dist/version.js with the real short commit SHA + UTC build time (the header build
     stamp). Mirrors the Pages deploy (.github/workflows/deploy.yml) — keep the two writers in sync."""
-    import subprocess
     from datetime import datetime, timezone
 
     try:

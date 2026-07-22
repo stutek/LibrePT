@@ -94,10 +94,16 @@ def local_server():
     """Serve the app on :8081 via deploy/local_http_server.py, which mounts src/ under the
     /LibrePT/ sub-path just like GitHub Pages (base rewrite + SPA fallback). Browser tests
     therefore run against the real production base path. Only started when an e2e test requests
-    it; reuses a running server."""
-    proc = None
+    it; reuses a running server.
+
+    The server is intentionally left running after the test session ends. With -n auto,
+    each xdist worker has its own session teardown, so terminating the process in teardown
+    would kill the server while other workers still have live browser connections (causing
+    ERR_CONNECTION_REFUSED). Leaving it running also matches AGENT_RULES.md §C: the user,
+    not the agent, is responsible for stopping the dev server.
+    """
     if not is_port_open(8081):
-        proc = subprocess.Popen(
+        subprocess.Popen(
             [
                 sys.executable,
                 str(REPO_ROOT / "deploy" / "local_http_server.py"),
@@ -107,8 +113,13 @@ def local_server():
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )
-        time.sleep(1.5)  # give it a moment to bind
+        # Poll until the port accepts connections (up to 10 s) instead of a
+        # blind sleep — parallel workers with -n auto race to connect and the
+        # server was sometimes not ready in time with a fixed 1.5 s delay.
+        deadline = time.monotonic() + 10
+        while not is_port_open(8081):
+            if time.monotonic() >= deadline:
+                raise RuntimeError("Local server did not start within 10 s")
+            time.sleep(0.1)
     yield "http://localhost:8081/LibrePT/"
-    if proc:
-        proc.terminate()
-        proc.wait()
+    # Server is deliberately NOT terminated here — see docstring above.
