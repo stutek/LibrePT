@@ -45,7 +45,8 @@ helpers they need (`state`, `t`, `escapeHTML`, …).
 
 | Module | Type | Description |
 | :--- | :--- | :--- |
-| [src/app.js](src/app.js) | `entry` | Application entry: state, view router, render orchestration, session logic, translation lookup (`t`), and wiring of the component modules below. |
+| [src/app.js](src/app.js) | `entry` | Application bootstrapper: root initialization, dependency injection wiring, and global lifecycle hooks. |
+| [src/data/stateStore.js](src/data/stateStore.js) | `data` | Central app state management: state object, localStorage persistence, seed data loading, and reset triggers. |
 | [src/data/index.js](src/data/index.js) | `data` | Barrel for the seed/demo data, split per entity: `exercises.js`, `clients.js`, `routines.js`, `history.js`, `planUpdates.js`, `sessions.js`. Entities reference each other by string id only. |
 | [src/i18n/index.js](src/i18n/index.js) | `i18n` | Translation registry: one flat key→string map per locale (`en.js`, `sl.js`). Adding a language is a new file listed here; key parity across locales is enforced by `tests/unit/test_i18n_parity.py`. |
 | [src/components/sessionCard.js](src/components/sessionCard.js) | `component` | Dashboard session-booking card (time, participants, program, readiness warnings, temporal tint, live-session emphasis) that launches the clipboard on tap. |
@@ -67,6 +68,9 @@ helpers they need (`state`, `t`, `escapeHTML`, …).
 | [src/components/exerciseAndRestTimer.js](src/components/exerciseAndRestTimer.js) | `component` | The clipboard timer stack: one labelled countdown per client (client name + Rest/Exercise), counting into negative overtime, dismiss-only, persisted across reloads. Start guards an existing timer (warn-flash if still running, ack-blink + reset if overtime). |
 | [src/components/exercisePicker.js](src/components/exercisePicker.js) | `component` | Reusable, low-friction exercise picker: muscle-group + equipment filter chips over a single-tap movement list. Powers the routine builder (Scenario A) and gym-floor swap (Scenario B) fast-selection flows (UC6 / TODO §13.2). |
 | [src/controllers/routerController.js](src/controllers/routerController.js) | `controller` | SPA route mapping and navigation logic: parses URL paths (`/sessions/YYYY-MM-DD`, `/session/ID/client/ID`), handles view transitions (`switchView`), and manages deep-link error fallbacks (`showErrorView`). |
+| [src/controllers/themeController.js](src/controllers/themeController.js) | `controller` | Unified theme manager: theme resolution, theme CSS class mapping, meta theme-color updating, and theme switcher UI sync. |
+| [src/controllers/appLifecycleController.js](src/controllers/appLifecycleController.js) | `controller` | PWA runtime lifecycle: phone viewport resizing, orientation locking, build stamp rendering, service worker registration, and connectivity monitoring. |
+| [src/styles/](src/styles/) | `styles` | Modular CSS architecture: `variables.css` (tokens), `base.css` (reset & utilities), `layout.css` (structure & header), `components.css` (UI elements & modals), `views.css` (view layouts). |
 | [src/helper/repsAndLoad.js](src/helper/repsAndLoad.js) | `helper` | Polymorphic reps (count / range / time / `max`-to-failure) and equipment-derived load (kg / cable level / band / bodyweight): parse, format, and the shared load-input markup used by every authoring surface. |
 | [src/helper/sessionCache.js](src/helper/sessionCache.js) | `helper` | Handles JSON serialization and recovery of active session state in `localStorage`. |
 | [src/helper/utils.js](src/helper/utils.js) | `helper` | Stateless formatting, date conversion, time range overlap detection, and general string helper functions. |

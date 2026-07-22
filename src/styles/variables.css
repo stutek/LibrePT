@@ -1,0 +1,30 @@
+/* src/styles/variables.css - Design System Tokens, Variables & Theme Imports */
+
+/* Themes & Look & Feel Selections */
+@import url("../themes/midnight.css");
+@import url("../themes/daylight.css");
+@import url("../themes/red.css");
+@import url("../themes/blossom.css");
+@import url("../themes/nebula.css");
+
+/* Design system shared, non-theme tokens (fonts, layout heights, blur) */
+:root {
+  /* Typography — geometric display headers, humanist body, mono for numbers */
+  --font-sans: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+  --font-header: "Outfit", var(--font-sans);
+  --font-mono: "JetBrains Mono", monospace;
+
+  /* Layout tokens (shared across themes) */
+  --hdr-height: 64px;
+  --nav-height: 70px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --glass-blur: blur(16px);
+  --text-dark: #09090b;
+
+  /* Temporal session tinting */
+  --temporal-past: #c084fc;
+  --cloud-icon-color: #0284c7;
+  --cloud-arrows-color: var(--success, #10b981);
+  --timer-warn-peak-color: #c97a2a;
+}

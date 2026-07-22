@@ -45,22 +45,9 @@
   <link rel="modulepreload" href="views/clientsView.js">
   <link rel="modulepreload" href="views/routinesView.js">
   <link rel="modulepreload" href="views/exercisesView.js">
-  <script>
-    (function() {
-      try {
-        if (location.protocol === 'http:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
-          location.replace('https://' + location.host + location.pathname + location.search + location.hash);
-          return;
-        }
-        var params = new URLSearchParams(window.location.search);
-        var t = params.get('theme') || localStorage.getItem('librept-theme') || 'daylight';
-        var map = { dark: 'midnight', light: 'daylight', rose: 'blossom', violet: 'nebula' };
-        var valid = { midnight: 'midnight-theme', daylight: 'daylight-theme', red: 'red-theme', blossom: 'blossom-theme', nebula: 'nebula-theme' };
-        var resolved = map[t] || t;
-        var themeClass = valid[resolved] || 'daylight-theme';
-        document.documentElement.className = themeClass;
-      } catch (e) {}
-    })();
+  <script type="module">
+    import { initTheme } from "./controllers/themeController.js";
+    initTheme();
   </script>
 </head>
 <body class="daylight-theme">
@@ -68,7 +55,7 @@
   <!-- Top Header Bar -->
   <header class="app-header">
     <div class="header-container">
-      <div class="logo-area" id="logo-area" style="cursor: pointer;">
+      <div class="logo-area" id="logo-area">
         <i class="fa-solid fa-dumbbell logo-icon"></i>
         <h1>LibrePT</h1>
         <!-- Build stamp (commit SHA) — visible so a client screenshot pins a bug report to a build.
@@ -78,7 +65,7 @@
       
       <div class="header-actions">
         <!-- Normal view actions -->
-        <div class="normal-header-actions" style="display: flex; align-items: center; gap: 8px;">
+        <div class="normal-header-actions">
           <button id="backup-btn" class="icon-btn sync-backup-btn" aria-label="Sync & Backup Data">
             <!-- Cloud + recycle: this one control now covers both syncing session data and
                  backup/restore (the separate home-page Sync button was merged in here). -->
@@ -101,14 +88,14 @@
                    header bar stays compact. Same <select> elements as before, just relocated. -->
               <div class="menu-control-row">
                 <label class="menu-control-label" for="lang-switcher"><i class="fa-solid fa-language" aria-hidden="true"></i> <span id="menu-label-lang">Language</span></label>
-                <select id="lang-switcher" class="form-control menu-select" style="cursor: pointer;" aria-label="Switch Language / Zamenjaj jezik">
+                <select id="lang-switcher" class="form-control menu-select" aria-label="Switch Language / Zamenjaj jezik">
                   <option value="en">EN</option>
                   <option value="sl">SL</option>
                 </select>
               </div>
               <div class="menu-control-row">
                 <label class="menu-control-label" for="theme-switcher"><i class="fa-solid fa-palette" aria-hidden="true"></i> <span id="menu-label-theme">Theme</span></label>
-                <select id="theme-switcher" class="form-control menu-select" style="cursor: pointer;" aria-label="Theme / Tema">
+                <select id="theme-switcher" class="form-control menu-select" aria-label="Theme / Tema">
                   <option value="daylight" selected>Daylight</option>
                   <option value="midnight">Midnight</option>
                   <option value="red">Red</option>
@@ -122,7 +109,7 @@
               </button>
               <button id="menu-adjustments" class="session-menu-item" role="menuitem">
                 <i class="fa-solid fa-bell-concierge"></i> <span id="menu-adjustments-text" data-i18n="menu_adjustments">Pending Adjustments</span>
-                <span class="badge hidden" id="menu-badge-adjustments-count" style="margin-left: auto;">0</span>
+                <span class="badge badge-push-right hidden" id="menu-badge-adjustments-count">0</span>
               </button>
               <button id="menu-routines" class="session-menu-item" role="menuitem">
                 <i class="fa-solid fa-clipboard-list"></i> Routines
