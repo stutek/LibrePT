@@ -57,13 +57,20 @@ Data should sync **periodically to Google Drive** and remain **editable directly
 - **Open question**: does it make sense to store the data in **Google's new OKF format**, using it to get concurrent editing and versioning for free?
 - No approach is chosen yet — decide in a dedicated brainstorm before implementing.
 
-### 3.5 [ ] Paper consent form — photo capture + date in the Add New Client form
-**Decided (2026-07-22): one path only.** Consent is captured as a **signed paper form the PT photographs**. No email flow, no IMAP inbox monitoring, no hosted online consent page — those were considered and **dropped** as needless complexity for a solo, offline-first PT.
+### 3.5 [ ] Paper consent — record checkbox + date; provide a printable blank form
+**Decided (2026-07-22): KISS — consent lives on paper, not in the app.** Blank consent forms are kept at the gym; the client signs one, the PT **files the paper**. That physical file is the system of record for evidence. **No photo capture, no image storage, no email flow, no IMAP** — all considered and dropped as needless complexity for a solo, offline-first PT.
 
-- **Consent date** field next to the existing `gdprConsent.cloudSync` checkbox — editable, defaults to today (the paper may have been signed earlier). Replaces relying on the invisible `timestamp` alone.
-- **Photo capture**: `<input type="file" accept="image/*" capture="environment">` — camera or gallery, fully offline, zero dependencies. Downscale on capture (~1024px JPEG, q≈0.7) so a consent photo is ~150KB, not multi-MB.
-- **Storage**: keep the image out of the `localStorage` JSON (base64 would bloat every export/sync). Store the blob in **IndexedDB**, referenced from the client record (`{blobId, consentDate}`). **Local-only by default** — the consent photo is the one artifact you least want casually syncing to the cloud (3.3).
+- App's only job: the existing `gdprConsent.cloudSync` checkbox plus an editable **consent date** (defaults to today — the paper may have been signed earlier), recording that signed paper consent was obtained and filed. Replaces relying on the invisible `timestamp` alone.
+- Optionally surface a **printable blank consent form** from the app — the full text already exists in `docs/templates/Client_Consent_Form.md` — so a PT can print copies to keep at the desk.
 - **Supersedes the shipped `mailto:` consent trigger** (former 3.4); that email path can be removed once this lands.
+
+### 3.7 [ ] [Decision] Persistence engine — stay on localStorage JSON, defer embedding a DB
+The consent-photo idea was the only thing pushing toward binary blob storage; KISS-ing consent to paper (3.5) removes it, so the "is it time to embed a DB?" question resolves for now.
+
+- **Decided (2026-07-22): keep the current `localStorage` JSON store.** It's synchronous, trivial to export/import (already the Backup & Restore mechanism), and a solo PT's *text* data (clients, routines, sessions, history) is nowhere near the ~5MB origin cap. The main DB is already centralized in `src/data/stateStore.js` (`librept_db`).
+- **Revisit → IndexedDB** (built-in, no wasm/SQLite dependency) only when a real driver appears: binary data returns, the 5MB cap looms, or the long-term analytics vision (13.x — volume load / 1RM aggregation across months) wants indexed queries. Per-version storage isolation (16.2) also nudges this way eventually.
+- **Not** SQLite-in-wasm — too heavy a dependency for a buildless offline app at this scale.
+- **Cheap prep now**: keep the main DB behind the `stateStore.js` seam so a future swap is localized, rather than scattering more raw `localStorage` calls across components.
 
 ---
 
@@ -102,12 +109,11 @@ NOTE: keep the goals and health & injury notes as is. (Done: removed "log workou
 - Tab 3 introduces a **session that exists without a calendar entry**. Decide where such a placeholder session lives in the data model, and what happens when it is later attached to a real booking.
 - Reuses the existing placeholder-card concept from [uc1_gym_floor_clipboard.md](use_cases/uc1_gym_floor_clipboard.md), but at the desk rather than on the gym floor — closes the loop with [uc2_async_plan_adjustments.md](use_cases/uc2_async_plan_adjustments.md).
 
-### 5.2 [ ] [Brainstorm] Promote add/modify client to a first-class view
-Today the client add/edit form is a `<dialog>` modal (`dialog-client`, `formsController.js`). Should it become a full `#view` with its own route, like the Sessions / Pending Adjustments / Client Directory split (former 4.8) and the session-setup view (former 1.5)?
+### 5.2 [ ] Client add/modify — fold editing into the detail view, keep creation a minimal modal
+**Decided (2026-07-22): no standalone add/modify client view.** Unlike a session (setup vs live clipboard are genuinely different modes), a client has no "live" mode — the detail screen is where you both view *and* edit, so a separate edit view would just duplicate it.
 
-- **For**: deep-linkable client-edit URLs and consistency with the other first-class views. (Note: consent is now just a photo + date — [3.5](#35--paper-consent-form--photo-capture--date-in-the-add-new-client-form) — so it fits a modal fine and no longer forces this decision.)
-- **Against**: a modal is lighter for a quick single-field edit; not every edit wants a full view.
-- **Decide alongside [5.1](#51--tabbed-client-view)**: if client detail becomes tabbed, "add/modify" may naturally be a *mode* of that view (or its Tab 3 prep surface) rather than a separate view.
+- **Create** = a lightweight modal with the minimum to bring the client into existence (name, maybe phone). Zero friction at signup / on the floor; creating drops the PT straight into the detail view for everything else.
+- **Edit** = inline, inside the tabbed client-detail view ([5.1](#51--tabbed-client-view)) — no separate route. Effectively a sub-decision of 5.1 and should ship with it.
 
 ---
 
