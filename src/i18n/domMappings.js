@@ -66,11 +66,6 @@ export function applyStaticDOMMappings(tDict) {
     "#btn-delete-session": "btn_delete_session",
     "#btn-finish-session": "btn_complete",
 
-    // Dialog setups
-    "#dialog-workout-setup .modal-header h3": "workout_setup_title",
-    '#dialog-workout-setup label[for="setup-participants-assignment-list"]': "select_participants",
-    '#dialog-workout-setup button[type="submit"]': "btn_launch_clipboard",
-
     "#dialog-add-session-exercise .modal-header h3": "add_ex_session_title",
     '#dialog-add-session-exercise label[for="session-add-select-ex"]': "select_exercise",
     '#dialog-add-session-exercise label[for="session-add-sets"]': "sets",

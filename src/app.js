@@ -135,6 +135,7 @@ import {
   seedDemoActiveSession as sessionsViewSeedDemo,
   setupCalendarBookings as sessionsViewSetupBookings,
 } from "./views/sessionsView.js";
+import { renderWorkoutSetupView } from "./views/workoutSetupView.js";
 
 function t(key) {
   const lang = state.lang || "en";
@@ -294,6 +295,7 @@ function init() {
   setupRoutineForms();
   setupExerciseForms();
   // Initialize Workout Setup Component
+  renderWorkoutSetupView();
   initWorkoutSetup({
     getState: () => state,
     t,

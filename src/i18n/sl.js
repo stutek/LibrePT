@@ -43,6 +43,7 @@ export const sl = {
   btn_add_set: "Dodaj serijo",
   btn_inject_exercise: "Vstavi vajo",
   btn_cancel: "Prekliči",
+  btn_discard_changes: "Zavrzi spremembe",
   btn_delete_session: "Izbriši sejo",
   btn_delete_plan: "Izbriši plan",
   btn_complete: "Zaključi vadbo",

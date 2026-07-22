@@ -219,7 +219,7 @@ export function renderSessionCard(b, colContainer, deps) {
       <strong class="booking-card-title" style="font-size: 13px;">${escapeHTML(b.title)}</strong>
       ${completedBadge}
       <button class="btn-edit-booking icon-btn text-muted" title="${t("edit") || "Edit"}" style="margin-left: auto; padding: 2px 6px; font-size: 11px;" aria-label="Edit session">
-        <i class="fa-solid fa-pen"></i>
+        <i class="fa-solid fa-pen-to-square"></i>
       </button>
     </div>
     <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 2px;">

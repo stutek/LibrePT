@@ -44,6 +44,7 @@ export const en = {
   btn_add_set: "Add Set",
   btn_inject_exercise: "Inject Exercise",
   btn_cancel: "Cancel",
+  btn_discard_changes: "Discard Changes",
   btn_delete_session: "Delete Session",
   btn_delete_plan: "Delete Plan",
   btn_complete: "Complete Workout Session",
