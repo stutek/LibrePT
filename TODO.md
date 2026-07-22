@@ -50,6 +50,15 @@ The session list can no longer assume one session per time slot. Model and displ
 ### 1.4 [x] Drop the 18:00 clamp on demo session hours
 `src/data/sessions.js`'s `currentHour = Math.min(18, Math.max(3, now.getHours()))` capped demo session times at 6pm with no documented reasoning (traced via `git log -S` to a large unrelated refactor, `03381c9`, that introduced it silently — before that it was uncapped `now.getHours()`). Simon: most gyms run well past 18:00, some to 23:00 or later. **Done**: dropped the upper clamp — `currentHour = Math.max(3, now.getHours())` — keeping only the lower floor so demo sessions never generate at 2am. Incidentally reduces (but doesn't eliminate) how often [13.5](#135-x-defect-test_timer_survives_reload_and_goes_overtime-fails--pre-existing-not-caused-by-134)'s session-staleness gotcha bites.
 
+### 1.5 [ ] Session creation form is missing key fields
+"Create session" currently does not expose: **start time**, **end time**, **date**, **session name**, or **program/routine assignment**. The PT has no way to configure a session before it goes live — all of those must be set up-front, not discovered after booking.
+
+- Start & end time: the obvious gym-floor fields — missing from the creation dialog entirely.
+- Date: a session can only be created for the implicit current day; needs an explicit date picker so the PT can schedule ahead.
+- Session name: free-text label for the session (e.g. "Morning Strength", "Evening Mobility").
+- Program / routine: PT must be able to assign a saved routine/programme to the session at creation time, not only after launching the clipboard.
+- Relates to [1.3](#13--session-list-must-model-partial-overlaps-and-other-pts-room-usage) (time model) and [4.3](#43-collapse-the-duplicated-session-header-into-one-row-with-a-date-picker) (session header / date picker).
+
 ---
 
 ## 2. Active Session Bar (bottom green row)
