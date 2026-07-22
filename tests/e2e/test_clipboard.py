@@ -22,9 +22,8 @@ def test_clipboard_launch_flow(page, local_server):
     lang_switcher = page.locator("#lang-switcher")
     assert lang_switcher.is_visible()
 
-    # Toggle language to Slovenian (SL); the dashboard header must translate dynamically
     lang_switcher.select_option("sl")
-    assert page.locator("#btn-sessions-today").inner_text().strip().upper() == "DANES"
+    assert page.locator("#menu-routines").inner_text().strip() == "Rutine"
 
     # The Sync control now lives in the header cloud (Sync & Backup) modal; open it and
     # confirm the label translated too.
@@ -47,7 +46,7 @@ def test_clipboard_launch_flow(page, local_server):
     page.locator("#btn-app-menu").click()
     page.wait_for_selector("#app-menu:not(.hidden)")
     lang_switcher.select_option("en")
-    assert page.locator("#btn-sessions-today").inner_text().strip().upper() == "TODAY"
+    assert page.locator("#menu-routines").inner_text().strip() == "Routines"
 
     # Verify bookings list cards appear on the dashboard
     page.wait_for_selector(".booking-card")
