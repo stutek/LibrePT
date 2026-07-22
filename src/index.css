@@ -411,7 +411,12 @@ select.menu-select {
    content column (breaks out of #main-content's side padding) with a bottom divider and a
    grab handle. Shared look for every view + the active-session clipboard. */
 .view-titlebar {
-  position: relative;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: var(--card-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
   padding: 18px 16px 12px;
   border-bottom: 1px solid var(--card-border);
   margin-bottom: 16px;
