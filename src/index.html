@@ -45,9 +45,22 @@
   <link rel="modulepreload" href="views/clientsView.js">
   <link rel="modulepreload" href="views/routinesView.js">
   <link rel="modulepreload" href="views/exercisesView.js">
-  <script type="module">
-    import { initTheme } from "./controllers/themeController.js";
-    initTheme();
+  <script>
+    (function() {
+      try {
+        if (location.protocol === 'http:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+          location.replace('https://' + location.host + location.pathname + location.search + location.hash);
+          return;
+        }
+        var params = new URLSearchParams(window.location.search);
+        var t = params.get('theme') || localStorage.getItem('librept-theme') || 'daylight';
+        var map = { dark: 'midnight', light: 'daylight', rose: 'blossom', violet: 'nebula' };
+        var valid = { midnight: 'midnight-theme', daylight: 'daylight-theme', red: 'red-theme', blossom: 'blossom-theme', nebula: 'nebula-theme' };
+        var resolved = map[t] || t;
+        var themeClass = valid[resolved] || 'daylight-theme';
+        document.documentElement.className = themeClass;
+      } catch (e) {}
+    })();
   </script>
 </head>
 <body class="daylight-theme">

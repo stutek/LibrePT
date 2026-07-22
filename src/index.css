@@ -1,8 +1,3796 @@
-/* src/index.css - LibrePT Master Style Guide & Architecture Entrypoint */
-/* Single responsibility: Imports modular design tokens, base styles, layout structures, components, and views. */
+/* index.css - LibrePT Modern UI Style Guide & Design System */
 
-@import url("./styles/variables.css");
-@import url("./styles/base.css");
-@import url("./styles/layout.css");
-@import url("./styles/components.css");
-@import url("./styles/views.css");
+/* Themes & Look & Feel Selections */
+@import url("./themes/midnight.css");
+@import url("./themes/daylight.css");
+@import url("./themes/red.css");
+@import url("./themes/blossom.css");
+@import url("./themes/nebula.css");
+
+/* Design system shared, non-theme tokens (fonts, layout heights, blur) */
+:root {
+  /* Typography — geometric display headers, humanist body, mono for numbers */
+  --font-sans: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+  --font-header: "Outfit", var(--font-sans);
+  --font-mono: "JetBrains Mono", monospace;
+
+  /* Layout tokens (shared across themes) */
+  --hdr-height: 64px;
+  --nav-height: 70px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --glass-blur: blur(16px);
+  --text-dark: #09090b;
+  /* Temporal session tinting (past = cool/history, future = warm/plan). Neutral fallback only;
+     each theme overrides these with palette-tuned values (see src/themes/*.css). */
+  --temporal-past: #c084fc;
+  --cloud-icon-color: #0284c7;
+  --cloud-arrows-color: var(--success, #10b981);
+  /* Timer warning animation peak color — computed as color-mix in each theme with theme-specific
+     amber blend percentage; fallback is a neutral brownish tone. Each theme defines this after
+     --card-bg to ensure proper color-mix evaluation. */
+  --timer-warn-peak-color: #c97a2a;
+}
+
+/* ==========================================================================
+   DRY BASE & SHARED UTILITY GROUPS
+   Consolidates layout, glass cards, flex containers, and button foundations.
+   ========================================================================== */
+
+/* Shared Glassmorphism Cards & Containers.
+   The app header and session/view title bars are deliberately NOT in this list: they are flat
+   full-width bars (sharp corners, no shadow, just a bottom divider), not floating cards. */
+.glassmorphic,
+.exercise-item,
+.bottom-nav,
+.session-menu,
+.client-card,
+.client-detail-card,
+.chart-box,
+.routine-card,
+.history-card,
+.exercise-deck-card,
+.modal-content,
+.timer-card,
+.history-exercise-log,
+.info-block {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--border-radius-lg);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--box-shadow);
+}
+
+/* Off-screen rendering optimization: skip layout and painting for out-of-viewport cards */
+.client-card,
+.routine-card,
+.history-card,
+.exercise-item {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 120px;
+}
+
+/* Shared Flex Between (Horizontal Row with Space Between) */
+.view-header,
+.modal-header,
+.session-title-block,
+.client-card-header,
+.history-header,
+.routine-header,
+.deck-header,
+.superset-header,
+.booking-header,
+.header-container,
+.section-title,
+.exercise-item-header,
+.session-bar-content,
+.active-exercise-navigator,
+.participant-card-header,
+.active-set-row,
+.timer-card-head,
+.deck-card-top,
+.form-row,
+.session-title-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Shared Flex Center (Centered Row or Button Icon Layout) */
+.btn,
+.icon-btn,
+.avatar,
+.avatar-large,
+.nav-item,
+.nav-arrow-btn,
+.step-btn,
+.set-checkbox-btn,
+.timer-close,
+.superset-done,
+.deck-action-btn,
+.collapse-btn,
+.close-btn-xs,
+.modal-close-btn,
+.btn-remove-row,
+.primary-btn,
+.secondary-btn,
+.danger-btn,
+.success-btn,
+.active-set-row .set-checkbox-btn,
+.active-set-row .step-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Shared Flex Column (Vertical Stack) */
+.error-view,
+.stack-list,
+.profile-info-grid,
+.chart-bar-wrapper,
+.routine-card,
+.exercise-item,
+.history-exercise-log,
+.active-session-overlay,
+.clipboard-body,
+.session-overlay-body,
+.group-matrix-grid,
+.session-actions-footer,
+.modal-form,
+.client-card,
+.client-detail-card,
+.superset-ex-list,
+.superset-ex-row,
+.deck-history-sets,
+.form-group,
+.backup-actions,
+.deck-stat,
+.sessions-category-column,
+.stack-list {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Shared Button & Interactive Foundation */
+.btn,
+.icon-btn,
+.nav-arrow-btn,
+.step-btn,
+.set-checkbox-btn,
+.timer-btn-sm,
+.deck-action-btn,
+.session-menu-item,
+.pill-btn,
+.superset-sig,
+.nav-item {
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: var(--btn-radius);
+  font-family: var(--font-sans);
+}
+
+/* Shared Muted Text Utilities */
+.client-name-meta p,
+.profile-meta p,
+.info-block label,
+.data-table th,
+.chart-label,
+.routine-title-info p,
+.preview-tag,
+.exercise-instructions,
+.history-header-meta p,
+.history-date,
+.history-ex-row span,
+.participant-header-status,
+.deck-history-reps,
+.deck-history-note,
+.deck-history-meta,
+.set-last-meta {
+  color: var(--text-muted);
+}
+/* Reset & Base Setup */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-color);
+  background-image: var(--bg-gradient);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  color: var(--text-main);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  overflow-x: hidden;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+} /* All headings use the geometric display face with tight tracking for a clear hierarchy. */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-header);
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+} /* Scrollbar customizations */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+} /* Header Styling */
+.app-header {
+  min-height: var(--hdr-height);
+  background: var(--card-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  /* Flat full-width bar: sharp corners, no shadow, only a bottom divider (not a card) */
+  border-radius: 0;
+  border-bottom: 1px solid var(--card-border);
+  position: sticky;
+  top: 0;
+  /* Above the fullscreen active-session overlay (z-index 120), which shares this stacking
+     context — otherwise the overlay paints over the ☰ dropdown that drops down into it. */
+  z-index: 125;
+}
+.header-nav {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 4px 16px 10px 16px;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-start;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.header-nav::-webkit-scrollbar {
+  display: none;
+}
+body:has(#active-session-overlay:not(.hidden)) .header-nav {
+  display: none;
+}
+.header-nav .nav-item {
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  border-radius: 999px;
+  padding: 6px 14px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.header-nav .nav-item i {
+  font-size: 14px;
+}
+.header-nav .nav-item span {
+  font-size: 13px;
+  font-weight: 600;
+}
+.header-nav .nav-item:hover {
+  background: var(--bg-surface);
+  color: var(--text-main);
+}
+.header-nav .nav-item.active {
+  background: color-mix(in srgb, var(--primary) 15%, transparent);
+  color: var(--primary);
+  font-weight: 700;
+}
+.header-nav .nav-item.active i {
+  filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.3));
+}
+.header-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 16px;
+  height: var(--hdr-height);
+}
+.logo-area {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+/* Build stamp next to the wordmark — small, muted, monospace. */
+.app-version {
+  align-self: flex-end;
+  margin: 0 0 5px -8px;
+  font-family: var(--font-mono, monospace);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.3px;
+}
+.logo-icon {
+  font-size: 26px;
+  color: var(--primary);
+  filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.4));
+}
+.logo-area h1 {
+  font-family: var(--font-header);
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+.header-actions,
+.normal-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.header-actions .icon-btn {
+  width: 44px;
+  height: 44px;
+  font-size: 18px;
+} /* Language + theme selectors live inside the ☰ menu (identical layout on desktop and mobile), so
+   the header bar stays compact — just the logo, the sync pill and the menu button. They appear as
+   labeled rows at the top of the dropdown; the selects follow the active theme like every input. */
+.menu-control-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 14px;
+}
+.menu-control-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+  white-space: nowrap;
+}
+.menu-control-label i {
+  width: 16px;
+  text-align: center;
+  color: var(--text-muted);
+}
+/* select.menu-select (element+class) outspecifies the later .form-control rule, whose
+   10px vertical padding would otherwise combine with the fixed height and clip the text. */
+select.menu-select {
+  background: var(--input-bg);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: var(--btn-radius);
+  height: 34px;
+  line-height: 32px;
+  padding: 0 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  flex: 0 0 auto;
+  min-width: 104px;
+}
+.menu-divider {
+  height: 1px;
+  background: var(--border-color);
+  margin: 6px 4px;
+}
+/* Narrow phones: only the logo, sync pill and menu button remain in the bar; keep the icon
+   buttons a comfortable 40px. */
+@media (max-width: 480px) {
+  .header-actions .icon-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
+}
+/* Main View Controller styling */
+#main-content {
+  flex: 1;
+  overflow-y: auto;
+  max-width: 800px;
+  width: 100%;
+  margin: 0 auto;
+  /* No top padding: each view opens with a flat title bar that sits flush under the app header
+     (the bar carries its own padding). Bottom clears the fixed notification area handle bar. */
+  padding: 0 16px calc(var(--notif-handle-height, 92px) + var(--safe-bottom) + 24px) 16px;
+}
+/* A view's primary title bar: a flat strip flush under the app header, spanning the full
+   content column (breaks out of #main-content's side padding) with a bottom divider and a
+   grab handle. Shared look for every view + the active-session clipboard. */
+.view-titlebar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: var(--card-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  padding: 18px 16px 12px;
+  border-bottom: 1px solid var(--card-border);
+  margin-bottom: 16px;
+}
+#main-content .view-titlebar {
+  margin-left: -16px;
+  margin-right: -16px;
+}
+/* Grab handle: a centered pill that signals "swipe down to close" and doubles as a tap/click
+   target (desktop, where the app-name logo is the other way home). Enlarged hit area via ::before. */
+.view-grabber {
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 5px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: var(--border-color);
+  cursor: grab;
+  transition: background 0.2s ease;
+}
+.view-grabber::before {
+  content: "";
+  position: absolute;
+  inset: -9px -22px;
+}
+.view-grabber:hover {
+  background: var(--text-muted);
+}
+.view-grabber:active {
+  cursor: grabbing;
+}
+.app-view {
+  display: none;
+}
+.app-view.active {
+  display: block;
+  animation: viewSwitch 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+/* Each view switch (bottom-nav tab, client detail, back home) plays this: the incoming view
+   rises and settles with a subtle scale + fade, so navigation reads as a deliberate transition. */
+@keyframes viewSwitch {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+/* Users who prefer reduced motion get the destination immediately, no slide. */
+@media (prefers-reduced-motion: reduce) {
+  .app-view.active {
+    animation-duration: 0.001s;
+  }
+}
+
+/* Not-found (404) view — centred in the content area, below the omnipresent header. */
+.error-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  padding: 48px 16px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+.error-view-icon {
+  font-size: 44px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+.error-view-path {
+  margin: 0;
+  word-break: break-all;
+}
+.error-view-path code {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--primary);
+  background: rgba(0, 0, 0, 0.3);
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+.error-view .btn {
+  margin-top: 8px;
+}
+.view-header {
+  margin-bottom: 16px;
+}
+/* Single source of truth for view-title type — every view reads as one system: the view headers,
+   the client-detail back header, the home "Sessions" label, the day-stepper date, the
+   active-session title, and the 404 title all share this one definition. The
+   `.section-title.sessions-title-bar h3` selector is specific enough to win over the generic
+   `.section-title h3` rule regardless of source order; `#error-view-title` (id) beats the base
+   heading rule. Change title size/weight/face here and nowhere else. */
+.view-header h2,
+.view-header-back h2,
+.view-title-label,
+.session-title-block h3,
+.section-title.sessions-title-bar h3,
+#error-view-title {
+  font-family: var(--font-header);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+.view-title-label {
+  flex: 0 0 auto;
+}
+.view-header-back {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.view-header-back h2 {
+  flex: 1;
+}
+.view-desc {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-top: -8px;
+  margin-bottom: 20px;
+} /* Button UI Components */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  border-radius: var(--btn-radius);
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 10px 16px;
+  font-size: 14px;
+  user-select: none;
+}
+.btn-sm {
+  padding: 8px 12px;
+  font-size: 13px;
+}
+.btn-xs {
+  padding: 6px 10px;
+  font-size: 12px;
+  border-radius: 6px;
+}
+.primary-btn {
+  background: var(--primary-gradient);
+  color: var(--on-primary);
+  box-shadow: 0 6px 16px -9px rgba(0, 0, 0, 0.55);
+}
+.primary-btn:hover {
+  filter: brightness(1.07);
+}
+.secondary-btn {
+  background-color: var(--primary-light);
+  color: var(--primary);
+  border: 1px solid color-mix(in srgb, var(--primary) 32%, transparent);
+}
+.secondary-btn:hover {
+  background-color: color-mix(in srgb, var(--primary) 22%, transparent);
+}
+.danger-btn {
+  background-color: var(--danger-light);
+  color: var(--danger);
+  border: 1px solid color-mix(in srgb, var(--danger) 32%, transparent);
+}
+.danger-btn:hover {
+  background-color: color-mix(in srgb, var(--danger) 24%, transparent);
+} /* Success (e.g. "Complete Workout") stays semantically green regardless of theme primary. */
+.success-btn {
+  background-color: var(--success);
+  color: var(--text-dark);
+  box-shadow: 0 6px 16px -9px rgba(0, 0, 0, 0.5);
+}
+.success-btn:hover {
+  filter: brightness(1.06);
+}
+.icon-btn {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+}
+.icon-btn:hover {
+  background: var(--border-color);
+} /* Theme-aware Badge & Text Utility Classes */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.badge-primary,
+.badge-cyan {
+  background: var(--primary-light);
+  color: var(--primary);
+  border: 1px solid color-mix(in srgb, var(--primary) 35%, transparent);
+}
+.badge-success,
+.badge-emerald {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--success);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+.badge-danger {
+  background: var(--danger-light);
+  color: var(--danger);
+  border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent);
+}
+.badge-warning {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+.text-primary,
+.text-cyan {
+  color: var(--primary) !important;
+} /* Cloud + recycle composite for the merged Sync & Backup button: a cloud with small sync
+   arrows overlaid on its body, so one control reads as both "cloud backup" and "sync". */
+.cloud-sync-icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.cloud-sync-icon .fa-cloud,
+.session-menu-item .fa-cloud-arrow-up {
+  font-size: 24px;
+  color: var(--cloud-icon-color, #0284c7);
+}
+.cloud-sync-icon .fa-arrows-rotate {
+  position: absolute;
+  left: 50%;
+  top: 56%;
+  transform: translate(-50%, -50%);
+  font-size: 13px;
+  color: var(--cloud-arrows-color, var(--success, #10b981));
+  filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.45));
+} /* When there are pending changes the cloud button grows into a pill to seat the ahead/behind
+   counters beside the icon; fully synced, the badge hides and it reads as a round icon again. */
+.sync-backup-btn {
+  width: auto;
+  min-width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  padding: 0 12px;
+  gap: 8px;
+}
+/* `.header-actions .icon-btn` pins a fixed 44/40px width that beats the width:auto above, so the
+   button stayed a cramped circle and clipped the ahead/behind counts. This higher-specificity
+   override lets it grow into a pill that seats the cloud + both counters. */
+.header-actions .icon-btn.sync-backup-btn {
+  width: auto;
+}
+/* Fully synced (badge hidden): drop the side padding so it reads as a round icon again. */
+.sync-backup-btn:has(.sync-badge.hidden) {
+  padding-left: 0;
+  padding-right: 0;
+}
+.sync-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+.sync-badge.hidden {
+  display: none;
+}
+.sync-badge .sync-ahead,
+.sync-badge .sync-behind {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.sync-badge .sync-ahead {
+  color: var(--success, #10b981);
+} /* local edits to push (ahead, green) */
+.sync-badge .sync-behind {
+  color: #ef4444;
+} /* remote changes to pull (behind, red) */
+.sync-badge .sync-offline {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #f59e0b;
+} /* offline cached code (amber warning) */
+.sync-badge i {
+  font-size: 9px;
+}
+.back-btn {
+  background: transparent;
+  border: none;
+  color: var(--primary);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.w-full {
+  width: 100%;
+}
+.flex-1 {
+  flex: 1;
+}
+.ml-1 {
+  margin-left: 4px;
+}
+.text-emerald {
+  color: var(--primary) !important;
+}
+.text-indigo {
+  color: var(--secondary) !important;
+}
+.text-sm {
+  font-size: 14px !important;
+} /* Cards & Glassmorphism styling */
+.card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--border-radius-lg);
+  padding: 16px;
+  box-shadow: var(--box-shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.glassmorphic {
+  -webkit-backdrop-filter: var(--glass-blur);
+} /* Search Bars & Inputs */
+.search-bar-container {
+  position: relative;
+  margin-bottom: 16px;
+}
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 14px;
+}
+.search-input {
+  width: 100%;
+  padding: 12px 12px 12px 38px;
+  background-color: var(--input-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+.search-input:focus {
+  border-color: var(--primary);
+} /* Chips Filter Container */
+.filter-chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  margin-bottom: 16px;
+  scrollbar-width: none;
+}
+.filter-chips::-webkit-scrollbar {
+  display: none;
+}
+.chip {
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+.chip.active {
+  background: var(--primary-light);
+  color: var(--primary);
+  border-color: rgba(16, 185, 129, 0.4);
+} /* Lists styling (Grid vs Stack) */
+.grid-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 480px) {
+  .grid-list {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.stack-list {
+  gap: 12px;
+} /* Client Card Components */
+.client-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+.client-card:hover {
+  border-color: rgba(16, 185, 129, 0.3);
+}
+.client-info-block {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: #fff;
+  font-family: var(--font-header);
+  font-weight: 700;
+  font-size: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+.client-name-meta h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.client-name-meta p {
+  font-size: 12px;
+} /* Client Detail Layout */
+.client-detail-card {
+  margin-bottom: 20px;
+}
+.client-profile-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.avatar-large {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: #fff;
+  font-family: var(--font-header);
+  font-weight: 700;
+  font-size: 22px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+.profile-meta h3 {
+  font-family: var(--font-header);
+  font-size: 20px;
+  font-weight: 700;
+}
+.profile-meta p {
+  font-size: 12px;
+}
+.profile-info-grid {
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.info-block label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  display: block;
+}
+.info-block p {
+  font-size: 14px;
+  line-height: 1.5;
+}
+.quick-workout-action {
+  border-top: 1px solid var(--border-color);
+  padding-top: 16px;
+}
+.section-title {
+  margin-top: 24px;
+  margin-bottom: 12px;
+}
+.section-title h3 {
+  font-family: var(--font-header);
+  font-size: 16px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+} /* Table Design */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-top: 10px;
+}
+.data-table th,
+.data-table td {
+  padding: 8px 12px;
+  text-align: left;
+}
+.data-table th {
+  border-bottom: 1px solid var(--border-color);
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+.data-table td {
+  border-bottom: 1px dashed var(--border-color);
+}
+.data-table tr:last-child td {
+  border-bottom: none;
+} /* Weight History Chart Box */
+.simple-chart {
+  height: 100px;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 4px;
+  position: relative;
+}
+.chart-bar-wrapper {
+  flex: 1;
+  align-items: center;
+  height: 100%;
+  justify-content: flex-end;
+}
+.chart-bar {
+  width: 100%;
+  background: linear-gradient(to top, var(--primary-hover), var(--primary));
+  border-radius: 4px 4px 0 0;
+  min-height: 4px;
+  transition: height 0.4s ease;
+  position: relative;
+}
+.chart-bar:hover .chart-tooltip {
+  opacity: 1;
+}
+.chart-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translate(-50%, -6px);
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--primary);
+  font-weight: 700;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  white-space: nowrap;
+  z-index: 10;
+}
+.chart-label {
+  font-size: 9px;
+  margin-top: 4px;
+} /* Routine Template Card components */
+.routine-card {
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+.routine-card:hover {
+  border-color: rgba(79, 70, 229, 0.4);
+}
+.routine-title-info h3 {
+  font-size: 18px;
+  font-weight: 700;
+  font-family: var(--font-header);
+  margin-bottom: 4px;
+}
+.routine-title-info p {
+  font-size: 13px;
+  line-height: 1.4;
+  margin-bottom: 12px;
+}
+.routine-exercise-preview-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.preview-tag {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-color);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+}
+.preview-tag-detail {
+  color: var(--primary);
+  font-weight: 700;
+  font-family: var(--font-mono);
+} /* Exercise Database Library card items */
+.exercise-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--border-radius-md);
+}
+.exercise-item-header h3 {
+  font-size: 15px;
+  font-weight: 600;
+}
+.muscle-badge {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: rgba(6, 182, 212, 0.1);
+  color: var(--primary);
+  border: 1px solid rgba(6, 182, 212, 0.2);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 700;
+}
+.exercise-instructions {
+  font-size: 12px;
+  line-height: 1.4;
+  margin-top: 4px;
+}
+.exercise-item-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.taxonomy-badge {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: rgba(148, 163, 184, 0.12);
+  color: var(--text-muted);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 700;
+}
+
+/* Reusable filtered exercise picker (routine builder + gym-floor swap) */
+.exercise-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.picker-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.chip-sm {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+.picker-count {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.picker-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+.picker-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--input-bg);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+}
+.picker-item:hover {
+  border-color: var(--primary);
+}
+.picker-item.selected {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+.picker-item.just-added {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  transform: scale(0.98);
+}
+.picker-item-name {
+  font-size: 13px;
+  font-weight: 600;
+}
+.picker-item-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.picker-empty {
+  font-size: 12px;
+  padding: 12px;
+  text-align: center;
+} /* History Card items */
+.history-card {
+  padding: 14px;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+.history-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-color: var(--primary);
+}
+.history-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+  border-bottom: 1px dashed var(--border-color);
+  padding-bottom: 8px;
+}
+.history-header-meta h4 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.history-header-meta p {
+  font-size: 11px;
+}
+.history-date {
+  font-size: 11px;
+  font-family: var(--font-mono);
+} /* Omnipresent bottom notification & status area (replaces old bottom-nav) */
+.notification-area {
+  /* Collapsed peek is a single text line (the summary title row) — .notification-summary-desc is
+     hidden below, which is what used to push this to 92px for two lines. */
+  --notif-handle-height: calc(56px + var(--safe-bottom));
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--card-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-top: 1px solid var(--card-border);
+  box-shadow: 0 -4px 25px rgba(0, 0, 0, 0.35);
+  z-index: 122;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.28s ease;
+  transform: translateY(calc(100% - var(--notif-handle-height)));
+  /* Expanded, the drawer covers the whole area below the omnipresent header (not just 82vh, which
+     used to leave a visible gap at the top even fully expanded). */
+  max-height: calc(100vh - var(--hdr-height));
+  max-height: calc(100dvh - var(--hdr-height));
+}
+.notification-area.has-active-session {
+  --notif-handle-height: calc(64px + var(--safe-bottom));
+}
+body:has(#active-session-overlay:not(.hidden)) .notification-area.has-active-session {
+  --notif-handle-height: calc(56px + var(--safe-bottom));
+}
+body:has(#active-session-overlay:not(.hidden)) .notification-area .active-session-bar {
+  display: none !important;
+}
+.notification-area.is-expanded {
+  transform: translateY(0);
+  /* max-height above only caps growth to fit short content; force the actual height so the drawer
+     fills the whole area below the header regardless of how much content it holds — the feed
+     list itself (flex: 1; overflow-y: auto) scrolls internally instead. */
+  height: calc(100vh - var(--hdr-height));
+  height: calc(100dvh - var(--hdr-height));
+}
+.notification-handle-bar {
+  min-height: var(--notif-handle-height);
+  padding: 16px 16px calc(12px + var(--safe-bottom)) 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  border-bottom: 1px solid transparent;
+  margin-bottom: 0;
+}
+.notification-area.is-expanded .notification-handle-bar {
+  border-bottom-color: var(--card-border);
+  min-height: 64px;
+  height: 64px;
+  padding: 16px 16px 12px 16px;
+}
+.notification-grabber {
+  top: 6px;
+}
+.notification-summary-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+.notification-area.has-active-session .notification-summary-preview,
+.notification-area.is-expanded .notification-summary-preview {
+  display: none;
+}
+body:has(#active-session-overlay:not(.hidden))
+  .notification-area.has-active-session:not(.is-expanded)
+  .notification-summary-preview {
+  display: flex !important;
+}
+.notification-summary-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.notification-summary-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+.notification-summary-title {
+  font-family: var(--font-header);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text-main);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.notification-bell-icon {
+  color: var(--primary);
+  font-size: 15px;
+  filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.4));
+  flex-shrink: 0;
+}
+.notification-summary-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+/* Collapsed peek is one line only (the summary title row above) — this description used to add a
+   second, taking the handle from a single line up to 92px tall. */
+.notification-summary-desc {
+  display: none;
+}
+.notification-toggle-btn {
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+}
+.notification-area.is-expanded .notification-toggle-btn {
+  transform: rotate(180deg);
+}
+
+/* Active Session Bar integration inside notification-area */
+.notification-area .active-session-bar {
+  position: relative;
+  bottom: auto;
+  left: auto;
+  right: auto;
+  margin: 0;
+  padding: 4px 8px 4px 12px;
+  background: rgba(16, 185, 129, 0.95);
+  color: #09090b;
+  border-radius: var(--border-radius-md);
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
+  z-index: auto;
+  flex: 1;
+  min-width: 0;
+  animation: none;
+}
+.notification-area.has-active-session #notification-summary-badge {
+  display: none;
+}
+.notification-area .active-session-bar.is-idle {
+  background: color-mix(in srgb, var(--secondary) 92%, var(--bg-color));
+  color: var(--text-main);
+  box-shadow: none;
+  border: 1px solid var(--card-border);
+}
+.notification-area .active-session-bar.is-idle .pulse-indicator {
+  animation: none;
+  opacity: 0.5;
+}
+.session-bar-content {
+  gap: 10px;
+}
+.session-bar-main {
+  min-width: 0;
+  flex: 1;
+}
+.session-bar-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 14px;
+}
+.session-bar-info span:not(.pulse-indicator) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.session-bar-meta {
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 0.75;
+  margin-top: 1px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pulse-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ef4444;
+  flex-shrink: 0;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
+}
+.session-bar-timer {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.session-bar-timer.overtime {
+  color: #7f1d1d;
+}
+.session-bar-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.session-bar-actions .icon-btn {
+  border-color: rgba(9, 9, 11, 0.2);
+  color: #09090b;
+  width: 30px;
+  height: 30px;
+}
+.session-bar-actions .icon-btn:hover {
+  background: rgba(9, 9, 11, 0.1);
+}
+.active-session-bar.is-idle .inline-timer-btn {
+  display: none;
+}
+
+/* Expanded Drawer Feed */
+.notification-drawer-feed {
+  padding: 12px 16px calc(24px + var(--safe-bottom)) 16px;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.notification-feed-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+.notification-feed-title {
+  font-family: var(--font-header);
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.notification-count-pill {
+  background: color-mix(in srgb, var(--primary) 20%, transparent);
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.notification-count-pill.has-unread {
+  background: var(--primary);
+  color: var(--on-primary);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+}
+.notification-feed-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.notification-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.notification-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--card-border);
+  border-left: 3px solid transparent;
+  border-radius: var(--border-radius-md);
+  padding: 14px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.notification-card.unread {
+  border-left-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 5%, var(--bg-surface));
+}
+.notification-card:hover {
+  border-color: color-mix(in srgb, var(--primary) 35%, var(--card-border));
+}
+.unread-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--primary);
+  margin-left: 6px;
+  vertical-align: middle;
+  box-shadow: 0 0 6px var(--primary);
+}
+.notification-card.read .unread-dot {
+  display: none;
+}
+.notification-card.welcome {
+  background: color-mix(in srgb, var(--primary) 8%, var(--card-bg));
+  border-color: color-mix(in srgb, var(--primary) 35%, var(--card-border));
+}
+.notification-card-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--primary) 15%, transparent);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+.notification-card.cancellation .notification-card-icon {
+  background: color-mix(in srgb, #ef4444 15%, transparent);
+  color: #ef4444;
+}
+.notification-card.demo-mode {
+  background: color-mix(in srgb, #f59e0b 8%, var(--card-bg));
+  border-color: color-mix(in srgb, #f59e0b 40%, var(--card-border));
+}
+.notification-card.demo-mode .notification-card-icon {
+  background: color-mix(in srgb, #f59e0b 18%, transparent);
+  color: #f59e0b;
+}
+.notification-empty {
+  padding: 24px 16px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.notification-card-content {
+  flex: 1;
+  min-width: 0;
+}
+.notification-card-title {
+  font-weight: 700;
+  font-size: 14px;
+  margin: 0 0 4px 0;
+  color: var(--text-main);
+}
+.notification-card-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0 0 10px 0;
+  line-height: 1.4;
+}
+.notification-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.notification-btn {
+  background: var(--bg-color);
+  border: 1px solid var(--card-border);
+  color: var(--text-main);
+  padding: 6px 12px;
+  border-radius: var(--border-radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+.notification-btn:hover {
+  background: var(--card-border);
+}
+.notification-btn.primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #09090b;
+}
+.notification-btn.primary:hover {
+  filter: brightness(1.1);
+}
+/* Fullscreen Active Workout Overlay Sheet */
+.active-session-overlay {
+  position: fixed;
+  /* Start below the omnipresent app header so it stays visible in the session view too,
+     rather than being covered by a full-screen overlay. */
+  top: var(--hdr-height);
+  left: 0;
+  right: 0;
+  /* Height tracks the *visual* viewport (dvh), not the layout viewport. With `bottom: 0`
+     the overlay sized to the layout viewport, so on mobile the footer and the last exercise
+     card sat behind the browser's URL bar — unreachable once an expanded card made the deck
+     tall enough to reach that zone. 100vh is the fallback for browsers without dvh support. */
+  height: calc(100vh - var(--hdr-height));
+  height: calc(100dvh - var(--hdr-height));
+  background: var(--bg-color);
+  z-index: 120;
+  display: flex;
+  flex-direction: column;
+  animation: slideUpFullscreen 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+} /* The header and participant tabs stay pinned; the rest of the clipboard scrolls.
+   Without this the overlay clips any content past the fold (tall stacks, the historical
+   review panel, the Complete/Delete actions) with no way to reach it. */
+.clipboard-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
+  padding-bottom: calc(var(--notif-handle-height, 92px) + var(--safe-bottom) + 24px);
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideUpFullscreen {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+.session-title-bar {
+  /* Flat-bar look (padding, divider, grab handle) comes from .view-titlebar; the client tabs
+     follow immediately, so no bottom margin here. */
+  gap: 16px;
+  margin-bottom: 0;
+} /* Countdown + the session's own controls (options menu, minimize), right-aligned in the bar. */
+.session-title-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.collapse-btn {
+  background: transparent;
+  border: none;
+  color: var(--primary);
+  font-size: 18px;
+  cursor: pointer;
+}
+.session-title-block {
+  flex: 1;
+  min-width: 0;
+} /* h3 type comes from the unified view-title rule */
+.session-title-block h3 {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.session-title-block p {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.session-timer-block span {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--primary);
+}
+.session-overlay-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  gap: 16px;
+  padding-bottom: calc(40px + var(--safe-bottom));
+} /* Current Exercise Navigator */
+.active-exercise-navigator {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+}
+.nav-arrow-btn {
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  color: var(--primary);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+}
+.nav-arrow-btn:hover {
+  background: var(--border-color);
+}
+.clipboard-empty-state {
+  padding: 32px 16px;
+  text-align: center;
+}
+.clipboard-empty-state h4 {
+  font-family: var(--font-header);
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.clipboard-empty-state p {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.4;
+} /* ===== Inline clipboard editor (on-the-fly plan editing) ===== */
+.clipboard-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+/* Edit-mode chrome: the session title bar is repurposed to show WHICH plan is being edited and
+   its temporal mode, so the trainer always knows if they're changing the live session or a future one. */
+.active-session-overlay.editing-plan .session-title-bar {
+  border-bottom: 2px solid var(--primary);
+}
+/* While editing the plan, the live-session chrome (member tabs, running timer, injury caveat)
+   steps aside so the client's goals + notes take focus. */
+.active-session-overlay.editing-plan #active-session-client-tabs,
+.active-session-overlay.editing-plan .session-timer-block,
+.active-session-overlay.editing-plan #clipboard-client-alert {
+  display: none;
+}
+
+/* Client focus panel: only visible while editing the plan. */
+.client-focus-panel {
+  display: none;
+}
+.active-session-overlay.editing-plan .client-focus-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  border: 1px solid var(--border-color);
+  border-left: 3px solid var(--primary);
+  border-radius: 10px;
+  background: var(--primary-light);
+}
+.client-focus-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.client-focus-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--primary);
+}
+.client-focus-item p {
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-main);
+}
+.edit-mode-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  vertical-align: middle;
+  margin-left: 8px;
+}
+.edit-mode-chip.live {
+  background: color-mix(in srgb, var(--danger) 15%, transparent);
+  color: var(--danger);
+  border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent);
+}
+.edit-mode-chip.future {
+  background: color-mix(in srgb, #f59e0b 15%, transparent);
+  color: #f59e0b;
+  border: 1px solid color-mix(in srgb, #f59e0b 40%, transparent);
+}
+.edit-mode-chip.planning {
+  background: var(--primary-light);
+  color: var(--primary);
+  border: 1px solid color-mix(in srgb, var(--primary) 40%, transparent);
+}
+.editor-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.editor-empty {
+  color: var(--text-muted);
+  font-size: 13px;
+  padding: 12px 0;
+}
+.editor-row {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  padding: 10px;
+  border-radius: var(--border-radius-md);
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+}
+.editor-row-dragging {
+  opacity: 0.6;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+/* Combined reorder control: tap the top half to move up / bottom half to move down; drag to
+   reorder freely. Sized as a tall two-zone target so both taps and drags are easy on touch. */
+.editor-reorder {
+  flex: 0 0 auto;
+  width: 34px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--input-bg);
+  color: var(--text-muted);
+  cursor: grab;
+  touch-action: none;
+  overflow: hidden;
+}
+.editor-reorder:active {
+  cursor: grabbing;
+}
+.editor-reorder-up,
+.editor-reorder-down {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+.editor-reorder-up {
+  border-bottom: 1px solid var(--border-color);
+}
+.editor-reorder:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+}
+.editor-row-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.editor-row-name-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.editor-row-circuit {
+  color: var(--secondary, var(--primary));
+  font-size: 12px;
+  flex: 0 0 auto;
+}
+.editor-row-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 34px;
+  padding: 0 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--input-bg);
+  color: var(--text-main);
+  font-family: var(--font-header);
+  font-size: 14px;
+  font-weight: 700;
+}
+.editor-row-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.editor-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.editor-field > span {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-muted);
+}
+.editor-field > input {
+  width: 62px;
+  height: 30px;
+  padding: 0 6px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--input-bg);
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+}
+/* Reps is polymorphic — ranges ("8-12"), holds ("30s"), or "max" — so it needs more room than the
+   numeric sets/load fields to show the whole token without clipping. */
+.editor-field > input.editor-f-reps {
+  width: 84px;
+}
+.editor-remove {
+  flex: 0 0 auto;
+  align-self: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid var(--danger-light);
+  background: transparent;
+  color: var(--danger);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+.editor-remove:hover {
+  background: var(--danger-light);
+}
+.clipboard-editor-actions {
+  display: flex;
+  gap: 8px;
+}
+.clipboard-editor-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: center;
+  margin: 0;
+}
+/* Superset membership <select> that sits in each row's field strip. */
+.editor-field-superset > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.editor-row-superset {
+  height: 30px;
+  max-width: 130px;
+  padding: 0 6px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--input-bg);
+  color: var(--text-main);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+/* Superset block: members grouped in a tinted, layer-group-accented card. */
+.editor-circuit {
+  border: 1px solid var(--secondary, var(--primary));
+  border-radius: var(--border-radius-md);
+  background: color-mix(in srgb, var(--secondary, var(--primary)) 8%, var(--card-bg));
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.editor-circuit-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.editor-circuit-icon {
+  color: var(--secondary, var(--primary));
+  flex: 0 0 auto;
+}
+.editor-circuit-title {
+  flex: 1 1 120px;
+  min-width: 0;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--input-bg);
+  color: var(--text-main);
+  font-family: var(--font-header);
+  font-size: 13px;
+  font-weight: 800;
+}
+.editor-circuit-rounds {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+.editor-circuit-rounds > span {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-muted);
+}
+.editor-circuit-series {
+  width: 52px;
+  height: 30px;
+  padding: 0 6px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--input-bg);
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+}
+.editor-circuit-ungroup {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.editor-circuit-ungroup:hover {
+  color: var(--danger);
+  border-color: var(--danger-light);
+  background: var(--danger-light);
+}
+.editor-circuit-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.editor-circuit-add {
+  align-self: flex-start;
+  background: transparent;
+  border: 1px dashed var(--secondary, var(--primary));
+  color: var(--secondary, var(--primary));
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.editor-circuit-add:hover {
+  background: color-mix(in srgb, var(--secondary, var(--primary)) 14%, transparent);
+}
+/* Rest is a first-class, movable plan row in the editor. */
+.editor-rest-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--border-radius-md);
+  background: color-mix(in srgb, var(--primary) 7%, var(--card-bg));
+  border: 1px dashed var(--border-color);
+}
+.editor-rest-row .editor-reorder {
+  height: 34px;
+}
+.editor-rest-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+.editor-rest-label i {
+  color: var(--primary);
+}
+.editor-rest-secs {
+  width: 64px;
+  height: 30px;
+  padding: 0 6px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--input-bg);
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+}
+.editor-rest-unit {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-left: -4px;
+}
+.editor-rest-remove {
+  margin-left: auto;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid var(--danger-light);
+  background: transparent;
+  color: var(--danger);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.editor-rest-remove:hover {
+  background: var(--danger-light);
+}
+/* Insert bar in every gap: inject an exercise / superset / rest at that position. */
+.editor-insert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 0;
+  opacity: 0.55;
+  transition: opacity 0.15s ease;
+}
+.editor-insert:hover,
+.editor-insert:focus-within {
+  opacity: 1;
+}
+.editor-insert-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border-color);
+}
+.ins-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.ins-btn:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+}
+.ins-btn.ins-ss:hover {
+  color: var(--secondary, var(--primary));
+  border-color: var(--secondary, var(--primary));
+}
+/* Standalone rest marker card in the live deck. */
+.exercise-deck-card.rest-card {
+  border-style: dashed;
+  opacity: 0.9;
+  cursor: pointer;
+}
+.exercise-deck-card.rest-card:hover {
+  opacity: 1;
+  border-color: var(--primary);
+}
+.rest-card-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.rest-card-inner .deck-card-counter {
+  color: var(--primary);
+}
+.rest-card-play {
+  margin-left: auto;
+  color: var(--primary);
+  font-size: 13px;
+}
+/* Group Matrix Grid for Active Session */
+.group-matrix-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@media (min-width: 600px) {
+  .group-matrix-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+}
+.participant-log-card {
+  padding: 12px;
+  border-radius: var(--border-radius-md);
+  background: rgba(39, 39, 42, 0.3);
+  border: 1px solid var(--border-color);
+}
+.participant-log-card.completed {
+  border-color: rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.03);
+}
+.participant-card-header {
+  margin-bottom: 10px;
+  border-bottom: 1px dashed var(--border-color);
+  padding-bottom: 6px;
+}
+.participant-card-header h5 {
+  font-size: 15px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.participant-header-status {
+  font-size: 11px;
+}
+.participant-card-header.completed-all .participant-header-status {
+  color: var(--primary);
+  font-weight: 600;
+} /* Set Rows styling for the touch steppers */
+.active-set-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+.active-set-row:last-child {
+  border-bottom: none;
+}
+.set-index-col {
+  width: 24px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--text-muted);
+}
+.stepper-control-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.stepper-input-wrapper {
+  display: flex;
+  align-items: center;
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  overflow: hidden;
+  height: 30px;
+}
+.stepper-input-wrapper input {
+  width: 46px;
+  border: none;
+  background: transparent;
+  color: var(--text-main);
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  outline: none;
+}
+.step-btn {
+  background: transparent;
+  color: var(--text-muted);
+  width: 24px;
+  height: 100%;
+  font-size: 11px;
+  transition: background 0.1s ease;
+}
+.step-btn:hover {
+  background: var(--border-color);
+  color: var(--text-main);
+}
+.stepper-label {
+  font-size: 9px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-right: 4px;
+  font-weight: 600;
+}
+.set-check-col {
+  width: 32px;
+  display: flex;
+  justify-content: flex-end;
+}
+.set-checkbox-btn {
+  background: transparent;
+  border: 1.5px solid var(--text-muted);
+  color: transparent;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  font-size: 11px;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.set-checkbox-btn.checked {
+  background: var(--primary-gradient);
+  border-color: transparent;
+  color: var(--on-primary);
+  box-shadow: 0 4px 12px -4px rgba(0, 0, 0, 0.45);
+} /* Footer layout for session overlay */
+.session-actions-footer {
+  border-top: 1px solid var(--border-color);
+  padding-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: auto;
+}
+.session-finish-row {
+  display: flex;
+  gap: 12px;
+} /* Overflow menu in the clipboard header — home for destructive Delete Session */
+.session-menu-wrap,
+.app-menu-wrap {
+  position: relative;
+} /* First-run Terms modal is mandatory: hide its dismiss (✕) so the only exit is "I agree". */
+#dialog-terms.first-run .modal-close-btn {
+  display: none;
+}
+.session-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 180px;
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  padding: 6px;
+  z-index: 130;
+}
+.session-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 14px;
+  background: transparent;
+  border-radius: var(--border-radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+  text-align: left;
+  text-decoration: none;
+}
+.session-menu-item:hover {
+  background: var(--input-bg);
+}
+.session-menu-item-danger {
+  color: var(--danger);
+}
+.session-menu-item-danger:hover {
+  background: var(--danger-light);
+} /* FLOATING REST TIMER */
+/* Per-client timer stack: a column of compact labelled countdowns floating over the clipboard. */
+.timer-stack {
+  position: fixed;
+  bottom: calc(92px + var(--safe-bottom) + 12px);
+  right: 6px;
+  z-index: 150;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 190px;
+  max-height: 60vh;
+  overflow-y: auto;
+  pointer-events: none; /* let taps fall through the gaps between cards */
+}
+.timer-card {
+  pointer-events: auto;
+  padding: 8px 12px;
+  cursor: pointer;
+  /* Force full opacity regardless of theme: --card-bg carries a translucent alpha (for the
+     glassmorphic look other cards use sitting on the page background), but the timer stack now
+     floats over arbitrary view content (13.4), so any see-through would blend with whatever's
+     underneath. Paint the theme's card tint over an opaque backing instead of using --card-bg
+     directly, and drop the blur since there's nothing left behind it to blur. */
+  background-image: linear-gradient(var(--card-bg), var(--card-bg));
+  background-color: var(--bg-color);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.timer-card.timer-card-enter {
+  animation: slideUp 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+.timer-card-head {
+  margin-bottom: 2px;
+  gap: 8px;
+}
+.timer-card-label {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  overflow: hidden;
+}
+.timer-card-who {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  font-size: 13px;
+  color: var(--text-main);
+}
+.timer-card-who i {
+  color: var(--primary);
+  flex: 0 0 auto;
+}
+.timer-card-who strong {
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.timer-card-type {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.timer-close {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 13px;
+  flex: 0 0 auto;
+}
+.timer-close:hover {
+  color: var(--text-main);
+}
+.timer-card-time {
+  font-family: var(--font-header);
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--primary);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+/* Overtime: past zero the countdown goes negative and turns red to demand attention. */
+.timer-card.overtime {
+  border-color: color-mix(in srgb, var(--danger) 55%, transparent);
+}
+.timer-card.overtime .timer-card-time,
+.timer-card.overtime .timer-card-label i {
+  color: var(--danger);
+}
+/* Stopped: the owning exercise/superset finished, so the timer is frozen at its final value and
+   dimmed to read as "done, awaiting dismissal" rather than something still needing attention —
+   deliberately NOT a warning color, which stays reserved for a still-running overtime timer. */
+.timer-card.stopped {
+  opacity: 0.6;
+}
+.timer-card.stopped .timer-card-time,
+.timer-card.stopped .timer-card-label i {
+  color: var(--text-muted);
+}
+/* Start-button feedback: a warning flash when a start is refused (timer still has time left), and
+   an acknowledge blink when an overtime timer is reset. Neither disturbs the running countdown. */
+@keyframes timerFlashWarn {
+  0%,
+  100% {
+    background: var(--card-bg);
+    border-color: var(--card-border);
+  }
+  35% {
+    background: var(--timer-warn-peak-color);
+    border-color: #f59e0b;
+  }
+}
+.timer-card.flash-warning {
+  animation: timerFlashWarn 1s ease;
+}
+@keyframes timerBlinkAck {
+  0%,
+  40%,
+  100% {
+    background: var(--card-bg);
+    border-color: var(--card-border);
+  }
+  20%,
+  60% {
+    background: color-mix(in srgb, var(--success) 38%, var(--card-bg));
+    border-color: var(--success);
+  }
+}
+.timer-card.flash-ack {
+  animation: timerBlinkAck 1s ease;
+} /* MODAL DIALOGS */
+.dialog-modal {
+  border: 1px solid var(--card-border);
+  background-color: var(--card-bg);
+  border-radius: var(--border-radius-lg);
+  padding: 20px;
+  margin: auto;
+  max-width: 440px;
+  width: 90%;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  color: var(--text-main);
+}
+.dialog-modal::backdrop {
+  background: rgba(9, 9, 11, 0.7);
+  backdrop-filter: blur(8px);
+}
+.wide-modal {
+  max-width: 600px;
+}
+.modal-header {
+  margin-bottom: 16px;
+}
+.modal-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 16px;
+  cursor: pointer;
+}
+.modal-form {
+  gap: 14px;
+}
+.form-group {
+  gap: 6px;
+}
+.form-row {
+  gap: 12px;
+}
+.form-group.col {
+  flex: 1;
+}
+.form-group label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.form-control {
+  background-color: var(--input-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  color: var(--text-main);
+  padding: 10px 12px;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+.form-control:focus {
+  border-color: var(--primary);
+}
+textarea.form-control {
+  resize: vertical;
+} /* Compact Workout Setup Modal Styling */
+#dialog-workout-setup {
+  padding: 16px 20px;
+}
+#dialog-workout-setup .modal-header {
+  margin-bottom: 10px;
+}
+#dialog-workout-setup .dialog-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+#dialog-workout-setup label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+  display: block;
+}
+#dialog-workout-setup .form-control {
+  padding: 6px 10px;
+  font-size: 13px;
+  height: 36px;
+  background-color: var(--input-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  border-radius: var(--border-radius-sm, 6px);
+}
+#dialog-workout-setup .form-control:focus {
+  border-color: var(--accent-cyan);
+}
+#dialog-workout-setup .participant-setup-list {
+  max-height: 190px;
+  overflow-y: auto;
+  padding-right: 2px;
+  margin-top: 4px;
+}
+.participant-setup-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+  padding: 6px 10px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--border-radius-sm, 6px);
+}
+.participant-setup-row:hover {
+  border-color: var(--accent-cyan);
+}
+
+/* Multi-select check checklist inside setup */
+.checkbox-checklist {
+  max-height: 150px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+}
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  user-select: none;
+}
+.checklist-item input[type="checkbox"] {
+  accent-color: var(--primary);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+  border-top: 1px solid var(--border-color);
+  padding-top: 14px;
+} /* Routine builder items */
+.routine-builder-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 250px;
+  overflow-y: auto;
+  padding-right: 4px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+.routine-builder-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  padding: 8px;
+  border-radius: var(--border-radius-sm);
+}
+.routine-builder-row select {
+  flex: 2;
+  min-width: 120px;
+}
+.routine-builder-row input {
+  width: 50px;
+}
+.btn-remove-row {
+  background: transparent;
+  border: none;
+  color: var(--danger);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px;
+} /* Data backup view options */
+.modal-body-scroll {
+  max-height: 70vh;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.dialog-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.4;
+  margin-bottom: 16px;
+}
+.backup-actions {
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.action-card {
+  text-align: center;
+  padding: 20px;
+}
+.backup-icon-large {
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+.action-card h4 {
+  font-size: 15px;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+.action-card p {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+  line-height: 1.4;
+}
+.file-upload-wrapper {
+  position: relative;
+}
+.file-input-hidden {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+.status-msg {
+  font-size: 11px;
+  margin-top: 6px;
+  font-weight: 600;
+}
+/* Utility classes */
+.hidden {
+  display: none !important;
+} /* History Feedback Icon and Tooltip CSS */
+.history-feedback-icon {
+  position: relative;
+  cursor: pointer;
+  margin-left: 6px;
+  display: inline-block;
+  font-size: 13px;
+  transition: transform 0.2s;
+  vertical-align: middle;
+}
+.history-feedback-icon:hover {
+  transform: scale(1.2);
+}
+.history-feedback-icon .tooltip-content {
+  visibility: hidden;
+  width: 220px;
+  background-color: rgba(18, 18, 24, 0.98);
+  color: var(--text-color);
+  text-align: left;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px 14px;
+  position: absolute;
+  z-index: 100;
+  bottom: 135%;
+  /* Position above the icon */
+  right: 0;
+  /* Align to the right of the icon to keep within screen limits */
+  opacity: 0;
+  transition: opacity 0.2s, visibility 0.2s;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
+  pointer-events: none;
+  font-size: 11px;
+  line-height: 1.5;
+  font-weight: normal;
+}
+.history-feedback-icon .tooltip-content::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  right: 12px;
+  /* Position the pointer arrow to align with the right-positioned icon */
+  border-width: 6px;
+  border-style: solid;
+  border-color: rgba(18, 18, 24, 0.98) transparent transparent transparent;
+}
+.history-feedback-icon:hover .tooltip-content,
+.history-feedback-icon.active .tooltip-content {
+  visibility: visible;
+  opacity: 1;
+}
+.tooltip-title {
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: var(--primary);
+}
+.tooltip-body {
+  color: var(--text-muted);
+} /* Sets tracking row style tweaks */
+.active-set-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  padding-bottom: 8px;
+}
+.active-set-row .step-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  width: 32px;
+  height: 32px;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+}
+.active-set-row .input-set-weight,
+.active-set-row .input-set-reps {
+  background: none;
+  border: none;
+  color: #fff;
+  text-align: center;
+  font-size: 13px;
+  height: 32px;
+}
+.active-set-row .input-set-weight {
+  width: 50px;
+}
+.active-set-row .input-set-reps {
+  width: 40px;
+}
+.active-set-row .set-checkbox-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.active-set-row .set-checkbox-btn.checked {
+  background: var(--primary-gradient) !important;
+  color: var(--on-primary) !important;
+  border-color: transparent !important;
+  box-shadow: 0 4px 12px -4px rgba(0, 0, 0, 0.45) !important;
+}
+
+/* Mobile responsive scaling */
+@media (max-width: 600px) {
+  /* Scale buttons for thumb-friendly interaction */
+  .btn,
+  .btn-sm {
+    padding: 12px 18px !important;
+    font-size: 14px !important;
+    min-height: 44px !important;
+  } /* Increase margins and size of feedback/note icons in global history to prevent misclicks */
+  .history-feedback-icon {
+    font-size: 20px !important;
+    padding: 10px !important;
+    /* Extremely easy to click/tap */
+    margin-left: 14px !important;
+  } /* Active session footer adjustments */
+  .session-finish-row {
+    gap: 16px !important;
+  }
+  .session-finish-row button {
+    flex: 1 !important;
+    min-height: 48px !important;
+  } /* Form input controls spacing */
+  .form-control,
+  select {
+    min-height: 44px !important;
+    font-size: 14px !important;
+  }
+  .active-set-row {
+    gap: 12px !important;
+    padding-top: 4px;
+    padding-bottom: 10px !important;
+  }
+  .active-set-row .step-btn {
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 18px !important;
+  }
+  .active-set-row .input-set-weight,
+  .active-set-row .input-set-reps {
+    height: 38px !important;
+    font-size: 15px !important;
+  }
+  .active-set-row .input-set-weight {
+    width: 58px !important;
+  }
+  .active-set-row .input-set-reps {
+    width: 48px !important;
+  }
+  .active-set-row .set-checkbox-btn {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 8px !important;
+  }
+}
+
+/* --- VOICE MEMO WAVEFORM ANIMATION --- */
+.audio-wave-container {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 16px;
+  margin-top: 4px;
+}
+.wave-bar {
+  display: inline-block;
+  width: 3px;
+  height: 60%;
+  background: var(--primary);
+  border-radius: 2px;
+}
+.audio-wave-container.recording .wave-bar {
+  animation: bounce 0.8s ease-in-out infinite alternate;
+}
+.wave-bar:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.wave-bar:nth-child(3) {
+  animation-delay: 0.25s;
+}
+.wave-bar:nth-child(4) {
+  animation-delay: 0.15s;
+}
+.wave-bar:nth-child(5) {
+  animation-delay: 0.3s;
+}
+.wave-bar:nth-child(6) {
+  animation-delay: 0.2s;
+}
+.wave-bar:nth-child(7) {
+  animation-delay: 0.35s;
+}
+
+@keyframes bounce {
+  10% {
+    height: 30%;
+  }
+  100% {
+    height: 100%;
+  }
+}
+
+/* --- SESSION BOOKING CARD --- */
+.booking-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px;
+  margin-bottom: 4px;
+  border-left: 4px solid var(--primary);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+} /* A finished session is muted and marked with a green edge — done, not up-next */
+.booking-card.booking-completed {
+  border-left-color: var(--success);
+  opacity: 0.6;
+} /* The session in progress is emphasised with an accent-tinted fill + accent ring — the same
+   "selected/active" language as a chosen participant tab, so it clearly stands out. */
+.booking-live {
+  /* Stack so the green left bracket can spill into a full-width bottom bar. */
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  border-left-color: var(--primary);
+  overflow: hidden;
+  background-image: linear-gradient(
+      color-mix(in srgb, var(--primary) 8%, transparent),
+      color-mix(in srgb, var(--primary) 8%, transparent)
+    ), linear-gradient(var(--card-bg), var(--card-bg));
+}
+/* Bottom bar: the left bracket's green wrapping along the bottom, with the Active-session tag + timer. */
+.booking-live-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 4px -14px -8px -14px; /* bleed to the card's padded edges (must match .booking-card's padding) */
+  padding: 5px 14px;
+  background: var(--primary);
+  color: var(--text-dark); /* near-black — better contrast on the accent bar than the previous dark green */
+}
+/* Overtime: the session ran past its scheduled end without being closed — warn in amber, and turn
+   the card's left bracket amber too so it reads as a warning at a glance (follows the bar's state). */
+.booking-live-bar.overtime {
+  background: var(--warning, #f59e0b);
+  color: #3d2600;
+}
+.booking-card.booking-live:has(.booking-live-bar.overtime) {
+  border-left-color: var(--warning, #f59e0b);
+}
+/* Same stacked-card + bottom-bar structure as .booking-live, for the two other status-line states
+   (2.3: upcoming countdown, past elapsed) — deliberately no tinted background, so a finished or
+   not-yet-started card never reads as "currently active" the way .booking-live's green wash does. */
+.booking-status-stack {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  overflow: hidden;
+}
+/* Upcoming/past bars share their identity color with the left bracket (see the :has() rules
+   below), but lightened toward white at the point of use — the raw --temporal-future/past tokens
+   are saturated enough that --text-dark on top of them fell short of WCAG AA (measured ~3.5:1 for
+   violet, ~3.8:1 for blue). Lightening only the bar fill (not the border, and not the shared
+   variable, which also tints past/future session titles elsewhere) keeps the bracket a strong
+   accent while giving the bar's text room to read clearly — same approach the flash-warning/
+   flash-ack keyframes already use for tinting a neutral surface toward a color. */
+.booking-live-bar.upcoming {
+  background: color-mix(in srgb, var(--temporal-future, #f59e0b) 55%, white);
+  color: var(--text-dark);
+}
+.booking-live-bar.past {
+  background: color-mix(in srgb, var(--temporal-past, #c084fc) 55%, white);
+  color: var(--text-dark);
+}
+/* The left bracket always matches whichever status bar the card is showing (live already does via
+   .booking-live's own border-left-color, and the overtime override above it) — carry the same rule
+   to the other two states so the border reads as one continuous accent with the bar beneath it. */
+.booking-card:has(.booking-live-bar.upcoming) {
+  border-left-color: var(--temporal-future);
+}
+.booking-card:has(.booking-live-bar.past) {
+  border-left-color: var(--temporal-past);
+}
+.booking-status-value {
+  cursor: pointer;
+}
+.booking-status-value:hover,
+.booking-status-value:focus-visible {
+  background: rgba(255, 255, 255, 0.45);
+  outline: none;
+}
+.booking-status-edit-input {
+  font-family: var(--font-mono, monospace);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  width: 52px;
+  padding: 1px 6px;
+  border-radius: 5px;
+  border: 1px solid var(--text-dark);
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--text-dark);
+}
+.booking-live-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 800;
+}
+.booking-live-timer {
+  font-family: var(--font-mono, monospace);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.28); /* chip keeps the countdown legible on any accent */
+} /* Session title tint by day, matching the day-selection line: past = purple, future = amber,
+   today = default. Set here (not inline) so the temporal class on the card can override it. */
+.booking-card-title {
+  color: var(--text-color);
+}
+.booking-card.booking-past .booking-card-title {
+  color: var(--temporal-past);
+}
+.booking-card.booking-future .booking-card-title {
+  color: var(--temporal-future);
+} /* --- SESSIONS DAY TITLE BAR --- */
+/* Home view title bar. The "Sessions Schedule" label (.view-title-label) is the conceptual view
+   title on the left; the date stepper (‹ weekday date ›) is the control on the right. The flush,
+   flat-bar look + grab handle come from .view-titlebar; override .section-title's 24px top margin. */
+.sessions-title-bar {
+  gap: 10px;
+  margin-top: 0;
+}
+.sessions-date-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 1 auto;
+  min-width: 0;
+} /* The date reads as a secondary control now that the label carries the title */
+.sessions-title-bar h3 {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  /* Fixed-width box so the ‹ › arrows and the Today reset button never shift as the
+     weekday/date text changes length. The weekday truncates within this width if needed; the
+     date always stays readable. Title type comes from the shared view-title rule above. */
+  width: 310px;
+  max-width: 100%;
+  flex: 0 0 auto;
+  min-width: 0;
+  white-space: nowrap;
+  text-transform: none;
+} /* Only the weekday truncates — the date and Today tag must always stay readable */
+#calendar-title-weekday,
+#calendar-title-weekday-short {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+} /* Narrow screens swap the full weekday for its abbreviation (see mobile media query) */
+#calendar-title-weekday-short {
+  display: none;
+} /* The open-ended bucket reads "Upcoming From 2026-07-17" rather than a weekday trailing a date */
+#calendar-title.is-upcoming #calendar-title-weekday,
+#calendar-title.is-upcoming #calendar-title-weekday-short {
+  order: -1;
+}
+#calendar-title-date {
+  flex: 0 0 auto;
+  color: var(--text-muted);
+  /* Type (family/size/weight/letter-spacing) is inherited from #calendar-title; only the muted
+     colour and its temporal-tint overrides are set here. */
+} /* Temporal tint of the whole day-selection line: past = purple, today = default, future =
+   amber. The weekday span and calendar icon inherit the h3 colour; the date sets its own
+   muted colour, so it needs an explicit override. Mirrors the session-card title colours. */
+#calendar-title.is-past {
+  color: var(--temporal-past);
+}
+#calendar-title.is-past #calendar-title-date {
+  color: var(--temporal-past);
+}
+#calendar-title.is-future {
+  color: var(--temporal-future);
+}
+#calendar-title.is-future #calendar-title-date {
+  color: var(--temporal-future);
+}
+/* "Today" reset control: jumps the deck back to today. Always occupies its slot (disabled while
+   already on today) so the stepper's width — and therefore the arrows — never shift. */
+.sessions-today-btn {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 12px;
+  white-space: nowrap;
+  border-radius: 999px;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.sessions-today-btn:hover:not(:disabled) {
+  background: var(--border-color);
+  color: var(--primary);
+  border-color: var(--primary);
+}
+.sessions-today-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+/* Desktop shows the text label; the icon takes its place only on phones (see mobile query). */
+.sessions-today-btn > i {
+  display: none;
+}
+.sessions-nav-arrow {
+  flex: 0 0 auto;
+  width: 46px;
+  height: 34px;
+  border-radius: 999px;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  font-size: 13px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+.sessions-nav-arrow:hover:not(:disabled) {
+  background: var(--border-color);
+  color: var(--primary);
+  border-color: var(--primary);
+}
+.sessions-nav-arrow:disabled {
+  opacity: 0.25;
+  cursor: default;
+} /* --- SESSIONS CATEGORIES GRID --- */
+.sessions-categories-grid {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+  width: 100%;
+  padding-bottom: 8px;
+  box-sizing: border-box;
+} /* Hide scrollbar */
+.sessions-categories-grid::-webkit-scrollbar {
+  display: none;
+}
+.sessions-categories-grid {
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+}
+.sessions-category-column {
+  /* Single column at every viewport: the visible day always matches the day named in the title bar */
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+  min-width: 0;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  padding: 14px;
+  box-sizing: border-box;
+}
+@media (max-width: 600px) {
+  .sessions-categories-grid {
+    gap: 16px;
+  } /* Phones keep the "Sessions" label and the date stepper on a single row (no wrap): the label
+     stays put on the left, the stepper takes the remaining width on the right, and the date
+     title truncates its weekday if space runs short. The Today button + arrows keep fixed widths
+     so they stay put; only the flexible title absorbs any change, so nothing shifts. */
+  .sessions-title-bar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+  .sessions-date-picker {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
+    gap: 6px;
+  }
+  .sessions-title-bar h3 {
+    width: auto;
+    flex: 1 1 auto;
+    min-width: 0;
+    justify-content: flex-start;
+    gap: 6px;
+    overflow: hidden;
+  }
+  /* Icon-only Today button reclaims width so the date + arrows fit one row; the date leads and only the weekday truncates */
+  .sessions-today-btn {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    font-size: 15px;
+  }
+  .sessions-today-btn > i {
+    display: inline;
+  }
+  .sessions-today-btn .today-btn-label {
+    display: none;
+  } /* "Wed" instead of "Wednesday" keeps the date readable on one row */
+  #calendar-title-weekday {
+    display: none;
+  }
+  #calendar-title-weekday-short {
+    display: inline;
+  } /* Sweaty-hands tap target: wide enough to hit without looking */
+  .sessions-nav-arrow {
+    width: 38px;
+    height: 36px;
+  } /* Stack card contents into a single column so times and names stop wrapping mid-word */
+  .booking-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .booking-card .btn {
+    width: 100%;
+    justify-content: center;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+  .sessions-category-column {
+    padding: 10px !important;
+  } /* Combo active set row mobile adjustments */
+  .active-set-row[data-ex-id] {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 12px !important;
+    margin-bottom: 6px;
+  }
+  .active-set-row[data-ex-id] > div:first-child {
+    width: 100% !important;
+    margin-bottom: 2px;
+  }
+  .active-set-row[data-ex-id] .stepper-control-group {
+    margin-bottom: 2px;
+  }
+  .active-set-row[data-ex-id] .set-check-col {
+    margin-left: auto !important;
+  }
+}
+
+/* --- CLIENT/PARTICIPANT TABS (wrap to multiple rows) --- */
+/* Participants wrap onto new rows once the row fills, like text line-breaks, so a merged
+   session with many clients stays fully visible instead of scrolling out of view. */
+.client-tabs-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+}
+.client-tab-btn {
+  flex: 0 0 auto;
+  white-space: nowrap;
+} /* --- VERTICAL EXERCISE CARD STACK --- */
+/* Cards stack vertically and overlap: the in-focus card is full-size (stats + one-tap
+   signals), while the rest collapse to a peeking top row. This keeps a long plan compact
+   on a gym-floor phone — as many upcoming cards as fit show their name + count. */
+.exercise-vertical-list {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 6px 20px;
+  perspective: 1400px;
+}
+.exercise-deck-card {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--border-color);
+  /* Fully opaque (card tint over the solid view background) so overlapping deck cards never
+     bleed through each other. Tinted states below layer their colour over this same base. */
+  background-color: var(--bg-color);
+  background-image: linear-gradient(var(--card-bg), var(--card-bg));
+  cursor: pointer;
+  transform-origin: center top;
+  transition:
+    transform 0.3s cubic-bezier(0.34, 1.4, 0.5, 1), box-shadow 0.3s ease,
+    background 0.2s, margin 0.3s ease, opacity 0.3s ease;
+} /* Collapsed cards slide up over the one below (negative margin) so only the top row peeks,
+   tilted back for a physical-deck depth cue. The depth comes from the scale/tilt/shadow, not
+   from element opacity — a translucent card here let the overlapped card below bleed through. */
+.exercise-deck-card:not(.in-focus) {
+  margin-bottom: -24px;
+  transform: scale(0.955) rotateX(6deg);
+  box-shadow: 0 -3px 10px rgba(0, 0, 0, 0.18);
+  position: relative;
+  z-index: 1;
+}
+.exercise-deck-card:not(.in-focus):hover {
+  opacity: 1;
+  transform: scale(0.975) rotateX(3deg);
+}
+.exercise-deck-card:last-child {
+  margin-bottom: 0;
+} /* The in-focus card pops forward, full-size, with breathing room around it */
+.exercise-deck-card.in-focus {
+  margin: 12px 0 16px;
+  transform: none;
+  opacity: 1;
+  position: relative;
+  z-index: 5;
+  background-image: linear-gradient(var(--primary-light), var(--primary-light)),
+    linear-gradient(var(--card-bg), var(--card-bg));
+  border-color: var(--primary);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35), 0 0 16px var(--primary-light);
+  animation: cardFocusIn 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+}
+/* Each navigation re-renders the focus card, so this entrance plays on every switch */
+@keyframes cardFocusIn {
+  from {
+    transform: translateY(12px) rotateX(-14deg);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) rotateX(0);
+    opacity: 1;
+  }
+}
+.exercise-deck-card.completed:not(.in-focus) {
+  border-color: rgba(16, 185, 129, 0.3);
+}
+.exercise-deck-card.past-session {
+  border-color: rgba(139, 92, 246, 0.3);
+  background-image: linear-gradient(rgba(139, 92, 246, 0.14), rgba(139, 92, 246, 0.14)),
+    linear-gradient(var(--card-bg), var(--card-bg));
+} /* Tapped past card expands in place — pops forward like the focus card (overriding the
+   collapsed-stack transform), but keeps its purple identity instead of the cyan live-focus
+   treatment. Higher specificity than .exercise-deck-card:not(.in-focus) so the pop wins. */
+.exercise-deck-card.past-session.past-expanded {
+  margin: 12px 0 16px;
+  transform: none;
+  opacity: 1;
+  z-index: 5;
+  border-color: rgba(139, 92, 246, 0.5);
+  background-image: linear-gradient(rgba(139, 92, 246, 0.16), rgba(139, 92, 246, 0.16)),
+    linear-gradient(var(--card-bg), var(--card-bg));
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35), 0 0 14px rgba(139, 92, 246, 0.18);
+  animation: cardFocusIn 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.deck-history-collapse {
+  margin-left: auto;
+  color: var(--temporal-past);
+  font-size: 12px;
+}
+.deck-history-sets {
+  gap: 4px;
+  margin-top: 4px;
+}
+.deck-history-set-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.02);
+}
+.deck-history-set-row strong {
+  color: var(--temporal-past);
+  width: 26px;
+  flex-shrink: 0;
+}
+.deck-history-load {
+  color: var(--text-color);
+  font-weight: 600;
+}
+.deck-history-note {
+  font-style: italic;
+  margin-left: auto;
+}
+.deck-history-meta {
+  margin-top: 8px;
+  font-size: 11px;
+} /* A launched future-day session is a plan, not a live workout — tint its exercise names amber
+   to match the future colour coding on the dashboard (mirrors the purple past history). */
+.exercise-deck-card.future-session .deck-card-name,
+.exercise-deck-card.future-session .deck-card-name-inline {
+  color: var(--temporal-future);
+}
+.exercise-deck-card.future-session:not(.in-focus) {
+  background: rgba(251, 191, 36, 0.04);
+} /* --- Superset card: a grouped block of exercises with a round counter --- */
+.superset-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-color);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.superset-title > i {
+  color: var(--primary);
+} /* Subtle accent-tinted pill with bright accent text — emphasised but not a loud solid block,
+   so the label keeps strong contrast against the badge. */
+.superset-round-badge {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--primary);
+  background: var(--primary-light);
+  border: 1px solid color-mix(in srgb, var(--primary) 45%, transparent);
+  padding: 3px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.superset-ex-list {
+  gap: 6px;
+}
+.superset-ex-row {
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+} /* Name + target on one line, sitting right next to each other. */
+.superset-ex-head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.superset-ex-name {
+  font-weight: 700;
+  font-size: 15px;
+}
+.superset-ex-target {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+} /* Reps/weight read at the same size as the name and in the accent colour so they pop. */
+.superset-ex-reps {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--primary);
+} /* The feedback trio stretches across the full row so there's no empty right-hand gutter and
+   the buttons stay gym-floor sized. */
+.superset-ex-actions {
+  display: flex;
+  gap: 8px;
+} /* Labeled per-exercise feedback trio (Easy / Hard / Note) */
+.superset-sig {
+  flex: 1;
+  height: 38px;
+  border-radius: var(--btn-radius);
+  border: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 0 12px;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+.superset-sig > span {
+  font-size: 13px;
+  font-weight: 700;
+}
+.superset-sig > i {
+  font-size: 14px;
+}
+.superset-sig.easy:hover {
+  color: var(--success);
+  border-color: var(--success);
+  background: rgba(16, 185, 129, 0.12);
+}
+.superset-sig.hard:hover {
+  color: #f59e0b;
+  border-color: #f59e0b;
+  background: rgba(245, 158, 11, 0.12);
+}
+.superset-sig.note:hover {
+  color: var(--danger);
+  border-color: var(--danger);
+  background: rgba(239, 68, 68, 0.12);
+} /* Rest is part of the work — the "Rest" label reads like an exercise name and the duration
+   like a rep count (mono, accent), in a subtle pill so it's as visible as an exercise row. */
+.superset-break-row {
+  width: 100%;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-main);
+  padding: 8px 12px;
+  margin: 2px 0 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid transparent;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  text-align: left;
+}
+.superset-break-row:hover {
+  border-color: var(--primary);
+}
+.superset-break-play {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--primary);
+}
+.superset-break-row > i {
+  font-size: 14px;
+  color: var(--primary);
+}
+.superset-complete-btn {
+  width: 100%;
+  justify-content: center;
+}
+.superset-done {
+  gap: 8px;
+  padding: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--success);
+  border: 1px dashed rgba(16, 185, 129, 0.3);
+  border-radius: 8px;
+} /* Compact (collapsed) card: single peeking row — counter, name, target, status */
+.deck-card-compact {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 20px;
+}
+.deck-card-name-inline {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 13px;
+}
+.deck-card-compact-target {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--primary);
+  font-weight: 700;
+  flex-shrink: 0;
+} /* Focus card internals: counter + status on top, name, sets/reps/weight, action buttons */
+.deck-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.deck-card-top-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+/* Per-card ⏱ timer affordance — starts the floating countdown for this exercise/superset */
+.deck-card-timer {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 18px;
+  padding: 0;
+  border-radius: 8px;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+.deck-card-timer:hover {
+  color: var(--primary);
+  background: var(--primary-light);
+}
+.deck-card-counter {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--primary);
+}
+.deck-card-status {
+  font-size: 11px;
+  padding: 2px 7px;
+  font-weight: 700;
+}
+.deck-card-status-upcoming {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+}
+.deck-card-status-past {
+  background: rgba(139, 92, 246, 0.2);
+  color: var(--temporal-past);
+}
+.deck-card-name {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+  color: var(--text-color);
+  font-weight: 700;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.deck-card-stats {
+  display: flex;
+  gap: 8px;
+}
+.deck-stat {
+  flex: 1;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 2px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+}
+.deck-stat-value {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--primary);
+  line-height: 1;
+}
+.deck-stat-label {
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--text-muted);
+  font-weight: 600;
+} /* One-tap outcome signals on the focus card — gym-floor tap targets */
+.deck-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+.deck-action-btn {
+  flex: 1;
+  gap: 6px;
+  min-height: 46px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-color);
+  font-weight: 700;
+  font-size: 12px;
+  transition: transform 0.12s ease, background 0.2s, border-color 0.2s;
+}
+.deck-action-btn i {
+  font-size: 12px;
+}
+.deck-action-btn:active {
+  transform: scale(0.93);
+}
+.deck-action-easy {
+  border-color: rgba(16, 185, 129, 0.4);
+  color: var(--success);
+}
+.deck-action-easy:hover {
+  background: rgba(16, 185, 129, 0.12);
+}
+.deck-action-hard {
+  border-color: rgba(245, 158, 11, 0.4);
+  color: #f59e0b;
+}
+.deck-action-hard:hover {
+  background: rgba(245, 158, 11, 0.12);
+}
+.deck-action-feedback {
+  border-color: rgba(239, 68, 68, 0.35);
+  color: var(--danger);
+}
+.deck-action-feedback:hover {
+  background: rgba(239, 68, 68, 0.12);
+}
+.deck-card-past-summary {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 45%;
+}
+
+/* Fast Adjust plan bar styling */
+.fast-adjust-bar {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  margin: 10px 0;
+}
+.body-daylight .fast-adjust-bar {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+.fast-adjust-bar button {
+  font-size: 11px !important;
+  padding: 6px 12px !important;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Floating Action Button (Create Session) — stays visible while scrolling the sessions list */
+.floating-action-btn {
+  position: fixed;
+  bottom: calc(72px + var(--safe-bottom));
+  right: 16px;
+  z-index: 120;
+  border-radius: var(--border-radius-pill, 9999px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  padding: 12px 20px;
+  font-weight: 600;
+}
+.floating-action-btn:hover {
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+}
