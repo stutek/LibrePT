@@ -7,10 +7,20 @@ from . import check_environment, run_lint, run_tests, run_build
 
 if __name__ == "__main__":
     check_environment()
-    run_lint()
-    run_tests()
-    if len(sys.argv) > 1 and sys.argv[1] == "check":
+    arg = sys.argv[1] if len(sys.argv) > 1 else ""
+
+    if arg == "lint":
+        run_lint()
+        print("\n  ✓ Static analysis & linting passed.")
+    elif arg == "test":
+        run_tests()
+        print("\n  ✓ Test suite passed.")
+    elif arg == "check":
+        run_lint()
+        run_tests()
         print("\n  ✓ Check finished (linting and tests passed).")
     else:
+        run_lint()
+        run_tests()
         run_build()
         print("\n  ✓ Build finished (dist/ is ready to deploy).")

@@ -24,7 +24,40 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  lint:
+    name: Lint & Security Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Cache Virtual Environment & Biome
+        id: cache-venv
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: ${{ runner.os }}-venv-${{ hashFiles('requirements.txt') }}-biome-v1.9.4
+
+      - name: Install Dependencies
+        if: steps.cache-venv.outputs.cache-hit != 'true'
+        run: |
+          python -m venv .venv
+          .venv/bin/pip install --upgrade pip
+          .venv/bin/pip install -r requirements.txt
+
+      - name: Run Static Code Analysis & Linting
+        env:
+          CI: "true"
+        run: |
+          .venv/bin/python -m build lint
+
+  test:
+    name: Automated E2E & Unit Test Suite
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -53,11 +86,18 @@ jobs:
         run: |
           .venv/bin/playwright install chromium --with-deps
 
-      - name: Run Full Build Validation Check (Linting & Tests)
+      - name: Run Test Suite
         env:
           CI: "true"
         run: |
-          .venv/bin/python -m build check
+          .venv/bin/python -m build test
+
+  build:
+    name: Assemble & Bundle App
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
       # The runtime app lives under src/. Publish that whole tree (index.html + app.js +
       # index.css + manifest.json + sw.js + i18n/ + components/ + icons/) flattened to the dist
