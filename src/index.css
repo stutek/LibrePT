@@ -457,7 +457,7 @@ select.menu-select {
 }
 .app-view.active {
   display: block;
-  animation: viewSwitch 0.32s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: viewSwitch 0.32s cubic-bezier(0.22, 1, 0.36, 1);
 }
 /* Each view switch (bottom-nav tab, client detail, back home) plays this: the incoming view
    rises and settles with a subtle scale + fade, so navigation reads as a deliberate transition. */
@@ -2556,7 +2556,62 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
 }
 textarea.form-control {
   resize: vertical;
-} /* Multi-select check checklist inside setup */
+} /* Compact Workout Setup Modal Styling */
+#dialog-workout-setup {
+  padding: 16px 20px;
+}
+#dialog-workout-setup .modal-header {
+  margin-bottom: 10px;
+}
+#dialog-workout-setup .dialog-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+#dialog-workout-setup label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+  display: block;
+}
+#dialog-workout-setup .form-control {
+  padding: 6px 10px;
+  font-size: 13px;
+  height: 36px;
+  background-color: var(--input-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  border-radius: var(--border-radius-sm, 6px);
+}
+#dialog-workout-setup .form-control:focus {
+  border-color: var(--accent-cyan);
+}
+#dialog-workout-setup .participant-setup-list {
+  max-height: 190px;
+  overflow-y: auto;
+  padding-right: 2px;
+  margin-top: 4px;
+}
+.participant-setup-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+  padding: 6px 10px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--border-radius-sm, 6px);
+}
+.participant-setup-row:hover {
+  border-color: var(--accent-cyan);
+}
+
+/* Multi-select check checklist inside setup */
 .checkbox-checklist {
   max-height: 150px;
   overflow-y: auto;

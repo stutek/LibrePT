@@ -131,12 +131,25 @@ export function openWorkoutSetupModal(
     targetBooking = state.bookings.find((b) => b.id === preselectedBookingId);
   }
 
-  // Pre-fill metadata fields
+  // Calculate default start time rounded up to next :00 or :30 mark, and end time (+1h)
   const now = new Date();
-  const defaultDate = now.toISOString().split("T")[0];
-  const startHour = now.getHours().toString().padStart(2, "0");
-  const startMin = now.getMinutes().toString().padStart(2, "0");
-  const endHour = ((now.getHours() + 1) % 24).toString().padStart(2, "0");
+  const mins = now.getMinutes();
+  const startDate = new Date(now);
+  if (mins > 0 && mins <= 30) {
+    startDate.setMinutes(30, 0, 0);
+  } else if (mins > 30) {
+    startDate.setHours(now.getHours() + 1, 0, 0, 0);
+  } else {
+    startDate.setMinutes(0, 0, 0);
+  }
+  const endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
+
+  const fmtTime = (d) =>
+    `${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}`;
+
+  const defaultDate = startDate.toISOString().split("T")[0];
+  const defaultStartTime = fmtTime(startDate);
+  const defaultEndTime = fmtTime(endDate);
 
   const nameInput = document.getElementById("setup-session-name");
   const dateInput = document.getElementById("setup-session-date");
@@ -149,45 +162,37 @@ export function openWorkoutSetupModal(
   if (startInput) {
     if (targetBooking?.timeLabel) {
       const parts = targetBooking.timeLabel.split("-").map((s) => s.trim());
-      startInput.value = parts[0] || `${startHour}:${startMin}`;
+      startInput.value = parts[0] || defaultStartTime;
     } else {
-      startInput.value = `${startHour}:${startMin}`;
+      startInput.value = defaultStartTime;
     }
   }
   if (endInput) {
     if (targetBooking?.timeLabel) {
       const parts = targetBooking.timeLabel.split("-").map((s) => s.trim());
-      endInput.value = parts[1] || `${endHour}:${startMin}`;
+      endInput.value = parts[1] || defaultEndTime;
     } else {
-      endInput.value = `${endHour}:${startMin}`;
+      endInput.value = defaultEndTime;
     }
   }
-  if (locInput) locInput.value = targetBooking?.location || "Trib gym base";
+  // Leave empty by default so focusing/clicking shows all datalist selections
+  if (locInput) locInput.value = targetBooking?.location || "";
 
   for (const client of state.clients.sort((a, b) => a.name.localeCompare(b.name))) {
     const row = document.createElement("div");
     row.className = "participant-setup-row";
-    row.style.display = "flex";
-    row.style.alignItems = "center";
-    row.style.justifyContent = "space-between";
-    row.style.gap = "10px";
-    row.style.marginBottom = "12px";
-    row.style.padding = "8px";
-    row.style.background = "rgba(255,255,255,0.03)";
-    row.style.borderRadius = "6px";
-    row.style.border = "1px solid var(--border-color)";
 
     const left = document.createElement("div");
     left.style.display = "flex";
     left.style.alignItems = "center";
-    left.style.gap = "10px";
+    left.style.gap = "8px";
 
     const cb = document.createElement("input");
     cb.type = "checkbox";
     cb.value = client.id;
     cb.id = `setup-cb-${client.id}`;
-    cb.style.width = "18px";
-    cb.style.height = "18px";
+    cb.style.width = "16px";
+    cb.style.height = "16px";
     cb.style.cursor = "pointer";
 
     if (targetBooking) {
@@ -216,7 +221,7 @@ export function openWorkoutSetupModal(
     select.style.padding = "4px 8px";
     select.style.fontSize = "12px";
     select.style.width = "160px";
-    select.style.height = "32px";
+    select.style.height = "30px";
 
     select.innerHTML = `<option value="" disabled>${t("select_exercise")}</option>`;
     const emptyOpt = document.createElement("option");
