@@ -57,6 +57,23 @@ Data should sync **periodically to Google Drive** and remain **editable directly
 - **Open question**: does it make sense to store the data in **Google's new OKF format**, using it to get concurrent editing and versioning for free?
 - No approach is chosen yet — decide in a dedicated brainstorm before implementing.
 
+### 3.5 [ ] Enhance the GDPR consent capture in the Add New Client form
+Today the Add New Client form carries a single `gdprConsent.cloudSync` checkbox with an invisible timestamp (shipped, see CHANGELOG — former 3.4). Enrich it into a proper accountability record (GDPR Art. 7(1)):
+
+- **Visible, editable consent date** next to the checkbox — not just a hidden `timestamp`. A PT must be able to record *when consent was actually given*, which may predate entering it in the app (paper signed last week, email reply yesterday).
+- **Capture/attach evidence**: take a **photo of a signed paper consent form**, or attach a screenshot/file of an **email reply**. Stored against the client as the audit trail regulators expect.
+- **Open — where the image lives**: `localStorage` is small and base64 bloats it fast. Decide between IndexedDB blob storage, a size-capped downscaled thumbnail, or deferring binary storage to the cloud-sync layer.
+- Ties to [3.6](#36--brainstorm-email-consent-flow-for-a-new-client--is-the-email-itself-a-breach-and-how-to-process-the-reply) (email evidence) and [5.2](#52--brainstorm-promote-addmodify-client-to-a-first-class-view) (a first-class view would give this richer capture room to breathe).
+
+### 3.6 [ ] [Brainstorm] Email consent flow for a new client — is the email itself a breach, and how to process the reply?
+The shipped `mailto:` consent trigger (former 3.4) assumes the client's email is already on record. Two unresolved questions for a **brand-new** client:
+
+- **Is emailing them itself a concern?** Sending a consent request *before* consent exists — is that processing that needs its own lawful basis (legitimate interest vs. consent), or a breach? Needs a real answer grounded in GDPR, not a guess.
+- **How does the reply get back into the app?** When the client replies "I CONSENT", options are:
+  - **Manual**: the PT pastes/attaches the reply as evidence — folds straight into [3.5](#35--enhance-the-gdpr-consent-capture-in-the-add-new-client-form)'s evidence capture.
+  - **Automated — monitor the PT's IMAP inbox** for replies. This implies a backend + stored mail credentials, cutting hard against the local-only, no-server design. Weigh that cost before assuming it's desirable.
+- Relates to the Data Controller guidance already in `PRIVACY.md`.
+
 ---
 
 ## 4. UI / UX
@@ -93,6 +110,13 @@ NOTE: keep the goals and health & injury notes as is. (Done: removed "log workou
 - Tab 2 is a genuinely new projection of the data: exercises currently only exist *inside* sessions/routines, so this needs a flattened, date-ordered view spanning logged history **and** planned future work.
 - Tab 3 introduces a **session that exists without a calendar entry**. Decide where such a placeholder session lives in the data model, and what happens when it is later attached to a real booking.
 - Reuses the existing placeholder-card concept from [uc1_gym_floor_clipboard.md](use_cases/uc1_gym_floor_clipboard.md), but at the desk rather than on the gym floor — closes the loop with [uc2_async_plan_adjustments.md](use_cases/uc2_async_plan_adjustments.md).
+
+### 5.2 [ ] [Brainstorm] Promote add/modify client to a first-class view
+Today the client add/edit form is a `<dialog>` modal (`dialog-client`, `formsController.js`). Should it become a full `#view` with its own route, like the Sessions / Pending Adjustments / Client Directory split (former 4.8) and the session-setup view (former 1.5)?
+
+- **For**: room for the richer consent capture ([3.5](#35--enhance-the-gdpr-consent-capture-in-the-add-new-client-form) — date, photo/email evidence), deep-linkable client-edit URLs, and consistency with the other first-class views.
+- **Against**: a modal is lighter for a quick single-field edit; not every edit wants a full view.
+- **Decide alongside [5.1](#51--tabbed-client-view)**: if client detail becomes tabbed, "add/modify" may naturally be a *mode* of that view (or its Tab 3 prep surface) rather than a separate view.
 
 ---
 
