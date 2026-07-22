@@ -243,6 +243,14 @@ Some movements are not `sets × reps × load`. A **conditioning/cardio machine**
   - `src/i18n/en.js` & `src/i18n/sl.js` — flat single-object dictionaries; every string lands in the same file. Consider per-feature namespaced string modules merged into the locale (keeping `test_i18n_parity` green).
 - **Guardrail:** the modular-file rule already exists for JS (AGENT_RULES §5); extend the same "one responsibility per file, edit-in-parallel-without-collision" principle to CSS, HTML, and i18n.
 
+### 14.6 [ ] Rename the `booking` domain term to `session`
+**Decided (2026-07-23):** from the PT's stance the entity is a **session**; "booking" is the customer-facing framing (a client *books* a slot; the PT *runs* a session). Unify the code on `session`.
+
+- **Scope:** ~200 `booking`/`bookings` references in `src/` (data objects, `state.bookings`, `getOverlappingBookings`, `buildBookingMeta`, `activeSession.booking`, `isPlanning` bookings, …), the CSS class family (`.booking-card`, `.booking-live`, `.booking-completed`, `.booking-status-stack`, `.booking-card-title`, `.booking-live-bar`, `.booking-live-timer`, `.booking-past`, …), and the ~12 e2e test files that select `.booking-card`.
+- **⚠ Migration risk (must handle):** the persisted DB (`librept_db`) stores the field as `state.bookings`. Renaming to `state.sessions` breaks existing local databases unless a **load-time migration** copies `bookings → sessions` — mirror the existing `openpt_db → librept_db` shim in `src/data/stateStore.js`. Keep it backward-compatible.
+- **Do it as one focused pass on a green baseline**, updating `src/` + CSS + tests together so nothing half-renames (a partial rename leaves the suite red).
+- **Best bundled with [§17](#17-structured-sessionprogram-history-sessionitemrecord)** (the `sessionItemRecord` build scheduled for Fri 2026-07-24): both rework the same session/history model and the same files. Renaming *first*, then building §17 on the `session` vocabulary, avoids touching the same code twice and keeps §17's new names consistent from the start.
+
 ---
 
 ## 16. Zero-Downtime Deploys & PT-Controlled Version Switching
