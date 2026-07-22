@@ -128,8 +128,13 @@ def test_clean_start_has_no_notifications(page, local_server):
     page.goto(local_server)
     page.wait_for_selector("#view-clients.active")
 
-    # Notifications are data-driven and seeded with the demo data, so a clean install has none.
-    assert page.locator("#notification-list-container .notification-card").count() == 0
+    # Notifications are data-driven and seeded with the demo data, so a clean install has no standard notification cards but shows the invitation.
+    assert (
+        page.locator(
+            "#notification-list-container .notification-card:not(.welcome)"
+        ).count()
+        == 0
+    )
     assert page.locator("#notification-list-container .notification-empty").count() == 1
 
 

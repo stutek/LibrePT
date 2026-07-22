@@ -477,6 +477,9 @@ function seedMockData() {
   saveToLocalStorage();
 }
 
+window.seedMockData = seedMockData;
+window.stateHasData = () => stateHasData(state);
+
 function saveToLocalStorage() {
   localStorage.setItem("librept_db", JSON.stringify(state));
   // Each on-device edit is one more local change "ahead" of the (mock) remote. Seeding runs

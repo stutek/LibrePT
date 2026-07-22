@@ -254,7 +254,7 @@ On a fresh install the app now contains **no test/demo data at all** — empty c
 A demo loader exists: opening `?init=demo_data_load` (parsed in `src/helper/shareLink.js`, applied in `app.js init()`) populates the demo dataset, but **only when the app is genuinely empty** — it's ignored if any data is already present, so it never clobbers real records. It currently loads the **full** `src/data/` fixture via `seedMockData()` + `seedDemoActiveSession()`.
 - **Still TODO:** narrow it to a focused **subset** (a few clients, one or two routines, today's sessions, the in-progress session) for the guided walkthrough, and expose it as a callable `loadDemoData()` invoked by the in-app demo activation (9.3) rather than only via the URL param.
 
-### 9.3 [ ] "Run the demo" message / invitation
+### 9.3 [x] "Run the demo" message / invitation
 A message/notification (the first real use of the planned message area — see [11.1](#111--replace-the-footer-nav-with-a-message--status-area)) that **invites the user to run the demo end-to-end**.
 
 - Shown **only when the app is empty** (9.1). Activating it loads the demo data (9.2) and starts the walkthrough (9.5).

@@ -88,14 +88,38 @@ export function renderNotificationArea() {
     if (summaryIconEl && firstItem.icon)
       summaryIconEl.className = `${firstItem.icon} notification-bell-icon`;
   } else {
-    // Empty feed (a clean, non-demo install): neutral placeholder, no stale demo copy.
-    if (summaryTitleEl) summaryTitleEl.textContent = t("notif_empty_title");
-    if (summaryDescEl) summaryDescEl.textContent = t("notif_empty_desc");
-    if (summaryIconEl) summaryIconEl.className = "fa-solid fa-bell notification-bell-icon";
-  }
+    if (summaryTitleEl) summaryTitleEl.textContent = t("notif_welcome_title") || "Interactive Demo";
+    if (summaryDescEl) summaryDescEl.textContent = t("notif_welcome_desc") || "Run demo";
+    if (summaryIconEl) summaryIconEl.className = "fa-solid fa-sparkles notification-bell-icon";
 
-  if (items.length === 0) {
-    container.innerHTML = `<div class="notification-empty">${escapeHTML(t("notif_empty_desc"))}</div>`;
+    container.innerHTML = `
+      <div class="notification-empty">
+        <div class="notification-card welcome unread" data-notification-id="demo-invitation">
+          <div class="notification-card-icon">
+            <i class="fa-solid fa-sparkles"></i>
+          </div>
+          <div class="notification-card-content">
+            <h4 class="notification-card-title">${escapeHTML(t("notif_welcome_title"))} <span class="unread-dot" title="Unread"></span></h4>
+            <p class="notification-card-desc">${escapeHTML(t("notif_welcome_desc"))}</p>
+            <div class="notification-actions">
+              <button type="button" class="notification-btn primary" id="btn-run-inapp-demo">${escapeHTML(t("notif_demo_btn") || "Run Live Demo")}</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const demoBtn = container.querySelector("#btn-run-inapp-demo");
+    if (demoBtn) {
+      demoBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (typeof window.seedMockData === "function") {
+          window.seedMockData();
+          window.location.reload();
+        }
+      });
+    }
+
     syncNotificationBarState();
     return;
   }
