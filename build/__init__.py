@@ -32,11 +32,19 @@ def check_environment():
             "  Virtual environment '.venv' not found. Creating and installing dependencies..."
         )
         subprocess.run([sys.executable, "-m", "venv", ".venv"], check=True)
+        subprocess.run(
+            [pip_path, "install", "--upgrade", "pip", "setuptools>=83.0.0"],
+            check=True,
+        )
         subprocess.run([pip_path, "install", "-r", "requirements.txt"], check=True)
         subprocess.run([playwright_path, "install", "chromium"], check=True)
     else:
         print("  ✓ Virtual environment '.venv' verified.")
         # Ensure dependencies from requirements.txt are up to date
+        subprocess.run(
+            [pip_path, "install", "--upgrade", "pip", "setuptools>=83.0.0"],
+            check=True,
+        )
         subprocess.run([pip_path, "install", "-r", "requirements.txt"], check=True)
 
 
