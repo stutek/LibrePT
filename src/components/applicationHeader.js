@@ -116,6 +116,7 @@ function resolveTheme(theme) {
 function applyTheme(theme) {
   const activeTheme = resolveTheme(theme);
   for (const c of Object.values(THEME_BODY_CLASS)) {
+    document.documentElement.classList.remove(c);
     document.body.classList.remove(c);
   }
   document.body.classList.add(THEME_BODY_CLASS[activeTheme]);
