@@ -226,6 +226,20 @@ def run_lint():
             sys.exit(1)
         print("  ✓ Frontend static analysis passed.")
 
+    # 3. Dependency Security Audit
+    print("  Running Security Vulnerability Audit (pip-audit)...")
+    if os.name == "nt":
+        audit_path = os.path.join(".venv", "Scripts", "pip-audit.exe")
+    else:
+        audit_path = os.path.join(".venv", "bin", "pip-audit")
+
+    if os.path.exists(audit_path):
+        audit_res = subprocess.run([audit_path, "--desc"])
+        if audit_res.returncode != 0:
+            print("  ✗ Security vulnerability audit failed.")
+            sys.exit(1)
+        print("  ✓ Security vulnerability audit passed.")
+
 
 def run_tests():
     """Runs the test suite programmatically. Allows a debugger to step directly into test setup."""
