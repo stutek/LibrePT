@@ -98,6 +98,9 @@ self.addEventListener("activate", (e) => {
 });
 
 function cachePut(request, response) {
+  const url = new URL(request.url);
+  if (url.protocol !== "http:" && url.protocol !== "https:") return response;
+
   if (response && response.status === 200 && response.type !== "opaque") {
     const copy = response.clone();
     caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
