@@ -48,7 +48,7 @@ const ASSETS = [
   "./components/exercisePicker.js",
   "./components/exerciseAndRestTimer.js",
   "./components/backupRestore.js",
-  "./components/workoutSetup.js",
+  "./components/editSessionControl.js",
   "./components/feedbackModal.js",
   // Domain views
   "./views/clientsView.js",
@@ -56,6 +56,7 @@ const ASSETS = [
   "./views/exercisesView.js",
   "./views/historyView.js",
   "./views/sessionsView.js",
+  "./views/editSessionView.js",
   // Domain controllers
   "./controllers/formsController.js",
   "./controllers/activeSessionController.js",

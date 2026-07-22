@@ -1,7 +1,7 @@
-// src/views/workoutSetupView.js - Modular view renderer for Workout Session Create & Edit view
+// src/views/editSessionView.js - Modular view renderer for Edit Session & Workout Session Setup view
 // Encapsulates the DOM structure and rendering logic for #view-workout-setup.
 
-export function renderWorkoutSetupView(targetElement) {
+export function renderEditSessionView(targetElement) {
   const container = targetElement || document.getElementById("view-workout-setup");
   if (!container) return;
 
@@ -19,7 +19,17 @@ export function renderWorkoutSetupView(targetElement) {
           <div class="grid grid-2-col gap-2 mb-3">
             <div>
               <label for="setup-session-name" data-i18n="label_session_name">Session Name</label>
-              <input type="text" id="setup-session-name" class="form-control" placeholder="e.g. Morning Strength">
+              <input type="text" id="setup-session-name" class="form-control" list="setup-session-name-list" placeholder="Select or type session name...">
+              <datalist id="setup-session-name-list">
+                <option value="Morning Strength"></option>
+                <option value="Hypertrophy Upper"></option>
+                <option value="Full Body Conditioning"></option>
+                <option value="Cardio & Core"></option>
+                <option value="Athletic Performance"></option>
+                <option value="Mobility & Recovery"></option>
+                <option value="Lower Body Power"></option>
+                <option value="Personal Training 1-on-1"></option>
+              </datalist>
             </div>
             <div>
               <label for="setup-location" data-i18n="label_location">Location</label>
@@ -68,3 +78,4 @@ export function renderWorkoutSetupView(targetElement) {
     </div>
   `;
 }
+export const renderWorkoutSetupView = renderEditSessionView;

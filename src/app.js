@@ -50,10 +50,13 @@ import { renderSessionCard } from "./components/sessionCard.js";
 import { renderSessionList } from "./components/sessionList.js";
 import { initSessionTitleBar, renderSessionTitle } from "./components/sessionTitleBar.js";
 import {
+  initEditSessionControl,
   initWorkoutSetup,
+  openEditSessionControlModal,
   openWorkoutSetupModal,
+  setupEditSessionControl,
   setupWorkoutSetup,
-} from "./components/workoutSetup.js";
+} from "./components/editSessionControl.js";
 import {
   cancelWorkoutSession as cancelWorkoutSessionController,
   focusExerciseByIndex,
@@ -144,7 +147,7 @@ import {
   seedDemoActiveSession as sessionsViewSeedDemo,
   setupCalendarBookings as sessionsViewSetupBookings,
 } from "./views/sessionsView.js";
-import { renderWorkoutSetupView } from "./views/workoutSetupView.js";
+import { renderEditSessionView, renderWorkoutSetupView } from "./views/editSessionView.js";
 
 function t(key) {
   const lang = getState().lang || "en";

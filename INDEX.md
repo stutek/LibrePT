@@ -61,7 +61,8 @@ helpers they need (`state`, `t`, `escapeHTML`, …).
 | [src/components/activeUsersList.js](src/components/activeUsersList.js) | `component` | Active-session participant tabs: the client selector buttons (with selected-tab emphasis) and their scroll-fade state. |
 | [src/components/applicationHeader.js](src/components/applicationHeader.js) | `component` | Shared top header actions: theme + language switchers, logo-home clicks, and the Sync & Backup control with its mock ahead/behind change badge. |
 | [src/components/planAdjustments.js](src/components/planAdjustments.js) | `component` | Pending Plan Adjustments deck (its own view/route, `/adjustments` — TODO 4.8), plus the interactive Apply-Adjustment wizard dialog (feedback → routine template update). |
-| [src/components/workoutSetup.js](src/components/workoutSetup.js) | `component` | Pre-session participant check setup modal dialog: selects clients and maps routine program templates. |
+| [src/components/editSessionControl.js](src/components/editSessionControl.js) | `component` | Pre-session edit/setup control modal dialog: configures session metadata, selects clients with combobox autocompletes, and maps routine program templates. |
+| [src/views/editSessionView.js](src/views/editSessionView.js) | `view` | Modular view renderer for Edit Session & Workout Session Setup view (`#view-workout-setup`). |
 | [src/components/feedbackModal.js](src/components/feedbackModal.js) | `component` | Feedback tags modal dialog: tags sets outcomes (Too Easy/Too Hard/Pain) and handles local voice note recorder transcriptions. |
 | [src/components/restTimer.js](src/components/restTimer.js) | `component` | Floating rest timer overlay with synthesized audio and haptic feedback triggers. |
 | [src/components/backupRestore.js](src/components/backupRestore.js) | `component` | Backup center dialog handlers: database JSON export, backup JSON file import, and factory reset action logic. |

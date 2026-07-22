@@ -1,17 +1,18 @@
-// components/workoutSetup.js
-// Manages the workout setup view (#view-workout-setup), allowing
-// selection of participants and assigning routine plans before launching the clipboard.
+// src/components/editSessionControl.js
+// Manages the session edit / workout setup control (#view-workout-setup / #dialog-workout-setup),
+// allowing selection of participants, assigning routine plans, and configuring session details before launching the clipboard.
 // Auto-persists form drafts to localStorage so user data survives page reloads.
 
 let deps = null;
 let isPlanningModeActive = false;
 const DRAFT_KEY = "librept_workout_setup_draft";
 
-export function initWorkoutSetup(d) {
+export function initEditSessionControl(d) {
   deps = d;
 }
+export const initWorkoutSetup = initEditSessionControl;
 
-export function saveSetupDraft() {
+export function saveEditSessionDraft() {
   const nameInput = document.getElementById("setup-session-name");
   const dateInput = document.getElementById("setup-session-date");
   const startInput = document.getElementById("setup-start-time");
@@ -53,14 +54,16 @@ export function saveSetupDraft() {
     console.warn("Failed to save workout setup draft to localStorage", e);
   }
 }
+export const saveSetupDraft = saveEditSessionDraft;
 
-export function clearSetupDraft() {
+export function clearEditSessionDraft() {
   try {
     localStorage.removeItem(DRAFT_KEY);
   } catch (e) {}
 }
+export const clearSetupDraft = clearEditSessionDraft;
 
-export function getSetupDraft() {
+export function getEditSessionDraft() {
   try {
     const raw = localStorage.getItem(DRAFT_KEY);
     return raw ? JSON.parse(raw) : null;
@@ -68,10 +71,11 @@ export function getSetupDraft() {
     return null;
   }
 }
+export const getSetupDraft = getEditSessionDraft;
 
 let editingBookingId = null;
 
-export function setupWorkoutSetup() {
+export function setupEditSessionControl() {
   const form = document.getElementById("form-workout-setup");
   if (!form) return;
 
@@ -80,7 +84,7 @@ export function setupWorkoutSetup() {
   );
 
   const handleCancel = () => {
-    clearSetupDraft();
+    clearEditSessionDraft();
     editingBookingId = null;
     const todayDate = deps.getISODateForColumn("today");
     window.history.pushState(null, "", deps.toUrl(`/sessions/${todayDate}`));
@@ -108,8 +112,8 @@ export function setupWorkoutSetup() {
   }
 
   // Auto-save draft on any input change
-  form.addEventListener("input", saveSetupDraft);
-  form.addEventListener("change", saveSetupDraft);
+  form.addEventListener("input", saveEditSessionDraft);
+  form.addEventListener("change", saveEditSessionDraft);
 
   form.addEventListener("submit", (e) => {
     e.preventDefault();
@@ -201,13 +205,14 @@ export function setupWorkoutSetup() {
       };
     }
 
-    clearSetupDraft();
+    clearEditSessionDraft();
     editingBookingId = null;
     deps.startWorkoutSession(clientRoutines, bookingMeta);
   });
 }
+export const setupWorkoutSetup = setupEditSessionControl;
 
-export function openWorkoutSetupModal(
+export function openEditSessionControlModal(
   preselectedClientId = null,
   preselectedRoutineId = null,
   preselectedBookingId = null,
@@ -236,12 +241,62 @@ export function openWorkoutSetupModal(
       : t("workout_setup_title") || "Start Workout Session";
   }
 
+  // Populate Session Name combobox suggestions dynamically
+  const nameDatalist = document.getElementById("setup-session-name-list");
+  if (nameDatalist && state) {
+    const suggestions = new Set([
+      "Morning Strength",
+      "Hypertrophy Upper",
+      "Full Body Conditioning",
+      "Cardio & Core",
+      "Athletic Performance",
+      "Mobility & Recovery",
+      "Lower Body Power",
+      "Personal Training 1-on-1",
+    ]);
+    if (state.bookings) {
+      for (const b of state.bookings) {
+        const title = b.title || b.titles?.[0];
+        if (title) suggestions.add(title);
+      }
+    }
+    if (state.routines) {
+      for (const r of state.routines) {
+        if (r.name) suggestions.add(r.name);
+      }
+    }
+    nameDatalist.innerHTML = Array.from(suggestions)
+      .map((s) => `<option value="${deps.escapeHTML ? deps.escapeHTML(s) : s}"></option>`)
+      .join("");
+  }
+
+  // Populate Location combobox suggestions dynamically
+  const locDatalist = document.getElementById("setup-location-list");
+  if (locDatalist && state) {
+    const locSuggestions = new Set([
+      "Trib gym base",
+      "playground outside",
+      "city park",
+      "Studio A",
+      "Main Gym Floor",
+      "Client Home Studio",
+    ]);
+    if (state.bookings) {
+      for (const b of state.bookings) {
+        if (b.location) locSuggestions.add(b.location);
+      }
+    }
+    locDatalist.innerHTML = Array.from(locSuggestions)
+      .map((l) => `<option value="${deps.escapeHTML ? deps.escapeHTML(l) : l}"></option>`)
+      .join("");
+  }
+
   let targetBooking = null;
   if (preselectedBookingId && state.bookings) {
     targetBooking = state.bookings.find((b) => b.id === preselectedBookingId);
   }
 
-  const draft = getSetupDraft();
+  const draft = getEditSessionDraft();
 
   // Calculate default start time rounded up to next :00 or :30 mark, and end time (+1h)
   const now = new Date();
@@ -379,3 +434,4 @@ export function openWorkoutSetupModal(
     participantsList.appendChild(row);
   }
 }
+export const openWorkoutSetupModal = openEditSessionControlModal;
