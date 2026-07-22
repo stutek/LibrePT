@@ -29,41 +29,13 @@ import { renderRoutinesList } from "../views/routinesView.js";
 
 let activeSession = null;
 let appDeps = {};
-let screenWakeLock = null;
-let wakeLockVisibilityAttached = false;
+import {
+  releaseScreenWakeLock,
+  requestScreenWakeLock as requestScreenWakeLockHelper,
+} from "../helper/wakeLock.js";
 
-async function requestScreenWakeLock() {
-  if (typeof navigator !== "undefined" && "wakeLock" in navigator) {
-    try {
-      if (!screenWakeLock) {
-        screenWakeLock = await navigator.wakeLock.request("screen");
-        screenWakeLock.addEventListener("release", () => {
-          screenWakeLock = null;
-        });
-      }
-      if (!wakeLockVisibilityAttached && typeof document !== "undefined") {
-        wakeLockVisibilityAttached = true;
-        document.addEventListener("visibilitychange", () => {
-          if (document.visibilityState === "visible" && activeSession !== null) {
-            requestScreenWakeLock();
-          }
-        });
-      }
-    } catch (err) {
-      console.debug("WakeLock request failed or disallowed:", err);
-    }
-  }
-}
-
-async function releaseScreenWakeLock() {
-  if (screenWakeLock !== null && typeof screenWakeLock.release === "function") {
-    try {
-      await screenWakeLock.release();
-      screenWakeLock = null;
-    } catch (err) {
-      console.debug("WakeLock release failed:", err);
-    }
-  }
+function requestScreenWakeLock() {
+  return requestScreenWakeLockHelper(getActiveSession);
 }
 
 // Inline clipboard edit mode: when on, the deck renders the editable plan list instead of the
