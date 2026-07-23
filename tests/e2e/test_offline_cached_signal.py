@@ -12,7 +12,7 @@ def test_offline_cached_signal(page, local_server):
 
     # Set offline cached mode via JS helper function exposed on applicationHeader
     page.evaluate("""() => {
-        import('./components/applicationHeader.js').then(mod => {
+        import('./modules/common/applicationHeader.js').then(mod => {
             mod.setOfflineCachedState(true);
         });
     }""")

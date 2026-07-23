@@ -97,7 +97,8 @@ def test_fresh_start_is_empty_without_init(page, local_server):
     assert page.locator("#clients-list .client-card").count() == 0
     db = _db(page)
     assert db is None or (
-        len(db.get("clients", [])) == 0 and len(db.get("bookings", [])) == 0
+        len(db.get("clients", [])) == 0
+        and len(db.get("sessions") or db.get("bookings") or []) == 0
     )
     # No stale/demo active session either.
     assert page.evaluate("() => localStorage.getItem('librept_active_session')") is None
@@ -111,7 +112,7 @@ def test_init_param_loads_demo_data(page, local_server):
     db = _db(page)
     assert db is not None
     assert len(db["clients"]) > 0
-    assert len(db["bookings"]) > 0
+    assert len(db.get("sessions") or db.get("bookings") or []) > 0
     # The message feed is seeded together with the demo data (data-driven notifications),
     # including the demo-mode clean-up notice.
     assert len(db["notifications"]) > 0
