@@ -49,15 +49,12 @@ LibrePT boots to a clean, empty state by default. To explore the platform pre-lo
 
 ### Resetting to a clean state
 
-LibrePT can be reset from sample demo data back to a first-run clean slate at any time:
+LibrePT can be reset back to a first-run clean slate at any time:
 
-- **In-App (Demo Mode Notification)** — When running in demo mode (with sample data), open the bottom **Notification & Status Feed**, locate the **Demo mode** notice card, and click **Clear Demo Data & Exit Demo Mode**. This clears the sample dataset and reloads into a clean, empty app. Once demo mode is exited, the notification automatically disappears.
-- **Fastest (DevTools console)** — Call the console helper `app.js` registers on every load:
-  ```js
-  resetLibrePTData({ demo: false }); // wipes every LibrePT key, reloads to the empty first-run state
-  resetLibrePTData();                // wipes local storage, reloads back onto fresh sample demo data
-  ```
-- **Browser UI** — DevTools → **Application** (Chrome/Edge) or **Storage** (Firefox) → **Local storage** → select the origin → delete the `librept_*` keys, or use **Clear site data**. Then reload.
+- **Browser Site Info Icon (Mobile & Desktop Chrome)** — Click/tap the tune/info icon immediately to the left of the address bar (`https://...` or `localhost`), select **Cookies and site data** (or **Site settings**), then click/tap **Delete / Clear data** (the trash icon or "Clear data" button) and refresh the page.
+- **In-App (Demo Mode Notification)** — When running in demo mode (with sample data), open the bottom **Notification & Status Feed**, locate the **Demo mode** notice card, and click **Clear Demo Data & Exit Demo Mode**.
+- **Browser DevTools** — DevTools → **Application** (Chrome/Edge) or **Storage** (Firefox) → **Local storage** → select the origin → delete the `librept_*` keys, or use **Clear site data**.
+- **DevTools Console** — Execute `window.resetLibrePTData({ demo: false })` in the console.
 - **A private/incognito window** — Always starts clean and discards everything on close.
 
 To land back on demo data instead of an empty app after clearing, reopen with `?init=demo_data_load`. For reference, the app writes these `localStorage` keys: `librept_db` (all data), `librept_active_session` (live session cache), `librept_read_notifications`, `librept-theme`, and `librept_terms_accepted` (first-run agreement); `openpt_*` are legacy keys migrated on first load.
