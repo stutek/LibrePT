@@ -26,13 +26,14 @@ export function seedDemoActiveSession({ state }) {
   if (!routine) return;
 
   const now = Date.now();
-  const HOUR = 60 * 60 * 1000;
-  const startTime = now - HOUR;
+  const FIVE_MIN = 5 * 60 * 1000;
+  const TWO_HOURS = 2 * 60 * 60 * 1000;
+  const startTime = now - FIVE_MIN;
 
   const session = {
     id: booking.id,
     startTime,
-    duration: Math.floor((now - startTime) / 1000),
+    duration: 300,
     participants: participantIds,
     clientRoutines: {},
     activeClientId: participantIds[0],
@@ -41,8 +42,8 @@ export function seedDemoActiveSession({ state }) {
       titles: [booking.title],
       day: booking.day,
       location: booking.location || "",
-      startDate: new Date(now - HOUR).toISOString(),
-      endDate: new Date(now + HOUR).toISOString(),
+      startDate: new Date(startTime).toISOString(),
+      endDate: new Date(now + TWO_HOURS).toISOString(),
       timeLabel: booking.time,
     },
     feedback: [],
