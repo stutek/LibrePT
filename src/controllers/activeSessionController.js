@@ -1,4 +1,12 @@
 import { renderClientsList } from "../modules/clients/clientsView.js";
+import { renderClipboardEditor } from "../modules/clipboard/clipboardEditor.js";
+import {
+  clearAllTimers,
+  restoreSessionTimers,
+  startTimer,
+  stopTimerIfMatches,
+} from "../modules/clipboard/exerciseAndRestTimer.js";
+import { renderExerciseDeck } from "../modules/clipboard/exerciseDeck.js";
 import {
   renderActiveUsersList,
   updateClientTabsFadeState,
@@ -24,14 +32,6 @@ import {
 } from "../modules/common/wakeLock.js";
 import { renderGlobalHistory } from "../modules/history/historyView.js";
 import { renderRoutinesList } from "../modules/plans/plansView.js";
-import { renderClipboardEditor } from "../modules/session/clipboardEditor.js";
-import {
-  clearAllTimers,
-  restoreSessionTimers,
-  startTimer,
-  stopTimerIfMatches,
-} from "../modules/session/exerciseAndRestTimer.js";
-import { renderExerciseDeck } from "../modules/session/exerciseDeck.js";
 import {
   renderActiveSessionBarLabels,
   renderIdleSessionBar,

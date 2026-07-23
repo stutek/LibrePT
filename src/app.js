@@ -60,6 +60,8 @@ import {
   renderClientsList as clientsViewRender,
   showClientDetails as clientsViewShowDetails,
 } from "./modules/clients/clientsView.js";
+import { initRestTimer, setupRestTimer } from "./modules/clipboard/exerciseAndRestTimer.js";
+import { renderExerciseDeck } from "./modules/clipboard/exerciseDeck.js";
 import {
   renderActiveUsersList,
   updateClientTabsFadeState,
@@ -114,16 +116,6 @@ import {
   renderRoutinesList as routinesViewRender,
 } from "./modules/plans/plansView.js";
 import {
-  focusSessionsColumn,
-  getFocusedSessionDay,
-  getSessionDayDate,
-  initDaySelector,
-  renderSessionsTitleBar,
-  sessionDayTemporal,
-  setFocusedSessionDay,
-  setupSessionsDayNav,
-} from "./modules/session/daySelector.js";
-import {
   initEditSessionControl,
   initWorkoutSetup,
   openEditSessionControlModal,
@@ -135,23 +127,31 @@ import {
   renderEditSessionView,
   renderWorkoutSetupView,
 } from "./modules/session/editSessionView.js";
-import { initRestTimer, setupRestTimer } from "./modules/session/exerciseAndRestTimer.js";
-import { renderExerciseDeck } from "./modules/session/exerciseDeck.js";
 import {
   initSessionBar,
   renderActiveSessionBarLabels,
   renderIdleSessionBar,
   updateSessionBarTimer,
 } from "./modules/session/sessionBar.js";
-import { renderSessionCard } from "./modules/session/sessionCard.js";
-import { renderSessionList } from "./modules/session/sessionList.js";
 import { initSessionTitleBar, renderSessionTitle } from "./modules/session/sessionTitleBar.js";
+import {
+  focusSessionsColumn,
+  getFocusedSessionDay,
+  getSessionDayDate,
+  initDaySelector,
+  renderSessionsTitleBar,
+  sessionDayTemporal,
+  setFocusedSessionDay,
+  setupSessionsDayNav,
+} from "./modules/sessionList/daySelector.js";
+import { renderSessionCard } from "./modules/sessionList/sessionCard.js";
+import { renderSessionList } from "./modules/sessionList/sessionList.js";
 import {
   launchClipboardDirectly as sessionsViewLaunchClipboard,
   renderSessions as sessionsViewRender,
   seedDemoActiveSession as sessionsViewSeedDemo,
   setupCalendarBookings as sessionsViewSetupBookings,
-} from "./modules/session/sessionsView.js";
+} from "./modules/sessionList/sessionsView.js";
 
 function t(key) {
   const lang = getState().lang || "en";

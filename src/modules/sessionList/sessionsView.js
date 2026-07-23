@@ -2,6 +2,7 @@ import { DEFAULT_SESSIONS } from "../../data/index.js";
 import { isOfflineCachedActive, resetSyncState } from "../common/applicationHeader.js";
 import { loadUnitForEquipment } from "../common/repsAndLoad.js";
 import { buildBookingMeta, escapeHTML, getOverlappingBookings } from "../common/utils.js";
+import { renderIdleSessionBar, updateSessionBarTimer } from "../session/sessionBar.js";
 import {
   focusSessionsColumn,
   getFocusedSessionDay,
@@ -9,7 +10,6 @@ import {
   renderSessionsTitleBar,
   sessionDayTemporal,
 } from "./daySelector.js";
-import { renderIdleSessionBar, updateSessionBarTimer } from "./sessionBar.js";
 import { renderSessionList } from "./sessionList.js";
 
 export function seedDemoActiveSession({ state }) {

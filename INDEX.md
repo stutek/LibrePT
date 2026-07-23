@@ -46,19 +46,19 @@ is structured into feature modules under `src/modules/` (`session`, `plans`, `cl
 | [src/data/stateStore.js](src/data/stateStore.js) | `data` | Central app state management: state object, localStorage persistence, seed data loading, and reset triggers. |
 | [src/data/index.js](src/data/index.js) | `data` | Barrel for seed/demo data: `exercises.js`, `clients.js`, `routines.js`, `history.js`, `planUpdates.js`, `sessions.js`. |
 | [src/i18n/index.js](src/i18n/index.js) | `i18n` | Translation registry: one flat key→string map per locale (`en.js`, `sl.js`). Key parity enforced by unit tests. |
-| [src/modules/session/sessionCard.js](src/modules/session/sessionCard.js) | `component` | Dashboard session-booking card that launches the clipboard on tap. |
-| [src/modules/session/sessionList.js](src/modules/session/sessionList.js) | `component` | Renders a column of session cards into a container. |
+| [src/modules/sessionList/sessionsView.js](src/modules/sessionList/sessionsView.js) | `view` | Modular view renderer for Sessions dashboard. |
+| [src/modules/sessionList/sessionList.js](src/modules/sessionList/sessionList.js) | `component` | Renders a column of session cards into a container. |
+| [src/modules/sessionList/sessionCard.js](src/modules/sessionList/sessionCard.js) | `component` | Dashboard session-booking card that launches the clipboard on tap. |
+| [src/modules/sessionList/daySelector.js](src/modules/sessionList/daySelector.js) | `component` | Dashboard day-deck navigation and focus/scroll handlers. |
+| [src/modules/clipboard/clipboardEditor.js](src/modules/clipboard/clipboardEditor.js) | `component` | Interactive active session plan/clipboard structure editor. |
+| [src/modules/clipboard/exerciseDeck.js](src/modules/clipboard/exerciseDeck.js) | `component` | Active-session exercise stack deck renderer. |
+| [src/modules/clipboard/exerciseCard.js](src/modules/clipboard/exerciseCard.js) | `component` | Standalone exercise card in clipboard deck. |
+| [src/modules/clipboard/supersetCard.js](src/modules/clipboard/supersetCard.js) | `component` | Superset/Giant set grouped block card. |
+| [src/modules/clipboard/exerciseAndRestTimer.js](src/modules/clipboard/exerciseAndRestTimer.js) | `component` | Session exercise and rest countdown timer stack. |
 | [src/modules/session/sessionBar.js](src/modules/session/sessionBar.js) | `component` | Bottom active/next-session bar with countdowns. |
 | [src/modules/session/sessionTitleBar.js](src/modules/session/sessionTitleBar.js) | `component` | Active-session overlay title line and countdown. |
-| [src/modules/session/daySelector.js](src/modules/session/daySelector.js) | `component` | Dashboard day-deck navigation and focus/scroll handlers. |
-| [src/modules/session/sessionsView.js](src/modules/session/sessionsView.js) | `view` | Modular view renderer for Sessions dashboard. |
 | [src/modules/session/editSessionView.js](src/modules/session/editSessionView.js) | `view` | Modular view renderer for Edit Session & Setup view. |
 | [src/modules/session/editSessionControl.js](src/modules/session/editSessionControl.js) | `component` | Pre-session edit/setup control modal dialog. |
-| [src/modules/session/clipboardEditor.js](src/modules/session/clipboardEditor.js) | `component` | Interactive active session plan/clipboard structure editor. |
-| [src/modules/session/exerciseCard.js](src/modules/session/exerciseCard.js) | `component` | Standalone exercise card in clipboard deck. |
-| [src/modules/session/supersetCard.js](src/modules/session/supersetCard.js) | `component` | Superset/Giant set grouped block card. |
-| [src/modules/session/exerciseDeck.js](src/modules/session/exerciseDeck.js) | `component` | Active-session exercise stack deck renderer. |
-| [src/modules/session/exerciseAndRestTimer.js](src/modules/session/exerciseAndRestTimer.js) | `component` | Session exercise and rest countdown timer stack. |
 | [src/modules/plans/plansView.js](src/modules/plans/plansView.js) | `view` | Modular view renderer for Plans (formerly Routines) catalog and template editor. |
 | [src/modules/plans/planAdjustments.js](src/modules/plans/planAdjustments.js) | `component` | Pending Plan Adjustments deck & interactive Apply wizard. |
 | [src/modules/clients/clientsView.js](src/modules/clients/clientsView.js) | `view` | Modular view renderer for Client Directory & Client profile views. |
