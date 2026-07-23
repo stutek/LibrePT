@@ -313,15 +313,21 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav {
      PREVIEW tag, and action buttons keep their size (see .logo-area h1 / .header-actions). */
   min-width: 0;
 }
-/* Build stamp next to the wordmark — small, muted, monospace. */
+.version-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 1px;
+}
+/* Build stamp under the PREVIEW tag — small, muted, monospace. */
 .app-version {
-  align-self: flex-end;
-  margin: 0 0 5px -8px;
   font-family: var(--font-mono, monospace);
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 700;
   color: var(--text-muted);
   letter-spacing: 0.3px;
+  line-height: 1;
 }
 .logo-icon {
   font-size: 26px;

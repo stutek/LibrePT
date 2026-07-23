@@ -112,7 +112,7 @@ jobs:
         run: .venv/bin/python -c "from build import run_e2e_tests; run_e2e_tests()"
 
   dynamic-security-checks:
-    name: Dynamic Security Checks
+    name: Dynamic Security & Injection Checks
     needs: [python-lint, frontend-lint, dependency-scan, unit-tests]
     runs-on: ubuntu-latest
     steps:
@@ -123,9 +123,21 @@ jobs:
       - name: Run Dynamic Security Checks
         run: python -c "from build import run_dynamic_security_checks; run_dynamic_security_checks()"
 
+  owasp-zap-scan:
+    name: OWASP ZAP Security Scan
+    needs: [python-lint, frontend-lint, dependency-scan, unit-tests]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run OWASP ZAP Scan
+        run: python -c "from build import run_owasp_zap_scan; run_owasp_zap_scan()"
+
   build:
     name: Assemble & Bundle App
-    needs: [e2e-tests, dynamic-security-checks]
+    needs: [e2e-tests, dynamic-security-checks, owasp-zap-scan]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

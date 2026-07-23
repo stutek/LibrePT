@@ -73,21 +73,18 @@
       <div class="logo-area" id="logo-area">
         <i class="fa-solid fa-dumbbell logo-icon"></i>
         <h1>LibrePT</h1>
-        <!-- Build stamp (commit SHA) — visible so a client screenshot pins a bug report to a build.
-             Filled from version.js by app.js; the deploy/build overwrite version.js with the real SHA. -->
-        <span id="app-version" class="app-version" aria-label="Build version"></span>
-        <!-- Pre-release marker: this build is a PREVIEW, not for production use. A deliberately
-             loud, always-visible cue so no screenshot or bug report is ambiguous about the stage.
-             Clickable → the risks & data-loss notice in the repo. Standalone for now; the fuller
-             multi-version /preview/ + beta ribbon is TODO 16.2. -->
-        <a id="preview-ribbon" class="preview-ribbon"
-           href="https://github.com/stutek/LibrePT/blob/main/docs/PREVIEW.md"
-           target="_blank" rel="noopener noreferrer"
-           aria-label="Preview build — pre-release, may lose data. Open the risks & data-loss notice.">
-          <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
-          <span id="preview-ribbon-label">PREVIEW</span>
-          <i class="fa-solid fa-circle-question" aria-hidden="true"></i>
-        </a>
+        <!-- Version info cluster: preview ribbon stacked above commit SHA -->
+        <div class="version-stack">
+          <a id="preview-ribbon" class="preview-ribbon"
+             href="https://github.com/stutek/LibrePT/blob/main/docs/PREVIEW.md"
+             target="_blank" rel="noopener noreferrer"
+             aria-label="Preview build — pre-release, may lose data. Open the risks & data-loss notice.">
+            <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+            <span id="preview-ribbon-label">PREVIEW</span>
+            <i class="fa-solid fa-circle-question" aria-hidden="true"></i>
+          </a>
+          <span id="app-version" class="app-version" aria-label="Build version"></span>
+        </div>
       </div>
       
       <div class="header-actions">
