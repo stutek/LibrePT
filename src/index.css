@@ -303,25 +303,23 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav {
   margin: 0 auto;
   padding: 0 16px;
   height: var(--hdr-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 .logo-area {
   height: 44px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   /* Allow the cluster to shrink on narrow phones so only the wordmark truncates — the stamp,
      PREVIEW tag, and action buttons keep their size (see .logo-area h1 / .header-actions). */
   min-width: 0;
 }
-.version-stack {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 1px;
-}
-/* Build stamp under the PREVIEW tag — small, muted, monospace. */
+/* Build stamp under/next to the wordmark — small, muted, monospace. */
 .app-version {
+  align-self: flex-end;
+  margin: 0 0 5px -4px;
   font-family: var(--font-mono, monospace);
   font-size: 9px;
   font-weight: 700;
@@ -341,6 +339,7 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav {
   align-items: center;
   gap: 4px;
   align-self: center;
+  margin: 0 auto;
   padding: 2px 9px;
   border-radius: 999px;
   background: #f59e0b;
@@ -801,7 +800,8 @@ select.menu-select {
   display: none;
 }
 .sync-badge .sync-ahead,
-.sync-badge .sync-behind {
+.sync-badge .sync-behind,
+.sync-badge .sync-zero {
   display: inline-flex;
   align-items: center;
   gap: 2px;
@@ -812,6 +812,9 @@ select.menu-select {
 .sync-badge .sync-behind {
   color: #ef4444;
 } /* remote changes to pull (behind, red) */
+.sync-badge .sync-zero {
+  color: var(--text-muted);
+} /* neutral state when counter is 0 */
 .sync-badge .sync-offline {
   display: inline-flex;
   align-items: center;

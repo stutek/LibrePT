@@ -103,26 +103,38 @@ export function renderSyncBadge() {
     return;
   }
 
-  const { local, remote } = mockSyncState;
-  if (local === 0 && remote === 0) {
-    badge.classList.add("hidden");
-    badge.textContent = "";
-    badge.removeAttribute("aria-label");
-    return;
+  const { local, remote, isCloudConfigured = true, isCloudReachable = true } = mockSyncState;
+
+  // When cloud is unreachable or not configured, display '?' for behind count
+  const isUnreachable = !isCloudConfigured || !isCloudReachable;
+
+  if (local === 0 && (remote === 0 || isUnreachable === false)) {
+    // Both 0: render with neutral styling
   }
-  // Past 9, a second arrow stands in for the digit (↑↑ / ↓↓) so the pill stays narrow and reads
-  // as "lots to sync"; the exact counts still ride along in the aria-label below.
-  const cell = (n, dir) => {
+
+  // Past 9, a second arrow stands in for the digit (↑↑ / ↓↓) so the pill stays narrow
+  const cell = (n, dir, isBehind = false) => {
+    if (isBehind && isUnreachable) {
+      return `<i class="fa-solid fa-arrow-down"></i>?`;
+    }
     const arrow = `<i class="fa-solid fa-arrow-${dir}"></i>`;
-    return n > 9 ? arrow + arrow : arrow + String(n);
+    const countStr = n > 9 ? arrow + arrow : arrow + String(n);
+    return countStr;
   };
+
+  const aheadClass = local === 0 ? "sync-zero" : "sync-ahead";
+  const behindClass = remote === 0 && !isUnreachable ? "sync-zero" : "sync-behind";
+
   badge.classList.remove("hidden");
   badge.innerHTML =
-    `<span class="sync-ahead">${cell(local, "up")}</span>` +
-    `<span class="sync-behind">${cell(remote, "down")}</span>`;
+    `<span class="${aheadClass}">${cell(local, "up")}</span>` +
+    `<span class="${behindClass}">${cell(remote, "down", true)}</span>`;
+  const remoteText = isUnreachable
+    ? "cloud status unknown"
+    : `${remote} remote change${remote === 1 ? "" : "s"} to pull`;
   badge.setAttribute(
     "aria-label",
-    `${local} local change${local === 1 ? "" : "s"} to push, ${remote} remote change${remote === 1 ? "" : "s"} to pull`,
+    `${local} local change${local === 1 ? "" : "s"} to push, ${remoteText}`,
   );
 }
 
