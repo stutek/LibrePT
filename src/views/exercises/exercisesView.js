@@ -1,5 +1,5 @@
 // src/views/exercisesView.js - Domain module for exercise catalog and filter logic
-import { escapeHTML } from "../helper/utils.js";
+import { escapeHTML } from "../../helper/utils.js";
 
 export function renderExercisesList({ state, t, filterQuery = "", categoryFilter = "All" }) {
   const container = document.getElementById("exercises-list");

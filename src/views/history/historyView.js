@@ -1,7 +1,7 @@
 // src/views/historyView.js - Domain module for global and client workout history logs
-import { openSessionFromHistory } from "../controllers/activeSessionController.js";
-import { formatLoad, formatReps } from "../helper/repsAndLoad.js";
-import { escapeHTML, formatDateStr } from "../helper/utils.js";
+import { openSessionFromHistory } from "../../controllers/activeSessionController.js";
+import { formatLoad, formatReps } from "../../helper/repsAndLoad.js";
+import { escapeHTML, formatDateStr } from "../../helper/utils.js";
 
 export function renderGlobalHistory({ state, t }) {
   const container = document.getElementById("global-history-list");

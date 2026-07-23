@@ -188,7 +188,8 @@ export function showSessionView(sessionId, clientId, focusRef = null, opts = {})
   }
 
   const state = routerDeps?.getState ? routerDeps.getState() : null;
-  const booking = state?.bookings?.find((b) => b.id === sessionId);
+  const sessions = state?.sessions || state?.bookings;
+  const booking = sessions?.find((b) => b.id === sessionId);
   if (booking && routerDeps?.launchClipboardDirectly) {
     routerDeps.launchClipboardDirectly({ bookingId: sessionId });
     if (routerDeps.getActiveSession() && (clientId || focusRef || opts.edit)) {

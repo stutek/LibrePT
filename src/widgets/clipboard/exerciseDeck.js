@@ -15,8 +15,8 @@
 //   onRerender()   // re-render the whole board (past-card toggle / superset save)
 // }
 
-import { formatLoad, formatReps } from "../helper/repsAndLoad.js";
-import { generateShortUUID } from "../helper/utils.js";
+import { formatLoad, formatReps } from "../../helper/repsAndLoad.js";
+import { generateShortUUID } from "../../helper/utils.js";
 import { renderExerciseCard } from "./exerciseCard.js";
 import { renderSupersetCard } from "./supersetCard.js";
 

@@ -1,13 +1,13 @@
-// src/views/clientsView.js - Domain module for client directory and detail views
-import { renderClientsDirectory } from "../components/clientsDirectory.js";
 import {
   escapeHTML,
   formatDateStr,
   getClientDisplayNameHTML,
   getInitials,
   truncateString,
-} from "../helper/utils.js";
-import { renderHistoryItems } from "./historyView.js";
+} from "../../helper/utils.js";
+// src/views/clientsView.js - Domain module for client directory and detail views
+import { renderClientsDirectory } from "../../widgets/common/clientsDirectory.js";
+import { renderHistoryItems } from "../history/historyView.js";
 
 let activeDetailClientId = null;
 

@@ -1,20 +1,21 @@
-import { isOfflineCachedActive, resetSyncState } from "../components/applicationHeader.js";
+// src/views/sessionsView.js - Domain module for sessions dashboard, calendar sync, and clipboard launching
+import { DEFAULT_SESSIONS } from "../../data/index.js";
+import { loadUnitForEquipment } from "../../helper/repsAndLoad.js";
+import { buildBookingMeta, escapeHTML, getOverlappingBookings } from "../../helper/utils.js";
+import { isOfflineCachedActive, resetSyncState } from "../../widgets/common/applicationHeader.js";
 import {
   focusSessionsColumn,
   getFocusedSessionDay,
   getSessionDayDate,
   renderSessionsTitleBar,
   sessionDayTemporal,
-} from "../components/daySelector.js";
-import { renderIdleSessionBar, updateSessionBarTimer } from "../components/sessionBar.js";
-import { renderSessionList } from "../components/sessionList.js";
-// src/views/sessionsView.js - Domain module for sessions dashboard, calendar sync, and clipboard launching
-import { DEFAULT_SESSIONS } from "../data/index.js";
-import { loadUnitForEquipment } from "../helper/repsAndLoad.js";
-import { buildBookingMeta, escapeHTML, getOverlappingBookings } from "../helper/utils.js";
+} from "../../widgets/common/daySelector.js";
+import { renderIdleSessionBar, updateSessionBarTimer } from "../../widgets/session/sessionBar.js";
+import { renderSessionList } from "../../widgets/session/sessionList.js";
 
 export function seedDemoActiveSession({ state }) {
-  const booking = (state.bookings || []).find((b) => b.id === "s01f2e3d");
+  const sessions = state.sessions || state.bookings || [];
+  const booking = sessions.find((b) => b.id === "s01f2e3d");
   if (!booking) return;
 
   const participantIds = booking.participants.filter((pid) =>
@@ -115,11 +116,11 @@ export function seedDemoActiveSession({ state }) {
 }
 
 export function launchClipboardDirectly({ bookingId, state, startWorkoutSession }) {
-  if (!state.bookings) return;
-  const booking = state.bookings.find((b) => b.id === bookingId);
+  const sessions = state.sessions || state.bookings || [];
+  const booking = sessions.find((b) => b.id === bookingId);
   if (!booking) return;
 
-  const overlappingBookings = getOverlappingBookings(booking, state.bookings);
+  const overlappingBookings = getOverlappingBookings(booking, sessions);
 
   const clientRoutinesMap = new Map();
   for (const ob of overlappingBookings) {
@@ -176,6 +177,7 @@ export function setupCalendarBookings({ state, t, saveToLocalStorage, renderSess
     }
 
     setTimeout(() => {
+      state.sessions = [...DEFAULT_SESSIONS];
       state.bookings = [...DEFAULT_SESSIONS];
 
       saveToLocalStorage();
@@ -213,7 +215,7 @@ export function renderSessions({
 
   renderSessionsTitleBar();
 
-  const bookings = state.bookings || [];
+  const sessions = state.sessions || state.bookings || [];
   const activeSession = getActiveSession();
 
   const cardDeps = {
@@ -230,10 +232,10 @@ export function renderSessions({
     toUrl,
   };
 
-  const yesterdaySessions = bookings.filter((b) => b.day === "yesterday");
-  const todaySessions = bookings.filter((b) => b.day === "today");
-  const tomorrowSessions = bookings.filter((b) => b.day === "tomorrow");
-  const upcomingSessions = bookings.filter((b) => b.day === "upcoming");
+  const yesterdaySessions = sessions.filter((b) => b.day === "yesterday");
+  const todaySessions = sessions.filter((b) => b.day === "today");
+  const tomorrowSessions = sessions.filter((b) => b.day === "tomorrow");
+  const upcomingSessions = sessions.filter((b) => b.day === "upcoming");
 
   if (yesterdayContainer) {
     renderSessionList(yesterdayContainer, yesterdaySessions, {
@@ -259,7 +261,8 @@ export function renderSessions({
     });
   }
 
-  requestAnimationFrame(() => focusSessionsColumn(getFocusedSessionDay(), "auto"));
+  const focusedDay = getFocusedSessionDay();
+  requestAnimationFrame(() => focusSessionsColumn(focusedDay, "auto"));
   renderIdleSessionBar();
   updateSessionBarTimer();
 }

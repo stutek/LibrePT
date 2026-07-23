@@ -154,7 +154,9 @@ export function setupEditSessionControl() {
     // Warning when editing a session and removing a participant who has recorded feedback data
     if (editingBookingId) {
       const state = deps.getState();
-      const existingBooking = (state.bookings || []).find((b) => b.id === editingBookingId);
+      const existingBooking = (state.sessions || state.bookings || []).find(
+        (b) => b.id === editingBookingId,
+      );
       if (existingBooking?.participants) {
         const selectedClientIds = clientRoutines.map((cr) => cr.clientId);
         const removedParticipants = existingBooking.participants.filter(
@@ -258,8 +260,9 @@ export function openEditSessionControlModal(
       "Lower Body Power",
       "Personal Training 1-on-1",
     ]);
-    if (state.bookings) {
-      for (const b of state.bookings) {
+    const sessions = state.sessions || state.bookings || [];
+    if (sessions) {
+      for (const b of sessions) {
         const title = b.title || b.titles?.[0];
         if (title) suggestions.add(title);
       }
@@ -285,8 +288,9 @@ export function openEditSessionControlModal(
       "Main Gym Floor",
       "Client Home Studio",
     ]);
-    if (state.bookings) {
-      for (const b of state.bookings) {
+    const sessions = state.sessions || state.bookings || [];
+    if (sessions) {
+      for (const b of sessions) {
         if (b.location) locSuggestions.add(b.location);
       }
     }
@@ -296,8 +300,9 @@ export function openEditSessionControlModal(
   }
 
   let targetBooking = null;
-  if (preselectedBookingId && state.bookings) {
-    targetBooking = state.bookings.find((b) => b.id === preselectedBookingId);
+  const sessions = state.sessions || state.bookings || [];
+  if (preselectedBookingId && sessions) {
+    targetBooking = sessions.find((b) => b.id === preselectedBookingId);
   }
 
   const draft = getEditSessionDraft();

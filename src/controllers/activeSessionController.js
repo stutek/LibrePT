@@ -1,18 +1,3 @@
-import { renderActiveUsersList, updateClientTabsFadeState } from "../components/activeUsersList.js";
-import { renderClipboardEditor } from "../components/clipboardEditor.js";
-import {
-  clearAllTimers,
-  restoreSessionTimers,
-  startTimer,
-  stopTimerIfMatches,
-} from "../components/exerciseAndRestTimer.js";
-import { renderExerciseDeck } from "../components/exerciseDeck.js";
-import { openFeedbackModal } from "../components/feedbackModal.js";
-import {
-  renderActiveSessionBarLabels,
-  renderIdleSessionBar,
-  updateSessionBarTimer,
-} from "../components/sessionBar.js";
 import { hasLoad, loadUnitForEquipment } from "../helper/repsAndLoad.js";
 // src/controllers/activeSessionController.js - Domain module for active workout session state, timers, signals, and lifecycle
 import {
@@ -26,6 +11,24 @@ import {
 import { renderClientsList } from "../views/clientsView.js";
 import { renderGlobalHistory } from "../views/historyView.js";
 import { renderRoutinesList } from "../views/routinesView.js";
+import { renderClipboardEditor } from "../widgets/clipboard/clipboardEditor.js";
+import { renderExerciseDeck } from "../widgets/clipboard/exerciseDeck.js";
+import {
+  renderActiveUsersList,
+  updateClientTabsFadeState,
+} from "../widgets/common/activeUsersList.js";
+import { openFeedbackModal } from "../widgets/common/feedbackModal.js";
+import {
+  renderActiveSessionBarLabels,
+  renderIdleSessionBar,
+  updateSessionBarTimer,
+} from "../widgets/session/sessionBar.js";
+import {
+  clearAllTimers,
+  restoreSessionTimers,
+  startTimer,
+  stopTimerIfMatches,
+} from "../widgets/timer/exerciseAndRestTimer.js";
 
 let activeSession = null;
 let appDeps = {};
@@ -973,8 +976,13 @@ export function finishWorkoutSession() {
   // dashboard's past-session status line (2.3) has something to show — previously finishing a
   // session never touched state.bookings at all, only state.history.
   const sb = activeSession.booking;
-  if (sb && !sb.isPlanning && Array.isArray(state.bookings)) {
-    for (const booking of state.bookings) {
+  const sessions = Array.isArray(state.sessions)
+    ? state.sessions
+    : Array.isArray(state.bookings)
+      ? state.bookings
+      : [];
+  if (sb && !sb.isPlanning) {
+    for (const booking of sessions) {
       if (booking.id === sb.id || (Array.isArray(sb.ids) && sb.ids.includes(booking.id))) {
         booking.completed = true;
         booking.duration = sessionDuration;

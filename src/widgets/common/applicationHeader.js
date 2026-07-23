@@ -19,7 +19,7 @@
 //   renderActiveSessionBarLabels()
 // }
 
-import { getShareParams } from "../helper/shareLink.js";
+import { getShareParams } from "../../helper/shareLink.js";
 
 let deps = null;
 

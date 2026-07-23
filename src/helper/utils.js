@@ -146,20 +146,21 @@ export function isTimeOverlapping(rangeA, rangeB) {
   return rangeA.start < rangeB.end && rangeB.start < rangeA.end;
 }
 
-// Return list of bookings overlapping with target booking
-export function getOverlappingBookings(booking, bookings) {
-  const targetRange = parseTimeRange(booking.time);
-  return bookings.filter((b) => {
-    if (b.day !== booking.day) return false;
-    return isTimeOverlapping(targetRange, parseTimeRange(b.time));
+// Return list of sessions overlapping with target session
+export function getOverlappingSessions(session, sessions) {
+  const targetRange = parseTimeRange(session.time);
+  return sessions.filter((s) => {
+    if (s.day !== session.day) return false;
+    return isTimeOverlapping(targetRange, parseTimeRange(s.time));
   });
 }
+export const getOverlappingBookings = getOverlappingSessions;
 
 // Aggregate participant details, scheduled range, and location for active/idle bar
-export function buildBookingMeta(bookings, day, getSessionDayDate) {
-  const titles = [...new Set(bookings.map((b) => b.title))];
-  const locations = [...new Set(bookings.map((b) => b.location).filter(Boolean))];
-  const ranges = bookings.map((b) => parseTimeRange(b.time)).filter(Boolean);
+export function buildSessionMeta(sessions, day, getSessionDayDate) {
+  const titles = [...new Set(sessions.map((s) => s.title))];
+  const locations = [...new Set(sessions.map((s) => s.location).filter(Boolean))];
+  const ranges = sessions.map((s) => parseTimeRange(s.time)).filter(Boolean);
   const startMin = Math.min(...ranges.map((r) => r.start));
   const endMin = Math.max(...ranges.map((r) => r.end));
   const dayDate = getSessionDayDate(day);
@@ -169,8 +170,8 @@ export function buildBookingMeta(bookings, day, getSessionDayDate) {
   endDate.setMinutes(endDate.getMinutes() + endMin);
 
   return {
-    id: bookings.length > 0 ? bookings[0].id : null,
-    ids: bookings.map((b) => b.id),
+    id: sessions.length > 0 ? sessions[0].id : null,
+    ids: sessions.map((s) => s.id),
     titles,
     day,
     startDate,
@@ -179,6 +180,7 @@ export function buildBookingMeta(bookings, day, getSessionDayDate) {
     timeLabel: `${formatClockFromMinutes(startMin)} - ${formatClockFromMinutes(endMin)}`,
   };
 }
+export const buildBookingMeta = buildSessionMeta;
 
 export function getISODateString(date) {
   const d = new Date(date);

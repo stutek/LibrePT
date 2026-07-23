@@ -29,16 +29,22 @@ export function emptyState() {
     routines: [],
     history: [],
     planUpdates: [],
-    bookings: [],
+    sessions: [],
     notifications: [],
     lang: "en",
   };
 }
 
 export function stateHasData(s = state) {
-  return ["clients", "exercises", "routines", "history", "planUpdates", "bookings"].some(
-    (k) => Array.isArray(s[k]) && s[k].length > 0,
-  );
+  return [
+    "clients",
+    "exercises",
+    "routines",
+    "history",
+    "planUpdates",
+    "sessions",
+    "bookings",
+  ].some((k) => Array.isArray(s[k]) && s[k].length > 0);
 }
 
 export function seedMockData(incrementLocalSyncFn) {
@@ -48,7 +54,7 @@ export function seedMockData(incrementLocalSyncFn) {
   state.routines = [...DEFAULT_ROUTINES];
   state.history = [...DEFAULT_HISTORY];
   state.planUpdates = [...DEFAULT_PLAN_UPDATES];
-  state.bookings = [...DEFAULT_SESSIONS];
+  state.sessions = [...DEFAULT_SESSIONS];
   state.notifications = [...DEFAULT_MESSAGES];
   state.lang = currentLang;
   saveToLocalStorage(incrementLocalSyncFn);
@@ -80,6 +86,10 @@ export function loadSavedState() {
   if (savedData) {
     try {
       state = JSON.parse(savedData);
+      if (state.bookings && !state.sessions) {
+        state.sessions = state.bookings;
+        state.bookings = undefined;
+      }
     } catch (e) {
       console.error("Error parsing local storage database. Starting empty.", e);
       state = emptyState();
@@ -88,6 +98,7 @@ export function loadSavedState() {
     state = emptyState();
   }
 
+  if (!state.sessions) state.sessions = [];
   if (!state.lang) state.lang = "en";
   return state;
 }

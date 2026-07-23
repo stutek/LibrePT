@@ -11,7 +11,7 @@
 //   logQuickSignal(tag), openFeedbackModal(), onFocus(index)
 // }
 
-import { formatLoad, formatReps, hasLoad, loadParts } from "../helper/repsAndLoad.js";
+import { formatLoad, formatReps, hasLoad, loadParts } from "../../helper/repsAndLoad.js";
 
 export function renderExerciseCard(card, item, ctx) {
   const {

@@ -2,61 +2,6 @@
 // Single responsibility: Bootstraps the application, wires dependency injections across components,
 // and manages global lifecycle hooks.
 
-import { renderActiveUsersList, updateClientTabsFadeState } from "./components/activeUsersList.js";
-import {
-  incrementLocalSync,
-  initApplicationHeader,
-  renderSyncBadge,
-  resetSyncState,
-  setOfflineCachedState,
-  setSyncTrackingReady,
-  setupApplicationHeader,
-} from "./components/applicationHeader.js";
-import { initBackupRestore, setupBackupRestore } from "./components/backupRestore.js";
-import { renderClientsDirectory } from "./components/clientsDirectory.js";
-import {
-  focusSessionsColumn,
-  getFocusedSessionDay,
-  getSessionDayDate,
-  initDaySelector,
-  renderSessionsTitleBar,
-  sessionDayTemporal,
-  setFocusedSessionDay,
-  setupSessionsDayNav,
-} from "./components/daySelector.js";
-import {
-  initEditSessionControl,
-  initWorkoutSetup,
-  openEditSessionControlModal,
-  openWorkoutSetupModal,
-  setupEditSessionControl,
-  setupWorkoutSetup,
-} from "./components/editSessionControl.js";
-import { initRestTimer, setupRestTimer } from "./components/exerciseAndRestTimer.js";
-import { renderExerciseDeck } from "./components/exerciseDeck.js";
-import {
-  initFeedbackModal,
-  openFeedbackModal,
-  setupFeedbackForms,
-} from "./components/feedbackModal.js";
-import {
-  initNotificationArea,
-  renderNotificationArea,
-  setupNotificationGestures,
-} from "./components/notificationArea.js";
-import {
-  openAdjustmentWizardComponent,
-  renderPendingPlanAdjustmentsComponent,
-} from "./components/planAdjustments.js";
-import {
-  initSessionBar,
-  renderActiveSessionBarLabels,
-  renderIdleSessionBar,
-  updateSessionBarTimer,
-} from "./components/sessionBar.js";
-import { renderSessionCard } from "./components/sessionCard.js";
-import { renderSessionList } from "./components/sessionList.js";
-import { initSessionTitleBar, renderSessionTitle } from "./components/sessionTitleBar.js";
 import {
   cancelWorkoutSession as cancelWorkoutSessionController,
   focusExerciseByIndex,
@@ -134,20 +79,81 @@ import { TRANSLATIONS } from "./i18n/index.js";
 import {
   renderClientsList as clientsViewRender,
   showClientDetails as clientsViewShowDetails,
-} from "./views/clientsView.js";
-import { renderEditSessionView, renderWorkoutSetupView } from "./views/editSessionView.js";
-import { renderExercisesList as exercisesViewRender } from "./views/exercisesView.js";
-import { renderGlobalHistory as historyViewRender } from "./views/historyView.js";
+} from "./views/clients/clientsView.js";
+import {
+  renderEditSessionView,
+  renderWorkoutSetupView,
+} from "./views/editSession/editSessionView.js";
+import { renderExercisesList as exercisesViewRender } from "./views/exercises/exercisesView.js";
+import { renderGlobalHistory as historyViewRender } from "./views/history/historyView.js";
 import {
   openRoutineEditorModal,
   renderRoutinesList as routinesViewRender,
-} from "./views/routinesView.js";
+} from "./views/routines/routinesView.js";
 import {
   launchClipboardDirectly as sessionsViewLaunchClipboard,
   renderSessions as sessionsViewRender,
   seedDemoActiveSession as sessionsViewSeedDemo,
   setupCalendarBookings as sessionsViewSetupBookings,
-} from "./views/sessionsView.js";
+} from "./views/sessionList/sessionsView.js";
+import { renderExerciseDeck } from "./widgets/clipboard/exerciseDeck.js";
+import {
+  renderActiveUsersList,
+  updateClientTabsFadeState,
+} from "./widgets/common/activeUsersList.js";
+import {
+  incrementLocalSync,
+  initApplicationHeader,
+  renderSyncBadge,
+  resetSyncState,
+  setOfflineCachedState,
+  setSyncTrackingReady,
+  setupApplicationHeader,
+} from "./widgets/common/applicationHeader.js";
+import { initBackupRestore, setupBackupRestore } from "./widgets/common/backupRestore.js";
+import { renderClientsDirectory } from "./widgets/common/clientsDirectory.js";
+import {
+  focusSessionsColumn,
+  getFocusedSessionDay,
+  getSessionDayDate,
+  initDaySelector,
+  renderSessionsTitleBar,
+  sessionDayTemporal,
+  setFocusedSessionDay,
+  setupSessionsDayNav,
+} from "./widgets/common/daySelector.js";
+import {
+  initFeedbackModal,
+  openFeedbackModal,
+  setupFeedbackForms,
+} from "./widgets/common/feedbackModal.js";
+import {
+  initNotificationArea,
+  renderNotificationArea,
+  setupNotificationGestures,
+} from "./widgets/common/notificationArea.js";
+import {
+  openAdjustmentWizardComponent,
+  renderPendingPlanAdjustmentsComponent,
+} from "./widgets/common/planAdjustments.js";
+import {
+  initEditSessionControl,
+  initWorkoutSetup,
+  openEditSessionControlModal,
+  openWorkoutSetupModal,
+  setupEditSessionControl,
+  setupWorkoutSetup,
+} from "./widgets/session/editSessionControl.js";
+import {
+  initSessionBar,
+  renderActiveSessionBarLabels,
+  renderIdleSessionBar,
+  updateSessionBarTimer,
+} from "./widgets/session/sessionBar.js";
+import { renderSessionCard } from "./widgets/session/sessionCard.js";
+import { renderSessionList } from "./widgets/session/sessionList.js";
+import { initSessionTitleBar, renderSessionTitle } from "./widgets/session/sessionTitleBar.js";
+import { initRestTimer, setupRestTimer } from "./widgets/timer/exerciseAndRestTimer.js";
 
 function t(key) {
   const lang = getState().lang || "en";

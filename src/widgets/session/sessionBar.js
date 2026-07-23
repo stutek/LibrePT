@@ -88,7 +88,7 @@ export function renderActiveSessionBarLabels() {
 function getNextUpcomingBookingGroup() {
   const state = deps.getState();
   const { parseTimeRange, getOverlappingBookings } = deps;
-  const bookings = state.bookings || [];
+  const bookings = state.sessions || state.bookings || [];
   const now = new Date();
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
 
