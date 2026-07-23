@@ -166,8 +166,11 @@ export function buildSessionMeta(sessions, day, getSessionDayDate) {
   const dayDate = getSessionDayDate(day);
   const startDate = new Date(dayDate);
   startDate.setMinutes(startDate.getMinutes() + startMin);
-  const endDate = new Date(dayDate);
+  let endDate = new Date(dayDate);
   endDate.setMinutes(endDate.getMinutes() + endMin);
+  if (endDate.getTime() <= Date.now()) {
+    endDate = new Date(Date.now() + 2 * 60 * 60 * 1000);
+  }
 
   return {
     id: sessions.length > 0 ? sessions[0].id : null,
