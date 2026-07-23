@@ -111,8 +111,10 @@ import { renderExercisesList as exercisesViewRender } from "./modules/exercises/
 import { renderGlobalHistory as historyViewRender } from "./modules/history/historyView.js";
 import {
   openAdjustmentWizardComponent,
-  openRoutineEditorModal,
   renderPendingPlanAdjustmentsComponent,
+} from "./modules/plans/planAdjustments.js";
+import {
+  openRoutineEditorModal,
   renderRoutinesList as routinesViewRender,
 } from "./modules/plans/plansView.js";
 import {
@@ -177,11 +179,11 @@ function saveState() {
   saveToLocalStorage(incrementLocalSync);
 }
 
-function init() {
-  window.resetLibrePTData = resetLibrePTData;
-  window.seedMockData = () => seedMockData(incrementLocalSync);
-  window.stateHasData = () => stateHasData(getState());
+window.resetLibrePTData = resetLibrePTData;
+window.seedMockData = () => seedMockData(incrementLocalSync);
+window.stateHasData = () => stateHasData(getState());
 
+function init() {
   initTheme();
   initAppLifecycle({
     basePath: getBasePath(),
