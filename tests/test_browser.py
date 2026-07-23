@@ -191,6 +191,7 @@ def test_interactive_dashboard_flow(page, local_server):
     page.wait_for_selector("#app-menu:not(.hidden)")
     lang_switcher.select_option("en")
     assert page.locator("#menu-routines").inner_text().strip() == "Routines"
+    page.locator("#btn-app-menu").click()
 
     # Verify bookings list cards appear on the dashboard
     page.wait_for_selector(".booking-card")
