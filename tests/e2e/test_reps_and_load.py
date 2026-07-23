@@ -10,7 +10,7 @@ def _load_helpers(page, local_server):
     page.wait_for_timeout(200)
     return page.evaluate(
         """async () => {
-            const m = await import(new URL('./helper/repsAndLoad.js', document.baseURI).href);
+            const m = await import(new URL('./modules/common/repsAndLoad.js', document.baseURI).href);
             return {
               parseReps: [m.parseReps('10'), m.parseReps('8-12'), m.parseReps('max'), m.parseReps('')],
               isFailure: [m.isFailureReps('max'), m.isFailureReps('AMRAP'), m.isFailureReps('10')],

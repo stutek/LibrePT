@@ -11,7 +11,7 @@ CORE_PALETTE_VARS = ("--primary", "--secondary", "--bg-color", "--text-main")
 
 
 def _theme_files(src_dir):
-    return sorted((src_dir / "themes").glob("*.css"))
+    return sorted((src_dir / "modules" / "themes").glob("*.css"))
 
 
 def _defined_vars(path):
