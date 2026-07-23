@@ -49,9 +49,11 @@ LibrePT boots to a clean, empty state by default. To explore the platform pre-lo
 
 ### Resetting to a clean state
 
-LibrePT can be reset back to a first-run clean slate at any time:
+LibrePT can be reset back to a first-run clean slate at any time by clearing stored site data:
 
-- **Browser Site Info Icon (Mobile & Desktop Chrome)** — Click/tap the tune/info icon immediately to the left of the address bar (`https://...` or `localhost`), select **Cookies and site data** (or **Site settings**), then click/tap **Delete / Clear data** (the trash icon or "Clear data" button) and refresh the page.
+- **Mobile Chrome (Android / iOS)** — Tap the tune/lock icon `tune` / `padlock` immediately to the left of the address bar (`https://...` or `localhost`), select **Cookies and site data** (or **Site settings**), tap the trash icon **Delete / Clear data**, and refresh the page. Alternatively, go to Chrome **Settings** → **Site settings** → **Data stored** → find LibrePT → **Clear & reset**.
+- **Mobile Firefox (Android / iOS)** — Tap the lock icon `padlock` to the left of the address bar, select **Clear cookies and site data** (or tap **Clear** next to storage), and confirm. Alternatively, go to Firefox **Settings** → **Delete browsing data** → check **Cookies and site data** → tap **Delete browsing data**.
+- **iOS Safari (iPhone / iPad)** — Open iOS **Settings** → **Safari** → scroll down to **Advanced** → **Website Data** → search for your domain/host → swipe left or tap **Edit** → tap **Delete**. (If saved to Home Screen as a PWA, deleting the Home Screen icon removes all offline data for that standalone PWA).
 - **In-App (Demo Mode Notification)** — When running in demo mode (with sample data), open the bottom **Notification & Status Feed**, locate the **Demo mode** notice card, and click **Clear Demo Data & Exit Demo Mode**.
 - **Browser DevTools** — DevTools → **Application** (Chrome/Edge) or **Storage** (Firefox) → **Local storage** → select the origin → delete the `librept_*` keys, or use **Clear site data**.
 - **DevTools Console** — Execute `window.resetLibrePTData({ demo: false })` in the console.
