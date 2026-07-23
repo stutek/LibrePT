@@ -1,4 +1,4 @@
-name: Deploy demo to GitHub Pages
+name: Build, Verify and Deploy to GitHub Pages
 
 # Publishes ONLY the runtime app (a freshly assembled dist/) to GitHub Pages on every
 # push to main. Publishes only src/, so tests/, use_cases/, build/, deploy/, and the Markdown docs
