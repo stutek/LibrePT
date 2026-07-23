@@ -53,7 +53,7 @@ export const DEFAULT_SESSIONS = (() => {
     },
     {
       id: "s02f2e3d",
-      time: `${formatHour(currentHour)} - ${formatHour(currentHour + 2)}`,
+      time: `${formatHour(currentHour + 1)} - ${formatHour(currentHour + 2)}`,
       title: "1:1 Personal Training",
       location: LOCATIONS.GYM,
       participants: ["c5e5b4a6"],
