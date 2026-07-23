@@ -68,6 +68,7 @@ def test_edit_mode_deeplinks_and_survives_reload(page, local_server):
         "() => document.getElementById('active-session-overlay').classList.contains('editing-plan')"
     ), "overlay should still be in editing-plan mode after reload"
     # ...the URL is still the edit deep link...
+    page.wait_for_url(lambda url: url.endswith("/edit"), timeout=5000)
     assert page.evaluate("() => location.pathname").endswith("/edit")
     # ...and the value typed before the reload is intact.
     values = page.eval_on_selector_all(
