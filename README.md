@@ -10,14 +10,14 @@ tags:
   - google-calendar-sync
 ---
 
-# LibrePT - Personal Trainer Management & Scheduling System
+# LibrePT - Personal Trainer Session Clipboard & Scheduling System
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-10b981.svg)](LICENSE)
 [![PWA](https://img.shields.io/badge/PWA-offline--first-06b6d4.svg)](manifest.json)
 [![Stack](https://img.shields.io/badge/stack-vanilla%20JS%20%7C%20HTML5%20%7C%20CSS-f7df1e.svg)](#-technical-stack)
 [![Tests](https://img.shields.io/badge/tests-pytest%20%2B%20playwright-10b981.svg)](tests/)
 
-LibrePT is a comprehensive, client-centric, and business-enabling software ecosystem designed for personal trainers (PTs) to manage schedules, publish slots, handle client bookings, orchestrate workout sessions, track execution, create and manage asynchronous session scenarios, capture on-the-fly voice notes, and collect granular exercise feedback to enable planning of client progression. 
+LibrePT is a comprehensive, client-centric, and business-enabling software ecosystem designed for personal trainers (PTs) to manage schedules, publish slots, handle client bookings, orchestrate workout sessions, track execution, create and manage asynchronous session scenarios, and collect granular exercise feedback to enable planning of client progression. 
 
 While the **mobile-first, offline PWA Gym Clipboard** is the core real-time tracking interface used on the gym floor, LibrePT is built as an end-to-end system that connects the trainer's scheduling back-office, client calendar invites, and program adjustments into a single unified database.
 
@@ -25,7 +25,19 @@ While the **mobile-first, offline PWA Gym Clipboard** is the core real-time trac
 
 ## 🚦 Quick Start
 
-LibrePT is a dependency-free static PWA — no bundler, no install step, no build required to run it.
+To start using LibrePT immediately without installing anything, open the live hosted Web App directly in your browser:
+
+👉 **[Launch LibrePT Web App](https://stutek.github.io/LibrePT/)**
+
+- **Explore Demo Mode**: To launch the platform pre-loaded with a sample dataset (clients, routines, and multi-set history), open the demo deep-link:  
+  👉 **[Launch LibrePT with Demo Data](https://stutek.github.io/LibrePT/?init=demo_data_load)**
+- **Install as PWA**: Open the link on your phone or desktop browser and select **"Add to Home Screen"** or **"Install App"** to use LibrePT as an offline-first gym floor application.
+
+---
+
+### 💻 Local Execution (Developers Only)
+
+Local execution is intended for developers contributing to or testing the codebase. LibrePT is a dependency-free static PWA — no bundler, no npm install, no build step required to run locally.
 
 ```bash
 git clone https://github.com/stutek/LibrePT.git
@@ -33,15 +45,15 @@ cd LibrePT
 python3 deploy/local_http_server.py     # dev server on http://localhost:8081
 ```
 
-Then open <http://localhost:8081>; it redirects to <http://localhost:8081/LibrePT/>. `deploy/local_http_server.py` deliberately serves `src/` under the **same `/LibrePT/` sub-path GitHub Pages uses** (rewriting `<base>` and adding a deep-link SPA fallback), so local dev exercises the real production base path instead of hiding sub-path bugs behind a domain-root server. The app boots to a **clean, empty slate** — to explore it pre-loaded with the demo dataset, open it with the demo deep-link instead: <http://localhost:8081/LibrePT/?init=demo_data_load>.
+Then open <http://localhost:8081>; it redirects to <http://localhost:8081/LibrePT/>. `deploy/local_http_server.py` deliberately serves `src/` under the **same `/LibrePT/` sub-path GitHub Pages uses** (rewriting `<base>` and adding a deep-link SPA fallback), so local dev exercises the real production base path. To run locally with demo data, open <http://localhost:8081/LibrePT/?init=demo_data_load>.
 
-> **Note**: Serve over HTTP rather than opening `index.html` via `file://` — the app loads ES modules and registers a Service Worker, both of which require an HTTP origin. A plain `python3 -m http.server -d src 8081` also works if you don't need the Pages sub-path, but then deep-link refreshes 404 locally.
+> **Note for Developers**: Serve over HTTP rather than opening `index.html` via `file://` — the app loads ES modules and registers a Service Worker, both of which require an HTTP origin.
 
-**Data & privacy**: all state lives in the browser's `localStorage` under the `librept_db` key, and voice notes never leave the device. Use the header's cloud **Sync & Backup** button (cloud + ↻, with mock ahead/behind change counters) to export/restore the database as JSON.
+**Data & privacy**: all state lives in the browser's `localStorage` under the `librept_db` key. Use the header's cloud **Sync & Backup** button (cloud + ↻, with mock ahead/behind change counters) to export/restore the database as JSON.
 
 ### About Demo Data
 
-LibrePT boots to a clean, empty state by default. To explore the platform pre-loaded with sample clients, routines, and workout sessions, open LibrePT with the demo deep-link: `<http://localhost:8081/LibrePT/?init=demo_data_load>` (or append `?init=demo_data_load` to any URL).
+LibrePT boots to a clean, empty state by default. To explore the platform pre-loaded with sample clients, routines, and workout sessions, open LibrePT with the demo deep-link: [`https://stutek.github.io/LibrePT/?init=demo_data_load`](https://stutek.github.io/LibrePT/?init=demo_data_load) (or append `?init=demo_data_load` to any URL).
 
 - **Sample Dataset**: Includes sample clients, pre-configured routines, and multi-set history.
 - **Safety Guard**: `?init=demo_data_load` only populates a **genuinely empty** app — if any client data is already present, it is ignored so it never overwrites existing records.
@@ -98,7 +110,6 @@ LibrePT is comprised of three major subsystems:
    - **Sub-Second Participant Switching**: Frictionless switches between active participants with as few clicks and scrolls as possible.
    - **Primary Focus Card with Foreshadowing**: Prominently displays the active exercise (directions and target load) while offering a compact preview of the upcoming exercise ("Up Next") for proactive equipment setup.
    - **Low-Interaction Progression & Safety Signals**: One-tap action buttons to record *"Load Up Next Weight"* (progression), *"Step Back Load"* (regression), or *"Pain / Injury Flag"* without typing on a phone keyboard.
-   - **Privacy-First Voice Notes (Local-Only)**: Triggered directly from the feedback UI and auto-mapped to the active exercise. Audio is stored locally on the device for async playback and on-device text conversion to protect client PII.
    - **Reversible Plan Pivot & Placeholder Injection**: Low friction session wipe/pivot with full undo capability. Low friction ability to inject generic placeholder cards when client fatigue or equipment delays force a sudden plan change.
 
 2. **Google Calendar Booking & Sync Integration (Cloud APIs)**
@@ -108,7 +119,7 @@ LibrePT is comprised of three major subsystems:
    - **Active Sync**: The LibrePT app queries the Google Calendar API to fetch session participant guest lists, automatically pre-loading the active clipboard with checked-in clients.
 
 3. **Trainer Program Adjustments Deck (Back-Office)**
-   - The desk-side workspace where feedback alerts and audio notes are reviewed to asynchronously edit client routine templates and plan progressive overload trajectories.
+   - The desk-side workspace where feedback alerts and details are reviewed to asynchronously edit client routine templates and plan progressive overload trajectories.
 
 ---
 
@@ -126,9 +137,8 @@ LibrePT is comprised of three major subsystems:
     *   `[ ⬆ Load Up Next ]`: Client completed cleanly; increase weight next session.
     *   `[ ⬇ Step Back ]`: Client struggled or broke form; reduce load next session.
     *   `[ ⚠️ Pain / Injury ]`: Immediately flag joint pain or acute discomfort on this movement.
-*   **Privacy-First Voice Notes (Local-Only & Auto-Mapped)**: Triggered directly from the feedback UI, voice recordings automatically attach to the current exercise and client. All audio is stored locally on the device and transcribed asynchronously using local, on-device libraries only—preventing PII exposure to cloud transcription services.
 *   **Reversible Plan Pivot & Session Wipe**: Low-friction action to wipe or pivot a client's planned session on the fly when fatigue, injury, or equipment delays occur. Fully undoable (`[ ↩ Undo ]`) and preserved in the audit history for later desk review.
-*   **Generic Placeholder Card Injection**: When a session is wiped or pivoted, the PT can instantly inject low-friction placeholder cards (`[ Mobility & Core Flow ]`, `[ Machine Superset/Giant Set ]`, `[ Freestyle Block ]`) to continue tracking effort without typing new exercises from scratch and using voice notes on the new card too.
+*   **Generic Placeholder Card Injection**: When a session is wiped or pivoted, the PT can instantly inject low-friction placeholder cards (`[ Mobility & Core Flow ]`, `[ Machine Superset/Giant Set ]`, `[ Freestyle Block ]`) to continue tracking effort without typing new exercises from scratch.
 *   **Asynchronous Session Scenarios**: Guide multiple participants through separate, distinct individual routines in the same session slot.
 
 ### 2. Google Calendar Appointment Booking & Integration
@@ -139,7 +149,7 @@ LibrePT is comprised of three major subsystems:
 
 ### 3. Closed-Loop Plan Feedback & Client Progression
 *   **Granular Signal Processing**: Signals recorded on the gym floor (`Load Up`, `Step Back`, `Pain/Injury`) flow directly into the trainer's back-office review queue.
-*   **Pending Program Adjustments Deck**: Feedback and voice notes compile into a desk workspace for the PT to review, allowing them to asynchronously plan client progression and update routine templates before the next session.
+*   **Pending Program Adjustments Deck**: Feedback and session notes compile into a desk workspace for the PT to review, allowing them to asynchronously plan client progression and update routine templates before the next session.
 
 ### 4. Professional Movement Taxonomy & Fast Selection
 *   **Taxonomy catalog, not an encyclopedia**: exercises carry an immutable ID plus an **equipment** tag and a **biomechanical movement pattern**; the catalog view shows these as compact taxonomy badges instead of beginner instructions, keeping long-term volume/1RM analytics consistent.
@@ -225,6 +235,8 @@ This repository follows Google's **Open Knowledge Format (OKF v0.1)**: every Mar
 ## 🤝 Contributing
 
 Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) for the development setup, testing expectations, and documentation standards before opening a pull request.
+
+Questions or problems? Open an issue on the [LibrePT](https://github.com/stutek/LibrePT) repository.
 
 Because LibrePT is used one-handed on a gym floor, changes are evaluated against real-world training friction: offline basement gyms, sweaty hands, sub-second participant switches, and sudden equipment pivots. Keep interactions low-tap and keyboard-free.
 

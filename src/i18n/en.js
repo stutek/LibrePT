@@ -211,6 +211,7 @@ export const en = {
   menu_coming_soon: "Cloud storage isn't available yet — coming soon.",
   menu_export_data: "Export data as a file",
   menu_github: "GitHub project",
+  menu_bug_report: "Bug Reporting",
   menu_about: "About",
   menu_terms: "Terms & disclaimer",
   menu_privacy: "Privacy & GDPR Statement",

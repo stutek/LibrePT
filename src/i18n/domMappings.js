@@ -20,6 +20,7 @@ export function applyStaticDOMMappings(tDict) {
     "#menu-connect-cloud": "menu_connect_cloud",
     "#menu-export-data": "menu_export_data",
     "#menu-github": "menu_github",
+    "#menu-bug-report": "menu_bug_report",
     "#menu-about": "menu_about",
     "#menu-terms": "menu_terms",
     "#menu-privacy": "menu_privacy",

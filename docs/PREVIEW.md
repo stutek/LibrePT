@@ -43,4 +43,6 @@ Your data lives **only in this browser**, on this device (`localStorage`). That 
 
 ---
 
-Questions or problems? Open an issue on the project repository. Including the small **build stamp** shown next to the logo (the commit hash) helps pin your report to an exact build.
+## 🐛 Bug Reporting
+
+Questions or problems? Read our [Bug Reporting Guide](BUG_REPORTING.md) for instructions on how to capture details, and open an issue on the [LibrePT](https://github.com/stutek/LibrePT/issues) repository. Including the small **build stamp** shown next to the logo (the commit hash) helps pin your report to an exact build.

@@ -14,5 +14,6 @@ tags:
 | Document / Template | Type | Description |
 | :--- | :--- | :--- |
 | [PREVIEW.md](PREVIEW.md) | `guidelines` | Pre-release PREVIEW build risks & data-loss notice (linked from the header PREVIEW tag) |
+| [BUG_REPORTING.md](BUG_REPORTING.md) | `guidelines` | Bug Reporting Guide — how to submit issues, include build stamps, and steps to reproduce |
 | [PRIVACY.md](../PRIVACY.md) | `guidelines` | Core Privacy Policy & GDPR Data Controller Statement |
 | [templates/Client_Consent_Form.md](templates/Client_Consent_Form.md) | `template` | Downloadable/Printable Informative Client Consent Letter |

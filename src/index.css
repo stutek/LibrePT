@@ -16,6 +16,7 @@
   --font-mono: "JetBrains Mono", monospace;
 
   /* Layout tokens (shared across themes) */
+  --app-max-width: 480px;
   --hdr-height: 64px;
   --nav-height: 70px;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -248,7 +249,7 @@ h6 {
   z-index: 125;
 }
 .header-nav {
-  max-width: 800px;
+  max-width: var(--app-max-width, 480px);
   margin: 0 auto;
   padding: 4px 16px 10px 16px;
   display: flex;
@@ -299,7 +300,7 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav {
   filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.3));
 }
 .header-container {
-  max-width: 800px;
+  max-width: var(--app-max-width, 480px);
   margin: 0 auto;
   padding: 0 16px;
   height: var(--hdr-height);
@@ -492,7 +493,7 @@ select.menu-select {
 #main-content {
   flex: 1;
   overflow-y: auto;
-  max-width: 800px;
+  max-width: var(--app-max-width, 480px);
   width: 100%;
   margin: 0 auto;
   /* No top padding: each view opens with a flat title bar that sits flush under the app header
@@ -1293,6 +1294,8 @@ select.menu-select {
   bottom: 0;
   left: 0;
   right: 0;
+  max-width: var(--app-max-width, 480px);
+  margin: 0 auto;
   background: var(--card-bg);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
@@ -1695,11 +1698,11 @@ body:has(#active-session-overlay:not(.hidden))
 /* Fullscreen Active Workout Overlay Sheet */
 .active-session-overlay {
   position: fixed;
-  /* Start below the omnipresent app header so it stays visible in the session view too,
-     rather than being covered by a full-screen overlay. */
   top: var(--hdr-height);
   left: 0;
   right: 0;
+  max-width: var(--app-max-width, 480px);
+  margin: 0 auto;
   /* Height tracks the *visual* viewport (dvh), not the layout viewport. With `bottom: 0`
      the overlay sized to the layout viewport, so on mobile the footer and the last exercise
      card sat behind the browser's URL bar — unreachable once an expanded card made the deck
@@ -2627,7 +2630,7 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   backdrop-filter: blur(8px);
 }
 .wide-modal {
-  max-width: 600px;
+  max-width: var(--app-max-width, 480px);
 }
 .modal-header {
   margin-bottom: 16px;

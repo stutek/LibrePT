@@ -290,8 +290,9 @@ function setupAppMenu() {
     const b = document.getElementById("backup-btn");
     if (b) b.click();
   });
-  // GitHub project and Privacy statement are real <a target="_blank">; just dismiss the menu.
+  // GitHub project, Bug reporting, and Privacy statement are real <a target="_blank">; just dismiss the menu.
   on("menu-github", () => closeMenu());
+  on("menu-bug-report", () => closeMenu());
   on("menu-privacy", () => closeMenu());
   // About / Terms open their modals.
   on("menu-about", () => {

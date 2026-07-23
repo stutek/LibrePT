@@ -211,6 +211,7 @@ export const sl = {
   menu_coming_soon: "Shramba v oblaku še ni na voljo — kmalu.",
   menu_export_data: "Izvozi podatke v datoteko",
   menu_github: "Projekt na GitHubu",
+  menu_bug_report: "Poročanje o napakah",
   menu_about: "O aplikaciji",
   menu_terms: "Pogoji in izjava o odgovornosti",
   menu_privacy: "Izjava o zasebnosti in GDPR",
