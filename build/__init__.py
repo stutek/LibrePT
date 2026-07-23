@@ -195,45 +195,43 @@ def ensure_biome_binary():
             return None
 
 
-def run_lint():
-    """Runs Python static analysis (Ruff) and frontend static analysis (Biome)."""
-    print("\n>>> Step 1.5: Running Static Code Analysis...")
-
+def run_python_lint():
+    """Runs Python static analysis (Ruff lint and format check)."""
+    print("\n  Running Python Lint & Format (Ruff)...")
     if os.name == "nt":
         ruff_path = os.path.join(".venv", "Scripts", "ruff.exe")
     else:
         ruff_path = os.path.join(".venv", "bin", "ruff")
 
     if not os.path.exists(ruff_path):
-        print(
-            "  ✗ Ruff linter not found in virtual environment. Run check_environment first."
-        )
+        print("  ✗ Ruff linter not found in virtual environment.")
         sys.exit(1)
 
-    print("  Running Ruff (Python linter & formatter)...")
-    print("    - Checking code lint rules...")
     lint_res = subprocess.run([ruff_path, "check", "build/", "deploy/", "tests/"])
-    print("    - Checking code formatting...")
     fmt_res = subprocess.run(
         [ruff_path, "format", "--check", "build/", "deploy/", "tests/"]
     )
-
     if lint_res.returncode != 0 or fmt_res.returncode != 0:
         print("  ✗ Python static analysis failed.")
         sys.exit(1)
-    print("  ✓ Python static analysis passed.")
+    print("  ✓ Python static analysis (Ruff) passed.")
 
+
+def run_frontend_lint():
+    """Runs JS/CSS/JSON static analysis (Biome)."""
+    print("\n  Running Frontend Lint & Format (Biome)...")
     biome_path = ensure_biome_binary()
     if biome_path:
-        print("  Running Biome (JS/CSS/JSON linter & formatter)...")
         biome_res = subprocess.run([biome_path, "check", "src/"])
         if biome_res.returncode != 0:
             print("  ✗ Frontend static analysis failed.")
             sys.exit(1)
-        print("  ✓ Frontend static analysis passed.")
+        print("  ✓ Frontend static analysis (Biome) passed.")
 
-    # 3. Dependency Security Audit
-    print("  Running Security Vulnerability Audit (pip-audit)...")
+
+def run_security_audit():
+    """Runs Dependency Security Vulnerability Audit (pip-audit)."""
+    print("\n  Running Dependency Security Audit (pip-audit)...")
     if os.name == "nt":
         audit_path = os.path.join(".venv", "Scripts", "pip-audit.exe")
     else:
@@ -247,33 +245,149 @@ def run_lint():
         print("  ✓ Security vulnerability audit passed.")
 
 
-def run_tests():
-    """Runs the test suite via the venv Python so pytest-xdist (-n) is always available.
-
-    Shells out to `<venv>/python -m pytest` rather than calling pytest.main() directly, which
-    would use whichever pytest was imported — potentially the system one that lacks xdist.
-    """
-    print("\n>>> Step 2: Running Automated Test Suite (parallel)...")
-
-    if os.name == "nt":
-        venv_python = os.path.join(".venv", "Scripts", "python.exe")
-    else:
-        venv_python = os.path.join(".venv", "bin", "python")
-
-    if not os.path.exists(venv_python):
-        print(
-            f"  ✗ Venv Python not found at {venv_python}. Run check_environment first."
-        )
-        sys.exit(1)
-
-    result = subprocess.run(
-        [venv_python, "-m", "pytest", "-n", "auto", "--dist=loadfile", "-v", "tests/"]
+def run_unit_tests():
+    """Runs fast unit tests (tests/unit/ and tests/test_app.py)."""
+    print("\n  Running Unit Tests...")
+    venv_python = (
+        os.path.join(".venv", "Scripts", "python.exe")
+        if os.name == "nt"
+        else os.path.join(".venv", "bin", "python")
     )
-
+    result = subprocess.run(
+        [venv_python, "-m", "pytest", "-v", "tests/unit/", "tests/test_app.py"]
+    )
     if result.returncode != 0:
-        print(f"\n  ✗ Test suite failed with exit code: {result.returncode}")
+        print(f"  ✗ Unit tests failed with exit code: {result.returncode}")
         sys.exit(result.returncode)
-    print("  ✓ All tests passed successfully!")
+    print("  ✓ Unit tests passed successfully!")
+
+
+def run_e2e_tests():
+    """Runs Playwright browser E2E tests in parallel (tests/e2e/ and tests/test_browser.py)."""
+    print("\n  Running E2E Browser Tests (parallel)...")
+    venv_python = (
+        os.path.join(".venv", "Scripts", "python.exe")
+        if os.name == "nt"
+        else os.path.join(".venv", "bin", "python")
+    )
+    result = subprocess.run(
+        [
+            venv_python,
+            "-m",
+            "pytest",
+            "-n",
+            "auto",
+            "--dist=loadfile",
+            "-v",
+            "tests/e2e/",
+            "tests/test_browser.py",
+        ]
+    )
+    if result.returncode != 0:
+        print(f"  ✗ E2E browser tests failed with exit code: {result.returncode}")
+        sys.exit(result.returncode)
+    print("  ✓ E2E browser tests passed successfully!")
+
+
+def run_dynamic_security_checks():
+    """Runs dynamic security checks (CSP, HTTP security headers, and permission policies)."""
+    print("\n  Running Dynamic Security Checks...")
+    index_path = os.path.join("src", "index.html")
+    if not os.path.exists(index_path):
+        print(f"  ✗ {index_path} not found for security check.")
+        sys.exit(1)
+    with open(index_path, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    required_headers = [
+        'http-equiv="Content-Security-Policy"',
+        'http-equiv="X-Content-Type-Options"',
+        'http-equiv="Referrer-Policy"',
+    ]
+    missing = [h for h in required_headers if h not in content]
+    if missing:
+        print(f"  ✗ Dynamic security check failed. Missing headers: {missing}")
+        sys.exit(1)
+    print("  ✓ Dynamic security checks passed.")
+
+
+def run_stage_1_parallel():
+    """Stage 1: Runs Python Lint, Frontend Lint, Dependency Scan, and Unit Tests concurrently."""
+    import concurrent.futures
+
+    print(
+        "\n=== Stage 1: Linting, Security Scans & Unit Tests (Parallel Execution) ==="
+    )
+    tasks = {
+        "Python Lint (Ruff)": run_python_lint,
+        "Frontend Lint (Biome)": run_frontend_lint,
+        "Dependency Security Scan (pip-audit)": run_security_audit,
+        "Unit Tests": run_unit_tests,
+    }
+
+    failures = []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=len(tasks)) as executor:
+        future_to_name = {executor.submit(task): name for name, task in tasks.items()}
+        for future in concurrent.futures.as_completed(future_to_name):
+            name = future_to_name[future]
+            try:
+                future.result()
+            except SystemExit as e:
+                if e.code != 0:
+                    failures.append(name)
+            except Exception as e:
+                print(f"  ✗ Task '{name}' raised exception: {e}")
+                failures.append(name)
+
+    if failures:
+        print(f"\n  ✗ Stage 1 failed in tasks: {', '.join(failures)}")
+        sys.exit(1)
+    print("\n  ✓ Stage 1 completed cleanly!")
+
+
+def run_stage_2_parallel():
+    """Stage 2: Runs E2E Browser Tests and Dynamic Security Checks concurrently."""
+    import concurrent.futures
+
+    print(
+        "\n=== Stage 2: E2E Browser Tests & Dynamic Security Checks (Parallel Execution) ==="
+    )
+    tasks = {
+        "E2E Browser Tests": run_e2e_tests,
+        "Dynamic Security Checks": run_dynamic_security_checks,
+    }
+
+    failures = []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=len(tasks)) as executor:
+        future_to_name = {executor.submit(task): name for name, task in tasks.items()}
+        for future in concurrent.futures.as_completed(future_to_name):
+            name = future_to_name[future]
+            try:
+                future.result()
+            except SystemExit as e:
+                if e.code != 0:
+                    failures.append(name)
+            except Exception as e:
+                print(f"  ✗ Task '{name}' raised exception: {e}")
+                failures.append(name)
+
+    if failures:
+        print(f"\n  ✗ Stage 2 failed in tasks: {', '.join(failures)}")
+        sys.exit(1)
+    print("\n  ✓ Stage 2 completed cleanly!")
+
+
+def run_lint():
+    """Backwards-compatible wrapper for linting & scans."""
+    run_python_lint()
+    run_frontend_lint()
+    run_security_audit()
+
+
+def run_tests():
+    """Backwards-compatible wrapper for running all tests."""
+    run_unit_tests()
+    run_e2e_tests()
 
 
 def run_build():

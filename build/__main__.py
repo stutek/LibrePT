@@ -3,7 +3,14 @@
 """
 
 import sys
-from . import check_environment, run_lint, run_tests, run_build
+from . import (
+    check_environment,
+    run_lint,
+    run_tests,
+    run_stage_1_parallel,
+    run_stage_2_parallel,
+    run_build,
+)
 
 if __name__ == "__main__":
     check_environment()
@@ -16,11 +23,11 @@ if __name__ == "__main__":
         run_tests()
         print("\n  ✓ Test suite passed.")
     elif arg == "check":
-        run_lint()
-        run_tests()
-        print("\n  ✓ Check finished (linting and tests passed).")
+        run_stage_1_parallel()
+        run_stage_2_parallel()
+        print("\n  ✓ Check finished (staged parallel validation passed).")
     else:
-        run_lint()
-        run_tests()
+        run_stage_1_parallel()
+        run_stage_2_parallel()
         run_build()
         print("\n  ✓ Build finished (dist/ is ready to deploy).")

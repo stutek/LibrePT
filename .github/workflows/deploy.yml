@@ -24,77 +24,108 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lint:
-    name: Lint & Security Analysis
+  python-lint:
+    name: Python Lint & Format (Ruff)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: 'pip'
-
-      - name: Cache Virtual Environment & Biome
-        id: cache-venv
-        uses: actions/cache@v4
-        with:
-          path: .venv
-          key: ${{ runner.os }}-venv-${{ hashFiles('requirements.txt') }}-biome-v1.9.4
-
       - name: Install Dependencies
-        if: steps.cache-venv.outputs.cache-hit != 'true'
         run: |
           python -m venv .venv
           .venv/bin/pip install --upgrade pip
           .venv/bin/pip install -r requirements.txt
+      - name: Run Ruff
+        run: .venv/bin/python -c "from build import run_python_lint; run_python_lint()"
 
-      - name: Run Static Code Analysis & Linting
-        env:
-          CI: "true"
-        run: |
-          .venv/bin/python -m build lint
-
-  test:
-    name: Automated E2E & Unit Test Suite
+  frontend-lint:
+    name: Frontend Lint & Format (Biome)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: 'pip'
-
-      - name: Cache Virtual Environment & Biome
-        id: cache-venv
-        uses: actions/cache@v4
-        with:
-          path: .venv
-          key: ${{ runner.os }}-venv-${{ hashFiles('requirements.txt') }}-biome-v1.9.4
-
       - name: Install Dependencies
-        if: steps.cache-venv.outputs.cache-hit != 'true'
         run: |
           python -m venv .venv
           .venv/bin/pip install --upgrade pip
           .venv/bin/pip install -r requirements.txt
+      - name: Run Biome
+        run: .venv/bin/python -c "from build import run_frontend_lint; run_frontend_lint()"
 
-      - name: Install Playwright Browsers & OS Dependencies
+  dependency-scan:
+    name: Dependency Security Scan (pip-audit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - name: Install Dependencies
         run: |
+          python -m venv .venv
+          .venv/bin/pip install --upgrade pip
+          .venv/bin/pip install -r requirements.txt
+      - name: Run pip-audit
+        run: .venv/bin/python -c "from build import run_security_audit; run_security_audit()"
+
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - name: Install Dependencies
+        run: |
+          python -m venv .venv
+          .venv/bin/pip install --upgrade pip
+          .venv/bin/pip install -r requirements.txt
+      - name: Run Unit Tests
+        run: .venv/bin/python -c "from build import run_unit_tests; run_unit_tests()"
+
+  e2e-tests:
+    name: E2E Browser Tests
+    needs: [python-lint, frontend-lint, dependency-scan, unit-tests]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - name: Install Dependencies & Browsers
+        run: |
+          python -m venv .venv
+          .venv/bin/pip install --upgrade pip
+          .venv/bin/pip install -r requirements.txt
           .venv/bin/playwright install chromium --with-deps
+      - name: Run E2E Tests
+        run: .venv/bin/python -c "from build import run_e2e_tests; run_e2e_tests()"
 
-      - name: Run Test Suite
-        env:
-          CI: "true"
-        run: |
-          .venv/bin/python -m build test
+  dynamic-security-checks:
+    name: Dynamic Security Checks
+    needs: [python-lint, frontend-lint, dependency-scan, unit-tests]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run Dynamic Security Checks
+        run: python -c "from build import run_dynamic_security_checks; run_dynamic_security_checks()"
 
   build:
     name: Assemble & Bundle App
-    needs: [lint, test]
+    needs: [e2e-tests, dynamic-security-checks]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
