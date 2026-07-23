@@ -209,6 +209,9 @@ body {
   height: 100vh;
   display: flex;
   flex-direction: column;
+  /* Constrain the entire app to phone width on desktop so the layout matches mobile exactly. */
+  max-width: var(--app-max-width, 480px);
+  margin: 0 auto;
 } /* All headings use the geometric display face with tight tracking for a clear hierarchy. */
 h1,
 h2,
@@ -340,7 +343,7 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav {
   align-items: center;
   gap: 4px;
   align-self: center;
-  margin: -4px auto 0;
+  margin: -8px auto 0;
   padding: 2px 9px;
   border-radius: 999px;
   background: #f59e0b;
