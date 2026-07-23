@@ -1,17 +1,16 @@
-// src/views/sessionsView.js - Domain module for sessions dashboard, calendar sync, and clipboard launching
 import { DEFAULT_SESSIONS } from "../../data/index.js";
-import { loadUnitForEquipment } from "../../helper/repsAndLoad.js";
-import { buildBookingMeta, escapeHTML, getOverlappingBookings } from "../../helper/utils.js";
-import { isOfflineCachedActive, resetSyncState } from "../../widgets/common/applicationHeader.js";
+import { isOfflineCachedActive, resetSyncState } from "../common/applicationHeader.js";
+import { loadUnitForEquipment } from "../common/repsAndLoad.js";
+import { buildBookingMeta, escapeHTML, getOverlappingBookings } from "../common/utils.js";
 import {
   focusSessionsColumn,
   getFocusedSessionDay,
   getSessionDayDate,
   renderSessionsTitleBar,
   sessionDayTemporal,
-} from "../../widgets/common/daySelector.js";
-import { renderIdleSessionBar, updateSessionBarTimer } from "../../widgets/session/sessionBar.js";
-import { renderSessionList } from "../../widgets/session/sessionList.js";
+} from "./daySelector.js";
+import { renderIdleSessionBar, updateSessionBarTimer } from "./sessionBar.js";
+import { renderSessionList } from "./sessionList.js";
 
 export function seedDemoActiveSession({ state }) {
   const sessions = state.sessions || state.bookings || [];

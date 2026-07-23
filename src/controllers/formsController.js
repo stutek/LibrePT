@@ -1,14 +1,14 @@
-import { $id, closeModal, openModal } from "../helper/dom.js";
-import { parseLoad, parseReps } from "../helper/repsAndLoad.js";
-import { generateShortUUID, getInitials } from "../helper/utils.js";
 import {
   getActiveDetailClientId,
   renderClientsList,
   showClientDetails,
-} from "../views/clients/clientsView.js";
-import { renderExercisesList } from "../views/exercises/exercisesView.js";
-import { addRoutineExerciseRow, renderRoutinesList } from "../views/routines/routinesView.js";
-import { mountExercisePicker } from "../widgets/common/exercisePicker.js";
+} from "../modules/clients/clientsView.js";
+import { $id, closeModal, openModal } from "../modules/common/dom.js";
+import { parseLoad, parseReps } from "../modules/common/repsAndLoad.js";
+import { generateShortUUID, getInitials } from "../modules/common/utils.js";
+import { mountExercisePicker } from "../modules/exercises/exercisePicker.js";
+import { renderExercisesList } from "../modules/exercises/exercisesView.js";
+import { addRoutineExerciseRow, renderRoutinesList } from "../modules/plans/plansView.js";
 
 export function setupClientForms({
   state,

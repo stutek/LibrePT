@@ -1,7 +1,7 @@
 // components/planAdjustments.js
 // Logic for displaying the pending plan adjustments widget on the dashboard,
 // as well as launching and submitting the interactive Apply Plan Adjustment Dialog wizard.
-import { mountExercisePicker } from "./exercisePicker.js";
+import { mountExercisePicker } from "../exercises/exercisePicker.js";
 
 /**
  * Renders the pending plan adjustments alert cards.

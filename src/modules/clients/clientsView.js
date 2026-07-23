@@ -4,10 +4,9 @@ import {
   getClientDisplayNameHTML,
   getInitials,
   truncateString,
-} from "../../helper/utils.js";
-// src/views/clientsView.js - Domain module for client directory and detail views
-import { renderClientsDirectory } from "../../widgets/common/clientsDirectory.js";
+} from "../common/utils.js";
 import { renderHistoryItems } from "../history/historyView.js";
+import { renderClientsDirectory } from "./clientsDirectory.js";
 
 let activeDetailClientId = null;
 

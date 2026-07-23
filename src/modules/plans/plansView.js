@@ -4,8 +4,8 @@ import {
   formatReps,
   loadInputHTML,
   loadUnitForEquipment,
-} from "../../helper/repsAndLoad.js";
-import { escapeHTML } from "../../helper/utils.js";
+} from "../common/repsAndLoad.js";
+import { escapeHTML } from "../common/utils.js";
 
 export function renderRoutinesList({ state, t, openWorkoutSetupModal }) {
   const container = document.getElementById("routines-list");

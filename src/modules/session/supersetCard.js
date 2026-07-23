@@ -13,7 +13,7 @@
 //   completeSupersetRound(circuitId), onFocus(firstExerciseIndex)
 // }
 
-import { formatLoad, hasLoad, isFailureReps } from "../../helper/repsAndLoad.js";
+import { formatLoad, hasLoad, isFailureReps } from "../common/repsAndLoad.js";
 
 export function renderSupersetCard(card, item, ctx) {
   const {

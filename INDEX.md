@@ -34,49 +34,49 @@ This index provides AI agents and contributors with a structured navigation map 
 | [uc4_client_self_subscription.md](use_cases/uc4_client_self_subscription.md) | `use_case` | Client | Self-service slot booking via Google-hosted scheduling pages and automated calendar invites. |
 | [uc5_session_day_deck_and_deep_links.md](use_cases/uc5_session_day_deck_and_deep_links.md) | `use_case` | Personal Trainer | Dashboard day-deck navigation (yesterday→upcoming, swipes, single-column), clean deep-linkable URLs down to the in-focus clipboard card, and the in-app not-found view — with spec↔test traceability. |
 
-## 3. Source Modules & UI Components (`src/`)
+3. Source Modules & UI Components (`src/modules/`)
 
 The runtime app lives under `src/` (served as the web root locally and flattened into `dist/`
 on deploy). It's a native ES-module app (`<script type="module" src="app.js">`). `src/app.js`
-is being incrementally split into focused modules — seed data under `src/data/` and UI
-components under `src/components/` — so each concern can be found and edited without loading the
-whole file. Components are decoupled via dependency injection: `app.js` passes the app-level
-helpers they need (`state`, `t`, `escapeHTML`, …).
+is structured into feature modules under `src/modules/` (`session`, `plans`, `clients`, `exercises`, `history`, `common`, `themes`) and data under `src/data/`.
 
 | Module | Type | Description |
 | :--- | :--- | :--- |
 | [src/app.js](src/app.js) | `entry` | Application bootstrapper: root initialization, dependency injection wiring, and global lifecycle hooks. |
 | [src/data/stateStore.js](src/data/stateStore.js) | `data` | Central app state management: state object, localStorage persistence, seed data loading, and reset triggers. |
-| [src/data/index.js](src/data/index.js) | `data` | Barrel for the seed/demo data, split per entity: `exercises.js`, `clients.js`, `routines.js`, `history.js`, `planUpdates.js`, `sessions.js`. Entities reference each other by string id only. |
-| [src/i18n/index.js](src/i18n/index.js) | `i18n` | Translation registry: one flat key→string map per locale (`en.js`, `sl.js`). Adding a language is a new file listed here; key parity across locales is enforced by `tests/unit/test_i18n_parity.py`. |
-| [src/widgets/session/sessionCard.js](src/widgets/session/sessionCard.js) | `component` | Dashboard session-booking card (time, participants, program, readiness warnings, temporal tint, live-session emphasis) that launches the clipboard on tap. |
-| [src/widgets/common/clientsDirectory.js](src/widgets/common/clientsDirectory.js) | `component` | Client Directory grid (its own view/route, `/clients` — TODO 4.8): one tappable client card per client (avatar, name, truncated goal), filtered by the search query, with an empty state. |
-| [src/widgets/clipboard/exerciseCard.js](src/widgets/clipboard/exerciseCard.js) | `component` | Standalone (non-superset) exercise card in the clipboard deck: the in-focus logging card (target stats + Too Easy / Too Hard / Feedback) and its compact tap-to-focus row. |
-| [src/widgets/clipboard/supersetCard.js](src/widgets/clipboard/supersetCard.js) | `component` | Superset / Giant Set card: a grouped block of exercises with a round counter, per-exercise feedback trio, rest breaks, and a Complete-round button that advances/finishes the superset. |
-| [src/widgets/clipboard/exerciseDeck.js](src/widgets/clipboard/exerciseDeck.js) | `component` | Active-session exercise stack: builds the deck items (most-recent past session as tappable history cards + current routine folded into superset units and standalone cards), wires their callbacks, and scrolls the acted-on card into view. Delegates card render to `supersetCard`/`exerciseCard`. |
-| [src/widgets/session/sessionBar.js](src/widgets/session/sessionBar.js) | `component` | Bottom active/next-session bar: live-session labels + scheduled-end countdown, and the idle "next session" state with a starts-in countdown. |
-| [src/widgets/session/sessionList.js](src/widgets/session/sessionList.js) | `component` | Renders a column of session cards into a container (delegating each to `sessionCard`), or an empty-state message when a day has no sessions. |
-| [src/widgets/common/daySelector.js](src/widgets/common/daySelector.js) | `component` | Dashboard day-deck navigation: the day-selection title bar, prev/next arrows, and horizontal focus/scroll across the Yesterday→Upcoming session columns. |
-| [src/widgets/session/sessionTitleBar.js](src/widgets/session/sessionTitleBar.js) | `component` | Active-session overlay title line: scheduled date, start time and gym location, plus the live countdown. |
-| [src/widgets/common/activeUsersList.js](src/widgets/common/activeUsersList.js) | `component` | Active-session participant tabs: the client selector buttons (with selected-tab emphasis) and their scroll-fade state. |
-| [src/widgets/common/applicationHeader.js](src/widgets/common/applicationHeader.js) | `component` | Shared top header actions: theme + language switchers, logo-home clicks, and the Sync & Backup control with its mock ahead/behind change badge. |
-| [src/widgets/common/planAdjustments.js](src/widgets/common/planAdjustments.js) | `component` | Pending Plan Adjustments deck (its own view/route, `/adjustments` — TODO 4.8), plus the interactive Apply-Adjustment wizard dialog (feedback → routine template update). |
-| [src/widgets/session/editSessionControl.js](src/widgets/session/editSessionControl.js) | `component` | Pre-session edit/setup control modal dialog: configures session metadata, selects clients with combobox autocompletes, and maps routine program templates. |
-| [src/views/editSession/editSessionView.js](src/views/editSession/editSessionView.js) | `view` | Modular view renderer for Edit Session & Workout Session Setup view (`#view-workout-setup`). |
-| [src/views/clients/clientsView.js](src/views/clients/clientsView.js) | `view` | Modular view renderer for Client Directory and client profile view (`#view-clients`). |
-| [src/views/sessionList/sessionsView.js](src/views/sessionList/sessionsView.js) | `view` | Modular view renderer for main Sessions dashboard and day columns view (`#view-sessions`). |
-| [src/views/routines/routinesView.js](src/views/routines/routinesView.js) | `view` | Modular view renderer for Routines catalog and builder view (`#view-routines`). |
-| [src/views/exercises/exercisesView.js](src/views/exercises/exercisesView.js) | `view` | Modular view renderer for Exercise taxonomy catalog view (`#view-exercises`). |
-| [src/views/history/historyView.js](src/views/history/historyView.js) | `view` | Modular view renderer for workout history logs view (`#view-history`). |
-| [src/widgets/common/feedbackModal.js](src/widgets/common/feedbackModal.js) | `component` | Feedback tags modal dialog: tags sets outcomes (Too Easy/Too Hard/Pain) and handles local voice note recorder transcriptions. |
-| [src/widgets/common/backupRestore.js](src/widgets/common/backupRestore.js) | `component` | Backup center dialog handlers: database JSON export, backup JSON file import, and factory reset action logic. |
-| [src/widgets/timer/exerciseAndRestTimer.js](src/widgets/timer/exerciseAndRestTimer.js) | `component` | The clipboard timer stack: one labelled countdown per client (client name + Rest/Exercise), counting into negative overtime, dismiss-only, persisted across reloads. Start guards an existing timer (warn-flash if still running, ack-blink + reset if overtime). |
-| [src/widgets/common/exercisePicker.js](src/widgets/common/exercisePicker.js) | `component` | Reusable, low-friction exercise picker: muscle-group + equipment filter chips over a single-tap movement list. Powers the routine builder (Scenario A) and gym-floor swap (Scenario B) fast-selection flows (UC6 / TODO §13.2). |
-| [src/controllers/routerController.js](src/controllers/routerController.js) | `controller` | SPA route mapping and navigation logic: parses URL paths (`/sessions/YYYY-MM-DD`, `/session/ID/client/ID`), handles view transitions (`switchView`), and manages deep-link error fallbacks (`showErrorView`). |
-| [src/controllers/themeController.js](src/controllers/themeController.js) | `controller` | Unified theme manager: theme resolution, theme CSS class mapping, meta theme-color updating, and theme switcher UI sync. |
-| [src/controllers/appLifecycleController.js](src/controllers/appLifecycleController.js) | `controller` | PWA runtime lifecycle: phone viewport resizing, orientation locking, build stamp rendering, service worker registration, and connectivity monitoring. |
-| [src/index.css](src/index.css) | `styles` | Single entrypoint master design system and layout stylesheet: design tokens, base typography, layout components, modals, responsive grids, and view styles. |
-| [src/helper/repsAndLoad.js](src/helper/repsAndLoad.js) | `helper` | Polymorphic reps (count / range / time / `max`-to-failure) and equipment-derived load (kg / cable level / band / bodyweight): parse, format, and the shared load-input markup used by every authoring surface. |
-| [src/helper/sessionCache.js](src/helper/sessionCache.js) | `helper` | Handles JSON serialization and recovery of active session state in `localStorage`. |
-| [src/helper/utils.js](src/helper/utils.js) | `helper` | Stateless formatting, date conversion, time range overlap detection, and general string helper functions. |
-| [src/helper/wakeLock.js](src/helper/wakeLock.js) | `helper` | Screen Wake Lock API management helper to prevent mobile screen dimming during active workout sessions. |
+| [src/data/index.js](src/data/index.js) | `data` | Barrel for seed/demo data: `exercises.js`, `clients.js`, `routines.js`, `history.js`, `planUpdates.js`, `sessions.js`. |
+| [src/i18n/index.js](src/i18n/index.js) | `i18n` | Translation registry: one flat key→string map per locale (`en.js`, `sl.js`). Key parity enforced by unit tests. |
+| [src/modules/session/sessionCard.js](src/modules/session/sessionCard.js) | `component` | Dashboard session-booking card that launches the clipboard on tap. |
+| [src/modules/session/sessionList.js](src/modules/session/sessionList.js) | `component` | Renders a column of session cards into a container. |
+| [src/modules/session/sessionBar.js](src/modules/session/sessionBar.js) | `component` | Bottom active/next-session bar with countdowns. |
+| [src/modules/session/sessionTitleBar.js](src/modules/session/sessionTitleBar.js) | `component` | Active-session overlay title line and countdown. |
+| [src/modules/session/daySelector.js](src/modules/session/daySelector.js) | `component` | Dashboard day-deck navigation and focus/scroll handlers. |
+| [src/modules/session/sessionsView.js](src/modules/session/sessionsView.js) | `view` | Modular view renderer for Sessions dashboard. |
+| [src/modules/session/editSessionView.js](src/modules/session/editSessionView.js) | `view` | Modular view renderer for Edit Session & Setup view. |
+| [src/modules/session/editSessionControl.js](src/modules/session/editSessionControl.js) | `component` | Pre-session edit/setup control modal dialog. |
+| [src/modules/session/clipboardEditor.js](src/modules/session/clipboardEditor.js) | `component` | Interactive active session plan/clipboard structure editor. |
+| [src/modules/session/exerciseCard.js](src/modules/session/exerciseCard.js) | `component` | Standalone exercise card in clipboard deck. |
+| [src/modules/session/supersetCard.js](src/modules/session/supersetCard.js) | `component` | Superset/Giant set grouped block card. |
+| [src/modules/session/exerciseDeck.js](src/modules/session/exerciseDeck.js) | `component` | Active-session exercise stack deck renderer. |
+| [src/modules/session/exerciseAndRestTimer.js](src/modules/session/exerciseAndRestTimer.js) | `component` | Session exercise and rest countdown timer stack. |
+| [src/modules/plans/plansView.js](src/modules/plans/plansView.js) | `view` | Modular view renderer for Plans (formerly Routines) catalog and template editor. |
+| [src/modules/plans/planAdjustments.js](src/modules/plans/planAdjustments.js) | `component` | Pending Plan Adjustments deck & interactive Apply wizard. |
+| [src/modules/clients/clientsView.js](src/modules/clients/clientsView.js) | `view` | Modular view renderer for Client Directory & Client profile views. |
+| [src/modules/clients/clientsDirectory.js](src/modules/clients/clientsDirectory.js) | `component` | Client Directory grid component. |
+| [src/modules/exercises/exercisesView.js](src/modules/exercises/exercisesView.js) | `view` | Modular view renderer for Exercise taxonomy catalog view. |
+| [src/modules/exercises/exercisePicker.js](src/modules/exercises/exercisePicker.js) | `component` | Reusable exercise picker with taxonomy filter chips. |
+| [src/modules/history/historyView.js](src/modules/history/historyView.js) | `view` | Modular view renderer for workout history logs. |
+| [src/modules/common/utils.js](src/modules/common/utils.js) | `helper` | Shared formatting, date conversion, and string helper functions. |
+| [src/modules/common/dom.js](src/modules/common/dom.js) | `helper` | DOM helper utilities and modal helpers. |
+| [src/modules/common/repsAndLoad.js](src/modules/common/repsAndLoad.js) | `helper` | Polymorphic reps and equipment-derived load helpers. |
+| [src/modules/common/sessionCache.js](src/modules/common/sessionCache.js) | `helper` | Active session local storage cache helper. |
+| [src/modules/common/wakeLock.js](src/modules/common/wakeLock.js) | `helper` | Screen Wake Lock API management helper. |
+| [src/modules/common/activeUsersList.js](src/modules/common/activeUsersList.js) | `component` | Active-session participant tabs component. |
+| [src/modules/common/applicationHeader.js](src/modules/common/applicationHeader.js) | `component` | Shared top header actions, theme/lang switchers, and sync badge. |
+| [src/modules/common/backupRestore.js](src/modules/common/backupRestore.js) | `component` | Backup center dialog and JSON import/export handlers. |
+| [src/modules/common/feedbackModal.js](src/modules/common/feedbackModal.js) | `component` | Feedback tags modal dialog and voice recorder handler. |
+| [src/modules/common/notificationArea.js](src/modules/common/notificationArea.js) | `component` | Toast and banner notification area handler. |
+| [src/modules/themes/](src/modules/themes/) | `styles` | Theme-specific CSS stylesheets (`daylight.css`, `midnight.css`, `red.css`, `blossom.css`, `nebula.css`). |
+| [src/controllers/routerController.js](src/controllers/routerController.js) | `controller` | SPA route mapping and navigation logic. |
+| [src/controllers/themeController.js](src/controllers/themeController.js) | `controller` | Unified theme manager. |
+| [src/controllers/appLifecycleController.js](src/controllers/appLifecycleController.js) | `controller` | PWA runtime lifecycle. |

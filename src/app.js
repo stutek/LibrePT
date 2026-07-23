@@ -53,8 +53,39 @@ import {
   setState,
   stateHasData,
 } from "./data/stateStore.js";
-import { repsPresetsDatalistHTML } from "./helper/repsAndLoad.js";
-import { INIT_DEMO_DATA, getShareParams } from "./helper/shareLink.js";
+import { applyStaticDOMMappings } from "./i18n/domMappings.js";
+import { TRANSLATIONS } from "./i18n/index.js";
+import { renderClientsDirectory } from "./modules/clients/clientsDirectory.js";
+import {
+  renderClientsList as clientsViewRender,
+  showClientDetails as clientsViewShowDetails,
+} from "./modules/clients/clientsView.js";
+import {
+  renderActiveUsersList,
+  updateClientTabsFadeState,
+} from "./modules/common/activeUsersList.js";
+import {
+  incrementLocalSync,
+  initApplicationHeader,
+  renderSyncBadge,
+  resetSyncState,
+  setOfflineCachedState,
+  setSyncTrackingReady,
+  setupApplicationHeader,
+} from "./modules/common/applicationHeader.js";
+import { initBackupRestore, setupBackupRestore } from "./modules/common/backupRestore.js";
+import {
+  initFeedbackModal,
+  openFeedbackModal,
+  setupFeedbackForms,
+} from "./modules/common/feedbackModal.js";
+import {
+  initNotificationArea,
+  renderNotificationArea,
+  setupNotificationGestures,
+} from "./modules/common/notificationArea.js";
+import { repsPresetsDatalistHTML } from "./modules/common/repsAndLoad.js";
+import { INIT_DEMO_DATA, getShareParams } from "./modules/common/shareLink.js";
 import {
   buildBookingMeta,
   escapeHTML,
@@ -73,45 +104,15 @@ import {
   isTimeOverlapping,
   parseTimeRange,
   truncateString,
-} from "./helper/utils.js";
-import { applyStaticDOMMappings } from "./i18n/domMappings.js";
-import { TRANSLATIONS } from "./i18n/index.js";
+} from "./modules/common/utils.js";
+import { renderExercisesList as exercisesViewRender } from "./modules/exercises/exercisesView.js";
+import { renderGlobalHistory as historyViewRender } from "./modules/history/historyView.js";
 import {
-  renderClientsList as clientsViewRender,
-  showClientDetails as clientsViewShowDetails,
-} from "./views/clients/clientsView.js";
-import {
-  renderEditSessionView,
-  renderWorkoutSetupView,
-} from "./views/editSession/editSessionView.js";
-import { renderExercisesList as exercisesViewRender } from "./views/exercises/exercisesView.js";
-import { renderGlobalHistory as historyViewRender } from "./views/history/historyView.js";
-import {
+  openAdjustmentWizardComponent,
   openRoutineEditorModal,
+  renderPendingPlanAdjustmentsComponent,
   renderRoutinesList as routinesViewRender,
-} from "./views/routines/routinesView.js";
-import {
-  launchClipboardDirectly as sessionsViewLaunchClipboard,
-  renderSessions as sessionsViewRender,
-  seedDemoActiveSession as sessionsViewSeedDemo,
-  setupCalendarBookings as sessionsViewSetupBookings,
-} from "./views/sessionList/sessionsView.js";
-import { renderExerciseDeck } from "./widgets/clipboard/exerciseDeck.js";
-import {
-  renderActiveUsersList,
-  updateClientTabsFadeState,
-} from "./widgets/common/activeUsersList.js";
-import {
-  incrementLocalSync,
-  initApplicationHeader,
-  renderSyncBadge,
-  resetSyncState,
-  setOfflineCachedState,
-  setSyncTrackingReady,
-  setupApplicationHeader,
-} from "./widgets/common/applicationHeader.js";
-import { initBackupRestore, setupBackupRestore } from "./widgets/common/backupRestore.js";
-import { renderClientsDirectory } from "./widgets/common/clientsDirectory.js";
+} from "./modules/plans/plansView.js";
 import {
   focusSessionsColumn,
   getFocusedSessionDay,
@@ -121,21 +122,7 @@ import {
   sessionDayTemporal,
   setFocusedSessionDay,
   setupSessionsDayNav,
-} from "./widgets/common/daySelector.js";
-import {
-  initFeedbackModal,
-  openFeedbackModal,
-  setupFeedbackForms,
-} from "./widgets/common/feedbackModal.js";
-import {
-  initNotificationArea,
-  renderNotificationArea,
-  setupNotificationGestures,
-} from "./widgets/common/notificationArea.js";
-import {
-  openAdjustmentWizardComponent,
-  renderPendingPlanAdjustmentsComponent,
-} from "./widgets/common/planAdjustments.js";
+} from "./modules/session/daySelector.js";
 import {
   initEditSessionControl,
   initWorkoutSetup,
@@ -143,17 +130,28 @@ import {
   openWorkoutSetupModal,
   setupEditSessionControl,
   setupWorkoutSetup,
-} from "./widgets/session/editSessionControl.js";
+} from "./modules/session/editSessionControl.js";
+import {
+  renderEditSessionView,
+  renderWorkoutSetupView,
+} from "./modules/session/editSessionView.js";
+import { initRestTimer, setupRestTimer } from "./modules/session/exerciseAndRestTimer.js";
+import { renderExerciseDeck } from "./modules/session/exerciseDeck.js";
 import {
   initSessionBar,
   renderActiveSessionBarLabels,
   renderIdleSessionBar,
   updateSessionBarTimer,
-} from "./widgets/session/sessionBar.js";
-import { renderSessionCard } from "./widgets/session/sessionCard.js";
-import { renderSessionList } from "./widgets/session/sessionList.js";
-import { initSessionTitleBar, renderSessionTitle } from "./widgets/session/sessionTitleBar.js";
-import { initRestTimer, setupRestTimer } from "./widgets/timer/exerciseAndRestTimer.js";
+} from "./modules/session/sessionBar.js";
+import { renderSessionCard } from "./modules/session/sessionCard.js";
+import { renderSessionList } from "./modules/session/sessionList.js";
+import { initSessionTitleBar, renderSessionTitle } from "./modules/session/sessionTitleBar.js";
+import {
+  launchClipboardDirectly as sessionsViewLaunchClipboard,
+  renderSessions as sessionsViewRender,
+  seedDemoActiveSession as sessionsViewSeedDemo,
+  setupCalendarBookings as sessionsViewSetupBookings,
+} from "./modules/session/sessionsView.js";
 
 function t(key) {
   const lang = getState().lang || "en";

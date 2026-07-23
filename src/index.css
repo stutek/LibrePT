@@ -1,11 +1,11 @@
 /* index.css - LibrePT Modern UI Style Guide & Design System */
 
 /* Themes & Look & Feel Selections */
-@import url("./themes/midnight.css");
-@import url("./themes/daylight.css");
-@import url("./themes/red.css");
-@import url("./themes/blossom.css");
-@import url("./themes/nebula.css");
+@import url("./modules/themes/midnight.css");
+@import url("./modules/themes/daylight.css");
+@import url("./modules/themes/red.css");
+@import url("./modules/themes/blossom.css");
+@import url("./modules/themes/nebula.css");
 
 /* Design system shared, non-theme tokens (fonts, layout heights, blur) */
 :root {

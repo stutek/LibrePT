@@ -1,5 +1,15 @@
-import { hasLoad, loadUnitForEquipment } from "../helper/repsAndLoad.js";
-// src/controllers/activeSessionController.js - Domain module for active workout session state, timers, signals, and lifecycle
+import { renderClientsList } from "../modules/clients/clientsView.js";
+import {
+  renderActiveUsersList,
+  updateClientTabsFadeState,
+} from "../modules/common/activeUsersList.js";
+import { openFeedbackModal } from "../modules/common/feedbackModal.js";
+import { hasLoad, loadUnitForEquipment } from "../modules/common/repsAndLoad.js";
+import {
+  clearActiveSessionCache,
+  readActiveSessionCache,
+  saveActiveSessionToCache as saveActiveSessionToCacheHelper,
+} from "../modules/common/sessionCache.js";
 import {
   escapeHTML,
   formatDuration,
@@ -7,40 +17,29 @@ import {
   generateShortUUID,
   getClientDisplayNameHTML,
   getInitials,
-} from "../helper/utils.js";
-import { renderClientsList } from "../views/clientsView.js";
-import { renderGlobalHistory } from "../views/historyView.js";
-import { renderRoutinesList } from "../views/routinesView.js";
-import { renderClipboardEditor } from "../widgets/clipboard/clipboardEditor.js";
-import { renderExerciseDeck } from "../widgets/clipboard/exerciseDeck.js";
+} from "../modules/common/utils.js";
 import {
-  renderActiveUsersList,
-  updateClientTabsFadeState,
-} from "../widgets/common/activeUsersList.js";
-import { openFeedbackModal } from "../widgets/common/feedbackModal.js";
-import {
-  renderActiveSessionBarLabels,
-  renderIdleSessionBar,
-  updateSessionBarTimer,
-} from "../widgets/session/sessionBar.js";
+  releaseScreenWakeLock,
+  requestScreenWakeLock as requestScreenWakeLockHelper,
+} from "../modules/common/wakeLock.js";
+import { renderGlobalHistory } from "../modules/history/historyView.js";
+import { renderRoutinesList } from "../modules/plans/plansView.js";
+import { renderClipboardEditor } from "../modules/session/clipboardEditor.js";
 import {
   clearAllTimers,
   restoreSessionTimers,
   startTimer,
   stopTimerIfMatches,
-} from "../widgets/timer/exerciseAndRestTimer.js";
+} from "../modules/session/exerciseAndRestTimer.js";
+import { renderExerciseDeck } from "../modules/session/exerciseDeck.js";
+import {
+  renderActiveSessionBarLabels,
+  renderIdleSessionBar,
+  updateSessionBarTimer,
+} from "../modules/session/sessionBar.js";
 
 let activeSession = null;
 let appDeps = {};
-import {
-  clearActiveSessionCache,
-  readActiveSessionCache,
-  saveActiveSessionToCache as saveActiveSessionToCacheHelper,
-} from "../helper/sessionCache.js";
-import {
-  releaseScreenWakeLock,
-  requestScreenWakeLock as requestScreenWakeLockHelper,
-} from "../helper/wakeLock.js";
 
 function requestScreenWakeLock() {
   return requestScreenWakeLockHelper(getActiveSession);
