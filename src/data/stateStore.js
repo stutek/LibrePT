@@ -103,7 +103,8 @@ export function loadSavedState() {
   return state;
 }
 
-export function resetLibrePTData({ demo = true } = {}) {
+export function resetLibrePTData(options = {}) {
+  const { demo = true } = options || {};
   for (const k of Object.keys(localStorage)) {
     if (k.startsWith("librept") || k.startsWith("openpt")) localStorage.removeItem(k);
   }

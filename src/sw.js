@@ -1,6 +1,6 @@
 // sw.js - LibrePT Service Worker for Offline Functionality
 // Bump CACHE_NAME on release: `activate` purges every cache that does not match it.
-const CACHE_NAME = "librept-v16";
+const CACHE_NAME = "librept-v17";
 const ASSETS = [
   "./",
   "./index.html",
@@ -25,7 +25,7 @@ const ASSETS = [
   "./modules/common/backupRestore.js",
   "./modules/common/feedbackModal.js",
   "./modules/common/notificationArea.js",
-  // Seed data (split per entity under data/)
+  // Seed data & stores
   "./data/index.js",
   "./data/exercises.js",
   "./data/clients.js",
@@ -33,6 +33,8 @@ const ASSETS = [
   "./data/history.js",
   "./data/planUpdates.js",
   "./data/sessions.js",
+  "./data/messages.js",
+  "./data/stateStore.js",
   // Translations (one file per locale, registered in i18n/index.js)
   "./i18n/index.js",
   "./i18n/en.js",
@@ -60,10 +62,12 @@ const ASSETS = [
   "./modules/sessionList/sessionList.js",
   "./modules/sessionList/sessionsView.js",
   // Domain controllers
+  "./controllers/appLifecycleController.js",
   "./controllers/formsController.js",
   "./controllers/activeSessionController.js",
   "./controllers/gestureController.js",
   "./controllers/routerController.js",
+  "./controllers/themeController.js",
   // Icons & Fonts
   "./icons/icon-192.png",
   "./icons/icon-512.png",
