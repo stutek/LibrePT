@@ -3213,17 +3213,15 @@ textarea.form-control {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  /* Fixed-width box so the ‹ › arrows and the Today reset button never shift as the
-     weekday/date text changes length. The weekday truncates within this width if needed; the
-     date always stays readable. Title type comes from the shared view-title rule above. */
-  width: 310px;
-  max-width: 100%;
-  flex: 0 0 auto;
+  gap: 6px;
+  max-width: 210px;
+  flex: 1 1 auto;
   min-width: 0;
   white-space: nowrap;
   text-transform: none;
-} /* Only the weekday truncates — the date and Today tag must always stay readable */
+  font-size: 14px;
+}
+/* Only the weekday truncates — the date and Today tag must always stay readable */
 #calendar-title-weekday,
 #calendar-title-weekday-short {
   min-width: 0;
@@ -3294,7 +3292,7 @@ textarea.form-control {
 }
 .sessions-nav-arrow {
   flex: 0 0 auto;
-  width: 46px;
+  width: 36px;
   height: 34px;
   border-radius: 999px;
   background: transparent;
