@@ -357,6 +357,7 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav {
   box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.9), 0 3px 14px rgba(245, 158, 11, 0.6);
   outline: none;
 }
+.preview-ribbon .fa-triangle-exclamation,
 .preview-ribbon .fa-circle-question {
   font-size: 11px;
   opacity: 0.85;
@@ -745,15 +746,15 @@ select.menu-select {
 }
 .cloud-sync-icon .fa-cloud,
 .session-menu-item .fa-cloud-arrow-up {
-  font-size: 24px;
+  font-size: 18px;
   color: var(--cloud-icon-color, #0284c7);
 }
 .cloud-sync-icon .fa-arrows-rotate {
   position: absolute;
   left: 50%;
-  top: 56%;
+  top: 54%;
   transform: translate(-50%, -50%);
-  font-size: 13px;
+  font-size: 10px;
   color: var(--cloud-arrows-color, var(--success, #10b981));
   filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.45));
 } /* When there are pending changes the cloud button grows into a pill to seat the ahead/behind
@@ -763,8 +764,11 @@ select.menu-select {
   min-width: 44px;
   height: 44px;
   border-radius: 999px;
-  padding: 0 12px;
-  gap: 8px;
+  padding: 0 10px;
+  gap: 2px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 /* `.header-actions .icon-btn` pins a fixed 44/40px width that beats the width:auto above, so the
    button stayed a cramped circle and clipped the ahead/behind counts. This higher-specificity
@@ -772,7 +776,7 @@ select.menu-select {
 .header-actions .icon-btn.sync-backup-btn {
   width: auto;
 }
-/* Fully synced (badge hidden): drop the side padding so it reads as a round icon again. */
+/* Fully synced (badge hidden): drop the side padding and restore single icon centering. */
 .sync-backup-btn:has(.sync-badge.hidden) {
   padding-left: 0;
   padding-right: 0;
@@ -780,11 +784,12 @@ select.menu-select {
 .sync-badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   line-height: 1;
+  margin-top: -2px;
 }
 .sync-badge.hidden {
   display: none;
