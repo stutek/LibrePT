@@ -266,7 +266,9 @@ def run_tests():
         )
         sys.exit(1)
 
-    result = subprocess.run([venv_python, "-m", "pytest", "-n", "auto", "-v", "tests/"])
+    result = subprocess.run(
+        [venv_python, "-m", "pytest", "-n", "auto", "--dist=loadfile", "-v", "tests/"]
+    )
 
     if result.returncode != 0:
         print(f"\n  ✗ Test suite failed with exit code: {result.returncode}")
