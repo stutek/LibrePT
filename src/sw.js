@@ -1,11 +1,20 @@
 // sw.js - LibrePT Service Worker for Offline Functionality
-// Bump CACHE_NAME on release: `activate` purges every cache that does not match it.
-const CACHE_NAME = "librept-v17";
+//
+// INVARIANT — module-version coherence (see README "Architectural Invariants"): the app is a graph of
+// cross-importing ES modules, so every module in a single load must be the SAME build; a mix of cached
+// (old) and network (new) files is a version skew that breaks at runtime. The cache is therefore
+// atomic — the WHOLE ASSETS set is precached with addAll (all-or-nothing), fetch is network-first so an
+// online load is one deployed version, and CACHE_NAME is bumped every release so `activate` purges old
+// caches wholesale. Adding a runtime module? Add it to ASSETS AND bump CACHE_NAME, or offline loads a
+// version-skewed app.
+const CACHE_NAME = "librept-v18";
 const ASSETS = [
   "./",
   "./index.html",
   "./index.css",
   "./app.js",
+  "./theme-boot.js",
+  "./version.js",
   "./manifest.json",
   // Themes
   "./modules/themes/blossom.css",
@@ -17,6 +26,8 @@ const ASSETS = [
   "./modules/common/utils.js",
   "./modules/common/dom.js",
   "./modules/common/repsAndLoad.js",
+  "./modules/common/exerciseModality.js",
+  "./modules/common/sessionItemRecord.js",
   "./modules/common/sessionCache.js",
   "./modules/common/wakeLock.js",
   "./modules/common/shareLink.js",

@@ -22,6 +22,25 @@ def test_manifest_icons_exist(src_dir):
         )
 
 
+def test_service_worker_precaches_every_runtime_module(src_dir):
+    """Module-version coherence (README "Architectural Invariants"): the app is a graph of cross-
+    importing ES modules, so every runtime .js/.css must be in sw.js ASSETS or an offline load serves
+    a version-skewed mix (some cached, some missing). Enforce that the precache set stays complete —
+    a new module that is not listed would otherwise silently break offline."""
+    sw = (src_dir / "sw.js").read_text(encoding="utf-8")
+    missing = []
+    for path in sorted([*src_dir.rglob("*.js"), *src_dir.rglob("*.css")]):
+        rel = path.relative_to(src_dir).as_posix()
+        if rel == "sw.js":
+            continue  # the service worker itself is registered, never fetched through the cache
+        if f'"./{rel}"' not in sw:
+            missing.append(rel)
+    assert not missing, (
+        "sw.js ASSETS is missing runtime files (add them AND bump CACHE_NAME): "
+        + ", ".join(missing)
+    )
+
+
 def test_seed_data_exports(src_dir):
     """The seed data is split per entity under src/data/, re-exported by the barrel."""
     data = src_dir / "data"

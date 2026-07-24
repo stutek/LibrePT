@@ -121,6 +121,10 @@ LibrePT is comprised of three major subsystems:
 3. **Trainer Program Adjustments Deck (Back-Office)**
    - The desk-side workspace where feedback alerts and details are reviewed to asynchronously edit client routine templates and plan progressive overload trajectories.
 
+### Architectural Invariants
+
+- **Module-version coherence — caching is all-or-nothing, never a mix.** The frontend is a buildless graph of **native ES modules that cross-import each other**. Correctness depends on **every module loaded in a single page load being from the same build**: a stale module importing a freshly-deployed one (or an old caller invoking a since-changed export contract) is a **version skew** that breaks at runtime, often silently. Therefore the service-worker cache (`src/sw.js`) is treated **atomically**: either the whole app loads from the network (one deployed version) or the whole app loads from the cache (one coherent precached snapshot) — a per-file policy that could serve *some* modules fresh and *others* stale within one load is explicitly avoided. The cache's purpose is loading the **entire app as one version for offline use**, *not* accelerating individual files; there is deliberately **no stale-while-revalidate** per-file layer, since that is exactly what would interleave versions. This is enforced by three things acting together: `install` precaches the **whole** `ASSETS` set with `addAll` (it is cached as a unit or not at all), the fetch handler is **network-first** so an online load always resolves to one deployed version (with cache only as the offline fallback), and **`CACHE_NAME` is bumped on every release** so `activate` purges every non-matching cache wholesale rather than leaving old files to be picked up piecemeal. **Contributor rule:** when you add or move a runtime module, add it to `ASSETS` in `sw.js` **and** bump `CACHE_NAME`, so the precached set stays complete and refreshes as one atomic version.
+
 ---
 
 ## 🚀 Key Functional Features
