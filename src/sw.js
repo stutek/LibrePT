@@ -87,13 +87,23 @@ const ASSETS = [
   "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-regular-400.woff2",
 ];
 
+// The same-origin app shell is the version-coherent module graph — it MUST precache as one atomic
+// unit (addAll fails the install if any of it is missing). Third-party libs (the Font Awesome CDN)
+// are NOT part of that graph and are cached best-effort: a blocked/failed cross-origin fetch (e.g. a
+// CSP without connect-src, or being offline at install) must not fail the whole precache and leave
+// the app shell uncached. They fall back to the network/cache at runtime regardless.
+const SHELL_ASSETS = ASSETS.filter((u) => !/^https?:/i.test(u));
+const EXTERNAL_ASSETS = ASSETS.filter((u) => /^https?:/i.test(u));
+
 self.addEventListener("install", (e) => {
   e.waitUntil(
     caches
       .open(CACHE_NAME)
-      .then((cache) => {
-        return cache.addAll(ASSETS);
-      })
+      .then((cache) =>
+        cache
+          .addAll(SHELL_ASSETS)
+          .then(() => Promise.allSettled(EXTERNAL_ASSETS.map((u) => cache.add(u).catch(() => {})))),
+      )
       .then(() => self.skipWaiting()),
   );
 });

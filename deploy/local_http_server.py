@@ -47,6 +47,10 @@ SECURITY_HEADERS = {
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; "
         "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; "
         "img-src 'self' data:; "
+        # connect-src governs fetch()/XHR — including the service worker precaching the Font Awesome
+        # CDN. Without it, connect falls back to default-src 'self' and the SW's cache.addAll is
+        # blocked, which (being atomic) fails the whole precache and breaks offline caching.
+        "connect-src 'self' https://cdnjs.cloudflare.com; "
         "base-uri 'self'; "
         "form-action 'self'; "
         "frame-ancestors 'none'; "
