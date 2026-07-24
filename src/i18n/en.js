@@ -211,6 +211,7 @@ export const en = {
   complete_round: "Complete round",
   finish_superset: "Finish superset",
   rest_label: "Rest",
+  skipped: "Skipped",
 
   // Application (☰) header menu + About / Terms modals
   menu_language: "Language",

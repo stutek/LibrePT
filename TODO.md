@@ -302,8 +302,12 @@ Continued brainstorm on 16.1's "keep multiple versions deployable" question. Lea
 
 > **⏳ Implementation scheduled for Claude on Fri 2026-07-24, 10:00** (when the subscription resets — this is a larger, cross-cutting change deliberately held for a complex-task budget, per the multi-model cost strategy). Design below is **decided**; it's a build task, not a brainstorm.
 
-### 17.1 [ ] Persist the whole structured program into history, via a generic typed item record
-Today a finished session flattens to performed exercises + sets only ([activeSessionController.js](src/controllers/activeSessionController.js) `finishWorkoutSession`), **dropping** rest, superset/circuit grouping, and prescribed-but-skipped exercises. Re-opening a past session therefore loses supersets/rests, and a past session can't seed a faithful template. Fix: store the **whole program** as an immutable snapshot.
+### 17.1 [x] Persist the whole structured program into history, via a generic typed item record — **SHIPPED 2026-07-24**
+Graduated to [CHANGELOG](CHANGELOG.md). Built in [sessionItemRecord.js](src/modules/common/sessionItemRecord.js): `finishWorkoutSession` now snapshots the whole program (rests + superset grouping + prescribed-but-skipped exercises kept `completed:false`, greyed in the view) instead of flattening to performed sets; historyView / exerciseDeck read it structure- and completed-aware; `openSessionFromHistory` rebuilds the full live plan from the snapshot; back-compat via a shape guard. Covered by `tests/e2e/test_session_item_record.py`.
+
+**Deviation from the design below (decided during build):** supersets are **not** a stored container — the snapshot is a **flat typed array** (`exercise` | `rest`) with `circuitId` grouping folded at render (`buildSupersetUnits`), the *same* single model the live session uses, so there is no second representation to keep in sync and the frozen record's contiguity can't drift. The `isRestItem` boolean is replaced by `type` dispatch (`isRestRecord`/`isExerciseRecord`). The original container-based design is kept below for reference; the rest of §17 (17.2–17.4) still applies.
+
+Historical design (superseded by the flat model above for storage; the goals stand):
 
 - **Generic `sessionItemRecord` with a `type` discriminator** — `exercise | rest | superset`:
   - `superset` is a **container** holding child items (renders/reuses as a unit), not a flag spread across sibling items.

@@ -17,6 +17,7 @@
 
 import { formatMetricValue } from "../common/exerciseModality.js";
 import { formatLoad, formatReps } from "../common/repsAndLoad.js";
+import { exerciseRecordsOf } from "../common/sessionItemRecord.js";
 import { generateShortUUID } from "../common/utils.js";
 import { renderExerciseCard } from "./exerciseCard.js";
 import { renderSupersetCard } from "./supersetCard.js";
@@ -74,7 +75,9 @@ export function renderExerciseDeck(deckContainer, deps) {
     const dateStr = formatDateStr(pastSession.date);
     {
       let pIdx = 0;
-      for (const ex of pastSession.exercises) {
+      // The last-performance reference lists movements only — flatten past rests/superset scaffolding
+      // to their exercise leaves (structured records) while legacy flat rows pass through unchanged.
+      for (const ex of exerciseRecordsOf(pastSession.exercises)) {
         pastExList.push({
           id: `past-${pastSession.id}-${ex.id}-${pIdx}`,
           name: ex.name,

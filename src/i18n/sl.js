@@ -211,6 +211,7 @@ export const sl = {
   complete_round: "Zaključi krog",
   finish_superset: "Zaključi superserijo",
   rest_label: "Počitek",
+  skipped: "Preskočeno",
 
   // Application (☰) header menu + About / Terms modals
   menu_language: "Jezik",

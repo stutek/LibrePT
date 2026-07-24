@@ -13,12 +13,13 @@ import {
 } from "../modules/common/activeUsersList.js";
 import { modalityOf, primaryMetricOf } from "../modules/common/exerciseModality.js";
 import { openFeedbackModal } from "../modules/common/feedbackModal.js";
-import { hasLoad, loadUnitForEquipment } from "../modules/common/repsAndLoad.js";
+import { loadUnitForEquipment } from "../modules/common/repsAndLoad.js";
 import {
   clearActiveSessionCache,
   readActiveSessionCache,
   saveActiveSessionToCache as saveActiveSessionToCacheHelper,
 } from "../modules/common/sessionCache.js";
+import { buildProgramSnapshot, isRestRecord } from "../modules/common/sessionItemRecord.js";
 import {
   escapeHTML,
   formatDuration,
@@ -212,30 +213,43 @@ export function openSessionFromHistory(log) {
     logs: {},
   };
 
+  // Rebuild the live plan from the stored snapshot, restoring rests and superset grouping — not just
+  // the performed exercises (TODO §17.1). A record item is either a first-class rest or an exercise.
   for (const item of log.exercises) {
+    if (isRestRecord(item)) {
+      clientState.exercises.push({
+        id: generateShortUUID(),
+        type: "rest",
+        rest: item.rest || 0,
+        circuitId: item.circuitId || null,
+        circuitTitle: item.circuitTitle || "",
+        circuitSeries: item.circuitSeries || 1,
+      });
+      continue;
+    }
+
     const ex = state.exercises.find((e) => e.id === item.id || e.name === item.name);
-    const setsTargetCount = item.sets.length;
-    const repsTarget = item.sets[0]?.reps || 0;
-    const weightTarget = item.sets[0]?.weight || 0;
+    const sets = Array.isArray(item.sets) ? item.sets : [];
     clientState.exercises.push({
       id: item.id,
       name: item.name,
       category: ex ? ex.category : "Recovery",
       pattern: ex ? ex.pattern : "",
       instructions: ex ? ex.instructions : "",
-      setsTargetCount: setsTargetCount,
-      repsTarget: repsTarget,
-      weightTarget: weightTarget,
-      loadUnit: loadUnitForEquipment(ex?.equipment),
-      modality: modalityOf(ex),
-      metric: primaryMetricOf(ex),
-      rest: item.rest || 0,
+      setsTargetCount: sets.length || 1,
+      repsTarget: sets[0]?.reps || 0,
+      weightTarget: sets[0]?.weight || 0,
+      // Prefer the snapshot's own logging axes (so an anonymized/renamed movement still logs right),
+      // falling back to the catalog entry for legacy rows that never stored them.
+      loadUnit: item.loadUnit || loadUnitForEquipment(ex?.equipment),
+      modality: item.modality || modalityOf(ex),
+      metric: item.metric || primaryMetricOf(ex),
       circuitId: item.circuitId || null,
       circuitTitle: item.circuitTitle || "",
       circuitSeries: item.circuitSeries || 1,
     });
 
-    clientState.logs[item.id] = item.sets.map((s) => ({
+    clientState.logs[item.id] = sets.map((s) => ({
       reps: s.reps,
       weight: s.weight,
       completed: s.completed,
@@ -1001,40 +1015,15 @@ export function finishWorkoutSession() {
     const clientState = activeSession.clientRoutines[pId];
     if (!client || !clientState) continue;
 
-    const clientCompletedExercises = [];
+    const isPlanning = !!activeSession.booking?.isPlanning;
+    // Persist the WHOLE program as an immutable snapshot (rests, superset grouping, and prescribed-
+    // but-skipped exercises included) rather than flattening to performed sets only (TODO §17.1).
+    const clientProgram = buildProgramSnapshot(clientState, { isPlanning });
+    const anyCompleted = clientProgram.some((it) => it.type === "exercise" && it.completed);
 
-    for (const ex of clientState.exercises) {
-      const logsList = clientState.logs[ex.id] || [];
-      const clientSetsLogged = [];
-
-      for (const log of logsList) {
-        if (
-          log.completed ||
-          hasLoad(log.weight, ex.loadUnit) ||
-          activeSession.booking?.isPlanning
-        ) {
-          clientSetsLogged.push({
-            reps: log.reps,
-            weight: log.weight,
-            completed: log.completed,
-            note: log.note || "",
-          });
-        }
-      }
-
-      if (clientSetsLogged.length > 0 || activeSession.booking?.isPlanning) {
-        clientCompletedExercises.push({
-          id: ex.id,
-          name: ex.name,
-          loadUnit: ex.loadUnit || "kg",
-          modality: ex.modality || "strength",
-          metric: ex.metric || "reps",
-          sets: clientSetsLogged,
-        });
-      }
-    }
-
-    if (clientCompletedExercises.length > 0 || activeSession.booking?.isPlanning) {
+    // Log a record when the client performed something (skipped work is kept alongside it), or
+    // always for a planning template. A session where nothing was done writes no history.
+    if (anyCompleted || isPlanning) {
       const clientLog = {
         id: generateShortUUID(),
         clientId: pId,
@@ -1042,10 +1031,10 @@ export function finishWorkoutSession() {
         routineName: clientState.routineName,
         date: sessionDateISO,
         duration: sessionDuration,
-        exercises: clientCompletedExercises,
+        exercises: clientProgram,
         feedback: (activeSession.feedback || []).filter((f) => f.clientId === pId),
       };
-      if (activeSession.booking?.isPlanning) {
+      if (isPlanning) {
         clientLog.isPlanning = true;
       }
 

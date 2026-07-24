@@ -256,6 +256,23 @@ export const DEFAULT_ROUTINES = [
         circuitSeries: 3,
       },
 
+      // 4.5 Cardio conditioning finisher (logged in calories, not reps × load)
+      {
+        id: "e41d5e6f", // Assault Bike (modality: cardio, metric: calories)
+        sets: 1,
+        reps: 20, // 20 cal target
+        rest: 60,
+        weight: 0,
+      },
+      // 4.6 Balance / stability hold (logged as a hold-time)
+      {
+        id: "e46e6f7a", // Single-Leg Balance (modality: balance)
+        sets: 2,
+        reps: "45s",
+        rest: 30,
+        weight: 0,
+      },
+
       // 5. Cooldown/Stretching
       {
         id: "e39c4d5e",

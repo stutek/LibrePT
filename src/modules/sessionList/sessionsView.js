@@ -1,5 +1,6 @@
 import { DEFAULT_SESSIONS } from "../../data/index.js";
 import { isOfflineCachedActive, resetSyncState } from "../common/applicationHeader.js";
+import { modalityOf, primaryMetricOf } from "../common/exerciseModality.js";
 import { loadUnitForEquipment } from "../common/repsAndLoad.js";
 import { buildBookingMeta, escapeHTML, getOverlappingBookings } from "../common/utils.js";
 import { renderIdleSessionBar, updateSessionBarTimer } from "../session/sessionBar.js";
@@ -74,6 +75,8 @@ export function seedDemoActiveSession({ state }) {
           repsTarget: item.reps,
           weightTarget: item.weight,
           loadUnit: loadUnitForEquipment(ex.equipment),
+          modality: modalityOf(ex),
+          metric: primaryMetricOf(ex),
           rest: item.rest,
           circuitId: item.circuitId || null,
           circuitTitle: item.circuitTitle || "",

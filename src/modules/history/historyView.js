@@ -1,7 +1,8 @@
 // src/views/historyView.js - Domain module for global and client workout history logs
 import { openSessionFromHistory } from "../../controllers/activeSessionController.js";
-import { formatMetricValue } from "../common/exerciseModality.js";
+import { formatDuration, formatMetricValue } from "../common/exerciseModality.js";
 import { formatLoad, formatReps } from "../common/repsAndLoad.js";
+import { isRestRecord, isSkippedRecord } from "../common/sessionItemRecord.js";
 import { escapeHTML, formatDateStr } from "../common/utils.js";
 
 export function renderGlobalHistory({ state, t }) {
@@ -28,19 +29,24 @@ export function renderHistoryItems({ historyList, container, t }) {
     const minutes = Math.floor(log.duration / 60);
     const durationText = minutes > 0 ? `${minutes} ${t("min_session")}` : t("less_than_minute");
 
-    let exercisesLogHTML = "";
-    for (const ex of log.exercises) {
+    // One logged exercise row — greyed with a "skipped" badge when the movement was prescribed but
+    // not performed (completed:false); legacy rows have no flag and render as completed.
+    const renderExerciseRow = (ex) => {
       const metric = ex.metric || "reps";
-      const setsText = ex.sets
-        .map((s) => {
-          const note = s.note ? ` (${s.note})` : ""; // setsText is escapeHTML'd whole at insertion
-          // Cardio/holds logged one magnitude per set (time/distance/cal/watts/hold); strength keeps
-          // its "load×reps" form.
-          if (metric !== "reps") return `${formatMetricValue(s.reps, metric)}${note}`;
-          const load = formatLoad(s.weight, ex.loadUnit);
-          return `${load ? `${load}×` : ""}${formatReps(s.reps)}${note}`;
-        })
-        .join(", ");
+      const sets = Array.isArray(ex.sets) ? ex.sets : [];
+      const skipped = isSkippedRecord(ex);
+      const setsText = skipped
+        ? t("skipped")
+        : sets
+            .map((s) => {
+              const note = s.note ? ` (${s.note})` : ""; // setsText is escapeHTML'd whole at insertion
+              // Cardio/holds logged one magnitude per set (time/distance/cal/watts/hold); strength
+              // keeps its "load×reps" form.
+              if (metric !== "reps") return `${formatMetricValue(s.reps, metric)}${note}`;
+              const load = formatLoad(s.weight, ex.loadUnit);
+              return `${load ? `${load}×` : ""}${formatReps(s.reps)}${note}`;
+            })
+            .join(", ");
 
       const feedbackItems = (log.feedback || []).filter((f) => f.exerciseName === ex.name);
       let feedbackIconsHTML = "";
@@ -83,7 +89,7 @@ export function renderHistoryItems({ historyList, container, t }) {
         `;
       }
 
-      const setNotes = ex.sets.filter((s) => s.note);
+      const setNotes = sets.filter((s) => s.note);
       if (setNotes.length > 0) {
         const notesListHTML = setNotes
           .map(
@@ -102,17 +108,47 @@ export function renderHistoryItems({ historyList, container, t }) {
         `;
       }
 
-      exercisesLogHTML += `
-        <div class="history-ex-row" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 4px; margin-bottom: 6px;">
+      const skipBadge = skipped ? `<span class="history-skip-badge">${t("skipped")}</span>` : "";
+      return `
+        <div class="history-ex-row${skipped ? " history-ex-skipped" : ""}">
           <div>
-            <strong>${escapeHTML(ex.name)}</strong>: <span>${escapeHTML(setsText)}</span>
+            <strong>${escapeHTML(ex.name)}</strong>: <span>${escapeHTML(setsText)}</span>${skipBadge}
           </div>
-          <div style="display: flex; gap: 6px; flex-shrink: 0;">
+          <div class="history-ex-icons">
             ${feedbackIconsHTML}
           </div>
         </div>
       `;
+    };
+
+    // Walk the stored program: exercises render as rows, first-class rests as chips, and consecutive
+    // items sharing a circuitId are wrapped in a superset group. Legacy flat rows (no rests/circuits)
+    // fall through as a plain list.
+    let exercisesLogHTML = "";
+    let openCircuit = null;
+    const closeCircuit = () => {
+      if (openCircuit !== null) {
+        exercisesLogHTML += "</div>";
+        openCircuit = null;
+      }
+    };
+    for (const item of log.exercises) {
+      const cid = item.circuitId || null;
+      if (cid !== openCircuit) {
+        closeCircuit();
+        if (cid) {
+          const title = item.circuitTitle || t("superset") || "Superset";
+          exercisesLogHTML += `<div class="history-superset"><div class="history-superset-title"><i class="fa-solid fa-layer-group"></i> ${escapeHTML(title)}</div>`;
+          openCircuit = cid;
+        }
+      }
+      if (isRestRecord(item)) {
+        exercisesLogHTML += `<div class="history-rest-row"><i class="fa-solid fa-hourglass-half"></i> ${t("rest_label")} · ${formatDuration(item.rest)}</div>`;
+        continue;
+      }
+      exercisesLogHTML += renderExerciseRow(item);
     }
+    closeCircuit();
 
     card.innerHTML = `
       <div class="history-card-header">

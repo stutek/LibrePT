@@ -71,6 +71,7 @@ is structured into feature modules under `src/modules/` (`session`, `plans`, `cl
 | [src/modules/common/dom.js](src/modules/common/dom.js) | `helper` | DOM helper utilities and modal helpers. |
 | [src/modules/common/repsAndLoad.js](src/modules/common/repsAndLoad.js) | `helper` | Polymorphic reps and equipment-derived load helpers. |
 | [src/modules/common/exerciseModality.js](src/modules/common/exerciseModality.js) | `helper` | Exercise modality axis (strength/cardio/stretch/balance) and per-metric target formatting (time/distance/calories/watts/hold). |
+| [src/modules/common/sessionItemRecord.js](src/modules/common/sessionItemRecord.js) | `helper` | Immutable history program snapshot: typed items (exercise/rest + superset grouping), shape guards, and `buildProgramSnapshot` keeping rests + skipped work. |
 | [src/modules/common/sessionCache.js](src/modules/common/sessionCache.js) | `helper` | Active session local storage cache helper. |
 | [src/modules/common/wakeLock.js](src/modules/common/wakeLock.js) | `helper` | Screen Wake Lock API management helper. |
 | [src/modules/common/activeUsersList.js](src/modules/common/activeUsersList.js) | `component` | Active-session participant tabs component. |
