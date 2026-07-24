@@ -107,3 +107,39 @@ def test_metric_formatting_model_renders_the_right_units(page, local_server):
     assert results["legacyDefault"] == "strength", (
         "a legacy exercise with no modality field must default to strength"
     )
+
+
+def test_isometric_agility_and_extended_cardio_metrics(page, local_server):
+    page.goto(local_server)
+    page.wait_for_timeout(300)
+
+    r = page.evaluate(
+        """async () => {
+            const url = new URL('modules/common/exerciseModality.js', document.baseURI).href;
+            const m = await import(url);
+            return {
+                pace: m.formatMetricValue('5:00', 'pace'),
+                bpm: m.formatMetricValue(150, 'heartrate'),
+                isoMetric: m.primaryMetricOf({ modality: 'isometric' }),
+                agilityDefault: m.primaryMetricOf({ modality: 'agility' }),
+                agilityDistance: m.primaryMetricOf({ modality: 'agility', metric: 'distance' }),
+                isoLoad: m.usesLoad('isometric'),
+                strengthLoad: m.usesLoad('strength'),
+                cardioLoad: m.usesLoad('cardio'),
+                agilityLoad: m.usesLoad('agility'),
+                agilityOpts: m.metricOptionsFor('agility'),
+                cardioHasPace: m.metricOptionsFor('cardio').includes('pace'),
+                strengthOpts: m.metricOptionsFor('strength'),
+            };
+        }"""
+    )
+    assert r["pace"] == "5:00 /km"
+    assert r["bpm"] == "150 bpm"
+    assert r["isoMetric"] == "hold", "isometric logs a hold-time"
+    assert r["agilityDefault"] == "time" and r["agilityDistance"] == "distance"
+    # Load axis: strength + isometric carry load; cardio + agility do not.
+    assert r["isoLoad"] is True and r["strengthLoad"] is True
+    assert r["cardioLoad"] is False and r["agilityLoad"] is False
+    assert r["agilityOpts"] == ["time", "distance", "reps"]
+    assert r["cardioHasPace"] is True
+    assert r["strengthOpts"] is None, "fixed-metric modalities offer no metric choice"

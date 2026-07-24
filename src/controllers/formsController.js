@@ -4,6 +4,7 @@ import {
   showClientDetails,
 } from "../modules/clients/clientsView.js";
 import { $id, closeModal, openModal } from "../modules/common/dom.js";
+import { metricOptionsFor } from "../modules/common/exerciseModality.js";
 import { parseLoad, parseReps } from "../modules/common/repsAndLoad.js";
 import { generateShortUUID, getInitials } from "../modules/common/utils.js";
 import { mountExercisePicker } from "../modules/exercises/exercisePicker.js";
@@ -246,9 +247,9 @@ export function setupExerciseForms({ state, t, saveToLocalStorage, populateDropd
   if (btnAddExercise) {
     btnAddExercise.addEventListener("click", () => {
       openModal("dialog-exercise", { resetForm: true, formId: "form-exercise" });
-      // The form reset restores modality to strength; re-sync the metric field so a reopen never
-      // leaves the cardio metric selector showing over a strength default.
-      $id("exercise-metric-group")?.classList.add("hidden");
+      // The form reset restores modality to strength; re-sync so a reopen never leaves a metric
+      // selector showing over a fixed-metric modality.
+      syncMetricField();
     });
   }
 
@@ -278,10 +279,12 @@ export function setupExerciseForms({ state, t, saveToLocalStorage, populateDropd
       instructions: instructions,
     };
     // Modality decides how the movement is logged (exerciseModality.js). Omit the default so
-    // strength entries stay identical to the legacy shape; cardio also carries its effort metric.
+    // strength entries stay identical to the legacy shape; metric-choice modalities (cardio, agility)
+    // also carry the chosen effort metric.
     if (modality && modality !== "strength") {
       newEx.modality = modality;
-      if (modality === "cardio") newEx.metric = $id("exercise-metric")?.value || "time";
+      const metricOpts = metricOptionsFor(modality);
+      if (metricOpts) newEx.metric = $id("exercise-metric")?.value || metricOpts[0];
     }
 
     state.exercises.push(newEx);
@@ -291,14 +294,34 @@ export function setupExerciseForms({ state, t, saveToLocalStorage, populateDropd
     closeModal("dialog-exercise");
   });
 
-  // Only cardio needs an effort-metric choice; reveal that field just for cardio.
+  // Modalities with a choice of effort metric (cardio, agility) reveal a metric selector, populated
+  // from the modality's own option set; the fixed-metric modalities (strength/isometric/holds) hide it.
+  const METRIC_LABELS = {
+    time: "Time",
+    distance: "Distance",
+    calories: "Calories",
+    watts: "Watts",
+    pace: "Pace (/km)",
+    heartrate: "Heart rate (bpm)",
+    reps: "Reps",
+  };
   const modalitySelect = $id("exercise-modality");
   const metricGroup = $id("exercise-metric-group");
+  const metricSelect = $id("exercise-metric");
+  const syncMetricField = () => {
+    const opts = metricOptionsFor(modalitySelect?.value);
+    if (opts && metricSelect) {
+      metricSelect.innerHTML = opts
+        .map((m) => `<option value="${m}">${METRIC_LABELS[m] || m}</option>`)
+        .join("");
+      metricGroup?.classList.remove("hidden");
+    } else {
+      metricGroup?.classList.add("hidden");
+    }
+  };
   if (modalitySelect && metricGroup) {
-    const syncMetricVisibility = () =>
-      metricGroup.classList.toggle("hidden", modalitySelect.value !== "cardio");
-    modalitySelect.addEventListener("change", syncMetricVisibility);
-    syncMetricVisibility();
+    modalitySelect.addEventListener("change", syncMetricField);
+    syncMetricField();
   }
 
   const searchExercisesEl = $id("search-exercises");

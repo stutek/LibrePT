@@ -1,5 +1,10 @@
 // src/views/routinesView.js - Domain module for routines catalog and template editor builder
-import { formatMetricValue, primaryMetricOf } from "../common/exerciseModality.js";
+import {
+  formatMetricValue,
+  modalityOf,
+  primaryMetricOf,
+  usesLoad,
+} from "../common/exerciseModality.js";
 import {
   formatLoad,
   formatReps,
@@ -26,15 +31,15 @@ export function renderRoutinesList({ state, t, openWorkoutSetupModal }) {
       .map((item) => {
         const ex = state.exercises.find((e) => e.id === item.id);
         const name = escapeHTML(ex ? ex.name : "Unknown Exercise");
+        // Strength "3×8 · 60kg", isometric "3×0:45 · 20kg" (load-bearing modalities show a load);
+        // cardio/holds/agility "1×20 cal" / "3×500 m" / "1×0:30" — the metric, no load.
         const metric = primaryMetricOf(ex);
-        // Strength shows "3×8 · 60kg"; cardio/holds show "3×500 m" / "1×20 cal" — the metric, no load.
-        const detail =
-          metric === "reps"
-            ? (() => {
-                const load = formatLoad(item.weight, loadUnitForEquipment(ex?.equipment));
-                return `${item.sets}×${formatReps(item.reps)}${load ? ` · ${load}` : ""}`;
-              })()
-            : `${item.sets}×${formatMetricValue(item.reps, metric)}`;
+        const primary =
+          metric === "reps" ? formatReps(item.reps) : formatMetricValue(item.reps, metric);
+        const load = usesLoad(modalityOf(ex))
+          ? formatLoad(item.weight, loadUnitForEquipment(ex?.equipment))
+          : "";
+        const detail = `${item.sets}×${primary}${load ? ` · ${load}` : ""}`;
         return `<span class="preview-tag">${name} <span class="preview-tag-detail">${escapeHTML(detail)}</span></span>`;
       })
       .slice(0, 4)

@@ -16,6 +16,7 @@ import {
   isTimeBasedMetric,
   metricLabelKey,
   toSeconds,
+  usesLoad,
 } from "../common/exerciseModality.js";
 import { formatLoad, formatReps, hasLoad, loadParts } from "../common/repsAndLoad.js";
 
@@ -48,15 +49,17 @@ export function renderExerciseCard(card, item, ctx) {
     statusBadge = `<span class="badge deck-card-status deck-card-status-upcoming">Upcoming</span>`;
   }
 
-  // Modality decides the primary target tile: strength shows reps + a load tile; cardio shows its
-  // effort metric (time/distance/calories/watts) and no load; stretch/balance show a hold-time.
+  // Modality decides the primary target tile and whether a load axis shows. reps → a count; every
+  // other metric (time/distance/calories/watts/pace/heartrate/hold) formats through the modality
+  // helper. A load tile shows only for load-bearing modalities (strength, isometric) — cardio,
+  // holds and agility carry no external resistance.
   const metric = item.metric || "reps";
-  const isStrength = metric === "reps";
-  const primaryValue = isStrength
-    ? formatReps(item.repsTarget)
-    : formatMetricValue(item.repsTarget, metric);
+  const modality = item.modality || "strength";
+  const showLoad = usesLoad(modality);
+  const primaryValue =
+    metric === "reps" ? formatReps(item.repsTarget) : formatMetricValue(item.repsTarget, metric);
   const primaryLabel = t(metricLabelKey(metric));
-  // Load renders per equipment (kg / stack level / band / bodyweight) — strength only.
+  // Load renders per equipment (kg / stack level / band / bodyweight).
   const load = loadParts(item.weightTarget, item.loadUnit);
   const counter = `${item.index + 1}/${currentCount}`;
 
@@ -86,7 +89,7 @@ export function renderExerciseCard(card, item, ctx) {
           <span class="deck-stat-label">${escapeHTML(primaryLabel)}</span>
         </div>
         ${
-          isStrength
+          showLoad
             ? `<div class="deck-stat">
           <span class="deck-stat-value">${escapeHTML(load.value)}</span>
           <span class="deck-stat-label">${escapeHTML(load.label)}</span>
@@ -133,17 +136,16 @@ export function renderExerciseCard(card, item, ctx) {
     // Compact row for the rest of the plan — tap to bring into focus. The target
     // is labelled S(ets) × R(eps) × weight so a collapsed, single-line card still
     // reads unambiguously (e.g. "S4 × R6 × 60kg").
-    // Strength collapses to "S4 × R6 × 60kg"; other modalities to "S3 × 500 m" / "S1 × 20 cal" /
-    // "S2 × 0:30" — sets × the primary metric value, with no load axis.
-    let compactTarget;
-    if (isStrength) {
-      const compactLoad = hasLoad(item.weightTarget, item.loadUnit)
+    // Sets × the primary target, with a load axis only for load-bearing modalities:
+    //   strength "S4 × R6 × 60kg", isometric "S3 × 0:45 × 20kg", cardio "S1 × 20 cal",
+    //   stretch/balance "S2 × 0:30", agility "S4 × 0:10".
+    const compactLoad =
+      showLoad && hasLoad(item.weightTarget, item.loadUnit)
         ? ` × ${escapeHTML(formatLoad(item.weightTarget, item.loadUnit))}`
         : "";
-      compactTarget = `S${escapeHTML(String(item.setsTarget))} × R${escapeHTML(formatReps(item.repsTarget))}${compactLoad}`;
-    } else {
-      compactTarget = `S${escapeHTML(String(item.setsTarget))} × ${escapeHTML(primaryValue)}`;
-    }
+    const primaryPart =
+      metric === "reps" ? `R${escapeHTML(formatReps(item.repsTarget))}` : escapeHTML(primaryValue);
+    const compactTarget = `S${escapeHTML(String(item.setsTarget))} × ${primaryPart}${compactLoad}`;
     card.innerHTML = `
       <div class="deck-card-compact">
         <span class="deck-card-counter">${counter}</span>

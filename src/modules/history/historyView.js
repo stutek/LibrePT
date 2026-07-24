@@ -1,6 +1,6 @@
 // src/views/historyView.js - Domain module for global and client workout history logs
 import { openSessionFromHistory } from "../../controllers/activeSessionController.js";
-import { formatDuration, formatMetricValue } from "../common/exerciseModality.js";
+import { formatDuration, formatMetricValue, usesLoad } from "../common/exerciseModality.js";
 import { formatLoad, formatReps } from "../common/repsAndLoad.js";
 import { isRestRecord, isSkippedRecord } from "../common/sessionItemRecord.js";
 import { escapeHTML, formatDateStr } from "../common/utils.js";
@@ -33,6 +33,7 @@ export function renderHistoryItems({ historyList, container, t }) {
     // not performed (completed:false); legacy rows have no flag and render as completed.
     const renderExerciseRow = (ex) => {
       const metric = ex.metric || "reps";
+      const modality = ex.modality || "strength";
       const sets = Array.isArray(ex.sets) ? ex.sets : [];
       const skipped = isSkippedRecord(ex);
       const setsText = skipped
@@ -40,11 +41,12 @@ export function renderHistoryItems({ historyList, container, t }) {
         : sets
             .map((s) => {
               const note = s.note ? ` (${s.note})` : ""; // setsText is escapeHTML'd whole at insertion
-              // Cardio/holds logged one magnitude per set (time/distance/cal/watts/hold); strength
-              // keeps its "load×reps" form.
-              if (metric !== "reps") return `${formatMetricValue(s.reps, metric)}${note}`;
-              const load = formatLoad(s.weight, ex.loadUnit);
-              return `${load ? `${load}×` : ""}${formatReps(s.reps)}${note}`;
+              // Load-bearing modalities (strength, isometric) show "load×value" (e.g. "60×6",
+              // "20kg×0:45"); cardio/holds/agility show the bare metric magnitude.
+              const primary =
+                metric === "reps" ? formatReps(s.reps) : formatMetricValue(s.reps, metric);
+              const load = usesLoad(modality) ? formatLoad(s.weight, ex.loadUnit) : "";
+              return `${load ? `${load}×` : ""}${primary}${note}`;
             })
             .join(", ");
 

@@ -101,11 +101,23 @@ what its target *means* — orthogonal to equipment-derived load and to the stru
 
 - **strength** *(default)* — sets × reps × load. Every legacy movement, and the shape the reps/load
   section above describes.
-- **cardio** — a conditioning effort measured in one of **time**, **distance**, **calories**, or
-  **watts** (assault bike, rower, ski-erg, watt bike, treadmill). No load; the clipboard timer is the
-  natural logging surface for time-bound work, seeded with the target duration so it counts the effort
-  down.
-- **stretch** / **balance** — a **hold-time** (child-pose stretch, single-leg / BOSU hold). No load.
+- **isometric** — a **hold under load**: hold-time **plus** a load axis (weighted plank, wall sit,
+  overhead hold). The only hold modality that keeps a load field.
+- **cardio** — a conditioning effort measured in **time**, **distance**, **calories**, **watts**,
+  **pace** (min/km), or **heart-rate** (bpm) — assault bike, rower, ski-erg, watt bike, treadmill,
+  outdoor run, Zone-2 ride. No load; the clipboard timer is the natural logging surface for time-bound
+  work, seeded with the target duration so it counts the effort down.
+- **stretch** / **balance** — an unloaded **hold-time** (child-pose stretch, single-leg / BOSU hold).
+- **agility** — a speed / coordination drill logged against **time**, **distance**, or **reps**
+  (pro-agility shuttle, ladder drill, cone sprints). No load.
+
+Two modalities (**cardio**, **agility**) let the author pick their effort metric; the rest are fixed
+by the modality (strength → reps, isometric/stretch/balance → hold). The load axis is shown only for
+the load-bearing modalities (**strength**, **isometric**) — decided centrally by `usesLoad` so every
+surface (focus card, editor, plans, history) agrees. This maps the app onto the recognised health- and
+skill-related fitness components (muscular strength & endurance, cardiorespiratory, flexibility,
+balance, agility, isometrics); HIIT/interval work (`hiit`, rounds) remains the one reserved-but-unbuilt
+type.
 
 Like reps/load, the **raw authored magnitude is stored on the item and its meaning derived at render
 time**, so routines, sessions, and history need **no migration** — modality lives on the catalog entry

@@ -22,7 +22,7 @@
 //   genId()        // fresh short id for new exercises/rests/circuits
 // }
 
-import { metricLabelKey } from "../common/exerciseModality.js";
+import { metricLabelKey, usesLoad } from "../common/exerciseModality.js";
 import {
   loadFieldMeta,
   loadInputHTML,
@@ -115,13 +115,15 @@ export function renderClipboardEditor(container, deps) {
     const name = escapeHTML(ex.name || "");
     const reps = escapeHTML(String(ex.repsTarget ?? ex.reps ?? 10));
     const unit = ex.loadUnit || "kg";
-    // Modality decides what the primary field means: strength authors reps + a load field; cardio
-    // authors its effort metric (time/distance/calories/watts) and holds a hold-time, both with NO
-    // load field. The value still lives in the same repsTarget slot (polymorphic), only the label
-    // and the presence of a load field change.
+    // Modality decides what the primary field means and whether a load field shows: strength authors
+    // reps, cardio/agility their effort metric, isometric/stretch/balance a hold-time. The value lives
+    // in the same repsTarget slot (polymorphic); only the label and the load field's presence change.
+    // A load field shows for load-bearing modalities (strength, isometric) — a weighted plank still
+    // takes a load — but not for cardio, holds, or agility.
     const metric = ex.metric || "reps";
-    const isStrength = metric === "reps";
-    const primaryLabel = isStrength ? tr("reps_label", "Reps") : tr(metricLabelKey(metric), metric);
+    const modality = ex.modality || "strength";
+    const primaryLabel =
+      metric === "reps" ? tr("reps_label", "Reps") : tr(metricLabelKey(metric), metric);
     // Point the reps combobox at the preset tier suited to this movement's pattern + load, so an
     // empty field suggests sensible values (the PT can still type any count/range/hold/"max").
     const repsListId = repsPresetListId(ex.pattern, unit);
@@ -130,7 +132,7 @@ export function renderClipboardEditor(container, deps) {
     const setsField = ex.circuitId
       ? ""
       : `<label class="editor-field"><span>${tr("sets", "Sets")}</span><input type="number" min="0" class="editor-f-sets" value="${escapeHTML(String(ex.setsTargetCount ?? ex.sets ?? 3))}"></label>`;
-    const loadField = isStrength
+    const loadField = usesLoad(modality)
       ? `<label class="editor-field"><span>${escapeHTML(loadFieldMeta(unit).label)}</span>${loadInputHTML(
           {
             unit,

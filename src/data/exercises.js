@@ -9,10 +9,13 @@
 //   category: Chest | Back | Legs | Shoulders | Arms | Core | Recovery | Cardio
 //   equipment: Barbell | Dumbbell | Cable | Machine | Bodyweight
 //   pattern: Horizontal Push | Horizontal Pull | Vertical Push | Vertical Pull |
-//            Squat | Hinge | Lunge | Isolation | Core | Mobility | Conditioning | Balance
-//   modality (TODO §13.3 / §17.1): strength (default, omitted) | cardio | stretch | balance
-//     - cardio entries also carry `metric`: time | distance | calories | watts (the effort unit).
-//     - stretch/balance are logged as a hold-time; strength stays sets × reps × load.
+//            Squat | Hinge | Lunge | Isolation | Core | Mobility | Conditioning | Balance | Agility
+//   modality (TODO §13.3 / §17.1): strength (default, omitted) | isometric | cardio | stretch |
+//            balance | agility
+//     - cardio entries carry `metric`: time | distance | calories | watts | pace | heartrate.
+//     - agility entries carry `metric`: time | distance | reps.
+//     - isometric is a hold under load (hold-time + load); stretch/balance are unloaded holds;
+//       strength stays sets × reps × load.
 export const DEFAULT_EXERCISES = [
   // Chest
   {
@@ -358,5 +361,90 @@ export const DEFAULT_EXERCISES = [
     modality: "balance",
     instructions:
       "Hold a quarter-squat on an unstable BOSU dome, staying centred for the target time.",
+  },
+
+  // Isometric — a hold under load, logged as hold-time + load (a weighted plank still takes weight).
+  {
+    id: "e48f7a8b",
+    name: "Weighted Plank",
+    category: "Core",
+    equipment: "Bodyweight",
+    pattern: "Core",
+    modality: "isometric",
+    instructions: "Hold a rigid plank with a plate on the upper back for the target time.",
+  },
+  {
+    id: "e49f7a8b",
+    name: "Wall Sit",
+    category: "Legs",
+    equipment: "Bodyweight",
+    pattern: "Squat",
+    modality: "isometric",
+    instructions:
+      "Sit against the wall at 90° knees, optionally holding a plate, for the target time.",
+  },
+  {
+    id: "e50f7a8b",
+    name: "Overhead Barbell Hold",
+    category: "Shoulders",
+    equipment: "Barbell",
+    pattern: "Vertical Push",
+    modality: "isometric",
+    instructions: "Hold a loaded barbell locked out overhead for the target time.",
+  },
+
+  // Agility — speed / coordination drills, logged against time, distance, or reps (not load).
+  {
+    id: "e51a8b9c",
+    name: "5-10-5 Pro Agility Shuttle",
+    category: "Cardio",
+    equipment: "Bodyweight",
+    pattern: "Agility",
+    modality: "agility",
+    metric: "time",
+    instructions: "Sprint 5yd, back 10yd, through 5yd, changing direction sharply; log the time.",
+  },
+  {
+    id: "e52a8b9c",
+    name: "Agility Ladder Drill",
+    category: "Cardio",
+    equipment: "Bodyweight",
+    pattern: "Agility",
+    modality: "agility",
+    metric: "time",
+    instructions:
+      "Quick-feet ladder pattern for the target time, staying light on the balls of the feet.",
+  },
+  {
+    id: "e53a8b9c",
+    name: "Cone Sprint Drill",
+    category: "Cardio",
+    equipment: "Bodyweight",
+    pattern: "Agility",
+    modality: "agility",
+    metric: "distance",
+    instructions: "Repeated accelerations between cones over the target distance.",
+  },
+
+  // Cardio with the newer effort metrics: pace (min/km) and heart-rate zone (bpm).
+  {
+    id: "e54a8b9c",
+    name: "Outdoor Run",
+    category: "Cardio",
+    equipment: "Bodyweight",
+    pattern: "Conditioning",
+    modality: "cardio",
+    metric: "pace",
+    instructions: "Run holding the target pace (min/km).",
+  },
+  {
+    id: "e55a8b9c",
+    name: "Zone 2 Bike Ride",
+    category: "Cardio",
+    equipment: "Machine",
+    pattern: "Conditioning",
+    modality: "cardio",
+    metric: "heartrate",
+    instructions: "Steady aerobic ride keeping heart rate at the target zone (bpm).",
   },
 ];
