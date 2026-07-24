@@ -22,6 +22,7 @@
 //   genId()        // fresh short id for new exercises/rests/circuits
 // }
 
+import { metricLabelKey } from "../common/exerciseModality.js";
 import {
   loadFieldMeta,
   loadInputHTML,
@@ -114,6 +115,13 @@ export function renderClipboardEditor(container, deps) {
     const name = escapeHTML(ex.name || "");
     const reps = escapeHTML(String(ex.repsTarget ?? ex.reps ?? 10));
     const unit = ex.loadUnit || "kg";
+    // Modality decides what the primary field means: strength authors reps + a load field; cardio
+    // authors its effort metric (time/distance/calories/watts) and holds a hold-time, both with NO
+    // load field. The value still lives in the same repsTarget slot (polymorphic), only the label
+    // and the presence of a load field change.
+    const metric = ex.metric || "reps";
+    const isStrength = metric === "reps";
+    const primaryLabel = isStrength ? tr("reps_label", "Reps") : tr(metricLabelKey(metric), metric);
     // Point the reps combobox at the preset tier suited to this movement's pattern + load, so an
     // empty field suggests sensible values (the PT can still type any count/range/hold/"max").
     const repsListId = repsPresetListId(ex.pattern, unit);
@@ -122,15 +130,17 @@ export function renderClipboardEditor(container, deps) {
     const setsField = ex.circuitId
       ? ""
       : `<label class="editor-field"><span>${tr("sets", "Sets")}</span><input type="number" min="0" class="editor-f-sets" value="${escapeHTML(String(ex.setsTargetCount ?? ex.sets ?? 3))}"></label>`;
-    const loadField = `<label class="editor-field"><span>${escapeHTML(loadFieldMeta(unit).label)}</span>${loadInputHTML(
-      {
-        unit,
-        value: ex.weightTarget ?? ex.weight ?? 0,
-        cls: "editor-f-weight",
-        escapeHTML,
-        ariaLabel: "Load",
-      },
-    )}</label>`;
+    const loadField = isStrength
+      ? `<label class="editor-field"><span>${escapeHTML(loadFieldMeta(unit).label)}</span>${loadInputHTML(
+          {
+            unit,
+            value: ex.weightTarget ?? ex.weight ?? 0,
+            cls: "editor-f-weight",
+            escapeHTML,
+            ariaLabel: "Load",
+          },
+        )}</label>`
+      : "";
     return `
       <li class="editor-row" data-rowkey="${idx}">
         ${reorderHandle()}
@@ -140,7 +150,7 @@ export function renderClipboardEditor(container, deps) {
           </div>
           <div class="editor-row-fields">
             ${setsField}
-            <label class="editor-field"><span>${tr("reps_label", "Reps")}</span><input type="text" list="${repsListId}" class="editor-f-reps" value="${reps}"></label>
+            <label class="editor-field"><span>${escapeHTML(primaryLabel)}</span><input type="text" list="${repsListId}" class="editor-f-reps" value="${reps}"></label>
             ${loadField}
             <label class="editor-field editor-field-superset"><span><i class="fa-solid fa-layer-group"></i></span>${supersetSelect(ex)}</label>
           </div>

@@ -92,6 +92,29 @@ mobility → *time* (`20s/30s/45s/60s`) — with a bodyweight override that keep
 `<datalist>`s are **generated from them at boot**, so nothing is hardcoded in markup, and the PT can
 always type any value regardless of the suggestion.
 
+## 5. Exercise Modality — how a movement is logged
+
+Reps/load is only one of several logging shapes. Each movement carries a **modality** axis
+([../src/modules/common/exerciseModality.js](../src/modules/common/exerciseModality.js)) that decides
+what its target *means* — orthogonal to equipment-derived load and to the structural item type
+(exercise / rest / superset):
+
+- **strength** *(default)* — sets × reps × load. Every legacy movement, and the shape the reps/load
+  section above describes.
+- **cardio** — a conditioning effort measured in one of **time**, **distance**, **calories**, or
+  **watts** (assault bike, rower, ski-erg, watt bike, treadmill). No load; the clipboard timer is the
+  natural logging surface for time-bound work, seeded with the target duration so it counts the effort
+  down.
+- **stretch** / **balance** — a **hold-time** (child-pose stretch, single-leg / BOSU hold). No load.
+
+Like reps/load, the **raw authored magnitude is stored on the item and its meaning derived at render
+time**, so routines, sessions, and history need **no migration** — modality lives on the catalog entry
+and is looked up alongside equipment. The focus card, compact row, past-session peek, plans preview,
+and history log all render the right unit and drop the load tile for non-strength work; custom-create
+offers a modality selector (cardio additionally picks its metric); the catalog and picker flag
+non-strength movements with a highlighted modality badge. Delivers TODO §13.3 and the modality field of
+§17.1. *(`hiit` is reserved by §17.1 but has no distinct logging surface yet.)*
+
 ---
 
 ## 7. Spec ↔ Code & Test Traceability
@@ -106,6 +129,10 @@ always type any value regardless of the suggestion.
 | Filter chips constrain list & search narrows dynamically | [../tests/e2e/test_exercise_taxonomy.py](../tests/e2e/test_exercise_taxonomy.py) · `test_picker_filters_and_search` |
 | Custom movement form enforces name + equipment + pattern | [../tests/e2e/test_exercise_taxonomy.py](../tests/e2e/test_exercise_taxonomy.py) · `test_custom_movement_creation_flow` |
 | Polymorphic reps/load parse, format & equipment-derived units | [../tests/e2e/test_reps_and_load.py](../tests/e2e/test_reps_and_load.py) · `test_reps_and_load_helpers` |
+| Exercise modality axis + per-metric target formatting | [../src/modules/common/exerciseModality.js](../src/modules/common/exerciseModality.js) · `modalityOf` / `primaryMetricOf` / `formatMetricValue` |
+| Catalog & picker flag non-strength movements with a modality badge | [../tests/e2e/test_exercise_modality.py](../tests/e2e/test_exercise_modality.py) · `test_catalog_marks_cardio_with_a_modality_badge` |
+| Custom-create reveals the cardio metric selector and persists modality + metric | [../tests/e2e/test_exercise_modality.py](../tests/e2e/test_exercise_modality.py) · `test_create_cardio_exercise_reveals_metric_and_persists` |
+| Metric formatting renders time/distance/calories/watts/hold units | [../tests/e2e/test_exercise_modality.py](../tests/e2e/test_exercise_modality.py) · `test_metric_formatting_model_renders_the_right_units` |
 
 ---
 

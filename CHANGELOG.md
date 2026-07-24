@@ -17,6 +17,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-07-24 — Exercise modalities & a real security gate
+
+### Added
+- **Exercise modalities** (TODO §13.3 / the modality field of §17.1) — a movement is no longer always sets × reps × load. Each carries a **modality** ([`exerciseModality.js`](src/modules/common/exerciseModality.js)): **strength** (default), **cardio** (logged against **time / distance / calories / watts** — assault bike, rower, ski-erg, watt bike, treadmill), and **stretch** / **balance** (a **hold-time**). Like reps/load, the raw target is stored on the item and its meaning derived at render, so routines/sessions/history need **no migration**. The focus card, compact row, past-session peek, plans preview and history log show the right unit and drop the load tile for non-strength work; the focus timer seeds the target duration for time-bound cardio/holds. Custom-create gains a modality selector (cardio also picks its metric); the catalog and picker flag non-strength movements with a highlighted modality badge. Covered by `test_exercise_modality.py`; documented in [UC6 §5](use_cases/uc6_exercise_taxonomy_and_picker.md).
+
+### Changed
+- **OWASP ZAP is now a real, enforced build gate.** It previously ran without host networking (so it reached nothing → exit 3) and swallowed every non-zero exit as success. Now the container runs with `--network host` so it truly scans the app, the dev server serves real security headers (CSP-as-header, Permissions-Policy, Referrer-Policy, COOP, scrubbed `Server`), `script-src` drops `'unsafe-inline'` (the theme bootstrap moved to [`theme-boot.js`](src/theme-boot.js); two inline `onclick`s became delegated listeners), and a non-zero ZAP exit **fails the build**. Remaining alerts are triaged in [`deploy/zap/zap-baseline.conf`](deploy/zap/zap-baseline.conf) with written justifications — result: `FAIL-NEW: 0, WARN-NEW: 0`. Codified as a squeaky-clean-builds rule in [AGENT_RULES.md §2.A.3](AGENT_RULES.md).
+
+---
+
 ## 2026-07-23 — Fixes
 
 ### Fixed

@@ -1191,6 +1191,14 @@ select.menu-select {
   font-weight: 700;
 }
 
+/* A non-strength movement's modality badge leads the row, accented so cardio/stretch/balance
+   work stands out from the muted equipment/pattern badges. */
+.taxonomy-badge-modality {
+  background: var(--primary-light);
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
 /* Reusable filtered exercise picker (routine builder + gym-floor swap) */
 .exercise-picker {
   display: flex;

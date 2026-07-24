@@ -246,6 +246,9 @@ export function setupExerciseForms({ state, t, saveToLocalStorage, populateDropd
   if (btnAddExercise) {
     btnAddExercise.addEventListener("click", () => {
       openModal("dialog-exercise", { resetForm: true, formId: "form-exercise" });
+      // The form reset restores modality to strength; re-sync the metric field so a reopen never
+      // leaves the cardio metric selector showing over a strength default.
+      $id("exercise-metric-group")?.classList.add("hidden");
     });
   }
 
@@ -259,6 +262,7 @@ export function setupExerciseForms({ state, t, saveToLocalStorage, populateDropd
     const category = $id("exercise-category").value;
     const equipment = $id("exercise-equipment").value;
     const pattern = $id("exercise-pattern").value;
+    const modality = $id("exercise-modality")?.value || "strength";
     const instructions = $id("exercise-instructions").value.trim();
 
     // Strict taxonomy inheritance (TODO §13.2 Scenario C): a new movement ID must carry its
@@ -273,6 +277,12 @@ export function setupExerciseForms({ state, t, saveToLocalStorage, populateDropd
       pattern: pattern,
       instructions: instructions,
     };
+    // Modality decides how the movement is logged (exerciseModality.js). Omit the default so
+    // strength entries stay identical to the legacy shape; cardio also carries its effort metric.
+    if (modality && modality !== "strength") {
+      newEx.modality = modality;
+      if (modality === "cardio") newEx.metric = $id("exercise-metric")?.value || "time";
+    }
 
     state.exercises.push(newEx);
     saveToLocalStorage();
@@ -280,6 +290,16 @@ export function setupExerciseForms({ state, t, saveToLocalStorage, populateDropd
     populateDropdownSelectors();
     closeModal("dialog-exercise");
   });
+
+  // Only cardio needs an effort-metric choice; reveal that field just for cardio.
+  const modalitySelect = $id("exercise-modality");
+  const metricGroup = $id("exercise-metric-group");
+  if (modalitySelect && metricGroup) {
+    const syncMetricVisibility = () =>
+      metricGroup.classList.toggle("hidden", modalitySelect.value !== "cardio");
+    modalitySelect.addEventListener("change", syncMetricVisibility);
+    syncMetricVisibility();
+  }
 
   const searchExercisesEl = $id("search-exercises");
   if (searchExercisesEl) {

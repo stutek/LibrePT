@@ -1,4 +1,5 @@
 // src/views/exercisesView.js - Domain module for exercise catalog and filter logic
+import { modalityOf } from "../common/exerciseModality.js";
 import { escapeHTML } from "../common/utils.js";
 
 export function renderExercisesList({ state, t, filterQuery = "", categoryFilter = "All" }) {
@@ -35,10 +36,17 @@ export function renderExercisesList({ state, t, filterQuery = "", categoryFilter
   for (const ex of filtered) {
     const card = document.createElement("div");
     card.className = "exercise-item card glassmorphic";
-    const meta = [ex.equipment, ex.pattern]
-      .filter(Boolean)
-      .map((v) => `<span class="taxonomy-badge">${escapeHTML(v)}</span>`)
-      .join("");
+    const modality = modalityOf(ex);
+    const modalityBadge =
+      modality === "strength"
+        ? ""
+        : `<span class="taxonomy-badge taxonomy-badge-modality">${escapeHTML(modality)}</span>`;
+    const meta =
+      modalityBadge +
+      [ex.equipment, ex.pattern]
+        .filter(Boolean)
+        .map((v) => `<span class="taxonomy-badge">${escapeHTML(v)}</span>`)
+        .join("");
     card.innerHTML = `
       <div class="exercise-item-header">
         <h3>${escapeHTML(ex.name)}</h3>

@@ -3,9 +3,20 @@
 // taxonomy badges). Powers the fast-selection flows called for in TODO §13.2: Scenario A
 // (routine builder — filter then drop standardized IDs into a template) and Scenario B (gym-floor
 // swap — pre-filtered to the same muscle group so the substitute inherits the correct volume bucket).
+import { modalityOf } from "../common/exerciseModality.js";
 import { escapeHTML } from "../common/utils.js";
 
-const MUSCLE_GROUPS = ["All", "Chest", "Back", "Legs", "Shoulders", "Arms", "Core", "Recovery"];
+const MUSCLE_GROUPS = [
+  "All",
+  "Chest",
+  "Back",
+  "Legs",
+  "Shoulders",
+  "Arms",
+  "Core",
+  "Recovery",
+  "Cardio",
+];
 const EQUIPMENT = ["All", "Barbell", "Dumbbell", "Cable", "Machine", "Band", "Bodyweight"];
 
 /**
@@ -77,10 +88,19 @@ export function mountExercisePicker(
     }
     listEl.innerHTML = matches
       .map((ex) => {
-        const badges = [ex.equipment, ex.pattern]
-          .filter(Boolean)
-          .map((v) => `<span class="taxonomy-badge">${escapeHTML(v)}</span>`)
-          .join("");
+        const modality = modalityOf(ex);
+        // A non-strength movement leads with a highlighted modality badge so cardio/stretch/balance
+        // work is spottable at a glance in the list.
+        const modalityBadge =
+          modality === "strength"
+            ? ""
+            : `<span class="taxonomy-badge taxonomy-badge-modality">${escapeHTML(modality)}</span>`;
+        const badges =
+          modalityBadge +
+          [ex.equipment, ex.pattern]
+            .filter(Boolean)
+            .map((v) => `<span class="taxonomy-badge">${escapeHTML(v)}</span>`)
+            .join("");
         return `
           <button type="button" class="picker-item ${
             keepSelection && ex.id === selectedId ? "selected" : ""

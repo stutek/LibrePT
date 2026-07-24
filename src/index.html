@@ -639,6 +639,7 @@
           <option value="Arms">Arms</option>
           <option value="Core">Core</option>
           <option value="Recovery">Recovery</option>
+          <option value="Cardio">Cardio</option>
         </select>
       </div>
 
@@ -667,6 +668,28 @@
           <option value="Isolation">Isolation</option>
           <option value="Core">Core</option>
           <option value="Mobility">Mobility</option>
+          <option value="Conditioning">Conditioning</option>
+          <option value="Balance">Balance</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="exercise-modality">How it's logged *</label>
+        <select id="exercise-modality" required class="form-control">
+          <option value="strength">Strength — sets × reps × load</option>
+          <option value="cardio">Cardio — time / distance / calories / watts</option>
+          <option value="stretch">Stretch — hold time</option>
+          <option value="balance">Balance — hold time</option>
+        </select>
+      </div>
+
+      <div class="form-group hidden" id="exercise-metric-group">
+        <label for="exercise-metric">Cardio metric</label>
+        <select id="exercise-metric" class="form-control">
+          <option value="time">Time</option>
+          <option value="distance">Distance</option>
+          <option value="calories">Calories</option>
+          <option value="watts">Watts</option>
         </select>
       </div>
 

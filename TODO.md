@@ -217,13 +217,14 @@ The trademark was scrubbed from history and force-pushed (remote is clean). Stil
 
 ## 13. Exercise Library & Movement Taxonomy (Call to Action & Vision)
 
-> **Status (2026-07-22):** the taxonomy pivot and all three §13.2 selection scenarios are **built** and
+> **Status (2026-07-24):** the taxonomy pivot and all three §13.2 selection scenarios are **built** and
 > covered by [UC6](use_cases/uc6_exercise_taxonomy_and_picker.md) / `tests/e2e/test_exercise_taxonomy.py`
 > + `tests/e2e/test_reps_and_load.py` (shipped, see CHANGELOG). Exercises carry `equipment` + `pattern`;
 > the catalog shows taxonomy badges (no instructions); the filtered picker powers routine building and
 > gym-floor swaps; custom creation enforces muscle group + equipment + pattern; reps/load are polymorphic.
+> **§13.3 (conditioning/modality) shipped 2026-07-24** — see the modality note below and CHANGELOG.
 > **Still open:** seeding/mapping from an open standard (wger / ExRx) for interchangeable exports (§13.1
-> last bullet), and the conditioning-metric model (§13.3).
+> last bullet).
 
 ### 13.1 [~] [Brainstorm / Call to Action] Repurpose `exercisesView` from "Beginner Encyclopedia" to "Professional Movement Taxonomy"
 **The Core Insight:** A certified, professional Personal Trainer (`LibrePT`) knows all exercises by heart. They do not need lengthy `"instructions"` paragraphs, beginner descriptions, or how-to tutorials on their screen, nor do they ever hand their working device over to a client mid-session.
@@ -231,8 +232,8 @@ The trademark was scrubbed from history and force-pushed (remote is clean). Stil
 - **The True Purpose (Referential Integrity)**: The Exercise Catalog exists in software to provide immutable IDs (`exerciseId`), equipment tags (`Barbell`, `Cable`, `Dumbbell`, `Bodyweight`), and anatomical/biomechanical categories (`Primary/Secondary Muscle Groups`, `Horizontal Push/Pull`, `Hip Hinge`). Without strict taxonomy, aggregating long-term volume load or plotting estimated 1RM curves across months of client history is impossible.
 - **Adopt Open Standards** *(still open)*: Map or seed the base catalog from an established, open-source sports science taxonomy (e.g., **wger Workout Manager API / dataset** or **ExRx** classifications) to guarantee that LibrePT exports (`.json`/`.csv`) are universally interchangeable with external research, performance tracking, and coaching tools.
 
-### 13.3 [ ] Conditioning metrics: extend the reps/load model beyond sets × reps × kg
-Some movements are not `sets × reps × load`. A **conditioning/cardio machine** (assault bike, rower, ski-erg) is **time-bound** (go for 60s), **calorie-bound** (20 cal), or **power-bound** (hold 200 W) — often a mix. Today [helper/repsAndLoad.js](src/helper/repsAndLoad.js) already makes reps polymorphic (count / range / `30s` time / `max`) and load equipment-derived (kg / level / band / bw), so the seam exists. Extend it with a **metric type** per exercise (derived from equipment/pattern, e.g. `Cardio` → target is `time | calories | watts | distance`) so the focus card and the plan editor author and log the right unit, and the **exercise timer** (see the clipboard timer stack in [exerciseAndRestTimer.js](src/components/exerciseAndRestTimer.js) / UC1) can be the primary logging surface for time-bound work. Keep the raw authored value stored and derive meaning at render time, as reps/load already do. Relates to UC6 and the timer stack.
+### 13.3 [x] Conditioning metrics: extend the reps/load model beyond sets × reps × kg — **SHIPPED 2026-07-24**
+Graduated to [CHANGELOG](CHANGELOG.md) / [UC6 §5](use_cases/uc6_exercise_taxonomy_and_picker.md). Built as the **modality** axis ([exerciseModality.js](src/modules/common/exerciseModality.js)): cardio targets are `time | distance | calories | watts`, stretch/balance are hold-time, strength stays sets × reps × load. The raw value is stored and its meaning derived at render (as reps/load already do), the focus timer seeds the target duration for time-bound work, and modality is authored in custom-create + the inline editor. Subsumed under §17.1's modality field — see the modality note there for what remains (routine-builder metric authoring polish, `hiit`).
 
 ---
 
@@ -308,7 +309,7 @@ Today a finished session flattens to performed exercises + sets only ([activeSes
   - `superset` is a **container** holding child items (renders/reuses as a unit), not a flag spread across sibling items.
   - `rest` stays a **first-class item type**, but is **not** an exercise (never in `state.exercises`, never focusable/loggable).
   - **Replace the scattered `isRestItem` boolean** with `type` dispatch — ideally one `renderItem(item)` / handler switch rather than predicate checks sprinkled across ~15 call sites. (Resolves the "leaky `isRestItem`" concern.)
-- **Two orthogonal axes — don't conflate:** structural `type` (above) vs. an **exercise modality** field — `strength | cardio | stretch | hiit | balance` — that decides *how you log* (reps×load vs time/distance/cal/watts vs hold-time vs rounds). The modality axis **subsumes [13.3](#133--conditioning-metrics-extend-the-repsload-model-beyond-sets--reps--kg)**: add the field cheaply now (default `strength`); each modality's logging surface is the real work, built incrementally.
+- **Two orthogonal axes — don't conflate:** structural `type` (above) vs. an **exercise modality** field — `strength | cardio | stretch | hiit | balance` — that decides *how you log* (reps×load vs time/distance/cal/watts vs hold-time vs rounds). The modality axis **subsumes [13.3](#133--conditioning-metrics-extend-the-repsload-model-beyond-sets--reps--kg)**. **[~] Partially built (2026-07-24):** the modality field + `strength`/`cardio`/`stretch`/`balance` logging surfaces shipped ([exerciseModality.js](src/modules/common/exerciseModality.js), see §13.3 / CHANGELOG) — additive on the catalog entry, no migration. **Still open here:** wiring modality into the **`sessionItemRecord`** history snapshot itself (this item's core), routine-**builder** (`plansView`) metric authoring to match the inline editor, and `hiit` (rounds) which has no logging surface yet.
 - **Skipped exercises are kept**, marked `completed: false`, and **rendered greyed** — a deliberate review signal (what the client didn't get to) that feeds plan adjustments (uc2). Analytics must honour the flag so skipped work isn't counted as volume.
 - **Immutable snapshot (option a — inline copy).** History embeds a frozen copy of the program, *not* a reference to a live editable routine (editing/deleting a routine must never rewrite the past). A versioned/deduped program store (option b) is deferred — it's 16.2's versioning applied to programs, only worth it if storage bites and programs repeat heavily.
 - **Readers to update** (the sweep): only **3** iterate `.exercises` — [historyView.js](src/views/historyView.js), [clientsView.js](src/views/clientsView.js), [exerciseDeck.js](src/components/exerciseDeck.js) (last-performance reference); plus the writer + `openSessionFromHistory` re-open + `backupRestore` round-trip. Each must become rest-aware and completed-aware. **Additive/back-compatible**: old flat rows (and `DEFAULT_HISTORY` seed) stay valid behind a shape guard.
