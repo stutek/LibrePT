@@ -1,5 +1,10 @@
 name: Build, Verify and Deploy to GitHub Pages
 
+# Title each run with the head commit's message (its first line shows in the runs list) instead of
+# GitHub's default — which falls back to the workflow name / "Commit <sha> pushed by <user>" for a
+# multi-commit push. workflow_dispatch has no head_commit, so fall back to the workflow name there.
+run-name: ${{ github.event.head_commit.message || github.workflow }}
+
 # Publishes ONLY the runtime app (a freshly assembled dist/) to GitHub Pages on every
 # push to main. Publishes only src/, so tests/, use_cases/, build/, deploy/, and the Markdown docs
 # stay out of the public demo, and avoids committing a dist/ folder or a gh-pages branch.
