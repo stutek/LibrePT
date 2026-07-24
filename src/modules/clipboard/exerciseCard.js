@@ -11,6 +11,12 @@
 //   logQuickSignal(tag), openFeedbackModal(), onFocus(index)
 // }
 
+import {
+  formatMetricValue,
+  isTimeBasedMetric,
+  metricLabelKey,
+  toSeconds,
+} from "../common/exerciseModality.js";
 import { formatLoad, formatReps, hasLoad, loadParts } from "../common/repsAndLoad.js";
 
 export function renderExerciseCard(card, item, ctx) {
@@ -42,7 +48,15 @@ export function renderExerciseCard(card, item, ctx) {
     statusBadge = `<span class="badge deck-card-status deck-card-status-upcoming">Upcoming</span>`;
   }
 
-  // Load renders per equipment (kg / stack level / band / bodyweight).
+  // Modality decides the primary target tile: strength shows reps + a load tile; cardio shows its
+  // effort metric (time/distance/calories/watts) and no load; stretch/balance show a hold-time.
+  const metric = item.metric || "reps";
+  const isStrength = metric === "reps";
+  const primaryValue = isStrength
+    ? formatReps(item.repsTarget)
+    : formatMetricValue(item.repsTarget, metric);
+  const primaryLabel = t(metricLabelKey(metric));
+  // Load renders per equipment (kg / stack level / band / bodyweight) — strength only.
   const load = loadParts(item.weightTarget, item.loadUnit);
   const counter = `${item.index + 1}/${currentCount}`;
 
@@ -68,13 +82,17 @@ export function renderExerciseCard(card, item, ctx) {
           <span class="deck-stat-label">${t("sets")}</span>
         </div>
         <div class="deck-stat">
-          <span class="deck-stat-value">${escapeHTML(formatReps(item.repsTarget))}</span>
-          <span class="deck-stat-label">${t("reps_label")}</span>
+          <span class="deck-stat-value">${escapeHTML(primaryValue)}</span>
+          <span class="deck-stat-label">${escapeHTML(primaryLabel)}</span>
         </div>
-        <div class="deck-stat">
+        ${
+          isStrength
+            ? `<div class="deck-stat">
           <span class="deck-stat-value">${escapeHTML(load.value)}</span>
           <span class="deck-stat-label">${escapeHTML(load.label)}</span>
-        </div>
+        </div>`
+            : ""
+        }
       </div>
       <div class="deck-card-actions">
         <button type="button" class="deck-action-btn deck-action-easy" aria-label="${t("signal_too_easy")}">
@@ -104,16 +122,28 @@ export function renderExerciseCard(card, item, ctx) {
     if (timerBtn && startRestTimer)
       timerBtn.addEventListener("click", (e) => {
         e.stopPropagation();
-        startRestTimer(item.workDuration || 0, "exercise", item.name);
+        // Time-bound work (cardio time / stretch & balance holds) seeds the timer with the target
+        // duration so it counts DOWN the prescribed effort; everything else counts up as a stopwatch.
+        const seconds = isTimeBasedMetric(metric)
+          ? toSeconds(item.repsTarget)
+          : item.workDuration || 0;
+        startRestTimer(seconds, "exercise", item.name);
       });
   } else {
     // Compact row for the rest of the plan — tap to bring into focus. The target
     // is labelled S(ets) × R(eps) × weight so a collapsed, single-line card still
     // reads unambiguously (e.g. "S4 × R6 × 60kg").
-    const compactLoad = hasLoad(item.weightTarget, item.loadUnit)
-      ? ` × ${escapeHTML(formatLoad(item.weightTarget, item.loadUnit))}`
-      : "";
-    const compactTarget = `S${escapeHTML(String(item.setsTarget))} × R${escapeHTML(formatReps(item.repsTarget))}${compactLoad}`;
+    // Strength collapses to "S4 × R6 × 60kg"; other modalities to "S3 × 500 m" / "S1 × 20 cal" /
+    // "S2 × 0:30" — sets × the primary metric value, with no load axis.
+    let compactTarget;
+    if (isStrength) {
+      const compactLoad = hasLoad(item.weightTarget, item.loadUnit)
+        ? ` × ${escapeHTML(formatLoad(item.weightTarget, item.loadUnit))}`
+        : "";
+      compactTarget = `S${escapeHTML(String(item.setsTarget))} × R${escapeHTML(formatReps(item.repsTarget))}${compactLoad}`;
+    } else {
+      compactTarget = `S${escapeHTML(String(item.setsTarget))} × ${escapeHTML(primaryValue)}`;
+    }
     card.innerHTML = `
       <div class="deck-card-compact">
         <span class="deck-card-counter">${counter}</span>

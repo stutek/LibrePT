@@ -15,6 +15,7 @@
 //   onRerender()   // re-render the whole board (past-card toggle / superset save)
 // }
 
+import { formatMetricValue } from "../common/exerciseModality.js";
 import { formatLoad, formatReps } from "../common/repsAndLoad.js";
 import { generateShortUUID } from "../common/utils.js";
 import { renderExerciseCard } from "./exerciseCard.js";
@@ -81,6 +82,7 @@ export function renderExerciseDeck(deckContainer, deps) {
           sessionDate: dateStr,
           sets: ex.sets,
           loadUnit: ex.loadUnit || "kg",
+          metric: ex.metric || "reps",
           routineName: pastSession.routineName,
         });
         pIdx++;
@@ -124,6 +126,8 @@ export function renderExerciseDeck(deckContainer, deps) {
       repsTarget: ex.repsTarget ?? ex.reps ?? 10,
       weightTarget: ex.weightTarget ?? ex.weight ?? 0,
       loadUnit: ex.loadUnit || "kg",
+      modality: ex.modality || "strength",
+      metric: ex.metric || "reps",
       rest: ex.rest || 0,
       circuitId: ex.circuitId || null,
       circuitTitle: ex.circuitTitle || "",
@@ -145,16 +149,25 @@ export function renderExerciseDeck(deckContainer, deps) {
       if (isExpanded) {
         // Logged history, not a target: every set is listed as-is rather than reduced to
         // one sets/reps/weight triplet, since loads and reps often vary across the sets
+        const isStrength = (item.metric || "reps") === "reps";
         const setRows = item.sets
-          .map(
-            (s, sIdx) => `
+          .map((s, sIdx) => {
+            // Strength lists load + reps columns; cardio/holds collapse to their single logged
+            // magnitude (time/distance/cal/watts/hold) in the reps column, with no load.
+            const loadCol = isStrength
+              ? `<span class="deck-history-load">${escapeHTML(formatLoad(s.weight, item.loadUnit) || "—")}</span>`
+              : "";
+            const valueCol = isStrength
+              ? `${escapeHTML(formatReps(s.reps))} reps`
+              : escapeHTML(formatMetricValue(s.reps, item.metric));
+            return `
             <div class="deck-history-set-row">
               <strong>S${sIdx + 1}</strong>
-              <span class="deck-history-load">${escapeHTML(formatLoad(s.weight, item.loadUnit) || "—")}</span>
-              <span class="deck-history-reps">${escapeHTML(formatReps(s.reps))} reps</span>
+              ${loadCol}
+              <span class="deck-history-reps">${valueCol}</span>
               ${s.note ? `<span class="deck-history-note">${escapeHTML(s.note)}</span>` : ""}
-            </div>`,
-          )
+            </div>`;
+          })
           .join("");
         card.innerHTML = `
             <div class="deck-card-top">

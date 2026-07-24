@@ -1,14 +1,18 @@
 // src/data/exercises.js — seed exercise library as a professional movement taxonomy.
-// Each entry carries the immutable `id` plus three taxonomy axes used for fast selection, filtering
-// and long-term volume analytics: `category` (primary muscle group), `equipment`, and `pattern`
-// (biomechanical movement pattern). `instructions` is retained for the live deck but deprecated in
-// the catalog view — a certified PT does not need how-to text (TODO §13.1).
+// Each entry carries the immutable `id` plus taxonomy axes used for fast selection, filtering and
+// long-term volume analytics: `category` (primary muscle group), `equipment`, `pattern`
+// (biomechanical movement pattern), and `modality` (HOW it is logged — see exerciseModality.js).
+// `instructions` is retained for the live deck but deprecated in the catalog view — a certified PT
+// does not need how-to text (TODO §13.1).
 //
 // Controlled vocabularies (keep values stable — history and analytics bucket on them):
-//   category: Chest | Back | Legs | Shoulders | Arms | Core | Recovery
+//   category: Chest | Back | Legs | Shoulders | Arms | Core | Recovery | Cardio
 //   equipment: Barbell | Dumbbell | Cable | Machine | Bodyweight
 //   pattern: Horizontal Push | Horizontal Pull | Vertical Push | Vertical Pull |
-//            Squat | Hinge | Lunge | Isolation | Core | Mobility
+//            Squat | Hinge | Lunge | Isolation | Core | Mobility | Conditioning | Balance
+//   modality (TODO §13.3 / §17.1): strength (default, omitted) | cardio | stretch | balance
+//     - cardio entries also carry `metric`: time | distance | calories | watts (the effort unit).
+//     - stretch/balance are logged as a hold-time; strength stays sets × reps × load.
 export const DEFAULT_EXERCISES = [
   // Chest
   {
@@ -268,6 +272,7 @@ export const DEFAULT_EXERCISES = [
     category: "Recovery",
     equipment: "Bodyweight",
     pattern: "Mobility",
+    modality: "stretch",
     instructions: "Hold child pose and lateral lat stretches for 30s.",
   },
   {
@@ -276,6 +281,82 @@ export const DEFAULT_EXERCISES = [
     category: "Recovery",
     equipment: "Bodyweight",
     pattern: "Mobility",
+    modality: "stretch",
     instructions: "Static hamstring stretch and hip flexor stretch, hold 30s per side.",
+  },
+
+  // Cardio / conditioning — logged against an effort metric (time | distance | calories | watts),
+  // not sets × reps × load. The clipboard timer is the primary logging surface for time-bound work.
+  {
+    id: "e41d5e6f",
+    name: "Assault Bike",
+    category: "Cardio",
+    equipment: "Machine",
+    pattern: "Conditioning",
+    modality: "cardio",
+    metric: "calories",
+    instructions: "Sustained air-bike intervals; drive with arms and legs to the calorie target.",
+  },
+  {
+    id: "e42d5e6f",
+    name: "Concept2 Rower",
+    category: "Cardio",
+    equipment: "Machine",
+    pattern: "Conditioning",
+    modality: "cardio",
+    metric: "distance",
+    instructions: "Row to the target distance with a strong legs-hips-arms sequence.",
+  },
+  {
+    id: "e43d5e6f",
+    name: "Ski-Erg",
+    category: "Cardio",
+    equipment: "Machine",
+    pattern: "Conditioning",
+    modality: "cardio",
+    metric: "calories",
+    instructions: "Double-pole the ski-erg to the calorie target, hinging at the hips.",
+  },
+  {
+    id: "e44d5e6f",
+    name: "Watt Bike",
+    category: "Cardio",
+    equipment: "Machine",
+    pattern: "Conditioning",
+    modality: "cardio",
+    metric: "watts",
+    instructions: "Hold the target power output (watts) for the prescribed effort.",
+  },
+  {
+    id: "e45d5e6f",
+    name: "Treadmill Run",
+    category: "Cardio",
+    equipment: "Machine",
+    pattern: "Conditioning",
+    modality: "cardio",
+    metric: "time",
+    instructions: "Steady-state or interval run to the target time.",
+  },
+
+  // Balance / stability — a stability hold measured in hold-time (optionally per side).
+  {
+    id: "e46e6f7a",
+    name: "Single-Leg Balance",
+    category: "Core",
+    equipment: "Bodyweight",
+    pattern: "Balance",
+    modality: "balance",
+    instructions:
+      "Stand on one leg, hips level and core braced; hold for the target time per side.",
+  },
+  {
+    id: "e47e6f7a",
+    name: "BOSU Squat Hold",
+    category: "Legs",
+    equipment: "Bodyweight",
+    pattern: "Balance",
+    modality: "balance",
+    instructions:
+      "Hold a quarter-squat on an unstable BOSU dome, staying centred for the target time.",
   },
 ];

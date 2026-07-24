@@ -11,6 +11,7 @@ import {
   renderActiveUsersList,
   updateClientTabsFadeState,
 } from "../modules/common/activeUsersList.js";
+import { modalityOf, primaryMetricOf } from "../modules/common/exerciseModality.js";
 import { openFeedbackModal } from "../modules/common/feedbackModal.js";
 import { hasLoad, loadUnitForEquipment } from "../modules/common/repsAndLoad.js";
 import {
@@ -226,6 +227,8 @@ export function openSessionFromHistory(log) {
       repsTarget: repsTarget,
       weightTarget: weightTarget,
       loadUnit: loadUnitForEquipment(ex?.equipment),
+      modality: modalityOf(ex),
+      metric: primaryMetricOf(ex),
       rest: item.rest || 0,
       circuitId: item.circuitId || null,
       circuitTitle: item.circuitTitle || "",
@@ -326,6 +329,8 @@ export function startWorkoutSession(clientRoutines, bookingMeta = null, deps = {
             repsTarget: item.reps,
             weightTarget: item.weight,
             loadUnit: loadUnitForEquipment(ex.equipment),
+            modality: modalityOf(ex),
+            metric: primaryMetricOf(ex),
             rest: item.rest,
             circuitId: item.circuitId || null,
             circuitTitle: item.circuitTitle || "",
@@ -875,6 +880,8 @@ export function setupActiveSession(deps) {
         pattern: baseEx.pattern || "",
         instructions: baseEx.instructions,
         loadUnit: loadUnitForEquipment(baseEx.equipment),
+        modality: modalityOf(baseEx),
+        metric: primaryMetricOf(baseEx),
         setsTargetCount: sets,
         repsTarget: reps,
         weightTarget: weight,
@@ -1020,6 +1027,8 @@ export function finishWorkoutSession() {
           id: ex.id,
           name: ex.name,
           loadUnit: ex.loadUnit || "kg",
+          modality: ex.modality || "strength",
+          metric: ex.metric || "reps",
           sets: clientSetsLogged,
         });
       }

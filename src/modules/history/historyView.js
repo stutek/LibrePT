@@ -1,5 +1,6 @@
 // src/views/historyView.js - Domain module for global and client workout history logs
 import { openSessionFromHistory } from "../../controllers/activeSessionController.js";
+import { formatMetricValue } from "../common/exerciseModality.js";
 import { formatLoad, formatReps } from "../common/repsAndLoad.js";
 import { escapeHTML, formatDateStr } from "../common/utils.js";
 
@@ -29,10 +30,15 @@ export function renderHistoryItems({ historyList, container, t }) {
 
     let exercisesLogHTML = "";
     for (const ex of log.exercises) {
+      const metric = ex.metric || "reps";
       const setsText = ex.sets
         .map((s) => {
+          const note = s.note ? ` (${s.note})` : ""; // setsText is escapeHTML'd whole at insertion
+          // Cardio/holds logged one magnitude per set (time/distance/cal/watts/hold); strength keeps
+          // its "load×reps" form.
+          if (metric !== "reps") return `${formatMetricValue(s.reps, metric)}${note}`;
           const load = formatLoad(s.weight, ex.loadUnit);
-          return `${load ? `${load}×` : ""}${formatReps(s.reps)}${s.note ? ` (${s.note})` : ""}`;
+          return `${load ? `${load}×` : ""}${formatReps(s.reps)}${note}`;
         })
         .join(", ");
 
