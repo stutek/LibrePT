@@ -35,10 +35,9 @@ def _nav(page, path):
 
 def _open_session(page, local_server):
     page.goto(local_server)
-    page.wait_for_timeout(700)  # let the seeded active session recover
-    page.locator(
-        ".booking-card.booking-live, .booking-card:has-text('Group Strength & Conditioning')"
-    ).first.click()
+    card_sel = ".booking-card.booking-live, .booking-card:has-text('Group Strength & Conditioning')"
+    page.wait_for_selector(card_sel)
+    page.locator(card_sel).first.click()
     page.wait_for_selector("#active-session-overlay:not(.hidden)")
     page.wait_for_timeout(400)
 
