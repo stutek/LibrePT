@@ -335,63 +335,95 @@ def run_dynamic_security_checks():
     print("  ✓ Dynamic security checks (headers & code injection audit) passed.")
 
 
+ZAP_TARGET = "http://localhost:8081/LibrePT/"
+ZAP_PORT = 8081
+
+
+def _is_port_open(port):
+    import socket
+
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.settimeout(0.5)
+        return sock.connect_ex(("localhost", port)) == 0
+
+
+def _ensure_zap_target_up():
+    """Guarantee the app is actually being served on :8081 before ZAP scans it.
+
+    A scan that reaches nothing exits "clean" and gives false assurance (AGENT_RULES §2.A.3),
+    so if the dev server / e2e fixture has not already bound the port we start our own copy and
+    wait for it. Returns the Popen we started (to leave running — the user owns the dev server)
+    or None if the port was already up.
+    """
+    import time
+
+    if _is_port_open(ZAP_PORT):
+        return None
+    proc = subprocess.Popen(
+        [sys.executable, "-m", "deploy.local_http_server", "--port", str(ZAP_PORT)],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+    for _ in range(100):  # up to ~10s for the server to come up
+        if _is_port_open(ZAP_PORT):
+            return proc
+        time.sleep(0.1)
+    proc.terminate()
+    return None
+
+
 def run_owasp_zap_scan():
-    """Runs OWASP ZAP Baseline Security Scan (via Docker or local ZAP CLI if available, with fallback audit)."""
+    """Runs the OWASP ZAP baseline scan against the live app and FAILS the build on any finding.
+
+    Enforcement (AGENT_RULES §2.A.3): the container runs with host networking so it truly reaches
+    the app on :8081, alerts are triaged by deploy/zap/zap-baseline.conf (each ignore justified in
+    that file), and a non-zero ZAP exit — code 1 (FAIL), 2 (WARN), or 3 (scan error / unreachable) —
+    fails the build. Nothing is printed-and-passed.
+    """
     print("\n  Running OWASP ZAP Security Scan...")
 
-    # Check if zap-cli or zap.sh exists locally
-    zap_bin = shutil.which("zap-cli") or shutil.which("zap.sh")
     docker_bin = shutil.which("docker")
+    if not docker_bin:
+        print("  ✗ OWASP ZAP requires Docker, which is not available on PATH.")
+        sys.exit(1)
 
-    if docker_bin:
-        print("    - Launching OWASP ZAP container baseline scan...")
-        # Rapid local baseline scan check against static dist/sources
-        res = subprocess.run(
-            [
-                docker_bin,
-                "run",
-                "--rm",
-                "zaproxy/zap-stable",
-                "zap-baseline.py",
-                "-t",
-                "http://localhost:8081/LibrePT/",
-                "-I",
-            ],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-        )
-        if res.returncode == 0 or "FAIL-NEW: 0" in res.stdout or res.returncode == 2:
-            print("  ✓ OWASP ZAP baseline security scan passed cleanly.")
-            return
-        else:
-            print(
-                f"  ! OWASP ZAP completed with warnings/findings (code {res.returncode})."
-            )
-            print("  ✓ OWASP ZAP security scan completed.")
-            return
-    elif zap_bin:
-        print(f"    - Running ZAP scan via {zap_bin}...")
-        subprocess.run([zap_bin, "quick-scan", "http://localhost:8081/LibrePT/"])
-        print("  ✓ OWASP ZAP security scan passed.")
+    if not _is_port_open(ZAP_PORT):
+        _ensure_zap_target_up()
+    if not _is_port_open(ZAP_PORT):
+        print(f"  ✗ OWASP ZAP target {ZAP_TARGET} is not reachable — nothing to scan.")
+        sys.exit(1)
+
+    print("    - Launching OWASP ZAP container baseline scan (host network)...")
+    conf_dir = os.path.join(os.path.abspath("deploy"), "zap")
+    res = subprocess.run(
+        [
+            docker_bin,
+            "run",
+            "--rm",
+            "--network",
+            "host",
+            "-v",
+            f"{conf_dir}:/zap/wrk:ro",
+            "zaproxy/zap-stable",
+            "zap-baseline.py",
+            "-t",
+            ZAP_TARGET,
+            "-c",
+            "zap-baseline.conf",
+        ],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+    )
+    if res.returncode == 0:
+        print("  ✓ OWASP ZAP baseline security scan passed cleanly (WARN-NEW: 0).")
         return
-    else:
-        # Graceful fallback report when Docker/ZAP daemon is not running in the current container
-        print(
-            "  ! OWASP ZAP engine (Docker/zap-cli) is not installed in local environment."
-        )
-        print("    - Performing ZAP DAST rules static assertion sweep...")
-        # Verify ZAP DAST rules compliance: no inline script hashes or unsafe-eval in CSP
-        with open(os.path.join("src", "index.html"), "r", encoding="utf-8") as f:
-            html = f.read()
-        if "unsafe-eval" in html:
-            print(
-                "  ✗ OWASP ZAP security policy check failed: 'unsafe-eval' detected in CSP."
-            )
-            sys.exit(1)
-        print(
-            "  ✓ OWASP ZAP baseline security rules passed (fallback static DAST mode)."
-        )
+
+    # Non-zero: surface the report tail so the offending alerts are visible, then fail.
+    tail = "\n".join(res.stdout.strip().splitlines()[-40:])
+    print(tail)
+    print(f"  ✗ OWASP ZAP scan failed (exit {res.returncode}).")
+    sys.exit(1)
 
 
 def run_stage_1_parallel():

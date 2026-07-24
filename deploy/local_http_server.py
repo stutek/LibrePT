@@ -34,10 +34,48 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC_DIR = os.path.join(REPO_ROOT, "src")
 BASE = "/LibrePT"  # mirror the GitHub Pages project sub-path (the repo name)
 
+# Security headers mirrored onto every response so the OWASP ZAP baseline scan (build check)
+# audits the app the way a hardened host would serve it. The CSP matches the index.html
+# <meta> policy plus the directives a meta tag cannot express as a header (frame-ancestors)
+# or that do not inherit from default-src (base-uri / form-action / object-src) — otherwise
+# ZAP flags "CSP: Failure to Define Directive with No Fallback". microphone is intentionally
+# left at its browser default so in-clipboard voice notes keep working.
+SECURITY_HEADERS = {
+    "Content-Security-Policy": (
+        "default-src 'self'; "
+        "script-src 'self'; "
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; "
+        "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; "
+        "img-src 'self' data:; "
+        "base-uri 'self'; "
+        "form-action 'self'; "
+        "frame-ancestors 'none'; "
+        "object-src 'none'"
+    ),
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Permissions-Policy": (
+        "geolocation=(), camera=(), payment=(), usb=(), "
+        "magnetometer=(), gyroscope=(), accelerometer=()"
+    ),
+    "Cross-Origin-Opener-Policy": "same-origin",
+}
+
 
 class SubPathHandler(SimpleHTTPRequestHandler):
+    # Suppress the Python/http.server version leak (ZAP "Server Leaks Version Information").
+    server_version = "LibrePT-dev"
+    sys_version = ""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=SRC_DIR, **kwargs)
+
+    def end_headers(self):
+        # Inject the hardening headers just before the header block closes, so they land on
+        # every response — the 302 root redirect, the SPA shell, static assets, and 404s alike.
+        for name, value in SECURITY_HEADERS.items():
+            self.send_header(name, value)
+        super().end_headers()
 
     def translate_path(self, path):
         # Strip the /LibrePT prefix, then let the base class map the remainder under src/.

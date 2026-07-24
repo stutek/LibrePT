@@ -67,7 +67,7 @@ export function renderHistoryItems({ historyList, container, t }) {
         const tooltipBody = f.note ? escapeHTML(f.note) : t("no_details_specified");
 
         feedbackIconsHTML += `
-          <span class="history-feedback-icon" onclick="this.classList.toggle('active'); event.stopPropagation();">
+          <span class="history-feedback-icon">
             <i class="${iconClass}"></i>
             <span class="tooltip-content">
               <div class="tooltip-title">${escapeHTML(tooltipTitle)}</div>
@@ -86,7 +86,7 @@ export function renderHistoryItems({ historyList, container, t }) {
           )
           .join("");
         feedbackIconsHTML += `
-          <span class="history-feedback-icon" onclick="this.classList.toggle('active'); event.stopPropagation();">
+          <span class="history-feedback-icon">
             <i class="fa-solid fa-sticky-note text-primary"></i>
             <span class="tooltip-content">
               <div class="tooltip-title">${t("trainer_set_notes")}</div>
@@ -124,6 +124,15 @@ export function renderHistoryItems({ historyList, container, t }) {
     card.addEventListener("click", () => {
       openSessionFromHistory(log);
     });
+
+    // Tap a feedback/notes icon to toggle its tooltip; stop the tap from also opening the
+    // session (the card's own click). Replaces inline onclick= so CSP can forbid inline script.
+    for (const icon of card.querySelectorAll(".history-feedback-icon")) {
+      icon.addEventListener("click", (e) => {
+        e.stopPropagation();
+        icon.classList.toggle("active");
+      });
+    }
 
     fragment.appendChild(card);
   }
