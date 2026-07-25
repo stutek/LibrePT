@@ -2518,10 +2518,11 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   background: var(--danger-light);
 } /* FLOATING REST TIMER */
 /* Per-client timer stack: a column of compact labelled countdowns floating over the clipboard. */
+/* Same viewport-vs-column pinning as .floating-action-btn — see the note there. */
 .timer-stack {
   position: fixed;
   bottom: calc(92px + var(--safe-bottom) + 12px);
-  right: 6px;
+  right: max(6px, calc((100vw - var(--app-max-width, 480px)) / 2 + 6px));
   z-index: 150;
   display: flex;
   flex-direction: column;
@@ -4025,10 +4026,14 @@ textarea.form-control {
 }
 
 /* Floating Action Button (Create Session) — stays visible while scrolling the sessions list */
+/* Fixed elements are pinned to the VIEWPORT, but the app is a centred column of --app-max-width.
+   Offsetting from the viewport edge therefore throws them far outside the app on a wide screen
+   (measured 464px clear of it at 1440px). This keeps the inset on a phone, where the column fills
+   the viewport, and follows the column's own edge once the screen is wider than it. */
 .floating-action-btn {
   position: fixed;
   bottom: calc(72px + var(--safe-bottom));
-  right: 16px;
+  right: max(16px, calc((100vw - var(--app-max-width, 480px)) / 2 + 16px));
   z-index: 120;
   border-radius: var(--border-radius-pill, 9999px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
