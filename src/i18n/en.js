@@ -94,6 +94,11 @@ export const en = {
   backup_export_title: "Export Data Backup",
   backup_export_desc: "Download your clients, routines, and workout logs as a single JSON file.",
   btn_export_json: "Export JSON",
+  catalog_export_title: "Export Exercise Catalog",
+  catalog_export_desc:
+    "Export your movement catalog mapped to the open wger taxonomy, so it stays interchangeable with external tools.",
+  btn_export_catalog_json: "Export Catalog JSON",
+  btn_export_catalog_csv: "Export Catalog CSV",
   backup_import_title: "Import Data Backup",
   backup_import_desc:
     "Load an existing .json backup file. This will merge or overwrite your current database.",

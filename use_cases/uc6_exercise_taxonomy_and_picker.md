@@ -129,6 +129,33 @@ non-strength movements with a highlighted modality badge. Delivers TODO §13.3 a
 
 ---
 
+## 6. Open-Standard Crosswalk — interchangeable exports
+
+The catalog is only useful for long-term, cross-tool analytics if its taxonomy speaks a language
+other software understands. LibrePT therefore maps its two wger-aligned axes onto the **wger Workout
+Manager** open dataset — the interchange target chosen because it is genuinely open (AGPL, open data)
+where ExRx is proprietary
+([../src/modules/common/exerciseStandard.js](../src/modules/common/exerciseStandard.js)):
+
+- **Mapping key is the canonical name, not a numeric id.** wger's primary keys are per-instance and
+  unstable; the category/equipment **name** is what actually round-trips between installs. LibrePT
+  maps `category` → wger `ExerciseCategory` (muscle groups; `Core` → wger `Abs`) and `equipment` →
+  wger `Equipment` (bodyweight → wger's literal `none (bodyweight exercise)`).
+- **LibrePT is a superset of the standard, and the crosswalk says so honestly.** LibrePT adds a
+  biomechanical `pattern` axis and a richer `modality` axis wger has no field for; these are preserved
+  under a namespaced `x_librept` extension so a round-trip loses nothing. Where the standard has **no
+  equivalent** — wger has no Cardio/flexibility category, and no Cable/Machine equipment — the mapping
+  is an explicit **null**, never a wrong best-fit. `unmappedTerms()` surfaces those gaps as a testable
+  fact.
+- **Two export shapes** from the Sync & Backup dialog, both over the trainer's **live** catalog
+  (custom movements included): a self-describing **interchange JSON** envelope
+  (`catalogToInterchange`) naming its `format`/`version`, and an interchange **CSV** (`catalogToCsv`)
+  that puts the wger-mapped and raw-LibrePT columns side by side for spreadsheet inspection.
+
+Delivers TODO §13.1's last bullet (adopt an open standard for interchangeable exports).
+
+---
+
 ## 7. Spec ↔ Code & Test Traceability
 
 | Specification Requirement | Target Implementation / Test |
@@ -145,6 +172,9 @@ non-strength movements with a highlighted modality badge. Delivers TODO §13.3 a
 | Catalog & picker flag non-strength movements with a modality badge | [../tests/e2e/test_exercise_modality.py](../tests/e2e/test_exercise_modality.py) · `test_catalog_marks_cardio_with_a_modality_badge` |
 | Custom-create reveals the cardio metric selector and persists modality + metric | [../tests/e2e/test_exercise_modality.py](../tests/e2e/test_exercise_modality.py) · `test_create_cardio_exercise_reveals_metric_and_persists` |
 | Metric formatting renders time/distance/calories/watts/hold units | [../tests/e2e/test_exercise_modality.py](../tests/e2e/test_exercise_modality.py) · `test_metric_formatting_model_renders_the_right_units` |
+| Open-standard crosswalk: category/equipment → wger canonical names, honest nulls | [../src/modules/common/exerciseStandard.js](../src/modules/common/exerciseStandard.js) · `wgerCategoryOf` / `wgerEquipmentOf` / `unmappedTerms` |
+| Interchange record preserves LibrePT axes under `x_librept`; CSV crosswalk | [../tests/e2e/test_exercise_standard.py](../tests/e2e/test_exercise_standard.py) · `test_interchange_record_preserves_librept_axes_and_flags_gaps` / `test_csv_export_has_header_and_quotes_cells` |
+| Backup dialog "Export Catalog" downloads a self-describing interchange file | [../tests/e2e/test_exercise_standard.py](../tests/e2e/test_exercise_standard.py) · `test_catalog_export_button_downloads_interchange_json` |
 
 ---
 
@@ -152,6 +182,3 @@ non-strength movements with a highlighted modality badge. Delivers TODO §13.3 a
 
 - **[UC1 — Gym-Floor Clipboard](uc1_gym_floor_clipboard.md)**: Scenario B's live swap happens inside the clipboard; the inline editor authors reps/load with the same polymorphic controls.
 - **[UC2 — Asynchronous Plan Adjustments](uc2_async_plan_adjustments.md)**: the desk-side adjustment wizard reuses the picker to swap a flagged movement.
-
-> **Open gap.** Seeding/mapping the base catalog from an established open taxonomy (e.g. wger / ExRx)
-> for universally interchangeable exports remains future work (TODO §13.1).

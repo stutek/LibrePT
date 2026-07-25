@@ -13,7 +13,26 @@
 //   t
 // }
 
+import { catalogToCsv, catalogToInterchange } from "./exerciseStandard.js";
+
 let deps = null;
+
+// Download an in-memory string as a file, reusing one blob-anchor pattern for every export action.
+function downloadFile(contents, filename, mimeType) {
+  const blob = new Blob([contents], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
+  URL.revokeObjectURL(url);
+}
+
+function catalogFilename(extension) {
+  return `librept_catalog_${new Date().toISOString().substring(0, 10)}.${extension}`;
+}
 
 export function initBackupRestore(d) {
   deps = d;
@@ -42,21 +61,36 @@ export function setupBackupRestore() {
     closeBtn.addEventListener("click", () => dialog.close());
   }
 
-  // Export JSON
+  // Export JSON — the whole local database, for backup / device migration.
   const exportBtn = document.getElementById("btn-export-db");
   if (exportBtn) {
     exportBtn.addEventListener("click", () => {
       const dataStr = JSON.stringify(deps.getState(), null, 2);
-      const dataBlob = new Blob([dataStr], { type: "application/json" });
-      const url = URL.createObjectURL(dataBlob);
+      downloadFile(
+        dataStr,
+        `librept_backup_${new Date().toISOString().substring(0, 10)}.json`,
+        "application/json",
+      );
+    });
+  }
 
-      const dlAnchor = document.createElement("a");
-      dlAnchor.href = url;
-      dlAnchor.download = `librept_backup_${new Date().toISOString().substring(0, 10)}.json`;
-      document.body.appendChild(dlAnchor);
-      dlAnchor.click();
-      document.body.removeChild(dlAnchor);
-      URL.revokeObjectURL(url);
+  // Export the exercise catalog mapped to the open wger taxonomy, so it stays interchangeable with
+  // external research / coaching tools (TODO §13.1). Exports the trainer's LIVE catalog — custom
+  // movements included — not just the seed set.
+  const exportCatalogJsonBtn = document.getElementById("btn-export-catalog-json");
+  if (exportCatalogJsonBtn) {
+    exportCatalogJsonBtn.addEventListener("click", () => {
+      const exercises = deps.getState().exercises || [];
+      const payload = JSON.stringify(catalogToInterchange(exercises), null, 2);
+      downloadFile(payload, catalogFilename("json"), "application/json");
+    });
+  }
+
+  const exportCatalogCsvBtn = document.getElementById("btn-export-catalog-csv");
+  if (exportCatalogCsvBtn) {
+    exportCatalogCsvBtn.addEventListener("click", () => {
+      const exercises = deps.getState().exercises || [];
+      downloadFile(catalogToCsv(exercises), catalogFilename("csv"), "text/csv");
     });
   }
 

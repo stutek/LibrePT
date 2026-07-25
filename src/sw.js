@@ -7,7 +7,7 @@
 // online load is one deployed version, and CACHE_NAME is bumped every release so `activate` purges old
 // caches wholesale. Adding a runtime module? Add it to ASSETS AND bump CACHE_NAME, or offline loads a
 // version-skewed app.
-const CACHE_NAME = "librept-v18";
+const CACHE_NAME = "librept-v19";
 const ASSETS = [
   "./",
   "./index.html",
@@ -27,6 +27,7 @@ const ASSETS = [
   "./modules/common/dom.js",
   "./modules/common/repsAndLoad.js",
   "./modules/common/exerciseModality.js",
+  "./modules/common/exerciseStandard.js",
   "./modules/common/sessionItemRecord.js",
   "./modules/common/sessionCache.js",
   "./modules/common/wakeLock.js",

@@ -92,6 +92,11 @@ export const sl = {
   backup_export_title: "Izvozi varnostno kopijo",
   backup_export_desc: "Prenesi svoje stranke, rutine in dnevnike vadb kot eno JSON datoteko.",
   btn_export_json: "Izvozi JSON",
+  catalog_export_title: "Izvozi katalog vaj",
+  catalog_export_desc:
+    "Izvozi svoj katalog gibov, preslikan v odprto taksonomijo wger, da ostane izmenljiv z zunanjimi orodji.",
+  btn_export_catalog_json: "Izvozi katalog JSON",
+  btn_export_catalog_csv: "Izvozi katalog CSV",
   backup_import_title: "Uvozi varnostno kopijo",
   backup_import_desc:
     "Naloži obstoječo .json datoteko. To bo združilo ali prepisalo trenutno bazo.",

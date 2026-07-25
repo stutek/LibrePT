@@ -17,6 +17,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-07-25 — Open-standard catalog exports
+
+### Added
+- **Open-standard crosswalk** (completes TODO §13.1) — the exercise catalog now maps onto the open **wger Workout Manager** dataset (chosen over proprietary ExRx) so exports are universally interchangeable with external research / coaching tools ([`exerciseStandard.js`](src/modules/common/exerciseStandard.js)). The mapping key is the canonical **name** — wger's numeric PKs are per-instance and don't round-trip — so `category` → wger `ExerciseCategory` (`Core`→`Abs`) and `equipment` → wger `Equipment` (bodyweight → `none (bodyweight exercise)`). LibrePT is a **superset**: its biomechanical `pattern` and richer `modality`/`metric` axes have no wger field, so they're preserved under an `x_librept` extension, and terms the standard lacks (Cardio/Recovery categories, Cable/Machine equipment) map to an explicit **null** rather than a wrong best-fit (`unmappedTerms()` surfaces the gaps). The **Sync & Backup** dialog gains an *Export Catalog* card that downloads the live catalog (custom movements included) as a self-describing interchange **JSON** envelope or a side-by-side crosswalk **CSV**. Covered by `test_exercise_standard.py`; documented in [UC6 §6](use_cases/uc6_exercise_taxonomy_and_picker.md). Section 13 (Exercise Library & Movement Taxonomy) is now complete.
+
+---
+
 ## 2026-07-24 — Exercise modalities & a real security gate
 
 ### Added
