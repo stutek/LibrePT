@@ -15,8 +15,8 @@ from deploy.local_http_server import (
 )
 
 
-def _shell_assets(sw_text):
-    block = sw_text[sw_text.index("const ASSETS = [") :]
+def _shell_assets(manifest_text):
+    block = manifest_text[manifest_text.index("const ASSETS = [") :]
     block = block[: block.index("];")]
     return re.findall(r'"(\./[^"]*)"', block)
 
@@ -41,8 +41,10 @@ def test_dev_catalog_hashes_the_served_index_shell():
 
 def test_dev_catalog_covers_every_shell_asset():
     files = build_dev_integrity_catalog()["files"]
-    sw = open(os.path.join(SRC_DIR, "sw.js"), encoding="utf-8").read()
-    missing = [a for a in _shell_assets(sw) if _catalog_key(a) not in files]
+    manifest = open(
+        os.path.join(SRC_DIR, "sw", "cacheManifest.js"), encoding="utf-8"
+    ).read()
+    missing = [a for a in _shell_assets(manifest) if _catalog_key(a) not in files]
     assert not missing, f"dev integrity catalog is missing shell assets: {missing}"
 
 

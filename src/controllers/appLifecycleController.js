@@ -81,7 +81,9 @@ export function registerServiceWorker(basePath, setOfflineCachedState, t) {
 
   window.addEventListener("load", () => {
     navigator.serviceWorker
-      .register(`${basePath}sw.js`)
+      // updateViaCache:'none' so the worker script AND its importScripts modules are always revalidated
+      // on an update check — otherwise a changed sw/*.js could be served stale from the HTTP cache.
+      .register(`${basePath}sw.js`, { updateViaCache: "none" })
       .then((reg) => console.log("PWA Service Worker registered:", reg.scope))
       .catch((err) => console.error("PWA Service Worker registration failed:", err));
   });

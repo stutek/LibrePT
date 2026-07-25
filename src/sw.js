@@ -1,306 +1,35 @@
-// sw.js - LibrePT Service Worker for Offline Functionality
+// sw.js — LibrePT service worker ENTRY. Thin lifecycle wiring only: it loads the worker's modules and
+// binds the three lifecycle events to them. Every concern lives in its own single-responsibility module
+// under src/sw/, loaded here via importScripts because this is a CLASSIC worker — chosen deliberately
+// over a module worker (`{type:'module'}`) so offline caching keeps working on EVERY browser that can
+// run the app, not only those supporting module service workers (Safari gained them only in 16.4).
 //
-// INVARIANT — module-version coherence (see README "Architectural Invariants"): the app is a graph of
-// cross-importing ES modules, so every module in a single load must be the SAME build; a mix of cached
-// (old) and network (new) files is a version skew that breaks at runtime. The cache is therefore
-// atomic — the WHOLE ASSETS set is precached with addAll (all-or-nothing), fetch is network-first so an
-// online load is one deployed version, and CACHE_NAME is bumped every release so `activate` purges old
-// caches wholesale. Adding a runtime module? Add it to ASSETS AND bump CACHE_NAME, or offline loads a
-// version-skewed app.
-const CACHE_NAME = "librept-v20";
-const ASSETS = [
-  "./",
-  "./index.html",
-  "./index.css",
-  "./app.js",
-  "./theme-boot.js",
-  "./version.js",
-  "./manifest.json",
-  // Themes
-  "./modules/themes/blossom.css",
-  "./modules/themes/daylight.css",
-  "./modules/themes/midnight.css",
-  "./modules/themes/nebula.css",
-  "./modules/themes/red.css",
-  // Common modules & helpers
-  "./modules/common/utils.js",
-  "./modules/common/dom.js",
-  "./modules/common/repsAndLoad.js",
-  "./modules/common/exerciseModality.js",
-  "./modules/common/exerciseStandard.js",
-  "./modules/common/sessionItemRecord.js",
-  "./modules/common/sessionCache.js",
-  "./modules/common/wakeLock.js",
-  "./modules/common/shareLink.js",
-  "./modules/common/activeUsersList.js",
-  "./modules/common/applicationHeader.js",
-  "./modules/common/backupRestore.js",
-  "./modules/common/feedbackModal.js",
-  "./modules/common/notificationArea.js",
-  // Seed data & stores
-  "./data/index.js",
-  "./data/exercises.js",
-  "./data/clients.js",
-  "./data/routines.js",
-  "./data/history.js",
-  "./data/planUpdates.js",
-  "./data/sessions.js",
-  "./data/messages.js",
-  "./data/stateStore.js",
-  // Translations (one file per locale, registered in i18n/index.js)
-  "./i18n/index.js",
-  "./i18n/en.js",
-  "./i18n/sl.js",
-  "./i18n/domMappings.js",
-  // Domain modules
-  "./modules/clipboard/clipboardEditor.js",
-  "./modules/clipboard/exerciseAndRestTimer.js",
-  "./modules/clipboard/exerciseCard.js",
-  "./modules/clipboard/exerciseDeck.js",
-  "./modules/clipboard/supersetCard.js",
-  "./modules/clients/clientsDirectory.js",
-  "./modules/clients/clientsView.js",
-  "./modules/exercises/exercisePicker.js",
-  "./modules/exercises/exercisesView.js",
-  "./modules/history/historyView.js",
-  "./modules/plans/planAdjustments.js",
-  "./modules/plans/plansView.js",
-  "./modules/session/editSessionControl.js",
-  "./modules/session/editSessionView.js",
-  "./modules/session/sessionBar.js",
-  "./modules/session/sessionTitleBar.js",
-  "./modules/sessionList/daySelector.js",
-  "./modules/sessionList/sessionCard.js",
-  "./modules/sessionList/sessionList.js",
-  "./modules/sessionList/sessionsView.js",
-  // Domain controllers
-  "./controllers/appLifecycleController.js",
-  "./controllers/formsController.js",
-  "./controllers/activeSessionController.js",
-  "./controllers/gestureController.js",
-  "./controllers/routerController.js",
-  "./controllers/themeController.js",
-  // Icons & Fonts
-  "./icons/icon-192.png",
-  "./icons/icon-512.png",
-  // Vendored webfonts — same-origin, so part of the atomic app shell (no third-party font origin).
-  "./fonts/fonts.css",
-  "./fonts/dmsans-normal-latin.woff2",
-  "./fonts/dmsans-normal-latin-ext.woff2",
-  "./fonts/dmsans-italic-latin.woff2",
-  "./fonts/dmsans-italic-latin-ext.woff2",
-  "./fonts/outfit-normal-latin.woff2",
-  "./fonts/outfit-normal-latin-ext.woff2",
-  "./fonts/jetbrainsmono-normal-latin.woff2",
-  "./fonts/jetbrainsmono-normal-latin-ext.woff2",
-  "./fonts/jetbrainsmono-italic-latin.woff2",
-  "./fonts/jetbrainsmono-italic-latin-ext.woff2",
-  // Font Awesome is still CDN-hosted (best-effort external cache — see below).
-  "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css",
-  "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-solid-900.woff2",
-  "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-regular-400.woff2",
-];
-
-// The same-origin app shell is the version-coherent module graph — it MUST precache as one atomic
-// unit (addAll fails the install if any of it is missing). Third-party libs (the Font Awesome CDN)
-// are NOT part of that graph and are cached best-effort: a blocked/failed cross-origin fetch (e.g. a
-// CSP without connect-src, or being offline at install) must not fail the whole precache and leave
-// the app shell uncached. They fall back to the network/cache at runtime regardless.
-const SHELL_ASSETS = ASSETS.filter((u) => !/^https?:/i.test(u));
-const EXTERNAL_ASSETS = ASSETS.filter((u) => /^https?:/i.test(u));
-
-// SHA-256 integrity catalog: a hash of every shell file keyed by its served path. In production it is
-// the build artifact dist/integrity.json (build.generate_integrity_catalog); in local dev the dev
-// server computes the same catalog live from src/ (deploy/local_http_server.py). Verifying each
-// precached asset against it turns the atomic precache into a *verified* atomic precache — a corrupted
-// download OR a stale file from a different build (a version skew) fails its hash check and rejects the
-// whole install, so the cache can never hold a half-old/half-new mix. The catalog is NEVER optional:
-// its absence is a hard install failure (surfaced as the integrity error page), never a silent skip —
-// a check that can quietly disable itself is exactly how a bad build slips into production.
+// Responsibilities, one module each:
+//   • sw/cacheManifest.js — the versioned cache identity + the exact app-shell file set + cache ops
+//   • sw/integrity.js     — SHA-256 catalog load + per-asset hash verification
+//   • sw/precache.js      — the install-time VERIFIED atomic precache (fails loud on an unverifiable build)
+//   • sw/runtimeFetch.js  — the runtime fetch strategy (network-first shell + offline cache fallback)
 //
-// This runs ONLY at install time (a new sw.js = a new deploy), which already requires the network, so
-// it adds no offline dependency: an already-installed app never re-fetches this and runs fully from cache.
+// The worker's own sub-scripts are NOT part of the app-shell cache (ASSETS); they are the worker's
+// script resources, kept coherent by the browser's SW-update mechanism (the page registers with
+// updateViaCache:'none', so they are always revalidated). See README "Architectural Invariants" for the
+// WHY behind module-version coherence and the verified precache.
+importScripts(
+  "./sw/cacheManifest.js",
+  "./sw/integrity.js",
+  "./sw/precache.js",
+  "./sw/runtimeFetch.js",
+);
 
-// On localhost the SW reuses the page-load-warmed HTTP cache (install stays light for dev + e2e); in
-// production it forces a fresh copy so it never hashes a stale HTTP-cached body against the new catalog.
-const IS_LOCAL_DEV = ["localhost", "127.0.0.1", "[::1]"].includes(self.location.hostname);
-
-async function loadIntegrityCatalog() {
-  try {
-    const res = await fetch("./integrity.json", { cache: "no-store" });
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data?.files ? data.files : null;
-  } catch (err) {
-    return null; // unreachable / unparseable — treated as a hard error by install, never skipped
-  }
-}
-
-// Map a SHELL_ASSETS entry ("./", "./app.js", "./fonts/x.woff2") to its catalog key (the served,
-// root-relative path the catalog hashed it under). The app shell "./" is served as index.html.
-function integrityKeyFor(asset) {
-  const key = asset.replace(/^\.\//, "");
-  return key === "" ? "index.html" : key;
-}
-
-async function sha256Hex(buffer) {
-  const digest = await crypto.subtle.digest("SHA-256", buffer);
-  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
-}
-
-// Fetch, verify against the catalog, then cache one shell asset. Rejects on a network error, a missing
-// catalog entry, or a hash mismatch, so the caller's Promise.all aborts the atomic install as a unit.
-async function precacheVerified(cache, asset, integrity) {
-  const response = await fetch(asset, IS_LOCAL_DEV ? undefined : { cache: "no-store" });
-  if (!response.ok) throw new Error(`Precache fetch failed (${response.status}) for ${asset}`);
-  const expected = integrity[integrityKeyFor(asset)];
-  if (!expected) throw new Error(`No integrity hash catalogued for ${asset}`);
-  const actual = await sha256Hex(await response.clone().arrayBuffer());
-  if (actual !== expected) {
-    throw new Error(`Integrity mismatch for ${asset} (expected ${expected}, got ${actual})`);
-  }
-  await cache.put(asset, response);
-}
-
-// Tell any open window the install failed verification, so the app can show the integrity error page.
-// includeUncontrolled reaches the window that triggered this update even though we don't control it yet.
-async function postIntegrityError(reason, detail) {
-  const clients = await self.clients.matchAll({ includeUncontrolled: true, type: "window" });
-  for (const client of clients) {
-    client.postMessage({ type: "INTEGRITY_ERROR", reason, detail });
-  }
-}
-
-self.addEventListener("install", (e) => {
-  e.waitUntil(
-    (async () => {
-      const cache = await caches.open(CACHE_NAME);
-      const integrity = await loadIntegrityCatalog();
-      // Fail loud, never silently skip: an unverifiable build (no reachable catalog) must not install.
-      if (!integrity) {
-        await postIntegrityError("missing-catalog");
-        throw new Error(
-          "Integrity catalog missing or unreachable — run the full build (integrity.json).",
-        );
-      }
-      try {
-        // Atomic + verified: any rejection aborts the install, so no partial/version-skewed cache lands.
-        await Promise.all(SHELL_ASSETS.map((asset) => precacheVerified(cache, asset, integrity)));
-      } catch (err) {
-        await postIntegrityError("mismatch", err?.message ? err.message : String(err));
-        throw err;
-      }
-      // Third-party libs (Font Awesome CDN) stay best-effort and are not integrity-verified here
-      // (cross-origin, pinned immutable URLs); a blocked/offline fetch must not fail the shell install.
-      await Promise.allSettled(EXTERNAL_ASSETS.map((u) => cache.add(u).catch(() => {})));
-      await self.skipWaiting();
-    })(),
-  );
+// install: build one coherent, integrity-verified cache, then take over immediately.
+self.addEventListener("install", (event) => {
+  event.waitUntil(self.swPrecache.installVerifiedShell().then(() => self.skipWaiting()));
 });
 
-self.addEventListener("activate", (e) => {
-  e.waitUntil(
-    caches
-      .keys()
-      .then((keys) => {
-        return Promise.all(
-          keys.map((key) => {
-            if (key !== CACHE_NAME) {
-              return caches.delete(key);
-            }
-          }),
-        );
-      })
-      .then(() => self.clients.claim()),
-  );
+// activate: purge every non-current cache version, then control open pages.
+self.addEventListener("activate", (event) => {
+  event.waitUntil(self.swCacheManifest.deleteObsoleteCaches().then(() => self.clients.claim()));
 });
 
-function cachePut(request, response) {
-  let url;
-  try {
-    url = new URL(request.url);
-  } catch (err) {
-    console.warn("ServiceWorker: Unable to parse request URL for caching:", request.url, err);
-    return response;
-  }
-
-  // Cache Storage API only supports http: and https: schemes.
-  // Non-HTTP requests (e.g. chrome-extension://, moz-extension://, data:, blob:) are skipped.
-  if (url.protocol !== "http:" && url.protocol !== "https:") {
-    return response;
-  }
-
-  if (response && response.status === 200 && response.type !== "opaque") {
-    const copy = response.clone();
-    caches
-      .open(CACHE_NAME)
-      .then((cache) => cache.put(request, copy))
-      .catch((err) => {
-        console.warn("ServiceWorker: Failed to write to cache for", request.url, err);
-      });
-  }
-  return response;
-}
-
-self.addEventListener("fetch", (e) => {
-  if (e.request.method !== "GET") return;
-
-  const url = new URL(e.request.url);
-  if (url.protocol !== "http:" && url.protocol !== "https:") return;
-
-  const isSameOrigin = url.origin === self.location.origin;
-
-  if (isSameOrigin) {
-    // Intercept page navigation requests and respond with the cached index.html
-    // shell to support clean URL paths in a client-side SPA.
-    if (e.request.mode === "navigate") {
-      e.respondWith(
-        fetch("./index.html", { cache: "no-store" })
-          .then((response) => cachePut(new Request("./index.html"), response))
-          .catch(() =>
-            caches.match("./index.html").then((cached) => {
-              if (cached) {
-                self.clients.matchAll().then((clients) => {
-                  for (const client of clients) {
-                    client.postMessage({ type: "OFFLINE_CACHE_USED" });
-                  }
-                });
-                return cached;
-              }
-              return Response.error();
-            }),
-          ),
-      );
-      return;
-    }
-
-    // Network-first for our own app shell. A stale-while-revalidate cache serves the previous
-    // build on every load after a deploy, which silently hides shipped changes from trainers.
-    // Falling back to cache keeps a basement gym with no signal fully offline-capable.
-    e.respondWith(
-      fetch(e.request, { cache: "no-store" })
-        .then((response) => cachePut(e.request, response))
-        .catch(() =>
-          caches.match(e.request).then((cached) => {
-            if (cached) {
-              self.clients.matchAll().then((clients) => {
-                for (const client of clients) {
-                  client.postMessage({ type: "OFFLINE_CACHE_USED" });
-                }
-              });
-              return cached;
-            }
-            return Response.error();
-          }),
-        ),
-    );
-    return;
-  }
-
-  // Cache-first for immutable third-party assets (Font Awesome CSS and its webfonts)
-  e.respondWith(
-    caches.match(e.request).then((cached) => {
-      return cached || fetch(e.request).then((response) => cachePut(e.request, response));
-    }),
-  );
-});
+// fetch: delegate to the runtime request strategy.
+self.addEventListener("fetch", (event) => self.swRuntimeFetch.handleFetch(event));

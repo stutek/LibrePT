@@ -84,4 +84,9 @@ is structured into feature modules under `src/modules/` (`session`, `plans`, `cl
 | [src/fonts/](src/fonts/) | `assets` | Locally-vendored variable webfonts (DM Sans, Outfit, JetBrains Mono; latin + latin-ext) + `fonts.css`, so the offline-first PWA has no `fonts.googleapis.com`/`fonts.gstatic.com` dependency (regeneration steps in the `fonts.css` header). |
 | [src/controllers/routerController.js](src/controllers/routerController.js) | `controller` | SPA route mapping and navigation logic. |
 | [src/controllers/themeController.js](src/controllers/themeController.js) | `controller` | Unified theme manager. |
-| [src/controllers/appLifecycleController.js](src/controllers/appLifecycleController.js) | `controller` | PWA runtime lifecycle. |
+| [src/controllers/appLifecycleController.js](src/controllers/appLifecycleController.js) | `controller` | PWA runtime lifecycle: SW registration, integrity-error page, online/offline state. |
+| [src/sw.js](src/sw.js) | `service-worker` | Thin classic-worker entry: loads the sw/ modules via `importScripts` and wires the install/activate/fetch lifecycle events. |
+| [src/sw/cacheManifest.js](src/sw/cacheManifest.js) | `service-worker` | The offline cache's versioned identity (`CACHE_NAME`), the exact app-shell `ASSETS` set, and cache open/purge/write ops. |
+| [src/sw/integrity.js](src/sw/integrity.js) | `service-worker` | Loads the SHA-256 integrity catalog (`integrity.json`) and verifies each precached asset's hash. |
+| [src/sw/precache.js](src/sw/precache.js) | `service-worker` | The install-time verified atomic precache; fails loud (integrity error page) on an unverifiable build. |
+| [src/sw/runtimeFetch.js](src/sw/runtimeFetch.js) | `service-worker` | The runtime fetch strategy: network-first shell with offline cache fallback, cache-first for third-party assets. |
