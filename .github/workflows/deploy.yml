@@ -145,7 +145,12 @@ jobs:
     needs: [e2e-tests, dynamic-security-checks, owasp-zap-scan]
     runs-on: ubuntu-latest
     steps:
+      # fetch-tags: the release identity (TODO §16) is the git tag this commit carries, and the
+      # default shallow checkout fetches no tags — without this every build would stamp itself "dev".
       - uses: actions/checkout@v4
+        with:
+          fetch-tags: true
+          fetch-depth: 0
 
       # The runtime app lives under src/. Publish that whole tree (index.html + app.js +
       # index.css + manifest.json + sw.js + i18n/ + components/ + icons/) flattened to the dist
@@ -158,10 +163,14 @@ jobs:
           touch dist/.nojekyll   # disable Jekyll processing on the published site
           # Build stamp: overwrite version.js with the real short commit SHA + UTC build time, so the
           # header shows which build is live and a client screenshot pins a bug report to a commit.
+          # `release` is the tag this commit IS (--exact-match, never the nearest one: a commit past
+          # v1.2.0 is not v1.2.0, and must not write into that version's storage bucket). Untagged
+          # commits stamp "dev" and opt out of version switching. Mirrors build.stamp_build_version.
           commit="${GITHUB_SHA::7}"
           builtAt="$(date -u +%Y-%m-%dT%H:%MZ)"
-          printf 'export const BUILD_INFO = { commit: "%s", builtAt: "%s" };\n' "${commit}" "${builtAt}" > dist/version.js
-          echo "Stamped build ${commit} (${builtAt})"
+          release="$(git describe --tags --exact-match 2>/dev/null || echo dev)"
+          printf 'export const BUILD_INFO = { commit: "%s", builtAt: "%s", release: "%s" };\n' "${commit}" "${builtAt}" "${release}" > dist/version.js
+          echo "Stamped build ${commit} (${builtAt}) release ${release}"
           # GitHub Pages serves a project site under /<repo>/, but the source assumes the
           # domain root (<base href="/">) so it works when src/ is served at localhost:8081/.
           # Rewrite the base to the repo sub-path so index.css, manifest.json, icons and the

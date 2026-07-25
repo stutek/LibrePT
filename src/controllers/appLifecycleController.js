@@ -2,7 +2,7 @@
 // Single responsibility: Handles PWA screen orientation lock, dev phone viewport resizing,
 // build stamp header rendering, Service Worker registration, and network connectivity state monitoring.
 
-import { BUILD_INFO } from "../version.js";
+import { buildDescription, releaseLabel } from "../modules/common/releaseIdentity.js";
 
 export function resizeToPhoneViewport() {
   const targetWidth = 412;
@@ -14,12 +14,15 @@ export function resizeToPhoneViewport() {
   }
 }
 
+// The stamp shows the RELEASE once a build is cut from a tag (that is the identity a PT switches
+// between), falling back to the commit for untagged builds. The tooltip always carries the full
+// release · commit · build-time triple so a support report can pin an exact build either way.
 export function renderBuildStamp() {
   const el = document.getElementById("app-version");
   if (!el) return;
-  const commit = BUILD_INFO?.commit || "dev";
-  el.textContent = commit === "dev" ? "dev" : `#${commit}`;
-  if (BUILD_INFO?.builtAt) el.title = `Built ${BUILD_INFO.builtAt}`;
+  el.textContent = releaseLabel();
+  const description = buildDescription();
+  if (description) el.title = description;
 }
 
 export function lockPortraitOrientation() {

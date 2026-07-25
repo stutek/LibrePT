@@ -73,6 +73,7 @@ is structured into feature modules under `src/modules/` (`session`, `plans`, `cl
 | [src/modules/common/exerciseModality.js](src/modules/common/exerciseModality.js) | `helper` | Exercise modality axis (strength/cardio/stretch/balance) and per-metric target formatting (time/distance/calories/watts/hold). |
 | [src/modules/common/exerciseStandard.js](src/modules/common/exerciseStandard.js) | `helper` | Open-standard crosswalk: maps the catalog's category/equipment onto the wger dataset by canonical name for interchangeable JSON/CSV exports (UC6 §6). |
 | [src/modules/common/sessionItemRecord.js](src/modules/common/sessionItemRecord.js) | `helper` | Immutable history program snapshot: typed items (exercise/rest + superset grouping), shape guards, and `buildProgramSnapshot` keeping rests + skipped work. |
+| [src/modules/common/releaseIdentity.js](src/modules/common/releaseIdentity.js) | `helper` | Release identity (TODO §16): the git tag a build was cut from, normalised for use as a storage-key suffix / URL path segment, with the untagged `dev` fallback and the header build label. |
 | [src/modules/common/sessionCache.js](src/modules/common/sessionCache.js) | `helper` | Active session local storage cache helper. |
 | [src/modules/common/wakeLock.js](src/modules/common/wakeLock.js) | `helper` | Screen Wake Lock API management helper. |
 | [src/modules/common/activeUsersList.js](src/modules/common/activeUsersList.js) | `component` | Active-session participant tabs component. |

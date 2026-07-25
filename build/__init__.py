@@ -582,9 +582,32 @@ def run_build():
     print(f"  ✓ Build complete. Bundle stored in: {os.path.abspath(dist_dir)}")
 
 
+def resolve_release_tag():
+    """The git tag this build is cut from — the release identity (TODO §16) used by versioned
+    hosting, per-version storage namespacing and the upgrade/rollback flow.
+
+    Deliberately `--exact-match`: only a commit that IS a tag is a release. A commit sitting a few
+    commits past v1.2.0 is NOT v1.2.0 — calling it that would let an untagged build write into a
+    released version's storage bucket. Anything untagged is "dev" and simply opts out of switching.
+    """
+    try:
+        return (
+            subprocess.check_output(
+                ["git", "describe", "--tags", "--exact-match"],
+                stderr=subprocess.DEVNULL,
+            )
+            .decode()
+            .strip()
+            or "dev"
+        )
+    except Exception:
+        return "dev"
+
+
 def stamp_build_version(dist_dir):
-    """Overwrite dist/version.js with the real short commit SHA + UTC build time (the header build
-    stamp). Mirrors the Pages deploy (.github/workflows/deploy.yml) — keep the two writers in sync."""
+    """Overwrite dist/version.js with the real short commit SHA, UTC build time and release tag (the
+    header build stamp). Mirrors the Pages deploy (.github/workflows/deploy.yml) — keep the two
+    writers in sync; test_release_identity.py checks they emit the same fields."""
     from datetime import datetime, timezone
 
     try:
@@ -598,11 +621,12 @@ def stamp_build_version(dist_dir):
     except Exception:
         commit = "local"
     built_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%MZ")
+    release = resolve_release_tag()
     with open(os.path.join(dist_dir, "version.js"), "w") as f:
         f.write(
-            f'export const BUILD_INFO = {{ commit: "{commit}", builtAt: "{built_at}" }};\n'
+            f'export const BUILD_INFO = {{ commit: "{commit}", builtAt: "{built_at}", release: "{release}" }};\n'
         )
-    print(f"  Stamped build {commit} ({built_at})")
+    print(f"  Stamped build {commit} ({built_at}) release {release}")
 
 
 INTEGRITY_CATALOG_NAME = "integrity.json"
