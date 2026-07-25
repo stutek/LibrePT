@@ -42,10 +42,10 @@ export const en = {
   active_session: "Active session",
   integrity_error_title: "App verification failed",
   integrity_error_missing:
-    "No integrity catalog was found for this build. Run the full build (python -m build) so the app can verify its files before you evaluate it locally.",
+    "No integrity catalog was found for this build. In local development, run the full build (python -m build) or restart the dev server so the catalog is recomputed; in production this means the deploy is incomplete.",
   integrity_error_mismatch:
-    "A file failed its integrity check — the download is corrupt or from a mismatched build. The previous version is still running; retry to download this build again.",
-  integrity_error_retry: "Retry download",
+    "A file didn't match its verified checksum — the download is corrupt or left over from a different build. Clear the cache and retry to re-download and re-verify this build; if it persists in local dev, restart the dev server to recompute the catalog.",
+  integrity_error_retry: "Clear cache & retry",
   btn_collapse: "Minimize",
   exercise_of: "Exercise",
   btn_add_set: "Add Set",

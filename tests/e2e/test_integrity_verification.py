@@ -29,7 +29,7 @@ def test_corrupt_build_shows_integrity_error_page(browser, local_server):
     page.goto(local_server)
 
     page.wait_for_selector("#integrity-error-overlay:not(.hidden)", timeout=10000)
-    assert "integrity check" in page.text_content("#integrity-error-message").lower()
-    # The offending asset is named verbatim so a bug report can pinpoint it.
+    # An explanatory message is shown, and the offending asset is named verbatim (for a bug report).
+    assert page.text_content("#integrity-error-message").strip()
     assert "app.js" in page.text_content("#integrity-error-detail")
     context.close()

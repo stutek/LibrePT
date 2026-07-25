@@ -37,10 +37,29 @@ export function lockPortraitOrientation() {
   orientation.addEventListener("change", apply);
 }
 
+// Discard the failed/stale worker and every cache, then reload from a clean slate so the next install
+// re-downloads and re-verifies from scratch. A plain reload was not enough: the old worker keeps
+// controlling and the HTTP cache keeps serving the same stale bytes, so the mismatch just recurs.
+async function clearCachesAndReload() {
+  try {
+    if ("serviceWorker" in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map((r) => r.unregister()));
+    }
+    if ("caches" in self) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map((k) => caches.delete(k)));
+    }
+  } catch (err) {
+    console.warn("Integrity retry cleanup failed:", err);
+  }
+  window.location.reload();
+}
+
 // Reveal the blocking integrity error page when the service worker reports a failed/absent verification
 // (INTEGRITY_ERROR). Never silently swallowed — a build that can't be verified must be impossible to
 // miss (dev and prod alike). `reason` picks the explanation; `detail` (the offending asset) is shown
-// verbatim for a bug report. Retry re-downloads by reloading, which re-attempts the atomic install.
+// verbatim for a bug report.
 function showIntegrityError(reason, detail, t) {
   const overlay = document.getElementById("integrity-error-overlay");
   if (!overlay) return;
@@ -60,8 +79,11 @@ function showIntegrityError(reason, detail, t) {
   }
   if (detailEl) detailEl.textContent = detail || "";
   if (retryBtn) {
-    retryBtn.textContent = tr("integrity_error_retry", "Retry download");
-    retryBtn.onclick = () => window.location.reload();
+    retryBtn.textContent = tr("integrity_error_retry", "Clear cache & retry");
+    retryBtn.onclick = () => {
+      retryBtn.disabled = true;
+      clearCachesAndReload();
+    };
   }
   overlay.classList.remove("hidden");
 }

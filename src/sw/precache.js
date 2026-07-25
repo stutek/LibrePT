@@ -3,12 +3,16 @@
 // unit, and surface a hard, visible failure (never a silent skip) when the build can't be verified.
 // Loaded via importScripts after cacheManifest + integrity; exposes its API on self.swPrecache.
 self.swPrecache = (() => {
-  // Fresh network copy in production (never hash a stale HTTP-cached body against the new catalog); on
-  // localhost reuse the page-load-warmed cache so install stays light for dev + the e2e suite.
+  // The catalog is always fetched fresh (no-store), so the assets we hash against it MUST be fresh too,
+  // or a stale HTTP-cached body fails verification against the newer catalog — a false mismatch that a
+  // plain reload can't clear (the reload re-serves the same stale body). In production we force a fresh
+  // copy (no-store); on localhost we "no-cache" (revalidate), which reuses the page-load-warmed body via
+  // a cheap conditional 304 when unchanged but always re-downloads a since-edited file — so dev stays
+  // light for the e2e suite yet never hashes stale bytes.
   const IS_LOCAL_DEV = ["localhost", "127.0.0.1", "[::1]"].includes(self.location.hostname);
 
   async function fetchVerifiedIntoCache(cache, asset, catalog) {
-    const response = await fetch(asset, IS_LOCAL_DEV ? undefined : { cache: "no-store" });
+    const response = await fetch(asset, { cache: IS_LOCAL_DEV ? "no-cache" : "no-store" });
     if (!response.ok) throw new Error(`Precache fetch failed (${response.status}) for ${asset}`);
     await self.swIntegrity.assertMatchesCatalog(catalog, asset, response);
     await cache.put(asset, response);
