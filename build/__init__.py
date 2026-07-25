@@ -359,80 +359,87 @@ def _csp_parity():
     return compare_csp(header_policy, meta.group(1) if meta else "")
 
 
-def run_dynamic_security_checks():
-    """Runs dynamic security checks (CSP, HTTP security headers, and client-side DOM injection & sanitization verification)."""
-    print("\n  Running Dynamic Security Checks...")
+# The ZAP scan's target: the local dev server, which serves src/ under the production sub-path.
+ZAP_TARGET = "http://localhost:8081/LibrePT/"
+ZAP_PORT = 8081
+
+
+def check_required_meta_policies():
+    """The <meta> security policies index.html must ship. Production is GitHub Pages, which sends no
+    custom headers, so these tags ARE the deployed policy — not a belt-and-braces duplicate."""
     index_path = os.path.join("src", "index.html")
     if not os.path.exists(index_path):
-        print(f"  ✗ {index_path} not found for security check.")
-        sys.exit(1)
-    with open(index_path, "r", encoding="utf-8") as f:
-        content = f.read()
-
-    required_headers = [
+        return [f"{index_path} not found"]
+    with open(index_path, encoding="utf-8") as handle:
+        content = handle.read()
+    required = [
         'http-equiv="Content-Security-Policy"',
         'http-equiv="X-Content-Type-Options"',
         'http-equiv="Referrer-Policy"',
     ]
-    missing = [h for h in required_headers if h not in content]
-    if missing:
-        print(f"  ✗ Dynamic security check failed. Missing headers: {missing}")
-        sys.exit(1)
+    return [f"missing {tag}" for tag in required if tag not in content]
 
-    # CSP parity: the ZAP scan validates the DEV SERVER's real HTTP headers, but GitHub Pages cannot
-    # send headers at all — production's policy is only the <meta> CSP. Without this check, hardening
-    # the dev header while leaving <meta> behind buys a green scan and ships nothing.
-    print(
-        "    - Comparing the production <meta> CSP against the dev server's header..."
-    )
+
+def check_csp_parity():
+    """(problems, notes) — is the SHIPPED policy as strong as the SCANNED one?
+
+    ZAP validates the dev server's real HTTP headers; GitHub Pages cannot send headers at all. So
+    hardening the header while leaving <meta> behind buys a green scan and ships nothing.
+    """
     weaker, header_only = _csp_parity()
-    if weaker:
-        print("  ✗ The shipped <meta> CSP is weaker than the scanned header:")
-        for problem in weaker:
-            print(f"      • {problem}")
-        sys.exit(1)
+    notes = []
     if header_only:
-        # Not a failure — a hosting limitation to accept knowingly rather than discover in an audit.
-        print(
-            f"      note: {', '.join(header_only)} cannot be expressed in <meta>, so production "
-            "goes without (GitHub Pages sends no custom headers)."
+        # Not a failure — a hosting limitation to accept knowingly rather than meet in an audit.
+        notes.append(
+            f"{', '.join(header_only)} cannot be expressed in <meta>, so production goes "
+            "without (GitHub Pages sends no custom headers)"
         )
+    return weaker, notes
 
-    # Injection Vulnerability & Unsanitized innerHTML Audit across frontend codebase
-    print(
-        "    - Auditing frontend codebase for unsanitized HTML/script injection patterns..."
-    )
-    sink_findings = audit_html_sinks("src")
-    if sink_findings:
-        print("  ✗ Unescaped user text reaches an HTML sink:")
-        for path, line, expression in sink_findings:
-            print(f"      • {path}:{line}  ${{{expression}}}")
-        print("    Wrap it in escapeHTML() — an imported backup is untrusted input.")
+
+def check_html_sinks():
+    """User-controlled text reaching innerHTML unescaped — the bug class that shipped twice under a
+    green ZAP badge, because a passive scan of a client-routed SPA never reaches these views."""
+    return [
+        f"{path}:{line}  ${{{expression}}} — wrap in escapeHTML(); an imported backup is untrusted"
+        for path, line, expression in audit_html_sinks("src")
+    ]
+
+
+# Named, independently-reported checks rather than one opaque pass/fail: when this stage goes red,
+# the line that fails should say WHICH property broke. All three are pure file analysis — despite
+# the old name, nothing here is dynamic; ZAP is the only check that probes a running app.
+STATIC_SECURITY_CHECKS = (
+    ("Required <meta> security policies", lambda: (check_required_meta_policies(), [])),
+    ("CSP parity (shipped <meta> vs scanned header)", check_csp_parity),
+    ("HTML-sink escaping audit", lambda: (check_html_sinks(), [])),
+)
+
+
+def run_static_security_checks():
+    """Run every static security check, reporting each by name.
+
+    Deliberately runs them ALL before failing: a single run should list everything that is wrong,
+    not stop at the first problem and make you re-run to discover the second.
+    """
+    print("\n  Running Static Security Audits...")
+    failures = []
+    for name, check in STATIC_SECURITY_CHECKS:
+        problems, notes = check()
+        if problems:
+            print(f"    ✗ {name}")
+            for problem in problems:
+                print(f"        • {problem}")
+            failures.append(name)
+        else:
+            print(f"    ✓ {name}")
+        for note in notes:
+            print(f"        note: {note}")
+
+    if failures:
+        print(f"  ✗ Static security audits failed: {', '.join(failures)}")
         sys.exit(1)
-    unsafe_patterns = ["document.write(", "eval("]
-    violations = []
-    for root, _, files in os.walk("src"):
-        for file in files:
-            if file.endswith(".js"):
-                fp = os.path.join(root, file)
-                with open(fp, "r", encoding="utf-8") as f:
-                    for line_num, line in enumerate(f, 1):
-                        for p in unsafe_patterns:
-                            if p in line and "//" not in line.split(p)[0]:
-                                violations.append(f"{fp}:{line_num} -> {p.strip()}")
-
-    if violations:
-        print(
-            "  ✗ Dynamic security injection check failed. Found unsafe injection patterns:\n    "
-            + "\n    ".join(violations)
-        )
-        sys.exit(1)
-
-    print("  ✓ Dynamic security checks (headers & code injection audit) passed.")
-
-
-ZAP_TARGET = "http://localhost:8081/LibrePT/"
-ZAP_PORT = 8081
+    print("  ✓ Static security audits passed.")
 
 
 def _is_port_open(port):
@@ -534,6 +541,7 @@ def run_stage_1_parallel():
         "Frontend Lint (Biome)": run_frontend_lint,
         "Dependency Security Scan (pip-audit)": run_security_audit,
         "Unit Tests": run_unit_tests,
+        "Static Security Audits": run_static_security_checks,
     }
 
     failures = []
@@ -562,11 +570,10 @@ def run_stage_2_parallel():
     import concurrent.futures
 
     print(
-        "\n=== Stage 2: E2E Browser Tests, Dynamic Security & OWASP ZAP (Parallel Execution) ==="
+        "\n=== Stage 2: E2E Browser Tests & OWASP ZAP Scan (Parallel Execution) ==="
     )
     tasks = {
         "E2E Browser Tests": run_e2e_tests,
-        "Dynamic Security Checks": run_dynamic_security_checks,
         "OWASP ZAP Scan": run_owasp_zap_scan,
     }
 

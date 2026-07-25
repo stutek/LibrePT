@@ -116,8 +116,12 @@ jobs:
       - name: Run E2E Tests
         run: .venv/bin/python -c "from build import run_e2e_tests; run_e2e_tests()"
 
-  dynamic-security-checks:
-    name: Dynamic Security & Injection Checks
+  # One job, three named checks (build/frontend_audit.py + build.run_static_security_checks). NOT
+  # three jobs: each GitHub Actions job costs a fresh runner, checkout and Python setup — ~30s of
+  # overhead apiece for checks that take milliseconds. They are separated where separation is free
+  # (named results in the output) and kept together where splitting would only buy latency.
+  static-security-audits:
+    name: Static Security Audits (CSP parity & HTML sinks)
     needs: [python-lint, frontend-lint, dependency-scan, unit-tests]
     runs-on: ubuntu-latest
     steps:
@@ -125,8 +129,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Run Dynamic Security Checks
-        run: python -c "from build import run_dynamic_security_checks; run_dynamic_security_checks()"
+      - name: Run Static Security Audits
+        run: python -c "from build import run_static_security_checks; run_static_security_checks()"
 
   owasp-zap-scan:
     name: OWASP ZAP Security Scan
@@ -142,7 +146,7 @@ jobs:
 
   build:
     name: Assemble & Bundle App
-    needs: [e2e-tests, dynamic-security-checks, owasp-zap-scan]
+    needs: [e2e-tests, static-security-audits, owasp-zap-scan]
     runs-on: ubuntu-latest
     steps:
       # fetch-tags: the release identity (TODO §16) is the git tag this commit carries, and the
