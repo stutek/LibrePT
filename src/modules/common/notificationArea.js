@@ -8,6 +8,11 @@
 //
 // Dependencies injected via initNotificationArea({ getState, getActiveSession, t, escapeHTML, navigateToPath })
 
+import { readVersionScoped, writeVersionScoped } from "../../data/storageNamespace.js";
+
+// Version-scoped: which notifications a PT has read is per-build state (see data/storageNamespace).
+const READ_NOTIFICATIONS_KEY = "librept_read_notifications";
+
 let deps = null;
 const barObserver = null;
 
@@ -35,7 +40,7 @@ export function renderNotificationArea() {
   // Read stored read IDs
   let readIds = [];
   try {
-    readIds = JSON.parse(localStorage.getItem("librept_read_notifications") || "[]");
+    readIds = JSON.parse(readVersionScoped(READ_NOTIFICATIONS_KEY) || "[]");
   } catch (e) {
     readIds = [];
   }
@@ -186,7 +191,7 @@ export function renderNotificationArea() {
       if (itemId && !readIds.includes(itemId)) {
         readIds.push(itemId);
         try {
-          localStorage.setItem("librept_read_notifications", JSON.stringify(readIds));
+          writeVersionScoped(READ_NOTIFICATIONS_KEY, JSON.stringify(readIds));
         } catch (e) {
           console.warn("Failed to persist read notifications to localStorage:", e);
         }
@@ -206,7 +211,7 @@ export function renderNotificationArea() {
       if (itemId && !readIds.includes(itemId)) {
         readIds.push(itemId);
         try {
-          localStorage.setItem("librept_read_notifications", JSON.stringify(readIds));
+          writeVersionScoped(READ_NOTIFICATIONS_KEY, JSON.stringify(readIds));
         } catch (e) {
           console.warn("Failed to persist read notifications to localStorage:", e);
         }
@@ -222,7 +227,7 @@ export function renderNotificationArea() {
       if (itemId && !readIds.includes(itemId)) {
         readIds.push(itemId);
         try {
-          localStorage.setItem("librept_read_notifications", JSON.stringify(readIds));
+          writeVersionScoped(READ_NOTIFICATIONS_KEY, JSON.stringify(readIds));
         } catch (e) {
           console.warn("Failed to persist read notifications to localStorage:", e);
         }
@@ -277,7 +282,7 @@ export function setupNotificationGestures() {
       e.stopPropagation();
       let readIds = [];
       try {
-        readIds = JSON.parse(localStorage.getItem("librept_read_notifications") || "[]");
+        readIds = JSON.parse(readVersionScoped(READ_NOTIFICATIONS_KEY) || "[]");
       } catch (e) {
         console.warn("Failed to parse read notifications from localStorage:", e);
         readIds = [];
@@ -286,7 +291,7 @@ export function setupNotificationGestures() {
         if (!readIds.includes(n.id)) readIds.push(n.id);
       }
       try {
-        localStorage.setItem("librept_read_notifications", JSON.stringify(readIds));
+        writeVersionScoped(READ_NOTIFICATIONS_KEY, JSON.stringify(readIds));
       } catch (e) {
         console.warn("Failed to persist read notifications to localStorage:", e);
       }

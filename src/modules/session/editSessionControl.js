@@ -3,8 +3,15 @@
 // allowing selection of participants, assigning routine plans, and configuring session details before launching the clipboard.
 // Auto-persists form drafts to localStorage so user data survives page reloads.
 
+import {
+  readVersionScoped,
+  removeVersionScoped,
+  writeVersionScoped,
+} from "../../data/storageNamespace.js";
+
 let deps = null;
 let isPlanningModeActive = false;
+// Version-scoped: a half-filled form belongs to the build whose form it is.
 const DRAFT_KEY = "librept_workout_setup_draft";
 
 export function initEditSessionControl(d) {
@@ -49,7 +56,7 @@ export function saveEditSessionDraft() {
   };
 
   try {
-    localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+    writeVersionScoped(DRAFT_KEY, JSON.stringify(draft));
   } catch (e) {
     console.warn("Failed to save workout setup draft to localStorage", e);
   }
@@ -58,7 +65,7 @@ export const saveSetupDraft = saveEditSessionDraft;
 
 export function clearEditSessionDraft() {
   try {
-    localStorage.removeItem(DRAFT_KEY);
+    removeVersionScoped(DRAFT_KEY);
   } catch (e) {
     console.warn("Failed to clear edit session draft from localStorage:", e);
   }
@@ -67,7 +74,7 @@ export const clearSetupDraft = clearEditSessionDraft;
 
 export function getEditSessionDraft() {
   try {
-    const raw = localStorage.getItem(DRAFT_KEY);
+    const raw = readVersionScoped(DRAFT_KEY);
     return raw ? JSON.parse(raw) : null;
   } catch (e) {
     console.warn("Failed to retrieve edit session draft from localStorage:", e);

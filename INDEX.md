@@ -45,6 +45,7 @@ is structured into feature modules under `src/modules/` (`session`, `plans`, `cl
 | [src/app.js](src/app.js) | `entry` | Application bootstrapper: root initialization, dependency injection wiring, and global lifecycle hooks. |
 | [src/theme-boot.js](src/theme-boot.js) | `entry` | Render-blocking classic script that sets the theme class before paint (anti-FOUC) and forces http→https; external so CSP `script-src` can forbid `'unsafe-inline'`. |
 | [src/data/stateStore.js](src/data/stateStore.js) | `data` | Central app state management: state object, localStorage persistence, seed data loading, and reset triggers. |
+| [src/data/storageNamespace.js](src/data/storageNamespace.js) | `data` | Per-release storage isolation (TODO §16.2): which localStorage bucket this build owns, copy-never-move migration between releases, bucket listing and EOL discard. |
 | [src/data/index.js](src/data/index.js) | `data` | Barrel for seed/demo data: `exercises.js`, `clients.js`, `routines.js`, `history.js`, `planUpdates.js`, `sessions.js`. |
 | [src/i18n/index.js](src/i18n/index.js) | `i18n` | Translation registry: one flat key→string map per locale (`en.js`, `sl.js`). Key parity enforced by unit tests. |
 | [src/modules/sessionList/sessionsView.js](src/modules/sessionList/sessionsView.js) | `view` | Modular view renderer for Sessions dashboard. |

@@ -1,6 +1,13 @@
 // src/helper/sessionCache.js - Active session local storage cache helper
 // Single responsibility: Handle JSON serialization and recovery of ongoing session state in localStorage.
 
+import {
+  readVersionScoped,
+  removeVersionScoped,
+  writeVersionScoped,
+} from "../../data/storageNamespace.js";
+
+// Version-scoped: a cached live session is written by one build's plan shape (see storageNamespace).
 const CACHE_KEY = "librept_active_session";
 
 export function saveActiveSessionToCache(activeSession) {
@@ -9,15 +16,15 @@ export function saveActiveSessionToCache(activeSession) {
     ...activeSession,
     timerIntervalId: null,
   };
-  localStorage.setItem(CACHE_KEY, JSON.stringify(cacheObj));
+  writeVersionScoped(CACHE_KEY, JSON.stringify(cacheObj));
 }
 
 export function clearActiveSessionCache() {
-  localStorage.removeItem(CACHE_KEY);
+  removeVersionScoped(CACHE_KEY);
 }
 
 export function readActiveSessionCache() {
-  const cached = localStorage.getItem(CACHE_KEY);
+  const cached = readVersionScoped(CACHE_KEY);
   if (!cached) return null;
   try {
     const parsed = JSON.parse(cached);

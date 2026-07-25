@@ -17,6 +17,9 @@
 //
 // deps: { t } (translator; the controller resolves client name/id and passes them to startTimer)
 
+import { readVersionScoped, writeVersionScoped } from "../../data/storageNamespace.js";
+
+// Version-scoped: a persisted timer carries the running build's session/focus shape.
 const STORE_KEY = "librept_active_timers";
 
 let deps = {};
@@ -135,7 +138,7 @@ export function clearAllTimers() {
 // recomputes its remaining time from the stored absolute end time.
 export function restoreSessionTimers() {
   try {
-    const raw = localStorage.getItem(STORE_KEY);
+    const raw = readVersionScoped(STORE_KEY);
     timers = {};
     if (raw) {
       const list = JSON.parse(raw);
@@ -233,7 +236,7 @@ function tick() {
 
 function persist() {
   try {
-    localStorage.setItem(STORE_KEY, JSON.stringify(Object.values(timers)));
+    writeVersionScoped(STORE_KEY, JSON.stringify(Object.values(timers)));
   } catch (e) {
     console.warn("Could not persist timers:", e);
   }

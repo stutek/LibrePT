@@ -11,6 +11,12 @@ import {
   DEFAULT_ROUTINES,
   DEFAULT_SESSIONS,
 } from "./index.js";
+import {
+  adoptLegacyBucket,
+  namespacedKey,
+  readVersionScoped,
+  writeVersionScoped,
+} from "./storageNamespace.js";
 
 let state = emptyState();
 
@@ -60,24 +66,35 @@ export function seedMockData(incrementLocalSyncFn) {
   saveToLocalStorage(incrementLocalSyncFn);
 }
 
+// The DB key is per-release (data/storageNamespace.js): an untagged build keeps the plain
+// "librept_db", a tagged release reads and writes "librept_db@<tag>" so versions hosted side by
+// side on one origin can never overwrite each other's data.
+const DB_KEY = "librept_db";
+const ACTIVE_SESSION_KEY = "librept_active_session";
+
 export function saveToLocalStorage(incrementLocalSyncFn) {
-  localStorage.setItem("librept_db", JSON.stringify(state));
+  writeVersionScoped(DB_KEY, JSON.stringify(state));
   if (typeof incrementLocalSyncFn === "function") {
     incrementLocalSyncFn();
   }
 }
 
 export function loadSavedState() {
-  let savedData = localStorage.getItem("librept_db");
+  // First boot of a tagged release on a device that has only run untagged builds: seed this
+  // release's bucket from the plain keys, leaving them intact as the rollback snapshot.
+  adoptLegacyBucket();
+
+  let savedData = readVersionScoped(DB_KEY);
   if (!savedData) {
+    // Pre-rename shim (openpt_* → librept_*), untouched by versioning: it predates both buckets.
     savedData = localStorage.getItem("openpt_db");
     if (savedData) {
-      localStorage.setItem("librept_db", savedData);
+      localStorage.setItem(namespacedKey(DB_KEY), savedData);
       localStorage.removeItem("openpt_db");
 
       const activeSessionData = localStorage.getItem("openpt_active_session");
       if (activeSessionData) {
-        localStorage.setItem("librept_active_session", activeSessionData);
+        localStorage.setItem(namespacedKey(ACTIVE_SESSION_KEY), activeSessionData);
         localStorage.removeItem("openpt_active_session");
       }
     }
