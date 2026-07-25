@@ -76,6 +76,10 @@ called out as **Swapped** (see [UC1](uc1_gym_floor_clipboard.md)).
 search box** that narrows by name, pattern, equipment or group as the PT types, and **Enter takes
 the top match** — a movement whose name is known costs a tap on 📖, a few letters, and Enter.
 
+Each filter row is **labelled by its axis** (*Muscle*, *Equipment*) — two unlabelled chip rows
+read as one wall of options, and the **All** chip appears in both, so only the label says which
+axis is being reset. The Exercise Library's own category filter is labelled the same way.
+
 ### 3.3 Scenario C — Custom Exercise vs. Taxonomy Integrity
 
 Creating a bespoke movement must not pollute the data with ad-hoc text. The custom-exercise form
@@ -181,6 +185,7 @@ Delivers TODO §13.1's last bullet (adopt an open standard for interchangeable e
 | Custom movement creation (strict inheritance) | [../src/components/exercisePicker.js](../src/components/exercisePicker.js) · `renderCustomMovementForm` |
 | Catalog shows equipment/pattern badges, not instructions | [../tests/e2e/test_exercise_taxonomy.py](../tests/e2e/test_exercise_taxonomy.py) · `test_catalog_shows_taxonomy_badges_not_instructions` |
 | Picker search narrows the list live; Enter takes the top match | [../tests/e2e/test_editor_row_catalog_swap.py](../tests/e2e/test_editor_row_catalog_swap.py) · `test_search_narrows_and_enter_takes_the_top_match` |
+| Filter chip rows are labelled by axis (Muscle / Equipment) | [../tests/e2e/test_editor_row_catalog_swap.py](../tests/e2e/test_editor_row_catalog_swap.py) · `test_filter_rows_are_labelled_by_axis` |
 | Every plan-editor row offers the catalog; picker opens pre-filtered + focused on search | [../tests/e2e/test_editor_row_catalog_swap.py](../tests/e2e/test_editor_row_catalog_swap.py) · `test_every_exercise_row_offers_the_catalog` |
 | Row swap retargets the movement in place — slot id, sets and logs preserved | [../tests/e2e/test_editor_row_catalog_swap.py](../tests/e2e/test_editor_row_catalog_swap.py) · `test_row_catalog_swaps_the_movement_in_place` |
 | Custom movement form enforces name + equipment + pattern | [../tests/e2e/test_exercise_taxonomy.py](../tests/e2e/test_exercise_taxonomy.py) · `test_custom_movement_creation_flow` |
