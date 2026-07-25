@@ -268,6 +268,20 @@ export const sl = {
   notif_welcome_desc:
     "Povabilo k zagonu celovite predstavitve: Preizkusite vodenje osebnih seans. Ker vaša aplikacija že vsebuje aktivne podatke, si oglejte dokumentacijo z navodili ali odprite interaktivno predstavitev na stutek.github.io/LibrePT/.",
   notif_demo_btn: "Odpri predstavitev v živo",
+
+  // Preklop med različicami (TODO §16.1): vabila za nadgradnjo / vrnitev, ki jih ni mogoče skriti.
+  version_upgrade_title: "Na voljo je nova različica",
+  version_upgrade_desc:
+    "Različica {version} je pripravljena. Preklopi, ko ti ustreza — podatki se prekopirajo s teboj.",
+  version_upgrade_btn: "Preklopi na {version}",
+  version_rollback_title: "Vrni se na {version}",
+  version_rollback_desc:
+    "Na {version} se lahko vrneš kadar koli. Vse, kar si zabeležil po preklopu, ostane na {current} in se ne vrne s teboj.",
+  version_rollback_btn: "Vrni se nazaj",
+  version_rollback_confirm:
+    "Se res želiš vrniti na {version}? Vse, kar si po nadgradnji zabeležil na {current}, ostane tam.",
+  version_eol_title: "Ta različica ni več podprta",
+  version_eol_desc: "Popravki izhajajo samo za trenutno različico ({version}).",
   notif_walkthrough_btn: "Oglej si navodila",
   notif_spot_res_title: "📅 Rezervacija mesta za stranko",
   notif_spot_res_desc: "Alex Smith je rezerviral mesto za petkov HIIT.",

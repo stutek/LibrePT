@@ -110,3 +110,18 @@ export function releasePath(release) {
   if (typeof release.path === "string" && release.path) return release.path;
   return `${release.id}/`;
 }
+
+// Versions are hosted as siblings under one root, so a build running at `/LibrePT/v1.2.0/` has to
+// strip its own release segment to address any other version. An untagged build is already at the
+// root. Kept here, next to releasePath, so the two halves of the URL scheme stay together.
+export function hostingRoot(basePath, release = currentRelease()) {
+  if (!basePath) return "./";
+  if (release === UNRELEASED) return basePath;
+  const segment = `${release}/`;
+  return basePath.endsWith(segment) ? basePath.slice(0, -segment.length) : basePath;
+}
+
+export function releaseUrl(basePath, release, runningRelease = currentRelease()) {
+  const path = releasePath(release);
+  return path ? `${hostingRoot(basePath, runningRelease)}${path}` : null;
+}

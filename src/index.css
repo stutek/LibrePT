@@ -1613,6 +1613,26 @@ body:has(#active-session-overlay:not(.hidden))
   background: color-mix(in srgb, var(--primary) 8%, var(--card-bg));
   border-color: color-mix(in srgb, var(--primary) 35%, var(--card-border));
 }
+/* Version offers (TODO §16.1) sit above the feed and are deliberately NOT dismissable: they carry
+   no unread dot, and a left accent marks them as chrome rather than another notification. */
+.notification-card.version-offer {
+  border-left: 3px solid var(--primary);
+}
+.notification-card.version-offer.warning {
+  background: color-mix(in srgb, #f59e0b 8%, var(--card-bg));
+  border-left-color: #f59e0b;
+}
+.notification-card.version-offer.warning .notification-card-icon {
+  background: color-mix(in srgb, #f59e0b 18%, transparent);
+  color: #f59e0b;
+}
+.notification-card.version-offer.muted {
+  border-left-color: var(--text-muted);
+}
+.notification-card.version-offer.muted .notification-card-icon {
+  background: color-mix(in srgb, var(--text-muted) 15%, transparent);
+  color: var(--text-muted);
+}
 .notification-card-icon {
   width: 32px;
   height: 32px;

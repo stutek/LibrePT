@@ -9,6 +9,7 @@
 // Dependencies injected via initNotificationArea({ getState, getActiveSession, t, escapeHTML, navigateToPath })
 
 import { readVersionScoped, writeVersionScoped } from "../../data/storageNamespace.js";
+import { renderVersionMessages } from "./versionMessages.js";
 
 // Version-scoped: which notifications a PT has read is per-build state (see data/storageNamespace).
 const READ_NOTIFICATIONS_KEY = "librept_read_notifications";
@@ -115,6 +116,10 @@ export function renderNotificationArea() {
       </div>
     `;
 
+    // Version offers sit above the feed even when there are no stored notifications: an upgrade
+    // invitation is not something a clean install should have to earn.
+    renderVersionMessages(container);
+
     const demoBtn = container.querySelector("#btn-run-inapp-demo");
     if (demoBtn) {
       demoBtn.addEventListener("click", (e) => {
@@ -166,6 +171,8 @@ export function renderNotificationArea() {
     `;
     })
     .join("");
+
+  renderVersionMessages(container);
 
   // Attach reset demo data listeners
   for (const btn of container.querySelectorAll("button[data-action-reset]")) {
