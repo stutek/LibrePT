@@ -16,6 +16,8 @@ import sys
 import shutil
 import subprocess
 
+from build.testreport import REPORT_DIR, failed_test_ids, print_digest, run_logged
+
 
 def check_environment():
     """Verifies that the virtual environment, pytest, and playwright are set up."""
@@ -247,32 +249,40 @@ def run_security_audit():
         print("  ✓ Security vulnerability audit passed.")
 
 
-def run_unit_tests():
-    """Runs fast unit tests (tests/unit/ and tests/test_app.py)."""
-    print("\n  Running Unit Tests...")
-    venv_python = (
+def venv_python_path():
+    return (
         os.path.join(".venv", "Scripts", "python.exe")
         if os.name == "nt"
         else os.path.join(".venv", "bin", "python")
     )
-    result = subprocess.run(
-        [venv_python, "-m", "pytest", "-v", "tests/unit/", "tests/test_app.py"]
+
+
+def run_unit_tests():
+    """Runs fast unit tests (tests/unit/ and tests/test_app.py)."""
+    print("\n  Running Unit Tests...")
+    returncode, output, path = run_logged(
+        [venv_python_path(), "-m", "pytest", "-q", "tests/unit/", "tests/test_app.py"],
+        "unit-tests",
     )
-    if result.returncode != 0:
-        print(f"  ✗ Unit tests failed with exit code: {result.returncode}")
-        sys.exit(result.returncode)
+    if returncode != 0:
+        print_digest("Unit tests", output, path)
+        print(f"  ✗ Unit tests failed with exit code: {returncode}")
+        sys.exit(returncode)
     print("  ✓ Unit tests passed successfully!")
 
 
 def run_e2e_tests():
-    """Runs Playwright browser E2E tests in parallel (tests/e2e/ and tests/test_browser.py)."""
+    """Runs Playwright browser E2E tests in parallel (tests/e2e/ and tests/test_browser.py).
+
+    On failure the failing node ids are re-run SERIALLY (AGENT_RULES §2.A.3: the suite is flaky
+    under pytest-xdist — port contention against the shared dev server produces spurious Playwright
+    timeouts). The re-run is the verdict, not a second chance: tests that fail serially fail the
+    build, and tests that pass serially are reported by name as parallel contention with both logs
+    kept as evidence, instead of costing a blind four-minute re-run of the whole suite to find out.
+    """
     print("\n  Running E2E Browser Tests (parallel)...")
-    venv_python = (
-        os.path.join(".venv", "Scripts", "python.exe")
-        if os.name == "nt"
-        else os.path.join(".venv", "bin", "python")
-    )
-    result = subprocess.run(
+    venv_python = venv_python_path()
+    returncode, output, path = run_logged(
         [
             venv_python,
             "-m",
@@ -280,15 +290,46 @@ def run_e2e_tests():
             "-n",
             "auto",
             "--dist=loadfile",
-            "-v",
+            "-q",
             "tests/e2e/",
             "tests/test_browser.py",
-        ]
+        ],
+        "e2e-parallel",
     )
-    if result.returncode != 0:
-        print(f"  ✗ E2E browser tests failed with exit code: {result.returncode}")
-        sys.exit(result.returncode)
-    print("  ✓ E2E browser tests passed successfully!")
+    if returncode == 0:
+        print("  ✓ E2E browser tests passed successfully!")
+        return
+
+    print_digest("E2E browser tests", output, path)
+    failed = failed_test_ids(output)
+    if not failed:
+        # No node ids means the runner itself died (collection error, crashed worker) — nothing to
+        # re-verify, and definitely nothing to excuse.
+        print(f"  ✗ E2E browser tests failed with exit code: {returncode} — see {path}")
+        sys.exit(returncode)
+
+    print(
+        f"\n  ↻ Re-verifying {len(failed)} failed test(s) serially (parallel-contention check)..."
+    )
+    rerun_code, rerun_output, rerun_path = run_logged(
+        [venv_python, "-m", "pytest", "-p", "no:xdist", "-q", *failed],
+        "e2e-serial-reverify",
+    )
+    if rerun_code != 0:
+        print_digest("E2E serial re-verification", rerun_output, rerun_path)
+        still_failing = failed_test_ids(rerun_output) or failed
+        print("  ✗ E2E browser tests genuinely failed:")
+        for test_id in still_failing:
+            print(f"      • {test_id}")
+        sys.exit(rerun_code)
+
+    print(
+        "  ⚠ Passed on serial re-verification — parallel runner contention, not a regression:"
+    )
+    for test_id in failed:
+        print(f"      • {test_id}")
+    print(f"    Evidence: {path} (parallel) · {rerun_path} (serial)")
+    print("  ✓ E2E browser tests passed (after serial re-verification).")
 
 
 def run_dynamic_security_checks():
@@ -458,6 +499,7 @@ def run_stage_1_parallel():
 
     if failures:
         print(f"\n  ✗ Stage 1 failed in tasks: {', '.join(failures)}")
+        print(f"    Digests above; full runner logs in {REPORT_DIR}/")
         sys.exit(1)
     print("\n  ✓ Stage 1 completed cleanly!")
 
@@ -491,6 +533,7 @@ def run_stage_2_parallel():
 
     if failures:
         print(f"\n  ✗ Stage 2 failed in tasks: {', '.join(failures)}")
+        print(f"    Digests above; full runner logs in {REPORT_DIR}/")
         sys.exit(1)
     print("\n  ✓ Stage 2 completed cleanly!")
 

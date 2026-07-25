@@ -21,3 +21,6 @@ env/
 
 # Build Outputs
 dist/
+
+# Captured test-runner output from the build gate (build/testreport.py)
+.build-reports/
