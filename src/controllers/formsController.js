@@ -156,6 +156,7 @@ export function setupRoutineForms({
         addRoutineExerciseRow({
           preset: { id: ex.id, sets: 3, reps: 10, weight: 0, rest: 60 },
           state,
+          t,
         });
       },
     });

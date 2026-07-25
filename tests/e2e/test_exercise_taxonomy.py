@@ -76,3 +76,39 @@ def test_custom_exercise_requires_taxonomy(page, local_server):
     # Options are seeded canonical taxonomy enums.
     assert page.locator("#exercise-equipment option[value='Barbell']").count() == 1
     assert page.locator("#exercise-pattern option[value='Hinge']").count() == 1
+
+
+def test_routine_builder_row_is_modality_aware(page, local_server):
+    # The routine builder authors metrics per the selected movement's MODALITY, at parity with the
+    # inline clipboard editor (TODO §17.1): a cardio movement hides the load axis and relabels the
+    # primary field to its effort metric; switching to a strength movement restores reps + load.
+    page.goto(local_server)
+    page.wait_for_timeout(500)
+    _nav(page, f"{_base(page)}/routines")
+
+    page.click("#btn-add-routine")
+    page.wait_for_selector("#routine-ex-picker:not(.hidden)")
+    page.locator("#routine-ex-picker .picker-item").first.click()
+    page.wait_for_timeout(150)
+
+    row = page.locator("#routine-exercises-list .routine-builder-row").first
+    load_cell = row.locator(".load-cell")
+    reps = row.locator(".input-reps")
+
+    # Cardio (Assault Bike, metric=calories): load axis hidden, primary field relabeled to the metric.
+    row.locator(".select-ex").select_option("e41d5e6f")
+    page.wait_for_timeout(100)
+    assert "hidden" in (load_cell.get_attribute("class") or ""), (
+        "a cardio movement carries no external load, so the load field must hide"
+    )
+    assert reps.get_attribute("placeholder") == "cal", (
+        "the primary field must relabel to the cardio effort metric"
+    )
+
+    # Strength (Barbell Bench Press): load axis returns, primary field is reps again.
+    row.locator(".select-ex").select_option("e10a2b3c")
+    page.wait_for_timeout(100)
+    assert "hidden" not in (load_cell.get_attribute("class") or ""), (
+        "a strength movement carries load, so the load field must show"
+    )
+    assert reps.get_attribute("placeholder") == "reps"

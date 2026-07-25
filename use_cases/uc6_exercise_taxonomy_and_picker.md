@@ -124,8 +124,10 @@ time**, so routines, sessions, and history need **no migration** — modality li
 and is looked up alongside equipment. The focus card, compact row, past-session peek, plans preview,
 and history log all render the right unit and drop the load tile for non-strength work; custom-create
 offers a modality selector (cardio additionally picks its metric); the catalog and picker flag
-non-strength movements with a highlighted modality badge. Delivers TODO §13.3 and the modality field of
-§17.1. *(`hiit` is reserved by §17.1 but has no distinct logging surface yet.)*
+non-strength movements with a highlighted modality badge. The **routine builder** authors metrics the
+same way — picking a movement relabels the row's primary field to its metric and hides the load axis
+for non-load-bearing modalities, at parity with the inline clipboard editor. Delivers TODO §13.3 and the
+modality field of §17.1. *(`hiit` is reserved by §17.1 but has no distinct logging surface yet.)*
 
 ---
 
@@ -172,6 +174,7 @@ Delivers TODO §13.1's last bullet (adopt an open standard for interchangeable e
 | Catalog & picker flag non-strength movements with a modality badge | [../tests/e2e/test_exercise_modality.py](../tests/e2e/test_exercise_modality.py) · `test_catalog_marks_cardio_with_a_modality_badge` |
 | Custom-create reveals the cardio metric selector and persists modality + metric | [../tests/e2e/test_exercise_modality.py](../tests/e2e/test_exercise_modality.py) · `test_create_cardio_exercise_reveals_metric_and_persists` |
 | Metric formatting renders time/distance/calories/watts/hold units | [../tests/e2e/test_exercise_modality.py](../tests/e2e/test_exercise_modality.py) · `test_metric_formatting_model_renders_the_right_units` |
+| Routine builder authors metric per modality (relabel primary, hide load) | [../tests/e2e/test_exercise_taxonomy.py](../tests/e2e/test_exercise_taxonomy.py) · `test_routine_builder_row_is_modality_aware` |
 | Open-standard crosswalk: category/equipment → wger canonical names, honest nulls | [../src/modules/common/exerciseStandard.js](../src/modules/common/exerciseStandard.js) · `wgerCategoryOf` / `wgerEquipmentOf` / `unmappedTerms` |
 | Interchange record preserves LibrePT axes under `x_librept`; CSV crosswalk | [../tests/e2e/test_exercise_standard.py](../tests/e2e/test_exercise_standard.py) · `test_interchange_record_preserves_librept_axes_and_flags_gaps` / `test_csv_export_has_header_and_quotes_cells` |
 | Backup dialog "Export Catalog" downloads a self-describing interchange file | [../tests/e2e/test_exercise_standard.py](../tests/e2e/test_exercise_standard.py) · `test_catalog_export_button_downloads_interchange_json` |

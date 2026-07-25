@@ -1,6 +1,7 @@
 // src/views/routinesView.js - Domain module for routines catalog and template editor builder
 import {
   formatMetricValue,
+  metricLabelKey,
   modalityOf,
   primaryMetricOf,
   usesLoad,
@@ -67,14 +68,14 @@ export function renderRoutinesList({ state, t, openWorkoutSetupModal }) {
     });
 
     card.addEventListener("click", () => {
-      openRoutineEditorModal({ routineId: routine.id, state });
+      openRoutineEditorModal({ routineId: routine.id, state, t });
     });
 
     container.appendChild(card);
   }
 }
 
-export function openRoutineEditorModal({ routineId, state }) {
+export function openRoutineEditorModal({ routineId, state, t }) {
   const routine = state.routines.find((r) => r.id === routineId);
   if (!routine) return;
 
@@ -92,15 +93,16 @@ export function openRoutineEditorModal({ routineId, state }) {
 
   builderList.innerHTML = "";
   for (const item of routine.exercises) {
-    addRoutineExerciseRow({ preset: item, state });
+    addRoutineExerciseRow({ preset: item, state, t });
   }
 
   dialog.showModal();
 }
 
-export function addRoutineExerciseRow({ preset = null, state }) {
+export function addRoutineExerciseRow({ preset = null, state, t }) {
   const builderList = document.getElementById("routine-exercises-list");
   if (!builderList) return;
+  const tr = (key, fallback) => (t ? t(key) || fallback : fallback);
   const row = document.createElement("div");
   row.className = "routine-builder-row";
 
@@ -124,7 +126,7 @@ export function addRoutineExerciseRow({ preset = null, state }) {
       <input type="number" min="1" placeholder="Sets" class="form-control input-sets" value="${preset ? preset.sets : "3"}" required aria-label="Sets quantity">
     </div>
     <div class="form-group" style="gap:2px">
-      <input type="text" placeholder="Reps" class="form-control input-reps" list="reps-presets" value="${preset ? escapeHTML(String(preset.reps)) : "10"}" required aria-label="Reps target (number, range like 8-12, time like 30s, or 'max' to failure)">
+      <input type="text" placeholder="Reps" class="form-control input-reps" list="reps-presets" value="${preset ? escapeHTML(String(preset.reps)) : "10"}" required aria-label="Primary target (reps, time, distance, or 'max' to failure — depends on the exercise's modality)">
     </div>
     <div class="form-group load-cell" style="gap:2px"></div>
     <div class="form-group" style="gap:2px">
@@ -136,6 +138,7 @@ export function addRoutineExerciseRow({ preset = null, state }) {
   // The load control adapts to the selected movement's equipment: kg for free weights/machines,
   // a stack level for cables, a resistance-band strength, or bodyweight (+ optional added kg).
   const loadCell = row.querySelector(".load-cell");
+  const repsInput = row.querySelector(".input-reps");
   const renderLoad = (unit, value) => {
     loadCell.innerHTML = loadInputHTML({
       unit,
@@ -145,12 +148,29 @@ export function addRoutineExerciseRow({ preset = null, state }) {
       ariaLabel: "Load",
     });
   };
+
+  // The selected movement's MODALITY decides how it is programmed — mirroring the inline clipboard
+  // editor. Strength authors reps; cardio/agility their effort metric (time/distance/cal/watts/…);
+  // isometric/stretch/balance a hold-time. The primary field is polymorphic (one text input, its
+  // label follows the metric), and the load axis shows only for load-bearing modalities. The load
+  // input stays in the DOM when hidden so the save handler still reads a (0) weight for it.
+  const applyModality = (ex) => {
+    const metric = primaryMetricOf(ex);
+    const label = metric === "reps" ? tr("reps_label", "Reps") : tr(metricLabelKey(metric), metric);
+    repsInput.placeholder = label;
+    if (metric === "reps") repsInput.setAttribute("list", "reps-presets");
+    else repsInput.removeAttribute("list"); // reps presets are meaningless for time/distance/cal
+    loadCell.classList.toggle("hidden", !usesLoad(modalityOf(ex)));
+  };
+
   renderLoad(loadUnitForEquipment(presetEx?.equipment), preset ? preset.weight : "");
+  applyModality(presetEx);
 
   const sel = row.querySelector(".select-ex");
   sel.addEventListener("change", () => {
     const chosen = state.exercises.find((e) => e.id === sel.value);
     renderLoad(loadUnitForEquipment(chosen?.equipment), "");
+    applyModality(chosen);
   });
 
   row.querySelector(".btn-remove-row").addEventListener("click", () => {

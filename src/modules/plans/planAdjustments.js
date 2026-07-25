@@ -92,7 +92,7 @@ export function renderPendingPlanAdjustmentsComponent(container, countBadge, ctx
       const routine = exercise
         ? state.routines.find((r) => r.exercises.some((ex) => ex.id === exercise.id))
         : null;
-      if (routine) openRoutineEditorModal({ routineId: routine.id, state });
+      if (routine) openRoutineEditorModal({ routineId: routine.id, state, t });
     });
 
     const resolveBtn = document.createElement("button");
