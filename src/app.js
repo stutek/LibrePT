@@ -188,6 +188,7 @@ function init() {
   initAppLifecycle({
     basePath: getBasePath(),
     setOfflineCachedState,
+    t,
   });
 
   const state = loadSavedState();

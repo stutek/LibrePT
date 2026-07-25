@@ -37,16 +37,45 @@ export function lockPortraitOrientation() {
   orientation.addEventListener("change", apply);
 }
 
-export function registerServiceWorker(basePath, setOfflineCachedState) {
+// Reveal the blocking integrity error page when the service worker reports a failed/absent verification
+// (INTEGRITY_ERROR). Never silently swallowed — a build that can't be verified must be impossible to
+// miss (dev and prod alike). `reason` picks the explanation; `detail` (the offending asset) is shown
+// verbatim for a bug report. Retry re-downloads by reloading, which re-attempts the atomic install.
+function showIntegrityError(reason, detail, t) {
+  const overlay = document.getElementById("integrity-error-overlay");
+  if (!overlay) return;
+  const tr = (key, fallback) => (typeof t === "function" && t(key)) || fallback;
+
+  const titleEl = document.getElementById("integrity-error-title");
+  const messageEl = document.getElementById("integrity-error-message");
+  const detailEl = document.getElementById("integrity-error-detail");
+  const retryBtn = document.getElementById("btn-integrity-retry");
+
+  if (titleEl) titleEl.textContent = tr("integrity_error_title", "App verification failed");
+  if (messageEl) {
+    messageEl.textContent =
+      reason === "missing-catalog"
+        ? tr("integrity_error_missing", "No integrity catalog was found for this build.")
+        : tr("integrity_error_mismatch", "A file failed its integrity check.");
+  }
+  if (detailEl) detailEl.textContent = detail || "";
+  if (retryBtn) {
+    retryBtn.textContent = tr("integrity_error_retry", "Retry download");
+    retryBtn.onclick = () => window.location.reload();
+  }
+  overlay.classList.remove("hidden");
+}
+
+export function registerServiceWorker(basePath, setOfflineCachedState, t) {
   if (!("serviceWorker" in navigator)) return;
 
   navigator.serviceWorker.addEventListener("message", (event) => {
-    if (
-      event.data &&
-      event.data.type === "OFFLINE_CACHE_USED" &&
-      typeof setOfflineCachedState === "function"
-    ) {
+    const data = event.data;
+    if (!data) return;
+    if (data.type === "OFFLINE_CACHE_USED" && typeof setOfflineCachedState === "function") {
       setOfflineCachedState(true);
+    } else if (data.type === "INTEGRITY_ERROR") {
+      showIntegrityError(data.reason, data.detail, t);
     }
   });
 
@@ -73,10 +102,10 @@ export function setupOnlineOfflineListeners(basePath, setOfflineCachedState) {
   });
 }
 
-export function initAppLifecycle({ basePath, setOfflineCachedState }) {
+export function initAppLifecycle({ basePath, setOfflineCachedState, t }) {
   resizeToPhoneViewport();
   lockPortraitOrientation();
   renderBuildStamp();
-  registerServiceWorker(basePath, setOfflineCachedState);
+  registerServiceWorker(basePath, setOfflineCachedState, t);
   setupOnlineOfflineListeners(basePath, setOfflineCachedState);
 }

@@ -39,6 +39,12 @@ export const sl = {
   no_workouts_history: "V splošni zgodovini ni zabeleženih vadb.",
   live_tracking_clipboard: "Sledenje vadbi v živo",
   active_session: "Aktivna seja",
+  integrity_error_title: "Preverjanje aplikacije ni uspelo",
+  integrity_error_missing:
+    "Za to različico ni bilo mogoče najti kataloga integritete. Zaženite celoten build (python -m build), da lahko aplikacija preveri svoje datoteke pred lokalnim preizkusom.",
+  integrity_error_mismatch:
+    "Datoteka ni prestala preverjanja integritete — prenos je poškodovan ali iz neujemajoče se različice. Prejšnja različica še vedno teče; poskusite znova prenesti to različico.",
+  integrity_error_retry: "Znova prenesi",
   btn_collapse: "Minimiziraj",
   exercise_of: "Vaja",
   btn_add_set: "Dodaj serijo",

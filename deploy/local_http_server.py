@@ -23,7 +23,9 @@ Then open http://localhost:8081/  (it redirects to /LibrePT/).
 """
 
 import argparse
+import hashlib
 import io
+import json
 import os
 from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -33,6 +35,40 @@ from urllib.parse import urlsplit
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC_DIR = os.path.join(REPO_ROOT, "src")
 BASE = "/LibrePT"  # mirror the GitHub Pages project sub-path (the repo name)
+
+INTEGRITY_CATALOG_NAME = "integrity.json"
+
+
+def served_bytes(abs_path, rel):
+    """The exact bytes this server sends for `rel` — raw file bytes, except index.html, which is
+    rewritten to the sub-path <base> just like _send_index_shell serves it. The service worker hashes
+    what it downloads, so the catalog must hash what is served, not the raw on-disk file."""
+    with open(abs_path, "rb") as f:
+        data = f.read()
+    if rel == "index.html":
+        data = data.replace(
+            b'<base href="/">', ('<base href="%s/">' % BASE).encode("ascii")
+        )
+    return data
+
+
+def build_dev_integrity_catalog(corrupt=False):
+    """Compute a live SHA-256 integrity catalog for the app served out of src/, so the service worker
+    verifies its precache in local dev exactly as it will in production — no silently-skipped check.
+    Regenerated per request so live edits never false-fail. `corrupt` (a test-only toggle) flips one
+    hash to drive the mismatch path. Mirrors the shape of build.generate_integrity_catalog."""
+    files = {}
+    for root, _dirs, names in os.walk(SRC_DIR):
+        for name in names:
+            abs_path = os.path.join(root, name)
+            rel = os.path.relpath(abs_path, SRC_DIR).replace(os.sep, "/")
+            files[rel] = hashlib.sha256(served_bytes(abs_path, rel)).hexdigest()
+    if corrupt and "app.js" in files:
+        files["app.js"] = (
+            "0" * 64
+        )  # force a deliberate mismatch for the failure-path e2e test
+    return {"algorithm": "SHA-256", "files": dict(sorted(files.items()))}
+
 
 # Security headers mirrored onto every response so the OWASP ZAP baseline scan (build check)
 # audits the app the way a hardened host would serve it. The CSP matches the index.html
@@ -108,6 +144,12 @@ class SubPathHandler(SimpleHTTPRequestHandler):
             return None
 
         rel = raw[len(BASE) :].lstrip("/")
+
+        # The integrity catalog is computed live from src/ (mirrors the build-time dist/integrity.json)
+        # so the service worker verifies its precache in dev exactly as in production — never skipped.
+        if rel == INTEGRITY_CATALOG_NAME:
+            return self._send_integrity_catalog()
+
         is_navigation = (
             os.path.splitext(rel)[1] == ""
         )  # a clean-URL route has no extension
@@ -120,6 +162,16 @@ class SubPathHandler(SimpleHTTPRequestHandler):
             return self._send_index_shell()
 
         return super().send_head()
+
+    def _send_integrity_catalog(self):
+        # A test-only cookie flips one hash so the failure-path e2e can drive the mismatch overlay.
+        corrupt = "corrupt_integrity=1" in (self.headers.get("Cookie") or "")
+        body = json.dumps(build_dev_integrity_catalog(corrupt=corrupt)).encode("utf-8")
+        self.send_response(HTTPStatus.OK)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        return io.BytesIO(body)
 
     def _send_index_shell(self):
         try:

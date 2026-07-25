@@ -50,6 +50,19 @@
 </head>
 <body class="daylight-theme">
 
+  <!-- Integrity error page: a blocking overlay shown only when the service worker fails to verify a
+       build against its SHA-256 catalog (corrupt download / version skew) or finds no catalog at all.
+       Hidden by default; revealed by appLifecycleController on an INTEGRITY_ERROR message from sw.js. -->
+  <div id="integrity-error-overlay" class="integrity-error-overlay hidden" role="alertdialog" aria-modal="true" aria-labelledby="integrity-error-title" aria-describedby="integrity-error-message">
+    <div class="integrity-error-card">
+      <i class="fa-solid fa-shield-halved integrity-error-icon" aria-hidden="true"></i>
+      <h2 id="integrity-error-title">App verification failed</h2>
+      <p id="integrity-error-message">This build could not be verified.</p>
+      <p id="integrity-error-detail" class="integrity-error-detail"></p>
+      <button id="btn-integrity-retry" class="btn primary-btn" type="button">Retry download</button>
+    </div>
+  </div>
+
   <!-- Top Header Bar -->
   <header class="app-header">
     <div class="header-container">

@@ -40,6 +40,12 @@ export const en = {
   no_workouts_history: "No logged workouts in global history.",
   live_tracking_clipboard: "Live Tracking Clipboard",
   active_session: "Active session",
+  integrity_error_title: "App verification failed",
+  integrity_error_missing:
+    "No integrity catalog was found for this build. Run the full build (python -m build) so the app can verify its files before you evaluate it locally.",
+  integrity_error_mismatch:
+    "A file failed its integrity check — the download is corrupt or from a mismatched build. The previous version is still running; retry to download this build again.",
+  integrity_error_retry: "Retry download",
   btn_collapse: "Minimize",
   exercise_of: "Exercise",
   btn_add_set: "Add Set",
