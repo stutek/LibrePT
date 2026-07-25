@@ -161,3 +161,38 @@ def test_a_stored_legacy_database_is_migrated_on_boot(page, local_server):
     assert r["schemaVersion"] == 2
     assert r["summary"]["fromVersion"] == 1
     assert r["summary"]["problems"] == []
+
+
+def test_absent_collections_are_filled_in_but_corrupt_ones_still_fail(
+    page, local_server
+):
+    """A hand-trimmed backup (or one taken before a collection existed) reaches every renderer, so
+    missing collections are filled in once here rather than defended against at each read site —
+    but a key that is present and NOT a list is corruption, and must still fail loudly."""
+    page.goto(local_server)
+    page.wait_for_timeout(300)
+
+    r = _evaluate(
+        page,
+        """const sparse = m.migrateState({ clients: [{ id: 'c1' }] });
+        const corrupt = m.migrateState({ schemaVersion: 2, sessions: [], clients: 'nope' });
+        return {
+            ok: sparse.ok,
+            history: sparse.state.history,
+            notifications: sparse.state.notifications,
+            planUpdates: sparse.state.planUpdates,
+            clients: sparse.state.clients.length,
+            corruptOk: corrupt.ok,
+            corruptProblems: corrupt.summary.problems,
+        };""",
+    )
+
+    assert r["ok"] is True
+    assert r["history"] == []
+    assert r["notifications"] == []
+    assert r["planUpdates"] == []
+    assert r["clients"] == 1, (
+        "filling in blanks never touches data that is actually there"
+    )
+    assert r["corruptOk"] is False
+    assert any("clients" in problem for problem in r["corruptProblems"])

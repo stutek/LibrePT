@@ -134,7 +134,9 @@ export function renderHistoryItems({ historyList, container, t }) {
         openCircuit = null;
       }
     };
-    for (const item of log.exercises) {
+    // A restored or hand-edited backup can carry a log with no exercises — render the header
+    // rather than throwing partway through the list.
+    for (const item of log.exercises || []) {
       const cid = item.circuitId || null;
       if (cid !== openCircuit) {
         closeCircuit();

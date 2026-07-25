@@ -63,7 +63,7 @@ export function seedDemoActiveSession({ state }) {
         logs: {},
       };
 
-      for (const item of routine.exercises) {
+      for (const item of routine.exercises || []) {
         const ex = state.exercises.find((e) => e.id === item.id);
         if (!ex) continue;
         clientState.exercises.push({

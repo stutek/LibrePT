@@ -28,7 +28,9 @@ export function renderRoutinesList({ state, t, openWorkoutSetupModal }) {
     const card = document.createElement("div");
     card.className = "routine-card card glassmorphic";
 
-    const tags = routine.exercises
+    // A restored backup can be hand-edited or truncated, and it now reaches every renderer whole —
+    // so a routine missing its exercises renders empty rather than throwing mid-import.
+    const tags = (routine.exercises || [])
       .map((item) => {
         const ex = state.exercises.find((e) => e.id === item.id);
         const name = escapeHTML(ex ? ex.name : "Unknown Exercise");
@@ -46,7 +48,8 @@ export function renderRoutinesList({ state, t, openWorkoutSetupModal }) {
       .slice(0, 4)
       .join("");
 
-    const moreCount = routine.exercises.length > 4 ? `+${routine.exercises.length - 4} more` : "";
+    const exerciseCount = (routine.exercises || []).length;
+    const moreCount = exerciseCount > 4 ? `+${exerciseCount - 4} more` : "";
 
     card.innerHTML = `
       <div class="routine-title-info">
@@ -92,7 +95,7 @@ export function openRoutineEditorModal({ routineId, state, t }) {
   document.getElementById("routine-ex-picker")?.classList.add("hidden");
 
   builderList.innerHTML = "";
-  for (const item of routine.exercises) {
+  for (const item of routine.exercises || []) {
     addRoutineExerciseRow({ preset: item, state, t });
   }
 

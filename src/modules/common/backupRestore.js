@@ -13,6 +13,7 @@
 //   t
 // }
 
+import { describeMigration, migrateState } from "../../data/schemaMigrations.js";
 import { catalogToCsv, catalogToInterchange } from "./exerciseStandard.js";
 
 let deps = null;
@@ -119,13 +120,17 @@ export function setupBackupRestore() {
             Array.isArray(importedData.clients) &&
             Array.isArray(importedData.exercises)
           ) {
-            const newState = {
-              clients: importedData.clients || [],
-              exercises: importedData.exercises || [],
-              routines: importedData.routines || [],
-              history: importedData.history || [],
-            };
-            deps.setState(newState);
+            // A backup is restored WHOLE. Rebuilding a fixed set of collections here silently
+            // dropped everything not listed — sessions, plan updates, notifications — so a restore
+            // quietly destroyed data the export had faithfully written out. Anything the file
+            // carries is kept, including keys a newer build added that this one does not know.
+            const { ok, state: restored, summary } = migrateState(importedData);
+            if (!ok) {
+              // A backup from a NEWER build (or one this version cannot migrate) is refused rather
+              // than half-imported over the trainer's live database.
+              throw new Error(describeMigration(summary).join("; ") || "Unmigratable backup.");
+            }
+            deps.setState(restored);
             deps.saveToLocalStorage();
 
             // Re-render
@@ -136,7 +141,10 @@ export function setupBackupRestore() {
             deps.populateDropdownSelectors();
 
             if (importStatus) {
-              importStatus.textContent = "Import successful! Database synchronized.";
+              const migrated = summary.applied.length > 0;
+              importStatus.textContent = migrated
+                ? `Import successful! Upgraded from schema ${summary.fromVersion}.`
+                : "Import successful! Database synchronized.";
               importStatus.className = "status-msg text-emerald";
             }
           } else {

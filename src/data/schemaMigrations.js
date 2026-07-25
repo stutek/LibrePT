@@ -54,6 +54,19 @@ export function validateStateShape(state, expectedVersion) {
   return problems;
 }
 
+// Fill in any known collection the stored database simply doesn't have. A hand-trimmed backup, or
+// one taken before a collection existed, otherwise reaches the renderers as `undefined` and breaks
+// them one at a time. Done once here rather than defended against at every read site.
+export function normalizeCollections(state) {
+  if (!state || typeof state !== "object") return state;
+  for (const key of ARRAY_COLLECTIONS) {
+    // Only ABSENT collections are filled in. A key that is present but not an array is corruption,
+    // and must still fail validation loudly rather than be quietly replaced with an empty list.
+    if (state[key] === undefined || state[key] === null) state[key] = [];
+  }
+  return state;
+}
+
 function clone(state) {
   return typeof structuredClone === "function"
     ? structuredClone(state)
@@ -123,6 +136,7 @@ export function migrateState(rawState) {
 
   // A database already at the current version still gets stamped, so the field exists from here on.
   if (working && typeof working === "object") working.schemaVersion = CURRENT_SCHEMA_VERSION;
+  normalizeCollections(working);
 
   const problems = validateStateShape(working, CURRENT_SCHEMA_VERSION);
   if (problems.length > 0) {
