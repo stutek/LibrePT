@@ -9,7 +9,12 @@ import json
 import os
 import subprocess
 
-from build.releases import VERSION_MANIFEST_NAME, list_release_tags, publish_releases
+from build.releases import (
+    VERSION_MANIFEST_NAME,
+    list_release_tags,
+    publish_releases,
+    tag_commit,
+)
 
 
 def _git(repo, *args):
@@ -106,3 +111,51 @@ def test_only_the_supported_window_of_releases_stays_hosted(tmp_path):
     tags = _in(repo, lambda: list_release_tags(limit=2))
 
     assert tags == ["v1.2.0", "v1.1.0"]
+
+
+def test_a_release_folder_identifies_its_own_code_not_the_deploy(tmp_path):
+    """A rollback does not rebuild code — it routes to a version that is already published. So each
+    folder must stamp the commit that release IS, never the deploy that happened to republish it:
+    the header stamp shows that SHA and support reads it off bug reports, so a trainer on an older
+    version must not report a SHA belonging to code they are not running."""
+    repo = _repo_with_tags(tmp_path, ["v1.0.0", "v1.1.0"])
+    dist = repo / "dist"
+    dist.mkdir()
+
+    _in(repo, lambda: publish_releases(str(dist), "/LibrePT/", "deploySHA"))
+
+    stamps = {
+        tag: (dist / tag / "version.js").read_text() for tag in ("v1.0.0", "v1.1.0")
+    }
+    assert "deploySHA" not in stamps["v1.0.0"], (
+        "the deploying commit must not leak into a release"
+    )
+    assert "deploySHA" not in stamps["v1.1.0"]
+    for tag, stamp in stamps.items():
+        assert f'commit: "{_in(repo, lambda t=tag: tag_commit(t))}"' in stamp
+    # Two releases are two different builds and must never share an identifier.
+    assert stamps["v1.0.0"] != stamps["v1.1.0"]
+
+
+def test_republishing_a_release_is_byte_identical(tmp_path):
+    """Both versions stay deployed side by side, so an unrelated deploy re-materialises the older
+    folder. If those bytes changed, its integrity catalog would change and every service worker on
+    that version would re-install — churn inflicted by a deploy that has nothing to do with them."""
+    repo = _repo_with_tags(tmp_path, ["v1.0.0"])
+    dist = repo / "dist"
+    dist.mkdir()
+
+    _in(repo, lambda: publish_releases(str(dist), "/LibrePT/", "firstDeploy"))
+    first = {
+        name: (dist / "v1.0.0" / name).read_text()
+        for name in ("version.js", "index.html", "integrity.json")
+    }
+    _in(repo, lambda: publish_releases(str(dist), "/LibrePT/", "secondDeploy"))
+    second = {
+        name: (dist / "v1.0.0" / name).read_text()
+        for name in ("version.js", "index.html", "integrity.json")
+    }
+
+    assert first == second, (
+        "republishing a released version must produce identical bytes"
+    )

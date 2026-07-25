@@ -46,6 +46,57 @@ def list_release_tags(limit=SUPPORTED_RELEASE_COUNT):
     return tags[:limit] if limit else tags
 
 
+def tag_commit(tag):
+    """The short SHA the tag points at — the release's OWN commit.
+
+    A published release folder must identify itself as the code it IS, never as the deploy that
+    happened to republish it. The header stamp shows this SHA and support reads it off bug reports
+    (AGENT_RULES §2.D), so stamping the deploying commit here would make every trainer on an older
+    version report a SHA belonging to code they are not running.
+    """
+    try:
+        return (
+            subprocess.check_output(
+                ["git", "rev-parse", "--short", f"{tag}^{{commit}}"],
+                stderr=subprocess.DEVNULL,
+            )
+            .decode()
+            .strip()
+        )
+    except Exception:
+        return "unknown"
+
+
+def tag_built_at(tag):
+    """The tag's own commit time, in the build stamp's format and always UTC.
+
+    Deliberately NOT "now": a rollback does not rebuild code, it routes to a version that is already
+    published, so republishing that version on an unrelated deploy must produce BYTE-IDENTICAL
+    output. Stamping the current time would change version.js, which changes integrity.json, which
+    makes the service worker re-install the app for every trainer sitting on that version — churn
+    caused by a deploy that has nothing to do with them.
+    """
+    try:
+        return (
+            subprocess.check_output(
+                [
+                    "git",
+                    "log",
+                    "-1",
+                    "--format=%cd",
+                    "--date=format-local:%Y-%m-%dT%H:%MZ",
+                    tag,
+                ],
+                stderr=subprocess.DEVNULL,
+                env={**os.environ, "TZ": "UTC"},
+            )
+            .decode()
+            .strip()
+        )
+    except Exception:
+        return ""
+
+
 def tag_date(tag):
     """The tag's creation date (YYYY-MM-DD), shown to the PT as when a release was published."""
     try:
@@ -91,13 +142,17 @@ def rewrite_base_href(target_dir, base):
         handle.write(html)
 
 
-def assemble_site(source_dir, target_dir, base, commit, release):
+def assemble_site(source_dir, target_dir, base, commit, release, built_at=None):
     """Assemble one complete copy of the app: files, version stamp, <base>, SPA 404 fallback and —
-    LAST, so it covers the exact bytes served — the SHA-256 integrity catalog."""
+    LAST, so it covers the exact bytes served — the SHA-256 integrity catalog.
+
+    `built_at` is passed explicitly for already-released versions so their output stays byte-stable
+    across deploys; the live root copy leaves it None and is stamped with the current time.
+    """
     if os.path.exists(target_dir):
         shutil.rmtree(target_dir)
     shutil.copytree(source_dir, target_dir)
-    stamp_version_file(target_dir, commit, release)
+    stamp_version_file(target_dir, commit, release, built_at)
     rewrite_base_href(target_dir, base)
     # Pages serves 404.html for any path with no file, so shipping the shell there lets a deep link
     # to a clean route boot the app and resolve the route client-side.
@@ -145,8 +200,15 @@ def publish_releases(dist_dir, base, commit, limit=SUPPORTED_RELEASE_COUNT):
             if not os.path.isdir(sources):
                 print(f"  ! Skipping release {tag}: it has no src/ directory")
                 continue
+            # Stamped with the TAG's own commit and time, not this deploy's: the folder is the
+            # code that release always was, re-materialised unchanged.
             assemble_site(
-                sources, os.path.join(dist_dir, tag), f"{base}{tag}/", commit, tag
+                sources,
+                os.path.join(dist_dir, tag),
+                f"{base}{tag}/",
+                tag_commit(tag),
+                tag,
+                tag_built_at(tag),
             )
         published.append(tag)
         print(f"  Published release {tag} at {base}{tag}/")
