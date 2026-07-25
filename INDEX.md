@@ -48,6 +48,7 @@ is structured into feature modules under `src/modules/` (`session`, `plans`, `cl
 | [src/data/storageNamespace.js](src/data/storageNamespace.js) | `data` | Per-release storage isolation (TODO §16.2): which localStorage bucket this build owns, copy-never-move migration between releases, bucket listing and EOL discard. |
 | [src/data/schemaMigrations.js](src/data/schemaMigrations.js) | `data` | Schema-migration runner (TODO §16.2): walks the version chain on a clone, validates every step's output, refuses data from a newer build, and returns a reportable summary. |
 | [src/data/migrationSteps.js](src/data/migrationSteps.js) | `data` | The ordered chain of pure per-version schema transforms and `CURRENT_SCHEMA_VERSION`. |
+| [src/data/versionCatalog.js](src/data/versionCatalog.js) | `data` | Published-release manifest reader (TODO §16.1): decides whether to offer an upgrade, a rollback (only for data that exists locally), or an end-of-support warning. |
 | [src/data/index.js](src/data/index.js) | `data` | Barrel for seed/demo data: `exercises.js`, `clients.js`, `routines.js`, `history.js`, `planUpdates.js`, `sessions.js`. |
 | [src/i18n/index.js](src/i18n/index.js) | `i18n` | Translation registry: one flat key→string map per locale (`en.js`, `sl.js`). Key parity enforced by unit tests. |
 | [src/modules/sessionList/sessionsView.js](src/modules/sessionList/sessionsView.js) | `view` | Modular view renderer for Sessions dashboard. |
