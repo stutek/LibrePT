@@ -44,8 +44,9 @@ SECURITY_HEADERS = {
     "Content-Security-Policy": (
         "default-src 'self'; "
         "script-src 'self'; "
-        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; "
-        "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; "
+        "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; "
+        # Fonts are vendored locally ('self'); only Font Awesome's webfonts still come from cdnjs.
+        "font-src 'self' https://cdnjs.cloudflare.com; "
         "img-src 'self' data:; "
         # connect-src governs fetch()/XHR — including the service worker precaching the Font Awesome
         # CDN. Without it, connect falls back to default-src 'self' and the SW's cache.addAll is

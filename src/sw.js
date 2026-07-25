@@ -7,7 +7,7 @@
 // online load is one deployed version, and CACHE_NAME is bumped every release so `activate` purges old
 // caches wholesale. Adding a runtime module? Add it to ASSETS AND bump CACHE_NAME, or offline loads a
 // version-skewed app.
-const CACHE_NAME = "librept-v19";
+const CACHE_NAME = "librept-v20";
 const ASSETS = [
   "./",
   "./index.html",
@@ -83,6 +83,19 @@ const ASSETS = [
   // Icons & Fonts
   "./icons/icon-192.png",
   "./icons/icon-512.png",
+  // Vendored webfonts — same-origin, so part of the atomic app shell (no third-party font origin).
+  "./fonts/fonts.css",
+  "./fonts/dmsans-normal-latin.woff2",
+  "./fonts/dmsans-normal-latin-ext.woff2",
+  "./fonts/dmsans-italic-latin.woff2",
+  "./fonts/dmsans-italic-latin-ext.woff2",
+  "./fonts/outfit-normal-latin.woff2",
+  "./fonts/outfit-normal-latin-ext.woff2",
+  "./fonts/jetbrainsmono-normal-latin.woff2",
+  "./fonts/jetbrainsmono-normal-latin-ext.woff2",
+  "./fonts/jetbrainsmono-italic-latin.woff2",
+  "./fonts/jetbrainsmono-italic-latin-ext.woff2",
+  // Font Awesome is still CDN-hosted (best-effort external cache — see below).
   "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css",
   "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-solid-900.woff2",
   "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-regular-400.woff2",

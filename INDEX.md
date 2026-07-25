@@ -81,6 +81,7 @@ is structured into feature modules under `src/modules/` (`session`, `plans`, `cl
 | [src/modules/common/feedbackModal.js](src/modules/common/feedbackModal.js) | `component` | Feedback tags modal dialog and voice recorder handler. |
 | [src/modules/common/notificationArea.js](src/modules/common/notificationArea.js) | `component` | Toast and banner notification area handler. |
 | [src/modules/themes/](src/modules/themes/) | `styles` | Theme-specific CSS stylesheets (`daylight.css`, `midnight.css`, `red.css`, `blossom.css`, `nebula.css`). |
+| [src/fonts/](src/fonts/) | `assets` | Locally-vendored variable webfonts (DM Sans, Outfit, JetBrains Mono; latin + latin-ext) + `fonts.css`, so the offline-first PWA has no `fonts.googleapis.com`/`fonts.gstatic.com` dependency (regeneration steps in the `fonts.css` header). |
 | [src/controllers/routerController.js](src/controllers/routerController.js) | `controller` | SPA route mapping and navigation logic. |
 | [src/controllers/themeController.js](src/controllers/themeController.js) | `controller` | Unified theme manager. |
 | [src/controllers/appLifecycleController.js](src/controllers/appLifecycleController.js) | `controller` | PWA runtime lifecycle. |
