@@ -897,14 +897,13 @@ select.menu-select {
 } /* Chips Filter Container */
 .filter-chips {
   display: flex;
+  /* Wrap the category filters to multiple rows so every one stays visible on a narrow phone. A single
+     overflow-x row hid the trailing chips off-screen with no scrollbar affordance (they "ran out of
+     view"); the reusable .picker-chips already wraps, so this keeps the two consistent. */
+  flex-wrap: wrap;
   gap: 8px;
-  overflow-x: auto;
   padding-bottom: 8px;
   margin-bottom: 16px;
-  scrollbar-width: none;
-}
-.filter-chips::-webkit-scrollbar {
-  display: none;
 }
 .chip {
   background: var(--input-bg);
