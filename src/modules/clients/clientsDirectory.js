@@ -40,7 +40,7 @@ export function renderClientsDirectory(container, deps) {
     card.className = "client-card card glassmorphic";
     card.innerHTML = `
       <div class="client-info-block">
-        <div class="avatar">${client.avatar || getInitials(client.name)}</div>
+        <div class="avatar">${escapeHTML(client.avatar || getInitials(client.name))}</div>
         <div class="client-name-meta">
           <h3>${getClientDisplayNameHTML(client)}</h3>
           <p>${escapeHTML(truncateString(client.goals, 45))}</p>

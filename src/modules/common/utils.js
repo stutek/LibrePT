@@ -10,9 +10,14 @@ export function generateShortUUID() {
 }
 
 // Generate initials for avatar text representation
+// Initials are rendered into HTML, so they are restricted to letters and digits rather than trusted
+// to be short: a name of "<img src=x>" would otherwise emit a raw "<I", which the parser reads as an
+// open tag and which swallows the markup after it. Length alone is not safety.
 export function getInitials(name) {
+  const letters = (s) => (s || "").replace(/[^\p{L}\p{N}]/gu, "");
   if (!name) return "PT";
-  const parts = name.trim().split(" ");
+  const parts = name.trim().split(" ").map(letters).filter(Boolean);
+  if (parts.length === 0) return "PT";
   if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
