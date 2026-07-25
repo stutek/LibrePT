@@ -109,16 +109,66 @@ const ASSETS = [
 const SHELL_ASSETS = ASSETS.filter((u) => !/^https?:/i.test(u));
 const EXTERNAL_ASSETS = ASSETS.filter((u) => /^https?:/i.test(u));
 
+// Build-time SHA-256 integrity catalog (dist/integrity.json, written by build.generate_integrity_catalog):
+// a hash of every bundled file keyed by its served path. Verifying each precached asset against it turns
+// the atomic precache into a *verified* atomic precache — a corrupted download OR a stale file from a
+// different build (a version skew) fails its hash check and rejects the whole install, so the cache can
+// never hold a half-old/half-new mix. The catalog is a build artifact: absent in local dev (src/ is
+// served directly, un-bundled), where verification is simply skipped and precache behaves as before.
+async function loadIntegrityCatalog() {
+  try {
+    const res = await fetch("./integrity.json", { cache: "no-store" });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data?.files ? data.files : null;
+  } catch (err) {
+    return null; // no catalog (dev) or unreadable — fall back to an unverified precache
+  }
+}
+
+// Map a SHELL_ASSETS entry ("./", "./app.js", "./fonts/x.woff2") to its catalog key (the dist-root-
+// relative path the build hashed it under). The app shell "./" is served as index.html.
+function integrityKeyFor(asset) {
+  const key = asset.replace(/^\.\//, "");
+  return key === "" ? "index.html" : key;
+}
+
+async function sha256Hex(buffer) {
+  const digest = await crypto.subtle.digest("SHA-256", buffer);
+  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+// Fetch, optionally verify, then cache one shell asset. Rejects on a network error, a catalogued-but-
+// missing entry, or a hash mismatch, so the caller's Promise.all aborts the atomic install as a unit.
+async function precacheVerified(cache, asset, integrity) {
+  // Force a fresh network copy only when verifying — hashing an HTTP-cached (possibly stale) body
+  // against the new build's catalog would falsely fail. Without a catalog (dev), use the default
+  // cache mode so install stays as light on the server as the original addAll.
+  const response = await fetch(asset, integrity ? { cache: "no-store" } : undefined);
+  if (!response.ok) throw new Error(`Precache fetch failed (${response.status}) for ${asset}`);
+  if (integrity) {
+    const expected = integrity[integrityKeyFor(asset)];
+    if (!expected) throw new Error(`No integrity hash catalogued for ${asset}`);
+    const actual = await sha256Hex(await response.clone().arrayBuffer());
+    if (actual !== expected) {
+      throw new Error(`Integrity mismatch for ${asset} (expected ${expected}, got ${actual})`);
+    }
+  }
+  await cache.put(asset, response);
+}
+
 self.addEventListener("install", (e) => {
   e.waitUntil(
-    caches
-      .open(CACHE_NAME)
-      .then((cache) =>
-        cache
-          .addAll(SHELL_ASSETS)
-          .then(() => Promise.allSettled(EXTERNAL_ASSETS.map((u) => cache.add(u).catch(() => {})))),
-      )
-      .then(() => self.skipWaiting()),
+    (async () => {
+      const cache = await caches.open(CACHE_NAME);
+      const integrity = await loadIntegrityCatalog();
+      // Atomic + verified: any rejection aborts the install, so no partial/version-skewed cache lands.
+      await Promise.all(SHELL_ASSETS.map((asset) => precacheVerified(cache, asset, integrity)));
+      // Third-party libs (Font Awesome CDN) stay best-effort and are not integrity-verified here
+      // (cross-origin, pinned immutable URLs); a blocked/offline fetch must not fail the shell install.
+      await Promise.allSettled(EXTERNAL_ASSETS.map((u) => cache.add(u).catch(() => {})));
+      await self.skipWaiting();
+    })(),
   );
 });
 

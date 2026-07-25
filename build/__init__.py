@@ -9,6 +9,8 @@ Always invoke via `.venv/bin/python -m build` or the venv Python so that pytest-
 also safe — run_tests() always shells out to the venv python explicitly.
 """
 
+import hashlib
+import json
 import os
 import sys
 import shutil
@@ -532,6 +534,7 @@ def run_build():
         print(f"  Copied src/{path} -> {dist_dir}/{path}")
 
     stamp_build_version(dist_dir)
+    generate_integrity_catalog(dist_dir)
 
     print(f"  ✓ Build complete. Bundle stored in: {os.path.abspath(dist_dir)}")
 
@@ -557,3 +560,36 @@ def stamp_build_version(dist_dir):
             f'export const BUILD_INFO = {{ commit: "{commit}", builtAt: "{built_at}" }};\n'
         )
     print(f"  Stamped build {commit} ({built_at})")
+
+
+INTEGRITY_CATALOG_NAME = "integrity.json"
+
+
+def generate_integrity_catalog(dist_dir, catalog_name=INTEGRITY_CATALOG_NAME):
+    """Write dist/integrity.json: a SHA-256 hash of every bundled file, keyed by its dist-root-relative
+    (POSIX) path — the same path the service worker fetches it under.
+
+    This is the download-integrity + version-coherence guarantee (README "Architectural Invariants").
+    The service worker verifies each precached shell asset against this catalog and aborts the whole
+    atomic install on any mismatch, so a corrupted download OR a stale file from a different build
+    (a version skew) can never be cached alongside fresh ones. Run LAST in the bundle — AFTER every
+    file mutation (version stamping, the <base href> rewrite, the 404.html copy) — so the recorded
+    hashes match the exact bytes that ship. The catalog cannot hash itself, so it is excluded.
+
+    Returns the {relpath: "sha256hex"} map for callers/tests."""
+    files = {}
+    for root, _dirs, names in os.walk(dist_dir):
+        for name in names:
+            abs_path = os.path.join(root, name)
+            rel = os.path.relpath(abs_path, dist_dir).replace(os.sep, "/")
+            if rel == catalog_name:
+                continue
+            with open(abs_path, "rb") as f:
+                files[rel] = hashlib.sha256(f.read()).hexdigest()
+
+    catalog = {"algorithm": "SHA-256", "files": dict(sorted(files.items()))}
+    with open(os.path.join(dist_dir, catalog_name), "w") as f:
+        json.dump(catalog, f, indent=2, sort_keys=False)
+        f.write("\n")
+    print(f"  Wrote {catalog_name} ({len(files)} files hashed, SHA-256)")
+    return files
