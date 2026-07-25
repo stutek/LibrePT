@@ -12,6 +12,10 @@ import subprocess
 
 REPORT_DIR = ".build-reports"
 SUMMARY_MARKER = "short test summary info"
+# pytest prints tracebacks in a FAILURES section BEFORE the short summary. The summary names WHICH
+# test broke; only the traceback says WHY — and without it the log has to be opened and grepped,
+# which is exactly the round trip this module exists to remove.
+FAILURES_MARKER = "= FAILURES ="
 # pytest's short-summary lines: "FAILED tests/e2e/x.py::test_y[chromium] - AssertionError: ..."
 SUMMARY_LINE = re.compile(r"^(?:FAILED|ERROR)\s+(\S+)")
 
@@ -47,12 +51,38 @@ def failed_test_ids(output):
     return ids
 
 
+def failure_traceback(output, limit=24):
+    """The FAILURES section — the exception, its message and the line that raised it.
+
+    Run with --tb=short, one failure is ~6 lines, so a cap of 24 covers the usual case of several
+    tests failing for one shared reason. Anything beyond the cap stays in the log.
+    """
+    lines = output.splitlines()
+    starts = [i for i, line in enumerate(lines) if FAILURES_MARKER in line]
+    if not starts:
+        return [], 0
+    summaries = [i for i, line in enumerate(lines) if SUMMARY_MARKER in line]
+    end = summaries[-1] if summaries and summaries[-1] > starts[0] else len(lines)
+    section = [line for line in lines[starts[0] : end] if line.strip()]
+    return section[:limit], max(0, len(section) - limit)
+
+
 def print_digest(label, output, path, limit=30):
-    """Print pytest's short summary (or the tail, for a runner that produced none) plus the log path."""
+    """Print WHY it failed (the compact traceback) and WHICH tests failed (pytest's short summary),
+    plus the log path for everything else. Both halves matter: the ids alone still cost a trip to
+    the log to learn the reason."""
     lines = output.splitlines()
     marker_indexes = [i for i, line in enumerate(lines) if SUMMARY_MARKER in line]
     digest = lines[marker_indexes[-1] :] if marker_indexes else lines[-limit:]
+
     print(f"\n  ── {label}: failure digest ──  (full log: {path})")
+    traceback, trimmed = failure_traceback(output)
+    for line in traceback:
+        print(f"    {line}")
+    if trimmed:
+        print(f"    … {trimmed} more traceback line(s) in {path}")
+    if traceback:
+        print()
     for line in digest[:limit]:
         print(f"    {line}")
     if len(digest) > limit:

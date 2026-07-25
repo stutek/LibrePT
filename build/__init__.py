@@ -261,7 +261,15 @@ def run_unit_tests():
     """Runs fast unit tests (tests/unit/ and tests/test_app.py)."""
     print("\n  Running Unit Tests...")
     returncode, output, path = run_logged(
-        [venv_python_path(), "-m", "pytest", "-q", "tests/unit/", "tests/test_app.py"],
+        [
+            venv_python_path(),
+            "-m",
+            "pytest",
+            "-q",
+            "--tb=short",
+            "tests/unit/",
+            "tests/test_app.py",
+        ],
         "unit-tests",
     )
     if returncode != 0:
@@ -291,6 +299,9 @@ def run_e2e_tests():
             "auto",
             "--dist=loadfile",
             "-q",
+            # Compact frames: enough to name the exception and the line that raised it, without the
+            # library internals that made the old output unreadable.
+            "--tb=short",
             "tests/e2e/",
             "tests/test_browser.py",
         ],
@@ -312,7 +323,7 @@ def run_e2e_tests():
         f"\n  ↻ Re-verifying {len(failed)} failed test(s) serially (parallel-contention check)..."
     )
     rerun_code, rerun_output, rerun_path = run_logged(
-        [venv_python, "-m", "pytest", "-p", "no:xdist", "-q", *failed],
+        [venv_python, "-m", "pytest", "-p", "no:xdist", "-q", "--tb=short", *failed],
         "e2e-serial-reverify",
     )
     if rerun_code != 0:
