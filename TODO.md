@@ -156,8 +156,8 @@ An on-the-fly edit mode for the active session clipboard (`src/components/clipbo
 - Allows swapping exercises, retargeting sets/reps/weight, reordering rows via tap or drag (`.editor-reorder`), adding new exercises, and adjusting rest breaks directly inside the live session without leaving the gym floor.
 - To apply later: `git apply patches/inline_clipboard_editor.patch`.
 
-### 8.4 [ ] Hide "Complete Workout Session" while editing the session plan
-In the clipboard's **edit-plan mode** (`clipboardEditMode` / the `/edit` route, `activeSessionController.js`), the **Complete Workout Session** action (`btn_complete`) must not be available — completing is a *live-session* action, not a plan-edit one. Editing a plan (or a planning-mode `isPlanning` session) should offer only Done/exit-edit, not finish-and-log-history. Hide or disable the button whenever edit mode is active, and restore it on exit.
+### 8.4 [x] Hide "Complete Workout Session" while editing the session plan — **SHIPPED 2026-07-25**
+The clipboard's finish bar (`.session-actions-footer`, holding `#btn-finish-session`) is hidden whenever **edit-plan mode** is active (`clipboardEditMode` / the `/edit` route) or the session is a **planning-mode** (`isPlanning`) programme — completing logs an execution to history, which is meaningless mid-edit and wrong for a programme that was never run. The whole footer hides (not just the button) so no empty action bar is left behind, and it returns on exit from edit mode because every mode change re-renders through `renderActiveGroupBoard`. Covered by `test_edit_mode_hides_complete.py`.
 
 ### 8.5 [x] Catalog picker button in the plan edit view — **SHIPPED 2026-07-25**
 The inline clipboard editor (`clipboardEditor.js`) gained an **"Add from catalog"** button that opens the reusable filtered taxonomy picker (`mountExercisePicker`) in `#dialog-catalog-picker`; tapping a movement injects it into the active plan (fresh slot id + taxonomy fields, defaults 3×10, adjustable inline) via the shared `injectExerciseIntoActivePlan` helper and returns to the editor. Covered by `test_catalog_picker_in_edit.py`.

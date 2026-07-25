@@ -745,6 +745,16 @@ export function renderActiveGroupBoard() {
     }
   }
 
+  // Completing is a LIVE-session action: it logs the session to history. That is wrong while the
+  // plan is being edited (Done exits edit mode instead) and wrong for a date-less planning
+  // programme that has not been run at all. Hide the whole footer, not just the button, so no empty
+  // bar is left behind; it comes back on exit because every mode change re-renders through here.
+  const finishFooter = document.querySelector("#active-session-overlay .session-actions-footer");
+  if (finishFooter) {
+    const finishAllowed = !clipboardEditMode && currentPlanMode() !== "planning";
+    finishFooter.classList.toggle("hidden", !finishAllowed);
+  }
+
   // Detach any previous editor's document listeners before this render replaces the deck DOM.
   if (editorCleanup) {
     editorCleanup();
