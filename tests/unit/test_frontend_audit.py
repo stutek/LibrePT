@@ -1,11 +1,11 @@
-# tests/unit/test_domsecurity.py
-# The static security audits the scanners structurally cannot do (build/domsecurity.py). Both exist
+# tests/unit/test_frontend_audit.py
+# The hand-written static audits the scanners structurally cannot do (build/frontend_audit.py). Both exist
 # because a green OWASP ZAP badge overstated our position: the baseline scan is passive, its spider
 # sees ~one page of a client-routed SPA, and it scans the DEV SERVER — whose real HTTP headers
 # production (GitHub Pages) cannot send at all. A stored XSS via `client.avatar` shipped under that
 # badge, twice, in two different views.
 
-from build.domsecurity import audit_html_sinks, compare_csp, parse_csp
+from build.frontend_audit import audit_html_sinks, compare_csp, parse_csp
 
 HEADER_CSP = "default-src 'self'; script-src 'self'; frame-ancestors 'none'; img-src 'self' data:"
 

@@ -1,6 +1,14 @@
-# build/domsecurity.py — static security audits of the frontend that the scanners cannot do.
+# build/frontend_audit.py — HAND-WRITTEN, repo-specific static checks. This is NOT a third-party
+# security scanner and nothing installs it: ~140 lines of stdlib Python (os + re) living in this
+# repo, maintained by whoever changes it. Do not mistake it for a tool with a community behind it.
+#
 # Single responsibility: find unescaped user text reaching an HTML sink, and prove the production
 # CSP is not weaker than the one the dev server serves.
+#
+# What it is NOT: it does not parse JavaScript and performs no dataflow or taint analysis. It is a
+# regex heuristic over template literals, tuned for PRECISION (a maintained list of free-text field
+# names) so that its findings are always worth acting on. It will therefore miss things a real
+# analyser would catch — Semgrep is the upgrade path if that trade stops being acceptable.
 #
 # Why these two, specifically:
 #   • The OWASP ZAP baseline is a PASSIVE scan of a SPA whose routes are client-side, so its spider

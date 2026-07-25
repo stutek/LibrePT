@@ -16,7 +16,7 @@ import sys
 import shutil
 import subprocess
 
-from build.domsecurity import audit_html_sinks, compare_csp
+from build.frontend_audit import audit_html_sinks, compare_csp
 from build.testreport import REPORT_DIR, failed_test_ids, print_digest, run_logged
 
 
