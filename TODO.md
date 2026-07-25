@@ -221,6 +221,31 @@ The trademark was scrubbed from history and force-pushed (remote is clean). Stil
 
 ---
 
+### 12.6 [ ] Vendor Font Awesome locally — the last CDN dependency
+Every other external origin is now vendored (webfonts landed 2026-07-25); **Font Awesome on cdnjs is
+the only one left**, and it contradicts offline-first: the icon font is fetched cross-origin on first
+load, needs its own CSP allowance, and is cached only best-effort by the service worker (it is
+deliberately excluded from the atomic, integrity-verified shell precache, since a blocked
+cross-origin fetch must not fail the whole install).
+
+- Vendoring it would let `style-src`/`font-src` drop the cdnjs origin entirely, and fold the icons
+  into the integrity-verified shell like the webfonts already are.
+- **Watch the size**: ship a *subset* of the glyphs actually used, not the full 6.4.0 set — the
+  reason it was left on a CDN in the first place.
+- Recurring source of CSP / SRI / COEP friction in the build gate.
+
+### 12.7 [ ] [Observation, low priority] ~89 separate module requests on first load
+The buildless native-ES-module design means a cold visit fetches ~89 files. In production this is
+fine — GitHub Pages multiplexes over HTTP/2 and the service worker precaches everything after the
+first visit, so it costs one visit, once. Recording it because it is the amplifier that turned a
+40ms-per-request dev-server stall into a 3.8-second page load (fixed 2026-07-25, dev server only).
+
+- Only worth acting on if first-load time on a poor mobile connection ever becomes a real complaint.
+- Any fix (bundling) trades away the buildless property, which is a deliberate architectural choice —
+  so the bar for changing it is high.
+
+---
+
 ## 13. Exercise Library & Movement Taxonomy (Call to Action & Vision)
 
 > **Status (2026-07-24):** the taxonomy pivot and all three §13.2 selection scenarios are **built** and
@@ -281,35 +306,23 @@ Graduated to [CHANGELOG](CHANGELOG.md) / [UC6 §5](use_cases/uc6_exercise_taxono
 > tags the deploy publishes no `versions.json`, so no version is ever advertised that isn't hosted.
 > **To turn it on**: tag a commit (`git tag v1.0.0`) and push — the deploy does the rest.
 >
-> **Still open** (see the sub-items): the `/preview/` channel and beta opt-in (16.2), distinct
-> ribbon treatments per preview tier, speculative background migration, migration fuzzing in CI, and
-> showing the migration summary to the PT before they accept a switch (the summary is produced and
-> exposed via `getLastMigrationSummary()`, but nothing renders it yet).
-
-### 16.3 [ ] [Decided, not built] Key storage buckets on the DATA SCHEMA, not the release tag
-**Decided (2026-07-25).** As shipped, `storageNamespace.js` keys buckets on the release tag, so
-**every** tag mints a new bucket — forcing a pointless copy and, worse, showing the data-loss warning
-on a rollback where *nothing can be lost*. A scary warning that isn't true trains a PT to click
-through the real one.
-
-- **Two axes, deliberately different shapes.** Code = full **semver git tag** (`v1.4.2`): the
-  switchable identity, the hosting subpath, the rollback target. Data = a plain **integer major**
-  (`schemaVersion`, [migrationSteps.js](src/data/migrationSteps.js)), bumped only when a migration
-  step is added. **Not** full semver on the schema — a "patch" to a schema is either a migration step
-  or nothing, and *minor* buys no correctness because the store already round-trips unknown fields
-  (it serialises the whole state object rather than reconstructing it — the restore path
-  *reconstructing* one was exactly the bug fixed on 2026-07-25). Add a schema minor the day an
-  additive change needs describing in the rollback warning; not before.
-- **Bucket key becomes the schema major** (`librept_db@schema2`). Two releases sharing a schema share
-  a bucket: switching between them is instant, needs no copy, and carries no warning — because the
-  move is genuinely reversible. Only crossing a schema major copies, migrates and warns.
-- **Consequences to implement**: `evaluateVersionOffer` compares schemas so the rollback warning
-  fires only when true; `versions.json` carries each release's `schemaVersion` so the running build
-  can tell *before* switching whether the move is free; migration steps stay keyed on the integer
-  major (no step per release); tags become free to cut whenever a rollback point is wanted.
-- **Open**: whether the hosted window (`SUPPORTED_RELEASE_COUNT`) counts releases or schemas —
-  leaning hosting-counts-tags, since a tag is what a rollback targets, with data retention following
-  schema majors.
+> **Settled while building (2026-07-25), and load-bearing:**
+> - **A rollback does not roll back code.** Every supported version stays published; switching only
+>   changes which one is routed to. Two bugs came from not honouring that, both fixed: a release
+>   folder was stamped with the *deploying* commit rather than its own, and `builtAt` was "now", so
+>   re-publishing an old version changed its bytes → changed its integrity catalog → forced a
+>   service-worker re-install on every trainer sitting on it. Release folders are now byte-identical
+>   across deploys.
+> - **The published manifest is the authority on order**, and that order must be *total*. Same-second
+>   tags tied under a date sort and published oldest-first, which would have offered a downgrade as
+>   "a new version is available". Sorted by `-v:refname` today; see [16.4](#164--open-dilemma-what-shape-should-a-release-tag-be--semver-or-an-iso-timestamp).
+>
+> **Still open** (see the sub-items): storage keyed on the schema rather than the tag ([16.3](#163--decided-not-built-key-storage-buckets-on-the-data-schema-not-the-release-tag)),
+> the tag format itself ([16.4](#164--open-dilemma-what-shape-should-a-release-tag-be--semver-or-an-iso-timestamp)),
+> the `/preview/` channel and beta opt-in (16.2), distinct ribbon treatments per preview tier,
+> speculative background migration, migration fuzzing in CI, and showing the migration summary to the
+> PT before they accept a switch (the summary is produced and exposed via `getLastMigrationSummary()`,
+> but nothing renders it yet).
 
 ### 16.1 [x] Zero-downtime re-deploys with PT-controlled upgrade timing and rollback — **SHIPPED 2026-07-25**
 Feature request by Simon. A deploy/upgrade must never force-interrupt a PT mid-session, and a PT must be able to defer, accept, or reverse an upgrade on their own schedule:
@@ -354,6 +367,70 @@ Continued brainstorm on 16.1's "keep multiple versions deployable" question. Lea
   - Every migration step **validates its output shape** before being considered successful, rather than trusting the transform; an unrecognized shape fails loud instead of silently corrupting.
   - **Fuzz migrations against synthetic edge-case data in CI**, generated from the existing seed/demo data machinery (`src/data/*.js`) — not a substitute for real-world coverage, but cheap and fits this repo's existing test conventions.
   - **Show the PT a migration summary before they commit** to switching ("7 clients migrated, 1 routine had an unrecognized field and was dropped") so problems are visible and reportable instead of silent.
+
+---
+
+### 16.3 [ ] [Decided, not built] Key storage buckets on the DATA SCHEMA, not the release tag
+**Decided (2026-07-25).** As shipped, `storageNamespace.js` keys buckets on the release tag, so
+**every** tag mints a new bucket — forcing a pointless copy and, worse, showing the data-loss warning
+on a rollback where *nothing can be lost*. A scary warning that isn't true trains a PT to click
+through the real one.
+
+- **Two axes, deliberately different shapes.** Code = the **git tag** (switchable identity, hosting
+  subpath, rollback target; format still open — see [16.4](#164--open-what-shape-should-a-release-tag-be)).
+  Data = a plain **integer major** (`schemaVersion`, [migrationSteps.js](src/data/migrationSteps.js)),
+  bumped only when a migration step is added. **Not** full semver on the schema — a "patch" to a
+  schema is either a migration step or nothing, and *minor* buys no correctness because the store
+  already round-trips unknown fields (it serialises the whole state object rather than reconstructing
+  it — the restore path *reconstructing* one was exactly the bug fixed on 2026-07-25). Add a schema
+  minor the day an additive change needs describing in the rollback warning; not before.
+- **Follows from integer-only majors**: refusing *any* newer `schemaVersion` (as
+  `migrateState` does today) stays correct. The minor-tolerant read discussed on 2026-07-25 —
+  accept same-major-higher-minor rather than refusing — only becomes necessary if a schema minor is
+  ever introduced.
+- **Invariant to protect**: unknown fields must survive a read/write round-trip, which is what makes
+  a same-major rollback lossless. The store gets this by serialising the whole state object;
+  anything that *reconstructs* state from a known field list breaks it silently (exactly the backup
+  restore bug fixed 2026-07-25). Never rebuild state from an explicit key list.
+- **Bucket key becomes the schema major** (`librept_db@schema2`). Two releases sharing a schema share
+  a bucket: switching between them is instant, needs no copy, and carries no warning — because the
+  move is genuinely reversible. Only crossing a schema major copies, migrates and warns.
+- **Consequences to implement**: `evaluateVersionOffer` compares schemas so the rollback warning
+  fires only when true; `versions.json` carries each release's `schemaVersion` so the running build
+  can tell *before* switching whether the move is free; migration steps stay keyed on the integer
+  major (no step per release); tags become free to cut whenever a rollback point is wanted.
+- **Open**: whether the hosted window (`SUPPORTED_RELEASE_COUNT`) counts releases or schemas —
+  leaning hosting-counts-tags, since a tag is what a rollback targets, with data retention following
+  schema majors.
+
+### 16.4 [ ] [Open dilemma] What shape should a release tag be — semver, or an ISO timestamp?
+Raised by Simon (2026-07-25): *"tags are not worth it — maybe if tag would be ISO date and time
+numeric, but not sure. Or maybe we need semver for rollbacks and upgrades?"* **Not decided.**
+
+What the tag has to do, and nothing more: name a rollback target to a PT, be a hosting path segment
+(`/<tag>/`), establish **order** (upgrade vs downgrade), and be cheap enough to cut without thinking.
+
+- **Case for an ISO timestamp** (`2026-07-25-1846`, UTC) — the agent's recommendation:
+  - **Order is intrinsic.** Zero-padded ISO sorts lexicographically *as* chronologically, killing a
+    real bug class: same-second tags tied under `--sort=-creatordate` during the §16.2 build and
+    published releases oldest-first, which would have offered a PT a downgrade labelled "a new
+    version is available". Would also let the publisher use plain `--sort=-refname`, which is
+    *provably* right for dates rather than merely usually right (`-v:refname` today).
+  - **Zero decision cost**: `git tag $(date -u +%Y-%m-%d-%H%M)` — never adjudicate minor vs patch.
+  - **Matches how a trainer thinks**: "go back to the 25th" beats "go back to v1.3.2".
+- **Case against / for semver**: semver communicates the *magnitude* of a change. But the only
+  magnitude with operational consequence here — "can I go back without losing data?" — is already
+  answered by `schemaVersion` ([16.3](#163--decided-not-built-key-storage-buckets-on-the-data-schema-not-the-release-tag)),
+  and answered *better*, because it is derived from whether a migration step exists rather than from
+  remembering to bump a number. Semver's real job is compatibility contracts for third-party
+  consumers, of which this project has none.
+- **Either way it is nearly free to switch**: `normalizeRelease` already accepts a leading digit,
+  `releasePath` just appends `/`, and buckets stop caring entirely once 16.3 lands. The only code
+  change is the publisher's sort key, plus docs and test fixtures.
+- **Settled either way (2026-07-25)**: a rollback **does not roll back code**. Both versions stay
+  published side by side; the switch only changes which one is routed to. This is why each release
+  folder is stamped with its *own* commit and time and re-materialises byte-identically — see the
+  status note above.
 
 ---
 
