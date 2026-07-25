@@ -286,6 +286,31 @@ Graduated to [CHANGELOG](CHANGELOG.md) / [UC6 §5](use_cases/uc6_exercise_taxono
 > showing the migration summary to the PT before they accept a switch (the summary is produced and
 > exposed via `getLastMigrationSummary()`, but nothing renders it yet).
 
+### 16.3 [ ] [Decided, not built] Key storage buckets on the DATA SCHEMA, not the release tag
+**Decided (2026-07-25).** As shipped, `storageNamespace.js` keys buckets on the release tag, so
+**every** tag mints a new bucket — forcing a pointless copy and, worse, showing the data-loss warning
+on a rollback where *nothing can be lost*. A scary warning that isn't true trains a PT to click
+through the real one.
+
+- **Two axes, deliberately different shapes.** Code = full **semver git tag** (`v1.4.2`): the
+  switchable identity, the hosting subpath, the rollback target. Data = a plain **integer major**
+  (`schemaVersion`, [migrationSteps.js](src/data/migrationSteps.js)), bumped only when a migration
+  step is added. **Not** full semver on the schema — a "patch" to a schema is either a migration step
+  or nothing, and *minor* buys no correctness because the store already round-trips unknown fields
+  (it serialises the whole state object rather than reconstructing it — the restore path
+  *reconstructing* one was exactly the bug fixed on 2026-07-25). Add a schema minor the day an
+  additive change needs describing in the rollback warning; not before.
+- **Bucket key becomes the schema major** (`librept_db@schema2`). Two releases sharing a schema share
+  a bucket: switching between them is instant, needs no copy, and carries no warning — because the
+  move is genuinely reversible. Only crossing a schema major copies, migrates and warns.
+- **Consequences to implement**: `evaluateVersionOffer` compares schemas so the rollback warning
+  fires only when true; `versions.json` carries each release's `schemaVersion` so the running build
+  can tell *before* switching whether the move is free; migration steps stay keyed on the integer
+  major (no step per release); tags become free to cut whenever a rollback point is wanted.
+- **Open**: whether the hosted window (`SUPPORTED_RELEASE_COUNT`) counts releases or schemas —
+  leaning hosting-counts-tags, since a tag is what a rollback targets, with data retention following
+  schema majors.
+
 ### 16.1 [x] Zero-downtime re-deploys with PT-controlled upgrade timing and rollback — **SHIPPED 2026-07-25**
 Feature request by Simon. A deploy/upgrade must never force-interrupt a PT mid-session, and a PT must be able to defer, accept, or reverse an upgrade on their own schedule:
 

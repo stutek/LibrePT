@@ -52,6 +52,14 @@ Every response and tool action must drive measurable, continuous progress toward
 2. **The user kills it, not the agent.** Stopping the server is the user's call. Only stop or restart it when the user asks, or when a change genuinely requires a restart (and say so first).
 3. **Reuse before starting.** Check whether it is already listening on `:8081` and reuse it rather than spawning a duplicate.
 
+### D. Product Constraints That Outlive Any One Feature
+
+These are not style preferences — they are decisions already paid for, and re-litigating them costs the maintainer real money. Treat them as binding.
+
+1. **Nothing lives only in a hover.** LibrePT is used on a phone, on the gym floor. A `title` tooltip is unreachable on touch, so information available *only* on hover is information nobody has. Tooltips may enrich a desktop view; they may never be the sole route to something a trainer or a support request needs. Touch targets need real padding, not just visible text (9px of text is nothing to aim at with a sweaty thumb).
+2. **In support surfaces, prefer the exact and always-present identifier over the pretty one.** The header build stamp shows the **commit SHA**, not a release tag: the SHA exists for every build, while most deploys sit between tags — and those are exactly the ones a confusing bug report comes from. Richer identity (release, data schema, build time) belongs one tap away, and copyable.
+3. **Code version and data-schema version are two different axes.** A git tag identifies switchable *code*; `schemaVersion` identifies the *data shape*. Never collapse them into one number — see [TODO.md §16](TODO.md).
+
 ---
 
 ## 3. Single Source of Truth Reference
