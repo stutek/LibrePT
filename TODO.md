@@ -90,6 +90,9 @@ The redundant second title row is **already removed** (the four `.sessions-colum
 
 > **⚠ Blocking design gap — settle before implementing.** Bookings currently have **no date**. They carry a relative bucket only (`day: 'yesterday' | 'today' | 'tomorrow' | 'upcoming'`, see `mockData.js`), and the title bar *derives* dates live from `new Date()`. That is exactly why the demo keeps working on any day without reseeding. A date picker implies **jumping to an arbitrary date**, which the four-bucket model cannot represent — picking `2025-03-04` would have nothing to show. Choosing a real date field is a **data-model migration** (existing `localStorage` databases included) and it would end the self-following demo behaviour. Decide the model first: real dates, or a picker restricted to the four buckets?
 
+### 4.4 [ ] Exercise catalog filter chips overflow off-screen
+The taxonomy **filter buttons/chips** in the exercise catalog (`exercisesView.js` / the `.picker-chips` rows in `exercisePicker.js`) **run out of view** — they overflow horizontally past the viewport edge instead of staying reachable. Fix so the chip rows either **wrap** to multiple lines or **scroll horizontally within a bounded container**, on narrow phone widths especially. (Reported 2026-07-25.)
+
 ---
 
 ## 5. Client Detail
@@ -155,6 +158,9 @@ An on-the-fly edit mode for the active session clipboard (`src/components/clipbo
 
 ### 8.4 [ ] Hide "Complete Workout Session" while editing the session plan
 In the clipboard's **edit-plan mode** (`clipboardEditMode` / the `/edit` route, `activeSessionController.js`), the **Complete Workout Session** action (`btn_complete`) must not be available — completing is a *live-session* action, not a plan-edit one. Editing a plan (or a planning-mode `isPlanning` session) should offer only Done/exit-edit, not finish-and-log-history. Hide or disable the button whenever edit mode is active, and restore it on exit.
+
+### 8.5 [ ] Catalog picker button in the plan edit view
+Add a **catalog (exercise-library) icon/action to the plan edit view** that opens the full exercise catalog/picker, lets the PT **select an exercise**, and **returns to the edit view with that exercise added**. Reuse the existing filtered picker (`mountExercisePicker` in `exercisePicker.js`) rather than the plain typed-name add. Applies to the inline clipboard editor (`clipboardEditor.js`, the `openAddExercise` affordance) and/or the routine template editor — confirm which "plan edit view" on implementation. (Requested 2026-07-25.) Relates to the inline editor (§8.3) and the taxonomy picker (UC6).
 
 ---
 
