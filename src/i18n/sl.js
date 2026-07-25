@@ -282,6 +282,16 @@ export const sl = {
     "Se res želiš vrniti na {version}? Vse, kar si po nadgradnji zabeležil na {current}, ostane tam.",
   version_eol_title: "Ta različica ni več podprta",
   version_eol_desc: "Popravki izhajajo samo za trenutno različico ({version}).",
+
+  // Pogovorno okno s podatki o gradnji: odpre se z dotikom oznake v glavi (namig ob prehodu miške na telefonu ni dosegljiv).
+  build_info_title: "Ta gradnja",
+  build_info_release: "Različica",
+  build_info_commit: "Objava",
+  build_info_schema: "Shema podatkov",
+  build_info_built: "Zgrajeno",
+  build_info_copy: "Kopiraj podatke o gradnji",
+  build_info_copied: "Kopirano",
+  build_info_copy_failed: "Označi in kopiraj besedilo zgoraj",
   notif_walkthrough_btn: "Oglej si navodila",
   notif_spot_res_title: "📅 Rezervacija mesta za stranko",
   notif_spot_res_desc: "Alex Smith je rezerviral mesto za petkov HIIT.",

@@ -31,17 +31,8 @@ export function isReleasedBuild() {
   return currentRelease() !== UNRELEASED;
 }
 
-// What the header stamp shows: the release when the build was cut from a tag, otherwise the commit.
-// A PT — or a screenshot pasted into a bug report — must always be able to say which build this is.
-export function releaseLabel() {
-  const release = currentRelease();
-  if (release !== UNRELEASED) return release;
-  const commit = typeof BUILD_INFO?.commit === "string" ? BUILD_INFO.commit.trim() : "";
-  return commit && commit !== UNRELEASED ? `#${commit}` : UNRELEASED;
-}
-
-// The long form for the stamp's tooltip: release, commit and build time together, so support can
-// pin a report to an exact build even when the visible label is just the release.
+// The long form for the stamp's desktop tooltip: release, commit and build time together. The
+// phone-reachable version of this is the build-info dialog (modules/common/buildInfoDialog.js).
 export function buildDescription() {
   const parts = [];
   const release = currentRelease();

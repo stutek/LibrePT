@@ -49,21 +49,21 @@ def test_untagged_build_opts_out_of_version_switching(page, local_server):
         """async () => {
             const url = new URL('modules/common/releaseIdentity.js', document.baseURI).href;
             const m = await import(url);
-            return { current: m.currentRelease(), released: m.isReleasedBuild(), label: m.releaseLabel() };
+            return { current: m.currentRelease(), released: m.isReleasedBuild() };
         }"""
     )
 
     assert r["current"] == "dev"
     assert r["released"] is False
-    assert r["label"] == "dev"
 
 
-def test_header_stamp_shows_the_release_label(page, local_server):
+def test_header_stamp_names_the_commit_not_the_release(page, local_server):
+    """For support the commit is the better identifier: exact, and present for EVERY build — most
+    deploys sit between tags, and those are the ones a confusing bug report comes from. The release
+    and data schema live one tap away in the build-info dialog (test_build_info.py)."""
     page.goto(local_server)
     page.wait_for_selector("#app-version")
     page.wait_for_timeout(300)
 
-    stamp = page.locator("#app-version")
-    assert stamp.inner_text().strip() == "dev", (
-        "the header stamp always names the build the PT is on"
-    )
+    # The checked-in version.js ships commit "dev"; a real build stamps "#<sha>".
+    assert page.locator("#app-version").inner_text().strip() == "dev"

@@ -69,7 +69,9 @@
       <div class="logo-area" id="logo-area">
         <i class="fa-solid fa-dumbbell logo-icon"></i>
         <h1>LibrePT</h1>
-        <span id="app-version" class="app-version" aria-label="Build version"></span>
+        <!-- Tappable: the long build identity used to live in a `title` tooltip, which a phone
+             cannot reach. Opens #dialog-build-info instead. -->
+        <button type="button" id="app-version" class="app-version" aria-label="Build version — tap for details" aria-haspopup="dialog"></button>
       </div>
 
       <!-- Pre-release PREVIEW marker positioned in the center between logo and action buttons -->
@@ -1000,6 +1002,20 @@
     </div>
     <div class="modal-actions">
       <button id="btn-terms-agree" class="btn primary-btn w-full">I agree</button>
+    </div>
+  </dialog>
+
+  <!-- DIALOG MODAL: Build info — which release, commit and DATA SCHEMA this device is running.
+       Reachable by tapping the header build stamp, and copyable, because the point of a build id is
+       pasting it into a bug report (TODO §16). -->
+  <dialog id="dialog-build-info" class="dialog-modal card glassmorphic">
+    <div class="modal-header">
+      <h3 id="build-info-title">This build</h3>
+      <button class="modal-close-btn" aria-label="Close build info"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <dl id="build-info-rows" class="build-info-list"></dl>
+    <div class="modal-actions">
+      <button type="button" id="btn-copy-build-info" class="btn primary-btn w-full">Copy build details</button>
     </div>
   </dialog>
 

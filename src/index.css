@@ -320,10 +320,17 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav {
      PREVIEW tag, and action buttons keep their size (see .logo-area h1 / .header-actions). */
   min-width: 0;
 }
-/* Build stamp under/next to the wordmark — small, muted, monospace. */
+/* Build stamp under/next to the wordmark — small, muted, monospace. It is a BUTTON (tap opens the
+   build-info dialog): the vertical padding buys a usable touch target on a phone without changing
+   how small the text reads, since 9px of text is nothing to aim at with a gym-floor thumb. */
 .app-version {
+  appearance: none;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  padding: 6px 4px;
   align-self: flex-end;
-  margin: 0 0 5px -4px;
+  margin: 0 0 -1px -8px;
   font-family: var(--font-mono, monospace);
   font-size: 9px;
   font-weight: 700;
@@ -406,7 +413,7 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav {
     font-size: 19px;
   }
   .app-version {
-    margin-left: -3px;
+    margin-left: -7px;
   }
   .preview-ribbon {
     padding: 2px 7px;
@@ -2887,6 +2894,35 @@ textarea.form-control {
   margin-top: 6px;
   font-weight: 600;
 }
+/* Build-info dialog: one fact per row, value in monospace so a commit SHA is readable and
+   selectable as a fallback when clipboard access is denied. */
+.build-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 4px 0 16px;
+}
+.build-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 6px;
+}
+.build-info-row dt {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+.build-info-row dd {
+  margin: 0;
+  font-family: var(--font-mono, monospace);
+  font-size: 13px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+  user-select: text;
+}
+
 /* Utility classes */
 .hidden {
   display: none !important;

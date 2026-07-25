@@ -77,6 +77,7 @@ import {
   setupApplicationHeader,
 } from "./modules/common/applicationHeader.js";
 import { initBackupRestore, setupBackupRestore } from "./modules/common/backupRestore.js";
+import { initBuildInfoDialog, setupBuildInfoDialog } from "./modules/common/buildInfoDialog.js";
 import {
   initFeedbackModal,
   openFeedbackModal,
@@ -337,6 +338,9 @@ function init() {
 
   // The version catalog is fetched once at boot and cached here; every notification render reads
   // this snapshot rather than refetching. Absent (today's single-version deploy) means no offers.
+  initBuildInfoDialog({ t });
+  setupBuildInfoDialog();
+
   initVersionMessages({
     t,
     escapeHTML,

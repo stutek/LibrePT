@@ -282,6 +282,16 @@ export const en = {
     "Switch back to {version}? Anything recorded on {current} since you upgraded will stay there.",
   version_eol_title: "This version is no longer supported",
   version_eol_desc: "Fixes only land on the current version ({version}).",
+
+  // Build-info dialog: reachable by tapping the header stamp (a tooltip is unreachable on a phone).
+  build_info_title: "This build",
+  build_info_release: "Version",
+  build_info_commit: "Commit",
+  build_info_schema: "Data schema",
+  build_info_built: "Built",
+  build_info_copy: "Copy build details",
+  build_info_copied: "Copied",
+  build_info_copy_failed: "Select and copy the text above",
   notif_walkthrough_btn: "Explore Walkthrough",
   notif_spot_res_title: "📅 Client Spot Reservation",
   notif_spot_res_desc: "Alex Smith booked a spot in Friday HIIT session.",
