@@ -1,15 +1,18 @@
-# tests/unit/test_release_identity.py
-# The release identity (TODO §16) is the git tag a build was cut from. THREE writers must agree on
-# the BUILD_INFO shape — the checked-in src/version.js, the local build (build.stamp_build_version),
-# and the Pages deploy (.github/workflows/deploy.yml) — or a deployed build silently loses its
-# release and drops out of version switching. These checks pin all three together, and pin the
-# --exact-match rule that stops an untagged commit claiming the previous release's identity.
+# tests/unit/test_release_stamp_writers.py
+# The release identity (TODO §16) is the git tag a build was cut from. Every writer of the
+# BUILD_INFO stamp must agree on its shape — the checked-in src/version.js, the local build
+# (build.stamp_build_version) and the per-release stamp the deploy uses
+# (build.releases.stamp_version_file) — or a deployed build silently loses its release and drops
+# out of version switching. These checks pin them together, pin the --exact-match rule that stops
+# an untagged commit claiming the previous release's identity, and pin the deploy delegating its
+# assembly to build/releases.py so the root and versioned copies cannot drift apart.
 
 import re
 import subprocess
 from pathlib import Path
 
 from build import resolve_release_tag, stamp_build_version
+from build.releases import build_version_manifest, list_release_tags, stamp_version_file
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 BUILD_INFO_FIELDS = {"commit", "builtAt", "release"}
@@ -30,21 +33,45 @@ def test_checked_in_version_module_declares_the_release_field(src_dir):
     assert re.search(r'release:\s*"dev"', source)
 
 
-def test_deploy_workflow_stamps_the_same_fields(src_dir):
+def test_deploy_workflow_delegates_assembly_to_the_release_publisher(src_dir):
     workflow = (REPO_ROOT / ".github" / "workflows" / "deploy.yml").read_text(
         encoding="utf-8"
     )
-    printf_line = next(
-        line
-        for line in workflow.splitlines()
-        if "BUILD_INFO" in line and "printf" in line
-    )
-    assert _build_info_fields(printf_line) == BUILD_INFO_FIELDS
-    # Only an exact tag counts as a release, and an untagged commit must fall back to "dev".
-    assert "git describe --tags --exact-match" in workflow
-    assert "|| echo dev" in workflow
-    # Tags are not in a default shallow checkout — without this the release is always "dev".
+    # One entry point assembles root + versioned copies, so they cannot be stamped differently.
+    assert "from build.releases import publish_site" in workflow
+    # Tags are not in a default shallow checkout — without this every release would stamp "dev".
     assert "fetch-tags: true" in workflow
+
+
+def test_release_stamp_writes_the_same_fields(tmp_path):
+    stamp_version_file(str(tmp_path), "abc1234", "v1.2.0")
+    stamped = (tmp_path / "version.js").read_text(encoding="utf-8")
+    assert _build_info_fields(stamped) == BUILD_INFO_FIELDS
+    # A version folder is stamped with ITS tag, not the checked-out commit's release.
+    assert 'release: "v1.2.0"' in stamped
+
+
+def test_the_manifest_is_newest_first_and_paths_each_release(tmp_path):
+    manifest = build_version_manifest(["v1.3.0", "v1.2.0", "v1.1.0"])
+    assert manifest["current"] == "v1.3.0", "the newest tag is the current release"
+    assert [r["id"] for r in manifest["releases"]] == ["v1.3.0", "v1.2.0", "v1.1.0"]
+    # The app trusts this order rather than parsing version strings, so it has to be the real one.
+    assert [r["path"] for r in manifest["releases"]] == [
+        "v1.3.0/",
+        "v1.2.0/",
+        "v1.1.0/",
+    ]
+    assert all(r["eol"] is None for r in manifest["releases"])
+
+
+def test_no_tags_means_no_releases_to_host():
+    """Today's repo has no tags: the whole versioning feature must stay dormant, not half-on."""
+    assert list_release_tags() == [] or all(
+        isinstance(tag, str) for tag in list_release_tags()
+    )
+    empty = build_version_manifest([])
+    assert empty["current"] is None
+    assert empty["releases"] == []
 
 
 def test_local_build_stamps_the_same_fields(tmp_path):

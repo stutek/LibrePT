@@ -265,7 +265,28 @@ Graduated to [CHANGELOG](CHANGELOG.md) / [UC6 §5](use_cases/uc6_exercise_taxono
 
 ## 16. Zero-Downtime Deploys & PT-Controlled Version Switching
 
-### 16.1 [ ] [Brainstorm] Zero-downtime re-deploys with PT-controlled upgrade timing and rollback
+> **Status (2026-07-25): the machinery is BUILT and dormant.** The brainstorms below are settled and
+> implemented end to end — release identity from git tags ([releaseIdentity.js](src/modules/common/releaseIdentity.js)),
+> per-release storage buckets ([storageNamespace.js](src/data/storageNamespace.js)), the validated
+> schema-migration chain ([schemaMigrations.js](src/data/schemaMigrations.js) + [migrationSteps.js](src/data/migrationSteps.js)),
+> the manifest reader and offer rules ([versionCatalog.js](src/data/versionCatalog.js)), the
+> non-dismissable upgrade / switch-back / EOL messages ([versionMessages.js](src/modules/common/versionMessages.js)),
+> and the deploy that publishes every supported tag under its own subpath plus `versions.json`
+> ([build/releases.py](build/releases.py)). Covered by `test_release_identity.py`,
+> `test_storage_namespace.py`, `test_schema_migrations.py`, `test_version_catalog.py`,
+> `test_version_messages.py`, `test_release_publishing.py`, `test_release_stamp_writers.py`.
+>
+> **It is deliberately a strict no-op until the first `git tag` is cut**: an untagged build stamps
+> `release: "dev"`, keeps the plain unsuffixed storage keys, and takes no part in switching; with no
+> tags the deploy publishes no `versions.json`, so no version is ever advertised that isn't hosted.
+> **To turn it on**: tag a commit (`git tag v1.0.0`) and push — the deploy does the rest.
+>
+> **Still open** (see the sub-items): the `/preview/` channel and beta opt-in (16.2), distinct
+> ribbon treatments per preview tier, speculative background migration, migration fuzzing in CI, and
+> showing the migration summary to the PT before they accept a switch (the summary is produced and
+> exposed via `getLastMigrationSummary()`, but nothing renders it yet).
+
+### 16.1 [x] Zero-downtime re-deploys with PT-controlled upgrade timing and rollback — **SHIPPED 2026-07-25**
 Feature request by Simon. A deploy/upgrade must never force-interrupt a PT mid-session, and a PT must be able to defer, accept, or reverse an upgrade on their own schedule:
 
 - **Zero-downtime re-deploys**: publishing a new build must not disrupt whoever is currently mid-session on the old one.
@@ -274,14 +295,21 @@ Feature request by Simon. A deploy/upgrade must never force-interrupt a PT mid-s
 - **Rollback anytime (within terms)**: a PT can switch back to the previous version **at any time**, also via a **non-dismissable** message in the message area — but doing so **after** the initial upgrade moment carries a **data-loss warning** (changes made under the newer version's schema/format may not round-trip cleanly back to the old one).
 - **No fixes ever land on a "maintenance mode" (old) version** — once superseded, an old version is kept *available* (for rollback, until its EOL) but never *patched*. All fix/feature work happens forward-only on the current version.
 
-**Open question, Simon's own framing — not yet decided:** this implies keeping **multiple versions of the app simultaneously deployable**, which is a "huge toll" on this repo's workflow. Do we solve that via:
-  - **git tags** per released version (deploy workflow parameterized to build/publish a specific tag on demand),
-  - **long-lived branches** (one per supported version), or
-  - **duplicated code** (each supported version literally vendored as its own copy under the deploy target)?
+**Resolved (2026-07-25): git tags, rebuilt into subpaths on every deploy.** Not branches, not
+vendored copies — "which commit is version N" stays a lookup, and the trunk-based single-`main`
+workflow is untouched. Hosting: a Pages run publishes one artifact, so a version folder omitted from
+it disappears; the deploy therefore re-materialises **each supported tag from its own commit** into
+`/<tag>/` on every run ([build/releases.py](build/releases.py)). The app is buildless, so a release
+folder is just that commit's `src/` — no past toolchain has to still work. The supported window is
+the newest `SUPPORTED_RELEASE_COUNT` tags; dropping out of that window *is* the EOL mechanism today.
 
-  Each has very different implications for this repo's trunk-based, single-`main`, no-feature-branches workflow (`AGENT_RULES.md`) — this needs a real design pass before any implementation starts. Also unresolved: where multiple simultaneously-live versions actually get *hosted* (GitHub Pages currently serves one `dist/` per push to `main`; serving N versions at once is a deploy-infrastructure question in its own right, separate from the git-history question above).
+**Ordering caveat worth keeping:** the manifest's order is the app's absolute authority on which
+release is newer, so tags are sorted with git's version-aware `-v:refname`, **not** by date — two
+tags cut in the same second tie under a date sort, and a tie publishes releases in the wrong order,
+which would present a *downgrade* to a PT as "a new version is available". (Found in testing; pinned
+by `test_releases_are_listed_newest_first_even_when_tag_dates_tie`.)
 
-### 16.2 [ ] [Brainstorm] Multi-version hosting, preview/beta channel, and per-version storage isolation
+### 16.2 [~] Multi-version hosting, preview/beta channel, and per-version storage isolation — **hosting + storage SHIPPED 2026-07-25; preview/beta still open**
 Continued brainstorm on 16.1's "keep multiple versions deployable" question. Leaning **git tags** (not branches, not duplicated code) — tag `main` at each release, zero change to the existing trunk-based workflow, "which commit is version N" becomes a lookup rather than a maintained fork. The rest of this item is the shape that unlocks, still all open/undecided:
 
 - **Versioned subpath hosting**: serve tagged versions side-by-side under the same GitHub Pages origin as subpaths (`/v1.2.0/`, `/v1.3.0/`, …), with a stable path resolving to whichever version a given PT has opted into as "current." Low-friction because the app already derives its base path dynamically at runtime (`BASE_PATH` from `import.meta.url` in `app.js`) for the GH-Pages-subpath deploy — extending that to "one more path segment per version" is incremental, not new infrastructure. Still open: does GitHub Pages alone support publishing N version folders from one workflow run, or does this need real deploy-pipeline work.
