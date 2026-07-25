@@ -236,6 +236,11 @@ export function renderClipboardEditor(container, deps) {
   // controller), so the editor body carries no header of its own — just the list and the exit hint.
   container.innerHTML = `
     <div class="clipboard-editor" role="region" aria-label="${tr("edit_plan", "Edit plan")}">
+      <div class="editor-toolbar">
+        <button type="button" class="btn secondary-btn btn-sm editor-catalog-btn">
+          <i class="fa-solid fa-book-open"></i> ${tr("add_from_catalog", "Add from catalog")}
+        </button>
+      </div>
       <ul class="editor-list">${items.length ? unitsHtml : `<li class="editor-empty">${tr("no_exercises_injected", "No exercises yet.")}</li>${insertBar(0, { allowSuperset: true })}`}</ul>
       <p class="clipboard-editor-hint">${tr("edit_exit_hint", "Tap Done, press Esc, or tap outside to finish.")}</p>
       <datalist id="${datalistId}">${options}</datalist>
@@ -243,6 +248,15 @@ export function renderClipboardEditor(container, deps) {
 
   const editorEl = container.querySelector(".clipboard-editor");
   const listEl = container.querySelector(".editor-list");
+
+  // Browse the full taxonomy catalog and inject the chosen movement into the plan, then return here.
+  const catalogBtn = container.querySelector(".editor-catalog-btn");
+  if (catalogBtn) {
+    catalogBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      deps.openCatalogPicker?.();
+    });
+  }
   const rowKeyOf = (rowEl) => parseInt(rowEl.dataset.rowkey, 10);
 
   // ---------- circuit invariant: members contiguous, shared title/series, clean round counters ----------
@@ -631,7 +645,8 @@ export function renderClipboardEditor(container, deps) {
   if (doneBtn) doneBtn.addEventListener("click", onDoneClick);
 
   const onKey = (e) => {
-    if (e.key === "Escape") doExit();
+    // Esc closes an open dialog (e.g. the catalog picker) first; only exit the editor when none is open.
+    if (e.key === "Escape" && !document.querySelector("dialog[open]")) doExit();
   };
   const onOutside = (e) => {
     // Ignore taps inside the editor itself, inside any open modal dialog (e.g. Add exercise), on the

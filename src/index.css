@@ -1915,6 +1915,11 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   color: var(--primary);
   border: 1px solid color-mix(in srgb, var(--primary) 40%, transparent);
 }
+.editor-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
 .editor-list {
   list-style: none;
   margin: 0;

@@ -40,6 +40,8 @@ export const en = {
   no_workouts_history: "No logged workouts in global history.",
   live_tracking_clipboard: "Live Tracking Clipboard",
   active_session: "Active session",
+  add_from_catalog: "Add from catalog",
+  catalog_picker_title: "Add from Exercise Catalog",
   integrity_error_title: "App verification failed",
   integrity_error_missing:
     "No integrity catalog was found for this build. In local development, run the full build (python -m build) or restart the dev server so the catalog is recomputed; in production this means the deploy is incomplete.",

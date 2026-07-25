@@ -39,6 +39,8 @@ export const sl = {
   no_workouts_history: "V splošni zgodovini ni zabeleženih vadb.",
   live_tracking_clipboard: "Sledenje vadbi v živo",
   active_session: "Aktivna seja",
+  add_from_catalog: "Dodaj iz kataloga",
+  catalog_picker_title: "Dodaj iz kataloga vaj",
   integrity_error_title: "Preverjanje aplikacije ni uspelo",
   integrity_error_missing:
     "Za to različico ni bilo mogoče najti kataloga integritete. Med lokalnim razvojem zaženite celoten build (python -m build) ali znova zaženite razvojni strežnik, da se katalog znova izračuna; v produkciji to pomeni nepopolno objavo.",

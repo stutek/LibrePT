@@ -764,6 +764,16 @@
     </form>
   </dialog>
 
+  <!-- DIALOG MODAL: Add from Exercise Catalog (plan edit view). Opens the reusable filtered picker;
+       tapping a movement injects it into the active plan with defaults and returns to the editor. -->
+  <dialog id="dialog-catalog-picker" class="dialog-modal card glassmorphic wide-modal">
+    <div class="modal-header">
+      <h3 id="catalog-picker-title">Add from Exercise Catalog</h3>
+      <button class="modal-close-btn" aria-label="Close catalog"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="catalog-picker-mount" class="exercise-picker"></div>
+  </dialog>
+
   <!-- DIALOG MODAL: Quick Feedback Loop (Asynchronous program logs) -->
   <dialog id="dialog-feedback" class="dialog-modal card glassmorphic">
     <div class="modal-header">

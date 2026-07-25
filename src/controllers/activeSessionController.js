@@ -32,6 +32,7 @@ import {
   releaseScreenWakeLock,
   requestScreenWakeLock as requestScreenWakeLockHelper,
 } from "../modules/common/wakeLock.js";
+import { mountExercisePicker } from "../modules/exercises/exercisePicker.js";
 import { renderGlobalHistory } from "../modules/history/historyView.js";
 import { renderRoutinesList } from "../modules/plans/plansView.js";
 import {
@@ -590,6 +591,58 @@ function openAddSessionExerciseDialog() {
   modal.showModal();
 }
 
+// Append a movement to the active client's plan as a fresh, taxonomy-aware item (its own slot id, so
+// the same catalog movement can appear twice without colliding logs), then re-render. Shared by the
+// typed add-exercise form and the catalog picker.
+function injectExerciseIntoActivePlan(baseEx, { sets, reps, weight, rest }) {
+  if (!activeSession || !baseEx) return;
+  const activeClientId = activeSession.activeClientId;
+  const clientState = activeSession.clientRoutines[activeClientId];
+  if (!clientState) return;
+  const slotId = generateShortUUID();
+  clientState.exercises.push({
+    id: slotId,
+    exerciseId: baseEx.id,
+    name: baseEx.name,
+    category: baseEx.category,
+    pattern: baseEx.pattern || "",
+    instructions: baseEx.instructions || "",
+    loadUnit: loadUnitForEquipment(baseEx.equipment),
+    modality: modalityOf(baseEx),
+    metric: primaryMetricOf(baseEx),
+    setsTargetCount: sets,
+    repsTarget: reps,
+    weightTarget: weight,
+    rest,
+  });
+  clientState.logs[slotId] = Array.from({ length: sets }, () => ({
+    reps,
+    weight,
+    completed: false,
+    note: "",
+  }));
+  clientState.activeExerciseIndex = clientState.exercises.length - 1;
+  saveActiveSessionToCache();
+  renderActiveGroupBoard();
+}
+
+// Plan-edit "Add from catalog": browse the full filtered taxonomy picker, and inject the chosen
+// movement (with sensible defaults, adjustable inline afterward) then return to the editor.
+function openCatalogPicker() {
+  const dialog = document.getElementById("dialog-catalog-picker");
+  const mount = document.getElementById("catalog-picker-mount");
+  if (!dialog || !mount || !activeSession) return;
+  const { state } = appDeps;
+  mountExercisePicker(mount, {
+    state,
+    onSelect: (ex) => {
+      injectExerciseIntoActivePlan(ex, { sets: 3, reps: 10, weight: 0, rest: 60 });
+      dialog.close();
+    },
+  });
+  dialog.showModal();
+}
+
 export function renderActiveGroupBoard() {
   if (!activeSession) return;
   const { state, t, navigateToPath } = appDeps;
@@ -714,6 +767,7 @@ export function renderActiveGroupBoard() {
       save: persist,
       rerender: renderActiveGroupBoard,
       openAddExercise: openAddSessionExerciseDialog,
+      openCatalogPicker,
       exit: exitClipboardEditMode,
       genId: generateShortUUID,
     });
@@ -868,6 +922,11 @@ export function setupActiveSession(deps) {
     if (cancelBtn) cancelBtn.addEventListener("click", () => addExModal.close());
     if (closeBtn) closeBtn.addEventListener("click", () => addExModal.close());
 
+    // Catalog picker dialog: only needs a close affordance — selecting a movement injects + closes it.
+    const catalogModal = document.getElementById("dialog-catalog-picker");
+    const catalogCloseBtn = catalogModal?.querySelector(".modal-close-btn");
+    if (catalogCloseBtn) catalogCloseBtn.addEventListener("click", () => catalogModal.close());
+
     addExForm.addEventListener("submit", (e) => {
       e.preventDefault();
       const typed = document.getElementById("session-add-select-ex").value.trim();
@@ -882,39 +941,8 @@ export function setupActiveSession(deps) {
       if (!baseEx) {
         baseEx = { id: generateShortUUID(), name: typed, category: "Custom", instructions: "" };
       }
-      const exId = baseEx.id;
 
-      const activeClientId = activeSession.activeClientId;
-      const clientState = activeSession.clientRoutines[activeClientId];
-
-      const newEx = {
-        id: exId,
-        name: baseEx.name,
-        category: baseEx.category,
-        pattern: baseEx.pattern || "",
-        instructions: baseEx.instructions,
-        loadUnit: loadUnitForEquipment(baseEx.equipment),
-        modality: modalityOf(baseEx),
-        metric: primaryMetricOf(baseEx),
-        setsTargetCount: sets,
-        repsTarget: reps,
-        weightTarget: weight,
-        rest: rest,
-      };
-
-      clientState.exercises.push(newEx);
-
-      clientState.logs[exId] = Array.from({ length: sets }, () => ({
-        reps: reps,
-        weight: weight,
-        completed: false,
-        note: "",
-      }));
-
-      clientState.activeExerciseIndex = clientState.exercises.length - 1;
-
-      saveActiveSessionToCache();
-      renderActiveGroupBoard();
+      injectExerciseIntoActivePlan(baseEx, { sets, reps, weight, rest });
       addExModal.close();
     });
   }

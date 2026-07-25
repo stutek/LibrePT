@@ -75,6 +75,7 @@ export function applyStaticDOMMappings(tDict) {
     '#dialog-add-session-exercise label[for="session-add-weight"]': "weight",
     '#dialog-add-session-exercise label[for="session-add-rest"]': "rest_seconds",
     '#dialog-add-session-exercise button[type="submit"]': "btn_inject",
+    "#catalog-picker-title": "catalog_picker_title",
 
     "#dialog-feedback .modal-header h3": "log_client_feedback",
     '#dialog-feedback label[for="feedback-custom-note"]': "custom_details",
