@@ -270,6 +270,9 @@ export function openAdjustmentWizardComponent(updateId, ctx) {
     defaultCategory: exercise ? exercise.category : "All",
     autoSelectFirst: true,
     keepSelection: true,
+    searchLabel: t("search_movements") || "Search movements",
+    muscleLabel: t("muscle") || "Muscle",
+    equipmentLabel: t("equipment") || "Equipment",
     onSelect: (ex) => {
       swapSelect.value = ex ? ex.id : "";
     },

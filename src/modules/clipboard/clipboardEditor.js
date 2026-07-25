@@ -95,13 +95,16 @@ export function renderClipboardEditor(container, deps) {
 
   // ---------- row builders ----------
   // A row inserted (or swapped) a moment ago is otherwise indistinguishable from the rest of the
-  // plan — an empty name field somewhere down a long list. Mark it so it can be tinted, badged,
-  // scrolled to and focused below; the badge (not just colour) is what survives a glance on a bright
-  // gym floor, and it says which thing happened rather than just "look here".
+  // plan — an empty name field somewhere down a long list. Mark it so it can be tinted, scrolled to
+  // and focused below.
   const isCalledOut = (it) => !!callout?.id && it.id === callout.id;
   const newMarkerClass = (it) => (isCalledOut(it) ? " editor-row-added" : "");
+  // A word only where the row can't speak for itself. An item inserted from the clipboard lands
+  // blank and holding the caret — that IS the announcement, and a badge next to it is noise on a
+  // narrow row. A row the catalog filled in (injected or swapped) takes no focus and reads as
+  // ordinary, so it keeps a label saying what just happened to it.
   const newBadge = (it) =>
-    isCalledOut(it)
+    isCalledOut(it) && !callout.focus
       ? `<span class="editor-added-badge">${
           callout.kind === "swap" ? tr("swapped_label", "Swapped") : tr("new_label", "New")
         }</span>`

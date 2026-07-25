@@ -691,6 +691,8 @@ function openCatalogPicker({ slotId = null, query = "", category = "" } = {}) {
     initialQuery: query,
     autoFocusSearch: true,
     searchLabel: t("search_movements") || "Search movements",
+    muscleLabel: t("muscle") || "Muscle",
+    equipmentLabel: t("equipment") || "Equipment",
     onSelect: (ex) => {
       if (slotId) swapPlanItemMovement(slotId, ex);
       else injectExerciseIntoActivePlan(ex, { sets: 3, reps: 10, weight: 0, rest: 60 });

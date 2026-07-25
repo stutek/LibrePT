@@ -152,6 +152,9 @@ export function setupRoutineForms({
     if (!pickerEl) return;
     mountExercisePicker(pickerEl, {
       state,
+      searchLabel: t("search_movements") || "Search movements",
+      muscleLabel: t("muscle") || "Muscle",
+      equipmentLabel: t("equipment") || "Equipment",
       onSelect: (ex) => {
         addRoutineExerciseRow({
           preset: { id: ex.id, sets: 3, reps: 10, weight: 0, rest: 60 },

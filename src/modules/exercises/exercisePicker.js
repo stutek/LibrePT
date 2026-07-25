@@ -31,6 +31,8 @@ const EQUIPMENT = ["All", "Barbell", "Dumbbell", "Cable", "Machine", "Band", "Bo
  * @param {string}  [opts.initialQuery]    - Seed the search box (e.g. what the PT already typed).
  * @param {boolean} [opts.autoFocusSearch] - Put the caret in the search box on mount.
  * @param {string}  [opts.searchLabel]     - Translated placeholder/aria-label for the search box.
+ * @param {string}  [opts.muscleLabel]     - Translated label for the muscle-group filter row.
+ * @param {string}  [opts.equipmentLabel]  - Translated label for the equipment filter row.
  * @param {(exercise: Object) => void} opts.onSelect - Called with the chosen exercise on tap.
  */
 export function mountExercisePicker(
@@ -44,6 +46,8 @@ export function mountExercisePicker(
     initialQuery = "",
     autoFocusSearch = false,
     searchLabel = "Search movements",
+    muscleLabel = "Muscle",
+    equipmentLabel = "Equipment",
     onSelect,
   },
 ) {
@@ -58,15 +62,18 @@ export function mountExercisePicker(
   };
   let selectedId = null;
 
-  const chipRow = (name, values, active) =>
-    `<div class="picker-chips" data-axis="${name}">${values
-      .map(
-        (v) =>
-          `<button type="button" class="chip chip-sm ${v === active ? "active" : ""}" data-value="${escapeHTML(
-            v,
-          )}">${escapeHTML(v)}</button>`,
-      )
-      .join("")}</div>`;
+  // Each chip row is labelled with the axis it filters: two unlabelled rows of chips read as one
+  // undifferentiated wall, and "All" appearing twice is only unambiguous once each row is named.
+  const chipRow = (name, values, active, label) =>
+    `<div class="picker-chips" data-axis="${name}">
+      <span class="picker-chips-label">${escapeHTML(label)}</span>${values
+        .map(
+          (v) =>
+            `<button type="button" class="chip chip-sm ${v === active ? "active" : ""}" data-value="${escapeHTML(
+              v,
+            )}">${escapeHTML(v)}</button>`,
+        )
+        .join("")}</div>`;
 
   container.classList.add("exercise-picker");
   container.innerHTML = `
@@ -75,8 +82,8 @@ export function mountExercisePicker(
       <input type="search" class="picker-search" value="${escapeHTML(filters.query)}"
              placeholder="${escapeHTML(searchLabel)}" aria-label="${escapeHTML(searchLabel)}">
     </div>
-    ${chipRow("muscle", MUSCLE_GROUPS, filters.muscle)}
-    ${chipRow("equipment", EQUIPMENT, filters.equipment)}
+    ${chipRow("muscle", MUSCLE_GROUPS, filters.muscle, muscleLabel)}
+    ${chipRow("equipment", EQUIPMENT, filters.equipment, equipmentLabel)}
     <div class="picker-count"></div>
     <div class="picker-list"></div>
   `;

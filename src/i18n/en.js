@@ -127,6 +127,8 @@ export const en = {
   browse_catalog: "Browse exercise catalog",
   swap_movement: "Swap movement",
   search_movements: "Search movements",
+  muscle: "Muscle",
+  equipment: "Equipment",
   reorder: "Reorder",
   exercise: "Exercise",
   close: "Close",

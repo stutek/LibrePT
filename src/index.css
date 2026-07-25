@@ -1211,6 +1211,18 @@ select.menu-select {
   flex-direction: column;
   gap: 6px;
 }
+/* Names the axis a chip row filters. Two unlabelled chip rows read as one wall of options, and the
+   "All" chip appears in both — the label is what tells them apart at a glance. */
+.picker-chips-label,
+.filter-chips-label {
+  align-self: center;
+  flex: 0 0 auto;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
 /* Typing is cheaper than scrolling on a phone: the search narrows the list live, and Enter takes
    the top match, so a known movement needs no scroll and no aimed tap at all. */
 .picker-search-wrap {

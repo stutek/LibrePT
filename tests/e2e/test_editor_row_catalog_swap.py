@@ -67,10 +67,25 @@ def test_row_catalog_swaps_the_movement_in_place(page, local_server):
     assert after["key"] == before["key"], "swapped in place — the row does not move"
     assert after["sets"] == before["sets"], "the slot keeps its authored set count"
     assert page.locator(".editor-row").count() == row_count, "a swap adds no row"
-    # Called out as swapped, so the trainer sees which row changed.
+    # Called out as swapped, so the trainer sees which row changed. This row keeps its label: it
+    # takes no focus and reads as an ordinary filled row, so the tint alone would not say what
+    # happened (a blank row inserted from the clipboard holds the caret instead and needs no tag).
     added = page.locator(".editor-row-added")
     assert added.count() == 1
     assert added.first.get_attribute("data-rowkey") == before["key"]
+    assert (
+        added.locator(".editor-added-badge").inner_text().strip().lower() == "swapped"
+    )
+
+
+def test_filter_rows_are_labelled_by_axis(page, local_server):
+    """Two unlabelled chip rows read as one wall of options, and 'All' appears in both."""
+    _open_editor(page, local_server)
+    page.locator(".editor-row .editor-row-catalog").first.click()
+    page.wait_for_selector("#dialog-catalog-picker[open]")
+
+    labels = page.locator("#catalog-picker-mount .picker-chips-label").all_inner_texts()
+    assert [label.strip().lower() for label in labels] == ["muscle", "equipment"]
 
 
 def test_search_narrows_and_enter_takes_the_top_match(page, local_server):

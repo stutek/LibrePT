@@ -1,6 +1,10 @@
 // components/activeUsersList.js
 // Renders the participant tabs scroll-fade and tab buttons for selecting active clients in the active session.
 
+// escapeHTML is imported rather than injected: it is a pure helper with no state, and an escaping
+// function that a caller can forget to pass is an escaping function that will eventually be missing.
+import { escapeHTML } from "./utils.js";
+
 export function updateClientTabsFadeState() {
   const el = document.getElementById("active-session-client-tabs");
   if (!el) return;
@@ -45,7 +49,7 @@ export function renderActiveUsersList(tabsContainer, activeSession, ctx) {
 
     tab.innerHTML = `
       <div class="avatar" style="width:20px; height:20px; font-size:9px; background: ${isActive ? "rgba(255, 255, 255, 0.25)" : "var(--primary-light)"}; color: ${isActive ? "#fff" : "var(--primary)"};">
-        ${client.avatar || getInitials(client.name)}
+        ${escapeHTML(client.avatar || getInitials(client.name))}
       </div>
       <span>${getClientDisplayNameHTML(client, true)}</span>
     `;

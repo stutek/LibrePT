@@ -16,6 +16,7 @@ import sys
 import shutil
 import subprocess
 
+from build.domsecurity import audit_html_sinks, compare_csp
 from build.testreport import REPORT_DIR, failed_test_ids, print_digest, run_logged
 
 
@@ -343,6 +344,21 @@ def run_e2e_tests():
     print("  ✓ E2E browser tests passed (after serial re-verification).")
 
 
+def _csp_parity():
+    """Extract the dev server's CSP header and index.html's <meta> CSP, and compare them."""
+    import re
+
+    server = open(
+        os.path.join("deploy", "local_http_server.py"), encoding="utf-8"
+    ).read()
+    block = re.search(r'"Content-Security-Policy": \((.*?)\n    \),', server, re.S)
+    header_policy = "".join(re.findall(r'"([^"]*)"', block.group(1))) if block else ""
+
+    index = open(os.path.join("src", "index.html"), encoding="utf-8").read()
+    meta = re.search(r'http-equiv="Content-Security-Policy"\s+content="([^"]*)"', index)
+    return compare_csp(header_policy, meta.group(1) if meta else "")
+
+
 def run_dynamic_security_checks():
     """Runs dynamic security checks (CSP, HTTP security headers, and client-side DOM injection & sanitization verification)."""
     print("\n  Running Dynamic Security Checks...")
@@ -363,10 +379,36 @@ def run_dynamic_security_checks():
         print(f"  ✗ Dynamic security check failed. Missing headers: {missing}")
         sys.exit(1)
 
+    # CSP parity: the ZAP scan validates the DEV SERVER's real HTTP headers, but GitHub Pages cannot
+    # send headers at all — production's policy is only the <meta> CSP. Without this check, hardening
+    # the dev header while leaving <meta> behind buys a green scan and ships nothing.
+    print(
+        "    - Comparing the production <meta> CSP against the dev server's header..."
+    )
+    weaker, header_only = _csp_parity()
+    if weaker:
+        print("  ✗ The shipped <meta> CSP is weaker than the scanned header:")
+        for problem in weaker:
+            print(f"      • {problem}")
+        sys.exit(1)
+    if header_only:
+        # Not a failure — a hosting limitation to accept knowingly rather than discover in an audit.
+        print(
+            f"      note: {', '.join(header_only)} cannot be expressed in <meta>, so production "
+            "goes without (GitHub Pages sends no custom headers)."
+        )
+
     # Injection Vulnerability & Unsanitized innerHTML Audit across frontend codebase
     print(
         "    - Auditing frontend codebase for unsanitized HTML/script injection patterns..."
     )
+    sink_findings = audit_html_sinks("src")
+    if sink_findings:
+        print("  ✗ Unescaped user text reaches an HTML sink:")
+        for path, line, expression in sink_findings:
+            print(f"      • {path}:{line}  ${{{expression}}}")
+        print("    Wrap it in escapeHTML() — an imported backup is untrusted input.")
+        sys.exit(1)
     unsafe_patterns = ["document.write(", "eval("]
     violations = []
     for root, _, files in os.walk("src"):

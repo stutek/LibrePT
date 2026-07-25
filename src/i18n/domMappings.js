@@ -58,6 +58,7 @@ export function applyStaticDOMMappings(tDict) {
     "#view-exercises .view-header h2": "exercises_title",
     "#btn-add-exercise": "btn_add_exercise",
     '.filter-chips button[data-filter="All"]': "filter_all",
+    "#exercises-filter-label": "muscle",
 
     // History View
     "#view-history .view-header h2": "history_title",

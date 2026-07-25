@@ -1,9 +1,12 @@
 # tests/e2e/test_editor_new_item_callout.py
 # Adding a plan item from the live clipboard flips the deck into the inline editor — and a freshly
 # inserted row used to look exactly like every other row (an empty name field somewhere down the
-# list). The just-added item must therefore be called out: highlighted (.editor-row-added + a "New"
-# badge, not colour alone) and pre-focused so the trainer can type the movement straight away. The
-# call-out is one-shot: the next insert moves it, it never lingers on a row already dealt with.
+# list). The just-added item must therefore be called out: highlighted (.editor-row-added) and
+# pre-focused, so the trainer can type the movement straight away. A row that lands blank and holding
+# the caret carries NO badge — the caret is the announcement, and a tag next to it is noise; the
+# label is reserved for rows the catalog filled in, which take no focus (see
+# test_editor_row_catalog_swap.py). The call-out is one-shot: the next insert moves it, it never
+# lingers on a row already dealt with.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
 
@@ -36,8 +39,8 @@ def test_deck_add_exercise_calls_out_the_new_row(page, local_server):
 
     added = page.locator(".editor-row-added")
     assert added.count() == 1, "exactly one row may be marked as just-added"
-    assert added.locator(".editor-added-badge").count() == 1, (
-        "the call-out needs a visible badge"
+    assert added.locator(".editor-added-badge").count() == 0, (
+        "a focused blank row needs no badge on top of the caret"
     )
     # Pre-focused on the name field, so the movement can be typed without hunting for the row.
     assert "editor-row-added" in _focused_row_class(page)
@@ -55,7 +58,7 @@ def test_deck_add_rest_calls_out_the_new_rest_row(page, local_server):
 
     added = page.locator(".editor-rest-row.editor-row-added")
     assert added.count() == 1
-    assert added.locator(".editor-added-badge").count() == 1
+    assert added.locator(".editor-added-badge").count() == 0
     assert page.evaluate(
         "() => document.activeElement.classList.contains('editor-rest-secs')"
     )

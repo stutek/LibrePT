@@ -127,6 +127,8 @@ export const sl = {
   browse_catalog: "Prebrskaj katalog vaj",
   swap_movement: "Zamenjaj vajo",
   search_movements: "Išči vaje",
+  muscle: "Mišica",
+  equipment: "Oprema",
   reorder: "Prerazporedi",
   exercise: "Vaja",
   close: "Zapri",
