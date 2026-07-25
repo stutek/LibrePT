@@ -11,6 +11,8 @@ import {
   DEFAULT_ROUTINES,
   DEFAULT_SESSIONS,
 } from "./index.js";
+import { CURRENT_SCHEMA_VERSION } from "./migrationSteps.js";
+import { describeMigration, migrateState } from "./schemaMigrations.js";
 import {
   adoptLegacyBucket,
   namespacedKey,
@@ -19,9 +21,16 @@ import {
 } from "./storageNamespace.js";
 
 let state = emptyState();
+// What the last load's schema migration did (or refused to do) — read by the UI so an upgrade can
+// be explained to the PT instead of happening invisibly. Null until a stored database is loaded.
+let lastMigrationSummary = null;
 
 export function getState() {
   return state;
+}
+
+export function getLastMigrationSummary() {
+  return lastMigrationSummary;
 }
 
 export function setState(newState) {
@@ -30,6 +39,8 @@ export function setState(newState) {
 
 export function emptyState() {
   return {
+    // Stamped so a database created by this build is never mistaken for a legacy (v1) one.
+    schemaVersion: CURRENT_SCHEMA_VERSION,
     clients: [],
     exercises: [],
     routines: [],
@@ -102,10 +113,16 @@ export function loadSavedState() {
 
   if (savedData) {
     try {
-      state = JSON.parse(savedData);
-      if (state.bookings && !state.sessions) {
-        state.sessions = state.bookings;
-        state.bookings = undefined;
+      const parsed = JSON.parse(savedData);
+      const { ok, state: migrated, summary } = migrateState(parsed);
+      lastMigrationSummary = summary;
+      if (ok) {
+        state = migrated;
+      } else {
+        // Never write back a database we could not migrate, and never discard it either: keep what
+        // was stored, fail loud, and leave the summary for the UI to surface (§16.2).
+        console.error("Schema migration refused:", describeMigration(summary));
+        state = parsed;
       }
     } catch (e) {
       console.error("Error parsing local storage database. Starting empty.", e);
