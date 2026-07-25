@@ -24,6 +24,7 @@ Then open http://localhost:8081/  (it redirects to /LibrePT/).
 
 import argparse
 import hashlib
+import threading
 import io
 import json
 import os
@@ -37,6 +38,9 @@ SRC_DIR = os.path.join(REPO_ROOT, "src")
 BASE = "/LibrePT"  # mirror the GitHub Pages project sub-path (the repo name)
 
 INTEGRITY_CATALOG_NAME = "integrity.json"
+
+# Per-request access logging is off by default (see log_message); --verbose brings it back.
+VERBOSE = False
 
 
 def served_bytes(abs_path, rel):
@@ -52,11 +56,43 @@ def served_bytes(abs_path, rel):
     return data
 
 
+def source_fingerprint():
+    """A stat-only fingerprint of src/: (path, mtime_ns, size) for every file, no reads.
+
+    This is what lets the catalog be cached without ever going stale on a live edit — touching a
+    file changes its mtime or size, which changes the fingerprint, which rebuilds the catalog.
+    """
+    entries = []
+    for root, _dirs, names in os.walk(SRC_DIR):
+        for name in sorted(names):
+            abs_path = os.path.join(root, name)
+            stat = os.stat(abs_path)
+            entries.append((abs_path, stat.st_mtime_ns, stat.st_size))
+    return tuple(sorted(entries))
+
+
+_catalog_cache = {}
+_catalog_lock = threading.Lock()
+
+
 def build_dev_integrity_catalog(corrupt=False):
-    """Compute a live SHA-256 integrity catalog for the app served out of src/, so the service worker
+    """A live SHA-256 integrity catalog for the app served out of src/, so the service worker
     verifies its precache in local dev exactly as it will in production — no silently-skipped check.
-    Regenerated per request so live edits never false-fail. `corrupt` (a test-only toggle) flips one
-    hash to drive the mismatch path. Mirrors the shape of build.generate_integrity_catalog."""
+    `corrupt` (a test-only toggle) flips one hash to drive the mismatch path. Mirrors the shape of
+    build.generate_integrity_catalog.
+
+    CACHED on the source fingerprint, because computing it reads and hashes every served file —
+    ~21ms of CPU that Python holds the GIL for, blocking every other request in this threaded
+    server. Every service-worker install asks for it, so under a parallel test run (one browser per
+    core) that cost is paid dozens of times over and serialises the whole suite behind it. A live
+    edit still rebuilds it: the fingerprint is exactly what changes when a file does.
+    """
+    fingerprint = source_fingerprint()
+    with _catalog_lock:
+        cached = _catalog_cache.get(corrupt)
+        if cached and cached[0] == fingerprint:
+            return cached[1]
+
     files = {}
     for root, _dirs, names in os.walk(SRC_DIR):
         for name in names:
@@ -67,7 +103,10 @@ def build_dev_integrity_catalog(corrupt=False):
         files["app.js"] = (
             "0" * 64
         )  # force a deliberate mismatch for the failure-path e2e test
-    return {"algorithm": "SHA-256", "files": dict(sorted(files.items()))}
+    catalog = {"algorithm": "SHA-256", "files": dict(sorted(files.items()))}
+    with _catalog_lock:
+        _catalog_cache[corrupt] = (fingerprint, catalog)
+    return catalog
 
 
 # Security headers mirrored onto every response so the OWASP ZAP baseline scan (build check)
@@ -104,12 +143,30 @@ SECURITY_HEADERS = {
 
 
 class SubPathHandler(SimpleHTTPRequestHandler):
+    # HTTP/1.1 for KEEP-ALIVE. The default (HTTP/1.0) closes the connection after every response, so
+    # one page load of this app opens ~89 TCP connections and spawns ~89 server threads — and a
+    # parallel test run does that once per browser, per test. Every response below sets
+    # Content-Length, which is what makes persistent connections safe here.
+    protocol_version = "HTTP/1.1"
+
+    # TCP_NODELAY. Without it, the handler's unbuffered header write and body write leave the kernel
+    # waiting on Nagle + the peer's delayed ACK — a flat ~40ms stall on EVERY request. Measured at
+    # 3.8s to serve one page load's 89 assets; with it, ~0.1s. That stall is what made page.goto
+    # time out once a parallel suite ran a browser per core.
+    disable_nagle_algorithm = True
     # Suppress the Python/http.server version leak (ZAP "Server Leaks Version Information").
     server_version = "LibrePT-dev"
     sys_version = ""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=SRC_DIR, **kwargs)
+
+    def log_message(self, fmt, *args):
+        """Silence the per-request access log. It is a formatted, lock-contended write to stderr on
+        every asset — noise in normal use, and measurable contention when a parallel suite is
+        pulling thousands of files. Errors still surface: log_error is untouched."""
+        if VERBOSE:
+            super().log_message(fmt, *args)
 
     def end_headers(self):
         # Inject the hardening headers just before the header block closes, so they land on
@@ -197,8 +254,15 @@ def main():
     parser.add_argument(
         "--port", type=int, default=8081, help="port to listen on (default: 8081)"
     )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="log every request (off by default — it is contended noise under a parallel test run)",
+    )
     args = parser.parse_args()
 
+    global VERBOSE
+    VERBOSE = bool(getattr(args, "verbose", False))
     ThreadingHTTPServer.allow_reuse_address = True
     server = ThreadingHTTPServer(("", args.port), SubPathHandler)
     print(
