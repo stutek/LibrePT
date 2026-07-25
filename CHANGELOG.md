@@ -17,6 +17,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-07-25 — Plan editor: never lose the row you just touched
+
+### Added
+- **Just-touched plan item is called out in the inline editor** — inserting an exercise, superset or rest (from the live deck's fast-adjust bar, an editor insert bar, or the catalog) flips into edit mode with that row **highlighted, badged *New*, scrolled into view and holding the caret**, instead of dropping the trainer into a full-plan list where a fresh row is just another empty name field. A movement swapped in from the catalog is badged ***Swapped*** and takes no focus (nothing left to type). The call-out is **one-shot**: the next insert moves it and any other re-render clears it, so a highlight never outlives the moment it describes ([`clipboardEditor.js`](src/modules/clipboard/clipboardEditor.js), [`activeSessionController.js`](src/controllers/activeSessionController.js)); covered by `test_editor_new_item_callout.py`.
+- **📖 catalog button on every plan-editor row** — the name combobox only serves a PT who already knows the movement's name, so each row now opens the **filtered taxonomy picker for that row** and swaps the movement **in place**: the slot keeps its id, set count and logs, so a swap changes *what is done*, never *what was done*. The picker opens pre-filtered on the row's muscle group, with the row's current movement excluded and any half-typed text carried across as the query; covered by `test_editor_row_catalog_swap.py` and documented in [UC6 §3.2](use_cases/uc6_exercise_taxonomy_and_picker.md).
+- **Live search in the reusable exercise picker** — a focused search box filters by name, pattern, equipment or muscle group as the PT types, and **Enter takes the top match**, so a known movement costs a few letters instead of a scroll and an aimed tap ([`exercisePicker.js`](src/modules/exercises/exercisePicker.js)). Every picker surface (routine builder, gym-floor swap, plan editor) gains it.
+
+---
+
 ## 2026-07-25 — Offline-first hardening: vendored fonts, verified precache, modular service worker
 
 ### Added

@@ -63,6 +63,19 @@ Mid-session, when a station is occupied or a movement aggravates an injury, the 
 same picker **pre-filtered to the affected muscle group** and swaps in an alternative in seconds.
 The substitute **inherits the correct volume bucket**, so historical tracking is preserved.
 
+**Reachable from the row itself.** In the inline plan editor every exercise row carries a **📖
+catalog button** beside its name combobox — the combobox only helps a PT who already knows the
+movement's name, the button is the browse-and-filter route for when they don't. It opens the picker
+**for that row**, already narrowed to the row's muscle group, with the movement currently on the row
+**excluded** (it is what they are moving away from) and any half-typed text carried across as the
+search query. Choosing a movement **swaps it in place**: the plan item keeps its **slot id, set
+count and logs**, so a swap changes *what is done*, never *what was done*, and the row returns
+called out as **Swapped** (see [UC1](uc1_gym_floor_clipboard.md)).
+
+**Friction budget: no scroll, no aimed tap.** The picker opens with the caret already in a **live
+search box** that narrows by name, pattern, equipment or group as the PT types, and **Enter takes
+the top match** — a movement whose name is known costs a tap on 📖, a few letters, and Enter.
+
 ### 3.3 Scenario C — Custom Exercise vs. Taxonomy Integrity
 
 Creating a bespoke movement must not pollute the data with ad-hoc text. The custom-exercise form
@@ -163,11 +176,13 @@ Delivers TODO §13.1's last bullet (adopt an open standard for interchangeable e
 | Specification Requirement | Target Implementation / Test |
 | :--- | :--- |
 | Taxonomy catalog (equipment + pattern badges) | [../src/data/exercises.js](../src/data/exercises.js) · `EXERCISES` |
-| Filtered movement picker modal (Scenario A/B) | [../src/components/exercisePicker.js](../src/components/exercisePicker.js) · `renderExercisePicker` |
+| Filtered movement picker modal (Scenario A/B) | [../src/modules/exercises/exercisePicker.js](../src/modules/exercises/exercisePicker.js) · `mountExercisePicker` |
 | Polymorphic reps/load parse, format & equipment-derived units | [../src/helper/repsAndLoad.js](../src/helper/repsAndLoad.js) · `parseRepsTarget` / `formatRepsTarget` / `getLoadUnitForEquipment` |
 | Custom movement creation (strict inheritance) | [../src/components/exercisePicker.js](../src/components/exercisePicker.js) · `renderCustomMovementForm` |
 | Catalog shows equipment/pattern badges, not instructions | [../tests/e2e/test_exercise_taxonomy.py](../tests/e2e/test_exercise_taxonomy.py) · `test_catalog_shows_taxonomy_badges_not_instructions` |
-| Filter chips constrain list & search narrows dynamically | [../tests/e2e/test_exercise_taxonomy.py](../tests/e2e/test_exercise_taxonomy.py) · `test_picker_filters_and_search` |
+| Picker search narrows the list live; Enter takes the top match | [../tests/e2e/test_editor_row_catalog_swap.py](../tests/e2e/test_editor_row_catalog_swap.py) · `test_search_narrows_and_enter_takes_the_top_match` |
+| Every plan-editor row offers the catalog; picker opens pre-filtered + focused on search | [../tests/e2e/test_editor_row_catalog_swap.py](../tests/e2e/test_editor_row_catalog_swap.py) · `test_every_exercise_row_offers_the_catalog` |
+| Row swap retargets the movement in place — slot id, sets and logs preserved | [../tests/e2e/test_editor_row_catalog_swap.py](../tests/e2e/test_editor_row_catalog_swap.py) · `test_row_catalog_swaps_the_movement_in_place` |
 | Custom movement form enforces name + equipment + pattern | [../tests/e2e/test_exercise_taxonomy.py](../tests/e2e/test_exercise_taxonomy.py) · `test_custom_movement_creation_flow` |
 | Polymorphic reps/load parse, format & equipment-derived units | [../tests/e2e/test_reps_and_load.py](../tests/e2e/test_reps_and_load.py) · `test_reps_and_load_helpers` |
 | Exercise modality axis + per-metric target formatting | [../src/modules/common/exerciseModality.js](../src/modules/common/exerciseModality.js) · `modalityOf` / `primaryMetricOf` / `formatMetricValue` |

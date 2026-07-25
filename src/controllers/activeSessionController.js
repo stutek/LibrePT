@@ -52,6 +52,12 @@ function requestScreenWakeLock() {
 // live logging deck. editorCleanup detaches the editor's document listeners on the next render.
 let clipboardEditMode = false;
 let editorCleanup = null;
+// A plan item the trainer JUST created or swapped, so the next editor render can point them at it:
+// { id, kind: "new" | "swap", focus }. `focus` puts the caret in the row's name field — right for a
+// blank inserted row, wrong for one the catalog just filled in (it would pop the phone keyboard over
+// a row that needs no typing). One-shot: consumed by that render and cleared, so a later re-render
+// never re-announces an item the trainer has already dealt with.
+let pendingCallout = null;
 // Holds the session title bar's normal content while edit mode repurposes it, so exiting restores it.
 let savedSessionTitleHTML = null;
 
@@ -121,8 +127,12 @@ function clampFocusToExercise(cs) {
   cs.activeExerciseIndex = 0;
 }
 
-export function enterClipboardEditMode() {
+// `newItemId` names a plan item the caller just created (the live deck's +Exercise/+Superset/+Rest
+// bar), so the editor opens with that row called out instead of dropping the trainer into an
+// otherwise-identical list.
+export function enterClipboardEditMode(newItemId = null) {
   clipboardEditMode = true;
+  pendingCallout = newItemId ? { id: newItemId, kind: "new", focus: true } : null;
   renderActiveGroupBoard();
 }
 
@@ -622,21 +632,68 @@ function injectExerciseIntoActivePlan(baseEx, { sets, reps, weight, rest }) {
     note: "",
   }));
   clientState.activeExerciseIndex = clientState.exercises.length - 1;
+  // Called out in the editor so the injected movement isn't lost in the list. No focus: the catalog
+  // already filled the name in, so there is nothing to type.
+  pendingCallout = { id: slotId, kind: "new", focus: false };
   saveActiveSessionToCache();
   renderActiveGroupBoard();
 }
 
-// Plan-edit "Add from catalog": browse the full filtered taxonomy picker, and inject the chosen
-// movement (with sensible defaults, adjustable inline afterward) then return to the editor.
-function openCatalogPicker() {
+// Retarget an existing plan row at a different movement, keeping the slot: the id, the sets and the
+// logs already written against them survive, so a swap changes WHAT is done, never what was done.
+function swapPlanItemMovement(slotId, baseEx) {
+  if (!activeSession || !baseEx) return;
+  const clientState = activeSession.clientRoutines[activeSession.activeClientId];
+  const item = clientState?.exercises?.find((e) => e.id === slotId);
+  if (!item) return;
+  item.exerciseId = baseEx.id;
+  item.name = baseEx.name;
+  item.category = baseEx.category;
+  item.pattern = baseEx.pattern || "";
+  item.instructions = baseEx.instructions || "";
+  item.loadUnit = loadUnitForEquipment(baseEx.equipment);
+  item.modality = modalityOf(baseEx);
+  item.metric = primaryMetricOf(baseEx);
+  pendingCallout = { id: slotId, kind: "swap", focus: false };
+  saveActiveSessionToCache();
+  if (appDeps.saveToLocalStorage) appDeps.saveToLocalStorage();
+  renderActiveGroupBoard();
+}
+
+// Plan-edit taxonomy browse. Two modes, one dialog:
+//  - no `slotId`: "Add from catalog" — inject the chosen movement with sensible defaults;
+//  - with `slotId`: the row's 📖 button — swap THAT row's movement in place.
+// The picker opens pre-filtered on the row's own muscle group and pre-seeded with whatever the PT
+// had already typed in the name field, with the caret in the search box: the common case ("swap this
+// press for another press") is then one tap, and a named target is type-then-Enter — no scrolling.
+function openCatalogPicker({ slotId = null, query = "", category = "" } = {}) {
   const dialog = document.getElementById("dialog-catalog-picker");
   const mount = document.getElementById("catalog-picker-mount");
   if (!dialog || !mount || !activeSession) return;
-  const { state } = appDeps;
+  const { state, t } = appDeps;
+  const titleEl = document.getElementById("catalog-picker-title");
+  if (titleEl) {
+    titleEl.textContent = slotId
+      ? t("swap_movement") || "Swap movement"
+      : t("catalog_picker_title") || "Add from Exercise Catalog";
+  }
+  const clientState = activeSession.clientRoutines[activeSession.activeClientId];
+  const item = slotId ? clientState?.exercises?.find((e) => e.id === slotId) : null;
+  // The movement already on the row is not a swap target. Plans authored before slots carried an
+  // `exerciseId` (routines, demo data) only know the movement by name, so fall back to that.
+  const currentMovementId = item
+    ? item.exerciseId || state.exercises.find((e) => e.name === item.name)?.id || null
+    : null;
   mountExercisePicker(mount, {
     state,
+    excludeId: currentMovementId,
+    defaultCategory: category || item?.category || "All",
+    initialQuery: query,
+    autoFocusSearch: true,
+    searchLabel: t("search_movements") || "Search movements",
     onSelect: (ex) => {
-      injectExerciseIntoActivePlan(ex, { sets: 3, reps: 10, weight: 0, rest: 60 });
+      if (slotId) swapPlanItemMovement(slotId, ex);
+      else injectExerciseIntoActivePlan(ex, { sets: 3, reps: 10, weight: 0, rest: 60 });
       dialog.close();
     },
   });
@@ -762,6 +819,8 @@ export function renderActiveGroupBoard() {
   }
 
   const deckContainer = document.getElementById("active-exercise-scroll-deck");
+  const callout = pendingCallout;
+  pendingCallout = null; // one render owns the call-out; never let it linger to a later one
   if (deckContainer && activeClientState && clipboardEditMode) {
     const persist = () => {
       saveActiveSessionToCache();
@@ -780,6 +839,10 @@ export function renderActiveGroupBoard() {
       openCatalogPicker,
       exit: exitClipboardEditMode,
       genId: generateShortUUID,
+      callout,
+      markNewItem: (id) => {
+        pendingCallout = { id, kind: "new", focus: true };
+      },
     });
   } else if (deckContainer && activeClientState) {
     renderExerciseDeck(deckContainer, {

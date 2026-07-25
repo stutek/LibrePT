@@ -19,7 +19,10 @@
 //   rerender(),    // re-render the board (stays in edit mode) after structural changes
 //   openAddExercise(),  // opens the existing #dialog-add-session-exercise (kept for compatibility)
 //   exit(),        // leave edit mode
-//   genId()        // fresh short id for new exercises/rests/circuits
+//   genId(),       // fresh short id for new exercises/rests/circuits
+//   openCatalogPicker({ slotId, query, category }),  // taxonomy browse; slotId swaps THAT row
+//   callout,       // { id, kind:'new'|'swap', focus } — item to call out on this render (one-shot)
+//   markNewItem(id)// hand the next render the id of an item this editor just inserted
 // }
 
 import { metricLabelKey, usesLoad } from "../common/exerciseModality.js";
@@ -54,6 +57,8 @@ export function renderClipboardEditor(container, deps) {
     openAddExercise,
     exit,
     genId,
+    callout,
+    markNewItem,
   } = deps;
   const items = activeClientState.exercises;
   const tr = (key, fallback) => t(key) || fallback;
@@ -89,6 +94,19 @@ export function renderClipboardEditor(container, deps) {
   };
 
   // ---------- row builders ----------
+  // A row inserted (or swapped) a moment ago is otherwise indistinguishable from the rest of the
+  // plan — an empty name field somewhere down a long list. Mark it so it can be tinted, badged,
+  // scrolled to and focused below; the badge (not just colour) is what survives a glance on a bright
+  // gym floor, and it says which thing happened rather than just "look here".
+  const isCalledOut = (it) => !!callout?.id && it.id === callout.id;
+  const newMarkerClass = (it) => (isCalledOut(it) ? " editor-row-added" : "");
+  const newBadge = (it) =>
+    isCalledOut(it)
+      ? `<span class="editor-added-badge">${
+          callout.kind === "swap" ? tr("swapped_label", "Swapped") : tr("new_label", "New")
+        }</span>`
+      : "";
+
   const reorderHandle = () => `
     <button type="button" class="editor-reorder" aria-label="${tr("reorder", "Reorder")}" title="${tr("reorder_hint", "Tap top/bottom to move, drag to reorder")}">
       <span class="editor-reorder-up"><i class="fa-solid fa-chevron-up"></i></span>
@@ -144,11 +162,13 @@ export function renderClipboardEditor(container, deps) {
         )}</label>`
       : "";
     return `
-      <li class="editor-row" data-rowkey="${idx}">
+      <li class="editor-row${newMarkerClass(ex)}" data-rowkey="${idx}">
         ${reorderHandle()}
         <div class="editor-row-main">
           <div class="editor-row-name-wrap">
             <input class="editor-row-name" type="text" list="${datalistId}" value="${name}" aria-label="${tr("exercise", "Exercise")}" placeholder="${tr("exercise", "Exercise")}">
+            <button type="button" class="editor-row-catalog" aria-label="${tr("browse_catalog", "Browse exercise catalog")}" title="${tr("browse_catalog", "Browse exercise catalog")}"><i class="fa-solid fa-book-open"></i></button>
+            ${newBadge(ex)}
           </div>
           <div class="editor-row-fields">
             ${setsField}
@@ -162,11 +182,12 @@ export function renderClipboardEditor(container, deps) {
   };
 
   const restRow = (rest, idx) => `
-    <li class="editor-rest-row" data-rowkey="${idx}">
+    <li class="editor-rest-row${newMarkerClass(rest)}" data-rowkey="${idx}">
       ${reorderHandle()}
       <span class="editor-rest-label"><i class="fa-solid fa-hourglass-half"></i> ${tr("rest_label", "Rest")}</span>
       <input type="number" min="0" step="5" class="editor-rest-secs" value="${escapeHTML(String(rest.rest ?? 0))}" aria-label="${tr("rest_label", "Rest")}">
       <span class="editor-rest-unit">s</span>
+      ${newBadge(rest)}
       <button type="button" class="editor-rest-remove" aria-label="${tr("remove", "Remove")}"><i class="fa-solid fa-trash-can"></i></button>
     </li>`;
 
@@ -357,6 +378,25 @@ export function renderClipboardEditor(container, deps) {
     ex.weightTarget = parseLoad(v);
   });
 
+  // --- 📖 per row: browse the taxonomy for THIS row and swap its movement in place ---
+  // The datalist combobox only helps a PT who already knows the movement's name; the catalog button
+  // is the browse-and-filter route for when they don't. It carries the row's own context across
+  // (partial text typed + muscle group), so the picker opens already narrowed.
+  for (const btn of listEl.querySelectorAll(".editor-row-catalog")) {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const row = btn.closest(".editor-row");
+      const ex = items[rowKeyOf(row)];
+      if (!ex) return;
+      // Only half-typed text is a search intent. A name that already IS a catalog movement is the
+      // row's current selection — seeding it would open the picker filtered to the one movement the
+      // PT is trying to move away from.
+      const typed = row.querySelector(".editor-row-name")?.value.trim() || "";
+      const query = (allExerciseNames || []).includes(typed) ? "" : typed;
+      deps.openCatalogPicker?.({ slotId: ex.id, query, category: ex.category || "" });
+    });
+  }
+
   // --- swap the movement in place via the name field (autocompletes from the catalog) ---
   for (const input of listEl.querySelectorAll(".editor-row-name")) {
     input.addEventListener("click", (e) => e.stopPropagation());
@@ -511,23 +551,27 @@ export function renderClipboardEditor(container, deps) {
     const exBtn = bar.querySelector(".ins-ex");
     const ssBtn = bar.querySelector(".ins-ss");
     const restBtn = bar.querySelector(".ins-rest");
+    // Inserting re-renders the whole list, so hand the fresh id forward: the next render calls out
+    // the row that just appeared instead of leaving the trainer to spot a blank field in the plan.
+    const insertItem = (item) => {
+      items.splice(at, 0, item);
+      markNewItem?.(item.id);
+      commit();
+    };
     if (exBtn)
       exBtn.addEventListener("click", (e) => {
         e.stopPropagation();
-        items.splice(at, 0, makeExercise(cid));
-        commit();
+        insertItem(makeExercise(cid));
       });
     if (ssBtn)
       ssBtn.addEventListener("click", (e) => {
         e.stopPropagation();
-        items.splice(at, 0, makeExercise(newId()));
-        commit();
+        insertItem(makeExercise(newId()));
       });
     if (restBtn)
       restBtn.addEventListener("click", (e) => {
         e.stopPropagation();
-        items.splice(at, 0, makeRest(cid));
-        commit();
+        insertItem(makeRest(cid));
       });
   }
 
@@ -612,6 +656,20 @@ export function renderClipboardEditor(container, deps) {
       document.addEventListener("pointercancel", endDrag);
       e.preventDefault();
     });
+  }
+
+  // Land the trainer ON the row that was just inserted: bring it into view and put the caret in the
+  // field they came here to fill (the movement name, or the seconds of a rest). Without this, "+
+  // Exercise" on the live deck flips to a full-plan editor with nothing saying which row is new.
+  const addedRow = callout?.id ? listEl.querySelector(".editor-row-added") : null;
+  if (addedRow) {
+    addedRow.scrollIntoView({ behavior: "smooth", block: "center" });
+    const field =
+      addedRow.querySelector(".editor-row-name") || addedRow.querySelector(".editor-rest-secs");
+    if (field && callout.focus) {
+      field.focus({ preventScroll: true }); // the smooth scroll above owns the scrolling
+      field.select?.();
+    }
   }
 
   // Drop any exercise left with a blank name (e.g. an injected row never filled in). Rests are kept.

@@ -1211,6 +1211,34 @@ select.menu-select {
   flex-direction: column;
   gap: 6px;
 }
+/* Typing is cheaper than scrolling on a phone: the search narrows the list live, and Enter takes
+   the top match, so a known movement needs no scroll and no aimed tap at all. */
+.picker-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  height: 38px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--input-bg);
+}
+.picker-search-wrap i {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.picker-search {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-main);
+  font-size: 14px;
+  outline: none;
+}
+.picker-search-wrap:focus-within {
+  border-color: var(--primary);
+}
 .picker-chips {
   display: flex;
   flex-wrap: wrap;
@@ -1973,6 +2001,42 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   opacity: 0.6;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
+/* The row just inserted (from the live deck's +Exercise bar, an editor insert bar, or the catalog).
+   Colour alone can't carry this on a sunlit gym floor, so the row also gets a thick accent edge and
+   a literal "New" badge; the pulse only draws the eye on arrival and then settles. */
+/* Two-class selectors: `.editor-rest-row` declares its own dashed border/background further down
+   the sheet, and equal specificity would let it win over this call-out. */
+.editor-row.editor-row-added,
+.editor-rest-row.editor-row-added {
+  border-color: var(--primary);
+  border-left: 4px solid var(--primary);
+  background: color-mix(in srgb, var(--primary) 12%, var(--card-bg));
+  animation: editor-added-pulse 1.2s ease-out 1;
+}
+.editor-added-badge {
+  flex: 0 0 auto;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: var(--on-primary);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+@keyframes editor-added-pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 55%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 10px transparent;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .editor-row-added {
+    animation: none;
+  }
+}
 /* Combined reorder control: tap the top half to move up / bottom half to move down; drag to
    reorder freely. Sized as a tall two-zone target so both taps and drags are easy on touch. */
 .editor-reorder {
@@ -2037,6 +2101,28 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   font-family: var(--font-header);
   font-size: 14px;
   font-weight: 700;
+}
+/* Browse the taxonomy for this row. Sized as a real 34px touch target next to the name field — the
+   combobox only serves a PT who already knows the movement's name; this is the route when they
+   don't, so it must be tappable with a sweaty thumb, not a hover affordance. */
+.editor-row-catalog {
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--input-bg);
+  color: var(--primary);
+  font-size: 13px;
+  cursor: pointer;
+}
+.editor-row-catalog:hover,
+.editor-row-catalog:focus-visible {
+  border-color: var(--primary);
+  background: var(--primary-light);
 }
 .editor-row-fields {
   display: flex;

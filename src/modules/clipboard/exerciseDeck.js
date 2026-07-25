@@ -280,9 +280,14 @@ export function renderExerciseDeck(deckContainer, deps) {
         const circuitTitle = activeItem.type === "circuit" ? activeItem.title : "";
         const circuitSeries = activeItem.type === "circuit" ? activeItem.series : 1;
 
+        // The insert drops the trainer into the editor mid-plan, where a blank row looks like every
+        // other row. Hand the new item's id to edit mode so it can point at the one just created.
+        let newItemId;
+
         if (type === "rest") {
+          newItemId = `rest-${generateShortUUID()}`;
           activeClientState.exercises.splice(newIdx, 0, {
-            id: `rest-${generateShortUUID()}`,
+            id: newItemId,
             type: "rest",
             rest: 30,
             circuitId: cid,
@@ -292,6 +297,7 @@ export function renderExerciseDeck(deckContainer, deps) {
         } else if (type === "superset") {
           const newCircuitId = `c-${generateShortUUID()}`;
           const id = generateShortUUID();
+          newItemId = id;
           activeClientState.logs[id] = Array.from({ length: 3 }, () => ({
             reps: 10,
             weight: 0,
@@ -311,6 +317,7 @@ export function renderExerciseDeck(deckContainer, deps) {
         } else {
           // exercise
           const id = generateShortUUID();
+          newItemId = id;
           activeClientState.logs[id] = Array.from({ length: 3 }, () => ({
             reps: 10,
             weight: 0,
@@ -335,7 +342,7 @@ export function renderExerciseDeck(deckContainer, deps) {
         if (saveToLocalStorage) saveToLocalStorage();
 
         if (enterEditMode) {
-          enterEditMode();
+          enterEditMode(newItemId);
         } else {
           onRerender();
         }

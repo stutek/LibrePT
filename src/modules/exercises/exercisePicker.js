@@ -28,6 +28,9 @@ const EQUIPMENT = ["All", "Barbell", "Dumbbell", "Cable", "Machine", "Band", "Bo
  * @param {string}  [opts.defaultCategory] - Muscle-group chip to pre-select (default "All").
  * @param {boolean} [opts.autoSelectFirst] - Pre-select the first match and fire onSelect (swap mode).
  * @param {boolean} [opts.keepSelection]   - Keep a persistent highlight on the chosen item (swap mode).
+ * @param {string}  [opts.initialQuery]    - Seed the search box (e.g. what the PT already typed).
+ * @param {boolean} [opts.autoFocusSearch] - Put the caret in the search box on mount.
+ * @param {string}  [opts.searchLabel]     - Translated placeholder/aria-label for the search box.
  * @param {(exercise: Object) => void} opts.onSelect - Called with the chosen exercise on tap.
  */
 export function mountExercisePicker(
@@ -38,6 +41,9 @@ export function mountExercisePicker(
     defaultCategory = "All",
     autoSelectFirst = false,
     keepSelection = false,
+    initialQuery = "",
+    autoFocusSearch = false,
+    searchLabel = "Search movements",
     onSelect,
   },
 ) {
@@ -46,6 +52,9 @@ export function mountExercisePicker(
   const filters = {
     muscle: MUSCLE_GROUPS.includes(defaultCategory) ? defaultCategory : "All",
     equipment: "All",
+    // Typing beats scrolling a 100-movement list on a phone: the search narrows by name, pattern or
+    // equipment, so "rom dead" or "band" lands on the target in one gesture.
+    query: (initialQuery || "").trim(),
   };
   let selectedId = null;
 
@@ -61,6 +70,11 @@ export function mountExercisePicker(
 
   container.classList.add("exercise-picker");
   container.innerHTML = `
+    <div class="picker-search-wrap">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="search" class="picker-search" value="${escapeHTML(filters.query)}"
+             placeholder="${escapeHTML(searchLabel)}" aria-label="${escapeHTML(searchLabel)}">
+    </div>
     ${chipRow("muscle", MUSCLE_GROUPS, filters.muscle)}
     ${chipRow("equipment", EQUIPMENT, filters.equipment)}
     <div class="picker-count"></div>
@@ -69,12 +83,22 @@ export function mountExercisePicker(
 
   const listEl = container.querySelector(".picker-list");
   const countEl = container.querySelector(".picker-count");
+  const searchEl = container.querySelector(".picker-search");
+
+  const matchesQuery = (ex) => {
+    if (!filters.query) return true;
+    const needle = filters.query.toLowerCase();
+    return [ex.name, ex.pattern, ex.equipment, ex.category]
+      .filter(Boolean)
+      .some((field) => field.toLowerCase().includes(needle));
+  };
 
   const getMatches = () =>
     state.exercises
       .filter((e) => e.id !== excludeId)
       .filter((e) => filters.muscle === "All" || e.category === filters.muscle)
       .filter((e) => filters.equipment === "All" || e.equipment === filters.equipment)
+      .filter(matchesQuery)
       .sort((a, b) => a.name.localeCompare(b.name));
 
   const renderList = () => {
@@ -112,6 +136,18 @@ export function mountExercisePicker(
       .join("");
   };
 
+  // Live search: filter as the PT types — no submit, no waiting.
+  searchEl.addEventListener("input", () => {
+    filters.query = searchEl.value.trim();
+    renderList();
+  });
+  // Enter takes the single obvious match, so a typed swap never needs a second aimed tap.
+  searchEl.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    listEl.querySelector(".picker-item")?.click();
+  });
+
   // Chip filtering (delegated).
   for (const row of container.querySelectorAll(".picker-chips")) {
     row.addEventListener("click", (e) => {
@@ -144,6 +180,14 @@ export function mountExercisePicker(
   });
 
   renderList();
+
+  if (autoFocusSearch) {
+    // Deferred: a dialog that has just been shown steals focus back to itself on the same tick.
+    setTimeout(() => {
+      searchEl.focus();
+      searchEl.select();
+    }, 0);
+  }
 
   if (autoSelectFirst) {
     const first = getMatches()[0];
