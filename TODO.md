@@ -74,6 +74,24 @@ The consent-photo idea was the only thing pushing toward binary blob storage; KI
 - **Not** SQLite-in-wasm — too heavy a dependency for a buildless offline app at this scale.
 - **Cheap prep now**: keep the main DB behind the `stateStore.js` seam so a future swap is localized, rather than scattering more raw `localStorage` calls across components.
 
+### 3.8 [ ] Unbacked-data warning banner — same weight as the PREVIEW ribbon
+**Raised 2026-07-26 (Simon).** The database holds the **only** copy of a trainer's records ([DATA_MODEL §6](docs/DATA_MODEL.md)), and a browser can evict IndexedDB under storage pressure. A PT with months of history and no external copy is one wiped profile away from losing the business's records, and today nothing on screen says so.
+
+- **Surface**: a persistent banner in the header strip, styled and placed like `#preview-ribbon` ([index.html](src/index.html)) — same visual weight, same "tap for the full explanation" affordance, linking to a short doc on what is at risk and how to fix it.
+- **Condition**: shown while the data has **no secured external copy** — no cloud target configured, or the last successful export/sync is stale (threshold to decide; "never" is the obvious first case). It is *not* the offline indicator and not the ahead/behind badge (3.9) — those say "not pushed *yet*"; this says "nothing anywhere but this browser profile".
+- **Dismissal**: must not be permanently dismissible while the condition holds — the risk does not go away because the banner was closed. Session-scoped dismissal at most; decide.
+- **Wording is the whole feature.** It has to be honest without being alarmist to a PT mid-session ("Only copy — no backup yet" beats "DATA LOSS RISK"), and it must state the fix in the same breath (Sync & Backup, one tap away).
+- **Interacts with**: [storageDurability.js](src/data/storageDurability.js) already measures eviction risk by consequence (quota, `persist()`), so the banner can escalate its wording when the browser has *refused* persistence rather than merely not been asked.
+- **Depends on** a real cloud target existing (3.3); until then it can only track "last export downloaded", which the Backup dialog already knows.
+
+### 3.9 [ ] Every write increments the ahead counter on the Sync & Backup button
+**Raised 2026-07-26 (Simon).** The `↑n ↓n` badge on `#backup-btn` is meant to read like git's ahead/behind — "you have n local changes not yet pushed". Today it under-reports, so a PT can believe they are safer than they are.
+
+- **Current wiring**: only `saveState()` in [app.js](src/app.js) passes `incrementLocalSync` into `saveToLocalStorage` ([applicationHeader.js](src/modules/common/applicationHeader.js)). There are **~21 other `saveToLocalStorage(...)` call sites** that pass nothing, plus **~16 `saveActiveSessionToCache()`** calls (every clipboard edit, every logged set) that never touch the badge at all.
+- **Fix at the seam, not the call sites**: the counter belongs *inside* the store's write path (and the live-session cache write), so a new writer cannot forget it. Passing a callback per call site is exactly the pattern that produced the gap. Ties into [§18.6](#18-data-layer-simultaneous-multi-schema-writes-star-writes) — once writes go through `writeQueue`/`stateStore`, that is the one place to count.
+- **Decide what "one change" means**: per `save()` (a keystroke in the plan editor would tick it) or per logical mutation. Per-keystroke makes the number noise; debouncing to a logical edit is closer to git's "one commit".
+- **The counter is currently mock state** (`mockSyncState` in `applicationHeader.js`) reset on load — real ahead/behind needs a persisted "last synced" marker (record ids from §18.2 make this cheap: count records written since the last synced id/time).
+
 ---
 
 ## 4. UI / UX
@@ -139,6 +157,19 @@ The Playwright suite already drives real end-to-end flows (gym-floor clipboard l
 Pending plan adjustment reminders — **do we allow a 1-click resolve?**
 
 - Tension to resolve: one-tap resolution fits the low-interaction principle, but plan adjustments are exactly the decisions that deserve deliberate review at the desk ([uc2_async_plan_adjustments.md](use_cases/uc2_async_plan_adjustments.md)).
+
+### 7.2 [ ] Feedback button must show its own state — toggled, and "notes exist"
+**Raised 2026-07-26 (Simon).** On the deck card, the three signal buttons (`.deck-action-easy` / `.deck-action-hard` / `.deck-action-feedback` in [exerciseCard.js](src/modules/clipboard/exerciseCard.js), and the `.circuit-sig` trio on a circuit card) look identical before and after they are used. A PT who tapped *Too Hard* thirty seconds ago has no way to see it landed, so the natural response is to tap again — which logs a second signal.
+
+Three distinct things the control must express, and they are **not** the same signal:
+
+1. **Toggled on** — this signal is currently set for this exercise. Needs a filled/active **background**, not just a colour tweak on the icon: it must read at arm's length on a bright gym floor, and it is the state the PT is most likely to be checking mid-set.
+2. **Icon changes with the state** — an outline icon for "available" vs a solid/filled one for "set", so the meaning survives for a colour-blind PT and in the greyscale of a sunlit screen. Colour alone is not a state indicator.
+3. **Notes are present** — a *separate* mark for "there is a written/voice note attached here", independent of whether a quick signal is toggled. A note is content, a signal is a flag; a card can have either, both, or neither, and the trainer needs to know a note exists without opening the modal.
+
+- **Toggling off**: if the button toggles, tapping an active signal must **clear** it, and that must round-trip to the stored feedback (not just the button's class). Decide whether clearing deletes the feedback record or supersedes it — the plan-adjustment deck (uc2) reads these, so a silently deleted signal changes what the PT sees at the desk.
+- **Where the state comes from**: `getExerciseSignalColor` already resolves a per-exercise signal for the deck; the notes indicator needs an equivalent "does this item have feedback with a note/voice payload" lookup.
+- **Applies to both card types** — standalone exercise cards and circuit member rows — and both must agree, since the same movement can be logged from either.
 
 ---
 
@@ -245,6 +276,16 @@ first visit, so it costs one visit, once. Recording it because it is the amplifi
 - Only worth acting on if first-load time on a poor mobile connection ever becomes a real complaint.
 - Any fix (bundling) trades away the buildless property, which is a deliberate architectural choice —
   so the bar for changing it is high.
+
+### 12.4 [ ] [Brainstorm] Capture exceptions and offer semi-automatic bug reporting
+**Raised 2026-07-26 (Simon).** Nothing in the app installs `window.onerror` or an `unhandledrejection` handler today — a thrown error dies in a console the PT will never open, and [docs/BUG_REPORTING.md](docs/BUG_REPORTING.md) asks them to retype the build stamp and steps by hand. On the gym floor that report never gets written.
+
+- **Capture**: global `error` + `unhandledrejection` listeners, kept deliberately small — record message, stack, the route at the time, and the build stamp (commit SHA, already in the header per §16). A ring buffer of the last N entries in memory, and only the most recent persisted, so a crash log can never grow into the storage budget (§18.6).
+- **Offer, never send.** LibrePT is offline-first with no server and no telemetry; automatic reporting would be an unannounced network egress of a PT's data. The flow is: a non-blocking "something went wrong — report it?" affordance, which opens a **prefilled GitHub issue URL** (title from the error, body from a template with stamp/route/stack) that the PT reviews and submits themselves. Zero traffic unless they tap.
+- **The hard part is redaction, and it decides the design.** A stack trace is safe; the state around it is not — client names, notes and injuries are PII (§17.3), and a report is a public GitHub issue. Either the payload is strictly non-identifying by construction (error + stack + route + version, ids only as opaque record ids) or it must be shown verbatim for review before submission. Prefer the first, and show it anyway.
+- **Deep-link the failure**: the app's routes are already durable (UC5), so a report can carry the URL that failed — reproduction becomes "open this link" instead of "list your steps".
+- **Boundary with the existing integrity error page**: a failed precache verification already blocks with its own screen (§18.6/`sw/integrity.js`). This is for *runtime* faults inside a working build; keep the two paths distinct so a corrupt-download error is never reported as an app bug.
+- **Watch the failure mode**: an error handler that itself throws, or that renders a modal over a live session mid-set, is worse than the original bug. It must be non-blocking, must never steal focus during logging, and must survive being called before the app has finished booting.
 
 ---
 
