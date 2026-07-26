@@ -502,6 +502,31 @@ With 17.1 preserving the full program, "**Save as routine**" on a history record
 >
 > **This supersedes the "stay on localStorage" half of §3.7** (see 18.6) and **depends on §16.3**
 > (see 18.1). It does not conflict with §16.1/§16.2's shipped machinery except where 18.10 says so.
+>
+> **Build order (decided with Simon 2026-07-26): DB first, then the star write layer, then the CD
+> pipeline tests (18.13), then onwards in small steps.** The engine comes first because the star write
+> layer cannot be built on localStorage at all — the fan-out multiplies a figure that already exceeds
+> the 5 MB cap, and atomic fan-out needs IndexedDB transactions. The pipeline tests come *after* the
+> write layer because most of what they assert (projection round-trips, the staging guard) has no
+> subject until projections exist.
+>
+> **Progress:**
+> - [x] **18.2 record identity** — [recordId.js](src/modules/common/recordId.js), UUIDv7 as fixed-width
+>   base62, all call sites switched. Replaced a 41.4-bit `Math.random` generator carrying a **1.38%
+>   chance of at least one collision** over five years of a very busy PT's records.
+> - [x] **18.6 engine, part 1** — [indexedDb.js](src/data/indexedDb.js): one database, one object
+>   store per schema, transactions that resolve on commit, collection + client indexes.
+> - [x] **18.6/18.8 engine, part 2** — [storageDurability.js](src/data/storageDurability.js):
+>   `persist()` on boot, eviction risk reported by consequence rather than private-mode sniffing.
+> - [ ] **18.6 engine, part 3** — move the main DB read/write path behind
+>   [stateStore.js](src/data/stateStore.js) onto IndexedDB, with §17.1's lazy per-client load. This is
+>   the risky one: it needs a one-way import from the existing localStorage bucket and must stay
+>   revertable until it has run on real data.
+> - [ ] **16.3** — bucket on the schema major. Coupled: `listReleaseBuckets()` feeds
+>   `evaluateVersionOffer`'s rollback check *by release id*, so the bucket key, the offer logic and
+>   `versions.json`'s new `schemaVersion` field have to move together or rollback offers silently stop.
+> - [ ] **18.1/18.4** — the star write layer itself (projections + fan-out).
+> - [ ] **18.13** — the CD pipeline tests.
 
 ### 18.1 [ ] [Decided in principle] The star write model, and its relationship to §16.3
 **A "bucket" is one physical store holding data shaped by exactly one schema** — `librept_db@schema6`.
@@ -815,3 +840,36 @@ treatments per preview tier" question into one piece of work.
   exactly when a PT has a client in front of them.
 - Keep the existing `prefers-reduced-motion` handling; a red flashing element is an accessibility
   problem in a way an amber pulse is not.
+
+### 18.13 [ ] CD pipeline tests for the star-write layer
+Requested by Simon (2026-07-26) as the step that follows the write layer. The properties §18 relies
+on are all *invariants across releases*, which is precisely what a per-commit gate can hold and what
+review cannot — none of them can ever be tested against a real PT's data, because that data is
+local-only by design (§16.2).
+
+What the pipeline has to assert, roughly in order of how expensive the failure is:
+
+- **The staging guard (§18.4)** — every field the current domain model writes exists in every live
+  schema's projection. This is the check that makes expand-first staging real rather than aspirational;
+  without it the discipline survives until the first hurried release, and the failure is silent data
+  loss on downgrade.
+- **Projection round-trips (§18.4)**, property-based over synthetic data generated from the existing
+  seed machinery (`src/data/*.js`): `project(x)` is idempotent, and `unproject(project(x)) === x` for
+  every live schema. Together these are what "projections are pure and total" actually means, and they
+  are what lets a bucket be re-derived rather than restored.
+- **The old-UI-writes case (§18.4)** — the specific scenario that loses data: a record using the
+  *newest* fields, written through an *older* schema's UI path. Nothing exercises it today.
+- **The reference graph is acyclic (§18.5)** — migration replay orders by foreign-key availability, so
+  a convenience back-reference added later would deadlock it or make the order arbitrary. §17.4 is the
+  first realistic cycle risk.
+- **The frozen backup corpus (§18.7)** — one committed fixture per historical schema, each asserted to
+  still import to the expected domain object. This is what turns "restorable indefinitely" from a hope
+  into something enforced on every commit.
+- **Migration fuzzing (§16.2, still open there)** — synthetic edge-case databases through the whole
+  chain, checking the runner refuses rather than corrupts.
+- **Manifest correctness (§16.3)** — `versions.json` carries each release's `schemaVersion`, releases
+  are ordered newest-first under a *total* order, and every advertised release is actually published.
+  The ordering half already burned once (§16.2's same-second tag tie).
+
+Fits the existing gate: `python -m build check` already runs staged parallel validation, and the
+property/fuzz work belongs in Stage 1 (fast, no browser) rather than in the e2e stage.
