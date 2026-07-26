@@ -72,6 +72,7 @@ is structured into feature modules under `src/modules/` (`session`, `plans`, `cl
 | [src/modules/exercises/exercisePicker.js](src/modules/exercises/exercisePicker.js) | `component` | Reusable exercise picker with taxonomy filter chips. |
 | [src/modules/history/historyView.js](src/modules/history/historyView.js) | `view` | Modular view renderer for workout history logs. |
 | [src/modules/common/utils.js](src/modules/common/utils.js) | `helper` | Shared formatting, date conversion, and string helper functions. |
+| [src/modules/common/recordId.js](src/modules/common/recordId.js) | `helper` | Record identity (TODO §18.2): UUIDv7 as fixed-width base62 — cryptographic collision resistance, and string sort order equal to creation order. |
 | [src/modules/common/dom.js](src/modules/common/dom.js) | `helper` | DOM helper utilities and modal helpers. |
 | [src/modules/common/repsAndLoad.js](src/modules/common/repsAndLoad.js) | `helper` | Polymorphic reps and equipment-derived load helpers. |
 | [src/modules/common/exerciseModality.js](src/modules/common/exerciseModality.js) | `helper` | Exercise modality axis (strength/cardio/stretch/balance) and per-metric target formatting (time/distance/calories/watts/hold). |
