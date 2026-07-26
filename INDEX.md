@@ -94,7 +94,12 @@ is structured into feature modules under `src/modules/` (`session`, `plans`, `cl
 | [src/modules/common/buildInfoDialog.js](src/modules/common/buildInfoDialog.js) | `component` | Tappable build identity (release, commit, data schema, build time) as a copyable dialog — the phone-reachable replacement for a hover tooltip. |
 | [src/modules/themes/](src/modules/themes/) | `styles` | Theme-specific CSS stylesheets (`daylight.css`, `midnight.css`, `red.css`, `blossom.css`, `nebula.css`). |
 | [src/fonts/](src/fonts/) | `assets` | Locally-vendored variable webfonts (DM Sans, Outfit, JetBrains Mono; latin + latin-ext) + `fonts.css`, so the offline-first PWA has no `fonts.googleapis.com`/`fonts.gstatic.com` dependency (regeneration steps in the `fonts.css` header). |
-| [src/controllers/routerController.js](src/controllers/routerController.js) | `controller` | SPA route mapping and navigation logic. |
+| [src/controllers/routerController.js](src/controllers/routerController.js) | `controller` | SPA route mapping and navigation logic: base path, history writes, and the facade of operations a route may perform. |
+| [src/controllers/routes/route.js](src/controllers/routes/route.js) | `controller` | Base `Route` class: pattern ↔ params translation (`match`/`build`), specificity, and the shared enter/exit chrome lifecycle. |
+| [src/controllers/routes/routeRegistry.js](src/controllers/routes/routeRegistry.js) | `controller` | The ordered route collection: register, resolve a path to one route by specificity, and spell a URL for a named route. |
+| [src/controllers/routes/viewRoute.js](src/controllers/routes/viewRoute.js) | `controller` | `ViewRoute` (a `#view-*` on screen, optionally re-rendered) and `RedirectRoute` (rewrite one URL into another, render the target in place). |
+| [src/controllers/routes/sessionRoutes.js](src/controllers/routes/sessionRoutes.js) | `controller` | Routes that resolve a record first: session-day deck, live/recovered session (focus + edit modes), workout setup, client detail. |
+| [src/controllers/routes/routeTable.js](src/controllers/routes/routeTable.js) | `controller` | Every addressable state of the app as data — the route patterns, stored without the base path so they stay version-agnostic. |
 | [src/controllers/themeController.js](src/controllers/themeController.js) | `controller` | Unified theme manager. |
 | [src/controllers/appLifecycleController.js](src/controllers/appLifecycleController.js) | `controller` | PWA runtime lifecycle: SW registration, integrity-error page, online/offline state. |
 | [src/sw.js](src/sw.js) | `service-worker` | Thin classic-worker entry: loads the sw/ modules via `importScripts` and wires the install/activate/fetch lifecycle events. |

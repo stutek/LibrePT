@@ -1,12 +1,53 @@
 // src/controllers/routerController.js - SPA route mapping and navigation logic
 // Single responsibility: Parse window.location paths, resolve deep links, manage view transitions, and route events.
+//
+// The route TABLE lives in routes/routeTable.js and each route's behaviour in its own class, so this
+// file holds only the parts that must know about the browser: the base path, history writes, and the
+// facade of operations a route is allowed to perform.
+
+import { buildRouteTable } from "./routes/routeTable.js";
 
 const BASE_PATH = new URL(".", import.meta.url).pathname.replace(/\/controllers\/$/, "/");
 
 let routerDeps = null;
+let routes = null;
+// The route currently on screen, with the ctx it was entered with: exit() must be able to undo what
+// that entry did, which needs its own params, not the incoming ones.
+let activeEntry = null;
 
 export function initRouter(deps) {
   routerDeps = deps;
+  routes = buildRouteTable();
+}
+
+// The operations a route may perform. Everything DOM- or history-shaped is here, so a route stays a
+// plain object that can be matched and entered in a test with a stub in this slot.
+const routerOps = {
+  setHeaderState: (showActions) => setHeaderState(showActions),
+  switchView: (viewId, options) => switchView(viewId, options),
+  showErrorView: (attemptedPath) => showErrorView(attemptedPath),
+  showSessionView: (sessionId, clientId, focusRef, opts) =>
+    showSessionView(sessionId, clientId, focusRef, opts),
+  focusActiveSessionCard: () => focusActiveSessionCard(),
+  hideSessionOverlay: () => {
+    const overlay = document.getElementById("active-session-overlay");
+    if (overlay) overlay.classList.add("hidden");
+  },
+  replaceUrl: (route) => {
+    window.history.replaceState(null, "", toUrl(route) + window.location.search);
+  },
+};
+
+// The route on screen right now, by name — for callers that must behave differently depending on
+// where the user is without re-parsing the path themselves.
+export function activeRouteName() {
+  return activeEntry?.route.name ?? null;
+}
+
+// Spell the URL for a named route. The only sanctioned way to build one: a hand-written path string
+// is what survives a pattern change and turns into a dead link.
+export function urlFor(name, params) {
+  return routes.urlFor(name, params);
 }
 
 export function getBasePath() {
@@ -212,127 +253,39 @@ export function showSessionView(sessionId, clientId, focusRef = null, opts = {})
   showErrorView(window.location.pathname);
 }
 
+let hasResolvedOnce = false;
+
+// Resolve the address bar to exactly one route and enter it. The route table decides WHICH state a
+// path names (routes/routeTable.js) and each route class decides what entering it does — so this
+// function never grows a branch when a new addressable state is added.
 export function handlePathChange() {
   const path = toRoute(window.location.pathname);
+  const hit = routes.resolve(path);
 
-  // `superset` is the pre-rename spelling of the circuit segment. It stays matched forever: links
-  // are shared and bookmarked, and a URL that once worked must not start showing an error page.
-  const sessionFocusMatch = path.match(
-    /^\/session\/([A-Za-z0-9_-]+)\/client\/([A-Za-z0-9_-]+)\/(exercise|circuit|superset)\/([A-Za-z0-9_-]+)$/,
-  );
-  const sessionEditMatch = path.match(
-    /^\/session\/([A-Za-z0-9_-]+)\/client\/([A-Za-z0-9_-]+)\/edit$/,
-  );
-  const sessionClientMatch = path.match(/^\/session\/([A-Za-z0-9_-]+)\/client\/([A-Za-z0-9_-]+)$/);
-  const sessionMatch = path.match(/^\/session\/([A-Za-z0-9_-]+)$/);
-  const clientDetailMatch = path.match(/^\/clients\/([A-Za-z0-9_-]+)$/);
-  const sessionsDateMatch = path.match(/^\/sessions\/([0-9]{4}-[0-9]{2}-[0-9]{2})$/);
-
-  if (path === "/session/new" || path === "/sessions/new") {
-    setHeaderState(false);
-    const overlay = document.getElementById("active-session-overlay");
-    if (overlay) overlay.classList.add("hidden");
-    switchView("workout-setup");
-    if (routerDeps?.openWorkoutSetupModal) {
-      routerDeps.openWorkoutSetupModal(null, null, null, false);
-    }
-  } else if (path.startsWith("/session/setup/")) {
-    const bookingId = path.split("/session/setup/")[1];
-    setHeaderState(false);
-    const overlay = document.getElementById("active-session-overlay");
-    if (overlay) overlay.classList.add("hidden");
-    switchView("workout-setup");
-    if (routerDeps?.openWorkoutSetupModal) {
-      routerDeps.openWorkoutSetupModal(null, null, bookingId, false);
-    }
-  } else if (sessionEditMatch) {
-    const [, sessionId, clientId] = sessionEditMatch;
-    setHeaderState(true);
-    showSessionView(sessionId, clientId, null, { edit: true });
-  } else if (sessionFocusMatch) {
-    const [, sessionId, clientId, focusType, focusId] = sessionFocusMatch;
-    setHeaderState(true);
-    // Legacy `superset` links resolve to the same focus; syncSessionFocusUrl then rewrites the
-    // address bar to the current spelling, so an old link upgrades itself on arrival.
-    const type = focusType === "superset" ? "circuit" : focusType;
-    showSessionView(sessionId, clientId, { type, id: focusId });
-  } else if (sessionClientMatch) {
-    const sessionId = sessionClientMatch[1];
-    const clientId = sessionClientMatch[2];
-    setHeaderState(true);
-    showSessionView(sessionId, clientId);
-  } else if (sessionMatch) {
-    const sessionId = sessionMatch[1];
-    setHeaderState(true);
-    showSessionView(sessionId, null);
-  } else if (clientDetailMatch) {
-    const clientId = clientDetailMatch[1];
-    setHeaderState(false);
-    const overlay = document.getElementById("active-session-overlay");
-    if (overlay) overlay.classList.add("hidden");
-    if (routerDeps?.clientsViewShowDetails) {
-      routerDeps.clientsViewShowDetails({
-        clientId,
-        state: routerDeps.getState(),
-        t: routerDeps.t,
-        showErrorView,
-        switchView,
-        openWorkoutSetupModal: routerDeps.openWorkoutSetupModal,
-      });
-    }
-  } else if (sessionsDateMatch) {
-    const isoDate = sessionsDateMatch[1];
-    const column = routerDeps?.getColumnForISODate
-      ? routerDeps.getColumnForISODate(isoDate)
-      : "today";
-    setHeaderState(false);
-    const overlay = document.getElementById("active-session-overlay");
-    if (overlay) overlay.classList.add("hidden");
-    switchView("clients");
-    requestAnimationFrame(() =>
-      routerDeps?.focusSessionsColumn ? routerDeps.focusSessionsColumn(column, "auto") : null,
-    );
-    focusActiveSessionCard();
-  } else if (path === "/" || path === "/index.html") {
-    const todayDate = routerDeps?.getISODateForColumn
-      ? routerDeps.getISODateForColumn("today")
-      : "";
-    setHeaderState(false);
-    window.history.replaceState(null, "", toUrl(`/sessions/${todayDate}`) + window.location.search);
-    const overlay = document.getElementById("active-session-overlay");
-    if (overlay) overlay.classList.add("hidden");
-    switchView("clients");
-    requestAnimationFrame(() =>
-      routerDeps?.focusSessionsColumn ? routerDeps.focusSessionsColumn("today", "auto") : null,
-    );
-    focusActiveSessionCard();
-  } else if (path === "/clients") {
-    setHeaderState(false);
-    const overlay = document.getElementById("active-session-overlay");
-    if (overlay) overlay.classList.add("hidden");
-    switchView("client-directory");
-    if (routerDeps?.renderClientsList) routerDeps.renderClientsList();
-  } else if (path === "/adjustments") {
-    setHeaderState(false);
-    const overlay = document.getElementById("active-session-overlay");
-    if (overlay) overlay.classList.add("hidden");
-    switchView("adjustments");
-  } else if (path === "/routines") {
-    setHeaderState(false);
-    const overlay = document.getElementById("active-session-overlay");
-    if (overlay) overlay.classList.add("hidden");
-    switchView("routines");
-  } else if (path === "/exercises") {
-    setHeaderState(false);
-    const overlay = document.getElementById("active-session-overlay");
-    if (overlay) overlay.classList.add("hidden");
-    switchView("exercises");
-  } else if (path === "/history") {
-    setHeaderState(false);
-    const overlay = document.getElementById("active-session-overlay");
-    if (overlay) overlay.classList.add("hidden");
-    switchView("history");
-  } else {
+  if (!hit) {
+    // An unknown route renders the in-app not-found view rather than redirecting, so the address bar
+    // keeps the path that failed: a link minted by a newer release must say so, not silently land the
+    // trainer somewhere else. The view offers the way home (#btn-error-home).
+    if (activeEntry) activeEntry.route.exit(activeEntry.ctx);
+    activeEntry = null;
     showErrorView(window.location.pathname);
+    return;
   }
+
+  const ctx = {
+    path,
+    params: hit.params,
+    route: hit.route,
+    previousRoute: activeEntry?.route ?? null,
+    isBootPass: !hasResolvedOnce,
+    deps: routerDeps,
+    router: routerOps,
+  };
+  hasResolvedOnce = true;
+
+  if (activeEntry && activeEntry.route !== hit.route) activeEntry.route.exit(activeEntry.ctx);
+  // enter() returns the route the user ends up on, which is not always the one that matched: a
+  // redirect renders its target, and that target is what a later exit() has to undo.
+  const entered = hit.route.enter(ctx) || hit.route;
+  activeEntry = { route: entered, ctx };
 }
