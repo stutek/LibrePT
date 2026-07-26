@@ -5,6 +5,7 @@
 // file holds only the parts that must know about the browser: the base path, history writes, and the
 // facade of operations a route is allowed to perform.
 
+import { SHARE_INIT_PARAM } from "../modules/common/shareLink.js";
 import { buildRouteTable } from "./routes/routeTable.js";
 
 const BASE_PATH = new URL(".", import.meta.url).pathname.replace(/\/controllers\/$/, "/");
@@ -33,10 +34,46 @@ const routerOps = {
     const overlay = document.getElementById("active-session-overlay");
     if (overlay) overlay.classList.add("hidden");
   },
-  replaceUrl: (route) => {
-    window.history.replaceState(null, "", toUrl(route) + window.location.search);
-  },
+  replaceUrl: (route) => replaceRoute(route),
 };
+
+// A promo param that is consumed once at boot and must NOT be carried onward: it seeds demo data, so
+// a sticky `?init=` would turn any URL the trainer copies out of the address bar into a link that
+// seeds someone else's empty app.
+const BOOT_ONLY_PARAMS = [SHARE_INIT_PARAM];
+
+// What a navigation carries over from the current URL: the presentational share params (`?lang`,
+// `?theme`) survive, because a promo link must still look like itself after the first tap. Before
+// this, only the `/` redirect happened to re-append the query string, so those two died on any
+// other navigation.
+function carriedSearch() {
+  const params = new URLSearchParams(window.location.search);
+  for (const name of BOOT_ONLY_PARAMS) params.delete(name);
+  const query = params.toString();
+  return query ? `?${query}` : "";
+}
+
+// The two history writers. Every URL change in the app goes through one of them, so the rules about
+// what a URL carries live in one place instead of being re-decided at each call site. A write that
+// would not change the URL is skipped, so history never grows a duplicate entry.
+//
+// push() when the user moved somewhere they should be able to come Back from; replace() when the URL
+// is catching up with a state they are already looking at.
+function writeHistory(route, { replace }) {
+  const url = toUrl(route) + carriedSearch();
+  if (url === window.location.pathname + window.location.search) return false;
+  if (replace) window.history.replaceState(null, "", url);
+  else window.history.pushState(null, "", url);
+  return true;
+}
+
+export function pushRoute(route) {
+  return writeHistory(route, { replace: false });
+}
+
+export function replaceRoute(route) {
+  return writeHistory(route, { replace: true });
+}
 
 // The route on screen right now, by name — for callers that must behave differently depending on
 // where the user is without re-parsing the path themselves.
@@ -130,13 +167,8 @@ export function setHeaderState(showActions = true) {
 }
 
 export function navigateToPath(targetPath) {
-  const url = toUrl(targetPath);
-  if (window.location.pathname === url) {
-    handlePathChange();
-  } else {
-    window.history.pushState(null, "", url);
-    handlePathChange();
-  }
+  pushRoute(targetPath);
+  handlePathChange();
 }
 
 export function setupNavigation({ setupSessionsDayNav } = {}) {
@@ -172,7 +204,7 @@ export function setupNavigation({ setupSessionsDayNav } = {}) {
   const createSessionBtn = document.getElementById("btn-create-session");
   if (createSessionBtn) {
     createSessionBtn.addEventListener("click", () => {
-      window.history.pushState(null, "", toUrl("/session/new"));
+      pushRoute(urlFor("session.new"));
       if (routerDeps?.openWorkoutSetupModal) {
         routerDeps.openWorkoutSetupModal();
       }

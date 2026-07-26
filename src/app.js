@@ -35,13 +35,15 @@ import {
   handlePathChange,
   initRouter,
   navigateToPath,
+  pushRoute,
+  replaceRoute,
   setHeaderState,
   setupNavigation,
   showErrorView as showErrorViewController,
   showSessionView,
   switchView as switchViewController,
   toRoute,
-  toUrl,
+  urlFor,
 } from "./controllers/routerController.js";
 import { applyThemeSwitcherLabels, initTheme } from "./controllers/themeController.js";
 import {
@@ -247,7 +249,8 @@ function init() {
     getClientDisplayNameHTML,
     startWorkoutSession,
     switchView,
-    toUrl,
+    pushRoute,
+    urlFor,
     getISODateForColumn,
     focusSessionsColumn,
   });
@@ -313,7 +316,8 @@ function init() {
     getState,
     t,
     toRoute,
-    toUrl,
+    pushRoute,
+    urlFor,
     getISODateForColumn,
   });
 
@@ -479,7 +483,8 @@ function startWorkoutSession(clientRoutines, bookingMeta = null) {
     newRecordId,
     navigateToPath,
     toRoute,
-    toUrl,
+    replaceRoute,
+    urlFor,
     focusSessionsColumn,
     launchClipboardDirectly,
     renderIdleSessionBar,
@@ -494,7 +499,8 @@ function setupActiveSession() {
     t,
     navigateToPath,
     toRoute,
-    toUrl,
+    replaceRoute,
+    urlFor,
     focusSessionsColumn,
     launchClipboardDirectly,
     newRecordId,
@@ -529,7 +535,8 @@ function recoverActiveSession() {
     navigateToPath,
     focusSessionsColumn,
     toRoute,
-    toUrl,
+    replaceRoute,
+    urlFor,
     launchClipboardDirectly,
     renderIdleSessionBar,
     saveToLocalStorage: saveState,
@@ -547,7 +554,8 @@ function renderActiveGroupBoard() {
     t,
     navigateToPath,
     toRoute,
-    toUrl,
+    replaceRoute,
+    urlFor,
     openFeedbackModal,
     newRecordId,
     saveToLocalStorage: saveState,
@@ -577,7 +585,7 @@ function renderSessions() {
     saveToLocalStorage: saveState,
     rerenderSessions: renderSessions,
     navigateToPath,
-    toUrl,
+    urlFor,
   });
 }
 

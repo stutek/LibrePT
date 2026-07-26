@@ -172,3 +172,51 @@ def test_init_seeds_only_once_then_edits_persist(page, local_server):
     page.goto(local_server + "?init=demo_data_load")
     page.wait_for_selector("#view-clients.active")
     assert page.locator("#clients-list .client-card").count() == 0
+
+
+# --- the params must survive navigation ----------------------------------------------------------
+
+
+def test_share_params_survive_in_app_navigation(page, local_server):
+    """A promo link's ?lang/?theme must outlive the first tap.
+
+    Every navigation used to rebuild the URL from the path alone — only the `/` redirect happened to
+    re-append the query string — so opening a `?lang=sl&theme=nebula` link and then tapping anything
+    dropped both params. They are now carried by the router's single history writer.
+    """
+    page.goto(local_server + "?lang=sl&theme=nebula&init=demo_data_load")
+    page.wait_for_selector("#view-clients.active")
+
+    # Navigate through the app's own menu — the router's writer is what must carry the params over.
+    for menu_item, view in (
+        ("#menu-exercises", "exercises"),
+        ("#menu-history", "history"),
+    ):
+        page.locator("#btn-app-menu").click()
+        page.locator(menu_item).click()
+        page.wait_for_selector(f"#view-{view}.active")
+
+    search = page.evaluate("() => location.search")
+    assert "lang=sl" in search, f"language param lost on navigation: {search!r}"
+    assert "theme=nebula" in search, f"theme param lost on navigation: {search!r}"
+    # The preselection is still in force, not merely still in the address bar.
+    assert page.locator("#lang-switcher").input_value() == "sl"
+
+
+def test_focus_url_updates_do_not_pile_up_history(page, local_server):
+    """The clipboard's URL catch-up replaces; one Back must leave the session, not undo card focus."""
+    page.goto(local_server + "?init=demo_data_load")
+    card_sel = ".booking-card.booking-live, .booking-card:has-text('Group Strength & Conditioning')"
+    page.wait_for_selector(card_sel)
+    entries_before = page.evaluate("() => history.length")
+
+    page.locator(card_sel).first.click()
+    page.wait_for_selector("#active-session-overlay:not(.hidden)")
+    page.wait_for_timeout(400)
+
+    # Opening the clipboard upgrades the bare URL to the focused card. That upgrade is a replace, so
+    # it must not add a second entry on top of the one the click pushed.
+    assert "/exercise/" in page.evaluate(
+        "() => location.pathname"
+    ) or "/circuit/" in page.evaluate("() => location.pathname")
+    assert page.evaluate("() => history.length") - entries_before <= 1

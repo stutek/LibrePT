@@ -97,8 +97,7 @@ export function setupEditSessionControl() {
   const handleCancel = () => {
     clearEditSessionDraft();
     editingBookingId = null;
-    const todayDate = deps.getISODateForColumn("today");
-    window.history.pushState(null, "", deps.toUrl(`/sessions/${todayDate}`));
+    deps.pushRoute(deps.urlFor("sessions.day", { isoDate: deps.getISODateForColumn("today") }));
     deps.switchView("clients");
     requestAnimationFrame(() => deps.focusSessionsColumn("today", "auto"));
   };

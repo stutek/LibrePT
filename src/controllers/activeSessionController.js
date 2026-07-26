@@ -171,16 +171,22 @@ export function focusIndexFromRef(clientState, focusRef) {
 
 export function sessionFocusPath() {
   if (!activeSession) return null;
+  const { urlFor } = appDeps;
+  if (!urlFor) return null;
   const clientId = activeSession.activeClientId || activeSession.participants[0];
-  const base = `/session/${activeSession.id}/client/${clientId}`;
+  const ids = { sessionId: activeSession.id, clientId };
   // Edit mode is a first-class, deep-linkable state: its URL survives a reload so the trainer lands
   // back in the editor (not the live deck), and the plan edits — persisted on every keystroke — are
   // intact. The client segment names WHOSE plan is open so the right participant is restored.
-  if (clipboardEditMode) return `${base}/edit`;
+  if (clipboardEditMode) return urlFor("session.edit", ids);
   const cs = activeSession.clientRoutines[clientId];
   const ex = cs?.exercises?.[cs.activeExerciseIndex];
-  if (!ex) return base;
-  return ex.circuitId ? `${base}/circuit/${ex.circuitId}` : `${base}/exercise/${ex.id}`;
+  if (!ex) return urlFor("session.client", ids);
+  // Built, never spelled: the focus segment was renamed once already (superset → circuit), and a
+  // hand-written path is what quietly survives the next rename as a dead link.
+  return ex.circuitId
+    ? urlFor("session.focus", { ...ids, focusType: "circuit", focusId: ex.circuitId })
+    : urlFor("session.focus", { ...ids, focusType: "exercise", focusId: ex.id });
 }
 
 // Set the edit-mode flag WITHOUT re-rendering — for the router restoring edit mode from an `/edit`
@@ -192,8 +198,8 @@ export function setClipboardEditMode(on) {
 
 export function syncSessionFocusUrl() {
   if (!activeSession) return;
-  const { toRoute, toUrl } = appDeps;
-  if (!toRoute || !toUrl) return;
+  const { toRoute, replaceRoute } = appDeps;
+  if (!toRoute || !replaceRoute) return;
   const current = toRoute(window.location.pathname);
   if (
     !current.startsWith("/session/") ||
@@ -202,9 +208,9 @@ export function syncSessionFocusUrl() {
   )
     return;
   const target = sessionFocusPath();
-  if (target && current !== target) {
-    window.history.replaceState(null, "", toUrl(target));
-  }
+  // replace, not push: the URL is catching up with the card the trainer is already looking at, and a
+  // history entry per card would turn Back into an undo of their own scrolling.
+  if (target) replaceRoute(target);
 }
 
 export function focusExerciseByIndex(index) {

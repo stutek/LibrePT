@@ -207,7 +207,7 @@ export function renderSessions({
   saveToLocalStorage,
   rerenderSessions,
   navigateToPath,
-  toUrl,
+  urlFor,
 }) {
   const yesterdayContainer = document.getElementById("yesterday-sessions-list");
   const todayContainer = document.getElementById("today-sessions-list");
@@ -232,7 +232,7 @@ export function renderSessions({
     saveToLocalStorage,
     rerenderSessions,
     navigateToPath,
-    toUrl,
+    urlFor,
   };
 
   const yesterdaySessions = sessions.filter((b) => b.day === "yesterday");

@@ -236,12 +236,7 @@ export function renderSessionCard(b, colContainer, deps) {
   if (editBtn) {
     editBtn.addEventListener("click", (e) => {
       e.stopPropagation();
-      const { toUrl, navigateToPath } = deps;
-      if (navigateToPath) {
-        navigateToPath(`/session/setup/${b.id}`);
-      } else if (toUrl) {
-        window.history.pushState(null, "", toUrl(`/session/setup/${b.id}`));
-      }
+      deps.navigateToPath?.(deps.urlFor("session.setup", { bookingId: b.id }));
     });
   }
 

@@ -27,7 +27,8 @@ def test_menu_navigates_to_pending_adjustments(page, local_server):
 
     page.locator("#menu-adjustments").click()
     page.wait_for_selector("#view-adjustments.active")
-    assert page.url.rstrip("/").endswith("/adjustments")
+    # pathname, not the whole URL: a navigation legitimately carries the ?lang/?theme share params.
+    assert page.evaluate("() => location.pathname").rstrip("/").endswith("/adjustments")
     assert page.locator("#dashboard-adjustments-list .adjustment-card").count() > 0
 
 
@@ -38,7 +39,7 @@ def test_menu_navigates_to_client_directory(page, local_server):
 
     page.locator("#menu-clients-register").click()
     page.wait_for_selector("#view-client-directory.active")
-    assert page.url.rstrip("/").endswith("/clients")
+    assert page.evaluate("() => location.pathname").rstrip("/").endswith("/clients")
     assert page.locator("#clients-list .client-card").count() > 0
 
 

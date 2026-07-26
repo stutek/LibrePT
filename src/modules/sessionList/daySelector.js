@@ -5,7 +5,8 @@
 //   getState(),
 //   t,
 //   toRoute,
-//   toUrl,
+//   pushRoute,
+//   urlFor,
 //   getISODateForColumn
 // }
 
@@ -131,14 +132,12 @@ export function focusSessionsColumn(day, behavior = "smooth") {
   focusedSessionDay = day;
   renderSessionsTitleBar();
 
-  const isoDate = deps.getISODateForColumn(day);
-  const targetPath = `/sessions/${isoDate}`;
-  const currentRoute = deps.toRoute(window.location.pathname);
+  const targetPath = deps.urlFor("sessions.day", { isoDate: deps.getISODateForColumn(day) });
   // Only reflect the focused day in the URL while the sessions list is the active route. A
   // background renderSessions() (e.g. right after launching a session) must not bounce the URL off
   // the /session/... view it just navigated to.
-  if (!currentRoute.startsWith("/session/") && currentRoute !== targetPath) {
-    window.history.pushState(null, "", deps.toUrl(targetPath));
+  if (!deps.toRoute(window.location.pathname).startsWith("/session/")) {
+    deps.pushRoute(targetPath);
   }
 
   if (grid.offsetParent === null) {
@@ -204,11 +203,7 @@ export function detectFocusedSessionsColumn() {
     focusedSessionDay = closest;
     renderSessionsTitleBar();
 
-    const isoDate = deps.getISODateForColumn(closest);
-    const targetPath = `/sessions/${isoDate}`;
-    if (deps.toRoute(window.location.pathname) !== targetPath) {
-      window.history.pushState(null, "", deps.toUrl(targetPath));
-    }
+    deps.pushRoute(deps.urlFor("sessions.day", { isoDate: deps.getISODateForColumn(closest) }));
   }
 }
 
