@@ -566,12 +566,12 @@ def run_stage_1_parallel():
 
 
 def run_stage_2_parallel():
-    """Stage 2: Runs E2E Browser Tests, Dynamic Security Checks, and OWASP ZAP Scan concurrently."""
+    """Stage 2: Runs the E2E browser suite and the OWASP ZAP scan concurrently.
+
+    The static security audits moved to stage 1 — they are file analysis, not dynamic checks."""
     import concurrent.futures
 
-    print(
-        "\n=== Stage 2: E2E Browser Tests & OWASP ZAP Scan (Parallel Execution) ==="
-    )
+    print("\n=== Stage 2: E2E Browser Tests & OWASP ZAP Scan (Parallel Execution) ===")
     tasks = {
         "E2E Browser Tests": run_e2e_tests,
         "OWASP ZAP Scan": run_owasp_zap_scan,
