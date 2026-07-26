@@ -8,6 +8,7 @@ import {
   removeVersionScoped,
   writeVersionScoped,
 } from "../../data/storageNamespace.js";
+import { newRecordId } from "../common/recordId.js";
 
 let deps = null;
 let isPlanningModeActive = false;
@@ -201,7 +202,7 @@ export function setupEditSessionControl() {
 
     if (isPlanningModeActive) {
       bookingMeta = {
-        id: editingBookingId || `plan-${Date.now()}`,
+        id: editingBookingId || newRecordId(),
         isPlanning: true,
         titles: [sessionName || t("planned_program") || "Planned Program"],
         date: sessionDate,
@@ -210,7 +211,7 @@ export function setupEditSessionControl() {
       };
     } else {
       bookingMeta = {
-        id: editingBookingId || `session-${Date.now()}`,
+        id: editingBookingId || newRecordId(),
         titles: [sessionName || t("workout_setup_title") || "Workout Session"],
         date: sessionDate,
         timeLabel,

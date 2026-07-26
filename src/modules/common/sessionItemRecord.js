@@ -2,17 +2,17 @@
 //
 // TODO §17.1: a finished session must persist the WHOLE structured program, not just the performed
 // sets. Previously finishWorkoutSession flattened a session to completed exercises only, dropping
-// rests, superset grouping, and prescribed-but-skipped exercises — so re-opening a past session lost
+// rests, circuit grouping, and prescribed-but-skipped exercises — so re-opening a past session lost
 // its structure and it could not seed a faithful template.
 //
 // Shape — a history record's `exercises` array is an ordered list of typed items:
 //   • exercise: { type:'exercise', id, name, loadUnit, modality, metric, completed, sets:[…],
 //                 circuitId, circuitTitle, circuitSeries }
 //   • rest:     { type:'rest', rest:<seconds>, circuitId, circuitTitle, circuitSeries }
-// Supersets are NOT a stored container — they are a RENDER-time grouping over consecutive items that
-// share a circuitId (buildSupersetUnits, the same unit the live deck folds). Keeping the stored form
+// Circuits are NOT a stored container — they are a RENDER-time grouping over consecutive items that
+// share a circuitId (buildCircuitUnits, the same unit the live deck folds). Keeping the stored form
 // a flat typed array means history and the live session share ONE model, with nothing to keep in sync;
-// and because a completed record is immutable, the contiguity a superset relies on is frozen for good.
+// and because a completed record is immutable, the contiguity a circuit relies on is frozen for good.
 //
 // Back-compat: legacy history rows (and the DEFAULT_HISTORY seed for strength work) are a flat list of
 // exercise leaves with no `type`, no `completed`, and no circuit fields. The guards below treat any
@@ -27,7 +27,7 @@ export const isExerciseRecord = (item) => !!item && !isRestRecord(item);
 export const isSkippedRecord = (item) => isExerciseRecord(item) && item.completed === false;
 
 // Exercise leaves only (rests filtered out) — for analytics, last-performance, feedback matching and
-// the backup round-trip, which all care about movements, not the rest/superset scaffolding.
+// the backup round-trip, which all care about movements, not the rest/circuit scaffolding.
 export function exerciseRecordsOf(items) {
   return (items || []).filter(isExerciseRecord);
 }

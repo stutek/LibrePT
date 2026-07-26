@@ -1,7 +1,7 @@
 // src/helper/repsAndLoad.js — helpers for the reps and load of a set (format / parse / derive).
 // Reps and load are polymorphic: a set is not always "3 sets × 10 reps × 40 kg".
 //   • Reps can be a count (10), a range ("8-12"), time/holds ("30s"), or to-failure ("max").
-//     "max" is the engine's failure token — the superset card renders a Fail-Reps stepper for it.
+//     "max" is the engine's failure token — the circuit card renders a Fail-Reps stepper for it.
 //   • Load depends on the movement's equipment: kilograms for free weights/machines, a stack
 //     LEVEL for cables, a resistance BAND label, or bodyweight (± added kg). We keep the raw
 //     `weight`/`weightTarget` value as authored and derive its meaning from equipment at render time.

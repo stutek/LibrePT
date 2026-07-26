@@ -79,7 +79,7 @@
 .history-header,
 .routine-header,
 .deck-header,
-.superset-header,
+.circuit-header,
 .booking-header,
 .header-container,
 .section-title,
@@ -107,7 +107,7 @@
 .step-btn,
 .set-checkbox-btn,
 .timer-close,
-.superset-done,
+.circuit-done,
 .deck-action-btn,
 .collapse-btn,
 .close-btn-xs,
@@ -140,8 +140,8 @@
 .modal-form,
 .client-card,
 .client-detail-card,
-.superset-ex-list,
-.superset-ex-row,
+.circuit-ex-list,
+.circuit-ex-row,
 .deck-history-sets,
 .form-group,
 .backup-actions,
@@ -162,7 +162,7 @@
 .deck-action-btn,
 .session-menu-item,
 .pill-btn,
-.superset-sig,
+.circuit-sig,
 .nav-item {
   border: none;
   cursor: pointer;
@@ -2096,11 +2096,6 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   align-items: center;
   gap: 6px;
 }
-.editor-row-circuit {
-  color: var(--secondary, var(--primary));
-  font-size: 12px;
-  flex: 0 0 auto;
-}
 .editor-row-name {
   flex: 1 1 auto;
   min-width: 0;
@@ -2199,13 +2194,13 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   text-align: center;
   margin: 0;
 }
-/* Superset membership <select> that sits in each row's field strip. */
-.editor-field-superset > span {
+/* Circuit membership <select> that sits in each row's field strip. */
+.editor-field-circuit > span {
   display: inline-flex;
   align-items: center;
   gap: 4px;
 }
-.editor-row-superset {
+.editor-row-circuit-select {
   height: 30px;
   max-width: 130px;
   padding: 0 6px;
@@ -2217,7 +2212,7 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   font-weight: 700;
   cursor: pointer;
 }
-/* Superset block: members grouped in a tinted, layer-group-accented card. */
+/* Circuit block: members grouped in a tinted, layer-group-accented card. */
 .editor-circuit {
   border: 1px solid var(--secondary, var(--primary));
   border-radius: var(--border-radius-md);
@@ -2374,7 +2369,7 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
 .editor-rest-remove:hover {
   background: var(--danger-light);
 }
-/* Insert bar in every gap: inject an exercise / superset / rest at that position. */
+/* Insert bar in every gap: inject an exercise / circuit / rest at that position. */
 .editor-insert {
   display: flex;
   align-items: center;
@@ -2410,7 +2405,7 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   color: var(--primary);
   border-color: var(--primary);
 }
-.ins-btn.ins-ss:hover {
+.ins-btn.ins-circuit:hover {
   color: var(--secondary, var(--primary));
   border-color: var(--secondary, var(--primary));
 }
@@ -2713,7 +2708,7 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
 .timer-card.overtime .timer-card-label i {
   color: var(--danger);
 }
-/* Stopped: the owning exercise/superset finished, so the timer is frozen at its final value and
+/* Stopped: the owning exercise/circuit finished, so the timer is frozen at its final value and
    dimmed to read as "done, awaiting dismissal" rather than something still needing attention —
    deliberately NOT a warning color, which stays reserved for a still-running overtime timer. */
 .timer-card.stopped {
@@ -3087,7 +3082,7 @@ textarea.form-control {
 }
 
 /* Structured history rows (TODO §17.1): exercise rows, greyed skips, first-class rest chips, and
-   superset groups. A completed record renders its whole program, not just performed sets. */
+   circuit groups. A completed record renders its whole program, not just performed sets. */
 .history-ex-row {
   display: flex;
   align-items: center;
@@ -3121,12 +3116,12 @@ textarea.form-control {
   color: var(--text-muted);
   padding: 2px 0 6px;
 }
-.history-superset {
+.history-circuit {
   border-left: 2px solid var(--primary);
   padding-left: 8px;
   margin-bottom: 6px;
 }
-.history-superset-title {
+.history-circuit-title {
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -3795,8 +3790,8 @@ textarea.form-control {
 }
 .exercise-deck-card.future-session:not(.in-focus) {
   background: rgba(251, 191, 36, 0.04);
-} /* --- Superset card: a grouped block of exercises with a round counter --- */
-.superset-title {
+} /* --- Circuit card: a grouped block of exercises with a round counter --- */
+.circuit-title {
   font-size: 15px;
   font-weight: 700;
   color: var(--text-color);
@@ -3806,11 +3801,11 @@ textarea.form-control {
   text-transform: uppercase;
   letter-spacing: 0.4px;
 }
-.superset-title > i {
+.circuit-title > i {
   color: var(--primary);
 } /* Subtle accent-tinted pill with bright accent text — emphasised but not a loud solid block,
    so the label keeps strong contrast against the badge. */
-.superset-round-badge {
+.circuit-round-badge {
   font-family: var(--font-sans);
   font-size: 12px;
   font-weight: 800;
@@ -3823,41 +3818,41 @@ textarea.form-control {
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
-.superset-ex-list {
+.circuit-ex-list {
   gap: 6px;
 }
-.superset-ex-row {
+.circuit-ex-row {
   padding: 8px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 } /* Name + target on one line, sitting right next to each other. */
-.superset-ex-head {
+.circuit-ex-head {
   display: flex;
   align-items: baseline;
   flex-wrap: wrap;
   gap: 10px;
   margin-bottom: 8px;
 }
-.superset-ex-name {
+.circuit-ex-name {
   font-weight: 700;
   font-size: 15px;
 }
-.superset-ex-target {
+.circuit-ex-target {
   display: inline-flex;
   align-items: baseline;
   gap: 6px;
 } /* Reps/weight read at the same size as the name and in the accent colour so they pop. */
-.superset-ex-reps {
+.circuit-ex-reps {
   font-family: var(--font-mono);
   font-size: 15px;
   font-weight: 700;
   color: var(--primary);
 } /* The feedback trio stretches across the full row so there's no empty right-hand gutter and
    the buttons stay gym-floor sized. */
-.superset-ex-actions {
+.circuit-ex-actions {
   display: flex;
   gap: 8px;
 } /* Labeled per-exercise feedback trio (Easy / Hard / Note) */
-.superset-sig {
+.circuit-sig {
   flex: 1;
   height: 38px;
   border-radius: var(--btn-radius);
@@ -3874,30 +3869,30 @@ textarea.form-control {
   gap: 6px;
   transition: all 0.15s ease;
 }
-.superset-sig > span {
+.circuit-sig > span {
   font-size: 13px;
   font-weight: 700;
 }
-.superset-sig > i {
+.circuit-sig > i {
   font-size: 14px;
 }
-.superset-sig.easy:hover {
+.circuit-sig.easy:hover {
   color: var(--success);
   border-color: var(--success);
   background: rgba(16, 185, 129, 0.12);
 }
-.superset-sig.hard:hover {
+.circuit-sig.hard:hover {
   color: #f59e0b;
   border-color: #f59e0b;
   background: rgba(245, 158, 11, 0.12);
 }
-.superset-sig.note:hover {
+.circuit-sig.note:hover {
   color: var(--danger);
   border-color: var(--danger);
   background: rgba(239, 68, 68, 0.12);
 } /* Rest is part of the work — the "Rest" label reads like an exercise name and the duration
    like a rep count (mono, accent), in a subtle pill so it's as visible as an exercise row. */
-.superset-break-row {
+.circuit-break-row {
   width: 100%;
   font-family: inherit;
   font-size: 15px;
@@ -3914,23 +3909,23 @@ textarea.form-control {
   cursor: pointer;
   text-align: left;
 }
-.superset-break-row:hover {
+.circuit-break-row:hover {
   border-color: var(--primary);
 }
-.superset-break-play {
+.circuit-break-play {
   margin-left: auto;
   font-size: 12px;
   color: var(--primary);
 }
-.superset-break-row > i {
+.circuit-break-row > i {
   font-size: 14px;
   color: var(--primary);
 }
-.superset-complete-btn {
+.circuit-complete-btn {
   width: 100%;
   justify-content: center;
 }
-.superset-done {
+.circuit-done {
   gap: 8px;
   padding: 10px;
   font-size: 13px;
@@ -3970,7 +3965,7 @@ textarea.form-control {
   align-items: center;
   gap: 8px;
 }
-/* Per-card ⏱ timer affordance — starts the floating countdown for this exercise/superset */
+/* Per-card ⏱ timer affordance — starts the floating countdown for this exercise/circuit */
 .deck-card-timer {
   display: inline-flex;
   align-items: center;

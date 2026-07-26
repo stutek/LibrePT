@@ -1,26 +1,26 @@
 // components/exerciseDeck.js
 // Renders the active-session exercise stack (the vertical scroll deck): the client's most-recent
-// past session as tappable history cards, then the current routine folded into superset units
+// past session as tappable history cards, then the current routine folded into circuit units
 // (one card per circuit) and standalone exercise cards. Card rendering is delegated to
-// supersetCard/exerciseCard; this module builds the deck items, wires their callbacks, and
+// circuitCard/exerciseCard; this module builds the deck items, wires their callbacks, and
 // scrolls the acted-on card into view. Dependencies are injected by the caller
 // (renderActiveGroupBoard in app.js) so it stays decoupled from app.js internals.
 //
 // deckContainer: the #active-exercise-scroll-deck element
 // deps: {
 //   activeSession, activeClientState, activeClientId, state,
-//   t, escapeHTML, buildSupersetUnits, getExerciseSignalColor,
-//   logQuickSignal, openFeedbackModal, completeSupersetRound, focusExerciseByIndex,
+//   t, escapeHTML, buildCircuitUnits, getExerciseSignalColor,
+//   logQuickSignal, openFeedbackModal, completeCircuitRound, focusExerciseByIndex,
 //   saveActiveSessionToCache, saveToLocalStorage,
-//   onRerender()   // re-render the whole board (past-card toggle / superset save)
+//   onRerender()   // re-render the whole board (past-card toggle / circuit save)
 // }
 
 import { formatMetricValue, usesLoad } from "../common/exerciseModality.js";
 import { newRecordId } from "../common/recordId.js";
 import { formatLoad, formatReps } from "../common/repsAndLoad.js";
 import { exerciseRecordsOf } from "../common/sessionItemRecord.js";
+import { renderCircuitCard } from "./circuitCard.js";
 import { renderExerciseCard } from "./exerciseCard.js";
-import { renderSupersetCard } from "./supersetCard.js";
 
 export function renderExerciseDeck(deckContainer, deps) {
   if (!deckContainer) return;
@@ -31,11 +31,11 @@ export function renderExerciseDeck(deckContainer, deps) {
     state,
     t,
     escapeHTML,
-    buildSupersetUnits,
+    buildCircuitUnits,
     getExerciseSignalColor,
     logQuickSignal,
     openFeedbackModal,
-    completeSupersetRound,
+    completeCircuitRound,
     focusExerciseByIndex,
     saveActiveSessionToCache,
     saveToLocalStorage,
@@ -75,7 +75,7 @@ export function renderExerciseDeck(deckContainer, deps) {
     const dateStr = formatDateStr(pastSession.date);
     {
       let pIdx = 0;
-      // The last-performance reference lists movements only — flatten past rests/superset scaffolding
+      // The last-performance reference lists movements only — flatten past rests/circuit scaffolding
       // to their exercise leaves (structured records) while legacy flat rows pass through unchanged.
       for (const ex of exerciseRecordsOf(pastSession.exercises)) {
         pastExList.push({
@@ -98,8 +98,8 @@ export function renderExerciseDeck(deckContainer, deps) {
   const currentExIdx = activeClientState.activeExerciseIndex;
   const currentExList = activeClientState.exercises.map((ex, idx) => {
     // A rest is a first-class plan item (never focusable/loggable). It renders as a break row inside
-    // its superset, or a standalone rest card in the deck. isCompleted:true keeps it from blocking a
-    // circuit's "all members complete" aggregation in buildSupersetUnits.
+    // its circuit, or a standalone rest card in the deck. isCompleted:true keeps it from blocking a
+    // circuit's "all members complete" aggregation in buildCircuitUnits.
     if (ex.type === "rest") {
       return {
         id: ex.id,
@@ -139,9 +139,9 @@ export function renderExerciseDeck(deckContainer, deps) {
     };
   });
 
-  // Fold consecutive exercises that share a circuitId into a single superset/giantset unit; ungrouped
-  // exercises stay as their own 'current' cards. Supersets render one card per group.
-  const renderUnits = buildSupersetUnits(currentExList);
+  // Fold consecutive exercises that share a circuitId into a single circuit/giantset unit; ungrouped
+  // exercises stay as their own 'current' cards. Circuits render one card per group.
+  const renderUnits = buildCircuitUnits(currentExList);
   const allDeckItems = [...pastExList, ...renderUnits];
   for (const item of allDeckItems) {
     const card = document.createElement("div");
@@ -219,9 +219,9 @@ export function renderExerciseDeck(deckContainer, deps) {
         card.addEventListener("click", () => startRestTimer(item.rest, "rest"));
       }
     } else if (item.type === "circuit") {
-      // Superset / Giant Set card render lives in components/supersetCard.js
+      // Circuit / Giant Set card render lives in components/circuitCard.js
       const round = activeClientState.circuitRounds?.[item.circuitId] || 1;
-      renderSupersetCard(card, item, {
+      renderCircuitCard(card, item, {
         round,
         activeClientId,
         activeClientState,
@@ -232,7 +232,7 @@ export function renderExerciseDeck(deckContainer, deps) {
         getExerciseSignalColor,
         logQuickSignal,
         openFeedbackModal,
-        completeSupersetRound,
+        completeCircuitRound,
         startRestTimer,
         saveSessionState: () => {
           saveActiveSessionToCache();
@@ -294,7 +294,7 @@ export function renderExerciseDeck(deckContainer, deps) {
             circuitTitle: circuitTitle,
             circuitSeries: circuitSeries,
           });
-        } else if (type === "superset") {
+        } else if (type === "circuit") {
           const newCircuitId = `c-${newRecordId()}`;
           const id = newRecordId();
           newItemId = id;
@@ -354,8 +354,8 @@ export function renderExerciseDeck(deckContainer, deps) {
         <button type="button" class="btn btn-sm secondary-btn fast-adj-ex">
           <i class="fa-solid fa-plus"></i> ${t("exercise") || "Exercise"}
         </button>
-        <button type="button" class="btn btn-sm secondary-btn fast-adj-ss">
-          <i class="fa-solid fa-plus"></i><i class="fa-solid fa-layer-group"></i> ${t("superset") || "Superset"}
+        <button type="button" class="btn btn-sm secondary-btn fast-adj-circuit">
+          <i class="fa-solid fa-plus"></i><i class="fa-solid fa-layer-group"></i> ${t("circuit") || "Circuit"}
         </button>
         <button type="button" class="btn btn-sm secondary-btn fast-adj-rest">
           <i class="fa-solid fa-plus"></i><i class="fa-solid fa-hourglass-half"></i> ${t("rest_label") || "Rest"}
@@ -366,9 +366,9 @@ export function renderExerciseDeck(deckContainer, deps) {
         e.stopPropagation();
         insertFastAdjustment("exercise", item);
       });
-      adjustBar.querySelector(".fast-adj-ss").addEventListener("click", (e) => {
+      adjustBar.querySelector(".fast-adj-circuit").addEventListener("click", (e) => {
         e.stopPropagation();
-        insertFastAdjustment("superset", item);
+        insertFastAdjustment("circuit", item);
       });
       adjustBar.querySelector(".fast-adj-rest").addEventListener("click", (e) => {
         e.stopPropagation();

@@ -141,7 +141,7 @@ erDiagram
         int position "explicit order — dense 0..n-1 within one session"
         string type "exercise|rest"
         string exerciseId FK
-        string circuitId "circuit (superset) grouping key — null when standalone"
+        string circuitId "circuit (circuit) grouping key — null when standalone"
         string circuitTitle "denormalised onto every member"
         int circuitSeries "rounds — denormalised onto every member"
         bool completed "false = prescribed but skipped"
@@ -162,7 +162,7 @@ Three modelling decisions worth knowing before changing anything here:
   engine: whether the items sit in the history record's payload or in rows of their own, they belong
   to that record and never re-point at a live routine. This makes history the fastest-growing
   collection.
-- **`SESSION_ITEM` is a flat typed list**, not a nested superset container — `circuitId` grouping is
+- **`SESSION_ITEM` is a flat typed list**, not a nested circuit container — `circuitId` grouping is
   folded at render (see *Circuits* below), and sequence comes from `position` (see *Ordering* below). The live session and the frozen record use the *same*
   model, so there is no second representation to drift.
 - **`routineName` is a soft string reference on purpose.** Making template provenance a hard FK would
@@ -240,11 +240,11 @@ derived.
 > from. Legacy JSON records get theirs assigned once, at migration, from the array order that is still
 > intact at that moment. Tracked in [TODO §17.5](../TODO.md).
 
-### Circuits (supersets) — a grouping key, not a record
+### Circuits — a grouping key, not a record
 
 There is **no circuit entity**, which is why one does not appear in the diagram above. A circuit is a
 run of **consecutive** `SESSION_ITEM`s that share a `circuitId` — exercises *and* the rests between
-them — folded into one unit at render time by `buildSupersetUnits`. `circuitId` is a **grouping key
+them — folded into one unit at render time by `buildCircuitUnits`. `circuitId` is a **grouping key
 among sibling items, not a foreign key**: it points at no record, so it adds no edge to the reference
 graph and cannot introduce the cycle §4 forbids. That is also why the field
 appears three times per member rather than once per group:
@@ -263,7 +263,7 @@ flowchart LR
         I3["pos 2 · exercise · circuitId c1"]
         I4["pos 3 · exercise · circuitId null"]
     end
-    stored --> F["buildSupersetUnits()"]
+    stored --> F["buildCircuitUnits()"]
     F --> U1["Circuit card · c1<br/>title, rounds, 3 members"]
     F --> U2["Standalone exercise card"]
 
@@ -279,14 +279,20 @@ explicit positions the invariant stops being a convention the editor upholds and
 **query** — `max(position) - min(position) + 1 === member count` per `circuitId` — so a circuit
 broken by anything other than the editor is detectable instead of merely rendering wrong.
 
-**Naming: stored `circuit*`, displayed "superset".** The feature shipped first as a round-counted
-*circuit* block (2026-07-16) and the user-facing term moved to *superset* the next day; the persisted
-field names never followed, because renaming a stored key is a migration, not a rename. The two words
-are not strict synonyms in training vocabulary either — a superset is two movements back-to-back, a
-circuit is a round-based block of three or more — and the stored model is the round-counted one.
-**Do not "fix" the field names in isolation**: `circuitId` / `circuitTitle` / `circuitSeries` are
-written into history records and cached live sessions, so a rename is a schema major with a
-projection (§4), not a find-and-replace.
+**One word, everywhere: circuit.** The feature shipped as a round-counted *circuit* block
+(2026-07-16); the UI called it a *superset* from the next day until **2026-07-26**, when the label
+was brought back in line with the data. The two were never synonyms anyway — a superset is two
+movements back-to-back, a circuit is a round-based block of three or more — and what the model
+actually stores is the round-counted one (`circuitSeries` **is** each member's set count), so the
+UI was the half that was wrong.
+
+The **stored keys never changed**, which is what made this a UI-and-identifiers rename rather than a
+schema major: `circuitId` / `circuitTitle` / `circuitSeries` read the same in a record written a year
+ago as in one written today, and no migration was needed. Two compatibility surfaces do carry the old
+spelling forward, deliberately and permanently — the `/session/…/superset/{id}` deep-link segment
+(links are bookmarked and shared; a URL that once worked must not start erroring) and a persisted
+`focusRef.type: "superset"` in a live session cached by an older build (a running timer must not lose
+the card it belongs to). Both normalise to `circuit` on arrival.
 
 **Round position is live-only.** The *current* round a trainer is on lives in the active-session
 cache as `circuitRounds[circuitId]`, never in a history record — a finished record stores how many

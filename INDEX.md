@@ -62,7 +62,7 @@ is structured into feature modules under `src/modules/` (`session`, `plans`, `cl
 | [src/modules/clipboard/clipboardEditor.js](src/modules/clipboard/clipboardEditor.js) | `component` | Interactive active session plan/clipboard structure editor. |
 | [src/modules/clipboard/exerciseDeck.js](src/modules/clipboard/exerciseDeck.js) | `component` | Active-session exercise stack deck renderer. |
 | [src/modules/clipboard/exerciseCard.js](src/modules/clipboard/exerciseCard.js) | `component` | Standalone exercise card in clipboard deck. |
-| [src/modules/clipboard/supersetCard.js](src/modules/clipboard/supersetCard.js) | `component` | Superset/Giant set grouped block card. |
+| [src/modules/clipboard/circuitCard.js](src/modules/clipboard/circuitCard.js) | `component` | Circuit/Giant set grouped block card. |
 | [src/modules/clipboard/exerciseAndRestTimer.js](src/modules/clipboard/exerciseAndRestTimer.js) | `component` | Session exercise and rest countdown timer stack. |
 | [src/modules/session/sessionBar.js](src/modules/session/sessionBar.js) | `component` | Bottom active/next-session bar with countdowns. |
 | [src/modules/session/sessionTitleBar.js](src/modules/session/sessionTitleBar.js) | `component` | Active-session overlay title line and countdown. |
@@ -81,7 +81,7 @@ is structured into feature modules under `src/modules/` (`session`, `plans`, `cl
 | [src/modules/common/repsAndLoad.js](src/modules/common/repsAndLoad.js) | `helper` | Polymorphic reps and equipment-derived load helpers. |
 | [src/modules/common/exerciseModality.js](src/modules/common/exerciseModality.js) | `helper` | Exercise modality axis (strength/cardio/stretch/balance) and per-metric target formatting (time/distance/calories/watts/hold). |
 | [src/modules/common/exerciseStandard.js](src/modules/common/exerciseStandard.js) | `helper` | Open-standard crosswalk: maps the catalog's category/equipment onto the wger dataset by canonical name for interchangeable JSON/CSV exports (UC6 §6). |
-| [src/modules/common/sessionItemRecord.js](src/modules/common/sessionItemRecord.js) | `helper` | Immutable history program snapshot: typed items (exercise/rest + superset grouping), shape guards, and `buildProgramSnapshot` keeping rests + skipped work. |
+| [src/modules/common/sessionItemRecord.js](src/modules/common/sessionItemRecord.js) | `helper` | Immutable history program snapshot: typed items (exercise/rest + circuit grouping), shape guards, and `buildProgramSnapshot` keeping rests + skipped work. |
 | [src/modules/common/releaseIdentity.js](src/modules/common/releaseIdentity.js) | `helper` | Release identity (TODO §16): the git tag a build was cut from, normalised for use as a storage-key suffix / URL path segment, with the untagged `dev` fallback and the header build label. |
 | [src/modules/common/sessionCache.js](src/modules/common/sessionCache.js) | `helper` | Active session local storage cache helper. |
 | [src/modules/common/wakeLock.js](src/modules/common/wakeLock.js) | `helper` | Screen Wake Lock API management helper. |

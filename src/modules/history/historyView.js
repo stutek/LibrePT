@@ -124,7 +124,7 @@ export function renderHistoryItems({ historyList, container, t }) {
     };
 
     // Walk the stored program: exercises render as rows, first-class rests as chips, and consecutive
-    // items sharing a circuitId are wrapped in a superset group. Legacy flat rows (no rests/circuits)
+    // items sharing a circuitId are wrapped in a circuit group. Legacy flat rows (no rests/circuits)
     // fall through as a plain list.
     let exercisesLogHTML = "";
     let openCircuit = null;
@@ -141,8 +141,8 @@ export function renderHistoryItems({ historyList, container, t }) {
       if (cid !== openCircuit) {
         closeCircuit();
         if (cid) {
-          const title = item.circuitTitle || t("superset") || "Superset";
-          exercisesLogHTML += `<div class="history-superset"><div class="history-superset-title"><i class="fa-solid fa-layer-group"></i> ${escapeHTML(title)}</div>`;
+          const title = item.circuitTitle || t("circuit") || "Circuit";
+          exercisesLogHTML += `<div class="history-circuit"><div class="history-circuit-title"><i class="fa-solid fa-layer-group"></i> ${escapeHTML(title)}</div>`;
           openCircuit = cid;
         }
       }

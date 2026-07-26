@@ -1,7 +1,7 @@
 # tests/e2e/test_session_item_record.py
 # TODO §17.1: a finished session is persisted as the WHOLE structured program — a flat list of typed
-# items (exercise | rest) with superset grouping via circuitId and a completed flag per exercise —
-# not just the performed sets. These tests cover the History render of that structure (superset group,
+# items (exercise | rest) with circuit grouping via circuitId and a completed flag per exercise —
+# not just the performed sets. These tests cover the History render of that structure (circuit group,
 # rest chips, greyed skips, per-modality metrics), the pure buildProgramSnapshot model (keeps rests +
 # skipped work), and the re-open round-trip that rebuilds the live plan from the snapshot.
 # Fixtures (page, local_server) come from tests/conftest.py; the demo dataset is auto-seeded.
@@ -26,9 +26,9 @@ def test_history_renders_the_structured_program(page, local_server):
     _nav(page, f"{_base(page)}/history")
 
     log = page.locator("#global-history-list")
-    # The seeded structured record preserves superset grouping and first-class rests…
-    assert log.locator(".history-superset").count() >= 1, (
-        "a superset group should render in history"
+    # The seeded structured record preserves circuit grouping and first-class rests…
+    assert log.locator(".history-circuit").count() >= 1, (
+        "a circuit group should render in history"
     )
     assert log.locator(".history-rest-row").count() >= 1, (
         "first-class rests should render as chips"
@@ -121,4 +121,4 @@ def test_reopening_a_structured_record_rebuilds_rests_and_modality(page, local_s
         "the rebuilt live plan should restore first-class rest items"
     )
     assert plan["hasCardio"], "the rebuilt live plan should restore the cardio modality"
-    assert plan["hasCircuit"], "the rebuilt live plan should restore superset grouping"
+    assert plan["hasCircuit"], "the rebuilt live plan should restore circuit grouping"

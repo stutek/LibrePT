@@ -8,9 +8,9 @@
 // The plan (activeClientState.exercises) is an ordered mix of first-class items: exercises and
 // rests ({ type:'rest', rest:<seconds> }). The editor renders each as its own row with the same
 // reorder handle (tap top/bottom to nudge, drag to move within its list), and an insert bar in
-// every gap injects an exercise, a superset, or a rest at that exact position. Because items are
+// every gap injects an exercise, a circuit, or a rest at that exact position. Because items are
 // first-class, reorder/insert/delete are plain array operations — no rest is derived from an
-// exercise. Supersets are bordered blocks with an editable title + round count; members (exercises
+// exercise. Circuits are bordered blocks with an editable title + round count; members (exercises
 // AND their in-circuit rests) stay CONSECUTIVE in the array, which normalizeCircuits() enforces.
 //
 // deps: {
@@ -119,20 +119,20 @@ export function renderClipboardEditor(container, deps) {
       <span class="editor-reorder-down"><i class="fa-solid fa-chevron-down"></i></span>
     </button>`;
 
-  const supersetSelect = (ex) => {
-    const opts = [`<option value="">${tr("superset_none", "No superset")}</option>`];
+  const circuitSelect = (ex) => {
+    const opts = [`<option value="">${tr("circuit_none", "No circuit")}</option>`];
     {
       let i = 0;
       for (const c of circuits) {
-        const label = c.title || `${tr("superset", "Superset")} ${i + 1}`;
+        const label = c.title || `${tr("circuit", "Circuit")} ${i + 1}`;
         opts.push(
           `<option value="${escapeHTML(c.id)}"${c.id === ex.circuitId ? " selected" : ""}>${escapeHTML(label)}</option>`,
         );
         i++;
       }
     }
-    opts.push(`<option value="__new__">＋ ${tr("superset_new", "New superset")}</option>`);
-    return `<select class="editor-row-superset" aria-label="${tr("superset", "Superset")}">${opts.join("")}</select>`;
+    opts.push(`<option value="__new__">＋ ${tr("circuit_new", "New circuit")}</option>`);
+    return `<select class="editor-row-circuit-select" aria-label="${tr("circuit", "Circuit")}">${opts.join("")}</select>`;
   };
 
   const exerciseRow = (ex, idx) => {
@@ -151,7 +151,7 @@ export function renderClipboardEditor(container, deps) {
     // Point the reps combobox at the preset tier suited to this movement's pattern + load, so an
     // empty field suggests sensible values (the PT can still type any count/range/hold/"max").
     const repsListId = repsPresetListId(ex.pattern, unit);
-    // A superset member's set count IS the circuit's round count, so we drop the redundant per-row
+    // A circuit member's set count IS the circuit's round count, so we drop the redundant per-row
     // Sets field for members — the circuit header's Rounds control is the single source of truth.
     const setsField = ex.circuitId
       ? ""
@@ -180,7 +180,7 @@ export function renderClipboardEditor(container, deps) {
             ${setsField}
             <label class="editor-field"><span>${escapeHTML(primaryLabel)}</span><input type="text" list="${repsListId}" class="editor-f-reps" value="${reps}"></label>
             ${loadField}
-            <label class="editor-field editor-field-superset"><span><i class="fa-solid fa-layer-group"></i></span>${supersetSelect(ex)}</label>
+            <label class="editor-field editor-field-circuit"><span><i class="fa-solid fa-layer-group"></i></span>${circuitSelect(ex)}</label>
           </div>
         </div>
         <button type="button" class="editor-remove" aria-label="${tr("remove", "Remove")}"><i class="fa-solid fa-trash-can"></i></button>
@@ -199,24 +199,24 @@ export function renderClipboardEditor(container, deps) {
 
   const anyRow = (it, idx) => (isRest(it) ? restRow(it, idx) : exerciseRow(it, idx));
 
-  // An insert bar sits in a gap and injects at items[] index `at`. `allowSuperset` is true only at
+  // An insert bar sits in a gap and injects at items[] index `at`. `allowCircuit` is true only at
   // the top level; `cid` (when inside a circuit) is stamped onto whatever is injected there.
-  const insertBar = (at, { allowSuperset = false, cid } = {}) => {
+  const insertBar = (at, { allowCircuit = false, cid } = {}) => {
     const cidAttr = cid ? ` data-cid="${escapeHTML(cid)}"` : "";
     return `
       <li class="editor-insert" data-at="${at}"${cidAttr}>
         <span class="editor-insert-line"></span>
         <button type="button" class="ins-btn ins-ex"><i class="fa-solid fa-plus"></i> ${tr("exercise", "Exercise")}</button>
-        ${allowSuperset ? `<button type="button" class="ins-btn ins-ss"><i class="fa-solid fa-plus"></i><i class="fa-solid fa-layer-group"></i> ${tr("superset", "Superset")}</button>` : ""}
+        ${allowCircuit ? `<button type="button" class="ins-btn ins-circuit"><i class="fa-solid fa-plus"></i><i class="fa-solid fa-layer-group"></i> ${tr("circuit", "Circuit")}</button>` : ""}
         <button type="button" class="ins-btn ins-rest"><i class="fa-solid fa-plus"></i><i class="fa-solid fa-hourglass-half"></i> ${tr("rest_label", "Rest")}</button>
         <span class="editor-insert-line"></span>
       </li>`;
   };
 
-  // Consistent auto-name for an untitled circuit: "Superset N" by first-appearance order — the SAME
+  // Consistent auto-name for an untitled circuit: "Circuit N" by first-appearance order — the SAME
   // ordinal the membership dropdown uses, so the header placeholder and the dropdown never disagree.
   const circuitAutoName = (cid) =>
-    `${tr("superset", "Superset")} ${circuits.findIndex((c) => c.id === cid) + 1}`;
+    `${tr("circuit", "Circuit")} ${circuits.findIndex((c) => c.id === cid) + 1}`;
 
   const circuitBlock = (cid, members) => {
     const meta = circuitMetaOf(cid);
@@ -232,16 +232,16 @@ export function renderClipboardEditor(container, deps) {
         <div class="editor-circuit-head">
           ${reorderHandle()}
           <span class="editor-circuit-icon"><i class="fa-solid fa-layer-group"></i></span>
-          <input class="editor-circuit-title" type="text" value="${title}" placeholder="${escapeHTML(circuitAutoName(cid))}" aria-label="${tr("superset_title", "Superset title")}">
+          <input class="editor-circuit-title" type="text" value="${title}" placeholder="${escapeHTML(circuitAutoName(cid))}" aria-label="${tr("circuit_title", "Circuit title")}">
           <label class="editor-circuit-rounds"><span>${tr("rounds", "Rounds")}</span><input type="number" min="1" class="editor-circuit-series" value="${series}"></label>
-          <button type="button" class="editor-circuit-ungroup" title="${tr("ungroup", "Break up superset")}"><i class="fa-solid fa-link-slash"></i></button>
+          <button type="button" class="editor-circuit-ungroup" title="${tr("ungroup", "Break up circuit")}"><i class="fa-solid fa-link-slash"></i></button>
         </div>
         <ul class="editor-circuit-list">${inner}</ul>
       </li>`;
   };
 
   // Walk the (contiguous) array into top-level units, with an insert bar in every gap.
-  let unitsHtml = insertBar(0, { allowSuperset: true });
+  let unitsHtml = insertBar(0, { allowCircuit: true });
   for (let i = 0; i < items.length; ) {
     const it = items[i];
     if (it.circuitId) {
@@ -256,7 +256,7 @@ export function renderClipboardEditor(container, deps) {
       unitsHtml += anyRow(it, i);
       i++;
     }
-    unitsHtml += insertBar(i, { allowSuperset: true });
+    unitsHtml += insertBar(i, { allowCircuit: true });
   }
 
   // The edit-mode title, ✎ icon, and Done button live on the session title bar (rendered by the
@@ -268,7 +268,7 @@ export function renderClipboardEditor(container, deps) {
           <i class="fa-solid fa-book-open"></i> ${tr("add_from_catalog", "Add from catalog")}
         </button>
       </div>
-      <ul class="editor-list">${items.length ? unitsHtml : `<li class="editor-empty">${tr("no_exercises_injected", "No exercises yet.")}</li>${insertBar(0, { allowSuperset: true })}`}</ul>
+      <ul class="editor-list">${items.length ? unitsHtml : `<li class="editor-empty">${tr("no_exercises_injected", "No exercises yet.")}</li>${insertBar(0, { allowCircuit: true })}`}</ul>
       <p class="clipboard-editor-hint">${tr("edit_exit_hint", "Tap Done, press Esc, or tap outside to finish.")}</p>
       <datalist id="${datalistId}">${options}</datalist>
     </div>`;
@@ -438,8 +438,8 @@ export function renderClipboardEditor(container, deps) {
     });
   }
 
-  // ---------- superset membership: None / an existing circuit / a fresh one. Regroup on change. ----------
-  for (const sel of listEl.querySelectorAll(".editor-row-superset")) {
+  // ---------- circuit membership: None / an existing circuit / a fresh one. Regroup on change. ----------
+  for (const sel of listEl.querySelectorAll(".editor-row-circuit-select")) {
     sel.addEventListener("click", (e) => e.stopPropagation());
     sel.addEventListener("change", () => {
       const ex = items[rowKeyOf(sel.closest(".editor-row"))];
@@ -463,7 +463,7 @@ export function renderClipboardEditor(container, deps) {
     });
   }
 
-  // ---------- superset header: title + round count apply to every member; ungroup clears them ----------
+  // ---------- circuit header: title + round count apply to every member; ungroup clears them ----------
   for (const block of listEl.querySelectorAll(".editor-circuit")) {
     const cid = block.dataset.circuit;
     const membersOf = () => items.filter((e) => e.circuitId === cid);
@@ -519,7 +519,7 @@ export function renderClipboardEditor(container, deps) {
     });
   }
 
-  // ---------- insert bars: inject an exercise / superset / rest at a gap ----------
+  // ---------- insert bars: inject an exercise / circuit / rest at a gap ----------
   const makeExercise = (cid) => {
     const id = newId();
     const meta = cid ? circuitMetaOf(cid) : null;
@@ -555,7 +555,7 @@ export function renderClipboardEditor(container, deps) {
     const at = parseInt(bar.dataset.at, 10);
     const cid = bar.dataset.cid || null;
     const exBtn = bar.querySelector(".ins-ex");
-    const ssBtn = bar.querySelector(".ins-ss");
+    const circuitBtn = bar.querySelector(".ins-circuit");
     const restBtn = bar.querySelector(".ins-rest");
     // Inserting re-renders the whole list, so hand the fresh id forward: the next render calls out
     // the row that just appeared instead of leaving the trainer to spot a blank field in the plan.
@@ -569,8 +569,8 @@ export function renderClipboardEditor(container, deps) {
         e.stopPropagation();
         insertItem(makeExercise(cid));
       });
-    if (ssBtn)
-      ssBtn.addEventListener("click", (e) => {
+    if (circuitBtn)
+      circuitBtn.addEventListener("click", (e) => {
         e.stopPropagation();
         insertItem(makeExercise(newId()));
       });

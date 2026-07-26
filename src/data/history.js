@@ -192,7 +192,7 @@ export const DEFAULT_HISTORY = [
     ],
   },
 
-  // A STRUCTURED record (TODO §17.1): the whole program is snapshotted — superset grouping and
+  // A STRUCTURED record (TODO §17.1): the whole program is snapshotted — circuit grouping and
   // first-class rests are preserved, cardio/balance log against their own metrics, and a movement the
   // client didn't reach is kept with completed:false (rendered greyed) rather than dropped.
   {

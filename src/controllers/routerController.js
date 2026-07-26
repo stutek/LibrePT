@@ -215,8 +215,10 @@ export function showSessionView(sessionId, clientId, focusRef = null, opts = {})
 export function handlePathChange() {
   const path = toRoute(window.location.pathname);
 
+  // `superset` is the pre-rename spelling of the circuit segment. It stays matched forever: links
+  // are shared and bookmarked, and a URL that once worked must not start showing an error page.
   const sessionFocusMatch = path.match(
-    /^\/session\/([A-Za-z0-9_-]+)\/client\/([A-Za-z0-9_-]+)\/(exercise|superset)\/([A-Za-z0-9_-]+)$/,
+    /^\/session\/([A-Za-z0-9_-]+)\/client\/([A-Za-z0-9_-]+)\/(exercise|circuit|superset)\/([A-Za-z0-9_-]+)$/,
   );
   const sessionEditMatch = path.match(
     /^\/session\/([A-Za-z0-9_-]+)\/client\/([A-Za-z0-9_-]+)\/edit$/,
@@ -250,7 +252,10 @@ export function handlePathChange() {
   } else if (sessionFocusMatch) {
     const [, sessionId, clientId, focusType, focusId] = sessionFocusMatch;
     setHeaderState(true);
-    showSessionView(sessionId, clientId, { type: focusType, id: focusId });
+    // Legacy `superset` links resolve to the same focus; syncSessionFocusUrl then rewrites the
+    // address bar to the current spelling, so an old link upgrades itself on arrival.
+    const type = focusType === "superset" ? "circuit" : focusType;
+    showSessionView(sessionId, clientId, { type, id: focusId });
   } else if (sessionClientMatch) {
     const sessionId = sessionClientMatch[1];
     const clientId = sessionClientMatch[2];

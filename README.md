@@ -164,7 +164,7 @@ The service worker is split into single-responsibility modules so each concern c
     *   `[ ⬇ Step Back ]`: Client struggled or broke form; reduce load next session.
     *   `[ ⚠️ Pain / Injury ]`: Immediately flag joint pain or acute discomfort on this movement.
 *   **Reversible Plan Pivot & Session Wipe**: Low-friction action to wipe or pivot a client's planned session on the fly when fatigue, injury, or equipment delays occur. Fully undoable (`[ ↩ Undo ]`) and preserved in the audit history for later desk review.
-*   **Generic Placeholder Card Injection**: When a session is wiped or pivoted, the PT can instantly inject low-friction placeholder cards (`[ Mobility & Core Flow ]`, `[ Machine Superset/Giant Set ]`, `[ Freestyle Block ]`) to continue tracking effort without typing new exercises from scratch.
+*   **Generic Placeholder Card Injection**: When a session is wiped or pivoted, the PT can instantly inject low-friction placeholder cards (`[ Mobility & Core Flow ]`, `[ Machine Circuit/Giant Set ]`, `[ Freestyle Block ]`) to continue tracking effort without typing new exercises from scratch.
 *   **Asynchronous Session Scenarios**: Guide multiple participants through separate, distinct individual routines in the same session slot.
 
 ### 2. Google Calendar Appointment Booking & Integration
@@ -187,7 +187,7 @@ The service worker is split into single-responsibility modules so each concern c
 *   **Every view and record is addressable by a clean URL**, so links are shareable and bookmarkable and restore the same screen on load:
     *   `/sessions/{YYYY-MM-DD}` — the day deck focused on a given day
     *   `/session/{sessionId}` and `/session/{sessionId}/client/{clientId}` — the active-session clipboard, optionally on a specific participant
-    *   `/session/{sessionId}/client/{clientId}/exercise/{exerciseId}` and `…/superset/{circuitId}` — the clipboard with a specific card in focus. Opening the session upgrades the URL to whatever card is focused, and tapping a card updates it, so the address bar is always a copy-able link to the exact card on screen.
+    *   `/session/{sessionId}/client/{clientId}/exercise/{exerciseId}` and `…/circuit/{circuitId}` — the clipboard with a specific card in focus. Opening the session upgrades the URL to whatever card is focused, and tapping a card updates it, so the address bar is always a copy-able link to the exact card on screen.
     *   `/session/{sessionId}/client/{clientId}/edit` — the **inline plan editor** open on that participant's plan. Entering edit mode (the ✎ on the clipboard) upgrades the URL to `…/edit`; exiting drops it back to the focused card. Because the state lives in the URL, a **page reload lands back in the editor**, and plan edits are persisted on every keystroke, so nothing typed is lost across the reload.
     *   `/clients/{clientId}` — a client detail page
     *   `/routines`, `/exercises`, `/history` — the primary views

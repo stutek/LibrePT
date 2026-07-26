@@ -1,6 +1,6 @@
 # tests/e2e/test_session_deeplink.py
 # The active-session view is deep-linkable down to the in-focus card:
-#   {base}/session/{sessionId}/client/{clientId}/superset/{circuitId}
+#   {base}/session/{sessionId}/client/{clientId}/circuit/{circuitId}
 #   {base}/session/{sessionId}/client/{clientId}/exercise/{exerciseId}
 # where {base} is the app's sub-path (/LibrePT). Opening the session upgrades the URL to the
 # focused card; tapping a card or navigating to such a URL moves focus; a stale/unknown card id
@@ -19,7 +19,7 @@ def _focus_re(base):
     return re.compile(
         "^"
         + re.escape(base)
-        + r"/session/([^/]+)/client/([^/]+)/(exercise|superset)/([^/]+)$"
+        + r"/session/([^/]+)/client/([^/]+)/(exercise|circuit)/([^/]+)$"
     )
 
 
@@ -42,18 +42,43 @@ def _open_session(page, local_server):
     page.wait_for_timeout(400)
 
 
+def test_legacy_superset_deep_link_still_resolves(page, local_server):
+    """`/superset/{id}` is the pre-2026-07-26 spelling of `/circuit/{id}`. Links get bookmarked and
+    shared, so the old segment must keep resolving — and the address bar is rewritten to the current
+    spelling, so an old link upgrades itself on arrival."""
+    _open_session(page, local_server)
+    base = _base(page)
+    session_id, client_id = (
+        _focus_re(base).match(page.evaluate("() => location.pathname")).groups()[:2]
+    )
+
+    cache = page.evaluate(
+        "() => JSON.parse(localStorage.getItem('librept_active_session'))"
+    )
+    circuit_id = next(
+        ex["circuitId"]
+        for ex in cache["clientRoutines"][client_id]["exercises"]
+        if ex.get("circuitId")
+    )
+
+    _nav(page, f"{base}/session/{session_id}/client/{client_id}/superset/{circuit_id}")
+    assert page.evaluate("() => location.pathname") == (
+        f"{base}/session/{session_id}/client/{client_id}/circuit/{circuit_id}"
+    ), "a legacy superset link must resolve to the same card and rewrite to /circuit/"
+
+
 def test_session_view_deep_links_to_focused_card(page, local_server):
     _open_session(page, local_server)
     base = _base(page)
     focus_re = _focus_re(base)
 
-    # Opening the session upgrades the bare URL to the in-focus card (a seeded superset).
+    # Opening the session upgrades the bare URL to the in-focus card (a seeded circuit).
     url_open = page.evaluate("() => location.pathname")
     m = focus_re.match(url_open)
     assert m, f"session URL did not carry a focused card: {url_open}"
     session_id, client_id, _, _ = m.groups()
 
-    # A seeded superset circuit id (different from whatever is focused now) resolves on navigation:
+    # A seeded circuit id (different from whatever is focused now) resolves on navigation:
     # the app keeps the URL on that card (it would rewrite it away if the id didn't resolve).
     cache = page.evaluate(
         "() => JSON.parse(localStorage.getItem('librept_active_session'))"
@@ -62,14 +87,14 @@ def test_session_view_deep_links_to_focused_card(page, local_server):
     for ex in cache["clientRoutines"][client_id]["exercises"]:
         if ex.get("circuitId") and ex["circuitId"] not in circuits:
             circuits.append(ex["circuitId"])
-    assert len(circuits) >= 2, "expected the seeded routine to have multiple supersets"
-    target_superset = (
-        f"{base}/session/{session_id}/client/{client_id}/superset/{circuits[-1]}"
+    assert len(circuits) >= 2, "expected the seeded routine to have multiple circuits"
+    target_circuit = (
+        f"{base}/session/{session_id}/client/{client_id}/circuit/{circuits[-1]}"
     )
-    _nav(page, target_superset)
-    assert page.evaluate("() => location.pathname") == target_superset
+    _nav(page, target_circuit)
+    assert page.evaluate("() => location.pathname") == target_circuit
 
-    # Inject a standalone (non-superset) exercise: it auto-focuses, so the URL becomes an
+    # Inject a standalone (non-circuit) exercise: it auto-focuses, so the URL becomes an
     # /exercise/{id} deep link — covering the standalone-card route end to end.
     page.eval_on_selector("#btn-add-exercise-to-session", "el => el.click()")
     page.wait_for_selector("#dialog-add-session-exercise[open]")
@@ -84,9 +109,9 @@ def test_session_view_deep_links_to_focused_card(page, local_server):
         f"inject did not focus an exercise route: {url_injected}"
     )
 
-    # Navigate away to the superset, then back to the injected exercise deep link: both resolve.
-    _nav(page, target_superset)
-    assert page.evaluate("() => location.pathname") == target_superset
+    # Navigate away to the circuit, then back to the injected exercise deep link: both resolve.
+    _nav(page, target_circuit)
+    assert page.evaluate("() => location.pathname") == target_circuit
     _nav(page, url_injected)
     assert page.evaluate("() => location.pathname") == url_injected
 

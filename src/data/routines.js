@@ -5,7 +5,7 @@ export const DEFAULT_ROUTINES = [
     name: "Upper Body A",
     description: "Strength-focused upper body session prioritizing compound presses and rows.",
     exercises: [
-      // Superset 1: Chest & Back Strength Complex
+      // Circuit 1: Chest & Back Strength Complex
       {
         id: "e10a2b3c",
         sets: 3,
@@ -29,7 +29,7 @@ export const DEFAULT_ROUTINES = [
         circuitSeries: 3,
       },
 
-      // Superset 2: Shoulder & Lat Density Superset
+      // Circuit 2: Shoulder & Lat Density Circuit
       {
         id: "e29b3c4d",
         sets: 3,
@@ -38,7 +38,7 @@ export const DEFAULT_ROUTINES = [
         weight: 18,
         comboGroupId: "g02a2b3c",
         circuitId: "z02a2b3c",
-        circuitTitle: "Shoulder & Lat Density Superset",
+        circuitTitle: "Shoulder & Lat Density Circuit",
         circuitSeries: 3,
       },
       {
@@ -49,11 +49,11 @@ export const DEFAULT_ROUTINES = [
         weight: 48,
         comboGroupId: "g02a2b3c",
         circuitId: "z02a2b3c",
-        circuitTitle: "Shoulder & Lat Density Superset",
+        circuitTitle: "Shoulder & Lat Density Circuit",
         circuitSeries: 3,
       },
 
-      // Superset 3: Arm Finisher Circuit
+      // Circuit 3: Arm Finisher Circuit
       {
         id: "e32c4d5e",
         sets: 3,
@@ -83,7 +83,7 @@ export const DEFAULT_ROUTINES = [
     name: "Legs & Core B",
     description: "Squat and hinge focus with direct core work.",
     exercises: [
-      // Superset 1: Lower Body Strength Superset
+      // Circuit 1: Lower Body Strength Circuit
       {
         id: "e20b3c4d",
         sets: 3,
@@ -92,7 +92,7 @@ export const DEFAULT_ROUTINES = [
         weight: 80,
         comboGroupId: "g04a2b3c",
         circuitId: "z04a2b3c",
-        circuitTitle: "Lower Body Strength Superset",
+        circuitTitle: "Lower Body Strength Circuit",
         circuitSeries: 3,
       },
       {
@@ -103,11 +103,11 @@ export const DEFAULT_ROUTINES = [
         weight: 65,
         comboGroupId: "g04a2b3c",
         circuitId: "z04a2b3c",
-        circuitTitle: "Lower Body Strength Superset",
+        circuitTitle: "Lower Body Strength Circuit",
         circuitSeries: 3,
       },
 
-      // Superset 2: Hypertrophy & Core Trio
+      // Circuit 2: Hypertrophy & Core Trio
       {
         id: "e22b3c4d",
         sets: 3,
@@ -149,7 +149,7 @@ export const DEFAULT_ROUTINES = [
     description:
       "A comprehensive 5-phase session featuring a dynamic warmup, metabolic strength tri-sets, core work, and a longevity cooldown.",
     exercises: [
-      // 1. Warmup Superset
+      // 1. Warmup Circuit
       {
         id: "e19a2b3c",
         sets: 1,
@@ -217,7 +217,7 @@ export const DEFAULT_ROUTINES = [
         weight: 16,
         comboGroupId: "g08a2b3c",
         circuitId: "z08a2b3c",
-        circuitTitle: "Leg & Hinge Superset",
+        circuitTitle: "Leg & Hinge Circuit",
         circuitSeries: 3,
       },
       {
@@ -228,7 +228,7 @@ export const DEFAULT_ROUTINES = [
         weight: 45,
         comboGroupId: "g08a2b3c",
         circuitId: "z08a2b3c",
-        circuitTitle: "Leg & Hinge Superset",
+        circuitTitle: "Leg & Hinge Circuit",
         circuitSeries: 3,
       },
 
@@ -304,7 +304,7 @@ export const DEFAULT_ROUTINES = [
     description:
       "Gentle core activation and mobility exercises focused on deep abdominal breathing, posture, and light functional strength.",
     exercises: [
-      // Superset 1: Core & Ankle Alignment
+      // Circuit 1: Core & Ankle Alignment
       {
         id: "e34c4d5e",
         sets: 3,
@@ -328,7 +328,7 @@ export const DEFAULT_ROUTINES = [
         circuitSeries: 3,
       },
 
-      // Superset 2: Posture & Leg Strength
+      // Circuit 2: Posture & Leg Strength
       {
         id: "e23b3c4d",
         sets: 3,
@@ -337,7 +337,7 @@ export const DEFAULT_ROUTINES = [
         weight: 8,
         comboGroupId: "g12a2b3c",
         circuitId: "z12a2b3c",
-        circuitTitle: "Posture & Leg Strength Superset",
+        circuitTitle: "Posture & Leg Strength Circuit",
         circuitSeries: 3,
       },
       {
@@ -348,7 +348,7 @@ export const DEFAULT_ROUTINES = [
         weight: 10,
         comboGroupId: "g12a2b3c",
         circuitId: "z12a2b3c",
-        circuitTitle: "Posture & Leg Strength Superset",
+        circuitTitle: "Posture & Leg Strength Circuit",
         circuitSeries: 3,
       },
     ],
@@ -359,7 +359,7 @@ export const DEFAULT_ROUTINES = [
     description:
       "Compound strength lifts paired with posture and core stability work optimized for long-term joint health.",
     exercises: [
-      // Superset 1: Press & Hinge Longevity Superset
+      // Circuit 1: Press & Hinge Longevity Circuit
       {
         id: "e11a2b3c",
         sets: 3,
@@ -368,7 +368,7 @@ export const DEFAULT_ROUTINES = [
         weight: 24,
         comboGroupId: "g13a2b3c",
         circuitId: "z13a2b3c",
-        circuitTitle: "Press & Hinge Longevity Superset",
+        circuitTitle: "Press & Hinge Longevity Circuit",
         circuitSeries: 3,
       },
       {
@@ -379,11 +379,11 @@ export const DEFAULT_ROUTINES = [
         weight: 70,
         comboGroupId: "g13a2b3c",
         circuitId: "z13a2b3c",
-        circuitTitle: "Press & Hinge Longevity Superset",
+        circuitTitle: "Press & Hinge Longevity Circuit",
         circuitSeries: 3,
       },
 
-      // Superset 2: Posture & Core Stability
+      // Circuit 2: Posture & Core Stability
       {
         id: "e19a2b3c",
         sets: 3,
@@ -392,7 +392,7 @@ export const DEFAULT_ROUTINES = [
         weight: 14,
         comboGroupId: "g14a2b3c",
         circuitId: "z14a2b3c",
-        circuitTitle: "Posture & Core Stability Superset",
+        circuitTitle: "Posture & Core Stability Circuit",
         circuitSeries: 3,
       },
       {
@@ -403,7 +403,7 @@ export const DEFAULT_ROUTINES = [
         weight: 0,
         comboGroupId: "g14a2b3c",
         circuitId: "z14a2b3c",
-        circuitTitle: "Posture & Core Stability Superset",
+        circuitTitle: "Posture & Core Stability Circuit",
         circuitSeries: 3,
       },
     ],

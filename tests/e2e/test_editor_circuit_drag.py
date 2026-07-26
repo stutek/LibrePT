@@ -1,9 +1,9 @@
-# tests/e2e/test_editor_superset_drag.py
-# Regression: dragging a card (esp. a newly added superset) in the inline clipboard editor must
+# tests/e2e/test_editor_circuit_drag.py
+# Regression: dragging a card (esp. a newly added circuit) in the inline clipboard editor must
 # reorder cleanly. The reorder relocates the dragged <li> in the DOM live; doing so drops any
 # pointer capture on the handle, so the drag is driven from document-level pointer listeners and
 # is always finalized (rebuildFromDom + commit + re-render). A regression here left the DOM half-
-# moved with orphaned/duplicated "+ Exercise/+ Superset/+ Rest" insert bars.
+# moved with orphaned/duplicated "+ Exercise/+ Circuit/+ Rest" insert bars.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
 
@@ -37,16 +37,16 @@ def _assert_well_formed(seq):
     )
 
 
-def _enter_editor_with_new_superset(page, local_server):
+def _enter_editor_with_new_circuit(page, local_server):
     _open_session(page, local_server)
     page.click("#btn-edit-plan")
     page.wait_for_selector(".clipboard-editor")
     page.wait_for_timeout(200)
-    # Add a new superset via the last top-level insert bar's "+ Superset" button.
+    # Add a new circuit via the last top-level insert bar's "+ Circuit" button.
     page.evaluate(
         """() => {
           const bars = [...document.querySelectorAll('.editor-list > li.editor-insert')];
-          bars[bars.length - 1].querySelector('.ins-ss').click();
+          bars[bars.length - 1].querySelector('.ins-circuit').click();
         }"""
     )
     page.wait_for_timeout(300)
@@ -73,14 +73,14 @@ def _drag_circuit(page, from_last=True, dy=-600):
     page.wait_for_timeout(400)
 
 
-def test_dragging_new_superset_keeps_editor_well_formed(page, local_server):
-    _enter_editor_with_new_superset(page, local_server)
+def test_dragging_new_circuit_keeps_editor_well_formed(page, local_server):
+    _enter_editor_with_new_circuit(page, local_server)
     before = _top_level_seq(page)
     _assert_well_formed(before)
 
     _drag_circuit(
         page, from_last=True, dy=-600
-    )  # drag the new superset decisively upward
+    )  # drag the new circuit decisively upward
 
     after = _top_level_seq(page)
     # Edit mode stays open and the structure is still clean (the reported bug left it corrupted).
@@ -98,7 +98,7 @@ def test_dragging_new_superset_keeps_editor_well_formed(page, local_server):
 
 
 def test_dragging_reorders_the_circuit(page, local_server):
-    _enter_editor_with_new_superset(page, local_server)
+    _enter_editor_with_new_circuit(page, local_server)
     circuits_before = [u for u in _top_level_seq(page) if u.startswith("CIRCUIT")]
     new_id = circuits_before[-1]
 

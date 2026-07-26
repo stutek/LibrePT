@@ -72,7 +72,7 @@ self.swCacheManifest = (() => {
     "./modules/clipboard/exerciseAndRestTimer.js",
     "./modules/clipboard/exerciseCard.js",
     "./modules/clipboard/exerciseDeck.js",
-    "./modules/clipboard/supersetCard.js",
+    "./modules/clipboard/circuitCard.js",
     "./modules/clients/clientsDirectory.js",
     "./modules/clients/clientsView.js",
     "./modules/exercises/exercisePicker.js",

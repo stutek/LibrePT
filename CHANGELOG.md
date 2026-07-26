@@ -17,6 +17,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-07-26 — One word for a grouped block: circuit
+
+### Changed
+- **"Superset" is now "circuit" everywhere** — UI labels (both locales), i18n keys, identifiers (`buildCircuitUnits`, `completeCircuitRound`, `renderCircuitCard`), CSS classes, the `supersetCard.js` module (now [`circuitCard.js`](src/modules/clipboard/circuitCard.js)), seed data and docs. The data always said `circuit*`; the UI drifted to *superset* the day after the feature shipped and stayed there. The words are not synonyms — a superset is two movements back-to-back, a circuit is a round-based block of three or more — and what the model stores is the round-counted one (`circuitSeries` **is** each member's set count), so the label was the half that was wrong.
+- **Stored keys are untouched**, so this is a rename, not a schema major: `circuitId` / `circuitTitle` / `circuitSeries` read identically in old and new records and no migration runs. Two surfaces keep the old spelling working permanently — the `/session/…/superset/{id}` deep link (bookmarked and shared links must not start erroring; it resolves and the address bar rewrites itself to `/circuit/`) and a persisted `focusRef.type: "superset"` in a session cached by an older build, so a running timer keeps the card it belongs to. Covered by `test_legacy_superset_deep_link_still_resolves`.
+
+### Fixed
+- **Bookings still minted `session-${Date.now()}` / `plan-${Date.now()}` ids** ([`editSessionControl.js`](src/modules/session/editSessionControl.js)) — the one call site TODO §18.2 missed when identity moved to UUIDv7. Two bookings created in the same millisecond collided outright, and the id leaked its creation time; across devices a backup merge could silently overwrite one booking with another. Now `newRecordId()` like every other record. Existing ids are opaque strings and keep working untouched.
+
+---
+
 ## 2026-07-25 — Plan editor: never lose the row you just touched
 
 ### Added

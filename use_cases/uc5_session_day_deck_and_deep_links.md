@@ -112,7 +112,8 @@ screen; navigating within the app keeps the address bar in step.
 | `/session/{sessionId}` | the active-session clipboard |
 | `/session/{sessionId}/client/{clientId}` | the clipboard on a specific participant |
 | `/session/{sessionId}/client/{clientId}/exercise/{exerciseId}` | the clipboard with that card in focus |
-| `/session/{sessionId}/client/{clientId}/superset/{circuitId}` | the clipboard with that superset in focus |
+| `/session/{sessionId}/client/{clientId}/circuit/{circuitId}` | the clipboard with that circuit in focus |
+| `…/superset/{circuitId}` | **legacy alias** for the row above — the pre-2026-07-26 spelling. Still resolves, and the address bar is rewritten to `/circuit/`, so shared and bookmarked links never break |
 | `/session/{sessionId}/client/{clientId}/edit` | the **inline plan editor** open on that participant's plan |
 | `/clients/{clientId}` | a client detail page |
 | `/clients` | the Client Directory (its own view since TODO 4.8; the homepage keeps only the session list) |

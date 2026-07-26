@@ -26,10 +26,10 @@ let deps = {};
 // clientId -> timer: { clientId, clientName, label, type:'rest'|'exercise', sessionId, focusRef,
 //   endTime, originalDuration, beeped,        — countdown mode (seconds > 0)
 //   startTime, countUp                        — count-up mode (seconds === 0)
-//   stopped, frozenSeconds                    — set once the owning exercise/superset is finished
+//   stopped, frozenSeconds                    — set once the owning exercise/circuit is finished
 // }
-// sessionId identifies the owning live session; focusRef (null | { type: 'exercise'|'superset', id })
-// identifies the exercise/superset card the timer was started from, so a card click can navigate back.
+// sessionId identifies the owning live session; focusRef (null | { type: 'exercise'|'circuit', id })
+// identifies the exercise/circuit card the timer was started from, so a card click can navigate back.
 // Countdown timers derive remaining from (endTime - now) and may go negative.
 // Count-up timers derive elapsed from (now - startTime) and never beep.
 // A stopped timer no longer ticks — it holds at frozenSeconds (whatever remaining/elapsed was at the
@@ -163,7 +163,7 @@ function closeTimer(clientId) {
   if (Object.keys(timers).length === 0) stopTicking();
 }
 
-// Freeze a client's timer in place — e.g. once the exercise/superset it belongs to is marked
+// Freeze a client's timer in place — e.g. once the exercise/circuit it belongs to is marked
 // finished, so a rest timer for work that's already done doesn't keep ticking (or counting into
 // overtime) for a card the trainer has already moved past. Unlike closeTimer this does NOT remove
 // it from the stack: the trainer still sees it (dimmed, holding its final value) and must tap ✕
@@ -178,12 +178,17 @@ export function stopTimer(clientId) {
   flashCard(clientId, "flash-ack");
 }
 
-// Only stop the client's active timer if it was started against this exact exercise/superset — so
+// Only stop the client's active timer if it was started against this exact exercise/circuit — so
 // finishing one card doesn't freeze an unrelated timer already running for something else.
 export function stopTimerIfMatches(clientId, focusRef) {
   const timer = timers[clientId];
   if (!timer || !timer.focusRef || !focusRef) return;
-  if (timer.focusRef.type === focusRef.type && timer.focusRef.id === focusRef.id) {
+  // "superset" is the pre-rename spelling of a circuit focus; a timer started by an older build and
+  // restored from cache must still be stopped by the circuit that owns it.
+  const sameType =
+    timer.focusRef.type === focusRef.type ||
+    [timer.focusRef.type, focusRef.type].every((t) => t === "circuit" || t === "superset");
+  if (sameType && timer.focusRef.id === focusRef.id) {
     stopTimer(clientId);
   }
 }

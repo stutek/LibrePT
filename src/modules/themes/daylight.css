@@ -19,7 +19,7 @@ body.daylight-theme {
   --on-primary: #ffffff;
   /* Daylight was the only theme not defining --secondary, so it inherited midnight's indigo
      (#4f46e5) from that file's :root default — a violet that clashed with the emerald/slate palette
-     (e.g. the superset accent in the plan editor). A clean blue pairs with the emerald primary and
+     (e.g. the circuit accent in the plan editor). A clean blue pairs with the emerald primary and
      the sky accents below without reading as violet. */
   --secondary: #2563eb; /* blue-600 */
   --secondary-light: rgba(37, 99, 235, 0.1);

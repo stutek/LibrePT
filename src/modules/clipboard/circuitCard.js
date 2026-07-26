@@ -1,8 +1,8 @@
-// components/supersetCard.js
-// Renders one superset/giantset card: a grouped block of exercises with a round counter. It shows an
-// optional title, a round badge over the superset's series, every exercise (and any rest break)
+// components/circuitCard.js
+// Renders one circuit/giantset card: a grouped block of exercises with a round counter. It shows an
+// optional title, a round badge over the circuit's series, every exercise (and any rest break)
 // listed with a per-exercise feedback trio (Too Easy / Too Hard / Note), and a "Complete round"
-// button that advances the counter (and finishes the superset on the last round). Feedback stays
+// button that advances the counter (and finishes the circuit on the last round). Feedback stays
 // tied to the exercise — logQuickSignal/openFeedbackModal receive that exercise's id.
 //
 // The caller creates the `card` element and appends it; this component only fills it in.
@@ -10,12 +10,12 @@
 //   round, activeClientId, pastExpanded, isFutureSession,
 //   t, escapeHTML, getExerciseSignalColor,
 //   logQuickSignal(tag, exId), openFeedbackModal(exId),
-//   completeSupersetRound(circuitId), onFocus(firstExerciseIndex)
+//   completeCircuitRound(circuitId), onFocus(firstExerciseIndex)
 // }
 
 import { formatLoad, hasLoad, isFailureReps } from "../common/repsAndLoad.js";
 
-export function renderSupersetCard(card, item, ctx) {
+export function renderCircuitCard(card, item, ctx) {
   const {
     round,
     activeClientId,
@@ -27,14 +27,14 @@ export function renderSupersetCard(card, item, ctx) {
     getExerciseSignalColor,
     logQuickSignal,
     openFeedbackModal,
-    completeSupersetRound,
+    completeCircuitRound,
     saveSessionState,
     onFocus,
     startRestTimer,
   } = ctx;
 
   const showInFocus = item.isInFocus && !pastExpanded;
-  card.className = `exercise-deck-card superset-card ${showInFocus ? "in-focus" : item.isCompleted ? "completed" : ""}${isFutureSession ? " future-session" : ""}`;
+  card.className = `exercise-deck-card circuit-card ${showInFocus ? "in-focus" : item.isCompleted ? "completed" : ""}${isFutureSession ? " future-session" : ""}`;
   const title = item.title ? escapeHTML(item.title) : t("combo_round_title");
 
   if (showInFocus) {
@@ -47,7 +47,7 @@ export function renderSupersetCard(card, item, ctx) {
         // exercise markup/wiring below.
         if (ex.type === "rest") {
           rows.push(
-            `<button type="button" class="superset-break-row" data-rest="${ex.rest}"><i class="fa-solid fa-hourglass-half"></i> <span class="superset-break-label">${t("rest_label")}</span> <span class="superset-ex-reps">${ex.rest}s</span> <i class="fa-solid fa-stopwatch superset-break-play"></i></button>`,
+            `<button type="button" class="circuit-break-row" data-rest="${ex.rest}"><i class="fa-solid fa-hourglass-half"></i> <span class="circuit-break-label">${t("rest_label")}</span> <span class="circuit-ex-reps">${ex.rest}s</span> <i class="fa-solid fa-stopwatch circuit-break-play"></i></button>`,
           );
           continue;
         }
@@ -64,15 +64,15 @@ export function renderSupersetCard(card, item, ctx) {
           const actualReps =
             currentLog && typeof currentLog.reps === "number" ? currentLog.reps : "";
           repsHTML = `
-          <div class="superset-failure-stepper" data-ex-id="${escapeHTML(ex.id)}" style="display: inline-flex; align-items: center; gap: 4px;">
+          <div class="circuit-failure-stepper" data-ex-id="${escapeHTML(ex.id)}" style="display: inline-flex; align-items: center; gap: 4px;">
             <span style="font-size: 10px; color: var(--text-muted); font-weight: 700;">Fail Reps:</span>
             <button type="button" class="stepper-btn minus" style="width: 22px; height: 22px; border-radius: 4px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.05); color: var(--text-color); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; cursor: pointer; user-select: none;">-</button>
-            <input type="number" class="superset-failure-input" value="${actualReps}" placeholder="Max" style="width: 38px; height: 22px; padding: 0; border-radius: 4px; border: 1px solid var(--border-color); background: rgba(0,0,0,0.3); color: var(--primary); font-size: 11px; font-weight: 700; text-align: center;">
+            <input type="number" class="circuit-failure-input" value="${actualReps}" placeholder="Max" style="width: 38px; height: 22px; padding: 0; border-radius: 4px; border: 1px solid var(--border-color); background: rgba(0,0,0,0.3); color: var(--primary); font-size: 11px; font-weight: 700; text-align: center;">
             <button type="button" class="stepper-btn plus" style="width: 22px; height: 22px; border-radius: 4px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.05); color: var(--text-color); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; cursor: pointer; user-select: none;">+</button>
           </div>
         `;
         } else {
-          repsHTML = `<span class="superset-ex-reps">${escapeHTML(String(ex.repsTarget))}</span>`;
+          repsHTML = `<span class="circuit-ex-reps">${escapeHTML(String(ex.repsTarget))}</span>`;
         }
 
         const repLabel = hasLoad(ex.weightTarget, ex.loadUnit)
@@ -81,19 +81,19 @@ export function renderSupersetCard(card, item, ctx) {
         const idAttr = isFirstExercise ? ' id="btn-log-feedback"' : "";
 
         rows.push(`
-        <div class="superset-ex-row" data-ex-id="${escapeHTML(ex.id)}">
-          <div class="superset-ex-head">
-            <span class="superset-ex-name"${nameStyle}>${escapeHTML(ex.name)}</span>
-            <span class="superset-ex-target">${repsHTML}${repLabel ? `<span class="superset-ex-reps">${repLabel}</span>` : ""}</span>
+        <div class="circuit-ex-row" data-ex-id="${escapeHTML(ex.id)}">
+          <div class="circuit-ex-head">
+            <span class="circuit-ex-name"${nameStyle}>${escapeHTML(ex.name)}</span>
+            <span class="circuit-ex-target">${repsHTML}${repLabel ? `<span class="circuit-ex-reps">${repLabel}</span>` : ""}</span>
           </div>
-          <div class="superset-ex-actions">
-            <button type="button" class="superset-sig easy" data-sig="easy" aria-label="${t("signal_too_easy")}">
+          <div class="circuit-ex-actions">
+            <button type="button" class="circuit-sig easy" data-sig="easy" aria-label="${t("signal_too_easy")}">
               <i class="fa-solid fa-feather"></i><span>${t("signal_too_easy")}</span>
             </button>
-            <button type="button" class="superset-sig hard" data-sig="hard" aria-label="${t("signal_too_hard")}">
+            <button type="button" class="circuit-sig hard" data-sig="hard" aria-label="${t("signal_too_hard")}">
               <i class="fa-solid fa-weight-hanging"></i><span>${t("signal_too_hard")}</span>
             </button>
-            <button type="button"${idAttr} class="superset-sig note" data-sig="note" aria-label="${t("btn_log_feedback")}">
+            <button type="button"${idAttr} class="circuit-sig note" data-sig="note" aria-label="${t("btn_log_feedback")}">
               <i class="fa-solid fa-triangle-exclamation"></i><span>${t("feedback_short")}</span>
             </button>
           </div>
@@ -103,37 +103,37 @@ export function renderSupersetCard(card, item, ctx) {
     }
     const isLastRound = round >= item.series;
     const footer = item.isCompleted
-      ? `<div class="superset-done"><i class="fa-solid fa-circle-check"></i> ${t("session_completed")}</div>`
-      : `<button type="button" class="btn success-btn btn-sm superset-complete-btn"><i class="fa-solid fa-check"></i> ${isLastRound ? t("finish_superset") : `${t("complete_round")} ${round} / ${item.series}`}</button>`;
+      ? `<div class="circuit-done"><i class="fa-solid fa-circle-check"></i> ${t("session_completed")}</div>`
+      : `<button type="button" class="btn success-btn btn-sm circuit-complete-btn"><i class="fa-solid fa-check"></i> ${isLastRound ? t("finish_circuit") : `${t("complete_round")} ${round} / ${item.series}`}</button>`;
     card.innerHTML = `
       <div class="deck-card-top" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-        <span class="superset-title" style="font-weight: 700; font-size: 13px;"><i class="fa-solid fa-layer-group"></i> ${title}</span>
+        <span class="circuit-title" style="font-weight: 700; font-size: 13px;"><i class="fa-solid fa-layer-group"></i> ${title}</span>
         <span class="deck-card-top-right">
-          <span class="superset-round-badge">${t("round_label")} ${round} / ${item.series}</span>
+          <span class="circuit-round-badge">${t("round_label")} ${round} / ${item.series}</span>
           <button type="button" class="deck-card-timer" aria-label="${t("rest_timer")}" title="${t("rest_timer")}"><i class="fa-solid fa-stopwatch"></i></button>
         </span>
       </div>
-      <div class="superset-ex-list">${rows.join("")}</div>
+      <div class="circuit-ex-list">${rows.join("")}</div>
       ${footer}
     `;
-    for (const rowEl of card.querySelectorAll(".superset-ex-row")) {
+    for (const rowEl of card.querySelectorAll(".circuit-ex-row")) {
       const exId = rowEl.getAttribute("data-ex-id");
-      rowEl.querySelector(".superset-sig.easy").addEventListener("click", (e) => {
+      rowEl.querySelector(".circuit-sig.easy").addEventListener("click", (e) => {
         e.stopPropagation();
         logQuickSignal("Too Easy - Increase Load", exId);
       });
-      rowEl.querySelector(".superset-sig.hard").addEventListener("click", (e) => {
+      rowEl.querySelector(".circuit-sig.hard").addEventListener("click", (e) => {
         e.stopPropagation();
         logQuickSignal("Too Hard - Reduce Load", exId);
       });
-      rowEl.querySelector(".superset-sig.note").addEventListener("click", (e) => {
+      rowEl.querySelector(".circuit-sig.note").addEventListener("click", (e) => {
         e.stopPropagation();
         openFeedbackModal(exId);
       });
 
-      const stepper = rowEl.querySelector(".superset-failure-stepper");
+      const stepper = rowEl.querySelector(".circuit-failure-stepper");
       if (stepper) {
-        const input = stepper.querySelector(".superset-failure-input");
+        const input = stepper.querySelector(".circuit-failure-input");
 
         const updateVal = (newVal) => {
           input.value = newVal;
@@ -167,11 +167,11 @@ export function renderSupersetCard(card, item, ctx) {
         });
       }
     }
-    const completeBtn = card.querySelector(".superset-complete-btn");
+    const completeBtn = card.querySelector(".circuit-complete-btn");
     if (completeBtn)
       completeBtn.addEventListener("click", (e) => {
         e.stopPropagation();
-        completeSupersetRound(item.circuitId);
+        completeCircuitRound(item.circuitId);
       });
     // Timing is a card feature: the ⏱ header button times the circuit; each rest row runs its own duration.
     if (startRestTimer) {
@@ -182,7 +182,7 @@ export function renderSupersetCard(card, item, ctx) {
           // Use the item's prescribed duration for countdown; if none, count up (elapsed stopwatch).
           startRestTimer(item.workDuration || 0, "exercise", item.title || "");
         });
-      for (const br of card.querySelectorAll(".superset-break-row")) {
+      for (const br of card.querySelectorAll(".circuit-break-row")) {
         br.addEventListener("click", (e) => {
           e.stopPropagation();
           startRestTimer(parseInt(br.dataset.rest, 10) || 0, "rest");

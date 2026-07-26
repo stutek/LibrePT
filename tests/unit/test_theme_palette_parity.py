@@ -1,7 +1,7 @@
 # tests/unit/test_theme_palette_parity.py
 # midnight.css seeds the palette on :root (the global default), so any theme that does NOT redefine a
 # palette variable silently inherits midnight's value. That leak once gave the daylight (emerald)
-# theme midnight's indigo --secondary, rendering a violet superset accent in the plan editor. Guard
+# theme midnight's indigo --secondary, rendering a violet circuit accent in the plan editor. Guard
 # against the whole class: every theme must define the core palette vars itself. Uses src_dir.
 
 import re

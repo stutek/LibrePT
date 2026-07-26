@@ -114,7 +114,7 @@ always type any value regardless of the suggestion.
 Reps/load is only one of several logging shapes. Each movement carries a **modality** axis
 ([../src/modules/common/exerciseModality.js](../src/modules/common/exerciseModality.js)) that decides
 what its target *means* — orthogonal to equipment-derived load and to the structural item type
-(exercise / rest / superset):
+(exercise / rest / circuit):
 
 - **strength** *(default)* — sets × reps × load. Every legacy movement, and the shape the reps/load
   section above describes.

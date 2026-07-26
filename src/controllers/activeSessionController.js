@@ -73,7 +73,7 @@ function currentPlanMode() {
 // ---- Rest as a first-class plan item ----------------------------------------------------------
 // The plan (clientState.exercises) is an ordered mix of exercise items and rest items. A rest item
 // is { id, type:'rest', rest:<seconds>, circuitId, circuitTitle, circuitSeries } — it carries the
-// circuit fields so a rest inside a superset stays grouped with it. Exercise items have no `type`.
+// circuit fields so a rest inside a circuit stays grouped with it. Exercise items have no `type`.
 export const isRestItem = (it) => !!it && it.type === "rest";
 
 // Legacy plans (routines, recovered/demo sessions) carried rest as a number on the exercise. Turn
@@ -127,7 +127,7 @@ function clampFocusToExercise(cs) {
   cs.activeExerciseIndex = 0;
 }
 
-// `newItemId` names a plan item the caller just created (the live deck's +Exercise/+Superset/+Rest
+// `newItemId` names a plan item the caller just created (the live deck's +Exercise/+Circuit/+Rest
 // bar), so the editor opens with that row called out instead of dropping the trainer into an
 // otherwise-identical list.
 export function enterClipboardEditMode(newItemId = null) {
@@ -153,9 +153,15 @@ export function setActiveSession(session) {
   activeSession = session;
 }
 
+// A circuit focus reference. Accepts the pre-rename "superset" spelling wherever a focusRef can
+// have been persisted or shared: renaming a term must not orphan a running timer or a saved link.
+export const isCircuitFocus = (type) => type === "circuit" || type === "superset";
+
 export function focusIndexFromRef(clientState, focusRef) {
   if (!clientState || !clientState.exercises || !focusRef) return -1;
-  if (focusRef.type === "superset") {
+  // "superset" is the pre-rename spelling, still arriving from a session cached by an older build
+  // or an old deep link. Treated as the same focus rather than silently matching nothing.
+  if (isCircuitFocus(focusRef.type)) {
     return clientState.exercises.findIndex((e) => !isRestItem(e) && e.circuitId === focusRef.id);
   }
   return clientState.exercises.findIndex(
@@ -174,7 +180,7 @@ export function sessionFocusPath() {
   const cs = activeSession.clientRoutines[clientId];
   const ex = cs?.exercises?.[cs.activeExerciseIndex];
   if (!ex) return base;
-  return ex.circuitId ? `${base}/superset/${ex.circuitId}` : `${base}/exercise/${ex.id}`;
+  return ex.circuitId ? `${base}/circuit/${ex.circuitId}` : `${base}/exercise/${ex.id}`;
 }
 
 // Set the edit-mode flag WITHOUT re-rendering — for the router restoring edit mode from an `/edit`
@@ -224,7 +230,7 @@ export function openSessionFromHistory(log) {
     logs: {},
   };
 
-  // Rebuild the live plan from the stored snapshot, restoring rests and superset grouping — not just
+  // Rebuild the live plan from the stored snapshot, restoring rests and circuit grouping — not just
   // the performed exercises (TODO §17.1). A record item is either a first-class rest or an exercise.
   for (const item of log.exercises) {
     if (isRestRecord(item)) {
@@ -500,7 +506,7 @@ export function getExerciseSignalColor(clientId, exerciseName) {
   return "var(--danger)";
 }
 
-export function buildSupersetUnits(list) {
+export function buildCircuitUnits(list) {
   const units = [];
   for (const item of list) {
     if (item.circuitId) {
@@ -527,7 +533,7 @@ export function buildSupersetUnits(list) {
   return units;
 }
 
-export function completeSupersetRound(circuitId) {
+export function completeCircuitRound(circuitId) {
   if (!activeSession) return;
   const { saveToLocalStorage } = appDeps;
   const cs = activeSession.clientRoutines[activeSession.activeClientId];
@@ -561,7 +567,7 @@ export function completeSupersetRound(circuitId) {
     // The block is fully done — a rest/exercise timer still running against it is now stale.
     // Freeze it rather than silently dropping it: the trainer sees it held at its final value
     // and clears it themselves with ✕.
-    stopTimerIfMatches(activeSession.activeClientId, { type: "superset", id: circuitId });
+    stopTimerIfMatches(activeSession.activeClientId, { type: "circuit", id: circuitId });
   }
   saveActiveSessionToCache();
   if (saveToLocalStorage) saveToLocalStorage();
@@ -578,7 +584,7 @@ function startClientTimer(seconds, type = "rest", label = "") {
   const ex = cs?.exercises?.[cs.activeExerciseIndex];
   const focusRef = ex
     ? ex.circuitId
-      ? { type: "superset", id: ex.circuitId }
+      ? { type: "circuit", id: ex.circuitId }
       : { type: "exercise", id: ex.id }
     : null;
   startTimer({
@@ -854,11 +860,11 @@ export function renderActiveGroupBoard() {
       state,
       t,
       escapeHTML,
-      buildSupersetUnits,
+      buildCircuitUnits,
       getExerciseSignalColor,
       logQuickSignal,
       openFeedbackModal,
-      completeSupersetRound,
+      completeCircuitRound,
       focusExerciseByIndex,
       saveActiveSessionToCache,
       saveToLocalStorage: appDeps.saveToLocalStorage,
@@ -1119,7 +1125,7 @@ export function finishWorkoutSession() {
     if (!client || !clientState) continue;
 
     const isPlanning = !!activeSession.booking?.isPlanning;
-    // Persist the WHOLE program as an immutable snapshot (rests, superset grouping, and prescribed-
+    // Persist the WHOLE program as an immutable snapshot (rests, circuit grouping, and prescribed-
     // but-skipped exercises included) rather than flattening to performed sets only (TODO §17.1).
     const clientProgram = buildProgramSnapshot(clientState, { isPlanning });
     const anyCompleted = clientProgram.some((it) => it.type === "exercise" && it.completed);
