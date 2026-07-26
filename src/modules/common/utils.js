@@ -1,13 +1,12 @@
 // helper/utils.js
-// General stateless utility helpers for formatting, uuid generation, time conversions, HTML escaping,
-// and scheduling time checks. Used widely by components and the app entry.
+// General stateless utility helpers for formatting, time conversions, HTML escaping, and scheduling
+// time checks. Used widely by components and the app entry.
+//
+// Record id generation deliberately does NOT live here — see modules/common/recordId.js. It was the
+// one helper in this file whose correctness the stored data depends on, and it earned its own module
+// when it became UUIDv7 (TODO §18.2).
 //
 // deps: none
-
-// Helper to generate short UUIDs for all entity types (clients, sessions, exercises, supersets/combos, etc.)
-export function generateShortUUID() {
-  return Math.random().toString(36).substring(2, 10);
-}
 
 // Generate initials for avatar text representation
 // Initials are rendered into HTML, so they are restricted to letters and digits rather than trusted

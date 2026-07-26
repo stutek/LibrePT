@@ -16,9 +16,9 @@
 // }
 
 import { formatMetricValue, usesLoad } from "../common/exerciseModality.js";
+import { newRecordId } from "../common/recordId.js";
 import { formatLoad, formatReps } from "../common/repsAndLoad.js";
 import { exerciseRecordsOf } from "../common/sessionItemRecord.js";
-import { generateShortUUID } from "../common/utils.js";
 import { renderExerciseCard } from "./exerciseCard.js";
 import { renderSupersetCard } from "./supersetCard.js";
 
@@ -285,7 +285,7 @@ export function renderExerciseDeck(deckContainer, deps) {
         let newItemId;
 
         if (type === "rest") {
-          newItemId = `rest-${generateShortUUID()}`;
+          newItemId = `rest-${newRecordId()}`;
           activeClientState.exercises.splice(newIdx, 0, {
             id: newItemId,
             type: "rest",
@@ -295,8 +295,8 @@ export function renderExerciseDeck(deckContainer, deps) {
             circuitSeries: circuitSeries,
           });
         } else if (type === "superset") {
-          const newCircuitId = `c-${generateShortUUID()}`;
-          const id = generateShortUUID();
+          const newCircuitId = `c-${newRecordId()}`;
+          const id = newRecordId();
           newItemId = id;
           activeClientState.logs[id] = Array.from({ length: 3 }, () => ({
             reps: 10,
@@ -316,7 +316,7 @@ export function renderExerciseDeck(deckContainer, deps) {
           });
         } else {
           // exercise
-          const id = generateShortUUID();
+          const id = newRecordId();
           newItemId = id;
           activeClientState.logs[id] = Array.from({ length: 3 }, () => ({
             reps: 10,

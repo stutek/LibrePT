@@ -26,6 +26,7 @@
 // }
 
 import { metricLabelKey, usesLoad } from "../common/exerciseModality.js";
+import { newRecordId } from "../common/recordId.js";
 import {
   loadFieldMeta,
   loadInputHTML,
@@ -62,8 +63,10 @@ export function renderClipboardEditor(container, deps) {
   } = deps;
   const items = activeClientState.exercises;
   const tr = (key, fallback) => t(key) || fallback;
-  const newId = () =>
-    genId ? genId() : `x${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+  // Falls back to the shared generator rather than an inline one: an ad-hoc Date.now()+Math.random()
+  // id would be both collision-prone and time-leaking, and it would be the one place in the app
+  // minting ids the rest of the system does not recognise (TODO §18.2).
+  const newId = () => (genId ? genId() : newRecordId());
 
   // Regroup so each circuit's members are contiguous before we render straight from the array.
   normalizeCircuits();

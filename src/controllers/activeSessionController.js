@@ -13,6 +13,7 @@ import {
 } from "../modules/common/activeUsersList.js";
 import { modalityOf, primaryMetricOf } from "../modules/common/exerciseModality.js";
 import { openFeedbackModal } from "../modules/common/feedbackModal.js";
+import { newRecordId } from "../modules/common/recordId.js";
 import { loadUnitForEquipment } from "../modules/common/repsAndLoad.js";
 import {
   clearActiveSessionCache,
@@ -24,7 +25,6 @@ import {
   escapeHTML,
   formatDuration,
   formatSignedDuration,
-  generateShortUUID,
   getClientDisplayNameHTML,
   getInitials,
 } from "../modules/common/utils.js";
@@ -229,7 +229,7 @@ export function openSessionFromHistory(log) {
   for (const item of log.exercises) {
     if (isRestRecord(item)) {
       clientState.exercises.push({
-        id: generateShortUUID(),
+        id: newRecordId(),
         type: "rest",
         rest: item.rest || 0,
         circuitId: item.circuitId || null,
@@ -318,7 +318,7 @@ export function startWorkoutSession(clientRoutines, bookingMeta = null, deps = {
   clearAllTimers(); // fresh session — never inherit a previous session's timers
 
   const participantIds = clientRoutines.map((cr) => cr.clientId);
-  const sessionId = bookingMeta ? bookingMeta.id : generateShortUUID();
+  const sessionId = bookingMeta ? bookingMeta.id : newRecordId();
 
   activeSession = {
     id: sessionId,
@@ -384,7 +384,7 @@ export function startWorkoutSession(clientRoutines, bookingMeta = null, deps = {
   saveActiveSessionToCache();
   requestScreenWakeLock();
 
-  const sId = activeSession.id || generateShortUUID();
+  const sId = activeSession.id || newRecordId();
   if (navigateToPath) {
     navigateToPath(`/session/${sId}/client/${activeSession.activeClientId}`);
   }
@@ -458,7 +458,7 @@ export function logQuickSignal(tag, exId) {
   const client = state.clients.find((c) => c.id === clientId);
 
   const newFeedback = {
-    id: generateShortUUID(),
+    id: newRecordId(),
     clientId,
     clientName: client ? client.name : "Unknown Client",
     date: new Date().toISOString(),
@@ -609,7 +609,7 @@ function injectExerciseIntoActivePlan(baseEx, { sets, reps, weight, rest }) {
   const activeClientId = activeSession.activeClientId;
   const clientState = activeSession.clientRoutines[activeClientId];
   if (!clientState) return;
-  const slotId = generateShortUUID();
+  const slotId = newRecordId();
   clientState.exercises.push({
     id: slotId,
     exerciseId: baseEx.id,
@@ -840,7 +840,7 @@ export function renderActiveGroupBoard() {
       openAddExercise: openAddSessionExerciseDialog,
       openCatalogPicker,
       exit: exitClipboardEditMode,
-      genId: generateShortUUID,
+      genId: newRecordId,
       callout,
       markNewItem: (id) => {
         pendingCallout = { id, kind: "new", focus: true };
@@ -1014,7 +1014,7 @@ export function setupActiveSession(deps) {
 
       let baseEx = state.exercises.find((ex) => ex.name.toLowerCase() === typed.toLowerCase());
       if (!baseEx) {
-        baseEx = { id: generateShortUUID(), name: typed, category: "Custom", instructions: "" };
+        baseEx = { id: newRecordId(), name: typed, category: "Custom", instructions: "" };
       }
 
       injectExerciseIntoActivePlan(baseEx, { sets, reps, weight, rest });
@@ -1128,7 +1128,7 @@ export function finishWorkoutSession() {
     // always for a planning template. A session where nothing was done writes no history.
     if (anyCompleted || isPlanning) {
       const clientLog = {
-        id: generateShortUUID(),
+        id: newRecordId(),
         clientId: pId,
         clientName: client.name,
         routineName: clientState.routineName,

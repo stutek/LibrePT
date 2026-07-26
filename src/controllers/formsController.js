@@ -5,8 +5,9 @@ import {
 } from "../modules/clients/clientsView.js";
 import { $id, closeModal, openModal } from "../modules/common/dom.js";
 import { metricOptionsFor } from "../modules/common/exerciseModality.js";
+import { newRecordId } from "../modules/common/recordId.js";
 import { parseLoad, parseReps } from "../modules/common/repsAndLoad.js";
-import { generateShortUUID, getInitials } from "../modules/common/utils.js";
+import { getInitials } from "../modules/common/utils.js";
 import { mountExercisePicker } from "../modules/exercises/exercisePicker.js";
 import { renderExercisesList } from "../modules/exercises/exercisesView.js";
 import { addRoutineExerciseRow, renderRoutinesList } from "../modules/plans/plansView.js";
@@ -82,7 +83,7 @@ export function setupClientForms({
         };
       }
     } else {
-      const newId = generateShortUUID();
+      const newId = newRecordId();
       const newClient = {
         id: newId,
         name: name,
@@ -225,7 +226,7 @@ export function setupRoutineForms({
       }
     } else {
       const newRoutine = {
-        id: generateShortUUID(),
+        id: newRecordId(),
         name: name,
         description: description,
         exercises: exercises,
@@ -275,7 +276,7 @@ export function setupExerciseForms({ state, t, saveToLocalStorage, populateDropd
     if (!name || !category || !equipment || !pattern) return;
 
     const newEx = {
-      id: generateShortUUID(),
+      id: newRecordId(),
       name: name,
       category: category,
       equipment: equipment,

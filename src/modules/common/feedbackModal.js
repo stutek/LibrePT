@@ -6,7 +6,7 @@
 //   getState(),
 //   getActiveSession(),
 //   t,
-//   generateShortUUID(),
+//   newRecordId(),
 //   saveActiveSessionToCache(),
 //   saveToLocalStorage(),
 //   renderPendingPlanAdjustments()
@@ -71,7 +71,7 @@ export function setupFeedbackForms() {
   const fbForm = $id("form-feedback");
   const {
     t,
-    generateShortUUID,
+    newRecordId,
     saveActiveSessionToCache,
     saveToLocalStorage,
     renderPendingPlanAdjustments,
@@ -183,7 +183,7 @@ export function setupFeedbackForms() {
       const client = state.clients.find((c) => c.id === clientId);
 
       const newFeedback = {
-        id: generateShortUUID(),
+        id: newRecordId(),
         clientId: clientId,
         clientName: client ? client.name : "Unknown Client",
         date: new Date().toISOString(),

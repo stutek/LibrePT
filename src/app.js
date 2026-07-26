@@ -88,6 +88,7 @@ import {
   renderNotificationArea,
   setupNotificationGestures,
 } from "./modules/common/notificationArea.js";
+import { newRecordId } from "./modules/common/recordId.js";
 import { repsPresetsDatalistHTML } from "./modules/common/repsAndLoad.js";
 import { INIT_DEMO_DATA, getShareParams } from "./modules/common/shareLink.js";
 import {
@@ -98,7 +99,6 @@ import {
   formatDuration,
   formatDurationHM,
   formatSignedDuration,
-  generateShortUUID,
   getClientDisplayNameHTML,
   getColumnForISODate,
   getISODateForColumn,
@@ -258,7 +258,7 @@ function init() {
     getState,
     getActiveSession: () => getActiveSession(),
     t,
-    generateShortUUID,
+    newRecordId,
     saveActiveSessionToCache,
     saveToLocalStorage: saveState,
     renderPendingPlanAdjustments,
@@ -476,7 +476,7 @@ function populateDropdownSelectors() {
 function startWorkoutSession(clientRoutines, bookingMeta = null) {
   startWorkoutSessionController(clientRoutines, bookingMeta, {
     state: getState(),
-    generateShortUUID,
+    newRecordId,
     navigateToPath,
     toRoute,
     toUrl,
@@ -497,7 +497,7 @@ function setupActiveSession() {
     toUrl,
     focusSessionsColumn,
     launchClipboardDirectly,
-    generateShortUUID,
+    newRecordId,
     renderIdleSessionBar,
     saveToLocalStorage: saveState,
   });
@@ -507,7 +507,7 @@ function setupActiveSession() {
     navigateToPath,
     focusSessionsColumn,
     launchClipboardDirectly,
-    generateShortUUID,
+    newRecordId,
     renderIdleSessionBar,
   });
 }
@@ -525,7 +525,7 @@ function recoverActiveSession() {
   recoverActiveSessionController({
     state: getState(),
     t,
-    generateShortUUID,
+    newRecordId,
     navigateToPath,
     focusSessionsColumn,
     toRoute,
@@ -549,7 +549,7 @@ function renderActiveGroupBoard() {
     toRoute,
     toUrl,
     openFeedbackModal,
-    generateShortUUID,
+    newRecordId,
     saveToLocalStorage: saveState,
   });
 }
