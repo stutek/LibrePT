@@ -1,9 +1,11 @@
 name: Build, Verify and Deploy to GitHub Pages
 
-# Title each run with the head commit's message (its first line shows in the runs list) instead of
-# GitHub's default — which falls back to the workflow name / "Commit <sha> pushed by <user>" for a
-# multi-commit push. workflow_dispatch has no head_commit, so fall back to the workflow name there.
-run-name: ${{ github.event.head_commit.message || github.workflow }}
+# NO custom run-name, deliberately. `head_commit.message` is the WHOLE message — subject AND body —
+# and GitHub Actions expressions have no way to split a string (no split/regex; only contains,
+# format, join, toJSON and friends). Using it therefore flattened every commit body into the run
+# title, producing a paragraph where a title belongs. GitHub's own default titles a push run with
+# the head commit's subject line, which is exactly what was wanted — so the fix is to stop
+# overriding it, and to keep subjects short enough to read (AGENT_RULES §2.A.7).
 
 # Publishes ONLY the runtime app (a freshly assembled dist/) to GitHub Pages on every
 # push to main. Publishes only src/, so tests/, use_cases/, build/, deploy/, and the Markdown docs

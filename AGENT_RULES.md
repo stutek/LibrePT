@@ -41,6 +41,13 @@ Every response and tool action must drive measurable, continuous progress toward
 4. **Trunk-based development**: Work directly on `main` — it is the trunk. Do **not** create feature branches; make small, coherent, verified commits straight to `main`. `main` must stay releasable, because the GitHub Pages deploy (`.github/workflows/deploy.yml`) runs on every push to `main`.
 5. **Never push — the user pushes manually.** Auto-commit to the trunk, then stop; the user always does the `git push` themselves (their push is the continuous-deployment trigger). Do not run `git push`.
 6. **No interactive UI modals for options/questions**: Never invoke interactive popups or modal tools (such as `ask_question`). All clarification questions, options, recommendations, and information requests MUST be presented directly in natural conversational chat response.
+7. **Commit message format is not cosmetic — the subject becomes a title elsewhere.** It is what `git log --oneline` shows, what GitHub titles the CI run with, and what a PR inherits. A subject that only makes sense once you have read the body is a broken subject.
+   - **`type(scope): imperative summary`** — conventional-commit types (`feat`, `fix`, `refactor`, `docs`, `build`, `perf`, `test`, `ci`). Lowercase after the colon, **no trailing period**.
+   - **Subject ≤ 72 characters**, and aim for ~60. Count it before committing; long subjects are silently truncated wherever they are displayed.
+   - **Blank line after the subject**, then the body **wrapped at 72 columns** (git tooling does not re-wrap, so unwrapped bodies render as one long line in most viewers).
+   - **The body explains WHY**: the constraint, the decision, the evidence, what was measured. Not a restatement of the diff — the diff is already in the commit.
+   - **Footer**: `Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>`.
+   - **Never put the body in a CI `run-name`** or any other title field. GitHub Actions expressions cannot split a string, so `head_commit.message` interpolates the entire message; rely on GitHub's default run title instead.
 
 ### B. Evaluate Changes, Call Out Gaps & Propose Opportunities
 1. **Evaluate User Changes**: Explicitly evaluate user modifications and input, highlighting how they refine the LibrePT domain model or improve real-world gym ergonomics.
