@@ -373,6 +373,11 @@ Continued brainstorm on 16.1's "keep multiple versions deployable" question. Lea
 ---
 
 ### 16.3 [ ] [Decided, not built] Key storage buckets on the DATA SCHEMA, not the release tag
+> **Simplified 2026-07-26 by the no-tags decision** (§18 banner): with no release identity there is
+> no `UNRELEASED` case, no tag normalisation and no per-release bucket to migrate away from —
+> storage keys go straight onto the schema major. The open "does the hosted window count releases
+> or schemas" question below is moot: there is no window of releases.
+
 > **Promoted to a prerequisite 2026-07-26**: [§18](#18-data-layer-simultaneous-multi-schema-writes-star-writes)'s star-write model is this item's bucket-per-schema-major layout expressed as a write policy, so §18 cannot start until this lands. Build it first.
 
 **Decided (2026-07-25).** As shipped, `storageNamespace.js` keys buckets on the release tag, so
@@ -407,7 +412,12 @@ through the real one.
   leaning hosting-counts-tags, since a tag is what a rollback targets, with data retention following
   schema majors.
 
-### 16.4 [ ] [Open dilemma] What shape should a release tag be — semver, or an ISO timestamp?
+### 16.4 [x] [CLOSED — moot] What shape should a release tag be — semver, or an ISO timestamp?
+> **Closed 2026-07-26: there are no release tags.** One build carries every supported behaviour
+> concurrently (see the §18 decision banner), so nothing needs naming as a rollback target, a
+> hosting path segment, or an order. The dilemma below is kept only as the record of why the
+> question stopped mattering rather than being answered.
+
 Raised by Simon (2026-07-25): *"tags are not worth it — maybe if tag would be ISO date and time
 numeric, but not sure. Or maybe we need semver for rollbacks and upgrades?"* **Not decided.**
 
@@ -502,6 +512,35 @@ With 17.1 preserving the full program, "**Save as routine**" on a history record
 >
 > **This supersedes the "stay on localStorage" half of §3.7** (see 18.6) and **depends on §16.3**
 > (see 18.1). It does not conflict with §16.1/§16.2's shipped machinery except where 18.10 says so.
+>
+> ## ⚠️ Decided 2026-07-26: NO RELEASE TAGS. One build carries old and new behaviour concurrently.
+>
+> Simon: *"there is no more roll back tags — app contains old and new behaviour concurrently."* This
+> **resolves §18.10's fork** in favour of the one-build model and retires most of §16's machinery.
+> What follows from it, so nothing is rebuilt on a retired assumption:
+>
+> - **Behaviour switching is an in-app choice, not navigation.** No `/v1.2.0/` subpaths, no per-tag
+>   publishing, no rollback-by-URL. Deep links lose their version dimension entirely, which is what
+>   made §18.10's failure mode 1 disappear rather than merely be mitigated.
+> - **`SUPPORTED_RELEASE_COUNT` is moot**, and so is §16.3's open "does the hosted window count
+>   releases or schemas" — there is no window of releases. What is supported is a set of **schemas**.
+> - **§16.4 (semver vs ISO tag shape) is closed as moot.** There is no tag to shape.
+> - **§16.3 gets simpler, not just different**: with no release identity there is no `UNRELEASED`
+>   case, no tag normalisation and no per-release bucket. Storage keys go straight onto the schema
+>   major.
+> - **§16.1's "no fixes ever land on a maintenance-mode version" is inverted, deliberately.** Old
+>   behaviours live inside the current build, so they get fixes automatically. That is the accepted
+>   consequence, not an oversight.
+> - **The `DEGRADED` ribbon tier (§18.12) survives and matters more**, because degraded mode is now
+>   reachable by an ordinary in-app choice rather than by a deliberate downgrade.
+>
+> **Open question this raises — confirm before building the write layer.** With one build, what still
+> justifies writing every live schema? The surviving case looks like **the previously-cached Service
+> Worker build**: a PWA update is not instant and must never interrupt a trainer mid-session (§16.1),
+> so a PT on yesterday's cached build *is* an older app version even with no tags — and multi-schema
+> writes are what keep their data readable by whichever build is actually running. Backup portability
+> is the second case. If that reading is right the write layer is unchanged; if the real driver is
+> something else, the set of live schemas may be chosen differently.
 >
 > **Build order (decided with Simon 2026-07-26): DB first, then the star write layer, then the CD
 > pipeline tests (18.13), then onwards in small steps.** The engine comes first because the star write
@@ -768,6 +807,9 @@ Three deep-link failure modes as UI behaviours are added and dropped:
 3. **The ID in the link no longer exists** — created by 18.2's remapping. The mapping table can
    resolve it, but the better answer is that **deep links carry the `lineageId`, never a per-schema
    id**, and no lookup is ever needed.
+
+> **RESOLVED 2026-07-26 in favour of the one-build model** — see the §18 decision banner. The
+> paragraph below is kept as the record of what the choice cost and inverted.
 
 **The fork worth deciding before anything here is built.** Simon's "each new release packages all UI
 code for supported version behaviours" implies **one build with versioned behaviours behind flags**,
