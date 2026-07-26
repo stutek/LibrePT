@@ -557,10 +557,17 @@ With 17.1 preserving the full program, "**Save as routine**" on a history record
 >   store per schema, transactions that resolve on commit, collection + client indexes.
 > - [x] **18.6/18.8 engine, part 2** — [storageDurability.js](src/data/storageDurability.js):
 >   `persist()` on boot, eviction risk reported by consequence rather than private-mode sniffing.
-> - [ ] **18.6 engine, part 3** — move the main DB read/write path behind
->   [stateStore.js](src/data/stateStore.js) onto IndexedDB, with §17.1's lazy per-client load. This is
->   the risky one: it needs a one-way import from the existing localStorage bucket and must stay
->   revertable until it has run on real data.
+> - [x] **18.6 engine, part 3** — [writeQueue.js](src/data/writeQueue.js): write-behind persistence.
+>   Measured first — the store has ~52 synchronous save call sites against ~47 synchronous
+>   `getState()` reads, so making persistence async end to end would be a very large diff across the
+>   gym-floor path for no user-visible gain. Reads stay synchronous against the in-memory state
+>   (which the UI already treats as truth); writes serialise through the queue.
+> - [ ] **18.6 engine, part 4** — move `stateStore`'s read/write path onto IndexedDB through the
+>   queue, with §17.1's lazy per-client load. The risky one: it needs a one-way import from the
+>   existing localStorage bucket and must stay revertable until it has run on real data. Only
+>   `loadSavedState` (4 call sites) becomes async; the other ~99 stay untouched.
+> - [ ] **Documentation** — [docs/DATA_MODEL.md](docs/DATA_MODEL.md) exists and must be kept in step
+>   with each of the steps below.
 > - [ ] **16.3** — bucket on the schema major. Coupled: `listReleaseBuckets()` feeds
 >   `evaluateVersionOffer`'s rollback check *by release id*, so the bucket key, the offer logic and
 >   `versions.json`'s new `schemaVersion` field have to move together or rollback offers silently stop.
