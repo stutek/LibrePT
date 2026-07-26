@@ -12,6 +12,20 @@ import { mountExercisePicker } from "../modules/exercises/exercisePicker.js";
 import { renderExercisesList } from "../modules/exercises/exercisesView.js";
 import { addRoutineExerciseRow, renderRoutinesList } from "../modules/plans/plansView.js";
 
+// Filled in by the setup functions below, and called by the create-form ROUTES. The form fields,
+// the builder list and the picker are closed over by those setups, so this is the seam that lets
+// the router open a form without formsController having to know about routing.
+let openRoutineCreateForm = () => {};
+let openExerciseCreateForm = () => {};
+
+export function openRoutineCreateDialog() {
+  openRoutineCreateForm();
+}
+
+export function openExerciseCreateDialog() {
+  openExerciseCreateForm();
+}
+
 export function setupClientForms({
   state,
   t,
@@ -136,6 +150,8 @@ export function setupRoutineForms({
   saveToLocalStorage,
   populateDropdownSelectors,
   openWorkoutSetupModal,
+  navigateToPath,
+  urlFor,
 }) {
   const dialog = $id("dialog-routine");
   const form = $id("form-routine");
@@ -167,13 +183,16 @@ export function setupRoutineForms({
     pickerEl.classList.remove("hidden");
   };
 
-  $id("btn-add-routine").addEventListener("click", () => {
+  // Populating the create form is the ROUTE's job now (`/routines/new`), so a reload reopens it on a
+  // blank form rather than dropping the trainer on the list. The button only navigates.
+  openRoutineCreateForm = () => {
     $id("routine-modal-title").textContent = "Create Routine Template";
     $id("routine-form-id").value = "";
     builderList.innerHTML = "";
     openModal("dialog-routine", { resetForm: true, formId: "form-routine" });
     openRoutinePicker();
-  });
+  };
+  $id("btn-add-routine").addEventListener("click", () => navigateToPath(urlFor("routine.new")));
 
   const btnRoutineAddEx = $id("btn-routine-add-ex");
   if (btnRoutineAddEx) {
@@ -241,21 +260,30 @@ export function setupRoutineForms({
   });
 }
 
-export function setupExerciseForms({ state, t, saveToLocalStorage, populateDropdownSelectors }) {
+export function setupExerciseForms({
+  state,
+  t,
+  saveToLocalStorage,
+  populateDropdownSelectors,
+  navigateToPath,
+  urlFor,
+}) {
   const dialog = $id("dialog-exercise");
   const form = $id("form-exercise");
   if (!dialog || !form) return;
   const cancelBtn = dialog.querySelector(".modal-cancel");
   const closeBtn = dialog.querySelector(".modal-close-btn");
 
+  // As with routines: the route (`/exercises/new`) owns opening the form; the button navigates.
+  openExerciseCreateForm = () => {
+    openModal("dialog-exercise", { resetForm: true, formId: "form-exercise" });
+    // The form reset restores modality to strength; re-sync so a reopen never leaves a metric
+    // selector showing over a fixed-metric modality.
+    syncMetricField();
+  };
   const btnAddExercise = $id("btn-add-exercise");
   if (btnAddExercise) {
-    btnAddExercise.addEventListener("click", () => {
-      openModal("dialog-exercise", { resetForm: true, formId: "form-exercise" });
-      // The form reset restores modality to strength; re-sync so a reopen never leaves a metric
-      // selector showing over a fixed-metric modality.
-      syncMetricField();
-    });
+    btnAddExercise.addEventListener("click", () => navigateToPath(urlFor("exercise.new")));
   }
 
   const handleClose = () => closeModal("dialog-exercise");

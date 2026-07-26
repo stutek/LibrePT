@@ -23,6 +23,8 @@ import {
 } from "./controllers/activeSessionController.js";
 import { initAppLifecycle } from "./controllers/appLifecycleController.js";
 import {
+  openExerciseCreateDialog,
+  openRoutineCreateDialog,
   populateDropdownSelectors as populateDropdownsController,
   setupClientForms as setupClientFormsController,
   setupExerciseForms as setupExerciseFormsController,
@@ -129,6 +131,7 @@ import {
   renderPendingPlanAdjustmentsComponent,
 } from "./modules/plans/planAdjustments.js";
 import {
+  initPlansView,
   openRoutineEditorModal,
   renderRoutinesList as routinesViewRender,
 } from "./modules/plans/plansView.js";
@@ -247,10 +250,15 @@ function init() {
     setHeaderState,
     prepareBackupDialog,
     renderBuildInfo,
+    openRoutineCreateDialog,
+    openExerciseCreateDialog,
+    openRoutineEditor: (routineId) => openRoutineEditorModal({ routineId, state: getState(), t }),
+    openAdjustmentWizard,
   });
 
   setupNavigation({ setupSessionsDayNav });
   setupClientForms();
+  initPlansView({ navigateToPath, urlFor });
   setupRoutineForms();
   setupExerciseForms();
 
@@ -424,8 +432,8 @@ function renderPendingPlanAdjustments() {
     state: getState(),
     t,
     escapeHTML,
-    openAdjustmentWizard,
-    openRoutineEditorModal,
+    navigateToPath,
+    urlFor,
   });
 
   const menuBadge = document.getElementById("menu-badge-adjustments-count");
@@ -478,6 +486,8 @@ function setupRoutineForms() {
     saveToLocalStorage: saveState,
     populateDropdownSelectors,
     openWorkoutSetupModal,
+    navigateToPath,
+    urlFor,
   });
 }
 function setupExerciseForms() {
@@ -486,6 +496,8 @@ function setupExerciseForms() {
     t,
     saveToLocalStorage: saveState,
     populateDropdownSelectors,
+    navigateToPath,
+    urlFor,
   });
 }
 function populateDropdownSelectors() {

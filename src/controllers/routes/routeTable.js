@@ -6,7 +6,7 @@
 // import.meta.url. That is what makes every route version-agnostic — the same pattern resolves
 // wherever the app happens to be hosted, and no route may ever name a version.
 
-import { GlobalDialogRoute } from "./dialogRoute.js";
+import { DialogRoute, GlobalDialogRoute } from "./dialogRoute.js";
 import { RouteRegistry } from "./routeRegistry.js";
 import {
   ClientDetailRoute,
@@ -110,14 +110,56 @@ export function buildRouteTable() {
     new ClientDetailRoute({ name: "client.detail", pattern: "/clients/:clientId" }),
   );
 
-  registry.register(
+  const adjustments = registry.register(
     new ViewRoute({ name: "adjustments", pattern: "/adjustments", viewId: "adjustments" }),
   );
-  registry.register(new ViewRoute({ name: "routines", pattern: "/routines", viewId: "routines" }));
-  registry.register(
+  const routines = registry.register(
+    new ViewRoute({ name: "routines", pattern: "/routines", viewId: "routines" }),
+  );
+  const exercises = registry.register(
     new ViewRoute({ name: "exercises", pattern: "/exercises", viewId: "exercises" }),
   );
   registry.register(new ViewRoute({ name: "history", pattern: "/history", viewId: "history" }));
+
+  // Record editors. Each opens over its own list view, so Back returns to the list and a cold link
+  // shows the record in context rather than a dialog floating on a blank shell.
+  registry.register(
+    new DialogRoute({
+      name: "routine.new",
+      parent: routines,
+      segment: "/new",
+      dialogId: "dialog-routine",
+      open: (ctx) => ctx.deps.openRoutineCreateDialog?.(),
+    }),
+  );
+  registry.register(
+    new DialogRoute({
+      name: "routine.edit",
+      parent: routines,
+      segment: "/:routineId",
+      dialogId: "dialog-routine",
+      open: (ctx) => ctx.deps.openRoutineEditor?.(ctx.params.routineId),
+    }),
+  );
+  registry.register(
+    new DialogRoute({
+      name: "exercise.new",
+      parent: exercises,
+      segment: "/new",
+      dialogId: "dialog-exercise",
+      open: (ctx) => ctx.deps.openExerciseCreateDialog?.(),
+    }),
+  );
+  // Keyed on the update being resolved, not on the client it belongs to.
+  registry.register(
+    new DialogRoute({
+      name: "adjustment.apply",
+      parent: adjustments,
+      segment: "/:updateId",
+      dialogId: "dialog-apply-adjustment",
+      open: (ctx) => ctx.deps.openAdjustmentWizard?.(ctx.params.updateId),
+    }),
+  );
 
   // Dialogs reachable from anywhere (the ☰ menu, the build stamp). Each is a state a reload should
   // restore and a link should be able to open, and routing them is what makes Back close them.

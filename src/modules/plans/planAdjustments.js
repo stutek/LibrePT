@@ -10,7 +10,7 @@ import { mountExercisePicker } from "../exercises/exercisePicker.js";
  * @param {Object} ctx - Context holding state, translation, and navigation helpers.
  */
 export function renderPendingPlanAdjustmentsComponent(container, countBadge, ctx) {
-  const { state, t, escapeHTML, openAdjustmentWizard, openRoutineEditorModal } = ctx;
+  const { state, t, escapeHTML, navigateToPath, urlFor } = ctx;
 
   if (!container) return;
   container.innerHTML = "";
@@ -87,12 +87,11 @@ export function renderPendingPlanAdjustmentsComponent(container, countBadge, ctx
     editBtn.setAttribute("aria-label", t("edit_plan"));
     editBtn.innerHTML = `<i class="fa-solid fa-pen-to-square"></i>`;
     editBtn.addEventListener("click", () => {
-      if (!openRoutineEditorModal) return;
       const exercise = state.exercises.find((e) => e.name === u.exerciseName);
       const routine = exercise
         ? state.routines.find((r) => r.exercises.some((ex) => ex.id === exercise.id))
         : null;
-      if (routine) openRoutineEditorModal({ routineId: routine.id, state, t });
+      if (routine) navigateToPath(urlFor("routine.edit", { routineId: routine.id }));
     });
 
     const resolveBtn = document.createElement("button");
@@ -101,8 +100,10 @@ export function renderPendingPlanAdjustmentsComponent(container, countBadge, ctx
     resolveBtn.title = t("btn_resolve");
     resolveBtn.setAttribute("aria-label", t("btn_resolve"));
     resolveBtn.innerHTML = `<i class="fa-solid fa-check"></i>`;
+    // The wizard is a route (`/adjustments/{updateId}`), so Back backs out of it and a link opens
+    // the one alert being resolved.
     resolveBtn.addEventListener("click", () => {
-      openAdjustmentWizard(u.id);
+      navigateToPath(urlFor("adjustment.apply", { updateId: u.id }));
     });
 
     actions.appendChild(editBtn);

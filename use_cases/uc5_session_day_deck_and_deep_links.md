@@ -138,6 +138,19 @@ the dialog over the dashboard rather than a blank shell.
 | `/build` | the build-identity dialog (release, commit, data schema, build time) |
 | `/backup` | the Sync & Backup dialog |
 
+Record editors are routes too, each opening over its own list view:
+
+| URL (under the base path) | Restores |
+| :--- | :--- |
+| `/routines/new` | the routine builder on a blank form |
+| `/routines/{routineId}` | the routine builder loaded with that template |
+| `/exercises/new` | the create-movement form |
+| `/adjustments/{updateId}` | the adjustment wizard on that alert |
+
+- **Saving pops exactly one entry.** The submit handler closes the dialog and the router turns that
+  close into the matching history pop, so Back after a save leaves the list rather than skipping a
+  screen.
+
 - **The first-run agreement is deliberately not routed.** It is a boot precondition, not a place the
   trainer navigated to: it takes no history entry, and Back must not dismiss an agreement that has
   not been accepted. From the ☰ menu afterwards it is an ordinary routed dialog.
@@ -186,6 +199,7 @@ not-found view (`#view-error`) *inside* the content area:
 | Homepage keeps only the session list; ☰-menu navigation and direct deep links to `/clients` and `/adjustments`; logo returns home; the moved menu badge | [../tests/e2e/test_view_split_navigation.py](../tests/e2e/test_view_split_navigation.py) |
 | Globally-reachable dialogs (`/about`, `/terms`, `/build`, `/backup`) are routes: Back closes them, ✕/Escape agree, a cold link reopens over a real view, and the first-run agreement is not routed | [../tests/e2e/test_dialog_routing.py](../tests/e2e/test_dialog_routing.py) · `test_back_closes_the_dialog`, `test_the_close_button_and_back_agree`, `test_cold_deep_link_opens_the_dialog_over_a_real_view`, `test_first_run_terms_is_not_routed` |
 | The just-inserted editor row is addressable and survives a reload, without a caret or a New badge; a deleted row id falls back | [../tests/e2e/test_editor_row_deeplink.py](../tests/e2e/test_editor_row_deeplink.py) · `test_the_called_out_row_survives_a_reload`, `test_a_restored_row_takes_no_caret_and_carries_no_badge`, `test_a_deleted_row_id_falls_back_instead_of_erroring` |
+| Record editors are addressable, reopen with the record loaded, and saving pops exactly one history entry | [../tests/e2e/test_record_dialog_routes.py](../tests/e2e/test_record_dialog_routes.py) · `test_routine_editor_deeplink_reopens_with_the_record_loaded`, `test_saving_pops_exactly_one_history_entry`, `test_adjustment_wizard_is_addressable` |
 
 ---
 

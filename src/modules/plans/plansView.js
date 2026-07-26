@@ -14,6 +14,16 @@ import {
 } from "../common/repsAndLoad.js";
 import { escapeHTML } from "../common/utils.js";
 
+// Navigation deps, set once at boot. Held at module level rather than passed per render because
+// renderRoutinesList is called from four places (saving a routine, a restore, the session
+// controller, the boot pass) — a card whose click handler depends on what the caller remembered
+// to pass is a card that silently stops working from one of them.
+let deps = {};
+
+export function initPlansView(d) {
+  deps = d || {};
+}
+
 export function renderRoutinesList({ state, t, openWorkoutSetupModal }) {
   const container = document.getElementById("routines-list");
   if (!container) return;
@@ -70,8 +80,9 @@ export function renderRoutinesList({ state, t, openWorkoutSetupModal }) {
       openWorkoutSetupModal(null, routine.id);
     });
 
+    // The editor is a route (`/routines/{id}`): Back closes it and a link opens it on that routine.
     card.addEventListener("click", () => {
-      openRoutineEditorModal({ routineId: routine.id, state, t });
+      deps.navigateToPath?.(deps.urlFor("routine.edit", { routineId: routine.id }));
     });
 
     container.appendChild(card);
