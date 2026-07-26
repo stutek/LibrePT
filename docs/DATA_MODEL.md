@@ -138,6 +138,7 @@ erDiagram
     }
     SESSION_ITEM {
         string id PK
+        int position "explicit order — dense 0..n-1 within one session"
         string type "exercise|rest"
         string exerciseId FK
         string circuitId "circuit (superset) grouping key — null when standalone"
@@ -163,6 +164,52 @@ Three modelling decisions worth knowing before changing anything here:
   model, so there is no second representation to drift.
 - **`routineName` is a soft string reference on purpose.** Making template provenance a hard FK would
   create `history → routine → history`, the first cycle in the graph, and break §4's ordering.
+
+### Ordering — explicit, dense, checkable
+
+**Order is data, not a side effect of storage.** Every `SESSION_ITEM` carries an integer `position`,
+and readers **sort by it**. Array order in the embedded JSON must agree with it, but is not the
+authority: a disagreement is a *detectable, repairable defect* rather than silent corruption.
+
+The rule the whole scheme rests on:
+
+```
+positions(session items) === [0, 1, 2, … , n-1]     — dense, unique, gapless
+```
+
+Three checks fall straight out of it, none of which the previous implicit scheme could express:
+
+| Invariant | Check | What it catches |
+| :--- | :--- | :--- |
+| **Dense and unique** | sorted positions equal `0..n-1` | a dropped item, a duplicated item, a half-applied reorder |
+| **Array agrees with position** | `items[i].position === i` for all `i` | a projection or import that reordered the array |
+| **Circuit members are contiguous** | per `circuitId`: `max(position) - min(position) + 1 === member count` | a circuit split in two by an item wedged into the middle |
+
+**Why explicit ordering at all.** Implicit array order survives only while items are an embedded JSON
+array. The entity above has a primary key and reads like a row; the moment anything stores items
+per-row, or a projection (§4) normalises or re-sorts them, the order — *and the circuit grouping that
+order encodes* — is lost with no field to reconstruct it from. The completeness check would not
+notice: every id is present, in the wrong sequence. An explicit `position` makes the ordering
+**assertable at rest**, which is what a store holding the only copy of a trainer's records needs.
+
+**Why dense rather than gapped or fractional.** Inserting renumbers the tail, which sounds expensive
+and is not: the items are one embedded array in one record, so renumbering ten of them is the *same
+single record write* as inserting without renumbering. Gapped (`10, 20, 30…`) and fractional /
+lexicographic ranks buy insert-without-renumber, and their whole payoff is concurrent writers on
+row-per-item storage — which a local-first, single-trainer app does not have. What they cost is
+exactly what was wanted here: with arbitrary rank values there is no cheap "is this list intact"
+question to ask, because *any* set of distinct values is valid. Dense positions are verifiable;
+sparse ranks are merely sortable.
+
+**Rejected: a second `circuitPosition` field.** Verbose in the wrong way. A member's index inside its
+circuit is derivable from `position` and the contiguity invariant, so storing it too creates two
+sources of truth that can disagree — and a disagreement between them has no correct resolution.
+One authoritative field, everything else derived.
+
+> **Not built yet.** Positions are specified here; the live and frozen shapes still order by array
+> index alone. Shipping it is expand-first (§4): write `position` on every item everywhere, keep
+> array order as the fallback for records that predate it, then make the sort authoritative. Tracked
+> in [TODO §17.5](../TODO.md).
 
 ### Circuits (supersets) — a grouping key, not a record
 
@@ -194,11 +241,14 @@ flowchart LR
     style F fill:#0d9488,color:#fff
 ```
 
-**The contiguity is an invariant, not an accident.** Members must stay adjacent in the array or the
-fold would split one circuit into two units; `normalizeCircuits()` in
+**The contiguity is an invariant, not an accident.** Members must stay adjacent or the fold would
+split one circuit into two units; `normalizeCircuits()` in
 [clipboardEditor.js](../src/modules/clipboard/clipboardEditor.js) pulls members back together on
 every edit, and re-stamps the shared `circuitTitle`/`circuitSeries` so denormalised copies cannot
-diverge. In a completed history record the order is frozen, so the invariant holds for good.
+diverge. In a completed history record the order is frozen, so the invariant holds for good. With
+explicit positions the invariant stops being a convention the editor upholds and becomes a
+**query** — `max(position) - min(position) + 1 === member count` per `circuitId` — so a circuit
+broken by anything other than the editor is detectable instead of merely rendering wrong.
 
 **Naming: stored `circuit*`, displayed "superset".** The feature shipped first as a round-counted
 *circuit* block (2026-07-16) and the user-facing term moved to *superset* the next day; the persisted
@@ -246,6 +296,7 @@ backward transforms to write** — a "downgrade" is just a projection that was a
 | Projections are **pure and total** | Buckets stay fully re-derivable, so a divergence is repairable by re-projection rather than by restore |
 | The fan-out is **one transaction** | A phone locking mid-write cannot leave schemas disagreeing |
 | Ids are **stable across projections** | The same logical record is the same key in every store |
+| Order is **carried in the record** (`position`), never implied by array index | A projection that re-serialises, or a store that holds items as rows, would otherwise lose sequence silently — every id still present, the session in the wrong order |
 | The reference graph is **acyclic** | Migration replays in topological (foreign-key availability) order, never by timestamp — the device clock is not trustworthy |
 | Schema changes are **expand-first** | A field's storage ships in every live schema *before* the UI that writes it, so no projection is ever lossy |
 
