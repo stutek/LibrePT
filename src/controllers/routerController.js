@@ -118,6 +118,15 @@ export function urlFor(name, params) {
   return routes.urlFor(name, params);
 }
 
+// What a pathname names, WITHOUT entering it: `{ name, params }` or null. For the one caller that
+// must read the address bar before the first route is entered — active-session recovery runs at boot,
+// ahead of routing, and both restores edit mode from the URL and must not overwrite the URL's own row
+// id when it renders.
+export function resolveRoute(pathname) {
+  const hit = routes.resolve(toRoute(pathname));
+  return hit ? { name: hit.route.name, params: hit.params } : null;
+}
+
 export function getBasePath() {
   return BASE_PATH;
 }
@@ -286,7 +295,7 @@ export function showSessionView(sessionId, clientId, focusRef = null, opts = {})
       if (idx >= 0) cs.activeExerciseIndex = idx;
     }
     if (opts.edit && routerDeps?.setClipboardEditMode) {
-      routerDeps.setClipboardEditMode(true);
+      routerDeps.setClipboardEditMode(true, opts.slotId ?? null);
     }
     if (routerDeps?.renderActiveGroupBoard) routerDeps.renderActiveGroupBoard();
     if (routerDeps?.syncSessionFocusUrl) routerDeps.syncSessionFocusUrl();

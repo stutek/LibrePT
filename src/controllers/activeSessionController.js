@@ -58,6 +58,10 @@ let editorCleanup = null;
 // a row that needs no typing). One-shot: consumed by that render and cleared, so a later re-render
 // never re-announces an item the trainer has already dealt with.
 let pendingCallout = null;
+// The plan row the trainer is working on in the editor. Unlike pendingCallout this is NOT one-shot:
+// it is what `/…/edit/exercise/{slotId}` carries, so a reload lands back on the row rather than on an
+// undifferentiated list. Cleared when edit mode exits.
+let editorRowId = null;
 // Holds the session title bar's normal content while edit mode repurposes it, so exiting restores it.
 let savedSessionTitleHTML = null;
 
@@ -132,13 +136,23 @@ function clampFocusToExercise(cs) {
 // otherwise-identical list.
 export function enterClipboardEditMode(newItemId = null) {
   clipboardEditMode = true;
-  pendingCallout = newItemId ? { id: newItemId, kind: "new", focus: true } : null;
+  markEditorRow(newItemId, { kind: "new", focus: true });
   renderActiveGroupBoard();
 }
 
 export function exitClipboardEditMode() {
   clipboardEditMode = false;
+  editorRowId = null;
   renderActiveGroupBoard();
+}
+
+// Record which plan row the trainer is working on. `pendingCallout` is one-shot — consumed by the
+// next render so a highlight never outlives the moment it describes — while `editorRowId` persists,
+// because it is what the URL carries: a row is only addressable if its id outlives the render that
+// announced it.
+function markEditorRow(slotId, { kind, focus }) {
+  editorRowId = slotId || null;
+  pendingCallout = slotId ? { id: slotId, kind, focus } : null;
 }
 
 export function initActiveSessionController(deps) {
@@ -177,8 +191,14 @@ export function sessionFocusPath() {
   const ids = { sessionId: activeSession.id, clientId };
   // Edit mode is a first-class, deep-linkable state: its URL survives a reload so the trainer lands
   // back in the editor (not the live deck), and the plan edits — persisted on every keystroke — are
-  // intact. The client segment names WHOSE plan is open so the right participant is restored.
-  if (clipboardEditMode) return urlFor("session.edit", ids);
+  // intact. The client segment names WHOSE plan is open so the right participant is restored, and the
+  // row segment names the one just inserted or swapped — otherwise a reload drops the trainer into a
+  // long plan with nothing saying which row they were in the middle of.
+  if (clipboardEditMode) {
+    return editorRowId
+      ? urlFor("session.edit.item", { ...ids, slotId: editorRowId })
+      : urlFor("session.edit", ids);
+  }
   const cs = activeSession.clientRoutines[clientId];
   const ex = cs?.exercises?.[cs.activeExerciseIndex];
   if (!ex) return urlFor("session.client", ids);
@@ -192,8 +212,21 @@ export function sessionFocusPath() {
 // Set the edit-mode flag WITHOUT re-rendering — for the router restoring edit mode from an `/edit`
 // deep link, where the caller (showSessionView) already renders the board once afterwards. Use
 // enter/exitClipboardEditMode for in-app toggles that must render immediately.
-export function setClipboardEditMode(on) {
+export function setClipboardEditMode(on, slotId = null) {
   clipboardEditMode = !!on;
+  if (!on) {
+    editorRowId = null;
+    return;
+  }
+  // A row id from a URL may name a row that has since been deleted. Like a stale focus card, it is
+  // ignored rather than erroring — syncSessionFocusUrl then drops the segment on the next render.
+  const plan = activeSession?.clientRoutines?.[activeSession.activeClientId]?.exercises;
+  const known = slotId && plan?.some((item) => item.id === slotId) ? slotId : null;
+  // Restoring from a URL, not reacting to an edit: highlight and scroll to the row so the trainer
+  // finds their place, but take no caret and show no badge. A reload is not the moment the row
+  // appeared — announcing it as New would be a lie, and stealing focus would pop the phone keyboard
+  // on a page the trainer may have reloaded for some other reason entirely.
+  markEditorRow(known, { kind: "restored", focus: false });
 }
 
 export function syncSessionFocusUrl() {
@@ -646,7 +679,7 @@ function injectExerciseIntoActivePlan(baseEx, { sets, reps, weight, rest }) {
   clientState.activeExerciseIndex = clientState.exercises.length - 1;
   // Called out in the editor so the injected movement isn't lost in the list. No focus: the catalog
   // already filled the name in, so there is nothing to type.
-  pendingCallout = { id: slotId, kind: "new", focus: false };
+  markEditorRow(slotId, { kind: "new", focus: false });
   saveActiveSessionToCache();
   renderActiveGroupBoard();
 }
@@ -666,7 +699,7 @@ function swapPlanItemMovement(slotId, baseEx) {
   item.loadUnit = loadUnitForEquipment(baseEx.equipment);
   item.modality = modalityOf(baseEx);
   item.metric = primaryMetricOf(baseEx);
-  pendingCallout = { id: slotId, kind: "swap", focus: false };
+  markEditorRow(slotId, { kind: "swap", focus: false });
   saveActiveSessionToCache();
   if (appDeps.saveToLocalStorage) appDeps.saveToLocalStorage();
   renderActiveGroupBoard();
@@ -854,9 +887,7 @@ export function renderActiveGroupBoard() {
       exit: exitClipboardEditMode,
       genId: newRecordId,
       callout,
-      markNewItem: (id) => {
-        pendingCallout = { id, kind: "new", focus: true };
-      },
+      markNewItem: (id) => markEditorRow(id, { kind: "new", focus: true }),
     });
   } else if (deckContainer && activeClientState) {
     renderExerciseDeck(deckContainer, {
@@ -1197,9 +1228,18 @@ export function recoverActiveSession() {
     if (activeSession.booking?.isPlanning) {
       clipboardEditMode = true;
     }
-    const path = typeof window !== "undefined" ? window.location.pathname : "";
-    if (path.includes(`/session/${activeSession.id}/`) && path.endsWith("/edit")) {
+    // Recovery runs before the first route is entered (app.js boots the session, then routes), so
+    // the URL is the only thing that knows the trainer was in the editor. Ask the router what the
+    // address bar names rather than sniffing the path for a suffix — the same question, answered by
+    // the code that owns the patterns, and it keeps working as edit-mode URLs gain segments.
+    //
+    // The row id has to be taken here too, not left to the router: recovery renders the board, that
+    // render syncs the URL, and a sync with no row id would erase the very segment the router is
+    // about to read. The router validates it a moment later and drops it if the row is gone.
+    const bootRoute = appDeps.resolveRoute?.(window.location.pathname);
+    if (bootRoute?.name === "session.edit" || bootRoute?.name === "session.edit.item") {
       clipboardEditMode = true;
+      editorRowId = bootRoute.params.slotId ?? null;
     }
 
     const bar = document.getElementById("active-session-bar");

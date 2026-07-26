@@ -70,6 +70,15 @@ export function buildRouteTable() {
       mode: "edit",
     }),
   );
+  // The editor with one row called out. Inserting or swapping a row names it here, so a reload lands
+  // the trainer back on the row they were in the middle of instead of an undifferentiated plan.
+  registry.register(
+    new SessionRoute({
+      name: "session.edit.item",
+      pattern: "/session/:sessionId/client/:clientId/edit/exercise/:slotId",
+      mode: "edit",
+    }),
+  );
   // `superset` is the pre-rename spelling of the circuit segment. It stays matched forever: links are
   // shared and bookmarked, and a URL that once worked must not start showing an error page. Patterns
   // are additive — removing one is a breaking change that needs a redirect left in its place.

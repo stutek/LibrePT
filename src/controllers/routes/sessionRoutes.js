@@ -44,12 +44,15 @@ export class SessionRoute extends Route {
 
   enter(ctx) {
     super.enter(ctx);
-    const { sessionId, clientId = null, focusType, focusId } = ctx.params;
+    const { sessionId, clientId = null, focusType, focusId, slotId = null } = ctx.params;
     // Legacy `superset` links resolve to the same focus as `circuit`; syncSessionFocusUrl then
     // rewrites the address bar to the current spelling, so an old link upgrades itself on arrival.
     const type = focusType === "superset" ? "circuit" : focusType;
     const focusRef = this.mode === "focus" ? { type, id: focusId } : null;
-    ctx.router.showSessionView(sessionId, clientId, focusRef, { edit: this.mode === "edit" });
+    ctx.router.showSessionView(sessionId, clientId, focusRef, {
+      edit: this.mode === "edit",
+      slotId,
+    });
     return this;
   }
 }

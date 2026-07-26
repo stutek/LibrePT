@@ -105,9 +105,10 @@ export function renderClipboardEditor(container, deps) {
   // A word only where the row can't speak for itself. An item inserted from the clipboard lands
   // blank and holding the caret — that IS the announcement, and a badge next to it is noise on a
   // narrow row. A row the catalog filled in (injected or swapped) takes no focus and reads as
-  // ordinary, so it keeps a label saying what just happened to it.
+  // ordinary, so it keeps a label saying what just happened to it. A row restored from the URL after
+  // a reload gets neither: nothing just happened to it, and calling it New would be a lie.
   const newBadge = (it) =>
-    isCalledOut(it) && !callout.focus
+    isCalledOut(it) && !callout.focus && callout.kind !== "restored"
       ? `<span class="editor-added-badge">${
           callout.kind === "swap" ? tr("swapped_label", "Swapped") : tr("new_label", "New")
         }</span>`

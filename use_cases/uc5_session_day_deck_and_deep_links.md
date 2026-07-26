@@ -119,6 +119,7 @@ route classes, specificity ordering, and the invariants a new route must respect
 | `/session/{sessionId}/client/{clientId}/circuit/{circuitId}` | the clipboard with that circuit in focus |
 | `…/superset/{circuitId}` | **legacy alias** for the row above — the pre-2026-07-26 spelling. Still resolves, and the address bar is rewritten to `/circuit/`, so shared and bookmarked links never break |
 | `/session/{sessionId}/client/{clientId}/edit` | the **inline plan editor** open on that participant's plan |
+| `/session/{sessionId}/client/{clientId}/edit/exercise/{slotId}` | the plan editor **with that row called out** — inserting or swapping a row names it here, so a reload lands back on the row the trainer was in the middle of. A restore highlights and scrolls to it but takes no caret and shows no badge: nothing just happened to it. An id that no longer resolves is ignored and the segment is dropped |
 | `/clients/{clientId}` | a client detail page |
 | `/clients` | the Client Directory (its own view since TODO 4.8; the homepage keeps only the session list) |
 | `/adjustments` | the Pending Plan Adjustments deck (its own view since TODO 4.8) |
@@ -184,6 +185,7 @@ not-found view (`#view-error`) *inside* the content area:
 | Upcoming countdown, past elapsed + inline edit (persists across reload), finishing a session stamps the booking completed/duration | [../tests/e2e/test_session_status_line.py](../tests/e2e/test_session_status_line.py) |
 | Homepage keeps only the session list; ☰-menu navigation and direct deep links to `/clients` and `/adjustments`; logo returns home; the moved menu badge | [../tests/e2e/test_view_split_navigation.py](../tests/e2e/test_view_split_navigation.py) |
 | Globally-reachable dialogs (`/about`, `/terms`, `/build`, `/backup`) are routes: Back closes them, ✕/Escape agree, a cold link reopens over a real view, and the first-run agreement is not routed | [../tests/e2e/test_dialog_routing.py](../tests/e2e/test_dialog_routing.py) · `test_back_closes_the_dialog`, `test_the_close_button_and_back_agree`, `test_cold_deep_link_opens_the_dialog_over_a_real_view`, `test_first_run_terms_is_not_routed` |
+| The just-inserted editor row is addressable and survives a reload, without a caret or a New badge; a deleted row id falls back | [../tests/e2e/test_editor_row_deeplink.py](../tests/e2e/test_editor_row_deeplink.py) · `test_the_called_out_row_survives_a_reload`, `test_a_restored_row_takes_no_caret_and_carries_no_badge`, `test_a_deleted_row_id_falls_back_instead_of_erroring` |
 
 ---
 
