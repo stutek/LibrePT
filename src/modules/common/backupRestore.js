@@ -39,6 +39,15 @@ export function initBackupRestore(d) {
   deps = d;
 }
 
+// Clear the previous import's status line. Called by the backup route before it shows the dialog.
+export function prepareBackupDialog() {
+  const importStatus = document.getElementById("import-status");
+  if (importStatus) {
+    importStatus.textContent = "";
+    importStatus.className = "status-msg";
+  }
+}
+
 export function setupBackupRestore() {
   const dialog = document.getElementById("dialog-backup");
   if (!dialog) return;
@@ -46,15 +55,12 @@ export function setupBackupRestore() {
   const importFile = document.getElementById("import-db-file");
   const importStatus = document.getElementById("import-status");
 
+  // The dialog is a route: navigating opens it, so Back closes it and a reload reopens it. The
+  // status line from a previous import is cleared by prepareBackupDialog(), which the route calls
+  // before showing — a stale "restore failed" must not greet the next open.
   const backupBtn = document.getElementById("backup-btn");
   if (backupBtn) {
-    backupBtn.addEventListener("click", () => {
-      if (importStatus) {
-        importStatus.textContent = "";
-        importStatus.className = "status-msg";
-      }
-      dialog.showModal();
-    });
+    backupBtn.addEventListener("click", () => deps.navigateToPath(deps.urlFor("backup")));
   }
 
   const closeBtn = dialog.querySelector(".modal-close-btn");

@@ -124,6 +124,23 @@ route classes, specificity ordering, and the invariants a new route must respect
 | `/adjustments` | the Pending Plan Adjustments deck (its own view since TODO 4.8) |
 | `/routines`, `/exercises`, `/history` | the primary list views |
 
+**Dialog routes.** A dialog is a state a reload should restore, so the globally-reachable ones are
+addressable too. Opening one **pushes** a history entry, which makes **Back close it** — the dismiss
+gesture a phone user already knows — and the ✕, Cancel and Escape agree, because closing pops that
+entry. Arriving straight at one of these URLs (a shared link, or a reload while it was open) reopens
+the dialog over the dashboard rather than a blank shell.
+
+| URL (under the base path) | Restores |
+| :--- | :--- |
+| `/about` | the About dialog |
+| `/terms` | the Terms & disclaimer dialog, reopened from the ☰ menu |
+| `/build` | the build-identity dialog (release, commit, data schema, build time) |
+| `/backup` | the Sync & Backup dialog |
+
+- **The first-run agreement is deliberately not routed.** It is a boot precondition, not a place the
+  trainer navigated to: it takes no history entry, and Back must not dismiss an agreement that has
+  not been accepted. From the ☰ menu afterwards it is an ordinary routed dialog.
+
 - **Focus follows the URL and vice-versa**: opening a session **upgrades** the bare
   `/session/{id}` URL to whatever card is in focus; tapping a card **updates** the URL to that
   card, so the address bar is always a copy-able link to the exact card on screen.
@@ -166,6 +183,7 @@ not-found view (`#view-error`) *inside* the content area:
 | Launch the clipboard from a session card (with language switch + calendar sync) | [../tests/e2e/test_clipboard.py](../tests/e2e/test_clipboard.py) · `test_clipboard_launch_flow` |
 | Upcoming countdown, past elapsed + inline edit (persists across reload), finishing a session stamps the booking completed/duration | [../tests/e2e/test_session_status_line.py](../tests/e2e/test_session_status_line.py) |
 | Homepage keeps only the session list; ☰-menu navigation and direct deep links to `/clients` and `/adjustments`; logo returns home; the moved menu badge | [../tests/e2e/test_view_split_navigation.py](../tests/e2e/test_view_split_navigation.py) |
+| Globally-reachable dialogs (`/about`, `/terms`, `/build`, `/backup`) are routes: Back closes them, ✕/Escape agree, a cold link reopens over a real view, and the first-run agreement is not routed | [../tests/e2e/test_dialog_routing.py](../tests/e2e/test_dialog_routing.py) · `test_back_closes_the_dialog`, `test_the_close_button_and_back_agree`, `test_cold_deep_link_opens_the_dialog_over_a_real_view`, `test_first_run_terms_is_not_routed` |
 
 ---
 

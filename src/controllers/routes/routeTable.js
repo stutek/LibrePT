@@ -6,6 +6,7 @@
 // import.meta.url. That is what makes every route version-agnostic — the same pattern resolves
 // wherever the app happens to be hosted, and no route may ever name a version.
 
+import { GlobalDialogRoute } from "./dialogRoute.js";
 import { RouteRegistry } from "./routeRegistry.js";
 import {
   ClientDetailRoute,
@@ -108,6 +109,32 @@ export function buildRouteTable() {
     new ViewRoute({ name: "exercises", pattern: "/exercises", viewId: "exercises" }),
   );
   registry.register(new ViewRoute({ name: "history", pattern: "/history", viewId: "history" }));
+
+  // Dialogs reachable from anywhere (the ☰ menu, the build stamp). Each is a state a reload should
+  // restore and a link should be able to open, and routing them is what makes Back close them.
+  for (const [name, segment, dialogId, open] of [
+    ["about", "/about", "dialog-about", null],
+    // The build stamp is read off the running app, and a stale import status must not greet the
+    // next open — so both are refreshed before the dialog is shown, not when the page loaded.
+    ["build", "/build", "dialog-build-info", (ctx) => ctx.deps.renderBuildInfo?.()],
+    ["backup", "/backup", "dialog-backup", (ctx) => ctx.deps.prepareBackupDialog?.()],
+  ]) {
+    registry.register(new GlobalDialogRoute({ name, segment, dialogId, open, home: sessionsDay }));
+  }
+
+  registry.register(
+    new GlobalDialogRoute({
+      name: "terms",
+      segment: "/terms",
+      dialogId: "dialog-terms",
+      home: sessionsDay,
+      // The first-run agreement is mandatory: its ✕ is hidden and Escape is blocked
+      // (applicationHeader.setupFirstRunTerms). It is a boot precondition, not a place the trainer
+      // navigated to — so the router leaves it alone entirely rather than letting Back dismiss an
+      // agreement that has not been accepted.
+      ownable: (el) => !el.classList.contains("first-run"),
+    }),
+  );
 
   return registry;
 }

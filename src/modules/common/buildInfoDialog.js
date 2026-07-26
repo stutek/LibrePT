@@ -61,19 +61,21 @@ export function renderBuildInfo() {
   if (copyBtn) copyBtn.textContent = t("build_info_copy") || "Copy build details";
 }
 
-export function openBuildInfoDialog() {
-  const dialog = document.getElementById("dialog-build-info");
-  if (!dialog) return;
-  renderBuildInfo();
-  dialog.showModal();
-}
-
 export function setupBuildInfoDialog() {
   const dialog = document.getElementById("dialog-build-info");
   const stamp = document.getElementById("app-version");
   if (!dialog || !stamp) return;
 
-  stamp.addEventListener("click", openBuildInfoDialog);
+  // A route, so the build identity is a link a PT can paste into a bug report and Back dismisses it.
+  // The route calls renderBuildInfo() before showing.
+  //
+  // The stamp sits inside #logo-area, which navigates home on click. That used to be harmless — the
+  // dialog simply opened over a re-rendered dashboard — but now that the dialog is a route, letting
+  // the event through means routing home a tick later, which closes it again.
+  stamp.addEventListener("click", (event) => {
+    event.stopPropagation();
+    deps.navigateToPath(deps.urlFor("build"));
+  });
   dialog.querySelector(".modal-close-btn")?.addEventListener("click", () => dialog.close());
 
   const copyBtn = document.getElementById("btn-copy-build-info");

@@ -4,7 +4,7 @@
 // deps: {
 //   getState(),
 //   t,
-//   toRoute,
+//   activeRouteName,
 //   pushRoute,
 //   urlFor,
 //   getISODateForColumn
@@ -132,12 +132,13 @@ export function focusSessionsColumn(day, behavior = "smooth") {
   focusedSessionDay = day;
   renderSessionsTitleBar();
 
-  const targetPath = deps.urlFor("sessions.day", { isoDate: deps.getISODateForColumn(day) });
-  // Only reflect the focused day in the URL while the sessions list is the active route. A
-  // background renderSessions() (e.g. right after launching a session) must not bounce the URL off
-  // the /session/... view it just navigated to.
-  if (!deps.toRoute(window.location.pathname).startsWith("/session/")) {
-    deps.pushRoute(targetPath);
+  // Only reflect the focused day in the URL while the day deck IS the active route. A background
+  // renderSessions() — right after launching a session, or from a sync that redraws the dashboard
+  // under an open dialog — must not bounce the URL off whatever the trainer is actually looking at.
+  // Asking the router which route is active is exact; the path-prefix test this replaced let every
+  // non-/session/ route through, including dialogs layered over the deck.
+  if (deps.activeRouteName?.() === "sessions.day") {
+    deps.pushRoute(deps.urlFor("sessions.day", { isoDate: deps.getISODateForColumn(day) }));
   }
 
   if (grid.offsetParent === null) {
@@ -203,7 +204,9 @@ export function detectFocusedSessionsColumn() {
     focusedSessionDay = closest;
     renderSessionsTitleBar();
 
-    deps.pushRoute(deps.urlFor("sessions.day", { isoDate: deps.getISODateForColumn(closest) }));
+    if (deps.activeRouteName?.() === "sessions.day") {
+      deps.pushRoute(deps.urlFor("sessions.day", { isoDate: deps.getISODateForColumn(closest) }));
+    }
   }
 }
 

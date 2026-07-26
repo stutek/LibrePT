@@ -30,6 +30,7 @@ import {
 } from "./controllers/formsController.js";
 import { setupViewDismiss } from "./controllers/gestureController.js";
 import {
+  activeRouteName,
   focusActiveSessionCard,
   getBasePath,
   handlePathChange,
@@ -78,8 +79,16 @@ import {
   setSyncTrackingReady,
   setupApplicationHeader,
 } from "./modules/common/applicationHeader.js";
-import { initBackupRestore, setupBackupRestore } from "./modules/common/backupRestore.js";
-import { initBuildInfoDialog, setupBuildInfoDialog } from "./modules/common/buildInfoDialog.js";
+import {
+  initBackupRestore,
+  prepareBackupDialog,
+  setupBackupRestore,
+} from "./modules/common/backupRestore.js";
+import {
+  initBuildInfoDialog,
+  renderBuildInfo,
+  setupBuildInfoDialog,
+} from "./modules/common/buildInfoDialog.js";
 import {
   initFeedbackModal,
   openFeedbackModal,
@@ -235,6 +244,8 @@ function init() {
     getISODateForColumn,
     clientsViewShowDetails,
     setHeaderState,
+    prepareBackupDialog,
+    renderBuildInfo,
   });
 
   setupNavigation({ setupSessionsDayNav });
@@ -281,6 +292,8 @@ function init() {
 
   initBackupRestore({
     getState,
+    navigateToPath,
+    urlFor,
     setState: (ns) => setState(ns),
     saveToLocalStorage: saveState,
     renderClientsList,
@@ -299,6 +312,7 @@ function init() {
     saveToLocalStorage: saveState,
     applyTranslations,
     navigateToPath,
+    urlFor,
     renderClientsList,
     renderRoutinesList,
     renderExercisesList,
@@ -315,7 +329,7 @@ function init() {
   initDaySelector({
     getState,
     t,
-    toRoute,
+    activeRouteName,
     pushRoute,
     urlFor,
     getISODateForColumn,
@@ -342,7 +356,7 @@ function init() {
 
   // The version catalog is fetched once at boot and cached here; every notification render reads
   // this snapshot rather than refetching. Absent (today's single-version deploy) means no offers.
-  initBuildInfoDialog({ t });
+  initBuildInfoDialog({ t, navigateToPath, urlFor });
   setupBuildInfoDialog();
 
   initVersionMessages({

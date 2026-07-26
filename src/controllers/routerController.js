@@ -6,6 +6,7 @@
 // facade of operations a route is allowed to perform.
 
 import { SHARE_INIT_PARAM } from "../modules/common/shareLink.js";
+import { DialogRoute } from "./routes/dialogRoute.js";
 import { buildRouteTable } from "./routes/routeTable.js";
 
 const BASE_PATH = new URL(".", import.meta.url).pathname.replace(/\/controllers\/$/, "/");
@@ -65,6 +66,36 @@ function writeHistory(route, { replace }) {
   if (replace) window.history.replaceState(null, "", url);
   else window.history.pushState(null, "", url);
   return true;
+}
+
+// A dialog opened from inside the app sits on top of the entry the trainer came from, so Back closes
+// it. Arriving straight at a dialog URL — a shared link, or a reload while one is open — has nothing
+// underneath, and Back would leave the app entirely. Rewrite that first entry as the view beneath and
+// push the dialog on top of it, so Back behaves the same either way.
+function ensureBackTargetForDialog(ctx) {
+  if (!ctx.isBootPass || !(ctx.route instanceof DialogRoute)) return;
+  const here = window.location.pathname + window.location.search;
+  window.history.replaceState(null, "", toUrl(ctx.route.parentUrl(ctx)) + carriedSearch());
+  window.history.pushState(null, "", here);
+}
+
+// Whatever closes a routed dialog — the ✕, Cancel, Escape, a save handler — has to pop the entry that
+// opened it, or the address bar would keep naming a dialog that is no longer on screen. `close` does
+// not bubble, but it does reach a capturing listener, so this one hook covers every existing close
+// call site without touching any of them.
+function setupRoutedDialogClose() {
+  document.addEventListener(
+    "close",
+    (event) => {
+      const el = event.target;
+      if (!(el instanceof HTMLDialogElement)) return;
+      if (el.dataset.routeClosing) return; // the router closed it as part of routing away
+      if (!el.dataset.routeName || el.dataset.routeName !== activeRouteName()) return;
+      delete el.dataset.routeName;
+      window.history.back();
+    },
+    true,
+  );
 }
 
 export function pushRoute(route) {
@@ -172,6 +203,8 @@ export function navigateToPath(targetPath) {
 }
 
 export function setupNavigation({ setupSessionsDayNav } = {}) {
+  setupRoutedDialogClose();
+
   const navItems = document.querySelectorAll(".header-nav .nav-item, .bottom-nav .nav-item");
   for (const item of navItems) {
     item.addEventListener("click", () => {
@@ -314,6 +347,7 @@ export function handlePathChange() {
     router: routerOps,
   };
   hasResolvedOnce = true;
+  ensureBackTargetForDialog(ctx);
 
   if (activeEntry && activeEntry.route !== hit.route) activeEntry.route.exit(activeEntry.ctx);
   // enter() returns the route the user ends up on, which is not always the one that matched: a

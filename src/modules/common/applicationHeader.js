@@ -259,10 +259,6 @@ function setupAppMenu() {
     }
   });
 
-  const openDialog = (id) => {
-    const d = document.getElementById(id);
-    if (d) d.showModal();
-  };
   const on = (id, handler) => {
     const el = document.getElementById(id);
     if (el) el.addEventListener("click", handler);
@@ -294,15 +290,11 @@ function setupAppMenu() {
   on("menu-github", () => closeMenu());
   on("menu-bug-report", () => closeMenu());
   on("menu-privacy", () => closeMenu());
-  // About / Terms open their modals.
-  on("menu-about", () => {
-    closeMenu();
-    openDialog("dialog-about");
-  });
-  on("menu-terms", () => {
-    closeMenu();
-    openDialog("dialog-terms");
-  });
+  // About / Terms are routes, not just modals: the router opens the dialog, so Back closes it and a
+  // reload reopens it. Their ✕ buttons below need no change — closing pops the entry (see
+  // routerController's close-capture hook).
+  on("menu-about", () => goto(deps.urlFor("about")));
+  on("menu-terms", () => goto(deps.urlFor("terms")));
 
   // Modal close (×) buttons for the About / Terms dialogs.
   for (const btn of document.querySelectorAll(
