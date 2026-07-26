@@ -225,7 +225,7 @@ export const en = {
   editing: "Editing",
   unscheduled: "Unscheduled",
   undefined: "Undefined",
-  combo_round_title: "Linked Combo Round",
+  combo_round_title: "Circuit",
   bar_clients_label: "clients",
   next_session_label: "Next",
   signal_too_easy: "Too Easy",
