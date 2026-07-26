@@ -543,7 +543,7 @@ Simon's proposal remaps record IDs at each schema migration and keeps an
   mapping becomes a *column on the record* instead of a second store. **Four independent arguments
   now point at this**: split/merge identity, the suppression list (18.7), deep-link durability
   (18.10), and dropping the hot-path lookup.
-- **ID format — recommend UUIDv7** (RFC 9562): 122 bits of collision resistance *and* lexicographic
+- **ID format — UUIDv7, decided 2026-07-26** (RFC 9562): 122 bits of collision resistance *and* lexicographic
   time-ordering in the prefix, so it doubles as a tiebreak within 18.5's topological order. Today's
   generators are a real clash risk and leak creation time — `Date.now()` + 4 chars of `Math.random()`
   ([clipboardEditor.js](src/modules/clipboard/clipboardEditor.js)), `session-${Date.now()}`
@@ -569,11 +569,17 @@ Simon's proposal remaps record IDs at each schema migration and keeps an
   `read old record → build domain object → normal star write`, i.e. *literally* the write layer, not
   a second transform. Otherwise half a bucket comes from one code path and half from another, and the
   drift is undetectable.
-- **A partially-migrated bucket must not be readable.** Needs a per-bucket `complete` flag; routing
-  refuses any schema whose bucket is incomplete, and `evaluateVersionOffer` gains it as a precondition
-  before offering the switch. Without it, a crash at 40% reboots the PT into a UI showing 40% of their
-  clients — indistinguishable from catastrophic data loss, and the rational response (re-entering
-  records) creates real corruption.
+- **A partially-migrated bucket must not be readable** — routing refuses any schema whose bucket is
+  incomplete, and `evaluateVersionOffer` gains it as a precondition before offering the switch.
+  Without it, a crash at 40% reboots the PT into a UI showing 40% of their clients —
+  indistinguishable from catastrophic data loss, and the rational response (re-entering records)
+  creates real corruption.
+  - **Completeness is a query, not a stored flag** (decided 2026-07-26): `count(source records) ===
+    count(mapping entries for that schema)`. Derived state cannot drift from reality the way a flag
+    written at the wrong moment can, and it needs no crash-safe flag update. Requires an IndexedDB
+    index on the migration marker so `count()` hits the index B-tree instead of scanning. **Count
+    equality is sound here precisely because there are no deletes (§17.3)** — the mapping can never
+    hold an entry whose source has gone, so equal counts cannot hide a mismatched pair.
 - **Still open**: defer pre-emptive migration to idle/charging (`requestIdleCallback`) so it does not
   cost battery mid-session; how a *failed* background migration reports itself without alarming a PT
   who never asked for it (block the switch offer, do not raise an error).
@@ -608,6 +614,11 @@ Without the check the discipline survives until the first hurried release.
   justified.
 - **Keep the degradation marker anyway** (cheap): a record carrying data the running version cannot
   render should be visibly flagged (lock glyph / greyed row), so a degraded view is never silent.
+- **Reading degraded is mild; WRITING degraded is the danger** (Simon, 2026-07-26). A v5 app showing a
+  HIIT exercise wrong is a display problem; a PT *logging reps or feedback into that wrong view*
+  produces bad data that then fans out to every bucket. So the signal belongs at the point of writing,
+  not only at the point of viewing, and the app must announce **degraded (= downgraded) mode** at the
+  whole-app level via the ribbon (see §18.12), not just per record.
 
 ### 18.5 [ ] [Decided] Ordering is topological, not chronological
 Migration replay order means **correct order of foreign-key availability**, not timestamp order.
@@ -687,6 +698,12 @@ per session, 9 exercises × 4 sets, rests, feedback, notes):**
   *locked phone with a passcode* is genuinely well protected (iOS Data Protection / Android FBE), a
   stolen laptop without FDE is not protected at all. Same-origin scripts, extensions with host
   permissions and anyone holding the unlocked device read it in plaintext.
+- **Desktop must be addressed eventually** (Simon, 2026-07-26). It is the weak case on every axis in
+  this section: FDE is opt-in and frequently off, browser extensions with host permissions are common,
+  and the device is shared far more often than a phone. It is also where the *better* tools live —
+  the File System Access API can put backups in a real user-chosen file (and keep a handle for
+  repeat exports) instead of the download folder. Treat "desktop" as its own threat model and its own
+  backup UX, not as a wide phone.
 - **Recommended first step: encrypt the backups, not the live DB.** The backup is the artifact that
   travels (§3.3 Drive sync, email, USB) and is where a leak actually happens; the live store already
   has OS encryption in the phone case; and a lost passphrase is *recoverable* because the live DB
@@ -731,12 +748,27 @@ Three deep-link failure modes as UI behaviours are added and dropped:
 code for supported version behaviours" implies **one build with versioned behaviours behind flags**,
 not multiple hosted builds. That is arguably a *simplification*: no byte-identical release folders, no
 per-tag subpath publishing, no service-worker reinstall hazard, no "which build am I running", and
-deep-link failure mode 1 disappears rather than being mitigated. Costs: payload grows by roughly
-671 KB of non-font `src/` per behaviour generation (~2 MB at three), old behaviours must be actively
-maintained rather than frozen, and it **inverts §16.1's "no fixes ever land on a maintenance-mode
-version"** — old behaviours living inside the current build *do* get fixes automatically. That may be
-better, but it must be a deliberate reversal, and it decides whether §16.1/§16.2's hosting machinery
-stays or is retired. Everything else in §18 holds either way.
+deep-link failure mode 1 disappears rather than being mitigated. **Confirmed as the intent
+(Simon, 2026-07-26).** Costs: old behaviours must be actively maintained rather than frozen, and it
+**inverts §16.1's "no fixes ever land on a maintenance-mode version"** — old behaviours living inside
+the current build *do* get fixes automatically. That may well be better, but it must be a deliberate
+reversal, and it decides whether §16.1/§16.2's hosting machinery stays or is retired. Everything else
+in §18 holds either way.
+
+- **Content-addressed modules make the payload cost much smaller than a naive ×N** (Simon,
+  2026-07-26): a module whose SHA is unchanged across behaviour generations is stored and downloaded
+  **once**, so the marginal cost of an extra generation is only the files that actually differ — not
+  another 671 KB. The app already computes a per-file integrity catalog for the service-worker cache
+  ([cacheManifest.js](src/sw/cacheManifest.js)), which is most of the machinery.
+- **The price is dependency resolution**: routing must work out which module graph a given behaviour
+  needs when the files are shared and deduplicated. **This is the payoff case for modularization** —
+  it raises the value of §14.5 (split the monolithic shared files) and §12.7 (~89 module requests on
+  first load) from housekeeping to load-bearing, because coarse modules dedupe badly and a file that
+  mixes two behaviours' code can never be shared.
+- **Watch the shipped invariant**: `cacheManifest.js` documents that the cache is *atomic* — one whole
+  coherent module version or nothing — because a stale module importing a fresh one is a runtime
+  version skew. Content-addressed sharing across generations must preserve that per-graph coherence,
+  not just per-file freshness.
 
 ### 18.11 [ ] [Open] Legal gaps this design creates
 - **Re-identification via backups + the mapping table.** A pre-erasure backup contains
@@ -767,9 +799,13 @@ stays or is retired. Everything else in §18 holds either way.
 
 ### 18.12 [ ] [Decided] Reuse the preview ribbon for unsupported-version warning
 Generalise `#preview-ribbon` from an always-on `PREVIEW` pill into a **build-status ribbon with
-severity tiers**: `PREVIEW` (amber, informational) → `BETA` (stronger — real data on unstable code) →
-`UNSUPPORTED` (red, non-dismissable). This collapses §16.2's open "distinct ribbon treatments per
-preview tier" question into one piece of work.
+severity tiers**: `PREVIEW` (amber, informational) → `DEGRADED` → `BETA` (stronger — real data on
+unstable code) → `UNSUPPORTED` (red, non-dismissable). This collapses §16.2's open "distinct ribbon
+treatments per preview tier" question into one piece of work.
+
+- **`DEGRADED` is the downgrade tier** (§18.4): the running app is older than the schema its data was
+  authored in, so some records display wrong and — the part that matters — **anything logged here may
+  be recorded lossily**. Wording must say that plainly rather than implying a read-only display quirk.
 
 - **The ribbon must not be the only signal.** Persistent chrome goes invisible within days — which is
   what makes an always-on amber pill safe today and an unsupported-version warning useless tomorrow.
