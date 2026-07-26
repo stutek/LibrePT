@@ -139,7 +139,9 @@ erDiagram
         string id PK
         string type "exercise|rest"
         string exerciseId FK
-        string circuitId "superset grouping"
+        string circuitId "circuit (superset) grouping key — null when standalone"
+        string circuitTitle "denormalised onto every member"
+        int circuitSeries "rounds — denormalised onto every member"
         bool completed "false = prescribed but skipped"
         json sets
     }
@@ -156,10 +158,60 @@ Three modelling decisions worth knowing before changing anything here:
 - **History embeds a frozen copy of the program**, not a reference to a live routine. Editing a
   routine must never rewrite the past. This makes history the fastest-growing collection.
 - **`SESSION_ITEM` is a flat typed array**, not a nested superset container — `circuitId` grouping is
-  folded at render. The live session and the frozen record use the *same* model, so there is no second
-  representation to drift.
+  folded at render (see *Circuits* below). The live session and the frozen record use the *same*
+  model, so there is no second representation to drift.
 - **`routineName` is a soft string reference on purpose.** Making template provenance a hard FK would
   create `history → routine → history`, the first cycle in the graph, and break §4's ordering.
+
+### Circuits (supersets) — a grouping key, not a record
+
+There is **no circuit entity**, which is why one does not appear in the diagram above. A circuit is a
+run of **consecutive** `SESSION_ITEM`s that share a `circuitId` — exercises *and* the rests between
+them — folded into one unit at render time by `buildSupersetUnits`. `circuitId` is a **grouping key
+among siblings inside one embedded array, not a foreign key**: it points at no record, so it adds no
+edge to the reference graph and cannot introduce the cycle §4 forbids. That is also why the field
+appears three times per member rather than once per group:
+
+| Field | On every member | Why it is denormalised |
+| :--- | :--- | :--- |
+| `circuitId` | the grouping key | the *only* thing that makes an item a member; `null` = standalone |
+| `circuitTitle` | the group's name | a member must render its own header without a second lookup |
+| `circuitSeries` | round count | a member's `sets` length **is** the round count — one source of truth per item |
+
+```mermaid
+flowchart LR
+    subgraph stored["Stored — flat ordered array"]
+        I1["exercise · circuitId c1"]
+        I2["rest · circuitId c1"]
+        I3["exercise · circuitId c1"]
+        I4["exercise · circuitId null"]
+    end
+    stored --> F["buildSupersetUnits()"]
+    F --> U1["Circuit card · c1<br/>title, rounds, 3 members"]
+    F --> U2["Standalone exercise card"]
+
+    style F fill:#0d9488,color:#fff
+```
+
+**The contiguity is an invariant, not an accident.** Members must stay adjacent in the array or the
+fold would split one circuit into two units; `normalizeCircuits()` in
+[clipboardEditor.js](../src/modules/clipboard/clipboardEditor.js) pulls members back together on
+every edit, and re-stamps the shared `circuitTitle`/`circuitSeries` so denormalised copies cannot
+diverge. In a completed history record the order is frozen, so the invariant holds for good.
+
+**Naming: stored `circuit*`, displayed "superset".** The feature shipped first as a round-counted
+*circuit* block (2026-07-16) and the user-facing term moved to *superset* the next day; the persisted
+field names never followed, because renaming a stored key is a migration, not a rename. The two words
+are not strict synonyms in training vocabulary either — a superset is two movements back-to-back, a
+circuit is a round-based block of three or more — and the stored model is the round-counted one.
+**Do not "fix" the field names in isolation**: `circuitId` / `circuitTitle` / `circuitSeries` are
+written into history records and cached live sessions, so a rename is a schema major with a
+projection (§4), not a find-and-replace.
+
+**Round position is live-only.** The *current* round a trainer is on lives in the active-session
+cache as `circuitRounds[circuitId]`, never in a history record — a finished record stores how many
+rounds were **prescribed** (`circuitSeries`) and what was **performed** (each member's `sets`), which
+is enough to reconstruct the block without storing a cursor into a session that has ended.
 
 ---
 
