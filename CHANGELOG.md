@@ -17,6 +17,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-07-27 — Routing becomes a route table
+
+### Changed
+- **Routes resolve through a registry instead of a 27-branch `if/else`** — each addressable state is now a `Route` object owning its own pattern *and* what entering it does ([`routes/`](src/controllers/routes/routeTable.js)), and [`routerController.js`](src/controllers/routerController.js) only resolves and delegates. Three things the chain got wrong are structurally gone: the header/overlay lines that were copy-pasted into nine branches live once in the base class; `/session/new` outranking `/session/:sessionId` is now a property of the patterns (**literal segments win**) rather than of where a human wrote the branch; and a route no longer reaches for `document`, so routing is exercisable against stubs. Reverse routing (`urlFor`) makes a hand-spelled path unnecessary — which is what keeps patterns **version-agnostic**, since none of them ever sees the base path. Behaviour is unchanged, including the legacy `…/superset/{id}` focus spelling and the not-found view keeping the failed path in the address bar.
+
+### Added
+- **[docs/ROUTING.md](docs/ROUTING.md)** — the routing architecture: the class hierarchy and the patterns it applies, specificity ordering, the `ctx` a route receives, the five invariants (no version in a path, patterns are additive, unknown routes 404 rather than redirect, URLs are built not spelled, no personal data in a path) and a checklist for adding a route. [UC5 §4](use_cases/uc5_session_day_deck_and_deep_links.md) stays the catalogue of *what* the URLs are.
+
+### Fixed
+- **The build gate fixes formatting instead of printing a diff** — both lint steps checked without applying, so a run ended by asking a human to re-apply whitespace by hand and re-run the whole gate (which is what produced `c3cc369`). Ruff and Biome now write those fixes and the stage **names every file it rewrote**; findings that need a human decision are untouched, and the re-check without `--write` is still the verdict ([`build/__init__.py`](build/__init__.py)).
+
+---
+
 ## 2026-07-26 — One word for a grouped block: circuit
 
 ### Changed

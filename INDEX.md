@@ -21,6 +21,7 @@ This index provides AI agents and contributors with a structured navigation map 
 | [CONTRIBUTING.md](CONTRIBUTING.md) | `guidelines` | Human contributor guide: development setup, testing, code conventions, and documentation standards. |
 | [TODO.md](TODO.md) | `roadmap` | Backlog of planned features, UX changes, and unresolved design questions awaiting brainstorming. |
 | [docs/DATA_MODEL.md](docs/DATA_MODEL.md) | `architecture` | Data model & storage schema: IndexedDB layout, logical record model, star-write projections, migration order and retention. |
+| [docs/ROUTING.md](docs/ROUTING.md) | `architecture` | Routing architecture: the Route class hierarchy and registry, specificity-based resolution, the `ctx` a route receives, routing invariants, and how to add a route. |
 | [AGENT_RULES.md](AGENT_RULES.md) | `guidelines` | Mandatory interaction protocols, direct execution rules, and single-source-of-truth guardrails for AI agents. |
 | [okf.yaml](okf.yaml) | `manifest` | Root configuration manifest declaring OKF v0.1 compliance and catalog entrypoints. |
 | [LICENSE](LICENSE) | `license` | MIT License terms governing use, modification, and distribution of LibrePT. |

@@ -184,7 +184,7 @@ The service worker is split into single-responsibility modules so each concern c
 *   **Polymorphic reps & load**: reps can be a count, a range (`8-12`), a hold (`30s`), or `max`-to-failure; load is equipment-derived (kg / cable level / band / bodyweight ± kg). The reps combobox suggests equipment-appropriate presets (loaded movements cluster low, bodyweight high). See [UC6](use_cases/uc6_exercise_taxonomy_and_picker.md).
 
 ### 5. Deep-Linkable Clean URLs (App Routing)
-*   **Every view and record is addressable by a clean URL**, so links are shareable and bookmarkable and restore the same screen on load:
+*   **Every view and record is addressable by a clean URL**, so links are shareable and bookmarkable and restore the same screen on load (the router's own design and invariants: [docs/ROUTING.md](docs/ROUTING.md)):
     *   `/sessions/{YYYY-MM-DD}` — the day deck focused on a given day
     *   `/session/{sessionId}` and `/session/{sessionId}/client/{clientId}` — the active-session clipboard, optionally on a specific participant
     *   `/session/{sessionId}/client/{clientId}/exercise/{exerciseId}` and `…/circuit/{circuitId}` — the clipboard with a specific card in focus. Opening the session upgrades the URL to whatever card is focused, and tapping a card updates it, so the address bar is always a copy-able link to the exact card on screen.

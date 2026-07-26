@@ -106,6 +106,10 @@ Every view and record is addressable by a clean URL under the app's base path (`
 GitHub Pages, derived from `<base>` locally). Opening or typing such a URL restores the same
 screen; navigating within the app keeps the address bar in step.
 
+This section is the catalogue of *what* the URLs are. How the router resolves one to a screen — the
+route classes, specificity ordering, and the invariants a new route must respect — is
+[docs/ROUTING.md](../docs/ROUTING.md).
+
 | URL (under the base path) | Restores |
 | :--- | :--- |
 | `/sessions/{YYYY-MM-DD}` | the day deck focused on that day |
