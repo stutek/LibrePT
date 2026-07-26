@@ -99,7 +99,7 @@ erDiagram
     CLIENT ||--o{ PLAN_UPDATE : "about"
     ROUTINE ||--o{ SESSION_ITEM : "prescribes"
     EXERCISE ||--o{ SESSION_ITEM : "referenced by"
-    HISTORY ||--|{ SESSION_ITEM : "snapshots (inline copy)"
+    HISTORY ||--|{ SESSION_ITEM : "snapshots (owned copy, ordered by position)"
     HISTORY ||--o{ FEEDBACK : "collected during"
 
     CLIENT {
@@ -157,67 +157,96 @@ erDiagram
 
 Three modelling decisions worth knowing before changing anything here:
 
-- **History embeds a frozen copy of the program**, not a reference to a live routine. Editing a
-  routine must never rewrite the past. This makes history the fastest-growing collection.
-- **`SESSION_ITEM` is a flat typed array**, not a nested superset container — `circuitId` grouping is
-  folded at render (see *Circuits* below). The live session and the frozen record use the *same*
+- **History owns a frozen copy of the program**, not a reference to a live routine. Editing a routine
+  must never rewrite the past. "Copy, not reference" is a *semantic* rule and outlives the storage
+  engine: whether the items sit in the history record's payload or in rows of their own, they belong
+  to that record and never re-point at a live routine. This makes history the fastest-growing
+  collection.
+- **`SESSION_ITEM` is a flat typed list**, not a nested superset container — `circuitId` grouping is
+  folded at render (see *Circuits* below), and sequence comes from `position` (see *Ordering* below). The live session and the frozen record use the *same*
   model, so there is no second representation to drift.
 - **`routineName` is a soft string reference on purpose.** Making template provenance a hard FK would
   create `history → routine → history`, the first cycle in the graph, and break §4's ordering.
 
 ### Ordering — explicit, dense, checkable
 
-**Order is data, not a side effect of storage.** Every `SESSION_ITEM` carries an integer `position`,
-and readers **sort by it**. Array order in the embedded JSON must agree with it, but is not the
-authority: a disagreement is a *detectable, repairable defect* rather than silent corruption.
+**Order is data, carried in the record.** Every `SESSION_ITEM` holds an integer `position`, and
+readers **sort by it**. Nothing about how the records are stored is allowed to imply sequence.
 
 The rule the whole scheme rests on:
 
 ```
-positions(session items) === [0, 1, 2, … , n-1]     — dense, unique, gapless
+positions(one session's items) === [0, 1, 2, … , n-1]     — dense, unique, gapless
 ```
 
-Three checks fall straight out of it, none of which the previous implicit scheme could express:
+**Why explicit at all: the store no longer preserves order for us.** On JSON, sequence rode along
+free in an array; the move to IndexedDB (§2, [TODO §18.6](../TODO.md)) retires that. Records are
+keyed and indexed, and a key order is not a program order — so unless order is a *field*, a
+projection, a per-row store or an import loses it with nothing left to rebuild from. The §4
+completeness check would not notice, because every id is still present and only the sequence is
+wrong: a scrambled session that passes every integrity test we have. **`position` is therefore a
+prerequisite of the engine move, not a follow-up to it.**
+
+Two invariants fall out of density, neither of which any implicit scheme could express:
 
 | Invariant | Check | What it catches |
 | :--- | :--- | :--- |
-| **Dense and unique** | sorted positions equal `0..n-1` | a dropped item, a duplicated item, a half-applied reorder |
-| **Array agrees with position** | `items[i].position === i` for all `i` | a projection or import that reordered the array |
+| **Dense and unique** | sorted positions equal `0..n-1` | a dropped item, a duplicated item, a half-applied reorder, a projection that wrote a partial list |
 | **Circuit members are contiguous** | per `circuitId`: `max(position) - min(position) + 1 === member count` | a circuit split in two by an item wedged into the middle |
 
-**Why explicit ordering at all.** Implicit array order survives only while items are an embedded JSON
-array. The entity above has a primary key and reads like a row; the moment anything stores items
-per-row, or a projection (§4) normalises or re-sorts them, the order — *and the circuit grouping that
-order encodes* — is lost with no field to reconstruct it from. The completeness check would not
-notice: every id is present, in the wrong sequence. An explicit `position` makes the ordering
-**assertable at rest**, which is what a store holding the only copy of a trainer's records needs.
+#### Why not a linked list
 
-**Why dense rather than gapped or fractional.** Inserting renumbers the tail, which sounds expensive
-and is not: the items are one embedded array in one record, so renumbering ten of them is the *same
-single record write* as inserting without renumbering. Gapped (`10, 20, 30…`) and fractional /
-lexicographic ranks buy insert-without-renumber, and their whole payoff is concurrent writers on
-row-per-item storage — which a local-first, single-trainer app does not have. What they cost is
-exactly what was wanted here: with arbitrary rank values there is no cheap "is this list intact"
-question to ask, because *any* set of distinct values is valid. Dense positions are verifiable;
-sparse ranks are merely sortable.
+`nextId` / `prevId` pointers are the more *flexible* representation, and that is the wrong axis to
+optimise. Three properties are on offer and no scheme gives all three:
 
-**Rejected: a second `circuitPosition` field.** Verbose in the wrong way. A member's index inside its
-circuit is derivable from `position` and the contiguity invariant, so storing it too creates two
-sources of truth that can disagree — and a disagreement between them has no correct resolution.
-One authoritative field, everything else derived.
+| Scheme | Cheap insert / move | Ordered read | Integrity checkable |
+| :--- | :--- | :--- | :--- |
+| **Dense `position`** | renumber the tail | index range scan, already sorted | **yes** — `0..n-1` |
+| Linked list | 2–3 row writes, no neighbours disturbed | pointer chase, `n` dependent reads | no cheap check |
+| Gapped / fractional rank | no renumber | index range scan | no — any distinct set is valid |
 
-> **Not built yet.** Positions are specified here; the live and frozen shapes still order by array
-> index alone. Shipping it is expand-first (§4): write `position` on every item everywhere, keep
-> array order as the fallback for records that predate it, then make the sort authoritative. Tracked
-> in [TODO §17.5](../TODO.md).
+- **Reading is the hot path, and a chain cannot be read in one go.** Rendering the clipboard needs
+  the whole session in order on every re-render. Positions come back sorted from one index range
+  scan; a chain costs `n` *dependent* lookups — each hop must complete before the next key is known,
+  so it cannot be batched or parallelised. Inserts, by contrast, happen at human speed: a trainer taps
+  "+ Exercise" a handful of times per session.
+- **A broken pointer loses the tail, silently.** One bad `nextId` and every item after it is
+  unreachable — the session simply ends early, and nothing distinguishes that from a session that
+  really was that short. A bad `position` misplaces exactly one item, and the density check names it.
+  For the *only copy* of a trainer's records, a failure mode of "lose one item's place" beats "lose
+  the rest of the workout".
+- **Chains fail in ways with no correct repair.** Corruption yields cycles, forks and orphans;
+  deciding which branch is the real one is guesswork. A position list fails as a hole or a duplicate,
+  and the repair is a renumber — mechanical, and obviously right.
+- **Contiguity stops being a predicate.** `max - min + 1 === count` has no equivalent over a chain;
+  verifying a circuit means traversing the whole list and hoping the traversal itself is sound.
+- **The flexibility does not pay for itself.** Pointer schemes earn their keep with concurrent
+  writers doing frequent reorders on large collections. This is a single-writer, offline-first app
+  where a session holds tens of items, and renumbering them is one transaction of `n` puts.
+
+**What would change the decision**: sessions in the thousands of items, or genuine concurrent editing
+of one session from two devices. Neither is on the roadmap; if either arrives, fractional ranks — not
+a chain — are the next stop, because they keep the ordered read.
+
+**Also rejected: a second `circuitPosition` field.** A member's index inside its circuit is derivable
+from `position` and the contiguity invariant, so storing it creates two sources of truth that can
+disagree — and their disagreement has no correct resolution. One authoritative field, everything else
+derived.
+
+> **Not built yet.** Positions are specified here; today's shapes still order by array index, which
+> is exactly the artefact the engine move retires. Shipping it is expand-first (§4): write `position`
+> on every item everywhere, then flip readers to sort by it — and it must land **before** items stop
+> living in an ordered structure, because after that there is nothing to derive the first positions
+> from. Legacy JSON records get theirs assigned once, at migration, from the array order that is still
+> intact at that moment. Tracked in [TODO §17.5](../TODO.md).
 
 ### Circuits (supersets) — a grouping key, not a record
 
 There is **no circuit entity**, which is why one does not appear in the diagram above. A circuit is a
 run of **consecutive** `SESSION_ITEM`s that share a `circuitId` — exercises *and* the rests between
 them — folded into one unit at render time by `buildSupersetUnits`. `circuitId` is a **grouping key
-among siblings inside one embedded array, not a foreign key**: it points at no record, so it adds no
-edge to the reference graph and cannot introduce the cycle §4 forbids. That is also why the field
+among sibling items, not a foreign key**: it points at no record, so it adds no edge to the reference
+graph and cannot introduce the cycle §4 forbids. That is also why the field
 appears three times per member rather than once per group:
 
 | Field | On every member | Why it is denormalised |
@@ -228,11 +257,11 @@ appears three times per member rather than once per group:
 
 ```mermaid
 flowchart LR
-    subgraph stored["Stored — flat ordered array"]
-        I1["exercise · circuitId c1"]
-        I2["rest · circuitId c1"]
-        I3["exercise · circuitId c1"]
-        I4["exercise · circuitId null"]
+    subgraph stored["Stored — flat list, ordered by position"]
+        I1["pos 0 · exercise · circuitId c1"]
+        I2["pos 1 · rest · circuitId c1"]
+        I3["pos 2 · exercise · circuitId c1"]
+        I4["pos 3 · exercise · circuitId null"]
     end
     stored --> F["buildSupersetUnits()"]
     F --> U1["Circuit card · c1<br/>title, rounds, 3 members"]
@@ -241,8 +270,8 @@ flowchart LR
     style F fill:#0d9488,color:#fff
 ```
 
-**The contiguity is an invariant, not an accident.** Members must stay adjacent or the fold would
-split one circuit into two units; `normalizeCircuits()` in
+**The contiguity is an invariant, not an accident.** Members must occupy consecutive positions or the
+fold would split one circuit into two units; `normalizeCircuits()` in
 [clipboardEditor.js](../src/modules/clipboard/clipboardEditor.js) pulls members back together on
 every edit, and re-stamps the shared `circuitTitle`/`circuitSeries` so denormalised copies cannot
 diverge. In a completed history record the order is frozen, so the invariant holds for good. With
