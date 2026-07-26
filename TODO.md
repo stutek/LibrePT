@@ -65,6 +65,8 @@ Data should sync **periodically to Google Drive** and remain **editable directly
 - **Supersedes the shipped `mailto:` consent trigger** (former 3.4); that email path can be removed once this lands.
 
 ### 3.7 [ ] [Decision] Persistence engine — stay on localStorage JSON, defer embedding a DB
+> **Superseded 2026-07-26 by [§18.6](#186--decided-persistence-engine--indexeddb-supersedes-the-37-deferral).** The revisit trigger this item names ("the 5 MB cap looms") has fired: §17.1 shipped, and a very busy PT reaches ~16.6 MiB/yr in a single bucket. The engine decision is now IndexedDB; the reasoning and sizing live in §18.6. The "keep the DB behind the `stateStore.js` seam" prep below stands and is what makes the swap cheap.
+
 The consent-photo idea was the only thing pushing toward binary blob storage; KISS-ing consent to paper (3.5) removes it, so the "is it time to embed a DB?" question resolves for now.
 
 - **Decided (2026-07-22): keep the current `localStorage` JSON store.** It's synchronous, trivial to export/import (already the Backup & Restore mechanism), and a solo PT's *text* data (clients, routines, sessions, history) is nowhere near the ~5MB origin cap. The main DB is already centralized in `src/data/stateStore.js` (`librept_db`).
@@ -371,6 +373,8 @@ Continued brainstorm on 16.1's "keep multiple versions deployable" question. Lea
 ---
 
 ### 16.3 [ ] [Decided, not built] Key storage buckets on the DATA SCHEMA, not the release tag
+> **Promoted to a prerequisite 2026-07-26**: [§18](#18-data-layer-simultaneous-multi-schema-writes-star-writes)'s star-write model is this item's bucket-per-schema-major layout expressed as a write policy, so §18 cannot start until this lands. Build it first.
+
 **Decided (2026-07-25).** As shipped, `storageNamespace.js` keys buckets on the release tag, so
 **every** tag mints a new bucket — forcing a pointless copy and, worse, showing the data-loss warning
 on a rollback where *nothing can be lost*. A scary warning that isn't true trains a PT to click
@@ -476,3 +480,302 @@ With 17.1 preserving the full program, "**Save as routine**" on a history record
 
 - Extraction **strips all person/day-specific magnitudes** — `weight`, `watts`, time/`duration`, distance/calories — keeping the **prescription structure**: exercise, set count, `reps`/target-reps, `rest`, superset grouping. (Rep counts are a reasonable reused default; loads are not.)
 - Pairs with the inline clipboard editor ([8.3](#83--inline-clipboard-editor-saved-patch-patchesinline_clipboard_editorpatch)) and "next session prep" ([5.1](#51--tabbed-client-view) Tab 3).
+- **Watch item for §18.5**: making template provenance a *hard* reference back to the source history record would create the first cycle in the reference graph (`history → routine → history`), which §18.5's topological migration order forbids. Keep provenance a soft/denormalised field.
+
+---
+
+## 18. Data layer: simultaneous multi-schema writes ("star writes")
+
+> **Status (2026-07-26): brainstorm, nothing built.** Raised by Simon as an architectural change to the
+> persistence layer: **the data layer writes every record to all supported data-schema versions at
+> once**, so that moving between app versions loses nothing in either direction. Captured here in full
+> so it can be resumed; the sub-items mark what is settled and what is still open.
+>
+> **The core idea, and why it is structurally good.** Today's shipped migration is a **chain**
+> (v1→v2→v3, [schemaMigrations.js](src/data/schemaMigrations.js)): lossiness compounds, and each step
+> is tested against the previous step's output rather than against reality. Star writes replace the
+> chain with a **star** — one projection per schema, each computed directly from the live domain
+> object, none feeding another. Error cannot compound, every projection is independently testable
+> against a single source, and there are **no backward transforms** to write: a "downgrade" is just
+> another projection that was already being written all along. This is the strongest argument for the
+> proposal and it should not be lost when weighing the costs.
+>
+> **This supersedes the "stay on localStorage" half of §3.7** (see 18.6) and **depends on §16.3**
+> (see 18.1). It does not conflict with §16.1/§16.2's shipped machinery except where 18.10 says so.
+
+### 18.1 [ ] [Decided in principle] The star write model, and its relationship to §16.3
+**A "bucket" is one physical store holding data shaped by exactly one schema** — `librept_db@schema6`.
+Bucket↔schema is 1:1; a bucket is not a list of anything. Three distinct relations were being
+conflated and are worth keeping apart:
+
+| Relation | Cardinality | Owner |
+| --- | --- | --- |
+| bucket ↔ schema | 1 : 1 | storage layout (§16.3) |
+| app version → schema it **reads** | N : 1 | the app build (`CURRENT_SCHEMA_VERSION`) |
+| write layer → schemas it **writes** | 1 : N | **the new relation this section adds** |
+
+- **§16.3 is the prerequisite, not an alternative.** "Write to all supported *schema* versions (not
+  app versions)" is exactly §16.3's bucket-per-schema-major expressed as a write policy. §16.3 is the
+  storage layout; star writes are the policy on top of it. Build §16.3 first.
+- **The fan-out set is global, never per-app-version.** If each app version declared its own set, two
+  tabs on two versions would write different sets and buckets would silently diverge — precisely what
+  a single write layer exists to prevent.
+- **A build can only write schemas it knows how to project**, so an old build's fan-out set can shrink
+  over time but never grow. Read the set from `versions.json` at runtime (already fetched `no-store`,
+  already the authority on order — [versionCatalog.js](src/data/versionCatalog.js)) rather than
+  hardcoding it, so an old release folder stays byte-identical (§16.2) while still learning that a
+  schema was retired.
+- **Write set ⊇ read set.** A bucket must start receiving star writes the moment its migration
+  *begins*, not when it completes — that is what makes 18.3's accelerator work.
+
+### 18.2 [ ] [Open] Identity: lineage IDs vs. the ID-mapping table
+Simon's proposal remaps record IDs at each schema migration and keeps an
+`old-id → migrated-id` mapping table, which also serves as the idempotency guard.
+
+- **Clash probability is *not* the justification** — 122 random bits do not collide. The real
+  justification is **split/merge migrations**: when one v5 record becomes N v6 rows (or the reverse),
+  identity genuinely cannot be preserved and no key format saves you.
+- **Cost of remapping**: the same logical record has a different ID per bucket, so the mapping becomes
+  **hot-path infrastructure** (every fan-out write translates IDs), must itself be stored, backed up
+  and reconciled, and grows as `records × schemas` forever with no deletes and no compaction story.
+- **Proposed alternative — an immutable `lineageId`** minted once and never changed, with per-schema
+  local ids only where a schema truly needs one; splits produce children under a stable parent. The
+  mapping becomes a *column on the record* instead of a second store. **Four independent arguments
+  now point at this**: split/merge identity, the suppression list (18.7), deep-link durability
+  (18.10), and dropping the hot-path lookup.
+- **ID format — recommend UUIDv7** (RFC 9562): 122 bits of collision resistance *and* lexicographic
+  time-ordering in the prefix, so it doubles as a tiebreak within 18.5's topological order. Today's
+  generators are a real clash risk and leak creation time — `Date.now()` + 4 chars of `Math.random()`
+  ([clipboardEditor.js](src/modules/clipboard/clipboardEditor.js)), `session-${Date.now()}`
+  ([editSessionControl.js](src/modules/session/editSessionControl.js)). If "short" ids are wanted,
+  shorten by base62-encoding a v7 — never by dropping entropy.
+
+### 18.3 [ ] [Decided] Migration is pre-emptive, resumable, and runs through the normal write layer
+- **Pre-emptive**: migration into a newly-available schema starts *before* the PT opts into anything,
+  so a switch is instant. **This closes §16.2's open staleness question** — §16.2 worried that a
+  speculative copy goes stale if the PT keeps working, and leaned toward redoing it at switch time.
+  Under star writes there is no staleness window: once migration completes, ongoing writes fan out to
+  that bucket too, so it stays continuously current. Catch-up is a **re-derivation**, not a restore
+  from a point in time — nothing is frozen, so nothing can go stale (this is also why §18.7 rejects a
+  snapshot tier).
+- **Resumable**, because battery death, app kill, tab reclaim and reloads are ordinary on a phone.
+  **The mapping table is the cursor** — "present in the mapping" *is* "migrated", so resumability
+  falls out of the idempotency mechanism for free, with no separate progress state.
+- **Yields to user writes**: migration breaks on any user interaction write and resumes when the
+  burst is done. Gym-floor latency wins over migration throughput.
+- **Ordinary use accelerates migration.** A star write to a not-yet-migrated record populates the new
+  bucket and marks it migrated; migration then skips it. Interleaving is safe in both directions.
+- **Invariant that makes the accelerator sound**: migration must be implemented as
+  `read old record → build domain object → normal star write`, i.e. *literally* the write layer, not
+  a second transform. Otherwise half a bucket comes from one code path and half from another, and the
+  drift is undetectable.
+- **A partially-migrated bucket must not be readable.** Needs a per-bucket `complete` flag; routing
+  refuses any schema whose bucket is incomplete, and `evaluateVersionOffer` gains it as a precondition
+  before offering the switch. Without it, a crash at 40% reboots the PT into a UI showing 40% of their
+  clients — indistinguishable from catastrophic data loss, and the rational response (re-entering
+  records) creates real corruption.
+- **Still open**: defer pre-emptive migration to idle/charging (`requestIdleCallback`) so it does not
+  cost battery mid-session; how a *failed* background migration reports itself without alarming a PT
+  who never asked for it (block the switch offer, do not raise an error).
+
+### 18.4 [ ] [Decided — staging, not envelopes] The lossy-projection problem
+**The problem is narrower than it first appears.** A rollback loses nothing: the newest bucket keeps
+full fidelity while the PT reads a degraded older one. The loss happens only when **the old UI
+writes** — v5's UI builds a domain object with no v6 concept in it, and the star write then
+overwrites the full-fidelity record in every newer bucket. Star writes are what *propagates* the loss.
+
+Two mutually exclusive fixes; **only one is needed**:
+
+- **Preservation envelope** (rejected): a reserved opaque field that older versions round-trip
+  verbatim without interpreting — Elasticsearch's `_source` trick. Costs code, free at release time.
+  Rejected because `_source` exists in ES precisely because its indexed form is lossy; if staging
+  guarantees projections are *not* lossy, there is nothing to reconstruct.
+- **Expand-first staged releases** (**chosen**): never let a supported schema be unable to carry a
+  field. Free in code, paid for in release discipline.
+
+**The rule staging obligates**: *no feature ships until its storage has shipped in every
+currently-supported schema* — the field lands N releases before the UI that uses it. **Enforce in
+CI**: assert every field the current domain model writes exists in every live schema's projection.
+Without the check the discipline survives until the first hurried release.
+
+- **Projections must be pure and total** so buckets are always fully re-derivable. That yields two
+  fuzzable properties for the CI migration fuzzing §16.2 already wants: `project(x)` is idempotent,
+  and `unproject(project(x)) == x` for every live schema.
+- **Test-corpus gap**: migration tests must include a record using the *newest* fields written through
+  an *old* schema's UI path. That is the exact case that loses data, and nothing exercises it today.
+- **Escape hatch**: a change that genuinely cannot be staged is the trigger to **EOL the incompatible
+  schema**, not to ship a lossy projection. This gives a crisp rule for when a forced upgrade is
+  justified.
+- **Keep the degradation marker anyway** (cheap): a record carrying data the running version cannot
+  render should be visibly flagged (lock glyph / greyed row), so a degraded view is never silent.
+
+### 18.5 [ ] [Decided] Ordering is topological, not chronological
+Migration replay order means **correct order of foreign-key availability**, not timestamp order.
+
+- **The reference graph must be acyclic**, so all dependent data reconstructs as a DAG. **Enforce it
+  in CI** — a convenience back-reference added later would otherwise deadlock migration or silently
+  pick an arbitrary order, and it would be found by a trainer, not by the build.
+- **§17.4 is the first realistic cycle risk** — see the watch item there.
+- **The wall clock is not an ordering key anywhere.** Star writes are immune to clock skew because a
+  single sequential writer resolves by execution order, not by comparing timestamps; timestamps are
+  inert data. Two riders: a backward clock jump still writes a wrong `loggedAt` (cosmetic, but it is
+  what the PT reads), and **§3.3 Google Drive sync reintroduces the problem structurally** — the
+  moment a second device writes concurrently, arbitration is unavoidable and a `(deviceId, seq)`
+  Lamport pair becomes necessary. Not needed before then.
+
+### 18.6 [ ] [Decided] Persistence engine → IndexedDB (supersedes the §3.7 deferral)
+§3.7 deferred the DB "until the 5 MB cap looms". With §17.1 shipped it now looms on its own, and star
+writes make it unavoidable. **Sizing (measured 2026-07-26, from the real §17.1 record shape — ~6.0 KB
+per session, 9 exercises × 4 sets, rests, feedback, notes):**
+
+| | sessions/yr | 1 bucket | ×2 | ×3 |
+| --- | --- | --- | --- | --- |
+| Busy PT (7/day, 5.5 d/wk) | 1,809 | 10.5 MiB | 21 MiB | 31 MiB |
+| **Very busy PT (10/day, 6 d/wk)** | 2,880 | 16.6 MiB | 33 MiB | **50 MiB** |
+| Studio ceiling (14/day) | 4,200 | 24.3 MiB | 49 MiB | 73 MiB |
+| Very busy PT, 5 yrs (no deletes, ever) | 14,400 | 83 MiB | 166 MiB | **250 MiB** |
+
+- **IndexedDB, +0 KB install cost** — it is the platform, present in every browser and mobile webview,
+  works offline and in the service worker. Quotas are orders of magnitude clear of the table above
+  (Chrome/Android ~60% of free disk, Firefox ~50%, Safari/iOS ~1 GB with a prompt to extend).
+- **Not SQLite-wasm**: +700 KB–1.2 MB against a 1,040 KB `src/` (671 KB excluding fonts) roughly
+  doubles the app, and the OPFS `SharedArrayBuffer` VFS wants COOP/COEP headers GitHub Pages cannot
+  set (the `opfs-sahpool` VFS avoids that, so it is a constraint with a workaround, not a hard
+  blocker). The "portability / configuration / permissions hell" concern is the correct argument
+  **for** IndexedDB: zero config, zero permissions, zero binary, no VFS, no file paths.
+- **Layout constraint**: one IDB database with **one object store per schema**, so a fan-out write is
+  a single transaction. IndexedDB transactions cannot span *databases* — giving each schema its own
+  database makes atomic fan-out impossible by construction, and it is expensive to retrofit.
+- **`navigator.storage.persist()` is mandatory**, not optional — without it IndexedDB is evictable and
+  this app holds the only copy of a PT's business records.
+- Keep it behind the [stateStore.js](src/data/stateStore.js) seam (§3.7's "cheap prep"), plus §17.1's
+  **lazy per-client load** — the real win, since today one screen deserializes every client's history.
+- **Emergency plan: plan for eviction, not deprecation.** IndexedDB will not be dropped — it is the
+  web's only structured storage and has no deprecation path. The realistic risks are **Safari's 7-day
+  cap on script-writable storage** for non-engaged sites (home-screen install exempts you, which the
+  app already promotes), quota-pressure eviction on Android, and private-browsing quotas. The recovery
+  tier for all three is the backup file (18.7), so the insurance is an artifact already required.
+
+### 18.7 [ ] [Decided] Backups: 1× not N×, readers forever, writers never
+- **Back up the newest bucket only — 1×, not 3×.** With staging (18.4) the newest schema's bucket is
+  lossless and canonical; every other bucket is a pure projection and derived data is not backed up.
+  Restore = import to domain, then fan out to repopulate the rest. This also means a bad fan-out is
+  *always* repairable by re-projection.
+- **No snapshot tier** (Simon: endless point-in-time issues in the backup world). Consequence to bank:
+  the backup file becomes the only recovery path from a write-layer bug, which raises the stakes on
+  everything else in this item.
+- **Retain readers forever; retain writers never.** A 2026 backup does not need 2026's *write* path —
+  it needs a 2026 **reader** that upcasts to today's domain object, which then goes through the single
+  current write layer. Readers are pure, small and free to keep indefinitely; writers carry logic and
+  side effects. Import path: `parse → detect schemaVersion → upcast → single write layer → fan out`.
+  This turns "restorable for a while" into "restorable indefinitely", which is stronger *and* cheaper
+  than the original requirement.
+- **Frozen backup-fixture corpus in CI** — one committed fixture per historical schema, with a test
+  asserting each still imports to the expected domain object. Without it a long-restore guarantee is a
+  hope; with it, it is enforced on every commit.
+- **Two version numbers, not one.** `formatVersion` on the envelope (how to *open the box*: gzip,
+  checksum header, multi-part manifest, encryption) and `schemaVersion` on the payload (how to read
+  the records). One number cannot distinguish "old container, new payload" from the reverse, and the
+  day compression or encryption is added every existing file must still parse.
+- **Consent at import**, made precise — star writes soften this, since an import fans out to *all*
+  live buckets: *"This backup is from schema 3. The oldest schema this deployment still writes is 5.
+  Importing brings it forward to 5–7; it will no longer open in builds older than v1.4."* Declining
+  must leave the `.json` byte-identical (no half-import, no helpful in-place upgrade).
+
+### 18.8 [ ] [Open] Encryption, device theft, and storage durability
+- **IndexedDB is not encrypted by the app.** At rest it relies on OS full-disk encryption: a stolen
+  *locked phone with a passcode* is genuinely well protected (iOS Data Protection / Android FBE), a
+  stolen laptop without FDE is not protected at all. Same-origin scripts, extensions with host
+  permissions and anyone holding the unlocked device read it in plaintext.
+- **Recommended first step: encrypt the backups, not the live DB.** The backup is the artifact that
+  travels (§3.3 Drive sync, email, USB) and is where a leak actually happens; the live store already
+  has OS encryption in the phone case; and a lost passphrase is *recoverable* because the live DB
+  survives. Encrypting the live store instead risks permanently destroying a solo PT's business
+  records with no recovery path — a bigger realistic risk than theft.
+- **Biometrics — the accurate answer: WebAuthn cannot decrypt.** It is authentication; it returns a
+  signature, never key material. The real primitive is the **WebAuthn PRF extension**, which derives a
+  stable secret usable as an AES-GCM key via WebCrypto (Chrome/Edge and Safari passkeys; support good
+  but not universal). Portable fallback: PT passphrase → PBKDF2/Argon2 → AES-GCM.
+- **Private browsing: detect the consequence, not the mode.** Mode detection is a heuristic arms race
+  browsers actively break. Instead read `navigator.storage.estimate()` / `persisted()` and warn *"
+  storage on this device is not durable — export a backup before you finish"*. More robust, and it
+  also catches low-disk Android and non-installed Safari, which are likelier and equally destructive.
+
+### 18.9 [ ] [Decided] Concurrency: transactions plus CAS, not app-level locks
+IndexedDB transactions give atomicity and cross-tab serialization for the fan-out (given 18.6's
+single-database layout), so **no app-level lock is needed for it**.
+
+- **The residual is read-modify-write spanning a JS computation.** IDB transactions auto-close when
+  the event loop yields — any `await` on a non-IDB promise silently kills the transaction — so
+  `read → compute → write` is not atomic by default and two tabs can interleave.
+- **Fix is compare-and-swap**, not locking: a version counter on the record, write conditional on it
+  being unchanged, retry on mismatch. Lock-free, cross-tab, immune to the transaction-closing gotcha.
+- Required properties, complete list: **resumable + acyclic + idempotent + CAS**.
+- `navigator.locks` around the *migration pass* is worth ~3 lines so two tabs do not duplicate work —
+  efficiency only, since idempotency already makes it safe.
+
+### 18.10 [ ] [Open — the fork to decide first] Deep links, and one build vs. many builds
+Three deep-link failure modes as UI behaviours are added and dropped:
+
+1. **Version segment dies at EOL** — a shared `/LibrePT/v1.5.0/#/…` 404s. Fix: **never version-qualify
+   a shareable link.** One canonical version-less URL space; the versioned path is the *switcher's*
+   mechanism. **Version selection is per-PT state, never part of a shared URL.**
+2. **Route removed or renamed** — deprecated routes become permanent aliases to canonical ones,
+   retained forever (routes are bytes, same principle as keeping backup readers forever). A link to a
+   retired *behaviour* resolves to the nearest surviving ancestor rather than erroring.
+3. **The ID in the link no longer exists** — created by 18.2's remapping. The mapping table can
+   resolve it, but the better answer is that **deep links carry the `lineageId`, never a per-schema
+   id**, and no lookup is ever needed.
+
+**The fork worth deciding before anything here is built.** Simon's "each new release packages all UI
+code for supported version behaviours" implies **one build with versioned behaviours behind flags**,
+not multiple hosted builds. That is arguably a *simplification*: no byte-identical release folders, no
+per-tag subpath publishing, no service-worker reinstall hazard, no "which build am I running", and
+deep-link failure mode 1 disappears rather than being mitigated. Costs: payload grows by roughly
+671 KB of non-font `src/` per behaviour generation (~2 MB at three), old behaviours must be actively
+maintained rather than frozen, and it **inverts §16.1's "no fixes ever land on a maintenance-mode
+version"** — old behaviours living inside the current build *do* get fixes automatically. That may be
+better, but it must be a deliberate reversal, and it decides whether §16.1/§16.2's hosting machinery
+stays or is retired. Everything else in §18 holds either way.
+
+### 18.11 [ ] [Open] Legal gaps this design creates
+- **Re-identification via backups + the mapping table.** A pre-erasure backup contains
+  `abc123 → "Jane Doe"`; the mapping says `abc123 → xyz789`; together they re-identify an anonymized
+  record. Normally the defence is that backups rotate out — **18.7's indefinite-restore requirement
+  removes that defence.** Simon's "record of forgotten IDs" closes it, but only with two properties it
+  does not have yet: it must be **applied at import**, not just at erasure (or a restore resurrects
+  the PII), and it must be **keyed on the stable `lineageId`** (a per-schema key silently fails to
+  match a backup from another schema). Feeds directly into §17.3's unresolved
+  "where could a re-identification key live" tension.
+- **Minimize the suppression list itself** — a permanently retained list of identifiers belonging to
+  erased people is lawful (you need it *to honour* the erasure) but should store a salted hash of the
+  id and nothing else.
+- **Retention basis is undocumented.** No-deletes + anonymization-only + 3× fan-out is technically
+  fine, but GDPR Art. 5(1)(e) wants a *stated, justified* retention period. "Retained indefinitely for
+  aggregate analytics" is a lawful answer only if written down; today neither [PRIVACY.md](PRIVACY.md)
+  nor §17.3 states the basis. Cheapest item on this list.
+- **Taxonomy licensing — checked 2026-07-26, currently clear.** wger's *application* is AGPLv3 but
+  LibrePT links no wger code, so AGPL is not engaged; wger's *dataset* is CC-BY-SA 4.0 but
+  [exerciseStandard.js](src/modules/common/exerciseStandard.js) vendors only ~17 generic category and
+  equipment words, far below any threshold. **Fees are zero on every axis.** The line not to cross:
+  bulk-importing wger's ~1000+ exercise entries would engage both CC-BY-SA ShareAlike (the derived
+  dataset would have to ship CC-BY-SA with attribution, a licensing split inside an MIT repo, and a
+  one-way door for that file) and the **EU *sui generis* database right** (Dir. 96/9/EC), which is
+  separate from copyright, needs no originality, and is the governing regime here. If clinical
+  vocabularies are ever considered: SNOMED CT requires an affiliate licence — country status must be
+  checked, not assumed.
+
+### 18.12 [ ] [Decided] Reuse the preview ribbon for unsupported-version warning
+Generalise `#preview-ribbon` from an always-on `PREVIEW` pill into a **build-status ribbon with
+severity tiers**: `PREVIEW` (amber, informational) → `BETA` (stronger — real data on unstable code) →
+`UNSUPPORTED` (red, non-dismissable). This collapses §16.2's open "distinct ribbon treatments per
+preview tier" question into one piece of work.
+
+- **The ribbon must not be the only signal.** Persistent chrome goes invisible within days — which is
+  what makes an always-on amber pill safe today and an unsupported-version warning useless tomorrow.
+  Pair it with §16.1's non-dismissable notification-area message.
+- **Never block mid-session.** The ribbon carries severity continuously, but any *blocking* consent
+  prompt is gated on there being no active session — a red warning plus a modal is maximally alarming
+  exactly when a PT has a client in front of them.
+- Keep the existing `prefers-reduced-motion` handling; a red flashing element is an accessibility
+  problem in a way an amber pulse is not.
