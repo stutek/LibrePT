@@ -645,12 +645,25 @@ Simon's proposal remaps record IDs at each schema migration and keeps an
   Without it, a crash at 40% reboots the PT into a UI showing 40% of their clients —
   indistinguishable from catastrophic data loss, and the rational response (re-entering records)
   creates real corruption.
-  - **Completeness is a query, not a stored flag** (decided 2026-07-26): `count(source records) ===
-    count(mapping entries for that schema)`. Derived state cannot drift from reality the way a flag
-    written at the wrong moment can, and it needs no crash-safe flag update. Requires an IndexedDB
-    index on the migration marker so `count()` hits the index B-tree instead of scanning. **Count
-    equality is sound here precisely because there are no deletes (§17.3)** — the mapping can never
-    hold an entry whose source has gone, so equal counts cannot hide a mismatched pair.
+  - **Completeness is a query, not a stored flag** (decided 2026-07-26): derived state cannot drift
+    from reality the way a flag written at the wrong moment can, and it needs no crash-safe flag
+    update.
+  - **The query is a set difference over ids, not a count comparison** (corrected 2026-07-26):
+    `complete(target) ⇔ keys(source store) \ keys(target store) = ∅` — the target is complete when
+    the source holds **no id the target is missing**.
+    - **Why the original `count(source) === count(mapping)` was wrong**: two counts are independent
+      aggregates over two stores and tie nothing element-to-element, so one absent source id plus one
+      spurious target entry (retried projection under a fresh id, imported backup, fan-out that
+      committed in one store only, a bug) passes the check **over a hole**. It was justified by "there
+      are no deletes (§17.3)", which is exactly the consistency assumption the storage layer cannot
+      enforce; a set difference needs no such premise.
+    - **Containment, not equality**: ids the target has and the source lacks are legitimate (a record
+      created after the target went live), so equality would fail on healthy data.
+    - **Cheap, and it names the gap**: `getAllKeys()` returns B-tree keys with no payload
+      deserialisation, already sorted, so it is a linear merge that short-circuits on the first
+      unmatched source key — and it yields the **missing ids**, making repair a re-projection of
+      exactly those records rather than a full re-migration. Supersedes the "index on the migration
+      marker so `count()` hits the B-tree" requirement.
 - **Still open**: defer pre-emptive migration to idle/charging (`requestIdleCallback`) so it does not
   cost battery mid-session; how a *failed* background migration reports itself without alarming a PT
   who never asked for it (block the switch offer, do not raise an error).

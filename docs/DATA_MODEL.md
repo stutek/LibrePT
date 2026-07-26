@@ -82,8 +82,9 @@ is a deliberate act.
 | `byClient` | `clientId` | **Lazy per-client load** — one index hit instead of deserialising every client's history to render one screen |
 
 `byClient` is sparse: records with no owner (the exercise catalog) simply do not appear in it.
-`count()` on an index goes through its B-tree, which is what makes the migration-completeness check
-(§4) cheap rather than a full scan.
+`getAllKeys()` walks an index's B-tree and returns keys **without deserialising payloads**, which is
+what makes the migration-completeness check (§4) — a set difference over two stores' keys — cheap
+rather than a full scan.
 
 ---
 
@@ -258,16 +259,38 @@ The `meta` store holds the id mapping, which doubles as the cursor: *present in 
 *migrated*. Ordinary use therefore **accelerates** migration, because a star write to a not-yet-
 migrated record populates the new store and marks it, and migration then skips it.
 
-**Completeness is a query, never a stored flag:**
+**Completeness is a query, never a stored flag** — and the query compares **id sets, not counts**:
 
 ```
-count(source records) === count(mapping entries for that schema)
+complete(target) ⇔ keys(source store) \ keys(target store) = ∅
 ```
 
-Derived state cannot drift the way a flag written at the wrong moment can. This is sound *because
-there are no deletes* — the mapping can never hold an entry whose source has gone, so equal counts
-cannot hide a mismatched pair. A store whose migration is incomplete is **not readable**: a crash at
-40% must not show a trainer 40% of their clients.
+The target is complete when the source holds **no id the target is missing**. Derived state cannot
+drift the way a flag written at the wrong moment can.
+
+**Why not `count(source) === count(mapping)`.** Two counts are independent aggregates over two
+stores; nothing ties them element-to-element. One absent source id together with one spurious target
+entry — a retried projection that wrote under a fresh id, an imported backup, a fan-out that
+committed in one store and not another, a plain bug — yields **equal counts over a hole**, and the
+check passes on a bucket that is missing a client. Count equality is only sound under assumptions the
+storage layer cannot enforce (no deletes, strict 1:1, no duplicates, no external writes); a set
+difference needs none of them, because it compares the actual thing being asserted. This is what the
+star-write invariant *"ids are stable across projections"* buys: the same logical record is the same
+key in every store, so the sets are directly comparable.
+
+**Containment, not equality.** Ids in the target that the source lacks are **not** an error — a
+record created after the target went live legitimately exists only forward. Asserting equality would
+fail on healthy data; asserting containment asks the only question that matters: *is anything left
+behind?*
+
+**Cheap, and it names the gap.** `getAllKeys()` on each store returns keys from the B-tree without
+deserialising a single payload, already sorted ascending, so the comparison is a linear merge that
+short-circuits on the first source key with no match. The result is the **list of missing ids**, not
+a boolean — which makes the repair a re-projection of exactly those records instead of a full
+re-migration.
+
+A store whose migration is incomplete is **not readable**: a crash at 40% must not show a trainer 40%
+of their clients.
 
 ---
 
