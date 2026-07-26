@@ -200,8 +200,11 @@ def ensure_biome_binary():
             return None
 
 
+PYTHON_LINT_TARGETS = ("build/", "deploy/", "tests/")
+
+
 def run_python_lint():
-    """Runs Python static analysis (Ruff lint and format check)."""
+    """Runs Python static analysis (Ruff), applying formatting itself — see run_frontend_lint."""
     print("\n  Running Python Lint & Format (Ruff)...")
     if os.name == "nt":
         ruff_path = os.path.join(".venv", "Scripts", "ruff.exe")
@@ -212,10 +215,14 @@ def run_python_lint():
         print("  ✗ Ruff linter not found in virtual environment.")
         sys.exit(1)
 
-    lint_res = subprocess.run([ruff_path, "check", "build/", "deploy/", "tests/"])
     fmt_res = subprocess.run(
-        [ruff_path, "format", "--check", "build/", "deploy/", "tests/"]
+        [ruff_path, "format", *PYTHON_LINT_TARGETS], capture_output=True, text=True
     )
+    for line in fmt_res.stdout.splitlines():
+        if "reformatted" in line:
+            print(f"    ⓘ {line.strip()}")
+
+    lint_res = subprocess.run([ruff_path, "check", *PYTHON_LINT_TARGETS])
     if lint_res.returncode != 0 or fmt_res.returncode != 0:
         print("  ✗ Python static analysis failed.")
         sys.exit(1)
@@ -223,15 +230,53 @@ def run_python_lint():
 
 
 def run_frontend_lint():
-    """Runs JS/CSS/JSON static analysis (Biome)."""
+    """Runs JS/CSS/JSON static analysis (Biome), applying the formatting it can fix itself.
+
+    Pure formatting (line breaks, quotes, trailing commas) is not a decision anyone needs to make:
+    printing a diff for a human to re-apply by hand only costs a second gate run, and a skipped
+    re-run is what produced c3cc369. So the gate WRITES those fixes and then names every file it
+    touched, loudly — the run stays observable, and `git diff` after a gate is the record of what it
+    changed. Lint findings that need judgement are never auto-fixed: the verification pass below
+    re-checks without --write and still fails the stage.
+    """
     print("\n  Running Frontend Lint & Format (Biome)...")
     biome_path = ensure_biome_binary()
-    if biome_path:
-        biome_res = subprocess.run([biome_path, "check", "src/"])
-        if biome_res.returncode != 0:
-            print("  ✗ Frontend static analysis failed.")
-            sys.exit(1)
-        print("  ✓ Frontend static analysis (Biome) passed.")
+    if not biome_path:
+        return
+
+    before = _tracked_frontend_mtimes()
+    subprocess.run(
+        [biome_path, "check", "--write", "src/"], capture_output=True, text=True
+    )
+    rewritten = [
+        path
+        for path, stamp in _tracked_frontend_mtimes().items()
+        if before.get(path) != stamp
+    ]
+    if rewritten:
+        print(f"    ⓘ Formatter rewrote {len(rewritten)} file(s):")
+        for path in sorted(rewritten):
+            print(f"        {path}")
+
+    # The verdict: a clean tree after the writes, or a genuine finding the formatter cannot fix.
+    biome_res = subprocess.run([biome_path, "check", "src/"])
+    if biome_res.returncode != 0:
+        print(
+            "  ✗ Frontend static analysis failed (findings above need a human decision)."
+        )
+        sys.exit(1)
+    print("  ✓ Frontend static analysis (Biome) passed.")
+
+
+def _tracked_frontend_mtimes():
+    """(path -> mtime_ns) for every file Biome may rewrite, so the gate can report what it changed."""
+    stamps = {}
+    for root, _dirs, files in os.walk("src"):
+        for name in files:
+            if name.endswith((".js", ".css", ".json")):
+                path = os.path.join(root, name)
+                stamps[path] = os.stat(path).st_mtime_ns
+    return stamps
 
 
 def run_security_audit():
