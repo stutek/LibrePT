@@ -2,6 +2,7 @@
 import { openSessionFromHistory } from "../../controllers/activeSessionController.js";
 import { formatDuration, formatMetricValue, usesLoad } from "../common/exerciseModality.js";
 import { formatLoad, formatReps } from "../common/repsAndLoad.js";
+import { orderedItems } from "../common/sessionItemOrder.js";
 import { isRestRecord, isSkippedRecord } from "../common/sessionItemRecord.js";
 import { escapeHTML, formatDateStr } from "../common/utils.js";
 
@@ -136,7 +137,7 @@ export function renderHistoryItems({ historyList, container, t }) {
     };
     // A restored or hand-edited backup can carry a log with no exercises — render the header
     // rather than throwing partway through the list.
-    for (const item of log.exercises || []) {
+    for (const item of orderedItems(log.exercises)) {
       const cid = item.circuitId || null;
       if (cid !== openCircuit) {
         closeCircuit();

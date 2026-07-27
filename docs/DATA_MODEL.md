@@ -233,12 +233,23 @@ from `position` and the contiguity invariant, so storing it creates two sources 
 disagree — and their disagreement has no correct resolution. One authoritative field, everything else
 derived.
 
-> **Not built yet.** Positions are specified here; today's shapes still order by array index, which
-> is exactly the artefact the engine move retires. Shipping it is expand-first (§4): write `position`
-> on every item everywhere, then flip readers to sort by it — and it must land **before** items stop
-> living in an ordered structure, because after that there is nothing to derive the first positions
-> from. Legacy JSON records get theirs assigned once, at migration, from the array order that is still
-> intact at that moment. Tracked in [TODO §17.5](../TODO.md).
+> **Built** — [sessionItemOrder.js](../src/modules/common/sessionItemOrder.js): `assignPositions`
+> (stamp dense order on write), `orderedItems` (read in program order), `positionIssues` (the two
+> invariants above, as a query naming what is wrong) and `repairPositions` (renumber from program
+> order). Shipped expand-first, in the order §4 requires: writers stamp positions, readers sort by
+> them, and only then may the store stop preserving list order.
+>
+> **Where order is stamped.** `saveActiveSessionToCache` is the single choke point every plan edit
+> funnels through — insert, delete, drag-reorder, circuit regroup — so "every writer writes
+> `position`" holds by construction rather than by each new splice site remembering to. The other
+> writer is `buildProgramSnapshot`, whose output is frozen into history and outlives every array it
+> was ever held in.
+>
+> **Legacy data needs no migration.** An item with no `position` falls back to its index in the list
+> it arrived in, so old history rows, old backups and the seed data stay readable. A session cached
+> by a build that predates the field is renumbered on read, at the last moment its array order is
+> still recoverable. That fallback is an import concern, not a permanent reader path: once the store
+> no longer guarantees list order there is no index left to fall back to.
 
 ### Circuits — a grouping key, not a record
 

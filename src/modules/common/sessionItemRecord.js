@@ -19,6 +19,8 @@
 // item that is not an explicit rest as an exercise, and readers treat a missing `completed` as done —
 // so old rows render exactly as before.
 
+import { assignPositions, orderedItems } from "./sessionItemOrder.js";
+
 export const isRestRecord = (item) => !!item && item.type === "rest";
 export const isExerciseRecord = (item) => !!item && !isRestRecord(item);
 
@@ -28,8 +30,10 @@ export const isSkippedRecord = (item) => isExerciseRecord(item) && item.complete
 
 // Exercise leaves only (rests filtered out) — for analytics, last-performance, feedback matching and
 // the backup round-trip, which all care about movements, not the rest/circuit scaffolding.
+// Reads in program order, not array order: a record that has been through a projection or a per-row
+// store arrives keyed, not sequenced (TODO §17.5). Legacy rows with no position keep arrival order.
 export function exerciseRecordsOf(items) {
-  return (items || []).filter(isExerciseRecord);
+  return orderedItems(items).filter(isExerciseRecord);
 }
 
 // Build the immutable program snapshot for one client from their live session state. Keeps EVERY
@@ -38,7 +42,7 @@ export function exerciseRecordsOf(items) {
 // retained as a deliberate review signal rather than silently dropped.
 export function buildProgramSnapshot(clientState, { isPlanning = false } = {}) {
   const items = [];
-  for (const it of clientState.exercises || []) {
+  for (const it of orderedItems(clientState.exercises)) {
     if (isRestRecord(it)) {
       items.push({
         type: "rest",
@@ -85,5 +89,7 @@ export function buildProgramSnapshot(clientState, { isPlanning = false } = {}) {
       sets,
     });
   }
-  return items;
+  // The record is frozen from here on, so its order must be carried in it — this is the one write
+  // whose output outlives every array it was ever held in (TODO §17.5).
+  return assignPositions(items);
 }

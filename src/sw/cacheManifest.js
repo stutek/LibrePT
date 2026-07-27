@@ -34,6 +34,7 @@ self.swCacheManifest = (() => {
     "./modules/common/repsAndLoad.js",
     "./modules/common/exerciseModality.js",
     "./modules/common/exerciseStandard.js",
+    "./modules/common/sessionItemOrder.js",
     "./modules/common/sessionItemRecord.js",
     "./modules/common/sessionCache.js",
     "./modules/common/wakeLock.js",

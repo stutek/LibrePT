@@ -20,6 +20,7 @@ import {
   readActiveSessionCache,
   saveActiveSessionToCache as saveActiveSessionToCacheHelper,
 } from "../modules/common/sessionCache.js";
+import { orderedItems } from "../modules/common/sessionItemOrder.js";
 import { buildProgramSnapshot, isRestRecord } from "../modules/common/sessionItemRecord.js";
 import {
   escapeHTML,
@@ -290,7 +291,10 @@ export function openSessionFromHistory(log) {
 
   // Rebuild the live plan from the stored snapshot, restoring rests and circuit grouping — not just
   // the performed exercises (TODO §17.1). A record item is either a first-class rest or an exercise.
-  for (const item of log.exercises) {
+  // Read in the record's OWN program order (TODO §17.5): the array it arrives in is a storage
+  // detail, and the live plan's array index is load-bearing here — activeExerciseIndex points into
+  // it — so the sequence has to be right before the first item is pushed, not sorted afterwards.
+  for (const item of orderedItems(log.exercises)) {
     if (isRestRecord(item)) {
       clientState.exercises.push({
         id: newRecordId(),

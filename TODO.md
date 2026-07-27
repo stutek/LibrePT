@@ -463,8 +463,18 @@ With 17.1 preserving the full program, "**Save as routine**" on a history record
 - Pairs with the inline clipboard editor ([8.3](#83--inline-clipboard-editor-saved-patch-patchesinline_clipboard_editorpatch)) and "next session prep" ([5.1](#51--tabbed-client-view) Tab 3).
 - **Watch item for §18.5**: making template provenance a *hard* reference back to the source history record would create the first cycle in the reference graph (`history → routine → history`), which §18.5's topological migration order forbids. Keep provenance a soft/denormalised field.
 
-### 17.5 [ ] Explicit item ordering — `position` on every session item
-**Decided 2026-07-26 (Simon): ordering must be explicit and verbose, not implied by array index.** Design in [DATA_MODEL §3 "Ordering"](docs/DATA_MODEL.md); this is the build task.
+### 17.5 [~] Explicit item ordering — `position` on every session item — **SHIPPED 2026-07-27**
+**Decided 2026-07-26 (Simon): ordering must be explicit and verbose, not implied by array index.** Design in [DATA_MODEL §3 "Ordering"](docs/DATA_MODEL.md).
+
+> **Built 2026-07-27** in [sessionItemOrder.js](src/modules/common/sessionItemOrder.js) — steps 1–3
+> of the sequencing below, which is what unblocks [§18.6 part 4](#18-data-layer-simultaneous-multi-schema-writes-star-writes).
+> Rather than stamping positions at each of the ~10 splice sites the plan below lists, writers stamp
+> at the **choke point they all funnel through** (`saveActiveSessionToCache`), plus
+> `buildProgramSnapshot` for the frozen record — so a splice site added later cannot forget, which a
+> per-site rule could not promise. Covered by `tests/e2e/test_session_item_order.py`.
+> **Still open**: nothing consumes `positionIssues()` at runtime yet — it is a query the tests call,
+> not a surfaced integrity warning; and `activeExerciseIndex` still means an *array index*, which
+> holds only while the live array stays in position order (it does — the choke point guarantees it).
 
 - **The field**: `position`, integer, **dense and unique — `0..n-1`** across one session's item list. Readers **sort by it**; nothing about how the records are stored may imply sequence.
 - **Why now — this blocks the engine move.** On JSON, sequence rode along free in an array; IndexedDB (§18.6) retires that, and a key order is not a program order. Once items stop living in an ordered structure there is nothing left to derive the first positions from, so `position` must land **before** the store swap, not after it. The §18.3 completeness check would never catch the loss: every id is present and only the *order* is wrong — a scrambled program that passes every integrity test we have.
@@ -552,15 +562,15 @@ With 17.1 preserving the full program, "**Save as routine**" on a history record
 >   queue, with §17.1's lazy per-client load. The risky one: it needs a one-way import from the
 >   existing localStorage bucket and must stay revertable until it has run on real data. Only
 >   `loadSavedState` (4 call sites) becomes async; the other ~99 stay untouched.
->   **Gated by [§17.5](#175--explicit-item-ordering--position-on-every-session-item)**: session item
+>   **Gated by [§17.5](#175--explicit-item-ordering--position-on-every-session-item--shipped-2026-07-27)**: session item
 >   order rides on array position today, and the store swap is what takes that away — positions must
 >   be written and authoritative *before* the import runs, or the first sessions to land in the DB
 >   have no recoverable sequence.
 > - [ ] **Documentation** — [docs/DATA_MODEL.md](docs/DATA_MODEL.md) exists and must be kept in step
 >   with each of the steps below.
-> - [ ] **[§17.5](#175--explicit-item-ordering--position-on-every-session-item) — explicit `position`.
->   The immediate next step**, because it is what gates part 4: order must be a field, written by
->   every writer and read by every reader, *before* items stop living in an ordered structure.
+> - [x] **[§17.5](#175--explicit-item-ordering--position-on-every-session-item-shipped-2026-07-27) — explicit `position`** (2026-07-27).
+>   The gate on part 4: order is now a field, stamped by every writer and sorted on by every reader
+>   of a stored record, so items may safely stop living in an ordered structure.
 > - [ ] **[16.5](#165--retire-the-multi-version-hosting-machinery-from-the-code)** — delete the
 >   multi-version hosting machinery, so the next item is a small diff instead of a rewrite.
 > - [ ] **[16.3](#163--decided-not-built-key-storage-buckets-on-the-data-schema-not-the-release-tag)** —
