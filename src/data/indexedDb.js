@@ -30,9 +30,19 @@
 export const DATABASE_NAME = "librept";
 
 // Records carry their collection and owner alongside the payload so one store per schema can serve
-// both a collection scan and §17.1's lazy per-client load without a second store per collection.
+// three distinct query shapes without a second store per collection:
+//   - COLLECTION_INDEX  "the whole exercise catalog" — no client dimension at all.
+//   - CLIENT_INDEX      "everything about client X, any collection" — §17.3 erasure/anonymization
+//                        needs exactly this: every record type touched for one client, unnarrowed.
+//   - CLIENT_COLLECTION_INDEX  "client X's HISTORY specifically" — §17.1's actual stated need.
+//     CLIENT_INDEX alone cannot serve this: a client with both history and planUpdates records
+//     returns both collections interleaved, so isolating one would cost deserialising and then
+//     filtering out records the caller never wanted. The compound index answers it as one exact
+//     index hit instead (see test_indexed_db.py, which pins the isolation against a fixture where
+//     one client has both a history record and a planUpdates record).
 export const COLLECTION_INDEX = "byCollection";
 export const CLIENT_INDEX = "byClient";
+export const CLIENT_COLLECTION_INDEX = "byClientAndCollection";
 
 // Bookkeeping that belongs to no single schema: the migration id mapping (§18.2), and per-bucket
 // counters. Kept in its own store so a schema store holds only records.
@@ -67,6 +77,11 @@ function createSchemaStore(db, schema) {
   // Non-unique and sparse: records with no owner (the exercise catalog) simply do not appear in it,
   // which is what makes a per-client load cheap rather than a full scan with a filter.
   store.createIndex(CLIENT_INDEX, "clientId", { unique: false });
+  // Compound, in [clientId, collection] order: a record missing EITHER path is absent from a
+  // multi-path index (same sparseness as CLIENT_INDEX, extended), and client-first is what would
+  // let a future range query ask "everything for this client" through this same index too, should
+  // CLIENT_INDEX's whole-client scan ever need to be ordered rather than just enumerated.
+  store.createIndex(CLIENT_COLLECTION_INDEX, ["clientId", "collection"], { unique: false });
   return store;
 }
 

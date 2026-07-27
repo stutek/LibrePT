@@ -78,23 +78,28 @@ is a deliberate act.
 
 | Index | Key path | Purpose |
 | :--- | :--- | :--- |
-| `byCollection` | `collection` | Load one collection without scanning the store |
-| `byClient` | `clientId` | **Lazy per-client load** — one index hit instead of deserialising every client's history to render one screen |
+| `byCollection` | `collection` | Load one collection without scanning the store — "the whole exercise catalog," no client dimension |
+| `byClient` | `clientId` | **Whole-client scan** — every collection touched by one client, unnarrowed. What §5's erasure/anonymization sweep needs: touch every record type for one client |
+| `byClientAndCollection` | `[clientId, collection]` | **Lazy per-client load** — one client's HISTORY specifically, one index hit. `byClient` alone would return that client's `planUpdates` interleaved too, costing a client-side filter over records the load never wanted deserialised |
 
-`byClient` is sparse: records with no owner (the exercise catalog) simply do not appear in it.
-`getAllKeys()` walks an index's B-tree and returns keys **without deserialising payloads**, which is
-what makes the migration-completeness check (§4) — a set difference over two stores' keys — cheap
-rather than a full scan.
+Both client-scoped indexes are sparse: records with no owner (the exercise catalog) simply do not
+appear in either. A compound index is sparse the same way — a record missing *either* path is
+absent from it, not present with a `null`. `getAllKeys()` walks an index's B-tree and returns keys
+**without deserialising payloads**, which is what makes the migration-completeness check (§4) — a
+set difference over two stores' keys — cheap rather than a full scan.
 
 ---
 
 ## 3. Logical record model
 
 The collections, and the references between them. **The reference graph must stay acyclic** — see §4.
+This diagram is the relationship map and stays illustrative rather than exhaustive (it omits, for
+instance, `SESSION.title`/`maxCapacity`); [recordSchemas.js](../src/data/recordSchemas.js) is the
+enforced, field-exact source of truth, checked in CI against real data — see §4.
 
 ```mermaid
 erDiagram
-    CLIENT ||--o{ SESSION : "booked for"
+    CLIENT }o--o{ SESSION : "participates in"
     CLIENT ||--o{ HISTORY : "performed"
     CLIENT ||--o{ PLAN_UPDATE : "about"
     ROUTINE ||--o{ SESSION_ITEM : "prescribes"
@@ -126,8 +131,10 @@ erDiagram
     }
     SESSION {
         string id PK
-        string clientId FK
-        string date
+        string[] participants FK "GROUP sessions — many clients, not one; TODO §1.2"
+        string routineId FK
+        string time
+        string location
     }
     HISTORY {
         string id PK
@@ -153,6 +160,13 @@ erDiagram
         string tag
         string note
     }
+    PLAN_UPDATE {
+        string id PK
+        string clientId FK
+        string exerciseName "soft ref — the movement the tag concerns"
+        string tag "e.g. Too Easy - Increase Load"
+        bool resolved
+    }
 ```
 
 Three modelling decisions worth knowing before changing anything here:
@@ -167,6 +181,13 @@ Three modelling decisions worth knowing before changing anything here:
   model, so there is no second representation to drift.
 - **`routineName` is a soft string reference on purpose.** Making template provenance a hard FK would
   create `history → routine → history`, the first cycle in the graph, and break §4's ordering.
+- **`SESSION.participants` is many-to-many, not the single `clientId` an earlier version of this
+  diagram drew.** A session can hold several clients (TODO §1.2's group-session merge) and a client
+  sits in many sessions, so the CLIENT↔SESSION edge is `}o--o{`. **Open, not built**: whether that
+  earns `participants` a `multiEntry` IndexedDB index (one entry per participant, so "this client's
+  upcoming sessions" is an index hit) — sessions are a small, bounded collection next to history's
+  unbounded growth, so this stays a documented question rather than a built index until a real
+  consumer needs the query.
 
 ### Ordering — explicit, dense, checkable
 

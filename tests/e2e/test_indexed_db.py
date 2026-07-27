@@ -156,17 +156,23 @@ def test_indexes_support_collection_scan_and_lazy_per_client_load(page, local_se
                 m.put(s, { id: 'h1', collection: 'history', clientId: 'c1' });
                 m.put(s, { id: 'h2', collection: 'history', clientId: 'c1' });
                 m.put(s, { id: 'h3', collection: 'history', clientId: 'c2' });
+                // Same client as h1/h2, DIFFERENT collection — the fixture CLIENT_INDEX alone
+                // cannot isolate, and CLIENT_COLLECTION_INDEX exists specifically to.
+                m.put(s, { id: 'p1', collection: 'planUpdates', clientId: 'c1' });
                 m.put(s, { id: 'e1', collection: 'exercises' });
             });
 
             let history = null;
             let forClient = null;
+            let historyForClient = null;
             let historyCount = null;
             let total = null;
             await m.withTransaction(db, 'schema2', 'readonly', (t) => {
                 const s = t.store('schema2');
                 m.getAllFromIndex(s, m.COLLECTION_INDEX, 'history').then((v) => { history = v; });
                 m.getAllFromIndex(s, m.CLIENT_INDEX, 'c1').then((v) => { forClient = v; });
+                m.getAllFromIndex(s, m.CLIENT_COLLECTION_INDEX, ['c1', 'history'])
+                    .then((v) => { historyForClient = v; });
                 m.countInIndex(s, m.COLLECTION_INDEX, 'history').then((v) => { historyCount = v; });
                 m.countAll(s).then((v) => { total = v; });
             });
@@ -175,15 +181,20 @@ def test_indexes_support_collection_scan_and_lazy_per_client_load(page, local_se
             return {
                 history: history.length,
                 forClient: forClient.map((r) => r.id).sort(),
+                historyForClient: historyForClient.map((r) => r.id).sort(),
                 historyCount,
                 total,
             };
         }"""
     )
     assert r["history"] == 3
-    # §17.1's lazy per-client load: one index hit, not a full scan plus filter.
-    assert r["forClient"] == ["h1", "h2"]
-    # The catalog has no owner, so it is absent from the client index rather than bucketed under one.
-    assert r["total"] == 4
+    # CLIENT_INDEX alone: everything about client c1, history AND planUpdates interleaved — the
+    # shape §17.3's whole-client erasure/anonymization sweep wants, not the shape §17.1 wants.
+    assert r["forClient"] == ["h1", "h2", "p1"]
+    # CLIENT_COLLECTION_INDEX: §17.1's actual lazy per-client load — client c1's history ONLY, one
+    # exact index hit, p1 excluded without a client-side filter over a record nobody asked to load.
+    assert r["historyForClient"] == ["h1", "h2"]
+    # The catalog has no owner, so it is absent from both client-scoped indexes rather than bucketed.
+    assert r["total"] == 5
     # count() goes through the index B-tree — this is what makes §18.3's completeness query cheap.
     assert r["historyCount"] == 3

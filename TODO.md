@@ -550,7 +550,14 @@ With 17.1 preserving the full program, "**Save as routine**" on a history record
 >   base62, all call sites switched. Replaced a 41.4-bit `Math.random` generator carrying a **1.38%
 >   chance of at least one collision** over five years of a very busy PT's records.
 > - [x] **18.6 engine, part 1** — [indexedDb.js](src/data/indexedDb.js): one database, one object
->   store per schema, transactions that resolve on commit, collection + client indexes.
+>   store per schema, transactions that resolve on commit, collection + client indexes. **Revised
+>   2026-07-27**: added a compound `byClientAndCollection` index — the two single-field indexes
+>   couldn't isolate "client X's history" from "client X's plan updates" without a client-side
+>   filter, which is exactly the query §17.1's lazy per-client load names. Found while checking
+>   `recordSchemas.js`'s seven declared collections against what the two original indexes actually
+>   serve. Also corrected `docs/DATA_MODEL.md`'s SESSION entity, which drew a single `clientId` where
+>   the real field is `participants` (many-to-many, group sessions — TODO §1.2), and added the
+>   missing `PLAN_UPDATE` entity block.
 > - [x] **18.6/18.8 engine, part 2** — [storageDurability.js](src/data/storageDurability.js):
 >   `persist()` on boot, eviction risk reported by consequence rather than private-mode sniffing.
 > - [x] **18.6 engine, part 3** — [writeQueue.js](src/data/writeQueue.js): write-behind persistence.
