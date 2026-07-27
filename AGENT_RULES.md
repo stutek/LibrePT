@@ -119,9 +119,18 @@ nothing behind for the next agent. When a check will be needed again, it belongs
 3. **Adding a tool means all of it**: the module (docstring stating *why it exists*), a catalog row, a
    unit test in [tests/unit/](tests/unit/), and a Stage 1 task in [build/](build/) if it should gate
    commits. A tool nobody runs is worse than no tool — it rots and then misleads.
-4. **Prefer the dedicated file tools for one-off edits.** Batching many exact replacements into one
-   throwaway script is defensible when it genuinely saves round-trips; using one to edit a couple of
-   lines is not — it skips the read-before-edit guard and hides the diff from review.
+4. **On small files, just make the edit — scripting it is the more expensive path.** Tokens are the
+   real budget here (see the multi-model cost split), and a `python - <<'PY'` heredoc that rewrites
+   two lines costs *more* of them than the direct edit: the script has to restate the old text, the
+   new text, the file handling and the assertions, and it is written blind. The direct edit also
+   keeps the read-before-edit guard (it fails loudly when the file is not what you thought) and shows
+   the user a reviewable diff, both of which a heredoc discards.
+   - **Default: the dedicated file tools** (Edit / Write) for anything measured in lines.
+   - **A script earns its keep only on volume or repetition** — a dozen exact replacements across
+     several files in one pass, where the round-trips genuinely dominate. Below that threshold the
+     accounting does not work out, however mechanical the change looks.
+   - **If you find yourself scripting the same shape twice, that is rule 2**: it wants to be a tool in
+     `agent_tools/`, not a better one-off.
 5. **Documentation cross-references are gated, not trusted.** `agent_tools/doclinks.py` runs in Stage
    1 and fails the build on a dead link, a dead `#anchor`, or a `§N.M` pointing at a section that no
    longer exists. Renumbering or deleting a section is therefore a whole-repo edit, and the gate will

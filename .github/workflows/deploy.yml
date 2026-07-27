@@ -48,6 +48,25 @@ jobs:
       - name: Run Ruff
         run: .venv/bin/python -c "from build import run_python_lint; run_python_lint()"
 
+  doc-graph:
+    name: Documentation Graph (doclinks)
+    runs-on: ubuntu-latest
+    steps:
+      # Needs the full history only for `git ls-files`, which a shallow checkout still serves — but
+      # the checker reads the working tree, so no fetch-depth tuning is required here.
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - name: Install Dependencies
+        run: |
+          python -m venv .venv
+          .venv/bin/pip install --upgrade pip
+          .venv/bin/pip install -r requirements.txt
+      - name: Check documentation cross-references
+        run: .venv/bin/python -c "from build import run_doc_graph_check; run_doc_graph_check()"
+
   frontend-lint:
     name: Frontend Lint & Format (Biome)
     runs-on: ubuntu-latest
