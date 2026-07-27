@@ -25,6 +25,7 @@ catalog below.
 | Tool | Type | Runs in | Description |
 | :--- | :--- | :--- | :--- |
 | [doclinks.py](doclinks.py) | `check` | `build check` Stage 1 | Verifies the OKF knowledge graph connects: every relative Markdown link resolves to a real file, every `#anchor` to a real heading, and every `§N.M` to a real numbered section. Suggests the nearest surviving anchor when one is dead. |
+| [pipeline_gates.py](pipeline_gates.py) | `check` | `build check` Stage 1 + `unit-tests` job | Asserts every CI job actually gates the deploy — exactly one terminal job, everything else inside its transitive `needs` closure. Catches a job that runs and reports red while the release ships anyway. |
 
 ## When to add a tool here
 

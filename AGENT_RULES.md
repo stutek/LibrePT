@@ -135,3 +135,10 @@ nothing behind for the next agent. When a check will be needed again, it belongs
    1 and fails the build on a dead link, a dead `#anchor`, or a `§N.M` pointing at a section that no
    longer exists. Renumbering or deleting a section is therefore a whole-repo edit, and the gate will
    say so.
+6. **Every pipeline task must be a gate — a check that blocks nothing is worse than no check.** A
+   GitHub Actions job that no other job lists in `needs` still runs and still reports red, while the
+   deploy ships regardless; the run page then shows a failure next to a successful release, which
+   reads as *more* trustworthy than having no check at all. Adding a workflow job therefore means
+   adding it to the `needs:` of whatever must wait for it, in the same change. Enforced by
+   `agent_tools/pipeline_gates.py`: exactly one terminal job, and every other job inside its
+   transitive closure.

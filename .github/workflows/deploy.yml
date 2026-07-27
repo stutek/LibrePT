@@ -120,7 +120,7 @@ jobs:
 
   e2e-tests:
     name: E2E Browser Tests
-    needs: [python-lint, frontend-lint, dependency-scan, unit-tests]
+    needs: [python-lint, doc-graph, frontend-lint, dependency-scan, unit-tests]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -143,7 +143,7 @@ jobs:
   # (named results in the output) and kept together where splitting would only buy latency.
   static-security-audits:
     name: Static Security Audits (CSP parity & HTML sinks)
-    needs: [python-lint, frontend-lint, dependency-scan, unit-tests]
+    needs: [python-lint, doc-graph, frontend-lint, dependency-scan, unit-tests]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -155,7 +155,7 @@ jobs:
 
   owasp-zap-scan:
     name: OWASP ZAP Security Scan
-    needs: [python-lint, frontend-lint, dependency-scan, unit-tests]
+    needs: [python-lint, doc-graph, frontend-lint, dependency-scan, unit-tests]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

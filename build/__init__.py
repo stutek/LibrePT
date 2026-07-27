@@ -242,6 +242,18 @@ def run_doc_graph_check():
         sys.exit(1)
 
 
+def run_pipeline_gate_check():
+    """Verifies every CI job actually gates the deploy — see agent_tools/pipeline_gates.py.
+
+    An orphan job is invisible by inspection: it runs, it can go red, and the deploy ships anyway.
+    """
+    print("\n  Checking CI pipeline gating...")
+    from agent_tools import pipeline_gates
+
+    if pipeline_gates.main() != 0:
+        sys.exit(1)
+
+
 def run_frontend_lint():
     """Runs JS/CSS/JSON static analysis (Biome), applying the formatting it can fix itself.
 
@@ -601,6 +613,7 @@ def run_stage_1_parallel():
         "Unit Tests": run_unit_tests,
         "Static Security Audits": run_static_security_checks,
         "Documentation Graph": run_doc_graph_check,
+        "Pipeline Gating": run_pipeline_gate_check,
     }
 
     failures = []
