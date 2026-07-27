@@ -560,6 +560,23 @@ function removeQuickSignal(clientId, exerciseName, tag, state) {
   state.planUpdates = state.planUpdates.filter((u) => !removedIds.has(u.id));
 }
 
+// The mutual-exclusion enforcement point for callers OTHER than logQuickSignal — specifically
+// feedbackModal.js, which offers the same "Too Easy"/"Too Hard" tags as its own radio choices and
+// writes activeSession.feedback directly rather than through logQuickSignal. Without this, a PT
+// submitting the modal with the (default-checked) opposite tag while a quick-tap was already
+// active left BOTH plain and "active" simultaneously — found 2026-07-27, the exact bug §8.7's
+// mutual-exclusivity fix was meant to close everywhere, not just on the quick-tap path itself.
+// Removes any PLAIN opposite-tag entry regardless of whether the NEW entry being logged is itself
+// plain or carries a note: asserting a tag (with or without extra detail) supersedes a bare
+// opposite tap either way, which is exactly what isPlainQuickSignal already governs for removal.
+export function enforceQuickSignalExclusivity(clientId, exerciseName, tag) {
+  if (!activeSession) return;
+  const { state } = appDeps;
+  if (!state) return;
+  const opposite = OPPOSITE_QUICK_SIGNAL[tag];
+  if (opposite) removeQuickSignal(clientId, exerciseName, opposite, state);
+}
+
 // One tap logs the signal; tapping the SAME signal again undoes it — a toggle, not a one-way
 // stamp, so a mis-tap on the gym floor doesn't need a trip to the feedback modal to correct.
 // Tapping the OPPOSITE signal while one is active swaps it — Too Easy and Too Hard are mutually
@@ -582,8 +599,7 @@ export function logQuickSignal(tag, exId) {
   if (hasQuickSignal(clientId, curEx.name, tag)) {
     removeQuickSignal(clientId, curEx.name, tag, state);
   } else {
-    const opposite = OPPOSITE_QUICK_SIGNAL[tag];
-    if (opposite) removeQuickSignal(clientId, curEx.name, opposite, state);
+    enforceQuickSignalExclusivity(clientId, curEx.name, tag);
 
     const client = state.clients.find((c) => c.id === clientId);
     const newFeedback = {

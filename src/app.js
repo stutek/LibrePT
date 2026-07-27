@@ -4,6 +4,7 @@
 
 import {
   cancelWorkoutSession as cancelWorkoutSessionController,
+  enforceQuickSignalExclusivity,
   focusExerciseByIndex,
   focusIndexFromRef,
   getActiveExercise as getActiveExerciseController,
@@ -288,6 +289,7 @@ function init() {
     saveActiveSessionToCache,
     saveToLocalStorage: saveState,
     renderPendingPlanAdjustments,
+    enforceQuickSignalExclusivity,
   });
   setupFeedbackForms();
 

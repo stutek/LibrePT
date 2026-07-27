@@ -259,6 +259,18 @@ jot a note.
   for the swap), which is what mistype correction on the gym floor actually needs: tap the wrong
   one, then the right one, no untap step in between. Bounded by the same `isPlainQuickSignal` rule
   as the toggle — a noted/voice-memo'd entry on the opposite tag survives a swap.
+- **Mutual exclusion closed on the Notes-modal path too, 2nd take (Simon, still 2026-07-27)**: the
+  modal offers the same "Too Easy"/"Too Hard" tags as its own radio choices (default-checked to Too
+  Easy) and wrote `activeSession.feedback` directly, bypassing `logQuickSignal` entirely — quick-tap
+  one signal, then submit the modal with the default opposite tag and no note, and both stayed
+  active at once (visible on the next re-render). The opposite-tag removal is now factored out of
+  `logQuickSignal` into an exported `enforceQuickSignalExclusivity(clientId, exerciseName, tag)`
+  ([activeSessionController.js](src/controllers/activeSessionController.js)) — the single canonical
+  enforcement point — wired via DI into
+  [feedbackModal.js](src/modules/common/feedbackModal.js)'s submit handler. Covered by
+  `test_modal_submission_of_opposite_tag_clears_the_quick_tapped_signal` and
+  `test_modal_submission_the_other_direction_also_clears` in
+  `tests/e2e/test_quick_signal_toggle.py`.
 - **Feedback → Notes**: icon `fa-triangle-exclamation` → `fa-note-sticky`,
   `feedback_short` "Feedback"→"Notes" (sl: "Opomba"→"Opombe"), `btn_log_feedback` "Log Feedback"→
   "Add Note" (sl: "Dodaj opombo") — in both

@@ -75,6 +75,7 @@ export function setupFeedbackForms() {
     saveActiveSessionToCache,
     saveToLocalStorage,
     renderPendingPlanAdjustments,
+    enforceQuickSignalExclusivity,
   } = deps;
 
   // Voice recording mock handlers
@@ -200,6 +201,11 @@ export function setupFeedbackForms() {
         if (!activeSession.feedback) {
           activeSession.feedback = [];
         }
+        // Too Easy / Too Hard are mutually exclusive everywhere a PT can log them, not just the
+        // quick-tap buttons — this modal offers the same two tags as its own radio choices
+        // (default-checked to "Too Easy"), so without this a submission here could leave both
+        // active at once alongside an existing quick-tap on the opposite tag.
+        enforceQuickSignalExclusivity?.(clientId, exName, tagVal);
         activeSession.feedback.push({
           id: newFeedback.id,
           clientId: clientId,
