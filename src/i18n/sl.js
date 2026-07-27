@@ -56,7 +56,7 @@ export const sl = {
   btn_delete_session: "Izbriši sejo",
   btn_delete_plan: "Izbriši plan",
   btn_complete: "Zaključi vadbo",
-  btn_log_feedback: "Zabeleži povratne informacije",
+  btn_log_feedback: "Dodaj opombo",
   alert_no_sets:
     "Ni zabeleženih zaključenih serij. Ali ste prepričani, da želite zaključiti in shraniti prazno vadbo?",
   confirm_finish_early:
@@ -230,7 +230,7 @@ export const sl = {
   next_session_label: "Naslednja",
   signal_too_easy: "Prelahko",
   signal_too_hard: "Pretežko",
-  feedback_short: "Opomba",
+  feedback_short: "Opombe",
   round_label: "Krog",
   complete_round: "Zaključi krog",
   finish_circuit: "Zaključi sklop",

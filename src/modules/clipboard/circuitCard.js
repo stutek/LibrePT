@@ -8,7 +8,7 @@
 // The caller creates the `card` element and appends it; this component only fills it in.
 // ctx: {
 //   round, activeClientId, pastExpanded, isFutureSession,
-//   t, escapeHTML, getExerciseSignalColor,
+//   t, escapeHTML, getExerciseSignalColor, hasQuickSignal(clientId, exerciseName, tag),
 //   logQuickSignal(tag, exId), openFeedbackModal(exId),
 //   completeCircuitRound(circuitId), onFocus(firstExerciseIndex)
 // }
@@ -25,6 +25,7 @@ export function renderCircuitCard(card, item, ctx) {
     t,
     escapeHTML,
     getExerciseSignalColor,
+    hasQuickSignal,
     logQuickSignal,
     openFeedbackModal,
     completeCircuitRound,
@@ -79,6 +80,10 @@ export function renderCircuitCard(card, item, ctx) {
           ? ` · ${escapeHTML(formatLoad(ex.weightTarget, ex.loadUnit))}`
           : "";
         const idAttr = isFirstExercise ? ' id="btn-log-feedback"' : "";
+        // Too Easy / Too Hard are toggles: pressed state mirrors whether THIS exact quick-signal
+        // is already logged for this exercise, so a second tap (which un-logs it) reads right.
+        const isEasyActive = hasQuickSignal(activeClientId, ex.name, "Too Easy - Increase Load");
+        const isHardActive = hasQuickSignal(activeClientId, ex.name, "Too Hard - Reduce Load");
 
         rows.push(`
         <div class="circuit-ex-row" data-ex-id="${escapeHTML(ex.id)}">
@@ -87,14 +92,14 @@ export function renderCircuitCard(card, item, ctx) {
             <span class="circuit-ex-target">${repsHTML}${repLabel ? `<span class="circuit-ex-reps">${repLabel}</span>` : ""}</span>
           </div>
           <div class="circuit-ex-actions">
-            <button type="button" class="circuit-sig easy" data-sig="easy" aria-label="${t("signal_too_easy")}">
+            <button type="button" class="circuit-sig easy${isEasyActive ? " active" : ""}" data-sig="easy" aria-pressed="${isEasyActive}" aria-label="${t("signal_too_easy")}">
               <i class="fa-solid fa-feather"></i><span>${t("signal_too_easy")}</span>
             </button>
-            <button type="button" class="circuit-sig hard" data-sig="hard" aria-label="${t("signal_too_hard")}">
+            <button type="button" class="circuit-sig hard${isHardActive ? " active" : ""}" data-sig="hard" aria-pressed="${isHardActive}" aria-label="${t("signal_too_hard")}">
               <i class="fa-solid fa-weight-hanging"></i><span>${t("signal_too_hard")}</span>
             </button>
             <button type="button"${idAttr} class="circuit-sig note" data-sig="note" aria-label="${t("btn_log_feedback")}">
-              <i class="fa-solid fa-triangle-exclamation"></i><span>${t("feedback_short")}</span>
+              <i class="fa-solid fa-note-sticky"></i><span>${t("feedback_short")}</span>
             </button>
           </div>
         </div>`);

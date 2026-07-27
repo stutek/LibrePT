@@ -300,6 +300,32 @@ export const DEFAULT_EXERCISES = [
     metric: "calories",
     instructions: "Sustained air-bike intervals; drive with arms and legs to the calorie target.",
   },
+  // Two more Assault Bike entries, same machine, different prescription style — matching the
+  // catalog's one-metric-per-entry convention (Watt Bike below is metric:watts, Treadmill Run is
+  // metric:time; a trainer who wants those styles on the air bike needs an entry to pick, the same
+  // way they would for any other machine). `sets` already works on every entry regardless of
+  // metric (e.g. 3 sets of 20 cal, or 3 sets of 20s) — nothing about that needed fixing.
+  {
+    id: "e46d5e6f",
+    name: "Assault Bike (Time)",
+    category: "Cardio",
+    equipment: "Machine",
+    pattern: "Conditioning",
+    modality: "cardio",
+    metric: "time",
+    instructions:
+      "Air-bike intervals to a fixed duration — steady pace or an all-out sprint clock.",
+  },
+  {
+    id: "e47d5e6f",
+    name: "Assault Bike (Watts)",
+    category: "Cardio",
+    equipment: "Machine",
+    pattern: "Conditioning",
+    modality: "cardio",
+    metric: "watts",
+    instructions: "Hold the target power output (watts) on the air bike for the prescribed effort.",
+  },
   {
     id: "e42d5e6f",
     name: "Concept2 Rower",

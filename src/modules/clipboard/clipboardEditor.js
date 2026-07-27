@@ -202,14 +202,22 @@ export function renderClipboardEditor(container, deps) {
 
   // An insert bar sits in a gap and injects at items[] index `at`. `allowCircuit` is true only at
   // the top level; `cid` (when inside a circuit) is stamped onto whatever is injected there.
+  //
+  // The +Rest option is hidden when `at` already sits directly against a rest — back-to-back rests
+  // are two waits with nothing between them, never a real plan shape, and the button offered no way
+  // to tell that apart from a genuinely useful gap. `items[at-1]`/`items[at]` are the two neighbours
+  // a rest inserted HERE would land next to; `at` is a true flat index into `items` in every caller
+  // (top-level gaps and circuit-internal gaps alike — a circuit member's `idx` is captured from the
+  // same walk over the top-level array), so no caller needs to compute this itself.
   const insertBar = (at, { allowCircuit = false, cid } = {}) => {
     const cidAttr = cid ? ` data-cid="${escapeHTML(cid)}"` : "";
+    const adjacentToRest = isRest(items[at - 1]) || isRest(items[at]);
     return `
       <li class="editor-insert" data-at="${at}"${cidAttr}>
         <span class="editor-insert-line"></span>
         <button type="button" class="ins-btn ins-ex"><i class="fa-solid fa-plus"></i> ${tr("exercise", "Exercise")}</button>
         ${allowCircuit ? `<button type="button" class="ins-btn ins-circuit"><i class="fa-solid fa-plus"></i><i class="fa-solid fa-layer-group"></i> ${tr("circuit", "Circuit")}</button>` : ""}
-        <button type="button" class="ins-btn ins-rest"><i class="fa-solid fa-plus"></i><i class="fa-solid fa-hourglass-half"></i> ${tr("rest_label", "Rest")}</button>
+        ${adjacentToRest ? "" : `<button type="button" class="ins-btn ins-rest"><i class="fa-solid fa-plus"></i><i class="fa-solid fa-hourglass-half"></i> ${tr("rest_label", "Rest")}</button>`}
         <span class="editor-insert-line"></span>
       </li>`;
   };

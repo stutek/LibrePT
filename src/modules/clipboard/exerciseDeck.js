@@ -9,7 +9,7 @@
 // deckContainer: the #active-exercise-scroll-deck element
 // deps: {
 //   activeSession, activeClientState, activeClientId, state,
-//   t, escapeHTML, buildCircuitUnits, getExerciseSignalColor,
+//   t, escapeHTML, buildCircuitUnits, getExerciseSignalColor, hasQuickSignal,
 //   logQuickSignal, openFeedbackModal, completeCircuitRound, focusExerciseByIndex,
 //   saveActiveSessionToCache, saveToLocalStorage,
 //   onRerender()   // re-render the whole board (past-card toggle / circuit save)
@@ -33,6 +33,7 @@ export function renderExerciseDeck(deckContainer, deps) {
     escapeHTML,
     buildCircuitUnits,
     getExerciseSignalColor,
+    hasQuickSignal,
     logQuickSignal,
     openFeedbackModal,
     completeCircuitRound,
@@ -230,6 +231,7 @@ export function renderExerciseDeck(deckContainer, deps) {
         t,
         escapeHTML,
         getExerciseSignalColor,
+        hasQuickSignal,
         logQuickSignal,
         openFeedbackModal,
         completeCircuitRound,
@@ -251,6 +253,7 @@ export function renderExerciseDeck(deckContainer, deps) {
         t,
         escapeHTML,
         getExerciseSignalColor,
+        hasQuickSignal,
         logQuickSignal,
         openFeedbackModal,
         startRestTimer,

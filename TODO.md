@@ -210,6 +210,38 @@ into focus like every other collapsed card does. Fix: gate the rest card's click
 `item.isInFocus` (mirroring `showInFocus` in the other two card components) and give it the same
 `onFocus`-only fallback when collapsed.
 
+### 8.7 [x] Too Easy / Too Hard are toggles; feedback button relabelled Notes — **SHIPPED 2026-07-27**
+Simon: the feedback trio gave no visible sign a tap had registered, and the third button's warning-
+triangle icon/label ("Feedback") read as an alert rather than what it actually does — open a place to
+jot a note.
+
+- **`logQuickSignal` is now a toggle**, not a one-way stamp
+  ([activeSessionController.js](src/controllers/activeSessionController.js)): a second tap on the
+  *same* signal removes the exact untouched quick-signal entry it created, from both
+  `activeSession.feedback` and `state.planUpdates`, so a mis-tap on the gym floor needs no trip to
+  the feedback modal to correct. `isPlainQuickSignal` (no typed note, no voice memo) is what keeps
+  this safe: a modal-authored entry on the same tag is never touched by a re-tap, and the new
+  `hasQuickSignal(clientId, exerciseName, tag)` export is what both card components render their
+  pressed state from.
+- **Pressed state is visible**: `.deck-action-easy/.hard.active` and `.circuit-sig.easy/.hard.active`
+  fill solid (matching the signal's own color) rather than only tinting on hover, plus
+  `aria-pressed` on both buttons.
+- **Feedback → Notes**: icon `fa-triangle-exclamation` → `fa-note-sticky`,
+  `feedback_short` "Feedback"→"Notes" (sl: "Opomba"→"Opombe"), `btn_log_feedback` "Log Feedback"→
+  "Add Note" (sl: "Dodaj opombo") — in both
+  [exerciseCard.js](src/modules/clipboard/exerciseCard.js) and
+  [circuitCard.js](src/modules/clipboard/circuitCard.js). Covered by
+  `tests/e2e/test_quick_signal_toggle.py`.
+
+### 8.8 [x] Hide +Rest in the editor's insert bar next to an existing rest — **SHIPPED 2026-07-27**
+Simon: back-to-back rests are two waits with nothing between them, never a real plan shape.
+[clipboardEditor.js](src/modules/clipboard/clipboardEditor.js)'s `insertBar(at, …)` now hides its
+`+Rest` button whenever `items[at-1]` or `items[at]` — the two neighbours a rest inserted there
+would land next to — is already a rest; `+Exercise` and `+Circuit` stay available in every gap,
+since only a *rest* next to a rest is the redundant shape. `at` is a true flat index into `items` in
+every caller (top-level gaps and circuit-internal gaps alike), so no call site needed to change.
+Covered by `tests/e2e/test_editor_insert_bar_rest_adjacency.py`.
+
 ---
 
 ## 9. Interactive Demo / Guided Onboarding
@@ -323,6 +355,18 @@ first visit, so it costs one visit, once. Recording it because it is the amplifi
 
 ### 13.3 [x] Conditioning metrics: extend the reps/load model beyond sets × reps × kg — **SHIPPED 2026-07-24**
 Graduated to [CHANGELOG](CHANGELOG.md) / [UC6 §5](use_cases/uc6_exercise_taxonomy_and_picker.md). Built as the **modality** axis ([exerciseModality.js](src/modules/common/exerciseModality.js)): cardio targets are `time | distance | calories | watts`, stretch/balance are hold-time, strength stays sets × reps × load. The raw value is stored and its meaning derived at render (as reps/load already do), the focus timer seeds the target duration for time-bound work, and modality is authored in custom-create + the inline editor. Subsumed under §17.1's modality field — see the modality note there for what remains (routine-builder metric authoring polish, `hiit`).
+
+### 13.4 [x] Assault Bike needed time/watts coverage, not just calories — **SHIPPED 2026-07-27**
+Simon: does Assault Bike need sets + watts + time-or-calories? `sets` already worked (any exercise
+carries a repeat-round count regardless of metric — confirmed against the seed history's own
+`sets: [{reps: 20, …}]` calorie entry). The real gap was metric coverage: the catalog's convention is
+one metric per entry (Watt Bike = `watts`, Treadmill Run = `time`, Concept2 Rower = `distance`), and
+Assault Bike had only the original `calories` row. Added two sibling entries on the same one-machine-
+one-metric pattern rather than changing the model: **Assault Bike (Time)** (`e46d5e6f`, metric
+`time`) and **Assault Bike (Watts)** (`e47d5e6f`, metric `watts`), next to the original
+(`e41d5e6f`, `calories`) in [exercises.js](src/data/exercises.js). A trainer who wants a
+time-or-watts air-bike prescription now has an entry to pick, the same way they already would for
+any other cardio machine.
 
 ---
 

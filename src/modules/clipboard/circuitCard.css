@@ -94,10 +94,22 @@
   border-color: var(--success);
   background: rgba(16, 185, 129, 0.12);
 }
+/* Pressed state: the tap already registered, so the fill carries the same weight as a real toggle
+   switch rather than a hover tint — a second tap here is what un-registers it. */
+.circuit-sig.easy.active {
+  color: var(--text-dark);
+  border-color: var(--success);
+  background: var(--success);
+}
 .circuit-sig.hard:hover {
   color: #f59e0b;
   border-color: #f59e0b;
   background: rgba(245, 158, 11, 0.12);
+}
+.circuit-sig.hard.active {
+  color: var(--text-dark);
+  border-color: #f59e0b;
+  background: #f59e0b;
 }
 .circuit-sig.note:hover {
   color: var(--danger);

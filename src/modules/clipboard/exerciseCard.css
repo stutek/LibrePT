@@ -60,12 +60,24 @@
 .deck-action-easy:hover {
   background: rgba(16, 185, 129, 0.12);
 }
+/* Pressed state: the tap already registered, so the fill carries the same weight as a real toggle
+   switch rather than a hover tint — a second tap here is what un-registers it. */
+.deck-action-easy.active {
+  background: var(--success);
+  border-color: var(--success);
+  color: var(--text-dark);
+}
 .deck-action-hard {
   border-color: rgba(245, 158, 11, 0.4);
   color: #f59e0b;
 }
 .deck-action-hard:hover {
   background: rgba(245, 158, 11, 0.12);
+}
+.deck-action-hard.active {
+  background: #f59e0b;
+  border-color: #f59e0b;
+  color: var(--text-dark);
 }
 .deck-action-feedback {
   border-color: rgba(239, 68, 68, 0.35);

@@ -511,6 +511,28 @@ export function getActiveExercise() {
   return activeClientState.exercises[activeClientState.activeExerciseIndex];
 }
 
+// A quick-signal entry is the "vanilla" one logQuickSignal itself creates — no typed note, no
+// voice note. A modal-authored entry (feedbackModal.js) always carries at least a tag choice and
+// may append a note, so this predicate is how the toggle avoids ever deleting something the PT
+// actually wrote: only an untouched quick-tap is safe to un-tap.
+const isPlainQuickSignal = (f) => !f.note?.trim() && !f.hasVoiceNote;
+
+// Whether THIS exact quick-signal is currently active for the exercise in focus — the toggle's
+// "on" state, and what the Too Easy / Too Hard buttons render pressed against.
+export function hasQuickSignal(clientId, exerciseName, tag) {
+  return (activeSession?.feedback || []).some(
+    (f) =>
+      f.clientId === clientId &&
+      f.exerciseName === exerciseName &&
+      f.tag === tag &&
+      isPlainQuickSignal(f),
+  );
+}
+
+// One tap logs the signal; tapping the SAME signal again undoes it — a toggle, not a one-way
+// stamp, so a mis-tap on the gym floor doesn't need a trip to the feedback modal to correct.
+// Only ever removes the exact untouched quick-signal entries it itself would have created; a
+// typed note or a voice memo on the same tag is never touched by this path.
 export function logQuickSignal(tag, exId) {
   if (!activeSession) return;
   const { state, saveToLocalStorage, renderPendingPlanAdjustments } = appDeps;
@@ -523,32 +545,48 @@ export function logQuickSignal(tag, exId) {
   const curEx =
     (exId && clientState.exercises.find((e) => e.id === exId)) ||
     clientState.exercises[clientState.activeExerciseIndex];
-  const client = state.clients.find((c) => c.id === clientId);
 
-  const newFeedback = {
-    id: newRecordId(),
-    clientId,
-    clientName: client ? client.name : "Unknown Client",
-    date: new Date().toISOString(),
-    exerciseName: curEx.name,
-    tag,
-    hasVoiceNote: false,
-    resolved: false,
-  };
-  state.planUpdates.push(newFeedback);
+  if (hasQuickSignal(clientId, curEx.name, tag)) {
+    const removedIds = new Set(
+      (activeSession.feedback || [])
+        .filter(
+          (f) =>
+            f.clientId === clientId &&
+            f.exerciseName === curEx.name &&
+            f.tag === tag &&
+            isPlainQuickSignal(f),
+        )
+        .map((f) => f.id),
+    );
+    activeSession.feedback = activeSession.feedback.filter((f) => !removedIds.has(f.id));
+    state.planUpdates = state.planUpdates.filter((u) => !removedIds.has(u.id));
+  } else {
+    const client = state.clients.find((c) => c.id === clientId);
+    const newFeedback = {
+      id: newRecordId(),
+      clientId,
+      clientName: client ? client.name : "Unknown Client",
+      date: new Date().toISOString(),
+      exerciseName: curEx.name,
+      tag,
+      hasVoiceNote: false,
+      resolved: false,
+    };
+    state.planUpdates.push(newFeedback);
 
-  if (!activeSession.feedback) activeSession.feedback = [];
-  activeSession.feedback.push({
-    id: newFeedback.id,
-    clientId,
-    exerciseName: curEx.name,
-    tag,
-    note: "",
-    hasVoiceNote: false,
-  });
+    if (!activeSession.feedback) activeSession.feedback = [];
+    activeSession.feedback.push({
+      id: newFeedback.id,
+      clientId,
+      exerciseName: curEx.name,
+      tag,
+      note: "",
+      hasVoiceNote: false,
+    });
 
-  for (const l of clientState.logs[curEx.id] || []) {
-    l.completed = true;
+    for (const l of clientState.logs[curEx.id] || []) {
+      l.completed = true;
+    }
   }
 
   saveActiveSessionToCache();
@@ -946,6 +984,7 @@ export function renderActiveGroupBoard() {
       escapeHTML,
       buildCircuitUnits,
       getExerciseSignalColor,
+      hasQuickSignal,
       logQuickSignal,
       openFeedbackModal,
       completeCircuitRound,

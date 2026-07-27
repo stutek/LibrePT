@@ -57,7 +57,7 @@ export const en = {
   btn_delete_session: "Delete Session",
   btn_delete_plan: "Delete Plan",
   btn_complete: "Complete Workout Session",
-  btn_log_feedback: "Log Feedback",
+  btn_log_feedback: "Add Note",
   alert_no_sets:
     "No completed sets were logged. Are you sure you want to finish and save an empty session?",
   confirm_finish_early: "This session still has about {min} minutes left. Finish it now anyway?",
@@ -230,7 +230,7 @@ export const en = {
   next_session_label: "Next",
   signal_too_easy: "Too Easy",
   signal_too_hard: "Too Hard",
-  feedback_short: "Feedback",
+  feedback_short: "Notes",
   round_label: "Round",
   complete_round: "Complete round",
   finish_circuit: "Finish circuit",
