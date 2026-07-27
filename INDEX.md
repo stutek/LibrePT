@@ -23,6 +23,7 @@ This index provides AI agents and contributors with a structured navigation map 
 | [docs/DATA_MODEL.md](docs/DATA_MODEL.md) | `architecture` | Data model & storage schema: IndexedDB layout, logical record model, star-write projections, migration order and retention. |
 | [docs/ROUTING.md](docs/ROUTING.md) | `architecture` | Routing architecture: the Route class hierarchy and registry, specificity-based resolution, the `ctx` a route receives, routing invariants, and how to add a route. |
 | [AGENT_RULES.md](AGENT_RULES.md) | `guidelines` | Mandatory interaction protocols, direct execution rules, and single-source-of-truth guardrails for AI agents. |
+| [agent_tools/INDEX.md](agent_tools/INDEX.md) | `index` | Catalog of durable, repo-owned agent tools — run these instead of improvising a throwaway script, and the bar a new one must clear. |
 | [okf.yaml](okf.yaml) | `manifest` | Root configuration manifest declaring OKF v0.1 compliance and catalog entrypoints. |
 | [LICENSE](LICENSE) | `license` | MIT License terms governing use, modification, and distribution of LibrePT. |
 
@@ -47,13 +48,13 @@ is structured into feature modules under `src/modules/` (`session`, `plans`, `cl
 | [src/app.js](src/app.js) | `entry` | Application bootstrapper: root initialization, dependency injection wiring, and global lifecycle hooks. |
 | [src/theme-boot.js](src/theme-boot.js) | `entry` | Render-blocking classic script that sets the theme class before paint (anti-FOUC) and forces http→https; external so CSP `script-src` can forbid `'unsafe-inline'`. |
 | [src/data/stateStore.js](src/data/stateStore.js) | `data` | Central app state management: state object, localStorage persistence, seed data loading, and reset triggers. |
-| [src/data/storageNamespace.js](src/data/storageNamespace.js) | `data` | Per-release storage isolation (TODO §16.2): which localStorage bucket this build owns, copy-never-move migration between releases, bucket listing and EOL discard. |
+| [src/data/storageNamespace.js](src/data/storageNamespace.js) | `data` | Per-release storage isolation (being retired, TODO §16.5): which localStorage bucket this build owns, copy-never-move migration between releases, bucket listing and EOL discard. |
 | [src/data/indexedDb.js](src/data/indexedDb.js) | `data` | IndexedDB adapter (TODO §18.6): one database with one object store per schema — the layout that lets a single transaction write every live schema atomically — plus promise wrappers that resolve on commit. |
 | [src/data/storageDurability.js](src/data/storageDurability.js) | `data` | Storage durability (TODO §18.6/§18.8): requests eviction-proof storage, and reports risk by measuring the consequence (quota, persistence) rather than sniffing for private browsing. |
 | [src/data/writeQueue.js](src/data/writeQueue.js) | `data` | Write-behind persistence queue (TODO §18.6): serialises async writes behind a synchronous call so saves can never land out of order, and surfaces failures instead of swallowing them. |
-| [src/data/schemaMigrations.js](src/data/schemaMigrations.js) | `data` | Schema-migration runner (TODO §16.2): walks the version chain on a clone, validates every step's output, refuses data from a newer build, and returns a reportable summary. |
-| [src/data/migrationSteps.js](src/data/migrationSteps.js) | `data` | The ordered chain of pure per-version schema transforms and `CURRENT_SCHEMA_VERSION`. |
-| [src/data/versionCatalog.js](src/data/versionCatalog.js) | `data` | Published-release manifest reader (TODO §16.1): decides whether to offer an upgrade, a rollback (only for data that exists locally), or an end-of-support warning. |
+| [src/data/schemaMigrations.js](src/data/schemaMigrations.js) | `data` | **Legacy chain runner, awaiting deletion (TODO §16.5).** Chains are *not* the architecture: [TODO §18](TODO.md) decided **star writes** — every record projected directly from the live domain object into each live schema, no step feeding another. This walks the old v1→v2→v3 chain and is kept only until the projections replace it. Do not extend it. |
+| [src/data/migrationSteps.js](src/data/migrationSteps.js) | `data` | `CURRENT_SCHEMA_VERSION` and the pure per-version transforms. The version constant survives star writes (it is what storage buckets key on, TODO §16.3); the ordered *chain* around it does not. |
+| [src/data/versionCatalog.js](src/data/versionCatalog.js) | `data` | Published-release manifest reader (being retired, TODO §16.5): decides whether to offer an upgrade, a rollback (only for data that exists locally), or an end-of-support warning. |
 | [src/data/index.js](src/data/index.js) | `data` | Barrel for seed/demo data: `exercises.js`, `clients.js`, `routines.js`, `history.js`, `planUpdates.js`, `sessions.js`. |
 | [src/i18n/index.js](src/i18n/index.js) | `i18n` | Translation registry: one flat key→string map per locale (`en.js`, `sl.js`). Key parity enforced by unit tests. |
 | [src/modules/sessionList/sessionsView.js](src/modules/sessionList/sessionsView.js) | `view` | Modular view renderer for Sessions dashboard. |
@@ -83,7 +84,7 @@ is structured into feature modules under `src/modules/` (`session`, `plans`, `cl
 | [src/modules/common/exerciseModality.js](src/modules/common/exerciseModality.js) | `helper` | Exercise modality axis (strength/cardio/stretch/balance) and per-metric target formatting (time/distance/calories/watts/hold). |
 | [src/modules/common/exerciseStandard.js](src/modules/common/exerciseStandard.js) | `helper` | Open-standard crosswalk: maps the catalog's category/equipment onto the wger dataset by canonical name for interchangeable JSON/CSV exports (UC6 §6). |
 | [src/modules/common/sessionItemRecord.js](src/modules/common/sessionItemRecord.js) | `helper` | Immutable history program snapshot: typed items (exercise/rest + circuit grouping), shape guards, and `buildProgramSnapshot` keeping rests + skipped work. |
-| [src/modules/common/releaseIdentity.js](src/modules/common/releaseIdentity.js) | `helper` | Release identity (TODO §16): the git tag a build was cut from, normalised for use as a storage-key suffix / URL path segment, with the untagged `dev` fallback and the header build label. |
+| [src/modules/common/releaseIdentity.js](src/modules/common/releaseIdentity.js) | `helper` | Release identity (being retired, TODO §16.5): the git tag a build was cut from, normalised for use as a storage-key suffix / URL path segment, with the untagged `dev` fallback and the header build label. |
 | [src/modules/common/sessionCache.js](src/modules/common/sessionCache.js) | `helper` | Active session local storage cache helper. |
 | [src/modules/common/wakeLock.js](src/modules/common/wakeLock.js) | `helper` | Screen Wake Lock API management helper. |
 | [src/modules/common/activeUsersList.js](src/modules/common/activeUsersList.js) | `component` | Active-session participant tabs component. |

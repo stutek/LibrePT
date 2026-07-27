@@ -65,7 +65,7 @@ These are not style preferences — they are decisions already paid for, and re-
 
 1. **Nothing lives only in a hover.** LibrePT is used on a phone, on the gym floor. A `title` tooltip is unreachable on touch, so information available *only* on hover is information nobody has. Tooltips may enrich a desktop view; they may never be the sole route to something a trainer or a support request needs. Touch targets need real padding, not just visible text (9px of text is nothing to aim at with a sweaty thumb).
 2. **In support surfaces, prefer the exact and always-present identifier over the pretty one.** The header build stamp shows the **commit SHA**, not a release tag: the SHA exists for every build, while most deploys sit between tags — and those are exactly the ones a confusing bug report comes from. Richer identity (release, data schema, build time) belongs one tap away, and copyable.
-3. **Code version and data-schema version are two different axes.** A git tag identifies switchable *code*; `schemaVersion` identifies the *data shape*. Never collapse them into one number — see [TODO.md §16](TODO.md).
+3. **Code version and data-schema version are two different axes.** The **commit SHA** identifies the *code* (there are no release tags — multi-version hosting was dropped, [TODO.md §16](TODO.md)); `schemaVersion` identifies the *data shape*, and is the only axis storage is keyed on. Never collapse them into one number — see [docs/DATA_MODEL.md §1](docs/DATA_MODEL.md).
 
 ---
 
@@ -100,3 +100,29 @@ parallel without collisions, and make the directory tree itself act as documenta
 5. **Keep the runtime app in `src/`; keep the root clean.** Only the app entry, its modules, and its assets live under `src/`. Dev tooling, docs, and CI configuration stay out of the app tree. Source files must never sit loose at the repository root.
 6. **Update the catalog when the module map changes.** When you add, move, or remove a module, update the *Source Modules & UI Components* table in [INDEX.md](INDEX.md) in the same change, so the knowledge graph stays a reliable map of the codebase.
 7. **Write self-documenting code inside each module, too.** Let names carry the intent — prefer descriptive functions and variables (`toRoute`, `renderSessionTitle`, `BASE_PATH`) over abbreviations or clever one-liners, so a reader rarely needs a comment to follow *what* the code does. Reserve comments for the *why*: the constraint, edge case, or decision the code cannot state itself (e.g. why the router derives its base from `import.meta.url`, or why an unknown route renders a view instead of redirecting). Don't restate mechanics the next line already shows, and delete dead code rather than leaving commented-out or unreachable branches behind.
+
+---
+
+## 6. Agent Tooling: Build the Tool, Don't Re-Improvise the Script
+
+Repeated one-off scripting is invisible waste — it costs the same tokens every session and leaves
+nothing behind for the next agent. When a check will be needed again, it belongs in
+[`agent_tools/`](agent_tools/INDEX.md) as a real, tested, catalogued tool.
+
+1. **Check the catalog before improvising.** [agent_tools/INDEX.md](agent_tools/INDEX.md) lists what
+   already exists. Run `python -m agent_tools.<name>` rather than reconstructing its logic in a shell
+   pipeline.
+2. **Promote a script to a tool when it will run again, fails silently otherwise, and is cheap and
+   deterministic.** All three, or just run the command — the bar and the rationale are in
+   [agent_tools/INDEX.md](agent_tools/INDEX.md). Something that fails only the second test belongs in
+   the test suite instead.
+3. **Adding a tool means all of it**: the module (docstring stating *why it exists*), a catalog row, a
+   unit test in [tests/unit/](tests/unit/), and a Stage 1 task in [build/](build/) if it should gate
+   commits. A tool nobody runs is worse than no tool — it rots and then misleads.
+4. **Prefer the dedicated file tools for one-off edits.** Batching many exact replacements into one
+   throwaway script is defensible when it genuinely saves round-trips; using one to edit a couple of
+   lines is not — it skips the read-before-edit guard and hides the diff from review.
+5. **Documentation cross-references are gated, not trusted.** `agent_tools/doclinks.py` runs in Stage
+   1 and fails the build on a dead link, a dead `#anchor`, or a `§N.M` pointing at a section that no
+   longer exists. Renumbering or deleting a section is therefore a whole-repo edit, and the gate will
+   say so.

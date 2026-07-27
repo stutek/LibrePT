@@ -70,7 +70,7 @@ Data should sync **periodically to Google Drive** and remain **editable directly
 The consent-photo idea was the only thing pushing toward binary blob storage; KISS-ing consent to paper (3.5) removes it, so the "is it time to embed a DB?" question resolves for now.
 
 - **Decided (2026-07-22): keep the current `localStorage` JSON store.** It's synchronous, trivial to export/import (already the Backup & Restore mechanism), and a solo PT's *text* data (clients, routines, sessions, history) is nowhere near the ~5MB origin cap. The main DB is already centralized in `src/data/stateStore.js` (`librept_db`).
-- **Revisit → IndexedDB** (built-in, no wasm/SQLite dependency) only when a real driver appears: binary data returns, the 5MB cap looms, or the long-term analytics vision (13.x — volume load / 1RM aggregation across months) wants indexed queries. Per-version storage isolation (16.2) also nudges this way eventually.
+- **Revisit → IndexedDB** (built-in, no wasm/SQLite dependency) only when a real driver appears: binary data returns, the 5MB cap looms, or the long-term analytics vision (13.x — volume load / 1RM aggregation across months) wants indexed queries.
 - **Not** SQLite-in-wasm — too heavy a dependency for a buildless offline app at this scale.
 - **Cheap prep now**: keep the main DB behind the `stateStore.js` seam so a future swap is localized, rather than scattering more raw `localStorage` calls across components.
 
@@ -291,7 +291,7 @@ first visit, so it costs one visit, once. Recording it because it is the amplifi
 
 ## 13. Exercise Library & Movement Taxonomy (Call to Action & Vision)
 
-> **Status (2026-07-24):** the taxonomy pivot and all three §13.2 selection scenarios are **built** and
+> **Status (2026-07-24):** the taxonomy pivot and all three of its selection scenarios are **built** and
 > covered by [UC6](use_cases/uc6_exercise_taxonomy_and_picker.md) / `tests/e2e/test_exercise_taxonomy.py`
 > + `tests/e2e/test_reps_and_load.py` (shipped, see CHANGELOG). Exercises carry `equipment` + `pattern`;
 > the catalog shows taxonomy badges (no instructions); the filtered picker powers routine building and
@@ -331,161 +331,91 @@ Graduated to [CHANGELOG](CHANGELOG.md) / [UC6 §5](use_cases/uc6_exercise_taxono
 
 ---
 
-## 16. Zero-Downtime Deploys & PT-Controlled Version Switching
+## 16. Deploy safety & schema-keyed storage
 
-> **Status (2026-07-25): the machinery is BUILT and dormant.** The brainstorms below are settled and
-> implemented end to end — release identity from git tags ([releaseIdentity.js](src/modules/common/releaseIdentity.js)),
-> per-release storage buckets ([storageNamespace.js](src/data/storageNamespace.js)), the validated
-> schema-migration chain ([schemaMigrations.js](src/data/schemaMigrations.js) + [migrationSteps.js](src/data/migrationSteps.js)),
-> the manifest reader and offer rules ([versionCatalog.js](src/data/versionCatalog.js)), the
-> non-dismissable upgrade / switch-back / EOL messages ([versionMessages.js](src/modules/common/versionMessages.js)),
-> and the deploy that publishes every supported tag under its own subpath plus `versions.json`
-> ([build/releases.py](build/releases.py)). Covered by `test_release_identity.py`,
-> `test_storage_namespace.py`, `test_schema_migrations.py`, `test_version_catalog.py`,
-> `test_version_messages.py`, `test_release_publishing.py`, `test_release_stamp_writers.py`.
+> **Status (2026-07-27): multi-version hosting is DROPPED, not deferred.** Following §18's
+> *no release tags* decision, hosting N builds side by side is off the table: one build carries every
+> supported behaviour concurrently, behaviour switching is an in-app choice rather than navigation,
+> and storage is keyed on the **data schema** alone. Removed from this file with that decision:
+> per-tag publishing and `/<tag>/` subpaths, the `/preview/` channel and beta opt-in, per-release
+> storage buckets and the copy-on-switch migration, rollback-by-URL, the published release manifest
+> and its total-ordering rules, `SUPPORTED_RELEASE_COUNT` as an EOL mechanism, and the tag-shape
+> question (semver vs ISO). What shipped of it is recorded in [CHANGELOG.md](CHANGELOG.md); why it was
+> retired is in [§18](#18-data-layer-simultaneous-multi-schema-writes-star-writes)'s decision banner.
 >
-> **It is deliberately a strict no-op until the first `git tag` is cut**: an untagged build stamps
-> `release: "dev"`, keeps the plain unsuffixed storage keys, and takes no part in switching; with no
-> tags the deploy publishes no `versions.json`, so no version is ever advertised that isn't hosted.
-> **To turn it on**: tag a commit (`git tag v1.0.0`) and push — the deploy does the rest.
+> **What survives, because none of it was about hosting:**
+> - **A deploy must never interrupt a trainer mid-session.** Still binding, and now purely a
+>   service-worker concern ([src/sw.js](src/sw.js)): the cached build keeps running until the PT
+>   accepts the update, on their moment. This is also §18's surviving justification for multi-schema
+>   writes — a PT on yesterday's cached build *is* running an older app version even with no tags.
+> - **Storage keyed on the schema major** — [16.3](#163--decided-not-built-key-storage-buckets-on-the-data-schema-not-the-release-tag), the prerequisite for §18's star writes.
+> - **The build stamp is the commit SHA**, not a tag ([AGENT_RULES §2.D.2](AGENT_RULES.md)) — now the
+>   only build identity there is, and the reason support never depended on tags in the first place.
+> - **The PREVIEW ribbon**, shipped standalone 2026-07-22 and generalised into severity tiers by
+>   [§18.12](#1812--decided-reuse-the-preview-ribbon-for-unsupported-version-warning).
+> - **Migration must validate every step's output** and refuse data from a newer build — kept as a
+>   property of the star-write projections ([§18.4](#184--decided--staging-not-envelopes-the-lossy-projection-problem)), not of a chain.
 >
-> **Settled while building (2026-07-25), and load-bearing:**
-> - **A rollback does not roll back code.** Every supported version stays published; switching only
->   changes which one is routed to. Two bugs came from not honouring that, both fixed: a release
->   folder was stamped with the *deploying* commit rather than its own, and `builtAt` was "now", so
->   re-publishing an old version changed its bytes → changed its integrity catalog → forced a
->   service-worker re-install on every trainer sitting on it. Release folders are now byte-identical
->   across deploys.
-> - **The published manifest is the authority on order**, and that order must be *total*. Same-second
->   tags tied under a date sort and published oldest-first, which would have offered a downgrade as
->   "a new version is available". Sorted by `-v:refname` today; see [16.4](#164--open-dilemma-what-shape-should-a-release-tag-be--semver-or-an-iso-timestamp).
->
-> **Still open** (see the sub-items): storage keyed on the schema rather than the tag ([16.3](#163--decided-not-built-key-storage-buckets-on-the-data-schema-not-the-release-tag)),
-> the tag format itself ([16.4](#164--open-dilemma-what-shape-should-a-release-tag-be--semver-or-an-iso-timestamp)),
-> the `/preview/` channel and beta opt-in (16.2), distinct ribbon treatments per preview tier,
-> speculative background migration, migration fuzzing in CI, and showing the migration summary to the
-> PT before they accept a switch (the summary is produced and exposed via `getLastMigrationSummary()`,
-> but nothing renders it yet).
-
-### 16.1 [x] Zero-downtime re-deploys with PT-controlled upgrade timing and rollback — **SHIPPED 2026-07-25**
-Feature request by Simon. A deploy/upgrade must never force-interrupt a PT mid-session, and a PT must be able to defer, accept, or reverse an upgrade on their own schedule:
-
-- **Zero-downtime re-deploys**: publishing a new build must not disrupt whoever is currently mid-session on the old one.
-- **Routing config is separate from app loading and data migrations**: which build/version a client is currently running, and how it resolves its own routes, must be decoupled from (a) the app-shell loading process and (b) any data-migration step a new version's schema requires — these are three distinct concerns today conflated into one PWA update flow (`src/sw.js`'s cache-bump-on-deploy).
-- **Opt-in upgrade timing**: when a new version is available, the PT sees a **non-dismissable** message in the message/notification area (`components/notificationArea.js`) inviting them to switch — but the switch itself is **their choice of moment**, not forced on next load, bounded by a **supportability EOL deadline** (the old version isn't kept alive forever).
-- **Rollback anytime (within terms)**: a PT can switch back to the previous version **at any time**, also via a **non-dismissable** message in the message area — but doing so **after** the initial upgrade moment carries a **data-loss warning** (changes made under the newer version's schema/format may not round-trip cleanly back to the old one).
-- **No fixes ever land on a "maintenance mode" (old) version** — once superseded, an old version is kept *available* (for rollback, until its EOL) but never *patched*. All fix/feature work happens forward-only on the current version.
-
-**Resolved (2026-07-25): git tags, rebuilt into subpaths on every deploy.** Not branches, not
-vendored copies — "which commit is version N" stays a lookup, and the trunk-based single-`main`
-workflow is untouched. Hosting: a Pages run publishes one artifact, so a version folder omitted from
-it disappears; the deploy therefore re-materialises **each supported tag from its own commit** into
-`/<tag>/` on every run ([build/releases.py](build/releases.py)). The app is buildless, so a release
-folder is just that commit's `src/` — no past toolchain has to still work. The supported window is
-the newest `SUPPORTED_RELEASE_COUNT` tags; dropping out of that window *is* the EOL mechanism today.
-
-**Ordering caveat worth keeping:** the manifest's order is the app's absolute authority on which
-release is newer, so tags are sorted with git's version-aware `-v:refname`, **not** by date — two
-tags cut in the same second tie under a date sort, and a tie publishes releases in the wrong order,
-which would present a *downgrade* to a PT as "a new version is available". (Found in testing; pinned
-by `test_releases_are_listed_newest_first_even_when_tag_dates_tie`.)
-
-### 16.2 [~] Multi-version hosting, preview/beta channel, and per-version storage isolation — **hosting + storage SHIPPED 2026-07-25; preview/beta still open**
-Continued brainstorm on 16.1's "keep multiple versions deployable" question. Leaning **git tags** (not branches, not duplicated code) — tag `main` at each release, zero change to the existing trunk-based workflow, "which commit is version N" becomes a lookup rather than a maintained fork. The rest of this item is the shape that unlocks, still all open/undecided:
-
-- **Versioned subpath hosting**: serve tagged versions side-by-side under the same GitHub Pages origin as subpaths (`/v1.2.0/`, `/v1.3.0/`, …), with a stable path resolving to whichever version a given PT has opted into as "current." Low-friction because the app already derives its base path dynamically at runtime (`BASE_PATH` from `import.meta.url` in `app.js`) for the GH-Pages-subpath deploy — extending that to "one more path segment per version" is incremental, not new infrastructure. Still open: does GitHub Pages alone support publishing N version folders from one workflow run, or does this need real deploy-pipeline work.
-- **`/preview/` stable path**, always resolving to the newest built tag regardless of what any individual PT has opted into. Two tiers:
-  - **Anonymous preview** (no opt-in): read-only, demo/seeded data only — never the PT's real `librept_db`, so "just looking" carries none of the upgrade/rollback data risk.
-  - **Beta opt-in** (explicit per-PT consent): runs the PT's *real* data against the not-yet-general-release build, early and voluntarily. Surfaced as its own **dismissable** "join the beta" invite in the message area, distinct from 16.1's mandatory (non-dismissable) upgrade-available / switch-back-anytime messages.
-  - **Beta data lifecycle — settled**: every time the beta build changes, beta storage is **dropped and re-migrated fresh** from the PT's real stable ("current") data — no state carried between beta iterations. Any progress made only inside a beta session is understood as disposable the moment the next beta build lands; simpler to reason about (and to warn a PT about) than trying to carry forward partial beta state across builds.
-- **Per-version storage isolation**: `localStorage` is scoped per **origin**, not per **path** — so without extra work, every version hosted under a subpath of the same origin would silently share one storage bucket. Needs explicit namespacing per version (e.g. `librept_db@v1.2.0`), with:
-  - **Migration = an explicit one-time copy** from the old version's namespaced key into the new version's key at the moment a PT accepts an upgrade (or opts into beta) — this *is* the "data migration" step 16.1 already calls out as separate from the routing switch and the app-load step.
-  - **The data-loss-on-rollback warning, made concrete**: after that copy, new writes only land in the new version's key. Rolling back means reverting to the old key's snapshot *as of the migration moment* — anything written since is on the new version's key only, and is what the warning is actually about.
-  - **Per-version discard**: once a version passes its EOL, its namespaced key can simply be deleted without touching any other still-supported version's data — this is the mechanism, not just a policy statement.
-- **Whole-app PREVIEW-STATE UI signal**: while running in `/preview/` (either tier), the app should be **unmistakably** marked as such, so there is no ambiguity about which build a PT (or a screenshot/bug report) is looking at. **Decided**: a warning **ribbon overlaying the header near the logo**, not a full logo replacement — keeps the brand/trust cue intact (matters most exactly when a PT is trusting a beta build with real data) while still being impossible to miss. **Shipped (2026-07-22, standalone):** a basic always-on amber `PREVIEW` pill sits by the logo (`#preview-ribbon`, i18n `preview_ribbon`), theme-independent, pulsing gently only under `prefers-reduced-motion: no-preference`, and the build stamp hides on phones so the header can't overflow — decoupled from the multi-version machinery so the pre-release cue is up now. Still open: whether anonymous preview and beta-opt-in get visually distinct ribbon treatments (beta is running real data on unstable code, arguably deserves a stronger warning color than read-only anonymous preview), the ribbon's animation must respect `prefers-reduced-motion` (steady/pulsing instead of flashing), and whether it also needs a non-visual signal for support/debugging (`renderBuildStamp()` in `app.js` already shows the commit SHA, may be enough).
-- **Migration chains, not single jumps**: a PT can sit on one version for a long time while several ship, so upgrading must walk a sequence of small per-version transforms (`v1.0→v1.1→v1.2→…`) from the PT's stored `schemaVersion` to the target, not one big direct conversion — standard, well-trodden shape (each version defines a pure `(oldShape) => newShape` step).
-- **Migration runs speculatively in the background**, before the PT ever clicks "switch" — since migration is already "copy old namespaced key → new namespaced key," that copy can happen the moment a new version becomes available, so the actual switch feels instant. Open: if the PT keeps changing their current-version data after that background copy ran, the precomputed snapshot goes stale — leaning toward just redoing the copy at the moment of switch (this is one trainer's local data, not a scale problem) rather than building incremental catch-up, but not decided.
-- **Testing migrations without ever seeing real PT data** (a direct cost of the privacy-first, local-only design working as intended): no single fix, several mitigations stacked —
-  - **The namespacing already bounds the blast radius for free**: migration *copies*, never mutates the old key in place, so a buggy migration corrupts only the new version's snapshot — the PT's real working data on their current version is never at risk. Worth stating as the actual answer to "what's the worst case," not just a hope.
-  - Every migration step **validates its output shape** before being considered successful, rather than trusting the transform; an unrecognized shape fails loud instead of silently corrupting.
-  - **Fuzz migrations against synthetic edge-case data in CI**, generated from the existing seed/demo data machinery (`src/data/*.js`) — not a substitute for real-world coverage, but cheap and fits this repo's existing test conventions.
-  - **Show the PT a migration summary before they commit** to switching ("7 clients migrated, 1 routine had an unrecognized field and was dropped") so problems are visible and reportable instead of silent.
-
----
+> **Two findings from the retired build, worth not re-learning:** an ordering authority must be a
+> *total* order (same-second tags tied under a date sort and would have offered a PT a downgrade
+> labelled "a new version is available"), and anything that changes an already-published build's bytes
+> forces a service-worker re-install on everyone sitting on it.
 
 ### 16.3 [ ] [Decided, not built] Key storage buckets on the DATA SCHEMA, not the release tag
-> **Simplified 2026-07-26 by the no-tags decision** (§18 banner): with no release identity there is
-> no `UNRELEASED` case, no tag normalisation and no per-release bucket to migrate away from —
-> storage keys go straight onto the schema major. The open "does the hosted window count releases
-> or schemas" question below is moot: there is no window of releases.
+> **Simplified by the no-tags decision**: no release identity means no `UNRELEASED` case, no tag
+> normalisation, and no per-release bucket to migrate away from — storage keys go straight onto the
+> schema major, and there is no window of releases to size.
 
-> **Promoted to a prerequisite 2026-07-26**: [§18](#18-data-layer-simultaneous-multi-schema-writes-star-writes)'s star-write model is this item's bucket-per-schema-major layout expressed as a write policy, so §18 cannot start until this lands. Build it first.
+> **This is [§18](#18-data-layer-simultaneous-multi-schema-writes-star-writes)'s prerequisite**: the
+> star-write model *is* this bucket-per-schema-major layout expressed as a write policy. Build it
+> first. Cheapest right after [16.5](#165--retire-the-multi-version-hosting-machinery-from-the-code),
+> which removes the per-release layer this would otherwise have to be threaded through.
 
 **Decided (2026-07-25).** As shipped, `storageNamespace.js` keys buckets on the release tag, so
 **every** tag mints a new bucket — forcing a pointless copy and, worse, showing the data-loss warning
 on a rollback where *nothing can be lost*. A scary warning that isn't true trains a PT to click
-through the real one.
+through the real one. With tags gone the tag axis simply disappears; the schema axis is all that is left.
 
-- **Two axes, deliberately different shapes.** Code = the **git tag** (switchable identity, hosting
-  subpath, rollback target; format still open — see [16.4](#164--open-what-shape-should-a-release-tag-be)).
-  Data = a plain **integer major** (`schemaVersion`, [migrationSteps.js](src/data/migrationSteps.js)),
+- **Data = a plain integer major** (`schemaVersion`, [migrationSteps.js](src/data/migrationSteps.js)),
   bumped only when a migration step is added. **Not** full semver on the schema — a "patch" to a
   schema is either a migration step or nothing, and *minor* buys no correctness because the store
   already round-trips unknown fields (it serialises the whole state object rather than reconstructing
   it — the restore path *reconstructing* one was exactly the bug fixed on 2026-07-25). Add a schema
-  minor the day an additive change needs describing in the rollback warning; not before.
-- **Follows from integer-only majors**: refusing *any* newer `schemaVersion` (as
-  `migrateState` does today) stays correct. The minor-tolerant read discussed on 2026-07-25 —
-  accept same-major-higher-minor rather than refusing — only becomes necessary if a schema minor is
-  ever introduced.
-- **Invariant to protect**: unknown fields must survive a read/write round-trip, which is what makes
-  a same-major rollback lossless. The store gets this by serialising the whole state object;
-  anything that *reconstructs* state from a known field list breaks it silently (exactly the backup
-  restore bug fixed 2026-07-25). Never rebuild state from an explicit key list.
-- **Bucket key becomes the schema major** (`librept_db@schema2`). Two releases sharing a schema share
-  a bucket: switching between them is instant, needs no copy, and carries no warning — because the
-  move is genuinely reversible. Only crossing a schema major copies, migrates and warns.
-- **Consequences to implement**: `evaluateVersionOffer` compares schemas so the rollback warning
-  fires only when true; `versions.json` carries each release's `schemaVersion` so the running build
-  can tell *before* switching whether the move is free; migration steps stay keyed on the integer
-  major (no step per release); tags become free to cut whenever a rollback point is wanted.
-- **Open**: whether the hosted window (`SUPPORTED_RELEASE_COUNT`) counts releases or schemas —
-  leaning hosting-counts-tags, since a tag is what a rollback targets, with data retention following
-  schema majors.
+  minor the day an additive change needs describing in a downgrade warning; not before.
+- **Follows from integer-only majors**: refusing *any* newer `schemaVersion` (as `migrateState` does
+  today) stays correct. The minor-tolerant read discussed on 2026-07-25 — accept same-major-higher-minor
+  rather than refusing — only becomes necessary if a schema minor is ever introduced.
+- **Invariant to protect**: unknown fields must survive a read/write round-trip. The store gets this
+  by serialising the whole state object; anything that *reconstructs* state from a known field list
+  breaks it silently (exactly the backup restore bug fixed 2026-07-25). Never rebuild state from an
+  explicit key list.
+- **Bucket key becomes the schema major** (`librept_db@schema2`), which is also the IndexedDB object
+  store name in [DATA_MODEL §2](docs/DATA_MODEL.md) — one naming scheme across both engines, so the
+  §18.6 part-4 import is a copy between two things named the same way.
+- **Consequences to implement**: the schema major is the only thing storage keys on; migration steps
+  stay keyed on the integer major; and the degraded/unsupported signal ([§18.12](#1812--decided-reuse-the-preview-ribbon-for-unsupported-version-warning))
+  fires off a schema comparison rather than off a release comparison.
 
-### 16.4 [x] [CLOSED — moot] What shape should a release tag be — semver, or an ISO timestamp?
-> **Closed 2026-07-26: there are no release tags.** One build carries every supported behaviour
-> concurrently (see the §18 decision banner), so nothing needs naming as a rollback target, a
-> hosting path segment, or an order. The dilemma below is kept only as the record of why the
-> question stopped mattering rather than being answered.
+### 16.5 [ ] Retire the multi-version hosting machinery from the code
+The TODO items are dropped (above); the implementation is still in the tree and is now dead weight
+sitting directly on §16.3's path. **Delete rather than adapt** — none of it has a subject any more.
 
-Raised by Simon (2026-07-25): *"tags are not worth it — maybe if tag would be ISO date and time
-numeric, but not sure. Or maybe we need semver for rollbacks and upgrades?"* **Not decided.**
-
-What the tag has to do, and nothing more: name a rollback target to a PT, be a hosting path segment
-(`/<tag>/`), establish **order** (upgrade vs downgrade), and be cheap enough to cut without thinking.
-
-- **Case for an ISO timestamp** (`2026-07-25-1846`, UTC) — the agent's recommendation:
-  - **Order is intrinsic.** Zero-padded ISO sorts lexicographically *as* chronologically, killing a
-    real bug class: same-second tags tied under `--sort=-creatordate` during the §16.2 build and
-    published releases oldest-first, which would have offered a PT a downgrade labelled "a new
-    version is available". Would also let the publisher use plain `--sort=-refname`, which is
-    *provably* right for dates rather than merely usually right (`-v:refname` today).
-  - **Zero decision cost**: `git tag $(date -u +%Y-%m-%d-%H%M)` — never adjudicate minor vs patch.
-  - **Matches how a trainer thinks**: "go back to the 25th" beats "go back to v1.3.2".
-- **Case against / for semver**: semver communicates the *magnitude* of a change. But the only
-  magnitude with operational consequence here — "can I go back without losing data?" — is already
-  answered by `schemaVersion` ([16.3](#163--decided-not-built-key-storage-buckets-on-the-data-schema-not-the-release-tag)),
-  and answered *better*, because it is derived from whether a migration step exists rather than from
-  remembering to bump a number. Semver's real job is compatibility contracts for third-party
-  consumers, of which this project has none.
-- **Either way it is nearly free to switch**: `normalizeRelease` already accepts a leading digit,
-  `releasePath` just appends `/`, and buckets stop caring entirely once 16.3 lands. The only code
-  change is the publisher's sort key, plus docs and test fixtures.
-- **Settled either way (2026-07-25)**: a rollback **does not roll back code**. Both versions stay
-  published side by side; the switch only changes which one is routed to. This is why each release
-  folder is stamped with its *own* commit and time and re-materialises byte-identically — see the
-  status note above.
+- **Modules**: [releaseIdentity.js](src/modules/common/releaseIdentity.js) (tag → storage suffix /
+  URL segment), [versionCatalog.js](src/data/versionCatalog.js) (the `versions.json` reader and offer
+  rules), [versionMessages.js](src/modules/common/versionMessages.js) (upgrade / switch-back / EOL
+  messages), the per-release suffixing half of [storageNamespace.js](src/data/storageNamespace.js),
+  and the chain runner in [schemaMigrations.js](src/data/schemaMigrations.js) — the chain is what star
+  writes replace, so it goes when §18.1 lands, not before.
+- **Build/deploy**: [build/releases.py](build/releases.py) and the release-publishing step in
+  `.github/workflows/deploy.yml`; `release` in [src/version.js](src/version.js).
+- **Tests**: `test_release_identity.py`, `test_storage_namespace.py`, `test_version_catalog.py`,
+  `test_version_messages.py`, `test_release_publishing.py`, `test_release_stamp_writers.py` —
+  the storage-namespace ones survive in schema-keyed form as §16.3's coverage.
+- **Keep**: the commit SHA build stamp and the build-info dialog ([buildInfoDialog.js](src/modules/common/buildInfoDialog.js)),
+  which are support surfaces, not switching machinery — but the dialog's release row becomes the
+  **schema** row.
+- **Order**: do this *before* §16.3, so the bucket change is a small diff against a store that has one
+  axis instead of a rewrite against one that has two.
 
 ---
 
@@ -504,10 +434,10 @@ Historical design (superseded by the flat model above for storage; the goals sta
   - `circuit` is a **container** holding child items (renders/reuses as a unit), not a flag spread across sibling items.
   - `rest` stays a **first-class item type**, but is **not** an exercise (never in `state.exercises`, never focusable/loggable).
   - **Replace the scattered `isRestItem` boolean** with `type` dispatch — ideally one `renderItem(item)` / handler switch rather than predicate checks sprinkled across ~15 call sites. (Resolves the "leaky `isRestItem`" concern.)
-- **Two orthogonal axes — don't conflate:** structural `type` (above) vs. an **exercise modality** field — `strength | cardio | stretch | hiit | balance` — that decides *how you log* (reps×load vs time/distance/cal/watts vs hold-time vs rounds). The modality axis **subsumes [13.3](#133--conditioning-metrics-extend-the-repsload-model-beyond-sets--reps--kg)**. **[~] Partially built (2026-07-24):** the modality field + `strength`/`cardio`/`stretch`/`balance` logging surfaces shipped ([exerciseModality.js](src/modules/common/exerciseModality.js), see §13.3 / CHANGELOG) — additive on the catalog entry, no migration. **Still open here:** wiring modality into the **`sessionItemRecord`** history snapshot itself (this item's core), routine-**builder** (`plansView`) metric authoring to match the inline editor, and `hiit` (rounds) which has no logging surface yet.
+- **Two orthogonal axes — don't conflate:** structural `type` (above) vs. an **exercise modality** field — `strength | cardio | stretch | hiit | balance` — that decides *how you log* (reps×load vs time/distance/cal/watts vs hold-time vs rounds). The modality axis **subsumes [13.3](#133-x-conditioning-metrics-extend-the-repsload-model-beyond-sets-reps-kg-shipped-2026-07-24)**. **[~] Partially built (2026-07-24):** the modality field + `strength`/`cardio`/`stretch`/`balance` logging surfaces shipped ([exerciseModality.js](src/modules/common/exerciseModality.js), see §13.3 / CHANGELOG) — additive on the catalog entry, no migration. **Still open here:** wiring modality into the **`sessionItemRecord`** history snapshot itself (this item's core), routine-**builder** (`plansView`) metric authoring to match the inline editor, and `hiit` (rounds) which has no logging surface yet.
 - **Skipped exercises are kept**, marked `completed: false`, and **rendered greyed** — a deliberate review signal (what the client didn't get to) that feeds plan adjustments (uc2). Analytics must honour the flag so skipped work isn't counted as volume.
-- **Immutable snapshot (option a — inline copy).** History embeds a frozen copy of the program, *not* a reference to a live editable routine (editing/deleting a routine must never rewrite the past). A versioned/deduped program store (option b) is deferred — it's 16.2's versioning applied to programs, only worth it if storage bites and programs repeat heavily.
-- **Readers to update** (the sweep): only **3** iterate `.exercises` — [historyView.js](src/views/historyView.js), [clientsView.js](src/views/clientsView.js), [exerciseDeck.js](src/components/exerciseDeck.js) (last-performance reference); plus the writer + `openSessionFromHistory` re-open + `backupRestore` round-trip. Each must become rest-aware and completed-aware. **Additive/back-compatible**: old flat rows (and `DEFAULT_HISTORY` seed) stay valid behind a shape guard.
+- **Immutable snapshot (option a — inline copy).** History embeds a frozen copy of the program, *not* a reference to a live editable routine (editing/deleting a routine must never rewrite the past). A versioned/deduped program store (option b) is deferred — content-addressed dedup applied to programs, only worth it if storage bites and programs repeat heavily.
+- **Readers to update** (the sweep): only **3** iterate `.exercises` — [historyView.js](src/modules/history/historyView.js), [clientsView.js](src/modules/clients/clientsView.js), [exerciseDeck.js](src/modules/clipboard/exerciseDeck.js) (last-performance reference); plus the writer + `openSessionFromHistory` re-open + `backupRestore` round-trip. Each must become rest-aware and completed-aware. **Additive/back-compatible**: old flat rows (and `DEFAULT_HISTORY` seed) stay valid behind a shape guard.
 - **Storage note**: an inline program per row makes history the fastest-growing collection → ties to [3.7](#37--decision-persistence-engine--stay-on-localstorage-json-defer-embedding-a-db). The binding wall is the **localStorage ~5MB disk quota** (`JSON.stringify(state)` on every save), *not* RAM; IndexedDB (bigger ceiling + **lazy per-client load**) is the eventual fix, not needed pre-release.
 
 ### 17.2 [ ] Edit rules for a completed, dated session — immutable except three narrow cases
@@ -565,24 +495,26 @@ With 17.1 preserving the full program, "**Save as routine**" on a history record
 > proposal and it should not be lost when weighing the costs.
 >
 > **This supersedes the "stay on localStorage" half of §3.7** (see 18.6) and **depends on §16.3**
-> (see 18.1). It does not conflict with §16.1/§16.2's shipped machinery except where 18.10 says so.
+> (see 18.1). §16's multi-version hosting was dropped outright on the strength of the decision below;
+> what is left of §16 is the schema-keyed bucket (16.3) and the code retirement (16.5).
 >
 > ## ⚠️ Decided 2026-07-26: NO RELEASE TAGS. One build carries old and new behaviour concurrently.
 >
 > Simon: *"there is no more roll back tags — app contains old and new behaviour concurrently."* This
-> **resolves §18.10's fork** in favour of the one-build model and retires most of §16's machinery.
-> What follows from it, so nothing is rebuilt on a retired assumption:
+> **resolves §18.10's fork** in favour of the one-build model, and on 2026-07-27 §16's hosting items
+> were **dropped from this file** rather than kept as deferred work. What follows from it, so nothing
+> is rebuilt on a retired assumption:
 >
 > - **Behaviour switching is an in-app choice, not navigation.** No `/v1.2.0/` subpaths, no per-tag
 >   publishing, no rollback-by-URL. Deep links lose their version dimension entirely, which is what
 >   made §18.10's failure mode 1 disappear rather than merely be mitigated.
-> - **`SUPPORTED_RELEASE_COUNT` is moot**, and so is §16.3's open "does the hosted window count
->   releases or schemas" — there is no window of releases. What is supported is a set of **schemas**.
-> - **§16.4 (semver vs ISO tag shape) is closed as moot.** There is no tag to shape.
+> - **A supported window of *releases* does not exist.** What is supported is a set of **schemas**,
+>   which is the only axis storage keys on ([16.3](#163--decided-not-built-key-storage-buckets-on-the-data-schema-not-the-release-tag)).
+>   The tag-shape question (semver vs ISO) is moot: there is no tag to shape.
 > - **§16.3 gets simpler, not just different**: with no release identity there is no `UNRELEASED`
 >   case, no tag normalisation and no per-release bucket. Storage keys go straight onto the schema
 >   major.
-> - **§16.1's "no fixes ever land on a maintenance-mode version" is inverted, deliberately.** Old
+> - **"No fixes ever land on a maintenance-mode version" is inverted, deliberately.** Old
 >   behaviours live inside the current build, so they get fixes automatically. That is the accepted
 >   consequence, not an oversight.
 > - **The `DEGRADED` ribbon tier (§18.12) survives and matters more**, because degraded mode is now
@@ -590,7 +522,7 @@ With 17.1 preserving the full program, "**Save as routine**" on a history record
 >
 > **Open question this raises — confirm before building the write layer.** With one build, what still
 > justifies writing every live schema? The surviving case looks like **the previously-cached Service
-> Worker build**: a PWA update is not instant and must never interrupt a trainer mid-session (§16.1),
+> Worker build**: a PWA update is not instant and must never interrupt a trainer mid-session (§16),
 > so a PT on yesterday's cached build *is* an older app version even with no tags — and multi-schema
 > writes are what keep their data readable by whichever build is actually running. Backup portability
 > is the second case. If that reading is right the write layer is unchanged; if the real driver is
@@ -626,9 +558,14 @@ With 17.1 preserving the full program, "**Save as routine**" on a history record
 >   have no recoverable sequence.
 > - [ ] **Documentation** — [docs/DATA_MODEL.md](docs/DATA_MODEL.md) exists and must be kept in step
 >   with each of the steps below.
-> - [ ] **16.3** — bucket on the schema major. Coupled: `listReleaseBuckets()` feeds
->   `evaluateVersionOffer`'s rollback check *by release id*, so the bucket key, the offer logic and
->   `versions.json`'s new `schemaVersion` field have to move together or rollback offers silently stop.
+> - [ ] **[§17.5](#175--explicit-item-ordering--position-on-every-session-item) — explicit `position`.
+>   The immediate next step**, because it is what gates part 4: order must be a field, written by
+>   every writer and read by every reader, *before* items stop living in an ordered structure.
+> - [ ] **[16.5](#165--retire-the-multi-version-hosting-machinery-from-the-code)** — delete the
+>   multi-version hosting machinery, so the next item is a small diff instead of a rewrite.
+> - [ ] **[16.3](#163--decided-not-built-key-storage-buckets-on-the-data-schema-not-the-release-tag)** —
+>   bucket on the schema major, matching the IndexedDB store naming so part 4's import is a copy
+>   between two things named alike.
 > - [ ] **18.1/18.4** — the star write layer itself (projections + fan-out).
 > - [ ] **18.13** — the CD pipeline tests.
 
@@ -649,11 +586,12 @@ conflated and are worth keeping apart:
 - **The fan-out set is global, never per-app-version.** If each app version declared its own set, two
   tabs on two versions would write different sets and buckets would silently diverge — precisely what
   a single write layer exists to prevent.
-- **A build can only write schemas it knows how to project**, so an old build's fan-out set can shrink
-  over time but never grow. Read the set from `versions.json` at runtime (already fetched `no-store`,
-  already the authority on order — [versionCatalog.js](src/data/versionCatalog.js)) rather than
-  hardcoding it, so an old release folder stays byte-identical (§16.2) while still learning that a
-  schema was retired.
+- **A build can only write schemas it knows how to project**, so a *cached* build's fan-out set is
+  fixed at the moment it was cached: it can never learn that a schema was retired. With no release
+  manifest to consult (§16), the set is a **constant compiled into the build** — the list of
+  projections it actually carries — and the newest build is the authority. A retired schema therefore
+  goes on receiving writes from stale cached builds until they update, which is harmless (a store
+  nobody reads) and is why retirement is a two-step: stop reading it, then stop provisioning it.
 - **Write set ⊇ read set.** A bucket must start receiving star writes the moment its migration
   *begins*, not when it completes — that is what makes 18.3's accelerator work.
 
@@ -681,8 +619,8 @@ Simon's proposal remaps record IDs at each schema migration and keeps an
 
 ### 18.3 [ ] [Decided] Migration is pre-emptive, resumable, and runs through the normal write layer
 - **Pre-emptive**: migration into a newly-available schema starts *before* the PT opts into anything,
-  so a switch is instant. **This closes §16.2's open staleness question** — §16.2 worried that a
-  speculative copy goes stale if the PT keeps working, and leaned toward redoing it at switch time.
+  so a switch is instant. **This closes the old staleness worry** — a speculative copy made ahead of
+  time goes stale if the PT keeps working, which is why the retired design redid it at switch time.
   Under star writes there is no staleness window: once migration completes, ongoing writes fan out to
   that bucket too, so it stays continuously current. Catch-up is a **re-derivation**, not a restore
   from a point in time — nothing is frozen, so nothing can go stale (this is also why §18.7 rejects a
@@ -747,7 +685,7 @@ CI**: assert every field the current domain model writes exists in every live sc
 Without the check the discipline survives until the first hurried release.
 
 - **Projections must be pure and total** so buckets are always fully re-derivable. That yields two
-  fuzzable properties for the CI migration fuzzing §16.2 already wants: `project(x)` is idempotent,
+  fuzzable properties for the CI migration fuzzing §18.13 wants: `project(x)` is idempotent,
   and `unproject(project(x)) == x` for every live schema.
 - **Test-corpus gap**: migration tests must include a record using the *newest* fields written through
   an *old* schema's UI path. That is the exact case that loses data, and nothing exercises it today.
@@ -873,7 +811,7 @@ single-database layout), so **no app-level lock is needed for it**.
 - `navigator.locks` around the *migration pass* is worth ~3 lines so two tabs do not duplicate work —
   efficiency only, since idempotency already makes it safe.
 
-### 18.10 [ ] [Open — the fork to decide first] Deep links, and one build vs. many builds
+### 18.10 [~] [Resolved — one build] Deep links, and one build vs. many builds
 Three deep-link failure modes as UI behaviours are added and dropped:
 
 1. **Version segment dies at EOL** — a shared `/LibrePT/v1.5.0/#/…` 404s. Fix: **never version-qualify
@@ -895,10 +833,10 @@ not multiple hosted builds. That is arguably a *simplification*: no byte-identic
 per-tag subpath publishing, no service-worker reinstall hazard, no "which build am I running", and
 deep-link failure mode 1 disappears rather than being mitigated. **Confirmed as the intent
 (Simon, 2026-07-26).** Costs: old behaviours must be actively maintained rather than frozen, and it
-**inverts §16.1's "no fixes ever land on a maintenance-mode version"** — old behaviours living inside
+**inverts "no fixes ever land on a maintenance-mode version"** — old behaviours living inside
 the current build *do* get fixes automatically. That may well be better, but it must be a deliberate
-reversal, and it decides whether §16.1/§16.2's hosting machinery stays or is retired. Everything else
-in §18 holds either way.
+reversal, and it decides whether §16's hosting machinery stays or is retired. **It was retired**
+(2026-07-27, §16). Everything else in §18 holds either way.
 
 - **Content-addressed modules make the payload cost much smaller than a naive ×N** (Simon,
   2026-07-26): a module whose SHA is unchanged across behaviour generations is stored and downloaded
@@ -945,8 +883,10 @@ in §18 holds either way.
 ### 18.12 [ ] [Decided] Reuse the preview ribbon for unsupported-version warning
 Generalise `#preview-ribbon` from an always-on `PREVIEW` pill into a **build-status ribbon with
 severity tiers**: `PREVIEW` (amber, informational) → `DEGRADED` → `BETA` (stronger — real data on
-unstable code) → `UNSUPPORTED` (red, non-dismissable). This collapses §16.2's open "distinct ribbon
-treatments per preview tier" question into one piece of work.
+unstable code) → `UNSUPPORTED` (red, non-dismissable). This absorbs the "distinct ribbon treatments
+per tier" question left over from the dropped preview/beta channels (§16) into one piece of work.
+The `BETA` tier keeps its slot even with no beta channel to host it: an in-app behaviour opt-in is
+the same promise — real data, less-proven code — and it needs the same signal.
 
 - **`DEGRADED` is the downgrade tier** (§18.4): the running app is older than the schema its data was
   authored in, so some records display wrong and — the part that matters — **anything logged here may
@@ -954,7 +894,7 @@ treatments per preview tier" question into one piece of work.
 
 - **The ribbon must not be the only signal.** Persistent chrome goes invisible within days — which is
   what makes an always-on amber pill safe today and an unsupported-version warning useless tomorrow.
-  Pair it with §16.1's non-dismissable notification-area message.
+  Pair it with a non-dismissable message in the notification area ([notificationArea.js](src/modules/common/notificationArea.js)).
 - **Never block mid-session.** The ribbon carries severity continuously, but any *blocking* consent
   prompt is gated on there being no active session — a red warning plus a modal is maximally alarming
   exactly when a PT has a client in front of them.
@@ -965,7 +905,7 @@ treatments per preview tier" question into one piece of work.
 Requested by Simon (2026-07-26) as the step that follows the write layer. The properties §18 relies
 on are all *invariants across releases*, which is precisely what a per-commit gate can hold and what
 review cannot — none of them can ever be tested against a real PT's data, because that data is
-local-only by design (§16.2).
+local-only by design.
 
 What the pipeline has to assert, roughly in order of how expensive the failure is:
 
@@ -985,11 +925,13 @@ What the pipeline has to assert, roughly in order of how expensive the failure i
 - **The frozen backup corpus (§18.7)** — one committed fixture per historical schema, each asserted to
   still import to the expected domain object. This is what turns "restorable indefinitely" from a hope
   into something enforced on every commit.
-- **Migration fuzzing (§16.2, still open there)** — synthetic edge-case databases through the whole
-  chain, checking the runner refuses rather than corrupts.
-- **Manifest correctness (§16.3)** — `versions.json` carries each release's `schemaVersion`, releases
-  are ordered newest-first under a *total* order, and every advertised release is actually published.
-  The ordering half already burned once (§16.2's same-second tag tie).
+- **Migration fuzzing** — synthetic edge-case databases through every projection, checking the runner
+  refuses rather than corrupts.
+- **Ordering invariants (§17.5)** — positions are dense `0..n-1` per session and circuit members are
+  contiguous, asserted over every writer's output. This replaces the retired manifest-ordering check
+  as the place where "the order is authoritative and total" is enforced; that one burned once already
+  (same-second release tags tying under a date sort), and the failure here is worse — a silently
+  scrambled program that every id-completeness check passes.
 
 Fits the existing gate: `python -m build check` already runs staged parallel validation, and the
 property/fuzz work belongs in Stage 1 (fast, no browser) rather than in the e2e stage.

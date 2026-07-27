@@ -92,7 +92,7 @@ whole roster.
 ## 4. Polymorphic Reps & Load
 
 A set is not always "3 × 10 × 40 kg". Reps and load are **polymorphic**, resolved by
-[../src/helper/repsAndLoad.js](../src/helper/repsAndLoad.js):
+[../src/helper/repsAndLoad.js](../src/modules/common/repsAndLoad.js):
 
 - **Reps**: a count (`10`), a range (`8-12`), a hold/time (`30s`), or **to-failure** (`max`, the
   engine's failure token).
@@ -105,7 +105,7 @@ load**, not equipment alone: loaded compounds → *strength* (`3/5/8/10/max`), l
 *hypertrophy* (`8/10/12/15/max`), core & most bodyweight movements → *endurance* (`10/20/50/max`),
 mobility → *time* (`20s/30s/45s/60s`) — with a bodyweight override that keeps vertical pulls
 (pull-ups) at *strength*. The tiers live only in
-[../src/helper/repsAndLoad.js](../src/helper/repsAndLoad.js) (`REPS_TIERS`); the
+[../src/helper/repsAndLoad.js](../src/modules/common/repsAndLoad.js) (`REPS_TIERS`); the
 `<datalist>`s are **generated from them at boot**, so nothing is hardcoded in markup, and the PT can
 always type any value regardless of the suggestion.
 
@@ -181,8 +181,8 @@ Delivers TODO §13.1's last bullet (adopt an open standard for interchangeable e
 | :--- | :--- |
 | Taxonomy catalog (equipment + pattern badges) | [../src/data/exercises.js](../src/data/exercises.js) · `EXERCISES` |
 | Filtered movement picker modal (Scenario A/B) | [../src/modules/exercises/exercisePicker.js](../src/modules/exercises/exercisePicker.js) · `mountExercisePicker` |
-| Polymorphic reps/load parse, format & equipment-derived units | [../src/helper/repsAndLoad.js](../src/helper/repsAndLoad.js) · `parseRepsTarget` / `formatRepsTarget` / `getLoadUnitForEquipment` |
-| Custom movement creation (strict inheritance) | [../src/components/exercisePicker.js](../src/components/exercisePicker.js) · `renderCustomMovementForm` |
+| Polymorphic reps/load parse, format & equipment-derived units | [../src/helper/repsAndLoad.js](../src/modules/common/repsAndLoad.js) · `parseRepsTarget` / `formatRepsTarget` / `getLoadUnitForEquipment` |
+| Custom movement creation (strict inheritance) | [../src/components/exercisePicker.js](../src/modules/exercises/exercisePicker.js) · `renderCustomMovementForm` |
 | Catalog shows equipment/pattern badges, not instructions | [../tests/e2e/test_exercise_taxonomy.py](../tests/e2e/test_exercise_taxonomy.py) · `test_catalog_shows_taxonomy_badges_not_instructions` |
 | Picker search narrows the list live; Enter takes the top match | [../tests/e2e/test_editor_row_catalog_swap.py](../tests/e2e/test_editor_row_catalog_swap.py) · `test_search_narrows_and_enter_takes_the_top_match` |
 | Filter chip rows are labelled by axis (Muscle / Equipment) | [../tests/e2e/test_editor_row_catalog_swap.py](../tests/e2e/test_editor_row_catalog_swap.py) · `test_filter_rows_are_labelled_by_axis` |
