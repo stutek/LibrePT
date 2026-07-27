@@ -146,6 +146,8 @@ Record editors are routes too, each opening over its own list view:
 | `/routines/{routineId}` | the routine builder loaded with that template |
 | `/exercises/new` | the create-movement form |
 | `/adjustments/{updateId}` | the adjustment wizard on that alert |
+| `/session/{id}/client/{cid}/edit/catalog` | the plan editor with the **taxonomy picker** open (add from catalog) |
+| `/session/{id}/client/{cid}/edit/catalog/slot/{slotId}` | the picker open to **swap that row's** movement |
 
 - **Saving pops exactly one entry.** The submit handler closes the dialog and the router turns that
   close into the matching history pop, so Back after a save leaves the list rather than skipping a
@@ -200,6 +202,7 @@ not-found view (`#view-error`) *inside* the content area:
 | Globally-reachable dialogs (`/about`, `/terms`, `/build`, `/backup`) are routes: Back closes them, ✕/Escape agree, a cold link reopens over a real view, and the first-run agreement is not routed | [../tests/e2e/test_dialog_routing.py](../tests/e2e/test_dialog_routing.py) · `test_back_closes_the_dialog`, `test_the_close_button_and_back_agree`, `test_cold_deep_link_opens_the_dialog_over_a_real_view`, `test_first_run_terms_is_not_routed` |
 | The just-inserted editor row is addressable and survives a reload, without a caret or a New badge; a deleted row id falls back | [../tests/e2e/test_editor_row_deeplink.py](../tests/e2e/test_editor_row_deeplink.py) · `test_the_called_out_row_survives_a_reload`, `test_a_restored_row_takes_no_caret_and_carries_no_badge`, `test_a_deleted_row_id_falls_back_instead_of_erroring` |
 | Record editors are addressable, reopen with the record loaded, and saving pops exactly one history entry | [../tests/e2e/test_record_dialog_routes.py](../tests/e2e/test_record_dialog_routes.py) · `test_routine_editor_deeplink_reopens_with_the_record_loaded`, `test_saving_pops_exactly_one_history_entry`, `test_adjustment_wizard_is_addressable` |
+| The session's taxonomy picker is addressable, survives a reload over the restored editor, and a render behind it does not erase its URL | [../tests/e2e/test_session_dialog_routes.py](../tests/e2e/test_session_dialog_routes.py) · `test_row_swap_picker_names_the_row_and_survives_a_reload`, `test_a_render_behind_the_picker_does_not_erase_its_url` |
 
 ---
 

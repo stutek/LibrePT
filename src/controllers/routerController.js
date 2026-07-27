@@ -112,6 +112,13 @@ export function activeRouteName() {
   return activeEntry?.route.name ?? null;
 }
 
+// True while a dialog route is what the URL names. Callers that mutate state from inside a dialog use
+// it to defer their re-render: painting the view behind an open dialog wastes the render on a surface
+// nobody can see, and a one-shot call-out spent there is gone by the time the dialog closes.
+export function activeRouteIsDialog() {
+  return activeEntry?.route instanceof DialogRoute;
+}
+
 // Spell the URL for a named route. The only sanctioned way to build one: a hand-written path string
 // is what survives a pattern change and turns into a dead link.
 export function urlFor(name, params) {
@@ -124,7 +131,7 @@ export function urlFor(name, params) {
 // id when it renders.
 export function resolveRoute(pathname) {
   const hit = routes.resolve(toRoute(pathname));
-  return hit ? { name: hit.route.name, params: hit.params } : null;
+  return hit ? { name: hit.route.name, params: hit.params, isEditor: hit.route.isEditor } : null;
 }
 
 export function getBasePath() {
@@ -359,8 +366,12 @@ export function handlePathChange() {
   ensureBackTargetForDialog(ctx);
 
   if (activeEntry && activeEntry.route !== hit.route) activeEntry.route.exit(activeEntry.ctx);
+  // Active from the moment entry BEGINS, not once it returns: entering renders, a render can ask
+  // where it is (the session's focus sync, the day deck), and an answer of "still the previous
+  // route" makes those callers act on a screen that is already gone.
+  activeEntry = { route: hit.route, ctx };
   // enter() returns the route the user ends up on, which is not always the one that matched: a
   // redirect renders its target, and that target is what a later exit() has to undo.
   const entered = hit.route.enter(ctx) || hit.route;
-  activeEntry = { route: entered, ctx };
+  if (entered !== hit.route) activeEntry = { route: entered, ctx };
 }

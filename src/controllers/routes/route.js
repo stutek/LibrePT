@@ -81,6 +81,13 @@ export class Route {
     return `/${parts.join("/")}`;
   }
 
+  // Whether this state sits inside the plan editor. Session recovery needs to know before routing
+  // runs, and asking the route graph beats matching on name prefixes — a dialog layered over the
+  // editor inherits the answer instead of having to be remembered separately.
+  get isEditor() {
+    return false;
+  }
+
   // May return a different Route for the router to record as active — see RedirectRoute, which
   // rewrites the URL and then renders its target in place.
   enter(ctx) {

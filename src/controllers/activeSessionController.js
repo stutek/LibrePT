@@ -218,10 +218,14 @@ export function setClipboardEditMode(on, slotId = null) {
     editorRowId = null;
     return;
   }
+  // No row in the URL does not mean "no row": a swap made from the catalog dialog marks its row and
+  // then routes BACK to a slot-less `/edit` entry, and that pop must not erase the mark it just set.
+  // The URL is authoritative only when it actually names a row.
+  if (!slotId) return;
   // A row id from a URL may name a row that has since been deleted. Like a stale focus card, it is
   // ignored rather than erroring — syncSessionFocusUrl then drops the segment on the next render.
   const plan = activeSession?.clientRoutines?.[activeSession.activeClientId]?.exercises;
-  const known = slotId && plan?.some((item) => item.id === slotId) ? slotId : null;
+  const known = plan?.some((item) => item.id === slotId) ? slotId : null;
   // Restoring from a URL, not reacting to an edit: highlight and scroll to the row so the trainer
   // finds their place, but take no caret and show no badge. A reload is not the moment the row
   // appeared — announcing it as New would be a lie, and stealing focus would pop the phone keyboard
@@ -229,10 +233,25 @@ export function setClipboardEditMode(on, slotId = null) {
   markEditorRow(known, { kind: "restored", focus: false });
 }
 
+// The session routes whose URL is the focus itself, and which the focus may therefore rewrite. A
+// dialog layered over the session is NOT one of them: it named itself in the address bar, and a
+// re-render behind it must not erase that.
+const FOCUS_OWNED_ROUTES = ["session", "session.client", "session.focus", "session.edit"];
+
 export function syncSessionFocusUrl() {
   if (!activeSession) return;
-  const { toRoute, replaceRoute } = appDeps;
+  const { toRoute, replaceRoute, activeRouteName } = appDeps;
   if (!toRoute || !replaceRoute) return;
+  // Asking which route is active is exact. The prefix tests below only ever excluded two paths, so
+  // every later route — the plan editor's catalog picker — would have had its URL overwritten by the
+  // next render.
+  //
+  // No active route at all means routing has not run yet: recovery renders the board at boot, ahead
+  // of the first resolve. The URL is the source of truth in that window, so writing here would erase
+  // the very deep link the router is about to read.
+  const routeName = activeRouteName?.();
+  if (!routeName) return;
+  if (!FOCUS_OWNED_ROUTES.includes(routeName) && routeName !== "session.edit.item") return;
   const current = toRoute(window.location.pathname);
   if (
     !current.startsWith("/session/") ||
@@ -646,6 +665,16 @@ function openAddSessionExerciseDialog() {
   modal.showModal();
 }
 
+// Navigate to a dialog that hangs off the session the trainer is in. Returns false when there is no
+// session to hang it off, so callers can fall back to opening it directly.
+function navigateToSessionDialog(routeName, params = {}) {
+  const { navigateToPath, urlFor } = appDeps;
+  if (!activeSession || !navigateToPath || !urlFor) return false;
+  const clientId = activeSession.activeClientId || activeSession.participants[0];
+  navigateToPath(urlFor(routeName, { sessionId: activeSession.id, clientId, ...params }));
+  return true;
+}
+
 // Append a movement to the active client's plan as a fresh, taxonomy-aware item (its own slot id, so
 // the same catalog movement can appear twice without colliding logs), then re-render. Shared by the
 // typed add-exercise form and the catalog picker.
@@ -681,6 +710,14 @@ function injectExerciseIntoActivePlan(baseEx, { sets, reps, weight, rest }) {
   // already filled the name in, so there is nothing to type.
   markEditorRow(slotId, { kind: "new", focus: false });
   saveActiveSessionToCache();
+  renderBoardUnlessDialogIsOpen();
+}
+
+// A change made from inside a routed dialog must not re-render the view behind it: the dialog is
+// about to close, that close routes, and the routing render is the one the trainer actually sees. A
+// render spent behind the dialog also spends the one-shot call-out, so the row would lose its mark.
+function renderBoardUnlessDialogIsOpen() {
+  if (appDeps.activeRouteIsDialog?.()) return;
   renderActiveGroupBoard();
 }
 
@@ -702,7 +739,7 @@ function swapPlanItemMovement(slotId, baseEx) {
   markEditorRow(slotId, { kind: "swap", focus: false });
   saveActiveSessionToCache();
   if (appDeps.saveToLocalStorage) appDeps.saveToLocalStorage();
-  renderActiveGroupBoard();
+  renderBoardUnlessDialogIsOpen();
 }
 
 // Plan-edit taxonomy browse. Two modes, one dialog:
@@ -711,7 +748,7 @@ function swapPlanItemMovement(slotId, baseEx) {
 // The picker opens pre-filtered on the row's own muscle group and pre-seeded with whatever the PT
 // had already typed in the name field, with the caret in the search box: the common case ("swap this
 // press for another press") is then one tap, and a named target is type-then-Enter — no scrolling.
-function openCatalogPicker({ slotId = null, query = "", category = "" } = {}) {
+export function openCatalogPicker({ slotId = null, query = "", category = "" } = {}) {
   const dialog = document.getElementById("dialog-catalog-picker");
   const mount = document.getElementById("catalog-picker-mount");
   if (!dialog || !mount || !activeSession) return;
@@ -883,7 +920,13 @@ export function renderActiveGroupBoard() {
       save: persist,
       rerender: renderActiveGroupBoard,
       openAddExercise: openAddSessionExerciseDialog,
-      openCatalogPicker,
+      // Routed so a reload reopens the picker. `query`/`category` are transient typing state and
+      // stay out of the URL; the route re-derives the filter from the row it is swapping.
+      openCatalogPicker: (opts = {}) =>
+        navigateToSessionDialog(
+          opts.slotId ? "session.catalog.slot" : "session.catalog",
+          opts.slotId ? { slotId: opts.slotId } : {},
+        ) || openCatalogPicker(opts),
       exit: exitClipboardEditMode,
       genId: newRecordId,
       callout,
@@ -1237,7 +1280,7 @@ export function recoverActiveSession() {
     // render syncs the URL, and a sync with no row id would erase the very segment the router is
     // about to read. The router validates it a moment later and drops it if the row is gone.
     const bootRoute = appDeps.resolveRoute?.(window.location.pathname);
-    if (bootRoute?.name === "session.edit" || bootRoute?.name === "session.edit.item") {
+    if (bootRoute?.isEditor) {
       clipboardEditMode = true;
       editorRowId = bootRoute.params.slotId ?? null;
     }

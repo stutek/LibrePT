@@ -63,7 +63,7 @@ export function buildRouteTable() {
     }),
   );
 
-  registry.register(
+  const sessionEdit = registry.register(
     new SessionRoute({
       name: "session.edit",
       pattern: "/session/:sessionId/client/:clientId/edit",
@@ -90,13 +90,39 @@ export function buildRouteTable() {
       mode: "focus",
     }),
   );
-  registry.register(
+  const sessionClient = registry.register(
     new SessionRoute({
       name: "session.client",
       pattern: "/session/:sessionId/client/:clientId",
     }),
   );
   registry.register(new SessionRoute({ name: "session", pattern: "/session/:sessionId" }));
+
+  // The taxonomy picker, which hangs off a live session. It adds no new class of exposure — the
+  // client id is already in the parent URL — and a browse the trainer is mid-way through is exactly
+  // the kind of state a reload should restore.
+  //
+  // `#dialog-add-session-exercise` is deliberately NOT routed: its only button lives in a
+  // `display: none !important` container and the editor never calls its opener, so the dialog is
+  // unreachable and a route for it would be dead code (see TODO §19).
+  registry.register(
+    new DialogRoute({
+      name: "session.catalog",
+      parent: sessionEdit,
+      segment: "/catalog",
+      dialogId: "dialog-catalog-picker",
+      open: (ctx) => ctx.deps.openCatalogPicker?.({}),
+    }),
+  );
+  registry.register(
+    new DialogRoute({
+      name: "session.catalog.slot",
+      parent: sessionEdit,
+      segment: "/catalog/slot/:slotId",
+      dialogId: "dialog-catalog-picker",
+      open: (ctx) => ctx.deps.openCatalogPicker?.({ slotId: ctx.params.slotId }),
+    }),
+  );
 
   registry.register(
     new ViewRoute({

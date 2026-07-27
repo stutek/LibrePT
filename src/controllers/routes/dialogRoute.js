@@ -47,6 +47,12 @@ export class DialogRoute extends Route {
     this.parentParams = parentParams;
   }
 
+  // A dialog is wherever its parent is: the catalog picker opened from the plan editor is an editor
+  // state, and a reload of its URL must restore the editor underneath it.
+  get isEditor() {
+    return this.parent.isEditor;
+  }
+
   // The URL of the view underneath — what Back returns to, and what a cold deep link into this
   // dialog has to synthesise an entry for.
   parentUrl(ctx) {

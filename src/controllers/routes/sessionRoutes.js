@@ -42,6 +42,10 @@ export class SessionRoute extends Route {
     this.mode = mode;
   }
 
+  get isEditor() {
+    return this.mode === "edit";
+  }
+
   enter(ctx) {
     super.enter(ctx);
     const { sessionId, clientId = null, focusType, focusId, slotId = null } = ctx.params;
