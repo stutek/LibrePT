@@ -218,7 +218,7 @@ export function showErrorView(attemptedPath, { setHeaderState } = {}) {
 
 export function focusActiveSessionCard() {
   requestAnimationFrame(() => {
-    const card = document.querySelector("#sessions-categories-grid .booking-card.booking-live");
+    const card = document.querySelector("#sessions-categories-grid .session-card.session-live");
     if (card) card.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
   });
 }
@@ -302,7 +302,7 @@ export function showSessionView(sessionId, clientId, focusRef = null, opts = {})
     const bar = document.getElementById("active-session-bar");
     if (bar) {
       bar.classList.remove("hidden", "is-idle");
-      delete bar.dataset.nextBookingId;
+      delete bar.dataset.nextSessionId;
     }
     if (routerDeps?.renderActiveSessionBarLabels) routerDeps.renderActiveSessionBarLabels();
 
@@ -331,10 +331,10 @@ export function showSessionView(sessionId, clientId, focusRef = null, opts = {})
   }
 
   const state = routerDeps?.getState ? routerDeps.getState() : null;
-  const sessions = state?.sessions || state?.bookings;
-  const booking = sessions?.find((b) => b.id === sessionId);
-  if (booking && routerDeps?.launchClipboardDirectly) {
-    routerDeps.launchClipboardDirectly({ bookingId: sessionId });
+  const sessions = state?.sessions;
+  const session = sessions?.find((s) => s.id === sessionId);
+  if (session && routerDeps?.launchClipboardDirectly) {
+    routerDeps.launchClipboardDirectly({ sessionId });
     if (routerDeps.getActiveSession() && (clientId || focusRef || opts.edit)) {
       showSessionView(sessionId, clientId, focusRef, opts);
     }

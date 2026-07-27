@@ -32,8 +32,8 @@ export function getFocusedSessionDate() {
   return focusedSessionDate;
 }
 
-// Unchanged: a booking's own `day` bucket -> its coarse temporal class, used by sessionCard.js's
-// title tint. Nothing about the continuous timeline changes what a booking IS.
+// Unchanged: a session's own `day` bucket -> its coarse temporal class, used by sessionCard.js's
+// title tint. Nothing about the continuous timeline changes what a session IS.
 export function sessionDayTemporal(day) {
   if (day === "yesterday") return "past";
   if (day === "tomorrow" || day === "upcoming") return "future";
@@ -41,7 +41,7 @@ export function sessionDayTemporal(day) {
 }
 
 // Unchanged: bucket -> the real calendar date it stands for "as of right now". Still used by
-// sessionCard.js and utils.js:buildSessionMeta to synthesize a countdown Date from a booking's
+// sessionCard.js and utils.js:buildSessionMeta to synthesize a countdown Date from a session's
 // `day` + `time`, independent of this module's own focused-date tracking.
 export function getSessionDayDate(day) {
   const d = new Date();

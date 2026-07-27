@@ -10,7 +10,7 @@
 import json
 
 LEGACY_BACKUP = {
-    # No schemaVersion and a `bookings` collection: a backup taken before the rename.
+    # No schemaVersion: a backup taken before the v2->v3 `startDate` migration (TODO §7.3 item 8).
     "clients": [{"id": "c1", "name": "Restored Client"}],
     "exercises": [{"id": "e1", "name": "Restored Squat"}],
     "routines": [
@@ -21,7 +21,7 @@ LEGACY_BACKUP = {
         }
     ],
     "history": [{"id": "h1", "clientId": "c1", "date": "2026-01-01"}],
-    "bookings": [{"id": "b1", "day": "today", "titles": ["Restored Session"]}],
+    "sessions": [{"id": "b1", "day": "today", "titles": ["Restored Session"]}],
     "planUpdates": [{"id": "p1", "clientId": "c1"}],
     "notifications": [{"id": "n1", "type": "welcome"}],
     "lang": "en",
@@ -55,7 +55,7 @@ def _state(page):
 
 def test_restore_keeps_every_collection_in_the_backup(page, local_server):
     page.goto(local_server)
-    page.wait_for_selector(".booking-card")
+    page.wait_for_selector(".session-card")
     page.wait_for_timeout(300)
 
     _import(page, LEGACY_BACKUP)
@@ -76,7 +76,7 @@ def test_restore_keeps_every_collection_in_the_backup(page, local_server):
 def test_restore_migrates_an_old_backup(page, local_server):
     """A backup is data re-entering the app, so it goes through the same chain a stored DB does."""
     page.goto(local_server)
-    page.wait_for_selector(".booking-card")
+    page.wait_for_selector(".session-card")
     page.wait_for_timeout(300)
 
     _import(page, LEGACY_BACKUP)
@@ -84,9 +84,6 @@ def test_restore_migrates_an_old_backup(page, local_server):
 
     assert state["schemaVersion"] == 3, (
         "the restored database is stamped at the current schema"
-    )
-    assert state.get("bookings") is None, (
-        "the legacy collection is migrated, not carried along"
     )
     assert state["sessions"][0]["id"] == "b1"
     assert state["sessions"][0]["startDate"], (
@@ -99,7 +96,7 @@ def test_a_backup_from_a_newer_build_is_refused(page, local_server):
     """Half-importing data this build cannot read, over the trainer's live database, is the one
     outcome worse than refusing."""
     page.goto(local_server)
-    page.wait_for_selector(".booking-card")
+    page.wait_for_selector(".session-card")
     page.wait_for_timeout(300)
 
     before = _state(page)
@@ -117,7 +114,7 @@ def test_a_sparse_backup_does_not_break_the_app(page, local_server):
     """A backup file can be hand-edited or truncated, and it now reaches every renderer whole — so
     a missing sub-collection must render empty, not throw halfway through the import."""
     page.goto(local_server)
-    page.wait_for_selector(".booking-card")
+    page.wait_for_selector(".session-card")
     page.wait_for_timeout(300)
 
     _import(

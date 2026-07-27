@@ -97,8 +97,7 @@ def test_fresh_start_is_empty_without_init(page, local_server):
     assert page.locator("#clients-list .client-card").count() == 0
     db = _db(page)
     assert db is None or (
-        len(db.get("clients", [])) == 0
-        and len(db.get("sessions") or db.get("bookings") or []) == 0
+        len(db.get("clients", [])) == 0 and len(db.get("sessions") or []) == 0
     )
     # No stale/demo active session either.
     assert page.evaluate("() => localStorage.getItem('librept_active_session')") is None
@@ -112,7 +111,7 @@ def test_init_param_loads_demo_data(page, local_server):
     db = _db(page)
     assert db is not None
     assert len(db["clients"]) > 0
-    assert len(db.get("sessions") or db.get("bookings") or []) > 0
+    assert len(db.get("sessions") or []) > 0
     # The message feed is seeded together with the demo data (data-driven notifications),
     # including the demo-mode clean-up notice.
     assert len(db["notifications"]) > 0
@@ -144,7 +143,7 @@ def test_init_ignored_when_data_already_present(page, local_server):
     page.add_init_script(
         "window.localStorage.setItem('librept_db', JSON.stringify({"
         "clients:[{id:'c-custom',name:'Custom Person'}],"
-        "exercises:[],routines:[],history:[],planUpdates:[],bookings:[],lang:'en'}));"
+        "exercises:[],routines:[],history:[],planUpdates:[],sessions:[],lang:'en'}));"
     )
     page.goto(local_server + "?init=demo_data_load")
     page.wait_for_selector("#view-clients.active")
@@ -206,7 +205,7 @@ def test_share_params_survive_in_app_navigation(page, local_server):
 def test_focus_url_updates_do_not_pile_up_history(page, local_server):
     """The clipboard's URL catch-up replaces; one Back must leave the session, not undo card focus."""
     page.goto(local_server + "?init=demo_data_load")
-    card_sel = ".booking-card.booking-live, .booking-card:has-text('Group Strength & Conditioning')"
+    card_sel = ".session-card.session-live, .session-card:has-text('Group Strength & Conditioning')"
     page.wait_for_selector(card_sel)
     entries_before = page.evaluate("() => history.length")
 

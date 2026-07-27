@@ -2,7 +2,7 @@ import { DEFAULT_SESSIONS } from "../../data/index.js";
 import { isOfflineCachedActive, resetSyncState } from "../common/applicationHeader.js";
 import { modalityOf, primaryMetricOf } from "../common/exerciseModality.js";
 import { loadUnitForEquipment } from "../common/repsAndLoad.js";
-import { buildBookingMeta, escapeHTML, getOverlappingBookings } from "../common/utils.js";
+import { buildSessionMeta, escapeHTML, getOverlappingSessions } from "../common/utils.js";
 import { renderIdleSessionBar, updateSessionBarTimer } from "../session/sessionBar.js";
 import { renderSessionCard } from "./sessionCard.js";
 import {
@@ -43,16 +43,17 @@ export function renderClientsViewShell() {
 }
 
 export function seedDemoActiveSession({ state }) {
-  const sessions = state.sessions || state.bookings || [];
-  const booking = sessions.find((b) => b.id === "s01f2e3d");
-  if (!booking) return;
+  const sessions = state.sessions || [];
+  const scheduledSession = sessions.find((s) => s.id === "s01f2e3d");
+  if (!scheduledSession) return;
 
-  const participantIds = booking.participants.filter((pid) =>
+  const participantIds = scheduledSession.participants.filter((pid) =>
     state.clients.some((c) => c.id === pid),
   );
   if (participantIds.length === 0) return;
 
-  const routine = state.routines.find((r) => r.id === booking.routineId) || state.routines[0];
+  const routine =
+    state.routines.find((r) => r.id === scheduledSession.routineId) || state.routines[0];
   if (!routine) return;
 
   const now = Date.now();
@@ -61,20 +62,20 @@ export function seedDemoActiveSession({ state }) {
   const startTime = now - FIVE_MIN;
 
   const session = {
-    id: booking.id,
+    id: scheduledSession.id,
     startTime,
     duration: 300,
     participants: participantIds,
     clientRoutines: {},
     activeClientId: participantIds[0],
-    booking: {
-      id: booking.id,
-      titles: [booking.title],
-      day: booking.day,
-      location: booking.location || "",
+    sourceSession: {
+      id: scheduledSession.id,
+      titles: [scheduledSession.title],
+      day: scheduledSession.day,
+      location: scheduledSession.location || "",
       startDate: new Date(startTime).toISOString(),
       endDate: new Date(now + TWO_HOURS).toISOString(),
-      timeLabel: booking.time,
+      timeLabel: scheduledSession.time,
     },
     feedback: [],
   };
@@ -147,17 +148,17 @@ export function seedDemoActiveSession({ state }) {
   localStorage.setItem("librept_active_session", JSON.stringify(session));
 }
 
-export function launchClipboardDirectly({ bookingId, state, startWorkoutSession }) {
-  const sessions = state.sessions || state.bookings || [];
-  const booking = sessions.find((b) => b.id === bookingId);
-  if (!booking) return;
+export function launchClipboardDirectly({ sessionId, state, startWorkoutSession }) {
+  const sessions = state.sessions || [];
+  const session = sessions.find((s) => s.id === sessionId);
+  if (!session) return;
 
-  const overlappingBookings = getOverlappingBookings(booking, sessions);
+  const overlappingSessions = getOverlappingSessions(session, sessions);
 
   const clientRoutinesMap = new Map();
-  for (const ob of overlappingBookings) {
-    for (const pId of ob.participants) {
-      let routineId = ob.routineId;
+  for (const os of overlappingSessions) {
+    for (const pId of os.participants) {
+      let routineId = os.routineId;
       if (!routineId || !state.routines.some((r) => r.id === routineId)) {
         routineId = state.routines.length > 0 ? state.routines[0].id : "routine-upper-a";
       }
@@ -176,11 +177,11 @@ export function launchClipboardDirectly({ bookingId, state, startWorkoutSession 
 
   startWorkoutSession(
     clientRoutines,
-    buildBookingMeta(overlappingBookings, booking.day, getSessionDayDate),
+    buildSessionMeta(overlappingSessions, session.day, getSessionDayDate),
   );
 }
 
-export function setupCalendarBookings({ state, t, saveToLocalStorage, renderSessions }) {
+export function setupCalendarSessions({ state, t, saveToLocalStorage, renderSessions }) {
   const syncBtn = document.getElementById("btn-sync-data");
   if (!syncBtn) return;
 
@@ -210,7 +211,6 @@ export function setupCalendarBookings({ state, t, saveToLocalStorage, renderSess
 
     setTimeout(() => {
       state.sessions = [...DEFAULT_SESSIONS];
-      state.bookings = [...DEFAULT_SESSIONS];
 
       saveToLocalStorage();
       renderSessions();
@@ -258,14 +258,14 @@ export function renderSessions({
 
   renderSessionsTitleBar();
 
-  const sessions = state.sessions || state.bookings || [];
+  const sessions = state.sessions || [];
   const activeSession = getActiveSession();
 
   const cardDeps = {
     state,
     t,
     escapeHTML,
-    launchClipboardDirectly: (bookingId) => launchClipboardDirectly(bookingId),
+    launchClipboardDirectly: (sessionId) => launchClipboardDirectly(sessionId),
     sessionDayTemporal,
     activeId: activeSession ? activeSession.id : null,
     getActiveSession,
@@ -278,7 +278,7 @@ export function renderSessions({
   container.innerHTML = "";
 
   if (sessions.length === 0) {
-    container.innerHTML = `<div class="card glassmorphic text-center text-muted" style="padding: 16px;">${t("no_bookings_today")}</div>`;
+    container.innerHTML = `<div class="card glassmorphic text-center text-muted" style="padding: 16px;">${t("no_sessions_scheduled")}</div>`;
   } else {
     // One continuous, strictly time-ordered pass — grouped under a sticky per-day header rather
     // than split into four fixed yesterday/today/tomorrow/upcoming containers (TODO §7.3 item 8).

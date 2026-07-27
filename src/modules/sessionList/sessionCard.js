@@ -1,5 +1,5 @@
 // components/sessionCard.js
-// Renders one session-booking card for the dashboard day columns (the tappable card that
+// Renders one session card for the dashboard day columns (the tappable card that
 // launches the clipboard). Dependencies are injected by the caller (renderSessions in app.js)
 // so this component stays decoupled from app.js internals and is easy to relocate/test.
 //
@@ -18,13 +18,13 @@ let cardTicker = null;
 function ensureCardTicker() {
   if (cardTicker) return;
   cardTicker = setInterval(() => {
-    for (const el of document.querySelectorAll(".booking-live-timer[data-end]")) {
+    for (const el of document.querySelectorAll(".session-live-timer[data-end]")) {
       const remSec = Math.round((parseInt(el.dataset.end, 10) - Date.now()) / 1000);
       el.textContent = formatDurationHM(remSec);
       if (el.dataset.overtimeAware) {
         const over = remSec < 0;
         el.classList.toggle("overtime", over);
-        const bar = el.closest(".booking-live-bar");
+        const bar = el.closest(".session-live-bar");
         if (bar) bar.classList.toggle("overtime", over);
       }
     }
@@ -32,16 +32,16 @@ function ensureCardTicker() {
 }
 
 // Turn a past session's elapsed-time chip into an inline "HH:MM" edit field on click/Enter — commits
-// on blur/Enter (parsed via parseDurationHM), discards on Escape. Persists onto the booking object
+// on blur/Enter (parsed via parseDurationHM), discards on Escape. Persists onto the session object
 // itself (b.duration, seconds) since that's the only place a finished ad-hoc/seed session's actual
-// elapsed time is recorded (state.history logs a duration per client, not per booking).
+// elapsed time is recorded (state.history logs a duration per client, not per session).
 function wireElapsedEdit(valueEl, b, deps) {
   const startEdit = (e) => {
     e.stopPropagation();
     const input = document.createElement("input");
     input.type = "text";
     input.inputMode = "numeric";
-    input.className = "booking-status-edit-input";
+    input.className = "session-status-edit-input";
     input.value = formatDurationHM(b.duration ?? 0);
     input.addEventListener("click", (ev) => ev.stopPropagation());
     let cancelled = false;
@@ -84,28 +84,29 @@ export function renderSessionCard(b, colContainer, deps) {
   const { state, t, escapeHTML, launchClipboardDirectly, sessionDayTemporal, activeId } = deps;
 
   const card = document.createElement("div");
-  // Layout lives in .booking-card (index.css) so it can stack to a single column on mobile.
+  // Layout lives in .session-card (index.css) so it can stack to a single column on mobile.
   // The temporal class tints the title to match the day-selection line (past/future).
   const temporal = sessionDayTemporal(b.day);
-  card.className = `booking-card card glassmorphic${temporal !== "today" ? ` booking-${temporal}` : ""}`;
+  card.className = `session-card card glassmorphic${temporal !== "today" ? ` session-${temporal}` : ""}`;
   // A card is marked "Active session" when it's the launched clipboard session (matched by the
-  // booking id(s) it launched from) OR a session that has started by wall-clock today and isn't
-  // closed. Every applicable card is marked, so overlapping sessions all show as ongoing. Once a
-  // non-closed session runs past its end (negative remaining), the marker turns a warning colour.
+  // source session id(s) it launched from) OR a session that has started by wall-clock today and
+  // isn't closed. Every applicable card is marked, so overlapping sessions all show as ongoing.
+  // Once a non-closed session runs past its end (negative remaining), the marker turns a warning
+  // colour.
   const activeSession = deps.getActiveSession ? deps.getActiveSession() : null;
-  const sb = activeSession?.booking;
+  const ss = activeSession?.sourceSession;
   const isLaunched =
     !b.completed &&
     !!activeSession &&
     ((activeId && b.id === activeId) ||
       activeSession.id === b.id ||
-      (sb && sb.id === b.id) ||
-      (sb && Array.isArray(sb.ids) && sb.ids.includes(b.id)));
+      (ss && ss.id === b.id) ||
+      (ss && Array.isArray(ss.ids) && ss.ids.includes(b.id)));
   const range = parseTimeRange(b.time);
   const nowMin = new Date().getHours() * 60 + new Date().getMinutes();
   const isNow = !b.completed && b.day === "today" && !!range && nowMin >= range.start;
   const isLive = isLaunched || isNow;
-  if (isLive) card.classList.add("booking-live");
+  if (isLive) card.classList.add("session-live");
 
   // Hover feedback style
   card.addEventListener("mouseenter", () => {
@@ -139,7 +140,7 @@ export function renderSessionCard(b, colContainer, deps) {
 
   // Readiness warnings — a session needs both a program and at least one participant
   const pill = (label) => `
-    <div class="booking-warning-pill" style="display: inline-flex; align-items: center; gap: 4px; background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700;">
+    <div class="session-warning-pill" style="display: inline-flex; align-items: center; gap: 4px; background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700;">
       <i class="fa-solid fa-triangle-exclamation"></i>
       <span>${label}</span>
     </div>`;
@@ -154,11 +155,11 @@ export function renderSessionCard(b, colContainer, deps) {
   const completedBadge = b.completed
     ? `<span class="badge badge-success" style="font-size: 9px; padding: 2px 6px; font-weight: 700;"><i class="fa-solid fa-circle-check" style="margin-right:3px;"></i>${t("session_completed")}</span>`
     : "";
-  if (b.completed) card.classList.add("booking-completed");
+  if (b.completed) card.classList.add("session-completed");
 
   // Elapsed time for a finished session: the trainer's actual recorded duration (b.duration,
   // stamped by finishWorkoutSession) if known, else a fallback derived from the scheduled slot
-  // length so seed/demo "completed" bookings (which predate that stamping) still show something.
+  // length so seed/demo "completed" sessions (which predate that stamping) still show something.
   const pastElapsedSeconds = b.completed
     ? typeof b.duration === "number"
       ? b.duration
@@ -171,7 +172,7 @@ export function renderSessionCard(b, colContainer, deps) {
   // bucket) — mirrors the isNow countdown-to-end below, aimed at the other end of the slot.
   // getSessionDayDate maps each relative day bucket to a real calendar date (daySelector.js) — the
   // same mapping the rest of the dashboard already uses — so this stays consistent even though
-  // bookings carry no real date of their own (see TODO 4.3).
+  // the `day` bucket carries no real date of its own (see TODO 4.3).
   const startMs =
     !b.completed && !isLive && range
       ? getSessionDayDate(b.day).getTime() + range.start * 60000
@@ -191,7 +192,7 @@ export function renderSessionCard(b, colContainer, deps) {
   let timerOvertimeAware = false;
   if (isLaunched && activeSession) {
     timerLive = true;
-    const endDate = activeSession.booking?.endDate;
+    const endDate = activeSession.sourceSession?.endDate;
     if (endDate) {
       const remainingSec = Math.round((new Date(endDate).getTime() - Date.now()) / 1000);
       timerText = formatDurationHM(remainingSec);
@@ -216,9 +217,9 @@ export function renderSessionCard(b, colContainer, deps) {
   info.innerHTML = `
     <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 3px;">
       <span class="badge badge-primary" style="font-size: 10px; padding: 2px 6px; font-weight: 700; font-family: monospace;">${escapeHTML(b.time)}</span>
-      <strong class="booking-card-title" style="font-size: 13px;">${escapeHTML(b.title)}</strong>
+      <strong class="session-card-title" style="font-size: 13px;">${escapeHTML(b.title)}</strong>
       ${completedBadge}
-      <button class="btn-edit-booking icon-btn text-muted" title="${t("edit") || "Edit"}" style="margin-left: auto; padding: 2px 6px; font-size: 11px;" aria-label="Edit session">
+      <button class="btn-edit-session icon-btn text-muted" title="${t("edit") || "Edit"}" style="margin-left: auto; padding: 2px 6px; font-size: 11px;" aria-label="Edit session">
         <i class="fa-solid fa-pen-to-square"></i>
       </button>
     </div>
@@ -232,17 +233,17 @@ export function renderSessionCard(b, colContainer, deps) {
     ${warningHTML}
   `;
 
-  const editBtn = info.querySelector(".btn-edit-booking");
+  const editBtn = info.querySelector(".btn-edit-session");
   if (editBtn) {
     editBtn.addEventListener("click", (e) => {
       e.stopPropagation();
-      deps.navigateToPath?.(deps.urlFor("session.setup", { bookingId: b.id }));
+      deps.navigateToPath?.(deps.urlFor("session.setup", { sessionId: b.id }));
     });
   }
 
   // Green left bracket spills into a full-width bottom bar with the Active-session tag + countdown;
   // the bar turns a warning colour when the session has run past its end (overtime, live-only).
-  const timerCls = `${timerLive ? "session-card-timer " : ""}booking-live-timer${timerIsOvertime ? " overtime" : ""}`;
+  const timerCls = `${timerLive ? "session-card-timer " : ""}session-live-timer${timerIsOvertime ? " overtime" : ""}`;
   const timerAttrs = timerLive
     ? ` id="session-card-timer-${escapeHTML(b.id)}"`
     : timerEndMs != null
@@ -254,28 +255,28 @@ export function renderSessionCard(b, colContainer, deps) {
 
   // Every card gets at most one status bar: live (existing), past/elapsed, or upcoming/countdown —
   // mutually exclusive, so this stacks the card into a column and bleeds a full-width bar to its
-  // edges the same way the live bar always has (booking-live's own layout rules already cover
-  // that; booking-status-stack gives the other two states the same structural stacking without
+  // edges the same way the live bar always has (session-live's own layout rules already cover
+  // that; session-status-stack gives the other two states the same structural stacking without
   // the live bar's green tint, so a finished/upcoming card doesn't read as "currently active").
   let statusBarHTML = "";
   if (isLive) {
     statusBarHTML = `
-    <div class="booking-live-bar${timerIsOvertime ? " overtime" : ""}">
-      <span class="booking-live-tag"><i class="fa-solid fa-person-running"></i> ${escapeHTML(t("active_session") || "Active session")}</span>
+    <div class="session-live-bar${timerIsOvertime ? " overtime" : ""}">
+      <span class="session-live-tag"><i class="fa-solid fa-person-running"></i> ${escapeHTML(t("active_session") || "Active session")}</span>
       ${timerSpan}
     </div>`;
   } else if (pastElapsedSeconds != null) {
-    card.classList.add("booking-status-stack");
+    card.classList.add("session-status-stack");
     statusBarHTML = `
-    <div class="booking-live-bar past">
-      <span class="booking-live-tag"><i class="fa-solid fa-clock-rotate-left"></i> ${escapeHTML(t("elapsed") || "Elapsed")}</span>
-      <span class="booking-live-timer booking-status-value" title="${escapeHTML(t("edit_elapsed_time") || "Edit elapsed time")}">${escapeHTML(formatDurationHM(pastElapsedSeconds))}</span>
+    <div class="session-live-bar past">
+      <span class="session-live-tag"><i class="fa-solid fa-clock-rotate-left"></i> ${escapeHTML(t("elapsed") || "Elapsed")}</span>
+      <span class="session-live-timer session-status-value" title="${escapeHTML(t("edit_elapsed_time") || "Edit elapsed time")}">${escapeHTML(formatDurationHM(pastElapsedSeconds))}</span>
     </div>`;
   } else if (isUpcoming) {
-    card.classList.add("booking-status-stack");
+    card.classList.add("session-status-stack");
     statusBarHTML = `
-    <div class="booking-live-bar upcoming">
-      <span class="booking-live-tag"><i class="fa-solid fa-forward-fast"></i> ${escapeHTML(t("starts_in") || "Starts in")}</span>
+    <div class="session-live-bar upcoming">
+      <span class="session-live-tag"><i class="fa-solid fa-forward-fast"></i> ${escapeHTML(t("starts_in") || "Starts in")}</span>
       ${timerSpan}
     </div>`;
   }
@@ -292,7 +293,7 @@ export function renderSessionCard(b, colContainer, deps) {
   colContainer.appendChild(card);
 
   if (pastElapsedSeconds != null) {
-    const valueEl = card.querySelector(".booking-status-value");
+    const valueEl = card.querySelector(".session-status-value");
     if (valueEl) wireElapsedEdit(valueEl, b, deps);
   }
 }

@@ -80,7 +80,7 @@ def test_leaving_the_clipboard_via_grab_handle_goes_home_not_client_directory(
     page.goto(local_server)
     page.wait_for_selector("#view-clients.active")
     page.locator(
-        ".booking-card", has_text="Group Strength & Conditioning"
+        ".session-card", has_text="Group Strength & Conditioning"
     ).first.click()
     page.wait_for_selector("#active-session-overlay:not(.hidden)")
 
@@ -95,7 +95,7 @@ def test_deleting_a_session_goes_home_not_client_directory(page, local_server):
     page.goto(local_server)
     page.wait_for_selector("#view-clients.active")
     page.locator(
-        ".booking-card", has_text="Group Strength & Conditioning"
+        ".session-card", has_text="Group Strength & Conditioning"
     ).first.click()
     page.wait_for_selector("#active-session-overlay:not(.hidden)")
 

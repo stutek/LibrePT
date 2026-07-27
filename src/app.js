@@ -113,7 +113,7 @@ import { newRecordId } from "./modules/common/recordId.js";
 import { repsPresetsDatalistHTML } from "./modules/common/repsAndLoad.js";
 import { INIT_DEMO_DATA, getShareParams } from "./modules/common/shareLink.js";
 import {
-  buildBookingMeta,
+  buildSessionMeta,
   escapeHTML,
   formatClockFromMinutes,
   formatDateStr,
@@ -124,7 +124,7 @@ import {
   getISODateForColumn,
   getISODateString,
   getInitials,
-  getOverlappingBookings,
+  getOverlappingSessions,
   isTimeOverlapping,
   parseTimeRange,
   truncateString,
@@ -182,7 +182,7 @@ import {
   launchClipboardDirectly as sessionsViewLaunchClipboard,
   renderSessions as sessionsViewRender,
   seedDemoActiveSession as sessionsViewSeedDemo,
-  setupCalendarBookings as sessionsViewSetupBookings,
+  setupCalendarSessions as sessionsViewSetupSessions,
 } from "./modules/sessionList/sessionsView.js";
 
 function t(key) {
@@ -308,6 +308,8 @@ function init() {
     urlFor,
     getISODateForColumn,
     focusSessionsColumn,
+    saveToLocalStorage: saveState,
+    rerenderSessions: renderSessions,
   });
   setupWorkoutSetup();
   setupActiveSession();
@@ -349,7 +351,7 @@ function init() {
     t,
   });
   setupBackupRestore();
-  setupCalendarBookings();
+  setupCalendarSessions();
 
   initApplicationHeader({
     getState,
@@ -393,8 +395,8 @@ function init() {
     formatDuration,
     formatDurationHM,
     parseTimeRange,
-    getOverlappingBookings,
-    buildBookingMeta,
+    getOverlappingSessions,
+    buildSessionMeta,
     getSessionDayDate,
   });
 
@@ -539,8 +541,8 @@ function populateDropdownSelectors() {
   populateDropdownsController({ state: getState(), t });
 }
 
-function startWorkoutSession(clientRoutines, bookingMeta = null) {
-  startWorkoutSessionController(clientRoutines, bookingMeta, {
+function startWorkoutSession(clientRoutines, sessionMeta = null) {
+  startWorkoutSessionController(clientRoutines, sessionMeta, {
     state: getState(),
     newRecordId,
     navigateToPath,
@@ -637,12 +639,12 @@ function renderActiveGroupBoard() {
 }
 
 function launchClipboardDirectly(arg) {
-  const bookingId = arg && typeof arg === "object" ? arg.bookingId : arg;
-  sessionsViewLaunchClipboard({ bookingId, state: getState(), startWorkoutSession });
+  const sessionId = arg && typeof arg === "object" ? arg.sessionId : arg;
+  sessionsViewLaunchClipboard({ sessionId, state: getState(), startWorkoutSession });
 }
 
-function setupCalendarBookings() {
-  sessionsViewSetupBookings({
+function setupCalendarSessions() {
+  sessionsViewSetupSessions({
     state: getState(),
     t,
     saveToLocalStorage: saveState,

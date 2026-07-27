@@ -18,8 +18,8 @@ def _open_session_with_one_exercise(page, local_server, log_id="feedback-modal-l
     """Real UI session (not a pure-function shortcut) — needed for the modal tests below, which
     drive the actual #dialog-feedback form rather than calling logQuickSignal directly."""
     page.goto(local_server)
-    page.wait_for_selector(".booking-card", timeout=10000)
-    page.locator(".booking-card").first.click()
+    page.wait_for_selector(".session-card", timeout=10000)
+    page.locator(".session-card").first.click()
     page.wait_for_timeout(700)
     page.evaluate(
         """async (logId) => {

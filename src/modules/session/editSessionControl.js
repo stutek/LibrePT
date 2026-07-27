@@ -84,7 +84,7 @@ export function getEditSessionDraft() {
 }
 export const getSetupDraft = getEditSessionDraft;
 
-let editingBookingId = null;
+let editingSessionId = null;
 
 export function setupEditSessionControl() {
   const form = document.getElementById("form-workout-setup");
@@ -96,7 +96,7 @@ export function setupEditSessionControl() {
 
   const handleCancel = () => {
     clearEditSessionDraft();
-    editingBookingId = null;
+    editingSessionId = null;
     deps.pushRoute(deps.urlFor("sessions.day", { isoDate: deps.getISODateForColumn("today") }));
     deps.switchView("clients");
     requestAnimationFrame(() => deps.focusSessionsColumn("today", "auto"));
@@ -159,21 +159,19 @@ export function setupEditSessionControl() {
     }
 
     // Warning when editing a session and removing a participant who has recorded feedback data
-    if (editingBookingId) {
+    if (editingSessionId) {
       const state = deps.getState();
-      const existingBooking = (state.sessions || state.bookings || []).find(
-        (b) => b.id === editingBookingId,
-      );
-      if (existingBooking?.participants) {
+      const existingSession = (state.sessions || []).find((b) => b.id === editingSessionId);
+      if (existingSession?.participants) {
         const selectedClientIds = clientRoutines.map((cr) => cr.clientId);
-        const removedParticipants = existingBooking.participants.filter(
+        const removedParticipants = existingSession.participants.filter(
           (pid) => !selectedClientIds.includes(pid),
         );
         if (
           removedParticipants.length > 0 &&
-          (existingBooking.status === "completed" ||
-            existingBooking.loggedHistory ||
-            existingBooking.hasFeedback)
+          (existingSession.status === "completed" ||
+            existingSession.loggedHistory ||
+            existingSession.hasFeedback)
         ) {
           const confirmed = confirm(
             "Warning: You are removing a participant from a session with recorded feedback data. Removing a client from the session will update session details, but all exercise history logs already recorded for this client will be preserved in their client history. Do you wish to proceed?",
@@ -189,7 +187,7 @@ export function setupEditSessionControl() {
     const endTime = document.getElementById("setup-end-time")?.value || "";
     const location = document.getElementById("setup-location")?.value.trim() || "";
 
-    let bookingMeta = null;
+    let sessionMeta = null;
     let timeLabel = "";
     if (startTime && endTime) {
       timeLabel = `${startTime} - ${endTime}`;
@@ -199,9 +197,11 @@ export function setupEditSessionControl() {
       timeLabel = t("date_unknown") || "Date Unknown";
     }
 
+    const sessionId = editingSessionId || newRecordId();
+
     if (isPlanningModeActive) {
-      bookingMeta = {
-        id: editingBookingId || newRecordId(),
+      sessionMeta = {
+        id: sessionId,
         isPlanning: true,
         titles: [sessionName || t("planned_program") || "Planned Program"],
         date: sessionDate,
@@ -209,18 +209,64 @@ export function setupEditSessionControl() {
         location,
       };
     } else {
-      bookingMeta = {
-        id: editingBookingId || newRecordId(),
+      sessionMeta = {
+        id: sessionId,
         titles: [sessionName || t("workout_setup_title") || "Workout Session"],
         date: sessionDate,
         timeLabel,
         location,
       };
+
+      // Planning mode never touches the sessions list (it's a routine-adjustment flow, not a
+      // scheduled session — see activeSessionController's `!ss.isPlanning` guards). A real session
+      // must be added here: startWorkoutSession only stashes sessionMeta into the ephemeral
+      // active-session cache, it never writes to state.sessions, so without this the new session
+      // launches the clipboard but never appears on the homepage list.
+      const state = deps.getState();
+      state.sessions = state.sessions || [];
+      const sessions = state.sessions;
+
+      const startDateTime = new Date(`${sessionDate}T${startTime || "00:00"}`);
+      const startOfToday = new Date();
+      startOfToday.setHours(0, 0, 0, 0);
+      const startOfSessionDay = new Date(startDateTime);
+      startOfSessionDay.setHours(0, 0, 0, 0);
+      const diffDays = Math.round((startOfSessionDay - startOfToday) / (24 * 60 * 60 * 1000));
+      const day =
+        diffDays === 0
+          ? "today"
+          : diffDays === 1
+            ? "tomorrow"
+            : diffDays > 1
+              ? "upcoming"
+              : "yesterday";
+
+      const sessionRecord = {
+        id: sessionId,
+        title: sessionName || t("workout_setup_title") || "Workout Session",
+        time: timeLabel,
+        startDate: startDateTime.toISOString(),
+        location,
+        participants: clientRoutines.map((cr) => cr.clientId),
+        routineId: clientRoutines[0]?.routineId || "",
+        maxCapacity: clientRoutines.length,
+        day,
+      };
+
+      const existingIndex = sessions.findIndex((b) => b.id === sessionId);
+      if (existingIndex >= 0) {
+        sessions[existingIndex] = { ...sessions[existingIndex], ...sessionRecord };
+      } else {
+        sessions.push(sessionRecord);
+      }
+
+      deps.saveToLocalStorage?.();
+      deps.rerenderSessions?.();
     }
 
     clearEditSessionDraft();
-    editingBookingId = null;
-    deps.startWorkoutSession(clientRoutines, bookingMeta);
+    editingSessionId = null;
+    deps.startWorkoutSession(clientRoutines, sessionMeta);
   });
 }
 export const setupWorkoutSetup = setupEditSessionControl;
@@ -228,11 +274,11 @@ export const setupWorkoutSetup = setupEditSessionControl;
 export function openEditSessionControlModal(
   preselectedClientId = null,
   preselectedRoutineId = null,
-  preselectedBookingId = null,
+  preselectedSessionId = null,
   isPlanning = false,
 ) {
   isPlanningModeActive = isPlanning;
-  editingBookingId = preselectedBookingId || null;
+  editingSessionId = preselectedSessionId || null;
   if (deps.switchView) {
     deps.switchView("workout-setup");
   }
@@ -267,7 +313,7 @@ export function openEditSessionControlModal(
       "Lower Body Power",
       "Personal Training 1-on-1",
     ]);
-    const sessions = state.sessions || state.bookings || [];
+    const sessions = state.sessions || [];
     if (sessions) {
       for (const b of sessions) {
         const title = b.title || b.titles?.[0];
@@ -295,7 +341,7 @@ export function openEditSessionControlModal(
       "Main Gym Floor",
       "Client Home Studio",
     ]);
-    const sessions = state.sessions || state.bookings || [];
+    const sessions = state.sessions || [];
     if (sessions) {
       for (const b of sessions) {
         if (b.location) locSuggestions.add(b.location);
@@ -306,10 +352,10 @@ export function openEditSessionControlModal(
       .join("");
   }
 
-  let targetBooking = null;
-  const sessions = state.sessions || state.bookings || [];
-  if (preselectedBookingId && sessions) {
-    targetBooking = sessions.find((b) => b.id === preselectedBookingId);
+  let targetSession = null;
+  const sessions = state.sessions || [];
+  if (preselectedSessionId && sessions) {
+    targetSession = sessions.find((b) => b.id === preselectedSessionId);
   }
 
   const draft = getEditSessionDraft();
@@ -342,13 +388,13 @@ export function openEditSessionControlModal(
 
   if (nameInput)
     nameInput.value =
-      draft?.sessionName ?? (targetBooking?.title || targetBooking?.titles?.[0] || "");
-  if (dateInput) dateInput.value = draft?.date || targetBooking?.date || defaultDate;
+      draft?.sessionName ?? (targetSession?.title || targetSession?.titles?.[0] || "");
+  if (dateInput) dateInput.value = draft?.date || targetSession?.date || defaultDate;
   if (startInput) {
     if (draft?.startTime) {
       startInput.value = draft.startTime;
-    } else if (targetBooking?.timeLabel) {
-      const parts = targetBooking.timeLabel.split("-").map((s) => s.trim());
+    } else if (targetSession?.timeLabel) {
+      const parts = targetSession.timeLabel.split("-").map((s) => s.trim());
       startInput.value = parts[0] || defaultStartTime;
     } else {
       startInput.value = defaultStartTime;
@@ -357,14 +403,14 @@ export function openEditSessionControlModal(
   if (endInput) {
     if (draft?.endTime) {
       endInput.value = draft.endTime;
-    } else if (targetBooking?.timeLabel) {
-      const parts = targetBooking.timeLabel.split("-").map((s) => s.trim());
+    } else if (targetSession?.timeLabel) {
+      const parts = targetSession.timeLabel.split("-").map((s) => s.trim());
       endInput.value = parts[1] || defaultEndTime;
     } else {
       endInput.value = defaultEndTime;
     }
   }
-  if (locInput) locInput.value = draft?.location ?? (targetBooking?.location || "");
+  if (locInput) locInput.value = draft?.location ?? (targetSession?.location || "");
 
   const clientsList = state?.clients || [];
   for (const client of [...clientsList].sort((a, b) => a.name.localeCompare(b.name))) {
@@ -386,8 +432,8 @@ export function openEditSessionControlModal(
 
     if (draft?.checkedClients) {
       cb.checked = draft.checkedClients.includes(client.id);
-    } else if (targetBooking) {
-      cb.checked = targetBooking.participants.includes(client.id);
+    } else if (targetSession) {
+      cb.checked = targetSession.participants.includes(client.id);
     } else if (preselectedClientId === client.id) {
       cb.checked = true;
     } else if (!preselectedClientId && client.id !== "c3c7d2c4") {
@@ -426,13 +472,13 @@ export function openEditSessionControlModal(
       select.appendChild(opt);
     }
 
-    // Restore selected routine from draft, target booking, or defaults
+    // Restore selected routine from draft, target session, or defaults
     if (draft?.clientRoutines?.[client.id]) {
       select.value = draft.clientRoutines[client.id];
     } else if (isPlanningModeActive) {
       select.value = "empty_plan";
-    } else if (targetBooking?.participants.includes(client.id)) {
-      select.value = targetBooking.routineId;
+    } else if (targetSession?.participants.includes(client.id)) {
+      select.value = targetSession.routineId;
     } else if (preselectedRoutineId && preselectedClientId === client.id) {
       select.value = preselectedRoutineId;
     } else if (client.id === "c1a9f0e2") {

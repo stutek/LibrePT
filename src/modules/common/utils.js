@@ -139,7 +139,7 @@ export function parseTimeRange(timeStr) {
   // A range whose end is at or before its start crosses midnight (e.g. "22:00 - 00:00"): treat the
   // end as the next day so overlap and duration maths stay correct. Without this a late-evening
   // session reads as an inverted range and overlaps nothing — not even itself — so its card
-  // silently fails to launch (getOverlappingBookings returns []).
+  // silently fails to launch (getOverlappingSessions returns []).
   if (end <= start) end += 24 * 60;
   return { start, end };
 }
@@ -158,7 +158,6 @@ export function getOverlappingSessions(session, sessions) {
     return isTimeOverlapping(targetRange, parseTimeRange(s.time));
   });
 }
-export const getOverlappingBookings = getOverlappingSessions;
 
 // Aggregate participant details, scheduled range, and location for active/idle bar
 export function buildSessionMeta(sessions, day, getSessionDayDate) {
@@ -187,7 +186,6 @@ export function buildSessionMeta(sessions, day, getSessionDayDate) {
     timeLabel: `${formatClockFromMinutes(startMin)} - ${formatClockFromMinutes(endMin)}`,
   };
 }
-export const buildBookingMeta = buildSessionMeta;
 
 export function getISODateString(date) {
   const d = new Date(date);

@@ -2,7 +2,7 @@
 # Regression guard for a time-of-day-dependent launch bug: the demo generates session times
 # relative to "now", so late in the evening a live session's range crossed midnight
 # (e.g. "22:00 - 00:00"). parseTimeRange then read it as inverted (end < start), isTimeOverlapping
-# failed even against itself, getOverlappingBookings returned [], and clicking the card silently
+# failed even against itself, getOverlappingSessions returned [], and clicking the card silently
 # did nothing (launchClipboardDirectly bailed at clientRoutines.length === 0). The wall clock is
 # mocked here so the check is deterministic regardless of when the suite runs.
 
@@ -18,7 +18,7 @@ def test_live_session_card_launches_regardless_of_hour(page, local_server, hour)
     page.wait_for_selector("#view-clients.active")
 
     page.locator(
-        ".booking-card", has_text="Group Strength & Conditioning"
+        ".session-card", has_text="Group Strength & Conditioning"
     ).first.click()
 
     # The clipboard overlay must open. Before the parseTimeRange midnight-crossing fix this

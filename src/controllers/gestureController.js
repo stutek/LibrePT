@@ -15,7 +15,7 @@ export function setupViewDismiss({ navigateToPath, getActiveSession, launchClipb
       return;
     }
     const bar = document.getElementById("active-session-bar");
-    const nextId = bar?.dataset.nextBookingId;
+    const nextId = bar?.dataset.nextSessionId;
     if (nextId) launchClipboardDirectly(nextId);
   }
 

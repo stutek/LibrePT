@@ -19,14 +19,16 @@ export function renderSessionTitle() {
   const activeSession = deps.getActiveSession();
   if (!activeSession) return;
 
-  const booking = activeSession.booking;
-  if (booking?.isPlanning) {
-    el.textContent = `${booking.titles[0]} · ${booking.timeLabel}`;
+  const sourceSession = activeSession.sourceSession;
+  if (sourceSession?.isPlanning) {
+    el.textContent = `${sourceSession.titles[0]} · ${sourceSession.timeLabel}`;
     return;
   }
-  const start = new Date(booking?.startDate ? booking.startDate : activeSession.startTime);
+  const start = new Date(
+    sourceSession?.startDate ? sourceSession.startDate : activeSession.startTime,
+  );
   const datePart = deps.getISODateString(start);
   const timePart = deps.formatClockFromMinutes(start.getHours() * 60 + start.getMinutes());
-  const location = booking?.location ? ` ${booking.location}` : "";
+  const location = sourceSession?.location ? ` ${sourceSession.location}` : "";
   el.textContent = `${datePart} ${timePart}${location}`;
 }

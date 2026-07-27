@@ -1,7 +1,7 @@
 # tests/e2e/test_session_reload_follows_id.py
 # A deep link must follow the session id in the URL. When the in-memory session is gone (a reload)
 # and its persisted cache has expired, the router resolves the URL's {sessionId} against known
-# bookings and re-launches that session — instead of opening a blank "Workout Session Setup" modal.
+# sessions and re-launches that session — instead of opening a blank "Workout Session Setup" modal.
 # An id that names nothing lands on the not-found view rather than the setup modal.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
@@ -24,7 +24,7 @@ def _nav(page, path):
 
 def _open_session(page, local_server):
     page.goto(local_server)
-    card_sel = ".booking-card.booking-live, .booking-card:has-text('Group Strength & Conditioning')"
+    card_sel = ".session-card.session-live, .session-card:has-text('Group Strength & Conditioning')"
     page.wait_for_selector(card_sel)
     page.locator(card_sel).first.click()
     page.wait_for_selector("#active-session-overlay:not(.hidden)")
@@ -37,7 +37,7 @@ def test_reload_with_expired_cache_relaunches_from_the_url_session_id(
     _open_session(page, local_server)
     base = _base(page)
 
-    # The session's id in the URL is the booking id it was launched from.
+    # The session's id in the URL is the scheduled session id it was launched from.
     url = page.evaluate("() => location.pathname")
     m = re.match(re.escape(base) + r"/session/([^/]+)", url)
     assert m, f"expected a /session/ URL, got {url}"
@@ -48,7 +48,7 @@ def test_reload_with_expired_cache_relaunches_from_the_url_session_id(
     page.reload()
     page.wait_for_timeout(800)
 
-    # The deep link followed the id: the session was re-launched from its booking, so the clipboard
+    # The deep link followed the id: the session was re-launched from its scheduled session record, so the clipboard
     # overlay is showing — NOT the blank workout-setup modal the old fallback opened.
     assert page.locator("#active-session-overlay").is_visible()
     assert (

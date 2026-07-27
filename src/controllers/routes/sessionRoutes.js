@@ -15,20 +15,20 @@ export class SessionsDayRoute extends Route {
   }
 }
 
-// `/session/new`, `/sessions/new`, `/session/setup/:bookingId` — the setup form. Despite its
+// `/session/new`, `/sessions/new`, `/session/setup/:sessionId` — the setup form. Despite its
 // `…Modal` name, openWorkoutSetupModal switches to a full `#view-workout-setup`, so this is a view
 // route, not a dialog route.
 export class WorkoutSetupRoute extends Route {
   enter(ctx) {
     super.enter(ctx);
-    ctx.deps.openWorkoutSetupModal?.(null, null, ctx.params.bookingId || null, false);
+    ctx.deps.openWorkoutSetupModal?.(null, null, ctx.params.sessionId || null, false);
     return this;
   }
 }
 
 // `/session/:sessionId[/client/:clientId[/edit | /(exercise|superset)/:focusId]]`.
 // One class, four registered instances: they differ only in which part of the focus the URL names, and
-// showSessionView already owns the hard part (recover from cache, launch from a booking, or replay a
+// showSessionView already owns the hard part (recover from cache, launch from a scheduled session, or replay a
 // history log — and the error view when the id matches none of them).
 export class SessionRoute extends Route {
   constructor({ mode = "plain", ...routeOptions }) {

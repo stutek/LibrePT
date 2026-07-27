@@ -49,15 +49,15 @@ def test_clipboard_launch_flow(page, local_server):
     assert page.locator("#menu-routines").inner_text().strip() == "Routines"
     page.locator("#btn-app-menu").click()
 
-    # Verify bookings list cards appear on the dashboard
-    page.wait_for_selector(".booking-card")
-    booking_titles = page.locator(".booking-card strong").all_inner_texts()
-    assert "Group Strength & Conditioning" in booking_titles
+    # Verify sessions list cards appear on the dashboard
+    page.wait_for_selector(".session-card")
+    session_titles = page.locator(".session-card strong").all_inner_texts()
+    assert "Group Strength & Conditioning" in session_titles
 
     # --- STEP 3: WORKOUT CLIPBOARD LAUNCH ---
     # Click the entire Group Strength card to verify clickability
     group_strength_card = page.locator(
-        ".booking-card", has_text="Group Strength & Conditioning"
+        ".session-card", has_text="Group Strength & Conditioning"
     )
     group_strength_card.click()
 

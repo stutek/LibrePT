@@ -52,7 +52,7 @@ export function renderExerciseDeck(deckContainer, deps) {
 
   // A launched future-day session is a plan, not a live workout — its exercises get the
   // same amber tint the dashboard uses for future days (mirrors the purple past history).
-  const launchedDay = activeSession.booking ? activeSession.booking.day : null;
+  const launchedDay = activeSession.sourceSession ? activeSession.sourceSession.day : null;
   const isFutureSession = launchedDay === "tomorrow" || launchedDay === "upcoming";
 
   // Single focus across the whole deck: while a past log is open, the live exercise card

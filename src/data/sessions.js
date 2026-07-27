@@ -1,6 +1,6 @@
-// src/data/sessions.js — seed bookings; times are generated relative to "now" so the demo always looks live.
+// src/data/sessions.js — seed sessions; times are generated relative to "now" so the demo always looks live.
 
-// The three venues this trainer runs sessions at. Referenced by every booking so the
+// The three venues this trainer runs sessions at. Referenced by every session so the
 // session view can show a "date time location" context line (e.g. "2026-07-17 10:00 Trib gym base").
 export const LOCATIONS = {
   GYM: "Trib gym base",

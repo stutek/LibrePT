@@ -58,7 +58,7 @@ export function buildRouteTable() {
   registry.register(
     new WorkoutSetupRoute({
       name: "session.setup",
-      pattern: "/session/setup/:bookingId",
+      pattern: "/session/setup/:sessionId",
       viewId: "workout-setup",
     }),
   );

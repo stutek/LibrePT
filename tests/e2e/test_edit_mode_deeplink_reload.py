@@ -13,7 +13,7 @@ def _base(page):
 
 def _open_session(page, local_server):
     page.goto(local_server)
-    card_sel = ".booking-card.booking-live, .booking-card:has-text('Group Strength & Conditioning')"
+    card_sel = ".session-card.session-live, .session-card:has-text('Group Strength & Conditioning')"
     page.wait_for_selector(card_sel)
     page.locator(card_sel).first.click()
     page.wait_for_selector("#active-session-overlay:not(.hidden)")
@@ -39,17 +39,17 @@ def test_edit_mode_deeplinks_and_survives_reload(page, local_server):
     first_name.fill(name)
     page.wait_for_timeout(150)
 
-    # Push the cached session's booking.endDate safely into the future before reloading:
+    # Push the cached session's sourceSession.endDate safely into the future before reloading:
     # recoverActiveSession() discards (and freshly relaunches from the routine template, losing
     # any in-memory edit) any cached session more than 2h past its scheduled end, and this seed
-    # booking's end time is clamped to at most 18:00 (src/data/sessions.js) -- without this, the
+    # session's end time is clamped to at most 18:00 (src/data/sessions.js) -- without this, the
     # test starts failing every evening once real wall-clock time passes ~20:00, regardless of
     # whether edit-mode reload-persistence itself works.
     page.evaluate(
         """() => {
             const cached = JSON.parse(localStorage.getItem('librept_active_session'));
-            if (cached?.booking) {
-                cached.booking.endDate = new Date(Date.now() + 3600000).toISOString();
+            if (cached?.sourceSession) {
+                cached.sourceSession.endDate = new Date(Date.now() + 3600000).toISOString();
                 localStorage.setItem('librept_active_session', JSON.stringify(cached));
             }
         }"""

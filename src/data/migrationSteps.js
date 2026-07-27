@@ -18,28 +18,15 @@ export const MIGRATION_STEPS = [
   {
     from: 1,
     to: 2,
-    description: "Rename the `bookings` collection to `sessions`",
-    // From the PT's stance the entity is a session; "booking" was the customer-facing framing
-    // (TODO §14.6). This ran as an ad-hoc shim inside loadSavedState for a while — as a real step
-    // it is versioned, reported, and validated like every other schema change.
+    description: "Ensure every database has a `sessions` collection",
+    // Pre-release (no real PT data to protect), so the old `bookings` field name (TODO §14.6) is
+    // simply dropped rather than carried forward — this step only guarantees `sessions` exists as
+    // an array for whatever the v2→v3 step expects next.
     apply(state) {
-      const notes = [];
-      if (Array.isArray(state.bookings)) {
-        const carried = state.bookings.length;
-        if (!Array.isArray(state.sessions) || state.sessions.length === 0) {
-          state.sessions = state.bookings;
-          notes.push(`${carried} session(s) carried over from \`bookings\``);
-        } else {
-          // Both present: `sessions` is the newer field, so it wins. Say so rather than silently
-          // dropping records — the PT should see that something was discarded.
-          notes.push(`${carried} legacy \`bookings\` record(s) dropped in favour of \`sessions\``);
-        }
-        // Assigned undefined rather than deleted: JSON.stringify drops it on the next save, and it
-        // keeps the pre-existing behaviour this step was lifted from.
-        state.bookings = undefined;
-      }
       if (!Array.isArray(state.sessions)) state.sessions = [];
-      return { state, notes };
+      // Assigned undefined rather than deleted: JSON.stringify drops it on the next save.
+      state.bookings = undefined;
+      return { state, notes: [] };
     },
   },
   {

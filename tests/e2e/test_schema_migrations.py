@@ -16,7 +16,10 @@ def _evaluate(page, body):
     )
 
 
-def test_legacy_database_migrates_bookings_to_sessions(page, local_server):
+def test_legacy_database_with_no_sessions_collection_gets_one(page, local_server):
+    """Pre-release, an old `bookings`-shaped database (or any v1 database missing `sessions`
+    entirely) is not migrated forward — there is no real PT data to protect (TODO §14.6) — it just
+    ends up with an empty `sessions` collection like any other database missing the field."""
     page.goto(local_server)
     page.wait_for_timeout(300)
 
@@ -31,24 +34,20 @@ def test_legacy_database_migrates_bookings_to_sessions(page, local_server):
             sessions: result.state.sessions.length,
             bookings: result.state.bookings ?? null,
             schemaVersion: result.state.schemaVersion,
-            description: m.describeMigration(result.summary),
             sourceUntouched: legacy.bookings.length,
-            sourceHasNoSessions: legacy.sessions === undefined,
         };""",
     )
 
     assert r["ok"] is True
     # A database with no schemaVersion is the legacy baseline, v1.
     assert r["from"] == 1
-    assert r["sessions"] == 2
+    assert r["sessions"] == 0, (
+        "the old `bookings` collection is dropped, not carried over"
+    )
     assert r["bookings"] is None
     assert r["schemaVersion"] == r["to"]
-    assert any("bookings" in line for line in r["description"]), (
-        "the PT is told what actually moved, not just that something did"
-    )
     # The input object is never mutated — the runner works on a clone.
     assert r["sourceUntouched"] == 2
-    assert r["sourceHasNoSessions"] is True
 
 
 def test_current_database_is_a_no_op_but_gets_stamped(page, local_server):
@@ -183,7 +182,8 @@ def test_a_step_producing_a_bad_shape_fails_loud(page, local_server):
 
 
 def test_a_stored_legacy_database_is_migrated_on_boot(page, local_server):
-    """End-to-end: a real localStorage database in the old shape loads as sessions, not bookings."""
+    """End-to-end: a real localStorage database in the old shape loads with an empty `sessions`,
+    not the dropped legacy `bookings` collection (TODO §14.6 — no back-compat carry-over)."""
     page.add_init_script(
         """window.localStorage.setItem('librept_db', JSON.stringify({
             clients: [{ id: 'c1', name: 'Legacy Client' }],
@@ -215,7 +215,9 @@ def test_a_stored_legacy_database_is_migrated_on_boot(page, local_server):
     assert r["clients"] == ["Legacy Client"], (
         "a migration never discards the PT's own data"
     )
-    assert r["sessions"] == 1
+    assert r["sessions"] == 0, (
+        "the legacy `bookings` collection is dropped, not carried over"
+    )
     assert r["bookings"] is None
     assert r["schemaVersion"] == 3, (
         "walks the full chain (v1→v2→v3) on one boot, not just one hop"

@@ -35,7 +35,7 @@ def _nav(page, path):
 
 def _open_session(page, local_server):
     page.goto(local_server)
-    card_sel = ".booking-card.booking-live, .booking-card:has-text('Group Strength & Conditioning')"
+    card_sel = ".session-card.session-live, .session-card:has-text('Group Strength & Conditioning')"
     page.wait_for_selector(card_sel)
     page.locator(card_sel).first.click()
     page.wait_for_selector("#active-session-overlay:not(.hidden)")

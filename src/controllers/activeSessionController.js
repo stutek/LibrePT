@@ -69,9 +69,9 @@ let savedSessionTitleHTML = null;
 // Temporal mode of the plan currently loaded, used to label edit mode so the trainer always knows
 // whether they're reshaping the LIVE session, an UPCOMING one, or a date-less PLANNING program.
 function currentPlanMode() {
-  const b = activeSession?.booking;
-  if (b?.isPlanning) return "planning";
-  if (b?.day === "tomorrow" || b?.day === "upcoming") return "future";
+  const ss = activeSession?.sourceSession;
+  if (ss?.isPlanning) return "planning";
+  if (ss?.day === "tomorrow" || ss?.day === "upcoming") return "future";
   return "live";
 }
 
@@ -348,7 +348,7 @@ export function openSessionFromHistory(log) {
     },
     activeClientId: log.clientId,
     feedback: log.feedback || [],
-    booking: log.isPlanning
+    sourceSession: log.isPlanning
       ? {
           id: `plan-${log.id}`,
           isPlanning: true,
@@ -371,7 +371,7 @@ export function openSessionFromHistory(log) {
   const bar = document.getElementById("active-session-bar");
   if (bar) {
     bar.classList.remove("hidden", "is-idle");
-    delete bar.dataset.nextBookingId;
+    delete bar.dataset.nextSessionId;
   }
   renderActiveSessionBarLabels();
   startSessionTimer();
@@ -381,14 +381,14 @@ export function openSessionFromHistory(log) {
   }
 }
 
-export function startWorkoutSession(clientRoutines, bookingMeta = null, deps = {}) {
+export function startWorkoutSession(clientRoutines, sessionMeta = null, deps = {}) {
   if (deps) appDeps = { ...appDeps, ...deps };
   const { state, navigateToPath, t } = appDeps;
   if (!state) return;
   clearAllTimers(); // fresh session — never inherit a previous session's timers
 
   const participantIds = clientRoutines.map((cr) => cr.clientId);
-  const sessionId = bookingMeta ? bookingMeta.id : newRecordId();
+  const sessionId = sessionMeta ? sessionMeta.id : newRecordId();
 
   activeSession = {
     id: sessionId,
@@ -397,7 +397,7 @@ export function startWorkoutSession(clientRoutines, bookingMeta = null, deps = {
     participants: participantIds,
     clientRoutines: {},
     activeClientId: participantIds[0],
-    booking: bookingMeta,
+    sourceSession: sessionMeta,
   };
 
   for (const cr of clientRoutines) {
@@ -445,7 +445,7 @@ export function startWorkoutSession(clientRoutines, bookingMeta = null, deps = {
     activeSession.clientRoutines[cr.clientId] = clientState;
   }
 
-  if (bookingMeta?.isPlanning) {
+  if (sessionMeta?.isPlanning) {
     clipboardEditMode = true;
   } else {
     clipboardEditMode = false;
@@ -466,7 +466,7 @@ export function startSessionTimer() {
 
   const tick = () => {
     if (!activeSession) return;
-    if (activeSession.booking?.isPlanning) {
+    if (activeSession.sourceSession?.isPlanning) {
       updateOverlaySessionTimer();
       updateSessionBarTimer();
       return;
@@ -488,13 +488,13 @@ export function updateOverlaySessionTimer() {
 
   const { t } = appDeps;
 
-  if (activeSession.booking?.isPlanning) {
+  if (activeSession.sourceSession?.isPlanning) {
     el.textContent = t("planning") || "Planning";
     el.style.color = "var(--primary)";
     return;
   }
 
-  const endDate = activeSession.booking?.endDate;
+  const endDate = activeSession.sourceSession?.endDate;
   if (endDate) {
     const remainingSec = Math.round((new Date(endDate).getTime() - Date.now()) / 1000);
     el.textContent = formatSignedDuration(remainingSec);
@@ -925,7 +925,7 @@ export function renderActiveGroupBoard() {
     if (clipboardEditMode) {
       if (savedSessionTitleHTML === null) savedSessionTitleHTML = titleEl.innerHTML;
       const mode = currentPlanMode();
-      const b = activeSession.booking;
+      const b = activeSession.sourceSession;
       // Concrete schedule beats a vague "Live": show the day + time of the booked session, or
       // "Unscheduled" for a date-less planning program. The chip's colour still encodes urgency.
       let chipLabel;
@@ -1258,8 +1258,8 @@ export function setupActiveSession(deps) {
         const activeClientId = activeSession.activeClientId || activeSession.participants[0];
         const sessionId = activeSession.id || "session";
         if (navigateToPath) navigateToPath(`/session/${sessionId}/client/${activeClientId}`);
-      } else if (sessionBar.dataset.nextBookingId && launchClipboardDirectly) {
-        launchClipboardDirectly(sessionBar.dataset.nextBookingId);
+      } else if (sessionBar.dataset.nextSessionId && launchClipboardDirectly) {
+        launchClipboardDirectly(sessionBar.dataset.nextSessionId);
       }
     });
     sessionBar.addEventListener("keydown", (e) => {
@@ -1403,8 +1403,8 @@ export function finishWorkoutSession() {
 
   // Confirm only when finishing meaningfully early — more than 10 minutes still on the
   // countdown. Near the scheduled end or in overrun (<=10 min or negative), complete silently.
-  const endDate = activeSession.booking?.endDate;
-  if (endDate && !activeSession.booking?.isPlanning) {
+  const endDate = activeSession.sourceSession?.endDate;
+  if (endDate && !activeSession.sourceSession?.isPlanning) {
     const remainingMin = (new Date(endDate).getTime() - Date.now()) / 60000;
     if (remainingMin > 10) {
       const msg = t("confirm_finish_early").replace("{min}", String(Math.round(remainingMin)));
@@ -1427,7 +1427,7 @@ export function finishWorkoutSession() {
     }
   }
 
-  if (completedSets === 0 && !activeSession.booking?.isPlanning) {
+  if (completedSets === 0 && !activeSession.sourceSession?.isPlanning) {
     if (!confirm(t("alert_no_sets"))) {
       return;
     }
@@ -1436,20 +1436,16 @@ export function finishWorkoutSession() {
   const sessionDateISO = new Date(activeSession.startTime).toISOString();
   const sessionDuration = activeSession.duration;
 
-  // Stamp completion + elapsed time onto the booking(s) this session launched from, so the
+  // Stamp completion + elapsed time onto the session(s) this live session launched from, so the
   // dashboard's past-session status line (2.3) has something to show — previously finishing a
-  // session never touched state.bookings at all, only state.history.
-  const sb = activeSession.booking;
-  const sessions = Array.isArray(state.sessions)
-    ? state.sessions
-    : Array.isArray(state.bookings)
-      ? state.bookings
-      : [];
-  if (sb && !sb.isPlanning) {
-    for (const booking of sessions) {
-      if (booking.id === sb.id || (Array.isArray(sb.ids) && sb.ids.includes(booking.id))) {
-        booking.completed = true;
-        booking.duration = sessionDuration;
+  // session never touched state.sessions at all, only state.history.
+  const ss = activeSession.sourceSession;
+  const sessions = Array.isArray(state.sessions) ? state.sessions : [];
+  if (ss && !ss.isPlanning) {
+    for (const session of sessions) {
+      if (session.id === ss.id || (Array.isArray(ss.ids) && ss.ids.includes(session.id))) {
+        session.completed = true;
+        session.duration = sessionDuration;
       }
     }
   }
@@ -1459,7 +1455,7 @@ export function finishWorkoutSession() {
     const clientState = activeSession.clientRoutines[pId];
     if (!client || !clientState) continue;
 
-    const isPlanning = !!activeSession.booking?.isPlanning;
+    const isPlanning = !!activeSession.sourceSession?.isPlanning;
     // Persist the WHOLE program as an immutable snapshot (rests, circuit grouping, and prescribed-
     // but-skipped exercises included) rather than flattening to performed sets only (TODO §17.1).
     const clientProgram = buildProgramSnapshot(clientState, { isPlanning });
@@ -1509,13 +1505,15 @@ export function recoverActiveSession() {
     activeSession = parsed;
     activeSession.duration = Math.floor((Date.now() - activeSession.startTime) / 1000);
 
-    if (activeSession.booking) {
-      activeSession.booking.startDate = new Date(activeSession.booking.startDate);
-      activeSession.booking.endDate = new Date(activeSession.booking.endDate);
+    if (activeSession.sourceSession) {
+      activeSession.sourceSession.startDate = new Date(activeSession.sourceSession.startDate);
+      activeSession.sourceSession.endDate = new Date(activeSession.sourceSession.endDate);
     }
 
     const STALE_AFTER_MS = 2 * 60 * 60 * 1000;
-    const endTime = activeSession.booking?.endDate ? activeSession.booking.endDate.getTime() : null;
+    const endTime = activeSession.sourceSession?.endDate
+      ? activeSession.sourceSession.endDate.getTime()
+      : null;
     if (endTime && Date.now() > endTime + STALE_AFTER_MS) {
       activeSession = null;
       clearActiveSessionCache();
@@ -1523,7 +1521,7 @@ export function recoverActiveSession() {
       return;
     }
 
-    if (activeSession.booking?.isPlanning) {
+    if (activeSession.sourceSession?.isPlanning) {
       clipboardEditMode = true;
     }
     // Recovery runs before the first route is entered (app.js boots the session, then routes), so
@@ -1543,7 +1541,7 @@ export function recoverActiveSession() {
     const bar = document.getElementById("active-session-bar");
     if (bar) {
       bar.classList.remove("hidden", "is-idle");
-      delete bar.dataset.nextBookingId;
+      delete bar.dataset.nextSessionId;
     }
     renderActiveSessionBarLabels();
 

@@ -12,7 +12,7 @@
 
 def _open_live_session(page, local_server):
     page.goto(local_server)
-    card_sel = ".booking-card.booking-live, .booking-card:has-text('Group Strength & Conditioning')"
+    card_sel = ".session-card.session-live, .session-card:has-text('Group Strength & Conditioning')"
     page.wait_for_selector(card_sel)
     page.locator(card_sel).first.click()
     page.wait_for_selector("#active-session-overlay:not(.hidden)")
@@ -26,8 +26,8 @@ def _keep_cached_session_fresh(page):
              const raw = localStorage.getItem('librept_active_session');
              if (!raw) return;
              const cached = JSON.parse(raw);
-             if (cached.booking) {
-               cached.booking.endDate = new Date(Date.now() + 3600000).toISOString();
+             if (cached.sourceSession) {
+               cached.sourceSession.endDate = new Date(Date.now() + 3600000).toISOString();
              }
              localStorage.setItem('librept_active_session', JSON.stringify(cached));
            }"""

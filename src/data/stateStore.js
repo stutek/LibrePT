@@ -53,15 +53,9 @@ export function emptyState() {
 }
 
 export function stateHasData(s = state) {
-  return [
-    "clients",
-    "exercises",
-    "routines",
-    "history",
-    "planUpdates",
-    "sessions",
-    "bookings",
-  ].some((k) => Array.isArray(s[k]) && s[k].length > 0);
+  return ["clients", "exercises", "routines", "history", "planUpdates", "sessions"].some(
+    (k) => Array.isArray(s[k]) && s[k].length > 0,
+  );
 }
 
 export function seedMockData(incrementLocalSyncFn) {

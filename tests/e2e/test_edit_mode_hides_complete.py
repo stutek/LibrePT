@@ -10,7 +10,7 @@ FOOTER = "#active-session-overlay .session-actions-footer"
 
 def _open_live_session(page, local_server):
     page.goto(local_server)
-    card = ".booking-card.booking-live, .booking-card:has-text('Group Strength & Conditioning')"
+    card = ".session-card.session-live, .session-card:has-text('Group Strength & Conditioning')"
     page.wait_for_selector(card)
     page.locator(card).first.click()
     page.wait_for_selector("#active-session-overlay:not(.hidden)")

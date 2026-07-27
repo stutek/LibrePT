@@ -7,7 +7,7 @@
 
 def _open_session(page, local_server):
     page.goto(local_server)
-    card_sel = ".booking-card.booking-live, .booking-card:has-text('Group Strength & Conditioning')"
+    card_sel = ".session-card.session-live, .session-card:has-text('Group Strength & Conditioning')"
     page.wait_for_selector(card_sel)
     page.locator(card_sel).first.click()
     page.wait_for_selector("#active-session-overlay:not(.hidden)")
@@ -48,10 +48,10 @@ def test_timer_survives_reload_and_goes_overtime(page, local_server):
     _start_a_timer(page)
 
     # Force the running timer into overtime by rewinding its stored end time, then reload: the session
-    # (and its timers) rehydrate from cache. Also push the cached session's own booking.endDate
+    # (and its timers) rehydrate from cache. Also push the cached session's own sourceSession.endDate
     # safely into the future first -- recoverActiveSession() discards (and freshly relaunches,
     # wiping every timer) any cached session more than 2h past its scheduled end, and this seed
-    # booking's end time is clamped to at most 18:00 (src/data/sessions.js), so this test would
+    # session's end time is clamped to at most 18:00 (src/data/sessions.js), so this test would
     # otherwise start failing every evening once real wall-clock time passes ~20:00, regardless of
     # the timer logic under test.
     page.evaluate(
@@ -61,8 +61,8 @@ def test_timer_survives_reload_and_goes_overtime(page, local_server):
             localStorage.setItem('librept_active_timers', JSON.stringify(list));
 
             const cached = JSON.parse(localStorage.getItem('librept_active_session'));
-            if (cached?.booking) {
-                cached.booking.endDate = new Date(Date.now() + 3600000).toISOString();
+            if (cached?.sourceSession) {
+                cached.sourceSession.endDate = new Date(Date.now() + 3600000).toISOString();
                 localStorage.setItem('librept_active_session', JSON.stringify(cached));
             }
         }"""
