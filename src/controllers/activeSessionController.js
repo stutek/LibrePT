@@ -519,6 +519,15 @@ export function getActiveExercise() {
 // actually wrote: only an untouched quick-tap is safe to un-tap.
 const isPlainQuickSignal = (f) => !f.note?.trim() && !f.hasVoiceNote;
 
+// Too Easy and Too Hard are mutually exclusive — an exercise can't be both at once — but each
+// stays independently tappable rather than requiring an untap-then-tap: hitting the opposite
+// signal silently replaces the current one, which is what mistype correction on the gym floor
+// actually needs (the PT meant to tap the other button, not to clear this one first).
+const OPPOSITE_QUICK_SIGNAL = {
+  "Too Easy - Increase Load": "Too Hard - Reduce Load",
+  "Too Hard - Reduce Load": "Too Easy - Increase Load",
+};
+
 // Whether THIS exact quick-signal is currently active for the exercise in focus — the toggle's
 // "on" state, and what the Too Easy / Too Hard buttons render pressed against.
 export function hasQuickSignal(clientId, exerciseName, tag) {
@@ -531,8 +540,30 @@ export function hasQuickSignal(clientId, exerciseName, tag) {
   );
 }
 
+// Removes every untouched quick-signal entry matching (clientId, exerciseName, tag) from both
+// activeSession.feedback and state.planUpdates — the shared removal both the toggle-off path and
+// the mutual-exclusivity swap use, so a mis-tap never leaves a phantom entry in either place.
+function removeQuickSignal(clientId, exerciseName, tag, state) {
+  const removedIds = new Set(
+    (activeSession.feedback || [])
+      .filter(
+        (f) =>
+          f.clientId === clientId &&
+          f.exerciseName === exerciseName &&
+          f.tag === tag &&
+          isPlainQuickSignal(f),
+      )
+      .map((f) => f.id),
+  );
+  if (removedIds.size === 0) return;
+  activeSession.feedback = activeSession.feedback.filter((f) => !removedIds.has(f.id));
+  state.planUpdates = state.planUpdates.filter((u) => !removedIds.has(u.id));
+}
+
 // One tap logs the signal; tapping the SAME signal again undoes it — a toggle, not a one-way
 // stamp, so a mis-tap on the gym floor doesn't need a trip to the feedback modal to correct.
+// Tapping the OPPOSITE signal while one is active swaps it — Too Easy and Too Hard are mutually
+// exclusive, but neither requires clearing the other first (see OPPOSITE_QUICK_SIGNAL).
 // Only ever removes the exact untouched quick-signal entries it itself would have created; a
 // typed note or a voice memo on the same tag is never touched by this path.
 export function logQuickSignal(tag, exId) {
@@ -549,20 +580,11 @@ export function logQuickSignal(tag, exId) {
     clientState.exercises[clientState.activeExerciseIndex];
 
   if (hasQuickSignal(clientId, curEx.name, tag)) {
-    const removedIds = new Set(
-      (activeSession.feedback || [])
-        .filter(
-          (f) =>
-            f.clientId === clientId &&
-            f.exerciseName === curEx.name &&
-            f.tag === tag &&
-            isPlainQuickSignal(f),
-        )
-        .map((f) => f.id),
-    );
-    activeSession.feedback = activeSession.feedback.filter((f) => !removedIds.has(f.id));
-    state.planUpdates = state.planUpdates.filter((u) => !removedIds.has(u.id));
+    removeQuickSignal(clientId, curEx.name, tag, state);
   } else {
+    const opposite = OPPOSITE_QUICK_SIGNAL[tag];
+    if (opposite) removeQuickSignal(clientId, curEx.name, opposite, state);
+
     const client = state.clients.find((c) => c.id === clientId);
     const newFeedback = {
       id: newRecordId(),

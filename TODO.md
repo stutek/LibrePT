@@ -253,6 +253,12 @@ jot a note.
 - **Pressed state is visible**: `.deck-action-easy/.hard.active` and `.circuit-sig.easy/.hard.active`
   fill solid (matching the signal's own color) rather than only tinting on hover, plus
   `aria-pressed` on both buttons.
+- **Too Easy and Too Hard are mutually exclusive, added 2026-07-27** (Simon): an exercise can't be
+  both, but neither requires clearing the other first — tapping the opposite signal silently swaps
+  it (`OPPOSITE_QUICK_SIGNAL`, `removeQuickSignal` factored out of the toggle-off path and reused
+  for the swap), which is what mistype correction on the gym floor actually needs: tap the wrong
+  one, then the right one, no untap step in between. Bounded by the same `isPlainQuickSignal` rule
+  as the toggle — a noted/voice-memo'd entry on the opposite tag survives a swap.
 - **Feedback → Notes**: icon `fa-triangle-exclamation` → `fa-note-sticky`,
   `feedback_short` "Feedback"→"Notes" (sl: "Opomba"→"Opombe"), `btn_log_feedback` "Log Feedback"→
   "Add Note" (sl: "Dodaj opombo") — in both
