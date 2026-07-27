@@ -50,6 +50,89 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-07-27 — Data layer: record identity, IndexedDB engine, and schema projections
+
+First steps of the star-write architecture (TODO §18): a data layer that writes every record to
+all supported schema versions at once, so moving between app versions loses nothing either way.
+
+### Added
+- **Record identity moved to UUIDv7** ([`recordId.js`](src/modules/common/recordId.js)) — 122 bits of
+  collision resistance plus lexicographic time-ordering, replacing a 41.4-bit `Math.random`
+  generator that carried a 1.38% chance of at least one collision over five years of a very busy
+  PT's records. All call sites switched to `newRecordId()`. **Decided (TODO §18.2, closed):**
+  identity is the record's own `id` acting as a `lineageId` — no separate old-id→new-id mapping
+  table; a set-difference completeness check gives migration the same guarantee a mapping table
+  would have, at no extra storage cost.
+- **IndexedDB engine, parts 1-3** — [`indexedDb.js`](src/data/indexedDb.js): one database, one
+  object store per schema, transactions that resolve on commit, collection + client indexes
+  (including a compound `byClientAndCollection` index for per-client queries).
+  [`storageDurability.js`](src/data/storageDurability.js): requests eviction-proof storage on boot,
+  reports risk by measuring the consequence (quota, `persist()`) rather than sniffing for private
+  browsing. [`writeQueue.js`](src/data/writeQueue.js): write-behind persistence — reads stay
+  synchronous against in-memory state, writes serialise through a queue. None of this is wired into
+  `stateStore` yet (still on localStorage); this is the engine the eventual swap will run on.
+- **Schemas exist as data** — [`recordSchemas.js`](src/data/recordSchemas.js) declares the current
+  schema's per-collection field shapes, and [`recordProjections.js`](src/data/recordProjections.js)
+  projects each live domain object into it, proven against real seed data and the actual object
+  literals live writers build (not an idealised model), in `test_record_schemas.py`. This is the
+  single-schema half of TODO §18.4's staging guard; the fan-out into an actual IndexedDB bucket and
+  the cross-schema half both wait on a second live schema existing.
+
+## 2026-07-27 — Explicit session-item ordering
+
+### Added
+- **Every session item carries a `position`** ([`sessionItemOrder.js`](src/modules/common/sessionItemOrder.js))
+  — dense, unique `0..n-1` per session, so order is data rather than implied by array index. Writers
+  stamp it at the one choke point they all funnel through (`saveActiveSessionToCache`), plus
+  `buildProgramSnapshot` for the frozen history record, so a splice site added later cannot forget.
+  Unblocks the eventual IndexedDB move (TODO §18.6 part 4): a key order is not a program order, so
+  position must exist before the store stops guaranteeing list order. Covered by
+  `test_session_item_order.py`. Full design rationale (why dense not gapped, why not a linked list):
+  [DATA_MODEL §"Ordering"](docs/DATA_MODEL.md).
+
+## 2026-07-27 — Rests become first-class, focusable plan items
+
+### Changed
+- **Polymorphic `DeckCard` hierarchy replaces the exercise deck's `if/else` dispatch** — started as a
+  narrower bug (a collapsed standalone rest card started its timer on any tap instead of coming into
+  focus like every other card) that exposed a structural gap: a rest item could **never** hold
+  `activeExerciseIndex`, so there was no "focused rest" state to fix the bug on.
+  [`deckCard.js`](src/modules/clipboard/deckCard.js) is now a Template Method base class (mirroring
+  [`route.js`](src/controllers/routes/route.js)'s `Route`); `ExerciseDeckCard`
+  ([`exerciseCard.js`](src/modules/clipboard/exerciseCard.js)), `CircuitDeckCard`
+  ([`circuitCard.js`](src/modules/clipboard/circuitCard.js)), `RestDeckCard`
+  ([`restDeckCard.js`](src/modules/clipboard/restDeckCard.js), new), and `PastDeckCard`
+  ([`pastDeckCard.js`](src/modules/clipboard/pastDeckCard.js), extracted from an inline branch) each
+  implement collapsed/focused rendering and their own focus rule. A rest is now deep-linkable as
+  `/session/{id}/client/{cid}/rest/{restId}`. Four independent re-implementations of "is this a
+  rest?" converged onto [`sessionItemRecord.js`](src/modules/common/sessionItemRecord.js)'s existing
+  `isRestRecord`/`isExerciseRecord`. Scope: the active-session clipboard only — routine/plan
+  templates are untouched.
+
+## 2026-07-27 — Quick-signal toggles, insert-bar polish, and Assault Bike metrics
+
+### Added
+- **Assault Bike gained time and watts coverage, not just calories** — two sibling catalog entries,
+  **Assault Bike (Time)** and **Assault Bike (Watts)**, next to the original calories entry
+  ([`exercises.js`](src/data/exercises.js)), matching the one-machine-one-metric convention every
+  other cardio machine already follows.
+
+### Changed
+- **Too Easy / Too Hard are now toggles, and Feedback is relabelled Notes** — a second tap on the
+  same quick-signal removes it (`isPlainQuickSignal` guards a modal-authored entry from being
+  touched by a re-tap); pressed state is visible (solid fill + `aria-pressed`); the two signals are
+  mutually exclusive — tapping the opposite one silently swaps it, enforced from both the quick-tap
+  path and the Notes-modal submit path via one canonical `enforceQuickSignalExclusivity`
+  ([`activeSessionController.js`](src/controllers/activeSessionController.js)). The third button's
+  warning-triangle icon/label ("Feedback") is now a note icon labelled **Notes**, matching what it
+  actually does. Covered by `tests/e2e/test_quick_signal_toggle.py`.
+- **The editor's insert bar hides `+Rest` next to an existing rest** — back-to-back rests are two
+  waits with nothing between them, never a real plan shape
+  ([`clipboardEditor.js`](src/modules/clipboard/clipboardEditor.js)); `+Exercise`/`+Circuit` stay
+  available in every gap. Covered by `test_editor_insert_bar_rest_adjacency.py`.
+
+---
+
 ## 2026-07-26 — One word for a grouped block: circuit
 
 ### Changed
@@ -92,6 +175,26 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Added
 - **Open-standard crosswalk** (completes TODO §13.1) — the exercise catalog now maps onto the open **wger Workout Manager** dataset (chosen over proprietary ExRx) so exports are universally interchangeable with external research / coaching tools ([`exerciseStandard.js`](src/modules/common/exerciseStandard.js)). The mapping key is the canonical **name** — wger's numeric PKs are per-instance and don't round-trip — so `category` → wger `ExerciseCategory` (`Core`→`Abs`) and `equipment` → wger `Equipment` (bodyweight → `none (bodyweight exercise)`). LibrePT is a **superset**: its biomechanical `pattern` and richer `modality`/`metric` axes have no wger field, so they're preserved under an `x_librept` extension, and terms the standard lacks (Cardio/Recovery categories, Cable/Machine equipment) map to an explicit **null** rather than a wrong best-fit (`unmappedTerms()` surfaces the gaps). The **Sync & Backup** dialog gains an *Export Catalog* card that downloads the live catalog (custom movements included) as a self-describing interchange **JSON** envelope or a side-by-side crosswalk **CSV**. Covered by `test_exercise_standard.py`; documented in [UC6 §6](use_cases/uc6_exercise_taxonomy_and_picker.md). Section 13 (Exercise Library & Movement Taxonomy) is now complete.
+
+---
+
+## 2026-07-25 — Editor & session-completion polish
+
+### Added
+- **"Add from catalog" button in the inline plan editor** — opens the reusable filtered taxonomy
+  picker (`mountExercisePicker`) in `#dialog-catalog-picker`; tapping a movement injects it into the
+  active plan (fresh slot id + taxonomy fields, defaults 3×10, adjustable inline) via
+  `injectExerciseIntoActivePlan` and returns to the editor. Covered by `test_catalog_picker_in_edit.py`.
+
+### Fixed
+- **Exercise catalog filter chips overflowed off-screen** — the `.filter-chips` row used
+  `overflow-x` with a hidden scrollbar, pushing trailing chips unreachably off-screen on a phone.
+  Now `flex-wrap`, consistent with `.picker-chips`, so every filter stays visible.
+- **"Complete Workout Session" showed while editing the plan or running a planning-mode programme**
+  — completing an in-edit or never-run session logs a meaningless execution to history. The whole
+  finish bar (`.session-actions-footer`, `#btn-finish-session`) now hides whenever edit-plan mode or
+  `isPlanning` is active, and returns on exit since every mode change re-renders through
+  `renderActiveGroupBoard`. Covered by `test_edit_mode_hides_complete.py`.
 
 ---
 
