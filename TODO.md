@@ -571,15 +571,38 @@ With 17.1 preserving the full program, "**Save as routine**" on a history record
 > - [x] **[§17.5](#175--explicit-item-ordering--position-on-every-session-item-shipped-2026-07-27) — explicit `position`** (2026-07-27).
 >   The gate on part 4: order is now a field, stamped by every writer and sorted on by every reader
 >   of a stored record, so items may safely stop living in an ordered structure.
+> - [x] **18.2 identity, closed** (2026-07-27) — `lineageId` is the record's own `id`; no mapping
+>   table. Found while proving it: `buildProgramSnapshot` was dropping the `id` off every rest item
+>   (sessionItemRecord.js), the one place a genuinely current write produced an item that could never
+>   be individually addressed — fixed alongside.
+> - [x] **18.1/18.4, single-schema half** (2026-07-27) — schemas now exist as data
+>   ([recordSchemas.js](src/data/recordSchemas.js)), with per-collection projections
+>   ([recordProjections.js](src/data/recordProjections.js)) proven against real seed data and the
+>   actual object literals live writers build, not an idealised model
+>   (`tests/e2e/test_record_schemas.py`). **Not yet built**: the fan-out into an actual IndexedDB
+>   bucket, and the cross-schema half of the staging guard — both wait on a second schema existing.
 > - [ ] **[16.5](#165--retire-the-multi-version-hosting-machinery-from-the-code)** — delete the
 >   multi-version hosting machinery, so the next item is a small diff instead of a rewrite.
 > - [ ] **[16.3](#163--decided-not-built-key-storage-buckets-on-the-data-schema-not-the-release-tag)** —
 >   bucket on the schema major, matching the IndexedDB store naming so part 4's import is a copy
 >   between two things named alike.
-> - [ ] **18.1/18.4** — the star write layer itself (projections + fan-out).
+> - [ ] **18.1/18.4, the rest** — the actual fan-out (write a projection into an IndexedDB bucket).
 > - [ ] **18.13** — the CD pipeline tests.
 
-### 18.1 [ ] [Decided in principle] The star write model, and its relationship to §16.3
+### 18.1 [~] [Decided in principle] The star write model, and its relationship to §16.3
+> **Schemas exist as data now (2026-07-27)** — [recordSchemas.js](src/data/recordSchemas.js) declares
+> `SCHEMA_2`'s per-collection field shapes, and [recordProjections.js](src/data/recordProjections.js)
+> projects each live domain object into it. Until this landed, "schema N" had no existence except as
+> whatever `migrationSteps.js` happened to produce as a side effect of a transform — there was
+> nothing a projection could target and nothing for §18.4's staging guard to compare. Every real
+> record this build writes (every seed fixture, plus the actual object literals `formsController.js`,
+> `feedbackModal.js` and `finishWorkoutSession` build — not just the seed data) is asserted to project
+> cleanly, in `tests/e2e/test_record_schemas.py`. **Still not built**: the fan-out itself — writing a
+> projection into an actual IndexedDB bucket. That is blocked on [16.5](#165--retire-the-multi-version-hosting-machinery-from-the-code)
+> and [16.3](#163--decided-not-built-key-storage-buckets-on-the-data-schema-not-the-release-tag)
+> landing first, per the agreed build order, and there is still only one live schema — the table
+> below is the layout the moment a second one is cut, not something exercised yet.
+
 **A "bucket" is one physical store holding data shaped by exactly one schema** — `librept_db@schema6`.
 Bucket↔schema is 1:1; a bucket is not a list of anything. Three distinct relations were being
 conflated and are worth keeping apart:
@@ -605,7 +628,17 @@ conflated and are worth keeping apart:
 - **Write set ⊇ read set.** A bucket must start receiving star writes the moment its migration
   *begins*, not when it completes — that is what makes 18.3's accelerator work.
 
-### 18.2 [ ] [Open] Identity: lineage IDs vs. the ID-mapping table
+### 18.2 [x] [Decided] Identity: lineage IDs vs. the ID-mapping table — **CLOSED 2026-07-27**
+**Decided: `lineageId`, expressed as the record's own `id` — no separate mapping table.** All four
+arguments below already pointed the same way, and §18.3's own corrected completeness check
+(`keys(source) \ keys(target) = ∅`, a set difference over ids) turned out to **be** the cursor a
+mapping table would have provided — so dropping the table costs nothing that §18.3 didn't already
+replace. `recordProjections.js`'s projections carry `record.id` through unchanged from the domain
+object for exactly this reason: today's `id` (UUIDv7 via `recordId.js`) already **is** the lineage
+id, so there is no remapping step to build. A genuine split/merge migration, if one is ever needed,
+mints per-schema local ids only on the schema that requires them — that case has not arisen yet and
+is not blocking anything live.
+
 Simon's proposal remaps record IDs at each schema migration and keeps an
 `old-id → migrated-id` mapping table, which also serves as the idempotency guard.
 
@@ -674,7 +707,17 @@ Simon's proposal remaps record IDs at each schema migration and keeps an
   cost battery mid-session; how a *failed* background migration reports itself without alarming a PT
   who never asked for it (block the switch offer, do not raise an error).
 
-### 18.4 [ ] [Decided — staging, not envelopes] The lossy-projection problem
+### 18.4 [~] [Decided — staging, not envelopes] The lossy-projection problem
+> **The single-schema half of the guard exists (2026-07-27)**: `recordProjections.js`'s
+> `projectionIssues()` plus `test_record_schemas.py` already assert "every record this build
+> actually writes conforms to the schema it targets" — proven against real seed data AND the literal
+> object shapes live writers build (`formsController.js`'s new-client form, `feedbackModal.js`'s
+> new-feedback form, `finishWorkoutSession`'s history record), not an idealised model. **The
+> cross-schema half — "exists in every OTHER live schema's projection" — has no subject yet**,
+> because there is still only one live schema; nothing has proposed a field schema 2 cannot carry.
+> This activates automatically the day a schema 3 is cut: `LIVE_SCHEMAS` in `recordSchemas.js` gains
+> an entry, and the same `projectionIssues()` machinery checks the new field against it.
+
 **The problem is narrower than it first appears.** A rollback loses nothing: the newest bucket keeps
 full fidelity while the PT reads a degraded older one. The loss happens only when **the old UI
 writes** — v5's UI builds a domain object with no v6 concept in it, and the star write then

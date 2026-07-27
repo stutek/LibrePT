@@ -5,10 +5,12 @@
 // rests, circuit grouping, and prescribed-but-skipped exercises — so re-opening a past session lost
 // its structure and it could not seed a faithful template.
 //
-// Shape — a history record's `exercises` array is an ordered list of typed items:
+// Shape — a history record's `exercises` array is an ordered list of typed items, EVERY item
+// carrying an id (TODO §18.2 treats a record's `id` as its lineageId — an item with none cannot be
+// individually addressed once items stop living only inside their parent's array):
 //   • exercise: { type:'exercise', id, name, loadUnit, modality, metric, completed, sets:[…],
 //                 circuitId, circuitTitle, circuitSeries }
-//   • rest:     { type:'rest', rest:<seconds>, circuitId, circuitTitle, circuitSeries }
+//   • rest:     { type:'rest', id, rest:<seconds>, circuitId, circuitTitle, circuitSeries }
 // Circuits are NOT a stored container — they are a RENDER-time grouping over consecutive items that
 // share a circuitId (buildCircuitUnits, the same unit the live deck folds). Keeping the stored form
 // a flat typed array means history and the live session share ONE model, with nothing to keep in sync;
@@ -19,6 +21,7 @@
 // item that is not an explicit rest as an exercise, and readers treat a missing `completed` as done —
 // so old rows render exactly as before.
 
+import { newRecordId } from "./recordId.js";
 import { assignPositions, orderedItems } from "./sessionItemOrder.js";
 
 export const isRestRecord = (item) => !!item && item.type === "rest";
@@ -46,6 +49,10 @@ export function buildProgramSnapshot(clientState, { isPlanning = false } = {}) {
     if (isRestRecord(it)) {
       items.push({
         type: "rest",
+        // The live editor already stamps an id on every rest it creates (clipboardEditor.js's
+        // makeRest); this snapshot must not be where that identity is silently dropped. The
+        // fallback exists for rests older than that — never for anything this build creates.
+        id: it.id || newRecordId(),
         rest: it.rest || 0,
         circuitId: it.circuitId || null,
         circuitTitle: it.circuitTitle || "",

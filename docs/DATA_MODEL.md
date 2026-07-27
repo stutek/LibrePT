@@ -314,6 +314,16 @@ is enough to reconstruct the block without storing a cursor into a session that 
 
 ## 4. Star writes — one domain object, every live schema
 
+> **Declared, not yet wired to storage (2026-07-27).** [recordSchemas.js](../src/data/recordSchemas.js)
+> is where "schema N" first exists as data — a per-collection field shape — rather than as a side
+> effect of whatever a migration transform happened to produce.
+> [recordProjections.js](../src/data/recordProjections.js) is the projection layer below, built for
+> the one schema currently live: every seed record and every literal object a live writer actually
+> builds (a new client, a submitted feedback form, a finished session's history record) is proven to
+> project cleanly (`tests/e2e/test_record_schemas.py`) — not an idealised model. **Not yet built**:
+> writing a projection into an actual IndexedDB bucket (the fan-out itself), and the cross-schema
+> half of the staging guard, which has no subject until a second schema exists.
+
 The data layer does not migrate a chain (`v2 → v3 → v4`). It **projects**, directly from the live
 domain object into every schema that is currently live:
 
@@ -424,6 +434,7 @@ The database holds the **only** copy of a trainer's records — there is no serv
 
 - [TODO §18](../TODO.md) — design rationale, decisions and open questions
 - [indexedDb.js](../src/data/indexedDb.js) — the adapter implementing §2
-- [recordId.js](../src/modules/common/recordId.js) — UUIDv7 identity
+- [recordSchemas.js](../src/data/recordSchemas.js) / [recordProjections.js](../src/data/recordProjections.js) — §4's declared shapes and projections
+- [recordId.js](../src/modules/common/recordId.js) — UUIDv7 identity, doubling as `lineageId` (TODO §18.2)
 - [storageDurability.js](../src/data/storageDurability.js) — §6
 - [PRIVACY.md](../PRIVACY.md) — the GDPR statement §5 serves

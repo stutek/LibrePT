@@ -62,6 +62,8 @@ self.swCacheManifest = (() => {
     "./data/writeQueue.js",
     "./data/schemaMigrations.js",
     "./data/migrationSteps.js",
+    "./data/recordSchemas.js",
+    "./data/recordProjections.js",
     "./data/versionCatalog.js",
     // Translations (one file per locale, registered in i18n/index.js)
     "./i18n/index.js",
