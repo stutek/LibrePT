@@ -193,7 +193,7 @@
         <button class="view-grabber" type="button" aria-label="Open session clipboard"></button>
         <h2 class="view-title-label" id="sessions-view-title">Sessions</h2>
         <div class="sessions-date-picker">
-          <button id="btn-sessions-prev" class="sessions-nav-arrow" type="button" aria-label="Yesterday" title="Yesterday">
+          <button id="btn-sessions-prev" class="sessions-nav-arrow" type="button" aria-label="Earlier" title="Earlier">
             <i class="fa-solid fa-chevron-left"></i>
           </button>
           <h3 id="calendar-title">
@@ -202,28 +202,25 @@
             <span id="calendar-title-weekday">Today</span>
             <span id="calendar-title-weekday-short">Today</span>
           </h3>
-          <button id="btn-sessions-next" class="sessions-nav-arrow" type="button" aria-label="Tomorrow" title="Tomorrow">
+          <button id="btn-sessions-next" class="sessions-nav-arrow" type="button" aria-label="Later" title="Later">
             <i class="fa-solid fa-chevron-right"></i>
           </button>
+          <button id="btn-sessions-today" class="sessions-today-btn" type="button" title="Today">
+            <i class="fa-solid fa-calendar-day"></i><span class="today-btn-label">Today</span>
+          </button>
+          <button id="btn-sessions-jump" class="sessions-nav-arrow" type="button" aria-label="Jump to date" title="Jump to date">
+            <i class="fa-solid fa-calendar-days"></i>
+          </button>
+          <!-- The native picker (opened via .showPicker()) is the "scrub to an exact date" control
+               (TODO §7.3 item 8) — touch-friendly and accessible for free, no custom calendar
+               widget to build or maintain. Visually hidden; the button above is the tap target. -->
+          <input id="sessions-date-jump-input" class="sessions-date-jump-input" type="date" tabindex="-1" aria-hidden="true" />
         </div>
       </div>
 
-      <!-- One day-column is shown at a time and the title bar above already names the day, so the
-           per-column header row (calendar icon + Today/Yesterday/Tomorrow/Upcoming) is omitted. -->
-      <div class="sessions-categories-grid mb-6" id="sessions-categories-grid" role="region" aria-label="Sessions">
-        <div class="sessions-category-column" id="yesterday-sessions-column">
-          <div id="yesterday-sessions-list" class="stack-list"></div>
-        </div>
-        <div class="sessions-category-column" id="today-sessions-column">
-          <div id="today-sessions-list" class="stack-list"></div>
-        </div>
-        <div class="sessions-category-column" id="tomorrow-sessions-column">
-          <div id="tomorrow-sessions-list" class="stack-list"></div>
-        </div>
-        <div class="sessions-category-column" id="upcoming-sessions-column">
-          <div id="upcoming-sessions-list" class="stack-list"></div>
-        </div>
-      </div>
+      <!-- One continuous, time-ordered scroll: sessions render grouped under sticky per-day
+           headers instead of fixed yesterday/today/tomorrow/upcoming columns (TODO §7.3 item 8). -->
+      <div class="sessions-timeline mb-6" id="sessions-categories-grid" role="region" aria-label="Sessions"></div>
 
       <!-- Floating "Create Session" button: stays visible while scrolling the sessions list -->
       <button id="btn-create-session" class="btn primary-btn floating-action-btn" aria-label="Create Session" title="Create Session">

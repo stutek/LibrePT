@@ -219,6 +219,7 @@ export const en = {
   tomorrow: "Tomorrow",
   yesterday: "Yesterday",
   upcoming: "Upcoming",
+  jump_to_date: "Jump to date",
   starts_in: "Starts in",
   elapsed: "Elapsed",
   edit_elapsed_time: "Edit elapsed time",

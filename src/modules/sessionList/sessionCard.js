@@ -7,7 +7,7 @@
 //         saveToLocalStorage, rerenderSessions }
 
 import { formatDurationHM, parseDurationHM, parseTimeRange } from "../common/utils.js";
-import { getSessionDayDate } from "./daySelector.js";
+import { getSessionDayDate } from "./sessionTimeline.js";
 
 // A single interval ticks every clock-driven status line that isn't the launched clipboard's own
 // timer (which ticks via sessionBar): an in-progress-by-clock session counting down to its

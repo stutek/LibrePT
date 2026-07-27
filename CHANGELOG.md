@@ -17,6 +17,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-07-27 — Continuous, time-ordered session timeline
+
+### Added
+- **Sessions carry a real `startDate`** — the dashboard's day model was four bucket labels (`yesterday|today|tomorrow|upcoming`) plus a free-text time-range string, with no actual date anywhere. Schema 3 (`src/data/migrationSteps.js`, `recordSchemas.js`) adds a required, absolute ISO timestamp, derived once for existing data and stamped directly on fresh seed data. `day` is untouched — overlap detection and card temporal tint still key off it.
+- **The date-jump control** — a calendar-days button opens a native `<input type="date">` (`.showPicker()`); choosing a date scrolls the timeline straight to it, falling back to the nearest date with a session when the exact day chosen has none.
+- **A dedicated Today button** — resets the timeline in one tap and disables itself once today is already focused (the markup and styling existed already; it had no wired behaviour until now).
+
+### Changed
+- **The four-column day-deck became one continuous, vertical, time-ordered timeline** — sessions render grouped under sticky per-day headers instead of paging through fixed yesterday/today/tomorrow/upcoming columns. An `IntersectionObserver` on the sticky headers replaces the old scroll-snap/swipe-clamp column detection; prev/next/Today/date-jump all resolve to a real ISO date. `daySelector.js` is renamed `sessionTimeline.js` to match. [UC5](use_cases/uc5_session_day_deck_and_deep_links.md) rewritten to match; `test_sessions_dashboard.py`'s three column-based tests replaced.
+
+### Fixed
+- **`focusActiveSessionCard` searched a container that no longer exists** — it queried `#today-sessions-list` directly, a leftover from the four-column markup; now searches the whole timeline (`routerController.js`).
+
 ## 2026-07-27 — Routing becomes a route table
 
 ### Added
@@ -31,7 +44,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Fixed
 - **The session stopped overwriting its own dialogs' URLs** — the clipboard rewrites the address bar to whatever card is in focus on every render, guarded by two path-prefix tests that only ever excluded `/session/new` and `/session/setup/`. Every later route slipped through, so opening the taxonomy picker and typing one character erased the picker's URL. The sync now asks the router which route is active, and stands down entirely before the first route is entered — recovery renders at boot, ahead of routing, and a write there would erase the deep link the router is about to read ([`activeSessionController.js`](src/controllers/activeSessionController.js)).
-- **A background re-render no longer bounces the URL off what the trainer is looking at** — the day deck reflected its focused day in the address bar whenever the dashboard redrew, guarded only by a "path does not start with `/session/`" test. Any other route slipped past it, so syncing from the Sync & Backup dialog pushed `/sessions/{date}` over the dialog's own URL and left Back reopening it. The guard now asks the router which route is actually active ([`daySelector.js`](src/modules/sessionList/daySelector.js)); covered by `test_a_background_render_does_not_clobber_an_open_dialog`.
+- **A background re-render no longer bounces the URL off what the trainer is looking at** — the day deck reflected its focused day in the address bar whenever the dashboard redrew, guarded only by a "path does not start with `/session/`" test. Any other route slipped past it, so syncing from the Sync & Backup dialog pushed `/sessions/{date}` over the dialog's own URL and left Back reopening it. The guard now asks the router which route is actually active ([`daySelector.js`, since renamed `sessionTimeline.js`](src/modules/sessionList/sessionTimeline.js)); covered by `test_a_background_render_does_not_clobber_an_open_dialog`.
 - **Tapping the build stamp no longer also navigates home** — it sits inside `#logo-area`, whose click goes to the dashboard. Harmless while the dialog merely opened on top; now that it is a route, the stray navigation closed it again ([`buildInfoDialog.js`](src/modules/common/buildInfoDialog.js)).
 - **The build gate fixes formatting instead of printing a diff** — both lint steps checked without applying, so a run ended by asking a human to re-apply whitespace by hand and re-run the whole gate (which is what produced `c3cc369`). Ruff and Biome now write those fixes and the stage **names every file it rewrote**; findings that need a human decision are untouched, and the re-check without `--write` is still the verdict ([`build/__init__.py`](build/__init__.py)).
 

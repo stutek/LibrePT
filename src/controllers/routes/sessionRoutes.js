@@ -4,16 +4,12 @@
 
 import { Route } from "./route.js";
 
-// `/sessions/:isoDate` — the day deck. Focuses the column the date belongs to, then the live card.
-// Bookings carry no real date yet (TODO §4.3), so a date only ever resolves to one of the four
-// relative columns; getColumnForISODate encodes exactly that limitation.
+// `/sessions/:isoDate` — the continuous session timeline. Sessions now carry a real `startDate`
+// (TODO §7.3 item 8), so the URL's date is a literal scroll target, not a bucket-name proxy.
 export class SessionsDayRoute extends Route {
   enter(ctx) {
     super.enter(ctx);
-    const column = ctx.deps.getColumnForISODate
-      ? ctx.deps.getColumnForISODate(ctx.params.isoDate)
-      : "today";
-    requestAnimationFrame(() => ctx.deps.focusSessionsColumn?.(column, "auto"));
+    requestAnimationFrame(() => ctx.deps.focusSessionsColumn?.(ctx.params.isoDate, "auto"));
     ctx.router.focusActiveSessionCard();
     return this;
   }

@@ -219,6 +219,7 @@ export const sl = {
   tomorrow: "Jutri",
   yesterday: "Včeraj",
   upcoming: "Prihodnje",
+  jump_to_date: "Pojdi na datum",
   starts_in: "Se začne čez",
   elapsed: "Trajanje",
   edit_elapsed_time: "Uredi trajanje",

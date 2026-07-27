@@ -35,7 +35,7 @@ This index provides AI agents and contributors with a structured navigation map 
 | [uc2_async_plan_adjustments.md](use_cases/uc2_async_plan_adjustments.md) | `use_case` | Personal Trainer | Back-office desk review of logged session signals, audio note playback, and progressive overload trajectories. |
 | [uc3_publish_slots.md](use_cases/uc3_publish_slots.md) | `use_case` | Personal Trainer | Publishing recurring training availability slots via Google Calendar Appointment Schedules. |
 | [uc4_client_self_subscription.md](use_cases/uc4_client_self_subscription.md) | `use_case` | Client | Self-service slot booking via Google-hosted scheduling pages and automated calendar invites. |
-| [uc5_session_day_deck_and_deep_links.md](use_cases/uc5_session_day_deck_and_deep_links.md) | `use_case` | Personal Trainer | Dashboard day-deck navigation (yesterday→upcoming, swipes, single-column), clean deep-linkable URLs down to the in-focus clipboard card, and the in-app not-found view — with spec↔test traceability. |
+| [uc5_session_day_deck_and_deep_links.md](use_cases/uc5_session_day_deck_and_deep_links.md) | `use_case` | Personal Trainer | Dashboard's continuous, time-ordered session timeline (sticky day headers, scrollspy title bar, date-jump), clean deep-linkable URLs down to the in-focus clipboard card, and the in-app not-found view — with spec↔test traceability. |
 
 3. Source Modules & UI Components (`src/modules/`)
 
@@ -59,10 +59,9 @@ is structured into feature modules under `src/modules/` (`session`, `plans`, `cl
 | [src/data/versionCatalog.js](src/data/versionCatalog.js) | `data` | Published-release manifest reader (being retired, TODO §16.5): decides whether to offer an upgrade, a rollback (only for data that exists locally), or an end-of-support warning. |
 | [src/data/index.js](src/data/index.js) | `data` | Barrel for seed/demo data: `exercises.js`, `clients.js`, `routines.js`, `history.js`, `planUpdates.js`, `sessions.js`. |
 | [src/i18n/index.js](src/i18n/index.js) | `i18n` | Translation registry: one flat key→string map per locale (`en.js`, `sl.js`). Key parity enforced by unit tests. |
-| [src/modules/sessionList/sessionsView.js](src/modules/sessionList/sessionsView.js) | `view` | Modular view renderer for Sessions dashboard. |
-| [src/modules/sessionList/sessionList.js](src/modules/sessionList/sessionList.js) | `component` | Renders a column of session cards into a container. |
+| [src/modules/sessionList/sessionsView.js](src/modules/sessionList/sessionsView.js) | `view` | Modular view renderer for the Sessions dashboard: merges/sorts all sessions and groups them into the continuous timeline's per-day sections. |
 | [src/modules/sessionList/sessionCard.js](src/modules/sessionList/sessionCard.js) | `component` | Dashboard session-booking card that launches the clipboard on tap. |
-| [src/modules/sessionList/daySelector.js](src/modules/sessionList/daySelector.js) | `component` | Dashboard day-deck navigation and focus/scroll handlers. |
+| [src/modules/sessionList/sessionTimeline.js](src/modules/sessionList/sessionTimeline.js) | `component` | Continuous, time-ordered dashboard timeline (TODO §7.3 item 8): scrollspy focus tracking, title bar, prev/next/Today/date-jump navigation. |
 | [src/modules/clipboard/clipboardEditor.js](src/modules/clipboard/clipboardEditor.js) | `component` | Interactive active session plan/clipboard structure editor. |
 | [src/modules/clipboard/activeSessionOverlay.css](src/modules/clipboard/activeSessionOverlay.css) | `styles` | The fullscreen active-session overlay shell's own CSS (TODO §14.5/§18.10) — title bar, timer block, footer, overflow menu. Styles the overlay chrome `activeSessionController.js` drives. |
 | [src/modules/clipboard/clipboardEditor.css](src/modules/clipboard/clipboardEditor.css) | `styles` | The inline editor's own CSS (TODO §14.5/§18.10) — row/circuit/rest editing, reorder control, insert bar. Loaded after index.css, whose foundation it inherits. |
@@ -114,7 +113,7 @@ is structured into feature modules under `src/modules/` (`session`, `plans`, `cl
 | [src/controllers/routes/routeRegistry.js](src/controllers/routes/routeRegistry.js) | `controller` | The ordered route collection: register, resolve a path to one route by specificity, and spell a URL for a named route. |
 | [src/controllers/routes/dialogRoute.js](src/controllers/routes/dialogRoute.js) | `controller` | `DialogRoute` / `GlobalDialogRoute`: a <dialog> as an addressable state layered over a parent route's view, so Back closes it and a reload reopens it. |
 | [src/controllers/routes/viewRoute.js](src/controllers/routes/viewRoute.js) | `controller` | `ViewRoute` (a `#view-*` on screen, optionally re-rendered) and `RedirectRoute` (rewrite one URL into another, render the target in place). |
-| [src/controllers/routes/sessionRoutes.js](src/controllers/routes/sessionRoutes.js) | `controller` | Routes that resolve a record first: session-day deck, live/recovered session (focus + edit modes), workout setup, client detail. |
+| [src/controllers/routes/sessionRoutes.js](src/controllers/routes/sessionRoutes.js) | `controller` | Routes that resolve a record first: session timeline, live/recovered session (focus + edit modes), workout setup, client detail. |
 | [src/controllers/routes/routeTable.js](src/controllers/routes/routeTable.js) | `controller` | Every addressable state of the app as data — the route patterns, stored without the base path so they stay version-agnostic. |
 | [src/controllers/themeController.js](src/controllers/themeController.js) | `controller` | Unified theme manager. |
 | [src/controllers/appLifecycleController.js](src/controllers/appLifecycleController.js) | `controller` | PWA runtime lifecycle: SW registration, integrity-error page, online/offline state. |

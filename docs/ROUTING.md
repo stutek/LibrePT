@@ -101,8 +101,8 @@ Inline constraints do the rest of the disambiguation:
 ```
 
 These are not decoration. The date constraint is what stops `/sessions/new` from being swallowed by
-the day-deck route, and the `focusType` alternation is what keeps a future sibling segment from being
-read as a focus type.
+the session-timeline route, and the `focusType` alternation is what keeps a future sibling segment
+from being read as a focus type.
 
 ---
 

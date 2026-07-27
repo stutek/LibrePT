@@ -1,23 +1,23 @@
 ---
 type: use_case
-title: UC5 - Session Day-Deck Navigation & Deep-Linkable Views
-description: Specification for the dashboard day deck (yesterday→upcoming), single-finger day swipes, each session card's live/upcoming/past status line, clean deep-linkable URLs down to the in-focus clipboard card, and the in-app not-found view.
+title: UC5 - Session Timeline Navigation & Deep-Linkable Views
+description: Specification for the dashboard's continuous, time-ordered session timeline, sticky per-day headers, the scrollspy title bar, the date-jump control, each session card's live/upcoming/past status line, clean deep-linkable URLs down to the in-focus clipboard card, and the in-app not-found view.
 status: active
 tags:
   - dashboard
-  - day-deck
+  - session-timeline
   - status-line
   - deep-links
   - routing
   - not-found
 ---
 
-# Use Case 5: Session Day-Deck Navigation & Deep-Linkable Views
+# Use Case 5: Session Timeline Navigation & Deep-Linkable Views
 
-This use case specifies how the Personal Trainer (PT) moves across their scheduled days on the
+This use case specifies how the Personal Trainer (PT) moves across their scheduled sessions on the
 dashboard and how every screen is addressable by a clean, shareable URL. It documents behaviour
 the Playwright suite already drives end-to-end but that UC1–UC4 did not previously specify — most
-notably the **session day deck**, each card's **status line** (§ 3), and the **deep-link router**.
+notably the **session timeline**, each card's **status line** (§ 3), and the **deep-link router**.
 See also the deep-link routing overview in
 [README.md](../README.md) (§ *Deep-Linkable Clean URLs*).
 
@@ -26,53 +26,57 @@ See also the deep-link routing overview in
 ## 1. Actors & Preconditions
 
 - **Primary actor**: the Personal Trainer, on the mobile PWA.
-- The app has loaded and seeded (or restored from `localStorage`) its bookings for the relative
-  buckets `yesterday | today | tomorrow | upcoming`.
+- The app has loaded and seeded (or restored from `localStorage`) its sessions, each carrying a
+  real absolute `startDate` timestamp (TODO §7.3 item 8; schema 3, `src/data/migrationSteps.js`).
 - The dashboard opens **focused on today**.
 
 ---
 
-## 2. Day-Deck Navigation
+## 2. Session Timeline Navigation
 
-The session schedule is a **horizontal deck of day-columns** (`yesterday → today → tomorrow →
-upcoming`). Exactly **one column occupies the viewport at a time**, on phone and desktop alike,
-and the single title bar above the deck always names the focused day.
+The session schedule is **one continuous, strictly time-ordered vertical scroll** — every session
+across past, present and future, grouped under a **sticky per-day header** — not four fixed
+yesterday/today/tomorrow/upcoming columns. The single title bar above the timeline always names
+whichever day-group currently sits under the focus band (an `IntersectionObserver` watching the
+sticky headers, `src/modules/sessionList/sessionTimeline.js`).
 
 ```mermaid
-graph LR
-    Y["◀ Yesterday<br/>(first column — prev disabled)"]
-    T["Today<br/>(opens here · (Today) tag)"]
-    M["Tomorrow"]
-    U["Upcoming"]
+graph TD
+    P["Past day-groups<br/>(scroll up)"]
+    T["Today<br/>(opens here, tagged inline)"]
+    F["Future day-groups<br/>(scroll down)"]
 
-    Y -- "▶ next / swipe left" --> T
-    T -- "◀ prev / swipe right" --> Y
-    T -- "▶ next / swipe left" --> M
-    M -- "▶ next" --> U
-    U -. "logo / home" .-> T
-    M -. "logo / home" .-> T
-    Y -. "logo / home" .-> T
+    P -- "scroll down / ▶ next" --> T
+    T -- "scroll up / ◀ prev" --> P
+    T -- "scroll down / ▶ next" --> F
+    F -. "logo / Today button" .-> T
+    P -. "logo / Today button" .-> T
 ```
 
 ### 2.1 Main flow
 
-1. **Open on today**: the title bar shows the focused day's **weekday**, its **ISO date**
-   (`YYYY-MM-DD`), and a **`(Today)` tag**.
-2. **Step with the arrows**: the title-bar `◀` / `▶` arrows move focus one day at a time. The
-   `(Today)` tag is shown only while today is focused and drops on any other day.
-3. **Swipe the deck**: a **single-finger horizontal swipe** of the deck itself advances exactly
-   one day and **retitles the bar** to the day it lands on — the arrows are the mouse-only
-   affordance for the same movement.
-4. **Return home**: tapping the **logo** pulls focus back to today.
+1. **Open on today**: the title bar shows the focused day-group's **weekday**, its **ISO date**
+   (`YYYY-MM-DD`); the group itself carries an inline **Today** tag.
+2. **Step with the arrows**: the title-bar `◀` / `▶` arrows move focus to the previous/next
+   day-group that actually has a session, smooth-scrolling there.
+3. **Scroll the timeline**: scrolling the page itself (mouse, trackpad, or touch) moves the focus
+   band across day-groups and **retitles the bar** to whichever one settles under it — the arrows
+   are a discrete-step affordance for the same continuous movement.
+4. **Jump to today**: the dedicated **Today** button resets the timeline in one tap; it disables
+   itself while today is already focused.
+5. **Jump to an exact date**: the calendar-days button opens a native date picker
+   (`.showPicker()`); choosing a date scrolls straight to it — the nearest date is used as a
+   fallback when nothing is scheduled on the exact day chosen.
+6. **Return home**: tapping the **logo** pulls focus back to today.
 
 ### 2.2 Alternative flows & invariants
 
-- **Deck bounds**: `yesterday` is the first column, so the `◀` (previous) arrow is **disabled**
-  there — stepping further back is a dead end.
-- **Single-column invariant**: at no viewport width may more than one day-column occupy the deck
-  viewport; the visible day always matches the day named in the title bar.
-- **No per-column header**: the day is named once, in the title bar. The columns carry no
-  redundant per-column header row (see TODO 4.3).
+- **Timeline bounds**: the arrows disable only at the true edges of loaded data — the earliest and
+  latest day-group that actually has a session — never at an artificial bucket boundary.
+- **Single-vertical-column invariant**: at every viewport width, day-groups stack in one column in
+  chronological order; nothing pages horizontally per day anymore.
+- **No per-card day chrome**: the day is named once, in its group's sticky header. Cards under it
+  carry no redundant per-card day label.
 
 ---
 
@@ -112,7 +116,7 @@ route classes, specificity ordering, and the invariants a new route must respect
 
 | URL (under the base path) | Restores |
 | :--- | :--- |
-| `/sessions/{YYYY-MM-DD}` | the day deck focused on that day |
+| `/sessions/{YYYY-MM-DD}` | the timeline scrolled/focused to that real date (any date, not just a 4-bucket proxy) |
 | `/session/{sessionId}` | the active-session clipboard |
 | `/session/{sessionId}/client/{clientId}` | the clipboard on a specific participant |
 | `/session/{sessionId}/client/{clientId}/exercise/{exerciseId}` | the clipboard with that card in focus |
@@ -188,9 +192,10 @@ not-found view (`#view-error`) *inside* the content area:
 
 | Specification Requirement | Target Implementation / Test |
 | :--- | :--- |
-| Open-on-today, arrow steps, `(Today)` tag, prev-disabled bound, logo-home | [../tests/e2e/test_sessions_dashboard.py](../tests/e2e/test_sessions_dashboard.py) · `test_sessions_day_navigation` |
-| Single-finger swipe retitles to the landed day | [../tests/e2e/test_sessions_dashboard.py](../tests/e2e/test_sessions_dashboard.py) · `test_touch_swipe_between_days` |
-| Single-column invariant at every viewport | [../tests/e2e/test_sessions_dashboard.py](../tests/e2e/test_sessions_dashboard.py) · `test_single_column_deck_at_every_viewport` |
+| Open-on-today, arrow steps, Today tag/button, prev/next edge bounds, logo-home | [../tests/e2e/test_sessions_dashboard.py](../tests/e2e/test_sessions_dashboard.py) · `test_sessions_day_navigation` |
+| Scrolling the timeline retitles the bar to the day-group that settles under focus | [../tests/e2e/test_sessions_dashboard.py](../tests/e2e/test_sessions_dashboard.py) · `test_scrolling_the_timeline_updates_the_focused_day` |
+| Date-jump control scrolls to a chosen date, falling back to the nearest real content | [../tests/e2e/test_sessions_dashboard.py](../tests/e2e/test_sessions_dashboard.py) · `test_date_jump_control_scrolls_to_chosen_date` |
+| Single-vertical-column, chronologically-ordered invariant at every viewport | [../tests/e2e/test_sessions_dashboard.py](../tests/e2e/test_sessions_dashboard.py) · `test_continuous_vertical_timeline_at_every_viewport` |
 | Deep link to the in-focus clipboard card; stale card id fallback | [../tests/e2e/test_session_deeplink.py](../tests/e2e/test_session_deeplink.py) |
 | Edit mode deep-links to `…/edit`, survives reload, keeps typed-but-uncommitted edits; direct `/edit` link reopens the editor | [../tests/e2e/test_edit_mode_deeplink_reload.py](../tests/e2e/test_edit_mode_deeplink_reload.py) |
 | Edit mode hides the member tabs + live timer and surfaces the client's goals + notes | [../tests/e2e/test_edit_mode_client_focus.py](../tests/e2e/test_edit_mode_client_focus.py) |
@@ -209,11 +214,12 @@ not-found view (`#view-error`) *inside* the content area:
 
 ## 7. Related Use Cases
 
-- **[UC1 — Gym-Floor Clipboard](uc1_gym_floor_clipboard.md)**: this deck is where the PT **launches** the clipboard UC1 specifies; the deep links in § 4 address that clipboard down to the focused card.
-- **[UC2 — Asynchronous Plan Adjustments](uc2_async_plan_adjustments.md)**: the Pending Plan Adjustments deck reviewed at the desk is its own view (§ 3), reachable from the ☰ menu — it was part of this same dashboard before TODO 4.8 split it out.
-- **[UC4 — Client Self-Subscription](uc4_client_self_subscription.md)**: bookings surfaced in the day deck originate from the self-subscription flow.
+- **[UC1 — Gym-Floor Clipboard](uc1_gym_floor_clipboard.md)**: this timeline is where the PT **launches** the clipboard UC1 specifies; the deep links in § 4 address that clipboard down to the focused card.
+- **[UC2 — Asynchronous Plan Adjustments](uc2_async_plan_adjustments.md)**: the Pending Review deck reviewed at the desk is its own view (§ 3), reachable from the ☰ menu — it was part of this same dashboard before TODO 4.8 split it out.
+- **[UC4 — Client Self-Subscription](uc4_client_self_subscription.md)**: bookings surfaced in the timeline originate from the self-subscription flow.
 
-> **Open gap (both directions).** The day deck still models days as **relative buckets**
-> (`yesterday | today | tomorrow | upcoming`), not real dates, so `/sessions/{YYYY-MM-DD}` can only
-> resolve those four days — an arbitrary past/future date has nothing to show. Giving bookings a
-> real date field is the blocking data-model decision tracked in TODO 4.3 / 1.3.
+> **Closed 2026-07-27 (TODO §7.3 item 8).** Sessions now carry a real `startDate` (schema 3), and
+> `/sessions/{YYYY-MM-DD}` resolves to any date, not just one of four relative buckets — the gap
+> this note used to describe. `day` (`yesterday|today|tomorrow|upcoming`) still exists on a
+> session record, but only as a coarse bucket other systems (overlap detection, card temporal
+> tint) key off; it no longer drives the dashboard's own navigation.

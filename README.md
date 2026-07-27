@@ -185,7 +185,7 @@ The service worker is split into single-responsibility modules so each concern c
 
 ### 5. Deep-Linkable Clean URLs (App Routing)
 *   **Every view and record is addressable by a clean URL**, so links are shareable and bookmarkable and restore the same screen on load (the router's own design and invariants: [docs/ROUTING.md](docs/ROUTING.md)):
-    *   `/sessions/{YYYY-MM-DD}` — the day deck focused on a given day
+    *   `/sessions/{YYYY-MM-DD}` — the continuous session timeline scrolled/focused to that date
     *   `/session/{sessionId}` and `/session/{sessionId}/client/{clientId}` — the active-session clipboard, optionally on a specific participant
     *   `/session/{sessionId}/client/{clientId}/exercise/{exerciseId}` and `…/circuit/{circuitId}` — the clipboard with a specific card in focus. Opening the session upgrades the URL to whatever card is focused, and tapping a card updates it, so the address bar is always a copy-able link to the exact card on screen.
     *   `/session/{sessionId}/client/{clientId}/edit` — the **inline plan editor** open on that participant's plan. Entering edit mode (the ✎ on the clipboard) upgrades the URL to `…/edit`; exiting drops it back to the focused card. Because the state lives in the URL, a **page reload lands back in the editor**, and plan edits are persisted on every keystroke, so nothing typed is lost across the reload.

@@ -82,21 +82,15 @@ The verify → build → deploy chain lives in the `build/` and `deploy/` packag
 .venv/bin/python -m pdb -m build         # step-by-step
 ```
 
-### Verifying swipe gestures by hand
+### Verifying the session timeline by hand
 
-The session day deck is scrolled with **touch**, so **a mouse drag will not swipe it** — that is standard browser behaviour, not a bug: dragging never scrolls an `overflow-x` container. To exercise swipes in a desktop browser:
+The dashboard's session timeline (TODO §7.3 item 8) is one continuous **vertical** scroll — plain
+mouse wheel, trackpad, or touch all work with no emulation needed, unlike the old horizontal
+day-deck this replaced. The title-bar `◀`/`▶`/Today/date-jump controls are there for a fast,
+discrete jump; scrolling itself is standard native browser behaviour.
 
-| Method | How |
-| :--- | :--- |
-| **Chrome/Edge DevTools** (best) | `F12`, then toggle the device toolbar (`Ctrl+Shift+M` / `Cmd+Shift+M`). Touch emulation turns mouse drags into real swipes. |
-| **Firefox** | `F12`, then Responsive Design Mode (`Ctrl+Shift+M`) and enable the touch simulation button. |
-| **Trackpad** | Two-finger horizontal swipe works on the desktop site with no emulation. |
-| **Mouse wheel** | Hold `Shift` and scroll to pan horizontally. |
-| **Real device** | Serve over your LAN (`python3 -m http.server -d src 8081 --bind 0.0.0.0`) and open the page from your phone. |
-
-The deck's scrollbar is hidden by design, so the title-bar arrows are the intended affordance for mouse-only desktop users.
-
-Swipes are also covered automatically by `test_touch_swipe_between_days`.
+This is covered automatically by `test_scrolling_the_timeline_updates_the_focused_day` and
+`test_date_jump_control_scrolls_to_chosen_date`.
 
 **Testing notes:**
 

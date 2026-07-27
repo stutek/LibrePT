@@ -117,7 +117,6 @@ import {
   formatDurationHM,
   formatSignedDuration,
   getClientDisplayNameHTML,
-  getColumnForISODate,
   getISODateForColumn,
   getISODateString,
   getInitials,
@@ -159,16 +158,11 @@ import {
 import { initSessionTitleBar, renderSessionTitle } from "./modules/session/sessionTitleBar.js";
 import {
   focusSessionsColumn,
-  getFocusedSessionDay,
   getSessionDayDate,
-  initDaySelector,
+  initSessionTimeline,
   renderSessionsTitleBar,
-  sessionDayTemporal,
-  setFocusedSessionDay,
   setupSessionsDayNav,
-} from "./modules/sessionList/daySelector.js";
-import { renderSessionCard } from "./modules/sessionList/sessionCard.js";
-import { renderSessionList } from "./modules/sessionList/sessionList.js";
+} from "./modules/sessionList/sessionTimeline.js";
 import {
   launchClipboardDirectly as sessionsViewLaunchClipboard,
   renderSessions as sessionsViewRender,
@@ -247,7 +241,6 @@ function init() {
     startSessionTimer,
     syncSessionFocusUrl,
     focusIndexFromRef,
-    getColumnForISODate,
     getISODateForColumn,
     clientsViewShowDetails,
     setHeaderState,
@@ -340,13 +333,12 @@ function init() {
   });
   setupApplicationHeader();
 
-  initDaySelector({
+  initSessionTimeline({
     getState,
     t,
     activeRouteName,
     pushRoute,
     urlFor,
-    getISODateForColumn,
   });
 
   initSessionTitleBar({

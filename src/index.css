@@ -146,7 +146,6 @@
 .form-group,
 .backup-actions,
 .deck-stat,
-.sessions-category-column,
 .stack-list {
   display: flex;
   flex-direction: column;
@@ -2435,10 +2434,6 @@ textarea.form-control {
 } /* Narrow screens swap the full weekday for its abbreviation (see mobile media query) */
 #calendar-title-weekday-short {
   display: none;
-} /* The open-ended bucket reads "Upcoming From 2026-07-17" rather than a weekday trailing a date */
-#calendar-title.is-upcoming #calendar-title-weekday,
-#calendar-title.is-upcoming #calendar-title-weekday-short {
-  order: -1;
 }
 #calendar-title-date {
   flex: 0 0 auto;
@@ -2518,41 +2513,75 @@ textarea.form-control {
 .sessions-nav-arrow:disabled {
   opacity: 0.25;
   cursor: default;
-} /* --- SESSIONS CATEGORIES GRID --- */
-.sessions-categories-grid {
+}
+/* Visually hidden but still rendered — showPicker() throws on an element with no box (display:none
+   or visibility:hidden), so this uses the standard clip-to-1px technique instead. The visible
+   #btn-sessions-jump icon button is the actual tap target; this input only ever opens its native
+   picker and reports the chosen date via `change`. */
+.sessions-date-jump-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+/* --- SESSIONS TIMELINE (continuous, time-ordered — TODO §7.3 item 8) --- */
+.sessions-timeline {
   display: flex;
-  gap: 20px;
-  overflow-x: auto;
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-  scroll-snap-type: x mandatory;
+  flex-direction: column;
+  gap: 4px;
   width: 100%;
-  padding-bottom: 8px;
   box-sizing: border-box;
-} /* Hide scrollbar */
-.sessions-categories-grid::-webkit-scrollbar {
-  display: none;
 }
-.sessions-categories-grid {
-  -ms-overflow-style: none;
-  /* IE and Edge */
-  scrollbar-width: none;
+.sessions-day-group {
+  display: flex;
+  flex-direction: column;
 }
-.sessions-category-column {
-  /* Single column at every viewport: the visible day always matches the day named in the title bar */
-  flex: 0 0 100%;
-  scroll-snap-align: start;
-  min-width: 0;
-  background: rgba(255, 255, 255, 0.01);
-  border: 1px solid rgba(255, 255, 255, 0.03);
-  border-radius: 12px;
-  padding: 14px;
-  box-sizing: border-box;
+.sessions-day-group-header {
+  /* Sticks relative to #main-content, the page's real scrolling ancestor — the timeline itself
+     has no overflow of its own, so the whole dashboard scrolls as one native page. */
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 4px;
+  margin-bottom: 6px;
+  background: var(--bg-color);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-color);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.sessions-day-group-header .sessions-day-group-date {
+  font-weight: 400;
+  color: var(--text-muted);
+}
+.sessions-day-group-header.is-past {
+  color: var(--temporal-past);
+}
+.sessions-day-group-header.is-future {
+  color: var(--temporal-future);
+}
+.sessions-day-group-today-tag {
+  flex: 0 0 auto;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--primary);
+  border: 1px solid color-mix(in srgb, var(--primary) 40%, transparent);
+  border-radius: 999px;
+  padding: 1px 6px;
 }
 @media (max-width: 600px) {
-  .sessions-categories-grid {
-    gap: 16px;
-  } /* Phones keep the "Sessions" label and the date stepper on a single row (no wrap): the label
+  /* Phones keep the "Sessions" label and the date stepper on a single row (no wrap): the label
      stays put on the left, the stepper takes the remaining width on the right, and the date
      title truncates its weekday if space runs short. The Today button + arrows keep fixed widths
      so they stay put; only the flexible title absorbs any change, so nothing shifts. */
@@ -2614,8 +2643,8 @@ textarea.form-control {
     padding-top: 10px;
     padding-bottom: 10px;
   }
-  .sessions-category-column {
-    padding: 10px !important;
+  .sessions-day-group-header {
+    padding: 6px 2px;
   } /* Combo active set row mobile adjustments */
   .active-set-row[data-ex-id] {
     flex-direction: column !important;

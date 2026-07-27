@@ -205,10 +205,3 @@ export function getISODateForColumn(day) {
   if (day === "upcoming") return getISODateString(now + 2 * 24 * 60 * 60 * 1000);
   return getISODateString(now);
 }
-
-export function getColumnForISODate(isoDate) {
-  if (isoDate === getISODateForColumn("yesterday")) return "yesterday";
-  if (isoDate === getISODateForColumn("today")) return "today";
-  if (isoDate === getISODateForColumn("tomorrow")) return "tomorrow";
-  return "upcoming";
-}

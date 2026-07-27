@@ -197,7 +197,7 @@ export function showErrorView(attemptedPath, { setHeaderState } = {}) {
 
 export function focusActiveSessionCard() {
   requestAnimationFrame(() => {
-    const card = document.querySelector("#today-sessions-list .booking-card.booking-live");
+    const card = document.querySelector("#sessions-categories-grid .booking-card.booking-live");
     if (card) card.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
   });
 }

@@ -5,8 +5,8 @@ import datetime
 
 def test_sessions_day_navigation(page, local_server):
     """
-    Verifies the sessions title bar reports the focused day (weekday + date),
-    and that the title arrows step across the day deck.
+    Verifies the sessions title bar reports the focused date (weekday + date),
+    and that the title arrows step across the timeline's day-groups.
     """
     page.goto(local_server)
 
@@ -20,13 +20,13 @@ def test_sessions_day_navigation(page, local_server):
         "%Y-%m-%d"
     )
 
-    # Left arrow steps back to yesterday
+    # Left arrow steps back to the previous day-group (the seed data's earliest is yesterday)
     page.locator("#btn-sessions-prev").click()
     page.wait_for_timeout(900)
     yesterday = today - datetime.timedelta(days=1)
     assert weekday.inner_text().strip().upper() == yesterday.strftime("%A").upper()
 
-    # Yesterday is the first column, so stepping further back is a dead end
+    # Yesterday is the earliest loaded day-group, so stepping further back is a dead end
     assert page.locator("#btn-sessions-prev").is_disabled()
 
     # Right arrow returns to today, then steps on to tomorrow
@@ -43,104 +43,83 @@ def test_sessions_day_navigation(page, local_server):
     page.wait_for_timeout(900)
     assert weekday.inner_text().strip().upper() == today.strftime("%A").upper()
 
-    # A swipe of the deck itself (rather than the arrows) must retitle to the day it lands on
-    page.evaluate("""() => {
-      const grid = document.getElementById('sessions-categories-grid');
-      const col = document.getElementById('tomorrow-sessions-column');
-      grid.scrollTo({
-        left: grid.scrollLeft + (col.getBoundingClientRect().left - grid.getBoundingClientRect().left),
-        behavior: 'auto'
-      });
-    }""")
+    # The Today control resets the timeline directly, without stepping through the arrows
+    page.locator("#btn-sessions-next").click()
+    page.wait_for_timeout(900)
+    page.locator("#btn-sessions-today").click()
+    page.wait_for_timeout(900)
+    assert weekday.inner_text().strip().upper() == today.strftime("%A").upper()
+    assert page.locator("#btn-sessions-today").is_disabled(), (
+        "the Today control disables itself once today is already focused"
+    )
+
+    # Scrolling the timeline itself (rather than the arrows) must retitle to the date it settles on
+    tomorrow_iso = tomorrow.strftime("%Y-%m-%d")
+    page.evaluate(
+        """(iso) => {
+      const group = document.querySelector(`.sessions-day-group[data-date="${iso}"]`);
+      if (group) group.scrollIntoView({ behavior: 'auto', block: 'start' });
+    }""",
+        tomorrow_iso,
+    )
     page.wait_for_timeout(900)
     assert weekday.inner_text().strip().upper() == tomorrow.strftime("%A").upper()
-    assert page.locator(
-        "#calendar-title-date"
-    ).inner_text().strip() == tomorrow.strftime("%Y-%m-%d")
+    assert page.locator("#calendar-title-date").inner_text().strip() == tomorrow_iso
 
 
-def _touch_swipe(cdp, page, x, y, dx, steps=12):
-    """
-    Drag a single finger horizontally across the deck.
-
-    Note: CDP's Input.synthesizeScrollGesture does NOT scroll overflow containers in this
-    headless setup (verified against a plain scroll-snap control deck), so the gesture is
-    built from raw touch events instead.
-    """
-    cdp.send(
-        "Input.dispatchTouchEvent",
-        {"type": "touchStart", "touchPoints": [{"x": x, "y": y}]},
-    )
-    for i in range(1, steps + 1):
-        cdp.send(
-            "Input.dispatchTouchEvent",
-            {
-                "type": "touchMove",
-                "touchPoints": [{"x": x + dx * i / steps, "y": y}],
-            },
-        )
-        page.wait_for_timeout(16)
-    cdp.send("Input.dispatchTouchEvent", {"type": "touchEnd", "touchPoints": []})
-
-
-def test_touch_swipe_between_days(browser, local_server, demo_data_script):
-    """A real one-finger swipe on the deck must advance exactly one day and retitle the bar."""
-    context = browser.new_context(
-        viewport={"width": 390, "height": 844}, has_touch=True, is_mobile=True
-    )
-    # This test builds its own context, so it opts into the first-run Terms auto-accept and the
-    # demo dataset manually (the autouse conftest fixtures only cover the shared `page` fixture).
-    context.add_init_script(
-        "window.localStorage.setItem('librept_terms_accepted', '1');"
-    )
-    context.add_init_script(demo_data_script)
-    page = context.new_page()
+def test_scrolling_the_timeline_updates_the_focused_day(page, local_server):
+    """The old day-deck's custom swipe/fling-clamp logic is gone with the horizontal carousel —
+    the continuous timeline is plain native browser scrolling plus an IntersectionObserver
+    watching the sticky headers (sessionTimeline.js), so what actually needs proving is that
+    scroll position drives the focused date, not any particular input method. Driving the
+    scroll directly (rather than a synthetic touch/wheel gesture, which headless Chromium does
+    not reliably turn into real scrolling for a plain overflow container) tests exactly that,
+    deterministically."""
     page.goto(local_server)
-    page.wait_for_selector("#today-sessions-column")
+    page.wait_for_selector(".sessions-day-group")
+    # Boot re-renders the timeline more than once (recovering an active session, notifications,
+    # etc.), and each render re-arms a brief "ignore scroll during a programmatic settle" guard
+    # (sessionTimeline.js) so the title doesn't flicker mid-scrollIntoView. Give every boot-time
+    # render's guard window a chance to expire before driving a scroll of our own.
     page.wait_for_timeout(1200)
 
-    cdp = context.new_cdp_session(page)
     weekday = page.locator("#calendar-title-weekday-short")
     today = datetime.date.today()
-
     assert weekday.inner_text().strip().upper() == today.strftime("%a").upper()
 
-    # Swiping left walks forward to tomorrow
-    _touch_swipe(cdp, page, 300, 300, -240)
-    page.wait_for_timeout(1200)
-    tomorrow = today + datetime.timedelta(days=1)
-    assert weekday.inner_text().strip().upper() == tomorrow.strftime("%a").upper()
-    assert page.locator(
-        "#calendar-title-date"
-    ).inner_text().strip() == tomorrow.strftime("%Y-%m-%d")
-
-    # Swiping right walks back to today
-    _touch_swipe(cdp, page, 50, 300, 240)
-    page.wait_for_timeout(1200)
-    assert weekday.inner_text().strip().upper() == today.strftime("%a").upper()
-
-    context.close()
+    page.evaluate("() => { document.getElementById('main-content').scrollTop += 900; }")
+    page.wait_for_timeout(1000)
+    assert weekday.inner_text().strip().upper() != today.strftime("%a").upper(), (
+        "scrolling the timeline must move the focused day-group off today"
+    )
 
 
-def test_single_column_deck_at_every_viewport(page, local_server):
-    """Exactly one day column may occupy the deck viewport, on phone and desktop alike."""
-    visible_columns = """() => {
-      const grid = document.getElementById('sessions-categories-grid');
-      const gr = grid.getBoundingClientRect();
-      return ['yesterday','today','tomorrow','upcoming'].filter(d => {
-        const r = document.getElementById(d + '-sessions-column').getBoundingClientRect();
-        return r.left < gr.right - 1 && r.right > gr.left + 1;
-      });
+def test_continuous_vertical_timeline_at_every_viewport(page, local_server):
+    """The timeline is one vertical, chronologically-ordered scroll of day-groups — not
+    per-viewport paged columns — at every viewport width."""
+    check = """() => {
+      const groups = Array.from(document.querySelectorAll('.sessions-day-group[data-date]'));
+      const dates = groups.map((g) => g.dataset.date);
+      const sorted = [...dates].sort();
+      const lefts = new Set(groups.map((g) => Math.round(g.getBoundingClientRect().left)));
+      return {
+        count: groups.length,
+        inOrder: JSON.stringify(dates) === JSON.stringify(sorted),
+        singleColumn: lefts.size <= 1,
+      };
     }"""
 
     for width, height in [(390, 844), (868, 843), (1280, 800)]:
         page.set_viewport_size({"width": width, "height": height})
         page.goto(local_server)
-        page.wait_for_selector("#today-sessions-column")
-        page.wait_for_timeout(1000)
-        assert page.evaluate(visible_columns) == ["today"], (
-            f"expected only today's column at {width}px"
+        page.wait_for_selector(".sessions-day-group")
+        page.wait_for_timeout(300)
+        result = page.evaluate(check)
+        assert result["count"] > 1, "the seed data spans multiple days"
+        assert result["singleColumn"], (
+            f"day-groups must stack in one column at {width}px"
         )
+        assert result["inOrder"], "day-groups must render in chronological order"
 
 
 def test_interactive_dashboard_flow(page, local_server):

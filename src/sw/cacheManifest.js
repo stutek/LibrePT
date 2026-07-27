@@ -99,9 +99,8 @@ self.swCacheManifest = (() => {
     "./modules/session/editSessionView.js",
     "./modules/session/sessionBar.js",
     "./modules/session/sessionTitleBar.js",
-    "./modules/sessionList/daySelector.js",
     "./modules/sessionList/sessionCard.js",
-    "./modules/sessionList/sessionList.js",
+    "./modules/sessionList/sessionTimeline.js",
     "./modules/sessionList/sessionsView.js",
     // Domain controllers
     "./controllers/appLifecycleController.js",

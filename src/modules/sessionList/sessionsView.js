@@ -4,14 +4,14 @@ import { modalityOf, primaryMetricOf } from "../common/exerciseModality.js";
 import { loadUnitForEquipment } from "../common/repsAndLoad.js";
 import { buildBookingMeta, escapeHTML, getOverlappingBookings } from "../common/utils.js";
 import { renderIdleSessionBar, updateSessionBarTimer } from "../session/sessionBar.js";
+import { renderSessionCard } from "./sessionCard.js";
 import {
-  focusSessionsColumn,
-  getFocusedSessionDay,
+  formatCalendarDayLabel,
   getSessionDayDate,
   renderSessionsTitleBar,
   sessionDayTemporal,
-} from "./daySelector.js";
-import { renderSessionList } from "./sessionList.js";
+  syncSessionTimelineAfterRender,
+} from "./sessionTimeline.js";
 
 export function seedDemoActiveSession({ state }) {
   const sessions = state.sessions || state.bookings || [];
@@ -199,6 +199,21 @@ export function setupCalendarBookings({ state, t, saveToLocalStorage, renderSess
   });
 }
 
+// Local calendar date (not UTC) a session's `startDate` falls on — the grouping key for the
+// timeline. `startDate` is built from a local Date at seed/migration time (src/data/sessions.js,
+// migrationSteps.js), so reading it back through local getters keeps a late-evening session on the
+// day the trainer actually thinks of it as.
+function calendarDayKey(session) {
+  const d = new Date(session.startDate);
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${month}-${day}`;
+}
+
+function compareByStartDate(a, b) {
+  return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
+}
+
 export function renderSessions({
   state,
   t,
@@ -209,12 +224,8 @@ export function renderSessions({
   navigateToPath,
   urlFor,
 }) {
-  const yesterdayContainer = document.getElementById("yesterday-sessions-list");
-  const todayContainer = document.getElementById("today-sessions-list");
-  const tomorrowContainer = document.getElementById("tomorrow-sessions-list");
-  const upcomingContainer = document.getElementById("upcoming-sessions-list");
-
-  if (!todayContainer || !tomorrowContainer) return;
+  const container = document.getElementById("sessions-categories-grid");
+  if (!container) return;
 
   renderSessionsTitleBar();
 
@@ -235,37 +246,46 @@ export function renderSessions({
     urlFor,
   };
 
-  const yesterdaySessions = sessions.filter((b) => b.day === "yesterday");
-  const todaySessions = sessions.filter((b) => b.day === "today");
-  const tomorrowSessions = sessions.filter((b) => b.day === "tomorrow");
-  const upcomingSessions = sessions.filter((b) => b.day === "upcoming");
+  container.innerHTML = "";
 
-  if (yesterdayContainer) {
-    renderSessionList(yesterdayContainer, yesterdaySessions, {
-      emptyMessage: "No past sessions.",
-      cardDeps,
-    });
+  if (sessions.length === 0) {
+    container.innerHTML = `<div class="card glassmorphic text-center text-muted" style="padding: 16px;">${t("no_bookings_today")}</div>`;
+  } else {
+    // One continuous, strictly time-ordered pass — grouped under a sticky per-day header rather
+    // than split into four fixed yesterday/today/tomorrow/upcoming containers (TODO §7.3 item 8).
+    const sorted = [...sessions].sort(compareByStartDate);
+    let currentKey = null;
+    let currentList = null;
+    for (const session of sorted) {
+      const key = calendarDayKey(session);
+      if (key !== currentKey) {
+        currentKey = key;
+        const { weekday, date, temporal, isToday } = formatCalendarDayLabel(key);
+
+        const group = document.createElement("div");
+        group.className = "sessions-day-group";
+        group.dataset.date = key;
+
+        const header = document.createElement("div");
+        header.className = `sessions-day-group-header${temporal !== "today" ? ` is-${temporal}` : ""}`;
+        header.innerHTML = `
+          <span class="sessions-day-group-weekday">${escapeHTML(weekday)}</span>
+          <span class="sessions-day-group-date">${escapeHTML(date)}</span>
+          ${isToday ? `<span class="sessions-day-group-today-tag">${escapeHTML(t("today"))}</span>` : ""}
+        `;
+        group.appendChild(header);
+
+        currentList = document.createElement("div");
+        currentList.className = "stack-list";
+        group.appendChild(currentList);
+
+        container.appendChild(group);
+      }
+      renderSessionCard(session, currentList, cardDeps);
+    }
   }
 
-  renderSessionList(todayContainer, todaySessions, {
-    emptyMessage: t("no_bookings_today"),
-    cardDeps,
-  });
-
-  renderSessionList(tomorrowContainer, tomorrowSessions, {
-    emptyMessage: t("no_bookings_today"),
-    cardDeps,
-  });
-
-  if (upcomingContainer) {
-    renderSessionList(upcomingContainer, upcomingSessions, {
-      emptyMessage: "No upcoming sessions.",
-      cardDeps,
-    });
-  }
-
-  const focusedDay = getFocusedSessionDay();
-  requestAnimationFrame(() => focusSessionsColumn(focusedDay, "auto"));
+  syncSessionTimelineAfterRender();
   renderIdleSessionBar();
   updateSessionBarTimer();
 }
