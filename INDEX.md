@@ -43,9 +43,21 @@ The runtime app lives under `src/` (served as the web root locally and flattened
 on deploy). It's a native ES-module app (`<script type="module" src="app.js">`). `src/app.js`
 is structured into feature modules under `src/modules/` (`session`, `plans`, `clients`, `exercises`, `history`, `common`, `themes`) and data under `src/data/`.
 
+**`src/index.html` and `src/index.css` are shells, not feature owners.** `index.html` holds only
+`<head>` boilerplate, the boot-critical integrity-error overlay, and empty named canvases
+(`#app-header`, `#main-content`, `#notification-area`, `#active-session-overlay`,
+`#clipboard-timer-stack`, `#dialogs-root`); every view section, dialog, the header, and the
+notification area render their own markup from the JS module that owns their behavior (e.g.
+`renderHeaderShell()` in `applicationHeader.js`, `renderClientDialog()` in `formsController.js`).
+`index.css` holds only shared design-system tokens/foundations (buttons, cards, modals, form
+controls, color tokens) — each feature's own rules live in a same-named `.css` file next to its
+module, listed in the table below alongside that module's `.js`.
+
 | Module | Type | Description |
 | :--- | :--- | :--- |
 | [src/app.js](src/app.js) | `entry` | Application bootstrapper: root initialization, dependency injection wiring, and global lifecycle hooks. |
+| [src/index.html](src/index.html) | `shell` | The app shell: `<head>`, the integrity-error overlay, and empty canvases every other module renders into. |
+| [src/index.css](src/index.css) | `styles` | Shared design-system tokens and foundations only (buttons, cards, modals, form controls, resets) — per-feature rules live in each module's own `.css`. |
 | [src/theme-boot.js](src/theme-boot.js) | `entry` | Render-blocking classic script that sets the theme class before paint (anti-FOUC) and forces http→https; external so CSP `script-src` can forbid `'unsafe-inline'`. |
 | [src/data/stateStore.js](src/data/stateStore.js) | `data` | Central app state management: state object, localStorage persistence, seed data loading, and reset triggers. |
 | [src/data/storageNamespace.js](src/data/storageNamespace.js) | `data` | Per-release storage isolation (being retired, TODO §16.5): which localStorage bucket this build owns, copy-never-move migration between releases, bucket listing and EOL discard. |
@@ -59,11 +71,12 @@ is structured into feature modules under `src/modules/` (`session`, `plans`, `cl
 | [src/data/versionCatalog.js](src/data/versionCatalog.js) | `data` | Published-release manifest reader (being retired, TODO §16.5): decides whether to offer an upgrade, a rollback (only for data that exists locally), or an end-of-support warning. |
 | [src/data/index.js](src/data/index.js) | `data` | Barrel for seed/demo data: `exercises.js`, `clients.js`, `routines.js`, `history.js`, `planUpdates.js`, `sessions.js`. |
 | [src/i18n/index.js](src/i18n/index.js) | `i18n` | Translation registry: one flat key→string map per locale (`en.js`, `sl.js`). Key parity enforced by unit tests. |
-| [src/modules/sessionList/sessionsView.js](src/modules/sessionList/sessionsView.js) | `view` | Modular view renderer for the Sessions dashboard: merges/sorts all sessions and groups them into the continuous timeline's per-day sections. |
+| [src/modules/sessionList/sessionsView.js](src/modules/sessionList/sessionsView.js) | `view` | Modular view renderer for the Sessions dashboard: merges/sorts all sessions and groups them into the continuous timeline's per-day sections; owns its `<section id="view-clients">` shell markup. |
+| [src/modules/sessionList/sessionsView.css](src/modules/sessionList/sessionsView.css) | `styles` | Session booking cards, the sessions title bar/date-picker, the continuous timeline, and the floating "Create Session" button. |
 | [src/modules/sessionList/sessionCard.js](src/modules/sessionList/sessionCard.js) | `component` | Dashboard session-booking card that launches the clipboard on tap. |
-| [src/modules/sessionList/sessionTimeline.js](src/modules/sessionList/sessionTimeline.js) | `component` | Continuous, time-ordered dashboard timeline (TODO §7.3 item 8): scrollspy focus tracking, title bar, prev/next/Today/date-jump navigation. |
+| [src/modules/sessionList/sessionTimeline.js](src/modules/sessionList/sessionTimeline.js) | `component` | Continuous, time-ordered dashboard timeline: scrollspy focus tracking, sticky-header offset sync (ResizeObserver), Today/date-jump navigation (renders its own `#sessions-date-picker` markup). |
 | [src/modules/clipboard/clipboardEditor.js](src/modules/clipboard/clipboardEditor.js) | `component` | Interactive active session plan/clipboard structure editor. |
-| [src/modules/clipboard/activeSessionOverlay.css](src/modules/clipboard/activeSessionOverlay.css) | `styles` | The fullscreen active-session overlay shell's own CSS (TODO §14.5/§18.10) — title bar, timer block, footer, overflow menu. Styles the overlay chrome `activeSessionController.js` drives. |
+| [src/modules/clipboard/activeSessionOverlay.css](src/modules/clipboard/activeSessionOverlay.css) | `styles` | The fullscreen active-session overlay shell's own CSS — title bar, timer block, footer, overflow menu. Styles the overlay chrome; `activeSessionController.js` renders the overlay's markup into `#active-session-overlay` and drives it. |
 | [src/modules/clipboard/clipboardEditor.css](src/modules/clipboard/clipboardEditor.css) | `styles` | The inline editor's own CSS (TODO §14.5/§18.10) — row/circuit/rest editing, reorder control, insert bar. Loaded after index.css, whose foundation it inherits. |
 | [src/modules/clipboard/deckCard.js](src/modules/clipboard/deckCard.js) | `component` | Base class for one deck card (TODO — rest-focus redesign, mirrors `Route`/`route.js`): Template Method skeleton (collapsed vs. focused, then wire) that `ExerciseDeckCard`/`CircuitDeckCard`/`RestDeckCard`/`PastDeckCard` implement. |
 | [src/modules/clipboard/exerciseDeck.js](src/modules/clipboard/exerciseDeck.js) | `component` | Active-session exercise stack deck renderer — builds deck items, constructs the right `DeckCard` subclass per item, calls `.render()` uniformly. |
@@ -78,15 +91,21 @@ is structured into feature modules under `src/modules/` (`session`, `plans`, `cl
 | [src/modules/clipboard/exerciseAndRestTimer.css](src/modules/clipboard/exerciseAndRestTimer.css) | `styles` | The floating per-client timer stack's own styling: overtime/stopped/flash states. |
 | [src/modules/session/sessionBar.js](src/modules/session/sessionBar.js) | `component` | Bottom active/next-session bar with countdowns. |
 | [src/modules/session/sessionTitleBar.js](src/modules/session/sessionTitleBar.js) | `component` | Active-session overlay title line and countdown. |
-| [src/modules/session/editSessionView.js](src/modules/session/editSessionView.js) | `view` | Modular view renderer for Edit Session & Setup view. |
+| [src/modules/session/editSessionView.js](src/modules/session/editSessionView.js) | `view` | Modular view renderer for Edit Session & Setup view; owns the `#view-workout-setup` shell and `#dialog-workout-setup`'s markup. |
+| [src/modules/session/editSessionView.css](src/modules/session/editSessionView.css) | `styles` | The compact workout-setup dialog: participant picker, checklists. |
 | [src/modules/session/editSessionControl.js](src/modules/session/editSessionControl.js) | `component` | Pre-session edit/setup control modal dialog. |
-| [src/modules/plans/plansView.js](src/modules/plans/plansView.js) | `view` | Modular view renderer for Plans (formerly Routines) catalog and template editor. |
-| [src/modules/plans/planAdjustments.js](src/modules/plans/planAdjustments.js) | `component` | Pending Plan Adjustments deck & interactive Apply wizard. |
-| [src/modules/clients/clientsView.js](src/modules/clients/clientsView.js) | `view` | Modular view renderer for Client Directory & Client profile views. |
+| [src/modules/plans/plansView.js](src/modules/plans/plansView.js) | `view` | Modular view renderer for Plans (formerly Routines) catalog and template editor; owns `#view-routines` and `#dialog-routine`'s markup. |
+| [src/modules/plans/plansView.css](src/modules/plans/plansView.css) | `styles` | Routine template cards + the routine builder dialog's exercise list rows. |
+| [src/modules/plans/planAdjustments.js](src/modules/plans/planAdjustments.js) | `component` | Pending Plan Adjustments deck & interactive Apply wizard; owns `#view-adjustments` and `#dialog-apply-adjustment`'s markup. |
+| [src/modules/clients/clientsView.js](src/modules/clients/clientsView.js) | `view` | Modular view renderer for Client Directory & Client profile views; owns `#view-client-directory`/`#view-client-detail`'s markup. |
+| [src/modules/clients/clientsView.css](src/modules/clients/clientsView.css) | `styles` | Client directory cards + client detail layout (profile, avatar, weight-history chart). |
 | [src/modules/clients/clientsDirectory.js](src/modules/clients/clientsDirectory.js) | `component` | Client Directory grid component. |
-| [src/modules/exercises/exercisesView.js](src/modules/exercises/exercisesView.js) | `view` | Modular view renderer for Exercise taxonomy catalog view. |
+| [src/modules/exercises/exercisesView.js](src/modules/exercises/exercisesView.js) | `view` | Modular view renderer for Exercise taxonomy catalog view; owns `#view-exercises`/`#dialog-exercise`'s markup. |
+| [src/modules/exercises/exercisesView.css](src/modules/exercises/exercisesView.css) | `styles` | Exercise library card items (muscle/taxonomy badges, instructions). |
 | [src/modules/exercises/exercisePicker.js](src/modules/exercises/exercisePicker.js) | `component` | Reusable exercise picker with taxonomy filter chips. |
-| [src/modules/history/historyView.js](src/modules/history/historyView.js) | `view` | Modular view renderer for workout history logs. |
+| [src/modules/exercises/exercisePicker.css](src/modules/exercises/exercisePicker.css) | `styles` | The reusable filtered exercise picker (routine builder + gym-floor swap + catalog picker). |
+| [src/modules/history/historyView.js](src/modules/history/historyView.js) | `view` | Modular view renderer for workout history logs; owns `#view-history`'s markup. |
+| [src/modules/history/historyView.css](src/modules/history/historyView.css) | `styles` | History card items, the feedback icon/tooltip, and structured history rows. |
 | [src/modules/common/utils.js](src/modules/common/utils.js) | `helper` | Shared formatting, date conversion, and string helper functions. |
 | [src/modules/common/recordId.js](src/modules/common/recordId.js) | `helper` | Record identity (TODO §18.2): UUIDv7 as fixed-width base62 — cryptographic collision resistance, and string sort order equal to creation order. |
 | [src/modules/common/dom.js](src/modules/common/dom.js) | `helper` | DOM helper utilities and modal helpers. |
@@ -100,15 +119,20 @@ is structured into feature modules under `src/modules/` (`session`, `plans`, `cl
 | [src/modules/common/wakeLock.js](src/modules/common/wakeLock.js) | `helper` | Screen Wake Lock API management helper. |
 | [src/modules/common/activeUsersList.js](src/modules/common/activeUsersList.js) | `component` | Active-session participant tabs component. |
 | [src/modules/common/activeUsersList.css](src/modules/common/activeUsersList.css) | `styles` | The participant-tabs row's own styling — wraps onto multiple rows for a merged group session. |
-| [src/modules/common/applicationHeader.js](src/modules/common/applicationHeader.js) | `component` | Shared top header actions, theme/lang switchers, and sync badge. |
-| [src/modules/common/backupRestore.js](src/modules/common/backupRestore.js) | `component` | Backup center dialog and JSON import/export handlers. |
-| [src/modules/common/feedbackModal.js](src/modules/common/feedbackModal.js) | `component` | Feedback tags modal dialog and voice recorder handler. |
-| [src/modules/common/notificationArea.js](src/modules/common/notificationArea.js) | `component` | Toast and banner notification area handler. |
+| [src/modules/common/applicationHeader.js](src/modules/common/applicationHeader.js) | `component` | Shared top header actions, theme/lang switchers, and sync badge; owns the `#app-header` shell's markup and `#dialog-about`/`#dialog-terms`. |
+| [src/modules/common/applicationHeader.css](src/modules/common/applicationHeader.css) | `styles` | The top app header: logo, build stamp, preview ribbon, sync/backup button, the ☰ overflow menu. |
+| [src/modules/common/backupRestore.js](src/modules/common/backupRestore.js) | `component` | Backup center dialog and JSON import/export handlers; owns `#dialog-backup`'s markup. |
+| [src/modules/common/backupRestore.css](src/modules/common/backupRestore.css) | `styles` | The Sync & Backup Center dialog's action cards. |
+| [src/modules/common/feedbackModal.js](src/modules/common/feedbackModal.js) | `component` | Feedback tags modal dialog and voice recorder handler; owns `#dialog-feedback`'s markup. |
+| [src/modules/common/feedbackModal.css](src/modules/common/feedbackModal.css) | `styles` | The feedback dialog's privacy-first voice-note recorder waveform animation. |
+| [src/modules/common/notificationArea.js](src/modules/common/notificationArea.js) | `component` | Toast and banner notification area handler; owns the `#notification-area` shell's markup. |
+| [src/modules/common/notificationArea.css](src/modules/common/notificationArea.css) | `styles` | The omnipresent bottom notification/status area, including the embedded active-session mini bar. |
 | [src/modules/common/versionMessages.js](src/modules/common/versionMessages.js) | `component` | Non-dismissable upgrade / rollback / end-of-support cards above the notification feed, and the release switch they perform (copy this release's data into the target's bucket, then navigate). |
-| [src/modules/common/buildInfoDialog.js](src/modules/common/buildInfoDialog.js) | `component` | Tappable build identity (release, commit, data schema, build time) as a copyable dialog — the phone-reachable replacement for a hover tooltip. |
+| [src/modules/common/buildInfoDialog.js](src/modules/common/buildInfoDialog.js) | `component` | Tappable build identity (release, commit, data schema, build time) as a copyable dialog — the phone-reachable replacement for a hover tooltip; owns `#dialog-build-info`'s markup. |
+| [src/modules/common/buildInfoDialog.css](src/modules/common/buildInfoDialog.css) | `styles` | The build-info dialog's fact rows. |
 | [src/modules/themes/](src/modules/themes/) | `styles` | Theme-specific CSS stylesheets (`daylight.css`, `midnight.css`, `red.css`, `blossom.css`, `nebula.css`). |
 | [src/fonts/](src/fonts/) | `assets` | Locally-vendored variable webfonts (DM Sans, Outfit, JetBrains Mono; latin + latin-ext) + `fonts.css`, so the offline-first PWA has no `fonts.googleapis.com`/`fonts.gstatic.com` dependency (regeneration steps in the `fonts.css` header). |
-| [src/controllers/routerController.js](src/controllers/routerController.js) | `controller` | SPA route mapping and navigation logic: base path, history writes, and the facade of operations a route may perform. |
+| [src/controllers/routerController.js](src/controllers/routerController.js) | `controller` | SPA route mapping and navigation logic: base path, history writes, and the facade of operations a route may perform; owns `#view-error`'s markup. |
 | [src/controllers/routes/route.js](src/controllers/routes/route.js) | `controller` | Base `Route` class: pattern ↔ params translation (`match`/`build`), specificity, and the shared enter/exit chrome lifecycle. |
 | [src/controllers/routes/routeRegistry.js](src/controllers/routes/routeRegistry.js) | `controller` | The ordered route collection: register, resolve a path to one route by specificity, and spell a URL for a named route. |
 | [src/controllers/routes/dialogRoute.js](src/controllers/routes/dialogRoute.js) | `controller` | `DialogRoute` / `GlobalDialogRoute`: a <dialog> as an addressable state layered over a parent route's view, so Back closes it and a reload reopens it. |

@@ -181,7 +181,7 @@ Three distinct things the control must express, and they are **not** the same si
 5. **One shared scrollable-deck component for session cards and clipboard exercise/superset/rest cards.** Partial pushback: the clipboard cards are mid-flight on their own inline-edit spec ([clipboard-inline-edit-feature](src/modules/clipboard/clipboardEditor.js), drag/tap reorder, swap/add/remove) while session-history cards in the registry are read-only browsing. Collapsing both into one component risks tangling drag-reorder + edit affordances into a view that should stay browse-only. Recommendation: extract the shared part — the virtualized scroll/snap container and card shell — as the common component, and keep reorder/edit interaction logic in the clipboard-specific consumer that composes on top of it.
 6. **Ordering — CLARIFIED**: every session card is strictly time-ordered along the axis; **unscheduled is the one exception**, sitting as its own non-time-ordered cluster at the past/active → future pivot (after (1)'s past/active, before any future card) rather than being sorted by a date it doesn't have. Only meaningful once (3) exists.
 7. **Filterable session cards (past/active/future/for-review/unscheduled).** Agreed, standard chip-filter row; depends on (1) and (3) existing first since two of the five filter values are new state.
-8. **[x] SHIPPED 2026-07-27 — the dashboard day-deck became one continuous, time-ordered timeline.** The four discrete day-columns (`SESSION_DAY_ORDER`, tab-like left/right paging, deep links addressed by bucket name) are gone. Built as a **vertical** continuous scroll (asked and confirmed over the alternative of an unbounded horizontal carousel) with sticky per-day headers, in [sessionTimeline.js](src/modules/sessionList/sessionTimeline.js) (renamed from `daySelector.js`) + [sessionsView.js](src/modules/sessionList/sessionsView.js). The prerequisite this needed — a real `startDate` on every session — shipped first as schema 3 (`src/data/migrationSteps.js`, `recordSchemas.js`); `day` survives unchanged as the coarser bucket other systems (overlap detection, card temporal tint) still key off. An `IntersectionObserver` on the sticky headers drives the scrollspy (which date-group is "focused"); prev/next/Today/date-jump (native `<input type="date">`, `.showPicker()`) all resolve to a real ISO date via `focusSessionsColumn`, with nearest-forward-or-latest fallback when the target date has no session. **Scope call, stated rather than silently built either way**: no virtualization/windowing was added — every session is already synchronously in `state.sessions` with no pagination boundary to defer against, so "infinite" here means unbounded by the old 4-bucket cap, not a DOM-recycling engine; that's real work to add later if session volumes ever justify it. Tests: [test_sessions_dashboard.py](tests/e2e/test_sessions_dashboard.py) (rewritten) + [uc5](use_cases/uc5_session_day_deck_and_deep_links.md) (rewritten).
+8. **[x] SHIPPED — the dashboard day-deck became one continuous, time-ordered timeline.** Graduated to [CHANGELOG.md](CHANGELOG.md). The prev/next arrows and weekday/date title text this originally shipped with were themselves later removed in favor of the sticky per-day headers alone — see `sessionTimeline.js`/`sessionsView.css`. No virtualization/windowing was added (open call, not an oversight): worth revisiting only if session volumes ever justify it.
 9. **CLARIFIED — unscheduled cards are directionally sticky.** They sit at the past/future pivot (per (6)) and must **not disappear when scrolling toward the future** (stay reachable as an actionable "needs scheduling" reminder no matter how far forward the PT browses) but **may scroll out of view when scrolling toward the past** (once you're reviewing history, they're no longer relevant). This is not plain CSS `position: sticky` — sticky pins in both scroll directions. It needs scroll-direction-aware pinning: hold the unscheduled block at the pivot edge while `scrollTop`/`scrollLeft` increases toward the future, release it to scroll normally with the rest of the list once direction reverses past the pivot. Flagging as its own sub-task under (8), since it's real interaction-code complexity, not styling.
 
 **Sequencing implication**: (8) — the continuous-timeline rewrite — was the load-bearing prerequisite beneath everything else in this bundle, and is now shipped: (3)'s unscheduled state needs somewhere to live in the new axis, (4)'s registry deck should reuse the same timeline rendering rather than inventing a second one, and (6)/(9)/half of (7) are all behaviors *of* that axis. Next up per this ordering: (3) unscheduled sessions, then (9), (4), (7).
@@ -204,103 +204,9 @@ An on-the-fly edit mode for the active session clipboard (`src/components/clipbo
 - Allows swapping exercises, retargeting sets/reps/weight, reordering rows via tap or drag (`.editor-reorder`), adding new exercises, and adjusting rest breaks directly inside the live session without leaving the gym floor.
 - To apply later: `git apply patches/inline_clipboard_editor.patch`.
 
-### 8.4 [x] Hide "Complete Workout Session" while editing the session plan — **SHIPPED 2026-07-25**
-The clipboard's finish bar (`.session-actions-footer`, holding `#btn-finish-session`) is hidden whenever **edit-plan mode** is active (`clipboardEditMode` / the `/edit` route) or the session is a **planning-mode** (`isPlanning`) programme — completing logs an execution to history, which is meaningless mid-edit and wrong for a programme that was never run. The whole footer hides (not just the button) so no empty action bar is left behind, and it returns on exit from edit mode because every mode change re-renders through `renderActiveGroupBoard`. Covered by `test_edit_mode_hides_complete.py`.
-
-### 8.5 [x] Catalog picker button in the plan edit view — **SHIPPED 2026-07-25**
-The inline clipboard editor (`clipboardEditor.js`) gained an **"Add from catalog"** button that opens the reusable filtered taxonomy picker (`mountExercisePicker`) in `#dialog-catalog-picker`; tapping a movement injects it into the active plan (fresh slot id + taxonomy fields, defaults 3×10, adjustable inline) via the shared `injectExerciseIntoActivePlan` helper and returns to the editor. Covered by `test_catalog_picker_in_edit.py`.
-
-### 8.6 [x] Rests are first-class, focusable plan items — polymorphic DeckCard hierarchy — **SHIPPED 2026-07-27**
-Started as a narrower bug: a collapsed standalone rest card started its timer on any tap, instead of
-only bringing itself into focus like every other collapsed card. Investigating it exposed why the
-obvious fix (mirror `showInFocus`) doesn't work: a rest item could **never** hold
-`activeExerciseIndex` — `clampFocusToExercise` forcibly snapped focus off any rest,
-`completeCircuitRound` explicitly skipped trailing rests when advancing focus, and the deep-link
-resolver excluded rests from ever resolving. There was no "focused rest" state anywhere to gate a
-fix on. Simon's direction, given that: **make rests first-class plan items — the less exceptions the
-better** — and **use OOP polymorphism to define the behaviour of all the cards, to DRY the code**. A
-dedicated Explore agent swept the codebase for every rest-exclusion point and every test that could
-be affected before this was built; no test covered the bug (nothing asserted the old behaviour either
-way).
-
-**Removed the "rest can't be focused" exceptions at the root**, rather than patching around them:
-- `clampFocusToExercise` → `clampFocusIndex` ([activeSessionController.js](src/controllers/activeSessionController.js)): stripped the forward/backward search that avoided rests; only out-of-bounds clamping remains.
-- `completeCircuitRound`: deleted the `while (isRestItem(…)) next++` skip — landing focus directly on a following rest when a round finishes is *more* correct, not less (the countdown is exactly what's next).
-- `focusIndexFromRef` / `sessionFocusPath`: a rest is now a real focus target, deep-linkable as `/session/{id}/client/{cid}/rest/{restId}` — `:focusType` gained `rest` alongside `exercise|circuit|superset` ([routeTable.js](src/controllers/routes/routeTable.js), [docs/ROUTING.md](docs/ROUTING.md), [UC5](use_cases/uc5_session_day_deck_and_deep_links.md)).
-- **Converged four independent re-implementations of the same "is this a rest?" check** (activeSessionController.js's own `isRestItem`, clipboardEditor.js's local `isRest`, and inline `item.type === "rest"` checks in exerciseDeck.js and circuitCard.js) onto [sessionItemRecord.js](src/modules/common/sessionItemRecord.js)'s existing `isRestRecord`/`isExerciseRecord` — the live item and the frozen history record already share one shape, so that was already the canonical predicate; the other three were needless duplication.
-- **Left alone, deliberately**: `logQuickSignal`/`openFeedbackModal` get no new runtime guard against being fed a rest — Too Easy/Too Hard/Notes genuinely don't apply to one, and under the new hierarchy `RestDeckCard`'s focused template simply never renders those buttons. The exclusion lives in the one class that owns it, not as a defensive check scattered into shared functions (confirmed no exception would even throw if it somehow were reached — `curEx.name` would just be `undefined`, which is moot since nothing can reach it). Circuit-embedded rests (`.circuit-break-row`) were already correct — only reachable while their circuit is in focus — and are untouched.
-
-**`DeckCard` base class + subclasses**, mirroring [route.js](src/controllers/routes/route.js)'s
-`Route` (Template Method + Replace Conditional with Polymorphism, per
-[docs/ROUTING.md §2](docs/ROUTING.md)): [deckCard.js](src/modules/clipboard/deckCard.js) is the fixed
-skeleton (collapsed vs. focused, then wire); `ExerciseDeckCard`
-([exerciseCard.js](src/modules/clipboard/exerciseCard.js)), `CircuitDeckCard`
-([circuitCard.js](src/modules/clipboard/circuitCard.js)), `RestDeckCard`
-([restDeckCard.js](src/modules/clipboard/restDeckCard.js), new), and `PastDeckCard`
-([pastDeckCard.js](src/modules/clipboard/pastDeckCard.js), extracted from an inline branch that
-never had its own file) each implement the four hooks. `exerciseDeck.js`'s ~115-line `if/else if`
-dispatch is now: construct the right subclass, call `.render(card)` uniformly — the type check moves
-to *construction* only; every render/focus/click decision after that point is polymorphic. Each
-subclass's own `isInFocus` getter carries its own focus rule with no if-else at the call site
-(`PastDeckCard` uses `expandedPastId`, not `activeExerciseIndex` — an orthogonal concept, which is
-exactly the case polymorphism is for). `RestDeckCard`'s new focused template — duration shown large
-and centered, a primary "Start Rest" button — **is** the fix: starting the timer is now only
-reachable from the focused state, itself only reachable by tapping the collapsed card first, like
-every other card.
-
-**Scope boundary**: only the *active session* clipboard. Routine/plan templates (`state.routines`)
-still use the legacy numeric `rest` field and are untouched — confirmed no rest-item code exists in
-routine editing at all.
-
-### 8.7 [x] Too Easy / Too Hard are toggles; feedback button relabelled Notes — **SHIPPED 2026-07-27**
-Simon: the feedback trio gave no visible sign a tap had registered, and the third button's warning-
-triangle icon/label ("Feedback") read as an alert rather than what it actually does — open a place to
-jot a note.
-
-- **`logQuickSignal` is now a toggle**, not a one-way stamp
-  ([activeSessionController.js](src/controllers/activeSessionController.js)): a second tap on the
-  *same* signal removes the exact untouched quick-signal entry it created, from both
-  `activeSession.feedback` and `state.planUpdates`, so a mis-tap on the gym floor needs no trip to
-  the feedback modal to correct. `isPlainQuickSignal` (no typed note, no voice memo) is what keeps
-  this safe: a modal-authored entry on the same tag is never touched by a re-tap, and the new
-  `hasQuickSignal(clientId, exerciseName, tag)` export is what both card components render their
-  pressed state from.
-- **Pressed state is visible**: `.deck-action-easy/.hard.active` and `.circuit-sig.easy/.hard.active`
-  fill solid (matching the signal's own color) rather than only tinting on hover, plus
-  `aria-pressed` on both buttons.
-- **Too Easy and Too Hard are mutually exclusive, added 2026-07-27** (Simon): an exercise can't be
-  both, but neither requires clearing the other first — tapping the opposite signal silently swaps
-  it (`OPPOSITE_QUICK_SIGNAL`, `removeQuickSignal` factored out of the toggle-off path and reused
-  for the swap), which is what mistype correction on the gym floor actually needs: tap the wrong
-  one, then the right one, no untap step in between. Bounded by the same `isPlainQuickSignal` rule
-  as the toggle — a noted/voice-memo'd entry on the opposite tag survives a swap.
-- **Mutual exclusion closed on the Notes-modal path too, 2nd take (Simon, still 2026-07-27)**: the
-  modal offers the same "Too Easy"/"Too Hard" tags as its own radio choices (default-checked to Too
-  Easy) and wrote `activeSession.feedback` directly, bypassing `logQuickSignal` entirely — quick-tap
-  one signal, then submit the modal with the default opposite tag and no note, and both stayed
-  active at once (visible on the next re-render). The opposite-tag removal is now factored out of
-  `logQuickSignal` into an exported `enforceQuickSignalExclusivity(clientId, exerciseName, tag)`
-  ([activeSessionController.js](src/controllers/activeSessionController.js)) — the single canonical
-  enforcement point — wired via DI into
-  [feedbackModal.js](src/modules/common/feedbackModal.js)'s submit handler. Covered by
-  `test_modal_submission_of_opposite_tag_clears_the_quick_tapped_signal` and
-  `test_modal_submission_the_other_direction_also_clears` in
-  `tests/e2e/test_quick_signal_toggle.py`.
-- **Feedback → Notes**: icon `fa-triangle-exclamation` → `fa-note-sticky`,
-  `feedback_short` "Feedback"→"Notes" (sl: "Opomba"→"Opombe"), `btn_log_feedback` "Log Feedback"→
-  "Add Note" (sl: "Dodaj opombo") — in both
-  [exerciseCard.js](src/modules/clipboard/exerciseCard.js) and
-  [circuitCard.js](src/modules/clipboard/circuitCard.js). Covered by
-  `tests/e2e/test_quick_signal_toggle.py`.
-
-### 8.8 [x] Hide +Rest in the editor's insert bar next to an existing rest — **SHIPPED 2026-07-27**
-Simon: back-to-back rests are two waits with nothing between them, never a real plan shape.
-[clipboardEditor.js](src/modules/clipboard/clipboardEditor.js)'s `insertBar(at, …)` now hides its
-`+Rest` button whenever `items[at-1]` or `items[at]` — the two neighbours a rest inserted there
-would land next to — is already a rest; `+Exercise` and `+Circuit` stay available in every gap,
-since only a *rest* next to a rest is the redundant shape. `at` is a true flat index into `items` in
-every caller (top-level gaps and circuit-internal gaps alike), so no call site needed to change.
-Covered by `tests/e2e/test_editor_insert_bar_rest_adjacency.py`.
+### 8.6 [x] Rests are first-class, focusable plan items — see CHANGELOG
+Polymorphic `DeckCard` hierarchy ([deckCard.js](src/modules/clipboard/deckCard.js) +
+subclasses) — full build notes graduated to [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
@@ -396,54 +302,32 @@ first visit, so it costs one visit, once. Recording it because it is the amplifi
 
 ---
 
-## 13. Exercise Library & Movement Taxonomy (Call to Action & Vision)
+## 13. Exercise Library & Movement Taxonomy
 
-> **Status (2026-07-24):** the taxonomy pivot and all three of its selection scenarios are **built** and
-> covered by [UC6](use_cases/uc6_exercise_taxonomy_and_picker.md) / `tests/e2e/test_exercise_taxonomy.py`
-> + `tests/e2e/test_reps_and_load.py` (shipped, see CHANGELOG). Exercises carry `equipment` + `pattern`;
-> the catalog shows taxonomy badges (no instructions); the filtered picker powers routine building and
-> gym-floor swaps; custom creation enforces muscle group + equipment + pattern; reps/load are polymorphic.
-> **§13.3 (conditioning/modality) shipped 2026-07-24** — see the modality note below and CHANGELOG.
-> **§13.1 open-standard crosswalk shipped 2026-07-25** — the catalog maps onto the wger dataset for
-> interchangeable JSON/CSV exports; see the §13.1 note below and CHANGELOG. Section 13 is now complete.
+**CLOSED — fully shipped.** See [CHANGELOG.md](CHANGELOG.md) and
+[UC6](use_cases/uc6_exercise_taxonomy_and_picker.md) for what shipped.
 
-### 13.1 [x] [Brainstorm / Call to Action] Repurpose `exercisesView` from "Beginner Encyclopedia" to "Professional Movement Taxonomy"
-**The Core Insight:** A certified, professional Personal Trainer (`LibrePT`) knows all exercises by heart. They do not need lengthy `"instructions"` paragraphs, beginner descriptions, or how-to tutorials on their screen, nor do they ever hand their working device over to a client mid-session.
-- **Call to Action**: Remove/deprecate bulky instructional text blocks from `exercisesView.js` (`ex.instructions`) and exercise cards. The UI must pivot from an "encyclopedia for gym beginners" into a **high-density, professional movement taxonomy inspector and fast-selection tool**. *(Done — the picker/taxonomy pivot shipped; see status note above.)*
-- **The True Purpose (Referential Integrity)**: The Exercise Catalog exists in software to provide immutable IDs (`exerciseId`), equipment tags (`Barbell`, `Cable`, `Dumbbell`, `Bodyweight`), and anatomical/biomechanical categories (`Primary/Secondary Muscle Groups`, `Horizontal Push/Pull`, `Hip Hinge`). Without strict taxonomy, aggregating long-term volume load or plotting estimated 1RM curves across months of client history is impossible.
-- **Adopt Open Standards** *(shipped 2026-07-25)*: The catalog maps onto the **wger Workout Manager** open dataset (chosen over proprietary ExRx) by canonical category/equipment **name** — the only interchange key that survives across installs, since wger's numeric PKs are per-instance. `category` → wger `ExerciseCategory` (`Core`→`Abs`), `equipment` → wger `Equipment` (bodyweight → `none (bodyweight exercise)`); LibrePT's superset axes (`pattern`, `modality`, `metric`) are preserved under an `x_librept` extension, and terms the standard lacks (Cardio/Recovery categories, Cable/Machine equipment) map to an explicit **null** rather than a wrong best-fit. The Sync & Backup dialog exports the live catalog as a self-describing interchange **JSON** envelope and a side-by-side crosswalk **CSV** ([exerciseStandard.js](src/modules/common/exerciseStandard.js), [UC6 §6](use_cases/uc6_exercise_taxonomy_and_picker.md), covered by `tests/e2e/test_exercise_standard.py`).
+### 13.1 [x] Repurposed `exercisesView` into a Professional Movement Taxonomy — see CHANGELOG
 
-### 13.3 [x] Conditioning metrics: extend the reps/load model beyond sets × reps × kg — **SHIPPED 2026-07-24**
-Graduated to [CHANGELOG](CHANGELOG.md) / [UC6 §5](use_cases/uc6_exercise_taxonomy_and_picker.md). Built as the **modality** axis ([exerciseModality.js](src/modules/common/exerciseModality.js)): cardio targets are `time | distance | calories | watts`, stretch/balance are hold-time, strength stays sets × reps × load. The raw value is stored and its meaning derived at render (as reps/load already do), the focus timer seeds the target duration for time-bound work, and modality is authored in custom-create + the inline editor. Subsumed under §17.1's modality field — see the modality note there for what remains (routine-builder metric authoring polish, `hiit`).
+### 13.3 [x] Conditioning metrics (modality axis) — see CHANGELOG
 
-### 13.4 [x] Assault Bike needed time/watts coverage, not just calories — **SHIPPED 2026-07-27**
-Simon: does Assault Bike need sets + watts + time-or-calories? `sets` already worked (any exercise
-carries a repeat-round count regardless of metric — confirmed against the seed history's own
-`sets: [{reps: 20, …}]` calorie entry). The real gap was metric coverage: the catalog's convention is
-one metric per entry (Watt Bike = `watts`, Treadmill Run = `time`, Concept2 Rower = `distance`), and
-Assault Bike had only the original `calories` row. Added two sibling entries on the same one-machine-
-one-metric pattern rather than changing the model: **Assault Bike (Time)** (`e46d5e6f`, metric
-`time`) and **Assault Bike (Watts)** (`e47d5e6f`, metric `watts`), next to the original
-(`e41d5e6f`, `calories`) in [exercises.js](src/data/exercises.js). A trainer who wants a
-time-or-watts air-bike prescription now has an entry to pick, the same way they already would for
-any other cardio machine.
+### 13.4 [x] Assault Bike time/watts coverage — see CHANGELOG
 
 ---
 
 ## 14. Refactoring: DRY & Complexity Reduction
 
 ### 14.5 [~] Split the monolithic shared files to avoid same-file co-edit conflicts
-- **Motivation:** two features touched in parallel (the active-session *plan editor* and the *home/notification-area* redesign) repeatedly collided in the same few god-files, forcing manual hunk-by-hunk staging to keep unrelated work apart. Good modularization should make concurrent feature work conflict-free by default.
-- **Promoted from housekeeping to load-bearing by [§18.10](#1810--resolved--one-build-deep-links-and-one-build-vs-many-builds)'s one-build decision (2026-07-27, Simon):** *"multiple version of a module... monoliths are a big obstacle to change behaviours via toggles."* A file that mixes several components' rules can never be shared or swapped independently when a behaviour toggle needs to change just one of them — exactly the failure §18.10 already named ("a file that mixes two behaviours' code can never be shared").
-- **`src/index.css` — split started 2026-07-27, clipboard/active-session slice done.** Decided **no build-time concatenation** (Simon): multiple `<link>` tags, same tradeoff already accepted for JS (~89 native module requests, [12.7](#127--observation-low-priority-89-separate-module-requests-on-first-load)). A build-time CSS transform would have been this project's first source-to-shipped-bytes step — `dist/` stays a verbatim `src/` copy (TODO §16). Extracted, byte-verified (a Counter-based multiset diff proved every declaration preserved exactly once, zero lost/duplicated) and visually confirmed live (Playwright, computed styles + screenshot):
-  - `src/modules/clipboard/activeSessionOverlay.css`, `clipboardEditor.css`, `exerciseDeck.css` (shared deck-card chrome — compact/top/timer/counter/status/name, used by all three card types), `exerciseCard.css`, `circuitCard.css`, `exerciseAndRestTimer.css`; `src/modules/common/activeUsersList.css`.
-  - Shared design tokens, glass-card/flex/button DRY groups and resets **stay in `index.css`**, loaded first — the new files inherit them via normal cascade rather than duplicating them. This is the CSS analogue of `modules/common/`: a legitimate shared layer, not the anti-pattern being fixed.
-  - Wired into `src/sw/cacheManifest.js` ASSETS (bumped `CACHE_NAME`) and `test_project_layout.py`'s precache-completeness check, same as any runtime module.
-  - **Not yet split** (deliberately, to keep this slice verifiable): header/nav, notification area, exercise picker/taxonomy chips, generic dialog chrome, history view, sessions dashboard/booking cards, build-info dialog, floating action button, integrity error page. Next pass should read and map these before cutting, the same way the clipboard slice was — the file mixes several components' rules per `@media` block in places (already found once: the old single mobile-scaling block interleaved `.session-finish-row`, `.active-set-row`, `.history-feedback-icon` and generic `.btn`/`.form-control` overrides together), so a rushed cut risks silently dropping or misplacing a rule.
-  - **Foundation extraction is a separate, later decision.** The shared DRY block *could* become its own explicit `foundation.css` once more components are split and its true shared surface is clearer — not decided now.
-  - `src/index.html` — one document holding every view, overlay, dialog, and the floating timer. Extract per-view/overlay/dialog HTML partials (or render them from JS) so structural edits localize.
-  - `src/i18n/en.js` & `src/i18n/sl.js` — flat single-object dictionaries; every string lands in the same file. Consider per-feature namespaced string modules merged into the locale (keeping `test_i18n_parity` green).
-- **Guardrail:** the modular-file rule already exists for JS (AGENT_RULES §5); extend the same "one responsibility per file, edit-in-parallel-without-collision" principle to CSS, HTML, and i18n.
+**`src/index.css` and `src/index.html` SHIPPED 2026-07-27** — both are now shells: `index.html`
+holds only `<head>`, the integrity overlay, and empty canvases; `index.css` holds only shared
+design-system tokens/foundations. Every view, dialog, the header, and the notification area render
+their own markup from the JS module that owns them, with a co-located `.css` file (see
+[INDEX.md](INDEX.md) for the full module↔stylesheet map). Wired into `src/sw/cacheManifest.js`
+ASSETS (bumped `CACHE_NAME`) same as any runtime module.
+
+**Still open**: `src/i18n/en.js` & `src/i18n/sl.js` are flat single-object dictionaries; every
+string lands in the same file. Consider per-feature namespaced string modules merged into the
+locale (keeping `test_i18n_parity` green).
 
 ### 14.6 [ ] Rename the `booking` domain term to `session`
 **Decided (2026-07-23):** from the PT's stance the entity is a **session**; "booking" is the customer-facing framing (a client *books* a slot; the PT *runs* a session). Unify the code on `session`.
@@ -457,33 +341,22 @@ any other cardio machine.
 
 ## 16. Deploy safety & schema-keyed storage
 
-> **Status (2026-07-27): multi-version hosting is DROPPED, not deferred.** Following §18's
-> *no release tags* decision, hosting N builds side by side is off the table: one build carries every
-> supported behaviour concurrently, behaviour switching is an in-app choice rather than navigation,
-> and storage is keyed on the **data schema** alone. Removed from this file with that decision:
-> per-tag publishing and `/<tag>/` subpaths, the `/preview/` channel and beta opt-in, per-release
-> storage buckets and the copy-on-switch migration, rollback-by-URL, the published release manifest
-> and its total-ordering rules, `SUPPORTED_RELEASE_COUNT` as an EOL mechanism, and the tag-shape
-> question (semver vs ISO). What shipped of it is recorded in [CHANGELOG.md](CHANGELOG.md); why it was
-> retired is in [§18](#18-data-layer-simultaneous-multi-schema-writes-star-writes)'s decision banner.
+> **Multi-version hosting is DROPPED, not deferred** (per §18's *no release tags* decision — see its
+> banner for why). One build carries every supported behaviour concurrently; storage keys on the
+> **data schema** alone, not a release tag. Do not re-propose per-tag publishing, a `/preview/`
+> channel, per-release storage buckets, or rollback-by-URL — all considered and dropped together.
 >
-> **What survives, because none of it was about hosting:**
-> - **A deploy must never interrupt a trainer mid-session.** Still binding, and now purely a
->   service-worker concern ([src/sw.js](src/sw.js)): the cached build keeps running until the PT
->   accepts the update, on their moment. This is also §18's surviving justification for multi-schema
->   writes — a PT on yesterday's cached build *is* running an older app version even with no tags.
-> - **Storage keyed on the schema major** — [16.3](#163--decided-not-built-key-storage-buckets-on-the-data-schema-not-the-release-tag), the prerequisite for §18's star writes.
-> - **The build stamp is the commit SHA**, not a tag ([AGENT_RULES §2.D.2](AGENT_RULES.md)) — now the
->   only build identity there is, and the reason support never depended on tags in the first place.
-> - **The PREVIEW ribbon**, shipped standalone 2026-07-22 and generalised into severity tiers by
->   [§18.12](#1812--decided-reuse-the-preview-ribbon-for-unsupported-version-warning).
-> - **Migration must validate every step's output** and refuse data from a newer build — kept as a
->   property of the star-write projections ([§18.4](#184--decided--staging-not-envelopes-the-lossy-projection-problem)), not of a chain.
+> **What survives:** a deploy must never interrupt a trainer mid-session (now purely a
+> service-worker concern, [src/sw.js](src/sw.js)); storage keyed on the schema major
+> ([16.3](#163--decided-not-built-key-storage-buckets-on-the-data-schema-not-the-release-tag)); the
+> build stamp is the commit SHA, not a tag; the PREVIEW ribbon (generalised into severity tiers by
+> [§18.12](#1812--decided-reuse-the-preview-ribbon-for-unsupported-version-warning)); migration must
+> validate every step's output and refuse data from a newer build.
 >
-> **Two findings from the retired build, worth not re-learning:** an ordering authority must be a
-> *total* order (same-second tags tied under a date sort and would have offered a PT a downgrade
-> labelled "a new version is available"), and anything that changes an already-published build's bytes
-> forces a service-worker re-install on everyone sitting on it.
+> **Two findings worth not re-learning:** an ordering authority must be a *total* order (same-second
+> tags tied under a date sort once offered a PT a downgrade labelled "a new version is available"),
+> and anything that changes an already-published build's bytes forces a service-worker re-install on
+> everyone sitting on it.
 
 ### 16.3 [ ] [Decided, not built] Key storage buckets on the DATA SCHEMA, not the release tag
 > **Simplified by the no-tags decision**: no release identity means no `UNRELEASED` case, no tag
@@ -547,22 +420,17 @@ sitting directly on §16.3's path. **Delete rather than adapt** — none of it h
 
 > **⏳ Implementation scheduled for Claude on Fri 2026-07-24, 10:00** (when the subscription resets — this is a larger, cross-cutting change deliberately held for a complex-task budget, per the multi-model cost strategy). Design below is **decided**; it's a build task, not a brainstorm.
 
-### 17.1 [x] Persist the whole structured program into history, via a generic typed item record — **SHIPPED 2026-07-24**
-Graduated to [CHANGELOG](CHANGELOG.md). Built in [sessionItemRecord.js](src/modules/common/sessionItemRecord.js): `finishWorkoutSession` now snapshots the whole program (rests + circuit grouping + prescribed-but-skipped exercises kept `completed:false`, greyed in the view) instead of flattening to performed sets; historyView / exerciseDeck read it structure- and completed-aware; `openSessionFromHistory` rebuilds the full live plan from the snapshot; back-compat via a shape guard. Covered by `tests/e2e/test_session_item_record.py`.
+### 17.1 [~] Persist the whole structured program into history, via a generic typed item record
+**Core mechanism SHIPPED** (graduated to [CHANGELOG.md](CHANGELOG.md)):
+[sessionItemRecord.js](src/modules/common/sessionItemRecord.js) snapshots the whole program as a
+flat typed array (`exercise` | `rest`, `circuitId` grouping folded at render), rest- and
+completed-aware readers, back-compat shape guard. Covered by
+`tests/e2e/test_session_item_record.py`.
 
-**Deviation from the design below (decided during build):** circuits are **not** a stored container — the snapshot is a **flat typed array** (`exercise` | `rest`) with `circuitId` grouping folded at render (`buildCircuitUnits`), the *same* single model the live session uses, so there is no second representation to keep in sync and the frozen record's contiguity can't drift. The `isRestItem` boolean is replaced by `type` dispatch (`isRestRecord`/`isExerciseRecord`). The original container-based design is kept below for reference; the rest of §17 (17.2–17.5) still applies. The flat array's one weakness — order carried by array index alone — is closed by §17.5.
-
-Historical design (superseded by the flat model above for storage; the goals stand):
-
-- **Generic `sessionItemRecord` with a `type` discriminator** — `exercise | rest | circuit`:
-  - `circuit` is a **container** holding child items (renders/reuses as a unit), not a flag spread across sibling items.
-  - `rest` stays a **first-class item type**, but is **not** an exercise (never in `state.exercises`, never focusable/loggable).
-  - **Replace the scattered `isRestItem` boolean** with `type` dispatch — ideally one `renderItem(item)` / handler switch rather than predicate checks sprinkled across ~15 call sites. (Resolves the "leaky `isRestItem`" concern.)
-- **Two orthogonal axes — don't conflate:** structural `type` (above) vs. an **exercise modality** field — `strength | cardio | stretch | hiit | balance` — that decides *how you log* (reps×load vs time/distance/cal/watts vs hold-time vs rounds). The modality axis **subsumes [13.3](#133-x-conditioning-metrics-extend-the-repsload-model-beyond-sets-reps-kg-shipped-2026-07-24)**. **[~] Partially built (2026-07-24):** the modality field + `strength`/`cardio`/`stretch`/`balance` logging surfaces shipped ([exerciseModality.js](src/modules/common/exerciseModality.js), see §13.3 / CHANGELOG) — additive on the catalog entry, no migration. **Still open here:** wiring modality into the **`sessionItemRecord`** history snapshot itself (this item's core), routine-**builder** (`plansView`) metric authoring to match the inline editor, and `hiit` (rounds) which has no logging surface yet.
-- **Skipped exercises are kept**, marked `completed: false`, and **rendered greyed** — a deliberate review signal (what the client didn't get to) that feeds plan adjustments (uc2). Analytics must honour the flag so skipped work isn't counted as volume.
-- **Immutable snapshot (option a — inline copy).** History embeds a frozen copy of the program, *not* a reference to a live editable routine (editing/deleting a routine must never rewrite the past). A versioned/deduped program store (option b) is deferred — content-addressed dedup applied to programs, only worth it if storage bites and programs repeat heavily.
-- **Readers to update** (the sweep): only **3** iterate `.exercises` — [historyView.js](src/modules/history/historyView.js), [clientsView.js](src/modules/clients/clientsView.js), [exerciseDeck.js](src/modules/clipboard/exerciseDeck.js) (last-performance reference); plus the writer + `openSessionFromHistory` re-open + `backupRestore` round-trip. Each must become rest-aware and completed-aware. **Additive/back-compatible**: old flat rows (and `DEFAULT_HISTORY` seed) stay valid behind a shape guard.
-- **Storage note**: an inline program per row makes history the fastest-growing collection → ties to [3.7](#37--decision-persistence-engine--stay-on-localstorage-json-defer-embedding-a-db). The binding wall is the **localStorage ~5MB disk quota** (`JSON.stringify(state)` on every save), *not* RAM; IndexedDB (bigger ceiling + **lazy per-client load**) is the eventual fix, not needed pre-release.
+**Still open**: wiring the exercise-**modality** field (`strength | cardio | stretch | hiit |
+balance`, shipped separately — see CHANGELOG's §13.3 entry) into the `sessionItemRecord` history
+snapshot itself, routine-**builder** (`plansView`) metric authoring to match the inline editor, and
+`hiit` (rounds) which has no logging surface yet.
 
 ### 17.2 [ ] Edit rules for a completed, dated session — immutable except three narrow cases
 A completed dated session is an **immutable execution record**. Anything forward-looking is **copy-to-a-new-session from a template**, never an edit of the past. The only permitted mutations:
@@ -587,137 +455,62 @@ With 17.1 preserving the full program, "**Save as routine**" on a history record
 - Pairs with the inline clipboard editor ([8.3](#83--inline-clipboard-editor-saved-patch-patchesinline_clipboard_editorpatch)) and "next session prep" ([5.1](#51--tabbed-client-view) Tab 3).
 - **Watch item for §18.5**: making template provenance a *hard* reference back to the source history record would create the first cycle in the reference graph (`history → routine → history`), which §18.5's topological migration order forbids. Keep provenance a soft/denormalised field.
 
-### 17.5 [~] Explicit item ordering — `position` on every session item — **SHIPPED 2026-07-27**
-**Decided 2026-07-26 (Simon): ordering must be explicit and verbose, not implied by array index.** Design in [DATA_MODEL §3 "Ordering"](docs/DATA_MODEL.md).
+### 17.5 [~] Explicit item ordering — `position` on every session item
+**SHIPPED** in [sessionItemOrder.js](src/modules/common/sessionItemOrder.js) — steps 1–3 of the
+design in [DATA_MODEL §"Ordering"](docs/DATA_MODEL.md) (full rationale: why dense not gapped, why
+not a linked list, rejected alternatives — lives there, not here). Writers stamp `position` at the
+choke point they all funnel through (`saveActiveSessionToCache`) plus `buildProgramSnapshot` for
+the frozen record. Covered by `tests/e2e/test_session_item_order.py`.
 
-> **Built 2026-07-27** in [sessionItemOrder.js](src/modules/common/sessionItemOrder.js) — steps 1–3
-> of the sequencing below, which is what unblocks [§18.6 part 4](#18-data-layer-simultaneous-multi-schema-writes-star-writes).
-> Rather than stamping positions at each of the ~10 splice sites the plan below lists, writers stamp
-> at the **choke point they all funnel through** (`saveActiveSessionToCache`), plus
-> `buildProgramSnapshot` for the frozen record — so a splice site added later cannot forget, which a
-> per-site rule could not promise. Covered by `tests/e2e/test_session_item_order.py`.
-> **Still open**: nothing consumes `positionIssues()` at runtime yet — it is a query the tests call,
-> not a surfaced integrity warning; and `activeExerciseIndex` still means an *array index*, which
-> holds only while the live array stays in position order (it does — the choke point guarantees it).
-
-- **The field**: `position`, integer, **dense and unique — `0..n-1`** across one session's item list. Readers **sort by it**; nothing about how the records are stored may imply sequence.
-- **Why now — this blocks the engine move.** On JSON, sequence rode along free in an array; IndexedDB (§18.6) retires that, and a key order is not a program order. Once items stop living in an ordered structure there is nothing left to derive the first positions from, so `position` must land **before** the store swap, not after it. The §18.3 completeness check would never catch the loss: every id is present and only the *order* is wrong — a scrambled program that passes every integrity test we have.
-- **What it buys beyond order**: two assertions that no implicit scheme could express — dense/unique (catches a dropped, duplicated or half-reordered item, or a projection that wrote a partial list) and **circuit contiguity as a query** (`max(position) - min(position) + 1 === member count` per `circuitId`), which turns the invariant `normalizeCircuits()` upholds by convention into something verifiable at rest.
-- **Dense, not gapped or fractional**: sparse/lexicographic ranks forfeit the intactness check — any set of distinct values is a valid rank set, so "is this list whole?" stops being answerable. They pay off for concurrent writers doing frequent reorders; a single-writer offline app has neither. Renumbering the tail costs `n` puts in one transaction, with `n` the item count of one session (tens).
-- **Not a linked list** (considered 2026-07-26): `nextId`/`prevId` is the more flexible representation and the wrong axis to optimise. Reading is the hot path — the clipboard needs the whole session in order on every re-render, which a chain serves as `n` *dependent* lookups (each hop must resolve before the next key is known, so it cannot be batched) versus one sorted index range scan. Failure modes decide it: a single bad pointer makes the entire tail unreachable — the session silently ends early, indistinguishable from one that really was short — while a bad `position` misplaces exactly one item and the density check names it. Chain corruption yields cycles, forks and orphans whose repair is guesswork; a position list fails as a hole or a duplicate and the repair is a mechanical renumber. Contiguity (`max - min + 1 === count`) has no equivalent over a chain. **Would revisit if** sessions reached thousands of items or one session were edited concurrently from two devices — and even then the next stop is fractional ranks, not a chain, because they keep the ordered read.
-- **Rejected**: a second `circuitPosition` for the index within a circuit. Derivable from `position` + contiguity, so storing it creates two sources of truth whose disagreement has no correct resolution.
-- **Sequencing (expand-first, per §18)**: (1) write `position` on every item in every writer — editor commits, deck inserts, `buildProgramSnapshot`, `openSessionFromHistory`, routine seeds, backup import — while readers still use list order; (2) add the invariant checks + a repair that renumbers from current list order; (3) flip readers to sort by `position`; (4) **only then** may the store stop guaranteeing list order — i.e. steps 1–3 gate [§18.6 part 4](#18-data-layer-simultaneous-multi-schema-writes-star-writes), the `stateStore` move onto IndexedDB. Legacy JSON records get positions assigned once, at migration, from the array order still intact at that moment.
-- **Touches**: [sessionItemRecord.js](src/modules/common/sessionItemRecord.js), [clipboardEditor.js](src/modules/clipboard/clipboardEditor.js) (`normalizeCircuits`, `rebuildFromDom`, every splice), [exerciseDeck.js](src/modules/clipboard/exerciseDeck.js) (`insertFastAdjustment`), [activeSessionController.js](src/controllers/activeSessionController.js) (`injectExerciseIntoActivePlan`, `buildCircuitUnits`, and `activeExerciseIndex` — a positional pointer that must keep meaning an *array index*, not a position value), backup round-trip, `DEFAULT_ROUTINES`/`DEFAULT_HISTORY` seeds.
-- **Back-compat**: additive behind a shape guard, exactly like `type`/`completed` in 17.1 — an item with no `position` falls back to its index in whatever list it arrived in, so legacy history and old backups stay readable. That fallback is a one-time import/migration concern, not a permanent reader path: once the store no longer preserves list order there is no index to fall back to.
+**Still open**: nothing consumes `positionIssues()` at runtime yet (it's a query the tests call,
+not a surfaced integrity warning); `activeExerciseIndex` still means an *array index*, which holds
+only while the live array stays in position order; and step 4 — the store may stop guaranteeing
+list order — gates on [§18.6 part 4](#18-data-layer-simultaneous-multi-schema-writes-star-writes),
+not yet reached.
 
 ---
 
 ## 18. Data layer: simultaneous multi-schema writes ("star writes")
 
-> **Status (2026-07-26): brainstorm, nothing built.** Raised by Simon as an architectural change to the
-> persistence layer: **the data layer writes every record to all supported data-schema versions at
-> once**, so that moving between app versions loses nothing in either direction. Captured here in full
-> so it can be resumed; the sub-items mark what is settled and what is still open.
+> **The architectural change**: the data layer writes every record to all supported data-schema
+> versions at once, so moving between app versions loses nothing in either direction. Today's
+> shipped migration is a **chain** (v1→v2→v3): lossiness compounds, and each step is tested against
+> the previous step's output rather than against reality. Star writes replace it with a **star** —
+> one projection per schema, each computed directly from the live domain object, none feeding
+> another. Error cannot compound, every projection is independently testable, and there are **no
+> backward transforms** to write: a "downgrade" is just another projection already being written.
 >
-> **The core idea, and why it is structurally good.** Today's shipped migration is a **chain**
-> (v1→v2→v3, [schemaMigrations.js](src/data/schemaMigrations.js)): lossiness compounds, and each step
-> is tested against the previous step's output rather than against reality. Star writes replace the
-> chain with a **star** — one projection per schema, each computed directly from the live domain
-> object, none feeding another. Error cannot compound, every projection is independently testable
-> against a single source, and there are **no backward transforms** to write: a "downgrade" is just
-> another projection that was already being written all along. This is the strongest argument for the
-> proposal and it should not be lost when weighing the costs.
+> **Supersedes the "stay on localStorage" half of §3.7** (see 18.6) and **depends on §16.3** (see
+> 18.1).
 >
-> **This supersedes the "stay on localStorage" half of §3.7** (see 18.6) and **depends on §16.3**
-> (see 18.1). §16's multi-version hosting was dropped outright on the strength of the decision below;
-> what is left of §16 is the schema-keyed bucket (16.3) and the code retirement (16.5).
+> **Decided: NO RELEASE TAGS. One build carries old and new behaviour concurrently.** Behaviour
+> switching is an in-app choice, not navigation — no per-tag publishing, no rollback-by-URL. What is
+> supported is a set of **schemas**, the only axis storage keys on ([16.3](#163--decided-not-built-key-storage-buckets-on-the-data-schema-not-the-release-tag)).
+> "No fixes ever land on a maintenance-mode version" is inverted, deliberately: old behaviours live
+> inside the current build, so they get fixes automatically.
 >
-> ## ⚠️ Decided 2026-07-26: NO RELEASE TAGS. One build carries old and new behaviour concurrently.
+> **Open question to confirm before building the write layer**: with one build, what still justifies
+> writing every live schema? The surviving case is the **previously-cached Service Worker build** — a
+> PT on yesterday's cached build *is* an older app version even with no tags, and multi-schema writes
+> keep their data readable. Backup portability is the second case.
 >
-> Simon: *"there is no more roll back tags — app contains old and new behaviour concurrently."* This
-> **resolves §18.10's fork** in favour of the one-build model, and on 2026-07-27 §16's hosting items
-> were **dropped from this file** rather than kept as deferred work. What follows from it, so nothing
-> is rebuilt on a retired assumption:
+> **Build order: DB first, then the star write layer, then the CD pipeline tests (18.13).** The
+> engine comes first because the fan-out cannot be built on localStorage at all (exceeds the 5 MB
+> cap; atomic fan-out needs IndexedDB transactions).
 >
-> - **Behaviour switching is an in-app choice, not navigation.** No `/v1.2.0/` subpaths, no per-tag
->   publishing, no rollback-by-URL. Deep links lose their version dimension entirely, which is what
->   made §18.10's failure mode 1 disappear rather than merely be mitigated.
-> - **A supported window of *releases* does not exist.** What is supported is a set of **schemas**,
->   which is the only axis storage keys on ([16.3](#163--decided-not-built-key-storage-buckets-on-the-data-schema-not-the-release-tag)).
->   The tag-shape question (semver vs ISO) is moot: there is no tag to shape.
-> - **§16.3 gets simpler, not just different**: with no release identity there is no `UNRELEASED`
->   case, no tag normalisation and no per-release bucket. Storage keys go straight onto the schema
->   major.
-> - **"No fixes ever land on a maintenance-mode version" is inverted, deliberately.** Old
->   behaviours live inside the current build, so they get fixes automatically. That is the accepted
->   consequence, not an oversight.
-> - **The `DEGRADED` ribbon tier (§18.12) survives and matters more**, because degraded mode is now
->   reachable by an ordinary in-app choice rather than by a deliberate downgrade.
->
-> **Open question this raises — confirm before building the write layer.** With one build, what still
-> justifies writing every live schema? The surviving case looks like **the previously-cached Service
-> Worker build**: a PWA update is not instant and must never interrupt a trainer mid-session (§16),
-> so a PT on yesterday's cached build *is* an older app version even with no tags — and multi-schema
-> writes are what keep their data readable by whichever build is actually running. Backup portability
-> is the second case. If that reading is right the write layer is unchanged; if the real driver is
-> something else, the set of live schemas may be chosen differently.
->
-> **Build order (decided with Simon 2026-07-26): DB first, then the star write layer, then the CD
-> pipeline tests (18.13), then onwards in small steps.** The engine comes first because the star write
-> layer cannot be built on localStorage at all — the fan-out multiplies a figure that already exceeds
-> the 5 MB cap, and atomic fan-out needs IndexedDB transactions. The pipeline tests come *after* the
-> write layer because most of what they assert (projection round-trips, the staging guard) has no
-> subject until projections exist.
->
-> **Progress:**
-> - [x] **18.2 record identity** — [recordId.js](src/modules/common/recordId.js), UUIDv7 as fixed-width
->   base62, all call sites switched. Replaced a 41.4-bit `Math.random` generator carrying a **1.38%
->   chance of at least one collision** over five years of a very busy PT's records.
-> - [x] **18.6 engine, part 1** — [indexedDb.js](src/data/indexedDb.js): one database, one object
->   store per schema, transactions that resolve on commit, collection + client indexes. **Revised
->   2026-07-27**: added a compound `byClientAndCollection` index — the two single-field indexes
->   couldn't isolate "client X's history" from "client X's plan updates" without a client-side
->   filter, which is exactly the query §17.1's lazy per-client load names. Found while checking
->   `recordSchemas.js`'s seven declared collections against what the two original indexes actually
->   serve. Also corrected `docs/DATA_MODEL.md`'s SESSION entity, which drew a single `clientId` where
->   the real field is `participants` (many-to-many, group sessions — TODO §1.2), and added the
->   missing `PLAN_UPDATE` entity block.
-> - [x] **18.6/18.8 engine, part 2** — [storageDurability.js](src/data/storageDurability.js):
->   `persist()` on boot, eviction risk reported by consequence rather than private-mode sniffing.
-> - [x] **18.6 engine, part 3** — [writeQueue.js](src/data/writeQueue.js): write-behind persistence.
->   Measured first — the store has ~52 synchronous save call sites against ~47 synchronous
->   `getState()` reads, so making persistence async end to end would be a very large diff across the
->   gym-floor path for no user-visible gain. Reads stay synchronous against the in-memory state
->   (which the UI already treats as truth); writes serialise through the queue.
+> **Remaining work, in order:**
 > - [ ] **18.6 engine, part 4** — move `stateStore`'s read/write path onto IndexedDB through the
->   queue, with §17.1's lazy per-client load. The risky one: it needs a one-way import from the
->   existing localStorage bucket and must stay revertable until it has run on real data. Only
->   `loadSavedState` (4 call sites) becomes async; the other ~99 stay untouched.
->   **Gated by [§17.5](#175--explicit-item-ordering--position-on-every-session-item--shipped-2026-07-27)**: session item
->   order rides on array position today, and the store swap is what takes that away — positions must
->   be written and authoritative *before* the import runs, or the first sessions to land in the DB
->   have no recoverable sequence.
-> - [ ] **Documentation** — [docs/DATA_MODEL.md](docs/DATA_MODEL.md) exists and must be kept in step
->   with each of the steps below.
-> - [x] **[§17.5](#175--explicit-item-ordering--position-on-every-session-item-shipped-2026-07-27) — explicit `position`** (2026-07-27).
->   The gate on part 4: order is now a field, stamped by every writer and sorted on by every reader
->   of a stored record, so items may safely stop living in an ordered structure.
-> - [x] **18.2 identity, closed** (2026-07-27) — `lineageId` is the record's own `id`; no mapping
->   table. Found while proving it: `buildProgramSnapshot` was dropping the `id` off every rest item
->   (sessionItemRecord.js), the one place a genuinely current write produced an item that could never
->   be individually addressed — fixed alongside.
-> - [x] **18.1/18.4, single-schema half** (2026-07-27) — schemas now exist as data
->   ([recordSchemas.js](src/data/recordSchemas.js)), with per-collection projections
->   ([recordProjections.js](src/data/recordProjections.js)) proven against real seed data and the
->   actual object literals live writers build, not an idealised model
->   (`tests/e2e/test_record_schemas.py`). **Not yet built**: the fan-out into an actual IndexedDB
->   bucket, and the cross-schema half of the staging guard — both wait on a second schema existing.
+>   write queue, with §17.1's lazy per-client load. The risky one: needs a one-way import from the
+>   existing localStorage bucket, revertable until proven on real data. **Gated by §17.5** (shipped):
+>   session-item `position` must be written and authoritative before the import runs.
+> - [ ] **Documentation** — [docs/DATA_MODEL.md](docs/DATA_MODEL.md) must be kept in step with each
+>   step below.
 > - [ ] **[16.5](#165--retire-the-multi-version-hosting-machinery-from-the-code)** — delete the
 >   multi-version hosting machinery, so the next item is a small diff instead of a rewrite.
 > - [ ] **[16.3](#163--decided-not-built-key-storage-buckets-on-the-data-schema-not-the-release-tag)** —
->   bucket on the schema major, matching the IndexedDB store naming so part 4's import is a copy
->   between two things named alike.
-> - [ ] **18.1/18.4, the rest** — the actual fan-out (write a projection into an IndexedDB bucket).
+>   bucket on the schema major, matching the IndexedDB store naming.
+> - [ ] **18.1/18.4, the rest** — the actual fan-out (write a projection into an IndexedDB bucket);
+>   waits on a second live schema existing.
 > - [ ] **18.13** — the CD pipeline tests.
 
 ### 18.1 [~] [Decided in principle] The star write model, and its relationship to §16.3
@@ -759,37 +552,17 @@ conflated and are worth keeping apart:
 - **Write set ⊇ read set.** A bucket must start receiving star writes the moment its migration
   *begins*, not when it completes — that is what makes 18.3's accelerator work.
 
-### 18.2 [x] [Decided] Identity: lineage IDs vs. the ID-mapping table — **CLOSED 2026-07-27**
-**Decided: `lineageId`, expressed as the record's own `id` — no separate mapping table.** All four
-arguments below already pointed the same way, and §18.3's own corrected completeness check
-(`keys(source) \ keys(target) = ∅`, a set difference over ids) turned out to **be** the cursor a
-mapping table would have provided — so dropping the table costs nothing that §18.3 didn't already
-replace. `recordProjections.js`'s projections carry `record.id` through unchanged from the domain
-object for exactly this reason: today's `id` (UUIDv7 via `recordId.js`) already **is** the lineage
-id, so there is no remapping step to build. A genuine split/merge migration, if one is ever needed,
-mints per-schema local ids only on the schema that requires them — that case has not arisen yet and
-is not blocking anything live.
+### 18.2 [x] [Decided, CLOSED] Identity: lineage IDs, no ID-mapping table
+**`lineageId` is the record's own `id` — no separate mapping table.** `recordProjections.js`'s
+projections carry `record.id` unchanged from the domain object: today's `id` (UUIDv7 via
+[recordId.js](src/modules/common/recordId.js)) already **is** the lineage id. A genuine split/merge
+migration, if one is ever needed, mints per-schema local ids only on the schema that requires them
+— not needed yet. §18.3's completeness check (a set difference over ids) already provides what a
+mapping table would have, at no extra cost.
 
-Simon's proposal remaps record IDs at each schema migration and keeps an
-`old-id → migrated-id` mapping table, which also serves as the idempotency guard.
-
-- **Clash probability is *not* the justification** — 122 random bits do not collide. The real
-  justification is **split/merge migrations**: when one v5 record becomes N v6 rows (or the reverse),
-  identity genuinely cannot be preserved and no key format saves you.
-- **Cost of remapping**: the same logical record has a different ID per bucket, so the mapping becomes
-  **hot-path infrastructure** (every fan-out write translates IDs), must itself be stored, backed up
-  and reconciled, and grows as `records × schemas` forever with no deletes and no compaction story.
-- **Proposed alternative — an immutable `lineageId`** minted once and never changed, with per-schema
-  local ids only where a schema truly needs one; splits produce children under a stable parent. The
-  mapping becomes a *column on the record* instead of a second store. **Four independent arguments
-  now point at this**: split/merge identity, the suppression list (18.7), deep-link durability
-  (18.10), and dropping the hot-path lookup.
-- **ID format — UUIDv7, decided 2026-07-26** (RFC 9562): 122 bits of collision resistance *and* lexicographic
-  time-ordering in the prefix, so it doubles as a tiebreak within 18.5's topological order. Today's
-  generators are a real clash risk and leak creation time — `Date.now()` + 4 chars of `Math.random()`
-  ([clipboardEditor.js](src/modules/clipboard/clipboardEditor.js)), `session-${Date.now()}`
-  ([editSessionControl.js](src/modules/session/editSessionControl.js)). If "short" ids are wanted,
-  shorten by base62-encoding a v7 — never by dropping entropy.
+**ID format: UUIDv7** (RFC 9562) — 122 bits of collision resistance *and* lexicographic
+time-ordering, doubling as a tiebreak within §18.5's topological order. If "short" ids are wanted,
+shorten by base62-encoding a v7 — never by dropping entropy.
 
 ### 18.3 [ ] [Decided] Migration is pre-emptive, resumable, and runs through the normal write layer
 - **Pre-emptive**: migration into a newly-available schema starts *before* the PT opts into anything,
@@ -995,47 +768,16 @@ single-database layout), so **no app-level lock is needed for it**.
 - `navigator.locks` around the *migration pass* is worth ~3 lines so two tabs do not duplicate work —
   efficiency only, since idempotency already makes it safe.
 
-### 18.10 [~] [Resolved — one build] Deep links, and one build vs. many builds
-Three deep-link failure modes as UI behaviours are added and dropped:
+### 18.10 [x] [RESOLVED — one build] Deep links, and one build vs. many builds
+**Resolved in favor of the one-build model** — see the §18 decision banner. Three deep-link
+invariants that follow and still apply:
 
-1. **Version segment dies at EOL** — a shared `/LibrePT/v1.5.0/#/…` 404s. Fix: **never version-qualify
-   a shareable link.** One canonical version-less URL space; the versioned path is the *switcher's*
-   mechanism. **Version selection is per-PT state, never part of a shared URL.**
+1. **Never version-qualify a shareable link.** One canonical version-less URL space — moot for
+   hosting now, but still the rule for any future per-PT behaviour-flag state.
 2. **Route removed or renamed** — deprecated routes become permanent aliases to canonical ones,
-   retained forever (routes are bytes, same principle as keeping backup readers forever). A link to a
-   retired *behaviour* resolves to the nearest surviving ancestor rather than erroring.
-3. **The ID in the link no longer exists** — created by 18.2's remapping. The mapping table can
-   resolve it, but the better answer is that **deep links carry the `lineageId`, never a per-schema
-   id**, and no lookup is ever needed.
-
-> **RESOLVED 2026-07-26 in favour of the one-build model** — see the §18 decision banner. The
-> paragraph below is kept as the record of what the choice cost and inverted.
-
-**The fork worth deciding before anything here is built.** Simon's "each new release packages all UI
-code for supported version behaviours" implies **one build with versioned behaviours behind flags**,
-not multiple hosted builds. That is arguably a *simplification*: no byte-identical release folders, no
-per-tag subpath publishing, no service-worker reinstall hazard, no "which build am I running", and
-deep-link failure mode 1 disappears rather than being mitigated. **Confirmed as the intent
-(Simon, 2026-07-26).** Costs: old behaviours must be actively maintained rather than frozen, and it
-**inverts "no fixes ever land on a maintenance-mode version"** — old behaviours living inside
-the current build *do* get fixes automatically. That may well be better, but it must be a deliberate
-reversal, and it decides whether §16's hosting machinery stays or is retired. **It was retired**
-(2026-07-27, §16). Everything else in §18 holds either way.
-
-- **Content-addressed modules make the payload cost much smaller than a naive ×N** (Simon,
-  2026-07-26): a module whose SHA is unchanged across behaviour generations is stored and downloaded
-  **once**, so the marginal cost of an extra generation is only the files that actually differ — not
-  another 671 KB. The app already computes a per-file integrity catalog for the service-worker cache
-  ([cacheManifest.js](src/sw/cacheManifest.js)), which is most of the machinery.
-- **The price is dependency resolution**: routing must work out which module graph a given behaviour
-  needs when the files are shared and deduplicated. **This is the payoff case for modularization** —
-  it raises the value of §14.5 (split the monolithic shared files) and §12.7 (~89 module requests on
-  first load) from housekeeping to load-bearing, because coarse modules dedupe badly and a file that
-  mixes two behaviours' code can never be shared.
-- **Watch the shipped invariant**: `cacheManifest.js` documents that the cache is *atomic* — one whole
-  coherent module version or nothing — because a stale module importing a fresh one is a runtime
-  version skew. Content-addressed sharing across generations must preserve that per-graph coherence,
-  not just per-file freshness.
+   retained forever. A link to a retired *behaviour* resolves to the nearest surviving ancestor
+   rather than erroring.
+3. **Deep links carry the `lineageId`**, never a per-schema id (§18.2) — no lookup is ever needed.
 
 ### 18.11 [ ] [Open] Legal gaps this design creates
 - **Re-identification via backups + the mapping table.** A pre-erasure backup contains
@@ -1131,18 +873,6 @@ instance of a general gap.
 
 Design, invariants and the "how to add a route" checklist: **[docs/ROUTING.md](docs/ROUTING.md)**.
 The catalogue of what the URLs are: [UC5 §4](use_cases/uc5_session_day_deck_and_deep_links.md).
-
-### 19.1 Shipped
-
-- [x] **Route registry** — routes are objects resolved by specificity, not a 27-branch `if/else`.
-- [x] **The router is the only URL writer** — `pushRoute`/`replaceRoute` own what a URL carries;
-      `?lang`/`?theme` survive navigation, `?init` deliberately does not.
-- [x] **Global dialogs** — `/about`, `/terms`, `/build`, `/backup`; Back closes them.
-- [x] **Record editors** — `/routines/new`, `/routines/{id}`, `/exercises/new`,
-      `/adjustments/{updateId}`.
-- [x] **The session's taxonomy picker** — `…/edit/catalog[/slot/{slotId}]`.
-- [x] **The plan editor's called-out row** — `…/edit/exercise/{slotId}`, restored without a caret or
-      a badge.
 
 ### 19.2 Blocked on the URL-privacy question
 

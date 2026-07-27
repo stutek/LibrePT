@@ -29,7 +29,26 @@ Every response and tool action must drive measurable, continuous progress toward
 ### A. Direct Execution & Git Flow
 1. **Direct Application**: Apply edits directly and cleanly, always choosing the best architectural option without asking questions or waiting for clarification.
 2. **Auto-commit coherent changes**: Commit your own work automatically — do **not** wait to be asked. As soon as a change is coherent and verified, stage exactly the files you touched and commit them to `main` with a clear message. Keep commits small and focused (one logical change each) so the user can review and, if needed, roll back via git history/diff. Never sweep unrelated or concurrently-edited files into your commit.
-3. **Run the full local pipeline before every code change commit and report results.** "Verified" means passing the same gate CI runs — not just running a test subset. Stage commits ONLY after executing `.venv/bin/python -m build check` in full and confirming all static analysis, security audits, automated tests, and documentation checks pass cleanly. Preexisting challenges are not tolerated and should be addressed. Include a concise pipeline status report in the response prior to committing. Rules:
+3. **Run the full local pipeline before every code change commit and report results.** "Verified" means passing the same gate CI runs — not just running a test subset (`pytest tests/` alone skips lint, the frontend HTML-sink/CSP audit, and the dependency scan). Stage commits ONLY after executing `.venv/bin/python -m build check` in full and confirming all static analysis, security audits, automated tests, and documentation checks pass cleanly. Preexisting challenges are not tolerated and should be addressed. Include a concise pipeline status report in the response prior to committing.
+
+   **Command reference:**
+   | Command | What it does |
+   | :--- | :--- |
+   | `.venv/bin/python -m build check` | The gate: Stage 1 + Stage 2 below, staged (Stage 2 only runs if Stage 1 is clean). This is what "run the pipeline" means. |
+   | `.venv/bin/python -m build` | Full build: env check → the same tests → bundle `src/` into `dist/`. |
+   | `.venv/bin/python -m deploy` | Publish the built `dist/`. |
+   | `.venv/bin/python -m build && .venv/bin/python -m deploy` | Full chain. |
+
+   **Stage 1 (fast, no browser — runs its tasks in parallel):** Python lint/format (Ruff), frontend
+   lint/format (Biome, JS+CSS), dependency security audit (`pip-audit`), unit tests (`tests/unit/` +
+   `tests/test_app.py`), and the static security audits (HTML-sink/CSP escaping audit via
+   `build/frontend_audit.py`, the OKF doc-graph link checker, the CI pipeline-gating checker).
+
+   **Stage 2 (only if Stage 1 is clean — also runs its tasks in parallel):** the full Playwright e2e
+   suite (`tests/e2e/` + `tests/test_browser.py`, itself fanned out across workers via `pytest-xdist`)
+   and an OWASP ZAP baseline scan against the running dev server.
+
+   Both stages together typically take 5-15 minutes; expect it, don't interrupt it. Rules:
    - **Squeaky clean, always — zero warnings, not just zero failures.** The bar is a *clean* build, not a *green-enough* one. Every gate stage — lint, format, unit, e2e, dependency audit, dynamic security, **and the OWASP ZAP scan** — must report **no warnings and no findings**. For ZAP specifically that means `WARN-NEW: 0` **and** `FAIL-NEW: 0`, not merely no FAILs. A warning is either **fixed** at its source or **explicitly suppressed with a written justification** (e.g. a ZAP `-c` ignore rule annotated with why it does not apply to an offline-first static PWA) — never left to print and pass.
    - **Never swallow a non-zero exit code.** A gate step that exits non-zero (including ZAP exit `2` = warnings and exit `3` = the scan errored / could not reach the target) MUST fail the build. Printing "completed with warnings" and returning success is forbidden — that pattern once hid a ZAP scan that was not even reaching the running app. If a stage cannot run, that is a failure to fix, not a pass to log.
    - **A security scan that scans nothing is a failed scan.** Confirm the scanner actually reaches the app under test (the ZAP container needs host networking to hit the dev server on `:8081`); a scan that connects to nothing and exits "clean" gives false assurance and is treated as a failure.
@@ -46,7 +65,7 @@ Every response and tool action must drive measurable, continuous progress toward
    - **Subject ≤ 72 characters**, and aim for ~60. Count it before committing; long subjects are silently truncated wherever they are displayed.
    - **Blank line after the subject**, then the body **wrapped at 72 columns** (git tooling does not re-wrap, so unwrapped bodies render as one long line in most viewers).
    - **The body explains WHY**: the constraint, the decision, the evidence, what was measured. Not a restatement of the diff — the diff is already in the commit.
-   - **Footer**: `Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>`.
+   - **Footer**: `Co-Authored-By: <the agent's own model name> <noreply@anthropic.com>` (or the equivalent for a non-Claude agent) — name the model actually running, not a fixed one.
    - **Never put the body in a CI `run-name`** or any other title field. GitHub Actions expressions cannot split a string, so `head_commit.message` interpolates the entire message; rely on GitHub's default run title instead.
 
 ### B. Evaluate Changes, Call Out Gaps & Propose Opportunities
