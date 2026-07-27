@@ -195,6 +195,21 @@ The clipboard's finish bar (`.session-actions-footer`, holding `#btn-finish-sess
 ### 8.5 [x] Catalog picker button in the plan edit view — **SHIPPED 2026-07-25**
 The inline clipboard editor (`clipboardEditor.js`) gained an **"Add from catalog"** button that opens the reusable filtered taxonomy picker (`mountExercisePicker`) in `#dialog-catalog-picker`; tapping a movement injects it into the active plan (fresh slot id + taxonomy fields, defaults 3×10, adjustable inline) via the shared `injectExerciseIntoActivePlan` helper and returns to the editor. Covered by `test_catalog_picker_in_edit.py`.
 
+### 8.6 [ ] Bug: a collapsed rest card starts its timer on tap — should only bring it into focus
+A collapsed (not-in-focus) card's only allowed action is bringing it into focus — confirmed correct
+for standalone exercise cards and circuit cards, both of which gate their whole in-focus template
+(reorder-sensitive actions, feedback signals, the circuit's own timer button) behind `showInFocus =
+item.isInFocus && !pastExpanded` and fall through to an `onFocus`-only click handler otherwise
+([exerciseCard.js](src/modules/clipboard/exerciseCard.js), [circuitCard.js](src/modules/clipboard/circuitCard.js)).
+
+**Standalone rest cards skip that gate.** [exerciseDeck.js](src/modules/clipboard/exerciseDeck.js)'s
+`item.type === "rest"` branch wires `card.addEventListener("click", () => startRestTimer(item.rest,
+"rest"))` unconditionally — it never checks `item.isInFocus`, so a rest card **anywhere in the
+upcoming list**, not just the focused one, starts its countdown on tap instead of bringing itself
+into focus like every other collapsed card does. Fix: gate the rest card's click handler on
+`item.isInFocus` (mirroring `showInFocus` in the other two card components) and give it the same
+`onFocus`-only fallback when collapsed.
+
 ---
 
 ## 9. Interactive Demo / Guided Onboarding
