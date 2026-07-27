@@ -28,9 +28,22 @@
   <!-- Inline SVG favicon: the Font Awesome dumbbell path in --primary emerald, matching the header logo mark -->
   <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%20-64%20640%20640'%3E%3Cpath%20fill='%2310b981'%20d='M96%2064c0-17.7%2014.3-32%2032-32h32c17.7%200%2032%2014.3%2032%2032V224v64V448c0%2017.7-14.3%2032-32%2032H128c-17.7%200-32-14.3-32-32V384H64c-17.7%200-32-14.3-32-32V288c-17.7%200-32-14.3-32-32s14.3-32%2032-32V160c0-17.7%2014.3-32%2032-32H96V64zm448%200v64h32c17.7%200%2032%2014.3%2032%2032v64c17.7%200%2032%2014.3%2032%2032s-14.3%2032-32%2032v64c0%2017.7-14.3%2032-32%2032H544v64c0%2017.7-14.3%2032-32%2032H480c-17.7%200-32-14.3-32-32V288%20224%2064c0-17.7%2014.3-32%2032-32h32c17.7%200%2032%2014.3%2032%2032zM416%20224v64H224V224H416z'/%3E%3C/svg%3E">
 
-  <!-- Custom Styles -->
+  <!-- Custom Styles: index.css carries shared design tokens, glass-card/button/flex foundations
+       and color scheme, loaded first. Per-module stylesheets below add only what that module owns
+       (TODO §14.5 / §18.10 — a monolithic stylesheet cannot be shared/toggled per behaviour).
+       Multiple requests, no build-time concatenation, by deliberate choice: this mirrors how the
+       app already treats JS (~89 native ES module requests, not bundled, TODO §12.7) rather than
+       introduce this project's first source-to-shipped-bytes transformation — dist/ stays a
+       verbatim copy of src/ (TODO §16). -->
   <link rel="stylesheet" href="index.css">
-  
+  <link rel="stylesheet" href="modules/clipboard/activeSessionOverlay.css">
+  <link rel="stylesheet" href="modules/clipboard/clipboardEditor.css">
+  <link rel="stylesheet" href="modules/clipboard/exerciseDeck.css">
+  <link rel="stylesheet" href="modules/clipboard/exerciseCard.css">
+  <link rel="stylesheet" href="modules/clipboard/circuitCard.css">
+  <link rel="stylesheet" href="modules/clipboard/exerciseAndRestTimer.css">
+  <link rel="stylesheet" href="modules/common/activeUsersList.css">
+
   <!-- Module Preloading for Core Architecture & Views -->
   <link rel="modulepreload" href="app.js">
   <link rel="modulepreload" href="modules/common/utils.js">

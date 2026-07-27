@@ -1,0 +1,513 @@
+/* clipboardEditor.css — the inline on-the-fly plan editor: row/circuit/rest editing, the
+   reorder control, and the insert bar. Extracted from index.css 2026-07-27 (TODO §14.5 / §18.10).
+   Inherits design tokens, glass-card/button/flex foundations and color scheme from index.css,
+   loaded first — this file adds only what clipboardEditor.js owns. */
+
+.clipboard-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+/* Edit-mode chrome: the session title bar is repurposed to show WHICH plan is being edited and
+   its temporal mode, so the trainer always knows if they're changing the live session or a future one. */
+.active-session-overlay.editing-plan .session-title-bar {
+  border-bottom: 2px solid var(--primary);
+}
+/* While editing the plan, the live-session chrome (member tabs, running timer, injury caveat)
+   steps aside so the client's goals + notes take focus. */
+.active-session-overlay.editing-plan #active-session-client-tabs,
+.active-session-overlay.editing-plan .session-timer-block,
+.active-session-overlay.editing-plan #clipboard-client-alert {
+  display: none;
+}
+
+/* Client focus panel: only visible while editing the plan. */
+.client-focus-panel {
+  display: none;
+}
+.active-session-overlay.editing-plan .client-focus-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  border: 1px solid var(--border-color);
+  border-left: 3px solid var(--primary);
+  border-radius: 10px;
+  background: var(--primary-light);
+}
+.client-focus-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.client-focus-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--primary);
+}
+.client-focus-item p {
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-main);
+}
+.edit-mode-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  vertical-align: middle;
+  margin-left: 8px;
+}
+.edit-mode-chip.live {
+  background: color-mix(in srgb, var(--danger) 15%, transparent);
+  color: var(--danger);
+  border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent);
+}
+.edit-mode-chip.future {
+  background: color-mix(in srgb, #f59e0b 15%, transparent);
+  color: #f59e0b;
+  border: 1px solid color-mix(in srgb, #f59e0b 40%, transparent);
+}
+.edit-mode-chip.planning {
+  background: var(--primary-light);
+  color: var(--primary);
+  border: 1px solid color-mix(in srgb, var(--primary) 40%, transparent);
+}
+.editor-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+.editor-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.editor-empty {
+  color: var(--text-muted);
+  font-size: 13px;
+  padding: 12px 0;
+}
+.editor-row {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  padding: 10px;
+  border-radius: var(--border-radius-md);
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+}
+.editor-row-dragging {
+  opacity: 0.6;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+/* The row just inserted (from the live deck's +Exercise bar, an editor insert bar, or the catalog).
+   Colour alone can't carry this on a sunlit gym floor, so the row also gets a thick accent edge and
+   a literal "New" badge; the pulse only draws the eye on arrival and then settles. */
+/* Two-class selectors: `.editor-rest-row` declares its own dashed border/background further down
+   the sheet, and equal specificity would let it win over this call-out. */
+.editor-row.editor-row-added,
+.editor-rest-row.editor-row-added {
+  border-color: var(--primary);
+  border-left: 4px solid var(--primary);
+  background: color-mix(in srgb, var(--primary) 12%, var(--card-bg));
+  animation: editor-added-pulse 1.2s ease-out 1;
+}
+.editor-added-badge {
+  flex: 0 0 auto;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: var(--on-primary);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+@keyframes editor-added-pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 55%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 10px transparent;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .editor-row-added {
+    animation: none;
+  }
+}
+/* Combined reorder control: tap the top half to move up / bottom half to move down; drag to
+   reorder freely. Sized as a tall two-zone target so both taps and drags are easy on touch. */
+.editor-reorder {
+  flex: 0 0 auto;
+  width: 34px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--input-bg);
+  color: var(--text-muted);
+  cursor: grab;
+  touch-action: none;
+  overflow: hidden;
+}
+.editor-reorder:active {
+  cursor: grabbing;
+}
+.editor-reorder-up,
+.editor-reorder-down {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+.editor-reorder-up {
+  border-bottom: 1px solid var(--border-color);
+}
+.editor-reorder:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+}
+.editor-row-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.editor-row-name-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.editor-row-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 34px;
+  padding: 0 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--input-bg);
+  color: var(--text-main);
+  font-family: var(--font-header);
+  font-size: 14px;
+  font-weight: 700;
+}
+/* Browse the taxonomy for this row. Sized as a real 34px touch target next to the name field — the
+   combobox only serves a PT who already knows the movement's name; this is the route when they
+   don't, so it must be tappable with a sweaty thumb, not a hover affordance. */
+.editor-row-catalog {
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--input-bg);
+  color: var(--primary);
+  font-size: 13px;
+  cursor: pointer;
+}
+.editor-row-catalog:hover,
+.editor-row-catalog:focus-visible {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+.editor-row-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.editor-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.editor-field > span {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-muted);
+}
+.editor-field > input {
+  width: 62px;
+  height: 30px;
+  padding: 0 6px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--input-bg);
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+}
+/* Reps is polymorphic — ranges ("8-12"), holds ("30s"), or "max" — so it needs more room than the
+   numeric sets/load fields to show the whole token without clipping. */
+.editor-field > input.editor-f-reps {
+  width: 84px;
+}
+.editor-remove {
+  flex: 0 0 auto;
+  align-self: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid var(--danger-light);
+  background: transparent;
+  color: var(--danger);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+.editor-remove:hover {
+  background: var(--danger-light);
+}
+.clipboard-editor-actions {
+  display: flex;
+  gap: 8px;
+}
+.clipboard-editor-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: center;
+  margin: 0;
+}
+/* Circuit membership <select> that sits in each row's field strip. */
+.editor-field-circuit > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.editor-row-circuit-select {
+  height: 30px;
+  max-width: 130px;
+  padding: 0 6px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--input-bg);
+  color: var(--text-main);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+/* Circuit block: members grouped in a tinted, layer-group-accented card. */
+.editor-circuit {
+  border: 1px solid var(--secondary, var(--primary));
+  border-radius: var(--border-radius-md);
+  background: color-mix(in srgb, var(--secondary, var(--primary)) 8%, var(--card-bg));
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.editor-circuit-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.editor-circuit-icon {
+  color: var(--secondary, var(--primary));
+  flex: 0 0 auto;
+}
+.editor-circuit-title {
+  flex: 1 1 120px;
+  min-width: 0;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--input-bg);
+  color: var(--text-main);
+  font-family: var(--font-header);
+  font-size: 13px;
+  font-weight: 800;
+}
+.editor-circuit-rounds {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+.editor-circuit-rounds > span {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-muted);
+}
+.editor-circuit-series {
+  width: 52px;
+  height: 30px;
+  padding: 0 6px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--input-bg);
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+}
+.editor-circuit-ungroup {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.editor-circuit-ungroup:hover {
+  color: var(--danger);
+  border-color: var(--danger-light);
+  background: var(--danger-light);
+}
+.editor-circuit-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.editor-circuit-add {
+  align-self: flex-start;
+  background: transparent;
+  border: 1px dashed var(--secondary, var(--primary));
+  color: var(--secondary, var(--primary));
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.editor-circuit-add:hover {
+  background: color-mix(in srgb, var(--secondary, var(--primary)) 14%, transparent);
+}
+/* Rest is a first-class, movable plan row in the editor. */
+.editor-rest-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--border-radius-md);
+  background: color-mix(in srgb, var(--primary) 7%, var(--card-bg));
+  border: 1px dashed var(--border-color);
+}
+.editor-rest-row .editor-reorder {
+  height: 34px;
+}
+.editor-rest-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+.editor-rest-label i {
+  color: var(--primary);
+}
+.editor-rest-secs {
+  width: 64px;
+  height: 30px;
+  padding: 0 6px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--input-bg);
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+}
+.editor-rest-unit {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-left: -4px;
+}
+.editor-rest-remove {
+  margin-left: auto;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid var(--danger-light);
+  background: transparent;
+  color: var(--danger);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.editor-rest-remove:hover {
+  background: var(--danger-light);
+}
+/* Insert bar in every gap: inject an exercise / circuit / rest at that position. */
+.editor-insert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 0;
+  opacity: 0.55;
+  transition: opacity 0.15s ease;
+}
+.editor-insert:hover,
+.editor-insert:focus-within {
+  opacity: 1;
+}
+.editor-insert-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border-color);
+}
+.ins-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.ins-btn:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+}
+.ins-btn.ins-circuit:hover {
+  color: var(--secondary, var(--primary));
+  border-color: var(--secondary, var(--primary));
+}

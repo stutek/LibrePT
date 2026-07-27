@@ -1,0 +1,19 @@
+/* activeUsersList.css — the active-session participant tabs, which wrap onto multiple rows
+   for a merged group session. Extracted from index.css 2026-07-27 (TODO §14.5 / §18.10).
+   Inherits design tokens, glass-card/button/flex foundations and color scheme from
+   index.css, loaded first — this file adds only what activeUsersList.js owns. */
+
+/* --- CLIENT/PARTICIPANT TABS (wrap to multiple rows) --- */
+/* Participants wrap onto new rows once the row fills, like text line-breaks, so a merged
+   session with many clients stays fully visible instead of scrolling out of view. */
+.client-tabs-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+}
+.client-tab-btn {
+  flex: 0 0 auto;
+  white-space: nowrap;
+} /* --- VERTICAL EXERCISE CARD STACK --- */

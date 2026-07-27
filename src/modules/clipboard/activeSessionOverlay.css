@@ -1,0 +1,199 @@
+/* activeSessionOverlay.css — the fullscreen active-session overlay shell: header/title bar,
+   timer block, footer, and the overflow (⋯) menu. Extracted from index.css 2026-07-27
+   (TODO §14.5 / §18.10 — a monolithic stylesheet cannot be shared/toggled per behaviour).
+   Inherits design tokens, glass-card/button/flex foundations and color scheme from index.css,
+   loaded first — this file adds only what activeSessionController.js's overlay chrome owns. */
+
+/* Fullscreen Active Workout Overlay Sheet */
+.active-session-overlay {
+  position: fixed;
+  top: var(--hdr-height);
+  left: 0;
+  right: 0;
+  max-width: var(--app-max-width, 480px);
+  margin: 0 auto;
+  /* Height tracks the *visual* viewport (dvh), not the layout viewport. With `bottom: 0`
+     the overlay sized to the layout viewport, so on mobile the footer and the last exercise
+     card sat behind the browser's URL bar — unreachable once an expanded card made the deck
+     tall enough to reach that zone. 100vh is the fallback for browsers without dvh support. */
+  height: calc(100vh - var(--hdr-height));
+  height: calc(100dvh - var(--hdr-height));
+  background: var(--bg-color);
+  z-index: 120;
+  display: flex;
+  flex-direction: column;
+  animation: slideUpFullscreen 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+} /* The header and participant tabs stay pinned; the rest of the clipboard scrolls.
+   Without this the overlay clips any content past the fold (tall stacks, the historical
+   review panel, the Complete/Delete actions) with no way to reach it. */
+.clipboard-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
+  padding-bottom: calc(var(--notif-handle-height, 92px) + var(--safe-bottom) + 24px);
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideUpFullscreen {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+.session-title-bar {
+  /* Flat-bar look (padding, divider, grab handle) comes from .view-titlebar; the client tabs
+     follow immediately, so no bottom margin here. */
+  gap: 16px;
+  margin-bottom: 0;
+} /* Countdown + the session's own controls (options menu, minimize), right-aligned in the bar. */
+.session-title-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.collapse-btn {
+  background: transparent;
+  border: none;
+  color: var(--primary);
+  font-size: 18px;
+  cursor: pointer;
+}
+.session-title-block {
+  flex: 1;
+  min-width: 0;
+} /* h3 type comes from the unified view-title rule */
+.session-title-block h3 {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.session-title-block p {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.session-timer-block span {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--primary);
+}
+.session-overlay-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  gap: 16px;
+  padding-bottom: calc(40px + var(--safe-bottom));
+} /* Current Exercise Navigator */
+.active-exercise-navigator {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+}
+.nav-arrow-btn {
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  color: var(--primary);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+}
+.nav-arrow-btn:hover {
+  background: var(--border-color);
+}
+.clipboard-empty-state {
+  padding: 32px 16px;
+  text-align: center;
+}
+.clipboard-empty-state h4 {
+  font-family: var(--font-header);
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.clipboard-empty-state p {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.4;
+} /* ===== Inline clipboard editor (on-the-fly plan editing) ===== */
+.session-actions-footer {
+  border-top: 1px solid var(--border-color);
+  padding-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: auto;
+}
+.session-finish-row {
+  display: flex;
+  gap: 12px;
+} /* Overflow menu in the clipboard header — home for destructive Delete Session */
+.session-menu-wrap,
+.app-menu-wrap {
+  position: relative;
+} /* First-run Terms modal is mandatory: hide its dismiss (✕) so the only exit is "I agree". */
+#dialog-terms.first-run .modal-close-btn {
+  display: none;
+}
+.session-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 180px;
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  padding: 6px;
+  z-index: 130;
+}
+.session-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 14px;
+  background: transparent;
+  border-radius: var(--border-radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+  text-align: left;
+  text-decoration: none;
+}
+.session-menu-item:hover {
+  background: var(--input-bg);
+}
+.session-menu-item-danger {
+  color: var(--danger);
+}
+.session-menu-item-danger:hover {
+  background: var(--danger-light);
+} /* FLOATING REST TIMER */
+
+/* Active session footer adjustments — thumb-friendly on a phone. */
+@media (max-width: 600px) {
+  .session-finish-row {
+    gap: 16px !important;
+  }
+  .session-finish-row button {
+    flex: 1 !important;
+    min-height: 48px !important;
+  }
+}

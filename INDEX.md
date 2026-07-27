@@ -64,10 +64,16 @@ is structured into feature modules under `src/modules/` (`session`, `plans`, `cl
 | [src/modules/sessionList/sessionCard.js](src/modules/sessionList/sessionCard.js) | `component` | Dashboard session-booking card that launches the clipboard on tap. |
 | [src/modules/sessionList/daySelector.js](src/modules/sessionList/daySelector.js) | `component` | Dashboard day-deck navigation and focus/scroll handlers. |
 | [src/modules/clipboard/clipboardEditor.js](src/modules/clipboard/clipboardEditor.js) | `component` | Interactive active session plan/clipboard structure editor. |
+| [src/modules/clipboard/activeSessionOverlay.css](src/modules/clipboard/activeSessionOverlay.css) | `styles` | The fullscreen active-session overlay shell's own CSS (TODO §14.5/§18.10) — title bar, timer block, footer, overflow menu. Styles the overlay chrome `activeSessionController.js` drives. |
+| [src/modules/clipboard/clipboardEditor.css](src/modules/clipboard/clipboardEditor.css) | `styles` | The inline editor's own CSS (TODO §14.5/§18.10) — row/circuit/rest editing, reorder control, insert bar. Loaded after index.css, whose foundation it inherits. |
 | [src/modules/clipboard/exerciseDeck.js](src/modules/clipboard/exerciseDeck.js) | `component` | Active-session exercise stack deck renderer. |
+| [src/modules/clipboard/exerciseDeck.css](src/modules/clipboard/exerciseDeck.css) | `styles` | Card-stack mechanics and the deck-card chrome SHARED by every card type (compact/top/timer/counter/status/name) — component-exclusive styling lives in that component's own file. |
 | [src/modules/clipboard/exerciseCard.js](src/modules/clipboard/exerciseCard.js) | `component` | Standalone exercise card in clipboard deck. |
+| [src/modules/clipboard/exerciseCard.css](src/modules/clipboard/exerciseCard.css) | `styles` | exerciseCard.js's exclusive styling: stat tiles and the Too Easy / Too Hard / Notes action row. Shared deck-card chrome lives in exerciseDeck.css. |
 | [src/modules/clipboard/circuitCard.js](src/modules/clipboard/circuitCard.js) | `component` | Circuit/Giant set grouped block card. |
+| [src/modules/clipboard/circuitCard.css](src/modules/clipboard/circuitCard.css) | `styles` | circuitCard.js's exclusive styling: round badge, per-exercise rows, feedback trio, break rows, complete-round button. |
 | [src/modules/clipboard/exerciseAndRestTimer.js](src/modules/clipboard/exerciseAndRestTimer.js) | `component` | Session exercise and rest countdown timer stack. |
+| [src/modules/clipboard/exerciseAndRestTimer.css](src/modules/clipboard/exerciseAndRestTimer.css) | `styles` | The floating per-client timer stack's own styling: overtime/stopped/flash states. |
 | [src/modules/session/sessionBar.js](src/modules/session/sessionBar.js) | `component` | Bottom active/next-session bar with countdowns. |
 | [src/modules/session/sessionTitleBar.js](src/modules/session/sessionTitleBar.js) | `component` | Active-session overlay title line and countdown. |
 | [src/modules/session/editSessionView.js](src/modules/session/editSessionView.js) | `view` | Modular view renderer for Edit Session & Setup view. |
@@ -91,6 +97,7 @@ is structured into feature modules under `src/modules/` (`session`, `plans`, `cl
 | [src/modules/common/sessionCache.js](src/modules/common/sessionCache.js) | `helper` | Active session local storage cache helper. |
 | [src/modules/common/wakeLock.js](src/modules/common/wakeLock.js) | `helper` | Screen Wake Lock API management helper. |
 | [src/modules/common/activeUsersList.js](src/modules/common/activeUsersList.js) | `component` | Active-session participant tabs component. |
+| [src/modules/common/activeUsersList.css](src/modules/common/activeUsersList.css) | `styles` | The participant-tabs row's own styling — wraps onto multiple rows for a merged group session. |
 | [src/modules/common/applicationHeader.js](src/modules/common/applicationHeader.js) | `component` | Shared top header actions, theme/lang switchers, and sync badge. |
 | [src/modules/common/backupRestore.js](src/modules/common/backupRestore.js) | `component` | Backup center dialog and JSON import/export handlers. |
 | [src/modules/common/feedbackModal.js](src/modules/common/feedbackModal.js) | `component` | Feedback tags modal dialog and voice recorder handler. |

@@ -1,0 +1,86 @@
+/* exerciseCard.css — the standalone in-focus exercise card's exclusive additions: the
+   stat tiles (sets/target/load) and the one-tap Too Easy / Too Hard / Notes action row.
+   Shared deck-card chrome (compact/top/timer/counter/status/name) lives in exerciseDeck.css.
+   Extracted from index.css 2026-07-27 (TODO §14.5 / §18.10). Inherits design tokens,
+   glass-card/button/flex foundations and color scheme from index.css, loaded first. */
+
+.deck-card-stats {
+  display: flex;
+  gap: 8px;
+}
+.deck-stat {
+  flex: 1;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 2px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+}
+.deck-stat-value {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--primary);
+  line-height: 1;
+}
+.deck-stat-label {
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--text-muted);
+  font-weight: 600;
+} /* One-tap outcome signals on the focus card — gym-floor tap targets */
+.deck-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+.deck-action-btn {
+  flex: 1;
+  gap: 6px;
+  min-height: 46px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-color);
+  font-weight: 700;
+  font-size: 12px;
+  transition: transform 0.12s ease, background 0.2s, border-color 0.2s;
+}
+.deck-action-btn i {
+  font-size: 12px;
+}
+.deck-action-btn:active {
+  transform: scale(0.93);
+}
+.deck-action-easy {
+  border-color: rgba(16, 185, 129, 0.4);
+  color: var(--success);
+}
+.deck-action-easy:hover {
+  background: rgba(16, 185, 129, 0.12);
+}
+.deck-action-hard {
+  border-color: rgba(245, 158, 11, 0.4);
+  color: #f59e0b;
+}
+.deck-action-hard:hover {
+  background: rgba(245, 158, 11, 0.12);
+}
+.deck-action-feedback {
+  border-color: rgba(239, 68, 68, 0.35);
+  color: var(--danger);
+}
+.deck-action-feedback:hover {
+  background: rgba(239, 68, 68, 0.12);
+}
+.deck-card-past-summary {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 45%;
+}

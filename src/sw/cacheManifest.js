@@ -11,11 +11,20 @@
 // atomic version. The worker's own sub-scripts (sw.js + this sw/ folder) are deliberately NOT in ASSETS:
 // they are the worker's script resources, kept coherent by the browser's own SW-update mechanism.
 self.swCacheManifest = (() => {
-  const CACHE_NAME = "librept-v34";
+  const CACHE_NAME = "librept-v35";
   const ASSETS = [
     "./",
     "./index.html",
     "./index.css",
+    // Per-module stylesheets (TODO §14.5 / §18.10) — index.css's shared foundation is loaded
+    // first; these add only what their module owns.
+    "./modules/clipboard/activeSessionOverlay.css",
+    "./modules/clipboard/clipboardEditor.css",
+    "./modules/clipboard/exerciseDeck.css",
+    "./modules/clipboard/exerciseCard.css",
+    "./modules/clipboard/circuitCard.css",
+    "./modules/clipboard/exerciseAndRestTimer.css",
+    "./modules/common/activeUsersList.css",
     "./app.js",
     "./theme-boot.js",
     "./version.js",
