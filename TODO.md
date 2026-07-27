@@ -329,13 +329,64 @@ ASSETS (bumped `CACHE_NAME`) same as any runtime module.
 string lands in the same file. Consider per-feature namespaced string modules merged into the
 locale (keeping `test_i18n_parity` green).
 
-### 14.6 [ ] Rename the `booking` domain term to `session`
-**Decided (2026-07-23):** from the PT's stance the entity is a **session**; "booking" is the customer-facing framing (a client *books* a slot; the PT *runs* a session). Unify the code on `session`.
+**Three findings from a DRY/SRP/modularity review of the §14.5 shell split (2026-07-27), not yet
+fixed — tracked as §14.7-14.9 below.**
 
-- **Scope:** ~200 `booking`/`bookings` references in `src/` (data objects, `state.bookings`, `getOverlappingBookings`, `buildBookingMeta`, `activeSession.booking`, `isPlanning` bookings, …), the CSS class family (`.booking-card`, `.booking-live`, `.booking-completed`, `.booking-status-stack`, `.booking-card-title`, `.booking-live-bar`, `.booking-live-timer`, `.booking-past`, …), and the ~12 e2e test files that select `.booking-card`.
-- **⚠ Migration risk (must handle):** the persisted DB (`librept_db`) stores the field as `state.bookings`. Renaming to `state.sessions` breaks existing local databases unless a **load-time migration** copies `bookings → sessions` — mirror the existing `openpt_db → librept_db` shim in `src/data/stateStore.js`. Keep it backward-compatible.
-- **Do it as one focused pass on a green baseline**, updating `src/` + CSS + tests together so nothing half-renames (a partial rename leaves the suite red).
-- **Best bundled with [§17](#17-structured-sessionprogram-history-sessionitemrecord)** (the `sessionItemRecord` build scheduled for Fri 2026-07-24): both rework the same session/history model and the same files. Renaming *first*, then building §17 on the `session` vocabulary, avoids touching the same code twice and keeps §17's new names consistent from the start.
+### 14.7 [ ] Extract a shared `renderMarkupOnce()` helper — 22 duplicated render-guard blocks
+The shell split (§14.5) copy-pasted the same 3-line pattern into 22 call sites across 14 files
+(`formsController.js` ×3, `activeSessionController.js` ×3, `applicationHeader.js` ×3, one each in
+`backupRestore.js`, `buildInfoDialog.js`, `feedbackModal.js`, `notificationArea.js`,
+`routerController.js`, and one per view module):
+
+```js
+const root = document.getElementById(containerId);
+if (!root || <exists-check>) return;
+root.insertAdjacentHTML("beforeend", `...`);
+```
+
+- **Risk**: a future fix to the idempotency guard (e.g. switching from an existence-check to a
+  data-attribute flag to survive a hot-reload) has to be hand-applied to all 22 sites; missing one
+  reintroduces the exact duplicate-injection bug the other 21 correctly guard against.
+- **Fix**: one helper in [`modules/common/dom.js`](src/modules/common/dom.js) (already the home for
+  DOM utilities) — `renderMarkupOnce(containerId, existsCheckFn, html)` — and thread all 22 call
+  sites through it.
+
+### 14.8 [ ] Render-order dependencies between modules are unenforced — already caused 2 bugs
+`app.js` sequences ~10 `renderXShell()`/`renderXDialog()` calls across two hand-ordered blocks
+(`renderHeaderShell()` specially hoisted above `initAppLifecycle()`, the other nine grouped later).
+Nothing structurally enforces that a module's render call happens before every *other* module that
+queries its elements — this already produced two real bugs in §14.5's own build, caught only by
+end-to-end testing: the header rendering too late for `backupRestore.js`'s `#backup-btn` and
+`buildInfoDialog.js`'s `#app-version` lookups, and `dialog-apply-adjustment` rendering too late for
+its own route's existence check.
+
+- **Risk**: the next module added that queries another module's element, placed above that
+  element's `renderXShell()` call, silently no-ops with no error — the same class of bug recurring
+  with no structural guard against it.
+- **Fix direction**: a small render registry app.js calls in one pass (each module registers its
+  shell render + declares what it depends on existing first), rather than a hand-maintained call
+  order a future edit can silently get wrong.
+
+### 14.9 [ ] `activeSessionController.js` (1553 lines) mixes markup templates into a behavior file
+The shell split (§14.5) added ownership of three unrelated UI surfaces' markup — the full-screen
+active-session overlay shell, `dialog-add-session-exercise`, and `dialog-catalog-picker` — into
+`activeSessionController.js`, on top of its existing active-session state/behavior logic, growing
+an already-large controller further instead of extracting a companion view file.
+
+- **Risk**: a future change to the overlay's markup requires scrolling a 1500+ line behavior-heavy
+  file to find the ~100-line template block buried inside it, and any edit there risks an unrelated
+  merge conflict with concurrent active-session logic changes in the same file — exactly the
+  same-file co-edit collision [AGENT_RULES §5](AGENT_RULES.md) exists to prevent.
+- **Fix direction**: extract the three `renderXShell`/`renderXDialog` functions (and their markup)
+  into a new `modules/clipboard/activeSessionOverlayView.js`, leaving `activeSessionController.js`
+  to own behavior only.
+
+### 14.6 [x] Rename the `booking` domain term to `session`
+**Decided (2026-07-23), SHIPPED 2026-07-27.** From the PT's stance the entity is a **session**; "booking" was the customer-facing framing (a client *books* a slot; the PT *runs* a session). Code is now unified on `session`.
+
+- **What moved:** `getOverlappingBookings`/`buildBookingMeta` aliases removed in favour of the already-canonical `getOverlappingSessions`/`buildSessionMeta`; `activeSession.booking` → `activeSession.sourceSession` (and every consumer: `activeSessionController.js`, `sessionBar.js`, `sessionTitleBar.js`, `sessionCard.js`, `exerciseDeck.js`, `sessionsView.js`'s demo seed); `editingBookingId`/`preselectedBookingId`/`targetBooking`/`existingBooking`/`bookingId`/`bookingMeta` → `editingSessionId`/`preselectedSessionId`/`targetSession`/`existingSession`/`sessionId`/`sessionMeta`; the `:bookingId` route param → `:sessionId`; the CSS class family `.booking-card`/`.booking-live`/`.booking-completed`/`.booking-status-stack`/`.booking-card-title`/`.booking-live-bar`/`.booking-live-timer`/`.booking-header`/`.btn-edit-booking`/… → `.session-*` equivalents, across CSS, JS, and every e2e test selector.
+- **Migration risk: already handled**, and didn't need new work — `MIGRATION_STEPS` (`src/data/migrationSteps.js`, schema v1→v2) already carries a versioned `bookings → sessions` step. That made the scattered `state.sessions || state.bookings || []` runtime fallbacks provably dead code (post-migration `state.bookings` is always `undefined`); they're now just `state.sessions || []`. `migrationSteps.js` itself, `stateStore.js`'s legacy `stateHasData` key, and the i18n copy/keys (`booking_spots`, `no_bookings_today`, `sync_session_desc`) were deliberately left alone — the first two are the historical/defensive record of the old shape, the last is user-facing English copy, not internal vocabulary.
+- **Test fixtures for the legacy shape were preserved on purpose**: `test_schema_migrations.py`, `test_backup_restore.py`, `test_share_deeplink.py` construct pre-migration `bookings:` payloads to verify the migration step itself — renaming those would test the wrong thing.
 
 ---
 
