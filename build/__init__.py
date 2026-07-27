@@ -200,7 +200,7 @@ def ensure_biome_binary():
             return None
 
 
-PYTHON_LINT_TARGETS = ("build/", "deploy/", "tests/")
+PYTHON_LINT_TARGETS = ("build/", "deploy/", "tests/", "agent_tools/")
 
 
 def run_python_lint():
@@ -227,6 +227,19 @@ def run_python_lint():
         print("  ✗ Python static analysis failed.")
         sys.exit(1)
     print("  ✓ Python static analysis (Ruff) passed.")
+
+
+def run_doc_graph_check():
+    """Verifies the OKF knowledge graph connects — see agent_tools/doclinks.py for the rules.
+
+    In the gate rather than in review because the failure is invisible by inspection: a renumbered
+    section leaves references that still *read* correctly and simply resolve to nothing.
+    """
+    print("\n  Checking documentation cross-references...")
+    from agent_tools import doclinks
+
+    if doclinks.main() != 0:
+        sys.exit(1)
 
 
 def run_frontend_lint():
@@ -587,6 +600,7 @@ def run_stage_1_parallel():
         "Dependency Security Scan (pip-audit)": run_security_audit,
         "Unit Tests": run_unit_tests,
         "Static Security Audits": run_static_security_checks,
+        "Documentation Graph": run_doc_graph_check,
     }
 
     failures = []
