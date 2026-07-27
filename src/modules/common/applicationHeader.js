@@ -182,7 +182,167 @@ function setupThemeSwitcher() {
   applyThemeSwitcherLabels();
 }
 
+export function renderAboutDialog() {
+  const root = document.getElementById("dialogs-root");
+  if (!root || document.getElementById("dialog-about")) return;
+  root.insertAdjacentHTML(
+    "beforeend",
+    `
+<dialog id="dialog-about" class="dialog-modal card glassmorphic">
+    <div class="modal-header">
+      <h3 id="about-title">About LibrePT</h3>
+      <button class="modal-close-btn" aria-label="Close about modal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body-scroll">
+      <p id="about-body" class="dialog-desc">LibrePT is a free, open-source, offline-first clipboard for personal trainers — schedule sessions, run them on the gym floor, and track client progress. All data stays on your device.</p>
+      <a id="about-repo-link" class="btn secondary-btn w-full" href="https://github.com/stutek/LibrePT" target="_blank" rel="noopener noreferrer">
+        <i class="fa-brands fa-github"></i> View the project on GitHub
+      </a>
+    </div>
+  </dialog>
+`,
+  );
+}
+
+export function renderTermsDialog() {
+  const root = document.getElementById("dialogs-root");
+  if (!root || document.getElementById("dialog-terms")) return;
+  root.insertAdjacentHTML(
+    "beforeend",
+    `
+<dialog id="dialog-terms" class="dialog-modal card glassmorphic">
+    <div class="modal-header">
+      <h3 id="terms-title">Terms &amp; Disclaimer</h3>
+      <button class="modal-close-btn" aria-label="Close terms modal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body-scroll">
+      <p id="terms-body" class="dialog-desc">LibrePT is provided "as is", without warranty of any kind. It is not medical, health, or professional training advice. Your data stays on your device and you are responsible for backing it up. Use at your own risk.</p>
+    </div>
+    <div class="modal-actions">
+      <button id="btn-terms-agree" class="btn primary-btn w-full">I agree</button>
+    </div>
+  </dialog>
+`,
+  );
+}
+
+export function renderHeaderShell() {
+  const header = document.getElementById("app-header");
+  if (!header || header.querySelector(".header-container")) return;
+  header.insertAdjacentHTML(
+    "beforeend",
+    `
+    <div class="header-container">
+      <div class="logo-area" id="logo-area">
+        <i class="fa-solid fa-dumbbell logo-icon"></i>
+        <h1>LibrePT</h1>
+        <!-- Tappable: the long build identity used to live in a \`title\` tooltip, which a phone
+             cannot reach. Opens #dialog-build-info instead. -->
+        <button type="button" id="app-version" class="app-version" aria-label="Build version — tap for details" aria-haspopup="dialog"></button>
+      </div>
+
+      <!-- Pre-release PREVIEW marker positioned in the center between logo and action buttons -->
+      <a id="preview-ribbon" class="preview-ribbon"
+         href="https://github.com/stutek/LibrePT/blob/main/docs/PREVIEW.md"
+         target="_blank" rel="noopener noreferrer"
+         aria-label="Preview build — pre-release, may lose data. Open the risks & data-loss notice.">
+        <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+        <span id="preview-ribbon-label">PREVIEW</span>
+        <i class="fa-solid fa-circle-question" aria-hidden="true"></i>
+      </a>
+      
+      <div class="header-actions">
+        <!-- Normal view actions -->
+        <div class="normal-header-actions">
+          <button id="backup-btn" class="icon-btn sync-backup-btn" aria-label="Sync & Backup Data">
+            <!-- Cloud + recycle: this one control now covers both syncing session data and
+                 backup/restore (the separate home-page Sync button was merged in here). -->
+            <span class="cloud-sync-icon" aria-hidden="true">
+              <i class="fa-solid fa-cloud"></i>
+              <i class="fa-solid fa-arrows-rotate"></i>
+            </span>
+            <!-- Mock GitHub-style ahead/behind counters (local edits to push / remote to pull),
+                 filled in by renderSyncBadge(); hidden once fully in sync. -->
+            <span id="sync-badge" class="sync-badge hidden"></span>
+          </button>
+          <!-- Application overflow menu (☰): app-level actions, mirrors the .session-menu
+               dropdown pattern (toggle + close-on-outside-click), wired in applicationHeader.js. -->
+          <div class="app-menu-wrap">
+            <button id="btn-app-menu" class="icon-btn" aria-label="Menu / Meni" aria-haspopup="true" aria-expanded="false">
+              <i class="fa-solid fa-bars"></i>
+            </button>
+            <div id="app-menu" class="session-menu hidden" role="menu">
+              <!-- Language + theme controls live here (same view on desktop and mobile) so the
+                   header bar stays compact. Same <select> elements as before, just relocated. -->
+              <div class="menu-control-row">
+                <label class="menu-control-label" for="lang-switcher"><i class="fa-solid fa-language" aria-hidden="true"></i> <span id="menu-label-lang">Language</span></label>
+                <select id="lang-switcher" class="form-control menu-select" aria-label="Switch Language / Zamenjaj jezik">
+                  <option value="en">EN</option>
+                  <option value="sl">SL</option>
+                </select>
+              </div>
+              <div class="menu-control-row">
+                <label class="menu-control-label" for="theme-switcher"><i class="fa-solid fa-palette" aria-hidden="true"></i> <span id="menu-label-theme">Theme</span></label>
+                <select id="theme-switcher" class="form-control menu-select" aria-label="Theme / Tema">
+                  <option value="daylight" selected>Daylight</option>
+                  <option value="midnight">Midnight</option>
+                  <option value="red">Red</option>
+                  <option value="blossom">Blossom</option>
+                  <option value="nebula">Nebula</option>
+                </select>
+              </div>
+              <div class="menu-divider" role="separator"></div>
+              <button id="menu-clients-register" class="session-menu-item" role="menuitem">
+                <i class="fa-solid fa-users"></i> <span id="menu-clients-register-text" data-i18n="menu_clients_register">Clients Directory</span>
+              </button>
+              <button id="menu-adjustments" class="session-menu-item" role="menuitem">
+                <i class="fa-solid fa-bell-concierge"></i> <span id="menu-adjustments-text" data-i18n="menu_adjustments">Pending Review</span>
+                <span class="badge badge-push-right hidden" id="menu-badge-adjustments-count">0</span>
+              </button>
+              <button id="menu-routines" class="session-menu-item" role="menuitem">
+                <i class="fa-solid fa-clipboard-list"></i> Routines
+              </button>
+              <button id="menu-exercises" class="session-menu-item" role="menuitem">
+                <i class="fa-solid fa-dumbbell"></i> Exercises
+              </button>
+              <button id="menu-history" class="session-menu-item" role="menuitem">
+                <i class="fa-solid fa-clock-rotate-left"></i> History
+              </button>
+              <div class="menu-divider" role="separator"></div>
+              <button id="menu-connect-cloud" class="session-menu-item" role="menuitem">
+                <i class="fa-solid fa-cloud-arrow-up"></i> Connect cloud storage
+              </button>
+              <button id="menu-export-data" class="session-menu-item" role="menuitem">
+                <i class="fa-solid fa-file-export"></i> Export data as a file
+              </button>
+              <a id="menu-github" class="session-menu-item" role="menuitem" href="https://github.com/stutek/LibrePT" target="_blank" rel="noopener noreferrer">
+                <i class="fa-brands fa-github"></i> GitHub project
+              </a>
+              <a id="menu-bug-report" class="session-menu-item" role="menuitem" href="https://github.com/stutek/LibrePT/blob/main/docs/BUG_REPORTING.md" target="_blank" rel="noopener noreferrer">
+                <i class="fa-solid fa-bug"></i> Bug Reporting
+              </a>
+              <button id="menu-about" class="session-menu-item" role="menuitem">
+                <i class="fa-solid fa-circle-info"></i> About
+              </button>
+              <button id="menu-terms" class="session-menu-item" role="menuitem">
+                <i class="fa-solid fa-shield-halved"></i> Terms &amp; disclaimer
+              </button>
+              <a id="menu-privacy" class="session-menu-item" role="menuitem" href="https://github.com/stutek/LibrePT/blob/main/PRIVACY.md" target="_blank" rel="noopener noreferrer">
+                <i class="fa-solid fa-lock"></i> Privacy &amp; GDPR Statement
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+`,
+  );
+}
+
 export function setupApplicationHeader() {
+  renderHeaderShell();
+  renderAboutDialog();
+  renderTermsDialog();
   // Logo Area home click handler
   const logoArea = document.getElementById("logo-area");
   if (logoArea) {

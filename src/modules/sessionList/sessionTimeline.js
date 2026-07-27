@@ -22,6 +22,7 @@ const SESSION_SCROLL_SETTLE_MS = 700;
 let focusedSessionDate = todayISODate();
 let sessionsProgrammaticScrollUntil = 0;
 let headerObserver = null;
+let titlebarResizeObserver = null;
 
 export function initSessionTimeline(d) {
   deps = d;
@@ -90,56 +91,23 @@ export function formatCalendarDayLabel(isoDate) {
 }
 
 export function renderSessionsTitleBar() {
-  const weekdayEl = document.getElementById("calendar-title-weekday");
-  const weekdayShortEl = document.getElementById("calendar-title-weekday-short");
-  const dateEl = document.getElementById("calendar-title-date");
   const todayBtn = document.getElementById("btn-sessions-today");
-  if (!weekdayEl || !weekdayShortEl || !dateEl) return;
+  if (!todayBtn) return;
 
-  const { weekday, weekdayShort, date, temporal } = formatCalendarDayLabel(focusedSessionDate);
-  const calTitle = document.getElementById("calendar-title");
-  calTitle.classList.toggle("is-past", temporal === "past");
-  calTitle.classList.toggle("is-future", temporal === "future");
-
-  weekdayEl.textContent = weekday;
-  weekdayShortEl.textContent = weekdayShort;
-  dateEl.textContent = date;
+  const { temporal } = formatCalendarDayLabel(focusedSessionDate);
 
   // The Today control doubles as the "current day" indicator: it resets the timeline to today, and
-  // is disabled while today is already focused. It always keeps its slot so the stepper's arrows
-  // never shift as the date text changes width.
-  if (todayBtn) {
-    const todayLabel = todayBtn.querySelector(".today-btn-label");
-    if (todayLabel) todayLabel.textContent = deps.t("today");
-    todayBtn.title = deps.t("today");
-    todayBtn.disabled = temporal === "today";
-  }
+  // is disabled while today is already focused.
+  const todayLabel = todayBtn.querySelector(".today-btn-label");
+  if (todayLabel) todayLabel.textContent = deps.t("today");
+  todayBtn.title = deps.t("today");
+  todayBtn.disabled = temporal === "today";
 
   const jumpBtn = document.getElementById("btn-sessions-jump");
   if (jumpBtn) {
     const jumpLabel = deps.t("jump_to_date");
     jumpBtn.title = jumpLabel;
     jumpBtn.setAttribute("aria-label", jumpLabel);
-  }
-
-  const headers = getGroupHeaders();
-  const idx = headers.findIndex((h) => h.dataset.date === focusedSessionDate);
-  const arrows = [
-    {
-      el: document.getElementById("btn-sessions-prev"),
-      header: idx > -1 ? headers[idx - 1] : null,
-    },
-    {
-      el: document.getElementById("btn-sessions-next"),
-      header: idx > -1 ? headers[idx + 1] : null,
-    },
-  ];
-  for (const { el, header } of arrows) {
-    if (!el) continue;
-    el.disabled = !header;
-    const label = header ? formatCalendarDayLabel(header.dataset.date).date : "";
-    el.setAttribute("aria-label", label);
-    el.title = label;
   }
 }
 
@@ -175,14 +143,6 @@ export function focusSessionsColumn(isoDateOrToday, behavior = "smooth") {
   target.scrollIntoView({ behavior, block: "start" });
 }
 
-function stepTimelineGroup(delta) {
-  const headers = getGroupHeaders();
-  const idx = headers.findIndex((h) => h.dataset.date === focusedSessionDate);
-  if (idx === -1) return;
-  const target = headers[idx + delta];
-  if (target) focusSessionsColumn(target.dataset.date);
-}
-
 // Scrollspy: which day-group is "focused" is now a function of scroll position, not a discrete
 // swipe-settled column — an IntersectionObserver watching each sticky header is the standard
 // technique for this (a header counts as focused once it reaches the top band of the scroll
@@ -213,20 +173,59 @@ function observeSessionTimelineGroups() {
   for (const header of getGroupHeaders()) headerObserver.observe(header);
 }
 
+// The sticky "Sessions" title bar (.view-titlebar) and each day-group header both pin to
+// #main-content's top edge — sharing that edge is what used to hide the header: at top:0 it sat
+// exactly under the title bar, which paints over it (title bar is z-index 10, header is 2). Rather
+// than hand-coding the title bar's height (it varies by breakpoint — the Today control is
+// icon-only + shorter on phones — and by locale, since a translated label can wrap differently), a
+// ResizeObserver keeps a live CSS var in sync so the header's sticky offset always starts right
+// where the title bar ends, keeping the day/date line on screen for whichever group is focused.
+function syncSessionsHeaderStickyOffset() {
+  const titlebar = document.querySelector("#view-clients .view-titlebar");
+  const grid = document.getElementById("sessions-categories-grid");
+  if (!titlebar || !grid) return;
+  grid.style.setProperty("--sessions-header-sticky-top", `${titlebar.offsetHeight}px`);
+}
+
+function observeSessionsTitlebarHeight() {
+  const titlebar = document.querySelector("#view-clients .view-titlebar");
+  if (!titlebar) return;
+  if (titlebarResizeObserver) titlebarResizeObserver.disconnect();
+  titlebarResizeObserver = new ResizeObserver(syncSessionsHeaderStickyOffset);
+  titlebarResizeObserver.observe(titlebar);
+  syncSessionsHeaderStickyOffset();
+}
+
 // Called once per renderSessions() pass, after the day-groups are (re)built — re-attaches the
 // scrollspy to the fresh DOM nodes and re-settles the scroll position to whichever date was
 // focused before the rebuild (or today, on first load), the same "don't let a re-render move the
 // trainer's scroll position" guarantee focusSessionsColumn always gave the old day-deck.
 export function syncSessionTimelineAfterRender() {
   observeSessionTimelineGroups();
+  observeSessionsTitlebarHeight();
   requestAnimationFrame(() => focusSessionsColumn(focusedSessionDate, "auto"));
 }
 
+// The date-picker's own markup (Today + jump-to-date) — index.html only holds the empty
+// #sessions-date-picker slot; this module owns what goes inside it, the same way sessionsView.js
+// owns #sessions-categories-grid's contents. Text/titles are placeholders here and get their real
+// (translated) values from renderSessionsTitleBar() right after.
+export function renderSessionsDatePicker() {
+  const container = document.getElementById("sessions-date-picker");
+  if (!container) return;
+  container.innerHTML = `
+    <button id="btn-sessions-today" class="sessions-today-btn" type="button" title="Today">
+      <i class="fa-solid fa-calendar-day"></i><span class="today-btn-label">Today</span>
+    </button>
+    <button id="btn-sessions-jump" class="sessions-nav-arrow" type="button" aria-label="Jump to date" title="Jump to date">
+      <i class="fa-solid fa-calendar-days"></i>
+    </button>
+    <input id="sessions-date-jump-input" class="sessions-date-jump-input" type="date" tabindex="-1" aria-hidden="true" />
+  `;
+}
+
 export function setupSessionsDayNav() {
-  const prevBtn = document.getElementById("btn-sessions-prev");
-  const nextBtn = document.getElementById("btn-sessions-next");
-  if (prevBtn) prevBtn.addEventListener("click", () => stepTimelineGroup(-1));
-  if (nextBtn) nextBtn.addEventListener("click", () => stepTimelineGroup(1));
+  renderSessionsDatePicker();
 
   const todayBtn = document.getElementById("btn-sessions-today");
   if (todayBtn) todayBtn.addEventListener("click", () => focusSessionsColumn("today"));

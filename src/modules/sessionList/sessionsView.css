@@ -1,0 +1,372 @@
+/* modules/sessionList/sessionsView.css — the dashboard's session booking cards, the
+   sessions title bar/date-picker, the continuous timeline, and the floating "Create
+   Session" button. Extracted from index.css to live next to sessionsView.js/sessionCard.js/
+   sessionTimeline.js. */
+
+.booking-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px;
+  margin-bottom: 4px;
+  border-left: 4px solid var(--primary);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+} /* A finished session is marked with a green edge and its "Completed" badge, not by a faded/greyed
+   look — opacity dimming here used to wash out the status-line text (and undo its contrast) along
+   with everything else in the card, so completion is signalled by border + badge only, leaving
+   every card's text at full strength. */
+.booking-card.booking-completed {
+  border-left-color: var(--success);
+} /* The session in progress is emphasised with an accent-tinted fill + accent ring — the same
+   "selected/active" language as a chosen participant tab, so it clearly stands out. */
+.booking-live {
+  /* Stack so the green left bracket can spill into a full-width bottom bar. */
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  border-left-color: var(--primary);
+  overflow: hidden;
+  background-image: linear-gradient(
+      color-mix(in srgb, var(--primary) 8%, transparent),
+      color-mix(in srgb, var(--primary) 8%, transparent)
+    ), linear-gradient(var(--card-bg), var(--card-bg));
+}
+/* Bottom bar: the left bracket's green wrapping along the bottom, with the Active-session tag + timer. */
+.booking-live-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 4px -14px -8px -14px; /* bleed to the card's padded edges (must match .booking-card's padding) */
+  padding: 5px 14px;
+  /* Lightened the same way the upcoming/past bars are below — the raw --primary fill left
+     --text-dark's contrast tighter than it needed to be; mixing toward white gives the black
+     text more room while the left bracket (border-left-color: var(--primary) on .booking-live)
+     keeps the full-strength green as the identity accent. */
+  background: color-mix(in srgb, var(--primary) 55%, white);
+  color: var(--text-dark); /* near-black — better contrast on the accent bar than the previous dark green */
+}
+/* Overtime: the session ran past its scheduled end without being closed — warn in amber, and turn
+   the card's left bracket amber too so it reads as a warning at a glance (follows the bar's state). */
+.booking-live-bar.overtime {
+  background: var(--warning, #f59e0b);
+  color: #3d2600;
+}
+.booking-card.booking-live:has(.booking-live-bar.overtime) {
+  border-left-color: var(--warning, #f59e0b);
+}
+/* Same stacked-card + bottom-bar structure as .booking-live, for the two other status-line states
+   (2.3: upcoming countdown, past elapsed) — deliberately no tinted background, so a finished or
+   not-yet-started card never reads as "currently active" the way .booking-live's green wash does. */
+.booking-status-stack {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  overflow: hidden;
+}
+/* Upcoming/past bars share their identity color with the left bracket (see the :has() rules
+   below), but lightened toward white at the point of use — the raw --temporal-future/past tokens
+   are saturated enough that --text-dark on top of them fell short of WCAG AA (measured ~3.5:1 for
+   violet, ~3.8:1 for blue). Lightening only the bar fill (not the border, and not the shared
+   variable, which also tints past/future session titles elsewhere) keeps the bracket a strong
+   accent while giving the bar's text room to read clearly — same approach the flash-warning/
+   flash-ack keyframes already use for tinting a neutral surface toward a color. */
+.booking-live-bar.upcoming {
+  /* Lightened further than the past bar below (35% vs 55% of the identity color into white) — the
+     saturated blue read as noticeably darker than the purple at the same mix ratio, so it needed
+     more white to land at a comparably light fill. */
+  background: color-mix(in srgb, var(--temporal-future, #f59e0b) 35%, white);
+  color: var(--text-dark);
+}
+.booking-live-bar.past {
+  background: color-mix(in srgb, var(--temporal-past, #c084fc) 55%, white);
+  /* Pure black (not --text-dark's #09090b) plus heavier weight, so the label/timer read as
+     strongly as possible against the purple fill. */
+  color: #000;
+  font-weight: 800;
+}
+/* The left bracket always matches whichever status bar the card is showing (live already does via
+   .booking-live's own border-left-color, and the overtime override above it) — carry the same rule
+   to the other two states so the border reads as one continuous accent with the bar beneath it. */
+.booking-card:has(.booking-live-bar.upcoming) {
+  border-left-color: var(--temporal-future);
+}
+.booking-card:has(.booking-live-bar.past) {
+  border-left-color: var(--temporal-past);
+}
+.booking-status-value {
+  cursor: pointer;
+}
+.booking-status-value:hover,
+.booking-status-value:focus-visible {
+  background: rgba(255, 255, 255, 0.45);
+  outline: none;
+}
+.booking-status-edit-input {
+  font-family: var(--font-mono, monospace);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  width: 52px;
+  padding: 1px 6px;
+  border-radius: 5px;
+  border: 1px solid var(--text-dark);
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--text-dark);
+}
+.booking-live-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 800;
+}
+.booking-live-timer {
+  font-family: var(--font-mono, monospace);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.28); /* chip keeps the countdown legible on any accent */
+} /* Card title stays one neutral color regardless of the card's temporal state (past/live/future)
+   or theme — only the status bar beneath it carries the past/future tint now. */
+.booking-card-title {
+  color: var(--text-color);
+} /* --- SESSIONS DAY TITLE BAR --- */
+/* Home view title bar. The "Sessions Schedule" label (.view-title-label) is the conceptual view
+   title on the left; the Today/jump-to-date controls (rendered by sessionTimeline.js into
+   #sessions-date-picker) sit on the right. The flush, flat-bar look + grab handle come from
+   .view-titlebar; override .section-title's 24px top margin. */
+.sessions-title-bar {
+  gap: 10px;
+  margin-top: 0;
+}
+.sessions-date-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 1 auto;
+  min-width: 0;
+}
+/* "Today" reset control: jumps the deck back to today. Always occupies its slot (disabled while
+   already on today) so the stepper's width — and therefore the arrows — never shift. */
+.sessions-today-btn {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 12px;
+  white-space: nowrap;
+  border-radius: 999px;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.sessions-today-btn:hover:not(:disabled) {
+  background: var(--border-color);
+  color: var(--primary);
+  border-color: var(--primary);
+}
+.sessions-today-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+/* Desktop shows the text label; the icon takes its place only on phones (see mobile query). */
+.sessions-today-btn > i {
+  display: none;
+}
+.sessions-nav-arrow {
+  flex: 0 0 auto;
+  width: 36px;
+  height: 34px;
+  border-radius: 999px;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  font-size: 13px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+.sessions-nav-arrow:hover:not(:disabled) {
+  background: var(--border-color);
+  color: var(--primary);
+  border-color: var(--primary);
+}
+.sessions-nav-arrow:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+/* Visually hidden but still rendered — showPicker() throws on an element with no box (display:none
+   or visibility:hidden), so this uses the standard clip-to-1px technique instead. The visible
+   #btn-sessions-jump icon button is the actual tap target; this input only ever opens its native
+   picker and reports the chosen date via `change`. */
+.sessions-date-jump-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+/* --- SESSIONS TIMELINE (continuous, time-ordered — TODO §7.3 item 8) --- */
+.sessions-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.sessions-day-group {
+  display: flex;
+  flex-direction: column;
+}
+.sessions-day-group-header {
+  /* Sticks relative to #main-content, the page's real scrolling ancestor — the timeline itself
+     has no overflow of its own, so the whole dashboard scrolls as one native page. The offset
+     (kept live by sessionTimeline.js's ResizeObserver) is the "Sessions" title bar's own height —
+     at top:0 this header would sit exactly under that title bar and be painted over by it (the
+     title bar's z-index is higher), so the focused day/date line would vanish while scrolling. */
+  position: sticky;
+  top: var(--sessions-header-sticky-top, 64px);
+  z-index: 2;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 4px;
+  margin-bottom: 6px;
+  background: var(--bg-color);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-color);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.sessions-day-group-header .sessions-day-group-date {
+  font-weight: 400;
+  color: var(--text-muted);
+}
+.sessions-day-group-header.is-past {
+  color: var(--temporal-past);
+}
+.sessions-day-group-header.is-future {
+  color: var(--temporal-future);
+}
+.sessions-day-group-today-tag {
+  flex: 0 0 auto;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--primary);
+  border: 1px solid color-mix(in srgb, var(--primary) 40%, transparent);
+  border-radius: 999px;
+  padding: 1px 6px;
+}
+@media (max-width: 600px) {
+  /* Phones keep the "Sessions" label and the Today/jump controls on a single row (no wrap). */
+  .sessions-title-bar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+  .sessions-date-picker {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 0;
+    gap: 6px;
+  }
+  /* Icon-only Today button reclaims width on narrow screens */
+  .sessions-today-btn {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    font-size: 15px;
+  }
+  .sessions-today-btn > i {
+    display: inline;
+  }
+  .sessions-today-btn .today-btn-label {
+    display: none;
+  } /* Sweaty-hands tap target: wide enough to hit without looking */
+  .sessions-nav-arrow {
+    width: 38px;
+    height: 36px;
+  } /* Stack card contents into a single column so times and names stop wrapping mid-word */
+  .booking-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .booking-card .btn {
+    width: 100%;
+    justify-content: center;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+  .sessions-day-group-header {
+    padding: 6px 2px;
+  } /* Combo active set row mobile adjustments */
+  .active-set-row[data-ex-id] {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 12px !important;
+    margin-bottom: 6px;
+  }
+  .active-set-row[data-ex-id] > div:first-child {
+    width: 100% !important;
+    margin-bottom: 2px;
+  }
+  .active-set-row[data-ex-id] .stepper-control-group {
+    margin-bottom: 2px;
+  }
+  .active-set-row[data-ex-id] .set-check-col {
+    margin-left: auto !important;
+  }
+}
+
+/* Floating Action Button (Create Session) — stays visible while scrolling the sessions list */
+/* Fixed elements are pinned to the VIEWPORT, but the app is a centred column of --app-max-width.
+   Offsetting from the viewport edge therefore throws them far outside the app on a wide screen
+   (measured 464px clear of it at 1440px). This keeps the inset on a phone, where the column fills
+   the viewport, and follows the column's own edge once the screen is wider than it. */
+.floating-action-btn {
+  position: fixed;
+  bottom: calc(72px + var(--safe-bottom));
+  right: max(16px, calc((100vw - var(--app-max-width, 480px)) / 2 + 16px));
+  z-index: 120;
+  border-radius: var(--border-radius-pill, 9999px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  padding: 12px 20px;
+  font-weight: 600;
+}
+.floating-action-btn:hover {
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+}
+
+/* Integrity error page — a blocking overlay above everything (z-index tops the stack) shown when the
+   service worker cannot verify a build. Theme-aware via the shared surface/text vars, with a danger
+   accent, so it reads correctly in every theme. */

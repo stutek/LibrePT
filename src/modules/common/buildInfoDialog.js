@@ -61,7 +61,28 @@ export function renderBuildInfo() {
   if (copyBtn) copyBtn.textContent = t("build_info_copy") || "Copy build details";
 }
 
+export function renderBuildInfoDialog() {
+  const root = document.getElementById("dialogs-root");
+  if (!root || document.getElementById("dialog-build-info")) return;
+  root.insertAdjacentHTML(
+    "beforeend",
+    `
+<dialog id="dialog-build-info" class="dialog-modal card glassmorphic">
+    <div class="modal-header">
+      <h3 id="build-info-title">This build</h3>
+      <button class="modal-close-btn" aria-label="Close build info"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <dl id="build-info-rows" class="build-info-list"></dl>
+    <div class="modal-actions">
+      <button type="button" id="btn-copy-build-info" class="btn primary-btn w-full">Copy build details</button>
+    </div>
+  </dialog>
+`,
+  );
+}
+
 export function setupBuildInfoDialog() {
+  renderBuildInfoDialog();
   const dialog = document.getElementById("dialog-build-info");
   const stamp = document.getElementById("app-version");
   if (!dialog || !stamp) return;

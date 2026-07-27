@@ -1,0 +1,433 @@
+/* modules/common/notificationArea.css — the omnipresent bottom notification/status area,
+   including the embedded active-session mini bar. Extracted from index.css to live next
+   to notificationArea.js. */
+
+.notification-area {
+  /* Collapsed peek is a single text line (the summary title row) — .notification-summary-desc is
+     hidden below, which is what used to push this to 92px for two lines. */
+  --notif-handle-height: calc(56px + var(--safe-bottom));
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-width: var(--app-max-width, 480px);
+  margin: 0 auto;
+  background: var(--card-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-top: 1px solid var(--card-border);
+  box-shadow: 0 -4px 25px rgba(0, 0, 0, 0.35);
+  z-index: 122;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.28s ease;
+  transform: translateY(calc(100% - var(--notif-handle-height)));
+  /* Expanded, the drawer covers the whole area below the omnipresent header (not just 82vh, which
+     used to leave a visible gap at the top even fully expanded). */
+  max-height: calc(100vh - var(--hdr-height));
+  max-height: calc(100dvh - var(--hdr-height));
+}
+.notification-area.has-active-session {
+  --notif-handle-height: calc(64px + var(--safe-bottom));
+}
+body:has(#active-session-overlay:not(.hidden)) .notification-area.has-active-session {
+  --notif-handle-height: calc(56px + var(--safe-bottom));
+}
+body:has(#active-session-overlay:not(.hidden)) .notification-area .active-session-bar {
+  display: none !important;
+}
+.notification-area.is-expanded {
+  transform: translateY(0);
+  /* max-height above only caps growth to fit short content; force the actual height so the drawer
+     fills the whole area below the header regardless of how much content it holds — the feed
+     list itself (flex: 1; overflow-y: auto) scrolls internally instead. */
+  height: calc(100vh - var(--hdr-height));
+  height: calc(100dvh - var(--hdr-height));
+}
+.notification-handle-bar {
+  min-height: var(--notif-handle-height);
+  padding: 16px 16px calc(12px + var(--safe-bottom)) 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  border-bottom: 1px solid transparent;
+  margin-bottom: 0;
+}
+.notification-area.is-expanded .notification-handle-bar {
+  border-bottom-color: var(--card-border);
+  min-height: 64px;
+  height: 64px;
+  padding: 16px 16px 12px 16px;
+}
+.notification-grabber {
+  top: 6px;
+}
+.notification-summary-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+.notification-area.has-active-session .notification-summary-preview,
+.notification-area.is-expanded .notification-summary-preview {
+  display: none;
+}
+body:has(#active-session-overlay:not(.hidden))
+  .notification-area.has-active-session:not(.is-expanded)
+  .notification-summary-preview {
+  display: flex !important;
+}
+.notification-summary-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.notification-summary-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+.notification-summary-title {
+  font-family: var(--font-header);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text-main);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.notification-bell-icon {
+  color: var(--primary);
+  font-size: 15px;
+  filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.4));
+  flex-shrink: 0;
+}
+.notification-summary-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+/* Collapsed peek is one line only (the summary title row above) — this description used to add a
+   second, taking the handle from a single line up to 92px tall. */
+.notification-summary-desc {
+  display: none;
+}
+.notification-toggle-btn {
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+}
+.notification-area.is-expanded .notification-toggle-btn {
+  transform: rotate(180deg);
+}
+
+/* Active Session Bar integration inside notification-area */
+.notification-area .active-session-bar {
+  position: relative;
+  bottom: auto;
+  left: auto;
+  right: auto;
+  margin: 0;
+  padding: 4px 8px 4px 12px;
+  background: rgba(16, 185, 129, 0.95);
+  color: #09090b;
+  border-radius: var(--border-radius-md);
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
+  z-index: auto;
+  flex: 1;
+  min-width: 0;
+  animation: none;
+}
+.notification-area.has-active-session #notification-summary-badge {
+  display: none;
+}
+.notification-area .active-session-bar.is-idle {
+  background: color-mix(in srgb, var(--secondary) 92%, var(--bg-color));
+  color: var(--text-main);
+  box-shadow: none;
+  border: 1px solid var(--card-border);
+}
+.notification-area .active-session-bar.is-idle .pulse-indicator {
+  animation: none;
+  opacity: 0.5;
+}
+.session-bar-content {
+  gap: 10px;
+}
+.session-bar-main {
+  min-width: 0;
+  flex: 1;
+}
+.session-bar-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 14px;
+}
+.session-bar-info span:not(.pulse-indicator) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.session-bar-meta {
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 0.75;
+  margin-top: 1px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pulse-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ef4444;
+  flex-shrink: 0;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
+}
+.session-bar-timer {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.session-bar-timer.overtime {
+  color: #7f1d1d;
+}
+.session-bar-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.session-bar-actions .icon-btn {
+  border-color: rgba(9, 9, 11, 0.2);
+  color: #09090b;
+  width: 30px;
+  height: 30px;
+}
+.session-bar-actions .icon-btn:hover {
+  background: rgba(9, 9, 11, 0.1);
+}
+.active-session-bar.is-idle .inline-timer-btn {
+  display: none;
+}
+
+/* Expanded Drawer Feed */
+.notification-drawer-feed {
+  padding: 12px 16px calc(24px + var(--safe-bottom)) 16px;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.notification-feed-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+.notification-feed-title {
+  font-family: var(--font-header);
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.notification-count-pill {
+  background: color-mix(in srgb, var(--primary) 20%, transparent);
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.notification-count-pill.has-unread {
+  background: var(--primary);
+  color: var(--on-primary);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+}
+.notification-feed-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.notification-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.notification-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--card-border);
+  border-left: 3px solid transparent;
+  border-radius: var(--border-radius-md);
+  padding: 14px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.notification-card.unread {
+  border-left-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 5%, var(--bg-surface));
+}
+.notification-card:hover {
+  border-color: color-mix(in srgb, var(--primary) 35%, var(--card-border));
+}
+.unread-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--primary);
+  margin-left: 6px;
+  vertical-align: middle;
+  box-shadow: 0 0 6px var(--primary);
+}
+.notification-card.read .unread-dot {
+  display: none;
+}
+.notification-card.welcome {
+  background: color-mix(in srgb, var(--primary) 8%, var(--card-bg));
+  border-color: color-mix(in srgb, var(--primary) 35%, var(--card-border));
+}
+/* Version offers (TODO §16.1) sit above the feed and are deliberately NOT dismissable: they carry
+   no unread dot, and a left accent marks them as chrome rather than another notification. */
+.notification-card.version-offer {
+  border-left: 3px solid var(--primary);
+}
+.notification-card.version-offer.warning {
+  background: color-mix(in srgb, #f59e0b 8%, var(--card-bg));
+  border-left-color: #f59e0b;
+}
+.notification-card.version-offer.warning .notification-card-icon {
+  background: color-mix(in srgb, #f59e0b 18%, transparent);
+  color: #f59e0b;
+}
+.notification-card.version-offer.muted {
+  border-left-color: var(--text-muted);
+}
+.notification-card.version-offer.muted .notification-card-icon {
+  background: color-mix(in srgb, var(--text-muted) 15%, transparent);
+  color: var(--text-muted);
+}
+.notification-card-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--primary) 15%, transparent);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+.notification-card.cancellation .notification-card-icon {
+  background: color-mix(in srgb, #ef4444 15%, transparent);
+  color: #ef4444;
+}
+.notification-card.demo-mode {
+  background: color-mix(in srgb, #f59e0b 8%, var(--card-bg));
+  border-color: color-mix(in srgb, #f59e0b 40%, var(--card-border));
+}
+.notification-card.demo-mode .notification-card-icon {
+  background: color-mix(in srgb, #f59e0b 18%, transparent);
+  color: #f59e0b;
+}
+.notification-empty {
+  padding: 24px 16px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.notification-card-content {
+  flex: 1;
+  min-width: 0;
+}
+.notification-card-title {
+  font-weight: 700;
+  font-size: 14px;
+  margin: 0 0 4px 0;
+  color: var(--text-main);
+}
+.notification-card-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0 0 10px 0;
+  line-height: 1.4;
+}
+.notification-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.notification-btn {
+  background: var(--bg-color);
+  border: 1px solid var(--card-border);
+  color: var(--text-main);
+  padding: 6px 12px;
+  border-radius: var(--border-radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+.notification-btn:hover {
+  background: var(--card-border);
+}
+.notification-btn.primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #09090b;
+}
+.notification-btn.primary:hover {
+  filter: brightness(1.1);
+}
+.notification-link {
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 0;
+  transition: opacity 0.2s ease;
+}
+.notification-link:hover {
+  opacity: 0.85;
+  text-decoration: none;
+}

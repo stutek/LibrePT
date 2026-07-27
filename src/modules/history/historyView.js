@@ -6,6 +6,27 @@ import { orderedItems } from "../common/sessionItemOrder.js";
 import { isRestRecord, isSkippedRecord } from "../common/sessionItemRecord.js";
 import { escapeHTML, formatDateStr } from "../common/utils.js";
 
+export function renderHistoryViewShell() {
+  const mainContent = document.getElementById("main-content");
+  if (!mainContent || document.getElementById("view-history")) return;
+  mainContent.insertAdjacentHTML(
+    "beforeend",
+    `
+<section id="view-history" class="app-view">
+      <div class="view-header view-titlebar">
+        <button class="view-grabber" type="button" aria-label="Return to home"></button>
+        <h2>Global History</h2>
+      </div>
+      <p class="view-desc">Log of all completed sessions across all clients.</p>
+      
+      <div id="global-history-list" class="stack-list">
+        <!-- Injected via JS -->
+      </div>
+    </section>
+`,
+  );
+}
+
 export function renderGlobalHistory({ state, t }) {
   const container = document.getElementById("global-history-list");
   if (!container) return;

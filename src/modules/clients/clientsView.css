@@ -1,0 +1,159 @@
+/* modules/clients/clientsView.css — client directory cards + client detail layout (profile,
+   avatar, weight-history chart). Extracted from index.css to live next to clientsView.js. */
+
+.client-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+.client-card:hover {
+  border-color: rgba(16, 185, 129, 0.3);
+}
+.client-info-block {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: #fff;
+  font-family: var(--font-header);
+  font-weight: 700;
+  font-size: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+.client-name-meta h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.client-name-meta p {
+  font-size: 12px;
+} /* Client Detail Layout */
+.client-detail-card {
+  margin-bottom: 20px;
+}
+.client-profile-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.avatar-large {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: #fff;
+  font-family: var(--font-header);
+  font-weight: 700;
+  font-size: 22px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+.profile-meta h3 {
+  font-family: var(--font-header);
+  font-size: 20px;
+  font-weight: 700;
+}
+.profile-meta p {
+  font-size: 12px;
+}
+.profile-info-grid {
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.info-block label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  display: block;
+}
+.info-block p {
+  font-size: 14px;
+  line-height: 1.5;
+}
+.quick-workout-action {
+  border-top: 1px solid var(--border-color);
+  padding-top: 16px;
+}
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-top: 10px;
+}
+.data-table th,
+.data-table td {
+  padding: 8px 12px;
+  text-align: left;
+}
+.data-table th {
+  border-bottom: 1px solid var(--border-color);
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+.data-table td {
+  border-bottom: 1px dashed var(--border-color);
+}
+.data-table tr:last-child td {
+  border-bottom: none;
+} /* Weight History Chart Box */
+.simple-chart {
+  height: 100px;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 4px;
+  position: relative;
+}
+.chart-bar-wrapper {
+  flex: 1;
+  align-items: center;
+  height: 100%;
+  justify-content: flex-end;
+}
+.chart-bar {
+  width: 100%;
+  background: linear-gradient(to top, var(--primary-hover), var(--primary));
+  border-radius: 4px 4px 0 0;
+  min-height: 4px;
+  transition: height 0.4s ease;
+  position: relative;
+}
+.chart-bar:hover .chart-tooltip {
+  opacity: 1;
+}
+.chart-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translate(-50%, -6px);
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--primary);
+  font-weight: 700;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  white-space: nowrap;
+  z-index: 10;
+}
+.chart-label {
+  font-size: 9px;
+  margin-top: 4px;
+}

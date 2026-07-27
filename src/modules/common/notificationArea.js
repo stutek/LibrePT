@@ -263,7 +263,57 @@ export function toggleNotificationArea(forceExpand = null) {
   }
 }
 
+export function renderNotificationAreaShell() {
+  const root = document.getElementById("notification-area");
+  if (!root || root.querySelector(".notification-handle-bar")) return;
+  root.insertAdjacentHTML(
+    "beforeend",
+    `
+    <div class="notification-handle-bar view-titlebar" id="notification-handle-bar">
+      <button class="view-grabber notification-grabber" id="notification-grabber-btn" type="button" aria-label="Toggle notifications drawer"></button>
+      
+      <!-- Collapsed status summary preview when no active session bar -->
+      <div class="notification-summary-preview" id="notification-summary-preview">
+        <div class="notification-summary-header">
+          <div class="notification-summary-title-wrap">
+            <i class="fa-solid fa-bell notification-bell-icon" id="notification-summary-icon"></i>
+            <span id="notification-summary-title" class="notification-summary-title">Welcome to LibrePT</span>
+          </div>
+          <div class="notification-summary-badges">
+            <span id="notification-summary-count" class="notification-count-pill">3 unread / 3 all</span>
+            <button class="icon-btn notification-toggle-btn" id="btn-toggle-notifications" aria-label="Toggle Notifications">
+              <i class="fa-solid fa-chevron-up toggle-chevron"></i>
+            </button>
+          </div>
+        </div>
+        <p id="notification-summary-desc" class="notification-summary-desc">LibrePT is your privacy-first, buildless personal trainer app...</p>
+      </div>
+
+    </div>
+
+    <div class="notification-drawer-feed" id="notification-drawer-feed">
+      <div class="notification-feed-header">
+        <div class="notification-feed-title">
+          <i class="fa-solid fa-bell"></i>
+          <span id="notification-feed-title-text">Notifications &amp; Status Feed</span>
+        </div>
+        <div class="notification-feed-actions">
+          <button type="button" class="btn btn-xs secondary-btn" id="btn-mark-all-read" title="Mark all as read">
+            <i class="fa-solid fa-check-double"></i> <span id="btn-mark-all-read-text">Mark all as read</span>
+          </button>
+          <span class="notification-count-pill" id="notification-feed-count">3 unread / 3 all</span>
+        </div>
+      </div>
+      <div class="notification-list" id="notification-list-container">
+        <!-- Dynamically populated by notificationArea.js with Welcome Demo, reservations, and alerts -->
+      </div>
+    </div>
+`,
+  );
+}
+
 export function setupNotificationGestures() {
+  renderNotificationAreaShell();
   const SWIPE_PX = 50; // vertical distance that commits the gesture
   const handleBar = document.getElementById("notification-handle-bar");
   const grabberBtn = document.getElementById("notification-grabber-btn");

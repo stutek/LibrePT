@@ -1,0 +1,31 @@
+/* modules/common/buildInfoDialog.css — the build-info dialog's fact rows. Extracted from
+   index.css to live next to buildInfoDialog.js. */
+
+.build-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 4px 0 16px;
+}
+.build-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 6px;
+}
+.build-info-row dt {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+.build-info-row dd {
+  margin: 0;
+  font-family: var(--font-mono, monospace);
+  font-size: 13px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+  user-select: text;
+}
+
+/* Utility classes */

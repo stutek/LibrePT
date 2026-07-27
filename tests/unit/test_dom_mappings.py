@@ -1,6 +1,12 @@
 # tests/unit/test_dom_mappings.py
 # Every selector in app.js's staticMappings (i18n target table) must resolve to an element
-# that actually exists in index.html — a typo'd selector silently drops a translation.
+# that actually exists at runtime — a typo'd selector silently drops a translation.
+#
+# index.html itself is now just a shell (empty header/main/notification-area/dialog canvases):
+# every view section, dialog, header, and notification-area is injected by the module that owns
+# its behavior (e.g. `renderClientDialog()` in formsController.js, `renderHeaderShell()` in
+# applicationHeader.js). So "does this element exist" means scanning index.html AND every JS
+# module's own HTML template literals, not just the static shell.
 
 import re
 from html.parser import HTMLParser
@@ -25,9 +31,24 @@ class ElementCollector(HTMLParser):
         self.elements.append({"tag": tag, "attrs": attrs_dict})
 
 
+def _feed_all_rendered_markup(collector, src_dir):
+    """Feeds index.html plus every HTML template literal found in the app's JS modules into
+    `collector`, so it reflects the full set of elements the app can actually put on screen —
+    not just the static shell index.html has been reduced to."""
+    collector.feed((src_dir / "index.html").read_text(encoding="utf-8"))
+    for js_path in src_dir.rglob("*.js"):
+        text = js_path.read_text(encoding="utf-8")
+        # Drop escaped backticks first so they don't prematurely terminate the block regex below
+        # (e.g. backupRestore.js's `` \`.json\` `` snippet inside its own template literal).
+        text = text.replace("\\`", "")
+        for block in re.findall(r"`([^`]*)`", text, re.DOTALL):
+            if "<" in block:
+                collector.feed(block)
+
+
 def test_static_mappings_selectors(src_dir):
     collector = ElementCollector()
-    collector.feed((src_dir / "index.html").read_text(encoding="utf-8"))
+    _feed_all_rendered_markup(collector, src_dir)
 
     js_content = (src_dir / "i18n" / "domMappings.js").read_text(encoding="utf-8")
     mappings_match = re.search(

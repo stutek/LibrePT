@@ -184,6 +184,27 @@ export function switchView(viewId, { focusSessionsColumn } = {}) {
   }
 }
 
+export function renderErrorViewShell() {
+  const mainContent = document.getElementById("main-content");
+  if (!mainContent || document.getElementById("view-error")) return;
+  mainContent.insertAdjacentHTML(
+    "beforeend",
+    `
+<section id="view-error" class="app-view">
+      <div class="error-view">
+        <i class="fa-solid fa-compass error-view-icon"></i>
+        <h2 id="error-view-title">Page not found</h2>
+        <p class="view-desc">This link doesn't point to a session, client or view in LibrePT.</p>
+        <p class="error-view-path"><code id="error-view-path"></code></p>
+        <button id="btn-error-home" class="btn primary-btn btn-sm">
+          <i class="fa-solid fa-house"></i> Back to dashboard
+        </button>
+      </div>
+    </section>
+`,
+  );
+}
+
 export function showErrorView(attemptedPath, { setHeaderState } = {}) {
   const fnSetHeader = setHeaderState || routerDeps?.setHeaderState;
   if (fnSetHeader) fnSetHeader(false);

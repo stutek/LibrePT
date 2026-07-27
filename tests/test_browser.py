@@ -5,55 +5,27 @@ import datetime
 
 def test_sessions_day_navigation(page, local_server):
     """
-    Verifies the sessions title bar reports the focused date (weekday + date),
-    and that the title arrows step across the timeline's day-groups.
+    Verifies the dashboard opens focused on today (reflected in the URL, since `/` redirects to
+    `/sessions/<isoDate>`), that scrolling to a day-group updates the URL to match, and that the
+    Today control resets the timeline and disables itself once today is already focused. The old
+    prev/next title-bar arrows and the weekday/date text are gone from the UI (removed in favor of
+    the sticky per-day headers already showing each group's own date) — this test only covers what
+    remains.
     """
     page.goto(local_server)
-
-    weekday = page.locator("#calendar-title-weekday")
+    page.wait_for_selector(".sessions-day-group")
     today = datetime.date.today()
+    today_iso = today.strftime("%Y-%m-%d")
 
-    # Dashboard opens focused on today: ISO date + weekday show today
-    page.wait_for_selector("#calendar-title-weekday")
-    assert weekday.inner_text().strip().upper() == today.strftime("%A").upper()
-    assert page.locator("#calendar-title-date").inner_text().strip() == today.strftime(
-        "%Y-%m-%d"
-    )
-
-    # Left arrow steps back to the previous day-group (the seed data's earliest is yesterday)
-    page.locator("#btn-sessions-prev").click()
+    # Dashboard opens focused on today
     page.wait_for_timeout(900)
-    yesterday = today - datetime.timedelta(days=1)
-    assert weekday.inner_text().strip().upper() == yesterday.strftime("%A").upper()
-
-    # Yesterday is the earliest loaded day-group, so stepping further back is a dead end
-    assert page.locator("#btn-sessions-prev").is_disabled()
-
-    # Right arrow returns to today, then steps on to tomorrow
-    page.locator("#btn-sessions-next").click()
-    page.wait_for_timeout(900)
-
-    page.locator("#btn-sessions-next").click()
-    page.wait_for_timeout(900)
-    tomorrow = today + datetime.timedelta(days=1)
-    assert weekday.inner_text().strip().upper() == tomorrow.strftime("%A").upper()
-
-    # Going home via the logo pulls focus back to today
-    page.locator("#logo-area").click()
-    page.wait_for_timeout(900)
-    assert weekday.inner_text().strip().upper() == today.strftime("%A").upper()
-
-    # The Today control resets the timeline directly, without stepping through the arrows
-    page.locator("#btn-sessions-next").click()
-    page.wait_for_timeout(900)
-    page.locator("#btn-sessions-today").click()
-    page.wait_for_timeout(900)
-    assert weekday.inner_text().strip().upper() == today.strftime("%A").upper()
+    assert page.url.rstrip("/").endswith(today_iso)
     assert page.locator("#btn-sessions-today").is_disabled(), (
         "the Today control disables itself once today is already focused"
     )
 
-    # Scrolling the timeline itself (rather than the arrows) must retitle to the date it settles on
+    # Scrolling the timeline to another day-group must retitle the URL to the date it settles on
+    tomorrow = today + datetime.timedelta(days=1)
     tomorrow_iso = tomorrow.strftime("%Y-%m-%d")
     page.evaluate(
         """(iso) => {
@@ -63,8 +35,27 @@ def test_sessions_day_navigation(page, local_server):
         tomorrow_iso,
     )
     page.wait_for_timeout(900)
-    assert weekday.inner_text().strip().upper() == tomorrow.strftime("%A").upper()
-    assert page.locator("#calendar-title-date").inner_text().strip() == tomorrow_iso
+    assert page.url.rstrip("/").endswith(tomorrow_iso)
+    assert not page.locator("#btn-sessions-today").is_disabled()
+
+    # Going home via the logo pulls focus back to today
+    page.locator("#logo-area").click()
+    page.wait_for_timeout(900)
+    assert page.url.rstrip("/").endswith(today_iso)
+
+    # The Today control resets the timeline directly
+    page.evaluate(
+        """(iso) => {
+      const group = document.querySelector(`.sessions-day-group[data-date="${iso}"]`);
+      if (group) group.scrollIntoView({ behavior: 'auto', block: 'start' });
+    }""",
+        tomorrow_iso,
+    )
+    page.wait_for_timeout(900)
+    page.locator("#btn-sessions-today").click()
+    page.wait_for_timeout(900)
+    assert page.url.rstrip("/").endswith(today_iso)
+    assert page.locator("#btn-sessions-today").is_disabled()
 
 
 def test_scrolling_the_timeline_updates_the_focused_day(page, local_server):
@@ -74,22 +65,22 @@ def test_scrolling_the_timeline_updates_the_focused_day(page, local_server):
     scroll position drives the focused date, not any particular input method. Driving the
     scroll directly (rather than a synthetic touch/wheel gesture, which headless Chromium does
     not reliably turn into real scrolling for a plain overflow container) tests exactly that,
-    deterministically."""
+    deterministically. The focused date is read from the URL (`/sessions/<isoDate>`), since the
+    title bar no longer renders it as text."""
     page.goto(local_server)
     page.wait_for_selector(".sessions-day-group")
     # Boot re-renders the timeline more than once (recovering an active session, notifications,
     # etc.), and each render re-arms a brief "ignore scroll during a programmatic settle" guard
-    # (sessionTimeline.js) so the title doesn't flicker mid-scrollIntoView. Give every boot-time
-    # render's guard window a chance to expire before driving a scroll of our own.
+    # (sessionTimeline.js) so the focused date doesn't flicker mid-scrollIntoView. Give every
+    # boot-time render's guard window a chance to expire before driving a scroll of our own.
     page.wait_for_timeout(1200)
 
-    weekday = page.locator("#calendar-title-weekday-short")
-    today = datetime.date.today()
-    assert weekday.inner_text().strip().upper() == today.strftime("%a").upper()
+    today_iso = datetime.date.today().strftime("%Y-%m-%d")
+    assert page.url.rstrip("/").endswith(today_iso)
 
     page.evaluate("() => { document.getElementById('main-content').scrollTop += 900; }")
     page.wait_for_timeout(1000)
-    assert weekday.inner_text().strip().upper() != today.strftime("%a").upper(), (
+    assert not page.url.rstrip("/").endswith(today_iso), (
         "scrolling the timeline must move the focused day-group off today"
     )
 

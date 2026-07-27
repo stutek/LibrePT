@@ -48,7 +48,65 @@ export function prepareBackupDialog() {
   }
 }
 
+export function renderBackupDialog() {
+  const root = document.getElementById("dialogs-root");
+  if (!root || document.getElementById("dialog-backup")) return;
+  root.insertAdjacentHTML(
+    "beforeend",
+    `
+<dialog id="dialog-backup" class="dialog-modal card glassmorphic">
+    <div class="modal-header">
+      <h3>Sync &amp; Backup Center</h3>
+      <button class="modal-close-btn" aria-label="Close sync & backup modal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body-scroll">
+      <p class="dialog-desc">LibrePT stores your logs directly on this device. Sync the latest session schedule, download a backup file to keep your history safe, or import it to move to another phone.</p>
+
+      <div class="backup-actions">
+        <div class="action-card card">
+          <i class="fa-solid fa-arrows-rotate backup-icon-large text-primary"></i>
+          <h4 id="sync-data-title">Sync Session Data</h4>
+          <p id="sync-data-desc">Pull the latest bookings and session schedule from your connected calendar.</p>
+          <button id="btn-sync-data" class="btn primary-btn w-full">
+            <i class="fa-solid fa-arrows-rotate"></i> <span id="btn-sync-data-text">Sync Data</span>
+          </button>
+          <p id="sync-status" class="status-msg"></p>
+        </div>
+
+        <div class="action-card card">
+          <i class="fa-solid fa-file-export backup-icon-large text-emerald"></i>
+          <h4 id="backup-export-title">Export Data Backup</h4>
+          <p id="backup-export-desc">Download your clients, routines, and workout logs as a single JSON file.</p>
+          <button id="btn-export-db" class="btn primary-btn w-full">Export JSON</button>
+        </div>
+
+        <div class="action-card card">
+          <i class="fa-solid fa-arrow-right-arrow-left backup-icon-large text-cyan"></i>
+          <h4 id="catalog-export-title">Export Exercise Catalog</h4>
+          <p id="catalog-export-desc">Export your movement catalog mapped to the open wger taxonomy, so it stays interchangeable with external tools.</p>
+          <button id="btn-export-catalog-json" class="btn secondary-btn w-full">Export Catalog JSON</button>
+          <button id="btn-export-catalog-csv" class="btn secondary-btn w-full">Export Catalog CSV</button>
+        </div>
+
+        <div class="action-card card">
+          <i class="fa-solid fa-file-import backup-icon-large text-indigo"></i>
+          <h4 id="backup-import-title">Import Data Backup</h4>
+          <p id="backup-import-desc">Load an existing \`.json\` backup file. This will merge or overwrite your current database.</p>
+          <div class="file-upload-wrapper">
+            <button type="button" id="btn-select-json" class="btn secondary-btn w-full file-trigger">Select JSON File</button>
+            <input type="file" id="import-db-file" accept=".json" class="file-input-hidden">
+          </div>
+          <p id="import-status" class="status-msg"></p>
+        </div>
+      </div>
+    </div>
+  </dialog>
+`,
+  );
+}
+
 export function setupBackupRestore() {
+  renderBackupDialog();
   const dialog = document.getElementById("dialog-backup");
   if (!dialog) return;
 

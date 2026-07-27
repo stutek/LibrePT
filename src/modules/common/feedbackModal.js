@@ -64,7 +64,96 @@ export function openFeedbackModal(exId) {
   openModal("dialog-feedback", { resetForm: true, formId: "form-feedback" });
 }
 
+export function renderFeedbackDialog() {
+  const root = document.getElementById("dialogs-root");
+  if (!root || document.getElementById("dialog-feedback")) return;
+  root.insertAdjacentHTML(
+    "beforeend",
+    `
+<dialog id="dialog-feedback" class="dialog-modal card glassmorphic">
+    <div class="modal-header">
+      <h3>Log Client Feedback</h3>
+      <button class="modal-close-btn" aria-label="Close feedback modal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form id="form-feedback" method="dialog" class="modal-form">
+      <input type="hidden" id="feedback-client-id">
+      <input type="hidden" id="feedback-exercise-name">
+      
+      <div class="form-group">
+        <label>Feedback for <span id="feedback-client-display-name" class="text-emerald font-semibold">Jane Doe</span> on <span id="feedback-ex-display-name" class="text-emerald font-semibold">Bench Press</span></label>
+        
+        <div class="feedback-chips-selector">
+          <label class="feedback-chip-option">
+            <input type="radio" name="feedback-tag" value="Too Easy - Increase Load" checked>
+            <span>🚀 Too Easy - Increase Load</span>
+          </label>
+          <label class="feedback-chip-option">
+            <input type="radio" name="feedback-tag" value="Too Hard - Reduce Load">
+            <span>⚠️ Too Hard - Reduce Load</span>
+          </label>
+          <label class="feedback-chip-option">
+            <input type="radio" name="feedback-tag" value="Form Break - Watch Position">
+            <span>🔬 Form Break - Focus Required</span>
+          </label>
+          <label class="feedback-chip-option">
+            <input type="radio" name="feedback-tag" value="Joint Pain / Discomfort">
+            <span>🔥 Joint Pain / Discomfort</span>
+          </label>
+          <label class="feedback-chip-option">
+            <input type="radio" name="feedback-tag" value="Completed reps easily">
+            <span>💪 Good Progression</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Privacy-First Voice Note Group -->
+      <div class="form-group" style="margin-top: 16px;">
+        <label style="display: flex; align-items: center; justify-content: space-between;">
+          <span id="label-voice-note" data-i18n="voice_note_label">Privacy-First Voice Note</span>
+          <span class="badge badge-emerald" style="font-size: 8px; padding: 1px 4px;">Local Only</span>
+        </label>
+        <div class="voice-recorder-widget" style="display: flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.15); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color); margin-top: 4px;">
+          <button type="button" id="btn-voice-record" class="btn secondary-btn" style="width: 40px; height: 40px; border-radius: 50%; padding: 0; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; background: rgba(255,255,255,0.05); color: var(--primary); border-color: var(--border-color); flex-shrink: 0;">
+            <i class="fa-solid fa-microphone" id="voice-record-icon" style="font-size: 16px;"></i>
+          </button>
+          <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+            <div id="voice-record-status" style="font-size: 11px; font-weight: 600; color: var(--text-muted);" data-i18n="voice_ready">Ready to record voice memo</div>
+            <!-- Mock audio wave visualization -->
+            <div id="voice-audio-wave" class="audio-wave-container hidden" style="display: flex; align-items: center; gap: 2px; height: 16px; margin-top: 4px;">
+              <span class="wave-bar"></span>
+              <span class="wave-bar"></span>
+              <span class="wave-bar"></span>
+              <span class="wave-bar"></span>
+              <span class="wave-bar"></span>
+              <span class="wave-bar"></span>
+              <span class="wave-bar"></span>
+            </div>
+            <!-- Audio player review if recorded -->
+            <div id="voice-audio-player" class="audio-player-mini hidden" style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+              <button type="button" id="btn-play-voice-preview" style="background: none; border: none; color: var(--primary); cursor: pointer; padding: 0;"><i class="fa-solid fa-circle-play" style="font-size: 16px;"></i></button>
+              <div style="font-size: 10px; color: var(--text-color); font-family: monospace;">voice_memo.wav (0:04)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="feedback-custom-note">Custom Details / Notes</label>
+        <input type="text" id="feedback-custom-note" placeholder="e.g. Left knee clicks, reduced load..." class="form-control">
+      </div>
+      
+      <div class="modal-actions">
+        <button type="button" class="btn secondary-btn modal-cancel">Cancel</button>
+        <button type="submit" class="btn primary-btn">Log Alert</button>
+      </div>
+    </form>
+  </dialog>
+`,
+  );
+}
+
 export function setupFeedbackForms() {
+  renderFeedbackDialog();
   const fbModal = $id("dialog-feedback");
   if (!fbModal) return;
 

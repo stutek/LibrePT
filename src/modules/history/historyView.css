@@ -1,0 +1,143 @@
+/* modules/history/historyView.css — history card items, the feedback icon/tooltip, and
+   structured history rows (exercise/rest/circuit). Extracted from index.css to live next
+   to historyView.js. */
+
+.history-card {
+  padding: 14px;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+.history-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-color: var(--primary);
+}
+.history-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+  border-bottom: 1px dashed var(--border-color);
+  padding-bottom: 8px;
+}
+.history-header-meta h4 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.history-header-meta p {
+  font-size: 11px;
+}
+.history-date {
+  font-size: 11px;
+  font-family: var(--font-mono);
+} /* Omnipresent bottom notification & status area (replaces old bottom-nav) */
+.history-feedback-icon {
+  position: relative;
+  cursor: pointer;
+  margin-left: 6px;
+  display: inline-block;
+  font-size: 13px;
+  transition: transform 0.2s;
+  vertical-align: middle;
+}
+.history-feedback-icon:hover {
+  transform: scale(1.2);
+}
+.history-feedback-icon .tooltip-content {
+  visibility: hidden;
+  width: 220px;
+  background-color: rgba(18, 18, 24, 0.98);
+  color: var(--text-color);
+  text-align: left;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px 14px;
+  position: absolute;
+  z-index: 100;
+  bottom: 135%;
+  /* Position above the icon */
+  right: 0;
+  /* Align to the right of the icon to keep within screen limits */
+  opacity: 0;
+  transition: opacity 0.2s, visibility 0.2s;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
+  pointer-events: none;
+  font-size: 11px;
+  line-height: 1.5;
+  font-weight: normal;
+}
+.history-feedback-icon .tooltip-content::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  right: 12px;
+  /* Position the pointer arrow to align with the right-positioned icon */
+  border-width: 6px;
+  border-style: solid;
+  border-color: rgba(18, 18, 24, 0.98) transparent transparent transparent;
+}
+.history-feedback-icon:hover .tooltip-content,
+.history-feedback-icon.active .tooltip-content {
+  visibility: visible;
+  opacity: 1;
+}
+.tooltip-title {
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: var(--primary);
+}
+.tooltip-body {
+  color: var(--text-muted);
+}
+
+/* Structured history rows (TODO §17.1): exercise rows, greyed skips, first-class rest chips, and
+   circuit groups. A completed record renders its whole program, not just performed sets. */
+.history-ex-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+  padding-bottom: 4px;
+  margin-bottom: 6px;
+}
+.history-ex-icons {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.history-ex-skipped {
+  opacity: 0.5;
+}
+.history-skip-badge {
+  margin-left: 6px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+  color: var(--text-muted);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 10px;
+  padding: 1px 6px;
+}
+.history-rest-row {
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 2px 0 6px;
+}
+.history-circuit {
+  border-left: 2px solid var(--primary);
+  padding-left: 8px;
+  margin-bottom: 6px;
+}
+.history-circuit-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 4px;
+}

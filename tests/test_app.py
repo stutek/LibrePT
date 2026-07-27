@@ -1,6 +1,7 @@
 import os
 import re
 from html.parser import HTMLParser
+from pathlib import Path
 
 
 class ElementCollector(HTMLParser):
@@ -20,6 +21,20 @@ class ElementCollector(HTMLParser):
             for c in attrs_dict["class"].split():
                 self.classes.add(c)
         self.elements.append({"tag": tag, "attrs": attrs_dict})
+
+
+def _feed_all_rendered_markup(collector, src_dir):
+    """Feeds index.html plus every HTML template literal found in the app's JS modules into
+    `collector` — index.html is just a shell now (empty header/main/notification-area/dialog
+    canvases); every view, dialog, and the header itself are injected by the module that owns
+    their behavior, so "does this element exist" has to look at those templates too."""
+    collector.feed((src_dir / "index.html").read_text(encoding="utf-8"))
+    for js_path in src_dir.rglob("*.js"):
+        text = js_path.read_text(encoding="utf-8")
+        text = text.replace("\\`", "")
+        for block in re.findall(r"`([^`]*)`", text, re.DOTALL):
+            if "<" in block:
+                collector.feed(block)
 
 
 def test_file_structure():
@@ -50,12 +65,8 @@ def test_manifest_icons_exist():
 
 
 def test_static_mappings_selectors():
-    # Parse index.html to gather all DOM elements
-    with open("src/index.html", "r", encoding="utf-8") as f:
-        html_content = f.read()
-
     collector = ElementCollector()
-    collector.feed(html_content)
+    _feed_all_rendered_markup(collector, Path("src"))
 
     # Read domMappings.js (where staticMappings moved from app.js)
     with open("src/i18n/domMappings.js", "r", encoding="utf-8") as f:

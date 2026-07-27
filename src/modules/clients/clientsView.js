@@ -18,6 +18,34 @@ export function setActiveDetailClientId(id) {
   activeDetailClientId = id;
 }
 
+export function renderClientDirectoryViewShell() {
+  const mainContent = document.getElementById("main-content");
+  if (!mainContent || document.getElementById("view-client-directory")) return;
+  mainContent.insertAdjacentHTML(
+    "beforeend",
+    `
+<section id="view-client-directory" class="app-view">
+      <div class="view-header view-titlebar">
+        <button class="view-grabber" type="button" aria-label="Return to home"></button>
+        <h2>Client Directory</h2>
+        <button id="btn-add-client" class="btn primary-btn btn-sm">
+          <i class="fa-solid fa-user-plus"></i> Add Client
+        </button>
+      </div>
+
+      <div class="search-bar-container">
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        <input type="text" id="search-clients" placeholder="Search clients..." class="search-input">
+      </div>
+
+      <div id="clients-list" class="grid-list">
+        <!-- Injected via JS -->
+      </div>
+    </section>
+`,
+  );
+}
+
 export function renderClientsList({ state, t, navigateToPath, filterQuery = "" }) {
   const container = document.getElementById("clients-list");
   if (!container) return;
@@ -31,6 +59,80 @@ export function renderClientsList({ state, t, navigateToPath, filterQuery = "" }
     truncateString,
     onOpenClient: (id) => navigateToPath(`/clients/${id}`),
   });
+}
+
+export function renderClientDetailViewShell() {
+  const mainContent = document.getElementById("main-content");
+  if (!mainContent || document.getElementById("view-client-detail")) return;
+  mainContent.insertAdjacentHTML(
+    "beforeend",
+    `
+<section id="view-client-detail" class="app-view">
+      <div class="view-header-back view-titlebar">
+        <button class="view-grabber" type="button" aria-label="Return to home"></button>
+        <button id="btn-back-to-clients" class="btn secondary-btn btn-sm">
+          <i class="fa-solid fa-arrow-left"></i> Back
+        </button>
+        <h2 id="detail-client-name">Client Details</h2>
+        <button id="btn-edit-client" class="btn secondary-btn btn-sm">
+          <i class="fa-solid fa-pen"></i> Edit
+        </button>
+      </div>
+      
+      <div class="client-detail-card card glassmorphic">
+        <div class="client-profile-header">
+          <div id="detail-client-avatar" class="avatar-large">JD</div>
+          <div class="profile-meta">
+            <h3 id="profile-name">Jane Doe</h3>
+            <p id="profile-joined-date">Joined March 15, 2026</p>
+          </div>
+        </div>
+        
+        <div class="profile-info-grid">
+          <div class="info-block">
+            <label>Current Goals</label>
+            <p id="profile-goals">Goals details go here.</p>
+          </div>
+          <div class="info-block">
+            <label>Health & Injury Notes</label>
+            <p id="profile-notes">Notes details go here.</p>
+          </div>
+          <div class="info-block">
+            <label id="label-profile-email">Email</label>
+            <p id="profile-email">Email goes here.</p>
+          </div>
+          <div class="info-block">
+            <label id="label-profile-phone">Phone Number</label>
+            <p id="profile-phone">Phone goes here.</p>
+          </div>
+          <div class="info-block">
+            <label>GDPR Cloud Sync Consent</label>
+            <p id="profile-gdpr-status"><span class="badge">Checking...</span></p>
+          </div>
+        </div>
+
+        <div class="quick-workout-action" style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button id="btn-plan-client-program" class="btn primary-btn" style="flex: 1; min-width: 150px;">
+            <i class="fa-solid fa-calendar-plus"></i> Plan Program
+          </button>
+          <a id="btn-send-consent-email" class="btn secondary-btn" style="flex: 1; min-width: 150px; text-decoration: none; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+            <i class="fa-solid fa-envelope"></i> Send Consent Form
+          </a>
+          <button id="btn-ai-safe-copy" class="btn secondary-btn" style="flex: 1; min-width: 150px;">
+            <i class="fa-solid fa-user-shield"></i> AI Safe Copy
+          </button>
+        </div>
+      </div>
+
+
+
+      <div class="section-title">
+        <h3>Training History</h3>
+      </div>
+      <div class="history-list" id="client-history-list"></div>
+    </section>
+`,
+  );
 }
 
 export function showClientDetails({

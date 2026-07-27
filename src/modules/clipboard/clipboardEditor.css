@@ -511,3 +511,58 @@
   color: var(--secondary, var(--primary));
   border-color: var(--secondary, var(--primary));
 }
+
+/* Moved from index.css — active-set-row styling belongs with the plan editor. */
+
+.active-set-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  padding-bottom: 8px;
+}
+.active-set-row .step-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  width: 32px;
+  height: 32px;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+}
+.active-set-row .input-set-weight,
+.active-set-row .input-set-reps {
+  background: none;
+  border: none;
+  color: #fff;
+  text-align: center;
+  font-size: 13px;
+  height: 32px;
+}
+.active-set-row .input-set-weight {
+  width: 50px;
+}
+.active-set-row .input-set-reps {
+  width: 40px;
+}
+.active-set-row .set-checkbox-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.active-set-row .set-checkbox-btn.checked {
+  background: var(--primary-gradient) !important;
+  color: var(--on-primary) !important;
+  border-color: transparent !important;
+  box-shadow: 0 4px 12px -4px rgba(0, 0, 0, 0.45) !important;
+}
+
+/* Mobile responsive scaling */

@@ -26,6 +26,62 @@ export function openExerciseCreateDialog() {
   openExerciseCreateForm();
 }
 
+export function renderClientDialog() {
+  const root = document.getElementById("dialogs-root");
+  if (!root || document.getElementById("dialog-client")) return;
+  root.insertAdjacentHTML(
+    "beforeend",
+    `
+<dialog id="dialog-client" class="dialog-modal card glassmorphic">
+    <div class="modal-header">
+      <h3 id="client-modal-title">Add New Client</h3>
+      <button class="modal-close-btn" aria-label="Close modal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form id="form-client" method="dialog" class="modal-form">
+      <input type="hidden" id="client-form-id">
+      
+      <div class="form-group">
+        <label for="client-name">Full Name *</label>
+        <input type="text" id="client-name" required placeholder="e.g. Jane Doe" class="form-control">
+      </div>
+      
+      <div class="form-group">
+        <label for="client-email">Email</label>
+        <input type="email" id="client-email" placeholder="e.g. jane.doe@example.com" class="form-control">
+      </div>
+      
+      <div class="form-group">
+        <label for="client-phone">Phone Number</label>
+        <input type="tel" id="client-phone" placeholder="e.g. +386 40 123 456" class="form-control">
+      </div>
+      
+      <div class="form-group">
+        <label for="client-goals">Fitness Goals</label>
+        <textarea id="client-goals" rows="2" placeholder="e.g. Strength gain, consistency..." class="form-control"></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label for="client-notes">Trainer Notes & Injuries (Alert banner shows during workout)</label>
+        <textarea id="client-notes" rows="3" placeholder="e.g. Left knee issue; monitor squat depth..." class="form-control"></textarea>
+      </div>
+
+      <div class="form-group checkbox-group" style="display: flex; align-items: center; gap: 8px;">
+        <input type="checkbox" id="client-gdpr-consent" class="form-checkbox">
+        <label for="client-gdpr-consent" style="margin-bottom: 0; font-weight: normal; cursor: pointer;">
+          Client consented to cloud sync & data storage (GDPR)
+        </label>
+      </div>
+      
+      <div class="modal-actions">
+        <button type="button" class="btn secondary-btn modal-cancel">Cancel</button>
+        <button type="submit" class="btn primary-btn">Save Client</button>
+      </div>
+    </form>
+  </dialog>
+`,
+  );
+}
+
 export function setupClientForms({
   state,
   t,
@@ -35,6 +91,7 @@ export function setupClientForms({
   switchView,
   openWorkoutSetupModal,
 }) {
+  renderClientDialog();
   const dialog = $id("dialog-client");
   const form = $id("form-client");
   if (!dialog || !form) return;
@@ -144,6 +201,60 @@ export function setupClientForms({
   }
 }
 
+export function renderRoutineDialog() {
+  const root = document.getElementById("dialogs-root");
+  if (!root || document.getElementById("dialog-routine")) return;
+  root.insertAdjacentHTML(
+    "beforeend",
+    `
+<dialog id="dialog-routine" class="dialog-modal card glassmorphic wide-modal">
+    <div class="modal-header">
+      <h3 id="routine-modal-title">Create Routine Template</h3>
+      <button class="modal-close-btn" aria-label="Close routine modal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form id="form-routine" method="dialog" class="modal-form">
+      <input type="hidden" id="routine-form-id">
+      
+      <div class="form-group">
+        <label for="routine-name">Routine Name *</label>
+        <input type="text" id="routine-name" required placeholder="e.g. Upper Body A" class="form-control">
+      </div>
+      
+      <div class="form-group">
+        <label for="routine-desc">Description</label>
+        <input type="text" id="routine-desc" placeholder="e.g. Strength compound focus" class="form-control">
+      </div>
+      
+      <div class="routine-builder-section">
+        <div class="section-sub-title">
+          <h4>Routine Exercises</h4>
+          <button type="button" id="btn-routine-add-ex" class="btn secondary-btn btn-xs">
+            <i class="fa-solid fa-plus"></i> Add Exercise
+          </button>
+        </div>
+
+        <!-- Reps-preset datalists (surfaced when the reps combobox is focused/emptied; the PT can
+             still type any value) are generated from helper/repsAndLoad.js REPS_TIERS at boot, so
+             the option lists are data-driven and defined in exactly one place. -->
+        <span id="reps-preset-datalists"></span>
+
+        <div id="routine-ex-picker" class="exercise-picker hidden"></div>
+
+        <div id="routine-exercises-list" class="routine-builder-list">
+          <!-- Selection rows injected via JS -->
+        </div>
+      </div>
+      
+      <div class="modal-actions">
+        <button type="button" class="btn secondary-btn modal-cancel">Cancel</button>
+        <button type="submit" class="btn primary-btn">Save Routine</button>
+      </div>
+    </form>
+  </dialog>
+`,
+  );
+}
+
 export function setupRoutineForms({
   state,
   t,
@@ -153,6 +264,7 @@ export function setupRoutineForms({
   navigateToPath,
   urlFor,
 }) {
+  renderRoutineDialog();
   const dialog = $id("dialog-routine");
   const form = $id("form-routine");
   const builderList = $id("routine-exercises-list");
@@ -260,6 +372,101 @@ export function setupRoutineForms({
   });
 }
 
+export function renderExerciseDialog() {
+  const root = document.getElementById("dialogs-root");
+  if (!root || document.getElementById("dialog-exercise")) return;
+  root.insertAdjacentHTML(
+    "beforeend",
+    `
+<dialog id="dialog-exercise" class="dialog-modal card glassmorphic">
+    <div class="modal-header">
+      <h3>Create Custom Exercise</h3>
+      <button class="modal-close-btn" aria-label="Close exercise modal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form id="form-exercise" method="dialog" class="modal-form">
+      <div class="form-group">
+        <label for="exercise-name">Exercise Name *</label>
+        <input type="text" id="exercise-name" required placeholder="e.g. Bulgarian Split Squat" class="form-control">
+      </div>
+      
+      <div class="form-group">
+        <label for="exercise-category">Target Muscle Group *</label>
+        <select id="exercise-category" required class="form-control">
+          <option value="Chest">Chest</option>
+          <option value="Back">Back</option>
+          <option value="Legs">Legs</option>
+          <option value="Shoulders">Shoulders</option>
+          <option value="Arms">Arms</option>
+          <option value="Core">Core</option>
+          <option value="Recovery">Recovery</option>
+          <option value="Cardio">Cardio</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="exercise-equipment">Equipment *</label>
+        <select id="exercise-equipment" required class="form-control">
+          <option value="Barbell">Barbell</option>
+          <option value="Dumbbell">Dumbbell</option>
+          <option value="Cable">Cable</option>
+          <option value="Machine">Machine</option>
+          <option value="Band">Band</option>
+          <option value="Bodyweight">Bodyweight</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="exercise-pattern">Movement Pattern *</label>
+        <select id="exercise-pattern" required class="form-control">
+          <option value="Horizontal Push">Horizontal Push</option>
+          <option value="Horizontal Pull">Horizontal Pull</option>
+          <option value="Vertical Push">Vertical Push</option>
+          <option value="Vertical Pull">Vertical Pull</option>
+          <option value="Squat">Squat</option>
+          <option value="Hinge">Hinge</option>
+          <option value="Lunge">Lunge</option>
+          <option value="Isolation">Isolation</option>
+          <option value="Core">Core</option>
+          <option value="Mobility">Mobility</option>
+          <option value="Conditioning">Conditioning</option>
+          <option value="Balance">Balance</option>
+          <option value="Agility">Agility</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="exercise-modality">How it's logged *</label>
+        <select id="exercise-modality" required class="form-control">
+          <option value="strength">Strength — sets × reps × load</option>
+          <option value="isometric">Isometric — hold time + load</option>
+          <option value="cardio">Cardio — time / distance / calories / watts / pace / HR</option>
+          <option value="stretch">Stretch — hold time</option>
+          <option value="balance">Balance — hold time</option>
+          <option value="agility">Agility — time / distance / reps</option>
+        </select>
+      </div>
+
+      <!-- Metric options are repopulated per modality by formsController (cardio / agility only). -->
+      <div class="form-group hidden" id="exercise-metric-group">
+        <label for="exercise-metric">Metric</label>
+        <select id="exercise-metric" class="form-control"></select>
+      </div>
+
+      <div class="form-group">
+        <label for="exercise-instructions">Instructions</label>
+        <textarea id="exercise-instructions" rows="2" placeholder="Form cues..." class="form-control"></textarea>
+      </div>
+      
+      <div class="modal-actions">
+        <button type="button" class="btn secondary-btn modal-cancel">Cancel</button>
+        <button type="submit" class="btn primary-btn">Save Exercise</button>
+      </div>
+    </form>
+  </dialog>
+`,
+  );
+}
+
 export function setupExerciseForms({
   state,
   t,
@@ -268,6 +475,7 @@ export function setupExerciseForms({
   navigateToPath,
   urlFor,
 }) {
+  renderExerciseDialog();
   const dialog = $id("dialog-exercise");
   const form = $id("form-exercise");
   if (!dialog || !form) return;

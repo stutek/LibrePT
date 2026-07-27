@@ -13,6 +13,35 @@ import {
   syncSessionTimelineAfterRender,
 } from "./sessionTimeline.js";
 
+export function renderClientsViewShell() {
+  const mainContent = document.getElementById("main-content");
+  if (!mainContent || document.getElementById("view-clients")) return;
+  mainContent.insertAdjacentHTML(
+    "beforeend",
+    `
+<section id="view-clients" class="app-view active">
+      <!-- Section B: Today's & Tomorrow's Sessions -->
+      <div class="section-title sessions-title-bar view-titlebar">
+        <button class="view-grabber" type="button" aria-label="Open session clipboard"></button>
+        <h2 class="view-title-label" id="sessions-view-title">Sessions</h2>
+        <!-- Populated by sessionTimeline.js (renderSessionsDatePicker) — the Today/jump-to-date
+             controls are that module's own concern, not shell markup. -->
+        <div class="sessions-date-picker" id="sessions-date-picker"></div>
+      </div>
+
+      <!-- One continuous, time-ordered scroll: sessions render grouped under sticky per-day
+           headers instead of fixed yesterday/today/tomorrow/upcoming columns (TODO §7.3 item 8). -->
+      <div class="sessions-timeline mb-6" id="sessions-categories-grid" role="region" aria-label="Sessions"></div>
+
+      <!-- Floating "Create Session" button: stays visible while scrolling the sessions list -->
+      <button id="btn-create-session" class="btn primary-btn floating-action-btn" aria-label="Create Session" title="Create Session">
+        <i class="fa-solid fa-plus"></i> <span data-i18n="btn_create_session">Create Session</span>
+      </button>
+    </section>
+`,
+  );
+}
+
 export function seedDemoActiveSession({ state }) {
   const sessions = state.sessions || state.bookings || [];
   const booking = sessions.find((b) => b.id === "s01f2e3d");

@@ -42,6 +42,7 @@ import {
   initRouter,
   navigateToPath,
   pushRoute,
+  renderErrorViewShell,
   replaceRoute,
   resolveRoute,
   setHeaderState,
@@ -69,6 +70,8 @@ import { renderClientsDirectory } from "./modules/clients/clientsDirectory.js";
 import {
   renderClientsList as clientsViewRender,
   showClientDetails as clientsViewShowDetails,
+  renderClientDetailViewShell,
+  renderClientDirectoryViewShell,
 } from "./modules/clients/clientsView.js";
 import { initRestTimer, setupRestTimer } from "./modules/clipboard/exerciseAndRestTimer.js";
 import { renderExerciseDeck } from "./modules/clipboard/exerciseDeck.js";
@@ -79,6 +82,7 @@ import {
 import {
   incrementLocalSync,
   initApplicationHeader,
+  renderHeaderShell,
   renderSyncBadge,
   resetSyncState,
   setOfflineCachedState,
@@ -126,15 +130,24 @@ import {
   truncateString,
 } from "./modules/common/utils.js";
 import { initVersionMessages } from "./modules/common/versionMessages.js";
-import { renderExercisesList as exercisesViewRender } from "./modules/exercises/exercisesView.js";
-import { renderGlobalHistory as historyViewRender } from "./modules/history/historyView.js";
+import {
+  renderExercisesList as exercisesViewRender,
+  renderExercisesViewShell,
+} from "./modules/exercises/exercisesView.js";
+import {
+  renderGlobalHistory as historyViewRender,
+  renderHistoryViewShell,
+} from "./modules/history/historyView.js";
 import {
   openAdjustmentWizardComponent,
+  renderAdjustmentsViewShell,
+  renderApplyAdjustmentDialog,
   renderPendingPlanAdjustmentsComponent,
 } from "./modules/plans/planAdjustments.js";
 import {
   initPlansView,
   openRoutineEditorModal,
+  renderRoutinesViewShell,
   renderRoutinesList as routinesViewRender,
 } from "./modules/plans/plansView.js";
 import {
@@ -148,6 +161,7 @@ import {
 import {
   renderEditSessionView,
   renderWorkoutSetupView,
+  renderWorkoutSetupViewShell,
 } from "./modules/session/editSessionView.js";
 import {
   initSessionBar,
@@ -164,6 +178,7 @@ import {
   setupSessionsDayNav,
 } from "./modules/sessionList/sessionTimeline.js";
 import {
+  renderClientsViewShell,
   launchClipboardDirectly as sessionsViewLaunchClipboard,
   renderSessions as sessionsViewRender,
   seedDemoActiveSession as sessionsViewSeedDemo,
@@ -204,6 +219,11 @@ let versionCatalog = null;
 
 function init() {
   initTheme();
+  // The header shell renders before anything else: initAppLifecycle() below stamps the build
+  // commit into #app-version synchronously, and several setup functions later in this file query
+  // header elements (#backup-btn, #app-version) despite not being the header's own module — the
+  // header must exist before any of that runs, not just before its own setupApplicationHeader().
+  renderHeaderShell();
   initAppLifecycle({
     basePath: getBasePath(),
     setOfflineCachedState,
@@ -252,6 +272,24 @@ function init() {
     openRoutineEditor: (routineId) => openRoutineEditorModal({ routineId, state: getState(), t }),
     openAdjustmentWizard,
   });
+
+  // Every view's shell markup is injected here, in document order, before any per-view setup
+  // step queries an element inside it — index.html only owns the empty #main-content canvas, each
+  // view module owns its own <section>, the same way the dialogs above own their own <dialog>.
+  renderClientsViewShell();
+  renderAdjustmentsViewShell();
+  // dialog-apply-adjustment must exist before its route is ever entered: DialogRoute.enter()
+  // looks the element up before calling this route's open() callback (which used to be the only
+  // thing creating it), so a lazily-rendered dialog was always missing on the very navigation
+  // meant to open it.
+  renderApplyAdjustmentDialog();
+  renderClientDirectoryViewShell();
+  renderClientDetailViewShell();
+  renderRoutinesViewShell();
+  renderExercisesViewShell();
+  renderHistoryViewShell();
+  renderWorkoutSetupViewShell();
+  renderErrorViewShell();
 
   setupNavigation({ setupSessionsDayNav });
   setupClientForms();

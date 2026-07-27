@@ -24,6 +24,26 @@ export function initPlansView(d) {
   deps = d || {};
 }
 
+export function renderRoutinesViewShell() {
+  const mainContent = document.getElementById("main-content");
+  if (!mainContent || document.getElementById("view-routines")) return;
+  mainContent.insertAdjacentHTML(
+    "beforeend",
+    `
+<section id="view-routines" class="app-view">
+      <div class="view-header view-titlebar">
+        <button class="view-grabber" type="button" aria-label="Return to home"></button>
+        <h2>Routines Database</h2>
+        <button id="btn-add-routine" class="btn primary-btn btn-sm">
+          <i class="fa-solid fa-plus"></i> Create Template
+        </button>
+      </div>
+      <div class="routines-grid" id="routines-list"></div>
+    </section>
+`,
+  );
+}
+
 export function renderRoutinesList({ state, t, openWorkoutSetupModal }) {
   const container = document.getElementById("routines-list");
   if (!container) return;
