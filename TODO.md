@@ -993,3 +993,69 @@ What the pipeline has to assert, roughly in order of how expensive the failure i
 
 Fits the existing gate: `python -m build check` already runs staged parallel validation, and the
 property/fuzz work belongs in Stage 1 (fast, no browser) rather than in the e2e stage.
+
+---
+
+## 19. Deep-linkable app state
+
+**Started 2026-07-27 (Simon).** The rule agreed for scope: **anything a page reload would change
+belongs in the URL.** The trigger was the plan editor's just-inserted row — highlighted, scrolled to
+and focused, but invisible to a refresh because the call-out lived in a module variable. That was one
+instance of a general gap.
+
+Design, invariants and the "how to add a route" checklist: **[docs/ROUTING.md](docs/ROUTING.md)**.
+The catalogue of what the URLs are: [UC5 §4](use_cases/uc5_session_day_deck_and_deep_links.md).
+
+### 19.1 Shipped
+
+- [x] **Route registry** — routes are objects resolved by specificity, not a 27-branch `if/else`.
+- [x] **The router is the only URL writer** — `pushRoute`/`replaceRoute` own what a URL carries;
+      `?lang`/`?theme` survive navigation, `?init` deliberately does not.
+- [x] **Global dialogs** — `/about`, `/terms`, `/build`, `/backup`; Back closes them.
+- [x] **Record editors** — `/routines/new`, `/routines/{id}`, `/exercises/new`,
+      `/adjustments/{updateId}`.
+- [x] **The session's taxonomy picker** — `…/edit/catalog[/slot/{slotId}]`.
+- [x] **The plan editor's called-out row** — `…/edit/exercise/{slotId}`, restored without a caret or
+      a badge.
+
+### 19.2 Blocked on the URL-privacy question
+
+Both would mint **new** URLs carrying a client id where none exists today. `/clients/{id}` and
+`/session/{id}/client/{cid}/…` already do, so this is a question of degree, not a new exposure — but
+it is unresolved, so these are parked rather than shipped.
+
+- [ ] **Client dialogs** — `/clients/new`, `/clients/{clientId}/edit`
+      ([formsController.js](src/controllers/formsController.js) `setupClientForms`).
+- [ ] **Workout-setup preselection** — `openEditSessionControlModal` takes four identifiers and the
+      URL carries only `bookingId`, so "Plan Program" from a client
+      ([clientsView.js](src/modules/clients/clientsView.js)) and "Start Group Session" from a routine
+      ([plansView.js](src/modules/plans/plansView.js)) lose their preselection *and* the
+      planning-mode flag on reload. Would need `/session/plan/client/{clientId}` and
+      `/session/new/routine/{routineId}`.
+
+**The question to settle**: whether to commit to an ids-and-enums-only invariant enforced by a test
+(no names, emails or free text in a path — see [docs/ROUTING.md](docs/ROUTING.md) §5.5), and whether
+client-detail navigation should `replaceState` so repeated browsing does not accumulate a
+who-was-viewed list in history. Client records are GDPR Art. 9 health data
+([PRIVACY.md](PRIVACY.md) §3.2); mitigating facts are that ids are opaque and the database is
+device-local, so a copied id dereferences to nothing elsewhere.
+
+### 19.3 Undecided — decide per use case
+
+- [ ] **Filter and search state.** Postponed deliberately. Enumerated chips (muscle, equipment,
+      category) are a closed, non-personal vocabulary and could be path segments; **free-text search
+      must not be**, since a typed client name would land in history, screenshots and shared links.
+      Separately and independently of routing: the exercise library silently resets its chip and
+      search box whenever `renderExercisesList()` is called with no arguments
+      ([app.js](src/app.js), e.g. after saving a new exercise) — a real bug that needs no URL.
+- [ ] **Transient chrome** — the ☰ menu, the session ⋮ menu, the notification drawer, a drag in
+      progress. A reload closes them, which is arguably correct; a URL that reopens a menu is noise
+      in history and fights the outside-click handlers. Recorded so the decision is explicit.
+- [ ] **`#dialog-add-session-exercise` is unreachable UI.** Its only button
+      (`#btn-add-exercise-to-session`) sits in a `display: none !important` container
+      ([index.html](src/index.html)) and the clipboard editor destructures `openAddExercise` without
+      ever calling it. Not routed, because a route for an unreachable dialog is dead code. Decide
+      whether to restore the affordance or delete the dialog, the button and the opener.
+- [ ] **Session sub-state that already survives via the cache** — `expandedPastId`, `circuitRounds`.
+      They persist through the session cache, so a reload keeps them; putting them in the URL would
+      make them *shareable*, which is a different (weaker) argument. Pinned by tests, not routed.
