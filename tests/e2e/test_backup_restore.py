@@ -82,13 +82,16 @@ def test_restore_migrates_an_old_backup(page, local_server):
     _import(page, LEGACY_BACKUP)
     state = _state(page)
 
-    assert state["schemaVersion"] == 2, (
+    assert state["schemaVersion"] == 3, (
         "the restored database is stamped at the current schema"
     )
     assert state.get("bookings") is None, (
         "the legacy collection is migrated, not carried along"
     )
     assert state["sessions"][0]["id"] == "b1"
+    assert state["sessions"][0]["startDate"], (
+        "the v2->v3 step runs too, deriving a real startDate for the restored session"
+    )
     assert "Upgraded from schema 1" in page.locator("#import-status").inner_text()
 
 

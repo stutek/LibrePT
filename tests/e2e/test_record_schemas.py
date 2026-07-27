@@ -121,6 +121,33 @@ def test_every_seed_collection_projects_and_validates_clean(page, local_server):
     assert all(count > 0 for count in r["counts"].values()), r["counts"]
 
 
+def test_seed_sessions_also_validate_against_schema_3(page, local_server):
+    """Schema 3 (TODO §7.3 item 8) requires `startDate` on every session — the seed data must
+    already carry it, not just satisfy the older, looser schema 2."""
+    page.goto(local_server)
+    page.wait_for_timeout(300)
+
+    r = page.evaluate(
+        """async () => {
+            const schemasUrl = new URL('data/recordSchemas.js', document.baseURI).href;
+            const projUrl = new URL('data/recordProjections.js', document.baseURI).href;
+            const dataUrl = new URL('data/index.js', document.baseURI).href;
+            const schemas = await import(schemasUrl);
+            const proj = await import(projUrl);
+            const seeds = await import(dataUrl);
+
+            const failures = [];
+            for (const record of seeds.DEFAULT_SESSIONS) {
+                const issues = proj.projectionIssues('sessions', record, schemas.SCHEMA_3);
+                if (issues.length) failures.push({ id: record.id, issues });
+            }
+            return { failures, count: seeds.DEFAULT_SESSIONS.length };
+        }"""
+    )
+    assert r["failures"] == [], r["failures"]
+    assert r["count"] > 0
+
+
 def test_a_live_created_client_validates_clean(page, local_server):
     """The exact object literal formsController.js builds for a brand-new client — including
     gdprConsent, which the seed fixtures never carry but every live-created client does."""

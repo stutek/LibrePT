@@ -130,10 +130,19 @@ export const SCHEMA_2 = {
   },
 };
 
+// Schema 3 (TODO §7.3 item 8 / migrationSteps.js's v2→v3 step): sessions gain a real absolute
+// `startDate` timestamp, required from here on — everything else is unchanged from schema 2.
+export const SCHEMA_3 = {
+  ...SCHEMA_2,
+  sessions: {
+    ...SCHEMA_2.sessions,
+    startDate: { required: true, type: "string" },
+  },
+};
+
 // Every schema major this build still knows how to write. A build can only write schemas it knows
-// how to project (TODO §18.1) — today that is exactly one, so the fan-out set and the live-schema
-// set are the same singleton. Grows only when a schema is cut; never grows retroactively.
-export const LIVE_SCHEMAS = { 2: SCHEMA_2 };
+// how to project (TODO §18.1) — grows only when a schema is cut; never grows retroactively.
+export const LIVE_SCHEMAS = { 2: SCHEMA_2, 3: SCHEMA_3 };
 
 export const NEWEST_SCHEMA = Math.max(...Object.keys(LIVE_SCHEMAS).map(Number));
 

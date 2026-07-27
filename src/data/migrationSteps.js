@@ -42,6 +42,44 @@ export const MIGRATION_STEPS = [
       return { state, notes };
     },
   },
+  {
+    from: 2,
+    to: 3,
+    description: "Give every session a real absolute `startDate` timestamp",
+    // Sessions carried only a 4-value `day` bucket (yesterday/today/tomorrow/upcoming) plus a
+    // free-text `time` range string — no way to place one on a real timeline (TODO §7.3 item 8).
+    // `day` is untouched: overlap detection and card styling still key off it. This derives a
+    // one-time absolute anchor from the bucket + parsed start time, at the moment of migration —
+    // it does not track wall-clock time afterwards, same as history's frozen `date` field.
+    apply(state) {
+      const notes = [];
+      const now = new Date();
+      const dayOffset = { yesterday: -1, today: 0, tomorrow: 1, upcoming: 2 };
+
+      function deriveStartDate(session) {
+        const [startHHMM] = String(session.time || "").split(" - ");
+        const match = /^(\d{1,2}):(\d{2})$/.exec((startHHMM || "").trim());
+        const hour = match ? Number(match[1]) : 9;
+        const minute = match ? Number(match[2]) : 0;
+        const d = new Date(now);
+        d.setDate(d.getDate() + (dayOffset[session.day] ?? 2));
+        d.setHours(hour, minute, 0, 0);
+        return d.toISOString();
+      }
+
+      if (Array.isArray(state.sessions)) {
+        let stamped = 0;
+        for (const session of state.sessions) {
+          if (!session.startDate) {
+            session.startDate = deriveStartDate(session);
+            stamped++;
+          }
+        }
+        if (stamped > 0) notes.push(`${stamped} session(s) given a derived \`startDate\``);
+      }
+      return { state, notes };
+    },
+  },
 ];
 
-export const CURRENT_SCHEMA_VERSION = 2;
+export const CURRENT_SCHEMA_VERSION = 3;

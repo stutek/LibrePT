@@ -38,7 +38,7 @@ def test_tapping_the_stamp_shows_release_commit_and_data_schema(page, local_serv
     assert facts["Commit"], "a bug report has to be pinnable to a build"
     # The data schema sits beside the code version on purpose: after a rollback it is the answer to
     # "why are records missing", and the code version alone cannot tell you.
-    assert facts["Data schema"] == "2"
+    assert facts["Data schema"] == "3"
     assert "Built" in facts
 
 
@@ -55,7 +55,7 @@ def test_the_build_details_are_offered_as_one_copyable_block(page, local_server)
 
     # Plain text, one fact per line: it gets pasted into whatever chat app is to hand.
     assert "release: dev" in text
-    assert "data schema: 2" in text
+    assert "data schema: 3" in text
     assert "commit:" in text
     assert "built:" in text
 

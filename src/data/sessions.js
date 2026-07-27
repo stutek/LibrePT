@@ -18,10 +18,22 @@ export const DEFAULT_SESSIONS = (() => {
     return `${rawH.toString().padStart(2, "0")}:00`;
   };
 
+  // The one real, absolute timestamp on a session (TODO §7.3 item 8) — `day` stays a coarse bucket
+  // for the other systems that already key off it (overlap detection, temporal card styling), but
+  // the continuous time-ordered dashboard axis sorts and positions purely on this. `offsetDays` is
+  // relative to today at midnight; `hour` is local, matching the same hour baked into `time` above.
+  const atHour = (offsetDays, hour) => {
+    const d = new Date(now);
+    d.setDate(d.getDate() + offsetDays);
+    d.setHours(((Math.trunc(hour) % 24) + 24) % 24, 0, 0, 0);
+    return d.toISOString();
+  };
+
   return [
     {
       id: "s00f2e3d",
       time: `${formatHour(currentHour - 3)} - ${formatHour(currentHour - 2)}`,
+      startDate: atHour(0, currentHour - 3),
       title: "Early Bird Strength",
       location: LOCATIONS.GYM,
       participants: ["c4d6c3b5", "c6f4a597"],
@@ -33,6 +45,7 @@ export const DEFAULT_SESSIONS = (() => {
     {
       id: "s01f2e3d",
       time: `${formatHour(currentHour - 1)} - ${formatHour(currentHour + 1)}`,
+      startDate: atHour(0, currentHour - 1),
       title: "Group Strength & Conditioning",
       location: LOCATIONS.GYM,
       participants: ["c1a9f0e2", "c2b8e1d3"],
@@ -43,6 +56,7 @@ export const DEFAULT_SESSIONS = (() => {
     {
       id: "s07f2e3d",
       time: `${formatHour(currentHour - 2)} - ${formatHour(currentHour - 1)}`,
+      startDate: atHour(0, currentHour - 2),
       title: "Strength & Longevity Focus",
       location: LOCATIONS.GYM,
       participants: ["c8b28799"],
@@ -54,6 +68,7 @@ export const DEFAULT_SESSIONS = (() => {
     {
       id: "s02f2e3d",
       time: `${formatHour(currentHour + 1)} - ${formatHour(currentHour + 2)}`,
+      startDate: atHour(0, currentHour + 1),
       title: "1:1 Personal Training",
       location: LOCATIONS.GYM,
       participants: ["c5e5b4a6"],
@@ -64,6 +79,7 @@ export const DEFAULT_SESSIONS = (() => {
     {
       id: "s03f2e3d",
       time: `${formatHour(currentHour + 2)} - ${formatHour(currentHour + 3)}`,
+      startDate: atHour(0, currentHour + 2),
       title: "Express Core HIIT",
       location: LOCATIONS.PLAYGROUND,
       participants: ["c3c7d2c4"],
@@ -74,6 +90,7 @@ export const DEFAULT_SESSIONS = (() => {
     {
       id: "s08f2e3d",
       time: `${formatHour(currentHour + 3)} - ${formatHour(currentHour + 4)}`,
+      startDate: atHour(0, currentHour + 3),
       title: "Mobility Flow",
       location: LOCATIONS.PARK,
       participants: ["c7a39688"],
@@ -84,6 +101,7 @@ export const DEFAULT_SESSIONS = (() => {
     {
       id: "s09f2e3d",
       time: `${formatHour(currentHour + 4)} - ${formatHour(currentHour + 5)}`,
+      startDate: atHour(0, currentHour + 4),
       title: "Open Slot (Drop-in)",
       location: LOCATIONS.GYM,
       participants: [],
@@ -94,6 +112,7 @@ export const DEFAULT_SESSIONS = (() => {
     {
       id: "s04f2e3d",
       time: "09:00 - 10:00",
+      startDate: atHour(1, 9),
       title: "Morning Conditioning",
       location: LOCATIONS.PARK,
       participants: ["c1a9f0e2"],
@@ -104,6 +123,7 @@ export const DEFAULT_SESSIONS = (() => {
     {
       id: "s05f2e3d",
       time: "10:30 - 11:30",
+      startDate: atHour(1, 10),
       title: "Upper Body Strength",
       location: LOCATIONS.GYM,
       participants: ["c2b8e1d3"],
@@ -114,6 +134,7 @@ export const DEFAULT_SESSIONS = (() => {
     {
       id: "s06f2e3d",
       time: "11:30 - 12:30",
+      startDate: atHour(1, 11),
       title: "Lunch Express HIIT",
       location: LOCATIONS.PLAYGROUND,
       participants: ["c3c7d2c4"],
@@ -124,6 +145,7 @@ export const DEFAULT_SESSIONS = (() => {
     {
       id: "s10f2e3d",
       time: "17:30 - 18:30",
+      startDate: atHour(1, 17),
       title: "Post-Work Cardio",
       location: LOCATIONS.PARK,
       participants: ["c4d6c3b5"],
@@ -134,6 +156,7 @@ export const DEFAULT_SESSIONS = (() => {
     {
       id: "s11f2e3d",
       time: "14:00 - 15:00",
+      startDate: atHour(1, 14),
       title: "Strength & Longevity Focus",
       location: LOCATIONS.GYM,
       participants: ["c8b28799"],
@@ -144,6 +167,7 @@ export const DEFAULT_SESSIONS = (() => {
     {
       id: "s12f2e3d",
       time: "09:00 - 10:30",
+      startDate: atHour(-1, 9),
       title: "Core & Stability",
       location: LOCATIONS.GYM,
       participants: ["c1a9f0e2"],
@@ -154,6 +178,7 @@ export const DEFAULT_SESSIONS = (() => {
     {
       id: "s13f2e3d",
       time: "16:00 - 17:00",
+      startDate: atHour(-1, 16),
       title: "Mobility & Recovery",
       location: LOCATIONS.PARK,
       participants: ["c2b8e1d3"],
@@ -164,6 +189,7 @@ export const DEFAULT_SESSIONS = (() => {
     {
       id: "s14f2e3d",
       time: "15:00 - 16:00",
+      startDate: atHour(-1, 15),
       title: "Strength & Longevity Focus",
       location: LOCATIONS.GYM,
       participants: ["c8b28799"],
@@ -175,6 +201,10 @@ export const DEFAULT_SESSIONS = (() => {
     {
       id: "s15f2e3d",
       time: "08:00 - 09:30",
+      // "upcoming" is a single bucket today but a real date on the continuous axis — spread these
+      // out rather than stacking them on the same +2-day slot the old 4-bucket model collapsed
+      // them to, so the demo shows a genuinely continuous future, not two coincident cards.
+      startDate: atHour(2, 8),
       title: "Lower Body Strength",
       location: LOCATIONS.GYM,
       participants: ["c3c7d2c4"],
@@ -185,6 +215,7 @@ export const DEFAULT_SESSIONS = (() => {
     {
       id: "s16f2e3d",
       time: "10:00 - 11:00",
+      startDate: atHour(4, 10),
       title: "HIIT Conditioning",
       location: LOCATIONS.PLAYGROUND,
       participants: ["c1a9f0e2", "c2b8e1d3"],

@@ -57,7 +57,11 @@ def test_current_database_is_a_no_op_but_gets_stamped(page, local_server):
 
     r = _evaluate(
         page,
-        """const current = { schemaVersion: 2, clients: [], sessions: [{ id: 's1' }] };
+        """const current = {
+            schemaVersion: 3,
+            clients: [],
+            sessions: [{ id: 's1', startDate: '2026-07-27T09:00:00.000Z' }],
+        };
         const result = m.migrateState(current);
         return {
             ok: result.ok,
@@ -70,7 +74,62 @@ def test_current_database_is_a_no_op_but_gets_stamped(page, local_server):
     assert r["ok"] is True
     assert r["applied"] == 0, "an up-to-date database runs no steps"
     assert r["sessions"] == 1
-    assert r["schemaVersion"] == 2
+    assert r["schemaVersion"] == 3
+
+
+def test_v2_sessions_gain_a_derived_start_date(page, local_server):
+    """The v2→v3 step (TODO §7.3 item 8): a session with only a `day` bucket + free-text `time`
+    gets a real absolute `startDate`, without disturbing `day` itself (other systems still key
+    off it) or a session that already has one."""
+    page.goto(local_server)
+    page.wait_for_timeout(300)
+
+    r = _evaluate(
+        page,
+        """const legacy = {
+            schemaVersion: 2,
+            clients: [],
+            sessions: [
+                { id: 's1', day: 'today', time: '09:00 - 10:00' },
+                { id: 's2', day: 'tomorrow', time: '14:30 - 15:00' },
+                { id: 's3', day: 'today', time: '09:00 - 10:00', startDate: 'kept-as-is' },
+            ],
+        };
+        const result = m.migrateState(legacy);
+        // Read the derived timestamps back through local Date fields, not a hardcoded UTC
+        // string — the migration builds `startDate` from local hour/minute, so asserting on it
+        // must go through the same local lens rather than assuming a particular timezone.
+        const s1Date = new Date(result.state.sessions[0].startDate);
+        const s2Date = new Date(result.state.sessions[1].startDate);
+        return {
+            ok: result.ok,
+            to: result.summary.toVersion,
+            schemaVersion: result.state.schemaVersion,
+            s1Day: result.state.sessions[0].day,
+            s1StartDate: result.state.sessions[0].startDate,
+            s1Hour: s1Date.getHours(),
+            s1Minute: s1Date.getMinutes(),
+            s2Hour: s2Date.getHours(),
+            s2Minute: s2Date.getMinutes(),
+            s3StartDate: result.state.sessions[2].startDate,
+            description: m.describeMigration(result.summary),
+        };""",
+    )
+
+    assert r["ok"] is True
+    assert r["schemaVersion"] == r["to"] == 3
+    assert r["s1Day"] == "today", (
+        "day bucket is untouched — other systems still key off it"
+    )
+    assert r["s1StartDate"].startswith(("2", "1")), (
+        "a real ISO timestamp, not a bucket label"
+    )
+    assert r["s1Hour"] == 9 and r["s1Minute"] == 0
+    assert r["s2Hour"] == 14 and r["s2Minute"] == 30
+    assert r["s3StartDate"] == "kept-as-is", (
+        "an existing startDate is never overwritten"
+    )
+    assert any("startDate" in line for line in r["description"])
 
 
 def test_data_from_a_newer_build_is_refused_not_guessed(page, local_server):
@@ -158,7 +217,9 @@ def test_a_stored_legacy_database_is_migrated_on_boot(page, local_server):
     )
     assert r["sessions"] == 1
     assert r["bookings"] is None
-    assert r["schemaVersion"] == 2
+    assert r["schemaVersion"] == 3, (
+        "walks the full chain (v1→v2→v3) on one boot, not just one hop"
+    )
     assert r["summary"]["fromVersion"] == 1
     assert r["summary"]["problems"] == []
 
