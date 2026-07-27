@@ -1,9 +1,10 @@
 // components/exerciseDeck.js
 // Renders the active-session exercise stack (the vertical scroll deck): the client's most-recent
 // past session as tappable history cards, then the current routine folded into circuit units
-// (one card per circuit) and standalone exercise cards. Card rendering is delegated to
-// circuitCard/exerciseCard; this module builds the deck items, wires their callbacks, and
-// scrolls the acted-on card into view. Dependencies are injected by the caller
+// (one card per circuit), standalone exercise cards, and standalone rest cards. Every card type is
+// a DeckCard subclass (see deckCard.js) — this module builds the deck items, constructs the right
+// subclass per item, and calls `.render(card)` uniformly; it wires no click/focus/timer behaviour
+// itself, and scrolls the acted-on card into view. Dependencies are injected by the caller
 // (renderActiveGroupBoard in app.js) so it stays decoupled from app.js internals.
 //
 // deckContainer: the #active-exercise-scroll-deck element
@@ -18,9 +19,11 @@
 import { formatMetricValue, usesLoad } from "../common/exerciseModality.js";
 import { newRecordId } from "../common/recordId.js";
 import { formatLoad, formatReps } from "../common/repsAndLoad.js";
-import { exerciseRecordsOf } from "../common/sessionItemRecord.js";
-import { renderCircuitCard } from "./circuitCard.js";
-import { renderExerciseCard } from "./exerciseCard.js";
+import { exerciseRecordsOf, isRestRecord } from "../common/sessionItemRecord.js";
+import { CircuitDeckCard } from "./circuitCard.js";
+import { ExerciseDeckCard } from "./exerciseCard.js";
+import { PastDeckCard } from "./pastDeckCard.js";
+import { RestDeckCard } from "./restDeckCard.js";
 
 export function renderExerciseDeck(deckContainer, deps) {
   if (!deckContainer) return;
@@ -98,10 +101,9 @@ export function renderExerciseDeck(deckContainer, deps) {
   // Current routine exercises
   const currentExIdx = activeClientState.activeExerciseIndex;
   const currentExList = activeClientState.exercises.map((ex, idx) => {
-    // A rest is a first-class plan item (never focusable/loggable). It renders as a break row inside
-    // its circuit, or a standalone rest card in the deck. isCompleted:true keeps it from blocking a
-    // circuit's "all members complete" aggregation in buildCircuitUnits.
-    if (ex.type === "rest") {
+    // Rest is a first-class plan item: isInFocus is computed the SAME way for every item type —
+    // idx === currentExIdx — no more hardcoded exception for rests (TODO §8.6).
+    if (isRestRecord(ex)) {
       return {
         id: ex.id,
         index: idx,
@@ -110,7 +112,9 @@ export function renderExerciseDeck(deckContainer, deps) {
         circuitId: ex.circuitId || null,
         circuitTitle: ex.circuitTitle || "",
         circuitSeries: ex.circuitSeries || 1,
-        isInFocus: false,
+        isInFocus: idx === currentExIdx,
+        // Still true regardless of focus: keeps a rest from blocking a circuit's "all members
+        // complete" aggregation in buildCircuitUnits — a rest has nothing to complete.
         isCompleted: true,
       };
     }
@@ -144,85 +148,37 @@ export function renderExerciseDeck(deckContainer, deps) {
   // exercises stay as their own 'current' cards. Circuits render one card per group.
   const renderUnits = buildCircuitUnits(currentExList);
   const allDeckItems = [...pastExList, ...renderUnits];
+
+  const onFocus = (index) => focusExerciseByIndex(index);
+
   for (const item of allDeckItems) {
     const card = document.createElement("div");
 
+    // Which DeckCard subclass owns this item — the only place item.type is branched on. Every
+    // decision after this point (render, focus rule, click wiring) is polymorphic, not branchy.
+    let deckCard;
     if (item.type === "past") {
-      // Tap toggles the card open in place, right in the deck — no separate review panel
-      const isExpanded = activeSession.expandedPastId === item.id;
-      card.className = `exercise-deck-card past-session${isExpanded ? " past-expanded" : ""}`;
-      if (isExpanded) {
-        // Logged history, not a target: every set is listed as-is rather than reduced to
-        // one sets/reps/weight triplet, since loads and reps often vary across the sets
-        const metric = item.metric || "reps";
-        const showLoad = usesLoad(item.modality || "strength");
-        const setRows = item.sets
-          .map((s, sIdx) => {
-            // Load-bearing modalities (strength, isometric) list a load column; cardio/holds/agility
-            // collapse to their single logged magnitude (time/distance/cal/watts/hold) with no load.
-            const loadCol = showLoad
-              ? `<span class="deck-history-load">${escapeHTML(formatLoad(s.weight, item.loadUnit) || "—")}</span>`
-              : "";
-            const valueCol =
-              metric === "reps"
-                ? `${escapeHTML(formatReps(s.reps))} reps`
-                : escapeHTML(formatMetricValue(s.reps, metric));
-            return `
-            <div class="deck-history-set-row">
-              <strong>S${sIdx + 1}</strong>
-              ${loadCol}
-              <span class="deck-history-reps">${valueCol}</span>
-              ${s.note ? `<span class="deck-history-note">${escapeHTML(s.note)}</span>` : ""}
-            </div>`;
-          })
-          .join("");
-        card.innerHTML = `
-            <div class="deck-card-top">
-              <span class="badge deck-card-status deck-card-status-past">Past: ${escapeHTML(item.sessionDate)}</span>
-              <i class="fa-solid fa-chevron-up deck-history-collapse" aria-hidden="true"></i>
-            </div>
-            <h5 class="deck-card-name">${escapeHTML(item.name)}</h5>
-            <div class="deck-history-sets">${setRows}</div>
-            <div class="deck-history-meta">${escapeHTML(item.routineName || "Completed Session")}</div>
-          `;
-      } else {
-        const setsSummary = item.sets
-          .map((s) => {
-            const load = formatLoad(s.weight, item.loadUnit);
-            return `${load ? `${load} x ` : ""}${formatReps(s.reps)}`;
-          })
-          .join(", ");
-        card.innerHTML = `
-            <div class="deck-card-compact">
-              <span class="badge deck-card-status deck-card-status-past">Past: ${escapeHTML(item.sessionDate)}</span>
-              <span class="deck-card-name deck-card-name-inline">${escapeHTML(item.name)}</span>
-              <span class="deck-card-compact-target">${escapeHTML(setsSummary)}</span>
-            </div>
-          `;
-      }
-      card.addEventListener("click", () => {
-        activeSession.expandedPastId = isExpanded ? null : item.id;
-        onRerender();
+      deckCard = new PastDeckCard(item, {
+        activeSession,
+        t,
+        escapeHTML,
+        formatLoad,
+        formatReps,
+        formatMetricValue,
+        usesLoad,
+        onRerender,
       });
     } else if (item.type === "rest") {
-      // Standalone rest between movements — tap to start its countdown on the floating timer.
-      card.className = `exercise-deck-card rest-card${isFutureSession ? " future-session" : ""}`;
-      card.innerHTML = `
-        <div class="deck-card-compact rest-card-inner">
-          <span class="deck-card-counter"><i class="fa-solid fa-hourglass-half"></i></span>
-          <span class="deck-card-name deck-card-name-inline">${t("rest_label")}</span>
-          <span class="deck-card-compact-target">${escapeHTML(String(item.rest))}s</span>
-          <span class="rest-card-play" aria-hidden="true"><i class="fa-solid fa-stopwatch"></i></span>
-        </div>`;
-      if (startRestTimer && !isFutureSession) {
-        card.setAttribute("role", "button");
-        card.setAttribute("aria-label", `${t("rest_label")} ${item.rest}s`);
-        card.addEventListener("click", () => startRestTimer(item.rest, "rest"));
-      }
+      deckCard = new RestDeckCard(item, {
+        t,
+        escapeHTML,
+        isFutureSession,
+        startRestTimer,
+        onFocus,
+      });
     } else if (item.type === "circuit") {
-      // Circuit / Giant Set card render lives in components/circuitCard.js
       const round = activeClientState.circuitRounds?.[item.circuitId] || 1;
-      renderCircuitCard(card, item, {
+      deckCard = new CircuitDeckCard(item, {
         round,
         activeClientId,
         activeClientState,
@@ -241,11 +197,10 @@ export function renderExerciseDeck(deckContainer, deps) {
           saveToLocalStorage();
           onRerender();
         },
-        onFocus: (index) => focusExerciseByIndex(index),
+        onFocus,
       });
     } else {
-      // Standalone exercise card render lives in components/exerciseCard.js
-      renderExerciseCard(card, item, {
+      deckCard = new ExerciseDeckCard(item, {
         currentCount: currentExList.length,
         activeClientId,
         pastExpanded,
@@ -257,9 +212,10 @@ export function renderExerciseDeck(deckContainer, deps) {
         logQuickSignal,
         openFeedbackModal,
         startRestTimer,
-        onFocus: (index) => focusExerciseByIndex(index),
+        onFocus,
       });
     }
+    deckCard.render(card);
     deckContainer.appendChild(card);
 
     if (item.isInFocus && !isFutureSession) {

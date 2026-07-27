@@ -4,7 +4,9 @@
 // one-tap Too Easy / Too Hard / Feedback signals), and the compact row is a collapsed peek
 // that taps to bring the exercise into focus.
 //
-// The caller creates the `card` element and appends it; this component only fills it in.
+// ExerciseDeckCard is a DeckCard subclass (see deckCard.js): render() is the base class's fixed
+// skeleton (collapsed vs. focused, then wire); this file supplies the four hooks.
+//
 // ctx: {
 //   currentCount, activeClientId, pastExpanded, isFutureSession,
 //   t, escapeHTML, getExerciseSignalColor, hasQuickSignal(clientId, exerciseName, tag),
@@ -19,61 +21,69 @@ import {
   usesLoad,
 } from "../common/exerciseModality.js";
 import { formatLoad, formatReps, hasLoad, loadParts } from "../common/repsAndLoad.js";
+import { DeckCard } from "./deckCard.js";
 
-export function renderExerciseCard(card, item, ctx) {
-  const {
-    currentCount,
-    activeClientId,
-    pastExpanded,
-    isFutureSession,
-    t,
-    escapeHTML,
-    getExerciseSignalColor,
-    hasQuickSignal,
-    logQuickSignal,
-    openFeedbackModal,
-    onFocus,
-    startRestTimer,
-  } = ctx;
-
-  // An open past log defocuses the live card, so the active exercise renders compact too
-  const showInFocus = item.isInFocus && !pastExpanded;
-  const checkedClass = showInFocus ? "in-focus" : item.isCompleted ? "completed" : "";
-  card.className = `exercise-deck-card ${checkedClass}${isFutureSession ? " future-session" : ""}`;
-
-  let statusBadge = "";
-  if (showInFocus) {
-    statusBadge = `<span class="badge badge-primary deck-card-status">In Focus</span>`;
-  } else if (item.isCompleted) {
-    statusBadge = `<span class="badge badge-success deck-card-status">Completed</span>`;
-  } else {
-    statusBadge = `<span class="badge deck-card-status deck-card-status-upcoming">Upcoming</span>`;
+export class ExerciseDeckCard extends DeckCard {
+  // An open past log defocuses the live card too, so the active exercise renders compact — the one
+  // place this card's focus rule differs from the base class's plain item.isInFocus.
+  get isInFocus() {
+    return this.item.isInFocus && !this.ctx.pastExpanded;
   }
 
-  // Modality decides the primary target tile and whether a load axis shows. reps → a count; every
-  // other metric (time/distance/calories/watts/pace/heartrate/hold) formats through the modality
-  // helper. A load tile shows only for load-bearing modalities (strength, isometric) — cardio,
-  // holds and agility carry no external resistance.
-  const metric = item.metric || "reps";
-  const modality = item.modality || "strength";
-  const showLoad = usesLoad(modality);
-  const primaryValue =
-    metric === "reps" ? formatReps(item.repsTarget) : formatMetricValue(item.repsTarget, metric);
-  const primaryLabel = t(metricLabelKey(metric));
-  // Load renders per equipment (kg / stack level / band / bodyweight).
-  const load = loadParts(item.weightTarget, item.loadUnit);
-  const counter = `${item.index + 1}/${currentCount}`;
+  get className() {
+    const checkedClass = this.isInFocus ? "in-focus" : this.item.isCompleted ? "completed" : "";
+    return `exercise-deck-card ${checkedClass}${this.ctx.isFutureSession ? " future-session" : ""}`;
+  }
 
-  // Tint the title by any feedback logged for this exercise (see getExerciseSignalColor)
-  const signalColor = getExerciseSignalColor(activeClientId, item.name);
-  const nameStyle = signalColor ? ` style="color: ${signalColor};"` : "";
+  // Values both renderFocused and renderCollapsed need — computed once per render call rather than
+  // promoted to instance state, since only one of the two ever runs per invocation.
+  #shared() {
+    const { activeClientId, t, escapeHTML, getExerciseSignalColor, currentCount } = this.ctx;
+    const item = this.item;
+    const metric = item.metric || "reps";
+    const modality = item.modality || "strength";
+    const showLoad = usesLoad(modality);
+    const primaryValue =
+      metric === "reps" ? formatReps(item.repsTarget) : formatMetricValue(item.repsTarget, metric);
+    const primaryLabel = t(metricLabelKey(metric));
+    const load = loadParts(item.weightTarget, item.loadUnit);
+    const counter = `${item.index + 1}/${currentCount}`;
+    // Tint the title by any feedback logged for this exercise (see getExerciseSignalColor)
+    const signalColor = getExerciseSignalColor(activeClientId, item.name);
+    const nameStyle = signalColor ? ` style="color: ${signalColor};"` : "";
+    let statusBadge = "";
+    if (this.isInFocus) {
+      statusBadge = `<span class="badge badge-primary deck-card-status">In Focus</span>`;
+    } else if (item.isCompleted) {
+      statusBadge = `<span class="badge badge-success deck-card-status">Completed</span>`;
+    } else {
+      statusBadge = `<span class="badge deck-card-status deck-card-status-upcoming">Upcoming</span>`;
+    }
+    return {
+      metric,
+      showLoad,
+      primaryValue,
+      primaryLabel,
+      load,
+      counter,
+      nameStyle,
+      statusBadge,
+      escapeHTML,
+      t,
+    };
+  }
 
-  // Too Easy / Too Hard are toggles: pressed state mirrors whether THIS exact quick-signal is
-  // already logged, so a second tap (which un-logs it) reads correctly the moment it lands.
-  const isEasyActive = hasQuickSignal(activeClientId, item.name, "Too Easy - Increase Load");
-  const isHardActive = hasQuickSignal(activeClientId, item.name, "Too Hard - Reduce Load");
+  renderFocused(card) {
+    const { activeClientId, hasQuickSignal, escapeHTML, t } = this.ctx;
+    const item = this.item;
+    const { showLoad, primaryValue, primaryLabel, load, counter, nameStyle, statusBadge } =
+      this.#shared();
 
-  if (showInFocus) {
+    // Too Easy / Too Hard are toggles: pressed state mirrors whether THIS exact quick-signal is
+    // already logged, so a second tap (which un-logs it) reads correctly the moment it lands.
+    const isEasyActive = hasQuickSignal(activeClientId, item.name, "Too Easy - Increase Load");
+    const isHardActive = hasQuickSignal(activeClientId, item.name, "Too Hard - Reduce Load");
+
     // Expanded focus card is the primary logging surface: target stats plus the
     // one-tap outcome signals that replaced the per-set stepper grid
     card.innerHTML = `
@@ -115,6 +125,12 @@ export function renderExerciseCard(card, item, ctx) {
         </button>
       </div>
     `;
+  }
+
+  wireFocused(card) {
+    const { logQuickSignal, openFeedbackModal, startRestTimer } = this.ctx;
+    const item = this.item;
+    const metric = item.metric || "reps";
     card.querySelector(".deck-action-easy").addEventListener("click", (e) => {
       e.stopPropagation();
       logQuickSignal("Too Easy - Increase Load");
@@ -138,7 +154,13 @@ export function renderExerciseCard(card, item, ctx) {
           : item.workDuration || 0;
         startRestTimer(seconds, "exercise", item.name);
       });
-  } else {
+  }
+
+  renderCollapsed(card) {
+    const item = this.item;
+    const { showLoad, primaryValue, counter, nameStyle, statusBadge, escapeHTML } = this.#shared();
+    const metric = item.metric || "reps";
+
     // Compact row for the rest of the plan — tap to bring into focus. The target
     // is labelled S(ets) × R(eps) × weight so a collapsed, single-line card still
     // reads unambiguously (e.g. "S4 × R6 × 60kg").
@@ -160,6 +182,7 @@ export function renderExerciseCard(card, item, ctx) {
         ${statusBadge}
       </div>
     `;
-    card.addEventListener("click", () => onFocus(item.index));
   }
+
+  // wireCollapsed: the base class default (tap → onFocus(item.index)) is exactly right here.
 }

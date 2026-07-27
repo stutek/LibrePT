@@ -86,7 +86,7 @@ export function buildRouteTable() {
     new SessionRoute({
       name: "session.focus",
       pattern:
-        "/session/:sessionId/client/:clientId/:focusType(exercise|circuit|superset)/:focusId",
+        "/session/:sessionId/client/:clientId/:focusType(exercise|circuit|rest|superset)/:focusId",
       mode: "focus",
     }),
   );

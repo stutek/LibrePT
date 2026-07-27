@@ -19,7 +19,7 @@ def _focus_re(base):
     return re.compile(
         "^"
         + re.escape(base)
-        + r"/session/([^/]+)/client/([^/]+)/(exercise|circuit)/([^/]+)$"
+        + r"/session/([^/]+)/client/([^/]+)/(exercise|circuit|rest)/([^/]+)$"
     )
 
 
@@ -130,17 +130,24 @@ def test_tapping_a_card_updates_the_deep_link(page, local_server):
     focus_re = _focus_re(_base(page))
 
     before = page.evaluate("() => location.pathname")
-    # Tap a non-focused, non-past card in the deck; focus (and the URL) must move to it.
+    # Tap a non-focused, non-past, non-rest card (an exercise or circuit) — deliberately excludes
+    # .rest-card so this test's outcome doesn't depend on seed-data ordering: a rest card focusing
+    # correctly is covered explicitly by test_rest_card_focus.py, not implicitly by whichever card
+    # this selector happens to land on.
     tapped = page.evaluate(
         """() => {
           const cards = [...document.querySelectorAll('#active-exercise-scroll-deck .exercise-deck-card')];
-          const t = cards.find(c => !c.classList.contains('in-focus') && !c.querySelector('.deck-card-status-past'));
+          const t = cards.find(c =>
+            !c.classList.contains('in-focus') &&
+            !c.classList.contains('rest-card') &&
+            !c.querySelector('.deck-card-status-past')
+          );
           if (!t) return false;
           t.click();
           return true;
         }"""
     )
-    assert tapped, "no tappable upcoming card found in the deck"
+    assert tapped, "no tappable upcoming exercise/circuit card found in the deck"
     page.wait_for_timeout(300)
     after = page.evaluate("() => location.pathname")
     assert after != before and focus_re.match(after), (

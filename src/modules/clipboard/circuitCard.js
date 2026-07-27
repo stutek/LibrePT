@@ -5,7 +5,9 @@
 // button that advances the counter (and finishes the circuit on the last round). Feedback stays
 // tied to the exercise — logQuickSignal/openFeedbackModal receive that exercise's id.
 //
-// The caller creates the `card` element and appends it; this component only fills it in.
+// CircuitDeckCard is a DeckCard subclass (see deckCard.js): render() is the base class's fixed
+// skeleton (collapsed vs. focused, then wire); this file supplies the four hooks.
+//
 // ctx: {
 //   round, activeClientId, pastExpanded, isFutureSession,
 //   t, escapeHTML, getExerciseSignalColor, hasQuickSignal(clientId, exerciseName, tag),
@@ -14,57 +16,56 @@
 // }
 
 import { formatLoad, hasLoad, isFailureReps } from "../common/repsAndLoad.js";
+import { isRestRecord } from "../common/sessionItemRecord.js";
+import { DeckCard } from "./deckCard.js";
 
-export function renderCircuitCard(card, item, ctx) {
-  const {
-    round,
-    activeClientId,
-    activeClientState,
-    pastExpanded,
-    isFutureSession,
-    t,
-    escapeHTML,
-    getExerciseSignalColor,
-    hasQuickSignal,
-    logQuickSignal,
-    openFeedbackModal,
-    completeCircuitRound,
-    saveSessionState,
-    onFocus,
-    startRestTimer,
-  } = ctx;
+export class CircuitDeckCard extends DeckCard {
+  // An open past log defocuses the live card too, so the circuit renders compact — the same rule
+  // ExerciseDeckCard applies, and the one place this card's focus differs from the plain base.
+  get isInFocus() {
+    return this.item.isInFocus && !this.ctx.pastExpanded;
+  }
 
-  const showInFocus = item.isInFocus && !pastExpanded;
-  card.className = `exercise-deck-card circuit-card ${showInFocus ? "in-focus" : item.isCompleted ? "completed" : ""}${isFutureSession ? " future-session" : ""}`;
-  const title = item.title ? escapeHTML(item.title) : t("combo_round_title");
+  get className() {
+    const checkedClass = this.isInFocus ? "in-focus" : this.item.isCompleted ? "completed" : "";
+    return `exercise-deck-card circuit-card ${checkedClass}${this.ctx.isFutureSession ? " future-session" : ""}`;
+  }
 
-  if (showInFocus) {
+  renderFocused(card) {
+    const {
+      round,
+      activeClientId,
+      activeClientState,
+      t,
+      escapeHTML,
+      getExerciseSignalColor,
+      hasQuickSignal,
+    } = this.ctx;
+    const item = this.item;
+    const title = item.title ? escapeHTML(item.title) : t("combo_round_title");
     const rows = [];
     let firstExerciseSeen = false;
-    {
-      let idx = 0;
-      for (const ex of item.items) {
-        // A rest is a first-class item inside the circuit — render it as a break row and skip the
-        // exercise markup/wiring below.
-        if (ex.type === "rest") {
-          rows.push(
-            `<button type="button" class="circuit-break-row" data-rest="${ex.rest}"><i class="fa-solid fa-hourglass-half"></i> <span class="circuit-break-label">${t("rest_label")}</span> <span class="circuit-ex-reps">${ex.rest}s</span> <i class="fa-solid fa-stopwatch circuit-break-play"></i></button>`,
-          );
-          continue;
-        }
-        const isFirstExercise = !firstExerciseSeen;
-        firstExerciseSeen = true;
-        const sig = getExerciseSignalColor(activeClientId, ex.name);
-        const nameStyle = sig ? ` style="color:${sig};"` : "";
-        const isMax = isFailureReps(ex.repsTarget);
+    for (const ex of item.items) {
+      // A rest is a first-class item inside the circuit — render it as a break row and skip the
+      // exercise markup/wiring below.
+      if (isRestRecord(ex)) {
+        rows.push(
+          `<button type="button" class="circuit-break-row" data-rest="${ex.rest}"><i class="fa-solid fa-hourglass-half"></i> <span class="circuit-break-label">${t("rest_label")}</span> <span class="circuit-ex-reps">${ex.rest}s</span> <i class="fa-solid fa-stopwatch circuit-break-play"></i></button>`,
+        );
+        continue;
+      }
+      const isFirstExercise = !firstExerciseSeen;
+      firstExerciseSeen = true;
+      const sig = getExerciseSignalColor(activeClientId, ex.name);
+      const nameStyle = sig ? ` style="color:${sig};"` : "";
+      const isMax = isFailureReps(ex.repsTarget);
 
-        let repsHTML = "";
-        if (isMax) {
-          const currentLog =
-            activeClientState?.logs[ex.id] && activeClientState.logs[ex.id][round - 1];
-          const actualReps =
-            currentLog && typeof currentLog.reps === "number" ? currentLog.reps : "";
-          repsHTML = `
+      let repsHTML = "";
+      if (isMax) {
+        const currentLog =
+          activeClientState?.logs[ex.id] && activeClientState.logs[ex.id][round - 1];
+        const actualReps = currentLog && typeof currentLog.reps === "number" ? currentLog.reps : "";
+        repsHTML = `
           <div class="circuit-failure-stepper" data-ex-id="${escapeHTML(ex.id)}" style="display: inline-flex; align-items: center; gap: 4px;">
             <span style="font-size: 10px; color: var(--text-muted); font-weight: 700;">Fail Reps:</span>
             <button type="button" class="stepper-btn minus" style="width: 22px; height: 22px; border-radius: 4px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.05); color: var(--text-color); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; cursor: pointer; user-select: none;">-</button>
@@ -72,20 +73,20 @@ export function renderCircuitCard(card, item, ctx) {
             <button type="button" class="stepper-btn plus" style="width: 22px; height: 22px; border-radius: 4px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.05); color: var(--text-color); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; cursor: pointer; user-select: none;">+</button>
           </div>
         `;
-        } else {
-          repsHTML = `<span class="circuit-ex-reps">${escapeHTML(String(ex.repsTarget))}</span>`;
-        }
+      } else {
+        repsHTML = `<span class="circuit-ex-reps">${escapeHTML(String(ex.repsTarget))}</span>`;
+      }
 
-        const repLabel = hasLoad(ex.weightTarget, ex.loadUnit)
-          ? ` · ${escapeHTML(formatLoad(ex.weightTarget, ex.loadUnit))}`
-          : "";
-        const idAttr = isFirstExercise ? ' id="btn-log-feedback"' : "";
-        // Too Easy / Too Hard are toggles: pressed state mirrors whether THIS exact quick-signal
-        // is already logged for this exercise, so a second tap (which un-logs it) reads right.
-        const isEasyActive = hasQuickSignal(activeClientId, ex.name, "Too Easy - Increase Load");
-        const isHardActive = hasQuickSignal(activeClientId, ex.name, "Too Hard - Reduce Load");
+      const repLabel = hasLoad(ex.weightTarget, ex.loadUnit)
+        ? ` · ${escapeHTML(formatLoad(ex.weightTarget, ex.loadUnit))}`
+        : "";
+      const idAttr = isFirstExercise ? ' id="btn-log-feedback"' : "";
+      // Too Easy / Too Hard are toggles: pressed state mirrors whether THIS exact quick-signal
+      // is already logged for this exercise, so a second tap (which un-logs it) reads right.
+      const isEasyActive = hasQuickSignal(activeClientId, ex.name, "Too Easy - Increase Load");
+      const isHardActive = hasQuickSignal(activeClientId, ex.name, "Too Hard - Reduce Load");
 
-        rows.push(`
+      rows.push(`
         <div class="circuit-ex-row" data-ex-id="${escapeHTML(ex.id)}">
           <div class="circuit-ex-head">
             <span class="circuit-ex-name"${nameStyle}>${escapeHTML(ex.name)}</span>
@@ -103,8 +104,6 @@ export function renderCircuitCard(card, item, ctx) {
             </button>
           </div>
         </div>`);
-        idx++;
-      }
     }
     const isLastRound = round >= item.series;
     const footer = item.isCompleted
@@ -121,6 +120,20 @@ export function renderCircuitCard(card, item, ctx) {
       <div class="circuit-ex-list">${rows.join("")}</div>
       ${footer}
     `;
+  }
+
+  wireFocused(card) {
+    const {
+      round,
+      activeClientState,
+      logQuickSignal,
+      openFeedbackModal,
+      completeCircuitRound,
+      saveSessionState,
+      startRestTimer,
+    } = this.ctx;
+    const item = this.item;
+
     for (const rowEl of card.querySelectorAll(".circuit-ex-row")) {
       const exId = rowEl.getAttribute("data-ex-id");
       rowEl.querySelector(".circuit-sig.easy").addEventListener("click", (e) => {
@@ -194,15 +207,24 @@ export function renderCircuitCard(card, item, ctx) {
         });
       }
     }
-  } else {
+  }
+
+  renderCollapsed(card) {
+    const { round, t, escapeHTML } = this.ctx;
+    const item = this.item;
+    const title = item.title ? escapeHTML(item.title) : t("combo_round_title");
     card.innerHTML = `
       <div class="deck-card-compact">
         <span class="deck-card-counter"><i class="fa-solid fa-layer-group"></i></span>
         <span class="deck-card-name deck-card-name-inline">${title}</span>
         ${item.isCompleted ? `<span class="badge badge-emerald deck-card-status">${t("session_completed")}</span>` : `<span class="badge deck-card-status deck-card-status-upcoming">Round ${round} of ${item.series}</span>`}
       </div>`;
-    // Focus the circuit by pointing the active index at its first exercise (skip any leading rest)
-    const firstEx = item.items.find((it) => it.type !== "rest") || item.items[0];
-    card.addEventListener("click", () => onFocus(firstEx.index));
+  }
+
+  // A circuit unit has no single .index of its own (only its members do), so collapsed tap can't
+  // use the base class's default — it focuses the first non-rest member instead, same as before.
+  wireCollapsed(card) {
+    const firstEx = this.item.items.find((it) => !isRestRecord(it)) || this.item.items[0];
+    card.addEventListener("click", () => this.ctx.onFocus(firstEx.index));
   }
 }

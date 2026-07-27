@@ -195,20 +195,47 @@ The clipboard's finish bar (`.session-actions-footer`, holding `#btn-finish-sess
 ### 8.5 [x] Catalog picker button in the plan edit view — **SHIPPED 2026-07-25**
 The inline clipboard editor (`clipboardEditor.js`) gained an **"Add from catalog"** button that opens the reusable filtered taxonomy picker (`mountExercisePicker`) in `#dialog-catalog-picker`; tapping a movement injects it into the active plan (fresh slot id + taxonomy fields, defaults 3×10, adjustable inline) via the shared `injectExerciseIntoActivePlan` helper and returns to the editor. Covered by `test_catalog_picker_in_edit.py`.
 
-### 8.6 [ ] Bug: a collapsed rest card starts its timer on tap — should only bring it into focus
-A collapsed (not-in-focus) card's only allowed action is bringing it into focus — confirmed correct
-for standalone exercise cards and circuit cards, both of which gate their whole in-focus template
-(reorder-sensitive actions, feedback signals, the circuit's own timer button) behind `showInFocus =
-item.isInFocus && !pastExpanded` and fall through to an `onFocus`-only click handler otherwise
-([exerciseCard.js](src/modules/clipboard/exerciseCard.js), [circuitCard.js](src/modules/clipboard/circuitCard.js)).
+### 8.6 [x] Rests are first-class, focusable plan items — polymorphic DeckCard hierarchy — **SHIPPED 2026-07-27**
+Started as a narrower bug: a collapsed standalone rest card started its timer on any tap, instead of
+only bringing itself into focus like every other collapsed card. Investigating it exposed why the
+obvious fix (mirror `showInFocus`) doesn't work: a rest item could **never** hold
+`activeExerciseIndex` — `clampFocusToExercise` forcibly snapped focus off any rest,
+`completeCircuitRound` explicitly skipped trailing rests when advancing focus, and the deep-link
+resolver excluded rests from ever resolving. There was no "focused rest" state anywhere to gate a
+fix on. Simon's direction, given that: **make rests first-class plan items — the less exceptions the
+better** — and **use OOP polymorphism to define the behaviour of all the cards, to DRY the code**. A
+dedicated Explore agent swept the codebase for every rest-exclusion point and every test that could
+be affected before this was built; no test covered the bug (nothing asserted the old behaviour either
+way).
 
-**Standalone rest cards skip that gate.** [exerciseDeck.js](src/modules/clipboard/exerciseDeck.js)'s
-`item.type === "rest"` branch wires `card.addEventListener("click", () => startRestTimer(item.rest,
-"rest"))` unconditionally — it never checks `item.isInFocus`, so a rest card **anywhere in the
-upcoming list**, not just the focused one, starts its countdown on tap instead of bringing itself
-into focus like every other collapsed card does. Fix: gate the rest card's click handler on
-`item.isInFocus` (mirroring `showInFocus` in the other two card components) and give it the same
-`onFocus`-only fallback when collapsed.
+**Removed the "rest can't be focused" exceptions at the root**, rather than patching around them:
+- `clampFocusToExercise` → `clampFocusIndex` ([activeSessionController.js](src/controllers/activeSessionController.js)): stripped the forward/backward search that avoided rests; only out-of-bounds clamping remains.
+- `completeCircuitRound`: deleted the `while (isRestItem(…)) next++` skip — landing focus directly on a following rest when a round finishes is *more* correct, not less (the countdown is exactly what's next).
+- `focusIndexFromRef` / `sessionFocusPath`: a rest is now a real focus target, deep-linkable as `/session/{id}/client/{cid}/rest/{restId}` — `:focusType` gained `rest` alongside `exercise|circuit|superset` ([routeTable.js](src/controllers/routes/routeTable.js), [docs/ROUTING.md](docs/ROUTING.md), [UC5](use_cases/uc5_session_day_deck_and_deep_links.md)).
+- **Converged four independent re-implementations of the same "is this a rest?" check** (activeSessionController.js's own `isRestItem`, clipboardEditor.js's local `isRest`, and inline `item.type === "rest"` checks in exerciseDeck.js and circuitCard.js) onto [sessionItemRecord.js](src/modules/common/sessionItemRecord.js)'s existing `isRestRecord`/`isExerciseRecord` — the live item and the frozen history record already share one shape, so that was already the canonical predicate; the other three were needless duplication.
+- **Left alone, deliberately**: `logQuickSignal`/`openFeedbackModal` get no new runtime guard against being fed a rest — Too Easy/Too Hard/Notes genuinely don't apply to one, and under the new hierarchy `RestDeckCard`'s focused template simply never renders those buttons. The exclusion lives in the one class that owns it, not as a defensive check scattered into shared functions (confirmed no exception would even throw if it somehow were reached — `curEx.name` would just be `undefined`, which is moot since nothing can reach it). Circuit-embedded rests (`.circuit-break-row`) were already correct — only reachable while their circuit is in focus — and are untouched.
+
+**`DeckCard` base class + subclasses**, mirroring [route.js](src/controllers/routes/route.js)'s
+`Route` (Template Method + Replace Conditional with Polymorphism, per
+[docs/ROUTING.md §2](docs/ROUTING.md)): [deckCard.js](src/modules/clipboard/deckCard.js) is the fixed
+skeleton (collapsed vs. focused, then wire); `ExerciseDeckCard`
+([exerciseCard.js](src/modules/clipboard/exerciseCard.js)), `CircuitDeckCard`
+([circuitCard.js](src/modules/clipboard/circuitCard.js)), `RestDeckCard`
+([restDeckCard.js](src/modules/clipboard/restDeckCard.js), new), and `PastDeckCard`
+([pastDeckCard.js](src/modules/clipboard/pastDeckCard.js), extracted from an inline branch that
+never had its own file) each implement the four hooks. `exerciseDeck.js`'s ~115-line `if/else if`
+dispatch is now: construct the right subclass, call `.render(card)` uniformly — the type check moves
+to *construction* only; every render/focus/click decision after that point is polymorphic. Each
+subclass's own `isInFocus` getter carries its own focus rule with no if-else at the call site
+(`PastDeckCard` uses `expandedPastId`, not `activeExerciseIndex` — an orthogonal concept, which is
+exactly the case polymorphism is for). `RestDeckCard`'s new focused template — duration shown large
+and centered, a primary "Start Rest" button — **is** the fix: starting the timer is now only
+reachable from the focused state, itself only reachable by tapping the collapsed card first, like
+every other card.
+
+**Scope boundary**: only the *active session* clipboard. Routine/plan templates (`state.routines`)
+still use the legacy numeric `rest` field and are untouched — confirmed no rest-item code exists in
+routine editing at all.
 
 ### 8.7 [x] Too Easy / Too Hard are toggles; feedback button relabelled Notes — **SHIPPED 2026-07-27**
 Simon: the feedback trio gave no visible sign a tap had registered, and the third button's warning-

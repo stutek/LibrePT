@@ -5,13 +5,15 @@
    2026-07-27 (TODO §14.5 / §18.10). Inherits design tokens, glass-card/button/flex
    foundations and color scheme from index.css, loaded first. */
 
-/* Standalone rest marker card in the live deck. */
-.exercise-deck-card.rest-card {
+/* Standalone rest marker card in the live deck. Dashed/faded look is deliberately scoped to the
+   collapsed state (:not(.in-focus)) — a focused rest is a primary card like any other and gets the
+   shared solid-border/full-opacity .in-focus treatment below, not this waiting-in-line look. */
+.exercise-deck-card.rest-card:not(.in-focus) {
   border-style: dashed;
   opacity: 0.9;
   cursor: pointer;
 }
-.exercise-deck-card.rest-card:hover {
+.exercise-deck-card.rest-card:not(.in-focus):hover {
   opacity: 1;
   border-color: var(--primary);
 }
@@ -23,10 +25,27 @@
 .rest-card-inner .deck-card-counter {
   color: var(--primary);
 }
-.rest-card-play {
-  margin-left: auto;
+/* Focused rest card: the duration reads large and centered — this is the primary content, not a
+   stat tile among several — with a full-width Start action below (§8.6's fix: starting the timer
+   is only reachable from here, never from a collapsed tap). */
+.rest-card-duration {
+  text-align: center;
+  font-family: var(--font-header);
+  font-size: 42px;
+  font-weight: 800;
   color: var(--primary);
-  font-size: 13px;
+  line-height: 1;
+  margin: 8px 0 14px;
+}
+.rest-card-duration-unit {
+  font-size: 20px;
+  font-weight: 700;
+  margin-left: 2px;
+  opacity: 0.8;
+}
+.rest-card-start {
+  width: 100%;
+  justify-content: center;
 }
 /* Group Matrix Grid for Active Session */
 .group-matrix-grid {

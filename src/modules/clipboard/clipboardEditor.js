@@ -34,11 +34,10 @@ import {
   parseReps,
   repsPresetListId,
 } from "../common/repsAndLoad.js";
+import { isRestRecord as isRest } from "../common/sessionItemRecord.js";
 
 const DEFAULT_SERIES = 3;
 const DEFAULT_REST = 30; // seconds, when injecting a fresh rest
-
-const isRest = (it) => !!it && it.type === "rest";
 
 // The editor's Esc / tap-outside handlers live on `document`, so they must be torn down before a
 // fresh render (or an exit) installs new ones. renderActiveGroupBoard can re-render the board more

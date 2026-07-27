@@ -79,7 +79,13 @@ function currentPlanMode() {
 // The plan (clientState.exercises) is an ordered mix of exercise items and rest items. A rest item
 // is { id, type:'rest', rest:<seconds>, circuitId, circuitTitle, circuitSeries } — it carries the
 // circuit fields so a rest inside a circuit stays grouped with it. Exercise items have no `type`.
-export const isRestItem = (it) => !!it && it.type === "rest";
+//
+// Rests are first-class: `activeExerciseIndex` may point at one exactly like any exercise or
+// circuit member (TODO §8.6). The live item and the frozen history record share
+// one shape (sessionItemRecord.js's own header comment), so `isRestRecord` — already imported above
+// — is the one canonical predicate; re-exported as `isRestItem` here only because that is the name
+// this file's own call sites already read naturally with.
+export const isRestItem = isRestRecord;
 
 // Legacy plans (routines, recovered/demo sessions) carried rest as a number on the exercise. Turn
 // any such `rest>0` into a following rest item. Idempotent: it zeroes the exercise's rest as it
@@ -108,28 +114,19 @@ function ensureRestItems(cs) {
     cs.exercises = out;
     const ai = out.indexOf(focused);
     cs.activeExerciseIndex = ai >= 0 ? ai : 0;
-    clampFocusToExercise(cs);
+    clampFocusIndex(cs);
   }
 }
 
-// The active-exercise pointer must never land on a rest item (rests aren't focusable/loggable).
-// Snap it to the nearest exercise, searching forward first, then backward.
-function clampFocusToExercise(cs) {
+// Bounds-only: after a deletion/reorder the pointer may run past the end of a shorter array. This
+// used to also steer the pointer off any rest item ("rests aren't focusable") — that exception is
+// gone (rests are first-class plan items now), so all that is left to guard against is running off
+// the end of the array.
+function clampFocusIndex(cs) {
   if (!cs || !cs.exercises || !cs.exercises.length) return;
-  if (!isRestItem(cs.exercises[cs.activeExerciseIndex])) return;
-  for (let i = cs.activeExerciseIndex; i < cs.exercises.length; i++) {
-    if (!isRestItem(cs.exercises[i])) {
-      cs.activeExerciseIndex = i;
-      return;
-    }
+  if (cs.activeExerciseIndex >= cs.exercises.length || cs.activeExerciseIndex < 0) {
+    cs.activeExerciseIndex = cs.exercises.length - 1;
   }
-  for (let i = cs.activeExerciseIndex - 1; i >= 0; i--) {
-    if (!isRestItem(cs.exercises[i])) {
-      cs.activeExerciseIndex = i;
-      return;
-    }
-  }
-  cs.activeExerciseIndex = 0;
 }
 
 // `newItemId` names a plan item the caller just created (the live deck's +Exercise/+Circuit/+Rest
@@ -177,7 +174,10 @@ export function focusIndexFromRef(clientState, focusRef) {
   // "superset" is the pre-rename spelling, still arriving from a session cached by an older build
   // or an old deep link. Treated as the same focus rather than silently matching nothing.
   if (isCircuitFocus(focusRef.type)) {
-    return clientState.exercises.findIndex((e) => !isRestItem(e) && e.circuitId === focusRef.id);
+    return clientState.exercises.findIndex((e) => e.circuitId === focusRef.id);
+  }
+  if (focusRef.type === "rest") {
+    return clientState.exercises.findIndex((e) => isRestItem(e) && e.id === focusRef.id);
   }
   return clientState.exercises.findIndex(
     (e) => !isRestItem(e) && !e.circuitId && e.id === focusRef.id,
@@ -204,10 +204,12 @@ export function sessionFocusPath() {
   const ex = cs?.exercises?.[cs.activeExerciseIndex];
   if (!ex) return urlFor("session.client", ids);
   // Built, never spelled: the focus segment was renamed once already (superset → circuit), and a
-  // hand-written path is what quietly survives the next rename as a dead link.
-  return ex.circuitId
-    ? urlFor("session.focus", { ...ids, focusType: "circuit", focusId: ex.circuitId })
-    : urlFor("session.focus", { ...ids, focusType: "exercise", focusId: ex.id });
+  // hand-written path is what quietly survives the next rename as a dead link. A rest is a
+  // first-class focus target exactly like an exercise, so it gets its own segment rather than
+  // being folded into "exercise" (which would mismatch what focusIndexFromRef resolves it back to).
+  const focusType = ex.circuitId ? "circuit" : isRestItem(ex) ? "rest" : "exercise";
+  const focusId = ex.circuitId || ex.id;
+  return urlFor("session.focus", { ...ids, focusType, focusId });
 }
 
 // Set the edit-mode flag WITHOUT re-rendering — for the router restoring edit mode from an `/edit`
@@ -651,7 +653,8 @@ export function completeCircuitRound(circuitId) {
         l.completed = true;
       }
     }
-    // End of the circuit block includes any trailing rest items; land focus on the next exercise.
+    // Land focus on whatever comes right after the circuit block — a trailing rest included: that
+    // countdown is exactly what's next, and rests are first-class focus targets like any other item.
     let lastIdx = -1;
     {
       let idx = 0;
@@ -660,10 +663,8 @@ export function completeCircuitRound(circuitId) {
         idx++;
       }
     }
-    let next = lastIdx + 1;
-    while (next < cs.exercises.length && isRestItem(cs.exercises[next])) next++;
-    cs.activeExerciseIndex = Math.min(next, cs.exercises.length - 1);
-    clampFocusToExercise(cs);
+    cs.activeExerciseIndex = Math.min(lastIdx + 1, cs.exercises.length - 1);
+    clampFocusIndex(cs);
     // The block is fully done — a rest/exercise timer still running against it is now stale.
     // Freeze it rather than silently dropping it: the trainer sees it held at its final value
     // and clears it themselves with ✕.
@@ -835,9 +836,10 @@ export function renderActiveGroupBoard() {
   activeSession.activeClientId = activeClientId;
   const activeClientState = activeSession.clientRoutines[activeClientId];
 
-  // Rest is a first-class plan item: migrate any legacy exercise-level rest and keep focus off rests.
+  // Rest is a first-class plan item: migrate any legacy exercise-level rest, then bounds-clamp focus
+  // (only an out-of-range index needs correcting — a rest is a perfectly valid focus target).
   ensureRestItems(activeClientState);
-  clampFocusToExercise(activeClientState);
+  clampFocusIndex(activeClientState);
 
   syncSessionFocusUrl();
 

@@ -144,6 +144,7 @@ export const sl = {
   rounds: "Runde",
   ungroup: "Razdruži sklop",
   rest_timer: "Časomer premora",
+  start_rest: "Začni premor",
   trainer_set_notes: "Trenerjeve opombe serije",
   kg: "kg",
   reps_label: "pon.",

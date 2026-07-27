@@ -118,6 +118,7 @@ route classes, specificity ordering, and the invariants a new route must respect
 | `/session/{sessionId}/client/{clientId}/exercise/{exerciseId}` | the clipboard with that card in focus |
 | `/session/{sessionId}/client/{clientId}/circuit/{circuitId}` | the clipboard with that circuit in focus |
 | `…/superset/{circuitId}` | **legacy alias** for the row above — the pre-2026-07-26 spelling. Still resolves, and the address bar is rewritten to `/circuit/`, so shared and bookmarked links never break |
+| `/session/{sessionId}/client/{clientId}/rest/{restId}` | the clipboard with that standalone rest in focus — a rest is a first-class plan item, focusable exactly like an exercise or circuit (TODO §8.6) |
 | `/session/{sessionId}/client/{clientId}/edit` | the **inline plan editor** open on that participant's plan |
 | `/session/{sessionId}/client/{clientId}/edit/exercise/{slotId}` | the plan editor **with that row called out** — inserting or swapping a row names it here, so a reload lands back on the row the trainer was in the middle of. A restore highlights and scrolls to it but takes no caret and shows no badge: nothing just happened to it. An id that no longer resolves is ignored and the segment is dropped |
 | `/clients/{clientId}` | a client detail page |

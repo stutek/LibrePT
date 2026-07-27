@@ -144,6 +144,7 @@ export const en = {
   rounds: "Rounds",
   ungroup: "Break up circuit",
   rest_timer: "Rest Timer",
+  start_rest: "Start Rest",
   trainer_set_notes: "Trainer Set Notes",
   kg: "kg",
   reps_label: "reps",

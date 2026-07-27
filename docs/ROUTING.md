@@ -97,7 +97,7 @@ Inline constraints do the rest of the disambiguation:
 
 ```
 /sessions/:isoDate([0-9]{4}-[0-9]{2}-[0-9]{2})
-/session/:sessionId/client/:clientId/:focusType(exercise|circuit|superset)/:focusId
+/session/:sessionId/client/:clientId/:focusType(exercise|circuit|rest|superset)/:focusId
 ```
 
 These are not decoration. The date constraint is what stops `/sessions/new` from being swallowed by
