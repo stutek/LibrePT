@@ -19,6 +19,12 @@ import { getSessionDayDate } from "./sessionTimeline.js";
 // scheduled end, or an upcoming session counting down to its scheduled start. Each such element
 // carries data-end (epoch ms of the target moment); the ticker updates the text and, for the
 // countdown-to-end case only (data-overtime-aware="1"), flips the "overtime" warning past zero.
+// The clipboard is crowded with a full day's sessions — every card starts collapsed to its
+// essentials (time, title, status bar) and expands on tap of its own chevron to reveal
+// participants/program/warnings. Ephemeral (module-level, not persisted): resets on reload, which
+// matches "start collapsed" — there's no stale "I left this one open" state to restore wrong.
+const expandedCardIds = new Set();
+
 let cardTicker = null;
 function ensureCardTicker() {
   if (cardTicker) return;
@@ -159,7 +165,7 @@ export function renderSessionCard(b, colContainer, deps) {
   if (!routineName) warnings.push(pill(t("program_not_defined")));
   if (clients.length === 0) warnings.push(pill(t("no_members_assigned")));
   const warningHTML = warnings.length
-    ? `<div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;">${warnings.join("")}</div>`
+    ? `<div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px;">${warnings.join("")}</div>`
     : "";
 
   // A finished session is badged and de-emphasised rather than shown as launchable
@@ -219,23 +225,43 @@ export function renderSessionCard(b, colContainer, deps) {
     timerIsOvertime = remSec < 0;
   }
 
+  const isExpanded = expandedCardIds.has(b.id);
+
   info.innerHTML = `
-    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 2px;">
+    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 1px;">
       <span class="badge badge-primary" style="font-size: 10px; padding: 2px 6px; font-weight: 700; font-family: monospace;">${escapeHTML(b.time)}</span>
       <strong class="session-card-title" style="font-size: 13px;">${escapeHTML(b.title)}</strong>
       ${completedBadge}
-      <button class="btn-edit-session icon-btn text-muted" title="${t("edit") || "Edit"}" style="margin-left: auto; padding: 2px 6px; font-size: 11px;" aria-label="Edit session">
+      <button class="btn-card-expand icon-btn text-muted" title="${t(isExpanded ? "collapse" : "expand") || (isExpanded ? "Collapse" : "Expand")}" style="margin-left: auto; padding: 2px 6px; font-size: 11px;" aria-label="${t(isExpanded ? "collapse" : "expand") || (isExpanded ? "Collapse" : "Expand")}" aria-expanded="${isExpanded}">
+        <i class="fa-solid fa-chevron-${isExpanded ? "up" : "down"}"></i>
+      </button>
+      <button class="btn-edit-session icon-btn text-muted" title="${t("edit") || "Edit"}" style="padding: 2px 6px; font-size: 11px;" aria-label="Edit session">
         <i class="fa-solid fa-pen-to-square"></i>
       </button>
     </div>
-    <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 11px; color: var(--text-muted); line-height: 1.4;">
+    ${
+      isExpanded
+        ? `
+    <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 11px; color: var(--text-muted); line-height: 1.3;">
       <span><i class="fa-solid fa-users" style="margin-right: 4px; font-size: 10px;"></i>${clientNamesStr || `<span style="color: #ef4444;">—</span>`}
       <span style="color: var(--primary); font-weight: 600;">(${clients.length}/${b.maxCapacity} ${t("spots_filled")})</span></span>
       <span style="opacity: 0.45;">&bull;</span>
       <span><i class="fa-solid fa-clipboard-list" style="margin-right: 4px; font-size: 10px;"></i>${routineName ? escapeHTML(routineName) : `<span style="color: #ef4444; font-weight: 600;">${t("undefined")}</span>`}</span>
-    </div>
+    </div>`
+        : ""
+    }
     ${warningHTML}
   `;
+
+  const expandBtn = info.querySelector(".btn-card-expand");
+  if (expandBtn) {
+    expandBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (isExpanded) expandedCardIds.delete(b.id);
+      else expandedCardIds.add(b.id);
+      deps.rerenderSessions?.();
+    });
+  }
 
   const editBtn = info.querySelector(".btn-edit-session");
   if (editBtn) {

@@ -10,7 +10,9 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px;
+  /* Row gap trimmed from 6px — with several participants wrapping to multiple rows, this is
+     genuine per-row vertical cost, unlike the tab's own min-height (floored at 44px regardless). */
+  gap: 4px;
   /* Trimmed from 10px/16px top+bottom — the bar's own padding, not the 44px tap target on each
      .client-tab-btn (kept intact, AGENT_RULES §2.D.1: real touch targets, never shrunk for density). */
   padding: 6px 16px;

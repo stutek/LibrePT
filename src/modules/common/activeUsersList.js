@@ -33,13 +33,16 @@ export function renderActiveUsersList(tabsContainer, activeSession, ctx) {
     tab.className = `client-tab-btn ${isActive ? "active" : ""}`;
 
     // Selected tab: uses unified primary gradient with on-primary text for clear, vibrant emphasis.
-    // Horizontal padding/gap trimmed from 20px/8px so more tabs fit per row (fewer wrapped rows =
-    // less vertical space for a large group session) — minHeight stays at 44px, a real tap target
-    // (AGENT_RULES §2.D.1), so this saves width, not the one dimension that must not shrink.
+    // Width-side chrome (padding/gap/avatar size) trimmed further so more tabs fit per row — a
+    // group session with 6-7+ participants wraps to fewer rows this way, which is what actually
+    // saves vertical space (fewer rows, not shorter rows). minHeight stays at 44px, a real tap
+    // target (AGENT_RULES §2.D.1) — vertical padding alone can't shrink below that floor anyway,
+    // so trimming it further would do nothing; the name is also capped+ellipsized so one long name
+    // can't force an otherwise-compact row to wrap early.
     tab.style.display = "flex";
     tab.style.alignItems = "center";
-    tab.style.gap = "6px";
-    tab.style.padding = "8px 16px";
+    tab.style.gap = "4px";
+    tab.style.padding = "6px 10px";
     tab.style.borderRadius = "24px";
     tab.style.border = isActive ? "1px solid transparent" : "1px solid var(--border-color)";
     tab.style.background = isActive ? "var(--primary-gradient)" : "rgba(255,255,255,0.05)";
@@ -49,12 +52,13 @@ export function renderActiveUsersList(tabsContainer, activeSession, ctx) {
     tab.style.cursor = "pointer";
     tab.style.transition = "all 0.2s";
     tab.style.minHeight = "44px";
+    tab.style.maxWidth = "140px";
 
     tab.innerHTML = `
-      <div class="avatar" style="width:20px; height:20px; font-size:9px; background: ${isActive ? "rgba(255, 255, 255, 0.25)" : "var(--primary-light)"}; color: ${isActive ? "#fff" : "var(--primary)"};">
+      <div class="avatar" style="width:16px; height:16px; font-size:8px; flex-shrink:0; background: ${isActive ? "rgba(255, 255, 255, 0.25)" : "var(--primary-light)"}; color: ${isActive ? "#fff" : "var(--primary)"};">
         ${escapeHTML(client.avatar || getInitials(client.name))}
       </div>
-      <span>${getClientDisplayNameHTML(client, true)}</span>
+      <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0;">${getClientDisplayNameHTML(client, true)}</span>
     `;
 
     tab.addEventListener("click", () => {
