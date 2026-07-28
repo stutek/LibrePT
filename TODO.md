@@ -47,6 +47,13 @@ The session list can no longer assume one session per time slot. Model and displ
 - Implies a **room/resource** dimension on bookings (which room, which trainer) that the data model does not have yet, and a scheduling/availability source for other PTs' bookings (shared calendar or backend).
 - Feeds directly into the planned **date-grouped, scrollable session card stack** ([4.3](#43--collapse-the-duplicated-session-header-into-one-row-with-a-date-picker) and the sessions-view redesign): overlaps and shaded external sessions must be legible within that stacked layout.
 
+### 1.4 [ ] Calendar preferences — holidays and non-working days
+Every PT should be able to configure their own calendar view: import a holiday calendar (public holidays, gym closures) and color-code off days throughout the app.
+
+- Holiday/non-working-day tags surface on the date-jump picker and on the session timeline's day lines (`sessionsView.js`/`sessionTimeline.js`), so a PT scanning the schedule immediately sees which days are closed rather than discovering it session-by-session.
+- Needs an import source (a holiday calendar feed/file, per country/region) and a per-PT on/off toggle for which days count as non-working — a gym's actual closures don't always match a public holiday calendar.
+- Related to but distinct from the existing per-theme temporal tinting (`--temporal-past`/`--temporal-future`, `src/modules/themes/*.css`) — that's about session recency, this is about the calendar day itself being open or closed.
+
 ---
 
 ## 3. Data Sync

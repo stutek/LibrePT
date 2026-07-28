@@ -286,11 +286,12 @@ export function renderSessions({
     const sorted = [...sessions].sort(compareByStartDate);
     let currentKey = null;
     let currentList = null;
+    const groupFooters = []; // [{ group, footer }] — pruned after render once real heights are known
     for (const session of sorted) {
       const key = calendarDayKey(session);
       if (key !== currentKey) {
         currentKey = key;
-        const { weekday, date, temporal, isToday } = formatCalendarDayLabel(key);
+        const { weekday, date, isToday } = formatCalendarDayLabel(key);
 
         const group = document.createElement("div");
         group.className = "sessions-day-group";
@@ -301,12 +302,11 @@ export function renderSessions({
           <span class="sessions-day-group-date">${escapeHTML(date)}</span>
           ${isToday ? `<span class="sessions-day-group-today-tag">${escapeHTML(t("today"))}</span>` : ""}
         `;
-        const temporalClass = temporal !== "today" ? ` is-${temporal}` : "";
 
         // Sticks to the top of the viewport while this group's cards are scrolled past it, the
         // same as it always has.
         const header = document.createElement("div");
-        header.className = `sessions-day-group-header${temporalClass}`;
+        header.className = "sessions-day-group-header";
         header.innerHTML = labelHTML;
         group.appendChild(header);
 
@@ -319,7 +319,7 @@ export function renderSessions({
         // has already scrolled out of view above — still shows which day is on screen, the same
         // orientation the top header already gives scrolling toward the future.
         const footer = document.createElement("div");
-        footer.className = `sessions-day-group-footer${temporalClass}`;
+        footer.className = "sessions-day-group-footer";
         footer.innerHTML = labelHTML;
         group.appendChild(footer);
 
@@ -332,8 +332,20 @@ export function renderSessions({
         }
 
         container.appendChild(group);
+        groupFooters.push({ group, footer });
       }
       renderSessionCard(session, currentList, cardDeps);
+    }
+
+    // A day whose cards all fit on one screen has its header and footer visible together with
+    // nothing to scroll between them — not a mirrored pair giving context at each edge, just the
+    // same day name printed twice in a row (confusable with a genuine duplicate day-group). The
+    // footer only earns its place once scrolling through the day would otherwise lose the header
+    // off the top; measured after render, since a group's real height isn't known before its cards
+    // are in the DOM.
+    const viewportHeight = document.getElementById("main-content")?.clientHeight || 0;
+    for (const { group, footer } of groupFooters) {
+      if (group.offsetHeight <= viewportHeight) footer.remove();
     }
   }
 

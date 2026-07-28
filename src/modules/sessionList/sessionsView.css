@@ -282,14 +282,6 @@
   font-weight: 400;
   color: var(--text-muted);
 }
-.sessions-day-group-header.is-past,
-.sessions-day-group-footer.is-past {
-  color: var(--temporal-past);
-}
-.sessions-day-group-header.is-future,
-.sessions-day-group-footer.is-future {
-  color: var(--temporal-future);
-}
 .sessions-day-group-today-tag {
   flex: 0 0 auto;
   font-size: 9px;
