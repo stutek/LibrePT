@@ -175,6 +175,7 @@ import {
   getSessionDayDate,
   initSessionTimeline,
   renderSessionsTitleBar,
+  scheduleTimelineSettle,
   setupSessionsDayNav,
 } from "./modules/sessionList/sessionTimeline.js";
 import {
@@ -253,6 +254,7 @@ function init() {
     openSessionFromHistory: (log) => openSessionFromHistory(log),
     openWorkoutSetupModal: (c, r, b, o) => openWorkoutSetupModal(c, r, b, o),
     focusSessionsColumn,
+    scheduleTimelineSettle,
     setClipboardEditMode,
     renderActiveGroupBoard: () => renderActiveGroupBoard(),
     renderActiveSessionBarLabels,
@@ -308,6 +310,7 @@ function init() {
     urlFor,
     getISODateForColumn,
     focusSessionsColumn,
+    scheduleTimelineSettle,
     saveToLocalStorage: saveState,
     rerenderSessions: renderSessions,
   });

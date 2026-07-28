@@ -23,6 +23,13 @@ let focusedSessionDate = todayISODate();
 let sessionsProgrammaticScrollUntil = 0;
 let headerObserver = null;
 let titlebarResizeObserver = null;
+// Bumped by every syncSessionTimelineAfterRender() call; its rAF-deferred settle checks this
+// before acting so a render that lands mid-flight of an earlier one's callback can't scroll the
+// timeline back to a focus a later render has already superseded (boot can call renderSessions()
+// several times in quick succession — recovering an active session, notifications, seeded data —
+// and each queues its own settle). Also stamped onto the grid so tests can wait for genuine
+// quiescence instead of guessing how long boot's render churn takes.
+let settleGeneration = 0;
 
 export function initSessionTimeline(d) {
   deps = d;
@@ -196,6 +203,27 @@ function observeSessionsTitlebarHeight() {
   syncSessionsHeaderStickyOffset();
 }
 
+// Defers a focusSessionsColumn() call to the next frame, coordinated through one generation
+// counter shared by every caller that needs to settle the timeline after the DOM might still be
+// mid-update: a renderSessions() pass re-settling to the pre-rebuild focus, the sessions.day route
+// settling to its own isoDate param on entry, and the workout-setup "discard changes" flow
+// settling back to today all used to each schedule their OWN independent requestAnimationFrame
+// call. None of them knew about the others, so whichever fired LAST silently won regardless of
+// which one actually reflected the current intent — e.g. a route entry settling to "today" arriving
+// after a render's settle to some other focused date would yank the timeline back to today even
+// though nothing asked for that. Routing every deferred settle through here means a newer call
+// always supersedes an older one still in flight, instead of racing it.
+export function scheduleTimelineSettle(isoDateOrToday, behavior = "auto") {
+  const gen = ++settleGeneration;
+  const grid = document.getElementById("sessions-categories-grid");
+  if (grid) grid.dataset.settleGen = String(gen);
+  requestAnimationFrame(() => {
+    if (gen !== settleGeneration) return; // superseded by a later scheduled settle
+    focusSessionsColumn(isoDateOrToday, behavior);
+    if (grid) grid.dataset.settled = String(gen);
+  });
+}
+
 // Called once per renderSessions() pass, after the day-groups are (re)built — re-attaches the
 // scrollspy to the fresh DOM nodes and re-settles the scroll position to whichever date was
 // focused before the rebuild (or today, on first load), the same "don't let a re-render move the
@@ -203,7 +231,7 @@ function observeSessionsTitlebarHeight() {
 export function syncSessionTimelineAfterRender() {
   observeSessionTimelineGroups();
   observeSessionsTitlebarHeight();
-  requestAnimationFrame(() => focusSessionsColumn(focusedSessionDate, "auto"));
+  scheduleTimelineSettle(focusedSessionDate, "auto");
 }
 
 // The date-picker's own markup (Today + jump-to-date) — index.html only holds the empty

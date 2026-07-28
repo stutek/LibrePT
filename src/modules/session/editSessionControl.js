@@ -109,7 +109,9 @@ export function setupEditSessionControl() {
     editingSessionId = null;
     deps.pushRoute(deps.urlFor("sessions.day", { isoDate: deps.getISODateForColumn("today") }));
     deps.switchView("clients");
-    requestAnimationFrame(() => deps.focusSessionsColumn("today", "auto"));
+    // Coordinated against renderSessions()'s own re-settle via scheduleTimelineSettle, rather than
+    // a private requestAnimationFrame racing it (sessionTimeline.js).
+    deps.scheduleTimelineSettle?.("today", "auto");
   };
 
   for (const btn of cancelBtns) {

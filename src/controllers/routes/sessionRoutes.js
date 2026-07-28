@@ -9,7 +9,9 @@ import { Route } from "./route.js";
 export class SessionsDayRoute extends Route {
   enter(ctx) {
     super.enter(ctx);
-    requestAnimationFrame(() => ctx.deps.focusSessionsColumn?.(ctx.params.isoDate, "auto"));
+    // Routed through scheduleTimelineSettle, not a private requestAnimationFrame, so this settle
+    // is coordinated against renderSessions()'s own re-settle instead of racing it (sessionTimeline.js).
+    ctx.deps.scheduleTimelineSettle?.(ctx.params.isoDate, "auto");
     ctx.router.focusActiveSessionCard();
     return this;
   }
