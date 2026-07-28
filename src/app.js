@@ -575,6 +575,7 @@ function setupActiveSession() {
     launchClipboardDirectly,
     newRecordId,
     renderIdleSessionBar,
+    renderSessions,
     saveToLocalStorage: saveState,
   });
   setupActiveSessionController({

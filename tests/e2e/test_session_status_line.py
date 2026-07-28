@@ -81,6 +81,11 @@ def test_finishing_a_session_stamps_completed_and_duration_on_the_session(
     page.wait_for_selector("#active-session-overlay:not(.hidden)")
     page.wait_for_timeout(300)
 
+    # Opening the clipboard only stages the session — it must be explicitly started before it can
+    # be completed.
+    page.click("#btn-start-session")
+    page.wait_for_timeout(200)
+
     # finishWorkoutSession() should never have touched state.sessions before this feature — confirm
     # it now stamps completed + duration so the dashboard's past status line has something to show.
     page.locator("#btn-finish-session").click()

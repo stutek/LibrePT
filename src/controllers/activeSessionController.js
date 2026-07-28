@@ -392,7 +392,8 @@ export function startWorkoutSession(clientRoutines, sessionMeta = null, deps = {
 
   activeSession = {
     id: sessionId,
-    startTime: Date.now(),
+    started: false,
+    startTime: null,
     duration: 0,
     participants: participantIds,
     clientRoutines: {},
@@ -452,7 +453,6 @@ export function startWorkoutSession(clientRoutines, sessionMeta = null, deps = {
   }
 
   saveActiveSessionToCache();
-  requestScreenWakeLock();
 
   const sId = activeSession.id || newRecordId();
   if (navigateToPath) {
@@ -460,8 +460,25 @@ export function startWorkoutSession(clientRoutines, sessionMeta = null, deps = {
   }
 }
 
+// Explicit trainer action, mirroring finishWorkoutSession: opening the clipboard only stages the
+// session (plan visible, nothing running yet) — the timer, duration, and "live" status only begin
+// once the trainer taps Start, same way a session only ends when they tap Complete.
+export function beginWorkoutSession() {
+  if (!activeSession || activeSession.started) return;
+  activeSession.started = true;
+  activeSession.startTime = Date.now();
+  activeSession.duration = 0;
+  saveActiveSessionToCache();
+  requestScreenWakeLock();
+  startSessionTimer();
+  renderActiveGroupBoard();
+  // The homepage's "Active session" badge is stamped at renderSessions() time, not derived live —
+  // without this, a card only picks up the started session on the NEXT unrelated re-render.
+  appDeps.renderSessions?.();
+}
+
 export function startSessionTimer() {
-  if (!activeSession) return;
+  if (!activeSession || !activeSession.started) return;
   if (activeSession.timerIntervalId) clearInterval(activeSession.timerIntervalId);
 
   const tick = () => {
@@ -968,14 +985,19 @@ export function renderActiveGroupBoard() {
     }
   }
 
-  // Completing is a LIVE-session action: it logs the session to history. That is wrong while the
-  // plan is being edited (Done exits edit mode instead) and wrong for a date-less planning
-  // programme that has not been run at all. Hide the whole footer, not just the button, so no empty
-  // bar is left behind; it comes back on exit because every mode change re-renders through here.
-  const finishFooter = document.querySelector("#active-session-overlay .session-actions-footer");
-  if (finishFooter) {
-    const finishAllowed = !clipboardEditMode && currentPlanMode() !== "planning";
-    finishFooter.classList.toggle("hidden", !finishAllowed);
+  // Starting/completing are LIVE-session actions: starting begins the timer, completing logs the
+  // session to history. Both are wrong while the plan is being edited (Done exits edit mode
+  // instead) and wrong for a date-less planning programme that is never run. Hide the whole footer,
+  // not just the button, so no empty bar is left behind; it comes back on exit because every mode
+  // change re-renders through here. Within the footer, Start and Complete are mutually exclusive —
+  // the trainer explicitly starts the session, same as they explicitly complete it.
+  const footer = document.querySelector("#active-session-overlay .session-actions-footer");
+  if (footer) {
+    const footerAllowed = !clipboardEditMode && currentPlanMode() !== "planning";
+    footer.classList.toggle("hidden", !footerAllowed);
+    const started = !!activeSession?.started;
+    document.getElementById("btn-start-session")?.classList.toggle("hidden", started);
+    document.getElementById("btn-finish-session")?.classList.toggle("hidden", !started);
   }
 
   // Detach any previous editor's document listeners before this render replaces the deck DOM.
@@ -1213,10 +1235,11 @@ export function renderActiveSessionOverlayShell() {
         </button>
       </div>
 
-      <!-- Session Completion Drawer -->
+      <!-- Session Start / Completion Drawer: mutually exclusive, toggled in renderActiveGroupBoard -->
       <div class="session-actions-footer mt-auto">
         <div class="session-finish-row">
-          <button id="btn-finish-session" class="btn success-btn btn-sm flex-1">Complete Workout Session</button>
+          <button id="btn-start-session" class="btn success-btn btn-sm flex-1" data-i18n="btn_start_workout_session"><i class="fa-solid fa-circle-play"></i> Start Session</button>
+          <button id="btn-finish-session" class="btn success-btn btn-sm flex-1 hidden">Complete Workout Session</button>
         </div>
       </div>
     </div>
@@ -1311,6 +1334,13 @@ export function setupActiveSession(deps) {
       } else if (confirm(t("confirm_cancel"))) {
         cancelWorkoutSession();
       }
+    });
+  }
+
+  const btnStartSession = document.getElementById("btn-start-session");
+  if (btnStartSession) {
+    btnStartSession.addEventListener("click", () => {
+      beginWorkoutSession();
     });
   }
 
@@ -1503,7 +1533,9 @@ export function recoverActiveSession() {
 
   try {
     activeSession = parsed;
-    activeSession.duration = Math.floor((Date.now() - activeSession.startTime) / 1000);
+    activeSession.duration = activeSession.started
+      ? Math.floor((Date.now() - activeSession.startTime) / 1000)
+      : 0;
 
     if (activeSession.sourceSession) {
       activeSession.sourceSession.startDate = new Date(activeSession.sourceSession.startDate);
@@ -1545,10 +1577,12 @@ export function recoverActiveSession() {
     }
     renderActiveSessionBarLabels();
 
-    startSessionTimer();
     renderActiveGroupBoard();
     restoreSessionTimers();
-    requestScreenWakeLock();
+    if (activeSession.started) {
+      startSessionTimer();
+      requestScreenWakeLock();
+    }
   } catch (e) {
     console.error("Error recovering active session cache:", e);
   }

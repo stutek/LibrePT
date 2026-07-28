@@ -86,6 +86,16 @@ export const getSetupDraft = getEditSessionDraft;
 
 let editingSessionId = null;
 
+// Session name repeated as a subtitle above the participants list — the name input sits at the top
+// of a form that can scroll well past it once several clients are listed, so the trainer loses track
+// of which session they're configuring. Live-synced from the input in both create and edit mode.
+function updateSessionNameSubtitle() {
+  const subtitleEl = document.getElementById("setup-session-name-subtitle");
+  if (!subtitleEl) return;
+  const name = document.getElementById("setup-session-name")?.value.trim();
+  subtitleEl.textContent = name || deps.t?.("untitled_session") || "Untitled Session";
+}
+
 export function setupEditSessionControl() {
   const form = document.getElementById("form-workout-setup");
   if (!form) return;
@@ -125,6 +135,11 @@ export function setupEditSessionControl() {
   // Auto-save draft on any input change
   form.addEventListener("input", saveEditSessionDraft);
   form.addEventListener("change", saveEditSessionDraft);
+
+  const nameInputEl = document.getElementById("setup-session-name");
+  if (nameInputEl) {
+    nameInputEl.addEventListener("input", updateSessionNameSubtitle);
+  }
 
   form.addEventListener("submit", (e) => {
     e.preventDefault();
@@ -411,6 +426,8 @@ export function openEditSessionControlModal(
     }
   }
   if (locInput) locInput.value = draft?.location ?? (targetSession?.location || "");
+
+  updateSessionNameSubtitle();
 
   const clientsList = state?.clients || [];
   for (const client of [...clientsList].sort((a, b) => a.name.localeCompare(b.name))) {

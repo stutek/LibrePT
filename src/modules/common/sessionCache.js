@@ -35,7 +35,9 @@ export function readActiveSessionCache() {
   if (!cached) return null;
   try {
     const parsed = JSON.parse(cached);
-    if (!parsed?.startTime) return null;
+    // Not `startTime` — a staged-but-not-yet-started session (§ explicit Start) legitimately has
+    // none until the trainer taps Start, and that must still survive a reload.
+    if (!parsed?.id) return null;
     // A session cached by a build that predates positions arrives with none, and the array order it
     // was serialised in is the last moment that sequence is recoverable — so it is renumbered here,
     // on the way in, rather than left to a reader that may no longer have an index to fall back on

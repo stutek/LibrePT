@@ -68,6 +68,8 @@ export function renderEditSessionView(targetElement) {
             </div>
           </div>
 
+          <p id="setup-session-name-subtitle" class="text-sm text-muted font-semibold mb-2"></p>
+
           <div class="participant-filter-bar mb-2 flex items-center justify-between gap-2">
             <label for="setup-participant-search" class="m-0 font-semibold" data-i18n="select_participants">Selected Participants & Assigned Routines *</label>
             <div class="search-input-wrap text-xs" style="width: 200px;">
@@ -81,7 +83,7 @@ export function renderEditSessionView(targetElement) {
 
         <div class="modal-actions mt-4 flex justify-end gap-3">
           <button type="button" class="btn secondary-btn modal-cancel setup-cancel-btn" data-i18n="btn_discard_changes">Discard Changes</button>
-          <button type="submit" class="btn success-btn"><span data-i18n="btn_launch_clipboard_short">Session Details</span> <i class="fa-solid fa-circle-play ml-1"></i></button>
+          <button type="submit" class="btn success-btn"><span data-i18n="btn_launch_clipboard_short">Open in Clipboard</span> <i class="fa-solid fa-clipboard-list ml-1"></i></button>
         </div>
       </form>
     </div>

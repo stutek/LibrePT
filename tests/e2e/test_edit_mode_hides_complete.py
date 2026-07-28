@@ -15,6 +15,10 @@ def _open_live_session(page, local_server):
     page.locator(card).first.click()
     page.wait_for_selector("#active-session-overlay:not(.hidden)")
     page.wait_for_timeout(400)
+    # Opening the clipboard only stages the session — the trainer must explicitly start it before
+    # any live-session-only affordance (like Complete) is offered.
+    page.click("#btn-start-session")
+    page.wait_for_timeout(200)
 
 
 def test_live_session_offers_complete(page, local_server):

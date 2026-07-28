@@ -98,6 +98,7 @@ export function renderSessionCard(b, colContainer, deps) {
   const isLaunched =
     !b.completed &&
     !!activeSession &&
+    !!activeSession.started &&
     ((activeId && b.id === activeId) ||
       activeSession.id === b.id ||
       (ss && ss.id === b.id) ||

@@ -67,6 +67,7 @@ export function applyStaticDOMMappings(tDict) {
     // Active session clipboard overlay
     "#btn-add-exercise-to-session": "btn_inject_exercise",
     "#btn-delete-session": "btn_delete_session",
+    "#btn-start-session": "btn_start_workout_session",
     "#btn-finish-session": "btn_complete",
 
     "#dialog-add-session-exercise .modal-header h3": "add_ex_session_title",
