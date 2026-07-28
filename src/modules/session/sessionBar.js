@@ -10,7 +10,7 @@
 //
 // deps: {
 //   getState(), getActiveSession(), t,
-//   formatSignedDuration, formatDuration, formatDurationHM,
+//   formatSignedDuration, formatDuration, formatDurationHourMin,
 //   parseTimeRange, getOverlappingSessions, buildSessionMeta
 // }
 
@@ -30,7 +30,7 @@ export function updateSessionBarTimer() {
   const endDate = activeSession.sourceSession?.endDate;
   // The bottom active-session bar keeps second-level precision (a separate surface from the
   // dashboard's session-card status lines, TODO 2.3); .session-card-timer is that dashboard
-  // card's own live timer and must render H:MM only, same as its non-launched countdown states.
+  // card's own live timer and must render "01h 32m", same as its non-launched countdown states.
   let text = "";
   let cardText = "";
   let isOvertime = false;
@@ -42,11 +42,11 @@ export function updateSessionBarTimer() {
     const endMs = new Date(endDate).getTime();
     const remainingSec = Math.round((endMs - Date.now()) / 1000);
     text = deps.formatSignedDuration(remainingSec);
-    cardText = deps.formatDurationHM(remainingSec);
+    cardText = deps.formatDurationHourMin(remainingSec);
     isOvertime = remainingSec < 0;
   } else {
     text = deps.formatDuration(activeSession.duration || 0);
-    cardText = deps.formatDurationHM(activeSession.duration || 0);
+    cardText = deps.formatDurationHourMin(activeSession.duration || 0);
   }
 
   if (durationEl) {

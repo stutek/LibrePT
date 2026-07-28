@@ -381,8 +381,9 @@ export function openSessionFromHistory(log) {
   }
 }
 
-export function startWorkoutSession(clientRoutines, sessionMeta = null, deps = {}) {
+export function startWorkoutSession(clientRoutines, sessionMeta = null, deps = {}, options = {}) {
   if (deps) appDeps = { ...appDeps, ...deps };
+  const { navigate = true } = options;
   const { state, navigateToPath, t } = appDeps;
   if (!state) return;
   clearAllTimers(); // fresh session — never inherit a previous session's timers
@@ -455,7 +456,10 @@ export function startWorkoutSession(clientRoutines, sessionMeta = null, deps = {
   saveActiveSessionToCache();
 
   const sId = activeSession.id || newRecordId();
-  if (navigateToPath) {
+  // A dashboard card's Start button stages + immediately begins the session in place (see
+  // beginWorkoutSession's call site in sessionCard.js's wiring) without navigating to the
+  // clipboard overlay — the trainer stays on the dashboard and watches the card itself go live.
+  if (navigate && navigateToPath) {
     navigateToPath(`/session/${sId}/client/${activeSession.activeClientId}`);
   }
 }

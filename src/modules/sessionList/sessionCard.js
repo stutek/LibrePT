@@ -3,10 +3,15 @@
 // launches the clipboard). Dependencies are injected by the caller (renderSessions in app.js)
 // so this component stays decoupled from app.js internals and is easy to relocate/test.
 //
-// deps: { state, t, escapeHTML, launchClipboardDirectly, sessionDayTemporal, activeId,
-//         saveToLocalStorage, rerenderSessions }
+// deps: { state, t, escapeHTML, launchClipboardDirectly, startSessionFromCard, sessionDayTemporal,
+//         activeId, saveToLocalStorage, rerenderSessions }
 
-import { formatDurationHM, parseDurationHM, parseTimeRange } from "../common/utils.js";
+import {
+  formatDurationHM,
+  formatDurationHourMin,
+  parseDurationHM,
+  parseTimeRange,
+} from "../common/utils.js";
 import { getSessionDayDate } from "./sessionTimeline.js";
 
 // A single interval ticks every clock-driven status line that isn't the launched clipboard's own
@@ -20,7 +25,7 @@ function ensureCardTicker() {
   cardTicker = setInterval(() => {
     for (const el of document.querySelectorAll(".session-live-timer[data-end]")) {
       const remSec = Math.round((parseInt(el.dataset.end, 10) - Date.now()) / 1000);
-      el.textContent = formatDurationHM(remSec);
+      el.textContent = formatDurationHourMin(remSec);
       if (el.dataset.overtimeAware) {
         const over = remSec < 0;
         el.classList.toggle("overtime", over);
@@ -88,11 +93,11 @@ export function renderSessionCard(b, colContainer, deps) {
   // The temporal class tints the title to match the day-selection line (past/future).
   const temporal = sessionDayTemporal(b.day);
   card.className = `session-card card glassmorphic${temporal !== "today" ? ` session-${temporal}` : ""}`;
-  // A card is marked "Active session" when it's the launched clipboard session (matched by the
-  // source session id(s) it launched from) OR a session that has started by wall-clock today and
-  // isn't closed. Every applicable card is marked, so overlapping sessions all show as ongoing.
-  // Once a non-closed session runs past its end (negative remaining), the marker turns a warning
-  // colour.
+  // A card is marked "Active session" only once the trainer has explicitly started it (matched by
+  // the launched clipboard's source session id(s) AND activeSession.started) — reaching the
+  // scheduled time by wall-clock alone is NOT enough (see isDue below). Every applicable card is
+  // marked, so overlapping sessions all show as ongoing. Once a non-closed session runs past its
+  // end (negative remaining), the marker turns a warning colour.
   const activeSession = deps.getActiveSession ? deps.getActiveSession() : null;
   const ss = activeSession?.sourceSession;
   const isLaunched =
@@ -105,8 +110,13 @@ export function renderSessionCard(b, colContainer, deps) {
       (ss && Array.isArray(ss.ids) && ss.ids.includes(b.id)));
   const range = parseTimeRange(b.time);
   const nowMin = new Date().getHours() * 60 + new Date().getMinutes();
-  const isNow = !b.completed && b.day === "today" && !!range && nowMin >= range.start;
-  const isLive = isLaunched || isNow;
+  // Reaching the scheduled start by wall-clock is NOT the same as the trainer having actually
+  // started the session — beginWorkoutSession() requires an explicit tap (see
+  // test_session_status_line.py: "opening the clipboard only stages the session"). A due-but-
+  // unstarted session must not read as already in progress, so isLive only follows isLaunched;
+  // isDue instead drives a Start button (below) so the trainer's tap is what flips it live.
+  const isDue = !b.completed && b.day === "today" && !!range && nowMin >= range.start;
+  const isLive = isLaunched;
   if (isLive) card.classList.add("session-live");
 
   // Hover feedback style
@@ -180,12 +190,12 @@ export function renderSessionCard(b, colContainer, deps) {
       : null;
   const isUpcoming = startMs != null && startMs > Date.now();
 
-  // Status-line timer text. Three mutually exclusive drivers, all rendered HH:MM only (session-list
-  // status lines never show seconds):
+  // Status-line timer text. Two mutually exclusive clock-driven drivers, both rendered "01h 32m"
+  // (session-list status lines never show seconds); a due-but-unstarted session gets no timer at
+  // all here — it gets a Start button in the status bar below instead:
   //  - the launched clipboard's own timer (ticks elsewhere, via sessionBar)
-  //  - a clock-driven countdown to the scheduled END (in progress, not launched) — the only one
-  //    that ever goes "overtime"
-  //  - a clock-driven countdown to the scheduled START (not yet begun)
+  //  - a clock-driven countdown to the scheduled START (not yet begun) — can go negative if the
+  //    wall clock crosses the start time before the next full re-render flips the card to isDue
   let timerText = "";
   let timerIsOvertime = false;
   let timerLive = false; // driven by the launched clipboard timer
@@ -196,27 +206,21 @@ export function renderSessionCard(b, colContainer, deps) {
     const endDate = activeSession.sourceSession?.endDate;
     if (endDate) {
       const remainingSec = Math.round((new Date(endDate).getTime() - Date.now()) / 1000);
-      timerText = formatDurationHM(remainingSec);
+      timerText = formatDurationHourMin(remainingSec);
       timerIsOvertime = remainingSec < 0;
     } else {
-      timerText = formatDurationHM(activeSession.duration || 0);
+      timerText = formatDurationHourMin(activeSession.duration || 0);
     }
-  } else if (isNow && range) {
-    const end = new Date();
-    end.setHours(0, 0, 0, 0);
-    end.setMinutes(range.end);
-    timerEndMs = end.getTime();
-    timerOvertimeAware = true;
-    const remSec = Math.round((timerEndMs - Date.now()) / 1000);
-    timerText = formatDurationHM(remSec);
-    timerIsOvertime = remSec < 0;
   } else if (isUpcoming) {
     timerEndMs = startMs;
-    timerText = formatDurationHM(Math.round((startMs - Date.now()) / 1000));
+    timerOvertimeAware = true;
+    const remSec = Math.round((startMs - Date.now()) / 1000);
+    timerText = formatDurationHourMin(remSec);
+    timerIsOvertime = remSec < 0;
   }
 
   info.innerHTML = `
-    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 3px;">
+    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 2px;">
       <span class="badge badge-primary" style="font-size: 10px; padding: 2px 6px; font-weight: 700; font-family: monospace;">${escapeHTML(b.time)}</span>
       <strong class="session-card-title" style="font-size: 13px;">${escapeHTML(b.title)}</strong>
       ${completedBadge}
@@ -224,12 +228,11 @@ export function renderSessionCard(b, colContainer, deps) {
         <i class="fa-solid fa-pen-to-square"></i>
       </button>
     </div>
-    <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 2px;">
-      <i class="fa-solid fa-users" style="margin-right: 4px; font-size: 10px;"></i> ${clientNamesStr || `<span style="color: #ef4444;">—</span>`}
-      <span style="margin-left: 4px; color: var(--primary); font-weight: 600;">(${clients.length}/${b.maxCapacity} ${t("spots_filled")})</span>
-    </div>
-    <div style="font-size: 11px; color: var(--text-muted);">
-      <i class="fa-solid fa-clipboard-list" style="margin-right: 4px; font-size: 10px;"></i> Program: <span class="font-semibold">${routineName ? escapeHTML(routineName) : `<span style="color: #ef4444; font-weight: 600;">${t("undefined")}</span>`}</span>
+    <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 11px; color: var(--text-muted); line-height: 1.4;">
+      <span><i class="fa-solid fa-users" style="margin-right: 4px; font-size: 10px;"></i>${clientNamesStr || `<span style="color: #ef4444;">—</span>`}
+      <span style="color: var(--primary); font-weight: 600;">(${clients.length}/${b.maxCapacity} ${t("spots_filled")})</span></span>
+      <span style="opacity: 0.45;">&bull;</span>
+      <span><i class="fa-solid fa-clipboard-list" style="margin-right: 4px; font-size: 10px;"></i>${routineName ? escapeHTML(routineName) : `<span style="color: #ef4444; font-weight: 600;">${t("undefined")}</span>`}</span>
     </div>
     ${warningHTML}
   `;
@@ -273,10 +276,20 @@ export function renderSessionCard(b, colContainer, deps) {
       <span class="session-live-tag"><i class="fa-solid fa-clock-rotate-left"></i> ${escapeHTML(t("elapsed") || "Elapsed")}</span>
       <span class="session-live-timer session-status-value" title="${escapeHTML(t("edit_elapsed_time") || "Edit elapsed time")}">${escapeHTML(formatDurationHM(pastElapsedSeconds))}</span>
     </div>`;
+  } else if (isDue) {
+    // Scheduled time has arrived but nobody has tapped Start yet — a countdown here would read as
+    // "already running" when it isn't. Offer the explicit action instead; wired below, it starts
+    // the session in place without navigating away from the dashboard.
+    card.classList.add("session-status-stack");
+    statusBarHTML = `
+    <div class="session-live-bar due">
+      <span class="session-live-tag"><i class="fa-solid fa-circle-play"></i> ${escapeHTML(t("ready_to_start") || "Ready to start")}</span>
+      <button type="button" class="session-card-start-btn">${escapeHTML(t("start_now") || "Start")}</button>
+    </div>`;
   } else if (isUpcoming) {
     card.classList.add("session-status-stack");
     statusBarHTML = `
-    <div class="session-live-bar upcoming">
+    <div class="session-live-bar upcoming${timerIsOvertime ? " overtime" : ""}">
       <span class="session-live-tag"><i class="fa-solid fa-forward-fast"></i> ${escapeHTML(t("starts_in") || "Starts in")}</span>
       ${timerSpan}
     </div>`;
@@ -284,7 +297,8 @@ export function renderSessionCard(b, colContainer, deps) {
   if (timerEndMs != null) ensureCardTicker();
 
   // No launch/completed button: the whole card is the tap target, and completion already shows
-  // as a badge — the button just duplicated that and ate horizontal space.
+  // as a badge — the button just duplicated that and ate horizontal space. The Start button (isDue
+  // only) is the one deliberate exception, wired separately below with its own stopPropagation.
   card.addEventListener("click", () => {
     launchClipboardDirectly(b.id);
   });
@@ -296,5 +310,15 @@ export function renderSessionCard(b, colContainer, deps) {
   if (pastElapsedSeconds != null) {
     const valueEl = card.querySelector(".session-status-value");
     if (valueEl) wireElapsedEdit(valueEl, b, deps);
+  }
+
+  if (isDue) {
+    const startBtn = card.querySelector(".session-card-start-btn");
+    if (startBtn) {
+      startBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        deps.startSessionFromCard?.(b.id);
+      });
+    }
   }
 }

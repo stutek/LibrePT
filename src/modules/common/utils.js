@@ -81,6 +81,18 @@ export function formatDurationHM(totalSeconds) {
   return `${negative ? "-" : ""}${String(hrs).padStart(2, "0")}:${String(mins).padStart(2, "0")}`;
 }
 
+// Countdown/status-line duration in "01h 32m" form — sessionCard.js's live and starts-in timers,
+// and sessionBar.js's mirrored dashboard-card chip (the same element). Distinct from
+// formatDurationHM: that one is reserved for the past-session elapsed-time field, which is also a
+// trainer-editable "HH:MM" input (parseDurationHM's inverse) and must keep that exact shape.
+export function formatDurationHourMin(totalSeconds) {
+  const negative = totalSeconds < 0;
+  const totalMin = Math.floor(Math.abs(totalSeconds) / 60);
+  const hrs = Math.floor(totalMin / 60);
+  const mins = totalMin % 60;
+  return `${negative ? "-" : ""}${String(hrs).padStart(2, "0")}h ${String(mins).padStart(2, "0")}m`;
+}
+
 // Inverse of formatDurationHM, for reading back a trainer-edited "HH:MM" elapsed-time value.
 // Returns null (not 0) for unparseable input so a bad edit can be rejected rather than silently
 // zeroing the recorded duration.

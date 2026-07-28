@@ -3,6 +3,7 @@
 // and manages global lifecycle hooks.
 
 import {
+  beginWorkoutSession,
   cancelWorkoutSession as cancelWorkoutSessionController,
   enforceQuickSignalExclusivity,
   focusExerciseByIndex,
@@ -118,7 +119,7 @@ import {
   formatClockFromMinutes,
   formatDateStr,
   formatDuration,
-  formatDurationHM,
+  formatDurationHourMin,
   formatSignedDuration,
   getClientDisplayNameHTML,
   getISODateForColumn,
@@ -396,7 +397,7 @@ function init() {
     t,
     formatSignedDuration,
     formatDuration,
-    formatDurationHM,
+    formatDurationHourMin,
     parseTimeRange,
     getOverlappingSessions,
     buildSessionMeta,
@@ -544,22 +545,27 @@ function populateDropdownSelectors() {
   populateDropdownsController({ state: getState(), t });
 }
 
-function startWorkoutSession(clientRoutines, sessionMeta = null) {
-  startWorkoutSessionController(clientRoutines, sessionMeta, {
-    state: getState(),
-    newRecordId,
-    navigateToPath,
-    toRoute,
-    replaceRoute,
-    resolveRoute,
-    activeRouteName,
-    activeRouteIsDialog,
-    urlFor,
-    focusSessionsColumn,
-    launchClipboardDirectly,
-    renderIdleSessionBar,
-    saveToLocalStorage: saveState,
-  });
+function startWorkoutSession(clientRoutines, sessionMeta = null, options = {}) {
+  startWorkoutSessionController(
+    clientRoutines,
+    sessionMeta,
+    {
+      state: getState(),
+      newRecordId,
+      navigateToPath,
+      toRoute,
+      replaceRoute,
+      resolveRoute,
+      activeRouteName,
+      activeRouteIsDialog,
+      urlFor,
+      focusSessionsColumn,
+      launchClipboardDirectly,
+      renderIdleSessionBar,
+      saveToLocalStorage: saveState,
+    },
+    options,
+  );
   renderSessions();
 }
 
@@ -642,9 +648,17 @@ function renderActiveGroupBoard() {
   });
 }
 
-function launchClipboardDirectly(arg) {
+function launchClipboardDirectly(arg, options = {}) {
   const sessionId = arg && typeof arg === "object" ? arg.sessionId : arg;
-  sessionsViewLaunchClipboard({ sessionId, state: getState(), startWorkoutSession });
+  sessionsViewLaunchClipboard({ sessionId, state: getState(), startWorkoutSession }, options);
+}
+
+// Dashboard "Start" button (sessionCard.js, isDue state): stages the session AND immediately marks
+// it started, without navigating to the clipboard overlay — the trainer stays on the dashboard and
+// the card itself flips from the Start button to the live countdown-to-end.
+function startSessionFromCard(sessionId) {
+  launchClipboardDirectly(sessionId, { navigate: false });
+  beginWorkoutSession();
 }
 
 function setupCalendarSessions() {
@@ -662,6 +676,7 @@ function renderSessions() {
     t,
     getActiveSession,
     launchClipboardDirectly,
+    startSessionFromCard,
     saveToLocalStorage: saveState,
     rerenderSessions: renderSessions,
     navigateToPath,

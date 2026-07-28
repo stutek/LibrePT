@@ -33,10 +33,13 @@ export function renderActiveUsersList(tabsContainer, activeSession, ctx) {
     tab.className = `client-tab-btn ${isActive ? "active" : ""}`;
 
     // Selected tab: uses unified primary gradient with on-primary text for clear, vibrant emphasis.
+    // Horizontal padding/gap trimmed from 20px/8px so more tabs fit per row (fewer wrapped rows =
+    // less vertical space for a large group session) — minHeight stays at 44px, a real tap target
+    // (AGENT_RULES §2.D.1), so this saves width, not the one dimension that must not shrink.
     tab.style.display = "flex";
     tab.style.alignItems = "center";
-    tab.style.gap = "8px";
-    tab.style.padding = "10px 20px";
+    tab.style.gap = "6px";
+    tab.style.padding = "8px 16px";
     tab.style.borderRadius = "24px";
     tab.style.border = isActive ? "1px solid transparent" : "1px solid var(--border-color)";
     tab.style.background = isActive ? "var(--primary-gradient)" : "rgba(255,255,255,0.05)";

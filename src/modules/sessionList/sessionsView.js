@@ -148,7 +148,7 @@ export function seedDemoActiveSession({ state }) {
   localStorage.setItem("librept_active_session", JSON.stringify(session));
 }
 
-export function launchClipboardDirectly({ sessionId, state, startWorkoutSession }) {
+export function launchClipboardDirectly({ sessionId, state, startWorkoutSession }, options = {}) {
   const sessions = state.sessions || [];
   const session = sessions.find((s) => s.id === sessionId);
   if (!session) return;
@@ -178,6 +178,7 @@ export function launchClipboardDirectly({ sessionId, state, startWorkoutSession 
   startWorkoutSession(
     clientRoutines,
     buildSessionMeta(overlappingSessions, session.day, getSessionDayDate),
+    options,
   );
 }
 
@@ -248,6 +249,7 @@ export function renderSessions({
   t,
   getActiveSession,
   launchClipboardDirectly,
+  startSessionFromCard,
   saveToLocalStorage,
   rerenderSessions,
   navigateToPath,
@@ -267,6 +269,7 @@ export function renderSessions({
     t,
     escapeHTML,
     launchClipboardDirectly: (sessionId) => launchClipboardDirectly(sessionId),
+    startSessionFromCard: (sessionId) => startSessionFromCard?.(sessionId),
     sessionDayTemporal,
     activeId: activeSession ? activeSession.id : null,
     getActiveSession,

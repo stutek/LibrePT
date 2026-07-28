@@ -10,8 +10,10 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
+  gap: 6px;
+  /* Trimmed from 10px/16px top+bottom — the bar's own padding, not the 44px tap target on each
+     .client-tab-btn (kept intact, AGENT_RULES §2.D.1: real touch targets, never shrunk for density). */
+  padding: 6px 16px;
 }
 .client-tab-btn {
   flex: 0 0 auto;
