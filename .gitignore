@@ -9,6 +9,7 @@ Thumbs.db
 *.swo
 
 # Cache and local databases
+.claude/
 .gemini/
 .agents/
 *.log

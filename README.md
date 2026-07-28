@@ -77,7 +77,7 @@ To land back on demo data instead of an empty app after clearing, reopen with `?
 
 ## 🧪 Development & Testing
 
-The test suite runs static structure checks (`tests/test_app.py`) plus a Playwright end-to-end gym-floor flow (`tests/test_browser.py`) that drives a real Chromium browser against a local server.
+The test suite runs static structure checks (`tests/test_app.py`) plus Playwright end-to-end suites (`tests/e2e/`) that drive a real Chromium browser against a local server.
 
 ```bash
 # One-time environment setup

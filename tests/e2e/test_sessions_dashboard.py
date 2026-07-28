@@ -7,6 +7,62 @@
 import datetime
 
 
+# Boot re-renders the timeline more than once (recovering an active session, notifications, the
+# seeded demo data), and EVERY render re-settles the scroll to `focusedSessionDate` — so a test
+# that starts scrolling before the last boot render's settle has run gets its own scroll silently
+# overwritten by a later one arriving mid-flight. The focused date already reads "today" from the
+# very first render (it is that variable's initial value), so waiting on the URL alone proves
+# nothing about whether boot is still churning underneath it — that URL can already be "correct"
+# while a later render is still queued to yank the scroll back to it out from under a real user (or
+# test) action. `sessionTimeline.js` stamps a generation number on #sessions-categories-grid each
+# time it schedules a settle and a matching `settled` marker once that settle actually runs; waiting
+# for the generation to stop advancing is a genuine quiescence signal, not a guessed duration.
+#
+# `polling=100` (an interval, not the `wait_for_function` default of `"raf"`) is deliberate on every
+# wait in this file: once a rAF-driven poll resolves, headless Chromium can stop producing new
+# compositor frames until something else asks for one — and a bare `scrollTop` write doesn't
+# reliably ask. That silently starves this page's own IntersectionObserver-driven scrollspy, so a
+# scroll performed right after a rAF-polled wait can sit forever without the URL ever updating
+# (confirmed by direct repro: identical scroll, only the polling mode of the preceding wait
+# differed). An interval poll doesn't create that dependency.
+def _wait_for_timeline_settled(page):
+    page.evaluate(
+        "() => { window.__lastSettleGen = -1; window.__settleStableTicks = 0; }"
+    )
+    page.wait_for_function(
+        """() => {
+          const grid = document.getElementById('sessions-categories-grid');
+          if (!grid) return false;
+          const gen = Number(grid.dataset.settleGen || 0);
+          const settled = Number(grid.dataset.settled || 0) === gen;
+          if (gen === window.__lastSettleGen && settled) {
+            window.__settleStableTicks++;
+          } else {
+            window.__lastSettleGen = gen;
+            window.__settleStableTicks = 0;
+          }
+          return window.__settleStableTicks >= 5;
+        }""",
+        polling=100,
+    )
+
+
+def _wait_for_focused_date(page, iso_date):
+    page.wait_for_function(
+        "(iso) => location.pathname.replace(/\\/$/, '').endsWith(iso)",
+        arg=iso_date,
+        polling=100,
+    )
+
+
+def _wait_for_focused_date_to_change_from(page, iso_date):
+    page.wait_for_function(
+        "(iso) => !location.pathname.replace(/\\/$/, '').endsWith(iso)",
+        arg=iso_date,
+        polling=100,
+    )
+
+
 def test_sessions_day_navigation(page, local_server):
     """
     Verifies the dashboard opens focused on today (reflected in the URL, since `/` redirects to
@@ -18,6 +74,14 @@ def test_sessions_day_navigation(page, local_server):
     """
     page.goto(local_server)
     page.wait_for_selector(".sessions-day-group")
+    # Guards against the boot-settle race fixed in sessionTimeline.js/sessionRoutes.js
+    # (scheduleTimelineSettle) — belt-and-braces alongside the fixed-delay waits below, which this
+    # test keeps: several `wait_for_function` polls back-to-back in this specific multi-hop
+    # scroll-then-navigate-then-scroll-again sequence were empirically LESS reliable here than a
+    # plain wait, for reasons that traced back into headless Chromium's own frame-production
+    # scheduling rather than anything under this app's control (see test_sessions_dashboard.py's
+    # sibling tests, which use the polling form successfully for their simpler single-scroll cases).
+    _wait_for_timeline_settled(page)
     today = datetime.date.today()
     today_iso = today.strftime("%Y-%m-%d")
 
@@ -73,20 +137,13 @@ def test_scrolling_the_timeline_updates_the_focused_day(page, local_server):
     title bar no longer renders it as text."""
     page.goto(local_server)
     page.wait_for_selector(".sessions-day-group")
-    # Boot re-renders the timeline more than once (recovering an active session, notifications,
-    # etc.), and each render re-arms a brief "ignore scroll during a programmatic settle" guard
-    # (sessionTimeline.js) so the focused date doesn't flicker mid-scrollIntoView. Give every
-    # boot-time render's guard window a chance to expire before driving a scroll of our own.
-    page.wait_for_timeout(1200)
+    _wait_for_timeline_settled(page)
 
     today_iso = datetime.date.today().strftime("%Y-%m-%d")
-    assert page.url.rstrip("/").endswith(today_iso)
+    _wait_for_focused_date(page, today_iso)
 
     page.evaluate("() => { document.getElementById('main-content').scrollTop += 900; }")
-    page.wait_for_timeout(1000)
-    assert not page.url.rstrip("/").endswith(today_iso), (
-        "scrolling the timeline must move the focused day-group off today"
-    )
+    _wait_for_focused_date_to_change_from(page, today_iso)
 
 
 def test_date_jump_control_scrolls_to_chosen_date(page, local_server):
@@ -96,22 +153,19 @@ def test_date_jump_control_scrolls_to_chosen_date(page, local_server):
     still rendered) input directly and fires `change` — exactly what a real picker selection does."""
     page.goto(local_server)
     page.wait_for_selector(".sessions-day-group")
-    page.wait_for_timeout(1200)
+    _wait_for_timeline_settled(page)
 
     today = datetime.date.today()
     today_iso = today.strftime("%Y-%m-%d")
-    assert page.url.rstrip("/").endswith(today_iso)
+    _wait_for_focused_date(page, today_iso)
 
     far_future = (today + datetime.timedelta(days=3)).strftime("%Y-%m-%d")
     page.locator("#sessions-date-jump-input").fill(far_future)
     page.locator("#sessions-date-jump-input").dispatch_event("change")
-    page.wait_for_timeout(900)
 
     # The seed data has nothing exactly 3 days out, so this also proves the "nearest date forward,
     # else the latest loaded" fallback (focusSessionsColumn) lands on real content, not nowhere.
-    assert not page.url.rstrip("/").endswith(today_iso), (
-        "jumping 3 days out must move the focused date off today"
-    )
+    _wait_for_focused_date_to_change_from(page, today_iso)
 
 
 def test_continuous_vertical_timeline_at_every_viewport(page, local_server):
@@ -133,7 +187,7 @@ def test_continuous_vertical_timeline_at_every_viewport(page, local_server):
         page.set_viewport_size({"width": width, "height": height})
         page.goto(local_server)
         page.wait_for_selector(".sessions-day-group")
-        page.wait_for_timeout(300)
+        page.wait_for_function(f"() => ({check})().count > 1", polling=100)
         result = page.evaluate(check)
         assert result["count"] > 1, "the seed data spans multiple days"
         assert result["singleColumn"], (

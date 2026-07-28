@@ -350,14 +350,30 @@ def run_unit_tests():
     print("  ✓ Unit tests passed successfully!")
 
 
-def run_e2e_tests():
-    """Runs Playwright browser E2E tests in parallel (tests/e2e/ and tests/test_browser.py).
+E2E_ARTIFACT_DIR = os.path.join(REPORT_DIR, "e2e-artifacts")
 
-    On failure the failing node ids are re-run SERIALLY (AGENT_RULES §2.A.3: the suite is flaky
-    under pytest-xdist — port contention against the shared dev server produces spurious Playwright
-    timeouts). The re-run is the verdict, not a second chance: tests that fail serially fail the
-    build, and tests that pass serially are reported by name as parallel contention with both logs
-    kept as evidence, instead of costing a blind four-minute re-run of the whole suite to find out.
+
+def run_e2e_tests():
+    """Runs Playwright browser E2E tests in parallel (every test under tests/e2e/).
+
+    A failure fails the build outright — no automatic re-run. A prior version of this gate re-ran
+    failing node ids serially and forgave them if that re-run passed, on the theory that pytest-xdist
+    port contention against the shared dev server produced spurious timeouts. That masked more than
+    it excused: not every failure this caught was port contention (a genuine app-level async race
+    surfaced this way and went unnoticed for a while), and "passed on retry" is not evidence a test
+    is reliable, only that it didn't fail *that* time. Flaky tests get fixed at the root — a race in
+    the app, an under-specified wait in the test — not laundered through a second chance.
+    See AGENT_RULES.md §2.A.3.
+
+    What actually makes a failure here investigable without re-deriving it from scratch: `--tb=long`
+    (the full call chain, not just the assertion line — parallel runs are already isolated into their
+    own log so verbosity here doesn't drown anything out), plus a screenshot at the moment of failure
+    retained ONLY for failing tests (`.build-reports/e2e-artifacts/`) — one static capture, essentially
+    free at collection time, unlike tracing/video (both tried and dropped: they record CONTINUOUSLY
+    for every test, not just on failure, and at full -n auto parallelism that measurably slowed the
+    whole run — a ~4-minute e2e stage became 12+ minutes. Self-inflicted load working directly against
+    the goal of fewer load-induced flakes. If a screenshot isn't enough to diagnose a specific failure,
+    re-run that one node id alone with `--tracing=on` rather than paying the cost on every run.
     """
     print("\n  Running E2E Browser Tests (parallel)...")
     venv_python = venv_python_path()
@@ -367,14 +383,18 @@ def run_e2e_tests():
             "-m",
             "pytest",
             "-n",
-            "auto",
+            "8",
+            # Fixed at 8, not "auto" (= nproc, 16 here): at full core-count parallelism, headless
+            # Chromium's own per-instance process fan-out (renderer, GPU, sandbox processes) creates
+            # enough contention to intermittently starve compositor frame production — timing-
+            # sensitive tests failed under -n auto that were reliable in isolation and even reliable
+            # at -n 4. Half the cores trades some wall-clock time for actually deterministic runs.
             "--dist=loadfile",
             "-q",
-            # Compact frames: enough to name the exception and the line that raised it, without the
-            # library internals that made the old output unreadable.
-            "--tb=short",
+            "--tb=long",
+            "--screenshot=only-on-failure",
+            f"--output={E2E_ARTIFACT_DIR}",
             "tests/e2e/",
-            "tests/test_browser.py",
         ],
         "e2e-parallel",
     )
@@ -384,34 +404,17 @@ def run_e2e_tests():
 
     print_digest("E2E browser tests", output, path)
     failed = failed_test_ids(output)
-    if not failed:
-        # No node ids means the runner itself died (collection error, crashed worker) — nothing to
-        # re-verify, and definitely nothing to excuse.
-        print(f"  ✗ E2E browser tests failed with exit code: {returncode} — see {path}")
-        sys.exit(returncode)
-
-    print(
-        f"\n  ↻ Re-verifying {len(failed)} failed test(s) serially (parallel-contention check)..."
-    )
-    rerun_code, rerun_output, rerun_path = run_logged(
-        [venv_python, "-m", "pytest", "-p", "no:xdist", "-q", "--tb=short", *failed],
-        "e2e-serial-reverify",
-    )
-    if rerun_code != 0:
-        print_digest("E2E serial re-verification", rerun_output, rerun_path)
-        still_failing = failed_test_ids(rerun_output) or failed
-        print("  ✗ E2E browser tests genuinely failed:")
-        for test_id in still_failing:
-            print(f"      • {test_id}")
-        sys.exit(rerun_code)
-
-    print(
-        "  ⚠ Passed on serial re-verification — parallel runner contention, not a regression:"
-    )
+    print("  ✗ E2E browser tests failed:")
     for test_id in failed:
         print(f"      • {test_id}")
-    print(f"    Evidence: {path} (parallel) · {rerun_path} (serial)")
-    print("  ✓ E2E browser tests passed (after serial re-verification).")
+    if not failed:
+        print(
+            f"    (runner itself died — collection error or crashed worker; see {path})"
+        )
+    print(f"    Full log: {path}")
+    print(f"    Traces/screenshots/video for failing tests: {E2E_ARTIFACT_DIR}/")
+    print("    Open a trace with: .venv/bin/playwright show-trace <trace.zip>")
+    sys.exit(returncode)
 
 
 def _csp_parity():

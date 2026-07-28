@@ -253,8 +253,8 @@ Fold the full-screen active-session overlay (`#active-session-overlay`) into a n
 ### 12.3 [~] Test completeness
 Broaden coverage: themes, the Sync & Backup modal + counters, the header menu + first-run agreement (10.x), and the not-found view are all covered now; the demo walkthrough (9.x) will need its own tests. Confirm every extracted component has at least one exercised path.
 
-- **Done**: `tests/e2e/` suites for themes, the Sync & Backup badge + modal, the ☰ header menu, the first-run terms agreement, the plan-adjustments deck + Apply wizard, and the Client Directory grid + live search.
-- **Still open**: the demo walkthrough (9.x) isn't built yet, so it has no tests; and a couple of components (e.g. voice-note capture inside the clipboard) are still only exercised by the legacy `tests/test_browser.py` rather than a focused `tests/e2e/` suite.
+- **Done**: `tests/e2e/` suites for themes, the Sync & Backup badge + modal, the ☰ header menu, the first-run terms agreement, the plan-adjustments deck + Apply wizard, and the Client Directory grid + live search. The legacy `tests/test_browser.py` is gone: its three sessions-dashboard tests were stale duplicates of the maintained `tests/e2e/test_sessions_dashboard.py` versions (dropped) and its gym-floor smoke flow (voice-note capture included) moved to `tests/e2e/test_gym_floor_flow.py`.
+- **Still open**: the demo walkthrough (9.x) isn't built yet, so it has no tests.
 
 ### 12.5 [ ] Local git housekeeping (trademark refs)
 The trademark was scrubbed from history and force-pushed (remote is clean). Still pending **locally**: expire the reflog and `git gc --prune=now` the old pre-rewrite objects (`refs/original/…` and any leftover backup branch) so the old blobs are purged from the local clone.

@@ -70,8 +70,7 @@ Or run the test suite directly:
 | :--- | :--- |
 | [tests/test_app.py](tests/test_app.py) | Static integrity: file structure, manifest icons, `staticMappings` selectors resolving against `index.html`, and seed data structure. |
 | [tests/unit/](tests/unit/) | Non-browser structural checks: EN/SL translation key parity (`test_i18n_parity.py`), DOM id/selector mappings (`test_dom_mappings.py`), and project layout (`test_project_layout.py`). |
-| [tests/test_browser.py](tests/test_browser.py) | Playwright end-to-end flows in real Chromium: sessions day navigation, touch swipes between days, single-column deck at every viewport, and the interactive dashboard flow. |
-| [tests/e2e/](tests/e2e/) | Playwright deep-flow suites: the sessions dashboard, clipboard launch, session deep-link routing, and the not-found/error view. |
+| [tests/e2e/](tests/e2e/) | Playwright end-to-end suites in real Chromium: the sessions dashboard, clipboard launch, session deep-link routing, the gym-floor smoke flow, and the not-found/error view. |
 
 The verify → build → deploy chain lives in the `build/` and `deploy/` packages, each runnable on its own and debuggable:
 

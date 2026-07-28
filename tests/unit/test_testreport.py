@@ -1,8 +1,8 @@
 # tests/unit/test_testreport.py
 # The build gate's failure digest (build/testreport.py). Its whole purpose is that a red build
 # explains itself on screen: WHICH tests failed and WHY, without opening a log. These pin the two
-# extractions that carry that — the failing node ids (which drive the serial contention re-check)
-# and the compact traceback (which is the part that used to cost a grep round trip).
+# extractions that carry that — the failing node ids (printed by name so nothing needs a log to
+# name what broke) and the compact traceback (which is the part that used to cost a grep round trip).
 
 from build.testreport import SUMMARY_MARKER, failed_test_ids, failure_traceback
 
