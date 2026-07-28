@@ -339,18 +339,21 @@ export function renderSessions({
     // last group has no successor to preview and gets no footer at all — there is nothing left to
     // scroll toward.
     //
-    // A group whose own cards all fit on one screen has its header AND its successor's header both
-    // visible together already (short groups sit close enough that scrolling a little already
-    // shows what's next) — the footer would just print that same next-day name a second time with
-    // nothing to distinguish a genuine preview from a duplicate. It only earns its place once
-    // scrolling through THIS group's own cards would otherwise leave the trainer with no clue what
-    // is coming up; measured after render, since a group's real height isn't known before its cards
-    // are in the DOM.
-    const viewportHeight = document.getElementById("main-content")?.clientHeight || 0;
+    // Deliberately NOT pruned by "does this group's own height already exceed the viewport": that
+    // was measured via offsetHeight right here at render time, which reads 0 for every element
+    // whose ancestor .app-view isn't .active yet — true mid-navigation (e.g. creating a session
+    // navigates straight into its clipboard, then back out to the dashboard, calling
+    // renderSessions() while the view is still transitioning). A too-short group measured that way
+    // got its footer permanently removed even though its real, laid-out height was well over the
+    // viewport — the bug this comment used to rationalize away. observeGroupFooterVisibility
+    // (sessionTimeline.js) already hides a footer whenever its previewed day's own header is
+    // genuinely on screen, which is the actual "would this be redundant" question — a group short
+    // enough that its successor's header is already visible gets exactly the same suppressed
+    // result, just decided dynamically against real layout instead of a fragile one-shot measurement.
     for (let i = 0; i < groupMeta.length; i++) {
-      const { group, footer } = groupMeta[i];
+      const { footer } = groupMeta[i];
       const next = groupMeta[i + 1];
-      if (!next || group.offsetHeight <= viewportHeight) {
+      if (!next) {
         footer.remove();
         continue;
       }
