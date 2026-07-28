@@ -28,6 +28,9 @@
 import { metricLabelKey, usesLoad } from "../common/exerciseModality.js";
 import { newRecordId } from "../common/recordId.js";
 import {
+  formatLoad,
+  formatReps,
+  hasLoad,
   loadFieldMeta,
   loadInputHTML,
   parseLoad,
@@ -66,6 +69,22 @@ export function renderClipboardEditor(container, deps) {
   // id would be both collision-prone and time-leaking, and it would be the one place in the app
   // minting ids the rest of the system does not recognise (TODO §18.2).
   const newId = () => (genId ? genId() : newRecordId());
+
+  // A long plan means every row's full editable field set (name, sets, reps, load, circuit picker)
+  // all rendered at once — genuinely crowded. Every row starts collapsed to a one-line summary (name
+  // + compact target, same shorthand the live deck's own collapsed cards use) and expands on tap.
+  // Kept on activeClientState (not module state) so it's naturally scoped per client: a client whose
+  // plan has never been opened in the editor has no entries here, so their rows start collapsed too —
+  // switching to them never dumps a wall of expanded fields from a different client's plan.
+  if (!activeClientState.editorExpanded) activeClientState.editorExpanded = {};
+  const expandedIds = activeClientState.editorExpanded;
+  const isRowExpanded = (it) => !!expandedIds[it.id];
+  const toggleRowExpanded = (it) => {
+    if (expandedIds[it.id]) delete expandedIds[it.id];
+    else expandedIds[it.id] = true;
+    save();
+    rerender();
+  };
 
   // Regroup so each circuit's members are contiguous before we render straight from the array.
   normalizeCircuits();
@@ -167,6 +186,38 @@ export function renderClipboardEditor(container, deps) {
           },
         )}</label>`
       : "";
+    // A row just inserted/swapped/restored (isCalledOut) always renders its fields expanded
+    // regardless of the collapsed default — the trainer either needs to type its name right now (a
+    // blank insert, the scroll+focus logic below targets .editor-row-name) or just picked it from
+    // the catalog and wants to see what landed, so collapsing it out from under them would be
+    // actively unhelpful. The name field, catalog button, reorder handle and remove button stay
+    // visible either way — only the bulkier sets/reps/load/circuit fields row toggles, so a
+    // collapsed row is still a full-fledged row (renamable, removable, reorderable, catalog-
+    // browsable) and not a stripped-down summary the trainer has to fight to act on.
+    const expanded = isRowExpanded(ex) || isCalledOut(ex);
+    let fieldsHTML;
+    if (expanded) {
+      fieldsHTML = `
+          <div class="editor-row-fields">
+            ${setsField}
+            <label class="editor-field"><span>${escapeHTML(primaryLabel)}</span><input type="text" list="${repsListId}" class="editor-f-reps" value="${reps}"></label>
+            ${loadField}
+            <label class="editor-field editor-field-circuit"><span><i class="fa-solid fa-layer-group"></i></span>${circuitSelect(ex)}</label>
+          </div>`;
+    } else {
+      const compactLoad =
+        usesLoad(modality) && hasLoad(ex.weightTarget ?? ex.weight, unit)
+          ? ` × ${escapeHTML(formatLoad(ex.weightTarget ?? ex.weight, unit))}`
+          : "";
+      const primaryPart =
+        metric === "reps"
+          ? `R${escapeHTML(formatReps(ex.repsTarget ?? ex.reps))}`
+          : escapeHTML(String(ex.repsTarget ?? ex.reps ?? ""));
+      const setsPart = ex.circuitId
+        ? ""
+        : `S${escapeHTML(String(ex.setsTargetCount ?? ex.sets ?? 3))} × `;
+      fieldsHTML = `<span class="editor-row-fields-summary">${setsPart}${primaryPart}${compactLoad}</span>`;
+    }
     return `
       <li class="editor-row${newMarkerClass(ex)}" data-rowkey="${idx}">
         ${reorderHandle()}
@@ -175,13 +226,9 @@ export function renderClipboardEditor(container, deps) {
             <input class="editor-row-name" type="text" list="${datalistId}" value="${name}" aria-label="${tr("exercise", "Exercise")}" placeholder="${tr("exercise", "Exercise")}">
             <button type="button" class="editor-row-catalog" aria-label="${tr("browse_catalog", "Browse exercise catalog")}" title="${tr("browse_catalog", "Browse exercise catalog")}"><i class="fa-solid fa-book-open"></i></button>
             ${newBadge(ex)}
+            <button type="button" class="editor-row-toggle" aria-expanded="${expanded}" aria-label="${expanded ? tr("collapse", "Collapse") : tr("expand", "Expand")}" title="${expanded ? tr("collapse", "Collapse") : tr("expand", "Expand")}"><i class="fa-solid fa-chevron-${expanded ? "up" : "down"}"></i></button>
           </div>
-          <div class="editor-row-fields">
-            ${setsField}
-            <label class="editor-field"><span>${escapeHTML(primaryLabel)}</span><input type="text" list="${repsListId}" class="editor-f-reps" value="${reps}"></label>
-            ${loadField}
-            <label class="editor-field editor-field-circuit"><span><i class="fa-solid fa-layer-group"></i></span>${circuitSelect(ex)}</label>
-          </div>
+          ${fieldsHTML}
         </div>
         <button type="button" class="editor-remove" aria-label="${tr("remove", "Remove")}"><i class="fa-solid fa-trash-can"></i></button>
       </li>`;
@@ -346,6 +393,12 @@ export function renderClipboardEditor(container, deps) {
     if (activeClientState.activeExerciseIndex >= items.length) {
       activeClientState.activeExerciseIndex = Math.max(0, items.length - 1);
     }
+    // Drop expand-state for rows that no longer exist (removed, or a swap gave them a new id) —
+    // same pruning pattern as circuitRounds above, so this map never grows unbounded across a long
+    // editing session.
+    for (const id of Object.keys(expandedIds)) {
+      if (!items.some((e) => e.id === id)) delete expandedIds[id];
+    }
   }
   const commit = () => {
     normalizeCircuits();
@@ -391,6 +444,16 @@ export function renderClipboardEditor(container, deps) {
   bindField(".editor-f-weight", (ex, v) => {
     ex.weightTarget = parseLoad(v);
   });
+
+  // ---------- fields collapse/expand: the chevron next to the name toggles that one row's
+  // sets/reps/load/circuit fields only, leaving every other row's state untouched. ----------
+  for (const btn of listEl.querySelectorAll(".editor-row-toggle")) {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const ex = items[rowKeyOf(btn.closest(".editor-row"))];
+      if (ex) toggleRowExpanded(ex);
+    });
+  }
 
   // --- 📖 per row: browse the taxonomy for THIS row and swap its movement in place ---
   // The datalist combobox only helps a PT who already knows the movement's name; the catalog button

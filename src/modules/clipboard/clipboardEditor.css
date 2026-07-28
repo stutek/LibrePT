@@ -115,6 +115,35 @@
   opacity: 0.6;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
+/* Row fields collapse: a long plan means every row's full sets/reps/load/circuit field set all
+   rendered at once is genuinely crowded, so that field row starts collapsed to a compact
+   "S3 × R10 × 60kg" summary (the same shorthand the live deck's own collapsed cards use) and
+   expands on tap — the name field, catalog button, reorder handle and remove button stay put
+   either way, so a collapsed row is still fully actionable, not a stripped-down placeholder. */
+.editor-row-fields-summary {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+.editor-row-toggle {
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--input-bg);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.editor-row-toggle:hover,
+.editor-row-toggle:focus-visible {
+  border-color: var(--primary);
+  color: var(--primary);
+}
 /* The row just inserted (from the live deck's +Exercise bar, an editor insert bar, or the catalog).
    Colour alone can't carry this on a sunlit gym floor, so the row also gets a thick accent edge and
    a literal "New" badge; the pulse only draws the eye on arrival and then settles. */
