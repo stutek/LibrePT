@@ -29,6 +29,10 @@ body.red-theme {
   --danger-light: rgba(251, 225, 34, 0.18);
   --success: #4ade80;
   --success-hover: #22c55e;
+  /* Overtime alert — an orange between the red primary and gold danger, not the plain amber other
+     themes default to: red already spends gold on --danger and --accent-cyan, so amber would read
+     as a third near-duplicate of the same hue instead of a distinct "caution" signal. */
+  --warning: #fb923c;
   /* Cool violet past / warm orange future — kept off the red primary and gold danger */
   --temporal-past: #c4b5fd;
   --temporal-future: #fdba74;

@@ -31,6 +31,11 @@ body.midnight-theme {
   --danger-light: rgba(239, 68, 68, 0.15);
   --success: #10b981;
   --success-hover: #059669;
+  /* Overtime alert (session ran past its scheduled end) — was a single hardcoded #f59e0b
+     everywhere via var()'s fallback, the one status color every other theme tunes but this one
+     didn't. Midnight already leaned on this exact amber for the timer-flash peak color above, so
+     it's the natural baseline every other theme's --warning is picked relative to. */
+  --warning: #f59e0b;
 
   /* Session temporal tint — violet past / amber future on the zinc field */
   --temporal-past: #c084fc;

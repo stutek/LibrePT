@@ -29,6 +29,9 @@ body.blossom-theme {
   --danger-light: rgba(225, 29, 72, 0.12);
   --success: #10b981;
   --success-hover: #059669;
+  /* Overtime alert — amber-600, the same light-bg legibility step daylight uses, deeper than the
+     plain amber-500 other (dark) themes default to. */
+  --warning: #d97706;
   /* Deep violet past / rose-coral future — legible on the light blush field, distinct from the
      pink primary; future was a muddy amber-brown that clashed with the soft pink/lavender palette. */
   --temporal-past: #9333ea;

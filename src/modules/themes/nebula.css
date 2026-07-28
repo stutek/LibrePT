@@ -31,6 +31,9 @@ body.nebula-theme {
   --danger-light: rgba(251, 113, 133, 0.16);
   --success: #34d399;
   --success-hover: #10b981;
+  /* Overtime alert — a deeper amber-500 than --temporal-future's pale amber-300 below, so an
+     active overrun reads as more urgent than a merely-upcoming countdown despite sharing the hue. */
+  --warning: #f59e0b;
   /* Light violet past / warm amber future — cool-vs-warm split reads against the indigo field */
   --temporal-past: #c4b5fd;
   --temporal-future: #fcd34d;

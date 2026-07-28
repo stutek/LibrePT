@@ -23,6 +23,9 @@ CORE_PALETTE_VARS = (
     "--danger-light",
     "--success",
     "--success-hover",
+    "--warning",
+    "--temporal-past",
+    "--temporal-future",
     "--bg-color",
     "--text-main",
 )
@@ -54,4 +57,23 @@ def test_every_theme_defines_the_core_palette(src_dir):
         missing = [v for v in CORE_PALETTE_VARS if v not in defined]
         assert not missing, (
             f"theme '{f.stem}' does not define {missing}; it would inherit midnight's :root default"
+        )
+
+
+def test_themes_define_the_same_variable_set(src_dir):
+    """CORE_PALETTE_VARS is a fixed, hand-maintained list — it only catches a gap once someone
+    remembers to add the var's name to it (twice already: --secondary's hover/light companions,
+    then --warning/--temporal-*). This test needs no maintenance: whichever theme was extended
+    most recently defines the reference set, and any other theme missing one of those vars — or
+    defining a var none of the others have, a typo'd name masquerading as a new one — fails
+    immediately, without anyone having to notice and update a list by hand."""
+    files = _theme_files(src_dir)
+    per_theme = {f.stem: _defined_vars(f) for f in files}
+    union = set().union(*per_theme.values())
+    for name, defined in per_theme.items():
+        missing = sorted(union - defined)
+        assert not missing, (
+            f"theme '{name}' is missing {missing}, defined by at least one other theme — "
+            "either add it here too or confirm it's genuinely meant to be theme-specific "
+            "and drop it from this parity check's expectations"
         )

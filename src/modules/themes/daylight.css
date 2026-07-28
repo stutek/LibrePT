@@ -35,6 +35,9 @@ body.daylight-theme {
   --danger-light: rgba(220, 38, 38, 0.12);
   --success: #059669; /* same emerald as --primary */
   --success-hover: #047857;
+  /* Overtime alert — amber-600, the same "-600 for light-bg legibility" step used above for
+     danger/primary rather than the plain amber-500 (#f59e0b) other themes default to. */
+  --warning: #d97706;
   /* Deeper violet so it stays legible on the light slate field. Future/upcoming reuses the theme's
      own blue accent (--secondary, defined above) instead of amber, per Simon's request. */
   --temporal-past: #7c3aed;
