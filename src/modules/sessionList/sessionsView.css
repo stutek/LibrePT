@@ -237,6 +237,24 @@
   display: flex;
   flex-direction: column;
 }
+.sessions-day-group-header,
+.sessions-day-group-footer {
+  z-index: 2;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 4px;
+  background: var(--bg-color);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-color);
+  cursor: pointer;
+}
+.sessions-day-group-header:hover,
+.sessions-day-group-footer:hover {
+  color: var(--primary);
+}
 .sessions-day-group-header {
   /* Sticks relative to #main-content, the page's real scrolling ancestor — the timeline itself
      has no overflow of its own, so the whole dashboard scrolls as one native page. The offset
@@ -245,27 +263,31 @@
      title bar's z-index is higher), so the focused day/date line would vanish while scrolling. */
   position: sticky;
   top: var(--sessions-header-sticky-top, 64px);
-  z-index: 2;
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  padding: 6px 4px;
   margin-bottom: 6px;
-  background: var(--bg-color);
-  font-family: var(--font-sans);
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text-color);
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
-.sessions-day-group-header .sessions-day-group-date {
+/* Mirrors the header at the opposite edge — sticks to the bottom of the viewport while this
+   group's cards are still below it, clearing the fixed notification-handle bar the same way
+   #main-content's own bottom padding already does (notificationArea.css / index.css). Scrolling
+   toward the past, where a group's header has already scrolled off the top, this is what still
+   shows which day is on screen. */
+.sessions-day-group-footer {
+  position: sticky;
+  bottom: var(--notif-handle-height, 92px);
+  margin-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+.sessions-day-group-header .sessions-day-group-date,
+.sessions-day-group-footer .sessions-day-group-date {
   font-weight: 400;
   color: var(--text-muted);
 }
-.sessions-day-group-header.is-past {
+.sessions-day-group-header.is-past,
+.sessions-day-group-footer.is-past {
   color: var(--temporal-past);
 }
-.sessions-day-group-header.is-future {
+.sessions-day-group-header.is-future,
+.sessions-day-group-footer.is-future {
   color: var(--temporal-future);
 }
 .sessions-day-group-today-tag {
@@ -325,7 +347,8 @@
     padding-top: 10px;
     padding-bottom: 10px;
   }
-  .sessions-day-group-header {
+  .sessions-day-group-header,
+  .sessions-day-group-footer {
     padding: 6px 2px;
   } /* Combo active set row mobile adjustments */
   .active-set-row[data-ex-id] {

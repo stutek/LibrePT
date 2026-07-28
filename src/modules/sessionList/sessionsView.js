@@ -252,6 +252,7 @@ export function renderSessions({
   rerenderSessions,
   navigateToPath,
   urlFor,
+  focusSessionsColumn,
 }) {
   const container = document.getElementById("sessions-categories-grid");
   if (!container) return;
@@ -295,18 +296,40 @@ export function renderSessions({
         group.className = "sessions-day-group";
         group.dataset.date = key;
 
-        const header = document.createElement("div");
-        header.className = `sessions-day-group-header${temporal !== "today" ? ` is-${temporal}` : ""}`;
-        header.innerHTML = `
+        const labelHTML = `
           <span class="sessions-day-group-weekday">${escapeHTML(weekday)}</span>
           <span class="sessions-day-group-date">${escapeHTML(date)}</span>
           ${isToday ? `<span class="sessions-day-group-today-tag">${escapeHTML(t("today"))}</span>` : ""}
         `;
+        const temporalClass = temporal !== "today" ? ` is-${temporal}` : "";
+
+        // Sticks to the top of the viewport while this group's cards are scrolled past it, the
+        // same as it always has.
+        const header = document.createElement("div");
+        header.className = `sessions-day-group-header${temporalClass}`;
+        header.innerHTML = labelHTML;
         group.appendChild(header);
 
         currentList = document.createElement("div");
         currentList.className = "stack-list";
         group.appendChild(currentList);
+
+        // Mirrors the header at the opposite edge: sticks to the BOTTOM of the viewport while this
+        // group's cards are still below it, so scrolling toward the past — where a group's header
+        // has already scrolled out of view above — still shows which day is on screen, the same
+        // orientation the top header already gives scrolling toward the future.
+        const footer = document.createElement("div");
+        footer.className = `sessions-day-group-footer${temporalClass}`;
+        footer.innerHTML = labelHTML;
+        group.appendChild(footer);
+
+        // Both sticky labels are a tap target: jump straight to that day, same as the Today button
+        // or the date-jump picker — one direct, user-initiated call, not a deferred/scheduled one.
+        if (focusSessionsColumn) {
+          const jumpToThisDay = () => focusSessionsColumn(key, "smooth");
+          header.addEventListener("click", jumpToThisDay);
+          footer.addEventListener("click", jumpToThisDay);
+        }
 
         container.appendChild(group);
       }

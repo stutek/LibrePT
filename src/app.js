@@ -666,6 +666,7 @@ function renderSessions() {
     rerenderSessions: renderSessions,
     navigateToPath,
     urlFor,
+    focusSessionsColumn,
   });
 }
 
