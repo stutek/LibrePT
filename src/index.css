@@ -20,6 +20,17 @@
   --hdr-height: 64px;
   --nav-height: 70px;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+  /* The fixed bottom notification bar's collapsed height (notificationArea.css owns the actual bar
+     and used to redeclare this locally on .notification-area) — needs to live at :root, not
+     scoped to the bar's own element, because every other bottom-edge consumer that clears it
+     (the sessions view's mirrored sticky day footer, #main-content's bottom padding, the active-
+     session overlay's own bottom padding) is a SIBLING of .notification-area, not a descendant, so
+     a custom property set there never reached them: they always fell back to each call site's own
+     hardcoded `92px` default instead of the bar's real, current height, leaving those elements
+     stopping well above where the bar actually sits (visibly above the floating "Create Session"
+     button on a phone with no safe-area inset, since 92px sits higher than the button's own
+     72px-based offset). */
+  --notif-handle-height: calc(56px + var(--safe-bottom));
   --glass-blur: blur(16px);
   --text-dark: #09090b;
   /* Temporal session tinting (past = cool/history, future = warm/plan). Neutral fallback only;

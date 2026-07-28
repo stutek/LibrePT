@@ -3,9 +3,12 @@
    to notificationArea.js. */
 
 .notification-area {
-  /* Collapsed peek is a single text line (the summary title row) — .notification-summary-desc is
-     hidden below, which is what used to push this to 92px for two lines. */
-  --notif-handle-height: calc(56px + var(--safe-bottom));
+  /* --notif-handle-height's own default now lives at :root (index.css) — every bottom-edge
+     consumer that clears this bar (the sessions view's mirrored sticky day footer, #main-content's
+     padding, the active-session overlay's padding) is a SIBLING of .notification-area, not a
+     descendant, so a value scoped only to this selector never reached them. Collapsed peek is a
+     single text line (the summary title row) — .notification-summary-desc is hidden below, which
+     is what used to push this to 92px for two lines. */
   position: fixed;
   bottom: 0;
   left: 0;
