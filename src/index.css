@@ -31,6 +31,13 @@
      button on a phone with no safe-area inset, since 92px sits higher than the button's own
      72px-based offset). */
   --notif-handle-height: calc(56px + var(--safe-bottom));
+  /* Extra breathing room #main-content reserves below the notification bar's own height (its
+     padding-bottom below is notif-handle-height + safe-bottom + this). sessionsView.css's mirrored
+     sticky day footer needs this SAME number back, negated: `position: sticky; bottom` resolves
+     against the scrollport's PADDING-BOX edge, which sits this many px above the true scrollport
+     edge because of that padding — left uncompensated, the footer sticks this-much-plus-56px above
+     the bar instead of flush against it. */
+  --main-content-bottom-gap: 24px;
   --glass-blur: blur(16px);
   --text-dark: #09090b;
   /* Temporal session tinting (past = cool/history, future = warm/plan). Neutral fallback only;
@@ -255,7 +262,13 @@ h6 {
   margin: 0 auto;
   /* No top padding: each view opens with a flat title bar that sits flush under the app header
      (the bar carries its own padding). Bottom clears the fixed notification area handle bar. */
-  padding: 0 16px calc(var(--notif-handle-height, 92px) + var(--safe-bottom) + 24px) 16px;
+  padding: 0 16px
+    calc(
+      var(--notif-handle-height, 92px) +
+      var(--safe-bottom) +
+      var(--main-content-bottom-gap, 24px)
+    )
+    16px;
 }
 /* A view's primary title bar: a flat strip flush under the app header, spanning the full
    content column (breaks out of #main-content's side padding) with a bottom divider and a

@@ -307,12 +307,31 @@
    group's cards are still below it, clearing the fixed notification-handle bar the same way
    #main-content's own bottom padding already does (notificationArea.css / index.css). Scrolling
    toward the past, where a group's header has already scrolled off the top, this is what still
-   shows which day is on screen. */
+   shows which day is on screen.
+   `bottom` is negative: `position: sticky` resolves its offset against the PADDING-BOX edge of the
+   nearest scrolling ancestor (#main-content), which sits --main-content-bottom-gap ABOVE the true
+   scrollport edge because of that element's own bottom padding (padding-bottom there is
+   notif-handle-height + safe-bottom + that gap). Left as plain var(--notif-handle-height), the
+   footer stuck the gap's-worth of extra distance above the bar instead of flush against it
+   (measured: 80px above the bar instead of 56px, exactly the 24px gap over-counted). Negating just
+   the gap here cancels that surplus algebraically regardless of notif-handle-height's own value:
+   padding_bottom(H+S+G) + this_offset(-G) = H+S, i.e. flush with the bar, every time. */
 .sessions-day-group-footer {
   position: sticky;
-  bottom: var(--notif-handle-height, 92px);
+  bottom: calc(-1 * var(--main-content-bottom-gap, 24px));
   margin-top: 6px;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+/* CSS sticky alone can't express "only once the header is off-screen": for a group taller than
+   ~2x the viewport, the header (still stuck at top — its group hasn't ended) and the footer (now
+   entering its own stuck range from the bottom) are both pinned at once near the group's tail,
+   printing the same day name twice with nothing between them. sessionTimeline.js's
+   observeGroupFooterVisibility toggles this class from an IntersectionObserver watching the header
+   bars themselves — visibility (not display) so the footer keeps its layout box/sticky behaviour
+   and only disappears from view + the tap target + a11y tree while its own header is genuinely
+   on screen. */
+.sessions-day-group-footer.header-visible {
+  visibility: hidden;
 }
 .sessions-day-group-header .sessions-day-group-date,
 .sessions-day-group-footer .sessions-day-group-date {

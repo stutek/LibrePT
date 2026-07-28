@@ -180,6 +180,36 @@ function observeSessionTimelineGroups() {
   for (const header of getGroupHeaders()) headerObserver.observe(header);
 }
 
+// The mirrored footer (sessionsView.js) exists so scrolling toward the past — where the sticky
+// header has already scrolled off the TOP — still shows which day is on screen. But CSS `position:
+// sticky` alone can't express "only when the header is out of view": for any group taller than
+// ~2x the viewport, there is a real scroll range near the group's tail where the header is STILL
+// stuck at the top (the group hasn't ended yet) at the same time the footer has entered its own
+// stuck range from the bottom — both pinned at once, printing the same day name twice with nothing
+// to distinguish them (read as a duplicated day-group, not a mirrored pair). A second observer,
+// watching the header BARS themselves (not the whole group — getGroupHeaders() serves the
+// scrollspy above and needs its own rootMargin trick), hides each group's footer for exactly as
+// long as that group's own header is genuinely on screen.
+let footerVisibilityObserver = null;
+function observeGroupFooterVisibility() {
+  const root = getTimelineScrollAncestor();
+  if (footerVisibilityObserver) footerVisibilityObserver.disconnect();
+  footerVisibilityObserver = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        const footer = entry.target
+          .closest(".sessions-day-group")
+          ?.querySelector(".sessions-day-group-footer");
+        if (footer) footer.classList.toggle("header-visible", entry.isIntersecting);
+      }
+    },
+    { root, threshold: 0 },
+  );
+  for (const header of document.querySelectorAll(".sessions-day-group-header")) {
+    footerVisibilityObserver.observe(header);
+  }
+}
+
 // The sticky "Sessions" title bar (.view-titlebar) and each day-group header both pin to
 // #main-content's top edge — sharing that edge is what used to hide the header: at top:0 it sat
 // exactly under the title bar, which paints over it (title bar is z-index 10, header is 2). Rather
@@ -230,6 +260,7 @@ export function scheduleTimelineSettle(isoDateOrToday, behavior = "auto") {
 // trainer's scroll position" guarantee focusSessionsColumn always gave the old day-deck.
 export function syncSessionTimelineAfterRender() {
   observeSessionTimelineGroups();
+  observeGroupFooterVisibility();
   observeSessionsTitlebarHeight();
   scheduleTimelineSettle(focusedSessionDate, "auto");
 }
