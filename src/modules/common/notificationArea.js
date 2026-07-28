@@ -26,6 +26,68 @@ export function syncNotificationBarState() {
   if (area) area.classList.remove("has-active-session");
 }
 
+// Computed fresh on every render, never stored: a planning-mode draft persists to
+// state.history (isPlanning:true — see activeSessionController.js's syncPlanningSnapshotToHistory)
+// so it survives being replaced by the next session the trainer opens, but a trainer has no other
+// place to rediscover it. One action per plan resumes it directly (openSessionFromHistory) — the
+// notification feed doubles as the "list of unscheduled plans" this backs.
+function buildUnscheduledPlansItem(state, t) {
+  const plans = (state.history || []).filter((h) => h.isPlanning);
+  if (plans.length === 0) return null;
+  const fallbackTitle = t("planned_program") || "Planned Program";
+  return {
+    id: "synthetic-unscheduled-plans",
+    type: "planning",
+    icon: "fa-solid fa-clipboard-list",
+    title: t("notif_unscheduled_plans_title") || "Unscheduled plans",
+    description: (
+      t("notif_unscheduled_plans_desc") ||
+      "{count} plan(s) drafted but not yet assigned to a session."
+    ).replace("{count}", String(plans.length)),
+    actions: plans.map((p) => ({
+      label: `${p.title || fallbackTitle} · ${p.clientName || ""}`,
+      resumePlanId: p.id,
+    })),
+  };
+}
+
+// Computed fresh on every render, never stored: state.planUpdates already IS the "Pending Plan
+// Adjustments" feature's own durable store (resolved:false = awaiting the trainer's review) — this
+// re-presents that same data grouped by client (cross-referenced to state.sessions for a friendlier
+// label where one exists) so it surfaces here too, not only in the dedicated Adjustments view that
+// every action links to.
+function buildPendingSessionsItem(state, t) {
+  const unresolved = (state.planUpdates || []).filter((u) => !u.resolved);
+  if (unresolved.length === 0) return null;
+
+  const byClient = new Map();
+  for (const u of unresolved) {
+    if (!byClient.has(u.clientId)) byClient.set(u.clientId, []);
+    byClient.get(u.clientId).push(u);
+  }
+
+  const sessions = state.sessions || [];
+  const labelFor = (clientId, clientName) => {
+    const session = sessions.find((s) => (s.participants || []).includes(clientId));
+    return session ? `${clientName} — ${session.title}` : clientName;
+  };
+
+  return {
+    id: "synthetic-pending-sessions",
+    type: "alert",
+    icon: "fa-solid fa-triangle-exclamation",
+    title: t("notif_pending_sessions_title") || "Sessions awaiting review",
+    description: (
+      t("notif_pending_sessions_desc") ||
+      "{count} client(s) have unresolved feedback signals from a session."
+    ).replace("{count}", String(byClient.size)),
+    actions: [...byClient.entries()].map(([clientId, items]) => ({
+      label: `${labelFor(clientId, items[0].clientName)} (${items.length})`,
+      view: "/adjustments",
+    })),
+  };
+}
+
 export function renderNotificationArea() {
   if (!deps) return;
   const { t, escapeHTML } = deps;
@@ -51,22 +113,31 @@ export function renderNotificationArea() {
   // feed, while a demo instance surfaces its messages (including the demo-mode clean-up notice).
   // Stored records carry i18n *keys* (titleKey/descKey/labelKey), resolved here so the feed
   // re-localizes on a language switch; `url`/`view`/`primary`/`icon`/`type` pass through.
-  const rawItems = deps.getState?.().notifications || [];
-  const items = rawItems.map((n) => ({
-    id: n.id,
-    type: n.type,
-    icon: n.icon,
-    title: n.titleKey ? t(n.titleKey) : n.title || "",
-    description: n.descKey ? t(n.descKey) : n.description || "",
-    actions: (n.actions || []).map((a) => ({
-      label: a.labelKey ? t(a.labelKey) : a.label || "",
-      url: a.url,
-      view: a.view,
-      resetDemo: a.resetDemo,
-      primary: a.primary,
+  const state = deps.getState?.() || {};
+  const rawItems = state.notifications || [];
+  // Synthetic items (built fresh from state.history / state.planUpdates, never stored themselves)
+  // lead the feed — they name work the trainer still owes a client, ahead of FYI-only messages.
+  const syntheticItems = [buildUnscheduledPlansItem(state, t), buildPendingSessionsItem(state, t)]
+    .filter(Boolean)
+    .map((it) => ({ ...it, read: readIds.includes(it.id) }));
+  const items = [
+    ...syntheticItems,
+    ...rawItems.map((n) => ({
+      id: n.id,
+      type: n.type,
+      icon: n.icon,
+      title: n.titleKey ? t(n.titleKey) : n.title || "",
+      description: n.descKey ? t(n.descKey) : n.description || "",
+      actions: (n.actions || []).map((a) => ({
+        label: a.labelKey ? t(a.labelKey) : a.label || "",
+        url: a.url,
+        view: a.view,
+        resetDemo: a.resetDemo,
+        primary: a.primary,
+      })),
+      read: readIds.includes(n.id),
     })),
-    read: readIds.includes(n.id),
-  }));
+  ];
 
   const allCount = items.length;
   const unreadCount = items.filter((i) => !i.read).length;
@@ -146,6 +217,9 @@ export function renderNotificationArea() {
               if (act.resetDemo) {
                 return `<button type="button" class="notification-btn ${act.primary ? "primary" : ""}" data-action-reset="true" data-action-id="${escapeHTML(item.id)}">${escapeHTML(act.label)}</button>`;
               }
+              if (act.resumePlanId) {
+                return `<button type="button" class="notification-btn ${act.primary ? "primary" : ""}" data-action-resume="${escapeHTML(act.resumePlanId)}" data-action-id="${escapeHTML(item.id)}">${escapeHTML(act.label)}</button>`;
+              }
               if (act.url) {
                 return `<a href="${escapeHTML(act.url)}" target="_blank" rel="noopener noreferrer" class="notification-link" data-action-id="${escapeHTML(item.id)}">${escapeHTML(act.label)} <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 11px; margin-left: 2px;"></i></a>`;
               }
@@ -185,6 +259,21 @@ export function renderNotificationArea() {
         if (typeof window.resetLibrePTData === "function") {
           window.resetLibrePTData({ demo: false });
         }
+      }
+    });
+  }
+
+  // Resume a planning-mode draft straight from the feed (the "unscheduled plans" item's actions):
+  // reopens via the SAME reconstruction openSessionFromHistory already does for a real past
+  // session, just looked up by id in state.history rather than passed in directly.
+  for (const btn of container.querySelectorAll("button[data-action-resume]")) {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const planId = btn.getAttribute("data-action-resume");
+      const log = (deps.getState?.().history || []).find((h) => h.id === planId);
+      if (log && deps.openSessionFromHistory) {
+        toggleNotificationArea(false);
+        deps.openSessionFromHistory(log);
       }
     });
   }
@@ -344,8 +433,15 @@ export function setupNotificationGestures() {
         console.warn("Failed to parse read notifications from localStorage:", e);
         readIds = [];
       }
-      for (const n of deps.getState?.().notifications || []) {
-        if (!readIds.includes(n.id)) readIds.push(n.id);
+      const state = deps.getState?.() || {};
+      const ids = [
+        ...(state.notifications || []).map((n) => n.id),
+        ...[buildUnscheduledPlansItem(state, deps.t), buildPendingSessionsItem(state, deps.t)]
+          .filter(Boolean)
+          .map((it) => it.id),
+      ];
+      for (const id of ids) {
+        if (!readIds.includes(id)) readIds.push(id);
       }
       try {
         writeVersionScoped(READ_NOTIFICATIONS_KEY, JSON.stringify(readIds));

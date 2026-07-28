@@ -366,6 +366,17 @@ body:has(#active-session-overlay:not(.hidden))
   background: color-mix(in srgb, #f59e0b 18%, transparent);
   color: #f59e0b;
 }
+/* Synthetic feed items (notificationArea.js's buildUnscheduledPlansItem/buildPendingSessionsItem):
+   "planning" is an invitation (primary accent, same language as the dashboard's due-session Start
+   button); "alert" is unresolved feedback awaiting the trainer, so it borrows the warning accent. */
+.notification-card.planning .notification-card-icon {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+.notification-card.alert .notification-card-icon {
+  background: color-mix(in srgb, var(--warning, #f59e0b) 18%, transparent);
+  color: var(--warning, #f59e0b);
+}
 .notification-empty {
   padding: 24px 16px;
   text-align: center;

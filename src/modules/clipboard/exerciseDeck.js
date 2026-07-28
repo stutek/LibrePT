@@ -69,8 +69,12 @@ export function renderExerciseDeck(deckContainer, deps) {
     });
   };
 
-  // Past session exercises
-  const clientHistory = (state.history || []).filter((h) => h.clientId === activeClientId);
+  // Past session exercises. Excludes isPlanning drafts (syncPlanningSnapshotToHistory writes them
+  // with an ever-fresh `date` on every save) — a drafted-but-unrun plan is not a performed session,
+  // and would otherwise eclipse the client's actual most recent workout here.
+  const clientHistory = (state.history || []).filter(
+    (h) => h.clientId === activeClientId && !h.isPlanning,
+  );
   clientHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
 
   const pastExList = [];

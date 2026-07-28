@@ -352,7 +352,7 @@ export function openSessionFromHistory(log) {
       ? {
           id: `plan-${log.id}`,
           isPlanning: true,
-          titles: [t("planned_program") || "Planned Program"],
+          titles: [log.title || t("planned_program") || "Planned Program"],
           timeLabel: t("date_unknown") || "Date Unknown",
           location: "",
         }
@@ -1414,7 +1414,15 @@ export function clearActivePlan() {
 }
 
 export function cancelWorkoutSession() {
-  const { navigateToPath, focusSessionsColumn } = appDeps;
+  const { state, navigateToPath, focusSessionsColumn, saveToLocalStorage } = appDeps;
+  // An explicit delete of a planning session must also drop its draft(s) from state.history —
+  // otherwise a discarded plan keeps reappearing in the "unscheduled plans" notification message
+  // it backs (syncPlanningSnapshotToHistory), which reads as the delete having silently failed.
+  if (activeSession?.sourceSession?.isPlanning && state && Array.isArray(state.history)) {
+    const participants = new Set(activeSession.participants || []);
+    state.history = state.history.filter((h) => !(h.isPlanning && participants.has(h.clientId)));
+    if (saveToLocalStorage) saveToLocalStorage();
+  }
   if (activeSession?.timerIntervalId) {
     clearInterval(activeSession.timerIntervalId);
   }
@@ -1527,8 +1535,57 @@ export function finishWorkoutSession() {
   if (navigateToPath) navigateToPath("/history");
 }
 
+// A planning-mode clipboard has no Start/Finish footer (currentPlanMode() === "planning" hides it
+// entirely — see renderActiveGroupBoard), so finishWorkoutSession() never runs for one. Without
+// this, a planning session simply vanishes the moment the trainer opens a different session (the
+// single activeSession slot is replaced) or leaves without saving anywhere durable. Every cache
+// sync while editing one upserts the CURRENT snapshot into state.history — the exact shape
+// finishWorkoutSession already writes for a real session (isPlanning:true), and the exact shape
+// openSessionFromHistory already knows how to reopen — matched by clientId so re-editing updates
+// the same record instead of piling up duplicates (one open draft per client at a time). This is
+// what backs the notification feed's "unscheduled plans" list (renderNotificationArea).
+function syncPlanningSnapshotToHistory() {
+  if (!activeSession?.sourceSession?.isPlanning) return;
+  const { state, saveToLocalStorage } = appDeps;
+  if (!state) return;
+  if (!Array.isArray(state.history)) state.history = [];
+
+  const title = activeSession.sourceSession.titles?.[0] || "";
+  const nowISO = new Date().toISOString();
+
+  for (const pId of activeSession.participants) {
+    const client = state.clients.find((c) => c.id === pId);
+    const clientState = activeSession.clientRoutines[pId];
+    if (!client || !clientState) continue;
+
+    const clientProgram = buildProgramSnapshot(clientState, { isPlanning: true });
+    const existing = state.history.find((h) => h.isPlanning && h.clientId === pId);
+    if (existing) {
+      existing.routineName = clientState.routineName;
+      existing.title = title;
+      existing.date = nowISO;
+      existing.exercises = clientProgram;
+    } else {
+      state.history.push({
+        id: newRecordId(),
+        clientId: pId,
+        clientName: client.name,
+        routineName: clientState.routineName,
+        title,
+        date: nowISO,
+        duration: 0,
+        exercises: clientProgram,
+        feedback: (activeSession.feedback || []).filter((f) => f.clientId === pId),
+        isPlanning: true,
+      });
+    }
+  }
+  if (saveToLocalStorage) saveToLocalStorage();
+}
+
 export function saveActiveSessionToCache() {
   saveActiveSessionToCacheHelper(activeSession);
+  syncPlanningSnapshotToHistory();
 }
 
 export function recoverActiveSession() {

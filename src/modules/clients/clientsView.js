@@ -191,7 +191,11 @@ export function showClientDetails({
   if (aiCopyBtn) {
     aiCopyBtn.replaceWith(aiCopyBtn.cloneNode(true));
     document.getElementById("btn-ai-safe-copy").addEventListener("click", () => {
-      const clientHistory = state.history.filter((log) => log.clientId === client.id);
+      // Excludes isPlanning drafts — a plan awaiting a session is not a "logged session" for a
+      // performance summary (it inflates the count and has no completed reps/outcomes to report).
+      const clientHistory = state.history.filter(
+        (log) => log.clientId === client.id && !log.isPlanning,
+      );
       const historyText =
         clientHistory.length > 0
           ? clientHistory
@@ -240,8 +244,10 @@ export function renderClientWorkoutHistory({ client, state, t }) {
   if (!container) return;
   container.innerHTML = "";
 
+  // Excludes isPlanning drafts (see the Global History view for those, historyView.js) — this
+  // widget is the client's actual workout history, not their in-progress plans.
   const clientHistory = state.history
-    .filter((log) => log.clientId === client.id)
+    .filter((log) => log.clientId === client.id && !log.isPlanning)
     .sort((a, b) => new Date(b.date) - new Date(a.date));
 
   if (clientHistory.length === 0) {

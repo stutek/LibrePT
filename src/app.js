@@ -427,6 +427,7 @@ function init() {
     t,
     escapeHTML,
     navigateToPath,
+    openSessionFromHistory,
   });
   setupNotificationGestures();
 

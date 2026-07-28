@@ -107,6 +107,9 @@ export const SCHEMA_2 = {
     exercises: { required: true, type: "array", items: SESSION_ITEM_SHAPE },
     feedback: { required: false, type: "array" },
     isPlanning: { required: false, type: "boolean" },
+    // The trainer-authored name of a planning-mode draft (e.g. "Upper Body Strength Draft") —
+    // only meaningful alongside isPlanning:true; a real finished session has no use for it.
+    title: { required: false, type: "string" },
   },
   planUpdates: {
     id: { required: true, type: "string" },
