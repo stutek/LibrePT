@@ -180,34 +180,39 @@ function observeSessionTimelineGroups() {
   for (const header of getGroupHeaders()) headerObserver.observe(header);
 }
 
-// The mirrored footer (sessionsView.js) exists so scrolling toward the past — where the sticky
-// header has already scrolled off the TOP — still shows which day is on screen. But CSS `position:
-// sticky` alone can't express "only when the header is out of view": for any group taller than
-// ~2x the viewport, there is a real scroll range near the group's tail where the header is STILL
-// stuck at the top (the group hasn't ended yet) at the same time the footer has entered its own
-// stuck range from the bottom — both pinned at once, printing the same day name twice with nothing
-// to distinguish them (read as a duplicated day-group, not a mirrored pair). A second observer,
-// watching the header BARS themselves (not the whole group — getGroupHeaders() serves the
-// scrollspy above and needs its own rootMargin trick), hides each group's footer for exactly as
-// long as that group's own header is genuinely on screen.
+// The sticky footer (sessionsView.js) previews the NEXT day-group while this one's cards are still
+// scrolling past — so a trainer working through a long day always knows what's coming up, without
+// waiting to reach it. It becomes redundant once that next day's OWN header is properly on screen
+// (now there's a real header saying the same thing); this observer, watching every header bar,
+// hides the PRECEDING group's footer for as long as its successor's header is prominently visible.
+// Watches the header BARS themselves, not the whole group (getGroupHeaders() serves the scrollspy
+// above and needs its own rootMargin trick, which would fire far too early for this purpose).
+//
+// Plain threshold:0 (any pixel on screen counts, no rootMargin) — the footer must disappear the
+// MOMENT the real header it previews is visible anywhere on screen, even just peeking at the
+// bottom edge, or the two read as the same day name printed twice regardless of exactly where each
+// one sits. (sessionsView.js's own "does this group even need a footer" prune — a group whose cards
+// all fit in one screen never gets one — is what keeps this from also being true of every short
+// group's neighbour, which would hide it near-permanently.)
 let footerVisibilityObserver = null;
 function observeGroupFooterVisibility() {
   const root = getTimelineScrollAncestor();
   if (footerVisibilityObserver) footerVisibilityObserver.disconnect();
+  const headers = Array.from(document.querySelectorAll(".sessions-day-group-header"));
   footerVisibilityObserver = new IntersectionObserver(
     (entries) => {
       for (const entry of entries) {
-        const footer = entry.target
+        const idx = headers.indexOf(entry.target);
+        if (idx <= 0) continue; // the first group's header has no PRECEDING footer to hide
+        const prevFooter = headers[idx - 1]
           .closest(".sessions-day-group")
           ?.querySelector(".sessions-day-group-footer");
-        if (footer) footer.classList.toggle("header-visible", entry.isIntersecting);
+        if (prevFooter) prevFooter.classList.toggle("next-header-visible", entry.isIntersecting);
       }
     },
     { root, threshold: 0 },
   );
-  for (const header of document.querySelectorAll(".sessions-day-group-header")) {
-    footerVisibilityObserver.observe(header);
-  }
+  for (const header of headers) footerVisibilityObserver.observe(header);
 }
 
 // The sticky "Sessions" title bar (.view-titlebar) and each day-group header both pin to

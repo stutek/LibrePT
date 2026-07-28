@@ -303,11 +303,11 @@
   margin-bottom: 6px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
-/* Mirrors the header at the opposite edge — sticks to the bottom of the viewport while this
-   group's cards are still below it, clearing the fixed notification-handle bar the same way
-   #main-content's own bottom padding already does (notificationArea.css / index.css). Scrolling
-   toward the past, where a group's header has already scrolled off the top, this is what still
-   shows which day is on screen.
+/* Sticks to the bottom of the viewport while this group's cards are still below it, previewing the
+   NEXT day (sessionsView.js fills in its content — the successor's weekday/date, not this group's
+   own) so a trainer scrolling through a long day always knows what's coming up next, clearing the
+   fixed notification-handle bar the same way #main-content's own bottom padding already does
+   (notificationArea.css / index.css).
    `bottom` is negative: `position: sticky` resolves its offset against the PADDING-BOX edge of the
    nearest scrolling ancestor (#main-content), which sits --main-content-bottom-gap ABOVE the true
    scrollport edge because of that element's own bottom padding (padding-bottom there is
@@ -322,15 +322,13 @@
   margin-top: 6px;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
-/* CSS sticky alone can't express "only once the header is off-screen": for a group taller than
-   ~2x the viewport, the header (still stuck at top — its group hasn't ended) and the footer (now
-   entering its own stuck range from the bottom) are both pinned at once near the group's tail,
-   printing the same day name twice with nothing between them. sessionTimeline.js's
-   observeGroupFooterVisibility toggles this class from an IntersectionObserver watching the header
-   bars themselves — visibility (not display) so the footer keeps its layout box/sticky behaviour
-   and only disappears from view + the tap target + a11y tree while its own header is genuinely
-   on screen. */
-.sessions-day-group-footer.header-visible {
+/* The footer previews its successor day — redundant the instant that day's OWN header is genuinely
+   on screen (now there's a real header saying the same thing one edge over). sessionTimeline.js's
+   observeGroupFooterVisibility toggles this class from an IntersectionObserver watching every
+   header bar, hiding the PRECEDING group's footer for as long as its successor's header is visible
+   — visibility (not display) so the footer keeps its layout box/sticky behaviour and only
+   disappears from view + the tap target + a11y tree while it would otherwise duplicate that header. */
+.sessions-day-group-footer.next-header-visible {
   visibility: hidden;
 }
 .sessions-day-group-header .sessions-day-group-date,

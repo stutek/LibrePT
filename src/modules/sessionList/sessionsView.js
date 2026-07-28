@@ -289,7 +289,7 @@ export function renderSessions({
     const sorted = [...sessions].sort(compareByStartDate);
     let currentKey = null;
     let currentList = null;
-    const groupFooters = []; // [{ group, footer }] — pruned after render once real heights are known
+    const groupMeta = []; // [{ key, group, footer }], in order — filled in with next-day info below
     for (const session of sorted) {
       const key = calendarDayKey(session);
       if (key !== currentKey) {
@@ -300,55 +300,69 @@ export function renderSessions({
         group.className = "sessions-day-group";
         group.dataset.date = key;
 
-        const labelHTML = `
-          <span class="sessions-day-group-weekday">${escapeHTML(weekday)}</span>
-          <span class="sessions-day-group-date">${escapeHTML(date)}</span>
-          ${isToday ? `<span class="sessions-day-group-today-tag">${escapeHTML(t("today"))}</span>` : ""}
-        `;
-
         // Sticks to the top of the viewport while this group's cards are scrolled past it, the
         // same as it always has.
         const header = document.createElement("div");
         header.className = "sessions-day-group-header";
-        header.innerHTML = labelHTML;
+        header.innerHTML = `
+          <span class="sessions-day-group-weekday">${escapeHTML(weekday)}</span>
+          <span class="sessions-day-group-date">${escapeHTML(date)}</span>
+          ${isToday ? `<span class="sessions-day-group-today-tag">${escapeHTML(t("today"))}</span>` : ""}
+        `;
         group.appendChild(header);
 
         currentList = document.createElement("div");
         currentList.className = "stack-list";
         group.appendChild(currentList);
 
-        // Mirrors the header at the opposite edge: sticks to the BOTTOM of the viewport while this
-        // group's cards are still below it, so scrolling toward the past — where a group's header
-        // has already scrolled out of view above — still shows which day is on screen, the same
-        // orientation the top header already gives scrolling toward the future.
+        // Sticks to the BOTTOM of the viewport while this group's cards are still below it — but
+        // previews the NEXT day, not this one: mirroring the SAME day here just prints it twice
+        // (once at each edge) with nothing between them to tell a genuine duplicate group from a
+        // mirrored pair. Showing what's coming up next is what a bottom-edge marker is actually
+        // for while scrolling through a long day. Content + click target filled in below, once
+        // every group (and therefore each one's successor) exists.
         const footer = document.createElement("div");
         footer.className = "sessions-day-group-footer";
-        footer.innerHTML = labelHTML;
         group.appendChild(footer);
 
-        // Both sticky labels are a tap target: jump straight to that day, same as the Today button
-        // or the date-jump picker — one direct, user-initiated call, not a deferred/scheduled one.
         if (focusSessionsColumn) {
-          const jumpToThisDay = () => focusSessionsColumn(key, "smooth");
-          header.addEventListener("click", jumpToThisDay);
-          footer.addEventListener("click", jumpToThisDay);
+          header.addEventListener("click", () => focusSessionsColumn(key, "smooth"));
         }
 
         container.appendChild(group);
-        groupFooters.push({ group, footer });
+        groupMeta.push({ key, group, footer });
       }
       renderSessionCard(session, currentList, cardDeps);
     }
 
-    // A day whose cards all fit on one screen has its header and footer visible together with
-    // nothing to scroll between them — not a mirrored pair giving context at each edge, just the
-    // same day name printed twice in a row (confusable with a genuine duplicate day-group). The
-    // footer only earns its place once scrolling through the day would otherwise lose the header
-    // off the top; measured after render, since a group's real height isn't known before its cards
+    // Second pass: each footer shows its SUCCESSOR's day, now that every group's key is known. The
+    // last group has no successor to preview and gets no footer at all — there is nothing left to
+    // scroll toward.
+    //
+    // A group whose own cards all fit on one screen has its header AND its successor's header both
+    // visible together already (short groups sit close enough that scrolling a little already
+    // shows what's next) — the footer would just print that same next-day name a second time with
+    // nothing to distinguish a genuine preview from a duplicate. It only earns its place once
+    // scrolling through THIS group's own cards would otherwise leave the trainer with no clue what
+    // is coming up; measured after render, since a group's real height isn't known before its cards
     // are in the DOM.
     const viewportHeight = document.getElementById("main-content")?.clientHeight || 0;
-    for (const { group, footer } of groupFooters) {
-      if (group.offsetHeight <= viewportHeight) footer.remove();
+    for (let i = 0; i < groupMeta.length; i++) {
+      const { group, footer } = groupMeta[i];
+      const next = groupMeta[i + 1];
+      if (!next || group.offsetHeight <= viewportHeight) {
+        footer.remove();
+        continue;
+      }
+      const { weekday, date, isToday } = formatCalendarDayLabel(next.key);
+      footer.innerHTML = `
+        <span class="sessions-day-group-weekday">${escapeHTML(weekday)}</span>
+        <span class="sessions-day-group-date">${escapeHTML(date)}</span>
+        ${isToday ? `<span class="sessions-day-group-today-tag">${escapeHTML(t("today"))}</span>` : ""}
+      `;
+      if (focusSessionsColumn) {
+        footer.addEventListener("click", () => focusSessionsColumn(next.key, "smooth"));
+      }
     }
   }
 
