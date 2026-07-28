@@ -7,7 +7,25 @@
 import re
 
 # Palette vars each theme must set on its own so nothing bleeds through midnight's :root default.
-CORE_PALETTE_VARS = ("--primary", "--secondary", "--bg-color", "--text-main")
+# A hover/light companion is part of its base var's own family, not a separate concern — the
+# original list caught a theme missing --secondary entirely but not one that redefined --secondary
+# while leaving --secondary-hover to inherit a now-mismatched shade from :root, which is exactly
+# what daylight did (fixed alongside this test in the same commit).
+CORE_PALETTE_VARS = (
+    "--primary",
+    "--primary-hover",
+    "--primary-light",
+    "--secondary",
+    "--secondary-hover",
+    "--secondary-light",
+    "--danger",
+    "--danger-hover",
+    "--danger-light",
+    "--success",
+    "--success-hover",
+    "--bg-color",
+    "--text-main",
+)
 
 
 def _theme_files(src_dir):

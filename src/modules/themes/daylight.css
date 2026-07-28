@@ -22,8 +22,19 @@ body.daylight-theme {
      (e.g. the circuit accent in the plan editor). A clean blue pairs with the emerald primary and
      the sky accents below without reading as violet. */
   --secondary: #2563eb; /* blue-600 */
+  --secondary-hover: #1d4ed8; /* blue-700 */
   --secondary-light: rgba(37, 99, 235, 0.1);
   --accent-cyan: #0891b2;
+  /* Daylight also left --danger/--success undefined, the same class of bug the --secondary fix
+     above was for (tests/unit/test_theme_palette_parity.py) — silently inheriting midnight's
+     values worked by coincidence (red/green read fine on a light card too) but --success matching
+     --primary here, the way midnight's own success mirrors its primary, is the deliberate choice
+     every other theme makes for its own palette. */
+  --danger: #dc2626; /* red-600 */
+  --danger-hover: #b91c1c; /* red-700 */
+  --danger-light: rgba(220, 38, 38, 0.12);
+  --success: #059669; /* same emerald as --primary */
+  --success-hover: #047857;
   /* Deeper violet so it stays legible on the light slate field. Future/upcoming reuses the theme's
      own blue accent (--secondary, defined above) instead of amber, per Simon's request. */
   --temporal-past: #7c3aed;
