@@ -16,9 +16,14 @@ Tools an agent would otherwise rewrite as a one-off shell pipeline every session
 costs the same tokens every time and leaves nothing behind; a tool here is written once, reviewed
 once, and runs in the gate forever.
 
-**Every tool in this directory:** runs as `python -m agent_tools.<name>`, needs no network and no
-browser, exits non-zero on failure, prints findings as `path:line  message`, and appears in the
-catalog below.
+**Every tool in this directory** runs as `python -m agent_tools.<name>` and appears in the catalog
+below. Two categories, distinguished by the Type column:
+- **`check`** — needs no network and no browser, exits non-zero on failure, prints findings as
+  `path:line  message`. Cheap and deterministic enough to gate `build check`.
+- **`diagnostic`** — a manual tool an agent runs on demand while investigating something (not
+  wired into the gate); may need a browser and a running server. Still exits non-zero on a
+  well-defined failure (e.g. a requested selector never found), still gets a unit test for its
+  pure-logic parts.
 
 ## Catalog
 
@@ -26,6 +31,7 @@ catalog below.
 | :--- | :--- | :--- | :--- |
 | [doclinks.py](doclinks.py) | `check` | `build check` Stage 1 | Verifies the OKF knowledge graph connects: every relative Markdown link resolves to a real file, every `#anchor` to a real heading, and every `§N.M` to a real numbered section. Suggests the nearest surviving anchor when one is dead. |
 | [pipeline_gates.py](pipeline_gates.py) | `check` | `build check` Stage 1 + `unit-tests` job | Asserts every CI job actually gates the deploy — exactly one terminal job, everything else inside its transitive `needs` closure. Catches a job that runs and reports red while the release ships anyway. |
+| [layout_probe.py](layout_probe.py) | `diagnostic` | manual, on demand | Reads real, rendered layout (bounding boxes + computed style) for one or more CSS selectors on a running page via headless Chromium — for pinning down a reported CSS positioning bug (wrong sticky/fixed offset, a custom property not cascading where expected) without writing a fresh throwaway Playwright script each time. |
 
 ## When to add a tool here
 
