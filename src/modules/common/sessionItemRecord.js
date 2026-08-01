@@ -39,6 +39,58 @@ export function exerciseRecordsOf(items) {
   return orderedItems(items).filter(isExerciseRecord);
 }
 
+function buildRestSnapshotItem(it) {
+  return {
+    type: "rest",
+    // The live editor already stamps an id on every rest it creates (clipboardEditor.js's
+    // makeRest); this snapshot must not be where that identity is silently dropped. The
+    // fallback exists for rests older than that — never for anything this build creates.
+    id: it.id || newRecordId(),
+    rest: it.rest || 0,
+    circuitId: it.circuitId || null,
+    circuitTitle: it.circuitTitle || "",
+    circuitSeries: it.circuitSeries || 1,
+  };
+}
+
+// A movement with no logged sets is kept as its prescription (uncompleted), so the record still
+// shows what was programmed but not reached.
+function resolvePrescribedSets(it) {
+  return Array.from({ length: Math.max(1, it.setsTargetCount ?? it.sets ?? 1) }, () => ({
+    reps: it.repsTarget ?? it.reps ?? 0,
+    weight: it.weightTarget ?? it.weight ?? 0,
+    completed: false,
+    note: "",
+  }));
+}
+
+function buildExerciseSnapshotItem(it, logs, isPlanning) {
+  const loggedSets = logs.map((l) => ({
+    reps: l.reps,
+    weight: l.weight,
+    completed: !!l.completed,
+    note: l.note || "",
+  }));
+  const anyCompleted = loggedSets.some((s) => s.completed);
+  const sets = loggedSets.length ? loggedSets : resolvePrescribedSets(it);
+
+  return {
+    type: "exercise",
+    id: it.id,
+    name: it.name,
+    loadUnit: it.loadUnit || "kg",
+    modality: it.modality || "strength",
+    metric: it.metric || "reps",
+    // A planning template is prescription only — never "performed"; live sessions mark completion
+    // from whether any set was logged done.
+    completed: isPlanning ? false : anyCompleted,
+    circuitId: it.circuitId || null,
+    circuitTitle: it.circuitTitle || "",
+    circuitSeries: it.circuitSeries || 1,
+    sets,
+  };
+}
+
 // Build the immutable program snapshot for one client from their live session state. Keeps EVERY
 // planned item: rests pass through; each exercise records its performed sets (or, if nothing was
 // logged, its prescription as uncompleted sets) plus a completed flag, so a skipped movement is
@@ -47,54 +99,10 @@ export function buildProgramSnapshot(clientState, { isPlanning = false } = {}) {
   const items = [];
   for (const it of orderedItems(clientState.exercises)) {
     if (isRestRecord(it)) {
-      items.push({
-        type: "rest",
-        // The live editor already stamps an id on every rest it creates (clipboardEditor.js's
-        // makeRest); this snapshot must not be where that identity is silently dropped. The
-        // fallback exists for rests older than that — never for anything this build creates.
-        id: it.id || newRecordId(),
-        rest: it.rest || 0,
-        circuitId: it.circuitId || null,
-        circuitTitle: it.circuitTitle || "",
-        circuitSeries: it.circuitSeries || 1,
-      });
+      items.push(buildRestSnapshotItem(it));
       continue;
     }
-
-    const logs = clientState.logs[it.id] || [];
-    const loggedSets = logs.map((l) => ({
-      reps: l.reps,
-      weight: l.weight,
-      completed: !!l.completed,
-      note: l.note || "",
-    }));
-    const anyCompleted = loggedSets.some((s) => s.completed);
-    // A movement with no logged sets is kept as its prescription (uncompleted), so the record still
-    // shows what was programmed but not reached.
-    const sets = loggedSets.length
-      ? loggedSets
-      : Array.from({ length: Math.max(1, it.setsTargetCount ?? it.sets ?? 1) }, () => ({
-          reps: it.repsTarget ?? it.reps ?? 0,
-          weight: it.weightTarget ?? it.weight ?? 0,
-          completed: false,
-          note: "",
-        }));
-
-    items.push({
-      type: "exercise",
-      id: it.id,
-      name: it.name,
-      loadUnit: it.loadUnit || "kg",
-      modality: it.modality || "strength",
-      metric: it.metric || "reps",
-      // A planning template is prescription only — never "performed"; live sessions mark completion
-      // from whether any set was logged done.
-      completed: isPlanning ? false : anyCompleted,
-      circuitId: it.circuitId || null,
-      circuitTitle: it.circuitTitle || "",
-      circuitSeries: it.circuitSeries || 1,
-      sets,
-    });
+    items.push(buildExerciseSnapshotItem(it, clientState.logs[it.id] || [], isPlanning));
   }
   // The record is frozen from here on, so its order must be carried in it — this is the one write
   // whose output outlives every array it was ever held in (TODO §17.5).
