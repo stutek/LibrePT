@@ -42,6 +42,61 @@ export function renderClientsViewShell() {
   );
 }
 
+function buildClientRoutineState(routine, state) {
+  const clientState = {
+    routineId: routine.id,
+    routineName: routine.name,
+    activeExerciseIndex: 0,
+    exercises: [],
+    logs: {},
+  };
+  for (const item of routine.exercises || []) {
+    const ex = state.exercises.find((e) => e.id === item.id);
+    if (!ex) continue;
+    clientState.exercises.push({
+      id: item.id,
+      name: ex.name,
+      category: ex.category,
+      instructions: ex.instructions,
+      setsTargetCount: item.sets,
+      repsTarget: item.reps,
+      weightTarget: item.weight,
+      loadUnit: loadUnitForEquipment(ex.equipment),
+      modality: modalityOf(ex),
+      metric: primaryMetricOf(ex),
+      rest: item.rest,
+      circuitId: item.circuitId || null,
+      circuitTitle: item.circuitTitle || "",
+      circuitSeries: item.circuitSeries || 1,
+    });
+    clientState.logs[item.id] = Array.from({ length: item.sets }, () => ({
+      reps: item.reps,
+      weight: item.weight,
+      completed: false,
+      note: "",
+    }));
+  }
+  return clientState;
+}
+
+// Marks the first `doneCount` exercises' logged sets as completed, and points the active-exercise
+// pointer at wherever the demo trainer would have "just gotten to."
+function markDemoProgress(clientState, doneCount) {
+  let exIdx = 0;
+  for (const ex of clientState.exercises) {
+    if (exIdx < doneCount) {
+      for (const l of clientState.logs[ex.id] || []) {
+        l.completed = true;
+      }
+    }
+    exIdx++;
+  }
+  clientState.activeExerciseIndex = Math.min(
+    doneCount,
+    Math.max(0, clientState.exercises.length - 1),
+  );
+}
+
 export function seedDemoActiveSession({ state }) {
   const sessions = state.sessions || [];
   const scheduledSession = sessions.find((s) => s.id === "s01f2e3d");
@@ -82,67 +137,16 @@ export function seedDemoActiveSession({ state }) {
 
   const completedCounts = [4, 2, 5, 3, 1, 3, 0];
 
-  {
-    let i = 0;
-    for (const pid of participantIds) {
-      const clientState = {
-        routineId: routine.id,
-        routineName: routine.name,
-        activeExerciseIndex: 0,
-        exercises: [],
-        logs: {},
-      };
-
-      for (const item of routine.exercises || []) {
-        const ex = state.exercises.find((e) => e.id === item.id);
-        if (!ex) continue;
-        clientState.exercises.push({
-          id: item.id,
-          name: ex.name,
-          category: ex.category,
-          instructions: ex.instructions,
-          setsTargetCount: item.sets,
-          repsTarget: item.reps,
-          weightTarget: item.weight,
-          loadUnit: loadUnitForEquipment(ex.equipment),
-          modality: modalityOf(ex),
-          metric: primaryMetricOf(ex),
-          rest: item.rest,
-          circuitId: item.circuitId || null,
-          circuitTitle: item.circuitTitle || "",
-          circuitSeries: item.circuitSeries || 1,
-        });
-        clientState.logs[item.id] = Array.from({ length: item.sets }, () => ({
-          reps: item.reps,
-          weight: item.weight,
-          completed: false,
-          note: "",
-        }));
-      }
-
-      const doneCount = Math.min(
-        completedCounts[i % completedCounts.length],
-        clientState.exercises.length,
-      );
-      {
-        let exIdx = 0;
-        for (const ex of clientState.exercises) {
-          if (exIdx < doneCount) {
-            for (const l of clientState.logs[ex.id] || []) {
-              l.completed = true;
-            }
-          }
-          exIdx++;
-        }
-      }
-      clientState.activeExerciseIndex = Math.min(
-        doneCount,
-        Math.max(0, clientState.exercises.length - 1),
-      );
-
-      session.clientRoutines[pid] = clientState;
-      i++;
-    }
+  let i = 0;
+  for (const pid of participantIds) {
+    const clientState = buildClientRoutineState(routine, state);
+    const doneCount = Math.min(
+      completedCounts[i % completedCounts.length],
+      clientState.exercises.length,
+    );
+    markDemoProgress(clientState, doneCount);
+    session.clientRoutines[pid] = clientState;
+    i++;
   }
 
   localStorage.setItem("librept_active_session", JSON.stringify(session));

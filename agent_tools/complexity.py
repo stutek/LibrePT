@@ -69,9 +69,6 @@ PRE_EXISTING_ALLOWLIST = {
     "src/modules/clipboard/circuitCard.js::renderFocused": (
         "In-focus circuit card markup, branching per member/round/quick-signal state; §14 follow-up."
     ),
-    "src/modules/sessionList/sessionsView.js::seedDemoActiveSession": (
-        "Demo-mode active-session seeding, mirrors real startWorkoutSession's branching; §14 follow-up."
-    ),
 }
 
 _LANGUAGE = Language(tsjs.language())
