@@ -75,9 +75,6 @@ PRE_EXISTING_ALLOWLIST = {
     "src/modules/clipboard/exerciseDeck.js::<anonymous>@112": (
         "Per-item deck row builder inside renderExerciseDeck's map(); §14 follow-up."
     ),
-    "src/modules/common/notificationArea.js::renderNotificationArea": (
-        "Merges adjustments/reviews/version-message/active-session banners into one feed; §14 follow-up."
-    ),
     "src/modules/common/sessionItemRecord.js::buildProgramSnapshot": (
         "Flattens a live plan (exercises + rests + circuits) into an immutable history record; §14 follow-up."
     ),

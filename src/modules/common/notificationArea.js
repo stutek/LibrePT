@@ -89,39 +89,27 @@ function buildPendingSessionsItem(state, t) {
   };
 }
 
-export function renderNotificationArea() {
-  if (!deps) return;
-  const { t, escapeHTML } = deps;
-
-  const container = document.getElementById("notification-list-container");
-  const summaryCountEl = document.getElementById("notification-summary-count");
-  const feedCountEl = document.getElementById("notification-feed-count");
-  const summaryTitleEl = document.getElementById("notification-summary-title");
-  const summaryDescEl = document.getElementById("notification-summary-desc");
-  const summaryIconEl = document.getElementById("notification-summary-icon");
-  if (!container) return;
-
-  // Read stored read IDs
-  let readIds = [];
+function loadReadNotificationIds() {
   try {
-    readIds = JSON.parse(readVersionScoped(READ_NOTIFICATIONS_KEY) || "[]");
+    return JSON.parse(readVersionScoped(READ_NOTIFICATIONS_KEY) || "[]");
   } catch (e) {
-    readIds = [];
+    return [];
   }
+}
 
-  // Notifications are data-driven: they come from state.notifications, which is seeded together
-  // with the demo dataset (?init=demo_data_load) — so a genuinely clean install shows an empty
-  // feed, while a demo instance surfaces its messages (including the demo-mode clean-up notice).
-  // Stored records carry i18n *keys* (titleKey/descKey/labelKey), resolved here so the feed
-  // re-localizes on a language switch; `url`/`view`/`primary`/`icon`/`type` pass through.
-  const state = deps.getState?.() || {};
+// Notifications are data-driven: they come from state.notifications, which is seeded together
+// with the demo dataset (?init=demo_data_load) — so a genuinely clean install shows an empty
+// feed, while a demo instance surfaces its messages (including the demo-mode clean-up notice).
+// Stored records carry i18n *keys* (titleKey/descKey/labelKey), resolved here so the feed
+// re-localizes on a language switch; `url`/`view`/`primary`/`icon`/`type` pass through.
+// Synthetic items (built fresh from state.history / state.planUpdates, never stored themselves)
+// lead the feed — they name work the trainer still owes a client, ahead of FYI-only messages.
+function resolveNotificationItems(state, t, readIds) {
   const rawItems = state.notifications || [];
-  // Synthetic items (built fresh from state.history / state.planUpdates, never stored themselves)
-  // lead the feed — they name work the trainer still owes a client, ahead of FYI-only messages.
   const syntheticItems = [buildUnscheduledPlansItem(state, t), buildPendingSessionsItem(state, t)]
     .filter(Boolean)
     .map((it) => ({ ...it, read: readIds.includes(it.id) }));
-  const items = [
+  return [
     ...syntheticItems,
     ...rawItems.map((n) => ({
       id: n.id,
@@ -139,100 +127,74 @@ export function renderNotificationArea() {
       read: readIds.includes(n.id),
     })),
   ];
+}
 
-  const allCount = items.length;
-  const unreadCount = items.filter((i) => !i.read).length;
-  const countText = (t("notif_count_badge") || "{unread} unread / {all} all")
-    .replace("{unread}", unreadCount.toString())
-    .replace("{all}", allCount.toString());
+function renderEmptyNotificationState(
+  container,
+  t,
+  escapeHTML,
+  { summaryTitleEl, summaryDescEl, summaryIconEl },
+) {
+  if (summaryTitleEl) summaryTitleEl.textContent = t("notif_welcome_title") || "Interactive Demo";
+  if (summaryDescEl) summaryDescEl.textContent = t("notif_welcome_desc") || "Run demo";
+  if (summaryIconEl) summaryIconEl.className = "fa-solid fa-sparkles notification-bell-icon";
 
-  if (summaryCountEl) {
-    summaryCountEl.textContent = countText;
-    summaryCountEl.classList.toggle("has-unread", unreadCount > 0);
-  }
-  if (feedCountEl) {
-    feedCountEl.textContent = countText;
-    feedCountEl.classList.toggle("has-unread", unreadCount > 0);
-  }
-
-  const markAllBtn = document.getElementById("btn-mark-all-read");
-  if (markAllBtn) {
-    markAllBtn.style.display = unreadCount > 0 ? "inline-flex" : "none";
-  }
-
-  if (items.length > 0) {
-    const firstItem = items[0];
-    if (summaryTitleEl) summaryTitleEl.textContent = firstItem.title.replace("👋 ", "");
-    if (summaryDescEl) summaryDescEl.textContent = firstItem.description;
-    if (summaryIconEl && firstItem.icon)
-      summaryIconEl.className = `${firstItem.icon} notification-bell-icon`;
-  } else {
-    if (summaryTitleEl) summaryTitleEl.textContent = t("notif_welcome_title") || "Interactive Demo";
-    if (summaryDescEl) summaryDescEl.textContent = t("notif_welcome_desc") || "Run demo";
-    if (summaryIconEl) summaryIconEl.className = "fa-solid fa-sparkles notification-bell-icon";
-
-    container.innerHTML = `
-      <div class="notification-empty">
-        <div class="notification-card welcome unread" data-notification-id="demo-invitation">
-          <div class="notification-card-icon">
-            <i class="fa-solid fa-sparkles"></i>
-          </div>
-          <div class="notification-card-content">
-            <h4 class="notification-card-title">${escapeHTML(t("notif_welcome_title"))} <span class="unread-dot" title="Unread"></span></h4>
-            <p class="notification-card-desc">${escapeHTML(t("notif_welcome_desc"))}</p>
-            <div class="notification-actions">
-              <button type="button" class="notification-btn primary" id="btn-run-inapp-demo">${escapeHTML(t("notif_demo_btn") || "Run Live Demo")}</button>
-            </div>
+  container.innerHTML = `
+    <div class="notification-empty">
+      <div class="notification-card welcome unread" data-notification-id="demo-invitation">
+        <div class="notification-card-icon">
+          <i class="fa-solid fa-sparkles"></i>
+        </div>
+        <div class="notification-card-content">
+          <h4 class="notification-card-title">${escapeHTML(t("notif_welcome_title"))} <span class="unread-dot" title="Unread"></span></h4>
+          <p class="notification-card-desc">${escapeHTML(t("notif_welcome_desc"))}</p>
+          <div class="notification-actions">
+            <button type="button" class="notification-btn primary" id="btn-run-inapp-demo">${escapeHTML(t("notif_demo_btn") || "Run Live Demo")}</button>
           </div>
         </div>
       </div>
-    `;
+    </div>
+  `;
 
-    // Version offers sit above the feed even when there are no stored notifications: an upgrade
-    // invitation is not something a clean install should have to earn.
-    renderVersionMessages(container);
+  // Version offers sit above the feed even when there are no stored notifications: an upgrade
+  // invitation is not something a clean install should have to earn.
+  renderVersionMessages(container);
 
-    const demoBtn = container.querySelector("#btn-run-inapp-demo");
-    if (demoBtn) {
-      demoBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        if (typeof window.seedMockData === "function") {
-          window.seedMockData();
-          window.location.reload();
-        }
-      });
+  const demoBtn = container.querySelector("#btn-run-inapp-demo");
+  demoBtn?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (typeof window.seedMockData === "function") {
+      window.seedMockData();
+      window.location.reload();
     }
+  });
+}
 
-    syncNotificationBarState();
-    return;
+function buildNotificationActionHTML(act, itemId, escapeHTML) {
+  const primaryCls = act.primary ? "primary" : "";
+  if (act.resetDemo) {
+    return `<button type="button" class="notification-btn ${primaryCls}" data-action-reset="true" data-action-id="${escapeHTML(itemId)}">${escapeHTML(act.label)}</button>`;
   }
+  if (act.resumePlanId) {
+    return `<button type="button" class="notification-btn ${primaryCls}" data-action-resume="${escapeHTML(act.resumePlanId)}" data-action-id="${escapeHTML(itemId)}">${escapeHTML(act.label)}</button>`;
+  }
+  if (act.url) {
+    return `<a href="${escapeHTML(act.url)}" target="_blank" rel="noopener noreferrer" class="notification-link" data-action-id="${escapeHTML(itemId)}">${escapeHTML(act.label)} <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 11px; margin-left: 2px;"></i></a>`;
+  }
+  return `<button type="button" class="notification-btn ${primaryCls}" data-nav-target="${escapeHTML(act.view || "")}" data-action-id="${escapeHTML(itemId)}">${escapeHTML(act.label)}</button>`;
+}
 
-  container.innerHTML = items
-    .map((item) => {
-      const iconClass = item.icon || "fa-solid fa-bell";
-      const actionsHTML =
-        item.actions && item.actions.length > 0
-          ? `<div class="notification-actions">
-          ${item.actions
-            .map((act) => {
-              if (act.resetDemo) {
-                return `<button type="button" class="notification-btn ${act.primary ? "primary" : ""}" data-action-reset="true" data-action-id="${escapeHTML(item.id)}">${escapeHTML(act.label)}</button>`;
-              }
-              if (act.resumePlanId) {
-                return `<button type="button" class="notification-btn ${act.primary ? "primary" : ""}" data-action-resume="${escapeHTML(act.resumePlanId)}" data-action-id="${escapeHTML(item.id)}">${escapeHTML(act.label)}</button>`;
-              }
-              if (act.url) {
-                return `<a href="${escapeHTML(act.url)}" target="_blank" rel="noopener noreferrer" class="notification-link" data-action-id="${escapeHTML(item.id)}">${escapeHTML(act.label)} <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 11px; margin-left: 2px;"></i></a>`;
-              }
-              return `<button type="button" class="notification-btn ${act.primary ? "primary" : ""}" data-nav-target="${escapeHTML(act.view || "")}" data-action-id="${escapeHTML(item.id)}">${escapeHTML(act.label)}</button>`;
-            })
-            .join("")}
+function buildNotificationCardHTML(item, escapeHTML) {
+  const iconClass = item.icon || "fa-solid fa-bell";
+  const actionsHTML =
+    item.actions && item.actions.length > 0
+      ? `<div class="notification-actions">
+          ${item.actions.map((act) => buildNotificationActionHTML(act, item.id, escapeHTML)).join("")}
         </div>`
-          : "";
+      : "";
+  const unreadDot = !item.read ? `<span class="unread-dot" title="Unread"></span>` : "";
 
-      const unreadDot = !item.read ? `<span class="unread-dot" title="Unread"></span>` : "";
-
-      return `
+  return `
       <div class="notification-card ${escapeHTML(item.type)} ${!item.read ? "unread" : "read"}" data-notification-id="${escapeHTML(item.id)}">
         <div class="notification-card-icon">
           <i class="${escapeHTML(iconClass)}"></i>
@@ -244,11 +206,22 @@ export function renderNotificationArea() {
         </div>
       </div>
     `;
-    })
-    .join("");
+}
 
-  renderVersionMessages(container);
+// Persists a newly-read id and reports whether it actually changed anything (callers use this to
+// decide whether a re-render is warranted).
+function markNotificationRead(itemId, readIds) {
+  if (!itemId || readIds.includes(itemId)) return false;
+  readIds.push(itemId);
+  try {
+    writeVersionScoped(READ_NOTIFICATIONS_KEY, JSON.stringify(readIds));
+  } catch (e) {
+    console.warn("Failed to persist read notifications to localStorage:", e);
+  }
+  return true;
+}
 
+function wireNotificationCardActions(container, deps, t, readIds) {
   // Attach reset demo data listeners
   for (const btn of container.querySelectorAll("button[data-action-reset]")) {
     btn.addEventListener("click", (e) => {
@@ -256,10 +229,8 @@ export function renderNotificationArea() {
       const msg =
         t("confirm_reset_demo_data") ||
         "Clear all sample demo data and reset to a clean, empty slate?";
-      if (window.confirm(msg)) {
-        if (typeof window.resetLibrePTData === "function") {
-          window.resetLibrePTData({ demo: false });
-        }
+      if (window.confirm(msg) && typeof window.resetLibrePTData === "function") {
+        window.resetLibrePTData({ demo: false });
       }
     });
   }
@@ -284,15 +255,7 @@ export function renderNotificationArea() {
     btn.addEventListener("click", (e) => {
       e.stopPropagation();
       const target = btn.getAttribute("data-nav-target");
-      const itemId = btn.getAttribute("data-action-id");
-      if (itemId && !readIds.includes(itemId)) {
-        readIds.push(itemId);
-        try {
-          writeVersionScoped(READ_NOTIFICATIONS_KEY, JSON.stringify(readIds));
-        } catch (e) {
-          console.warn("Failed to persist read notifications to localStorage:", e);
-        }
-      }
+      markNotificationRead(btn.getAttribute("data-action-id"), readIds);
       if (target && deps.navigateToPath) {
         deps.navigateToPath(target);
         toggleNotificationArea(false);
@@ -304,14 +267,7 @@ export function renderNotificationArea() {
 
   for (const link of container.querySelectorAll("a[data-action-id]")) {
     link.addEventListener("click", () => {
-      const itemId = link.getAttribute("data-action-id");
-      if (itemId && !readIds.includes(itemId)) {
-        readIds.push(itemId);
-        try {
-          writeVersionScoped(READ_NOTIFICATIONS_KEY, JSON.stringify(readIds));
-        } catch (e) {
-          console.warn("Failed to persist read notifications to localStorage:", e);
-        }
+      if (markNotificationRead(link.getAttribute("data-action-id"), readIds)) {
         renderNotificationArea();
       }
     });
@@ -320,19 +276,69 @@ export function renderNotificationArea() {
   // Clicking any unread card marks it as read
   for (const card of container.querySelectorAll(".notification-card.unread")) {
     card.addEventListener("click", () => {
-      const itemId = card.getAttribute("data-notification-id");
-      if (itemId && !readIds.includes(itemId)) {
-        readIds.push(itemId);
-        try {
-          writeVersionScoped(READ_NOTIFICATIONS_KEY, JSON.stringify(readIds));
-        } catch (e) {
-          console.warn("Failed to persist read notifications to localStorage:", e);
-        }
+      if (markNotificationRead(card.getAttribute("data-notification-id"), readIds)) {
         renderNotificationArea();
       }
     });
   }
+}
 
+export function renderNotificationArea() {
+  if (!deps) return;
+  const { t, escapeHTML } = deps;
+
+  const container = document.getElementById("notification-list-container");
+  const summaryCountEl = document.getElementById("notification-summary-count");
+  const feedCountEl = document.getElementById("notification-feed-count");
+  const summaryTitleEl = document.getElementById("notification-summary-title");
+  const summaryDescEl = document.getElementById("notification-summary-desc");
+  const summaryIconEl = document.getElementById("notification-summary-icon");
+  if (!container) return;
+
+  const readIds = loadReadNotificationIds();
+  const state = deps.getState?.() || {};
+  const items = resolveNotificationItems(state, t, readIds);
+
+  const allCount = items.length;
+  const unreadCount = items.filter((i) => !i.read).length;
+  const countText = (t("notif_count_badge") || "{unread} unread / {all} all")
+    .replace("{unread}", unreadCount.toString())
+    .replace("{all}", allCount.toString());
+
+  if (summaryCountEl) {
+    summaryCountEl.textContent = countText;
+    summaryCountEl.classList.toggle("has-unread", unreadCount > 0);
+  }
+  if (feedCountEl) {
+    feedCountEl.textContent = countText;
+    feedCountEl.classList.toggle("has-unread", unreadCount > 0);
+  }
+
+  const markAllBtn = document.getElementById("btn-mark-all-read");
+  if (markAllBtn) {
+    markAllBtn.style.display = unreadCount > 0 ? "inline-flex" : "none";
+  }
+
+  if (items.length === 0) {
+    renderEmptyNotificationState(container, t, escapeHTML, {
+      summaryTitleEl,
+      summaryDescEl,
+      summaryIconEl,
+    });
+    syncNotificationBarState();
+    return;
+  }
+
+  const firstItem = items[0];
+  if (summaryTitleEl) summaryTitleEl.textContent = firstItem.title.replace("👋 ", "");
+  if (summaryDescEl) summaryDescEl.textContent = firstItem.description;
+  if (summaryIconEl && firstItem.icon)
+    summaryIconEl.className = `${firstItem.icon} notification-bell-icon`;
+
+  container.innerHTML = items.map((item) => buildNotificationCardHTML(item, escapeHTML)).join("");
+
+  renderVersionMessages(container);
+  wireNotificationCardActions(container, deps, t, readIds);
   syncNotificationBarState();
 }
 
