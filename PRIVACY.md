@@ -1,6 +1,6 @@
 # LibrePT — Privacy & GDPR Statement
 
-*Last Updated: July 2026*
+*Last Updated: August 2026*
 
 ---
 
@@ -17,11 +17,16 @@ We believe that data privacy and data ownership are fundamental rights:
 
 ## 2. Cloud Synchronization & Data Security (Optional Cloud Storage & Backups)
 
-When using cloud synchronization, remote database hosting, or backup features (`Sync & Backup Center`):
-- Data is transmitted directly from your local device to your personal cloud storage provider (e.g., Google Drive AppData folder, iCloud, or WebDAV) or integrated remote databases using standard client-side authentication.
+LibrePT's optional Google integration is split by what the data actually is, not bundled into one generic "cloud sync":
+- **Scheduling data (session times, room, client RSVP)** lives in **your own Google Calendar** — LibrePT reads and writes it directly via your own OAuth-authorized account. Google Calendar is the authoritative record for this data; LibrePT never stores an independent copy that could drift from it.
+- **App-only data with no Calendar equivalent** (routines, session notes, logged sets/reps) can optionally sync across your own devices via **Google Drive's `appDataFolder`** — a storage area private to the LibrePT app inside your own Drive, invisible in your normal Drive file browser and inaccessible to other apps.
+- **Other trainers sharing a gym/room** only ever see your session slots as busy/free time blocks (via Calendar free/busy), never your client names, notes, or session detail.
+
+Regardless of which of the above is in use:
+- Data is transmitted directly from your local device to your own Google account using standard OAuth authentication — LibrePT never proxies it through a server we operate.
 - **HTTPS Only Protocol Enforcement:** All remote network communications and Web PWA assets are strictly restricted to TLS-encrypted HTTPS endpoints. Non-localhost HTTP connections are automatically redirected to `https://` before application initialization, guaranteeing that client records, authentication tokens, and backup payloads are never exposed over unencrypted HTTP channels.
-- **No Third-Party Interception:** The LibrePT maintainers and developers do not host, access, process, or view any data you sync to your personal cloud storage or remote databases.
-- **End-to-End Security:** We strongly recommend securing your device with a passcode/biometrics and utilizing client-side encryption (`Web Crypto API`) where applicable so that synced cloud snapshots and backups remain opaque and secure at rest.
+- **No Third-Party Interception:** The LibrePT maintainers and developers do not host, access, process, or view any data you sync to your personal cloud storage or remote databases. Because no server we operate ever touches your client data, we are not a data processor for it — your relationship with Google (as your own chosen storage provider) is yours alone.
+- **What Google's platform encryption does and doesn't cover:** Google encrypts Drive/Calendar data in transit (TLS) and at rest (server-side AES-256) as standard platform behavior. This is *not* zero-knowledge encryption — Google's own infrastructure can technically access the underlying content (e.g., automated abuse scanning, legal process), same as any file stored in your Drive. For most coaching data this is a reasonable baseline; if you want stronger protection, LibrePT supports optional client-side encryption (`Web Crypto API`) before data is uploaded, so synced snapshots are opaque even to Google. **Trade-off to know before enabling it:** the encryption key is not recoverable by LibrePT or Google — losing the key or the device that holds it makes that cloud copy permanently unreadable, so treat it as an additional safeguard alongside your local backups, not a replacement for them.
 
 ---
 
@@ -65,7 +70,7 @@ To prepare our workout schedules, track your strength progression, and ensure sa
 
 In accordance with data protection regulations (GDPR), I want to make sure you are fully informed about how your coaching data is managed:
 
-1. Storage & Security: Your workout logs and training notes are stored securely on my device and backed up in encrypted form to my personal cloud storage (Google Drive/iCloud) strictly for coaching continuity and preparation.
+1. Storage & Security: Your workout logs and training notes are stored securely on my device and, optionally, backed up in encrypted form to my personal Google Drive strictly for coaching continuity and preparation.
 2. No Third-Party Tracking or Selling: Your data is never sold, shared with advertisers, or transferred to third parties.
 3. Artificial Intelligence Safety: If I utilize AI tools to assist in periodizing or analyzing workout volume, your records are strictly anonymized (all names and identifying personal information are stripped) prior to analysis.
 4. Your Rights: You have the right at any time to request a complete export of your workout history, request corrections, or ask for your personal records to be permanently deleted.

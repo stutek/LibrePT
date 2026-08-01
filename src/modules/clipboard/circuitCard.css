@@ -5,7 +5,7 @@
    this file adds only what circuitCard.js exclusively owns. */
 
 .circuit-title {
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--text-color);
   display: inline-flex;
@@ -20,22 +20,22 @@
    so the label keeps strong contrast against the badge. */
 .circuit-round-badge {
   font-family: var(--font-sans);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
   color: var(--primary);
   background: var(--primary-light);
   border: 1px solid color-mix(in srgb, var(--primary) 45%, transparent);
-  padding: 3px 10px;
+  padding: 2px 8px;
   border-radius: 999px;
   white-space: nowrap;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 .circuit-ex-list {
-  gap: 4px;
+  gap: 2px;
 }
 .circuit-ex-row {
-  padding: 6px 0;
+  padding: 4px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 } /* Name + target on one line, sitting right next to each other. */
 .circuit-ex-head {
@@ -43,11 +43,11 @@
   align-items: baseline;
   flex-wrap: wrap;
   gap: 10px;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 .circuit-ex-name {
   font-weight: 700;
-  font-size: 15px;
+  font-size: 14px;
 }
 .circuit-ex-target {
   display: inline-flex;
@@ -63,11 +63,11 @@
    the buttons stay gym-floor sized. */
 .circuit-ex-actions {
   display: flex;
-  gap: 8px;
+  gap: 6px;
 } /* Labeled per-exercise feedback trio (Easy / Hard / Note) */
 .circuit-sig {
   flex: 1;
-  height: 38px;
+  height: 32px;
   border-radius: var(--btn-radius);
   border: 1px solid var(--border-color);
   background: rgba(255, 255, 255, 0.04);
@@ -76,18 +76,18 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
-  padding: 0 12px;
-  gap: 6px;
+  padding: 0 8px;
+  gap: 5px;
   transition: all 0.15s ease;
 }
 .circuit-sig > span {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
 }
 .circuit-sig > i {
-  font-size: 14px;
+  font-size: 13px;
 }
 .circuit-sig.easy:hover {
   color: var(--success);
@@ -120,11 +120,11 @@
 .circuit-break-row {
   width: 100%;
   font-family: inherit;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--text-main);
-  padding: 6px 12px;
-  margin: 2px 0 4px;
+  padding: 5px 10px;
+  margin: 1px 0 3px;
   display: flex;
   align-items: center;
   gap: 8px;

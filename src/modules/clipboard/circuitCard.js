@@ -110,8 +110,8 @@ export class CircuitDeckCard extends DeckCard {
       ? `<div class="circuit-done"><i class="fa-solid fa-circle-check"></i> ${t("session_completed")}</div>`
       : `<button type="button" class="btn success-btn btn-sm circuit-complete-btn"><i class="fa-solid fa-check"></i> ${isLastRound ? t("finish_circuit") : `${t("complete_round")} ${round} / ${item.series}`}</button>`;
     card.innerHTML = `
-      <div class="deck-card-top" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-        <span class="circuit-title" style="font-weight: 700; font-size: 13px;"><i class="fa-solid fa-layer-group"></i> ${title}</span>
+      <div class="deck-card-top">
+        <span class="circuit-title"><i class="fa-solid fa-layer-group"></i> ${title}</span>
         <span class="deck-card-top-right">
           <span class="circuit-round-badge">${t("round_label")} ${round} / ${item.series}</span>
           <button type="button" class="deck-card-timer" aria-label="${t("rest_timer")}" title="${t("rest_timer")}"><i class="fa-solid fa-stopwatch"></i></button>
