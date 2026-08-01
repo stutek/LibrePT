@@ -63,79 +63,58 @@ function card({ id, tone, icon, title, description, actionLabel, actionId }) {
     </div>`;
 }
 
-/**
- * Prepend the version messages to the notification feed. A no-op when there is nothing to offer —
- * which is every build until versioned hosting publishes a manifest.
- */
-export function renderVersionMessages(container, { release = currentRelease() } = {}) {
-  if (!container || !deps.t) return;
-  const catalog = deps.getCatalog?.();
-  const { upgrade, rollback, eol } = evaluateVersionOffer(catalog, { release });
-  if (!upgrade && !rollback && !eol) return;
+function buildEolCard(t, upgrade) {
+  return card({
+    id: "version-eol",
+    tone: "warning",
+    icon: "fa-solid fa-triangle-exclamation",
+    title: t("version_eol_title") || "This version is no longer supported",
+    description: fill(
+      t("version_eol_desc") || "Fixes only land on the current version ({version}).",
+      {
+        version: upgrade?.id || "",
+      },
+    ),
+    actionLabel: fill(t("version_upgrade_btn") || "Switch to {version}", {
+      version: upgrade?.id || "",
+    }),
+    actionId: upgrade ? `upgrade:${upgrade.id}` : "",
+  });
+}
 
-  const { t } = deps;
-  const running = release;
-  const cards = [];
+function buildUpgradeCard(t, upgrade) {
+  return card({
+    id: "version-upgrade",
+    tone: "info",
+    icon: "fa-solid fa-circle-up",
+    title: t("version_upgrade_title") || "A new version is available",
+    description: fill(
+      t("version_upgrade_desc") ||
+        "Version {version} is ready. Switch whenever it suits you — your data is copied across.",
+      { version: upgrade.id },
+    ),
+    actionLabel: fill(t("version_upgrade_btn") || "Switch to {version}", { version: upgrade.id }),
+    actionId: `upgrade:${upgrade.id}`,
+  });
+}
 
-  if (eol) {
-    cards.push(
-      card({
-        id: "version-eol",
-        tone: "warning",
-        icon: "fa-solid fa-triangle-exclamation",
-        title: t("version_eol_title") || "This version is no longer supported",
-        description: fill(
-          t("version_eol_desc") || "Fixes only land on the current version ({version}).",
-          { version: upgrade?.id || "" },
-        ),
-        actionLabel: fill(t("version_upgrade_btn") || "Switch to {version}", {
-          version: upgrade?.id || "",
-        }),
-        actionId: upgrade ? `upgrade:${upgrade.id}` : "",
-      }),
-    );
-  } else if (upgrade) {
-    cards.push(
-      card({
-        id: "version-upgrade",
-        tone: "info",
-        icon: "fa-solid fa-circle-up",
-        title: t("version_upgrade_title") || "A new version is available",
-        description: fill(
-          t("version_upgrade_desc") ||
-            "Version {version} is ready. Switch whenever it suits you — your data is copied across.",
-          { version: upgrade.id },
-        ),
-        actionLabel: fill(t("version_upgrade_btn") || "Switch to {version}", {
-          version: upgrade.id,
-        }),
-        actionId: `upgrade:${upgrade.id}`,
-      }),
-    );
-  }
+function buildRollbackCard(t, rollback, running) {
+  return card({
+    id: "version-rollback",
+    tone: "muted",
+    icon: "fa-solid fa-rotate-left",
+    title: fill(t("version_rollback_title") || "Go back to {version}", { version: rollback.id }),
+    description: fill(
+      t("version_rollback_desc") ||
+        "You can return to {version} at any time. Anything recorded since you switched stays on {current} and does not come back with you.",
+      { version: rollback.id, current: running },
+    ),
+    actionLabel: t("version_rollback_btn") || "Switch back",
+    actionId: `rollback:${rollback.id}`,
+  });
+}
 
-  if (rollback) {
-    cards.push(
-      card({
-        id: "version-rollback",
-        tone: "muted",
-        icon: "fa-solid fa-rotate-left",
-        title: fill(t("version_rollback_title") || "Go back to {version}", {
-          version: rollback.id,
-        }),
-        description: fill(
-          t("version_rollback_desc") ||
-            "You can return to {version} at any time. Anything recorded since you switched stays on {current} and does not come back with you.",
-          { version: rollback.id, current: running },
-        ),
-        actionLabel: t("version_rollback_btn") || "Switch back",
-        actionId: `rollback:${rollback.id}`,
-      }),
-    );
-  }
-
-  container.insertAdjacentHTML("afterbegin", cards.join(""));
-
+function wireVersionActionButtons(container, { rollback, upgrade, running, t }) {
   for (const button of container.querySelectorAll("button[data-version-action]")) {
     button.addEventListener("click", (event) => {
       event.stopPropagation();
@@ -156,4 +135,32 @@ export function renderVersionMessages(container, { release = currentRelease() } 
       switchToRelease(target, { release: running });
     });
   }
+}
+
+/**
+ * Prepend the version messages to the notification feed. A no-op when there is nothing to offer —
+ * which is every build until versioned hosting publishes a manifest.
+ */
+export function renderVersionMessages(container, { release = currentRelease() } = {}) {
+  if (!container || !deps.t) return;
+  const catalog = deps.getCatalog?.();
+  const { upgrade, rollback, eol } = evaluateVersionOffer(catalog, { release });
+  if (!upgrade && !rollback && !eol) return;
+
+  const { t } = deps;
+  const running = release;
+  const cards = [];
+
+  if (eol) {
+    cards.push(buildEolCard(t, upgrade));
+  } else if (upgrade) {
+    cards.push(buildUpgradeCard(t, upgrade));
+  }
+
+  if (rollback) {
+    cards.push(buildRollbackCard(t, rollback, running));
+  }
+
+  container.insertAdjacentHTML("afterbegin", cards.join(""));
+  wireVersionActionButtons(container, { rollback, upgrade, running, t });
 }
