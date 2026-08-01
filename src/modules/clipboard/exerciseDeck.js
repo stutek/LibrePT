@@ -25,6 +25,206 @@ import { ExerciseDeckCard } from "./exerciseCard.js";
 import { PastDeckCard } from "./pastDeckCard.js";
 import { RestDeckCard } from "./restDeckCard.js";
 
+// The last-performance reference lists movements only — flatten past rests/circuit scaffolding
+// to their exercise leaves (structured records) while legacy flat rows pass through unchanged.
+function buildPastExerciseItems(pastSession, dateStr) {
+  const items = [];
+  let pIdx = 0;
+  for (const ex of exerciseRecordsOf(pastSession.exercises)) {
+    items.push({
+      id: `past-${pastSession.id}-${ex.id}-${pIdx}`,
+      name: ex.name,
+      type: "past",
+      sessionDate: dateStr,
+      sets: ex.sets,
+      loadUnit: ex.loadUnit || "kg",
+      metric: ex.metric || "reps",
+      modality: ex.modality || "strength",
+      routineName: pastSession.routineName,
+    });
+    pIdx++;
+  }
+  return items;
+}
+
+function buildRestDeckItem(ex, idx, currentExIdx) {
+  return {
+    id: ex.id,
+    index: idx,
+    type: "rest",
+    rest: ex.rest || 0,
+    circuitId: ex.circuitId || null,
+    circuitTitle: ex.circuitTitle || "",
+    circuitSeries: ex.circuitSeries || 1,
+    // Rest is a first-class plan item: isInFocus is computed the SAME way for every item type —
+    // idx === currentExIdx — no more hardcoded exception for rests (TODO §8.6).
+    isInFocus: idx === currentExIdx,
+    // Still true regardless of focus: keeps a rest from blocking a circuit's "all members
+    // complete" aggregation in buildCircuitUnits — a rest has nothing to complete.
+    isCompleted: true,
+  };
+}
+
+function resolveExerciseTargets(ex) {
+  return {
+    setsTarget: ex.setsTargetCount || ex.sets || 3,
+    repsTarget: ex.repsTarget ?? ex.reps ?? 10,
+    weightTarget: ex.weightTarget ?? ex.weight ?? 0,
+  };
+}
+
+function buildCurrentExerciseDeckItem(ex, idx, currentExIdx, activeClientState) {
+  const logsList = activeClientState.logs[ex.id] || [];
+  const isCompleted = logsList.length > 0 && logsList.every((l) => l.completed);
+  return {
+    id: ex.id,
+    index: idx,
+    name: ex.name,
+    type: "current",
+    isCompleted,
+    isInFocus: idx === currentExIdx,
+    instructions: ex.instructions,
+    ...resolveExerciseTargets(ex),
+    loadUnit: ex.loadUnit || "kg",
+    modality: ex.modality || "strength",
+    metric: ex.metric || "reps",
+    rest: ex.rest || 0,
+    circuitId: ex.circuitId || null,
+    circuitTitle: ex.circuitTitle || "",
+    circuitSeries: ex.circuitSeries || 1,
+  };
+}
+
+// The trainer inserting an exercise/circuit/rest right after the in-focus card mid-session — drops
+// them into the editor pointed at the new (blank) item, same shape whichever kind was tapped.
+function insertFastAdjustmentItem(type, activeItem, ctx) {
+  const {
+    activeClientState,
+    saveActiveSessionToCache,
+    saveToLocalStorage,
+    enterEditMode,
+    onRerender,
+  } = ctx;
+  let insertIndex = -1;
+  if (activeItem.type === "circuit") {
+    const circuitId = activeItem.circuitId;
+    let idx = 0;
+    for (const ex of activeClientState.exercises) {
+      if (ex.circuitId === circuitId) {
+        insertIndex = idx;
+      }
+      idx++;
+    }
+  } else {
+    insertIndex = activeItem.index;
+  }
+
+  const newIdx = insertIndex + 1;
+  const cid = activeItem.type === "circuit" ? activeItem.circuitId : null;
+  const circuitTitle = activeItem.type === "circuit" ? activeItem.title : "";
+  const circuitSeries = activeItem.type === "circuit" ? activeItem.series : 1;
+
+  // The insert drops the trainer into the editor mid-plan, where a blank row looks like every
+  // other row. Hand the new item's id to edit mode so it can point at the one just created.
+  let newItemId;
+
+  if (type === "rest") {
+    newItemId = `rest-${newRecordId()}`;
+    activeClientState.exercises.splice(newIdx, 0, {
+      id: newItemId,
+      type: "rest",
+      rest: 30,
+      circuitId: cid,
+      circuitTitle: circuitTitle,
+      circuitSeries: circuitSeries,
+    });
+  } else if (type === "circuit") {
+    const newCircuitId = `c-${newRecordId()}`;
+    const id = newRecordId();
+    newItemId = id;
+    activeClientState.logs[id] = Array.from({ length: 3 }, () => ({
+      reps: 10,
+      weight: 0,
+      completed: false,
+      note: "",
+    }));
+    activeClientState.exercises.splice(newIdx, 0, {
+      id,
+      name: "",
+      setsTargetCount: 3,
+      repsTarget: 10,
+      weightTarget: 0,
+      circuitId: newCircuitId,
+      circuitTitle: "",
+      circuitSeries: 3,
+    });
+  } else {
+    // exercise
+    const id = newRecordId();
+    newItemId = id;
+    activeClientState.logs[id] = Array.from({ length: 3 }, () => ({
+      reps: 10,
+      weight: 0,
+      completed: false,
+      note: "",
+    }));
+    activeClientState.exercises.splice(newIdx, 0, {
+      id,
+      name: "",
+      setsTargetCount: 3,
+      repsTarget: 10,
+      weightTarget: 0,
+      circuitId: cid,
+      circuitTitle: circuitTitle,
+      circuitSeries: circuitSeries,
+    });
+  }
+
+  activeClientState.activeExerciseIndex = newIdx;
+  activeClientState.deckAllCollapsed = false;
+
+  saveActiveSessionToCache();
+  if (saveToLocalStorage) saveToLocalStorage();
+
+  if (enterEditMode) {
+    enterEditMode(newItemId);
+  } else {
+    onRerender();
+  }
+}
+
+// The in-focus card's own fast-adjustment bar: +Exercise / +Circuit / +Rest, inserted right after it.
+function renderFastAdjustBar(deckContainer, item, ctx) {
+  const adjustBar = document.createElement("div");
+  adjustBar.className = "fast-adjust-bar";
+  adjustBar.innerHTML = `
+        <button type="button" class="btn btn-sm secondary-btn fast-adj-ex">
+          <i class="fa-solid fa-plus"></i> ${ctx.t("exercise") || "Exercise"}
+        </button>
+        <button type="button" class="btn btn-sm secondary-btn fast-adj-circuit">
+          <i class="fa-solid fa-plus"></i><i class="fa-solid fa-layer-group"></i> ${ctx.t("circuit") || "Circuit"}
+        </button>
+        <button type="button" class="btn btn-sm secondary-btn fast-adj-rest">
+          <i class="fa-solid fa-plus"></i><i class="fa-solid fa-hourglass-half"></i> ${ctx.t("rest_label") || "Rest"}
+        </button>
+      `;
+
+  adjustBar.querySelector(".fast-adj-ex").addEventListener("click", (e) => {
+    e.stopPropagation();
+    insertFastAdjustmentItem("exercise", item, ctx);
+  });
+  adjustBar.querySelector(".fast-adj-circuit").addEventListener("click", (e) => {
+    e.stopPropagation();
+    insertFastAdjustmentItem("circuit", item, ctx);
+  });
+  adjustBar.querySelector(".fast-adj-rest").addEventListener("click", (e) => {
+    e.stopPropagation();
+    insertFastAdjustmentItem("rest", item, ctx);
+  });
+
+  deckContainer.appendChild(adjustBar);
+}
+
 export function renderExerciseDeck(deckContainer, deps) {
   if (!deckContainer) return;
   const {
@@ -77,30 +277,10 @@ export function renderExerciseDeck(deckContainer, deps) {
   );
   clientHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-  const pastExList = [];
-  if (clientHistory.length > 0) {
-    const pastSession = clientHistory[0];
-    const dateStr = formatDateStr(pastSession.date);
-    {
-      let pIdx = 0;
-      // The last-performance reference lists movements only — flatten past rests/circuit scaffolding
-      // to their exercise leaves (structured records) while legacy flat rows pass through unchanged.
-      for (const ex of exerciseRecordsOf(pastSession.exercises)) {
-        pastExList.push({
-          id: `past-${pastSession.id}-${ex.id}-${pIdx}`,
-          name: ex.name,
-          type: "past",
-          sessionDate: dateStr,
-          sets: ex.sets,
-          loadUnit: ex.loadUnit || "kg",
-          metric: ex.metric || "reps",
-          modality: ex.modality || "strength",
-          routineName: pastSession.routineName,
-        });
-        pIdx++;
-      }
-    }
-  }
+  const pastExList =
+    clientHistory.length > 0
+      ? buildPastExerciseItems(clientHistory[0], formatDateStr(clientHistory[0].date))
+      : [];
 
   // Current routine exercises. The deck starts fully collapsed on a fresh open (deckAllCollapsed,
   // stamped by activeSessionController.js's startWorkoutSession/openSessionFromHistory, cleared by
@@ -109,49 +289,11 @@ export function renderExerciseDeck(deckContainer, deps) {
   const currentExIdx = activeClientState.deckAllCollapsed
     ? -1
     : activeClientState.activeExerciseIndex;
-  const currentExList = activeClientState.exercises.map((ex, idx) => {
-    // Rest is a first-class plan item: isInFocus is computed the SAME way for every item type —
-    // idx === currentExIdx — no more hardcoded exception for rests (TODO §8.6).
-    if (isRestRecord(ex)) {
-      return {
-        id: ex.id,
-        index: idx,
-        type: "rest",
-        rest: ex.rest || 0,
-        circuitId: ex.circuitId || null,
-        circuitTitle: ex.circuitTitle || "",
-        circuitSeries: ex.circuitSeries || 1,
-        isInFocus: idx === currentExIdx,
-        // Still true regardless of focus: keeps a rest from blocking a circuit's "all members
-        // complete" aggregation in buildCircuitUnits — a rest has nothing to complete.
-        isCompleted: true,
-      };
-    }
-
-    const logsList = activeClientState.logs[ex.id] || [];
-    const isCompleted = logsList.length > 0 && logsList.every((l) => l.completed);
-    const isInFocus = idx === currentExIdx;
-
-    return {
-      id: ex.id,
-      index: idx,
-      name: ex.name,
-      type: "current",
-      isCompleted,
-      isInFocus,
-      instructions: ex.instructions,
-      setsTarget: ex.setsTargetCount || ex.sets || 3,
-      repsTarget: ex.repsTarget ?? ex.reps ?? 10,
-      weightTarget: ex.weightTarget ?? ex.weight ?? 0,
-      loadUnit: ex.loadUnit || "kg",
-      modality: ex.modality || "strength",
-      metric: ex.metric || "reps",
-      rest: ex.rest || 0,
-      circuitId: ex.circuitId || null,
-      circuitTitle: ex.circuitTitle || "",
-      circuitSeries: ex.circuitSeries || 1,
-    };
-  });
+  const currentExList = activeClientState.exercises.map((ex, idx) =>
+    isRestRecord(ex)
+      ? buildRestDeckItem(ex, idx, currentExIdx)
+      : buildCurrentExerciseDeckItem(ex, idx, currentExIdx, activeClientState),
+  );
 
   // Fold consecutive exercises that share a circuitId into a single circuit/giantset unit; ungrouped
   // exercises stay as their own 'current' cards. Circuits render one card per group.
@@ -228,123 +370,14 @@ export function renderExerciseDeck(deckContainer, deps) {
     deckContainer.appendChild(card);
 
     if (item.isInFocus && !isFutureSession) {
-      const insertFastAdjustment = (type, activeItem) => {
-        let insertIndex = -1;
-        if (activeItem.type === "circuit") {
-          const circuitId = activeItem.circuitId;
-          let idx = 0;
-          for (const ex of activeClientState.exercises) {
-            if (ex.circuitId === circuitId) {
-              insertIndex = idx;
-            }
-            idx++;
-          }
-        } else {
-          insertIndex = activeItem.index;
-        }
-
-        const newIdx = insertIndex + 1;
-        const cid = activeItem.type === "circuit" ? activeItem.circuitId : null;
-        const circuitTitle = activeItem.type === "circuit" ? activeItem.title : "";
-        const circuitSeries = activeItem.type === "circuit" ? activeItem.series : 1;
-
-        // The insert drops the trainer into the editor mid-plan, where a blank row looks like every
-        // other row. Hand the new item's id to edit mode so it can point at the one just created.
-        let newItemId;
-
-        if (type === "rest") {
-          newItemId = `rest-${newRecordId()}`;
-          activeClientState.exercises.splice(newIdx, 0, {
-            id: newItemId,
-            type: "rest",
-            rest: 30,
-            circuitId: cid,
-            circuitTitle: circuitTitle,
-            circuitSeries: circuitSeries,
-          });
-        } else if (type === "circuit") {
-          const newCircuitId = `c-${newRecordId()}`;
-          const id = newRecordId();
-          newItemId = id;
-          activeClientState.logs[id] = Array.from({ length: 3 }, () => ({
-            reps: 10,
-            weight: 0,
-            completed: false,
-            note: "",
-          }));
-          activeClientState.exercises.splice(newIdx, 0, {
-            id,
-            name: "",
-            setsTargetCount: 3,
-            repsTarget: 10,
-            weightTarget: 0,
-            circuitId: newCircuitId,
-            circuitTitle: "",
-            circuitSeries: 3,
-          });
-        } else {
-          // exercise
-          const id = newRecordId();
-          newItemId = id;
-          activeClientState.logs[id] = Array.from({ length: 3 }, () => ({
-            reps: 10,
-            weight: 0,
-            completed: false,
-            note: "",
-          }));
-          activeClientState.exercises.splice(newIdx, 0, {
-            id,
-            name: "",
-            setsTargetCount: 3,
-            repsTarget: 10,
-            weightTarget: 0,
-            circuitId: cid,
-            circuitTitle: circuitTitle,
-            circuitSeries: circuitSeries,
-          });
-        }
-
-        activeClientState.activeExerciseIndex = newIdx;
-        activeClientState.deckAllCollapsed = false;
-
-        saveActiveSessionToCache();
-        if (saveToLocalStorage) saveToLocalStorage();
-
-        if (enterEditMode) {
-          enterEditMode(newItemId);
-        } else {
-          onRerender();
-        }
-      };
-
-      const adjustBar = document.createElement("div");
-      adjustBar.className = "fast-adjust-bar";
-      adjustBar.innerHTML = `
-        <button type="button" class="btn btn-sm secondary-btn fast-adj-ex">
-          <i class="fa-solid fa-plus"></i> ${t("exercise") || "Exercise"}
-        </button>
-        <button type="button" class="btn btn-sm secondary-btn fast-adj-circuit">
-          <i class="fa-solid fa-plus"></i><i class="fa-solid fa-layer-group"></i> ${t("circuit") || "Circuit"}
-        </button>
-        <button type="button" class="btn btn-sm secondary-btn fast-adj-rest">
-          <i class="fa-solid fa-plus"></i><i class="fa-solid fa-hourglass-half"></i> ${t("rest_label") || "Rest"}
-        </button>
-      `;
-
-      adjustBar.querySelector(".fast-adj-ex").addEventListener("click", (e) => {
-        e.stopPropagation();
-        insertFastAdjustment("exercise", item);
+      renderFastAdjustBar(deckContainer, item, {
+        activeClientState,
+        saveActiveSessionToCache,
+        saveToLocalStorage,
+        enterEditMode,
+        onRerender,
+        t,
       });
-      adjustBar.querySelector(".fast-adj-circuit").addEventListener("click", (e) => {
-        e.stopPropagation();
-        insertFastAdjustment("circuit", item);
-      });
-      adjustBar.querySelector(".fast-adj-rest").addEventListener("click", (e) => {
-        e.stopPropagation();
-        insertFastAdjustment("rest", item);
-      });
-
-      deckContainer.appendChild(adjustBar);
     }
   }
 

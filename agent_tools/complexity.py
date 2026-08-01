@@ -69,12 +69,6 @@ PRE_EXISTING_ALLOWLIST = {
     "src/modules/clipboard/circuitCard.js::renderFocused": (
         "In-focus circuit card markup, branching per member/round/quick-signal state; §14 follow-up."
     ),
-    "src/modules/clipboard/exerciseDeck.js::renderExerciseDeck": (
-        "Live deck's top-level render — focus/collapse/circuit/rest dispatch; §14 follow-up."
-    ),
-    "src/modules/clipboard/exerciseDeck.js::<anonymous>@112": (
-        "Per-item deck row builder inside renderExerciseDeck's map(); §14 follow-up."
-    ),
     "src/modules/common/sessionItemRecord.js::buildProgramSnapshot": (
         "Flattens a live plan (exercises + rests + circuits) into an immutable history record; §14 follow-up."
     ),
