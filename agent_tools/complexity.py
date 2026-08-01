@@ -75,12 +75,6 @@ PRE_EXISTING_ALLOWLIST = {
     "src/modules/common/versionMessages.js::renderVersionMessages": (
         "Upgrade/rollback/end-of-support card variants, one render; §14 follow-up."
     ),
-    "src/modules/plans/planAdjustments.js::renderPendingPlanAdjustmentsComponent": (
-        "Pending-adjustment list across every adjustment kind; §14 follow-up."
-    ),
-    "src/modules/plans/planAdjustments.js::openAdjustmentWizardComponent": (
-        "Multi-step apply-adjustment wizard, one function per TODO.md §7; §14 follow-up."
-    ),
     "src/modules/sessionList/sessionsView.js::seedDemoActiveSession": (
         "Demo-mode active-session seeding, mirrors real startWorkoutSession's branching; §14 follow-up."
     ),

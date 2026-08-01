@@ -29,6 +29,118 @@ export function renderAdjustmentsViewShell() {
   );
 }
 
+function resolveAdjustmentBadgeClass(tag) {
+  if (tag.includes("Pain") || tag.includes("Discomfort")) return "badge-danger";
+  if (tag.includes("Hard")) return "badge-warning";
+  if (tag.includes("Easy") || tag.includes("Progression")) return "badge-success";
+  return "badge-primary";
+}
+
+function buildVoiceNoteHTML(u) {
+  if (!u.hasVoiceNote) return "";
+  return `
+        <div class="mini-audio-note" style="display: flex; align-items: center; gap: 6px; margin-top: 6px; background: var(--primary-light); padding: 4px 8px; border-radius: 4px; border: 1px solid color-mix(in srgb, var(--primary) 25%, transparent); width: fit-content;">
+          <button type="button" class="btn-play-adjustment-audio" data-id="${u.id}" style="background: none; border: none; color: var(--primary); cursor: pointer; padding: 0; display: inline-flex; align-items: center;"><i class="fa-solid fa-circle-play" style="font-size: 14px;"></i></button>
+          <span class="audio-status-label" style="font-size: 9px; color: var(--text-muted); font-family: monospace;">voice_memo.wav (0:04)</span>
+        </div>
+      `;
+}
+
+// Toggles the mini play/pause icon on the voice-memo preview — a fixed 3s "playing" state, no real
+// audio (there is no recorded file to play back yet; TODO tracks wiring a real one).
+function wireAdjustmentAudioPreview(card, t) {
+  const playBtn = card.querySelector(".btn-play-adjustment-audio");
+  const audioStatus = card.querySelector(".audio-status-label");
+  if (!playBtn || !audioStatus) return;
+  playBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const playIcon = playBtn.querySelector("i");
+    if (!playIcon.classList.contains("fa-circle-play")) {
+      playIcon.className = "fa-solid fa-circle-play";
+      audioStatus.textContent = "voice_memo.wav (0:04)";
+      return;
+    }
+    playIcon.className = "fa-solid fa-circle-pause";
+    audioStatus.textContent = t("voice_playing");
+    setTimeout(() => {
+      playIcon.className = "fa-solid fa-circle-play";
+      audioStatus.textContent = "voice_memo.wav (0:04)";
+    }, 3000);
+  });
+}
+
+function buildAdjustmentCard(u, ctx) {
+  const { state, t, escapeHTML, navigateToPath, urlFor } = ctx;
+
+  const card = document.createElement("div");
+  card.className = "adjustment-card card glassmorphic";
+  card.style.display = "flex";
+  card.style.justifyContent = "space-between";
+  card.style.alignItems = "center";
+  card.style.gap = "12px";
+  card.style.padding = "12px";
+  card.style.marginBottom = "8px";
+  card.style.borderLeft = "4px solid var(--primary)";
+
+  const info = document.createElement("div");
+  info.style.flex = "1";
+  const badgeClass = resolveAdjustmentBadgeClass(u.tag);
+  info.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px;">
+        <strong style="color: var(--text-color); font-size: 13px;">${escapeHTML(u.clientName)}</strong>
+        <span class="badge ${badgeClass}" style="font-size: 9px; padding: 2px 6px;">${escapeHTML(u.tag)}</span>
+      </div>
+      <div style="font-size: 11px; color: var(--text-muted);">
+        ${t("exercise_of")}: <span class="font-semibold" style="color: var(--primary);">${escapeHTML(u.exerciseName)}</span>
+      </div>
+      ${buildVoiceNoteHTML(u)}
+    `;
+
+  // Icon-only actions (matching the clipboard's own compact .icon-btn edit control) — a card
+  // per unresolved alert already carries client name + tag + exercise, so labelled buttons here
+  // were pure repetition; the icon + tooltip says enough.
+  const actions = document.createElement("div");
+  actions.style.display = "flex";
+  actions.style.gap = "4px";
+  actions.style.flex = "0 0 auto";
+
+  const editBtn = document.createElement("button");
+  editBtn.type = "button";
+  editBtn.className = "icon-btn btn-edit-plan-alert";
+  editBtn.title = t("edit_plan");
+  editBtn.setAttribute("aria-label", t("edit_plan"));
+  editBtn.innerHTML = `<i class="fa-solid fa-pen-to-square"></i>`;
+  editBtn.addEventListener("click", () => {
+    const exercise = state.exercises.find((e) => e.name === u.exerciseName);
+    const routine = exercise
+      ? state.routines.find((r) => r.exercises.some((ex) => ex.id === exercise.id))
+      : null;
+    if (routine) navigateToPath(urlFor("routine.edit", { routineId: routine.id }));
+  });
+
+  const resolveBtn = document.createElement("button");
+  resolveBtn.type = "button";
+  resolveBtn.className = "icon-btn btn-resolve-alert";
+  resolveBtn.title = t("btn_resolve");
+  resolveBtn.setAttribute("aria-label", t("btn_resolve"));
+  resolveBtn.innerHTML = `<i class="fa-solid fa-check"></i>`;
+  // The wizard is a route (`/adjustments/{updateId}`), so Back backs out of it and a link opens
+  // the one alert being resolved.
+  resolveBtn.addEventListener("click", () => {
+    navigateToPath(urlFor("adjustment.apply", { updateId: u.id }));
+  });
+
+  actions.appendChild(editBtn);
+  actions.appendChild(resolveBtn);
+
+  card.appendChild(info);
+  card.appendChild(actions);
+
+  wireAdjustmentAudioPreview(card, t);
+
+  return card;
+}
+
 export function renderPendingPlanAdjustmentsComponent(container, countBadge, ctx) {
   const { state, t, escapeHTML, navigateToPath, urlFor } = ctx;
 
@@ -52,111 +164,7 @@ export function renderPendingPlanAdjustmentsComponent(container, countBadge, ctx
   }
 
   for (const u of unresolved) {
-    const card = document.createElement("div");
-    card.className = "adjustment-card card glassmorphic";
-    card.style.display = "flex";
-    card.style.justifyContent = "space-between";
-    card.style.alignItems = "center";
-    card.style.gap = "12px";
-    card.style.padding = "12px";
-    card.style.marginBottom = "8px";
-    card.style.borderLeft = "4px solid var(--primary)";
-
-    const info = document.createElement("div");
-    info.style.flex = "1";
-
-    // Format tag badge color based on severity
-    let badgeClass = "badge-primary";
-    if (u.tag.includes("Pain") || u.tag.includes("Discomfort")) badgeClass = "badge-danger";
-    else if (u.tag.includes("Hard")) badgeClass = "badge-warning";
-    else if (u.tag.includes("Easy") || u.tag.includes("Progression")) badgeClass = "badge-success";
-
-    let voiceNoteHTML = "";
-    if (u.hasVoiceNote) {
-      voiceNoteHTML = `
-        <div class="mini-audio-note" style="display: flex; align-items: center; gap: 6px; margin-top: 6px; background: var(--primary-light); padding: 4px 8px; border-radius: 4px; border: 1px solid color-mix(in srgb, var(--primary) 25%, transparent); width: fit-content;">
-          <button type="button" class="btn-play-adjustment-audio" data-id="${u.id}" style="background: none; border: none; color: var(--primary); cursor: pointer; padding: 0; display: inline-flex; align-items: center;"><i class="fa-solid fa-circle-play" style="font-size: 14px;"></i></button>
-          <span class="audio-status-label" style="font-size: 9px; color: var(--text-muted); font-family: monospace;">voice_memo.wav (0:04)</span>
-        </div>
-      `;
-    }
-
-    info.innerHTML = `
-      <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px;">
-        <strong style="color: var(--text-color); font-size: 13px;">${escapeHTML(u.clientName)}</strong>
-        <span class="badge ${badgeClass}" style="font-size: 9px; padding: 2px 6px;">${escapeHTML(u.tag)}</span>
-      </div>
-      <div style="font-size: 11px; color: var(--text-muted);">
-        ${t("exercise_of")}: <span class="font-semibold" style="color: var(--primary);">${escapeHTML(u.exerciseName)}</span>
-      </div>
-      ${voiceNoteHTML}
-    `;
-
-    // Icon-only actions (matching the clipboard's own compact .icon-btn edit control) — a card
-    // per unresolved alert already carries client name + tag + exercise, so labelled buttons here
-    // were pure repetition; the icon + tooltip says enough.
-    const actions = document.createElement("div");
-    actions.style.display = "flex";
-    actions.style.gap = "4px";
-    actions.style.flex = "0 0 auto";
-
-    const editBtn = document.createElement("button");
-    editBtn.type = "button";
-    editBtn.className = "icon-btn btn-edit-plan-alert";
-    editBtn.title = t("edit_plan");
-    editBtn.setAttribute("aria-label", t("edit_plan"));
-    editBtn.innerHTML = `<i class="fa-solid fa-pen-to-square"></i>`;
-    editBtn.addEventListener("click", () => {
-      const exercise = state.exercises.find((e) => e.name === u.exerciseName);
-      const routine = exercise
-        ? state.routines.find((r) => r.exercises.some((ex) => ex.id === exercise.id))
-        : null;
-      if (routine) navigateToPath(urlFor("routine.edit", { routineId: routine.id }));
-    });
-
-    const resolveBtn = document.createElement("button");
-    resolveBtn.type = "button";
-    resolveBtn.className = "icon-btn btn-resolve-alert";
-    resolveBtn.title = t("btn_resolve");
-    resolveBtn.setAttribute("aria-label", t("btn_resolve"));
-    resolveBtn.innerHTML = `<i class="fa-solid fa-check"></i>`;
-    // The wizard is a route (`/adjustments/{updateId}`), so Back backs out of it and a link opens
-    // the one alert being resolved.
-    resolveBtn.addEventListener("click", () => {
-      navigateToPath(urlFor("adjustment.apply", { updateId: u.id }));
-    });
-
-    actions.appendChild(editBtn);
-    actions.appendChild(resolveBtn);
-
-    card.appendChild(info);
-    card.appendChild(actions);
-
-    // Bind event to play audio preview
-    if (u.hasVoiceNote) {
-      const playBtn = card.querySelector(".btn-play-adjustment-audio");
-      const audioStatus = card.querySelector(".audio-status-label");
-      if (playBtn && audioStatus) {
-        playBtn.addEventListener("click", (e) => {
-          e.stopPropagation();
-          const playIcon = playBtn.querySelector("i");
-          if (playIcon.classList.contains("fa-circle-play")) {
-            playIcon.className = "fa-solid fa-circle-pause";
-            audioStatus.textContent = t("voice_playing");
-
-            setTimeout(() => {
-              playIcon.className = "fa-solid fa-circle-play";
-              audioStatus.textContent = "voice_memo.wav (0:04)";
-            }, 3000);
-          } else {
-            playIcon.className = "fa-solid fa-circle-play";
-            audioStatus.textContent = "voice_memo.wav (0:04)";
-          }
-        });
-      }
-    }
-
-    container.appendChild(card);
+    container.appendChild(buildAdjustmentCard(u, ctx));
   }
 }
 
@@ -244,6 +252,74 @@ export function renderApplyAdjustmentDialog() {
   );
 }
 
+// A feedback tag can carry a free-text detail after " - " (e.g. "Too Hard - knee twinge on rep 4");
+// when it does, the short tag and the detail are shown separately.
+function parseAdjustmentNote(tag) {
+  if (!tag.includes(" - ")) return { label: tag, detail: tag };
+  const parts = tag.split(" - ");
+  return { label: parts[0], detail: parts.slice(1).join(" - ") };
+}
+
+function wireVoiceNotePreview(update, voiceContainer) {
+  if (!update.hasVoiceNote) {
+    voiceContainer.classList.add("hidden");
+    return;
+  }
+  voiceContainer.classList.remove("hidden");
+  const playBtn = document.getElementById("adjust-btn-play-voice");
+  // reset listener
+  playBtn.replaceWith(playBtn.cloneNode(true));
+  const newPlayBtn = document.getElementById("adjust-btn-play-voice");
+  newPlayBtn.addEventListener("click", () => {
+    const icon = newPlayBtn.querySelector("i");
+    if (!icon.classList.contains("fa-circle-play")) {
+      icon.className = "fa-solid fa-circle-play";
+      return;
+    }
+    icon.className = "fa-solid fa-circle-pause";
+    setTimeout(() => {
+      icon.className = "fa-solid fa-circle-play";
+    }, 3000);
+  });
+}
+
+// Find target exercise & routine database links.
+function resolveAdjustmentTargets(state, update) {
+  const exercise = state.exercises.find((e) => e.name === update.exerciseName);
+  const exerciseId = exercise ? exercise.id : "";
+  const routine = state.routines.find((r) => r.exercises.some((ex) => ex.id === exerciseId));
+  const exMapping = routine ? routine.exercises.find((ex) => ex.id === exerciseId) : null;
+  return { exercise, exerciseId, routine, exMapping };
+}
+
+// Pre-fill parameters, with a smart load offset recommendation: +2.5kg if the tag is "Too Easy",
+// -2.5kg (floored at 0) if "Too Hard" — a starting suggestion the trainer can still override.
+function prefillAdjustmentFields(exMapping, tag) {
+  document.getElementById("adjust-weight").value = exMapping ? exMapping.weight : 0;
+  document.getElementById("adjust-reps").value = exMapping ? exMapping.reps : 10;
+  document.getElementById("adjust-sets").value = exMapping ? exMapping.sets : 3;
+
+  if (tag.includes("Easy")) {
+    document.getElementById("adjust-weight").value = exMapping ? exMapping.weight + 2.5 : 2.5;
+  } else if (tag.includes("Hard")) {
+    document.getElementById("adjust-weight").value = exMapping
+      ? Math.max(0, exMapping.weight - 2.5)
+      : 0;
+  }
+}
+
+// Cancel / close buttons (close-btn sits outside the form, so clone it to avoid stacking
+// listeners across repeat opens; the in-form cancel button is refreshed separately via the form
+// clone in openAdjustmentWizardComponent).
+function wireDialogCloseButtons(dialog) {
+  for (const btn of dialog.querySelectorAll(".modal-cancel, .modal-close-btn")) {
+    btn.replaceWith(btn.cloneNode(true));
+  }
+  for (const btn of dialog.querySelectorAll(".modal-cancel, .modal-close-btn")) {
+    btn.addEventListener("click", () => dialog.close());
+  }
+}
+
 export function openAdjustmentWizardComponent(updateId, ctx) {
   renderApplyAdjustmentDialog();
   const {
@@ -270,42 +346,13 @@ export function openAdjustmentWizardComponent(updateId, ctx) {
   document.getElementById("adjust-feedback-tag").textContent = update.tag;
 
   // Parse note details for display
-  let cleanNote = update.tag;
-  if (update.tag.includes(" - ")) {
-    const parts = update.tag.split(" - ");
-    document.getElementById("adjust-feedback-tag").textContent = parts[0];
-    cleanNote = parts.slice(1).join(" - ");
-  }
-  document.getElementById("adjust-details").textContent = cleanNote;
+  const { label, detail } = parseAdjustmentNote(update.tag);
+  document.getElementById("adjust-feedback-tag").textContent = label;
+  document.getElementById("adjust-details").textContent = detail;
 
-  // Voice note player handling
-  const voiceContainer = document.getElementById("adjust-voice-player-container");
-  if (update.hasVoiceNote) {
-    voiceContainer.classList.remove("hidden");
-    const playBtn = document.getElementById("adjust-btn-play-voice");
-    // reset listener
-    playBtn.replaceWith(playBtn.cloneNode(true));
-    const newPlayBtn = document.getElementById("adjust-btn-play-voice");
-    newPlayBtn.addEventListener("click", () => {
-      const icon = newPlayBtn.querySelector("i");
-      if (icon.classList.contains("fa-circle-play")) {
-        icon.className = "fa-solid fa-circle-pause";
-        setTimeout(() => {
-          icon.className = "fa-solid fa-circle-play";
-        }, 3000);
-      } else {
-        icon.className = "fa-solid fa-circle-play";
-      }
-    });
-  } else {
-    voiceContainer.classList.add("hidden");
-  }
+  wireVoiceNotePreview(update, document.getElementById("adjust-voice-player-container"));
 
-  // Find target exercise & routine database links
-  const exercise = state.exercises.find((e) => e.name === update.exerciseName);
-  const exerciseId = exercise ? exercise.id : "";
-  const routine = state.routines.find((r) => r.exercises.some((ex) => ex.id === exerciseId));
-  const exMapping = routine ? routine.exercises.find((ex) => ex.id === exerciseId) : null;
+  const { exercise, exerciseId, routine, exMapping } = resolveAdjustmentTargets(state, update);
 
   document.getElementById("adjust-routine-id").value = routine ? routine.id : "";
   document.getElementById("adjust-exercise-id").value = exerciseId;
@@ -315,19 +362,7 @@ export function openAdjustmentWizardComponent(updateId, ctx) {
   document.getElementById("adjust-panel-modify").classList.remove("hidden");
   document.getElementById("adjust-panel-swap").classList.add("hidden");
 
-  // Pre-fill parameters
-  document.getElementById("adjust-weight").value = exMapping ? exMapping.weight : 0;
-  document.getElementById("adjust-reps").value = exMapping ? exMapping.reps : 10;
-  document.getElementById("adjust-sets").value = exMapping ? exMapping.sets : 3;
-
-  // Pre-fill smart load offsets (recommend 2.5kg increase if tag is "Too Easy", decrease if "Too Hard")
-  if (update.tag.includes("Easy")) {
-    document.getElementById("adjust-weight").value = exMapping ? exMapping.weight + 2.5 : 2.5;
-  } else if (update.tag.includes("Hard")) {
-    document.getElementById("adjust-weight").value = exMapping
-      ? Math.max(0, exMapping.weight - 2.5)
-      : 0;
-  }
+  prefillAdjustmentFields(exMapping, update.tag);
 
   // Reset all stale listeners in one shot by cloning the form, THEN wire every interactive
   // element against the fresh DOM. (The action select, cancel button, and swap picker all live
@@ -352,14 +387,7 @@ export function openAdjustmentWizardComponent(updateId, ctx) {
     }
   });
 
-  // Cancel / close buttons (close-btn sits outside the form, so clone it to avoid stacking
-  // listeners across repeat opens; the in-form cancel button is already fresh from the clone).
-  for (const btn of dialog.querySelectorAll(".modal-cancel, .modal-close-btn")) {
-    btn.replaceWith(btn.cloneNode(true));
-  }
-  for (const btn of dialog.querySelectorAll(".modal-cancel, .modal-close-btn")) {
-    btn.addEventListener("click", () => dialog.close());
-  }
+  wireDialogCloseButtons(dialog);
 
   // Swap picker — pre-filtered to the same muscle group so the replacement inherits the correct
   // volume bucket (TODO §13.2 Scenario B). The chosen id lands in the hidden #adjust-exercise-swap.
