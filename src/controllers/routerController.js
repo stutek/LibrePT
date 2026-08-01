@@ -5,6 +5,7 @@
 // file holds only the parts that must know about the browser: the base path, history writes, and the
 // facade of operations a route is allowed to perform.
 
+import { renderMarkupOnce } from "../modules/common/dom.js";
 import { SHARE_INIT_PARAM } from "../modules/common/shareLink.js";
 import { DialogRoute } from "./routes/dialogRoute.js";
 import { buildRouteTable } from "./routes/routeTable.js";
@@ -185,10 +186,9 @@ export function switchView(viewId, { focusSessionsColumn } = {}) {
 }
 
 export function renderErrorViewShell() {
-  const mainContent = document.getElementById("main-content");
-  if (!mainContent || document.getElementById("view-error")) return;
-  mainContent.insertAdjacentHTML(
-    "beforeend",
+  renderMarkupOnce(
+    "main-content",
+    (mainContent) => mainContent.querySelector("#view-error"),
     `
 <section id="view-error" class="app-view">
       <div class="error-view">

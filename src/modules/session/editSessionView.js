@@ -1,11 +1,12 @@
 // src/views/editSessionView.js - Modular view renderer for Edit Session & Workout Session Setup view
 // Encapsulates the DOM structure and rendering logic for #view-workout-setup.
 
+import { renderMarkupOnce } from "../common/dom.js";
+
 export function renderWorkoutSetupViewShell() {
-  const mainContent = document.getElementById("main-content");
-  if (!mainContent || document.getElementById("view-workout-setup")) return;
-  mainContent.insertAdjacentHTML(
-    "beforeend",
+  renderMarkupOnce(
+    "main-content",
+    (mainContent) => mainContent.querySelector("#view-workout-setup"),
     `<section id="view-workout-setup" class="app-view"></section>`,
   );
 }

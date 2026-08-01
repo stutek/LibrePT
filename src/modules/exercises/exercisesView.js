@@ -1,12 +1,12 @@
 // src/views/exercisesView.js - Domain module for exercise catalog and filter logic
+import { renderMarkupOnce } from "../common/dom.js";
 import { modalityOf } from "../common/exerciseModality.js";
 import { escapeHTML } from "../common/utils.js";
 
 export function renderExercisesViewShell() {
-  const mainContent = document.getElementById("main-content");
-  if (!mainContent || document.getElementById("view-exercises")) return;
-  mainContent.insertAdjacentHTML(
-    "beforeend",
+  renderMarkupOnce(
+    "main-content",
+    (mainContent) => mainContent.querySelector("#view-exercises"),
     `
 <section id="view-exercises" class="app-view">
       <div class="view-header view-titlebar">

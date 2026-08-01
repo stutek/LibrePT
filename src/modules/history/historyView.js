@@ -1,5 +1,6 @@
 // src/views/historyView.js - Domain module for global and client workout history logs
 import { openSessionFromHistory } from "../../controllers/activeSessionController.js";
+import { renderMarkupOnce } from "../common/dom.js";
 import { formatDuration, formatMetricValue, usesLoad } from "../common/exerciseModality.js";
 import { formatLoad, formatReps } from "../common/repsAndLoad.js";
 import { orderedItems } from "../common/sessionItemOrder.js";
@@ -7,10 +8,9 @@ import { isRestRecord, isSkippedRecord } from "../common/sessionItemRecord.js";
 import { escapeHTML, formatDateStr } from "../common/utils.js";
 
 export function renderHistoryViewShell() {
-  const mainContent = document.getElementById("main-content");
-  if (!mainContent || document.getElementById("view-history")) return;
-  mainContent.insertAdjacentHTML(
-    "beforeend",
+  renderMarkupOnce(
+    "main-content",
+    (mainContent) => mainContent.querySelector("#view-history"),
     `
 <section id="view-history" class="app-view">
       <div class="view-header view-titlebar">

@@ -1,3 +1,4 @@
+import { renderMarkupOnce } from "../common/dom.js";
 import {
   escapeHTML,
   formatDateStr,
@@ -19,10 +20,9 @@ export function setActiveDetailClientId(id) {
 }
 
 export function renderClientDirectoryViewShell() {
-  const mainContent = document.getElementById("main-content");
-  if (!mainContent || document.getElementById("view-client-directory")) return;
-  mainContent.insertAdjacentHTML(
-    "beforeend",
+  renderMarkupOnce(
+    "main-content",
+    (mainContent) => mainContent.querySelector("#view-client-directory"),
     `
 <section id="view-client-directory" class="app-view">
       <div class="view-header view-titlebar">
@@ -62,10 +62,9 @@ export function renderClientsList({ state, t, navigateToPath, filterQuery = "" }
 }
 
 export function renderClientDetailViewShell() {
-  const mainContent = document.getElementById("main-content");
-  if (!mainContent || document.getElementById("view-client-detail")) return;
-  mainContent.insertAdjacentHTML(
-    "beforeend",
+  renderMarkupOnce(
+    "main-content",
+    (mainContent) => mainContent.querySelector("#view-client-detail"),
     `
 <section id="view-client-detail" class="app-view">
       <div class="view-header-back view-titlebar">

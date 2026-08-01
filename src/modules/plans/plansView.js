@@ -1,4 +1,5 @@
 // src/views/routinesView.js - Domain module for routines catalog and template editor builder
+import { renderMarkupOnce } from "../common/dom.js";
 import {
   formatMetricValue,
   metricLabelKey,
@@ -25,10 +26,9 @@ export function initPlansView(d) {
 }
 
 export function renderRoutinesViewShell() {
-  const mainContent = document.getElementById("main-content");
-  if (!mainContent || document.getElementById("view-routines")) return;
-  mainContent.insertAdjacentHTML(
-    "beforeend",
+  renderMarkupOnce(
+    "main-content",
+    (mainContent) => mainContent.querySelector("#view-routines"),
     `
 <section id="view-routines" class="app-view">
       <div class="view-header view-titlebar">

@@ -15,6 +15,7 @@
 
 import { CURRENT_SCHEMA_VERSION } from "../../data/migrationSteps.js";
 import { BUILD_INFO } from "../../version.js";
+import { renderMarkupOnce } from "./dom.js";
 import { currentRelease } from "./releaseIdentity.js";
 
 let deps = {};
@@ -62,10 +63,9 @@ export function renderBuildInfo() {
 }
 
 export function renderBuildInfoDialog() {
-  const root = document.getElementById("dialogs-root");
-  if (!root || document.getElementById("dialog-build-info")) return;
-  root.insertAdjacentHTML(
-    "beforeend",
+  renderMarkupOnce(
+    "dialogs-root",
+    (root) => root.querySelector("#dialog-build-info"),
     `
 <dialog id="dialog-build-info" class="dialog-modal card glassmorphic">
     <div class="modal-header">

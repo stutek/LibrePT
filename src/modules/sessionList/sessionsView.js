@@ -1,5 +1,6 @@
 import { DEFAULT_SESSIONS } from "../../data/index.js";
 import { isOfflineCachedActive, resetSyncState } from "../common/applicationHeader.js";
+import { renderMarkupOnce } from "../common/dom.js";
 import { modalityOf, primaryMetricOf } from "../common/exerciseModality.js";
 import { loadUnitForEquipment } from "../common/repsAndLoad.js";
 import { buildSessionMeta, escapeHTML, getOverlappingSessions } from "../common/utils.js";
@@ -14,10 +15,9 @@ import {
 } from "./sessionTimeline.js";
 
 export function renderClientsViewShell() {
-  const mainContent = document.getElementById("main-content");
-  if (!mainContent || document.getElementById("view-clients")) return;
-  mainContent.insertAdjacentHTML(
-    "beforeend",
+  renderMarkupOnce(
+    "main-content",
+    (mainContent) => mainContent.querySelector("#view-clients"),
     `
 <section id="view-clients" class="app-view active">
       <!-- Section B: Today's & Tomorrow's Sessions -->

@@ -26,3 +26,9 @@ export function closeModal(modalId) {
   }
   return modal;
 }
+
+export function renderMarkupOnce(containerId, existsCheckFn, html) {
+  const root = document.getElementById(containerId);
+  if (!root || existsCheckFn(root)) return;
+  root.insertAdjacentHTML("beforeend", html);
+}

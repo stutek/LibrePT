@@ -1,6 +1,7 @@
 // components/planAdjustments.js
 // Logic for displaying the pending plan adjustments widget on the dashboard,
 // as well as launching and submitting the interactive Apply Plan Adjustment Dialog wizard.
+import { renderMarkupOnce } from "../common/dom.js";
 import { mountExercisePicker } from "../exercises/exercisePicker.js";
 
 /**
@@ -10,10 +11,9 @@ import { mountExercisePicker } from "../exercises/exercisePicker.js";
  * @param {Object} ctx - Context holding state, translation, and navigation helpers.
  */
 export function renderAdjustmentsViewShell() {
-  const mainContent = document.getElementById("main-content");
-  if (!mainContent || document.getElementById("view-adjustments")) return;
-  mainContent.insertAdjacentHTML(
-    "beforeend",
+  renderMarkupOnce(
+    "main-content",
+    (mainContent) => mainContent.querySelector("#view-adjustments"),
     `
 <section id="view-adjustments" class="app-view">
       <div class="view-header view-titlebar">
@@ -166,10 +166,9 @@ export function renderPendingPlanAdjustmentsComponent(container, countBadge, ctx
  * @param {Object} ctx - Context holding state, translation, and UI refresh callbacks.
  */
 export function renderApplyAdjustmentDialog() {
-  const root = document.getElementById("dialogs-root");
-  if (!root || document.getElementById("dialog-apply-adjustment")) return;
-  root.insertAdjacentHTML(
-    "beforeend",
+  renderMarkupOnce(
+    "dialogs-root",
+    (root) => root.querySelector("#dialog-apply-adjustment"),
     `
 <dialog id="dialog-apply-adjustment" class="dialog-modal card glassmorphic">
     <div class="modal-header">

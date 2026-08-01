@@ -9,6 +9,7 @@
 // Dependencies injected via initNotificationArea({ getState, getActiveSession, t, escapeHTML, navigateToPath })
 
 import { readVersionScoped, writeVersionScoped } from "../../data/storageNamespace.js";
+import { renderMarkupOnce } from "./dom.js";
 import { renderVersionMessages } from "./versionMessages.js";
 
 // Version-scoped: which notifications a PT has read is per-build state (see data/storageNamespace).
@@ -353,10 +354,9 @@ export function toggleNotificationArea(forceExpand = null) {
 }
 
 export function renderNotificationAreaShell() {
-  const root = document.getElementById("notification-area");
-  if (!root || root.querySelector(".notification-handle-bar")) return;
-  root.insertAdjacentHTML(
-    "beforeend",
+  renderMarkupOnce(
+    "notification-area",
+    (root) => root.querySelector(".notification-handle-bar"),
     `
     <div class="notification-handle-bar view-titlebar" id="notification-handle-bar">
       <button class="view-grabber notification-grabber" id="notification-grabber-btn" type="button" aria-label="Toggle notifications drawer"></button>

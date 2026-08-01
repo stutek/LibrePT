@@ -6,11 +6,12 @@
 // activeSessionController.js by adding markup ownership on top of its existing behavior logic
 // instead of extracting a companion view file — this is that extraction, unchanged in content.
 
+import { renderMarkupOnce } from "../common/dom.js";
+
 export function renderAddSessionExerciseDialog() {
-  const root = document.getElementById("dialogs-root");
-  if (!root || document.getElementById("dialog-add-session-exercise")) return;
-  root.insertAdjacentHTML(
-    "beforeend",
+  renderMarkupOnce(
+    "dialogs-root",
+    (root) => root.querySelector("#dialog-add-session-exercise"),
     `
 <dialog id="dialog-add-session-exercise" class="dialog-modal card glassmorphic">
     <div class="modal-header">
@@ -60,10 +61,9 @@ export function renderAddSessionExerciseDialog() {
 }
 
 export function renderCatalogPickerDialog() {
-  const root = document.getElementById("dialogs-root");
-  if (!root || document.getElementById("dialog-catalog-picker")) return;
-  root.insertAdjacentHTML(
-    "beforeend",
+  renderMarkupOnce(
+    "dialogs-root",
+    (root) => root.querySelector("#dialog-catalog-picker"),
     `
 <dialog id="dialog-catalog-picker" class="dialog-modal card glassmorphic wide-modal">
     <div class="modal-header">
@@ -77,10 +77,9 @@ export function renderCatalogPickerDialog() {
 }
 
 export function renderActiveSessionOverlayShell() {
-  const root = document.getElementById("active-session-overlay");
-  if (!root || root.querySelector(".session-title-bar")) return;
-  root.insertAdjacentHTML(
-    "beforeend",
+  renderMarkupOnce(
+    "active-session-overlay",
+    (root) => root.querySelector(".session-title-bar"),
     `
     <div class="session-title-bar view-titlebar">
       <button class="view-grabber" type="button" aria-label="Close session and return to home"></button>

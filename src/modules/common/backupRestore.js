@@ -14,6 +14,7 @@
 // }
 
 import { describeMigration, migrateState } from "../../data/schemaMigrations.js";
+import { renderMarkupOnce } from "./dom.js";
 import { catalogToCsv, catalogToInterchange } from "./exerciseStandard.js";
 
 let deps = null;
@@ -49,10 +50,9 @@ export function prepareBackupDialog() {
 }
 
 export function renderBackupDialog() {
-  const root = document.getElementById("dialogs-root");
-  if (!root || document.getElementById("dialog-backup")) return;
-  root.insertAdjacentHTML(
-    "beforeend",
+  renderMarkupOnce(
+    "dialogs-root",
+    (root) => root.querySelector("#dialog-backup"),
     `
 <dialog id="dialog-backup" class="dialog-modal card glassmorphic">
     <div class="modal-header">

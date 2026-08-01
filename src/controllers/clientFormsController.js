@@ -8,15 +8,14 @@ import {
   renderClientsList,
   showClientDetails,
 } from "../modules/clients/clientsView.js";
-import { $id, closeModal, openModal } from "../modules/common/dom.js";
+import { $id, closeModal, openModal, renderMarkupOnce } from "../modules/common/dom.js";
 import { newRecordId } from "../modules/common/recordId.js";
 import { getInitials } from "../modules/common/utils.js";
 
 export function renderClientDialog() {
-  const root = document.getElementById("dialogs-root");
-  if (!root || document.getElementById("dialog-client")) return;
-  root.insertAdjacentHTML(
-    "beforeend",
+  renderMarkupOnce(
+    "dialogs-root",
+    (root) => root.querySelector("#dialog-client"),
     `
 <dialog id="dialog-client" class="dialog-modal card glassmorphic">
     <div class="modal-header">

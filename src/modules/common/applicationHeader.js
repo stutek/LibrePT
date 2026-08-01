@@ -19,6 +19,7 @@
 //   renderActiveSessionBarLabels()
 // }
 
+import { renderMarkupOnce } from "./dom.js";
 import { getShareParams } from "./shareLink.js";
 
 let deps = null;
@@ -183,10 +184,9 @@ function setupThemeSwitcher() {
 }
 
 export function renderAboutDialog() {
-  const root = document.getElementById("dialogs-root");
-  if (!root || document.getElementById("dialog-about")) return;
-  root.insertAdjacentHTML(
-    "beforeend",
+  renderMarkupOnce(
+    "dialogs-root",
+    (root) => root.querySelector("#dialog-about"),
     `
 <dialog id="dialog-about" class="dialog-modal card glassmorphic">
     <div class="modal-header">
@@ -205,10 +205,9 @@ export function renderAboutDialog() {
 }
 
 export function renderTermsDialog() {
-  const root = document.getElementById("dialogs-root");
-  if (!root || document.getElementById("dialog-terms")) return;
-  root.insertAdjacentHTML(
-    "beforeend",
+  renderMarkupOnce(
+    "dialogs-root",
+    (root) => root.querySelector("#dialog-terms"),
     `
 <dialog id="dialog-terms" class="dialog-modal card glassmorphic">
     <div class="modal-header">
@@ -227,10 +226,9 @@ export function renderTermsDialog() {
 }
 
 export function renderHeaderShell() {
-  const header = document.getElementById("app-header");
-  if (!header || header.querySelector(".header-container")) return;
-  header.insertAdjacentHTML(
-    "beforeend",
+  renderMarkupOnce(
+    "app-header",
+    (header) => header.querySelector(".header-container"),
     `
     <div class="header-container">
       <div class="logo-area" id="logo-area">

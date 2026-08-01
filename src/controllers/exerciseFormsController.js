@@ -5,7 +5,7 @@
 // Split 2026-08-01 out of the old formsController.js, which bundled Client, Routine, and Exercise
 // forms in one file despite the three sharing nothing but boilerplate (AGENT_RULES §5.1).
 
-import { $id, closeModal, openModal } from "../modules/common/dom.js";
+import { $id, closeModal, openModal, renderMarkupOnce } from "../modules/common/dom.js";
 import { metricOptionsFor } from "../modules/common/exerciseModality.js";
 import { newRecordId } from "../modules/common/recordId.js";
 import { renderExercisesList } from "../modules/exercises/exercisesView.js";
@@ -19,10 +19,9 @@ export function openExerciseCreateDialog() {
 }
 
 export function renderExerciseDialog() {
-  const root = document.getElementById("dialogs-root");
-  if (!root || document.getElementById("dialog-exercise")) return;
-  root.insertAdjacentHTML(
-    "beforeend",
+  renderMarkupOnce(
+    "dialogs-root",
+    (root) => root.querySelector("#dialog-exercise"),
     `
 <dialog id="dialog-exercise" class="dialog-modal card glassmorphic">
     <div class="modal-header">

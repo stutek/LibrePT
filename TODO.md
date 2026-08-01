@@ -44,8 +44,18 @@ The session list can no longer assume one session per time slot. Model and displ
 - **Partially overlapping sessions** (not just same-slot): sessions that share *part* of a time window — e.g. 10:00–11:00 and 10:30–11:30 — must both render, visibly showing the overlap rather than stacking as if sequential. The current relative-bucket model (`day: today/tomorrow/…`) and the same-day time-overlap merge in `launchClipboardDirectly` only handle full-slot collisions; partial overlaps need a real start/end time model.
   - **Render overlaps the way calendar apps do**: a vertical **time grid** with sessions as blocks whose **top/height map to start/end**, and overlapping blocks placed **side by side** (columns) within the shared span, each narrowed to fit. This replaces the single-column stacked card idea *for time-conflicted ranges* — a session's horizontal position/width encodes its overlap, its vertical position encodes when. Non-overlapping parts of the day can still collapse to save space, but any overlap expands into the aligned grid.
 - **Shaded sessions from other PTs sharing the gym/room**: show *other trainers'* bookings for the **same gym/room** as read-only, visually **shaded/muted** context, so a PT sees when a room is already occupied and avoids double-booking equipment. These are not the PT's own sessions — not launchable, no participant detail, just occupancy.
-- Implies a **room/resource** dimension on bookings (which room, which trainer) that the data model does not have yet, and a scheduling/availability source for other PTs' bookings (shared calendar or backend).
+- Implies a **room/resource** dimension on bookings (which room, which trainer) that the data model does not have yet, and a scheduling/availability source for other PTs' bookings. **Source decided in [1.5](#15--brainstorm-google-calendar-integration--source-of-truth-occupancy-and-data-processor-exposure): a per-room Google resource calendar, read via `freebusy.query`** — not a backend of our own.
 - Feeds directly into the planned **date-grouped, scrollable session card stack** ([4.3](#43--collapse-the-duplicated-session-header-into-one-row-with-a-date-picker) and the sessions-view redesign): overlaps and shaded external sessions must be legible within that stacked layout.
+
+### 1.5 [ ] [Brainstorm] Google Calendar integration — source of truth, occupancy, and data-processor exposure
+**Raised 2026-08-01 (Simon).** Settles the "shared calendar or backend" open question left in [1.3](#13--session-list-must-model-partial-overlaps-and-other-pts-room-usage), and decides what, if anything, sits behind Google Calendar for sync.
+
+- **Source of truth split, by data type**: Google Calendar is the sole authority for scheduling facts — event time, room, and attendee RSVP (`attendee.responseStatus`) — because that is literally where those facts originate (client books via the Google-hosted Appointment Schedule page; RSVP is Google's own field). No local cache or relay may ever be treated as authoritative for "is this booked" or "did they accept" — only GCal's own response after a write is final. App-only data with no Calendar representation (clipboard state, per-participant tags, logged sets/reps) is the one thing the app's own store is genuinely authoritative for.
+- **Facility occupancy**: model each gym/room as its own Google resource calendar. Read via `freebusy.query` for the "other PT, room's busy" shading in [1.3](#13--session-list-must-model-partial-overlaps-and-other-pts-room-usage) — free/busy only, never the event body, so no PT's session detail leaks to another PT. Filter workout vs. maintenance events via `extendedProperties.private` (e.g. `eventType: workout|maintenance`) tagged at creation, since Calendar's native `eventType` field doesn't cover this; maintenance can then render as a hard block instead of shaded "avoid if possible" context.
+- **PT's own private calendar**: never read by anyone but that PT, and only via their own `freebusy.query` (self double-booking warning against personal commitments) — never surfaced to other PTs, never mixed into the room calendar.
+- **Multi-instance sync, without a backend of our own**: Google Drive's `appDataFolder` (a hidden per-app folder inside *the user's own* Drive, reachable only by our app, using the same OAuth grant already needed for Calendar) covers syncing a PT's own app-only data across their own devices. Combined with the room resource calendar (Google's own shared infra) for cross-PT occupancy, this covers every sync need raised **without LibrePT operating any backend** — see [3.3](#33--brainstorm-google-drive-periodic-sync).
+- **Why Firestore was rejected as the default**: introducing a Firestore/Firebase backend would make Simon a GDPR **data processor** for PTs' client data (PT = controller, LibrePT = processor, Google Cloud = subprocessor) — a DPA with Google, subprocessor disclosure to PT customers, a data-residency choice, and breach-notification duties, none of which apply to the Calendar+Drive approach since client data never leaves each PT's own Google account or device. Only reconsider Firestore/a relay if a real requirement needs true sub-second live push between devices (Drive sync is poll/on-open, not live) or server-side compute — **open question, unresolved**: is that actually needed, or is next-sync-on-open acceptable?
+- **GCP note, independent of the above**: any Calendar API access (with or without Firestore) requires a GCP project registered once by the developer for OAuth client credentials — not per PT, who only ever sees a normal "LibrePT wants to access your Google Calendar" consent screen. Public distribution (beyond ~100 test users) requires Google's OAuth consent-screen **verification** (privacy policy, homepage, review lead time) — a real launch dependency to plan for, separate from the architecture question.
 
 ### 1.4 [ ] Calendar preferences — holidays and non-working days
 Every PT should be able to configure their own calendar view: import a holiday calendar (public holidays, gym closures) and color-code off days throughout the app.
@@ -63,6 +73,7 @@ Data should sync **periodically to Google Drive** and remain **editable directly
 
 - **Open question**: does it make sense to store the data in **Google's new OKF format**, using it to get concurrent editing and versioning for free?
 - No approach is chosen yet — decide in a dedicated brainstorm before implementing.
+- **Narrowed by [1.5](#15--brainstorm-google-calendar-integration--source-of-truth-occupancy-and-data-processor-exposure) (2026-08-01)**: for **cross-device sync of a single PT's own app-only data**, `appDataFolder` (hidden per-app Drive space, same OAuth grant as Calendar, no data processor exposure) is the leading option over a general "editable in Drive view" file — the "editable directly in Drive" framing above implies a visible, human-editable file, which is a different, heavier feature than a sync target. Decide whether both are wanted or only the sync target.
 
 ### 3.5 [ ] Paper consent — record checkbox + date; provide a printable blank form
 **Decided (2026-07-22): KISS — consent lives on paper, not in the app.** Blank consent forms are kept at the gym; the client signs one, the PT **files the paper**. That physical file is the system of record for evidence. **No photo capture, no image storage, no email flow, no IMAP** — all considered and dropped as needless complexity for a solo, offline-first PT.
@@ -117,8 +128,7 @@ The redundant second title row is **already removed** (the four `.sessions-colum
 
 > **⚠ Blocking design gap — settle before implementing.** Bookings currently have **no date**. They carry a relative bucket only (`day: 'yesterday' | 'today' | 'tomorrow' | 'upcoming'`, see `mockData.js`), and the title bar *derives* dates live from `new Date()`. That is exactly why the demo keeps working on any day without reseeding. A date picker implies **jumping to an arbitrary date**, which the four-bucket model cannot represent — picking `2025-03-04` would have nothing to show. Choosing a real date field is a **data-model migration** (existing `localStorage` databases included) and it would end the self-following demo behaviour. Decide the model first: real dates, or a picker restricted to the four buckets?
 
-### 4.4 [x] Exercise catalog filter chips overflow off-screen — **SHIPPED 2026-07-25**
-The catalog's `.filter-chips` row used `overflow-x` with a hidden scrollbar, so trailing chips were pushed off-screen unreachably on a phone. Fixed by making the row `flex-wrap` (consistent with `.picker-chips`), so every filter stays visible.
+### 4.4 [x] Exercise catalog filter chips overflow off-screen — see CHANGELOG
 
 ---
 
@@ -339,40 +349,32 @@ locale (keeping `test_i18n_parity` green).
 **Three findings from a DRY/SRP/modularity review of the §14.5 shell split (2026-07-27), not yet
 fixed — tracked as §14.7-14.9 below.**
 
-### 14.7 [ ] Extract a shared `renderMarkupOnce()` helper — 22 duplicated render-guard blocks
-The shell split (§14.5) copy-pasted the same 3-line pattern into 22 call sites across 14 files
-(`formsController.js` ×3, `activeSessionController.js` ×3, `applicationHeader.js` ×3, one each in
+### 14.7 [x] Extract a shared `renderMarkupOnce()` helper — 22 duplicated render-guard blocks
+**SHIPPED 2026-08-01.** One helper in [modules/common/dom.js](src/modules/common/dom.js) —
+`renderMarkupOnce(containerId, existsCheckFn, html)` — replacing the copy-pasted
+`const root = ...; if (!root || <exists-check>) return; root.insertAdjacentHTML(...)` pattern at
+every call site across `routineFormsController.js`, `exerciseFormsController.js`,
+`clientFormsController.js`, `activeSessionOverlayView.js` ×3, `applicationHeader.js` ×3,
 `backupRestore.js`, `buildInfoDialog.js`, `feedbackModal.js`, `notificationArea.js`,
-`routerController.js`, and one per view module):
+`routerController.js`, `editSessionView.js`, `historyView.js`, `exercisesView.js`, `plansView.js`,
+`planAdjustments.js` ×2, `sessionsView.js`, and `clientsView.js` ×2. A future fix to the idempotency
+guard now touches one function instead of 22 call sites. `versionMessages.js`'s
+`insertAdjacentHTML("afterbegin", ...)` and `sessionCard.js`'s conditional status-bar append were
+left alone — neither is the same existence-guard pattern. Verified against the full `build check`
+gate (unit + e2e + ZAP), all green.
 
-```js
-const root = document.getElementById(containerId);
-if (!root || <exists-check>) return;
-root.insertAdjacentHTML("beforeend", `...`);
-```
-
-- **Risk**: a future fix to the idempotency guard (e.g. switching from an existence-check to a
-  data-attribute flag to survive a hot-reload) has to be hand-applied to all 22 sites; missing one
-  reintroduces the exact duplicate-injection bug the other 21 correctly guard against.
-- **Fix**: one helper in [`modules/common/dom.js`](src/modules/common/dom.js) (already the home for
-  DOM utilities) — `renderMarkupOnce(containerId, existsCheckFn, html)` — and thread all 22 call
-  sites through it.
-
-### 14.8 [ ] Render-order dependencies between modules are unenforced — already caused 2 bugs
-`app.js` sequences ~10 `renderXShell()`/`renderXDialog()` calls across two hand-ordered blocks
-(`renderHeaderShell()` specially hoisted above `initAppLifecycle()`, the other nine grouped later).
-Nothing structurally enforces that a module's render call happens before every *other* module that
-queries its elements — this already produced two real bugs in §14.5's own build, caught only by
-end-to-end testing: the header rendering too late for `backupRestore.js`'s `#backup-btn` and
-`buildInfoDialog.js`'s `#app-version` lookups, and `dialog-apply-adjustment` rendering too late for
-its own route's existence check.
-
-- **Risk**: the next module added that queries another module's element, placed above that
-  element's `renderXShell()` call, silently no-ops with no error — the same class of bug recurring
-  with no structural guard against it.
-- **Fix direction**: a small render registry app.js calls in one pass (each module registers its
-  shell render + declares what it depends on existing first), rather than a hand-maintained call
-  order a future edit can silently get wrong.
+### 14.8 [x] Render-order dependencies between modules are unenforced — already caused 2 bugs
+**SHIPPED 2026-08-01.** [modules/common/renderRegistry.js](src/modules/common/renderRegistry.js)
+replaces the hand-ordered shell-render block in `app.js` with `registerShellRender(name, render,
+dependsOn)` + `runShellRenders()`, which topologically sorts and throws on an unregistered or
+cyclic dependency instead of silently no-op-ing. `renderHeaderShell()` stays separately hoisted
+above `initAppLifecycle()` (a hard ordering requirement unrelated to the other shells, not folded
+into the registry); the other nine — `clients-view`, `adjustments-view`,
+`apply-adjustment-dialog` (declared depending on `adjustments-view`), `client-directory-view`,
+`client-detail-view`, `routines-view`, `exercises-view`, `history-view`, `workout-setup-view`,
+`error-view` — now register through it. The next module that needs another module's element
+present first declares it and gets a real error on a bad order, instead of a silent no-op found
+only by end-to-end testing.
 
 ### 14.9 [x] `activeSessionController.js` mixed markup templates into a behavior file
 **SHIPPED 2026-08-01.** The shell split (§14.5) had added ownership of three unrelated UI

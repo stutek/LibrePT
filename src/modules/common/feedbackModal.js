@@ -12,7 +12,7 @@
 //   renderPendingPlanAdjustments()
 // }
 
-import { $id, closeModal, openModal } from "./dom.js";
+import { $id, closeModal, openModal, renderMarkupOnce } from "./dom.js";
 
 let deps = null;
 
@@ -65,10 +65,9 @@ export function openFeedbackModal(exId) {
 }
 
 export function renderFeedbackDialog() {
-  const root = document.getElementById("dialogs-root");
-  if (!root || document.getElementById("dialog-feedback")) return;
-  root.insertAdjacentHTML(
-    "beforeend",
+  renderMarkupOnce(
+    "dialogs-root",
+    (root) => root.querySelector("#dialog-feedback"),
     `
 <dialog id="dialog-feedback" class="dialog-modal card glassmorphic">
     <div class="modal-header">

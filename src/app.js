@@ -112,6 +112,7 @@ import {
 } from "./modules/common/notificationArea.js";
 import { populateDropdownSelectors as populateDropdownsController } from "./modules/common/populateDropdownSelectors.js";
 import { newRecordId } from "./modules/common/recordId.js";
+import { registerShellRender, runShellRenders } from "./modules/common/renderRegistry.js";
 import { repsPresetsDatalistHTML } from "./modules/common/repsAndLoad.js";
 import { INIT_DEMO_DATA, getShareParams } from "./modules/common/shareLink.js";
 import {
@@ -277,23 +278,28 @@ function init() {
     openAdjustmentWizard,
   });
 
-  // Every view's shell markup is injected here, in document order, before any per-view setup
-  // step queries an element inside it — index.html only owns the empty #main-content canvas, each
-  // view module owns its own <section>, the same way the dialogs above own their own <dialog>.
-  renderClientsViewShell();
-  renderAdjustmentsViewShell();
-  // dialog-apply-adjustment must exist before its route is ever entered: DialogRoute.enter()
-  // looks the element up before calling this route's open() callback (which used to be the only
-  // thing creating it), so a lazily-rendered dialog was always missing on the very navigation
-  // meant to open it.
-  renderApplyAdjustmentDialog();
-  renderClientDirectoryViewShell();
-  renderClientDetailViewShell();
-  renderRoutinesViewShell();
-  renderExercisesViewShell();
-  renderHistoryViewShell();
-  renderWorkoutSetupViewShell();
-  renderErrorViewShell();
+  // Every view's shell markup is injected here, before any per-view setup step queries an element
+  // inside it — index.html only owns the empty #main-content canvas, each view module owns its own
+  // <section>, the same way the dialogs above own their own <dialog>. TODO.md §14.8: rather than a
+  // hand-maintained call order (which already produced two silent no-op bugs — a module's render
+  // landing above the element it queries), each shell registers itself plus what it depends on
+  // existing first, and runShellRenders() computes a valid order via topological sort.
+  registerShellRender("clients-view", renderClientsViewShell);
+  registerShellRender("adjustments-view", renderAdjustmentsViewShell);
+  // dialog-apply-adjustment must exist before its route is ever entered: DialogRoute.enter() looks
+  // the element up before calling this route's open() callback (which used to be the only thing
+  // creating it), so a lazily-rendered dialog was always missing on the very navigation meant to
+  // open it. Declared as depending on "adjustments-view" (the surface it's launched from) so a
+  // future reorder can't silently separate them again.
+  registerShellRender("apply-adjustment-dialog", renderApplyAdjustmentDialog, ["adjustments-view"]);
+  registerShellRender("client-directory-view", renderClientDirectoryViewShell);
+  registerShellRender("client-detail-view", renderClientDetailViewShell);
+  registerShellRender("routines-view", renderRoutinesViewShell);
+  registerShellRender("exercises-view", renderExercisesViewShell);
+  registerShellRender("history-view", renderHistoryViewShell);
+  registerShellRender("workout-setup-view", renderWorkoutSetupViewShell);
+  registerShellRender("error-view", renderErrorViewShell);
+  runShellRenders();
 
   setupNavigation({ setupSessionsDayNav });
   setupClientForms();
