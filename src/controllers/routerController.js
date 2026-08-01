@@ -320,7 +320,13 @@ export function showSessionView(sessionId, clientId, focusRef = null, opts = {})
     if (focusRef && routerDeps?.focusIndexFromRef) {
       const cs = currentActive.clientRoutines[currentActive.activeClientId];
       const idx = routerDeps.focusIndexFromRef(cs, focusRef);
-      if (idx >= 0) cs.activeExerciseIndex = idx;
+      // A deep link naming a specific card is explicit intent to see THAT card in focus — it
+      // overrides the deck's own "start collapsed" default (activeSessionController.js's
+      // deckAllCollapsed), same as the trainer's first tap on a card would.
+      if (idx >= 0) {
+        cs.activeExerciseIndex = idx;
+        cs.deckAllCollapsed = false;
+      }
     }
     if (opts.edit && routerDeps?.setClipboardEditMode) {
       routerDeps.setClipboardEditMode(true, opts.slotId ?? null);

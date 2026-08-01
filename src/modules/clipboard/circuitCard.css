@@ -32,10 +32,10 @@
   letter-spacing: 0.5px;
 }
 .circuit-ex-list {
-  gap: 6px;
+  gap: 4px;
 }
 .circuit-ex-row {
-  padding: 8px 0;
+  padding: 6px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 } /* Name + target on one line, sitting right next to each other. */
 .circuit-ex-head {
@@ -43,7 +43,7 @@
   align-items: baseline;
   flex-wrap: wrap;
   gap: 10px;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 .circuit-ex-name {
   font-weight: 700;
@@ -123,8 +123,8 @@
   font-size: 15px;
   font-weight: 700;
   color: var(--text-main);
-  padding: 8px 12px;
-  margin: 2px 0 6px;
+  padding: 6px 12px;
+  margin: 2px 0 4px;
   display: flex;
   align-items: center;
   gap: 8px;

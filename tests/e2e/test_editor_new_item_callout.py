@@ -17,6 +17,13 @@ def _open_live_session(page, local_server):
     page.locator(card_sel).first.click()
     page.wait_for_selector("#active-session-overlay:not(.hidden)")
     page.wait_for_timeout(400)
+    # The deck starts fully collapsed on open (deckAllCollapsed) — the fast-adjust bar every test
+    # below drives only renders under the in-focus card, so bring one into focus first (skip any
+    # past-session reference card, whose own tap toggles a review panel instead).
+    # force=True: collapsed cards use margin-bottom:-24px overlap so the first non-past card may
+    # sit behind a stacked card that physically intercepts the pointer — force bypasses it.
+    page.locator(".exercise-deck-card:not(.past-session)").first.click(force=True)
+    page.wait_for_selector(".fast-adjust-bar", timeout=5000)
 
 
 def _focused_row_class(page):

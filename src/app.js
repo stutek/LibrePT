@@ -3,7 +3,6 @@
 // and manages global lifecycle hooks.
 
 import {
-  beginWorkoutSession,
   cancelWorkoutSession as cancelWorkoutSessionController,
   enforceQuickSignalExclusivity,
   focusExerciseByIndex,
@@ -654,14 +653,6 @@ function launchClipboardDirectly(arg, options = {}) {
   sessionsViewLaunchClipboard({ sessionId, state: getState(), startWorkoutSession }, options);
 }
 
-// Dashboard "Start" button (sessionCard.js, isDue state): stages the session AND immediately marks
-// it started, without navigating to the clipboard overlay — the trainer stays on the dashboard and
-// the card itself flips from the Start button to the live countdown-to-end.
-function startSessionFromCard(sessionId) {
-  launchClipboardDirectly(sessionId, { navigate: false });
-  beginWorkoutSession();
-}
-
 function setupCalendarSessions() {
   sessionsViewSetupSessions({
     state: getState(),
@@ -677,7 +668,6 @@ function renderSessions() {
     t,
     getActiveSession,
     launchClipboardDirectly,
-    startSessionFromCard,
     saveToLocalStorage: saveState,
     rerenderSessions: renderSessions,
     navigateToPath,

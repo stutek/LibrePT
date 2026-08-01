@@ -224,8 +224,6 @@ export const sl = {
   upcoming: "Prihodnje",
   jump_to_date: "Pojdi na datum",
   starts_in: "Se začne čez",
-  ready_to_start: "Pripravljeno za začetek",
-  start_now: "Začni",
   elapsed: "Trajanje",
   edit_elapsed_time: "Uredi trajanje",
   live: "V živo",

@@ -24,8 +24,7 @@ import { orderedItems } from "../modules/common/sessionItemOrder.js";
 import { buildProgramSnapshot, isRestRecord } from "../modules/common/sessionItemRecord.js";
 import {
   escapeHTML,
-  formatDuration,
-  formatSignedDuration,
+  formatDurationHourMin,
   getClientDisplayNameHTML,
   getInitials,
 } from "../modules/common/utils.js";
@@ -135,6 +134,13 @@ function clampFocusIndex(cs) {
 export function enterClipboardEditMode(newItemId = null) {
   clipboardEditMode = true;
   markEditorRow(newItemId, { kind: "new", focus: true });
+  // Re-entering edit mode resets the accordion to its default (one row open) unless a callout row
+  // is being inserted — toggling a row closed sets editorExpandedId to null, which must stick until
+  // the trainer leaves and re-enters edit mode.
+  if (!newItemId && activeSession) {
+    const cs = activeSession.clientRoutines[activeSession.activeClientId];
+    if (cs) cs.editorExpandedId = undefined;
+  }
   renderActiveGroupBoard();
 }
 
@@ -273,6 +279,9 @@ export function focusExerciseByIndex(index) {
   const cs = activeSession.clientRoutines[activeSession.activeClientId];
   if (!cs) return;
   cs.activeExerciseIndex = index;
+  // The trainer's first tap on any deck card reveals focus for the rest of this live session — see
+  // deckAllCollapsed's own comment (clientRoutines' shape, above startWorkoutSession).
+  cs.deckAllCollapsed = false;
   activeSession.expandedPastId = null;
   saveActiveSessionToCache();
   renderActiveGroupBoard();
@@ -287,6 +296,9 @@ export function openSessionFromHistory(log) {
     routineId: log.routineId || "",
     routineName: log.routineName,
     activeExerciseIndex: 0,
+    // See startWorkoutSession's own clientState for what this gates — opening a recovered/history
+    // session is "opening the Clipboard view" exactly like a fresh launch.
+    deckAllCollapsed: true,
     exercises: [],
     logs: {},
   };
@@ -408,6 +420,13 @@ export function startWorkoutSession(clientRoutines, sessionMeta = null, deps = {
       routineId: routine ? routine.id : "",
       routineName: routine ? routine.name : t("custom_empty_plan") || "Custom / Empty Plan",
       activeExerciseIndex: 0,
+      // The deck is crowded on a fresh open — every card starts collapsed (exerciseDeck.js reads
+      // this to skip rendering ANY card in focus) until the trainer taps one, which reveals focus
+      // for the rest of this live session (see focusExerciseByIndex). activeExerciseIndex itself
+      // still points at a real item throughout — this flag only gates whether the deck's render
+      // honours it, so every OTHER consumer of activeExerciseIndex (getActiveExercise, quick
+      // signals, the timer) keeps working unmodified.
+      deckAllCollapsed: true,
       exercises: [],
       logs: {},
     };
@@ -456,9 +475,6 @@ export function startWorkoutSession(clientRoutines, sessionMeta = null, deps = {
   saveActiveSessionToCache();
 
   const sId = activeSession.id || newRecordId();
-  // A dashboard card's Start button stages + immediately begins the session in place (see
-  // beginWorkoutSession's call site in sessionCard.js's wiring) without navigating to the
-  // clipboard overlay — the trainer stays on the dashboard and watches the card itself go live.
   if (navigate && navigateToPath) {
     navigateToPath(`/session/${sId}/client/${activeSession.activeClientId}`);
   }
@@ -502,28 +518,35 @@ export function startSessionTimer() {
   tick();
 }
 
+// The title bar's live duration, once Start has been tapped: "01h 32m" (formatDurationHourMin),
+// the same shorthand the dashboard card's own live/starts-in timers use (sessionCard.js) — one
+// countdown shape across the whole app instead of this surface keeping its own H:MM:SS. Once the
+// session runs past its scheduled end the wrap gets `.overtime`, which activeSessionOverlay.css
+// turns into a warning-coloured pill — the trainer glances at the title bar, not a stopwatch app.
 export function updateOverlaySessionTimer() {
   if (!activeSession) return;
   const el = document.getElementById("overlay-session-duration");
+  const wrap = document.getElementById("overlay-session-timer");
   if (!el) return;
 
   const { t } = appDeps;
 
   if (activeSession.sourceSession?.isPlanning) {
     el.textContent = t("planning") || "Planning";
-    el.style.color = "var(--primary)";
+    wrap?.classList.remove("overtime");
     return;
   }
 
   const endDate = activeSession.sourceSession?.endDate;
+  let overtime = false;
   if (endDate) {
     const remainingSec = Math.round((new Date(endDate).getTime() - Date.now()) / 1000);
-    el.textContent = formatSignedDuration(remainingSec);
-    el.style.color = remainingSec < 0 ? "var(--danger)" : "var(--primary)";
+    el.textContent = formatDurationHourMin(remainingSec);
+    overtime = remainingSec < 0;
   } else {
-    el.textContent = formatDuration(activeSession.duration);
-    el.style.color = "var(--primary)";
+    el.textContent = formatDurationHourMin(activeSession.duration);
   }
+  wrap?.classList.toggle("overtime", overtime);
 }
 
 export function getActiveExercise() {
@@ -723,6 +746,7 @@ export function completeCircuitRound(circuitId) {
       }
     }
     cs.activeExerciseIndex = Math.min(lastIdx + 1, cs.exercises.length - 1);
+    cs.deckAllCollapsed = false;
     clampFocusIndex(cs);
     // The block is fully done — a rest/exercise timer still running against it is now stale.
     // Freeze it rather than silently dropping it: the trainer sees it held at its final value
@@ -808,6 +832,7 @@ function injectExerciseIntoActivePlan(baseEx, { sets, reps, weight, rest }) {
     note: "",
   }));
   clientState.activeExerciseIndex = clientState.exercises.length - 1;
+  clientState.deckAllCollapsed = false;
   // Called out in the editor so the injected movement isn't lost in the list. No focus: the catalog
   // already filled the name in, so there is nothing to type.
   markEditorRow(slotId, { kind: "new", focus: false });
@@ -991,17 +1016,23 @@ export function renderActiveGroupBoard() {
 
   // Starting/completing are LIVE-session actions: starting begins the timer, completing logs the
   // session to history. Both are wrong while the plan is being edited (Done exits edit mode
-  // instead) and wrong for a date-less planning programme that is never run. Hide the whole footer,
-  // not just the button, so no empty bar is left behind; it comes back on exit because every mode
-  // change re-renders through here. Within the footer, Start and Complete are mutually exclusive —
-  // the trainer explicitly starts the session, same as they explicitly complete it.
+  // instead) and wrong for a date-less planning programme that is never run.
+  const started = !!activeSession?.started;
+  const canStartSession = !clipboardEditMode && currentPlanMode() !== "planning";
+
+  // Start lives on the title bar (session-timer-block) so it reads as part of the session's own
+  // clock, not a footer action — it's the one thing that flips "00:00" into a running countdown.
+  document
+    .getElementById("btn-start-session")
+    ?.classList.toggle("hidden", started || !canStartSession);
+  document.getElementById("overlay-session-timer")?.classList.toggle("hidden", !started);
+
+  // Complete stays a footer drawer, but now it's the footer's only occupant — hide the whole bar
+  // (not just the button) until there's something running to complete, so no empty bar is left
+  // behind; it comes back on exit because every mode change re-renders through here.
   const footer = document.querySelector("#active-session-overlay .session-actions-footer");
   if (footer) {
-    const footerAllowed = !clipboardEditMode && currentPlanMode() !== "planning";
-    footer.classList.toggle("hidden", !footerAllowed);
-    const started = !!activeSession?.started;
-    document.getElementById("btn-start-session")?.classList.toggle("hidden", started);
-    document.getElementById("btn-finish-session")?.classList.toggle("hidden", !started);
+    footer.classList.toggle("hidden", !canStartSession || !started);
   }
 
   // Detach any previous editor's document listeners before this render replaces the deck DOM.
@@ -1164,8 +1195,16 @@ export function renderActiveSessionOverlayShell() {
       </div>
       <div class="session-title-actions">
         <div class="session-timer-block">
-          <i class="fa-solid fa-clock text-primary"></i>
-          <span id="overlay-session-duration">00:00</span>
+          <!-- Staged-but-not-started: Start lives here (not on the dashboard card, TODO §2.3) so
+               tapping it is the one explicit "begin the workout" action. Once tapped it's replaced
+               by the live countdown-to-end (updateOverlaySessionTimer), which is what earns the
+               clock icon back — a clock ticking down means something once a clock is actually
+               running. -->
+          <button id="btn-start-session" class="btn primary-btn btn-sm" data-i18n="btn_start_workout_session" aria-label="Start session"><i class="fa-solid fa-circle-play"></i> Start Session</button>
+          <div id="overlay-session-timer" class="hidden">
+            <i class="fa-solid fa-clock text-primary" id="overlay-session-duration-icon"></i>
+            <span id="overlay-session-duration">00:00</span>
+          </div>
         </div>
         <button id="btn-edit-plan" class="icon-btn" aria-label="Edit plan" title="Edit plan">
           <i class="fa-solid fa-pen-to-square"></i>
@@ -1239,11 +1278,11 @@ export function renderActiveSessionOverlayShell() {
         </button>
       </div>
 
-      <!-- Session Start / Completion Drawer: mutually exclusive, toggled in renderActiveGroupBoard -->
-      <div class="session-actions-footer mt-auto">
+      <!-- Session Completion Drawer: Start moved to the title bar's session-timer-block above (only
+           Complete is a footer action now), shown once the session is running (renderActiveGroupBoard). -->
+      <div class="session-actions-footer mt-auto hidden">
         <div class="session-finish-row">
-          <button id="btn-start-session" class="btn success-btn btn-sm flex-1" data-i18n="btn_start_workout_session"><i class="fa-solid fa-circle-play"></i> Start Session</button>
-          <button id="btn-finish-session" class="btn success-btn btn-sm flex-1 hidden">Complete Workout Session</button>
+          <button id="btn-finish-session" class="btn success-btn btn-sm flex-1">Complete Workout Session</button>
         </div>
       </div>
     </div>

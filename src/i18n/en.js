@@ -224,8 +224,6 @@ export const en = {
   upcoming: "Upcoming",
   jump_to_date: "Jump to date",
   starts_in: "Starts in",
-  ready_to_start: "Ready to start",
-  start_now: "Start",
   elapsed: "Elapsed",
   edit_elapsed_time: "Edit elapsed time",
   live: "Live",

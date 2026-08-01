@@ -6,7 +6,7 @@
 .clipboard-editor {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 /* Edit-mode chrome: the session title bar is repurposed to show WHICH plan is being edited and
    its temporal mode, so the trainer always knows if they're changing the live session or a future one. */
@@ -87,7 +87,7 @@
 .editor-toolbar {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 .editor-list {
   list-style: none;
@@ -95,7 +95,7 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 .editor-empty {
   color: var(--text-muted);
@@ -105,8 +105,8 @@
 .editor-row {
   display: flex;
   align-items: stretch;
-  gap: 10px;
-  padding: 10px;
+  gap: 8px;
+  padding: 8px;
   border-radius: var(--border-radius-md);
   background: var(--card-bg);
   border: 1px solid var(--card-border);
@@ -128,8 +128,8 @@
 }
 .editor-row-toggle {
   flex: 0 0 auto;
-  width: 34px;
-  height: 34px;
+  width: 30px;
+  height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -184,7 +184,7 @@
    reorder freely. Sized as a tall two-zone target so both taps and drags are easy on touch. */
 .editor-reorder {
   flex: 0 0 auto;
-  width: 34px;
+  width: 30px;
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -220,7 +220,7 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 .editor-row-name-wrap {
   display: flex;
@@ -426,7 +426,7 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 .editor-circuit-add {
   align-self: flex-start;
@@ -446,8 +446,8 @@
 .editor-rest-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
+  gap: 8px;
+  padding: 6px 10px;
   border-radius: var(--border-radius-md);
   background: color-mix(in srgb, var(--primary) 7%, var(--card-bg));
   border: 1px dashed var(--border-color);

@@ -12,6 +12,12 @@ def _open_session(page, local_server):
     page.locator(card_sel).first.click()
     page.wait_for_selector("#active-session-overlay:not(.hidden)")
     page.wait_for_timeout(400)
+    # The deck starts fully collapsed on open (deckAllCollapsed) — .circuit-break-row only renders
+    # on the focused circuit card, so bring one into focus first.
+    # force=True: collapsed cards use margin-bottom:-24px overlap — the first non-past card may
+    # sit behind a stacked card that physically intercepts the pointer; force bypasses it.
+    page.locator(".exercise-deck-card:not(.past-session)").first.click(force=True)
+    page.wait_for_timeout(300)
 
 
 def _start_a_timer(page):

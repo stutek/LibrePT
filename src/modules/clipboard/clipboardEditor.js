@@ -71,17 +71,24 @@ export function renderClipboardEditor(container, deps) {
   const newId = () => (genId ? genId() : newRecordId());
 
   // A long plan means every row's full editable field set (name, sets, reps, load, circuit picker)
-  // all rendered at once — genuinely crowded. Every row starts collapsed to a one-line summary (name
-  // + compact target, same shorthand the live deck's own collapsed cards use) and expands on tap.
-  // Kept on activeClientState (not module state) so it's naturally scoped per client: a client whose
-  // plan has never been opened in the editor has no entries here, so their rows start collapsed too —
-  // switching to them never dumps a wall of expanded fields from a different client's plan.
-  if (!activeClientState.editorExpanded) activeClientState.editorExpanded = {};
-  const expandedIds = activeClientState.editorExpanded;
-  const isRowExpanded = (it) => !!expandedIds[it.id];
+  // all rendered at once — genuinely crowded. Rows are an accordion: at most ONE expanded at a time,
+  // the rest collapsed to a one-line summary (name + compact target, same shorthand the live deck's
+  // own collapsed cards use) — expanding a row auto-collapses whichever one was open. Kept on
+  // activeClientState (not module state) so it's naturally scoped per client: a client whose plan
+  // has never been opened in the editor gets the default one-row-open accordion on first render;
+  // switching to them never dumps a wall of expanded fields left over from a different client's plan.
+  // undefined = edit mode just opened for this client (expand the first row below); null = the
+  // trainer deliberately collapsed the accordion; an id = that row stays the sole expansion.
+  if (activeClientState.editorExpandedId === undefined) {
+    activeClientState.editorExpandedId = items.length > 0 ? items[0].id : null;
+  }
+  // A row the editor just inserted/swapped/restored (callout) is the trainer's current focus by
+  // definition — it becomes the sole accordion selection, collapsing whatever was open before.
+  if (callout?.id) activeClientState.editorExpandedId = callout.id;
+  const isRowExpanded = (it) => activeClientState.editorExpandedId === it.id;
   const toggleRowExpanded = (it) => {
-    if (expandedIds[it.id]) delete expandedIds[it.id];
-    else expandedIds[it.id] = true;
+    activeClientState.editorExpandedId =
+      activeClientState.editorExpandedId === it.id ? null : it.id;
     save();
     rerender();
   };
@@ -186,15 +193,15 @@ export function renderClipboardEditor(container, deps) {
           },
         )}</label>`
       : "";
-    // A row just inserted/swapped/restored (isCalledOut) always renders its fields expanded
-    // regardless of the collapsed default — the trainer either needs to type its name right now (a
-    // blank insert, the scroll+focus logic below targets .editor-row-name) or just picked it from
-    // the catalog and wants to see what landed, so collapsing it out from under them would be
-    // actively unhelpful. The name field, catalog button, reorder handle and remove button stay
-    // visible either way — only the bulkier sets/reps/load/circuit fields row toggles, so a
-    // collapsed row is still a full-fledged row (renamable, removable, reorderable, catalog-
-    // browsable) and not a stripped-down summary the trainer has to fight to act on.
-    const expanded = isRowExpanded(ex) || isCalledOut(ex);
+    // A row just inserted/swapped/restored (isCalledOut) is already the accordion's sole expanded
+    // row (editorExpandedId was forced to callout.id above) — the trainer either needs to type its
+    // name right now (a blank insert, the scroll+focus logic below targets .editor-row-name) or just
+    // picked it from the catalog and wants to see what landed. The name field, catalog button,
+    // reorder handle and remove button stay visible either way — only the bulkier sets/reps/load/
+    // circuit fields row toggles, so a collapsed row is still a full-fledged row (renamable,
+    // removable, reorderable, catalog-browsable) and not a stripped-down summary the trainer has to
+    // fight to act on.
+    const expanded = isRowExpanded(ex);
     let fieldsHTML;
     if (expanded) {
       fieldsHTML = `
@@ -393,11 +400,13 @@ export function renderClipboardEditor(container, deps) {
     if (activeClientState.activeExerciseIndex >= items.length) {
       activeClientState.activeExerciseIndex = Math.max(0, items.length - 1);
     }
-    // Drop expand-state for rows that no longer exist (removed, or a swap gave them a new id) —
-    // same pruning pattern as circuitRounds above, so this map never grows unbounded across a long
-    // editing session.
-    for (const id of Object.keys(expandedIds)) {
-      if (!items.some((e) => e.id === id)) delete expandedIds[id];
+    // Drop the accordion selection if that row no longer exists (removed, or a swap gave it a new
+    // id) — same pruning intent as circuitRounds above, just a single id instead of a map.
+    if (
+      activeClientState.editorExpandedId &&
+      !items.some((e) => e.id === activeClientState.editorExpandedId)
+    ) {
+      activeClientState.editorExpandedId = null;
     }
   }
   const commit = () => {

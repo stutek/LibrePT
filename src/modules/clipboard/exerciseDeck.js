@@ -102,8 +102,13 @@ export function renderExerciseDeck(deckContainer, deps) {
     }
   }
 
-  // Current routine exercises
-  const currentExIdx = activeClientState.activeExerciseIndex;
+  // Current routine exercises. The deck starts fully collapsed on a fresh open (deckAllCollapsed,
+  // stamped by activeSessionController.js's startWorkoutSession/openSessionFromHistory, cleared by
+  // the first focusExerciseByIndex call) — -1 matches nothing, so `isInFocus: idx === currentExIdx`
+  // is false for every item below without touching activeExerciseIndex itself.
+  const currentExIdx = activeClientState.deckAllCollapsed
+    ? -1
+    : activeClientState.activeExerciseIndex;
   const currentExList = activeClientState.exercises.map((ex, idx) => {
     // Rest is a first-class plan item: isInFocus is computed the SAME way for every item type —
     // idx === currentExIdx — no more hardcoded exception for rests (TODO §8.6).
@@ -300,6 +305,7 @@ export function renderExerciseDeck(deckContainer, deps) {
         }
 
         activeClientState.activeExerciseIndex = newIdx;
+        activeClientState.deckAllCollapsed = false;
 
         saveActiveSessionToCache();
         if (saveToLocalStorage) saveToLocalStorage();

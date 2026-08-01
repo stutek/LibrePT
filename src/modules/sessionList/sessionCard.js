@@ -3,7 +3,7 @@
 // launches the clipboard). Dependencies are injected by the caller (renderSessions in app.js)
 // so this component stays decoupled from app.js internals and is easy to relocate/test.
 //
-// deps: { state, t, escapeHTML, launchClipboardDirectly, startSessionFromCard, sessionDayTemporal,
+// deps: { state, t, escapeHTML, launchClipboardDirectly, sessionDayTemporal,
 //         activeId, saveToLocalStorage, rerenderSessions }
 
 import {
@@ -101,9 +101,9 @@ export function renderSessionCard(b, colContainer, deps) {
   card.className = `session-card card glassmorphic${temporal !== "today" ? ` session-${temporal}` : ""}`;
   // A card is marked "Active session" only once the trainer has explicitly started it (matched by
   // the launched clipboard's source session id(s) AND activeSession.started) — reaching the
-  // scheduled time by wall-clock alone is NOT enough (see isDue below). Every applicable card is
-  // marked, so overlapping sessions all show as ongoing. Once a non-closed session runs past its
-  // end (negative remaining), the marker turns a warning colour.
+  // scheduled time by wall-clock alone is NOT enough. Every applicable card is marked, so
+  // overlapping sessions all show as ongoing. Once a non-closed session runs past its end
+  // (negative remaining), the marker turns a warning colour.
   const activeSession = deps.getActiveSession ? deps.getActiveSession() : null;
   const ss = activeSession?.sourceSession;
   const isLaunched =
@@ -115,13 +115,11 @@ export function renderSessionCard(b, colContainer, deps) {
       (ss && ss.id === b.id) ||
       (ss && Array.isArray(ss.ids) && ss.ids.includes(b.id)));
   const range = parseTimeRange(b.time);
-  const nowMin = new Date().getHours() * 60 + new Date().getMinutes();
   // Reaching the scheduled start by wall-clock is NOT the same as the trainer having actually
-  // started the session — beginWorkoutSession() requires an explicit tap (see
+  // started the session — beginWorkoutSession() requires an explicit tap from the clipboard title
+  // bar (#btn-start-session in activeSessionController.js), not from this card (see
   // test_session_status_line.py: "opening the clipboard only stages the session"). A due-but-
-  // unstarted session must not read as already in progress, so isLive only follows isLaunched;
-  // isDue instead drives a Start button (below) so the trainer's tap is what flips it live.
-  const isDue = !b.completed && b.day === "today" && !!range && nowMin >= range.start;
+  // unstarted session must not read as already in progress, so isLive only follows isLaunched.
   const isLive = isLaunched;
   if (isLive) card.classList.add("session-live");
 
@@ -194,14 +192,17 @@ export function renderSessionCard(b, colContainer, deps) {
     !b.completed && !isLive && range
       ? getSessionDayDate(b.day).getTime() + range.start * 60000
       : null;
-  const isUpcoming = startMs != null && startMs > Date.now();
+  // No longer gated on startMs > Date.now(): starting a session is now a clipboard-title-bar action
+  // (#btn-start-session), not a card action, so this card has nothing else to show once the
+  // scheduled start passes — the countdown just keeps counting into negative/overtime instead of
+  // handing off to a Start button.
+  const isUpcoming = startMs != null;
 
   // Status-line timer text. Two mutually exclusive clock-driven drivers, both rendered "01h 32m"
-  // (session-list status lines never show seconds); a due-but-unstarted session gets no timer at
-  // all here — it gets a Start button in the status bar below instead:
+  // (session-list status lines never show seconds):
   //  - the launched clipboard's own timer (ticks elsewhere, via sessionBar)
-  //  - a clock-driven countdown to the scheduled START (not yet begun) — can go negative if the
-  //    wall clock crosses the start time before the next full re-render flips the card to isDue
+  //  - a clock-driven countdown to the scheduled START (not yet begun) — goes negative once the
+  //    wall clock crosses the start time, warned via the overtime-aware ticker below
   let timerText = "";
   let timerIsOvertime = false;
   let timerLive = false; // driven by the launched clipboard timer
@@ -302,16 +303,6 @@ export function renderSessionCard(b, colContainer, deps) {
       <span class="session-live-tag"><i class="fa-solid fa-clock-rotate-left"></i> ${escapeHTML(t("elapsed") || "Elapsed")}</span>
       <span class="session-live-timer session-status-value" title="${escapeHTML(t("edit_elapsed_time") || "Edit elapsed time")}">${escapeHTML(formatDurationHM(pastElapsedSeconds))}</span>
     </div>`;
-  } else if (isDue) {
-    // Scheduled time has arrived but nobody has tapped Start yet — a countdown here would read as
-    // "already running" when it isn't. Offer the explicit action instead; wired below, it starts
-    // the session in place without navigating away from the dashboard.
-    card.classList.add("session-status-stack");
-    statusBarHTML = `
-    <div class="session-live-bar due">
-      <span class="session-live-tag"><i class="fa-solid fa-circle-play"></i> ${escapeHTML(t("ready_to_start") || "Ready to start")}</span>
-      <button type="button" class="session-card-start-btn">${escapeHTML(t("start_now") || "Start")}</button>
-    </div>`;
   } else if (isUpcoming) {
     card.classList.add("session-status-stack");
     statusBarHTML = `
@@ -323,8 +314,8 @@ export function renderSessionCard(b, colContainer, deps) {
   if (timerEndMs != null) ensureCardTicker();
 
   // No launch/completed button: the whole card is the tap target, and completion already shows
-  // as a badge — the button just duplicated that and ate horizontal space. The Start button (isDue
-  // only) is the one deliberate exception, wired separately below with its own stopPropagation.
+  // as a badge — the button just duplicated that and ate horizontal space. Starting the session is
+  // now a clipboard title-bar action (#btn-start-session), reached by tapping the card to open it.
   card.addEventListener("click", () => {
     launchClipboardDirectly(b.id);
   });
@@ -336,15 +327,5 @@ export function renderSessionCard(b, colContainer, deps) {
   if (pastElapsedSeconds != null) {
     const valueEl = card.querySelector(".session-status-value");
     if (valueEl) wireElapsedEdit(valueEl, b, deps);
-  }
-
-  if (isDue) {
-    const startBtn = card.querySelector(".session-card-start-btn");
-    if (startBtn) {
-      startBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        deps.startSessionFromCard?.(b.id);
-      });
-    }
   }
 }

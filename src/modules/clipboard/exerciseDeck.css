@@ -178,13 +178,13 @@
 .exercise-vertical-list {
   display: flex;
   flex-direction: column;
-  padding: 12px 6px 20px;
+  padding: 8px 6px 14px;
   perspective: 1400px;
 }
 .exercise-deck-card {
   width: 100%;
   box-sizing: border-box;
-  padding: 12px 14px;
+  padding: 8px 10px;
   border-radius: 14px;
   border: 1px solid var(--border-color);
   /* Fully opaque (card tint over the solid view background) so overlapping deck cards never
@@ -200,7 +200,7 @@
    tilted back for a physical-deck depth cue. The depth comes from the scale/tilt/shadow, not
    from element opacity — a translucent card here let the overlapped card below bleed through. */
 .exercise-deck-card:not(.in-focus) {
-  margin-bottom: -24px;
+  margin-bottom: -28px;
   transform: scale(0.955) rotateX(6deg);
   box-shadow: 0 -3px 10px rgba(0, 0, 0, 0.18);
   position: relative;
@@ -214,7 +214,7 @@
   margin-bottom: 0;
 } /* The in-focus card pops forward, full-size, with breathing room around it */
 .exercise-deck-card.in-focus {
-  margin: 12px 0 16px;
+  margin: 6px 0 10px;
   transform: none;
   opacity: 1;
   position: relative;
@@ -247,7 +247,7 @@
    collapsed-stack transform), but keeps its purple identity instead of the cyan live-focus
    treatment. Higher specificity than .exercise-deck-card:not(.in-focus) so the pop wins. */
 .exercise-deck-card.past-session.past-expanded {
-  margin: 12px 0 16px;
+  margin: 6px 0 10px;
   transform: none;
   opacity: 1;
   z-index: 5;
@@ -304,18 +304,18 @@
 .deck-card-compact {
   display: flex;
   align-items: center;
-  gap: 8px;
-  min-height: 20px;
+  gap: 6px;
+  min-height: 18px;
 }
 .deck-card-name-inline {
   flex: 1;
   min-width: 0;
   margin: 0;
-  font-size: 13px;
+  font-size: 12px;
 }
 .deck-card-compact-target {
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: 12px;
   color: var(--primary);
   font-weight: 700;
   flex-shrink: 0;
@@ -325,7 +325,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 6px;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 .deck-card-top-right {
   display: inline-flex;
@@ -337,8 +337,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   background: transparent;
   border: none;
   color: var(--text-muted);
@@ -372,8 +372,8 @@
   color: var(--temporal-past);
 }
 .deck-card-name {
-  margin: 0 0 10px 0;
-  font-size: 16px;
+  margin: 0 0 4px 0;
+  font-size: 14px;
   color: var(--text-color);
   font-weight: 700;
   line-height: 1.2;

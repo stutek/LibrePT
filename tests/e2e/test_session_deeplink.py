@@ -130,22 +130,28 @@ def test_tapping_a_card_updates_the_deep_link(page, local_server):
     focus_re = _focus_re(_base(page))
 
     before = page.evaluate("() => location.pathname")
-    # Tap a non-focused, non-past, non-rest card (an exercise or circuit) — deliberately excludes
-    # .rest-card so this test's outcome doesn't depend on seed-data ordering: a rest card focusing
-    # correctly is covered explicitly by test_rest_card_focus.py, not implicitly by whichever card
-    # this selector happens to land on.
+    # Tap a non-past, non-rest card that is NOT the one the URL already names (an exercise or
+    # circuit) — deliberately excludes .rest-card so this test's outcome doesn't depend on seed-data
+    # ordering: a rest card focusing correctly is covered explicitly by test_rest_card_focus.py, not
+    # implicitly by whichever card this selector happens to land on. The deck starts fully collapsed
+    # on open (deckAllCollapsed), so `.in-focus` can't be used to find "the other" card — the URL
+    # (still derived straight from activeExerciseIndex, unaffected by the collapsed render) is.
     tapped = page.evaluate(
-        """() => {
+        """(before) => {
           const cards = [...document.querySelectorAll('#active-exercise-scroll-deck .exercise-deck-card')];
-          const t = cards.find(c =>
-            !c.classList.contains('in-focus') &&
+          const candidates = cards.filter(c =>
             !c.classList.contains('rest-card') &&
             !c.querySelector('.deck-card-status-past')
           );
-          if (!t) return false;
-          t.click();
-          return true;
-        }"""
+          // Click each candidate in turn until the URL actually moves. A click that lands on
+          // whatever the URL already names is a no-op (same index re-focused) and safely falls
+          // through to the next candidate.
+          return candidates.some((c) => {
+            c.click();
+            return location.pathname !== before;
+          });
+        }""",
+        before,
     )
     assert tapped, "no tappable upcoming exercise/circuit card found in the deck"
     page.wait_for_timeout(300)

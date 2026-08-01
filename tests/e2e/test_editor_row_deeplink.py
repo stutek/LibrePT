@@ -35,6 +35,14 @@ def _keep_cached_session_fresh(page):
 
 
 def _insert_exercise_from_the_deck(page):
+    # The deck starts fully collapsed on open (deckAllCollapsed) — the fast-adjust bar only renders
+    # under the in-focus card, so bring one into focus first (not a past-session reference card,
+    # whose own tap toggles a review panel instead of the shared focus index).
+    # force=True: collapsed cards use margin-bottom:-24px overlap so the first non-past card may
+    # sit behind a stacked card that physically intercepts the pointer — the card is the correct
+    # target and IS visible; force bypasses the pointer-events interceptor check.
+    page.locator(".exercise-deck-card:not(.past-session)").first.click(force=True)
+    page.wait_for_selector(".fast-adjust-bar", timeout=5000)
     page.locator(".fast-adjust-bar .fast-adj-ex").first.click()
     page.wait_for_selector(".clipboard-editor")
     page.wait_for_timeout(300)

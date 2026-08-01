@@ -6,19 +6,19 @@
 
 .deck-card-stats {
   display: flex;
-  gap: 8px;
+  gap: 6px;
 }
 .deck-stat {
   flex: 1;
   align-items: center;
   gap: 2px;
-  padding: 8px 2px;
+  padding: 4px 2px;
   background: rgba(0, 0, 0, 0.2);
   border-radius: 8px;
 }
 .deck-stat-value {
   font-family: var(--font-mono);
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--primary);
   line-height: 1;
@@ -32,13 +32,13 @@
 } /* One-tap outcome signals on the focus card — gym-floor tap targets */
 .deck-card-actions {
   display: flex;
-  gap: 8px;
-  margin-top: 12px;
+  gap: 6px;
+  margin-top: 6px;
 }
 .deck-action-btn {
   flex: 1;
   gap: 6px;
-  min-height: 46px;
+  min-height: 40px;
   border-radius: 10px;
   border: 1px solid var(--border-color);
   background: rgba(255, 255, 255, 0.04);

@@ -94,6 +94,26 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   font-size: 18px;
   color: var(--primary);
 }
+/* The live countdown that replaces the Start button once tapped — "01h 32m" next to its clock
+   icon, same shorthand the dashboard card's own timers use. */
+#overlay-session-timer {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+/* Session ran past its scheduled end without being closed: warn in amber (matches the dashboard
+   card's own overtime bar, sessionsView.css) so it reads as a warning at a glance, not just a
+   number that quietly went negative. */
+#overlay-session-timer.overtime {
+  background: var(--warning, #f59e0b);
+  color: #3d2600;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+#overlay-session-timer.overtime span,
+#overlay-session-timer.overtime i {
+  color: #3d2600;
+}
 .session-overlay-body {
   flex: 1;
   overflow-y: auto;

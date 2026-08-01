@@ -83,6 +83,20 @@ def test_interactive_dashboard_flow(page, local_server):
     assert any("Jane" in t for t in tabs)
     assert any("John" in t for t in tabs)
 
+    # The deck starts fully collapsed on open (deckAllCollapsed) — tap the first card into focus so
+    # its Log Feedback action actually renders. Use JS evaluate rather than Playwright's locator:
+    # the card lives inside the overlay's own scroll container, and Playwright's click can't scroll
+    # an inner container's element into the page viewport even with force=True.
+    page.evaluate(
+        """() => {
+            const card = document.querySelector(
+                '#active-exercise-scroll-deck .exercise-deck-card:not(.past-session)'
+            );
+            if (card) { card.scrollIntoView({ block: 'center' }); card.click(); }
+        }"""
+    )
+    page.wait_for_timeout(400)
+
     # --- STEP 5: PRIVACY-FIRST VOICE NOTE RECORDING ---
     # Log Feedback now lives on the in-focus exercise card
     page.locator("#btn-log-feedback").click()
