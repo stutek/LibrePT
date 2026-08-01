@@ -69,15 +69,6 @@ PRE_EXISTING_ALLOWLIST = {
     "src/modules/clipboard/circuitCard.js::renderFocused": (
         "In-focus circuit card markup, branching per member/round/quick-signal state; §14 follow-up."
     ),
-    "src/modules/clipboard/clipboardEditor.js::exerciseRow": (
-        "One editable plan row's full field set (name/sets/reps/load/circuit); §14 follow-up."
-    ),
-    "src/modules/clipboard/clipboardEditor.js::normalizeCircuits": (
-        "Keeps a circuit's members contiguous after any reorder/insert/delete; §14 follow-up."
-    ),
-    "src/modules/clipboard/clipboardEditor.js::renderClipboardEditor": (
-        "The plan editor's top-level render — accordion, circuits, inserts, in one pass; §14 follow-up."
-    ),
     "src/modules/clipboard/exerciseDeck.js::renderExerciseDeck": (
         "Live deck's top-level render — focus/collapse/circuit/rest dispatch; §14 follow-up."
     ),

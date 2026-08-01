@@ -49,6 +49,141 @@ const DEFAULT_REST = 30; // seconds, when injecting a fresh rest
 // exactly one set live. A stale leftover was what made an in-editor tap read as "outside".
 let detachDocListeners = null;
 
+// Modality decides what the primary field means and whether a load field shows: strength authors
+// reps, cardio/agility their effort metric, isometric/stretch/balance a hold-time. The value lives
+// in the same repsTarget slot (polymorphic); only the label and the load field's presence change.
+function resolveExerciseFieldMeta(ex, tr) {
+  const unit = ex.loadUnit || "kg";
+  const metric = ex.metric || "reps";
+  const modality = ex.modality || "strength";
+  return {
+    name: ex.name || "",
+    reps: String(ex.repsTarget ?? ex.reps ?? 10),
+    unit,
+    metric,
+    modality,
+    primaryLabel: metric === "reps" ? tr("reps_label", "Reps") : tr(metricLabelKey(metric), metric),
+    // Points the reps combobox at the preset tier suited to this movement's pattern + load, so an
+    // empty field suggests sensible values (the PT can still type any count/range/hold/"max").
+    repsListId: repsPresetListId(ex.pattern, unit),
+  };
+}
+
+// A circuit member's set count IS the circuit's round count, so we drop the redundant per-row Sets
+// field for members — the circuit header's Rounds control is the single source of truth.
+function buildSetsFieldHTML(ex, tr, escapeHTML) {
+  if (ex.circuitId) return "";
+  const value = escapeHTML(String(ex.setsTargetCount ?? ex.sets ?? 3));
+  return `<label class="editor-field"><span>${tr("sets", "Sets")}</span><input type="number" min="0" class="editor-f-sets" value="${value}"></label>`;
+}
+
+// A load field shows for load-bearing modalities (strength, isometric) — a weighted plank still
+// takes a load — but not for cardio, holds, or agility.
+function buildLoadFieldHTML(ex, modality, unit, escapeHTML) {
+  if (!usesLoad(modality)) return "";
+  const value = ex.weightTarget ?? ex.weight ?? 0;
+  return `<label class="editor-field"><span>${escapeHTML(loadFieldMeta(unit).label)}</span>${loadInputHTML(
+    { unit, value, cls: "editor-f-weight", escapeHTML, ariaLabel: "Load" },
+  )}</label>`;
+}
+
+// The collapsed-row one-line summary: sets × reps/effort × load, the same shorthand the live deck's
+// own collapsed cards use.
+function buildCollapsedSummaryHTML(ex, modality, metric, unit, escapeHTML) {
+  const compactLoad =
+    usesLoad(modality) && hasLoad(ex.weightTarget ?? ex.weight, unit)
+      ? ` × ${escapeHTML(formatLoad(ex.weightTarget ?? ex.weight, unit))}`
+      : "";
+  const primaryPart =
+    metric === "reps"
+      ? `R${escapeHTML(formatReps(ex.repsTarget ?? ex.reps))}`
+      : escapeHTML(String(ex.repsTarget ?? ex.reps ?? ""));
+  const setsPart = ex.circuitId
+    ? ""
+    : `S${escapeHTML(String(ex.setsTargetCount ?? ex.sets ?? 3))} × `;
+  return `<span class="editor-row-fields-summary">${setsPart}${primaryPart}${compactLoad}</span>`;
+}
+
+// Rounds drive a circuit member's set count: keeps its target and log rows aligned to the series.
+function syncCircuitMemberSetCount(member, series, logs) {
+  member.setsTargetCount = series;
+  const memberLogs = logs[member.id];
+  if (!Array.isArray(memberLogs)) return;
+  while (memberLogs.length < series)
+    memberLogs.push({
+      reps: member.repsTarget ?? 0,
+      weight: member.weightTarget ?? 0,
+      completed: false,
+      note: "",
+    });
+  memberLogs.length = series;
+}
+
+// Regroup so each circuit's members are contiguous, sharing one title/series, with round-aligned logs.
+function regroupCircuitMembers(items, logs) {
+  const emitted = new Set();
+  const result = [];
+  for (const it of items) {
+    if (!it.circuitId) {
+      result.push(it);
+      continue;
+    }
+    if (emitted.has(it.circuitId)) continue; // members are pulled together on first sight
+    emitted.add(it.circuitId);
+    const members = items.filter((e) => e.circuitId === it.circuitId);
+    const firstEx = members.find((m) => !isRest(m)) || members[0];
+    const title = firstEx.circuitTitle || "";
+    const series = firstEx.circuitSeries || 1;
+    for (const m of members) {
+      m.circuitTitle = title;
+      m.circuitSeries = series;
+      if (!isRest(m)) syncCircuitMemberSetCount(m, series, logs);
+    }
+    result.push(...members);
+  }
+  return result;
+}
+
+function pruneOrphanedCircuitRounds(items, rounds) {
+  for (const cid of Object.keys(rounds)) {
+    if (!items.some((e) => e.circuitId === cid)) delete rounds[cid];
+  }
+  for (const it of items) {
+    if (!it.circuitId) continue;
+    const series = it.circuitSeries || 1;
+    rounds[it.circuitId] = Math.min(Math.max(1, rounds[it.circuitId] || 1), series);
+  }
+}
+
+// First-appearance order + metadata for the existing circuits, used to build the move <select>.
+function collectCircuitsMeta(items) {
+  const circuits = [];
+  for (const it of items) {
+    if (it.circuitId && !circuits.some((c) => c.id === it.circuitId)) {
+      circuits.push({
+        id: it.circuitId,
+        title: it.circuitTitle || "",
+        series: it.circuitSeries || 1,
+      });
+    }
+  }
+  return circuits;
+}
+
+function clampActiveIndexAndAccordion(activeClientState, items) {
+  if (activeClientState.activeExerciseIndex >= items.length) {
+    activeClientState.activeExerciseIndex = Math.max(0, items.length - 1);
+  }
+  // Drop the accordion selection if that row no longer exists (removed, or a swap gave it a new
+  // id) — same pruning intent as circuitRounds above, just a single id instead of a map.
+  if (
+    activeClientState.editorExpandedId &&
+    !items.some((e) => e.id === activeClientState.editorExpandedId)
+  ) {
+    activeClientState.editorExpandedId = null;
+  }
+}
+
 export function renderClipboardEditor(container, deps) {
   const {
     activeClientState,
@@ -101,17 +236,7 @@ export function renderClipboardEditor(container, deps) {
     .map((n) => `<option value="${escapeHTML(n)}"></option>`)
     .join("");
 
-  // First-appearance order + metadata for the existing circuits, used to build the move <select>.
-  const circuits = [];
-  for (const it of items) {
-    if (it.circuitId && !circuits.some((c) => c.id === it.circuitId)) {
-      circuits.push({
-        id: it.circuitId,
-        title: it.circuitTitle || "",
-        series: it.circuitSeries || 1,
-      });
-    }
-  }
+  const circuits = collectCircuitsMeta(items);
   const circuitMetaOf = (cid) => {
     const m =
       items.find((e) => e.circuitId === cid && !isRest(e)) ||
@@ -162,37 +287,12 @@ export function renderClipboardEditor(container, deps) {
   };
 
   const exerciseRow = (ex, idx) => {
-    const name = escapeHTML(ex.name || "");
-    const reps = escapeHTML(String(ex.repsTarget ?? ex.reps ?? 10));
-    const unit = ex.loadUnit || "kg";
-    // Modality decides what the primary field means and whether a load field shows: strength authors
-    // reps, cardio/agility their effort metric, isometric/stretch/balance a hold-time. The value lives
-    // in the same repsTarget slot (polymorphic); only the label and the load field's presence change.
-    // A load field shows for load-bearing modalities (strength, isometric) — a weighted plank still
-    // takes a load — but not for cardio, holds, or agility.
-    const metric = ex.metric || "reps";
-    const modality = ex.modality || "strength";
-    const primaryLabel =
-      metric === "reps" ? tr("reps_label", "Reps") : tr(metricLabelKey(metric), metric);
-    // Point the reps combobox at the preset tier suited to this movement's pattern + load, so an
-    // empty field suggests sensible values (the PT can still type any count/range/hold/"max").
-    const repsListId = repsPresetListId(ex.pattern, unit);
-    // A circuit member's set count IS the circuit's round count, so we drop the redundant per-row
-    // Sets field for members — the circuit header's Rounds control is the single source of truth.
-    const setsField = ex.circuitId
-      ? ""
-      : `<label class="editor-field"><span>${tr("sets", "Sets")}</span><input type="number" min="0" class="editor-f-sets" value="${escapeHTML(String(ex.setsTargetCount ?? ex.sets ?? 3))}"></label>`;
-    const loadField = usesLoad(modality)
-      ? `<label class="editor-field"><span>${escapeHTML(loadFieldMeta(unit).label)}</span>${loadInputHTML(
-          {
-            unit,
-            value: ex.weightTarget ?? ex.weight ?? 0,
-            cls: "editor-f-weight",
-            escapeHTML,
-            ariaLabel: "Load",
-          },
-        )}</label>`
-      : "";
+    const { name, reps, unit, metric, modality, primaryLabel, repsListId } =
+      resolveExerciseFieldMeta(ex, tr);
+    const escapedName = escapeHTML(name);
+    const escapedReps = escapeHTML(reps);
+    const setsField = buildSetsFieldHTML(ex, tr, escapeHTML);
+    const loadField = buildLoadFieldHTML(ex, modality, unit, escapeHTML);
     // A row just inserted/swapped/restored (isCalledOut) is already the accordion's sole expanded
     // row (editorExpandedId was forced to callout.id above) — the trainer either needs to type its
     // name right now (a blank insert, the scroll+focus logic below targets .editor-row-name) or just
@@ -202,38 +302,25 @@ export function renderClipboardEditor(container, deps) {
     // removable, reorderable, catalog-browsable) and not a stripped-down summary the trainer has to
     // fight to act on.
     const expanded = isRowExpanded(ex);
-    let fieldsHTML;
-    if (expanded) {
-      fieldsHTML = `
+    const fieldsHTML = expanded
+      ? `
           <div class="editor-row-fields">
             ${setsField}
-            <label class="editor-field"><span>${escapeHTML(primaryLabel)}</span><input type="text" list="${repsListId}" class="editor-f-reps" value="${reps}"></label>
+            <label class="editor-field"><span>${escapeHTML(primaryLabel)}</span><input type="text" list="${repsListId}" class="editor-f-reps" value="${escapedReps}"></label>
             ${loadField}
             <label class="editor-field editor-field-circuit"><span><i class="fa-solid fa-layer-group"></i></span>${circuitSelect(ex)}</label>
-          </div>`;
-    } else {
-      const compactLoad =
-        usesLoad(modality) && hasLoad(ex.weightTarget ?? ex.weight, unit)
-          ? ` × ${escapeHTML(formatLoad(ex.weightTarget ?? ex.weight, unit))}`
-          : "";
-      const primaryPart =
-        metric === "reps"
-          ? `R${escapeHTML(formatReps(ex.repsTarget ?? ex.reps))}`
-          : escapeHTML(String(ex.repsTarget ?? ex.reps ?? ""));
-      const setsPart = ex.circuitId
-        ? ""
-        : `S${escapeHTML(String(ex.setsTargetCount ?? ex.sets ?? 3))} × `;
-      fieldsHTML = `<span class="editor-row-fields-summary">${setsPart}${primaryPart}${compactLoad}</span>`;
-    }
+          </div>`
+      : buildCollapsedSummaryHTML(ex, modality, metric, unit, escapeHTML);
+    const toggleLabel = expanded ? tr("collapse", "Collapse") : tr("expand", "Expand");
     return `
       <li class="editor-row${newMarkerClass(ex)}" data-rowkey="${idx}">
         ${reorderHandle()}
         <div class="editor-row-main">
           <div class="editor-row-name-wrap">
-            <input class="editor-row-name" type="text" list="${datalistId}" value="${name}" aria-label="${tr("exercise", "Exercise")}" placeholder="${tr("exercise", "Exercise")}">
+            <input class="editor-row-name" type="text" list="${datalistId}" value="${escapedName}" aria-label="${tr("exercise", "Exercise")}" placeholder="${tr("exercise", "Exercise")}">
             <button type="button" class="editor-row-catalog" aria-label="${tr("browse_catalog", "Browse exercise catalog")}" title="${tr("browse_catalog", "Browse exercise catalog")}"><i class="fa-solid fa-book-open"></i></button>
             ${newBadge(ex)}
-            <button type="button" class="editor-row-toggle" aria-expanded="${expanded}" aria-label="${expanded ? tr("collapse", "Collapse") : tr("expand", "Expand")}" title="${expanded ? tr("collapse", "Collapse") : tr("expand", "Expand")}"><i class="fa-solid fa-chevron-${expanded ? "up" : "down"}"></i></button>
+            <button type="button" class="editor-row-toggle" aria-expanded="${expanded}" aria-label="${toggleLabel}" title="${toggleLabel}"><i class="fa-solid fa-chevron-${expanded ? "up" : "down"}"></i></button>
           </div>
           ${fieldsHTML}
         </div>
@@ -303,23 +390,27 @@ export function renderClipboardEditor(container, deps) {
   };
 
   // Walk the (contiguous) array into top-level units, with an insert bar in every gap.
-  let unitsHtml = insertBar(0, { allowCircuit: true });
-  for (let i = 0; i < items.length; ) {
-    const it = items[i];
-    if (it.circuitId) {
-      const cid = it.circuitId;
-      const members = [];
-      while (i < items.length && items[i].circuitId === cid) {
-        members.push({ it: items[i], idx: i });
+  const buildUnitsHtml = () => {
+    let html = insertBar(0, { allowCircuit: true });
+    for (let i = 0; i < items.length; ) {
+      const it = items[i];
+      if (it.circuitId) {
+        const cid = it.circuitId;
+        const members = [];
+        while (i < items.length && items[i].circuitId === cid) {
+          members.push({ it: items[i], idx: i });
+          i++;
+        }
+        html += circuitBlock(cid, members);
+      } else {
+        html += anyRow(it, i);
         i++;
       }
-      unitsHtml += circuitBlock(cid, members);
-    } else {
-      unitsHtml += anyRow(it, i);
-      i++;
+      html += insertBar(i, { allowCircuit: true });
     }
-    unitsHtml += insertBar(i, { allowCircuit: true });
-  }
+    return html;
+  };
+  const unitsHtml = buildUnitsHtml();
 
   // The edit-mode title, ✎ icon, and Done button live on the session title bar (rendered by the
   // controller), so the editor body carries no header of its own — just the list and the exit hint.
@@ -340,74 +431,21 @@ export function renderClipboardEditor(container, deps) {
 
   // Browse the full taxonomy catalog and inject the chosen movement into the plan, then return here.
   const catalogBtn = container.querySelector(".editor-catalog-btn");
-  if (catalogBtn) {
-    catalogBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      deps.openCatalogPicker?.();
-    });
-  }
+  catalogBtn?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    deps.openCatalogPicker?.();
+  });
   const rowKeyOf = (rowEl) => parseInt(rowEl.dataset.rowkey, 10);
 
   // ---------- circuit invariant: members contiguous, shared title/series, clean round counters ----------
   function normalizeCircuits() {
-    const emitted = new Set();
-    const result = [];
-    for (const it of items) {
-      if (!it.circuitId) {
-        result.push(it);
-        continue;
-      }
-      if (emitted.has(it.circuitId)) continue; // members are pulled together on first sight
-      emitted.add(it.circuitId);
-      const members = items.filter((e) => e.circuitId === it.circuitId);
-      const firstEx = members.find((m) => !isRest(m)) || members[0];
-      const title = firstEx.circuitTitle || "";
-      const series = firstEx.circuitSeries || 1;
-      for (const m of members) {
-        m.circuitTitle = title;
-        m.circuitSeries = series;
-        // Rounds drive a member's set count: keep its target and log rows aligned to the series.
-        if (!isRest(m)) {
-          m.setsTargetCount = series;
-          const logs = activeClientState.logs[m.id];
-          if (Array.isArray(logs)) {
-            while (logs.length < series)
-              logs.push({
-                reps: m.repsTarget ?? 0,
-                weight: m.weightTarget ?? 0,
-                completed: false,
-                note: "",
-              });
-            logs.length = series;
-          }
-        }
-      }
-      result.push(...members);
-    }
+    const result = regroupCircuitMembers(items, activeClientState.logs);
     items.length = 0;
     items.push(...result);
 
     if (!activeClientState.circuitRounds) activeClientState.circuitRounds = {};
-    const rounds = activeClientState.circuitRounds;
-    for (const cid of Object.keys(rounds)) {
-      if (!items.some((e) => e.circuitId === cid)) delete rounds[cid];
-    }
-    for (const it of items) {
-      if (!it.circuitId) continue;
-      const series = it.circuitSeries || 1;
-      rounds[it.circuitId] = Math.min(Math.max(1, rounds[it.circuitId] || 1), series);
-    }
-    if (activeClientState.activeExerciseIndex >= items.length) {
-      activeClientState.activeExerciseIndex = Math.max(0, items.length - 1);
-    }
-    // Drop the accordion selection if that row no longer exists (removed, or a swap gave it a new
-    // id) — same pruning intent as circuitRounds above, just a single id instead of a map.
-    if (
-      activeClientState.editorExpandedId &&
-      !items.some((e) => e.id === activeClientState.editorExpandedId)
-    ) {
-      activeClientState.editorExpandedId = null;
-    }
+    pruneOrphanedCircuitRounds(items, activeClientState.circuitRounds);
+    clampActiveIndexAndAccordion(activeClientState, items);
   }
   const commit = () => {
     normalizeCircuits();
@@ -456,148 +494,162 @@ export function renderClipboardEditor(container, deps) {
 
   // ---------- fields collapse/expand: the chevron next to the name toggles that one row's
   // sets/reps/load/circuit fields only, leaving every other row's state untouched. ----------
-  for (const btn of listEl.querySelectorAll(".editor-row-toggle")) {
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const ex = items[rowKeyOf(btn.closest(".editor-row"))];
-      if (ex) toggleRowExpanded(ex);
-    });
-  }
+  const wireRowExpandToggle = () => {
+    for (const btn of listEl.querySelectorAll(".editor-row-toggle")) {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const ex = items[rowKeyOf(btn.closest(".editor-row"))];
+        if (ex) toggleRowExpanded(ex);
+      });
+    }
+  };
 
   // --- 📖 per row: browse the taxonomy for THIS row and swap its movement in place ---
   // The datalist combobox only helps a PT who already knows the movement's name; the catalog button
   // is the browse-and-filter route for when they don't. It carries the row's own context across
   // (partial text typed + muscle group), so the picker opens already narrowed.
-  for (const btn of listEl.querySelectorAll(".editor-row-catalog")) {
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const row = btn.closest(".editor-row");
-      const ex = items[rowKeyOf(row)];
-      if (!ex) return;
-      // Only half-typed text is a search intent. A name that already IS a catalog movement is the
-      // row's current selection — seeding it would open the picker filtered to the one movement the
-      // PT is trying to move away from.
-      const typed = row.querySelector(".editor-row-name")?.value.trim() || "";
-      const query = (allExerciseNames || []).includes(typed) ? "" : typed;
-      deps.openCatalogPicker?.({ slotId: ex.id, query, category: ex.category || "" });
-    });
-  }
+  const wireRowCatalogButtons = () => {
+    for (const btn of listEl.querySelectorAll(".editor-row-catalog")) {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const row = btn.closest(".editor-row");
+        const ex = items[rowKeyOf(row)];
+        if (!ex) return;
+        // Only half-typed text is a search intent. A name that already IS a catalog movement is the
+        // row's current selection — seeding it would open the picker filtered to the one movement the
+        // PT is trying to move away from.
+        const typed = row.querySelector(".editor-row-name")?.value.trim() || "";
+        const query = (allExerciseNames || []).includes(typed) ? "" : typed;
+        deps.openCatalogPicker?.({ slotId: ex.id, query, category: ex.category || "" });
+      });
+    }
+  };
 
   // --- swap the movement in place via the name field (autocompletes from the catalog) ---
-  for (const input of listEl.querySelectorAll(".editor-row-name")) {
-    input.addEventListener("click", (e) => e.stopPropagation());
-    const applyName = () => {
-      const ex = items[rowKeyOf(input.closest(".editor-row"))];
-      if (!ex) return;
-      const newName = input.value.trim();
-      if (!newName || newName === ex.name) return;
-      ex.name = newName; // keep the same slot/id/logs — a swap retargets the movement, not the sets
-      save();
-    };
-    input.addEventListener("input", applyName); // persist per keystroke so a reload keeps typing intact
-    input.addEventListener("change", applyName);
-  }
+  const wireRowNameSwap = () => {
+    for (const input of listEl.querySelectorAll(".editor-row-name")) {
+      input.addEventListener("click", (e) => e.stopPropagation());
+      const applyName = () => {
+        const ex = items[rowKeyOf(input.closest(".editor-row"))];
+        if (!ex) return;
+        const newName = input.value.trim();
+        if (!newName || newName === ex.name) return;
+        ex.name = newName; // keep the same slot/id/logs — a swap retargets the movement, not the sets
+        save();
+      };
+      input.addEventListener("input", applyName); // persist per keystroke so a reload keeps typing intact
+      input.addEventListener("change", applyName);
+    }
+  };
 
   // ---------- rest rows: edit seconds (live) / remove ----------
-  for (const input of listEl.querySelectorAll(".editor-rest-secs")) {
-    input.addEventListener("click", (e) => e.stopPropagation());
-    const applyRest = () => {
-      const it = items[rowKeyOf(input.closest(".editor-rest-row"))];
-      if (!it) return;
-      it.rest = Math.max(0, parseInt(input.value, 10) || 0);
-      save();
-    };
-    input.addEventListener("input", applyRest);
-    input.addEventListener("change", applyRest);
-  }
-  for (const btn of listEl.querySelectorAll(".editor-rest-remove")) {
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      items.splice(rowKeyOf(btn.closest(".editor-rest-row")), 1);
-      commit();
-    });
-  }
+  const wireRestRowFields = () => {
+    for (const input of listEl.querySelectorAll(".editor-rest-secs")) {
+      input.addEventListener("click", (e) => e.stopPropagation());
+      const applyRest = () => {
+        const it = items[rowKeyOf(input.closest(".editor-rest-row"))];
+        if (!it) return;
+        it.rest = Math.max(0, parseInt(input.value, 10) || 0);
+        save();
+      };
+      input.addEventListener("input", applyRest);
+      input.addEventListener("change", applyRest);
+    }
+    for (const btn of listEl.querySelectorAll(".editor-rest-remove")) {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        items.splice(rowKeyOf(btn.closest(".editor-rest-row")), 1);
+        commit();
+      });
+    }
+  };
 
   // ---------- circuit membership: None / an existing circuit / a fresh one. Regroup on change. ----------
-  for (const sel of listEl.querySelectorAll(".editor-row-circuit-select")) {
-    sel.addEventListener("click", (e) => e.stopPropagation());
-    sel.addEventListener("change", () => {
-      const ex = items[rowKeyOf(sel.closest(".editor-row"))];
-      if (!ex) return;
-      const val = sel.value;
-      if (val === "") {
-        ex.circuitId = null;
-        ex.circuitTitle = "";
-        ex.circuitSeries = 1;
-      } else if (val === "__new__") {
-        ex.circuitId = newId();
-        ex.circuitTitle = "";
-        ex.circuitSeries = DEFAULT_SERIES;
-      } else {
-        const meta = circuitMetaOf(val);
-        ex.circuitId = val;
-        ex.circuitTitle = meta.title;
-        ex.circuitSeries = meta.series;
-      }
-      commit();
-    });
-  }
+  const wireCircuitMembershipSelect = () => {
+    for (const sel of listEl.querySelectorAll(".editor-row-circuit-select")) {
+      sel.addEventListener("click", (e) => e.stopPropagation());
+      sel.addEventListener("change", () => {
+        const ex = items[rowKeyOf(sel.closest(".editor-row"))];
+        if (!ex) return;
+        const val = sel.value;
+        if (val === "") {
+          ex.circuitId = null;
+          ex.circuitTitle = "";
+          ex.circuitSeries = 1;
+        } else if (val === "__new__") {
+          ex.circuitId = newId();
+          ex.circuitTitle = "";
+          ex.circuitSeries = DEFAULT_SERIES;
+        } else {
+          const meta = circuitMetaOf(val);
+          ex.circuitId = val;
+          ex.circuitTitle = meta.title;
+          ex.circuitSeries = meta.series;
+        }
+        commit();
+      });
+    }
+  };
 
   // ---------- circuit header: title + round count apply to every member; ungroup clears them ----------
-  for (const block of listEl.querySelectorAll(".editor-circuit")) {
-    const cid = block.dataset.circuit;
-    const membersOf = () => items.filter((e) => e.circuitId === cid);
-    const titleInput = block.querySelector(".editor-circuit-title");
-    const seriesInput = block.querySelector(".editor-circuit-series");
-    titleInput.addEventListener("click", (e) => e.stopPropagation());
-    seriesInput.addEventListener("click", (e) => e.stopPropagation());
-    const applyTitle = () => {
-      for (const m of membersOf()) {
-        m.circuitTitle = titleInput.value.trim();
-      }
-      save();
-    };
-    titleInput.addEventListener("input", applyTitle); // persist per keystroke for reload safety
-    titleInput.addEventListener("change", applyTitle);
-    // Series persists live on input (so a reload keeps the number); the heavier normalize + rerender
-    // that clamps the round counter and resizes logs stays on change/blur to avoid caret loss.
-    seriesInput.addEventListener("input", () => {
-      const n = Math.max(1, parseInt(seriesInput.value, 10) || 1);
-      for (const m of membersOf()) {
-        m.circuitSeries = n;
-      }
-      save();
-    });
-    seriesInput.addEventListener("change", () => {
-      const n = Math.max(1, parseInt(seriesInput.value, 10) || 1);
-      for (const m of membersOf()) {
-        m.circuitSeries = n;
-      }
-      normalizeCircuits(); // clamps the live round counter to the new series
-      save();
-      rerender();
-    });
-    block.querySelector(".editor-circuit-ungroup").addEventListener("click", (e) => {
-      e.stopPropagation();
-      for (const m of membersOf()) {
-        m.circuitId = null;
-        m.circuitTitle = "";
-        m.circuitSeries = 1;
-      }
-      commit();
-    });
-  }
+  const wireCircuitHeaders = () => {
+    for (const block of listEl.querySelectorAll(".editor-circuit")) {
+      const cid = block.dataset.circuit;
+      const membersOf = () => items.filter((e) => e.circuitId === cid);
+      const titleInput = block.querySelector(".editor-circuit-title");
+      const seriesInput = block.querySelector(".editor-circuit-series");
+      titleInput.addEventListener("click", (e) => e.stopPropagation());
+      seriesInput.addEventListener("click", (e) => e.stopPropagation());
+      const applyTitle = () => {
+        for (const m of membersOf()) {
+          m.circuitTitle = titleInput.value.trim();
+        }
+        save();
+      };
+      titleInput.addEventListener("input", applyTitle); // persist per keystroke for reload safety
+      titleInput.addEventListener("change", applyTitle);
+      // Series persists live on input (so a reload keeps the number); the heavier normalize + rerender
+      // that clamps the round counter and resizes logs stays on change/blur to avoid caret loss.
+      seriesInput.addEventListener("input", () => {
+        const n = Math.max(1, parseInt(seriesInput.value, 10) || 1);
+        for (const m of membersOf()) {
+          m.circuitSeries = n;
+        }
+        save();
+      });
+      seriesInput.addEventListener("change", () => {
+        const n = Math.max(1, parseInt(seriesInput.value, 10) || 1);
+        for (const m of membersOf()) {
+          m.circuitSeries = n;
+        }
+        normalizeCircuits(); // clamps the live round counter to the new series
+        save();
+        rerender();
+      });
+      block.querySelector(".editor-circuit-ungroup").addEventListener("click", (e) => {
+        e.stopPropagation();
+        for (const m of membersOf()) {
+          m.circuitId = null;
+          m.circuitTitle = "";
+          m.circuitSeries = 1;
+        }
+        commit();
+      });
+    }
+  };
 
   // ---------- remove an exercise entirely ----------
-  for (const btn of listEl.querySelectorAll(".editor-remove")) {
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const idx = rowKeyOf(btn.closest(".editor-row"));
-      const [removed] = items.splice(idx, 1);
-      if (removed) delete activeClientState.logs[removed.id];
-      commit();
-    });
-  }
+  const wireRemoveButtons = () => {
+    for (const btn of listEl.querySelectorAll(".editor-remove")) {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const idx = rowKeyOf(btn.closest(".editor-row"));
+        const [removed] = items.splice(idx, 1);
+        if (removed) delete activeClientState.logs[removed.id];
+        commit();
+      });
+    }
+  };
 
   // ---------- insert bars: inject an exercise / circuit / rest at a gap ----------
   const makeExercise = (cid) => {
@@ -631,35 +683,34 @@ export function renderClipboardEditor(container, deps) {
       circuitSeries: meta ? meta.series : 1,
     };
   };
-  for (const bar of listEl.querySelectorAll(".editor-insert")) {
-    const at = parseInt(bar.dataset.at, 10);
-    const cid = bar.dataset.cid || null;
-    const exBtn = bar.querySelector(".ins-ex");
-    const circuitBtn = bar.querySelector(".ins-circuit");
-    const restBtn = bar.querySelector(".ins-rest");
-    // Inserting re-renders the whole list, so hand the fresh id forward: the next render calls out
-    // the row that just appeared instead of leaving the trainer to spot a blank field in the plan.
-    const insertItem = (item) => {
-      items.splice(at, 0, item);
-      markNewItem?.(item.id);
-      commit();
-    };
-    if (exBtn)
-      exBtn.addEventListener("click", (e) => {
+  const wireInsertBars = () => {
+    for (const bar of listEl.querySelectorAll(".editor-insert")) {
+      const at = parseInt(bar.dataset.at, 10);
+      const cid = bar.dataset.cid || null;
+      const exBtn = bar.querySelector(".ins-ex");
+      const circuitBtn = bar.querySelector(".ins-circuit");
+      const restBtn = bar.querySelector(".ins-rest");
+      // Inserting re-renders the whole list, so hand the fresh id forward: the next render calls out
+      // the row that just appeared instead of leaving the trainer to spot a blank field in the plan.
+      const insertItem = (item) => {
+        items.splice(at, 0, item);
+        markNewItem?.(item.id);
+        commit();
+      };
+      exBtn?.addEventListener("click", (e) => {
         e.stopPropagation();
         insertItem(makeExercise(cid));
       });
-    if (circuitBtn)
-      circuitBtn.addEventListener("click", (e) => {
+      circuitBtn?.addEventListener("click", (e) => {
         e.stopPropagation();
         insertItem(makeExercise(newId()));
       });
-    if (restBtn)
-      restBtn.addEventListener("click", (e) => {
+      restBtn?.addEventListener("click", (e) => {
         e.stopPropagation();
         insertItem(makeRest(cid));
       });
-  }
+    }
+  };
 
   // ---------- reorder: nudge (tap) + drag, within the row's own list. Rebuilds items[] from DOM. ----------
   const MOVABLE = "editor-row editor-rest-row editor-circuit".split(" ");
@@ -685,7 +736,7 @@ export function renderClipboardEditor(container, deps) {
     items.push(...result);
   };
 
-  for (const handle of listEl.querySelectorAll(".editor-reorder")) {
+  const wireReorderHandle = (handle) => {
     const moveEl =
       handle.closest(".editor-row") ||
       handle.closest(".editor-rest-row") ||
@@ -742,13 +793,17 @@ export function renderClipboardEditor(container, deps) {
       document.addEventListener("pointercancel", endDrag);
       e.preventDefault();
     });
-  }
+  };
+  const wireReorderHandles = () => {
+    for (const handle of listEl.querySelectorAll(".editor-reorder")) wireReorderHandle(handle);
+  };
 
   // Land the trainer ON the row that was just inserted: bring it into view and put the caret in the
   // field they came here to fill (the movement name, or the seconds of a rest). Without this, "+
   // Exercise" on the live deck flips to a full-plan editor with nothing saying which row is new.
-  const addedRow = callout?.id ? listEl.querySelector(".editor-row-added") : null;
-  if (addedRow) {
+  const focusCalledOutRow = () => {
+    const addedRow = callout?.id ? listEl.querySelector(".editor-row-added") : null;
+    if (!addedRow) return;
     addedRow.scrollIntoView({ behavior: "smooth", block: "center" });
     const field =
       addedRow.querySelector(".editor-row-name") || addedRow.querySelector(".editor-rest-secs");
@@ -756,7 +811,7 @@ export function renderClipboardEditor(container, deps) {
       field.focus({ preventScroll: true }); // the smooth scroll above owns the scrolling
       field.select?.();
     }
-  }
+  };
 
   // Drop any exercise left with a blank name (e.g. an injected row never filled in). Rests are kept.
   const pruneBlanks = () => {
@@ -786,7 +841,7 @@ export function renderClipboardEditor(container, deps) {
     e.stopPropagation();
     doExit();
   };
-  if (doneBtn) doneBtn.addEventListener("click", onDoneClick);
+  doneBtn?.addEventListener("click", onDoneClick);
 
   const onKey = (e) => {
     // Esc closes an open dialog (e.g. the catalog picker) first; only exit the editor when none is open.
@@ -809,12 +864,12 @@ export function renderClipboardEditor(container, deps) {
     clearTimeout(outsideTimer); // if we're torn down before the deferred add fires, never add it
     document.removeEventListener("keydown", onKey);
     document.removeEventListener("pointerdown", onOutside, true);
-    if (doneBtn) doneBtn.removeEventListener("click", onDoneClick);
+    doneBtn?.removeEventListener("click", onDoneClick);
     if (detachDocListeners === cleanup) detachDocListeners = null;
   }
 
   // Tear down any prior render's document listeners before installing ours, so only one set is live.
-  if (detachDocListeners) detachDocListeners();
+  detachDocListeners?.();
   detachDocListeners = cleanup;
   document.addEventListener("keydown", onKey);
   // Capture phase so a tap anywhere outside the editor (but inside the overlay) exits first. Deferred
@@ -824,6 +879,17 @@ export function renderClipboardEditor(container, deps) {
     () => document.addEventListener("pointerdown", onOutside, true),
     0,
   );
+
+  wireRowExpandToggle();
+  wireRowCatalogButtons();
+  wireRowNameSwap();
+  wireRestRowFields();
+  wireCircuitMembershipSelect();
+  wireCircuitHeaders();
+  wireRemoveButtons();
+  wireInsertBars();
+  wireReorderHandles();
+  focusCalledOutRow();
 
   // Hand cleanup back so the controller can detach listeners if it re-renders us away
   return cleanup;
