@@ -81,9 +81,6 @@ PRE_EXISTING_ALLOWLIST = {
     "src/modules/common/versionMessages.js::renderVersionMessages": (
         "Upgrade/rollback/end-of-support card variants, one render; §14 follow-up."
     ),
-    "src/modules/history/historyView.js::renderExerciseRow": (
-        "One history-log exercise row across every modality's metric display; §14 follow-up."
-    ),
     "src/modules/plans/planAdjustments.js::renderPendingPlanAdjustmentsComponent": (
         "Pending-adjustment list across every adjustment kind; §14 follow-up."
     ),
