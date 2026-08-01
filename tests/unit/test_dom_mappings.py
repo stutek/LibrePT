@@ -4,7 +4,7 @@
 #
 # index.html itself is now just a shell (empty header/main/notification-area/dialog canvases):
 # every view section, dialog, header, and notification-area is injected by the module that owns
-# its behavior (e.g. `renderClientDialog()` in formsController.js, `renderHeaderShell()` in
+# its behavior (e.g. `renderClientDialog()` in clientFormsController.js, `renderHeaderShell()` in
 # applicationHeader.js). So "does this element exist" means scanning index.html AND every JS
 # module's own HTML template literals, not just the static shell.
 

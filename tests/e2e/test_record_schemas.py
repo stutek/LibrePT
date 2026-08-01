@@ -149,7 +149,7 @@ def test_seed_sessions_also_validate_against_schema_3(page, local_server):
 
 
 def test_a_live_created_client_validates_clean(page, local_server):
-    """The exact object literal formsController.js builds for a brand-new client — including
+    """The exact object literal clientFormsController.js builds for a brand-new client — including
     gdprConsent, which the seed fixtures never carry but every live-created client does."""
     page.goto(local_server)
     page.wait_for_timeout(300)

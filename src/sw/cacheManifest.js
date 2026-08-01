@@ -11,7 +11,7 @@
 // atomic version. The worker's own sub-scripts (sw.js + this sw/ folder) are deliberately NOT in ASSETS:
 // they are the worker's script resources, kept coherent by the browser's own SW-update mechanism.
 self.swCacheManifest = (() => {
-  const CACHE_NAME = "librept-v37";
+  const CACHE_NAME = "librept-v38";
   const ASSETS = [
     "./",
     "./index.html",
@@ -65,6 +65,7 @@ self.swCacheManifest = (() => {
     "./modules/common/backupRestore.js",
     "./modules/common/feedbackModal.js",
     "./modules/common/notificationArea.js",
+    "./modules/common/populateDropdownSelectors.js",
     "./modules/common/versionMessages.js",
     "./modules/common/buildInfoDialog.js",
     // Seed data & stores
@@ -93,6 +94,7 @@ self.swCacheManifest = (() => {
     "./i18n/domMappings.js",
     // Domain modules
     "./modules/clipboard/deckCard.js",
+    "./modules/clipboard/activeSessionOverlayView.js",
     "./modules/clipboard/clipboardEditor.js",
     "./modules/clipboard/exerciseAndRestTimer.js",
     "./modules/clipboard/exerciseCard.js",
@@ -116,7 +118,9 @@ self.swCacheManifest = (() => {
     "./modules/sessionList/sessionsView.js",
     // Domain controllers
     "./controllers/appLifecycleController.js",
-    "./controllers/formsController.js",
+    "./controllers/clientFormsController.js",
+    "./controllers/routineFormsController.js",
+    "./controllers/exerciseFormsController.js",
     "./controllers/activeSessionController.js",
     "./controllers/gestureController.js",
     "./controllers/routerController.js",

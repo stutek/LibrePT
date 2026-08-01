@@ -1,4 +1,9 @@
 import { renderClientsList } from "../modules/clients/clientsView.js";
+import {
+  renderActiveSessionOverlayShell,
+  renderAddSessionExerciseDialog,
+  renderCatalogPickerDialog,
+} from "../modules/clipboard/activeSessionOverlayView.js";
 import { renderClipboardEditor } from "../modules/clipboard/clipboardEditor.js";
 import {
   clearAllTimers,
@@ -287,11 +292,56 @@ export function focusExerciseByIndex(index) {
   renderActiveGroupBoard();
 }
 
-export function openSessionFromHistory(log) {
-  const { state, t, navigateToPath } = appDeps;
-  if (!state || !t) return;
-  clearAllTimers(); // fresh session — never inherit a previous session's timers
+function historyRestItemToPlanItem(item) {
+  return {
+    id: newRecordId(),
+    type: "rest",
+    rest: item.rest || 0,
+    circuitId: item.circuitId || null,
+    circuitTitle: item.circuitTitle || "",
+    circuitSeries: item.circuitSeries || 1,
+  };
+}
 
+// One performed-exercise record from a history/planning snapshot, rebuilt into a live plan item
+// plus its logs. `ex` is the catalog entry if the movement still exists there (falls back to the
+// snapshot's own fields for a renamed/deleted or anonymized movement — TODO §17.1).
+function historyExerciseItemToPlanItem(item, state) {
+  const ex = state.exercises.find((e) => e.id === item.id || e.name === item.name);
+  const sets = Array.isArray(item.sets) ? item.sets : [];
+  const planItem = {
+    id: item.id,
+    name: item.name,
+    category: ex ? ex.category : "Recovery",
+    pattern: ex ? ex.pattern : "",
+    instructions: ex ? ex.instructions : "",
+    setsTargetCount: sets.length || 1,
+    repsTarget: sets[0]?.reps || 0,
+    weightTarget: sets[0]?.weight || 0,
+    // Prefer the snapshot's own logging axes (so an anonymized/renamed movement still logs right),
+    // falling back to the catalog entry for legacy rows that never stored them.
+    loadUnit: item.loadUnit || loadUnitForEquipment(ex?.equipment),
+    modality: item.modality || modalityOf(ex),
+    metric: item.metric || primaryMetricOf(ex),
+    circuitId: item.circuitId || null,
+    circuitTitle: item.circuitTitle || "",
+    circuitSeries: item.circuitSeries || 1,
+  };
+  const logs = sets.map((s) => ({
+    reps: s.reps,
+    weight: s.weight,
+    completed: s.completed,
+    note: s.note || "",
+  }));
+  return { planItem, logs };
+}
+
+// Rebuild the live plan from a stored history/planning snapshot, restoring rests and circuit
+// grouping — not just the performed exercises (TODO §17.1). Read in the record's OWN program order
+// (TODO §17.5): the array it arrives in is a storage detail, and the live plan's array index is
+// load-bearing (activeExerciseIndex points into it), so the sequence has to be right before the
+// first item is pushed, not sorted afterwards.
+function buildClientStateFromHistoryLog(log, state) {
   const clientState = {
     routineId: log.routineId || "",
     routineName: log.routineName,
@@ -303,52 +353,25 @@ export function openSessionFromHistory(log) {
     logs: {},
   };
 
-  // Rebuild the live plan from the stored snapshot, restoring rests and circuit grouping — not just
-  // the performed exercises (TODO §17.1). A record item is either a first-class rest or an exercise.
-  // Read in the record's OWN program order (TODO §17.5): the array it arrives in is a storage
-  // detail, and the live plan's array index is load-bearing here — activeExerciseIndex points into
-  // it — so the sequence has to be right before the first item is pushed, not sorted afterwards.
   for (const item of orderedItems(log.exercises)) {
     if (isRestRecord(item)) {
-      clientState.exercises.push({
-        id: newRecordId(),
-        type: "rest",
-        rest: item.rest || 0,
-        circuitId: item.circuitId || null,
-        circuitTitle: item.circuitTitle || "",
-        circuitSeries: item.circuitSeries || 1,
-      });
+      clientState.exercises.push(historyRestItemToPlanItem(item));
       continue;
     }
-
-    const ex = state.exercises.find((e) => e.id === item.id || e.name === item.name);
-    const sets = Array.isArray(item.sets) ? item.sets : [];
-    clientState.exercises.push({
-      id: item.id,
-      name: item.name,
-      category: ex ? ex.category : "Recovery",
-      pattern: ex ? ex.pattern : "",
-      instructions: ex ? ex.instructions : "",
-      setsTargetCount: sets.length || 1,
-      repsTarget: sets[0]?.reps || 0,
-      weightTarget: sets[0]?.weight || 0,
-      // Prefer the snapshot's own logging axes (so an anonymized/renamed movement still logs right),
-      // falling back to the catalog entry for legacy rows that never stored them.
-      loadUnit: item.loadUnit || loadUnitForEquipment(ex?.equipment),
-      modality: item.modality || modalityOf(ex),
-      metric: item.metric || primaryMetricOf(ex),
-      circuitId: item.circuitId || null,
-      circuitTitle: item.circuitTitle || "",
-      circuitSeries: item.circuitSeries || 1,
-    });
-
-    clientState.logs[item.id] = sets.map((s) => ({
-      reps: s.reps,
-      weight: s.weight,
-      completed: s.completed,
-      note: s.note || "",
-    }));
+    const { planItem, logs } = historyExerciseItemToPlanItem(item, state);
+    clientState.exercises.push(planItem);
+    clientState.logs[item.id] = logs;
   }
+
+  return clientState;
+}
+
+export function openSessionFromHistory(log) {
+  const { state, t, navigateToPath } = appDeps;
+  if (!state || !t) return;
+  clearAllTimers(); // fresh session — never inherit a previous session's timers
+
+  const clientState = buildClientStateFromHistoryLog(log, state);
 
   activeSession = {
     id: log.id,
@@ -371,11 +394,7 @@ export function openSessionFromHistory(log) {
       : null,
   };
 
-  if (log.isPlanning) {
-    clipboardEditMode = true;
-  } else {
-    clipboardEditMode = false;
-  }
+  clipboardEditMode = !!log.isPlanning;
 
   saveActiveSessionToCache();
   requestScreenWakeLock();
@@ -391,6 +410,57 @@ export function openSessionFromHistory(log) {
   if (navigateToPath) {
     navigateToPath(`/session/${log.id}/client/${log.clientId}`);
   }
+}
+
+function populateClientStateExercisesFromRoutine(clientState, routine, state) {
+  for (const item of routine.exercises) {
+    const ex = state.exercises.find((e) => e.id === item.id);
+    if (!ex) continue;
+    clientState.exercises.push({
+      id: item.id,
+      name: ex.name,
+      category: ex.category,
+      pattern: ex.pattern,
+      instructions: ex.instructions,
+      setsTargetCount: item.sets,
+      repsTarget: item.reps,
+      weightTarget: item.weight,
+      loadUnit: loadUnitForEquipment(ex.equipment),
+      modality: modalityOf(ex),
+      metric: primaryMetricOf(ex),
+      rest: item.rest,
+      circuitId: item.circuitId || null,
+      circuitTitle: item.circuitTitle || "",
+      circuitSeries: item.circuitSeries || 1,
+    });
+
+    clientState.logs[item.id] = Array.from({ length: item.sets }, () => ({
+      reps: item.reps,
+      weight: item.weight,
+      completed: false,
+      note: "",
+    }));
+  }
+}
+
+function buildClientStateFromRoutine(cr, state, t) {
+  const routine = state.routines.find((r) => r.id === cr.routineId);
+  const clientState = {
+    routineId: routine ? routine.id : "",
+    routineName: routine ? routine.name : t("custom_empty_plan") || "Custom / Empty Plan",
+    activeExerciseIndex: 0,
+    // The deck is crowded on a fresh open — every card starts collapsed (exerciseDeck.js reads
+    // this to skip rendering ANY card in focus) until the trainer taps one, which reveals focus
+    // for the rest of this live session (see focusExerciseByIndex). activeExerciseIndex itself
+    // still points at a real item throughout — this flag only gates whether the deck's render
+    // honours it, so every OTHER consumer of activeExerciseIndex (getActiveExercise, quick
+    // signals, the timer) keeps working unmodified.
+    deckAllCollapsed: true,
+    exercises: [],
+    logs: {},
+  };
+  if (routine) populateClientStateExercisesFromRoutine(clientState, routine, state);
+  return clientState;
 }
 
 export function startWorkoutSession(clientRoutines, sessionMeta = null, deps = {}, options = {}) {
@@ -415,62 +485,10 @@ export function startWorkoutSession(clientRoutines, sessionMeta = null, deps = {
   };
 
   for (const cr of clientRoutines) {
-    const routine = state.routines.find((r) => r.id === cr.routineId);
-    const clientState = {
-      routineId: routine ? routine.id : "",
-      routineName: routine ? routine.name : t("custom_empty_plan") || "Custom / Empty Plan",
-      activeExerciseIndex: 0,
-      // The deck is crowded on a fresh open — every card starts collapsed (exerciseDeck.js reads
-      // this to skip rendering ANY card in focus) until the trainer taps one, which reveals focus
-      // for the rest of this live session (see focusExerciseByIndex). activeExerciseIndex itself
-      // still points at a real item throughout — this flag only gates whether the deck's render
-      // honours it, so every OTHER consumer of activeExerciseIndex (getActiveExercise, quick
-      // signals, the timer) keeps working unmodified.
-      deckAllCollapsed: true,
-      exercises: [],
-      logs: {},
-    };
-
-    if (routine) {
-      for (const item of routine.exercises) {
-        const ex = state.exercises.find((e) => e.id === item.id);
-        if (ex) {
-          clientState.exercises.push({
-            id: item.id,
-            name: ex.name,
-            category: ex.category,
-            pattern: ex.pattern,
-            instructions: ex.instructions,
-            setsTargetCount: item.sets,
-            repsTarget: item.reps,
-            weightTarget: item.weight,
-            loadUnit: loadUnitForEquipment(ex.equipment),
-            modality: modalityOf(ex),
-            metric: primaryMetricOf(ex),
-            rest: item.rest,
-            circuitId: item.circuitId || null,
-            circuitTitle: item.circuitTitle || "",
-            circuitSeries: item.circuitSeries || 1,
-          });
-
-          clientState.logs[item.id] = Array.from({ length: item.sets }, () => ({
-            reps: item.reps,
-            weight: item.weight,
-            completed: false,
-            note: "",
-          }));
-        }
-      }
-    }
-
-    activeSession.clientRoutines[cr.clientId] = clientState;
+    activeSession.clientRoutines[cr.clientId] = buildClientStateFromRoutine(cr, state, t);
   }
 
-  if (sessionMeta?.isPlanning) {
-    clipboardEditMode = true;
-  } else {
-    clipboardEditMode = false;
-  }
+  clipboardEditMode = !!sessionMeta?.isPlanning;
 
   saveActiveSessionToCache();
 
@@ -875,24 +893,30 @@ function swapPlanItemMovement(slotId, baseEx) {
 // The picker opens pre-filtered on the row's own muscle group and pre-seeded with whatever the PT
 // had already typed in the name field, with the caret in the search box: the common case ("swap this
 // press for another press") is then one tap, and a named target is type-then-Enter — no scrolling.
+function catalogPickerTitle(slotId, t) {
+  return slotId
+    ? t("swap_movement") || "Swap movement"
+    : t("catalog_picker_title") || "Add from Exercise Catalog";
+}
+
+// The movement already on the row is not a swap target. Plans authored before slots carried an
+// `exerciseId` (routines, demo data) only know the movement by name, so fall back to that.
+function resolveCurrentMovementId(item, state) {
+  if (!item) return null;
+  return item.exerciseId || state.exercises.find((e) => e.name === item.name)?.id || null;
+}
+
 export function openCatalogPicker({ slotId = null, query = "", category = "" } = {}) {
   const dialog = document.getElementById("dialog-catalog-picker");
   const mount = document.getElementById("catalog-picker-mount");
   if (!dialog || !mount || !activeSession) return;
   const { state, t } = appDeps;
   const titleEl = document.getElementById("catalog-picker-title");
-  if (titleEl) {
-    titleEl.textContent = slotId
-      ? t("swap_movement") || "Swap movement"
-      : t("catalog_picker_title") || "Add from Exercise Catalog";
-  }
+  if (titleEl) titleEl.textContent = catalogPickerTitle(slotId, t);
+
   const clientState = activeSession.clientRoutines[activeSession.activeClientId];
   const item = slotId ? clientState?.exercises?.find((e) => e.id === slotId) : null;
-  // The movement already on the row is not a swap target. Plans authored before slots carried an
-  // `exerciseId` (routines, demo data) only know the movement by name, so fall back to that.
-  const currentMovementId = item
-    ? item.exerciseId || state.exercises.find((e) => e.name === item.name)?.id || null
-    : null;
+  const currentMovementId = resolveCurrentMovementId(item, state);
   mountExercisePicker(mount, {
     state,
     excludeId: currentMovementId,
@@ -911,115 +935,122 @@ export function openCatalogPicker({ slotId = null, query = "", category = "" } =
   dialog.showModal();
 }
 
-export function renderActiveGroupBoard() {
-  if (!activeSession) return;
-  const { state, t, navigateToPath } = appDeps;
-  if (!state || !t) return;
-
-  const activeClientId = activeSession.activeClientId || activeSession.participants[0];
-  activeSession.activeClientId = activeClientId;
-  const activeClientState = activeSession.clientRoutines[activeClientId];
-
-  // Rest is a first-class plan item: migrate any legacy exercise-level rest, then bounds-clamp focus
-  // (only an out-of-range index needs correcting — a rest is a perfectly valid focus target).
-  ensureRestItems(activeClientState);
-  clampFocusIndex(activeClientState);
-
-  syncSessionFocusUrl();
-
+function renderClientTabsBar(activeClientId) {
+  const { state, navigateToPath } = appDeps;
   const tabsContainer = document.getElementById("active-session-client-tabs");
-  if (tabsContainer) {
-    renderActiveUsersList(tabsContainer, activeSession, {
-      clients: state.clients,
-      activeClientId,
-      getInitials,
-      getClientDisplayNameHTML,
-      navigateToPath,
-    });
-  }
+  if (!tabsContainer) return;
+  renderActiveUsersList(tabsContainer, activeSession, {
+    clients: state.clients,
+    activeClientId,
+    getInitials,
+    getClientDisplayNameHTML,
+    navigateToPath,
+  });
+}
 
+function renderInjuryAlertBanner(activeClient) {
   const alertBanner = document.getElementById("clipboard-client-alert");
   const alertText = document.getElementById("clipboard-client-notes-text");
-  const activeClient = state.clients.find((c) => c.id === activeClientId);
-  if (alertBanner && activeClient) {
-    if (activeClient.hasInjury && (activeClient.injury || activeClient.notes)) {
-      alertText.textContent = activeClient.injury || activeClient.notes;
-      alertBanner.classList.remove("hidden");
-    } else {
-      alertBanner.classList.add("hidden");
-    }
+  if (!alertBanner || !activeClient) return;
+  if (activeClient.hasInjury && (activeClient.injury || activeClient.notes)) {
+    alertText.textContent = activeClient.injury || activeClient.notes;
+    alertBanner.classList.remove("hidden");
+  } else {
+    alertBanner.classList.add("hidden");
   }
+}
 
-  // Client focus panel (goals + notes): only shown while editing the plan (CSS-gated by
-  // .editing-plan), so it's cheap to keep populated on every render.
-  if (activeClient) {
-    const goalsLabel = document.getElementById("client-focus-goals-label");
-    const notesLabel = document.getElementById("client-focus-notes-label");
-    const goalsEl = document.getElementById("client-focus-goals");
-    const notesEl = document.getElementById("client-focus-notes");
-    if (goalsLabel) goalsLabel.textContent = t("goals") || "Training Goals";
-    if (notesLabel) notesLabel.textContent = t("notes_injuries") || "Notes";
-    if (goalsEl) goalsEl.textContent = activeClient.goals || t("no_goals_specified") || "";
-    if (notesEl) notesEl.textContent = activeClient.notes || t("no_notes_specified") || "";
+// Only shown while editing the plan (CSS-gated by .editing-plan), so it's cheap to keep populated
+// on every render.
+function renderClientFocusPanel(activeClient) {
+  if (!activeClient) return;
+  const { t } = appDeps;
+  const goalsLabel = document.getElementById("client-focus-goals-label");
+  const notesLabel = document.getElementById("client-focus-notes-label");
+  const goalsEl = document.getElementById("client-focus-goals");
+  const notesEl = document.getElementById("client-focus-notes");
+  if (goalsLabel) goalsLabel.textContent = t("goals") || "Training Goals";
+  if (notesLabel) notesLabel.textContent = t("notes_injuries") || "Notes";
+  if (goalsEl) goalsEl.textContent = activeClient.goals || t("no_goals_specified") || "";
+  if (notesEl) notesEl.textContent = activeClient.notes || t("no_notes_specified") || "";
+}
+
+// Repurpose the session title bar for edit mode: show WHICH client's plan is open and its temporal
+// mode (Live / Upcoming / Planning). Restored verbatim on exit from the saved snapshot.
+// The ✎ icon rides up here as the mode indicator (the editor body no longer has its own header).
+function buildEditModeTitleHTML(activeClient) {
+  const { t } = appDeps;
+  const mode = currentPlanMode();
+  const b = activeSession.sourceSession;
+  // Concrete schedule beats a vague "Live": show the day + time of the booked session, or
+  // "Unscheduled" for a date-less planning program. The chip's colour still encodes urgency.
+  let chipLabel;
+  if (mode === "planning") {
+    chipLabel = t("unscheduled") || "Unscheduled";
+  } else {
+    const parts = [b?.day ? t(b.day) || b.day : "", b?.timeLabel || ""].filter(Boolean);
+    chipLabel = parts.join(" · ") || t("live") || "Live";
   }
+  const clientNm = activeClient ? escapeHTML(activeClient.name) : "";
+  return `<i class="fa-solid fa-pen-to-square"></i> ${escapeHTML(t("editing") || "Editing")}${
+    clientNm ? ` · <strong>${clientNm}</strong>` : ""
+  } <span class="edit-mode-chip ${mode}">${escapeHTML(chipLabel)}</span>`;
+}
 
-  // Repurpose the session title bar for edit mode: show WHICH client's plan is open and its temporal
-  // mode (Live / Upcoming / Planning). Restored verbatim on exit from the saved snapshot.
+// Swaps the title bar's own content between the normal session title and the edit-mode label,
+// saving/restoring the original HTML verbatim so exiting edit mode never has to reconstruct it.
+function swapTitleBarContent(titleEl, overlay, activeClient) {
+  if (clipboardEditMode) {
+    if (savedSessionTitleHTML === null) savedSessionTitleHTML = titleEl.innerHTML;
+    titleEl.innerHTML = buildEditModeTitleHTML(activeClient);
+    overlay.classList.add("editing-plan");
+    return;
+  }
+  if (savedSessionTitleHTML !== null) {
+    titleEl.innerHTML = savedSessionTitleHTML;
+    savedSessionTitleHTML = null;
+  }
+  overlay.classList.remove("editing-plan");
+}
+
+// The rest of the title bar's chrome that reacts to edit mode: the ✎/Done button swap, and the
+// ⋯ menu's destructive action relabelling itself between "Delete Session" and "Delete Plan".
+function syncTitleBarEditChrome() {
+  const { t } = appDeps;
+  // The ✎ trigger is redundant while editing (the ✎ mode icon now rides on the title, and Done
+  // exits), and leaving it live would race the tap-outside handler; hide it during edit mode and
+  // surface the title-bar Done button in its place.
+  document.getElementById("btn-edit-plan")?.classList.toggle("hidden", clipboardEditMode);
+  document.getElementById("btn-done-edit")?.classList.toggle("hidden", !clipboardEditMode);
+
+  // In edit mode the ⋯ menu's destructive action targets the PLAN (clear its exercises), not the
+  // whole session — relabel it so the trainer knows which one they're deleting. Preserve the icon.
+  const delBtn = document.getElementById("btn-delete-session");
+  if (!delBtn) return;
+  const label = clipboardEditMode
+    ? t("btn_delete_plan") || "Delete Plan"
+    : t("btn_delete_session") || "Delete Session";
+  const icon = delBtn.querySelector("i");
+  delBtn.innerHTML = "";
+  if (icon) delBtn.appendChild(icon);
+  delBtn.appendChild(document.createTextNode(` ${label}`));
+}
+
+// Repurpose the session title bar for edit mode: show WHICH client's plan is open and its temporal
+// mode (Live / Upcoming / Planning). Restored verbatim on exit from the saved snapshot.
+function renderTitleBarForEditMode(activeClient) {
   const titleEl = document.getElementById("session-title-text");
   const overlay = document.getElementById("active-session-overlay");
-  if (titleEl && overlay) {
-    if (clipboardEditMode) {
-      if (savedSessionTitleHTML === null) savedSessionTitleHTML = titleEl.innerHTML;
-      const mode = currentPlanMode();
-      const b = activeSession.sourceSession;
-      // Concrete schedule beats a vague "Live": show the day + time of the booked session, or
-      // "Unscheduled" for a date-less planning program. The chip's colour still encodes urgency.
-      let chipLabel;
-      if (mode === "planning") {
-        chipLabel = t("unscheduled") || "Unscheduled";
-      } else {
-        const parts = [b?.day ? t(b.day) || b.day : "", b?.timeLabel || ""].filter(Boolean);
-        chipLabel = parts.join(" · ") || t("live") || "Live";
-      }
-      const clientNm = activeClient ? escapeHTML(activeClient.name) : "";
-      // The ✎ icon rides up here as the mode indicator (the editor body no longer has its own header).
-      titleEl.innerHTML = `<i class="fa-solid fa-pen-to-square"></i> ${escapeHTML(t("editing") || "Editing")}${
-        clientNm ? ` · <strong>${clientNm}</strong>` : ""
-      } <span class="edit-mode-chip ${mode}">${escapeHTML(chipLabel)}</span>`;
-      overlay.classList.add("editing-plan");
-    } else {
-      if (savedSessionTitleHTML !== null) {
-        titleEl.innerHTML = savedSessionTitleHTML;
-        savedSessionTitleHTML = null;
-      }
-      overlay.classList.remove("editing-plan");
-    }
-    // The ✎ trigger is redundant while editing (the ✎ mode icon now rides on the title, and Done
-    // exits), and leaving it live would race the tap-outside handler; hide it during edit mode and
-    // surface the title-bar Done button in its place.
-    document.getElementById("btn-edit-plan")?.classList.toggle("hidden", clipboardEditMode);
-    document.getElementById("btn-done-edit")?.classList.toggle("hidden", !clipboardEditMode);
+  if (!titleEl || !overlay) return;
 
-    // In edit mode the ⋯ menu's destructive action targets the PLAN (clear its exercises), not the
-    // whole session — relabel it so the trainer knows which one they're deleting. Preserve the icon.
-    const delBtn = document.getElementById("btn-delete-session");
-    if (delBtn) {
-      const label = clipboardEditMode
-        ? t("btn_delete_plan") || "Delete Plan"
-        : t("btn_delete_session") || "Delete Session";
-      const icon = delBtn.querySelector("i");
-      delBtn.innerHTML = "";
-      if (icon) delBtn.appendChild(icon);
-      delBtn.appendChild(document.createTextNode(` ${label}`));
-    }
-  }
+  swapTitleBarContent(titleEl, overlay, activeClient);
+  syncTitleBarEditChrome();
+}
 
-  // Starting/completing are LIVE-session actions: starting begins the timer, completing logs the
-  // session to history. Both are wrong while the plan is being edited (Done exits edit mode
-  // instead) and wrong for a date-less planning programme that is never run.
-  const started = !!activeSession?.started;
-  const canStartSession = !clipboardEditMode && currentPlanMode() !== "planning";
-
+// Starting/completing are LIVE-session actions: starting begins the timer, completing logs the
+// session to history. Both are wrong while the plan is being edited (Done exits edit mode
+// instead) and wrong for a date-less planning programme that is never run.
+function syncStartCompleteVisibility(canStartSession, started) {
   // Start lives on the title bar (session-timer-block) so it reads as part of the session's own
   // clock, not a footer action — it's the one thing that flips "00:00" into a running countdown.
   document
@@ -1034,6 +1065,10 @@ export function renderActiveGroupBoard() {
   if (footer) {
     footer.classList.toggle("hidden", !canStartSession || !started);
   }
+}
+
+function renderDeckOrEditor(activeClientId, activeClientState) {
+  const { state, t } = appDeps;
 
   // Detach any previous editor's document listeners before this render replaces the deck DOM.
   if (editorCleanup) {
@@ -1093,7 +1128,13 @@ export function renderActiveGroupBoard() {
       enterEditMode: enterClipboardEditMode,
     });
   }
+}
 
+// The historical-review panel (repurposed as an empty-state placeholder when the active client
+// has no plan at all — see showPastExerciseInFocus for its other use, populating it with a past
+// session's read-only detail).
+function renderClipboardLoggerContainer(activeClientState) {
+  const { t } = appDeps;
   const container = document.getElementById("clipboard-logger-container");
   if (!container) return;
 
@@ -1112,198 +1153,45 @@ export function renderActiveGroupBoard() {
   container.innerHTML = "";
 }
 
-export function renderAddSessionExerciseDialog() {
-  const root = document.getElementById("dialogs-root");
-  if (!root || document.getElementById("dialog-add-session-exercise")) return;
-  root.insertAdjacentHTML(
-    "beforeend",
-    `
-<dialog id="dialog-add-session-exercise" class="dialog-modal card glassmorphic">
-    <div class="modal-header">
-      <h3>Inject Exercise to Active Plan</h3>
-      <button class="modal-close-btn" aria-label="Close add exercise modal"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-    <form id="form-add-session-exercise" method="dialog" class="modal-form">
-      <div class="form-group">
-        <label for="session-add-select-ex">Select Exercise *</label>
-        <!-- Free-text combobox: type any name (matching library exercises are offered in the
-             datalist as you type; a name that isn't in the library is injected as-is). -->
-        <input id="session-add-select-ex" list="session-ex-datalist" required class="form-control"
-               autocomplete="off" placeholder="Type to search or add a new exercise…">
-        <datalist id="session-ex-datalist"><!-- Injected via JS --></datalist>
-      </div>
-      
-      <div class="form-row">
-        <div class="form-group col">
-          <label for="session-add-sets">Sets</label>
-          <input type="number" id="session-add-sets" min="1" value="3" required class="form-control">
-        </div>
-        <div class="form-group col">
-          <label for="session-add-reps">Reps</label>
-          <input type="number" id="session-add-reps" min="1" value="10" required class="form-control">
-        </div>
-      </div>
-      
-      <div class="form-row">
-        <div class="form-group col">
-          <label for="session-add-weight">Weight (kg)</label>
-          <input type="number" step="0.5" id="session-add-weight" value="0" class="form-control">
-        </div>
-        <div class="form-group col">
-          <label for="session-add-rest">Rest (sec)</label>
-          <input type="number" id="session-add-rest" min="0" value="60" class="form-control">
-        </div>
-      </div>
-      
-      <div class="modal-actions">
-        <button type="button" class="btn secondary-btn modal-cancel">Cancel</button>
-        <button type="submit" class="btn primary-btn">Inject Exercise</button>
-      </div>
-    </form>
-  </dialog>
-`,
-  );
+export function renderActiveGroupBoard() {
+  if (!activeSession) return;
+  const { state, t } = appDeps;
+  if (!state || !t) return;
+
+  const activeClientId = activeSession.activeClientId || activeSession.participants[0];
+  activeSession.activeClientId = activeClientId;
+  const activeClientState = activeSession.clientRoutines[activeClientId];
+
+  // Rest is a first-class plan item: migrate any legacy exercise-level rest, then bounds-clamp focus
+  // (only an out-of-range index needs correcting — a rest is a perfectly valid focus target).
+  ensureRestItems(activeClientState);
+  clampFocusIndex(activeClientState);
+
+  syncSessionFocusUrl();
+
+  const activeClient = state.clients.find((c) => c.id === activeClientId);
+
+  renderClientTabsBar(activeClientId);
+  renderInjuryAlertBanner(activeClient);
+  renderClientFocusPanel(activeClient);
+  renderTitleBarForEditMode(activeClient);
+
+  const started = !!activeSession?.started;
+  const canStartSession = !clipboardEditMode && currentPlanMode() !== "planning";
+  syncStartCompleteVisibility(canStartSession, started);
+
+  renderDeckOrEditor(activeClientId, activeClientState);
+  renderClipboardLoggerContainer(activeClientState);
 }
 
-export function renderCatalogPickerDialog() {
-  const root = document.getElementById("dialogs-root");
-  if (!root || document.getElementById("dialog-catalog-picker")) return;
-  root.insertAdjacentHTML(
-    "beforeend",
-    `
-<dialog id="dialog-catalog-picker" class="dialog-modal card glassmorphic wide-modal">
-    <div class="modal-header">
-      <h3 id="catalog-picker-title">Add from Exercise Catalog</h3>
-      <button class="modal-close-btn" aria-label="Close catalog"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-    <div id="catalog-picker-mount" class="exercise-picker"></div>
-  </dialog>
-`,
-  );
-}
-
-export function renderActiveSessionOverlayShell() {
-  const root = document.getElementById("active-session-overlay");
-  if (!root || root.querySelector(".session-title-bar")) return;
-  root.insertAdjacentHTML(
-    "beforeend",
-    `
-    <div class="session-title-bar view-titlebar">
-      <button class="view-grabber" type="button" aria-label="Close session and return to home"></button>
-      <div class="session-title-block">
-        <h3 id="session-title-text">Clipboard</h3>
-      </div>
-      <div class="session-title-actions">
-        <div class="session-timer-block">
-          <!-- Staged-but-not-started: Start lives here (not on the dashboard card, TODO §2.3) so
-               tapping it is the one explicit "begin the workout" action. Once tapped it's replaced
-               by the live countdown-to-end (updateOverlaySessionTimer), which is what earns the
-               clock icon back — a clock ticking down means something once a clock is actually
-               running. -->
-          <button id="btn-start-session" class="btn primary-btn btn-sm" data-i18n="btn_start_workout_session" aria-label="Start session"><i class="fa-solid fa-circle-play"></i> Start Session</button>
-          <div id="overlay-session-timer" class="hidden">
-            <i class="fa-solid fa-clock text-primary" id="overlay-session-duration-icon"></i>
-            <span id="overlay-session-duration">00:00</span>
-          </div>
-        </div>
-        <button id="btn-edit-plan" class="icon-btn" aria-label="Edit plan" title="Edit plan">
-          <i class="fa-solid fa-pen-to-square"></i>
-        </button>
-        <!-- Shown only in edit mode (see renderActiveGroupBoard): finishing the plan edit lives on
-             the title line next to the mode label, so the editor body needs no header of its own. -->
-        <button id="btn-done-edit" class="btn primary-btn btn-sm hidden" aria-label="Done editing plan">
-          <i class="fa-solid fa-check"></i> <span data-i18n="done">Done</span>
-        </button>
-        <div class="session-menu-wrap">
-          <button id="btn-session-menu" class="icon-btn" aria-label="Session options" aria-haspopup="true" aria-expanded="false">
-            <i class="fa-solid fa-ellipsis-vertical"></i>
-          </button>
-          <div id="session-menu" class="session-menu hidden" role="menu">
-            <button id="btn-delete-session" class="session-menu-item session-menu-item-danger" role="menuitem">
-              <i class="fa-solid fa-trash-can"></i> Delete Session
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Client selector tabs for sub-second plan switching -->
-    <div id="active-session-client-tabs" class="client-tabs-bar">
-      <!-- Injected via JS: [Jane Doe] [John Smith] [Sarah Jenkins] -->
-    </div>
-
-    <!-- Active Client Clipboard Content (Budgeted height, scroll-free design) -->
-    <div class="clipboard-body">
-      <!-- Health Caveat Banner (crucial for PT awareness) -->
-      <div id="clipboard-client-alert" class="client-caveat-banner">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-        <span id="clipboard-client-notes-text">Notes go here</span>
-      </div>
-
-      <!-- Client focus panel: personal goals + notes, surfaced while editing the plan
-           (with the active-member tabs and live timer hidden) so the trainer shapes the
-           program against the client's aims rather than the running session. -->
-      <div id="clipboard-client-focus" class="client-focus-panel">
-        <div class="client-focus-item">
-          <span class="client-focus-label">
-            <i class="fa-solid fa-bullseye"></i>
-            <span id="client-focus-goals-label">Training Goals</span>
-          </span>
-          <p id="client-focus-goals"></p>
-        </div>
-        <div class="client-focus-item">
-          <span class="client-focus-label">
-            <i class="fa-solid fa-notes-medical"></i>
-            <span id="client-focus-notes-label">Notes</span>
-          </span>
-          <p id="client-focus-notes"></p>
-        </div>
-      </div>
-
-      <!-- Vertical Exercise List: the in-focus card is the primary logging surface
-           (stats + one-tap Too Easy / Too Hard / Feedback), upcoming exercises stack below -->
-      <div id="active-exercise-scroll-deck" class="exercise-vertical-list">
-        <!-- Dynamically populated card elements: Past Session Exercises, Current Exercises (Completed/In-Focus/Upcoming) -->
-      </div>
-
-      <!-- Historical review panel: only shown when a past-session card is tapped -->
-      <div id="clipboard-logger-container" class="clipboard-grid-card card glassmorphic hidden">
-        <!-- Populated by showPastExerciseInFocus() -->
-      </div>
-
-      <!-- Active Client Level Controls -->
-      <div class="clipboard-actions-row" style="display: none !important;">
-        <button id="btn-add-exercise-to-session" class="btn secondary-btn btn-sm">
-          <i class="fa-solid fa-circle-plus"></i> Inject Exercise
-        </button>
-      </div>
-
-      <!-- Session Completion Drawer: Start moved to the title bar's session-timer-block above (only
-           Complete is a footer action now), shown once the session is running (renderActiveGroupBoard). -->
-      <div class="session-actions-footer mt-auto hidden">
-        <div class="session-finish-row">
-          <button id="btn-finish-session" class="btn success-btn btn-sm flex-1">Complete Workout Session</button>
-        </div>
-      </div>
-    </div>
-`,
-  );
-}
-
-export function setupActiveSession(deps) {
-  if (deps) appDeps = { ...appDeps, ...deps };
-  renderActiveSessionOverlayShell();
-  renderAddSessionExerciseDialog();
-  renderCatalogPickerDialog();
-  const { state, t, navigateToPath, focusSessionsColumn, launchClipboardDirectly } = appDeps;
-
+// The dashboard mini-bar's own expand affordance + click-through, and its Enter/Space keyboard
+// equivalent. Leaving the clipboard is handled globally by the title-bar grab handle + swipe-down
+// gesture (setupViewDismiss in app.js), shared with every other view.
+function wireSessionExpandBar(navigateToPath, launchClipboardDirectly) {
   const clientTabsBar = document.getElementById("active-session-client-tabs");
   if (clientTabsBar) {
     clientTabsBar.addEventListener("scroll", updateClientTabsFadeState);
   }
-
-  // Leaving the clipboard is handled globally by the title-bar grab handle + swipe-down gesture
-  // (setupViewDismiss in app.js), shared with every other view; and the app-name logo also goes home.
 
   const btnExpandSession = document.getElementById("btn-expand-session");
   if (btnExpandSession) {
@@ -1318,24 +1206,28 @@ export function setupActiveSession(deps) {
   }
 
   const sessionBar = document.getElementById("active-session-bar");
-  if (sessionBar) {
-    sessionBar.addEventListener("click", () => {
-      if (activeSession) {
-        const activeClientId = activeSession.activeClientId || activeSession.participants[0];
-        const sessionId = activeSession.id || "session";
-        if (navigateToPath) navigateToPath(`/session/${sessionId}/client/${activeClientId}`);
-      } else if (sessionBar.dataset.nextSessionId && launchClipboardDirectly) {
-        launchClipboardDirectly(sessionBar.dataset.nextSessionId);
-      }
-    });
-    sessionBar.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        sessionBar.click();
-      }
-    });
-  }
+  if (!sessionBar) return;
+  sessionBar.addEventListener("click", () => {
+    if (activeSession) {
+      const activeClientId = activeSession.activeClientId || activeSession.participants[0];
+      const sessionId = activeSession.id || "session";
+      if (navigateToPath) navigateToPath(`/session/${sessionId}/client/${activeClientId}`);
+    } else if (sessionBar.dataset.nextSessionId && launchClipboardDirectly) {
+      launchClipboardDirectly(sessionBar.dataset.nextSessionId);
+    }
+  });
+  sessionBar.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      sessionBar.click();
+    }
+  });
+}
 
+// The title bar's ⋯ overflow menu, its Edit-plan trigger, and the Start/Complete/Delete actions
+// that hang off it — all of a single overlay-chrome piece, wired together because closeSessionMenu
+// is shared between the menu's own outside-tap dismissal and the Delete action inside it.
+function wireSessionMenuAndActions(t) {
   const sessionMenuBtn = document.getElementById("btn-session-menu");
   const sessionMenu = document.getElementById("session-menu");
   const closeSessionMenu = () => {
@@ -1356,85 +1248,85 @@ export function setupActiveSession(deps) {
     });
   }
 
-  const btnEditPlan = document.getElementById("btn-edit-plan");
-  if (btnEditPlan) {
-    btnEditPlan.addEventListener("click", (e) => {
-      e.stopPropagation();
-      enterClipboardEditMode();
-    });
+  document.getElementById("btn-edit-plan")?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    enterClipboardEditMode();
+  });
+
+  document.getElementById("btn-delete-session")?.addEventListener("click", () => {
+    closeSessionMenu();
+    // While editing, this button deletes the PLAN (clears its exercises) and stays in the session;
+    // otherwise it cancels the whole session. The label is swapped to match in renderActiveGroupBoard.
+    if (clipboardEditMode) {
+      if (confirm(t("confirm_delete_plan"))) clearActivePlan();
+    } else if (confirm(t("confirm_cancel"))) {
+      cancelWorkoutSession();
+    }
+  });
+
+  document
+    .getElementById("btn-start-session")
+    ?.addEventListener("click", () => beginWorkoutSession());
+  document
+    .getElementById("btn-finish-session")
+    ?.addEventListener("click", () => finishWorkoutSession());
+}
+
+function handleAddSessionExerciseSubmit(e, state, addExModal) {
+  e.preventDefault();
+  const typed = document.getElementById("session-add-select-ex").value.trim();
+  const sets = parseInt(document.getElementById("session-add-sets").value);
+  const reps = parseInt(document.getElementById("session-add-reps").value);
+  const weight = parseFloat(document.getElementById("session-add-weight").value);
+  const rest = parseInt(document.getElementById("session-add-rest").value);
+
+  if (!activeSession || !typed || isNaN(sets)) return;
+
+  let baseEx = state.exercises.find((ex) => ex.name.toLowerCase() === typed.toLowerCase());
+  if (!baseEx) {
+    baseEx = { id: newRecordId(), name: typed, category: "Custom", instructions: "" };
   }
 
-  const btnDeleteSession = document.getElementById("btn-delete-session");
-  if (btnDeleteSession) {
-    btnDeleteSession.addEventListener("click", () => {
-      closeSessionMenu();
-      // While editing, this button deletes the PLAN (clears its exercises) and stays in the session;
-      // otherwise it cancels the whole session. The label is swapped to match in renderActiveGroupBoard.
-      if (clipboardEditMode) {
-        if (confirm(t("confirm_delete_plan"))) {
-          clearActivePlan();
-        }
-      } else if (confirm(t("confirm_cancel"))) {
-        cancelWorkoutSession();
-      }
-    });
-  }
+  injectExerciseIntoActivePlan(baseEx, { sets, reps, weight, rest });
+  addExModal.close();
+}
 
-  const btnStartSession = document.getElementById("btn-start-session");
-  if (btnStartSession) {
-    btnStartSession.addEventListener("click", () => {
-      beginWorkoutSession();
-    });
-  }
-
-  const btnFinishSession = document.getElementById("btn-finish-session");
-  if (btnFinishSession) {
-    btnFinishSession.addEventListener("click", () => {
-      finishWorkoutSession();
-    });
-  }
-
+function wireAddExerciseAndCatalogDialogs(state) {
   const addExModal = document.getElementById("dialog-add-session-exercise");
   const addExForm = document.getElementById("form-add-session-exercise");
+  if (!addExModal || !addExForm) return;
 
-  if (addExModal && addExForm) {
-    const btnAddExToSession = document.getElementById("btn-add-exercise-to-session");
-    if (btnAddExToSession) {
-      btnAddExToSession.addEventListener("click", () => {
-        addExForm.reset();
-        addExModal.showModal();
-      });
-    }
-
-    const cancelBtn = addExModal.querySelector(".modal-cancel");
-    const closeBtn = addExModal.querySelector(".modal-close-btn");
-    if (cancelBtn) cancelBtn.addEventListener("click", () => addExModal.close());
-    if (closeBtn) closeBtn.addEventListener("click", () => addExModal.close());
-
-    // Catalog picker dialog: only needs a close affordance — selecting a movement injects + closes it.
-    const catalogModal = document.getElementById("dialog-catalog-picker");
-    const catalogCloseBtn = catalogModal?.querySelector(".modal-close-btn");
-    if (catalogCloseBtn) catalogCloseBtn.addEventListener("click", () => catalogModal.close());
-
-    addExForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const typed = document.getElementById("session-add-select-ex").value.trim();
-      const sets = parseInt(document.getElementById("session-add-sets").value);
-      const reps = parseInt(document.getElementById("session-add-reps").value);
-      const weight = parseFloat(document.getElementById("session-add-weight").value);
-      const rest = parseInt(document.getElementById("session-add-rest").value);
-
-      if (!activeSession || !typed || isNaN(sets)) return;
-
-      let baseEx = state.exercises.find((ex) => ex.name.toLowerCase() === typed.toLowerCase());
-      if (!baseEx) {
-        baseEx = { id: newRecordId(), name: typed, category: "Custom", instructions: "" };
-      }
-
-      injectExerciseIntoActivePlan(baseEx, { sets, reps, weight, rest });
-      addExModal.close();
+  const btnAddExToSession = document.getElementById("btn-add-exercise-to-session");
+  if (btnAddExToSession) {
+    btnAddExToSession.addEventListener("click", () => {
+      addExForm.reset();
+      addExModal.showModal();
     });
   }
+
+  const cancelBtn = addExModal.querySelector(".modal-cancel");
+  const closeBtn = addExModal.querySelector(".modal-close-btn");
+  if (cancelBtn) cancelBtn.addEventListener("click", () => addExModal.close());
+  if (closeBtn) closeBtn.addEventListener("click", () => addExModal.close());
+
+  // Catalog picker dialog: only needs a close affordance — selecting a movement injects + closes it.
+  const catalogModal = document.getElementById("dialog-catalog-picker");
+  const catalogCloseBtn = catalogModal?.querySelector(".modal-close-btn");
+  if (catalogCloseBtn) catalogCloseBtn.addEventListener("click", () => catalogModal.close());
+
+  addExForm.addEventListener("submit", (e) => handleAddSessionExerciseSubmit(e, state, addExModal));
+}
+
+export function setupActiveSession(deps) {
+  if (deps) appDeps = { ...appDeps, ...deps };
+  renderActiveSessionOverlayShell();
+  renderAddSessionExerciseDialog();
+  renderCatalogPickerDialog();
+  const { state, t, navigateToPath, launchClipboardDirectly } = appDeps;
+
+  wireSessionExpandBar(navigateToPath, launchClipboardDirectly);
+  wireSessionMenuAndActions(t);
+  wireAddExerciseAndCatalogDialogs(state);
 }
 
 // Edit-mode "Delete Plan": empty the active client's plan (exercises + their logs + circuit rounds)
@@ -1477,91 +1369,105 @@ export function cancelWorkoutSession() {
   if (focusSessionsColumn) focusSessionsColumn("today", "smooth");
 }
 
+// Confirm only when finishing meaningfully early — more than 10 minutes still on the countdown.
+// Near the scheduled end or in overrun (<=10 min or negative), complete silently. Returns whether
+// the trainer wants to proceed (always true when there's nothing to confirm).
+function confirmEarlyFinish(t) {
+  const endDate = activeSession.sourceSession?.endDate;
+  if (!endDate || activeSession.sourceSession?.isPlanning) return true;
+  const remainingMin = (new Date(endDate).getTime() - Date.now()) / 60000;
+  if (remainingMin <= 10) return true;
+  const msg = t("confirm_finish_early").replace("{min}", String(Math.round(remainingMin)));
+  return confirm(msg);
+}
+
+function countCompletedSets() {
+  let completedSets = 0;
+  for (const pId of activeSession.participants) {
+    const clientState = activeSession.clientRoutines[pId];
+    if (!clientState) continue;
+    for (const exId in clientState.logs) {
+      for (const log of clientState.logs[exId]) {
+        if (log.completed) completedSets++;
+      }
+    }
+  }
+  return completedSets;
+}
+
+// Stamp completion + elapsed time onto the session(s) this live session launched from, so the
+// dashboard's past-session status line (2.3) has something to show — previously finishing a
+// session never touched state.sessions at all, only state.history.
+function stampSourceSessionsCompleted(state, sessionDuration) {
+  const ss = activeSession.sourceSession;
+  if (!ss || ss.isPlanning) return;
+  const sessions = Array.isArray(state.sessions) ? state.sessions : [];
+  for (const session of sessions) {
+    if (session.id === ss.id || (Array.isArray(ss.ids) && ss.ids.includes(session.id))) {
+      session.completed = true;
+      session.duration = sessionDuration;
+    }
+  }
+}
+
+// One participant's history record, or null when there's nothing worth logging (nothing
+// performed, and this isn't a planning template that always logs regardless).
+function buildParticipantHistoryLog(pId, state, sessionDateISO, sessionDuration) {
+  const client = state.clients.find((c) => c.id === pId);
+  const clientState = activeSession.clientRoutines[pId];
+  if (!client || !clientState) return null;
+
+  const isPlanning = !!activeSession.sourceSession?.isPlanning;
+  // Persist the WHOLE program as an immutable snapshot (rests, circuit grouping, and prescribed-
+  // but-skipped exercises included) rather than flattening to performed sets only (TODO §17.1).
+  const clientProgram = buildProgramSnapshot(clientState, { isPlanning });
+  const anyCompleted = clientProgram.some((it) => it.type === "exercise" && it.completed);
+  if (!anyCompleted && !isPlanning) return null;
+
+  const clientLog = {
+    id: newRecordId(),
+    clientId: pId,
+    clientName: client.name,
+    routineName: clientState.routineName,
+    date: sessionDateISO,
+    duration: sessionDuration,
+    exercises: clientProgram,
+    feedback: (activeSession.feedback || []).filter((f) => f.clientId === pId),
+  };
+  if (isPlanning) clientLog.isPlanning = true;
+  return clientLog;
+}
+
+// Log a record for every participant who performed something (skipped work is kept alongside it),
+// or always for a planning template. A session where nothing was done writes no history.
+function appendHistoryRecordsForParticipants(state, sessionDateISO, sessionDuration) {
+  for (const pId of activeSession.participants) {
+    const clientLog = buildParticipantHistoryLog(pId, state, sessionDateISO, sessionDuration);
+    if (clientLog) state.history.push(clientLog);
+  }
+}
+
 export function finishWorkoutSession() {
   if (!activeSession) return;
   const { state, t, saveToLocalStorage, navigateToPath } = appDeps;
   if (!state || !t) return;
 
-  // Confirm only when finishing meaningfully early — more than 10 minutes still on the
-  // countdown. Near the scheduled end or in overrun (<=10 min or negative), complete silently.
-  const endDate = activeSession.sourceSession?.endDate;
-  if (endDate && !activeSession.sourceSession?.isPlanning) {
-    const remainingMin = (new Date(endDate).getTime() - Date.now()) / 60000;
-    if (remainingMin > 10) {
-      const msg = t("confirm_finish_early").replace("{min}", String(Math.round(remainingMin)));
-      if (!confirm(msg)) return;
-    }
-  }
+  if (!confirmEarlyFinish(t)) return;
 
-  let totalSets = 0;
-  let completedSets = 0;
-
-  for (const pId of activeSession.participants) {
-    const clientState = activeSession.clientRoutines[pId];
-    if (clientState) {
-      for (const exId in clientState.logs) {
-        for (const log of clientState.logs[exId]) {
-          totalSets++;
-          if (log.completed) completedSets++;
-        }
-      }
-    }
-  }
-
-  if (completedSets === 0 && !activeSession.sourceSession?.isPlanning) {
-    if (!confirm(t("alert_no_sets"))) {
-      return;
-    }
+  const completedSets = countCompletedSets();
+  if (
+    completedSets === 0 &&
+    !activeSession.sourceSession?.isPlanning &&
+    !confirm(t("alert_no_sets"))
+  ) {
+    return;
   }
 
   const sessionDateISO = new Date(activeSession.startTime).toISOString();
   const sessionDuration = activeSession.duration;
 
-  // Stamp completion + elapsed time onto the session(s) this live session launched from, so the
-  // dashboard's past-session status line (2.3) has something to show — previously finishing a
-  // session never touched state.sessions at all, only state.history.
-  const ss = activeSession.sourceSession;
-  const sessions = Array.isArray(state.sessions) ? state.sessions : [];
-  if (ss && !ss.isPlanning) {
-    for (const session of sessions) {
-      if (session.id === ss.id || (Array.isArray(ss.ids) && ss.ids.includes(session.id))) {
-        session.completed = true;
-        session.duration = sessionDuration;
-      }
-    }
-  }
-
-  for (const pId of activeSession.participants) {
-    const client = state.clients.find((c) => c.id === pId);
-    const clientState = activeSession.clientRoutines[pId];
-    if (!client || !clientState) continue;
-
-    const isPlanning = !!activeSession.sourceSession?.isPlanning;
-    // Persist the WHOLE program as an immutable snapshot (rests, circuit grouping, and prescribed-
-    // but-skipped exercises included) rather than flattening to performed sets only (TODO §17.1).
-    const clientProgram = buildProgramSnapshot(clientState, { isPlanning });
-    const anyCompleted = clientProgram.some((it) => it.type === "exercise" && it.completed);
-
-    // Log a record when the client performed something (skipped work is kept alongside it), or
-    // always for a planning template. A session where nothing was done writes no history.
-    if (anyCompleted || isPlanning) {
-      const clientLog = {
-        id: newRecordId(),
-        clientId: pId,
-        clientName: client.name,
-        routineName: clientState.routineName,
-        date: sessionDateISO,
-        duration: sessionDuration,
-        exercises: clientProgram,
-        feedback: (activeSession.feedback || []).filter((f) => f.clientId === pId),
-      };
-      if (isPlanning) {
-        clientLog.isPlanning = true;
-      }
-
-      state.history.push(clientLog);
-    }
-  }
+  stampSourceSessionsCompleted(state, sessionDuration);
+  appendHistoryRecordsForParticipants(state, sessionDateISO, sessionDuration);
 
   if (saveToLocalStorage) saveToLocalStorage();
 

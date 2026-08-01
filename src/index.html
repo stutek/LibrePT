@@ -64,7 +64,9 @@
   <link rel="modulepreload" href="i18n/domMappings.js">
   <link rel="modulepreload" href="data/index.js">
   <link rel="modulepreload" href="controllers/gestureController.js">
-  <link rel="modulepreload" href="controllers/formsController.js">
+  <link rel="modulepreload" href="controllers/clientFormsController.js">
+  <link rel="modulepreload" href="controllers/routineFormsController.js">
+  <link rel="modulepreload" href="controllers/exerciseFormsController.js">
   <link rel="modulepreload" href="controllers/activeSessionController.js">
   <link rel="modulepreload" href="modules/sessionList/sessionsView.js">
   <link rel="modulepreload" href="modules/clients/clientsView.js">
@@ -101,7 +103,8 @@
   <aside id="notification-area" class="notification-area" aria-label="Notification Center and Active Session"></aside>
 
   <!-- FULL SCREEN OVERLAY: Active Workout Clipboard Dashboard — inner markup owned and
-       injected by activeSessionController.js (renderActiveSessionOverlayShell). -->
+       injected by activeSessionOverlayView.js (renderActiveSessionOverlayShell), called from
+       activeSessionController.js's setupActiveSession(). -->
   <div id="active-session-overlay" class="active-session-overlay hidden"></div>
 
   <!-- Per-client timer stack: one labelled countdown per client (client name + Rest/Exercise),
@@ -110,10 +113,11 @@
        whenever any client has an active timer, not just while the live session overlay is open. -->
   <div id="clipboard-timer-stack" class="timer-stack hidden"></div>
 
-  <!-- Every <dialog> is injected here by its owning module (formsController.js,
-       activeSessionController.js, feedbackModal.js, planAdjustments.js, backupRestore.js,
-       applicationHeader.js, buildInfoDialog.js) at boot, before that module wires its behavior —
-       index.html only owns the mount point, not any dialog's markup. -->
+  <!-- Every <dialog> is injected here by its owning module (clientFormsController.js,
+       routineFormsController.js, exerciseFormsController.js, activeSessionController.js,
+       feedbackModal.js, planAdjustments.js, backupRestore.js, applicationHeader.js,
+       buildInfoDialog.js) at boot, before that module wires its behavior — index.html only owns
+       the mount point, not any dialog's markup. -->
   <div id="dialogs-root"></div>
   <!-- Application Logic Scripts -->
   <script type="module" src="app.js"></script>

@@ -24,14 +24,11 @@ import {
   syncSessionFocusUrl,
 } from "./controllers/activeSessionController.js";
 import { initAppLifecycle } from "./controllers/appLifecycleController.js";
+import { setupClientForms as setupClientFormsController } from "./controllers/clientFormsController.js";
 import {
   openExerciseCreateDialog,
-  openRoutineCreateDialog,
-  populateDropdownSelectors as populateDropdownsController,
-  setupClientForms as setupClientFormsController,
   setupExerciseForms as setupExerciseFormsController,
-  setupRoutineForms as setupRoutineFormsController,
-} from "./controllers/formsController.js";
+} from "./controllers/exerciseFormsController.js";
 import { setupViewDismiss } from "./controllers/gestureController.js";
 import {
   activeRouteIsDialog,
@@ -53,6 +50,10 @@ import {
   toRoute,
   urlFor,
 } from "./controllers/routerController.js";
+import {
+  openRoutineCreateDialog,
+  setupRoutineForms as setupRoutineFormsController,
+} from "./controllers/routineFormsController.js";
 import { applyThemeSwitcherLabels, initTheme } from "./controllers/themeController.js";
 import {
   getState,
@@ -109,6 +110,7 @@ import {
   renderNotificationArea,
   setupNotificationGestures,
 } from "./modules/common/notificationArea.js";
+import { populateDropdownSelectors as populateDropdownsController } from "./modules/common/populateDropdownSelectors.js";
 import { newRecordId } from "./modules/common/recordId.js";
 import { repsPresetsDatalistHTML } from "./modules/common/repsAndLoad.js";
 import { INIT_DEMO_DATA, getShareParams } from "./modules/common/shareLink.js";

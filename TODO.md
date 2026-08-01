@@ -374,19 +374,19 @@ its own route's existence check.
   shell render + declares what it depends on existing first), rather than a hand-maintained call
   order a future edit can silently get wrong.
 
-### 14.9 [ ] `activeSessionController.js` (1553 lines) mixes markup templates into a behavior file
-The shell split (§14.5) added ownership of three unrelated UI surfaces' markup — the full-screen
-active-session overlay shell, `dialog-add-session-exercise`, and `dialog-catalog-picker` — into
-`activeSessionController.js`, on top of its existing active-session state/behavior logic, growing
-an already-large controller further instead of extracting a companion view file.
+### 14.9 [x] `activeSessionController.js` mixed markup templates into a behavior file
+**SHIPPED 2026-08-01.** The shell split (§14.5) had added ownership of three unrelated UI
+surfaces' markup — the full-screen active-session overlay shell, `dialog-add-session-exercise`,
+and `dialog-catalog-picker` — into `activeSessionController.js`, on top of its existing
+active-session state/behavior logic, growing an already-large controller further instead of
+extracting a companion view file.
 
-- **Risk**: a future change to the overlay's markup requires scrolling a 1500+ line behavior-heavy
-  file to find the ~100-line template block buried inside it, and any edit there risks an unrelated
-  merge conflict with concurrent active-session logic changes in the same file — exactly the
-  same-file co-edit collision [AGENT_RULES §5](AGENT_RULES.md) exists to prevent.
-- **Fix direction**: extract the three `renderXShell`/`renderXDialog` functions (and their markup)
-  into a new `modules/clipboard/activeSessionOverlayView.js`, leaving `activeSessionController.js`
-  to own behavior only.
+The three `renderXShell`/`renderXDialog` functions (unchanged content) now live in
+[modules/clipboard/activeSessionOverlayView.js](src/modules/clipboard/activeSessionOverlayView.js);
+`activeSessionController.js` imports and calls them from `setupActiveSession()` and owns behavior
+only. Landed alongside the same-day complexity-gate work
+([agent_tools/complexity.py](agent_tools/complexity.py)) that flagged this file's
+`renderActiveGroupBoard` as the single largest function in the codebase.
 
 ### 14.6 [x] Rename the `booking` domain term to `session`
 **Decided (2026-07-23), SHIPPED 2026-07-27.** From the PT's stance the entity is a **session**; "booking" was the customer-facing framing (a client *books* a slot; the PT *runs* a session). Code is now unified on `session`.
@@ -940,7 +940,7 @@ Both would mint **new** URLs carrying a client id where none exists today. `/cli
 it is unresolved, so these are parked rather than shipped.
 
 - [ ] **Client dialogs** — `/clients/new`, `/clients/{clientId}/edit`
-      ([formsController.js](src/controllers/formsController.js) `setupClientForms`).
+      ([clientFormsController.js](src/controllers/clientFormsController.js) `setupClientForms`).
 - [ ] **Workout-setup preselection** — `openEditSessionControlModal` takes four identifiers and the
       URL carries only `bookingId`, so "Plan Program" from a client
       ([clientsView.js](src/modules/clients/clientsView.js)) and "Start Group Session" from a routine
