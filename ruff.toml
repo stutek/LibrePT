@@ -1,0 +1,11 @@
+# Ruff config for the Python tooling (build/, deploy/, tests/, agent_tools/ — see
+# PYTHON_LINT_TARGETS in build/__init__.py). No src/ here: the frontend is buildless JS, gated
+# instead by agent_tools/complexity.py.
+#
+# C901 (mccabe cyclomatic complexity) is opt-in in ruff — without this, ruff's own tooling had no
+# complexity check at all, the same gap agent_tools/complexity.py closes for the frontend. Default
+# threshold (10) is ruff's own; pre-existing functions over it are exempted inline with `# noqa:
+# C901` and a written reason (AGENT_RULES §2.A.3's "explicitly suppressed with a written
+# justification" rule, same discipline as the ZAP ignore list), not raised here for everyone.
+[lint]
+extend-select = ["C901"]

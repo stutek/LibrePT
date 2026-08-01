@@ -203,7 +203,10 @@ def display_path(path):
         return path
 
 
-def check_file(path, cache, all_files):
+# One doc's worth of checks (links, anchors, §-refs) genuinely needs one pass per reference kind;
+# splitting would just scatter one file's findings across several functions passing the same
+# (path, cache, all_files) around. Pre-existing debt, not part of today's complexity-gate work.
+def check_file(path, cache, all_files):  # noqa: C901
     findings = []
     rel = display_path(path)
 

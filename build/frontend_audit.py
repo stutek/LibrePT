@@ -58,7 +58,12 @@ ESCAPED_ASSIGNMENT = (
 BARE_IDENTIFIER = re.compile(r"^[A-Za-z_$][\w$]*$")
 
 
-def audit_html_sinks(root="src"):
+# Security-critical: this is the one check standing between a raw `${...}` interpolation and a
+# shipped XSS sink (see its own module docstring). Splitting the sink-detection branches across
+# functions would make the one property that matters — "did every sink actually get checked" —
+# harder to verify by reading, not easier. Pre-existing debt, not part of today's complexity-gate
+# work.
+def audit_html_sinks(root="src"):  # noqa: C901
     """Every unescaped interpolation of a user-text field into an HTML sink, as
     (path, line_number, expression) — empty when the tree is clean."""
     findings = []

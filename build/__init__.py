@@ -53,7 +53,11 @@ def check_environment():
         subprocess.run([pip_path, "install", "-r", "requirements.txt"], check=True)
 
 
-def ensure_biome_binary():
+# Platform/arch detection, download, and integrity verification for one binary — each step depends
+# on the platform branch taken above it, so splitting would thread the same platform_suffix/
+# biome_path pair through several functions for no real separation of concerns. Pre-existing debt,
+# not part of today's complexity-gate work.
+def ensure_biome_binary():  # noqa: C901
     """Detects platform and architecture, downloads the precompiled Biome binary if missing."""
     import platform
     import stat
@@ -103,7 +107,10 @@ def ensure_biome_binary():
         "darwin": (b"\xcf\xfa\xed\xfe", b"\xfe\xed\xfa\xcf", b"\xca\xfe\xba\xbe"),
     }
 
-    def verify_binary_integrity(path):
+    # Three independent corruption checks (existence, size, magic bytes, checksum) that all have
+    # to run and all have to pass — genuinely one sequential validation, not several concerns.
+    # Pre-existing debt, not part of today's complexity-gate work.
+    def verify_binary_integrity(path):  # noqa: C901
         """Verifies binary size, magic bytes, and SHA256 checksum to prevent corruption."""
         if not os.path.exists(path):
             return False
@@ -251,6 +258,19 @@ def run_pipeline_gate_check():
     from agent_tools import pipeline_gates
 
     if pipeline_gates.main() != 0:
+        sys.exit(1)
+
+
+def run_complexity_check():
+    """Cyclomatic complexity gate for the frontend JS — see agent_tools/complexity.py.
+
+    A function that grows past a reasonable size reads fine one branch at a time in review; only
+    counting the whole thing at once catches it, which review does not do reliably.
+    """
+    print("\n  Checking frontend cyclomatic complexity...")
+    from agent_tools import complexity
+
+    if complexity.main() != 0:
         sys.exit(1)
 
 
@@ -617,6 +637,7 @@ def run_stage_1_parallel():
         "Static Security Audits": run_static_security_checks,
         "Documentation Graph": run_doc_graph_check,
         "Pipeline Gating": run_pipeline_gate_check,
+        "Cyclomatic Complexity": run_complexity_check,
     }
 
     failures = []
