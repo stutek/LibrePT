@@ -106,12 +106,6 @@ PRE_EXISTING_ALLOWLIST = {
     "src/modules/plans/planAdjustments.js::openAdjustmentWizardComponent": (
         "Multi-step apply-adjustment wizard, one function per TODO.md §7; §14 follow-up."
     ),
-    "src/modules/session/editSessionControl.js::openEditSessionControlModal": (
-        "Workout-setup modal: four preselection paths × participant/routine/date wiring; §14 follow-up."
-    ),
-    "src/modules/session/editSessionControl.js::<anonymous>@146": (
-        "Form-submit handler inside setupEditSessionControl closing over the modal's own fields; §14 follow-up."
-    ),
     "src/modules/sessionList/sessionsView.js::seedDemoActiveSession": (
         "Demo-mode active-session seeding, mirrors real startWorkoutSession's branching; §14 follow-up."
     ),
