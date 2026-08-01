@@ -286,53 +286,70 @@ export function setupNavigation({ setupSessionsDayNav } = {}) {
   }
 }
 
-export function showSessionView(sessionId, clientId, focusRef = null, opts = {}) {
+function recoverActiveSessionIfNeeded() {
   const activeSession = routerDeps?.getActiveSession ? routerDeps.getActiveSession() : null;
+  if (activeSession) return;
+  const cached = localStorage.getItem("librept_active_session");
+  if (cached && routerDeps?.recoverActiveSession) {
+    routerDeps.recoverActiveSession();
+  }
+}
 
-  if (!activeSession) {
-    const cached = localStorage.getItem("librept_active_session");
-    if (cached && routerDeps?.recoverActiveSession) {
-      routerDeps.recoverActiveSession();
+// Everything that happens when the address bar already names the session that's live: unhide the
+// bar/overlay, make sure its timer is ticking, apply a deep link's focus/edit intent, and re-render.
+function enterActiveSessionFocus(currentActive, clientId, focusRef, opts) {
+  const bar = document.getElementById("active-session-bar");
+  if (bar) {
+    bar.classList.remove("hidden", "is-idle");
+    delete bar.dataset.nextSessionId;
+  }
+  routerDeps?.renderActiveSessionBarLabels?.();
+
+  if (!currentActive.timerIntervalId) {
+    routerDeps?.startSessionTimer?.();
+  }
+
+  const overlay = document.getElementById("active-session-overlay");
+  if (overlay) overlay.classList.remove("hidden");
+  routerDeps?.renderSessionTitle?.();
+
+  if (clientId && currentActive.participants.includes(clientId)) {
+    currentActive.activeClientId = clientId;
+  }
+  if (focusRef) {
+    const cs = currentActive.clientRoutines[currentActive.activeClientId];
+    const idx = routerDeps?.focusIndexFromRef?.(cs, focusRef);
+    // A deep link naming a specific card is explicit intent to see THAT card in focus — it
+    // overrides the deck's own "start collapsed" default (activeSessionController.js's
+    // deckAllCollapsed), same as the trainer's first tap on a card would.
+    if (idx >= 0) {
+      cs.activeExerciseIndex = idx;
+      cs.deckAllCollapsed = false;
     }
   }
+  if (opts.edit) {
+    routerDeps?.setClipboardEditMode?.(true, opts.slotId ?? null);
+  }
+  routerDeps?.renderActiveGroupBoard?.();
+  routerDeps?.syncSessionFocusUrl?.();
+}
+
+// launchClipboardDirectly/openSessionFromHistory stage a session but don't always leave it "active"
+// synchronously — re-entering only when it did, and only when the caller asked for more than just
+// launching (a client/focus/edit deep link), avoids a redundant no-op showSessionView call.
+function reenterIfBecameActive(sessionId, clientId, focusRef, opts) {
+  if (routerDeps.getActiveSession() && (clientId || focusRef || opts.edit)) {
+    showSessionView(sessionId, clientId, focusRef, opts);
+  }
+}
+
+export function showSessionView(sessionId, clientId, focusRef = null, opts = {}) {
+  recoverActiveSessionIfNeeded();
 
   const currentActive = routerDeps?.getActiveSession ? routerDeps.getActiveSession() : null;
 
   if (currentActive && currentActive.id === sessionId) {
-    const bar = document.getElementById("active-session-bar");
-    if (bar) {
-      bar.classList.remove("hidden", "is-idle");
-      delete bar.dataset.nextSessionId;
-    }
-    if (routerDeps?.renderActiveSessionBarLabels) routerDeps.renderActiveSessionBarLabels();
-
-    if (!currentActive.timerIntervalId && routerDeps?.startSessionTimer) {
-      routerDeps.startSessionTimer();
-    }
-
-    const overlay = document.getElementById("active-session-overlay");
-    if (overlay) overlay.classList.remove("hidden");
-    if (routerDeps?.renderSessionTitle) routerDeps.renderSessionTitle();
-
-    if (clientId && currentActive.participants.includes(clientId)) {
-      currentActive.activeClientId = clientId;
-    }
-    if (focusRef && routerDeps?.focusIndexFromRef) {
-      const cs = currentActive.clientRoutines[currentActive.activeClientId];
-      const idx = routerDeps.focusIndexFromRef(cs, focusRef);
-      // A deep link naming a specific card is explicit intent to see THAT card in focus — it
-      // overrides the deck's own "start collapsed" default (activeSessionController.js's
-      // deckAllCollapsed), same as the trainer's first tap on a card would.
-      if (idx >= 0) {
-        cs.activeExerciseIndex = idx;
-        cs.deckAllCollapsed = false;
-      }
-    }
-    if (opts.edit && routerDeps?.setClipboardEditMode) {
-      routerDeps.setClipboardEditMode(true, opts.slotId ?? null);
-    }
-    if (routerDeps?.renderActiveGroupBoard) routerDeps.renderActiveGroupBoard();
-    if (routerDeps?.syncSessionFocusUrl) routerDeps.syncSessionFocusUrl();
+    enterActiveSessionFocus(currentActive, clientId, focusRef, opts);
     return;
   }
 
@@ -341,18 +358,14 @@ export function showSessionView(sessionId, clientId, focusRef = null, opts = {})
   const session = sessions?.find((s) => s.id === sessionId);
   if (session && routerDeps?.launchClipboardDirectly) {
     routerDeps.launchClipboardDirectly({ sessionId });
-    if (routerDeps.getActiveSession() && (clientId || focusRef || opts.edit)) {
-      showSessionView(sessionId, clientId, focusRef, opts);
-    }
+    reenterIfBecameActive(sessionId, clientId, focusRef, opts);
     return;
   }
 
   const log = state?.history?.find((h) => h.id === sessionId);
   if (log && routerDeps?.openSessionFromHistory) {
     routerDeps.openSessionFromHistory(log);
-    if (routerDeps.getActiveSession() && (clientId || focusRef || opts.edit)) {
-      showSessionView(sessionId, clientId, focusRef, opts);
-    }
+    reenterIfBecameActive(sessionId, clientId, focusRef, opts);
     return;
   }
 

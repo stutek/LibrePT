@@ -66,10 +66,6 @@ DECISION_NODE_TYPES = {
 # Removing an entry without lowering the function's complexity first will fail the build — the
 # entry only buys time on functions nobody has touched yet, not a permanent exemption.
 PRE_EXISTING_ALLOWLIST = {
-    "src/controllers/routerController.js::showSessionView": (
-        "Route-entry dispatch across every session sub-view (client tabs, focus, edit, dialogs); "
-        "TODO.md §14 follow-up, not part of today's split."
-    ),
     "src/modules/clipboard/circuitCard.js::renderFocused": (
         "In-focus circuit card markup, branching per member/round/quick-signal state; §14 follow-up."
     ),
