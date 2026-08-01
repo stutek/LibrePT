@@ -90,9 +90,9 @@ export function setupBuildInfoDialog() {
   // A route, so the build identity is a link a PT can paste into a bug report and Back dismisses it.
   // The route calls renderBuildInfo() before showing.
   //
-  // The stamp sits inside #logo-area, which navigates home on click. That used to be harmless — the
-  // dialog simply opened over a re-rendered dashboard — but now that the dialog is a route, letting
-  // the event through means routing home a tick later, which closes it again.
+  // stopPropagation here is a leftover safety net from when the stamp lived inside #logo-area
+  // (which navigates home on click) — harmless to keep since a stray bubble to a parent handler
+  // would still be wrong for a route-backed dialog.
   stamp.addEventListener("click", (event) => {
     event.stopPropagation();
     deps.navigateToPath(deps.urlFor("build"));

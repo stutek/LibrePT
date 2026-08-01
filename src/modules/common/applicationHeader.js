@@ -234,21 +234,24 @@ export function renderHeaderShell() {
       <div class="logo-area" id="logo-area">
         <i class="fa-solid fa-dumbbell logo-icon"></i>
         <h1>LibrePT</h1>
+      </div>
+
+      <!-- PREVIEW tag stacked above the build stamp (rather than side by side) to save horizontal
+           space in the mobile title bar — positioned between logo and action buttons. -->
+      <div class="header-build-stack">
+        <a id="preview-ribbon" class="preview-ribbon"
+           href="https://github.com/stutek/LibrePT/blob/main/docs/PREVIEW.md"
+           target="_blank" rel="noopener noreferrer"
+           aria-label="Preview build — pre-release, may lose data. Open the risks & data-loss notice.">
+          <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+          <span id="preview-ribbon-label">PREVIEW</span>
+          <i class="fa-solid fa-circle-question" aria-hidden="true"></i>
+        </a>
         <!-- Tappable: the long build identity used to live in a \`title\` tooltip, which a phone
              cannot reach. Opens #dialog-build-info instead. -->
         <button type="button" id="app-version" class="app-version" aria-label="Build version — tap for details" aria-haspopup="dialog"></button>
       </div>
 
-      <!-- Pre-release PREVIEW marker positioned in the center between logo and action buttons -->
-      <a id="preview-ribbon" class="preview-ribbon"
-         href="https://github.com/stutek/LibrePT/blob/main/docs/PREVIEW.md"
-         target="_blank" rel="noopener noreferrer"
-         aria-label="Preview build — pre-release, may lose data. Open the risks & data-loss notice.">
-        <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
-        <span id="preview-ribbon-label">PREVIEW</span>
-        <i class="fa-solid fa-circle-question" aria-hidden="true"></i>
-      </a>
-      
       <div class="header-actions">
         <!-- Normal view actions -->
         <div class="normal-header-actions">
