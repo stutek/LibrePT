@@ -112,9 +112,6 @@ PRE_EXISTING_ALLOWLIST = {
     "src/modules/session/editSessionControl.js::<anonymous>@146": (
         "Form-submit handler inside setupEditSessionControl closing over the modal's own fields; §14 follow-up."
     ),
-    "src/modules/sessionList/sessionCard.js::renderSessionCard": (
-        "One dashboard session card across live/upcoming/completed/overtime states; §14 follow-up."
-    ),
     "src/modules/sessionList/sessionsView.js::seedDemoActiveSession": (
         "Demo-mode active-session seeding, mirrors real startWorkoutSession's branching; §14 follow-up."
     ),
