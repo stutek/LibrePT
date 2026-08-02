@@ -275,6 +275,32 @@ Broaden coverage: themes, the Sync & Backup modal + counters, the header menu + 
 - **Done**: `tests/e2e/` suites for themes, the Sync & Backup badge + modal, the ☰ header menu, the first-run terms agreement, the plan-adjustments deck + Apply wizard, and the Client Directory grid + live search. The legacy `tests/test_browser.py` is gone: its three sessions-dashboard tests were stale duplicates of the maintained `tests/e2e/test_sessions_dashboard.py` versions (dropped) and its gym-floor smoke flow (voice-note capture included) moved to `tests/e2e/test_gym_floor_flow.py`.
 - **Still open**: the demo walkthrough (9.x) isn't built yet, so it has no tests.
 
+### 12.8 [ ] [Observation] `tests/e2e/` vs `tests/unit/` is a browser split, not a UI split — worth optimizing
+**Raised 2026-08-02 (Simon), while reviewing the star-writes CD tests (§18.13).** A pure-logic test
+that touches no DOM (`test_record_schemas.py`, `test_star_write_invariants.py`, `test_record_references.py`,
+`test_schema_migrations.py`, `test_migration_edge_case_robustness.py`, `test_frozen_backup_corpus.py`
+— all schema/projection/migration/reference-graph logic) still has to live in `tests/e2e/` and boot a
+full Playwright page, because that is the **only JS runtime this project has**: no Node.js, no
+`package.json`, buildless native ES modules served straight to a browser. `tests/unit/*.py` is pure
+Python and never executes JS at all — it checks *static* properties of the source (regex / a
+`tree-sitter` parse: complexity, i18n key parity, dom mappings), never runtime behaviour. So today's
+`unit` vs `e2e` split is really "does this test need a browser to exist," not "does this test touch
+the UI" — every one of those pure-logic data-layer tests pays a full page boot + navigation just to
+call a plain function.
+
+- **The fix would be adding Node.js + a JS test runner** (Vitest/Jest, native ESM support, no browser
+  needed) as a new dev dependency, purely to run the pure-logic subset fast. Weigh against the
+  project's deliberate dependency-light stance (same reasoning that rejected SQLite-wasm for the DB
+  engine, §3.7/§18.6, and a fuzzing library for migration tests, §18.13) — this would be the first
+  Node toolchain dependency in a project that has none today.
+- **Not urgent**: the current e2e suite runs in a few minutes even with the pure-logic tests folded
+  in (`python -m build check`'s Stage 2), and Playwright is already a required dependency regardless
+  (real UI tests need it). Worth revisiting if the data-layer test count keeps growing and Stage 2
+  duration becomes the bottleneck, not before.
+- **If pursued**: the split should become "needs a browser" (`tests/e2e/`) vs "pure function, no
+  DOM" (a new fast lane, not today's `tests/unit/` — that stays Python-only tooling checks), with the
+  data-layer tests listed above as the first migration candidates.
+
 ### 12.5 [ ] Local git housekeeping (trademark refs)
 The trademark was scrubbed from history and force-pushed (remote is clean). Still pending **locally**: expire the reflog and `git gc --prune=now` the old pre-rewrite objects (`refs/original/…` and any leftover backup branch) so the old blobs are purged from the local clone.
 
