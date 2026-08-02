@@ -100,17 +100,16 @@ def test_terms_modal_opens_and_agree_closes_it(page, local_server):
     assert terms.get_attribute("open") is None
 
 
-def test_connect_cloud_shows_coming_soon(page, local_server):
+def test_connect_cloud_opens_the_drive_sync_card(page, local_server):
+    # menu-connect-cloud now opens the Sync & Backup dialog on its Google Drive card
+    # (driveSyncUi.js), which itself reports "not configured" honestly rather than an opaque alert.
     page.goto(local_server)
     page.wait_for_selector("#view-clients.active")
     _open_menu(page)
 
-    messages = []
-    page.on("dialog", lambda d: (messages.append(d.message), d.dismiss()))
     page.locator("#menu-connect-cloud").click()
-    page.wait_for_timeout(200)
-    assert messages, "expected a 'coming soon' alert"
-    assert "coming soon" in messages[0].lower()
+    assert page.locator("#dialog-backup").get_attribute("open") is not None
+    assert page.locator("#drive-sync-card").is_visible()
 
 
 def test_menu_labels_translate_to_slovenian(page, local_server):

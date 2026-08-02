@@ -268,6 +268,28 @@ export function saveToLocalStorage(incrementLocalSyncFn) {
   }
 }
 
+// Google Drive sync's own bookkeeping (TODO §1.5/§3.3): the Drive file id and the merge ancestor
+// snapshot (the state as of the last successful sync, used as the common ancestor for the next
+// three-way merge — see syncMerge.js). Lives in META_STORE, not localStorage: the ancestor is a full
+// domain snapshot, the same size class as the main database, and localStorage's ~5-10MB origin cap is
+// exactly what IndexedDB was adopted to get away from (§18.6).
+const DRIVE_SYNC_META_KEY = "driveSync";
+
+export async function readDriveSyncMeta() {
+  if (!indexedDbSupported()) return null;
+  const db = await getDb();
+  const entry = await readMeta(db, DRIVE_SYNC_META_KEY);
+  return entry?.value || null;
+}
+
+export async function writeDriveSyncMeta(meta) {
+  if (!indexedDbSupported()) return;
+  const db = await getDb();
+  await withTransaction(db, [META_STORE], "readwrite", ({ store }) => {
+    store(META_STORE).put({ key: DRIVE_SYNC_META_KEY, value: meta });
+  });
+}
+
 export async function resetLibrePTData(options = {}) {
   const { demo = true } = options || {};
   for (const k of Object.keys(localStorage)) {

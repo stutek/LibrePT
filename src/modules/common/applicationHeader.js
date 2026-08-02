@@ -440,10 +440,12 @@ function setupAppMenu() {
   on("menu-routines", () => goto("/routines"));
   on("menu-exercises", () => goto("/exercises"));
   on("menu-history", () => goto("/history"));
-  // Connect cloud storage — placeholder, no backend yet.
+  // Connect cloud storage — opens the Sync & Backup dialog's Google Drive card (driveSyncUi.js),
+  // which itself reports "not configured" honestly on a deployment with no OAuth client id set.
   on("menu-connect-cloud", () => {
     closeMenu();
-    alert(deps.t("menu_coming_soon"));
+    const b = document.getElementById("backup-btn");
+    if (b) b.click();
   });
   // Export data — reuse the existing Sync & Backup modal (it holds JSON export/restore).
   on("menu-export-data", () => {

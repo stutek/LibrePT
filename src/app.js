@@ -100,6 +100,11 @@ import {
   setupBuildInfoDialog,
 } from "./modules/common/buildInfoDialog.js";
 import {
+  initDriveSyncUi,
+  prepareDriveSyncCard,
+  setupDriveSyncUi,
+} from "./modules/common/driveSyncUi.js";
+import {
   initFeedbackModal,
   openFeedbackModal,
   setupFeedbackForms,
@@ -266,6 +271,7 @@ async function init() {
     clientsViewShowDetails,
     setHeaderState,
     prepareBackupDialog,
+    prepareDriveSyncCard,
     renderBuildInfo,
     openRoutineCreateDialog,
     openExerciseCreateDialog,
@@ -358,6 +364,8 @@ async function init() {
     t,
   });
   setupBackupRestore();
+  initDriveSyncUi({ t });
+  setupDriveSyncUi();
   setupCalendarSessions();
 
   initApplicationHeader({

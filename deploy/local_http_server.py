@@ -118,7 +118,10 @@ def build_dev_integrity_catalog(corrupt=False):
 SECURITY_HEADERS = {
     "Content-Security-Policy": (
         "default-src 'self'; "
-        "script-src 'self'; "
+        # accounts.google.com serves Google Identity Services' token-client script, loaded lazily
+        # only when a trainer taps Connect Google Drive (TODO §1.5/§3.3) — never on boot, so the
+        # normal offline-first path never touches it.
+        "script-src 'self' https://accounts.google.com; "
         "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; "
         # Fonts are vendored locally ('self'); only Font Awesome's webfonts still come from cdnjs.
         "font-src 'self' https://cdnjs.cloudflare.com; "
@@ -126,7 +129,9 @@ SECURITY_HEADERS = {
         # connect-src governs fetch()/XHR — including the service worker precaching the Font Awesome
         # CDN. Without it, connect falls back to default-src 'self' and the SW's cache.addAll is
         # blocked, which (being atomic) fails the whole precache and breaks offline caching.
-        "connect-src 'self' https://cdnjs.cloudflare.com; "
+        # googleapis.com/oauth2.googleapis.com/accounts.google.com are the Drive appDataFolder sync
+        # target and its token endpoints (TODO §1.5) — same lazy, connect-only-when-used story.
+        "connect-src 'self' https://cdnjs.cloudflare.com https://www.googleapis.com https://oauth2.googleapis.com https://accounts.google.com; "
         "base-uri 'self'; "
         "form-action 'self'; "
         "frame-ancestors 'none'; "

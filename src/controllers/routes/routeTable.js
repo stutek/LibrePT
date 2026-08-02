@@ -194,7 +194,15 @@ export function buildRouteTable() {
     // The build stamp is read off the running app, and a stale import status must not greet the
     // next open — so both are refreshed before the dialog is shown, not when the page loaded.
     ["build", "/build", "dialog-build-info", (ctx) => ctx.deps.renderBuildInfo?.()],
-    ["backup", "/backup", "dialog-backup", (ctx) => ctx.deps.prepareBackupDialog?.()],
+    [
+      "backup",
+      "/backup",
+      "dialog-backup",
+      (ctx) => {
+        ctx.deps.prepareBackupDialog?.();
+        ctx.deps.prepareDriveSyncCard?.();
+      },
+    ],
   ]) {
     registry.register(new GlobalDialogRoute({ name, segment, dialogId, open, home: sessionsDay }));
   }

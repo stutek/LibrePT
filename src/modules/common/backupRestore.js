@@ -73,6 +73,17 @@ export function renderBackupDialog() {
           <p id="sync-status" class="status-msg"></p>
         </div>
 
+        <div class="action-card card" id="drive-sync-card">
+          <i class="fa-brands fa-google-drive backup-icon-large text-primary"></i>
+          <h4 id="drive-sync-title">Cloud Backup (Google Drive)</h4>
+          <p id="drive-sync-desc">Keep your clients, routines and session history mirrored across your own devices, in a hidden app folder only LibrePT can see in your Google Drive.</p>
+          <button id="btn-drive-connect" class="btn primary-btn w-full">
+            <i class="fa-brands fa-google-drive"></i> <span id="btn-drive-connect-text">Connect Google Drive</span>
+          </button>
+          <button id="btn-drive-disconnect" class="btn secondary-btn w-full hidden">Disconnect</button>
+          <p id="drive-sync-status" class="status-msg"></p>
+        </div>
+
         <div class="action-card card">
           <i class="fa-solid fa-file-export backup-icon-large text-emerald"></i>
           <h4 id="backup-export-title">Export Data Backup</h4>

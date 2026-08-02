@@ -242,7 +242,7 @@ LibrePT/
 
 *   **Core**: HTML5, Vanilla JavaScript (ES6+ ES modules), and Vanilla CSS custom properties driving a 5-theme system (Midnight, Daylight, Red, Blossom, Nebula) — no hard-coded theme colours.
 *   **Internationalization**: Built-in EN/SL dictionaries with locale-aware date formatting via `Intl`.
-*   **Data Sync**: No backend of our own — Google Calendar is the source of truth for bookings/RSVP, and Google Drive's `appDataFolder` covers optional cross-device sync of app-only data (see [TODO §1.5](TODO.md#15--brainstorm-google-calendar-integration--source-of-truth-occupancy-and-data-processor-exposure)). A Firestore/Firebase relay was considered and set aside as the default: it would make the operator a GDPR data processor for PT/client data, which this design avoids.
+*   **Data Sync**: No backend of our own — Google Calendar is the planned source of truth for bookings/RSVP (not yet built, [TODO §1.5](TODO.md#15--brainstorm-google-calendar-integration--source-of-truth-occupancy-and-data-processor-exposure)), and Google Drive's `appDataFolder` covers optional cross-device sync of app-only data — **built**, see [TODO §3.3](TODO.md#33--google-drive-periodic-sync). A Firestore/Firebase relay was considered and set aside as the default: it would make the operator a GDPR data processor for PT/client data, which this design avoids.
 *   **Third-Party APIs**: Google Calendar API + Google Drive API (OAuth 2.0).
 *   **Native Wrap**: **Capacitor** to wrap the HTML/CSS/JS code into native Android (.apk) and iOS (.ipa) app packages.
 

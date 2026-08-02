@@ -11,7 +11,7 @@
 // atomic version. The worker's own sub-scripts (sw.js + this sw/ folder) are deliberately NOT in ASSETS:
 // they are the worker's script resources, kept coherent by the browser's own SW-update mechanism.
 self.swCacheManifest = (() => {
-  const CACHE_NAME = "librept-v41";
+  const CACHE_NAME = "librept-v42";
   const ASSETS = [
     "./",
     "./index.html",
@@ -63,6 +63,8 @@ self.swCacheManifest = (() => {
     "./modules/common/activeUsersList.js",
     "./modules/common/applicationHeader.js",
     "./modules/common/backupRestore.js",
+    "./modules/common/driveSyncUi.js",
+    "./modules/common/googleAuth.js",
     "./modules/common/feedbackModal.js",
     "./modules/common/notificationArea.js",
     "./modules/common/populateDropdownSelectors.js",
@@ -86,6 +88,10 @@ self.swCacheManifest = (() => {
     "./data/recordSchemas.js",
     "./data/recordProjections.js",
     "./data/recordReferences.js",
+    "./data/syncMerge.js",
+    "./data/driveSyncConfig.js",
+    "./data/driveAppData.js",
+    "./data/driveSyncService.js",
     // Translations (one file per locale, registered in i18n/index.js)
     "./i18n/index.js",
     "./i18n/en.js",

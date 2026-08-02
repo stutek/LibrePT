@@ -2,6 +2,7 @@
 // Single responsibility: Handles PWA screen orientation lock, dev phone viewport resizing,
 // build stamp header rendering, Service Worker registration, and network connectivity state monitoring.
 
+import { driveSyncStatus, syncNow as runDriveSync } from "../data/driveSyncService.js";
 import { CURRENT_SCHEMA_VERSION } from "../data/migrationSteps.js";
 import { BUILD_INFO } from "../version.js";
 
@@ -136,10 +137,24 @@ export function setupOnlineOfflineListeners(basePath, setOfflineCachedState) {
   });
 }
 
+// Poll-on-resume (TODO §1.5): Drive sync has no push channel (`changes.watch` needs a webhook
+// endpoint this app deliberately doesn't run), so the next best trigger is "the trainer came back to
+// the tab" — a real device switch is exactly when a phone's tab was backgrounded and is now visible
+// again. A no-op call when nothing changed is cheap; `syncNow()` itself no-ops when not connected.
+export function setupDriveSyncOnResume() {
+  if (typeof document === "undefined") return;
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState !== "visible") return;
+    if (!driveSyncStatus().connected) return;
+    runDriveSync().catch((err) => console.warn("Drive sync on resume failed:", err));
+  });
+}
+
 export function initAppLifecycle({ basePath, setOfflineCachedState, t }) {
   resizeToPhoneViewport();
   lockPortraitOrientation();
   renderBuildStamp();
   registerServiceWorker(basePath, setOfflineCachedState, t);
   setupOnlineOfflineListeners(basePath, setOfflineCachedState);
+  setupDriveSyncOnResume();
 }
