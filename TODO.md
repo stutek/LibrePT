@@ -561,26 +561,30 @@ not yet reached.
 > - [x] **[16.3](#163-x-resolved-superseded-by-186-part-4-key-storage-buckets-on-the-data-schema-not-the-release-tag)** —
 >   resolved differently: the schema axis already lives in IndexedDB's per-schema stores, so
 >   `localStorage` needed no replacement bucket scheme once the release-tag axis was gone.
-> - [ ] **18.1/18.4, the rest** — the actual fan-out into IndexedDB is live for both schemas
+> - [x] **18.1/18.4, the rest** — the fan-out into IndexedDB is live for both schemas
 >   (`schema2`+`schema3`, via §18.6 part 4's `starWrite`), using an identical projection for each
->   since no field has diverged yet. **Still open**: the cross-schema half of §18.4's staging guard
->   (CI assertion that every field the current domain model writes exists in every live schema's
->   projection) and §18.5's acyclic-reference-graph check — neither is built.
-> - [ ] **18.13** — the CD pipeline tests.
+>   since no field has diverged yet. The cross-schema staging guard and §18.5's acyclic-reference
+>   graph check are both built (`test_star_write_invariants.py`, `test_record_references.py`).
+> - [x] **18.13** — the CD pipeline tests (staging guard, projection round-trips, old-UI-writes
+>   case, acyclic graph, frozen backup corpus, migration edge-case robustness — §17.5's ordering
+>   invariants were already covered by `test_session_item_order.py`).
+>
+> **All ordered items are now built.** What remains inside §18 is narrower, open sub-items called
+> out in their own sections: §17.1's lazy per-client load (§18.6 part 4, still open), §18.3's
+> "defer migration to idle" and failure-reporting UX, §18.8's encryption/desktop threat model,
+> §18.9's concurrency (CAS/transactions), §18.11's legal gaps, and §18.12's ribbon reuse for the
+> unsupported-version warning — none of these were in the original build-order list, so none were
+> blocking it.
 
-### 18.1 [~] [Decided in principle] The star write model, and its relationship to §16.3
-> **Schemas exist as data now (2026-07-27)** — [recordSchemas.js](src/data/recordSchemas.js) declares
-> `SCHEMA_2`'s per-collection field shapes, and [recordProjections.js](src/data/recordProjections.js)
-> projects each live domain object into it. Until this landed, "schema N" had no existence except as
-> whatever `migrationSteps.js` happened to produce as a side effect of a transform — there was
-> nothing a projection could target and nothing for §18.4's staging guard to compare. Every real
-> record this build writes (every seed fixture, plus the actual object literals `formsController.js`,
-> `feedbackModal.js` and `finishWorkoutSession` build — not just the seed data) is asserted to project
-> cleanly, in `tests/e2e/test_record_schemas.py`. **Still not built**: the fan-out itself — writing a
-> projection into an actual IndexedDB bucket. That is blocked on [16.5](#165-x-retire-the-multi-version-hosting-machinery-from-the-code)
-> and [16.3](#163-x-resolved-superseded-by-186-part-4-key-storage-buckets-on-the-data-schema-not-the-release-tag)
-> landing first, per the agreed build order, and there is still only one live schema — the table
-> below is the layout the moment a second one is cut, not something exercised yet.
+### 18.1 [x] [Decided in principle] The star write model, and its relationship to §16.3
+> **Built.** [recordSchemas.js](src/data/recordSchemas.js) declares `SCHEMA_2`/`SCHEMA_3`'s
+> per-collection field shapes; [recordProjections.js](src/data/recordProjections.js) projects each
+> live domain object into them; [stateStore.js](src/data/stateStore.js)'s `starWrite()` (TODO §18.6
+> part 4) is the fan-out itself — one transaction, every live schema's IndexedDB store, with
+> reconcile-deletes for records no longer present. Every real record this build writes (seed
+> fixtures, the actual object literals `formsController.js`, `feedbackModal.js` and
+> `finishWorkoutSession` build) is asserted to project cleanly against **every** live schema in
+> `test_star_write_invariants.py` — the cross-schema table below is now exercised, not aspirational.
 
 **A "bucket" is one physical store holding data shaped by exactly one schema** — `librept_db@schema6`.
 Bucket↔schema is 1:1; a bucket is not a list of anything. Three distinct relations were being
@@ -666,16 +670,17 @@ shorten by base62-encoding a v7 — never by dropping entropy.
   cost battery mid-session; how a *failed* background migration reports itself without alarming a PT
   who never asked for it (block the switch offer, do not raise an error).
 
-### 18.4 [~] [Decided — staging, not envelopes] The lossy-projection problem
-> **The single-schema half of the guard exists (2026-07-27)**: `recordProjections.js`'s
-> `projectionIssues()` plus `test_record_schemas.py` already assert "every record this build
-> actually writes conforms to the schema it targets" — proven against real seed data AND the literal
-> object shapes live writers build (`formsController.js`'s new-client form, `feedbackModal.js`'s
-> new-feedback form, `finishWorkoutSession`'s history record), not an idealised model. **The
-> cross-schema half — "exists in every OTHER live schema's projection" — has no subject yet**,
-> because there is still only one live schema; nothing has proposed a field schema 2 cannot carry.
-> This activates automatically the day a schema 3 is cut: `LIVE_SCHEMAS` in `recordSchemas.js` gains
-> an entry, and the same `projectionIssues()` machinery checks the new field against it.
+### 18.4 [x] [Decided — staging, not envelopes] The lossy-projection problem
+> **Both halves of the guard exist.** The single-schema half (2026-07-27): `recordProjections.js`'s
+> `projectionIssues()` plus `test_record_schemas.py` assert "every record this build actually writes
+> conforms to the schema it targets" — proven against real seed data AND the literal object shapes
+> live writers build. **The cross-schema half** (now that schema 3 is genuinely live, not just
+> declared): `test_star_write_invariants.py` asserts every live writer's shape validates against
+> *every* live schema, that schema evolution only ever adds fields
+> (`test_schema_evolution_is_additive_never_drops_a_field`), that projections are idempotent and
+> invertible, and — the specific loss scenario this section exists to prevent — that a schema-2-shaped
+> session missing `startDate` is correctly caught against schema 3
+> (`test_an_older_schemas_writer_missing_a_newer_required_field_is_caught`).
 
 **The problem is narrower than it first appears.** A rollback loses nothing: the newest bucket keeps
 full fidelity while the PT reads a degraded older one. The loss happens only when **the old UI
@@ -692,15 +697,13 @@ Two mutually exclusive fixes; **only one is needed**:
   field. Free in code, paid for in release discipline.
 
 **The rule staging obligates**: *no feature ships until its storage has shipped in every
-currently-supported schema* — the field lands N releases before the UI that uses it. **Enforce in
-CI**: assert every field the current domain model writes exists in every live schema's projection.
-Without the check the discipline survives until the first hurried release.
+currently-supported schema* — the field lands N releases before the UI that uses it. **Enforced in
+CI** (`test_star_write_invariants.py`): every field the current domain model writes exists in every
+live schema's projection. Without the check the discipline survives until the first hurried release.
 
-- **Projections must be pure and total** so buckets are always fully re-derivable. That yields two
-  fuzzable properties for the CI migration fuzzing §18.13 wants: `project(x)` is idempotent,
-  and `unproject(project(x)) == x` for every live schema.
-- **Test-corpus gap**: migration tests must include a record using the *newest* fields written through
-  an *old* schema's UI path. That is the exact case that loses data, and nothing exercises it today.
+- **Projections must be pure and total** so buckets are always fully re-derivable — enforced by
+  `test_projections_are_idempotent_and_invertible`: `project(x)` is idempotent, and
+  `unproject(project(x)) == x` for every live schema.
 - **Escape hatch**: a change that genuinely cannot be staged is the trigger to **EOL the incompatible
   schema**, not to ship a lossy projection. This gives a crisp rule for when a forced upgrade is
   justified.
@@ -712,12 +715,16 @@ Without the check the discipline survives until the first hurried release.
   not only at the point of viewing, and the app must announce **degraded (= downgraded) mode** at the
   whole-app level via the ribbon (see §18.12), not just per record.
 
-### 18.5 [ ] [Decided] Ordering is topological, not chronological
+### 18.5 [x] [Decided] Ordering is topological, not chronological
 Migration replay order means **correct order of foreign-key availability**, not timestamp order.
 
-- **The reference graph must be acyclic**, so all dependent data reconstructs as a DAG. **Enforce it
-  in CI** — a convenience back-reference added later would otherwise deadlock migration or silently
-  pick an arbitrary order, and it would be found by a trainer, not by the build.
+- **The reference graph must be acyclic**, so all dependent data reconstructs as a DAG. **Enforced in
+  CI**: [recordReferences.js](src/data/recordReferences.js) declares the graph (structural
+  ownership references only — a "soft ref" label like `routineName` is deliberately excluded) and
+  `findCycle()`/`isAcyclic()` run a DFS cycle check, asserted in `test_record_references.py` —
+  including a proof the detector actually catches a real cycle, not just one that never triggers.
+  Today's graph is trivial (`history.clientId`/`planUpdates.clientId` → `clients`) — the point is
+  catching a *future* convenience back-reference before a trainer does.
 - **§17.4 is the first realistic cycle risk** — see the watch item there.
 - **The wall clock is not an ordering key anywhere.** Star writes are immune to clock skew because a
   single sequential writer resolves by execution order, not by comparing timestamps; timestamps are
@@ -882,37 +889,41 @@ the same promise — real data, less-proven code — and it needs the same signa
 - Keep the existing `prefers-reduced-motion` handling; a red flashing element is an accessibility
   problem in a way an amber pulse is not.
 
-### 18.13 [ ] CD pipeline tests for the star-write layer
+### 18.13 [x] CD pipeline tests for the star-write layer
 Requested by Simon (2026-07-26) as the step that follows the write layer. The properties §18 relies
 on are all *invariants across releases*, which is precisely what a per-commit gate can hold and what
 review cannot — none of them can ever be tested against a real PT's data, because that data is
 local-only by design.
 
-What the pipeline has to assert, roughly in order of how expensive the failure is:
+What the pipeline asserts, roughly in order of how expensive the failure is:
 
 - **The staging guard (§18.4)** — every field the current domain model writes exists in every live
-  schema's projection. This is the check that makes expand-first staging real rather than aspirational;
-  without it the discipline survives until the first hurried release, and the failure is silent data
-  loss on downgrade.
-- **Projection round-trips (§18.4)**, property-based over synthetic data generated from the existing
-  seed machinery (`src/data/*.js`): `project(x)` is idempotent, and `unproject(project(x)) === x` for
-  every live schema. Together these are what "projections are pure and total" actually means, and they
-  are what lets a bucket be re-derived rather than restored.
+  schema's projection. `test_star_write_invariants.py`. This is the check that makes expand-first
+  staging real rather than aspirational; without it the discipline survives until the first hurried
+  release, and the failure is silent data loss on downgrade.
+- **Projection round-trips (§18.4)** — `test_projections_are_idempotent_and_invertible`, over the
+  real live-writer shapes rather than synthetic property-based data (no fuzzing library in this
+  dependency-light stack — see "Migration fuzzing" below for the same trade-off): `project(x)` is
+  idempotent, and `unproject(project(x)) === x` for every live schema.
 - **The old-UI-writes case (§18.4)** — the specific scenario that loses data: a record using the
-  *newest* fields, written through an *older* schema's UI path. Nothing exercises it today.
-- **The reference graph is acyclic (§18.5)** — migration replay orders by foreign-key availability, so
-  a convenience back-reference added later would deadlock it or make the order arbitrary. §17.4 is the
-  first realistic cycle risk.
-- **The frozen backup corpus (§18.7)** — one committed fixture per historical schema, each asserted to
-  still import to the expected domain object. This is what turns "restorable indefinitely" from a hope
-  into something enforced on every commit.
-- **Migration fuzzing** — synthetic edge-case databases through every projection, checking the runner
-  refuses rather than corrupts.
-- **Ordering invariants (§17.5)** — positions are dense `0..n-1` per session and circuit members are
-  contiguous, asserted over every writer's output. This replaces the retired manifest-ordering check
-  as the place where "the order is authoritative and total" is enforced; that one burned once already
-  (same-second release tags tying under a date sort), and the failure here is worse — a silently
-  scrambled program that every id-completeness check passes.
+  *newest* fields, written through an *older* schema's UI path.
+  `test_an_older_schemas_writer_missing_a_newer_required_field_is_caught` reconstructs exactly what
+  schema 2's UI wrote (no `startDate`) and asserts schema 3's projection catches it.
+- **The reference graph is acyclic (§18.5)** — `test_record_references.py`, via
+  [recordReferences.js](src/data/recordReferences.js)'s `findCycle()`.
+- **The frozen backup corpus (§18.7)** — `test_frozen_backup_corpus.py` plus
+  `tests/fixtures/backups/*.json`: one committed fixture per historical schema, each asserted to
+  still import to the expected domain object, with a structural check that no fixture is ever added
+  without being wired into a test. This is what turns "restorable indefinitely" from a hope into
+  something enforced on every commit.
+- **Migration fuzzing** — `test_migration_edge_case_robustness.py`: a hand-authored, growing table of
+  hostile synthetic inputs (not true property-based fuzzing — no fuzzing library in this
+  dependency-light stack), asserting the runner never throws and never fabricates a state on refusal.
+- **Ordering invariants (§17.5)** — already covered by `test_session_item_order.py` (positions dense
+  `0..n-1`, circuit contiguity, asserted over real writer output including a finished session
+  snapshot) — this is the place where "the order is authoritative and total" is enforced, replacing
+  the retired manifest-ordering check that burned once already (same-second release tags tying under
+  a date sort).
 
 Fits the existing gate: `python -m build check` already runs staged parallel validation, and the
 property/fuzz work belongs in Stage 1 (fast, no browser) rather than in the e2e stage.

@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 2,
+  "clients": [
+    { "id": "c1", "name": "Schema2 Client", "active": true }
+  ],
+  "exercises": [],
+  "routines": [],
+  "history": [],
+  "planUpdates": [],
+  "sessions": [
+    {
+      "id": "s1",
+      "day": "today",
+      "time": "09:00 - 10:00",
+      "title": "Old Session",
+      "participants": ["c1"]
+    }
+  ],
+  "notifications": []
+}
