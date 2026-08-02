@@ -86,18 +86,16 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav {
      and action buttons keep their size (see .header-build-stack / .header-actions). */
   min-width: 0;
 }
-/* PREVIEW tag + build stamp, stacked vertically instead of side by side so the pair costs one
-   column's width in the mobile title bar rather than two. */
+/* Build stamp's own slot, now that the PREVIEW tag has moved onto the logo icon (see
+   .logo-icon-wrap / .preview-ribbon below) — it no longer needs to stack with anything. */
 .header-build-stack {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 1px;
   flex-shrink: 0;
 }
-/* Build stamp under the PREVIEW tag — small, muted, monospace. It is a BUTTON (tap opens the
-   build-info dialog): the vertical padding buys a usable touch target on a phone without changing
-   how small the text reads, since 9px of text is nothing to aim at with a gym-floor thumb. */
+/* Small, muted, monospace build stamp. It is a BUTTON (tap opens the build-info dialog): the
+   vertical padding buys a usable touch target on a phone without changing how small the text
+   reads, since 9px of text is nothing to aim at with a gym-floor thumb. */
 .app-version {
   appearance: none;
   background: none;
@@ -111,43 +109,67 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav {
   letter-spacing: 0.3px;
   line-height: 1;
 }
+/* Anchors the PREVIEW badge to the dumbbell icon's corner — sized to the icon, not the pill, so
+   the badge overlaps it rather than taking its own column in the flex row. */
+.logo-icon-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
 .logo-icon {
   font-size: 26px;
   color: var(--primary);
   filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.4));
 }
+/* Screen-reader-only text: kept in the DOM for accessibility/name computation but removed from
+   layout, so it can't affect the visible size of whatever it's inside (the PREVIEW badge below). */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 /* Pre-release PREVIEW marker (see index.html / TODO 16.2). Amber is a warning cue, so it stays
-   theme-independent by design — a warning that changed colour per theme would read as decoration. */
+   theme-independent by design — a warning that changed colour per theme would read as decoration.
+   A small round badge pinned to the logo icon's top-right corner (icon-only — "PREVIEW" wouldn't
+   be legible at this size, so the word is screen-reader text on the link) instead of a pill in the
+   header's flex flow, so it costs zero horizontal width — on narrow phones (Galaxy S23 Ultra and
+   similar) the pill used to eat into <h1>'s width and truncate the "LibrePT" wordmark early.
+   Sized/positioned to stay within the icon's own footprint so it never spills over the wordmark or
+   off the left edge of the header. */
 .preview-ribbon {
+  position: absolute;
+  top: -5px;
+  right: -6px;
+  z-index: 1;
+  width: 16px;
+  height: 16px;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 2px 9px;
-  border-radius: 999px;
+  justify-content: center;
+  border-radius: 50%;
   background: #f59e0b;
   color: #1a1206;
-  font-family: var(--font-header, sans-serif);
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  line-height: 1.4;
-  white-space: nowrap;
+  font-size: 8px;
   cursor: pointer;
   text-decoration: none;
-  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.5), 0 2px 8px rgba(245, 158, 11, 0.35);
+  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.5), 0 2px 6px rgba(245, 158, 11, 0.4);
   transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 .preview-ribbon:hover,
 .preview-ribbon:focus-visible {
-  transform: translateY(-2px);
-  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.9), 0 3px 14px rgba(245, 158, 11, 0.6);
+  transform: scale(1.15);
+  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.9), 0 3px 10px rgba(245, 158, 11, 0.6);
   outline: none;
 }
-.preview-ribbon .fa-triangle-exclamation,
-.preview-ribbon .fa-circle-question {
-  font-size: 11px;
-  opacity: 0.85;
+.preview-ribbon .fa-triangle-exclamation {
+  font-size: 8px;
 }
 /* A gentle but clearly-visible pulse (opacity + glow), never a flash — and only for viewers who
    haven't asked to reduce motion, who keep a steady pill instead. */
@@ -167,10 +189,8 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav {
     }
   }
 }
-/* Phones: keep BOTH the build stamp (pins a bug report to a build — matters most in preview) and
-   the PREVIEW tag by shrinking the logo cluster + padding so the header still fits, rather than
-   dropping either signal. Stacking them (.header-build-stack) already halves their combined
-   horizontal footprint versus laying both out side by side. */
+/* Phones: the logo cluster still shrinks a bit for the build stamp + action buttons, but the
+   PREVIEW badge no longer competes for that space — it rides on the (slightly smaller) icon. */
 @media (max-width: 600px) {
   .header-container {
     padding: 0 10px;
@@ -185,8 +205,10 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav {
     font-size: 19px;
   }
   .preview-ribbon {
-    padding: 2px 7px;
-    letter-spacing: 0.5px;
+    width: 14px;
+    height: 14px;
+    top: -4px;
+    right: -5px;
   }
 }
 .logo-area h1 {

@@ -232,21 +232,25 @@ export function renderHeaderShell() {
     `
     <div class="header-container">
       <div class="logo-area" id="logo-area">
-        <i class="fa-solid fa-dumbbell logo-icon"></i>
+        <span class="logo-icon-wrap">
+          <i class="fa-solid fa-dumbbell logo-icon"></i>
+          <!-- PREVIEW tag is a small corner badge on the logo icon instead of a pill sitting in the
+               flex row beside the wordmark — on narrow phones (e.g. Galaxy S23 Ultra) the pill used
+               to eat into <h1>'s width and force the title to truncate early. At badge size the
+               "PREVIEW" wordmark itself would be illegible, so it's screen-reader text here; the
+               full text still reads on the About/build-info surfaces. -->
+          <a id="preview-ribbon" class="preview-ribbon"
+             href="https://github.com/stutek/LibrePT/blob/main/docs/PREVIEW.md"
+             target="_blank" rel="noopener noreferrer"
+             aria-label="Preview build — pre-release, may lose data. Open the risks & data-loss notice.">
+            <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+            <span id="preview-ribbon-label" class="sr-only">PREVIEW</span>
+          </a>
+        </span>
         <h1>LibrePT</h1>
       </div>
 
-      <!-- PREVIEW tag stacked above the build stamp (rather than side by side) to save horizontal
-           space in the mobile title bar — positioned between logo and action buttons. -->
       <div class="header-build-stack">
-        <a id="preview-ribbon" class="preview-ribbon"
-           href="https://github.com/stutek/LibrePT/blob/main/docs/PREVIEW.md"
-           target="_blank" rel="noopener noreferrer"
-           aria-label="Preview build — pre-release, may lose data. Open the risks & data-loss notice.">
-          <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
-          <span id="preview-ribbon-label">PREVIEW</span>
-          <i class="fa-solid fa-circle-question" aria-hidden="true"></i>
-        </a>
         <!-- Tappable: the long build identity used to live in a \`title\` tooltip, which a phone
              cannot reach. Opens #dialog-build-info instead. -->
         <button type="button" id="app-version" class="app-version" aria-label="Build version — tap for details" aria-haspopup="dialog"></button>
