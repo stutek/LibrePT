@@ -58,50 +58,55 @@ ESCAPED_ASSIGNMENT = (
 BARE_IDENTIFIER = re.compile(r"^[A-Za-z_$][\w$]*$")
 
 
-# Security-critical: this is the one check standing between a raw `${...}` interpolation and a
-# shipped XSS sink (see its own module docstring). Splitting the sink-detection branches across
-# functions would make the one property that matters — "did every sink actually get checked" —
-# harder to verify by reading, not easier. Pre-existing debt, not part of today's complexity-gate
-# work.
-def audit_html_sinks(root="src"):  # noqa: C901
-    """Every unescaped interpolation of a user-text field into an HTML sink, as
-    (path, line_number, expression) — empty when the tree is clean."""
-    findings = []
+def _walk_js_files(root):
     for directory, _subdirs, names in os.walk(root):
         for name in sorted(names):
-            if not name.endswith(".js"):
+            if name.endswith(".js"):
+                yield os.path.join(directory, name)
+
+
+def _escaped_locally(expression, source):
+    if not BARE_IDENTIFIER.match(expression):
+        return False
+    name = re.escape(expression)
+    return re.search(ESCAPED_ASSIGNMENT % (name, name), source) is not None
+
+
+def _scan_sink_line(lines, index, source):
+    """Walk the template literal that follows a sink line (line `index`) for unescaped user-text
+    interpolations, from the sink until its closing backtick (bounded, so a malformed file cannot
+    run away with the scan). Returns [(line_number, expression), ...]."""
+    findings = []
+    backticks = 0
+    for offset in range(index, min(index + 80, len(lines))):
+        text = lines[offset]
+        backticks += text.count("`")
+        for expression in INTERPOLATION.findall(text):
+            expression = expression.strip()
+            if ALREADY_SAFE.search(expression) or _escaped_locally(expression, source):
                 continue
-            path = os.path.join(directory, name)
-            with open(path, encoding="utf-8") as handle:
-                source = handle.read()
-            lines = source.splitlines()
+            if FIELD_REFERENCE.search(expression):
+                findings.append((offset + 1, expression[:90]))
+        if backticks >= 2 and offset > index:
+            break
+    return findings
 
-            def escaped_locally(expression, source=source):
-                if not BARE_IDENTIFIER.match(expression):
-                    return False
-                name = re.escape(expression)
-                return re.search(ESCAPED_ASSIGNMENT % (name, name), source) is not None
 
-            for index, line in enumerate(lines):
-                if not HTML_SINK.search(line):
-                    continue
-                # Walk the template literal that follows the sink: from the sink line until its
-                # closing backtick (bounded, so a malformed file cannot run away with the scan).
-                backticks = 0
-                for offset in range(index, min(index + 80, len(lines))):
-                    text = lines[offset]
-                    backticks += text.count("`")
-                    for expression in INTERPOLATION.findall(text):
-                        expression = expression.strip()
-                        if ALREADY_SAFE.search(expression) or escaped_locally(
-                            expression
-                        ):
-                            continue
-                        if FIELD_REFERENCE.search(expression):
-                            findings.append((path, offset + 1, expression[:90]))
-                    if backticks >= 2 and offset > index:
-                        break
-    # One report per distinct expression; the same helper repeated is one problem, not five.
+def _scan_file_for_unescaped_sinks(path):
+    with open(path, encoding="utf-8") as handle:
+        source = handle.read()
+    lines = source.splitlines()
+    findings = []
+    for index, line in enumerate(lines):
+        if not HTML_SINK.search(line):
+            continue
+        for line_no, expression in _scan_sink_line(lines, index, source):
+            findings.append((path, line_no, expression))
+    return findings
+
+
+def _dedupe_by_expression(findings):
+    """One report per distinct expression; the same helper repeated is one problem, not five."""
     seen = set()
     unique = []
     for finding in findings:
@@ -110,6 +115,18 @@ def audit_html_sinks(root="src"):  # noqa: C901
         seen.add(finding[2])
         unique.append(finding)
     return unique
+
+
+# Security-critical: this is the one check standing between a raw `${...}` interpolation and a
+# shipped XSS sink (see its own module docstring). Kept as a plain walk → scan → dedupe pipeline so
+# "did every sink actually get checked" stays a one-glance read of this function's body.
+def audit_html_sinks(root="src"):
+    """Every unescaped interpolation of a user-text field into an HTML sink, as
+    (path, line_number, expression) — empty when the tree is clean."""
+    findings = []
+    for path in _walk_js_files(root):
+        findings.extend(_scan_file_for_unescaped_sinks(path))
+    return _dedupe_by_expression(findings)
 
 
 def parse_csp(policy):

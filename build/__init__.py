@@ -53,16 +53,121 @@ def check_environment():
         subprocess.run([pip_path, "install", "-r", "requirements.txt"], check=True)
 
 
-# Platform/arch detection, download, and integrity verification for one binary — each step depends
-# on the platform branch taken above it, so splitting would thread the same platform_suffix/
-# biome_path pair through several functions for no real separation of concerns. Pre-existing debt,
-# not part of today's complexity-gate work.
-def ensure_biome_binary():  # noqa: C901
+def _linux_platform_suffix(arch):
+    if "arm64" in arch or "aarch64" in arch:
+        return "linux-arm64"
+    if "64" in arch:
+        return "linux-x64"
+    raise RuntimeError(f"Unsupported Linux architecture: {arch}")
+
+
+def _darwin_platform_suffix(arch):
+    if "arm64" in arch or "aarch64" in arch:
+        return "darwin-arm64"
+    if "64" in arch:
+        return "darwin-x64"
+    raise RuntimeError(f"Unsupported macOS architecture: {arch}")
+
+
+def _windows_platform_suffix(arch):
+    if "arm64" in arch:
+        return "win32-arm64.exe"
+    if "64" in arch:
+        return "win32-x64.exe"
+    raise RuntimeError(f"Unsupported Windows architecture: {arch}")
+
+
+_PLATFORM_SUFFIX_RESOLVERS = {
+    "linux": _linux_platform_suffix,
+    "darwin": _darwin_platform_suffix,
+    "windows": _windows_platform_suffix,
+}
+
+
+def _resolve_platform_suffix(os_name, arch):
+    resolver = _PLATFORM_SUFFIX_RESOLVERS.get(os_name)
+    if resolver is None:
+        raise RuntimeError(f"Unsupported OS: {os_name}")
+    return resolver(arch)
+
+
+def _check_binary_size(path):
+    size = os.path.getsize(path)
+    if size < 10 * 1024 * 1024:
+        print(
+            f"  ! Warning: Cached Biome binary is too small ({size} bytes). Possibly corrupted."
+        )
+        return False
+    return True
+
+
+def _check_binary_magic(path, os_name, expected_magics):
+    try:
+        with open(path, "rb") as f:
+            header = f.read(4)
+    except Exception as e:
+        print(f"  ! Warning: Failed to read binary headers: {e}")
+        return False
+
+    magic = expected_magics.get(os_name)
+    if not magic:
+        return True
+    if isinstance(magic, tuple):
+        if any(header.startswith(m) for m in magic):
+            return True
+        print(
+            "  ! Warning: Cached Biome binary magic bytes do not match macOS Mach-O headers."
+        )
+        return False
+    if header.startswith(magic):
+        return True
+    print(
+        f"  ! Warning: Cached Biome binary magic bytes do not match {os_name} executable signature."
+    )
+    return False
+
+
+def _check_binary_checksum(path, platform_suffix, expected_hashes):
+    expected_hash = expected_hashes.get(platform_suffix)
+    if not expected_hash:
+        return True
+    sha256 = hashlib.sha256()
+    try:
+        with open(path, "rb") as f:
+            for chunk in iter(lambda: f.read(65536), b""):
+                sha256.update(chunk)
+        current_hash = sha256.hexdigest()
+    except Exception as e:
+        print(f"  ! Warning: Failed to calculate SHA256 checksum: {e}")
+        return False
+    if current_hash != expected_hash:
+        print(
+            f"  ! Warning: SHA256 checksum mismatch for cached Biome binary.\n    Expected: {expected_hash}\n    Got: {current_hash}"
+        )
+        return False
+    return True
+
+
+def verify_binary_integrity(
+    path, os_name, platform_suffix, expected_magics, expected_hashes
+):
+    """Verifies binary size, magic bytes, and SHA256 checksum to prevent corruption. Three
+    independent checks that all have to run and all have to pass — genuinely one sequential
+    validation, not several concerns, so each stays its own named step rather than a shared loop."""
+    if not os.path.exists(path):
+        return False
+    return (
+        _check_binary_size(path)
+        and _check_binary_magic(path, os_name, expected_magics)
+        and _check_binary_checksum(path, platform_suffix, expected_hashes)
+    )
+
+
+def ensure_biome_binary():
     """Detects platform and architecture, downloads the precompiled Biome binary if missing."""
     import platform
     import stat
     import requests
-    import hashlib
 
     venv_bin = os.path.join(".venv", "Scripts" if os.name == "nt" else "bin")
     binary_name = "biome.exe" if os.name == "nt" else "biome"
@@ -70,30 +175,7 @@ def ensure_biome_binary():  # noqa: C901
 
     os_name = platform.system().lower()
     arch = platform.machine().lower()
-
-    if os_name == "linux":
-        if "arm64" in arch or "aarch64" in arch:
-            platform_suffix = "linux-arm64"
-        elif "64" in arch:
-            platform_suffix = "linux-x64"
-        else:
-            raise RuntimeError(f"Unsupported Linux architecture: {arch}")
-    elif os_name == "darwin":
-        if "arm64" in arch or "aarch64" in arch:
-            platform_suffix = "darwin-arm64"
-        elif "64" in arch:
-            platform_suffix = "darwin-x64"
-        else:
-            raise RuntimeError(f"Unsupported macOS architecture: {arch}")
-    elif os_name == "windows":
-        if "arm64" in arch:
-            platform_suffix = "win32-arm64.exe"
-        elif "64" in arch:
-            platform_suffix = "win32-x64.exe"
-        else:
-            raise RuntimeError(f"Unsupported Windows architecture: {arch}")
-    else:
-        raise RuntimeError(f"Unsupported OS: {os_name}")
+    platform_suffix = _resolve_platform_suffix(os_name, arch)
 
     # Expected SHA256 checksums/validation info for security
     expected_hashes = {
@@ -107,66 +189,10 @@ def ensure_biome_binary():  # noqa: C901
         "darwin": (b"\xcf\xfa\xed\xfe", b"\xfe\xed\xfa\xcf", b"\xca\xfe\xba\xbe"),
     }
 
-    # Three independent corruption checks (existence, size, magic bytes, checksum) that all have
-    # to run and all have to pass — genuinely one sequential validation, not several concerns.
-    # Pre-existing debt, not part of today's complexity-gate work.
-    def verify_binary_integrity(path):  # noqa: C901
-        """Verifies binary size, magic bytes, and SHA256 checksum to prevent corruption."""
-        if not os.path.exists(path):
-            return False
-
-        # 1. Size check
-        size = os.path.getsize(path)
-        if size < 10 * 1024 * 1024:
-            print(
-                f"  ! Warning: Cached Biome binary is too small ({size} bytes). Possibly corrupted."
-            )
-            return False
-
-        # 2. Magic bytes check
-        try:
-            with open(path, "rb") as f:
-                header = f.read(4)
-            magic = expected_magics.get(os_name)
-            if magic:
-                if isinstance(magic, tuple):
-                    if not any(header.startswith(m) for m in magic):
-                        print(
-                            "  ! Warning: Cached Biome binary magic bytes do not match macOS Mach-O headers."
-                        )
-                        return False
-                else:
-                    if not header.startswith(magic):
-                        print(
-                            f"  ! Warning: Cached Biome binary magic bytes do not match {os_name} executable signature."
-                        )
-                        return False
-        except Exception as e:
-            print(f"  ! Warning: Failed to read binary headers: {e}")
-            return False
-
-        # 3. SHA256 check
-        expected_hash = expected_hashes.get(platform_suffix)
-        if expected_hash:
-            sha256 = hashlib.sha256()
-            try:
-                with open(path, "rb") as f:
-                    for chunk in iter(lambda: f.read(65536), b""):
-                        sha256.update(chunk)
-                current_hash = sha256.hexdigest()
-                if current_hash != expected_hash:
-                    print(
-                        f"  ! Warning: SHA256 checksum mismatch for cached Biome binary.\n    Expected: {expected_hash}\n    Got: {current_hash}"
-                    )
-                    return False
-            except Exception as e:
-                print(f"  ! Warning: Failed to calculate SHA256 checksum: {e}")
-                return False
-
-        return True
-
     # Check cached binary
-    if verify_binary_integrity(biome_path):
+    if verify_binary_integrity(
+        biome_path, os_name, platform_suffix, expected_magics, expected_hashes
+    ):
         return biome_path
 
     # Clean up corrupted file if present
@@ -192,7 +218,9 @@ def ensure_biome_binary():  # noqa: C901
             os.chmod(biome_path, st.st_mode | stat.S_IEXEC)
 
         # Validate integrity of newly downloaded binary
-        if not verify_binary_integrity(biome_path):
+        if not verify_binary_integrity(
+            biome_path, os_name, platform_suffix, expected_magics, expected_hashes
+        ):
             raise ValueError("Integrity check failed after download.")
 
         print("  ✓ Biome binary downloaded and verified successfully.")

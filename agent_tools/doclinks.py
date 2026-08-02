@@ -203,62 +203,75 @@ def display_path(path):
         return path
 
 
-# One doc's worth of checks (links, anchors, §-refs) genuinely needs one pass per reference kind;
-# splitting would just scatter one file's findings across several functions passing the same
-# (path, cache, all_files) around. Pre-existing debt, not part of today's complexity-gate work.
-def check_file(path, cache, all_files):  # noqa: C901
+def _extract_line_links(line):
+    return [
+        (m.start(), m.end(), m.start(1) + len(m.group(1)), m.group(2))
+        for m in MD_LINK.finditer(line)
+    ]
+
+
+def _check_link_targets(links, path, rel, number, cache):
+    findings = []
+    for _, _, _, target in links:
+        if EXTERNAL_LINK.match(target) or target.startswith("#!"):
+            continue
+        file_part, _, fragment = target.partition("#")
+        resolved = (path.parent / file_part).resolve() if file_part else path
+        if file_part and not resolved.exists():
+            findings.append((rel, number, f"dead link → {file_part}"))
+            continue
+        if fragment and resolved.suffix == ".md":
+            anchors = anchors_of(resolved, cache)
+            if normalize_anchor(fragment) not in anchors:
+                near = nearest(normalize_anchor(fragment), anchors)
+                hint = f"  (did you mean #{near}?)" if near else ""
+                findings.append((rel, number, f"dead anchor → #{fragment}{hint}"))
+    return findings
+
+
+def _check_section_refs(line, links, path, rel, number, cache, all_files):
+    findings = []
+    for match in SECTION_REF.finditer(line):
+        target_path = qualifier_for(line, match.start(), links, path, all_files)
+        if target_path is None:
+            continue  # prose that names no document — ambiguous, not this tool's business
+        sections = sections_of(target_path, cache)
+        section = match.group(1)
+        if not sections or section in sections:
+            continue
+        # A reference to a whole section ("§18") is satisfied by any of its sub-items.
+        if any(s.startswith(section + ".") for s in sections):
+            continue
+        # A §N.M may name a numbered *item* rather than a heading — ROUTING.md numbers its
+        # invariants as a list inside "## 5", so "§5.5" is item 5 of section 5. Accept that only
+        # on evidence: the parent section exists, publishes no sub-headings of its own, and
+        # really does carry an item with that number. Anything looser would swallow the very
+        # thing this check is for — a §16.2 left behind when section 16.2 was deleted.
+        parent, _, item = section.rpartition(".")
+        parent_has_subheadings = any(s.startswith(parent + ".") for s in sections)
+        if (
+            parent in sections
+            and not parent_has_subheadings
+            and section in list_items_of(target_path, cache)
+        ):
+            continue
+        where = "" if target_path == path else f"{target_path.name} "
+        findings.append((rel, number, f"dangling ref → {where}§{section}"))
+    return findings
+
+
+def check_file(path, cache, all_files):
     findings = []
     rel = display_path(path)
 
     for number, line in enumerate(
         strip_code(path.read_text(encoding="utf-8")).splitlines(), 1
     ):
-        links = [
-            (m.start(), m.end(), m.start(1) + len(m.group(1)), m.group(2))
-            for m in MD_LINK.finditer(line)
-        ]
-
-        for _, _, _, target in links:
-            if EXTERNAL_LINK.match(target) or target.startswith("#!"):
-                continue
-            file_part, _, fragment = target.partition("#")
-            resolved = (path.parent / file_part).resolve() if file_part else path
-            if file_part and not resolved.exists():
-                findings.append((rel, number, f"dead link → {file_part}"))
-                continue
-            if fragment and resolved.suffix == ".md":
-                anchors = anchors_of(resolved, cache)
-                if normalize_anchor(fragment) not in anchors:
-                    near = nearest(normalize_anchor(fragment), anchors)
-                    hint = f"  (did you mean #{near}?)" if near else ""
-                    findings.append((rel, number, f"dead anchor → #{fragment}{hint}"))
-
-        for match in SECTION_REF.finditer(line):
-            target_path = qualifier_for(line, match.start(), links, path, all_files)
-            if target_path is None:
-                continue  # prose that names no document — ambiguous, not this tool's business
-            sections = sections_of(target_path, cache)
-            section = match.group(1)
-            if not sections or section in sections:
-                continue
-            # A reference to a whole section ("§18") is satisfied by any of its sub-items.
-            if any(s.startswith(section + ".") for s in sections):
-                continue
-            # A §N.M may name a numbered *item* rather than a heading — ROUTING.md numbers its
-            # invariants as a list inside "## 5", so "§5.5" is item 5 of section 5. Accept that only
-            # on evidence: the parent section exists, publishes no sub-headings of its own, and
-            # really does carry an item with that number. Anything looser would swallow the very
-            # thing this check is for — a §16.2 left behind when section 16.2 was deleted.
-            parent, _, item = section.rpartition(".")
-            parent_has_subheadings = any(s.startswith(parent + ".") for s in sections)
-            if (
-                parent in sections
-                and not parent_has_subheadings
-                and section in list_items_of(target_path, cache)
-            ):
-                continue
-            where = "" if target_path == path else f"{target_path.name} "
-            findings.append((rel, number, f"dangling ref → {where}§{section}"))
+        links = _extract_line_links(line)
+        findings.extend(_check_link_targets(links, path, rel, number, cache))
+        findings.extend(
+            _check_section_refs(line, links, path, rel, number, cache, all_files)
+        )
 
     return findings
 
