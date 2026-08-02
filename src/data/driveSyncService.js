@@ -55,7 +55,53 @@ export function driveSyncStatus() {
     connected: hasStoredConsent(),
     syncing,
     lastSyncResult,
+    intervalMinutes: getSyncIntervalMinutes(),
   };
+}
+
+// Periodic pull (in addition to poll-on-resume): a PT-configurable "how often" for devices left open
+// on the gym floor rather than backgrounded/resumed. A plain localStorage key, not IndexedDB — this
+// is a per-device preference (like the theme choice), not domain data any schema/star-write covers.
+const SYNC_INTERVAL_KEY = "librept_drive_sync_interval_minutes";
+export const DEFAULT_SYNC_INTERVAL_MINUTES = 5;
+export const MIN_SYNC_INTERVAL_MINUTES = 1;
+export const MAX_SYNC_INTERVAL_MINUTES = 60;
+
+function clampIntervalMinutes(minutes) {
+  const rounded = Math.round(Number(minutes));
+  if (!Number.isFinite(rounded)) return DEFAULT_SYNC_INTERVAL_MINUTES;
+  return Math.min(MAX_SYNC_INTERVAL_MINUTES, Math.max(MIN_SYNC_INTERVAL_MINUTES, rounded));
+}
+
+export function getSyncIntervalMinutes() {
+  return clampIntervalMinutes(
+    localStorage.getItem(SYNC_INTERVAL_KEY) ?? DEFAULT_SYNC_INTERVAL_MINUTES,
+  );
+}
+
+/** Persists the interval and restarts the running timer to pick it up immediately — a PT changing
+ * "sync every 5 min" to "1 min" shouldn't have to wait out the old interval once first. */
+export function setSyncIntervalMinutes(minutes) {
+  const clamped = clampIntervalMinutes(minutes);
+  localStorage.setItem(SYNC_INTERVAL_KEY, String(clamped));
+  if (periodicTimer) startPeriodicSync();
+  return clamped;
+}
+
+let periodicTimer = null;
+
+function periodicTick() {
+  if (!isDriveSyncConfigured() || !hasStoredConsent() || syncing) return;
+  syncNow().catch((err) => console.warn("Periodic Drive sync failed:", err));
+}
+
+/** Start (or restart, picking up a new interval) the periodic pull. Safe to call repeatedly — always
+ * clears any existing timer first, so app.js's boot call and a later interval-setting change never
+ * stack two timers. A no-op tick when not connected costs nothing, so this runs unconditionally; the
+ * actual network gate is in periodicTick(). */
+export function startPeriodicSync() {
+  if (periodicTimer) clearInterval(periodicTimer);
+  periodicTimer = setInterval(periodicTick, getSyncIntervalMinutes() * 60_000);
 }
 
 /** First-time consent grant (must run inside a user-gesture handler) followed by an immediate sync. */

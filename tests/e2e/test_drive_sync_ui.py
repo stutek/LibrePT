@@ -24,10 +24,29 @@ def test_drive_sync_card_reports_not_configured_and_disables_connect(
 
     connect_btn = page.locator("#btn-drive-connect")
     assert connect_btn.is_disabled()
-    # Disconnect stays hidden — there is nothing to disconnect from.
+    # Disconnect and the periodic-interval control stay hidden — there is nothing to disconnect
+    # from and nothing to schedule.
     assert "hidden" in (
         page.locator("#btn-drive-disconnect").get_attribute("class") or ""
     )
+    assert "hidden" in (
+        page.locator("#drive-sync-interval-row").get_attribute("class") or ""
+    )
+
+
+def test_header_cloud_icon_still_opens_the_dialog_when_not_connected(
+    page, local_server
+):
+    # setupHeaderCloudIconSync() adds a SECOND listener on #backup-btn (fire a sync when already
+    # connected) alongside backupRestore.js's own (navigate to the dialog) — this pins that the
+    # original behaviour survives, and that the new listener's guard clause (configured/connected)
+    # means it does nothing harmful when neither is true.
+    page.goto(local_server)
+    page.wait_for_selector("#view-clients.active")
+
+    page.locator("#backup-btn").click()
+    assert page.locator("#dialog-backup").get_attribute("open") is not None
+    assert page.locator("#drive-sync-card").is_visible()
 
 
 def test_drive_sync_card_survives_repeated_dialog_opens(page, local_server):

@@ -81,6 +81,11 @@ export function renderBackupDialog() {
             <i class="fa-brands fa-google-drive"></i> <span id="btn-drive-connect-text">Connect Google Drive</span>
           </button>
           <button id="btn-drive-disconnect" class="btn secondary-btn w-full hidden">Disconnect</button>
+          <div id="drive-sync-interval-row" class="drive-sync-interval-row hidden">
+            <label for="drive-sync-interval" id="drive-sync-interval-label">Sync every</label>
+            <input type="number" id="drive-sync-interval" class="form-control drive-sync-interval-input" min="1" max="60" step="1">
+            <span id="drive-sync-interval-unit">min</span>
+          </div>
           <p id="drive-sync-status" class="status-msg"></p>
         </div>
 

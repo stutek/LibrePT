@@ -6,9 +6,12 @@
 // deps: { t }
 
 import {
+  MAX_SYNC_INTERVAL_MINUTES,
+  MIN_SYNC_INTERVAL_MINUTES,
   connectDriveSync,
   disconnectDriveSync,
   driveSyncStatus,
+  setSyncIntervalMinutes,
   syncNow,
 } from "../../data/driveSyncService.js";
 import { preloadGoogleIdentityServices } from "./googleAuth.js";
@@ -61,6 +64,8 @@ function cardStateFor(status) {
       connectDisabled: true,
       connectLabel: tr("drive_sync_connect", "Connect Google Drive"),
       disconnectVisible: false,
+      intervalVisible: false,
+      intervalMinutes: status.intervalMinutes,
       statusText: "",
       statusClass: "status-msg",
     };
@@ -73,6 +78,8 @@ function cardStateFor(status) {
       connectDisabled: status.syncing,
       connectLabel: status.syncing ? busyLabel : tr("drive_sync_now", "Sync Now"),
       disconnectVisible: true,
+      intervalVisible: true,
+      intervalMinutes: status.intervalMinutes,
       statusText: formatLastSync(status),
       statusClass: `status-msg ${failed ? "text-danger" : "text-emerald"}`,
     };
@@ -82,6 +89,8 @@ function cardStateFor(status) {
     connectDisabled: status.syncing,
     connectLabel: status.syncing ? busyLabel : tr("drive_sync_connect", "Connect Google Drive"),
     disconnectVisible: false,
+    intervalVisible: false,
+    intervalMinutes: status.intervalMinutes,
     statusText: "",
     statusClass: "status-msg",
   };
@@ -102,6 +111,12 @@ function applyCardState(state) {
     el.textContent = state.connectLabel;
   });
   set("btn-drive-disconnect", (el) => el.classList.toggle("hidden", !state.disconnectVisible));
+  set("drive-sync-interval-row", (el) => el.classList.toggle("hidden", !state.intervalVisible));
+  set("drive-sync-interval", (el) => {
+    // Never clobber the value while the trainer is mid-edit — this element is re-rendered on every
+    // sync tick (periodic timer, poll-on-resume), not just on an explicit user action.
+    if (document.activeElement !== el) el.value = String(state.intervalMinutes);
+  });
   set("drive-sync-status", (el) => {
     el.textContent = state.statusText;
     el.className = state.statusClass;
@@ -149,4 +164,33 @@ export function setupDriveSyncUi() {
       renderDriveSyncCard();
     });
   }
+
+  const intervalInput = document.getElementById("drive-sync-interval");
+  if (intervalInput) {
+    intervalInput.setAttribute("min", String(MIN_SYNC_INTERVAL_MINUTES));
+    intervalInput.setAttribute("max", String(MAX_SYNC_INTERVAL_MINUTES));
+    // "change" (commits on blur/Enter), not "input" (fires per keystroke) — a half-typed number
+    // must not restart the periodic timer on every digit.
+    intervalInput.addEventListener("change", () => {
+      setSyncIntervalMinutes(intervalInput.value);
+      renderDriveSyncCard();
+    });
+  }
+
+  setupHeaderCloudIconSync();
+}
+
+/** The header's cloud/sync icon (#backup-btn) already opens the Sync & Backup dialog via
+ * backupRestore.js's own listener — this adds a second, independent listener that also fires an
+ * immediate sync when already connected, so tapping the header icon is a one-tap "sync now" and not
+ * just a way to reach the dialog's own button. */
+function setupHeaderCloudIconSync() {
+  const headerCloudBtn = document.getElementById("backup-btn");
+  if (!headerCloudBtn) return;
+  headerCloudBtn.addEventListener("click", () => {
+    const status = driveSyncStatus();
+    if (!status.configured || !status.connected || status.syncing) return;
+    syncNow().finally(renderDriveSyncCard);
+    renderDriveSyncCard(); // reflect "Syncing…" immediately, without waiting for the promise
+  });
 }

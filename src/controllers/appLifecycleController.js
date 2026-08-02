@@ -2,7 +2,11 @@
 // Single responsibility: Handles PWA screen orientation lock, dev phone viewport resizing,
 // build stamp header rendering, Service Worker registration, and network connectivity state monitoring.
 
-import { driveSyncStatus, syncNow as runDriveSync } from "../data/driveSyncService.js";
+import {
+  driveSyncStatus,
+  syncNow as runDriveSync,
+  startPeriodicSync as startPeriodicDriveSync,
+} from "../data/driveSyncService.js";
 import { CURRENT_SCHEMA_VERSION } from "../data/migrationSteps.js";
 import { BUILD_INFO } from "../version.js";
 
@@ -157,4 +161,8 @@ export function initAppLifecycle({ basePath, setOfflineCachedState, t }) {
   registerServiceWorker(basePath, setOfflineCachedState, t);
   setupOnlineOfflineListeners(basePath, setOfflineCachedState);
   setupDriveSyncOnResume();
+  // Runs unconditionally from boot regardless of connection state (periodicTick() no-ops until
+  // connected) — the alternative, starting it only after a successful connect, would also need to
+  // restart on every future boot with a stored grant, which this already does for free.
+  startPeriodicDriveSync();
 }
