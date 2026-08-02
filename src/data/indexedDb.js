@@ -174,6 +174,20 @@ export function getAllFromIndex(store, indexName, key) {
   return requestToPromise(store.index(indexName).getAll(key));
 }
 
+// Keys only, no deserialization — cheap enough to compute "what's currently in this collection" on
+// every save, which is what lets a save RECONCILE (delete records no longer present) rather than
+// only ever add/update (TODO §18.6 part 4's star write must remove, not just append).
+export function getAllKeysFromIndex(store, indexName, key) {
+  return requestToPromise(store.index(indexName).getAllKeys(key));
+}
+
+// Every record in a store, unfiltered — the boot-time read that reassembles the in-memory `state`
+// object from the newest schema's bucket (TODO §18.6 part 4). Safe to await outside a transaction
+// callback, same as the other request helpers in this section.
+export function getAll(store) {
+  return requestToPromise(store.getAll());
+}
+
 export function countInIndex(store, indexName, key) {
   return requestToPromise(store.index(indexName).count(key));
 }

@@ -53,3 +53,27 @@ export function projectionIssues(collection, domainObject, schema = SCHEMA_2) {
   if (!shape) return [`no schema declared for collection "${collection}"`];
   return fieldIssues(projectCollection(collection, domainObject), shape);
 }
+
+// Every collection this build projects — the boot-time read (TODO §18.6 part 4) groups a flat
+// IndexedDB record list back into this shape, so it needs the same set PROJECTORS was built from.
+export const COLLECTIONS = Object.keys(PROJECTORS);
+
+// Inverse of projectCollection: drop the routing field a stored record carries, recovering the
+// domain object exactly as it was before projection. `collection` is redundant once a record has
+// been sorted into its bucket, so nothing else needs to change shape here.
+export function toDomainObject(record) {
+  const { collection: _collection, ...domainObject } = record;
+  return domainObject;
+}
+
+// Reassemble a flat list of IndexedDB records (each stamped with `collection`) into the
+// per-collection shape stateStore.js keeps in memory. Every known collection is present, even if
+// empty, so a fresh database reads back exactly like `emptyState()`.
+export function groupRecordsByCollection(records) {
+  const grouped = Object.fromEntries(COLLECTIONS.map((collection) => [collection, []]));
+  for (const record of records) {
+    if (!grouped[record.collection]) grouped[record.collection] = [];
+    grouped[record.collection].push(toDomainObject(record));
+  }
+  return grouped;
+}

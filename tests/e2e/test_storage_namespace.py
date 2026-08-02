@@ -37,16 +37,44 @@ def test_untagged_build_uses_the_plain_keys(page, local_server):
     assert r["malformed"] == "librept_db"
 
 
-def test_the_live_app_still_persists_to_the_plain_db_key(page, local_server):
-    """End-to-end proof of the no-op: the seeded demo data lands in "librept_db", not a suffixed key."""
+def test_the_live_app_persists_to_indexeddb_not_a_versioned_localstorage_bucket(
+    page, local_server
+):
+    """The read/write path moved onto IndexedDB (TODO §18.6 part 4): the seeded demo data lands in
+    the `librept` IndexedDB database, and — since this is an untagged build — never in a versioned
+    `librept_db@...` localStorage bucket. `librept_db` itself is no longer written by ongoing saves;
+    it only still exists as the one-time legacy import source (test_schema_migrations.py covers
+    that path), not as this build's live store."""
     page.goto(local_server)
     page.wait_for_selector(".session-card")
     page.wait_for_timeout(300)
 
     keys = page.evaluate("() => Object.keys(window.localStorage)")
-    assert "librept_db" in keys
     assert not any(k.startswith("librept_db@") for k in keys), (
         "an untagged build must not create a versioned bucket"
+    )
+
+    stores = page.evaluate(
+        """async () => {
+            const db = await new Promise((resolve, reject) => {
+                const req = indexedDB.open('librept');
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+            const names = [...db.objectStoreNames].sort();
+            const tx = db.transaction(['schema3'], 'readonly');
+            const count = await new Promise((resolve, reject) => {
+                const req = tx.objectStore('schema3').count();
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+            db.close();
+            return { names, count };
+        }"""
+    )
+    assert "schema3" in stores["names"]
+    assert stores["count"] > 0, (
+        "seeded demo data should have been star-written into IndexedDB"
     )
 
 

@@ -17,9 +17,14 @@ tags:
 How LibrePT stores a trainer's data, and why it is shaped this way. Design rationale and open
 questions live in [TODO §18](../TODO.md); this document is the reference for what exists.
 
-> **Status:** the physical layout below is **built** ([indexedDb.js](../src/data/indexedDb.js)); the
-> star-write layer that fills it is **in progress**. The main read/write path still runs through
-> `localStorage` via [stateStore.js](../src/data/stateStore.js) until that move lands.
+> **Status:** the physical layout is **built** ([indexedDb.js](../src/data/indexedDb.js)) and the
+> main read/write path now runs through it
+> ([stateStore.js](../src/data/stateStore.js), TODO §18.6 part 4) — `getState()`/`setState()` stay
+> synchronous, only load-at-boot and save-on-write are async, via a one-time, revertable import from
+> the legacy `localStorage` bucket (left untouched as the rollback snapshot). **Still pending:**
+> §17.1's lazy per-client load — every collection is still fully hydrated at boot, not loaded
+> on-demand per client — and §16.5/§16.3 (retiring multi-version hosting, rekeying buckets on the
+> schema major).
 
 ---
 

@@ -221,7 +221,7 @@ window.stateHasData = () => stateHasData(getState());
 // on a deploy that publishes a single version.
 let versionCatalog = null;
 
-function init() {
+async function init() {
   initTheme();
   // The header shell renders before anything else: initAppLifecycle() below stamps the build
   // commit into #app-version synchronously, and several setup functions later in this file query
@@ -234,7 +234,9 @@ function init() {
     t,
   });
 
-  const state = loadSavedState();
+  // Loading is IndexedDB-backed (TODO §18.6 part 4): everything below still assumes `state` is
+  // fully populated once this resolves, exactly as when the call was synchronous.
+  const state = await loadSavedState();
 
   const { lang: shareLang, init: shareInit } = getShareParams();
   if (shareLang && TRANSLATIONS[shareLang]) state.lang = shareLang;

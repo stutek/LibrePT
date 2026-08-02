@@ -24,8 +24,15 @@ def _body_classes(page):
 
 
 def _db(page):
+    """The app's live in-memory state — the authoritative source now that persistence is
+    IndexedDB-backed (TODO §18.6 part 4); `librept_db` in localStorage is only ever the one-time
+    legacy import source, never the ongoing store, so reading it directly no longer reflects what
+    the app actually holds."""
     return page.evaluate(
-        "() => { const d = localStorage.getItem('librept_db'); return d ? JSON.parse(d) : null; }"
+        """async () => {
+            const store = await import(new URL('data/stateStore.js', document.baseURI).href);
+            return store.getState();
+        }"""
     )
 
 
@@ -96,9 +103,7 @@ def test_fresh_start_is_empty_without_init(page, local_server):
     # No demo data is autoloaded on a plain visit.
     assert page.locator("#clients-list .client-card").count() == 0
     db = _db(page)
-    assert db is None or (
-        len(db.get("clients", [])) == 0 and len(db.get("sessions") or []) == 0
-    )
+    assert len(db.get("clients", [])) == 0 and len(db.get("sessions") or []) == 0
     # No stale/demo active session either.
     assert page.evaluate("() => localStorage.getItem('librept_active_session')") is None
 
@@ -161,10 +166,17 @@ def test_init_seeds_only_once_then_edits_persist(page, local_server):
     seeded_count = page.locator("#clients-list .client-card").count()
     assert seeded_count > 0
 
-    # Simulate a user edit: wipe the clients collection but keep other demo data present.
+    # Simulate a user edit: wipe the clients collection but keep other demo data present. Goes
+    # through the real write path (IndexedDB, TODO §18.6 part 4) rather than poking localStorage
+    # directly, since ongoing saves no longer land there.
     page.evaluate(
-        "() => { const db = JSON.parse(localStorage.getItem('librept_db'));"
-        " db.clients = []; localStorage.setItem('librept_db', JSON.stringify(db)); }"
+        """async () => {
+            const store = await import(new URL('data/stateStore.js', document.baseURI).href);
+            const queue = await import(new URL('data/writeQueue.js', document.baseURI).href);
+            store.getState().clients = [];
+            store.saveToLocalStorage();
+            await queue.flushWrites();
+        }"""
     )
 
     # Re-opening the init link must NOT re-seed — data is already present, so it is ignored.
@@ -207,6 +219,7 @@ def test_focus_url_updates_do_not_pile_up_history(page, local_server):
     page.goto(local_server + "?init=demo_data_load")
     card_sel = ".session-card.session-live, .session-card:has-text('Group Strength & Conditioning')"
     page.wait_for_selector(card_sel)
+    page.wait_for_timeout(300)
     entries_before = page.evaluate("() => history.length")
 
     page.locator(card_sel).first.click()

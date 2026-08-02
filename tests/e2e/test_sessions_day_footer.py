@@ -57,10 +57,15 @@ def _seed_sessions(page, local_server, sessions):
     page.evaluate(
         """async (sessions) => {
             const stateUrl = new URL('data/stateStore.js', document.baseURI).href;
+            const queueUrl = new URL('data/writeQueue.js', document.baseURI).href;
             const store = await import(stateUrl);
+            const queue = await import(queueUrl);
             const state = store.getState();
             state.sessions = sessions;
             store.saveToLocalStorage();
+            // The write is write-behind onto IndexedDB now (TODO §18.6 part 4): a reload must wait
+            // for it to land, or it can race the write and read back stale data.
+            await queue.flushWrites();
         }""",
         sessions,
     )
@@ -245,13 +250,16 @@ def test_deleting_a_whole_day_relinks_the_preceding_footer_to_its_new_successor(
 
     # Remove every session on day B entirely, the same way clearing a day of bookings would.
     page.evaluate(
-        """(dayB) => {
+        """async (dayB) => {
             const stateUrl = new URL('data/stateStore.js', document.baseURI).href;
-            return import(stateUrl).then((store) => {
-                const state = store.getState();
-                state.sessions = state.sessions.filter((s) => !s.startDate.startsWith(dayB));
-                store.saveToLocalStorage();
-            });
+            const queueUrl = new URL('data/writeQueue.js', document.baseURI).href;
+            const store = await import(stateUrl);
+            const queue = await import(queueUrl);
+            const state = store.getState();
+            state.sessions = state.sessions.filter((s) => !s.startDate.startsWith(dayB));
+            store.saveToLocalStorage();
+            // Write-behind onto IndexedDB (TODO §18.6 part 4): wait for it before reloading.
+            await queue.flushWrites();
         }""",
         day_b,
     )

@@ -562,12 +562,13 @@ not yet reached.
 > cap; atomic fan-out needs IndexedDB transactions).
 >
 > **Remaining work, in order:**
-> - [ ] **18.6 engine, part 4** — move `stateStore`'s read/write path onto IndexedDB through the
->   write queue, with §17.1's lazy per-client load. The risky one: needs a one-way import from the
->   existing localStorage bucket, revertable until proven on real data. **Gated by §17.5** (shipped):
->   session-item `position` must be written and authoritative before the import runs.
-> - [ ] **Documentation** — [docs/DATA_MODEL.md](docs/DATA_MODEL.md) must be kept in step with each
->   step below.
+> - [~] **18.6 engine, part 4** — move `stateStore`'s read/write path onto IndexedDB through the
+>   write queue. **SHIPPED**: `getState()`/`setState()` stay synchronous; boot does a one-time,
+>   revertable import from the legacy localStorage bucket (left untouched) and reads back through
+>   `recordProjections.js`; saves star-write every live schema (`schema2`+`schema3`) and reconcile
+>   deletes, not just puts, via `writeQueue.js`. **Still open**: §17.1's lazy per-client load —
+>   every collection is still fully hydrated at boot, not fetched on demand per client.
+> - [x] **Documentation** — [docs/DATA_MODEL.md](docs/DATA_MODEL.md) status banner updated to match.
 > - [ ] **[16.5](#165--retire-the-multi-version-hosting-machinery-from-the-code)** — delete the
 >   multi-version hosting machinery, so the next item is a small diff instead of a rewrite.
 > - [ ] **[16.3](#163--decided-not-built-key-storage-buckets-on-the-data-schema-not-the-release-tag)** —

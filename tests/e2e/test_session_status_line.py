@@ -59,7 +59,14 @@ def test_past_card_shows_editable_elapsed_time(page, local_server):
     )
     assert new_value == "02:15"
 
-    # Survives a reload (persisted onto the session via saveToLocalStorage).
+    # Survives a reload (persisted onto the session via saveToLocalStorage, write-behind onto
+    # IndexedDB now — TODO §18.6 part 4 — so wait for the queue to drain before reloading).
+    page.evaluate(
+        """async () => {
+            const queue = await import(new URL('data/writeQueue.js', document.baseURI).href);
+            await queue.flushWrites();
+        }"""
+    )
     page.reload()
     page.wait_for_selector("#view-clients.active")
     card = page.locator(".session-card", has_text="Early Bird Strength").first
@@ -94,6 +101,14 @@ def test_finishing_a_session_stamps_completed_and_duration_on_the_session(
     page.locator("#btn-finish-session").click()
     page.wait_for_timeout(300)
 
+    # The stamp is persisted write-behind onto IndexedDB now (TODO §18.6 part 4) — wait for the
+    # queue to drain before navigating away, or the navigation can race the write.
+    page.evaluate(
+        """async () => {
+            const queue = await import(new URL('data/writeQueue.js', document.baseURI).href);
+            await queue.flushWrites();
+        }"""
+    )
     page.goto(local_server)
     page.wait_for_selector("#view-clients.active")
     card = page.locator(".session-card", has_text="Group Strength & Conditioning").first

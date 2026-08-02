@@ -67,8 +67,10 @@ def test_create_cardio_exercise_reveals_metric_and_persists(page, local_server):
     page.wait_for_timeout(200)
 
     saved = page.evaluate(
-        "() => (JSON.parse(localStorage.getItem('librept_db')).exercises || [])"
-        "        .find(e => e.name === 'Test Rower Sprint') || null"
+        """async () => {
+            const store = await import(new URL('data/stateStore.js', document.baseURI).href);
+            return store.getState().exercises.find((e) => e.name === 'Test Rower Sprint') || null;
+        }"""
     )
     assert saved is not None, "the custom cardio exercise should persist to the store"
     assert saved["modality"] == "cardio"
