@@ -55,22 +55,6 @@ DECISION_NODE_TYPES = {
     "switch_case",  # switch_default is a separate node type and is not counted
 }
 
-# Pre-existing hotspots outside the 2026-08-01 activeSessionController.js/formsController.js SRP
-# split (TODO.md §14) — not silently ignored: each entry needs a reason, same discipline as
-# deploy/zap/zap-baseline.conf's per-rule ZAP ignores (AGENT_RULES §2.A.3, "explicitly suppressed
-# with a written justification"). Keyed by "path::functionName" (or "path::<anonymous>@<line>" for
-# an unnamed function, fixed at the line it had when listed) — DELIBERATELY fragile: a name change
-# or a shift in an anonymous function's start line drops it out of the allowlist and fails the gate
-# again, loudly, rather than quietly continuing to cover a function that has since moved or grown
-# further under a new name. That is a nudge to actually fix the function, not a bug in the matcher.
-# Removing an entry without lowering the function's complexity first will fail the build — the
-# entry only buys time on functions nobody has touched yet, not a permanent exemption.
-PRE_EXISTING_ALLOWLIST = {
-    "src/modules/clipboard/circuitCard.js::renderFocused": (
-        "In-focus circuit card markup, branching per member/round/quick-signal state; §14 follow-up."
-    ),
-}
-
 _LANGUAGE = Language(tsjs.language())
 
 
@@ -158,49 +142,15 @@ def over_limit(findings):
     return [f for f in findings if f[3] > MAX_COMPLEXITY]
 
 
-def _allowlist_key(path, line, name):
-    if name == "<anonymous>":
-        return f"{path}::<anonymous>@{line}"
-    return f"{path}::{name}"
-
-
-def classify_findings(all_findings):
-    """Split over-limit findings into (findings, allowlisted, stale_entries):
-    - findings: over-limit and NOT in PRE_EXISTING_ALLOWLIST — these fail the build.
-    - allowlisted: over-limit and covered by a PRE_EXISTING_ALLOWLIST entry — reported, don't fail.
-    - stale_entries: PRE_EXISTING_ALLOWLIST keys that matched nothing — the function moved, was
-      renamed, or is no longer over the limit; a dead exemption, and itself fails the build.
+def main():
+    """AGENT_RULES §2.A.3: no gate may carry a mechanism for allowlisting real, unfixed debt — an
+    over-limit function fails the build every time, unconditionally. There used to be a
+    PRE_EXISTING_ALLOWLIST here (removed 2026-08-01 once its last entry was fixed); do not
+    reintroduce one — split the function instead.
     """
     findings = []
-    allowlisted = []
-    for path, line, name, complexity in all_findings:
-        key = _allowlist_key(path, line, name)
-        if key in PRE_EXISTING_ALLOWLIST:
-            allowlisted.append((path, line, name, complexity, key))
-        else:
-            findings.append((path, line, name, complexity))
-
-    stale_entries = sorted(
-        set(PRE_EXISTING_ALLOWLIST) - {key for *_, key in allowlisted}
-    )
-    return findings, allowlisted, stale_entries
-
-
-def main():
-    all_findings = []
     for path in sorted(SRC_DIR.rglob("*.js")):
-        all_findings.extend(over_limit(analyze_file(path)))
-
-    findings, allowlisted, stale_entries = classify_findings(all_findings)
-
-    if allowlisted:
-        print(
-            f"\n  ⚠ Cyclomatic complexity: {len(allowlisted)} pre-existing function(s) allowlisted\n"
-        )
-        for path, line, name, complexity, key in allowlisted:
-            print(
-                f"    {path}:{line}  {name}() — complexity {complexity}  ({PRE_EXISTING_ALLOWLIST[key]})"
-            )
+        findings.extend(over_limit(analyze_file(path)))
 
     if findings:
         print(
@@ -210,30 +160,13 @@ def main():
             print(f"    {path}:{line}  {name}() — complexity {complexity}")
         print(
             "\n    Split the function, or extract a branch — see agent_tools/complexity.py "
-            "for what counts. New over-limit functions cannot be allowlisted — only pre-existing"
-            "\n    ones (agent_tools/complexity.py's PRE_EXISTING_ALLOWLIST) can, each with its own"
-            "\n    written justification."
-        )
-        return 1
-
-    if stale_entries:
-        print(
-            f"\n  ✗ Cyclomatic complexity: {len(stale_entries)} stale allowlist entr(y/ies)\n"
-        )
-        for key in stale_entries:
-            print(
-                f"    {key}  — no longer over {MAX_COMPLEXITY}; remove from PRE_EXISTING_ALLOWLIST"
-            )
-        print(
-            "\n    An allowlist entry for a function that's no longer over the limit is a dead"
-            "\n    exemption — remove it so the list stays a reliable map of real, current debt."
+            "for what counts."
         )
         return 1
 
     checked = sum(1 for _ in SRC_DIR.rglob("*.js"))
     print(
-        f"  ✓ Cyclomatic complexity: {checked} file(s), every function ≤ {MAX_COMPLEXITY} "
-        f"or a justified pre-existing exception."
+        f"  ✓ Cyclomatic complexity: {checked} file(s), every function ≤ {MAX_COMPLEXITY}."
     )
     return 0
 
