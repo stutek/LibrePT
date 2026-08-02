@@ -131,3 +131,60 @@ def test_a_write_after_boot_persists_across_a_reload(page, local_server):
         }"""
     )
     assert "Freshly Added" in names
+
+
+def test_a_real_save_star_writes_into_every_live_schema_store_identically(
+    page, local_server
+):
+    """The actual "star write" property, proven end to end through the app rather than the
+    low-level adapter (test_indexed_db.py) or a single-store read (every other test in this file
+    only ever inspects `schema3`): a save through `stateStore.js`'s real write path must land the
+    same record in EVERY live schema's IndexedDB store, not just the newest one this build reads
+    back from. A regression that silently dropped `schema2` from the fan-out would go unnoticed by
+    every other test here, since they never look at it."""
+    page.goto(local_server)
+    page.wait_for_selector(".session-card")
+    page.wait_for_timeout(300)
+
+    page.evaluate(
+        """async () => {
+            const store = await import(new URL('data/stateStore.js', document.baseURI).href);
+            const queue = await import(new URL('data/writeQueue.js', document.baseURI).href);
+            store.getState().clients.push({ id: 'star-write-check', name: 'Star Written', active: true });
+            store.saveToLocalStorage();
+            await queue.flushWrites();
+        }"""
+    )
+
+    stores = page.evaluate(
+        """async () => {
+            const db = await new Promise((resolve, reject) => {
+                const req = indexedDB.open('librept');
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+            const names = [...db.objectStoreNames].filter((n) => n.startsWith('schema')).sort();
+            const result = {};
+            for (const name of names) {
+                const tx = db.transaction([name], 'readonly');
+                result[name] = await new Promise((resolve, reject) => {
+                    const req = tx.objectStore(name).get('star-write-check');
+                    req.onsuccess = () => resolve(req.result ?? null);
+                    req.onerror = () => reject(req.error);
+                });
+            }
+            db.close();
+            return result;
+        }"""
+    )
+
+    assert set(stores.keys()) == {"schema2", "schema3"}, (
+        "expected exactly the two live schema stores — update this test if a schema was added/retired"
+    )
+    for schema_name, record in stores.items():
+        assert record is not None, (
+            f"{schema_name} is missing the record — the fan-out dropped it"
+        )
+        assert record["name"] == "Star Written", (
+            f"{schema_name} has a stale or wrong record"
+        )
