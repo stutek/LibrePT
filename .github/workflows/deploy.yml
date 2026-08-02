@@ -170,30 +170,22 @@ jobs:
     needs: [e2e-tests, static-security-audits, owasp-zap-scan]
     runs-on: ubuntu-latest
     steps:
-      # fetch-tags: the release identity (TODO §16) is the git tag this commit carries, and the
-      # default shallow checkout fetches no tags — without this every build would stamp itself "dev".
       - uses: actions/checkout@v4
-        with:
-          fetch-tags: true
-          fetch-depth: 0
 
       # The runtime app lives under src/. Publish that whole tree (index.html + app.js +
       # index.css + manifest.json + sw.js + i18n/ + components/ + icons/) flattened to the dist
-      # root, so relative paths resolve the same as in local dev. This mirrors build/run_build()
-      # (build/__init__.py) — keep the two in sync.
-      # One entry point (build/releases.py, stdlib only — no venv needed) assembles the whole
-      # published site so the root copy and the versioned copies cannot drift apart:
-      #   • the current build at /<repo>/ — the stable path a PT's bookmark keeps pointing at;
-      #   • every supported tag re-materialised from its own commit at /<repo>/<tag>/, because a
-      #     Pages run publishes ONE artifact and a folder left out of it disappears (TODO §16.2);
-      #   • versions.json, written only once tags exist, so the app never advertises a version it
-      #     does not host.
-      # Each copy gets its own <base>, version stamp, SPA 404 fallback and — last, over the exact
-      # bytes served — its SHA-256 integrity catalog.
+      # root, so relative paths resolve the same as in local dev. build/run_build() is the single
+      # entry point local builds use too (build/__init__.py) — keep the two in sync.
+      #
+      # No release tags, no per-version folders, no versions.json: multi-version hosting was
+      # dropped (TODO §16/§18) — one build carries every supported data schema concurrently, and
+      # storage keys on the schema major, not a release tag. Just the current build, at /<repo>/,
+      # with its <base> rewritten for the Pages sub-path, a SPA 404 fallback, and — last, over the
+      # exact bytes served — its SHA-256 integrity catalog.
       - name: Assemble dist
         run: |
           base="/${GITHUB_REPOSITORY##*/}/"
-          python3 -c "from build.releases import publish_site; publish_site('dist', '${base}')"
+          python3 -c "from build import run_build; run_build(base='${base}')"
           touch dist/.nojekyll   # disable Jekyll processing on the published site
 
       - name: Upload Pages artifact

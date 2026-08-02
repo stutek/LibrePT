@@ -34,12 +34,7 @@ import { CURRENT_SCHEMA_VERSION } from "./migrationSteps.js";
 import { COLLECTIONS, groupRecordsByCollection, projectCollection } from "./recordProjections.js";
 import { LIVE_SCHEMAS, NEWEST_SCHEMA } from "./recordSchemas.js";
 import { describeMigration, migrateState } from "./schemaMigrations.js";
-import {
-  adoptLegacyBucket,
-  namespacedKey,
-  readVersionScoped,
-  writeVersionScoped,
-} from "./storageNamespace.js";
+import { readVersionScoped, writeVersionScoped } from "./storageNamespace.js";
 import { enqueueWrite } from "./writeQueue.js";
 
 let state = emptyState();
@@ -93,11 +88,10 @@ export function seedMockData(incrementLocalSyncFn) {
   saveToLocalStorage(incrementLocalSyncFn);
 }
 
-// The DB key is per-release (data/storageNamespace.js): an untagged build keeps the plain
-// "librept_db", a tagged release reads and writes "librept_db@<tag>" so versions hosted side by
-// side on one origin can never overwrite each other's data. It remains the IMPORT SOURCE for the
-// one-time move onto IndexedDB below — once imported it is never written to again, which is what
-// keeps it a valid rollback snapshot for a build revert.
+// The plain localStorage key every build before this engine wrote (data/storageNamespace.js — no
+// release-tag axis any more, TODO §16.5). It is the IMPORT SOURCE for the one-time move onto
+// IndexedDB below — once imported it is never written to again, which is what keeps it a valid
+// rollback snapshot for a build revert.
 const DB_KEY = "librept_db";
 const ACTIVE_SESSION_KEY = "librept_active_session";
 
@@ -175,22 +169,19 @@ async function readStateFromIndexedDb(db) {
   };
 }
 
-// Read the legacy localStorage blob, handling the pre-rename shim (openpt_* → librept_*) and the
-// per-release adoption copy — unchanged from the pre-IndexedDB engine.
+// Read the legacy localStorage blob, handling the pre-rename shim (openpt_* → librept_*).
 function readLegacyBlob() {
-  adoptLegacyBucket();
-
   let savedData = readVersionScoped(DB_KEY);
   if (!savedData) {
-    // Pre-rename shim (openpt_* → librept_*), untouched by versioning: it predates both buckets.
+    // Pre-rename shim (openpt_* → librept_*): it predates the "librept_" rename entirely.
     savedData = localStorage.getItem("openpt_db");
     if (savedData) {
-      localStorage.setItem(namespacedKey(DB_KEY), savedData);
+      localStorage.setItem(DB_KEY, savedData);
       localStorage.removeItem("openpt_db");
 
       const activeSessionData = localStorage.getItem("openpt_active_session");
       if (activeSessionData) {
-        localStorage.setItem(namespacedKey(ACTIVE_SESSION_KEY), activeSessionData);
+        localStorage.setItem(ACTIVE_SESSION_KEY, activeSessionData);
         localStorage.removeItem("openpt_active_session");
       }
     }

@@ -281,23 +281,8 @@ export const sl = {
     "Povabilo k zagonu celovite predstavitve: Preizkusite vodenje osebnih seans. Ker vaša aplikacija že vsebuje aktivne podatke, si oglejte dokumentacijo z navodili ali odprite interaktivno predstavitev na stutek.github.io/LibrePT/.",
   notif_demo_btn: "Odpri predstavitev v živo",
 
-  // Preklop med različicami (TODO §16.1): vabila za nadgradnjo / vrnitev, ki jih ni mogoče skriti.
-  version_upgrade_title: "Na voljo je nova različica",
-  version_upgrade_desc:
-    "Različica {version} je pripravljena. Preklopi, ko ti ustreza — podatki se prekopirajo s teboj.",
-  version_upgrade_btn: "Preklopi na {version}",
-  version_rollback_title: "Vrni se na {version}",
-  version_rollback_desc:
-    "Na {version} se lahko vrneš kadar koli. Vse, kar si zabeležil po preklopu, ostane na {current} in se ne vrne s teboj.",
-  version_rollback_btn: "Vrni se nazaj",
-  version_rollback_confirm:
-    "Se res želiš vrniti na {version}? Vse, kar si po nadgradnji zabeležil na {current}, ostane tam.",
-  version_eol_title: "Ta različica ni več podprta",
-  version_eol_desc: "Popravki izhajajo samo za trenutno različico ({version}).",
-
   // Pogovorno okno s podatki o gradnji: odpre se z dotikom oznake v glavi (namig ob prehodu miške na telefonu ni dosegljiv).
   build_info_title: "Ta gradnja",
-  build_info_release: "Različica",
   build_info_commit: "Objava",
   build_info_schema: "Shema podatkov",
   build_info_built: "Zgrajeno",

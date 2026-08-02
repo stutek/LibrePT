@@ -2,7 +2,7 @@
 // Single responsibility: Handles PWA screen orientation lock, dev phone viewport resizing,
 // build stamp header rendering, Service Worker registration, and network connectivity state monitoring.
 
-import { buildDescription } from "../modules/common/releaseIdentity.js";
+import { CURRENT_SCHEMA_VERSION } from "../data/migrationSteps.js";
 import { BUILD_INFO } from "../version.js";
 
 export function resizeToPhoneViewport() {
@@ -15,17 +15,21 @@ export function resizeToPhoneViewport() {
   }
 }
 
-// The stamp shows the COMMIT, not the release. For support it is the better identifier: it is
-// exact, and it exists for EVERY build — most deploys sit between tags, and those are precisely the
-// ones a confusing bug report comes from. The release, data schema and build time are one tap away
-// in the build-info dialog (the `title` is a desktop nicety only; a phone cannot reach it).
+// The stamp shows the COMMIT, not a release tag — there are no release tags any more (TODO §16/§18:
+// one build carries every supported schema concurrently). The commit is the better identifier for
+// support regardless: it is exact and exists for EVERY build. The full detail (commit, data schema,
+// build time) is one tap away in the build-info dialog (the `title` is a desktop nicety only; a
+// phone cannot reach it).
 export function renderBuildStamp() {
   const el = document.getElementById("app-version");
   if (!el) return;
   const commit = typeof BUILD_INFO?.commit === "string" ? BUILD_INFO.commit.trim() : "";
   el.textContent = commit && commit !== "dev" ? `#${commit}` : "dev";
-  const description = buildDescription();
-  if (description) el.title = description;
+  const parts = [];
+  if (commit && commit !== "dev") parts.push(`Commit ${commit}`);
+  parts.push(`Schema ${CURRENT_SCHEMA_VERSION}`);
+  if (BUILD_INFO?.builtAt) parts.push(`Built ${BUILD_INFO.builtAt}`);
+  el.title = parts.join(" · ");
 }
 
 export function lockPortraitOrientation() {

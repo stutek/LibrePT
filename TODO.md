@@ -411,7 +411,7 @@ only. Landed alongside the same-day complexity-gate work
 >
 > **What survives:** a deploy must never interrupt a trainer mid-session (now purely a
 > service-worker concern, [src/sw.js](src/sw.js)); storage keyed on the schema major
-> ([16.3](#163--decided-not-built-key-storage-buckets-on-the-data-schema-not-the-release-tag)); the
+> ([16.3](#163-x-resolved-superseded-by-186-part-4-key-storage-buckets-on-the-data-schema-not-the-release-tag)); the
 > build stamp is the commit SHA, not a tag; the PREVIEW ribbon (generalised into severity tiers by
 > [§18.12](#1812--decided-reuse-the-preview-ribbon-for-unsupported-version-warning)); migration must
 > validate every step's output and refuse data from a newer build.
@@ -421,61 +421,48 @@ only. Landed alongside the same-day complexity-gate work
 > and anything that changes an already-published build's bytes forces a service-worker re-install on
 > everyone sitting on it.
 
-### 16.3 [ ] [Decided, not built] Key storage buckets on the DATA SCHEMA, not the release tag
-> **Simplified by the no-tags decision**: no release identity means no `UNRELEASED` case, no tag
-> normalisation, and no per-release bucket to migrate away from — storage keys go straight onto the
-> schema major, and there is no window of releases to size.
+### 16.3 [x] [Resolved — superseded by §18.6 part 4] Key storage buckets on the DATA SCHEMA, not the release tag
+**Resolved differently than originally planned.** This item assumed `localStorage` would stay a
+live, multi-bucket store with one bucket per schema major (`librept_db@schema2`,
+`librept_db@schema3`, ...), mirroring IndexedDB's layout. That premise stopped applying once
+[§18.6 part 4](#186--decided-persistence-engine--indexeddb-supersedes-the-37-deferral) shipped: the
+live star-write destination is IndexedDB, whose per-schema object stores (`storeNameForSchema()` in
+[indexedDb.js](src/data/indexedDb.js)) already **are** the schema-major bucket-per-schema layout this
+item wanted. `localStorage`'s `librept_db` key is no longer a live bucket at all — it is read exactly
+once, as the legacy import source for a device's one-time move onto IndexedDB, and left untouched
+afterwards. A single plain key needs no bucket-keying scheme, so there was nothing left to build:
+[storageNamespace.js](src/data/storageNamespace.js) was simplified to drop the release-tag axis
+(§16.5) and given no replacement axis, because none is needed.
 
-> **This is [§18](#18-data-layer-simultaneous-multi-schema-writes-star-writes)'s prerequisite**: the
-> star-write model *is* this bucket-per-schema-major layout expressed as a write policy. Build it
-> first. Cheapest right after [16.5](#165--retire-the-multi-version-hosting-machinery-from-the-code),
-> which removes the per-release layer this would otherwise have to be threaded through.
+The substance of "the schema major is the only thing storage keys on" is true today — just entirely
+inside IndexedDB rather than split across two engines. `CURRENT_SCHEMA_VERSION`
+([migrationSteps.js](src/data/migrationSteps.js)) stays a plain integer major, unchanged from the
+original decision — a "patch" to a schema is either a migration step or nothing, and the store
+already round-trips unknown fields by serialising the whole object, so a schema minor buys no
+correctness and isn't introduced.
 
-**Decided (2026-07-25).** As shipped, `storageNamespace.js` keys buckets on the release tag, so
-**every** tag mints a new bucket — forcing a pointless copy and, worse, showing the data-loss warning
-on a rollback where *nothing can be lost*. A scary warning that isn't true trains a PT to click
-through the real one. With tags gone the tag axis simply disappears; the schema axis is all that is left.
+### 16.5 [x] Retire the multi-version hosting machinery from the code
+**Done.** Deleted rather than adapted, since none of it had a subject any more:
 
-- **Data = a plain integer major** (`schemaVersion`, [migrationSteps.js](src/data/migrationSteps.js)),
-  bumped only when a migration step is added. **Not** full semver on the schema — a "patch" to a
-  schema is either a migration step or nothing, and *minor* buys no correctness because the store
-  already round-trips unknown fields (it serialises the whole state object rather than reconstructing
-  it — the restore path *reconstructing* one was exactly the bug fixed on 2026-07-25). Add a schema
-  minor the day an additive change needs describing in a downgrade warning; not before.
-- **Follows from integer-only majors**: refusing *any* newer `schemaVersion` (as `migrateState` does
-  today) stays correct. The minor-tolerant read discussed on 2026-07-25 — accept same-major-higher-minor
-  rather than refusing — only becomes necessary if a schema minor is ever introduced.
-- **Invariant to protect**: unknown fields must survive a read/write round-trip. The store gets this
-  by serialising the whole state object; anything that *reconstructs* state from a known field list
-  breaks it silently (exactly the backup restore bug fixed 2026-07-25). Never rebuild state from an
-  explicit key list.
-- **Bucket key becomes the schema major** (`librept_db@schema2`), which is also the IndexedDB object
-  store name in [DATA_MODEL §2](docs/DATA_MODEL.md) — one naming scheme across both engines, so the
-  §18.6 part-4 import is a copy between two things named the same way.
-- **Consequences to implement**: the schema major is the only thing storage keys on; migration steps
-  stay keyed on the integer major; and the degraded/unsupported signal ([§18.12](#1812--decided-reuse-the-preview-ribbon-for-unsupported-version-warning))
-  fires off a schema comparison rather than off a release comparison.
-
-### 16.5 [ ] Retire the multi-version hosting machinery from the code
-The TODO items are dropped (above); the implementation is still in the tree and is now dead weight
-sitting directly on §16.3's path. **Delete rather than adapt** — none of it has a subject any more.
-
-- **Modules**: [releaseIdentity.js](src/modules/common/releaseIdentity.js) (tag → storage suffix /
-  URL segment), [versionCatalog.js](src/data/versionCatalog.js) (the `versions.json` reader and offer
-  rules), [versionMessages.js](src/modules/common/versionMessages.js) (upgrade / switch-back / EOL
-  messages), the per-release suffixing half of [storageNamespace.js](src/data/storageNamespace.js),
-  and the chain runner in [schemaMigrations.js](src/data/schemaMigrations.js) — the chain is what star
-  writes replace, so it goes when §18.1 lands, not before.
-- **Build/deploy**: [build/releases.py](build/releases.py) and the release-publishing step in
-  `.github/workflows/deploy.yml`; `release` in [src/version.js](src/version.js).
-- **Tests**: `test_release_identity.py`, `test_storage_namespace.py`, `test_version_catalog.py`,
-  `test_version_messages.py`, `test_release_publishing.py`, `test_release_stamp_writers.py` —
-  the storage-namespace ones survive in schema-keyed form as §16.3's coverage.
-- **Keep**: the commit SHA build stamp and the build-info dialog ([buildInfoDialog.js](src/modules/common/buildInfoDialog.js)),
-  which are support surfaces, not switching machinery — but the dialog's release row becomes the
-  **schema** row.
-- **Order**: do this *before* §16.3, so the bucket change is a small diff against a store that has one
-  axis instead of a rewrite against one that has two.
+- **Modules deleted**: `releaseIdentity.js` (tag → storage suffix / URL segment), `versionCatalog.js`
+  (the `versions.json` reader and offer rules), `versionMessages.js` (upgrade / switch-back / EOL
+  messages). [storageNamespace.js](src/data/storageNamespace.js) was simplified to drop the
+  release-tag axis entirely (see [16.3](#163-x-resolved-superseded-by-186-part-4-key-storage-buckets-on-the-data-schema-not-the-release-tag)
+  for why it got no replacement axis). The chain runner in
+  [schemaMigrations.js](src/data/schemaMigrations.js) is **kept** — it is still live production code
+  (the one-time upcast of a legacy `localStorage` blob at import), and stays until §18.1's fan-out
+  fully lands.
+- **Build/deploy deleted**: `build/releases.py` (per-tag site assembly, `versions.json`) and the
+  release-publishing step in `.github/workflows/deploy.yml`'s `build` job — now a single `run_build()`
+  call with an optional `base` for the Pages sub-path rewrite; `resolve_release_tag()` in
+  `build/__init__.py`; the `release` field in [src/version.js](src/version.js)'s `BUILD_INFO`.
+- **Tests**: `test_release_identity.py`, `test_version_catalog.py`, `test_version_messages.py`,
+  `test_release_publishing.py`, `test_release_stamp_writers.py` deleted.
+  `test_storage_namespace.py` survives, rewritten for the no-axis shape.
+- **Kept**: the commit SHA build stamp and the build-info dialog
+  ([buildInfoDialog.js](src/modules/common/buildInfoDialog.js)) — support surfaces, not switching
+  machinery. The dialog's release row is gone; the pre-existing schema row is now the sole identity
+  row alongside commit and build time.
 
 ---
 
@@ -548,7 +535,7 @@ not yet reached.
 >
 > **Decided: NO RELEASE TAGS. One build carries old and new behaviour concurrently.** Behaviour
 > switching is an in-app choice, not navigation — no per-tag publishing, no rollback-by-URL. What is
-> supported is a set of **schemas**, the only axis storage keys on ([16.3](#163--decided-not-built-key-storage-buckets-on-the-data-schema-not-the-release-tag)).
+> supported is a set of **schemas**, the only axis storage keys on ([16.3](#163-x-resolved-superseded-by-186-part-4-key-storage-buckets-on-the-data-schema-not-the-release-tag)).
 > "No fixes ever land on a maintenance-mode version" is inverted, deliberately: old behaviours live
 > inside the current build, so they get fixes automatically.
 >
@@ -569,12 +556,16 @@ not yet reached.
 >   deletes, not just puts, via `writeQueue.js`. **Still open**: §17.1's lazy per-client load —
 >   every collection is still fully hydrated at boot, not fetched on demand per client.
 > - [x] **Documentation** — [docs/DATA_MODEL.md](docs/DATA_MODEL.md) status banner updated to match.
-> - [ ] **[16.5](#165--retire-the-multi-version-hosting-machinery-from-the-code)** — delete the
->   multi-version hosting machinery, so the next item is a small diff instead of a rewrite.
-> - [ ] **[16.3](#163--decided-not-built-key-storage-buckets-on-the-data-schema-not-the-release-tag)** —
->   bucket on the schema major, matching the IndexedDB store naming.
-> - [ ] **18.1/18.4, the rest** — the actual fan-out (write a projection into an IndexedDB bucket);
->   waits on a second live schema existing.
+> - [x] **[16.5](#165-x-retire-the-multi-version-hosting-machinery-from-the-code)** — deleted the
+>   multi-version hosting machinery.
+> - [x] **[16.3](#163-x-resolved-superseded-by-186-part-4-key-storage-buckets-on-the-data-schema-not-the-release-tag)** —
+>   resolved differently: the schema axis already lives in IndexedDB's per-schema stores, so
+>   `localStorage` needed no replacement bucket scheme once the release-tag axis was gone.
+> - [ ] **18.1/18.4, the rest** — the actual fan-out into IndexedDB is live for both schemas
+>   (`schema2`+`schema3`, via §18.6 part 4's `starWrite`), using an identical projection for each
+>   since no field has diverged yet. **Still open**: the cross-schema half of §18.4's staging guard
+>   (CI assertion that every field the current domain model writes exists in every live schema's
+>   projection) and §18.5's acyclic-reference-graph check — neither is built.
 > - [ ] **18.13** — the CD pipeline tests.
 
 ### 18.1 [~] [Decided in principle] The star write model, and its relationship to §16.3
@@ -586,8 +577,8 @@ not yet reached.
 > record this build writes (every seed fixture, plus the actual object literals `formsController.js`,
 > `feedbackModal.js` and `finishWorkoutSession` build — not just the seed data) is asserted to project
 > cleanly, in `tests/e2e/test_record_schemas.py`. **Still not built**: the fan-out itself — writing a
-> projection into an actual IndexedDB bucket. That is blocked on [16.5](#165--retire-the-multi-version-hosting-machinery-from-the-code)
-> and [16.3](#163--decided-not-built-key-storage-buckets-on-the-data-schema-not-the-release-tag)
+> projection into an actual IndexedDB bucket. That is blocked on [16.5](#165-x-retire-the-multi-version-hosting-machinery-from-the-code)
+> and [16.3](#163-x-resolved-superseded-by-186-part-4-key-storage-buckets-on-the-data-schema-not-the-release-tag)
 > landing first, per the agreed build order, and there is still only one live schema — the table
 > below is the layout the moment a second one is cut, not something exercised yet.
 

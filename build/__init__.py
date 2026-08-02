@@ -735,8 +735,25 @@ def run_tests():
     run_e2e_tests()
 
 
-def run_build():
-    """Builds and bundles the PWA files into the dist/ distribution directory."""
+def rewrite_base_href(target_dir, base):
+    """GitHub Pages serves the site under /<repo>/, but the source assumes the domain root so it
+    also works from localhost. Rewrite it for the published copy only."""
+    index_path = os.path.join(target_dir, "index.html")
+    with open(index_path, encoding="utf-8") as handle:
+        html = handle.read()
+    html = html.replace('<base href="/">', f'<base href="{base}">')
+    with open(index_path, "w", encoding="utf-8") as handle:
+        handle.write(html)
+
+
+def run_build(base=None):
+    """Builds and bundles the PWA files into the dist/ distribution directory.
+
+    `base` rewrites `<base href="/">` to the given path and adds a `404.html` SPA fallback (Pages
+    serves it for any path with no matching file, letting a deep link boot the app and resolve the
+    route client-side) — used by the GitHub Pages deploy, which serves the site under `/<repo>/`
+    rather than the domain root. Local builds omit it and keep `<base href="/">`.
+    """
     print("\n>>> Step 3: Running Build & Bundle Step...")
     dist_dir = "dist"
 
@@ -746,10 +763,6 @@ def run_build():
     # The runtime app lives under src/. Publish that whole tree (index.html, app.js, index.css,
     # manifest.json, sw.js, i18n/, components/, icons/) flattened to the dist root so relative
     # paths resolve the same as in local dev. Mirrors .github/workflows/deploy.yml.
-    #
-    # Note: this local dist keeps <base href="/"> because it is served at the domain root.
-    # The GitHub Pages deploy (deploy.yml) additionally rewrites <base> to the /<repo>/ sub-path,
-    # since a project site is served under stutek.github.io/<repo>/, not the root.
     src_dir = "src"
     if not os.path.isdir(src_dir):
         print(f"  Warning: {src_dir}/ not found!")
@@ -761,37 +774,24 @@ def run_build():
         print(f"  Copied src/{path} -> {dist_dir}/{path}")
 
     stamp_build_version(dist_dir)
+    if base:
+        rewrite_base_href(dist_dir, base)
+        # Pages serves 404.html for any path with no file, so shipping the shell there lets a deep
+        # link to a clean route boot the app and resolve the route client-side.
+        shutil.copyfile(
+            os.path.join(dist_dir, "index.html"), os.path.join(dist_dir, "404.html")
+        )
+    # Last, so it covers the exact bytes actually served.
     generate_integrity_catalog(dist_dir)
 
     print(f"  ✓ Build complete. Bundle stored in: {os.path.abspath(dist_dir)}")
 
 
-def resolve_release_tag():
-    """The git tag this build is cut from — the release identity (TODO §16) used by versioned
-    hosting, per-version storage namespacing and the upgrade/rollback flow.
-
-    Deliberately `--exact-match`: only a commit that IS a tag is a release. A commit sitting a few
-    commits past v1.2.0 is NOT v1.2.0 — calling it that would let an untagged build write into a
-    released version's storage bucket. Anything untagged is "dev" and simply opts out of switching.
-    """
-    try:
-        return (
-            subprocess.check_output(
-                ["git", "describe", "--tags", "--exact-match"],
-                stderr=subprocess.DEVNULL,
-            )
-            .decode()
-            .strip()
-            or "dev"
-        )
-    except Exception:
-        return "dev"
-
-
 def stamp_build_version(dist_dir):
-    """Overwrite dist/version.js with the real short commit SHA, UTC build time and release tag (the
-    header build stamp). Mirrors the Pages deploy (.github/workflows/deploy.yml) — keep the two
-    writers in sync; test_release_identity.py checks they emit the same fields."""
+    """Overwrite dist/version.js with the real short commit SHA and UTC build time (the header
+    build stamp). Mirrors the Pages deploy (.github/workflows/deploy.yml) — keep the two writers in
+    sync. No release tag: multi-version hosting was dropped (TODO §16/§18) — one build carries every
+    supported data schema concurrently, and storage keys on the schema major, not a release tag."""
     from datetime import datetime, timezone
 
     try:
@@ -805,12 +805,11 @@ def stamp_build_version(dist_dir):
     except Exception:
         commit = "local"
     built_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%MZ")
-    release = resolve_release_tag()
     with open(os.path.join(dist_dir, "version.js"), "w") as f:
         f.write(
-            f'export const BUILD_INFO = {{ commit: "{commit}", builtAt: "{built_at}", release: "{release}" }};\n'
+            f'export const BUILD_INFO = {{ commit: "{commit}", builtAt: "{built_at}" }};\n'
         )
-    print(f"  Stamped build {commit} ({built_at}) release {release}")
+    print(f"  Stamped build {commit} ({built_at})")
 
 
 INTEGRITY_CATALOG_NAME = "integrity.json"

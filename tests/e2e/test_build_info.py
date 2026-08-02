@@ -2,8 +2,9 @@
 # "Which build am I on" has to be answerable ON A PHONE. The long build identity used to live only
 # in the header stamp's `title` tooltip, which a touch device cannot reach at all — a support detail
 # only a mouse can see is a support detail nobody has. The stamp is now a button opening a dialog
-# that shows release, commit and DATA SCHEMA (after a rollback those are different questions), and
-# offers the text as one copyable block, because the point of a build id is pasting it somewhere.
+# that shows commit and DATA SCHEMA (two different axes, TODO §16 — no release tags any more, so a
+# missing record after an update is explained by the schema, not a version number), and offers the
+# text as one copyable block, because the point of a build id is pasting it somewhere.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
 
@@ -22,7 +23,7 @@ def test_the_header_stamp_is_a_real_touch_target(page, local_server):
     assert height >= 20, f"touch target is only {height}px tall"
 
 
-def test_tapping_the_stamp_shows_release_commit_and_data_schema(page, local_server):
+def test_tapping_the_stamp_shows_commit_and_data_schema(page, local_server):
     page.goto(local_server)
     page.wait_for_selector("#app-version")
     page.wait_for_timeout(300)
@@ -34,12 +35,12 @@ def test_tapping_the_stamp_shows_release_commit_and_data_schema(page, local_serv
     values = page.locator("#build-info-rows dd").all_inner_texts()
     facts = dict(zip(labels, values))
 
-    assert facts["Version"] == "dev", "the untagged build every install runs today"
     assert facts["Commit"], "a bug report has to be pinnable to a build"
-    # The data schema sits beside the code version on purpose: after a rollback it is the answer to
-    # "why are records missing", and the code version alone cannot tell you.
+    # The data schema sits beside the commit on purpose: after a cached build updates, it is the
+    # answer to "why are records missing", and the commit alone cannot tell you.
     assert facts["Data schema"] == "3"
     assert "Built" in facts
+    assert "Version" not in facts, "no release tags any more — nothing to show here"
 
 
 def test_the_build_details_are_offered_as_one_copyable_block(page, local_server):
@@ -54,7 +55,7 @@ def test_the_build_details_are_offered_as_one_copyable_block(page, local_server)
     )
 
     # Plain text, one fact per line: it gets pasted into whatever chat app is to hand.
-    assert "release: dev" in text
+    assert "release:" not in text, "no release tags any more — nothing to show here"
     assert "data schema: 3" in text
     assert "commit:" in text
     assert "built:" in text

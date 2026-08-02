@@ -64,7 +64,6 @@ import {
   setState,
   stateHasData,
 } from "./data/stateStore.js";
-import { fetchVersionCatalog } from "./data/versionCatalog.js";
 import { applyStaticDOMMappings } from "./i18n/domMappings.js";
 import { TRANSLATIONS } from "./i18n/index.js";
 import { renderClientsDirectory } from "./modules/clients/clientsDirectory.js";
@@ -132,7 +131,6 @@ import {
   parseTimeRange,
   truncateString,
 } from "./modules/common/utils.js";
-import { initVersionMessages } from "./modules/common/versionMessages.js";
 import {
   renderExercisesList as exercisesViewRender,
   renderExercisesViewShell,
@@ -216,10 +214,6 @@ function saveState() {
 window.resetLibrePTData = resetLibrePTData;
 window.seedMockData = () => seedMockData(incrementLocalSync);
 window.stateHasData = () => stateHasData(getState());
-
-// Populated asynchronously at boot from the published manifest; null until then, and null forever
-// on a deploy that publishes a single version.
-let versionCatalog = null;
 
 async function init() {
   initTheme();
@@ -413,22 +407,8 @@ async function init() {
     getSessionDayDate,
   });
 
-  // The version catalog is fetched once at boot and cached here; every notification render reads
-  // this snapshot rather than refetching. Absent (today's single-version deploy) means no offers.
   initBuildInfoDialog({ t, navigateToPath, urlFor });
   setupBuildInfoDialog();
-
-  initVersionMessages({
-    t,
-    escapeHTML,
-    basePath: getBasePath(),
-    getCatalog: () => versionCatalog,
-  });
-  fetchVersionCatalog(getBasePath()).then((catalog) => {
-    if (!catalog) return;
-    versionCatalog = catalog;
-    renderNotificationArea();
-  });
 
   initNotificationArea({
     getState,

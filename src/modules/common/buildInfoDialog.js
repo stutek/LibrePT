@@ -1,22 +1,22 @@
 // src/modules/common/buildInfoDialog.js — "which build am I on", reachable on a phone.
-// Single responsibility: compose the build identity (release · commit · data schema · built) and
-// show it in a tappable, COPYABLE dialog.
+// Single responsibility: compose the build identity (commit · data schema · built) and show it in
+// a tappable, COPYABLE dialog.
 //
 // Why this exists: the header stamp shows only the short label, and the long form used to live in
 // its `title` tooltip — which a phone cannot reach at all. Since the app is used on the gym floor,
 // a support detail only a mouse can see is a support detail nobody has. Copy-to-clipboard matters
 // as much as the display: the point of a commit SHA is pasting it into a bug report.
 //
-// The DATA SCHEMA is shown alongside the code version deliberately — after a rollback, "which
-// version" and "which data shape" are different questions, and the second is the one that explains
-// missing records (TODO §16).
+// The DATA SCHEMA is shown alongside the commit deliberately — code version and data-schema version
+// are two different axes (TODO §16): there are no release tags any more (one build carries every
+// supported schema concurrently, TODO §18), so the schema is what actually explains a missing record
+// after a cached build updates, not the commit.
 //
 // Injected dependencies: { t } (translator).
 
 import { CURRENT_SCHEMA_VERSION } from "../../data/migrationSteps.js";
 import { BUILD_INFO } from "../../version.js";
 import { renderMarkupOnce } from "./dom.js";
-import { currentRelease } from "./releaseIdentity.js";
 
 let deps = {};
 
@@ -30,7 +30,6 @@ export function buildInfoText() {
   const commit = typeof BUILD_INFO?.commit === "string" ? BUILD_INFO.commit : "";
   return [
     "LibrePT build",
-    `release: ${currentRelease()}`,
     `commit: ${commit || "unknown"}`,
     `data schema: ${CURRENT_SCHEMA_VERSION}`,
     `built: ${BUILD_INFO?.builtAt || "unknown"}`,
@@ -41,7 +40,6 @@ function rows() {
   const t = deps.t || ((_key, fallback) => fallback);
   const commit = typeof BUILD_INFO?.commit === "string" ? BUILD_INFO.commit : "";
   return [
-    [t("build_info_release") || "Version", currentRelease()],
     [t("build_info_commit") || "Commit", commit || "—"],
     [t("build_info_schema") || "Data schema", String(CURRENT_SCHEMA_VERSION)],
     [t("build_info_built") || "Built", BUILD_INFO?.builtAt || "—"],

@@ -10,9 +10,8 @@
 
 import { readVersionScoped, writeVersionScoped } from "../../data/storageNamespace.js";
 import { renderMarkupOnce } from "./dom.js";
-import { renderVersionMessages } from "./versionMessages.js";
 
-// Version-scoped: which notifications a PT has read is per-build state (see data/storageNamespace).
+// Schema-scoped: which notifications a PT has read is per-build state (see data/storageNamespace).
 const READ_NOTIFICATIONS_KEY = "librept_read_notifications";
 
 let deps = null;
@@ -155,10 +154,6 @@ function renderEmptyNotificationState(
       </div>
     </div>
   `;
-
-  // Version offers sit above the feed even when there are no stored notifications: an upgrade
-  // invitation is not something a clean install should have to earn.
-  renderVersionMessages(container);
 
   const demoBtn = container.querySelector("#btn-run-inapp-demo");
   demoBtn?.addEventListener("click", (e) => {
@@ -337,7 +332,6 @@ export function renderNotificationArea() {
 
   container.innerHTML = items.map((item) => buildNotificationCardHTML(item, escapeHTML)).join("");
 
-  renderVersionMessages(container);
   wireNotificationCardActions(container, deps, t, readIds);
   syncNotificationBarState();
 }

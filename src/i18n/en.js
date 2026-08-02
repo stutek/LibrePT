@@ -280,24 +280,8 @@ export const en = {
     "Invite to run the demo end-to-end: Experience personal training orchestration. Since your workspace is preloaded with live training data, explore the interactive walkthrough documentation or open the live interactive demo at stutek.github.io/LibrePT/.",
   notif_demo_btn: "Open Live Demo",
 
-  // Version switching (TODO §16.1): non-dismissable upgrade / switch-back invitations. {version}
-  // and {current} are filled in at render time.
-  version_upgrade_title: "A new version is available",
-  version_upgrade_desc:
-    "Version {version} is ready. Switch whenever it suits you — your data is copied across.",
-  version_upgrade_btn: "Switch to {version}",
-  version_rollback_title: "Go back to {version}",
-  version_rollback_desc:
-    "You can return to {version} at any time. Anything recorded since you switched stays on {current} and does not come back with you.",
-  version_rollback_btn: "Switch back",
-  version_rollback_confirm:
-    "Switch back to {version}? Anything recorded on {current} since you upgraded will stay there.",
-  version_eol_title: "This version is no longer supported",
-  version_eol_desc: "Fixes only land on the current version ({version}).",
-
   // Build-info dialog: reachable by tapping the header stamp (a tooltip is unreachable on a phone).
   build_info_title: "This build",
-  build_info_release: "Version",
   build_info_commit: "Commit",
   build_info_schema: "Data schema",
   build_info_built: "Built",
