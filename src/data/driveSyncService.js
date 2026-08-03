@@ -1,8 +1,15 @@
-// src/data/driveSyncService.js — orchestrates Google Drive appDataFolder sync (TODO §1.5/§3.3).
+// src/data/driveSyncService.js — orchestrates Google Drive appDataFolder sync (TODO §1.5/§3.3/§3.10).
 // Single responsibility: connect/disconnect the OAuth grant, and run one sync pass (download → merge
 // → apply locally → upload). Delegates auth to googleAuth.js, the wire format to driveAppData.js, and
 // the actual merge decision to the pure functions in syncMerge.js — this module is the glue between
 // them and stateStore.js's `getState`/`setState`/`saveToLocalStorage`.
+//
+// **Manual-only syncing (TODO §3.10)**: `syncNow()` is the only function that merges, applies, or
+// uploads anything, and it only ever runs from an explicit trainer tap — the dialog's "Sync Now"
+// button, the first-connect flow, or the header cloud icon (driveSyncUi.js). The periodic timer and
+// tab-resume hook (below, and appLifecycleController.js) never call it; they call the read-only
+// `refreshSyncCounts()` instead, so a device left open on the gym floor keeps an honest ahead/behind
+// badge without ever writing to Drive or local state in the background.
 //
 // **Scope of what syncs**: the collections `recordProjections.js` projects (clients, exercises,
 // routines, sessions, history, planUpdates, notifications) — i.e. everything a backup export already
@@ -77,14 +84,29 @@ export function getAheadCount() {
   return countChangedRecords(COLLECTIONS, cachedAncestor, getState());
 }
 
-// "Remote changes not yet pulled" is always 0 immediately after a successful sync — every sync fully
-// merges remote in (TODO §3.3), so there is no partial-pull state this architecture can be in. The
-// only real information left to report is whether that number is even trustworthy right now: not
-// connected, never synced, or the last attempt failed all mean "unknown", which the badge already
-// has a signal for (`isCloudReachable` → renders "?" instead of a number). A future incremental sync
-// (the not-yet-built Changes API path, TODO §3.3) would be what makes a genuinely nonzero, live
-// behind-count possible; BEHIND_COUNT is a constant, not a stale variable, until that lands.
-const BEHIND_COUNT = 0;
+// "Remote changes not yet pulled" — kept live by refreshSyncCounts() below, not by a sync pass:
+// syncing is now manual-only (TODO §3.10), so a trainer who hasn't tapped "Sync Now" in a while still
+// needs an honest count of what's waiting on Drive. `cachedBehind` is 0 until the first counter
+// refresh resolves (boot, periodic tick, or tab resume), same "no data yet" convention as
+// `cachedAncestor`/`getAheadCount()`.
+let cachedBehind = 0;
+
+function getBehindCount() {
+  return cachedBehind;
+}
+
+// Single-listener seam (mirrors stateStore.js's onStateSaved) so app.js can re-render the header
+// badge when a counts-only refresh changes `cachedBehind` — the only path that already forces a
+// re-render, onStateSaved, only fires for LOCAL writes, which a read-only remote diff never causes.
+let countsChangedListener = null;
+
+export function onSyncCountsChanged(listener) {
+  countsChangedListener = listener;
+}
+
+function notifyCountsChanged() {
+  if (typeof countsChangedListener === "function") countsChangedListener();
+}
 
 export function driveSyncStatus() {
   const reachable = Boolean(hasStoredConsent() && lastSyncResult?.ok !== false);
@@ -96,13 +118,46 @@ export function driveSyncStatus() {
     lastSyncResult,
     intervalMinutes: getSyncIntervalMinutes(),
     ahead: getAheadCount(),
-    behind: BEHIND_COUNT,
+    behind: getBehindCount(),
   };
 }
 
-// Periodic pull (in addition to poll-on-resume): a PT-configurable "how often" for devices left open
-// on the gym floor rather than backgrounded/resumed. A plain localStorage key, not IndexedDB — this
-// is a per-device preference (like the theme choice), not domain data any schema/star-write covers.
+/**
+ * Read-only counter refresh (TODO §3.10: Drive syncing is manual-only — a trainer must tap "Sync Now"
+ * or the header cloud icon for any merge/upload to happen). Unlike syncNow(), this NEVER merges,
+ * applies, or uploads anything: it downloads the remote file purely to diff it against the last
+ * synced ancestor via `countChangedRecords()`, so the header badge's ahead/behind counts stay
+ * accurate between manual syncs without ever writing to Drive or to local state in the background.
+ * Any failure (offline, token needs an interactive re-prompt, no file yet) just leaves the counts as
+ * they were — a background counter tick failing silently is correct; a manual "Sync Now" tap is the
+ * only place a failure should surface to the trainer.
+ */
+export async function refreshSyncCounts() {
+  if (!isDriveSyncConfigured() || !hasStoredConsent() || syncing) return;
+  try {
+    const token = await requestAccessToken({ interactive: false });
+    if (!token) return;
+
+    const meta = (await readDriveSyncMeta()) || { fileId: null, ancestor: {} };
+    let fileId = meta.fileId;
+    if (!fileId) {
+      const existing = await findSyncFile(token);
+      if (existing) fileId = existing.id;
+    }
+    const remoteState = fileId ? (await downloadSyncFile(token, fileId)) || {} : {};
+    cachedBehind = countChangedRecords(COLLECTIONS, meta.ancestor || {}, remoteState);
+    notifyCountsChanged();
+  } catch (error) {
+    console.warn("Drive sync counter refresh failed:", error);
+  }
+}
+
+// Periodic counter refresh (in addition to refresh-on-resume): a PT-configurable "how often" for
+// devices left open on the gym floor rather than backgrounded/resumed. Only ever calls
+// refreshSyncCounts() below (TODO §3.10: manual-only syncing) — this interval governs how fresh the
+// header badge's numbers are, never how often an actual merge/upload happens. A plain localStorage
+// key, not IndexedDB — this is a per-device preference (like the theme choice), not domain data any
+// schema/star-write covers.
 const SYNC_INTERVAL_KEY = "librept_drive_sync_interval_minutes";
 export const DEFAULT_SYNC_INTERVAL_MINUTES = 5;
 export const MIN_SYNC_INTERVAL_MINUTES = 1;
@@ -132,14 +187,13 @@ export function setSyncIntervalMinutes(minutes) {
 let periodicTimer = null;
 
 function periodicTick() {
-  if (!isDriveSyncConfigured() || !hasStoredConsent() || syncing) return;
-  syncNow().catch((err) => console.warn("Periodic Drive sync failed:", err));
+  refreshSyncCounts();
 }
 
-/** Start (or restart, picking up a new interval) the periodic pull. Safe to call repeatedly — always
- * clears any existing timer first, so app.js's boot call and a later interval-setting change never
- * stack two timers. A no-op tick when not connected costs nothing, so this runs unconditionally; the
- * actual network gate is in periodicTick(). */
+/** Start (or restart, picking up a new interval) the periodic counter refresh. Safe to call
+ * repeatedly — always clears any existing timer first, so app.js's boot call and a later
+ * interval-setting change never stack two timers. A no-op tick when not connected costs nothing, so
+ * this runs unconditionally; the actual network gate is in refreshSyncCounts(). */
 export function startPeriodicSync() {
   if (periodicTimer) clearInterval(periodicTimer);
   periodicTimer = setInterval(periodicTick, getSyncIntervalMinutes() * 60_000);

@@ -55,7 +55,7 @@ import {
   setupRoutineForms as setupRoutineFormsController,
 } from "./controllers/routineFormsController.js";
 import { applyThemeSwitcherLabels, initTheme } from "./controllers/themeController.js";
-import { primeAheadCache } from "./data/driveSyncService.js";
+import { onSyncCountsChanged, primeAheadCache } from "./data/driveSyncService.js";
 import {
   getState,
   loadSavedState,
@@ -219,11 +219,15 @@ function saveState() {
   saveToLocalStorage();
 }
 
-// The header's ahead/behind badge re-renders itself off this ONE seam (TODO §3.9's actual fix — see
-// stateStore.js's onStateSaved doc comment) rather than needing every write call site to remember to
-// refresh it. Registered once, at module load, since renderSyncBadge() already no-ops safely if the
-// header hasn't rendered yet.
+// The header's ahead/behind badge re-renders itself off these TWO seams (TODO §3.9's actual fix —
+// see stateStore.js's onStateSaved doc comment) rather than needing every write call site to
+// remember to refresh it: onStateSaved covers the "ahead" half (any local write), and
+// onSyncCountsChanged covers the "behind" half (a read-only Drive counter refresh never touches
+// local state, so it never fires onStateSaved on its own — see driveSyncService.js). Both registered
+// once, at module load, since renderSyncBadge() already no-ops safely if the header hasn't rendered
+// yet.
 onStateSaved(renderSyncBadge);
+onSyncCountsChanged(renderSyncBadge);
 
 window.resetLibrePTData = resetLibrePTData;
 window.seedMockData = seedMockData;

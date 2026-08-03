@@ -4,7 +4,7 @@
 
 import {
   driveSyncStatus,
-  syncNow as runDriveSync,
+  refreshSyncCounts,
   startPeriodicSync as startPeriodicDriveSync,
 } from "../data/driveSyncService.js";
 import { CURRENT_SCHEMA_VERSION } from "../data/migrationSteps.js";
@@ -141,16 +141,18 @@ export function setupOnlineOfflineListeners(basePath, setOfflineCachedState) {
   });
 }
 
-// Poll-on-resume (TODO §1.5): Drive sync has no push channel (`changes.watch` needs a webhook
+// Poll-on-resume (TODO §1.5/§3.10): Drive sync has no push channel (`changes.watch` needs a webhook
 // endpoint this app deliberately doesn't run), so the next best trigger is "the trainer came back to
 // the tab" — a real device switch is exactly when a phone's tab was backgrounded and is now visible
-// again. A no-op call when nothing changed is cheap; `syncNow()` itself no-ops when not connected.
+// again. Only refreshes the ahead/behind counters (syncing itself is manual-only, see
+// driveSyncService.js's module doc) — a no-op call when nothing changed is cheap either way, and
+// `refreshSyncCounts()` itself no-ops when not connected.
 export function setupDriveSyncOnResume() {
   if (typeof document === "undefined") return;
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState !== "visible") return;
     if (!driveSyncStatus().connected) return;
-    runDriveSync().catch((err) => console.warn("Drive sync on resume failed:", err));
+    refreshSyncCounts();
   });
 }
 

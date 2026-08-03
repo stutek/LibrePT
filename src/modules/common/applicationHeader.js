@@ -86,10 +86,11 @@ export function renderSyncBadge() {
     return;
   }
 
-  // Real counts (TODO §3.9/§3.3, no longer a mock): `local` is how many of THIS device's own
+  // Real counts (TODO §3.9/§3.3/§19, no longer a mock): `local` is how many of THIS device's own
   // records differ from the last Drive-synced ancestor (0 with no Drive target configured — see
-  // driveSyncService.js's getAheadCount doc comment); `remote` is always 0 right after any
-  // successful sync, since a sync fully merges remote in, and is otherwise unknown ("?" below).
+  // driveSyncService.js's getAheadCount doc comment); `remote` is a read-only diff against the same
+  // ancestor, kept fresh by periodic/resume counter refreshes rather than a background sync (syncing
+  // itself is manual-only) — "unknown" ("?" below) only when cloud is unreachable or unconfigured.
   const status = driveSyncStatus();
   const {
     ahead: local,
