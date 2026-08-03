@@ -1,0 +1,32 @@
+/* modules/session/sessionInviteDialog.css — the "Send calendar invites" dialog
+   sessionInviteDialog.js renders after a PT assigns new participants to a session. */
+
+.session-invite-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  margin-bottom: 8px;
+}
+.session-invite-name {
+  font-weight: 600;
+  font-size: 13px;
+}
+.session-invite-send-btn {
+  font-size: 12px;
+  padding: 10px 14px;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+.session-invite-send-btn.disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+.session-invite-send-btn.session-invite-sent {
+  background: var(--success);
+  border-color: var(--success);
+  color: #fff;
+}

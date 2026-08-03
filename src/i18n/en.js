@@ -218,6 +218,18 @@ export const en = {
   program_not_defined: "Program Not Defined",
   no_members_assigned: "No Participants",
   session_completed: "Completed",
+  session_invite_title: "Send calendar invites",
+  session_invite_desc:
+    "Newly assigned participants can be sent a calendar invite for this session.",
+  session_invite_send: "Send invite",
+  session_invite_sent: "Invite sent",
+  session_invite_no_email: "No email address on client profile",
+  session_invite_send_to: "Send invite to",
+  session_invite_subject: "Training session",
+  session_invite_body_greeting: "Hi",
+  session_invite_body: "You've been scheduled for a session",
+  session_invite_body_attach:
+    "The calendar invite file just downloaded — attach it to this email before sending.",
   today: "Today",
   tomorrow: "Tomorrow",
   yesterday: "Yesterday",

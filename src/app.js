@@ -174,6 +174,10 @@ import {
   renderIdleSessionBar,
   updateSessionBarTimer,
 } from "./modules/session/sessionBar.js";
+import {
+  initSessionInviteDialog,
+  openSessionInviteDialog,
+} from "./modules/session/sessionInviteDialog.js";
 import { initSessionTitleBar, renderSessionTitle } from "./modules/session/sessionTitleBar.js";
 import {
   focusSessionsColumn,
@@ -314,6 +318,8 @@ async function init() {
   setupRoutineForms();
   setupExerciseForms();
 
+  initSessionInviteDialog({ getState, t });
+
   renderWorkoutSetupView();
   initWorkoutSetup({
     getState,
@@ -328,6 +334,7 @@ async function init() {
     scheduleTimelineSettle,
     saveToLocalStorage: saveState,
     rerenderSessions: renderSessions,
+    openSessionInviteDialog,
   });
   setupWorkoutSetup();
   setupActiveSession();

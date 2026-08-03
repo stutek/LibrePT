@@ -102,6 +102,21 @@ exclusive states, so the PT reads a card's state at a glance without opening it:
   time** beyond what the trainer confirms; a fallback (the scheduled slot length) covers completed
   bookings from before this recording existed.
 
+### 3.1 PT-Side Assignment & Calendar Invite (TODO §1)
+
+Client assignment is not only client-initiated: the card's Edit button opens the same
+participant-assignment form used to create a session, letting the PT check clients directly onto
+`participants` — this complements, and does not replace, the Google-hosted self-subscription flow
+([UC4](uc4_client_self_subscription.md)).
+
+- On save, any **newly** assigned participant (diffed against the session's prior `participants`,
+  so re-saving unchanged assignments never re-prompts) triggers a "Send calendar invites" dialog.
+- LibrePT has no backend/SMTP relay, so a client is offered a downloadable `.ics` file plus a
+  prefilled `mailto:` compose to send it in — not an automated send like UC4's Google-triggered
+  invite email.
+- A client with no email on record gets a disabled "Send invite" affordance with a tooltip, the
+  same fallback used elsewhere for a missing email — assignment itself is never blocked on it.
+
 ---
 
 ## 4. Deep-Linkable Clean URLs
@@ -192,6 +207,7 @@ not-found view (`#view-error`) *inside* the content area:
 
 | Specification Requirement | Target Implementation / Test |
 | :--- | :--- |
+| Newly-assigned participants trigger a calendar-invite dialog; re-saving unchanged assignments does not re-prompt | [../tests/e2e/test_session_invite_dialog.py](../tests/e2e/test_session_invite_dialog.py) |
 | Open-on-today, arrow steps, Today tag/button, prev/next edge bounds, logo-home | [../tests/e2e/test_sessions_dashboard.py](../tests/e2e/test_sessions_dashboard.py) · `test_sessions_day_navigation` |
 | Scrolling the timeline retitles the bar to the day-group that settles under focus | [../tests/e2e/test_sessions_dashboard.py](../tests/e2e/test_sessions_dashboard.py) · `test_scrolling_the_timeline_updates_the_focused_day` |
 | Date-jump control scrolls to a chosen date, falling back to the nearest real content | [../tests/e2e/test_sessions_dashboard.py](../tests/e2e/test_sessions_dashboard.py) · `test_date_jump_control_scrolls_to_chosen_date` |

@@ -153,6 +153,39 @@ function computeSessionDayBucket(startDateTime) {
   return "yesterday";
 }
 
+// Diffs against the session's participants as they stood before this save, so re-saving an
+// unchanged assignment never re-prompts an invite for someone already assigned (TODO §1.1).
+function notifyNewlyAssignedParticipants(
+  deps,
+  {
+    previousParticipants,
+    clientRoutines,
+    sessionId,
+    sessionName,
+    sessionDate,
+    startTime,
+    endTime,
+    location,
+    t,
+  },
+) {
+  if (!deps.openSessionInviteDialog) return;
+  const newlyAssignedIds = clientRoutines
+    .map((cr) => cr.clientId)
+    .filter((id) => !previousParticipants.includes(id));
+  if (newlyAssignedIds.length === 0) return;
+  deps.openSessionInviteDialog({
+    sessionId,
+    sessionName: sessionName || t("workout_setup_title") || "Workout Session",
+    location,
+    dateLabel: sessionDate,
+    timeLabel: computeTimeLabel(startTime, endTime, t),
+    startDate: new Date(`${sessionDate}T${startTime || "00:00"}`),
+    endDate: new Date(`${sessionDate}T${endTime || startTime || "00:00"}`),
+    clientIds: newlyAssignedIds,
+  });
+}
+
 function upsertSessionRecord(sessions, sessionRecord) {
   const existingIndex = sessions.findIndex((b) => b.id === sessionRecord.id);
   if (existingIndex >= 0) {
@@ -285,6 +318,13 @@ export function setupEditSessionControl() {
     const timeLabel = computeTimeLabel(startTime, endTime, t);
     const sessionId = editingSessionId || newRecordId();
 
+    // Captured before commitRealSession mutates state.sessions: the diff against this is what
+    // decides who's a *newly* assigned participant (TODO §1.1) — re-saving an unchanged session
+    // must not re-prompt an invite for someone already assigned.
+    const previousParticipants = editingSessionId
+      ? (deps.getState().sessions || []).find((s) => s.id === editingSessionId)?.participants || []
+      : [];
+
     const sessionMeta = isPlanningModeActive
       ? buildPlanningSessionMeta({ sessionId, sessionName, sessionDate, timeLabel, location, t })
       : commitRealSession(deps, {
@@ -297,6 +337,20 @@ export function setupEditSessionControl() {
           clientRoutines,
           t,
         });
+
+    if (!isPlanningModeActive) {
+      notifyNewlyAssignedParticipants(deps, {
+        previousParticipants,
+        clientRoutines,
+        sessionId,
+        sessionName,
+        sessionDate,
+        startTime,
+        endTime,
+        location,
+        t,
+      });
+    }
 
     clearEditSessionDraft();
     editingSessionId = null;

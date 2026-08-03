@@ -74,6 +74,7 @@ module, listed in the table below alongside that module's `.js`.
 | [src/data/driveSyncConfig.js](src/data/driveSyncConfig.js) | `data` | The one deployment constant Drive sync needs (TODO §1.5): `GOOGLE_DRIVE_CLIENT_ID`, blank by default and a valid "not configured" state until the maintainer fills it in. |
 | [src/data/driveAppData.js](src/data/driveAppData.js) | `data` | Google Drive `appDataFolder` REST client (TODO §1.5/§3.3): find/download/create/update the app's one hidden sync file. `fetchImpl`-injectable for tests. |
 | [src/data/driveSyncService.js](src/data/driveSyncService.js) | `data` | Orchestrates one Drive sync pass (TODO §1.5/§3.3): auth → download → three-way merge → apply locally → upload → record the new ancestor. |
+| [src/data/calendarInvite.js](src/data/calendarInvite.js) | `data` | Builds an RFC 5545 `.ics` VEVENT for a PT-assigned session (TODO §1.1) — LibrePT has no backend/SMTP relay, so this is a downloadable invite file, not a sent email. |
 | [src/i18n/index.js](src/i18n/index.js) | `i18n` | Translation registry: one flat key→string map per locale (`en.js`, `sl.js`). Key parity enforced by unit tests. |
 | [src/modules/sessionList/sessionsView.js](src/modules/sessionList/sessionsView.js) | `view` | Modular view renderer for the Sessions dashboard: merges/sorts all sessions and groups them into the continuous timeline's per-day sections; owns its `<section id="view-clients">` shell markup. |
 | [src/modules/sessionList/sessionsView.css](src/modules/sessionList/sessionsView.css) | `styles` | Session booking cards, the sessions title bar/date-picker, the continuous timeline, and the floating "Create Session" button. |
@@ -99,6 +100,8 @@ module, listed in the table below alongside that module's `.js`.
 | [src/modules/session/editSessionView.js](src/modules/session/editSessionView.js) | `view` | Modular view renderer for Edit Session & Setup view; owns the `#view-workout-setup` shell and `#dialog-workout-setup`'s markup. |
 | [src/modules/session/editSessionView.css](src/modules/session/editSessionView.css) | `styles` | The compact workout-setup dialog: participant picker, checklists. |
 | [src/modules/session/editSessionControl.js](src/modules/session/editSessionControl.js) | `component` | Pre-session edit/setup control modal dialog. |
+| [src/modules/session/sessionInviteDialog.js](src/modules/session/sessionInviteDialog.js) | `component` | "Send calendar invites" dialog (TODO §1.1): offers each newly PT-assigned participant a downloadable `.ics` + prefilled mailto compose; owns `#dialog-session-invite`'s markup. |
+| [src/modules/session/sessionInviteDialog.css](src/modules/session/sessionInviteDialog.css) | `styles` | The invite dialog's per-participant row and send-button states. |
 | [src/modules/plans/plansView.js](src/modules/plans/plansView.js) | `view` | Modular view renderer for Plans (formerly Routines) catalog and template editor; owns `#view-routines` and `#dialog-routine`'s markup. |
 | [src/modules/plans/plansView.css](src/modules/plans/plansView.css) | `styles` | Routine template cards + the routine builder dialog's exercise list rows. |
 | [src/modules/plans/planAdjustments.js](src/modules/plans/planAdjustments.js) | `component` | Pending Plan Adjustments deck & interactive Apply wizard; owns `#view-adjustments` and `#dialog-apply-adjustment`'s markup. |
@@ -114,6 +117,7 @@ module, listed in the table below alongside that module's `.js`.
 | [src/modules/common/utils.js](src/modules/common/utils.js) | `helper` | Shared formatting, date conversion, and string helper functions. |
 | [src/modules/common/recordId.js](src/modules/common/recordId.js) | `helper` | Record identity (TODO §18.2): UUIDv7 as fixed-width base62 — cryptographic collision resistance, and string sort order equal to creation order. |
 | [src/modules/common/dom.js](src/modules/common/dom.js) | `helper` | DOM helper utilities and modal helpers. |
+| [src/modules/common/download.js](src/modules/common/download.js) | `helper` | Blob-anchor client-side file download, shared by JSON backup export and calendar-invite `.ics` download. |
 | [src/modules/common/repsAndLoad.js](src/modules/common/repsAndLoad.js) | `helper` | Polymorphic reps and equipment-derived load helpers. |
 | [src/modules/common/exerciseModality.js](src/modules/common/exerciseModality.js) | `helper` | Exercise modality axis (strength/cardio/stretch/balance) and per-metric target formatting (time/distance/calories/watts/hold). |
 | [src/modules/common/exerciseStandard.js](src/modules/common/exerciseStandard.js) | `helper` | Open-standard crosswalk: maps the catalog's category/equipment onto the wger dataset by canonical name for interchangeable JSON/CSV exports (UC6 §6). |

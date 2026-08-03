@@ -18,15 +18,14 @@ Canonical context: [README.md](README.md) (architecture & features), [use_cases/
 
 ---
 
-## 1. Scheduling & Bookings
+## 1. Scheduling & Sessions
 
-### 1.1 [ ] PT-side client assignment to a session
+### 1.1 [x] PT-side client assignment to a session
 The session card on the home dashboard must let the **PT assign clients to a session directly**, not only rely on client self-subscription via the Google-hosted booking page.
 
-- Assignment happens from the session card on the dashboard.
-- Assigned clients are **notified by a calendar invite email**, when an email address exists for them in the database.
-- Complements, does not replace, the existing self-subscription flow ([uc4_client_self_subscription.md](use_cases/uc4_client_self_subscription.md)).
-- **Open**: clients with no email on record — assign silently, or prompt for an address?
+- **Assignment already existed**: the session card's Edit button (`.btn-edit-session`, [sessionCard.js](src/modules/sessionList/sessionCard.js)) opens the same "Start Workout Session" participant-assignment form ([editSessionControl.js](src/modules/session/editSessionControl.js)/[editSessionView.js](src/modules/session/editSessionView.js)) used to create a session — a PT has always been able to check/uncheck clients onto a session's `participants` array directly, independent of the Google-hosted self-subscription page. What this item actually added is the notification half.
+- **Built — calendar invite, no email sent**: LibrePT has no backend/SMTP relay ([TODO §1.5](#15--brainstorm-google-calendar-integration--source-of-truth-occupancy-and-data-processor-exposure)'s "no backend of our own" stance), so "notified by a calendar invite email" is a downloadable `.ics` file ([calendarInvite.js](src/data/calendarInvite.js), RFC 5545) plus a prefilled `mailto:` compose — the same honest, no-network pattern as the existing consent-email button in [clientsView.js](src/modules/clients/clientsView.js). On saving a session with newly-assigned participants (diffed against the session's previous `participants`, so re-saving unchanged assignments never re-prompts), [sessionInviteDialog.js](src/modules/session/sessionInviteDialog.js) opens listing each new participant with a "Send invite" action.
+- **Open question resolved — no email on record**: assign silently, matching the existing `client.email || t("not_specified")` fallback pattern elsewhere — the invite row shows a disabled "Send invite" button with a tooltip explaining why, rather than blocking assignment or prompting for an address inline.
 
 ### 1.2 [ ] Simultaneous sessions merged into one clipboard: multi-line titles + per-participant tags
 When several sessions run in **the same time slot with different programmes**, the clipboard must merge **all participants into a single view**, with enough visual separation to tell which participant belongs to which session/programme.

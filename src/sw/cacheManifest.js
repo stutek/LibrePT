@@ -11,7 +11,7 @@
 // atomic version. The worker's own sub-scripts (sw.js + this sw/ folder) are deliberately NOT in ASSETS:
 // they are the worker's script resources, kept coherent by the browser's own SW-update mechanism.
 self.swCacheManifest = (() => {
-  const CACHE_NAME = "librept-v43";
+  const CACHE_NAME = "librept-v44";
   const ASSETS = [
     "./",
     "./index.html",
@@ -37,6 +37,7 @@ self.swCacheManifest = (() => {
     "./modules/exercises/exercisePicker.css",
     "./modules/history/historyView.css",
     "./modules/session/editSessionView.css",
+    "./modules/session/sessionInviteDialog.css",
     "./modules/sessionList/sessionsView.css",
     "./app.js",
     "./theme-boot.js",
@@ -70,6 +71,7 @@ self.swCacheManifest = (() => {
     "./modules/common/notificationArea.js",
     "./modules/common/populateDropdownSelectors.js",
     "./modules/common/buildInfoDialog.js",
+    "./modules/common/download.js",
     // Seed data & stores
     "./data/index.js",
     "./data/exercises.js",
@@ -93,6 +95,7 @@ self.swCacheManifest = (() => {
     "./data/driveSyncConfig.js",
     "./data/driveAppData.js",
     "./data/driveSyncService.js",
+    "./data/calendarInvite.js",
     // Translations (one file per locale, registered in i18n/index.js)
     "./i18n/index.js",
     "./i18n/en.js",
@@ -118,6 +121,7 @@ self.swCacheManifest = (() => {
     "./modules/session/editSessionControl.js",
     "./modules/session/editSessionView.js",
     "./modules/session/sessionBar.js",
+    "./modules/session/sessionInviteDialog.js",
     "./modules/session/sessionTitleBar.js",
     "./modules/sessionList/sessionCard.js",
     "./modules/sessionList/sessionTimeline.js",

@@ -15,22 +15,10 @@
 
 import { describeMigration, migrateState } from "../../data/schemaMigrations.js";
 import { renderMarkupOnce } from "./dom.js";
+import { downloadFile } from "./download.js";
 import { catalogToCsv, catalogToInterchange } from "./exerciseStandard.js";
 
 let deps = null;
-
-// Download an in-memory string as a file, reusing one blob-anchor pattern for every export action.
-function downloadFile(contents, filename, mimeType) {
-  const blob = new Blob([contents], { type: mimeType });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = filename;
-  document.body.appendChild(anchor);
-  anchor.click();
-  document.body.removeChild(anchor);
-  URL.revokeObjectURL(url);
-}
 
 function catalogFilename(extension) {
   return `librept_catalog_${new Date().toISOString().substring(0, 10)}.${extension}`;
