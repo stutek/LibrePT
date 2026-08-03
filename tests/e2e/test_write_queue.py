@@ -126,6 +126,13 @@ def test_writes_enqueued_while_draining_are_picked_up(page, local_server):
 
 
 def test_flush_on_an_idle_queue_resolves_immediately(page, local_server):
+    # Backup export awaits a flush before reading; an idle queue must not add latency to it.
+    # Pinned via microtask ordering, not a wall-clock budget: flushWrites() returns
+    # Promise.resolve() when idle, so its .then() callback must already have run by the time a
+    # single extra `await Promise.resolve()` in this same async function resumes (that await's own
+    # continuation is queued behind the .then() one). A wall-clock threshold here previously flaked
+    # on shared CI runners — it was timing a Playwright IPC round-trip for a synchronous return, not
+    # anything the app actually does slowly.
     page.goto(local_server)
     page.wait_for_timeout(300)
 
@@ -134,10 +141,10 @@ def test_flush_on_an_idle_queue_resolves_immediately(page, local_server):
             const url = new URL('data/writeQueue.js', document.baseURI).href;
             const m = await import(url);
             m.resetWriteQueue();
-            const started = performance.now();
-            await m.flushWrites();
-            return { elapsed: performance.now() - started };
+            let resolved = false;
+            m.flushWrites().then(() => { resolved = true; });
+            await Promise.resolve();
+            return { resolved };
         }"""
     )
-    # Backup export awaits a flush before reading; an idle queue must not add latency to it.
-    assert r["elapsed"] < 50
+    assert r["resolved"] is True
