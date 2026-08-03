@@ -1,0 +1,1 @@
+Before doing anything else in this repository, read and follow `AGENT_RULES.md` in the repo root. It contains the full operating rules (git flow, pipeline verification, architecture conventions) for any AI agent working on LibrePT — Codex included.
