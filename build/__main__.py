@@ -9,7 +9,8 @@ from . import (
     run_lint,
     run_tests,
     run_stage_1_parallel,
-    run_stage_2_parallel,
+    run_stage_2_e2e,
+    run_stage_3_zap,
     run_build,
 )
 
@@ -34,14 +35,16 @@ if __name__ == "__main__":
         print(f"\n  ✓ Test suite passed. ({_fmt_elapsed(time.monotonic() - start)})")
     elif arg == "check":
         run_stage_1_parallel()
-        run_stage_2_parallel()
+        run_stage_2_e2e()
+        run_stage_3_zap()
         print(
             f"\n  ✓ Check finished (staged parallel validation passed). "
             f"({_fmt_elapsed(time.monotonic() - start)})"
         )
     else:
         run_stage_1_parallel()
-        run_stage_2_parallel()
+        run_stage_2_e2e()
+        run_stage_3_zap()
         run_build()
         print(
             f"\n  ✓ Build finished (dist/ is ready to deploy). "

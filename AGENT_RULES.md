@@ -34,7 +34,7 @@ Every response and tool action must drive measurable, continuous progress toward
    **Command reference:**
    | Command | What it does |
    | :--- | :--- |
-   | `.venv/bin/python -m build check` | The gate: Stage 1 + Stage 2 below, staged (Stage 2 only runs if Stage 1 is clean). This is what "run the pipeline" means. |
+   | `.venv/bin/python -m build check` | The gate: Stage 1 → Stage 2 → Stage 3 below, staged (each stage only runs if the previous is clean). This is what "run the pipeline" means. |
    | `.venv/bin/python -m build` | Full build: env check → the same tests → bundle `src/` into `dist/`. |
    | `.venv/bin/python -m deploy` | Publish the built `dist/`. |
    | `.venv/bin/python -m build && .venv/bin/python -m deploy` | Full chain. |
@@ -44,11 +44,20 @@ Every response and tool action must drive measurable, continuous progress toward
    `tests/test_app.py`), and the static security audits (HTML-sink/CSP escaping audit via
    `build/frontend_audit.py`, the OKF doc-graph link checker, the CI pipeline-gating checker).
 
-   **Stage 2 (only if Stage 1 is clean — also runs its tasks in parallel):** the full Playwright e2e
-   suite (`tests/e2e/`, itself fanned out across workers via `pytest-xdist`)
-   and an OWASP ZAP baseline scan against the running dev server.
+   **Stage 2 (only if Stage 1 is clean):** the full Playwright e2e suite (`tests/e2e/`, itself
+   fanned out across workers via `pytest-xdist`) against the local dev server.
 
-   Both stages together typically take 5-15 minutes; expect it, don't interrupt it. Rules:
+   **Stage 3 (only if Stage 2 is clean):** an OWASP ZAP baseline scan against that same dev
+   server. **Sequential with Stage 2, not concurrent** (`build/__init__.py`'s `run_stage_2_e2e`/
+   `run_stage_3_zap`) — the two used to run in one `ThreadPoolExecutor`, and ZAP's request flood
+   against the SAME local `:8081` server while `pytest-xdist` workers were mid-suite produced
+   `Page.goto` timeouts across specs with no relation to whatever change was under test (seen
+   2026-08-03: 30 failures, all `Timeout 30000ms exceeded`). In CI this was never an issue — e2e
+   and ZAP are already separate jobs on separate runners, each with its own dev server — so only
+   the local path needed the split. This is traceable resource contention, not the "probably
+   flaky" hand-wave forbidden below; don't re-parallelize the two locally without addressing that.
+
+   All three stages together typically take 5-15 minutes; expect it, don't interrupt it. Rules:
    - **Squeaky clean, always — zero warnings, not just zero failures.** The bar is a *clean* build, not a *green-enough* one. Every gate stage — lint, format, unit, e2e, dependency audit, dynamic security, **and the OWASP ZAP scan** — must report **no warnings and no findings**. For ZAP specifically that means `WARN-NEW: 0` **and** `FAIL-NEW: 0`, not merely no FAILs. A warning is either **fixed** at its source or **explicitly suppressed with a written justification** — never left to print and pass.
    - **A suppression is only ever a statement that there is no issue, never a way to defer one.** A gate suppression is legitimate in exactly one case: the finding is a false positive or genuinely does not apply to this architecture (e.g. a ZAP `-c` ignore for a CSRF check on an app with no server-side state-changing form). It is never legitimate as a way to park a *real* finding — a complexity violation, a genuine lint issue — for later. If the gate is right that something is wrong, fix it in the same change; do not add it to an allowlist, `# noqa`, or ignore file "for now." **No pipeline gate may carry a mechanism for allowlisting real, unfixed debt** (e.g. `agent_tools/complexity.py`'s old `PRE_EXISTING_ALLOWLIST`, or a bare `# noqa: C901` with no non-applicability justification) — every function a gate flags gets fixed in the change that touches the gate, full stop. Each justified suppression must also be periodically re-verified against the current architecture, not assumed valid forever — a false-positive rationale can stop being true as the app changes (e.g. adding a server-side form would retire the CSRF ignore).
    - **Never swallow a non-zero exit code.** A gate step that exits non-zero (including ZAP exit `2` = warnings and exit `3` = the scan errored / could not reach the target) MUST fail the build. Printing "completed with warnings" and returning success is forbidden — that pattern once hid a ZAP scan that was not even reaching the running app. If a stage cannot run, that is a failure to fix, not a pass to log.

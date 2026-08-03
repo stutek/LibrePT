@@ -269,6 +269,15 @@ def main():
     global VERBOSE
     VERBOSE = bool(getattr(args, "verbose", False))
     ThreadingHTTPServer.allow_reuse_address = True
+    # socketserver's default TCP listen backlog is 5 — plenty for one browser, not for a parallel
+    # e2e run. A fresh browser context opens ~6 simultaneous connections just to fetch one page's
+    # ~89 assets, and pytest-xdist starts several contexts within the same instant; that burst can
+    # exceed 5 pending connections, so a page.goto sits waiting on the kernel's SYN queue rather
+    # than on anything the app or Chromium is doing (root-caused 2026-08-03, see build/__init__.py's
+    # run_e2e_tests `-n` comment). Must be set as a class attribute before the server is
+    # constructed, the same way allow_reuse_address is above: TCPServer.__init__ calls listen()
+    # with this value immediately, so setting it on the instance afterwards would be too late.
+    ThreadingHTTPServer.request_queue_size = 128
     server = ThreadingHTTPServer(("", args.port), SubPathHandler)
     print(
         "LibrePT dev server: http://localhost:%d%s/  (root redirects here)"

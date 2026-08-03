@@ -134,12 +134,28 @@ def test_flush_on_an_idle_queue_resolves_immediately(page, local_server):
     # on shared CI runners — it was timing a Playwright IPC round-trip for a synchronous return, not
     # anything the app actually does slowly.
     page.goto(local_server)
-    page.wait_for_timeout(300)
 
+    # Deterministic, not a wall-clock guess: `resetWriteQueue()` clears the queued task list but
+    # deliberately does NOT force `draining` false — a real in-flight `await task()` from the app's
+    # own boot-time write (seedMockData's one `saveToLocalStorage()` call, stateStore.js) must be
+    # allowed to finish naturally, because forcing it off here would let a second, concurrently-
+    # triggered `drain()` start pulling from the same queue array before the first one's current
+    # task settles — exactly the out-of-order, concurrent-write bug this module exists to prevent
+    # (see writeQueue.js's own module comment). So the test cannot fix the race by hacking the app;
+    # it has to actually wait for that write to genuinely finish before asserting anything about
+    # "idle" — a fixed `wait_for_timeout` here was itself a hidden wall-clock guess (this is the
+    # exact flake class the microtask-ordering pin below already eliminated once, reintroduced one
+    # step earlier). `await m.flushWrites()` below waits on the REAL in-flight promise rather than
+    # polling a snapshot of `.draining` — a poll-then-act check has its own gap between "observed
+    # idle" and "acted on it" that a real await does not, and boot enqueues its one write exactly
+    # once (nothing here is periodic), so once this resolves the queue stays idle for the rest of
+    # this same synchronous continuation.
     r = page.evaluate(
         """async () => {
             const url = new URL('data/writeQueue.js', document.baseURI).href;
             const m = await import(url);
+            await m.flushWrites();
+
             m.resetWriteQueue();
             let resolved = false;
             m.flushWrites().then(() => { resolved = true; });

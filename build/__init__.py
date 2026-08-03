@@ -401,6 +401,21 @@ def run_unit_tests():
 E2E_ARTIFACT_DIR = os.path.join(REPORT_DIR, "e2e-artifacts")
 
 
+def _e2e_worker_count():
+    """Half the visible core count, not a hardcoded number — contributors run this on very
+    different hardware, and a fixed "8" is either wasted (a 4-core laptop oversubscribes worse
+    than -n auto ever would) or needlessly conservative (a 32-core CI box gets the same headroom
+    ratio as this repo's 16-core dev machine, one Chromium instance per two cores, at half the
+    wall time). See run_e2e_tests' docstring for why it's half of the count, not the count itself:
+    each headless Chromium instance fans out its own renderer/GPU/sandbox processes, and giving
+    every one a full core to itself (`-n auto`) still lets those processes starve each other's
+    compositor. `os.cpu_count()` can return None (containers with no /proc affinity info); fall
+    back to a serial run rather than crashing the gate over an unknowable core count.
+    """
+    cpu_count = os.cpu_count() or 2
+    return max(1, cpu_count // 2)
+
+
 def run_e2e_tests():
     """Runs Playwright browser E2E tests in parallel (every test under tests/e2e/).
 
@@ -425,18 +440,34 @@ def run_e2e_tests():
     """
     print("\n  Running E2E Browser Tests (parallel)...")
     venv_python = venv_python_path()
+    worker_count = _e2e_worker_count()
     returncode, output, path = run_logged(
         [
             venv_python,
             "-m",
             "pytest",
             "-n",
-            "8",
-            # Fixed at 8, not "auto" (= nproc, 16 here): at full core-count parallelism, headless
-            # Chromium's own per-instance process fan-out (renderer, GPU, sandbox processes) creates
-            # enough contention to intermittently starve compositor frame production — timing-
-            # sensitive tests failed under -n auto that were reliable in isolation and even reliable
-            # at -n 4. Half the cores trades some wall-clock time for actually deterministic runs.
+            str(worker_count),
+            # Half the visible cores (_e2e_worker_count), not "auto" (= the full count): at full
+            # core-count parallelism, headless Chromium's own per-instance process fan-out
+            # (renderer, GPU, sandbox processes) creates enough contention to intermittently starve
+            # compositor frame production — timing-sensitive tests failed under -n auto that were
+            # reliable in isolation. Half the cores trades some wall-clock time for actually
+            # deterministic runs, on any machine this happens to run on, not just this repo's.
+            #
+            # 2026-08-03: on this repo's 16-core dev machine, two consecutive full runs at -n 8
+            # each dropped a different, disjoint set of ~7 tests to a `Page.goto` 30s timeout (all
+            # passed cleanly in isolation) — NOT the Chromium-side contention above, which would
+            # show up as flaky rendering/timing assertions, not navigation itself failing to
+            # complete. Root cause was the dev server (deploy/local_http_server.py):
+            # `socketserver`'s default TCP listen backlog is 5, and a fresh browser context opens
+            # ~6 simultaneous connections just to fetch one page's ~89 assets — worker_count
+            # contexts starting near-simultaneously (pytest-xdist's loadfile distribution) could
+            # burst past that backlog, so `Page.goto` waited on a connection sitting in the
+            # kernel's SYN queue rather than on anything the app or Chromium was doing. Fixed at
+            # the actual bottleneck (`request_queue_size` raised there), not by lowering
+            # parallelism — slowing the suite down would only have hidden the same server-side
+            # limit on faster hardware, not removed it.
             "--dist=loadfile",
             "-q",
             "--tb=long",
@@ -689,37 +720,33 @@ def run_stage_1_parallel():
     print("\n  ✓ Stage 1 completed cleanly!")
 
 
-def run_stage_2_parallel():
-    """Stage 2: Runs the E2E browser suite and the OWASP ZAP scan concurrently.
+def run_stage_2_e2e():
+    """Stage 2: Runs the E2E browser suite.
 
-    The static security audits moved to stage 1 — they are file analysis, not dynamic checks."""
-    import concurrent.futures
-
-    print("\n=== Stage 2: E2E Browser Tests & OWASP ZAP Scan (Parallel Execution) ===")
-    tasks = {
-        "E2E Browser Tests": run_e2e_tests,
-        "OWASP ZAP Scan": run_owasp_zap_scan,
-    }
-
-    failures = []
-    with concurrent.futures.ThreadPoolExecutor(max_workers=len(tasks)) as executor:
-        future_to_name = {executor.submit(task): name for name, task in tasks.items()}
-        for future in concurrent.futures.as_completed(future_to_name):
-            name = future_to_name[future]
-            try:
-                future.result()
-            except SystemExit as e:
-                if e.code != 0:
-                    failures.append(name)
-            except Exception as e:
-                print(f"  ✗ Task '{name}' raised exception: {e}")
-                failures.append(name)
-
-    if failures:
-        print(f"\n  ✗ Stage 2 failed in tasks: {', '.join(failures)}")
-        print(f"    Digests above; full runner logs in {REPORT_DIR}/")
-        sys.exit(1)
+    The static security audits moved to stage 1 — they are file analysis, not dynamic checks.
+    Split from the ZAP scan (stage 3, run sequentially after this one): in CI the two are already
+    separate jobs on separate runners, each hitting its own dev server, so they never contend. The
+    local `build check`/`build` path used to run them concurrently via one ThreadPoolExecutor
+    against the SAME local :8081 server — ZAP's baseline scan floods it with requests while
+    pytest-xdist's workers are mid-suite, and that contention produced `Page.goto` timeouts across
+    unrelated specs (seen 2026-08-03: 30 failures, all `Timeout 30000ms exceeded`, with no relation
+    to whatever the change under test touched). Running sequentially locally too trades some wall
+    time for a gate that does not spuriously fail — matching AGENT_RULES' "never hand-wave a
+    failure as probably flaky" stance: this was traceable to a real, avoidable contention source,
+    not an unexplained flake to shrug off.
+    """
+    print("\n=== Stage 2: E2E Browser Tests ===")
+    run_e2e_tests()
     print("\n  ✓ Stage 2 completed cleanly!")
+
+
+def run_stage_3_zap():
+    """Stage 3: Runs the OWASP ZAP baseline scan, alone, after Stage 2's e2e suite has released
+    the dev server — see run_stage_2_e2e's docstring for why this no longer runs concurrently
+    with e2e locally."""
+    print("\n=== Stage 3: OWASP ZAP Security Scan ===")
+    run_owasp_zap_scan()
+    print("\n  ✓ Stage 3 completed cleanly!")
 
 
 def run_lint():
