@@ -15,9 +15,31 @@ import os
 import sys
 import shutil
 import subprocess
+import time
 
 from build.frontend_audit import audit_html_sinks, compare_csp
 from build.testreport import REPORT_DIR, failed_test_ids, print_digest, run_logged
+
+
+def _timed_task(name, fn):
+    """Run one pipeline task, always printing its wall-clock time — pass or fail — so a slow gate
+    step is visible without re-running it under `time` by hand. Re-raises whatever `fn` raised
+    (SystemExit or otherwise) so the caller's existing failure handling is unchanged."""
+    start = time.monotonic()
+    try:
+        fn()
+    except SystemExit as e:
+        elapsed = time.monotonic() - start
+        mark = "✓" if e.code in (0, None) else "✗"
+        print(f"    ⏱ {name}: {elapsed:.1f}s {mark}")
+        raise
+    except Exception:
+        elapsed = time.monotonic() - start
+        print(f"    ⏱ {name}: {elapsed:.1f}s ✗")
+        raise
+    else:
+        elapsed = time.monotonic() - start
+        print(f"    ⏱ {name}: {elapsed:.1f}s ✓")
 
 
 def check_environment():
@@ -699,9 +721,13 @@ def run_stage_1_parallel():
         "Cyclomatic Complexity": run_complexity_check,
     }
 
+    stage_start = time.monotonic()
     failures = []
     with concurrent.futures.ThreadPoolExecutor(max_workers=len(tasks)) as executor:
-        future_to_name = {executor.submit(task): name for name, task in tasks.items()}
+        future_to_name = {
+            executor.submit(_timed_task, name, task): name
+            for name, task in tasks.items()
+        }
         for future in concurrent.futures.as_completed(future_to_name):
             name = future_to_name[future]
             try:
@@ -712,12 +738,15 @@ def run_stage_1_parallel():
             except Exception as e:
                 print(f"  ✗ Task '{name}' raised exception: {e}")
                 failures.append(name)
+    stage_elapsed = time.monotonic() - stage_start
 
     if failures:
-        print(f"\n  ✗ Stage 1 failed in tasks: {', '.join(failures)}")
+        print(
+            f"\n  ✗ Stage 1 failed in tasks: {', '.join(failures)} ({stage_elapsed:.1f}s)"
+        )
         print(f"    Digests above; full runner logs in {REPORT_DIR}/")
         sys.exit(1)
-    print("\n  ✓ Stage 1 completed cleanly!")
+    print(f"\n  ✓ Stage 1 completed cleanly! ({stage_elapsed:.1f}s)")
 
 
 def run_stage_2_e2e():
@@ -736,8 +765,9 @@ def run_stage_2_e2e():
     not an unexplained flake to shrug off.
     """
     print("\n=== Stage 2: E2E Browser Tests ===")
-    run_e2e_tests()
-    print("\n  ✓ Stage 2 completed cleanly!")
+    stage_start = time.monotonic()
+    _timed_task("E2E Browser Tests", run_e2e_tests)
+    print(f"\n  ✓ Stage 2 completed cleanly! ({time.monotonic() - stage_start:.1f}s)")
 
 
 def run_stage_3_zap():
@@ -745,8 +775,9 @@ def run_stage_3_zap():
     the dev server — see run_stage_2_e2e's docstring for why this no longer runs concurrently
     with e2e locally."""
     print("\n=== Stage 3: OWASP ZAP Security Scan ===")
-    run_owasp_zap_scan()
-    print("\n  ✓ Stage 3 completed cleanly!")
+    stage_start = time.monotonic()
+    _timed_task("OWASP ZAP Scan", run_owasp_zap_scan)
+    print(f"\n  ✓ Stage 3 completed cleanly! ({time.monotonic() - stage_start:.1f}s)")
 
 
 def run_lint():
