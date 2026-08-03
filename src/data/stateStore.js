@@ -75,7 +75,7 @@ export function stateHasData(s = state) {
   );
 }
 
-export function seedMockData(incrementLocalSyncFn) {
+export function seedMockData() {
   const currentLang = state.lang || "en";
   state.clients = [...DEFAULT_CLIENTS];
   state.exercises = [...DEFAULT_EXERCISES];
@@ -85,7 +85,7 @@ export function seedMockData(incrementLocalSyncFn) {
   state.sessions = [...DEFAULT_SESSIONS];
   state.notifications = [...DEFAULT_MESSAGES];
   state.lang = currentLang;
-  saveToLocalStorage(incrementLocalSyncFn);
+  saveToLocalStorage();
 }
 
 // The plain localStorage key every build before this engine wrote (data/storageNamespace.js — no
@@ -254,7 +254,19 @@ export async function loadSavedState() {
   return state;
 }
 
-export function saveToLocalStorage(incrementLocalSyncFn) {
+// TODO §3.9's actual fix: a listener registered ONCE (app.js, at boot) rather than a callback each
+// of the ~60 call sites across the app must remember to pass. `saveToLocalStorage()` is the one seam
+// every write already goes through — some via this exact function imported directly, some via
+// app.js's `saveState()` wrapper — so notifying here is notifying for all of them, unconditionally.
+// The previous design (an optional `incrementLocalSyncFn` parameter) under-reported for exactly the
+// reason a call-site-by-call-site convention always does: most callers didn't pass it.
+let stateSavedListener = null;
+
+export function onStateSaved(listener) {
+  stateSavedListener = listener;
+}
+
+export function saveToLocalStorage() {
   if (indexedDbSupported()) {
     enqueueWrite(async () => {
       const db = await getDb();
@@ -263,9 +275,9 @@ export function saveToLocalStorage(incrementLocalSyncFn) {
   } else {
     writeVersionScoped(DB_KEY, JSON.stringify(state));
   }
-  if (typeof incrementLocalSyncFn === "function") {
-    incrementLocalSyncFn();
-  }
+  // Fired immediately, not after the (possibly still-queued) IndexedDB write completes: `state` is
+  // already mutated in memory at this point, which is all a live ahead-count diff needs.
+  if (typeof stateSavedListener === "function") stateSavedListener();
 }
 
 // Google Drive sync's own bookkeeping (TODO §1.5/§3.3): the Drive file id and the merge ancestor

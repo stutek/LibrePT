@@ -19,13 +19,11 @@
 //   renderActiveSessionBarLabels()
 // }
 
+import { driveSyncStatus } from "../../data/driveSyncService.js";
 import { renderMarkupOnce } from "./dom.js";
 import { getShareParams } from "./shareLink.js";
 
 let deps = null;
-
-let mockSyncState = { local: 2, remote: 1 };
-let syncTrackingReady = false;
 
 const DEFAULT_THEME = "daylight";
 const THEME_BODY_CLASS = {
@@ -63,22 +61,6 @@ export function initApplicationHeader(d) {
   deps = d;
 }
 
-export function incrementLocalSync() {
-  if (syncTrackingReady) {
-    mockSyncState.local += 1;
-    renderSyncBadge();
-  }
-}
-
-export function resetSyncState() {
-  mockSyncState = { local: 0, remote: 0 };
-  renderSyncBadge();
-}
-
-export function setSyncTrackingReady(val) {
-  syncTrackingReady = val;
-}
-
 let isOfflineCached = false;
 
 export function setOfflineCachedState(val) {
@@ -104,14 +86,20 @@ export function renderSyncBadge() {
     return;
   }
 
-  const { local, remote, isCloudConfigured = true, isCloudReachable = true } = mockSyncState;
+  // Real counts (TODO §3.9/§3.3, no longer a mock): `local` is how many of THIS device's own
+  // records differ from the last Drive-synced ancestor (0 with no Drive target configured — see
+  // driveSyncService.js's getAheadCount doc comment); `remote` is always 0 right after any
+  // successful sync, since a sync fully merges remote in, and is otherwise unknown ("?" below).
+  const status = driveSyncStatus();
+  const {
+    ahead: local,
+    behind: remote,
+    configured: isCloudConfigured,
+    reachable: isCloudReachable,
+  } = status;
 
   // When cloud is unreachable or not configured, display '?' for behind count
   const isUnreachable = !isCloudConfigured || !isCloudReachable;
-
-  if (local === 0 && (remote === 0 || isUnreachable === false)) {
-    // Both 0: render with neutral styling
-  }
 
   // Past 9, a second arrow stands in for the digit (↑↑ / ↓↓) so the pill stays narrow
   const cell = (n, dir, isBehind = false) => {
@@ -266,8 +254,9 @@ export function renderHeaderShell() {
               <i class="fa-solid fa-cloud"></i>
               <i class="fa-solid fa-arrows-rotate"></i>
             </span>
-            <!-- Mock GitHub-style ahead/behind counters (local edits to push / remote to pull),
-                 filled in by renderSyncBadge(); hidden once fully in sync. -->
+            <!-- GitHub-style ahead/behind counters, real (driveSyncService.js, TODO §3.9): local
+                 edits since the last Drive sync / remote changes not yet pulled, filled in by
+                 renderSyncBadge(). -->
             <span id="sync-badge" class="sync-badge hidden"></span>
           </button>
           <!-- Application overflow menu (☰): app-level actions, mirrors the .session-menu

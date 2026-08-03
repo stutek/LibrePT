@@ -153,3 +153,28 @@ export function mergeState(collections, { base, local, remote }) {
   }
   return { mergedState, conflicts };
 }
+
+/**
+ * How many records differ between two snapshots of one collection — added, removed, or changed all
+ * count as one each. A one-sided diff, not a merge: used for the header's real ahead/behind counts
+ * (driveSyncService.js), where what's wanted is "how many", not a resolved value per id.
+ */
+function countChangedInCollection(collection, from, to) {
+  const fromMap = byId(from);
+  const toMap = byId(to);
+  const ids = new Set([...fromMap.keys(), ...toMap.keys()]);
+  let count = 0;
+  for (const id of ids) {
+    if (!recordsEqual(fromMap.get(id), toMap.get(id))) count += 1;
+  }
+  return count;
+}
+
+/** Same idea as `countChangedInCollection`, summed across every collection in a domain state. */
+export function countChangedRecords(collections, from, to) {
+  let count = 0;
+  for (const collection of collections) {
+    count += countChangedInCollection(collection, from?.[collection], to?.[collection]);
+  }
+  return count;
+}

@@ -1,5 +1,5 @@
 import { DEFAULT_SESSIONS } from "../../data/index.js";
-import { isOfflineCachedActive, resetSyncState } from "../common/applicationHeader.js";
+import { isOfflineCachedActive } from "../common/applicationHeader.js";
 import { renderMarkupOnce } from "../common/dom.js";
 import { modalityOf, primaryMetricOf } from "../common/exerciseModality.js";
 import { loadUnitForEquipment } from "../common/repsAndLoad.js";
@@ -217,10 +217,11 @@ export function setupCalendarSessions({ state, t, saveToLocalStorage, renderSess
     setTimeout(() => {
       state.sessions = [...DEFAULT_SESSIONS];
 
+      // saveToLocalStorage() (deps.saveToLocalStorage — app.js's saveState()) fires
+      // onStateSaved's listener on its own now, which re-renders the header badge with a real
+      // ahead count — no separate reset call needed (TODO §3.9).
       saveToLocalStorage();
       renderSessions();
-
-      resetSyncState();
 
       if (icon) icon.classList.remove("fa-spin");
       if (btnText) btnText.textContent = t("btn_sync_data");

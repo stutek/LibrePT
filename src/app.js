@@ -55,9 +55,11 @@ import {
   setupRoutineForms as setupRoutineFormsController,
 } from "./controllers/routineFormsController.js";
 import { applyThemeSwitcherLabels, initTheme } from "./controllers/themeController.js";
+import { primeAheadCache } from "./data/driveSyncService.js";
 import {
   getState,
   loadSavedState,
+  onStateSaved,
   resetLibrePTData,
   saveToLocalStorage,
   seedMockData,
@@ -80,13 +82,10 @@ import {
   updateClientTabsFadeState,
 } from "./modules/common/activeUsersList.js";
 import {
-  incrementLocalSync,
   initApplicationHeader,
   renderHeaderShell,
   renderSyncBadge,
-  resetSyncState,
   setOfflineCachedState,
-  setSyncTrackingReady,
   setupApplicationHeader,
 } from "./modules/common/applicationHeader.js";
 import {
@@ -213,11 +212,17 @@ function applyTranslations(lang = getState().lang || "en") {
 }
 
 function saveState() {
-  saveToLocalStorage(incrementLocalSync);
+  saveToLocalStorage();
 }
 
+// The header's ahead/behind badge re-renders itself off this ONE seam (TODO §3.9's actual fix — see
+// stateStore.js's onStateSaved doc comment) rather than needing every write call site to remember to
+// refresh it. Registered once, at module load, since renderSyncBadge() already no-ops safely if the
+// header hasn't rendered yet.
+onStateSaved(renderSyncBadge);
+
 window.resetLibrePTData = resetLibrePTData;
-window.seedMockData = () => seedMockData(incrementLocalSync);
+window.seedMockData = seedMockData;
 window.stateHasData = () => stateHasData(getState());
 
 async function init() {
@@ -241,7 +246,7 @@ async function init() {
   if (shareLang && TRANSLATIONS[shareLang]) state.lang = shareLang;
 
   if (shareInit === INIT_DEMO_DATA && !stateHasData(state)) {
-    seedMockData(incrementLocalSync);
+    seedMockData();
     sessionsViewSeedDemo({ state: getState() });
   } else if (!stateHasData(state)) {
     localStorage.removeItem("librept_active_session");
@@ -451,8 +456,11 @@ async function init() {
 
   setInterval(renderIdleSessionBar, 30000);
 
+  // Local-only read (IndexedDB meta), so this is cheap to await here rather than firing it off
+  // unobserved — the ahead count badge below would otherwise render its very first paint from an
+  // empty cache (reading 0) even when a prior sync's ancestor is sitting right there in storage.
+  await primeAheadCache();
   renderSyncBadge();
-  setSyncTrackingReady(true);
 }
 
 // --- BOUND VIEW & CONTROLLER ACTIONS ---

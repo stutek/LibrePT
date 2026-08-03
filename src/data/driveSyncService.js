@@ -44,18 +44,53 @@ import {
   setState,
   writeDriveSyncMeta,
 } from "./stateStore.js";
-import { mergeState } from "./syncMerge.js";
+import { countChangedRecords, mergeState } from "./syncMerge.js";
 
 let syncing = false;
 let lastSyncResult = null;
 
+// The real ahead/behind counters (replaces the header badge's former hardcoded mock, TODO §3.9).
+// `cachedAncestor` is the last-synced snapshot, kept in memory so `getAheadCount()` can be
+// synchronous (every render-badge call site is sync) without re-reading IndexedDB each time. `null`
+// until `primeAheadCache()` resolves at boot or a sync completes — "ahead" reads 0 until then, which
+// is the honest answer: with no known ancestor there is nothing yet to compare against.
+let cachedAncestor = null;
+
+/** Populates `cachedAncestor` from IndexedDB meta — a local-only read, no network. Called once at
+ * boot (app.js); safe to call again any time (e.g. after a reset) since it just re-reads. */
+export async function primeAheadCache() {
+  const meta = await readDriveSyncMeta();
+  cachedAncestor = meta?.ancestor || null;
+}
+
+/** Real, live count of local records changed since the last-synced ancestor — "how many of my own
+ * edits haven't reached Drive yet". 0 when never synced: with no ancestor there is no meaningful
+ * "since" to diff against, and showing the whole dataset as "ahead" would be noise, not signal. */
+export function getAheadCount() {
+  if (!cachedAncestor) return 0;
+  return countChangedRecords(COLLECTIONS, cachedAncestor, getState());
+}
+
+// "Remote changes not yet pulled" is always 0 immediately after a successful sync — every sync fully
+// merges remote in (TODO §3.3), so there is no partial-pull state this architecture can be in. The
+// only real information left to report is whether that number is even trustworthy right now: not
+// connected, never synced, or the last attempt failed all mean "unknown", which the badge already
+// has a signal for (`isCloudReachable` → renders "?" instead of a number). A future incremental sync
+// (the not-yet-built Changes API path, TODO §3.3) would be what makes a genuinely nonzero, live
+// behind-count possible; BEHIND_COUNT is a constant, not a stale variable, until that lands.
+const BEHIND_COUNT = 0;
+
 export function driveSyncStatus() {
+  const reachable = Boolean(hasStoredConsent() && lastSyncResult?.ok !== false);
   return {
     configured: isDriveSyncConfigured(),
     connected: hasStoredConsent(),
+    reachable,
     syncing,
     lastSyncResult,
     intervalMinutes: getSyncIntervalMinutes(),
+    ahead: getAheadCount(),
+    behind: BEHIND_COUNT,
   };
 }
 
@@ -173,6 +208,7 @@ export async function syncNow() {
       fileId = created.id;
     }
     await writeDriveSyncMeta({ fileId, ancestor: mergedState });
+    cachedAncestor = mergedState;
 
     const result = { ok: true, at: Date.now(), conflicts };
     lastSyncResult = result;
