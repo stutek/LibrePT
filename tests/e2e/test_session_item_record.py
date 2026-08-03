@@ -1,9 +1,10 @@
 # tests/e2e/test_session_item_record.py
 # TODO §17.1: a finished session is persisted as the WHOLE structured program — a flat list of typed
 # items (exercise | rest) with circuit grouping via circuitId and a completed flag per exercise —
-# not just the performed sets. These tests cover the History render of that structure (circuit group,
-# rest chips, greyed skips, per-modality metrics), the pure buildProgramSnapshot model (keeps rests +
-# skipped work), and the re-open round-trip that rebuilds the live plan from the snapshot.
+# not just the performed sets. What stays here needs the real, live-booted app: the History render
+# of that structure (circuit group, rest chips, greyed skips, per-modality metrics) and the re-open
+# round-trip that rebuilds the live plan from the snapshot. The pure buildProgramSnapshot model
+# moved to tests/unit_js/modules/common/sessionItemRecord.test.mjs.
 # Fixtures (page, local_server) come from tests/conftest.py; the demo dataset is auto-seeded.
 
 
@@ -44,55 +45,6 @@ def test_history_renders_the_structured_program(page, local_server):
     assert log.locator(".history-ex-skipped").count() >= 1, (
         "a skipped exercise should be greyed"
     )
-
-
-def test_build_program_snapshot_keeps_rests_and_skips(page, local_server):
-    page.goto(local_server)
-    page.wait_for_timeout(300)
-
-    result = page.evaluate(
-        """async () => {
-            const url = new URL('modules/common/sessionItemRecord.js', document.baseURI).href;
-            const m = await import(url);
-            const cs = {
-                exercises: [
-                    { id: 'a', name: 'Squat', loadUnit: 'kg', modality: 'strength', metric: 'reps',
-                      setsTargetCount: 3, repsTarget: 5, weightTarget: 100,
-                      circuitId: 'c1', circuitTitle: 'SS', circuitSeries: 3 },
-                    { id: 'r1', type: 'rest', rest: 60, circuitId: 'c1' },
-                    { id: 'b', name: 'Skipped Curl', loadUnit: 'kg', modality: 'strength',
-                      metric: 'reps', setsTargetCount: 2, repsTarget: 12, weightTarget: 15 },
-                ],
-                logs: {
-                    a: [ { reps: 5, weight: 100, completed: true },
-                         { reps: 5, weight: 100, completed: true },
-                         { reps: 5, weight: 100, completed: false } ],
-                },
-            };
-            const items = m.buildProgramSnapshot(cs);
-            return {
-                len: items.length,
-                t0: items[0].type, done0: items[0].completed, sets0: items[0].sets.length,
-                circuit0: items[0].circuitId,
-                t1: items[1].type, rest1: items[1].rest,
-                t2: items[2].type, done2: items[2].completed, sets2: items[2].sets.length,
-                skippedSetDone: items[2].sets[0].completed,
-                exerciseCount: m.exerciseRecordsOf(items).length,
-            };
-        }"""
-    )
-    assert result["len"] == 3
-    assert (
-        result["t0"] == "exercise" and result["done0"] is True and result["sets0"] == 3
-    )
-    assert result["circuit0"] == "c1"
-    assert result["t1"] == "rest" and result["rest1"] == 60
-    # A movement with no logged work is KEPT as its prescription, flagged not-completed.
-    assert (
-        result["t2"] == "exercise" and result["done2"] is False and result["sets2"] == 2
-    )
-    assert result["skippedSetDone"] is False
-    assert result["exerciseCount"] == 2, "exerciseRecordsOf must filter out rest items"
 
 
 def test_reopening_a_structured_record_rebuilds_rests_and_modality(page, local_server):

@@ -118,9 +118,37 @@ jobs:
       - name: Run Unit Tests
         run: .venv/bin/python -c "from build import run_unit_tests; run_unit_tests()"
 
+  javascript-unit-tests:
+    name: JavaScript Unit Tests (node:test)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - name: Install Dependencies
+        run: |
+          python -m venv .venv
+          .venv/bin/pip install --upgrade pip
+          .venv/bin/pip install -r requirements.txt
+      - name: Run JavaScript Unit Tests
+        # No actions/setup-node: build.ensure_node_binary() vendors Node the same way
+        # ensure_biome_binary() vendors Biome, so this stays on the same Python-only toolchain
+        # every other job uses.
+        run: .venv/bin/python -c "from build import run_javascript_unit_tests; run_javascript_unit_tests()"
+
   e2e-tests:
     name: E2E Browser Tests
-    needs: [python-lint, doc-graph, frontend-lint, dependency-scan, unit-tests]
+    needs:
+      [
+        python-lint,
+        doc-graph,
+        frontend-lint,
+        dependency-scan,
+        unit-tests,
+        javascript-unit-tests,
+      ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -143,7 +171,7 @@ jobs:
   # (named results in the output) and kept together where splitting would only buy latency.
   static-security-audits:
     name: Static Security Audits (CSP parity & HTML sinks)
-    needs: [python-lint, doc-graph, frontend-lint, dependency-scan, unit-tests]
+    needs: [python-lint, doc-graph, frontend-lint, dependency-scan, unit-tests, javascript-unit-tests]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -155,7 +183,7 @@ jobs:
 
   owasp-zap-scan:
     name: OWASP ZAP Security Scan
-    needs: [python-lint, doc-graph, frontend-lint, dependency-scan, unit-tests]
+    needs: [python-lint, doc-graph, frontend-lint, dependency-scan, unit-tests, javascript-unit-tests]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

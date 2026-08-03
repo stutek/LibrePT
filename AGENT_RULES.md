@@ -41,7 +41,8 @@ Every response and tool action must drive measurable, continuous progress toward
 
    **Stage 1 (fast, no browser — runs its tasks in parallel):** Python lint/format (Ruff), frontend
    lint/format (Biome, JS+CSS), dependency security audit (`pip-audit`), unit tests (`tests/unit/` +
-   `tests/test_app.py`), and the static security audits (HTML-sink/CSP escaping audit via
+   `tests/test_app.py`), JavaScript unit tests (`tests/unit_js/`, under Node's built-in `node:test` —
+   see §5.2), and the static security audits (HTML-sink/CSP escaping audit via
    `build/frontend_audit.py`, the OKF doc-graph link checker, the CI pipeline-gating checker).
 
    **Stage 2 (only if Stage 1 is clean):** the full Playwright e2e suite (`tests/e2e/`, itself
@@ -125,7 +126,22 @@ files reduce the context an agent must load to make a change, let separate conce
 parallel without collisions, and make the directory tree itself act as documentation.
 
 1. **One responsibility per file.** A UI element, a data entity, or a single concern belongs in its own module. When a self-contained unit inside the entry file (`src/app.js`) grows, extract it. Prefer a file an agent can read in full over scrolling a multi-thousand-line file.
-2. **Organise by concern in subfolders.** UI components in `src/components/`, seed data per entity in `src/data/`, browser tests in `tests/e2e/`, static/unit tests in `tests/unit/`. Group tests by feature/component — not one file per test, and not one monolithic file for everything.
+2. **Organise by concern in subfolders.** UI components in `src/components/`, seed data per entity in `src/data/`, browser tests in `tests/e2e/`, Python static/unit tests in `tests/unit/`, JavaScript unit tests in `tests/unit_js/`. Group tests by feature/component — not one file per test, and not one monolithic file for everything.
+
+   `tests/unit_js/` exists for tests that pin pure logic — schema/migration transforms, id
+   generation, merge algorithms — with no DOM and no persistence, mirroring the `src/data/` /
+   `src/modules/common/` subpath they cover (e.g. `src/data/syncMerge.js` →
+   `tests/unit_js/data/syncMerge.test.mjs`). They run under Node's built-in `node:test` +
+   `node:assert/strict` (`build.run_javascript_unit_tests`, Stage 1) rather than Playwright: these
+   tests used to run in the browser ONLY because the app's CSP forbids `new Function`, so there was
+   no in-process eval harness — Node's own `import()` never touches a page, so the CSP is not in
+   play, and the browser/dev-server/IndexedDB overhead every one of them was paying for nothing goes
+   away. Node itself is vendored the same way as Biome (`build.ensure_node_binary`, a pinned,
+   checksum-verified download into `.venv/node-runtime/`) rather than assumed on `PATH`. It adds no
+   npm dependency at all — no `package.json`, no `node_modules`, nothing for a JS-side `pip-audit`
+   equivalent to even cover — because `node:test`/`node:assert` are built into the runtime. A test
+   belongs here only if it needs nothing a browser provides; if it touches the DOM, IndexedDB, or a
+   real app boot, it stays in `tests/e2e/`.
 3. **Decouple with dependency injection, not cross-imports.** Extracted components receive the app-level helpers they need as parameters (`state`, `t`, `escapeHTML`, launch callbacks). For globals that get reassigned (`activeSession`, `state`), pass an *accessor* (`getActiveSession()`) so the module always reads the current value. This avoids circular imports and keeps modules independently testable.
 4. **Self-document at the top of every module.** Begin each file with a short comment naming its single responsibility and listing its injected dependencies. Choose descriptive names over clever ones — a reader should understand a file without opening its call site.
 5. **Keep the runtime app in `src/`; keep the root clean.** Only the app entry, its modules, and its assets live under `src/`. Dev tooling, docs, and CI configuration stay out of the app tree. Source files must never sit loose at the repository root.

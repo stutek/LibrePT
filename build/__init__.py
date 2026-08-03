@@ -257,6 +257,120 @@ def ensure_biome_binary():
             return None
 
 
+NODE_VERSION = "24.19.0"
+
+# SHA256 of the official release archive itself (not an extracted binary — Node ships as an
+# archive, unlike Biome's single-file binary), from https://nodejs.org/dist/vX.Y.Z/SHASUMS256.txt.
+_NODE_ARCHIVE_HASHES = {
+    "darwin-arm64": "8294b7aa9b03997481c06babf1e8b270c859358f27da57a11509afe537ac381d",
+    "darwin-x64": "d1b5e999db158c62fe8f7267a4476b035d8bd93b1a605bac24a3f0dd166e3316",
+    "linux-arm64": "01443c1e1a29e531ccad5a46fefa6df490d2189c49f7955904aecdbb0fe86fdc",
+    "linux-x64": "14b342e71204f811bde6153be8e04b62aef63c236fef92b55f9c83154b409647",
+    "win-arm64": "8502f4a50b458d4cc38ed8f2001556c2cd239d464920f74017926ccb1e1c157f",
+    "win-x64": "57f71ab3652e797d84acddc79c81cc9ff1c6ddb2a1974cdb83f00fee9bff4c73",
+}
+
+NODE_INSTALL_DIR = os.path.join(".venv", "node-runtime")
+
+
+def _node_platform_suffix(os_name, arch):
+    """Node's own dist naming — reuses Biome's linux/darwin resolvers (identical strings), but
+    Node names Windows archives "win-x64"/"win-arm64" rather than Biome's "win32-x64.exe"."""
+    if os_name == "windows":
+        return "win-arm64" if "arm64" in arch else "win-x64"
+    return _resolve_platform_suffix(os_name, arch)
+
+
+def _node_archive_ext(os_name):
+    if os_name == "windows":
+        return "zip"
+    if os_name == "darwin":
+        return "tar.gz"
+    return "tar.xz"
+
+
+def _node_binary_path(platform_suffix, os_name):
+    root = os.path.join(NODE_INSTALL_DIR, f"node-v{NODE_VERSION}-{platform_suffix}")
+    return os.path.join(root, "node.exe" if os_name == "windows" else "bin/node")
+
+
+def ensure_node_binary():
+    """Detects platform and architecture, downloads the precompiled Node.js runtime if missing.
+
+    tests/unit_js/ needs a real ES-module-capable JS runtime to import src/data/*.js and
+    src/modules/common/*.js directly (see run_javascript_unit_tests) — Node's built-in `node:test` +
+    `node:assert` need zero npm packages, so this is the only new dependency the tier adds: no
+    package.json, no node_modules, nothing for a JS-side pip-audit equivalent to even cover.
+    Vendored the same way as Biome (ensure_biome_binary) rather than assumed on PATH: contributors
+    run this on very different machines, and a system Node install (or lack of one) should not gate
+    the build.
+    """
+    import platform
+    import stat
+    import requests
+
+    os_name = platform.system().lower()
+    arch = platform.machine().lower()
+    platform_suffix = _node_platform_suffix(os_name, arch)
+    node_path = _node_binary_path(platform_suffix, os_name)
+
+    if os.path.exists(node_path):
+        return node_path
+
+    print("  Downloading precompiled Node.js runtime...")
+    expected_hash = _NODE_ARCHIVE_HASHES.get(platform_suffix)
+    ext = _node_archive_ext(os_name)
+    archive_name = f"node-v{NODE_VERSION}-{platform_suffix}.{ext}"
+    url = f"https://nodejs.org/dist/v{NODE_VERSION}/{archive_name}"
+
+    try:
+        response = requests.get(url, stream=True, timeout=30)
+        response.raise_for_status()
+        os.makedirs(NODE_INSTALL_DIR, exist_ok=True)
+        archive_path = os.path.join(NODE_INSTALL_DIR, archive_name)
+        sha256 = hashlib.sha256()
+        with open(archive_path, "wb") as f:
+            for chunk in response.iter_content(chunk_size=65536):
+                f.write(chunk)
+                sha256.update(chunk)
+
+        if expected_hash and sha256.hexdigest() != expected_hash:
+            os.remove(archive_path)
+            raise ValueError("Integrity check failed after download (SHA256 mismatch).")
+
+        if ext == "zip":
+            import zipfile
+
+            with zipfile.ZipFile(archive_path) as zf:
+                zf.extractall(NODE_INSTALL_DIR)
+        else:
+            import tarfile
+
+            with tarfile.open(
+                archive_path, "r:xz" if ext == "tar.xz" else "r:gz"
+            ) as tf:
+                tf.extractall(NODE_INSTALL_DIR, filter="data")
+        os.remove(archive_path)
+
+        if os_name != "windows":
+            st = os.stat(node_path)
+            os.chmod(node_path, st.st_mode | stat.S_IEXEC)
+
+        if not os.path.exists(node_path):
+            raise ValueError(f"Extracted archive did not produce {node_path}.")
+
+        print("  ✓ Node.js runtime downloaded and verified successfully.")
+        return node_path
+    except Exception as e:
+        if os.environ.get("CI") == "true":
+            print(f"  ✗ Failed to download/verify Node.js runtime in CI: {e}")
+            raise e
+        else:
+            print(f"  ! Warning: Failed to download/verify Node.js runtime: {e}")
+            print("  ! Skipping JavaScript unit tests locally.")
+            return None
+
+
 PYTHON_LINT_TARGETS = ("build/", "deploy/", "tests/", "agent_tools/")
 
 
@@ -418,6 +532,32 @@ def run_unit_tests():
         print(f"  ✗ Unit tests failed with exit code: {returncode}")
         sys.exit(returncode)
     print("  ✓ Unit tests passed successfully!")
+
+
+def run_javascript_unit_tests():
+    """Runs the pure-logic JavaScript test suite (tests/unit_js/) under node:test.
+
+    These tests import src/data/*.js and src/modules/common/*.js directly as native ESM — no
+    browser needed. They used to run only under Playwright because the app's CSP forbids
+    `new Function`, so there was no in-process eval harness; Node's own `import()` never touches a
+    page, so the CSP is not in play. Skipped rather than failed if the runtime could not be
+    fetched locally (see ensure_node_binary) — CI always has it and fails hard instead.
+    """
+    print("\n  Running JavaScript Unit Tests (node:test)...")
+    node_path = ensure_node_binary()
+    if not node_path:
+        return
+    returncode, output, path = run_logged(
+        # A bare directory arg fails on this Node build (misresolves as a CJS module
+        # rather than a glob root); the explicit glob is what actually recurses.
+        [node_path, "--test", "tests/unit_js/**/*.test.mjs"],
+        "unit-js-tests",
+    )
+    if returncode != 0:
+        print_digest("JavaScript unit tests", output, path)
+        print(f"  ✗ JavaScript unit tests failed with exit code: {returncode}")
+        sys.exit(returncode)
+    print("  ✓ JavaScript unit tests passed successfully!")
 
 
 E2E_ARTIFACT_DIR = os.path.join(REPORT_DIR, "e2e-artifacts")
@@ -715,6 +855,7 @@ def run_stage_1_parallel():
         "Frontend Lint (Biome)": run_frontend_lint,
         "Dependency Security Scan (pip-audit)": run_security_audit,
         "Unit Tests": run_unit_tests,
+        "JavaScript Unit Tests": run_javascript_unit_tests,
         "Static Security Audits": run_static_security_checks,
         "Documentation Graph": run_doc_graph_check,
         "Pipeline Gating": run_pipeline_gate_check,

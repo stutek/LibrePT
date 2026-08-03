@@ -77,7 +77,7 @@ To land back on demo data instead of an empty app after clearing, reopen with `?
 
 ## 🧪 Development & Testing
 
-The test suite runs static structure checks (`tests/test_app.py`) plus Playwright end-to-end suites (`tests/e2e/`) that drive a real Chromium browser against a local server.
+The test suite runs static structure checks (`tests/test_app.py`), pure-logic JavaScript tests (`tests/unit_js/`) under Node's built-in `node:test`, and Playwright end-to-end suites (`tests/e2e/`) that drive a real Chromium browser against a local server.
 
 ```bash
 # One-time environment setup
@@ -85,8 +85,11 @@ python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
 .venv/bin/playwright install chromium
 
-# Run the whole suite
+# Run the Python-driven suite (static checks + Playwright e2e)
 .venv/bin/python -m pytest tests/ -v
+
+# Run the pure-logic JavaScript suite (separate runtime, no npm install needed)
+.venv/bin/python -c "from build import run_javascript_unit_tests; run_javascript_unit_tests()"
 ```
 
 The verify → build → deploy chain lives in the `build/` and `deploy/` packages, each runnable on its own and debuggable:
