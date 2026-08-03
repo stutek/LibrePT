@@ -45,7 +45,7 @@ The session list can no longer assume one session per time slot. Model and displ
   - **Render overlaps the way calendar apps do**: a vertical **time grid** with sessions as blocks whose **top/height map to start/end**, and overlapping blocks placed **side by side** (columns) within the shared span, each narrowed to fit. This replaces the single-column stacked card idea *for time-conflicted ranges* — a session's horizontal position/width encodes its overlap, its vertical position encodes when. Non-overlapping parts of the day can still collapse to save space, but any overlap expands into the aligned grid.
 - **Shaded sessions from other PTs sharing the gym/room**: show *other trainers'* bookings for the **same gym/room** as read-only, visually **shaded/muted** context, so a PT sees when a room is already occupied and avoids double-booking equipment. These are not the PT's own sessions — not launchable, no participant detail, just occupancy.
 - Implies a **room/resource** dimension on bookings (which room, which trainer) that the data model does not have yet, and a scheduling/availability source for other PTs' bookings. **Source decided in [1.5](#15--brainstorm-google-calendar-integration--source-of-truth-occupancy-and-data-processor-exposure): a per-room Google resource calendar, read via `freebusy.query`** — not a backend of our own.
-- Feeds directly into the planned **date-grouped, scrollable session card stack** ([4.3](#43--collapse-the-duplicated-session-header-into-one-row-with-a-date-picker) and the sessions-view redesign): overlaps and shaded external sessions must be legible within that stacked layout.
+- Feeds directly into the continuous session timeline ([4.3](#43-x-collapse-the-duplicated-session-header-into-one-row-with-a-date-picker-see-changelog) shipped that rewrite): overlaps and shaded external sessions must be legible within it.
 
 ### 1.4 [ ] Calendar preferences — holidays and non-working days
 Every PT should be able to configure their own calendar view: import a holiday calendar (public holidays, gym closures) and color-code off days throughout the app.
@@ -60,8 +60,8 @@ Every PT should be able to configure their own calendar view: import a holiday c
 - **Source of truth split, by data type**: Google Calendar is the sole authority for scheduling facts — event time, room, and attendee RSVP (`attendee.responseStatus`) — because that is literally where those facts originate (client books via the Google-hosted Appointment Schedule page; RSVP is Google's own field). No local cache or relay may ever be treated as authoritative for "is this booked" or "did they accept" — only GCal's own response after a write is final. App-only data with no Calendar representation (clipboard state, per-participant tags, logged sets/reps) is the one thing the app's own store is genuinely authoritative for.
 - **Facility occupancy**: model each gym/room as its own Google resource calendar. Read via `freebusy.query` for the "other PT, room's busy" shading in [1.3](#13--session-list-must-model-partial-overlaps-and-other-pts-room-usage) — free/busy only, never the event body, so no PT's session detail leaks to another PT. Filter workout vs. maintenance events via `extendedProperties.private` (e.g. `eventType: workout|maintenance`) tagged at creation, since Calendar's native `eventType` field doesn't cover this; maintenance can then render as a hard block instead of shaded "avoid if possible" context.
 - **PT's own private calendar**: never read by anyone but that PT, and only via their own `freebusy.query` (self double-booking warning against personal commitments) — never surfaced to other PTs, never mixed into the room calendar.
-- **Multi-instance sync via Drive `appDataFolder`, no backend of our own**: covers syncing a PT's own app-only data across their own devices, using the same OAuth grant already needed for Calendar. Combined with the room resource calendar for cross-PT occupancy, this covers every sync need raised **without LibrePT operating any backend** — **built, see [3.3](#33--google-drive-periodic-sync)**. Sync is poll-on-resume (a `visibilitychange` trigger, not the Drive Changes API as first sketched here — §3.3 downloads/re-uploads the whole sync file each pass rather than tracking incremental changes, a bandwidth optimisation left for later), not live push — `changes.watch` needs a server-side webhook endpoint LibrePT deliberately doesn't have.
-- **Merge strategy for the appDataFolder sync loop**: NOT wall-clock last-write-wins — [DATA_MODEL.md](docs/DATA_MODEL.md#invariants-the-star-depends-on) already establishes the device clock isn't trustworthy for ordering (and [§16](#16-deploy-safety--schema-keyed-storage) records a real bug from a similar mistake). Instead: three-way merge per record id (records already have stable UUIDv7 ids, [recordId.js](src/modules/common/recordId.js)) against the last-synced Drive `headRevisionId` as the common ancestor — Drive's server-assigned revision is the trustworthy ordering authority, not either device's clock. Same-record-both-sides conflicts (rare — one PT's own devices, not concurrent independent users) are surfaced for manual resolution, never silently guessed, matching [17.3](#173--erasure--anonymization-only-never-delete-design-pseudonymization)'s "never silently destroy" stance. Deletions need soft-delete tombstones, not array removal, so a merge can't resurrect a record.
+- **Multi-instance sync via Drive `appDataFolder`, no backend of our own**: covers syncing a PT's own app-only data across their own devices, using the same OAuth grant already needed for Calendar. Combined with the room resource calendar for cross-PT occupancy, this covers every sync need raised **without LibrePT operating any backend** — **built, see [3.3](#33--google-drive-periodic-sync)** for the actual sync/merge design (it ended up differing from the sketch below in a few ways, noted there).
+- **Merge strategy — original sketch, superseded by what §3.3 actually built.** The core call survived: NOT wall-clock last-write-wins ([DATA_MODEL.md](docs/DATA_MODEL.md#invariants-the-star-depends-on) already establishes the device clock isn't trustworthy for ordering), but a three-way merge per record id against a locally-tracked ancestor, not Drive's `headRevisionId`; same-record conflicts are still surfaced, never silently guessed (matching [17.3](#173--erasure--anonymization-only-never-delete-design-pseudonymization)'s "never silently destroy" stance); and deletions turned out **not** to need soft-delete tombstones after all — see §3.3's "Merge" note for why. This bullet is kept only as the paper trail for that last call.
 - **PII security on Drive**: `appDataFolder` gives TLS-in-transit and Google's standard server-side AES-256 at-rest encryption, plus access isolation (only this app's OAuth token can read it, invisible in the Drive UI/picker to other apps) — but **not** zero-knowledge encryption; Google's infrastructure can technically access plaintext (abuse scanning, legal process), same as any Drive file. Given client records include injury/health notes (already flagged as sensitive in [17.3](#173--erasure--anonymization-only-never-delete-design-pseudonymization)), default posture is to accept Google's platform security (reasonable GDPR Art. 32 baseline, and — since no server LibrePT operates ever touches this data — Simon stays outside the controller/processor chain entirely, PT-to-Google is the PT's own arrangement). **Optional harden-further path**: client-side encrypt the JSON blob before upload (`Web Crypto API`) so Drive only ever stores ciphertext; real cost is key management — a lost key/device makes that Drive copy unrecoverable, a direct tension with [3.8](#38--unbacked-data-warning-banner--same-weight-as-the-preview-ribbon)'s "don't silently lose the only copy," so it needs its own recovery-code story before shipping. Not blocking — PRIVACY.md already recommends this as optional, matches the current stance.
 - **Why Firestore was rejected as the default**: introducing a Firestore/Firebase backend would make Simon a GDPR **data processor** for PTs' client data (PT = controller, LibrePT = processor, Google Cloud = subprocessor) — a DPA with Google, subprocessor disclosure to PT customers, a data-residency choice, and breach-notification duties, none of which apply to the Calendar+Drive approach since client data never leaves each PT's own Google account or device. Only reconsider Firestore/a relay if a real requirement needs true sub-second live push between devices or server-side compute — **open question, unresolved**: is that actually needed, or is poll-on-resume acceptable?
 - **GCP note, independent of the above**: any Calendar API access (with or without Firestore) requires a GCP project registered once by the developer for OAuth client credentials — not per PT, who only ever sees a normal "LibrePT wants to access your Google Calendar" consent screen. Public distribution (beyond ~100 test users) requires Google's OAuth consent-screen **verification** (privacy policy, homepage, review lead time) — a real launch dependency to plan for, separate from the architecture question.
@@ -90,15 +90,8 @@ Data should sync **periodically to Google Drive** and remain **editable directly
 - Optionally surface a **printable blank consent form** from the app — the full text already exists in `docs/templates/Client_Consent_Form.md` — so a PT can print copies to keep at the desk.
 - **Supersedes the shipped `mailto:` consent trigger** (former 3.4); that email path can be removed once this lands.
 
-### 3.7 [ ] [Decision] Persistence engine — stay on localStorage JSON, defer embedding a DB
-> **Superseded 2026-07-26 by [§18.6](#186--decided-persistence-engine--indexeddb-supersedes-the-37-deferral).** The revisit trigger this item names ("the 5 MB cap looms") has fired: §17.1 shipped, and a very busy PT reaches ~16.6 MiB/yr in a single bucket. The engine decision is now IndexedDB; the reasoning and sizing live in §18.6. The "keep the DB behind the `stateStore.js` seam" prep below stands and is what makes the swap cheap.
-
-The consent-photo idea was the only thing pushing toward binary blob storage; KISS-ing consent to paper (3.5) removes it, so the "is it time to embed a DB?" question resolves for now.
-
-- **Decided (2026-07-22): keep the current `localStorage` JSON store.** It's synchronous, trivial to export/import (already the Backup & Restore mechanism), and a solo PT's *text* data (clients, routines, sessions, history) is nowhere near the ~5MB origin cap. The main DB is already centralized in `src/data/stateStore.js` (`librept_db`).
-- **Revisit → IndexedDB** (built-in, no wasm/SQLite dependency) only when a real driver appears: binary data returns, the 5MB cap looms, or the long-term analytics vision (13.x — volume load / 1RM aggregation across months) wants indexed queries.
-- **Not** SQLite-in-wasm — too heavy a dependency for a buildless offline app at this scale.
-- **Cheap prep now**: keep the main DB behind the `stateStore.js` seam so a future swap is localized, rather than scattering more raw `localStorage` calls across components.
+### 3.7 [x] [Superseded by §18.6] Persistence engine — localStorage JSON, then IndexedDB
+**Decided (2026-07-22): stay on `localStorage` JSON**, deferring a real DB until a concrete driver appeared (binary data, the 5MB cap, or indexed queries). **Superseded 2026-07-26**: §17.1 shipped and a very busy PT reaches ~16.6 MiB/yr in a single bucket — the cap this item named as its revisit trigger. The engine decision is now IndexedDB; full reasoning and sizing live in §18.6.
 
 ### 3.8 [ ] Unbacked-data warning banner — same weight as the PREVIEW ribbon
 **Raised 2026-07-26 (Simon).** The database holds the **only** copy of a trainer's records ([DATA_MODEL §6](docs/DATA_MODEL.md)), and a browser can evict IndexedDB under storage pressure. A PT with months of history and no external copy is one wiped profile away from losing the business's records, and today nothing on screen says so.
@@ -127,16 +120,8 @@ The consent-photo idea was the only thing pushing toward binary blob storage; KI
 - **Dark theme** should be improved in the same pass.
 - Constraint: both themes must keep working from the CSS custom properties in `index.css` — no hard-coded theme colours.
 
-### 4.3 [ ] Collapse the duplicated session header into one row, with a date picker
-The redundant second title row is **already removed** (the four `.sessions-column-header` `<h4>`s were deleted); the day column now starts directly at the first session card. What remains open is the **date-picker** half below, blocked on the dated-bookings data-model decision.
-
-- In the remaining title row, make the **calendar icon clickable**, opening an overlay with a **date picker**.
-- The picker **must accept a typed date** — no scrolling back through years to reach a past date.
-- Note: the removed header is what colour-coded each bucket (purple/cyan/muted/emerald). If that signal is worth keeping, it has to move into the title bar.
-
-> **⚠ Blocking design gap — settle before implementing.** Bookings currently have **no date**. They carry a relative bucket only (`day: 'yesterday' | 'today' | 'tomorrow' | 'upcoming'`, see `mockData.js`), and the title bar *derives* dates live from `new Date()`. That is exactly why the demo keeps working on any day without reseeding. A date picker implies **jumping to an arbitrary date**, which the four-bucket model cannot represent — picking `2025-03-04` would have nothing to show. Choosing a real date field is a **data-model migration** (existing `localStorage` databases included) and it would end the self-following demo behaviour. Decide the model first: real dates, or a picker restricted to the four buckets?
-
-### 4.4 [x] Exercise catalog filter chips overflow off-screen — see CHANGELOG
+### 4.3 [x] Collapse the duplicated session header into one row, with a date picker — see CHANGELOG
+Shipped as part of the continuous-timeline rewrite (2026-07-27): the duplicated header row is gone, and the calendar icon opens a native typed-date picker (`sessionTimeline.js`'s `#sessions-date-picker`/`.showPicker()`) that jumps straight to the chosen date. The blocking premise this item once had — sessions carried no real date — is resolved: schema 3 gave sessions a real `startDate`.
 
 ---
 
@@ -362,8 +347,6 @@ first visit, so it costs one visit, once. Recording it because it is the amplifi
 
 ### 13.3 [x] Conditioning metrics (modality axis) — see CHANGELOG
 
-### 13.4 [x] Assault Bike time/watts coverage — see CHANGELOG
-
 ---
 
 ## 14. Refactoring: DRY & Complexity Reduction
@@ -576,37 +559,16 @@ not yet reached.
 > PT on yesterday's cached build *is* an older app version even with no tags, and multi-schema writes
 > keep their data readable. Backup portability is the second case.
 >
-> **Build order: DB first, then the star write layer, then the CD pipeline tests (18.13).** The
-> engine comes first because the fan-out cannot be built on localStorage at all (exceeds the 5 MB
-> cap; atomic fan-out needs IndexedDB transactions).
->
-> **Remaining work, in order:**
-> - [~] **18.6 engine, part 4** — move `stateStore`'s read/write path onto IndexedDB through the
->   write queue. **SHIPPED**: `getState()`/`setState()` stay synchronous; boot does a one-time,
->   revertable import from the legacy localStorage bucket (left untouched) and reads back through
->   `recordProjections.js`; saves star-write every live schema (`schema2`+`schema3`) and reconcile
->   deletes, not just puts, via `writeQueue.js`. **Still open**: §17.1's lazy per-client load —
->   every collection is still fully hydrated at boot, not fetched on demand per client.
-> - [x] **Documentation** — [docs/DATA_MODEL.md](docs/DATA_MODEL.md) status banner updated to match.
-> - [x] **[16.5](#165-x-retire-the-multi-version-hosting-machinery-from-the-code)** — deleted the
->   multi-version hosting machinery.
-> - [x] **[16.3](#163-x-resolved-superseded-by-186-part-4-key-storage-buckets-on-the-data-schema-not-the-release-tag)** —
->   resolved differently: the schema axis already lives in IndexedDB's per-schema stores, so
->   `localStorage` needed no replacement bucket scheme once the release-tag axis was gone.
-> - [x] **18.1/18.4, the rest** — the fan-out into IndexedDB is live for both schemas
->   (`schema2`+`schema3`, via §18.6 part 4's `starWrite`), using an identical projection for each
->   since no field has diverged yet. The cross-schema staging guard and §18.5's acyclic-reference
->   graph check are both built (`test_star_write_invariants.py`, `test_record_references.py`).
-> - [x] **18.13** — the CD pipeline tests (staging guard, projection round-trips, old-UI-writes
->   case, acyclic graph, frozen backup corpus, migration edge-case robustness — §17.5's ordering
->   invariants were already covered by `test_session_item_order.py`).
->
-> **All ordered items are now built.** What remains inside §18 is narrower, open sub-items called
-> out in their own sections: §17.1's lazy per-client load (§18.6 part 4, still open), §18.3's
-> "defer migration to idle" and failure-reporting UX, §18.8's encryption/desktop threat model,
-> §18.9's concurrency (CAS/transactions), §18.11's legal gaps, and §18.12's ribbon reuse for the
-> unsupported-version warning — none of these were in the original build-order list, so none were
-> blocking it.
+> **Build order was DB first, then the star write layer, then the CD pipeline tests (18.13)** — the
+> engine had to come first since the fan-out cannot be built on localStorage at all (exceeds the 5 MB
+> cap; atomic fan-out needs IndexedDB transactions). **That build order is now complete**: the
+> IndexedDB engine (§18.6 part 4), §16.3/§16.5's storage-layout prerequisites, the §18.1/18.4 fan-out
+> itself, and §18.13's CD pipeline tests are all built — each has its own detail in its section below.
+> What remains inside §18 is narrower, open sub-items called out in their own sections: §17.1's lazy
+> per-client load (§18.6 part 4), §18.3's "defer migration to idle" and failure-reporting UX, §18.8's
+> encryption/desktop threat model, §18.9's concurrency (CAS/transactions), §18.11's legal gaps, and
+> §18.12's ribbon reuse for the unsupported-version warning — none of these were in the original
+> build-order list, so none were blocking it.
 
 ### 18.1 [x] [Decided in principle] The star write model, and its relationship to §16.3
 > **Built.** [recordSchemas.js](src/data/recordSchemas.js) declares `SCHEMA_2`/`SCHEMA_3`'s
