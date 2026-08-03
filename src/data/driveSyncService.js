@@ -14,10 +14,16 @@
 // **Not built in this slice**: incremental sync via the Drive Changes API (`changes.list` +
 // `pageToken`) — every sync downloads and re-uploads the whole JSON file, which is correct but not
 // bandwidth-minimal; a real optimisation, not a correctness gap, and left for a follow-up once this
-// path has real usage to size against. Also not built: a resolution UI for the `conflicts` a sync
-// pass returns — they are detected, applied with a safe default (the local edit wins, the remote
-// version travels alongside for later review), and reported in `driveSyncStatus()`, but nothing in
-// the UI yet lets a trainer review and pick between the two sides. See docs/TODO.md §3.3.
+// path has real usage to size against.
+//
+// **Conflict review**: a sync pass applies a safe default per conflict (an edit always wins over a
+// deletion; a same-record double-edit takes the local side) and reports every conflict it could not
+// resolve on its own via `driveSyncStatus().lastSyncResult.conflicts`. `resolveSyncConflict()` below
+// lets a trainer override that default per record — it doesn't re-run the merge, it just overwrites
+// the one record in local state with whichever side was picked (or deletes it, for the
+// deletion-vs-edit types) and drops the conflict from `lastSyncResult` so the review UI's count goes
+// down. The next sync pass uploads that choice like any other local edit — there's no separate
+// "resolution" concept on the wire, which is what keeps this override safe to skip entirely.
 //
 // **Why no Lamport (deviceId, seq) pair**, despite TODO §18.5 flagging it as something concurrent
 // writers would eventually need: the three-way merge here never tries to ORDER two edits — it detects
@@ -219,5 +225,32 @@ export async function syncNow() {
     return result;
   } finally {
     syncing = false;
+  }
+}
+
+/**
+ * Override a merge's default pick for one conflict — `keepSide` is `"local"` or `"remote"`,
+ * whichever side of `conflict.local`/`conflict.remote` should survive (either may be `null`, which
+ * means "delete this record": the deletion-vs-edit conflict types report the deleted side as `null`,
+ * so choosing it is how a trainer can undo the "an edit always wins" default and honour the deletion
+ * instead). Not a re-merge — just replaces the one record in local state and re-saves, exactly like
+ * any other local edit; the next sync pass is what actually pushes it to Drive.
+ */
+export function resolveSyncConflict(conflict, keepSide) {
+  const chosen = keepSide === "remote" ? conflict.remote : conflict.local;
+  const state = getState();
+  const records = (state[conflict.collection] || []).filter((r) => r.id !== conflict.id);
+  if (chosen) records.push(chosen);
+  state[conflict.collection] = records;
+  setState(state);
+  saveToLocalStorage();
+
+  if (lastSyncResult?.conflicts) {
+    lastSyncResult = {
+      ...lastSyncResult,
+      conflicts: lastSyncResult.conflicts.filter(
+        (c) => !(c.collection === conflict.collection && c.id === conflict.id),
+      ),
+    };
   }
 }

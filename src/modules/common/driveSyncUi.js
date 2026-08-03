@@ -11,9 +11,11 @@ import {
   connectDriveSync,
   disconnectDriveSync,
   driveSyncStatus,
+  resolveSyncConflict,
   setSyncIntervalMinutes,
   syncNow,
 } from "../../data/driveSyncService.js";
+import { closeModal, openModal, renderMarkupOnce } from "./dom.js";
 import { preloadGoogleIdentityServices } from "./googleAuth.js";
 
 let deps = null;
@@ -68,11 +70,16 @@ function cardStateFor(status) {
       intervalMinutes: status.intervalMinutes,
       statusText: "",
       statusClass: "status-msg",
+      reviewVisible: false,
+      reviewLabel: "",
     };
   }
   const busyLabel = tr("drive_sync_syncing", "Syncing…");
   if (status.connected) {
     const failed = Boolean(status.lastSyncResult && !status.lastSyncResult.ok);
+    const conflictCount = status.lastSyncResult?.ok
+      ? status.lastSyncResult.conflicts?.length || 0
+      : 0;
     return {
       desc: connectedDesc(),
       connectDisabled: status.syncing,
@@ -82,6 +89,8 @@ function cardStateFor(status) {
       intervalMinutes: status.intervalMinutes,
       statusText: formatLastSync(status),
       statusClass: `status-msg ${failed ? "text-danger" : "text-emerald"}`,
+      reviewVisible: conflictCount > 0,
+      reviewLabel: `${tr("drive_sync_review_conflicts", "Review conflicts")} (${conflictCount})`,
     };
   }
   return {
@@ -93,6 +102,8 @@ function cardStateFor(status) {
     intervalMinutes: status.intervalMinutes,
     statusText: "",
     statusClass: "status-msg",
+    reviewVisible: false,
+    reviewLabel: "",
   };
 }
 
@@ -120,6 +131,10 @@ function applyCardState(state) {
   set("drive-sync-status", (el) => {
     el.textContent = state.statusText;
     el.className = state.statusClass;
+  });
+  set("btn-drive-review-conflicts", (el) => el.classList.toggle("hidden", !state.reviewVisible));
+  set("btn-drive-review-conflicts-text", (el) => {
+    el.textContent = state.reviewLabel;
   });
 }
 
@@ -177,7 +192,132 @@ export function setupDriveSyncUi() {
     });
   }
 
+  renderConflictsDialog();
+  const reviewBtn = document.getElementById("btn-drive-review-conflicts");
+  if (reviewBtn) {
+    reviewBtn.addEventListener("click", () => {
+      renderConflictsList();
+      openModal("dialog-drive-conflicts");
+    });
+  }
+
   setupHeaderCloudIconSync();
+}
+
+const CONFLICT_TYPE_LABELS = {
+  "add-add": ["drive_conflict_type_add_add", "Created on both devices"],
+  "edit-vs-edit": ["drive_conflict_type_edit_edit", "Edited on both devices"],
+  "delete-vs-edit": ["drive_conflict_type_delete_edit", "Deleted on this device, edited elsewhere"],
+  "edit-vs-delete": ["drive_conflict_type_edit_delete", "Edited on this device, deleted elsewhere"],
+};
+
+function conflictTypeLabel(type) {
+  const [key, fallback] = CONFLICT_TYPE_LABELS[type] || [null, type];
+  return key ? tr(key, fallback) : fallback;
+}
+
+// Builds one side of a conflict card entirely via DOM APIs (createElement/textContent), never
+// innerHTML — the two records are arbitrary trainer/client data (names, notes, injury text) and
+// routing them through an HTML sink would need per-field escaping for no benefit, since a `<pre>`
+// with plain text renders identically either way.
+function buildConflictSide(label, record) {
+  const wrap = document.createElement("div");
+  wrap.className = "conflict-side";
+  const heading = document.createElement("div");
+  heading.className = "conflict-side-label";
+  heading.textContent = label;
+  wrap.appendChild(heading);
+  const pre = document.createElement("pre");
+  pre.className = "conflict-json";
+  pre.textContent = record
+    ? JSON.stringify(record, null, 2)
+    : tr("drive_conflict_deleted", "— deleted —");
+  wrap.appendChild(pre);
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "btn secondary-btn conflict-keep-btn";
+  btn.textContent = record
+    ? tr("drive_conflict_keep", "Keep this version")
+    : tr("drive_conflict_keep_deleted", "Delete anyway");
+  wrap.appendChild(btn);
+  return { wrap, btn };
+}
+
+function buildConflictCard(conflict) {
+  const card = document.createElement("div");
+  card.className = "conflict-item card";
+
+  const header = document.createElement("div");
+  header.className = "conflict-item-header";
+  const title = document.createElement("span");
+  title.className = "conflict-collection";
+  title.textContent = conflict.collection;
+  const typeBadge = document.createElement("span");
+  typeBadge.className = "badge";
+  typeBadge.textContent = conflictTypeLabel(conflict.type);
+  header.append(title, typeBadge);
+  card.appendChild(header);
+
+  const sides = document.createElement("div");
+  sides.className = "conflict-sides";
+  const local = buildConflictSide(tr("drive_conflict_local", "This device"), conflict.local);
+  const remote = buildConflictSide(tr("drive_conflict_remote", "Other device"), conflict.remote);
+  local.btn.addEventListener("click", () => {
+    resolveSyncConflict(conflict, "local");
+    renderConflictsList();
+    renderDriveSyncCard();
+  });
+  remote.btn.addEventListener("click", () => {
+    resolveSyncConflict(conflict, "remote");
+    renderConflictsList();
+    renderDriveSyncCard();
+  });
+  sides.append(local.wrap, remote.wrap);
+  card.appendChild(sides);
+
+  return card;
+}
+
+function renderConflictsList() {
+  const list = document.getElementById("drive-conflicts-list");
+  if (!list) return;
+  const conflicts = driveSyncStatus().lastSyncResult?.conflicts || [];
+  list.replaceChildren();
+  if (conflicts.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "dialog-desc";
+    empty.textContent = tr("drive_conflict_none", "No conflicts left to review.");
+    list.appendChild(empty);
+    return;
+  }
+  for (const conflict of conflicts) list.appendChild(buildConflictCard(conflict));
+}
+
+function renderConflictsDialog() {
+  renderMarkupOnce(
+    "dialogs-root",
+    (root) => root.querySelector("#dialog-drive-conflicts"),
+    `
+<dialog id="dialog-drive-conflicts" class="dialog-modal card glassmorphic">
+    <div class="modal-header">
+      <h3 id="drive-conflicts-title">Review sync conflicts</h3>
+      <button class="modal-close-btn" aria-label="Close conflict review"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body-scroll">
+      <p id="drive-conflicts-desc" class="dialog-desc">These records changed on two devices since the last sync. Pick which version to keep — the other side is discarded once you choose.</p>
+      <div id="drive-conflicts-list"></div>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn primary-btn modal-cancel">Done</button>
+    </div>
+  </dialog>
+`,
+  );
+  const dialog = document.getElementById("dialog-drive-conflicts");
+  if (!dialog) return;
+  for (const btn of dialog.querySelectorAll(".modal-close-btn, .modal-cancel")) {
+    btn.addEventListener("click", () => closeModal("dialog-drive-conflicts"));
+  }
 }
 
 /** The header's cloud/sync icon (#backup-btn) already opens the Sync & Backup dialog via

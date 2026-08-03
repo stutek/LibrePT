@@ -32,6 +32,10 @@ def test_drive_sync_card_reports_not_configured_and_disables_connect(
     assert "hidden" in (
         page.locator("#drive-sync-interval-row").get_attribute("class") or ""
     )
+    # No conflicts exist to review when there's nothing configured to have synced in the first place.
+    assert "hidden" in (
+        page.locator("#btn-drive-review-conflicts").get_attribute("class") or ""
+    )
 
 
 def test_header_cloud_icon_still_opens_the_dialog_when_not_connected(
