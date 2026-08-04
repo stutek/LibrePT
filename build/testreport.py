@@ -73,11 +73,35 @@ def failed_test_ids(output):
     return ids
 
 
-def failure_traceback(output, limit=24):
-    """The FAILURES section — the exception, its message and the line that raised it.
+# pytest marks the raised exception with a leading "E   " in every --tb mode. Under --tb=long that
+# marker is the ONLY reliable way to find it: the exception sits at the END of a traceback block
+# that can run past 150 lines of source listing, so a head-truncated digest shows call-site
+# boilerplate and drops the one line that says what actually went wrong (observed 2026-08-04: the
+# digest printed 24 lines of function signature, then "… 143 more", hiding a `TimeoutError`).
+EXCEPTION_LINE = re.compile(r"^E\s{2,}\S")
 
-    Run with --tb=short, one failure is ~6 lines, so a cap of 24 covers the usual case of several
-    tests failing for one shared reason. Anything beyond the cap stays in the log.
+
+def failure_exceptions(output, limit=12):
+    """Just the raised exceptions, de-duplicated, in order.
+
+    This is the part of a failure that is never safe to truncate, so it is extracted separately and
+    printed before (and independently of) the surrounding traceback. De-duplicated because a
+    parallel suite failing for ONE shared reason otherwise repeats the same line once per worker,
+    pushing everything else out of the digest.
+    """
+    seen = []
+    for line in output.splitlines():
+        if EXCEPTION_LINE.match(line.strip()) and line.strip() not in seen:
+            seen.append(line.strip())
+    return seen[:limit], max(0, len(seen) - limit)
+
+
+def failure_traceback(output, limit=24):
+    """The FAILURES section — the call chain leading to the exception.
+
+    Capped, and that cap is safe ONLY because failure_exceptions() surfaces the exception itself
+    separately: under --tb=long this section is mostly source listing, and the cap would otherwise
+    swallow the message. Anything beyond the cap stays in the log.
     """
     lines = output.splitlines()
     starts = [i for i, line in enumerate(lines) if FAILURES_MARKER in line]
@@ -90,14 +114,27 @@ def failure_traceback(output, limit=24):
 
 
 def print_digest(label, output, path, limit=30):
-    """Print WHY it failed (the compact traceback) and WHICH tests failed (pytest's short summary),
-    plus the log path for everything else. Both halves matter: the ids alone still cost a trip to
-    the log to learn the reason."""
+    """Print WHY it failed (the exception, then the call chain) and WHICH tests failed (pytest's
+    short summary), plus the log path for everything else. All three matter: the ids alone still
+    cost a trip to the log to learn the reason, and the traceback alone can bury the reason.
+
+    The exception block comes FIRST and is never truncated away — the browser suites run with
+    --tb=long, where the message is the last line of a very long block, so ordering by "most
+    important first" is what keeps a digest useful without reading the log.
+    """
     lines = output.splitlines()
     marker_indexes = [i for i, line in enumerate(lines) if SUMMARY_MARKER in line]
     digest = lines[marker_indexes[-1] :] if marker_indexes else lines[-limit:]
 
     print(f"\n  ── {label}: failure digest ──  (full log: {path})")
+    exceptions, more_exceptions = failure_exceptions(output)
+    for line in exceptions:
+        print(f"    {line}")
+    if more_exceptions:
+        print(f"    … {more_exceptions} more distinct exception(s) in {path}")
+    if exceptions:
+        print()
+
     traceback, trimmed = failure_traceback(output)
     for line in traceback:
         print(f"    {line}")

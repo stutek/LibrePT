@@ -570,9 +570,6 @@ def run_javascript_unit_tests():
     print("  ✓ JavaScript unit tests passed successfully!")
 
 
-MEDIUM_ARTIFACT_DIR = os.path.join(REPORT_DIR, "medium-artifacts")
-
-
 def _playwright_worker_count():
     """Half the visible core count, not a hardcoded number — contributors run this on very
     different hardware, and a fixed "8" is either wasted (a 4-core laptop oversubscribes worse
@@ -622,8 +619,6 @@ def run_medium_tests():
             "--dist=loadfile",
             "-q",
             "--tb=long",
-            "--screenshot=only-on-failure",
-            f"--output={MEDIUM_ARTIFACT_DIR}",
             "tests/medium/",
         ],
         "medium-parallel",
@@ -645,9 +640,6 @@ def run_medium_tests():
     sys.exit(returncode)
 
 
-E2E_ARTIFACT_DIR = os.path.join(REPORT_DIR, "e2e-artifacts")
-
-
 def run_e2e_tests():
     """Runs Playwright browser E2E tests in parallel (every test under tests/e2e/).
 
@@ -660,15 +652,21 @@ def run_e2e_tests():
     the app, an under-specified wait in the test — not laundered through a second chance.
     See AGENT_RULES.md §2.A.3.
 
-    What actually makes a failure here investigable without re-deriving it from scratch: `--tb=long`
-    (the full call chain, not just the assertion line — parallel runs are already isolated into their
-    own log so verbosity here doesn't drown anything out), plus a screenshot at the moment of failure
-    retained ONLY for failing tests (`.build-reports/e2e-artifacts/`) — one static capture, essentially
-    free at collection time, unlike tracing/video (both tried and dropped: they record CONTINUOUSLY
-    for every test, not just on failure, and at full -n auto parallelism that measurably slowed the
-    whole run — a ~4-minute e2e stage became 12+ minutes. Self-inflicted load working directly against
-    the goal of fewer load-induced flakes. If a screenshot isn't enough to diagnose a specific failure,
-    re-run that one node id alone with `--tracing=on` rather than paying the cost on every run.
+    What makes a failure here investigable without re-deriving it from scratch is `--tb=long` (the
+    full call chain, not just the assertion line — parallel runs are isolated into their own log, so
+    verbosity here drowns nothing out) plus build/testreport.py's digest, which lifts the raised
+    exception out of that block and prints it FIRST, un-truncated.
+
+    NO artifact capture. `--screenshot=only-on-failure --output=…` used to run here, documented as
+    "essentially free at collection time". Measured 2026-08-04, that was simply false: any artifact
+    option activates pytest-playwright's per-test artifact recorder, which wrapped every context in
+    the suite and cost ~40s of a 175s stage (~23%) on a fully GREEN run, where by definition not one
+    screenshot is written. Tracing and video were dropped earlier for the same reason at larger
+    scale (a ~4-minute stage became 12+). Across ~11 real e2e failures diagnosed on 2026-08-04, every
+    single one was read off the traceback and not one screenshot was opened — so the tax bought
+    nothing it was claimed to. When a failure genuinely needs visual state, re-run that one node id
+    with `--screenshot=on` (or `--tracing=on`), which is the same escalate-on-demand rule already
+    applied to tracing rather than paying for it on every run.
     """
     print("\n  Running E2E Browser Tests (parallel)...")
     venv_python = venv_python_path()
@@ -703,8 +701,6 @@ def run_e2e_tests():
             "--dist=loadfile",
             "-q",
             "--tb=long",
-            "--screenshot=only-on-failure",
-            f"--output={E2E_ARTIFACT_DIR}",
             "tests/e2e/",
         ],
         "e2e-parallel",
@@ -723,8 +719,9 @@ def run_e2e_tests():
             f"    (runner itself died — collection error or crashed worker; see {path})"
         )
     print(f"    Full log: {path}")
-    print(f"    Traces/screenshots/video for failing tests: {E2E_ARTIFACT_DIR}/")
-    print("    Open a trace with: .venv/bin/playwright show-trace <trace.zip>")
+    print(
+        "    Need visual state? Re-run that one node id with --screenshot=on (or --tracing=on)."
+    )
     sys.exit(returncode)
 
 
