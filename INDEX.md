@@ -56,6 +56,7 @@ module, listed in the table below alongside that module's `.js`.
 | Module | Type | Description |
 | :--- | :--- | :--- |
 | [src/app.js](src/app.js) | `entry` | Application bootstrapper: root initialization, dependency injection wiring, and global lifecycle hooks. |
+| [src/appBoot.js](src/appBoot.js) | `entry` | Side-effect-free boot steps extracted from `app.js`'s `init()` — one exported `bootXyz(deps)` per feature, callable independently of the real boot (used by `tests/medium/` to mount one component without running the full app). |
 | [src/index.html](src/index.html) | `shell` | The app shell: `<head>`, the integrity-error overlay, and empty canvases every other module renders into. |
 | [src/index.css](src/index.css) | `styles` | Shared design-system tokens and foundations only (buttons, cards, modals, form controls, resets) — per-feature rules live in each module's own `.css`. |
 | [src/theme-boot.js](src/theme-boot.js) | `entry` | Render-blocking classic script that sets the theme class before paint (anti-FOUC) and forces http→https; external so CSP `script-src` can forbid `'unsafe-inline'`. |

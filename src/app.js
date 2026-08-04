@@ -2,6 +2,7 @@
 // Single responsibility: Bootstraps the application, wires dependency injections across components,
 // and manages global lifecycle hooks.
 
+import * as appBoot from "./appBoot.js";
 import {
   cancelWorkoutSession as cancelWorkoutSessionController,
   enforceQuickSignalExclusivity,
@@ -23,20 +24,17 @@ import {
   startWorkoutSession as startWorkoutSessionController,
   syncSessionFocusUrl,
 } from "./controllers/activeSessionController.js";
-import { initAppLifecycle } from "./controllers/appLifecycleController.js";
 import { setupClientForms as setupClientFormsController } from "./controllers/clientFormsController.js";
 import {
   openExerciseCreateDialog,
   setupExerciseForms as setupExerciseFormsController,
 } from "./controllers/exerciseFormsController.js";
-import { setupViewDismiss } from "./controllers/gestureController.js";
 import {
   activeRouteIsDialog,
   activeRouteName,
   focusActiveSessionCard,
   getBasePath,
   handlePathChange,
-  initRouter,
   navigateToPath,
   pushRoute,
   renderErrorViewShell,
@@ -75,44 +73,21 @@ import {
   renderClientDetailViewShell,
   renderClientDirectoryViewShell,
 } from "./modules/clients/clientsView.js";
-import { initRestTimer, setupRestTimer } from "./modules/clipboard/exerciseAndRestTimer.js";
 import { renderExerciseDeck } from "./modules/clipboard/exerciseDeck.js";
 import {
   renderActiveUsersList,
   updateClientTabsFadeState,
 } from "./modules/common/activeUsersList.js";
 import {
-  initApplicationHeader,
   renderHeaderShell,
   renderSyncBadge,
   setOfflineCachedState,
-  setupApplicationHeader,
 } from "./modules/common/applicationHeader.js";
-import {
-  initBackupRestore,
-  prepareBackupDialog,
-  setupBackupRestore,
-} from "./modules/common/backupRestore.js";
-import {
-  initBuildInfoDialog,
-  renderBuildInfo,
-  setupBuildInfoDialog,
-} from "./modules/common/buildInfoDialog.js";
-import {
-  initDriveSyncUi,
-  prepareDriveSyncCard,
-  setupDriveSyncUi,
-} from "./modules/common/driveSyncUi.js";
-import {
-  initFeedbackModal,
-  openFeedbackModal,
-  setupFeedbackForms,
-} from "./modules/common/feedbackModal.js";
-import {
-  initNotificationArea,
-  renderNotificationArea,
-  setupNotificationGestures,
-} from "./modules/common/notificationArea.js";
+import { prepareBackupDialog } from "./modules/common/backupRestore.js";
+import { renderBuildInfo } from "./modules/common/buildInfoDialog.js";
+import { prepareDriveSyncCard } from "./modules/common/driveSyncUi.js";
+import { openFeedbackModal } from "./modules/common/feedbackModal.js";
+import { renderNotificationArea } from "./modules/common/notificationArea.js";
 import { populateDropdownSelectors as populateDropdownsController } from "./modules/common/populateDropdownSelectors.js";
 import { newRecordId } from "./modules/common/recordId.js";
 import { registerShellRender, runShellRenders } from "./modules/common/renderRegistry.js";
@@ -150,39 +125,30 @@ import {
   renderPendingPlanAdjustmentsComponent,
 } from "./modules/plans/planAdjustments.js";
 import {
-  initPlansView,
   openRoutineEditorModal,
   renderRoutinesViewShell,
   renderRoutinesList as routinesViewRender,
 } from "./modules/plans/plansView.js";
 import {
   initEditSessionControl,
-  initWorkoutSetup,
   openEditSessionControlModal,
   openWorkoutSetupModal,
   setupEditSessionControl,
-  setupWorkoutSetup,
 } from "./modules/session/editSessionControl.js";
 import {
   renderEditSessionView,
-  renderWorkoutSetupView,
   renderWorkoutSetupViewShell,
 } from "./modules/session/editSessionView.js";
 import {
-  initSessionBar,
   renderActiveSessionBarLabels,
   renderIdleSessionBar,
   updateSessionBarTimer,
 } from "./modules/session/sessionBar.js";
-import {
-  initSessionInviteDialog,
-  openSessionInviteDialog,
-} from "./modules/session/sessionInviteDialog.js";
-import { initSessionTitleBar, renderSessionTitle } from "./modules/session/sessionTitleBar.js";
+import { openSessionInviteDialog } from "./modules/session/sessionInviteDialog.js";
+import { renderSessionTitle } from "./modules/session/sessionTitleBar.js";
 import {
   focusSessionsColumn,
   getSessionDayDate,
-  initSessionTimeline,
   renderSessionsTitleBar,
   scheduleTimelineSettle,
   setupSessionsDayNav,
@@ -235,12 +201,12 @@ window.stateHasData = () => stateHasData(getState());
 
 async function init() {
   initTheme();
-  // The header shell renders before anything else: initAppLifecycle() below stamps the build
-  // commit into #app-version synchronously, and several setup functions later in this file query
-  // header elements (#backup-btn, #app-version) despite not being the header's own module — the
-  // header must exist before any of that runs, not just before its own setupApplicationHeader().
+  // The header shell renders before anything else: appBoot.bootAppLifecycle() below stamps the
+  // build commit into #app-version synchronously, and several setup functions later in this file
+  // query header elements (#backup-btn, #app-version) despite not being the header's own module —
+  // the header must exist before any of that runs, not just before appBoot.bootHeader() itself.
   renderHeaderShell();
-  initAppLifecycle({
+  appBoot.bootAppLifecycle({
     basePath: getBasePath(),
     setOfflineCachedState,
     t,
@@ -261,7 +227,7 @@ async function init() {
   }
 
   // Wire router dependencies
-  initRouter({
+  appBoot.bootRouter({
     getState,
     t,
     getActiveSession,
@@ -318,14 +284,13 @@ async function init() {
 
   setupNavigation({ setupSessionsDayNav });
   setupClientForms();
-  initPlansView({ navigateToPath, urlFor });
+  appBoot.bootPlansView({ navigateToPath, urlFor });
   setupRoutineForms();
   setupExerciseForms();
 
-  initSessionInviteDialog({ getState, t });
+  appBoot.bootSessionInviteDialog({ getState, t });
 
-  renderWorkoutSetupView();
-  initWorkoutSetup({
+  appBoot.bootWorkoutSetup({
     getState,
     t,
     getClientDisplayNameHTML,
@@ -340,10 +305,9 @@ async function init() {
     rerenderSessions: renderSessions,
     openSessionInviteDialog,
   });
-  setupWorkoutSetup();
   setupActiveSession();
 
-  initFeedbackModal({
+  appBoot.bootFeedbackModal({
     getState,
     getActiveSession: () => getActiveSession(),
     t,
@@ -353,9 +317,8 @@ async function init() {
     renderPendingPlanAdjustments,
     enforceQuickSignalExclusivity,
   });
-  setupFeedbackForms();
 
-  initRestTimer({
+  appBoot.bootRestTimer({
     t,
     onFocusTimer: (timer) => {
       if (!timer.sessionId || !timer.clientId) return;
@@ -364,9 +327,8 @@ async function init() {
       navigateToPath(path);
     },
   });
-  setupRestTimer();
 
-  initBackupRestore({
+  appBoot.bootBackupRestore({
     getState,
     navigateToPath,
     urlFor,
@@ -379,12 +341,10 @@ async function init() {
     populateDropdownSelectors,
     t,
   });
-  setupBackupRestore();
-  initDriveSyncUi({ t });
-  setupDriveSyncUi();
+  appBoot.bootDriveSyncUi({ t });
   setupCalendarSessions();
 
-  initApplicationHeader({
+  appBoot.bootHeader({
     getState,
     t,
     saveToLocalStorage: saveState,
@@ -402,9 +362,8 @@ async function init() {
     renderActiveGroupBoard,
     renderActiveSessionBarLabels,
   });
-  setupApplicationHeader();
 
-  initSessionTimeline({
+  appBoot.bootSessionTimeline({
     getState,
     t,
     activeRouteName,
@@ -412,13 +371,13 @@ async function init() {
     urlFor,
   });
 
-  initSessionTitleBar({
+  appBoot.bootSessionTitleBar({
     getActiveSession: () => getActiveSession(),
     getISODateString,
     formatClockFromMinutes,
   });
 
-  initSessionBar({
+  appBoot.bootSessionBar({
     getState,
     getActiveSession: () => getActiveSession(),
     t,
@@ -431,10 +390,9 @@ async function init() {
     getSessionDayDate,
   });
 
-  initBuildInfoDialog({ t, navigateToPath, urlFor });
-  setupBuildInfoDialog();
+  appBoot.bootBuildInfoDialog({ t, navigateToPath, urlFor });
 
-  initNotificationArea({
+  appBoot.bootNotificationArea({
     getState,
     getActiveSession: () => getActiveSession(),
     t,
@@ -442,7 +400,6 @@ async function init() {
     navigateToPath,
     openSessionFromHistory,
   });
-  setupNotificationGestures();
 
   applyTranslations(getState().lang);
 
@@ -463,7 +420,7 @@ async function init() {
   window.addEventListener("popstate", handlePathChange);
   handlePathChange();
 
-  setupViewDismiss({ navigateToPath, getActiveSession, launchClipboardDirectly });
+  appBoot.bootViewDismiss({ navigateToPath, getActiveSession, launchClipboardDirectly });
 
   setInterval(renderIdleSessionBar, 30000);
 
