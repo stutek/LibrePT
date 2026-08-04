@@ -4,33 +4,33 @@
 // not just the performed sets. This covers the pure buildProgramSnapshot model (keeps rests +
 // skipped work).
 
-import { test } from 'node:test';
-import assert from 'node:assert/strict';
-import * as m from '../../../../src/modules/common/sessionItemRecord.js';
+import assert from "node:assert/strict";
+import { test } from "node:test";
+import * as m from "../../../../src/modules/common/sessionItemRecord.js";
 
-test('build program snapshot keeps rests and skips', () => {
+test("build program snapshot keeps rests and skips", () => {
   const cs = {
     exercises: [
       {
-        id: 'a',
-        name: 'Squat',
-        loadUnit: 'kg',
-        modality: 'strength',
-        metric: 'reps',
+        id: "a",
+        name: "Squat",
+        loadUnit: "kg",
+        modality: "strength",
+        metric: "reps",
         setsTargetCount: 3,
         repsTarget: 5,
         weightTarget: 100,
-        circuitId: 'c1',
-        circuitTitle: 'SS',
+        circuitId: "c1",
+        circuitTitle: "SS",
         circuitSeries: 3,
       },
-      { id: 'r1', type: 'rest', rest: 60, circuitId: 'c1' },
+      { id: "r1", type: "rest", rest: 60, circuitId: "c1" },
       {
-        id: 'b',
-        name: 'Skipped Curl',
-        loadUnit: 'kg',
-        modality: 'strength',
-        metric: 'reps',
+        id: "b",
+        name: "Skipped Curl",
+        loadUnit: "kg",
+        modality: "strength",
+        metric: "reps",
         setsTargetCount: 2,
         repsTarget: 12,
         weightTarget: 15,
@@ -61,14 +61,14 @@ test('build program snapshot keeps rests and skips', () => {
   };
 
   assert.equal(result.len, 3);
-  assert.equal(result.t0, 'exercise');
+  assert.equal(result.t0, "exercise");
   assert.equal(result.done0, true);
   assert.equal(result.sets0, 3);
-  assert.equal(result.circuit0, 'c1');
-  assert.equal(result.t1, 'rest');
+  assert.equal(result.circuit0, "c1");
+  assert.equal(result.t1, "rest");
   assert.equal(result.rest1, 60);
   // A movement with no logged work is KEPT as its prescription, flagged not-completed.
-  assert.equal(result.t2, 'exercise');
+  assert.equal(result.t2, "exercise");
   assert.equal(result.done2, false);
   assert.equal(result.sets2, 2);
   assert.equal(result.skippedSetDone, false);

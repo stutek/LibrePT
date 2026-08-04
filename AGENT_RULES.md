@@ -48,9 +48,14 @@ Every response and tool action must drive measurable, continuous progress toward
    **Stage 2 (only if Stage 1 is clean):** the medium-tier component suite (`tests/medium/` — see
    §5.2). Each test mounts ONE component via a `src/appBoot.js` boot step against real `index.html`
    markup, with the real `app.js` request intercepted and replaced — no router, IndexedDB, service
-   worker, or demo-data seed. Not timing-sensitive the way full e2e is (no drag-and-drop, no
-   countdown timers), so it runs at `-n auto` rather than Stage 3's half-the-cores cap. Gated
-   separately from Stage 3 so a broken component fails fast before the slower full-flow suite runs.
+   worker, or demo-data seed. Uses the same half-the-cores worker count as Stage 3
+   (`build._playwright_worker_count`), not `-n auto`: full core-count parallelism was tried here
+   first on the theory that this tier isn't timing-sensitive the way full e2e is, but it hit the
+   OTHER documented `-n auto` failure mode instead — enough simultaneous fresh browser contexts
+   can still burst past the dev server's TCP listen backlog and produce the same `Page.goto` 30s
+   timeout, a constraint that applies to any Playwright suite hitting this shared server regardless
+   of what it asserts (seen 2026-08-04). Gated separately from Stage 3 so a broken component fails
+   fast before the slower full-flow suite runs.
 
    **Stage 3 (only if Stage 2 is clean):** the full Playwright e2e suite (`tests/e2e/`, itself
    fanned out across workers via `pytest-xdist`) against the local dev server.
@@ -66,6 +71,24 @@ Every response and tool action must drive measurable, continuous progress toward
    flaky" hand-wave forbidden below; don't re-parallelize the two locally without addressing that.
 
    All four stages together typically take 5-15 minutes; expect it, don't interrupt it. Rules:
+   - **Say how long it will take, BEFORE starting it, every time.** A gate run is minutes of dead
+     air, and "running the pipeline…" with no number leaves the user unable to tell a normal run
+     from a hung one — they end up asking "done yet?", which is the agent's failure, not theirs.
+     State the expected completion time when you kick it off, and quote the per-stage budget the
+     run is being measured against (typical on a 16-core dev box, from `_timed_task`'s own output):
+
+     | Stage | Typical | Investigate past |
+     | :--- | :--- | :--- |
+     | 1 — lint / unit / JS unit / audits (parallel) | 4-30s | 60s |
+     | 2 — medium component tests | 15-65s | 2min |
+     | 3 — e2e browser suite | ~3min | 6min |
+     | 4 — OWASP ZAP baseline | 3-4min | 10min (hard-killed at 20min) |
+     | **whole `build check`** | **6-8min** | **12min** |
+
+     If a stage blows past its "investigate" column, say so and diagnose — do not keep reporting
+     "still running" indefinitely. Check host load first (`uptime`; this box has 16 cores, so a
+     1-minute load average near or above that means the machine is oversubscribed and the run is
+     being starved rather than stuck), then the stage's own log under `.build-reports/`.
    - **Squeaky clean, always — zero warnings, not just zero failures.** The bar is a *clean* build, not a *green-enough* one. Every gate stage — lint, format, unit, e2e, dependency audit, dynamic security, **and the OWASP ZAP scan** — must report **no warnings and no findings**. For ZAP specifically that means `WARN-NEW: 0` **and** `FAIL-NEW: 0`, not merely no FAILs. A warning is either **fixed** at its source or **explicitly suppressed with a written justification** — never left to print and pass.
    - **A suppression is only ever a statement that there is no issue, never a way to defer one.** A gate suppression is legitimate in exactly one case: the finding is a false positive or genuinely does not apply to this architecture (e.g. a ZAP `-c` ignore for a CSRF check on an app with no server-side state-changing form). It is never legitimate as a way to park a *real* finding — a complexity violation, a genuine lint issue — for later. If the gate is right that something is wrong, fix it in the same change; do not add it to an allowlist, `# noqa`, or ignore file "for now." **No pipeline gate may carry a mechanism for allowlisting real, unfixed debt** (e.g. `agent_tools/complexity.py`'s old `PRE_EXISTING_ALLOWLIST`, or a bare `# noqa: C901` with no non-applicability justification) — every function a gate flags gets fixed in the change that touches the gate, full stop. Each justified suppression must also be periodically re-verified against the current architecture, not assumed valid forever — a false-positive rationale can stop being true as the app changes (e.g. adding a server-side form would retire the CSRF ignore).
    - **Never swallow a non-zero exit code.** A gate step that exits non-zero (including ZAP exit `2` = warnings and exit `3` = the scan errored / could not reach the target) MUST fail the build. Printing "completed with warnings" and returning success is forbidden — that pattern once hid a ZAP scan that was not even reaching the running app. If a stage cannot run, that is a failure to fix, not a pass to log.
@@ -157,8 +180,9 @@ parallel without collisions, and make the directory tree itself act as documenta
    `app.js`'s real `init()` calls, extracted so it's independently callable — with test-supplied
    fakes for cross-feature callbacks the test doesn't exercise. `index.html`'s real markup still
    loads unchanged (no separate fixture page, so nothing to go stale against it), so the component
-   wires against the same DOM ids production does. Runs at `-n auto` (Stage 2), not e2e's
-   half-the-cores cap, since it isn't timing-sensitive (see `build.run_medium_tests`). A test
+   wires against the same DOM ids production does. Runs as Stage 2, at the same worker count as
+   e2e's Stage 3 — see `build._playwright_worker_count`'s docstring for why `-n auto` isn't safe
+   here either, even though this tier isn't timing-sensitive the way full e2e is. A test
    belongs here if it needs the DOM/CSS but NOT navigation, persistence, or a real app boot; if it
    needs those, it stays in `tests/e2e/`.
 3. **Decouple with dependency injection, not cross-imports.** Extracted components receive the app-level helpers they need as parameters (`state`, `t`, `escapeHTML`, launch callbacks). For globals that get reassigned (`activeSession`, `state`), pass an *accessor* (`getActiveSession()`) so the module always reads the current value. This avoids circular imports and keeps modules independently testable.

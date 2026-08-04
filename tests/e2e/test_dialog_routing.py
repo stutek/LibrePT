@@ -8,6 +8,8 @@
 # not dismiss an agreement that has not been accepted.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
+from tests.conftest import NAVIGATION_TIMEOUT_MS
+
 
 def _path(page):
     return page.evaluate("() => location.pathname")
@@ -122,6 +124,8 @@ def test_first_run_terms_is_not_routed(browser, local_server):
     """
     context = browser.new_context()
     page = context.new_page()
+    # Own context, so the conftest fixture that does this for the shared `page` cannot reach us.
+    page.set_default_navigation_timeout(NAVIGATION_TIMEOUT_MS)
     try:
         page.goto(local_server)
         page.wait_for_selector("#dialog-terms[open]")

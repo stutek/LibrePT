@@ -455,7 +455,9 @@ def run_frontend_lint():
 
     before = _tracked_frontend_mtimes()
     subprocess.run(
-        [biome_path, "check", "--write", "src/"], capture_output=True, text=True
+        [biome_path, "check", "--write", *FRONTEND_LINT_TARGETS],
+        capture_output=True,
+        text=True,
     )
     rewritten = [
         path
@@ -468,7 +470,7 @@ def run_frontend_lint():
             print(f"        {path}")
 
     # The verdict: a clean tree after the writes, or a genuine finding the formatter cannot fix.
-    biome_res = subprocess.run([biome_path, "check", "src/"])
+    biome_res = subprocess.run([biome_path, "check", *FRONTEND_LINT_TARGETS])
     if biome_res.returncode != 0:
         print(
             "  ✗ Frontend static analysis failed (findings above need a human decision)."
@@ -477,14 +479,22 @@ def run_frontend_lint():
     print("  ✓ Frontend static analysis (Biome) passed.")
 
 
+# src/ is the runtime app; tests/unit_js/ is the only other place hand-written JS lives (the
+# node:test suite). Deliberately NOT all of tests/ — tests/fixtures/backups/*.json are frozen
+# byte-for-byte on purpose (test_frozen_backup_corpus.py: "never edit an existing one, that would
+# stop testing what it always tested"), and Biome would otherwise reformat their whitespace.
+FRONTEND_LINT_TARGETS = ("src/", "tests/unit_js/")
+
+
 def _tracked_frontend_mtimes():
     """(path -> mtime_ns) for every file Biome may rewrite, so the gate can report what it changed."""
     stamps = {}
-    for root, _dirs, files in os.walk("src"):
-        for name in files:
-            if name.endswith((".js", ".css", ".json")):
-                path = os.path.join(root, name)
-                stamps[path] = os.stat(path).st_mtime_ns
+    for target in FRONTEND_LINT_TARGETS:
+        for root, _dirs, files in os.walk(target):
+            for name in files:
+                if name.endswith((".js", ".mjs", ".css", ".json")):
+                    path = os.path.join(root, name)
+                    stamps[path] = os.stat(path).st_mtime_ns
     return stamps
 
 
@@ -563,15 +573,43 @@ def run_javascript_unit_tests():
 MEDIUM_ARTIFACT_DIR = os.path.join(REPORT_DIR, "medium-artifacts")
 
 
+def _playwright_worker_count():
+    """Half the visible core count, not a hardcoded number — contributors run this on very
+    different hardware, and a fixed "8" is either wasted (a 4-core laptop oversubscribes worse
+    than -n auto ever would) or needlessly conservative (a 32-core CI box gets the same headroom
+    ratio as this repo's 16-core dev machine, one Chromium instance per two cores, at half the
+    wall time). Shared by both Playwright suites (run_e2e_tests and run_medium_tests) — full
+    core-count parallelism (`-n auto`) has TWO independent failure modes here, not one: headless
+    Chromium's own per-instance process fan-out (renderer/GPU/sandbox) starves compositor frame
+    production for e2e's timing-sensitive assertions, but a medium test was assumed exempt from
+    that and given `-n auto` anyway — which surfaced the OTHER cause instead: enough simultaneous
+    fresh browser contexts opening their ~6 connections apiece can still burst past the dev
+    server's TCP listen backlog (`deploy/local_http_server.py`'s `request_queue_size`), producing
+    the exact same `Page.goto` 30s timeout e2e was capped to avoid (seen 2026-08-04, medium tier,
+    full clean pipeline run). That constraint applies to ANY Playwright suite hitting this shared
+    server, regardless of what the tests themselves assert — so both suites use this one function.
+    `os.cpu_count()` can return None (containers with no /proc affinity info); fall back to a
+    serial run rather than crashing the gate over an unknowable core count.
+
+    DELIBERATELY NOT load-aware. Scaling this down by `os.getloadavg()` was tried on 2026-08-04 and
+    reverted the same day: the stages run back-to-back, so Stage 3 samples the 1-minute load average
+    seconds after Stage 2's own workers stopped — it reads the pipeline's OWN exhaust (measured: 4.2
+    on a 16-core box, with nothing else running) and throttles itself for load that is already gone.
+    The e2e stage went 171-191s at the static count to 359s at the throttled one, and still failed
+    the same way, so the throttle cost three minutes and fixed nothing. If ambient load is genuinely
+    the problem, the answer is to not run the gate while hammering the machine — not to let the gate
+    misread its own footprint as a reason to go slower.
+    """
+    cpu_count = os.cpu_count() or 2
+    return max(1, cpu_count // 2)
+
+
 def run_medium_tests():
     """Runs the medium-tier Playwright suite (tests/medium/): one component mounted via a
     src/appBoot.js boot step, real index.html markup, no router/IndexedDB/service worker/demo-data
-    seed (see tests/medium/_harness.py). Unlike run_e2e_tests, this runs at `-n auto` (every
-    visible core), not half: the `-n 8` cap exists specifically because full-app e2e tests are
-    timing-sensitive (drag-and-drop, countdown timers, animation) and headless Chromium's
-    per-instance process fan-out starves their compositor frame production under full core-count
-    parallelism. A medium test mounts one static component with no such timing dependency, so it
-    doesn't pay for that cap.
+    seed (see tests/medium/_harness.py). Same worker count as run_e2e_tests — see
+    _playwright_worker_count's docstring for why `-n auto` isn't safe for this suite either, even
+    though it isn't timing-sensitive the way full e2e is.
     """
     print("\n  Running Medium Component Tests (parallel)...")
     returncode, output, path = run_logged(
@@ -580,7 +618,7 @@ def run_medium_tests():
             "-m",
             "pytest",
             "-n",
-            "auto",
+            str(_playwright_worker_count()),
             "--dist=loadfile",
             "-q",
             "--tb=long",
@@ -610,21 +648,6 @@ def run_medium_tests():
 E2E_ARTIFACT_DIR = os.path.join(REPORT_DIR, "e2e-artifacts")
 
 
-def _e2e_worker_count():
-    """Half the visible core count, not a hardcoded number — contributors run this on very
-    different hardware, and a fixed "8" is either wasted (a 4-core laptop oversubscribes worse
-    than -n auto ever would) or needlessly conservative (a 32-core CI box gets the same headroom
-    ratio as this repo's 16-core dev machine, one Chromium instance per two cores, at half the
-    wall time). See run_e2e_tests' docstring for why it's half of the count, not the count itself:
-    each headless Chromium instance fans out its own renderer/GPU/sandbox processes, and giving
-    every one a full core to itself (`-n auto`) still lets those processes starve each other's
-    compositor. `os.cpu_count()` can return None (containers with no /proc affinity info); fall
-    back to a serial run rather than crashing the gate over an unknowable core count.
-    """
-    cpu_count = os.cpu_count() or 2
-    return max(1, cpu_count // 2)
-
-
 def run_e2e_tests():
     """Runs Playwright browser E2E tests in parallel (every test under tests/e2e/).
 
@@ -649,7 +672,7 @@ def run_e2e_tests():
     """
     print("\n  Running E2E Browser Tests (parallel)...")
     venv_python = venv_python_path()
-    worker_count = _e2e_worker_count()
+    worker_count = _playwright_worker_count()
     returncode, output, path = run_logged(
         [
             venv_python,
@@ -657,7 +680,7 @@ def run_e2e_tests():
             "pytest",
             "-n",
             str(worker_count),
-            # Half the visible cores (_e2e_worker_count), not "auto" (= the full count): at full
+            # Half the visible cores (_playwright_worker_count), not "auto" (= the full count): at full
             # core-count parallelism, headless Chromium's own per-instance process fan-out
             # (renderer, GPU, sandbox processes) creates enough contention to intermittently starve
             # compositor frame production — timing-sensitive tests failed under -n auto that were
@@ -859,26 +882,56 @@ def run_owasp_zap_scan():
 
     print("    - Launching OWASP ZAP container baseline scan (host network)...")
     conf_dir = os.path.join(os.path.abspath("deploy"), "zap")
-    res = subprocess.run(
-        [
-            docker_bin,
-            "run",
-            "--rm",
-            "--network",
-            "host",
-            "-v",
-            f"{conf_dir}:/zap/wrk:ro",
-            "zaproxy/zap-stable",
-            "zap-baseline.py",
-            "-t",
-            ZAP_TARGET,
-            "-c",
-            "zap-baseline.conf",
-        ],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-    )
+    container_name = "librept-zap-baseline"
+    # ZAP baseline typically finishes in 3-4 minutes against an app this size; 20 minutes is a
+    # generous ceiling, not a target. Bounded because an unbounded subprocess.run() turned a
+    # genuine hang (or, observed 2026-08-04, severe host CPU contention — 8 Playwright workers
+    # plus the operator's own browser tabs pushed 1-min load average to 13+/16 cores) into a gate
+    # that never fails, never passes, and never tells you why: "a stage that cannot run is a
+    # failure to fix, not a pass to log" (AGENT_RULES §2.A.3) applies to hanging, not just crashing.
+    timeout_seconds = 1200
+    try:
+        res = subprocess.run(
+            [
+                docker_bin,
+                "run",
+                "--rm",
+                "--name",
+                container_name,
+                "--network",
+                "host",
+                "-v",
+                f"{conf_dir}:/zap/wrk:ro",
+                "zaproxy/zap-stable",
+                "zap-baseline.py",
+                "-t",
+                ZAP_TARGET,
+                "-c",
+                "zap-baseline.conf",
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            timeout=timeout_seconds,
+        )
+    except subprocess.TimeoutExpired as e:
+        # `docker run --rm` without -d is attached; killing the client process alone can leave the
+        # container running server-side, so stop it explicitly rather than trust SIGTERM to propagate.
+        subprocess.run([docker_bin, "stop", container_name], capture_output=True)
+        # TimeoutExpired.stdout is None on POSIX (communicate() raises before collecting output) but
+        # str on Windows in text mode, so normalise rather than assuming either.
+        partial = e.stdout or ""
+        if isinstance(partial, bytes):
+            partial = partial.decode("utf-8", errors="replace")
+        if partial.strip():
+            print("\n".join(partial.strip().splitlines()[-40:]))
+        print(
+            f"  ✗ OWASP ZAP scan did not finish within {timeout_seconds}s — killed. "
+            "Check host load (`uptime`) and Docker's own network reachability for the ZAP "
+            "add-on update it runs on startup before assuming the app is at fault."
+        )
+        sys.exit(1)
+
     if res.returncode == 0:
         print("  ✓ OWASP ZAP baseline security scan passed cleanly (WARN-NEW: 0).")
         return

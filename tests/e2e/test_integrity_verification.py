@@ -5,6 +5,8 @@
 # so this path runs for real here (not only in production). The failure path is driven by a test-only
 # `corrupt_integrity` cookie the dev server honours by flipping one hash.
 
+from tests.conftest import NAVIGATION_TIMEOUT_MS
+
 
 def test_service_worker_installs_and_verifies_clean(page, local_server):
     """Happy path: the verified atomic precache succeeds, so a worker activates and no error page shows.
@@ -26,6 +28,8 @@ def test_corrupt_build_shows_integrity_error_page(browser, local_server):
         [{"name": "corrupt_integrity", "value": "1", "url": local_server}]
     )
     page = context.new_page()
+    # Own context, so the conftest fixture that does this for the shared `page` cannot reach us.
+    page.set_default_navigation_timeout(NAVIGATION_TIMEOUT_MS)
     page.goto(local_server)
 
     page.wait_for_selector("#integrity-error-overlay:not(.hidden)", timeout=10000)

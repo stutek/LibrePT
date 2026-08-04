@@ -1,12 +1,20 @@
-# tests/e2e/test_theme.py
+# tests/medium/test_theme.py
 # End-to-end coverage of the 5-theme switcher (Midnight/Daylight/Red/Blossom/Nebula): selecting
 # a theme swaps the single <body> theme class and the <meta name="theme-color">, persists the
-# choice to localStorage['librept-theme'], and restores it across a reload.
+# choice to localStorage['librept-theme'], and restores it across a reload. Mounted via
+# appBoot.bootHeader() (see tests/medium/_harness.py's HEADER_STUB) — the theme switcher lives
+# inside the ☰ header menu, wired by setupApplicationHeader()'s setupThemeSwitcher(). The initial
+# body theme class itself comes from src/theme-boot.js, a separate anti-FOUC script tag that runs
+# regardless of app.js/our stub, so it's unaffected by the interception.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
 import pytest
 
-# value in #theme-switcher -> the body class applyTheme() sets (components/applicationHeader.js)
+from tests.medium._harness import HEADER_STUB, load_with_stub
+
+pytestmark = pytest.mark.clean_start
+
+# value in #theme-switcher -> the body class applyTheme() sets (modules/common/applicationHeader.js)
 THEME_BODY_CLASS = {
     "midnight": "midnight-theme",
     "daylight": "daylight-theme",
@@ -21,8 +29,8 @@ def _body_classes(page):
 
 
 def test_default_theme_is_daylight(page, local_server):
-    page.goto(local_server)
-    page.wait_for_selector("#view-clients.active")
+    load_with_stub(page, local_server, HEADER_STUB)
+    page.wait_for_selector("#app-header")
 
     assert "daylight-theme" in _body_classes(page)
     assert page.locator("#theme-switcher").input_value() == "daylight"
@@ -30,10 +38,9 @@ def test_default_theme_is_daylight(page, local_server):
 
 @pytest.mark.parametrize("value", ["midnight", "red", "blossom", "nebula"])
 def test_selecting_a_theme_swaps_the_single_body_class(page, local_server, value):
-    page.goto(local_server)
-    page.wait_for_selector("#view-clients.active")
+    load_with_stub(page, local_server, HEADER_STUB)
+    page.wait_for_selector("#app-header")
 
-    # The theme switcher lives inside the ☰ menu; open it before selecting.
     page.locator("#btn-app-menu").click()
     page.wait_for_selector("#app-menu:not(.hidden)")
     page.locator("#theme-switcher").select_option(value)
@@ -51,8 +58,8 @@ def test_selecting_a_theme_swaps_the_single_body_class(page, local_server, value
 
 
 def test_theme_persists_across_reload(page, local_server):
-    page.goto(local_server)
-    page.wait_for_selector("#view-clients.active")
+    load_with_stub(page, local_server, HEADER_STUB)
+    page.wait_for_selector("#app-header")
 
     page.locator("#btn-app-menu").click()
     page.wait_for_selector("#app-menu:not(.hidden)")
@@ -60,7 +67,7 @@ def test_theme_persists_across_reload(page, local_server):
     assert "nebula-theme" in _body_classes(page)
 
     page.reload()
-    page.wait_for_selector("#view-clients.active")
+    page.wait_for_selector("#app-header")
 
     # Restored from localStorage, not reset to the light default.
     assert "nebula-theme" in _body_classes(page)

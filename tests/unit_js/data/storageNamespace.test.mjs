@@ -7,18 +7,18 @@
 // `librept_db` is read exactly once, as the one-time legacy import source for a device's move onto
 // IndexedDB — never as a live, ongoing store.
 
-import { test } from 'node:test';
-import assert from 'node:assert/strict';
-import '../helpers/webStorageStub.mjs';
-import * as m from '../../../src/data/storageNamespace.js';
+import assert from "node:assert/strict";
+import { test } from "node:test";
+import "../helpers/webStorageStub.mjs";
+import * as m from "../../../src/data/storageNamespace.js";
 
-test('read write remove are plain unsuffixed keys', () => {
+test("read write remove are plain unsuffixed keys", () => {
   // No bucket-keying scheme survives here — every key is exactly what was asked for.
   localStorage.clear();
-  m.writeVersionScoped('librept_db', '{"clients":["a"]}');
-  const readBack = m.readVersionScoped('librept_db');
-  m.removeVersionScoped('librept_db');
-  const afterRemove = m.readVersionScoped('librept_db');
+  m.writeVersionScoped("librept_db", '{"clients":["a"]}');
+  const readBack = m.readVersionScoped("librept_db");
+  m.removeVersionScoped("librept_db");
+  const afterRemove = m.readVersionScoped("librept_db");
 
   assert.equal(readBack, '{"clients":["a"]}');
   assert.equal(afterRemove, null);

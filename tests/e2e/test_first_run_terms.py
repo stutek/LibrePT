@@ -6,6 +6,8 @@
 # These tests build their OWN browser context so the conftest auto-accept fixture (which only
 # covers the shared `page` fixture) does not suppress the modal.
 
+from tests.conftest import NAVIGATION_TIMEOUT_MS
+
 
 def _fresh_page(browser, local_server, accepted=False):
     context = browser.new_context()
@@ -14,6 +16,8 @@ def _fresh_page(browser, local_server, accepted=False):
             "window.localStorage.setItem('librept_terms_accepted', '1');"
         )
     page = context.new_page()
+    # Own context, so the conftest fixture that does this for the shared `page` cannot reach us.
+    page.set_default_navigation_timeout(NAVIGATION_TIMEOUT_MS)
     page.goto(local_server)
     page.wait_for_selector("#view-clients.active")
     return context, page

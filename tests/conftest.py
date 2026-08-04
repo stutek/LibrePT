@@ -38,6 +38,37 @@ def accept_first_run_terms(request):
     yield
 
 
+# Playwright's default `page.goto()` budget is 30s. Under contention on the shared local dev server
+# (parallel xdist workers' browser contexts each opening ~6 connections to fetch one page's ~89
+# assets, worse when the host has other load) that 30s can be spent waiting in the kernel's
+# connection queue alone, before the app or Chromium has done anything wrong — seen 2026-08-04,
+# unrelated tests failing `Page.goto: Timeout 30000ms` in batches while the box was loaded.
+#
+# Raised for NAVIGATION ONLY. Action and `expect()` timeouts stay at 30s on purpose: "the page took
+# a while to connect" is a latency fact about a contended dev box, but "an element was not
+# actionable for 30 seconds" is a claim about the app, and inflating that would launder a real bug
+# into a pass (AGENT_RULES §2.A.3 — never forgive a failure you have not root-caused).
+NAVIGATION_TIMEOUT_MS = 60000
+
+
+@pytest.fixture(autouse=True)
+def raise_navigation_timeout(request):
+    """Apply NAVIGATION_TIMEOUT_MS to the shared `page` fixture.
+
+    Tests that build their OWN context (via the `browser` fixture) are NOT covered here — there is
+    no hook to reach a context the test creates itself — so they call
+    `page.set_default_navigation_timeout(NAVIGATION_TIMEOUT_MS)` explicitly, the same way they
+    already opt into the demo-data seed by hand. That gap is not theoretical: it is why
+    test_first_run_terms.py still reported a 30000ms (not 60000ms) navigation timeout on the run
+    that first shipped this fixture.
+    """
+    if "page" in request.fixturenames:
+        request.getfixturevalue("page").set_default_navigation_timeout(
+            NAVIGATION_TIMEOUT_MS
+        )
+    yield
+
+
 # Init script that opts a browser context into the demo dataset. The app no longer autoloads demo
 # data — it boots to a clean, empty slate — and the dataset is populated only via the
 # ?init=demo_data_load deep-link param (see src/helper/shareLink.js). This rewrites the URL to

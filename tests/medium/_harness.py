@@ -28,3 +28,81 @@ def load_with_stub(page, local_server, stub_js_body):
 
     page.route("**/app.js", handle)
     page.goto(local_server)
+
+
+# Shared by every test that needs the real header shell + its two route-backed dialogs (Sync &
+# Backup, Drive sync card) — three separate components (applicationHeader.js, backupRestore.js,
+# driveSyncUi.js) that always boot together in production and share the #backup-btn click wiring
+# (backupRestore.js's own listener opens the dialog; driveSyncUi's is a second listener on the
+# same button). One shared stub here rather than three near-identical copies, so a real change to
+# any of these boot steps' deps shape breaks this ONE place, not three silently-drifting ones.
+HEADER_STUB = """
+import { bootHeader, bootBackupRestore, bootDriveSyncUi } from './appBoot.js';
+import { renderHeaderShell } from './modules/common/applicationHeader.js';
+import { prepareBackupDialog } from './modules/common/backupRestore.js';
+import { applyStaticDOMMappings } from './i18n/domMappings.js';
+import { TRANSLATIONS } from './i18n/index.js';
+
+const t = (key) => TRANSLATIONS.en[key] || key;
+const noop = () => {};
+const state = {
+  lang: 'en', clients: [], routines: [], exercises: [], history: [], planUpdates: [], sessions: [],
+};
+// The real app.js's applyTranslations() also re-renders the sessions title bar and notification
+// area for the new language, on top of this — irrelevant here since neither is mounted, but the
+// static DOM-mapping pass itself (menu/label text) is real, not a hand-duplicated stand-in.
+function applyTranslations(lang) {
+  applyStaticDOMMappings(TRANSLATIONS[lang]);
+}
+
+// No real router: a route-backed dialog (build info, backup, about, terms) normally opens because
+// the router's route.enter() calls the component's own "prepare, then show" pair. This fake just
+// does that same pairing directly, keyed on what urlFor() named the route.
+function navigateToPath(path) {
+  if (path.includes('backup')) {
+    prepareBackupDialog();
+    document.getElementById('dialog-backup').showModal();
+  } else if (path.includes('about')) {
+    document.getElementById('dialog-about').showModal();
+  } else if (path.includes('terms')) {
+    document.getElementById('dialog-terms').showModal();
+  }
+}
+function urlFor(name) {
+  return '/' + name;
+}
+
+renderHeaderShell();
+bootBackupRestore({
+  getState: () => state,
+  navigateToPath,
+  urlFor,
+  setState: noop,
+  saveToLocalStorage: noop,
+  renderClientsList: noop,
+  renderRoutinesList: noop,
+  renderExercisesList: noop,
+  renderGlobalHistory: noop,
+  populateDropdownSelectors: noop,
+  t,
+});
+bootDriveSyncUi({ t });
+bootHeader({
+  getState: () => state,
+  t,
+  saveToLocalStorage: noop,
+  applyTranslations,
+  navigateToPath,
+  urlFor,
+  renderClientsList: noop,
+  renderRoutinesList: noop,
+  renderExercisesList: noop,
+  renderGlobalHistory: noop,
+  renderPendingPlanAdjustments: noop,
+  renderSessions: noop,
+  populateDropdownSelectors: noop,
+  getActiveSession: () => null,
+  renderActiveGroupBoard: noop,
+  renderActiveSessionBarLabels: noop,
+});
+"""

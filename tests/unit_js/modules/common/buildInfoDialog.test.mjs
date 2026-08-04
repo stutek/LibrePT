@@ -4,15 +4,15 @@
 // parts of this component (the header stamp touch target, the dialog opening/closing) live in
 // tests/medium/test_build_info.py.
 
-import { test } from 'node:test';
-import assert from 'node:assert/strict';
-import { buildInfoText } from '../../../../src/modules/common/buildInfoDialog.js';
+import assert from "node:assert/strict";
+import { test } from "node:test";
+import { buildInfoText } from "../../../../src/modules/common/buildInfoDialog.js";
 
-test('build details are offered as one copyable, plain-text block', () => {
+test("build details are offered as one copyable, plain-text block", () => {
   const text = buildInfoText();
 
-  assert.equal(text.includes('release:'), false, 'no release tags any more — nothing to show here');
-  assert.equal(text.includes('data schema: 3'), true);
-  assert.equal(text.includes('commit:'), true);
-  assert.equal(text.includes('built:'), true);
+  assert.equal(text.includes("release:"), false, "no release tags any more — nothing to show here");
+  assert.equal(text.includes("data schema: 3"), true);
+  assert.equal(text.includes("commit:"), true);
+  assert.equal(text.includes("built:"), true);
 });

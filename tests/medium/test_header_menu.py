@@ -1,9 +1,15 @@
-# tests/e2e/test_header_menu.py
+# tests/medium/test_header_menu.py
 # End-to-end coverage of the application (hamburger / ☰) header menu (TODO 10.1): the dropdown
 # toggles and closes on an outside click, its items are translated, GitHub is a real new-tab
-# link, Export opens the Sync & Backup modal, About/Terms open their modals, and the cloud
-# placeholder surfaces a "coming soon" message.
+# link, Export opens the Sync & Backup modal, About/Terms open their modals, and Connect cloud
+# storage opens the Drive sync card. Mounted via tests/medium/_harness.py's HEADER_STUB.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
+
+import pytest
+
+from tests.medium._harness import HEADER_STUB, load_with_stub
+
+pytestmark = pytest.mark.clean_start
 
 
 def _open_menu(page):
@@ -12,8 +18,8 @@ def _open_menu(page):
 
 
 def test_menu_toggles_and_closes_on_outside_click(page, local_server):
-    page.goto(local_server)
-    page.wait_for_selector("#view-clients.active")
+    load_with_stub(page, local_server, HEADER_STUB)
+    page.wait_for_selector("#app-header")
 
     menu = page.locator("#app-menu")
     assert "hidden" in (menu.get_attribute("class") or "")
@@ -22,7 +28,7 @@ def test_menu_toggles_and_closes_on_outside_click(page, local_server):
     assert page.locator("#btn-app-menu").get_attribute("aria-expanded") == "true"
 
     # Clicking a neutral element outside the menu dismisses it.
-    page.locator("#sessions-view-title").click()
+    page.locator("#logo-area").click()
     page.wait_for_function(
         "() => document.getElementById('app-menu').classList.contains('hidden')"
     )
@@ -30,8 +36,8 @@ def test_menu_toggles_and_closes_on_outside_click(page, local_server):
 
 
 def test_menu_items_present_and_github_link(page, local_server):
-    page.goto(local_server)
-    page.wait_for_selector("#view-clients.active")
+    load_with_stub(page, local_server, HEADER_STUB)
+    page.wait_for_selector("#app-header")
     _open_menu(page)
 
     for item_id, text in [
@@ -59,8 +65,8 @@ def test_menu_items_present_and_github_link(page, local_server):
 
 
 def test_export_item_opens_backup_modal(page, local_server):
-    page.goto(local_server)
-    page.wait_for_selector("#view-clients.active")
+    load_with_stub(page, local_server, HEADER_STUB)
+    page.wait_for_selector("#app-header")
     _open_menu(page)
 
     page.locator("#menu-export-data").click()
@@ -70,8 +76,8 @@ def test_export_item_opens_backup_modal(page, local_server):
 
 
 def test_about_modal_opens_and_closes(page, local_server):
-    page.goto(local_server)
-    page.wait_for_selector("#view-clients.active")
+    load_with_stub(page, local_server, HEADER_STUB)
+    page.wait_for_selector("#app-header")
     _open_menu(page)
 
     page.locator("#menu-about").click()
@@ -87,8 +93,8 @@ def test_about_modal_opens_and_closes(page, local_server):
 
 
 def test_terms_modal_opens_and_agree_closes_it(page, local_server):
-    page.goto(local_server)
-    page.wait_for_selector("#view-clients.active")
+    load_with_stub(page, local_server, HEADER_STUB)
+    page.wait_for_selector("#app-header")
     _open_menu(page)
 
     page.locator("#menu-terms").click()
@@ -101,10 +107,10 @@ def test_terms_modal_opens_and_agree_closes_it(page, local_server):
 
 
 def test_connect_cloud_opens_the_drive_sync_card(page, local_server):
-    # menu-connect-cloud now opens the Sync & Backup dialog on its Google Drive card
+    # menu-connect-cloud opens the Sync & Backup dialog on its Google Drive card
     # (driveSyncUi.js), which itself reports "not configured" honestly rather than an opaque alert.
-    page.goto(local_server)
-    page.wait_for_selector("#view-clients.active")
+    load_with_stub(page, local_server, HEADER_STUB)
+    page.wait_for_selector("#app-header")
     _open_menu(page)
 
     page.locator("#menu-connect-cloud").click()
@@ -113,10 +119,10 @@ def test_connect_cloud_opens_the_drive_sync_card(page, local_server):
 
 
 def test_menu_labels_translate_to_slovenian(page, local_server):
-    page.goto(local_server)
-    page.wait_for_selector("#view-clients.active")
+    load_with_stub(page, local_server, HEADER_STUB)
+    page.wait_for_selector("#app-header")
 
-    # The language switcher now lives inside the ☰ menu, so open it first, then switch.
+    # The language switcher lives inside the ☰ menu, so open it first, then switch.
     _open_menu(page)
     page.locator("#lang-switcher").select_option("sl")
 
