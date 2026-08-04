@@ -747,6 +747,86 @@ def _csp_parity():
 ZAP_TARGET = "http://localhost:8081/LibrePT/"
 ZAP_PORT = 8081
 
+ZAP_ADDONS_DIR = os.path.join(".venv", "zap-addons")
+
+# The passive-scan add-ons the stock `zaproxy/zap-stable` image does NOT bundle, pinned by version
+# and SHA-256 exactly like the Biome and Node runtimes above. `commonlib` is pscanrulesBeta's own
+# dependency, not an extra we chose — ZAP refuses to load the rules without it.
+#
+# Why vendor these at all: `zap-baseline.py` starts ZAP with `-addonupdate -addoninstall
+# pscanrulesBeta`, so every scan re-fetched them from the ZAP marketplace. Measured 2026-08-04:
+# 262s per scan with that round trip, 40s without it — i.e. ~85% of the gate's slowest stage was
+# network I/O, not scanning this app.
+#
+# Passing ZAP's `-silent` flag alone "fixes" that and is a TRAP: with the marketplace unreachable
+# the beta rules never load, and the scan happily reports `WARN-NEW: 0 / PASS: 57` having quietly
+# stopped checking six things — including Source Code Disclosure [10099] and Dangerous JS Functions
+# [10110], both squarely relevant to this app. A scan that checks LESS and still says clean is the
+# false assurance AGENT_RULES §2.A.3 forbids. Vendoring the add-ons and THEN passing `-silent`
+# keeps the full 67-rule set (verified by diffing rule ids against a marketplace run) at the fast
+# path's speed.
+#
+# Pinned rather than refreshed on a timer on purpose: for a security gate, a change to WHICH rules
+# run should be a visible, reviewable commit — not something that happens overnight and shifts what
+# the gate enforces without anyone deciding to.
+_ZAP_ADDONS = {
+    "pscanrulesBeta-beta-50.zap": (
+        "https://github.com/zaproxy/zap-extensions/releases/download/pscanrulesBeta-v50/pscanrulesBeta-beta-50.zap",
+        "a979f7cd5d8be10e0338b417e006ec1e2f6ec79101010d570ddb5199892e921b",
+    ),
+    "commonlib-release-1.43.0.zap": (
+        "https://github.com/zaproxy/zap-extensions/releases/download/commonlib-v1.43.0/commonlib-release-1.43.0.zap",
+        "f1c46d6c65434a2a54307065b558a87121eaa5b9b6bc6cfb10bf230b6335d1f5",
+    ),
+}
+
+
+def _file_sha256(path):
+    digest = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(65536), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def ensure_zap_addons():
+    """Vendors the pinned ZAP passive-scan add-ons into .venv/zap-addons/, downloading only what is
+    missing or checksum-mismatched. Returns the absolute directory to mount into the scanner, or
+    None if it could not be assembled.
+
+    Same contract as ensure_biome_binary/ensure_node_binary: pinned version, verified hash, cached
+    under .venv/ so it is fetched once per environment rather than once per run (and never at all
+    on a warm checkout). See _ZAP_ADDONS for why the add-ons are vendored instead of fetched by ZAP.
+    """
+    import requests
+
+    os.makedirs(ZAP_ADDONS_DIR, exist_ok=True)
+    for name, (url, expected_hash) in _ZAP_ADDONS.items():
+        path = os.path.join(ZAP_ADDONS_DIR, name)
+        if os.path.exists(path) and _file_sha256(path) == expected_hash:
+            continue
+        if os.path.exists(path):
+            os.remove(
+                path
+            )  # corrupt or superseded — never scan with an unverified rule set
+        print(f"  Downloading ZAP add-on {name}...")
+        try:
+            response = requests.get(url, stream=True, timeout=60)
+            response.raise_for_status()
+            with open(path, "wb") as f:
+                for chunk in response.iter_content(chunk_size=65536):
+                    f.write(chunk)
+            actual = _file_sha256(path)
+            if actual != expected_hash:
+                os.remove(path)
+                raise ValueError(
+                    f"SHA256 mismatch for {name}\n    Expected: {expected_hash}\n    Got:      {actual}"
+                )
+        except Exception as e:
+            print(f"  ✗ Failed to download/verify ZAP add-on {name}: {e}")
+            return None
+    return os.path.abspath(ZAP_ADDONS_DIR)
+
 
 def check_required_meta_policies():
     """The <meta> security policies index.html must ship. Production is GitHub Pages, which sends no
@@ -880,6 +960,18 @@ def run_owasp_zap_scan():
         print(f"  ✗ OWASP ZAP target {ZAP_TARGET} is not reachable — nothing to scan.")
         sys.exit(1)
 
+    # Fail CLOSED. Without these the scan still runs and still reports "clean", just with six fewer
+    # rules — a weaker gate that looks identical in the log. Same reasoning as "a security scan that
+    # scans nothing is a failed scan" (AGENT_RULES §2.A.3): silently scanning LESS is the same
+    # false assurance, only harder to notice.
+    addons_dir = ensure_zap_addons()
+    if not addons_dir:
+        print(
+            "  ✗ OWASP ZAP add-ons could not be vendored — refusing to scan with an incomplete "
+            "rule set (six passive rules, incl. Source Code Disclosure, would be silently skipped)."
+        )
+        sys.exit(1)
+
     print("    - Launching OWASP ZAP container baseline scan (host network)...")
     conf_dir = os.path.join(os.path.abspath("deploy"), "zap")
     container_name = "librept-zap-baseline"
@@ -891,7 +983,12 @@ def run_owasp_zap_scan():
     # failure to fix, not a pass to log" (AGENT_RULES §2.A.3) applies to hanging, not just crashing.
     timeout_seconds = 1200
     try:
-        res = subprocess.run(
+        # Logged like every other runner (build/testreport.py) rather than captured and thrown away
+        # on success: this scan is the slowest stage in the gate, and when it took 9m27s instead of
+        # its usual 3-4 (2026-08-04) there was no artifact to diagnose from, because the output was
+        # only ever printed on failure. A stage you cannot explain the duration of is a stage you
+        # cannot tune.
+        returncode, output, path = run_logged(
             [
                 docker_bin,
                 "run",
@@ -902,44 +999,44 @@ def run_owasp_zap_scan():
                 "host",
                 "-v",
                 f"{conf_dir}:/zap/wrk:ro",
+                # ZAP loads add-ons from its home plugin dir; mounting the vendored set there is
+                # what makes `-silent` below safe (see _ZAP_ADDONS).
+                "-v",
+                f"{addons_dir}:/home/zap/.ZAP/plugin",
                 "zaproxy/zap-stable",
                 "zap-baseline.py",
                 "-t",
                 ZAP_TARGET,
                 "-c",
                 "zap-baseline.conf",
+                # No marketplace round trip: every rule this scan needs is already mounted above.
+                "-z",
+                "-silent",
             ],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
+            "zap-baseline",
             timeout=timeout_seconds,
         )
     except subprocess.TimeoutExpired as e:
         # `docker run --rm` without -d is attached; killing the client process alone can leave the
         # container running server-side, so stop it explicitly rather than trust SIGTERM to propagate.
         subprocess.run([docker_bin, "stop", container_name], capture_output=True)
-        # TimeoutExpired.stdout is None on POSIX (communicate() raises before collecting output) but
-        # str on Windows in text mode, so normalise rather than assuming either.
-        partial = e.stdout or ""
-        if isinstance(partial, bytes):
-            partial = partial.decode("utf-8", errors="replace")
-        if partial.strip():
-            print("\n".join(partial.strip().splitlines()[-40:]))
         print(
             f"  ✗ OWASP ZAP scan did not finish within {timeout_seconds}s — killed. "
+            f"Partial output: {getattr(e, 'log_path', REPORT_DIR)}. "
             "Check host load (`uptime`) and Docker's own network reachability for the ZAP "
             "add-on update it runs on startup before assuming the app is at fault."
         )
         sys.exit(1)
 
-    if res.returncode == 0:
-        print("  ✓ OWASP ZAP baseline security scan passed cleanly (WARN-NEW: 0).")
+    if returncode == 0:
+        print(
+            f"  ✓ OWASP ZAP baseline security scan passed cleanly (WARN-NEW: 0). Log: {path}"
+        )
         return
 
     # Non-zero: surface the report tail so the offending alerts are visible, then fail.
-    tail = "\n".join(res.stdout.strip().splitlines()[-40:])
-    print(tail)
-    print(f"  ✗ OWASP ZAP scan failed (exit {res.returncode}).")
+    print("\n".join(output.strip().splitlines()[-40:]))
+    print(f"  ✗ OWASP ZAP scan failed (exit {returncode}). Full log: {path}")
     sys.exit(1)
 
 

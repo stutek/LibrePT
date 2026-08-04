@@ -71,19 +71,23 @@ Every response and tool action must drive measurable, continuous progress toward
    flaky" hand-wave forbidden below; don't re-parallelize the two locally without addressing that.
 
    All four stages together typically take 5-15 minutes; expect it, don't interrupt it. Rules:
-   - **Say how long it will take, BEFORE starting it, every time.** A gate run is minutes of dead
-     air, and "running the pipeline…" with no number leaves the user unable to tell a normal run
-     from a hung one — they end up asking "done yet?", which is the agent's failure, not theirs.
-     State the expected completion time when you kick it off, and quote the per-stage budget the
-     run is being measured against (typical on a 16-core dev box, from `_timed_task`'s own output):
+   - **Say how long it will take, BEFORE starting it, every time — as a WALL-CLOCK time, not just a
+     duration.** A gate run is minutes of dead air, and "running the pipeline…" with no number
+     leaves the user unable to tell a normal run from a hung one — they end up asking "done yet?",
+     which is the agent's failure, not theirs. "~5 minutes" still makes them do the arithmetic and
+     then remember when they started reading; **"started 16:59, expect done by ~17:04"** does not.
+     So: run `date` when you kick a long task off, and quote both the duration and the clock time
+     it should land by. Applies to anything long enough to wait on — the gate, a full e2e run, a
+     container build, a scan — not only `build check`. Per-stage budget the run is measured against
+     (typical on this 16-core dev box, from `_timed_task`'s own output):
 
      | Stage | Typical | Investigate past |
      | :--- | :--- | :--- |
      | 1 — lint / unit / JS unit / audits (parallel) | 4-30s | 60s |
      | 2 — medium component tests | 15-65s | 2min |
      | 3 — e2e browser suite | ~3min | 6min |
-     | 4 — OWASP ZAP baseline | 3-4min | 10min (hard-killed at 20min) |
-     | **whole `build check`** | **6-8min** | **12min** |
+     | 4 — OWASP ZAP baseline | ~40s (~75s on a cold `.venv`) | 3min (hard-killed at 20min) |
+     | **whole `build check`** | **~4-5min** | **8min** |
 
      If a stage blows past its "investigate" column, say so and diagnose — do not keep reporting
      "still running" indefinitely. Check host load first (`uptime`; this box has 16 cores, so a
