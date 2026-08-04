@@ -77,7 +77,7 @@ To land back on demo data instead of an empty app after clearing, reopen with `?
 
 ## 🧪 Development & Testing
 
-The test suite runs static structure checks (`tests/test_app.py`), pure-logic JavaScript tests (`tests/unit_js/`) under Node's built-in `node:test`, and Playwright end-to-end suites (`tests/e2e/`) that drive a real Chromium browser against a local server.
+The test suite runs static structure checks (`tests/test_app.py`), pure-logic JavaScript tests (`tests/unit_js/`) under Node's built-in `node:test`, single-component Playwright tests (`tests/medium/`) that mount one UI component without booting the full app, and full Playwright end-to-end suites (`tests/e2e/`) that drive a real Chromium browser against a local server.
 
 ```bash
 # One-time environment setup

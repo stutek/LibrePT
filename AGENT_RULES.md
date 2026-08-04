@@ -34,7 +34,7 @@ Every response and tool action must drive measurable, continuous progress toward
    **Command reference:**
    | Command | What it does |
    | :--- | :--- |
-   | `.venv/bin/python -m build check` | The gate: Stage 1 → Stage 2 → Stage 3 below, staged (each stage only runs if the previous is clean). This is what "run the pipeline" means. |
+   | `.venv/bin/python -m build check` | The gate: Stage 1 → Stage 2 → Stage 3 → Stage 4 below, staged (each stage only runs if the previous is clean). This is what "run the pipeline" means. |
    | `.venv/bin/python -m build` | Full build: env check → the same tests → bundle `src/` into `dist/`. |
    | `.venv/bin/python -m deploy` | Publish the built `dist/`. |
    | `.venv/bin/python -m build && .venv/bin/python -m deploy` | Full chain. |
@@ -45,12 +45,19 @@ Every response and tool action must drive measurable, continuous progress toward
    see §5.2), and the static security audits (HTML-sink/CSP escaping audit via
    `build/frontend_audit.py`, the OKF doc-graph link checker, the CI pipeline-gating checker).
 
-   **Stage 2 (only if Stage 1 is clean):** the full Playwright e2e suite (`tests/e2e/`, itself
+   **Stage 2 (only if Stage 1 is clean):** the medium-tier component suite (`tests/medium/` — see
+   §5.2). Each test mounts ONE component via a `src/appBoot.js` boot step against real `index.html`
+   markup, with the real `app.js` request intercepted and replaced — no router, IndexedDB, service
+   worker, or demo-data seed. Not timing-sensitive the way full e2e is (no drag-and-drop, no
+   countdown timers), so it runs at `-n auto` rather than Stage 3's half-the-cores cap. Gated
+   separately from Stage 3 so a broken component fails fast before the slower full-flow suite runs.
+
+   **Stage 3 (only if Stage 2 is clean):** the full Playwright e2e suite (`tests/e2e/`, itself
    fanned out across workers via `pytest-xdist`) against the local dev server.
 
-   **Stage 3 (only if Stage 2 is clean):** an OWASP ZAP baseline scan against that same dev
-   server. **Sequential with Stage 2, not concurrent** (`build/__init__.py`'s `run_stage_2_e2e`/
-   `run_stage_3_zap`) — the two used to run in one `ThreadPoolExecutor`, and ZAP's request flood
+   **Stage 4 (only if Stage 3 is clean):** an OWASP ZAP baseline scan against that same dev
+   server. **Sequential with Stage 3, not concurrent** (`build/__init__.py`'s `run_stage_3_e2e`/
+   `run_stage_4_zap`) — the two used to run in one `ThreadPoolExecutor`, and ZAP's request flood
    against the SAME local `:8081` server while `pytest-xdist` workers were mid-suite produced
    `Page.goto` timeouts across specs with no relation to whatever change was under test (seen
    2026-08-03: 30 failures, all `Timeout 30000ms exceeded`). In CI this was never an issue — e2e
@@ -58,7 +65,7 @@ Every response and tool action must drive measurable, continuous progress toward
    the local path needed the split. This is traceable resource contention, not the "probably
    flaky" hand-wave forbidden below; don't re-parallelize the two locally without addressing that.
 
-   All three stages together typically take 5-15 minutes; expect it, don't interrupt it. Rules:
+   All four stages together typically take 5-15 minutes; expect it, don't interrupt it. Rules:
    - **Squeaky clean, always — zero warnings, not just zero failures.** The bar is a *clean* build, not a *green-enough* one. Every gate stage — lint, format, unit, e2e, dependency audit, dynamic security, **and the OWASP ZAP scan** — must report **no warnings and no findings**. For ZAP specifically that means `WARN-NEW: 0` **and** `FAIL-NEW: 0`, not merely no FAILs. A warning is either **fixed** at its source or **explicitly suppressed with a written justification** — never left to print and pass.
    - **A suppression is only ever a statement that there is no issue, never a way to defer one.** A gate suppression is legitimate in exactly one case: the finding is a false positive or genuinely does not apply to this architecture (e.g. a ZAP `-c` ignore for a CSRF check on an app with no server-side state-changing form). It is never legitimate as a way to park a *real* finding — a complexity violation, a genuine lint issue — for later. If the gate is right that something is wrong, fix it in the same change; do not add it to an allowlist, `# noqa`, or ignore file "for now." **No pipeline gate may carry a mechanism for allowlisting real, unfixed debt** (e.g. `agent_tools/complexity.py`'s old `PRE_EXISTING_ALLOWLIST`, or a bare `# noqa: C901` with no non-applicability justification) — every function a gate flags gets fixed in the change that touches the gate, full stop. Each justified suppression must also be periodically re-verified against the current architecture, not assumed valid forever — a false-positive rationale can stop being true as the app changes (e.g. adding a server-side form would retire the CSRF ignore).
    - **Never swallow a non-zero exit code.** A gate step that exits non-zero (including ZAP exit `2` = warnings and exit `3` = the scan errored / could not reach the target) MUST fail the build. Printing "completed with warnings" and returning success is forbidden — that pattern once hid a ZAP scan that was not even reaching the running app. If a stage cannot run, that is a failure to fix, not a pass to log.
@@ -126,7 +133,7 @@ files reduce the context an agent must load to make a change, let separate conce
 parallel without collisions, and make the directory tree itself act as documentation.
 
 1. **One responsibility per file.** A UI element, a data entity, or a single concern belongs in its own module. When a self-contained unit inside the entry file (`src/app.js`) grows, extract it. Prefer a file an agent can read in full over scrolling a multi-thousand-line file.
-2. **Organise by concern in subfolders.** UI components in `src/components/`, seed data per entity in `src/data/`, browser tests in `tests/e2e/`, Python static/unit tests in `tests/unit/`, JavaScript unit tests in `tests/unit_js/`. Group tests by feature/component — not one file per test, and not one monolithic file for everything.
+2. **Organise by concern in subfolders.** UI components in `src/components/`, seed data per entity in `src/data/`, full-flow browser tests in `tests/e2e/`, single-component browser tests in `tests/medium/`, Python static/unit tests in `tests/unit/`, JavaScript unit tests in `tests/unit_js/`. Group tests by feature/component — not one file per test, and not one monolithic file for everything.
 
    `tests/unit_js/` exists for tests that pin pure logic — schema/migration transforms, id
    generation, merge algorithms — with no DOM and no persistence, mirroring the `src/data/` /
@@ -140,8 +147,20 @@ parallel without collisions, and make the directory tree itself act as documenta
    checksum-verified download into `.venv/node-runtime/`) rather than assumed on `PATH`. It adds no
    npm dependency at all — no `package.json`, no `node_modules`, nothing for a JS-side `pip-audit`
    equivalent to even cover — because `node:test`/`node:assert` are built into the runtime. A test
-   belongs here only if it needs nothing a browser provides; if it touches the DOM, IndexedDB, or a
-   real app boot, it stays in `tests/e2e/`.
+   belongs here only if it needs nothing a browser provides; if it touches the DOM at all, it
+   belongs in `tests/medium/` or `tests/e2e/` instead (below).
+
+   `tests/medium/` exists for tests that mount ONE component's real markup and behavior without
+   the rest of the app — no router, no IndexedDB, no service worker, no demo-data seed. A test uses
+   `tests/medium/_harness.py`'s `load_with_stub()` to intercept the real `app.js` request and serve
+   a stub that imports one `bootXyz(deps)` step from `src/appBoot.js` — the *exact* function
+   `app.js`'s real `init()` calls, extracted so it's independently callable — with test-supplied
+   fakes for cross-feature callbacks the test doesn't exercise. `index.html`'s real markup still
+   loads unchanged (no separate fixture page, so nothing to go stale against it), so the component
+   wires against the same DOM ids production does. Runs at `-n auto` (Stage 2), not e2e's
+   half-the-cores cap, since it isn't timing-sensitive (see `build.run_medium_tests`). A test
+   belongs here if it needs the DOM/CSS but NOT navigation, persistence, or a real app boot; if it
+   needs those, it stays in `tests/e2e/`.
 3. **Decouple with dependency injection, not cross-imports.** Extracted components receive the app-level helpers they need as parameters (`state`, `t`, `escapeHTML`, launch callbacks). For globals that get reassigned (`activeSession`, `state`), pass an *accessor* (`getActiveSession()`) so the module always reads the current value. This avoids circular imports and keeps modules independently testable.
 4. **Self-document at the top of every module.** Begin each file with a short comment naming its single responsibility and listing its injected dependencies. Choose descriptive names over clever ones — a reader should understand a file without opening its call site.
 5. **Keep the runtime app in `src/`; keep the root clean.** Only the app entry, its modules, and its assets live under `src/`. Dev tooling, docs, and CI configuration stay out of the app tree. Source files must never sit loose at the repository root.

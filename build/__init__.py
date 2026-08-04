@@ -560,6 +560,53 @@ def run_javascript_unit_tests():
     print("  ✓ JavaScript unit tests passed successfully!")
 
 
+MEDIUM_ARTIFACT_DIR = os.path.join(REPORT_DIR, "medium-artifacts")
+
+
+def run_medium_tests():
+    """Runs the medium-tier Playwright suite (tests/medium/): one component mounted via a
+    src/appBoot.js boot step, real index.html markup, no router/IndexedDB/service worker/demo-data
+    seed (see tests/medium/_harness.py). Unlike run_e2e_tests, this runs at `-n auto` (every
+    visible core), not half: the `-n 8` cap exists specifically because full-app e2e tests are
+    timing-sensitive (drag-and-drop, countdown timers, animation) and headless Chromium's
+    per-instance process fan-out starves their compositor frame production under full core-count
+    parallelism. A medium test mounts one static component with no such timing dependency, so it
+    doesn't pay for that cap.
+    """
+    print("\n  Running Medium Component Tests (parallel)...")
+    returncode, output, path = run_logged(
+        [
+            venv_python_path(),
+            "-m",
+            "pytest",
+            "-n",
+            "auto",
+            "--dist=loadfile",
+            "-q",
+            "--tb=long",
+            "--screenshot=only-on-failure",
+            f"--output={MEDIUM_ARTIFACT_DIR}",
+            "tests/medium/",
+        ],
+        "medium-parallel",
+    )
+    if returncode == 0:
+        print("  ✓ Medium component tests passed successfully!")
+        return
+
+    print_digest("Medium component tests", output, path)
+    failed = failed_test_ids(output)
+    print("  ✗ Medium component tests failed:")
+    for test_id in failed:
+        print(f"      • {test_id}")
+    if not failed:
+        print(
+            f"    (runner itself died — collection error or crashed worker; see {path})"
+        )
+    print(f"    Full log: {path}")
+    sys.exit(returncode)
+
+
 E2E_ARTIFACT_DIR = os.path.join(REPORT_DIR, "e2e-artifacts")
 
 
@@ -890,11 +937,22 @@ def run_stage_1_parallel():
     print(f"\n  ✓ Stage 1 completed cleanly! ({stage_elapsed:.1f}s)")
 
 
-def run_stage_2_e2e():
-    """Stage 2: Runs the E2E browser suite.
+def run_stage_2_medium():
+    """Stage 2: Runs the medium-tier component suite (tests/medium/) — see run_medium_tests'
+    docstring for what makes this tier different from Stage 3's full e2e suite. Gated on Stage 1
+    the same way Stage 3 is, so a broken component fails fast here before the pipeline pays for
+    the slower, harder-to-diagnose full-flow suite."""
+    print("\n=== Stage 2: Medium Component Tests ===")
+    stage_start = time.monotonic()
+    _timed_task("Medium Component Tests", run_medium_tests)
+    print(f"\n  ✓ Stage 2 completed cleanly! ({time.monotonic() - stage_start:.1f}s)")
+
+
+def run_stage_3_e2e():
+    """Stage 3: Runs the E2E browser suite.
 
     The static security audits moved to stage 1 — they are file analysis, not dynamic checks.
-    Split from the ZAP scan (stage 3, run sequentially after this one): in CI the two are already
+    Split from the ZAP scan (stage 4, run sequentially after this one): in CI the two are already
     separate jobs on separate runners, each hitting its own dev server, so they never contend. The
     local `build check`/`build` path used to run them concurrently via one ThreadPoolExecutor
     against the SAME local :8081 server — ZAP's baseline scan floods it with requests while
@@ -905,20 +963,20 @@ def run_stage_2_e2e():
     failure as probably flaky" stance: this was traceable to a real, avoidable contention source,
     not an unexplained flake to shrug off.
     """
-    print("\n=== Stage 2: E2E Browser Tests ===")
+    print("\n=== Stage 3: E2E Browser Tests ===")
     stage_start = time.monotonic()
     _timed_task("E2E Browser Tests", run_e2e_tests)
-    print(f"\n  ✓ Stage 2 completed cleanly! ({time.monotonic() - stage_start:.1f}s)")
+    print(f"\n  ✓ Stage 3 completed cleanly! ({time.monotonic() - stage_start:.1f}s)")
 
 
-def run_stage_3_zap():
-    """Stage 3: Runs the OWASP ZAP baseline scan, alone, after Stage 2's e2e suite has released
-    the dev server — see run_stage_2_e2e's docstring for why this no longer runs concurrently
+def run_stage_4_zap():
+    """Stage 4: Runs the OWASP ZAP baseline scan, alone, after Stage 3's e2e suite has released
+    the dev server — see run_stage_3_e2e's docstring for why this no longer runs concurrently
     with e2e locally."""
-    print("\n=== Stage 3: OWASP ZAP Security Scan ===")
+    print("\n=== Stage 4: OWASP ZAP Security Scan ===")
     stage_start = time.monotonic()
     _timed_task("OWASP ZAP Scan", run_owasp_zap_scan)
-    print(f"\n  ✓ Stage 3 completed cleanly! ({time.monotonic() - stage_start:.1f}s)")
+    print(f"\n  ✓ Stage 4 completed cleanly! ({time.monotonic() - stage_start:.1f}s)")
 
 
 def run_lint():
@@ -931,6 +989,7 @@ def run_lint():
 def run_tests():
     """Backwards-compatible wrapper for running all tests."""
     run_unit_tests()
+    run_medium_tests()
     run_e2e_tests()
 
 

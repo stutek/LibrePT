@@ -138,6 +138,33 @@ jobs:
         # every other job uses.
         run: .venv/bin/python -c "from build import run_javascript_unit_tests; run_javascript_unit_tests()"
 
+  medium-tests:
+    name: Medium Component Tests
+    needs:
+      [
+        python-lint,
+        doc-graph,
+        frontend-lint,
+        dependency-scan,
+        unit-tests,
+        javascript-unit-tests,
+      ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - name: Install Dependencies & Browsers
+        run: |
+          python -m venv .venv
+          .venv/bin/pip install --upgrade pip
+          .venv/bin/pip install -r requirements.txt
+          .venv/bin/playwright install chromium --with-deps
+      - name: Run Medium Component Tests
+        run: .venv/bin/python -c "from build import run_medium_tests; run_medium_tests()"
+
   e2e-tests:
     name: E2E Browser Tests
     needs:
@@ -195,7 +222,7 @@ jobs:
 
   build:
     name: Assemble & Bundle App
-    needs: [e2e-tests, static-security-audits, owasp-zap-scan]
+    needs: [medium-tests, e2e-tests, static-security-audits, owasp-zap-scan]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

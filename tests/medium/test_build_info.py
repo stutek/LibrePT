@@ -1,17 +1,47 @@
-# tests/e2e/test_build_info.py
+# tests/medium/test_build_info.py
 # "Which build am I on" has to be answerable ON A PHONE. The long build identity used to live only
-# in the header stamp's `title` tooltip, which a touch device cannot reach at all — a support detail
-# only a mouse can see is a support detail nobody has. The stamp is now a button opening a dialog
-# that shows commit and DATA SCHEMA (two different axes, TODO §16 — no release tags any more, so a
-# missing record after an update is explained by the schema, not a version number), and offers the
-# text as one copyable block, because the point of a build id is pasting it somewhere.
+# in the header stamp's `title` tooltip, which a touch device cannot reach at all. The stamp is a
+# button opening a dialog that shows commit and DATA SCHEMA (two different axes, TODO §16). The
+# pure copyable-text-block model (buildInfoText()) is covered by
+# tests/unit_js/modules/common/buildInfoDialog.test.mjs; this file covers the DOM: the touch
+# target and the dialog itself. Mounted via appBoot.bootBuildInfoDialog() (see
+# tests/medium/_harness.py) — the real router isn't booted, so the stub's fake `navigateToPath`
+# does what the real "build" route does: render the dialog's rows and open it.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
+
+import pytest
+
+from tests.medium._harness import load_with_stub
+
+pytestmark = pytest.mark.clean_start
+
+STUB = """
+import { bootBuildInfoDialog } from './appBoot.js';
+import { renderHeaderShell } from './modules/common/applicationHeader.js';
+import { renderBuildInfo } from './modules/common/buildInfoDialog.js';
+import { renderBuildStamp } from './controllers/appLifecycleController.js';
+import { TRANSLATIONS } from './i18n/index.js';
+
+const t = (key) => TRANSLATIONS.en[key] || key;
+
+renderHeaderShell();
+// Only the stamp's own text render, not the rest of bootAppLifecycle (SW registration, viewport
+// resize, Drive-sync polling) — this test only needs #app-version to carry real text/height.
+renderBuildStamp();
+bootBuildInfoDialog({
+  t,
+  navigateToPath: () => {
+    renderBuildInfo();
+    document.getElementById('dialog-build-info').showModal();
+  },
+  urlFor: () => '#',
+});
+"""
 
 
 def test_the_header_stamp_is_a_real_touch_target(page, local_server):
-    page.goto(local_server)
+    load_with_stub(page, local_server, STUB)
     page.wait_for_selector("#app-version")
-    page.wait_for_timeout(300)
 
     stamp = page.locator("#app-version")
     assert stamp.is_visible(), "the stamp is shown on every viewport, phones included"
@@ -24,9 +54,8 @@ def test_the_header_stamp_is_a_real_touch_target(page, local_server):
 
 
 def test_tapping_the_stamp_shows_commit_and_data_schema(page, local_server):
-    page.goto(local_server)
+    load_with_stub(page, local_server, STUB)
     page.wait_for_selector("#app-version")
-    page.wait_for_timeout(300)
 
     page.click("#app-version")
     page.wait_for_selector("#dialog-build-info[open]")
@@ -43,28 +72,9 @@ def test_tapping_the_stamp_shows_commit_and_data_schema(page, local_server):
     assert "Version" not in facts, "no release tags any more — nothing to show here"
 
 
-def test_the_build_details_are_offered_as_one_copyable_block(page, local_server):
-    page.goto(local_server)
-    page.wait_for_timeout(300)
-
-    text = page.evaluate(
-        """async () => {
-            const m = await import(new URL('modules/common/buildInfoDialog.js', document.baseURI).href);
-            return m.buildInfoText();
-        }"""
-    )
-
-    # Plain text, one fact per line: it gets pasted into whatever chat app is to hand.
-    assert "release:" not in text, "no release tags any more — nothing to show here"
-    assert "data schema: 3" in text
-    assert "commit:" in text
-    assert "built:" in text
-
-
 def test_the_dialog_closes(page, local_server):
-    page.goto(local_server)
+    load_with_stub(page, local_server, STUB)
     page.wait_for_selector("#app-version")
-    page.wait_for_timeout(300)
 
     page.click("#app-version")
     page.wait_for_selector("#dialog-build-info[open]")
