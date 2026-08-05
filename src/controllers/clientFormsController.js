@@ -70,6 +70,7 @@ export function renderClientDialog() {
 export function setupClientForms({
   state,
   t,
+  navigateToPath,
   saveToLocalStorage,
   populateDropdownSelectors,
   showErrorView,
@@ -160,7 +161,7 @@ export function setupClientForms({
     }
 
     saveToLocalStorage();
-    renderClientsList({ state, t });
+    renderClientsList({ state, t, navigateToPath });
     populateDropdownSelectors();
 
     const activeId = getActiveDetailClientId();
@@ -181,7 +182,9 @@ export function setupClientForms({
   const searchClientsEl = $id("search-clients");
   if (searchClientsEl) {
     searchClientsEl.addEventListener("input", (e) => {
-      renderClientsList({ state, t, filterQuery: e.target.value });
+      // navigateToPath is not optional: renderClientsList wires it onto every card's click, so a
+      // re-render without it leaves the filtered grid looking correct and throwing on the first tap.
+      renderClientsList({ state, t, navigateToPath, filterQuery: e.target.value });
     });
   }
 }

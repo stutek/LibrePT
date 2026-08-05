@@ -15,6 +15,7 @@ import {
   setupActiveSession,
 } from "./controllers/activeSessionController.js";
 import { initAppLifecycle } from "./controllers/appLifecycleController.js";
+import { setupClientForms } from "./controllers/clientFormsController.js";
 import { setupViewDismiss } from "./controllers/gestureController.js";
 import { initRouter } from "./controllers/routerController.js";
 import { initRestTimer, setupRestTimer } from "./modules/clipboard/exerciseAndRestTimer.js";
@@ -58,6 +59,12 @@ export function bootWorkoutSetup(deps) {
   renderWorkoutSetupView();
   initWorkoutSetup(deps);
   setupWorkoutSetup();
+}
+
+// The add/edit client dialog AND the directory's live search box — the search listener lives in
+// this controller rather than in the view module, so the two only work together.
+export function bootClientForms(deps) {
+  setupClientForms(deps);
 }
 
 // The live clipboard: the overlay shell plus every listener the deck, the inline plan editor and
