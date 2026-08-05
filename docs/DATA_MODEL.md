@@ -527,6 +527,38 @@ closed would otherwise be thrown away the moment it was recovered.
 
 ---
 
+## 8. Untrusted input, and what guards it
+
+**A backup file is the one untrusted input this app has.** It is JSON a trainer is invited to
+import, it is restored whole so every field round-trips, and it renders into the trainer's own
+origin where the entire client database lives. Everything below follows from that: a value in a
+restored backup reaches the same sinks a hand-typed one does, so "a trainer would not type that" is
+never the argument.
+
+**The OWASP ZAP baseline scan (gate stage 4) does not cover any of this**, and assuming otherwise is
+the mistake this section exists to prevent. That scan is *passive* — it spiders the app and inspects
+responses, it never injects a payload — and this is an offline-first PWA that renders client-side
+from local storage. None of these paths cross the network, so there is no response for it to
+inspect. ZAP covers headers, CSP and transport; it is not why any row below is safe.
+
+| Property | Where it can go wrong | Gated by |
+| :--- | :--- | :--- |
+| Stored XSS | Any field interpolated into HTML — `client.avatar` was, unescaped | [tests/medium/test_xss_hardening.py](../tests/medium/test_xss_hardening.py) + the HTML-sink escaping audit (stage 1) |
+| Derived values emitting markup | `getInitials()` builds a string rather than escaping one | [tests/unit_js/modules/common/utils.test.mjs](../tests/unit_js/modules/common/utils.test.mjs) |
+| Spreadsheet formula injection (CWE-1236) | The catalog CSV export — `=`/`+`/`-`/`@` executes on open | [tests/unit_js/security/csvInjection.test.mjs](../tests/unit_js/security/csvInjection.test.mjs) |
+| Prototype pollution | `record.collection` used as an object key on the boot path | [tests/unit_js/security/prototypePollution.test.mjs](../tests/unit_js/security/prototypePollution.test.mjs) |
+| Query injection | — see below | [tests/e2e/test_indexed_db.py](../tests/e2e/test_indexed_db.py) |
+
+**There is no SQL to inject into, and that is architectural rather than lucky.** Storage is
+IndexedDB plus `localStorage` (§2), and SQLite-wasm was considered and rejected
+([TODO §3.7/§18.6](../TODO.md)). IndexedDB takes structured keys and `IDBKeyRange` objects, never a
+parsed query string, so `' OR 1=1 --` is a key that matches itself and nothing else. The e2e test
+pins exactly that property — hostile payloads driven through every lookup path the app uses
+(primary key, single index, compound index, count), each matching only its own record — so it fails
+the day someone builds a lookup by assembling a key from strings, or introduces a query language.
+
+---
+
 ## Related
 
 - [TODO §18](../TODO.md) — design rationale, decisions and open questions

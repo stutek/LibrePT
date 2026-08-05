@@ -196,8 +196,9 @@ Delivers TODO §13.1's last bullet (adopt an open standard for interchangeable e
 | Metric formatting renders time/distance/calories/watts/hold units | [../tests/unit_js/modules/common/exerciseModality.test.mjs](../tests/unit_js/modules/common/exerciseModality.test.mjs) · `metric formatting model renders the right units` |
 | Routine builder authors metric per modality (relabel primary, hide load) | [../tests/medium/test_routine_builder.py](../tests/medium/test_routine_builder.py) · `test_routine_builder_row_is_modality_aware` |
 | Open-standard crosswalk: category/equipment → wger canonical names, honest nulls | [../src/modules/common/exerciseStandard.js](../src/modules/common/exerciseStandard.js) · `wgerCategoryOf` / `wgerEquipmentOf` / `unmappedTerms` |
-| Interchange record preserves LibrePT axes under `x_librept`; CSV crosswalk | [../tests/e2e/test_exercise_standard.py](../tests/e2e/test_exercise_standard.py) · `test_interchange_record_preserves_librept_axes_and_flags_gaps` / `test_csv_export_has_header_and_quotes_cells` |
+| Interchange record preserves LibrePT axes under `x_librept`; CSV crosswalk | [../tests/unit_js/modules/common/exerciseStandard.test.mjs](../tests/unit_js/modules/common/exerciseStandard.test.mjs) · `interchange record preserves librept axes and flags gaps` / `csv export has header and quotes cells` |
 | Backup dialog "Export Catalog" downloads a self-describing interchange file | [../tests/e2e/test_exercise_standard.py](../tests/e2e/test_exercise_standard.py) · `test_catalog_export_button_downloads_interchange_json` |
+| **Security** — a movement name cannot execute as a spreadsheet formula in the exported CSV (CWE-1236) | [../tests/unit_js/security/csvInjection.test.mjs](../tests/unit_js/security/csvInjection.test.mjs) · gated by the `security-tests` CI job, not by ZAP (its baseline scan is passive and this never crosses the network) |
 
 ---
 
