@@ -17,9 +17,21 @@ let deps = null;
 // neither of which this rewrite touches. This module's own state is a real focused ISO date, not a
 // bucket, so SESSION_DAY_OFFSETS survives only as the bucket->date mapping those other callers need.
 const SESSION_DAY_OFFSETS = { yesterday: -1, today: 0, tomorrow: 1, upcoming: 2 };
+// Ceiling only — the suppression below normally ends on the `scrollend` event, when the
+// programmatic scroll ACTUALLY finishes. This bounds the case where no scroll happens at all (the
+// target is already in position, so no scroll starts and no `scrollend` ever fires).
 const SESSION_SCROLL_SETTLE_MS = 700;
 
 let focusedSessionDate = todayISODate();
+// While a programmatic scrollIntoView is in flight the scrollspy must ignore intersection churn,
+// or the title bar flickers through every header on the way to the target. This used to be a bare
+// `Date.now() + 700` deadline, which suppressed the trainer's OWN scrolling for 700ms after any
+// settle: open the dashboard and immediately swipe — the single most common gym-floor gesture —
+// and the sticky header silently stopped following your finger until the timer expired. It also
+// made the behaviour a function of how long the page took to load, which is how it survived so
+// long: a slow Font Awesome CDN fetch (TODO §12.6) padded every load past the window, and the bug
+// only surfaced once that request was vendored away and the app got fast.
+let sessionsProgrammaticScrollActive = false;
 let sessionsProgrammaticScrollUntil = 0;
 let headerObserver = null;
 let titlebarResizeObserver = null;
@@ -146,8 +158,30 @@ export function focusSessionsColumn(isoDateOrToday, behavior = "smooth") {
     deps.pushRoute(deps.urlFor("sessions.day", { isoDate: focusedSessionDate }));
   }
 
-  sessionsProgrammaticScrollUntil = Date.now() + SESSION_SCROLL_SETTLE_MS;
+  beginProgrammaticScroll();
   target.scrollIntoView({ behavior, block: "start" });
+}
+
+// Suppress scrollspy churn for the duration of a programmatic scroll — no longer than that. The
+// `scrollend` listener is registered per scroll and removed as soon as it fires, so a later
+// user-driven scroll can never be mistaken for the tail of an earlier programmatic one.
+function beginProgrammaticScroll() {
+  const root = getTimelineScrollAncestor();
+  sessionsProgrammaticScrollActive = true;
+  sessionsProgrammaticScrollUntil = Date.now() + SESSION_SCROLL_SETTLE_MS;
+  if (!root) return;
+  const endSuppression = () => {
+    sessionsProgrammaticScrollActive = false;
+    root.removeEventListener("scrollend", endSuppression);
+  };
+  root.addEventListener("scrollend", endSuppression, { once: true });
+}
+
+// True only while THIS module's own scrollIntoView is still travelling. Both conditions matter:
+// the flag alone would strand the scrollspy forever in a browser without `scrollend`, and the
+// deadline alone is the blanket 700ms suppression this replaced.
+function isProgrammaticScrollInFlight() {
+  return sessionsProgrammaticScrollActive && Date.now() < sessionsProgrammaticScrollUntil;
 }
 
 // Scrollspy: which day-group is "focused" is now a function of scroll position, not a discrete
@@ -159,9 +193,9 @@ function observeSessionTimelineGroups() {
   if (headerObserver) headerObserver.disconnect();
   headerObserver = new IntersectionObserver(
     (entries) => {
-      // Ignore intersection churn while a programmatic scrollIntoView is still settling, so the
+      // Ignore intersection churn while a programmatic scrollIntoView is still travelling, so the
       // title bar doesn't flicker through every header it passes on the way to its target.
-      if (Date.now() < sessionsProgrammaticScrollUntil) return;
+      if (isProgrammaticScrollInFlight()) return;
       const intersecting = new Set(entries.filter((e) => e.isIntersecting).map((e) => e.target));
       if (intersecting.size === 0) return;
       const focused = getGroupHeaders().find((h) => intersecting.has(h));
