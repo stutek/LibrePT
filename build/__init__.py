@@ -413,6 +413,20 @@ def run_doc_graph_check():
         sys.exit(1)
 
 
+def run_import_layer_check():
+    """Verifies the import graph still flows one way — see agent_tools/import_layers.py.
+
+    In the gate rather than in review because an upward import is invisible by inspection: the code
+    works, nothing fails, and the only casualty is the module's ability to be mounted on its own —
+    which is discovered much later, by whoever tries.
+    """
+    print("\n  Checking import layering...")
+    from agent_tools import import_layers
+
+    if import_layers.main() != 0:
+        sys.exit(1)
+
+
 def run_catalog_coverage_check():
     """Verifies the module catalog still describes the tree — see agent_tools/catalog_coverage.py.
 
@@ -1073,6 +1087,7 @@ def run_stage_1_parallel():
         "Static Security Audits": run_static_security_checks,
         "Documentation Graph": run_doc_graph_check,
         "Module Catalog Coverage": run_catalog_coverage_check,
+        "Import Layering": run_import_layer_check,
         "Pipeline Gating": run_pipeline_gate_check,
         "Cyclomatic Complexity": run_complexity_check,
     }

@@ -22,7 +22,7 @@ import {
   GOOGLE_DRIVE_CLIENT_ID,
   GOOGLE_DRIVE_SCOPE,
   isDriveSyncConfigured,
-} from "../../data/driveSyncConfig.js";
+} from "./driveSyncConfig.js";
 
 const GIS_SCRIPT_URL = "https://accounts.google.com/gsi/client";
 const CONNECTED_KEY = "librept_drive_connected";

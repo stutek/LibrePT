@@ -71,6 +71,7 @@ export class ClientDetailRoute extends Route {
       showErrorView: ctx.router.showErrorView,
       switchView: ctx.router.switchView,
       openWorkoutSetupModal: ctx.deps.openWorkoutSetupModal,
+      openSessionFromHistory: ctx.deps.openSessionFromHistory,
     });
     return this;
   }

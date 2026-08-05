@@ -15,8 +15,8 @@ import {
   setSyncIntervalMinutes,
   syncNow,
 } from "../../data/driveSyncService.js";
+import { preloadGoogleIdentityServices } from "../../data/googleAuth.js";
 import { closeModal, openModal, renderMarkupOnce } from "./dom.js";
-import { preloadGoogleIdentityServices } from "./googleAuth.js";
 
 let deps = null;
 

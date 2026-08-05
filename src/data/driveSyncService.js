@@ -42,13 +42,9 @@
 // Injected dependencies: none at the module level — call sites are the UI layer (driveSyncUi.js) and
 // app.js's lifecycle hook.
 
-import {
-  hasStoredConsent,
-  requestAccessToken,
-  revokeAccess,
-} from "../modules/common/googleAuth.js";
 import { createSyncFile, downloadSyncFile, findSyncFile, updateSyncFile } from "./driveAppData.js";
 import { isDriveSyncConfigured } from "./driveSyncConfig.js";
+import { hasStoredConsent, requestAccessToken, revokeAccess } from "./googleAuth.js";
 import { COLLECTIONS } from "./recordProjections.js";
 import {
   getState,

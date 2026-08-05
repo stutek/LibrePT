@@ -1,5 +1,4 @@
 // src/views/historyView.js - Domain module for global and client workout history logs
-import { openSessionFromHistory } from "../../controllers/activeSessionController.js";
 import { renderMarkupOnce } from "../common/dom.js";
 import { formatDuration, formatMetricValue, usesLoad } from "../common/exerciseModality.js";
 import { formatLoad, formatReps } from "../common/repsAndLoad.js";
@@ -27,7 +26,7 @@ export function renderHistoryViewShell() {
   );
 }
 
-export function renderGlobalHistory({ state, t }) {
+export function renderGlobalHistory({ state, t, openSessionFromHistory }) {
   const container = document.getElementById("global-history-list");
   if (!container) return;
   container.innerHTML = "";
@@ -39,7 +38,7 @@ export function renderGlobalHistory({ state, t }) {
     return;
   }
 
-  renderHistoryItems({ historyList: sorted, container, t });
+  renderHistoryItems({ historyList: sorted, container, t, openSessionFromHistory });
 }
 
 function resolveFeedbackIconClass(tag) {
@@ -110,7 +109,11 @@ function buildExerciseSetsText(ex, metric, modality, skipped, t) {
     .join(", ");
 }
 
-export function renderHistoryItems({ historyList, container, t }) {
+// `openSessionFromHistory` arrives as a parameter rather than an import: it lives in
+// activeSessionController, and a view importing its own controller inverts the layering the app is
+// built on (controllers orchestrate views, not the reverse) — gated by
+// agent_tools/import_layers.py. Injected, this file stays independently mountable.
+export function renderHistoryItems({ historyList, container, t, openSessionFromHistory }) {
   const fragment = document.createDocumentFragment();
   for (const log of historyList) {
     const card = document.createElement("div");

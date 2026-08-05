@@ -141,6 +141,7 @@ export function showClientDetails({
   showErrorView,
   switchView,
   openWorkoutSetupModal,
+  openSessionFromHistory,
 }) {
   const client = state.clients.find((c) => c.id === clientId);
   if (!client) {
@@ -234,11 +235,11 @@ ${historyText}`;
     });
   }
 
-  renderClientWorkoutHistory({ client, state, t });
+  renderClientWorkoutHistory({ client, state, t, openSessionFromHistory });
   switchView("client-detail");
 }
 
-export function renderClientWorkoutHistory({ client, state, t }) {
+export function renderClientWorkoutHistory({ client, state, t, openSessionFromHistory }) {
   const container = document.getElementById("client-history-list");
   if (!container) return;
   container.innerHTML = "";
@@ -254,5 +255,5 @@ export function renderClientWorkoutHistory({ client, state, t }) {
     return;
   }
 
-  renderHistoryItems({ historyList: clientHistory, container, t });
+  renderHistoryItems({ historyList: clientHistory, container, t, openSessionFromHistory });
 }

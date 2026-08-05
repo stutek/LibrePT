@@ -480,7 +480,7 @@ function renderExercisesList(filterQuery = "", categoryFilter = "All") {
   exercisesViewRender({ state: getState(), t, filterQuery, categoryFilter });
 }
 function renderGlobalHistory() {
-  historyViewRender({ state: getState(), t });
+  historyViewRender({ state: getState(), t, openSessionFromHistory });
 }
 
 function setupClientForms() {

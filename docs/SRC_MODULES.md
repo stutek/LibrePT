@@ -105,7 +105,7 @@ module, listed in the table below alongside that module's `.js`.
 | [src/modules/common/backupRestore.js](../src/modules/common/backupRestore.js) | `component` | Backup center dialog and JSON import/export handlers; owns `#dialog-backup`'s markup, including the Google Drive card driveSyncUi.js wires up. |
 | [src/modules/common/backupRestore.css](../src/modules/common/backupRestore.css) | `styles` | The Sync & Backup Center dialog's action cards. |
 | [src/modules/common/driveSyncUi.js](../src/modules/common/driveSyncUi.js) | `component` | Wires the "Cloud Backup (Google Drive)" card in `#dialog-backup` to driveSyncService.js: connect/sync-now/disconnect and status rendering. |
-| [src/modules/common/googleAuth.js](../src/modules/common/googleAuth.js) | `helper` | Google Identity Services token-client wrapper (TODO §1.5): lazily loads the GIS script only on first use, holds the access token in memory only. |
+| [src/data/googleAuth.js](../src/data/googleAuth.js) | `helper` | Google Identity Services token-client wrapper (TODO §1.5): lazily loads the GIS script only on first use, holds the access token in memory only. |
 | [src/modules/common/feedbackModal.js](../src/modules/common/feedbackModal.js) | `component` | Feedback tags modal dialog and voice recorder handler; owns `#dialog-feedback`'s markup. |
 | [src/modules/common/feedbackModal.css](../src/modules/common/feedbackModal.css) | `styles` | The feedback dialog's privacy-first voice-note recorder waveform animation. |
 | [src/modules/common/notificationArea.js](../src/modules/common/notificationArea.js) | `component` | Toast and banner notification area handler; owns the `#notification-area` shell's markup. |
