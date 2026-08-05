@@ -20,7 +20,7 @@ localises the fault better, and a test placed too low simply cannot express what
 | :--- | :--- | :--- | :--- |
 | [tests/unit/](unit/) (13 files) | pytest, stage 1 | nothing — static analysis of the repo | It inspects files/structure: layout rules, i18n parity, doc links, generated catalogs. |
 | [tests/unit_js/](unit_js/) (21 files, 81 tests) | `node:test`, stage 1 | one ES module, no DOM | It pins **pure logic** — schema/migration transforms, id generation, merge algorithms, projections. Mirrors the `src/` subpath it covers. |
-| [tests/medium/](medium/) (13 files) | Playwright, stage 2 | one component against real `index.html` markup | It needs the **DOM/CSS** but not navigation, persistence or a real app boot. Two shapes, both in [_harness.py](medium/_harness.py): `HEADER_STUB` for the header and its route-backed dialogs, `view_stub()` for one view (shell markup → activate → render). |
+| [tests/medium/](medium/) (14 files) | Playwright, stage 2 | one component against real `index.html` markup | It needs the **DOM/CSS** but not navigation, persistence or a real app boot. Three shapes, all in [_harness.py](medium/_harness.py): `HEADER_STUB` (header + its route-backed dialogs), `SESSIONS_STUB` (the dashboard timeline), and `view_stub()` to build one for any other view — shell markup → activate → render. |
 | [tests/e2e/](e2e/) (43 files) | Playwright, stage 3 | the whole app | It needs the router, IndexedDB, the service worker, reload/deep-link behaviour, or a multi-step flow across views. |
 
 **Why the split is worth maintaining:** the pure-logic tests used to run in a browser purely because

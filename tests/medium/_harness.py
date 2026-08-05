@@ -142,3 +142,52 @@ bootHeader({
   renderActiveSessionBarLabels: noop,
 });
 """
+
+
+# The sessions dashboard: the timeline of day-grouped session cards. Its own shell is
+# `renderClientsViewShell` (the dashboard IS #view-clients), and the timeline module must be
+# initialised before renderSessions, because renderSessions calls into it for the title bar and
+# day grouping. Shared because two files mount exactly this and nothing else.
+SESSIONS_STUB = view_stub(
+    imports="""
+import {
+  renderClientsViewShell,
+  renderSessions,
+} from './modules/sessionList/sessionsView.js';
+import { initSessionTimeline } from './modules/sessionList/sessionTimeline.js';
+import { DEFAULT_SESSIONS, DEFAULT_CLIENTS, DEFAULT_ROUTINES } from './data/index.js';
+""",
+    view_id="clients",
+    body="""
+const state = {
+  lang: 'en',
+  sessions: structuredClone(DEFAULT_SESSIONS),
+  clients: structuredClone(DEFAULT_CLIENTS),
+  routines: structuredClone(DEFAULT_ROUTINES),
+  exercises: [],
+  history: [],
+  planUpdates: [],
+  notifications: [],
+};
+
+renderClientsViewShell();
+initSessionTimeline({
+  getState: () => state,
+  t,
+  activeRouteName: () => 'sessions',
+  pushRoute: noop,
+  urlFor: (name) => `/${name}`,
+});
+renderSessions({
+  state,
+  t,
+  getActiveSession: () => null,
+  launchClipboardDirectly: noop,
+  saveToLocalStorage: noop,
+  rerenderSessions: noop,
+  navigateToPath: noop,
+  urlFor: (name) => `/${name}`,
+  focusSessionsColumn: noop,
+});
+""",
+)

@@ -166,31 +166,3 @@ def test_date_jump_control_scrolls_to_chosen_date(page, local_server):
     # The seed data has nothing exactly 3 days out, so this also proves the "nearest date forward,
     # else the latest loaded" fallback (focusSessionsColumn) lands on real content, not nowhere.
     _wait_for_focused_date_to_change_from(page, today_iso)
-
-
-def test_continuous_vertical_timeline_at_every_viewport(page, local_server):
-    """The timeline is one vertical, chronologically-ordered scroll of day-groups — not
-    per-viewport paged columns — at every viewport width."""
-    check = """() => {
-      const groups = Array.from(document.querySelectorAll('.sessions-day-group[data-date]'));
-      const dates = groups.map((g) => g.dataset.date);
-      const sorted = [...dates].sort();
-      const lefts = new Set(groups.map((g) => Math.round(g.getBoundingClientRect().left)));
-      return {
-        count: groups.length,
-        inOrder: JSON.stringify(dates) === JSON.stringify(sorted),
-        singleColumn: lefts.size <= 1,
-      };
-    }"""
-
-    for width, height in [(390, 844), (868, 843), (1280, 800)]:
-        page.set_viewport_size({"width": width, "height": height})
-        page.goto(local_server)
-        page.wait_for_selector(".sessions-day-group")
-        page.wait_for_function(f"() => ({check})().count > 1", polling=100)
-        result = page.evaluate(check)
-        assert result["count"] > 1, "the seed data spans multiple days"
-        assert result["singleColumn"], (
-            f"day-groups must stack in one column at {width}px"
-        )
-        assert result["inOrder"], "day-groups must render in chronological order"

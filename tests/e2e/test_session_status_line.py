@@ -1,7 +1,9 @@
 # tests/e2e/test_session_status_line.py
 # Every session card on the dashboard carries a status line (components/sessionCard.js): live
 # (existing), a countdown to the scheduled start for not-yet-started sessions, and an editable
-# elapsed-time readout for finished ones. The live/starts-in countdowns render "01h 32m"
+# elapsed-time readout for finished ones. The upcoming-countdown RENDER moved to
+# tests/medium/test_sessions_timeline.py; what stays needs a reload or the real finish-session
+# controller. The live/starts-in countdowns render "01h 32m"
 # (formatDurationHourMin); the editable elapsed-time field stays "HH:MM" (formatDurationHM,
 # parseDurationHM's inverse — it's a value the trainer types back in, not just a countdown display).
 # Closes the loop for TODO 2.3. Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
@@ -10,23 +12,6 @@ import re
 
 HHMM = re.compile(r"^-?\d{2}:\d\d$")
 HOUR_MIN = re.compile(r"^-?\d{2}h \d{2}m$")
-
-
-def test_upcoming_card_shows_a_starts_in_countdown(page, local_server):
-    page.goto(local_server)
-    page.wait_for_selector("#view-clients.active")
-
-    # "Morning Conditioning" is in the "tomorrow" bucket (src/data/sessions.js) — always in the
-    # future regardless of wall-clock time of day, unlike a same-day currentHour-relative slot
-    # (currentHour is clamped to at most 18, so a +3/+4 offset can itself have already started
-    # once real time passes ~21:00).
-    card = page.locator(".session-card", has_text="Morning Conditioning").first
-    bar = card.locator(".session-live-bar.upcoming")
-    assert bar.count() == 1
-    assert "fa-forward-fast" in bar.locator("i").first.get_attribute("class")
-
-    countdown = bar.locator(".session-live-timer").inner_text().strip()
-    assert HOUR_MIN.match(countdown), f"expected '01h 32m' countdown, got {countdown!r}"
 
 
 def test_past_card_shows_editable_elapsed_time(page, local_server):
