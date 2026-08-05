@@ -19,3 +19,4 @@ tags:
 | [BUG_REPORTING.md](BUG_REPORTING.md) | `guidelines` | Bug Reporting Guide — how to submit issues, include build stamps, and steps to reproduce |
 | [PRIVACY.md](../PRIVACY.md) | `guidelines` | Core Privacy Policy & GDPR Data Controller Statement |
 | [templates/Client_Consent_Form.md](templates/Client_Consent_Form.md) | `template` | Downloadable/Printable Informative Client Consent Letter |
+| [SRC_MODULES.md](SRC_MODULES.md) | `index` | Catalog of every runtime module under `src/` — app entry, data layer, feature modules, controllers, service worker. Lives here, not in `src/`, because `src/` is copied wholesale into `dist/` on deploy (AGENT_RULES §5.5: docs stay out of the app tree). |

@@ -413,6 +413,21 @@ def run_doc_graph_check():
         sys.exit(1)
 
 
+def run_catalog_coverage_check():
+    """Verifies the module catalog still describes the tree — see agent_tools/catalog_coverage.py.
+
+    Paired with, not covered by, the doc-graph check above: that one proves every link RESOLVES,
+    which says nothing about a module nobody linked at all. A catalog can therefore rot into a
+    partial map with every link green, and an agent trusting it as the map of the codebase reasons
+    from a repo that no longer exists.
+    """
+    print("\n  Checking module catalog coverage...")
+    from agent_tools import catalog_coverage
+
+    if catalog_coverage.main() != 0:
+        sys.exit(1)
+
+
 def run_pipeline_gate_check():
     """Verifies every CI job actually gates the deploy — see agent_tools/pipeline_gates.py.
 
@@ -1057,6 +1072,7 @@ def run_stage_1_parallel():
         "JavaScript Unit Tests": run_javascript_unit_tests,
         "Static Security Audits": run_static_security_checks,
         "Documentation Graph": run_doc_graph_check,
+        "Module Catalog Coverage": run_catalog_coverage_check,
         "Pipeline Gating": run_pipeline_gate_check,
         "Cyclomatic Complexity": run_complexity_check,
     }
