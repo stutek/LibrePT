@@ -10,10 +10,13 @@
 //   renderExercisesList(),
 //   renderGlobalHistory(),
 //   populateDropdownSelectors(),
+//   renderSessions(),   // for the dialog's Sync Data button, which reseeds state.sessions
 //   t
 // }
 
+import { DEFAULT_SESSIONS } from "../../data/index.js";
 import { describeMigration, migrateState } from "../../data/schemaMigrations.js";
+import { isOfflineCachedActive } from "./applicationHeader.js";
 import { renderMarkupOnce } from "./dom.js";
 import { downloadFile } from "./download.js";
 import { catalogToCsv, catalogToInterchange } from "./exerciseStandard.js";
@@ -110,8 +113,66 @@ export function renderBackupDialog() {
   );
 }
 
+// The dialog's "Sync Data" button. It lived in sessionsView.js's setupCalendarSessions until
+// 2026-08-05 (TODO §22) — the sessions dashboard wiring a button whose markup belongs to this
+// dialog, which is why a test of the offline signal had to boot a sessions-module function to reach
+// a backup-dialog button. import_layers.py cannot catch that: both sides were legal cross-feature
+// imports and the problem was ownership, not direction.
+//
+// `state` and `renderSessions` come from deps rather than an import, so this module still knows
+// nothing about the sessions feature beyond "re-render it when the data changes".
+function setupCalendarSync() {
+  const syncBtn = document.getElementById("btn-sync-data");
+  if (!syncBtn) return;
+  const { getState, t, saveToLocalStorage, renderSessions } = deps;
+
+  syncBtn.addEventListener("click", () => {
+    const icon = syncBtn.querySelector("i");
+    const btnText = document.getElementById("btn-sync-data-text");
+    const status = document.getElementById("sync-status");
+
+    if (icon) icon.classList.add("fa-spin");
+    if (btnText) btnText.textContent = t("syncing_calendar");
+    if (status) {
+      status.textContent = "";
+      status.className = "status-msg";
+    }
+    syncBtn.disabled = true;
+
+    if (isOfflineCachedActive() || !navigator.onLine) {
+      if (status) {
+        status.textContent = t("offline_cached_desc");
+        status.className = "status-msg text-danger";
+      }
+      if (icon) icon.classList.remove("fa-spin");
+      if (btnText) btnText.textContent = t("btn_sync_data");
+      syncBtn.disabled = false;
+      return;
+    }
+
+    setTimeout(() => {
+      getState().sessions = [...DEFAULT_SESSIONS];
+
+      // saveToLocalStorage() (deps.saveToLocalStorage — app.js's saveState()) fires
+      // onStateSaved's listener on its own now, which re-renders the header badge with a real
+      // ahead count — no separate reset call needed (TODO §3.9).
+      saveToLocalStorage();
+      renderSessions();
+
+      if (icon) icon.classList.remove("fa-spin");
+      if (btnText) btnText.textContent = t("btn_sync_data");
+      syncBtn.disabled = false;
+      if (status) {
+        status.textContent = t("calendar_synced");
+        status.className = "status-msg text-emerald";
+      }
+    }, 1200);
+  });
+}
+
 export function setupBackupRestore() {
   renderBackupDialog();
+  setupCalendarSync(); // after renderBackupDialog — #btn-sync-data is part of that markup
   const dialog = document.getElementById("dialog-backup");
   if (!dialog) return;
 

@@ -1,5 +1,3 @@
-import { DEFAULT_SESSIONS } from "../../data/index.js";
-import { isOfflineCachedActive } from "../common/applicationHeader.js";
 import { renderMarkupOnce } from "../common/dom.js";
 import { modalityOf, primaryMetricOf } from "../common/exerciseModality.js";
 import { loadUnitForEquipment } from "../common/repsAndLoad.js";
@@ -184,54 +182,6 @@ export function launchClipboardDirectly({ sessionId, state, startWorkoutSession 
     buildSessionMeta(overlappingSessions, session.day, getSessionDayDate),
     options,
   );
-}
-
-export function setupCalendarSessions({ state, t, saveToLocalStorage, renderSessions }) {
-  const syncBtn = document.getElementById("btn-sync-data");
-  if (!syncBtn) return;
-
-  syncBtn.addEventListener("click", () => {
-    const icon = syncBtn.querySelector("i");
-    const btnText = document.getElementById("btn-sync-data-text");
-    const status = document.getElementById("sync-status");
-
-    if (icon) icon.classList.add("fa-spin");
-    if (btnText) btnText.textContent = t("syncing_calendar");
-    if (status) {
-      status.textContent = "";
-      status.className = "status-msg";
-    }
-    syncBtn.disabled = true;
-
-    if (isOfflineCachedActive() || !navigator.onLine) {
-      if (status) {
-        status.textContent = t("offline_cached_desc");
-        status.className = "status-msg text-danger";
-      }
-      if (icon) icon.classList.remove("fa-spin");
-      if (btnText) btnText.textContent = t("btn_sync_data");
-      syncBtn.disabled = false;
-      return;
-    }
-
-    setTimeout(() => {
-      state.sessions = [...DEFAULT_SESSIONS];
-
-      // saveToLocalStorage() (deps.saveToLocalStorage — app.js's saveState()) fires
-      // onStateSaved's listener on its own now, which re-renders the header badge with a real
-      // ahead count — no separate reset call needed (TODO §3.9).
-      saveToLocalStorage();
-      renderSessions();
-
-      if (icon) icon.classList.remove("fa-spin");
-      if (btnText) btnText.textContent = t("btn_sync_data");
-      syncBtn.disabled = false;
-      if (status) {
-        status.textContent = t("calendar_synced");
-        status.className = "status-msg text-emerald";
-      }
-    }, 1200);
-  });
 }
 
 // Local calendar date (not UTC) a session's `startDate` falls on — the grouping key for the

@@ -15,19 +15,12 @@ from tests.medium._harness import HEADER_STUB, load_with_stub
 
 pytestmark = pytest.mark.clean_start
 
-# #btn-sync-data's markup belongs to backupRestore.js (it lives in the Sync & Backup dialog), but
-# its click handler is wired by sessionsView.js's setupCalendarSessions — the sessions dashboard
-# wiring a button it does not own. That coupling is why this stub has to boot a sessions-module
-# function to test a backup-dialog button; the import-layering gate cannot see it, since both sides
-# are legal cross-feature imports. Recorded rather than fixed here: moving the handler to
-# backupRestore.js is a src change, not a test migration.
-STUB = (
-    HEADER_STUB
-    + """
-import { setupCalendarSessions } from './modules/sessionList/sessionsView.js';
-setupCalendarSessions({ state, t, saveToLocalStorage: noop, renderSessions: noop });
-"""
-)
+# #btn-sync-data needs no extra boot step: its handler now lives in backupRestore.js, the module that
+# owns its markup. Until 2026-08-05 (TODO §22) it was wired by sessionsView.js's
+# setupCalendarSessions, so this stub had to boot a sessions-module function to exercise a
+# backup-dialog button — the import-layering gate could not see that, both sides being legal
+# cross-feature imports and the problem being ownership rather than direction.
+STUB = HEADER_STUB
 
 
 def test_offline_cached_signal(page, local_server):

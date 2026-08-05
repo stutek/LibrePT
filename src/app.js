@@ -22,7 +22,6 @@ import {
   startWorkoutSession as startWorkoutSessionController,
   syncSessionFocusUrl,
 } from "./controllers/activeSessionController.js";
-import { setupClientForms as setupClientFormsController } from "./controllers/clientFormsController.js";
 import {
   openExerciseCreateDialog,
   setupExerciseForms as setupExerciseFormsController,
@@ -156,7 +155,6 @@ import {
   launchClipboardDirectly as sessionsViewLaunchClipboard,
   renderSessions as sessionsViewRender,
   seedDemoActiveSession as sessionsViewSeedDemo,
-  setupCalendarSessions as sessionsViewSetupSessions,
 } from "./modules/sessionList/sessionsView.js";
 
 function t(key) {
@@ -337,10 +335,10 @@ async function init() {
     renderExercisesList,
     renderGlobalHistory,
     populateDropdownSelectors,
+    renderSessions,
     t,
   });
   appBoot.bootDriveSyncUi({ t });
-  setupCalendarSessions();
 
   appBoot.bootHeader({
     getState,
@@ -482,9 +480,10 @@ function renderGlobalHistory() {
 }
 
 function setupClientForms() {
-  setupClientFormsController({
+  appBoot.bootClientForms({
     state: getState(),
     t,
+    navigateToPath,
     saveToLocalStorage: saveState,
     populateDropdownSelectors,
     showErrorView,
@@ -614,15 +613,6 @@ function renderActiveGroupBoard() {
 function launchClipboardDirectly(arg, options = {}) {
   const sessionId = arg && typeof arg === "object" ? arg.sessionId : arg;
   sessionsViewLaunchClipboard({ sessionId, state: getState(), startWorkoutSession }, options);
-}
-
-function setupCalendarSessions() {
-  sessionsViewSetupSessions({
-    state: getState(),
-    t,
-    saveToLocalStorage: saveState,
-    renderSessions,
-  });
 }
 
 function renderSessions() {

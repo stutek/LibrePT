@@ -1056,20 +1056,27 @@ the gate's dominant failure source.
       stage runs ~340s instead of ~115s). If the root cause is not fixed, consider reverting to 30s
       so stalls fail fast and cheap.
 
-## 22. Two `src` defects found while testing, deliberately not fixed
+## 22. [x] Two `src` defects found while testing — FIXED
 
-Both surfaced during the tier work and were left alone: they are app-code changes, not test changes.
+Both surfaced during the tier work and were deferred as app-code changes rather than test changes.
+Both fixed 2026-08-05.
 
-- [ ] **`clientFormsController.js:184` re-renders the client list on search WITHOUT
-      `navigateToPath`.** After filtering, a card click calls `onOpenClient` → `navigateToPath(...)`
-      where that dependency is `undefined`. A real user-facing bug; no tier currently covers it,
-      because the migrated stub passes the dep on both paths.
-- [ ] **`#btn-sync-data`'s handler lives in the wrong module.** Its markup belongs to the Sync &
-      Backup dialog ([backupRestore.js](src/modules/common/backupRestore.js)) but its click handler
-      is wired by `setupCalendarSessions` in
-      [sessionsView.js](src/modules/sessionList/sessionsView.js) — the sessions dashboard wiring a
-      button it does not own, which is why
-      [tests/medium/test_offline_cached_signal.py](tests/medium/test_offline_cached_signal.py) must
-      boot a sessions-module function to exercise a backup-dialog button. `import_layers.py` cannot
-      see this: both sides are legal cross-feature imports, and the problem is ownership, not
-      direction.
+- [x] **`clientFormsController.js` re-rendered the client list WITHOUT `navigateToPath`.** Worse than
+      recorded: the dependency was never threaded into `setupClientForms` at all, so BOTH its
+      `renderClientsList` calls (the save path and the search path) dropped it, and every card in a
+      re-rendered grid threw `navigateToPath is not a function` on tap. Threaded through from
+      `app.js` and covered by a new medium test — verified failing without the fix, which mattered,
+      because the old stub hand-duplicated the search listener and passed the dep on both paths. The
+      stub now boots `appBoot.bootClientForms`, the real step, so it cannot diverge that way again.
+- [x] **`#btn-sync-data`'s handler moved to the module that owns its markup.** Now
+      `setupCalendarSync()` inside [backupRestore.js](src/modules/common/backupRestore.js), taking
+      `renderSessions` as a dep so that module still knows nothing about the sessions feature beyond
+      "re-render it". `setupCalendarSessions` is gone from
+      [sessionsView.js](src/modules/sessionList/sessionsView.js) along with its two now-unused
+      imports, and [test_offline_cached_signal.py](tests/medium/test_offline_cached_signal.py) no
+      longer boots a sessions-module function to reach a backup-dialog button — it is plain
+      `HEADER_STUB` again.
+
+**The general lesson, worth keeping:** a stub that hand-duplicates production wiring will agree with
+itself and disagree with the app. Both defects hid behind exactly that. Mount the real `bootXyz`
+step, or the test proves only that the test is self-consistent.

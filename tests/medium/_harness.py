@@ -122,6 +122,7 @@ bootBackupRestore({
   renderExercisesList: noop,
   renderGlobalHistory: noop,
   populateDropdownSelectors: noop,
+  renderSessions: noop,
   t,
 });
 bootDriveSyncUi({ t });
