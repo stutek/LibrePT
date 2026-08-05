@@ -985,3 +985,82 @@ device-local, so a copied id dereferences to nothing elsewhere.
 - [ ] **Session sub-state that already survives via the cache** — `expandedPastId`, `circuitRounds`.
       They persist through the session cache, so a reload keeps them; putting them in the URL would
       make them *shareable*, which is a different (weaker) argument. Pinned by tests, not routed.
+
+---
+
+## 20. Test tiers: the clipboard, and the `activeSession` contract
+
+The test-tier refactor (`tests/unit_js/`, `tests/medium/`, `tests/e2e/` — see
+[tests/INDEX.md](tests/INDEX.md)) moved everything it could without redesign. What remains is not a
+migration backlog; it is one structural gap and its consequences.
+
+**The gap: `activeSession` has no written contract.** It is constructed in two places inside
+[activeSessionController.js](src/controllers/activeSessionController.js) — `startWorkoutSession` and
+the `openSessionFromHistory` path — and consumed across a dozen modules, but its shape is written
+down nowhere. So the only reliable way to obtain a valid one was to drive the real flow, and that is
+why **68 of the 138 remaining e2e tests are the clipboard**: half the e2e suite is one feature, held
+there by a missing contract rather than by a genuine need to boot the whole app.
+
+- [x] **Derive the contract and encode it as a fixture.** `active_session_fixture()` and
+      `clipboard_stub()` in [tests/medium/_harness.py](tests/medium/_harness.py) mount the live
+      clipboard with an injected session, through the controller's own public `setActiveSession()` —
+      the production render path fed a known session, not a parallel one. Verified: the deck renders
+      `1/1 · In Focus · Barbell Bench Press · 3 SETS · 5 REPS · 60 KG · Too Easy · Too Hard · Notes`.
+      Two dep fakes must return real values, not `noop`: `sessionFocusPath` builds a focus URL and
+      calls string methods on `urlFor`'s result, so `() => undefined` fails deep inside rendering
+      with an error naming neither.
+- [ ] **Migrate the clipboard's RENDER and INTERACTION tests to `tests/medium/`.** Estimated 30-40 of
+      the 68. The split is not by file: a test asserting what a card shows, or how it responds to a
+      tap, is a render fact; a test asserting start → log → finish → history is lifecycle and stays.
+      `test_quick_signal_toggle`'s header states it deliberately drives the real
+      `openSessionFromHistory` path "rather than a hand-built shortcut" — treat that as binding for
+      its lifecycle assertions, not necessarily for its render ones.
+- [ ] **Document the session ↔ clipboard seam in [docs/DATA_MODEL.md](docs/DATA_MODEL.md).** That
+      document covers the PERSISTED model; `activeSession` is its transient counterpart and has no
+      home. The seam itself is `activeSession.sourceSession`, built by `buildSessionMeta`
+      ([utils.js](src/modules/common/utils.js)) from one or more scheduled sessions sharing a day:
+      consumed as `isPlanning` (10 sites), `endDate` (8), `startDate` (4), `titles` (3), `timeLabel`
+      (2), `location` (2), `day` (1). A planning draft synthesises one with `isPlanning: true` and no
+      real dates; a session opened from history has `sourceSession: null` unless it was a plan. Write
+      that down — it is the contract between the sessions dashboard and the clipboard, and both
+      sides currently rely on it implicitly.
+
+## 21. `Page.goto` stalls against the local dev server
+
+Five occurrences on 2026-08-05, each failing an unrelated e2e test with
+`Page.goto: Timeout 60000ms exceeded` and costing a full re-run. Not a regression and not sleep —
+the failing tests pass in isolation, the server is healthy before and after (1 thread, 4 fds, no
+leaked sockets), and `journalctl | grep "PM: suspend entry"` showed no suspend in the windows. Now
+the gate's dominant failure source.
+
+- [ ] **Test the service-worker hypothesis before changing anything.** It predicts the observed
+      split rather than merely describing it: every e2e browser context registers the service
+      worker, which precaches and SHA-256-verifies all 89 shell assets, so eight workers burst ~700
+      asset requests at a single-threaded Python accept loop. `tests/medium/` never registers it
+      (its stubs do not call `bootAppLifecycle`) and has stalled **zero** times against e2e's five.
+      Measure request volume//timing, then decide.
+- [ ] **If it holds, skip SW registration except where it is the subject.** Only
+      `test_integrity_verification` genuinely needs it. That removes the burst while leaving
+      fidelity higher, not lower — unlike lowering the worker count, which hides the symptom.
+- [ ] **Note the interaction with the raised navigation timeout.** 30s → 60s
+      ([tests/conftest.py](tests/conftest.py)) made each stall twice as expensive (a stalled e2e
+      stage runs ~340s instead of ~115s). If the root cause is not fixed, consider reverting to 30s
+      so stalls fail fast and cheap.
+
+## 22. Two `src` defects found while testing, deliberately not fixed
+
+Both surfaced during the tier work and were left alone: they are app-code changes, not test changes.
+
+- [ ] **`clientFormsController.js:184` re-renders the client list on search WITHOUT
+      `navigateToPath`.** After filtering, a card click calls `onOpenClient` → `navigateToPath(...)`
+      where that dependency is `undefined`. A real user-facing bug; no tier currently covers it,
+      because the migrated stub passes the dep on both paths.
+- [ ] **`#btn-sync-data`'s handler lives in the wrong module.** Its markup belongs to the Sync &
+      Backup dialog ([backupRestore.js](src/modules/common/backupRestore.js)) but its click handler
+      is wired by `setupCalendarSessions` in
+      [sessionsView.js](src/modules/sessionList/sessionsView.js) — the sessions dashboard wiring a
+      button it does not own, which is why
+      [tests/medium/test_offline_cached_signal.py](tests/medium/test_offline_cached_signal.py) must
+      boot a sessions-module function to exercise a backup-dialog button. `import_layers.py` cannot
+      see this: both sides are legal cross-feature imports, and the problem is ownership, not
+      direction.

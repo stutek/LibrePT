@@ -191,3 +191,146 @@ renderSessions({
 });
 """,
 )
+
+
+# ---------------------------------------------------------------------------------------------
+# The live clipboard (active session).
+#
+# Half of what remained in tests/e2e/ was one flow — the gym-floor clipboard — and it was stuck
+# there for a structural reason rather than a good one: `activeSession`'s shape is implicit. It is
+# built in two places inside activeSessionController (startWorkoutSession and the
+# openSessionFromHistory path) and consumed in a dozen modules, but written down nowhere, so the
+# only reliable way to obtain a valid one was to drive the real flow. This fixture writes that
+# contract down, derived from both construction sites:
+#
+#   activeSession = {
+#     id, started, startTime, duration,     // lifecycle — `started` gates the timer and "live" state
+#     participants: [clientId],             // iterated, so never undefined
+#     activeClientId,                       // which participant's plan is on screen
+#     clientRoutines: { [clientId]: clientState },
+#     feedback: [],                         // quick signals / modal submissions land here
+#     sourceSession,                        // the scheduled session this came from, or null
+#   }
+#   clientState = {
+#     routineId, routineName, activeExerciseIndex,
+#     deckAllCollapsed,                     // true on a fresh open: the deck renders NO card in
+#                                           // focus until the trainer taps one
+#     exercises: [item...],                 // typed items — exercise | rest — in program order
+#     logs: { [exerciseId]: [set...] },
+#   }
+#
+# Keeping this in the harness rather than in one test means a change to the real shape breaks one
+# place, and the next person reading it learns the contract instead of re-deriving it.
+def active_session_fixture(
+    client_id="c1", client_name="Jane Doe", exercises=None, **overrides
+):
+    """A valid activeSession as JS source, for injection via setActiveSession()."""
+    import json
+
+    items = (
+        exercises
+        if exercises is not None
+        else [
+            {
+                "id": "x1",
+                "name": "Barbell Bench Press",
+                "setsTargetCount": 3,
+                "repsTarget": 5,
+                "weightTarget": 60,
+                "loadUnit": "kg",
+                "modality": "strength",
+                "metric": "reps",
+            }
+        ]
+    )
+    session = {
+        "id": "s1",
+        "started": True,
+        "startTime": None,  # replaced with Date.now() below — JSON cannot carry it
+        "duration": 0,
+        "participants": [client_id],
+        "activeClientId": client_id,
+        "feedback": [],
+        "sourceSession": None,
+        "clientRoutines": {
+            client_id: {
+                "routineId": "r1",
+                "routineName": "Upper Body",
+                "clientName": client_name,
+                "activeExerciseIndex": 0,
+                "deckAllCollapsed": False,
+                "exercises": items,
+                "logs": {},
+            }
+        },
+    }
+    session.update(overrides)
+    return json.dumps(session).replace('"startTime": null', '"startTime": Date.now()')
+
+
+def clipboard_stub(session_js, extra_imports="", extra_body=""):
+    """Mount the live clipboard with an INJECTED session, no router and no session lifecycle.
+
+    `setActiveSession` is the controller's own public setter — the same one the real flow assigns
+    through — so this is the production render path fed a known session, not a parallel one. Route
+    helpers return real strings rather than noop: sessionFocusPath builds a focus URL and calls
+    string methods on what urlFor returns, so a `() => undefined` fake fails deep inside rendering
+    with an error that names neither.
+
+    Use for tests asserting what the clipboard RENDERS or how it responds to a tap. Tests about the
+    session LIFECYCLE — start, finish, recover from cache, persist to history — belong in
+    tests/e2e/, where that lifecycle is the subject rather than the setup.
+    """
+    return view_stub(
+        imports="""
+import { renderActiveSessionOverlayShell } from './modules/clipboard/activeSessionOverlayView.js';
+import {
+  initActiveSessionController,
+  setActiveSession,
+  renderActiveGroupBoard,
+} from './controllers/activeSessionController.js';
+import { escapeHTML } from './modules/common/utils.js';
+import { DEFAULT_CLIENTS, DEFAULT_EXERCISES, DEFAULT_ROUTINES } from './data/index.js';
+"""
+        + extra_imports,
+        view_id="clients",
+        body="""
+const state = {
+  lang: 'en',
+  clients: structuredClone(DEFAULT_CLIENTS),
+  exercises: structuredClone(DEFAULT_EXERCISES),
+  routines: structuredClone(DEFAULT_ROUTINES),
+  sessions: [],
+  history: [],
+  planUpdates: [],
+};
+
+renderActiveSessionOverlayShell();
+initActiveSessionController({
+  state,
+  t,
+  escapeHTML,
+  navigateToPath: noop,
+  toRoute: (path) => path || '/',
+  replaceRoute: noop,
+  resolveRoute: () => ({ name: 'session' }),
+  activeRouteName: () => 'session',
+  activeRouteIsDialog: () => false,
+  urlFor: (name, params = {}) =>
+    '/' + name + Object.values(params).map((v) => '/' + v).join(''),
+  focusSessionsColumn: noop,
+  launchClipboardDirectly: noop,
+  newRecordId: () => 'id' + Math.random().toString(36).slice(2),
+  renderIdleSessionBar: noop,
+  renderSessions: noop,
+  saveToLocalStorage: noop,
+  openFeedbackModal: noop,
+  syncSessionFocusUrl: noop,
+});
+
+setActiveSession(__SESSION__);
+document.getElementById('active-session-overlay')?.classList.remove('hidden');
+renderActiveGroupBoard();
+"""
+        + extra_body,
+    ).replace("__SESSION__", session_js)
