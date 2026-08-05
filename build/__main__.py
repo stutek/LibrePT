@@ -21,6 +21,23 @@ def _fmt_elapsed(seconds):
     return f"{minutes}m{secs:02d}s" if minutes else f"{secs}s"
 
 
+def _print_summary(verdict, total_seconds, stage_seconds):
+    """The last line anyone reads, so it must not need interpreting.
+
+    It previously said "Check finished (staged parallel validation passed). (2m53s)", which never
+    stated what the number measured — and it sits directly under Stage 4's own "(33.7s)", so the
+    obvious reading is that it belongs to that stage rather than the whole run. Printing the total
+    next to the per-stage breakdown it is the sum of removes the question instead of answering it.
+    """
+    print(f"\n  ✓ {verdict}")
+    print(f"    TOTAL WALL TIME: {_fmt_elapsed(total_seconds)}")
+    if stage_seconds:
+        breakdown = "  ".join(
+            f"stage {n} {seconds:.0f}s" for n, seconds in enumerate(stage_seconds, 1)
+        )
+        print(f"    = {breakdown}")
+
+
 if __name__ == "__main__":
     start = time.monotonic()
     check_environment()
@@ -28,28 +45,32 @@ if __name__ == "__main__":
 
     if arg == "lint":
         run_lint()
-        print(
-            f"\n  ✓ Static analysis & linting passed. ({_fmt_elapsed(time.monotonic() - start)})"
-        )
+        _print_summary("LINT PASSED", time.monotonic() - start, [])
     elif arg == "test":
         run_tests()
-        print(f"\n  ✓ Test suite passed. ({_fmt_elapsed(time.monotonic() - start)})")
+        _print_summary("TESTS PASSED", time.monotonic() - start, [])
     elif arg == "check":
-        run_stage_1_parallel()
-        run_stage_2_medium()
-        run_stage_3_e2e()
-        run_stage_4_zap()
-        print(
-            f"\n  ✓ Check finished (staged parallel validation passed). "
-            f"({_fmt_elapsed(time.monotonic() - start)})"
+        stages = [
+            run_stage_1_parallel(),
+            run_stage_2_medium(),
+            run_stage_3_e2e(),
+            run_stage_4_zap(),
+        ]
+        _print_summary(
+            "build check PASSED — all 4 stages green",
+            time.monotonic() - start,
+            stages,
         )
     else:
-        run_stage_1_parallel()
-        run_stage_2_medium()
-        run_stage_3_e2e()
-        run_stage_4_zap()
+        stages = [
+            run_stage_1_parallel(),
+            run_stage_2_medium(),
+            run_stage_3_e2e(),
+            run_stage_4_zap(),
+        ]
         run_build()
-        print(
-            f"\n  ✓ Build finished (dist/ is ready to deploy). "
-            f"({_fmt_elapsed(time.monotonic() - start)})"
+        _print_summary(
+            "build PASSED — all 4 stages green, dist/ ready to deploy",
+            time.monotonic() - start,
+            stages,
         )

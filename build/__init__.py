@@ -1164,6 +1164,7 @@ def run_stage_1_parallel():
         print(f"    Digests above; full runner logs in {REPORT_DIR}/")
         sys.exit(1)
     print(f"\n  ✓ Stage 1 completed cleanly! ({stage_elapsed:.1f}s)")
+    return stage_elapsed
 
 
 def run_stage_2_medium():
@@ -1174,7 +1175,9 @@ def run_stage_2_medium():
     print("\n=== Stage 2: Medium Component Tests ===")
     stage_start = time.monotonic()
     _timed_task("Medium Component Tests", run_medium_tests)
-    print(f"\n  ✓ Stage 2 completed cleanly! ({time.monotonic() - stage_start:.1f}s)")
+    stage_elapsed = time.monotonic() - stage_start
+    print(f"\n  ✓ Stage 2 completed cleanly! ({stage_elapsed:.1f}s)")
+    return stage_elapsed
 
 
 def run_stage_3_e2e():
@@ -1195,7 +1198,9 @@ def run_stage_3_e2e():
     print("\n=== Stage 3: E2E Browser Tests ===")
     stage_start = time.monotonic()
     _timed_task("E2E Browser Tests", run_e2e_tests)
-    print(f"\n  ✓ Stage 3 completed cleanly! ({time.monotonic() - stage_start:.1f}s)")
+    stage_elapsed = time.monotonic() - stage_start
+    print(f"\n  ✓ Stage 3 completed cleanly! ({stage_elapsed:.1f}s)")
+    return stage_elapsed
 
 
 def run_stage_4_zap():
@@ -1205,7 +1210,9 @@ def run_stage_4_zap():
     print("\n=== Stage 4: OWASP ZAP Security Scan ===")
     stage_start = time.monotonic()
     _timed_task("OWASP ZAP Scan", run_owasp_zap_scan)
-    print(f"\n  ✓ Stage 4 completed cleanly! ({time.monotonic() - stage_start:.1f}s)")
+    stage_elapsed = time.monotonic() - stage_start
+    print(f"\n  ✓ Stage 4 completed cleanly! ({stage_elapsed:.1f}s)")
+    return stage_elapsed
 
 
 def run_lint():

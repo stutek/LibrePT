@@ -138,6 +138,33 @@ jobs:
         # every other job uses.
         run: .venv/bin/python -c "from build import run_javascript_unit_tests; run_javascript_unit_tests()"
 
+  # One job, four named checks — same reasoning as static-security-audits below: each Actions job
+  # costs a fresh runner, checkout and Python setup (~30s) for checks that take milliseconds. These
+  # are the repo's structural invariants: the module catalog matches the tree, imports flow one way,
+  # every CI job gates the deploy, and no function has grown past the complexity ceiling.
+  structure-checks:
+    name: Structural Invariants (catalog, layering, gating, complexity)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - name: Install Dependencies
+        run: |
+          python -m venv .venv
+          .venv/bin/pip install --upgrade pip
+          .venv/bin/pip install -r requirements.txt
+      - name: Module catalog coverage
+        run: .venv/bin/python -c "from build import run_catalog_coverage_check; run_catalog_coverage_check()"
+      - name: Import layering
+        run: .venv/bin/python -c "from build import run_import_layer_check; run_import_layer_check()"
+      - name: CI pipeline gating
+        run: .venv/bin/python -c "from build import run_pipeline_gate_check; run_pipeline_gate_check()"
+      - name: Cyclomatic complexity
+        run: .venv/bin/python -c "from build import run_complexity_check; run_complexity_check()"
+
   medium-tests:
     name: Medium Component Tests
     needs:
@@ -148,6 +175,7 @@ jobs:
         dependency-scan,
         unit-tests,
         javascript-unit-tests,
+        structure-checks,
       ]
     runs-on: ubuntu-latest
     steps:
@@ -175,6 +203,7 @@ jobs:
         dependency-scan,
         unit-tests,
         javascript-unit-tests,
+        structure-checks,
       ]
     runs-on: ubuntu-latest
     steps:
@@ -198,7 +227,16 @@ jobs:
   # (named results in the output) and kept together where splitting would only buy latency.
   static-security-audits:
     name: Static Security Audits (CSP parity & HTML sinks)
-    needs: [python-lint, doc-graph, frontend-lint, dependency-scan, unit-tests, javascript-unit-tests]
+    needs:
+      [
+        python-lint,
+        doc-graph,
+        frontend-lint,
+        dependency-scan,
+        unit-tests,
+        javascript-unit-tests,
+        structure-checks,
+      ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -210,7 +248,16 @@ jobs:
 
   owasp-zap-scan:
     name: OWASP ZAP Security Scan
-    needs: [python-lint, doc-graph, frontend-lint, dependency-scan, unit-tests, javascript-unit-tests]
+    needs:
+      [
+        python-lint,
+        doc-graph,
+        frontend-lint,
+        dependency-scan,
+        unit-tests,
+        javascript-unit-tests,
+        structure-checks,
+      ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

@@ -82,3 +82,26 @@ def test_a_scalar_needs_is_accepted(workflow):
 def test_the_real_workflow_gates_every_job():
     """The invariant itself, on this repository — Simon: 'all pipeline tasks should be a gate'."""
     assert pipeline_gates.main() == 0
+
+
+def test_a_stage_1_check_with_no_ci_step_is_reported():
+    """The mirror of the orphan-job check, and the easier failure to create: adding a Stage 1 task
+    is a one-line edit, giving it a CI job is not. Four had accumulated (catalog coverage, import
+    layering, pipeline gating, complexity) before the drift was noticed — each blocking a local
+    commit while the deploy sailed past it."""
+    workflow = "run: python -c 'from build import run_python_lint; run_python_lint()'"
+    ungated = pipeline_gates.locally_gated_only([workflow])
+
+    assert "run_python_lint" not in ungated, "a task CI does run must not be reported"
+    assert "run_import_layer_check" in ungated, (
+        "a Stage 1 task absent from every workflow must be reported"
+    )
+
+
+def test_the_real_workflow_runs_every_stage_1_check():
+    """Guards the repo itself, not a fixture — this is the invariant that actually drifted."""
+    workflows = sorted(pipeline_gates.WORKFLOW_DIR.glob("*.yml"))
+    texts = [w.read_text(encoding="utf-8") for w in workflows]
+
+    assert pipeline_gates.locally_gated_only(texts) == []
+    assert pipeline_gates.stage_1_tasks(), "the Stage 1 task table must be parseable"

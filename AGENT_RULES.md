@@ -247,3 +247,18 @@ nothing behind for the next agent. When a check will be needed again, it belongs
    adding it to the `needs:` of whatever must wait for it, in the same change. Enforced by
    `agent_tools/pipeline_gates.py`: exactly one terminal job, and every other job inside its
    transitive closure.
+
+   **The same rule runs in the other direction, and that one is easier to break: a Stage 1 check
+   with no CI job blocks your commit but not the deploy.** Adding a task to `run_stage_1_parallel`'s
+   table is a one-line edit; giving it a workflow job is not — so four had quietly accumulated
+   (module catalog coverage, import layering, pipeline gating, cyclomatic complexity), each enforced
+   locally and bypassable by anyone who pushed without running the gate. `pipeline_gates.py` now
+   also asserts that every Stage 1 `run_*` is invoked by some workflow step. Group fast pure-analysis
+   checks into ONE job (`structure-checks`, `static-security-audits`) rather than one job each — a
+   fresh runner, checkout and Python setup costs ~30s apiece for checks measured in milliseconds.
+
+   **Local green is not CI green.** The two environments differ in ways that do not surface until a
+   push: the `owasp-zap-scan` and `static-security-audits` jobs run bare system Python with no
+   `pip install`, so anything they reach must import with the stdlib alone (a `requests` import
+   added to `ensure_zap_addons` passed every local run and would have failed the deploy). When a
+   change touches a function CI calls, check *which* job calls it and *what that job installs*.
