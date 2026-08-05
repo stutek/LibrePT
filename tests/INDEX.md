@@ -20,14 +20,22 @@ localises the fault better, and a test placed too low simply cannot express what
 | :--- | :--- | :--- | :--- |
 | [tests/unit/](unit/) (13 files) | pytest, stage 1 | nothing — static analysis of the repo | It inspects files/structure: layout rules, i18n parity, doc links, generated catalogs. |
 | [tests/unit_js/](unit_js/) (20 files, 80 tests) | `node:test`, stage 1 | one ES module, no DOM | It pins **pure logic** — schema/migration transforms, id generation, merge algorithms, projections. Mirrors the `src/` subpath it covers. |
-| [tests/medium/](medium/) (8 files) | Playwright, stage 2 | one component against real `index.html` markup | It needs the **DOM/CSS** but not navigation, persistence or a real app boot. Two shapes, both in [_harness.py](medium/_harness.py): `HEADER_STUB` for the header and its route-backed dialogs, `view_stub()` for one view (shell markup → activate → render). |
-| [tests/e2e/](e2e/) (45 files) | Playwright, stage 3 | the whole app | It needs the router, IndexedDB, the service worker, reload/deep-link behaviour, or a multi-step flow across views. |
+| [tests/medium/](medium/) (9 files) | Playwright, stage 2 | one component against real `index.html` markup | It needs the **DOM/CSS** but not navigation, persistence or a real app boot. Two shapes, both in [_harness.py](medium/_harness.py): `HEADER_STUB` for the header and its route-backed dialogs, `view_stub()` for one view (shell markup → activate → render). |
+| [tests/e2e/](e2e/) (44 files) | Playwright, stage 3 | the whole app | It needs the router, IndexedDB, the service worker, reload/deep-link behaviour, or a multi-step flow across views. |
 
 **Why the split is worth maintaining:** the pure-logic tests used to run in a browser purely because
 the app's CSP forbids `new Function` — they now fail in ~4s inside stage 1 instead of at the
 3-minute mark. The win is *feedback latency*, not total wall clock: e2e is fanned out across workers,
 so moving cheap tests out of it barely moves the stage's duration (measured — do not expect
 otherwise), while moving a *slow* one does.
+
+**What is left in `tests/e2e/` is there on merit.** The migration stopped when the remaining files
+each had a concrete reason to boot the whole app: a `page.reload()` asserting state survives it, a
+live session started through the real `openSessionFromHistory` path (test_quick_signal_toggle says
+so in its own header, and a medium version would substitute exactly the hand-built shortcut its
+author rejected), a real IndexedDB engine or Storage API, a service-worker install, a download, or
+`app.js`'s boot wiring itself. Moving those would not make them faster — it would make them test
+something else.
 
 **Shared fixtures** live in [tests/conftest.py](conftest.py) and apply to every tier, notably
 `local_server` — which refuses to run against a dev server whose revision does not match the working
