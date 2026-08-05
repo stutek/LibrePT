@@ -28,8 +28,14 @@ def _print_summary(verdict, total_seconds, stage_seconds):
     stated what the number measured — and it sits directly under Stage 4's own "(33.7s)", so the
     obvious reading is that it belongs to that stage rather than the whole run. Printing the total
     next to the per-stage breakdown it is the sum of removes the question instead of answering it.
+
+    The `=== Report ===` banner matches the per-stage banners so the summary is findable by the same
+    visual cue when scrolling back through minutes of output — without it the verdict is a bare
+    indented line that reads as part of Stage 4's block, which is the same ambiguity the total-time
+    wording above was fixed for.
     """
-    print(f"\n  ✓ {verdict}")
+    print("\n=== Report ===\n")
+    print(f"  ✓ {verdict}")
     print(f"    TOTAL WALL TIME: {_fmt_elapsed(total_seconds)}")
     if stage_seconds:
         breakdown = "  ".join(
