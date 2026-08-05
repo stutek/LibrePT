@@ -988,13 +988,17 @@ device-local, so a copied id dereferences to nothing elsewhere.
 
 ---
 
-## 20. Test tiers: the clipboard, and the `activeSession` contract
+## 20. [x] Test tiers: the clipboard, and the `activeSession` contract — COMPLETE
+
+**Closed 2026-08-05.** All three items below are done: the contract is a fixture, 26 tests moved to
+`tests/medium/`, and the seam is written up as [DATA_MODEL §7](docs/DATA_MODEL.md). Kept for the
+reasoning, not as work.
 
 The test-tier refactor (`tests/unit_js/`, `tests/medium/`, `tests/e2e/` — see
-[tests/INDEX.md](tests/INDEX.md)) moved everything it could without redesign. What remains is not a
-migration backlog; it is one structural gap and its consequences.
+[tests/INDEX.md](tests/INDEX.md)) moved everything it could without redesign. What remained was not a
+migration backlog; it was one structural gap and its consequences.
 
-**The gap: `activeSession` has no written contract.** It is constructed in two places inside
+**The gap: `activeSession` had no written contract.** It is constructed in two places inside
 [activeSessionController.js](src/controllers/activeSessionController.js) — `startWorkoutSession` and
 the `openSessionFromHistory` path — and consumed across a dozen modules, but its shape is written
 down nowhere. So the only reliable way to obtain a valid one was to drive the real flow, and that is
@@ -1020,15 +1024,15 @@ there by a missing contract rather than by a genuine need to boot the whole app.
       `test_quick_signal_toggle`'s "rather than a hand-built shortcut" was honoured, not overridden:
       the fixture IS the written-down contract, so it is no longer hand-built. The file kept only
       its two modal tests and is renamed `test_feedback_modal_exclusivity.py` after what it covers.
-- [ ] **Document the session ↔ clipboard seam in [docs/DATA_MODEL.md](docs/DATA_MODEL.md).** That
-      document covers the PERSISTED model; `activeSession` is its transient counterpart and has no
-      home. The seam itself is `activeSession.sourceSession`, built by `buildSessionMeta`
-      ([utils.js](src/modules/common/utils.js)) from one or more scheduled sessions sharing a day:
-      consumed as `isPlanning` (10 sites), `endDate` (8), `startDate` (4), `titles` (3), `timeLabel`
-      (2), `location` (2), `day` (1). A planning draft synthesises one with `isPlanning: true` and no
-      real dates; a session opened from history has `sourceSession: null` unless it was a plan. Write
-      that down — it is the contract between the sessions dashboard and the clipboard, and both
-      sides currently rely on it implicitly.
+- [x] **Document the session ↔ clipboard seam in [docs/DATA_MODEL.md](docs/DATA_MODEL.md).** Written
+      as §7 (appended, so nothing renumbered), covering both `activeSession` and the
+      `sourceSession` seam `buildSessionMeta` produces, with the per-field consumption counts
+      re-measured rather than copied. Two shapes are called out as the ones that break naive
+      consumers: a planning draft carries `isPlanning: true` and NO `startDate`/`endDate`, and a
+      session opened from history has `sourceSession: null` unless it was a plan. Also records why
+      `buildSessionMeta`'s 2h `endDate` clamp is load-bearing — `recoverActiveSession()` discards a
+      cache more than 2h past its scheduled end, so without it a same-day session whose window had
+      closed would be thrown away the moment it was recovered.
 
 ## 21. `Page.goto` stalls against the local dev server
 

@@ -456,9 +456,81 @@ The database holds the **only** copy of a trainer's records — there is no serv
 
 ---
 
+## 7. `activeSession` — the transient counterpart
+
+Everything above describes the **persisted** model. `activeSession` is its transient twin: the live
+clipboard a trainer has open on the gym floor. It is never a record — it is cached to
+`librept_active_session` so a reload or a dropped connection does not lose the session in progress,
+and it is *converted* into records only when the session finishes. It is documented here because it
+has no other home, and because two independent components rely on its shape implicitly.
+
+It is constructed in exactly two places, both in
+[activeSessionController.js](../src/controllers/activeSessionController.js) — `startWorkoutSession`
+(a session launched from the dashboard) and the `openSessionFromHistory` path (a finished session
+re-opened, rebuilt from its stored program snapshot).
+
+```
+activeSession = {
+  id, started, startTime, duration,   // lifecycle — `started` gates the timer and the "live" state
+  participants: [clientId],           // iterated, so never undefined
+  activeClientId,                     // whose plan is on screen
+  clientRoutines: { [clientId]: clientState },
+  feedback: [],                       // quick signals and modal submissions land here
+  sourceSession,                      // the scheduled session this came from, or null
+}
+
+clientState = {
+  routineId, routineName, clientName, activeExerciseIndex,
+  deckAllCollapsed,                   // true on a fresh open: no card is in focus until one is tapped
+  exercises: [item...],               // typed items — exercise | rest — in program order (§3)
+  logs: { [exerciseId]: [set...] },
+}
+```
+
+The canonical, executable copy of this contract is
+[`active_session_fixture()`](../tests/medium/_harness.py), which the medium-tier clipboard tests
+inject through the controller's own `setActiveSession()`. Change the shape here and that fixture is
+what fails.
+
+### The seam: `sourceSession`
+
+`sourceSession` is the contract between the **sessions dashboard** and the **clipboard**, and it is
+the one field neither side owns. It is built by `buildSessionMeta()`
+([utils.js](../src/modules/common/utils.js)) from one or more scheduled sessions **sharing a day** —
+a group session is several bookings collapsed into one clipboard, so the fields are aggregates, not
+copies:
+
+| Field | Aggregation | Consumed at |
+| :--- | :--- | :--- |
+| `isPlanning` | set by the caller, not by `buildSessionMeta` | 10 sites |
+| `endDate` | latest end across the day's sessions, pushed 2h out if already past | 8 |
+| `startDate` | earliest start | 4 |
+| `titles` | de-duplicated list — a merged clipboard has several | 3 |
+| `timeLabel` | `"HH:MM - HH:MM"` spanning earliest to latest | 2 |
+| `location` | distinct locations joined with `" / "` | 2 |
+| `day` | the day column it was grouped under | 1 |
+
+Two shapes do **not** come from `buildSessionMeta` and are the ones that break naive consumers:
+
+- **A planning draft** synthesises its own `sourceSession` — `buildPlanningSessionMeta()`
+  ([editSessionControl.js](../src/modules/session/editSessionControl.js)), or the inline literal in
+  `openSessionFromHistory` for a re-opened plan — with `isPlanning: true` and **no `startDate` or
+  `endDate` at all** (it carries a plain `date`, or a `timeLabel` reading "Date Unknown"). A
+  programme being authored is not a booking, so anything reading the two dates must tolerate their
+  absence.
+- **A session opened from history** has `sourceSession: null` unless it was a plan. Every read is
+  therefore optional-chained; a non-null `sourceSession` is not something the clipboard may assume.
+
+The `endDate` clamp is load-bearing rather than cosmetic: `recoverActiveSession()` discards a cached
+session more than two hours past its scheduled end, so a same-day session whose window has already
+closed would otherwise be thrown away the moment it was recovered.
+
+---
+
 ## Related
 
 - [TODO §18](../TODO.md) — design rationale, decisions and open questions
+- [TODO §20](../TODO.md) — the test tiers this document's §7 was written for
 - [indexedDb.js](../src/data/indexedDb.js) — the adapter implementing §2
 - [recordSchemas.js](../src/data/recordSchemas.js) / [recordProjections.js](../src/data/recordProjections.js) — §4's declared shapes and projections
 - [recordId.js](../src/modules/common/recordId.js) — UUIDv7 identity, doubling as `lineageId` (TODO §18.2)
