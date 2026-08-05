@@ -1009,12 +1009,17 @@ there by a missing contract rather than by a genuine need to boot the whole app.
       Two dep fakes must return real values, not `noop`: `sessionFocusPath` builds a focus URL and
       calls string methods on `urlFor`'s result, so `() => undefined` fails deep inside rendering
       with an error naming neither.
-- [ ] **Migrate the clipboard's RENDER and INTERACTION tests to `tests/medium/`.** Estimated 30-40 of
-      the 68. The split is not by file: a test asserting what a card shows, or how it responds to a
-      tap, is a render fact; a test asserting start → log → finish → history is lifecycle and stays.
-      `test_quick_signal_toggle`'s header states it deliberately drives the real
-      `openSessionFromHistory` path "rather than a hand-built shortcut" — treat that as binding for
-      its lifecycle assertions, not necessarily for its render ones.
+- [x] **Migrate the clipboard's RENDER and INTERACTION tests to `tests/medium/`.** 26 moved (e2e
+      137 → 112 tests, 43 → 35 files; medium 42 → 68), in five files: edit-mode chrome, the inline
+      editor, the catalog picker, the quick-signal toggle rules, and rest focus. Two things the
+      first attempt got wrong and the next reader should not repeat: the stub had to boot through a
+      new `bootActiveSession` step in [appBoot.js](src/appBoot.js) (the deck's own listeners live in
+      `setupActiveSession`, which nothing but `app.js` called, so an injected session rendered but
+      no button did anything); and the taxonomy picker is route-backed, so `navigateToPath` has to
+      reproduce the router's route→dialog pairing or the 📖 button navigates into nothing.
+      `test_quick_signal_toggle`'s "rather than a hand-built shortcut" was honoured, not overridden:
+      the fixture IS the written-down contract, so it is no longer hand-built. The file kept only
+      its two modal tests and is renamed `test_feedback_modal_exclusivity.py` after what it covers.
 - [ ] **Document the session ↔ clipboard seam in [docs/DATA_MODEL.md](docs/DATA_MODEL.md).** That
       document covers the PERSISTED model; `activeSession` is its transient counterpart and has no
       home. The seam itself is `activeSession.sourceSession`, built by `buildSessionMeta`

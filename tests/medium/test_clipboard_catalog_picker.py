@@ -1,23 +1,45 @@
-# tests/e2e/test_editor_row_catalog_swap.py
-# In the inline plan editor every exercise row carries a 📖 catalog button next to its name combobox:
-# the combobox only serves a PT who already knows the movement's name, so the button opens the
-# filtered taxonomy picker for THAT row and swaps its movement in place (same slot id, same sets and
-# logs), then returns to the editor with the row called out. Friction rules under test: the picker
-# opens pre-filtered on the row's muscle group with the caret already in the search box, half-typed
-# text carries across as the query, and Enter takes the top match (no scroll, no aimed tap).
+# tests/medium/test_clipboard_catalog_picker.py
+# The taxonomy picker as reached from the inline plan editor, in both of its modes: the editor's own
+# "Add from catalog" button (appends a movement) and a ROW's 📖 button (swaps that row's movement in
+# place, keeping the slot id, its authored sets and its logs). The combobox on a row only serves a
+# PT who already knows the movement's name; the picker is for everyone else, so its friction rules
+# are the subject here — it opens pre-filtered on the row's muscle group with the caret already in
+# the search box, half-typed text carries across as the query, and Enter takes the top match.
+#
+# Migrated from tests/e2e/test_editor_row_catalog_swap.py and tests/e2e/test_catalog_picker_in_edit.py.
+# The picker dialog is rendered by the same bootActiveSession step production uses, and it lists
+# state.exercises — the real seeded taxonomy, so a count or a category asserted here stays true to
+# what the app ships.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
+
+from tests.medium._harness import (
+    active_session_fixture,
+    clipboard_stub,
+    exercise_item,
+    load_with_stub,
+)
+
+# Real entries from the seeded taxonomy (src/data/exercises.js): the row's movement must resolve to
+# a catalog category, or the picker has no muscle group to pre-filter on and nothing to exclude.
+SEEDED_MOVEMENT = "Barbell Bench Press"
 
 
 def _open_editor(page, local_server):
-    page.goto(local_server)
-    card = ".session-card.session-live, .session-card:has-text('Group Strength & Conditioning')"
-    page.wait_for_selector(card)
-    page.locator(card).first.click()
+    load_with_stub(
+        page,
+        local_server,
+        clipboard_stub(
+            active_session_fixture(
+                exercises=[
+                    exercise_item("exA", SEEDED_MOVEMENT),
+                    exercise_item("exB", "Bent-Over Barbell Row"),
+                ]
+            )
+        ),
+    )
     page.wait_for_selector("#active-session-overlay:not(.hidden)")
-    page.wait_for_timeout(300)
     page.click("#btn-edit-plan")
     page.wait_for_selector(".clipboard-editor")
-    page.wait_for_timeout(200)
 
 
 def _first_row_state(page):
@@ -47,7 +69,6 @@ def test_row_catalog_swaps_the_movement_in_place(page, local_server):
 
     page.locator(".editor-row .editor-row-catalog").first.click()
     page.wait_for_selector("#dialog-catalog-picker[open]")
-    page.wait_for_timeout(200)
 
     # The caret starts in the search box, so a named target is type-then-Enter.
     assert page.evaluate(
@@ -59,9 +80,8 @@ def test_row_catalog_swaps_the_movement_in_place(page, local_server):
     chosen = page.locator("#catalog-picker-mount .picker-item").first
     chosen_name = chosen.locator(".picker-item-name").inner_text().strip()
     chosen.click()
-    page.wait_for_timeout(300)
+    page.wait_for_selector("#dialog-catalog-picker[open]", state="detached")
 
-    assert page.locator("#dialog-catalog-picker[open]").count() == 0
     after = _first_row_state(page)
     assert after["name"] == chosen_name, "the row now holds the chosen movement"
     assert after["key"] == before["key"], "swapped in place — the row does not move"
@@ -94,7 +114,6 @@ def test_search_narrows_and_enter_takes_the_top_match(page, local_server):
 
     page.locator(".editor-row .editor-row-catalog").first.click()
     page.wait_for_selector("#dialog-catalog-picker[open]")
-    page.wait_for_timeout(200)
 
     # Search across the whole taxonomy, not just the pre-selected muscle group.
     page.click(
@@ -102,18 +121,43 @@ def test_search_narrows_and_enter_takes_the_top_match(page, local_server):
     )
     search = page.locator("#catalog-picker-mount .picker-search")
     search.fill("press")
-    page.wait_for_timeout(150)
-    matches = page.locator("#catalog-picker-mount .picker-item")
-    assert matches.count() > 0
-    top = matches.first.locator(".picker-item-name").inner_text().strip()
-    assert all(
-        "press" in name.lower()
-        for name in matches.locator(".picker-item-name").all_inner_texts()
-    ), "the search filters the list by name"
+    page.wait_for_function(
+        """() => {
+             const names = [...document.querySelectorAll('#catalog-picker-mount .picker-item-name')];
+             return names.length > 0 && names.every((n) => n.innerText.toLowerCase().includes('press'));
+           }"""
+    )
+    top = (
+        page.locator("#catalog-picker-mount .picker-item")
+        .first.locator(".picker-item-name")
+        .inner_text()
+        .strip()
+    )
 
     search.press("Enter")
-    page.wait_for_timeout(300)
-    assert page.locator("#dialog-catalog-picker[open]").count() == 0
+    page.wait_for_selector("#dialog-catalog-picker[open]", state="detached")
     after = _first_row_state(page)
     assert after["name"] == top
     assert after["name"] != before["name"]
+
+
+def test_editor_catalog_button_adds_a_movement_and_returns(page, local_server):
+    """The editor-level button APPENDS rather than swapping — same picker, different landing."""
+    _open_editor(page, local_server)
+    before = page.locator(".editor-row").count()
+
+    page.click(".editor-catalog-btn")
+    page.wait_for_selector("#dialog-catalog-picker[open]")
+    assert page.locator("#catalog-picker-mount .picker-item").count() > 0, (
+        "the catalog picker lists movements"
+    )
+
+    page.locator("#catalog-picker-mount .picker-item").first.click()
+    page.wait_for_selector("#dialog-catalog-picker[open]", state="detached")
+
+    assert page.locator(".clipboard-editor").is_visible(), (
+        "and returns to the plan editor"
+    )
+    assert page.locator(".editor-row").count() == before + 1, (
+        "the chosen movement is injected into the plan"
+    )

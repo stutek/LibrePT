@@ -1,9 +1,10 @@
 # tests/e2e/test_rest_card_focus.py
-# Rests are first-class, focusable plan items (TODO §8.6): a collapsed standalone rest card's only
-# allowed action is bringing itself into focus, exactly like a collapsed exercise or circuit card —
-# starting its timer is only reachable from the focused state, via RestDeckCard's Start action.
-# Also covers the routing/focus-model changes that made this possible: a rest is deep-linkable
-# (focusType=rest), and completeCircuitRound lands focus on a following rest instead of skipping it.
+# What remains of the first-class-rest coverage (TODO §8.6) that genuinely needs the whole app: a
+# focused rest is deep-linkable (focusType=rest) and that focus survives a reload. Writing the URL
+# needs the real router, and restoring from it needs the real boot to read it back — neither exists
+# in tests/medium/. The focus MODEL itself (tapping a collapsed rest focuses without starting its
+# timer, Start on the focused card starts it, completeCircuitRound lands on a following rest) moved
+# to tests/medium/test_clipboard_rest_focus.py.
 #
 # Note on style: each test inlines its own literal `page.evaluate` body rather than sharing a helper
 # that builds one from a string. The app ships `script-src 'self'` with no `unsafe-eval`, so a
@@ -61,65 +62,6 @@ def _plan():
     ]
 
 
-def test_tapping_a_collapsed_rest_focuses_it_without_starting_the_timer(
-    page, local_server
-):
-    _open_session_with_items(page, local_server, _plan())
-
-    # The rest card starts collapsed (focus is on exercise A, index 0).
-    result = page.evaluate(
-        """() => {
-            const card = document.querySelector('.exercise-deck-card.rest-card');
-            const wasCollapsed = card && !card.classList.contains('in-focus');
-            card?.click();
-            return { found: !!card, wasCollapsed };
-        }"""
-    )
-    assert result["found"], "no standalone rest card rendered"
-    assert result["wasCollapsed"], "rest card should not start in focus"
-    page.wait_for_timeout(300)
-
-    # Focus moved to the rest card; no timer was started by that tap.
-    after = page.evaluate(
-        """() => {
-            const card = document.querySelector('.exercise-deck-card.rest-card');
-            return {
-                inFocus: card?.classList.contains('in-focus'),
-                timerCards: document.querySelectorAll('#clipboard-timer-stack .timer-card').length,
-            };
-        }"""
-    )
-    assert after["inFocus"] is True, (
-        "tapping the collapsed rest card should bring it into focus"
-    )
-    assert after["timerCards"] == 0, "focusing a rest must not start its timer"
-
-
-def test_starting_the_now_focused_rest_starts_its_timer(page, local_server):
-    client_id = _open_session_with_items(page, local_server, _plan())
-
-    page.evaluate(
-        "() => document.querySelector('.exercise-deck-card.rest-card')?.click()"
-    )
-    page.wait_for_timeout(300)
-
-    page.evaluate(
-        "() => document.querySelector('.exercise-deck-card.rest-card.in-focus .rest-card-start')?.click()"
-    )
-    page.wait_for_timeout(300)
-
-    timer = page.evaluate(
-        """(clientId) => {
-            const card = document.querySelector(`#clipboard-timer-stack .timer-card[data-client="${clientId}"]`);
-            return card ? card.textContent : null;
-        }""",
-        client_id,
-    )
-    assert timer is not None, (
-        "Start action on the focused rest card must start its timer"
-    )
-
-
 def test_rest_focus_is_deep_linkable_and_survives_reload(page, local_server):
     _open_session_with_items(page, local_server, _plan())
 
@@ -140,45 +82,4 @@ def test_rest_focus_is_deep_linkable_and_survives_reload(page, local_server):
     )
     assert restored is True, (
         "reloading a rest-focused URL must restore focus to that rest"
-    )
-
-
-def test_completing_a_circuit_round_lands_on_a_following_rest(page, local_server):
-    """completeCircuitRound must land focus on whatever comes right after the circuit — a rest
-    included — rather than skipping past it (TODO §8.6: the skip was one of the removed exceptions)."""
-    _open_session_with_items(
-        page,
-        local_server,
-        [
-            {
-                "id": "exC",
-                "type": "exercise",
-                "name": "Circuit Exercise",
-                "circuitId": "c1",
-                "circuitTitle": "Test Circuit",
-                "circuitSeries": 1,
-                "sets": [{"reps": 10, "weight": 20, "completed": False}],
-            },
-            {"id": "restAfterCircuit", "type": "rest", "rest": 60, "circuitId": None},
-        ],
-        log_id="circuit-round-log",
-    )
-
-    page.evaluate(
-        """async () => {
-            const url = new URL('controllers/activeSessionController.js', document.baseURI).href;
-            const m = await import(url);
-            m.completeCircuitRound('c1');
-        }"""
-    )
-    page.wait_for_timeout(300)
-
-    focused = page.evaluate(
-        """() => {
-            const card = document.querySelector('.exercise-deck-card.rest-card');
-            return card?.classList.contains('in-focus');
-        }"""
-    )
-    assert focused is True, (
-        "focus should land on the rest right after the finished circuit"
     )

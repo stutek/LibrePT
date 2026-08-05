@@ -17,6 +17,8 @@
 #      the service worker, resizes the viewport, and starts Drive-sync polling, none of which a
 #      component test wants running.
 
+import json
+
 
 def load_with_stub(page, local_server, stub_js_body):
     """Navigate to `local_server` with app.js replaced by `stub_js_body` (literal ES module
@@ -222,11 +224,9 @@ renderSessions({
 # Keeping this in the harness rather than in one test means a change to the real shape breaks one
 # place, and the next person reading it learns the contract instead of re-deriving it.
 def active_session_fixture(
-    client_id="c1", client_name="Jane Doe", exercises=None, **overrides
+    client_id="c1a9f0e2", client_name="Jane Doe", exercises=None, **overrides
 ):
     """A valid activeSession as JS source, for injection via setActiveSession()."""
-    import json
-
     items = (
         exercises
         if exercises is not None
@@ -268,28 +268,53 @@ def active_session_fixture(
     return json.dumps(session).replace('"startTime": null', '"startTime": Date.now()')
 
 
+def exercise_item(item_id, name, circuit_id=None, **overrides):
+    """One `type: 'exercise'` plan item in the shape a session rebuilt from history carries —
+    a `sets` array rather than the setsTargetCount/repsTarget authoring fields, because that is what
+    the deck and the inline editor actually read once a session is live."""
+    item = {
+        "id": item_id,
+        "type": "exercise",
+        "name": name,
+        "sets": [{"reps": 10, "weight": 20, "completed": False}],
+        "circuitId": circuit_id,
+    }
+    item.update(overrides)
+    return item
+
+
+def rest_item(item_id, seconds=45, circuit_id=None):
+    """One first-class rest — a plan item in its own right, not a property of the exercise before
+    it (TODO §8.6), which is why it is focusable and reorderable like any other row."""
+    return {"id": item_id, "type": "rest", "rest": seconds, "circuitId": circuit_id}
+
+
 def clipboard_stub(session_js, extra_imports="", extra_body=""):
     """Mount the live clipboard with an INJECTED session, no router and no session lifecycle.
 
-    `setActiveSession` is the controller's own public setter — the same one the real flow assigns
-    through — so this is the production render path fed a known session, not a parallel one. Route
-    helpers return real strings rather than noop: sessionFocusPath builds a focus URL and calls
-    string methods on what urlFor returns, so a `() => undefined` fake fails deep inside rendering
-    with an error that names neither.
+    `bootActiveSession` is the exact step app.js's `setupActiveSession()` calls, so the overlay
+    shell, the deck, the inline plan editor and every listener the ⋯ session menu hangs off are all
+    wired the way production wires them — an interaction test taps the same button the trainer does.
+    `setActiveSession` is likewise the controller's own public setter, the one the real flow assigns
+    through, so this is the production render path fed a known session, not a parallel one.
+
+    Route helpers return real strings rather than noop: sessionFocusPath builds a focus URL and
+    calls string methods on what urlFor returns, so a `() => undefined` fake fails deep inside
+    rendering with an error that names neither.
 
     Use for tests asserting what the clipboard RENDERS or how it responds to a tap. Tests about the
     session LIFECYCLE — start, finish, recover from cache, persist to history — belong in
-    tests/e2e/, where that lifecycle is the subject rather than the setup.
+    tests/e2e/, where that lifecycle is the subject rather than the setup, as do the ones asserting
+    a focus or edit-mode URL survives a reload (there is no router here to write one).
     """
     return view_stub(
         imports="""
-import { renderActiveSessionOverlayShell } from './modules/clipboard/activeSessionOverlayView.js';
+import { bootActiveSession } from './appBoot.js';
 import {
-  initActiveSessionController,
+  openCatalogPicker,
   setActiveSession,
   renderActiveGroupBoard,
 } from './controllers/activeSessionController.js';
-import { escapeHTML } from './modules/common/utils.js';
 import { DEFAULT_CLIENTS, DEFAULT_EXERCISES, DEFAULT_ROUTINES } from './data/index.js';
 """
         + extra_imports,
@@ -305,12 +330,23 @@ const state = {
   planUpdates: [],
 };
 
-renderActiveSessionOverlayShell();
-initActiveSessionController({
+// The taxonomy picker is route-backed, and the editor only ever ASKS for its URL — the router's
+// route.enter() is what actually opens the dialog (routeTable.js's session.catalog / .slot). With
+// no router mounted, navigateToPath must reproduce that one pairing itself, or the editor's 📖
+// button navigates into nothing. Same shape as HEADER_STUB's fake, keyed on what urlFor() named.
+function navigateToPath(path) {
+  const segments = path.split('/').filter(Boolean);
+  if (segments[0] === 'session.catalog.slot') {
+    openCatalogPicker({ slotId: segments[segments.length - 1] });
+  } else if (segments[0] === 'session.catalog') {
+    openCatalogPicker({});
+  }
+}
+
+bootActiveSession({
   state,
   t,
-  escapeHTML,
-  navigateToPath: noop,
+  navigateToPath,
   toRoute: (path) => path || '/',
   replaceRoute: noop,
   resolveRoute: () => ({ name: 'session' }),
@@ -324,8 +360,6 @@ initActiveSessionController({
   renderIdleSessionBar: noop,
   renderSessions: noop,
   saveToLocalStorage: noop,
-  openFeedbackModal: noop,
-  syncSessionFocusUrl: noop,
 });
 
 setActiveSession(__SESSION__);

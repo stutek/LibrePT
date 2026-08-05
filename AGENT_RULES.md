@@ -84,10 +84,10 @@ Every response and tool action must drive measurable, continuous progress toward
      | Stage | Typical | Investigate past |
      | :--- | :--- | :--- |
      | 1 — lint / unit / JS unit / audits (parallel) | ~13s (pip-audit dominates) | 60s |
-     | 2 — medium component tests | ~20s | 90s |
-     | 3 — e2e browser suite | ~1m55s | 4min |
+     | 2 — medium component tests | ~85s | 3min |
+     | 3 — e2e browser suite | ~1m40s | 4min |
      | 4 — OWASP ZAP baseline | ~35s (~75s on a cold `.venv`) | 3min (hard-killed at 20min) |
-     | **whole `build check`** | **~3m15s** | **6min** |
+     | **whole `build check`** | **~3m40s** | **6min** |
 
      A run well outside these is usually the ENVIRONMENT, not the change under test. The two that
      have actually bitten: a dev server left running across days so it no longer matches its own

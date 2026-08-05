@@ -10,7 +10,6 @@ import {
   focusIndexFromRef,
   getActiveExercise as getActiveExerciseController,
   getActiveSession,
-  initActiveSessionController,
   openCatalogPicker,
   openSessionFromHistory,
   recoverActiveSession as recoverActiveSessionController,
@@ -19,7 +18,6 @@ import {
   sessionFocusPath,
   setActiveSession,
   setClipboardEditMode,
-  setupActiveSession as setupActiveSessionController,
   startSessionTimer,
   startWorkoutSession as startWorkoutSessionController,
   syncSessionFocusUrl,
@@ -544,7 +542,7 @@ function startWorkoutSession(clientRoutines, sessionMeta = null, options = {}) {
 }
 
 function setupActiveSession() {
-  initActiveSessionController({
+  appBoot.bootActiveSession({
     state: getState(),
     t,
     navigateToPath,
@@ -560,15 +558,6 @@ function setupActiveSession() {
     renderIdleSessionBar,
     renderSessions,
     saveToLocalStorage: saveState,
-  });
-  setupActiveSessionController({
-    state: getState(),
-    t,
-    navigateToPath,
-    focusSessionsColumn,
-    launchClipboardDirectly,
-    newRecordId,
-    renderIdleSessionBar,
   });
 }
 

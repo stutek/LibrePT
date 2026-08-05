@@ -10,6 +10,10 @@
 // boot on DOMContentLoaded the moment it's imported. Extracting each step here, verbatim, means a
 // test calls the exact function production calls, not a hand-duplicated stand-in that could drift.
 
+import {
+  initActiveSessionController,
+  setupActiveSession,
+} from "./controllers/activeSessionController.js";
 import { initAppLifecycle } from "./controllers/appLifecycleController.js";
 import { setupViewDismiss } from "./controllers/gestureController.js";
 import { initRouter } from "./controllers/routerController.js";
@@ -54,6 +58,15 @@ export function bootWorkoutSetup(deps) {
   renderWorkoutSetupView();
   initWorkoutSetup(deps);
   setupWorkoutSetup();
+}
+
+// The live clipboard: the overlay shell plus every listener the deck, the inline plan editor and
+// the ⋯ session menu hang off. `setupActiveSession`'s deps are a strict subset of the controller's
+// init deps, so one object serves both — app.js used to pass two hand-maintained lists that had to
+// be kept in agreement.
+export function bootActiveSession(deps) {
+  initActiveSessionController(deps);
+  setupActiveSession(deps);
 }
 
 export function bootFeedbackModal(deps) {

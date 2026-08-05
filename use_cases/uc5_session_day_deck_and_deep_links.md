@@ -214,8 +214,8 @@ not-found view (`#view-error`) *inside* the content area:
 | Single-vertical-column, chronologically-ordered invariant at every viewport | [../tests/e2e/test_sessions_dashboard.py](../tests/e2e/test_sessions_dashboard.py) · `test_continuous_vertical_timeline_at_every_viewport` |
 | Deep link to the in-focus clipboard card; stale card id fallback | [../tests/e2e/test_session_deeplink.py](../tests/e2e/test_session_deeplink.py) |
 | Edit mode deep-links to `…/edit`, survives reload, keeps typed-but-uncommitted edits; direct `/edit` link reopens the editor | [../tests/e2e/test_edit_mode_deeplink_reload.py](../tests/e2e/test_edit_mode_deeplink_reload.py) |
-| Edit mode hides the member tabs + live timer and surfaces the client's goals + notes | [../tests/e2e/test_edit_mode_client_focus.py](../tests/e2e/test_edit_mode_client_focus.py) |
-| A just-inserted or just-swapped plan item is called out in the editor (highlight + badge + caret), one-shot | [../tests/e2e/test_editor_new_item_callout.py](../tests/e2e/test_editor_new_item_callout.py) |
+| Edit mode hides the member tabs + live timer and surfaces the client's goals + notes | [../tests/medium/test_clipboard_edit_mode.py](../tests/medium/test_clipboard_edit_mode.py) |
+| A just-inserted or just-swapped plan item is called out in the editor (highlight + badge + caret), one-shot | [../tests/medium/test_clipboard_editor.py](../tests/medium/test_clipboard_editor.py) |
 | Edit mode and planning programmes hide *Complete Workout Session*; it returns on exit from edit mode | [../tests/e2e/test_edit_mode_hides_complete.py](../tests/e2e/test_edit_mode_hides_complete.py) |
 | Not-found view for unknown route / deleted client; header stays; URL kept | [../tests/e2e/test_error_view.py](../tests/e2e/test_error_view.py) |
 | Launch the clipboard from a session card (with language switch + calendar sync) | [../tests/e2e/test_clipboard.py](../tests/e2e/test_clipboard.py) · `test_clipboard_launch_flow` |
