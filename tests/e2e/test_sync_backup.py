@@ -1,6 +1,10 @@
 # tests/e2e/test_sync_backup.py
-# End-to-end coverage of the header's Sync & Backup control: the real (TODO §3.9 — no longer a mock)
-# GitHub-style ahead/behind change badge (renderSyncBadge) and the backup/restore dialog it opens.
+# The header's ahead/behind change badge (renderSyncBadge, TODO §3.9 — no longer a mock) proved
+# against REAL local writes. The badge's never-synced state and the backup dialog's open/close are
+# pure header surface and moved to tests/medium/test_sync_badge.py; what stays here needs the real
+# store, because the claim under test is that `onStateSaved` at the stateStore seam catches every
+# writer — including clientFormsController, which saves directly rather than through app.js's
+# wrapper. A mounted component with a fake state could not assert that.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
 # Seeds a Drive-sync ancestor directly via stateStore.js/driveSyncService.js, bypassing the OAuth
@@ -18,25 +22,6 @@ async () => {
     await driveSyncService.primeAheadCache();
 }
 """
-
-
-def test_sync_badge_shows_real_zero_ahead_and_unknown_behind_before_any_sync(
-    page, local_server
-):
-    page.goto(local_server)
-    page.wait_for_selector("#view-clients.active")
-
-    badge = page.locator("#sync-badge")
-    assert badge.is_visible()
-    assert "hidden" not in (badge.get_attribute("class") or "")
-
-    # This deployment ships with no Drive OAuth client id configured (TODO §3.3) and no sync has
-    # ever run, so the real ahead count is 0 (nothing yet to diff against) and behind is genuinely
-    # unknown ("?") rather than a fabricated number.
-    assert page.locator("#sync-badge .sync-zero").inner_text().strip() == "0"
-    aria = badge.get_attribute("aria-label")
-    assert "0 local changes to push" in aria
-    assert "cloud status unknown" in aria
 
 
 def test_ahead_count_reflects_real_local_edits_since_the_synced_ancestor(
@@ -78,20 +63,3 @@ def test_sync_badge_caps_over_nine_with_second_arrow(page, local_server):
     assert "local changes to push" in (
         page.locator("#sync-badge").get_attribute("aria-label") or ""
     )
-
-
-def test_backup_modal_opens_and_closes(page, local_server):
-    page.goto(local_server)
-    page.wait_for_selector("#view-clients.active")
-
-    dialog = page.locator("#dialog-backup")
-    assert dialog.get_attribute("open") is None  # closed on load
-
-    page.locator("#backup-btn").click()
-    assert dialog.get_attribute("open") is not None
-    assert dialog.is_visible()
-    # The export/restore affordances are present in the opened modal.
-    assert page.locator("#dialog-backup #btn-export-db").is_visible()
-
-    page.locator("#dialog-backup .modal-close-btn").click()
-    assert dialog.get_attribute("open") is None
