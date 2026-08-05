@@ -13,6 +13,10 @@
 #
 # The companion check — that DERIVED initials cannot emit markup either — needs no DOM at all and
 # lives in tests/unit_js/modules/common/utils.test.mjs.
+#
+# tests/e2e/test_xss_hardening.py held both of these and was left behind by that migration rather
+# than deleted; it ran on for a while asserting, verbatim, what this file and the unit_js one
+# already assert. Deleted 2026-08-05. A migration is not finished until the source file is gone.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
 import pytest

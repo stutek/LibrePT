@@ -21,7 +21,7 @@ localises the fault better, and a test placed too low simply cannot express what
 | [tests/unit/](unit/) (17 files + `test_app.py`, 92 tests) | pytest, stage 1 | nothing — static analysis of the repo | It inspects files/structure: layout rules, i18n parity, doc links, generated catalogs. |
 | [tests/unit_js/](unit_js/) (21 files, 81 tests) | `node:test`, stage 1 | one ES module, no DOM | It pins **pure logic** — schema/migration transforms, id generation, merge algorithms, projections. Mirrors the `src/` subpath it covers. |
 | [tests/medium/](medium/) (20 files, 72 tests) | Playwright, stage 2 | one component against real `index.html` markup | It needs the **DOM/CSS** but not navigation, persistence or a real app boot. Four shapes, all in [_harness.py](medium/_harness.py): `HEADER_STUB` (header + its route-backed dialogs), `SESSIONS_STUB` (the dashboard timeline), `clipboard_stub()` (the live session, fed an injected `activeSession`), and `view_stub()` to build one for any other view — shell markup → activate → render. |
-| [tests/e2e/](e2e/) (34 files, 109 tests) | Playwright, stage 3 | the whole app | It needs the router, IndexedDB, the service worker, reload/deep-link behaviour, or a multi-step flow across views. |
+| [tests/e2e/](e2e/) (33 files, 107 tests) | Playwright, stage 3 | the whole app | It needs the router, IndexedDB, the service worker, reload/deep-link behaviour, or a multi-step flow across views. |
 
 **Why the split is worth maintaining:** the pure-logic tests used to run in a browser purely because
 the app's CSP forbids `new Function` — they now fail in ~4s inside stage 1 instead of at the
@@ -43,6 +43,13 @@ was a strict prefix of `test_gym_floor_flow.py` and was deleted in 2026-08-05's 
 `test_browser.py`'s sessions-dashboard tests had been earlier. Neither was in the wrong tier — both
 were simply already covered. When reviewing a file, check what ELSE asserts it before concluding it
 has to stay.
+
+**And check that finished migrations actually deleted their source.** `tests/e2e/test_xss_hardening.py`
+survived its own migration: `tests/medium/test_xss_hardening.py`'s header already described moving
+the avatar sink down and the initials check into `tests/unit_js/`, both of which had genuinely
+happened — the e2e file simply was not removed, and went on asserting verbatim what two other tiers
+already asserted. A migration is not finished until the source file is gone; grep both tiers for the
+same test name (`ls tests/*/test_<name>.py`) before assuming a duplicate pair is intentional.
 
 **What is left in `tests/e2e/` is there on merit — and that claim was audited, not assumed.** An
 earlier pass declared the pool exhausted after examining only the files a crude grep had flagged;
