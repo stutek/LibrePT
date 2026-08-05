@@ -42,9 +42,49 @@ def _timed_task(name, fn):
         print(f"    ⏱ {name}: {elapsed:.1f}s ✓")
 
 
+# Records which requirements.txt the venv was last installed from, so an unchanged one is not
+# reinstalled. Lives inside .venv/ so deleting the venv correctly forgets it.
+REQUIREMENTS_STAMP = os.path.join(".venv", ".requirements-sha256")
+
+
+def _requirements_changed():
+    """True when requirements.txt differs from what the venv was last installed from."""
+    if not os.path.exists("requirements.txt"):
+        return False
+    current = _file_sha256("requirements.txt")
+    try:
+        with open(REQUIREMENTS_STAMP, encoding="utf-8") as handle:
+            return handle.read().strip() != current
+    except OSError:
+        return True
+
+
+def _install_requirements(pip_path):
+    """Install pinned dependencies, then stamp what was installed.
+
+    `-q` because the default output is ~47 lines of "Requirement already satisfied" on every run —
+    85% of a green pipeline's entire output, which is how a real failure ends up needing `grep` to
+    find. Quiet still prints what it actually does; pip is only silent when there is nothing to say.
+    """
+    subprocess.run(
+        [pip_path, "install", "-q", "--upgrade", "pip", "setuptools>=83.0.0"],
+        check=True,
+    )
+    subprocess.run([pip_path, "install", "-q", "-r", "requirements.txt"], check=True)
+    with open(REQUIREMENTS_STAMP, "w", encoding="utf-8") as handle:
+        handle.write(_file_sha256("requirements.txt"))
+
+
 def check_environment():
-    """Verifies that the virtual environment, pytest, and playwright are set up."""
-    print(">>> Step 1: Checking Environment Setup...")
+    """Verifies that the virtual environment, pytest, and playwright are set up.
+
+    Reinstalls ONLY when requirements.txt has actually changed. It used to run `pip install` on
+    every invocation, which cost ~3s and 47 lines of noise per run for work that was almost always a
+    no-op — and, because `--upgrade pip` reaches the network, gave the gate a recurring failure mode
+    that had nothing to do with the change under test (one such failure, after the machine slept
+    mid-run, read as a dependency-audit finding until the traceback was checked).
+    """
+    print(">>> Environment")
 
     # Determine pip and python paths based on OS
     if os.name == "nt":
@@ -59,20 +99,14 @@ def check_environment():
             "  Virtual environment '.venv' not found. Creating and installing dependencies..."
         )
         subprocess.run([sys.executable, "-m", "venv", ".venv"], check=True)
-        subprocess.run(
-            [pip_path, "install", "--upgrade", "pip", "setuptools>=83.0.0"],
-            check=True,
-        )
-        subprocess.run([pip_path, "install", "-r", "requirements.txt"], check=True)
+        _install_requirements(pip_path)
         subprocess.run([playwright_path, "install", "chromium"], check=True)
+    elif _requirements_changed():
+        print("  requirements.txt changed — installing dependencies...")
+        _install_requirements(pip_path)
+        print("  ✓ Dependencies updated.")
     else:
-        print("  ✓ Virtual environment '.venv' verified.")
-        # Ensure dependencies from requirements.txt are up to date
-        subprocess.run(
-            [pip_path, "install", "--upgrade", "pip", "setuptools>=83.0.0"],
-            check=True,
-        )
-        subprocess.run([pip_path, "install", "-r", "requirements.txt"], check=True)
+        print("  ✓ Virtual environment '.venv' verified (dependencies unchanged).")
 
 
 def _linux_platform_suffix(arch):
@@ -393,8 +427,14 @@ def run_python_lint():
         if "reformatted" in line:
             print(f"    ⓘ {line.strip()}")
 
-    lint_res = subprocess.run([ruff_path, "check", *PYTHON_LINT_TARGETS])
+    # Captured, not streamed: Stage 1 runs these tasks in parallel threads, so an uncaptured
+    # subprocess writes straight to the terminal — its output lands unattributed, ahead of the
+    # stage header, with nothing tying it to the task that produced it. Surfaced only on failure.
+    lint_res = subprocess.run(
+        [ruff_path, "check", *PYTHON_LINT_TARGETS], capture_output=True, text=True
+    )
     if lint_res.returncode != 0 or fmt_res.returncode != 0:
+        print(lint_res.stdout.rstrip() or lint_res.stderr.rstrip())
         print("  ✗ Python static analysis failed.")
         sys.exit(1)
     print("  ✓ Python static analysis (Ruff) passed.")
@@ -499,8 +539,11 @@ def run_frontend_lint():
             print(f"        {path}")
 
     # The verdict: a clean tree after the writes, or a genuine finding the formatter cannot fix.
-    biome_res = subprocess.run([biome_path, "check", *FRONTEND_LINT_TARGETS])
+    biome_res = subprocess.run(
+        [biome_path, "check", *FRONTEND_LINT_TARGETS], capture_output=True, text=True
+    )
     if biome_res.returncode != 0:
+        print(biome_res.stdout.rstrip() or biome_res.stderr.rstrip())
         print(
             "  ✗ Frontend static analysis failed (findings above need a human decision)."
         )
@@ -536,8 +579,11 @@ def run_security_audit():
         audit_path = os.path.join(".venv", "bin", "pip-audit")
 
     if os.path.exists(audit_path):
-        audit_res = subprocess.run([audit_path, "--desc"])
+        audit_res = subprocess.run(
+            [audit_path, "--desc"], capture_output=True, text=True
+        )
         if audit_res.returncode != 0:
+            print(audit_res.stdout.rstrip() or audit_res.stderr.rstrip())
             print("  ✗ Security vulnerability audit failed.")
             sys.exit(1)
         print("  ✓ Security vulnerability audit passed.")
