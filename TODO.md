@@ -310,18 +310,34 @@ The trademark was scrubbed from history and force-pushed (remote is clean). Stil
 
 ---
 
-### 12.6 [ ] Vendor Font Awesome locally — the last CDN dependency
-Every other external origin is now vendored (webfonts landed 2026-07-25); **Font Awesome on cdnjs is
-the only one left**, and it contradicts offline-first: the icon font is fetched cross-origin on first
-load, needs its own CSP allowance, and is cached only best-effort by the service worker (it is
-deliberately excluded from the atomic, integrity-verified shell precache, since a blocked
-cross-origin fetch must not fail the whole install).
+### 12.6 [x] Vendor Font Awesome locally — the last CDN dependency
+**Done 2026-08-05.** Every other external origin was already vendored (webfonts, 2026-07-25); Font
+Awesome on cdnjs was the last, and it turned out to cost far more than the offline-first violation
+this entry was filed for. It was **the root cause of TODO §21's `Page.goto` stalls**: `page.goto`
+waits for `load`, `load` waits for every stylesheet, and that stylesheet was a live internet request
+made by every test in every tier. Measured under 8 parallel fresh contexts: **1948ms median,
+35233ms worst case**, with the goto maximum (35.61s) tracking the CDN maximum (35.23s) almost
+exactly. Days of stall-chasing were looking at the local server, the listen backlog, CPU and the
+service worker — none of which were ever involved, because the slow request never touched them.
 
-- Vendoring it would let `style-src`/`font-src` drop the cdnjs origin entirely, and fold the icons
-  into the integrity-verified shell like the webfonts already are.
-- **Watch the size**: ship a *subset* of the glyphs actually used, not the full 6.4.0 set — the
-  reason it was left on a CDN in the first place.
-- Recurring source of CSP / SRI / COEP friction in the build gate.
+- Vendored to `src/fonts/fontawesome.css` + four woff2 files, matching the existing `fonts.css`
+  pattern: woff2 only (the `.ttf` fallbacks would have multiplied the bytes and the integrity
+  catalog for no reachable browser), upstream license banner retained, regeneration documented in
+  the file header.
+- `style-src`/`font-src` dropped the cdnjs origin entirely, and `connect-src` lost it too — the
+  allowance existed only so the SW could precache the CDN. Both `index.html` and the dev server's
+  header were updated together; they must stay identical.
+- The icons now precache as part of the atomic, **integrity-verified** shell. `EXTERNAL_ASSETS` and
+  its best-effort `Promise.allSettled` path are deleted rather than left empty — an unused escape
+  hatch is how a future CDN entry would slip past SHA-256 verification unnoticed.
+- **ZAP suppression 90003 (SRI Missing) removed**, since its entire justification was this
+  stylesheet. 90004 (COEP) keeps only the half of its rationale that still holds.
+- **Size not subsetted, deliberately.** This entry planned to ship only the glyphs in use; the
+  vendored set is the full 6.4.0 (~288KB of woff2). Parity with what the CDN already served was the
+  safer first move while fixing a live gate failure, and it is all same-origin and precached now, so
+  it costs one cold load rather than a per-visit round trip. Subsetting is a follow-up
+  ([§12.7](#127--observation-low-priority-89-separate-module-requests-on-first-load) territory), not
+  a blocker.
 
 ### 12.7 [ ] [Observation, low priority] ~89 separate module requests on first load
 The buildless native-ES-module design means a cold visit fetches ~89 files. In production this is
@@ -1042,15 +1058,43 @@ the failing tests pass in isolation, the server is healthy before and after (1 t
 leaked sockets), and `journalctl | grep "PM: suspend entry"` showed no suspend in the windows. Now
 the gate's dominant failure source.
 
-- [ ] **Test the service-worker hypothesis before changing anything.** It predicts the observed
-      split rather than merely describing it: every e2e browser context registers the service
-      worker, which precaches and SHA-256-verifies all 89 shell assets, so eight workers burst ~700
-      asset requests at a single-threaded Python accept loop. `tests/medium/` never registers it
-      (its stubs do not call `bootAppLifecycle`) and has stalled **zero** times against e2e's five.
-      Measure request volume//timing, then decide.
-- [ ] **If it holds, skip SW registration except where it is the subject.** Only
-      `test_integrity_verification` genuinely needs it. That removes the burst while leaving
-      fidelity higher, not lower — unlike lowering the worker count, which hides the symptom.
+- [x] **The service-worker hypothesis is DISPROVEN — measured 2026-08-05, do not retry it.** Both
+      halves of its evidence failed. (a) `tests/medium/` no longer stalls zero times; it stalls
+      routinely (five failures in one stage, all `Page.goto`), and its stubs register no worker at
+      all — so the stall happens with no service worker in play. (b) Disabling registration made
+      things **worse**, not better: real app, fresh contexts, 8 workers, SW on = 38.3s wall /
+      median 2.84s; SW off (via an `add_init_script` stub of `navigator.serviceWorker.register`) =
+      52.7s wall / median 4.81s. The worker's cache *helps* once installed.
+      **Also do not implement it via `page.route`**: an autouse fixture serving an inert `sw.js`
+      that way produced **59 failed / 53 passed in 702s** (baseline 113s green). Route interception
+      routes every request through the Node driver for pattern matching, so the cost lands on all
+      ~90 requests, not just the one intercepted.
+- [x] **Four other suspects ruled out by measurement, so nobody re-derives them.**
+      | Suspect | Measurement | Verdict |
+      | :--- | :--- | :--- |
+      | Dev server throughput | 8 procs × 126 assets = **2791 req/s**, 1008 requests in 0.4s | not the bottleneck |
+      | TCP listen backlog | `Recv-Q` sampled every 5s for a whole stage: **0 throughout**, backlog 128 | never saturated |
+      | Host CPU / contention | load peaked **2.4 of 16 cores**; 22GB RAM free, zero swap | not oversubscribed |
+      | CPU clock (`power-saver`) | 887MHz vs 3074MHz loaded → **202.1s vs 159.5s** (21% for a 3.5x clock) | minor tax, not the cause |
+      That last row matters on its own: the stage is **not CPU-bound**. It is dominated by waiting.
+      A `power-saver` profile costs ~21% and is worth clearing, but it fixes nothing here.
+- [ ] **What the evidence actually points at: the cold module graph, per fresh context.** Isolating
+      the variables against the live server, 8 workers, no pytest involved:
+      | Scenario | median | max |
+      | :--- | :--- | :--- |
+      | fresh context → trivial asset (`manifest.json`) | 0.11s | 0.22s |
+      | **reused** context → real app | 0.31s | 16.19s |
+      | **fresh** context → real app | 2.84–8.81s | 17.6–59.1s |
+      Context creation is nearly free (row 1) and the server is fast, so the entire cost is the app's
+      **cold load of ~89 ES modules** ([§12.7](#127--observation-low-priority-89-separate-module-requests-on-first-load))
+      re-fetched and re-parsed for every function-scoped `page`. §12.7 is filed as a low-priority
+      observation; this promotes it — it is the gate's dominant failure source. A `modulepreload`
+      pass (flattening the import waterfall) or a dev-time bundle is the first thing to try.
+- [ ] **Beware: run-to-run variance is ~3x and will fool a single measurement.** The same command,
+      unchanged, gave **125.8s / 38.3s / 66.7s** wall across three consecutive runs (maxes 59.1s /
+      17.6s / 22.0s). Any fix here needs several runs before/after to claim anything; one green run
+      proves nothing, and one red run does not convict a change. Two conclusions in this session
+      were drawn from single runs and both turned out wrong.
 - [ ] **Note the interaction with the raised navigation timeout.** 30s → 60s
       ([tests/conftest.py](tests/conftest.py)) made each stall twice as expensive (a stalled e2e
       stage runs ~340s instead of ~115s). If the root cause is not fixed, consider reverting to 30s

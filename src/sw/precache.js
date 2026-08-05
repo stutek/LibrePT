@@ -31,7 +31,7 @@ self.swPrecache = (() => {
   // the install so nothing partial/version-skewed lands. A missing/unreachable catalog is a hard
   // failure (never a skip); both it and a hash mismatch message the page so it can show the error page.
   async function installVerifiedShell() {
-    const { SHELL_ASSETS, EXTERNAL_ASSETS } = self.swCacheManifest;
+    const { SHELL_ASSETS } = self.swCacheManifest;
     const cache = await self.swCacheManifest.openAppCache();
     const catalog = await self.swIntegrity.loadCatalog();
     if (!catalog) {
@@ -46,9 +46,6 @@ self.swPrecache = (() => {
       await postIntegrityError("mismatch", err?.message ? err.message : String(err));
       throw err;
     }
-    // Third-party libs (Font Awesome CDN) stay best-effort and are not integrity-verified here
-    // (cross-origin, pinned immutable URLs); a blocked/offline fetch must not fail the shell install.
-    await Promise.allSettled(EXTERNAL_ASSETS.map((u) => cache.add(u).catch(() => {})));
   }
 
   return { installVerifiedShell };

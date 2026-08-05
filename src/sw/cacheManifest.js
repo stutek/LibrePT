@@ -157,18 +157,20 @@ self.swCacheManifest = (() => {
     "./fonts/jetbrainsmono-normal-latin-ext.woff2",
     "./fonts/jetbrainsmono-italic-latin.woff2",
     "./fonts/jetbrainsmono-italic-latin-ext.woff2",
-    // Font Awesome is still CDN-hosted (best-effort external cache — see EXTERNAL_ASSETS).
-    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css",
-    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-solid-900.woff2",
-    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-regular-400.woff2",
+    // Font Awesome, vendored 2026-08-05 (TODO §12.6 / §21) — same-origin now, so it joins the
+    // atomic, integrity-verified shell instead of being a best-effort external fetch.
+    "./fonts/fontawesome.css",
+    "./fonts/fa-solid-900.woff2",
+    "./fonts/fa-regular-400.woff2",
+    "./fonts/fa-brands-400.woff2",
+    "./fonts/fa-v4compatibility.woff2",
   ];
 
-  // The same-origin app shell is the version-coherent module graph — it MUST precache as one atomic,
-  // integrity-verified unit. Third-party libs (the Font Awesome CDN) are NOT part of that graph and are
-  // cached best-effort: a blocked/failed cross-origin fetch (a CSP without connect-src, or being offline
-  // at install) must not fail the whole precache. They fall back to network/cache at runtime regardless.
-  const SHELL_ASSETS = ASSETS.filter((u) => !/^https?:/i.test(u));
-  const EXTERNAL_ASSETS = ASSETS.filter((u) => /^https?:/i.test(u));
+  // Every asset is same-origin since Font Awesome was vendored (TODO §12.6), so the whole list IS
+  // the version-coherent module graph and precaches as one atomic, integrity-verified unit. The old
+  // best-effort EXTERNAL_ASSETS split is gone with the last cross-origin asset: an empty escape
+  // hatch invites a future CDN entry to slip past integrity verification unnoticed.
+  const SHELL_ASSETS = ASSETS;
 
   function openAppCache() {
     return caches.open(CACHE_NAME);
@@ -209,7 +211,6 @@ self.swCacheManifest = (() => {
     CACHE_NAME,
     ASSETS,
     SHELL_ASSETS,
-    EXTERNAL_ASSETS,
     openAppCache,
     deleteObsoleteCaches,
     putInCache,

@@ -7,7 +7,7 @@
   <title>LibrePT - Personal Trainer Dashboard</title>
   
   <!-- Security Meta Tags -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://accounts.google.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com; img-src 'self' data:; connect-src 'self' https://cdnjs.cloudflare.com https://www.googleapis.com https://oauth2.googleapis.com https://accounts.google.com; base-uri 'self'; form-action 'self'; object-src 'none';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://accounts.google.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self' https://www.googleapis.com https://oauth2.googleapis.com https://accounts.google.com; base-uri 'self'; form-action 'self'; object-src 'none';">
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
   <meta name="description" content="LibrePT is a mobile-friendly group & individual exercise tracking web app for personal trainers with instant client switching, scroll-free logging, and async feedback loops.">
@@ -22,8 +22,11 @@
        in-brand. Regenerate via scratchpad/vendor_fonts.py. -->
   <link rel="stylesheet" href="fonts/fonts.css">
   
-  <!-- FontAwesome for Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Font Awesome, vendored for the same reason as the webfonts above — plus two this one made
+       unavoidable: a CDN asset cannot be covered by the service worker's SHA-256 integrity catalog
+       (it hashes what is served out of src/), and blocking every page load on cdnjs measured a
+       1948ms median / 35233ms worst case under a parallel test run (TODO §21). -->
+  <link rel="stylesheet" href="fonts/fontawesome.css">
   
   <!-- Inline SVG favicon: the Font Awesome dumbbell path in --primary emerald, matching the header logo mark -->
   <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%20-64%20640%20640'%3E%3Cpath%20fill='%2310b981'%20d='M96%2064c0-17.7%2014.3-32%2032-32h32c17.7%200%2032%2014.3%2032%2032V224v64V448c0%2017.7-14.3%2032-32%2032H128c-17.7%200-32-14.3-32-32V384H64c-17.7%200-32-14.3-32-32V288c-17.7%200-32-14.3-32-32s14.3-32%2032-32V160c0-17.7%2014.3-32%2032-32H96V64zm448%200v64h32c17.7%200%2032%2014.3%2032%2032v64c17.7%200%2032%2014.3%2032%2032s-14.3%2032-32%2032v64c0%2017.7-14.3%2032-32%2032H544v64c0%2017.7-14.3%2032-32%2032H480c-17.7%200-32-14.3-32-32V288%20224%2064c0-17.7%2014.3-32%2032-32h32c17.7%200%2032%2014.3%2032%2032zM416%20224v64H224V224H416z'/%3E%3C/svg%3E">

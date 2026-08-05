@@ -141,7 +141,7 @@ The service worker is split into single-responsibility modules so each concern c
 | Module | Responsibility |
 | :--- | :--- |
 | [`src/sw.js`](src/sw.js) | Entry/wiring only: `importScripts` the modules below, then bind `install` → verified precache, `activate` → purge old caches, `fetch` → runtime strategy. |
-| [`src/sw/cacheManifest.js`](src/sw/cacheManifest.js) | The offline cache's identity: `CACHE_NAME`, the complete app-shell `ASSETS` list (split into same-origin `SHELL_ASSETS` and best-effort `EXTERNAL_ASSETS`), and the open / purge / write-through cache operations. |
+| [`src/sw/cacheManifest.js`](src/sw/cacheManifest.js) | The offline cache's identity: `CACHE_NAME`, the complete app-shell `ASSETS` list (all same-origin, so `SHELL_ASSETS` is the whole of it), and the open / purge / write-through cache operations. |
 | [`src/sw/integrity.js`](src/sw/integrity.js) | Integrity verification: load `integrity.json` and assert a fetched response's SHA-256 matches its catalogued hash. |
 | [`src/sw/precache.js`](src/sw/precache.js) | The install-time **verified atomic precache** — fetch + verify + cache the whole shell as one unit — and the fail-loud messaging that drives the integrity error page. |
 | [`src/sw/runtimeFetch.js`](src/sw/runtimeFetch.js) | The runtime request strategy: network-first for the app shell with an offline cache fallback, cache-first for immutable third-party assets. |

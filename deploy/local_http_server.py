@@ -144,16 +144,15 @@ SECURITY_HEADERS = {
         # only when a trainer taps Connect Google Drive (TODO §1.5/§3.3) — never on boot, so the
         # normal offline-first path never touches it.
         "script-src 'self' https://accounts.google.com; "
-        "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; "
-        # Fonts are vendored locally ('self'); only Font Awesome's webfonts still come from cdnjs.
-        "font-src 'self' https://cdnjs.cloudflare.com; "
+        # Every stylesheet and font is same-origin since Font Awesome was vendored (TODO §12.6):
+        # no external style or font origin remains, so neither directive needs a host allowance.
+        "style-src 'self' 'unsafe-inline'; "
+        "font-src 'self'; "
         "img-src 'self' data:; "
-        # connect-src governs fetch()/XHR — including the service worker precaching the Font Awesome
-        # CDN. Without it, connect falls back to default-src 'self' and the SW's cache.addAll is
-        # blocked, which (being atomic) fails the whole precache and breaks offline caching.
-        # googleapis.com/oauth2.googleapis.com/accounts.google.com are the Drive appDataFolder sync
-        # target and its token endpoints (TODO §1.5) — same lazy, connect-only-when-used story.
-        "connect-src 'self' https://cdnjs.cloudflare.com https://www.googleapis.com https://oauth2.googleapis.com https://accounts.google.com; "
+        # connect-src governs fetch()/XHR. googleapis.com/oauth2.googleapis.com/accounts.google.com
+        # are the Drive appDataFolder sync target and its token endpoints (TODO §1.5) — lazy,
+        # connect-only-when-used. The precache needs no allowance now that the shell is same-origin.
+        "connect-src 'self' https://www.googleapis.com https://oauth2.googleapis.com https://accounts.google.com; "
         "base-uri 'self'; "
         "form-action 'self'; "
         "frame-ancestors 'none'; "

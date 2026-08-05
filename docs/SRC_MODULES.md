@@ -113,7 +113,7 @@ module, listed in the table below alongside that module's `.js`.
 | [src/modules/common/buildInfoDialog.js](../src/modules/common/buildInfoDialog.js) | `component` | Tappable build identity (commit, data schema, build time) as a copyable dialog — the phone-reachable replacement for a hover tooltip; owns `#dialog-build-info`'s markup. |
 | [src/modules/common/buildInfoDialog.css](../src/modules/common/buildInfoDialog.css) | `styles` | The build-info dialog's fact rows. |
 | [src/modules/themes/](../src/modules/themes/) | `styles` | Theme-specific CSS stylesheets (`daylight.css`, `midnight.css`, `red.css`, `blossom.css`, `nebula.css`). |
-| [src/fonts/](../src/fonts/) | `assets` | Locally-vendored variable webfonts (DM Sans, Outfit, JetBrains Mono; latin + latin-ext) + `fonts.css`, so the offline-first PWA has no `fonts.googleapis.com`/`fonts.gstatic.com` dependency (regeneration steps in the `fonts.css` header). |
+| [src/fonts/](../src/fonts/) | `assets` | Locally-vendored variable webfonts (DM Sans, Outfit, JetBrains Mono; latin + latin-ext) + `fonts.css`, and Font Awesome 6.4.0 + `fontawesome.css` since 2026-08-05 — so the offline-first PWA has no `fonts.googleapis.com`/`fonts.gstatic.com`/`cdnjs.cloudflare.com` dependency at all (regeneration steps in each CSS header). |
 | [src/controllers/routerController.js](../src/controllers/routerController.js) | `controller` | SPA route mapping and navigation logic: base path, history writes, and the facade of operations a route may perform; owns `#view-error`'s markup. |
 | [src/controllers/routes/route.js](../src/controllers/routes/route.js) | `controller` | Base `Route` class: pattern ↔ params translation (`match`/`build`), specificity, and the shared enter/exit chrome lifecycle. |
 | [src/controllers/routes/routeRegistry.js](../src/controllers/routes/routeRegistry.js) | `controller` | The ordered route collection: register, resolve a path to one route by specificity, and spell a URL for a named route. |
@@ -149,6 +149,7 @@ module, listed in the table below alongside that module's `.js`.
 | [src/data/planUpdates.js](../src/data/planUpdates.js) | `data` | Seed pending plan adjustments (unresolved client feedback) for the adjustments deck. |
 | [src/data/messages.js](../src/data/messages.js) | `data` | Seed notification/message feed the notification area renders from. |
 | [src/fonts/fonts.css](../src/fonts/fonts.css) | `styles` | LibrePT-vendored variable webfonts (DM Sans, Outfit, JetBrains Mono), latin + latin-ext only, so the offline-first PWA has zero third-party font origin. |
+| [src/fonts/fontawesome.css](../src/fonts/fontawesome.css) | `styles` | LibrePT-vendored Font Awesome Free 6.4.0 (woff2 only), replacing the cdnjs stylesheet — the last cross-origin asset. Upstream-minified, so it is the one file Biome is configured to skip; regenerate by re-downloading rather than editing (steps in its header). |
 | [src/modules/themes/daylight.css](../src/modules/themes/daylight.css) | `styles` | Daylight theme palette (the default). |
 | [src/modules/themes/midnight.css](../src/modules/themes/midnight.css) | `styles` | Midnight theme palette. |
 | [src/modules/themes/red.css](../src/modules/themes/red.css) | `styles` | Red theme palette. |
