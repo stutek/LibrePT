@@ -128,5 +128,24 @@ def test_external_links_and_code_samples_are_ignored(docs):
 
 
 def test_repository_documentation_graph_is_intact():
-    """The gate itself, as a test: every tracked .md link and §-reference resolves."""
-    assert doclinks.main() == 0
+    """The gate itself, as a test: every tracked .md link and §-reference resolves.
+
+    Reports the findings IN the assertion message rather than asserting on `main()`'s exit code.
+    `assert doclinks.main() == 0` fails as a bare `assert 1 == 0`, and the file:line of the dead
+    link reached the screen only because pytest happened to echo main()'s captured stdout — which
+    is a display setting, not a guarantee. A gate failure has to name what broke without anyone
+    re-running the tool by hand.
+    """
+    files = doclinks.tracked_markdown_files()
+    cache = {}
+    findings = []
+    for path in files:
+        findings.extend(doclinks.check_file(path, cache, files))
+
+    detail = "\n".join(
+        f"  {rel}:{line}  {message}"
+        for rel, line, message in sorted(findings, key=lambda f: (str(f[0]), f[1]))
+    )
+    assert not findings, (
+        f"{len(findings)} unresolved documentation reference(s):\n{detail}"
+    )
