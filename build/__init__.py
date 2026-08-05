@@ -795,7 +795,12 @@ def ensure_zap_addons():
     under .venv/ so it is fetched once per environment rather than once per run (and never at all
     on a warm checkout). See _ZAP_ADDONS for why the add-ons are vendored instead of fetched by ZAP.
     """
-    import requests
+    # urllib, NOT requests, deliberately: unlike every other job, the CI owasp-zap-scan job
+    # (.github/workflows/deploy.yml) has no venv and no `pip install` — it runs bare system python
+    # on the strength of `build` importing with stdlib only. `import requests` here would therefore
+    # ImportError on the runner, failing a job the deploy gates on, while passing locally where the
+    # venv has it. Keep this function stdlib-clean, or give that job a dependency install step.
+    import urllib.request
 
     os.makedirs(ZAP_ADDONS_DIR, exist_ok=True)
     for name, (url, expected_hash) in _ZAP_ADDONS.items():
@@ -808,11 +813,11 @@ def ensure_zap_addons():
             )  # corrupt or superseded — never scan with an unverified rule set
         print(f"  Downloading ZAP add-on {name}...")
         try:
-            response = requests.get(url, stream=True, timeout=60)
-            response.raise_for_status()
-            with open(path, "wb") as f:
-                for chunk in response.iter_content(chunk_size=65536):
-                    f.write(chunk)
+            with (
+                urllib.request.urlopen(url, timeout=60) as response,
+                open(path, "wb") as f,
+            ):
+                shutil.copyfileobj(response, f)
             actual = _file_sha256(path)
             if actual != expected_hash:
                 os.remove(path)

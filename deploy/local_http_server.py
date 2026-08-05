@@ -39,6 +39,28 @@ BASE = "/LibrePT"  # mirror the GitHub Pages project sub-path (the repo name)
 
 INTEGRITY_CATALOG_NAME = "integrity.json"
 
+# A reserved path that reports which REVISION of this file the running process was started from.
+# AGENT_RULES §2.C deliberately keeps this server alive across tasks, which means a long-lived
+# process can silently outlive edits to its own source: on 2026-08-04 a server started Jul 31 was
+# still serving with `socketserver`'s default listen backlog of 5, four days after the fix raising
+# it to 128 had been committed — so the fix was never once in effect, every parallel browser run
+# since had been hitting the exact bottleneck it was meant to remove, and the resulting `Page.goto`
+# timeouts got misattributed to CPU load and worker counts for hours. Serving the revision lets
+# tests refuse to run against a stale server instead of quietly producing junk measurements.
+SERVER_REVISION_NAME = "__server_revision__"
+
+
+def server_revision():
+    """SHA-256 of this module's own source, as it was on disk when the process started."""
+    with open(os.path.abspath(__file__), "rb") as handle:
+        return hashlib.sha256(handle.read()).hexdigest()
+
+
+# Captured at import, NOT per request: it must report the code this process is actually RUNNING,
+# which is what the file said at startup — re-reading per request would report later edits the
+# running process never loaded, i.e. exactly the false "all good" this exists to prevent.
+RUNNING_REVISION = server_revision()
+
 # Per-request access logging is off by default (see log_message); --verbose brings it back.
 VERBOSE = False
 
@@ -212,6 +234,9 @@ class SubPathHandler(SimpleHTTPRequestHandler):
         if rel == INTEGRITY_CATALOG_NAME:
             return self._send_integrity_catalog()
 
+        if rel == SERVER_REVISION_NAME:
+            return self._send_json({"revision": RUNNING_REVISION})
+
         is_navigation = (
             os.path.splitext(rel)[1] == ""
         )  # a clean-URL route has no extension
@@ -225,15 +250,18 @@ class SubPathHandler(SimpleHTTPRequestHandler):
 
         return super().send_head()
 
-    def _send_integrity_catalog(self):
-        # A test-only cookie flips one hash so the failure-path e2e can drive the mismatch overlay.
-        corrupt = "corrupt_integrity=1" in (self.headers.get("Cookie") or "")
-        body = json.dumps(build_dev_integrity_catalog(corrupt=corrupt)).encode("utf-8")
+    def _send_json(self, payload):
+        body = json.dumps(payload).encode("utf-8")
         self.send_response(HTTPStatus.OK)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         return io.BytesIO(body)
+
+    def _send_integrity_catalog(self):
+        # A test-only cookie flips one hash so the failure-path e2e can drive the mismatch overlay.
+        corrupt = "corrupt_integrity=1" in (self.headers.get("Cookie") or "")
+        return self._send_json(build_dev_integrity_catalog(corrupt=corrupt))
 
     def _send_index_shell(self):
         try:

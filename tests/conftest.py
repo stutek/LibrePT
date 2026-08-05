@@ -2,10 +2,13 @@
 # Fixtures live here so both the e2e (browser) tests and the unit (static) tests can use them
 # without duplicating setup. Applies to every test under tests/ (including subfolders).
 
+import hashlib
+import json
 import sys
 import socket
 import time
 import subprocess
+import urllib.request
 from pathlib import Path
 
 import pytest
@@ -120,6 +123,46 @@ def is_port_open(port):
         return s.connect_ex(("localhost", port)) == 0
 
 
+SERVER_PATH = REPO_ROOT / "deploy" / "local_http_server.py"
+
+
+def _source_revision():
+    """SHA-256 of the dev server's source as it is on disk right now."""
+    return hashlib.sha256(SERVER_PATH.read_bytes()).hexdigest()
+
+
+def _running_revision(base_url):
+    """The revision the already-running server reports, or None if it is too old to report one."""
+    try:
+        with urllib.request.urlopen(f"{base_url}__server_revision__", timeout=5) as r:
+            return json.load(r).get("revision")
+    except Exception:
+        return None
+
+
+def assert_server_is_current(base_url):
+    """Refuse to test against a dev server running code older than the working tree.
+
+    AGENT_RULES §2.C keeps this server alive across tasks on purpose, so it can outlive edits to
+    its own source — and when it does, nothing says so. On 2026-08-04 a server started four days
+    earlier was still serving with the default listen backlog of 5, long after the fix raising it
+    to 128 had been committed and "verified": every parallel browser run in between had been
+    hitting the precise bottleneck that fix removed, and the `Page.goto` timeouts it caused were
+    misattributed to CPU load and worker counts across hours of debugging. A gate measurement taken
+    against the wrong build is worse than no measurement, because it is trusted.
+    """
+    if _running_revision(base_url) == _source_revision():
+        return
+    raise RuntimeError(
+        "The dev server on :8081 is running a DIFFERENT revision of "
+        "deploy/local_http_server.py than the working tree (or is too old to report one).\n"
+        "    Its behaviour — listen backlog, headers, SPA fallback — is therefore not what this "
+        "checkout says it is, and any result from this run is untrustworthy.\n"
+        "    Restart it:  pkill -f local_http_server && "
+        ".venv/bin/python -m deploy.local_http_server --port 8081"
+    )
+
+
 @pytest.fixture(scope="session")
 def local_server():
     """Serve the app on :8081 via deploy/local_http_server.py, which mounts src/ under the
@@ -152,5 +195,10 @@ def local_server():
             if time.monotonic() >= deadline:
                 raise RuntimeError("Local server did not start within 10 s")
             time.sleep(0.1)
-    yield "http://localhost:8081/LibrePT/"
+
+    base_url = "http://localhost:8081/LibrePT/"
+    # Whether we just started it or reused one that was already up, prove it is THIS revision
+    # before a single test runs — see assert_server_is_current for what a stale one costs.
+    assert_server_is_current(base_url)
+    yield base_url
     # Server is deliberately NOT terminated here — see docstring above.

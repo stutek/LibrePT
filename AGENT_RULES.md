@@ -83,11 +83,17 @@ Every response and tool action must drive measurable, continuous progress toward
 
      | Stage | Typical | Investigate past |
      | :--- | :--- | :--- |
-     | 1 — lint / unit / JS unit / audits (parallel) | 4-30s | 60s |
-     | 2 — medium component tests | 15-65s | 2min |
-     | 3 — e2e browser suite | ~2m20s | 5min |
-     | 4 — OWASP ZAP baseline | ~40s (~75s on a cold `.venv`) | 3min (hard-killed at 20min) |
-     | **whole `build check`** | **~3m30s-4min** | **7min** |
+     | 1 — lint / unit / JS unit / audits (parallel) | ~13s (pip-audit dominates) | 60s |
+     | 2 — medium component tests | ~20s | 90s |
+     | 3 — e2e browser suite | ~1m55s | 4min |
+     | 4 — OWASP ZAP baseline | ~35s (~75s on a cold `.venv`) | 3min (hard-killed at 20min) |
+     | **whole `build check`** | **~3m15s** | **6min** |
+
+     A run well outside these is usually the ENVIRONMENT, not the change under test. The two that
+     have actually bitten: a dev server left running across days so it no longer matches its own
+     source (now caught up front by `tests/conftest.py`'s `assert_server_is_current`), and a
+     machine that slept mid-run — a suspend drops open sockets, so a network-dependent step like
+     `pip-audit` fails with a connection error that reads like a finding but is not one.
 
      If a stage blows past its "investigate" column, say so and diagnose — do not keep reporting
      "still running" indefinitely. Check host load first (`uptime`; this box has 16 cores, so a
