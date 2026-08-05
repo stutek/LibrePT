@@ -20,8 +20,8 @@ localises the fault better, and a test placed too low simply cannot express what
 | :--- | :--- | :--- | :--- |
 | [tests/unit/](unit/) (13 files) | pytest, stage 1 | nothing — static analysis of the repo | It inspects files/structure: layout rules, i18n parity, doc links, generated catalogs. |
 | [tests/unit_js/](unit_js/) (21 files, 81 tests) | `node:test`, stage 1 | one ES module, no DOM | It pins **pure logic** — schema/migration transforms, id generation, merge algorithms, projections. Mirrors the `src/` subpath it covers. |
-| [tests/medium/](medium/) (19 files, 68 tests) | Playwright, stage 2 | one component against real `index.html` markup | It needs the **DOM/CSS** but not navigation, persistence or a real app boot. Four shapes, all in [_harness.py](medium/_harness.py): `HEADER_STUB` (header + its route-backed dialogs), `SESSIONS_STUB` (the dashboard timeline), `clipboard_stub()` (the live session, fed an injected `activeSession`), and `view_stub()` to build one for any other view — shell markup → activate → render. |
-| [tests/e2e/](e2e/) (35 files, 112 tests) | Playwright, stage 3 | the whole app | It needs the router, IndexedDB, the service worker, reload/deep-link behaviour, or a multi-step flow across views. |
+| [tests/medium/](medium/) (20 files, 67 tests) | Playwright, stage 2 | one component against real `index.html` markup | It needs the **DOM/CSS** but not navigation, persistence or a real app boot. Four shapes, all in [_harness.py](medium/_harness.py): `HEADER_STUB` (header + its route-backed dialogs), `SESSIONS_STUB` (the dashboard timeline), `clipboard_stub()` (the live session, fed an injected `activeSession`), and `view_stub()` to build one for any other view — shell markup → activate → render. |
+| [tests/e2e/](e2e/) (35 files, 109 tests) | Playwright, stage 3 | the whole app | It needs the router, IndexedDB, the service worker, reload/deep-link behaviour, or a multi-step flow across views. |
 
 **Why the split is worth maintaining:** the pure-logic tests used to run in a browser purely because
 the app's CSP forbids `new Function` — they now fail in ~4s inside stage 1 instead of at the

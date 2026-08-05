@@ -1,57 +1,22 @@
 # tests/e2e/test_edit_mode_hides_complete.py
-# TODO §8.4 — "Complete Workout Session" is a LIVE-session action: it logs the session to history.
-# It must therefore disappear while the plan is being edited (Done exits edit mode instead) and stay
-# gone for a planning-mode programme that was never run at all. The whole footer hides, so the
-# clipboard is not left with an empty action bar.
+# TODO §8.4 — creating a planning-mode programme, end to end: client directory → client detail →
+# "Plan Client Program" → the workout-setup form → the clipboard it opens. Four views and a real
+# form submission, which is why this one stays here.
+#
+# The RULE it ends on — that a planning programme never offers "Complete Workout Session", in or out
+# of edit mode — moved to tests/medium/test_clipboard_complete_action.py, along with the live and
+# edit-mode cases that used to sit here. Those are pure render facts about one component
+# (`canStartSession && started`), and a regression in them should not have to be discovered at the
+# end of a four-view journey. What this test still proves is the part the medium tier cannot: that
+# the creation flow actually ARRIVES at a planning-mode session rather than a live one.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
 FOOTER = "#active-session-overlay .session-actions-footer"
 
 
-def _open_live_session(page, local_server):
-    page.goto(local_server)
-    card = ".session-card.session-live, .session-card:has-text('Group Strength & Conditioning')"
-    page.wait_for_selector(card)
-    page.locator(card).first.click()
-    page.wait_for_selector("#active-session-overlay:not(.hidden)")
-    page.wait_for_timeout(400)
-    # Opening the clipboard only stages the session — the trainer must explicitly start it before
-    # any live-session-only affordance (like Complete) is offered.
-    page.click("#btn-start-session")
-    page.wait_for_timeout(200)
-
-
-def test_live_session_offers_complete(page, local_server):
-    _open_live_session(page, local_server)
-    assert page.locator(FOOTER).is_visible() is True
-    assert page.locator("#btn-finish-session").is_visible() is True
-
-
-def test_complete_hides_in_edit_mode_and_returns_on_done(page, local_server):
-    _open_live_session(page, local_server)
-
-    page.click("#btn-edit-plan")
-    page.wait_for_selector(".clipboard-editor")
-    page.wait_for_timeout(200)
-
-    assert page.locator(FOOTER).is_visible() is False, (
-        "editing a plan must not offer finish-and-log-history"
-    )
-    assert page.locator("#btn-finish-session").is_visible() is False
-    # Done is the only exit offered while editing.
-    assert page.locator("#btn-done-edit").is_visible() is True
-
-    page.click("#btn-done-edit")
-    page.wait_for_timeout(300)
-
-    assert page.locator(FOOTER).is_visible() is True, (
-        "exiting edit mode restores the footer"
-    )
-    assert page.locator("#btn-finish-session").is_visible() is True
-
-
-def test_planning_session_never_offers_complete(page, local_server):
-    """A planning-mode programme has no execution to complete — not even after leaving edit mode."""
+def test_planning_programme_created_from_a_client_is_not_completable(
+    page, local_server
+):
     page.goto(local_server + "clients")
     page.wait_for_selector("#view-client-directory.active")
     page.locator("#clients-list .client-card").first.click()
@@ -75,11 +40,8 @@ def test_planning_session_never_offers_complete(page, local_server):
     page.wait_for_selector("#active-session-overlay:not(.hidden)")
     page.wait_for_timeout(400)
 
+    # Arriving in planning mode is the claim: the footer is hidden because currentPlanMode() reads
+    # the sourceSession this flow built, not because of anything the clipboard was told directly.
     assert page.locator(FOOTER).is_visible() is False, (
-        "a planning programme must not be completable"
+        "the workout-setup flow must create a PLANNING session, not a completable live one"
     )
-
-    # Leaving edit mode does not turn it into a live session either.
-    page.click("#btn-done-edit")
-    page.wait_for_timeout(300)
-    assert page.locator(FOOTER).is_visible() is False
