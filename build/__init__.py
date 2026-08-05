@@ -635,7 +635,9 @@ def run_javascript_unit_tests():
     returncode, output, path = run_logged(
         # A bare directory arg fails on this Node build (misresolves as a CJS module
         # rather than a glob root); the explicit glob is what actually recurses.
-        [node_path, "--test", "tests/unit_js/**/*.test.mjs"],
+        # tests/unit_js/security/ is EXCLUDED here and gated by run_security_tests() instead, so a
+        # security regression is never reported as a generic "JavaScript unit tests failed".
+        [node_path, "--test", "tests/unit_js/!(security)/**/*.test.mjs"],
         "unit-js-tests",
     )
     if returncode != 0:
@@ -643,6 +645,38 @@ def run_javascript_unit_tests():
         print(f"  ✗ JavaScript unit tests failed with exit code: {returncode}")
         sys.exit(returncode)
     print("  ✓ JavaScript unit tests passed successfully!")
+
+
+def run_security_tests():
+    """Runs the pure-logic security suite (tests/unit_js/security/) under node:test.
+
+    Its own gate, separate from the generic JavaScript unit tests, for three reasons. A security
+    regression must not be reported as "JavaScript unit tests failed" — the stage name is the first
+    thing anyone reads, and on a red build it decides who looks at it and how fast. It gives the
+    class a visible home, so "is X covered?" is answerable by listing one directory rather than
+    grepping the suite. And it gets its own CI job, so the deploy is gated on it by name.
+
+    Scope is deliberately the tests NO other gate can reach. The static audits already cover HTML
+    sinks and CSP parity, pip-audit covers dependencies, and OWASP ZAP covers what crosses the
+    network — but ZAP's baseline scan is PASSIVE, and every finding this suite exists for is
+    client-side and never leaves the browser: spreadsheet formula injection in a generated CSV,
+    prototype pollution from attacker-controlled object keys on the boot path. Browser-tier security
+    tests (the stored-XSS sink in tests/medium/, IndexedDB injection in tests/e2e/) stay in their
+    tiers, because what they need to boot is what decides where they live.
+    """
+    print("\n  Running Security Tests (node:test)...")
+    node_path = ensure_node_binary()
+    if not node_path:
+        return
+    returncode, output, path = run_logged(
+        [node_path, "--test", "tests/unit_js/security/**/*.test.mjs"],
+        "security-tests",
+    )
+    if returncode != 0:
+        print_digest("Security tests", output, path)
+        print(f"  ✗ Security tests FAILED with exit code: {returncode}")
+        sys.exit(returncode)
+    print("  ✓ Security tests passed successfully!")
 
 
 def _playwright_worker_count():
@@ -1130,6 +1164,7 @@ def run_stage_1_parallel():
         "Dependency Security Scan (pip-audit)": run_security_audit,
         "Unit Tests": run_unit_tests,
         "JavaScript Unit Tests": run_javascript_unit_tests,
+        "Security Tests": run_security_tests,
         "Static Security Audits": run_static_security_checks,
         "Documentation Graph": run_doc_graph_check,
         "Module Catalog Coverage": run_catalog_coverage_check,

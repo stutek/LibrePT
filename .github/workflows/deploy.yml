@@ -138,6 +138,30 @@ jobs:
         # every other job uses.
         run: .venv/bin/python -c "from build import run_javascript_unit_tests; run_javascript_unit_tests()"
 
+  # Its own job, not folded into javascript-unit-tests, so a security regression is named as one on
+  # the run page rather than reported as a generic unit-test failure. Covers the client-side classes
+  # no other gate can reach: the OWASP ZAP baseline scan is PASSIVE and only sees what crosses the
+  # network, while spreadsheet formula injection in a generated CSV and prototype pollution from
+  # attacker-controlled object keys never leave the browser. Browser-tier security tests (the
+  # stored-XSS sink, IndexedDB injection) run inside medium-tests / e2e-tests, where their tier
+  # puts them.
+  security-tests:
+    name: Security Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - name: Install Dependencies
+        run: |
+          python -m venv .venv
+          .venv/bin/pip install --upgrade pip
+          .venv/bin/pip install -r requirements.txt
+      - name: Run Security Tests
+        run: .venv/bin/python -c "from build import run_security_tests; run_security_tests()"
+
   # One job, four named checks — same reasoning as static-security-audits below: each Actions job
   # costs a fresh runner, checkout and Python setup (~30s) for checks that take milliseconds. These
   # are the repo's structural invariants: the module catalog matches the tree, imports flow one way,
@@ -175,6 +199,7 @@ jobs:
         dependency-scan,
         unit-tests,
         javascript-unit-tests,
+        security-tests,
         structure-checks,
       ]
     runs-on: ubuntu-latest
@@ -203,6 +228,7 @@ jobs:
         dependency-scan,
         unit-tests,
         javascript-unit-tests,
+        security-tests,
         structure-checks,
       ]
     runs-on: ubuntu-latest
@@ -235,6 +261,7 @@ jobs:
         dependency-scan,
         unit-tests,
         javascript-unit-tests,
+        security-tests,
         structure-checks,
       ]
     runs-on: ubuntu-latest
@@ -256,6 +283,7 @@ jobs:
         dependency-scan,
         unit-tests,
         javascript-unit-tests,
+        security-tests,
         structure-checks,
       ]
     runs-on: ubuntu-latest

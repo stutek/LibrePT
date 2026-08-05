@@ -20,6 +20,7 @@ localises the fault better, and a test placed too low simply cannot express what
 | :--- | :--- | :--- | :--- |
 | [tests/unit/](unit/) (17 files + `test_app.py`, 92 tests) | pytest, stage 1 | nothing — static analysis of the repo | It inspects files/structure: layout rules, i18n parity, doc links, generated catalogs. |
 | [tests/unit_js/](unit_js/) (21 files, 81 tests) | `node:test`, stage 1 | one ES module, no DOM | It pins **pure logic** — schema/migration transforms, id generation, merge algorithms, projections. Mirrors the `src/` subpath it covers. |
+| [tests/unit_js/security/](unit_js/security/) (2 files, 7 tests) | `node:test`, stage 1 | one ES module, no DOM | It pins a **security property** with no DOM: injection into a generated file, attacker-controlled object keys. Its own gate task and its own CI job (`security-tests`), so a regression is named as a security one instead of a generic unit-test failure. Excluded from the glob above — it is gated separately, not twice. |
 | [tests/medium/](medium/) (20 files, 72 tests) | Playwright, stage 2 | one component against real `index.html` markup | It needs the **DOM/CSS** but not navigation, persistence or a real app boot. Four shapes, all in [_harness.py](medium/_harness.py): `HEADER_STUB` (header + its route-backed dialogs), `SESSIONS_STUB` (the dashboard timeline), `clipboard_stub()` (the live session, fed an injected `activeSession`), and `view_stub()` to build one for any other view — shell markup → activate → render. |
 | [tests/e2e/](e2e/) (33 files, 107 tests) | Playwright, stage 3 | the whole app | It needs the router, IndexedDB, the service worker, reload/deep-link behaviour, or a multi-step flow across views. |
 
@@ -74,6 +75,16 @@ component's boot step.
 collection (`[chromium-nebula]`, `[chromium-10]`, `[chromium-23]`), so the function count understates
 every browser tier — it read 67/109 where pytest collects 72/110. Recount with
 `pytest <dir> --collect-only -q`, never with grep.
+
+**Security tests are a concern, not a tier — they live wherever their tier puts them.** Only the
+DOM-free ones are collected under [unit_js/security/](unit_js/security/) and gated by name; the
+stored-XSS sink is a component test ([medium/test_xss_hardening.py](medium/test_xss_hardening.py))
+and IndexedDB injection needs the real engine ([e2e/test_indexed_db.py](e2e/test_indexed_db.py)).
+What a test must boot still decides where it lives. Worth knowing when judging coverage: **the OWASP
+ZAP baseline scan in stage 4 is PASSIVE** — it spiders and inspects responses, it never injects a
+payload — so it cannot see stored XSS from an imported backup, formula injection in a generated CSV,
+or prototype pollution on the boot path. None of those cross the network. ZAP is not the reason any
+of these classes is covered.
 
 **Shared fixtures** live in [tests/conftest.py](conftest.py) and apply to every tier, notably
 `local_server` — which refuses to run against a dev server whose revision does not match the working

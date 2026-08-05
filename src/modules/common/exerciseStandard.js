@@ -128,10 +128,25 @@ export function catalogToInterchange(exercises) {
   };
 }
 
+// Excel, LibreOffice and Sheets evaluate a cell whose text begins with = + - @ (or a leading tab /
+// carriage return), so a movement NAME can execute on open — CWE-1236, spreadsheet formula
+// injection. That is not theoretical here on two counts: names are free text a trainer types, and a
+// restored backup is untrusted input that lands in the same field, so a hostile catalog survives an
+// export and fires in whoever opens it. This function is the ONLY cell sink (catalogToCsv below is
+// the only CSV producer), so neutralising here covers the format.
+//
+// A leading apostrophe is the standard mitigation: spreadsheets read the rest of the cell as literal
+// text. It does change the exported bytes, which is why the LOSSLESS machine path is the JSON
+// interchange (catalogToInterchange) — this CSV exists to be read by a human in a spreadsheet, so
+// fidelity yields to not executing. Quoting alone is not a fix: a quoted CSV cell is still parsed
+// as a formula.
+const SPREADSHEET_FORMULA_TRIGGER = /^[=+\-@\t\r]/;
+
 // RFC-4180-ish CSV cell: quote when the value contains a comma, quote, or newline; double inner quotes.
 function csvCell(value) {
-  const s = value == null ? "" : String(value);
-  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  const raw = value == null ? "" : String(value);
+  const neutralised = SPREADSHEET_FORMULA_TRIGGER.test(raw) ? `'${raw}` : raw;
+  return /[",\n]/.test(neutralised) ? `"${neutralised.replace(/"/g, '""')}"` : neutralised;
 }
 
 const CSV_HEADER = [

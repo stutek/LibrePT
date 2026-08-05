@@ -198,3 +198,100 @@ def test_indexes_support_collection_scan_and_lazy_per_client_load(page, local_se
     assert r["total"] == 5
     # count() goes through the index B-tree — this is what makes §18.3's completeness query cheap.
     assert r["historyCount"] == 3
+
+
+# --- Injection: the query-language question, answered for a store that has none -----------------
+# LibrePT has no SQL. Storage is IndexedDB (plus localStorage), and SQLite-wasm was considered and
+# rejected (TODO §3.7/§18.6), so there is no query string for a payload to break out of — an
+# `' OR 1=1 --` in a client name is inert because nothing ever parses it. That is an architectural
+# property, not a lucky one, and this test exists to keep it true: it drives hostile values through
+# every lookup path the app actually uses (primary key, single index, compound index, count) and
+# asserts they behave as OPAQUE DATA — matching themselves exactly and nothing else.
+#
+# The failure it guards against is a future regression, not today's code: the moment anyone builds a
+# lookup by string-assembling a key, or reaches for a query language, "it round-trips exactly"
+# stops holding and this fails. ZAP cannot cover any of it — the baseline scan is passive and none
+# of this crosses the network.
+INJECTION_PAYLOADS = [
+    "' OR 1=1 --",
+    '"; DROP TABLE clients; --',
+    "1; DELETE FROM history WHERE 1=1",
+    "c1' UNION SELECT * FROM sqlite_master --",
+    "__proto__",
+    "constructor.prototype.polluted",
+]
+
+
+def test_hostile_keys_and_index_values_are_stored_as_opaque_data(page, local_server):
+    page.goto(local_server)
+    page.wait_for_timeout(300)
+
+    r = page.evaluate(
+        """async (payloads) => {
+            const url = new URL('data/indexedDb.js', document.baseURI).href;
+            const m = await import(url);
+            const name = 'librept_test_injection';
+            await m.deleteDatabase(name);
+            const db = await m.openDatabase({ schemas: [2], name });
+
+            // Each payload is BOTH a primary key and an indexed clientId, so a lookup that
+            // mis-parsed one would surface as a wrong match on either path.
+            await m.withTransaction(db, 'schema2', 'readwrite', (t) => {
+                const s = t.store('schema2');
+                for (const p of payloads) {
+                    m.put(s, { id: p, collection: 'history', clientId: p, marker: p });
+                }
+                m.put(s, { id: 'benign', collection: 'history', clientId: 'c1', marker: 'benign' });
+            });
+
+            // Accumulate into ARRAYS of pairs, not objects keyed by the payload: `obj["__proto__"] = v`
+            // does not create an own property in JS, so an object accumulator silently loses exactly
+            // the payload this test most wants to report on.
+            const byKey = [];
+            const byClient = [];
+            const byCompound = [];
+            let total = null;
+            await m.withTransaction(db, 'schema2', 'readonly', (t) => {
+                const s = t.store('schema2');
+                for (const p of payloads) {
+                    m.get(s, p).then((v) => { byKey.push([p, v ? v.marker : null]); });
+                    m.getAllFromIndex(s, m.CLIENT_INDEX, p)
+                        .then((v) => { byClient.push([p, v.map((x) => x.id)]); });
+                    m.getAllFromIndex(s, m.CLIENT_COLLECTION_INDEX, [p, 'history'])
+                        .then((v) => { byCompound.push([p, v.map((x) => x.id)]); });
+                }
+                m.countAll(s).then((v) => { total = v; });
+            });
+            db.close();
+            await m.deleteDatabase(name);
+            return { byKey, byClient, byCompound, total, polluted: {}.polluted ?? null };
+        }""",
+        INJECTION_PAYLOADS,
+    )
+
+    by_key = dict(r["byKey"])
+    by_client = dict(r["byClient"])
+    by_compound = dict(r["byCompound"])
+
+    # Every payload stored and came back byte-identical: it was a key, never a fragment of one.
+    for payload in INJECTION_PAYLOADS:
+        assert by_key[payload] == payload, (
+            f"payload did not round-trip as an exact key: {payload!r}"
+        )
+        # And it matched ONLY its own record — no widening, which is what an injected
+        # `OR 1=1` would produce if anything were parsing these.
+        assert by_client[payload] == [payload], (
+            f"index lookup matched more than its own record for {payload!r}"
+        )
+        assert by_compound[payload] == [payload], (
+            f"compound index lookup widened for {payload!r}"
+        )
+
+    # Nothing was deleted or dropped: all payloads plus the benign record survive.
+    assert r["total"] == len(INJECTION_PAYLOADS) + 1, (
+        "a payload altered the store's contents — it was not treated as opaque data"
+    )
+    # `__proto__`/`constructor.prototype` as KEYS must not reach Object.prototype.
+    assert r["polluted"] is None, (
+        "storing a __proto__-shaped key polluted Object.prototype"
+    )

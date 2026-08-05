@@ -69,8 +69,22 @@ export function toDomainObject(record) {
 // Reassemble a flat list of IndexedDB records (each stamped with `collection`) into the
 // per-collection shape stateStore.js keeps in memory. Every known collection is present, even if
 // empty, so a fresh database reads back exactly like `emptyState()`.
+// `record.collection` is DATA — it arrives from IndexedDB, which is fed by imported backups — and
+// this function deliberately accepts collection names it does not know, so a backup written by a
+// newer build survives a round trip through an older one. A plain-object accumulator cannot hold
+// that combination safely: `grouped["__proto__"]` reads back Object.prototype rather than
+// undefined, so the "not seen yet" check passes, and the push then lands on Object.prototype and
+// throws. The same goes for `constructor` and every other inherited member. That is a crash on the
+// BOOT path from a merely corrupt file, not just a malicious one.
+//
+// A null-prototype accumulator removes the class of problem instead of blocklisting the names:
+// with no inherited members, every collection name is an ordinary data key and the unknown-name
+// behaviour above stays exactly as intended.
 export function groupRecordsByCollection(records) {
-  const grouped = Object.fromEntries(COLLECTIONS.map((collection) => [collection, []]));
+  const grouped = Object.assign(
+    Object.create(null),
+    Object.fromEntries(COLLECTIONS.map((collection) => [collection, []])),
+  );
   for (const record of records) {
     if (!grouped[record.collection]) grouped[record.collection] = [];
     grouped[record.collection].push(toDomainObject(record));
