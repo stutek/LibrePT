@@ -128,6 +128,9 @@ def test_menu_labels_translate_to_slovenian(page, local_server):
 
     assert "Poveži shrambo" in page.locator("#menu-connect-cloud").inner_text()
     assert "O aplikaciji" in page.locator("#menu-about").inner_text()
+    # A navigation item, not just the dialog entries — inherited from the deleted
+    # tests/e2e/test_clipboard.py, whose every other assertion test_gym_floor_flow.py already made.
+    assert page.locator("#menu-routines").inner_text().strip() == "Rutine"
     # The relocated control labels translate too.
     assert page.locator("#menu-label-lang").inner_text().strip() == "Jezik"
     assert page.locator("#menu-label-theme").inner_text().strip() == "Tema"

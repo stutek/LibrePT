@@ -10,6 +10,14 @@
 # live there (sessions day navigation, timeline scroll, continuous vertical layout) were stale
 # duplicates of the maintained versions in test_sessions_dashboard.py and were dropped rather than
 # moved.
+#
+# test_clipboard.py was deleted into this file for the same reason (2026-08-05): its whole flow —
+# logo, language switch, the Slovenian sync label, sync success, switching back, the session cards,
+# the card tap, the Jane/John participant tabs — was a strict prefix of STEPS 1-3 below. Its one
+# assertion this file did not already make (a NAVIGATION item translating, `#menu-routines` ==
+# "Rutine", rather than only the dialog entries) moved down to
+# tests/medium/test_header_menu.py::test_menu_labels_translate_to_slovenian, where menu translation
+# already lives. Two near-identical full-app flows cost ~9s per run to assert the same thing twice.
 
 
 def test_interactive_dashboard_flow(page, local_server):
