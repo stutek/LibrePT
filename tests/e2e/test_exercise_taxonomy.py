@@ -3,6 +3,9 @@
 # UC6): the list shows equipment + pattern badges instead of instructions; the routine builder drops
 # standardized movement IDs via a filtered picker (Scenario A); and custom-exercise creation forces
 # a muscle group, equipment, and movement pattern so volume analytics stay clean (Scenario C).
+# The catalog-view halves (taxonomy badges, custom-exercise required fields) moved to
+# tests/medium/test_exercise_catalog.py; what remains spans views — the picker drops a movement
+# into the routine builder and the builder row reflects its modality.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
 
@@ -17,19 +20,6 @@ def _nav(page, path):
         path,
     )
     page.wait_for_timeout(300)
-
-
-def test_catalog_shows_taxonomy_badges_not_instructions(page, local_server):
-    page.goto(local_server)
-    page.wait_for_timeout(500)
-    _nav(page, f"{_base(page)}/exercises")
-
-    assert page.locator("#view-exercises .taxonomy-badge").count() > 0, (
-        "exercise cards should show equipment/pattern taxonomy badges"
-    )
-    assert page.locator("#view-exercises .exercise-instructions").count() == 0, (
-        "instructional text should be gone from the professional taxonomy view"
-    )
 
 
 def test_routine_builder_picker_drops_a_movement(page, local_server):
@@ -54,28 +44,6 @@ def test_routine_builder_picker_drops_a_movement(page, local_server):
     assert page.locator("#routine-exercises-list > *").count() == 1, (
         "tapping a movement should drop a configured row into the template"
     )
-
-
-def test_custom_exercise_requires_taxonomy(page, local_server):
-    page.goto(local_server)
-    page.wait_for_timeout(500)
-    _nav(page, f"{_base(page)}/exercises")
-
-    page.click("#btn-add-exercise")
-    page.wait_for_selector("#dialog-exercise[open]")
-
-    # Strict inheritance (Scenario C): equipment + movement pattern are mandatory.
-    assert (
-        page.evaluate("() => document.getElementById('exercise-equipment').required")
-        is True
-    )
-    assert (
-        page.evaluate("() => document.getElementById('exercise-pattern').required")
-        is True
-    )
-    # Options are seeded canonical taxonomy enums.
-    assert page.locator("#exercise-equipment option[value='Barbell']").count() == 1
-    assert page.locator("#exercise-pattern option[value='Hinge']").count() == 1
 
 
 def test_routine_builder_row_is_modality_aware(page, local_server):

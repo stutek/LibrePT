@@ -30,6 +30,42 @@ def load_with_stub(page, local_server, stub_js_body):
     page.goto(local_server)
 
 
+def view_stub(imports, view_id, body):
+    """Build a stub that mounts ONE view: its shell markup, activated, then `body`.
+
+    A view needs three things the header/dialog components do not, which is why they could not use
+    HEADER_STUB and stayed in tests/e2e/ through the first pass:
+
+      1. its shell markup injected into `#main-content` (each view module owns its own `<section>`;
+         `index.html` holds only the empty canvas), via the module's own `renderXViewShell()`;
+      2. that section marked `.active` — the single thing `routerController.switchView` does that
+         matters here, reproduced directly so no router has to be booted;
+      3. its render function called with a state, since nothing seeds one.
+
+    `imports` is the literal import block, `view_id` the section's id WITHOUT the `view-` prefix,
+    and `body` the mount code. The demo dataset comes from `src/data/index.js` — the same seed the
+    real app uses — so counts asserted here ("eight seeded clients") stay true to production rather
+    than to a fixture that could drift away from it.
+    """
+    return f"""
+{imports}
+import {{ TRANSLATIONS }} from './i18n/index.js';
+
+const t = (key) => TRANSLATIONS.en[key] || key;
+const noop = () => {{}};
+
+// switchView() also clears nav highlighting and resolves a main tab; a single mounted view has
+// neither, so activating the section is the whole of what it does that this tier can observe.
+function activateView(id) {{
+  for (const view of document.querySelectorAll('.app-view')) view.classList.remove('active');
+  document.getElementById(`view-${{id}}`)?.classList.add('active');
+}}
+
+{body}
+activateView('{view_id}');
+"""
+
+
 # Shared by every test that needs the real header shell + its two route-backed dialogs (Sync &
 # Backup, Drive sync card) — three separate components (applicationHeader.js, backupRestore.js,
 # driveSyncUi.js) that always boot together in production and share the #backup-btn click wiring
