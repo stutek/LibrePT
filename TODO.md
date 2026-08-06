@@ -1344,48 +1344,18 @@ data, so this is a compliance answer, not a mood). Also **narrow the wedge**: do
 - [ ] **No feedback route a non-developer will use.** GitHub issues is a wall to a PT; one email
       address or form, linked in-app. See [docs/BUG_REPORTING.md](docs/BUG_REPORTING.md).
 
-### 23.6 [ ] Campaign: "Prvih deset" — 10 Slovenian trainers, 12 weeks
-The concrete first campaign, chosen over an online launch because **the whole Slovenian market is
-small enough to enumerate** — likely a few hundred to ~1,500 working trainers (verify). That removes
-the need for a funnel, a budget, or a growth loop; it needs a list of names and a calendar, which no
-international competitor can assemble. Two consequences shape everything below: the shipped SL
-translation is a genuine moat (every competitor is English-only), and **a small market is one
-reputation graph** — burning ten trainers with a preview build that eats their data does not cost
-ten users, it closes the country. Hence this is explicitly **not a launch**.
+### 23.6 [ ] Campaign plan — kept private, not in this repo
+The concrete Slovenia-first campaign (target list, outreach scripts, timing, named institutions and
+gyms) lives OUTSIDE version control, at `.private/go-to-market-campaign.md`, ignored via the
+`.private/` rule in `.gitignore`. It is deliberately not committed: it names specific gyms and
+contacts, quotes draft outreach copy, and is candid about the reputational risk of promoting a
+preview build — none of which belongs in a public repository.
 
-**Framing:** design-partner recruitment. Not "adopt my software" but "help me build this, it is
-unfinished, it is free and always will be." That converts *better* with no reputation behind it,
-because it is a request a trainer can accept in thirty seconds.
+What stays public is the reasoning above (§23.1–§23.5), which is useful to any contributor and
+names nobody. When acting on the campaign, read the private file; when changing the *strategy*,
+update both so they do not drift.
 
-**Success metric — one number:** 10 trainers who log a **real session** in a given week, sustained
-8 weeks. Not installs, stars, or signups. Failing to reach 10 in an entire country is a product
-signal, not a marketing one, and is worth learning cheaply.
-
-- [ ] **Phase 0 — assets (2 weeks, before talking to anyone).** The §23.5 checklist, plus
-      **printed QR cards** to the SL demo deep-link (~€30 for 250): a trainer mid-shift will not
-      type a URL but will scan a card and look at it later, and unlike a conversation the card
-      survives. Public pitch must not mention Calendar or Drive sync until they work.
-- [ ] **Phase 1 — the gym walk (weeks 3–8, the core).** Target ~30 conversations → 10 committed
-      trainers. Visit during **dead hours, 10:00–15:00** — PTs are unreachable 6–9 and 16–21.
-      Ljubljana first (probably a third of the country's working PTs), then Maribor, Kranj, Celje,
-      Koper. **Do not demo the app**: ask to shadow one session, say nothing, log it yourself in
-      parallel, then hand over the phone with their own session already on screen. Close with
-      *"can I text you on Sunday and ask what broke?"* — a yes is a design partner, a hedge is not,
-      and is not chased.
-- [ ] **Phase 2 — institutions (weeks 6–16, parallel).** Where a small market compounds, because
-      the unit of persuasion becomes a gatekeeper rather than a trainer. **Fakulteta za šport (UL)**
-      is the highest-leverage target in the country — it produces the kinesiologists who become
-      Slovenia's PTs, and a lecturer mentioning a free tool reaches a full cohort every year.
-      Kinesiology at UP Koper is the same play, smaller. Also: whoever actually issues the *licenca
-      za osebnega trenerja* and runs the CPD courses (names to verify), and **gym owners**, pitched
-      a different benefit than trainers — record consistency across staff turnover.
-- [ ] **Phase 3 — only after the PREVIEW badge is gone.** SL Facebook groups, Instagram (the
-      profession's own platform; the same clip weekly), then the channels in §23.2–§23.3. A public
-      post is permanent and cannot be un-rung in a market this size.
-- [ ] **Weekly measurement, four numbers:** conversations had, trainers who logged a session this
-      week, sessions logged total, and the one that actually predicts retention — **how many would
-      be annoyed if it vanished tomorrow.** If that is 2/10, distribution is not the problem.
-- [ ] **Explicit non-goals:** no waitlist, no "launch", no ad spend, no r/personaltraining, no
-      chasing anyone who hesitates, and **no feature built on one trainer's request** until three
-      ask independently — one loud early user will otherwise redirect the roadmap onto their own
-      quirks.
+**The one deadline worth recording here:** the demo recording and landing page in §23.5 gate every
+outreach channel, and the highest-leverage target (a sport-science faculty, whose academic year
+starts in autumn) is only reachable in a late-August-to-mid-September window. Missing it slips that
+channel by a full semester.

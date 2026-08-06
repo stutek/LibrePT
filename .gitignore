@@ -25,3 +25,8 @@ dist/
 
 # Captured test-runner output from the build gate (build/testreport.py)
 .build-reports/
+
+# Private working notes that must not ship in a public repo — go-to-market and
+# outreach material naming specific gyms, contacts, and competitive tactics.
+# See TODO.md §23 for the part of the analysis that IS public.
+.private/
