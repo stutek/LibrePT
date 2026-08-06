@@ -1264,3 +1264,82 @@ Both fixed 2026-08-05.
 **The general lesson, worth keeping:** a stub that hand-duplicates production wiring will agree with
 itself and disagree with the app. Both defects hid behind exactly that. Mount the real `bootXyz`
 step, or the test proves only that the test is self-consistent.
+
+---
+
+## 23. [Brainstorm] Go-to-market — audiences, channels, and what blocks a launch
+
+Captured 2026-08-06 from a GTM discussion. Nothing here is decided; the point is that promotion is
+sequenced work with prerequisites, not a post that can be written on a whim. **The governing fact
+is [docs/PREVIEW.md](docs/PREVIEW.md)**: the app currently tells its own users it can wipe their
+data and is "not for running your real business on yet". A successful trainer-facing launch in that
+state is the worst available outcome — one first impression per person, spent on a build that will
+lose their clients' records.
+
+### 23.1 [ ] [Decide] What "winning" means, before any channel is chosen
+Every downstream choice hangs on this and it is unresolved. The candidates pull in different
+directions: **users** (a trainer roster to learn from), **contributors** (a project that survives
+one maintainer), **credibility** (a portfolio artefact), or **a future paid tier** (hosted sync,
+which would reintroduce the data-processor exposure deliberately avoided in [§1.5](#15--brainstorm-google-calendar-integration--source-of-truth-occupancy-and-data-processor-exposure)).
+Pick one as primary — optimising for all four picks none.
+
+### 23.2 [ ] Two motions, sequenced — dev audience now, trainers only after PREVIEW comes off
+- **Now (preview is acceptable here).** Developers expect pre-release software and are not harmed
+  by it. r/selfhosted (angle: no backend, no account, data never leaves the browser), r/opensource,
+  r/webdev Showoff Saturday, r/PWA. **Show HN** is a one-shot and should be spent only once a demo
+  recording exists (§23.5). Durable, compounding placements beat any single post: a PR to
+  **awesome-selfhosted**, an **AlternativeTo** listing against Trainerize / TrueCoach / My PT Hub /
+  PT Distinction, and **F-Droid** if [§9.6](#96--tbd-install-as-an-offline-android--ios-app) ever
+  lands. Product Hunt is largely vanity — low priority.
+- **Also now, and higher value:** recruit 5–15 trainers **as design partners, not users**, by hand.
+  Ten trainers who reply are worth more than a thousand stars.
+- **Later (only once the PREVIEW badge is gone and sync works).** The real trainer-facing launch.
+
+### 23.3 [ ] Channel ranking for the trainer audience — Reddit is not the top of it
+Reddit's PT subs (r/personaltraining, r/personaltrainerbusiness, r/fitnesscoaching) skew toward
+*aspiring* and newly-certified trainers; the person who needs a gym-floor clipboard has a full
+roster and is on their feet all day, not browsing software forums. r/personaltraining is worth
+entering eventually, but **via months of helpful comments in the recurring "what software do you
+use" threads, never a launch post** — those get removed. Higher-density channels, best first:
+1. **Gyms and studios, in person.** One manager adopting it reaches 5–20 trainers at once. Best
+   conversion per conversation available, and the shipped SL translation makes Slovenia the
+   natural first market.
+2. **Facebook groups** — national/local PT groups, online-coaching groups, certification alumni.
+   Where working trainers actually ask the software question.
+3. **Certification bodies and federations** — EREPS, NASM/ACE/ISSA alumni channels, Fitnes zveza
+   Slovenije. One newsletter mention outreaches any forum post.
+4. **PT education providers.** Students cannot afford subscription SaaS; entering a curriculum
+   yields a cohort every year.
+5. **Instagram / short-form video** — the profession's own platform. Not a link drop: 15 seconds of
+   one-handed set logging, which is native to both the format and the audience.
+6. **LinkedIn** — reaches the gym-owner/manager tier, i.e. the buyers for (1).
+
+### 23.4 [ ] Positioning — "open source" is the proof, not the pitch
+Trainers do not buy licences, and the name reads as opaque to them. The claims that land, and each
+is already true: **free, no subscription** (the entire competitive set is $20–100/month); **no
+signup, no account — open a link and you are using it**; **works with no signal** (basement gyms
+kill every cloud app); **client data never leaves your phone** (EU trainers legally hold health
+data, so this is a compliance answer, not a mood). Also **narrow the wedge**: do not pitch
+"replace your PT software" — switching costs are brutal and they already have a system. Pitch the
+**clipboard**, the one job they all hate, and expand from there.
+
+### 23.5 [ ] Launch prerequisites — these block promotion more than channel choice does
+- [ ] **No screenshots or video exist anywhere in the repo.** Nobody adopts a UI tool they cannot
+      see. A 20–30s recording of a real set being logged one-handed — tap, `⬆ Load Up Next`, next
+      participant — is the single highest-leverage asset and is an afternoon of work. Blocks
+      everything else here.
+- [ ] **No landing page.** [README.md](README.md) is developer-facing (correctly) and the app boots
+      empty. A trainer arriving from any of §23.3 needs one screen: what it is, the recording,
+      "try it now", "add to home screen".
+- [ ] **Share only the demo deep-link, never the bare URL.** `?init=demo_data_load&lang=…&theme=…`
+      already exists and is an unfair advantage no competitor can match — comment to working
+      clipboard in three seconds, no email gate. It also papers over the missing onboarding below.
+- [ ] **Two headline README features are not shippable.** Google Calendar is unbuilt
+      ([§1.5](#15--brainstorm-google-calendar-integration--source-of-truth-occupancy-and-data-processor-exposure))
+      and the Drive OAuth client ID is still uncreated, so [§3.3](#33-x-google-drive-periodic-sync)
+      sync works for nobody but the maintainer. Either ship them or trim the public pitch to what
+      runs today — promoting either now is promising vapor.
+- [ ] **No onboarding for an empty app** ([§9.5](#95--guided-walkthrough-engine-step-overlay) is
+      unbuilt). A trainer landing on a blank client list churns in ten seconds.
+- [ ] **No feedback route a non-developer will use.** GitHub issues is a wall to a PT; one email
+      address or form, linked in-app. See [docs/BUG_REPORTING.md](docs/BUG_REPORTING.md).
