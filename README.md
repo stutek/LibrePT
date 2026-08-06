@@ -223,7 +223,8 @@ LibrePT/
 │   ├── modules/        # Feature modules & UI components (session, clipboard, plans, clients, exercises, common, themes)
 │   ├── controllers/    # SPA router, theme, and PWA lifecycle controllers
 │   ├── fonts/          # Locally-vendored webfonts (no third-party font origin)
-│   └── icons/          # PWA install icons (dumbbell mark, matching the in-app logo and favicon)
+│   └── icons/          # PWA install icons + favicon, all rendered from assets/icon-master.png
+├── assets/             # Design sources kept OUT of src/ so they never ship in dist/ (icon master artwork)
 ├── build/              # Build steps (verify → build): env check, tests, bundle src/ → dist/ (python -m build)
 ├── deploy/             # Deploy step + local dev server (local_http_server.py) — python -m deploy
 ├── dist/               # Build output: flattened, base-rewritten app shell for GitHub Pages

@@ -28,8 +28,10 @@
        1948ms median / 35233ms worst case under a parallel test run (TODO §21). -->
   <link rel="stylesheet" href="fonts/fontawesome.css">
   
-  <!-- Inline SVG favicon: the Font Awesome dumbbell path in --primary emerald, matching the header logo mark -->
-  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%20-64%20640%20640'%3E%3Cpath%20fill='%2310b981'%20d='M96%2064c0-17.7%2014.3-32%2032-32h32c17.7%200%2032%2014.3%2032%2032V224v64V448c0%2017.7-14.3%2032-32%2032H128c-17.7%200-32-14.3-32-32V384H64c-17.7%200-32-14.3-32-32V288c-17.7%200-32-14.3-32-32s14.3-32%2032-32V160c0-17.7%2014.3-32%2032-32H96V64zm448%200v64h32c17.7%200%2032%2014.3%2032%2032v64c17.7%200%2032%2014.3%2032%2032s-14.3%2032-32%2032v64c0%2017.7-14.3%2032-32%2032H544v64c0%2017.7-14.3%2032-32%2032H480c-17.7%200-32-14.3-32-32V288%20224%2064c0-17.7%2014.3-32%2032-32h32c17.7%200%2032%2014.3%2032%2032zM416%20224v64H224V224H416z'/%3E%3C/svg%3E">
+  <!-- Favicon: the whistle alone, not the full clipboard mark the launcher icons use. At tab size
+       the composition collapses into a smudge, so this one crop is rendered from the same master
+       (assets/icon-master.png) by `python -m agent_tools.icon_render` — never hand-edited. -->
+  <link rel="icon" href="icons/icon-32.png" type="image/png" sizes="32x32">
 
   <!-- Custom Styles: index.css carries shared design tokens, glass-card/button/flex foundations
        and color scheme, loaded first. Per-module stylesheets below add only what that module owns
