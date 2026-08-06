@@ -330,7 +330,8 @@ made by every test in every tier. Measured under 8 parallel fresh contexts: **19
 exactly. Days of stall-chasing were looking at the local server, the listen backlog, CPU and the
 service worker — none of which were ever involved, because the slow request never touched them.
 
-- Vendored to `src/fonts/fontawesome.css` + four woff2 files, matching the existing `fonts.css`
+- Vendored to `src/fonts/fontawesome.css` + two woff2 files (four initially; see the trim below),
+  matching the existing `fonts.css`
   pattern: woff2 only (the `.ttf` fallbacks would have multiplied the bytes and the integrity
   catalog for no reachable browser), upstream license banner retained, regeneration documented in
   the file header.
@@ -342,12 +343,48 @@ service worker — none of which were ever involved, because the slow request ne
   hatch is how a future CDN entry would slip past SHA-256 verification unnoticed.
 - **ZAP suppression 90003 (SRI Missing) removed**, since its entire justification was this
   stylesheet. 90004 (COEP) keeps only the half of its rationale that still holds.
-- **Size not subsetted, deliberately.** This entry planned to ship only the glyphs in use; the
-  vendored set is the full 6.4.0 (~288KB of woff2). Parity with what the CDN already served was the
-  safer first move while fixing a live gate failure, and it is all same-origin and precached now, so
-  it costs one cold load rather than a per-visit round trip. Subsetting is a follow-up
-  ([§12.7](#127--observation-low-priority-89-separate-module-requests-on-first-load) territory), not
-  a blocker.
+- **Dead faces trimmed 2026-08-06 — 29KB, no rendering change.** `fa-regular-400.woff2` and
+  `fa-v4compatibility.woff2` were vendored for parity with the CDN and used **zero** times: nothing
+  in `src/` carries a `far`/`fa-regular` class or a v4-era bare `fa fa-x` class, verified against
+  class attributes in every `.js`/`.html`. Their four `@font-face` blocks went with them. The
+  `Font Awesome 5 …`/`FontAwesome` alias faces are KEPT — they point at the solid and brands files
+  already shipped, so they cost no payload, and an unused `@font-face` never triggers a fetch.
+  Regenerating from upstream reintroduces both; the CSS header says so.
+- **Still not glyph-subsetted, and that needs a gate first.** 2 woff2 files remain (252KB):
+  `fa-solid-900` (147KB, **48 glyphs used of ~1400**) and `fa-brands-400` (105KB, **2 glyphs** —
+  `fa-github`, `fa-google-drive`). Merging into ONE file is feasible — the two sets' codepoints were
+  checked and **do not collide** — and would land ~381KB of font+CSS at roughly 24KB.
+  **The blocker is not the tooling, it is that three icon names are built at runtime**:
+  `fa-arrow-${dir}` ([applicationHeader.js](src/modules/common/applicationHeader.js)),
+  and `fa-chevron-${…}` in [sessionCard.js](src/modules/sessionList/sessionCard.js) and
+  [clipboardEditor.js](src/modules/clipboard/clipboardEditor.js). A static scan finds 46 of the 48
+  glyphs and silently misses `arrow-up`/`arrow-down`/`chevron-up`/`chevron-down` — which subsets to
+  blank boxes with no error and no failing test. So subsetting must be preceded by an explicit icon
+  manifest plus a Stage 1 gate asserting every `fa-` class in `src/` is declared in it; today a
+  missing icon is impossible, and subsetting makes it possible AND invisible.
+- **LICENSING: a subset is a "Modified Version" and must be RENAMED.** Checked against the shipped
+  licence text, not from memory. SIL OFL 1.1 explicitly permits "use, study, copy, merge, embed,
+  modify, redistribute", so subsetting and merging are allowed — but Font Awesome declares
+  `"Font Awesome"` as a **Reserved Font Name**, and the OFL defines a Modified Version as any
+  derivative made by "adding to, deleting, or substituting … any of the components". Deleting glyphs
+  qualifies. Clause 3 therefore forbids the merged font from using that name "as presented to the
+  users", so the `font-family` must become something neutral (`"LibrePT Icons"`) — no hardship,
+  since merging two families into one needs a new name anyway. Clause 2 additionally requires the
+  copyright notice and licence to travel with every copy (standalone file, human-readable header, or
+  machine-readable metadata) — and subsetting tools routinely STRIP a font's internal name table, so
+  that has to be handled deliberately rather than assumed. The icons are separately CC BY 4.0, which
+  requires attribution AND indicating that changes were made, so the notice must say the set was
+  subset.
+  **Today's state is compliant and does not rely on any of this**: both `.woff2` files are
+  byte-identical to upstream (verified by SHA-256), so no Modified Version exists yet; only the CSS
+  was edited, and that is MIT-licensed code, with the upstream attribution banner retained.
+- **Font subsetting cannot affect names in any language.** Font Awesome is an icon font: every glyph
+  is in the Private Use Area (`U+F000`–`U+F8FF`) and it contains no letters at all. Non-Latin
+  coverage is a question about `fonts.css` (latin + latin-ext only, so a CJK/Cyrillic name renders
+  through the CSS fallback chain rather than in-brand — deliberate, since a CJK webfont is megabytes
+  shipped to every trainer). `--font-sans` terminates in `sans-serif`, and `getInitials()` derives
+  real initials from Han/Cyrillic/Greek/Arabic names rather than falling back to `PT` — now pinned
+  in [utils.test.mjs](tests/unit_js/modules/common/utils.test.mjs).
 
 ### 12.7 [ ] [Observation, low priority] ~89 separate module requests on first load
 The buildless native-ES-module design means a cold visit fetches ~89 files. In production this is

@@ -31,3 +31,42 @@ test("initials from a hostile name stay alphanumeric", () => {
   assert.equal(derived.punctuation, "PT");
   assert.equal(derived.empty, "PT");
 });
+
+// A client's name is user data and can be in any script. The vendored webfonts cover latin +
+// latin-ext only (src/fonts/fonts.css), so a non-Latin name renders via the CSS fallback chain
+// rather than in-brand — that is a deliberate size trade-off and works fine. What must NOT happen
+// is the DERIVED initials degrading: getInitials builds an avatar label by hand, and the "nothing
+// alphanumeric here" fallback (`PT`) would erase a perfectly good name if the regex stopped
+// recognising a script. Today's behaviour is correct but was never pinned, so pin it.
+test("initials are derived from non-Latin names, not replaced by the fallback", () => {
+  const derived = {
+    han: getInitials("王小明"),
+    hanSpaced: getInitials("山田 太郎"),
+    cyrillic: getInitials("Милан Петров"),
+    greek: getInitials("Γιώργος"),
+    arabic: getInitials("مريم"),
+    latinExt: getInitials("Ana Švab"),
+  };
+
+  for (const [script, value] of Object.entries(derived)) {
+    assert.equal(
+      value,
+      value.toString(),
+      `${script} produced a non-string: ${JSON.stringify(value)}`,
+    );
+    assert.notEqual(
+      value,
+      "PT",
+      `${script} fell back to the placeholder instead of using the name`,
+    );
+    assert.equal(value.length > 0, true, `${script} produced empty initials`);
+  }
+
+  // Two-glyph initials for a two-part name, one script or mixed spacing.
+  assert.equal(derived.han, "王小");
+  assert.equal(derived.hanSpaced, "山太");
+  assert.equal(derived.cyrillic, "МП");
+  assert.equal(derived.greek, "ΓΙ");
+  assert.equal(derived.arabic, "مر");
+  assert.equal(derived.latinExt, "AŠ");
+});
