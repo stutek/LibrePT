@@ -221,6 +221,38 @@ An on-the-fly edit mode for the active session clipboard (`src/components/clipbo
 - Allows swapping exercises, retargeting sets/reps/weight, reordering rows via tap or drag (`.editor-reorder`), adding new exercises, and adjusting rest breaks directly inside the live session without leaving the gym floor.
 - To apply later: `git apply patches/inline_clipboard_editor.patch`.
 
+### 8.7 [ ] [Discuss] Should completing a circuit ROUND stop its timer, like completing the block does?
+**Raised 2026-08-06 (Simon).** The behaviour is currently asymmetric, and the asymmetry was never
+decided — it fell out of where the code happened to put the call.
+[`completeCircuitRound`](src/controllers/activeSessionController.js) does two different things
+depending on which round you are on:
+
+- **Final round** — logs are marked complete, focus moves past the block, and
+  `stopTimerIfMatches(clientId, { type: "circuit", id: circuitId })` **freezes** any timer bound to
+  that circuit. Freeze, not clear: the trainer sees it held at its final value and dismisses it with
+  ✕ themselves, so a number they might still want to read is never yanked away.
+- **Any earlier round** — the round counter increments and **the timer is left entirely alone**.
+
+So tapping the same control does or does not touch the timer depending on a number the trainer is
+not looking at. The question is which behaviour is right for the earlier rounds.
+
+- **Argument for leaving it running**: between rounds of a circuit, a running rest countdown is
+  exactly what the trainer is pacing off. Freezing it at round 2 of 4 would destroy the thing they
+  started it for, and they would have to restart it every round.
+- **Argument for stopping it**: the round is over, so a timer started *against that round* is
+  measuring nothing. Whether that is true depends on what the timer was started FOR — and
+  `focusRef` only records `{type: "circuit", id}`, so the app currently cannot tell "resting between
+  rounds" from "timing this round's work". That may be the real gap: the decision needs a
+  distinction the data model does not yet make.
+- **Worth checking against the gym floor before coding either**: what does the trainer physically do
+  at the end of a round — start a rest, or keep the same clock running through the whole block?
+  §8.6's rests-as-first-class-items means a between-rounds rest can now be a real plan item with its
+  own timer, which may make the question moot for well-authored circuits and only relevant for
+  ad-hoc ones.
+
+No behaviour change until this is settled; the entry exists so the asymmetry is a recorded decision
+rather than an accident nobody revisits.
+
 ### 8.6 [x] Rests are first-class, focusable plan items — see CHANGELOG
 Polymorphic `DeckCard` hierarchy ([deckCard.js](src/modules/clipboard/deckCard.js) +
 subclasses) — full build notes graduated to [CHANGELOG.md](CHANGELOG.md).
