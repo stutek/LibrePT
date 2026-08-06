@@ -1,3 +1,13 @@
+/* Copyright 2014 The DM Sans Project Authors (https://github.com/googlefonts/dm-fonts)
+ * Copyright 2021 The Outfit Project Authors (https://github.com/Outfitio/Outfit-Fonts)
+ * Copyright 2020 The JetBrains Mono Project Authors (https://github.com/JetBrains/JetBrainsMono)
+ *
+ * These three families are licensed under the SIL Open Font License 1.1
+ * (https://openfontlicense.org). OFL clause 2 requires this notice to travel with every
+ * redistributed copy — and these woff2 files ARE redistributed, served to every visitor from the
+ * published build, not just used at development time. Subsetting to a unicode range is a permitted
+ * modification; no glyph outlines were altered. See THIRD_PARTY_NOTICES.md. */
+
 /* src/fonts/fonts.css — LibrePT-vendored variable webfonts (DM Sans, Outfit, JetBrains
  * Mono), latin + latin-ext subsets only (latin-ext covers Slovenian č/š/ž). Vendored from
  * Google Fonts so the offline-first PWA has ZERO third-party font origin: no fonts.googleapis

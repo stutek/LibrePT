@@ -22,6 +22,7 @@ This index provides AI agents and contributors with a structured navigation map 
 | [TODO.md](TODO.md) | `roadmap` | Backlog of planned features, UX changes, and unresolved design questions awaiting brainstorming. |
 | [docs/DATA_MODEL.md](docs/DATA_MODEL.md) | `architecture` | Data model & storage schema: IndexedDB layout, logical record model, star-write projections, migration order and retention. |
 | [docs/ROUTING.md](docs/ROUTING.md) | `architecture` | Routing architecture: the Route class hierarchy and registry, specificity-based resolution, the `ctx` a route receives, routing invariants, and how to add a route. |
+| [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) | `guidelines` | Copyright notices and licences for the fonts and icon font vendored into `src/` and therefore redistributed in every published build (SIL OFL 1.1, CC BY 4.0, MIT), plus the changes made to each. |
 | [AGENT_RULES.md](AGENT_RULES.md) | `guidelines` | Mandatory interaction protocols, direct execution rules, and single-source-of-truth guardrails for AI agents. |
 | [agent_tools/INDEX.md](agent_tools/INDEX.md) | `index` | Catalog of durable, repo-owned agent tools — run these instead of improvising a throwaway script, and the bar a new one must clear. |
 | [okf.yaml](okf.yaml) | `manifest` | Root configuration manifest declaring OKF v0.1 compliance and catalog entrypoints. |

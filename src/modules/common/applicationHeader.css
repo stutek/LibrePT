@@ -373,3 +373,42 @@ select.menu-select {
 .sync-badge i {
   font-size: 9px;
 }
+
+/* Attribution block in the About dialog. Collapsed by default so the dialog still opens on the
+   product description, but reachable in ONE tap — the notices must be present in the installed app,
+   not only in the repository (run_build ships src/ only, so THIRD_PARTY_NOTICES.md never reaches a
+   phone). The summary is a real touch target, not 9px of text: licence text is exactly the kind of
+   thing a support request needs and a sweaty thumb has to hit (AGENT_RULES §2.D.1). */
+.about-attribution {
+  margin-top: 0.75rem;
+  border-top: 1px solid var(--border-color, rgba(128, 128, 128, 0.25));
+  padding-top: 0.5rem;
+}
+
+.about-attribution > summary {
+  cursor: pointer;
+  padding: 0.6rem 0.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted, inherit);
+  list-style: none;
+}
+
+.about-attribution > summary::-webkit-details-marker {
+  display: none;
+}
+
+.about-attribution > summary::after {
+  content: " ▾";
+  opacity: 0.6;
+}
+
+.about-attribution[open] > summary::after {
+  content: " ▴";
+}
+
+.about-attribution .dialog-desc {
+  font-size: 0.78rem;
+  line-height: 1.5;
+  opacity: 0.85;
+}

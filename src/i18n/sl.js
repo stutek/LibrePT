@@ -290,6 +290,7 @@ export const sl = {
   about_body:
     "LibrePT je brezplačen odprtokoden pripomoček za osebne trenerje, ki deluje brez povezave — načrtujte seje, jih izvajajte v telovadnici in spremljajte napredek strank. Privzeto vsi podatki ostanejo na vaši lokalni napravi, razen če se odločite za sinhronizacijo s svojo osebno shrambo v oblaku.",
   about_repo: "Oglejte si projekt na GitHubu",
+  about_licenses: "Licence in zasluge",
   terms_title: "Pogoji in izjava o odgovornosti",
   terms_body:
     'LibrePT je na voljo "kakršen je", brez kakršnega koli jamstva. Ne predstavlja zdravstvenega ali strokovnega nasveta za treniranje. Vaši podatki so shranjeni na vaši lokalni napravi (z neobveznimi integracijami osebne shrambe v oblaku/varnostnih kopij, ki jih omogočite sami), sami pa ste odgovorni za njihovo upravljanje. Uporaba je na lastno odgovornost.',

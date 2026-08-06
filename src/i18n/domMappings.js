@@ -27,6 +27,7 @@ export function applyStaticDOMMappings(tDict) {
     "#about-title": "about_title",
     "#about-body": "about_body",
     "#about-repo-link": "about_repo",
+    "#about-licenses-label": "about_licenses",
     "#terms-title": "terms_title",
     "#terms-body": "terms_body",
     "#btn-terms-agree": "terms_agree",

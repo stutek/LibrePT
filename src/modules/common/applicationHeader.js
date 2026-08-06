@@ -187,6 +187,32 @@ export function renderAboutDialog() {
       <a id="about-repo-link" class="btn secondary-btn w-full" href="https://github.com/stutek/LibrePT" target="_blank" rel="noopener noreferrer">
         <i class="fa-brands fa-github"></i> View the project on GitHub
       </a>
+      <!-- Attribution has to be reachable from the INSTALLED app, not only the repository:
+           THIRD_PARTY_NOTICES.md lives at the repo root and run_build copies only src/, so a phone
+           user would never see it. CC BY 4.0 requires attribution and the SIL OFL requires its
+           notice to travel with each redistributed copy — and these fonts are redistributed to
+           every visitor. A <details> keeps it one tap away instead of hidden behind a hover, which
+           on a touch device would mean not present at all (AGENT_RULES §2.D.1).
+           Copyright lines and licence names are deliberately NOT translated: they are legal
+           identifiers, and altering them defeats the notice. Only the summary label is. -->
+      <details class="about-attribution">
+        <summary id="about-licenses-label">Licences &amp; attribution</summary>
+        <p class="dialog-desc">
+          LibrePT is MIT-licensed. Copyright &copy; 2026 Simon Tutek.
+        </p>
+        <p class="dialog-desc">
+          Icons: <a href="https://fontawesome.com/license/free" target="_blank" rel="noopener noreferrer">Font Awesome Free 6.4.0</a>,
+          copyright 2023 Fonticons, Inc. — icons CC BY 4.0, fonts SIL OFL 1.1, code MIT.
+          The stylesheet was modified (local paths, unused faces removed); the fonts are unmodified.
+        </p>
+        <p class="dialog-desc">
+          Typefaces, all under the <a href="https://openfontlicense.org" target="_blank" rel="noopener noreferrer">SIL Open Font License 1.1</a>,
+          subset to latin + latin-ext:
+          DM&nbsp;Sans (copyright 2014 The DM Sans Project Authors),
+          Outfit (copyright 2021 The Outfit Project Authors),
+          JetBrains&nbsp;Mono (copyright 2020 The JetBrains Mono Project Authors).
+        </p>
+      </details>
     </div>
   </dialog>
 `,

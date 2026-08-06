@@ -291,6 +291,7 @@ export const en = {
   about_body:
     "LibrePT is a free, open-source, offline-first clipboard for personal trainers — schedule sessions, run them on the gym floor, and track client progress. By default, all data stays on your local device unless you choose to sync with your personal cloud storage.",
   about_repo: "View the project on GitHub",
+  about_licenses: "Licences & attribution",
   terms_title: "Terms & Disclaimer",
   terms_body:
     'LibrePT is provided "as is", without warranty of any kind. It is not medical, health, or professional training advice. Your data is stored on your local device (with optional personal cloud storage/backup integrations enabled by you) and you are responsible for its management. Use at your own risk.',

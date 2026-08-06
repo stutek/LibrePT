@@ -280,3 +280,8 @@ Because LibrePT is used one-handed on a gym floor, changes are evaluated against
 LibrePT is released under the [MIT License](LICENSE).
 
 Copyright (c) 2026 Simon Tutek.
+
+The vendored webfonts and icon font carry their own licences and are redistributed in every
+published build — see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the copyright notices,
+licences (SIL OFL 1.1, CC BY 4.0, MIT) and the changes made to each. None of them restricts use of
+LibrePT.
