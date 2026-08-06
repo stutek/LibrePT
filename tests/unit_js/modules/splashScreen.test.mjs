@@ -14,6 +14,8 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import {
+  demoDataUrl,
+  isSplashDisabled,
   remainingHoldMs,
   requestedMinimumVisibleMs,
 } from "../../../src/modules/splash/splashScreen.js";
@@ -43,4 +45,26 @@ test("the hold is what REMAINS of the minimum, not the minimum again", () => {
 
 test("a boot slower than the minimum owes no further hold", () => {
   assert.equal(remainingHoldMs(4000, 9000), 0);
+});
+
+test("the demo link reuses the app's own deep-link params, and suppresses the splash", () => {
+  const url = new URL(demoDataUrl("http://localhost:8081/LibrePT/?lang=sl"));
+  assert.equal(url.searchParams.get("init"), "demo_data_load");
+  assert.equal(url.searchParams.get("splash"), "off");
+  // Whatever else was on the URL survives — a demo link can still carry a language or theme.
+  assert.equal(url.searchParams.get("lang"), "sl");
+  assert.equal(url.pathname, "/LibrePT/");
+});
+
+test("the demo link overwrites a contradictory splash param rather than appending one", () => {
+  const url = new URL(demoDataUrl("http://localhost:8081/LibrePT/?splash=on"));
+  assert.deepEqual(url.searchParams.getAll("splash"), ["off"]);
+});
+
+test("splash=off disables the splash entirely, onboarding included", () => {
+  // dismissSplashWhenReady gates the onboarding panel on this too: the parameter means "put me in
+  // the app", and a blocking panel would contradict that — the browser suite depends on it.
+  assert.equal(isSplashDisabled("?splash=off"), true);
+  assert.equal(isSplashDisabled("?splash=on"), false);
+  assert.equal(isSplashDisabled(""), false);
 });

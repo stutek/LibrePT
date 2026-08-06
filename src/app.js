@@ -559,8 +559,10 @@ function setupActiveSession() {
     saveToLocalStorage: saveState,
   });
 
-  // Deliberately last: the splash comes down only once every component above is wired.
-  appBoot.bootSplashScreen({});
+  // Deliberately last: the splash comes down only once every component above is wired. With an
+  // empty database it does not come down at all — it becomes the onboarding entry point and waits
+  // for the trainer to pick demo data or an empty app.
+  appBoot.bootSplashScreen({ offerOnboarding: !stateHasData(getState()) });
 }
 
 function cancelWorkoutSession() {

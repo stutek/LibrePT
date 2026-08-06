@@ -95,7 +95,26 @@
     <!-- Static English, like the integrity-error overlay below: both paint before i18n/index.js has
          loaded, so there is no dictionary to translate against yet. -->
     <p class="app-splash-tagline">A lightweight, free app for your clipboard, sessions and training programmes.</p>
-    <div class="app-splash-progress" aria-hidden="true"></div>
+    <div id="app-splash-progress" class="app-splash-progress" aria-hidden="true"></div>
+
+    <!-- Onboarding entry point. Revealed by splashScreen.js in place of the progress sweep, once
+         the hold is over, but ONLY while the trainer has saved nothing of their own — no client,
+         session, exercise or plan (data/stateStore.js's stateHasData). It is not a first-run
+         one-shot: someone who skips it and closes the app gets the offer again next launch, and it
+         stops appearing the moment they have real data. -->
+    <div id="app-splash-onboarding" class="app-splash-onboarding" hidden>
+      <button type="button" id="splash-load-demo" class="app-splash-action app-splash-action-primary">
+        <i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i>
+        <span>Explore with demo data</span>
+      </button>
+      <button type="button" id="splash-walkthrough" class="app-splash-action" disabled
+              aria-describedby="splash-walkthrough-soon">
+        <i class="fa-solid fa-circle-play" aria-hidden="true"></i>
+        <span>Guided walkthrough</span>
+        <span id="splash-walkthrough-soon" class="app-splash-soon">soon</span>
+      </button>
+      <button type="button" id="splash-start-empty" class="app-splash-skip">Start with an empty app</button>
+    </div>
   </div>
 
   <!-- Integrity error page: a blocking overlay shown only when the service worker fails to verify a

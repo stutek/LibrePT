@@ -124,6 +124,96 @@
   animation: splash-sweep 1500ms cubic-bezier(0.65, 0, 0.35, 1) infinite;
 }
 
+/* Onboarding entry point — replaces the progress sweep once the hold is over and the trainer has
+   no data yet. Buttons are full-width and 48px tall: this is the first thing a new user touches,
+   often one-handed on a phone, so the targets are sized for a thumb rather than for the text. */
+.app-splash-onboarding {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  width: min(100%, 320px);
+  margin-top: 8px;
+  animation: splash-rise 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.app-splash-onboarding[hidden] {
+  display: none;
+}
+
+.app-splash-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 48px;
+  padding: 0 18px;
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  background: var(--card-bg);
+  color: var(--text-main);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.12s ease, border-color 0.12s ease;
+}
+
+.app-splash-action:hover:not(:disabled),
+.app-splash-action:focus-visible:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: var(--primary);
+  outline: none;
+}
+
+.app-splash-action-primary {
+  border-color: transparent;
+  background: var(--primary-gradient, var(--primary));
+  color: var(--on-primary, #fff);
+}
+
+/* The walkthrough is announced but not built yet (it waits on the UI settling). Disabled and
+   visibly labelled rather than hidden: a trainer deciding whether to invest time in this app is
+   told what is coming, and nothing here pretends to work and then does nothing. */
+.app-splash-action:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.app-splash-soon {
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--primary-light, rgba(16, 185, 129, 0.16));
+  color: var(--primary);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.app-splash-skip {
+  padding: 10px 8px; /* a real target, not just the 14px of text */
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 14px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.app-splash-skip:hover,
+.app-splash-skip:focus-visible {
+  color: var(--text-main);
+  outline: none;
+}
+
+/* While onboarding, the tagline is the pitch rather than a loading caption, so it gets room. */
+.app-splash.is-onboarding .app-splash-tagline {
+  margin-bottom: 4px;
+}
+
 @keyframes splash-rise {
   from {
     opacity: 0;
@@ -174,7 +264,8 @@
   .app-splash-name,
   .app-splash-tagline,
   .app-splash-progress,
-  .app-splash-progress::after {
+  .app-splash-progress::after,
+  .app-splash-onboarding {
     animation: none;
     transition: none;
   }
