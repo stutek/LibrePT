@@ -62,7 +62,7 @@ import {
   stateHasData,
 } from "./data/stateStore.js";
 import { applyStaticDOMMappings } from "./i18n/domMappings.js";
-import { TRANSLATIONS } from "./i18n/index.js";
+import { dictionaryFor, isSupportedLang } from "./i18n/index.js";
 import { renderClientsDirectory } from "./modules/clients/clientsDirectory.js";
 import {
   renderClientsList as clientsViewRender,
@@ -159,7 +159,7 @@ import {
 
 function t(key) {
   const lang = getState().lang || "en";
-  const dict = TRANSLATIONS[lang] || TRANSLATIONS.en;
+  const dict = dictionaryFor(lang);
   return dict[key] || key;
 }
 
@@ -171,7 +171,7 @@ function applyTranslations(lang = getState().lang || "en") {
   if (switcher) switcher.value = lang;
 
   applyThemeSwitcherLabels(lang);
-  applyStaticDOMMappings(TRANSLATIONS[lang]);
+  applyStaticDOMMappings(dictionaryFor(lang));
 
   renderSessionsTitleBar();
   renderNotificationArea();
@@ -213,7 +213,7 @@ async function init() {
   const state = await loadSavedState();
 
   const { lang: shareLang, init: shareInit } = getShareParams();
-  if (shareLang && TRANSLATIONS[shareLang]) state.lang = shareLang;
+  if (isSupportedLang(shareLang)) state.lang = shareLang;
 
   if (shareInit === INIT_DEMO_DATA && !stateHasData(state)) {
     seedMockData();

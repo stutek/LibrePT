@@ -273,7 +273,7 @@ Broaden coverage: themes, the Sync & Backup modal + counters, the header menu + 
 - **Done**: `tests/e2e/` suites for themes, the Sync & Backup badge + modal, the ☰ header menu, the first-run terms agreement, the plan-adjustments deck + Apply wizard, and the Client Directory grid + live search. The legacy `tests/test_browser.py` is gone: its three sessions-dashboard tests were stale duplicates of the maintained `tests/e2e/test_sessions_dashboard.py` versions (dropped) and its gym-floor smoke flow (voice-note capture included) moved to `tests/e2e/test_gym_floor_flow.py`.
 - **Still open**: the demo walkthrough (9.x) isn't built yet, so it has no tests.
 
-### 12.8 [ ] [Observation] `tests/e2e/` vs `tests/unit/` is a browser split, not a UI split — worth optimizing
+### 12.8 [x] [Observation] `tests/e2e/` vs `tests/unit/` is a browser split, not a UI split — DONE
 **Raised 2026-08-02 (Simon), while reviewing the star-writes CD tests (§18.13).** A pure-logic test
 that touches no DOM (`test_record_schemas.py`, `test_star_write_invariants.py`, `test_record_references.py`,
 `test_schema_migrations.py`, `test_migration_edge_case_robustness.py`, `test_frozen_backup_corpus.py`
@@ -298,6 +298,16 @@ call a plain function.
 - **If pursued**: the split should become "needs a browser" (`tests/e2e/`) vs "pure function, no
   DOM" (a new fast lane, not today's `tests/unit/` — that stays Python-only tooling checks), with the
   data-layer tests listed above as the first migration candidates.
+
+**SHIPPED — `tests/unit_js/` is that fast lane** (21 files, 81 tests, plus a separately-gated
+`tests/unit_js/security/`). All six named candidates moved: five left `tests/e2e/` entirely, and
+`test_schema_migrations.py` split correctly rather than wholesale — its six pure-runner tests became
+`tests/unit_js/data/schemaMigrations.test.mjs` while the one test that genuinely boots the app (a
+stored legacy localStorage database migrated on real boot) stayed. The dependency worry above was
+resolved rather than accepted: **no npm dependency at all** — `node:test`/`node:assert` are built
+into the runtime, and Node itself is vendored the same pinned, checksum-verified way as Biome
+(`build.ensure_node_binary`), so there is still no `package.json` and nothing for a JS-side
+`pip-audit` equivalent to cover. See [tests/INDEX.md](tests/INDEX.md) for the resulting four tiers.
 
 ### 12.5 [ ] Local git housekeeping (trademark refs)
 The trademark was scrubbed from history and force-pushed (remote is clean). Still pending **locally**: expire the reflog and `git gc --prune=now` the old pre-rewrite objects (`refs/original/…` and any leftover backup branch) so the old blobs are purged from the local clone.

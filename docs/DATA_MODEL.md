@@ -547,7 +547,17 @@ inspect. ZAP covers headers, CSP and transport; it is not why any row below is s
 | Derived values emitting markup | `getInitials()` builds a string rather than escaping one | [tests/unit_js/modules/common/utils.test.mjs](../tests/unit_js/modules/common/utils.test.mjs) |
 | Spreadsheet formula injection (CWE-1236) | The catalog CSV export — `=`/`+`/`-`/`@` executes on open | [tests/unit_js/security/csvInjection.test.mjs](../tests/unit_js/security/csvInjection.test.mjs) |
 | Prototype pollution | `record.collection` used as an object key on the boot path | [tests/unit_js/security/prototypePollution.test.mjs](../tests/unit_js/security/prototypePollution.test.mjs) |
+| Prototype members passing a whitelist | `?lang=` on a share link, checked with `TRANSLATIONS[lang]` truthiness | [tests/unit_js/security/langParamGuard.test.mjs](../tests/unit_js/security/langParamGuard.test.mjs) |
 | Query injection | — see below | [tests/e2e/test_indexed_db.py](../tests/e2e/test_indexed_db.py) |
+
+**Two of those rows are the same bug reached through different doors**, which is the pattern worth
+remembering: a **plain object used as a lookup table against untrusted keys** answers for everything
+on `Object.prototype`. It bit the record grouper (`grouped["__proto__"]` is truthy, so the
+"unseen" check passed) and the language whitelist (`TRANSLATIONS["__proto__"]` is truthy, so the
+guard passed). Both fixes remove the class rather than blocklisting names — a null-prototype
+accumulator, and `Object.hasOwn`. When adding a lookup keyed by anything a user or a file supplies,
+assume this applies. (`resolveTheme` survives only by accident: the object it reads back coerces to
+the string `"[object Object]"`, which misses its own map and falls through to the default.)
 
 **There is no SQL to inject into, and that is architectural rather than lucky.** Storage is
 IndexedDB plus `localStorage` (§2), and SQLite-wasm was considered and rejected
