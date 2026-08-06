@@ -22,6 +22,7 @@ const DEFAULT_MINIMUM_VISIBLE_MS = 4000;
 const FADE_OUT_MS = 320;
 
 const SPLASH_ID = "app-splash";
+const DISMISS_ID = "splash-dismiss";
 const PROGRESS_ID = "app-splash-progress";
 const ONBOARDING_ID = "app-splash-onboarding";
 const DISMISSING_CLASS = "is-dismissing";
@@ -105,9 +106,20 @@ export function dismissSplashWhenReady({
   const onboarding = offerOnboarding && !isSplashDisabled();
   const remaining = remainingHoldMs(minimumVisibleMs, performance.now());
   return new Promise((resolve) => {
-    window.setTimeout(() => {
+    const holdTimer = window.setTimeout(() => {
       if (onboarding) revealOnboarding(splash, resolve);
       else fadeOut(splash, resolve);
     }, remaining);
+
+    // The X wins over whatever the splash is doing — it cancels a hold in progress rather than
+    // waiting it out, so the escape is immediate at any point.
+    document.getElementById(DISMISS_ID)?.addEventListener(
+      "click",
+      () => {
+        window.clearTimeout(holdTimer);
+        fadeOut(splash, resolve);
+      },
+      { once: true },
+    );
   });
 }

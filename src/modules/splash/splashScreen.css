@@ -124,6 +124,34 @@
   animation: splash-sweep 1500ms cubic-bezier(0.65, 0, 0.35, 1) infinite;
 }
 
+/* The escape hatch, top-left. 44x44 because it is a real touch target on a phone even though the
+   glyph inside it is small (AGENT_RULES §2.D.1) — and it sits inside the safe-area inset so it is
+   not under a notch or a rounded corner on a device with one. */
+.app-splash-dismiss {
+  position: absolute;
+  top: max(12px, env(safe-area-inset-top));
+  left: max(12px, env(safe-area-inset-left));
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--text-muted);
+  font-size: 18px;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.app-splash-dismiss:hover,
+.app-splash-dismiss:focus-visible {
+  background: var(--card-bg);
+  color: var(--text-main);
+  outline: none;
+}
+
 /* Onboarding entry point — replaces the progress sweep once the hold is over and the trainer has
    no data yet. Buttons are full-width and 48px tall: this is the first thing a new user touches,
    often one-handed on a phone, so the targets are sized for a thumb rather than for the text. */

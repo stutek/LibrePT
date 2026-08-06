@@ -12,6 +12,7 @@ import urllib.request
 from pathlib import Path
 
 import pytest
+from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 
 # tests/conftest.py -> parents[1] is the repo root; the runtime app lives in src/.
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -29,6 +30,11 @@ def src_dir():
 # a fresh document via add_init_script, i.e. before app.js reads the flag.
 ACCEPT_TERMS_SCRIPT = "window.localStorage.setItem('librept_terms_accepted', '1');"
 
+# Generous, because this runs on the very first interaction after a cold navigation, when parallel
+# xdist workers are all compiling the app's ~89 ES modules at once — the same contention the
+# `page.goto` budget below is raised for.
+SPLASH_DISMISS_TIMEOUT_MS = 20000
+
 
 @pytest.fixture(autouse=True)
 def accept_first_run_terms(request):
@@ -42,28 +48,49 @@ def accept_first_run_terms(request):
 
 
 @pytest.fixture(autouse=True)
-def skip_splash_hold(request):
-    """Append `?splash=off` to every browser-test navigation, so the cold-start splash's 4s hold is
-    not paid on each of the ~84 `page.goto` calls in the suite (that alone would add minutes).
+def dismiss_splash(request):
+    """Click the splash's dismiss X after every browser-test navigation, so the cold-start splash's
+    4s hold (and, on an empty database, its blocking onboarding panel) is not paid on each of the
+    ~84 `page.goto` calls in the suite.
 
-    Done by wrapping `page.goto` rather than editing every call site: the hold is a property of the
-    app under test, not of any one test, and a wrapper cannot drift the way 84 hand-edited URLs
-    would. `?splash=off` is the app's own deep-link parameter (modules/splash/splashScreen.js),
-    the same convention as `?init`, `?lang` and `?theme` — not a test-only backdoor compiled into
-    production code. A URL that already sets `splash` is left alone, so the splash's own test can
-    ask for the real hold."""
-    if "page" not in request.fixturenames:
+    It drives the REAL control a user has, rather than the `?splash=off` deep-link parameter this
+    first used. Two reasons that is better: the suite then exercises the production path instead of
+    a bypass, and appending a query parameter to every navigation changed what the app's own URLs
+    looked like — which broke assertions about the route the router had landed on.
+
+    Wrapping `page.goto` rather than editing every call site: getting past the splash is a property
+    of the app under test, not of any one test, and a wrapper cannot drift the way 84 hand-edited
+    call sites would. Tests marked `keep_splash` are left alone — they are the ones testing it."""
+    if "page" not in request.fixturenames or "keep_splash" in request.keywords:
         yield
         return
     page = request.getfixturevalue("page")
     navigate = page.goto
 
-    def goto_without_splash_hold(url, **kwargs):
-        if "splash=" not in url:
-            url = f"{url}{'&' if '?' in url else '?'}splash=off"
-        return navigate(url, **kwargs)
+    def goto_and_dismiss_splash(url, **kwargs):
+        response = navigate(url, **kwargs)
+        splash = page.locator("#app-splash")
+        # Absent only if a test navigated somewhere that is not the app shell.
+        if not splash.count():
+            return response
 
-    page.goto = goto_without_splash_hold
+        # The splash may ALSO retire on its own, and under xdist it often does: when the workers
+        # are all compiling the app's ~89 modules at once, `page.goto` can return after the 4s
+        # hold has already elapsed, leaving the X inside an element that is on its way out. So the
+        # click is best-effort and the wait is what actually gates — either route gets us past the
+        # splash, and if neither does, `wait_for` fails the test loudly rather than hanging here.
+        try:
+            page.locator("#splash-dismiss").click(timeout=SPLASH_DISMISS_TIMEOUT_MS)
+        except PlaywrightTimeoutError:
+            pass
+        splash.wait_for(state="hidden", timeout=SPLASH_DISMISS_TIMEOUT_MS)
+        return response
+
+    # Exposed for tests/medium/, whose harness replaces app.js with a stub: nothing there wires the
+    # dismiss listener, so clicking the X would sit waiting on a button that does nothing. That tier
+    # deletes the splash element outright instead (see tests/medium/_harness.py).
+    page.goto_without_splash_dismiss = navigate
+    page.goto = goto_and_dismiss_splash
     yield
 
 
@@ -141,6 +168,10 @@ def pytest_configure(config):
     config.addinivalue_line(
         "markers",
         "clean_start: boot the app to an empty slate (skip the demo-data seed injection)",
+    )
+    config.addinivalue_line(
+        "markers",
+        "keep_splash: leave the cold-start splash up (skip the auto-dismiss) — for testing it",
     )
 
 

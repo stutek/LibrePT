@@ -29,12 +29,16 @@ def load_with_stub(page, local_server, stub_js_body):
         route.fulfill(body=stub_js_body, content_type="application/javascript")
 
     page.route("**/app.js", handle)
-    page.goto(local_server)
+    # Deliberately NOT the wrapped page.goto: conftest's dismiss_splash clicks the splash's X after
+    # every navigation, and the listener behind that X is wired by the real app.js — which this
+    # tier replaces with a stub. The click would hang on a dead button until the timeout.
+    navigate = getattr(page, "goto_without_splash_dismiss", page.goto)
+    navigate(local_server)
     # The cold-start splash is static markup in index.html, and the real app.js is what takes it
-    # down (appBoot.bootSplashScreen, the last step of init()). A stub replaces that app.js, so
-    # nothing would ever dismiss it and a fixed, full-screen overlay would sit on top of the one
-    # component under test, swallowing every click. It is not part of any single component's
-    # contract — tests/e2e/test_splash_screen.py is what covers it — so this tier drops it.
+    # down (appBoot.bootSplashScreen, the last step of init()). With that app.js stubbed, nothing
+    # would ever dismiss it and a fixed, full-screen overlay would sit on top of the one component
+    # under test, swallowing every click. It is not part of any single component's contract —
+    # tests/e2e/test_splash_screen.py is what covers it — so this tier drops it.
     page.evaluate("() => document.getElementById('app-splash')?.remove()")
 
 
