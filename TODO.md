@@ -354,14 +354,25 @@ service worker — none of which were ever involved, because the slow request ne
   `fa-solid-900` (147KB, **48 glyphs used of ~1400**) and `fa-brands-400` (105KB, **2 glyphs** —
   `fa-github`, `fa-google-drive`). Merging into ONE file is feasible — the two sets' codepoints were
   checked and **do not collide** — and would land ~381KB of font+CSS at roughly 24KB.
-  **The blocker is not the tooling, it is that three icon names are built at runtime**:
+  **The prerequisite is now BUILT**: `agent_tools/icon_coverage.py` gates every `fa-` class in
+  `src/` against what the stylesheet can render (Stage 1 + the `structure-checks` job), so a glyph
+  that stops shipping fails the build by name instead of rendering as a gap. Its first run found two
+  Font Awesome **Pro** classes live in the app — `fa-wifi-slash` on the header's offline indicator
+  and `fa-sparkles` on the demo invitation — neither of which was ever in the Free set this project
+  vendors, so both had been rendering as empty boxes. (No licensing exposure: only the class NAMES
+  existed, never the Pro glyphs, so nothing proprietary was ever distributed.) Swapped for
+  `fa-plug-circle-xmark` and `fa-wand-magic-sparkles`.
+  **The remaining difficulty is that three icon names are built at runtime**:
   `fa-arrow-${dir}` ([applicationHeader.js](src/modules/common/applicationHeader.js)),
   and `fa-chevron-${…}` in [sessionCard.js](src/modules/sessionList/sessionCard.js) and
   [clipboardEditor.js](src/modules/clipboard/clipboardEditor.js). A static scan finds 46 of the 48
   glyphs and silently misses `arrow-up`/`arrow-down`/`chevron-up`/`chevron-down` — which subsets to
-  blank boxes with no error and no failing test. So subsetting must be preceded by an explicit icon
-  manifest plus a Stage 1 gate asserting every `fa-` class in `src/` is declared in it; today a
-  missing icon is impossible, and subsetting makes it possible AND invisible.
+  blank boxes with no error and no failing test — which is why those four are declared explicitly in
+  the gate's `RUNTIME_BUILT` set, checked exactly like a literal usage. With that in place the
+  silent-breakage risk subsetting introduces is already closed, so the remaining work is the
+  mechanical part: a dev-time `fonttools` script (NOT a build dependency — regeneration stays a
+  deliberate committed act, like Node/Biome/ZAP rules) that emits the merged font plus a stylesheet
+  containing only the shipped glyphs, under a non-reserved family name.
 - **LICENSING: a subset is a "Modified Version" and must be RENAMED.** Checked against the shipped
   licence text, not from memory. SIL OFL 1.1 explicitly permits "use, study, copy, merge, embed,
   modify, redistribute", so subsetting and merging are allowed — but Font Awesome declares

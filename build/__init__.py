@@ -467,6 +467,28 @@ def run_import_layer_check():
         sys.exit(1)
 
 
+def run_icon_coverage_check():
+    """Verifies every icon class in src/ maps to a glyph the shipped font can render — see
+    agent_tools/icon_coverage.py.
+
+    A missing glyph is invisible: CSS resolves the class to nothing and the control renders as a
+    gap, with no error and no failing test. That made two Font Awesome PRO classes survive in the
+    app unnoticed — `fa-wifi-slash` on the header's offline indicator and `fa-sparkles` on the demo
+    invitation — because Pro icons are absent from the Free set this project vendors, and a
+    dangling reference looks exactly like a typo at runtime. Both were found by this check's first
+    run and swapped for Free equivalents.
+
+    Pure text analysis against the stylesheet, no font parsing and no fonttools, so it stays in
+    Stage 1 and adds no dependency. It also has to exist BEFORE the font is ever subset (TODO
+    §12.6): subsetting turns "correct class, glyph not included" into the same invisible gap.
+    """
+    print("\n  Checking icon coverage...")
+    from agent_tools import icon_coverage
+
+    if icon_coverage.main() != 0:
+        sys.exit(1)
+
+
 def run_catalog_coverage_check():
     """Verifies the module catalog still describes the tree — see agent_tools/catalog_coverage.py.
 
@@ -1168,6 +1190,7 @@ def run_stage_1_parallel():
         "Static Security Audits": run_static_security_checks,
         "Documentation Graph": run_doc_graph_check,
         "Module Catalog Coverage": run_catalog_coverage_check,
+        "Icon Coverage": run_icon_coverage_check,
         "Import Layering": run_import_layer_check,
         "Pipeline Gating": run_pipeline_gate_check,
         "Cyclomatic Complexity": run_complexity_check,

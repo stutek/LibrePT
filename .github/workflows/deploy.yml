@@ -162,12 +162,12 @@ jobs:
       - name: Run Security Tests
         run: .venv/bin/python -c "from build import run_security_tests; run_security_tests()"
 
-  # One job, four named checks — same reasoning as static-security-audits below: each Actions job
+  # One job, five named checks — same reasoning as static-security-audits below: each Actions job
   # costs a fresh runner, checkout and Python setup (~30s) for checks that take milliseconds. These
   # are the repo's structural invariants: the module catalog matches the tree, imports flow one way,
   # every CI job gates the deploy, and no function has grown past the complexity ceiling.
   structure-checks:
-    name: Structural Invariants (catalog, layering, gating, complexity)
+    name: Structural Invariants (catalog, icons, layering, gating, complexity)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -182,6 +182,8 @@ jobs:
           .venv/bin/pip install -r requirements.txt
       - name: Module catalog coverage
         run: .venv/bin/python -c "from build import run_catalog_coverage_check; run_catalog_coverage_check()"
+      - name: Icon coverage
+        run: .venv/bin/python -c "from build import run_icon_coverage_check; run_icon_coverage_check()"
       - name: Import layering
         run: .venv/bin/python -c "from build import run_import_layer_check; run_import_layer_check()"
       - name: CI pipeline gating

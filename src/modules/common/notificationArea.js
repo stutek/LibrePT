@@ -136,13 +136,14 @@ function renderEmptyNotificationState(
 ) {
   if (summaryTitleEl) summaryTitleEl.textContent = t("notif_welcome_title") || "Interactive Demo";
   if (summaryDescEl) summaryDescEl.textContent = t("notif_welcome_desc") || "Run demo";
-  if (summaryIconEl) summaryIconEl.className = "fa-solid fa-sparkles notification-bell-icon";
+  if (summaryIconEl)
+    summaryIconEl.className = "fa-solid fa-wand-magic-sparkles notification-bell-icon";
 
   container.innerHTML = `
     <div class="notification-empty">
       <div class="notification-card welcome unread" data-notification-id="demo-invitation">
         <div class="notification-card-icon">
-          <i class="fa-solid fa-sparkles"></i>
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
         </div>
         <div class="notification-card-content">
           <h4 class="notification-card-title">${escapeHTML(t("notif_welcome_title"))} <span class="unread-dot" title="Unread"></span></h4>

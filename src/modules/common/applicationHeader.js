@@ -78,7 +78,7 @@ export function renderSyncBadge() {
 
   if (isOfflineCached) {
     badge.classList.remove("hidden");
-    badge.innerHTML = `<span class="sync-offline" title="${deps?.t ? deps.t("offline_cached_desc") : "HTTP server unreachable. Running on cached code."}"><i class="fa-solid fa-wifi-slash"></i> Offline</span>`;
+    badge.innerHTML = `<span class="sync-offline" title="${deps?.t ? deps.t("offline_cached_desc") : "HTTP server unreachable. Running on cached code."}"><i class="fa-solid fa-plug-circle-xmark"></i> Offline</span>`;
     badge.setAttribute(
       "aria-label",
       deps?.t ? deps.t("offline_cached_desc") : "HTTP server unreachable. Running on cached code.",
