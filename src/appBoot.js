@@ -38,6 +38,7 @@ import { initSessionBar } from "./modules/session/sessionBar.js";
 import { initSessionInviteDialog } from "./modules/session/sessionInviteDialog.js";
 import { initSessionTitleBar } from "./modules/session/sessionTitleBar.js";
 import { initSessionTimeline } from "./modules/sessionList/sessionTimeline.js";
+import { dismissSplashWhenReady } from "./modules/splash/splashScreen.js";
 
 export function bootAppLifecycle(deps) {
   initAppLifecycle(deps);
@@ -125,4 +126,10 @@ export function bootNotificationArea(deps) {
 
 export function bootViewDismiss(deps) {
   setupViewDismiss(deps);
+}
+
+// Last step of init(): everything the splash was covering is now wired, so start the fade. Returns
+// the promise so a caller (a test, or any future "app is interactive" hook) can await it.
+export function bootSplashScreen(deps) {
+  return dismissSplashWhenReady(deps);
 }

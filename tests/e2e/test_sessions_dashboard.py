@@ -5,6 +5,14 @@
 # Fixtures (page, browser, local_server) come from tests/conftest.py + pytest-playwright.
 
 import datetime
+from urllib.parse import urlparse
+
+
+def _route_path(page):
+    """The URL path alone, without the query string. Assertions here are about which day the router
+    navigated to; the query carries unrelated deep-link parameters (conftest appends `splash=off`)
+    that the router deliberately preserves across navigation."""
+    return urlparse(page.url).path.rstrip("/")
 
 
 # Boot re-renders the timeline more than once (recovering an active session, notifications, the
@@ -87,7 +95,7 @@ def test_sessions_day_navigation(page, local_server):
 
     # Dashboard opens focused on today
     page.wait_for_timeout(900)
-    assert page.url.rstrip("/").endswith(today_iso)
+    assert _route_path(page).endswith(today_iso)
     assert page.locator("#btn-sessions-today").is_disabled(), (
         "the Today control disables itself once today is already focused"
     )
@@ -103,13 +111,13 @@ def test_sessions_day_navigation(page, local_server):
         tomorrow_iso,
     )
     page.wait_for_timeout(900)
-    assert page.url.rstrip("/").endswith(tomorrow_iso)
+    assert _route_path(page).endswith(tomorrow_iso)
     assert not page.locator("#btn-sessions-today").is_disabled()
 
     # Going home via the logo pulls focus back to today
     page.locator("#logo-area").click()
     page.wait_for_timeout(900)
-    assert page.url.rstrip("/").endswith(today_iso)
+    assert _route_path(page).endswith(today_iso)
 
     # The Today control resets the timeline directly
     page.evaluate(
@@ -122,7 +130,7 @@ def test_sessions_day_navigation(page, local_server):
     page.wait_for_timeout(900)
     page.locator("#btn-sessions-today").click()
     page.wait_for_timeout(900)
-    assert page.url.rstrip("/").endswith(today_iso)
+    assert _route_path(page).endswith(today_iso)
     assert page.locator("#btn-sessions-today").is_disabled()
 
 

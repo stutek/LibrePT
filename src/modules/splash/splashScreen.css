@@ -1,0 +1,181 @@
+/* modules/common/splashScreen.css — the cold-start splash overlay owned by splashScreen.js.
+
+   It paints the SAME background the app itself uses — --bg-color plus --bg-gradient, exactly as
+   index.css sets on <body> — rather than a fixed colour. theme-boot.js is a render-blocking classic
+   script in <head>, so the theme class is already on <body> before this ever paints; the splash
+   therefore comes up in the user's chosen theme, and fading it out reveals an identical background
+   underneath instead of a colour change. A hardcoded dark plate would have been a black rectangle
+   on the daylight and blossom themes.
+
+   Everything animates in on a stagger — mark, wordmark, tagline, then the progress sweep — so the
+   4s hold reads as a considered intro rather than a frozen image. All of it is CSS: no rAF loop, no
+   JS-driven animation, nothing that competes with the boot happening behind it. The whole thing is
+   cut to a static frame under prefers-reduced-motion (bottom of file).
+
+   Styles live here rather than in index.css so the overlay ships with its module (AGENT_RULES
+   §5.2), and are loaded in <head> — a splash that paints after its own stylesheet arrives would
+   flash unstyled markup, which is the one thing it exists to prevent. */
+
+.app-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 9000; /* above the app; below #integrity-error-overlay, which must always win */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 0 32px;
+  text-align: center;
+  background-color: var(--bg-color);
+  background-image: var(--bg-gradient);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  opacity: 1;
+  transition: opacity 320ms ease-out; /* FADE_OUT_MS in splashScreen.js */
+}
+
+/* Removed from the layout once faded, so it can never intercept a tap afterwards. */
+.app-splash[hidden] {
+  display: none;
+}
+
+.app-splash.is-dismissing {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* A soft emerald bloom behind the mark, sized off the mark itself. Drawn as a pseudo-element rather
+   than a box-shadow so it can be much larger than the artwork without affecting layout. */
+.app-splash::before {
+  content: "";
+  position: absolute;
+  width: min(78vw, 420px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    var(--primary-light, rgba(16, 185, 129, 0.14)) 0%,
+    transparent 68%
+  );
+  transform: translateY(-8%);
+  animation: splash-bloom 3600ms ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* The one place the FULL clipboard mark is used: at this size the composition actually reads,
+   unlike the 26px header slot and the browser tab, which both get the whistle crop instead. */
+.app-splash-mark {
+  position: relative;
+  width: min(46vw, 196px);
+  height: auto;
+  filter: drop-shadow(0 18px 34px rgba(0, 0, 0, 0.28))
+    drop-shadow(0 0 22px var(--primary-light, rgba(16, 185, 129, 0.35)));
+  animation: splash-rise 760ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.app-splash-name {
+  position: relative;
+  margin: 0;
+  font-family: var(--font-display, inherit);
+  font-size: clamp(30px, 8vw, 38px);
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  line-height: 1.1;
+  color: var(--text-main);
+  animation: splash-rise 760ms cubic-bezier(0.22, 1, 0.36, 1) 120ms both;
+}
+
+/* "PT" in the accent, so the wordmark carries the same emerald as the mark above it. */
+.app-splash-name .app-splash-name-accent {
+  color: var(--primary);
+}
+
+.app-splash-tagline {
+  position: relative;
+  margin: 0;
+  max-width: 30ch;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--text-muted);
+  animation: splash-rise 760ms cubic-bezier(0.22, 1, 0.36, 1) 240ms both;
+}
+
+/* Indeterminate progress: a sweep rather than a spinner, because there is no percentage to report
+   and a spinner at this size reads as "stuck" more than "working". */
+.app-splash-progress {
+  position: relative;
+  width: 132px;
+  height: 3px;
+  margin-top: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--border-color);
+  animation: splash-fade-in 600ms ease-out 420ms both;
+}
+
+.app-splash-progress::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 44%;
+  border-radius: inherit;
+  background: var(--primary-gradient, var(--primary));
+  animation: splash-sweep 1500ms cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+@keyframes splash-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes splash-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes splash-bloom {
+  0%,
+  100% {
+    opacity: 0.75;
+    transform: translateY(-8%) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-8%) scale(1.06);
+  }
+}
+
+@keyframes splash-sweep {
+  from {
+    transform: translateX(-115%);
+  }
+  to {
+    transform: translateX(330%);
+  }
+}
+
+/* Reduced motion: the hold still happens and the layout is identical, but nothing moves — no
+   entrance stagger, no bloom pulse, no sweep, and the dismissal cuts instead of fading. */
+@media (prefers-reduced-motion: reduce) {
+  .app-splash,
+  .app-splash::before,
+  .app-splash-mark,
+  .app-splash-name,
+  .app-splash-tagline,
+  .app-splash-progress,
+  .app-splash-progress::after {
+    animation: none;
+    transition: none;
+  }
+}

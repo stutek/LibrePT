@@ -41,6 +41,32 @@ def accept_first_run_terms(request):
     yield
 
 
+@pytest.fixture(autouse=True)
+def skip_splash_hold(request):
+    """Append `?splash=off` to every browser-test navigation, so the cold-start splash's 4s hold is
+    not paid on each of the ~84 `page.goto` calls in the suite (that alone would add minutes).
+
+    Done by wrapping `page.goto` rather than editing every call site: the hold is a property of the
+    app under test, not of any one test, and a wrapper cannot drift the way 84 hand-edited URLs
+    would. `?splash=off` is the app's own deep-link parameter (modules/splash/splashScreen.js),
+    the same convention as `?init`, `?lang` and `?theme` — not a test-only backdoor compiled into
+    production code. A URL that already sets `splash` is left alone, so the splash's own test can
+    ask for the real hold."""
+    if "page" not in request.fixturenames:
+        yield
+        return
+    page = request.getfixturevalue("page")
+    navigate = page.goto
+
+    def goto_without_splash_hold(url, **kwargs):
+        if "splash=" not in url:
+            url = f"{url}{'&' if '?' in url else '?'}splash=off"
+        return navigate(url, **kwargs)
+
+    page.goto = goto_without_splash_hold
+    yield
+
+
 # Playwright's default `page.goto()` budget is 30s. Under contention on the shared local dev server
 # (parallel xdist workers' browser contexts each opening ~6 connections to fetch one page's ~89
 # assets, worse when the host has other load) that 30s can be spent waiting in the kernel's

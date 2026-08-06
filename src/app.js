@@ -558,6 +558,9 @@ function setupActiveSession() {
     renderSessions,
     saveToLocalStorage: saveState,
   });
+
+  // Deliberately last: the splash comes down only once every component above is wired.
+  appBoot.bootSplashScreen({});
 }
 
 function cancelWorkoutSession() {

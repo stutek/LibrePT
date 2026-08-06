@@ -30,6 +30,12 @@ def load_with_stub(page, local_server, stub_js_body):
 
     page.route("**/app.js", handle)
     page.goto(local_server)
+    # The cold-start splash is static markup in index.html, and the real app.js is what takes it
+    # down (appBoot.bootSplashScreen, the last step of init()). A stub replaces that app.js, so
+    # nothing would ever dismiss it and a fixed, full-screen overlay would sit on top of the one
+    # component under test, swallowing every click. It is not part of any single component's
+    # contract — tests/e2e/test_splash_screen.py is what covers it — so this tier drops it.
+    page.evaluate("() => document.getElementById('app-splash')?.remove()")
 
 
 def view_stub(imports, view_id, body):

@@ -45,18 +45,36 @@ MANIFEST = SRC / "manifest.json"
 # catalog for nothing. It is design tooling, not a runtime asset (AGENT_RULES §5.5).
 MASTER = REPO_ROOT / "assets" / "icon-master.png"
 
-# The plate the transparent artwork is composited onto. Matches the manifest's own
+# The plate the artwork is composited onto for the LAUNCHER icons, which must be opaque — a PWA
+# icon with transparent pixels gets an unpredictable backing from the OS. Matches the manifest's own
 # background_color/theme_color, so the icon and the app's chrome are the same black.
+#
+# Everything the app renders INSIDE itself is transparent instead (background=None below): the
+# header mark, the favicon and the splash mark all sit on a themed surface that ranges from
+# zinc-950 to near-white, so a baked dark plate would show up as a black square on the light themes.
 BACKGROUND = "#09090b"
 
-# Not a manifest entry — index.html links this directly, so its size is declared nowhere else.
+# Renders the app references directly rather than through the manifest, so nothing else states
+# their sizes: the browser-tab favicon, and the mark in the app's own header.
 #
-# It renders the WHISTLE ONLY, not the whole clipboard. At tab size the full mark is unreadable: a
+# Both crop to the WHISTLE ALONE, not the whole clipboard. Small, the full mark is unreadable — a
 # 32px render of board-plus-clip-plus-whistle resolves to a grey smudge with a green dot in it, and
 # the reference artwork this was cut from hits the same wall in its own 16px sample. One bold shape
 # filling the frame survives the downscale; a composition does not. The crop is measured off the
 # master's green pixels rather than hardcoded, so it follows the artwork if the mark is redrawn.
+#
+# The header mark is rendered at 64 for a 26px slot: enough for a 2x phone display without the
+# browser resampling it. The splash screen is the one place the FULL clipboard is used, because
+# there it is large enough to read (see modules/splash/splashScreen.css).
 FAVICON = (32, "icons/icon-32.png", "any")
+HEADER_MARK = (64, "icons/icon-64.png", "any")
+
+# The splash is the ONE surface that gets the full clipboard mark, because there it is drawn large
+# enough to read. It is also the only in-app render that is not cropped to the whistle.
+SPLASH_MARK = (512, "icons/icon-mark-512.png", "any")
+
+DIRECT_RENDERS = (FAVICON, HEADER_MARK, SPLASH_MARK)
+WHISTLE_CROP_RENDERS = (FAVICON, HEADER_MARK)
 
 # Fraction of the canvas the artwork's longer edge occupies, per purpose. `any` leaves a hair of
 # breathing room; `maskable` is derived, not chosen — see _maskable_scale().
@@ -141,8 +159,10 @@ RENDER_SCRIPT = """
     const canvas = document.createElement('canvas');
     canvas.width = size; canvas.height = size;
     const ctx = canvas.getContext('2d');
-    ctx.fillStyle = background;
-    ctx.fillRect(0, 0, size, size);
+    if (background) {                    // null leaves the canvas transparent
+      ctx.fillStyle = background;
+      ctx.fillRect(0, 0, size, size);
+    }
     // Scale against the LONGER edge so portrait artwork stays inside the square either way.
     const longEdge = Math.max(sw, sh);
     const drawW = sw / longEdge * size * scale;
@@ -192,8 +212,11 @@ def measure_master(master_png):
     ]
 
 
-def render(master_png, size, purpose, aspect_ratio, source_rect=None):
-    """PNG bytes: the master artwork (or `source_rect` of it) centred on the plate at size×size."""
+def render(
+    master_png, size, purpose, aspect_ratio, source_rect=None, background=BACKGROUND
+):
+    """PNG bytes: the master artwork (or `source_rect` of it) centred at size×size, on `background`
+    — or on transparency when `background` is None."""
     from playwright.sync_api import sync_playwright
 
     scale = ANY_SCALE if purpose == "any" else _maskable_scale(aspect_ratio)
@@ -203,7 +226,7 @@ def render(master_png, size, purpose, aspect_ratio, source_rect=None):
         page.set_content("<html><body></body></html>")
         result = page.evaluate(
             RENDER_SCRIPT,
-            [_data_uri(master_png), size, scale, BACKGROUND, source_rect],
+            [_data_uri(master_png), size, scale, background, source_rect],
         )
         browser.close()
     return base64.b64decode(result.split(",", 1)[1])
@@ -232,10 +255,18 @@ def main(argv=None):
 
     aspect_ratio, whistle_rect = measure_master(master_png)
     stale = []
-    for size, relative_src, purpose in icons + [FAVICON]:
+    for size, relative_src, purpose in icons + list(DIRECT_RENDERS):
         destination = SRC / relative_src
-        source_rect = whistle_rect if (size, relative_src, purpose) == FAVICON else None
-        png = render(master_png, size, purpose, aspect_ratio, source_rect)
+        entry = (size, relative_src, purpose)
+        in_app = entry in DIRECT_RENDERS
+        png = render(
+            master_png,
+            size,
+            purpose,
+            aspect_ratio,
+            source_rect=whistle_rect if entry in WHISTLE_CROP_RENDERS else None,
+            background=None if in_app else BACKGROUND,
+        )
         if args.check:
             if not destination.exists() or destination.read_bytes() != png:
                 stale.append(relative_src)

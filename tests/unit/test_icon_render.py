@@ -88,3 +88,68 @@ def test_master_artwork_is_not_inside_the_shipped_tree():
     (AGENT_RULES §5.5) or it ships to production and is hashed into the integrity catalog."""
     assert icon_render.MASTER.exists(), "the icon master artwork is missing"
     assert icon_render.SRC not in icon_render.MASTER.parents
+
+
+def _top_left_pixel_alpha(png_path):
+    """Alpha of the top-left pixel of an 8-bit RGBA PNG, decoding just the first scanline.
+
+    Hand-rolled because this venv has no Pillow (see agent_tools/icon_render.py on why the renderer
+    uses Chromium rather than adding an imaging dependency), and stdlib zlib is all it takes: row 0
+    is enough for a corner, and every filter type reduces to its own bytes there because the
+    "previous row" a filter references is defined as zeros for the first line."""
+    import struct
+    import zlib
+
+    raw = png_path.read_bytes()
+    assert raw[:8] == b"\x89PNG\r\n\x1a\n", f"{png_path} is not a PNG"
+
+    offset, idat, header = 8, b"", None
+    while offset < len(raw):
+        (length,) = struct.unpack(">I", raw[offset : offset + 4])
+        kind = raw[offset + 4 : offset + 8]
+        data = raw[offset + 8 : offset + 8 + length]
+        if kind == b"IHDR":
+            header = struct.unpack(">IIBBBBB", data)
+        elif kind == b"IDAT":
+            idat += data
+        elif kind == b"IEND":
+            break
+        offset += 12 + length
+
+    _, _, bit_depth, colour_type, _, _, interlace = header
+    assert (bit_depth, colour_type, interlace) == (8, 6, 0), (
+        f"{png_path}: expected non-interlaced 8-bit RGBA, got {header}"
+    )
+
+    row = zlib.decompress(idat)[:5]
+    filter_type, pixel = row[0], list(row[1:5])
+    if filter_type in (
+        1,
+        3,
+        4,
+    ):  # Sub/Average/Paeth: left and up neighbours are zero at (0,0)
+        pass
+    elif filter_type not in (0, 2):  # None/Up: Up's previous row is zero
+        raise AssertionError(f"{png_path}: unknown PNG filter type {filter_type}")
+    return pixel[3]
+
+
+def test_launcher_icons_are_opaque_and_in_app_marks_are_transparent(src_dir):
+    """A PWA launcher icon must be opaque — transparent pixels get an unpredictable backing from
+    the OS — while the marks the app draws on its own themed surfaces must NOT carry a plate.
+
+    This exists because the renderer once passed the module-level BACKGROUND constant instead of
+    its own `background` parameter, so every "transparent" render silently got the dark plate. The
+    whole gate stayed green; it took a screenshot of the splash to notice a black square behind the
+    artwork on a light theme."""
+    for _, relative_src, _ in icon_render.declared_icons(
+        json.loads((src_dir / "manifest.json").read_text(encoding="utf-8"))
+    ):
+        assert _top_left_pixel_alpha(src_dir / relative_src) == 255, (
+            f"src/{relative_src} is a launcher icon and must have an opaque background"
+        )
+
+    for _, relative_src, _ in icon_render.DIRECT_RENDERS:
+        assert _top_left_pixel_alpha(src_dir / relative_src) == 0, (
+            f"src/{relative_src} is drawn on a themed app surface and must be transparent"
+        )

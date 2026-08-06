@@ -47,6 +47,7 @@
   <link rel="stylesheet" href="modules/clipboard/exerciseCard.css">
   <link rel="stylesheet" href="modules/clipboard/circuitCard.css">
   <link rel="stylesheet" href="modules/clipboard/exerciseAndRestTimer.css">
+  <link rel="stylesheet" href="modules/splash/splashScreen.css">
   <link rel="stylesheet" href="modules/common/activeUsersList.css">
   <link rel="stylesheet" href="modules/common/applicationHeader.css">
   <link rel="stylesheet" href="modules/common/notificationArea.css">
@@ -83,6 +84,19 @@
   <script src="theme-boot.js"></script>
 </head>
 <body class="daylight-theme">
+
+  <!-- Cold-start splash. Static markup, visible from first paint and removed by
+       modules/splash/splashScreen.js once the app has booted AND a minimum hold has elapsed — a
+       module-created overlay would appear only after app.js parses, which is already too late to
+       cover the boot it exists to cover. `?splash=off` skips the hold. -->
+  <div id="app-splash" class="app-splash" role="status" aria-label="Loading LibrePT">
+    <img class="app-splash-mark" src="icons/icon-mark-512.png" alt="" width="512" height="512">
+    <p class="app-splash-name">Libre<span class="app-splash-name-accent">PT</span></p>
+    <!-- Static English, like the integrity-error overlay below: both paint before i18n/index.js has
+         loaded, so there is no dictionary to translate against yet. -->
+    <p class="app-splash-tagline">A lightweight, free app for your clipboard, sessions and training programmes.</p>
+    <div class="app-splash-progress" aria-hidden="true"></div>
+  </div>
 
   <!-- Integrity error page: a blocking overlay shown only when the service worker fails to verify a
        build against its SHA-256 catalog (corrupt download / version skew) or finds no catalog at all.

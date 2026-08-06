@@ -16,6 +16,15 @@
 # real calendar. Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
 import datetime
+from urllib.parse import urlparse
+
+
+def _route_path(page):
+    """The URL path alone, without the query string. Assertions here are about which day the router
+    navigated to; the query carries unrelated deep-link parameters (conftest appends `splash=off`)
+    that the router deliberately preserves across navigation."""
+    return urlparse(page.url).path.rstrip("/")
+
 
 ANCHOR = "2026-07-28T09:00:00"
 ANCHOR_DATE = datetime.date(2026, 7, 28)
@@ -186,7 +195,7 @@ def test_footer_click_jumps_to_the_previewed_day(page, local_server):
         today_iso,
     )
     page.wait_for_timeout(900)
-    assert page.url.rstrip("/").endswith(tomorrow_iso), (
+    assert _route_path(page).endswith(tomorrow_iso), (
         "clicking the footer must jump to the day it previews, not the day it belongs to"
     )
 

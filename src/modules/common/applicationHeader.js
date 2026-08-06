@@ -248,7 +248,7 @@ export function renderHeaderShell() {
     <div class="header-container">
       <div class="logo-area" id="logo-area">
         <span class="logo-icon-wrap">
-          <i class="fa-solid fa-dumbbell logo-icon"></i>
+          <img class="logo-icon" src="icons/icon-64.png" alt="" width="26" height="26">
           <!-- A small corner badge on the logo icon, not a pill in the flex row beside the wordmark
                — on narrow phones (e.g. Galaxy S23 Ultra) the pill ate into <h1>'s width and forced
                the title to truncate early. At badge size the "PREVIEW" wordmark itself would be
