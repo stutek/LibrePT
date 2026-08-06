@@ -145,6 +145,12 @@
   transition: background 0.12s ease, color 0.12s ease;
 }
 
+/* Required, not redundant: `display: flex` above outranks the UA stylesheet's `[hidden]` rule, so
+   without this the hidden attribute silently does nothing and the button stays on screen. */
+.app-splash-dismiss[hidden] {
+  display: none;
+}
+
 .app-splash-dismiss:hover,
 .app-splash-dismiss:focus-visible {
   background: var(--card-bg);

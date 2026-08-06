@@ -12,9 +12,9 @@
 
 // How long the mark stays up, measured from navigation start rather than from the moment boot
 // finishes: a slow cold boot should be absorbed by this window, not added on top of it. So the
-// splash is visible for max(this, boot time) — 4s on a normal boot, longer only if the app is not
-// ready yet, never a 4s delay bolted onto the end of a slow one.
-const DEFAULT_MINIMUM_VISIBLE_MS = 4000;
+// splash is visible for max(this, boot time) — 5s on a normal boot, longer only if the app is not
+// ready yet, never a 5s delay bolted onto the end of a slow one.
+const DEFAULT_MINIMUM_VISIBLE_MS = 5000;
 
 // Matches the transition in splashScreen.css. Kept in sync by hand — the element is removed from
 // the layout after fading, and reading the duration back out of getComputedStyle to save one
@@ -27,6 +27,13 @@ const PROGRESS_ID = "app-splash-progress";
 const ONBOARDING_ID = "app-splash-onboarding";
 const DISMISSING_CLASS = "is-dismissing";
 const ONBOARDING_CLASS = "is-onboarding";
+
+// The hold is a first-impression, not a toll. Once it has been paid, every later load in the same
+// tab session skips straight past it — a reload, a deep link opened from a message, or bouncing
+// back into the app all show the splash for as long as the boot actually needs and no longer.
+// sessionStorage rather than localStorage on purpose: relaunching the installed PWA is a genuinely
+// new session and gets the full moment again, while re-entering the running app never does.
+const HELD_THIS_SESSION_KEY = "librept_splash_held";
 
 const DEMO_INIT_PARAM = "init";
 const DEMO_INIT_VALUE = "demo_data_load";
@@ -41,8 +48,20 @@ export function isSplashDisabled(search = window.location.search) {
   return new URLSearchParams(search).get(SPLASH_PARAM) === SPLASH_OPT_OUT;
 }
 
-export function requestedMinimumVisibleMs(search = window.location.search) {
-  return isSplashDisabled(search) ? 0 : DEFAULT_MINIMUM_VISIBLE_MS;
+export function hasHeldThisSession() {
+  return sessionStorage.getItem(HELD_THIS_SESSION_KEY) === "1";
+}
+
+function rememberHeldThisSession() {
+  sessionStorage.setItem(HELD_THIS_SESSION_KEY, "1");
+}
+
+export function requestedMinimumVisibleMs(
+  search = window.location.search,
+  alreadyHeld = hasHeldThisSession(),
+) {
+  if (isSplashDisabled(search) || alreadyHeld) return 0;
+  return DEFAULT_MINIMUM_VISIBLE_MS;
 }
 
 /** ms still owed to the minimum, given how long the document has already been open. */
@@ -79,6 +98,8 @@ function revealOnboarding(splash, resolve) {
   if (!onboarding) return fadeOut(splash, resolve);
 
   document.getElementById(PROGRESS_ID)?.setAttribute("hidden", "");
+  // The X stays. The offer does not auto-close — there is a choice to make and nothing should make
+  // it by timing out — but the trainer is never held here against their will either.
   onboarding.hidden = false;
   splash.classList.add(ONBOARDING_CLASS);
 
@@ -97,11 +118,23 @@ function revealOnboarding(splash, resolve) {
  * trainer to choose — so the returned promise resolves on their action, not on a timer.
  */
 export function dismissSplashWhenReady({
-  minimumVisibleMs = requestedMinimumVisibleMs(),
+  alreadyHeld = hasHeldThisSession(),
+  minimumVisibleMs = requestedMinimumVisibleMs(window.location.search, alreadyHeld),
   offerOnboarding = false,
 } = {}) {
   const splash = document.getElementById(SPLASH_ID);
   if (!splash) return Promise.resolve();
+
+  // Note this call is made from the LAST step of init(): the splash covers the whole boot either
+  // way, so a load that skips the hold still waits for a fully wired app before it lifts.
+  rememberHeldThisSession();
+
+  // A tap on the X that landed while the app was still booting, captured by theme-boot.js because
+  // this module was not loaded yet to hear it. Honouring it here is what makes that close DELAYED
+  // rather than lost: the trainer asked to leave, and the first moment leaving is possible is now.
+  if (window.librePtSplashCloseRequested) {
+    return new Promise((resolve) => fadeOut(splash, resolve));
+  }
 
   const onboarding = offerOnboarding && !isSplashDisabled();
   const remaining = remainingHoldMs(minimumVisibleMs, performance.now());

@@ -149,3 +149,56 @@ def test_dismissed_splash_leaves_the_app_usable(page, local_server):
 
     page.locator("#app-header").wait_for(state="visible", timeout=10000)
     assert page.locator("#backup-btn").is_enabled()
+
+
+@pytest.mark.keep_splash
+def test_the_hold_is_paid_once_per_session_not_on_every_load(page, local_server):
+    """A reload should not cost another 4s. The splash still covers the boot — it just stops adding
+    to it once this tab session has already seen the full moment."""
+    page.goto(local_server)
+    page.locator("#app-splash").wait_for(state="hidden", timeout=20000)
+
+    started = time.monotonic()
+    page.reload()
+    page.locator("#app-splash").wait_for(state="hidden", timeout=20000)
+    second_load = time.monotonic() - started
+
+    # Compared against the 4s minimum, not against a boot budget: the point is that no minimum was
+    # applied at all the second time.
+    assert second_load < 3.0, f"the second load still held for {second_load:.2f}s"
+
+
+@pytest.mark.clean_start
+@pytest.mark.keep_splash
+def test_the_offer_keeps_the_x_and_does_not_auto_close(page, local_server):
+    """Two rules at once: the onboarding offer never times out (there is a choice to make, and
+    nothing should make it by expiry), and the X stays available throughout, so nobody is held
+    there against their will."""
+    page.goto(local_server)
+    page.locator("#app-splash-onboarding").wait_for(state="visible", timeout=20000)
+
+    page.wait_for_timeout(2000)
+    assert page.locator("#app-splash-onboarding").is_visible(), (
+        "the offer expired on a timer"
+    )
+    assert page.locator("#splash-dismiss").is_visible(), "the X should stay available"
+
+    page.locator("#splash-dismiss").click()
+    page.locator("#app-splash").wait_for(state="hidden", timeout=5000)
+
+
+@pytest.mark.clean_start
+@pytest.mark.keep_splash
+def test_a_close_tapped_during_boot_is_honoured_not_lost(page, local_server):
+    """The X paints before app.js has wired anything behind it. A tap in that window must be
+    remembered and acted on as soon as the app is usable — delayed, never dropped.
+
+    Driven by setting the flag theme-boot.js sets, which is the exact state a real early tap
+    leaves behind; splashScreen.js is what has to honour it."""
+    page.add_init_script("window.librePtSplashCloseRequested = true;")
+    page.goto(local_server)
+
+    # Clean start, so running to the end of the hold would reveal the offer and wait indefinitely.
+    # Hidden, with no offer ever shown, is proof the early tap was acted on once boot finished.
+    page.locator("#app-splash").wait_for(state="hidden", timeout=20000)
+    assert page.locator("#app-splash-onboarding").is_hidden()

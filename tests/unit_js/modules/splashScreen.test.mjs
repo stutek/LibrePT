@@ -10,6 +10,9 @@
 // overlay covering the app, then being removed from the layout) stays in
 // tests/e2e/test_splash_screen.py.
 
+// Every requestedMinimumVisibleMs() call here passes `alreadyHeld` explicitly. Its default reads
+// sessionStorage, which node:test has no equivalent of, and a default argument is evaluated
+// before the body can short-circuit — so omitting it throws even for cases that never need it.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
@@ -21,18 +24,21 @@ import {
 } from "../../../src/modules/splash/splashScreen.js";
 
 test("?splash=off asks for no hold at all", () => {
-  assert.equal(requestedMinimumVisibleMs("?splash=off"), 0);
+  assert.equal(requestedMinimumVisibleMs("?splash=off", false), 0);
 });
 
 test("the hold applies by default, and to any other splash value", () => {
   // Only the exact opt-out disables it — a typo must not silently skip the splash.
   for (const search of ["", "?", "?init=demo_data_load", "?splash=on", "?splash=", "?splash=OFF"]) {
-    assert.ok(requestedMinimumVisibleMs(search) > 0, `${search || "(empty)"} should keep the hold`);
+    assert.ok(
+      requestedMinimumVisibleMs(search, false) > 0,
+      `${search || "(empty)"} should keep the hold`,
+    );
   }
 });
 
 test("?splash=off survives being one parameter among several", () => {
-  assert.equal(requestedMinimumVisibleMs("?lang=sl&splash=off&theme=nebula"), 0);
+  assert.equal(requestedMinimumVisibleMs("?lang=sl&splash=off&theme=nebula", false), 0);
 });
 
 test("the hold is what REMAINS of the minimum, not the minimum again", () => {
@@ -67,4 +73,15 @@ test("splash=off disables the splash entirely, onboarding included", () => {
   assert.equal(isSplashDisabled("?splash=off"), true);
   assert.equal(isSplashDisabled("?splash=on"), false);
   assert.equal(isSplashDisabled(""), false);
+});
+
+test("the hold is paid once per session, not on every load", () => {
+  // Second and later loads in the same tab — a reload, a deep link, bouncing back in — get no
+  // hold at all. The splash still covers the boot; it just adds nothing to it.
+  assert.equal(requestedMinimumVisibleMs("", true), 0);
+  assert.ok(requestedMinimumVisibleMs("", false) > 0);
+});
+
+test("splash=off still wins even on the first load of a session", () => {
+  assert.equal(requestedMinimumVisibleMs("?splash=off", false), 0);
 });

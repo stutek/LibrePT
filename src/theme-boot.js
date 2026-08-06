@@ -30,6 +30,18 @@
     const resolved = map[t] || t;
     const themeClass = valid[resolved] || "daylight-theme";
     document.documentElement.className = themeClass;
+
+    // The splash's dismiss X is on screen from first paint, but the handler behind it is wired by
+    // modules/splash/splashScreen.js at the END of app.js's init(). A tap before that lands on a
+    // button that does nothing and is simply lost. Record it here — this script is the only thing
+    // running that early — and let the splash honour it the moment the app is ready. The close is
+    // DELAYED until the app can actually be used, never dropped. Delegated on `document` because
+    // the button does not exist yet when this runs.
+    document.addEventListener("click", (event) => {
+      if (event.target.closest?.("#splash-dismiss")) {
+        window.librePtSplashCloseRequested = true;
+      }
+    });
   } catch (e) {
     console.warn("Theme bootstrap script error:", e);
   }
