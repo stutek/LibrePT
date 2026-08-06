@@ -249,17 +249,23 @@ export function renderHeaderShell() {
       <div class="logo-area" id="logo-area">
         <span class="logo-icon-wrap">
           <i class="fa-solid fa-dumbbell logo-icon"></i>
-          <!-- PREVIEW tag is a small corner badge on the logo icon instead of a pill sitting in the
-               flex row beside the wordmark — on narrow phones (e.g. Galaxy S23 Ultra) the pill used
-               to eat into <h1>'s width and force the title to truncate early. At badge size the
-               "PREVIEW" wordmark itself would be illegible, so it's screen-reader text here; the
-               full text still reads on the About/build-info surfaces. -->
-          <a id="preview-ribbon" class="preview-ribbon"
+          <!-- A small corner badge on the logo icon, not a pill in the flex row beside the wordmark
+               — on narrow phones (e.g. Galaxy S23 Ultra) the pill ate into <h1>'s width and forced
+               the title to truncate early. At badge size the "PREVIEW" wordmark itself would be
+               illegible, so it is screen-reader text here.
+               The full warning therefore has to live somewhere a SIGHTED user can read it, and for
+               a while it did not: this comment claimed it "still reads on the About/build-info
+               surfaces" when neither mentioned preview at all, leaving an unexplained pulsing amber
+               triangle whose only explanation was an aria-label or an external link needing signal.
+               For a data-loss warning that is the hover problem in another costume
+               (AGENT_RULES §2.D.1). It now renders in #dialog-build-info, which this badge and the
+               version stamp both open. -->
+          <a id="preview-badge" class="preview-badge"
              href="https://github.com/stutek/LibrePT/blob/main/docs/PREVIEW.md"
              target="_blank" rel="noopener noreferrer"
              aria-label="Preview build — pre-release, may lose data. Open the risks & data-loss notice.">
             <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
-            <span id="preview-ribbon-label" class="sr-only">PREVIEW</span>
+            <span id="preview-badge-label" class="sr-only">PREVIEW</span>
           </a>
         </span>
         <h1>LibrePT</h1>
@@ -374,9 +380,9 @@ export function setupApplicationHeader() {
 
   // The PREVIEW tag lives inside the logo area but is its own link (risks/data-loss notice).
   // Stop its click from bubbling to the logo's home-navigation so it only opens the notice.
-  const previewRibbon = document.getElementById("preview-ribbon");
-  if (previewRibbon) {
-    previewRibbon.addEventListener("click", (e) => e.stopPropagation());
+  const previewBadge = document.getElementById("preview-badge");
+  if (previewBadge) {
+    previewBadge.addEventListener("click", (e) => e.stopPropagation());
   }
 
   // Language switcher setup

@@ -29,3 +29,27 @@
 }
 
 /* Utility classes */
+
+/* The preview warning, shown at full length here because the header badge cannot carry it (16px of
+   icon plus screen-reader text). Amber matches the badge so the two read as the same signal, and it
+   sits ABOVE the build rows: someone who opened this dialog to copy a version string for a bug
+   report should see why the build might be misbehaving before they see the string. */
+.build-info-preview {
+  display: flex;
+  gap: 0.55rem;
+  align-items: flex-start;
+  margin: 0 0 0.9rem;
+  padding: 0.7rem 0.8rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--text-color, inherit);
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.45);
+}
+
+.build-info-preview .fa-triangle-exclamation {
+  color: #f59e0b;
+  margin-top: 0.1rem;
+  flex-shrink: 0;
+}

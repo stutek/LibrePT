@@ -101,7 +101,7 @@ module, listed in the table below alongside that module's `.js`.
 | [src/modules/common/activeUsersList.js](../src/modules/common/activeUsersList.js) | `component` | Active-session participant tabs component. |
 | [src/modules/common/activeUsersList.css](../src/modules/common/activeUsersList.css) | `styles` | The participant-tabs row's own styling — wraps onto multiple rows for a merged group session. |
 | [src/modules/common/applicationHeader.js](../src/modules/common/applicationHeader.js) | `component` | Shared top header actions, theme/lang switchers, and sync badge; owns the `#app-header` shell's markup and `#dialog-about`/`#dialog-terms`. |
-| [src/modules/common/applicationHeader.css](../src/modules/common/applicationHeader.css) | `styles` | The top app header: logo, build stamp, preview ribbon, sync/backup button, the ☰ overflow menu. |
+| [src/modules/common/applicationHeader.css](../src/modules/common/applicationHeader.css) | `styles` | The top app header: logo, build stamp, preview badge, sync/backup button, the ☰ overflow menu. |
 | [src/modules/common/backupRestore.js](../src/modules/common/backupRestore.js) | `component` | Backup center dialog and JSON import/export handlers; owns `#dialog-backup`'s markup, including the Google Drive card driveSyncUi.js wires up. |
 | [src/modules/common/backupRestore.css](../src/modules/common/backupRestore.css) | `styles` | The Sync & Backup Center dialog's action cards. |
 | [src/modules/common/driveSyncUi.js](../src/modules/common/driveSyncUi.js) | `component` | Wires the "Cloud Backup (Google Drive)" card in `#dialog-backup` to driveSyncService.js: connect/sync-now/disconnect and status rendering. |

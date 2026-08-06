@@ -70,6 +70,16 @@ export function renderBuildInfoDialog() {
       <h3 id="build-info-title">This build</h3>
       <button class="modal-close-btn" aria-label="Close build info"><i class="fa-solid fa-xmark"></i></button>
     </div>
+    <!-- The preview warning in FULL, because the header badge cannot carry it: at 16px the
+         "PREVIEW" wordmark is illegible, so the badge is an icon plus screen-reader text. Sighted
+         users previously had no in-app route to the meaning at all — only an aria-label or a link
+         to GitHub, which needs signal a basement gym does not have. This dialog is where the badge
+         and the version stamp both land, and it is already the support surface, so the warning
+         belongs here rather than in About. -->
+    <p id="build-info-preview" class="build-info-preview">
+      <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+      <span id="build-info-preview-text">This is a preview build — pre-release and under active development. Features change without notice and your data can be lost. Keep backups, and do not rely on it for real client records yet.</span>
+    </p>
     <dl id="build-info-rows" class="build-info-list"></dl>
     <div class="modal-actions">
       <button type="button" id="btn-copy-build-info" class="btn primary-btn w-full">Copy build details</button>

@@ -2,7 +2,9 @@
 // Keep keys in parity with every other locale in this folder.
 export const sl = {
   logo_title: "LibrePT",
-  preview_ribbon: "Predogled",
+  preview_badge: "Predogled",
+  preview_warning:
+    "To je predogledna različica — pred izdajo in v aktivnem razvoju. Funkcije se spreminjajo brez obvestila in podatki se lahko izgubijo. Redno delajte varnostne kopije in se nanjo še ne zanašajte za resnične podatke strank.",
   tab_clients: "Stranke",
   tab_routines: "Rutine",
   tab_exercises: "Vaje",

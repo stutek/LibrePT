@@ -87,7 +87,7 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav {
   min-width: 0;
 }
 /* Build stamp's own slot, now that the PREVIEW tag has moved onto the logo icon (see
-   .logo-icon-wrap / .preview-ribbon below) — it no longer needs to stack with anything. */
+   .logo-icon-wrap / .preview-badge below) — it no longer needs to stack with anything. */
 .header-build-stack {
   display: flex;
   align-items: center;
@@ -143,7 +143,7 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav {
    similar) the pill used to eat into <h1>'s width and truncate the "LibrePT" wordmark early.
    Sized/positioned to stay within the icon's own footprint so it never spills over the wordmark or
    off the left edge of the header. */
-.preview-ribbon {
+.preview-badge {
   position: absolute;
   top: -5px;
   right: -6px;
@@ -162,19 +162,19 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav {
   box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.5), 0 2px 6px rgba(245, 158, 11, 0.4);
   transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
-.preview-ribbon:hover,
-.preview-ribbon:focus-visible {
+.preview-badge:hover,
+.preview-badge:focus-visible {
   transform: scale(1.15);
   box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.9), 0 3px 10px rgba(245, 158, 11, 0.6);
   outline: none;
 }
-.preview-ribbon .fa-triangle-exclamation {
+.preview-badge .fa-triangle-exclamation {
   font-size: 8px;
 }
 /* A gentle but clearly-visible pulse (opacity + glow), never a flash — and only for viewers who
    haven't asked to reduce motion, who keep a steady pill instead. */
 @media (prefers-reduced-motion: no-preference) {
-  .preview-ribbon {
+  .preview-badge {
     animation: previewPulse 1.8s ease-in-out infinite;
   }
   @keyframes previewPulse {
@@ -204,7 +204,7 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav {
   .logo-area h1 {
     font-size: 19px;
   }
-  .preview-ribbon {
+  .preview-badge {
     width: 14px;
     height: 14px;
     top: -4px;
