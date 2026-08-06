@@ -247,28 +247,26 @@ export function renderHeaderShell() {
     `
     <div class="header-container">
       <div class="logo-area" id="logo-area">
-        <span class="logo-icon-wrap">
-          <img class="logo-icon" src="icons/icon-64.png" alt="" width="26" height="26">
-          <!-- A small corner badge on the logo icon, not a pill in the flex row beside the wordmark
-               — on narrow phones (e.g. Galaxy S23 Ultra) the pill ate into <h1>'s width and forced
-               the title to truncate early. At badge size the "PREVIEW" wordmark itself would be
-               illegible, so it is screen-reader text here.
-               The full warning therefore has to live somewhere a SIGHTED user can read it, and for
-               a while it did not: this comment claimed it "still reads on the About/build-info
-               surfaces" when neither mentioned preview at all, leaving an unexplained pulsing amber
-               triangle whose only explanation was an aria-label or an external link needing signal.
-               For a data-loss warning that is the hover problem in another costume
-               (AGENT_RULES §2.D.1). It now renders in #dialog-build-info, which this badge and the
-               version stamp both open. -->
-          <a id="preview-badge" class="preview-badge"
-             href="https://github.com/stutek/LibrePT/blob/main/docs/PREVIEW.md"
-             target="_blank" rel="noopener noreferrer"
-             aria-label="Preview build — pre-release, may lose data. Open the risks & data-loss notice.">
-            <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
-            <span id="preview-badge-label" class="sr-only">PREVIEW</span>
-          </a>
-        </span>
+        <img class="logo-icon" src="icons/icon-64.png" alt="" width="26" height="26">
         <h1>LibrePT</h1>
+        <!-- The word PREVIEW is spelled out, not reduced to an icon. It briefly wasn't: the pill
+             was shrunk to an amber triangle pinned to the logo's corner because at that size the
+             wordmark would be illegible, and because a pill in this flex row costs horizontal
+             width that narrow phones (Galaxy S23 Ultra and similar) took out of <h1>. But a bare
+             pulsing triangle is an unexplained warning — its meaning lived only in an aria-label
+             and an external link needing signal, which is the hover problem in another costume
+             (AGENT_RULES §2.D.1) for what is a data-loss warning.
+             The width it costs is handled rather than avoided: the pill never shrinks
+             (flex-shrink: 0) and <h1> ellipsizes instead, so the wordmark degrades gracefully
+             while the warning always reads. The full notice is still one tap away in
+             #dialog-build-info, which the version stamp also opens. -->
+        <a id="preview-badge" class="preview-badge"
+           href="https://github.com/stutek/LibrePT/blob/main/docs/PREVIEW.md"
+           target="_blank" rel="noopener noreferrer"
+           aria-label="Preview build — pre-release, may lose data. Open the risks & data-loss notice.">
+          <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+          <span id="preview-badge-label" class="preview-badge-label">PREVIEW</span>
+        </a>
       </div>
 
       <div class="header-build-stack">

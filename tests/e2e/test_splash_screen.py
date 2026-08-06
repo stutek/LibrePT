@@ -37,13 +37,10 @@ def test_splash_holds_for_its_minimum_even_though_boot_is_faster(page, local_ser
     assert held_for > 3.0, f"splash was dismissed after only {held_for:.2f}s"
 
 
-def test_splash_off_skips_the_hold_entirely(page, local_server):
-    """`?splash=off` is a real deep-link parameter (demo links land straight on the app), and it is
-    what keeps the rest of the browser suite from paying 4s per navigation."""
-    started = time.monotonic()
-    page.goto(local_server + "?splash=off")
-    page.locator("#app-splash").wait_for(state="hidden", timeout=15000)
-    assert time.monotonic() - started < 3.0
+# `?splash=off` skipping the hold is NOT tested here. Measuring "it was fast" by wall clock around
+# a real page load asserts on the machine as much as on the code — it failed on a box at load
+# average 20 across 16 cores, for reasons having nothing to do with the splash. The rule itself is
+# pure arithmetic and is pinned in tests/unit_js/modules/splashScreen.test.mjs instead.
 
 
 def test_splash_uses_the_themed_background_not_a_fixed_colour(page, local_server):
