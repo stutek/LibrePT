@@ -215,11 +215,19 @@ Allow **two or more participants to be bound to the same set of exercises**, mer
 - Decide the data model: a per-client `clientRoutines[clientId]` today owns its own `exercises` + `logs`. Binding needs either a shared exercise reference with per-client log/feedback overlays, or a "group" pseudo-participant that fans feedback back out to members.
 - Interacts with the merged-session view ([1.2](#12--simultaneous-sessions-merged-into-one-clipboard-multi-line-titles--per-participant-tags)) and the horizontal participant tabs — a bound group should read as one tab, expandable to its members.
 
-### 8.3 [ ] Inline Clipboard Editor (Saved Patch: `patches/inline_clipboard_editor.patch`)
+### 8.3 [x] Inline Clipboard Editor — SHIPPED (the saved patch is long gone)
 An on-the-fly edit mode for the active session clipboard (`src/components/clipboardEditor.js`), saved as an unstaged patch (`patches/inline_clipboard_editor.patch`) so it can be cleanly reviewed/applied after core refactoring passes.
 - When the trainer taps a card's edit (✎) affordance (`.deck-card-edit`), the deck flips into an inline editable list (`renderClipboardEditor`).
 - Allows swapping exercises, retargeting sets/reps/weight, reordering rows via tap or drag (`.editor-reorder`), adding new exercises, and adjusting rest breaks directly inside the live session without leaving the gym floor.
-- To apply later: `git apply patches/inline_clipboard_editor.patch`.
+- ~~To apply later: `git apply patches/inline_clipboard_editor.patch`.~~
+**Closed by the 2026-08-06 sweep.** Everything above shipped and the entry simply was never ticked:
+the editor lives at [clipboardEditor.js](src/modules/clipboard/clipboardEditor.js) (not the
+`src/components/` path this entry predates), and `patches/` does not exist — the patch was applied
+or superseded, so the "apply later" instruction pointed at nothing. Covered by three medium suites:
+[test_clipboard_editor.py](tests/medium/test_clipboard_editor.py) (drag reorder, circuit
+well-formedness), [test_clipboard_catalog_picker.py](tests/medium/test_clipboard_catalog_picker.py)
+(swapping a movement) and [test_clipboard_edit_mode.py](tests/medium/test_clipboard_edit_mode.py)
+(the mode's chrome).
 
 ### 8.7 [ ] [Discuss] Should completing a circuit ROUND stop its timer, like completing the block does?
 **Raised 2026-08-06 (Simon).** The behaviour is currently asymmetric, and the asymmetry was never
@@ -435,7 +443,13 @@ fine — GitHub Pages multiplexes over HTTP/2 and the service worker precaches e
 first visit, so it costs one visit, once. Recording it because it is the amplifier that turned a
 40ms-per-request dev-server stall into a 3.8-second page load (fixed 2026-07-25, dev server only).
 
+- **The cheap half is already done** (noted 2026-08-06): `index.html` carries 15
+  `<link rel="modulepreload">` hints covering the boot-critical path, so the import waterfall is
+  already flattened where it costs most. Only bundling remains, and that is the expensive half.
 - Only worth acting on if first-load time on a poor mobile connection ever becomes a real complaint.
+  **This entry was briefly mis-recommended as "the next big win" on 2026-08-05** — it is not; its own
+  guidance above says so, and the vendoring of Font Awesome (§12.6) had already removed the actual
+  cold-load bottleneck. Read the two bullets here before proposing it again.
 - Any fix (bundling) trades away the buildless property, which is a deliberate architectural choice —
   so the bar for changing it is high.
 
@@ -630,7 +644,7 @@ A completed dated session is an **immutable execution record**. Anything forward
 With 17.1 preserving the full program, "**Save as routine**" on a history record extracts a reusable template — **demoting the Routines view from an authoring surface to a library that fills itself from real sessions** (removes the blank-page authoring chore that blocks ramp-up).
 
 - Extraction **strips all person/day-specific magnitudes** — `weight`, `watts`, time/`duration`, distance/calories — keeping the **prescription structure**: exercise, set count, `reps`/target-reps, `rest`, circuit grouping. (Rep counts are a reasonable reused default; loads are not.)
-- Pairs with the inline clipboard editor ([8.3](#83--inline-clipboard-editor-saved-patch-patchesinline_clipboard_editorpatch)) and "next session prep" ([5.1](#51--tabbed-client-view) Tab 3).
+- Pairs with the inline clipboard editor ([8.3](#83-x-inline-clipboard-editor--shipped-the-saved-patch-is-long-gone)) and "next session prep" ([5.1](#51--tabbed-client-view) Tab 3).
 - **Watch item for §18.5**: making template provenance a *hard* reference back to the source history record would create the first cycle in the reference graph (`history → routine → history`), which §18.5's topological migration order forbids. Keep provenance a soft/denormalised field.
 
 ### 17.5 [~] Explicit item ordering — `position` on every session item
@@ -843,7 +857,17 @@ Migration replay order means **correct order of foreign-key availability**, not 
   edits, only to detect whether both sides changed the same record since the ancestor, which needs no
   clock or clock substitute — see §3.3's "Merge" note for the full reasoning.
 
-### 18.6 [ ] [Decided] Persistence engine → IndexedDB (supersedes the §3.7 deferral)
+### 18.6 [~] [Decided] Persistence engine → IndexedDB (supersedes the §3.7 deferral)
+**ENGINE SHIPPED — reclassified from open by the 2026-08-06 sweep.**
+[indexedDb.js](src/data/indexedDb.js) (one database, one store per schema, the three indexes),
+[writeQueue.js](src/data/writeQueue.js) (write-behind, ordered) and
+[storageDurability.js](src/data/storageDurability.js) (`persist()`) all exist and are wired into
+[stateStore.js](src/data/stateStore.js)'s boot and save paths. What is still open is the part that
+entry called "the real win": **true lazy per-client loading is deliberately NOT done**, and
+stateStore's own header says why — the read model stays synchronous so ~115 existing
+`state.<collection>.push(...)` call sites need no change, and converting them to async per-client
+fetches is separate, larger work. The index it needs (`CLIENT_COLLECTION_INDEX`) is already built.
+
 §3.7 deferred the DB "until the 5 MB cap looms". With §17.1 shipped it now looms on its own, and star
 writes make it unavoidable. **Sizing (measured 2026-07-26, from the real §17.1 record shape — ~6.0 KB
 per session, 9 exercises × 4 sets, rests, feedback, notes):**
@@ -1139,6 +1163,32 @@ there by a missing contract rather than by a genuine need to boot the whole app.
       `buildSessionMeta`'s 2h `endDate` clamp is load-bearing — `recoverActiveSession()` discards a
       cache more than 2h past its scheduled end, so without it a same-day session whose window had
       closed would be thrown away the moment it was recovered.
+
+## 20b. Backlog sweep — 2026-08-06
+
+Four entries had shipped without being ticked (§12.6, §12.8, §22, §8.3) and one was misclassified
+(§18.6), so the backlog could not be trusted for prioritising. Every open/partial item was checked
+against the code rather than re-read, and the results are recorded here so the next sweep starts
+from evidence instead of repeating it.
+
+**Changed:**
+
+| Item | Was | Now | Evidence |
+| :--- | :--- | :--- | :--- |
+| [§8.3](#83-x-inline-clipboard-editor--shipped-the-saved-patch-is-long-gone) | open | **done** | `clipboardEditor.js` ships; `patches/` does not exist; three medium suites cover it |
+| [§18.6](#186--decided-persistence-engine--indexeddb-supersedes-the-37-deferral) | open | **partial** | engine + write queue + durability all wired; lazy per-client load deliberately deferred |
+| [§12.7](#127--observation-low-priority-89-separate-module-requests-on-first-load) | open | open, **corrected** | 15 `modulepreload` hints already cover the boot path; the entry's own guidance is "do not act" |
+
+**Two grep false positives**, recorded so the next sweep does not re-raise them: `expectedVersion`
+in [schemaMigrations.js](src/data/schemaMigrations.js) is *schema* validation, not §18.9's
+compare-and-swap; and the `walkthrough` hits are i18n strings for a notification button, not §9.5's
+engine. Checking a signal's CONTEXT, not its count, is the whole method — the first pass of this
+sweep also mis-scored several items because `grep -c` over multiple files emits `file:count`.
+
+**Noticed while sweeping, not fixed:** the demo notification offers an "Explore Walkthrough" button
+([messages.js](src/data/messages.js)) that merely navigates to `/clients` — it promises a guided
+walkthrough (§9.5) that does not exist yet. Either the copy should stop promising it, or §9.5 should
+be built; leaving a button that under-delivers is the worse of the three options.
 
 ## 21. `Page.goto` stalls against the local dev server
 
