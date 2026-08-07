@@ -1496,8 +1496,8 @@ was split *horizontally* into ~60 small functions but never *vertically*. By con
 | 304–473 | history-log / routine → live `clientState` | `sessionPlanFactory.js` (pure) |
 | ~~528–596~~ | ~~schedule-drift detection + apply~~ | **dropped in 4b** — see below |
 | 651–782 | quick signals (toggle, exclusivity, colour) | `quickSignals.js` (pure-ish) |
-| 1260–1403 | DOM wiring / `setupActiveSession` | `controllers/activeSessionWiring.js` |
-| 1448–1604 | finish → history projection | `modules/session/sessionCompletion.js` |
+| ~~1260–1403~~ | ~~DOM wiring / `setupActiveSession`~~ | **dropped in 4c** — see below |
+| ~~1448–1604~~ | ~~finish → history projection~~ | **done in 4c** → `domain/sessionHistoryRecord.js` |
 
 **4a SHIPPED 2026-08-07** — `domain/sessionPlanFactory.js` and `domain/quickSignals.js`, with 13
 unit tests that were previously unreachable without a booted browser. The quick-signal split is
@@ -1527,6 +1527,32 @@ refuses to resolve (its exercise branch excludes rests). `showSessionView` treat
 as "leave focus alone", so tapping the timer card for a rest landed on the session without focusing
 or revealing the rest it was counting down. One writer and one reader in one file, with a round-trip
 test over every item kind, is what makes that class of drift impossible rather than merely fixed.
+
+**4c SHIPPED 2026-08-07** — `domain/sessionHistoryRecord.js`. The history record was being built
+in two places with two slightly different sets of fields: once when a session is COMPLETED, once on
+every cache sync while a PLANNING draft is authored. They agreed on everything that mattered, but
+only by hand, and the planning path runs on every keystroke — a field added to the finish path alone
+would have gone unnoticed until a draft was reopened and found missing it. The upsert rule moved
+with it: one open draft per client, keeping the id, because that id is what the notification feed
+and any deep link to the draft are keyed on.
+
+**The wiring block was dropped from the split**, same judgement as §24.4b. `wireSessionExpandBar` /
+`wireSessionMenuAndActions` / `wireAddExerciseAndCatalogDialogs` are one-time DOM setup whose every
+dependency is a function in the controller; moving them would mean passing eight callbacks across a
+file boundary to unlock nothing testable — `tests/medium/` already mounts this wiring through
+`appBoot`. Extract it only if a second surface ever needs the same wiring.
+
+### 24.4d [ ] Follow-up found while doing 4a–4c: one movement → plan item mapping
+The projection "catalog movement → plan item fields" (`name`, `category`, `pattern`,
+`instructions`, `loadUnit`, `modality`, `metric`) is written in FOUR places:
+`sessionPlanFactory.historyExerciseItemToPlanItem`, `sessionPlanFactory`'s routine path, and the
+controller's `injectExerciseIntoActivePlan` and `swapPlanItemMovement`. They agree on the fields but
+not on `exerciseId`: only the inject/swap pair sets it, which is exactly why
+`resolveCurrentMovementId` needs a name-based fallback for "plans authored before slots carried an
+`exerciseId` (routines, demo data)". Consolidating into one `planItemFromCatalogEntry()` in
+`sessionPlanFactory.js` would let the routine path carry `exerciseId` too and retire that fallback —
+but that changes what the catalog picker excludes for routine-authored slots, so it is a behaviour
+change and wants its own commit rather than riding along with a move.
 
 **A pre-existing bug surfaced while verifying 4a**, unrelated to the refactor and fixed on its own
 commit: `buildSessionMeta` rewrote a session's `endDate` to `now + 2h` once its slot had passed, and

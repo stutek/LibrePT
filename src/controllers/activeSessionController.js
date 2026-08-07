@@ -21,7 +21,7 @@ import {
   resolveScheduleFromClockValues,
 } from "../domain/sessionClock.js";
 import { focusIndexFromRef, focusRefForItem, isCircuitFocus } from "../domain/sessionFocus.js";
-import { buildProgramSnapshot } from "../domain/sessionItemRecord.js";
+import { buildSessionHistoryRecord, upsertPlanningRecord } from "../domain/sessionHistoryRecord.js";
 import {
   buildClientStateFromHistoryLog,
   buildClientStateFromRoutine,
@@ -1019,39 +1019,19 @@ function stampSourceSessionsCompleted(state, sessionDuration) {
   }
 }
 
-// One participant's history record, or null when there's nothing worth logging (nothing
-// performed, and this isn't a planning template that always logs regardless).
-function buildParticipantHistoryLog(pId, state, sessionDateISO, sessionDuration) {
-  const client = state.clients.find((c) => c.id === pId);
-  const clientState = activeSession.clientRoutines[pId];
-  if (!client || !clientState) return null;
-
-  const isPlanning = !!activeSession.sourceSession?.isPlanning;
-  // Persist the WHOLE program as an immutable snapshot (rests, circuit grouping, and prescribed-
-  // but-skipped exercises included) rather than flattening to performed sets only (TODO §17.1).
-  const clientProgram = buildProgramSnapshot(clientState, { isPlanning });
-  const anyCompleted = clientProgram.some((it) => it.type === "exercise" && it.completed);
-  if (!anyCompleted && !isPlanning) return null;
-
-  const clientLog = {
-    id: newRecordId(),
-    clientId: pId,
-    clientName: client.name,
-    routineName: clientState.routineName,
-    date: sessionDateISO,
-    duration: sessionDuration,
-    exercises: clientProgram,
-    feedback: (activeSession.feedback || []).filter((f) => f.clientId === pId),
-  };
-  if (isPlanning) clientLog.isPlanning = true;
-  return clientLog;
-}
-
 // Log a record for every participant who performed something (skipped work is kept alongside it),
-// or always for a planning template. A session where nothing was done writes no history.
+// or always for a planning template. A session where nothing was done writes no history — the
+// record's own shape and that judgement both live in domain/sessionHistoryRecord.js.
 function appendHistoryRecordsForParticipants(state, sessionDateISO, sessionDuration) {
   for (const pId of activeSession.participants) {
-    const clientLog = buildParticipantHistoryLog(pId, state, sessionDateISO, sessionDuration);
+    const clientLog = buildSessionHistoryRecord({
+      client: state.clients.find((c) => c.id === pId),
+      clientState: activeSession.clientRoutines[pId],
+      feedback: activeSession.feedback || [],
+      dateISO: sessionDateISO,
+      duration: sessionDuration,
+      isPlanning: !!activeSession.sourceSession?.isPlanning,
+    });
     if (clientLog) state.history.push(clientLog);
   }
 }
@@ -1108,31 +1088,16 @@ function syncPlanningSnapshotToHistory() {
   const nowISO = new Date().toISOString();
 
   for (const pId of activeSession.participants) {
-    const client = state.clients.find((c) => c.id === pId);
-    const clientState = activeSession.clientRoutines[pId];
-    if (!client || !clientState) continue;
-
-    const clientProgram = buildProgramSnapshot(clientState, { isPlanning: true });
-    const existing = state.history.find((h) => h.isPlanning && h.clientId === pId);
-    if (existing) {
-      existing.routineName = clientState.routineName;
-      existing.title = title;
-      existing.date = nowISO;
-      existing.exercises = clientProgram;
-    } else {
-      state.history.push({
-        id: newRecordId(),
-        clientId: pId,
-        clientName: client.name,
-        routineName: clientState.routineName,
-        title,
-        date: nowISO,
-        duration: 0,
-        exercises: clientProgram,
-        feedback: (activeSession.feedback || []).filter((f) => f.clientId === pId),
-        isPlanning: true,
-      });
-    }
+    const draft = buildSessionHistoryRecord({
+      client: state.clients.find((c) => c.id === pId),
+      clientState: activeSession.clientRoutines[pId],
+      feedback: activeSession.feedback || [],
+      dateISO: nowISO,
+      duration: 0,
+      isPlanning: true,
+      title,
+    });
+    if (draft) upsertPlanningRecord(state.history, draft);
   }
   if (saveToLocalStorage) saveToLocalStorage();
 }
