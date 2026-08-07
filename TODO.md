@@ -1359,3 +1359,122 @@ update both so they do not drift.
 outreach channel, and the highest-leverage target (a sport-science faculty, whose academic year
 starts in autumn) is only reachable in a late-August-to-mid-September window. Missing it slips that
 channel by a full semester.
+
+---
+
+## 24. Single-responsibility & module-boundary reorganisation
+
+Audit dated **2026-08-07** over `src/` (25,508 lines, 100 modules). The tree is mostly healthy —
+median module ~130 lines — so this is not a rewrite; it is a list of five oversized modules and
+four boundary defects, each independently shippable. Work the stages **in order** and commit each
+one on its own: every stage below is a complete, gate-verifiable change, so this section can be
+picked up cold by whoever comes next.
+
+**The finding worth reading even if you skip the rest** (§24.1): a gate blocking an import is
+sometimes evidence that the *callee* is in the wrong layer. `agent_tools/import_layers.py` correctly
+forbids `modules/common/` → `controllers/`, and the response at the time was to copy the whole theme
+system into the header rather than to notice that a theme service is not a controller. A gate cannot
+see a copy-paste. When an import is refused, check the layering before duplicating.
+
+### 24.1 [ ] Stage 1 — one theme system, not two
+`controllers/themeController.js` calls itself "single source of truth for resolving, applying,
+persisting, and localizing theme styles". It is not: `modules/common/applicationHeader.js` carries a
+verbatim copy of all five constants (`THEME_BODY_CLASS`, `THEME_META_COLOR`, `LEGACY_THEME_MAP`,
+`THEME_SWITCHER_LABELS`, `DEFAULT_THEME`) plus its own `resolveTheme`, `applyTheme` and a same-named
+`applyThemeSwitcherLabels` export. Both run in the same page — `app.js` boots the controller's, the
+header's `setupThemeSwitcher()` then re-applies through the copy.
+
+They have already diverged, which is the live defect: the controller's `applyTheme` assigns
+`document.documentElement.className`, the header's copy touches `body` only. Theme CSS keys on both
+`html.X` and `body.X`, so after any switcher change the root element keeps the boot theme's class.
+
+Fix: move the module to `src/modules/common/theme.js` (it is a service, not a controller — it
+orchestrates nothing), delete the header's copy, keep ONE `applyTheme` that updates both elements.
+
+### 24.2 [ ] Stage 2 — two `formatDuration`, two `escapeHTML`
+- `modules/common/utils.js` returns `"05:02"`; `modules/common/exerciseModality.js` returns `"5:02"`.
+  Same exported name, different output for the same input.
+- `modules/clipboard/exerciseAndRestTimer.js` carries a private `escapeHTML`. This one is
+  security-relevant: `build/frontend_audit.py` recognises the *name*, so a local copy passes the
+  audit while being free to drift — and it already has (`utils.escapeHTML` returns `""` for any
+  falsy input, so `escapeHTML(0)` is `""`; the timer's copy stringifies first).
+
+### 24.3 [ ] Stage 3 — the board render leaves `controllers/`
+`controllers/activeSessionController.js` lines 1011–1258 are ~250 lines of view rendering (client
+tabs, injury banner, focus panel, title-bar edit chrome, start/complete visibility, deck-or-editor,
+empty state). Everything else in `controllers/` orchestrates; this paints. Extract to
+`modules/clipboard/activeSessionBoard.js`, which also lets `tests/medium/` mount the board without
+the controller.
+
+### 24.4 [ ] Stage 4 — split the rest of `activeSessionController.js`
+1,668 lines, 6.5% of `src/`, 2.3× the next-largest module. It passes the complexity gate because it
+was split *horizontally* into ~60 small functions but never *vertically*. By concern:
+
+| Lines | Concern | Destination |
+| :--- | :--- | :--- |
+| 65–174, 238–257 | edit-mode flag, one-shot callout, `editorRowId` | `modules/clipboard/editModeState.js` |
+| 192–302 | focus↔URL resolution, `FOCUS_OWNED_ROUTES` | `modules/session/sessionFocusUrl.js` |
+| 304–473 | history-log / routine → live `clientState` | `sessionPlanFactory.js` (pure) |
+| 528–596 | schedule-drift detection + apply | `modules/session/sessionScheduleAdjust.js` |
+| 651–782 | quick signals (toggle, exclusivity, colour) | `quickSignals.js` (pure-ish) |
+| 1260–1403 | DOM wiring / `setupActiveSession` | `controllers/activeSessionWiring.js` |
+| 1448–1604 | finish → history projection | `modules/session/sessionCompletion.js` |
+
+Residual ≈ 330 lines of genuine controller (the `activeSession` variable, lifecycle orchestration,
+timers, cache/recover). Every new *pure* module gets a `tests/unit_js/` file in the same commit.
+
+### 24.5 [ ] Stage 5 — `clipboardEditor.js`'s 710-line function
+`renderClipboardEditor()` spans lines 187–896 and holds a template layer, 11 wiring closures, a drag
+reorder engine and circuit normalisation in one scope — none of it reachable without a browser.
+Extract, highest value first:
+- **`circuitGrouping.js`** (lines 108–186 + `normalizeCircuits`) — pure array algebra enforcing
+  "circuit members stay consecutive". Exactly the invariant a `tests/unit_js/` test should pin.
+- **`clipboardEditorMarkup.js`** (~202–437) — pure `(item, ctx) → HTML` row/circuit/insert-bar builders.
+- **`listReorder.js`** (~717–803) — a generic tap-nudge/drag reorder engine, not editor-specific.
+
+### 24.6 [ ] Stage 6 — `src/domain/`, a layer for what is neither storage nor UI
+`modules/common/` is two directories wearing one name. A DOM-reference count splits its 22 modules
+cleanly: ten have **zero** DOM references (`exerciseModality`, `exerciseStandard`, `repsAndLoad`,
+`sessionClock`, `sessionItemRecord`, `sessionItemOrder`, `recordId`, `sessionCache`,
+`renderRegistry`, `utils`) while the rest are real components with 5–35. The doc calls this
+directory "shared UI helpers", so half of it is misfiled.
+
+The test tree already ratifies the split: `tests/unit_js/modules/common/` contains exactly the
+DOM-free set and nothing else. The precedent is set too — `googleAuth.js` moved to `data/` for this
+same reason when `import_layers.py` first ran.
+
+Create `src/domain/`, ranked in `import_layers.py`'s `LAYERS` between `data/` and `modules/common/`.
+It takes the pure set plus the pure modules stages 4–5 produce (`sessionPlanFactory`, `quickSignals`,
+`circuitGrouping`). Two go to `data/` instead: `sessionCache.js` (localStorage persistence) and
+`recordId.js` (its own docstring says storage keys on it). `utils.js` and `renderRegistry.js` stay
+in `common/` — genuinely UI-adjacent. Update `sw/cacheManifest.js` and `docs/SRC_MODULES.md`.
+
+### 24.7 [ ] Stage 7 — three more multi-responsibility modules
+- **`applicationHeader.js` (512)** → header shell + menu (~250) once `renderSyncBadge` (76–136) moves
+  beside `driveSyncUi.js`, and `renderAboutDialog`/`renderTermsDialog`/`setupFirstRunTerms` move to
+  `legalDialogs.js`. (The theme copy is already gone in §24.1.)
+- **`editSessionControl.js` (645)** → `editSessionDraft.js` (23–91), `editSessionCommit.js` (99–246,
+  pure and currently untested), `editSessionForm.js` (364–575); ~150 lines of setup/open remain.
+- **`notificationArea.js` (498)** → `notificationItems.js` (34–131, pure `(state, t, readIds) →
+  items[]`), `notificationReadState.js` (91–105, 209–219 — it reaches into `storageNamespace`
+  directly from a UI module), gestures (405–498); ~250 lines of render remain.
+
+### 24.8 [ ] Stage 8 — names that match what the tree holds
+- Three session directories, none named for its lifecycle stage: `modules/session/` (setup/edit/
+  dialogs/bars), `modules/sessionList/` (dashboard), `modules/clipboard/` (the live run).
+  "Clipboard" is domain slang the directory tree should not need a glossary for. Rename to
+  `sessionPlanning/` / `sessionDashboard/` / `sessionLive/` as ONE mechanical commit after the
+  splits land. Two files are filed against their consumer and should move regardless:
+  `session/sessionTitleBar.js` renders the live overlay's title, and `session/sessionBar.js` is
+  consumed by `sessionList/sessionsView.js`.
+- **14 module headers name directories that no longer exist** (`components/clipboardEditor.js`,
+  `src/helper/sessionCache.js`, …). AGENT_RULES §5.4 makes that first line the module's
+  self-documentation, so today it misdirects. Fix them, and add the path-vs-header check to
+  `agent_tools/` — it is exactly the "will run again, fails silently otherwise, cheap and
+  deterministic" shape §6.2 asks for.
+
+**Not a problem, deliberately left alone:** `src/index.css` (773) is a genuine design system;
+`src/data/exercises.js` (476) and the i18n dictionaries (357 each) are flat data. Size alone is not
+a defect. The test tiers are also in good shape — the e2e residuals next to migrated `unit_js`
+suites (`test_reps_and_load.py`, `test_exercise_standard.py`) are real integration assertions with
+headers explaining what moved and why. That is the model the `src/` reorg is copying.
