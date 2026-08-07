@@ -44,8 +44,11 @@ dropped** (2026-08-07 — see `run_e2e_tests`, and the budget table in
 arithmetic shifts: with the file no longer pinned to a worker, a stage's floor is its slowest
 *test* rather than its heaviest *file*, so moving a slow test down now removes close to its full
 cost from stage 3 instead of a share of one worker's queue. **Before migrating anything for speed,
-check which shape the cost has** — `--durations=0` on the suite. In 2026-08-07's pass, the entire
-215s → 98s win came from the distribution flag and not one test moved.
+check which shape the cost has** — `--durations=0` on the suite. In 2026-08-07's pass the entire
+stage-3 win, 215s → 45s, came from two harness waits (the distribution flag, then a swallowed 20s
+splash-dismiss timeout on every `clean_start` navigation) and **not one test moved between tiers**.
+A tight cluster of near-identical durations is a timeout, not work — 17 tests all landing on
+~21.2s was the whole tell.
 
 **Duplication is the other thing an audit finds, and it does not show up as a tier mistake.** Two
 full-app flows can each be legitimately e2e and still assert the same thing twice: `test_clipboard.py`

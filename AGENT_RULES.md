@@ -83,18 +83,29 @@ Every response and tool action must drive measurable, continuous progress toward
 
      | Stage | Typical | Investigate past |
      | :--- | :--- | :--- |
-     | 1 — lint / unit / JS unit / audits (parallel) | ~5s (~13s on a cold pip-audit) | 60s |
-     | 2 — medium component tests | ~14s | 90s |
-     | 3 — e2e browser suite | ~1m50s | 4min |
+     | 1 — lint / unit / JS unit / audits (parallel) | ~6s (~13s on a cold pip-audit) | 60s |
+     | 2 — medium component tests | ~13s | 90s |
+     | 3 — e2e browser suite | ~45s | 2min |
      | 4 — OWASP ZAP baseline | ~15s (~75s on a cold `.venv`) | 3min (hard-killed at 20min) |
-     | **whole `build check`** | **~2m20s** | **5min** |
+     | **whole `build check`** | **~1m20s** | **3min** |
 
-     Re-measured 2026-08-07, after dropping `--dist=loadfile` from both Playwright stages: that
-     flag pinned each file to one worker, so a stage could not finish faster than its heaviest
-     file, and `tests/e2e/test_share_deeplink.py` alone (13 tests, ~203s of call time) set stage 3
-     while seven of eight workers idled. Measured back to back at `-n 8`: stage 3 215s → 98s,
-     stage 2 14.7s → 12.1s, whole gate 5m06s → 2m20s. The flag had been added for a reporting
-     nicety `-q` does not even render differently. Do not put it back.
+     Re-measured 2026-08-07, after two fixes to the browser stages — **5m06s → 1m18s, with no test
+     moved between tiers and none deleted**. Both were harness waits, not test cost, and both are
+     the kind that hide as "browsers are just slow":
+
+     1. **`--dist=loadfile` pinned each file to one worker**, so a stage could not finish faster
+        than its heaviest FILE — `test_share_deeplink.py` alone (13 tests, ~203s of call time) set
+        stage 3 while seven of eight workers idled. Back to back at `-n 8`: stage 3 215s → 98s.
+        The flag had been added for a reporting nicety `-q` does not even render differently.
+     2. **The splash-dismiss pre-tap borrowed the full 20s dismiss budget** (`tests/conftest.py`).
+        On an empty database the language step withdraws the X on purpose, so every `clean_start`
+        navigation sat in a swallowed timeout: 17 tests at a suspiciously identical ~21.2s, ~350s
+        of the suite's 663s total call time. Given its own 1.5s budget: stage 3 98s → 45s, suite
+        call time 663s → 336s.
+
+     The lesson worth keeping is the diagnostic, not the two constants: **a tight cluster of
+     near-identical durations is a timeout, not work.** Read `--durations=0` before concluding a
+     suite is inherently slow or that tests need moving down a tier.
 
      A run well outside these is usually the ENVIRONMENT, not the change under test. The two that
      have actually bitten: a dev server left running across days so it no longer matches its own

@@ -35,6 +35,20 @@ ACCEPT_TERMS_SCRIPT = "window.localStorage.setItem('librept_terms_accepted', '1'
 # `page.goto` budget below is raised for.
 SPLASH_DISMISS_TIMEOUT_MS = 20000
 
+# The PRE-EMPTIVE X tap is an opportunity, not a wait, and must not borrow the budget above.
+# `#splash-dismiss` is static markup in index.html, visible from the first paint, so when it is
+# offered at all it is actionable in milliseconds. The one case where it is NOT offered is the one
+# that matters: on an empty database the language step withdraws it (splashScreen.js sets `hidden`)
+# until a language is answered — so with the full 20s budget, every `clean_start` navigation sat in
+# a swallowed timeout waiting for a control the app is deliberately not showing.
+#
+# Measured 2026-08-07: 20.85s for a single-navigation clean_start test in isolation, ~1.2s of which
+# was real work; ~350s across the e2e suite, more than half its total call time, spread over 17
+# tests that all clocked in at a suspiciously identical ~21.2s. Falling through fast costs nothing —
+# the state machine below already handles the language branch, and the second tap after the answer
+# still carries the full budget, which is where an X is genuinely expected.
+SPLASH_EARLY_TAP_TIMEOUT_MS = 1500
+
 
 @pytest.fixture(autouse=True)
 def accept_first_run_terms(request):
@@ -74,10 +88,11 @@ def dismiss_splash(request):
     page = request.getfixturevalue("page")
     navigate = page.goto
 
-    def click_dismiss_if_present():
-        """Best-effort: the splash may already be on its way out, leaving no X to hit."""
+    def click_dismiss_if_present(timeout=SPLASH_DISMISS_TIMEOUT_MS):
+        """Best-effort: the splash may already be on its way out, or be holding its X back behind
+        the language step, leaving no X to hit."""
         try:
-            page.locator("#splash-dismiss").click(timeout=SPLASH_DISMISS_TIMEOUT_MS)
+            page.locator("#splash-dismiss").click(timeout=timeout)
         except PlaywrightTimeoutError:
             pass
 
@@ -97,8 +112,10 @@ def dismiss_splash(request):
         # not come up in a language nobody picked). Seen 2026-08-07 under xdist contention.
         #
         # Clicking first is safe in every case: pre-boot the tap is captured by theme-boot.js and
-        # honoured once the app is ready, and post-boot it dismisses outright.
-        click_dismiss_if_present()
+        # honoured once the app is ready, and post-boot it dismisses outright. Short budget on
+        # purpose (SPLASH_EARLY_TAP_TIMEOUT_MS): this tap is worth taking if there is an X, and
+        # worth abandoning immediately if there is not.
+        click_dismiss_if_present(SPLASH_EARLY_TAP_TIMEOUT_MS)
 
         # Now wait for the splash to actually commit to something: gone/going, or holding the
         # language step up. Both branches resolve fast — the early tap short-circuits the 5s hold
