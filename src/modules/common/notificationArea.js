@@ -9,6 +9,7 @@
 // Dependencies injected via initNotificationArea({ getState, getActiveSession, t, escapeHTML, navigateToPath })
 
 import { readVersionScoped, writeVersionScoped } from "../../data/storageNamespace.js";
+import { resolveNotificationItems } from "../../domain/notificationItems.js";
 import { renderMarkupOnce } from "./dom.js";
 
 // Schema-scoped: which notifications a PT has read is per-build state (see data/storageNamespace).
@@ -26,106 +27,12 @@ export function syncNotificationBarState() {
   if (area) area.classList.remove("has-active-session");
 }
 
-// Computed fresh on every render, never stored: a planning-mode draft persists to
-// state.history (isPlanning:true — see activeSessionController.js's syncPlanningSnapshotToHistory)
-// so it survives being replaced by the next session the trainer opens, but a trainer has no other
-// place to rediscover it. One action per plan resumes it directly (openSessionFromHistory) — the
-// notification feed doubles as the "list of unscheduled plans" this backs.
-function buildUnscheduledPlansItem(state, t) {
-  const plans = (state.history || []).filter((h) => h.isPlanning);
-  if (plans.length === 0) return null;
-  const fallbackTitle = t("planned_program") || "Planned Program";
-  return {
-    id: "synthetic-unscheduled-plans",
-    type: "planning",
-    icon: "fa-solid fa-clipboard-list",
-    title: t("notif_unscheduled_plans_title") || "Unscheduled plans",
-    description: (
-      t("notif_unscheduled_plans_desc") ||
-      "{count} plan(s) drafted but not yet assigned to a session."
-    ).replace("{count}", String(plans.length)),
-    actions: plans.map((p) => ({
-      label: `${p.title || fallbackTitle} · ${p.clientName || ""}`,
-      resumePlanId: p.id,
-    })),
-  };
-}
-
-// Computed fresh on every render, never stored: state.planUpdates already IS the "Pending Plan
-// Adjustments" feature's own durable store (resolved:false = awaiting the trainer's review) — this
-// re-presents that same data grouped by client (cross-referenced to state.sessions for a friendlier
-// label where one exists) so it surfaces here too, not only in the dedicated Adjustments view that
-// every action links to.
-function buildPendingSessionsItem(state, t) {
-  const unresolved = (state.planUpdates || []).filter((u) => !u.resolved);
-  if (unresolved.length === 0) return null;
-
-  const byClient = new Map();
-  for (const u of unresolved) {
-    if (!byClient.has(u.clientId)) byClient.set(u.clientId, []);
-    byClient.get(u.clientId).push(u);
-  }
-
-  const sessions = state.sessions || [];
-  const labelFor = (clientId, clientName) => {
-    const session = sessions.find((s) => (s.participants || []).includes(clientId));
-    return session ? `${clientName} — ${session.title}` : clientName;
-  };
-
-  return {
-    id: "synthetic-pending-sessions",
-    type: "alert",
-    icon: "fa-solid fa-triangle-exclamation",
-    title: t("notif_pending_sessions_title") || "Sessions awaiting review",
-    description: (
-      t("notif_pending_sessions_desc") ||
-      "{count} client(s) have unresolved feedback signals from a session."
-    ).replace("{count}", String(byClient.size)),
-    actions: [...byClient.entries()].map(([clientId, items]) => ({
-      label: `${labelFor(clientId, items[0].clientName)} (${items.length})`,
-      view: "/adjustments",
-    })),
-  };
-}
-
 function loadReadNotificationIds() {
   try {
     return JSON.parse(readVersionScoped(READ_NOTIFICATIONS_KEY) || "[]");
   } catch (e) {
     return [];
   }
-}
-
-// Notifications are data-driven: they come from state.notifications, which is seeded together
-// with the demo dataset (?init=demo_data_load) — so a genuinely clean install shows an empty
-// feed, while a demo instance surfaces its messages (including the demo-mode clean-up notice).
-// Stored records carry i18n *keys* (titleKey/descKey/labelKey), resolved here so the feed
-// re-localizes on a language switch; `url`/`view`/`primary`/`icon`/`type` pass through.
-// Synthetic items (built fresh from state.history / state.planUpdates, never stored themselves)
-// lead the feed — they name work the trainer still owes a client, ahead of FYI-only messages.
-function resolveNotificationItems(state, t, readIds) {
-  const rawItems = state.notifications || [];
-  const syntheticItems = [buildUnscheduledPlansItem(state, t), buildPendingSessionsItem(state, t)]
-    .filter(Boolean)
-    .map((it) => ({ ...it, read: readIds.includes(it.id) }));
-  return [
-    ...syntheticItems,
-    ...rawItems.map((n) => ({
-      id: n.id,
-      type: n.type,
-      icon: n.icon,
-      title: n.titleKey ? t(n.titleKey) : n.title || "",
-      description: n.descKey ? t(n.descKey) : n.description || "",
-      actions: (n.actions || []).map((a) => ({
-        label: a.labelKey ? t(a.labelKey) : a.label || "",
-        url: a.url,
-        view: a.view,
-        resetDemo: a.resetDemo,
-        primary: a.primary,
-      })),
-      read: readIds.includes(n.id),
-    })),
-  ];
 }
 
 function renderEmptyNotificationState(
@@ -435,12 +342,9 @@ export function setupNotificationGestures() {
         readIds = [];
       }
       const state = deps.getState?.() || {};
-      const ids = [
-        ...(state.notifications || []).map((n) => n.id),
-        ...[buildUnscheduledPlansItem(state, deps.t), buildPendingSessionsItem(state, deps.t)]
-          .filter(Boolean)
-          .map((it) => it.id),
-      ];
+      // Every id currently in the feed, synthetic ones included — resolved through the same
+      // function the render uses, so "mark all read" can never miss an item the feed is showing.
+      const ids = resolveNotificationItems(state, deps.t).map((item) => item.id);
       for (const id of ids) {
         if (!readIds.includes(id)) readIds.push(id);
       }

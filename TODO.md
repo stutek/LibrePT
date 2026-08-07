@@ -1642,7 +1642,7 @@ substitution — importers sit at four different depths — and `import_layers.p
   The rule is narrower than "every module states its path", deliberately. A header that OPENS with a
   path is making a claim and must be right; one that opens with prose (`// Owns the Client
   create/edit dialog: …`) is making no claim and is left alone — those are already self-documenting,
-  which is all §5.4 asks. And a path *after* the first token is a reference to a NEIGHBOUR
+  which is all [AGENT_RULES.md](AGENT_RULES.md) §5.4 asks. And a path *after* the first token is a reference to a NEIGHBOUR
   (`// Markup-only companion to activeSessionController.js`), never a self-claim, so it is never
   "fixed". Getting either direction wrong would have made the check useless: too strict and it
   nags about good headers, too loose and it rewrites references to other files.
