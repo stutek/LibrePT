@@ -148,7 +148,7 @@ export const SCHEMA_3 = {
 export const LIVE_SCHEMAS = { 2: SCHEMA_2, 3: SCHEMA_3 };
 
 /**
- * The schema this build READS from. Declared, never derived.
+ * The schema a fresh install READS from. Declared, never derived.
  *
  * It used to be `Math.max(...Object.keys(LIVE_SCHEMAS))`, which made the read target a function of
  * registry MEMBERSHIP: merely registering a shape silently relocated every read in the app. Those
@@ -156,23 +156,12 @@ export const LIVE_SCHEMAS = { 2: SCHEMA_2, 3: SCHEMA_3 };
  * conflating them means a cutover can happen as a side effect of a one-line registry edit, with
  * nothing in the diff saying so.
  *
- * Pinning it is also what makes a disposable preview store safe (data/previewSchema.js): a store
- * outside this registry cannot become canonical by accident, no matter what it is keyed by.
- * Cutting over is a deliberate edit to THIS line, and it is greppable.
+ * It is only the DEFAULT. Which schema a given install actually reads is a per-install choice the
+ * trainer makes (data/readSchema.js): every live schema is written concurrently by the star-write
+ * fan-out, so a newer one is already current and complete by the time it is offered, and moving
+ * between them is a read re-point rather than a migration.
  */
-export const READ_SCHEMA = 3;
-
-/**
- * The shape an in-development build writes, projected into its own disposable database rather than
- * into the numbered registry above (data/previewSchema.js). Identical to SCHEMA_3 today because no
- * next schema has been cut yet — when one is being designed, it is authored HERE first, exercised
- * by opted-in trainers against real data, and only promoted into LIVE_SCHEMAS once it settles.
- *
- * Deliberately NOT in LIVE_SCHEMAS: a preview shape is not a schema major. It has no migration
- * step, no guarantee of stability, and may change with every build — which is exactly why its
- * store is keyed by commit and thrown away rather than migrated.
- */
-export const SCHEMA_PREVIEW = { ...SCHEMA_3 };
+export const DEFAULT_READ_SCHEMA = 3;
 
 function typeOf(value) {
   if (Array.isArray(value)) return "array";

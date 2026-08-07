@@ -397,39 +397,38 @@ backward transforms to write** — a "downgrade" is just a projection that was a
 
 The two halves of the star are asymmetric on purpose, and the asymmetry is the invariant:
 
-- **Writes fan out and compare no versions.** Every provisioned store gets the same projected
-  record, so no writer decides which schema is "current".
-- **Reads come from one DECLARED schema** — `READ_SCHEMA` in
-  [recordSchemas.js](../src/data/recordSchemas.js), **never derived**. It used to be
-  `Math.max(...Object.keys(LIVE_SCHEMAS))`, which made the read target a function of registry
-  *membership*: registering a shape silently relocated every read in the app. "This build can write
-  shape N" and "this build reads shape N" are independent facts, and conflating them let a cutover
-  happen as a side effect of a one-line registry edit with nothing in the diff saying so.
+- **Writes fan out and compare no versions.** Every live schema's store gets the same projected
+  record on every save, so no writer decides which schema is "current".
+- **Reads come from one DECLARED schema**, never derived. `DEFAULT_READ_SCHEMA` in
+  [recordSchemas.js](../src/data/recordSchemas.js) is what a fresh install reads; which schema a
+  given install *actually* reads is a trainer-owned setting ([readSchema.js](../src/data/readSchema.js)).
+  It used to be `Math.max(...Object.keys(LIVE_SCHEMAS))`, which made the read target a function of
+  registry *membership*: registering a shape silently relocated every read in the app. "This build
+  can write shape N" and "this build reads shape N" are independent facts, and conflating them let a
+  cutover happen as a side effect of a one-line registry edit with nothing in the diff saying so.
 
-### Preview schema — an opt-in, disposable store
+### Upgrading is a toggle, not a migration
 
-An in-development shape (`SCHEMA_PREVIEW`) is projected into **its own IndexedDB database**,
-`librept-preview`, keyed by `BUILD_INFO.commit` ([previewSchema.js](../src/data/previewSchema.js)).
-It is deliberately **not** in `LIVE_SCHEMAS`: a preview shape has no migration step, no stability
-guarantee, and may change with every build.
+Because every live schema is written on every save, a newer schema's store is **continuously
+current** rather than something built at the moment of switching. So the trainer-facing upgrade is a
+read re-point: instantaneous, and **reversible**, because the schema being left goes on being
+written too. Nothing is deleted, nothing is transformed in place, and no record can be lost in
+either direction.
 
-Because reads are pinned and writes already fan out, **opting back out is not a migration** — it is
-a read re-point plus a database delete, and a record created while previewing is already in the
-canonical store. Only opting *in* projects anything.
+The only real work is the **backfill**. A store a build has just provisioned starts empty and would
+otherwise only become current at the next save, so it is filled once from whichever schema the
+install reads today — **pre-emptively at boot, before the trainer opts into anything**, so an offer
+is never followed by a wait. It runs through the normal projection path (`read record →
+toDomainObject → projectCollection`) rather than copying rows, so a schema change needing a genuine
+transform has exactly one place to land and cannot drift from the write path.
 
-Its own database rather than a store in the main one: a new store means an `onupgradeneeded`, and
-therefore a permanent version bump on the database holding real client data, on *every* preview
-release. Fifty previews would leave that database at version 50-something, diverging per install,
-with `databaseVersion` never again derivable from schema numbers. (A numeric sentinel such as
-`999999` is worse still — verified: opening at 999999 then at 4 fails with `VersionError`, so the
-install can never open its own database again.)
-
-The projection is **restartable, not resumable**: it is one transaction, so an interruption commits
-nothing and leaves no partial state, and recovery is simply to rebuild from the canonical store.
-A store that is missing, unmarked, or stamped with another commit is rebuilt rather than adopted.
-This is why there is no progress bookkeeping — and why chunking it behind an "X of Y" progress bar
-would *remove* the property rather than report on it. Measured: a full fan-out of the 90-record demo
-dataset takes ~22ms; ~3,000 records lands near 400ms.
+The backfill is **one transaction**, so an interruption commits nothing and the next boot simply
+runs it again; the completion marker is written in that same transaction, or a kill between records
+and marker would leave a store claiming to be complete when it is not. Measured, that is the right
+trade at this app's scale: a full fan-out of the 90-record demo dataset takes ~22ms, and ~3,000
+records — a busy trainer after several years — lands near 400ms. This is also why there is no
+progress bar: chunking it behind an "X of Y" counter would *remove* the atomicity rather than
+report on it. Revisit near ~50k records, where one transaction becomes a stall worth splitting.
 
 ### Migration
 

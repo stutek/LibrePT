@@ -31,14 +31,9 @@ import {
   withTransaction,
 } from "./indexedDb.js";
 import { CURRENT_SCHEMA_VERSION } from "./migrationSteps.js";
-import {
-  ensurePreviewStoreCurrent,
-  isPreviewEnabled,
-  mirrorIntoPreview,
-  readPreviewRecords,
-} from "./previewSchema.js";
+import { ensureLiveSchemasBackfilled, readStoreName } from "./readSchema.js";
 import { COLLECTIONS, groupRecordsByCollection, projectCollection } from "./recordProjections.js";
-import { LIVE_SCHEMAS, READ_SCHEMA } from "./recordSchemas.js";
+import { LIVE_SCHEMAS } from "./recordSchemas.js";
 import { describeMigration, migrateState } from "./schemaMigrations.js";
 import { readVersionScoped, writeVersionScoped } from "./storageNamespace.js";
 import { enqueueWrite } from "./writeQueue.js";
@@ -104,9 +99,6 @@ const DB_KEY = "librept_db";
 const ACTIVE_SESSION_KEY = "librept_active_session";
 
 const SCHEMAS = Object.keys(LIVE_SCHEMAS).map(Number);
-// The store this build reads from — pinned via READ_SCHEMA, NOT derived from the registry. See
-// recordSchemas.js: registering a shape must never be able to relocate a read.
-const READ_STORE = storeNameForSchema(READ_SCHEMA);
 const IMPORTED_META_KEY = "imported";
 const LANG_META_KEY = "lang";
 
@@ -138,8 +130,11 @@ async function readMeta(db, key) {
 // one transaction (TODO §18's fan-out).
 async function starWrite(db, currentState) {
   const staleIdsByCollection = {};
-  const readTx = db.transaction([READ_STORE], "readonly");
-  const readStore = readTx.objectStore(READ_STORE);
+  // Reconciled against the store this install READS (readSchema.js) — the one whose id set is
+  // authoritative for what the trainer is actually looking at.
+  const currentReadStore = readStoreName();
+  const readTx = db.transaction([currentReadStore], "readonly");
+  const readStore = readTx.objectStore(currentReadStore);
   for (const collection of COLLECTIONS) {
     const existingIds = await getAllKeysFromIndex(readStore, COLLECTION_INDEX, collection);
     const currentIds = new Set((currentState[collection] || []).map((record) => record.id));
@@ -171,36 +166,14 @@ async function starWrite(db, currentState) {
   return Object.values(staleIdsByCollection).flat();
 }
 
-// Every record this save writes, flat — the same projected shape the fan-out puts into each schema
-// store, reused by the preview mirror so the two cannot drift apart.
-function projectAllRecords(currentState) {
-  const records = [];
-  for (const collection of COLLECTIONS) {
-    for (const record of currentState[collection] || []) {
-      records.push(projectCollection(collection, record));
-    }
-  }
-  return records;
-}
-
-// The canonical write, then the preview mirror. Sequential and separate on purpose: they are
-// different DATABASES, so one transaction cannot span them, and the canonical store must be
-// durable before anything disposable is touched. A mirror failure costs a rebuild, never a record.
-async function starWriteWithPreviewMirror(db, currentState) {
-  const staleIds = await starWrite(db, currentState);
-  await mirrorIntoPreview(projectAllRecords(currentState), staleIds);
-}
-
-// Reassemble the in-memory `state` shape from the READ_SCHEMA bucket — the lossless, canonical
-// store; every other live schema is a pure projection of it (TODO §18.7). When the trainer has
-// opted into preview, the records come from the preview database instead — that read re-point is
-// the ONLY thing opting in changes, because the fan-out has been keeping both stores current all
-// along. `lang` still comes from the canonical meta store: it is a setting, not a record, and it
-// must survive the preview database being thrown away.
+// Reassemble the in-memory `state` shape from whichever live schema this install reads
+// (readSchema.js). Every live schema is written by the fan-out on every save, so this is a pure
+// read re-point — switching schemas needs no migration and loses nothing, because the store being
+// left keeps being written too. `lang` comes from the meta store either way: it is a setting, not
+// a record, and it belongs to the install rather than to a schema.
 async function readStateFromIndexedDb(db) {
-  const records = isPreviewEnabled()
-    ? await readPreviewRecords()
-    : await getAll(db.transaction([READ_STORE], "readonly").objectStore(READ_STORE));
+  const storeName = readStoreName();
+  const records = await getAll(db.transaction([storeName], "readonly").objectStore(storeName));
   const langEntry = await readMeta(db, LANG_META_KEY);
   return {
     schemaVersion: CURRENT_SCHEMA_VERSION,
@@ -293,10 +266,11 @@ export async function loadSavedState() {
     await starWrite(db, migrated);
   }
 
-  // Before the first read, not after: an opted-in trainer whose preview store is missing, was
-  // interrupted mid-projection, or was built by a different commit gets it rebuilt from canonical
-  // here — which is the whole of "re-migration". A no-op when opted out.
-  await ensurePreviewStoreCurrent();
+  // Pre-emptive, before the trainer opts into anything (docs/DATA_MODEL.md §4): a store this build
+  // just provisioned starts empty and would otherwise only become current at the next save. Filling
+  // it here is what makes a later schema upgrade an instant toggle rather than a wait. A no-op on
+  // every boot after the first for a given schema.
+  await ensureLiveSchemasBackfilled(db);
 
   state = finalizeLoadedState(await readStateFromIndexedDb(db));
   return state;
@@ -318,7 +292,7 @@ export function saveToLocalStorage() {
   if (indexedDbSupported()) {
     enqueueWrite(async () => {
       const db = await getDb();
-      await starWriteWithPreviewMirror(db, state);
+      await starWrite(db, state);
     }, "state");
   } else {
     writeVersionScoped(DB_KEY, JSON.stringify(state));
