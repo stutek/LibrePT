@@ -9,6 +9,21 @@
 
 import json
 
+import re
+
+from tests.conftest import SRC_DIR
+
+
+def current_schema_version():
+    """CURRENT_SCHEMA_VERSION as declared in src/data/migrationSteps.js.
+
+    Read rather than hardcoded: this asserts "migrated to the CURRENT schema", and a literal turns
+    that into "migrated to 3" — which starts silently asserting the wrong thing the moment a
+    migration lands, and has to be edited by whoever adds one."""
+    source = (SRC_DIR / "data" / "migrationSteps.js").read_text(encoding="utf-8")
+    return int(re.search(r"CURRENT_SCHEMA_VERSION = (\d+)", source).group(1))
+
+
 LEGACY_BACKUP = {
     # No schemaVersion: a backup taken before the v2->v3 `startDate` migration (TODO §7.3 item 8).
     "clients": [{"id": "c1", "name": "Restored Client"}],
@@ -82,7 +97,7 @@ def test_restore_migrates_an_old_backup(page, local_server):
     _import(page, LEGACY_BACKUP)
     state = _state(page)
 
-    assert state["schemaVersion"] == 3, (
+    assert state["schemaVersion"] == current_schema_version(), (
         "the restored database is stamped at the current schema"
     )
     assert state["sessions"][0]["id"] == "b1"

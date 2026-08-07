@@ -24,3 +24,23 @@ export function isSupportedLang(lang) {
 export function dictionaryFor(lang) {
   return isSupportedLang(lang) ? TRANSLATIONS[lang] : TRANSLATIONS[DEFAULT_LANG];
 }
+
+// CHOSEN language vs EFFECTIVE language — two different questions, and the reason `state.lang` is
+// allowed to be null.
+//
+// The app has always had to render in *some* language from the first frame, so `lang` was forced
+// to "en" wherever it was absent. That made "this trainer picked English" and "this trainer has
+// never been asked" the same stored value, and there is no way back from that: the splash cannot
+// offer a language choice to exactly the people who have not made one. Keeping the unset state
+// distinguishable costs one null and answers both questions.
+//
+// Nothing that renders should read `state.lang` directly — it reads through resolveLang, which is
+// where the EN default lives. The language <select> in the header shows the resolved value too,
+// so "not chosen yet" never appears as an empty option in a dropdown.
+export function hasChosenLanguage(lang) {
+  return isSupportedLang(lang);
+}
+
+export function resolveLang(lang) {
+  return isSupportedLang(lang) ? lang : DEFAULT_LANG;
+}

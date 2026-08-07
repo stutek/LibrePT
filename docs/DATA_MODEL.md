@@ -38,6 +38,17 @@ number:
 | **Behaviour** | Which UI/logic a trainer is using | a named behaviour, selectable in-app | one deployed build carries them all |
 | **Data schema** | The shape of a stored record | plain integer major | `schemaVersion`, [migrationSteps.js](../src/data/migrationSteps.js) |
 
+**`lang` is nullable, and that is load-bearing.** It holds the language the trainer *chose*; null
+means they have never been asked. The language the UI actually renders in is a separate question,
+answered by `resolveLang()` in [i18n/index.js](../src/i18n/index.js), which falls back to English.
+
+Collapsing the two — as the app did until schema 4, forcing `"en"` wherever the field was absent —
+makes "picked English" and "never asked" the same stored value, and there is no way back from it:
+the splash cannot offer a language to exactly the people who have not chosen one. The v3→v4
+migration therefore CLEARS the stored language for every existing database rather than trying to
+infer intent from it. One tap for someone who did want English; the alternative is a Slovene
+trainer stuck in an English app with no prompt.
+
 **There are no release tags and no rollback-by-navigation.** One build ships every supported
 behaviour concurrently, so switching behaviour is an in-app choice, not a different URL and not a
 different deployment. The data schema is the only axis storage is keyed on.

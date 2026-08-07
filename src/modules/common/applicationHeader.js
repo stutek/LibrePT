@@ -20,6 +20,7 @@
 // }
 
 import { driveSyncStatus } from "../../data/driveSyncService.js";
+import { resolveLang } from "../../i18n/index.js";
 import { renderMarkupOnce } from "./dom.js";
 import { getShareParams } from "./shareLink.js";
 
@@ -152,7 +153,7 @@ function applyTheme(theme) {
 export function applyThemeSwitcherLabels() {
   const sel = document.getElementById("theme-switcher");
   if (!sel) return;
-  const labels = THEME_SWITCHER_LABELS[deps.getState().lang] || THEME_SWITCHER_LABELS.en;
+  const labels = THEME_SWITCHER_LABELS[resolveLang(deps.getState().lang)];
   for (const opt of Array.from(sel.options)) {
     if (labels[opt.value]) opt.textContent = labels[opt.value];
   }
@@ -386,7 +387,9 @@ export function setupApplicationHeader() {
   // Language switcher setup
   const langSwitcher = document.getElementById("lang-switcher");
   if (langSwitcher) {
-    langSwitcher.value = deps.getState().lang;
+    // resolveLang, not the raw value: an unchosen language is null, and assigning null to a
+    // <select> leaves it showing nothing at all.
+    langSwitcher.value = resolveLang(deps.getState().lang);
     langSwitcher.addEventListener("change", (e) => {
       const newLang = e.target.value;
       deps.getState().lang = newLang;

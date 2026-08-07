@@ -8,6 +8,9 @@
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
+// Asserted against the constant, not a literal: a migration that bumps the version should not
+// need every "migrates to current" test edited alongside it.
+import { CURRENT_SCHEMA_VERSION } from "../../../src/data/migrationSteps.js";
 import * as m from "../../../src/data/schemaMigrations.js";
 
 test("legacy database with no sessions collection gets one", () => {
@@ -30,7 +33,10 @@ test("legacy database with no sessions collection gets one", () => {
 
 test("current database is a no op but gets stamped", () => {
   const current = {
-    schemaVersion: 3,
+    // The CURRENT version, whatever it is — hardcoding it means this test starts asserting
+    // "one version behind runs no steps" the moment a migration lands, which is the opposite
+    // of what it is for.
+    schemaVersion: CURRENT_SCHEMA_VERSION,
     clients: [],
     sessions: [{ id: "s1", startDate: "2026-07-27T09:00:00.000Z" }],
   };
@@ -40,7 +46,7 @@ test("current database is a no op but gets stamped", () => {
   // an up-to-date database runs no steps
   assert.equal(result.summary.applied.length, 0);
   assert.equal(result.state.sessions.length, 1);
-  assert.equal(result.state.schemaVersion, 3);
+  assert.equal(result.state.schemaVersion, CURRENT_SCHEMA_VERSION);
 });
 
 test("v2 sessions gain a derived start date", () => {
@@ -65,8 +71,8 @@ test("v2 sessions gain a derived start date", () => {
   const description = m.describeMigration(result.summary);
 
   assert.equal(result.ok, true);
-  assert.equal(result.state.schemaVersion, 3);
-  assert.equal(result.summary.toVersion, 3);
+  assert.equal(result.state.schemaVersion, CURRENT_SCHEMA_VERSION);
+  assert.equal(result.summary.toVersion, CURRENT_SCHEMA_VERSION);
   // day bucket is untouched — other systems still key off it
   assert.equal(result.state.sessions[0].day, "today");
   // a real ISO timestamp, not a bucket label
@@ -147,4 +153,18 @@ test("absent collections are filled in but corrupt ones still fail", () => {
     corrupt.summary.problems.some((problem) => problem.includes("clients")),
     true,
   );
+});
+
+test("v3 to v4 clears the stored language so everyone is asked once", async () => {
+  // Deliberately treats every existing PT as never-asked: before the splash could offer a choice,
+  // `lang` was forced to "en" wherever it was absent, so a chosen English and a never-asked
+  // trainer are the same stored value and cannot be told apart after the fact.
+  const migrated = m.migrateState({ schemaVersion: 3, lang: "en", sessions: [] });
+  assert.equal(migrated.state.lang, null);
+  assert.equal(migrated.state.schemaVersion, CURRENT_SCHEMA_VERSION);
+});
+
+test("v3 to v4 clears a non-English stored language too", async () => {
+  const migrated = m.migrateState({ schemaVersion: 3, lang: "sl", sessions: [] });
+  assert.equal(migrated.state.lang, null);
 });

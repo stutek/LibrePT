@@ -102,6 +102,18 @@
     <p class="app-splash-tagline">A lightweight, free app for your clipboard, sessions and training programmes.</p>
     <div id="app-splash-progress" class="app-splash-progress" aria-hidden="true"></div>
 
+    <!-- Language choice. Shown ahead of everything else and with no way out — the app cannot speak
+         to someone in a language they have not picked, and every later screen depends on it. The
+         labels are each in their OWN language, never translated, so the choice is legible to
+         someone who cannot read the current one. -->
+    <div id="app-splash-language" class="app-splash-language" hidden>
+      <p class="app-splash-language-prompt">Choose your language<span lang="sl"> · Izberite jezik</span></p>
+      <div class="app-splash-language-options">
+        <button type="button" class="app-splash-action" data-splash-lang="en" lang="en">English</button>
+        <button type="button" class="app-splash-action" data-splash-lang="sl" lang="sl">Slovenščina</button>
+      </div>
+    </div>
+
     <!-- Onboarding entry point. Revealed by splashScreen.js in place of the progress sweep, once
          the hold is over, but ONLY while the trainer has saved nothing of their own — no client,
          session, exercise or plan (data/stateStore.js's stateHasData). It is not a first-run

@@ -7,6 +7,20 @@
 # on actual boot, read back through the app's own module instance.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
+import re
+
+from tests.conftest import SRC_DIR
+
+
+def current_schema_version():
+    """CURRENT_SCHEMA_VERSION as declared in src/data/migrationSteps.js.
+
+    Read rather than hardcoded: these tests assert "migrated to the CURRENT schema", and a literal
+    turns that into "migrated to 3" — which starts silently asserting the wrong thing the moment a
+    migration lands, and has to be edited by whoever adds one."""
+    source = (SRC_DIR / "data" / "migrationSteps.js").read_text(encoding="utf-8")
+    return int(re.search(r"CURRENT_SCHEMA_VERSION = (\d+)", source).group(1))
+
 
 def test_a_stored_legacy_database_is_migrated_on_boot(page, local_server):
     """End-to-end: a real localStorage database in the old shape loads with an empty `sessions`,
@@ -46,8 +60,8 @@ def test_a_stored_legacy_database_is_migrated_on_boot(page, local_server):
         "the legacy `bookings` collection is dropped, not carried over"
     )
     assert r["bookings"] is None
-    assert r["schemaVersion"] == 3, (
-        "walks the full chain (v1→v2→v3) on one boot, not just one hop"
+    assert r["schemaVersion"] == current_schema_version(), (
+        "walks the full chain in one boot, not just one hop"
     )
     assert r["summary"]["fromVersion"] == 1
     assert r["summary"]["problems"] == []

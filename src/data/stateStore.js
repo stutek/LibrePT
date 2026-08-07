@@ -65,7 +65,9 @@ export function emptyState() {
     planUpdates: [],
     sessions: [],
     notifications: [],
-    lang: "en",
+    // null, not "en": the language nobody has chosen yet must stay distinguishable from a chosen
+    // English, or the splash cannot tell who to offer the choice to (see i18n/index.js).
+    lang: null,
   };
 }
 
@@ -152,7 +154,9 @@ async function starWrite(db, currentState) {
       }
     }
     store(META_STORE).put({ key: IMPORTED_META_KEY, value: true });
-    store(META_STORE).put({ key: LANG_META_KEY, value: currentState.lang || "en" });
+    // Persist the CHOSEN language verbatim, null included — coercing to "en" here would silently
+    // record a choice the trainer never made, on the very first save.
+    store(META_STORE).put({ key: LANG_META_KEY, value: currentState.lang ?? null });
   });
 }
 
@@ -165,7 +169,7 @@ async function readStateFromIndexedDb(db) {
   return {
     schemaVersion: CURRENT_SCHEMA_VERSION,
     ...groupRecordsByCollection(records),
-    lang: langEntry?.value || "en",
+    lang: langEntry?.value ?? null,
   };
 }
 
@@ -207,7 +211,10 @@ function migrateLegacyBlob(savedData) {
 
 function finalizeLoadedState(candidate) {
   if (!candidate.sessions) candidate.sessions = [];
-  if (!candidate.lang) candidate.lang = "en";
+  // `lang` is deliberately NOT defaulted here. An install that predates the language prompt has
+  // "en" already written to its meta store and reads back as chosen; a fresh one reads null and
+  // gets asked. Filling it in would erase that difference again.
+  if (candidate.lang === undefined) candidate.lang = null;
   return candidate;
 }
 

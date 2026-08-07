@@ -8,7 +8,21 @@
 
 import json
 
+import re
+
 import pytest
+
+from tests.conftest import SRC_DIR
+
+
+def current_schema_version():
+    """CURRENT_SCHEMA_VERSION as declared in src/data/migrationSteps.js.
+
+    Read rather than hardcoded: these tests assert "migrated to the CURRENT schema", and a literal
+    turns that into "migrated to 3" — which starts silently asserting the wrong thing the moment a
+    migration lands, and has to be edited by whoever adds one."""
+    source = (SRC_DIR / "data" / "migrationSteps.js").read_text(encoding="utf-8")
+    return int(re.search(r"CURRENT_SCHEMA_VERSION = (\d+)", source).group(1))
 
 
 def test_legacy_localstorage_is_imported_and_left_as_a_rollback_snapshot(
@@ -93,7 +107,7 @@ def test_fresh_install_with_no_prior_data_starts_empty_without_error(
     )
 
     assert r["clients"] == []
-    assert r["schemaVersion"] == 3
+    assert r["schemaVersion"] == current_schema_version()
     assert r["legacyBlob"] is None, (
         "a fresh install never creates a legacy localStorage bucket"
     )

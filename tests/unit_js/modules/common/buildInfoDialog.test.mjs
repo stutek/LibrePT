@@ -6,13 +6,15 @@
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { CURRENT_SCHEMA_VERSION } from "../../../../src/data/migrationSteps.js";
 import { buildInfoText } from "../../../../src/modules/common/buildInfoDialog.js";
 
 test("build details are offered as one copyable, plain-text block", () => {
   const text = buildInfoText();
 
   assert.equal(text.includes("release:"), false, "no release tags any more — nothing to show here");
-  assert.equal(text.includes("data schema: 3"), true);
+  // Against the constant, so a migration that bumps the schema does not also fail this.
+  assert.equal(text.includes(`data schema: ${CURRENT_SCHEMA_VERSION}`), true);
   assert.equal(text.includes("commit:"), true);
   assert.equal(text.includes("built:"), true);
 });

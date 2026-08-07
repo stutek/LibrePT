@@ -67,6 +67,27 @@ export const MIGRATION_STEPS = [
       return { state, notes };
     },
   },
+  {
+    from: 3,
+    to: 4,
+    description: "Clear the stored language so every existing PT is asked to choose one",
+    // Before the splash could offer a language, `lang` was forced to "en" everywhere it was
+    // absent — so an install carries "en" whether the trainer picked English or was simply never
+    // asked. There is no way to tell those apart after the fact, and guessing the wrong way leaves
+    // a Slovene trainer with an English app and no prompt.
+    //
+    // So this deliberately treats EVERY database on schema 3 as never-asked and clears the value.
+    // The cost of being wrong is one tap for someone who did want English; the cost of the other
+    // choice is a trainer who never gets offered their own language at all.
+    apply(state) {
+      const notes = [];
+      if (state.lang !== null && state.lang !== undefined) {
+        notes.push(`language choice reset from \`${state.lang}\` so it can be asked once`);
+      }
+      state.lang = null;
+      return { state, notes };
+    },
+  },
 ];
 
-export const CURRENT_SCHEMA_VERSION = 3;
+export const CURRENT_SCHEMA_VERSION = 4;

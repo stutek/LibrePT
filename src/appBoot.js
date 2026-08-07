@@ -128,8 +128,9 @@ export function bootViewDismiss(deps) {
   setupViewDismiss(deps);
 }
 
-// Last step of init(): everything the splash was covering is now wired, so start the fade. Returns
-// the promise so a caller (a test, or any future "app is interactive" hook) can await it.
+// Last step of init(): everything the splash was covering is now wired, so start the fade — unless
+// there is still something to ask (a language, or the empty-database onboarding offer). Returns the
+// promise so a caller (a test, or any future "app is interactive" hook) can await it.
 export function bootSplashScreen(deps) {
   return dismissSplashWhenReady(deps);
 }

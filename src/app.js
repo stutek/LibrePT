@@ -62,7 +62,7 @@ import {
   stateHasData,
 } from "./data/stateStore.js";
 import { applyStaticDOMMappings } from "./i18n/domMappings.js";
-import { dictionaryFor, isSupportedLang } from "./i18n/index.js";
+import { dictionaryFor, hasChosenLanguage, isSupportedLang, resolveLang } from "./i18n/index.js";
 import { renderClientsDirectory } from "./modules/clients/clientsDirectory.js";
 import {
   renderClientsList as clientsViewRender,
@@ -158,12 +158,13 @@ import {
 } from "./modules/sessionList/sessionsView.js";
 
 function t(key) {
-  const lang = getState().lang || "en";
-  const dict = dictionaryFor(lang);
+  // resolveLang, not `|| "en"`: an unchosen language is null and must still render in English
+  // without that null being written back as a choice (see i18n/index.js).
+  const dict = dictionaryFor(resolveLang(getState().lang));
   return dict[key] || key;
 }
 
-function applyTranslations(lang = getState().lang || "en") {
+function applyTranslations(lang = resolveLang(getState().lang)) {
   const state = getState();
   state.lang = lang;
 
@@ -559,10 +560,17 @@ function setupActiveSession() {
     saveToLocalStorage: saveState,
   });
 
-  // Deliberately last: the splash comes down only once every component above is wired. With an
-  // empty database it does not come down at all — it becomes the onboarding entry point and waits
-  // for the trainer to pick demo data or an empty app.
-  appBoot.bootSplashScreen({ offerOnboarding: !stateHasData(getState()) });
+  // Deliberately last: the splash comes down only once every component above is wired. It may not
+  // come down on its own at all — first it asks for a language if none has been chosen, then, with
+  // an empty database, it becomes the onboarding entry point and waits for a choice.
+  appBoot.bootSplashScreen({
+    offerOnboarding: !stateHasData(getState()),
+    needsLanguageChoice: !hasChosenLanguage(getState().lang),
+    onChooseLanguage: (lang) => {
+      applyTranslations(lang);
+      saveState();
+    },
+  });
 }
 
 function cancelWorkoutSession() {

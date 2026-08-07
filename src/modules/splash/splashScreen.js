@@ -25,6 +25,7 @@ const SPLASH_ID = "app-splash";
 const DISMISS_ID = "splash-dismiss";
 const PROGRESS_ID = "app-splash-progress";
 const ONBOARDING_ID = "app-splash-onboarding";
+const LANGUAGE_ID = "app-splash-language";
 const DISMISSING_CLASS = "is-dismissing";
 const ONBOARDING_CLASS = "is-onboarding";
 
@@ -92,6 +93,35 @@ function fadeOut(splash, resolve) {
   }, FADE_OUT_MS);
 }
 
+/**
+ * The language step: shown ahead of the hold and ahead of onboarding, with the X withdrawn.
+ *
+ * No exit on purpose, and this is the one screen where that is right — every other word the app
+ * would show is in a language nobody has chosen, so there is nothing useful to dismiss TO. It is
+ * also two taps at most, once ever.
+ */
+function revealLanguageChoice(splash, { onChooseLanguage, afterChoice }) {
+  const languageStep = document.getElementById(LANGUAGE_ID);
+  if (!languageStep) return afterChoice();
+
+  document.getElementById(PROGRESS_ID)?.setAttribute("hidden", "");
+  document.getElementById(DISMISS_ID)?.setAttribute("hidden", "");
+  languageStep.hidden = false;
+
+  for (const button of languageStep.querySelectorAll("[data-splash-lang]")) {
+    button.addEventListener(
+      "click",
+      () => {
+        onChooseLanguage(button.dataset.splashLang);
+        languageStep.hidden = true;
+        document.getElementById(DISMISS_ID)?.removeAttribute("hidden");
+        afterChoice();
+      },
+      { once: true },
+    );
+  }
+}
+
 function revealOnboarding(splash, resolve) {
   const onboarding = document.getElementById(ONBOARDING_ID);
   // Never trap the trainer behind a panel that failed to render: fall back to just leaving.
@@ -121,6 +151,8 @@ export function dismissSplashWhenReady({
   alreadyHeld = hasHeldThisSession(),
   minimumVisibleMs = requestedMinimumVisibleMs(window.location.search, alreadyHeld),
   offerOnboarding = false,
+  needsLanguageChoice = false,
+  onChooseLanguage = () => {},
 } = {}) {
   const splash = document.getElementById(SPLASH_ID);
   if (!splash) return Promise.resolve();
@@ -129,30 +161,46 @@ export function dismissSplashWhenReady({
   // way, so a load that skips the hold still waits for a fully wired app before it lifts.
   rememberHeldThisSession();
 
+  const askForLanguage = needsLanguageChoice && !isSplashDisabled();
+
   // A tap on the X that landed while the app was still booting, captured by theme-boot.js because
   // this module was not loaded yet to hear it. Honouring it here is what makes that close DELAYED
   // rather than lost: the trainer asked to leave, and the first moment leaving is possible is now.
-  if (window.librePtSplashCloseRequested) {
+  //
+  // It cannot skip the language step, though. That step has no X precisely because there is
+  // nothing to dismiss to, and an early tap landing where the X will eventually be must not become
+  // a way around it — the app would come up in a language nobody picked.
+  if (window.librePtSplashCloseRequested && !askForLanguage) {
     return new Promise((resolve) => fadeOut(splash, resolve));
   }
 
   const onboarding = offerOnboarding && !isSplashDisabled();
-  const remaining = remainingHoldMs(minimumVisibleMs, performance.now());
   return new Promise((resolve) => {
-    const holdTimer = window.setTimeout(() => {
-      if (onboarding) revealOnboarding(splash, resolve);
-      else fadeOut(splash, resolve);
-    }, remaining);
+    const continueAfterLanguage = () => {
+      // The hold is measured from navigation start, so whatever the language step consumed already
+      // counts towards it — answering a prompt is not made to be followed by a wait.
+      const remaining = remainingHoldMs(minimumVisibleMs, performance.now());
+      const holdTimer = window.setTimeout(() => {
+        if (onboarding) revealOnboarding(splash, resolve);
+        else fadeOut(splash, resolve);
+      }, remaining);
 
-    // The X wins over whatever the splash is doing — it cancels a hold in progress rather than
-    // waiting it out, so the escape is immediate at any point.
-    document.getElementById(DISMISS_ID)?.addEventListener(
-      "click",
-      () => {
-        window.clearTimeout(holdTimer);
-        fadeOut(splash, resolve);
-      },
-      { once: true },
-    );
+      // The X wins over whatever the splash is doing — it cancels a hold in progress rather than
+      // waiting it out, so the escape is immediate at any point.
+      document.getElementById(DISMISS_ID)?.addEventListener(
+        "click",
+        () => {
+          window.clearTimeout(holdTimer);
+          fadeOut(splash, resolve);
+        },
+        { once: true },
+      );
+    };
+
+    if (askForLanguage) {
+      revealLanguageChoice(splash, { onChooseLanguage, afterChoice: continueAfterLanguage });
+    } else {
+      continueAfterLanguage();
+    }
   });
 }

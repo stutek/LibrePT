@@ -13,6 +13,9 @@ import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
+// Asserted against the constant, not a literal: a migration that bumps the version should not
+// need every "migrates to current" test edited alongside it.
+import { CURRENT_SCHEMA_VERSION } from "../../../src/data/migrationSteps.js";
 import * as m from "../../../src/data/schemaMigrations.js";
 
 const FIXTURES_DIR = fileURLToPath(new URL("../../fixtures/backups/", import.meta.url));
@@ -29,7 +32,7 @@ test("schema1 baseline fixture still imports", () => {
   const r = migrate("schema1_baseline.json");
 
   assert.equal(r.ok, true, JSON.stringify(r.problems));
-  assert.equal(r.state.schemaVersion, 3);
+  assert.equal(r.state.schemaVersion, CURRENT_SCHEMA_VERSION);
   assert.deepEqual(
     r.state.clients.map((c) => c.name),
     ["Legacy Client"],
@@ -44,7 +47,7 @@ test("schema2 fixture still imports and gains a derived start date", () => {
   const r = migrate("schema2.json");
 
   assert.equal(r.ok, true, JSON.stringify(r.problems));
-  assert.equal(r.state.schemaVersion, 3);
+  assert.equal(r.state.schemaVersion, CURRENT_SCHEMA_VERSION);
   assert.deepEqual(
     r.state.clients.map((c) => c.name),
     ["Schema2 Client"],

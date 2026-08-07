@@ -158,6 +158,40 @@
   outline: none;
 }
 
+/* Language choice — the first thing shown when nobody has picked one, ahead of the hold and ahead
+   of any onboarding. Shares .app-splash-action with the onboarding buttons so the two steps look
+   like one flow rather than two designs. */
+.app-splash-language {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  width: min(100%, 320px);
+  margin-top: 8px;
+  animation: splash-rise 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.app-splash-language[hidden] {
+  display: none;
+}
+
+.app-splash-language-prompt {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.app-splash-language-options {
+  display: flex;
+  gap: 10px;
+}
+
+/* Side by side while there are two; each still gets a full-height target. */
+.app-splash-language-options .app-splash-action {
+  flex: 1;
+}
+
 /* Onboarding entry point — replaces the progress sweep once the hold is over and the trainer has
    no data yet. Buttons are full-width and 48px tall: this is the first thing a new user touches,
    often one-handed on a phone, so the targets are sized for a thumb rather than for the text. */
@@ -299,6 +333,7 @@
   .app-splash-tagline,
   .app-splash-progress,
   .app-splash-progress::after,
+  .app-splash-language,
   .app-splash-onboarding {
     animation: none;
     transition: none;

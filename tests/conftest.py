@@ -74,6 +74,15 @@ def dismiss_splash(request):
         if not splash.count():
             return response
 
+        # On an empty database the splash asks for a language first, and that step deliberately
+        # has no X — so it has to be answered before there is anything to dismiss. English, since
+        # that is what every assertion in the suite is written against.
+        language_step = page.locator("#app-splash-language")
+        if language_step.count() and language_step.is_visible():
+            page.locator("[data-splash-lang='en']").click(
+                timeout=SPLASH_DISMISS_TIMEOUT_MS
+            )
+
         # The splash may ALSO retire on its own, and under xdist it often does: when the workers
         # are all compiling the app's ~89 modules at once, `page.goto` can return after the 4s
         # hold has already elapsed, leaving the X inside an element that is on its way out. So the
