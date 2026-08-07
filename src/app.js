@@ -167,6 +167,10 @@ function t(key) {
 function applyTranslations(lang = resolveLang(getState().lang)) {
   const state = getState();
   state.lang = lang;
+  // index.html ships `lang="en"` and nothing moved it, so a trainer switched to Slovenian was
+  // served Slovenian text inside a document still declaring English — which is what a screen
+  // reader picks its pronunciation from, and what `:lang()`/hyphenation rules match on.
+  document.documentElement.lang = lang;
 
   const switcher = document.getElementById("lang-switcher");
   if (switcher) switcher.value = lang;
