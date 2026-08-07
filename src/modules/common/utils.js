@@ -192,11 +192,17 @@ export function buildSessionMeta(sessions, day, getSessionDayDate) {
   const dayDate = getSessionDayDate(day);
   const startDate = new Date(dayDate);
   startDate.setMinutes(startDate.getMinutes() + startMin);
-  let endDate = new Date(dayDate);
+  const endDate = new Date(dayDate);
   endDate.setMinutes(endDate.getMinutes() + endMin);
-  if (endDate.getTime() <= Date.now()) {
-    endDate = new Date(Date.now() + 2 * 60 * 60 * 1000);
-  }
+  // `endDate` is the SCHEDULED end and nothing else. A slot that has already passed used to be
+  // rewritten here to `now + 2h`, to keep a countdown alive for a session launched late — but a
+  // fabricated end is not a schedule, and everything downstream reads it as one:
+  // `proposeAdjustedSchedule` derives the session's planned LENGTH from it, so a 16:00-18:00 slot
+  // opened at 21:40 proposed a seven-hour-forty session, and `confirmEarlyFinish` believed two
+  // hours were still owed on a session whose slot ended hours ago.
+  // Nothing needs the lie any more: sessionClock.js's `computeActiveSessionCountdown` already
+  // decides that a session begun after its scheduled end has no countdown left and reports honest
+  // elapsed time instead. That is the one place that judgement belongs.
 
   return {
     id: sessions.length > 0 ? sessions[0].id : null,

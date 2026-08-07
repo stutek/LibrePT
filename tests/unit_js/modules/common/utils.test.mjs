@@ -9,7 +9,7 @@
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { escapeHTML, getInitials } from "../../../../src/modules/common/utils.js";
+import { buildSessionMeta, escapeHTML, getInitials } from "../../../../src/modules/common/utils.js";
 
 test("initials from a hostile name stay alphanumeric", () => {
   const derived = {
@@ -93,4 +93,38 @@ test("escapeHTML renders zero, and renders absent values as nothing", () => {
   assert.equal(escapeHTML(""), "");
   assert.equal(escapeHTML(null), "");
   assert.equal(escapeHTML(undefined), "");
+});
+
+// buildSessionMeta's endDate is the SCHEDULED end. It used to be rewritten to `now + 2h` whenever
+// the slot had already passed, to keep a countdown alive for a session launched late — but a
+// fabricated end is not a schedule, and it is read as one downstream: the adjust dialog derives the
+// session's planned LENGTH from it. A 16:00-18:00 slot opened at 21:40 therefore proposed a
+// 21:40-05:20 session. Found by the e2e suite only because that run happened to be in the evening;
+// every earlier run that day was before 18:00 and passed (TODO §24.4).
+test("a session's scheduled end survives that end having already passed", () => {
+  const dayStart = new Date();
+  dayStart.setHours(0, 0, 0, 0);
+  const sessions = [{ id: "s1", title: "Group Strength", location: "Gym", time: "03:00 - 05:00" }];
+
+  const meta = buildSessionMeta(sessions, "today", () => new Date(dayStart));
+
+  const lengthMinutes = (meta.endDate.getTime() - meta.startDate.getTime()) / 60000;
+  assert.equal(lengthMinutes, 120, "the planned length must not depend on the time of day");
+  assert.equal(meta.endDate.getHours(), 5);
+  assert.equal(meta.timeLabel, "03:00 - 05:00");
+});
+
+test("a slot spanning several sessions reports the outer range as its schedule", () => {
+  const dayStart = new Date();
+  dayStart.setHours(0, 0, 0, 0);
+  const sessions = [
+    { id: "s1", title: "A", location: "Gym", time: "09:00 - 10:00" },
+    { id: "s2", title: "B", location: "Gym", time: "10:00 - 11:30" },
+  ];
+
+  const meta = buildSessionMeta(sessions, "today", () => new Date(dayStart));
+
+  assert.equal(meta.timeLabel, "09:00 - 11:30");
+  assert.equal((meta.endDate.getTime() - meta.startDate.getTime()) / 60000, 150);
+  assert.deepEqual(meta.ids, ["s1", "s2"]);
 });

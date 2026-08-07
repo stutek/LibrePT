@@ -13,8 +13,12 @@
 #      shifted onto the clock — because it is the SCHEDULE that is wrong by then, not the session.
 #
 # "Group Strength & Conditioning" is seeded currentHour-1..currentHour+1 and NOT completed
-# (src/data/sessions.js), so its start is between 60 and 119 minutes ago whenever this runs —
-# always outside the tolerance, never a coin flip on what time of day the suite happens to run.
+# (src/data/sessions.js), so its start is always in the past and always outside the tolerance —
+# never a coin flip on what time of day the suite happens to run. Note that `currentHour` there is
+# CLAMPED to 03..17 so the demo sits in plausible gym hours, which means that from ~18:00 onward
+# the seeded slot has already ended. That is not an edge case to design around, it is the ordinary
+# "opening yesterday's session" path, and it is what exposed the fabricated end date this test now
+# guards: the slot's LENGTH must survive its end having passed (TODO §24.4).
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
 import re
