@@ -50,7 +50,9 @@ export function formatDateStr(dateStr) {
   return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
 }
 
-// Format duration from seconds to timer layout (e.g. "59:02")
+// Format duration from seconds to timer layout (e.g. "59:02"). Minutes are PADDED: this drives live
+// countdowns, and a field that changes width as it ticks makes the whole row shift. For a
+// non-ticking compact readout see exerciseModality.js's formatCompactDuration ("5:02").
 export function formatDuration(totalSeconds) {
   const hrs = Math.floor(totalSeconds / 3600);
   const mins = Math.floor((totalSeconds % 3600) / 60);
@@ -111,10 +113,19 @@ export function formatClockFromMinutes(totalMinutes) {
   return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
 }
 
-// Escape HTML characters to prevent rendering attacks/unexpected HTML injection
-export function escapeHTML(str) {
-  if (!str) return "";
-  return str
+// Escape HTML characters to prevent rendering attacks/unexpected HTML injection.
+//
+// THE app's escaper — there is deliberately no second one. exerciseAndRestTimer.js carried a
+// private copy until TODO §24.2, which is worse than ordinary duplication here: build/
+// frontend_audit.py recognises the NAME, so a local copy passes the audit while being free to
+// drift from the escaping this one does.
+//
+// Absent values render as nothing, but a value of 0 is a value: `String(value)` rather than a
+// blanket falsy guard, which used to make escapeHTML(0) return "" — a zero silently rendering as
+// an empty cell.
+export function escapeHTML(value) {
+  if (value === null || value === undefined) return "";
+  return String(value)
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")

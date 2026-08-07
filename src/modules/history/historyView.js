@@ -1,6 +1,6 @@
 // src/views/historyView.js - Domain module for global and client workout history logs
 import { renderMarkupOnce } from "../common/dom.js";
-import { formatDuration, formatMetricValue, usesLoad } from "../common/exerciseModality.js";
+import { formatCompactDuration, formatMetricValue, usesLoad } from "../common/exerciseModality.js";
 import { formatLoad, formatReps } from "../common/repsAndLoad.js";
 import { orderedItems } from "../common/sessionItemOrder.js";
 import { isRestRecord, isSkippedRecord } from "../common/sessionItemRecord.js";
@@ -167,7 +167,7 @@ export function renderHistoryItems({ historyList, container, t, openSessionFromH
         }
       }
       if (isRestRecord(item)) {
-        exercisesLogHTML += `<div class="history-rest-row"><i class="fa-solid fa-hourglass-half"></i> ${t("rest_label")} · ${formatDuration(item.rest)}</div>`;
+        exercisesLogHTML += `<div class="history-rest-row"><i class="fa-solid fa-hourglass-half"></i> ${t("rest_label")} · ${formatCompactDuration(item.rest)}</div>`;
         continue;
       }
       exercisesLogHTML += renderExerciseRow(item);

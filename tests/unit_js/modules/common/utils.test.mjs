@@ -9,7 +9,7 @@
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { getInitials } from "../../../../src/modules/common/utils.js";
+import { escapeHTML, getInitials } from "../../../../src/modules/common/utils.js";
 
 test("initials from a hostile name stay alphanumeric", () => {
   const derived = {
@@ -69,4 +69,28 @@ test("initials are derived from non-Latin names, not replaced by the fallback", 
   assert.equal(derived.greek, "ΓΙ");
   assert.equal(derived.arabic, "مر");
   assert.equal(derived.latinExt, "AŠ");
+});
+
+// escapeHTML is the sink every rendered string in the app passes through, and it had NO test —
+// which is how a second, subtly different copy lived in exerciseAndRestTimer.js unnoticed until
+// TODO §24.2. build/frontend_audit.py checks that interpolated values are wrapped in a call named
+// escapeHTML; it cannot check that the call escapes anything. That is this test's job.
+test("escapeHTML neutralises every character that can break out of markup", () => {
+  assert.equal(escapeHTML("<script>alert(1)</script>"), "&lt;script&gt;alert(1)&lt;/script&gt;");
+  // Attribute contexts: both quote styles must go, or a value can escape its own attribute.
+  assert.equal(escapeHTML(`" onerror="alert(1)`), "&quot; onerror=&quot;alert(1)");
+  assert.equal(escapeHTML("' onerror='alert(1)"), "&#039; onerror=&#039;alert(1)");
+  // Ampersand first, so an escape is never itself re-escaped into something inert-looking.
+  assert.equal(escapeHTML("&lt;"), "&amp;lt;");
+  assert.equal(escapeHTML("Tom & Jerry's <b>"), "Tom &amp; Jerry&#039;s &lt;b&gt;");
+});
+
+// A rendered value is not always a string: set counts, loads and rest seconds all reach a template
+// as numbers. The old falsy guard turned 0 into "", so a legitimately-zero field rendered blank.
+test("escapeHTML renders zero, and renders absent values as nothing", () => {
+  assert.equal(escapeHTML(0), "0");
+  assert.equal(escapeHTML(42), "42");
+  assert.equal(escapeHTML(""), "");
+  assert.equal(escapeHTML(null), "");
+  assert.equal(escapeHTML(undefined), "");
 });

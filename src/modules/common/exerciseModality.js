@@ -79,8 +79,12 @@ export function toSeconds(raw) {
   return Math.round(n); // bare number or "30s" → seconds
 }
 
-// Compact "M:SS" (or "H:MM:SS") duration for a stat tile / compact row.
-export function formatDuration(totalSeconds) {
+// Compact "M:SS" (or "H:MM:SS") duration for a stat tile / compact row — minutes UNPADDED, so a
+// short effort reads as "5:02", not "05:02". Deliberately not utils.js's formatDuration, which pads
+// to a fixed width because it drives a live countdown that must not jitter as the digits change.
+// Both were called formatDuration until TODO §24.2; two same-named exports differing only in
+// padding is exactly the pair a reader picks the wrong one from.
+export function formatCompactDuration(totalSeconds) {
   const sec = Math.max(0, Math.round(totalSeconds));
   const h = Math.floor(sec / 3600);
   const m = Math.floor((sec % 3600) / 60);
@@ -101,7 +105,7 @@ export function formatMetricValue(rawValue, metric) {
   switch (metric) {
     case "time":
     case "hold":
-      return formatDuration(toSeconds(rawValue));
+      return formatCompactDuration(toSeconds(rawValue));
     case "distance": {
       const n = num(rawValue);
       return n >= 1000 ? `${n / 1000} km` : `${n} m`;
@@ -111,7 +115,7 @@ export function formatMetricValue(rawValue, metric) {
     case "watts":
       return `${num(rawValue)} W`;
     case "pace":
-      return `${formatDuration(toSeconds(rawValue))} /km`;
+      return `${formatCompactDuration(toSeconds(rawValue))} /km`;
     case "heartrate":
       return `${num(rawValue)} bpm`;
     default:

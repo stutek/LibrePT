@@ -18,6 +18,7 @@
 // deps: { t } (translator; the controller resolves client name/id and passes them to startTimer)
 
 import { readVersionScoped, writeVersionScoped } from "../../data/storageNamespace.js";
+import { escapeHTML } from "../common/utils.js";
 
 // Version-scoped: a persisted timer carries the running build's session/focus shape.
 const STORE_KEY = "librept_active_timers";
@@ -253,13 +254,6 @@ function fmt(seconds) {
   const m = Math.floor(abs / 60);
   const s = abs % 60;
   return `${neg ? "-" : ""}${m}:${String(s).padStart(2, "0")}`;
-}
-
-function escapeHTML(str) {
-  return String(str).replace(
-    /[&<>"']/g,
-    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c],
-  );
 }
 
 const t = (key, fallback) => (deps.t ? deps.t(key) || fallback : fallback);

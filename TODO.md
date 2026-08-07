@@ -1449,13 +1449,20 @@ divergence was invisible because every assertion only ever read `<body>`.
 `src/theme-boot.js` keeps its own small copy of the theme map, deliberately: it must stay
 import-free to run before first paint. That is the one duplication here that earns its keep.
 
-### 24.2 [ ] Stage 2 — two `formatDuration`, two `escapeHTML`
-- `modules/common/utils.js` returns `"05:02"`; `modules/common/exerciseModality.js` returns `"5:02"`.
-  Same exported name, different output for the same input.
-- `modules/clipboard/exerciseAndRestTimer.js` carries a private `escapeHTML`. This one is
-  security-relevant: `build/frontend_audit.py` recognises the *name*, so a local copy passes the
-  audit while being free to drift — and it already has (`utils.escapeHTML` returns `""` for any
-  falsy input, so `escapeHTML(0)` is `""`; the timer's copy stringifies first).
+### 24.2 [x] Stage 2 — two `formatDuration`, two `escapeHTML` — **SHIPPED 2026-08-07**
+- `modules/common/utils.js` returned `"05:02"`; `modules/common/exerciseModality.js` returned
+  `"5:02"`. Same exported name, different output for the same input. **Not merged** — the padding
+  difference is deliberate (one drives a live countdown that must not change width as it ticks, the
+  other is a static compact readout), so the modality one became `formatCompactDuration` and both
+  now carry a comment naming the other. Two same-named exports differing only in padding is exactly
+  the pair a reader picks the wrong one from.
+- `modules/clipboard/exerciseAndRestTimer.js` carried a private `escapeHTML`, now importing the one
+  in `utils.js`. Security-relevant: `build/frontend_audit.py` recognises the *name*, so a local copy
+  passes the audit while being free to drift.
+- `utils.escapeHTML` had **no test at all** — which is how the drift went unseen. Pinned in
+  `tests/unit_js/modules/common/utils.test.mjs`, and its falsy guard fixed: `escapeHTML(0)` returned
+  `""`, so a legitimately-zero field rendered blank. Absent values (`null`/`undefined`) still render
+  as nothing.
 
 ### 24.3 [ ] Stage 3 — the board render leaves `controllers/`
 `controllers/activeSessionController.js` lines 1011–1258 are ~250 lines of view rendering (client
