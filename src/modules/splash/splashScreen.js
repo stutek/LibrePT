@@ -43,8 +43,13 @@ const SPLASH_OPT_OUT = "off";
 
 /** `?splash=off` turns the splash off entirely — no hold, and no onboarding offer either. It is
  *  the "put me straight into the app" parameter, the same deep-link convention as `?init`, `?lang`
- *  and `?theme`. Demo links use it, and the browser suite relies on it so a 4s hold and a blocking
- *  onboarding panel are not paid on every one of its ~84 navigations. */
+ *  and `?theme`. Demo links use it.
+ *
+ *  The browser suite deliberately does NOT: it clicks the real X instead (tests/conftest.py's
+ *  dismiss_splash), so its ~100 navigations exercise the production boot rather than a bypass, and
+ *  so appending a parameter to every URL cannot disturb the route assertions. Measured, the bypass
+ *  would save ~384ms per navigation — ~5s of a 177s stage once spread across the xdist workers,
+ *  which does not buy either of those. */
 export function isSplashDisabled(search = window.location.search) {
   return new URLSearchParams(search).get(SPLASH_PARAM) === SPLASH_OPT_OUT;
 }
