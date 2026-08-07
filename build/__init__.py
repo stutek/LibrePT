@@ -747,7 +747,10 @@ def run_medium_tests():
             "pytest",
             "-n",
             str(_playwright_worker_count()),
-            "--dist=loadfile",
+            # No --dist=loadfile here either, for the reason measured in run_e2e_tests: pinning a
+            # file to one worker makes the slowest FILE the floor. Smaller effect at this tier
+            # (14.7s → 12.1s) only because no medium file is disproportionately heavy yet — the
+            # same trap is one fat component test away.
             "-q",
             "--tb=long",
             "tests/medium/",
@@ -829,7 +832,17 @@ def run_e2e_tests():
             # the actual bottleneck (`request_queue_size` raised there), not by lowering
             # parallelism — slowing the suite down would only have hidden the same server-side
             # limit on faster hardware, not removed it.
-            "--dist=loadfile",
+            # DELIBERATELY NOT --dist=loadfile. That flag pins every test in a file to one worker,
+            # so the stage cannot finish faster than its slowest FILE — and this suite has one that
+            # dominates: test_share_deeplink.py is 13 tests totalling ~203s of call time, which on
+            # its own set the whole stage while the other seven workers sat idle. Measured back to
+            # back on this 16-core box at -n 8, 126 tests: loadfile 215s, default per-test
+            # distribution 98s. The flag was added for a reporting nicety ("so test count reports
+            # 96 items across workers", b1c9483) that -q does not even show a difference for.
+            #
+            # Re-adding it costs ~2 minutes per gate run. If a test ever turns out to depend on
+            # another test in its file, fix that dependency — sharing a worker is not isolation,
+            # it only hides the coupling until the file is split.
             "-q",
             "--tb=long",
             "tests/e2e/",

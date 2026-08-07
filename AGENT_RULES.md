@@ -83,11 +83,18 @@ Every response and tool action must drive measurable, continuous progress toward
 
      | Stage | Typical | Investigate past |
      | :--- | :--- | :--- |
-     | 1 — lint / unit / JS unit / audits (parallel) | ~13s (pip-audit dominates) | 60s |
-     | 2 — medium component tests | ~85s | 3min |
-     | 3 — e2e browser suite | ~1m40s | 4min |
-     | 4 — OWASP ZAP baseline | ~35s (~75s on a cold `.venv`) | 3min (hard-killed at 20min) |
-     | **whole `build check`** | **~3m40s** | **6min** |
+     | 1 — lint / unit / JS unit / audits (parallel) | ~5s (~13s on a cold pip-audit) | 60s |
+     | 2 — medium component tests | ~14s | 90s |
+     | 3 — e2e browser suite | ~1m50s | 4min |
+     | 4 — OWASP ZAP baseline | ~15s (~75s on a cold `.venv`) | 3min (hard-killed at 20min) |
+     | **whole `build check`** | **~2m20s** | **5min** |
+
+     Re-measured 2026-08-07, after dropping `--dist=loadfile` from both Playwright stages: that
+     flag pinned each file to one worker, so a stage could not finish faster than its heaviest
+     file, and `tests/e2e/test_share_deeplink.py` alone (13 tests, ~203s of call time) set stage 3
+     while seven of eight workers idled. Measured back to back at `-n 8`: stage 3 215s → 98s,
+     stage 2 14.7s → 12.1s, whole gate 5m06s → 2m20s. The flag had been added for a reporting
+     nicety `-q` does not even render differently. Do not put it back.
 
      A run well outside these is usually the ENVIRONMENT, not the change under test. The two that
      have actually bitten: a dev server left running across days so it no longer matches its own

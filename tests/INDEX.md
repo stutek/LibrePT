@@ -38,6 +38,15 @@ adds close to its full cost. What is bought is that a broken component now fails
 mark against one mounted module instead of at the 3-minute mark against the whole app. Do not
 justify a migration on total wall clock — it will not deliver that.
 
+**Those numbers were taken under `--dist=loadfile`, which both Playwright stages have since
+dropped** (2026-08-07 — see `run_e2e_tests`, and the budget table in
+[AGENT_RULES.md §2](../AGENT_RULES.md)). The conclusion above survives the change, but its
+arithmetic shifts: with the file no longer pinned to a worker, a stage's floor is its slowest
+*test* rather than its heaviest *file*, so moving a slow test down now removes close to its full
+cost from stage 3 instead of a share of one worker's queue. **Before migrating anything for speed,
+check which shape the cost has** — `--durations=0` on the suite. In 2026-08-07's pass, the entire
+215s → 98s win came from the distribution flag and not one test moved.
+
 **Duplication is the other thing an audit finds, and it does not show up as a tier mistake.** Two
 full-app flows can each be legitimately e2e and still assert the same thing twice: `test_clipboard.py`
 was a strict prefix of `test_gym_floor_flow.py` and was deleted in 2026-08-05's pass, exactly as
