@@ -50,22 +50,36 @@ def accept_first_run_terms(request):
 @pytest.fixture(autouse=True)
 def dismiss_splash(request):
     """Click the splash's dismiss X after every browser-test navigation, so the cold-start splash's
-    4s hold (and, on an empty database, its blocking onboarding panel) is not paid on each of the
-    ~84 `page.goto` calls in the suite.
+    5s hold (and, on an empty database, its blocking onboarding panel) is not paid on each of the
+    ~100 `page.goto` calls in the suite.
 
     It drives the REAL control a user has, rather than the `?splash=off` deep-link parameter this
     first used. Two reasons that is better: the suite then exercises the production path instead of
     a bypass, and appending a query parameter to every navigation changed what the app's own URLs
-    looked like — which broke assertions about the route the router had landed on.
+    looked like — which broke assertions about the route the router had landed on. The X costs
+    ~384ms per navigation over that parameter (measured 2026-08-07: 869ms vs 486ms from goto
+    returning to the splash being hidden) — ~5s of a 177s stage across the workers, which is not
+    worth either property.
+
+    Seeding `librept_splash_held` instead is not an option: it zeroes the hold, but the language
+    step and the onboarding panel are gated on the database being empty rather than on the hold, so
+    a seeded session still sits behind a blocking panel (measured the same day — it never hides).
 
     Wrapping `page.goto` rather than editing every call site: getting past the splash is a property
-    of the app under test, not of any one test, and a wrapper cannot drift the way 84 hand-edited
+    of the app under test, not of any one test, and a wrapper cannot drift the way ~100 hand-edited
     call sites would. Tests marked `keep_splash` are left alone — they are the ones testing it."""
     if "page" not in request.fixturenames or "keep_splash" in request.keywords:
         yield
         return
     page = request.getfixturevalue("page")
     navigate = page.goto
+
+    def click_dismiss_if_present():
+        """Best-effort: the splash may already be on its way out, leaving no X to hit."""
+        try:
+            page.locator("#splash-dismiss").click(timeout=SPLASH_DISMISS_TIMEOUT_MS)
+        except PlaywrightTimeoutError:
+            pass
 
     def goto_and_dismiss_splash(url, **kwargs):
         response = navigate(url, **kwargs)
@@ -74,24 +88,44 @@ def dismiss_splash(request):
         if not splash.count():
             return response
 
-        # On an empty database the splash asks for a language first, and that step deliberately
-        # has no X — so it has to be answered before there is anything to dismiss. English, since
-        # that is what every assertion in the suite is written against.
+        # Click FIRST, then wait — never sample the splash's state the moment goto returns.
+        # `page.goto` resolves on `load`, while app.js is still compiling its ~89 modules, so at
+        # that instant the splash has not yet decided what it is going to be. Asking
+        # `#app-splash-language.is_visible()` there answers "not yet", not "not ever" — and losing
+        # that race stranded the suite behind an unanswered language step, because an early X tap
+        # is deliberately NOT honoured when a language choice is due (splashScreen.js: the app must
+        # not come up in a language nobody picked). Seen 2026-08-07 under xdist contention.
+        #
+        # Clicking first is safe in every case: pre-boot the tap is captured by theme-boot.js and
+        # honoured once the app is ready, and post-boot it dismisses outright.
+        click_dismiss_if_present()
+
+        # Now wait for the splash to actually commit to something: gone/going, or holding the
+        # language step up. Both branches resolve fast — the early tap short-circuits the 5s hold
+        # everywhere it is allowed to.
+        page.wait_for_function(
+            """() => {
+                const splash = document.getElementById('app-splash');
+                if (!splash || splash.hidden || splash.classList.contains('is-dismissing')) {
+                    return true;
+                }
+                const language = document.getElementById('app-splash-language');
+                return Boolean(language && !language.hidden);
+            }""",
+            timeout=SPLASH_DISMISS_TIMEOUT_MS,
+        )
+
+        # The language step has no X of its own — it has to be answered before there is anything
+        # to dismiss. English, since that is what every assertion in the suite is written against.
         language_step = page.locator("#app-splash-language")
         if language_step.count() and language_step.is_visible():
             page.locator("[data-splash-lang='en']").click(
                 timeout=SPLASH_DISMISS_TIMEOUT_MS
             )
+            # Answering it restores the X and starts the hold; this second tap cancels that hold
+            # (the first one was consumed by the language gate).
+            click_dismiss_if_present()
 
-        # The splash may ALSO retire on its own, and under xdist it often does: when the workers
-        # are all compiling the app's ~89 modules at once, `page.goto` can return after the 4s
-        # hold has already elapsed, leaving the X inside an element that is on its way out. So the
-        # click is best-effort and the wait is what actually gates — either route gets us past the
-        # splash, and if neither does, `wait_for` fails the test loudly rather than hanging here.
-        try:
-            page.locator("#splash-dismiss").click(timeout=SPLASH_DISMISS_TIMEOUT_MS)
-        except PlaywrightTimeoutError:
-            pass
         splash.wait_for(state="hidden", timeout=SPLASH_DISMISS_TIMEOUT_MS)
         return response
 
