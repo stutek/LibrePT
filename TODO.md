@@ -17,7 +17,8 @@ Open and in-progress backlog. Shipped items **graduate to [CHANGELOG.md](CHANGEL
 Canonical context: [README.md](README.md) (architecture & features), [use_cases/](use_cases/) (workflows), [CONTRIBUTING.md](CONTRIBUTING.md) (conventions).
 
 ---
-
+## TBD: 
+https://github.com/stutek/LibrePT/actions/runs/31224697989 seems medium tests and e-2-e tests are the same stage on github pipeline
 ## 1. Scheduling & Sessions
 
 ### 1.1 [x] PT-side client assignment to a session
