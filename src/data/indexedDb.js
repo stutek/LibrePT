@@ -93,17 +93,23 @@ function createSchemaStore(db, schema) {
  * bucket is a deliberate act with its own confirmation (§16.2's per-version discard), never a side
  * effect of an app that happens to boot with a shorter list.
  */
+// `version` is normally derived from the schema list, because provisioning a store is the only
+// thing that should trigger an upgrade. The preview database (data/previewSchema.js) overrides it:
+// its store set is keyed by commit rather than by schema number, so it is REPLACED (deleted and
+// recreated at version 1) rather than upgraded — and it must never pull the main database's
+// monotonically-increasing version along with it.
 export function openDatabase({
   schemas,
   factory = globalThis.indexedDB,
   name = DATABASE_NAME,
+  version = null,
 } = {}) {
   if (!factory) return Promise.reject(new Error("IndexedDB is unavailable"));
   if (!Array.isArray(schemas) || schemas.length === 0) {
     return Promise.reject(new Error("openDatabase needs at least one schema"));
   }
 
-  const request = factory.open(name, databaseVersion(schemas));
+  const request = factory.open(name, version ?? databaseVersion(schemas));
 
   request.onupgradeneeded = () => {
     const db = request.result;

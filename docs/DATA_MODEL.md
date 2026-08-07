@@ -393,6 +393,44 @@ backward transforms to write** — a "downgrade" is just a projection that was a
 | The reference graph is **acyclic** | Migration replays in topological (foreign-key availability) order, never by timestamp — the device clock is not trustworthy |
 | Schema changes are **expand-first** | A field's storage ships in every live schema *before* the UI that writes it, so no projection is ever lossy |
 
+### Reads are pinned; writes are the star
+
+The two halves of the star are asymmetric on purpose, and the asymmetry is the invariant:
+
+- **Writes fan out and compare no versions.** Every provisioned store gets the same projected
+  record, so no writer decides which schema is "current".
+- **Reads come from one DECLARED schema** — `READ_SCHEMA` in
+  [recordSchemas.js](../src/data/recordSchemas.js), **never derived**. It used to be
+  `Math.max(...Object.keys(LIVE_SCHEMAS))`, which made the read target a function of registry
+  *membership*: registering a shape silently relocated every read in the app. "This build can write
+  shape N" and "this build reads shape N" are independent facts, and conflating them let a cutover
+  happen as a side effect of a one-line registry edit with nothing in the diff saying so.
+
+### Preview schema — an opt-in, disposable store
+
+An in-development shape (`SCHEMA_PREVIEW`) is projected into **its own IndexedDB database**,
+`librept-preview`, keyed by `BUILD_INFO.commit` ([previewSchema.js](../src/data/previewSchema.js)).
+It is deliberately **not** in `LIVE_SCHEMAS`: a preview shape has no migration step, no stability
+guarantee, and may change with every build.
+
+Because reads are pinned and writes already fan out, **opting back out is not a migration** — it is
+a read re-point plus a database delete, and a record created while previewing is already in the
+canonical store. Only opting *in* projects anything.
+
+Its own database rather than a store in the main one: a new store means an `onupgradeneeded`, and
+therefore a permanent version bump on the database holding real client data, on *every* preview
+release. Fifty previews would leave that database at version 50-something, diverging per install,
+with `databaseVersion` never again derivable from schema numbers. (A numeric sentinel such as
+`999999` is worse still — verified: opening at 999999 then at 4 fails with `VersionError`, so the
+install can never open its own database again.)
+
+The projection is **restartable, not resumable**: it is one transaction, so an interruption commits
+nothing and leaves no partial state, and recovery is simply to rebuild from the canonical store.
+A store that is missing, unmarked, or stamped with another commit is rebuilt rather than adopted.
+This is why there is no progress bookkeeping — and why chunking it behind an "X of Y" progress bar
+would *remove* the property rather than report on it. Measured: a full fan-out of the 90-record demo
+dataset takes ~22ms; ~3,000 records lands near 400ms.
+
 ### Migration
 
 Migration into a newly live schema is **pre-emptive** (it starts before a trainer opts into anything),

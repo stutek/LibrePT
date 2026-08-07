@@ -147,7 +147,32 @@ export const SCHEMA_3 = {
 // how to project (TODO §18.1) — grows only when a schema is cut; never grows retroactively.
 export const LIVE_SCHEMAS = { 2: SCHEMA_2, 3: SCHEMA_3 };
 
-export const NEWEST_SCHEMA = Math.max(...Object.keys(LIVE_SCHEMAS).map(Number));
+/**
+ * The schema this build READS from. Declared, never derived.
+ *
+ * It used to be `Math.max(...Object.keys(LIVE_SCHEMAS))`, which made the read target a function of
+ * registry MEMBERSHIP: merely registering a shape silently relocated every read in the app. Those
+ * are two independent facts — "this build can write shape N" and "this build reads shape N" — and
+ * conflating them means a cutover can happen as a side effect of a one-line registry edit, with
+ * nothing in the diff saying so.
+ *
+ * Pinning it is also what makes a disposable preview store safe (data/previewSchema.js): a store
+ * outside this registry cannot become canonical by accident, no matter what it is keyed by.
+ * Cutting over is a deliberate edit to THIS line, and it is greppable.
+ */
+export const READ_SCHEMA = 3;
+
+/**
+ * The shape an in-development build writes, projected into its own disposable database rather than
+ * into the numbered registry above (data/previewSchema.js). Identical to SCHEMA_3 today because no
+ * next schema has been cut yet — when one is being designed, it is authored HERE first, exercised
+ * by opted-in trainers against real data, and only promoted into LIVE_SCHEMAS once it settles.
+ *
+ * Deliberately NOT in LIVE_SCHEMAS: a preview shape is not a schema major. It has no migration
+ * step, no guarantee of stability, and may change with every build — which is exactly why its
+ * store is keyed by commit and thrown away rather than migrated.
+ */
+export const SCHEMA_PREVIEW = { ...SCHEMA_3 };
 
 function typeOf(value) {
   if (Array.isArray(value)) return "array";
