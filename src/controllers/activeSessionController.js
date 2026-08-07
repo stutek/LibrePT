@@ -30,6 +30,7 @@ import {
   ensureRestItems,
   isRestItem,
 } from "../domain/sessionPlanFactory.js";
+import { sessionBelongsToSlot } from "../domain/sessionRecord.js";
 import { renderClientsList } from "../modules/clients/clientsView.js";
 import {
   initActiveSessionBoard,
@@ -53,6 +54,7 @@ import {
   stopTimerIfMatches,
 } from "../modules/clipboard/exerciseAndRestTimer.js";
 import { updateClientTabsFadeState } from "../modules/common/activeUsersList.js";
+import { renderNotificationArea } from "../modules/common/notificationArea.js";
 import { formatClockFromMinutes, formatDurationHourMin } from "../modules/common/utils.js";
 import {
   releaseScreenWakeLock,
@@ -273,6 +275,9 @@ export function openSessionFromHistory(log) {
     },
     activeClientId: log.clientId,
     feedback: log.feedback || [],
+    // Reopening a draft names it outright, so the sync edits THIS record even when the client has
+    // several open (upsertPlanningRecord's draftId).
+    planningDraftIds: log.isPlanning ? { [log.clientId]: log.id } : {},
     sourceSession: log.isPlanning
       ? {
           id: `plan-${log.id}`,
@@ -386,13 +391,9 @@ function applyAdjustedSchedule({ startMs, endMs }) {
 
   const sessions = Array.isArray(appDeps.state?.sessions) ? appDeps.state.sessions : [];
   for (const session of sessions) {
-    const belongsToThisSlot =
-      session.id === sourceSession.id ||
-      (Array.isArray(sourceSession.ids) && sourceSession.ids.includes(session.id));
-    if (belongsToThisSlot) {
-      session.time = timeLabel;
-      session.startDate = new Date(startMs).toISOString();
-    }
+    if (!sessionBelongsToSlot(session, sourceSession)) continue;
+    session.time = timeLabel;
+    session.startDate = new Date(startMs).toISOString();
   }
 
   saveActiveSessionToCache();
@@ -426,6 +427,9 @@ function offerScheduleAdjustment() {
         endValue,
       });
       if (schedule) applyAdjustedSchedule(schedule);
+    },
+    onDelete: () => {
+      if (confirm(appDeps.t("confirm_delete_session"))) deleteScheduledSession();
     },
   });
 }
@@ -869,8 +873,14 @@ function wireSessionMenuAndActions(t) {
     // otherwise it cancels the whole session. The label is swapped to match in renderActiveGroupBoard.
     if (isClipboardEditMode()) {
       if (confirm(t("confirm_delete_plan"))) clearActivePlan();
-    } else if (confirm(t("confirm_cancel"))) {
-      cancelWorkoutSession();
+      return;
+    }
+    // A planning draft has no scheduled slot to take off the board, so deleting one IS just
+    // discarding the clipboard; a real session's delete has to remove the row behind it too.
+    if (activeSession?.sourceSession?.isPlanning) {
+      if (confirm(t("confirm_cancel"))) cancelWorkoutSession();
+    } else if (confirm(t("confirm_delete_session"))) {
+      deleteScheduledSession();
     }
   });
 
@@ -960,8 +970,15 @@ export function cancelWorkoutSession() {
   // otherwise a discarded plan keeps reappearing in the "unscheduled plans" notification message
   // it backs (syncPlanningSnapshotToHistory), which reads as the delete having silently failed.
   if (activeSession?.sourceSession?.isPlanning && state && Array.isArray(state.history)) {
+    // By draft id where the clipboard knows it, so deleting one draft leaves a client's OTHER
+    // drafts alone — falling back to the clientId sweep only for a session cached before drafts
+    // were addressable, where the client can only have had the one.
+    const ownDraftIds = new Set(Object.values(activeSession.planningDraftIds || {}));
     const participants = new Set(activeSession.participants || []);
-    state.history = state.history.filter((h) => !(h.isPlanning && participants.has(h.clientId)));
+    state.history = state.history.filter((entry) => {
+      if (!entry.isPlanning) return true;
+      return ownDraftIds.size ? !ownDraftIds.has(entry.id) : !participants.has(entry.clientId);
+    });
     if (saveToLocalStorage) saveToLocalStorage();
   }
   if (activeSession?.timerIntervalId) {
@@ -977,6 +994,54 @@ export function cancelWorkoutSession() {
 
   if (navigateToPath) navigateToPath("/");
   if (focusSessionsColumn) focusSessionsColumn("today", "smooth");
+}
+
+// "This one never happened" — the slot comes off the board for good, unlike cancelWorkoutSession
+// above, which only drops the LIVE clipboard and leaves the scheduled row behind (the ⋯ menu said
+// "Delete Session" and the confirm said "delete this session", but the card was still on the
+// dashboard afterwards).
+//
+// The programming does not die with the slot. Each participant's plan is kept as an UNSCHEDULED
+// draft, because the trainer authored it once and a session deleted for having slipped its slot is
+// exactly the one that gets re-run on another day; the feed's "unscheduled plans" item is then the
+// route back to it. Logged sets and feedback ARE discarded, which is what the confirm says — a
+// session worth deleting is a session that did not happen.
+export function deleteScheduledSession() {
+  const { state, saveToLocalStorage } = appDeps;
+  const sourceSession = activeSession?.sourceSession;
+  // A planning draft has no slot to remove, and deleting one is already cancelWorkoutSession's job.
+  if (!state || !sourceSession || sourceSession.isPlanning) return;
+
+  if (!Array.isArray(state.history)) state.history = [];
+  const title = sourceSession.titles?.[0] || "";
+  const nowISO = new Date().toISOString();
+
+  for (const participantId of activeSession.participants) {
+    const plan = buildSessionHistoryRecord({
+      client: state.clients.find((client) => client.id === participantId),
+      clientState: activeSession.clientRoutines[participantId],
+      dateISO: nowISO,
+      duration: 0,
+      isPlanning: true,
+      title,
+    });
+    // Pushed rather than upserted: this is a NEW unscheduled plan, and a client already holding one
+    // must keep it (upsertPlanningRecord's draftId is what keeps the two apart from here on). An
+    // empty plan is not rescued — there is nothing in it to re-run, and it would only inflate the
+    // feed's outstanding-work count with a draft the trainer never wrote.
+    if (plan?.exercises?.length) state.history.push(plan);
+  }
+
+  state.sessions = (state.sessions || []).filter(
+    (session) => !sessionBelongsToSlot(session, sourceSession),
+  );
+  if (saveToLocalStorage) saveToLocalStorage();
+
+  cancelWorkoutSession();
+
+  appDeps.renderSessions?.();
+  renderGlobalHistory({ state, t: appDeps.t });
+  renderNotificationArea();
 }
 
 // Confirm only when finishing meaningfully early — more than 10 minutes still on the countdown.
@@ -1013,10 +1078,9 @@ function stampSourceSessionsCompleted(state, sessionDuration) {
   if (!ss || ss.isPlanning) return;
   const sessions = Array.isArray(state.sessions) ? state.sessions : [];
   for (const session of sessions) {
-    if (session.id === ss.id || (Array.isArray(ss.ids) && ss.ids.includes(session.id))) {
-      session.completed = true;
-      session.duration = sessionDuration;
-    }
+    if (!sessionBelongsToSlot(session, ss)) continue;
+    session.completed = true;
+    session.duration = sessionDuration;
   }
 }
 
@@ -1087,6 +1151,7 @@ function syncPlanningSnapshotToHistory() {
 
   const title = activeSession.sourceSession.titles?.[0] || "";
   const nowISO = new Date().toISOString();
+  if (!activeSession.planningDraftIds) activeSession.planningDraftIds = {};
 
   for (const pId of activeSession.participants) {
     const draft = buildSessionHistoryRecord({
@@ -1098,7 +1163,11 @@ function syncPlanningSnapshotToHistory() {
       isPlanning: true,
       title,
     });
-    if (draft) upsertPlanningRecord(state.history, draft);
+    if (!draft) continue;
+    // Remember which draft this client's edits belong to, so a client holding more than one (a
+    // deleted session leaves one per participant) keeps them apart across syncs.
+    const stored = upsertPlanningRecord(state.history, draft, activeSession.planningDraftIds[pId]);
+    activeSession.planningDraftIds[pId] = stored.id;
   }
   if (saveToLocalStorage) saveToLocalStorage();
 }

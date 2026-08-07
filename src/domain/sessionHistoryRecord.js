@@ -59,17 +59,26 @@ export function buildSessionHistoryRecord({
   return record;
 }
 
-// A planning draft is edited over and over, so it UPSERTS: one open draft per client, matched on
-// clientId, rather than a new record per cache sync piling up duplicates in the feed.
+// A planning draft is edited over and over, so it UPSERTS rather than letting every cache sync pile
+// up a duplicate in the feed. Returns the stored record, whose `id` the caller keeps to address the
+// same draft on the next sync.
 //
-// The existing record keeps its id and its feedback. The id is what a deep link and the feed's own
-// list are keyed on, so re-authoring a draft must not invalidate a link to it — this is an edit of
-// the same draft, not a new one.
-export function upsertPlanningRecord(history, record) {
-  const existing = history.find((entry) => entry.isPlanning && entry.clientId === record.clientId);
+// `draftId` names WHICH draft is being edited, and it matters as soon as one client can hold more
+// than one: a deleted session leaves an unscheduled plan per participant, so a client who already
+// had a draft open now has two. Matching on clientId alone — all this did — would then find the
+// wrong one and overwrite a plan the trainer never opened. Without a draftId (a brand-new planning
+// clipboard, or one cached before drafts were addressable) it still falls back to clientId, which
+// is unambiguous precisely when the client has only the one.
+//
+// Either way the existing record keeps its id and its feedback: the id is what a deep link and the
+// feed's own list are keyed on, so re-authoring a draft must not invalidate a link to it.
+export function upsertPlanningRecord(history, record, draftId = null) {
+  const existing = draftId
+    ? history.find((entry) => entry.isPlanning && entry.id === draftId)
+    : history.find((entry) => entry.isPlanning && entry.clientId === record.clientId);
   if (!existing) {
     history.push(record);
-    return existing ?? null;
+    return record;
   }
   existing.routineName = record.routineName;
   existing.title = record.title;

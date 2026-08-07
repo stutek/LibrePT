@@ -68,6 +68,8 @@ export const en = {
   confirm_finish_early: "This session still has about {min} minutes left. Finish it now anyway?",
   confirm_cancel:
     "Delete this session? Its logged progress and feedback will be permanently discarded.",
+  confirm_delete_session:
+    "Delete this session? It comes off the schedule and its logged progress and feedback are discarded — each participant's plan is kept under Unscheduled plans.",
   confirm_delete_plan:
     "Delete every exercise from this plan? You can rebuild it from scratch or exit editing.",
   warning_banner_title: "Client Safety Advisory",
@@ -239,6 +241,7 @@ export const en = {
   session_start_time_early: "early",
   session_start_time_keep: "Keep scheduled",
   session_start_time_apply: "Adjust time",
+  session_start_time_delete: "Didn't happen",
   today: "Today",
   tomorrow: "Tomorrow",
   yesterday: "Yesterday",

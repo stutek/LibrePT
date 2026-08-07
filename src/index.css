@@ -454,6 +454,21 @@ h6 {
 }
 .danger-btn:hover {
   background-color: color-mix(in srgb, var(--danger) 24%, transparent);
+}
+/* A destructive action that shares a row with the ordinary ones — it must read as available but
+   never compete for a thumb aiming at the button beside it, so it drops the filled surface and
+   takes the far end of the row instead. Full button padding is kept: on a phone this is still a
+   real touch target, not a hover-sized link. */
+.danger-link-btn {
+  background: none;
+  color: var(--danger);
+  border: 1px solid transparent;
+}
+.danger-link-btn:hover {
+  background-color: var(--danger-light);
+}
+.modal-actions .danger-link-btn {
+  margin-right: auto;
 } /* Success (e.g. "Complete Workout") stays semantically green regardless of theme primary. */
 .success-btn {
   background-color: var(--success);

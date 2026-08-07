@@ -13,7 +13,10 @@
 //
 // Owns `#dialog-session-start-time`'s markup. Both ends are editable rather than just shifted,
 // because "we actually started 20 minutes ago and I forgot to tap Start" and "we start now and run
-// the planned hour" are both real, and only the trainer knows which.
+// the planned hour" are both real, and only the trainer knows which. There is a third answer past
+// the tolerance and it is not a time at all: hours off its slot, the session often never ran, so
+// the dialog also offers to delete it (the plans survive as unscheduled ones — see
+// activeSessionController's deleteScheduledSession).
 //
 // Takes { t, ... } per open rather than init(deps)-then-open: `t` is the only app-level helper it
 // needs, so a boot step would be ceremony around a single argument.
@@ -23,9 +26,10 @@ import { formatClockFromMinutes } from "../common/utils.js";
 
 const DIALOG_ID = "dialog-session-start-time";
 
-// Set per open, read by the listeners bound once below — the callback closes over the schedule of
-// the session being started, so it cannot be captured at wiring time.
+// Set per open, read by the listeners bound once below — the callbacks close over the session being
+// started, so they cannot be captured at wiring time.
 let applyChoice = null;
+let deleteChoice = null;
 
 function wireStartTimeDialog(dialog) {
   dialog.querySelector("#form-session-start-time").addEventListener("submit", (event) => {
@@ -35,6 +39,12 @@ function wireStartTimeDialog(dialog) {
       endValue: dialog.querySelector("#session-start-time-end").value,
     });
     closeModal(DIALOG_ID);
+  });
+  // Close FIRST: the delete tears down the very session this dialog is describing and navigates
+  // away, so a dialog still open over the dashboard would be describing nothing.
+  dialog.querySelector("#btn-session-start-time-delete").addEventListener("click", () => {
+    closeModal(DIALOG_ID);
+    deleteChoice?.();
   });
   for (const dismiss of dialog.querySelectorAll(".modal-close-btn, #btn-session-start-time-keep")) {
     dismiss.addEventListener("click", () => closeModal(DIALOG_ID));
@@ -67,6 +77,11 @@ function ensureStartTimeDialog(t) {
         </div>
       </div>
       <div class="modal-actions">
+        <!-- Set apart from the pair on the right, and destructive-styled: a session hours off its
+             slot is often one that never ran at all, so "delete it" is the third honest answer to
+             the question this dialog asks — but it must not sit where a thumb aiming for Keep on a
+             phone can find it. It confirms before anything is destroyed. -->
+        <button type="button" class="btn danger-link-btn" id="btn-session-start-time-delete"></button>
         <button type="button" class="btn secondary-btn" id="btn-session-start-time-keep"></button>
         <button type="submit" class="btn primary-btn" id="btn-session-start-time-apply"></button>
       </div>
@@ -86,6 +101,9 @@ function ensureStartTimeDialog(t) {
   dialog.querySelector("#session-start-time-end-label").textContent = t("label_end_time");
   dialog.querySelector("#btn-session-start-time-keep").textContent = t("session_start_time_keep");
   dialog.querySelector("#btn-session-start-time-apply").textContent = t("session_start_time_apply");
+  dialog.querySelector("#btn-session-start-time-delete").textContent = t(
+    "session_start_time_delete",
+  );
   return dialog;
 }
 
@@ -106,6 +124,8 @@ function describeDrift(driftMs, scheduledLabel, t) {
 
 // `onApply({ startValue, endValue })` receives the two raw "HH:MM" field values — turning them into
 // a schedule and persisting it belongs to the caller, since this module knows nothing about state.
+// `onDelete()` is the same deal for "this session never happened": confirming it and taking the
+// slot off the board are the caller's, not this dialog's.
 export function openSessionStartTimeDialog({
   t,
   scheduledLabel,
@@ -113,6 +133,7 @@ export function openSessionStartTimeDialog({
   proposedStartMs,
   proposedEndMs,
   onApply,
+  onDelete,
 }) {
   const dialog = ensureStartTimeDialog(t);
   if (!dialog) return;
@@ -126,5 +147,6 @@ export function openSessionStartTimeDialog({
   dialog.querySelector("#session-start-time-end").value = toClockValue(proposedEndMs);
 
   applyChoice = onApply;
+  deleteChoice = onDelete;
   openModal(DIALOG_ID);
 }

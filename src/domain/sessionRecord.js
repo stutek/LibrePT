@@ -48,6 +48,18 @@ export function upsertSessionRecord(sessions, sessionRecord) {
   sessions.push(sessionRecord);
 }
 
+// The inverse of the meta factories below: which stored rows is this live clipboard running?
+// A slot can be more than one row — the day timeline merges sessions sharing a time and place into
+// a single card, and the meta then carries `ids` for all of them (`id` names the first). Every
+// caller that writes back onto "the session behind the clipboard" — stamping it completed,
+// re-timing it, deleting it — has to agree on that set, and three of them had grown their own copy
+// of the same two-clause check.
+export function sessionBelongsToSlot(session, sourceSession) {
+  if (!session || !sourceSession) return false;
+  if (session.id === sourceSession.id) return true;
+  return Array.isArray(sourceSession.ids) && sourceSession.ids.includes(session.id);
+}
+
 export function buildSessionRecord({
   sessionId,
   sessionName,

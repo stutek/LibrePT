@@ -68,6 +68,8 @@ export const sl = {
     "Do konca te seje je še približno {min} minut. Ali jo želite vseeno zaključiti zdaj?",
   confirm_cancel:
     "Izbriši to sejo? Zabeležen napredek in povratne informacije bodo trajno izgubljeni.",
+  confirm_delete_session:
+    "Izbriši to sejo? Odstranjena bo z urnika, zabeležen napredek in povratne informacije pa bodo izgubljeni — program vsakega udeleženca se ohrani med nenačrtovanimi programi.",
   confirm_delete_plan:
     "Izbrišem vse vaje iz tega plana? Lahko ga sestaviš znova ali zapustiš urejanje.",
   warning_banner_title: "Varnostno opozorilo za stranko",
@@ -238,6 +240,7 @@ export const sl = {
   session_start_time_early: "prezgodaj",
   session_start_time_keep: "Ohrani urnik",
   session_start_time_apply: "Prilagodi čas",
+  session_start_time_delete: "Ni se zgodila",
   today: "Danes",
   tomorrow: "Jutri",
   yesterday: "Včeraj",

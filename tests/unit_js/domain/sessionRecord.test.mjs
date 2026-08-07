@@ -18,6 +18,7 @@ import {
   computeSessionDayBucket,
   computeTimeLabel,
   newlyAssignedParticipantIds,
+  sessionBelongsToSlot,
   upsertSessionRecord,
 } from "../../../src/domain/sessionRecord.js";
 
@@ -149,4 +150,20 @@ test("a planning session is flagged as having no slot; a real one is not", () =>
   assert.equal("isPlanning" in real, false, "the flag every downstream guard reads must be absent");
   assert.deepEqual(planning.titles, ["Winter block"]);
   assert.deepEqual(real.titles, ["Winter block"]);
+});
+
+test("a slot claims every stored row it was merged from", () => {
+  // The day timeline merges sessions sharing a time and place into one card, so the meta the
+  // clipboard runs can stand for several rows (`ids`). Everything that writes back onto "the
+  // session behind the clipboard" — completing it, re-timing it, deleting it — has to agree on
+  // which rows those are.
+  const merged = { id: "s1", ids: ["s1", "s2"] };
+  assert.equal(sessionBelongsToSlot({ id: "s1" }, merged), true);
+  assert.equal(sessionBelongsToSlot({ id: "s2" }, merged), true);
+  assert.equal(sessionBelongsToSlot({ id: "s3" }, merged), false);
+
+  // A single-row slot carries no `ids` at all, and a planning meta matches nothing stored.
+  assert.equal(sessionBelongsToSlot({ id: "s1" }, { id: "s1" }), true);
+  assert.equal(sessionBelongsToSlot({ id: "s1" }, { id: "plan-x", isPlanning: true }), false);
+  assert.equal(sessionBelongsToSlot({ id: "s1" }, null), false);
 });

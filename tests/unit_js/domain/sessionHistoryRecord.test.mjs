@@ -147,3 +147,52 @@ test("a draft never collides with another client's, or with completed history", 
     ["c1", "c2"],
   );
 });
+
+test("a named draft is edited in place even when the client holds several", () => {
+  // Deleting a scheduled session leaves an unscheduled plan per participant, so a client who
+  // already had a draft open now has two. Matched on clientId alone the sync would find whichever
+  // came first and overwrite a plan the trainer never opened.
+  const history = [];
+  const older = buildSessionHistoryRecord({
+    ...base,
+    duration: 0,
+    isPlanning: true,
+    title: "Draft the trainer is not editing",
+  });
+  const rescued = buildSessionHistoryRecord({
+    ...base,
+    clientState: { ...planWith(false), routineName: "Rescued" },
+    duration: 0,
+    isPlanning: true,
+    title: "From a deleted session",
+  });
+  history.push(older, rescued);
+
+  const edit = buildSessionHistoryRecord({
+    ...base,
+    clientState: { ...planWith(false), routineName: "Rescued, reworked" },
+    duration: 0,
+    isPlanning: true,
+    title: "From a deleted session",
+  });
+  const stored = upsertPlanningRecord(history, edit, rescued.id);
+
+  assert.equal(history.length, 2, "editing one draft must not add or drop another");
+  assert.equal(stored.id, rescued.id);
+  assert.equal(history[1].routineName, "Rescued, reworked");
+  assert.equal(history[0].routineName, "Upper A", "the untouched draft stays untouched");
+});
+
+test("an unrecognised draft id is a new draft, not a silent overwrite", () => {
+  const history = [];
+  const record = buildSessionHistoryRecord({
+    ...base,
+    duration: 0,
+    isPlanning: true,
+    title: "Draft",
+  });
+  const stored = upsertPlanningRecord(history, record, "no-such-draft");
+
+  assert.equal(history.length, 1);
+  assert.equal(stored.id, record.id, "the caller needs the stored record's id to address it again");
+});

@@ -130,6 +130,53 @@ def test_a_session_started_late_survives_a_reload(page, local_server):
     )
 
 
+def _unscheduled_plan_count(page):
+    # Read the live store rather than localStorage: state is persisted through IndexedDB as well,
+    # and a mirror written on a different beat is not what the feed counts.
+    return page.evaluate(
+        """async () => {
+            const store = await import(new URL('data/stateStore.js', document.baseURI).href);
+            return store.getState().history.filter((entry) => entry.isPlanning).length;
+        }"""
+    )
+
+
+def test_deleting_an_off_schedule_session_keeps_its_plans_unscheduled(
+    page, local_server
+):
+    # The third honest answer to "you started this five hours late": it never ran. The slot has to
+    # actually leave the board — the ⋯ menu said "Delete Session" and left the card sitting there —
+    # while the programming behind it survives as unscheduled plans, because that is what gets
+    # re-run on another day.
+    _launch_and_start(page, local_server)
+    planned_before = _unscheduled_plan_count(page)
+
+    page.on("dialog", lambda d: d.accept())
+    page.click("#btn-session-start-time-delete")
+    page.wait_for_selector("#view-clients.active")
+
+    assert page.locator(".session-card", has_text=CARD_TITLE).count() == 0, (
+        "a deleted session must leave the dashboard, not just close its clipboard"
+    )
+    planned_after = _unscheduled_plan_count(page)
+    assert planned_after > planned_before, (
+        "the participants' plans must survive the session as unscheduled ones"
+    )
+
+    # And it has to be a WRITE, not just a re-render: a delete the next reload undoes is worse than
+    # no delete, because the trainer has already stopped expecting the session.
+    page.evaluate(
+        """async () => {
+            const queue = await import(new URL('data/writeQueue.js', document.baseURI).href);
+            await queue.flushWrites();
+        }"""
+    )
+    page.goto(local_server)
+    page.wait_for_selector("#view-clients.active")
+    assert page.locator(".session-card", has_text=CARD_TITLE).count() == 0
+    assert _unscheduled_plan_count(page) == planned_after
+
+
 def test_keeping_the_schedule_leaves_the_slot_and_counts_up(page, local_server):
     _launch_and_start(page, local_server)
     scheduled_title = page.inner_text("#session-title-text")
