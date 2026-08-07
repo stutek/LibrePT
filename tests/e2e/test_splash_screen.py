@@ -12,6 +12,10 @@ import time
 
 import pytest
 
+# Mirrors DEFAULT_MINIMUM_VISIBLE_MS in src/modules/splash/splashScreen.js. Kept as seconds because
+# every stopwatch here is a time.monotonic() delta.
+SPLASH_MINIMUM_HOLD_S = 5.0
+
 
 def _answer_language_step(page, code="en"):
     """Clear the language step, which precedes everything else on a clean start.
@@ -31,7 +35,7 @@ def test_splash_shows_the_mark_wordmark_and_tagline(page, local_server):
 
     Deliberately asserted on an EMPTY database: the onboarding offer then holds the splash open
     until a choice is made, so these checks cannot race the fade. Asserting them mid-hold instead
-    was flaky — on a loaded box the 4s could elapse between `wait_for(visible)` and the next line,
+    was flaky — on a loaded box the 5s could elapse between `wait_for(visible)` and the next line,
     and the suite duly caught it doing exactly that."""
     page.goto(local_server)
     _answer_language_step(page)
@@ -65,7 +69,7 @@ def test_splash_holds_for_its_minimum_even_though_boot_is_faster(page, local_ser
     page.locator("#app-splash").wait_for(state="hidden", timeout=15000)
     held_for = time.monotonic() - started
 
-    # Against 4000ms, with room for the fade and for a page.goto that resolves after first paint.
+    # Against 5000ms, with room for the fade and for a page.goto that resolves after first paint.
     assert held_for > 3.0, f"splash was dismissed after only {held_for:.2f}s"
 
 
@@ -138,7 +142,7 @@ def test_demo_data_choice_loads_the_dataset_and_stops_offering(page, local_serve
 @pytest.mark.clean_start
 @pytest.mark.keep_splash
 def test_dismiss_x_cancels_the_hold_instead_of_waiting_it_out(page, local_server):
-    """The X is live from first paint, not only after the hold — a 4s wait you cannot skip is not
+    """The X is live from first paint, not only after the hold — a 5s wait you cannot skip is not
     something to put in front of someone mid-session.
 
     Asserted without a stopwatch. On a clean start, letting the hold run to completion reveals the
@@ -169,7 +173,7 @@ def test_dismissed_splash_leaves_the_app_usable(page, local_server):
 
 @pytest.mark.keep_splash
 def test_the_hold_is_paid_once_per_session_not_on_every_load(page, local_server):
-    """A reload should not cost another 4s. The splash still covers the boot — it just stops adding
+    """A reload should not cost another 5s. The splash still covers the boot — it just stops adding
     to it once this tab session has already seen the full moment."""
     page.goto(local_server)
     page.locator("#app-splash").wait_for(state="hidden", timeout=20000)
@@ -179,9 +183,17 @@ def test_the_hold_is_paid_once_per_session_not_on_every_load(page, local_server)
     page.locator("#app-splash").wait_for(state="hidden", timeout=20000)
     second_load = time.monotonic() - started
 
-    # Compared against the 4s minimum, not against a boot budget: the point is that no minimum was
-    # applied at all the second time.
-    assert second_load < 3.0, f"the second load still held for {second_load:.2f}s"
+    # Compared against the MINIMUM itself, not a boot budget. A second load that finishes inside
+    # the minimum proves the minimum was not applied — which is the whole claim — while any tighter
+    # number starts asserting on how fast the box booted the app. It was tighter (3.0s), and duly
+    # failed at 3.13s on a 16-core machine sitting at load average 18, for reasons having nothing
+    # to do with the splash. Same trap the note above `?splash=off` describes; the arithmetic that
+    # a held session asks for zero hold is pinned exactly in
+    # tests/unit_js/modules/splashScreen.test.mjs.
+    assert second_load < SPLASH_MINIMUM_HOLD_S, (
+        f"the second load still held for {second_load:.2f}s, "
+        f"which is the full {SPLASH_MINIMUM_HOLD_S}s minimum being re-applied"
+    )
 
 
 @pytest.mark.clean_start
