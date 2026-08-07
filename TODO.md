@@ -1485,7 +1485,7 @@ does. It earned its place on this very stage: moving module-level state out left
 deleted variable behind, and finding it cost a 38s Stage 2 browser run. With the rule on it is a
 32ms Stage 1 failure naming the line. Zero findings on the rest of the tree.
 
-### 24.4 [ ] Stage 4 — split the rest of `activeSessionController.js`
+### 24.4 [~] Stage 4 — split the rest of `activeSessionController.js`
 1,668 lines, 6.5% of `src/`, 2.3× the next-largest module. It passes the complexity gate because it
 was split *horizontally* into ~60 small functions but never *vertically*. By concern:
 
@@ -1498,6 +1498,21 @@ was split *horizontally* into ~60 small functions but never *vertically*. By con
 | 651–782 | quick signals (toggle, exclusivity, colour) | `quickSignals.js` (pure-ish) |
 | 1260–1403 | DOM wiring / `setupActiveSession` | `controllers/activeSessionWiring.js` |
 | 1448–1604 | finish → history projection | `modules/session/sessionCompletion.js` |
+
+**4a SHIPPED 2026-08-07** — `domain/sessionPlanFactory.js` and `domain/quickSignals.js`, with 13
+unit tests that were previously unreachable without a booted browser. The quick-signal split is
+worth stating as a rule: the DECISIONS are pure (what counts as a disposable one-tap signal versus
+something the trainer wrote, which tags supersede each other, the severity order behind a card's
+colour) while the MUTATION is not, so the controller keeps thin wrappers over pure functions rather
+than the whole thing moving.
+
+**A pre-existing bug surfaced while verifying 4a**, unrelated to the refactor and fixed on its own
+commit: `buildSessionMeta` rewrote a session's `endDate` to `now + 2h` once its slot had passed, and
+`proposeAdjustedSchedule` reads that to derive the planned LENGTH — so a 16:00-18:00 slot opened at
+21:40 offered to reschedule itself as 21:40-05:20. It had been invisible because the demo seed
+clamps its hours to 03..17: the e2e suite only catches it when the run happens to be after 18:00.
+The lesson for this reorg: **a suite that passes all afternoon is not the same as a suite that
+passes.** Time-of-day-dependent coverage belongs in `unit_js/`, where the clock is an argument.
 
 Residual ≈ 330 lines of genuine controller (the `activeSession` variable, lifecycle orchestration,
 timers, cache/recover). Every new *pure* module gets a `tests/unit_js/` file in the same commit.
@@ -1541,8 +1556,9 @@ authored, what a session's clock means) — pure, no DOM, no storage.
 their modules. The 29 import rewrites were done by resolving each specifier rather than by string
 substitution — importers sit at four different depths — and `import_layers.py`'s own
 `broken_imports()` check was the backstop for any path missed. Also updated: `sw/cacheManifest.js`
-(+ `CACHE_NAME`), `docs/SRC_MODULES.md`, `tests/INDEX.md`, `AGENT_RULES.md` §5.2/§5.3, and every
-markdown link across `CHANGELOG.md`, `docs/DATA_MODEL.md` and `use_cases/`.
+(+ `CACHE_NAME`), `docs/SRC_MODULES.md`, `tests/INDEX.md`, the test-tier and layering rules in
+[AGENT_RULES.md](AGENT_RULES.md), and every markdown link across `CHANGELOG.md`,
+`docs/DATA_MODEL.md` and `use_cases/`.
 
 ### 24.7 [ ] Stage 7 — three more multi-responsibility modules
 - **`applicationHeader.js` (512)** → header shell + menu (~250) once `renderSyncBadge` (76–136) moves

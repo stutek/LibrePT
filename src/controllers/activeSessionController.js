@@ -4,8 +4,14 @@ import {
   readActiveSessionCache,
   saveActiveSessionToCache as saveActiveSessionToCacheHelper,
 } from "../data/sessionCache.js";
-import { orderedItems } from "../data/sessionItemOrder.js";
 import { modalityOf, primaryMetricOf } from "../domain/exerciseModality.js";
+import {
+  buildQuickSignalEntries,
+  hasQuickSignal as hasPlainQuickSignal,
+  oppositeQuickSignal,
+  plainQuickSignalIds,
+  quickSignalColor,
+} from "../domain/quickSignals.js";
 import { loadUnitForEquipment } from "../domain/repsAndLoad.js";
 import {
   computeActiveSessionCountdown,
@@ -14,7 +20,14 @@ import {
   proposeAdjustedSchedule,
   resolveScheduleFromClockValues,
 } from "../domain/sessionClock.js";
-import { buildProgramSnapshot, isRestRecord } from "../domain/sessionItemRecord.js";
+import { buildProgramSnapshot } from "../domain/sessionItemRecord.js";
+import {
+  buildClientStateFromHistoryLog,
+  buildClientStateFromRoutine,
+  clampFocusIndex,
+  ensureRestItems,
+  isRestItem,
+} from "../domain/sessionPlanFactory.js";
 import { renderClientsList } from "../modules/clients/clientsView.js";
 import {
   initActiveSessionBoard,
@@ -75,53 +88,10 @@ function currentPlanMode() {
 // circuit fields so a rest inside a circuit stays grouped with it. Exercise items have no `type`.
 //
 // Rests are first-class: `activeExerciseIndex` may point at one exactly like any exercise or
-// circuit member (TODO §8.6). The live item and the frozen history record share
-// one shape (sessionItemRecord.js's own header comment), so `isRestRecord` — already imported above
-// — is the one canonical predicate; re-exported as `isRestItem` here only because that is the name
-// this file's own call sites already read naturally with.
-export const isRestItem = isRestRecord;
-
-// Legacy plans (routines, recovered/demo sessions) carried rest as a number on the exercise. Turn
-// any such `rest>0` into a following rest item. Idempotent: it zeroes the exercise's rest as it
-// migrates, so re-running is a no-op. Keeps the focus pointer on the same exercise object.
-function ensureRestItems(cs) {
-  if (!cs || !Array.isArray(cs.exercises)) return;
-  const focused = cs.exercises[cs.activeExerciseIndex];
-  let changed = false;
-  const out = [];
-  for (const it of cs.exercises) {
-    out.push(it);
-    if (!isRestItem(it) && it.rest > 0) {
-      out.push({
-        id: `rest-${it.id}`,
-        type: "rest",
-        rest: it.rest,
-        circuitId: it.circuitId || null,
-        circuitTitle: it.circuitTitle || "",
-        circuitSeries: it.circuitSeries || 1,
-      });
-      it.rest = 0;
-      changed = true;
-    }
-  }
-  if (changed) {
-    cs.exercises = out;
-    const ai = out.indexOf(focused);
-    cs.activeExerciseIndex = ai >= 0 ? ai : 0;
-    clampFocusIndex(cs);
-  }
-}
-
-// Bounds-only: after a deletion/reorder the pointer may run past the end of a shorter array. This
-// used to also steer the pointer off any rest item ("rests aren't focusable") — that exception is
-// gone (rests are first-class plan items now), so all that is left to guard against is running off
-// the end of the array.
-function clampFocusIndex(cs) {
-  if (!cs || !cs.exercises || !cs.exercises.length) return;
-  if (cs.activeExerciseIndex >= cs.exercises.length || cs.activeExerciseIndex < 0) {
-    cs.activeExerciseIndex = cs.exercises.length - 1;
-  }
-}
+// circuit member (TODO §8.6). The plan's shape, and everything that builds one, now lives in
+// domain/sessionPlanFactory.js; `isRestItem` is re-exported from here only because the router and
+// the deck already import it from this module.
+export { isRestItem };
 
 // `newItemId` names a plan item the caller just created (the live deck's +Exercise/+Circuit/+Rest
 // bar), so the editor opens with that row called out instead of dropping the trainer into an
@@ -301,86 +271,12 @@ export function focusExerciseByIndex(index) {
   renderActiveGroupBoard();
 }
 
-function historyRestItemToPlanItem(item) {
-  return {
-    id: newRecordId(),
-    type: "rest",
-    rest: item.rest || 0,
-    circuitId: item.circuitId || null,
-    circuitTitle: item.circuitTitle || "",
-    circuitSeries: item.circuitSeries || 1,
-  };
-}
-
-// One performed-exercise record from a history/planning snapshot, rebuilt into a live plan item
-// plus its logs. `ex` is the catalog entry if the movement still exists there (falls back to the
-// snapshot's own fields for a renamed/deleted or anonymized movement — TODO §17.1).
-function historyExerciseItemToPlanItem(item, state) {
-  const ex = state.exercises.find((e) => e.id === item.id || e.name === item.name);
-  const sets = Array.isArray(item.sets) ? item.sets : [];
-  const planItem = {
-    id: item.id,
-    name: item.name,
-    category: ex ? ex.category : "Recovery",
-    pattern: ex ? ex.pattern : "",
-    instructions: ex ? ex.instructions : "",
-    setsTargetCount: sets.length || 1,
-    repsTarget: sets[0]?.reps || 0,
-    weightTarget: sets[0]?.weight || 0,
-    // Prefer the snapshot's own logging axes (so an anonymized/renamed movement still logs right),
-    // falling back to the catalog entry for legacy rows that never stored them.
-    loadUnit: item.loadUnit || loadUnitForEquipment(ex?.equipment),
-    modality: item.modality || modalityOf(ex),
-    metric: item.metric || primaryMetricOf(ex),
-    circuitId: item.circuitId || null,
-    circuitTitle: item.circuitTitle || "",
-    circuitSeries: item.circuitSeries || 1,
-  };
-  const logs = sets.map((s) => ({
-    reps: s.reps,
-    weight: s.weight,
-    completed: s.completed,
-    note: s.note || "",
-  }));
-  return { planItem, logs };
-}
-
-// Rebuild the live plan from a stored history/planning snapshot, restoring rests and circuit
-// grouping — not just the performed exercises (TODO §17.1). Read in the record's OWN program order
-// (TODO §17.5): the array it arrives in is a storage detail, and the live plan's array index is
-// load-bearing (activeExerciseIndex points into it), so the sequence has to be right before the
-// first item is pushed, not sorted afterwards.
-function buildClientStateFromHistoryLog(log, state) {
-  const clientState = {
-    routineId: log.routineId || "",
-    routineName: log.routineName,
-    activeExerciseIndex: 0,
-    // See startWorkoutSession's own clientState for what this gates — opening a recovered/history
-    // session is "opening the Clipboard view" exactly like a fresh launch.
-    deckAllCollapsed: true,
-    exercises: [],
-    logs: {},
-  };
-
-  for (const item of orderedItems(log.exercises)) {
-    if (isRestRecord(item)) {
-      clientState.exercises.push(historyRestItemToPlanItem(item));
-      continue;
-    }
-    const { planItem, logs } = historyExerciseItemToPlanItem(item, state);
-    clientState.exercises.push(planItem);
-    clientState.logs[item.id] = logs;
-  }
-
-  return clientState;
-}
-
 export function openSessionFromHistory(log) {
   const { state, t, navigateToPath } = appDeps;
   if (!state || !t) return;
   clearAllTimers(); // fresh session — never inherit a previous session's timers
 
-  const clientState = buildClientStateFromHistoryLog(log, state);
+  const clientState = buildClientStateFromHistoryLog(log, state.exercises);
 
   activeSession = {
     id: log.id,
@@ -421,57 +317,6 @@ export function openSessionFromHistory(log) {
   }
 }
 
-function populateClientStateExercisesFromRoutine(clientState, routine, state) {
-  for (const item of routine.exercises) {
-    const ex = state.exercises.find((e) => e.id === item.id);
-    if (!ex) continue;
-    clientState.exercises.push({
-      id: item.id,
-      name: ex.name,
-      category: ex.category,
-      pattern: ex.pattern,
-      instructions: ex.instructions,
-      setsTargetCount: item.sets,
-      repsTarget: item.reps,
-      weightTarget: item.weight,
-      loadUnit: loadUnitForEquipment(ex.equipment),
-      modality: modalityOf(ex),
-      metric: primaryMetricOf(ex),
-      rest: item.rest,
-      circuitId: item.circuitId || null,
-      circuitTitle: item.circuitTitle || "",
-      circuitSeries: item.circuitSeries || 1,
-    });
-
-    clientState.logs[item.id] = Array.from({ length: item.sets }, () => ({
-      reps: item.reps,
-      weight: item.weight,
-      completed: false,
-      note: "",
-    }));
-  }
-}
-
-function buildClientStateFromRoutine(cr, state, t) {
-  const routine = state.routines.find((r) => r.id === cr.routineId);
-  const clientState = {
-    routineId: routine ? routine.id : "",
-    routineName: routine ? routine.name : t("custom_empty_plan") || "Custom / Empty Plan",
-    activeExerciseIndex: 0,
-    // The deck is crowded on a fresh open — every card starts collapsed (exerciseDeck.js reads
-    // this to skip rendering ANY card in focus) until the trainer taps one, which reveals focus
-    // for the rest of this live session (see focusExerciseByIndex). activeExerciseIndex itself
-    // still points at a real item throughout — this flag only gates whether the deck's render
-    // honours it, so every OTHER consumer of activeExerciseIndex (getActiveExercise, quick
-    // signals, the timer) keeps working unmodified.
-    deckAllCollapsed: true,
-    exercises: [],
-    logs: {},
-  };
-  if (routine) populateClientStateExercisesFromRoutine(clientState, routine, state);
-  return clientState;
-}
-
 export function startWorkoutSession(clientRoutines, sessionMeta = null, deps = {}, options = {}) {
   if (deps) appDeps = { ...appDeps, ...deps };
   const { navigate = true } = options;
@@ -494,7 +339,12 @@ export function startWorkoutSession(clientRoutines, sessionMeta = null, deps = {
   };
 
   for (const cr of clientRoutines) {
-    activeSession.clientRoutines[cr.clientId] = buildClientStateFromRoutine(cr, state, t);
+    activeSession.clientRoutines[cr.clientId] = buildClientStateFromRoutine({
+      routineId: cr.routineId,
+      routines: state.routines,
+      exercises: state.exercises,
+      emptyPlanName: t("custom_empty_plan") || "Custom / Empty Plan",
+    });
   }
 
   setClipboardEditModeFlag(!!sessionMeta?.isPlanning);
@@ -648,51 +498,20 @@ export function getActiveExercise() {
   return activeClientState.exercises[activeClientState.activeExerciseIndex];
 }
 
-// A quick-signal entry is the "vanilla" one logQuickSignal itself creates — no typed note, no
-// voice note. A modal-authored entry (feedbackModal.js) always carries at least a tag choice and
-// may append a note, so this predicate is how the toggle avoids ever deleting something the PT
-// actually wrote: only an untouched quick-tap is safe to un-tap.
-const isPlainQuickSignal = (f) => !f.note?.trim() && !f.hasVoiceNote;
-
-// Too Easy and Too Hard are mutually exclusive — an exercise can't be both at once — but each
-// stays independently tappable rather than requiring an untap-then-tap: hitting the opposite
-// signal silently replaces the current one, which is what mistype correction on the gym floor
-// actually needs (the PT meant to tap the other button, not to clear this one first).
-const OPPOSITE_QUICK_SIGNAL = {
-  "Too Easy - Increase Load": "Too Hard - Reduce Load",
-  "Too Hard - Reduce Load": "Too Easy - Increase Load",
-};
-
-// Whether THIS exact quick-signal is currently active for the exercise in focus — the toggle's
-// "on" state, and what the Too Easy / Too Hard buttons render pressed against.
+// The quick-signal RULES live in domain/quickSignals.js; what stays here is the part that knows
+// about the live session and the app's persistence — which is exactly the split TODO §24.4 drew.
+// These wrappers keep their (clientId, exerciseName, tag) signatures because exerciseDeck.js and
+// feedbackModal.js are wired against them.
 export function hasQuickSignal(clientId, exerciseName, tag) {
-  return (activeSession?.feedback || []).some(
-    (f) =>
-      f.clientId === clientId &&
-      f.exerciseName === exerciseName &&
-      f.tag === tag &&
-      isPlainQuickSignal(f),
-  );
+  return hasPlainQuickSignal(activeSession?.feedback, clientId, exerciseName, tag);
 }
 
-// Removes every untouched quick-signal entry matching (clientId, exerciseName, tag) from both
-// activeSession.feedback and state.planUpdates — the shared removal both the toggle-off path and
-// the mutual-exclusivity swap use, so a mis-tap never leaves a phantom entry in either place.
+// Drops every untouched quick-signal entry for this tag from BOTH lists that hold one.
 function removeQuickSignal(clientId, exerciseName, tag, state) {
-  const removedIds = new Set(
-    (activeSession.feedback || [])
-      .filter(
-        (f) =>
-          f.clientId === clientId &&
-          f.exerciseName === exerciseName &&
-          f.tag === tag &&
-          isPlainQuickSignal(f),
-      )
-      .map((f) => f.id),
-  );
+  const removedIds = plainQuickSignalIds(activeSession.feedback, clientId, exerciseName, tag);
   if (removedIds.size === 0) return;
-  activeSession.feedback = activeSession.feedback.filter((f) => !removedIds.has(f.id));
-  state.planUpdates = state.planUpdates.filter((u) => !removedIds.has(u.id));
+  activeSession.feedback = activeSession.feedback.filter((entry) => !removedIds.has(entry.id));
+  state.planUpdates = state.planUpdates.filter((update) => !removedIds.has(update.id));
 }
 
 // The mutual-exclusion enforcement point for callers OTHER than logQuickSignal — specifically
@@ -701,23 +520,17 @@ function removeQuickSignal(clientId, exerciseName, tag, state) {
 // submitting the modal with the (default-checked) opposite tag while a quick-tap was already
 // active left BOTH plain and "active" simultaneously — found 2026-07-27, the exact bug §8.7's
 // mutual-exclusivity fix was meant to close everywhere, not just on the quick-tap path itself.
-// Removes any PLAIN opposite-tag entry regardless of whether the NEW entry being logged is itself
-// plain or carries a note: asserting a tag (with or without extra detail) supersedes a bare
-// opposite tap either way, which is exactly what isPlainQuickSignal already governs for removal.
 export function enforceQuickSignalExclusivity(clientId, exerciseName, tag) {
   if (!activeSession) return;
   const { state } = appDeps;
   if (!state) return;
-  const opposite = OPPOSITE_QUICK_SIGNAL[tag];
+  const opposite = oppositeQuickSignal(tag);
   if (opposite) removeQuickSignal(clientId, exerciseName, opposite, state);
 }
 
 // One tap logs the signal; tapping the SAME signal again undoes it — a toggle, not a one-way
 // stamp, so a mis-tap on the gym floor doesn't need a trip to the feedback modal to correct.
-// Tapping the OPPOSITE signal while one is active swaps it — Too Easy and Too Hard are mutually
-// exclusive, but neither requires clearing the other first (see OPPOSITE_QUICK_SIGNAL).
-// Only ever removes the exact untouched quick-signal entries it itself would have created; a
-// typed note or a voice memo on the same tag is never touched by this path.
+// Tapping the OPPOSITE signal while one is active swaps it (see OPPOSITE_QUICK_SIGNAL).
 export function logQuickSignal(tag, exId) {
   if (!activeSession) return;
   const { state, saveToLocalStorage, renderPendingPlanAdjustments } = appDeps;
@@ -727,40 +540,30 @@ export function logQuickSignal(tag, exId) {
   const clientState = activeSession.clientRoutines[clientId];
   if (!clientState || clientState.exercises.length === 0) return;
 
-  const curEx =
+  const currentExercise =
     (exId && clientState.exercises.find((e) => e.id === exId)) ||
     clientState.exercises[clientState.activeExerciseIndex];
 
-  if (hasQuickSignal(clientId, curEx.name, tag)) {
-    removeQuickSignal(clientId, curEx.name, tag, state);
+  if (hasQuickSignal(clientId, currentExercise.name, tag)) {
+    removeQuickSignal(clientId, currentExercise.name, tag, state);
   } else {
-    enforceQuickSignalExclusivity(clientId, curEx.name, tag);
+    enforceQuickSignalExclusivity(clientId, currentExercise.name, tag);
 
     const client = state.clients.find((c) => c.id === clientId);
-    const newFeedback = {
-      id: newRecordId(),
+    const { planUpdate, sessionFeedback } = buildQuickSignalEntries({
       clientId,
       clientName: client ? client.name : "Unknown Client",
-      date: new Date().toISOString(),
-      exerciseName: curEx.name,
+      exerciseName: currentExercise.name,
       tag,
-      hasVoiceNote: false,
-      resolved: false,
-    };
-    state.planUpdates.push(newFeedback);
-
-    if (!activeSession.feedback) activeSession.feedback = [];
-    activeSession.feedback.push({
-      id: newFeedback.id,
-      clientId,
-      exerciseName: curEx.name,
-      tag,
-      note: "",
-      hasVoiceNote: false,
     });
+    state.planUpdates.push(planUpdate);
+    if (!activeSession.feedback) activeSession.feedback = [];
+    activeSession.feedback.push(sessionFeedback);
 
-    for (const l of clientState.logs[curEx.id] || []) {
-      l.completed = true;
+    // Signalling on an exercise implies it was performed — the trainer is reacting to the work,
+    // not planning it, so the sets stop asking to be ticked off individually.
+    for (const log of clientState.logs[currentExercise.id] || []) {
+      log.completed = true;
     }
   }
 
@@ -771,14 +574,7 @@ export function logQuickSignal(tag, exId) {
 }
 
 export function getExerciseSignalColor(clientId, exerciseName) {
-  const fb = (activeSession?.feedback || []).filter(
-    (f) => f.clientId === clientId && f.exerciseName === exerciseName,
-  );
-  if (fb.length === 0) return null;
-  if (fb.some((f) => f.note?.trim() || f.hasVoiceNote)) return "var(--danger)";
-  if (fb.some((f) => /too hard|reduce load/i.test(f.tag))) return "#f59e0b";
-  if (fb.some((f) => /too easy|increase load/i.test(f.tag))) return "var(--success)";
-  return "var(--danger)";
+  return quickSignalColor(activeSession?.feedback, clientId, exerciseName);
 }
 
 export function buildCircuitUnits(list) {
