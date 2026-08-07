@@ -11,6 +11,8 @@
 #      tests/unit_js/domain/sessionClock.test.mjs).
 #   2. Past a ±15 minute tolerance the trainer is offered the schedule, prefilled with the session
 #      shifted onto the clock — because it is the SCHEDULE that is wrong by then, not the session.
+#   3. The session so started must SURVIVE a reload. Recovery aged a cached session out against its
+#      scheduled end, which for a late start is already hours gone (isCachedSessionStale).
 #
 # "Group Strength & Conditioning" is seeded currentHour-1..currentHour+1 and NOT completed
 # (src/data/sessions.js), so its start is always in the past and always outside the tolerance —
@@ -87,6 +89,44 @@ def test_starting_late_offers_the_schedule_and_never_a_negative_clock(
     card = page.locator(".session-card", has_text=CARD_TITLE).first
     assert f"{start_value} - {end_value}" in card.inner_text(), (
         "the adjusted slot must be persisted onto the session, not just shown live"
+    )
+
+
+def test_a_session_started_late_survives_a_reload(page, local_server):
+    # Recovery used to age a cached session out against its SCHEDULED end, so a session begun well
+    # after its slot — the very case the dialog above exists for — was already "abandoned" the
+    # second Start was tapped. The next reload dropped it: the clipboard came back staged with the
+    # Start button restored, and everything logged into the session went with it.
+    #
+    # The slot is pushed into the far past through the cache rather than by waiting or by seeding a
+    # hand-built session, so the flow up to here stays the REAL one (launch, Start, dismiss) and the
+    # test does not quietly depend on what time of day the suite runs (see the header note on the
+    # seed's clamped currentHour).
+    _launch_and_start(page, local_server)
+    page.click(f"{DIALOG} .modal-close-btn")
+    page.wait_for_selector(f"{DIALOG}[open]", state="detached")
+    session_url = page.url
+
+    page.evaluate(
+        """() => {
+            const key = 'librept_active_session';
+            const cached = JSON.parse(localStorage.getItem(key));
+            const sixHours = 6 * 60 * 60 * 1000;
+            cached.sourceSession.startDate = new Date(cached.startTime - 2 * sixHours).toISOString();
+            cached.sourceSession.endDate = new Date(cached.startTime - sixHours).toISOString();
+            localStorage.setItem(key, JSON.stringify(cached));
+        }"""
+    )
+
+    page.goto(session_url)
+    page.wait_for_selector("#active-session-overlay:not(.hidden)")
+    assert page.locator("#overlay-session-timer").is_visible() is True
+    assert page.locator("#btn-start-session").is_visible() is False
+    assert (
+        page.evaluate(
+            "() => JSON.parse(localStorage.getItem('librept_active_session')).started"
+        )
+        is True
     )
 
 

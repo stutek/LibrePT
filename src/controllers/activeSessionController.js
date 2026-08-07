@@ -16,6 +16,7 @@ import { loadUnitForEquipment } from "../domain/repsAndLoad.js";
 import {
   computeActiveSessionCountdown,
   computeScheduleDriftMs,
+  isCachedSessionStale,
   isScheduleDriftWorthAdjusting,
   proposeAdjustedSchedule,
   resolveScheduleFromClockValues,
@@ -1122,11 +1123,7 @@ export function recoverActiveSession() {
       activeSession.sourceSession.endDate = new Date(activeSession.sourceSession.endDate);
     }
 
-    const STALE_AFTER_MS = 2 * 60 * 60 * 1000;
-    const endTime = activeSession.sourceSession?.endDate
-      ? activeSession.sourceSession.endDate.getTime()
-      : null;
-    if (endTime && Date.now() > endTime + STALE_AFTER_MS) {
+    if (isCachedSessionStale(activeSession)) {
       activeSession = null;
       clearActiveSessionCache();
       renderIdleSessionBar();

@@ -25,6 +25,11 @@ const DEFAULT_SESSION_LENGTH_MS = 60 * 60 * 1000;
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
+// How long a cached live session is worth restoring for after it has stopped being current. Two
+// hours covers a browser reload, a phone locking mid-set, and the walk between two gym floors;
+// past that a session nobody completed is abandoned, not paused.
+export const ACTIVE_SESSION_STALE_AFTER_MS = 2 * 60 * 60 * 1000;
+
 // `startDate`/`endDate` arrive as Date objects from buildSessionMeta but as ISO strings once the
 // session has been through the cache, so both shapes have to read the same.
 function toEpochMs(value) {
@@ -81,6 +86,25 @@ export function proposeAdjustedSchedule(sourceSession, actualStartMs) {
 
   const startMs = Math.floor(actualStartMs / 60000) * 60000;
   return { startMs, endMs: startMs + plannedLengthMs };
+}
+
+// Whether a cached live session is too old to restore. The window is measured from the moment the
+// session STOPPED being current, and for a session the trainer actually started that moment is
+// never earlier than the start itself — a 16:00-18:00 slot begun at 23:45 (exactly the late start
+// the adjust dialog exists for) had not been running two hours by 23:45:01, however long ago its
+// slot ended. Measuring from the scheduled end alone discarded such a session on the very next
+// reload: the clipboard came back staged with the Start button restored, silently losing the
+// session that was running and every set logged into it.
+//
+// A session that was only STAGED (opened, never started) still ages out against its slot — there
+// is no elapsed time to lose, and a plan left open from this morning is not today's next session.
+export function isCachedSessionStale(activeSession, now = Date.now()) {
+  const scheduledEndMs = toEpochMs(activeSession?.sourceSession?.endDate);
+  const startedAtMs = activeSession?.started ? (activeSession.startTime ?? null) : null;
+  if (scheduledEndMs === null && startedAtMs === null) return false;
+
+  const lastCurrentAtMs = Math.max(scheduledEndMs ?? -Infinity, startedAtMs ?? -Infinity);
+  return now > lastCurrentAtMs + ACTIVE_SESSION_STALE_AFTER_MS;
 }
 
 function clockValueToMinutes(value) {
