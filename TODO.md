@@ -1464,12 +1464,26 @@ import-free to run before first paint. That is the one duplication here that ear
   `""`, so a legitimately-zero field rendered blank. Absent values (`null`/`undefined`) still render
   as nothing.
 
-### 24.3 [ ] Stage 3 — the board render leaves `controllers/`
-`controllers/activeSessionController.js` lines 1011–1258 are ~250 lines of view rendering (client
-tabs, injury banner, focus panel, title-bar edit chrome, start/complete visibility, deck-or-editor,
-empty state). Everything else in `controllers/` orchestrates; this paints. Extract to
-`modules/clipboard/activeSessionBoard.js`, which also lets `tests/medium/` mount the board without
-the controller.
+### 24.3 [x] Stage 3 — the board render leaves `controllers/` — **SHIPPED 2026-08-07**
+~250 lines of view rendering (client tabs, injury banner, focus panel, title-bar edit chrome,
+start/complete visibility, deck-or-editor, empty state) moved to
+`modules/clipboard/activeSessionBoard.js`. Everything else in `controllers/` orchestrates; this
+painted. Wired by injection only — the board never imports back up into `controllers/`, so it stays
+independently mountable, which is the property `import_layers.py` exists to protect.
+
+**`modules/clipboard/editModeState.js` came with it**, ahead of its slot in §24.4: the board is the
+edit-mode flag's main reader, and leaving the state behind would have meant injecting six more
+callbacks to reach it. Extracting it first made the board's injected surface honest instead of
+hidden. It holds three variables with three different lifetimes — a flag, a ONE-SHOT call-out
+consumed by exactly one render, and a URL-carried row id that must outlive the render that
+announced it — and keeping them apart is the whole reason it is a module.
+
+**Also enabled `correctness/noUndeclaredVariables` in `biome.json`.** It is not in Biome's
+recommended set, but this is a buildless native-ES-module app with no compiler between source and
+browser, so an undeclared identifier is always a bug and nothing else catches it before a browser
+does. It earned its place on this very stage: moving module-level state out left one read of the
+deleted variable behind, and finding it cost a 38s Stage 2 browser run. With the rule on it is a
+32ms Stage 1 failure naming the line. Zero findings on the rest of the tree.
 
 ### 24.4 [ ] Stage 4 — split the rest of `activeSessionController.js`
 1,668 lines, 6.5% of `src/`, 2.3× the next-largest module. It passes the complexity gate because it
@@ -1477,7 +1491,7 @@ was split *horizontally* into ~60 small functions but never *vertically*. By con
 
 | Lines | Concern | Destination |
 | :--- | :--- | :--- |
-| 65–174, 238–257 | edit-mode flag, one-shot callout, `editorRowId` | `modules/clipboard/editModeState.js` |
+| ~~65–174, 238–257~~ | ~~edit-mode flag, one-shot callout, `editorRowId`~~ | **done in §24.3** |
 | 192–302 | focus↔URL resolution, `FOCUS_OWNED_ROUTES` | `modules/session/sessionFocusUrl.js` |
 | 304–473 | history-log / routine → live `clientState` | `sessionPlanFactory.js` (pure) |
 | 528–596 | schedule-drift detection + apply | `modules/session/sessionScheduleAdjust.js` |

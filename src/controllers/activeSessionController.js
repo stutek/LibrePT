@@ -1,23 +1,27 @@
 import { renderClientsList } from "../modules/clients/clientsView.js";
 import {
+  initActiveSessionBoard,
+  renderActiveSessionBoard,
+} from "../modules/clipboard/activeSessionBoard.js";
+import {
   renderActiveSessionOverlayShell,
   renderAddSessionExerciseDialog,
   renderCatalogPickerDialog,
 } from "../modules/clipboard/activeSessionOverlayView.js";
-import { renderClipboardEditor } from "../modules/clipboard/clipboardEditor.js";
+import {
+  getEditorRowId,
+  isClipboardEditMode,
+  markEditorRow,
+  setClipboardEditModeFlag,
+} from "../modules/clipboard/editModeState.js";
 import {
   clearAllTimers,
   restoreSessionTimers,
   startTimer,
   stopTimerIfMatches,
 } from "../modules/clipboard/exerciseAndRestTimer.js";
-import { renderExerciseDeck } from "../modules/clipboard/exerciseDeck.js";
-import {
-  renderActiveUsersList,
-  updateClientTabsFadeState,
-} from "../modules/common/activeUsersList.js";
+import { updateClientTabsFadeState } from "../modules/common/activeUsersList.js";
 import { modalityOf, primaryMetricOf } from "../modules/common/exerciseModality.js";
-import { openFeedbackModal } from "../modules/common/feedbackModal.js";
 import { newRecordId } from "../modules/common/recordId.js";
 import { loadUnitForEquipment } from "../modules/common/repsAndLoad.js";
 import {
@@ -34,13 +38,7 @@ import {
 } from "../modules/common/sessionClock.js";
 import { orderedItems } from "../modules/common/sessionItemOrder.js";
 import { buildProgramSnapshot, isRestRecord } from "../modules/common/sessionItemRecord.js";
-import {
-  escapeHTML,
-  formatClockFromMinutes,
-  formatDurationHourMin,
-  getClientDisplayNameHTML,
-  getInitials,
-} from "../modules/common/utils.js";
+import { formatClockFromMinutes, formatDurationHourMin } from "../modules/common/utils.js";
 import {
   releaseScreenWakeLock,
   requestScreenWakeLock as requestScreenWakeLockHelper,
@@ -61,23 +59,6 @@ let appDeps = {};
 function requestScreenWakeLock() {
   return requestScreenWakeLockHelper(getActiveSession);
 }
-
-// Inline clipboard edit mode: when on, the deck renders the editable plan list instead of the
-// live logging deck. editorCleanup detaches the editor's document listeners on the next render.
-let clipboardEditMode = false;
-let editorCleanup = null;
-// A plan item the trainer JUST created or swapped, so the next editor render can point them at it:
-// { id, kind: "new" | "swap", focus }. `focus` puts the caret in the row's name field — right for a
-// blank inserted row, wrong for one the catalog just filled in (it would pop the phone keyboard over
-// a row that needs no typing). One-shot: consumed by that render and cleared, so a later re-render
-// never re-announces an item the trainer has already dealt with.
-let pendingCallout = null;
-// The plan row the trainer is working on in the editor. Unlike pendingCallout this is NOT one-shot:
-// it is what `/…/edit/exercise/{slotId}` carries, so a reload lands back on the row rather than on an
-// undifferentiated list. Cleared when edit mode exits.
-let editorRowId = null;
-// Holds the session title bar's normal content while edit mode repurposes it, so exiting restores it.
-let savedSessionTitleHTML = null;
 
 // Temporal mode of the plan currently loaded, used to label edit mode so the trainer always knows
 // whether they're reshaping the LIVE session, an UPCOMING one, or a date-less PLANNING program.
@@ -146,7 +127,7 @@ function clampFocusIndex(cs) {
 // bar), so the editor opens with that row called out instead of dropping the trainer into an
 // otherwise-identical list.
 export function enterClipboardEditMode(newItemId = null) {
-  clipboardEditMode = true;
+  setClipboardEditModeFlag(true);
   markEditorRow(newItemId, { kind: "new", focus: true });
   // Re-entering edit mode resets the accordion to its default (one row open) unless a callout row
   // is being inserted — toggling a row closed sets editorExpandedId to null, which must stick until
@@ -159,23 +140,44 @@ export function enterClipboardEditMode(newItemId = null) {
 }
 
 export function exitClipboardEditMode() {
-  clipboardEditMode = false;
-  editorRowId = null;
+  setClipboardEditModeFlag(false);
   renderActiveGroupBoard();
-}
-
-// Record which plan row the trainer is working on. `pendingCallout` is one-shot — consumed by the
-// next render so a highlight never outlives the moment it describes — while `editorRowId` persists,
-// because it is what the URL carries: a row is only addressable if its id outlives the render that
-// announced it.
-function markEditorRow(slotId, { kind, focus }) {
-  editorRowId = slotId || null;
-  pendingCallout = slotId ? { id: slotId, kind, focus } : null;
 }
 
 export function initActiveSessionController(deps) {
   appDeps = { ...appDeps, ...deps };
 }
+
+// The board paints; this controller orchestrates. Everything it needs is injected rather than
+// imported back up a layer — see agent_tools/import_layers.py and the board's own header.
+initActiveSessionBoard({
+  getActiveSession: () => activeSession,
+  getAppDeps: () => appDeps,
+  currentPlanMode,
+  syncSessionFocusUrl: () => syncSessionFocusUrl(),
+  ensureRestItems,
+  clampFocusIndex,
+  rerender: () => renderActiveGroupBoard(),
+  enterEditMode: enterClipboardEditMode,
+  exitEditMode: exitClipboardEditMode,
+  saveActiveSessionToCache: () => saveActiveSessionToCache(),
+  openAddExercise: () => openAddSessionExerciseDialog(),
+  // Routed so a reload reopens the picker. `query`/`category` are transient typing state and stay
+  // out of the URL; the route re-derives the filter from the row it is swapping.
+  openCatalogPicker: (opts = {}) =>
+    navigateToSessionDialog(
+      opts.slotId ? "session.catalog.slot" : "session.catalog",
+      opts.slotId ? { slotId: opts.slotId } : {},
+    ) || openCatalogPicker(opts),
+  buildCircuitUnits,
+  getExerciseSignalColor,
+  hasQuickSignal,
+  logQuickSignal,
+  completeCircuitRound,
+  focusExerciseByIndex,
+  startRestTimer: (seconds, type, label) => startClientTimer(seconds, type, label),
+  newRecordId,
+});
 
 export function getActiveSession() {
   return activeSession;
@@ -215,7 +217,8 @@ export function sessionFocusPath() {
   // intact. The client segment names WHOSE plan is open so the right participant is restored, and the
   // row segment names the one just inserted or swapped — otherwise a reload drops the trainer into a
   // long plan with nothing saying which row they were in the middle of.
-  if (clipboardEditMode) {
+  if (isClipboardEditMode()) {
+    const editorRowId = getEditorRowId();
     return editorRowId
       ? urlFor("session.edit.item", { ...ids, slotId: editorRowId })
       : urlFor("session.edit", ids);
@@ -236,11 +239,8 @@ export function sessionFocusPath() {
 // deep link, where the caller (showSessionView) already renders the board once afterwards. Use
 // enter/exitClipboardEditMode for in-app toggles that must render immediately.
 export function setClipboardEditMode(on, slotId = null) {
-  clipboardEditMode = !!on;
-  if (!on) {
-    editorRowId = null;
-    return;
-  }
+  setClipboardEditModeFlag(on);
+  if (!on) return;
   // No row in the URL does not mean "no row": a swap made from the catalog dialog marks its row and
   // then routes BACK to a slot-less `/edit` entry, and that pop must not erase the mark it just set.
   // The URL is authoritative only when it actually names a row.
@@ -403,7 +403,7 @@ export function openSessionFromHistory(log) {
       : null,
   };
 
-  clipboardEditMode = !!log.isPlanning;
+  setClipboardEditModeFlag(!!log.isPlanning);
 
   saveActiveSessionToCache();
   requestScreenWakeLock();
@@ -497,7 +497,7 @@ export function startWorkoutSession(clientRoutines, sessionMeta = null, deps = {
     activeSession.clientRoutines[cr.clientId] = buildClientStateFromRoutine(cr, state, t);
   }
 
-  clipboardEditMode = !!sessionMeta?.isPlanning;
+  setClipboardEditModeFlag(!!sessionMeta?.isPlanning);
 
   saveActiveSessionToCache();
 
@@ -1008,253 +1008,11 @@ export function openCatalogPicker({ slotId = null, query = "", category = "" } =
   dialog.showModal();
 }
 
-function renderClientTabsBar(activeClientId) {
-  const { state, navigateToPath } = appDeps;
-  const tabsContainer = document.getElementById("active-session-client-tabs");
-  if (!tabsContainer) return;
-  renderActiveUsersList(tabsContainer, activeSession, {
-    clients: state.clients,
-    activeClientId,
-    getInitials,
-    getClientDisplayNameHTML,
-    navigateToPath,
-  });
-}
-
-function renderInjuryAlertBanner(activeClient) {
-  const alertBanner = document.getElementById("clipboard-client-alert");
-  const alertText = document.getElementById("clipboard-client-notes-text");
-  if (!alertBanner || !activeClient) return;
-  if (activeClient.hasInjury && (activeClient.injury || activeClient.notes)) {
-    alertText.textContent = activeClient.injury || activeClient.notes;
-    alertBanner.classList.remove("hidden");
-  } else {
-    alertBanner.classList.add("hidden");
-  }
-}
-
-// Only shown while editing the plan (CSS-gated by .editing-plan), so it's cheap to keep populated
-// on every render.
-function renderClientFocusPanel(activeClient) {
-  if (!activeClient) return;
-  const { t } = appDeps;
-  const goalsLabel = document.getElementById("client-focus-goals-label");
-  const notesLabel = document.getElementById("client-focus-notes-label");
-  const goalsEl = document.getElementById("client-focus-goals");
-  const notesEl = document.getElementById("client-focus-notes");
-  if (goalsLabel) goalsLabel.textContent = t("goals") || "Training Goals";
-  if (notesLabel) notesLabel.textContent = t("notes_injuries") || "Notes";
-  if (goalsEl) goalsEl.textContent = activeClient.goals || t("no_goals_specified") || "";
-  if (notesEl) notesEl.textContent = activeClient.notes || t("no_notes_specified") || "";
-}
-
-// Repurpose the session title bar for edit mode: show WHICH client's plan is open and its temporal
-// mode (Live / Upcoming / Planning). Restored verbatim on exit from the saved snapshot.
-// The ✎ icon rides up here as the mode indicator (the editor body no longer has its own header).
-function buildEditModeTitleHTML(activeClient) {
-  const { t } = appDeps;
-  const mode = currentPlanMode();
-  const b = activeSession.sourceSession;
-  // Concrete schedule beats a vague "Live": show the day + time of the booked session, or
-  // "Unscheduled" for a date-less planning program. The chip's colour still encodes urgency.
-  let chipLabel;
-  if (mode === "planning") {
-    chipLabel = t("unscheduled") || "Unscheduled";
-  } else {
-    const parts = [b?.day ? t(b.day) || b.day : "", b?.timeLabel || ""].filter(Boolean);
-    chipLabel = parts.join(" · ") || t("live") || "Live";
-  }
-  const clientNm = activeClient ? escapeHTML(activeClient.name) : "";
-  return `<i class="fa-solid fa-pen-to-square"></i> ${escapeHTML(t("editing") || "Editing")}${
-    clientNm ? ` · <strong>${clientNm}</strong>` : ""
-  } <span class="edit-mode-chip ${mode}">${escapeHTML(chipLabel)}</span>`;
-}
-
-// Swaps the title bar's own content between the normal session title and the edit-mode label,
-// saving/restoring the original HTML verbatim so exiting edit mode never has to reconstruct it.
-function swapTitleBarContent(titleEl, overlay, activeClient) {
-  if (clipboardEditMode) {
-    if (savedSessionTitleHTML === null) savedSessionTitleHTML = titleEl.innerHTML;
-    titleEl.innerHTML = buildEditModeTitleHTML(activeClient);
-    overlay.classList.add("editing-plan");
-    return;
-  }
-  if (savedSessionTitleHTML !== null) {
-    titleEl.innerHTML = savedSessionTitleHTML;
-    savedSessionTitleHTML = null;
-  }
-  overlay.classList.remove("editing-plan");
-}
-
-// The rest of the title bar's chrome that reacts to edit mode: the ✎/Done button swap, and the
-// ⋯ menu's destructive action relabelling itself between "Delete Session" and "Delete Plan".
-function syncTitleBarEditChrome() {
-  const { t } = appDeps;
-  // The ✎ trigger is redundant while editing (the ✎ mode icon now rides on the title, and Done
-  // exits), and leaving it live would race the tap-outside handler; hide it during edit mode and
-  // surface the title-bar Done button in its place.
-  document.getElementById("btn-edit-plan")?.classList.toggle("hidden", clipboardEditMode);
-  document.getElementById("btn-done-edit")?.classList.toggle("hidden", !clipboardEditMode);
-
-  // In edit mode the ⋯ menu's destructive action targets the PLAN (clear its exercises), not the
-  // whole session — relabel it so the trainer knows which one they're deleting. Preserve the icon.
-  const delBtn = document.getElementById("btn-delete-session");
-  if (!delBtn) return;
-  const label = clipboardEditMode
-    ? t("btn_delete_plan") || "Delete Plan"
-    : t("btn_delete_session") || "Delete Session";
-  const icon = delBtn.querySelector("i");
-  delBtn.innerHTML = "";
-  if (icon) delBtn.appendChild(icon);
-  delBtn.appendChild(document.createTextNode(` ${label}`));
-}
-
-// Repurpose the session title bar for edit mode: show WHICH client's plan is open and its temporal
-// mode (Live / Upcoming / Planning). Restored verbatim on exit from the saved snapshot.
-function renderTitleBarForEditMode(activeClient) {
-  const titleEl = document.getElementById("session-title-text");
-  const overlay = document.getElementById("active-session-overlay");
-  if (!titleEl || !overlay) return;
-
-  swapTitleBarContent(titleEl, overlay, activeClient);
-  syncTitleBarEditChrome();
-}
-
-// Starting/completing are LIVE-session actions: starting begins the timer, completing logs the
-// session to history. Both are wrong while the plan is being edited (Done exits edit mode
-// instead) and wrong for a date-less planning programme that is never run.
-function syncStartCompleteVisibility(canStartSession, started) {
-  // Start lives on the title bar (session-timer-block) so it reads as part of the session's own
-  // clock, not a footer action — it's the one thing that flips "00:00" into a running countdown.
-  document
-    .getElementById("btn-start-session")
-    ?.classList.toggle("hidden", started || !canStartSession);
-  document.getElementById("overlay-session-timer")?.classList.toggle("hidden", !started);
-
-  // Complete stays a footer drawer, but now it's the footer's only occupant — hide the whole bar
-  // (not just the button) until there's something running to complete, so no empty bar is left
-  // behind; it comes back on exit because every mode change re-renders through here.
-  const footer = document.querySelector("#active-session-overlay .session-actions-footer");
-  if (footer) {
-    footer.classList.toggle("hidden", !canStartSession || !started);
-  }
-}
-
-function renderDeckOrEditor(activeClientId, activeClientState) {
-  const { state, t } = appDeps;
-
-  // Detach any previous editor's document listeners before this render replaces the deck DOM.
-  if (editorCleanup) {
-    editorCleanup();
-    editorCleanup = null;
-  }
-
-  const deckContainer = document.getElementById("active-exercise-scroll-deck");
-  const callout = pendingCallout;
-  pendingCallout = null; // one render owns the call-out; never let it linger to a later one
-  if (deckContainer && activeClientState && clipboardEditMode) {
-    const persist = () => {
-      saveActiveSessionToCache();
-      if (appDeps.saveToLocalStorage) appDeps.saveToLocalStorage();
-    };
-    const editClient = state.clients.find((c) => c.id === activeClientId);
-    editorCleanup = renderClipboardEditor(deckContainer, {
-      activeClientState,
-      clientName: editClient ? editClient.name : "",
-      allExerciseNames: (state.exercises || []).map((e) => e.name),
-      t,
-      escapeHTML,
-      save: persist,
-      rerender: renderActiveGroupBoard,
-      openAddExercise: openAddSessionExerciseDialog,
-      // Routed so a reload reopens the picker. `query`/`category` are transient typing state and
-      // stay out of the URL; the route re-derives the filter from the row it is swapping.
-      openCatalogPicker: (opts = {}) =>
-        navigateToSessionDialog(
-          opts.slotId ? "session.catalog.slot" : "session.catalog",
-          opts.slotId ? { slotId: opts.slotId } : {},
-        ) || openCatalogPicker(opts),
-      exit: exitClipboardEditMode,
-      genId: newRecordId,
-      callout,
-      markNewItem: (id) => markEditorRow(id, { kind: "new", focus: true }),
-    });
-  } else if (deckContainer && activeClientState) {
-    renderExerciseDeck(deckContainer, {
-      activeSession,
-      activeClientState,
-      activeClientId,
-      state,
-      t,
-      escapeHTML,
-      buildCircuitUnits,
-      getExerciseSignalColor,
-      hasQuickSignal,
-      logQuickSignal,
-      openFeedbackModal,
-      completeCircuitRound,
-      focusExerciseByIndex,
-      saveActiveSessionToCache,
-      saveToLocalStorage: appDeps.saveToLocalStorage,
-      onRerender: renderActiveGroupBoard,
-      startRestTimer: startClientTimer,
-      enterEditMode: enterClipboardEditMode,
-    });
-  }
-}
-
-// The historical-review panel (repurposed as an empty-state placeholder when the active client
-// has no plan at all — see showPastExerciseInFocus for its other use, populating it with a past
-// session's read-only detail).
-function renderClipboardLoggerContainer(activeClientState) {
-  const { t } = appDeps;
-  const container = document.getElementById("clipboard-logger-container");
-  if (!container) return;
-
-  if (!activeClientState || activeClientState.exercises.length === 0) {
-    container.classList.remove("hidden");
-    container.innerHTML = `
-      <div class="clipboard-empty-state">
-        <h4>${t("no_exercises_injected")}</h4>
-        <p>${t("no_exercises_desc")}</p>
-      </div>
-    `;
-    return;
-  }
-
-  container.classList.add("hidden");
-  container.innerHTML = "";
-}
-
+// The board render itself lives in modules/clipboard/activeSessionBoard.js (TODO §24.3). Kept as a
+// named export here because ~15 call sites in this file, plus app.js and the router, already call
+// renderActiveGroupBoard() — the seam moved, the entry point did not.
 export function renderActiveGroupBoard() {
-  if (!activeSession) return;
-  const { state, t } = appDeps;
-  if (!state || !t) return;
-
-  const activeClientId = activeSession.activeClientId || activeSession.participants[0];
-  activeSession.activeClientId = activeClientId;
-  const activeClientState = activeSession.clientRoutines[activeClientId];
-
-  // Rest is a first-class plan item: migrate any legacy exercise-level rest, then bounds-clamp focus
-  // (only an out-of-range index needs correcting — a rest is a perfectly valid focus target).
-  ensureRestItems(activeClientState);
-  clampFocusIndex(activeClientState);
-
-  syncSessionFocusUrl();
-
-  const activeClient = state.clients.find((c) => c.id === activeClientId);
-
-  renderClientTabsBar(activeClientId);
-  renderInjuryAlertBanner(activeClient);
-  renderClientFocusPanel(activeClient);
-  renderTitleBarForEditMode(activeClient);
-
-  const started = !!activeSession?.started;
-  const canStartSession = !clipboardEditMode && currentPlanMode() !== "planning";
-  syncStartCompleteVisibility(canStartSession, started);
-
-  renderDeckOrEditor(activeClientId, activeClientState);
-  renderClipboardLoggerContainer(activeClientState);
+  renderActiveSessionBoard();
 }
 
 // The dashboard mini-bar's own expand affordance + click-through, and its Enter/Space keyboard
@@ -1330,7 +1088,7 @@ function wireSessionMenuAndActions(t) {
     closeSessionMenu();
     // While editing, this button deletes the PLAN (clears its exercises) and stays in the session;
     // otherwise it cancels the whole session. The label is swapped to match in renderActiveGroupBoard.
-    if (clipboardEditMode) {
+    if (isClipboardEditMode()) {
       if (confirm(t("confirm_delete_plan"))) clearActivePlan();
     } else if (confirm(t("confirm_cancel"))) {
       cancelWorkoutSession();
@@ -1432,7 +1190,7 @@ export function cancelWorkoutSession() {
   }
   releaseScreenWakeLock();
   activeSession = null;
-  clipboardEditMode = false;
+  setClipboardEditModeFlag(false);
   clearActiveSessionCache();
   clearAllTimers(); // timers are session-scoped
 
@@ -1633,7 +1391,7 @@ export function recoverActiveSession() {
     }
 
     if (activeSession.sourceSession?.isPlanning) {
-      clipboardEditMode = true;
+      setClipboardEditModeFlag(true);
     }
     // Recovery runs before the first route is entered (app.js boots the session, then routes), so
     // the URL is the only thing that knows the trainer was in the editor. Ask the router what the
@@ -1645,8 +1403,8 @@ export function recoverActiveSession() {
     // about to read. The router validates it a moment later and drops it if the row is gone.
     const bootRoute = appDeps.resolveRoute?.(window.location.pathname);
     if (bootRoute?.isEditor) {
-      clipboardEditMode = true;
-      editorRowId = bootRoute.params.slotId ?? null;
+      setClipboardEditModeFlag(true);
+      markEditorRow(bootRoute.params.slotId ?? null, { kind: "restored", focus: false });
     }
 
     const bar = document.getElementById("active-session-bar");
