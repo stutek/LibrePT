@@ -82,6 +82,10 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav {
   display: flex;
   align-items: center;
   gap: 8px;
+  /* The whole cluster is the home button (click handler in applicationHeader.js), so it has to
+     look like one — without a pointer cursor the only hint that the wordmark navigates was
+     discovering it by tapping. */
+  cursor: pointer;
   /* Allow the cluster to shrink on narrow phones so only the wordmark truncates — the build stack
      and action buttons keep their size (see .header-build-stack / .header-actions). */
   min-width: 0;
