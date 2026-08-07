@@ -26,6 +26,7 @@
 // }
 
 import { newRecordId } from "../../data/recordId.js";
+import { collectCircuitsMeta, normalizeCircuits } from "../../domain/circuitGrouping.js";
 import { metricLabelKey, usesLoad } from "../../domain/exerciseModality.js";
 import {
   formatLoad,
@@ -104,86 +105,6 @@ function buildCollapsedSummaryHTML(ex, modality, metric, unit, escapeHTML) {
   return `<span class="editor-row-fields-summary">${setsPart}${primaryPart}${compactLoad}</span>`;
 }
 
-// Rounds drive a circuit member's set count: keeps its target and log rows aligned to the series.
-function syncCircuitMemberSetCount(member, series, logs) {
-  member.setsTargetCount = series;
-  const memberLogs = logs[member.id];
-  if (!Array.isArray(memberLogs)) return;
-  while (memberLogs.length < series)
-    memberLogs.push({
-      reps: member.repsTarget ?? 0,
-      weight: member.weightTarget ?? 0,
-      completed: false,
-      note: "",
-    });
-  memberLogs.length = series;
-}
-
-// Regroup so each circuit's members are contiguous, sharing one title/series, with round-aligned logs.
-function regroupCircuitMembers(items, logs) {
-  const emitted = new Set();
-  const result = [];
-  for (const it of items) {
-    if (!it.circuitId) {
-      result.push(it);
-      continue;
-    }
-    if (emitted.has(it.circuitId)) continue; // members are pulled together on first sight
-    emitted.add(it.circuitId);
-    const members = items.filter((e) => e.circuitId === it.circuitId);
-    const firstEx = members.find((m) => !isRest(m)) || members[0];
-    const title = firstEx.circuitTitle || "";
-    const series = firstEx.circuitSeries || 1;
-    for (const m of members) {
-      m.circuitTitle = title;
-      m.circuitSeries = series;
-      if (!isRest(m)) syncCircuitMemberSetCount(m, series, logs);
-    }
-    result.push(...members);
-  }
-  return result;
-}
-
-function pruneOrphanedCircuitRounds(items, rounds) {
-  for (const cid of Object.keys(rounds)) {
-    if (!items.some((e) => e.circuitId === cid)) delete rounds[cid];
-  }
-  for (const it of items) {
-    if (!it.circuitId) continue;
-    const series = it.circuitSeries || 1;
-    rounds[it.circuitId] = Math.min(Math.max(1, rounds[it.circuitId] || 1), series);
-  }
-}
-
-// First-appearance order + metadata for the existing circuits, used to build the move <select>.
-function collectCircuitsMeta(items) {
-  const circuits = [];
-  for (const it of items) {
-    if (it.circuitId && !circuits.some((c) => c.id === it.circuitId)) {
-      circuits.push({
-        id: it.circuitId,
-        title: it.circuitTitle || "",
-        series: it.circuitSeries || 1,
-      });
-    }
-  }
-  return circuits;
-}
-
-function clampActiveIndexAndAccordion(activeClientState, items) {
-  if (activeClientState.activeExerciseIndex >= items.length) {
-    activeClientState.activeExerciseIndex = Math.max(0, items.length - 1);
-  }
-  // Drop the accordion selection if that row no longer exists (removed, or a swap gave it a new
-  // id) — same pruning intent as circuitRounds above, just a single id instead of a map.
-  if (
-    activeClientState.editorExpandedId &&
-    !items.some((e) => e.id === activeClientState.editorExpandedId)
-  ) {
-    activeClientState.editorExpandedId = null;
-  }
-}
-
 export function renderClipboardEditor(container, deps) {
   const {
     activeClientState,
@@ -229,7 +150,7 @@ export function renderClipboardEditor(container, deps) {
   };
 
   // Regroup so each circuit's members are contiguous before we render straight from the array.
-  normalizeCircuits();
+  normalizeCircuits(activeClientState);
 
   const datalistId = "clipboard-editor-ex-names";
   const options = (allExerciseNames || [])
@@ -438,17 +359,8 @@ export function renderClipboardEditor(container, deps) {
   const rowKeyOf = (rowEl) => parseInt(rowEl.dataset.rowkey, 10);
 
   // ---------- circuit invariant: members contiguous, shared title/series, clean round counters ----------
-  function normalizeCircuits() {
-    const result = regroupCircuitMembers(items, activeClientState.logs);
-    items.length = 0;
-    items.push(...result);
-
-    if (!activeClientState.circuitRounds) activeClientState.circuitRounds = {};
-    pruneOrphanedCircuitRounds(items, activeClientState.circuitRounds);
-    clampActiveIndexAndAccordion(activeClientState, items);
-  }
   const commit = () => {
-    normalizeCircuits();
+    normalizeCircuits(activeClientState);
     save();
     rerender();
   };
@@ -622,7 +534,7 @@ export function renderClipboardEditor(container, deps) {
         for (const m of membersOf()) {
           m.circuitSeries = n;
         }
-        normalizeCircuits(); // clamps the live round counter to the new series
+        normalizeCircuits(activeClientState); // clamps the live round counter to the new series
         save();
         rerender();
       });
@@ -824,7 +736,7 @@ export function renderClipboardEditor(container, deps) {
       }
     }
     if (changed) {
-      normalizeCircuits();
+      normalizeCircuits(activeClientState);
       save();
     }
   };

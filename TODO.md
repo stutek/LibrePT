@@ -1565,12 +1565,19 @@ passes.** Time-of-day-dependent coverage belongs in `unit_js/`, where the clock 
 Residual ≈ 330 lines of genuine controller (the `activeSession` variable, lifecycle orchestration,
 timers, cache/recover). Every new *pure* module gets a `tests/unit_js/` file in the same commit.
 
-### 24.5 [ ] Stage 5 — `clipboardEditor.js`'s 710-line function
+### 24.5 [~] Stage 5 — `clipboardEditor.js`'s 710-line function
 `renderClipboardEditor()` spans lines 187–896 and holds a template layer, 11 wiring closures, a drag
 reorder engine and circuit normalisation in one scope — none of it reachable without a browser.
 Extract, highest value first:
-- **`circuitGrouping.js`** (lines 108–186 + `normalizeCircuits`) — pure array algebra enforcing
-  "circuit members stay consecutive". Exactly the invariant a `tests/unit_js/` test should pin.
+- **`circuitGrouping.js`** — **SHIPPED 2026-08-07**, now `domain/circuitGrouping.js` with 10 unit
+  tests. A circuit is not a container in the data: its members are ordinary items in the same flat
+  array that share a `circuitId`, which keeps reorder/insert/delete as plain array operations but
+  makes the grouping an invariant somebody MAINTAINS rather than one the structure enforces. Three
+  rules, all now pinned: members contiguous, one shared title/round count per circuit (taken from
+  its first EXERCISE, not from a leading rest), and set counts + the live round counter tracking the
+  series. Every way of breaking them yields a plan that still looks plausible — two blocks with the
+  same name, or a counter pointing at round 5 of a circuit that is now 3 rounds long and therefore
+  can never be completed.
 - **`clipboardEditorMarkup.js`** (~202–437) — pure `(item, ctx) → HTML` row/circuit/insert-bar builders.
 - **`listReorder.js`** (~717–803) — a generic tap-nudge/drag reorder engine, not editor-specific.
 
