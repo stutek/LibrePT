@@ -9,6 +9,14 @@ import {
   removeVersionScoped,
   writeVersionScoped,
 } from "../../data/storageNamespace.js";
+import {
+  buildPlanningSessionMeta,
+  buildRealSessionMeta,
+  buildSessionRecord,
+  computeTimeLabel,
+  newlyAssignedParticipantIds,
+  upsertSessionRecord,
+} from "../../domain/sessionRecord.js";
 
 let deps = null;
 let isPlanningModeActive = false;
@@ -135,24 +143,6 @@ function confirmParticipantRemovalIfNeeded(sessionId, deps, clientRoutines) {
   );
 }
 
-function computeTimeLabel(startTime, endTime, t) {
-  if (startTime && endTime) return `${startTime} - ${endTime}`;
-  if (startTime) return startTime;
-  return t("date_unknown") || "Date Unknown";
-}
-
-function computeSessionDayBucket(startDateTime) {
-  const startOfToday = new Date();
-  startOfToday.setHours(0, 0, 0, 0);
-  const startOfSessionDay = new Date(startDateTime);
-  startOfSessionDay.setHours(0, 0, 0, 0);
-  const diffDays = Math.round((startOfSessionDay - startOfToday) / (24 * 60 * 60 * 1000));
-  if (diffDays === 0) return "today";
-  if (diffDays === 1) return "tomorrow";
-  if (diffDays > 1) return "upcoming";
-  return "yesterday";
-}
-
 // Diffs against the session's participants as they stood before this save, so re-saving an
 // unchanged assignment never re-prompts an invite for someone already assigned (TODO §1.1).
 function notifyNewlyAssignedParticipants(
@@ -170,40 +160,18 @@ function notifyNewlyAssignedParticipants(
   },
 ) {
   if (!deps.openSessionInviteDialog) return;
-  const newlyAssignedIds = clientRoutines
-    .map((cr) => cr.clientId)
-    .filter((id) => !previousParticipants.includes(id));
+  const newlyAssignedIds = newlyAssignedParticipantIds(previousParticipants, clientRoutines);
   if (newlyAssignedIds.length === 0) return;
   deps.openSessionInviteDialog({
     sessionId,
     sessionName: sessionName || t("workout_setup_title") || "Workout Session",
     location,
     dateLabel: sessionDate,
-    timeLabel: computeTimeLabel(startTime, endTime, t),
+    timeLabel: computeTimeLabel(startTime, endTime, t("date_unknown") || "Date Unknown"),
     startDate: new Date(`${sessionDate}T${startTime || "00:00"}`),
     endDate: new Date(`${sessionDate}T${endTime || startTime || "00:00"}`),
     clientIds: newlyAssignedIds,
   });
-}
-
-function upsertSessionRecord(sessions, sessionRecord) {
-  const existingIndex = sessions.findIndex((b) => b.id === sessionRecord.id);
-  if (existingIndex >= 0) {
-    sessions[existingIndex] = { ...sessions[existingIndex], ...sessionRecord };
-  } else {
-    sessions.push(sessionRecord);
-  }
-}
-
-function buildPlanningSessionMeta({ sessionId, sessionName, sessionDate, timeLabel, location, t }) {
-  return {
-    id: sessionId,
-    isPlanning: true,
-    titles: [sessionName || t("planned_program") || "Planned Program"],
-    date: sessionDate,
-    timeLabel,
-    location,
-  };
 }
 
 // Planning mode never touches the sessions list (it's a routine-adjustment flow, not a scheduled
@@ -218,31 +186,39 @@ function commitRealSession(
   const state = deps.getState();
   state.sessions = state.sessions || [];
 
-  const startDateTime = new Date(`${sessionDate}T${startTime || "00:00"}`);
-  const sessionRecord = {
-    id: sessionId,
-    title: sessionName || t("workout_setup_title") || "Workout Session",
-    time: timeLabel,
-    startDate: startDateTime.toISOString(),
-    location,
-    participants: clientRoutines.map((cr) => cr.clientId),
-    routineId: clientRoutines[0]?.routineId || "",
-    maxCapacity: clientRoutines.length,
-    day: computeSessionDayBucket(startDateTime),
-  };
+  const title = sessionName || t("workout_setup_title") || "Workout Session";
+  const identity = { sessionId, sessionName: title, sessionDate, timeLabel, location };
 
-  upsertSessionRecord(state.sessions, sessionRecord);
+  upsertSessionRecord(
+    state.sessions,
+    buildSessionRecord({ ...identity, startTime, clientRoutines }),
+  );
   deps.saveToLocalStorage?.();
   deps.rerenderSessions?.();
 
+  return buildRealSessionMeta(identity);
+}
+
+// Every field the setup form holds, read once. The `|| ""` fallbacks are about a field being
+// absent from the DOM, not about the trainer leaving it blank, so they belong together here rather
+// than spread through the submit handler — which is also what keeps that handler under the
+// complexity gate now that the record shapes have moved to domain/sessionRecord.js.
+function readSessionFormFields(t) {
+  const fieldValue = (id) => document.getElementById(id)?.value.trim() || "";
+  const startTime = fieldValue("setup-start-time");
+  const endTime = fieldValue("setup-end-time");
   return {
-    id: sessionId,
-    titles: [sessionName || t("workout_setup_title") || "Workout Session"],
-    date: sessionDate,
-    timeLabel,
-    location,
+    sessionName: fieldValue("setup-session-name"),
+    sessionDate: fieldValue("setup-session-date"),
+    startTime,
+    endTime,
+    location: fieldValue("setup-location"),
+    timeLabel: computeTimeLabel(startTime, endTime, t("date_unknown") || "Date Unknown"),
   };
 }
+
+// An untitled planning draft still needs something a trainer can recognise in the feed.
+const plannedProgramLabel = (t) => t("planned_program") || "Planned Program";
 
 export function setupEditSessionControl() {
   const form = document.getElementById("form-workout-setup");
@@ -310,12 +286,8 @@ export function setupEditSessionControl() {
 
     if (!confirmParticipantRemovalIfNeeded(editingSessionId, deps, clientRoutines)) return;
 
-    const sessionName = document.getElementById("setup-session-name")?.value.trim() || "";
-    const sessionDate = document.getElementById("setup-session-date")?.value || "";
-    const startTime = document.getElementById("setup-start-time")?.value || "";
-    const endTime = document.getElementById("setup-end-time")?.value || "";
-    const location = document.getElementById("setup-location")?.value.trim() || "";
-    const timeLabel = computeTimeLabel(startTime, endTime, t);
+    const { sessionName, sessionDate, startTime, endTime, location, timeLabel } =
+      readSessionFormFields(t);
     const sessionId = editingSessionId || newRecordId();
 
     // Captured before commitRealSession mutates state.sessions: the diff against this is what
@@ -326,7 +298,13 @@ export function setupEditSessionControl() {
       : [];
 
     const sessionMeta = isPlanningModeActive
-      ? buildPlanningSessionMeta({ sessionId, sessionName, sessionDate, timeLabel, location, t })
+      ? buildPlanningSessionMeta({
+          sessionId,
+          sessionName: sessionName || plannedProgramLabel(t),
+          sessionDate,
+          timeLabel,
+          location,
+        })
       : commitRealSession(deps, {
           sessionId,
           sessionName,

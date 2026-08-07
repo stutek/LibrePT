@@ -1615,15 +1615,31 @@ substitution — importers sit at four different depths — and `import_layers.p
 [AGENT_RULES.md](AGENT_RULES.md), and every markdown link across `CHANGELOG.md`,
 `docs/DATA_MODEL.md` and `use_cases/`.
 
-### 24.7 [ ] Stage 7 — three more multi-responsibility modules
+### 24.7 [~] Stage 7 — three more multi-responsibility modules
 - **`applicationHeader.js` (512)** → header shell + menu (~250) once `renderSyncBadge` (76–136) moves
   beside `driveSyncUi.js`, and `renderAboutDialog`/`renderTermsDialog`/`setupFirstRunTerms` move to
   `legalDialogs.js`. (The theme copy is already gone in §24.1.)
-- **`editSessionControl.js` (645)** → `editSessionDraft.js` (23–91), `editSessionCommit.js` (99–246,
-  pure and currently untested), `editSessionForm.js` (364–575); ~150 lines of setup/open remain.
-- **`notificationArea.js` (498)** → `notificationItems.js` (34–131, pure `(state, t, readIds) →
-  items[]`), `notificationReadState.js` (91–105, 209–219 — it reaches into `storageNamespace`
-  directly from a UI module), gestures (405–498); ~250 lines of render remain.
+- **`editSessionControl.js` — SHIPPED 2026-08-07** (the commit half). `domain/sessionRecord.js` now
+  owns what the form PRODUCES: the dashboard row a real session becomes, the slot-less meta a
+  planning session becomes instead, the day bucket, the time label, and the newly-assigned diff
+  behind invites. It had no test at all — it was reachable only by filling in a real form in a real
+  browser. Two rules now pinned that would cost a trainer data: the upsert MERGES (a stored session
+  carries `completed`/`duration` that this form never edits, so a wholesale replace would
+  silently un-complete a session by editing its title), and invites go only to NEWLY assigned
+  participants.
+
+  The complexity gate fired during this one — inlining the translated fallbacks pushed the submit
+  handler to 18. Fixed at source per §2.A.3 by extracting `readSessionFormFields()`, which is a
+  better shape anyway: the `|| ""` fallbacks are about a field being absent from the DOM, not about
+  the trainer leaving it blank, and they belong together rather than spread through the handler.
+  **Still open:** the draft-persistence and form-population halves (`editSessionDraft.js`,
+  `editSessionForm.js`).
+- **`notificationArea.js` — SHIPPED 2026-08-07** (the derivation half): `domain/notificationItems.js`,
+  498 → 405 lines, 7 unit tests. Extracting it removed a THIRD copy of the item-id list — "mark all
+  read" rebuilt the ids by hand from the two synthetic builders plus `state.notifications`, so an
+  item kind added to the feed would have rendered but never been markable. It now reads the same
+  resolver the render does. **Still open:** `notificationReadState.js` (the module reaches into
+  `storageNamespace` directly from a UI module) and the gesture block.
 
 ### 24.8 [~] Stage 8 — names that match what the tree holds
 - Three session directories, none named for its lifecycle stage: `modules/session/` (setup/edit/
