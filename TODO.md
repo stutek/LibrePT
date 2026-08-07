@@ -1427,6 +1427,33 @@ forbids `modules/common/` → `controllers/`, and the response at the time was t
 system into the header rather than to notice that a theme service is not a controller. A gate cannot
 see a copy-paste. When an import is refused, check the layering before duplicating.
 
+### State of play (2026-08-07)
+
+| Stage | Status |
+| :--- | :--- |
+| §24.1 theme, §24.2 duplicate helpers, §24.3 board render, §24.6 `domain/` layer | **done** |
+| §24.4 controller split | **done** (4a–4c); §24.4d is a new follow-up found while doing it |
+| §24.5 clipboard editor | `circuitGrouping` done; **markup + reorder still open** |
+| §24.7 header / notifications / edit-session | derivation halves done; **three halves still open** |
+| §24.8 module headers | **done and gated**; the directory rename is still open and still optional |
+
+`activeSessionController.js` 1,668 → 1,169 · `clipboardEditor.js` 896 → 808 ·
+`notificationArea.js` 498 → 402. `src/domain/` is 12 modules / 1,500 lines with a `unit_js` suite
+each — 74 assertions that previously needed a browser, or did not exist.
+
+**Three things this work found that the audit did not**, all fixed on their own commits: a
+fabricated session end date that proposed a seven-hour-forty reschedule (see §24.4), a focus
+reference the timer spelled wrong for standalone rests (§24.4b), and a "mark all read" that rebuilt
+the notification id list by hand and so could not mark an item kind it did not know about (§24.7).
+Each was invisible to review and none was what the stage set out to change — which is the argument
+for extracting pure logic even when the file it comes from "works fine".
+
+**Two stages were deliberately narrowed rather than completed as written** (§24.4b, §24.4c): the
+focus↔URL sync, the schedule-adjust apply, and the session wiring all stayed in the controller,
+because each is orchestration whose every dependency is already there. Moving them would have been
+motion, not progress. If you resume this, apply the same test: extract what becomes *testable* or
+*shared*, not what merely makes a file shorter.
+
 ### 24.1 [x] Stage 1 — one theme system, not two — **SHIPPED 2026-08-07**
 `controllers/themeController.js` calls itself "single source of truth for resolving, applying,
 persisting, and localizing theme styles". It is not: `modules/common/applicationHeader.js` carries a
@@ -1629,7 +1656,7 @@ substitution — importers sit at four different depths — and `import_layers.p
   participants.
 
   The complexity gate fired during this one — inlining the translated fallbacks pushed the submit
-  handler to 18. Fixed at source per §2.A.3 by extracting `readSessionFormFields()`, which is a
+  handler to 18. Fixed at source (no allowlist, per [AGENT_RULES.md](AGENT_RULES.md)) by extracting `readSessionFormFields()`, which is a
   better shape anyway: the `|| ""` fallbacks are about a field being absent from the DOM, not about
   the trainer leaving it blank, and they belong together rather than spread through the handler.
   **Still open:** the draft-persistence and form-population halves (`editSessionDraft.js`,
