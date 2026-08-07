@@ -63,11 +63,7 @@ import {
 import { mountExercisePicker } from "../modules/exercises/exercisePicker.js";
 import { renderGlobalHistory } from "../modules/history/historyView.js";
 import { renderRoutinesList } from "../modules/plans/plansView.js";
-import {
-  renderActiveSessionBarLabels,
-  renderIdleSessionBar,
-  updateSessionBarTimer,
-} from "../modules/session/sessionBar.js";
+import { renderClipboardBar, updateSessionBarTimer } from "../modules/session/sessionBar.js";
 import { openSessionStartTimeDialog } from "../modules/session/sessionStartTimeDialog.js";
 
 let activeSession = null;
@@ -294,12 +290,7 @@ export function openSessionFromHistory(log) {
   saveActiveSessionToCache();
   requestScreenWakeLock();
 
-  const bar = document.getElementById("active-session-bar");
-  if (bar) {
-    bar.classList.remove("hidden", "is-idle");
-    delete bar.dataset.nextSessionId;
-  }
-  renderActiveSessionBarLabels();
+  renderClipboardBar();
   startSessionTimer();
 
   if (navigateToPath) {
@@ -399,7 +390,7 @@ function applyAdjustedSchedule({ startMs, endMs }) {
   saveActiveSessionToCache();
   appDeps.saveToLocalStorage?.();
   appDeps.renderSessionTitle?.();
-  renderActiveSessionBarLabels();
+  renderClipboardBar();
   updateSessionBarTimer();
   updateOverlaySessionTimer();
   appDeps.renderSessions?.();
@@ -818,24 +809,6 @@ function wireSessionExpandBar(navigateToPath, launchClipboardDirectly) {
       if (navigateToPath) navigateToPath(`/session/${sessionId}/client/${activeClientId}`);
     });
   }
-
-  const sessionBar = document.getElementById("active-session-bar");
-  if (!sessionBar) return;
-  sessionBar.addEventListener("click", () => {
-    if (activeSession) {
-      const activeClientId = activeSession.activeClientId || activeSession.participants[0];
-      const sessionId = activeSession.id || "session";
-      if (navigateToPath) navigateToPath(`/session/${sessionId}/client/${activeClientId}`);
-    } else if (sessionBar.dataset.nextSessionId && launchClipboardDirectly) {
-      launchClipboardDirectly(sessionBar.dataset.nextSessionId);
-    }
-  });
-  sessionBar.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      sessionBar.click();
-    }
-  });
 }
 
 // The title bar's ⋯ overflow menu, its Edit-plan trigger, and the Start/Complete/Delete actions
@@ -990,7 +963,7 @@ export function cancelWorkoutSession() {
   clearActiveSessionCache();
   clearAllTimers(); // timers are session-scoped
 
-  renderIdleSessionBar();
+  renderClipboardBar();
 
   if (navigateToPath) navigateToPath("/");
   if (focusSessionsColumn) focusSessionsColumn("today", "smooth");
@@ -1195,7 +1168,7 @@ export function recoverActiveSession() {
     if (isCachedSessionStale(activeSession)) {
       activeSession = null;
       clearActiveSessionCache();
-      renderIdleSessionBar();
+      renderClipboardBar();
       return;
     }
 
@@ -1216,12 +1189,7 @@ export function recoverActiveSession() {
       markEditorRow(bootRoute.params.slotId ?? null, { kind: "restored", focus: false });
     }
 
-    const bar = document.getElementById("active-session-bar");
-    if (bar) {
-      bar.classList.remove("hidden", "is-idle");
-      delete bar.dataset.nextSessionId;
-    }
-    renderActiveSessionBarLabels();
+    renderClipboardBar();
 
     renderActiveGroupBoard();
     restoreSessionTimers();

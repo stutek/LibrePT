@@ -137,8 +137,8 @@ import {
   renderWorkoutSetupViewShell,
 } from "./modules/session/editSessionView.js";
 import {
-  renderActiveSessionBarLabels,
-  renderIdleSessionBar,
+  renderClipboardBar,
+  renderClipboardBarShell,
   updateSessionBarTimer,
 } from "./modules/session/sessionBar.js";
 import { openSessionInviteDialog } from "./modules/session/sessionInviteDialog.js";
@@ -241,7 +241,7 @@ async function init() {
     scheduleTimelineSettle,
     setClipboardEditMode,
     renderActiveGroupBoard: () => renderActiveGroupBoard(),
-    renderActiveSessionBarLabels,
+    renderClipboardBar,
     renderSessions: () => renderSessions(),
     renderClientsList: (q) => renderClientsList(q),
     startSessionTimer,
@@ -361,7 +361,7 @@ async function init() {
     populateDropdownSelectors,
     getActiveSession: () => getActiveSession(),
     renderActiveGroupBoard,
-    renderActiveSessionBarLabels,
+    renderClipboardBar,
   });
 
   appBoot.bootSessionTimeline({
@@ -378,19 +378,6 @@ async function init() {
     formatClockFromMinutes,
   });
 
-  appBoot.bootSessionBar({
-    getState,
-    getActiveSession: () => getActiveSession(),
-    t,
-    formatSignedDuration,
-    formatDuration,
-    formatDurationHourMin,
-    parseTimeRange,
-    getOverlappingSessions,
-    buildSessionMeta,
-    getSessionDayDate,
-  });
-
   appBoot.bootBuildInfoDialog({ t, navigateToPath, urlFor });
 
   appBoot.bootNotificationArea({
@@ -400,6 +387,20 @@ async function init() {
     escapeHTML,
     navigateToPath,
     openSessionFromHistory,
+  });
+
+  // After bootNotificationArea: the clipboard bar mounts into the notification area's handle bar,
+  // so that shell has to exist first. `clipboardPath` is what the bar navigates to — the controller
+  // builds it, including the in-focus card and edit-mode segments, so a tap returns the trainer to
+  // exactly where they left rather than to the top of the deck.
+  appBoot.bootSessionBar({
+    getActiveSession: () => getActiveSession(),
+    t,
+    formatSignedDuration,
+    formatDuration,
+    formatDurationHourMin,
+    navigateToPath,
+    clipboardPath: () => sessionFocusPath(),
   });
 
   applyTranslations(getState().lang);
@@ -422,8 +423,6 @@ async function init() {
   handlePathChange();
 
   appBoot.bootViewDismiss({ navigateToPath, getActiveSession, launchClipboardDirectly });
-
-  setInterval(renderIdleSessionBar, 30000);
 
   // Local-only read (IndexedDB meta), so this is cheap to await here rather than firing it off
   // unobserved — the ahead count badge below would otherwise render its very first paint from an
@@ -537,7 +536,7 @@ function startWorkoutSession(clientRoutines, sessionMeta = null, options = {}) {
       urlFor,
       focusSessionsColumn,
       launchClipboardDirectly,
-      renderIdleSessionBar,
+      renderClipboardBar,
       saveToLocalStorage: saveState,
     },
     options,
@@ -559,7 +558,7 @@ function setupActiveSession() {
     focusSessionsColumn,
     launchClipboardDirectly,
     newRecordId,
-    renderIdleSessionBar,
+    renderClipboardBar,
     renderSessions,
     renderSessionTitle,
     saveToLocalStorage: saveState,
@@ -601,7 +600,7 @@ function recoverActiveSession() {
     activeRouteIsDialog,
     urlFor,
     launchClipboardDirectly,
-    renderIdleSessionBar,
+    renderClipboardBar,
     saveToLocalStorage: saveState,
   });
   renderSessions();

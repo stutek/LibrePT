@@ -16,7 +16,7 @@
 //   populateDropdownSelectors(),
 //   getActiveSession(),
 //   renderActiveGroupBoard(),
-//   renderActiveSessionBarLabels()
+//   renderClipboardBar()
 // }
 
 import { driveSyncStatus } from "../../data/driveSyncService.js";
@@ -322,7 +322,7 @@ export function setupApplicationHeader() {
       const activeSession = deps.getActiveSession();
       if (activeSession) {
         deps.renderActiveGroupBoard();
-        deps.renderActiveSessionBarLabels();
+        deps.renderClipboardBar();
       }
     });
   }

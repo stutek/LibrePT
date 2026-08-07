@@ -298,12 +298,7 @@ function recoverActiveSessionIfNeeded() {
 // Everything that happens when the address bar already names the session that's live: unhide the
 // bar/overlay, make sure its timer is ticking, apply a deep link's focus/edit intent, and re-render.
 function enterActiveSessionFocus(currentActive, clientId, focusRef, opts) {
-  const bar = document.getElementById("active-session-bar");
-  if (bar) {
-    bar.classList.remove("hidden", "is-idle");
-    delete bar.dataset.nextSessionId;
-  }
-  routerDeps?.renderActiveSessionBarLabels?.();
+  routerDeps?.renderClipboardBar?.();
 
   if (!currentActive.timerIntervalId) {
     routerDeps?.startSessionTimer?.();

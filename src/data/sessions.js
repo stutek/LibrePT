@@ -65,6 +65,23 @@ export const DEFAULT_SESSIONS = (() => {
       day: "today",
       completed: true,
     },
+    // Deliberately OVERLAPS "Group Strength & Conditioning" above, in the same slot and venue: a
+    // trainer running a group while one client works a separate rehab plan alongside it. That is
+    // ordinary gym reality, and it is the case the clipboard is actually built for — overlapping
+    // slots collapse into ONE clipboard (`buildSessionMeta` merges them, so `titles` and `ids` are
+    // both lists), which is why nothing in the UI may say "the session" in the singular.
+    // Without a merged pair in the seed data, that whole path went unexercised by the demo.
+    {
+      id: "s09f2e3d",
+      time: `${formatHour(currentHour - 1)} - ${formatHour(currentHour + 1)}`,
+      startDate: atHour(0, currentHour - 1),
+      title: "Return-to-Play Rehab",
+      location: LOCATIONS.GYM,
+      participants: ["c3c7d2c4"],
+      routineId: "r13d5e6f",
+      maxCapacity: 1,
+      day: "today",
+    },
     {
       id: "s02f2e3d",
       time: `${formatHour(currentHour + 1)} - ${formatHour(currentHour + 2)}`,

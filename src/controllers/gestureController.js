@@ -14,9 +14,6 @@ export function setupViewDismiss({ navigateToPath, getActiveSession, launchClipb
       navigateToPath(`/session/${active.id || "session"}/client/${clientId}`);
       return;
     }
-    const bar = document.getElementById("active-session-bar");
-    const nextId = bar?.dataset.nextSessionId;
-    if (nextId) launchClipboardDirectly(nextId);
   }
 
   // Close the fullscreen clipboard by sliding it back down (the reverse of its slide-up open),

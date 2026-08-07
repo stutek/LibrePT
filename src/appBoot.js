@@ -34,7 +34,7 @@ import {
 import { initPlansView } from "./modules/plans/plansView.js";
 import { initWorkoutSetup, setupWorkoutSetup } from "./modules/session/editSessionControl.js";
 import { renderWorkoutSetupView } from "./modules/session/editSessionView.js";
-import { initSessionBar } from "./modules/session/sessionBar.js";
+import { initSessionBar, renderClipboardBarShell } from "./modules/session/sessionBar.js";
 import { initSessionInviteDialog } from "./modules/session/sessionInviteDialog.js";
 import { initSessionTitleBar } from "./modules/session/sessionTitleBar.js";
 import { initSessionTimeline } from "./modules/sessionList/sessionTimeline.js";
@@ -110,8 +110,11 @@ export function bootSessionTitleBar(deps) {
   initSessionTitleBar(deps);
 }
 
+// Must boot AFTER bootNotificationArea: the bar mounts into `#notification-handle-bar`, which the
+// notification area's own shell renders.
 export function bootSessionBar(deps) {
   initSessionBar(deps);
+  renderClipboardBarShell();
 }
 
 export function bootBuildInfoDialog(deps) {

@@ -97,7 +97,7 @@ module, listed in the table below alongside that module's `.js`.
 | [src/modules/clipboard/circuitCard.css](../src/modules/clipboard/circuitCard.css) | `styles` | circuitCard.js's exclusive styling: round badge, per-exercise rows, feedback trio, break rows, complete-round button. |
 | [src/modules/clipboard/exerciseAndRestTimer.js](../src/modules/clipboard/exerciseAndRestTimer.js) | `component` | Session exercise and rest countdown timer stack. |
 | [src/modules/clipboard/exerciseAndRestTimer.css](../src/modules/clipboard/exerciseAndRestTimer.css) | `styles` | The floating per-client timer stack's own styling: overtime/stopped/flash states. |
-| [src/modules/session/sessionBar.js](../src/modules/session/sessionBar.js) | `component` | Bottom active/next-session bar with countdowns. |
+| [src/modules/session/sessionBar.js](../src/modules/session/sessionBar.js) | `component` | The live-clipboard bar (`#clipboard-bar`) in the notification handle bar: names the clipboard — every merged session's title, never "the session" — carries its countdown/overtime, and is one tap back into it. Active state only; the old idle "next session" state was dropped as planning information that did not earn permanent space. |
 | [src/modules/session/sessionTitleBar.js](../src/modules/session/sessionTitleBar.js) | `component` | Active-session overlay title line and countdown. |
 | [src/modules/session/editSessionView.js](../src/modules/session/editSessionView.js) | `view` | Modular view renderer for Edit Session & Setup view; owns the `#view-workout-setup` shell and `#dialog-workout-setup`'s markup. |
 | [src/modules/session/editSessionView.css](../src/modules/session/editSessionView.css) | `styles` | The compact workout-setup dialog: participant picker, checklists. |

@@ -152,7 +152,7 @@ bootHeader({
   populateDropdownSelectors: noop,
   getActiveSession: () => null,
   renderActiveGroupBoard: noop,
-  renderActiveSessionBarLabels: noop,
+  renderClipboardBar: noop,
 });
 """
 
@@ -368,7 +368,7 @@ bootActiveSession({
   focusSessionsColumn: noop,
   launchClipboardDirectly: noop,
   newRecordId: () => 'id' + Math.random().toString(36).slice(2),
-  renderIdleSessionBar: noop,
+  renderClipboardBar: noop,
   renderSessions: noop,
   saveToLocalStorage: noop,
 });

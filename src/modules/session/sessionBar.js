@@ -1,20 +1,31 @@
 // src/modules/session/sessionBar.js
-// The bottom "active / next session" bar (#active-session-bar). Two states:
-//   - active: a session is running — shows its title, client count, and a countdown to the
-//     scheduled end (goes negative once it overruns).
-//   - idle:   no session running — names the next upcoming session and a starts-in countdown.
+// The live-clipboard bar: a persistent strip in the notification handle bar saying a clipboard is
+// running, and taking one tap to get back into it.
 //
-// `state` and `activeSession` are reassigned over the app's life, so they're read through
-// accessor deps (getState / getActiveSession) rather than captured once. Wire up with
-// initSessionBar(deps) before the first render.
+// It names the CLIPBOARD, never "the active session". A clipboard can be several scheduled
+// sessions merged into one — `buildSessionMeta` collapses overlapping slots, so `titles` and `ids`
+// are both lists — and a group slot running three bookings is one clipboard, not three sessions.
+// Anything phrased as "the session" would be wrong for exactly the case the app was built for.
+//
+// ACTIVE STATE ONLY. This bar used to have a second, idle state naming the next upcoming session.
+// That is planning information rather than in-progress state: it does not earn permanent space on
+// a phone, the dashboard already shows it, and it competed with the notification summary for this
+// same strip (which is why a `display: none !important` rule had to exist to separate them).
+//
+// What it is worth is not the taps saved. The clipboard is an overlay dismissed by a swipe-down or
+// the grab handle, so leaving it by accident is ordinary on a phone in a pocket — and without this,
+// getting back means home → scroll → find the right card, which is a SEARCH task on the gym floor.
+// It also makes overtime glanceable from anywhere, which otherwise requires navigating back to
+// discover.
 //
 // deps: {
-//   getState(), getActiveSession(), t,
-//   formatSignedDuration, formatDuration, formatDurationHourMin,
-//   parseTimeRange, getOverlappingSessions, buildSessionMeta
+//   getActiveSession(), t,
+//   formatDuration, formatSignedDuration, formatDurationHourMin,
+//   navigateToPath, clipboardPath()
 // }
 
 import { computeActiveSessionCountdown } from "../../domain/sessionClock.js";
+import { renderMarkupOnce } from "../common/dom.js";
 
 let deps = null;
 
@@ -22,16 +33,82 @@ export function initSessionBar(d) {
   deps = d;
 }
 
-// What the bar's timer means — countdown to the scheduled end, or elapsed count-up when there is
-// no live schedule left to count down — is decided by computeActiveSessionCountdown, shared with
-// the clipboard title bar and the dashboard card so all three never disagree (sessionClock.js).
+// The whole strip is the tap target, not the text inside it — 14px of title is nothing to aim at
+// with a sweaty thumb (AGENT_RULES §2.D.1). A <button> gets that, plus keyboard and screen-reader
+// behaviour, without a click handler on a <div>.
+export function renderClipboardBarShell() {
+  renderMarkupOnce(
+    "notification-handle-bar",
+    (root) => root.querySelector("#clipboard-bar"),
+    `
+    <button type="button" id="clipboard-bar" class="clipboard-bar hidden">
+      <span class="session-bar-content">
+        <span class="session-bar-main">
+          <span class="session-bar-info">
+            <span class="pulse-indicator"></span>
+            <span id="clipboard-bar-title"></span>
+          </span>
+          <span class="session-bar-meta" id="clipboard-bar-meta"></span>
+        </span>
+        <span class="session-bar-timer" id="clipboard-bar-duration"></span>
+      </span>
+    </button>
+`,
+  );
+
+  document.getElementById("clipboard-bar")?.addEventListener("click", () => {
+    const path = deps?.clipboardPath?.();
+    if (path) deps.navigateToPath(path);
+  });
+}
+
+// Shown only while a clipboard is live. Also flips `.has-active-session` on the notification area,
+// which is what stands the notification summary down — the two share this strip and only one of
+// them can own it.
+export function renderClipboardBar() {
+  const bar = document.getElementById("clipboard-bar");
+  if (!bar) return;
+  const activeSession = deps.getActiveSession();
+  const area = document.getElementById("notification-area");
+
+  bar.classList.toggle("hidden", !activeSession);
+  area?.classList.toggle("has-active-session", !!activeSession);
+  if (!activeSession) return;
+
+  const { t } = deps;
+  const sourceSession = activeSession.sourceSession;
+  const participantCount = activeSession.participants.length;
+  const clientsLabel = `${participantCount} ${t("bar_clients_label")}`;
+
+  // Merged titles joined, because one clipboard can cover several booked slots. An ad-hoc clipboard
+  // has no source session at all and falls back to the generic name — there is no schedule to cite.
+  const titleEl = document.getElementById("clipboard-bar-title");
+  const metaEl = document.getElementById("clipboard-bar-meta");
+  if (titleEl) {
+    titleEl.textContent = sourceSession
+      ? sourceSession.titles.join(" + ")
+      : t("live_tracking_clipboard");
+  }
+  if (metaEl) {
+    metaEl.textContent = sourceSession
+      ? `${clientsLabel} · ${sourceSession.timeLabel}`
+      : clientsLabel;
+  }
+  bar.setAttribute("aria-label", `${t("btn_launch_clipboard")}: ${titleEl?.textContent || ""}`);
+
+  updateSessionBarTimer();
+}
+
+// What the timer MEANS — a countdown to the scheduled end, or an elapsed count-up once there is no
+// live schedule left to count down — is decided by computeActiveSessionCountdown, shared with the
+// clipboard title bar and the dashboard card so the three can never disagree (domain/sessionClock.js).
 export function updateSessionBarTimer() {
   const activeSession = deps.getActiveSession();
   if (!activeSession) return;
-  const durationEl = document.getElementById("session-bar-duration");
-  // The bottom active-session bar keeps second-level precision (a separate surface from the
-  // dashboard's session-card status lines, TODO 2.3); .session-card-timer is that dashboard
-  // card's own live timer and must render "01h 32m", same as its non-launched countdown states.
+  const durationEl = document.getElementById("clipboard-bar-duration");
+  // This bar keeps second-level precision (a separate surface from the dashboard's session-card
+  // status lines, TODO 2.3); .session-card-timer is that dashboard card's own live timer and must
+  // render "01h 32m", same as its non-launched countdown states.
   let text = "";
   let cardText = "";
   let isOvertime = false;
@@ -59,96 +136,4 @@ export function updateSessionBarTimer() {
     const bar = el.closest(".session-live-bar");
     if (bar) bar.classList.toggle("overtime", isOvertime); // warn the whole bar on overtime
   }
-}
-
-// Session name, participant count, and scheduled time range for the active bar.
-// Ad-hoc sessions (started without a source session) fall back to a generic label — there
-// is no scheduled title or time range to show.
-export function renderActiveSessionBarLabels() {
-  const activeSession = deps.getActiveSession();
-  if (!activeSession) return;
-  const titleEl = document.getElementById("session-bar-title");
-  const metaEl = document.getElementById("session-bar-meta");
-  if (!titleEl || !metaEl) return;
-  const { t } = deps;
-
-  const sourceSession = activeSession.sourceSession;
-  const count = activeSession.participants.length;
-  const clientsLabel = `${count} ${t("bar_clients_label")}`;
-
-  titleEl.textContent = sourceSession
-    ? sourceSession.titles.join(" + ")
-    : t("live_tracking_clipboard");
-  metaEl.textContent = sourceSession
-    ? `${clientsLabel} · ${sourceSession.timeLabel}`
-    : clientsLabel;
-}
-
-// The next session the idle bar should refer to: the earliest slot today that hasn't
-// finished yet (covers both "not started" and "in progress but not launched"), or —
-// if today has nothing left — the earliest slot tomorrow. Returns null when there's
-// nothing scheduled in either bucket.
-function getNextUpcomingSessionGroup() {
-  const state = deps.getState();
-  const { parseTimeRange, getOverlappingSessions } = deps;
-  const sessions = state.sessions || [];
-  const now = new Date();
-  const nowMinutes = now.getHours() * 60 + now.getMinutes();
-
-  const pickEarliest = (list) => {
-    let best = null;
-    let bestStart = Infinity;
-    for (const s of list) {
-      const r = parseTimeRange(s.time);
-      if (r && r.start < bestStart) {
-        bestStart = r.start;
-        best = s;
-      }
-    }
-    return best;
-  };
-
-  const todayCandidates = sessions.filter((s) => {
-    if (s.day !== "today") return false;
-    const r = parseTimeRange(s.time);
-    return r && r.end >= nowMinutes;
-  });
-
-  const anchor =
-    pickEarliest(todayCandidates) || pickEarliest(sessions.filter((s) => s.day === "tomorrow"));
-  if (!anchor) return null;
-
-  return { day: anchor.day, sessions: getOverlappingSessions(anchor, sessions) };
-}
-
-// Idle bar: colour-distinct from the active state, names the next upcoming session(s)
-// (merged when several run in the same slot), and its click target opens that same
-// clipboard directly. Hides entirely when nothing is scheduled to show.
-export function renderIdleSessionBar() {
-  if (deps.getActiveSession()) return;
-  const bar = document.getElementById("active-session-bar");
-  if (!bar) return;
-  const { t, buildSessionMeta, formatSignedDuration, getSessionDayDate } = deps;
-
-  const next = getNextUpcomingSessionGroup();
-  if (!next || next.sessions.length === 0) {
-    bar.classList.add("hidden");
-    delete bar.dataset.nextSessionId;
-    return;
-  }
-
-  const meta = buildSessionMeta(next.sessions, next.day, getSessionDayDate);
-  const participantCount = new Set(next.sessions.flatMap((s) => s.participants)).size;
-  const startsInSec = Math.round((meta.startDate.getTime() - Date.now()) / 1000);
-
-  bar.classList.remove("hidden");
-  bar.classList.add("is-idle");
-  bar.dataset.nextSessionId = next.sessions[0].id;
-
-  document.getElementById("session-bar-title").textContent =
-    `${t("next_session_label")}: ${meta.titles.join(" + ")}`;
-  document.getElementById("session-bar-meta").textContent =
-    `${participantCount} ${t("bar_clients_label")} · ${meta.timeLabel}`;
-  document.getElementById("session-bar-duration").textContent = formatSignedDuration(startsInSec);
-  document.getElementById("session-bar-duration").classList.remove("overtime");
 }

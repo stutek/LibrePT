@@ -36,7 +36,7 @@
 body:has(#active-session-overlay:not(.hidden)) .notification-area.has-active-session {
   --notif-handle-height: calc(56px + var(--safe-bottom));
 }
-body:has(#active-session-overlay:not(.hidden)) .notification-area .active-session-bar {
+body:has(#active-session-overlay:not(.hidden)) .notification-area .clipboard-bar {
   display: none !important;
 }
 .notification-area.is-expanded {
@@ -131,8 +131,14 @@ body:has(#active-session-overlay:not(.hidden))
   transform: rotate(180deg);
 }
 
-/* Active Session Bar integration inside notification-area */
-.notification-area .active-session-bar {
+/* Live-clipboard bar, sharing the handle bar with the notification summary */
+.notification-area .clipboard-bar {
+  /* A <button>, so the whole strip is the tap target rather than the 14px of title inside it
+     (AGENT_RULES §2.D.1) — these three reset the UA button styling the rest of the rule replaces. */
+  border: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
   position: relative;
   bottom: auto;
   left: auto;
@@ -151,16 +157,7 @@ body:has(#active-session-overlay:not(.hidden))
 .notification-area.has-active-session #notification-summary-badge {
   display: none;
 }
-.notification-area .active-session-bar.is-idle {
-  background: color-mix(in srgb, var(--secondary) 92%, var(--bg-color));
-  color: var(--text-main);
-  box-shadow: none;
-  border: 1px solid var(--card-border);
-}
-.notification-area .active-session-bar.is-idle .pulse-indicator {
-  animation: none;
-  opacity: 0.5;
-}
+
 .session-bar-content {
   gap: 10px;
 }
@@ -234,9 +231,6 @@ body:has(#active-session-overlay:not(.hidden))
 }
 .session-bar-actions .icon-btn:hover {
   background: rgba(9, 9, 11, 0.1);
-}
-.active-session-bar.is-idle .inline-timer-btn {
-  display: none;
 }
 
 /* Expanded Drawer Feed */
