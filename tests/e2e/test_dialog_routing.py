@@ -88,7 +88,7 @@ def test_reload_reopens_the_routed_dialog(page, local_server):
 
 
 def test_build_stamp_does_not_also_navigate_home(page, local_server):
-    """The stamp sits inside #logo-area, whose click goes home — that must not close the dialog."""
+    """The stamp once sat inside #logo-area, whose click goes home; that must never close the dialog."""
     page.goto(local_server + "exercises")
     page.wait_for_selector("#view-exercises.active")
     page.locator("#app-version").click()

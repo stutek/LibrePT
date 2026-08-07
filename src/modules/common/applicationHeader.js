@@ -250,17 +250,17 @@ export function renderHeaderShell() {
       <div class="logo-area" id="logo-area">
         <img class="logo-icon" src="icons/icon-64.png" alt="" width="26" height="26">
         <h1>LibrePT</h1>
-        <!-- The word PREVIEW is spelled out, not reduced to an icon. It briefly wasn't: the pill
-             was shrunk to an amber triangle pinned to the logo's corner because at that size the
-             wordmark would be illegible, and because a pill in this flex row costs horizontal
-             width that narrow phones (Galaxy S23 Ultra and similar) took out of <h1>. But a bare
-             pulsing triangle is an unexplained warning — its meaning lived only in an aria-label
-             and an external link needing signal, which is the hover problem in another costume
-             (AGENT_RULES §2.D.1) for what is a data-loss warning.
-             The width it costs is handled rather than avoided: the pill never shrinks
-             (flex-shrink: 0) and <h1> ellipsizes instead, so the wordmark degrades gracefully
-             while the warning always reads. The full notice is still one tap away in
-             #dialog-build-info, which the version stamp also opens. -->
+      </div>
+
+      <!-- Both build markers stack here, PREVIEW over the version stamp: they answer the same
+           question ("what am I running?"), and side by side in the logo row the pill was taking
+           horizontal space out of <h1> on narrow phones (Galaxy S23 Ultra and similar). Stacked,
+           it costs height the header already has instead of width it does not.
+           The word PREVIEW is spelled out, not reduced to an icon. It briefly wasn't — a bare
+           pulsing triangle is an unexplained warning, with its meaning reachable only through an
+           aria-label and an external link, which is the hover problem in another costume
+           (AGENT_RULES §2.D.1) for what is a data-loss warning. -->
+      <div class="header-build-stack">
         <a id="preview-badge" class="preview-badge"
            href="https://github.com/stutek/LibrePT/blob/main/docs/PREVIEW.md"
            target="_blank" rel="noopener noreferrer"
@@ -268,9 +268,6 @@ export function renderHeaderShell() {
           <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
           <span id="preview-badge-label" class="preview-badge-label">PREVIEW</span>
         </a>
-      </div>
-
-      <div class="header-build-stack">
         <!-- Tappable: the long build identity used to live in a \`title\` tooltip, which a phone
              cannot reach. Opens #dialog-build-info instead. -->
         <button type="button" id="app-version" class="app-version" aria-label="Build version — tap for details" aria-haspopup="dialog"></button>
@@ -375,13 +372,6 @@ export function setupApplicationHeader() {
     logoArea.addEventListener("click", () => {
       deps.navigateToPath("/");
     });
-  }
-
-  // The PREVIEW tag lives inside the logo area but is its own link (risks/data-loss notice).
-  // Stop its click from bubbling to the logo's home-navigation so it only opens the notice.
-  const previewBadge = document.getElementById("preview-badge");
-  if (previewBadge) {
-    previewBadge.addEventListener("click", (e) => e.stopPropagation());
   }
 
   // Language switcher setup

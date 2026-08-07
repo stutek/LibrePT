@@ -86,11 +86,14 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav {
      and action buttons keep their size (see .header-build-stack / .header-actions). */
   min-width: 0;
 }
-/* Build stamp's own slot — the PREVIEW pill lives in .logo-area, not here, so this no longer
-   needs to stack with anything. */
+/* The two build markers, stacked: PREVIEW pill over the version stamp, both centred on the same
+   vertical axis so the narrower stamp reads as belonging to the pill above it. */
 .header-build-stack {
   display: flex;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
+  gap: 2px;
   flex-shrink: 0;
 }
 /* Small, muted, monospace build stamp. It is a BUTTON (tap opens the build-info dialog): the
@@ -137,8 +140,8 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav {
    tried, and a lone pulsing triangle is an unexplained warning (see the comment in
    applicationHeader.js).
    The padding is sized for a thumb, not for the 9px text — the text is small, but the tap target
-   must not be (AGENT_RULES §2.D.1). It never shrinks, so the wordmark beside it ellipsizes first
-   rather than the warning being squeezed away. */
+   must not be (AGENT_RULES §2.D.1). It never shrinks, so the wordmark ellipsizes first rather
+   than the warning being squeezed away. */
 .preview-badge {
   display: inline-flex;
   align-items: center;
@@ -187,9 +190,9 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav {
     }
   }
 }
-/* Phones: everything in the logo cluster tightens a step — icon, wordmark and the PREVIEW pill —
-   so the warning keeps its full text on a narrow screen instead of the wordmark losing more
-   characters to it. */
+/* Phones: the logo cluster and the build stack each tighten a step — icon, wordmark and the
+   PREVIEW pill — so the warning keeps its full text on a narrow screen instead of the wordmark
+   losing more characters to it. */
 @media (max-width: 600px) {
   .header-container {
     padding: 0 10px;
