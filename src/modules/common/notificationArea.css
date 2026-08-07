@@ -286,6 +286,20 @@ body:has(#active-session-overlay:not(.hidden))
   flex-direction: column;
   gap: 12px;
 }
+/* Trails the list inside the scrolled feed, so it never competes with the header for width. */
+.notification-feed-footer {
+  display: flex;
+  margin-top: 4px;
+}
+.notification-mark-all-btn {
+  width: 100%;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+}
 .notification-card {
   background: var(--bg-surface);
   border: 1px solid var(--card-border);

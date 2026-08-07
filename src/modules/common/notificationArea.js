@@ -217,9 +217,9 @@ export function renderNotificationArea() {
     feedCountEl.classList.toggle("has-unread", unreadCount > 0);
   }
 
-  const markAllBtn = document.getElementById("btn-mark-all-read");
-  if (markAllBtn) {
-    markAllBtn.style.display = unreadCount > 0 ? "inline-flex" : "none";
+  const markAllFooter = document.querySelector(".notification-feed-footer");
+  if (markAllFooter) {
+    markAllFooter.style.display = unreadCount > 0 ? "flex" : "none";
   }
 
   if (items.length === 0) {
@@ -295,14 +295,19 @@ export function renderNotificationAreaShell() {
           <span id="notification-feed-title-text">Notifications &amp; Status Feed</span>
         </div>
         <div class="notification-feed-actions">
-          <button type="button" class="btn btn-xs secondary-btn" id="btn-mark-all-read" title="Mark all as read">
-            <i class="fa-solid fa-check-double"></i> <span id="btn-mark-all-read-text">Mark all as read</span>
-          </button>
           <span class="notification-count-pill" id="notification-feed-count">3 unread / 3 all</span>
         </div>
       </div>
       <div class="notification-list" id="notification-list-container">
         <!-- Dynamically populated by notificationArea.js with Welcome Demo, reservations, and alerts -->
+      </div>
+      <!-- Below the feed, not beside the title: at phone widths a labelled button in the header
+           wrapped to two lines and squeezed the count pill. Sitting after the list it also reads
+           as "and now clear the ones you just scrolled past". -->
+      <div class="notification-feed-footer">
+        <button type="button" class="btn secondary-btn notification-mark-all-btn" id="btn-mark-all-read">
+          <i class="fa-solid fa-check-double"></i> <span id="btn-mark-all-read-text">Mark all as read</span>
+        </button>
       </div>
     </div>
 `,
