@@ -1,4 +1,4 @@
-// components/circuitCard.js
+// src/modules/clipboard/circuitCard.js
 // Renders one circuit/giantset card: a grouped block of exercises with a round counter. It shows an
 // optional title, a round badge over the circuit's series, every exercise (and any rest break)
 // listed with a per-exercise feedback trio (Too Easy / Too Hard / Note), and a "Complete round"

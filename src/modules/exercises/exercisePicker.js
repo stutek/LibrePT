@@ -1,4 +1,4 @@
-// src/components/exercisePicker.js — reusable, low-friction exercise picker.
+// src/modules/exercises/exercisePicker.js — reusable, low-friction exercise picker.
 // Renders muscle-group + equipment filter chips over a single-tap list of movements (name +
 // taxonomy badges). Powers the fast-selection flows called for in TODO §13.2: Scenario A
 // (routine builder — filter then drop standardized IDs into a template) and Scenario B (gym-floor

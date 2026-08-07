@@ -1,4 +1,4 @@
-// sw.js — LibrePT service worker ENTRY. Thin lifecycle wiring only: it loads the worker's modules and
+// src/sw.js — LibrePT service worker ENTRY. Thin lifecycle wiring only: it loads the worker's modules and
 // binds the three lifecycle events to them. Every concern lives in its own single-responsibility module
 // under src/sw/, loaded here via importScripts because this is a CLASSIC worker — chosen deliberately
 // over a module worker (`{type:'module'}`) so offline caching keeps working on EVERY browser that can

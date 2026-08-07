@@ -504,6 +504,21 @@ def run_catalog_coverage_check():
         sys.exit(1)
 
 
+def run_module_header_check():
+    """Verifies a module that names its own path names the right one — see agent_tools/module_headers.py.
+
+    AGENT_RULES §5.4 makes line 1 a module's self-documentation, and moving a file is both what
+    invalidates it and the moment nobody thinks to look at line 1. Left unchecked it had rotted to 28
+    modules naming directories the repo no longer has, which does not merely fail to help — it points
+    a reader at somewhere that does not exist.
+    """
+    print("\n  Checking module self-path headers...")
+    from agent_tools import module_headers
+
+    if module_headers.main([]) != 0:
+        sys.exit(1)
+
+
 def run_pipeline_gate_check():
     """Verifies every CI job actually gates the deploy — see agent_tools/pipeline_gates.py.
 
@@ -1203,6 +1218,7 @@ def run_stage_1_parallel():
         "Static Security Audits": run_static_security_checks,
         "Documentation Graph": run_doc_graph_check,
         "Module Catalog Coverage": run_catalog_coverage_check,
+        "Module Headers": run_module_header_check,
         "Icon Coverage": run_icon_coverage_check,
         "Import Layering": run_import_layer_check,
         "Pipeline Gating": run_pipeline_gate_check,

@@ -1625,7 +1625,7 @@ substitution — importers sit at four different depths — and `import_layers.p
   items[]`), `notificationReadState.js` (91–105, 209–219 — it reaches into `storageNamespace`
   directly from a UI module), gestures (405–498); ~250 lines of render remain.
 
-### 24.8 [ ] Stage 8 — names that match what the tree holds
+### 24.8 [~] Stage 8 — names that match what the tree holds
 - Three session directories, none named for its lifecycle stage: `modules/session/` (setup/edit/
   dialogs/bars), `modules/sessionList/` (dashboard), `modules/clipboard/` (the live run).
   "Clipboard" is domain slang the directory tree should not need a glossary for. Rename to
@@ -1633,11 +1633,22 @@ substitution — importers sit at four different depths — and `import_layers.p
   splits land. Two files are filed against their consumer and should move regardless:
   `session/sessionTitleBar.js` renders the live overlay's title, and `session/sessionBar.js` is
   consumed by `sessionList/sessionsView.js`.
-- **14 module headers name directories that no longer exist** (`components/clipboardEditor.js`,
-  `src/helper/sessionCache.js`, …). AGENT_RULES §5.4 makes that first line the module's
-  self-documentation, so today it misdirects. Fix them, and add the path-vs-header check to
-  `agent_tools/` — it is exactly the "will run again, fails silently otherwise, cheap and
-  deterministic" shape §6.2 asks for.
+- **Module headers — SHIPPED 2026-08-07.** The sweep found **28**, not the 14 the audit spotted by
+  eye: `components/`, `helper/`, `src/views/`, and `googleAuth.js` still claiming `modules/common/`
+  after the import-layering gate moved it to `data/`. Now gated by
+  [agent_tools/module_headers.py](agent_tools/module_headers.py) in Stage 1 and in CI's
+  `structure-checks` job, with `--fix` to rewrite them.
+
+  The rule is narrower than "every module states its path", deliberately. A header that OPENS with a
+  path is making a claim and must be right; one that opens with prose (`// Owns the Client
+  create/edit dialog: …`) is making no claim and is left alone — those are already self-documenting,
+  which is all §5.4 asks. And a path *after* the first token is a reference to a NEIGHBOUR
+  (`// Markup-only companion to activeSessionController.js`), never a self-claim, so it is never
+  "fixed". Getting either direction wrong would have made the check useless: too strict and it
+  nags about good headers, too loose and it rewrites references to other files.
+
+  Why it needed a tool rather than a sweep: moving a file is both what invalidates line 1 and the
+  exact moment nobody thinks to look at line 1. This reorganisation alone moved 11 modules.
 
 **Not a problem, deliberately left alone:** `src/index.css` (773) is a genuine design system;
 `src/data/exercises.js` (476) and the i18n dictionaries (357 each) are flat data. Size alone is not

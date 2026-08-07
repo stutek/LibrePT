@@ -1,4 +1,4 @@
-// components/clientsDirectory.js
+// src/modules/clients/clientsDirectory.js
 // Renders the dashboard "Client Directory" grid: one tappable .client-card per client (avatar,
 // name, truncated goal), filtered by a search query, with an empty-state message. Dependencies
 // are injected by the caller (renderClientsList in app.js) so this stays decoupled and testable.

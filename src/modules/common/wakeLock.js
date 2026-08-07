@@ -1,4 +1,4 @@
-// src/helper/wakeLock.js - Screen Wake Lock API helper
+// src/modules/common/wakeLock.js - Screen Wake Lock API helper
 // Single responsibility: Manage navigator.wakeLock to keep screen active during workouts.
 
 let screenWakeLock = null;

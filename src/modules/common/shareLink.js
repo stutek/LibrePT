@@ -1,4 +1,4 @@
-// helper/shareLink.js
+// src/modules/common/shareLink.js
 // Promo/share deep-links for the demo instance. A link may carry a preselected UI language and
 // colour theme, plus an optional demo-data initializer, in the query string, e.g.
 //

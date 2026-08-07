@@ -1,4 +1,4 @@
-// src/views/editSessionView.js - Modular view renderer for Edit Session & Workout Session Setup view
+// src/modules/session/editSessionView.js - Modular view renderer for Edit Session & Workout Session Setup view
 // Encapsulates the DOM structure and rendering logic for #view-workout-setup.
 
 import { renderMarkupOnce } from "../common/dom.js";

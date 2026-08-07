@@ -1,4 +1,4 @@
-// components/exerciseDeck.js
+// src/modules/clipboard/exerciseDeck.js
 // Renders the active-session exercise stack (the vertical scroll deck): the client's most-recent
 // past session as tappable history cards, then the current routine folded into circuit units
 // (one card per circuit), standalone exercise cards, and standalone rest cards. Every card type is

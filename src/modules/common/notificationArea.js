@@ -1,4 +1,4 @@
-// components/notificationArea.js
+// src/modules/common/notificationArea.js
 // Omnipresent bottom notification and status area replacing the old app footer.
 // Handles:
 //   - Collapsed status bar showing grab handle, active/next session status, and notification count.

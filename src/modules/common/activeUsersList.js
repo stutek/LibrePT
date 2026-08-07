@@ -1,4 +1,4 @@
-// components/activeUsersList.js
+// src/modules/common/activeUsersList.js
 // Renders the participant tabs scroll-fade and tab buttons for selecting active clients in the active session.
 
 // escapeHTML is imported rather than injected: it is a pure helper with no state, and an escaping

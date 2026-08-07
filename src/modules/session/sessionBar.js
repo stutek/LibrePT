@@ -1,4 +1,4 @@
-// components/sessionBar.js
+// src/modules/session/sessionBar.js
 // The bottom "active / next session" bar (#active-session-bar). Two states:
 //   - active: a session is running — shows its title, client count, and a countdown to the
 //     scheduled end (goes negative once it overruns).

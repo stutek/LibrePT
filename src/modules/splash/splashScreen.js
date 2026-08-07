@@ -1,4 +1,4 @@
-// modules/splash/splashScreen.js — the cold-start splash: holds the app mark on screen for a
+// src/modules/splash/splashScreen.js — the cold-start splash: holds the app mark on screen for a
 // minimum time, then either fades out or, for a trainer with no data yet, turns into the
 // onboarding entry point.
 //

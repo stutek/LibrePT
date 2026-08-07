@@ -1,4 +1,4 @@
-// components/sessionTimeline.js — the dashboard's continuous, time-ordered session timeline
+// src/modules/sessionList/sessionTimeline.js — the dashboard's continuous, time-ordered session timeline
 // (TODO §7.3 item 8): one vertical scroll, sessions grouped under sticky per-day headers, replacing
 // the old four fixed yesterday/today/tomorrow/upcoming day-columns and their horizontal swipe-deck.
 //

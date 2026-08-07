@@ -1,4 +1,4 @@
-// theme-boot.js — synchronous, render-blocking theme bootstrap.
+// src/theme-boot.js — synchronous, render-blocking theme bootstrap.
 //
 // MUST load as a classic (non-module, non-deferred) <script> in <head> so it runs BEFORE the
 // body paints: it sets the resolved theme class on <html> up front to prevent a flash of the

@@ -1,4 +1,4 @@
-// helper/utils.js
+// src/modules/common/utils.js
 // General stateless utility helpers for formatting, time conversions, HTML escaping, and scheduling
 // time checks. Used widely by components and the app entry.
 //

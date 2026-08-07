@@ -1,4 +1,4 @@
-// components/feedbackModal.js
+// src/modules/common/feedbackModal.js
 // Controls the feedback modal dialog (#dialog-feedback), handles custom outcome tagging,
 // and manages the mock local voice note recorder / speech-to-text transcription.
 //

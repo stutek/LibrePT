@@ -1,4 +1,4 @@
-// components/applicationHeader.js
+// src/modules/common/applicationHeader.js
 // Handles the shared top header bar actions: theme, language, logo clicks, and synchronization/backup badge.
 //
 // deps: {

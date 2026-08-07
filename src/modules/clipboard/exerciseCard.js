@@ -1,4 +1,4 @@
-// components/exerciseCard.js
+// src/modules/clipboard/exerciseCard.js
 // Renders one standalone (non-circuit) exercise card inside the clipboard deck. It has two
 // states: the in-focus card is the live logging surface (target sets/reps/weight plus the
 // one-tap Too Easy / Too Hard / Feedback signals), and the compact row is a collapsed peek

@@ -1,4 +1,4 @@
-// src/helper/dom.js - DOM and Modal lifecycle helpers for DRY component handling
+// src/modules/common/dom.js - DOM and Modal lifecycle helpers for DRY component handling
 
 export function $id(id) {
   return document.getElementById(id);

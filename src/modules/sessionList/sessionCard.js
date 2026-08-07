@@ -1,4 +1,4 @@
-// components/sessionCard.js
+// src/modules/sessionList/sessionCard.js
 // Renders one session card for the dashboard day columns (the tappable card that
 // launches the clipboard). Dependencies are injected by the caller (renderSessions in app.js)
 // so this component stays decoupled from app.js internals and is easy to relocate/test.

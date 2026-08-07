@@ -1,4 +1,4 @@
-// components/backupRestore.js
+// src/modules/common/backupRestore.js
 // Component that manages the data backup, JSON export, and JSON file import actions.
 //
 // deps: {

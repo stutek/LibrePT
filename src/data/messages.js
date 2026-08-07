@@ -1,4 +1,4 @@
-// data/messages.js
+// src/data/messages.js
 // Default notification/message feed, seeded together with the rest of the demo dataset (see
 // seedMockData in app.js). The notification area (components/notificationArea.js) renders from
 // state.notifications, so a genuinely clean install has an empty feed — these appear only once

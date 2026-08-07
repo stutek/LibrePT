@@ -1,4 +1,4 @@
-// components/planAdjustments.js
+// src/modules/plans/planAdjustments.js
 // Logic for displaying the pending plan adjustments widget on the dashboard,
 // as well as launching and submitting the interactive Apply Plan Adjustment Dialog wizard.
 import { renderMarkupOnce } from "../common/dom.js";

@@ -1,4 +1,4 @@
-// components/sessionTitleBar.js
+// src/modules/session/sessionTitleBar.js
 // Renders the header / title block of the Active Session Overlay (date, time, and gym location).
 //
 // deps: {

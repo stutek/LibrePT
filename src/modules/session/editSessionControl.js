@@ -1,4 +1,4 @@
-// src/components/editSessionControl.js
+// src/modules/session/editSessionControl.js
 // Manages the session edit / workout setup control (#view-workout-setup / #dialog-workout-setup),
 // allowing selection of participants, assigning routine plans, and configuring session details before launching the clipboard.
 // Auto-persists form drafts to localStorage so user data survives page reloads.

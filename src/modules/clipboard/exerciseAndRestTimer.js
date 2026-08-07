@@ -1,4 +1,4 @@
-// components/exerciseAndRestTimer.js
+// src/modules/clipboard/exerciseAndRestTimer.js
 // The gym-floor timer stack: one labelled countdown per client, stacked on the clipboard, with
 // synthesized audio + haptic alerts. Replaces the old single floating rest timer.
 //

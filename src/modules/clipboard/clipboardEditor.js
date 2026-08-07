@@ -1,4 +1,4 @@
-// components/clipboardEditor.js
+// src/modules/clipboard/clipboardEditor.js
 // The inline "edit mode" render of the active-session clipboard. When the trainer taps a card's
 // edit (✎) icon, the whole deck flips into this editable list so the plan can be reshaped mid-
 // session. It renders as an ALTERNATE view over the same #active-exercise-scroll-deck container;
