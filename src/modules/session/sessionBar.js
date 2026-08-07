@@ -14,7 +14,7 @@
 //   parseTimeRange, getOverlappingSessions, buildSessionMeta
 // }
 
-import { computeActiveSessionCountdown } from "../common/sessionClock.js";
+import { computeActiveSessionCountdown } from "../../domain/sessionClock.js";
 
 let deps = null;
 

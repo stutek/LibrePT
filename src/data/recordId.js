@@ -1,4 +1,5 @@
-// src/modules/common/recordId.js — the identity primitive every stored record is keyed on (TODO §18.2).
+// src/data/recordId.js — the identity primitive every stored record is keyed on (TODO §18.2).
+// Moved out of modules/common/ in TODO §24.6: it is what storage keys on, as the note below says.
 // Single responsibility: mint a new record id, and read back the creation time encoded inside one.
 //
 // Why this exists as its own module rather than another helper in utils.js: record identity is the

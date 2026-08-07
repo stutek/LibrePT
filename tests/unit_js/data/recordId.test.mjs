@@ -6,7 +6,7 @@
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import * as m from "../../../../src/modules/common/recordId.js";
+import * as m from "../../../src/data/recordId.js";
 
 test("id is fixed width base62 and recognised", () => {
   const ids = Array.from({ length: 200 }, () => m.newRecordId());

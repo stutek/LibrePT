@@ -639,7 +639,7 @@ correctness and isn't introduced.
 
 ### 17.1 [~] Persist the whole structured program into history, via a generic typed item record
 **Core mechanism SHIPPED** (graduated to [CHANGELOG.md](CHANGELOG.md)):
-[sessionItemRecord.js](src/modules/common/sessionItemRecord.js) snapshots the whole program as a
+[sessionItemRecord.js](src/domain/sessionItemRecord.js) snapshots the whole program as a
 flat typed array (`exercise` | `rest`, `circuitId` grouping folded at render), rest- and
 completed-aware readers, back-compat shape guard. Covered by
 `tests/e2e/test_session_item_record.py`.
@@ -673,7 +673,7 @@ With 17.1 preserving the full program, "**Save as routine**" on a history record
 - **Watch item for §18.5**: making template provenance a *hard* reference back to the source history record would create the first cycle in the reference graph (`history → routine → history`), which §18.5's topological migration order forbids. Keep provenance a soft/denormalised field.
 
 ### 17.5 [~] Explicit item ordering — `position` on every session item
-**SHIPPED** in [sessionItemOrder.js](src/modules/common/sessionItemOrder.js) — steps 1–3 of the
+**SHIPPED** in [sessionItemOrder.js](src/data/sessionItemOrder.js) — steps 1–3 of the
 design in [DATA_MODEL §"Ordering"](docs/DATA_MODEL.md) (full rationale: why dense not gapped, why
 not a linked list, rejected alternatives — lives there, not here). Writers stamp `position` at the
 choke point they all funnel through (`saveActiveSessionToCache`) plus `buildProgramSnapshot` for
@@ -760,7 +760,7 @@ conflated and are worth keeping apart:
 ### 18.2 [x] [Decided, CLOSED] Identity: lineage IDs, no ID-mapping table
 **`lineageId` is the record's own `id` — no separate mapping table.** `recordProjections.js`'s
 projections carry `record.id` unchanged from the domain object: today's `id` (UUIDv7 via
-[recordId.js](src/modules/common/recordId.js)) already **is** the lineage id. A genuine split/merge
+[recordId.js](src/data/recordId.js)) already **is** the lineage id. A genuine split/merge
 migration, if one is ever needed, mints per-schema local ids only on the schema that requires them
 — not needed yet. §18.3's completeness check (a set difference over ids) already provides what a
 mapping table would have, at no extra cost.
@@ -1044,7 +1044,7 @@ invariants that follow and still apply:
   nor §17.3 states the basis. Cheapest item on this list.
 - **Taxonomy licensing — checked 2026-07-26, currently clear.** wger's *application* is AGPLv3 but
   LibrePT links no wger code, so AGPL is not engaged; wger's *dataset* is CC-BY-SA 4.0 but
-  [exerciseStandard.js](src/modules/common/exerciseStandard.js) vendors only ~17 generic category and
+  [exerciseStandard.js](src/domain/exerciseStandard.js) vendors only ~17 generic category and
   equipment words, far below any threshold. **Fees are zero on every axis.** The line not to cross:
   bulk-importing wger's ~1000+ exercise entries would engage both CC-BY-SA ShareAlike (the derived
   dataset would have to ship CC-BY-SA with attribution, a licensing split inside an MIT repo, and a
@@ -1450,7 +1450,7 @@ divergence was invisible because every assertion only ever read `<body>`.
 import-free to run before first paint. That is the one duplication here that earns its keep.
 
 ### 24.2 [x] Stage 2 — two `formatDuration`, two `escapeHTML` — **SHIPPED 2026-08-07**
-- `modules/common/utils.js` returned `"05:02"`; `modules/common/exerciseModality.js` returned
+- `modules/common/utils.js` returned `"05:02"`; `domain/exerciseModality.js` returned
   `"5:02"`. Same exported name, different output for the same input. **Not merged** — the padding
   difference is deliberate (one drives a live countdown that must not change width as it ticks, the
   other is a static compact readout), so the modality one became `formatCompactDuration` and both
@@ -1511,7 +1511,9 @@ Extract, highest value first:
 - **`clipboardEditorMarkup.js`** (~202–437) — pure `(item, ctx) → HTML` row/circuit/insert-bar builders.
 - **`listReorder.js`** (~717–803) — a generic tap-nudge/drag reorder engine, not editor-specific.
 
-### 24.6 [ ] Stage 6 — `src/domain/`, a layer for what is neither storage nor UI
+### 24.6 [x] Stage 6 — `src/domain/`, a layer for what is neither storage nor UI — **SHIPPED 2026-08-07**
+**Pulled ahead of §24.4/§24.5** so the pure modules those stages extract land in their final home
+instead of being created in `modules/common/` and moved a commit later.
 `modules/common/` is two directories wearing one name. A DOM-reference count splits its 22 modules
 cleanly: ten have **zero** DOM references (`exerciseModality`, `exerciseStandard`, `repsAndLoad`,
 `sessionClock`, `sessionItemRecord`, `sessionItemOrder`, `recordId`, `sessionCache`,
@@ -1522,11 +1524,25 @@ The test tree already ratifies the split: `tests/unit_js/modules/common/` contai
 DOM-free set and nothing else. The precedent is set too — `googleAuth.js` moved to `data/` for this
 same reason when `import_layers.py` first ran.
 
-Create `src/domain/`, ranked in `import_layers.py`'s `LAYERS` between `data/` and `modules/common/`.
-It takes the pure set plus the pure modules stages 4–5 produce (`sessionPlanFactory`, `quickSignals`,
-`circuitGrouping`). Two go to `data/` instead: `sessionCache.js` (localStorage persistence) and
-`recordId.js` (its own docstring says storage keys on it). `utils.js` and `renderRegistry.js` stay
-in `common/` — genuinely UI-adjacent. Update `sw/cacheManifest.js` and `docs/SRC_MODULES.md`.
+`src/domain/` is now ranked in `import_layers.py`'s `LAYERS` between `data/` and `modules/common/`,
+and holds `exerciseModality`, `exerciseStandard`, `repsAndLoad`, `sessionClock`, `sessionItemRecord`
+— plus whatever stages 4–5 extract. **Three** went to `data/` rather than `domain/`:
+`sessionCache.js` (localStorage persistence), `recordId.js` (its own docstring says storage keys on
+it), and `sessionItemOrder.js` — the last one was going to be `domain/`, but `position` is a stored
+FIELD and `sessionCache.js` needs the logic that keeps it well-formed; a `data/` module may not
+import upward, so the layering itself decided where it belonged. `utils.js` and `renderRegistry.js`
+stayed in `common/` — genuinely UI-adjacent.
+
+The line to hold when adding to either: **`data/` is records at rest** (shape, identity, ordering,
+persistence); **`domain/` is the training vocabulary** (what a modality is, how reps and load are
+authored, what a session's clock means) — pure, no DOM, no storage.
+
+`tests/unit_js/` mirrors the `src/` subpath it covers, so the seven matching test files moved with
+their modules. The 29 import rewrites were done by resolving each specifier rather than by string
+substitution — importers sit at four different depths — and `import_layers.py`'s own
+`broken_imports()` check was the backstop for any path missed. Also updated: `sw/cacheManifest.js`
+(+ `CACHE_NAME`), `docs/SRC_MODULES.md`, `tests/INDEX.md`, `AGENT_RULES.md` §5.2/§5.3, and every
+markdown link across `CHANGELOG.md`, `docs/DATA_MODEL.md` and `use_cases/`.
 
 ### 24.7 [ ] Stage 7 — three more multi-responsibility modules
 - **`applicationHeader.js` (512)** → header shell + menu (~250) once `renderSyncBadge` (76–136) moves

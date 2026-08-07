@@ -19,8 +19,8 @@ import {
   metricLabelKey,
   toSeconds,
   usesLoad,
-} from "../common/exerciseModality.js";
-import { formatLoad, formatReps, hasLoad, loadParts } from "../common/repsAndLoad.js";
+} from "../../domain/exerciseModality.js";
+import { formatLoad, formatReps, hasLoad, loadParts } from "../../domain/repsAndLoad.js";
 import { DeckCard } from "./deckCard.js";
 
 export class ExerciseDeckCard extends DeckCard {

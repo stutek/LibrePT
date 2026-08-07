@@ -9,8 +9,8 @@
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import * as m from "../../../../src/modules/common/sessionItemOrder.js";
-import * as rec from "../../../../src/modules/common/sessionItemRecord.js";
+import * as m from "../../../src/data/sessionItemOrder.js";
+import * as rec from "../../../src/domain/sessionItemRecord.js";
 
 test("positions are dense and unique", () => {
   const items = [{ id: "a" }, { id: "b" }, { id: "c" }, { id: "d" }];

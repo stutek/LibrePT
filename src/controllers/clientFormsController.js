@@ -3,13 +3,13 @@
 // Split 2026-08-01 out of the old formsController.js, which bundled Client, Routine, and Exercise
 // forms in one file despite the three sharing nothing but boilerplate (AGENT_RULES §5.1).
 
+import { newRecordId } from "../data/recordId.js";
 import {
   getActiveDetailClientId,
   renderClientsList,
   showClientDetails,
 } from "../modules/clients/clientsView.js";
 import { $id, closeModal, openModal, renderMarkupOnce } from "../modules/common/dom.js";
-import { newRecordId } from "../modules/common/recordId.js";
 import { getInitials } from "../modules/common/utils.js";
 
 export function renderClientDialog() {

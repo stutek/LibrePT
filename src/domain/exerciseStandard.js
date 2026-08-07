@@ -1,4 +1,4 @@
-// src/modules/common/exerciseStandard.js — crosswalk from LibrePT's movement taxonomy to an
+// src/domain/exerciseStandard.js — crosswalk from LibrePT's movement taxonomy to an
 // established open standard (the wger Workout Manager dataset), so the catalog exports are
 // universally interchangeable with external research / coaching tools (TODO §13.1, UC6 §6).
 //

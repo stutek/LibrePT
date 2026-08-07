@@ -2,7 +2,7 @@
 # The open-standard crosswalk (TODO §13.1, UC6 §6): LibrePT's movement taxonomy mapped to the wger
 # dataset so catalog exports stay universally interchangeable. Pure mapping-model coverage
 # (category/equipment → wger canonical names, the interchange record, CSV shape) moved to
-# tests/unit_js/modules/common/exerciseStandard.test.mjs. What stays here needs the real,
+# tests/unit_js/domain/exerciseStandard.test.mjs. What stays here needs the real,
 # live-booted app: the integration path where the backup dialog's "Export Catalog" button downloads
 # a self-describing interchange file.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.

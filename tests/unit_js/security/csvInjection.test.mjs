@@ -14,7 +14,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { catalogToCsv } from "../../../src/modules/common/exerciseStandard.js";
+import { catalogToCsv } from "../../../src/domain/exerciseStandard.js";
 
 const FIRST_CELL = (name) =>
   catalogToCsv([{ id: "x", name }])

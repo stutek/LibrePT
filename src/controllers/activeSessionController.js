@@ -1,3 +1,20 @@
+import { newRecordId } from "../data/recordId.js";
+import {
+  clearActiveSessionCache,
+  readActiveSessionCache,
+  saveActiveSessionToCache as saveActiveSessionToCacheHelper,
+} from "../data/sessionCache.js";
+import { orderedItems } from "../data/sessionItemOrder.js";
+import { modalityOf, primaryMetricOf } from "../domain/exerciseModality.js";
+import { loadUnitForEquipment } from "../domain/repsAndLoad.js";
+import {
+  computeActiveSessionCountdown,
+  computeScheduleDriftMs,
+  isScheduleDriftWorthAdjusting,
+  proposeAdjustedSchedule,
+  resolveScheduleFromClockValues,
+} from "../domain/sessionClock.js";
+import { buildProgramSnapshot, isRestRecord } from "../domain/sessionItemRecord.js";
 import { renderClientsList } from "../modules/clients/clientsView.js";
 import {
   initActiveSessionBoard,
@@ -21,23 +38,6 @@ import {
   stopTimerIfMatches,
 } from "../modules/clipboard/exerciseAndRestTimer.js";
 import { updateClientTabsFadeState } from "../modules/common/activeUsersList.js";
-import { modalityOf, primaryMetricOf } from "../modules/common/exerciseModality.js";
-import { newRecordId } from "../modules/common/recordId.js";
-import { loadUnitForEquipment } from "../modules/common/repsAndLoad.js";
-import {
-  clearActiveSessionCache,
-  readActiveSessionCache,
-  saveActiveSessionToCache as saveActiveSessionToCacheHelper,
-} from "../modules/common/sessionCache.js";
-import {
-  computeActiveSessionCountdown,
-  computeScheduleDriftMs,
-  isScheduleDriftWorthAdjusting,
-  proposeAdjustedSchedule,
-  resolveScheduleFromClockValues,
-} from "../modules/common/sessionClock.js";
-import { orderedItems } from "../modules/common/sessionItemOrder.js";
-import { buildProgramSnapshot, isRestRecord } from "../modules/common/sessionItemRecord.js";
 import { formatClockFromMinutes, formatDurationHourMin } from "../modules/common/utils.js";
 import {
   releaseScreenWakeLock,

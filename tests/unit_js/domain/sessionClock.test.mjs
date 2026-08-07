@@ -9,7 +9,7 @@
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import * as clock from "../../../../src/modules/common/sessionClock.js";
+import * as clock from "../../../src/domain/sessionClock.js";
 
 const MINUTE = 60 * 1000;
 

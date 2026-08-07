@@ -270,7 +270,7 @@ from `position` and the contiguity invariant, so storing it creates two sources 
 disagree — and their disagreement has no correct resolution. One authoritative field, everything else
 derived.
 
-> **Built** — [sessionItemOrder.js](../src/modules/common/sessionItemOrder.js): `assignPositions`
+> **Built** — [sessionItemOrder.js](../src/data/sessionItemOrder.js): `assignPositions`
 > (stamp dense order on write), `orderedItems` (read in program order), `positionIssues` (the two
 > invariants above, as a query naming what is wrong) and `repairPositions` (renumber from program
 > order). Shipped expand-first, in the order §4 requires: writers stamp positions, readers sort by
@@ -583,7 +583,7 @@ completed stamp read the latter. Nothing else in the app rewrites a `sourceSessi
 A consumer must therefore never treat `endDate` as "the moment this session ends": until the
 adjustment above, it is only where the session was *planned* to end. A session that began after its
 own `endDate` has no countdown left to run, and
-[sessionClock.js](../src/modules/common/sessionClock.js) is the single place that decides so — it
+[sessionClock.js](../src/domain/sessionClock.js) is the single place that decides so — it
 counts up from `startTime` instead, which is why a late start no longer opens on a negative clock.
 
 ---
@@ -636,6 +636,6 @@ the day someone builds a lookup by assembling a key from strings, or introduces 
 - [TODO §20](../TODO.md) — the test tiers this document's §7 was written for
 - [indexedDb.js](../src/data/indexedDb.js) — the adapter implementing §2
 - [recordSchemas.js](../src/data/recordSchemas.js) / [recordProjections.js](../src/data/recordProjections.js) — §4's declared shapes and projections
-- [recordId.js](../src/modules/common/recordId.js) — UUIDv7 identity, doubling as `lineageId` (TODO §18.2)
+- [recordId.js](../src/data/recordId.js) — UUIDv7 identity, doubling as `lineageId` (TODO §18.2)
 - [storageDurability.js](../src/data/storageDurability.js) — §6
 - [PRIVACY.md](../PRIVACY.md) — the GDPR statement §5 serves

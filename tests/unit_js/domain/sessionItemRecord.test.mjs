@@ -6,7 +6,7 @@
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import * as m from "../../../../src/modules/common/sessionItemRecord.js";
+import * as m from "../../../src/domain/sessionItemRecord.js";
 
 test("build program snapshot keeps rests and skips", () => {
   const cs = {

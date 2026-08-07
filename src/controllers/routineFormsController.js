@@ -4,9 +4,9 @@
 // Split 2026-08-01 out of the old formsController.js, which bundled Client, Routine, and Exercise
 // forms in one file despite the three sharing nothing but boilerplate (AGENT_RULES §5.1).
 
+import { newRecordId } from "../data/recordId.js";
+import { parseLoad, parseReps } from "../domain/repsAndLoad.js";
 import { $id, closeModal, openModal, renderMarkupOnce } from "../modules/common/dom.js";
-import { newRecordId } from "../modules/common/recordId.js";
-import { parseLoad, parseReps } from "../modules/common/repsAndLoad.js";
 import { mountExercisePicker } from "../modules/exercises/exercisePicker.js";
 import { addRoutineExerciseRow, renderRoutinesList } from "../modules/plans/plansView.js";
 

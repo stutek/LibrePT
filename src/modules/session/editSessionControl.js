@@ -3,12 +3,12 @@
 // allowing selection of participants, assigning routine plans, and configuring session details before launching the clipboard.
 // Auto-persists form drafts to localStorage so user data survives page reloads.
 
+import { newRecordId } from "../../data/recordId.js";
 import {
   readVersionScoped,
   removeVersionScoped,
   writeVersionScoped,
 } from "../../data/storageNamespace.js";
-import { newRecordId } from "../common/recordId.js";
 
 let deps = null;
 let isPlanningModeActive = false;

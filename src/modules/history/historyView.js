@@ -1,9 +1,13 @@
+import { orderedItems } from "../../data/sessionItemOrder.js";
+import {
+  formatCompactDuration,
+  formatMetricValue,
+  usesLoad,
+} from "../../domain/exerciseModality.js";
+import { formatLoad, formatReps } from "../../domain/repsAndLoad.js";
+import { isRestRecord, isSkippedRecord } from "../../domain/sessionItemRecord.js";
 // src/views/historyView.js - Domain module for global and client workout history logs
 import { renderMarkupOnce } from "../common/dom.js";
-import { formatCompactDuration, formatMetricValue, usesLoad } from "../common/exerciseModality.js";
-import { formatLoad, formatReps } from "../common/repsAndLoad.js";
-import { orderedItems } from "../common/sessionItemOrder.js";
-import { isRestRecord, isSkippedRecord } from "../common/sessionItemRecord.js";
 import { escapeHTML, formatDateStr } from "../common/utils.js";
 
 export function renderHistoryViewShell() {

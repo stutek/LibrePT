@@ -1,4 +1,4 @@
-// src/modules/common/sessionItemRecord.js — the immutable program snapshot stored in history.
+// src/domain/sessionItemRecord.js — the immutable program snapshot stored in history.
 //
 // TODO §17.1: a finished session must persist the WHOLE structured program, not just the performed
 // sets. Previously finishWorkoutSession flattened a session to completed exercises only, dropping
@@ -21,8 +21,8 @@
 // item that is not an explicit rest as an exercise, and readers treat a missing `completed` as done —
 // so old rows render exactly as before.
 
-import { newRecordId } from "./recordId.js";
-import { assignPositions, orderedItems } from "./sessionItemOrder.js";
+import { newRecordId } from "../data/recordId.js";
+import { assignPositions, orderedItems } from "../data/sessionItemOrder.js";
 
 export const isRestRecord = (item) => !!item && item.type === "rest";
 export const isExerciseRecord = (item) => !!item && !isRestRecord(item);

@@ -1,18 +1,18 @@
-// src/views/routinesView.js - Domain module for routines catalog and template editor builder
-import { renderMarkupOnce } from "../common/dom.js";
 import {
   formatMetricValue,
   metricLabelKey,
   modalityOf,
   primaryMetricOf,
   usesLoad,
-} from "../common/exerciseModality.js";
+} from "../../domain/exerciseModality.js";
 import {
   formatLoad,
   formatReps,
   loadInputHTML,
   loadUnitForEquipment,
-} from "../common/repsAndLoad.js";
+} from "../../domain/repsAndLoad.js";
+// src/views/routinesView.js - Domain module for routines catalog and template editor builder
+import { renderMarkupOnce } from "../common/dom.js";
 import { escapeHTML } from "../common/utils.js";
 
 // Navigation deps, set once at boot. Held at module level rather than passed per render because

@@ -15,11 +15,19 @@ exemption is a gate that documents debt instead of preventing it (AGENT_RULES §
 
 The layering, bottom to top — each may import only from layers strictly below it:
 
-    data/          persistence and pure domain logic; imports nothing above itself
+    data/          persistence and record shape; imports nothing above itself
+    domain/        the training vocabulary — pure, no DOM, no storage (TODO §24.6)
     modules/common/ shared UI helpers, usable by any feature
     modules/<feat>/ one feature's views and components
     controllers/   orchestration; wires modules together and owns app-level actions
     app.js         composition root
+
+`domain/` was carved out of `modules/common/`, which had become two directories wearing one name:
+a DOM-reference count split its 22 modules cleanly, ten with zero and the rest with 5-35. A
+directory documented as "shared UI helpers" holding the exercise-modality axis and the session
+clock is a directory that has stopped describing itself, and there was nowhere to put a pure
+domain rule that both storage and UI needed. The test tree had already ratified the split before
+the code did — `tests/unit_js/` contained exactly the DOM-free set and nothing else.
 
 CROSS-FEATURE imports are deliberately allowed and not flagged. Three exist (the adjustment wizard
 mounting the exercise picker, the client card rendering history rows, the dashboard showing the
@@ -41,9 +49,10 @@ SRC = REPO_ROOT / "src"
 # Lower number = lower layer. A module may import only from a STRICTLY lower rank.
 LAYERS = {
     "data": 0,
-    "modules/common": 1,
-    "modules": 2,
-    "controllers": 3,
+    "domain": 1,
+    "modules/common": 2,
+    "modules": 3,
+    "controllers": 4,
 }
 
 IMPORT = re.compile(r"""^\s*import\s[^'"]*['"]([^'"]+)['"]""", re.M)

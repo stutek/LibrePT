@@ -6,7 +6,7 @@
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import * as m from "../../../../src/modules/common/exerciseModality.js";
+import * as m from "../../../src/domain/exerciseModality.js";
 
 test("metric formatting model renders the right units", () => {
   const results = {

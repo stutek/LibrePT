@@ -15,8 +15,8 @@
 //   completeCircuitRound(circuitId), onFocus(firstExerciseIndex)
 // }
 
-import { formatLoad, hasLoad, isFailureReps } from "../common/repsAndLoad.js";
-import { isRestRecord } from "../common/sessionItemRecord.js";
+import { formatLoad, hasLoad, isFailureReps } from "../../domain/repsAndLoad.js";
+import { isRestRecord } from "../../domain/sessionItemRecord.js";
 import { DeckCard } from "./deckCard.js";
 
 function buildCircuitBreakRowHTML(ex, t) {

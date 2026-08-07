@@ -5,7 +5,7 @@
 # round-trip that rebuilds a live plan from the stored snapshot, through the real
 # openSessionFromHistory controller. The History RENDER of that structure moved to
 # tests/medium/test_history_structured_program.py, and the pure buildProgramSnapshot model to
-# tests/unit_js/modules/common/sessionItemRecord.test.mjs.
+# tests/unit_js/domain/sessionItemRecord.test.mjs.
 # Fixtures (page, local_server) come from tests/conftest.py; the demo dataset is auto-seeded.
 
 

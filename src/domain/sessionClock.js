@@ -1,4 +1,4 @@
-// src/modules/common/sessionClock.js
+// src/domain/sessionClock.js
 // Reconciles an active session's SCHEDULE (`sourceSession.startDate`/`endDate` — what was planned)
 // against the WALL CLOCK (when the trainer actually tapped Start). Pure: no DOM, no persistence,
 // no formatting — every caller owns its own rendering.

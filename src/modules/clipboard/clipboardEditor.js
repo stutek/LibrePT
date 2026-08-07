@@ -25,8 +25,8 @@
 //   markNewItem(id)// hand the next render the id of an item this editor just inserted
 // }
 
-import { metricLabelKey, usesLoad } from "../common/exerciseModality.js";
-import { newRecordId } from "../common/recordId.js";
+import { newRecordId } from "../../data/recordId.js";
+import { metricLabelKey, usesLoad } from "../../domain/exerciseModality.js";
 import {
   formatLoad,
   formatReps,
@@ -36,8 +36,8 @@ import {
   parseLoad,
   parseReps,
   repsPresetListId,
-} from "../common/repsAndLoad.js";
-import { isRestRecord as isRest } from "../common/sessionItemRecord.js";
+} from "../../domain/repsAndLoad.js";
+import { isRestRecord as isRest } from "../../domain/sessionItemRecord.js";
 
 const DEFAULT_SERIES = 3;
 const DEFAULT_REST = 30; // seconds, when injecting a fresh rest

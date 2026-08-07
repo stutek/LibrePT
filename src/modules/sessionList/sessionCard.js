@@ -6,7 +6,7 @@
 // deps: { state, t, escapeHTML, launchClipboardDirectly, sessionDayTemporal,
 //         activeId, saveToLocalStorage, rerenderSessions }
 
-import { computeActiveSessionCountdown } from "../common/sessionClock.js";
+import { computeActiveSessionCountdown } from "../../domain/sessionClock.js";
 import {
   formatDurationHM,
   formatDurationHourMin,

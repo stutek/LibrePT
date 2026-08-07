@@ -50,6 +50,7 @@ import {
   setupRoutineForms as setupRoutineFormsController,
 } from "./controllers/routineFormsController.js";
 import { onSyncCountsChanged, primeAheadCache } from "./data/driveSyncService.js";
+import { newRecordId } from "./data/recordId.js";
 import {
   getState,
   loadSavedState,
@@ -60,6 +61,7 @@ import {
   setState,
   stateHasData,
 } from "./data/stateStore.js";
+import { repsPresetsDatalistHTML } from "./domain/repsAndLoad.js";
 import { applyStaticDOMMappings } from "./i18n/domMappings.js";
 import { dictionaryFor, hasChosenLanguage, isSupportedLang, resolveLang } from "./i18n/index.js";
 import { renderClientsDirectory } from "./modules/clients/clientsDirectory.js";
@@ -85,9 +87,7 @@ import { prepareDriveSyncCard } from "./modules/common/driveSyncUi.js";
 import { openFeedbackModal } from "./modules/common/feedbackModal.js";
 import { renderNotificationArea } from "./modules/common/notificationArea.js";
 import { populateDropdownSelectors as populateDropdownsController } from "./modules/common/populateDropdownSelectors.js";
-import { newRecordId } from "./modules/common/recordId.js";
 import { registerShellRender, runShellRenders } from "./modules/common/renderRegistry.js";
-import { repsPresetsDatalistHTML } from "./modules/common/repsAndLoad.js";
 import { INIT_DEMO_DATA, getShareParams } from "./modules/common/shareLink.js";
 import { applyThemeSwitcherLabels, initTheme } from "./modules/common/theme.js";
 import {

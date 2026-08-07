@@ -9,7 +9,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import * as proj from "../../../src/data/recordProjections.js";
 import * as schemas from "../../../src/data/recordSchemas.js";
-import * as rec from "../../../src/modules/common/sessionItemRecord.js";
+import * as rec from "../../../src/domain/sessionItemRecord.js";
 
 // Real object literals the app's write path actually builds — mirrors recordSchemas.test.mjs's
 // live-writer fixtures, reused here across every live schema rather than just one.

@@ -13,7 +13,7 @@ import { test } from "node:test";
 import * as seeds from "../../../src/data/index.js";
 import * as proj from "../../../src/data/recordProjections.js";
 import * as m from "../../../src/data/recordSchemas.js";
-import * as rec from "../../../src/modules/common/sessionItemRecord.js";
+import * as rec from "../../../src/domain/sessionItemRecord.js";
 
 test("field issues catches missing required and wrong type", () => {
   const shape = {

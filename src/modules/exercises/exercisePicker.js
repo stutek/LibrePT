@@ -3,7 +3,7 @@
 // taxonomy badges). Powers the fast-selection flows called for in TODO §13.2: Scenario A
 // (routine builder — filter then drop standardized IDs into a template) and Scenario B (gym-floor
 // swap — pre-filtered to the same muscle group so the substitute inherits the correct volume bucket).
-import { modalityOf } from "../common/exerciseModality.js";
+import { modalityOf } from "../../domain/exerciseModality.js";
 import { escapeHTML } from "../common/utils.js";
 
 const MUSCLE_GROUPS = [

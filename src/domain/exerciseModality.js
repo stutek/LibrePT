@@ -1,4 +1,4 @@
-// src/modules/common/exerciseModality.js — the exercise MODALITY axis: how a movement is LOGGED.
+// src/domain/exerciseModality.js — the exercise MODALITY axis: how a movement is LOGGED.
 //
 // Orthogonal to the structural item type (exercise / rest / circuit) and to equipment-derived
 // load. Modality decides which TARGET a movement is programmed and logged against (TODO §13.3 / §17.1):

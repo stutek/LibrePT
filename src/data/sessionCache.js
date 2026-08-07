@@ -1,12 +1,9 @@
-// src/helper/sessionCache.js - Active session local storage cache helper
+// src/data/sessionCache.js - Active session local storage cache helper
+// In data/ (TODO §24.6): it is localStorage persistence, not a UI helper.
 // Single responsibility: Handle JSON serialization and recovery of ongoing session state in localStorage.
 
-import {
-  readVersionScoped,
-  removeVersionScoped,
-  writeVersionScoped,
-} from "../../data/storageNamespace.js";
 import { assignPositions, positionIssues, repairPositions } from "./sessionItemOrder.js";
+import { readVersionScoped, removeVersionScoped, writeVersionScoped } from "./storageNamespace.js";
 
 // Version-scoped: a cached live session is written by one build's plan shape (see storageNamespace).
 const CACHE_KEY = "librept_active_session";

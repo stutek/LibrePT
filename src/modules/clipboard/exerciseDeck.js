@@ -16,10 +16,10 @@
 //   onRerender()   // re-render the whole board (past-card toggle / circuit save)
 // }
 
-import { formatMetricValue, usesLoad } from "../common/exerciseModality.js";
-import { newRecordId } from "../common/recordId.js";
-import { formatLoad, formatReps } from "../common/repsAndLoad.js";
-import { exerciseRecordsOf, isRestRecord } from "../common/sessionItemRecord.js";
+import { newRecordId } from "../../data/recordId.js";
+import { formatMetricValue, usesLoad } from "../../domain/exerciseModality.js";
+import { formatLoad, formatReps } from "../../domain/repsAndLoad.js";
+import { exerciseRecordsOf, isRestRecord } from "../../domain/sessionItemRecord.js";
 import { CircuitDeckCard } from "./circuitCard.js";
 import { ExerciseDeckCard } from "./exerciseCard.js";
 import { PastDeckCard } from "./pastDeckCard.js";

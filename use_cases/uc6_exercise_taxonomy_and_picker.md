@@ -92,7 +92,7 @@ whole roster.
 ## 4. Polymorphic Reps & Load
 
 A set is not always "3 × 10 × 40 kg". Reps and load are **polymorphic**, resolved by
-[../src/helper/repsAndLoad.js](../src/modules/common/repsAndLoad.js):
+[../src/domain/repsAndLoad.js](../src/domain/repsAndLoad.js):
 
 - **Reps**: a count (`10`), a range (`8-12`), a hold/time (`30s`), or **to-failure** (`max`, the
   engine's failure token).
@@ -105,14 +105,14 @@ load**, not equipment alone: loaded compounds → *strength* (`3/5/8/10/max`), l
 *hypertrophy* (`8/10/12/15/max`), core & most bodyweight movements → *endurance* (`10/20/50/max`),
 mobility → *time* (`20s/30s/45s/60s`) — with a bodyweight override that keeps vertical pulls
 (pull-ups) at *strength*. The tiers live only in
-[../src/helper/repsAndLoad.js](../src/modules/common/repsAndLoad.js) (`REPS_TIERS`); the
+[../src/domain/repsAndLoad.js](../src/domain/repsAndLoad.js) (`REPS_TIERS`); the
 `<datalist>`s are **generated from them at boot**, so nothing is hardcoded in markup, and the PT can
 always type any value regardless of the suggestion.
 
 ## 5. Exercise Modality — how a movement is logged
 
 Reps/load is only one of several logging shapes. Each movement carries a **modality** axis
-([../src/modules/common/exerciseModality.js](../src/modules/common/exerciseModality.js)) that decides
+([../src/domain/exerciseModality.js](../src/domain/exerciseModality.js)) that decides
 what its target *means* — orthogonal to equipment-derived load and to the structural item type
 (exercise / rest / circuit):
 
@@ -154,7 +154,7 @@ The catalog is only useful for long-term, cross-tool analytics if its taxonomy s
 other software understands. LibrePT therefore maps its two wger-aligned axes onto the **wger Workout
 Manager** open dataset — the interchange target chosen because it is genuinely open (AGPL, open data)
 where ExRx is proprietary
-([../src/modules/common/exerciseStandard.js](../src/modules/common/exerciseStandard.js)):
+([../src/domain/exerciseStandard.js](../src/domain/exerciseStandard.js)):
 
 - **Mapping key is the canonical name, not a numeric id.** wger's primary keys are per-instance and
   unstable; the category/equipment **name** is what actually round-trips between installs. LibrePT
@@ -181,7 +181,7 @@ Delivers TODO §13.1's last bullet (adopt an open standard for interchangeable e
 | :--- | :--- |
 | Taxonomy catalog (equipment + pattern badges) | [../src/data/exercises.js](../src/data/exercises.js) · `EXERCISES` |
 | Filtered movement picker modal (Scenario A/B) | [../src/modules/exercises/exercisePicker.js](../src/modules/exercises/exercisePicker.js) · `mountExercisePicker` |
-| Polymorphic reps/load parse, format & equipment-derived units | [../src/helper/repsAndLoad.js](../src/modules/common/repsAndLoad.js) · `parseRepsTarget` / `formatRepsTarget` / `getLoadUnitForEquipment` |
+| Polymorphic reps/load parse, format & equipment-derived units | [../src/domain/repsAndLoad.js](../src/domain/repsAndLoad.js) · `parseRepsTarget` / `formatRepsTarget` / `getLoadUnitForEquipment` |
 | Custom movement creation (strict inheritance) | [../src/components/exercisePicker.js](../src/modules/exercises/exercisePicker.js) · `renderCustomMovementForm` |
 | Catalog shows equipment/pattern badges, not instructions | [../tests/medium/test_exercise_catalog.py](../tests/medium/test_exercise_catalog.py) · `test_catalog_shows_taxonomy_badges_not_instructions` |
 | Picker search narrows the list live; Enter takes the top match | [../tests/medium/test_clipboard_catalog_picker.py](../tests/medium/test_clipboard_catalog_picker.py) · `test_search_narrows_and_enter_takes_the_top_match` |
@@ -190,13 +190,13 @@ Delivers TODO §13.1's last bullet (adopt an open standard for interchangeable e
 | Row swap retargets the movement in place — slot id, sets and logs preserved | [../tests/medium/test_clipboard_catalog_picker.py](../tests/medium/test_clipboard_catalog_picker.py) · `test_row_catalog_swaps_the_movement_in_place` |
 | Custom movement form enforces name + equipment + pattern | [../tests/medium/test_exercise_catalog.py](../tests/medium/test_exercise_catalog.py) · `test_custom_exercise_requires_taxonomy` |
 | Polymorphic reps/load parse, format & equipment-derived units | [../tests/e2e/test_reps_and_load.py](../tests/e2e/test_reps_and_load.py) · `test_reps_and_load_helpers` |
-| Exercise modality axis + per-metric target formatting | [../src/modules/common/exerciseModality.js](../src/modules/common/exerciseModality.js) · `modalityOf` / `primaryMetricOf` / `formatMetricValue` |
+| Exercise modality axis + per-metric target formatting | [../src/domain/exerciseModality.js](../src/domain/exerciseModality.js) · `modalityOf` / `primaryMetricOf` / `formatMetricValue` |
 | Catalog & picker flag non-strength movements with a modality badge | [../tests/medium/test_exercise_catalog.py](../tests/medium/test_exercise_catalog.py) · `test_catalog_marks_cardio_with_a_modality_badge` |
 | Custom-create reveals the cardio metric selector and persists modality + metric | [../tests/medium/test_exercise_catalog.py](../tests/medium/test_exercise_catalog.py) · `test_create_cardio_exercise_reveals_metric_and_persists` |
-| Metric formatting renders time/distance/calories/watts/hold units | [../tests/unit_js/modules/common/exerciseModality.test.mjs](../tests/unit_js/modules/common/exerciseModality.test.mjs) · `metric formatting model renders the right units` |
+| Metric formatting renders time/distance/calories/watts/hold units | [../tests/unit_js/domain/exerciseModality.test.mjs](../tests/unit_js/domain/exerciseModality.test.mjs) · `metric formatting model renders the right units` |
 | Routine builder authors metric per modality (relabel primary, hide load) | [../tests/medium/test_routine_builder.py](../tests/medium/test_routine_builder.py) · `test_routine_builder_row_is_modality_aware` |
-| Open-standard crosswalk: category/equipment → wger canonical names, honest nulls | [../src/modules/common/exerciseStandard.js](../src/modules/common/exerciseStandard.js) · `wgerCategoryOf` / `wgerEquipmentOf` / `unmappedTerms` |
-| Interchange record preserves LibrePT axes under `x_librept`; CSV crosswalk | [../tests/unit_js/modules/common/exerciseStandard.test.mjs](../tests/unit_js/modules/common/exerciseStandard.test.mjs) · `interchange record preserves librept axes and flags gaps` / `csv export has header and quotes cells` |
+| Open-standard crosswalk: category/equipment → wger canonical names, honest nulls | [../src/domain/exerciseStandard.js](../src/domain/exerciseStandard.js) · `wgerCategoryOf` / `wgerEquipmentOf` / `unmappedTerms` |
+| Interchange record preserves LibrePT axes under `x_librept`; CSV crosswalk | [../tests/unit_js/domain/exerciseStandard.test.mjs](../tests/unit_js/domain/exerciseStandard.test.mjs) · `interchange record preserves librept axes and flags gaps` / `csv export has header and quotes cells` |
 | Backup dialog "Export Catalog" downloads a self-describing interchange file | [../tests/e2e/test_exercise_standard.py](../tests/e2e/test_exercise_standard.py) · `test_catalog_export_button_downloads_interchange_json` |
 | **Security** — a movement name cannot execute as a spreadsheet formula in the exported CSV (CWE-1236) | [../tests/unit_js/security/csvInjection.test.mjs](../tests/unit_js/security/csvInjection.test.mjs) · gated by the `security-tests` CI job, not by ZAP (its baseline scan is passive and this never crosses the network) |
 

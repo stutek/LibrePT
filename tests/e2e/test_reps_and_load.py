@@ -2,7 +2,7 @@
 # The reps/load preset datalists (index.html's #reps-preset-datalists) are generated at boot from
 # REPS_TIERS by app.js's own DOM wiring, not hardcoded markup — this is a real-DOM assertion on the
 # live rendered page, so it stays here. Pure parse/format/derive coverage for
-# helper/repsAndLoad.js moved to tests/unit_js/modules/common/repsAndLoad.test.mjs.
+# domain/repsAndLoad.js moved to tests/unit_js/domain/repsAndLoad.test.mjs.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
 

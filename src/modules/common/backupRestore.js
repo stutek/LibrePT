@@ -16,10 +16,10 @@
 
 import { DEFAULT_SESSIONS } from "../../data/index.js";
 import { describeMigration, migrateState } from "../../data/schemaMigrations.js";
+import { catalogToCsv, catalogToInterchange } from "../../domain/exerciseStandard.js";
 import { isOfflineCachedActive } from "./applicationHeader.js";
 import { renderMarkupOnce } from "./dom.js";
 import { downloadFile } from "./download.js";
-import { catalogToCsv, catalogToInterchange } from "./exerciseStandard.js";
 
 let deps = null;
 

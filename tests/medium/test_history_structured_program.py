@@ -8,7 +8,7 @@
 # Mounted as one view over the same DEFAULT_HISTORY seed the real app boots with, so the structure
 # under test is production's, not a fixture that could drift from it. The re-open round-trip (which
 # rebuilds a live plan through the real controller) stays in tests/e2e/, and the pure
-# buildProgramSnapshot model is in tests/unit_js/modules/common/sessionItemRecord.test.mjs.
+# buildProgramSnapshot model is in tests/unit_js/domain/sessionItemRecord.test.mjs.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
 import pytest

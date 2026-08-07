@@ -8,7 +8,7 @@
 #   1. The headline timer must never open NEGATIVE. It used to: every surface counted down to the
 #      scheduled end, so tapping Start after that end had passed reported an overrun before a
 #      single set was logged (the decision itself is pinned in
-#      tests/unit_js/modules/common/sessionClock.test.mjs).
+#      tests/unit_js/domain/sessionClock.test.mjs).
 #   2. Past a ±15 minute tolerance the trainer is offered the schedule, prefilled with the session
 #      shifted onto the clock — because it is the SCHEDULE that is wrong by then, not the session.
 #

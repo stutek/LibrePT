@@ -13,7 +13,18 @@ tags:
 
 The runtime app lives under `src/` (served as the web root locally and flattened into `dist/`
 on deploy). It's a native ES-module app (`<script type="module" src="app.js">`). `src/app.js`
-is structured into feature modules under `src/modules/` (`session`, `plans`, `clients`, `exercises`, `history`, `common`, `themes`) and data under `src/data/`.
+is structured into feature modules under `src/modules/` (`session`, `plans`, `clients`, `exercises`, `history`, `common`, `themes`), the training vocabulary under `src/domain/`, and storage under `src/data/`.
+
+**The tree is layered, and the layering is gated** by
+[agent_tools/import_layers.py](../agent_tools/import_layers.py) — each layer may import only from
+those strictly below it: `data/` → `domain/` → `modules/common/` → `modules/<feature>/` →
+`controllers/` → `app.js`. The two lowest are the ones easily confused: **`data/` is about records
+at rest** (their shape, identity, ordering, persistence), while **`domain/` is the training
+vocabulary** — what a modality is, how reps and load are authored, what a session's clock means —
+pure, with no DOM and no storage. `domain/` was carved out of `modules/common/` in
+[TODO §24.6](../TODO.md), which had grown into two directories wearing one name: a
+DOM-reference count split its modules cleanly into ten with zero and the rest with 5–35, so a
+directory documented as "shared UI helpers" was also holding half the domain rules.
 
 **`src/index.html` and `src/index.css` are shells, not feature owners.** `index.html` holds only
 `<head>` boilerplate, the boot-critical integrity-error overlay, and empty named canvases
@@ -49,6 +60,14 @@ module, listed in the table below alongside that module's `.js`.
 | [src/data/driveAppData.js](../src/data/driveAppData.js) | `data` | Google Drive `appDataFolder` REST client (TODO §1.5/§3.3): find/download/create/update the app's one hidden sync file. `fetchImpl`-injectable for tests. |
 | [src/data/driveSyncService.js](../src/data/driveSyncService.js) | `data` | Orchestrates one Drive sync pass (TODO §1.5/§3.3): auth → download → three-way merge → apply locally → upload → record the new ancestor. |
 | [src/data/calendarInvite.js](../src/data/calendarInvite.js) | `data` | Builds an RFC 5545 `.ics` VEVENT for a PT-assigned session (TODO §1.1) — LibrePT has no backend/SMTP relay, so this is a downloadable invite file, not a sent email. |
+| [src/data/recordId.js](../src/data/recordId.js) | `data` | Record identity (TODO §18.2): UUIDv7 as fixed-width base62 — cryptographic collision resistance, and string sort order equal to creation order. |
+| [src/data/sessionItemOrder.js](../src/data/sessionItemOrder.js) | `data` | Explicit session-item ordering (TODO §17.5): dense `position` stamped by every writer, program-order reads, and the density + circuit-contiguity invariants that make a scrambled or partial item list detectable at rest. |
+| [src/data/sessionCache.js](../src/data/sessionCache.js) | `data` | Active session local storage cache helper. |
+| [src/domain/repsAndLoad.js](../src/domain/repsAndLoad.js) | `domain` | Polymorphic reps and equipment-derived load helpers. |
+| [src/domain/exerciseModality.js](../src/domain/exerciseModality.js) | `domain` | Exercise modality axis (strength/cardio/stretch/balance) and per-metric target formatting (time/distance/calories/watts/hold). |
+| [src/domain/exerciseStandard.js](../src/domain/exerciseStandard.js) | `domain` | Open-standard crosswalk: maps the catalog's category/equipment onto the wger dataset by canonical name for interchangeable JSON/CSV exports (UC6 §6). |
+| [src/domain/sessionItemRecord.js](../src/domain/sessionItemRecord.js) | `domain` | Immutable history program snapshot: typed items (exercise/rest + circuit grouping), shape guards, and `buildProgramSnapshot` keeping rests + skipped work. |
+| [src/domain/sessionClock.js](../src/domain/sessionClock.js) | `domain` | Wall clock ↔ schedule reconciliation for a live session: the one countdown-vs-count-up decision the bar, title bar and dashboard card all share (a session started after its slot has no countdown left, so it never opens negative), plus the ±15min start-drift test and the shifted-slot proposal behind the adjust dialog. |
 | [src/i18n/index.js](../src/i18n/index.js) | `i18n` | Translation registry: one flat key→string map per locale (`en.js`, `sl.js`). Key parity enforced by unit tests. |
 | [src/modules/sessionList/sessionsView.js](../src/modules/sessionList/sessionsView.js) | `view` | Modular view renderer for the Sessions dashboard: merges/sorts all sessions and groups them into the continuous timeline's per-day sections; owns its `<section id="view-clients">` shell markup. |
 | [src/modules/sessionList/sessionsView.css](../src/modules/sessionList/sessionsView.css) | `styles` | Session booking cards, the sessions title bar/date-picker, the continuous timeline, and the floating "Create Session" button. |
@@ -92,16 +111,8 @@ module, listed in the table below alongside that module's `.js`.
 | [src/modules/history/historyView.js](../src/modules/history/historyView.js) | `view` | Modular view renderer for workout history logs; owns `#view-history`'s markup. |
 | [src/modules/history/historyView.css](../src/modules/history/historyView.css) | `styles` | History card items, the feedback icon/tooltip, and structured history rows. |
 | [src/modules/common/utils.js](../src/modules/common/utils.js) | `helper` | Shared formatting, date conversion, and string helper functions. |
-| [src/modules/common/recordId.js](../src/modules/common/recordId.js) | `helper` | Record identity (TODO §18.2): UUIDv7 as fixed-width base62 — cryptographic collision resistance, and string sort order equal to creation order. |
 | [src/modules/common/dom.js](../src/modules/common/dom.js) | `helper` | DOM helper utilities and modal helpers. |
 | [src/modules/common/download.js](../src/modules/common/download.js) | `helper` | Blob-anchor client-side file download, shared by JSON backup export and calendar-invite `.ics` download. |
-| [src/modules/common/repsAndLoad.js](../src/modules/common/repsAndLoad.js) | `helper` | Polymorphic reps and equipment-derived load helpers. |
-| [src/modules/common/exerciseModality.js](../src/modules/common/exerciseModality.js) | `helper` | Exercise modality axis (strength/cardio/stretch/balance) and per-metric target formatting (time/distance/calories/watts/hold). |
-| [src/modules/common/exerciseStandard.js](../src/modules/common/exerciseStandard.js) | `helper` | Open-standard crosswalk: maps the catalog's category/equipment onto the wger dataset by canonical name for interchangeable JSON/CSV exports (UC6 §6). |
-| [src/modules/common/sessionItemOrder.js](../src/modules/common/sessionItemOrder.js) | `helper` | Explicit session-item ordering (TODO §17.5): dense `position` stamped by every writer, program-order reads, and the density + circuit-contiguity invariants that make a scrambled or partial item list detectable at rest. |
-| [src/modules/common/sessionItemRecord.js](../src/modules/common/sessionItemRecord.js) | `helper` | Immutable history program snapshot: typed items (exercise/rest + circuit grouping), shape guards, and `buildProgramSnapshot` keeping rests + skipped work. |
-| [src/modules/common/sessionCache.js](../src/modules/common/sessionCache.js) | `helper` | Active session local storage cache helper. |
-| [src/modules/common/sessionClock.js](../src/modules/common/sessionClock.js) | `helper` | Wall clock ↔ schedule reconciliation for a live session: the one countdown-vs-count-up decision the bar, title bar and dashboard card all share (a session started after its slot has no countdown left, so it never opens negative), plus the ±15min start-drift test and the shifted-slot proposal behind the adjust dialog. |
 | [src/modules/common/wakeLock.js](../src/modules/common/wakeLock.js) | `helper` | Screen Wake Lock API management helper. |
 | [src/modules/common/activeUsersList.js](../src/modules/common/activeUsersList.js) | `component` | Active-session participant tabs component. |
 | [src/modules/common/activeUsersList.css](../src/modules/common/activeUsersList.css) | `styles` | The participant-tabs row's own styling — wraps onto multiple rows for a merged group session. |

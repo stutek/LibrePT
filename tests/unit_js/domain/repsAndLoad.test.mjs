@@ -5,7 +5,7 @@
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import * as m from "../../../../src/modules/common/repsAndLoad.js";
+import * as m from "../../../src/domain/repsAndLoad.js";
 
 test("reps and load helpers", () => {
   const parseReps = [m.parseReps("10"), m.parseReps("8-12"), m.parseReps("max"), m.parseReps("")];

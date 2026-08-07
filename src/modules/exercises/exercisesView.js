@@ -1,6 +1,6 @@
+import { modalityOf } from "../../domain/exerciseModality.js";
 // src/views/exercisesView.js - Domain module for exercise catalog and filter logic
 import { renderMarkupOnce } from "../common/dom.js";
-import { modalityOf } from "../common/exerciseModality.js";
 import { escapeHTML } from "../common/utils.js";
 
 export function renderExercisesViewShell() {

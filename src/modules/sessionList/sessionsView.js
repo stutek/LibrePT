@@ -1,6 +1,6 @@
+import { modalityOf, primaryMetricOf } from "../../domain/exerciseModality.js";
+import { loadUnitForEquipment } from "../../domain/repsAndLoad.js";
 import { renderMarkupOnce } from "../common/dom.js";
-import { modalityOf, primaryMetricOf } from "../common/exerciseModality.js";
-import { loadUnitForEquipment } from "../common/repsAndLoad.js";
 import { buildSessionMeta, escapeHTML, getOverlappingSessions } from "../common/utils.js";
 import { renderIdleSessionBar, updateSessionBarTimer } from "../session/sessionBar.js";
 import { renderSessionCard } from "./sessionCard.js";

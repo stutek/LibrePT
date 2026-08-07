@@ -6,7 +6,7 @@
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import * as m from "../../../../src/modules/common/exerciseStandard.js";
+import * as m from "../../../src/domain/exerciseStandard.js";
 
 test("crosswalk maps categories and equipment to wger", () => {
   const r = {
