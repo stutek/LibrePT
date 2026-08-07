@@ -1492,9 +1492,9 @@ was split *horizontally* into ~60 small functions but never *vertically*. By con
 | Lines | Concern | Destination |
 | :--- | :--- | :--- |
 | ~~65–174, 238–257~~ | ~~edit-mode flag, one-shot callout, `editorRowId`~~ | **done in §24.3** |
-| 192–302 | focus↔URL resolution, `FOCUS_OWNED_ROUTES` | `modules/session/sessionFocusUrl.js` |
+| ~~192–302~~ | ~~focus↔URL resolution~~ | **partly done in 4b** — see below |
 | 304–473 | history-log / routine → live `clientState` | `sessionPlanFactory.js` (pure) |
-| 528–596 | schedule-drift detection + apply | `modules/session/sessionScheduleAdjust.js` |
+| ~~528–596~~ | ~~schedule-drift detection + apply~~ | **dropped in 4b** — see below |
 | 651–782 | quick signals (toggle, exclusivity, colour) | `quickSignals.js` (pure-ish) |
 | 1260–1403 | DOM wiring / `setupActiveSession` | `controllers/activeSessionWiring.js` |
 | 1448–1604 | finish → history projection | `modules/session/sessionCompletion.js` |
@@ -1505,6 +1505,28 @@ worth stating as a rule: the DECISIONS are pure (what counts as a disposable one
 something the trainer wrote, which tags supersede each other, the severity order behind a card's
 colour) while the MUTATION is not, so the controller keeps thin wrappers over pure functions rather
 than the whole thing moving.
+
+**4b SHIPPED 2026-08-07, deliberately narrower than planned** — `domain/sessionFocus.js`.
+
+Reading the code changed what this stage should be. The plan said "move the focus↔URL block", but
+the block is two different things. The PURE half is a matched pair — `focusRefForItem` (plan item →
+`{type, id}`) and `focusIndexFromRef` (ref → plan index) — and those belong together because they
+are a ROUND TRIP: a URL, a cached session and a running timer all store a ref and later ask for the
+item back. The other half (`sessionFocusPath`, `syncSessionFocusUrl`, `FOCUS_OWNED_ROUTES`) needs
+the router, `window.location` and the edit-mode flag; that is orchestration and it STAYS in the
+controller. Moving it would have been motion, not progress.
+
+`sessionScheduleAdjust` was dropped for the same reason: its arithmetic already lives in
+`domain/sessionClock.js`, and what remains — write the corrected slot to both places that hold one,
+then re-render — is exactly what a controller is for. Splitting it out would have produced a file
+whose only description is "the rest of the schedule adjustment".
+
+**Consolidating the pair fixed a defect by construction.** The ref was built in three places and one
+disagreed: the timer spelled a STANDALONE REST as `{type: "exercise"}`, which `focusIndexFromRef`
+refuses to resolve (its exercise branch excludes rests). `showSessionView` treats an unresolved ref
+as "leave focus alone", so tapping the timer card for a rest landed on the session without focusing
+or revealing the rest it was counting down. One writer and one reader in one file, with a round-trip
+test over every item kind, is what makes that class of drift impossible rather than merely fixed.
 
 **A pre-existing bug surfaced while verifying 4a**, unrelated to the refactor and fixed on its own
 commit: `buildSessionMeta` rewrote a session's `endDate` to `now + 2h` once its slot had passed, and

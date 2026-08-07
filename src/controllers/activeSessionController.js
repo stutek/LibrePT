@@ -20,6 +20,7 @@ import {
   proposeAdjustedSchedule,
   resolveScheduleFromClockValues,
 } from "../domain/sessionClock.js";
+import { focusIndexFromRef, focusRefForItem, isCircuitFocus } from "../domain/sessionFocus.js";
 import { buildProgramSnapshot } from "../domain/sessionItemRecord.js";
 import {
   buildClientStateFromHistoryLog,
@@ -93,6 +94,11 @@ function currentPlanMode() {
 // the deck already import it from this module.
 export { isRestItem };
 
+// Re-exported rather than moved off this module's surface: app.js hands focusIndexFromRef to the
+// router from here, and the deck reads isCircuitFocus from here. The logic lives in
+// domain/sessionFocus.js; these two names are the seam its callers were already wired against.
+export { focusIndexFromRef, isCircuitFocus };
+
 // `newItemId` names a plan item the caller just created (the live deck's +Exercise/+Circuit/+Rest
 // bar), so the editor opens with that row called out instead of dropping the trainer into an
 // otherwise-identical list.
@@ -157,25 +163,6 @@ export function setActiveSession(session) {
   activeSession = session;
 }
 
-// A circuit focus reference. Accepts the pre-rename "superset" spelling wherever a focusRef can
-// have been persisted or shared: renaming a term must not orphan a running timer or a saved link.
-export const isCircuitFocus = (type) => type === "circuit" || type === "superset";
-
-export function focusIndexFromRef(clientState, focusRef) {
-  if (!clientState || !clientState.exercises || !focusRef) return -1;
-  // "superset" is the pre-rename spelling, still arriving from a session cached by an older build
-  // or an old deep link. Treated as the same focus rather than silently matching nothing.
-  if (isCircuitFocus(focusRef.type)) {
-    return clientState.exercises.findIndex((e) => e.circuitId === focusRef.id);
-  }
-  if (focusRef.type === "rest") {
-    return clientState.exercises.findIndex((e) => isRestItem(e) && e.id === focusRef.id);
-  }
-  return clientState.exercises.findIndex(
-    (e) => !isRestItem(e) && !e.circuitId && e.id === focusRef.id,
-  );
-}
-
 export function sessionFocusPath() {
   if (!activeSession) return null;
   const { urlFor } = appDeps;
@@ -194,15 +181,12 @@ export function sessionFocusPath() {
       : urlFor("session.edit", ids);
   }
   const cs = activeSession.clientRoutines[clientId];
-  const ex = cs?.exercises?.[cs.activeExerciseIndex];
-  if (!ex) return urlFor("session.client", ids);
+  const focusRef = focusRefForItem(cs?.exercises?.[cs.activeExerciseIndex]);
+  if (!focusRef) return urlFor("session.client", ids);
   // Built, never spelled: the focus segment was renamed once already (superset → circuit), and a
-  // hand-written path is what quietly survives the next rename as a dead link. A rest is a
-  // first-class focus target exactly like an exercise, so it gets its own segment rather than
-  // being folded into "exercise" (which would mismatch what focusIndexFromRef resolves it back to).
-  const focusType = ex.circuitId ? "circuit" : isRestItem(ex) ? "rest" : "exercise";
-  const focusId = ex.circuitId || ex.id;
-  return urlFor("session.focus", { ...ids, focusType, focusId });
+  // hand-written path is what quietly survives the next rename as a dead link. The segment comes
+  // from the same function the router resolves it back through, so the round trip cannot drift.
+  return urlFor("session.focus", { ...ids, focusType: focusRef.type, focusId: focusRef.id });
 }
 
 // Set the edit-mode flag WITHOUT re-rendering — for the router restoring edit mode from an `/edit`
@@ -652,12 +636,10 @@ function startClientTimer(seconds, type = "rest", label = "") {
   const clientId = activeSession.activeClientId;
   const client = appDeps.state?.clients?.find((c) => c.id === clientId);
   const cs = activeSession.clientRoutines[clientId];
-  const ex = cs?.exercises?.[cs.activeExerciseIndex];
-  const focusRef = ex
-    ? ex.circuitId
-      ? { type: "circuit", id: ex.circuitId }
-      : { type: "exercise", id: ex.id }
-    : null;
+  // The SAME ref builder the URL uses: this one used to spell a standalone rest as an "exercise",
+  // which focusIndexFromRef refuses to resolve, so tapping the timer card never landed on the rest
+  // it was counting down (TODO §24.4).
+  const focusRef = focusRefForItem(cs?.exercises?.[cs.activeExerciseIndex]);
   startTimer({
     clientId,
     clientName: client ? client.name : "",
