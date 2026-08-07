@@ -166,6 +166,31 @@ The Playwright suite already drives real end-to-end flows (gym-floor clipboard l
 - **Partly done**: the biggest gap the tests exercised but no UC specified — the **session day deck, deep-linkable views, and the not-found flow** — is now written up as **[UC5](use_cases/uc5_session_day_deck_and_deep_links.md)** (OKF frontmatter + both INDEX rows + graph links to UC1/UC2/UC4), including a **spec↔test traceability table** mapping each scenario to `test_sessions_dashboard.py` / `test_session_deeplink.py` / `test_error_view.py` / `test_clipboard.py`.
 - **Still open**: (a) the reverse gaps — UC1/UC2 behaviour (voice notes, the feedback→adjustment wizard, plan pivots) that has partial or no test coverage; (b) whether the newer app-surface flows (themes, header menu, first-run terms, sync/backup) each deserve a UC or belong in README feature docs. The interesting reconciliation of *specified-but-untested* is not yet complete.
 
+### 6.3 [ ] The bottom session bar renders nothing — decide whether to restore it or delete it
+
+Found 2026-08-07 while writing a test that asserted against it. `#active-session-bar` and its three
+children (`#session-bar-title`, `#session-bar-meta`, `#session-bar-duration`) are **read by six
+modules and created by none** — no markup in [index.html](src/index.html), none injected by any
+render path. Every write is null-guarded, so nothing throws and nothing logs; the component simply
+has no DOM.
+
+What that means in practice: [sessionBar.js](src/modules/session/sessionBar.js)'s
+`renderActiveSessionBarLabels()` and `renderIdleSessionBar()` are silent no-ops, and the only live
+work `updateSessionBarTimer()` still does is its `.session-card-timer` loop (the dashboard cards'
+timers, which do exist). The bar is also still described as present in
+[UC5](use_cases/uc5_session_day_deck_and_deep_links.md) and catalogued in
+[docs/SRC_MODULES.md](docs/SRC_MODULES.md), so the docs currently describe a surface no trainer can
+see. Dead call sites also sit in [gestureController.js](src/controllers/gestureController.js),
+[routerController.js](src/controllers/routerController.js) and
+[activeSessionController.js](src/controllers/activeSessionController.js).
+
+**Decision needed, not a mechanical fix**: either restore the bar (it was a real feature — an
+always-visible "active / next session" strip with a countdown, and the idle state was the only
+surface naming the next session) or delete the module, its call sites, its CSS in
+[notificationArea.css](src/modules/common/notificationArea.css) and the UC5 text. The notification
+area appears to have taken over the screen space, which suggests deletion — but that should be
+confirmed against what the notification area actually shows before ~200 lines are removed.
+
 ---
 
 ## 7. Feedback Loop
@@ -744,7 +769,33 @@ mapping table would have, at no extra cost.
 time-ordering, doubling as a tiebreak within §18.5's topological order. If "short" ids are wanted,
 shorten by base62-encoding a v7 — never by dropping entropy.
 
-### 18.3 [ ] [Decided] Migration is pre-emptive, resumable, and runs through the normal write layer
+### 18.3 [~] [Decided] Migration is pre-emptive, resumable, and runs through the normal write layer
+
+> **Shipped 2026-08-07 — [readSchema.js](src/data/readSchema.js), pinned by
+> [test_read_schema_toggle.py](tests/e2e/test_read_schema_toggle.py).** Pre-emptive backfill at
+> boot; the switch is a per-install **read re-point** (`DEFAULT_READ_SCHEMA` declares the
+> fresh-install default, the choice is stored per install) and is **reversible**, because the
+> schema being left goes on being star-written. The backfill runs through the normal projection
+> path (`read record → toDomainObject → projectCollection`), honouring the invariant below.
+>
+> **Two deliberate divergences from what this section decided, both because the backfill turned out
+> to fit in ONE transaction:**
+>
+> 1. **Completeness is a stored marker, not a query.** The decision below rejects a flag because one
+>    "written at the wrong moment can drift" — true of a chunked migration, not of this one. The
+>    marker is written *inside the same transaction as the records*, so there is no moment at which
+>    it can be wrong: either both commit or neither does. The set-difference query stays the right
+>    answer if this is ever chunked.
+> 2. **Restartable, not resumable.** One transaction means an interruption commits nothing, so there
+>    is no partial state to resume from — the next boot simply runs it again. Measured: ~22ms for
+>    the 90-record demo set, ~400ms at ~3,000 records. Revisit near ~50k records, where a single
+>    transaction becomes a stall worth splitting — and at that point both decisions below apply
+>    again as written.
+>
+> **Still open from this section**: yielding to user writes; deferring the backfill to
+> idle/charging; and how a failed background backfill reports itself. Also unbuilt: any **UI** for
+> the switch — `setReadSchema` / `upgradableSchemas` exist but nothing offers them to a trainer, and
+> `upgradableSchemas()` is empty until a schema 4 is cut.
 - **Pre-emptive**: migration into a newly-available schema starts *before* the PT opts into anything,
   so a switch is instant. **This closes the old staleness worry** — a speculative copy made ahead of
   time goes stale if the PT keeps working, which is why the retired design redid it at switch time.
@@ -1376,7 +1427,7 @@ forbids `modules/common/` → `controllers/`, and the response at the time was t
 system into the header rather than to notice that a theme service is not a controller. A gate cannot
 see a copy-paste. When an import is refused, check the layering before duplicating.
 
-### 24.1 [ ] Stage 1 — one theme system, not two
+### 24.1 [x] Stage 1 — one theme system, not two — **SHIPPED 2026-08-07**
 `controllers/themeController.js` calls itself "single source of truth for resolving, applying,
 persisting, and localizing theme styles". It is not: `modules/common/applicationHeader.js` carries a
 verbatim copy of all five constants (`THEME_BODY_CLASS`, `THEME_META_COLOR`, `LEGACY_THEME_MAP`,
@@ -1388,8 +1439,15 @@ They have already diverged, which is the live defect: the controller's `applyThe
 `document.documentElement.className`, the header's copy touches `body` only. Theme CSS keys on both
 `html.X` and `body.X`, so after any switcher change the root element keeps the boot theme's class.
 
-Fix: move the module to `src/modules/common/theme.js` (it is a service, not a controller — it
-orchestrates nothing), delete the header's copy, keep ONE `applyTheme` that updates both elements.
+Fixed by moving the module to `src/modules/common/theme.js` (a service, not a controller — it
+orchestrates nothing), deleting the header's copy, and keeping ONE `applyTheme` that updates both
+elements via `classList` rather than assigning `className` (the root and body are shared surfaces;
+assigning the whole attribute would drop any other class a feature had put there).
+`tests/medium/test_theme.py` now asserts the theme class on `<html>` as well as `<body>` — the
+divergence was invisible because every assertion only ever read `<body>`.
+
+`src/theme-boot.js` keeps its own small copy of the theme map, deliberately: it must stay
+import-free to run before first paint. That is the one duplication here that earns its keep.
 
 ### 24.2 [ ] Stage 2 — two `formatDuration`, two `escapeHTML`
 - `modules/common/utils.js` returns `"05:02"`; `modules/common/exerciseModality.js` returns `"5:02"`.

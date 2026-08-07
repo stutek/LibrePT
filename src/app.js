@@ -49,7 +49,6 @@ import {
   openRoutineCreateDialog,
   setupRoutineForms as setupRoutineFormsController,
 } from "./controllers/routineFormsController.js";
-import { applyThemeSwitcherLabels, initTheme } from "./controllers/themeController.js";
 import { onSyncCountsChanged, primeAheadCache } from "./data/driveSyncService.js";
 import {
   getState,
@@ -90,6 +89,7 @@ import { newRecordId } from "./modules/common/recordId.js";
 import { registerShellRender, runShellRenders } from "./modules/common/renderRegistry.js";
 import { repsPresetsDatalistHTML } from "./modules/common/repsAndLoad.js";
 import { INIT_DEMO_DATA, getShareParams } from "./modules/common/shareLink.js";
+import { applyThemeSwitcherLabels, initTheme } from "./modules/common/theme.js";
 import {
   buildSessionMeta,
   escapeHTML,

@@ -22,41 +22,9 @@
 import { driveSyncStatus } from "../../data/driveSyncService.js";
 import { resolveLang } from "../../i18n/index.js";
 import { renderMarkupOnce } from "./dom.js";
-import { getShareParams } from "./shareLink.js";
+import { setupThemeSwitcher } from "./theme.js";
 
 let deps = null;
-
-const DEFAULT_THEME = "daylight";
-const THEME_BODY_CLASS = {
-  midnight: "midnight-theme",
-  daylight: "daylight-theme",
-  red: "red-theme",
-  blossom: "blossom-theme",
-  nebula: "nebula-theme",
-};
-const THEME_META_COLOR = {
-  midnight: "#09090b",
-  daylight: "#f6f7fb",
-  red: "#2a0407",
-  blossom: "#fdf2f8",
-  nebula: "#0b0a1f",
-};
-const THEME_SWITCHER_LABELS = {
-  en: {
-    midnight: "Midnight",
-    daylight: "Daylight",
-    red: "Red",
-    blossom: "Blossom",
-    nebula: "Nebula",
-  },
-  sl: { midnight: "Polnoč", daylight: "Dan", red: "Rdeča", blossom: "Cvet", nebula: "Nebula" },
-};
-const LEGACY_THEME_MAP = {
-  dark: "midnight",
-  light: "daylight",
-  rose: "blossom",
-  violet: "nebula",
-};
 
 export function initApplicationHeader(d) {
   deps = d;
@@ -127,50 +95,6 @@ export function renderSyncBadge() {
     "aria-label",
     `${local} local change${local === 1 ? "" : "s"} to push, ${remoteText}`,
   );
-}
-
-// Map any incoming theme name (current, legacy alias, or unknown) onto a theme that actually
-// exists. Unknown names — including a theme that was later renamed and lives on only in an old
-// share link or a stale localStorage value — resolve to the default so the app never lands in a
-// broken/no-theme state.
-function resolveTheme(theme) {
-  const mapped = LEGACY_THEME_MAP[theme] || theme;
-  return THEME_BODY_CLASS[mapped] ? mapped : DEFAULT_THEME;
-}
-
-function applyTheme(theme) {
-  const activeTheme = resolveTheme(theme);
-  for (const c of Object.values(THEME_BODY_CLASS)) {
-    document.documentElement.classList.remove(c);
-    document.body.classList.remove(c);
-  }
-  document.body.classList.add(THEME_BODY_CLASS[activeTheme]);
-  localStorage.setItem("librept-theme", activeTheme);
-  const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute("content", THEME_META_COLOR[activeTheme]);
-}
-
-export function applyThemeSwitcherLabels() {
-  const sel = document.getElementById("theme-switcher");
-  if (!sel) return;
-  const labels = THEME_SWITCHER_LABELS[resolveLang(deps.getState().lang)];
-  for (const opt of Array.from(sel.options)) {
-    if (labels[opt.value]) opt.textContent = labels[opt.value];
-  }
-}
-
-function setupThemeSwitcher() {
-  // A promo/share link's ?theme= wins over the saved preference on this visit, so the recipient
-  // sees the app as it was shared. resolveTheme() reverts a renamed/unknown theme to the default.
-  const shareTheme = getShareParams().theme;
-  const active = resolveTheme(shareTheme || localStorage.getItem("librept-theme") || DEFAULT_THEME);
-  applyTheme(active);
-  const sel = document.getElementById("theme-switcher");
-  if (sel) {
-    sel.value = active;
-    sel.addEventListener("change", () => applyTheme(sel.value));
-  }
-  applyThemeSwitcherLabels();
 }
 
 export function renderAboutDialog() {
@@ -403,8 +327,9 @@ export function setupApplicationHeader() {
     });
   }
 
-  // Theme switcher setup
-  setupThemeSwitcher();
+  // Theme switcher setup — owned by modules/common/theme.js, which is also what app.js boots the
+  // initial theme through, so the switcher and the boot path can no longer disagree.
+  setupThemeSwitcher(resolveLang(deps.getState().lang));
 
   // Application overflow (☰) menu
   setupAppMenu();

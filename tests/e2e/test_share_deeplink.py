@@ -2,7 +2,7 @@
 # End-to-end coverage of promo/share deep-links: a URL may carry ?lang=, ?theme= and/or ?init= to
 # open the demo with a preselected UI language, colour theme, and (opt-in) demo dataset
 # (src/helper/shareLink.js, consumed in app.js init() for lang + init, and
-# components/applicationHeader.js setupThemeSwitcher for theme).
+# modules/common/theme.js setupThemeSwitcher for theme).
 #
 # Rules under test:
 #   * an unknown/since-renamed theme reverts to the default (daylight); an unknown language falls
