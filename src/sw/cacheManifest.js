@@ -148,7 +148,7 @@ self.swCacheManifest = (() => {
     "./controllers/themeController.js",
     // Icons & Fonts
     "./icons/icon-32.png",
-    "./icons/icon-64.png",
+    "./icons/icon-96.png",
     "./icons/icon-192.png",
     "./icons/icon-512.png",
     "./icons/icon-maskable-512.png",

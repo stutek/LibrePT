@@ -57,24 +57,27 @@ BACKGROUND = "#09090b"
 # Renders the app references directly rather than through the manifest, so nothing else states
 # their sizes: the browser-tab favicon, and the mark in the app's own header.
 #
-# Both crop to the WHISTLE ALONE, not the whole clipboard. Small, the full mark is unreadable — a
-# 32px render of board-plus-clip-plus-whistle resolves to a grey smudge with a green dot in it, and
-# the reference artwork this was cut from hits the same wall in its own 16px sample. One bold shape
-# filling the frame survives the downscale; a composition does not. The crop is measured off the
-# master's green pixels rather than hardcoded, so it follows the artwork if the mark is redrawn.
+# ONLY the favicon crops to the whistle. At 16-32px the full mark is unreadable — board-plus-clip-
+# plus-whistle resolves to a grey smudge with a green dot in it, and the reference artwork this was
+# cut from hits the same wall in its own 16px sample — so the tab gets one bold shape filling the
+# frame. The crop is measured off the master's green pixels rather than hardcoded, so it follows the
+# artwork if the mark is redrawn.
 #
-# The header mark is rendered at 64 for a 26px slot: enough for a 2x phone display without the
-# browser resampling it. The splash screen is the one place the FULL clipboard is used, because
-# there it is large enough to read (see modules/splash/splashScreen.css).
+# The HEADER mark is the full clipboard, and the crop is exactly why it cannot be the whistle: the
+# master's whistle sits on the clipboard's opaque white page, so cropping to it carries that page
+# along as a white plate. In the header that plate reads as a white tile on every theme AND clips
+# the emerald drop-shadow glow to a square behind it (applicationHeader.css) — the glow is drawn
+# from the image's alpha silhouette, and a fully opaque square has none to follow. The full mark's
+# surround is transparent, so the glow traces the board. Rendered at 96 for a 34px slot: enough for
+# a 2x phone display without the browser resampling it.
 FAVICON = (32, "icons/icon-32.png", "any")
-HEADER_MARK = (64, "icons/icon-64.png", "any")
+HEADER_MARK = (96, "icons/icon-96.png", "any")
 
-# The splash is the ONE surface that gets the full clipboard mark, because there it is drawn large
-# enough to read. It is also the only in-app render that is not cropped to the whistle.
+# The splash draws the same full clipboard mark, just far larger.
 SPLASH_MARK = (512, "icons/icon-mark-512.png", "any")
 
 DIRECT_RENDERS = (FAVICON, HEADER_MARK, SPLASH_MARK)
-WHISTLE_CROP_RENDERS = (FAVICON, HEADER_MARK)
+WHISTLE_CROP_RENDERS = (FAVICON,)
 
 # Fraction of the canvas the artwork's longer edge occupies, per purpose. `any` leaves a hair of
 # breathing room; `maskable` is derived, not chosen — see _maskable_scale().

@@ -248,7 +248,7 @@ export function renderHeaderShell() {
     `
     <div class="header-container">
       <div class="logo-area" id="logo-area">
-        <img class="logo-icon" src="icons/icon-64.png" alt="" width="26" height="26">
+        <img class="logo-icon" src="icons/icon-96.png" alt="" width="34" height="34">
         <h1>LibrePT</h1>
       </div>
 

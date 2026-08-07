@@ -116,12 +116,14 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav {
   letter-spacing: 0.3px;
   line-height: 1;
 }
-/* The mark is an <img> (the whistle crop of the app icon), not a font glyph — so it is sized in
+/* The mark is an <img> (the full clipboard-and-whistle icon), not a font glyph — so it is sized in
    px rather than font-size, and `color` no longer applies. The emerald glow is kept: it is what
-   ties the header mark to the --primary accent the rest of the chrome uses. */
+   ties the header mark to the --primary accent the rest of the chrome uses. The glow needs the
+   icon's transparent surround to trace — see agent_tools/icon_render.py's HEADER_MARK for why this
+   is the full mark and not the favicon's whistle crop. */
 .logo-icon {
-  width: 26px;
-  height: 26px;
+  width: 34px;
+  height: 34px;
   display: block;
   filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.4));
 }
@@ -205,8 +207,8 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav {
     gap: 6px;
   }
   .logo-icon {
-    width: 22px;
-    height: 22px;
+    width: 29px;
+    height: 29px;
   }
   .logo-area h1 {
     font-size: 19px;
