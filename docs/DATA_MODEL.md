@@ -536,6 +536,19 @@ The `endDate` clamp is load-bearing rather than cosmetic: `recoverActiveSession(
 session more than two hours past its scheduled end, so a same-day session whose window has already
 closed would otherwise be thrown away the moment it was recovered.
 
+**`startDate`/`endDate`/`timeLabel` are the one part of the seam that is writable after the fact.**
+Tapping Start more than ±15 minutes from `startDate` offers the trainer an adjusted slot
+([sessionStartTimeDialog.js](../src/modules/session/sessionStartTimeDialog.js)); accepting rewrites
+all three here **and** on every `state.sessions` record the aggregate was built from (`ids`, else
+`id`), because the clipboard reads the former while the dashboard card, the day timeline and the
+completed stamp read the latter. Nothing else in the app rewrites a `sourceSession` in place.
+
+A consumer must therefore never treat `endDate` as "the moment this session ends": until the
+adjustment above, it is only where the session was *planned* to end. A session that began after its
+own `endDate` has no countdown left to run, and
+[sessionClock.js](../src/modules/common/sessionClock.js) is the single place that decides so — it
+counts up from `startTime` instead, which is why a late start no longer opens on a negative clock.
+
 ---
 
 ## 8. Untrusted input, and what guards it

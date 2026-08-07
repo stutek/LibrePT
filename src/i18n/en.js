@@ -232,6 +232,13 @@ export const en = {
   session_invite_body: "You've been scheduled for a session",
   session_invite_body_attach:
     "The calendar invite file just downloaded — attach it to this email before sending.",
+  session_start_time_title: "Session started off schedule",
+  session_start_time_desc:
+    "Scheduled for {scheduled}, started {minutes} min {direction}. Move the session to when it is actually running?",
+  session_start_time_late: "late",
+  session_start_time_early: "early",
+  session_start_time_keep: "Keep scheduled",
+  session_start_time_apply: "Adjust time",
   today: "Today",
   tomorrow: "Tomorrow",
   yesterday: "Yesterday",

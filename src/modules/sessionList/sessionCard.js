@@ -6,6 +6,7 @@
 // deps: { state, t, escapeHTML, launchClipboardDirectly, sessionDayTemporal,
 //         activeId, saveToLocalStorage, rerenderSessions }
 
+import { computeActiveSessionCountdown } from "../common/sessionClock.js";
 import {
   formatDurationHM,
   formatDurationHourMin,
@@ -150,14 +151,11 @@ function computeCardTiming(b, isLaunched, activeSession, isLive, range) {
   let timerOvertimeAware = false;
   if (isLaunched && activeSession) {
     timerLive = true;
-    const endDate = activeSession.sourceSession?.endDate;
-    if (endDate) {
-      const remainingSec = Math.round((new Date(endDate).getTime() - Date.now()) / 1000);
-      timerText = formatDurationHourMin(remainingSec);
-      timerIsOvertime = remainingSec < 0;
-    } else {
-      timerText = formatDurationHourMin(activeSession.duration || 0);
-    }
+    // Same countdown/count-up decision the clipboard's own timers make (sessionClock.js), so a
+    // card and the clipboard it launches never show two different readings of one session.
+    const countdown = computeActiveSessionCountdown(activeSession);
+    timerText = formatDurationHourMin(countdown.seconds);
+    timerIsOvertime = countdown.isOvertime;
   } else if (isUpcoming) {
     timerEndMs = startMs;
     timerOvertimeAware = true;

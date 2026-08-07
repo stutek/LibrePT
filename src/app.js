@@ -557,6 +557,7 @@ function setupActiveSession() {
     newRecordId,
     renderIdleSessionBar,
     renderSessions,
+    renderSessionTitle,
     saveToLocalStorage: saveState,
   });
 

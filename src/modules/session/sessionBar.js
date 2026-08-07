@@ -14,20 +14,21 @@
 //   parseTimeRange, getOverlappingSessions, buildSessionMeta
 // }
 
+import { computeActiveSessionCountdown } from "../common/sessionClock.js";
+
 let deps = null;
 
 export function initSessionBar(d) {
   deps = d;
 }
 
-// The bar's countdown derives from the source session's scheduled end when one is known
-// (may run negative once a session overruns); ad-hoc sessions with no source session fall
-// back to an elapsed count-up, since there is no schedule to count down against.
+// What the bar's timer means — countdown to the scheduled end, or elapsed count-up when there is
+// no live schedule left to count down — is decided by computeActiveSessionCountdown, shared with
+// the clipboard title bar and the dashboard card so all three never disagree (sessionClock.js).
 export function updateSessionBarTimer() {
   const activeSession = deps.getActiveSession();
   if (!activeSession) return;
   const durationEl = document.getElementById("session-bar-duration");
-  const endDate = activeSession.sourceSession?.endDate;
   // The bottom active-session bar keeps second-level precision (a separate surface from the
   // dashboard's session-card status lines, TODO 2.3); .session-card-timer is that dashboard
   // card's own live timer and must render "01h 32m", same as its non-launched countdown states.
@@ -38,15 +39,13 @@ export function updateSessionBarTimer() {
   if (activeSession.sourceSession?.isPlanning) {
     text = deps.t("planning") || "Planning";
     cardText = text;
-  } else if (endDate) {
-    const endMs = new Date(endDate).getTime();
-    const remainingSec = Math.round((endMs - Date.now()) / 1000);
-    text = deps.formatSignedDuration(remainingSec);
-    cardText = deps.formatDurationHourMin(remainingSec);
-    isOvertime = remainingSec < 0;
   } else {
-    text = deps.formatDuration(activeSession.duration || 0);
-    cardText = deps.formatDurationHourMin(activeSession.duration || 0);
+    const countdown = computeActiveSessionCountdown(activeSession);
+    text = countdown.isCountdown
+      ? deps.formatSignedDuration(countdown.seconds)
+      : deps.formatDuration(countdown.seconds);
+    cardText = deps.formatDurationHourMin(countdown.seconds);
+    isOvertime = countdown.isOvertime;
   }
 
   if (durationEl) {

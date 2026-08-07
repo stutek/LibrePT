@@ -79,7 +79,12 @@ def test_finishing_a_session_stamps_completed_and_duration_on_the_session(
     # Opening the clipboard only stages the session — it must be explicitly started before it can
     # be completed.
     page.click("#btn-start-session")
-    page.wait_for_timeout(200)
+    # This seeded session starts currentHour-1, so Start always lands outside the ±15 minute
+    # tolerance and offers to move the schedule onto the clock (test_session_start_time_adjust.py
+    # is what covers that offer). Declining leaves the session exactly as this test found it.
+    page.wait_for_selector("#dialog-session-start-time[open]")
+    page.click("#btn-session-start-time-keep")
+    page.wait_for_selector("#dialog-session-start-time[open]", state="detached")
 
     # finishWorkoutSession() should never have touched state.sessions before this feature — confirm
     # it now stamps completed + duration so the dashboard's past status line has something to show.

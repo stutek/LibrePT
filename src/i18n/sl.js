@@ -231,6 +231,13 @@ export const sl = {
   session_invite_body: "Razporejeni ste na sejo",
   session_invite_body_attach:
     "Datoteka z vabilom v koledar se je pravkar prenesla — pred pošiljanjem jo priložite temu e-poštnemu sporočilu.",
+  session_start_time_title: "Seja se je začela izven urnika",
+  session_start_time_desc:
+    "Načrtovano ob {scheduled}, začeto {minutes} min {direction}. Želite sejo premakniti na dejanski čas izvedbe?",
+  session_start_time_late: "prepozno",
+  session_start_time_early: "prezgodaj",
+  session_start_time_keep: "Ohrani urnik",
+  session_start_time_apply: "Prilagodi čas",
   today: "Danes",
   tomorrow: "Jutri",
   yesterday: "Včeraj",
