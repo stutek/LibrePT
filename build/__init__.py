@@ -757,10 +757,10 @@ def _playwright_worker_count():
     well before `-n auto`; the docstring's reasoning is confirmed by measurement, not merely
     inherited. Do not re-derive this.
 
-    What the same profile DOES say is that the cap is not the bottleneck at all: average call time
-    is 2.69s/test against TODO §21's measured 2.84s median for one cold app boot in a fresh browser
-    context, so a typical e2e test is almost entirely boot and almost none of it assertions. The
-    lever that matters is that boot (§12.7), not the scheduler.
+    The cap is not the bottleneck either way. Average call time is 2.69s/test, of which a cold app
+    boot in a fresh context measures ~0.94s under this same 8-way parallelism — about a third, not
+    the whole thing (see §12.7 for the full fresh-vs-warm numbers, and for the misreading that
+    briefly put that figure at 2.84s).
     """
     cpu_count = os.cpu_count() or 2
     return max(1, cpu_count // 2)

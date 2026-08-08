@@ -531,20 +531,39 @@ worker's precache make it one visit, once.
 
 - **The cheap half is done**: `index.html` carries 15 `<link rel="modulepreload">` hints covering the
   boot-critical path. Only bundling remains, and that is the expensive half.
-- **This is now also the gate's dominant cost, measured 2026-08-08.** Profiling Stage 3 on a quiet
-  box: 131 tests, **352s of call time, 2.69s average** — against §21's measured **2.84s median for
-  one cold app boot in a fresh browser context**. A typical e2e test is therefore almost entirely
-  boot and almost none of it assertions, and the scheduler is not the constraint (8 workers → 88%
-  parallel efficiency; 12 workers bought 5%, see `_playwright_worker_count`). Stage 3 cannot go
-  below ~44s while every test pays a cold module graph.
-- **The unexplored lever is the browser context, not the bundle.** §21 measured a **reused** context
-  hitting the real app at **0.31s median against 2.84s fresh — 9×** — because a fresh context throws
-  away the HTTP cache and re-fetches all ~89 modules. Keeping one context per xdist worker and
-  clearing IndexedDB/localStorage between tests would keep the isolation that matters while paying
-  the module fetch once per worker instead of once per test. **Not attempted**: it trades an
-  isolation model the whole suite is built on (fresh context per test, guaranteed by construction)
-  for one maintained by explicit teardown, where a missed store leaks state between tests silently.
-  Needs a decision before anyone starts, not a spike.
+- **Measured properly 2026-08-08, and it is NOT the gate's dominant cost.** Stage 3 is 131 tests and
+  352s of call time, 2.69s average. A cold app boot in a fresh context, measured under the same 8-way
+  parallelism the suite actually runs at, is **~0.94s** — roughly a third of an average test, with
+  splash dismissal a few hundred ms on top. The rest is the tests doing their work.
+  - **Correcting a misreading recorded earlier the same day**: boot was briefly written up as ~2.84s,
+    i.e. essentially all of a test, by taking §21's number at face value. That number was measured
+    under a heavier condition and does not describe this suite. **Always state the parallelism a
+    browser timing was taken at** — the same navigation measures 0.30s serial, 0.94s at 8-way, and
+    the difference is contention, not the browser.
+- **Cheaper isolation is real but smaller than it looks.** Isolation today comes from a fresh context
+  per test; the same isolation from a **reused context with storage cleared** measures **0.23s vs
+  0.94s at 8-way parallelism — 4×**, because the fetch of ~89 modules is served warm. Serially the
+  gap nearly vanishes (0.07s vs 0.30s), which is why it must be measured under load.
+
+    | strategy | serial | 8-way parallel |
+    | :--- | :--- | :--- |
+    | fresh context (today) | 0.30s | 0.94s |
+    | warm context, new page | 0.27s | — |
+    | warm context, cleared storage | 0.07s | **0.23s** |
+
+  - **Worth ~0.7s × 131 ≈ 90s of call time, so Stage 3 ~49s → ~37s**: a real 15% off the gate, not
+    the 3× a "9×" figure would imply.
+  - **Deep-link tests are the right pilot.** `test_share_deeplink` (13), `test_dialog_routing` (11),
+    `test_record_dialog_routes` (7), `test_editor_row_deeplink` (5) and `test_session_dialog_routes`
+    (4) are ~40 tests and ~100s of call time, and they are *by definition* "arrive at this URL cold"
+    — they depend on no prior in-page state, so the only isolation surface they need is storage,
+    which is enumerable (localStorage, sessionStorage, IndexedDB, CacheStorage, cookies, service
+    workers). Contained blast radius, and the biggest single cluster of the win.
+  - **The cost is the isolation model**, which is why this is a decision and not a spike: today a
+    fresh context guarantees isolation *by construction*; clearing guarantees it *by maintenance*,
+    and a store someone forgets leaks state silently and intermittently. If it is done, the clearing
+    fixture needs its own test — write to every store, assert the next test sees none of it — or the
+    guarantee is only a comment.
 - **Read this before proposing it again.** It was mis-recommended as "the next big win" on 2026-08-05
   and again implicated in §21 — both wrong. §12.6's CDN stylesheet was the actual cold-load
   bottleneck, and it is gone.
