@@ -551,14 +551,17 @@ worker's precache make it one visit, once.
     | warm context, new page | 0.27s | — |
     | warm context, cleared storage | 0.07s | **0.23s** |
 
-  - **SHIPPED for six files, and the stage-level gain is ~6%, not the 24% the subset showed.**
-    Measured on a quiet box, balanced profile, `-n 8`, full `tests/e2e/`:
+  - **SHIPPED for six files, and the stage-level gain is ~8%, not the 24% the subset showed.**
+    Every row below is the SAME 131 tests, `-n 8`, quiet box, **balanced** profile, re-measured
+    together after an earlier table mixed one row of unverified provenance with two known-balanced
+    ones — the machine moved between power-saver and balanced during this work, and a row whose
+    conditions you cannot name is not a baseline:
 
-    | pooled files | full stage 3 |
-    | :--- | :--- |
-    | none (131 tests) | 49.5s |
-    | four (134 tests) | 47.99 / 47.50 / 48.01s |
-    | six (134 tests) | 45.82 / 47.09s |
+    | pooled files | full stage 3 (each run) | median |
+    | :--- | :--- | :--- |
+    | none | 50.84 / 49.05 / 50.24s | 50.2s |
+    | four | 47.99 / 47.50 / 48.01s | 48.0s |
+    | six | 45.22 / 46.18 / 46.91 / 44.53 / 46.07s | 46.1s |
 
     **The lesson is about how to read a subset benchmark.** Those four files run *alone* went
     34.8s → 25.5s, a genuine 24% — but alone they are 27 tests over 8 workers, so the pooled page
@@ -566,9 +569,13 @@ worker's precache make it one visit, once.
     same workers, the saving is ~0.35s per pooled test against a 352s call-time total, and the
     stage moves a second or two. Both numbers are true; only the second one is the gate.
   - **Extending it further has sharply diminishing returns.** Adding two files (14 tests) bought
-    ~1.5s. The remaining ~67 eligible tests would plausibly buy a few seconds more, at the cost of
+    ~1.9s. The remaining ~67 eligible tests would plausibly buy a few seconds more, at the cost of
     a `page` override in every file. Not obviously worth it — revisit only if Stage 3 becomes the
     complaint again.
+  - **Method note, because it cost two invalid comparisons.** `git stash push -- <paths>` on a
+    CLEAN tree stashes nothing and still exits 0, so a "before" run measured this way silently
+    re-measures "after". Disable the thing under test explicitly and assert it is disabled before
+    trusting a baseline.
   - **Deep-link tests are the right pilot.** `test_share_deeplink` (13), `test_dialog_routing` (11),
     `test_record_dialog_routes` (7), `test_editor_row_deeplink` (5) and `test_session_dialog_routes`
     (4) are ~40 tests and ~100s of call time, and they are *by definition* "arrive at this URL cold"
