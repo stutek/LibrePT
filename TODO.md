@@ -540,10 +540,15 @@ worker's precache make it one visit, once.
     under a heavier condition and does not describe this suite. **Always state the parallelism a
     browser timing was taken at** — the same navigation measures 0.30s serial, 0.94s at 8-way, and
     the difference is contention, not the browser.
-- **Cheaper isolation is real but smaller than it looks.** Isolation today comes from a fresh context
-  per test; the same isolation from a **reused context with storage cleared** measures **0.23s vs
-  0.94s at 8-way parallelism — 4×**, because the fetch of ~89 modules is served warm. Serially the
-  gap nearly vanishes (0.07s vs 0.30s), which is why it must be measured under load.
+- **Pooling the browser page was BUILT, MEASURED AND REVERTED (2026-08-08). Do not rebuild it
+  without reading why.** It works and it is faster; it was reverted because 4% of a gate that is
+  already inside its budget does not pay for what it costs. The measurements are kept because they
+  are expensive to retake and they close the question.
+
+  Isolation comes from a fresh context per test; the same isolation from a **reused page with
+  storage cleared** measures **0.23s vs 0.94s at 8-way parallelism — 4×**, because the fetch of
+  ~89 modules is served warm. Serially the gap nearly vanishes (0.07s vs 0.30s), which is why it
+  must be measured under load.
 
     | strategy | serial | 8-way parallel |
     | :--- | :--- | :--- |
@@ -576,8 +581,30 @@ worker's precache make it one visit, once.
 
     So **~3s off stage 3 and ~3s off the gate, about 4-6%** — less than the 8% the stage-3-only
     table suggests, because the "after" tree also carries the three isolation tests that make the
-    pooling safe. That is the honest net: the guardrail costs about a second of the win, and is
-    still worth it.
+    pooling safe. The guardrail spends about a second of the win.
+
+  - **Why 4% was not enough (the reason it went back).** Ranked by how much each mattered:
+    1. **The debugging path diverged from the failing path.** Artifact capture is invisible to a
+       pooled context, so `--screenshot=on` on a pooled file wrote nothing — fixed by disabling
+       pooling whenever artifacts are requested, which is correct and is also the problem: the
+       moment you escalate to look at a failure you change the page lifecycle that produced it.
+    2. **The guardrail could only test the list it was written against.** `RESET_ORIGIN_STORAGE`
+       covered every surface the app uses, but a NEW one would leak *and* leave the isolation test
+       green, because it probes exactly the surfaces already cleared. A fresh context has no such
+       hole — it does not enumerate anything.
+    3. **`page` stopped meaning one thing.** Six modules overrode it, so reading a test no longer
+       told you what kind of page it ran on.
+    4. **An extra browser context per worker**, which is the leading explanation for the one
+       3-failure run seen during the pilot and never reproduced.
+    5. **~100 lines of conftest machinery** — profile keying, once-per-page init scripts, a
+       splash-wrapper re-entry guard — existing only to support the above. Two latent bugs were
+       found writing it (the splash wrapper nested on re-wrap; init scripts stacked per test), and
+       *both are unreachable with a fresh page per test*, so they went back with it.
+
+    The general rule this is an instance of: the wins that stuck on this gate came from deleting
+    waste — a CDN stylesheet on every navigation, a swallowed 20s splash timeout, `--dist=loadfile`
+    — not from trading away a property the suite is relied on for. A speedup that makes the tests
+    harder to trust is priced in the wrong currency.
 
     **The lesson is about how to read a subset benchmark.** Those four files run *alone* went
     34.8s → 25.5s, a genuine 24% — but alone they are 27 tests over 8 workers, so the pooled page
@@ -592,17 +619,15 @@ worker's precache make it one visit, once.
     CLEAN tree stashes nothing and still exits 0, so a "before" run measured this way silently
     re-measures "after". Disable the thing under test explicitly and assert it is disabled before
     trusting a baseline.
-  - **Deep-link tests are the right pilot.** `test_share_deeplink` (13), `test_dialog_routing` (11),
-    `test_record_dialog_routes` (7), `test_editor_row_deeplink` (5) and `test_session_dialog_routes`
-    (4) are ~40 tests and ~100s of call time, and they are *by definition* "arrive at this URL cold"
-    — they depend on no prior in-page state, so the only isolation surface they need is storage,
-    which is enumerable (localStorage, sessionStorage, IndexedDB, CacheStorage, cookies, service
-    workers). Contained blast radius, and the biggest single cluster of the win.
-  - **The cost is the isolation model**, which is why this is a decision and not a spike: today a
-    fresh context guarantees isolation *by construction*; clearing guarantees it *by maintenance*,
-    and a store someone forgets leaks state silently and intermittently. If it is done, the clearing
-    fixture needs its own test — write to every store, assert the next test sees none of it — or the
-    guarantee is only a comment.
+  - **Deep-link tests were the right tenants**, if it is ever revisited: `test_dialog_routing` (11),
+    `test_record_dialog_routes` (7), `test_editor_row_deeplink` (5), `test_session_dialog_routes`
+    (4), `test_view_split_navigation` (8) and `test_sessions_day_footer` (6) are *by definition*
+    "arrive at this URL cold" and depend on no prior in-page state. `test_share_deeplink` (13) is
+    eligible too — `pytestmark = pytest.mark.clean_start` makes the whole module one profile — but
+    needs a second pooled page, since `clean_start` suppresses the demo seed and Playwright init
+    scripts cannot be removed once added. `test_splash_screen` (16) never qualifies: it *is* the
+    cold boot under test. Blocked for their own reasons: `test_first_run_terms` and
+    `test_integrity_verification`, both of which build their own context.
 - **Read this before proposing it again.** It was mis-recommended as "the next big win" on 2026-08-05
   and again implicated in §21 — both wrong. §12.6's CDN stylesheet was the actual cold-load
   bottleneck, and it is gone.

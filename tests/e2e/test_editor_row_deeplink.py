@@ -10,19 +10,6 @@
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
 
-import pytest
-
-
-# Opt this module's tests onto the pooled, storage-reset page (tests/conftest.py's `deeplink_page`)
-# instead of a fresh browser context each. Overriding `page` MODULE-LOCALLY keeps every test
-# signature and every autouse fixture exactly as they were, and leaves the rest of the suite on the
-# default fresh-context path. These tests qualify because each starts by navigating to a URL cold
-# and asserts on what the router does with it — none depends on state left by the one before.
-@pytest.fixture
-def page(deeplink_page):
-    return deeplink_page
-
-
 def _open_live_session(page, local_server):
     page.goto(local_server)
     card_sel = ".session-card.session-live, .session-card:has-text('Group Strength & Conditioning')"
