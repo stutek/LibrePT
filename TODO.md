@@ -551,8 +551,24 @@ worker's precache make it one visit, once.
     | warm context, new page | 0.27s | — |
     | warm context, cleared storage | 0.07s | **0.23s** |
 
-  - **Worth ~0.7s × 131 ≈ 90s of call time, so Stage 3 ~49s → ~37s**: a real 15% off the gate, not
-    the 3× a "9×" figure would imply.
+  - **SHIPPED for six files, and the stage-level gain is ~6%, not the 24% the subset showed.**
+    Measured on a quiet box, balanced profile, `-n 8`, full `tests/e2e/`:
+
+    | pooled files | full stage 3 |
+    | :--- | :--- |
+    | none (131 tests) | 49.5s |
+    | four (134 tests) | 47.99 / 47.50 / 48.01s |
+    | six (134 tests) | 45.82 / 47.09s |
+
+    **The lesson is about how to read a subset benchmark.** Those four files run *alone* went
+    34.8s → 25.5s, a genuine 24% — but alone they are 27 tests over 8 workers, so the pooled page
+    is amortised over ~3.4 tests each. In the full suite xdist spreads all 134 tests across the
+    same workers, the saving is ~0.35s per pooled test against a 352s call-time total, and the
+    stage moves a second or two. Both numbers are true; only the second one is the gate.
+  - **Extending it further has sharply diminishing returns.** Adding two files (14 tests) bought
+    ~1.5s. The remaining ~67 eligible tests would plausibly buy a few seconds more, at the cost of
+    a `page` override in every file. Not obviously worth it — revisit only if Stage 3 becomes the
+    complaint again.
   - **Deep-link tests are the right pilot.** `test_share_deeplink` (13), `test_dialog_routing` (11),
     `test_record_dialog_routes` (7), `test_editor_row_deeplink` (5) and `test_session_dialog_routes`
     (4) are ~40 tests and ~100s of call time, and they are *by definition* "arrive at this URL cold"
