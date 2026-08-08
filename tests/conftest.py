@@ -25,6 +25,24 @@ def src_dir():
     return SRC_DIR
 
 
+def add_init_script_once(page, key, script):
+    """`page.add_init_script`, but at most once per page for a given key.
+
+    Playwright init scripts cannot be removed, and the autouse fixtures below run per TEST while a
+    pooled page (`deeplink_page`) lives for the whole session — so re-adding would stack another
+    copy on every navigation, unboundedly. Both scripts are idempotent, so the duplicates would be
+    harmless and invisible, which is the bad combination: slower every test with nothing to show
+    for it."""
+    added = getattr(page, "_librept_init_scripts", None)
+    if added is None:
+        added = set()
+        page._librept_init_scripts = added
+    if key in added:
+        return
+    added.add(key)
+    page.add_init_script(script)
+
+
 # Script that pre-accepts the first-run Terms & disclaimer modal (10.2) before the app boots,
 # so the one-time mandatory agreement doesn't overlay the UI a browser test is driving. Runs in
 # a fresh document via add_init_script, i.e. before app.js reads the flag.
@@ -57,7 +75,9 @@ def accept_first_run_terms(request):
     `browser` fixture) and deliberately skip this so the modal appears. Unit tests never request
     `page`, so this never starts a browser for them."""
     if "page" in request.fixturenames:
-        request.getfixturevalue("page").add_init_script(ACCEPT_TERMS_SCRIPT)
+        add_init_script_once(
+            request.getfixturevalue("page"), "accept-terms", ACCEPT_TERMS_SCRIPT
+        )
     yield
 
 
@@ -86,6 +106,13 @@ def dismiss_splash(request):
         yield
         return
     page = request.getfixturevalue("page")
+    # A pooled page (see `deeplink_page`) outlives the test that first wrapped it, and this fixture
+    # is autouse — so without this guard the wrapper would be re-applied every test and nest,
+    # `goto` calling a dismiss that calls a dismiss. Harmless while every test got a fresh page,
+    # which is exactly why it went unnoticed.
+    if getattr(page, "goto_without_splash_dismiss", None):
+        yield
+        return
     navigate = page.goto
 
     def click_dismiss_if_present(timeout=SPLASH_DISMISS_TIMEOUT_MS):
@@ -220,7 +247,9 @@ def seed_demo_data(request):
     the `demo_data_script` fixture instead. Unit tests never request `page`, so this is a no-op
     for them."""
     if "page" in request.fixturenames and "clean_start" not in request.keywords:
-        request.getfixturevalue("page").add_init_script(SEED_DEMO_DATA_SCRIPT)
+        add_init_script_once(
+            request.getfixturevalue("page"), "seed-demo", SEED_DEMO_DATA_SCRIPT
+        )
     yield
 
 
@@ -319,3 +348,66 @@ def local_server():
     assert_server_is_current(base_url)
     yield base_url
     # Server is deliberately NOT terminated here — see docstring above.
+
+
+# Storage a test can leave behind on the app's origin. Enumerated because a POOLED page (below)
+# gets its isolation by clearing these rather than by being thrown away — so this list IS the
+# isolation guarantee, and anything missing from it leaks silently between tests. Pinned by
+# tests/e2e/test_deeplink_page_isolation.py, which writes to every one of them.
+RESET_ORIGIN_STORAGE = """async () => {
+  localStorage.clear();
+  sessionStorage.clear();
+  for (const db of await indexedDB.databases()) {
+    if (db.name) indexedDB.deleteDatabase(db.name);
+  }
+  if (window.caches) {
+    for (const key of await caches.keys()) await caches.delete(key);
+  }
+}"""
+
+
+@pytest.fixture(scope="session")
+def _pooled_deeplink_page(browser, local_server):
+    """One browser page per xdist worker, reused across every test that opts in.
+
+    Why this exists: a fresh browser context per test re-fetches the app's ~89 ES modules with a
+    cold HTTP cache, and under the parallelism the suite actually runs at that dominates a
+    deep-link test — measured 2026-08-08 at 8-way, on this box in power-saver: a fresh context
+    boots in ~3.0s against ~1.0s for a reused page whose cache is warm.
+
+    A reused page, not a reused context with a new page: `new_page()` in a warm context measured
+    ~3.0s too, no better than a fresh context, and unregistering the service worker did not change
+    that — so the cost is page creation under load, not the module fetch it was assumed to be.
+    That rules out the safer-looking variant; there is no cheap isolation between "same page" and
+    "throw everything away".
+
+    Deep-link tests are the right tenants: they are by definition "arrive at this URL cold" and
+    depend on no prior in-page state, so the only surface that has to be reset is storage
+    (RESET_ORIGIN_STORAGE). Everything else — the JS heap, module registry, listeners, open
+    dialogs — is discarded by the navigation each test starts with.
+    """
+    context = browser.new_context()
+    page = context.new_page()
+    page.set_default_navigation_timeout(NAVIGATION_TIMEOUT_MS)
+    # Land on the origin once so the first reset has somewhere to run, and so the module fetch
+    # this fixture exists to amortise is paid here rather than by whichever test happens to be
+    # first.
+    page.goto(local_server)
+    yield page
+    context.close()
+
+
+@pytest.fixture
+def deeplink_page(_pooled_deeplink_page, local_server):
+    """The pooled page, reset to a clean origin after each test.
+
+    Resetting on TEARDOWN rather than setup so a failing test's storage is still there to inspect
+    when the run stops, and so the reset cost is never billed to the test that follows.
+    """
+    page = _pooled_deeplink_page
+    yield page
+    if not page.url.startswith(local_server):
+        # A test navigated off-origin (or to about:blank); storage is per-origin, so get back
+        # before clearing or the reset silently does nothing.
+        page.goto_without_splash_dismiss(local_server)
+    page.evaluate(RESET_ORIGIN_STORAGE)
