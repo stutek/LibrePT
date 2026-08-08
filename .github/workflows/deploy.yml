@@ -193,6 +193,35 @@ jobs:
       - name: Cyclomatic complexity
         run: .venv/bin/python -c "from build import run_complexity_check; run_complexity_check()"
 
+  # One job, three named checks (build/frontend_audit.py + build.run_static_security_checks). NOT
+  # three jobs: each GitHub Actions job costs a fresh runner, checkout and Python setup — ~30s of
+  # overhead apiece for checks that take milliseconds. They are separated where separation is free
+  # (named results in the output) and kept together where splitting would only buy latency.
+  # Stage 1 locally, so Stage 1 here: no `needs`, concurrent with the other fast checks.
+  static-security-audits:
+    name: Static Security Audits (CSP parity & HTML sinks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run Static Security Audits
+        run: python -c "from build import run_static_security_checks; run_static_security_checks()"
+
+  # === STAGE 2 ===
+  #
+  # From here the workflow is a STAGE CHAIN mirroring the local `build check` gate exactly:
+  # Stage 1 (every job above, concurrently) → Stage 2 medium → Stage 3 e2e → Stage 4 ZAP → build →
+  # deploy. Each stage starts only if the previous one is clean, so CI and local fail in the same
+  # order on the same change (TODO §6.4, decided 2026-08-08).
+  #
+  # This is deliberately NOT the cheapest arrangement. These jobs have no resource contention in CI
+  # — each gets its own runner and its own dev server — so they *could* run concurrently, and did
+  # until now. Chaining them costs the setup of each stage (checkout, pip install, `playwright
+  # install chromium --with-deps`) in series on every green run. What it buys is that the pipeline
+  # has ONE definition rather than two: a broken component stops the run here, and nobody has to
+  # remember which ordering guarantees hold locally but not in CI.
   medium-tests:
     name: Medium Component Tests
     needs:
@@ -205,6 +234,7 @@ jobs:
         javascript-unit-tests,
         security-tests,
         structure-checks,
+        static-security-audits,
       ]
     runs-on: ubuntu-latest
     steps:
@@ -222,19 +252,11 @@ jobs:
       - name: Run Medium Component Tests
         run: .venv/bin/python -c "from build import run_medium_tests; run_medium_tests()"
 
+  # === STAGE 3 === Only if Stage 2 is clean, so a broken component fails fast and cheap rather than
+  # after the slowest suite in the pipeline has also run.
   e2e-tests:
     name: E2E Browser Tests
-    needs:
-      [
-        python-lint,
-        doc-graph,
-        frontend-lint,
-        dependency-scan,
-        unit-tests,
-        javascript-unit-tests,
-        security-tests,
-        structure-checks,
-      ]
+    needs: [medium-tests]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -251,45 +273,13 @@ jobs:
       - name: Run E2E Tests
         run: .venv/bin/python -c "from build import run_e2e_tests; run_e2e_tests()"
 
-  # One job, three named checks (build/frontend_audit.py + build.run_static_security_checks). NOT
-  # three jobs: each GitHub Actions job costs a fresh runner, checkout and Python setup — ~30s of
-  # overhead apiece for checks that take milliseconds. They are separated where separation is free
-  # (named results in the output) and kept together where splitting would only buy latency.
-  static-security-audits:
-    name: Static Security Audits (CSP parity & HTML sinks)
-    needs:
-      [
-        python-lint,
-        doc-graph,
-        frontend-lint,
-        dependency-scan,
-        unit-tests,
-        javascript-unit-tests,
-        security-tests,
-        structure-checks,
-      ]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - name: Run Static Security Audits
-        run: python -c "from build import run_static_security_checks; run_static_security_checks()"
-
+  # === STAGE 4 === Only if Stage 3 is clean. Locally that ordering is mandatory: ZAP's request flood
+  # against the SAME dev server a mid-suite pytest-xdist run is using produced Page.goto timeouts
+  # across unrelated specs. Here it is not mandatory — separate runners, separate servers — but it is
+  # kept so the stage numbering means one thing in both places.
   owasp-zap-scan:
     name: OWASP ZAP Security Scan
-    needs:
-      [
-        python-lint,
-        doc-graph,
-        frontend-lint,
-        dependency-scan,
-        unit-tests,
-        javascript-unit-tests,
-        security-tests,
-        structure-checks,
-      ]
+    needs: [e2e-tests]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -301,7 +291,8 @@ jobs:
 
   build:
     name: Assemble & Bundle App
-    needs: [medium-tests, e2e-tests, static-security-audits, owasp-zap-scan]
+    # The chain carries the rest transitively: zap → e2e → medium → every Stage 1 job.
+    needs: [owasp-zap-scan]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

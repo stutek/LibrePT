@@ -1272,7 +1272,8 @@ def run_stage_3_e2e():
 
     The static security audits moved to stage 1 — they are file analysis, not dynamic checks.
     Split from the ZAP scan (stage 4, run sequentially after this one): in CI the two are already
-    separate jobs on separate runners, each hitting its own dev server, so they never contend. The
+    separate jobs on separate runners, each hitting its own dev server, so they never contend —
+    CI chains them regardless, so both paths stage identically (see PIPELINE_STAGES). The
     local `build check`/`build` path used to run them concurrently via one ThreadPoolExecutor
     against the SAME local :8081 server — ZAP's baseline scan floods it with requests while
     pytest-xdist's workers are mid-suite, and that contention produced `Page.goto` timeouts across
@@ -1300,6 +1301,25 @@ def run_stage_4_zap():
     stage_elapsed = time.monotonic() - stage_start
     print(f"\n  ✓ Stage 4 completed cleanly! ({stage_elapsed:.1f}s)")
     return stage_elapsed
+
+
+# The pipeline's stage order, declared ONCE. `build/__main__.py` executes the stages in this order,
+# and `agent_tools/pipeline_gates.py` parses this table to assert that
+# `.github/workflows/deploy.yml`'s job graph enforces the SAME order. Before this existed the
+# ordering was hand-maintained in two places and drifted: CI ran the medium and e2e suites
+# concurrently while the local gate staged them, so "the pipeline" meant two different things
+# depending on where it ran (TODO §6.4).
+#
+# Each row is (stage number, the local stage runner, the leaf `run_*` checks CI must place in that
+# stage). Stage 1's leaves are deliberately empty here — it has many, and they are already declared
+# in `run_stage_1_parallel`'s own `tasks` table, which the checker reads directly. Adding a leaf to
+# a stage without giving it a correspondingly-gated CI job fails Stage 1.
+PIPELINE_STAGES = (
+    (1, run_stage_1_parallel, ()),
+    (2, run_stage_2_medium, ("run_medium_tests",)),
+    (3, run_stage_3_e2e, ("run_e2e_tests",)),
+    (4, run_stage_4_zap, ("run_owasp_zap_scan",)),
+)
 
 
 def run_lint():

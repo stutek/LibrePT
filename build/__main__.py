@@ -5,15 +5,21 @@
 import sys
 import time
 from . import (
+    PIPELINE_STAGES,
     check_environment,
     run_lint,
     run_tests,
-    run_stage_1_parallel,
-    run_stage_2_medium,
-    run_stage_3_e2e,
-    run_stage_4_zap,
     run_build,
 )
+
+
+def run_all_stages():
+    """Every stage in order, each starting only if the previous one was clean.
+
+    Driven off `PIPELINE_STAGES` rather than a hand-written call list so this order and the one
+    `.github/workflows/deploy.yml` enforces cannot drift apart — see that table's comment.
+    """
+    return [runner() for _, runner, _ in PIPELINE_STAGES]
 
 
 def _fmt_elapsed(seconds):
@@ -56,27 +62,17 @@ if __name__ == "__main__":
         run_tests()
         _print_summary("TESTS PASSED", time.monotonic() - start, [])
     elif arg == "check":
-        stages = [
-            run_stage_1_parallel(),
-            run_stage_2_medium(),
-            run_stage_3_e2e(),
-            run_stage_4_zap(),
-        ]
+        stages = run_all_stages()
         _print_summary(
-            "build check PASSED — all 4 stages green",
+            f"build check PASSED — all {len(stages)} stages green",
             time.monotonic() - start,
             stages,
         )
     else:
-        stages = [
-            run_stage_1_parallel(),
-            run_stage_2_medium(),
-            run_stage_3_e2e(),
-            run_stage_4_zap(),
-        ]
+        stages = run_all_stages()
         run_build()
         _print_summary(
-            "build PASSED — all 4 stages green, dist/ ready to deploy",
+            f"build PASSED — all {len(stages)} stages green, dist/ ready to deploy",
             time.monotonic() - start,
             stages,
         )

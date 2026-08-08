@@ -252,19 +252,39 @@ overlapping booked slots merged into one, so the seed data now generates that ca
 space on a phone, the dashboard already shows it, and it competed with the notification summary for
 the same strip. The bar is a `<button>`, so the whole strip is the tap target.
 
-### 6.4 [ ] CI runs medium and e2e in parallel; the local gate runs them staged
+### 6.4 [x] CI runs medium and e2e in parallel; the local gate runs them staged — RESOLVED: keep parallel
 **Raised 2026-08-08 (Simon), from
-[run 31224697989](https://github.com/stutek/LibrePT/actions/runs/31224697989).** Locally Stage 2
-(medium) gates Stage 3 (e2e) so a broken component fails fast. In
-[deploy.yml](.github/workflows/deploy.yml) `medium-tests` and `e2e-tests` declare the **same** Stage 1
-`needs:` list and therefore run concurrently.
+[run 31224697989](https://github.com/stutek/LibrePT/actions/runs/31224697989).** The observation is
+correct: locally `build check` stages the browser suites (2 → 3 → 4) so a broken component fails fast,
+while in [deploy.yml](.github/workflows/deploy.yml) `medium-tests`, `e2e-tests`,
+`static-security-audits` and `owasp-zap-scan` all declare the same Stage 1 `needs:` list and run
+concurrently.
 
-- **Not a correctness bug, and the parallelism is probably right**: each job gets its own runner and
-  its own dev server, so none of the resource contention that forced the local Stage 3 / Stage 4
-  split (see [AGENT_RULES.md](AGENT_RULES.md)) applies.
-- **The real question is runner minutes**: with `e2e-tests` needing `medium-tests`, a component
-  break would stop the expensive job instead of paying for both. Cost is latency on green runs.
-- Decide one way and record it, so the local/CI divergence is deliberate rather than accidental.
+**Decided (Simon): CI mirrors the local gate — four stages, chained.**
+`deploy.yml` is now Stage 1 (nine concurrent fast jobs) → Stage 2 medium → Stage 3 e2e → Stage 4 ZAP
+→ build → deploy, each stage starting only if the previous is clean. `static-security-audits` moved
+to Stage 1, where it already sits locally; it had accumulated a `needs:` on the other Stage 1 jobs,
+making it a phantom Stage 1.5.
+
+**The cost, stated plainly, because it was argued against and overruled**: these jobs have no
+resource contention in CI — each gets its own runner and its own dev server — so chaining buys none
+of what it buys locally, and adds each stage's setup (checkout, pip install,
+`playwright install chromium --with-deps`) in series to every green run. What it buys is that the
+pipeline has **one** definition: a broken component stops the run, and nobody has to remember which
+ordering guarantees hold in which place.
+
+**The ordering is now shared code, not a convention.** `build/__init__.py`'s `PIPELINE_STAGES` table
+is the single declaration: `build/__main__.py` executes it, and
+[agent_tools/pipeline_gates.py](agent_tools/pipeline_gates.py) parses it and asserts `deploy.yml`'s
+job graph reproduces the same order — a Stage N job must have every Stage N-1 job in its transitive
+`needs` closure. Adding a stage, or quietly re-parallelising one, now fails Stage 1 by name.
+
+**A bug found while building that check, worth recording**: the first version let stage 1's
+deliberately-empty row in `PIPELINE_STAGES` overwrite the set seeded from `run_stage_1_parallel`'s
+own table, so stage 1 dropped out of the comparison entirely and the check passed **vacuously** for
+the stage with fourteen members. It reported "3 stages ordered" where four exist, which is the only
+reason it was caught. A detector is only worth what its negative test proves — pinned by
+`test_a_later_stage_that_does_not_wait_for_an_earlier_one_is_reported`.
 
 ---
 

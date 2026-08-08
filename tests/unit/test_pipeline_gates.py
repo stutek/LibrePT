@@ -105,3 +105,64 @@ def test_the_real_workflow_runs_every_stage_1_check():
 
     assert pipeline_gates.locally_gated_only(texts) == []
     assert pipeline_gates.stage_1_tasks(), "the Stage 1 task table must be parseable"
+
+
+def test_stage_leaves_reads_every_stage_from_the_build_table():
+    """Stage 1 must survive the parse.
+
+    Its row in PIPELINE_STAGES is deliberately empty (its fourteen checks are declared in
+    run_stage_1_parallel's own table), and an earlier version let that empty row overwrite the
+    seeded set. The whole ordering check then passed vacuously for stage 1 — nothing to compare
+    against is not the same as nothing wrong.
+    """
+    stages = pipeline_gates.stage_leaves()
+
+    assert set(stages) == {1, 2, 3, 4}
+    assert "run_python_lint" in stages[1]
+    assert stages[2] == {"run_medium_tests"}
+    assert stages[3] == {"run_e2e_tests"}
+    assert stages[4] == {"run_owasp_zap_scan"}
+
+
+def test_a_later_stage_that_does_not_wait_for_an_earlier_one_is_reported():
+    """The detector must catch a real violation, not merely never fire.
+
+    This is the shape CI actually had: the medium and e2e suites fanning out from Stage 1 side by
+    side, so a broken component failed fast locally and only after the slowest suite in CI.
+    """
+    jobs = {"fast": [], "medium": ["fast"], "e2e": ["fast"]}
+    commands = {
+        "fast": "run_python_lint()",
+        "medium": "run_medium_tests()",
+        "e2e": "run_e2e_tests()",
+    }
+
+    problems = pipeline_gates.out_of_order_stages(jobs, commands)
+
+    assert any(
+        "'e2e' (stage 3) does not wait for 'medium' (stage 2)" in p for p in problems
+    )
+
+
+def test_a_correctly_chained_pipeline_reports_nothing():
+    """The same three jobs, staged — the arrangement this repo now uses."""
+    jobs = {"fast": [], "medium": ["fast"], "e2e": ["medium"]}
+    commands = {
+        "fast": "run_python_lint()",
+        "medium": "run_medium_tests()",
+        "e2e": "run_e2e_tests()",
+    }
+
+    assert pipeline_gates.out_of_order_stages(jobs, commands) == []
+
+
+def test_the_real_workflow_enforces_the_local_stage_order():
+    """The invariant on this repository: CI fails in the same order `build check` does."""
+    workflow = pipeline_gates.WORKFLOW_DIR / "deploy.yml"
+
+    problems = pipeline_gates.out_of_order_stages(
+        pipeline_gates.load_jobs(workflow),
+        pipeline_gates.load_job_commands(workflow),
+    )
+
+    assert problems == []

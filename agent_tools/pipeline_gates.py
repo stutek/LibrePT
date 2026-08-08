@@ -9,6 +9,12 @@ there, since nothing about the workflow file makes an orphan visible.
 The invariant, stated directly: **exactly one job is terminal, and every other job is inside its
 transitive `needs` closure.** A second terminal job is by definition one nothing waits for.
 
+A second drift followed the same shape and needed the same treatment: the STAGE ORDER was written by
+hand in two files, so CI ran the medium and e2e suites concurrently while the local gate staged them
+(TODO §6.4). `build/__init__.py`'s `PIPELINE_STAGES` is now the single declaration of that order, and
+`out_of_order_stages()` asserts the workflow reproduces it — a job running a Stage N check must have
+every Stage N-1 job in its transitive closure.
+
 AGENT_RULES §2.A.3 already required this ("a gate step that exits non-zero MUST fail the build") —
 the workflow just did not implement it. This is that rule, made mechanical.
 """
@@ -28,6 +34,9 @@ BUILD_MODULE = REPO_ROOT / "build" / "__init__.py"
 # and importing `build` here would also make the checker depend on the thing it checks.
 STAGE_1_TABLE = re.compile(r"tasks = \{(.*?)\n    \}", re.S)
 STAGE_1_TASK = re.compile(r'"[^"]+":\s*(run_[a-z_0-9]+)')
+# The stage-order table, read the same way and for the same reason as STAGE_1_TABLE above.
+PIPELINE_STAGES_TABLE = re.compile(r"PIPELINE_STAGES = \((.*?)\n\)", re.S)
+PIPELINE_STAGE_ROW = re.compile(r"\((\d+),\s*run_stage_[a-z_0-9]+,\s*\(([^)]*)\)\)")
 
 
 def load_jobs(workflow_path):
@@ -38,6 +47,21 @@ def load_jobs(workflow_path):
         needs = (body or {}).get("needs") or []
         jobs[name] = [needs] if isinstance(needs, str) else list(needs)
     return jobs
+
+
+def load_job_commands(workflow_path):
+    """Return {job_name: every `run:` string in its steps, concatenated}.
+
+    Needed to answer "which job runs this check", which is what ties a workflow job to a local
+    pipeline stage. Matching on the `run_*` function name rather than the job's display name means
+    renaming a job cannot silently detach it from the stage it belongs to.
+    """
+    document = yaml.safe_load(workflow_path.read_text(encoding="utf-8"))
+    commands = {}
+    for name, body in (document.get("jobs") or {}).items():
+        steps = (body or {}).get("steps") or []
+        commands[name] = " ".join(str(step.get("run", "")) for step in steps)
+    return commands
 
 
 def closure_of(job, jobs, seen=None):
@@ -75,6 +99,58 @@ def stage_1_tasks():
     return set(STAGE_1_TASK.findall(table.group(1))) if table else set()
 
 
+def stage_leaves():
+    """{stage number: the `run_*` checks it holds}, read from build's PIPELINE_STAGES table.
+
+    Stage 1's row is deliberately empty in that table — it has fourteen checks and they are already
+    declared in `run_stage_1_parallel`'s own `tasks` dict, so reading them twice would be the exact
+    duplication this checker exists to prevent.
+    """
+    text = BUILD_MODULE.read_text(encoding="utf-8")
+    table = PIPELINE_STAGES_TABLE.search(text)
+    stages = {1: stage_1_tasks()}
+    if table:
+        for number, tasks in PIPELINE_STAGE_ROW.findall(table.group(1)):
+            declared = set(re.findall(r'"(run_[a-z_0-9]+)"', tasks))
+            # An empty row means "this stage declares its checks elsewhere" (stage 1's `tasks`
+            # dict), so it must not clobber what was seeded above. Overwriting it silently dropped
+            # stage 1 from the ordering entirely, which meant the Stage 2 job was never checked for
+            # waiting on the fast checks — the check passed by having nothing to compare.
+            if declared:
+                stages[int(number)] = declared
+    return {number: tasks for number, tasks in stages.items() if tasks}
+
+
+def out_of_order_stages(jobs, commands):
+    """Workflow jobs whose `needs` do not reproduce the local stage order.
+
+    The local gate runs stages strictly in sequence — each starts only if the previous was clean —
+    so a job running a Stage N check must have every Stage N-1 job in its transitive `needs`
+    closure. Without this the two orderings are maintained by hand in two files, which is how CI
+    came to run the medium and e2e suites concurrently while `build check` staged them: a broken
+    component failed fast locally and only after the slowest suite in CI (TODO §6.4).
+    """
+    leaves = stage_leaves()
+    stage_of_job = {}
+    for job, command in commands.items():
+        for number, tasks in leaves.items():
+            if any(re.search(rf"\b{task}\b", command) for task in tasks):
+                stage_of_job[job] = max(stage_of_job.get(job, 0), number)
+
+    problems = []
+    for job, stage in sorted(stage_of_job.items()):
+        if stage <= 1:
+            continue
+        gated_by = closure_of(job, jobs)
+        for earlier, earlier_stage in sorted(stage_of_job.items()):
+            if earlier_stage < stage and earlier not in gated_by:
+                problems.append(
+                    f"'{job}' (stage {stage}) does not wait for '{earlier}' "
+                    f"(stage {earlier_stage})"
+                )
+    return problems
+
+
 def locally_gated_only(workflow_texts):
     """Stage 1 checks no CI job runs — gates that block a commit but not the deploy.
 
@@ -106,6 +182,8 @@ def main():
             failures.append(
                 f"{rel}: job '{job}' gates nothing (no job lists it in `needs`)"
             )
+        for problem in out_of_order_stages(jobs, load_job_commands(workflow)):
+            failures.append(f"{rel}: stage order not enforced — {problem}")
 
     if failures:
         print(
@@ -118,6 +196,12 @@ def main():
         )
         print(
             "    but blocks nothing is worse than no check — it shows red while the deploy ships."
+        )
+        print(
+            "    For a stage-order failure, the fix is the same edit: the later stage's job must"
+        )
+        print(
+            "    `needs:` the earlier one, so CI fails in the order build check does."
         )
         return 1
 
@@ -142,7 +226,8 @@ def main():
     checked = sum(len(load_jobs(w)) for w in workflows)
     print(
         f"  ✓ Pipeline gates: {checked} job(s), every one gates the deploy; "
-        f"all {len(stage_1_tasks())} Stage 1 checks run in CI."
+        f"all {len(stage_1_tasks())} Stage 1 checks run in CI; "
+        f"{len(stage_leaves())} stages ordered as locally."
     )
     return 0
 

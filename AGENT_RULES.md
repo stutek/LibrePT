@@ -55,7 +55,12 @@ Every response and tool action must drive measurable, continuous progress toward
    can still burst past the dev server's TCP listen backlog and produce the same `Page.goto` 30s
    timeout, a constraint that applies to any Playwright suite hitting this shared server regardless
    of what it asserts (seen 2026-08-04). Gated separately from Stage 3 so a broken component fails
-   fast before the slower full-flow suite runs.
+   fast before the slower full-flow suite runs. **CI enforces the same four stages in the same
+   order** ([TODO §6.4](TODO.md)) — not because it must (each CI job has its own runner and its own
+   dev server, so none of the contention below applies there) but so the pipeline has one definition
+   rather than two. The order is declared once, in `build/__init__.py`'s `PIPELINE_STAGES`:
+   `build/__main__.py` executes it and `agent_tools/pipeline_gates.py` asserts `deploy.yml`'s job
+   graph reproduces it, so re-parallelising a stage in CI fails Stage 1 by name.
 
    **Stage 3 (only if Stage 2 is clean):** the full Playwright e2e suite (`tests/e2e/`, itself
    fanned out across workers via `pytest-xdist`) against the local dev server.
@@ -65,10 +70,11 @@ Every response and tool action must drive measurable, continuous progress toward
    `run_stage_4_zap`) — the two used to run in one `ThreadPoolExecutor`, and ZAP's request flood
    against the SAME local `:8081` server while `pytest-xdist` workers were mid-suite produced
    `Page.goto` timeouts across specs with no relation to whatever change was under test (seen
-   2026-08-03: 30 failures, all `Timeout 30000ms exceeded`). In CI this was never an issue — e2e
-   and ZAP are already separate jobs on separate runners, each with its own dev server — so only
-   the local path needed the split. This is traceable resource contention, not the "probably
-   flaky" hand-wave forbidden below; don't re-parallelize the two locally without addressing that.
+   2026-08-03: 30 failures, all `Timeout 30000ms exceeded`). In CI this was never a *correctness*
+   issue — e2e and ZAP are separate jobs on separate runners, each with its own dev server — so
+   only the local path ever needed the split for that reason; CI chains them anyway so both paths
+   stage identically ([TODO §6.4](TODO.md)). This is traceable resource contention, not the "probably flaky"
+   hand-wave forbidden below; don't re-parallelize the two locally without addressing that.
 
    All four stages together typically take 5-15 minutes; expect it, don't interrupt it. Rules:
    - **Say how long it will take, BEFORE starting it, every time — as a WALL-CLOCK time, not just a
