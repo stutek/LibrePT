@@ -531,6 +531,20 @@ worker's precache make it one visit, once.
 
 - **The cheap half is done**: `index.html` carries 15 `<link rel="modulepreload">` hints covering the
   boot-critical path. Only bundling remains, and that is the expensive half.
+- **This is now also the gate's dominant cost, measured 2026-08-08.** Profiling Stage 3 on a quiet
+  box: 131 tests, **352s of call time, 2.69s average** — against §21's measured **2.84s median for
+  one cold app boot in a fresh browser context**. A typical e2e test is therefore almost entirely
+  boot and almost none of it assertions, and the scheduler is not the constraint (8 workers → 88%
+  parallel efficiency; 12 workers bought 5%, see `_playwright_worker_count`). Stage 3 cannot go
+  below ~44s while every test pays a cold module graph.
+- **The unexplored lever is the browser context, not the bundle.** §21 measured a **reused** context
+  hitting the real app at **0.31s median against 2.84s fresh — 9×** — because a fresh context throws
+  away the HTTP cache and re-fetches all ~89 modules. Keeping one context per xdist worker and
+  clearing IndexedDB/localStorage between tests would keep the isolation that matters while paying
+  the module fetch once per worker instead of once per test. **Not attempted**: it trades an
+  isolation model the whole suite is built on (fresh context per test, guaranteed by construction)
+  for one maintained by explicit teardown, where a missed store leaks state between tests silently.
+  Needs a decision before anyone starts, not a spike.
 - **Read this before proposing it again.** It was mis-recommended as "the next big win" on 2026-08-05
   and again implicated in §21 — both wrong. §12.6's CDN stylesheet was the actual cold-load
   bottleneck, and it is gone.

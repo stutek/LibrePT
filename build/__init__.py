@@ -742,6 +742,25 @@ def _playwright_worker_count():
     the same way, so the throttle cost three minutes and fixed nothing. If ambient load is genuinely
     the problem, the answer is to not run the gate while hammering the machine — not to let the gate
     misread its own footprint as a reason to go slower.
+
+    RAISING IT IS NOT WORTH IT EITHER — measured 2026-08-08 on the 16-core box, quiet (1-min load
+    0.55), so this is not another starved-run artifact. Half-cores is not leaving throughput on the
+    table the way the arithmetic suggests:
+
+      | workers | wall (2 runs)   | parallel efficiency |
+      | :--     | :--             | :--                 |
+      | 8       | 49.5s / 49.8s   | 88%                 |
+      | 12      | 47.8s / 46.5s   | 62%                 |
+
+    131 tests, 352s of call time, so the -n 8 floor is ~44s and the -n 12 floor ~29s — but 12 landed
+    at 47s, i.e. six extra workers bought 5%. The contention this cap exists for is real and starts
+    well before `-n auto`; the docstring's reasoning is confirmed by measurement, not merely
+    inherited. Do not re-derive this.
+
+    What the same profile DOES say is that the cap is not the bottleneck at all: average call time
+    is 2.69s/test against TODO §21's measured 2.84s median for one cold app boot in a fresh browser
+    context, so a typical e2e test is almost entirely boot and almost none of it assertions. The
+    lever that matters is that boot (§12.7), not the scheduler.
     """
     cpu_count = os.cpu_count() or 2
     return max(1, cpu_count // 2)
