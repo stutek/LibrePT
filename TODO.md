@@ -260,11 +260,22 @@ while in [deploy.yml](.github/workflows/deploy.yml) `medium-tests`, `e2e-tests`,
 `static-security-audits` and `owasp-zap-scan` all declare the same Stage 1 `needs:` list and run
 concurrently.
 
-**Decided (Simon): CI mirrors the local gate — four stages, chained.**
+**Decided (Simon): CI mirrors the local gate — four stages, chained, with no half-stages.**
 `deploy.yml` is now Stage 1 (nine concurrent fast jobs) → Stage 2 medium → Stage 3 e2e → Stage 4 ZAP
-→ build → deploy, each stage starting only if the previous is clean. `static-security-audits` moved
-to Stage 1, where it already sits locally; it had accumulated a `needs:` on the other Stage 1 jobs,
-making it a phantom Stage 1.5.
+→ post-gate assemble → deploy, each stage starting only if the previous is clean.
+
+**The half-stage is the part that needed fixing, not just the ordering.**
+`static-security-audits` is a Stage 1 check locally, but in CI it had acquired a `needs:` on every
+other Stage 1 job — so it ran after the fast checks and before Stage 2, delaying everything behind
+it, and nothing in the file said so. Its stage existed only as an implication of its dependency
+list, which is precisely how a job ends up between stages without anyone deciding it should.
+
+So the stage is now **stated and checked, not implied**: every job's `name:` carries its stage
+(`Stage 2 · Medium Component Tests`), and `pipeline_gates.py` asserts the label matches the checks
+the job actually runs — a job running Stage N's checks must say Stage N, and a job running none
+(assemble, deploy) must not claim a stage at all. A fractional stage is now unrepresentable rather
+than merely absent: you cannot write `Stage 1.5`, and an unlabelled or mislabelled job fails Stage 1
+by name.
 
 **The cost, stated plainly, because it was argued against and overruled**: these jobs have no
 resource contention in CI — each gets its own runner and its own dev server — so chaining buys none
@@ -275,9 +286,10 @@ ordering guarantees hold in which place.
 
 **The ordering is now shared code, not a convention.** `build/__init__.py`'s `PIPELINE_STAGES` table
 is the single declaration: `build/__main__.py` executes it, and
-[agent_tools/pipeline_gates.py](agent_tools/pipeline_gates.py) parses it and asserts `deploy.yml`'s
-job graph reproduces the same order — a Stage N job must have every Stage N-1 job in its transitive
-`needs` closure. Adding a stage, or quietly re-parallelising one, now fails Stage 1 by name.
+[agent_tools/pipeline_gates.py](agent_tools/pipeline_gates.py) parses it and asserts `deploy.yml`
+both **orders** its jobs to match (a Stage N job has every Stage N-1 job in its transitive `needs`
+closure) and **labels** them to match. Adding a stage, quietly re-parallelising one, or letting a job
+drift between two, now fails Stage 1 by name.
 
 **A bug found while building that check, worth recording**: the first version let stage 1's
 deliberately-empty row in `PIPELINE_STAGES` overwrite the set seeded from `run_stage_1_parallel`'s

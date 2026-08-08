@@ -37,6 +37,8 @@ STAGE_1_TASK = re.compile(r'"[^"]+":\s*(run_[a-z_0-9]+)')
 # The stage-order table, read the same way and for the same reason as STAGE_1_TABLE above.
 PIPELINE_STAGES_TABLE = re.compile(r"PIPELINE_STAGES = \((.*?)\n\)", re.S)
 PIPELINE_STAGE_ROW = re.compile(r"\((\d+),\s*run_stage_[a-z_0-9]+,\s*\(([^)]*)\)\)")
+# A job's displayed name claiming a stage: "Stage 2 · Medium Component Tests".
+STAGE_LABEL = re.compile(r"\s*Stage\s+(\d+)\s*[·:-]")
 
 
 def load_jobs(workflow_path):
@@ -62,6 +64,55 @@ def load_job_commands(workflow_path):
         steps = (body or {}).get("steps") or []
         commands[name] = " ".join(str(step.get("run", "")) for step in steps)
     return commands
+
+
+def load_job_names(workflow_path):
+    """Return {job_name: its `name:` display string}, empty when a job declares none."""
+    document = yaml.safe_load(workflow_path.read_text(encoding="utf-8"))
+    return {
+        name: str((body or {}).get("name", ""))
+        for name, body in (document.get("jobs") or {}).items()
+    }
+
+
+def mislabelled_stages(commands, names):
+    """Jobs whose displayed stage does not match the stage they actually run.
+
+    The `needs` graph already enforces the ORDER; this enforces that the order is legible. Without
+    it the stage a job belongs to is implicit in its dependency list, which is exactly how a job
+    came to sit between stages — `static-security-audits` had acquired a `needs` on every Stage 1
+    job, making it an unnamed Stage 1.5 that delayed everything behind it and that no label
+    contradicted. A stage number in the name is a claim, so it is checked like one: a job running a
+    Stage N check must say `Stage N`, and a job running no staged check must not claim a stage at
+    all.
+    """
+    leaves = stage_leaves()
+    problems = []
+    for job, command in sorted(commands.items()):
+        actual = max(
+            (
+                number
+                for number, tasks in leaves.items()
+                if any(re.search(rf"\b{task}\b", command) for task in tasks)
+            ),
+            default=None,
+        )
+        declared = STAGE_LABEL.match(names.get(job, ""))
+        declared = int(declared.group(1)) if declared else None
+
+        if actual is None and declared is not None:
+            problems.append(
+                f"'{job}' is named Stage {declared} but runs no stage's checks"
+            )
+        elif actual is not None and declared is None:
+            problems.append(
+                f"'{job}' runs Stage {actual} checks but its name says no stage"
+            )
+        elif actual is not None and declared != actual:
+            problems.append(
+                f"'{job}' is named Stage {declared} but runs Stage {actual} checks"
+            )
+    return problems
 
 
 def closure_of(job, jobs, seen=None):
@@ -165,25 +216,44 @@ def locally_gated_only(workflow_texts):
     return sorted(task for task in stage_1_tasks() if task not in invoked)
 
 
-def main():
+def workflow_failures(workflow):
+    """Every gating problem in one workflow file, already prefixed with its path.
+
+    Split out of `main()` when adding the stage-order and stage-label checks pushed it past the
+    complexity gate — three checks over one file is one job, and `main()`'s remaining job is
+    reporting.
+    """
+    jobs = load_jobs(workflow)
+    if not jobs:
+        return []
+
+    rel = workflow.relative_to(REPO_ROOT)
+    commands = load_job_commands(workflow)
+    ungated, terminals = orphans(jobs)
+
     failures = []
+    if len(terminals) > 1:
+        failures.append(
+            f"{rel}: {len(terminals)} terminal jobs — {', '.join(terminals)}"
+        )
+    failures += [
+        f"{rel}: job '{job}' gates nothing (no job lists it in `needs`)"
+        for job in ungated
+    ]
+    failures += [
+        f"{rel}: stage order not enforced — {problem}"
+        for problem in out_of_order_stages(jobs, commands)
+    ]
+    failures += [
+        f"{rel}: stage label wrong — {problem}"
+        for problem in mislabelled_stages(commands, load_job_names(workflow))
+    ]
+    return failures
+
+
+def main():
     workflows = sorted(WORKFLOW_DIR.glob("*.yml")) + sorted(WORKFLOW_DIR.glob("*.yaml"))
-    for workflow in workflows:
-        jobs = load_jobs(workflow)
-        if not jobs:
-            continue
-        ungated, terminals = orphans(jobs)
-        rel = workflow.relative_to(REPO_ROOT)
-        if len(terminals) > 1:
-            failures.append(
-                f"{rel}: {len(terminals)} terminal jobs — {', '.join(terminals)}"
-            )
-        for job in ungated:
-            failures.append(
-                f"{rel}: job '{job}' gates nothing (no job lists it in `needs`)"
-            )
-        for problem in out_of_order_stages(jobs, load_job_commands(workflow)):
-            failures.append(f"{rel}: stage order not enforced — {problem}")
+    failures = [f for workflow in workflows for f in workflow_failures(workflow)]
 
     if failures:
         print(
@@ -227,7 +297,7 @@ def main():
     print(
         f"  ✓ Pipeline gates: {checked} job(s), every one gates the deploy; "
         f"all {len(stage_1_tasks())} Stage 1 checks run in CI; "
-        f"{len(stage_leaves())} stages ordered as locally."
+        f"{len(stage_leaves())} stages ordered and labelled as locally."
     )
     return 0
 

@@ -166,3 +166,43 @@ def test_the_real_workflow_enforces_the_local_stage_order():
     )
 
     assert problems == []
+
+
+def test_a_job_labelled_with_the_wrong_stage_is_reported():
+    """The label is a claim about which stage a job is in, so it is checked like one."""
+    commands = {"medium": "run_medium_tests()", "e2e": "run_e2e_tests()"}
+    names = {"medium": "Stage 1 · Medium Component Tests", "e2e": "Stage 3 · E2E"}
+
+    problems = pipeline_gates.mislabelled_stages(commands, names)
+
+    assert problems == ["'medium' is named Stage 1 but runs Stage 2 checks"]
+
+
+def test_a_job_running_staged_checks_must_declare_a_stage():
+    """An unlabelled job is how a de-facto half-stage hides: its position lives only in `needs`."""
+    problems = pipeline_gates.mislabelled_stages(
+        {"medium": "run_medium_tests()"}, {"medium": "Medium Component Tests"}
+    )
+
+    assert problems == ["'medium' runs Stage 2 checks but its name says no stage"]
+
+
+def test_a_post_gate_job_must_not_claim_a_stage():
+    """`build` and `deploy` follow the gate; letting them number themselves would invent stages."""
+    problems = pipeline_gates.mislabelled_stages(
+        {"build": "run_build()"}, {"build": "Stage 5 · Assemble"}
+    )
+
+    assert problems == ["'build' is named Stage 5 but runs no stage's checks"]
+
+
+def test_the_real_workflow_labels_every_job_with_its_actual_stage():
+    """The invariant on this repository: a fractional stage is unrepresentable."""
+    workflow = pipeline_gates.WORKFLOW_DIR / "deploy.yml"
+
+    problems = pipeline_gates.mislabelled_stages(
+        pipeline_gates.load_job_commands(workflow),
+        pipeline_gates.load_job_names(workflow),
+    )
+
+    assert problems == []
