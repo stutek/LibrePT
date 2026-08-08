@@ -563,6 +563,22 @@ worker's precache make it one visit, once.
     | four | 47.99 / 47.50 / 48.01s | 48.0s |
     | six | 45.22 / 46.18 / 46.91 / 44.53 / 46.07s | 46.1s |
 
+    **Confirmed end-to-end against a real checkout, not a hand-disabled tree.** The rows above
+    disable pooling by editing the working tree, which leaves this conftest's other changes in
+    place; checking `tests/` out at `3d612af` (the commit before any of it) and running the whole
+    `build check` both ways is the version with nothing assumed. `src/` is identical across that
+    range, so the dev server stays valid and only the test tree varies:
+
+    | `tests/` at | whole gate | stage 3 |
+    | :--- | :--- | :--- |
+    | `3d612af` (before, 131 e2e tests) | 1m21s | 50 / 51s |
+    | `HEAD` (after, 134 e2e tests) | 1m18s / 1m18s | 48 / 47s |
+
+    So **~3s off stage 3 and ~3s off the gate, about 4-6%** — less than the 8% the stage-3-only
+    table suggests, because the "after" tree also carries the three isolation tests that make the
+    pooling safe. That is the honest net: the guardrail costs about a second of the win, and is
+    still worth it.
+
     **The lesson is about how to read a subset benchmark.** Those four files run *alone* went
     34.8s → 25.5s, a genuine 24% — but alone they are 27 tests over 8 workers, so the pooled page
     is amortised over ~3.4 tests each. In the full suite xdist spreads all 134 tests across the
