@@ -367,8 +367,23 @@ RESET_ORIGIN_STORAGE = """async () => {
 
 
 @pytest.fixture(scope="session")
-def _pooled_deeplink_page(browser, local_server):
-    """One browser page per xdist worker, reused across every test that opts in.
+def _pooled_deeplink_pages():
+    """Pooled pages keyed by INIT-SCRIPT PROFILE, not one page for everyone.
+
+    The autouse fixtures decide what to inject from a test's markers — `clean_start` suppresses the
+    demo seed — and Playwright init scripts cannot be removed once added. So a pool shared across
+    profiles would hand whichever profile arrived second the FIRST one's scripts: a seeded test
+    silently running against an empty database, or worse, a `clean_start` test running against a
+    seeded one. Nothing would error; the assertions would just be about the wrong app.
+
+    Keying the pool on the profile makes that unrepresentable, and is what lets this be extended to
+    more files (TODO §12.7) without each addition being a correctness review.
+    """
+    return {}
+
+
+def _make_pooled_page(browser, local_server):
+    """One browser page per xdist worker per profile, reused across every test that opts in.
 
     Why this exists: a fresh browser context per test re-fetches the app's ~89 ES modules with a
     cold HTTP cache, and under the parallelism the suite actually runs at that dominates a
@@ -393,18 +408,52 @@ def _pooled_deeplink_page(browser, local_server):
     # this fixture exists to amortise is paid here rather than by whichever test happens to be
     # first.
     page.goto(local_server)
-    yield page
-    context.close()
+    return page
+
+
+def artifact_capture_requested(config):
+    """Whether this run was asked for screenshots, video or a trace.
+
+    Always false in the gated run — `build check` captures no artifacts at all, deliberately
+    (AGENT_RULES §2.A.3) — and true exactly when a human is escalating one failing node id with
+    `--screenshot=on` / `--tracing=on`, which is the documented way to get visual state.
+    """
+    return any(
+        config.getoption(name, default="off") not in ("off", None)
+        for name in ("--screenshot", "--video", "--tracing")
+    )
 
 
 @pytest.fixture
-def deeplink_page(_pooled_deeplink_page, local_server):
+def deeplink_page(request, local_server):
     """The pooled page, reset to a clean origin after each test.
 
     Resetting on TEARDOWN rather than setup so a failing test's storage is still there to inspect
     when the run stops, and so the reset cost is never billed to the test that follows.
+
+    POOLING IS SKIPPED WHEN ARTIFACTS ARE REQUESTED. pytest-playwright records screenshots/video/
+    traces by listening to the context IT creates; a page from the pooled context is invisible to
+    that recorder, so `--screenshot=on` on one of these files silently produced nothing — verified,
+    not assumed: the same escalation on a non-pooled file wrote its PNG. Silently, because the run
+    still passes and the only symptom is a missing file you were not watching for. Escalation is
+    the one case where speed does not matter (one node id) and visual state is the entire point, so
+    it takes the ordinary per-test context and the artifact recorder that comes with it.
     """
-    page = _pooled_deeplink_page
+    if artifact_capture_requested(request.config):
+        page = request.getfixturevalue("context").new_page()
+        page.set_default_navigation_timeout(NAVIGATION_TIMEOUT_MS)
+        yield page
+        return
+
+    # `clean_start` suppresses the demo seed, so it is a different init-script profile and needs
+    # its own pooled page — see _pooled_deeplink_pages.
+    profile = "clean_start" if "clean_start" in request.keywords else "seeded"
+    pool = request.getfixturevalue("_pooled_deeplink_pages")
+    if profile not in pool:
+        pool[profile] = _make_pooled_page(
+            request.getfixturevalue("browser"), local_server
+        )
+    page = pool[profile]
     yield page
     if not page.url.startswith(local_server):
         # A test navigated off-origin (or to about:blank); storage is per-origin, so get back
