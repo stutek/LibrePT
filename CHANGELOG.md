@@ -11,9 +11,138 @@ tags:
 
 # LibrePT Changelog
 
-Shipped changes, newest first. Backlog and open questions live in [TODO.md](TODO.md); completed backlog items graduate here once they are older than a week.
+Shipped changes, newest first. Backlog and open questions live in [TODO.md](TODO.md); a completed
+backlog item graduates here as soon as it has shipped and passed the gate, leaving a one-line stub
+behind so its `§N.M` number keeps resolving — those numbers are cited from `src/`, `tests/` and
+`docs/`, so they are identifiers, not just headings.
 
 Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Added**, **Changed**, **Fixed**.
+
+---
+
+## 2026-08-08 — One pipeline definition; the clipboard bar returns
+
+### Added
+- **Deleting a session keeps each participant's plan as an unscheduled draft** (TODO §7.3) — reachable from the notification feed and addressed by id, so one client can hold several. Previously the plan died with the slot. Still open: authoring an unscheduled session directly rather than only rescuing one from a deletion.
+- **The bottom clipboard bar renders again** (TODO §6.3) — `#active-session-bar` was read by six modules and created by none, every write null-guarded, so it failed silently and the docs described a surface no trainer could see. It names the **clipboard**, not "the active session", because several overlapping booked slots can merge into one; the seed data now generates that case. The idle "Next: …" state was deliberately **not** restored — planning information does not earn permanent space on a phone, and it competed with the notification summary for the same strip. The bar is a `<button>`, so the whole strip is the tap target.
+
+### Changed
+- **CI now mirrors the local gate: four stages, chained, no half-stages** (TODO §6.4). `deploy.yml` had `medium-tests`, `e2e-tests`, `static-security-audits` and `owasp-zap-scan` all declaring the same Stage 1 `needs:` and running concurrently, while `build check` staged them 2 → 3 → 4. The cost of chaining is real and was argued against: CI jobs have no resource contention (each gets its own runner and dev server), so this adds each stage's setup in series to every green run. What it buys is **one** definition of the pipeline. The half-stage was the worse half of the bug — `static-security-audits` had acquired a `needs:` on every other Stage 1 job, so its stage existed only as an implication of its dependency list. Stages are now **stated and checked**: every job's `name:` carries its stage, [`PIPELINE_STAGES`](build/__init__.py) is the single declaration, and [`pipeline_gates.py`](agent_tools/pipeline_gates.py) asserts `deploy.yml` both orders and labels its jobs to match. A fractional stage is unrepresentable rather than merely absent.
+
+### Fixed
+- **The first version of that check passed vacuously** — stage 1's deliberately-empty row in `PIPELINE_STAGES` overwrote the set seeded from `run_stage_1_parallel`'s own table, so the stage with fourteen members dropped out of the comparison entirely. It reported "3 stages ordered" where four exist, which is the only reason it was caught. Pinned by `test_a_later_stage_that_does_not_wait_for_an_earlier_one_is_reported` — **a detector is only worth what its negative test proves**.
+
+### Measured and reverted
+- **Pooling one browser page per xdist worker** (TODO §12.7) was built, measured and taken back out. It works and it is faster: a reused page with storage cleared boots in **0.23s vs 0.94s** at 8-way parallelism, because the fetch of ~89 modules is served warm. But end-to-end against a real pre-change checkout the whole gate moved **1m21s → 1m18s, ~4%** — and that did not pay for a debugging path that diverges from the failing path (artifact capture is invisible to a pooled context), a guardrail that can only test the surface list it was written against, `page` no longer meaning one thing, and ~100 lines of conftest machinery. **How to read a subset benchmark**, the lesson kept: those files run *alone* went 24% faster, because the pooled page amortised over ~3.4 tests per worker; in the full suite xdist spreads all 134 tests over the same workers and the stage moves a second or two. Both numbers are true; only the second one is the gate.
+
+---
+
+## 2026-08-07 — `src/domain/`: single-responsibility reorganisation
+
+An audit over `src/` (25,508 lines, 100 modules) found the tree mostly healthy — median module ~130
+lines — so this was never a rewrite, just five oversized modules and four boundary defects.
+`activeSessionController.js` 1,668 → 1,169 · `clipboardEditor.js` 896 → 808 · `notificationArea.js`
+498 → 402. Remaining stages and their open halves are TODO §24.
+
+### Added
+- **`src/domain/`, a layer for what is neither storage nor UI** (TODO §24.6) — 12 modules / 1,500 lines with a `unit_js` suite each, 74 assertions that previously needed a browser or did not exist. A DOM-reference count split `modules/common/` cleanly: ten modules with **zero** DOM references, the rest with 5–35, so a directory documented as "shared UI helpers" was holding half the domain rules and there was nowhere to put a rule both storage and UI needed. The line to hold: **`data/` is records at rest** (shape, identity, ordering, persistence); **`domain/` is the training vocabulary** (what a modality is, how reps and load are authored, what a session's clock means) — pure, no DOM, no storage. `import_layers.py` ranks it between the two.
+- **A per-install read-schema toggle** (TODO §18.3) — [`readSchema.js`](src/data/readSchema.js) backfills pre-emptively at boot; the switch is a **read re-point** and is **reversible**, because the schema being left goes on being star-written. Two deliberate divergences from the design on paper, both because the backfill fits in ONE transaction: completeness is a stored marker (committed in the same transaction as the records, so there is no moment at which it can be wrong) rather than a query, and it is **restartable, not resumable**. Measured ~22ms for the 90-record demo set, ~400ms at ~3,000 records.
+- **A gate on the path a module claims for itself** ([`module_headers.py`](agent_tools/module_headers.py), TODO §24.8) — the sweep found **28** stale self-claims, not the 14 the audit spotted by eye. The rule is deliberately narrow: a header that OPENS with a path is making a claim and must be right; one that opens with prose is making no claim and is left alone; a path *after* the first token is a reference to a NEIGHBOUR, never a self-claim. It needed a tool because moving a file is both what invalidates line 1 and the exact moment nobody thinks to look at line 1 — this reorganisation alone moved 11 modules.
+
+### Changed
+- **One theme system, not two** (TODO §24.1) — the header carried a verbatim copy of all five theme constants plus its own `resolveTheme`/`applyTheme`, and they had diverged: the controller assigned `documentElement.className`, the copy touched `body` only, so after any switcher change the root kept the boot theme's class. Now one service at `modules/common/theme.js` updating both via `classList` (never `className` — the root and body are shared surfaces). `src/theme-boot.js` keeps its own small copy deliberately: it must stay import-free to run before first paint.
+- **Two `formatDuration` and two `escapeHTML` resolved — differently** (TODO §24.2). The durations were **not** merged: the padding difference is deliberate (one drives a live countdown that must not change width as it ticks), so one became `formatCompactDuration` and both name the other in a comment. The duplicate `escapeHTML` was security-relevant — `build/frontend_audit.py` recognises the *name*, so a local copy passes the audit while being free to drift. `utils.escapeHTML` had **no test at all**, which is how the drift went unseen; pinning it also fixed `escapeHTML(0)` returning `""`.
+- **The board render left `controllers/`** (TODO §24.3) — ~250 lines to `modules/clipboard/activeSessionBoard.js`, wired by injection only. Also enabled `correctness/noUndeclaredVariables` in `biome.json`: not in Biome's recommended set, but this is a buildless app with no compiler between source and browser, so an undeclared identifier is always a bug and nothing else catches it before a browser does. It earned its place on this very stage — a 32ms Stage 1 failure naming the line, instead of a 38s browser run.
+- **The rest of `activeSessionController.js` split** (TODO §24.4) into `domain/sessionPlanFactory.js`, `domain/quickSignals.js`, `domain/sessionFocus.js` and `domain/sessionHistoryRecord.js`. The quick-signal **decisions** are pure (what counts as a disposable one-tap signal, which tags supersede each other, the severity order behind a card's colour) while the **mutation** is not, so the controller keeps thin wrappers rather than the whole thing moving.
+- **Circuit grouping became an explicit invariant** (`domain/circuitGrouping.js`, TODO §24.5) with 10 unit tests. A circuit is not a container in the data: its members are ordinary items in the same flat array sharing a `circuitId`, which keeps reorder/insert/delete as plain array operations but makes the grouping something somebody MAINTAINS rather than something the structure enforces. Three rules now pinned — members contiguous, one shared title/round count per circuit (from its first EXERCISE, not a leading rest), and set counts plus the live round counter tracking the series. Every way of breaking them yields a plan that still looks plausible.
+- **What the session form produces, and what the notification feed derives, both left the DOM** (`domain/sessionRecord.js`, `domain/notificationItems.js`, TODO §24.7). Neither had a test — the first was reachable only by filling in a real form in a real browser.
+
+### Fixed
+- **A fabricated session end date proposed a seven-hour-forty reschedule** — found only because this stage extracted the logic. It was invisible to the browser suite because the demo seed clamps its hours to 03..17, so e2e only caught it after 18:00. **A suite that passes all afternoon is not the same as a suite that passes**; time-of-day-dependent coverage belongs in `unit_js/`, where the clock is an argument.
+- **A standalone rest's timer card did not focus it** — `focusRefForItem`/`focusIndexFromRef` are a ROUND TRIP, and consolidating them fixed the defect by construction: the ref was built in three places and one disagreed, spelling a standalone rest as `{type: "exercise"}`, which the reader refuses to resolve.
+- **"Mark all read" could not mark a kind it did not know about** — it rebuilt the notification id list by hand, a THIRD copy, so an item kind added to the feed would have rendered but never been markable.
+- **The session history record was built in two places** — once on completion, once on every cache sync while a planning draft is authored — agreeing only by hand, on a path that runs on every keystroke.
+- **The gate went 5m06s → 1m18s**, both fixes harness waits rather than test cost, and both the kind that hide as "browsers are just slow": `--dist=loadfile` pinned each file to one worker, so a stage could not finish faster than its heaviest FILE (`test_share_deeplink.py` alone set stage 3 while seven of eight workers idled); and the splash-dismiss pre-tap borrowed the full 20s dismiss budget, so on an empty database — where the language step withdraws the X on purpose — 17 tests sat in a swallowed timeout at a suspiciously identical ~21.2s. **A tight cluster of near-identical durations is a timeout, not work.**
+
+---
+
+## 2026-08-05 — Test tiers, the `activeSession` contract, and the real cause of the `Page.goto` stalls
+
+### Added
+- **`tests/medium/`, a component tier** (TODO §20) — each test mounts ONE component via an `src/appBoot.js` boot step against real `index.html` markup, with the real `app.js` request intercepted and replaced: no router, IndexedDB, service worker or demo seed. The blocker had been that `activeSession` had no written contract — constructed in two places, consumed across a dozen modules, written down nowhere — so the only reliable way to obtain a valid one was to drive the real flow, which is why 68 of 138 e2e tests were the clipboard. The contract is now `active_session_fixture()` in [`tests/medium/_harness.py`](tests/medium/_harness.py) and [DATA_MODEL §7](docs/DATA_MODEL.md); 26 tests moved down a tier.
+- **`tests/unit_js/`, a Node tier** (TODO §12.8) — pure-logic tests used to boot a full Playwright page because a browser was the only JS runtime this project had (the app's CSP forbids `new Function`, so there was no in-process eval harness; Node's own `import()` never touches a page). The dependency worry was **resolved rather than accepted**: no npm dependency at all — `node:test`/`node:assert` are built into the runtime — and Node is vendored the same pinned, checksum-verified way as Biome, so there is still no `package.json`.
+- **An import-layer gate** ([`import_layers.py`](agent_tools/import_layers.py)) enforcing `data/` → `domain/` → `modules/common/` → `modules/<feature>/` → `controllers/` → `app.js`. Cross-feature imports are deliberately allowed (three exist, each a genuine composition); importing *up* a layer is not, because that is what costs a module its independent mountability. It found two inversions on its first run, both fixed rather than exempted.
+
+### Changed
+- **Font Awesome is vendored locally** (TODO §12.6) — the last CDN dependency, and **the root cause of the `Page.goto` stalls** (TODO §21): `page.goto` waits for `load`, `load` waits for every stylesheet, and that stylesheet was a live internet request made by every test in every tier — 1948ms median, 35233ms worst under 8 parallel contexts, with the goto maximum (35.61s) tracking the CDN maximum (35.23s) almost exactly. Days of chasing the local server, the listen backlog, CPU and the service worker were looking at things that were never involved, because the slow request never touched them. Also removed ZAP suppression 90003 (SRI Missing), whose entire justification was this stylesheet.
+- **Artifact capture dropped from the gated run** — not tracing, not video, and not screenshots. Any artifact option activates pytest-playwright's per-test recorder around every browser context. Screenshots had survived on the claim that `--screenshot=only-on-failure` is "essentially free at collection time"; measured, that was false — **~40s of a 175s stage (~23%) on a fully green run**, where by definition not one screenshot is written. Escalate on demand instead (`--screenshot=on` on one node id).
+- **A failing e2e test now fails the build, with no automatic re-run.** The old serial re-run forgave failures on the theory that xdist port contention produced spurious timeouts; it masked a genuine app-level async race (two uncoordinated `requestAnimationFrame` callbacks stomping each other's result) that went unnoticed for a while. "Passed on retry" is never evidence a test is reliable.
+
+### Fixed
+- **Every card in a re-rendered client grid threw on tap** (TODO §22) — `clientFormsController.js` re-rendered the list without `navigateToPath`, which had never been threaded in at all.
+- **`#btn-sync-data`'s handler moved to the module that owns its markup.** Both defects hid behind the same thing: **a stub that hand-duplicates production wiring will agree with itself and disagree with the app.** Mount the real `bootXyz` step, or the test proves only that the test is self-consistent.
+
+### Ruled out by measurement — do not re-derive
+- The service worker (disabling registration made it *worse*: 38.3s → 52.7s wall; a `page.route` stub cost 59 failures in 702s because interception routes every request through the Node driver); dev-server throughput (2791 req/s); the TCP listen backlog (`Recv-Q` sampled at 0 throughout); host CPU (peak 2.4 of 16 cores); and CPU governor (`power-saver` costs ~21%, worth clearing, but fixes nothing). Run-to-run variance was ~3x and **will** fool a single measurement — two conclusions drawn from single runs during this investigation turned out wrong.
+
+---
+
+## 2026-08-04 — Drive syncing becomes manual-only; calendar invites
+
+### Added
+- **A downloadable `.ics` plus a prefilled `mailto:` for newly assigned participants** (TODO §1.1) — [`calendarInvite.js`](src/data/calendarInvite.js), offered by [`sessionInviteDialog.js`](src/modules/session/sessionInviteDialog.js). Assignment already existed via the session-card Edit form; this is the notification half. There is no backend to send mail from. A participant with no email address is assigned silently, with a disabled invite row explaining why.
+
+### Changed
+- **Drive syncing is manual-only** (TODO §3.10) — every merge/apply/upload now runs only from an explicit tap. The periodic timer and the resume hook call a read-only `refreshSyncCounts()` instead, which downloads the remote file purely to diff it: never merges, applies, or uploads. A second single-listener seam (`onSyncCountsChanged()`) keeps the `behind` half of the badge live without touching local state.
+- **Stage 4 (ZAP) runs sequentially after Stage 3 (e2e), not concurrently.** The two used to share one `ThreadPoolExecutor`, and ZAP's request flood against the SAME local dev server while xdist workers were mid-suite produced 30 `Page.goto` timeouts with no relation to the change under test. Traceable resource contention, not flakiness.
+
+---
+
+## 2026-08-03 — The sync badge stops being a mock
+
+### Added
+- **Conflict review** — a "Review conflicts (N)" dialog rendering both sides via `textContent`/`<pre>` (never an HTML sink), where the trainer picks the survivor. Conflicts are surfaced, never silently resolved.
+
+### Fixed
+- **The ahead counter now counts every write** (TODO §3.9), fixed at the seam rather than the call sites: `onStateSaved(listener)` in [`stateStore.js`](src/data/stateStore.js) fires for every writer that reaches `saveToLocalStorage()`, including the ~21 that bypassed the old per-call-site callback. `ahead` is a live diff (`countChangedRecords()`), not a counter — ten edits to one field collapse to one changed record, so no debounce policy was needed. The live-session cache is deliberately excluded: it writes `librept_active_session`, which a Drive sync does not send, so counting it would make the badge lie.
+
+---
+
+## 2026-08-02 — IndexedDB, Google Drive sync, and the end of multi-version hosting
+
+### Added
+- **Google Drive `appDataFolder` sync** (TODO §3.3) — [`driveSyncConfig.js`](src/data/driveSyncConfig.js), [`googleAuth.js`](src/data/googleAuth.js), [`driveAppData.js`](src/data/driveAppData.js), [`syncMerge.js`](src/data/syncMerge.js), [`driveSyncService.js`](src/data/driveSyncService.js), UI in [`driveSyncUi.js`](src/modules/common/driveSyncUi.js). Decisions worth not re-litigating: **no visible, human-editable Drive file, ever** (`appDataFolder`'s invisibility is what makes the PII isolation of TODO §1.5 hold; a visible file needs the broader `drive.file`/`drive` scope every PT would re-consent to, for a convenience view with no safe editing UI — the escape hatch is the existing Export/Import JSON backup); **merge is a per-record three-way merge against the last-synced ancestor**, never wall-clock last-write-wins, which is why it needs **no Lamport `(deviceId, seq)` pair** despite TODO §18.5 anticipating one and **no tombstones** (the remote snapshot is always freshly downloaded and Drive's history is linear, so absence from a fresh fetch *is* the deletion signal — what would invalidate both: anything else ever writing the same file). Not built: incremental sync via the Drive Changes API; every pass moves the whole file. **`GOOGLE_DRIVE_CLIENT_ID` is blank** until a real GCP OAuth client id is created, which is a supported "not configured" state — so live-OAuth behaviour is untested in CI by design, and the suite pins the merge logic and request shapes against an injected `fetchImpl`.
+- **The star-write CD gate** (TODO §18.13) — the properties this layer relies on are all *invariants across releases*, which is what a per-commit gate can hold and review cannot, because none can ever be tested against a real PT's data (that data is local-only by design). Asserted roughly in order of how expensive the failure is: the staging guard, projection round-trips, the old-UI-writes case, the acyclic reference graph, the frozen backup corpus, migration edge-case robustness, ordering invariants. Two places use a hand-authored hostile-input table rather than property-based fuzzing — a deliberate trade-off in this dependency-light stack, recorded so it is not mistaken for an oversight.
+
+### Changed
+- **`stateStore`'s read/write path moved onto IndexedDB** (TODO §18.6) — [`indexedDb.js`](src/data/indexedDb.js) (one database, one store per schema, three indexes), [`writeQueue.js`](src/data/writeQueue.js) (write-behind, ordered) and [`storageDurability.js`](src/data/storageDurability.js) (`persist()`). **+0 KB install cost** — it is the platform. Not SQLite-wasm: +700 KB–1.2 MB roughly doubles `src/`, and the OPFS `SharedArrayBuffer` VFS wants COOP/COEP headers GitHub Pages cannot set. **The layout constraint that decided it**: one database with one object store per schema, so a fan-out is a single transaction — IndexedDB transactions cannot span *databases*, so a database-per-schema layout makes atomic fan-out impossible by construction and is expensive to retrofit. `navigator.storage.persist()` is mandatory, not optional: without it IndexedDB is evictable and this app holds the only copy of a PT's business records.
+- **Multi-version hosting retired from the code** (TODO §16.5) — deleted rather than adapted, since none of it had a subject any more: `releaseIdentity.js`, `versionCatalog.js`, `versionMessages.js`, `build/releases.py`, the release-publishing deploy step, and five test files. **Kept**: the commit-SHA build stamp and the build-info dialog — support surfaces, not switching machinery.
+- **Storage keys on the data schema alone** (TODO §16.3), and resolved differently than planned: once IndexedDB shipped, its per-schema object stores **are** that layout, and `librept_db` is read exactly once as the legacy import source. A single plain key needs no bucket-keying scheme, so [`storageNamespace.js`](src/data/storageNamespace.js) dropped the release-tag axis and got no replacement. `CURRENT_SCHEMA_VERSION` stays a plain integer major — a "patch" to a schema is either a migration step or nothing.
+- **The complexity gate lost its allowlist.** The last four `# noqa: C901` debt functions were fixed at source rather than carried; no pipeline gate may hold a mechanism for allowlisting real, unfixed debt.
+
+---
+
+## 2026-08-01 — De-godding the controllers; render order becomes explicit
+
+### Added
+- **A cyclomatic-complexity gate** over `src/**/*.js` and Python, and thirteen functions split into named steps to satisfy it — the editor's three worst offenders, `renderSessionCard`, `showSessionView`, `renderNotificationArea`, `renderExerciseDeck`, `buildProgramSnapshot`, and the rest.
+- **[`renderRegistry.js`](src/modules/common/renderRegistry.js)** (TODO §14.8) — topologically sorts shell renders and throws on an unregistered or cyclic dependency, instead of silently no-op-ing. Render-order dependencies between modules had already caused two bugs found only by end-to-end testing.
+
+### Changed
+- **One `renderMarkupOnce()` helper** in [`modules/common/dom.js`](src/modules/common/dom.js) (TODO §14.7), replacing a copy-pasted render-guard block at 22 call sites.
+- **The three shell/dialog templates left `activeSessionController.js`** (TODO §14.9) for [`activeSessionOverlayView.js`](src/modules/clipboard/activeSessionOverlayView.js) — markup templates do not belong in a behavior file.
+- **Session Start moved into the clipboard title bar**, and a session's live status is gated on an explicit start with a due Start button, rather than inferred from the clock.
+
+---
+
+## 2026-07-28 — Denser session cards, sticky day footer, theme parity
+
+### Changed
+- **Session cards collapse by default** and the plan-editor's row fields collapse with them — the dashboard is a scanning surface first.
+- **Every theme owns its own `--warning`, `--danger` and `--success` family**, with the parity guard extended to keep it that way; the temporal tint was dropped where it fought the day grouping.
+
+### Fixed
+- **The sticky day footer** stopped vanishing after a live re-render, stopped sitting above the FAB, previews the NEXT day rather than the current one, and no longer duplicates a day label on short groups.
 
 ---
 

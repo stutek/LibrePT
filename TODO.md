@@ -18,14 +18,14 @@ numbering mark items pruned entirely. **[Brainstorm]** marks a design question t
 **[~]** marks partial work.
 
 Canonical context: [README.md](README.md) (architecture & features), [use_cases/](use_cases/)
-(workflows), [CONTRIBUTING.md](CONTRIBUTING.md) (conventions).
+(workflows), [CONTRIBUTING.md](CONTRIBUTING.md) (conventions). Durable engineering lessons live in
+[AGENT_RULES.md](AGENT_RULES.md), not here — this file records *work*, not process.
 
-## Where to start (ranked 2026-08-08)
+## Where to start (ranked 2026-08-09)
 
 The governing fact is [docs/PREVIEW.md](docs/PREVIEW.md): the app tells its own users it can wipe
 their data. Nothing trainer-facing can be promoted until that is false, so the ranking is **data
-safety → showability → everything else**. §24's module reorg is essentially done and its remaining
-halves are the ones its own rule says to skip.
+safety → showability → everything else**.
 
 | Rank | Item | Why now |
 | :--- | :--- | :--- |
@@ -36,20 +36,22 @@ halves are the ones its own rule says to skip.
 | 5 | §23.5 demo recording | Gates every outreach channel, and the autumn window in §23.6 is real |
 | 6 | §9.5 guided walkthrough | Blank-app churn; big, so not before the above |
 
+**Cheap wins, unranked** — each is small enough to ride along with adjacent work: §12.5's reflog
+expiry (one maintainer command), §19.3's exercise-library filter reset (a real bug needing no URL
+decision), §12.6's glyph subsetting (prerequisite already built), and §18.11's retention basis (one
+paragraph, in the privacy policy).
+
 Deprioritised on purpose: §24.5/§24.7 remainders and §24.8's rename (optional by their own text),
 §11/§5.1/§4.1 (large UI churn with no users yet to aim it), §17.2–§17.4 and §18.8–§18.12 (decided on
-paper, correctly parked).
+paper, correctly parked), §12.7 (measured, closed — do not reopen).
 
 ---
 
 ## 1. Scheduling & Sessions
 
-### 1.1 [x] PT-side client assignment to a session — shipped, see CHANGELOG
-Assignment already existed via the session-card Edit form; what this added is the notification half —
-a downloadable `.ics` ([calendarInvite.js](src/data/calendarInvite.js)) plus a prefilled `mailto:`,
-offered by [sessionInviteDialog.js](src/modules/session/sessionInviteDialog.js) for *newly* assigned
-participants only. There is no backend to send mail from (§1.5). A participant with no email address
-is assigned silently, with a disabled invite row explaining why.
+### 1.1 [x] PT-side client assignment to a session
+Shipped 2026-08-04 — [CHANGELOG](CHANGELOG.md). Invites are `.ics` + `mailto:`, because there is no
+backend to send mail from (§1.5).
 
 ### 1.2 [ ] Simultaneous sessions merged into one clipboard: multi-line titles + per-participant tags
 Overlapping same-day sessions **already merge** into one clipboard (`getOverlappingSessions` /
@@ -68,8 +70,7 @@ programme. Relates to [uc1_gym_floor_clipboard.md](use_cases/uc1_gym_floor_clipb
 ### 1.3 [ ] Session list must model partial overlaps and other PTs' room usage
 - **Partial overlaps** (10:00–11:00 vs 10:30–11:30) must both render, showing the overlap rather than
   stacking as if sequential. Render it the way calendar apps do: a vertical time grid, blocks whose
-  top/height map to start/end, overlapping blocks side by side in columns. Non-conflicted parts of
-  the day may still collapse.
+  top/height map to start/end, overlapping blocks side by side in columns.
 - **Other PTs' bookings for the same room** render read-only and shaded — occupancy only, not
   launchable, no participant detail.
 - Implies a **room/resource** dimension the data model lacks. Source decided in §1.5: a per-room
@@ -115,46 +116,61 @@ Cross-referenced from [PRIVACY.md](PRIVACY.md).
 ## 3. Data Sync
 
 ### 3.3 [x] Google Drive periodic sync
-**Shipped**, manual-only as of §3.10. [driveSyncConfig.js](src/data/driveSyncConfig.js),
-[googleAuth.js](src/data/googleAuth.js), [driveAppData.js](src/data/driveAppData.js),
-[syncMerge.js](src/data/syncMerge.js), [driveSyncService.js](src/data/driveSyncService.js), UI in
-[driveSyncUi.js](src/modules/common/driveSyncUi.js). Decisions worth not re-litigating:
+Shipped 2026-08-02, manual-only as of §3.10 — [CHANGELOG](CHANGELOG.md) carries the decisions worth
+not re-litigating (no visible Drive file ever; three-way merge, so no Lamport pair and no tombstones).
 
-- **No visible, human-editable Drive file, ever.** `appDataFolder`'s invisibility is what makes
-  §1.5's PII isolation hold; a visible file needs the broader `drive.file`/`drive` scope every PT
-  would re-consent to, for a convenience view with no safe editing UI. The escape hatch for anyone
-  who wants their data outside the app is the existing Export/Import JSON backup (§3.7).
-- **Merge is a per-record three-way merge against the last-synced ancestor**, never wall-clock
-  last-write-wins. **No Lamport `(deviceId, seq)` pair** despite §18.5 flagging one as eventually
-  necessary: this merge never orders two edits, it only detects "both sides changed since the
-  ancestor" and reports a conflict. **No tombstones** either — the remote snapshot is always freshly
-  downloaded and Drive's history is linear, so absence from a fresh fetch *is* the deletion signal.
-  What would invalidate that: anything else ever writing the same file.
-- **Conflicts are surfaced, never silently resolved** — a "Review conflicts (N)" dialog renders both
-  sides via `textContent`/`<pre>` (never an HTML sink) and the trainer picks the survivor.
-- **Not built**: incremental sync via the Drive Changes API. Every pass moves the whole file —
-  correct, not bandwidth-minimal.
-- **⚠ Blocked on a maintainer action**: `GOOGLE_DRIVE_CLIENT_ID` is blank until a real GCP OAuth
-  client id is created (see the file header for the steps). A blank id is a supported "not configured"
-  state, so the app is honest — but this feature works for nobody until it is filled in. **Ranked #1
-  in Where to start.** Live-OAuth behaviour is therefore untested in CI by design; the suite pins the
-  merge logic and request shapes against an injected `fetchImpl`.
+**⚠ Still blocked on a maintainer action**: `GOOGLE_DRIVE_CLIENT_ID` is blank until a real GCP OAuth
+client id is created (steps in [driveSyncConfig.js](src/data/driveSyncConfig.js)). A blank id is a
+supported "not configured" state, so the app is honest — but this feature works for nobody until it
+is filled in. **Ranked #1 in Where to start.**
 
-### 3.5 [ ] Paper consent — record checkbox + date; provide a printable blank form
+**Not built**: incremental sync via the Drive Changes API. Every pass moves the whole file — correct,
+not bandwidth-minimal.
+
+### 3.5 [x] Paper consent — checkbox, signed date, form version, and delivery
 **Decided (2026-07-22): KISS — consent lives on paper.** The client signs a form kept at the gym and
 the PT files the paper; that physical file is the evidence. No photo capture, no image storage, no
-email flow, no IMAP — all considered and dropped.
+IMAP — all considered and dropped, and still dropped.
 
-- App's only job: the existing `gdprConsent.cloudSync` checkbox plus an **editable consent date**
-  (defaults to today; the paper may have been signed earlier), replacing reliance on the invisible
-  `timestamp`.
-- Optionally surface a printable blank form from `docs/templates/Client_Consent_Form.md`.
-- **Supersedes the shipped `mailto:` consent trigger** (former 3.4), which can be removed once this
-  lands.
+**Shipped 2026-08-09** in [clientConsentSection.js](src/modules/clients/clientConsentSection.js) +
+[consentForm.js](src/modules/common/consentForm.js), as a *Data Protection (GDPR)* fieldset in the
+Add/Edit Client dialog. What landed, and the two amendments to the 07-22 decision:
+
+- **Editable signed date** (`gdprConsent.consentDate`, defaults to today) as decided — the invisible
+  `timestamp` is kept alongside but is no longer what anything reads. Legacy records fall back to
+  its date part rather than reading as blank.
+- **The delivery trigger stays, and gained an SMS sibling** — the 07-22 note said the `mailto:` flow
+  could be removed once paper consent landed. Reversed on request (Simon, 2026-08-09): a trainer who
+  has to produce the letter themselves before the first session will not, and both buttons open the
+  device's OWN mail/messaging app, so neither is an "email flow" in the IMAP sense that was rejected.
+  Email sends the full letter; SMS sends one line and a link, because messaging clients truncate.
+- **The letter is versioned** (`gdprConsent.formVersion`, a `YYYY-MM` stamp). Consent is consent to a
+  *wording*; without the stamp there is no way to answer "who is still covered?" after the text
+  changes. Existing consents keep the version they were signed under across later record edits.
+- **An archiving reminder as a dialog, not a tooltip** — LibrePT stores no signature, so the trainer
+  holding the paper is the whole evidence chain and cannot be told so only on hover.
+- Docs: [Client_Consent_Form.md](docs/templates/en/Client_Consent_Form.md) is now the printable form
+  AND the pinned source of the shipped wording (a unit test fails the build if the two drift), joined
+  by a client-facing [Client_Privacy_Notice.md](docs/templates/en/Client_Privacy_Notice.md) (Art. 13)
+  and the trainer-facing [PRIVACY_FOR_TRAINERS.md](docs/PRIVACY_FOR_TRAINERS.md).
+- **The client documents are per language**, added 2026-08-09 on the same day: the letters live in
+  [src/i18n/consent/](src/i18n/consent/index.js) (one file per locale, registry keys pinned to
+  `TRANSLATIONS`) and the printable editions in `docs/templates/<lang>/`, catalogued in
+  [templates/INDEX.md](docs/templates/INDEX.md). The trainer picks the language **per client**,
+  defaulting to the UI language and stored as `gdprConsent.formLang` — the trainer's app language
+  and the client's reading language are different facts, and a Slovenian trainer with one expat
+  client must be able to send that one client an English form without switching the whole app. The
+  choice drives the letter, the SMS text, and which locale folder the privacy-notice link points at.
+- **One version spans all languages** — translations state the same promises, so per-language
+  versioning would make `formVersion` stop meaning "which promises were made".
+- **Still open**: `PRIVACY_FOR_TRAINERS.md` and `PRIVACY.md` remain English-only (they are read by
+  the trainer, not the client). The Slovenian client documents are maintainer translations and have
+  **not** been reviewed by a data-protection lawyer — each says so at the top, and that review is a
+  launch prerequisite for §23.6, not a code task.
 
 ### 3.7 [x] [Superseded by §18.6] Persistence engine — localStorage JSON, then IndexedDB
-Deferred a real DB in 2026-07-22 until the 5 MB cap loomed; §17.1 shipping made it loom. Engine
-decision and sizing now live in §18.6.
+Engine decision and sizing live in §18.6. The Export/Import JSON backup remains the user-facing
+escape hatch (§3.3, §18.7).
 
 ### 3.8 [ ] Unbacked-data warning banner — same weight as the PREVIEW badge
 **Raised 2026-07-26 (Simon).** The database holds the **only** copy of a trainer's records
@@ -175,18 +191,11 @@ Nothing on screen says so.
   merely not been asked.
 
 ### 3.9 [x] [Decided] Every write increments the ahead counter on the Sync & Backup button
-**Fixed 2026-08-03 at the seam, not the call sites**: `onStateSaved(listener)` in
-[stateStore.js](src/data/stateStore.js) fires for every writer that reaches `saveToLocalStorage()`,
-including the ~21 that bypassed the old per-call-site callback. `ahead` is a live diff
-(`countChangedRecords()`), not a counter — ten edits to one field collapse to one changed record, so
-no debounce policy was needed. The live-session cache is deliberately excluded: it writes
-`librept_active_session`, which a Drive sync does not send, so counting it would make the badge lie.
+Shipped 2026-08-03, fixed at the seam (`onStateSaved`) rather than the ~21 call sites —
+[CHANGELOG](CHANGELOG.md).
 
 ### 3.10 [x] [Decided] Drive syncing is manual-only; periodic/resume ticks refresh counters, not data
-**Decided 2026-08-04.** Every merge/apply/upload now runs only from an explicit tap. The periodic
-timer and the resume hook call a read-only `refreshSyncCounts()` instead, which downloads the remote
-file purely to diff it — never merges, applies, or uploads. A second single-listener seam
-(`onSyncCountsChanged()`) keeps the `behind` half of the badge live without touching local state.
+Shipped 2026-08-04 — [CHANGELOG](CHANGELOG.md).
 
 ---
 
@@ -244,59 +253,13 @@ The Playwright suites drive real end-to-end flows that are documented nowhere. E
   header menu, first-run terms, sync/backup) each deserve a UC or belong in README feature docs.
 
 ### 6.3 [x] The bottom session bar renders nothing — decided: restore, active state only
-**Closed 2026-08-07.** `#active-session-bar` was read by six modules and created by none — every
-write null-guarded, so it failed silently and the docs described a surface no trainer could see. The
-strip is back, and it names the **clipboard**, not "the active session": a clipboard can be several
-overlapping booked slots merged into one, so the seed data now generates that case. The idle
-"Next: …" state was deliberately **not** restored — planning information does not earn permanent
-space on a phone, the dashboard already shows it, and it competed with the notification summary for
-the same strip. The bar is a `<button>`, so the whole strip is the tap target.
+Shipped 2026-08-08 — [CHANGELOG](CHANGELOG.md). The idle "Next: …" state was deliberately not
+restored.
 
 ### 6.4 [x] CI runs medium and e2e in parallel; the local gate runs them staged — RESOLVED: keep parallel
-**Raised 2026-08-08 (Simon), from
-[run 31224697989](https://github.com/stutek/LibrePT/actions/runs/31224697989).** The observation is
-correct: locally `build check` stages the browser suites (2 → 3 → 4) so a broken component fails fast,
-while in [deploy.yml](.github/workflows/deploy.yml) `medium-tests`, `e2e-tests`,
-`static-security-audits` and `owasp-zap-scan` all declare the same Stage 1 `needs:` list and run
-concurrently.
-
-**Decided (Simon): CI mirrors the local gate — four stages, chained, with no half-stages.**
-`deploy.yml` is now Stage 1 (nine concurrent fast jobs) → Stage 2 medium → Stage 3 e2e → Stage 4 ZAP
-→ post-gate assemble → deploy, each stage starting only if the previous is clean.
-
-**The half-stage is the part that needed fixing, not just the ordering.**
-`static-security-audits` is a Stage 1 check locally, but in CI it had acquired a `needs:` on every
-other Stage 1 job — so it ran after the fast checks and before Stage 2, delaying everything behind
-it, and nothing in the file said so. Its stage existed only as an implication of its dependency
-list, which is precisely how a job ends up between stages without anyone deciding it should.
-
-So the stage is now **stated and checked, not implied**: every job's `name:` carries its stage
-(`Stage 2 · Medium Component Tests`), and `pipeline_gates.py` asserts the label matches the checks
-the job actually runs — a job running Stage N's checks must say Stage N, and a job running none
-(assemble, deploy) must not claim a stage at all. A fractional stage is now unrepresentable rather
-than merely absent: you cannot write `Stage 1.5`, and an unlabelled or mislabelled job fails Stage 1
-by name.
-
-**The cost, stated plainly, because it was argued against and overruled**: these jobs have no
-resource contention in CI — each gets its own runner and its own dev server — so chaining buys none
-of what it buys locally, and adds each stage's setup (checkout, pip install,
-`playwright install chromium --with-deps`) in series to every green run. What it buys is that the
-pipeline has **one** definition: a broken component stops the run, and nobody has to remember which
-ordering guarantees hold in which place.
-
-**The ordering is now shared code, not a convention.** `build/__init__.py`'s `PIPELINE_STAGES` table
-is the single declaration: `build/__main__.py` executes it, and
-[agent_tools/pipeline_gates.py](agent_tools/pipeline_gates.py) parses it and asserts `deploy.yml`
-both **orders** its jobs to match (a Stage N job has every Stage N-1 job in its transitive `needs`
-closure) and **labels** them to match. Adding a stage, quietly re-parallelising one, or letting a job
-drift between two, now fails Stage 1 by name.
-
-**A bug found while building that check, worth recording**: the first version let stage 1's
-deliberately-empty row in `PIPELINE_STAGES` overwrite the set seeded from `run_stage_1_parallel`'s
-own table, so stage 1 dropped out of the comparison entirely and the check passed **vacuously** for
-the stage with fourteen members. It reported "3 stages ordered" where four exist, which is the only
-reason it was caught. A detector is only worth what its negative test proves — pinned by
-`test_a_later_stage_that_does_not_wait_for_an_earlier_one_is_reported`.
+Resolved 2026-08-08 (Simon): **CI mirrors the local gate**, four stages chained from one declaration
+(`PIPELINE_STAGES`). See [AGENT_RULES §2.A.3](AGENT_RULES.md) for the standing rule and
+[CHANGELOG](CHANGELOG.md) for the cost this was overruled on.
 
 ---
 
@@ -328,39 +291,34 @@ Three things the control must express, and they are not the same signal:
 - Applies to standalone cards **and** circuit member rows, and both must agree.
 
 ### 7.3 [~] [Brainstorm] Session-level "Pending Review" flag, unscheduled sessions, and a shared scrollable-deck component
-**Raised 2026-07-27 (Simon).** The label rename to "Pending Review" shipped. The rest is a bundle of
-separable proposals:
+**Raised 2026-07-27 (Simon).** A bundle of separable proposals; the label rename shipped, and (8) —
+the continuous time-ordered timeline that everything else waited on — shipped, see CHANGELOG.
 
-1. **[ ] Session-level review flag.** Keep per-item feedback as the underlying record and add a
-   **derived** `needsReview` roll-up for the dashboard/registry — opening the session still shows
-   which items carry which tag.
-2. **[x] CLARIFIED — resolution is per feedback record, not per session.** It stays on the `resolved`
-   flag of a `planUpdates` entry, set via the existing wizard. (1) is therefore purely derived and
-   never stores its own bit — one source of truth, no drift.
-3. **[~] Unscheduled sessions.** Now largely built (2026-08-07): deleting a session keeps each
-   participant's plan as an unscheduled draft, reachable from the feed, addressed by id so one client
-   can hold several. **Still open**: authoring an unscheduled session directly (rather than only
-   rescuing one from a deletion), and its place on the timeline axis per (6)/(9).
-4. **[ ] Client registry → all sessions as a scrollable deck.** "Potentially infinite" must mean
-   windowed/virtualized rendering, not unbounded DOM — years of history would otherwise degrade the
-   exact responsiveness this app protects.
-5. **[ ] One shared scrollable-deck component.** Partial pushback: clipboard cards carry drag-reorder
-   and edit affordances, registry cards are browse-only. Extract only the shared part — the
-   virtualized scroll/snap container and card shell — and keep interaction logic in the clipboard
-   consumer composing on top.
-6. **[x] CLARIFIED — ordering.** Every card is strictly time-ordered; **unscheduled is the one
-   exception**, clustered at the past/active → future pivot rather than sorted by a date it lacks.
-7. **[ ] Filter chips** (past/active/future/for-review/unscheduled). Depends on (1) and (3).
-8. **[x] SHIPPED — the day-deck became one continuous, time-ordered timeline.** See CHANGELOG. Its
-   prev/next arrows and date title were later removed in favour of sticky per-day headers alone. No
-   virtualization was added — an open call, worth revisiting only if session volumes justify it.
-9. **[ ] Unscheduled cards are directionally sticky.** They must **not** disappear when scrolling
+**Settled, not re-litigated**: resolution is per feedback record (the `resolved` flag on a
+`planUpdates` entry), so (1)'s roll-up is purely derived and never stores its own bit; and every card
+is strictly time-ordered with **unscheduled the one exception**, clustered at the past/active →
+future pivot rather than sorted by a date it lacks.
+
+Still open, in the order they should be done:
+
+1. **[ ] Unscheduled cards are directionally sticky.** They must **not** disappear when scrolling
    toward the future (an actionable "needs scheduling" reminder) but **may** scroll away toward the
    past. Plain `position: sticky` pins in both directions, so this needs scroll-direction-aware
    pinning — real interaction code, not styling.
-
-**Sequencing**: (8) was the load-bearing prerequisite and is shipped; (3) is now mostly there. Next
-per this ordering: (9), then (4), then (7).
+2. **[ ] Client registry → all sessions as a scrollable deck.** "Potentially infinite" must mean
+   windowed/virtualized rendering, not unbounded DOM. (No virtualization exists yet anywhere; an open
+   call, worth revisiting only if session volumes justify it.)
+3. **[ ] Filter chips** (past/active/future/for-review/unscheduled). Depends on the derived
+   `needsReview` roll-up and on unscheduled authoring.
+4. **[ ] Session-level review flag** — a **derived** `needsReview` roll-up for the
+   dashboard/registry; opening the session still shows which items carry which tag.
+5. **[~] Unscheduled sessions.** Largely built 2026-08-07 (deleting a session keeps each
+   participant's plan as an unscheduled draft, reachable from the feed, addressed by id). **Still
+   open**: authoring one directly rather than only rescuing one from a deletion.
+6. **[ ] One shared scrollable-deck component.** Extract only the shared part — the virtualized
+   scroll/snap container and card shell — and keep interaction logic in the clipboard consumer
+   composing on top; clipboard cards carry drag-reorder and edit affordances, registry cards are
+   browse-only.
 
 ---
 
@@ -379,32 +337,45 @@ the identical programme in lockstep, so the trainer logs it once instead of swit
 - Interacts with §1.2 and the participant tabs — a bound group should read as one tab, expandable.
 
 ### 8.3 [x] Inline Clipboard Editor — shipped, see CHANGELOG
-[clipboardEditor.js](src/modules/clipboard/clipboardEditor.js); the `patches/` directory this entry
-once pointed at no longer exists. Covered by three medium suites (drag reorder and circuit
-well-formedness, the catalog picker, and the mode's chrome).
 
-### 8.6 [x] Rests are first-class, focusable plan items — see CHANGELOG
-Polymorphic `DeckCard` hierarchy ([deckCard.js](src/modules/clipboard/deckCard.js) + subclasses).
+### 8.6 [x] Rests are first-class, focusable plan items — shipped, see CHANGELOG
 
 ### 8.7 [ ] [Discuss] Should completing a circuit ROUND stop its timer, like completing the block does?
 **Raised 2026-08-06 (Simon).** `completeCircuitRound` is asymmetric and the asymmetry was never
 decided — it fell out of where the code happened to put the call. On the **final** round the timer is
-**frozen** (not cleared: the trainer dismisses it themselves, so a number they might still want is
-never yanked away); on any **earlier** round the timer is left entirely alone. So the same control
-does or does not touch the timer depending on a number the trainer is not looking at.
+**frozen** (not cleared: the trainer dismisses it themselves); on any **earlier** round the timer is
+left entirely alone. So the same control does or does not touch the timer depending on a number the
+trainer is not looking at.
 
 - **For leaving it running**: between rounds, a running rest countdown is exactly what the trainer is
   pacing off. Freezing at round 2 of 4 destroys the thing they started it for.
-- **For stopping it**: the round is over, so a timer started *against that round* measures nothing —
-  but `focusRef` only records `{type: "circuit", id}`, so the app cannot tell "resting between rounds"
-  from "timing this round's work". **That may be the real gap**: the decision needs a distinction the
-  data model does not make.
+- **For stopping it**: the round is over — but `focusRef` only records `{type: "circuit", id}`, so
+  the app cannot tell "resting between rounds" from "timing this round's work". **That may be the
+  real gap**: the decision needs a distinction the data model does not make.
 - **Check the gym floor first**: §8.6's first-class rests mean a between-rounds rest can now be a real
-  plan item with its own timer, which may make the question moot for well-authored circuits and leave
-  it relevant only for ad-hoc ones.
+  plan item with its own timer, which may make the question moot for well-authored circuits.
 
 No behaviour change until this is settled; the entry exists so the asymmetry is recorded rather than
 re-discovered.
+
+### 8.8 [ ] Copy-program icon on the clipboard view
+**Raised 2026-08-09 (Simon).** A control on the live clipboard that copies the current program —
+one tap to reuse today's plan rather than re-authoring it. Open questions before building:
+
+- **Copy to what?** The three plausible targets are a different participant in the same clipboard
+  (the common case when a walk-in joins a session already underway), the same client's next session,
+  or a routine template. The third overlaps §17.4, which extracts a template from *history*; this one
+  would act on the plan that is live right now.
+- **Copy what, exactly?** Prescription structure only (exercise, sets, reps/targets, rest, circuit
+  grouping) or logged magnitudes too. §17.4 already decided that a *template* strips person- and
+  day-specific magnitudes; a participant-to-participant copy mid-session probably wants the same
+  rule, since the point is a shared plan, not a shared performance.
+- **Placement**: it belongs beside the existing edit affordance in the title bar, not on a card —
+  the unit being copied is the whole program. Must satisfy the no-hover rule and carry a real touch
+  target, not a 9px glyph.
+- Interacts with §8.1 (binding several clients to one shared set) — if that ships, a copy and a bind
+  are two different intentions and the UI must not blur them: a copy diverges afterwards, a bind
+  does not.
 
 ---
 
@@ -474,8 +445,7 @@ so a thrown error dies in a console the PT will never open while
   build stamp. A small in-memory ring buffer, only the most recent persisted, so a crash log can
   never grow into the storage budget (§18.6).
 - **Offer, never send.** No server, no telemetry: automatic reporting would be an unannounced egress
-  of a PT's data. The flow opens a **prefilled GitHub issue URL** the PT reviews and submits. Zero
-  traffic unless they tap.
+  of a PT's data. The flow opens a **prefilled GitHub issue URL** the PT reviews and submits.
 - **Redaction is the hard part and it decides the design.** A stack is safe; the state around it is
   not — names, notes and injuries are PII (§17.3) and the issue is public. Prefer a payload
   non-identifying **by construction** (error, stack, route, version, opaque ids only) — and show it
@@ -497,21 +467,18 @@ from the agent because reflog expiry is irreversible:
 git reflog expire --expire=now --all && git gc --prune=now
 ```
 
-### 12.6 [x] Vendor Font Awesome locally — the last CDN dependency
-**Done 2026-08-05**, and it was **the root cause of §21's `Page.goto` stalls**: `page.goto` waits for
-`load`, `load` waits for every stylesheet, and that stylesheet was a live internet request made by
-every test in every tier (1948ms median, 35233ms worst under 8 parallel contexts). Also removed ZAP
-suppression 90003 (SRI Missing), whose entire justification was this stylesheet.
+### 12.6 [~] Vendor Font Awesome locally — the last CDN dependency
+**Vendored 2026-08-05** ([CHANGELOG](CHANGELOG.md)); it was the root cause of §21's `Page.goto`
+stalls.
 
 **Still open — glyph subsetting**, and it is now safe to do: 2 woff2 files remain (252KB) using 48
-glyphs of ~1400 and 2 brand glyphs; the codepoints do not collide, so merging would land ~381KB of
+glyphs of ~1400 plus 2 brand glyphs; the codepoints do not collide, so merging would land ~381KB of
 font+CSS at roughly 24KB. The prerequisite is built —
 [agent_tools/icon_coverage.py](agent_tools/icon_coverage.py) gates every `fa-` class in `src/`
 against what the stylesheet can render, with the four **runtime-built** names
 (`fa-arrow-${dir}`, `fa-chevron-${…}`) declared explicitly because a static scan misses them and they
-would subset to blank boxes with no error. Its first run found two Font Awesome **Pro** classes live
-in the app, rendering as empty boxes; both were swapped. Remaining work is a dev-time `fonttools`
-script (not a build dependency — regeneration stays a deliberate committed act).
+would subset to blank boxes with no error. Remaining work is a dev-time `fonttools` script (not a
+build dependency — regeneration stays a deliberate committed act).
 
 **Licensing, checked against the shipped text**: a subset is a "Modified Version" under SIL OFL 1.1,
 which permits it but reserves the name — so the merged font's `font-family` must be renamed
@@ -521,124 +488,22 @@ the set was subset. **Today is compliant and relies on none of this**: both woff
 byte-identical to upstream (SHA-256 verified), so no Modified Version exists yet.
 
 **Subsetting cannot affect names in any language** — Font Awesome is Private Use Area only and
-contains no letters. Non-Latin coverage is a `fonts.css` question (latin + latin-ext only, so CJK and
-Cyrillic names render through the fallback chain — deliberate, since a CJK webfont is megabytes per
-trainer), and `getInitials()` derives real initials from Han/Cyrillic/Greek/Arabic names.
+contains no letters. Non-Latin coverage is a `fonts.css` question (latin + latin-ext only, deliberate
+since a CJK webfont is megabytes per trainer), and `getInitials()` derives real initials from
+Han/Cyrillic/Greek/Arabic names.
 
-### 12.7 [ ] [Observation, low priority] ~89 separate module requests on first load
-A cold visit fetches ~89 files. In production this is fine: HTTP/2 multiplexing plus the service
-worker's precache make it one visit, once.
+### 12.7 [x] [CLOSED — measured, do not reopen] ~89 separate module requests on first load
+The cheap half shipped (15 `<link rel="modulepreload">` hints on the boot-critical path); page
+pooling was built, measured at ~4% of the gate and **reverted** 2026-08-08. Full measurements, and
+how to read a subset benchmark, are in [CHANGELOG](CHANGELOG.md) — they are expensive to retake, so
+read them before proposing this again (it was mis-recommended as "the next big win" twice).
 
-- **The cheap half is done**: `index.html` carries 15 `<link rel="modulepreload">` hints covering the
-  boot-critical path. Only bundling remains, and that is the expensive half.
-- **Measured properly 2026-08-08, and it is NOT the gate's dominant cost.** Stage 3 is 131 tests and
-  352s of call time, 2.69s average. A cold app boot in a fresh context, measured under the same 8-way
-  parallelism the suite actually runs at, is **~0.94s** — roughly a third of an average test, with
-  splash dismissal a few hundred ms on top. The rest is the tests doing their work.
-  - **Correcting a misreading recorded earlier the same day**: boot was briefly written up as ~2.84s,
-    i.e. essentially all of a test, by taking §21's number at face value. That number was measured
-    under a heavier condition and does not describe this suite. **Always state the parallelism a
-    browser timing was taken at** — the same navigation measures 0.30s serial, 0.94s at 8-way, and
-    the difference is contention, not the browser.
-- **Pooling the browser page was BUILT, MEASURED AND REVERTED (2026-08-08). Do not rebuild it
-  without reading why.** It works and it is faster; it was reverted because 4% of a gate that is
-  already inside its budget does not pay for what it costs. The measurements are kept because they
-  are expensive to retake and they close the question.
-
-  Isolation comes from a fresh context per test; the same isolation from a **reused page with
-  storage cleared** measures **0.23s vs 0.94s at 8-way parallelism — 4×**, because the fetch of
-  ~89 modules is served warm. Serially the gap nearly vanishes (0.07s vs 0.30s), which is why it
-  must be measured under load.
-
-    | strategy | serial | 8-way parallel |
-    | :--- | :--- | :--- |
-    | fresh context (today) | 0.30s | 0.94s |
-    | warm context, new page | 0.27s | — |
-    | warm context, cleared storage | 0.07s | **0.23s** |
-
-  - **SHIPPED for six files, and the stage-level gain is ~8%, not the 24% the subset showed.**
-    Every row below is the SAME 131 tests, `-n 8`, quiet box, **balanced** profile, re-measured
-    together after an earlier table mixed one row of unverified provenance with two known-balanced
-    ones — the machine moved between power-saver and balanced during this work, and a row whose
-    conditions you cannot name is not a baseline:
-
-    | pooled files | full stage 3 (each run) | median |
-    | :--- | :--- | :--- |
-    | none | 50.84 / 49.05 / 50.24s | 50.2s |
-    | four | 47.99 / 47.50 / 48.01s | 48.0s |
-    | six | 45.22 / 46.18 / 46.91 / 44.53 / 46.07s | 46.1s |
-
-    **Confirmed end-to-end against a real checkout, not a hand-disabled tree.** The rows above
-    disable pooling by editing the working tree, which leaves this conftest's other changes in
-    place; checking `tests/` out at `3d612af` (the commit before any of it) and running the whole
-    `build check` both ways is the version with nothing assumed. `src/` is identical across that
-    range, so the dev server stays valid and only the test tree varies:
-
-    | `tests/` at | whole gate | stage 3 |
-    | :--- | :--- | :--- |
-    | `3d612af` (before, 131 e2e tests) | 1m21s | 50 / 51s |
-    | `HEAD` (after, 134 e2e tests) | 1m18s / 1m18s | 48 / 47s |
-
-    So **~3s off stage 3 and ~3s off the gate, about 4-6%** — less than the 8% the stage-3-only
-    table suggests, because the "after" tree also carries the three isolation tests that make the
-    pooling safe. The guardrail spends about a second of the win.
-
-  - **Why 4% was not enough (the reason it went back).** Ranked by how much each mattered:
-    1. **The debugging path diverged from the failing path.** Artifact capture is invisible to a
-       pooled context, so `--screenshot=on` on a pooled file wrote nothing — fixed by disabling
-       pooling whenever artifacts are requested, which is correct and is also the problem: the
-       moment you escalate to look at a failure you change the page lifecycle that produced it.
-    2. **The guardrail could only test the list it was written against.** `RESET_ORIGIN_STORAGE`
-       covered every surface the app uses, but a NEW one would leak *and* leave the isolation test
-       green, because it probes exactly the surfaces already cleared. A fresh context has no such
-       hole — it does not enumerate anything.
-    3. **`page` stopped meaning one thing.** Six modules overrode it, so reading a test no longer
-       told you what kind of page it ran on.
-    4. **An extra browser context per worker**, which is the leading explanation for the one
-       3-failure run seen during the pilot and never reproduced.
-    5. **~100 lines of conftest machinery** — profile keying, once-per-page init scripts, a
-       splash-wrapper re-entry guard — existing only to support the above. Two latent bugs were
-       found writing it (the splash wrapper nested on re-wrap; init scripts stacked per test), and
-       *both are unreachable with a fresh page per test*, so they went back with it.
-
-    The general rule this is an instance of: the wins that stuck on this gate came from deleting
-    waste — a CDN stylesheet on every navigation, a swallowed 20s splash timeout, `--dist=loadfile`
-    — not from trading away a property the suite is relied on for. A speedup that makes the tests
-    harder to trust is priced in the wrong currency.
-
-    **The lesson is about how to read a subset benchmark.** Those four files run *alone* went
-    34.8s → 25.5s, a genuine 24% — but alone they are 27 tests over 8 workers, so the pooled page
-    is amortised over ~3.4 tests each. In the full suite xdist spreads all 134 tests across the
-    same workers, the saving is ~0.35s per pooled test against a 352s call-time total, and the
-    stage moves a second or two. Both numbers are true; only the second one is the gate.
-  - **Extending it further has sharply diminishing returns.** Adding two files (14 tests) bought
-    ~1.9s. The remaining ~67 eligible tests would plausibly buy a few seconds more, at the cost of
-    a `page` override in every file. Not obviously worth it — revisit only if Stage 3 becomes the
-    complaint again.
-  - **Method note, because it cost two invalid comparisons.** `git stash push -- <paths>` on a
-    CLEAN tree stashes nothing and still exits 0, so a "before" run measured this way silently
-    re-measures "after". Disable the thing under test explicitly and assert it is disabled before
-    trusting a baseline.
-  - **Deep-link tests were the right tenants**, if it is ever revisited: `test_dialog_routing` (11),
-    `test_record_dialog_routes` (7), `test_editor_row_deeplink` (5), `test_session_dialog_routes`
-    (4), `test_view_split_navigation` (8) and `test_sessions_day_footer` (6) are *by definition*
-    "arrive at this URL cold" and depend on no prior in-page state. `test_share_deeplink` (13) is
-    eligible too — `pytestmark = pytest.mark.clean_start` makes the whole module one profile — but
-    needs a second pooled page, since `clean_start` suppresses the demo seed and Playwright init
-    scripts cannot be removed once added. `test_splash_screen` (16) never qualifies: it *is* the
-    cold boot under test. Blocked for their own reasons: `test_first_run_terms` and
-    `test_integrity_verification`, both of which build their own context.
-- **Read this before proposing it again.** It was mis-recommended as "the next big win" on 2026-08-05
-  and again implicated in §21 — both wrong. §12.6's CDN stylesheet was the actual cold-load
-  bottleneck, and it is gone.
-- Bundling trades away the buildless property, a deliberate architectural choice, so the bar is high.
+Bundling remains the only untried half, and it trades away the buildless property — a deliberate
+architectural choice, so the bar is high.
 
 ### 12.8 [x] `tests/e2e/` vs `tests/unit/` is a browser split, not a UI split — resolved by `tests/unit_js/`
-Pure-logic tests used to boot a full Playwright page because a browser was the only JS runtime this
-project had. `tests/unit_js/` is now the fast lane, and the dependency worry was **resolved rather
-than accepted**: no npm dependency at all — `node:test`/`node:assert` are built into the runtime, and
-Node is vendored the same pinned, checksum-verified way as Biome, so there is still no
-`package.json`. See [tests/INDEX.md](tests/INDEX.md) for the four tiers.
+Shipped 2026-08-04/05 — [CHANGELOG](CHANGELOG.md). See [tests/INDEX.md](tests/INDEX.md) for the four
+tiers.
 
 ---
 
@@ -649,14 +514,19 @@ Node is vendored the same pinned, checksum-verified way as Biome, so there is st
 
 ### 13.1 [x] Repurposed `exercisesView` into a Professional Movement Taxonomy — see CHANGELOG
 
+### 13.2 [x] Fast-selection flows over the taxonomy — see CHANGELOG
+Restored as a stub because four `src/` modules still cite it. The three scenarios those comments
+mean: **A** multi-add from the picker, staying open for rapid entry; **B** swap-by-volume-bucket in
+the adjustment wizard; **C** strict taxonomy inheritance when authoring a new movement.
+
 ### 13.3 [x] Conditioning metrics (modality axis) — see CHANGELOG
 
 ---
 
 ## 14. Refactoring: DRY & Complexity Reduction
 
-> Superseded in scope by **§24**, which re-audited `src/` on 2026-08-07. The entries below are the
-> earlier pass; only §14.5's i18n half is still open.
+> Superseded in scope by **§24**, which re-audited `src/` on 2026-08-07. Only §14.5's i18n half is
+> still open; the rest shipped, see CHANGELOG.
 
 ### 14.5 [~] Split the monolithic shared files to avoid same-file co-edit conflicts
 **`index.css` and `index.html` shipped 2026-07-27** — both are shells now, with every view, dialog,
@@ -666,22 +536,14 @@ dictionaries, so every string lands in the same file. Consider per-feature names
 merged into the locale, keeping `test_i18n_parity` green.
 
 ### 14.6 [x] Rename the `booking` domain term to `session` — shipped 2026-07-27
-Code is unified on `session` (the PT runs a session; the client books a slot). **No back-compat kept**
-— decided pre-release with no real PT data to protect, so the v1→v2 migration drops stray `bookings`
-rather than carrying it forward. User-facing i18n copy was left alone.
+**No back-compat kept** — decided pre-release with no real PT data to protect, so the v1→v2 migration
+drops stray `bookings` rather than carrying it forward.
 
-### 14.7 [x] Extract a shared `renderMarkupOnce()` helper — shipped 2026-08-01
-One helper in [modules/common/dom.js](src/modules/common/dom.js) replacing the copy-pasted
-render-guard block at 22 call sites.
+### 14.7 [x] Extract a shared `renderMarkupOnce()` helper — shipped 2026-08-01, see CHANGELOG
 
-### 14.8 [x] Render-order dependencies between modules are unenforced — shipped 2026-08-01
-[renderRegistry.js](src/modules/common/renderRegistry.js) topologically sorts shell renders and
-throws on an unregistered or cyclic dependency, instead of silently no-op-ing. Had already caused two
-bugs found only by end-to-end testing.
+### 14.8 [x] Render-order dependencies between modules are unenforced — shipped 2026-08-01, see CHANGELOG
 
 ### 14.9 [x] `activeSessionController.js` mixed markup templates into a behavior file — shipped 2026-08-01
-The three shell/dialog templates moved to
-[activeSessionOverlayView.js](src/modules/clipboard/activeSessionOverlayView.js).
 
 ---
 
@@ -703,18 +565,12 @@ The three shell/dialog templates moved to
 > sitting on it.
 
 ### 16.3 [x] [Resolved — superseded by §18.6] Key storage buckets on the DATA SCHEMA, not the release tag
-Resolved differently than planned. This assumed `localStorage` would stay a live multi-bucket store;
-once §18.6 shipped, IndexedDB's per-schema object stores **are** that layout, and `librept_db` is read
-exactly once as the legacy import source. A single plain key needs no bucket-keying scheme, so
-[storageNamespace.js](src/data/storageNamespace.js) dropped the release-tag axis and got no
-replacement. `CURRENT_SCHEMA_VERSION` stays a plain integer major — a "patch" to a schema is either a
-migration step or nothing.
+Shipped 2026-08-02 — [CHANGELOG](CHANGELOG.md). `CURRENT_SCHEMA_VERSION` stays a plain integer major:
+a "patch" to a schema is either a migration step or nothing.
 
 ### 16.5 [x] Retire the multi-version hosting machinery from the code — done
-Deleted rather than adapted, since none of it had a subject any more: `releaseIdentity.js`,
-`versionCatalog.js`, `versionMessages.js`, `build/releases.py`, the release-publishing deploy step,
-and five test files. **Kept**: the commit-SHA build stamp and the build-info dialog — support
-surfaces, not switching machinery.
+Shipped 2026-08-02 — [CHANGELOG](CHANGELOG.md). **Kept**: the commit-SHA build stamp and the
+build-info dialog — support surfaces, not switching machinery.
 
 ---
 
@@ -766,8 +622,8 @@ real sessions**, removing the blank-page chore that blocks ramp-up.
 
 ### 17.5 [~] Explicit item ordering — `position` on every session item
 **Shipped** in [sessionItemOrder.js](src/data/sessionItemOrder.js); rationale (why dense not gapped,
-why not a linked list, rejected alternatives) lives in
-[DATA_MODEL](docs/DATA_MODEL.md). Writers stamp `position` at the choke point they all funnel through.
+why not a linked list, rejected alternatives) lives in [DATA_MODEL](docs/DATA_MODEL.md). Writers
+stamp `position` at the choke point they all funnel through.
 
 **Still open**: nothing consumes `positionIssues()` at runtime (it is a query the tests call, not a
 surfaced integrity warning); `activeExerciseIndex` still means an *array index*, which holds only
@@ -788,31 +644,19 @@ order — gates on §18.6.
 >
 > **Decided: NO RELEASE TAGS.** One build carries old and new behaviour concurrently; behaviour
 > switching is an in-app choice, not navigation. What is supported is a set of **schemas**, the only
-> axis storage keys on (§16.3). "No fixes ever land on a maintenance-mode version" is inverted
-> deliberately: old behaviours live inside the current build, so they get fixes automatically. The
-> surviving justification for writing every live schema is the **previously-cached service-worker
-> build** — a PT on yesterday's cached build *is* an older app version even with no tags — plus
-> backup portability.
+> axis storage keys on (§16.3). The surviving justification for writing every live schema is the
+> **previously-cached service-worker build** — a PT on yesterday's cached build *is* an older app
+> version even with no tags — plus backup portability.
 >
-> **The build order (DB → write layer → CD tests) is complete.** What remains inside §18 is narrower
-> and called out per section: §17.1's lazy per-client load (§18.6), §18.3's idle deferral and failure
-> reporting, §18.7's backups, §18.8's encryption/desktop threat model, §18.9's CAS, §18.11's legal
-> gaps, §18.12's ribbon tiers.
+> **The build order (DB → write layer → CD tests) is complete.** What remains is narrower and called
+> out per section: §17.1's lazy per-client load (§18.6), §18.3's idle deferral and failure reporting,
+> §18.7's backups, §18.8's encryption/desktop threat model, §18.9's CAS, §18.11's legal gaps,
+> §18.12's ribbon tiers.
 
 ### 18.1 [x] [Decided in principle] The star write model, and its relationship to §16.3
-**Built**: [recordSchemas.js](src/data/recordSchemas.js) declares each schema's per-collection field
-shapes, [recordProjections.js](src/data/recordProjections.js) projects the live domain object into
-them, and `starWrite()` in [stateStore.js](src/data/stateStore.js) is the fan-out — one transaction,
-every live schema's store, with reconcile-deletes for records no longer present.
-
-A **bucket** is one physical store holding data shaped by exactly one schema; bucket↔schema is 1:1.
-Three relations were being conflated and are worth keeping apart:
-
-| Relation | Cardinality | Owner |
-| --- | --- | --- |
-| bucket ↔ schema | 1 : 1 | storage layout (§16.3) |
-| app version → schema it **reads** | N : 1 | the app build (`CURRENT_SCHEMA_VERSION`) |
-| write layer → schemas it **writes** | 1 : N | the relation this section adds |
+**Built** — [recordSchemas.js](src/data/recordSchemas.js), [recordProjections.js](src/data/recordProjections.js)
+and `starWrite()` in [stateStore.js](src/data/stateStore.js). Three constraints that still bind any
+change here:
 
 - **The fan-out set is global, never per-app-version.** If each version declared its own, two tabs on
   two versions would write different sets and buckets would silently diverge.
@@ -825,31 +669,18 @@ Three relations were being conflated and are worth keeping apart:
 
 ### 18.2 [x] [Decided, CLOSED] Identity: lineage IDs, no ID-mapping table
 `lineageId` **is** the record's own `id` — projections carry it unchanged, so today's UUIDv7 already
-is the lineage id and no mapping table exists. §18.3's completeness check (a set difference over ids)
-provides what a mapping table would have, free. **UUIDv7** (RFC 9562): 122 bits of collision
+is the lineage id and no mapping table exists. **UUIDv7** (RFC 9562) gives 122 bits of collision
 resistance *and* lexicographic time-ordering, doubling as the tiebreak within §18.5's topological
 order. If short ids are ever wanted, base62-encode a v7 — never drop entropy.
 
 ### 18.3 [~] [Decided] Migration is pre-emptive, resumable, and runs through the normal write layer
-**Shipped 2026-08-07** — [readSchema.js](src/data/readSchema.js). Pre-emptive backfill at boot; the
-switch is a per-install **read re-point** and is **reversible**, because the schema being left goes on
-being star-written. The backfill runs through the normal projection path, honouring the invariant
-below.
+**Shipped 2026-08-07** — [readSchema.js](src/data/readSchema.js), see [CHANGELOG](CHANGELOG.md).
+Revisit near ~50k records, where the single transaction it relies on becomes a stall worth splitting
+— at which point the design below applies again as written:
 
-**Two deliberate divergences, both because the backfill fits in ONE transaction:**
-
-1. **Completeness is a stored marker, not a query.** The decision below rejected a flag because one
-   written at the wrong moment can drift — true of a chunked migration, not this one: the marker
-   commits inside the same transaction as the records, so there is no moment at which it can be wrong.
-2. **Restartable, not resumable.** One transaction means an interruption commits nothing. Measured
-   ~22ms for the 90-record demo set, ~400ms at ~3,000 records; revisit near ~50k, where a single
-   transaction becomes a stall worth splitting — and both decisions below apply again as written.
-
-The decided design, still authoritative if this is ever chunked:
-
-- **Pre-emptive**, so a switch is instant, and there is no staleness window: once migration completes,
-  ongoing writes fan out to that bucket too. Catch-up is a **re-derivation**, not a restore from a
-  point in time — which is also why §18.7 rejects a snapshot tier.
+- **Pre-emptive**, so a switch is instant and there is no staleness window. Catch-up is a
+  **re-derivation**, not a restore from a point in time — which is also why §18.7 rejects a snapshot
+  tier.
 - **Yields to user writes**: migration breaks on any interaction write and resumes when the burst
   ends. Gym-floor latency beats migration throughput.
 - **Ordinary use accelerates migration**: a star write to a not-yet-migrated record populates the new
@@ -859,13 +690,11 @@ The decided design, still authoritative if this is ever chunked:
   second transform. Otherwise half a bucket comes from each code path and the drift is undetectable.
 - **A partially-migrated bucket must not be readable.** A crash at 40% would otherwise reboot the PT
   into a UI showing 40% of their clients — indistinguishable from catastrophic loss, and the rational
-  response (re-entering records) creates real corruption.
-  - **Completeness is a set difference over ids, not a count comparison**:
-    `complete(target) ⇔ keys(source) \ keys(target) = ∅`. Two counts are independent aggregates that
-    tie nothing element-to-element, so one absent source id plus one spurious target entry passes the
-    check **over a hole**. **Containment, not equality** — ids the target has and the source lacks are
-    legitimate. It is also cheap (`getAllKeys()` returns sorted B-tree keys with no deserialisation)
-    and it **names the missing ids**, so repair is a re-projection of exactly those records.
+  response (re-entering records) creates real corruption. **Completeness is a set difference over
+  ids, not a count comparison**: `complete(target) ⇔ keys(source) \ keys(target) = ∅`. Two counts are
+  independent aggregates that tie nothing element-to-element, so one absent source id plus one
+  spurious target entry passes the check **over a hole**. **Containment, not equality** — ids the
+  target has and the source lacks are legitimate. It is also cheap and it **names the missing ids**.
 
 **Still open**: deferring the backfill to idle/charging so it does not cost battery mid-session; how a
 failed background backfill reports itself without alarming a PT who never asked for it (block the
@@ -880,8 +709,8 @@ v5 domain object with no v6 concept in it fans out and overwrites the full-fidel
 
 **Chosen: expand-first staged releases** — never let a supported schema be unable to carry a field.
 Free in code, paid for in release discipline. (Rejected: a preservation envelope, an opaque field
-older versions round-trip verbatim. `_source` exists in Elasticsearch precisely because its indexed
-form is lossy; if staging guarantees projections are not lossy, there is nothing to reconstruct.)
+older versions round-trip verbatim — if staging guarantees projections are not lossy, there is
+nothing to reconstruct.)
 
 - **The rule staging obligates**: *no feature ships until its storage has shipped in every currently
   supported schema* — the field lands N releases before the UI that uses it. **Enforced in CI**
@@ -893,27 +722,18 @@ form is lossy; if staging guarantees projections are not lossy, there is nothing
   schema**, not to ship a lossy projection.
 - **Reading degraded is mild; WRITING degraded is the danger.** A wrongly displayed HIIT exercise is a
   display problem; a PT *logging into that wrong view* produces bad data that fans out everywhere. So
-  the signal belongs at the point of writing, announced app-wide via §18.12's ribbon, not only as a
-  per-record marker (keep that too — it is cheap).
+  the signal belongs at the point of writing, announced app-wide via §18.12's ribbon.
 
 ### 18.5 [x] [Decided] Ordering is topological, not chronological
 Replay order means correct **foreign-key availability**, not timestamp order.
-
-- **The reference graph must be acyclic.** [recordReferences.js](src/data/recordReferences.js)
-  declares it (structural ownership only — a soft label like `routineName` is deliberately excluded)
-  and a DFS cycle check is asserted in CI, including a proof the detector catches a real cycle rather
-  than one that never triggers. Today's graph is trivial; the point is catching a future convenience
-  back-reference before a trainer does. **§17.4 is the first realistic cycle risk.**
-- **The wall clock is not an ordering key anywhere.** A single sequential writer resolves by execution
-  order; timestamps are inert data. One rider: a backward clock jump still writes a wrong `loggedAt`
-  — cosmetic, but it is what the PT reads. §3.3's Drive sync turned out **not** to need the
-  `(deviceId, seq)` Lamport pair this section anticipated; see §3.3's merge note.
+[recordReferences.js](src/data/recordReferences.js) declares the reference graph (structural
+ownership only) and a DFS cycle check is asserted in CI. Today's graph is trivial; the point is
+catching a future convenience back-reference before a trainer does — **§17.4 is the first realistic
+cycle risk.** The wall clock is not an ordering key anywhere.
 
 ### 18.6 [~] [Decided] Persistence engine → IndexedDB (supersedes the §3.7 deferral)
-**Engine shipped**: [indexedDb.js](src/data/indexedDb.js) (one database, one store per schema, three
-indexes), [writeQueue.js](src/data/writeQueue.js) (write-behind, ordered) and
-[storageDurability.js](src/data/storageDurability.js) (`persist()`), all wired into
-[stateStore.js](src/data/stateStore.js).
+**Engine shipped 2026-08-02** — [CHANGELOG](CHANGELOG.md) carries the engine choice and the
+single-database layout constraint that decided it.
 
 **Still open — true lazy per-client loading is deliberately NOT done.** The read model stays
 synchronous so ~115 existing `state.<collection>.push(...)` call sites need no change; converting them
@@ -929,16 +749,8 @@ to async per-client fetches is separate, larger work. The index it needs
 | Studio ceiling (14/day) | 4,200 | 24.3 MiB | 49 MiB | 73 MiB |
 | Very busy PT, 5 yrs (no deletes) | 14,400 | 83 MiB | 166 MiB | **250 MiB** |
 
-- **IndexedDB, +0 KB install cost** — it is the platform, and quotas are orders of magnitude clear of
-  the table above. **Not SQLite-wasm**: +700 KB–1.2 MB roughly doubles `src/`, and the OPFS
-  `SharedArrayBuffer` VFS wants COOP/COEP headers GitHub Pages cannot set (`opfs-sahpool` avoids that,
-  so it is a constraint with a workaround, not a blocker). The portability/permissions concern is the
-  argument *for* IndexedDB: zero config, zero permissions, no binary, no VFS.
-- **Layout constraint**: one database with one object store per schema, so a fan-out is a single
-  transaction. IndexedDB transactions cannot span *databases*, so a database-per-schema layout makes
-  atomic fan-out impossible by construction and is expensive to retrofit.
-- **`navigator.storage.persist()` is mandatory**, not optional — without it IndexedDB is evictable and
-  this app holds the only copy of a PT's business records.
+Quotas are orders of magnitude clear of that table, so sizing is not the constraint — eviction is:
+
 - **Plan for eviction, not deprecation.** IndexedDB has no deprecation path. The realistic risks are
   Safari's 7-day cap on script-writable storage for non-engaged sites (home-screen install exempts
   you, which the app already promotes), quota-pressure eviction on Android, and private-browsing
@@ -1011,6 +823,10 @@ retained forever, so a link to a retired behaviour resolves to the nearest survi
 than erroring; and **deep links carry the `lineageId`**, never a per-schema id (§18.2).
 
 ### 18.11 [ ] [Open] Legal gaps this design creates
+- **Retention basis is undocumented.** No-deletes + anonymization-only + fan-out is technically fine,
+  but GDPR Art. 5(1)(e) wants a *stated* retention period. "Retained indefinitely for aggregate
+  analytics" is lawful only if written down; neither [PRIVACY.md](PRIVACY.md) nor §17.3 says it.
+  **Cheapest item in this file — one paragraph.**
 - **Re-identification via backups + the mapping table.** A pre-erasure backup contains
   `abc123 → "Jane Doe"` and the mapping says `abc123 → xyz789`; together they re-identify an anonymized
   record. The usual defence is that backups rotate out — **§18.7's indefinite-restore requirement
@@ -1020,18 +836,13 @@ than erroring; and **deep links carry the `lineageId`**, never a per-schema id (
   Feeds §17.3's unresolved key-location tension.
 - **Minimize the suppression list itself** — a retained list of erased people's identifiers is lawful
   (you need it *to honour* the erasure) but should store a salted hash of the id and nothing else.
-- **Retention basis is undocumented.** No-deletes + anonymization-only + fan-out is technically fine,
-  but GDPR Art. 5(1)(e) wants a *stated* retention period. "Retained indefinitely for aggregate
-  analytics" is lawful only if written down; neither [PRIVACY.md](PRIVACY.md) nor §17.3 says it.
-  Cheapest item on this list.
 - **Taxonomy licensing — checked 2026-07-26, currently clear.** wger's *application* is AGPLv3 but no
   wger code is linked; its *dataset* is CC-BY-SA 4.0 but
   [exerciseStandard.js](src/domain/exerciseStandard.js) vendors ~17 generic category and equipment
-  words, far below any threshold. Fees are zero on every axis. **The line not to cross**: bulk-importing
-  wger's 1000+ entries would engage both ShareAlike (a licensing split inside an MIT repo, and a
-  one-way door for that file) and the **EU *sui generis* database right** (Dir. 96/9/EC), which is
-  separate from copyright and needs no originality. SNOMED CT, if ever considered, requires an
-  affiliate licence — country status must be checked, not assumed.
+  words, far below any threshold. **The line not to cross**: bulk-importing wger's 1000+ entries would
+  engage both ShareAlike (a licensing split inside an MIT repo, and a one-way door for that file) and
+  the **EU *sui generis* database right** (Dir. 96/9/EC), which is separate from copyright and needs
+  no originality. SNOMED CT, if ever considered, requires an affiliate licence.
 
 ### 18.12 [ ] [Decided] Reuse the preview badge for unsupported-version warning
 Generalise `#preview-badge` into a **build-status ribbon with severity tiers**: `PREVIEW` (amber,
@@ -1052,13 +863,9 @@ same promise and needs the same signal.
   problem in a way an amber pulse is not.
 
 ### 18.13 [x] CD pipeline tests for the star-write layer — shipped
-The properties §18 relies on are all *invariants across releases*, which is what a per-commit gate can
-hold and review cannot — none can ever be tested against a real PT's data, because that data is
-local-only by design. Asserted, roughly in order of how expensive the failure is: the staging guard
-(§18.4), projection round-trips, the old-UI-writes case, the acyclic reference graph (§18.5), the
-frozen backup corpus (§18.7), migration edge-case robustness, and ordering invariants (§17.5). Two
-places use a hand-authored hostile-input table rather than property-based fuzzing — a deliberate
-trade-off in this dependency-light stack, recorded so it is not mistaken for an oversight.
+Shipped 2026-08-02 — [CHANGELOG](CHANGELOG.md). The properties §18 relies on are *invariants across
+releases*, which a per-commit gate can hold and review cannot: none can ever be tested against a real
+PT's data, because that data is local-only by design.
 
 ---
 
@@ -1088,9 +895,9 @@ database is device-local, so a copied id dereferences to nothing elsewhere.
 ### 19.3 Undecided — decide per use case
 - [ ] **Filter and search state.** Enumerated chips (muscle, equipment, category) are a closed,
       non-personal vocabulary and could be path segments; **free-text search must not be**, since a
-      typed client name would land in history, screenshots and shared links. Separately and
-      independently of routing: the exercise library silently resets its chip and search box whenever
-      `renderExercisesList()` is called with no arguments — a real bug that needs no URL.
+      typed client name would land in history, screenshots and shared links. **Separately and needing
+      no URL decision: the exercise library silently resets its chip and search box whenever
+      `renderExercisesList()` is called with no arguments — a real bug, and a cheap fix.**
 - [ ] **Transient chrome** — the ☰ menu, the session ⋮ menu, the notification drawer, a drag in
       progress. A reload closes them, which is arguably correct; a URL that reopens a menu is noise in
       history and fights the outside-click handlers. Recorded so the decision is explicit.
@@ -1105,64 +912,37 @@ database is device-local, so a copied id dereferences to nothing elsewhere.
 ---
 
 ## 20. [x] Test tiers: the clipboard, and the `activeSession` contract — COMPLETE
-**Closed 2026-08-05.** The gap was that `activeSession` had no written contract: constructed in two
-places, consumed across a dozen modules, written down nowhere — so the only reliable way to obtain a
-valid one was to drive the real flow, which is why 68 of 138 e2e tests were the clipboard. The
-contract is now `active_session_fixture()` in [tests/medium/_harness.py](tests/medium/_harness.py),
-mounting the live clipboard through the controller's own `setActiveSession()`; 26 tests moved to
-`tests/medium/`; and the seam is documented as [DATA_MODEL §7](docs/DATA_MODEL.md).
+**Closed 2026-08-05** — [CHANGELOG](CHANGELOG.md); the seam is [DATA_MODEL §7](docs/DATA_MODEL.md).
 
-**Two shapes that break naive consumers**, worth keeping: a planning draft carries `isPlanning: true`
-and NO `startDate`/`endDate`, and a session opened from history has `sourceSession: null` unless it
-was a plan. `buildSessionMeta`'s 2h `endDate` clamp is load-bearing — `recoverActiveSession()`
-discards a cache more than 2h past its scheduled end.
+**Two shapes that break naive consumers**, worth keeping in front of anyone writing a fixture: a
+planning draft carries `isPlanning: true` and NO `startDate`/`endDate`, and a session opened from
+history has `sourceSession: null` unless it was a plan. `buildSessionMeta`'s 2h `endDate` clamp is
+load-bearing — `recoverActiveSession()` discards a cache more than 2h past its scheduled end.
 
 ## 20b. Backlog sweep — 2026-08-06
-Method note, kept so the next sweep starts from evidence: check a signal's **context, not its count**.
-Two grep false positives, recorded so they are not re-raised: `expectedVersion` in
+Method note, kept so the next sweep starts from evidence: check a signal's **context, not its count**
+(a `grep -c` over multiple files emits `file:count`, which mis-scored several items on the first
+pass). Two recorded false positives: `expectedVersion` in
 [schemaMigrations.js](src/data/schemaMigrations.js) is *schema* validation, not §18.9's
 compare-and-swap; and the `walkthrough` hits are i18n strings for a notification button, not §9.5's
-engine. A `grep -c` over multiple files emits `file:count`, which mis-scored several items on the
-first pass.
+engine.
 
 **The lesson this sweep exists to prevent recurred anyway**: on 2026-08-08 two more items (§6.3 and
-§7.3(3)) were found shipped but unticked. Tick the entry in the commit that closes it.
+§7.3) were found shipped but unticked. **Tick the entry in the commit that closes it.**
 
 ## 21. [x] `Page.goto` stalls against the local dev server — ROOT-CAUSED AND FIXED
-**The cause was the Font Awesome CDN stylesheet (§12.6), vendored 2026-08-05.** `page.goto` waits for
-`load`, `load` waits for every stylesheet, and that one was a live internet request made by every test
-in every tier: 1948ms median and 35233ms worst case under 8 parallel fresh contexts, with the goto
-maximum (35.61s) tracking the CDN maximum (35.23s) almost exactly. Days of chasing the local server,
-the listen backlog, CPU and the service worker were looking at things that were never involved,
-because the slow request never touched them.
+**The cause was the Font Awesome CDN stylesheet (§12.6), vendored 2026-08-05.** The measurements, and
+the list of things ruled out so they are not re-derived, are in [CHANGELOG](CHANGELOG.md); the
+per-stage budget and the diagnostic that generalises (**a tight cluster of near-identical durations
+is a timeout, not work**) are in [AGENT_RULES §2.A.3](AGENT_RULES.md).
 
-Two later fixes (2026-08-07) took the gate from 5m06s to 1m18s, both harness waits rather than test
-cost: `--dist=loadfile` pinned each file to one worker, so a stage could not finish faster than its
-heaviest file; and the splash-dismiss pre-tap borrowed the full 20s dismiss budget, so 17 tests sat
-in a swallowed timeout at a suspiciously identical ~21.2s.
-
-**What to keep from all of it**, since the measurements were expensive:
-
-- **A tight cluster of near-identical durations is a timeout, not work.** Read `--durations=0` before
-  concluding a suite is inherently slow or that tests need moving down a tier.
-- **Ruled out by measurement — do not re-derive**: the service worker (disabling registration made it
-  *worse*: 38.3s → 52.7s wall; its cache helps once installed, and a `page.route` stub cost 59 failures
-  in 702s because interception routes every request through the Node driver); dev-server throughput
-  (2791 req/s); the TCP listen backlog (`Recv-Q` sampled at 0 throughout); host CPU (peak 2.4 of 16
-  cores); and CPU governor (`power-saver` costs ~21%, worth clearing, but fixes nothing).
-- **Run-to-run variance was ~3x and will fool a single measurement.** Two conclusions drawn from
-  single runs during this investigation turned out wrong.
-- The navigation timeout was raised 30s → 60s while chasing this. With the cause fixed, consider
-  reverting it so any future stall fails fast and cheap.
+**One loose end**: the navigation timeout was raised 30s → 60s while chasing this. With the cause
+fixed, consider reverting it so any future stall fails fast and cheap.
 
 ## 22. [x] Two `src` defects found while testing — FIXED
-`clientFormsController.js` re-rendered the client list without `navigateToPath` — never threaded in at
-all, so every card in a re-rendered grid threw on tap. And `#btn-sync-data`'s handler moved to the
-module that owns its markup.
-
-**The general lesson**: a stub that hand-duplicates production wiring will agree with itself and
-disagree with the app. Both defects hid behind exactly that. Mount the real `bootXyz` step, or the
-test proves only that the test is self-consistent.
+Fixed 2026-08-05 — [CHANGELOG](CHANGELOG.md). **The general lesson**: a stub that hand-duplicates
+production wiring will agree with itself and disagree with the app. Mount the real `bootXyz` step, or
+the test proves only that the test is self-consistent.
 
 ---
 
@@ -1240,9 +1020,8 @@ one job they all hate, and expand from there.
 The concrete Slovenia-first campaign (target list, outreach scripts, timing, named institutions and
 gyms) lives outside version control at `.private/go-to-market-campaign.md`. It names specific gyms and
 contacts, quotes draft outreach copy, and is candid about the reputational risk of promoting a preview
-build — none of which belongs in a public repository. What stays public is §23.1–§23.5, which is
-useful to any contributor and names nobody. When acting on the campaign, read the private file; when
-changing the *strategy*, update both so they do not drift.
+build — none of which belongs in a public repository. What stays public is §23.1–§23.5. When acting on
+the campaign, read the private file; when changing the *strategy*, update both so they do not drift.
 
 **The one deadline worth recording**: §23.5's recording and landing page gate every outreach channel,
 and the highest-leverage target (a sport-science faculty, whose academic year starts in autumn) is only
@@ -1269,9 +1048,9 @@ previously needed a browser, or did not exist.
   not a controller. **A gate cannot see a copy-paste.** When an import is refused, check the layering
   before duplicating.
 - **Extract what becomes *testable* or *shared*, not what merely makes a file shorter.** Two stages
-  were deliberately narrowed on exactly this test (§24.4b/§24.4c): the focus↔URL sync, the
-  schedule-adjust apply and the session wiring all stayed in the controller, because each is
-  orchestration whose every dependency is already there. Moving them would have been motion.
+  were deliberately narrowed on exactly this test: the focus↔URL sync, the schedule-adjust apply and
+  the session wiring all stayed in the controller, because each is orchestration whose every
+  dependency is already there. Moving them would have been motion.
 - **Three defects surfaced that the audit did not predict**, each invisible to review and none what
   the stage set out to change: a fabricated session end date that proposed a seven-hour-forty
   reschedule, a focus reference the timer spelled wrong for standalone rests, and a "mark all read"
@@ -1282,42 +1061,23 @@ previously needed a browser, or did not exist.
   Time-of-day-dependent coverage belongs in `unit_js/`, where the clock is an argument.
 
 ### 24.1 [x] Stage 1 — one theme system, not two — shipped 2026-08-07
-The header carried a verbatim copy of all five theme constants plus its own `resolveTheme`/
-`applyTheme`, and they had diverged: the controller assigned `documentElement.className`, the copy
-touched `body` only, so after any switcher change the root kept the boot theme's class. Now one
-service at `modules/common/theme.js` updating both via `classList` (never `className` — the root and
-body are shared surfaces). `src/theme-boot.js` keeps its own small copy deliberately: it must stay
+See [CHANGELOG](CHANGELOG.md). `src/theme-boot.js` keeps its own small copy deliberately: it must stay
 import-free to run before first paint.
 
 ### 24.2 [x] Stage 2 — two `formatDuration`, two `escapeHTML` — shipped 2026-08-07
-The two durations were **not** merged: the padding difference is deliberate (one drives a live
-countdown that must not change width as it ticks), so one became `formatCompactDuration` and both name
-the other in a comment. The duplicate `escapeHTML` was security-relevant —
-`build/frontend_audit.py` recognises the *name*, so a local copy passes the audit while being free to
-drift. `utils.escapeHTML` had **no test at all**, which is how the drift went unseen; pinning it also
-fixed `escapeHTML(0)` returning `""`.
+See [CHANGELOG](CHANGELOG.md). The two durations were deliberately **not** merged; the duplicate
+`escapeHTML` was, because `build/frontend_audit.py` recognises the *name*, so a local copy passes the
+audit while being free to drift.
 
 ### 24.3 [x] Stage 3 — the board render leaves `controllers/` — shipped 2026-08-07
-~250 lines of view rendering moved to `modules/clipboard/activeSessionBoard.js`, wired by injection
-only. Also enabled `correctness/noUndeclaredVariables` in `biome.json` — not in Biome's recommended
-set, but this is a buildless app with no compiler between source and browser, so an undeclared
-identifier is always a bug and nothing else catches it before a browser does. It earned its place on
-this very stage: a 32ms Stage 1 failure naming the line, instead of a 38s browser run.
+See [CHANGELOG](CHANGELOG.md), which also records why `correctness/noUndeclaredVariables` is on
+despite not being in Biome's recommended set.
 
 ### 24.4 [x] Stage 4 — split the rest of `activeSessionController.js` — shipped 2026-08-07
 `domain/sessionPlanFactory.js`, `domain/quickSignals.js`, `domain/sessionFocus.js` and
-`domain/sessionHistoryRecord.js`, with unit tests previously unreachable without a booted browser.
-Three rules worth keeping:
-
-- **The quick-signal DECISIONS are pure** (what counts as a disposable one-tap signal, which tags
-  supersede each other, the severity order behind a card's colour) **while the MUTATION is not**, so
-  the controller keeps thin wrappers rather than the whole thing moving.
-- **`focusRefForItem`/`focusIndexFromRef` belong together because they are a ROUND TRIP.**
-  Consolidating them fixed a defect by construction: the ref was built in three places and one
-  disagreed, spelling a standalone rest as `{type: "exercise"}`, which the reader refuses to resolve —
-  so tapping a rest's timer card landed on the session without focusing it.
-- **The history record was built in two places** — once on completion, once on every cache sync while
-  a planning draft is authored — agreeing only by hand, on a path that runs on every keystroke.
+`domain/sessionHistoryRecord.js` — see [CHANGELOG](CHANGELOG.md) for the three defects it surfaced.
+The rule that decided the split boundary: **the quick-signal DECISIONS are pure while the MUTATION is
+not**, so the controller keeps thin wrappers rather than the whole thing moving.
 
 ### 24.4d [ ] Follow-up: one movement → plan item mapping
 The projection "catalog movement → plan item fields" is written in **four** places. They agree on the
@@ -1331,20 +1091,13 @@ slots, so it is a **behaviour change** wanting its own commit rather than riding
 `renderClipboardEditor()` holds a template layer, 11 wiring closures, a drag reorder engine and
 circuit normalisation in one scope.
 
-- **`domain/circuitGrouping.js` — shipped 2026-08-07** with 10 unit tests. A circuit is not a container
-  in the data: its members are ordinary items in the same flat array sharing a `circuitId`, which
-  keeps reorder/insert/delete as plain array operations but makes the grouping an invariant somebody
-  MAINTAINS rather than one the structure enforces. Three rules now pinned — members contiguous, one
-  shared title/round count per circuit (from its first EXERCISE, not a leading rest), and set counts
-  plus the live round counter tracking the series. Every way of breaking them yields a plan that still
-  looks plausible.
+- **`domain/circuitGrouping.js` — shipped 2026-08-07**, see [CHANGELOG](CHANGELOG.md).
 - [ ] **`clipboardEditorMarkup.js`** — pure `(item, ctx) → HTML` row/circuit/insert-bar builders.
 - [ ] **`listReorder.js`** — a generic tap-nudge/drag reorder engine, not editor-specific.
 
 ### 24.6 [x] Stage 6 — `src/domain/`, a layer for what is neither storage nor UI — shipped 2026-08-07
-A DOM-reference count split `modules/common/` cleanly: ten modules with **zero** DOM references, the
-rest with 5–35 — so a directory documented as "shared UI helpers" was holding half the domain rules.
-`src/domain/` is now ranked in `import_layers.py` between `data/` and `modules/common/`.
+See [CHANGELOG](CHANGELOG.md). `src/domain/` is ranked in `import_layers.py` between `data/` and
+`modules/common/`.
 
 **The line to hold when adding to either**: **`data/` is records at rest** (shape, identity, ordering,
 persistence); **`domain/` is the training vocabulary** (what a modality is, how reps and load are
@@ -1356,16 +1109,12 @@ upward.
 ### 24.7 [~] Stage 7 — three more multi-responsibility modules
 - [ ] **`applicationHeader.js` (512)** → header shell + menu (~250) once `renderSyncBadge` moves beside
       `driveSyncUi.js` and the about/terms dialogs move to `legalDialogs.js`.
-- **`editSessionControl.js` — commit half shipped 2026-08-07.** `domain/sessionRecord.js` owns what the
-  form PRODUCES. It had no test at all — reachable only by filling in a real form in a real browser.
-  Two rules now pinned that would cost a trainer data: the upsert **MERGES** (a stored session carries
+- **`editSessionControl.js` — commit half shipped 2026-08-07** (`domain/sessionRecord.js`). Two rules
+  now pinned that would otherwise cost a trainer data: the upsert **MERGES** (a stored session carries
   `completed`/`duration` this form never edits, so a wholesale replace would silently un-complete a
-  session by editing its title), and invites go only to **newly** assigned participants. The complexity
-  gate fired here and was fixed at source per AGENT_RULES, not allowlisted.
+  session by editing its title), and invites go only to **newly** assigned participants.
   **Still open**: the draft-persistence and form-population halves.
-- **`notificationArea.js` — derivation half shipped 2026-08-07** (`domain/notificationItems.js`,
-  498 → 405). Extracting it removed a THIRD copy of the item-id list: "mark all read" rebuilt the ids
-  by hand, so an item kind added to the feed would have rendered but never been markable.
+- **`notificationArea.js` — derivation half shipped 2026-08-07** (`domain/notificationItems.js`).
   **Still open**: `notificationReadState.js` (the module reaches into `storageNamespace` directly from
   a UI module) and the gesture block.
 
@@ -1378,14 +1127,7 @@ upward.
       `session/sessionTitleBar.js` renders the live overlay's title, and `session/sessionBar.js` is
       consumed by `sessionList/sessionsView.js`.
 - **Module headers — shipped 2026-08-07**, gated by
-  [agent_tools/module_headers.py](agent_tools/module_headers.py). The sweep found **28** stale
-  self-claims, not the 14 the audit spotted by eye. The rule is deliberately narrower than "every
-  module states its path": a header that OPENS with a path is making a claim and must be right; one
-  that opens with prose is making no claim and is left alone; and a path *after* the first token is a
-  reference to a NEIGHBOUR, never a self-claim, so it is never "fixed". Too strict and it nags about
-  good headers, too loose and it rewrites references to other files. It needed a tool because moving a
-  file is both what invalidates line 1 and the exact moment nobody thinks to look at line 1 — this
-  reorganisation alone moved 11 modules.
+  [agent_tools/module_headers.py](agent_tools/module_headers.py); see [CHANGELOG](CHANGELOG.md).
 
 **Not a problem, deliberately left alone**: `src/index.css` (773) is a genuine design system;
 `src/data/exercises.js` and the i18n dictionaries are flat data. Size alone is not a defect.
