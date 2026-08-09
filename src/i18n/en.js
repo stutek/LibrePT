@@ -361,6 +361,7 @@ export const en = {
   consent_signed_label: "Client signed the consent form (data storage & cloud sync)",
   consent_date_label: "Date signed",
   consent_form_version: "Consent form version",
+  consent_lang_label: "Form language",
   consent_send_email: "Email form",
   consent_send_sms: "Send link by SMS",
   consent_no_email: "No email on file",

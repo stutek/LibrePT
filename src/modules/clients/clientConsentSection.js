@@ -18,13 +18,26 @@
 //
 // deps: injected { t } via initClientConsentSection; reads/writes only its own form controls.
 
-import { CONSENT_FORM_VERSION, consentEmailHref, consentSmsHref } from "../common/consentForm.js";
+import { CONSENT_LANG_LABELS } from "../../i18n/consent/index.js";
+import {
+  CONSENT_FORM_VERSION,
+  consentEmailHref,
+  consentSmsHref,
+  resolveConsentLang,
+} from "../common/consentForm.js";
 import { $id, closeModal, openModal, renderMarkupOnce } from "../common/dom.js";
 
 let translate = (_key, fallback) => fallback;
+// An accessor, not a value: the trainer can switch UI language between two openings of the dialog,
+// and the default offered has to follow (AGENT_RULES §5.3).
+let readUiLang = () => null;
+// The client currently in the form, so a language change can rebuild the delivery links without the
+// controller having to re-open the dialog.
+let editedClient = null;
 
-export function initClientConsentSection({ t } = {}) {
+export function initClientConsentSection({ t, getLang } = {}) {
   if (typeof t === "function") translate = (key, fallback) => t(key) || fallback;
+  if (typeof getLang === "function") readUiLang = getLang;
 }
 
 // Inlined into the client dialog's form markup rather than injected afterwards, so the block is
@@ -45,6 +58,15 @@ export function consentSectionMarkup() {
           <label for="client-consent-date" id="label-client-consent-date">Date signed</label>
           <input type="date" id="client-consent-date" class="form-control">
           <p class="consent-meta" id="client-consent-version"></p>
+        </div>
+
+        <div class="form-group consent-lang-group">
+          <label for="client-consent-lang" id="label-client-consent-lang">Form language</label>
+          <select id="client-consent-lang" class="form-control">
+${Object.entries(CONSENT_LANG_LABELS)
+  .map(([code, label]) => `            <option value="${code}">${label}</option>`)
+  .join("\n")}
+          </select>
         </div>
 
         <div class="consent-actions">
@@ -89,6 +111,9 @@ export function setupClientConsentSection() {
   const checkbox = $id("client-gdpr-consent");
   if (checkbox) checkbox.addEventListener("change", () => syncConsentDateVisibility());
 
+  const langSelect = $id("client-consent-lang");
+  if (langSelect) langSelect.addEventListener("change", () => applyDeliveryLinks(editedClient));
+
   const infoBtn = $id("btn-consent-info");
   if (infoBtn) infoBtn.addEventListener("click", () => openModal("dialog-consent-info"));
 
@@ -107,6 +132,7 @@ export function todayDateString() {
 // Called on every dialog open (add and edit alike): `form.reset()` restores the checkbox but not
 // the derived visibility or the delivery hrefs, both of which depend on the record being edited.
 export function fillConsentSection(client) {
+  editedClient = client;
   const consent = client?.gdprConsent;
   const checkbox = $id("client-gdpr-consent");
   if (checkbox) checkbox.checked = Boolean(consent?.cloudSync);
@@ -114,8 +140,18 @@ export function fillConsentSection(client) {
   const dateInput = $id("client-consent-date");
   if (dateInput) dateInput.value = consent?.consentDate || legacyConsentDate(consent) || "";
 
+  const langSelect = $id("client-consent-lang");
+  // A client already sent the form in one language keeps it — re-sending in a language they did not
+  // read the first time is worse than not re-sending. Otherwise the UI language, which is the right
+  // guess for a trainer's local clientele and wrong only for the exceptions they can see on screen.
+  if (langSelect) langSelect.value = resolveConsentLang(consent?.formLang || readUiLang());
+
   syncConsentDateVisibility(consent?.formVersion);
   applyDeliveryLinks(client);
+}
+
+export function selectedConsentLang() {
+  return resolveConsentLang($id("client-consent-lang")?.value || readUiLang());
 }
 
 // Records written before the date field existed carry only the ISO write timestamp. Showing its
@@ -147,11 +183,12 @@ function syncConsentDateVisibility(storedVersion) {
 // no phone number for them yet" is the useful message, and it explains itself in the label instead
 // of only in a tooltip no touch device can reach.
 function applyDeliveryLinks(client) {
-  applyDeliveryLink($id("btn-consent-email"), consentEmailHref(client), {
+  const lang = selectedConsentLang();
+  applyDeliveryLink($id("btn-consent-email"), consentEmailHref(client, lang), {
     ready: translate("consent_send_email", "Email form"),
     missing: translate("consent_no_email", "No email on file"),
   });
-  applyDeliveryLink($id("btn-consent-sms"), consentSmsHref(client), {
+  applyDeliveryLink($id("btn-consent-sms"), consentSmsHref(client, lang), {
     ready: translate("consent_send_sms", "Send link by SMS"),
     missing: translate("consent_no_phone", "No phone on file"),
   });
@@ -172,12 +209,17 @@ function applyDeliveryLink(anchor, href, labels) {
 // later edit of the address does not silently claim the client agreed to newer text.
 export function readConsentFromSection(previousConsent) {
   const consented = Boolean($id("client-gdpr-consent")?.checked);
-  if (!consented) return { cloudSync: false, timestamp: "", consentDate: "", formVersion: "" };
+  if (!consented) {
+    return { cloudSync: false, timestamp: "", consentDate: "", formVersion: "", formLang: "" };
+  }
 
   return {
     cloudSync: true,
     timestamp: previousConsent?.timestamp || new Date().toISOString(),
     consentDate: $id("client-consent-date")?.value || todayDateString(),
     formVersion: previousConsent?.formVersion || CONSENT_FORM_VERSION,
+    // The language chosen NOW, not the one first recorded: switching it is how a trainer corrects a
+    // wrong guess, and the next re-send must follow the correction.
+    formLang: selectedConsentLang(),
   };
 }

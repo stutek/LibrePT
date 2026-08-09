@@ -44,7 +44,7 @@ const state = {
       id: 'c-signed', name: 'Marko Novak', email: 'marko@example.com', phone: '+386 41 222 333',
       goals: '', notes: '', weightHistory: [], active: true,
       gdprConsent: { cloudSync: true, timestamp: '2026-03-02T09:00:00.000Z',
-                     consentDate: '2026-02-28', formVersion: '2025-01' },
+                     consentDate: '2026-02-28', formVersion: '2025-01', formLang: 'sl' },
     },
     {
       id: 'c-nocontact', name: 'Ana Kos', email: '', phone: '',
@@ -74,6 +74,9 @@ window.__editClient = (id) => {
   document.getElementById('btn-edit-client').click();
 };
 window.__consentOf = (id) => state.clients.find((c) => c.id === id).gdprConsent;
+// The trainer's UI language, read through an accessor by the consent block — switching it between
+// two openings of the dialog must change the language it offers by default.
+window.__setUiLang = (lang) => { state.lang = lang; };
 """,
 )
 
@@ -200,4 +203,62 @@ def test_unticking_consent_clears_the_date_and_version(page, local_server):
         "timestamp": "",
         "consentDate": "",
         "formVersion": "",
+        "formLang": "",
     }
+
+
+def test_form_language_defaults_to_the_ui_language(page, local_server):
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#view-client-directory.active")
+
+    _open_edit(page, "c-new")
+    expect(page.locator("#client-consent-lang")).to_have_value("en")
+    page.locator("#dialog-client .modal-cancel").click()
+
+    # A trainer who switches the app to Slovenian is coaching Slovenian clients, so the default has
+    # to follow — which is why the block reads the language through an accessor, not a cached value.
+    page.evaluate("() => window.__setUiLang('sl')")
+    _open_edit(page, "c-new")
+    expect(page.locator("#client-consent-lang")).to_have_value("sl")
+
+
+def test_a_client_keeps_the_language_they_were_already_sent(page, local_server):
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#view-client-directory.active")
+    _open_edit(page, "c-signed")
+
+    # UI is English, but this client read the Slovenian form — re-sending in a language they did not
+    # read the first time is worse than not re-sending.
+    expect(page.locator("#client-consent-lang")).to_have_value("sl")
+    assert "Osebno%20treniranje" in page.locator("#btn-consent-email").get_attribute(
+        "href"
+    )
+
+
+def test_changing_the_language_rebuilds_both_delivery_links(page, local_server):
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#view-client-directory.active")
+    _open_edit(page, "c-new")
+
+    assert "templates%2Fen%2FClient_Privacy_Notice.md" in page.locator(
+        "#btn-consent-email"
+    ).get_attribute("href")
+
+    page.locator("#client-consent-lang").select_option("sl")
+    # Both links, not only the one most recently touched: the SMS body carries the notice URL too.
+    assert "SOGLA" in page.locator("#btn-consent-email").get_attribute("href")
+    assert "templates%2Fsl%2FClient_Privacy_Notice.md" in page.locator(
+        "#btn-consent-sms"
+    ).get_attribute("href")
+
+
+def test_the_chosen_language_is_recorded_on_save(page, local_server):
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#view-client-directory.active")
+    _open_edit(page, "c-new")
+
+    page.locator("#client-gdpr-consent").check()
+    page.locator("#client-consent-lang").select_option("sl")
+    page.locator("#form-client button[type=submit]").click()
+
+    assert page.evaluate("() => window.__consentOf('c-new')")["formLang"] == "sl"

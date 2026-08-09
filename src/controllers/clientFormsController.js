@@ -82,7 +82,7 @@ export function setupClientForms({
   const dialog = $id("dialog-client");
   const form = $id("form-client");
   if (!dialog || !form) return;
-  initClientConsentSection({ t });
+  initClientConsentSection({ t, getLang: () => state.lang });
   setupClientConsentSection();
   const cancelBtn = dialog.querySelector(".modal-cancel");
   const closeBtn = dialog.querySelector(".modal-close-btn");

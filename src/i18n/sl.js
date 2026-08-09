@@ -361,6 +361,7 @@ export const sl = {
   consent_signed_label: "Stranka je podpisala soglasje (hramba podatkov in sinhronizacija v oblak)",
   consent_date_label: "Datum podpisa",
   consent_form_version: "Različica obrazca soglasja",
+  consent_lang_label: "Jezik obrazca",
   consent_send_email: "Pošlji obrazec po e-pošti",
   consent_send_sms: "Pošlji povezavo po SMS",
   consent_no_email: "E-pošta ni vpisana",

@@ -28,9 +28,9 @@ signature — so the signed sheet in your own files is the only proof, and it is
 Consent is only valid if the client was informed *first* (Art. 7(2), Art. 13). Two documents, in
 this order:
 
-1. **Send the [Client Privacy Notice](templates/Client_Privacy_Notice.md)** — fill in your name,
+1. **Send the [Client Privacy Notice](templates/en/Client_Privacy_Notice.md)** — fill in your name,
    contact details, and retention period once, and reuse it for every client.
-2. **Send or print the [Client Consent Form](templates/Client_Consent_Form.md)** — the letter and the
+2. **Send or print the [Client Consent Form](templates/en/Client_Consent_Form.md)** — the letter and the
    signature block.
 
 From **Add/Edit Client → Data Protection (GDPR)**, the app does both deliveries for you:
@@ -45,6 +45,13 @@ Both open your *own* mail/SMS app: nothing is sent through any server, and Libre
 message. A button whose address is missing says so on its face ("No email on file") rather than
 failing silently.
 
+**Form language** is per client, defaulting to the language the app is in. Change it for a client
+who reads another language and both buttons switch — letter, SMS, and the privacy-notice link, which
+points at that language's copy ([templates INDEX](templates/INDEX.md) lists them). The choice is
+saved with the consent, so a re-send later goes out in the language they actually read the first
+time. Non-English editions are maintainer translations of the English source and are not legally
+reviewed.
+
 ## 2. Recording the consent
 
 Tick **Client signed the consent form** and set **Date signed** to the date on the paper — not
@@ -52,7 +59,7 @@ today, if the client signed at the desk last week. The date is the field a super
 asks about; the app's own write timestamp is not it, which is exactly why the field is editable.
 
 The **consent form version** shown beside the date is stamped onto the record. See
-[Client_Consent_Form.md](templates/Client_Consent_Form.md) for when the version moves and who has to
+[Client_Consent_Form.md](templates/en/Client_Consent_Form.md) for when the version moves and who has to
 re-sign when it does.
 
 ## 3. Archiving — the part only you can do
@@ -102,6 +109,7 @@ Answer within one month. Keep a short note of what you sent and when.
 ## Related
 
 - [PRIVACY.md](../PRIVACY.md) — what the LibrePT app itself does and does not do with data
-- [Client Privacy Notice](templates/Client_Privacy_Notice.md) — the notice you hand to the client
-- [Client Consent Form](templates/Client_Consent_Form.md) — the letter, the signature block, and versioning
+- [Client Privacy Notice](templates/en/Client_Privacy_Notice.md) — the notice you hand to the client
+- [Client Consent Form](templates/en/Client_Consent_Form.md) — the letter, the signature block, and versioning
+- [templates INDEX](templates/INDEX.md) — both documents in every language the app can send them in
 - [DATA_MODEL.md](DATA_MODEL.md) — where consent is stored and what is kept

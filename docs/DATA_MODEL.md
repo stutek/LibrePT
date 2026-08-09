@@ -131,7 +131,7 @@ erDiagram
         string goals
         string injury
         bool active
-        object gdprConsent "consent flag, signed date, form version — see §5"
+        object gdprConsent "consent flag, signed date, form version + language — see §5"
     }
     EXERCISE {
         string id PK
@@ -489,7 +489,8 @@ of their clients.
 | `cloudSync` | Whether consent is currently held. Unticking it clears the other three. |
 | `consentDate` | `YYYY-MM-DD` — the date **on the signed paper**, editable, defaulting to today |
 | `timestamp` | ISO — when the app first recorded it. Not the consent date, and not a substitute for one |
-| `formVersion` | Which wording was signed ([Client_Consent_Form.md](templates/Client_Consent_Form.md)). Preserved across later edits of the record, so amending an address never re-dates the consent onto newer text |
+| `formVersion` | Which wording was signed ([Client_Consent_Form.md](templates/en/Client_Consent_Form.md)). Preserved across later edits of the record, so amending an address never re-dates the consent onto newer text |
+| `formLang` | Which language the client was sent the form in. Unlike `formVersion` it follows the selector on every save — switching it is how a trainer corrects a wrong guess, and the next re-send must follow the correction. Defaults to the trainer's UI language, which is right for local clientele and visibly wrong for the exceptions |
 
 **No signature, photo, or scan is ever stored** — deliberately, since a signature image is more
 sensitive than the rest of the record combined. The signed sheet lives in the trainer's own files

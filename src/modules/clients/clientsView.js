@@ -163,7 +163,7 @@ export function showClientDetails({
   document.getElementById("profile-phone").textContent = client.phone || t("not_specified");
 
   renderConsentStatus(client);
-  renderConsentDelivery(client);
+  renderConsentDelivery(client, client.gdprConsent?.formLang || state.lang);
 
   const aiCopyBtn = document.getElementById("btn-ai-safe-copy");
   if (aiCopyBtn) {
@@ -240,11 +240,13 @@ function renderConsentStatus(client) {
   statusEl.innerHTML = `<span class="badge badge-success"><i class="fa-solid fa-check mr-1"></i> Consented (${safeDetail})</span>`;
 }
 
-function renderConsentDelivery(client) {
+// The language the client was (or will be) sent the form in — their recorded one if there is one,
+// otherwise the trainer's UI language, same default the dialog's selector offers.
+function renderConsentDelivery(client, lang) {
   const mailtoBtn = document.getElementById("btn-send-consent-email");
   if (!mailtoBtn) return;
 
-  const href = consentEmailHref(client);
+  const href = consentEmailHref(client, lang);
   mailtoBtn.href = href || "#";
   mailtoBtn.classList.toggle("disabled", !href);
   // The label carries the reason, not only the tooltip — a phone cannot hover (AGENT_RULES §2.D.1).

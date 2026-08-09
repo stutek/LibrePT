@@ -65,9 +65,14 @@ the app actually sends:
 
 | Document | Audience | Purpose |
 | :--- | :--- | :--- |
-| [Client Privacy Notice](docs/templates/Client_Privacy_Notice.md) | The client | The Art. 13 information they must have **before** consenting |
-| [Client Consent Form](docs/templates/Client_Consent_Form.md) | The client | The letter and signature block; also the exact text the app's **Email form** button sends |
+| [Client Privacy Notice](docs/templates/en/Client_Privacy_Notice.md) | The client | The Art. 13 information they must have **before** consenting |
+| [Client Consent Form](docs/templates/en/Client_Consent_Form.md) | The client | The letter and signature block; also the exact text the app's **Email form** button sends |
 | [Trainer Privacy Guide](docs/PRIVACY_FOR_TRAINERS.md) | The trainer | The operational workflow — obtain, record, archive, withdraw, answer requests |
+
+The two client-facing documents exist per language (`docs/templates/<lang>/`, catalogued in
+[templates/INDEX.md](docs/templates/INDEX.md)); the trainer picks one per client, defaulting to the
+app's language, and the app links that client to the matching copy. English is the source edition —
+where a translation disagrees with it, the English text is what was intended.
 
 **LibrePT records that consent exists; the trainer holds the evidence that it does.** The app stores
 a consent flag, the date on the signed paper, and the version of the letter that was signed — never

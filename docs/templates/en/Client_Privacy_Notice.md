@@ -98,5 +98,7 @@ one on your consent form.*
 ## Related
 
 - [Client Consent Form](Client_Consent_Form.md) — the letter and signature block that accompany this notice
-- [Trainer Privacy Guide](../PRIVACY_FOR_TRAINERS.md) — the trainer-facing counterpart
-- [PRIVACY.md](../../PRIVACY.md) — what the LibrePT app itself does with data
+- [Slovenian edition](../sl/Client_Privacy_Notice.md) — the same notice in Slovenian
+- [templates INDEX](../INDEX.md) — every language these documents exist in
+- [Trainer Privacy Guide](../../PRIVACY_FOR_TRAINERS.md) — the trainer-facing counterpart
+- [PRIVACY.md](../../../PRIVACY.md) — what the LibrePT app itself does with data

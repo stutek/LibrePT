@@ -123,6 +123,7 @@ export function applyStaticDOMMappings(tDict) {
     "#client-consent-legend": "consent_legend",
     "#label-client-gdpr-consent": "consent_signed_label",
     "#label-client-consent-date": "consent_date_label",
+    "#label-client-consent-lang": "consent_lang_label",
     "#btn-consent-info-text": "consent_info_button",
     "#consent-info-title": "consent_info_title",
     "#consent-info-body-text": "consent_info_body",

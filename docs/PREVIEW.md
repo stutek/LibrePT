@@ -39,7 +39,7 @@ Your data lives **only in this browser**, on this device (`localStorage`). That 
 1. **Don't put real, irreplaceable client data in a preview build.** Use demo/sample data, or data you can afford to lose.
 2. **Export your data regularly.** Use **Sync & Backup → Export** to download a JSON copy, and keep it somewhere safe. This is your only backup.
 3. **Re-import after an update** if a build resets your data (**Sync & Backup → Import**).
-4. **Handle client personal data lawfully.** If you do enter real client information, you are the Data Controller — see [PRIVACY.md](../PRIVACY.md) and the [client consent template](templates/Client_Consent_Form.md).
+4. **Handle client personal data lawfully.** If you do enter real client information, you are the Data Controller — see [PRIVACY.md](../PRIVACY.md) and the [client consent template](templates/en/Client_Consent_Form.md).
 
 ---
 
