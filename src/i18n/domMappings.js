@@ -117,6 +117,17 @@ export function applyStaticDOMMappings(tDict) {
     "#label-profile-email": "client_email",
     "#label-profile-phone": "client_phone",
 
+    // GDPR consent block inside the client modal, and its archiving-reminder dialog. The two
+    // delivery buttons are deliberately absent: their labels swap between "send" and "no address on
+    // file" per client (clientConsentSection.js), so a static mapping would overwrite that state.
+    "#client-consent-legend": "consent_legend",
+    "#label-client-gdpr-consent": "consent_signed_label",
+    "#label-client-consent-date": "consent_date_label",
+    "#btn-consent-info-text": "consent_info_button",
+    "#consent-info-title": "consent_info_title",
+    "#consent-info-body-text": "consent_info_body",
+    "#btn-consent-info-close": "consent_info_ack",
+
     // Routine Template modal
     "#routine-modal-title": "create_routine_title",
     '#dialog-routine label[for="routine-name"]': "routine_name",

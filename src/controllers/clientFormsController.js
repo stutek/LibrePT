@@ -5,6 +5,13 @@
 
 import { newRecordId } from "../data/recordId.js";
 import {
+  consentSectionMarkup,
+  fillConsentSection,
+  initClientConsentSection,
+  readConsentFromSection,
+  setupClientConsentSection,
+} from "../modules/clients/clientConsentSection.js";
+import {
   getActiveDetailClientId,
   renderClientsList,
   showClientDetails,
@@ -50,13 +57,7 @@ export function renderClientDialog() {
         <textarea id="client-notes" rows="3" placeholder="e.g. Left knee issue; monitor squat depth..." class="form-control"></textarea>
       </div>
 
-      <div class="form-group checkbox-group" style="display: flex; align-items: center; gap: 8px;">
-        <input type="checkbox" id="client-gdpr-consent" class="form-checkbox">
-        <label for="client-gdpr-consent" style="margin-bottom: 0; font-weight: normal; cursor: pointer;">
-          Client consented to cloud sync & data storage (GDPR)
-        </label>
-      </div>
-
+${consentSectionMarkup()}
       <div class="modal-actions">
         <button type="button" class="btn secondary-btn modal-cancel">Cancel</button>
         <button type="submit" class="btn primary-btn">Save Client</button>
@@ -81,6 +82,8 @@ export function setupClientForms({
   const dialog = $id("dialog-client");
   const form = $id("form-client");
   if (!dialog || !form) return;
+  initClientConsentSection({ t });
+  setupClientConsentSection();
   const cancelBtn = dialog.querySelector(".modal-cancel");
   const closeBtn = dialog.querySelector(".modal-close-btn");
 
@@ -88,6 +91,8 @@ export function setupClientForms({
     $id("client-modal-title").textContent = "Add New Client";
     $id("client-form-id").value = "";
     openModal("dialog-client", { resetForm: true, formId: "form-client" });
+    // After the reset, never before: reset() would otherwise wipe the date the block just derived.
+    fillConsentSection(null);
   });
 
   $id("btn-edit-client").addEventListener("click", () => {
@@ -102,7 +107,7 @@ export function setupClientForms({
     $id("client-phone").value = client.phone || "";
     $id("client-goals").value = client.goals || "";
     $id("client-notes").value = client.notes || "";
-    $id("client-gdpr-consent").checked = Boolean(client.gdprConsent?.cloudSync);
+    fillConsentSection(client);
 
     openModal("dialog-client");
   });
@@ -119,7 +124,6 @@ export function setupClientForms({
     const phone = $id("client-phone").value.trim();
     const goals = $id("client-goals").value.trim();
     const notes = $id("client-notes").value.trim();
-    const gdprConsentChecked = $id("client-gdpr-consent").checked;
     const nowIso = new Date().toISOString();
 
     if (!name) return;
@@ -134,10 +138,7 @@ export function setupClientForms({
         client.phone = phone;
         client.goals = goals;
         client.notes = notes;
-        client.gdprConsent = {
-          cloudSync: gdprConsentChecked,
-          timestamp: gdprConsentChecked ? client.gdprConsent?.timestamp || nowIso : "",
-        };
+        client.gdprConsent = readConsentFromSection(client.gdprConsent);
       }
     } else {
       const newId = newRecordId();
@@ -151,10 +152,7 @@ export function setupClientForms({
         goals: goals,
         weightHistory: [],
         notes: notes,
-        gdprConsent: {
-          cloudSync: gdprConsentChecked,
-          timestamp: gdprConsentChecked ? nowIso : "",
-        },
+        gdprConsent: readConsentFromSection(null),
         active: true,
       };
       state.clients.push(newClient);

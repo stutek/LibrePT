@@ -3,6 +3,7 @@ type: template
 title: Informative Client Consent Letter & Intake Template
 description: Standardized GDPR-compliant client consent form template for personal trainers handling health data (Special Category Data under Article 9).
 status: active
+consent_form_version: "2026-08"
 tags:
   - gdpr
   - consent
@@ -13,7 +14,18 @@ tags:
 
 # Informative Client Consent Letter Template
 
-To help personal trainers maintain GDPR compliance during onboarding, you can copy, adapt, print, or email the standardized consent template below to your clients before storing their coaching data:
+The letter below is the wording LibrePT itself sends. The app's **Email form** button (Add/Edit
+Client → *Data Protection (GDPR)*) opens your mail client prefilled with exactly this text, and its
+**Send link by SMS** button sends a one-line message pointing at the
+[Client Privacy Notice](Client_Privacy_Notice.md). Print it, email it, or adapt it — but if you
+adapt it, see *Versioning* below.
+
+The runtime copy lives in [src/modules/common/consentForm.js](../../src/modules/common/consentForm.js)
+and the two are pinned to each other by
+[tests/unit_js/modules/common/consentForm.test.mjs](../../tests/unit_js/modules/common/consentForm.test.mjs),
+so this document cannot silently drift out of step with what the app actually sends.
+
+## The letter
 
 ```markdown
 Subject: Personal Training — Data Privacy & Cloud Storage Consent
@@ -24,12 +36,51 @@ To prepare our workout schedules, track your strength progression, and ensure sa
 
 In accordance with data protection regulations (GDPR), I want to make sure you are fully informed about how your coaching data is managed:
 
-1. Storage & Security: Your workout logs and training notes are stored securely on my device and backed up in encrypted form to my personal cloud storage (Google Drive/iCloud) strictly for coaching continuity and preparation.
+1. Storage & Security: Your workout logs and training notes are stored on my own device and, optionally, backed up to my personal cloud storage strictly for coaching continuity and preparation.
 2. No Third-Party Tracking or Selling: Your data is never sold, shared with advertisers, or transferred to third parties.
 3. Artificial Intelligence Safety: If I utilize AI tools to assist in periodizing or analyzing workout volume, your records are strictly anonymized (all names and identifying personal information are stripped) prior to analysis.
 4. Your Rights: You have the right at any time to request a complete export of your workout history, request corrections, or ask for your personal records to be permanently deleted.
 
-Please reply "I CONSENT" to this email (or sign below) to confirm that you understand and agree to these privacy practices for our personal training sessions.
+The full privacy notice is here: https://github.com/stutek/LibrePT/blob/main/docs/templates/Client_Privacy_Notice.md
 
-Client Signature: ___________________________   Date: _______________
+Please reply "I CONSENT" to this email (or sign the printed form) to confirm that you understand and agree to these privacy practices for our personal training sessions.
+
+Consent form version: 2026-08
+
+Best regards,
+Your Personal Trainer
 ```
+
+## Printed form — signature block
+
+Append this to the printed version. **You keep the signed sheet.** LibrePT never stores a photo,
+scan, or signature — only the fact of consent, the date on this sheet, and the form version above.
+
+```markdown
+Client Signature: ___________________________   Date: _______________
+
+Trainer Signature: __________________________   Date: _______________
+```
+
+## Versioning
+
+Consent is consent to *a specific wording*, so LibrePT stamps the version a client signed under onto
+their record (`gdprConsent.formVersion`, see [DATA_MODEL §1](../DATA_MODEL.md)) alongside the signed
+date. That stamp is what lets you answer "who is still covered?" after the letter changes.
+
+- **Bump the version** when the *substance* changes — a new purpose, a new recipient or processor, a
+  change to retention or to the rights on offer. Clients on an older version should re-sign.
+- **Do not bump it** for typos, formatting, or translation of unchanged meaning: those clients
+  consented to the same thing, and a bump would send every one of them a form to re-sign for nothing.
+- The version is a plain `YYYY-MM` string. It is deliberately not the app's commit SHA or data
+  schema — those are the *code* and *data shape* axes and change constantly, while this letter does
+  not (see [AGENT_RULES §2.D.3](../../AGENT_RULES.md)).
+- Bumping means editing three things in one change: `CONSENT_FORM_VERSION` in
+  [consentForm.js](../../src/modules/common/consentForm.js), the letter body, and this file's
+  `consent_form_version` frontmatter.
+
+## Related
+
+- [Client Privacy Notice](Client_Privacy_Notice.md) — the plain-language notice this letter links to
+- [Trainer Privacy Guide](../PRIVACY_FOR_TRAINERS.md) — your obligations as data controller
+- [PRIVACY.md](../../PRIVACY.md) — what LibrePT itself does and does not do with data

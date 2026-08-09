@@ -131,6 +131,7 @@ erDiagram
         string goals
         string injury
         bool active
+        object gdprConsent "consent flag, signed date, form version — see §5"
     }
     EXERCISE {
         string id PK
@@ -476,6 +477,28 @@ of their clients.
 ---
 
 ## 5. Deletion, erasure and retention
+
+### Consent is a record about paper, not a document
+
+`CLIENT.gdprConsent` is a free-form object on the record
+([recordSchemas.js](../src/data/recordSchemas.js)) with four fields, written by
+[clientConsentSection.js](../src/modules/clients/clientConsentSection.js):
+
+| Field | Meaning |
+| :--- | :--- |
+| `cloudSync` | Whether consent is currently held. Unticking it clears the other three. |
+| `consentDate` | `YYYY-MM-DD` — the date **on the signed paper**, editable, defaulting to today |
+| `timestamp` | ISO — when the app first recorded it. Not the consent date, and not a substitute for one |
+| `formVersion` | Which wording was signed ([Client_Consent_Form.md](templates/Client_Consent_Form.md)). Preserved across later edits of the record, so amending an address never re-dates the consent onto newer text |
+
+**No signature, photo, or scan is ever stored** — deliberately, since a signature image is more
+sensitive than the rest of the record combined. The signed sheet lives in the trainer's own files
+([PRIVACY_FOR_TRAINERS.md](PRIVACY_FOR_TRAINERS.md)); this record only says that it exists.
+
+Records written before `consentDate` existed carry only `timestamp`; the UI falls back to its date
+part so those clients read as consented rather than as blank.
+
+### Erasure
 
 **There are no hard deletes.** Erasure is **anonymization**: client PII is replaced with an anonymous
 token and the execution records stay, so longitudinal analytics survive.

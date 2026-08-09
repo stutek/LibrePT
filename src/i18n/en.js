@@ -357,4 +357,17 @@ export const en = {
   offline_cached_desc:
     "HTTP server unreachable. Running off cached code; unable to check for updates.",
   offline_cached_status: "HTTP server is currently unreachable. You are running off cached code.",
+  consent_legend: "Data Protection (GDPR)",
+  consent_signed_label: "Client signed the consent form (data storage & cloud sync)",
+  consent_date_label: "Date signed",
+  consent_form_version: "Consent form version",
+  consent_send_email: "Email form",
+  consent_send_sms: "Send link by SMS",
+  consent_no_email: "No email on file",
+  consent_no_phone: "No phone on file",
+  consent_info_button: "Who keeps the form?",
+  consent_info_title: "You keep the signed form",
+  consent_info_body:
+    "LibrePT records only that consent was given and on which date — never a photo, scan, or signature. As the data controller you are responsible for archiving the signed form yourself, for as long as you hold this client's records, so you can prove the consent if you are ever asked to. If the client withdraws consent, delete their records here and note the withdrawal on your copy.",
+  consent_info_ack: "Got it",
 };

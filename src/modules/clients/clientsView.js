@@ -1,3 +1,4 @@
+import { consentEmailHref } from "../common/consentForm.js";
 import { renderMarkupOnce } from "../common/dom.js";
 import {
   escapeHTML,
@@ -115,7 +116,7 @@ export function renderClientDetailViewShell() {
             <i class="fa-solid fa-calendar-plus"></i> Plan Program
           </button>
           <a id="btn-send-consent-email" class="btn secondary-btn" style="flex: 1; min-width: 150px; text-decoration: none; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
-            <i class="fa-solid fa-envelope"></i> Send Consent Form
+            <i class="fa-solid fa-envelope"></i> <span id="btn-send-consent-email-text">Send Consent Form</span>
           </a>
           <button id="btn-ai-safe-copy" class="btn secondary-btn" style="flex: 1; min-width: 150px;">
             <i class="fa-solid fa-user-shield"></i> AI Safe Copy
@@ -161,31 +162,8 @@ export function showClientDetails({
   document.getElementById("profile-email").textContent = client.email || t("not_specified");
   document.getElementById("profile-phone").textContent = client.phone || t("not_specified");
 
-  const hasConsent = Boolean(client.gdprConsent?.cloudSync);
-  const statusEl = document.getElementById("profile-gdpr-status");
-  if (statusEl) {
-    statusEl.innerHTML = hasConsent
-      ? `<span class="badge badge-success"><i class="fa-solid fa-check mr-1"></i> Consented (${client.gdprConsent.timestamp ? client.gdprConsent.timestamp.split("T")[0] : "Verified"})</span>`
-      : `<span class="badge badge-warning"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Not Consented (Local Only)</span>`;
-  }
-
-  const mailtoBtn = document.getElementById("btn-send-consent-email");
-  if (mailtoBtn) {
-    const subject = encodeURIComponent("Personal Training — Data Privacy & Cloud Storage Consent");
-    const body = encodeURIComponent(
-      `Hi ${client.name},\n\nTo prepare our workout schedules, track your strength progression, and ensure safe training, I use LibrePT to log our session results, exercise weights, and any relevant mobility or injury notes.\n\nIn accordance with data protection regulations (GDPR), I want to make sure you are fully informed about how your coaching data is managed:\n\n1. Storage & Security: Your workout logs and training notes are stored securely on my device and backed up in encrypted form to my personal cloud storage strictly for coaching continuity and preparation.\n2. No Third-Party Tracking or Selling: Your data is never sold, shared with advertisers, or transferred to third parties.\n3. Artificial Intelligence Safety: If I utilize AI tools to assist in periodizing or analyzing workout volume, your records are strictly anonymized (all names and identifying personal information are stripped) prior to analysis.\n4. Your Rights: You have the right at any time to request a complete export of your workout history, request corrections, or ask for your personal records to be permanently deleted.\n\nPlease reply "I CONSENT" to this email to confirm that you understand and agree to these privacy practices for our personal training sessions.\n\nBest regards,\nYour Personal Trainer`,
-    );
-    mailtoBtn.href = client.email
-      ? `mailto:${encodeURIComponent(client.email)}?subject=${subject}&body=${body}`
-      : "#";
-    if (!client.email) {
-      mailtoBtn.classList.add("disabled");
-      mailtoBtn.title = "No email address on client profile";
-    } else {
-      mailtoBtn.classList.remove("disabled");
-      mailtoBtn.title = `Send consent request to ${client.email}`;
-    }
-  }
+  renderConsentStatus(client);
+  renderConsentDelivery(client);
 
   const aiCopyBtn = document.getElementById("btn-ai-safe-copy");
   if (aiCopyBtn) {
@@ -237,6 +215,41 @@ ${historyText}`;
 
   renderClientWorkoutHistory({ client, state, t, openSessionFromHistory });
   switchView("client-detail");
+}
+
+// The badge answers the two questions a trainer is actually asked: did they consent, and to WHICH
+// wording. `consentDate` is the date on the signed paper; a record predating that field falls back
+// to the write timestamp's date (see clientConsentSection.js).
+function renderConsentStatus(client) {
+  const statusEl = document.getElementById("profile-gdpr-status");
+  if (!statusEl) return;
+
+  const consent = client.gdprConsent;
+  if (!consent?.cloudSync) {
+    statusEl.innerHTML = `<span class="badge badge-warning"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Not Consented (Local Only)</span>`;
+    return;
+  }
+
+  const signedOn = consent.consentDate || (consent.timestamp || "").split("T")[0];
+  const detail = [signedOn, consent.formVersion && `v${consent.formVersion}`]
+    .filter(Boolean)
+    .join(" · ");
+  // A local const, not an inline expression: the HTML-sink audit reads the escaping at the
+  // interpolation site (build/frontend_audit.py).
+  const safeDetail = escapeHTML(detail || "Verified");
+  statusEl.innerHTML = `<span class="badge badge-success"><i class="fa-solid fa-check mr-1"></i> Consented (${safeDetail})</span>`;
+}
+
+function renderConsentDelivery(client) {
+  const mailtoBtn = document.getElementById("btn-send-consent-email");
+  if (!mailtoBtn) return;
+
+  const href = consentEmailHref(client);
+  mailtoBtn.href = href || "#";
+  mailtoBtn.classList.toggle("disabled", !href);
+  // The label carries the reason, not only the tooltip — a phone cannot hover (AGENT_RULES §2.D.1).
+  const label = mailtoBtn.querySelector("span");
+  if (label) label.textContent = href ? "Send Consent Form" : "No email on file";
 }
 
 export function renderClientWorkoutHistory({ client, state, t, openSessionFromHistory }) {

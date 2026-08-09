@@ -41,7 +41,7 @@ As the Data Controller, you must adhere to the following best practices:
 ### 3.1 Obtain Explicit Client Consent
 Before storing client health and performance records—and specifically before backing up or syncing those records to cloud storage—you must obtain verifiable, explicit consent from each client.
 - **What to tell your clients:** Inform them what data you record, that you store it securely on your device and personal cloud storage solely for coaching preparation, and that they have the right to inspect, export, or request the deletion of their records at any time.
-- **Consent Audit Trail:** Use LibrePT's built-in client profile consent toggles (`[✓] Client consented to cloud storage`) to keep a clear audit trail.
+- **Consent Audit Trail:** Use the **Data Protection (GDPR)** block on the client profile — the signed checkbox, the date on the signed paper, and the version of the consent letter that was signed. The step-by-step workflow is in the [Trainer Privacy Guide](docs/PRIVACY_FOR_TRAINERS.md).
 
 ### 3.2 Safe AI & Large Language Model (LLM) Usage
 Many trainers utilize AI assistants (such as ChatGPT, Claude, or DeepSeek) to analyze workout volume, draft periodized cycles, or review rehabilitation notes.
@@ -57,28 +57,21 @@ Under GDPR, your clients have the right to:
 
 ---
 
-## 4. Informative Client Consent Letter Template
+## 4. Client-Facing Documents
 
-To help you maintain GDPR compliance during onboarding, you can copy, adapt, or email the standardized consent template below to your clients before storing their coaching data:
+Three documents cover onboarding a client, and they are maintained in `docs/` rather than reproduced
+here — a policy that carries its own copy of a consent letter is a policy that drifts from the one
+the app actually sends:
 
-```markdown
-Subject: Personal Training — Data Privacy & Cloud Storage Consent
+| Document | Audience | Purpose |
+| :--- | :--- | :--- |
+| [Client Privacy Notice](docs/templates/Client_Privacy_Notice.md) | The client | The Art. 13 information they must have **before** consenting |
+| [Client Consent Form](docs/templates/Client_Consent_Form.md) | The client | The letter and signature block; also the exact text the app's **Email form** button sends |
+| [Trainer Privacy Guide](docs/PRIVACY_FOR_TRAINERS.md) | The trainer | The operational workflow — obtain, record, archive, withdraw, answer requests |
 
-Hi [Client Name],
-
-To prepare our workout schedules, track your strength progression, and ensure safe training, I use LibrePT to log our session results, exercise weights, and any relevant mobility or injury notes.
-
-In accordance with data protection regulations (GDPR), I want to make sure you are fully informed about how your coaching data is managed:
-
-1. Storage & Security: Your workout logs and training notes are stored securely on my device and, optionally, backed up in encrypted form to my personal Google Drive strictly for coaching continuity and preparation.
-2. No Third-Party Tracking or Selling: Your data is never sold, shared with advertisers, or transferred to third parties.
-3. Artificial Intelligence Safety: If I utilize AI tools to assist in periodizing or analyzing workout volume, your records are strictly anonymized (all names and identifying personal information are stripped) prior to analysis.
-4. Your Rights: You have the right at any time to request a complete export of your workout history, request corrections, or ask for your personal records to be permanently deleted.
-
-Please reply "I CONSENT" to this email (or sign below) to confirm that you understand and agree to these privacy practices for our personal training sessions.
-
-Client Signature: ___________________________   Date: _______________
-```
+**LibrePT records that consent exists; the trainer holds the evidence that it does.** The app stores
+a consent flag, the date on the signed paper, and the version of the letter that was signed — never
+a photo, scan, or signature image. The signed sheet stays in the trainer's own files.
 
 ---
 

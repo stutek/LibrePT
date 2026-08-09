@@ -157,3 +157,62 @@
   font-size: 9px;
   margin-top: 4px;
 }
+
+/* --- GDPR consent block (Add/Edit Client dialog, clientConsentSection.js) --- */
+.consent-fieldset {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+.consent-fieldset legend {
+  padding: 0 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.consent-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.consent-checkbox label {
+  margin-bottom: 0;
+  font-weight: normal;
+  cursor: pointer;
+}
+.consent-date-group[hidden] {
+  display: none;
+}
+.consent-meta {
+  margin: 4px 0 0;
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+/* Wraps rather than scrolls: three controls at a thumb-sized height do not fit one phone row. */
+.consent-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.consent-actions .btn {
+  flex: 1 1 auto;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-decoration: none;
+}
+.consent-actions .btn.disabled,
+#btn-send-consent-email.disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+.consent-info-body p {
+  line-height: 1.5;
+}
