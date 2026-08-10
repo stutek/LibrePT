@@ -1,0 +1,85 @@
+name: Live Google API Canary
+
+# Watches for changes on GOOGLE's side — a deprecated endpoint, a reclassified scope, altered
+# appDataFolder semantics — which the hermetic tests/unit_js/ suites structurally cannot see. Those
+# pin our request shapes against an injected `fetchImpl` and catch every regression WE can cause.
+#
+# **Not part of the deploy gate, on purpose.** agent_tools/pipeline_gates.py requires every job in
+# deploy.yml to gate the release, and this one deliberately lives outside that file instead of
+# joining the chain: it depends on a third party's uptime, so gating a release on it would block a
+# deploy for an outage no change of ours caused and no revert could fix. The failure it reports is
+# real and worth waking up to — it just is not a reason to stop shipping. This file has exactly one
+# job, so pipeline_gates' "exactly one terminal job" invariant holds here trivially.
+#
+# **No stored credential, by design.** Workload Identity Federation exchanges GitHub's OIDC assertion
+# for a short-lived Google access token, so this repository holds no long-lived Google secret for an
+# attacker to exfiltrate or for anyone to rotate. The provider's attribute condition in GCP MUST pin
+# `assertion.repository` (see TODO §1.5) — without it, any repository on GitHub could mint tokens as
+# this service account. Note also what is NOT here: no `pull_request_target` trigger, which is the
+# standard way workflows leak credentials to untrusted fork code.
+
+on:
+  schedule:
+    # 05:17 UTC daily. Off the hour on purpose — GitHub's scheduler queues heavily at :00 and
+    # delays runs that pile up there.
+    - cron: '17 5 * * *'
+  workflow_dispatch:
+
+# Read-only against the repo; the OIDC token is the only thing this workflow can actually do
+# anything with. Scoped here rather than inherited so the grant is visible next to its one use.
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  live-google-canary:
+    # NOT named "Stage N · …" — that prefix is how pipeline_gates.py binds a job to a local pipeline
+    # stage and enforces stage ordering. This job belongs to no stage.
+    name: Live · Google Drive & Calendar Contract
+    runs-on: ubuntu-latest
+    # Forks do not run scheduled workflows, but they can run workflow_dispatch — and a fork has no
+    # WIF grant, so the run would fail confusingly rather than skip. Say so explicitly.
+    if: github.repository == 'stutek/LibrePT'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m venv .venv
+          .venv/bin/pip install --upgrade pip
+          .venv/bin/pip install -r requirements.txt
+
+      # Repository *variables*, not secrets: a WIF provider path and a service account email are
+      # both non-sensitive identifiers (the security boundary is the provider's attribute condition
+      # in GCP, not the secrecy of these strings). Keeping them as vars means a missing setup is a
+      # readable skip below rather than an empty-secret authentication error.
+      - name: Authenticate to Google (Workload Identity Federation)
+        id: auth
+        if: vars.GOOGLE_WIF_PROVIDER != ''
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GOOGLE_WIF_PROVIDER }}
+          service_account: ${{ vars.GOOGLE_TEST_SERVICE_ACCOUNT }}
+          token_format: 'access_token'
+          # Exactly the two scopes production asks for — never `drive` or `calendar.readonly`. A
+          # canary minted with broader access than the app uses would pass while the real scopes
+          # were broken, which is worse than no canary.
+          access_token_scopes: 'https://www.googleapis.com/auth/drive.appdata,https://www.googleapis.com/auth/calendar.freebusy'
+
+      - name: Report missing federation setup
+        if: vars.GOOGLE_WIF_PROVIDER == ''
+        run: |
+          echo "::warning::GOOGLE_WIF_PROVIDER is not set — the live suite will skip." \
+               "See TODO §1.5 for the one-time GCP setup."
+
+      - name: Run Live Google API Tests
+        env:
+          # Empty when the auth step was skipped; tests/live/_credentials.mjs treats an absent token
+          # as a skip, so this stays green rather than red on an unconfigured repository.
+          GOOGLE_LIVE_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+        run: .venv/bin/python -c "from build import run_live_google_tests; run_live_google_tests()"

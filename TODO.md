@@ -110,6 +110,41 @@ Cross-referenced from [PRIVACY.md](PRIVACY.md).
 - **GCP dependency, independent of the above**: Calendar access needs a developer-registered OAuth
   client. Public distribution beyond ~100 test users requires Google's consent-screen **verification**
   (privacy policy, homepage, review lead time) — a real launch dependency to plan for.
+  **`github.io` is a live risk here**: it sits on the Public Suffix List, so proving domain ownership
+  for the OAuth review may not be possible, and the privacy policy needs hosting on the app's own
+  domain regardless. A custom domain resolves both and is on the launch path anyway.
+
+#### 1.5.1 [~] Live-Google testing without a stored credential (Workload Identity Federation)
+
+**Built 2026-08-10**: [tests/live/](tests/live/), `.github/workflows/google-canary.yml`,
+`build.run_live_google_tests`. Still needs the one-time GCP setup below before it does anything.
+
+The problem this solves is not "how do we test Google" but **"how do we test Google from a public
+repository without a secret to leak."** A stored refresh token would be exfiltratable by any workflow
+change, *and* would break weekly — Google expires refresh tokens after 7 days while an OAuth app is
+in Testing mode, which against AGENT_RULES §2.A.3's "squeaky clean, always" is disqualifying on its
+own. WIF stores nothing: GitHub's OIDC assertion is exchanged for a short-lived token at run time.
+
+- **A service account is a faithful fixture, not a compromise.** It cannot touch a consumer Gmail
+  account's data (that needs domain-wide delegation, i.e. Workspace), but it does not need to: it has
+  its own `appDataFolder`, and its own calendar — and this section's room resource calendars are
+  **non-human calendars by definition**, so a service-account calendar models one exactly.
+- **Not a deploy gate, deliberately.** It sits outside `deploy.yml` rather than joining the chain, so
+  Google's uptime can never block a release. `pipeline_gates.py`'s one-terminal-job rule holds
+  trivially in a single-job workflow. What it cannot cover — the consent UI — is unautomatable
+  anyway: Google fingerprints and blocks driven browsers on `accounts.google.com`.
+- **The one setting that must not be wrong**: the WIF provider's attribute condition must pin
+  `assertion.repository == 'stutek/LibrePT'`. Without it, *any* repository on GitHub can mint tokens
+  as this service account — the classic WIF misconfiguration, exploited in the wild.
+- **Blast radius, designed down**: put the service account in a separate GCP project from the
+  production OAuth client and give it **zero IAM roles** — it needs none to use its own Drive and
+  Calendar, so a leaked token reaches only disposable test data.
+- **Remaining maintainer action**: create the pool/provider/service account, then set repository
+  *variables* (not secrets — neither string is sensitive) `GOOGLE_WIF_PROVIDER` and
+  `GOOGLE_TEST_SERVICE_ACCOUNT`. Until they exist the canary skips with a warning.
+- **Not built**: a live test importing a real `calendarFreeBusy.js`, because §1.3's occupancy module
+  does not exist yet. `calendarFreeBusy.live.test.mjs` probes the endpoint directly meanwhile, which
+  is what proves the minted token actually carries the calendar scope.
 
 ---
 

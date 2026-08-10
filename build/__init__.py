@@ -684,6 +684,39 @@ def run_javascript_unit_tests():
     print("  ✓ JavaScript unit tests passed successfully!")
 
 
+def run_live_google_tests():
+    """Runs tests/live/ against the REAL Google Drive and Calendar APIs.
+
+    **Deliberately absent from `PIPELINE_STAGES` and from Stage 1's task table**, so `build check`
+    never calls it and no workflow job can `needs:` it. That is not an oversight to be tidied up
+    later — it is the design. This suite depends on a third party's availability and on a credential
+    that is absent on every contributor's machine, which are precisely the properties a commit gate
+    must not have (AGENT_RULES §2.A.3: squeaky clean, always). Gating the deploy on Google's uptime
+    would block a release for an outage no change of ours caused and no revert could fix.
+
+    What it is instead: a scheduled canary (.github/workflows/google-canary.yml) answering the one
+    question the hermetic suite structurally cannot — has GOOGLE changed something. tests/unit_js/
+    pins our request shapes against an injected `fetchImpl` and catches every regression we can
+    cause; it cannot notice a deprecated endpoint or a reclassified scope.
+
+    Exits 0 when no credentials are present: node:test reports the suites as skipped, which is the
+    correct outcome for the common case rather than a failure to explain away.
+    """
+    print("\n  Running Live Google API Tests (tests/live/)...")
+    node_path = ensure_node_binary()
+    if not node_path:
+        return
+    returncode, output, path = run_logged(
+        [node_path, "--test", "tests/live/**/*.live.test.mjs"],
+        "live-google-tests",
+    )
+    if returncode != 0:
+        print_digest("Live Google API tests", output, path)
+        print(f"  ✗ Live Google API tests failed with exit code: {returncode}")
+        sys.exit(returncode)
+    print("  ✓ Live Google API tests passed successfully!")
+
+
 def run_security_tests():
     """Runs the pure-logic security suite (tests/unit_js/security/) under node:test.
 

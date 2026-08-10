@@ -32,6 +32,18 @@ is silently clipped inside its own box ([TODO §25](../TODO.md)). It lives here 
 and breaks beside a long client name. The sweep itself is
 [agent_tools/overflow_scan.py](../agent_tools/overflow_scan.py), shared with the by-hand diagnostic.
 
+**A fifth directory that is deliberately not a tier**: [tests/live/](live/) runs the real
+[driveAppData.js](../src/data/driveAppData.js) against the real Google Drive and Calendar APIs. It is
+absent from `PIPELINE_STAGES` and from every `deploy.yml` job, because it depends on a third party's
+uptime and on a credential no contributor has — properties a commit gate must not have. It answers
+the one question the hermetic suites structurally cannot: **has Google changed something.**
+`unit_js/data/driveAppData.test.mjs` pins our request shapes against an injected `fetchImpl` and
+catches every regression *we* can cause; it cannot see a deprecated endpoint or a reclassified scope.
+So this runs as a scheduled canary (`.github/workflows/google-canary.yml`, credentials via Workload
+Identity Federation so nothing long-lived is stored) and, locally, off `.private/google-live.json`.
+With no credentials present it **skips rather than fails**, which is the correct outcome for almost
+every run. See [TODO §1.5](../TODO.md).
+
 **Why the split is worth maintaining:** the pure-logic tests used to run in a browser purely because
 the app's CSP forbids `new Function` — they now fail in ~4s inside stage 1 instead of at the
 3-minute mark. The win is *feedback latency*, not total wall clock: e2e is fanned out across workers,
