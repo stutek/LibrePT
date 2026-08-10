@@ -8,29 +8,11 @@
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
 import json
+from pathlib import Path
 
-import re
+import pytest
 
-from tests.conftest import SRC_DIR
-
-
-def current_schema_version():
-    """CURRENT_SCHEMA_VERSION as declared in src/data/migrationSteps.js.
-
-    Read rather than hardcoded: this asserts "migrated to the CURRENT schema", and a literal turns
-    that into "migrated to 3" — which starts silently asserting the wrong thing the moment a
-    migration lands, and has to be edited by whoever adds one."""
-    source = (SRC_DIR / "data" / "migrationSteps.js").read_text(encoding="utf-8")
-    return int(re.search(r"CURRENT_SCHEMA_VERSION = (\d+)", source).group(1))
-
-
-def baseline_schema_version():
-    """BASELINE_SCHEMA_VERSION as declared in src/data/migrationSteps.js.
-
-    Read for the same reason as the current version above — the banner names the version the
-    database came FROM, and the floor moved from 1 to 0 when the pre-release chain collapsed."""
-    source = (SRC_DIR / "data" / "migrationSteps.js").read_text(encoding="utf-8")
-    return int(re.search(r"BASELINE_SCHEMA_VERSION = (\d+)", source).group(1))
+from tests.conftest import current_schema_version, baseline_schema_version
 
 
 LEGACY_BACKUP = {
@@ -113,7 +95,9 @@ def test_restore_migrates_an_old_backup(page, local_server):
     assert state["sessions"][0]["startDate"], (
         "the startDate derivation runs too, giving the restored session a real one"
     )
-    assert f"Upgraded from schema {baseline_schema_version()}" in (
+    # %g so a whole float renders as "0", matching what the app prints — an f-string would
+    # produce "0.0" and never match.
+    assert f"Upgraded from schema {baseline_schema_version():g}" in (
         page.locator("#import-status").inner_text()
     )
 
@@ -154,3 +138,66 @@ def test_a_sparse_backup_does_not_break_the_app(page, local_server):
 
     assert "successful" in page.locator("#import-status").inner_text().lower()
     assert _state(page)["routines"][0]["name"] == "No Exercises"
+
+
+FIXTURES_DIR = Path(__file__).resolve().parents[1] / "fixtures" / "backups"
+
+
+def _restore_fixture(page, name):
+    _import(page, json.loads((FIXTURES_DIR / name).read_text(encoding="utf-8")))
+    return _state(page)
+
+
+# One row per version a real backup can arrive at. These are the SAME frozen files the unit-level
+# corpus migrates (tests/unit_js/data/frozenBackupCorpus.test.mjs) — asserted here through the
+# actual restore UI, because a backup re-entering the app crosses the file picker, the import
+# handler and the store, none of which the pure-logic tier exercises.
+#
+# `lang` is the discriminator worth watching: the v3->v4 step clears it so a trainer is asked once,
+# and a database ALREADY at 4 must keep the choice its trainer has since made.
+@pytest.mark.parametrize(
+    "fixture,expected_session_ids,expected_lang",
+    [
+        # No `schemaVersion` at all — enters at the floor and walks every step. Its schedule lives
+        # in the legacy `bookings` field, which is carried over rather than dropped.
+        ("schema1_baseline.json", ["b1"], None),
+        ("schema2.json", ["s1"], None),
+        ("schema3_field_install.json", ["s1"], None),
+        # Already past the language step: the stored choice survives.
+        ("schema4_field_install.json", ["s1"], "sl"),
+    ],
+)
+def test_restore_from_every_supported_version(
+    page, local_server, fixture, expected_session_ids, expected_lang
+):
+    page.goto(local_server)
+    page.wait_for_selector(".session-card")
+    page.wait_for_timeout(300)
+
+    state = _restore_fixture(page, fixture)
+
+    assert state["schemaVersion"] == current_schema_version(), (
+        "every restore ends at the current schema, whatever it entered at"
+    )
+    assert [s["id"] for s in state["sessions"]] == expected_session_ids
+    assert state["lang"] == expected_lang
+    for session in state["sessions"]:
+        assert session["startDate"], (
+            "no session may reach the app without an absolute timestamp to place it on the timeline"
+        )
+
+
+def test_restore_from_v4_preserves_logged_training(page, local_server):
+    """The least recoverable data in the database is what a trainer actually logged. A restore that
+    kept the record count but dropped the sets inside it would still look like a success."""
+    page.goto(local_server)
+    page.wait_for_selector(".session-card")
+    page.wait_for_timeout(300)
+
+    state = _restore_fixture(page, "schema4_field_install.json")
+
+    assert [h["id"] for h in state["history"]] == ["h1"]
+    assert state["history"][0]["exercises"][0]["sets"][0]["weight"] == 120
+    # A real `startDate` is never recomputed from the coarse `day` bucket — doing so would silently
+    # move a session on a trainer's calendar.
+    assert state["sessions"][0]["startDate"] == "2026-08-09T16:00:00.000Z"

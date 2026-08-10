@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 4,
+  "lang": "sl",
+  "clients": [
+    { "id": "c1", "name": "Field Trainer Client", "active": true, "goals": "Powerlifting total" }
+  ],
+  "exercises": [{ "id": "e1", "name": "Deadlift", "category": "Back", "equipment": "Barbell" }],
+  "routines": [
+    { "id": "r1", "name": "Pull Day", "exercises": [{ "id": "e1", "sets": 5, "reps": 3, "weight": 120 }] }
+  ],
+  "history": [
+    {
+      "id": "h1",
+      "clientId": "c1",
+      "clientName": "Field Trainer Client",
+      "routineName": "Pull Day",
+      "date": "2026-08-01T08:00:00.000Z",
+      "duration": 3000,
+      "exercises": [
+        { "id": "e1", "name": "Deadlift", "sets": [{ "reps": 3, "weight": 120, "completed": true }] }
+      ]
+    }
+  ],
+  "planUpdates": [],
+  "sessions": [
+    {
+      "id": "s1",
+      "day": "today",
+      "time": "18:00 - 19:00",
+      "title": "Pull Day",
+      "startDate": "2026-08-09T16:00:00.000Z",
+      "participants": ["c1"],
+      "routineId": "r1",
+      "maxCapacity": 2
+    }
+  ],
+  "notifications": []
+}

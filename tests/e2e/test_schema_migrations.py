@@ -7,34 +7,12 @@
 # on actual boot, read back through the app's own module instance.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
-import re
-
-from tests.conftest import SRC_DIR
-
-
-def current_schema_version():
-    """CURRENT_SCHEMA_VERSION as declared in src/data/migrationSteps.js.
-
-    Read rather than hardcoded: these tests assert "migrated to the CURRENT schema", and a literal
-    turns that into "migrated to 3" — which starts silently asserting the wrong thing the moment a
-    migration lands, and has to be edited by whoever adds one."""
-    source = (SRC_DIR / "data" / "migrationSteps.js").read_text(encoding="utf-8")
-    return int(re.search(r"CURRENT_SCHEMA_VERSION = (\d+)", source).group(1))
-
-
-def baseline_schema_version():
-    """BASELINE_SCHEMA_VERSION as declared in src/data/migrationSteps.js.
-
-    Read for the same reason as the current version above: the floor moved from 1 to 0 when the
-    pre-release chain was collapsed, and a literal here would have silently kept asserting the
-    old one."""
-    source = (SRC_DIR / "data" / "migrationSteps.js").read_text(encoding="utf-8")
-    return int(re.search(r"BASELINE_SCHEMA_VERSION = (\d+)", source).group(1))
+from tests.conftest import current_schema_version, baseline_schema_version
 
 
 def test_a_stored_legacy_database_is_migrated_on_boot(page, local_server):
-    """End-to-end: a real localStorage database in the old shape loads with an empty `sessions`,
-    not the dropped legacy `bookings` collection (TODO §14.6 — no back-compat carry-over)."""
+    """End-to-end: a real localStorage database in the old shape loads with its schedule intact,
+    the legacy `bookings` collection having been carried over into `sessions` (fd59637's rename)."""
     page.add_init_script(
         """window.localStorage.setItem('librept_db', JSON.stringify({
             clients: [{ id: 'c1', name: 'Legacy Client' }],
@@ -66,8 +44,8 @@ def test_a_stored_legacy_database_is_migrated_on_boot(page, local_server):
     assert r["clients"] == ["Legacy Client"], (
         "a migration never discards the PT's own data"
     )
-    assert r["sessions"] == 0, (
-        "the legacy `bookings` collection is dropped, not carried over"
+    assert r["sessions"] == 1, (
+        "`bookings` was a RENAME of `sessions` — its records are carried over, never dropped"
     )
     assert r["bookings"] is None
     assert r["schemaVersion"] == current_schema_version(), (

@@ -49,35 +49,66 @@ therefore CLEARS the stored language for every pre-release database rather than 
 intent from it. One tap for someone who did want English; the alternative is a Slovene trainer
 stuck in an English app with no prompt.
 
-### Only two schema versions exist: 0 and 5
+### The schema-version line: 1 → 4 → P, with 5 reserved
 
-`schemaVersion` runs **0 → 5**, and nothing in between. **0** is the pre-release shape (the field
-absent, 0, or garbage); **5** is what every current build reads and writes, and the version LibrePT
-ships at release. LibrePT has not shipped, so the four steps that once described an upgrade history
-were collapsed into a single `0 → 5` transform — legitimate *only* while no trainer holds data. Once
-one does, the rule inverts to §6's: readers retained forever, steps appended, never squashed.
+`schemaVersion` is a **chain**, not a single current value. A database enters it wherever it was
+last stamped and walks only the steps it is missing.
 
-**1, 2, 3 and 4 are retired, and never recycled.** All four were stamped into real pre-release
-databases. A database still carrying one is rescued by a **comparison** — anything below current
-re-enters at the floor — rather than by a hardcoded set of dead numbers, which would need
-maintaining and would silently refuse any value nobody remembered to list.
+| Value | Meaning |
+| :--- | :--- |
+| **0 or absent** | below the floor. Enters at 1 — what the frozen corpus stamps deliberately |
+| **1 → 2** | `bookings` carried over to `sessions` |
+| **2 → 3** | every session given an absolute `startDate` |
+| **3 → 4** | stored language cleared so every trainer is asked once |
+| **4** | the newest numbered version — the shape backups are written at |
+| **"P"** | the unstable preview schema this build reads and writes |
+| **5** | **does not exist yet.** Reserved for the first stable release, created from P's final state |
 
-That comparison is the whole reason the chain **starts at 5 rather than 1**. Numbering current as 1
-would put three retired values *above* it, where they read as "written by a newer build" and get
-refused — stranding exactly the databases the rule exists to rescue. A unit test in
-[schemaMigrations.test.mjs](../tests/unit_js/data/schemaMigrations.test.mjs) fails the build if
-current ever drops back below the retired range.
+**Every numbered version is a live input, not history.** Two preview instances are demoed on real
+PTs' devices and backups restore from 1–4, so each step has real work to do. The chain was briefly
+collapsed into one transform on the reasoning that nothing had shipped; that reasoning was wrong,
+and the per-version steps are back. A step being its own step is also what makes it *safe* — a
+database already at 4 never runs the `3 → 4` language clear, so a trainer who has chosen is never
+re-asked. While collapsed, that property needed an explicit version guard to hold.
 
-**"P" is the pre-release placeholder for 5** — the same version under a name that says it is not
-settled. 5 becomes the stable release schema; until then, P is what the shape is called while it can
-still move.
+**A recognised version is honoured at face value.** `detectSchemaVersion` sends only what sits
+*below* the floor (absent, 0, unrecognisable) back to 1. Anything at or above it enters at its own
+position. Reading a stored 4 as "pre-release, start over" is precisely the bug that re-asks a
+settled language question.
 
-That carries one consequence worth stating plainly: **a placeholder shape can change without the
-number changing.** Two preview databases can both read `schemaVersion: 5` and hold different shapes,
-and `migrateState` will compare 5 against 5, apply nothing, and report success — the version cannot
-tell them apart. Only the **commit SHA** can, which is why a preview backup has to carry it, and why
-the two axes above stay separate: the chain numbers the **data**, the SHA identifies the **code**.
-At release the shape settles and the number starts meaning what it says.
+**"P" is the value recorded — never a number.** A fraction in stored data would read as a real
+schema version to anyone looking at a database or a backup, and P is exactly the thing that is not
+one. `PREVIEW_SCHEMA_RANK` (4.5) exists only so the runner can *order* P against numbered versions,
+and it is fractional so both bounds fall out of one comparison:
+
+- **above every numbered version**, so 1–4 all migrate up into P rather than reading as newer than
+  the build and being refused;
+- **below 5**, so the day 5 is minted from P's final state, every P database is already below
+  current and re-enters the chain on its own — no retirement step, no special case.
+
+**Every fraction is P.** `schemaRank` collapses 4.5, 5.5 and any other non-integer to the same rank:
+a fractional version is by definition a preview shape, preview data is disposable, and no build
+promises to still understand one. So the release that mints 5 has no old preview values to clean up.
+
+**P data is dropped on every P change** rather than migrated — that is what makes an unstable shape
+safe to iterate on, and why P needs no migration steps of its own.
+
+### Backups are written at 4, not at P
+
+Because P's shape can change on any commit, a backup written *at* P is restorable only by the exact
+build that wrote it. Backups are therefore written at the newest **numbered** version, which the
+star-write fan-out already keeps continuously current for free (§4) — so a backup file is in a shape
+that does not move when P moves, and any build can restore it through the chain.
+
+**The cost, and it needs saying out loud: a P-only field never reaches a backup.** Add a field in P,
+back up, restore — the field is gone. The same applies to Drive sync, which is the more dangerous
+of the two because it runs unattended and offers no moment at which a trainer could be warned. Both
+surfaces need an explicit preview-mode warning naming what is not covered.
+
+Two consequences of P being unstable that the version number cannot express: two preview databases
+can both read `schemaVersion: "P"` and hold different shapes, and `migrateState` will compare P to P,
+apply nothing, and report success. Only the **commit SHA** distinguishes them — the chain numbers the
+**data**, the SHA identifies the **code**.
 
 **There are no release tags and no rollback-by-navigation.** One build ships every supported
 behaviour concurrently, so switching behaviour is an in-app choice, not a different URL and not a

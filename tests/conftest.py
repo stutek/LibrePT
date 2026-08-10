@@ -3,6 +3,7 @@
 # without duplicating setup. Applies to every test under tests/ (including subfolders).
 
 import hashlib
+import re
 import json
 import sys
 import socket
@@ -17,6 +18,36 @@ from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 # tests/conftest.py -> parents[1] is the repo root; the runtime app lives in src/.
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SRC_DIR = REPO_ROOT / "src"
+
+
+def schema_constant(name):
+    r"""A `<name> = <number>` constant, straight out of src/data/migrationSteps.js.
+
+    Shared rather than redefined per test file. Four copies of this parser existed, each with a
+    `\d+` pattern, which truncated any non-integer version and would silently pass an assertion
+    against a version the app never had. One definition, one pattern that accepts a number or the
+    literal "P", and `%g` at the call site when a numeric value has to match rendered text.
+    """
+    source = (SRC_DIR / "data" / "migrationSteps.js").read_text(encoding="utf-8")
+    match = re.search(rf'{name} = "?([\w.]+)"?', source)
+    assert match, f"{name} is not declared in migrationSteps.js"
+    raw = match.group(1)
+    # A version is a number OR the literal "P" — the preview schema is deliberately not a number,
+    # so this has to hand back whichever it found rather than coercing.
+    try:
+        return float(raw)
+    except ValueError:
+        return raw
+
+
+def current_schema_version():
+    """CURRENT_SCHEMA_VERSION — what a migrated database must end up stamped at."""
+    return schema_constant("CURRENT_SCHEMA_VERSION")
+
+
+def baseline_schema_version():
+    """BASELINE_SCHEMA_VERSION — the floor a pre-release database re-enters the chain at."""
+    return schema_constant("BASELINE_SCHEMA_VERSION")
 
 
 @pytest.fixture

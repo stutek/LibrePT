@@ -9,11 +9,9 @@
 # does what the real "build" route does: render the dialog's rows and open it.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
-import re
-
 import pytest
 
-from tests.conftest import SRC_DIR
+from tests.conftest import current_schema_version
 from tests.medium._harness import load_with_stub
 
 pytestmark = pytest.mark.clean_start
@@ -56,12 +54,6 @@ def test_the_header_stamp_is_a_real_touch_target(page, local_server):
     assert height >= 20, f"touch target is only {height}px tall"
 
 
-def _current_schema_version():
-    """The CURRENT_SCHEMA_VERSION constant, straight out of the module that declares it."""
-    source = (SRC_DIR / "data" / "migrationSteps.js").read_text(encoding="utf-8")
-    return re.search(r"CURRENT_SCHEMA_VERSION = (\d+)", source).group(1)
-
-
 def test_tapping_the_stamp_shows_commit_and_data_schema(page, local_server):
     load_with_stub(page, local_server, STUB)
     page.wait_for_selector("#app-version")
@@ -78,7 +70,7 @@ def test_tapping_the_stamp_shows_commit_and_data_schema(page, local_server):
     # answer to "why are records missing", and the commit alone cannot tell you.
     # Read out of migrationSteps.js rather than hardcoded: a migration bumps this, and a test that
     # has to be edited alongside every migration is a test that will be edited without being read.
-    assert facts["Data schema"] == _current_schema_version()
+    assert facts["Data schema"] == str(current_schema_version())
     assert "Built" in facts
     assert "Version" not in facts, "no release tags any more — nothing to show here"
 

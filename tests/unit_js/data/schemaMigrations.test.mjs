@@ -13,21 +13,26 @@ import { test } from "node:test";
 import {
   BASELINE_SCHEMA_VERSION,
   CURRENT_SCHEMA_VERSION,
+  MIGRATION_STEPS,
+  schemaRank,
 } from "../../../src/data/migrationSteps.js";
 import * as m from "../../../src/data/schemaMigrations.js";
 
-test("legacy database with no sessions collection gets one", () => {
-  // Pre-release, an old `bookings`-shaped database (or any v1 database missing `sessions`
-  // entirely) is not migrated forward — there is no real PT data to protect (TODO §14.6) — it just
-  // ends up with an empty `sessions` collection like any other database missing the field.
+test("legacy bookings are carried over into sessions", () => {
+  // The v1->v2 rename (fd59637): `bookings` became `sessions`, same records, same shape.
   const legacy = { clients: [{ id: "c1" }], bookings: [{ id: "b1" }, { id: "b2" }] };
   const result = m.migrateState(legacy);
 
   assert.equal(result.ok, true);
-  // A database with no schemaVersion is the pre-release baseline.
+  // A database with no schemaVersion is the legacy baseline.
   assert.equal(result.summary.fromVersion, BASELINE_SCHEMA_VERSION);
-  // the old `bookings` collection is dropped, not carried over
-  assert.equal(result.state.sessions.length, 0);
+  // `bookings` was a RENAME of `sessions`, so its records are carried over, never dropped —
+  // dropping them would destroy the trainer's whole schedule.
+  assert.equal(result.state.sessions.length, 2);
+  assert.deepEqual(
+    result.state.sessions.map((session) => session.id),
+    ["b1", "b2"],
+  );
   assert.equal(result.state.bookings ?? null, null);
   assert.equal(result.state.schemaVersion, result.summary.toVersion);
   // The input object is never mutated — the runner works on a clone.
@@ -119,8 +124,11 @@ test("a step producing a bad shape fails loud", () => {
   const detectLegacy = m.detectSchemaVersion({});
   const detectStored = m.detectSchemaVersion({ schemaVersion: 7 });
   const detectGarbage = m.detectSchemaVersion({ schemaVersion: "two" });
-  // Every burned value reads as pre-release, not as a version of its own.
-  const detectRetired = [2, 3, 4].map((v) => m.detectSchemaVersion({ schemaVersion: v }));
+  // A recognised version enters the chain at its OWN position, so it runs only the steps it still
+  // needs — this is what stops a database at 4 re-running the v3->v4 language clear.
+  const detectKnown = [1, 2, 3, 4].map((v) => m.detectSchemaVersion({ schemaVersion: v }));
+  // Below the floor means the same thing as no field at all.
+  const detectBelowFloor = m.detectSchemaVersion({ schemaVersion: 0 });
 
   assert.deepEqual(notAnObject, ["the migrated database is not an object"]);
   assert.equal(
@@ -139,7 +147,8 @@ test("a step producing a bad shape fails loud", () => {
   assert.equal(detectLegacy, BASELINE_SCHEMA_VERSION);
   assert.equal(detectStored, 7);
   assert.equal(detectGarbage, BASELINE_SCHEMA_VERSION);
-  assert.deepEqual(detectRetired, [0, 0, 0]);
+  assert.deepEqual(detectKnown, [1, 2, 3, 4]);
+  assert.equal(detectBelowFloor, BASELINE_SCHEMA_VERSION);
 });
 
 test("absent collections are filled in but corrupt ones still fail", () => {
@@ -180,27 +189,39 @@ test("the 0 to P step clears a non-English stored language too", async () => {
   assert.equal(migrated.state.lang, null);
 });
 
-test("current stays above every retired version", () => {
-  // 1, 2, 3 and 4 were stamped into real pre-release databases and are retired. They are rescued by
-  // a COMPARISON — anything below current re-enters at the floor — which needs no list to maintain
-  // and cannot forget a value nobody remembered to enumerate.
-  //
-  // That only works while current sits above all of them, which is the entire reason the chain
-  // starts at 5. Dropping current to 1 would put three retired values ABOVE it, where they read as
-  // "written by a newer build" and get refused — stranding exactly the databases the rule exists to
-  // rescue. This fails the build rather than letting that regress silently.
-  const HIGHEST_RETIRED_VERSION = 4;
+test("P ranks above every numbered version and below the next stable one", () => {
+  // P is the value RECORDED; the rank is only how it sorts, and both bounds carry weight.
+  const NEXT_STABLE_VERSION = 5;
+  const currentRank = schemaRank(CURRENT_SCHEMA_VERSION);
+  const highestChainVersion = Math.max(...MIGRATION_STEPS.map((step) => step.to));
 
+  // A fraction must never reach storage — that is the whole reason P is a letter.
+  assert.equal(CURRENT_SCHEMA_VERSION, "P");
+  // Above every numbered version the chain produces, so they all migrate up into P rather than
+  // reading as newer than the build and being refused.
   assert.ok(
-    CURRENT_SCHEMA_VERSION > HIGHEST_RETIRED_VERSION,
-    `current is ${CURRENT_SCHEMA_VERSION}, which does not sort above retired version ${HIGHEST_RETIRED_VERSION}`,
+    currentRank > highestChainVersion,
+    `current ranks ${currentRank}, which does not sort above chain version ${highestChainVersion}`,
   );
-  assert.equal(BASELINE_SCHEMA_VERSION, 0);
-  for (const retired of [1, 2, 3, 4]) {
-    assert.equal(
-      m.detectSchemaVersion({ schemaVersion: retired }),
-      BASELINE_SCHEMA_VERSION,
-      `retired version ${retired} must read as pre-release, not as a version of its own`,
-    );
+  // The other half of why P is fractional: it must stay BELOW the next stable version, so that the
+  // day 5 is created from P's final state, every preview database is already below current and
+  // re-enters at the floor on its own. An integer P above 5 would instead read as newer than the
+  // release build and be refused, and release would need a retirement step to undo that.
+  assert.ok(
+    currentRank < NEXT_STABLE_VERSION,
+    `current ranks ${currentRank}, which would outrank the stable ${NEXT_STABLE_VERSION} it precedes`,
+  );
+  // Every fraction is P, not just this one — preview data is disposable, so telling 4.5 from 5.5
+  // buys nothing and would leave the release that mints 5 with old preview values to clean up.
+  assert.equal(schemaRank(5.5), currentRank);
+  assert.equal(schemaRank(4.5), currentRank);
+  assert.equal(schemaRank("nonsense"), null);
+  assert.equal(BASELINE_SCHEMA_VERSION, 1);
+
+  // The chain runs contiguously from the floor up to the highest numbered version, and P sits above
+  // that — so a database at ANY point on it walks only the steps it is missing and ends at P.
+  assert.equal(MIGRATION_STEPS[0].from, BASELINE_SCHEMA_VERSION);
+  for (const [index, step] of MIGRATION_STEPS.slice(1).entries()) {
+    assert.equal(step.from, MIGRATION_STEPS[index].to, `gap before step v${step.from}→v${step.to}`);
   }
 });

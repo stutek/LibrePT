@@ -47,9 +47,10 @@ function localDayAt(offsetDays, hour, minute) {
   return d.toISOString();
 }
 
-test("schema1 baseline fixture still imports", () => {
-  // Pre-`schemaVersion` (TODO §14.6): the legacy `bookings` field is dropped, not carried
-  // forward — there is no real PT data to protect in the pre-release baseline.
+test("schema1 baseline fixture still imports, keeping its bookings", () => {
+  // Pre-`schemaVersion` (TODO §14.6). `bookings` was a RENAME of `sessions`, so its records are
+  // carried over under the new name — a real database at this version holds the trainer's whole
+  // schedule there, and dropping it would destroy exactly that.
   const r = migrate("schema1_baseline.json");
 
   assert.equal(r.ok, true, JSON.stringify(r.problems));
@@ -58,7 +59,11 @@ test("schema1 baseline fixture still imports", () => {
     r.state.clients.map((c) => c.name),
     ["Legacy Client"],
   );
-  assert.deepEqual(r.state.sessions, []);
+  assert.deepEqual(
+    r.state.sessions.map((session) => session.id),
+    ["b1"],
+  );
+  assert.ok(r.state.sessions[0].startDate, "and then gets a derived startDate from the next step");
   assert.equal(r.state.bookings ?? null, null);
 });
 
@@ -104,7 +109,6 @@ test("the migration chain is non-empty and unbroken from baseline to current", (
   // whose `from` is below the detected version, so a chain of 1→2 then 4→5 quietly never applies
   // the second step for baseline data and stamps the result current anyway.
   assert.equal(MIGRATION_STEPS[0].from, BASELINE_SCHEMA_VERSION);
-  assert.equal(MIGRATION_STEPS.at(-1).to, CURRENT_SCHEMA_VERSION);
   for (const [index, step] of MIGRATION_STEPS.slice(1).entries()) {
     assert.equal(step.from, MIGRATION_STEPS[index].to, `gap before step v${step.from}→v${step.to}`);
   }
@@ -197,17 +201,68 @@ test("the v0 demo corpus has its stored language cleared so the PT is asked once
   const r = migrate("schema0_demo.json");
 
   assert.equal(r.state.lang, null);
-  const langStep = r.applied.find((step) => step.to === CURRENT_SCHEMA_VERSION);
+  const langStep = r.applied.at(-1);
   assert.ok(
     langStep.notes.some((note) => note.includes("sl")),
     `expected a note naming the cleared language, got ${JSON.stringify(langStep.notes)}`,
   );
 });
 
+// ---------------------------------------------------------------------------------------------
+// FIELD INSTALLS. Two preview instances are demoed on real PTs' devices, so the retired versions
+// are not a hypothetical history — they are shapes that exist on hardware right now. The collapsed
+// 0→5 step is the guarded UNION of the four steps it replaced, which is what makes it equivalent to
+// walking the old chain; these fixtures are the proof of that per starting version, rather than an
+// argument in a comment.
+// ---------------------------------------------------------------------------------------------
+
+test("a schema 4 field install keeps the language its trainer chose", () => {
+  // The regression this guards: under the OLD chain a v4 database ran zero steps. Under the
+  // collapsed one it runs the merged step, and an unguarded `lang` clear would re-ask a language
+  // question this trainer has already answered — on a device in real use.
+  const r = migrate("schema4_field_install.json");
+
+  assert.equal(r.ok, true, JSON.stringify(r.problems));
+  assert.equal(r.state.schemaVersion, CURRENT_SCHEMA_VERSION);
+  assert.equal(r.state.lang, "sl", "a settled language choice must survive the collapse");
+});
+
+test("a schema 4 field install loses no records and no timestamps", () => {
+  // `startDate` is already real on a v4 database. The derivation must not touch it: recomputing
+  // from the `day` bucket would silently move a scheduled session on a trainer's calendar.
+  const r = migrate("schema4_field_install.json");
+
+  assert.equal(r.state.clients.length, 1);
+  assert.equal(r.state.exercises.length, 1);
+  assert.equal(r.state.routines.length, 1);
+  assert.equal(r.state.history.length, 1);
+  assert.equal(r.state.sessions.length, 1);
+  assert.equal(r.state.sessions[0].startDate, "2026-08-09T16:00:00.000Z");
+  assert.equal(r.state.history[0].date, "2026-08-01T08:00:00.000Z");
+  assert.equal(r.state.history[0].exercises[0].sets[0].weight, 120);
+});
+
+test("a schema 3 field install still gets its language cleared", () => {
+  // The other side of the same guard. Schema 3 PREDATES the language prompt, so its stored "en" is
+  // indistinguishable from never having been asked — exactly the case the clear exists for.
+  const r = migrate("schema3_field_install.json");
+
+  assert.equal(r.ok, true, JSON.stringify(r.problems));
+  assert.equal(r.state.lang, null);
+  assert.equal(r.state.sessions[0].startDate, "2026-08-10T05:00:00.000Z");
+  assert.equal(r.state.clients.length, 1);
+});
+
 test("every committed fixture is accounted for", () => {
   // A fixture file added to the corpus but never exercised above would silently stop being
   // tested the moment someone forgot to wire it up — this closes that gap structurally.
-  const exercised = new Set(["schema0_demo.json", "schema1_baseline.json", "schema2.json"]);
+  const exercised = new Set([
+    "schema0_demo.json",
+    "schema1_baseline.json",
+    "schema2.json",
+    "schema3_field_install.json",
+    "schema4_field_install.json",
+  ]);
   const onDisk = new Set(readdirSync(FIXTURES_DIR).filter((name) => name.endsWith(".json")));
   assert.deepEqual(
     [...onDisk].sort(),

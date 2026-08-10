@@ -17,6 +17,7 @@ import {
   BASELINE_SCHEMA_VERSION,
   CURRENT_SCHEMA_VERSION,
   MIGRATION_STEPS,
+  schemaRank,
 } from "./migrationSteps.js";
 
 // Collections that must be arrays if present at all — the cheap, universal shape assertion every
@@ -34,15 +35,21 @@ const ARRAY_COLLECTIONS = [
 /**
  * Which version a stored database should be read AS.
  *
- * Current or newer is taken at face value — that is what lets the rollback refusal below fire.
- * Everything else re-enters at the floor: the field absent, 0, garbage, or one of the burned
- * pre-release values (2, 3, 4), whose shapes were dropped wholesale rather than migrated one hop at
- * a time (migrationSteps.js). A comparison rather than a list of dead numbers — which works only
- * because current sits ABOVE every burned value, the reason the chain starts at 5 and not 1.
+ * Any version at or above the floor is taken at FACE VALUE, so it enters the chain at its own
+ * position and runs only the steps it still needs. That is what keeps a database already at 4 from
+ * re-running the v3→v4 language clear and re-asking a trainer something they have answered.
+ *
+ * Only what sits BELOW the floor re-enters at it: the field absent, 0, or anything unrecognisable.
+ * Above current is left alone too — that is what lets the rollback refusal below fire.
+ *
+ * Compared by RANK, because "P" is not a number — see schemaRank(). Every fractional version ranks
+ * as P, so a database from any preview build reads as current rather than being re-migrated on
+ * every boot.
  */
 export function detectSchemaVersion(state) {
   const stored = state?.schemaVersion;
-  if (Number.isInteger(stored) && stored >= CURRENT_SCHEMA_VERSION) return stored;
+  const storedRank = schemaRank(stored);
+  if (storedRank !== null && storedRank >= schemaRank(BASELINE_SCHEMA_VERSION)) return stored;
   return BASELINE_SCHEMA_VERSION;
 }
 
@@ -100,7 +107,7 @@ export function migrateState(rawState) {
 
   // Data written by a NEWER build than this one. This is the rollback case, and it is exactly what
   // §16.2's data-loss warning is about: the old build has no forward transform and must not guess.
-  if (fromVersion > CURRENT_SCHEMA_VERSION) {
+  if (schemaRank(fromVersion) > schemaRank(CURRENT_SCHEMA_VERSION)) {
     summary.problems.push(
       `this build reads schema ${CURRENT_SCHEMA_VERSION} but the data is schema ${fromVersion} — it was written by a newer version`,
     );
@@ -116,8 +123,8 @@ export function migrateState(rawState) {
   }
 
   for (const step of MIGRATION_STEPS) {
-    if (step.from < fromVersion) continue;
-    if (step.to > CURRENT_SCHEMA_VERSION) break;
+    if (schemaRank(step.from) < schemaRank(fromVersion)) continue;
+    if (schemaRank(step.to) > schemaRank(CURRENT_SCHEMA_VERSION)) break;
 
     let notes = [];
     try {

@@ -11,74 +11,92 @@
 // what actually moved — the notes are what the PT is shown before committing to an upgrade.
 // Injected dependencies: none.
 //
-// TWO VERSIONS EXIST TODAY, and that is deliberate: **0** (pre-release) and **5** (current).
-// LibrePT has not shipped, so no trainer is sitting on an intermediate version whose upgrade path
-// has to be preserved: the four steps that used to run here (v1→v2 `sessions`, v2→v3 `startDate`,
-// v3→v4 `lang`) described a history nobody lived through, and are collapsed into the ONE step
-// below, which does all of their work at once.
+// THE CHAIN IS PER-VERSION, not one collapsed transform. It was briefly collapsed into a single
+// step on the reasoning that nothing had shipped so no upgrade path needed preserving; that was
+// wrong twice over. Two preview instances are demoed on real PTs' devices, and backups restore from
+// 1-4 — so 1, 2, 3 and 4 are live inputs, not a history nobody lived through. Each version gets its
+// own small transform again, which is what lets the import banner tell a trainer what actually
+// moved rather than "upgraded from the floor".
 //
-// **"P" is the pre-release placeholder for 5** — the same version, under a name that says it is not
-// settled yet. 5 becomes the stable release schema; until then P is what the shape is called while
-// it can still move.
+// "P" is the unstable preview schema this build reads and writes, and the value actually RECORDED.
+// It is not a number: a fraction in stored data would read as a real schema version to anyone
+// looking at a database or a backup, and P is precisely the thing that is not one. PREVIEW_SCHEMA_RANK
+// below exists only so the runner can ORDER P against numbered versions.
 //
-// The consequence to keep in mind: a placeholder shape may change WITHOUT the number changing, so
-// two preview databases can both read `schemaVersion: 5` and hold genuinely different shapes.
-// `migrateState` compares 5 against 5, applies nothing, and reports success — the number cannot
-// discriminate them. Only the commit SHA can, which is why a preview backup has to carry it
-// (docs/DATA_MODEL.md §1). At release the shape settles and the number starts meaning what it says.
-//
-// **Current starts at 5 because 1–4 are burned, not free.** Those values were stamped into real
-// preview databases. Keeping current above all of them is what lets a single comparison rescue
-// them — see BASELINE_SCHEMA_VERSION. Reusing one would need a hardcoded set of dead numbers
-// instead, which has to be maintained, and which would silently reset a real database the day a
-// release happened to reach the same number. Burned numbers are never recycled, however empty the
-// range looks.
-//
-// The collapse is legitimate ONLY because nothing is released. The moment a real trainer holds
-// data the rule inverts: readers are retained forever (docs/DATA_MODEL.md §6), steps are appended
-// and never squashed, and this note becomes the reason a future agent must not repeat it.
+// 5 does not exist yet — it is reserved for the first stable release, created from P's final state.
+// The rank is fractional so both bounds fall out of one comparison: above every numbered version
+// that exists (so they all migrate up into P), and below 5 (so the day 5 is minted, every P
+// database is already below current and re-enters the chain on its own, with no retirement step).
 
-// Pre-release databases — the field absent entirely, explicitly 0, or carrying any value a
-// pre-release build once stamped (2, 3, 4 were all written at some point). The floor of the chain,
-// and the version the frozen corpus (tests/fixtures/backups/) enters at.
-//
-// Anything BELOW current re-enters here: the field absent, 0, garbage, or one of the burned
-// pre-release values (2, 3, 4) an older build stamped. Detection is a RULE, not a list of dead
-// numbers — a list needs editing every time one more turns out to exist in the wild, and silently
-// refuses the ones nobody remembered to enumerate.
-export const BASELINE_SCHEMA_VERSION = 0;
+// Legacy databases predate the field entirely; anything without a `schemaVersion` is version 1.
+// A value BELOW the floor — 0, or anything unrecognisable — means the same thing and enters here.
+// The frozen corpus stamps 0 deliberately, so the chain's entry point is visible in the fixture.
+export const BASELINE_SCHEMA_VERSION = 1;
 
-// What this build reads and writes. Declared above MIGRATION_STEPS because the step below reads it
-// at module-evaluation time.
-export const CURRENT_SCHEMA_VERSION = 5;
+// "P" — the unstable preview schema this build reads and writes, and the value actually RECORDED.
+export const CURRENT_SCHEMA_VERSION = "P";
+
+// How "P" ORDERS against numbered versions — never stored, never shown. Above every numbered
+// version that exists, below the 5 reserved for the stable release.
+export const PREVIEW_SCHEMA_RANK = 4.5;
+
+/**
+ * Comparable rank for a stored version: "P", a number, or null when it is unrecognisable.
+ *
+ * **"P" is the alias for EVERY fraction, not just the current one.** A fractional version is by
+ * definition a preview shape, and preview data is disposable — there is nothing to gain from
+ * telling 4.5 apart from 5.5, because neither is a shape any build promises to still understand.
+ */
+export function schemaRank(version) {
+  if (version === CURRENT_SCHEMA_VERSION) return PREVIEW_SCHEMA_RANK;
+  if (!Number.isFinite(version)) return null;
+  return Number.isInteger(version) ? version : PREVIEW_SCHEMA_RANK;
+}
 
 export const MIGRATION_STEPS = [
   {
-    from: BASELINE_SCHEMA_VERSION,
-    to: CURRENT_SCHEMA_VERSION,
-    description: "Normalise a pre-release database to the preview shape",
+    from: 1,
+    to: 2,
+    description: "Carry the legacy `bookings` collection over to `sessions`",
+    // MOVED, not dropped. `bookings` was RENAMED to `sessions` in fd59637 — the same records with
+    // the same shape, never a different one (the seed was literally `bookings = [...SESSIONS]`), so
+    // there is nothing to convert and carrying them over is the whole job. An earlier version of
+    // this step dropped them, reasoning that pre-release data was not worth protecting; that
+    // expired the moment preview instances went onto real devices and backups began restoring from
+    // 1-4, because dropping them destroys a trainer's entire schedule.
+    //
+    // Guarded on `sessions` being absent, exactly as the original rename was: a database that
+    // already has `sessions` has been through this once, and its `bookings` is a stale leftover
+    // that must not clobber the live collection.
     apply(state) {
       const notes = [];
-
-      // --- was v1→v2: the `bookings` → `sessions` rename (TODO §14.6) ---
-      // Pre-release, so the old field name is DROPPED rather than carried forward. Assigned
-      // undefined rather than deleted: JSON.stringify omits it on the next save.
-      if (Array.isArray(state.bookings) && state.bookings.length > 0) {
-        notes.push(`${state.bookings.length} legacy \`bookings\` entr(ies) dropped`);
+      if (Array.isArray(state.bookings) && !Array.isArray(state.sessions)) {
+        state.sessions = state.bookings;
+        notes.push(
+          `${state.sessions.length} session(s) carried over from the legacy \`bookings\` field`,
+        );
       }
+      // Assigned undefined rather than deleted: JSON.stringify omits it on the next save.
       state.bookings = undefined;
       if (!Array.isArray(state.sessions)) state.sessions = [];
-
-      // --- was v2→v3: give every session a real absolute `startDate` (TODO §7.3 item 8) ---
-      // Sessions carried only a 4-value `day` bucket plus a free-text `time` range — no way to
-      // place one on a real timeline. This derives a one-time absolute anchor from the bucket +
-      // parsed start time AT THE MOMENT OF MIGRATION; it does not track wall-clock time afterwards,
-      // same as history's frozen `date` field. `day` is untouched: overlap detection and card
-      // styling still key off it.
-      //
-      // `upcoming` is lossy and unavoidably so — the bucket carries no magnitude, so a session four
-      // days out always lands at +2. Nothing in a pre-`startDate` database records where it really
-      // was: this fills a field that was never written, it does not preserve one.
+      return { state, notes };
+    },
+  },
+  {
+    from: 2,
+    to: 3,
+    description: "Give every session a real absolute `startDate` timestamp",
+    // Sessions carried only a 4-value `day` bucket (yesterday/today/tomorrow/upcoming) plus a
+    // free-text `time` range string — no way to place one on a real timeline (TODO §7.3 item 8).
+    // `day` is untouched: overlap detection and card styling still key off it. This derives a
+    // one-time absolute anchor from the bucket + parsed start time, at the moment of migration —
+    // it does not track wall-clock time afterwards, same as history's frozen `date` field.
+    //
+    // `upcoming` is lossy and unavoidably so: the bucket carries no magnitude, so a session four
+    // days out always lands at +2. Nothing in a pre-`startDate` database records where it really
+    // was — this fills a field that was never written, it does not preserve one.
+    apply(state) {
+      const notes = [];
       const now = new Date();
       const dayOffset = { yesterday: -1, today: 0, tomorrow: 1, upcoming: 2 };
 
@@ -93,30 +111,38 @@ export const MIGRATION_STEPS = [
         return d.toISOString();
       }
 
-      let stamped = 0;
-      for (const session of state.sessions) {
-        if (!session.startDate) {
-          session.startDate = deriveStartDate(session);
-          stamped++;
+      if (Array.isArray(state.sessions)) {
+        let stamped = 0;
+        for (const session of state.sessions) {
+          if (!session.startDate) {
+            session.startDate = deriveStartDate(session);
+            stamped++;
+          }
         }
+        if (stamped > 0) notes.push(`${stamped} session(s) given a derived \`startDate\``);
       }
-      if (stamped > 0) notes.push(`${stamped} session(s) given a derived \`startDate\``);
-
-      // --- was v3→v4: clear the stored language so every PT is asked once ---
-      // Before the splash could offer a language, `lang` was forced to "en" wherever it was absent,
-      // so an install carries "en" whether the trainer picked English or was never asked. Those are
-      // indistinguishable after the fact, and guessing wrong leaves a Slovene trainer with an
-      // English app and no prompt. Clearing costs one tap for someone who did want English; not
-      // clearing costs a trainer their own language entirely.
-      //
-      // The one part of this step that is NOT idempotent, which matters only for a database
-      // carrying a retired version: a preview install that had already chosen is asked once more.
-      // One tap, once, on unreleased software.
+      return { state, notes };
+    },
+  },
+  {
+    from: 3,
+    to: 4,
+    description: "Clear the stored language so every existing PT is asked to choose one",
+    // Before the splash could offer a language, `lang` was forced to "en" everywhere it was absent,
+    // so an install carries "en" whether the trainer picked English or was simply never asked.
+    // There is no way to tell those apart after the fact, and guessing wrong leaves a Slovene
+    // trainer with an English app and no prompt.
+    //
+    // Being its OWN step is what makes this safe: a database already at 4 never runs it, so a
+    // trainer who has since chosen is not re-asked. That property was lost while the chain was
+    // collapsed into one transform and had to be restored with an explicit version guard; here it
+    // is structural.
+    apply(state) {
+      const notes = [];
       if (state.lang !== null && state.lang !== undefined) {
         notes.push(`language choice reset from \`${state.lang}\` so it can be asked once`);
       }
       state.lang = null;
-
       return { state, notes };
     },
   },

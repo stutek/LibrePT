@@ -19,10 +19,10 @@ localises the fault better, and a test placed too low simply cannot express what
 | Tier | Runner | Boots | Put a test here when… |
 | :--- | :--- | :--- | :--- |
 | [tests/unit/](unit/) (19 files + `test_app.py`, 112 tests) | pytest, stage 1 | nothing — static analysis of the repo | It inspects files/structure: layout rules, i18n parity, doc links, generated catalogs. |
-| [tests/unit_js/](unit_js/) (31 files, 182 tests) | `node:test`, stage 1 | one ES module, no DOM | It pins **pure logic** — schema/migration transforms, id generation, merge algorithms, projections, domain rules. Mirrors the `src/` subpath it covers, so `src/domain/sessionClock.js` → `unit_js/domain/sessionClock.test.mjs`. |
+| [tests/unit_js/](unit_js/) (31 files, 186 tests) | `node:test`, stage 1 | one ES module, no DOM | It pins **pure logic** — schema/migration transforms, id generation, merge algorithms, projections, domain rules. Mirrors the `src/` subpath it covers, so `src/domain/sessionClock.js` → `unit_js/domain/sessionClock.test.mjs`. |
 | [tests/unit_js/security/](unit_js/security/) (3 files, 10 tests) | `node:test`, stage 1 | one ES module, no DOM | It pins a **security property** with no DOM: injection into a generated file, attacker-controlled object keys. Its own gate task and its own CI job (`security-tests`), so a regression is named as a security one instead of a generic unit-test failure. Excluded from the glob above — it is gated separately, not twice. |
 | [tests/medium/](medium/) (22 files, 83 tests) | Playwright, stage 2 | one component against real `index.html` markup | It needs the **DOM/CSS** but not navigation, persistence or a real app boot. Four shapes, all in [_harness.py](medium/_harness.py): `HEADER_STUB` (header + its route-backed dialogs), `SESSIONS_STUB` (the dashboard timeline), `clipboard_stub()` (the live session, fed an injected `activeSession`), and `view_stub()` to build one for any other view — shell markup → activate → render. |
-| [tests/e2e/](e2e/) (36 files, 129 tests) | Playwright, stage 3 | the whole app | It needs the router, IndexedDB, the service worker, reload/deep-link behaviour, or a multi-step flow across views. |
+| [tests/e2e/](e2e/) (36 files, 136 tests) | Playwright, stage 3 | the whole app | It needs the router, IndexedDB, the service worker, reload/deep-link behaviour, or a multi-step flow across views. |
 
 **Why the split is worth maintaining:** the pure-logic tests used to run in a browser purely because
 the app's CSP forbids `new Function` — they now fail in ~4s inside stage 1 instead of at the
@@ -97,6 +97,13 @@ ZAP baseline scan in stage 4 is PASSIVE** — it spiders and inspects responses,
 payload — so it cannot see stored XSS from an imported backup, formula injection in a generated CSV,
 or prototype pollution on the boot path. None of those cross the network. ZAP is not the reason any
 of these classes is covered.
+
+**The frozen backup corpus** lives in [tests/fixtures/backups/](fixtures/backups/) — one committed
+file per schema version a real backup can arrive at (1, 2, 3, 4, plus a demo-scale `schema0_demo`
+that enters below the floor). Both tiers use the SAME files: `tests/unit_js/data/frozenBackupCorpus`
+migrates them as pure logic, and `tests/e2e/test_backup_restore.py` restores them through the actual
+import UI. **Never edit an existing fixture** — that stops it testing what it always tested; add a
+new one when a version is added.
 
 **Shared fixtures** live in [tests/conftest.py](conftest.py) and apply to every tier, notably
 `local_server` — which refuses to run against a dev server whose revision does not match the working
