@@ -40,7 +40,7 @@ In accordance with data protection regulations (GDPR), I want to make sure you a
 1. Storage & Security: Your workout logs and training notes are stored on my own device and, optionally, backed up to my personal cloud storage strictly for coaching continuity and preparation.
 2. No Third-Party Tracking or Selling: Your data is never sold, shared with advertisers, or transferred to third parties.
 3. Artificial Intelligence Safety: If I utilize AI tools to assist in periodizing or analyzing workout volume, your records are strictly anonymized (all names and identifying personal information are stripped) prior to analysis.
-4. Your Rights: You have the right at any time to request a complete export of your workout history, request corrections, or ask for your personal records to be permanently deleted.
+4. Your Rights: You have the right at any time to request a complete export of your workout history, request corrections, or ask for your personal records to be permanently deleted. You may also withdraw this consent at any time and in any form — withdrawal stops any further processing and does not affect the lawfulness of processing carried out before it.
 
 The full privacy notice is here: https://github.com/stutek/LibrePT/blob/main/docs/templates/en/Client_Privacy_Notice.md
 
@@ -73,6 +73,12 @@ date. That stamp is what lets you answer "who is still covered?" after the lette
   change to retention or to the rights on offer. Clients on an older version should re-sign.
 - **Do not bump it** for typos, formatting, or translation of unchanged meaning: those clients
   consented to the same thing, and a bump would send every one of them a form to re-sign for nothing.
+  The 2026-08-10 terminology audit is the worked example — the Slovenian edition changed
+  substantially (consent became *privolitev* throughout, per the
+  [terminology map](../sl/INDEX.md)) and both editions gained an explicit Art. 7(3) sentence on
+  withdrawal, yet **2026-08 stayed**: the purposes, the recipients, the retention and the rights on
+  offer are all unchanged, and stating a right the client already held more plainly does not make
+  the earlier consent cover less than it did.
 - The version is a plain `YYYY-MM` string. It is deliberately not the app's commit SHA or data
   schema — those are the *code* and *data shape* axes and change constantly, while this letter does
   not (see [AGENT_RULES §2.D.3](../../../AGENT_RULES.md)).

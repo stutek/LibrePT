@@ -358,9 +358,10 @@ export const sl = {
     "Strežnik HTTP ni dosegljiv. Zagon iz predpomnjene kode; preverjanje posodobitev ni mogoče.",
   offline_cached_status: "Strežnik HTTP trenutno ni dosegljiv. Delujete v predpomnjeni kodi.",
   consent_legend: "Varstvo osebnih podatkov (GDPR)",
-  consent_signed_label: "Stranka je podpisala soglasje (hramba podatkov in sinhronizacija v oblak)",
+  consent_signed_label:
+    "Stranka je podpisala privolitev (hramba podatkov in sinhronizacija v oblak)",
   consent_date_label: "Datum podpisa",
-  consent_form_version: "Različica obrazca soglasja",
+  consent_form_version: "Različica obrazca privolitve",
   consent_lang_label: "Jezik obrazca",
   consent_send_email: "Pošlji obrazec po e-pošti",
   consent_send_sms: "Pošlji povezavo po SMS",
@@ -369,6 +370,6 @@ export const sl = {
   consent_info_button: "Kdo hrani obrazec?",
   consent_info_title: "Podpisan obrazec hranite vi",
   consent_info_body:
-    "LibrePT zabeleži le, da je bilo soglasje dano, in datum — nikoli fotografije, skena ali podpisa. Kot upravljavec osebnih podatkov ste za arhiviranje podpisanega obrazca odgovorni sami, dokler hranite podatke te stranke, da lahko soglasje kadar koli dokažete. Če stranka soglasje prekliče, tukaj izbrišite njene zapise in preklic zabeležite na svojem izvodu.",
+    "LibrePT zabeleži le, da je bila privolitev dana, in datum — nikoli fotografije, skena ali podpisa. Kot upravljavec osebnih podatkov ste za arhiviranje podpisanega obrazca odgovorni sami, dokler hranite podatke te stranke, da lahko privolitev kadar koli dokažete (člen 7(1) GDPR). Če stranka privolitev prekliče, tukaj izbrišite njene zapise in preklic zabeležite na svojem izvodu.",
   consent_info_ack: "Razumem",
 };

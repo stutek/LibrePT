@@ -246,7 +246,7 @@ def test_changing_the_language_rebuilds_both_delivery_links(page, local_server):
 
     page.locator("#client-consent-lang").select_option("sl")
     # Both links, not only the one most recently touched: the SMS body carries the notice URL too.
-    assert "SOGLA" in page.locator("#btn-consent-email").get_attribute("href")
+    assert "PRIVOL" in page.locator("#btn-consent-email").get_attribute("href")
     assert "templates%2Fsl%2FClient_Privacy_Notice.md" in page.locator(
         "#btn-consent-sms"
     ).get_attribute("href")

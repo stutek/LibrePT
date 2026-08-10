@@ -25,7 +25,7 @@ In accordance with data protection regulations (GDPR), I want to make sure you a
 1. Storage & Security: Your workout logs and training notes are stored on my own device and, optionally, backed up to my personal cloud storage strictly for coaching continuity and preparation.
 2. No Third-Party Tracking or Selling: Your data is never sold, shared with advertisers, or transferred to third parties.
 3. Artificial Intelligence Safety: If I utilize AI tools to assist in periodizing or analyzing workout volume, your records are strictly anonymized (all names and identifying personal information are stripped) prior to analysis.
-4. Your Rights: You have the right at any time to request a complete export of your workout history, request corrections, or ask for your personal records to be permanently deleted.
+4. Your Rights: You have the right at any time to request a complete export of your workout history, request corrections, or ask for your personal records to be permanently deleted. You may also withdraw this consent at any time and in any form — withdrawal stops any further processing and does not affect the lawfulness of processing carried out before it.
 
 The full privacy notice is here: ${noticeUrl}
 

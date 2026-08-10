@@ -21,6 +21,11 @@ in the [parent catalog](../INDEX.md), rather than being restated per locale.
 | [Client_Consent_Form.md](Client_Consent_Form.md) | `template` |
 | [Client_Privacy_Notice.md](Client_Privacy_Notice.md) | `template` |
 
+Terminology here is the GDPR's own English vocabulary (controller, processor, data subject, special
+category data, and the article numbers each right comes from). A translation is held to the
+equivalent standard against its own official text — see [../sl/INDEX.md](../sl/INDEX.md) for how
+that is recorded.
+
 ## Related
 
 - [../INDEX.md](../INDEX.md) — every language these documents exist in
