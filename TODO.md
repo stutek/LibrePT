@@ -1230,21 +1230,34 @@ sweep a rule that is now written down in the tool. In order:
    truncated. Exempting it unconditionally reported the wide phone and let the narrow — worse — case
    through, which is exactly backwards.
 
-**The surviving finding is real, and it is phone-only:** in the session editor
+**The surviving finding was real, phone-only, and is now fixed** (2026-08-10): in the session editor
 (`session.edit`, `session.catalog`), the edit-mode status chip
-(`.edit-mode-chip`, built in `src/modules/clipboard/activeSessionBoard.js`) is appended AFTER the
+(`.edit-mode-chip`, built in `src/modules/clipboard/activeSessionBoard.js`) was appended AFTER the
 client name inside `#session-title-text`, which is `overflow:hidden; white-space:nowrap;
-text-overflow:ellipsis`. So the ellipsis eats the chip first: **169px outside the box at 390px in
-English, 160px in Slovenian — entirely invisible.** At 412px and 1280px it is partly visible. The
+text-overflow:ellipsis`. So the ellipsis ate the chip first: **169px outside the box at 390px in
+English, 160px in Slovenian — entirely invisible.** At 412px and 1280px it was partly visible. The
 chip is the only thing on screen distinguishing editing a LIVE session from editing a future one, so
 losing it on the narrowest phone is a real gym-floor hazard, and no existing test could see it.
 
-### 25.6 [ ] Status, and what is left
+**Reordering it did not fix it — that only chose the casualty.** Putting the chip first made the
+*client name* vanish by the same 169px, which the sweep caught on the very next run. An ellipsis
+eats whole ELEMENTS, so a nowrap line that cannot hold its contents will always delete one of them
+outright. The fix is structural: `.edit-mode-title` is a flex row where the chip and the "Editing"
+label declare `flex: 0 0 auto` and only the client name shrinks — and being the ellipsised box
+itself, it truncates as *text*, with the "…" a trainer can see. `min-width: 0` on both the row and
+the name is the part that actually does the work; a flex item's default `min-width: auto` refuses to
+shrink below its content, which is how the name got pushed out rather than ellipsised in the first
+place.
 
-- [x] `agent_tools/overflow_scan.py`, its unit tests, and the four-device e2e suite — written and
-      verified against a clean `HEAD` worktree (the working tree's in-progress `src/data/` edits
-      stopped the app booting, so `build check` could not be run on 2026-08-10).
-- [ ] **Run the full gate and commit**, once the data-layer work in flight has landed.
-- [ ] **Fix the edit-mode chip** (§25.5). It is the sweep's first real catch; the suite stays red
-      until it is fixed, which is the point.
+### 25.6 Status
+
+- [x] `agent_tools/overflow_scan.py`, its unit tests, and the four-device e2e suite.
+- [x] Full gate green (2026-08-10), edit-mode title bar fixed.
 - [ ] `tests/medium/_overflow.py`, for per-component attribution (§25.3).
+
+**Cost, measured rather than assumed:** each walk is **~12.5s of call time**, ~50s across the four,
+which adds roughly 13s to stage 3's floor once fanned out. The run that first went green clocked
+4m03s, but that number is worthless — three back-to-back gate runs had the box at a load average of
+17–26 on 16 cores, and stage 2, which the change never touches, tripled in the same run (16s → 53s).
+That is the tell for an environment problem rather than a change problem, per
+[AGENT_RULES.md](AGENT_RULES.md) §2.
