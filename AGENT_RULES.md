@@ -31,6 +31,18 @@ Every response and tool action must drive measurable, continuous progress toward
 2. **Auto-commit coherent changes**: Commit your own work automatically — do **not** wait to be asked. As soon as a change is coherent and verified, stage exactly the files you touched and commit them to `main` with a clear message. Keep commits small and focused (one logical change each) so the user can review and, if needed, roll back via git history/diff. Never sweep unrelated or concurrently-edited files into your commit.
 3. **Run the full local pipeline before every code change commit and report results.** "Verified" means passing the same gate CI runs — not just running a test subset (`pytest tests/` alone skips lint, the frontend HTML-sink/CSP audit, and the dependency scan). Stage commits ONLY after executing `.venv/bin/python -m build check` in full and confirming all static analysis, security audits, automated tests, and documentation checks pass cleanly. Preexisting challenges are not tolerated and should be addressed. Include a concise pipeline status report in the response prior to committing.
 
+   **Exception — a prose-only commit does not need the gate.** If a commit touches *only* Markdown
+   (a `TODO.md` entry, a `CHANGELOG.md` line, a doc or use case) and no file any gate reads as data,
+   run `.venv/bin/python -m agent_tools.doclinks` and commit on that. Nothing else in the pipeline
+   can even observe the change: two minutes of lint, browsers and a ZAP scan to verify a paragraph
+   is pure waste, and the dead-link checker is the only part that was ever going to fail. Say which
+   check you ran, exactly as you would report the full gate.
+
+   **The carve-out is prose, not "docs".** Some Markdown IS gate input and takes the full run:
+   `docs/SRC_MODULES.md` (read by `catalog_coverage.py`), any `INDEX.md` a tool parses, and this
+   file when it changes a rule a tool enforces. Mixed commits — one Markdown file and one code file
+   — are code commits. When unsure, run the gate.
+
    **Command reference:**
    | Command | What it does |
    | :--- | :--- |
