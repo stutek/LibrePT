@@ -106,10 +106,23 @@ is `SCHEMA_2` plus `startDate`), so the newest is a strict superset of every old
 copy alongside it would store strictly less information at full size. Restore re-derives every live
 store from whatever it receives.
 
-Every file also carries `exportedAt` (a temporal anchor, so a future migration never has to date a
-two-year-old backup as though it were taken today) and `buildSha` — because while the runtime shape
-is a placeholder, two files can both say `schemaVersion: 3` and come from builds whose P shapes
-differed, and the SHA is the only thing that can tell them apart.
+Every file also carries `exportedAt` — a temporal anchor, so a future migration never has to date a
+two-year-old backup as though it were taken today — and `buildSha`, which is a **support breadcrumb
+only**. It is deliberately not consulted on restore: two files declaring the same numbered schema
+have the same shape by definition, so comparing SHAs would imply a doubt that cannot exist. The only
+shape that varies between builds is P, and P is never written to a file.
+
+### A restore REPLACES; it does not merge
+
+The file is a snapshot of a whole database, so restoring makes the device match it. Merging would
+need a common ancestor to resolve two versions of the same record — which is exactly what Drive
+sync's three-way merge has ([syncMerge.js](../src/data/syncMerge.js)) and a file import does not.
+Guessing without one is worse than replacing.
+
+Replacing is right; replacing **silently** is not. A restore onto a database that holds anything
+asks first, naming what would be lost per collection — a trainer setting up a new phone may already
+have entered real work. The prompt appears only when there is something at stake, because a warning
+shown every time is a warning nobody reads.
 
 **The cost, and it needs saying out loud: a P-only field never reaches a backup.** Add a field in P,
 back up, restore — the field is gone. The same applies to Drive sync, which is the more dangerous

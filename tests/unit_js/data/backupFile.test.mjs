@@ -113,18 +113,38 @@ test("the routing field the store adds does not leak into the file", () => {
   }
 });
 
-test("origin is reported honestly, including when it cannot be known", () => {
-  const sameBuild = backup.describeBackupOrigin({ buildSha: "abc1234" }, "abc1234");
-  const otherBuild = backup.describeBackupOrigin({ buildSha: "def5678" }, "abc1234");
-  // A file written before this metadata existed: neither confirmed same-build nor different, and
-  // claiming either would be a guess presented as a fact.
-  const older = backup.describeBackupOrigin({ clients: [] }, "abc1234");
+test("the file records which build wrote it, without that affecting a restore", () => {
+  // `buildSha` is a support breadcrumb, not a compatibility check. Two files declaring the same
+  // NUMBERED schema have the same shape by definition — that is what a numbered schema means — so
+  // comparing SHAs would imply a doubt that cannot exist. The only shape that varies between builds
+  // is P, and P is never written to a file.
+  const payload = backup.buildBackupPayload(database(), { buildSha: "abc1234" });
+  const fromAnotherBuild = { ...payload, buildSha: "def5678" };
 
-  assert.equal(sameBuild.fromThisBuild, true);
-  assert.equal(otherBuild.fromThisBuild, false);
-  assert.equal(older.fromThisBuild, false);
-  assert.equal(older.unknownOrigin, true);
-  assert.equal(sameBuild.unknownOrigin, false);
+  const mine = migrateState(JSON.parse(JSON.stringify(payload)));
+  const theirs = migrateState(JSON.parse(JSON.stringify(fromAnotherBuild)));
+
+  assert.equal(mine.ok, true);
+  assert.equal(theirs.ok, true, "a file from another build restores exactly the same way");
+  assert.deepEqual(
+    theirs.state.clients.map((c) => c.id),
+    mine.state.clients.map((c) => c.id),
+  );
+});
+
+test("a restore summary names what would be replaced, per collection", () => {
+  // "Replace 8 clients, 1 session" is a sentence a trainer can weigh; "Are you sure?" is not.
+  const summary = backup.summarizeReplacement(database());
+
+  assert.equal(summary.counts.clients, DEFAULT_CLIENTS.length);
+  assert.equal(summary.counts.sessions, 1);
+  assert.ok(summary.total > 0);
+  // Empty collections are omitted rather than listed as zero — a prompt should name only what is
+  // actually at stake.
+  assert.ok(!("history" in summary.counts));
+
+  const empty = backup.summarizeReplacement({ clients: [], sessions: [] });
+  assert.equal(empty.total, 0, "nothing at stake means no prompt at all");
 });
 
 test("settings that belong to the database, not to a record, are carried", () => {

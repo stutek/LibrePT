@@ -122,3 +122,32 @@
     color: var(--warning-text-dark, #ffce7a);
   }
 }
+
+/* Restore confirmation. Shown only when a restore would overwrite something, because a warning that
+   appears every time is a warning nobody reads. The destructive action is styled as destructive and
+   is NOT the default-focused one. */
+.restore-confirm {
+  margin: 0 0 14px;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--danger-bg, rgba(220, 60, 60, 0.12));
+  border: 1px solid var(--danger-border, rgba(220, 60, 60, 0.4));
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.restore-confirm p {
+  margin: 0 0 10px;
+}
+
+.restore-confirm-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Real padding, not just text: this is a decision made on a phone with sweaty hands. */
+.restore-confirm-actions button {
+  min-height: 44px;
+  padding: 0 16px;
+}

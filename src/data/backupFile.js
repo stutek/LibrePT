@@ -29,10 +29,11 @@ const SETTINGS_KEYS = ["lang"];
 /**
  * Build the backup payload for `state`.
  *
- * `buildSha` identifies the code that produced the file. It is not decoration: while the runtime
- * schema is a placeholder, two files can both say `schemaVersion: 4` and have been produced by
- * builds whose P shapes differed, and the SHA is the only thing that can tell them apart when
- * someone is diagnosing a restore.
+ * `buildSha` is a support breadcrumb — "which build wrote this file" — and nothing more. It is
+ * deliberately NOT consulted when restoring: the file is written at a NUMBERED schema, and two
+ * files declaring the same number have the same shape by definition. That is what a numbered schema
+ * means. Comparing SHAs would imply a doubt that cannot exist here; the only shape that could vary
+ * between builds is P, and P is never written to a file.
  */
 export function buildBackupPayload(state, { buildSha = null, now = new Date() } = {}) {
   const payload = {
@@ -67,19 +68,17 @@ export function isBackupPayload(parsed) {
 }
 
 /**
- * What a restore should TELL the trainer about a file, beyond whether it worked.
+ * What restoring `parsed` would REPLACE, so a trainer is told before it happens rather than after.
  *
- * A file from a different build cannot be assumed shape-compatible in its preview-only details, and
- * saying so is the difference between a restore they can trust and one they merely survived.
+ * A restore is a whole-database replace, not a merge — the file is a snapshot, and merging two
+ * databases without a common ancestor is guesswork (that ancestor is exactly what Drive sync's
+ * three-way merge has and a file import does not). Replacing is right; replacing silently is not.
  */
-export function describeBackupOrigin(parsed, currentBuildSha) {
-  if (!isBackupPayload(parsed)) return null;
-  const sha = parsed.buildSha || null;
-  return {
-    exportedAt: parsed.exportedAt || null,
-    buildSha: sha,
-    fromThisBuild: Boolean(sha && currentBuildSha && sha === currentBuildSha),
-    // A file predating this metadata: neither confirmed same-build nor confirmed different.
-    unknownOrigin: !sha,
-  };
+export function summarizeReplacement(currentState) {
+  const counts = {};
+  for (const collection of COLLECTIONS) {
+    const records = Array.isArray(currentState?.[collection]) ? currentState[collection] : [];
+    if (records.length > 0) counts[collection] = records.length;
+  }
+  return { counts, total: Object.values(counts).reduce((sum, n) => sum + n, 0) };
 }

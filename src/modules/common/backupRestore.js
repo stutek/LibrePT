@@ -14,7 +14,7 @@
 //   t
 // }
 
-import { buildBackupPayload } from "../../data/backupFile.js";
+import { buildBackupPayload, summarizeReplacement } from "../../data/backupFile.js";
 import { DEFAULT_SESSIONS } from "../../data/index.js";
 import { describeMigration, migrateState } from "../../data/schemaMigrations.js";
 import { catalogToCsv, catalogToInterchange } from "../../domain/exerciseStandard.js";
@@ -24,6 +24,45 @@ import { renderMarkupOnce } from "./dom.js";
 import { downloadFile } from "./download.js";
 
 let deps = null;
+
+// A parsed, migrated database waiting for the trainer to confirm it may replace what they have.
+// Held here rather than re-read from the file input, which browsers clear on re-render.
+let pendingRestore = null;
+let pendingSummary = null;
+let confirmedRestore = false;
+
+function applyRestoredState(restored) {
+  deps.setState(restored);
+  deps.saveToLocalStorage();
+  pendingRestore = null;
+  confirmedRestore = false;
+}
+
+// The one place a successful import's status line is built, so the confirmed path cannot drift from
+// the direct one. It once did: a hardcoded "Import successful!" on the confirm branch silently
+// dropped the migration report — the very thing a trainer needs to see when old data moves.
+function renderImportSuccess(summary) {
+  const importStatus = document.getElementById("import-status");
+  if (!importStatus) return;
+  importStatus.textContent =
+    summary && summary.fromVersion !== summary.toVersion
+      ? `Import successful! Upgraded from schema ${summary.fromVersion}.`
+      : "Import successful! Database synchronized.";
+  importStatus.className = "status-msg text-emerald";
+}
+
+// Names what is about to be overwritten, per collection. "Replace 12 clients and 40 sessions?" is a
+// sentence a trainer can weigh; "Are you sure?" is not.
+function showReplaceConfirmation(replacing) {
+  const box = document.getElementById("restore-confirm");
+  const detail = document.getElementById("restore-confirm-detail");
+  if (!box || !detail) return;
+  const parts = Object.entries(replacing.counts).map(
+    ([collection, count]) => `${count} ${collection}`,
+  );
+  detail.textContent = parts.join(", ");
+  box.hidden = false;
+}
 
 function catalogFilename(extension) {
   return `librept_catalog_${new Date().toISOString().substring(0, 10)}.${extension}`;
@@ -59,6 +98,19 @@ export function renderBackupDialog() {
            restore it, which means anything the preview shape added on top is NOT in the file. That
            is a real gap and it is stated here rather than left to be discovered after a restore.
            Spelled out in full, not an icon: this is the one thing a trainer needs to have read. -->
+      <!-- Shown only when a restore would overwrite existing records. Hidden by default so the
+           common case (restoring onto an empty device) stays one step. -->
+      <div id="restore-confirm" class="restore-confirm" hidden>
+        <p><i class="fa-solid fa-triangle-exclamation"></i>
+          <strong>Restoring replaces everything on this device.</strong>
+          You would lose: <span id="restore-confirm-detail"></span>.
+        </p>
+        <div class="restore-confirm-actions">
+          <button type="button" class="btn-secondary" id="btn-restore-cancel">Keep what I have</button>
+          <button type="button" class="btn-danger" id="btn-restore-confirm">Replace it</button>
+        </div>
+      </div>
+
       <p class="backup-preview-warning" id="backup-preview-warning">
         <i class="fa-solid fa-triangle-exclamation"></i>
         <span id="backup-preview-warning-text">This is a preview build. Backups and sync are written in the last stable format, so anything added by this preview is not included. Keep your own copy of anything you cannot lose.</span>
@@ -79,6 +131,13 @@ export function renderBackupDialog() {
           <i class="fa-brands fa-google-drive backup-icon-large text-primary"></i>
           <h4 id="drive-sync-title">Cloud Backup (Google Drive)</h4>
           <p id="drive-sync-desc">Keep your clients, routines and session history mirrored across your own devices, in a hidden app folder only LibrePT can see in your Google Drive.</p>
+          <!-- Sync carries the SAME stable-format limitation as a downloaded backup, and needs the
+               warning more: an export is something a trainer chooses in the moment, while sync runs
+               unattended, so there is no point at which they would otherwise be told. -->
+          <p class="backup-preview-warning" id="drive-sync-preview-warning">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span id="drive-sync-preview-warning-text">Preview build: sync writes the last stable format, so anything this preview added is not mirrored.</span>
+          </p>
           <button id="btn-drive-connect" class="btn primary-btn w-full">
             <i class="fa-brands fa-google-drive"></i> <span id="btn-drive-connect-text">Connect Google Drive</span>
           </button>
@@ -203,6 +262,45 @@ export function setupBackupRestore() {
     closeBtn.addEventListener("click", () => dialog.close());
   }
 
+  // Restore confirmation. `confirmedRestore` is not a flag the import path checks forever — it is
+  // cleared as soon as the pending state is applied, so a SECOND import still has to be confirmed.
+  const restoreConfirmBtn = document.getElementById("btn-restore-confirm");
+  if (restoreConfirmBtn) {
+    restoreConfirmBtn.addEventListener("click", () => {
+      if (!pendingRestore) return;
+      confirmedRestore = true;
+      const summary = pendingSummary;
+      applyRestoredState(pendingRestore);
+      pendingSummary = null;
+      const box = document.getElementById("restore-confirm");
+      if (box) box.hidden = true;
+      renderImportSuccess(summary);
+      deps.renderClientsList();
+      deps.renderRoutinesList();
+      deps.renderExercisesList();
+      deps.renderGlobalHistory();
+      deps.populateDropdownSelectors();
+    });
+  }
+
+  const restoreCancelBtn = document.getElementById("btn-restore-cancel");
+  if (restoreCancelBtn) {
+    restoreCancelBtn.addEventListener("click", () => {
+      // Discard the parsed file entirely rather than leaving it primed — a trainer who declined
+      // once must not have it applied by an unrelated later click.
+      pendingRestore = null;
+      pendingSummary = null;
+      confirmedRestore = false;
+      const box = document.getElementById("restore-confirm");
+      if (box) box.hidden = true;
+      const status = document.getElementById("import-status");
+      if (status) {
+        status.textContent = "Nothing was changed.";
+        status.className = "status-msg";
+      }
+    });
+  }
+
   // Export JSON — the whole local database, for backup / device migration.
   const exportBtn = document.getElementById("btn-export-db");
   if (exportBtn) {
@@ -276,8 +374,21 @@ export function setupBackupRestore() {
               // than half-imported over the trainer's live database.
               throw new Error(describeMigration(summary).join("; ") || "Unmigratable backup.");
             }
-            deps.setState(restored);
-            deps.saveToLocalStorage();
+
+            // A restore REPLACES the database — the file is a snapshot, and merging two databases
+            // without a common ancestor is guesswork (that ancestor is what Drive sync's three-way
+            // merge has and a file import does not). Replacing is right; replacing SILENTLY is not:
+            // a trainer setting up a new phone who has already entered a client would lose it with
+            // no warning. So when there is anything to lose, the restore waits for a confirmation
+            // that names what it is about to overwrite.
+            const replacing = summarizeReplacement(deps.getState());
+            if (replacing.total > 0 && !confirmedRestore) {
+              pendingRestore = restored;
+              pendingSummary = summary;
+              showReplaceConfirmation(replacing);
+              return;
+            }
+            applyRestoredState(restored);
 
             // Re-render
             deps.renderClientsList();

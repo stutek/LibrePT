@@ -34,7 +34,11 @@ LEGACY_BACKUP = {
 }
 
 
-def _import(page, payload):
+def _import(page, payload, confirm=True):
+    """Restore `payload`, confirming the replace prompt when it appears.
+
+    A restore over a non-empty database asks before overwriting — these tests boot with the demo
+    dataset, so they take that branch every time. `confirm=False` exercises the decline path."""
     page.click("#backup-btn")
     page.wait_for_selector("#dialog-backup[open]")
     page.set_input_files(
@@ -48,6 +52,10 @@ def _import(page, payload):
         ],
     )
     page.wait_for_timeout(500)
+
+    if page.locator("#restore-confirm:not([hidden])").count() > 0:
+        page.click("#btn-restore-confirm" if confirm else "#btn-restore-cancel")
+        page.wait_for_timeout(400)
 
 
 def _state(page):
@@ -201,3 +209,87 @@ def test_restore_from_v4_preserves_logged_training(page, local_server):
     # A real `startDate` is never recomputed from the coarse `day` bucket — doing so would silently
     # move a session on a trainer's calendar.
     assert state["sessions"][0]["startDate"] == "2026-08-09T16:00:00.000Z"
+
+
+def test_a_restore_over_existing_data_asks_before_replacing(page, local_server):
+    """Restore REPLACES the database — a file is a snapshot, and merging two databases without a
+    common ancestor is guesswork. Replacing is right; replacing silently is not, because a trainer
+    setting up a new phone may already have entered real work."""
+    page.goto(local_server)
+    page.wait_for_selector(".session-card")
+    page.wait_for_timeout(300)
+
+    before = _state(page)
+    _import(page, LEGACY_BACKUP, confirm=False)
+
+    assert len(_state(page)["clients"]) == len(before["clients"]), (
+        "declining the prompt must leave the database exactly as it was"
+    )
+    assert "Nothing was changed" in page.locator("#import-status").inner_text()
+
+    # And the declined payload is discarded, not left primed to be applied by a later click.
+    page.click("#btn-backup-export") if page.locator(
+        "#btn-backup-export"
+    ).count() else None
+    assert page.locator("#restore-confirm:not([hidden])").count() == 0
+
+
+def test_the_replace_prompt_names_what_would_be_lost(page, local_server):
+    """ "Replace 8 clients, 13 sessions" is a sentence a trainer can weigh. "Are you sure?" is not."""
+    page.goto(local_server)
+    page.wait_for_selector(".session-card")
+    page.wait_for_timeout(300)
+
+    page.click("#backup-btn")
+    page.wait_for_selector("#dialog-backup[open]")
+    page.set_input_files(
+        "#import-db-file",
+        files=[
+            {
+                "name": "librept_backup.json",
+                "mimeType": "application/json",
+                "buffer": json.dumps(LEGACY_BACKUP).encode(),
+            }
+        ],
+    )
+    page.wait_for_timeout(500)
+
+    detail = page.locator("#restore-confirm-detail").inner_text()
+    assert "clients" in detail, (
+        f"the prompt has to name what is at stake, got {detail!r}"
+    )
+
+
+def test_a_restore_onto_an_empty_device_does_not_ask(page, local_server):
+    """The prompt appears only when there is something to lose — a warning shown every time is a
+    warning nobody reads."""
+    page.goto(local_server)
+    page.wait_for_selector(".session-card")
+    page.wait_for_timeout(300)
+
+    # Clear the database first, so the restore lands on an empty device.
+    page.evaluate(
+        """async () => {
+            const store = await import(new URL('data/stateStore.js', document.baseURI).href);
+            store.setState({ ...store.emptyState() });
+            store.saveToLocalStorage();
+        }"""
+    )
+    page.wait_for_timeout(300)
+
+    page.click("#backup-btn")
+    page.wait_for_selector("#dialog-backup[open]")
+    page.set_input_files(
+        "#import-db-file",
+        files=[
+            {
+                "name": "librept_backup.json",
+                "mimeType": "application/json",
+                "buffer": json.dumps(LEGACY_BACKUP).encode(),
+            }
+        ],
+    )
+    page.wait_for_timeout(600)
+
+    assert page.locator("#restore-confirm:not([hidden])").count() == 0
+    assert [c["name"] for c in _state(page)["clients"]] == ["Restored Client"]
