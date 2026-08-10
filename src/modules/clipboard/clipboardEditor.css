@@ -56,7 +56,30 @@
   line-height: 1.45;
   color: var(--text-main);
 }
+/* The edit-mode title bar. `min-width: 0` on both the row and the name is what actually lets the
+   name shrink — a flex item's default `min-width: auto` refuses to go below its content, which is
+   how the name ended up pushed out of the bar rather than ellipsised inside it. */
+.edit-mode-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.edit-mode-label {
+  flex: 0 0 auto;
+}
+.edit-mode-client {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.edit-mode-client::before {
+  content: "· ";
+}
 .edit-mode-chip {
+  flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -67,7 +90,6 @@
   padding: 2px 8px;
   border-radius: 10px;
   vertical-align: middle;
-  margin-left: 8px;
 }
 .edit-mode-chip.live {
   background: color-mix(in srgb, var(--danger) 15%, transparent);

@@ -99,9 +99,24 @@ function buildEditModeTitleHTML(activeClient) {
     chipLabel = parts.join(" · ") || t("live") || "Live";
   }
   const clientNm = activeClient ? escapeHTML(activeClient.name) : "";
-  return `<i class="fa-solid fa-pen-to-square"></i> ${escapeHTML(t("editing") || "Editing")}${
-    clientNm ? ` · <strong>${clientNm}</strong>` : ""
-  } <span class="edit-mode-chip ${mode}">${escapeHTML(chipLabel)}</span>`;
+  // A flex row, not a run of inline text, because the bar it lands in (#session-title-text) is
+  // `white-space: nowrap; text-overflow: ellipsis` — and an ellipsis eats whole ELEMENTS, not just
+  // the tail of a sentence. Laid out inline, the last item was 169px outside the box on a 390px
+  // phone in both languages: entirely invisible, with no "…" to say anything was missing. Ordering
+  // alone does not fix that, it only chooses the casualty — the chip trailing loses the chip, the
+  // chip leading loses the client name.
+  //
+  // So each part declares whether it may shrink. The chip (is this session running RIGHT NOW?) and
+  // the "Editing" label do not; the client NAME does, and being the ellipsised box itself it
+  // truncates as text, with the affordance a trainer can actually see. Caught, and now kept honest,
+  // by tests/e2e/test_layout_overflow.py.
+  return `<span class="edit-mode-title">
+    <span class="edit-mode-chip ${mode}">${escapeHTML(chipLabel)}</span>
+    <i class="fa-solid fa-pen-to-square"></i>
+    <span class="edit-mode-label">${escapeHTML(t("editing") || "Editing")}</span>${
+      clientNm ? `<strong class="edit-mode-client">${clientNm}</strong>` : ""
+    }
+  </span>`;
 }
 
 // Swaps the title bar's own content between the normal session title and the edit-mode label,

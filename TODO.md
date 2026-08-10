@@ -1137,7 +1137,8 @@ upward.
 
 ## 25. Layout overflow: assert geometry, not just semantics
 
-Captured **2026-08-10**, design only — no code yet. Every test in the suite asserts *semantics*
+Captured **2026-08-10**; the sweep and its e2e suite were **built the same day** — see the status
+box at §25.6 for what is verified and what is still open. Every test in the suite asserts *semantics*
 (text, counts, element ids); none asserts *geometry*. So a component that runs off the screen edge,
 or one whose content is silently clipped inside its own box, passes the full gate. This is the
 class of bug a trainer hits on the gym floor and the pipeline never sees — the chips fix recorded in
@@ -1167,8 +1168,9 @@ element itself declares. A scroll container is not undecidable — it is self-de
 | computed overflow on that axis | verdict |
 | :--- | :--- |
 | `auto` / `scroll` | skip that axis — content is *supposed* to exceed the box; still assert the other |
-| `visible` | fail — content is escaping, and A will usually fire on the child too |
-| `hidden`/`clip` with `text-overflow: ellipsis` + `white-space: nowrap` | pass — the ellipsis idiom states the intent |
+| `visible` | skip — a non-clipping element reports its children's overflow as its own `scrollWidth`, so every ancestor up the chain would repeat one defect. Invariant A names the offending child once instead. **B is therefore about clipping only.** |
+| `hidden`/`clip` with `text-overflow: ellipsis` (x) or `-webkit-line-clamp` (y) | pass — the idiom states the intent |
+| `hidden`/`clip` with `white-space: nowrap`, vertically | pass — a single line has nothing to lose vertically; the few px are line-box rounding (the header `h1`: 26px font on a 26px line reports 3px at every width) |
 | bare `hidden` with real overflow | fail — the silent-clipping case, and the one worth finding |
 
 **No test-side allowlist**, per [AGENT_RULES.md](AGENT_RULES.md) §2: a Python set of "components we
@@ -1177,37 +1179,72 @@ the ellipsis idiom (a circular avatar crop, a decorative bleed), the opt-out bel
 markup** as `data-clip="intentional"` — self-documenting at the site, reviewable in a diff, and it
 travels with the component instead of rotting in a test file.
 
-### 25.3 [ ] Where it runs
+### 25.3 [x] Where it runs
 
-**Start with one e2e file**, `tests/e2e/test_layout_overflow.py`, not a retrofit of the 24 medium
-tests. With demo data seeded, walk every route from `src/controllers/routes/routeTable.js` (plus
-opening each route-backed dialog) inside a **single page context per width**, sweeping after each
-navigation — so ~4 tests, not routes × widths tests, keeping inside stage 3's budget (§21).
+[tests/e2e/test_layout_overflow.py](tests/e2e/test_layout_overflow.py): with demo data seeded, one
+page context per device walks every route in `src/controllers/routes/routeTable.js` — views, then
+each route-backed dialog while OPEN — sweeping after each. Router-driven `pushState` navigation, not
+`page.goto`, so the whole walk costs one cold boot instead of twenty. **Four tests**, not
+routes × widths.
 
-Widths **320** (narrowest realistic phone), **390** (the suite default), **1280** (desktop, where
-the 480px column boundary is what is being asserted). **At least one width must run in Slovenian**:
-overflow is a text-length bug, `sl` labels are materially longer than `en`, and an `en`-only sweep
-passes on strings that break the live app. It costs a `?lang=sl` deep-link param (§19).
+Devices are the ones the app is actually opened on, rather than round numbers:
+**iPhone 14 (390×844)**, **Galaxy S23 Ultra (412×915)**, **desktop (1280×800)** — where `body`'s
+480px column, not the window, is the edge. CSS pixels only: device pixel ratio does not change
+layout, so a full device descriptor would buy nothing a viewport size does not. Plus **one
+Slovenian pass** at the narrowest width (§19's `?lang=sl`) — overflow is a text-length bug and `sl`
+labels are longer than the `en` ones every other assertion is written against.
 
-Medium tier second and incremental: extract the sweep into `tests/medium/_overflow.py` so an
-existing component test adds one line after mount and gets per-component attribution at 320px.
-Better failure messages; the e2e sweep already covers the same markup composed.
+A fifth test, `test_the_walk_still_covers_every_route`, needs no browser: it diffs the walk's route
+list against `routeTable.js` so a route added later fails until someone decides whether its view can
+overflow. Five routes are listed as deliberately not walked, each with the reason its markup is
+already covered.
 
-### 25.4 [ ] The sweep is one function, used three ways
+Medium tier second and still open: extract the sweep into `tests/medium/_overflow.py` so an existing
+component test adds one line after mount and gets per-component attribution.
 
-Per [AGENT_RULES.md](AGENT_RULES.md) §6, the JS lives in ONE module (`agent_tools/overflow_scan.py`,
-exporting the JS source plus a Python wrapper) consumed by the e2e test, the later medium helper,
-and **[agent_tools/layout_probe.py](agent_tools/layout_probe.py) as a new `--overflow` mode** — that
-tool already launches Chromium, parses `--viewport`, waits and scrolls, and exists precisely so
-overflow diagnosis is not re-scripted per bug. Adding the mode means a unit test under `tests/unit/`
-and a row in [agent_tools/INDEX.md](agent_tools/INDEX.md), plus a row in
-[tests/INDEX.md](tests/INDEX.md) for the new suite.
+### 25.4 [x] One sweep, two consumers
 
-### 25.5 Expect it red, and budget the fixes
+Per [AGENT_RULES.md](AGENT_RULES.md) §6 the JS lives in ONE module,
+[agent_tools/overflow_scan.py](agent_tools/overflow_scan.py) — used by the e2e suite and runnable
+directly as a diagnostic (`--device`, `--viewport`, `--invariant`). It is its own tool rather than a
+flag on [layout_probe.py](agent_tools/layout_probe.py), which stays about *named selectors*; the two
+answer different questions and share no arguments beyond `--url`.
 
-`body { overflow-x: hidden }` has been covering horizontal offenders for the life of the project, so
-they all surface at once. `.filter-chips` is a documented instance already fixed by hand; the fixed
-notification handle bar and the sticky day-footer share the offset arithmetic that took three
-throwaway scripts to pin down in July (the bug that produced `layout_probe.py` in the first place).
-Findings get fixed in the change that adds the gate, so this is plausibly two commits — CSS fixes
-first if the count is large, then the sweep landing green.
+### 25.5 What it found, and the four rules the findings bought
+
+The first run was red, but not in the shape §25 predicted — and every false positive taught the
+sweep a rule that is now written down in the tool. In order:
+
+1. **`#notification-area` "overflows the viewport vertically by 716px".** It is a bottom sheet, and
+   that is how every sheet works. → **The viewport bounds an element horizontally only**, `position:
+   fixed` included. A real clipping ancestor still bounds both axes, because there content IS lost.
+2. **The header `h1` "overflows its own box vertically by 3px"** at every width. 26px font on a 26px
+   line. → **`white-space: nowrap` exempts the vertical axis**: one line has nothing to lose.
+3. **A long Slovenian client name exceeding the ellipsised session title by 6px.** That is what
+   `text-overflow: ellipsis` is FOR. → **Inside an ellipsised box the bar is "wholly invisible", not
+   "exceeds by a pixel"** — a partly-visible child ending in "…" keeps the promise the ellipsis
+   makes; a child pushed entirely out does not.
+4. That last rule needed its own exception, and it is the one worth remembering: **"wholly outside"
+   is only benign for elements positioned OUT OF FLOW.** A parked drawer sits wholly outside on
+   purpose; in-flow static content wholly outside its clipping box has been *deleted*, not
+   truncated. Exempting it unconditionally reported the wide phone and let the narrow — worse — case
+   through, which is exactly backwards.
+
+**The surviving finding is real, and it is phone-only:** in the session editor
+(`session.edit`, `session.catalog`), the edit-mode status chip
+(`.edit-mode-chip`, built in `src/modules/clipboard/activeSessionBoard.js`) is appended AFTER the
+client name inside `#session-title-text`, which is `overflow:hidden; white-space:nowrap;
+text-overflow:ellipsis`. So the ellipsis eats the chip first: **169px outside the box at 390px in
+English, 160px in Slovenian — entirely invisible.** At 412px and 1280px it is partly visible. The
+chip is the only thing on screen distinguishing editing a LIVE session from editing a future one, so
+losing it on the narrowest phone is a real gym-floor hazard, and no existing test could see it.
+
+### 25.6 [ ] Status, and what is left
+
+- [x] `agent_tools/overflow_scan.py`, its unit tests, and the four-device e2e suite — written and
+      verified against a clean `HEAD` worktree (the working tree's in-progress `src/data/` edits
+      stopped the app booting, so `build check` could not be run on 2026-08-10).
+- [ ] **Run the full gate and commit**, once the data-layer work in flight has landed.
+- [ ] **Fix the edit-mode chip** (§25.5). It is the sweep's first real catch; the suite stays red
+      until it is fixed, which is the point.
+- [ ] `tests/medium/_overflow.py`, for per-component attribution (§25.3).
