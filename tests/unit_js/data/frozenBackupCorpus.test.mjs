@@ -15,14 +15,21 @@ import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 // Asserted against the constant, not a literal: a migration that bumps the version should not
 // need every "migrates to current" test edited alongside it.
-import { CURRENT_SCHEMA_VERSION, MIGRATION_STEPS } from "../../../src/data/migrationSteps.js";
+import {
+  BASELINE_SCHEMA_VERSION,
+  CURRENT_SCHEMA_VERSION,
+  MIGRATION_STEPS,
+} from "../../../src/data/migrationSteps.js";
 import * as m from "../../../src/data/schemaMigrations.js";
 
 const FIXTURES_DIR = fileURLToPath(new URL("../../fixtures/backups/", import.meta.url));
 
+function readFixture(fixtureName) {
+  return JSON.parse(readFileSync(FIXTURES_DIR + fixtureName, "utf-8"));
+}
+
 function migrate(fixtureName) {
-  const raw = readFileSync(FIXTURES_DIR + fixtureName, "utf-8");
-  const result = m.migrateState(JSON.parse(raw));
+  const result = m.migrateState(readFixture(fixtureName));
   return {
     ok: result.ok,
     state: result.state,
@@ -80,6 +87,34 @@ test("schema2 fixture still imports and gains a derived start date", () => {
 // current version, untouched by migrations) — the v2→v3 derivation is lossy for `day: "upcoming"`,
 // which is fine for a corpus nobody asserts a timeline spread against, and not fine for the seed.
 // ---------------------------------------------------------------------------------------------
+
+test("the migration chain is non-empty and unbroken from baseline to current", () => {
+  // Guards the assertion BELOW from going vacuous. "The corpus applied every step in
+  // MIGRATION_STEPS" is trivially true of an EMPTY chain, so squashing the steps away — a normal
+  // enough thing to consider pre-1.0, and this project has already dropped a pre-release field
+  // outright — would leave the corpus test green while testing nothing at all.
+  //
+  // This is what a permanent 0→1 step was meant to buy, without the step: a no-op transform kept
+  // alive purely so a length check stays honest is ceremony, and the same hand that squashes the
+  // chain deletes it just as easily. An assertion has to be consciously removed instead.
+  assert.ok(MIGRATION_STEPS.length > 0, "the migration chain must never be empty");
+
+  // A GAP is the other silent failure: the runner walks the array in order and skips any step
+  // whose `from` is below the detected version, so a chain of 1→2 then 4→5 quietly never applies
+  // the second step for baseline data and stamps the result current anyway.
+  assert.equal(MIGRATION_STEPS[0].from, BASELINE_SCHEMA_VERSION);
+  assert.equal(MIGRATION_STEPS.at(-1).to, CURRENT_SCHEMA_VERSION);
+  for (const [index, step] of MIGRATION_STEPS.slice(1).entries()) {
+    assert.equal(step.from, MIGRATION_STEPS[index].to, `gap before step v${step.from}→v${step.to}`);
+  }
+});
+
+test("the v0 demo corpus enters the chain at the baseline", () => {
+  // The corpus only covers every step if it enters BELOW the first one. A fixture that drifted
+  // upward — someone "fixing" it by stamping a current version — would still migrate cleanly and
+  // still report ok, having applied nothing.
+  assert.equal(m.detectSchemaVersion(readFixture("schema0_demo.json")), BASELINE_SCHEMA_VERSION);
+});
 
 test("the v0 demo corpus walks EVERY migration step", () => {
   // This is the durable part: the corpus enters at the baseline, so a step added to the chain

@@ -14,10 +14,12 @@
 // Legacy databases predate the field entirely; anything without a `schemaVersion` is version 1.
 //
 // A literal `schemaVersion: 0` means the same thing and is read the same way (schemaMigrations.js's
-// `detectSchemaVersion` only honours integers ABOVE zero). There is no 0→1 step and there must not
-// be one invented: "0" is a NAME for the pre-versioning shape, not a version the app ever wrote.
-// The frozen corpus (tests/fixtures/backups/schema0_demo.json) states it explicitly rather than
-// omitting the field, so the entry point of the chain is visible in the fixture itself.
+// `detectSchemaVersion` only honours integers ABOVE zero). "0" is a NAME for the pre-versioning
+// shape, not a version the app ever wrote, so there is no 0→1 step: it would have no data of its
+// own to move, and a no-op step kept alive only to keep the chain non-empty is ceremony — the
+// frozen-corpus test asserts non-emptiness and contiguity directly instead, which cannot be
+// satisfied by accident. The corpus (tests/fixtures/backups/schema0_demo.json) states the 0
+// explicitly rather than omitting the field, so the chain's entry point is visible in the fixture.
 export const BASELINE_SCHEMA_VERSION = 1;
 
 export const MIGRATION_STEPS = [
