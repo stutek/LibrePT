@@ -25,6 +25,10 @@ import {
 } from "./modules/common/applicationHeader.js";
 import { initBackupRestore, setupBackupRestore } from "./modules/common/backupRestore.js";
 import { initBuildInfoDialog, setupBuildInfoDialog } from "./modules/common/buildInfoDialog.js";
+import {
+  initDemoCleanupDialog,
+  openDemoCleanupDialog,
+} from "./modules/common/demoCleanupDialog.js";
 import { initDriveSyncUi, setupDriveSyncUi } from "./modules/common/driveSyncUi.js";
 import { initFeedbackModal, setupFeedbackForms } from "./modules/common/feedbackModal.js";
 import {
@@ -122,8 +126,12 @@ export function bootBuildInfoDialog(deps) {
   setupBuildInfoDialog();
 }
 
+// The demo-cleanup dialog boots WITH the notification area because that feed is its only entry
+// point (the demo-mode notice's primary action). Injected as a callback rather than imported by
+// notificationArea.js, so the feed keeps knowing nothing about how the cleanup is presented.
 export function bootNotificationArea(deps) {
-  initNotificationArea(deps);
+  initDemoCleanupDialog(deps);
+  initNotificationArea({ ...deps, openDemoCleanup: openDemoCleanupDialog });
   setupNotificationGestures();
 }
 

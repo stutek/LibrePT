@@ -126,15 +126,15 @@ function markNotificationRead(itemId, readIds) {
 
 function wireNotificationCardActions(container, deps, t, readIds) {
   // Attach reset demo data listeners
+  // Opens the cleanup CONFIRMATION rather than resetting. This used to call resetLibrePTData(),
+  // which deletes the whole database — fine while the only person who ever pressed it had nothing
+  // but demo data, and destructive the moment a trainer has started adding real clients, which is
+  // exactly when they want the demo gone. The dialog removes demo records selectively and shows
+  // what it is keeping (modules/common/demoCleanupDialog.js).
   for (const btn of container.querySelectorAll("button[data-action-reset]")) {
     btn.addEventListener("click", (e) => {
       e.stopPropagation();
-      const msg =
-        t("confirm_reset_demo_data") ||
-        "Clear all sample demo data and reset to a clean, empty slate?";
-      if (window.confirm(msg) && typeof window.resetLibrePTData === "function") {
-        window.resetLibrePTData({ demo: false });
-      }
+      deps.openDemoCleanup?.();
     });
   }
 

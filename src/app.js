@@ -55,6 +55,7 @@ import {
   getState,
   loadSavedState,
   onStateSaved,
+  removeDemoData,
   resetLibrePTData,
   saveToLocalStorage,
   seedMockData,
@@ -387,6 +388,10 @@ async function init() {
     escapeHTML,
     navigateToPath,
     openSessionFromHistory,
+    removeDemoData,
+    // A full re-render rather than a targeted patch: clearing the demo touches every collection, so
+    // every view showing one is stale at once.
+    onRemoved: () => window.location.reload(),
   });
 
   // After bootNotificationArea: the clipboard bar mounts into the notification area's handle bar,
