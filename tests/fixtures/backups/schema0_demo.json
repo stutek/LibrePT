@@ -1,0 +1,287 @@
+{
+  "schemaVersion": 0,
+  "lang": "sl",
+  "clients": [
+    {
+      "id": "c1a9f0e2",
+      "name": "Jana Novak",
+      "avatar": "JN",
+      "joinedDate": "2026-03-15",
+      "email": "jana.novak@example.com",
+      "phone": "+386 40 111 222",
+      "goals": "Strength gain, building shoulder mobility, and improving squat form.",
+      "weightHistory": [],
+      "notes": "Slight left shoulder tightness during overhead movements. Keep warmups thorough.",
+      "hasInjury": true,
+      "injury": "Slight left shoulder tightness during overhead movements",
+      "active": true
+    },
+    {
+      "id": "c2b8e1d3",
+      "name": "Marko Kos",
+      "avatar": "MK",
+      "joinedDate": "2026-01-08",
+      "email": "marko.kos@example.com",
+      "phone": "+386 41 333 444",
+      "goals": "Fat loss and conditioning ahead of a spring hiking season.",
+      "weightHistory": [
+        { "date": "2026-01-08", "weight": 94.2 },
+        { "date": "2026-05-02", "weight": 89.6 }
+      ],
+      "notes": "Prefers early sessions. Responds well to circuit formats.",
+      "hasInjury": false,
+      "active": true
+    },
+    {
+      "id": "c4d6c3b5",
+      "name": "Ana Zupan",
+      "avatar": "AZ",
+      "joinedDate": "2025-11-20",
+      "goals": "Return to training after a long layoff.",
+      "weightHistory": [],
+      "hasInjury": false,
+      "active": false
+    }
+  ],
+  "exercises": [
+    {
+      "id": "e10a2b3c",
+      "name": "Barbell Bench Press",
+      "category": "Chest",
+      "equipment": "Barbell",
+      "pattern": "Horizontal Push",
+      "instructions": "Lie flat on a bench, grip the barbell slightly wider than shoulder width, lower it to mid-chest, and push up."
+    },
+    {
+      "id": "e17a2b3c",
+      "name": "Barbell Row",
+      "category": "Back",
+      "equipment": "Barbell",
+      "pattern": "Horizontal Pull",
+      "instructions": "Hinge at the hips, keep a flat back, and row the bar to the lower ribcage."
+    },
+    {
+      "id": "e29b3c4d",
+      "name": "Dumbbell Lateral Raise",
+      "category": "Shoulders",
+      "equipment": "Dumbbell",
+      "pattern": "Vertical Push",
+      "instructions": "Raise the dumbbells out to the sides to shoulder height with a soft elbow."
+    },
+    {
+      "id": "e41c4d5e",
+      "name": "Back Squat",
+      "category": "Legs",
+      "equipment": "Barbell",
+      "pattern": "Squat",
+      "instructions": "Brace, sit between the hips, and drive up through mid-foot."
+    },
+    {
+      "id": "e55d5e6f",
+      "name": "Farmer Carry",
+      "category": "Full Body",
+      "equipment": "Dumbbell",
+      "pattern": "Carry",
+      "instructions": "Walk tall with heavy dumbbells at the sides, ribs down, for the prescribed distance."
+    }
+  ],
+  "routines": [
+    {
+      "id": "r10d5e6f",
+      "name": "Upper Body A",
+      "description": "Strength-focused upper body session prioritizing compound presses and rows.",
+      "exercises": [
+        {
+          "id": "e10a2b3c",
+          "sets": 3,
+          "reps": 5,
+          "rest": 0,
+          "weight": 62.5,
+          "comboGroupId": "g01a2b3c",
+          "circuitId": "z01a2b3c",
+          "circuitTitle": "Chest & Back Strength Complex",
+          "circuitSeries": 3
+        },
+        {
+          "id": "e17a2b3c",
+          "sets": 3,
+          "reps": 8,
+          "rest": 90,
+          "weight": 55,
+          "comboGroupId": "g01a2b3c",
+          "circuitId": "z01a2b3c",
+          "circuitTitle": "Chest & Back Strength Complex",
+          "circuitSeries": 3
+        },
+        {
+          "id": "e29b3c4d",
+          "sets": 3,
+          "reps": 12,
+          "rest": 60,
+          "weight": 8
+        }
+      ]
+    },
+    {
+      "id": "r12d5e6f",
+      "name": "Lower Body & Carries",
+      "description": "Squat pattern paired with loaded carries for trunk stability.",
+      "exercises": [
+        { "id": "e41c4d5e", "sets": 5, "reps": 5, "rest": 150, "weight": 80 },
+        { "id": "e55d5e6f", "sets": 3, "reps": 40, "rest": 90, "weight": 24 }
+      ]
+    }
+  ],
+  "history": [
+    {
+      "id": "h001f2e3",
+      "clientId": "c1a9f0e2",
+      "clientName": "Jana Novak",
+      "routineName": "Upper Body A",
+      "date": "2026-07-06T10:15:00.000Z",
+      "duration": 3420,
+      "exercises": [
+        {
+          "id": "e10a2b3c",
+          "name": "Barbell Bench Press",
+          "sets": [
+            { "reps": 6, "weight": 60, "completed": true, "note": "RPE 8" },
+            { "reps": 6, "weight": 60, "completed": true, "note": "RPE 8.5" },
+            { "reps": 5, "weight": 60, "completed": true, "note": "Failed 6th rep" }
+          ]
+        },
+        {
+          "id": "e17a2b3c",
+          "name": "Barbell Row",
+          "sets": [
+            { "reps": 8, "weight": 50, "completed": true },
+            { "reps": 8, "weight": 50, "completed": true, "note": "Strict form" }
+          ]
+        }
+      ],
+      "feedback": [
+        {
+          "id": "u001f2e3",
+          "clientId": "c1a9f0e2",
+          "exerciseName": "Barbell Bench Press",
+          "tag": "Too Easy - Increase Load",
+          "note": "Completed all sets with high speed. Recommend adding 2.5kg next session."
+        }
+      ]
+    },
+    {
+      "id": "h002f2e3",
+      "clientId": "c2b8e1d3",
+      "clientName": "Marko Kos",
+      "routineName": "Lower Body & Carries",
+      "date": "2026-07-09T06:30:00.000Z",
+      "duration": 2880,
+      "exercises": [
+        {
+          "id": "e41c4d5e",
+          "name": "Back Squat",
+          "sets": [
+            { "reps": 5, "weight": 80, "completed": true },
+            { "reps": 5, "weight": 80, "completed": true },
+            { "reps": 5, "weight": 82.5, "completed": false, "note": "Cut short, hip tightness" }
+          ]
+        }
+      ],
+      "feedback": []
+    }
+  ],
+  "planUpdates": [
+    {
+      "id": "u001f2e3",
+      "clientId": "c1a9f0e2",
+      "clientName": "Jana Novak",
+      "date": "2026-07-06T11:00:00.000Z",
+      "exerciseName": "Barbell Bench Press",
+      "tag": "Too Easy - Increase Load",
+      "resolved": false
+    },
+    {
+      "id": "u002f2e3",
+      "clientId": "c2b8e1d3",
+      "clientName": "Marko Kos",
+      "date": "2026-07-09T07:30:00.000Z",
+      "exerciseName": "Back Squat",
+      "tag": "Pain - Regress Movement",
+      "resolved": true
+    }
+  ],
+  "sessions": [
+    {
+      "id": "s00f2e3d",
+      "day": "yesterday",
+      "time": "09:00 - 10:30",
+      "title": "Morning Strength",
+      "location": "Trib gym base",
+      "participants": ["c1a9f0e2"],
+      "routineId": "r10d5e6f",
+      "maxCapacity": 4,
+      "completed": true
+    },
+    {
+      "id": "s01f2e3d",
+      "day": "today",
+      "time": "07:30 - 08:30",
+      "title": "Early Bird Conditioning",
+      "location": "city park",
+      "participants": ["c2b8e1d3", "c1a9f0e2"],
+      "routineId": "r12d5e6f",
+      "maxCapacity": 7
+    },
+    {
+      "id": "s02f2e3d",
+      "day": "today",
+      "time": "17:00 - 18:00",
+      "title": "Evening Squat Focus",
+      "location": "Trib gym base",
+      "participants": ["c2b8e1d3"],
+      "routineId": "r12d5e6f",
+      "maxCapacity": 3
+    },
+    {
+      "id": "s03f2e3d",
+      "day": "tomorrow",
+      "time": "10:30 - 11:30",
+      "title": "Upper Body Technique",
+      "location": "Trib gym base",
+      "participants": ["c1a9f0e2"],
+      "routineId": "r10d5e6f",
+      "maxCapacity": 4
+    },
+    {
+      "id": "s04f2e3d",
+      "day": "upcoming",
+      "time": "08:00 - 09:30",
+      "title": "Outdoor Circuit",
+      "location": "playground outside",
+      "participants": ["c1a9f0e2", "c2b8e1d3"],
+      "routineId": "r12d5e6f",
+      "maxCapacity": 8
+    },
+    {
+      "id": "s05f2e3d",
+      "day": "tomorrow",
+      "title": "Unscheduled Make-up Slot",
+      "location": "Trib gym base",
+      "participants": [],
+      "maxCapacity": 2
+    }
+  ],
+  "bookings": [
+    { "id": "b1", "day": "today", "titles": ["Legacy Booking Kept Only In The Old Field"] },
+    { "id": "b2", "day": "tomorrow", "titles": ["Second Legacy Booking"] }
+  ],
+  "notifications": [
+    {
+      "id": "demo-mode-notice",
+      "type": "demo-mode",
+      "icon": "fa-solid fa-triangle-exclamation",
+      "titleKey": "notifications.demoMode.title",
+      "descKey": "notifications.demoMode.desc"
+    }
+  ]
+}

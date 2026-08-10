@@ -525,6 +525,25 @@ The database holds the **only** copy of a trainer's records — there is no serv
 - The **backup file is the disaster-recovery tier**, and the only recovery path from a write-layer
   bug. Backups export the newest schema's store only (every other store is derived), and old backups
   stay importable indefinitely: readers are retained forever, writers never.
+- That last sentence is a **tested** claim, not a hope. A frozen corpus of committed fixtures under
+  [tests/fixtures/backups/](../tests/fixtures/backups/) is re-imported on every commit by
+  [frozenBackupCorpus.test.mjs](../tests/unit_js/data/frozenBackupCorpus.test.mjs), against real
+  bytes rather than an inline literal that could quietly evolve alongside the code reading it. Never
+  edit an existing fixture — that stops it testing what it always tested; add a new one instead.
+
+  `schema0_demo.json` is the corpus's entry point and carries a **demo-scale** database (multiple
+  clients, routines, logged history, sessions across all four `day` buckets) in the pre-versioning
+  shape, so the whole chain is walked against something the size of a real trainer's database rather
+  than a one-client toy. `"schemaVersion": 0` is a *name* for the pre-versioning shape — the runner
+  reads it identically to the field being absent (`detectSchemaVersion` honours only integers above
+  zero), and **there is no 0→1 step, nor may one be invented**. Its test asserts the applied-step
+  list equals `MIGRATION_STEPS` in full, so a step added to the chain that the corpus does not reach
+  fails Stage 1 instead of shipping untested.
+
+  It is deliberately **not** the app's demo seed: `DEFAULT_*` in [src/data/](../src/data/) stays at
+  the current version and never touches a migration. The v2→v3 `startDate` derivation is lossy for
+  `day: "upcoming"` (the bucket has no magnitude, so it always lands at +2 days) — acceptable in a
+  corpus nobody asserts a timeline spread against, not acceptable in the seed the dashboard renders.
 
 ---
 
