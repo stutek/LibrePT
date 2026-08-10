@@ -15,6 +15,8 @@
 #
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
+import json
+
 IMPORTS = """
     const store = await import(new URL('data/stateStore.js', document.baseURI).href);
     const readSchema = await import(new URL('data/readSchema.js', document.baseURI).href);
@@ -45,12 +47,12 @@ def _records_in_schema(page, schema):
         page,
         _open_db(page)
         + """
-        const name = indexedDb.storeNameForSchema(%d);
+        const name = indexedDb.storeNameForSchema(%s);
         const all = await indexedDb.getAll(db.transaction([name], 'readonly').objectStore(name));
         db.close();
         return all.map((r) => r.id);
         """
-        % schema,
+        % json.dumps(schema),
     )
 
 
@@ -85,7 +87,8 @@ def test_switching_schema_keeps_every_record_and_is_reversible(page, local_serve
 
     _evaluate(
         page,
-        _open_db(page) + "await readSchema.setReadSchema(db, %d); db.close();" % lower,
+        _open_db(page)
+        + "await readSchema.setReadSchema(db, %s); db.close();" % json.dumps(lower),
     )
     page.goto(local_server)
     page.wait_for_selector("#view-clients.active")
@@ -113,7 +116,8 @@ def test_switching_schema_keeps_every_record_and_is_reversible(page, local_serve
 
     _evaluate(
         page,
-        _open_db(page) + "await readSchema.setReadSchema(db, %d); db.close();" % upper,
+        _open_db(page)
+        + "await readSchema.setReadSchema(db, %s); db.close();" % json.dumps(upper),
     )
     page.goto(local_server)
     page.wait_for_selector("#view-clients.active")

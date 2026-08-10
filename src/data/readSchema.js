@@ -32,7 +32,7 @@ import {
   withTransaction,
 } from "./indexedDb.js";
 import { COLLECTIONS, projectCollection, toDomainObject } from "./recordProjections.js";
-import { DEFAULT_READ_SCHEMA, LIVE_SCHEMAS } from "./recordSchemas.js";
+import { DEFAULT_READ_SCHEMA, LIVE_SCHEMAS, STABLE_SCHEMA } from "./recordSchemas.js";
 
 // localStorage, not the database: boot has to know WHICH store to read before it can read anything,
 // so this cannot live in the thing it selects.
@@ -42,14 +42,21 @@ const READ_SCHEMA_KEY = "librept_read_schema";
 // Absent means either never provisioned or interrupted mid-backfill; both want the same answer.
 const BACKFILLED_KEY_PREFIX = "backfilled:";
 
+// Numbered schemas first, ascending, with "P" last — it is the newest shape by construction, and
+// ordering it by string would put it before every number.
 export function liveSchemas() {
-  return Object.keys(LIVE_SCHEMAS)
+  const keys = Object.keys(LIVE_SCHEMAS);
+  const numbered = keys
+    .filter((key) => Number.isFinite(Number(key)))
     .map(Number)
     .sort((a, b) => a - b);
+  const named = keys.filter((key) => !Number.isFinite(Number(key)));
+  return [...numbered, ...named];
 }
 
 function isLiveSchema(schema) {
-  return liveSchemas().includes(Number(schema));
+  // Compared as strings: a schema is now either a number or "P", and Number("P") is NaN.
+  return liveSchemas().some((live) => String(live) === String(schema));
 }
 
 /**
@@ -59,8 +66,10 @@ function isLiveSchema(schema) {
  */
 export function getReadSchema() {
   try {
-    const stored = Number(localStorage.getItem(READ_SCHEMA_KEY));
-    return isLiveSchema(stored) ? stored : DEFAULT_READ_SCHEMA;
+    const stored = localStorage.getItem(READ_SCHEMA_KEY);
+    if (!isLiveSchema(stored)) return DEFAULT_READ_SCHEMA;
+    // Hand back the live key itself, so a numbered schema stays a number and "P" stays a string.
+    return liveSchemas().find((live) => String(live) === String(stored));
   } catch {
     return DEFAULT_READ_SCHEMA;
   }
@@ -71,9 +80,10 @@ export function readStoreName() {
 }
 
 /** Schemas above the one being read — what an "upgrade available" offer is built from. */
+/** Schemas listed after the one being read — what an "upgrade available" offer is built from. */
 export function upgradableSchemas() {
-  const current = getReadSchema();
-  return liveSchemas().filter((schema) => schema > current);
+  const ordered = liveSchemas();
+  return ordered.slice(ordered.indexOf(getReadSchema()) + 1);
 }
 
 function backfilledKey(schema) {
@@ -127,6 +137,46 @@ export async function ensureLiveSchemasBackfilled(db) {
   }
 }
 
+// The build that last wrote the preview store. Absent means unknown, which is treated as stale —
+// see rebuildPreviewSchemaIfBuildChanged.
+const PREVIEW_BUILD_KEY = "previewBuild";
+
+/**
+ * Rebuild the preview store from the stable one whenever the build has changed.
+ *
+ * P's fields can change on any commit, so a P store written by a different build cannot be trusted
+ * to have the shape this build expects — and there is no migration to fix that, because P is not a
+ * version that migrations run between. The answer is not to migrate it but to DISCARD it: schema4
+ * holds the durable copy, so P is a projection that can always be rebuilt.
+ *
+ * An ABSENT marker counts as changed. A database written before this bookkeeping existed cannot say
+ * which build produced it, and "unknown" must resolve to the safe branch — rebuilding from the
+ * stable copy costs a projection pass, while trusting an unknown shape risks reading fields that
+ * are not there.
+ *
+ * What this loses, by design: any preview-only field, since it exists in P and not in schema4. That
+ * is the same cost the backup surfaces warn about, applied at the same boundary.
+ */
+export async function rebuildPreviewSchemaIfBuildChanged(db, currentBuildSha) {
+  const previewStore = storeNameForSchema("P");
+  if (!db.objectStoreNames.contains(previewStore)) return { rebuilt: false };
+
+  const entry = await getMetaEntry(
+    db.transaction([META_STORE], "readonly").objectStore(META_STORE),
+    PREVIEW_BUILD_KEY,
+  );
+  const storedBuild = entry?.value ?? null;
+  if (storedBuild && currentBuildSha && storedBuild === currentBuildSha) {
+    return { rebuilt: false };
+  }
+
+  await backfillSchema(db, "P", STABLE_SCHEMA);
+  await withTransaction(db, [META_STORE], "readwrite", ({ store }) => {
+    store(META_STORE).put({ key: PREVIEW_BUILD_KEY, value: currentBuildSha ?? null });
+  });
+  return { rebuilt: true, from: storedBuild };
+}
+
 /**
  * Move this install onto `schema`. Backfills first if the boot pass has not already — so the switch
  * cannot land on a store that is not ready — then persists the choice. Reversible: the schema being
@@ -134,7 +184,7 @@ export async function ensureLiveSchemasBackfilled(db) {
  * no migration either way.
  */
 export async function setReadSchema(db, schema) {
-  const target = Number(schema);
+  const target = liveSchemas().find((live) => String(live) === String(schema)) ?? schema;
   if (!isLiveSchema(target)) {
     throw new Error(`schema ${schema} is not live in this build`);
   }

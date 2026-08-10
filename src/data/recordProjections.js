@@ -2,7 +2,7 @@
 //
 // The star-write model projects a live domain object DIRECTLY into every live schema, never through
 // a chain (see docs/DATA_MODEL.md §4). Today there is exactly one live schema (recordSchemas.js's
-// SCHEMA_2), so each projection here is necessarily small — pick the record's collection and stamp
+// SCHEMA_4), so each projection here is necessarily small — pick the record's collection and stamp
 // the IndexedDB routing fields (`collection`, and `clientId` where the collection is owned by a
 // client) onto the domain object. That triviality is not a shortcut: §18.1 predicts it directly — a
 // "downgrade" is just a projection that was already being written all along, and the day a second
@@ -15,7 +15,7 @@
 // Injected dependencies: none — pure functions over plain objects, the live domain shapes already
 // held in `state` and `clientState`.
 
-import { SCHEMA_2, fieldIssues } from "./recordSchemas.js";
+import { SCHEMA_4, fieldIssues } from "./recordSchemas.js";
 
 function toRecord(collection, domainObject) {
   return { ...domainObject, collection };
@@ -48,7 +48,7 @@ export function projectCollection(collection, domainObject) {
 // Structural problems in a projected record against a schema — empty means clean. This is §18.4's
 // "projections must be pure and total" made checkable: every record this build actually produces
 // must conform to the schema it targets, and this is what a CI fixture or a fuzz corpus calls.
-export function projectionIssues(collection, domainObject, schema = SCHEMA_2) {
+export function projectionIssues(collection, domainObject, schema = SCHEMA_4) {
   const shape = schema[collection];
   if (!shape) return [`no schema declared for collection "${collection}"`];
   return fieldIssues(projectCollection(collection, domainObject), shape);

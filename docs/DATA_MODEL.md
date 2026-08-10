@@ -170,8 +170,10 @@ erDiagram
 *databases*. Giving each schema its own database would make an atomic star write impossible by
 construction — and a phone locking mid-fan-out would leave one schema written and another not.
 
-Store names are `schema2`, `schema3`, … The database `version` is derived from the highest live
-schema, so provisioning a schema is the only thing that triggers `onupgradeneeded`. Provisioning is
+Store names are `schema4`, `schemaP` — one per live schema, on the SAME numbering as
+`schemaVersion` (§1). The database `version` is derived from the highest **numbered** live schema,
+so provisioning a schema is the only thing that triggers `onupgradeneeded`; `"P"` is skipped in that
+maximum rather than coerced, since `Number("P")` is `NaN` and would pin the version at 1 forever. Provisioning is
 additive: a retired schema's store is never dropped as a side effect of booting: discarding a bucket
 is a deliberate act.
 
@@ -454,9 +456,8 @@ domain object into every schema that is currently live:
 flowchart LR
     UI["UI behaviour<br/>(any of the ones shipped)"] --> D["Domain object"]
     D --> W["Write layer"]
-    W -->|project| S2["schema2 store"]
-    W -->|project| S3["schema3 store"]
-    W -->|project| S4["schema4 store"]
+    W -->|project| S4["schema4 store — stable, durable"]
+    W -->|project| SP["schemaP store — preview, disposable"]
     W -.->|"one IndexedDB transaction"| TX(["commit or nothing"])
 
     style W fill:#0d9488,color:#fff
@@ -485,6 +486,16 @@ The two halves of the star are asymmetric on purpose, and the asymmetry is the i
 
 - **Writes fan out and compare no versions.** Every live schema's store gets the same projected
   record on every save, so no writer decides which schema is "current".
+**The two live shapes do different jobs, and only one is durable.** `schema4` is stable — what a
+backup is written at, and the copy `schemaP` is rebuilt FROM. `schemaP` is the shape this build
+reads, and is disposable: its fields can change on any commit, so it is never a source of truth for
+anything that has to outlive the build. On boot, if the recorded build SHA does not match the
+running one — **or is absent, which counts as not matching** — the preview store is discarded and
+re-projected from `schema4` (`rebuildPreviewSchemaIfBuildChanged`). There is no migration between
+preview shapes, and there does not need to be: the durable copy makes P rebuildable rather than
+something that must be preserved. Preview-only fields do not survive that rebuild, which is the same
+cost the backup and sync surfaces warn about, applied at the same boundary.
+
 - **Reads come from one DECLARED schema**, never derived. `DEFAULT_READ_SCHEMA` in
   [recordSchemas.js](../src/data/recordSchemas.js) is what a fresh install reads; which schema a
   given install *actually* reads is a trainer-owned setting ([readSchema.js](../src/data/readSchema.js)).

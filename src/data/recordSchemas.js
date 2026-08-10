@@ -53,7 +53,7 @@ const SESSION_ITEM_SHAPE = {
   rest: { required: false, type: "number" },
 };
 
-export const SCHEMA_2 = {
+export const SCHEMA_4 = {
   clients: {
     id: { required: true, type: "string" },
     name: { required: true, type: "string" },
@@ -135,17 +135,31 @@ export const SCHEMA_2 = {
 
 // Schema 3 (TODO §7.3 item 8 / migrationSteps.js's v2→v3 step): sessions gain a real absolute
 // `startDate` timestamp, required from here on — everything else is unchanged from schema 2.
-export const SCHEMA_3 = {
-  ...SCHEMA_2,
+export const SCHEMA_P = {
+  ...SCHEMA_4,
   sessions: {
-    ...SCHEMA_2.sessions,
+    ...SCHEMA_4.sessions,
     startDate: { required: true, type: "string" },
   },
 };
 
 // Every schema major this build still knows how to write. A build can only write schemas it knows
 // how to project (TODO §18.1) — grows only when a schema is cut; never grows retroactively.
-export const LIVE_SCHEMAS = { 2: SCHEMA_2, 3: SCHEMA_3 };
+// ONE numbering across both axes. These used to be 2 and 3 on a "record schema" axis independent of
+// `schemaVersion`'s migration axis — two systems using small integers for different things, which
+// cost real time in review before it was collapsed. `4` here is the SAME 4 the migration chain ends
+// at, and `P` the same P it stamps.
+//
+// Two shapes are live, and they do different jobs:
+//   - **4** is stable and durable. It is what a backup is written at, and the copy P is rebuilt
+//     FROM when the build changes.
+//   - **P** is the preview shape this build reads. Disposable by design: its fields can change on
+//     any commit, so it is never a source of truth for anything that has to outlive the build.
+export const LIVE_SCHEMAS = { 4: SCHEMA_4, P: SCHEMA_P };
+
+// The durable shape, and the one P is rebuilt from. Not derived from LIVE_SCHEMAS by taking a max:
+// "P" is not a number, and the stable shape is a decision rather than an accident of ordering.
+export const STABLE_SCHEMA = 4;
 
 /**
  * The newest NUMBERED shape, and what a backup file is written at.
@@ -155,11 +169,11 @@ export const LIVE_SCHEMAS = { 2: SCHEMA_2, 3: SCHEMA_3 };
  * numbered shape does not move, so any build can restore it.
  *
  * Only ONE shape goes into a file, not every live one. Shapes only gain fields under expand-first —
- * SCHEMA_3 is SCHEMA_2 plus `startDate` — so the newest is a strict superset of every older one,
+ * SCHEMA_P is SCHEMA_4 plus whatever the preview adds — so P is a superset of the stable shape,
  * and an older copy alongside it stores strictly less information at full size. Restore re-derives
  * every live store from whatever it receives, through the same fan-out that keeps them current.
  */
-export const BACKUP_SCHEMA = Math.max(...Object.keys(LIVE_SCHEMAS).map(Number));
+export const BACKUP_SCHEMA = STABLE_SCHEMA;
 
 /**
  * The schema a fresh install READS from. Declared, never derived.
@@ -175,7 +189,7 @@ export const BACKUP_SCHEMA = Math.max(...Object.keys(LIVE_SCHEMAS).map(Number));
  * fan-out, so a newer one is already current and complete by the time it is offered, and moving
  * between them is a read re-point rather than a migration.
  */
-export const DEFAULT_READ_SCHEMA = 3;
+export const DEFAULT_READ_SCHEMA = "P";
 
 function typeOf(value) {
   if (Array.isArray(value)) return "array";

@@ -55,13 +55,20 @@ export function storeNameForSchema(schema) {
 /**
  * The IndexedDB version number for a given set of live schemas.
  *
- * Derived from the highest schema rather than maintained by hand: provisioning a new schema is the
- * only thing that changes the store layout, so it is also the only thing that should trigger
+ * Derived from the highest NUMBERED schema rather than maintained by hand: provisioning a schema is
+ * the only thing that changes the store layout, so it is also the only thing that should trigger
  * `onupgradeneeded`. IndexedDB requires this to increase monotonically, which it does — schemas are
  * only ever added, and retiring an old one does not lower the maximum.
+ *
+ * Non-numeric schemas ("P") are skipped here rather than coerced: `Number("P")` is NaN, which would
+ * poison the max and leave the database stuck at version 1 forever, silently never provisioning
+ * anything again. P's store is provisioned by whatever numbered bump ships alongside it, which is
+ * sound because P never arrives on its own — it is always accompanied by the stable shape it is
+ * rebuilt from.
  */
 export function databaseVersion(schemas) {
-  return Math.max(1, ...schemas.map(Number));
+  const numbered = schemas.map(Number).filter((value) => Number.isFinite(value));
+  return Math.max(1, ...numbered);
 }
 
 function requestToPromise(request) {

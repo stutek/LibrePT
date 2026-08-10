@@ -12,8 +12,8 @@
 // backup while the runtime shape is unstable, and it is why the export surfaces carry a
 // preview-mode warning instead of pretending the file is complete.
 //
-// ONE shape per file, not every live one. Shapes only gain fields under expand-first (SCHEMA_3 is
-// SCHEMA_2 plus `startDate`), so the newest is a strict superset of the rest and older copies would
+// ONE shape per file, not every live one. Shapes only gain fields under expand-first (SCHEMA_P is
+// SCHEMA_4 plus `startDate`), so the newest is a strict superset of the rest and older copies would
 // store strictly less information at full size. Restore re-derives every live store anyway.
 //
 // Injected dependencies: none.

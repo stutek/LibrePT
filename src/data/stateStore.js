@@ -9,6 +9,7 @@
 // (§17.1's further win) is deliberately NOT part of this — it needs those call sites converted to
 // an async per-client fetch, which is separate, larger follow-up work.
 
+import { BUILD_INFO } from "../version.js";
 import { applyDemoRemoval, brokenDependenciesAfter, planDemoRemoval } from "./demoDataRemoval.js";
 import {
   DEFAULT_CLIENTS,
@@ -32,9 +33,13 @@ import {
   withTransaction,
 } from "./indexedDb.js";
 import { CURRENT_SCHEMA_VERSION } from "./migrationSteps.js";
-import { ensureLiveSchemasBackfilled, readStoreName } from "./readSchema.js";
+import {
+  ensureLiveSchemasBackfilled,
+  liveSchemas,
+  readStoreName,
+  rebuildPreviewSchemaIfBuildChanged,
+} from "./readSchema.js";
 import { COLLECTIONS, groupRecordsByCollection, projectCollection } from "./recordProjections.js";
-import { LIVE_SCHEMAS } from "./recordSchemas.js";
 import { describeMigration, migrateState } from "./schemaMigrations.js";
 import { stampAsSeeded } from "./seedProvenance.js";
 import { readVersionScoped, writeVersionScoped } from "./storageNamespace.js";
@@ -125,7 +130,10 @@ export function removeDemoData(options = {}) {
 const DB_KEY = "librept_db";
 const ACTIVE_SESSION_KEY = "librept_active_session";
 
-const SCHEMAS = Object.keys(LIVE_SCHEMAS).map(Number);
+// Via liveSchemas(), NOT `Object.keys(LIVE_SCHEMAS).map(Number)`. Schema keys are no longer all
+// numbers — "P" coerces to NaN, every store name became "schemaNaN", and the boot transaction threw
+// against a store that does not exist, so the app never finished loading.
+const SCHEMAS = liveSchemas();
 const IMPORTED_META_KEY = "imported";
 const LANG_META_KEY = "lang";
 
@@ -298,6 +306,12 @@ export async function loadSavedState() {
   // it here is what makes a later schema upgrade an instant toggle rather than a wait. A no-op on
   // every boot after the first for a given schema.
   await ensureLiveSchemasBackfilled(db);
+
+  // AFTER the backfill, so a freshly provisioned stable store is populated before P is rebuilt from
+  // it. P's shape can change on any commit and there is no migration between preview shapes, so a P
+  // store written by a different build is discarded and re-projected from the durable schema4 copy.
+  // Preview-only fields do not survive that, which is the cost the backup/sync warnings name.
+  await rebuildPreviewSchemaIfBuildChanged(db, BUILD_INFO?.commit ?? null);
 
   state = finalizeLoadedState(await readStateFromIndexedDb(db));
   return state;

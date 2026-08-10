@@ -33,9 +33,9 @@ def test_the_live_app_persists_to_indexeddb_not_a_versioned_localstorage_bucket(
                 req.onerror = () => reject(req.error);
             });
             const names = [...db.objectStoreNames].sort();
-            const tx = db.transaction(['schema3'], 'readonly');
+            const tx = db.transaction(['schemaP'], 'readonly');
             const count = await new Promise((resolve, reject) => {
-                const req = tx.objectStore('schema3').count();
+                const req = tx.objectStore('schemaP').count();
                 req.onsuccess = () => resolve(req.result);
                 req.onerror = () => reject(req.error);
             });
@@ -43,7 +43,7 @@ def test_the_live_app_persists_to_indexeddb_not_a_versioned_localstorage_bucket(
             return { names, count };
         }"""
     )
-    assert "schema3" in stores["names"]
+    assert "schemaP" in stores["names"]
     assert stores["count"] > 0, (
         "seeded demo data should have been star-written into IndexedDB"
     )

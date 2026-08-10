@@ -11,7 +11,7 @@ import { test } from "node:test";
 import * as backup from "../../../src/data/backupFile.js";
 import { DEFAULT_CLIENTS, DEFAULT_EXERCISES } from "../../../src/data/index.js";
 import { CURRENT_SCHEMA_VERSION } from "../../../src/data/migrationSteps.js";
-import { BACKUP_SCHEMA, LIVE_SCHEMAS } from "../../../src/data/recordSchemas.js";
+import { BACKUP_SCHEMA, LIVE_SCHEMAS, STABLE_SCHEMA } from "../../../src/data/recordSchemas.js";
 import { migrateState } from "../../../src/data/schemaMigrations.js";
 
 function database() {
@@ -53,22 +53,23 @@ test("a backup is stamped at the newest numbered schema, never at the runtime on
   );
 });
 
-test("the backup schema is the newest live one, so it is a superset of the others", () => {
-  // Shapes only gain fields under expand-first, so the newest carries every field an older one
-  // does. That is what makes ONE shape per file sufficient — an older copy alongside it would hold
-  // strictly less information at full size.
-  const live = Object.keys(LIVE_SCHEMAS).map(Number);
-  assert.equal(BACKUP_SCHEMA, Math.max(...live));
+test("a backup is written at the STABLE shape, and P is a superset of it", () => {
+  // The invariant inverted when the two axes were unified. It used to be "backups use the newest
+  // live shape"; now the newest live shape is P, which is exactly what a backup must NOT be written
+  // at. The stable shape is a decision, not an accident of ordering.
+  assert.equal(BACKUP_SCHEMA, STABLE_SCHEMA);
+  assert.ok(BACKUP_SCHEMA in LIVE_SCHEMAS, "the backup shape has to be one the fan-out writes");
 
-  const newest = LIVE_SCHEMAS[BACKUP_SCHEMA];
-  for (const schema of live) {
-    for (const [collection, shape] of Object.entries(LIVE_SCHEMAS[schema])) {
-      for (const field of Object.keys(shape)) {
-        assert.ok(
-          field in newest[collection],
-          `${collection}.${field} exists in schema ${schema} but not in the backup schema`,
-        );
-      }
+  // Every field of the stable shape exists in P. This is what makes rebuilding P from schema4 —
+  // which happens whenever the build changes — lose ONLY preview-only fields, never a stable one.
+  const stable = LIVE_SCHEMAS[STABLE_SCHEMA];
+  const preview = LIVE_SCHEMAS.P;
+  for (const [collection, shape] of Object.entries(stable)) {
+    for (const field of Object.keys(shape)) {
+      assert.ok(
+        field in preview[collection],
+        `${collection}.${field} is in the stable shape but missing from P — rebuilding P would drop it`,
+      );
     }
   }
 });

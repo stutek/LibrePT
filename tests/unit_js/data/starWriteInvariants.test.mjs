@@ -61,8 +61,8 @@ test("schema evolution is additive never drops a field", () => {
   // Expand-first (TODO §18.4): a field lands in every live schema before the UI that writes it
   // ever ships, so a live schema's declared field set may only grow release over release, never
   // shrink — a field disappearing would silently break every OLDER build still writing it.
-  const older = schemas.SCHEMA_2;
-  const newer = schemas.SCHEMA_3;
+  const older = schemas.SCHEMA_4;
+  const newer = schemas.SCHEMA_P;
   const dropped = [];
   for (const collection of Object.keys(older)) {
     const newerShape = newer[collection];
@@ -115,8 +115,8 @@ test("projections are idempotent and invertible", () => {
 
 test("an older schemas writer missing a newer required field is caught", () => {
   // The specific loss scenario staging exists to prevent (TODO §18.4): a session literal shaped
-  // exactly like what schema 2's UI wrote — no `startDate` at all, since schema 2 never declared the
-  // field — must fail schema 3's projection, which requires it. If this ever silently passed, a
+  // exactly like what schema 4's UI wrote — no `startDate` at all, since schema 4 never declared the
+  // field — must fail schema P's projection, which requires it. If this ever silently passed, a
   // star write from an old cached build would plant an invalid record in the newest bucket.
   const oldSession = {
     id: "s-old",
@@ -127,19 +127,19 @@ test("an older schemas writer missing a newer required field is caught", () => {
     routineId: "r1",
     maxCapacity: 4,
     day: "today",
-    // deliberately no startDate — schema 2 never declared it.
+    // deliberately no startDate — schema 4 never declared it.
   };
-  const againstSchema2 = proj.projectionIssues("sessions", oldSession, schemas.SCHEMA_2);
-  const againstSchema3 = proj.projectionIssues("sessions", oldSession, schemas.SCHEMA_3);
+  const againstSchema2 = proj.projectionIssues("sessions", oldSession, schemas.SCHEMA_4);
+  const againstSchema3 = proj.projectionIssues("sessions", oldSession, schemas.SCHEMA_P);
 
   assert.deepEqual(
     againstSchema2,
     [],
-    "schema 2 never required startDate — this must validate clean",
+    "schema 4 never required startDate — this must validate clean",
   );
   assert.equal(
     againstSchema3.some((issue) => issue.includes("startDate")),
     true,
-    "schema 3 requires startDate — an old-shaped record must be caught, not silently accepted",
+    "schema P requires startDate — an old-shaped record must be caught, not silently accepted",
   );
 });

@@ -1,5 +1,5 @@
 // tests/unit_js/data/recordSchemas.test.mjs
-// The declared schema (TODO §18.1 / §18.4): recordSchemas.js's SCHEMA_2 is the first time "schema N"
+// The declared schema (TODO §18.1 / §18.4): recordSchemas.js's SCHEMA_4 is the first time "schema N"
 // exists as data rather than as a side effect of whatever migrationSteps.js happens to produce, and
 // recordProjections.js is the star-write model's projection layer for the one schema that is live
 // today. This file is the proof that both are faithful to what the app ACTUALLY writes, not an
@@ -79,7 +79,7 @@ test("every seed collection projects and validates clean", () => {
   const failures = [];
   for (const [collection, records] of Object.entries(collections)) {
     for (const record of records) {
-      const issues = proj.projectionIssues(collection, record, m.SCHEMA_2);
+      const issues = proj.projectionIssues(collection, record, m.SCHEMA_4);
       if (issues.length) failures.push({ collection, id: record.id, issues });
     }
   }
@@ -94,12 +94,12 @@ test("every seed collection projects and validates clean", () => {
   );
 });
 
-test("seed sessions also validate against schema 3", () => {
+test("seed sessions also validate against schema P", () => {
   // Schema 3 (TODO §7.3 item 8) requires `startDate` on every session — the seed data must
-  // already carry it, not just satisfy the older, looser schema 2.
+  // already carry it, not just satisfy the older, looser schema 4.
   const failures = [];
   for (const record of seeds.DEFAULT_SESSIONS) {
-    const issues = proj.projectionIssues("sessions", record, m.SCHEMA_3);
+    const issues = proj.projectionIssues("sessions", record, m.SCHEMA_P);
     if (issues.length) failures.push({ id: record.id, issues });
   }
   assert.deepEqual(failures, []);
@@ -122,7 +122,7 @@ test("a live created client validates clean", () => {
     gdprConsent: { cloudSync: true, timestamp: "2026-07-27T10:00:00.000Z" },
     active: true,
   };
-  const issues = proj.projectionIssues("clients", newClient, m.SCHEMA_2);
+  const issues = proj.projectionIssues("clients", newClient, m.SCHEMA_4);
   assert.deepEqual(issues, []);
 });
 
@@ -146,7 +146,7 @@ test("a live finished session history record validates clean", () => {
     exercises: rec.buildProgramSnapshot(clientState),
     feedback: [{ id: "u-new", clientId: "c1", exerciseName: "Squat", tag: "ok", note: "" }],
   };
-  const issues = proj.projectionIssues("history", clientLog, m.SCHEMA_2);
+  const issues = proj.projectionIssues("history", clientLog, m.SCHEMA_4);
   // id/type/position are schema-optional (DEFAULT_HISTORY predates them and stays
   // valid) — but the CURRENT write path must carry all three on every item, rest
   // included, which is what this half of the test actually pins.
@@ -170,12 +170,12 @@ test("a live feedback submission validates clean", () => {
     hasVoiceNote: false,
     resolved: false,
   };
-  const issues = proj.projectionIssues("planUpdates", newFeedback, m.SCHEMA_2);
+  const issues = proj.projectionIssues("planUpdates", newFeedback, m.SCHEMA_4);
   assert.deepEqual(issues, []);
 });
 
 test("projecting into an undeclared collection fails loud", () => {
-  const issues = proj.projectionIssues("not-a-real-collection", { id: "x" }, m.SCHEMA_2);
+  const issues = proj.projectionIssues("not-a-real-collection", { id: "x" }, m.SCHEMA_4);
   assert.equal(
     issues.some((issue) => issue.includes("no schema declared")),
     true,

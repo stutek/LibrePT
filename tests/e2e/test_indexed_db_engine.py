@@ -62,9 +62,9 @@ def test_legacy_localstorage_is_imported_and_left_as_a_rollback_snapshot(
                 req.onsuccess = () => resolve(req.result);
                 req.onerror = () => reject(req.error);
             });
-            const tx = db.transaction(['schema3'], 'readonly');
+            const tx = db.transaction(['schemaP'], 'readonly');
             const c = await new Promise((resolve, reject) => {
-                const req = tx.objectStore('schema3').count();
+                const req = tx.objectStore('schemaP').count();
                 req.onsuccess = () => resolve(req.result);
                 req.onerror = () => reject(req.error);
             });
@@ -140,9 +140,9 @@ def test_a_real_save_star_writes_into_every_live_schema_store_identically(
 ):
     """The actual "star write" property, proven end to end through the app rather than the
     low-level adapter (test_indexed_db.py) or a single-store read (every other test in this file
-    only ever inspects `schema3`): a save through `stateStore.js`'s real write path must land the
+    only ever inspects `schemaP`): a save through `stateStore.js`'s real write path must land the
     same record in EVERY live schema's IndexedDB store, not just the newest one this build reads
-    back from. A regression that silently dropped `schema2` from the fan-out would go unnoticed by
+    back from. A regression that silently dropped `schema4` from the fan-out would go unnoticed by
     every other test here, since they never look at it."""
     page.goto(local_server)
     page.wait_for_selector(".session-card")
@@ -180,7 +180,7 @@ def test_a_real_save_star_writes_into_every_live_schema_store_identically(
         }"""
     )
 
-    assert set(stores.keys()) == {"schema2", "schema3"}, (
+    assert set(stores.keys()) == {"schema4", "schemaP"}, (
         "expected exactly the two live schema stores — update this test if a schema was added/retired"
     )
     for schema_name, record in stores.items():
