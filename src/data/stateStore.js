@@ -9,6 +9,7 @@
 // (§17.1's further win) is deliberately NOT part of this — it needs those call sites converted to
 // an async per-client fetch, which is separate, larger follow-up work.
 
+import { applyDemoRemoval, brokenDependenciesAfter, planDemoRemoval } from "./demoDataRemoval.js";
 import {
   DEFAULT_CLIENTS,
   DEFAULT_EXERCISES,
@@ -35,6 +36,7 @@ import { ensureLiveSchemasBackfilled, readStoreName } from "./readSchema.js";
 import { COLLECTIONS, groupRecordsByCollection, projectCollection } from "./recordProjections.js";
 import { LIVE_SCHEMAS } from "./recordSchemas.js";
 import { describeMigration, migrateState } from "./schemaMigrations.js";
+import { stampAsSeeded } from "./seedProvenance.js";
 import { readVersionScoped, writeVersionScoped } from "./storageNamespace.js";
 import { enqueueWrite } from "./writeQueue.js";
 
@@ -78,17 +80,42 @@ export function stateHasData(s = state) {
   );
 }
 
+// Every seeded record is STAMPED (data/seedProvenance.js) so a later "clear the demo data" can tell
+// it from the trainer's own work without inferring anything from ids. Stamping copies rather than
+// mutates: DEFAULT_* are module singletons, and marking them in place would leave the seed arrays
+// flagged for the lifetime of the page.
 export function seedMockData() {
   const currentLang = state.lang || "en";
-  state.clients = [...DEFAULT_CLIENTS];
-  state.exercises = [...DEFAULT_EXERCISES];
-  state.routines = [...DEFAULT_ROUTINES];
-  state.history = [...DEFAULT_HISTORY];
-  state.planUpdates = [...DEFAULT_PLAN_UPDATES];
-  state.sessions = [...DEFAULT_SESSIONS];
-  state.notifications = [...DEFAULT_MESSAGES];
+  const seeded = (records) => records.map(stampAsSeeded);
+  state.clients = seeded(DEFAULT_CLIENTS);
+  state.exercises = seeded(DEFAULT_EXERCISES);
+  state.routines = seeded(DEFAULT_ROUTINES);
+  state.history = seeded(DEFAULT_HISTORY);
+  state.planUpdates = seeded(DEFAULT_PLAN_UPDATES);
+  state.sessions = seeded(DEFAULT_SESSIONS);
+  state.notifications = seeded(DEFAULT_MESSAGES);
   state.lang = currentLang;
   saveToLocalStorage();
+}
+
+/**
+ * Remove the demo records a trainer no longer wants, keeping everything their own work depends on
+ * (data/demoDataRemoval.js plans it; this applies and persists it).
+ *
+ * Goes through the ordinary save path on purpose: star-write already reconciles a removed record
+ * out of every live schema store, so there is no separate deletion path to keep in step with it.
+ */
+export function removeDemoData(options = {}) {
+  const plan = planDemoRemoval(state, options);
+  const broken = brokenDependenciesAfter(state, plan);
+  if (broken.length > 0) {
+    // Refuse rather than write a database whose records point at rows that no longer exist. Only
+    // reachable via a caller-edited plan; a plan straight from planDemoRemoval cannot break one.
+    return { ok: false, plan, broken };
+  }
+  setState(applyDemoRemoval(state, plan));
+  saveToLocalStorage();
+  return { ok: true, plan, broken: [] };
 }
 
 // The plain localStorage key every build before this engine wrote (data/storageNamespace.js — no
