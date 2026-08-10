@@ -42,12 +42,42 @@ number:
 means they have never been asked. The language the UI actually renders in is a separate question,
 answered by `resolveLang()` in [i18n/index.js](../src/i18n/index.js), which falls back to English.
 
-Collapsing the two — as the app did until schema 4, forcing `"en"` wherever the field was absent —
-makes "picked English" and "never asked" the same stored value, and there is no way back from it:
-the splash cannot offer a language to exactly the people who have not chosen one. The v3→v4
-migration therefore CLEARS the stored language for every existing database rather than trying to
-infer intent from it. One tap for someone who did want English; the alternative is a Slovene
-trainer stuck in an English app with no prompt.
+Collapsing the two — as the app once did, forcing `"en"` wherever the field was absent — makes
+"picked English" and "never asked" the same stored value, and there is no way back from it: the
+splash cannot offer a language to exactly the people who have not chosen one. The migration
+therefore CLEARS the stored language for every pre-release database rather than trying to infer
+intent from it. One tap for someone who did want English; the alternative is a Slovene trainer
+stuck in an English app with no prompt.
+
+### Only two schema versions exist: 0 and 5
+
+`schemaVersion` runs **0 → 5**, and nothing in between. **0** is the pre-release shape (the field
+absent, 0, or garbage); **5** is what every current build reads and writes, and the version LibrePT
+ships at release. LibrePT has not shipped, so the four steps that once described an upgrade history
+were collapsed into a single `0 → 5` transform — legitimate *only* while no trainer holds data. Once
+one does, the rule inverts to §6's: readers retained forever, steps appended, never squashed.
+
+**1, 2, 3 and 4 are retired, and never recycled.** All four were stamped into real pre-release
+databases. A database still carrying one is rescued by a **comparison** — anything below current
+re-enters at the floor — rather than by a hardcoded set of dead numbers, which would need
+maintaining and would silently refuse any value nobody remembered to list.
+
+That comparison is the whole reason the chain **starts at 5 rather than 1**. Numbering current as 1
+would put three retired values *above* it, where they read as "written by a newer build" and get
+refused — stranding exactly the databases the rule exists to rescue. A unit test in
+[schemaMigrations.test.mjs](../tests/unit_js/data/schemaMigrations.test.mjs) fails the build if
+current ever drops back below the retired range.
+
+**"P" is the pre-release placeholder for 5** — the same version under a name that says it is not
+settled. 5 becomes the stable release schema; until then, P is what the shape is called while it can
+still move.
+
+That carries one consequence worth stating plainly: **a placeholder shape can change without the
+number changing.** Two preview databases can both read `schemaVersion: 5` and hold different shapes,
+and `migrateState` will compare 5 against 5, apply nothing, and report success — the version cannot
+tell them apart. Only the **commit SHA** can, which is why a preview backup has to carry it, and why
+the two axes above stay separate: the chain numbers the **data**, the SHA identifies the **code**.
+At release the shape settles and the number starts meaning what it says.
 
 **There are no release tags and no rollback-by-navigation.** One build ships every supported
 behaviour concurrently, so switching behaviour is an in-app choice, not a different URL and not a
@@ -532,13 +562,12 @@ The database holds the **only** copy of a trainer's records — there is no serv
   edit an existing fixture — that stops it testing what it always tested; add a new one instead.
 
   `schema0_demo.json` is the corpus's entry point and carries a **demo-scale** database (multiple
-  clients, routines, logged history, sessions across all four `day` buckets) in the pre-versioning
-  shape, so the whole chain is walked against something the size of a real trainer's database rather
-  than a one-client toy. `"schemaVersion": 0` is a *name* for the pre-versioning shape — the runner
-  reads it identically to the field being absent (`detectSchemaVersion` honours only integers above
-  zero), and **there is no 0→1 step, nor may one be invented**. Its test asserts the applied-step
-  list equals `MIGRATION_STEPS` in full, so a step added to the chain that the corpus does not reach
-  fails Stage 1 instead of shipping untested.
+  clients, routines, logged history, sessions across all four `day` buckets) at version **0**, so
+  the chain is walked against something the size of a real trainer's database rather than a
+  one-client toy. Its test asserts the applied-step list equals `MIGRATION_STEPS` in full, so a step
+  added to the chain that the corpus does not reach fails Stage 1 instead of shipping untested,
+  alongside assertions that the chain is non-empty and contiguous — a squashed chain would otherwise
+  satisfy the first check vacuously.
 
   It is deliberately **not** the app's demo seed: `DEFAULT_*` in [src/data/](../src/data/) stays at
   the current version and never touches a migration. The v2→v3 `startDate` derivation is lossy for

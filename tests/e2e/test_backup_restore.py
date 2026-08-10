@@ -24,6 +24,15 @@ def current_schema_version():
     return int(re.search(r"CURRENT_SCHEMA_VERSION = (\d+)", source).group(1))
 
 
+def baseline_schema_version():
+    """BASELINE_SCHEMA_VERSION as declared in src/data/migrationSteps.js.
+
+    Read for the same reason as the current version above — the banner names the version the
+    database came FROM, and the floor moved from 1 to 0 when the pre-release chain collapsed."""
+    source = (SRC_DIR / "data" / "migrationSteps.js").read_text(encoding="utf-8")
+    return int(re.search(r"BASELINE_SCHEMA_VERSION = (\d+)", source).group(1))
+
+
 LEGACY_BACKUP = {
     # No schemaVersion: a backup taken before the v2->v3 `startDate` migration (TODO §7.3 item 8).
     "clients": [{"id": "c1", "name": "Restored Client"}],
@@ -102,9 +111,11 @@ def test_restore_migrates_an_old_backup(page, local_server):
     )
     assert state["sessions"][0]["id"] == "b1"
     assert state["sessions"][0]["startDate"], (
-        "the v2->v3 step runs too, deriving a real startDate for the restored session"
+        "the startDate derivation runs too, giving the restored session a real one"
     )
-    assert "Upgraded from schema 1" in page.locator("#import-status").inner_text()
+    assert f"Upgraded from schema {baseline_schema_version()}" in (
+        page.locator("#import-status").inner_text()
+    )
 
 
 def test_a_backup_from_a_newer_build_is_refused(page, local_server):

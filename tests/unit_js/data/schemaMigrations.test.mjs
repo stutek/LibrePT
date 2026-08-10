@@ -10,7 +10,10 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 // Asserted against the constant, not a literal: a migration that bumps the version should not
 // need every "migrates to current" test edited alongside it.
-import { CURRENT_SCHEMA_VERSION } from "../../../src/data/migrationSteps.js";
+import {
+  BASELINE_SCHEMA_VERSION,
+  CURRENT_SCHEMA_VERSION,
+} from "../../../src/data/migrationSteps.js";
 import * as m from "../../../src/data/schemaMigrations.js";
 
 test("legacy database with no sessions collection gets one", () => {
@@ -21,8 +24,8 @@ test("legacy database with no sessions collection gets one", () => {
   const result = m.migrateState(legacy);
 
   assert.equal(result.ok, true);
-  // A database with no schemaVersion is the legacy baseline, v1.
-  assert.equal(result.summary.fromVersion, 1);
+  // A database with no schemaVersion is the pre-release baseline.
+  assert.equal(result.summary.fromVersion, BASELINE_SCHEMA_VERSION);
   // the old `bookings` collection is dropped, not carried over
   assert.equal(result.state.sessions.length, 0);
   assert.equal(result.state.bookings ?? null, null);
@@ -49,10 +52,11 @@ test("current database is a no op but gets stamped", () => {
   assert.equal(result.state.schemaVersion, CURRENT_SCHEMA_VERSION);
 });
 
-test("v2 sessions gain a derived start date", () => {
-  // The v2→v3 step (TODO §7.3 item 8): a session with only a `day` bucket + free-text `time`
-  // gets a real absolute `startDate`, without disturbing `day` itself (other systems still key
-  // off it) or a session that already has one.
+test("pre-release sessions gain a derived start date", () => {
+  // TODO §7.3 item 8, now folded into the single 0→P step: a session with only a `day` bucket +
+  // free-text `time` gets a real absolute `startDate`, without disturbing `day` itself (other
+  // systems still key off it) or a session that already has one. `schemaVersion: 2` is a RETIRED
+  // value — it must be read as pre-release and normalised, never refused as newer-build data.
   const legacy = {
     schemaVersion: 2,
     clients: [],
@@ -115,6 +119,8 @@ test("a step producing a bad shape fails loud", () => {
   const detectLegacy = m.detectSchemaVersion({});
   const detectStored = m.detectSchemaVersion({ schemaVersion: 7 });
   const detectGarbage = m.detectSchemaVersion({ schemaVersion: "two" });
+  // Every burned value reads as pre-release, not as a version of its own.
+  const detectRetired = [2, 3, 4].map((v) => m.detectSchemaVersion({ schemaVersion: v }));
 
   assert.deepEqual(notAnObject, ["the migrated database is not an object"]);
   assert.equal(
@@ -130,9 +136,10 @@ test("a step producing a bad shape fails loud", () => {
     true,
   );
   assert.deepEqual(clean, []);
-  assert.equal(detectLegacy, 1);
+  assert.equal(detectLegacy, BASELINE_SCHEMA_VERSION);
   assert.equal(detectStored, 7);
-  assert.equal(detectGarbage, 1);
+  assert.equal(detectGarbage, BASELINE_SCHEMA_VERSION);
+  assert.deepEqual(detectRetired, [0, 0, 0]);
 });
 
 test("absent collections are filled in but corrupt ones still fail", () => {
@@ -140,7 +147,11 @@ test("absent collections are filled in but corrupt ones still fail", () => {
   // missing collections are filled in once here rather than defended against at each read site —
   // but a key that is present and NOT a list is corruption, and must still fail loudly.
   const sparse = m.migrateState({ clients: [{ id: "c1" }] });
-  const corrupt = m.migrateState({ schemaVersion: 2, sessions: [], clients: "nope" });
+  const corrupt = m.migrateState({
+    schemaVersion: CURRENT_SCHEMA_VERSION,
+    sessions: [],
+    clients: "nope",
+  });
 
   assert.equal(sparse.ok, true);
   assert.deepEqual(sparse.state.history, []);
@@ -155,16 +166,41 @@ test("absent collections are filled in but corrupt ones still fail", () => {
   );
 });
 
-test("v3 to v4 clears the stored language so everyone is asked once", async () => {
+test("the 0 to P step clears the stored language so everyone is asked once", async () => {
   // Deliberately treats every existing PT as never-asked: before the splash could offer a choice,
   // `lang` was forced to "en" wherever it was absent, so a chosen English and a never-asked
   // trainer are the same stored value and cannot be told apart after the fact.
-  const migrated = m.migrateState({ schemaVersion: 3, lang: "en", sessions: [] });
+  const migrated = m.migrateState({ schemaVersion: 0, lang: "en", sessions: [] });
   assert.equal(migrated.state.lang, null);
   assert.equal(migrated.state.schemaVersion, CURRENT_SCHEMA_VERSION);
 });
 
-test("v3 to v4 clears a non-English stored language too", async () => {
-  const migrated = m.migrateState({ schemaVersion: 3, lang: "sl", sessions: [] });
+test("the 0 to P step clears a non-English stored language too", async () => {
+  const migrated = m.migrateState({ schemaVersion: 0, lang: "sl", sessions: [] });
   assert.equal(migrated.state.lang, null);
+});
+
+test("current stays above every retired version", () => {
+  // 1, 2, 3 and 4 were stamped into real pre-release databases and are retired. They are rescued by
+  // a COMPARISON — anything below current re-enters at the floor — which needs no list to maintain
+  // and cannot forget a value nobody remembered to enumerate.
+  //
+  // That only works while current sits above all of them, which is the entire reason the chain
+  // starts at 5. Dropping current to 1 would put three retired values ABOVE it, where they read as
+  // "written by a newer build" and get refused — stranding exactly the databases the rule exists to
+  // rescue. This fails the build rather than letting that regress silently.
+  const HIGHEST_RETIRED_VERSION = 4;
+
+  assert.ok(
+    CURRENT_SCHEMA_VERSION > HIGHEST_RETIRED_VERSION,
+    `current is ${CURRENT_SCHEMA_VERSION}, which does not sort above retired version ${HIGHEST_RETIRED_VERSION}`,
+  );
+  assert.equal(BASELINE_SCHEMA_VERSION, 0);
+  for (const retired of [1, 2, 3, 4]) {
+    assert.equal(
+      m.detectSchemaVersion({ schemaVersion: retired }),
+      BASELINE_SCHEMA_VERSION,
+      `retired version ${retired} must read as pre-release, not as a version of its own`,
+    );
+  }
 });

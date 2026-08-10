@@ -22,6 +22,16 @@ def current_schema_version():
     return int(re.search(r"CURRENT_SCHEMA_VERSION = (\d+)", source).group(1))
 
 
+def baseline_schema_version():
+    """BASELINE_SCHEMA_VERSION as declared in src/data/migrationSteps.js.
+
+    Read for the same reason as the current version above: the floor moved from 1 to 0 when the
+    pre-release chain was collapsed, and a literal here would have silently kept asserting the
+    old one."""
+    source = (SRC_DIR / "data" / "migrationSteps.js").read_text(encoding="utf-8")
+    return int(re.search(r"BASELINE_SCHEMA_VERSION = (\d+)", source).group(1))
+
+
 def test_a_stored_legacy_database_is_migrated_on_boot(page, local_server):
     """End-to-end: a real localStorage database in the old shape loads with an empty `sessions`,
     not the dropped legacy `bookings` collection (TODO §14.6 — no back-compat carry-over)."""
@@ -63,5 +73,5 @@ def test_a_stored_legacy_database_is_migrated_on_boot(page, local_server):
     assert r["schemaVersion"] == current_schema_version(), (
         "walks the full chain in one boot, not just one hop"
     )
-    assert r["summary"]["fromVersion"] == 1
+    assert r["summary"]["fromVersion"] == baseline_schema_version()
     assert r["summary"]["problems"] == []

@@ -63,8 +63,9 @@ test("schema1 baseline fixture still imports", () => {
 });
 
 test("schema2 fixture still imports and gains a derived start date", () => {
-  // The v2->v3 step (TODO §7.3 item 8) must still derive `startDate` from `day`+`time` on a real
-  // frozen schema-2 backup, not just on a same-commit literal.
+  // `schemaVersion: 2` is a BURNED value. This fixture is the standing proof that a database
+  // stamped with one is read as pre-release and normalised, rather than refused as written by a
+  // newer build — the failure mode that appears the moment P reuses a retired number.
   const r = migrate("schema2.json");
 
   assert.equal(r.ok, true, JSON.stringify(r.problems));
@@ -196,7 +197,7 @@ test("the v0 demo corpus has its stored language cleared so the PT is asked once
   const r = migrate("schema0_demo.json");
 
   assert.equal(r.state.lang, null);
-  const langStep = r.applied.find((step) => step.to === 4);
+  const langStep = r.applied.find((step) => step.to === CURRENT_SCHEMA_VERSION);
   assert.ok(
     langStep.notes.some((note) => note.includes("sl")),
     `expected a note naming the cleared language, got ${JSON.stringify(langStep.notes)}`,

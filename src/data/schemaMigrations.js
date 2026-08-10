@@ -31,9 +31,19 @@ const ARRAY_COLLECTIONS = [
   "notifications",
 ];
 
+/**
+ * Which version a stored database should be read AS.
+ *
+ * Current or newer is taken at face value — that is what lets the rollback refusal below fire.
+ * Everything else re-enters at the floor: the field absent, 0, garbage, or one of the burned
+ * pre-release values (2, 3, 4), whose shapes were dropped wholesale rather than migrated one hop at
+ * a time (migrationSteps.js). A comparison rather than a list of dead numbers — which works only
+ * because current sits ABOVE every burned value, the reason the chain starts at 5 and not 1.
+ */
 export function detectSchemaVersion(state) {
   const stored = state?.schemaVersion;
-  return Number.isInteger(stored) && stored > 0 ? stored : BASELINE_SCHEMA_VERSION;
+  if (Number.isInteger(stored) && stored >= CURRENT_SCHEMA_VERSION) return stored;
+  return BASELINE_SCHEMA_VERSION;
 }
 
 // Structural problems, as a list of human-readable strings — empty means the shape is acceptable.
