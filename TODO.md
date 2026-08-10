@@ -1132,3 +1132,82 @@ upward.
 
 **Not a problem, deliberately left alone**: `src/index.css` (773) is a genuine design system;
 `src/data/exercises.js` and the i18n dictionaries are flat data. Size alone is not a defect.
+
+---
+
+## 25. Layout overflow: assert geometry, not just semantics
+
+Captured **2026-08-10**, design only — no code yet. Every test in the suite asserts *semantics*
+(text, counts, element ids); none asserts *geometry*. So a component that runs off the screen edge,
+or one whose content is silently clipped inside its own box, passes the full gate. This is the
+class of bug a trainer hits on the gym floor and the pipeline never sees — the chips fix recorded in
+`src/index.css` (`.filter-chips`, "they ran out of view") was found by looking, not by a test.
+
+Two invariants, separate assertions, one DOM sweep.
+
+### 25.1 [ ] Invariant A — nothing extends past its clipping boundary
+
+Not "past the viewport": `body` is `max-width: 480px` centered, so on desktop the real boundary is
+the app column. For each visible element, compare `getBoundingClientRect()` against the client box
+of its nearest **clipping ancestor** (nearest ancestor whose computed `overflow-x`/`overflow-y` is
+not `visible`, else the viewport). `position: fixed` escapes that chain and is compared to the
+viewport directly. Tolerance 1px, skip zero-area and hidden elements.
+
+**The mechanic that makes this non-obvious**: `body { overflow-x: hidden }` in `src/index.css`
+*already* masks this whole class of bug — a horizontally overflowing child is clipped silently and
+`documentElement.scrollWidth` never reports it. A naive `scrollWidth > clientWidth` check on the
+root would read clean today and forever. The per-element rect still sees the true layout box
+through a clipping ancestor, which is why the check has to be geometric and per-element.
+
+### 25.2 [ ] Invariant B — nothing overflows its own box
+
+`el.scrollWidth > el.clientWidth + 1` and the height equivalent, exempted **per axis** by what the
+element itself declares. A scroll container is not undecidable — it is self-declaring:
+
+| computed overflow on that axis | verdict |
+| :--- | :--- |
+| `auto` / `scroll` | skip that axis — content is *supposed* to exceed the box; still assert the other |
+| `visible` | fail — content is escaping, and A will usually fire on the child too |
+| `hidden`/`clip` with `text-overflow: ellipsis` + `white-space: nowrap` | pass — the ellipsis idiom states the intent |
+| bare `hidden` with real overflow | fail — the silent-clipping case, and the one worth finding |
+
+**No test-side allowlist**, per [AGENT_RULES.md](AGENT_RULES.md) §2: a Python set of "components we
+know overflow" is parking real debt. Where clipping is genuinely intentional and not expressible via
+the ellipsis idiom (a circular avatar crop, a decorative bleed), the opt-out belongs **in the
+markup** as `data-clip="intentional"` — self-documenting at the site, reviewable in a diff, and it
+travels with the component instead of rotting in a test file.
+
+### 25.3 [ ] Where it runs
+
+**Start with one e2e file**, `tests/e2e/test_layout_overflow.py`, not a retrofit of the 24 medium
+tests. With demo data seeded, walk every route from `src/controllers/routes/routeTable.js` (plus
+opening each route-backed dialog) inside a **single page context per width**, sweeping after each
+navigation — so ~4 tests, not routes × widths tests, keeping inside stage 3's budget (§21).
+
+Widths **320** (narrowest realistic phone), **390** (the suite default), **1280** (desktop, where
+the 480px column boundary is what is being asserted). **At least one width must run in Slovenian**:
+overflow is a text-length bug, `sl` labels are materially longer than `en`, and an `en`-only sweep
+passes on strings that break the live app. It costs a `?lang=sl` deep-link param (§19).
+
+Medium tier second and incremental: extract the sweep into `tests/medium/_overflow.py` so an
+existing component test adds one line after mount and gets per-component attribution at 320px.
+Better failure messages; the e2e sweep already covers the same markup composed.
+
+### 25.4 [ ] The sweep is one function, used three ways
+
+Per [AGENT_RULES.md](AGENT_RULES.md) §6, the JS lives in ONE module (`agent_tools/overflow_scan.py`,
+exporting the JS source plus a Python wrapper) consumed by the e2e test, the later medium helper,
+and **[agent_tools/layout_probe.py](agent_tools/layout_probe.py) as a new `--overflow` mode** — that
+tool already launches Chromium, parses `--viewport`, waits and scrolls, and exists precisely so
+overflow diagnosis is not re-scripted per bug. Adding the mode means a unit test under `tests/unit/`
+and a row in [agent_tools/INDEX.md](agent_tools/INDEX.md), plus a row in
+[tests/INDEX.md](tests/INDEX.md) for the new suite.
+
+### 25.5 Expect it red, and budget the fixes
+
+`body { overflow-x: hidden }` has been covering horizontal offenders for the life of the project, so
+they all surface at once. `.filter-chips` is a documented instance already fixed by hand; the fixed
+notification handle bar and the sticky day-footer share the offset arithmetic that took three
+throwaway scripts to pin down in July (the bug that produced `layout_probe.py` in the first place).
+Findings get fixed in the change that adds the gate, so this is plausibly two commits — CSS fixes
+first if the count is large, then the sweep landing green.
