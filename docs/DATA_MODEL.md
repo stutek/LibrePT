@@ -96,9 +96,20 @@ safe to iterate on, and why P needs no migration steps of its own.
 ### Backups are written at 4, not at P
 
 Because P's shape can change on any commit, a backup written *at* P is restorable only by the exact
-build that wrote it. Backups are therefore written at the newest **numbered** version, which the
-star-write fan-out already keeps continuously current for free (§4) — so a backup file is in a shape
-that does not move when P moves, and any build can restore it through the chain.
+build that wrote it. Backups are therefore written at `BACKUP_SCHEMA` — the newest **numbered**
+shape ([backupFile.js](../src/data/backupFile.js)) — through the same projection path the star-write
+fan-out uses, so the file cannot drift from what the store would write for that shape. Any build can
+restore it through the chain.
+
+**One shape per file, not every live one.** Shapes only gain fields under expand-first (`SCHEMA_3`
+is `SCHEMA_2` plus `startDate`), so the newest is a strict superset of every older one and an older
+copy alongside it would store strictly less information at full size. Restore re-derives every live
+store from whatever it receives.
+
+Every file also carries `exportedAt` (a temporal anchor, so a future migration never has to date a
+two-year-old backup as though it were taken today) and `buildSha` — because while the runtime shape
+is a placeholder, two files can both say `schemaVersion: 3` and come from builds whose P shapes
+differed, and the SHA is the only thing that can tell them apart.
 
 **The cost, and it needs saying out loud: a P-only field never reaches a backup.** Add a field in P,
 back up, restore — the field is gone. The same applies to Drive sync, which is the more dangerous
@@ -550,7 +561,7 @@ of their clients.
 | `cloudSync` | Whether consent is currently held. Unticking it clears the other three. |
 | `consentDate` | `YYYY-MM-DD` — the date **on the signed paper**, editable, defaulting to today |
 | `timestamp` | ISO — when the app first recorded it. Not the consent date, and not a substitute for one |
-| `formVersion` | Which wording was signed ([Client_Consent_Form.md](templates/en/Client_Consent_Form.md)). Preserved across later edits of the record, so amending an address never re-dates the consent onto newer text |
+| `formVersion` | Which wording was signed — a full ISO date, the day that wording was adopted ([Client_Consent_Form.md](templates/en/Client_Consent_Form.md)). Preserved across later edits of the record, so amending an address never re-dates the consent onto newer text. Same shape as `consentDate` but a different fact: one dates the TEXT, the other the SIGNATURE |
 | `formLang` | Which language the client was sent the form in. Unlike `formVersion` it follows the selector on every save — switching it is how a trainer corrects a wrong guess, and the next re-send must follow the correction. Defaults to the trainer's UI language, which is right for local clientele and visibly wrong for the exceptions |
 
 **No signature, photo, or scan is ever stored** — deliberately, since a signature image is more

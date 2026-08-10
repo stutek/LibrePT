@@ -22,12 +22,17 @@ import { consentLetterFor, resolveConsentLang } from "../../i18n/consent/index.j
 
 export { resolveConsentLang };
 
+// A full ISO date (YYYY-MM-DD), not a month: two substantive revisions can land in one month, and a
+// stamp that cannot tell them apart cannot answer "who is still covered?" — which is the only
+// question the stamp exists to answer. It is the date the CURRENT WORDING was adopted, so it stays
+// put while the letter does; it is not a "last touched" date.
+//
 // Bumped ONLY when the letter's substance changes (purposes, recipients, rights, retention).
 // Typo, formatting and translation fixes leave it alone: a client who signed the old text still
 // consented to the same thing, and a bump asks every one of them to sign again. One version spans
 // every locale — the translations say the same thing, so they cannot be separately versioned
 // without the version ceasing to mean "which promises were made".
-export const CONSENT_FORM_VERSION = "2026-08";
+export const CONSENT_FORM_VERSION = "2026-08-09";
 
 // The docs are read on the CLIENT's device, by someone who has no LibrePT install and should not
 // need one to read what they are agreeing to — so a GitHub URL, not an in-app route. One folder per

@@ -3,7 +3,7 @@ type: template
 title: Obrazec privolitve stranke (informativno pismo)
 description: Standardiziran obrazec privolitve po GDPR za osebne trenerje, ki obdelujejo zdravstvene podatke strank (posebne vrste osebnih podatkov po členu 9).
 status: active
-consent_form_version: "2026-08"
+consent_form_version: "2026-08-09"
 terminology_audit: "2026-08-10"
 tags:
   - gdpr
@@ -51,7 +51,7 @@ Celotno obvestilo o obdelavi osebnih podatkov je na voljo tukaj: https://github.
 
 Prosim, da na to sporočilo odgovoriš s "PRIVOLIM" (ali podpišeš natisnjen obrazec) in s tem potrdiš, da si s temi informacijami seznanjen(-a) in privoliš v opisano obdelavo svojih osebnih podatkov.
 
-Različica obrazca privolitve: 2026-08
+Različica obrazca privolitve: 2026-08-09
 
 Lep pozdrav,
 Tvoj osebni trener
@@ -78,7 +78,8 @@ tako je po spremembi besedila mogoče odgovoriti na vprašanje, katere stranke s
 Pravila za dvig različice so enaka v vseh jezikih in so zapisana v angleški izdaji —
 [Versioning](../en/Client_Consent_Form.md). Na kratko: dvigni ob **vsebinski** spremembi (nov namen,
 nov prejemnik, druga hramba ali pravice), ne pa ob tipkarski napaki ali popravku prevoda. Ena
-različica velja za vse jezike hkrati.
+različica velja za vse jezike hkrati in je zapisana kot polni datum ISO (`LLLL-MM-DD`) — dan, ko je
+bilo sprejeto veljavno besedilo, ne dan zadnjega urejanja datoteke.
 
 ## Povezano
 

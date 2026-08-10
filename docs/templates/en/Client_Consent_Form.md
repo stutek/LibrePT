@@ -3,7 +3,7 @@ type: template
 title: Informative Client Consent Letter & Intake Template
 description: Standardized GDPR-compliant client consent form template for personal trainers handling health data (Special Category Data under Article 9).
 status: active
-consent_form_version: "2026-08"
+consent_form_version: "2026-08-09"
 tags:
   - gdpr
   - consent
@@ -46,7 +46,7 @@ The full privacy notice is here: https://github.com/stutek/LibrePT/blob/main/doc
 
 Please reply "I CONSENT" to this email (or sign the printed form) to confirm that you understand and agree to these privacy practices for our personal training sessions.
 
-Consent form version: 2026-08
+Consent form version: 2026-08-09
 
 Best regards,
 Your Personal Trainer
@@ -76,12 +76,14 @@ date. That stamp is what lets you answer "who is still covered?" after the lette
   The 2026-08-10 terminology audit is the worked example — the Slovenian edition changed
   substantially (consent became *privolitev* throughout, per the
   [terminology map](../sl/INDEX.md)) and both editions gained an explicit Art. 7(3) sentence on
-  withdrawal, yet **2026-08 stayed**: the purposes, the recipients, the retention and the rights on
-  offer are all unchanged, and stating a right the client already held more plainly does not make
+  withdrawal, yet **`2026-08-09` stayed**: the purposes, the recipients, the retention and the rights
+  on offer are all unchanged, and stating a right the client already held more plainly does not make
   the earlier consent cover less than it did.
-- The version is a plain `YYYY-MM` string. It is deliberately not the app's commit SHA or data
-  schema — those are the *code* and *data shape* axes and change constantly, while this letter does
-  not (see [AGENT_RULES §2.D.3](../../../AGENT_RULES.md)).
+- **The version is a full ISO date (`YYYY-MM-DD`) — the day the current wording was adopted, not the
+  day the file was last touched.** A month alone cannot separate two substantive revisions that land
+  in the same month, and separating them is the only thing the stamp is for. It is deliberately not
+  the app's commit SHA or data schema — those are the *code* and *data shape* axes and change
+  constantly, while this letter does not (see [AGENT_RULES §2.D.3](../../../AGENT_RULES.md)).
 - **One version spans every language.** The translations state the same promises, so versioning them
   separately would make the stamp stop meaning "which promises were made". Bumping therefore means
   editing, in one change: `CONSENT_FORM_VERSION` in

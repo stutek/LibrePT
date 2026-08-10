@@ -3,7 +3,7 @@ type: template
 title: Obvestilo posamezniku o obdelavi osebnih podatkov (člen 13 GDPR)
 description: Obvestilo o obdelavi osebnih podatkov v razumljivem jeziku, ki ga osebni trener izroči stranki — kaj se beleži, zakaj, na kateri pravni podlagi, kje je shranjeno, kako dolgo se hrani in kako uveljaviti pravice posameznika.
 status: active
-consent_form_version: "2026-08"
+consent_form_version: "2026-08-09"
 terminology_audit: "2026-08-10"
 tags:
   - gdpr
@@ -99,7 +99,7 @@ Zahteve naslovi na trenerja na zgoraj navedene kontakte.
 
 ---
 
-*Različica obvestila: 2026-08. Če je ta izvod starejši od različice na tvojem obrazcu privolitve,
+*Različica obvestila: 2026-08-09. Če je ta izvod starejši od različice na tvojem obrazcu privolitve,
 trenerja prosi za aktualnega.*
 
 ## Povezano

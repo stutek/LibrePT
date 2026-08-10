@@ -144,7 +144,8 @@ Add/Edit Client dialog. What landed, and the two amendments to the 07-22 decisio
   has to produce the letter themselves before the first session will not, and both buttons open the
   device's OWN mail/messaging app, so neither is an "email flow" in the IMAP sense that was rejected.
   Email sends the full letter; SMS sends one line and a link, because messaging clients truncate.
-- **The letter is versioned** (`gdprConsent.formVersion`, a `YYYY-MM` stamp). Consent is consent to a
+- **The letter is versioned** (`gdprConsent.formVersion`, a full ISO date — the day the wording
+  was adopted; a month alone cannot separate two revisions landing in the same month). Consent is consent to a
   *wording*; without the stamp there is no way to answer "who is still covered?" after the text
   changes. Existing consents keep the version they were signed under across later record edits.
 - **An archiving reminder as a dialog, not a tooltip** — LibrePT stores no signature, so the trainer

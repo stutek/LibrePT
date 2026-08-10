@@ -66,3 +66,59 @@
   text-align: center;
   padding: 4px 6px;
 }
+
+/* Preview-build warning on the backup/sync surface. Amber is the warning cue used consistently for
+   preview markers; it stays a full sentence rather than an icon because the gap it describes — that
+   preview-only fields are not in the file — is not guessable from a symbol. */
+.backup-preview-warning {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--warning-text, #7a5200);
+  background: var(--warning-bg, rgba(255, 176, 32, 0.15));
+  border: 1px solid var(--warning-border, rgba(255, 176, 32, 0.4));
+}
+
+.backup-preview-warning i {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .backup-preview-warning {
+    color: var(--warning-text-dark, #ffce7a);
+  }
+}
+
+/* Preview-build warning on the backup/sync surface. Amber is the warning cue used consistently for
+   preview markers, and it stays a full sentence rather than an icon because the gap it describes —
+   that preview-only fields are not written into the file — is not guessable from a symbol. */
+.backup-preview-warning {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--warning-text, #7a5200);
+  background: var(--warning-bg, rgba(255, 176, 32, 0.15));
+  border: 1px solid var(--warning-border, rgba(255, 176, 32, 0.4));
+}
+
+.backup-preview-warning i {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .backup-preview-warning {
+    color: var(--warning-text-dark, #ffce7a);
+  }
+}

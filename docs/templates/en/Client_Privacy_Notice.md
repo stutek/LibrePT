@@ -3,7 +3,7 @@ type: template
 title: Client Privacy Notice (GDPR Article 13)
 description: Plain-language privacy notice a personal trainer gives to a client — what is recorded, why, where it is stored, how long it is kept, and how to exercise data rights.
 status: active
-consent_form_version: "2026-08"
+consent_form_version: "2026-08-09"
 tags:
   - gdpr
   - privacy
@@ -92,7 +92,7 @@ Requests go to your trainer at the contact details above.
 
 ---
 
-*Notice version: 2026-08. Ask your trainer for the current version if this copy is older than the
+*Notice version: 2026-08-09. Ask your trainer for the current version if this copy is older than the
 one on your consent form.*
 
 ## Related

@@ -44,7 +44,7 @@ const state = {
       id: 'c-signed', name: 'Marko Novak', email: 'marko@example.com', phone: '+386 41 222 333',
       goals: '', notes: '', weightHistory: [], active: true,
       gdprConsent: { cloudSync: true, timestamp: '2026-03-02T09:00:00.000Z',
-                     consentDate: '2026-02-28', formVersion: '2025-01', formLang: 'sl' },
+                     consentDate: '2026-02-28', formVersion: '2025-01-15', formLang: 'sl' },
     },
     {
       id: 'c-nocontact', name: 'Ana Kos', email: '', phone: '',
@@ -101,7 +101,7 @@ def test_date_field_appears_only_once_consent_is_ticked(page, local_server):
     expect(page.locator("#client-consent-date-group")).to_be_visible()
     # Defaults to today, but stays editable: the paper is often signed before anyone opens the app.
     expect(page.locator("#client-consent-date")).to_have_value(_today())
-    expect(page.locator("#client-consent-version")).to_contain_text("2026-08")
+    expect(page.locator("#client-consent-version")).to_contain_text("2026-08-09")
 
 
 def test_existing_consent_shows_its_signed_date_and_the_version_signed_under(
@@ -114,7 +114,7 @@ def test_existing_consent_shows_its_signed_date_and_the_version_signed_under(
     expect(page.locator("#client-gdpr-consent")).to_be_checked()
     # The date on the paper (2026-02-28), not the app's write timestamp (2026-03-02).
     expect(page.locator("#client-consent-date")).to_have_value("2026-02-28")
-    expect(page.locator("#client-consent-version")).to_contain_text("2025-01")
+    expect(page.locator("#client-consent-version")).to_contain_text("2025-01-15")
 
 
 def test_delivery_buttons_carry_the_client_address_or_say_they_cannot(
@@ -166,7 +166,7 @@ def test_saving_records_the_signed_date_and_the_current_form_version(
     consent = page.evaluate("() => window.__consentOf('c-new')")
     assert consent["cloudSync"] is True
     assert consent["consentDate"] == "2026-07-04"
-    assert consent["formVersion"] == "2026-08"
+    assert consent["formVersion"] == "2026-08-09"
     # The write timestamp is recorded alongside, and is NOT the consent date.
     assert consent["timestamp"].startswith(_today())
 
@@ -183,7 +183,7 @@ def test_editing_a_consented_client_keeps_the_version_they_signed_under(
 
     consent = page.evaluate("() => window.__consentOf('c-signed')")
     # Editing an unrelated field must never silently claim the client agreed to newer wording.
-    assert consent["formVersion"] == "2025-01"
+    assert consent["formVersion"] == "2025-01-15"
     assert consent["consentDate"] == "2026-02-28"
 
 

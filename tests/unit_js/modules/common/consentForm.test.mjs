@@ -41,10 +41,12 @@ function templateFor(lang) {
   return readFileSync(path, "utf8");
 }
 
-test("the version is a plain YYYY-MM stamp, not a commit or a schema number", () => {
-  // Deliberately its own axis: the code version and the data schema both move constantly, and a
+test("the version is a full ISO date, not a month, a commit, or a schema number", () => {
+  // Full date because two substantive revisions can land in one month and the stamp has to separate
+  // them. Its own axis because the code version and the data schema both move constantly, and a
   // consent that re-dated itself on every deploy would ask every client to re-sign for nothing.
-  assert.match(CONSENT_FORM_VERSION, /^\d{4}-\d{2}$/);
+  assert.match(CONSENT_FORM_VERSION, /^\d{4}-\d{2}-\d{2}$/);
+  assert.ok(!Number.isNaN(Date.parse(CONSENT_FORM_VERSION)), "must be a real date");
 });
 
 test("every UI language can send the consent letter in that language", () => {

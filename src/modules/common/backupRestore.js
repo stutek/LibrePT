@@ -14,9 +14,11 @@
 //   t
 // }
 
+import { buildBackupPayload } from "../../data/backupFile.js";
 import { DEFAULT_SESSIONS } from "../../data/index.js";
 import { describeMigration, migrateState } from "../../data/schemaMigrations.js";
 import { catalogToCsv, catalogToInterchange } from "../../domain/exerciseStandard.js";
+import { BUILD_INFO } from "../../version.js";
 import { isOfflineCachedActive } from "./applicationHeader.js";
 import { renderMarkupOnce } from "./dom.js";
 import { downloadFile } from "./download.js";
@@ -52,6 +54,15 @@ export function renderBackupDialog() {
     </div>
     <div class="modal-body-scroll">
       <p class="dialog-desc">LibrePT stores your logs directly on this device. Sync the latest session schedule, download a backup file to keep your history safe, or import it to move to another phone.</p>
+
+      <!-- Preview-build warning. A backup is written at the newest NUMBERED schema so any build can
+           restore it, which means anything the preview shape added on top is NOT in the file. That
+           is a real gap and it is stated here rather than left to be discovered after a restore.
+           Spelled out in full, not an icon: this is the one thing a trainer needs to have read. -->
+      <p class="backup-preview-warning" id="backup-preview-warning">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span id="backup-preview-warning-text">This is a preview build. Backups and sync are written in the last stable format, so anything added by this preview is not included. Keep your own copy of anything you cannot lose.</span>
+      </p>
 
       <div class="backup-actions">
         <div class="action-card card">
@@ -196,7 +207,12 @@ export function setupBackupRestore() {
   const exportBtn = document.getElementById("btn-export-db");
   if (exportBtn) {
     exportBtn.addEventListener("click", () => {
-      const dataStr = JSON.stringify(deps.getState(), null, 2);
+      // Built at the newest NUMBERED schema, not at the runtime one (data/backupFile.js): a file
+      // written at the unstable preview shape is restorable only by the build that wrote it.
+      const payload = buildBackupPayload(deps.getState(), {
+        buildSha: typeof BUILD_INFO?.commit === "string" ? BUILD_INFO.commit : null,
+      });
+      const dataStr = JSON.stringify(payload, null, 2);
       downloadFile(
         dataStr,
         `librept_backup_${new Date().toISOString().substring(0, 10)}.json`,

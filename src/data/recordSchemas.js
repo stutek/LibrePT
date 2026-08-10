@@ -148,6 +148,20 @@ export const SCHEMA_3 = {
 export const LIVE_SCHEMAS = { 2: SCHEMA_2, 3: SCHEMA_3 };
 
 /**
+ * The newest NUMBERED shape, and what a backup file is written at.
+ *
+ * A backup is not written at "P" on purpose (docs/DATA_MODEL.md §1): P's shape can change on any
+ * commit, so a file written at it is restorable only by the exact build that produced it. A
+ * numbered shape does not move, so any build can restore it.
+ *
+ * Only ONE shape goes into a file, not every live one. Shapes only gain fields under expand-first —
+ * SCHEMA_3 is SCHEMA_2 plus `startDate` — so the newest is a strict superset of every older one,
+ * and an older copy alongside it stores strictly less information at full size. Restore re-derives
+ * every live store from whatever it receives, through the same fan-out that keeps them current.
+ */
+export const BACKUP_SCHEMA = Math.max(...Object.keys(LIVE_SCHEMAS).map(Number));
+
+/**
  * The schema a fresh install READS from. Declared, never derived.
  *
  * It used to be `Math.max(...Object.keys(LIVE_SCHEMAS))`, which made the read target a function of
