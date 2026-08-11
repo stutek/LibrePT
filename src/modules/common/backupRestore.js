@@ -15,6 +15,12 @@
 // }
 
 import { buildBackupPayload, summarizeReplacement } from "../../data/backupFile.js";
+import {
+  applySuppressions,
+  mergeSuppressionLists,
+  readSuppressionList,
+  writeSuppressionList,
+} from "../../data/erasureSuppression.js";
 import { DEFAULT_SESSIONS } from "../../data/index.js";
 import { describeMigration, migrateState } from "../../data/schemaMigrations.js";
 import { catalogToCsv, catalogToInterchange } from "../../domain/exerciseStandard.js";
@@ -31,23 +37,46 @@ let pendingRestore = null;
 let pendingSummary = null;
 let confirmedRestore = false;
 
-function applyRestoredState(restored) {
-  deps.setState(restored);
+// Async because the erasure register has to be applied to the INCOMING data before it becomes the
+// live database — not after, which would leave a window where the app holds names their owners
+// asked to have removed, and would write them to disk on the way through.
+async function applyRestoredState(restored) {
+  const merged = mergeSuppressionLists(readSuppressionList(), restored?.erasureSuppressions);
+  writeSuppressionList(merged);
+  const { state: filtered, reErased } = await applySuppressions(restored, merged);
+  // The register is not part of the database; it lives in localStorage and is written back into a
+  // file only at export time. Destructured out rather than deleted so the live state never carries
+  // a key the schema does not declare.
+  const { erasureSuppressions: _register, ...database } = filtered;
+
+  deps.setState(database);
   deps.saveToLocalStorage();
   pendingRestore = null;
   confirmedRestore = false;
+  return reErased;
 }
 
 // The one place a successful import's status line is built, so the confirmed path cannot drift from
 // the direct one. It once did: a hardcoded "Import successful!" on the confirm branch silently
 // dropped the migration report — the very thing a trainer needs to see when old data moves.
-function renderImportSuccess(summary) {
+// A restore that silently differs from the file the trainer chose is exactly the surprise this
+// codebase keeps refusing to ship. If the erasure register filtered the incoming data, say so.
+function erasureNotice(reErased) {
+  if (!reErased || reErased.length === 0) return "";
+  return `${reErased.length} previously-erased client(s) in this file were re-anonymised on import.`;
+}
+
+function renderImportSuccess(summary, reErased) {
   const importStatus = document.getElementById("import-status");
   if (!importStatus) return;
-  importStatus.textContent =
+  importStatus.textContent = [
     summary && summary.fromVersion !== summary.toVersion
       ? `Import successful! Upgraded from schema ${summary.fromVersion}.`
-      : "Import successful! Database synchronized.";
+      : "Import successful! Database synchronized.",
+    erasureNotice(reErased),
+  ]
+    .filter(Boolean)
+    .join(" ");
   importStatus.className = "status-msg text-emerald";
 }
 
@@ -266,15 +295,15 @@ export function setupBackupRestore() {
   // cleared as soon as the pending state is applied, so a SECOND import still has to be confirmed.
   const restoreConfirmBtn = document.getElementById("btn-restore-confirm");
   if (restoreConfirmBtn) {
-    restoreConfirmBtn.addEventListener("click", () => {
+    restoreConfirmBtn.addEventListener("click", async () => {
       if (!pendingRestore) return;
       confirmedRestore = true;
       const summary = pendingSummary;
-      applyRestoredState(pendingRestore);
+      const reErased = await applyRestoredState(pendingRestore);
       pendingSummary = null;
       const box = document.getElementById("restore-confirm");
       if (box) box.hidden = true;
-      renderImportSuccess(summary);
+      renderImportSuccess(summary, reErased);
       deps.renderClientsList();
       deps.renderRoutinesList();
       deps.renderExercisesList();
@@ -309,6 +338,8 @@ export function setupBackupRestore() {
       // written at the unstable preview shape is restorable only by the build that wrote it.
       const payload = buildBackupPayload(deps.getState(), {
         buildSha: typeof BUILD_INFO?.commit === "string" ? BUILD_INFO.commit : null,
+        // Carried so the erasure register survives a reinstall — see erasureSuppression.js.
+        suppressions: readSuppressionList(),
       });
       const dataStr = JSON.stringify(payload, null, 2);
       downloadFile(
@@ -354,7 +385,7 @@ export function setupBackupRestore() {
       if (!file) return;
 
       const reader = new FileReader();
-      reader.onload = (evt) => {
+      reader.onload = async (evt) => {
         try {
           const importedData = JSON.parse(evt.target.result);
 
@@ -388,7 +419,7 @@ export function setupBackupRestore() {
               showReplaceConfirmation(replacing);
               return;
             }
-            applyRestoredState(restored);
+            const reErased = await applyRestoredState(restored);
 
             // Re-render
             deps.renderClientsList();
@@ -399,9 +430,14 @@ export function setupBackupRestore() {
 
             if (importStatus) {
               const migrated = summary.applied.length > 0;
-              importStatus.textContent = migrated
-                ? `Import successful! Upgraded from schema ${summary.fromVersion}.`
-                : "Import successful! Database synchronized.";
+              importStatus.textContent = [
+                migrated
+                  ? `Import successful! Upgraded from schema ${summary.fromVersion}.`
+                  : "Import successful! Database synchronized.",
+                erasureNotice(reErased),
+              ]
+                .filter(Boolean)
+                .join(" ");
               importStatus.className = "status-msg text-emerald";
             }
           } else {

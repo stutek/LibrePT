@@ -262,6 +262,9 @@ export function renderHeaderShell() {
               <button id="menu-export-data" class="session-menu-item" role="menuitem">
                 <i class="fa-solid fa-file-export"></i> Export data as a file
               </button>
+              <button id="menu-open-encrypted" class="session-menu-item" role="menuitem">
+                <i class="fa-solid fa-lock-open"></i> Open an encrypted file
+              </button>
               <a id="menu-github" class="session-menu-item" role="menuitem" href="https://github.com/stutek/LibrePT" target="_blank" rel="noopener noreferrer">
                 <i class="fa-brands fa-github"></i> GitHub project
               </a>
@@ -390,6 +393,12 @@ function setupAppMenu() {
     closeMenu();
     const b = document.getElementById("backup-btn");
     if (b) b.click();
+  });
+  // For a CLIENT who was emailed their data export, not for the trainer — which is why it sits in
+  // the app menu and not on a client record: the person opening it has no client record.
+  on("menu-open-encrypted", () => {
+    closeMenu();
+    deps.openEncryptedFileReader?.();
   });
   // GitHub project, Bug reporting, and Privacy statement are real <a target="_blank">; just dismiss the menu.
   on("menu-github", () => closeMenu());

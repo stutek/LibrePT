@@ -18,6 +18,7 @@ import { initAppLifecycle } from "./controllers/appLifecycleController.js";
 import { setupClientForms } from "./controllers/clientFormsController.js";
 import { setupViewDismiss } from "./controllers/gestureController.js";
 import { initRouter } from "./controllers/routerController.js";
+import { initClientDataRights, setupClientDataRights } from "./modules/clients/clientDataRights.js";
 import { initRestTimer, setupRestTimer } from "./modules/clipboard/exerciseAndRestTimer.js";
 import {
   initApplicationHeader,
@@ -30,6 +31,7 @@ import {
   openDemoCleanupDialog,
 } from "./modules/common/demoCleanupDialog.js";
 import { initDriveSyncUi, setupDriveSyncUi } from "./modules/common/driveSyncUi.js";
+import { setupEncryptedFileReader } from "./modules/common/encryptedFileReader.js";
 import { initFeedbackModal, setupFeedbackForms } from "./modules/common/feedbackModal.js";
 import {
   initNotificationArea,
@@ -70,6 +72,18 @@ export function bootWorkoutSetup(deps) {
 // this controller rather than in the view module, so the two only work together.
 export function bootClientForms(deps) {
   setupClientForms(deps);
+}
+
+// The two data-subject-request dialogs (export / erase). Separate from bootClientForms because they
+// need write access to the WHOLE state — an erasure fans out across four collections — where the
+// client form only ever edits one record.
+export function bootEncryptedFileReader() {
+  setupEncryptedFileReader();
+}
+
+export function bootClientDataRights(deps) {
+  initClientDataRights(deps);
+  setupClientDataRights();
 }
 
 // The live clipboard: the overlay shell plus every listener the deck, the inline plan editor and

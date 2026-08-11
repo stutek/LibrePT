@@ -136,7 +136,11 @@ export function escapeHTML(value) {
 // Render formatted client name, appending warning icon if they have injuries
 export function getClientDisplayNameHTML(client, isShort = false) {
   if (!client) return "";
-  const nameText = isShort ? client.name.split(" ")[0] : client.name;
+  const baseName = isShort ? client.name.split(" ")[0] : client.name;
+  // The alias rides along with the name EVERYWHERE the name is rendered, which is the whole point
+  // of having one: it exists because two clients share a name, so showing it only on the profile
+  // page would leave every list — the one place the two actually sit side by side — ambiguous.
+  const nameText = client.alias ? `${baseName} (${client.alias})` : baseName;
   if (client.hasInjury) {
     return `<span class="client-name-with-injury" style="display: inline-flex; align-items: center; gap: 4px;">${escapeHTML(nameText)} <i class="fa-solid fa-triangle-exclamation text-red" style="font-size: 11px; color: #ef4444;" title="Has recorded injury: ${escapeHTML(client.injury || client.notes || "")}"></i></span>`;
   }

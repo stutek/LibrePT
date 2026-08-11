@@ -89,12 +89,49 @@ from that point.
 
 | Request | Article | What to do in LibrePT |
 | :--- | :--- | :--- |
-| "What do you hold on me?" / "Send me a copy" | 15, 20 | Export the client's history (JSON or Markdown) and send it |
+| "What do you hold on me?" / "Send me a copy" | 15, 20 | **Export data (GDPR)** on the client profile — see below |
 | "That's wrong" | 16 | Edit the client record |
-| "Delete me" | 17 | Delete the client profile — it goes from this device and from the next cloud backup |
+| "Delete me" | 17 | **Erase client (GDPR)** on the client profile — see below |
 | "Stop using my data" | 7(3), 18 | Untick consent, then §4 above |
 
 Answer within one month. Keep a short note of what you sent and when.
+
+### Sending the data (Art. 15 / 20)
+
+**Export data (GDPR)** builds a file containing only that client's records. A group session appears
+as a size, never a roster — that a session happened is their data; who else was in the room is not.
+
+- **Your own notes about them are included, and that is correct.** An assessment about a person is
+  that person's personal data. The notes box in the dialog is for removing information about
+  *someone else* that happens to sit in the same note (Art. 15(4)) — not for withholding an opinion
+  about the client. Whatever you remove, the file says that something was withheld.
+- **The file is encrypted, and an app cannot attach it to your email for you.** Download it, compose
+  the message, attach it yourself. LibrePT prefills the email with instructions for opening it.
+- **Send the passphrase separately** — by text, or say it at the next session. A passphrase in the
+  same email as the file protects nothing.
+- The client opens it at the LibrePT address, **Open an encrypted file** in the menu. It decrypts on
+  their own device; nothing is uploaded.
+- Handing it over in person instead? Use **Readable copy** — plain Markdown, no passphrase ceremony.
+
+### Erasing a client (Art. 17)
+
+**Erase client (GDPR)** replaces their name, contact details, goals, notes, injuries and body-weight
+history with an anonymous label. The training records stay, keyed to an id that no longer resolves
+to a person. Set **the date they asked** — that is what your one-month deadline runs from, not the
+date you got round to it.
+
+- **It cannot be undone.** Nothing is kept that could reverse it, which is what makes the remaining
+  records anonymous rather than merely pseudonymous.
+- **Check you have the right person open.** If another client shares the name, the dialog says so
+  and shows their details. Session titles you typed by hand are *not* rewritten when the name is
+  ambiguous — the app will not guess which Jane a title meant. It lists the ones to check.
+- **The receipt lists what only you can finish**: the gym calendar, your sent mail, your SMS thread,
+  old backup files. Copy it into your own records — it is your evidence of what you did and when.
+- **Keep the signed consent form.** It is the one document an erasure request does not sweep away
+  (Art. 7(1), Art. 17(3)(e)).
+- If you ever restore a backup taken before the erasure, LibrePT re-anonymises that client on the
+  way in and tells you it did. The register that makes this work travels inside your backup files,
+  so it survives a reinstall — but delete the old files anyway; the file itself still names them.
 
 ## 6. Two mistakes that are easy to make
 

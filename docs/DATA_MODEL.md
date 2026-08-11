@@ -597,16 +597,47 @@ part so those clients read as consented rather than as blank.
 
 ### Erasure
 
-**There are no hard deletes.** Erasure is **anonymization**: client PII is replaced with an anonymous
-token and the execution records stay, so longitudinal analytics survive.
+**There are no hard deletes.** Erasure is **anonymization**
+([clientErasure.js](../src/data/clientErasure.js)): the client's identity is replaced with a
+pseudonym derived from their own opaque record id, and the execution records stay, so longitudinal
+analytics survive.
 
-Two consequences that are easy to get wrong:
+**It is irreversible, which resolves the open question in [TODO §17.3](../TODO.md).** A reversible
+scheme needs a mapping from pseudonym back to person; with no server, that mapping would live in the
+same local database it is meant to protect — one file that un-erases everyone. So nothing is stored
+that could reverse it, and the pseudonym is derived rather than looked up. That is also the line
+between *pseudonymised* data (still personal data, Art. 4(5)) and *anonymised* data (Recital 26).
 
-- **Anonymization fans out like any other write.** If one store keeps the name and another is
-  anonymized, the erasure has failed.
-- **The suppression list must be applied at import, not only at erasure.** Restoring a pre-erasure
-  backup would otherwise resurrect the PII. It is keyed on the stable record id and stores a salted
-  hash and nothing else.
+What is cleared, and the judgement call inside it: name, contact, goals, trainer notes, injuries —
+and **body-weight history**, because a body weight measures the *person*, while a session load
+measures the *work*. `gdprConsent` survives: it identifies nobody and is the trainer's Art. 7(1)
+evidence that the processing up to that point was lawful.
+
+Four consequences that are easy to get wrong:
+
+- **Anonymization fans out like any other write.** `clientName` is denormalised onto every history
+  and planUpdate record, so an erasure that only rewrites the client record leaves the name in two
+  other collections. If one store keeps the name, the erasure has failed.
+- **Trainer-typed prose is a fan-out surface no schema marks.** Session and draft titles and
+  feedback notes can contain the name. They are rewritten — except where the name is **ambiguous**:
+  with a namesake in the book, or on a session shared with other participants, the text is left
+  exactly as typed and reported for a human pass. Guessing there would edit one client's records
+  under another client's request.
+- **Erasure is idempotent.** `erasure.erasedAt` is set once and never re-dated, because the register
+  below re-runs the erasure on every import and a restore in November must not re-date an August
+  erasure — that date is the evidence of *when* the controller complied.
+- **The erasure register must be applied at import, not only at erasure**
+  ([erasureSuppression.js](../src/data/erasureSuppression.js)). Restoring a pre-erasure backup would
+  otherwise resurrect the PII. It stores a salted SHA-256 of the record id and nothing else, with a
+  **fresh salt per entry** so two devices' registers can be merged; it travels inside backup files
+  and is **unioned, never replaced**, on import, which is how it survives a reinstall. A restore that
+  the register filtered says so in the import status rather than quietly differing from the file.
+
+**What erasure cannot reach** is itemised for the trainer rather than glossed over
+([erasureChecklist.js](../src/data/erasureChecklist.js)): the gym calendar (reachable on the Google
+grant the app already asks for — automatable once §1.5 lands), sent mail and SMS (never reachable —
+composed in the trainer's own client), backup files already written, and the signed consent form,
+which must deliberately be **kept**.
 
 ---
 

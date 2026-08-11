@@ -49,7 +49,7 @@ import {
   openRoutineCreateDialog,
   setupRoutineForms as setupRoutineFormsController,
 } from "./controllers/routineFormsController.js";
-import { onSyncCountsChanged, primeAheadCache } from "./data/driveSyncService.js";
+import { driveSyncStatus, onSyncCountsChanged, primeAheadCache } from "./data/driveSyncService.js";
 import { newRecordId } from "./data/recordId.js";
 import {
   getState,
@@ -85,6 +85,7 @@ import {
 import { prepareBackupDialog } from "./modules/common/backupRestore.js";
 import { renderBuildInfo } from "./modules/common/buildInfoDialog.js";
 import { prepareDriveSyncCard } from "./modules/common/driveSyncUi.js";
+import { openEncryptedFileReader } from "./modules/common/encryptedFileReader.js";
 import { openFeedbackModal } from "./modules/common/feedbackModal.js";
 import { renderNotificationArea } from "./modules/common/notificationArea.js";
 import { populateDropdownSelectors as populateDropdownsController } from "./modules/common/populateDropdownSelectors.js";
@@ -286,6 +287,8 @@ async function init() {
 
   setupNavigation({ setupSessionsDayNav });
   setupClientForms();
+  setupClientDataRights();
+  appBoot.bootEncryptedFileReader();
   appBoot.bootPlansView({ navigateToPath, urlFor });
   setupRoutineForms();
   setupExerciseForms();
@@ -363,6 +366,7 @@ async function init() {
     getActiveSession: () => getActiveSession(),
     renderActiveGroupBoard,
     renderClipboardBar,
+    openEncryptedFileReader,
   });
 
   appBoot.bootSessionTimeline({
@@ -486,6 +490,23 @@ function renderExercisesList(filterQuery = "", categoryFilter = "All") {
 }
 function renderGlobalHistory() {
   historyViewRender({ state: getState(), t, openSessionFromHistory });
+}
+
+function setupClientDataRights() {
+  appBoot.bootClientDataRights({
+    getState,
+    // The erasure rewrites four collections at once, so it hands back a whole new state rather than
+    // mutating in place — setState is the only seam that can accept that.
+    saveState: (next) => {
+      setState(next);
+      saveState();
+      renderClientsList();
+      renderGlobalHistory();
+      populateDropdownSelectors();
+    },
+    isDriveConfigured: () => driveSyncStatus().configured,
+    t,
+  });
 }
 
 function setupClientForms() {

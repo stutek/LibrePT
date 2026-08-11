@@ -57,6 +57,12 @@ export const SCHEMA_4 = {
   clients: {
     id: { required: true, type: "string" },
     name: { required: true, type: "string" },
+    // How the trainer tells two same-named clients apart ("morning", "Novak", "with the knee").
+    // Optional and free-form: gyms have two Jane Does, and every surface that must not confuse them
+    // — the erasure confirmation, the data-export picker — needs something human to show alongside
+    // an opaque id. Additive, so a record without it stays valid; declared here rather than only in
+    // P so it reaches a backup (BACKUP_SCHEMA is 4 — see backupFile.js).
+    alias: { required: false, type: "string" },
     avatar: { required: false, type: "string" },
     joinedDate: { required: false, type: "string" },
     email: { required: false, type: "string" },
@@ -68,6 +74,9 @@ export const SCHEMA_4 = {
     injury: { required: false, type: "string" },
     active: { required: true, type: "boolean" },
     gdprConsent: { required: false, type: "object" },
+    // Set once an Art. 17 request has been honoured (clientErasure.js): `{ erasedAt, requestedOn }`.
+    // Absent on every client who has not asked to be forgotten, which is nearly all of them.
+    erasure: { required: false, type: "object" },
   },
   exercises: {
     id: { required: true, type: "string" },

@@ -216,3 +216,123 @@
 .consent-info-body p {
   line-height: 1.5;
 }
+
+/* --- Data-subject request dialogs (clientDataRights.js) --- */
+.data-rights-body {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+/* The one line that must be read before a destructive action: who this is about. */
+.data-rights-subject {
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.data-rights-note {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+.data-rights-warning {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--warning, #b45309);
+  border-left: 3px solid var(--warning, #b45309);
+  padding: 6px 10px;
+  margin: 8px 0;
+  background: color-mix(in srgb, var(--warning, #b45309) 8%, transparent);
+  border-radius: 4px;
+}
+.data-rights-passphrase-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.data-rights-passphrase-row input {
+  flex: 1 1 200px;
+  font-family: var(--font-mono);
+}
+.data-rights-steps {
+  font-size: 12px;
+  color: var(--text-muted);
+  padding-left: 18px;
+  line-height: 1.6;
+}
+/* Wraps: four actions at a thumb-sized height do not fit one phone row. */
+.data-rights-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.data-rights-actions .btn {
+  flex: 1 1 auto;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+.data-rights-actions .btn.disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+.btn.danger-btn {
+  background: #dc2626;
+  border-color: #dc2626;
+  color: #fff;
+}
+.btn.danger-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.data-rights-receipt {
+  margin-top: 12px;
+  border-top: 1px solid var(--border-color);
+  padding-top: 12px;
+}
+.data-rights-done {
+  font-weight: 700;
+  color: var(--success, #059669);
+}
+.data-rights-checklist {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.data-rights-checklist li {
+  padding: 8px 10px;
+  margin-bottom: 6px;
+  border-radius: 6px;
+  background: var(--input-bg);
+}
+.data-rights-checklist li.todo {
+  border-left: 3px solid var(--warning, #b45309);
+}
+.data-rights-checklist li.info {
+  border-left: 3px solid var(--border-color);
+}
+.data-rights-checklist .why {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+.form-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin: 4px 0 0;
+}
+/* The decrypted export, rendered as text — never as markup: it arrived from outside the app. */
+.data-rights-output {
+  margin-top: 12px;
+  padding: 10px;
+  background: var(--input-bg);
+  border-radius: 6px;
+  font-size: 11px;
+  line-height: 1.5;
+  max-height: 40vh;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}

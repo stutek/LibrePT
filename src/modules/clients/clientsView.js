@@ -1,3 +1,4 @@
+import { isErased } from "../../data/clientErasure.js";
 import { consentEmailHref } from "../common/consentForm.js";
 import { renderMarkupOnce } from "../common/dom.js";
 import {
@@ -8,6 +9,7 @@ import {
   truncateString,
 } from "../common/utils.js";
 import { renderHistoryItems } from "../history/historyView.js";
+import { openClientEraseDialog, openClientExportDialog } from "./clientDataRights.js";
 import { renderClientsDirectory } from "./clientsDirectory.js";
 
 let activeDetailClientId = null;
@@ -88,6 +90,8 @@ export function renderClientDetailViewShell() {
           </div>
         </div>
         
+        <p id="profile-erased" class="data-rights-warning" hidden></p>
+
         <div class="profile-info-grid">
           <div class="info-block">
             <label>Current Goals</label>
@@ -120,6 +124,12 @@ export function renderClientDetailViewShell() {
           </a>
           <button id="btn-ai-safe-copy" class="btn secondary-btn" style="flex: 1; min-width: 150px;">
             <i class="fa-solid fa-user-shield"></i> AI Safe Copy
+          </button>
+          <button id="btn-client-export" class="btn secondary-btn" style="flex: 1; min-width: 150px;">
+            <i class="fa-solid fa-file-export"></i> Export data (GDPR)
+          </button>
+          <button id="btn-client-erase" class="btn secondary-btn" style="flex: 1; min-width: 150px;">
+            <i class="fa-solid fa-user-slash"></i> Erase client (GDPR)
           </button>
         </div>
       </div>
@@ -203,6 +213,29 @@ ${historyText}`;
         alert("Anonymized client summary copied to clipboard! Safe to use with AI assistants.");
       });
     });
+  }
+
+  // Both data-rights actions are rebound per render (cloneNode drops the previous listener), the
+  // same pattern the other buttons here use — they close over THIS client, and a stale listener
+  // would aim an erasure at whoever was on screen before.
+  for (const [id, open] of [
+    ["btn-client-export", openClientExportDialog],
+    ["btn-client-erase", openClientEraseDialog],
+  ]) {
+    const button = document.getElementById(id);
+    if (!button) continue;
+    button.replaceWith(button.cloneNode(true));
+    document.getElementById(id).addEventListener("click", () => open(clientId));
+  }
+
+  const erasedBanner = document.getElementById("profile-erased");
+  if (erasedBanner) {
+    // An erased record still appears in the directory (a trainer asked "did you action it?" needs
+    // to show that it was), so it has to say what it is at a glance.
+    erasedBanner.hidden = !isErased(client);
+    if (isErased(client)) {
+      erasedBanner.textContent = `Erased on ${(client.erasure.erasedAt || "").substring(0, 10)} at the client's request. The training records below are anonymous.`;
+    }
   }
 
   const planBtn = document.getElementById("btn-plan-client-program");

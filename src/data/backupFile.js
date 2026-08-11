@@ -35,7 +35,10 @@ const SETTINGS_KEYS = ["lang"];
  * means. Comparing SHAs would imply a doubt that cannot exist here; the only shape that could vary
  * between builds is P, and P is never written to a file.
  */
-export function buildBackupPayload(state, { buildSha = null, now = new Date() } = {}) {
+export function buildBackupPayload(
+  state,
+  { buildSha = null, now = new Date(), suppressions = null } = {},
+) {
   const payload = {
     schemaVersion: BACKUP_SCHEMA,
     // Recorded so a future migration needing a temporal anchor has one, instead of reaching for
@@ -46,6 +49,13 @@ export function buildBackupPayload(state, { buildSha = null, now = new Date() } 
     // `schemaVersion` above; this is here so "which preview produced this file" is answerable.
     runtimeSchema: CURRENT_SCHEMA_VERSION,
   };
+
+  // The erasure register rides along, and it is the ONE part of this file that is not a snapshot of
+  // the database (erasureSuppression.js). It has to travel: a trainer who reinstalls and restores
+  // this file would otherwise come back with an empty register, and the next restore of an older
+  // file would resurrect someone who asked to be forgotten. It carries salted hashes only — no ids,
+  // no names — so a backup file discloses nothing about who was erased, only how many.
+  if (suppressions) payload.erasureSuppressions = suppressions;
 
   for (const key of SETTINGS_KEYS) payload[key] = state?.[key] ?? null;
 

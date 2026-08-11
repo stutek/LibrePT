@@ -11,7 +11,7 @@
 // atomic version. The worker's own sub-scripts (sw.js + this sw/ folder) are deliberately NOT in ASSETS:
 // they are the worker's script resources, kept coherent by the browser's own SW-update mechanism.
 self.swCacheManifest = (() => {
-  const CACHE_NAME = "librept-v66";
+  const CACHE_NAME = "librept-v68";
   const ASSETS = [
     "./",
     "./index.html",
@@ -81,6 +81,7 @@ self.swCacheManifest = (() => {
     "./modules/common/populateDropdownSelectors.js",
     "./modules/common/buildInfoDialog.js",
     "./modules/common/consentForm.js",
+    "./modules/common/encryptedFileReader.js",
     "./modules/common/download.js",
     // Seed data & stores
     "./data/index.js",
@@ -102,6 +103,11 @@ self.swCacheManifest = (() => {
     "./data/schemaMigrations.js",
     "./data/migrationSteps.js",
     "./data/recordSchemas.js",
+    "./data/clientErasure.js",
+    "./data/clientDataExport.js",
+    "./data/encryptedExport.js",
+    "./data/erasureSuppression.js",
+    "./data/erasureChecklist.js",
     "./data/readSchema.js",
     "./data/recordProjections.js",
     "./data/recordReferences.js",
@@ -136,6 +142,7 @@ self.swCacheManifest = (() => {
     "./modules/clipboard/restDeckCard.js",
     "./modules/clipboard/pastDeckCard.js",
     "./modules/clients/clientConsentSection.js",
+    "./modules/clients/clientDataRights.js",
     "./modules/clients/clientsDirectory.js",
     "./modules/clients/clientsView.js",
     "./modules/exercises/exercisePicker.js",

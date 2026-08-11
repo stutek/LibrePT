@@ -3,6 +3,7 @@
 // Split 2026-08-01 out of the old formsController.js, which bundled Client, Routine, and Exercise
 // forms in one file despite the three sharing nothing but boilerplate (AGENT_RULES §5.1).
 
+import { clientDisambiguator, clientsSharingName } from "../data/clientErasure.js";
 import { newRecordId } from "../data/recordId.js";
 import {
   consentSectionMarkup,
@@ -38,6 +39,12 @@ export function renderClientDialog() {
       </div>
 
       <div class="form-group">
+        <label for="client-alias">Alias (only if two clients share a name)</label>
+        <input type="text" id="client-alias" placeholder="e.g. morning, Novak, the runner" class="form-control">
+        <p class="form-hint" id="client-name-collision" hidden></p>
+      </div>
+
+      <div class="form-group">
         <label for="client-email">Email</label>
         <input type="email" id="client-email" placeholder="e.g. jane.doe@example.com" class="form-control">
       </div>
@@ -68,6 +75,21 @@ ${consentSectionMarkup()}
   );
 }
 
+// Two clients called Jane Doe is ordinary in a gym, and it is the case where every data-rights
+// surface downstream (the erasure confirmation, the export picker) risks acting on the wrong
+// person. The alias is the trainer's own answer to that, so the form asks for one at the exact
+// moment the collision appears rather than leaving them to discover it during an erasure.
+function renderNameCollisionHint(state, client) {
+  const hint = $id("client-name-collision");
+  if (!hint) return;
+  const namesakes = client?.name ? clientsSharingName(state, client) : [];
+  hint.hidden = namesakes.length === 0;
+  if (namesakes.length === 0) return;
+  hint.textContent = `${namesakes.length} other client${namesakes.length === 1 ? " has" : "s have"} this name (${namesakes
+    .map((namesake) => clientDisambiguator(namesake))
+    .join("; ")}). Add an alias so you can tell them apart.`;
+}
+
 export function setupClientForms({
   state,
   t,
@@ -93,6 +115,7 @@ export function setupClientForms({
     openModal("dialog-client", { resetForm: true, formId: "form-client" });
     // After the reset, never before: reset() would otherwise wipe the date the block just derived.
     fillConsentSection(null);
+    renderNameCollisionHint(state, null);
   });
 
   $id("btn-edit-client").addEventListener("click", () => {
@@ -103,11 +126,13 @@ export function setupClientForms({
     $id("client-modal-title").textContent = "Edit Client Profile";
     $id("client-form-id").value = client.id;
     $id("client-name").value = client.name;
+    $id("client-alias").value = client.alias || "";
     $id("client-email").value = client.email || "";
     $id("client-phone").value = client.phone || "";
     $id("client-goals").value = client.goals || "";
     $id("client-notes").value = client.notes || "";
     fillConsentSection(client);
+    renderNameCollisionHint(state, client);
 
     openModal("dialog-client");
   });
@@ -120,6 +145,7 @@ export function setupClientForms({
     e.preventDefault();
     const id = $id("client-form-id").value;
     const name = $id("client-name").value.trim();
+    const alias = $id("client-alias").value.trim();
     const email = $id("client-email").value.trim();
     const phone = $id("client-phone").value.trim();
     const goals = $id("client-goals").value.trim();
@@ -134,6 +160,7 @@ export function setupClientForms({
       const client = state.clients.find((c) => c.id === id);
       if (client) {
         client.name = name;
+        client.alias = alias;
         client.email = email;
         client.phone = phone;
         client.goals = goals;
@@ -145,6 +172,7 @@ export function setupClientForms({
       const newClient = {
         id: newId,
         name: name,
+        alias: alias,
         avatar: getInitials(name),
         joinedDate: todayStr,
         email: email,
@@ -176,6 +204,17 @@ export function setupClientForms({
 
     closeModal("dialog-client");
   });
+
+  // Live, not only on save: the moment a trainer types a name that already exists, the alias field
+  // above is the thing they should be filling in — telling them afterwards means going back.
+  const nameInput = $id("client-name");
+  if (nameInput) {
+    nameInput.addEventListener("input", () => {
+      const editingId = $id("client-form-id").value;
+      const editing = state.clients.find((c) => c.id === editingId) || null;
+      renderNameCollisionHint(state, { ...(editing || {}), id: editingId, name: nameInput.value });
+    });
+  }
 
   const searchClientsEl = $id("search-clients");
   if (searchClientsEl) {
