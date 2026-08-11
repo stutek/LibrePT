@@ -30,16 +30,19 @@ safety → showability → everything else**.
 **What moved since the 08-09 ranking**: §18.7's core shipped (backups written at a stable numbered
 schema, a frozen five-file restore corpus, a confirmation before a restore replaces real data), so
 data safety drops out of the top slots and *showability* now leads. §3.5 consent, §25's geometry
-gate and §1.5.1's Google canary all shipped in the same window.
+gate and §1.5.1's Google canary all shipped in the same window. **§27 is new and enters at rank 3**:
+reading the trainer-facing privacy doc against `src/` found two documented data-subject rights with
+no code behind them at all.
 
 | Rank | Item | Why now |
 | :--- | :--- | :--- |
 | 1 | Create the Google OAuth client id (§3.3, maintainer action) | A fully built feature works for exactly one person; also makes a README headline true |
 | 2 | §9.5's promise in the demo notification | A shipped button offers a walkthrough that does not exist — copy change or build it, not both |
-| 3 | §3.8 unbacked-data banner | The honesty surface for the eviction risk; §18.7 gave it a fix to name in the same breath |
-| 4 | §23.5 demo recording + landing page | Gates every outreach channel, and §23.6's autumn window is a real deadline |
-| 5 | §18.7 remainder — `formatVersion` on the envelope | Must land *before* compression or encryption, or every existing file becomes unparseable |
-| 6 | §9.5 guided walkthrough | Blank-app churn; big, so not before the above |
+| 3 | §27.5, then §27.2/§27.1 | The trainer doc promises an erasure and an export the app does not have; the doc half is a paragraph and a statutory clock runs on the other |
+| 4 | §3.8 unbacked-data banner | The honesty surface for the eviction risk; §18.7 gave it a fix to name in the same breath |
+| 5 | §23.5 demo recording + landing page | Gates every outreach channel, and §23.6's autumn window is a real deadline |
+| 6 | §18.7 remainder — `formatVersion` on the envelope | Must land *before* compression or encryption, or every existing file becomes unparseable |
+| 7 | §9.5 guided walkthrough | Blank-app churn; big, so not before the above |
 
 **Cheap wins, unranked** — each small enough to ride along with adjacent work: §12.5's reflog expiry
 (one maintainer command), §19.3's exercise-library filter reset (a real bug needing no URL decision),
@@ -68,6 +71,7 @@ the thing that must happen first, not merely what it touches.
 | **Refactor remainders** | §24.4d, §24.5, §24.7, §24.8 | One movement → plan item mapping | Optional by their own text |
 | **Tests & docs** | §6.2, §12.3, §12.4, §12.5, §12.6, §25.6 | Medium-tier overflow harness | Nothing; all small |
 | **Routing decisions** | §19.2, §19.3 | The URL-privacy invariant | One decision, then both unblock |
+| **Data-subject rights** | §27.1–§27.5 | Correct the doc, then build per-client export | Nothing; §27.1 needs the redact-vs-cascade decision first |
 
 ---
 
@@ -1269,99 +1273,78 @@ false positives came first, each buying a rule now written into the tool — see
 
 ---
 
-## 26. [Brainstorm] Client self-onboarding — an intake page the client fills on their own phone
+## 27. Data-subject rights the app documents but cannot perform
 
-The trainer hands over a QR or a link; the client enters their own details and signs consent on
-their own device; the record comes back for the trainer to review and save. Today every client
-record is typed by the trainer, at the desk, from something the client said — which is both the
-slowest part of taking on a client and the least accurate.
+[PRIVACY_FOR_TRAINERS.md §5](docs/PRIVACY_FOR_TRAINERS.md) tabulates four data-subject rights against
+"what to do in LibrePT". **Two of the four have no code behind them** (verified 2026-08-11): there is
+no way to delete a client, and no way to export one client's data. The document is not wrong about
+the law — it is wrong about the app, which is worse, because it is written for trainers who will rely
+on it while answering a request under a one-month deadline.
 
-**There is no backend, so the return path is the design problem, not the form.** Everything below
-follows from that one fact.
+Numbering note: section 26 (client self-onboarding via an intake deep-link) was pruned the same day
+it was written — the idea is in the git history if it is ever wanted back.
 
-### 26.1 One app, one route — not a second PWA
-**Decided**: `#/intake` inside the same build. A second PWA means a second service worker, CSP,
-deploy target and test tier for what is ~200 lines of form; the client simply never installs the one
-that exists. The constraint this buys is worth stating: intake must render on a **stock, cold
-browser** — no IndexedDB write, no demo seed, no service-worker dependency, no boot of the trainer's
-app state. It is the only route in the app that is stateless by design, and a medium test should
-pin that rather than trusting it.
+### 27.1 [ ] Erasure (Art. 17) — there is no way to delete a client
+The only deletion primitives in `src/` are [`removeDemoData()`](src/data/stateStore.js) and
+[`deleteDatabase()`](src/data/indexedDb.js): remove the demo fixture, or destroy everything. No
+single-record delete exists at any layer, and [recordDependencies.js](src/data/recordDependencies.js)
+declares clients *leaves* — nothing in the codebase describes what removing one would have to take
+with it.
 
-### 26.2 The payload, and why it lives in the fragment
-Name / email / phone / goals / injury plus `gdprConsent` is ~400–600 bytes of JSON;
-`CompressionStream('deflate-raw')` + base64url takes it to ~250–400 characters. The codec belongs in
-`src/data/` with a round-trip unit test in [tests/unit_js/](tests/unit_js/) — pure logic, no DOM, no
-persistence.
+**The reason this is not a one-line delete, and the decision to settle first**: a completed group
+session with three participants is simultaneously two *other* clients' training record. Erasing one
+participant must not delete the other two's history, so erasure here is **per-field redaction inside
+shared records**, not row removal. It needs the inverse of `recordDependencies` — what points *at* a
+client (sessions by `clientId`, group sessions by participant list, plans and routines, the
+`weightHistory` and notes inside the record itself) — and a per-referrer decision between cascade and
+redact-in-place. Art. 17 is also not absolute: a session already invoiced may be retained on another
+basis, so the action a trainer needs is closer to **"redact identity, keep the training record"** than
+to a delete button.
 
-**In the fragment (`#`), never the query string.** A fragment is not sent to the host, so it never
-reaches GitHub Pages logs or a `Referer`, and WhatsApp's link-preview crawler cannot fetch it. This
-is §19.2's URL-privacy question in its sharpest form — the payload is names, phone numbers and
-health data rather than an opaque id — and the fragment is what keeps it off every wire except the
-two devices that already hold it.
+### 27.2 [ ] Access & portability (Art. 15, 20) — no per-client export
+The whole-database backup is the only export, and it is exactly what must **never** be sent to a
+client: it carries every other client's Art. 9 health data, so honouring an access request with it
+would itself be a personal-data breach. The doc meanwhile instructs trainers to "export the client's
+history (JSON or Markdown) and send it" as though the action existed.
 
-### 26.3 Return path — share first, mail/SMS second, QR third
-1. **`navigator.share()`** — one tap surfaces every channel the phone has (WhatsApp, Viber, Signal,
-   mail, AirDrop) with no trainer address baked in at authoring time.
-2. **`mailto:` / `sms:`** — reuse the shape and the hard-won iOS `?&body=` quirk already encoded in
-   [consentForm.js](src/modules/common/consentForm.js); the trainer's address rides in the outbound
-   QR as `#/intake?to=…`. Email's real advantage is that it leaves the trainer a **durable copy in
-   an inbox**, which is worth something as consent evidence. Some phones have no mail client
-   configured, so it is never the only button.
-3. **QR shown on the client's screen, decoded by the trainer's NATIVE camera app.** Both iOS and
-   Android decode a QR from the stock camera and offer to open the URL, which launches LibrePT with
-   the payload — so this needs an **encoder only, on the client side only**: no `getUserMedia`, no
-   `BarcodeDetector` (absent on iOS Safari), no camera permission in our app. ~250–400 characters is
-   QR byte-mode version ~10–13 of 40, which scans off a phone screen at arm's length. This is the
-   only path that works with **no network and no messaging app** — the basement gym, or the client
-   who would rather not hand their trainer a phone number. Cost is one vendored ~10–15KB pure-JS
-   encoder, pinned and checksummed the way Node and Biome already are ([AGENT_RULES.md](AGENT_RULES.md) §5.2)
-   — no npm, so nothing a JS-side dependency audit would need to cover.
+Needed: a per-client projection over [backupFile.js](src/data/backupFile.js)'s format, plus a
+**Markdown rendering** — Art. 12(1) asks for "concise, transparent, intelligible" form, and a raw
+JSON dump handed to a lay person arguably is not. The Markdown view is the compliance-relevant half;
+the JSON is the portability half. Both come from one projection.
 
-### 26.4 The trainer's own QR needs no code at all
-It encodes a **static** URL, so it is a pre-rendered SVG in `assets/` — printable, stickable on the
-gym wall, one file per language variant. No runtime encoder on the trainer side in either phase.
+### 27.3 [ ] Erasure does not reach the copies
+Deleting the record leaves the Drive `appData` backups already written, any local export the trainer
+took, and the frozen restore corpus. The doc's "it goes from this device and from the next cloud
+backup" is true of the *next* backup and false of the ones already sitting in Drive — restore an
+older one and the erased client is back. Two honest options, and the cheap one may be the right one:
 
-### 26.5 Import is a review, never an auto-save
-Anyone who photographs the wall QR can craft a payload, so the review dialog is the trust boundary,
-not a nicety. It also carries **dedupe**: match email/phone against existing clients and offer
-"update existing" rather than minting a second Jane Doe — the same key
-[UC4](use_cases/uc4_client_self_subscription.md) already uses to reconcile bookings, so the two
-should agree on it. Sits naturally inside §5.2's "creation is a minimal modal, editing is inline"
-decision.
+- **Document it** — "erasure also requires deleting backups taken before today" — one paragraph, no
+  code, correct.
+- **Prune on restore** — a tombstone list the restore path filters against. Note the recursion: a
+  tombstone must survive the erasure it records, and a tombstone keyed by client id is itself
+  minimal personal data retained after an erasure request. Not obviously the better answer.
 
-### 26.6 Consent is the actual prize, and it does not overturn §3.5
-Paper stays the evidence — the 2026-07-22 decision holds. But a client ticking the box on **their
-own device** produces a materially better record than a trainer typing a date afterwards: the date
-is genuinely theirs, the language is the one they read (`en`/`sl` already exist in
-[src/i18n/consent/](src/i18n/consent/)), and `CONSENT_FORM_VERSION` is stamped at the moment they
-were shown *that* version rather than whichever is current at save time.
+Interacts with §18.7's backup work; whichever way it goes, it should be decided before backups gain
+compression or encryption.
 
-**Open**: whether a checkbox on the client's own phone counts as retained evidence at all, or is
-only a better-attested claim about the paper. `PRIVACY_FOR_TRAINERS.md` needs a paragraph either
-way, and §3.5's still-open translation gap applies here twice over — this is the first surface a
-client reads unaccompanied.
+### 27.4 [ ] Withdrawal as easy as consent (Art. 7(3)) — the cheap one
+The consent letter the client receives should carry a one-tap withdrawal route back to the trainer: a
+prefilled `mailto:`/`sms:` in the client's own language, reusing what
+[consentForm.js](src/modules/common/consentForm.js) already builds for delivery. No server, so it
+arrives as a message the trainer acts on — which is compliant, since withdrawal must be *easy*, not
+automated. Smallest item in this section by a wide margin, and it makes §3.5's shipped consent flow
+symmetrical.
 
-### 26.7 Phasing
-- [ ] **Phase 1** — the `#/intake` route and form, the codec, the import-review dialog, and
-      share / `mailto:` / `sms:` delivery. **No new dependency and no CSP change** (`connect-src`
-      untouched; it is all local).
-- [ ] **Phase 2** — the vendored QR encoder and client-side QR display, plus the static trainer-side
-      QR asset. Additive: both phases land on the same review dialog. Worth deferring until the
-      messaging handoff has actually been tried in a gym.
-- [ ] **Tests** — `tests/unit_js/` for codec round-trip and rejection of malformed/oversized
-      payloads; `tests/medium/` for the intake form mounted cold and for the review dialog;
-      `tests/e2e/` for the full link → review → saved-client loop. A new use case file
-      (`uc8_client_self_onboarding.md`) plus its [INDEX](use_cases/INDEX.md) row ships with phase 1.
+### 27.5 [ ] Until 27.1 and 27.2 ship, the doc must describe what a trainer can actually do
+A compliance document naming a button that does not exist is worse than one that says "do this by
+hand", because the trainer discovers the gap while a statutory clock is running. Either the doc's §5
+rows change to the manual procedure, or they ship. **This half is a paragraph and should not wait for
+the other half.**
 
-### 26.8 Known gaps
-- **First load needs network.** The client's phone has never cached the app, and the basement gym is
-  exactly where it will not be able to. The trainer's device is no help — it is the wrong device.
-  Either a printed fallback, or accept that intake happens at the desk and not on the floor.
-- **The payload has no authenticity, deliberately.** Signing would need a key exchange, which needs
-  the server this project does not have. §26.5's review dialog is the mitigation, and it is enough
-  because the stakes are one reviewable record.
-- **Real-world URL length is untested.** Chat clients wrap, truncate and sometimes re-render long
-  links; measure an actual payload through WhatsApp, Viber and SMS before committing to share-as-url
-  over share-as-text.
-- **No photo or avatar.** Out of scope — derive initials the way the seed data in
-  [clients.js](src/data/clients.js) does.
+### 27.6 What this architecture already gets for free
+Worth stating so effort goes to the two hard rights rather than the easy ones: **identity
+verification** (Art. 12(6)) is trivial here — the trainer knows the client by face, with no account,
+no recovery flow and no impersonation vector, where a SaaS has to build for it. And with data never
+leaving the device (the trainer's own Drive aside), there is no processor relationship to paper.
+The asymmetry is the point: **this architecture makes verification easy and erasure hard**, the exact
+inverse of a hosted product, so the backlog should be weighted accordingly.
