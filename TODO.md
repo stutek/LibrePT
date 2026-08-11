@@ -21,29 +21,53 @@ Canonical context: [README.md](README.md) (architecture & features), [use_cases/
 (workflows), [CONTRIBUTING.md](CONTRIBUTING.md) (conventions). Durable engineering lessons live in
 [AGENT_RULES.md](AGENT_RULES.md), not here — this file records *work*, not process.
 
-## Where to start (ranked 2026-08-09)
+## Where to start (ranked 2026-08-11)
 
 The governing fact is [docs/PREVIEW.md](docs/PREVIEW.md): the app tells its own users it can wipe
 their data. Nothing trainer-facing can be promoted until that is false, so the ranking is **data
 safety → showability → everything else**.
 
+**What moved since the 08-09 ranking**: §18.7's core shipped (backups written at a stable numbered
+schema, a frozen five-file restore corpus, a confirmation before a restore replaces real data), so
+data safety drops out of the top slots and *showability* now leads. §3.5 consent, §25's geometry
+gate and §1.5.1's Google canary all shipped in the same window.
+
 | Rank | Item | Why now |
 | :--- | :--- | :--- |
 | 1 | Create the Google OAuth client id (§3.3, maintainer action) | A fully built feature works for exactly one person; also makes a README headline true |
-| 2 | §9.5's promise in the demo notification | A shipped button offers a walkthrough that does not exist |
-| 3 | §18.7 backups — readers-forever + frozen corpus | The only recovery path there is, currently unenforced |
-| 4 | §3.8 unbacked-data banner | The honesty surface for the risk §18.7 fixes; unblocked now that §3.3 exists |
-| 5 | §23.5 demo recording | Gates every outreach channel, and the autumn window in §23.6 is real |
+| 2 | §9.5's promise in the demo notification | A shipped button offers a walkthrough that does not exist — copy change or build it, not both |
+| 3 | §3.8 unbacked-data banner | The honesty surface for the eviction risk; §18.7 gave it a fix to name in the same breath |
+| 4 | §23.5 demo recording + landing page | Gates every outreach channel, and §23.6's autumn window is a real deadline |
+| 5 | §18.7 remainder — `formatVersion` on the envelope | Must land *before* compression or encryption, or every existing file becomes unparseable |
 | 6 | §9.5 guided walkthrough | Blank-app churn; big, so not before the above |
 
-**Cheap wins, unranked** — each is small enough to ride along with adjacent work: §12.5's reflog
-expiry (one maintainer command), §19.3's exercise-library filter reset (a real bug needing no URL
-decision), §12.6's glyph subsetting (prerequisite already built), and §18.11's retention basis (one
-paragraph, in the privacy policy).
+**Cheap wins, unranked** — each small enough to ride along with adjacent work: §12.5's reflog expiry
+(one maintainer command), §19.3's exercise-library filter reset (a real bug needing no URL decision),
+§12.6's glyph subsetting (prerequisite already built), §18.11's retention basis (one paragraph, in
+the privacy policy), §21's 60s → 30s navigation timeout (the cause it was raised for is fixed), and
+§25.6's medium-tier overflow harness (the sweep already exists).
 
 Deprioritised on purpose: §24.5/§24.7 remainders and §24.8's rename (optional by their own text),
 §11/§5.1/§4.1 (large UI churn with no users yet to aim it), §17.2–§17.4 and §18.8–§18.12 (decided on
 paper, correctly parked), §12.7 (measured, closed — do not reopen).
+
+### Open work at a glance
+
+One row per theme, so the shape of the backlog is readable without scrolling it. "Blocked on" names
+the thing that must happen first, not merely what it touches.
+
+| Theme | Open | Lead item | Blocked on |
+| :--- | :--- | :--- | :--- |
+| **Launch prerequisites** | §3.3, §23.5, §9.5, §3.8 | Recording + landing page + a real OAuth id | Maintainer actions; nothing technical |
+| **Data safety remainder** | §18.7, §18.8, §18.9, §18.11, §18.12 | `formatVersion` envelope | Nothing — but only §18.7 is urgent |
+| **Scheduling** | §1.2, §1.3, §1.4, §1.5 | Room occupancy via `freebusy.query` | §1.5's OAuth/verification path |
+| **Gym-floor UX** | §7.2, §8.1, §8.7, §8.8 | Feedback buttons showing their own state | Nothing; §7.2 is the real defect of the four |
+| **History & templates** | §17.1, §17.2, §17.3, §17.4, §17.5 | Modality into the history snapshot | Decided on paper, parked deliberately |
+| **UI redesign** | §4.1, §5.1, §5.2, §11.1, §11.2 | Tabbed client view | Deliberately waiting for real users to aim it |
+| **Go-to-market** | §23.1–§23.6 | Decide what "winning" means | §23.1 gates every channel choice |
+| **Refactor remainders** | §24.4d, §24.5, §24.7, §24.8 | One movement → plan item mapping | Optional by their own text |
+| **Tests & docs** | §6.2, §12.3, §12.4, §12.5, §12.6, §25.6 | Medium-tier overflow harness | Nothing; all small |
+| **Routing decisions** | §19.2, §19.3 | The URL-privacy invariant | One decision, then both unblock |
 
 ---
 
@@ -163,53 +187,32 @@ is filled in. **Ranked #1 in Where to start.**
 not bandwidth-minimal.
 
 ### 3.5 [x] Paper consent — checkbox, signed date, form version, and delivery
-**Decided (2026-07-22): KISS — consent lives on paper.** The client signs a form kept at the gym and
-the PT files the paper; that physical file is the evidence. No photo capture, no image storage, no
-IMAP — all considered and dropped, and still dropped.
+**Decided 2026-07-22: KISS — consent lives on paper.** The client signs a form kept at the gym; that
+physical file is the evidence. No photo capture, no image storage, no IMAP — considered and dropped,
+and still dropped. **Shipped 2026-08-09**, per client and per language — see
+[CHANGELOG](CHANGELOG.md) for the editable signed date, the versioned letter, the localised client
+documents and why the archiving reminder is a dialog rather than a tooltip.
 
-**Shipped 2026-08-09** in [clientConsentSection.js](src/modules/clients/clientConsentSection.js) +
-[consentForm.js](src/modules/common/consentForm.js), as a *Data Protection (GDPR)* fieldset in the
-Add/Edit Client dialog. What landed, and the two amendments to the 07-22 decision:
+One amendment to the 07-22 decision worth recording: the `mailto:` delivery trigger was to be removed
+once paper consent landed. **Reversed on request (Simon, 2026-08-09)** and given an SMS sibling — a
+trainer who has to produce the letter themselves before the first session will not, and both buttons
+open the device's OWN mail/messaging app, so neither is an "email flow" in the IMAP sense rejected
+above.
 
-- **Editable signed date** (`gdprConsent.consentDate`, defaults to today) as decided — the invisible
-  `timestamp` is kept alongside but is no longer what anything reads. Legacy records fall back to
-  its date part rather than reading as blank.
-- **The delivery trigger stays, and gained an SMS sibling** — the 07-22 note said the `mailto:` flow
-  could be removed once paper consent landed. Reversed on request (Simon, 2026-08-09): a trainer who
-  has to produce the letter themselves before the first session will not, and both buttons open the
-  device's OWN mail/messaging app, so neither is an "email flow" in the IMAP sense that was rejected.
-  Email sends the full letter; SMS sends one line and a link, because messaging clients truncate.
-- **The letter is versioned** (`gdprConsent.formVersion`, a full ISO date — the day the wording
-  was adopted; a month alone cannot separate two revisions landing in the same month). Consent is consent to a
-  *wording*; without the stamp there is no way to answer "who is still covered?" after the text
-  changes. Existing consents keep the version they were signed under across later record edits.
-- **An archiving reminder as a dialog, not a tooltip** — LibrePT stores no signature, so the trainer
-  holding the paper is the whole evidence chain and cannot be told so only on hover.
-- Docs: [Client_Consent_Form.md](docs/templates/en/Client_Consent_Form.md) is now the printable form
-  AND the pinned source of the shipped wording (a unit test fails the build if the two drift), joined
-  by a client-facing [Client_Privacy_Notice.md](docs/templates/en/Client_Privacy_Notice.md) (Art. 13)
-  and the trainer-facing [PRIVACY_FOR_TRAINERS.md](docs/PRIVACY_FOR_TRAINERS.md).
-- **The client documents are per language**, added 2026-08-09 on the same day: the letters live in
-  [src/i18n/consent/](src/i18n/consent/index.js) (one file per locale, registry keys pinned to
-  `TRANSLATIONS`) and the printable editions in `docs/templates/<lang>/`, catalogued in
-  [templates/INDEX.md](docs/templates/INDEX.md). The trainer picks the language **per client**,
-  defaulting to the UI language and stored as `gdprConsent.formLang` — the trainer's app language
-  and the client's reading language are different facts, and a Slovenian trainer with one expat
-  client must be able to send that one client an English form without switching the whole app. The
-  choice drives the letter, the SMS text, and which locale folder the privacy-notice link points at.
-- **One version spans all languages** — translations state the same promises, so per-language
-  versioning would make `formVersion` stop meaning "which promises were made".
-- **Still open**: `PRIVACY_FOR_TRAINERS.md` and `PRIVACY.md` remain English-only (they are read by
-  the trainer, not the client). The Slovenian client documents are maintainer translations and have
-  **not** been reviewed by a data-protection lawyer — each says so at the top, and that review is a
-  launch prerequisite for §23.6, not a code task.
+**Still open**: `PRIVACY_FOR_TRAINERS.md` and `PRIVACY.md` remain English-only (they are read by the
+trainer, not the client), and the Slovenian client documents are maintainer translations that have
+**not** been reviewed by a data-protection lawyer — each says so at the top. That review is a launch
+prerequisite for §23.6, not a code task.
+
 
 ### 3.7 [x] [Superseded by §18.6] Persistence engine — localStorage JSON, then IndexedDB
 Engine decision and sizing live in §18.6. The Export/Import JSON backup remains the user-facing
 escape hatch (§3.3, §18.7).
 
 ### 3.8 [ ] Unbacked-data warning banner — same weight as the PREVIEW badge
-**Raised 2026-07-26 (Simon).** The database holds the **only** copy of a trainer's records
+**Raised 2026-07-26 (Simon). Ranked #3 in Where to start** — now that §18.7 ships a real backup and
+restore, the banner has a fix to name in the same breath, which was the missing half. The database
+holds the **only** copy of a trainer's records
 ([DATA_MODEL §6](docs/DATA_MODEL.md)) and a browser can evict IndexedDB under storage pressure.
 Nothing on screen says so.
 
@@ -422,10 +425,26 @@ seeding demo data silently. The app already boots empty with an opt-in demo deep
 phase below is committable on its own.
 
 ### 9.2 [~] Demo-data loader — PARTIAL
-`?init=demo_data_load` (parsed in `src/helper/shareLink.js`) seeds the full fixture, but **only when
-the app is genuinely empty**, so it never clobbers real records. **Still open**: narrow it to a
-focused subset (a few clients, one or two routines, today's sessions, the in-progress session) and
-expose it as a callable `loadDemoData()` invoked by the in-app activation in §9.5, not only by URL.
+`?init=demo_data_load` (parsed in [shareLink.js](src/modules/common/shareLink.js)) seeds the full
+fixture, but **only when the app is genuinely empty**, so it never clobbers real records. **Still
+open**: narrow it to a focused subset (a few clients, one or two routines, today's sessions, the
+in-progress session) and expose it as a callable `loadDemoData()` invoked by the in-app activation in
+§9.5, not only by URL.
+
+### 9.3 [x] Selective demo-data removal — shipped 2026-08-10
+The demo notice's primary action called `resetLibrePTData()`, which deletes the **whole database** —
+fine while the only person pressing it had nothing else, destructive from the moment a trainer adds
+real clients, which is exactly when the fake people become a stain worth removing. Now a
+confirmation screen that removes demo records selectively. See [CHANGELOG](CHANGELOG.md) and
+[UC7](use_cases/uc7_demo_to_clean_database.md). Two rules worth not re-deriving: **provenance is
+never inferred from id shape**, and the seeded exercise **catalog is an asset, not a stain** — it is
+kept, with the reason it survived shown on its own line rather than in a tooltip.
+
+Also fixed the same week: the seed anchored "today" sessions with a `min(17, …)` hour clamp, so a
+demo loaded after 17:00 opened on a wall of already-past sessions counting down in negative hours.
+Slots now follow the real clock and may cross midnight, each session's `day` bucket is **derived**
+from its timestamp rather than asserted alongside it, and an overdue card flips its label to
+"Overdue" instead of printing a minus sign.
 
 ### 9.4 [ ] `src/demo/` — simulated finger / touch controller
 A separate `src/demo/` folder for demo controls. First module: an on-screen pointer that moves to a
@@ -792,29 +811,39 @@ Quotas are orders of magnitude clear of that table, so sizing is not the constra
   you, which the app already promotes), quota-pressure eviction on Android, and private-browsing
   quotas. The recovery tier for all three is §18.7's backup file.
 
-### 18.7 [ ] [Decided] Backups: 1× not N×, readers forever, writers never
-**Ranked #3 in Where to start** — with no snapshot tier, this file is the only recovery path from a
-write-layer bug, and the guarantee is currently a hope rather than a test.
+### 18.7 [~] [Decided] Backups: 1× not N×, readers forever, writers never
+**Core shipped 2026-08-10** — [CHANGELOG](CHANGELOG.md). What landed, and what the decisions were:
 
-- **Back up the newest bucket only — 1×, not 3×.** With §18.4's staging the newest schema is lossless
-  and canonical; every other bucket is a pure projection, and derived data is not backed up. Restore =
-  import to domain, then fan out. A bad fan-out is therefore *always* repairable by re-projection.
+- **Back up the newest STABLE bucket only — 1×, not 3×.** Export projects through `STABLE_SCHEMA`
+  ([backupFile.js](src/data/backupFile.js)) using the same projection path the star-write fan-out
+  uses, so a file cannot drift from what the store would write for that shape. Not the newest *live*
+  shape — that is the disposable preview schema (§18.14), which is exactly what a backup must not be
+  written at. One shape per file, because expand-first staging (§18.4) makes the newest a strict
+  superset of every older one; a test asserts that superset rather than trusting the convention.
 - **No snapshot tier** (Simon: endless point-in-time issues in the backup world).
-- **Retain readers forever; retain writers never.** A 2026 backup does not need 2026's *write* path —
-  it needs a 2026 **reader** that upcasts to today's domain object, which then goes through the single
-  current write layer. Readers are pure, small and free to keep indefinitely; writers carry logic and
-  side effects. Import path: `parse → detect schemaVersion → upcast → single write layer → fan out`.
-  This makes "restorable indefinitely" both stronger *and* cheaper than "restorable for a while".
-- **Frozen backup-fixture corpus in CI** — one committed fixture per historical schema, each asserted
-  to still import to the expected domain object. Without it the long-restore guarantee is a hope.
+- **Retain readers forever; retain writers never** — a restore runs `parse → migration chain →
+  single write layer → fan out`, so an old file needs no old writer.
+- **Frozen backup-fixture corpus in CI** — five committed fixtures (schema 0 through 4) in
+  [tests/fixtures/backups/](tests/fixtures/backups/), asserted by
+  [frozenBackupCorpus.test.mjs](tests/unit_js/data/frozenBackupCorpus.test.mjs) to still import to
+  the expected domain object.
+- **A restore REPLACES, and now says so** — it names what would be lost per collection ("8 clients,
+  13 sessions") and only when something is at stake, because a warning shown every time is a warning
+  nobody reads. Declining discards the parsed file rather than leaving it primed for a later click.
+  Merging two databases was rejected: it needs a common ancestor, which Drive sync's three-way merge
+  has and a file import does not.
+
+**Still open**:
+
 - **Two version numbers, not one.** `formatVersion` on the envelope (how to open the box: gzip,
   checksum, multi-part, encryption) and `schemaVersion` on the payload (how to read the records). One
   number cannot distinguish "old container, new payload" from the reverse — and the day compression or
-  encryption is added, every existing file must still parse. **Land this before either.**
-- **Consent at import**, made precise, since an import fans out to all live buckets: *"This backup is
-  from schema 3. The oldest schema this deployment still writes is 5. Importing brings it forward to
-  5–7; it will no longer open in older builds."* Declining must leave the `.json` byte-identical — no
-  half-import, no helpful in-place upgrade.
+  encryption is added, every existing file must still parse. **Land this before either** (§18.8's
+  backup encryption is the likely trigger). Ranked #5 in Where to start.
+- **Forward-migration consent at import.** Today's prompt covers *what you lose from this device*;
+  it does not yet say what the import does to the file's own portability: *"This backup is from
+  schema 3. Importing brings it forward; it will no longer open in older builds."* Declining must
+  leave the `.json` byte-identical — no half-import, no helpful in-place upgrade.
 
 ### 18.8 [ ] [Open] Encryption, device theft, and storage durability
 - **IndexedDB is not encrypted by the app**; at rest it relies on OS full-disk encryption. A stolen
@@ -902,6 +931,20 @@ same promise and needs the same signal.
 Shipped 2026-08-02 — [CHANGELOG](CHANGELOG.md). The properties §18 relies on are *invariants across
 releases*, which a per-commit gate can hold and review cannot: none can ever be tested against a real
 PT's data, because that data is local-only by design.
+
+### 18.14 [x] One numbering axis, and a disposable preview schema — shipped 2026-08-10
+Record schemas and the migration chain used small integers for **different** things (`{2, 3}` vs
+`1–4`+`P`), so "schema 3" meant two things in two files. Unified: `LIVE_SCHEMAS` is `{4, P}` and 4 is
+the same 4 the migration chain ends at. See [CHANGELOG](CHANGELOG.md). Two rules this pins:
+
+- **`schema4` is durable, `schemaP` is not.** P is the shape *this build* reads; its fields may change
+  on any commit, so it is never a source of truth for anything outliving the build. It is rebuilt from
+  schema 4 whenever the recorded build SHA does not match the running one — and an **absent** marker
+  counts as not matching, so "we don't know which build wrote this" costs a projection pass rather
+  than risking a read of fields that are not there.
+- **Non-numeric schema keys must be threaded, never coerced.** `Number("P")` is `NaN`;
+  `Object.keys(LIVE_SCHEMAS).map(Number)` once sent every star write to a `schemaNaN` store that does
+  not exist, failing 139 of 141 e2e tests on a splash timeout. Use `liveSchemas()`.
 
 ---
 
@@ -1038,7 +1081,7 @@ one job they all hate, and expand from there.
 - [ ] **No screenshots or video exist anywhere in the repo.** Nobody adopts a UI tool they cannot see.
       A 20–30s recording of a real set logged one-handed — tap, `⬆ Load Up Next`, next participant — is
       the single highest-leverage asset and is an afternoon of work. **Blocks everything else here**,
-      and is ranked #5 in Where to start.
+      and is ranked #4 in Where to start.
 - [ ] **No landing page.** [README.md](README.md) is developer-facing (correctly) and the app boots
       empty. A trainer needs one screen: what it is, the recording, "try it now", "add to home screen".
 - [ ] **Share only the demo deep-link, never the bare URL.** `?init=demo_data_load&lang=…&theme=…` is
@@ -1170,129 +1213,56 @@ upward.
 
 ---
 
-## 25. Layout overflow: assert geometry, not just semantics
+## 25. [x] Layout overflow: assert geometry, not just semantics
 
-Captured **2026-08-10**; the sweep and its e2e suite were **built the same day** — see the status
-box at §25.6 for what is verified and what is still open. Every test in the suite asserts *semantics*
-(text, counts, element ids); none asserts *geometry*. So a component that runs off the screen edge,
-or one whose content is silently clipped inside its own box, passes the full gate. This is the
-class of bug a trainer hits on the gym floor and the pipeline never sees — the chips fix recorded in
-`src/index.css` (`.filter-chips`, "they ran out of view") was found by looking, not by a test.
+**Shipped 2026-08-10** — [overflow_scan.py](agent_tools/overflow_scan.py) plus
+[tests/e2e/test_layout_overflow.py](tests/e2e/test_layout_overflow.py); the rules the sweep learned,
+and the real defect it found, are in [CHANGELOG](CHANGELOG.md). Every other test in this repo asserts
+*semantics* (text, counts, ids); this one asserts *geometry*, which is the class of bug a trainer
+hits on the gym floor and the pipeline never saw.
 
-Two invariants, separate assertions, one DOM sweep.
+### 25.1 [x] Invariant A — nothing extends past its clipping boundary
+Each visible element's `getBoundingClientRect()` against the client box of its nearest **clipping
+ancestor** (`position: fixed` escapes that chain and is bounded by the viewport **horizontally
+only** — a bottom sheet is not a bug). **The mechanic worth keeping**: `body { overflow-x: hidden }`
+already masks this whole class, so `documentElement.scrollWidth` reads clean today and forever. The
+check has to be geometric and per-element to see the true layout box.
 
-### 25.1 [ ] Invariant A — nothing extends past its clipping boundary
-
-Not "past the viewport": `body` is `max-width: 480px` centered, so on desktop the real boundary is
-the app column. For each visible element, compare `getBoundingClientRect()` against the client box
-of its nearest **clipping ancestor** (nearest ancestor whose computed `overflow-x`/`overflow-y` is
-not `visible`, else the viewport). `position: fixed` escapes that chain and is compared to the
-viewport directly. Tolerance 1px, skip zero-area and hidden elements.
-
-**The mechanic that makes this non-obvious**: `body { overflow-x: hidden }` in `src/index.css`
-*already* masks this whole class of bug — a horizontally overflowing child is clipped silently and
-`documentElement.scrollWidth` never reports it. A naive `scrollWidth > clientWidth` check on the
-root would read clean today and forever. The per-element rect still sees the true layout box
-through a clipping ancestor, which is why the check has to be geometric and per-element.
-
-### 25.2 [ ] Invariant B — nothing overflows its own box
-
-`el.scrollWidth > el.clientWidth + 1` and the height equivalent, exempted **per axis** by what the
-element itself declares. A scroll container is not undecidable — it is self-declaring:
-
-| computed overflow on that axis | verdict |
-| :--- | :--- |
-| `auto` / `scroll` | skip that axis — content is *supposed* to exceed the box; still assert the other |
-| `visible` | skip — a non-clipping element reports its children's overflow as its own `scrollWidth`, so every ancestor up the chain would repeat one defect. Invariant A names the offending child once instead. **B is therefore about clipping only.** |
-| `hidden`/`clip` with `text-overflow: ellipsis` (x) or `-webkit-line-clamp` (y) | pass — the idiom states the intent |
-| `hidden`/`clip` with `white-space: nowrap`, vertically | pass — a single line has nothing to lose vertically; the few px are line-box rounding (the header `h1`: 26px font on a 26px line reports 3px at every width) |
-| bare `hidden` with real overflow | fail — the silent-clipping case, and the one worth finding |
-
-**No test-side allowlist**, per [AGENT_RULES.md](AGENT_RULES.md) §2: a Python set of "components we
-know overflow" is parking real debt. Where clipping is genuinely intentional and not expressible via
-the ellipsis idiom (a circular avatar crop, a decorative bleed), the opt-out belongs **in the
-markup** as `data-clip="intentional"` — self-documenting at the site, reviewable in a diff, and it
-travels with the component instead of rotting in a test file.
+### 25.2 [x] Invariant B — nothing overflows its own box
+`scrollWidth > clientWidth + 1` and the height equivalent, exempted **per axis** by what the element
+itself declares: `auto`/`scroll` is self-declaring intent, `visible` is skipped (a non-clipping
+element reports its children's overflow as its own, so one defect would repeat up the whole chain —
+Invariant A names the offending child once), and the ellipsis / line-clamp idioms state their intent.
+Bare `overflow: hidden` with real overflow is the silent-clipping case, and the one worth finding.
+**No test-side allowlist** — intentional clipping opts out in the markup as `data-clip="intentional"`,
+reviewable in a diff and travelling with the component.
 
 ### 25.3 [x] Where it runs
-
-[tests/e2e/test_layout_overflow.py](tests/e2e/test_layout_overflow.py): with demo data seeded, one
-page context per device walks every route in `src/controllers/routes/routeTable.js` — views, then
-each route-backed dialog while OPEN — sweeping after each. Router-driven `pushState` navigation, not
-`page.goto`, so the whole walk costs one cold boot instead of twenty. **Four tests**, not
-routes × widths.
-
-Devices are the ones the app is actually opened on, rather than round numbers:
-**iPhone 14 (390×844)**, **Galaxy S23 Ultra (412×915)**, **desktop (1280×800)** — where `body`'s
-480px column, not the window, is the edge. CSS pixels only: device pixel ratio does not change
-layout, so a full device descriptor would buy nothing a viewport size does not. Plus **one
-Slovenian pass** at the narrowest width (§19's `?lang=sl`) — overflow is a text-length bug and `sl`
-labels are longer than the `en` ones every other assertion is written against.
-
-A fifth test, `test_the_walk_still_covers_every_route`, needs no browser: it diffs the walk's route
-list against `routeTable.js` so a route added later fails until someone decides whether its view can
-overflow. Five routes are listed as deliberately not walked, each with the reason its markup is
-already covered.
-
-Medium tier second and still open: extract the sweep into `tests/medium/_overflow.py` so an existing
-component test adds one line after mount and gets per-component attribution.
+With demo data seeded, one page context per device walks every route in
+`src/controllers/routes/routeTable.js` — views, then each route-backed dialog while OPEN — via
+router-driven `pushState`, so ~20 routes cost one cold boot (~12.5s of call time per walk). Devices
+are **iPhone 14 (390×844)**, **Galaxy S23 Ultra (412×915)** and **desktop (1280×800)** (where
+`body`'s 480px column, not the window, is the edge), plus **one Slovenian pass** at the narrowest
+width, because overflow is a text-length bug. A fifth test needs no browser: it diffs the walk's
+route list against `routeTable.js`, so a route added later fails until someone decides whether its
+view can overflow.
 
 ### 25.4 [x] One sweep, two consumers
+Per [AGENT_RULES.md](AGENT_RULES.md) §6 the JS lives in ONE module, used by the e2e suite and
+runnable directly as a diagnostic (`--device`, `--viewport`, `--invariant`). Its own tool rather than
+a flag on [layout_probe.py](agent_tools/layout_probe.py), which stays about *named selectors*.
 
-Per [AGENT_RULES.md](AGENT_RULES.md) §6 the JS lives in ONE module,
-[agent_tools/overflow_scan.py](agent_tools/overflow_scan.py) — used by the e2e suite and runnable
-directly as a diagnostic (`--device`, `--viewport`, `--invariant`). It is its own tool rather than a
-flag on [layout_probe.py](agent_tools/layout_probe.py), which stays about *named selectors*; the two
-answer different questions and share no arguments beyond `--url`.
-
-### 25.5 What it found, and the four rules the findings bought
-
-The first run was red, but not in the shape §25 predicted — and every false positive taught the
-sweep a rule that is now written down in the tool. In order:
-
-1. **`#notification-area` "overflows the viewport vertically by 716px".** It is a bottom sheet, and
-   that is how every sheet works. → **The viewport bounds an element horizontally only**, `position:
-   fixed` included. A real clipping ancestor still bounds both axes, because there content IS lost.
-2. **The header `h1` "overflows its own box vertically by 3px"** at every width. 26px font on a 26px
-   line. → **`white-space: nowrap` exempts the vertical axis**: one line has nothing to lose.
-3. **A long Slovenian client name exceeding the ellipsised session title by 6px.** That is what
-   `text-overflow: ellipsis` is FOR. → **Inside an ellipsised box the bar is "wholly invisible", not
-   "exceeds by a pixel"** — a partly-visible child ending in "…" keeps the promise the ellipsis
-   makes; a child pushed entirely out does not.
-4. That last rule needed its own exception, and it is the one worth remembering: **"wholly outside"
-   is only benign for elements positioned OUT OF FLOW.** A parked drawer sits wholly outside on
-   purpose; in-flow static content wholly outside its clipping box has been *deleted*, not
-   truncated. Exempting it unconditionally reported the wide phone and let the narrow — worse — case
-   through, which is exactly backwards.
-
-**The surviving finding was real, phone-only, and is now fixed** (2026-08-10): in the session editor
-(`session.edit`, `session.catalog`), the edit-mode status chip
-(`.edit-mode-chip`, built in `src/modules/clipboard/activeSessionBoard.js`) was appended AFTER the
-client name inside `#session-title-text`, which is `overflow:hidden; white-space:nowrap;
-text-overflow:ellipsis`. So the ellipsis ate the chip first: **169px outside the box at 390px in
-English, 160px in Slovenian — entirely invisible.** At 412px and 1280px it was partly visible. The
-chip is the only thing on screen distinguishing editing a LIVE session from editing a future one, so
-losing it on the narrowest phone is a real gym-floor hazard, and no existing test could see it.
-
-**Reordering it did not fix it — that only chose the casualty.** Putting the chip first made the
-*client name* vanish by the same 169px, which the sweep caught on the very next run. An ellipsis
-eats whole ELEMENTS, so a nowrap line that cannot hold its contents will always delete one of them
-outright. The fix is structural: `.edit-mode-title` is a flex row where the chip and the "Editing"
-label declare `flex: 0 0 auto` and only the client name shrinks — and being the ellipsised box
-itself, it truncates as *text*, with the "…" a trainer can see. `min-width: 0` on both the row and
-the name is the part that actually does the work; a flex item's default `min-width: auto` refuses to
-shrink below its content, which is how the name got pushed out rather than ellipsised in the first
-place.
+### 25.5 [x] What it found
+One real, phone-only defect — the edit-mode status chip pushed 169px outside the ellipsised session
+title, entirely invisible, and the only thing on screen distinguishing editing a LIVE session from a
+future one. **Reordering did not fix it, it only chose the casualty**; an ellipsis eats whole
+ELEMENTS, so the fix was structural (flex row, `min-width: 0`, only the client name shrinks). Three
+false positives came first, each buying a rule now written into the tool — see
+[CHANGELOG](CHANGELOG.md).
 
 ### 25.6 Status
+- [x] The tool, its unit tests, and the four-device e2e suite; full gate green 2026-08-10.
+- [ ] `tests/medium/_overflow.py`, so an existing component test adds one line after mount and gets
+      per-component attribution. Cheap, and the sweep already exists.
 
-- [x] `agent_tools/overflow_scan.py`, its unit tests, and the four-device e2e suite.
-- [x] Full gate green (2026-08-10), edit-mode title bar fixed.
-- [ ] `tests/medium/_overflow.py`, for per-component attribution (§25.3).
-
-**Cost, measured rather than assumed:** each walk is **~12.5s of call time**, ~50s across the four,
-which adds roughly 13s to stage 3's floor once fanned out. The run that first went green clocked
-4m03s, but that number is worthless — three back-to-back gate runs had the box at a load average of
-17–26 on 16 cores, and stage 2, which the change never touches, tripled in the same run (16s → 53s).
-That is the tell for an environment problem rather than a change problem, per
-[AGENT_RULES.md](AGENT_RULES.md) §2.
+**Cost, measured**: ~50s of call time across the four walks, ~13s on stage 3's floor once fanned out.
