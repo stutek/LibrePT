@@ -10,12 +10,51 @@ export const LOCATIONS = {
 
 export const DEFAULT_SESSIONS = (() => {
   const now = new Date();
-  const currentHour = Math.min(17, Math.max(3, now.getHours()));
 
   // 24-hour HH:MM (ISO-style), e.g. "14:00"
-  const formatHour = (h) => {
-    const rawH = (h + 24) % 24;
-    return `${rawH.toString().padStart(2, "0")}:00`;
+  const formatClock = (date) => `${String(date.getHours()).padStart(2, "0")}:00`;
+
+  // Which coarse bucket a date falls in, compared at MIDNIGHT — "tomorrow" is a calendar fact, not
+  // a count of elapsed hours. Computed locally rather than imported from domain/sessionRecord.js:
+  // `data/` sits below `domain/` in the import layering (AGENT_RULES §5.3), so reaching up for it
+  // would invert the graph the Stage 1 gate enforces.
+  const dayBucketFor = (date) => {
+    const startOfToday = new Date(now);
+    startOfToday.setHours(0, 0, 0, 0);
+    const startOfThatDay = new Date(date);
+    startOfThatDay.setHours(0, 0, 0, 0);
+    const diffDays = Math.round((startOfThatDay - startOfToday) / 86400000);
+    if (diffDays < 0) return "yesterday";
+    if (diffDays === 0) return "today";
+    if (diffDays === 1) return "tomorrow";
+    return "upcoming";
+  };
+
+  const hoursFromNow = (offset) => {
+    const d = new Date(now);
+    d.setHours(d.getHours() + offset, 0, 0, 0);
+    return d;
+  };
+
+  /**
+   * A session slot `startOffset`..`endOffset` hours from now, as the three fields that describe
+   * when it happens.
+   *
+   * Anchored on the REAL current hour and allowed to cross midnight. It used to be anchored on
+   * `Math.min(17, Math.max(3, now.getHours()))` — a clamp that kept the whole spread inside one
+   * calendar day, at the cost of making the demo wrong outside 03:00-17:00: loaded at 22:00, every
+   * "today" session had already happened and the dashboard opened on a wall of past sessions
+   * counting down in negative hours. The point of this dataset is that something is live RIGHT NOW,
+   * whenever a trainer opens it, so the bucket is derived from the resulting timestamp instead of
+   * being asserted — a slot that lands after midnight is honestly "tomorrow".
+   */
+  const slot = (startOffset, endOffset) => {
+    const start = hoursFromNow(startOffset);
+    return {
+      time: `${formatClock(start)} - ${formatClock(hoursFromNow(endOffset))}`,
+      startDate: start.toISOString(),
+      day: dayBucketFor(start),
+    };
   };
 
   // The one real, absolute timestamp on a session (TODO §7.3 item 8) — `day` stays a coarse bucket
@@ -32,37 +71,31 @@ export const DEFAULT_SESSIONS = (() => {
   return [
     {
       id: "s00f2e3d",
-      time: `${formatHour(currentHour - 3)} - ${formatHour(currentHour - 2)}`,
-      startDate: atHour(0, currentHour - 3),
+      ...slot(-3, -2),
       title: "Early Bird Strength",
       location: LOCATIONS.GYM,
       participants: ["c4d6c3b5", "c6f4a597"],
       routineId: "r10d5e6f",
       maxCapacity: 4,
-      day: "today",
       completed: true,
     },
     {
       id: "s01f2e3d",
-      time: `${formatHour(currentHour - 1)} - ${formatHour(currentHour + 1)}`,
-      startDate: atHour(0, currentHour - 1),
+      ...slot(-1, +1),
       title: "Group Strength & Conditioning",
       location: LOCATIONS.GYM,
       participants: ["c1a9f0e2", "c2b8e1d3"],
       routineId: "r12d5e6f",
       maxCapacity: 7,
-      day: "today",
     },
     {
       id: "s07f2e3d",
-      time: `${formatHour(currentHour - 2)} - ${formatHour(currentHour - 1)}`,
-      startDate: atHour(0, currentHour - 2),
+      ...slot(-2, -1),
       title: "Strength & Longevity Focus",
       location: LOCATIONS.GYM,
       participants: ["c8b28799"],
       routineId: "r14d5e6f",
       maxCapacity: 1,
-      day: "today",
       completed: true,
     },
     // Deliberately OVERLAPS "Group Strength & Conditioning" above, in the same slot and venue: a
@@ -73,58 +106,48 @@ export const DEFAULT_SESSIONS = (() => {
     // Without a merged pair in the seed data, that whole path went unexercised by the demo.
     {
       id: "s09f2e3d",
-      time: `${formatHour(currentHour - 1)} - ${formatHour(currentHour + 1)}`,
-      startDate: atHour(0, currentHour - 1),
+      ...slot(-1, +1),
       title: "Return-to-Play Rehab",
       location: LOCATIONS.GYM,
       participants: ["c3c7d2c4"],
       routineId: "r13d5e6f",
       maxCapacity: 1,
-      day: "today",
     },
     {
       id: "s02f2e3d",
-      time: `${formatHour(currentHour + 1)} - ${formatHour(currentHour + 2)}`,
-      startDate: atHour(0, currentHour + 1),
+      ...slot(+1, +2),
       title: "1:1 Personal Training",
       location: LOCATIONS.GYM,
       participants: ["c5e5b4a6"],
       routineId: "r11d5e6f",
       maxCapacity: 1,
-      day: "today",
     },
     {
       id: "s03f2e3d",
-      time: `${formatHour(currentHour + 2)} - ${formatHour(currentHour + 3)}`,
-      startDate: atHour(0, currentHour + 2),
+      ...slot(+2, +3),
       title: "Express Core HIIT",
       location: LOCATIONS.PLAYGROUND,
       participants: ["c3c7d2c4"],
       routineId: "r11d5e6f",
       maxCapacity: 2,
-      day: "today",
     },
     {
       id: "s08f2e3d",
-      time: `${formatHour(currentHour + 3)} - ${formatHour(currentHour + 4)}`,
-      startDate: atHour(0, currentHour + 3),
+      ...slot(+3, +4),
       title: "Mobility Flow",
       location: LOCATIONS.PARK,
       participants: ["c7a39688"],
       routineId: "r13d5e6f",
       maxCapacity: 2,
-      day: "today",
     },
     {
       id: "s09f2e3d",
-      time: `${formatHour(currentHour + 4)} - ${formatHour(currentHour + 5)}`,
-      startDate: atHour(0, currentHour + 4),
+      ...slot(+4, +5),
       title: "Open Slot (Drop-in)",
       location: LOCATIONS.GYM,
       participants: [],
       routineId: "r11d5e6f",
       maxCapacity: 3,
-      day: "today",
     },
     {
       id: "s04f2e3d",

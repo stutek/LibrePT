@@ -80,13 +80,22 @@
   background: color-mix(in srgb, var(--temporal-future, #f59e0b) 35%, white);
   color: var(--text-dark);
 }
-/* The "Starts in" countdown keeps counting once the scheduled start passes — starting the session
-   is a clipboard title-bar action now (sessionTitleBar.js), not a card action, so this bar has
-   nothing else to hand off to. Warn instead of silently counting into negative time, matching the
-   live bar's own overtime treatment. */
+/* The countdown keeps counting once the scheduled start passes — starting the session is a
+   clipboard title-bar action now (sessionTitleBar.js), not a card action, so this bar has nothing
+   else to hand off to. Warn instead of silently counting into negative time, matching the live
+   bar's own overtime treatment. */
 .session-live-bar.upcoming.overtime {
   background: var(--warning, #f59e0b);
   color: #3d2600;
+}
+
+/* Both labels ship in the markup and CSS picks one, so the bar can flip from "Starts in" to
+   "Overdue" at the moment the start passes without re-rendering the card — the 1s ticker already
+   toggles `.overtime` here, and re-rendering a card under a trainer's thumb mid-set is exactly what
+   the dashboard avoids doing. */
+.session-live-bar.upcoming .when-overdue,
+.session-live-bar.upcoming.overtime .when-upcoming {
+  display: none;
 }
 .session-live-bar.past {
   background: color-mix(in srgb, var(--temporal-past, #c084fc) 55%, white);

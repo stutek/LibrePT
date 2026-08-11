@@ -264,6 +264,7 @@ export const en = {
   upcoming: "Upcoming",
   jump_to_date: "Jump to date",
   starts_in: "Starts in",
+  overdue: "Overdue",
   elapsed: "Elapsed",
   edit_elapsed_time: "Edit elapsed time",
   live: "Live",

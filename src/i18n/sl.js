@@ -262,6 +262,7 @@ export const sl = {
   upcoming: "Prihodnje",
   jump_to_date: "Pojdi na datum",
   starts_in: "Se začne čez",
+  overdue: "Zamuja",
   elapsed: "Trajanje",
   edit_elapsed_time: "Uredi trajanje",
   live: "V živo",

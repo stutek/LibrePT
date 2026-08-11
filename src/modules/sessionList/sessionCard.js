@@ -32,7 +32,9 @@ function ensureCardTicker() {
   cardTicker = setInterval(() => {
     for (const el of document.querySelectorAll(".session-live-timer[data-end]")) {
       const remSec = Math.round((parseInt(el.dataset.end, 10) - Date.now()) / 1000);
-      el.textContent = formatDurationHourMin(remSec);
+      // Same unsigned rule as the initial paint, or the value would sprout a minus sign the moment
+      // a card ticked past its scheduled start while the trainer was looking at it.
+      el.textContent = formatDurationHourMin(el.dataset.overtimeAware ? Math.abs(remSec) : remSec);
       if (el.dataset.overtimeAware) {
         const over = remSec < 0;
         el.classList.toggle("overtime", over);
@@ -132,15 +134,18 @@ function computeCardTiming(b, isLaunched, activeSession, isLive, range) {
         : null
     : null;
 
-  // getSessionDayDate maps each relative day bucket to a real calendar date (daySelector.js) — the
-  // same mapping the rest of the dashboard already uses — so this stays consistent even though
-  // the `day` bucket carries no real date of its own (see TODO 4.3). No longer gated on
-  // startMs > Date.now(): starting a session is a clipboard-title-bar action, not a card action, so
-  // this card has nothing else to show once the scheduled start passes — the countdown just keeps
-  // counting into negative/overtime.
+  // `startDate` FIRST: it is the session's own absolute timestamp, and the only field that stays
+  // correct when the day rolls over. getSessionDayDate re-derives a date from the coarse `day`
+  // bucket "as of right now" — a necessary fallback for records predating `startDate`, but wrong to
+  // prefer, because a stale bucket then silently moves a session that already knows its real date.
+  //
+  // Not gated on being in the future: starting a session is a clipboard-title-bar action, not a
+  // card action, so the card still has something to say once the scheduled start passes — but it
+  // says OVERDUE rather than counting down through zero into negative hours.
+  const scheduledStartMs = b.startDate ? new Date(b.startDate).getTime() : null;
   const startMs =
-    !b.completed && !isLive && range
-      ? getSessionDayDate(b.day).getTime() + range.start * 60000
+    !b.completed && !isLive && (scheduledStartMs != null || range)
+      ? (scheduledStartMs ?? getSessionDayDate(b.day).getTime() + range.start * 60000)
       : null;
   const isUpcoming = startMs != null;
 
@@ -160,7 +165,9 @@ function computeCardTiming(b, isLaunched, activeSession, isLive, range) {
     timerEndMs = startMs;
     timerOvertimeAware = true;
     const remSec = Math.round((startMs - Date.now()) / 1000);
-    timerText = formatDurationHourMin(remSec);
+    // Unsigned: the bar's label says whether the time is still to come or already gone, so a minus
+    // sign in the value states it a second time and reads as "Starts in -06h 00m".
+    timerText = formatDurationHourMin(Math.abs(remSec));
     timerIsOvertime = remSec < 0;
   }
 
@@ -265,7 +272,8 @@ function buildSessionCardStatusBarHTML({
       stack: true,
       html: `
     <div class="session-live-bar upcoming${timerIsOvertime ? " overtime" : ""}">
-      <span class="session-live-tag"><i class="fa-solid fa-forward-fast"></i> ${escapeHTML(t("starts_in") || "Starts in")}</span>
+      <span class="session-live-tag when-upcoming"><i class="fa-solid fa-forward-fast"></i> ${escapeHTML(t("starts_in") || "Starts in")}</span>
+      <span class="session-live-tag when-overdue"><i class="fa-solid fa-triangle-exclamation"></i> ${escapeHTML(t("overdue") || "Overdue")}</span>
       ${timerSpan}
     </div>`,
     };
