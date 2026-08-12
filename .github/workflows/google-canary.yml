@@ -11,12 +11,23 @@ name: Live Google API Canary
 # real and worth waking up to — it just is not a reason to stop shipping. This file has exactly one
 # job, so pipeline_gates' "exactly one terminal job" invariant holds here trivially.
 #
-# **No stored credential, by design.** Workload Identity Federation exchanges GitHub's OIDC assertion
-# for a short-lived Google access token, so this repository holds no long-lived Google secret for an
-# attacker to exfiltrate or for anyone to rotate. The provider's attribute condition in GCP MUST pin
-# `assertion.repository` (see TODO §1.5) — without it, any repository on GitHub could mint tokens as
-# this service account. Note also what is NOT here: no `pull_request_target` trigger, which is the
-# standard way workflows leak credentials to untrusted fork code.
+# **Nothing long-lived in THIS repository, by design.** Workload Identity Federation exchanges
+# GitHub's OIDC assertion for a short-lived Google access token, so there is no stored Google secret
+# here for an attacker to exfiltrate or for anyone to rotate. The provider's attribute condition in
+# GCP MUST pin `assertion.repository` (see TODO §1.5) — without it, any repository on GitHub could
+# mint tokens as this service account. Note also what is NOT here: no `pull_request_target` trigger,
+# which is the standard way workflows leak credentials to untrusted fork code.
+#
+# **Why there are two steps rather than one — a service account cannot write to Drive.** The federated
+# token proves WHO the run is; the identity that actually touches Drive and Calendar is a consumer
+# account whose refresh token lives in Secret Manager, unlocked by that federated token. This was
+# built, removed on 2026-08-12 as buying no coverage, and restored the same day when the first live
+# run proved otherwise: `findSyncFile` (a list) succeeded and `createSyncFile` (the upload) came back
+# **403**. Google removed service-account Drive storage quota, and their own remedy — a shared drive,
+# or domain-wide delegation — reaches neither case here: `appDataFolder` cannot live in a shared
+# drive, and delegation needs Workspace. So a service account can READ the API and can never write
+# to it, which makes it useless for the half of the contract most likely to break (multipart upload).
+# TODO §1.5.1 named exactly this as the one reason to bring the vault back.
 
 on:
   schedule:
@@ -58,18 +69,10 @@ jobs:
       # both non-sensitive identifiers (the security boundary is the provider's attribute condition
       # in GCP, not the secrecy of these strings). Keeping them as vars means a missing setup is a
       # readable skip below rather than an empty-secret authentication error.
-      # Prove WHO this run is, without a stored credential anywhere. GitHub mints a short-lived OIDC
-      # assertion ("this run is stutek/LibrePT on main"), Google verifies GitHub's signature and
-      # returns an hour-long token for the service account. Nothing is stored on either side: no key
-      # to rotate, no token to expire, and nothing an exfiltrating job could steal that outlives the
-      # run.
-      #
-      # A refresh token for a real consumer account was designed and then dropped (2026-08-12). It
-      # would have exercised a Gmail identity rather than a service account — but the ONLY part that
-      # differs is the consent flow, which no CI can drive at all, because Google fingerprints and
-      # blocks automated browsers on accounts.google.com. Every endpoint a canary can actually reach
-      # behaves identically for either identity, so the refresh token bought a vault, a second OAuth
-      # client, a manual consent dance and an expiry story in exchange for no extra coverage.
+      # Step 1 of 2: prove WHO this run is, without a stored credential. GitHub mints a short-lived
+      # OIDC assertion ("this run is stutek/LibrePT on main"), Google verifies GitHub's signature and
+      # returns an hour-long token. Nothing is stored on either side, so there is no key to rotate
+      # and nothing an exfiltrating job could steal that outlives the run.
       - name: Authenticate to Google (Workload Identity Federation)
         id: auth
         if: vars.GOOGLE_WIF_PROVIDER != ''
@@ -78,10 +81,40 @@ jobs:
           workload_identity_provider: ${{ vars.GOOGLE_WIF_PROVIDER }}
           service_account: ${{ vars.GOOGLE_TEST_SERVICE_ACCOUNT }}
           token_format: 'access_token'
-          # Exactly the two scopes production asks for — never `drive` or `calendar.readonly`. A
-          # canary minted with broader access than the app uses would pass while the real scopes
-          # were broken, which is worse than no canary.
-          access_token_scopes: 'https://www.googleapis.com/auth/drive.appdata,https://www.googleapis.com/auth/calendar.freebusy'
+          # cloud-platform is the ONLY scope Secret Manager accepts — it publishes no narrower one.
+          # The real boundary is therefore IAM, not this scope: the service account holds
+          # `secretmanager.secretAccessor` on ONE secret and no project roles at all, so a leaked
+          # token of this kind reads that one secret and reaches nothing else.
+          #
+          # Note what is deliberately ABSENT: no drive.appdata, no calendar.freebusy. The federated
+          # identity never holds app scopes — it could not use them anyway (see the header: Drive
+          # refuses its writes), and granting them would let the canary pass on an identity no
+          # trainer has while the consumer grant actually under test was broken.
+          access_token_scopes: 'https://www.googleapis.com/auth/cloud-platform'
+
+      # Step 2 of 2: fetch the consumer test account's refresh token from Secret Manager and drop it
+      # exactly where a developer's own credential lives. That is the point of writing a file rather
+      # than exporting env vars: tests/live/_credentials.mjs then runs the SAME path in CI as on a
+      # laptop, so the CI path cannot rot separately, and no secret is ever placed in the process
+      # environment. `.private/` is gitignored, and the runner is destroyed after the job.
+      - name: Fetch the test credential from Secret Manager
+        if: steps.auth.outputs.access_token != ''
+        env:
+          ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+          SECRET_RESOURCE: ${{ vars.GOOGLE_LIVE_SECRET }}
+        run: |
+          # pipefail matters here: without it a failed curl still yields a zero exit through the
+          # pipe, and the job would carry on with an empty credential file and "skip" the suite —
+          # a silently disarmed canary, which AGENT_RULES §2.A.3 treats as a failure, not a pass.
+          set -euo pipefail
+          mkdir -p .private
+          curl -sS --fail \
+            -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+            "https://secretmanager.googleapis.com/v1/${SECRET_RESOURCE}/versions/latest:access" \
+            | jq -r '.payload.data' | base64 -d > .private/google-live.json
+          # A secret fetched at RUNTIME is not masked automatically — only ones GitHub injected are.
+          echo "::add-mask::$(jq -r '.refresh_token' .private/google-live.json)"
+          echo "::add-mask::$(jq -r '.client_secret' .private/google-live.json)"
 
       - name: Report missing federation setup
         if: vars.GOOGLE_WIF_PROVIDER == ''
@@ -90,8 +123,7 @@ jobs:
                "See .private/google-cloud-setup.md for the one-time GCP setup."
 
       - name: Run Live Google API Tests
-        env:
-          # Empty when the auth step was skipped; tests/live/_credentials.mjs treats an absent token
-          # as a skip, so this stays green rather than red on an unconfigured repository.
-          GOOGLE_LIVE_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+        # No credential env var by design — the suite reads .private/google-live.json, written above
+        # when federation is configured and simply absent otherwise, which _credentials.mjs treats as
+        # a skip rather than a failure.
         run: .venv/bin/python -c "from build import run_live_google_tests; run_live_google_tests()"

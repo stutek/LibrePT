@@ -39,8 +39,12 @@ uptime and on a credential no contributor has — properties a commit gate must 
 the one question the hermetic suites structurally cannot: **has Google changed something.**
 `unit_js/data/driveAppData.test.mjs` pins our request shapes against an injected `fetchImpl` and
 catches every regression *we* can cause; it cannot see a deprecated endpoint or a reclassified scope.
-So this runs as a scheduled canary (`.github/workflows/google-canary.yml`, credentials via Workload
-Identity Federation so nothing long-lived is stored) and, locally, off `.private/google-live.json`.
+So this runs as a scheduled canary (`.github/workflows/google-canary.yml`) and, locally, off
+`.private/google-live.json`. In CI that same file is written from GCP Secret Manager, unlocked by a
+Workload Identity Federation token, so this repository stores no Google credential of its own. The
+identity in the file is a **consumer account, not the federated service account** — Google refuses a
+service account's `appDataFolder` writes for lack of storage quota, so the federated identity can
+read the Drive API and never write to it (verified 2026-08-12; [TODO §1.5.1](../TODO.md)).
 With no credentials present it **skips rather than fails**, which is the correct outcome for almost
 every run. See [TODO §1.5](../TODO.md).
 
