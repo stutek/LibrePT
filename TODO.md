@@ -316,30 +316,32 @@ Shipped 2026-08-04 — [CHANGELOG](CHANGELOG.md).
 
 ## 4. UI / UX
 
-### 3.11 [ ] Sync surface — the icon vocabulary and tap-to-sync
+### 3.11 [x] Sync surface — the icon vocabulary and tap-to-sync — SHIPPED 2026-08-12
 
 Split out of 2026-08-12's sync work, which fixed the counter's honesty and its legibility but stopped
-before the states around it. Ordered as they should be built.
+before the states around it. All five items built; what shipped, and what was decided along the way:
 
-- **`↑!` past nine, for AHEAD only.** The cell currently shows `↑↑` (a second arrow standing in for
-  the digit, so the pill stays narrow); `↑!` is the same width and reads better, since two identical
-  arrows say "many" only to whoever wrote them. **Behind keeps `↓↓`** — an alarm glyph there would
-  flatten the distinction that makes it meaningful: *behind* means Drive holds changes not pulled
-  yet, so nothing is at risk, while *ahead* means those edits exist only on this device.
-- **Warning over the cloud on a failed sync**, replacing the sync glyph. A failure is a genuine
-  fault, so it earns the treatment deliberately withheld from "merely not connected".
-- **A muted slashed cloud when not connected** — informational, NOT an ✕ and not a warning colour.
-  Marking a supported choice as a fault is wrong when [PRIVACY.md](PRIVACY.md) tells trainers
-  local-first is the point; warning colour stays reserved for §3.8's real hazard.
-- **Animated arrows while syncing**, gated on `prefers-reduced-motion` (falling back to the existing
-  `drive_sync_syncing` label). This is the good kind of motion — transient, representing work
-  actually happening, and it ends. Distinct from the persistent pulse rejected in §3.8.
-- **Tap-to-sync when connected**: the header cloud should sync directly instead of opening the
-  dialog, which stays reachable from the menu. Half-built already — `setupHeaderCloudIconSync()` adds
-  a SECOND listener on `#backup-btn`, so a connected tap currently opens the dialog *and* syncs.
-  **Two exceptions must survive**: a sync returning conflicts opens the modal (the review UI lives
-  there, and swallowing a conflict silently is worse than an extra tap), and a failure needs a home
-  outside the dialog — the notification area — or "tap to sync" becomes "tap and hope".
+- **`↑!` past nine, for AHEAD only** — `↑↑` said "many" only to whoever wrote it. **Behind keeps
+  `↓↓`**: *behind* means Drive holds changes not pulled yet, so nothing is at risk, while *ahead*
+  means those edits exist only on this device. Same width, and the asymmetry is the point.
+- **Warning over the cloud on a failed sync**, replacing the sync glyph — a genuine fault earns the
+  treatment deliberately withheld from "merely not connected".
+- **A muted slashed cloud when not connected** — informational, not an ✕ and not warning colour,
+  because [PRIVACY.md](PRIVACY.md) tells trainers local-first is the point. The cloud desaturates
+  along with its slash: a bright cloud under a grey slash still reads as connected.
+- **Animated arrows while syncing** — Font Awesome's own `fa-spin`, whose stylesheet already cuts
+  the animation under `prefers-reduced-motion`, so the guard cannot drift from what it guards.
+- **Tap-to-sync when connected**, with the dialog left in the ☰ menu. The two listeners on
+  `#backup-btn` became one: `driveSyncUi` answers first and `backupRestore` opens the dialog only
+  for the taps it declines. Both exceptions survived — conflicts open the review modal, and a
+  failure posts to the notification feed.
+
+The four states live in [syncStatusGlyph.js](src/modules/common/syncStatusGlyph.js), DOM-free so
+each is forced to carry a LABEL as well as a shape (the glyph is `aria-hidden`, so without words in
+the button's `aria-label` the state would be unreachable on touch and silent to a screen reader).
+The failure notification is **synthetic, never stored in `state.notifications`** — a stored one
+would ride into the backup file and the Drive snapshot and count as a local change, so a failed
+sync would increment the very ahead counter it failed to clear.
 
 ### 3.12 [ ] Ship the remaining trainer-facing docs as pages, not GitHub links
 
