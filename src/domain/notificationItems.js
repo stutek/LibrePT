@@ -94,8 +94,37 @@ function resolveStoredItem(notification, t, readIds) {
   };
 }
 
-export function resolveNotificationItems(state, t, readIds = []) {
-  const synthetic = [buildUnscheduledPlansItem(state, t), buildPendingSessionsItem(state, t)]
+// A failed sync needs a home OUTSIDE the Sync & Backup dialog (TODO §3.11): once tapping the header
+// cloud syncs directly instead of opening that dialog, a failure reported only inside it would be a
+// failure nobody sees, and "tap to sync" would become "tap and hope". The header glyph turns into a
+// warning triangle, but a triangle cannot say WHY — that is this item's job.
+//
+// Deliberately synthetic, never written to `state.notifications`: a stored one would ride into the
+// backup file and the Drive snapshot, and would itself count as a local change — a failed sync would
+// increment the very "ahead" counter it failed to clear.
+//
+// The id carries the failure's timestamp so each distinct failure arrives unread. A fixed id would
+// be marked read once and then stay silent for every failure after it.
+export function buildSyncFailureItem(syncFailure, t) {
+  if (!syncFailure) return null;
+  return {
+    id: `synthetic-sync-failure-${syncFailure.at}`,
+    type: "warning",
+    icon: "fa-solid fa-triangle-exclamation",
+    title: t("notif_sync_failed_title") || "Cloud sync failed",
+    description: syncFailure.message,
+    actions: [],
+  };
+}
+
+export function resolveNotificationItems(state, t, readIds = [], syncFailure = null) {
+  const synthetic = [
+    // A fault leads: it is the only item here reporting that something the trainer asked for did
+    // not happen.
+    buildSyncFailureItem(syncFailure, t),
+    buildUnscheduledPlansItem(state, t),
+    buildPendingSessionsItem(state, t),
+  ]
     .filter(Boolean)
     .map((item) => ({ ...item, read: readIds.includes(item.id) }));
   const stored = (state.notifications || []).map((notification) =>

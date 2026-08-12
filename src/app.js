@@ -84,7 +84,7 @@ import {
 } from "./modules/common/applicationHeader.js";
 import { prepareBackupDialog } from "./modules/common/backupRestore.js";
 import { renderBuildInfo } from "./modules/common/buildInfoDialog.js";
-import { prepareDriveSyncCard } from "./modules/common/driveSyncUi.js";
+import { driveSyncFailureNotice, prepareDriveSyncCard } from "./modules/common/driveSyncUi.js";
 import { openEncryptedFileReader } from "./modules/common/encryptedFileReader.js";
 import { openFeedbackModal } from "./modules/common/feedbackModal.js";
 import { renderNotificationArea } from "./modules/common/notificationArea.js";
@@ -347,7 +347,10 @@ async function init() {
     renderSessions,
     t,
   });
-  appBoot.bootDriveSyncUi({ t });
+  // renderSyncBadge/renderNotificationArea are injected because a sync's START and its FAILURE
+  // repaint surfaces the header's own seams never hear about: onStateSaved fires only for a local
+  // write, and a sync that failed before writing made none.
+  appBoot.bootDriveSyncUi({ t, renderSyncBadge, renderNotificationArea });
 
   appBoot.bootHeader({
     getState,
@@ -389,6 +392,9 @@ async function init() {
     getState,
     getActiveSession: () => getActiveSession(),
     t,
+    // A failed sync's home outside the Sync & Backup dialog (TODO §3.11) — the header glyph turns
+    // into a warning triangle, and this is what says why.
+    getSyncFailure: driveSyncFailureNotice,
     escapeHTML,
     navigateToPath,
     openSessionFromHistory,

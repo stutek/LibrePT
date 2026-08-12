@@ -294,6 +294,7 @@ export const sl = {
   drive_sync_glyph_failed: "Zadnja sinhronizacija ni uspela",
   drive_sync_glyph_disconnected: "Sinhronizacija v oblak ni povezana",
   drive_sync_glyph_idle: "Sinhronizacija v oblak je povezana",
+  notif_sync_failed_title: "Sinhronizacija v oblak ni uspela",
   drive_sync_desc_connected:
     "Ohrani stranke, programe in zgodovino vadb usklajene med svojimi napravami, v skriti mapi, ki jo v vašem Google Drivu vidi samo LibrePT.",
   drive_sync_not_configured: "Sinhronizacija z Google Drive za to postavitev še ni nastavljena.",

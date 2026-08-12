@@ -3,7 +3,7 @@
 // Single responsibility: DOM wiring and status rendering for that one card. Knows nothing about auth,
 // merging, or the Drive REST API — those live in driveSyncService.js and what it delegates to.
 //
-// deps: { t }
+// deps: { t, renderSyncBadge, renderNotificationArea }
 
 import {
   MAX_SYNC_INTERVAL_MINUTES,
@@ -215,8 +215,6 @@ export function setupDriveSyncUi() {
       openModal("dialog-drive-conflicts");
     });
   }
-
-  setupHeaderCloudIconSync();
 }
 
 const CONFLICT_TYPE_LABELS = {
@@ -335,17 +333,55 @@ function renderConflictsDialog() {
   }
 }
 
-/** The header's cloud/sync icon (#backup-btn) already opens the Sync & Backup dialog via
- * backupRestore.js's own listener — this adds a second, independent listener that also fires an
- * immediate sync when already connected, so tapping the header icon is a one-tap "sync now" and not
- * just a way to reach the dialog's own button. */
-function setupHeaderCloudIconSync() {
-  const headerCloudBtn = document.getElementById("backup-btn");
-  if (!headerCloudBtn) return;
-  headerCloudBtn.addEventListener("click", () => {
-    const status = driveSyncStatus();
-    if (!status.configured || !status.connected || status.syncing) return;
-    syncNow().finally(renderDriveSyncCard);
-    renderDriveSyncCard(); // reflect "Syncing…" immediately, without waiting for the promise
-  });
+/** The last sync failure as `{ at, message }`, or null when the last sync was fine or none has run.
+ *
+ * Exported for the notification feed (domain/notificationItems.js): once a header tap syncs
+ * directly rather than opening this dialog, a failure reported ONLY in here is a failure nobody
+ * sees. The wording is `formatLastSync`'s, so the two surfaces cannot drift into describing the
+ * same failure differently. */
+export function driveSyncFailureNotice() {
+  const status = driveSyncStatus();
+  if (!status.lastSyncResult || status.lastSyncResult.ok !== false) return null;
+  return { at: status.lastSyncResult.at, message: formatLastSync(status) };
+}
+
+/** Handles a tap on the header cloud (#backup-btn), returning true when it took the tap.
+ *
+ * Connected, this is "sync now" — the dialog is one extra tap nobody needed, and stays reachable
+ * from the ☰ menu (TODO §3.11). Not connected, it declines the tap so backupRestore.js's listener
+ * opens the dialog, which is where connecting actually happens.
+ *
+ * Two outcomes still open UI, and both are deliberate: conflicts open the review modal, because the
+ * review UI genuinely lives there and silently swallowing a conflict is worse than an extra tap;
+ * a failure repaints the header glyph and the notification feed, which is the failure's home
+ * outside the dialog. */
+export function handleHeaderCloudTap() {
+  const status = driveSyncStatus();
+  if (!status.configured || !status.connected) return false;
+  // A tap while a sync is already running is a no-op, not a queued second sync — but it must not
+  // fall through to opening the dialog either, or an impatient double tap lands somewhere the
+  // first tap never promised.
+  if (status.syncing) return true;
+
+  syncNow()
+    .then((result) => {
+      if (result?.conflicts?.length) {
+        renderConflictsList();
+        openModal("dialog-drive-conflicts");
+      }
+    })
+    .finally(repaintSyncSurfaces);
+  // Repaint before awaiting anything: the header glyph starts spinning on the tap itself, which is
+  // the only feedback a trainer gets that the tap registered at all now that no dialog opens.
+  repaintSyncSurfaces();
+  return true;
+}
+
+// The header badge repaints itself off onStateSaved/onSyncCountsChanged, but neither fires for the
+// start of a sync or for one that failed before writing anything — the two moments this control
+// most needs to reflect. Injected rather than imported so this module stays free of the header.
+function repaintSyncSurfaces() {
+  renderDriveSyncCard();
+  deps?.renderSyncBadge?.();
+  deps?.renderNotificationArea?.();
 }

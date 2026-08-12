@@ -29,6 +29,7 @@ import { BUILD_INFO } from "../../version.js";
 import { isOfflineCachedActive } from "./applicationHeader.js";
 import { renderMarkupOnce } from "./dom.js";
 import { downloadFile } from "./download.js";
+import { handleHeaderCloudTap } from "./driveSyncUi.js";
 
 let deps = null;
 
@@ -282,9 +283,16 @@ export function setupBackupRestore() {
   // The dialog is a route: navigating opens it, so Back closes it and a reload reopens it. The
   // status line from a previous import is cleared by prepareBackupDialog(), which the route calls
   // before showing — a stale "restore failed" must not greet the next open.
+  // ONE listener on the header cloud, not two. driveSyncUi.js used to add its own alongside this
+  // one, so a connected tap both synced and opened the dialog — each listener correct on its own and
+  // neither aware of the other. It now answers first, and this opens the dialog only for the taps it
+  // declines (TODO §3.11: connected means sync directly; the dialog stays in the ☰ menu).
   const backupBtn = document.getElementById("backup-btn");
   if (backupBtn) {
-    backupBtn.addEventListener("click", () => deps.navigateToPath(deps.urlFor("backup")));
+    backupBtn.addEventListener("click", () => {
+      if (handleHeaderCloudTap()) return;
+      deps.navigateToPath(deps.urlFor("backup"));
+    });
   }
 
   const closeBtn = dialog.querySelector(".modal-close-btn");

@@ -298,6 +298,7 @@ export const en = {
   drive_sync_glyph_failed: "Last sync failed",
   drive_sync_glyph_disconnected: "Cloud sync not connected",
   drive_sync_glyph_idle: "Cloud sync connected",
+  notif_sync_failed_title: "Cloud sync failed",
   drive_sync_desc_connected:
     "Keep your clients, routines and session history mirrored across your own devices, in a hidden app folder only LibrePT can see in your Google Drive.",
   drive_sync_not_configured: "Google Drive sync isn't set up for this deployment yet.",

@@ -6,7 +6,9 @@
 //     (mimicking active-session-overlay collapse/expand behavior).
 //   - Priority-ordered notification feed: Live/Upcoming session → Welcome/Demo message → Reservations/Cancellations.
 //
-// Dependencies injected via initNotificationArea({ getState, getActiveSession, t, escapeHTML, navigateToPath })
+// Dependencies injected via initNotificationArea({ getState, getActiveSession, t, escapeHTML,
+// navigateToPath, getSyncFailure }) — `getSyncFailure` is an accessor rather than a value because a
+// sync can fail at any moment after boot, and it keeps this module unaware of Drive entirely.
 
 import { readVersionScoped, writeVersionScoped } from "../../data/storageNamespace.js";
 import { resolveNotificationItems } from "../../domain/notificationItems.js";
@@ -200,7 +202,7 @@ export function renderNotificationArea() {
 
   const readIds = loadReadNotificationIds();
   const state = deps.getState?.() || {};
-  const items = resolveNotificationItems(state, t, readIds);
+  const items = resolveNotificationItems(state, t, readIds, deps.getSyncFailure?.() || null);
 
   const allCount = items.length;
   const unreadCount = items.filter((i) => !i.read).length;
@@ -349,7 +351,12 @@ export function setupNotificationGestures() {
       const state = deps.getState?.() || {};
       // Every id currently in the feed, synthetic ones included — resolved through the same
       // function the render uses, so "mark all read" can never miss an item the feed is showing.
-      const ids = resolveNotificationItems(state, deps.t).map((item) => item.id);
+      const ids = resolveNotificationItems(
+        state,
+        deps.t,
+        readIds,
+        deps.getSyncFailure?.() || null,
+      ).map((item) => item.id);
       for (const id of ids) {
         if (!readIds.includes(id)) readIds.push(id);
       }

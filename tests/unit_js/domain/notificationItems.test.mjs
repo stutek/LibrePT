@@ -140,3 +140,41 @@ test("read state applies to synthetic items too, or they could never be dismisse
   // Defaulting to "nothing read" must not throw — this is the mark-all-read path's call shape.
   assert.equal(resolveNotificationItems(state, t)[0].read, false);
 });
+
+test("a failed sync leads the feed, ahead of the work items", () => {
+  // Once a header tap syncs directly instead of opening the Sync & Backup dialog (TODO §3.11), the
+  // feed is where a failure lives. Everything else here is work waiting; this is something the
+  // trainer asked for that did not happen, so it goes first or it is missed.
+  const state = {
+    notifications: [{ id: "n1", title: "FYI", actions: [] }],
+    history: [{ id: "h1", isPlanning: true, title: "Draft", clientName: "Ana" }],
+  };
+  const failure = { at: 1_700_000_000_000, message: "Session expired — tap to reconnect." };
+
+  const items = resolveNotificationItems(state, t, [], failure);
+
+  assert.equal(items[0].type, "warning");
+  assert.equal(items[0].description, failure.message);
+  assert.deepEqual(
+    items.slice(1).map((item) => item.id),
+    ["synthetic-unscheduled-plans", "n1"],
+  );
+});
+
+test("a later failure arrives unread even after the previous one was dismissed", () => {
+  // The id carries the failure's timestamp precisely for this: a fixed id would be marked read
+  // once and then stay silent for every failure after it — the feed going quiet exactly when it
+  // has something to say.
+  const state = {};
+  const first = { at: 1, message: "first" };
+  const second = { at: 2, message: "second" };
+
+  const dismissed = resolveNotificationItems(state, t, [], first)[0].id;
+  assert.equal(resolveNotificationItems(state, t, [dismissed], first)[0].read, true);
+  assert.equal(resolveNotificationItems(state, t, [dismissed], second)[0].read, false);
+});
+
+test("no failure means no card at all, not an empty one", () => {
+  assert.equal(resolveNotificationItems({}, t, [], null).length, 0);
+  assert.equal(resolveNotificationItems({}, t, []).length, 0);
+});
