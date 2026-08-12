@@ -1,11 +1,16 @@
 # tests/medium/test_drive_sync_ui.py
-# The "Cloud Backup (Google Drive)" card in the Sync & Backup dialog (driveSyncUi.js). This
-# deployment ships with no OAuth client id configured (src/data/driveSyncConfig.js —
-# GOOGLE_DRIVE_CLIENT_ID is a per-deployment secret-free constant the maintainer fills in, TODO
-# §1.5), so the only state this suite can pin without a real Google account is the honest
-# "not configured" one — the card must say so plainly and refuse to open a broken consent flow,
-# never guess or silently no-op. Behaviour once a client id IS configured belongs to a real Google
-# test account, out of scope for CI. Mounted via tests/medium/_harness.py's HEADER_STUB.
+# The "Cloud Backup (Google Drive)" card in the Sync & Backup dialog (driveSyncUi.js).
+#
+# **This suite flipped state on 2026-08-12**, when a real OAuth client id was installed in
+# src/data/driveSyncConfig.js. It used to pin the "not configured" card — the honest state of a
+# deployment whose GOOGLE_DRIVE_CLIENT_ID was blank — and that assertion is now unreachable, because
+# `configured` is derived from that constant and is true for every build we ship. What it pins now is
+# the CONFIGURED-BUT-NOT-CONNECTED card: Connect offered and enabled, and nothing that implies a
+# session we do not have.
+#
+# The third state (connected) still cannot be reached here: it needs a real consent grant, and
+# Google fingerprints and blocks automated browsers on accounts.google.com, so no Playwright tier
+# will ever reach it. That is what tests/live/ exists for. Mounted via _harness.py's HEADER_STUB.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
 import pytest
@@ -15,9 +20,7 @@ from tests.medium._harness import HEADER_STUB, load_with_stub
 pytestmark = pytest.mark.clean_start
 
 
-def test_drive_sync_card_reports_not_configured_and_disables_connect(
-    page, local_server
-):
+def test_drive_sync_card_offers_connect_and_implies_no_session(page, local_server):
     load_with_stub(page, local_server, HEADER_STUB)
     page.wait_for_selector("#app-header")
 
@@ -26,12 +29,19 @@ def test_drive_sync_card_reports_not_configured_and_disables_connect(
 
     card = page.locator("#drive-sync-card")
     assert card.is_visible()
-    assert "isn't set up" in page.locator("#drive-sync-desc").inner_text()
 
+    # The card explains what connecting does, rather than reporting the deployment is unconfigured.
+    desc = page.locator("#drive-sync-desc").inner_text()
+    assert "isn't set up" not in desc
+    assert "hidden app folder" in desc
+
+    # Connect is live: a configured deployment must open a real consent flow, not a dead button.
     connect_btn = page.locator("#btn-drive-connect")
-    assert connect_btn.is_disabled()
-    # Disconnect and the periodic-interval control stay hidden — there is nothing to disconnect
-    # from and nothing to schedule.
+    assert connect_btn.is_enabled()
+    assert "Connect" in page.locator("#btn-drive-connect-text").inner_text()
+
+    # Disconnect and the periodic-interval control stay hidden until a grant exists — offering
+    # either here would imply a session this device has never had.
     assert "hidden" in (
         page.locator("#btn-drive-disconnect").get_attribute("class") or ""
     )
@@ -72,4 +82,9 @@ def test_drive_sync_card_survives_repeated_dialog_opens(page, local_server):
         assert page.locator("#dialog-backup").get_attribute("open") is None
 
     page.locator("#backup-btn").click()
-    assert page.locator("#btn-drive-connect").is_disabled()
+    # Still the configured-but-not-connected card after three cycles — the re-render neither
+    # accumulates stale state nor drifts into implying a session.
+    assert page.locator("#btn-drive-connect").is_enabled()
+    assert "hidden" in (
+        page.locator("#btn-drive-disconnect").get_attribute("class") or ""
+    )

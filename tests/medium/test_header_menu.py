@@ -107,8 +107,8 @@ def test_terms_modal_opens_and_agree_closes_it(page, local_server):
 
 
 def test_connect_cloud_opens_the_drive_sync_card(page, local_server):
-    # menu-connect-cloud opens the Sync & Backup dialog on its Google Drive card
-    # (driveSyncUi.js), which itself reports "not configured" honestly rather than an opaque alert.
+    # menu-connect-cloud opens the Sync & Backup dialog on its Google Drive card (driveSyncUi.js).
+    # What that card shows is test_drive_sync_ui.py's concern; this pins only the routing.
     load_with_stub(page, local_server, HEADER_STUB)
     page.wait_for_selector("#app-header")
     _open_menu(page)

@@ -36,13 +36,12 @@ no code behind them at all.
 
 | Rank | Item | Why now |
 | :--- | :--- | :--- |
-| 1 | Create the Google OAuth client id (§3.3, maintainer action) | A fully built feature works for exactly one person; also makes a README headline true |
-| 2 | §9.5's promise in the demo notification | A shipped button offers a walkthrough that does not exist — copy change or build it, not both |
-| 3 | §27.5, then §27.2/§27.1 | The trainer doc promises an erasure and an export the app does not have; the doc half is a paragraph and a statutory clock runs on the other |
-| 4 | §3.8 unbacked-data banner | The honesty surface for the eviction risk; §18.7 gave it a fix to name in the same breath |
-| 5 | §23.5 demo recording + landing page | Gates every outreach channel, and §23.6's autumn window is a real deadline |
-| 6 | §18.7 remainder — `formatVersion` on the envelope | Must land *before* compression or encryption, or every existing file becomes unparseable |
-| 7 | §9.5 guided walkthrough | Blank-app churn; big, so not before the above |
+| 1 | §9.5's promise in the demo notification | A shipped button offers a walkthrough that does not exist — copy change or build it, not both |
+| 2 | §27.5, then §27.2/§27.1 | The trainer doc promises an erasure and an export the app does not have; the doc half is a paragraph and a statutory clock runs on the other |
+| 3 | §3.8 unbacked-data banner | The honesty surface for the eviction risk; §18.7 gave it a fix to name in the same breath |
+| 4 | §23.5 demo recording + landing page | Gates every outreach channel, and §23.6's autumn window is a real deadline |
+| 5 | §18.7 remainder — `formatVersion` on the envelope | Must land *before* compression or encryption, or every existing file becomes unparseable |
+| 6 | §9.5 guided walkthrough | Blank-app churn; big, so not before the above |
 
 **Cheap wins, unranked** — each small enough to ride along with adjacent work: §12.5's reflog expiry
 (one maintainer command), §19.3's exercise-library filter reset (a real bug needing no URL decision),
@@ -182,10 +181,23 @@ own. WIF stores nothing: GitHub's OIDC assertion is exchanged for a short-lived 
 Shipped 2026-08-02, manual-only as of §3.10 — [CHANGELOG](CHANGELOG.md) carries the decisions worth
 not re-litigating (no visible Drive file ever; three-way merge, so no Lamport pair and no tombstones).
 
-**⚠ Still blocked on a maintainer action**: `GOOGLE_DRIVE_CLIENT_ID` is blank until a real GCP OAuth
-client id is created (steps in [driveSyncConfig.js](src/data/driveSyncConfig.js)). A blank id is a
-supported "not configured" state, so the app is honest — but this feature works for nobody until it
-is filled in. **Ranked #1 in Where to start.**
+**Unblocked 2026-08-12**: a real GCP OAuth client id is installed in
+[driveSyncConfig.js](src/data/driveSyncConfig.js), so the card now offers a live Connect instead of
+reporting "not configured". Two consequences worth knowing:
+
+- **Only listed test users can actually grant access.** The OAuth app is in *Testing*, capped at 100
+  explicitly-listed accounts; anyone else gets `403: access_denied`. Demo users are unaffected —
+  `?init=demo_data_load` is local seed data that never contacts Google, and the app is offline-first
+  — but cloud sync is a you-and-known-pilots feature until the app is published. Publishing WITHOUT
+  verification is the useful middle state: it drops the manual list while keeping a 100-user cap and
+  an "unverified app" warning, and it ends the 7-day refresh-token expiry that Testing imposes.
+- **The unconfigured card is now unreachable**, so `tests/medium/test_drive_sync_ui.py` pins the
+  configured-but-not-connected state instead. The connected state cannot be reached by any Playwright
+  tier — Google fingerprints and blocks automated browsers on `accounts.google.com` — which is what
+  [tests/live/](tests/live/) exists for.
+
+Setup steps and the console field-by-field walkthrough are kept out of this repo, in
+`.private/google-cloud-setup.md` (they name accounts and project ids).
 
 **Not built**: incremental sync via the Drive Changes API. Every pass moves the whole file — correct,
 not bandwidth-minimal.
@@ -1091,9 +1103,10 @@ one job they all hate, and expand from there.
 - [ ] **Share only the demo deep-link, never the bare URL.** `?init=demo_data_load&lang=…&theme=…` is
       an unfair advantage no competitor can match — comment to working clipboard in three seconds, no
       email gate. It also papers over the missing onboarding below.
-- [ ] **Two headline README features are not shippable.** Google Calendar is unbuilt (§1.5) and the
-      Drive OAuth client id is uncreated, so §3.3 works for nobody but the maintainer. Either ship them
-      or trim the public pitch to what runs today — promoting either now is promising vapor.
+- [ ] **One headline README feature is still not shippable.** Google Calendar is unbuilt (§1.5).
+      Drive sync is now live (§3.3, client id installed 2026-08-12) but reaches only the ≤100
+      explicitly-listed test users until the OAuth app is published, so the pitch can promise it only
+      with that caveat — or wait for Production-unverified, which drops the list and keeps the cap.
 - [ ] **No onboarding for an empty app** (§9.5 unbuilt). A trainer landing on a blank client list
       churns in ten seconds.
 - [ ] **No feedback route a non-developer will use.** GitHub issues is a wall to a PT; one email
