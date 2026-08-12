@@ -38,7 +38,8 @@ no code behind them at all.
 | :--- | :--- | :--- |
 | 1 | §9.5's promise in the demo notification | A shipped button offers a walkthrough that does not exist — copy change or build it, not both |
 | 2 | §27.5, then §27.2/§27.1 | The trainer doc promises an erasure and an export the app does not have; the doc half is a paragraph and a statutory clock runs on the other |
-| 3 | §3.8 unbacked-data banner | The honesty surface for the eviction risk; §18.7 gave it a fix to name in the same breath |
+| 3 | §3.8 unbacked-data banner | The honesty surface for the eviction risk; §18.7 gave it a fix to name in the same breath, and 2026-08-12 built its input (`readBackupHistory`) |
+| 3= | §3.12 remaining docs as pages | Four in-app links still open GitHub for people with no GitHub account, and none of them work offline — the machinery already exists, so each is one table row plus a repoint |
 | 4 | §23.5 demo recording + landing page | Gates every outreach channel, and §23.6's autumn window is a real deadline |
 | 5 | §18.7 remainder — `formatVersion` on the envelope | Must land *before* compression or encryption, or every existing file becomes unparseable |
 | 6 | §9.5 guided walkthrough | Blank-app churn; big, so not before the above |
@@ -145,6 +146,25 @@ Cross-referenced from [PRIVACY.md](PRIVACY.md).
 
 **Built 2026-08-10**: [tests/live/](tests/live/), `.github/workflows/google-canary.yml`,
 `build.run_live_google_tests`. Still needs the one-time GCP setup below before it does anything.
+
+**Revisited 2026-08-12, and the detour is worth recording so it is not re-proposed.** A design where
+the canary ran as a real consumer account — refresh token in GCP Secret Manager, unlocked keylessly
+by the same federation — was built and then reverted. It was rejected on coverage, not on security:
+the ONLY thing a consumer identity exercises that a service account cannot is the consent flow, and
+no CI can drive that at all, because Google fingerprints and blocks automated browsers on
+`accounts.google.com`. Every endpoint a token can reach behaves identically for either identity, so
+the vault bought a second OAuth client, a manual consent dance and a token-expiry story for no extra
+coverage. **If service-account Drive storage ever turns out to be refused for `appDataFolder`, that
+design is the documented fallback** — it is the one reason to bring it back.
+
+**Also built 2026-08-12: [agent_tools/wif_audit.py](agent_tools/wif_audit.py)**, because the two
+settings this whole design rests on live in GCP rather than in the repo, so no code review can
+confirm them and both fail *silently* — everything works, the canary stays green, and strangers can
+mint tokens as the service account. It checks that the provider's `attributeCondition` pins
+`assertion.repository`, and that the service-account binding names `attribute.repository/<owner>/<repo>`
+rather than the whole pool (the same hole one layer down, and the likelier mistake since it is what
+copy-pasted snippets show). It also rejects conditions that look protective and are not: `!=` admits
+every repository but one, `startsWith` admits every repository an owner ever creates.
 
 The problem this solves is not "how do we test Google" but **"how do we test Google from a public
 repository without a secret to leak."** A stored refresh token would be exfiltratable by any workflow
@@ -275,6 +295,52 @@ Shipped 2026-08-04 — [CHANGELOG](CHANGELOG.md).
 ---
 
 ## 4. UI / UX
+
+### 3.11 [ ] Sync surface — the icon vocabulary and tap-to-sync
+
+Split out of 2026-08-12's sync work, which fixed the counter's honesty and its legibility but stopped
+before the states around it. Ordered as they should be built.
+
+- **`↑!` past nine, for AHEAD only.** The cell currently shows `↑↑` (a second arrow standing in for
+  the digit, so the pill stays narrow); `↑!` is the same width and reads better, since two identical
+  arrows say "many" only to whoever wrote them. **Behind keeps `↓↓`** — an alarm glyph there would
+  flatten the distinction that makes it meaningful: *behind* means Drive holds changes not pulled
+  yet, so nothing is at risk, while *ahead* means those edits exist only on this device.
+- **Warning over the cloud on a failed sync**, replacing the sync glyph. A failure is a genuine
+  fault, so it earns the treatment deliberately withheld from "merely not connected".
+- **A muted slashed cloud when not connected** — informational, NOT an ✕ and not a warning colour.
+  Marking a supported choice as a fault is wrong when [PRIVACY.md](PRIVACY.md) tells trainers
+  local-first is the point; warning colour stays reserved for §3.8's real hazard.
+- **Animated arrows while syncing**, gated on `prefers-reduced-motion` (falling back to the existing
+  `drive_sync_syncing` label). This is the good kind of motion — transient, representing work
+  actually happening, and it ends. Distinct from the persistent pulse rejected in §3.8.
+- **Tap-to-sync when connected**: the header cloud should sync directly instead of opening the
+  dialog, which stays reachable from the menu. Half-built already — `setupHeaderCloudIconSync()` adds
+  a SECOND listener on `#backup-btn`, so a connected tap currently opens the dialog *and* syncs.
+  **Two exceptions must survive**: a sync returning conflicts opens the modal (the review UI lives
+  there, and swallowing a conflict silently is worse than an extra tap), and a failure needs a home
+  outside the dialog — the notification area — or "tap to sync" becomes "tap and hope".
+
+### 3.12 [ ] Ship the remaining trainer-facing docs as pages, not GitHub links
+
+[render_docs.py](agent_tools/render_docs.py) shipped 2026-08-12 with PRIVACY.md as its only entry.
+Four in-app links still point at `github.com`, each aimed at someone who will never have a GitHub
+account, and each dead without signal — which is a defect in an offline-first app before Google's
+verification requirements enter into it.
+
+| Link | Where | Audience |
+| :--- | :--- | :--- |
+| `docs/PREVIEW.md` | header PREVIEW tag | the **data-loss notice** |
+| `docs/BUG_REPORTING.md` | app menu | trainer |
+| `docs/templates/**` (en + sl) | [consentForm.js](src/modules/common/consentForm.js) | **gym clients** — a legal form handed to a client |
+| `README.md#about-demo-data` | [messages.js](src/data/messages.js) | trainer |
+
+The templates are the worst of these: a trainer hands a client a consent form and the link opens a
+blob view with a "Sign in" header. Adding a row to `DOCUMENTS` ships a page; the work is repointing
+the links, cache-manifest entries for offline, and the per-language pages doubling the count.
+Developer-facing docs (README, DATA_MODEL, ROUTING, SRC_MODULES, use_cases, INDEX files) stay on
+GitHub — the test is whether a non-developer reaches it from the app, or a regulator needs it at a
+stable URL on a domain we own.
 
 ### 4.1 [ ] Theme redesign
 Light mode needs a nicer design (reference:
