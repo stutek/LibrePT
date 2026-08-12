@@ -22,6 +22,7 @@
 import { driveSyncStatus } from "../../data/driveSyncService.js";
 import { resolveLang } from "../../i18n/index.js";
 import { renderMarkupOnce } from "./dom.js";
+import { syncGlyphFor } from "./syncStatusGlyph.js";
 import { setupThemeSwitcher } from "./theme.js";
 
 let deps = null;
@@ -39,6 +40,26 @@ export function setOfflineCachedState(val) {
 
 export function isOfflineCachedActive() {
   return isOfflineCached;
+}
+
+const SYNC_BUTTON_BASE_LABEL = "Sync & Backup Data";
+
+/** Repaints the header cloud's overlay glyph for the current sync state, and says in the button's
+ * aria-label what that glyph MEANS — the shape alone would be a hover tooltip's problem in another
+ * costume (AGENT_RULES §2.D.1), unreachable on touch and silent to a screen reader. */
+function renderSyncCloudIcon(status) {
+  const wrap = document.getElementById("sync-cloud-icon");
+  const overlay = document.getElementById("sync-cloud-overlay");
+  if (!wrap || !overlay) return;
+
+  const glyph = syncGlyphFor(status);
+  wrap.className = `cloud-sync-icon ${glyph.stateClass}`;
+  overlay.className = glyph.overlayIcon;
+
+  const stateLabel = deps?.t ? deps.t(glyph.labelKey) || glyph.labelFallback : glyph.labelFallback;
+  document
+    .getElementById("backup-btn")
+    ?.setAttribute("aria-label", `${SYNC_BUTTON_BASE_LABEL} — ${stateLabel}`);
 }
 
 export function renderSyncBadge() {
@@ -61,6 +82,7 @@ export function renderSyncBadge() {
   // ancestor, kept fresh by periodic/resume counter refreshes rather than a background sync (syncing
   // itself is manual-only) — "unknown" ("?" below) only when cloud is unreachable or unconfigured.
   const status = driveSyncStatus();
+  renderSyncCloudIcon(status);
   const {
     ahead: local,
     behind: remote,
@@ -71,14 +93,18 @@ export function renderSyncBadge() {
   // When cloud is unreachable or not configured, display '?' for behind count
   const isUnreachable = !isCloudConfigured || !isCloudReachable;
 
-  // Past 9, a second arrow stands in for the digit (↑↑ / ↓↓) so the pill stays narrow
+  // Past 9 the digit is dropped so the pill stays narrow, and the two directions use DIFFERENT
+  // stand-ins on purpose (TODO §3.11). Ahead gets `↑!`: those edits exist only on this device, so
+  // "many" is the point. Behind keeps `↓↓`, because behind means Drive holds changes not pulled yet
+  // — nothing is at risk — and an alarm glyph there would flatten the distinction that makes the
+  // ahead one mean anything.
   const cell = (n, dir, isBehind = false) => {
     if (isBehind && isUnreachable) {
       return `<i class="fa-solid fa-arrow-down"></i>?`;
     }
     const arrow = `<i class="fa-solid fa-arrow-${dir}"></i>`;
-    const countStr = n > 9 ? arrow + arrow : arrow + String(n);
-    return countStr;
+    if (n <= 9) return arrow + String(n);
+    return arrow + (isBehind ? arrow : "!");
   };
 
   const aheadClass = local === 0 ? "sync-zero" : "sync-ahead";
@@ -203,9 +229,13 @@ export function renderHeaderShell() {
           <button id="backup-btn" class="icon-btn sync-backup-btn" aria-label="Sync & Backup Data">
             <!-- Cloud + recycle: this one control now covers both syncing session data and
                  backup/restore (the separate home-page Sync button was merged in here). -->
-            <span class="cloud-sync-icon" aria-hidden="true">
+            <!-- The overlay glyph is state-driven (renderSyncCloudIcon): spinning arrows while
+                 syncing, a warning triangle after a failure, a slash when not connected. Its
+                 markup here is the idle state, so a build that never boots the header still shows
+                 something coherent. -->
+            <span id="sync-cloud-icon" class="cloud-sync-icon is-idle" aria-hidden="true">
               <i class="fa-solid fa-cloud"></i>
-              <i class="fa-solid fa-arrows-rotate"></i>
+              <i id="sync-cloud-overlay" class="fa-solid fa-arrows-rotate"></i>
             </span>
             <!-- GitHub-style ahead/behind counters, real (driveSyncService.js, TODO §3.9): local
                  edits since the last Drive sync / remote changes not yet pulled, filled in by

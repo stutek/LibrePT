@@ -311,7 +311,11 @@ select.menu-select {
   font-size: 18px;
   color: var(--cloud-icon-color, #0284c7);
 }
-.cloud-sync-icon .fa-arrows-rotate {
+/* One rule for whichever overlay glyph the state calls for (TODO §3.11) — arrows, warning triangle
+   or slash all sit in the same place over the cloud, so only the colour changes between states. */
+.cloud-sync-icon .fa-arrows-rotate,
+.cloud-sync-icon .fa-triangle-exclamation,
+.cloud-sync-icon .fa-slash {
   position: absolute;
   left: 50%;
   top: 54%;
@@ -319,6 +323,23 @@ select.menu-select {
   font-size: 10px;
   color: var(--cloud-arrows-color, var(--success, #10b981));
   filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.45));
+}
+/* A failed sync is a genuine fault and earns warning colour — the treatment deliberately withheld
+   from "merely not connected" below. */
+.cloud-sync-icon.is-failed .fa-triangle-exclamation {
+  color: var(--danger, #ef4444);
+}
+/* Not connected is INFORMATIONAL, never a fault: PRIVACY.md tells trainers local-first is the
+   point, so declining cloud sync is a supported choice. Muted, and the slash is drawn larger than
+   the other overlays because it has to read as crossing the whole cloud rather than sitting on it.
+   The cloud itself desaturates too, or a bright cloud under a grey slash reads as connected. */
+.cloud-sync-icon.is-disconnected .fa-cloud,
+.cloud-sync-icon.is-disconnected .fa-slash {
+  color: var(--text-muted);
+}
+.cloud-sync-icon.is-disconnected .fa-slash {
+  font-size: 16px;
+  top: 50%;
 } /* When there are pending changes the cloud button grows into a pill to seat the ahead/behind
    counters beside the icon; fully synced, the badge hides and it reads as a round icon again. */
 .sync-backup-btn {

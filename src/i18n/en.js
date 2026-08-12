@@ -293,6 +293,11 @@ export const en = {
   drive_sync_connect: "Connect Google Drive",
   drive_sync_now: "Sync Now",
   drive_sync_syncing: "Syncing…",
+  // What the header cloud's overlay glyph MEANS, spoken (TODO §3.11) — a shape alone is a hover
+  // tooltip's problem in another costume: unreachable on touch, silent to a screen reader.
+  drive_sync_glyph_failed: "Last sync failed",
+  drive_sync_glyph_disconnected: "Cloud sync not connected",
+  drive_sync_glyph_idle: "Cloud sync connected",
   drive_sync_desc_connected:
     "Keep your clients, routines and session history mirrored across your own devices, in a hidden app folder only LibrePT can see in your Google Drive.",
   drive_sync_not_configured: "Google Drive sync isn't set up for this deployment yet.",

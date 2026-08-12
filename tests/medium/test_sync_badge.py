@@ -83,6 +83,51 @@ def test_counters_are_legible_and_grow_on_desktop(page, local_server):
     )
 
 
+def test_an_unconnected_cloud_is_informational_not_a_warning(page, local_server):
+    """With no Drive grant the header shows a muted slashed cloud — never an ✕, never warning
+    colour (TODO §3.11).
+
+    PRIVACY.md tells trainers that local-first is the point, so declining cloud sync is a supported
+    choice; painting it as a fault would spend the warning vocabulary that TODO §3.8's real hazard
+    and a genuine sync failure need. The colour is asserted by comparison — cloud and slash agree,
+    and neither is the danger token — rather than against a literal hex, so a theme may restyle both
+    and only a warning-coloured regression fails.
+    """
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#app-header")
+
+    icon = page.locator("#sync-cloud-icon")
+    assert icon.locator(".fa-slash").count() == 1, (
+        "expected a slashed cloud when not connected"
+    )
+
+    cloud_color, slash_color, danger = page.evaluate(
+        """() => {
+            const probe = document.createElement('span');
+            probe.style.color = 'var(--danger)';
+            document.body.appendChild(probe);
+            const danger = getComputedStyle(probe).color;
+            probe.remove();
+            return [
+              getComputedStyle(document.querySelector('#sync-cloud-icon .fa-cloud')).color,
+              getComputedStyle(document.querySelector('#sync-cloud-overlay')).color,
+              danger,
+            ];
+        }"""
+    )
+    assert slash_color == cloud_color, (
+        "a bright cloud under a grey slash reads as connected — both must mute together"
+    )
+    assert slash_color != danger, "not-connected must not borrow the warning colour"
+
+    # The meaning is spoken, not left to the shape: on a phone there is no hover to reveal it, and
+    # a screen reader gets nothing from an aria-hidden glyph (AGENT_RULES §2.D.1).
+    label = page.locator("#backup-btn").get_attribute("aria-label")
+    assert "not connected" in label.lower(), (
+        f"header cloud says nothing about its state: {label}"
+    )
+
+
 def test_backup_modal_opens_and_closes(page, local_server):
     load_with_stub(page, local_server, STUB)
     page.wait_for_selector("#app-header")

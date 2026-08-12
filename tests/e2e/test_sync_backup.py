@@ -100,7 +100,14 @@ def test_never_synced_counts_the_whole_dataset_as_ahead(page, local_server):
     assert count > 1, f"expected the whole dataset counted as ahead, got {count}"
 
 
-def test_sync_badge_caps_over_nine_with_second_arrow(page, local_server):
+def test_more_than_nine_unpushed_changes_reads_as_an_alarm(page, local_server):
+    """Past nine, the ahead cell drops the digit for `↑!` — an alarm, not a second arrow.
+
+    The two directions are deliberately asymmetric (TODO §3.11). Ahead means those edits exist ONLY
+    on this device, so past a handful the point is "many, and at risk"; behind means Drive holds
+    changes not pulled yet, where nothing is at risk. `↑↑` said "many" only to whoever wrote it, and
+    using it on both sides flattened the one distinction that makes either worth reading.
+    """
     page.goto(local_server + "clients")
     page.wait_for_selector("#view-client-directory.active")
     page.evaluate(SEED_ANCESTOR_TO_CURRENT_STATE)
@@ -111,9 +118,10 @@ def test_sync_badge_caps_over_nine_with_second_arrow(page, local_server):
         page.locator("#dialog-client button[type='submit']").click()
 
     ahead = page.locator("#sync-badge .sync-ahead")
-    # Past 9 the digit is replaced by a second arrow: two icons, no number in the cell...
-    assert ahead.inner_text().strip() == ""
-    assert ahead.locator("i").count() == 2
+    assert ahead.inner_text().strip() == "!"
+    assert ahead.locator("i").count() == 1, (
+        "the alarm replaces the digit, not the arrow"
+    )
     # ...while the exact count still rides along in the aria-label for screen readers.
     assert "local changes to push" in (
         page.locator("#sync-badge").get_attribute("aria-label") or ""
