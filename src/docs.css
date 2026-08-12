@@ -1,0 +1,162 @@
+/* docs.css — the only stylesheet for the generated documentation pages (privacy policy and, as
+   agent_tools/render_docs.py's DOCUMENTS table grows, the PREVIEW notice, bug-reporting guide and
+   client consent templates).
+
+   Deliberately standalone rather than reusing index.css. Two reasons, both structural: index.css
+   pulls in five theme files whose selection is driven by theme-boot.js at runtime, and these pages
+   ship with `default-src 'none'` and load no scripts at all — so the theme attribute would never be
+   set and every page would render in whatever the fallback happens to be. Light/dark therefore comes
+   from prefers-color-scheme, which needs no JavaScript. No @font-face either: system fonts render a
+   legal document perfectly well and save every reader a font download on a page they visit once.
+
+   Kept small and token-driven so a future theme redesign (TODO §4.1) can restyle it without
+   touching the generator. */
+
+:root {
+  --doc-bg: #ffffff;
+  --doc-surface: #f4f4f5;
+  --doc-text: #18181b;
+  --doc-muted: #52525b;
+  --doc-border: #d4d4d8;
+  --doc-link: #1d4ed8;
+  --doc-measure: 42rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --doc-bg: #09090b;
+    --doc-surface: #18181b;
+    --doc-text: #e4e4e7;
+    --doc-muted: #a1a1aa;
+    --doc-border: #3f3f46;
+    --doc-link: #93c5fd;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 2rem 1.25rem 4rem;
+  background: var(--doc-bg);
+  color: var(--doc-text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 1rem;
+  line-height: 1.65;
+  /* The pages are read on a phone on the gym floor as often as on a desktop. */
+  -webkit-text-size-adjust: 100%;
+}
+
+.doc {
+  max-width: var(--doc-measure);
+  margin: 0 auto;
+}
+
+.doc h1,
+.doc h2,
+.doc h3 {
+  line-height: 1.25;
+  margin: 2.5rem 0 0.75rem;
+}
+
+.doc h1 {
+  font-size: 1.75rem;
+  margin-top: 0;
+}
+
+.doc h2 {
+  font-size: 1.35rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid var(--doc-border);
+}
+
+.doc h3 {
+  font-size: 1.1rem;
+}
+
+.doc p,
+.doc ul,
+.doc ol {
+  margin: 0 0 1rem;
+}
+
+.doc li + li {
+  margin-top: 0.35rem;
+}
+
+.doc a {
+  color: var(--doc-link);
+}
+
+.doc hr {
+  height: 1px;
+  margin: 2rem 0;
+  border: 0;
+  background: var(--doc-border);
+}
+
+.doc blockquote {
+  margin: 0 0 1rem;
+  padding: 0.5rem 1rem;
+  border-left: 3px solid var(--doc-border);
+  color: var(--doc-muted);
+}
+
+.doc code {
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+  background: var(--doc-surface);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9em;
+}
+
+.doc pre {
+  padding: 1rem;
+  border-radius: 8px;
+  background: var(--doc-surface);
+  overflow-x: auto;
+}
+
+.doc pre code {
+  padding: 0;
+  background: none;
+}
+
+/* Tables carry real content in these documents (the data-category and retention tables in the
+   privacy policy), so they must stay readable at phone widths rather than forcing the page to
+   scroll sideways — the wrapper scrolls, the page never does. */
+.doc table {
+  display: block;
+  width: 100%;
+  margin: 0 0 1rem;
+  border-collapse: collapse;
+  overflow-x: auto;
+}
+
+.doc th,
+.doc td {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--doc-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.doc th {
+  background: var(--doc-surface);
+}
+
+.doc-back {
+  max-width: var(--doc-measure);
+  margin: 3rem auto 0;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--doc-border);
+}
+
+.doc-back a {
+  color: var(--doc-link);
+  /* A real touch target, not 9px of text — these pages are opened from the app on a phone. */
+  display: inline-block;
+  padding: 0.6rem 0;
+}

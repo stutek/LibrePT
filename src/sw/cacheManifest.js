@@ -16,6 +16,11 @@ self.swCacheManifest = (() => {
     "./",
     "./index.html",
     "./index.css",
+    // Generated documentation pages (agent_tools/render_docs.py) and their stylesheet. Cached for
+    // the reason they were brought in-app at all: a trainer in a basement gym tapping "Privacy"
+    // used to reach github.com, which needs signal. These must work with none.
+    "./privacy.html",
+    "./docs.css",
     // Per-module stylesheets (TODO §14.5 / §18.10) — index.css's shared foundation is loaded
     // first; these add only what their module owns.
     "./modules/clipboard/activeSessionOverlay.css",

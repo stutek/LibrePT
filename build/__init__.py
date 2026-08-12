@@ -698,6 +698,31 @@ def run_javascript_unit_tests():
     print("  ✓ JavaScript unit tests passed successfully!")
 
 
+def run_docs_render_check():
+    """Fails if a generated documentation page is out of date with its Markdown source.
+
+    The shipped pages under src/ are generated from canonical Markdown (agent_tools/render_docs.py),
+    so the risk this gate exists for is editing PRIVACY.md and shipping the previous HTML — silently
+    serving users, and Google's reviewers, a policy that no longer matches the repository. Same shape
+    as a formatter check: re-render, compare, tell you the one command that fixes it.
+
+    Imported lazily rather than at module scope: render_docs pulls in markdown_it, and `import build`
+    must stay reachable from the CI jobs that run bare system Python with no `pip install`
+    (tests/unit/test_ci_bare_python.py). Those jobs never call this function.
+    """
+    print("\n  Checking generated documentation pages...")
+    from agent_tools.render_docs import DOCUMENTS, render_all
+
+    stale = render_all(check_only=True)
+    if stale:
+        print("  ✗ Generated documentation pages are out of date:")
+        for path in stale:
+            print(f"      {path}")
+        print("    Run: .venv/bin/python -m agent_tools.render_docs")
+        sys.exit(1)
+    print(f"  ✓ Rendered docs: {len(DOCUMENTS)} page(s) match their Markdown source.")
+
+
 def run_live_google_tests():
     """Runs tests/live/ against the REAL Google Drive and Calendar APIs.
 
@@ -1290,6 +1315,7 @@ def run_stage_1_parallel():
         "Pipeline Gating": run_pipeline_gate_check,
         "Cyclomatic Complexity": run_complexity_check,
         "Test Assertions": run_test_assertion_check,
+        "Rendered Docs": run_docs_render_check,
     }
 
     stage_start = time.monotonic()

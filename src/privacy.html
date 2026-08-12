@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self'; img-src 'self' data:; font-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Privacy &amp; GDPR Statement — LibrePT</title>
+<link rel="stylesheet" href="./docs.css">
+</head>
+<body>
+<main class="doc">
+<h1>LibrePT — Privacy &amp; GDPR Statement</h1>
+<p><em>Last Updated: August 2026</em></p>
+<hr />
+<h2>1. Introduction &amp; Local-First Commitment</h2>
+<p><strong>LibrePT</strong> is a free, open-source, local-first personal training dashboard designed to help certified trainers schedule sessions, track client progress on the gym floor, and log workout performance without friction.</p>
+<p>We believe that data privacy and data ownership are fundamental rights:</p>
+<ul>
+<li><strong>Zero Central Backend:</strong> LibrePT by default does not operate a central database, API server, or analytics pipeline. Optional cloud integrations connect directly to your personal cloud storage.</li>
+<li><strong>Zero Telemetry &amp; Cookies:</strong> We collect no usage statistics, tracking cookies, IP addresses, or personal information when you use the app.</li>
+<li><strong>Local-First Architecture:</strong> By default, all client profiles, training routines, exercise histories, and session logs reside strictly on your local device (in your web browser's <code>localStorage</code> or <code>IndexedDB</code>), with support for optional personal cloud storage and database synchronization integrations.</li>
+</ul>
+<hr />
+<h2>2. Cloud Synchronization &amp; Data Security (Optional Cloud Storage &amp; Backups)</h2>
+<p>LibrePT's optional Google integration is split by what the data actually is, not bundled into one generic &quot;cloud sync&quot;:</p>
+<ul>
+<li><strong>Scheduling data (session times, room, client RSVP)</strong> is planned to live in <strong>your own Google Calendar</strong>, read and written directly via your own OAuth-authorized account, as the authoritative record for that data. <strong>Not built yet</strong> (TODO §1.5) — LibrePT currently has no Calendar integration.</li>
+<li><strong>App data</strong> (clients, routines, session notes, logged sets/reps) can optionally sync across your own devices via <strong>Google Drive's <code>appDataFolder</code></strong> — a storage area private to the LibrePT app inside your own Drive, invisible in your normal Drive file browser and inaccessible to other apps. <strong>Built</strong> (TODO §3.3): this covers every collection today, not only &quot;no Calendar equivalent&quot; data, since there is no Calendar-sourced overlap to exclude yet — that will narrow once Calendar integration exists. Requires the deployment you're using to have its own Google OAuth client id configured; a deployment without one shows &quot;not configured&quot; rather than a broken connect button.</li>
+<li><strong>Other trainers sharing a gym/room</strong> seeing only busy/free time blocks (via Calendar free/busy), never client names, notes, or session detail, is likewise part of the not-yet-built Calendar integration.</li>
+</ul>
+<p>Regarding the Drive sync that IS live:</p>
+<ul>
+<li>Data is transmitted directly from your local device to your own Google account using standard OAuth authentication — LibrePT never proxies it through a server we operate.</li>
+<li><strong>HTTPS Only Protocol Enforcement:</strong> All remote network communications and Web PWA assets are strictly restricted to TLS-encrypted HTTPS endpoints. Non-localhost HTTP connections are automatically redirected to <code>https://</code> before application initialization, guaranteeing that client records, authentication tokens, and backup payloads are never exposed over unencrypted HTTP channels.</li>
+<li><strong>No Third-Party Interception:</strong> The LibrePT maintainers and developers do not host, access, process, or view any data you sync to your personal cloud storage or remote databases. Because no server we operate ever touches your client data, we are not a data processor for it — your relationship with Google (as your own chosen storage provider) is yours alone.</li>
+<li><strong>What Google's platform encryption does and doesn't cover:</strong> Google encrypts Drive data in transit (TLS) and at rest (server-side AES-256) as standard platform behavior. This is <em>not</em> zero-knowledge encryption — Google's own infrastructure can technically access the underlying content (e.g., automated abuse scanning, legal process), same as any file stored in your Drive. For most coaching data this is a reasonable baseline. <strong>Not built yet</strong>: client-side encryption (<code>Web Crypto API</code>) before upload, so synced snapshots would be opaque even to Google — a real hardening option (TODO §3.3), not implemented in the current sync. Its trade-off, worth knowing before it ships: the encryption key would not be recoverable by LibrePT or Google — losing the key or the device that holds it would make that cloud copy permanently unreadable, so it would need to be an additional safeguard alongside local backups, not a replacement for them.</li>
+</ul>
+<hr />
+<h2>3. Personal Trainer Guidelines: Your Role as Data Controller under GDPR</h2>
+<p>If you are a Personal Trainer (<code>PT</code>) using LibrePT to coach clients within the European Union, UK, or other GDPR-compliant jurisdictions, <strong>you are the legally designated Data Controller</strong> under GDPR Article 4(7).</p>
+<p>Because LibrePT records client names, physical goals, exercise history, and pre-existing injury notes, this information qualifies as <strong>Special Category Data (Health Data)</strong> under GDPR Article 9.</p>
+<p>As the Data Controller, you must adhere to the following best practices:</p>
+<h3>3.1 Obtain Explicit Client Consent</h3>
+<p>Before storing client health and performance records—and specifically before backing up or syncing those records to cloud storage—you must obtain verifiable, explicit consent from each client.</p>
+<ul>
+<li><strong>What to tell your clients:</strong> Inform them what data you record, that you store it securely on your device and personal cloud storage solely for coaching preparation, and that they have the right to inspect, export, or request the deletion of their records at any time.</li>
+<li><strong>Consent Audit Trail:</strong> Use the <strong>Data Protection (GDPR)</strong> block on the client profile — the signed checkbox, the date on the signed paper, and the version of the consent letter that was signed. The step-by-step workflow is in the <a href="docs/PRIVACY_FOR_TRAINERS.md">Trainer Privacy Guide</a>.</li>
+</ul>
+<h3>3.2 Safe AI &amp; Large Language Model (LLM) Usage</h3>
+<p>Many trainers utilize AI assistants (such as ChatGPT, Claude, or DeepSeek) to analyze workout volume, draft periodized cycles, or review rehabilitation notes.</p>
+<ul>
+<li><strong>The Legal Risk:</strong> Pasting unencrypted, identifiable client health records (<code>&quot;Jane Doe, 34yo, chronic L4 disc herniation, struggles with overhead squats...&quot;</code>) into third-party AI prompts transfers Special Category Data to external data processors without a Data Processing Agreement (DPA), which constitutes a GDPR violation.</li>
+<li><strong>How to stay compliant:</strong>
+<ol>
+<li><strong>Use Anonymization:</strong> Never include client names, email addresses, phone numbers, exact birthdates, or uniquely identifying medical histories in AI prompts.</li>
+<li><strong>Use LibrePT's AI Safe Copy Tool:</strong> Use LibrePT's built-in <code>AI Safe Copy (Anonymized)</code> action on client history profiles. This tool automatically strips Personally Identifiable Information (PII) and replaces names with generic identifiers (<code>Client #UUID</code>) before copying the workout summary to your clipboard.</li>
+</ol>
+</li>
+</ul>
+<h3>3.3 Supporting Client Data Rights</h3>
+<p>Under GDPR, your clients have the right to:</p>
+<ul>
+<li><strong>Right of Access &amp; Portability (Art. 15 / Art. 20):</strong> You can export any client's complete training history to JSON or clean Markdown directly from LibrePT and provide it to them upon request.</li>
+<li><strong>Right to Erasure / &quot;Right to be Forgotten&quot; (Art. 17):</strong> If a client terminates their coaching contract and requests data deletion, deleting their client profile within LibrePT instantly purges their records from your local storage and subsequent cloud snapshots.</li>
+</ul>
+<hr />
+<h2>4. Client-Facing Documents</h2>
+<p>Three documents cover onboarding a client, and they are maintained in <code>docs/</code> rather than reproduced
+here — a policy that carries its own copy of a consent letter is a policy that drifts from the one
+the app actually sends:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Document</th>
+<th style="text-align:left">Audience</th>
+<th style="text-align:left">Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><a href="docs/templates/en/Client_Privacy_Notice.md">Client Privacy Notice</a></td>
+<td style="text-align:left">The client</td>
+<td style="text-align:left">The Art. 13 information they must have <strong>before</strong> consenting</td>
+</tr>
+<tr>
+<td style="text-align:left"><a href="docs/templates/en/Client_Consent_Form.md">Client Consent Form</a></td>
+<td style="text-align:left">The client</td>
+<td style="text-align:left">The letter and signature block; also the exact text the app's <strong>Email form</strong> button sends</td>
+</tr>
+<tr>
+<td style="text-align:left"><a href="docs/PRIVACY_FOR_TRAINERS.md">Trainer Privacy Guide</a></td>
+<td style="text-align:left">The trainer</td>
+<td style="text-align:left">The operational workflow — obtain, record, archive, withdraw, answer requests</td>
+</tr>
+</tbody>
+</table>
+<p>The two client-facing documents exist per language (<code>docs/templates/&lt;lang&gt;/</code>, catalogued in
+<a href="docs/templates/INDEX.md">templates/INDEX.md</a>); the trainer picks one per client, defaulting to the
+app's language, and the app links that client to the matching copy. English is the source edition —
+where a translation disagrees with it, the English text is what was intended.</p>
+<p><strong>LibrePT records that consent exists; the trainer holds the evidence that it does.</strong> The app stores
+a consent flag, the date on the signed paper, and the version of the letter that was signed — never
+a photo, scan, or signature image. The signed sheet stays in the trainer's own files.</p>
+<hr />
+<h2>5. Official EU Data Protection &amp; GDPR Resources</h2>
+<p>For personal trainers and data controllers seeking further official legal guidance on European Union data protection laws and processing special category health data, refer to the official regulatory authorities below:</p>
+<ul>
+<li><strong>Official GDPR Regulation Text (Regulation (EU) 2016/679):</strong>
+<a href="https://eur-lex.europa.eu/eli/reg/2016/679/oj">EUR-Lex Official Portal</a></li>
+<li><strong>European Commission — Data Protection Guidelines:</strong>
+<a href="https://commission.europa.eu/law/law-topic/data-protection_en">European Commission Data Protection Portal</a></li>
+<li><strong>European Data Protection Board (EDPB):</strong>
+<a href="https://edpb.europa.eu/edpb_en">EDPB Guidelines on Consent &amp; Data Processing</a></li>
+<li><strong>Slovenian Information Commissioner (Informacijski pooblaščenec RS):</strong>
+<a href="https://www.ip-rs.si/">IP RS — Varstvo osebnih podatkov in smernice za upravljavce</a></li>
+</ul>
+<hr />
+<h2>6. Contact &amp; Repository Information</h2>
+<p>LibrePT is an open-source community project developed under the MIT License.</p>
+<ul>
+<li><strong>Source Code &amp; Contributions:</strong> <a href="https://github.com/stutek/LibrePT">https://github.com/stutek/LibrePT</a></li>
+<li><strong>Issue Tracker &amp; Questions:</strong> <a href="https://github.com/stutek/LibrePT/issues">https://github.com/stutek/LibrePT/issues</a></li>
+</ul>
+</main>
+<p class="doc-back"><a href="./index.html">Back to LibrePT</a></p>
+</body>
+</html>

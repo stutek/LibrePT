@@ -209,6 +209,8 @@ jobs:
         run: .venv/bin/python -c "from build import run_complexity_check; run_complexity_check()"
       - name: Test assertions pin behaviour
         run: .venv/bin/python -c "from build import run_test_assertion_check; run_test_assertion_check()"
+      - name: Generated documentation pages
+        run: .venv/bin/python -c "from build import run_docs_render_check; run_docs_render_check()"
 
   # One job, three named checks (build/frontend_audit.py + build.run_static_security_checks). NOT
   # three jobs: each GitHub Actions job costs a fresh runner, checkout and Python setup — ~30s of
