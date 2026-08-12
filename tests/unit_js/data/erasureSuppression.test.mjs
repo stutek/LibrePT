@@ -102,10 +102,10 @@ test("restoring a pre-erasure backup re-erases the client on the way in", async 
   const { state, reErased } = await applySuppressions(backupState(), list, subtle);
 
   const jane = state.clients.find((client) => client.id === "c-jane");
-  assert.equal(jane.name, "Client #C-JANE");
+  assert.ok(!jane.name.includes("Jane Doe"), "the restored record must not still name them");
   assert.equal(jane.email, "");
   assert.equal(jane.notes, "");
-  assert.equal(state.history[0].clientName, "Client #C-JANE");
+  assert.equal(state.history[0].clientName, jane.name, "and their history matches, not the backup");
   assert.deepEqual(reErased, ["c-jane"]);
 
   // Everyone else comes back from the backup untouched.

@@ -56,12 +56,11 @@ const state = {
 renderClientDirectoryViewShell();
 renderClientDetailViewShell();
 
-window.__saved = 0;
 bootClientForms({
   state,
   t,
   navigateToPath: noop,
-  saveToLocalStorage: () => { window.__saved += 1; },
+  saveToLocalStorage: noop,
   populateDropdownSelectors: noop,
   showErrorView: noop,
   switchView: noop,

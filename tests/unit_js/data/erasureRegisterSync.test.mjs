@@ -53,7 +53,8 @@ test("the first sync creates the file from this device's register", async () => 
     drive,
   });
 
-  assert.equal(drive.created, 1);
+  // What the next device must find in the account, not how many calls got it there.
+  assert.equal(drive.content.entries.length, 1);
   assert.equal(result.list.entries.length, 1);
   // The high-water count travels with the file so a later shortfall is detectable.
   assert.equal(drive.content.highWaterCount, 1);
@@ -119,7 +120,7 @@ test("the register heals from the erased records themselves", async () => {
   });
 
   assert.equal(result.list.entries.length, 1);
-  assert.equal(drive.created, 1);
+  assert.equal(drive.content.entries.length, 1, "and it reaches the account, not just this device");
 });
 
 test("syncing twice changes nothing the second time", async () => {
@@ -137,6 +138,9 @@ test("syncing twice changes nothing the second time", async () => {
     drive,
   });
 
+  // Counting writes is normally implementation-coupling, but AN AVOIDED SIDE EFFECT IS BEHAVIOUR
+  // (AGENT_RULES §5.8): the promise here is that a poll on a trainer's phone does not spend a Drive
+  // request, and their battery and quota, to upload a file that has not changed.
   assert.equal(drive.created + drive.updated, writesAfterFirst);
   assert.equal(again.pushed, false);
   assert.equal(again.list.entries.length, 1);
@@ -161,10 +165,13 @@ test("a remote register never shrinks, whatever this device sends", async () => 
 test("registerHealth reports a shortfall rather than accusing anyone", async () => {
   const list = await withSuppressedClient(null, "c-jane", subtle, webcrypto);
 
-  assert.deepEqual(registerHealth(list, 1), { count: 1, highWater: 1, lost: 0, healthy: true });
+  // The fields a caller reads, not the exact object shape — an added field must not fail this.
+  assert.equal(registerHealth(list, 1).healthy, true);
+  assert.equal(registerHealth(list, 1).lost, 0);
   // Two entries were seen by this account, one is here: a loss to be healed by a sync, not proof of
   // tampering — the person holding the device is the one legally responsible for it.
-  assert.deepEqual(registerHealth(list, 2), { count: 1, highWater: 2, lost: 1, healthy: false });
+  assert.equal(registerHealth(list, 2).healthy, false);
+  assert.equal(registerHealth(list, 2).lost, 1);
   // The high-water can only rise.
   assert.equal(registerHealth(list, 0).highWater, 1);
 });

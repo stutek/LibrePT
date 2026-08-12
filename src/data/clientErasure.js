@@ -36,13 +36,30 @@
 // Session loads stay because they describe what was lifted, not who lifted it.
 const CLEARED_TEXT_FIELDS = ["email", "phone", "goals", "notes", "injury"];
 
+// Short and stable: the trainer needs to tell two erased records apart in a list, and the full id is
+// unreadable at a glance.
+//
+// HASHED rather than sliced, and that is not decoration. Slicing the id echoes whatever the id
+// happens to contain — fine for `recordId.js`'s opaque UUIDv7s, but a record imported from another
+// system can carry an id like `jane-doe-1`, and slicing it would print the erased person's name back
+// onto their own anonymised record. A hash cannot leak what it does not copy, so the guarantee stops
+// depending on another module's contract. Not a security boundary and deliberately not a crypto hash
+// — nothing here resists an attacker who already holds the id; it exists so the label reflects
+// nothing but the id's identity, and it stays synchronous, which SubtleCrypto would not.
+function shortDigest(text) {
+  // FNV-1a, 32-bit: tiny, dependency-free, and well-distributed enough that two clients in one
+  // trainer's book collide with vanishing probability.
+  let hash = 0x811c9dc5;
+  for (let index = 0; index < text.length; index += 1) {
+    hash ^= text.charCodeAt(index);
+    hash = Math.imul(hash, 0x01000193) >>> 0;
+  }
+  return hash.toString(36).toUpperCase().padStart(6, "0").slice(-6);
+}
+
 export function erasurePseudonym(clientId) {
-  // Short and stable: the trainer needs to tell two erased records apart in a list, and the full id
-  // is unreadable at a glance. Uppercase because it reads as an identifier rather than as a name.
-  const tail = String(clientId || "")
-    .slice(-6)
-    .toUpperCase();
-  return `Client #${tail || "ERASED"}`;
+  const id = String(clientId || "");
+  return `Client #${id ? shortDigest(id) : "ERASED"}`;
 }
 
 export function isErased(client) {

@@ -60,10 +60,21 @@ function stateWithTwoJanes() {
   };
 }
 
-test("the pseudonym is derived from the opaque id, so nothing new has to be stored", () => {
-  // A stored mapping is the thing that would make erasure reversible — see the module header.
-  assert.equal(erasurePseudonym("c-jane-a"), "Client #JANE-A");
-  assert.equal(erasurePseudonym(""), "Client #ERASED");
+test("the pseudonym identifies the record without describing the person", () => {
+  // The exact format is not the contract — the three properties it must have are, and pinning the
+  // literal string would fail on a cosmetic change while catching none of these.
+  const jane = erasurePseudonym("c-jane-a");
+  const marko = erasurePseudonym("c-marko-b");
+
+  assert.notEqual(jane, marko, "two erased clients must stay distinguishable in a list");
+  assert.equal(jane, erasurePseudonym("c-jane-a"), "stable: derived, never generated afresh");
+  assert.ok(jane.trim().length > 0, "a record with no label cannot be worked with");
+  // Nothing personal may leak in: the input is an opaque record id, and that is all it may reflect.
+  for (const personal of ["Jane", "Doe", "jane@example.com"]) {
+    assert.ok(!jane.toLowerCase().includes(personal.toLowerCase()));
+  }
+  // Even a record with no id at all gets a usable label rather than an empty one.
+  assert.ok(erasurePseudonym("").trim().length > 0);
 });
 
 test("every identifying field on the client record is cleared", () => {
@@ -72,7 +83,10 @@ test("every identifying field on the client record is cleared", () => {
   });
   const erased = state.clients.find((client) => client.id === "c-jane-a");
 
-  assert.equal(erased.name, "Client #JANE-A");
+  // Against the function, not a literal: what matters is that the record now carries the pseudonym
+  // for THIS id, not what that pseudonym happens to spell.
+  assert.equal(erased.name, erasurePseudonym("c-jane-a"));
+  assert.ok(!erased.name.includes("Jane"), "the erased record must not still say their name");
   for (const field of ["email", "phone", "goals", "notes", "injury"]) {
     assert.equal(erased[field], "", `${field} should be cleared`);
   }
@@ -89,8 +103,9 @@ test("the denormalised name copies are rewritten too", () => {
   // DATA_MODEL §5: "if one store keeps the name, the erasure has failed".
   const { state } = eraseClientInState(stateWithTwoJanes(), "c-jane-a", {});
 
-  assert.equal(state.history.find((record) => record.id === "h1").clientName, "Client #JANE-A");
-  assert.equal(state.planUpdates.find((record) => record.id === "p1").clientName, "Client #JANE-A");
+  const pseudonym = erasurePseudonym("c-jane-a");
+  assert.equal(state.history.find((record) => record.id === "h1").clientName, pseudonym);
+  assert.equal(state.planUpdates.find((record) => record.id === "p1").clientName, pseudonym);
 });
 
 test("another client with the same name is left completely untouched", () => {
@@ -126,10 +141,10 @@ test("with no namesake, a solo session title is rewritten and a group one is not
 
   const result = eraseClientInState(state, "c-jane-a", {});
 
-  assert.equal(
-    result.state.sessions.find((session) => session.id === "s-solo").title,
-    "Client #JANE-A 1:1",
-  );
+  const soloTitle = result.state.sessions.find((session) => session.id === "s-solo").title;
+  assert.ok(!soloTitle.includes("Jane Doe"), "the name is gone from the title");
+  assert.ok(soloTitle.includes(erasurePseudonym("c-jane-a")), "and the pseudonym stands in for it");
+  assert.ok(soloTitle.includes("1:1"), "the rest of what the trainer typed survives");
   // A group title may mean any participant, and the others did not ask to be forgotten.
   assert.equal(
     result.state.sessions.find((session) => session.id === "s-group").title,
@@ -144,18 +159,22 @@ test("prose inside the client's OWN records is rewritten even with a namesake pr
   const { state } = eraseClientInState(stateWithTwoJanes(), "c-jane-a", {});
   const record = state.history.find((entry) => entry.id === "h1");
 
-  assert.equal(record.feedback[0].note, "Client #JANE-A flew through this");
-  assert.equal(record.title, "Client #JANE-A — deload week");
+  const pseudonym = erasurePseudonym("c-jane-a");
+  assert.equal(record.feedback[0].note, `${pseudonym} flew through this`);
+  assert.equal(record.title, `${pseudonym} — deload week`);
 });
 
 test("the disambiguator always says something, and prefers the trainer's own alias", () => {
   const [janeA, janeB] = stateWithTwoJanes().clients;
 
-  assert.match(clientDisambiguator(janeA), /^morning · jane\.a@example\.com/);
+  // The alias comes first because it is the label the trainer chose FOR this purpose; the exact
+  // separator is presentation, so only the ordering and the presence of each part are pinned.
+  const labelA = clientDisambiguator(janeA);
+  assert.ok(labelA.indexOf("morning") < labelA.indexOf("jane.a@example.com"));
   assert.match(clientDisambiguator(janeB), /jane\.b@example\.com/);
   // Even a record with nothing on it gets a label — an unlabelled option in a destructive
   // confirmation is how the wrong person gets erased.
-  assert.match(clientDisambiguator({ id: "c-abc123" }), /id …c-abc123|id …abc123/);
+  assert.ok(clientDisambiguator({ id: "c-abc123" }).trim().length > 0);
 });
 
 test("namesakes are matched on a normalised name, not an exact string", () => {
@@ -170,5 +189,7 @@ test("erasing an unknown client changes nothing at all", () => {
   const { state, summary } = eraseClientInState(before, "c-nobody", {});
 
   assert.equal(summary, null);
-  assert.equal(state, before);
+  // deepEqual, not identity: "returned the same object" is an implementation choice, "nobody's
+  // record was touched" is the promise.
+  assert.deepEqual(state, before);
 });

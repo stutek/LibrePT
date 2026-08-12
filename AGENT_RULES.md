@@ -242,6 +242,40 @@ parallel without collisions, and make the directory tree itself act as documenta
    The catalog lives in `docs/`, **not** in `src/`, and no documentation may live under `src/` at any depth: `run_build` copies that tree wholesale into `dist/`, so anything placed there ships to production and is hashed into the integrity catalog. Every other knowledge directory owns its own `INDEX.md` ([tests/](tests/INDEX.md), [docs/](docs/INDEX.md), [use_cases/](use_cases/INDEX.md), [agent_tools/](agent_tools/INDEX.md)) with the root [INDEX.md](INDEX.md) as the map of maps — `src/` is the one exception, and this is why.
 7. **Write self-documenting code inside each module, too.** Let names carry the intent — prefer descriptive functions and variables (`toRoute`, `renderSessionTitle`, `BASE_PATH`) over abbreviations or clever one-liners, so a reader rarely needs a comment to follow *what* the code does. Reserve comments for the *why*: the constraint, edge case, or decision the code cannot state itself (e.g. why the router derives its base from `import.meta.url`, or why an unknown route renders a view instead of redirecting). Don't restate mechanics the next line already shows, and delete dead code rather than leaving commented-out or unreachable branches behind.
 
+8. **Assert the BEHAVIOUR a caller depends on, never the mechanics that produce it.** §5.2 and
+   [tests/INDEX.md](tests/INDEX.md) say which tier a test belongs in — how much of the app it boots.
+   This is the other axis: what it is allowed to look at once it gets there. A test that encodes
+   *how* the code works fails on every refactor that changes nothing anyone can observe, so it
+   punishes cleanup and stops being evidence of anything. Worse, it passes while the behaviour is
+   broken, as long as the mechanics are untouched.
+
+   The question to ask of every assertion: **if I rewrote this module's internals and kept its
+   contract, would this line still hold?** If not, it is pinned to the wrong thing.
+
+   | Pinned to mechanics | Pinned to behaviour |
+   | :--- | :--- |
+   | `erasurePseudonym(id) === "Client #JANE-A"` | the label is stable, differs per client, and contains none of their PII |
+   | `drive.created === 1` (counting stub calls) | the account's register ends up holding both erasures |
+   | `assert.deepEqual(health, {count, highWater, lost, healthy})` | `lost` reports the shortfall; the caller reads that field |
+   | `assert.equal(next, previous)` (same object reference) | the state is unchanged — `deepEqual` |
+   | `el.classList.contains("hidden")` | `expect(el).to_be_hidden()` — what the trainer sees |
+   | `id.length === 22` | ids are unique, sortable, and URL-safe |
+
+   Three carve-outs, because the rule is not "never look at internals":
+   - **A class name that IS the contract** — one another module or a stylesheet keys off — may be
+     asserted, with a comment saying which. `hidden`/`active` usually have a visible equivalent
+     (`to_be_visible()`); prefer it.
+   - **An avoided side effect is behaviour.** "A second sync writes nothing to Drive" is a real
+     promise about someone's battery and quota, and counting the write is the only way to state it.
+     Say so in the test.
+   - **A format that outlives the code** — a stored field, a file on disk, a URL someone bookmarked
+     — is a contract precisely because changing it breaks data already written. Pin it, and say it
+     is a persisted shape rather than an internal one.
+
+   **Name tests for the promise, not the function**: "restoring a pre-erasure backup re-erases the
+   client on the way in" beats "applySuppressions works". The name is what a future reader diffs
+   against the behaviour they are about to change.
+
 ---
 
 ## 6. Agent Tooling: Build the Tool, Don't Re-Improvise the Script
