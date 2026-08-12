@@ -116,7 +116,9 @@ test("an empty list is a no-op, not a full sweep", async () => {
   const before = backupState();
   const { state, reErased } = await applySuppressions(before, { entries: [] }, subtle);
 
-  assert.equal(state, before);
+  // deepEqual, not identity: returning the same object is an implementation choice; "nobody was
+  // re-erased" is the promise.
+  assert.deepEqual(state, before);
   assert.deepEqual(reErased, []);
 });
 

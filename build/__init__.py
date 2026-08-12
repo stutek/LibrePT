@@ -544,6 +544,20 @@ def run_complexity_check():
         sys.exit(1)
 
 
+def run_test_assertion_check():
+    """Verifies tests assert behaviour, not mechanics — see agent_tools/test_assertions.py.
+
+    AGENT_RULES §5.8 exists because a mechanics-pinned test fails on refactors that change nothing
+    observable and passes while the behaviour is broken. Neither is visible in review — the
+    assertion looks precise, which is what makes it convincing — so it needs a machine.
+    """
+    print("\n  Checking test assertions (behaviour, not mechanics)...")
+    from agent_tools import test_assertions
+
+    if test_assertions.main() != 0:
+        sys.exit(1)
+
+
 def run_frontend_lint():
     """Runs JS/CSS/JSON static analysis (Biome), applying the formatting it can fix itself.
 
@@ -1275,6 +1289,7 @@ def run_stage_1_parallel():
         "Import Layering": run_import_layer_check,
         "Pipeline Gating": run_pipeline_gate_check,
         "Cyclomatic Complexity": run_complexity_check,
+        "Test Assertions": run_test_assertion_check,
     }
 
     stage_start = time.monotonic()

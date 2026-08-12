@@ -182,7 +182,7 @@ jobs:
   # are the repo's structural invariants: the module catalog matches the tree, imports flow one way,
   # every CI job gates the deploy, and no function has grown past the complexity ceiling.
   structure-checks:
-    name: Stage 1 · Structural Invariants (catalog, icons, layering, gating, complexity)
+    name: Stage 1 · Structural Invariants (catalog, icons, layering, gating, complexity, test assertions)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -207,6 +207,8 @@ jobs:
         run: .venv/bin/python -c "from build import run_pipeline_gate_check; run_pipeline_gate_check()"
       - name: Cyclomatic complexity
         run: .venv/bin/python -c "from build import run_complexity_check; run_complexity_check()"
+      - name: Test assertions pin behaviour
+        run: .venv/bin/python -c "from build import run_test_assertion_check; run_test_assertion_check()"
 
   # One job, three named checks (build/frontend_audit.py + build.run_static_security_checks). NOT
   # three jobs: each GitHub Actions job costs a fresh runner, checkout and Python setup — ~30s of
