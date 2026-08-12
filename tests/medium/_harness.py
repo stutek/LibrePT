@@ -80,13 +80,14 @@ activateView('{view_id}');
 
 # Shared by every test that needs the real header shell + its two route-backed dialogs (Sync &
 # Backup, Drive sync card) — three separate components (applicationHeader.js, backupRestore.js,
-# driveSyncUi.js) that always boot together in production and share the #backup-btn click wiring
-# (backupRestore.js's own listener opens the dialog; driveSyncUi's is a second listener on the
-# same button). One shared stub here rather than three near-identical copies, so a real change to
-# any of these boot steps' deps shape breaks this ONE place, not three silently-drifting ones.
+# driveSyncUi.js) that always boot together in production and share the #backup-btn click wiring:
+# backupRestore.js owns the listener, and asks driveSyncUi's handleHeaderCloudTap() first, which
+# takes the tap when a sync is possible (TODO §3.11). One shared stub here rather than three
+# near-identical copies, so a real change to any of these boot steps' deps shape breaks this ONE
+# place, not three silently-drifting ones.
 HEADER_STUB = """
 import { bootHeader, bootBackupRestore, bootDriveSyncUi } from './appBoot.js';
-import { renderHeaderShell } from './modules/common/applicationHeader.js';
+import { renderHeaderShell, renderSyncBadge } from './modules/common/applicationHeader.js';
 import { prepareBackupDialog } from './modules/common/backupRestore.js';
 import { applyStaticDOMMappings } from './i18n/domMappings.js';
 import { TRANSLATIONS } from './i18n/index.js';
@@ -135,7 +136,10 @@ bootBackupRestore({
   renderSessions: noop,
   t,
 });
-bootDriveSyncUi({ t });
+// renderSyncBadge is the real one — a sync starting or failing has to repaint the header cloud,
+// and passing a noop here would make the glyph untestable for the exact transitions that matter.
+// The notification feed is not mounted in this stub, so its repaint is the one genuine stand-in.
+bootDriveSyncUi({ t, renderSyncBadge, renderNotificationArea: noop });
 bootHeader({
   getState: () => state,
   t,

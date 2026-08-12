@@ -67,6 +67,11 @@ export function renderSyncBadge() {
   if (!badge) return;
 
   if (isOfflineCached) {
+    // Repaint the cloud before returning, or it keeps whatever it last showed — a sync that was in
+    // flight when the server went away would leave the arrows spinning here forever, and an idle
+    // grant would keep claiming a connection that cannot possibly work. Running from cached code
+    // means no sync can succeed whatever the grant says, which is the not-connected glyph.
+    renderSyncCloudIcon({ configured: false });
     badge.classList.remove("hidden");
     badge.innerHTML = `<span class="sync-offline" title="${deps?.t ? deps.t("offline_cached_desc") : "HTTP server unreachable. Running on cached code."}"><i class="fa-solid fa-plug-circle-xmark"></i> Offline</span>`;
     badge.setAttribute(
@@ -413,17 +418,14 @@ function setupAppMenu() {
   on("menu-history", () => goto("/history"));
   // Connect cloud storage — opens the Sync & Backup dialog's Google Drive card (driveSyncUi.js),
   // which itself reports "not configured" honestly on a deployment with no OAuth client id set.
-  on("menu-connect-cloud", () => {
-    closeMenu();
-    const b = document.getElementById("backup-btn");
-    if (b) b.click();
-  });
+  // Both open the Sync & Backup dialog, and both navigate to its route rather than synthesising a
+  // click on #backup-btn — which is what they used to do, and what broke the moment that button
+  // learned to sync (TODO §3.11): for a CONNECTED trainer the simulated click ran a sync and never
+  // opened the dialog, so "Export data as a file" silently did something else entirely. The header
+  // button's behaviour is now state-dependent; these two are not, so they must not borrow it.
+  on("menu-connect-cloud", () => goto(deps.urlFor("backup")));
   // Export data — reuse the existing Sync & Backup modal (it holds JSON export/restore).
-  on("menu-export-data", () => {
-    closeMenu();
-    const b = document.getElementById("backup-btn");
-    if (b) b.click();
-  });
+  on("menu-export-data", () => goto(deps.urlFor("backup")));
   // For a CLIENT who was emailed their data export, not for the trainer — which is why it sits in
   // the app menu and not on a client record: the person opening it has no client record.
   on("menu-open-encrypted", () => {

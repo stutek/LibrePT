@@ -18,13 +18,10 @@ pytestmark = pytest.mark.clean_start
 
 # app.js renders the badge at the end of init() (and re-renders it from the onStateSaved /
 # onSyncCountsChanged seams). Neither runs here, so the stub renders it once explicitly.
-STUB = (
-    HEADER_STUB
-    + """
-import { renderSyncBadge } from './modules/common/applicationHeader.js';
-renderSyncBadge();
-"""
-)
+# `renderSyncBadge` is already imported by HEADER_STUB (it hands the real one to bootDriveSyncUi, so
+# a sync starting or failing repaints the cloud). Re-importing it here would be a duplicate binding
+# in the same module — a SyntaxError that silently leaves nothing mounted at all.
+STUB = HEADER_STUB + "\nrenderSyncBadge();\n"
 
 
 def test_sync_badge_shows_real_zero_ahead_and_unknown_behind_before_any_sync(
@@ -126,6 +123,63 @@ def test_an_unconnected_cloud_is_informational_not_a_warning(page, local_server)
     assert "not connected" in label.lower(), (
         f"header cloud says nothing about its state: {label}"
     )
+
+
+def _load_connected(page, local_server):
+    """Mount the header with Drive sync reporting CONNECTED, without an OAuth grant.
+
+    `hasStoredConsent()` is a localStorage flag, so the connected branch — unreachable to every
+    browser tier through the real consent flow, since Google fingerprints and blocks automated
+    browsers — is reachable by seeding it. Google's script host is aborted so the token request
+    fails immediately and offline: this tier must not depend on `accounts.google.com` being up, and
+    the failure it produces is exactly the state under test.
+    """
+    page.route("**/accounts.google.com/**", lambda route: route.abort())
+    page.add_init_script("localStorage.setItem('librept_drive_connected', '1')")
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#app-header")
+
+
+def test_a_connected_tap_syncs_instead_of_opening_the_dialog(page, local_server):
+    """Connected, the header cloud is "sync now" — the dialog was an extra tap nobody needed
+    (TODO §3.11), and it stays reachable from the ☰ menu.
+
+    The sync attempted here cannot succeed (no real grant), which is what makes the second half
+    assertable: the failure has to reach the glyph, because the dialog that used to report it is
+    the one surface this tap no longer opens.
+    """
+    _load_connected(page, local_server)
+
+    page.locator("#backup-btn").click()
+    assert page.locator("#dialog-backup").get_attribute("open") is None, (
+        "a connected tap opened the dialog instead of syncing"
+    )
+
+    page.wait_for_function(
+        "() => document.querySelector('#sync-cloud-icon')?.classList.contains('is-failed')"
+    )
+    label = page.locator("#backup-btn").get_attribute("aria-label")
+    assert "failed" in label.lower(), f"the failure is shown but not spoken: {label}"
+
+
+def test_the_menu_still_opens_the_dialog_while_connected(page, local_server):
+    """The ☰ items must not inherit the header button's state-dependent behaviour.
+
+    Both used to synthesise a click on `#backup-btn`, which was harmless while that button only
+    ever opened the dialog. The moment it learned to sync, "Export data as a file" ran a sync and
+    opened nothing — a menu item silently doing something else entirely. Only reachable in the
+    CONNECTED state, which is why nothing caught it.
+    """
+    _load_connected(page, local_server)
+
+    page.locator("#btn-app-menu").click()
+    page.locator("#menu-export-data").click()
+
+    dialog = page.locator("#dialog-backup")
+    assert dialog.get_attribute("open") is not None, (
+        "Export data as a file did not open the Sync & Backup dialog"
+    )
+    assert page.locator("#dialog-backup #btn-export-db").is_visible()
 
 
 def test_backup_modal_opens_and_closes(page, local_server):
