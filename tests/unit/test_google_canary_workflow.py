@@ -14,7 +14,6 @@ import yaml
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 WORKFLOW_DIR = REPO_ROOT / ".github" / "workflows"
 CANARY = WORKFLOW_DIR / "google-canary.yml"
-DRIVE_CONFIG = REPO_ROOT / "src" / "data" / "driveSyncConfig.js"
 
 # Scopes that would make the canary pass while the app's real, narrow scopes were broken — and that
 # would hand a leaked token far more reach than the app ever needs. `drive.appdata` is bounded to
@@ -64,29 +63,48 @@ def test_canary_stores_no_long_lived_google_secret():
     )
 
 
-def test_canary_requests_only_the_narrow_production_scopes():
-    """A canary minted with broader access than the app uses would pass while the real scopes were
-    broken — worse than no canary, because it reports confidence it has not earned. Widening the
-    scope list is also the tempting 'fix' for a genuine permissions failure."""
-    text = CANARY.read_text(encoding="utf-8")
-    scope_lines = [line for line in text.splitlines() if "access_token_scopes" in line]
+def test_the_federated_identity_holds_no_app_scopes():
+    """The WIF token exists to read ONE secret, and must never carry Drive or Calendar access.
+
+    That separation is the whole security story: `cloud-platform` is the only scope Secret Manager
+    accepts, so the real boundary is IAM — `secretmanager.secretAccessor` on a single secret, no
+    project roles. If app scopes were added here the federated identity would become a way into
+    trainer-shaped data, and a canary could also pass while the CONSUMER grant (the thing actually
+    under test) was broken."""
+    scope_lines = [
+        line
+        for line in CANARY.read_text(encoding="utf-8").splitlines()
+        if "access_token_scopes" in line
+    ]
     assert scope_lines, "canary declares no access_token_scopes"
     scopes = scope_lines[0]
-    for overbroad in OVERBROAD_SCOPES:
-        assert overbroad not in scopes, (
-            f"canary requests overbroad scope {overbroad.strip()}"
+    for app_scope in OVERBROAD_SCOPES + (
+        "/auth/drive.appdata",
+        "/auth/calendar.freebusy",
+    ):
+        assert app_scope not in scopes, (
+            f"federated identity must not request {app_scope.strip()} — "
+            "Drive/Calendar access comes only from the consumer refresh token"
         )
 
 
-def test_canary_drive_scope_matches_the_shipping_app():
-    """The canary must exercise the SAME Drive scope production asks for. If they drift, the canary
-    is testing a configuration no user has."""
-    shipped = re.search(
-        r'GOOGLE_DRIVE_SCOPE\s*=\s*"([^"]+)"', DRIVE_CONFIG.read_text(encoding="utf-8")
+def test_the_credential_fetch_cannot_fail_silently():
+    """A curl piped into jq returns the PIPE's exit code, so a failed fetch would leave an empty
+    credential file and the suite would 'skip' — a disarmed canary reporting green, which
+    AGENT_RULES §2.A.3 calls a failure rather than a pass."""
+    text = CANARY.read_text(encoding="utf-8")
+    assert "set -euo pipefail" in text, (
+        "the fetch step must not swallow a mid-pipe failure"
     )
-    assert shipped, "could not read GOOGLE_DRIVE_SCOPE from driveSyncConfig.js"
-    assert shipped.group(1) in CANARY.read_text(encoding="utf-8"), (
-        f"canary does not request the app's Drive scope {shipped.group(1)}"
+    assert "--fail" in text, "curl must exit non-zero on an HTTP error"
+
+
+def test_a_runtime_fetched_secret_is_masked():
+    """GitHub masks secrets it injected, not ones a job fetched at runtime — those must be masked
+    explicitly or a later `set -x` or error dump could print them."""
+    text = CANARY.read_text(encoding="utf-8")
+    assert text.count("::add-mask::") >= 2, (
+        "both the refresh token and client secret must be masked after fetching"
     )
 
 

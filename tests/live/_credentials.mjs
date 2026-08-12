@@ -1,17 +1,28 @@
 // tests/live/_credentials.mjs — resolves an access token for the live-Google suite, from whichever
 // of the two credential sources is present, and returns null (never throws) when neither is.
 //
-// **Two sources, one seam.** The suite itself never learns where its token came from:
+// **One path, two ways of arriving at it.** `.private/google-live.json` holds
+// `{client_id, client_secret, refresh_token}` for a consumer test account, which this module
+// exchanges for a short-lived access token. That file gets there either because a developer put it
+// there, or because CI fetched it — and the code cannot tell the difference, which is the point:
+// there is no CI-only branch to rot unnoticed.
 //
-//   1. **CI** sets `GOOGLE_LIVE_ACCESS_TOKEN` directly. It is minted by Workload Identity
-//      Federation — GitHub's OIDC assertion is exchanged with Google for a short-lived service
-//      account token, so the repository stores no long-lived credential at all. Nothing to leak,
-//      nothing to rotate, and no `pull_request_target` hazard: a fork's workflow cannot obtain an
-//      OIDC assertion that satisfies the provider's repository condition.
-//   2. **Locally** `.private/google-live.json` holds `{client_id, client_secret, refresh_token}` for
-//      a consumer test account, exchanged for an access token here. `.private/` is gitignored and
-//      must stay that way — unlike the OAuth *client id* (which ships in `googleApiConfig.js` by
-//      design), a client secret and refresh token are real secrets.
+//   * **Locally** the developer writes it once. `.private/` is gitignored and must stay that way —
+//     unlike the OAuth *client id* (which ships in driveSyncConfig.js by design), a client secret
+//     and refresh token are real secrets.
+//   * **In CI** the canary workflow authenticates with **no stored credential at all**: GitHub mints
+//     a short-lived OIDC assertion, Google verifies GitHub's signature and returns a token, and that
+//     token reads the credential from **GCP Secret Manager** and writes this same file into the
+//     ephemeral runner. So the vault is on Google's side, with IAM and audit logs, and GitHub holds
+//     nothing secret — only two non-sensitive variables naming the provider and service account.
+//
+// A consumer refresh token is used rather than the federated identity itself because a service
+// account is not a Gmail user: it has its own Drive and calendar, but it can never exercise the
+// consumer OAuth path a real trainer takes. The federated identity therefore holds no Drive or
+// Calendar scope at all — only permission to read one secret.
+//
+// `GOOGLE_LIVE_ACCESS_TOKEN` still short-circuits everything below, for ad-hoc runs against a token
+// obtained some other way.
 //
 // **Absence is a skip, not a failure.** Most runs — every contributor, every gated `build check` —
 // have neither source, and must not go red for it. The live suite is a canary for changes on
