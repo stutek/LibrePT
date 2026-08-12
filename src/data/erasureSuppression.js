@@ -127,6 +127,49 @@ export async function applySuppressions(state, list, subtle) {
   return { state: next, reErased };
 }
 
+/**
+ * Rebuild register entries from the records themselves — every client already carrying
+ * `erasure.erasedAt` is its own proof that an erasure happened.
+ *
+ * This is what makes the register **self-healing**, and it costs nothing: the anonymised records ARE
+ * a second copy of the register, held in the one place a trainer is most careful about. A device
+ * whose localStorage was cleared, or one restored from a backup written by a build that predates the
+ * register, re-derives its entries from the data it already has instead of silently forgetting who
+ * asked to be forgotten.
+ *
+ * It cannot recover an erasure whose records are also gone — nothing can, short of the Drive copy.
+ */
+export async function registerFromErasedClients(state, subtle, cryptoImpl = globalThis.crypto) {
+  let list = { entries: [] };
+  for (const client of state?.clients || []) {
+    if (!client?.erasure?.erasedAt) continue;
+    list = await withSuppressedClient(list, client.id, subtle, cryptoImpl);
+  }
+  return list;
+}
+
+/**
+ * Whether the register looks like it LOST entries since this device last saw it.
+ *
+ * The realistic adversary here is entropy, not the trainer: cleared site data, a half-finished
+ * profile migration, a restore from a stale file. Since the register only ever grows, a count that
+ * has gone down is evidence of loss — not proof of tampering, and deliberately not described as
+ * such, because the person holding the device is also the person legally responsible for it and
+ * accusing them of editing their own register would be both rude and useless.
+ *
+ * `highWater` is carried in the Drive copy and in local storage; the caller surfaces a shortfall so
+ * a sync (which unions, and therefore heals) is the obvious next step.
+ */
+export function registerHealth(list, highWater = 0) {
+  const count = entriesOf(list).length;
+  return {
+    count,
+    highWater: Math.max(count, highWater),
+    lost: Math.max(0, highWater - count),
+    healthy: count >= highWater,
+  };
+}
+
 export function readSuppressionList(storage = globalThis.localStorage) {
   try {
     const raw = storage?.getItem(SUPPRESSION_KEY);

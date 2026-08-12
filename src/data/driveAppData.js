@@ -15,6 +15,12 @@ const API_BASE = "https://www.googleapis.com/drive/v3";
 const UPLOAD_BASE = "https://www.googleapis.com/upload/drive/v3";
 export const SYNC_FILENAME = "librept_sync.json";
 
+// The erasure register is a SECOND file, not a key inside the snapshot, and the separation is
+// load-bearing (erasureSuppression.js): the snapshot is replaced wholesale by a restore or a merge,
+// and a register that rode inside it would be rolled back by the very operation it exists to
+// filter. As its own file it is only ever unioned — an append-only set that cannot regress.
+export const ERASURE_REGISTER_FILENAME = "librept_erasure_register.json";
+
 async function driveFetch(url, options, fetchImpl) {
   const response = await fetchImpl(url, options);
   if (!response.ok) {
@@ -30,9 +36,12 @@ function authHeaders(accessToken, extra = {}) {
   return { Authorization: `Bearer ${accessToken}`, ...extra };
 }
 
-/** The sync file's `{id, modifiedTime}`, or null if this device's grant has never created one. */
-export async function findSyncFile(accessToken, { fetchImpl = fetch } = {}) {
-  const query = encodeURIComponent(`name='${SYNC_FILENAME}' and trashed=false`);
+/** A file's `{id, modifiedTime}`, or null if this device's grant has never created it. */
+export async function findSyncFile(
+  accessToken,
+  { fetchImpl = fetch, filename = SYNC_FILENAME } = {},
+) {
+  const query = encodeURIComponent(`name='${filename}' and trashed=false`);
   const fields = encodeURIComponent("files(id,modifiedTime)");
   const url = `${API_BASE}/files?spaces=appDataFolder&q=${query}&fields=${fields}`;
   const response = await driveFetch(url, { headers: authHeaders(accessToken) }, fetchImpl);
@@ -60,10 +69,14 @@ function buildMultipartBody(boundary, metadata, content) {
   );
 }
 
-/** Create the sync file for the first time. Returns the new file's `{id}`. */
-export async function createSyncFile(accessToken, content, { fetchImpl = fetch } = {}) {
+/** Create a file for the first time. Returns the new file's `{id}`. */
+export async function createSyncFile(
+  accessToken,
+  content,
+  { fetchImpl = fetch, filename = SYNC_FILENAME } = {},
+) {
   const boundary = "librept-drive-sync";
-  const metadata = { name: SYNC_FILENAME, parents: ["appDataFolder"] };
+  const metadata = { name: filename, parents: ["appDataFolder"] };
   const body = buildMultipartBody(boundary, metadata, content);
   const url = `${UPLOAD_BASE}/files?uploadType=multipart&fields=id`;
   const response = await driveFetch(
@@ -80,7 +93,7 @@ export async function createSyncFile(accessToken, content, { fetchImpl = fetch }
   return response.json();
 }
 
-/** Overwrite the sync file's content (metadata unchanged) — a plain media-only update. */
+/** Overwrite a file's content (metadata unchanged) — a plain media-only update. */
 export async function updateSyncFile(accessToken, fileId, content, { fetchImpl = fetch } = {}) {
   const url = `${UPLOAD_BASE}/files/${fileId}?uploadType=media`;
   await driveFetch(

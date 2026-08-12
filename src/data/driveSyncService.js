@@ -44,6 +44,12 @@
 
 import { createSyncFile, downloadSyncFile, findSyncFile, updateSyncFile } from "./driveAppData.js";
 import { isDriveSyncConfigured } from "./driveSyncConfig.js";
+import { syncErasureRegister } from "./erasureRegisterSync.js";
+import {
+  applySuppressions,
+  readSuppressionList,
+  writeSuppressionList,
+} from "./erasureSuppression.js";
 import { hasStoredConsent, requestAccessToken, revokeAccess } from "./googleAuth.js";
 import { COLLECTIONS } from "./recordProjections.js";
 import {
@@ -219,12 +225,50 @@ export async function disconnectDriveSync() {
  * Safe to call repeatedly (poll-on-resume, a manual "Sync now" tap) — a no-op re-sync converges on
  * the same state it started from because the merge of three identical snapshots is that snapshot.
  */
+// The snapshot file's id and content, resolving the id from Drive when this device has never
+// recorded one. Extracted from syncNow purely to keep that function under the complexity gate — it
+// has no independent meaning.
+async function fetchRemoteSnapshot(token, meta) {
+  let fileId = meta.fileId;
+  if (!fileId) {
+    const existing = await findSyncFile(token);
+    if (existing) fileId = existing.id;
+  }
+  const remoteState = fileId ? (await downloadSyncFile(token, fileId)) || {} : {};
+  return { fileId, remoteState };
+}
+
+// Kept out of syncNow's body so a Drive hiccup on the register cannot fail a state sync that
+// otherwise succeeded — the register heals on the next pass, whereas a failed state sync loses the
+// trainer's work window. Returns null when it could not run.
+async function syncRegister(mergedState) {
+  try {
+    const token = await requestAccessToken({ interactive: false });
+    if (!token) return null;
+    const result = await syncErasureRegister(token, {
+      localList: readSuppressionList(),
+      state: mergedState,
+      drive: {
+        findFile: findSyncFile,
+        downloadFile: downloadSyncFile,
+        createFile: createSyncFile,
+        updateFile: updateSyncFile,
+      },
+    });
+    writeSuppressionList(result.list);
+    return result;
+  } catch {
+    return null;
+  }
+}
+
 export async function syncNow() {
   if (!isDriveSyncConfigured()) return { ok: false, error: "not_configured", at: Date.now() };
   if (!hasStoredConsent()) return { ok: false, error: "not_connected", at: Date.now() };
   if (syncing) return { ok: false, error: "already_syncing", at: Date.now() };
 
   syncing = true;
+  let reErasedOnSync = [];
   try {
     const token = await requestAccessToken({ interactive: false });
     if (!token) {
@@ -234,15 +278,7 @@ export async function syncNow() {
     }
 
     const meta = (await readDriveSyncMeta()) || { fileId: null, ancestor: {} };
-    let fileId = meta.fileId;
-    let remoteState = {};
-    if (!fileId) {
-      const existing = await findSyncFile(token);
-      if (existing) fileId = existing.id;
-    }
-    if (fileId) {
-      remoteState = (await downloadSyncFile(token, fileId)) || {};
-    }
+    const { fileId, remoteState } = await fetchRemoteSnapshot(token, meta);
 
     const localState = getState();
     const { mergedState, conflicts } = mergeState(COLLECTIONS, {
@@ -254,19 +290,29 @@ export async function syncNow() {
     for (const collection of COLLECTIONS) {
       localState[collection] = mergedState[collection];
     }
+
+    // The register rides the same pass, BEFORE the merged state is applied: a client another device
+    // erased must not surface here even briefly, and must not be written to disk under their name
+    // on the way through. This is what makes an erasure a promise kept on every device rather than
+    // only on the one it was performed on.
+    const registerResult = await syncRegister(mergedState);
+    if (registerResult) {
+      const filtered = await applySuppressions(mergedState, registerResult.list);
+      for (const collection of COLLECTIONS) {
+        localState[collection] = filtered.state[collection];
+      }
+      reErasedOnSync = filtered.reErased;
+    }
+
     setState(localState);
     saveToLocalStorage();
 
-    if (fileId) {
-      await updateSyncFile(token, fileId, mergedState);
-    } else {
-      const created = await createSyncFile(token, mergedState);
-      fileId = created.id;
-    }
-    await writeDriveSyncMeta({ fileId, ancestor: mergedState });
+    const writtenFileId = fileId || (await createSyncFile(token, mergedState)).id;
+    if (fileId) await updateSyncFile(token, fileId, mergedState);
+    await writeDriveSyncMeta({ fileId: writtenFileId, ancestor: mergedState });
     cachedAncestor = mergedState;
 
-    const result = { ok: true, at: Date.now(), conflicts };
+    const result = { ok: true, at: Date.now(), conflicts, reErased: reErasedOnSync };
     lastSyncResult = result;
     return result;
   } catch (error) {
