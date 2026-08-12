@@ -16,8 +16,16 @@
 // **freeBusy, never events.** The production scope is `calendar.freebusy`, the narrowest Google
 // publishes: it authorises this endpoint and nothing else, so a token minted with it CANNOT read an
 // event's summary, attendees or location even if asked. That is TODO §1.5's "no PT's session detail
-// leaks to another", enforced by Google rather than by our own restraint — so this test must never
-// grow an `events.list` call as a convenience.
+// leaks to another", enforced by Google rather than by our own restraint.
+//
+// **So there IS one `events.list` call below, and it is the opposite of a convenience** — it asserts
+// that the call is REFUSED. The privacy claim is not "we chose not to read event bodies", which is
+// worth nothing to a trainer whose clients' sessions are the data; it is "this grant cannot read
+// them." Nothing verified that until now: `tokenScopes.live.test.mjs` proves the token was granted
+// no broader scope, which is a statement about our consent screen, not about what Google enforces
+// at the endpoint. If that call ever starts SUCCEEDING, the scope has been widened or reclassified
+// and §1.5's isolation argument has quietly stopped being true — exactly the class of Google-side
+// change this suite exists to catch. Any other `events` call is still forbidden here.
 
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
@@ -60,6 +68,30 @@ describe("Calendar freeBusy contract", { skip: skipReason(accessToken) }, () => 
       assert.match(interval.start, /^\d{4}-\d{2}-\d{2}T/);
       assert.match(interval.end, /^\d{4}-\d{2}-\d{2}T/);
     }
+  });
+
+  test("the grant cannot read an event body, only whether the time is busy", async () => {
+    // The one place this suite touches `events` — to prove the door is locked. A `calendar.freebusy`
+    // token must be refused here; if it is ever accepted, every trainer's session titles, client
+    // names and locations became readable by anyone holding a room-calendar grant, and PRIVACY.md
+    // and TODO §1.5 both stop being accurate.
+    const response = await fetch(
+      "https://www.googleapis.com/calendar/v3/calendars/primary/events?maxResults=1",
+      { headers: { Authorization: `Bearer ${accessToken}` } },
+    );
+    assert.equal(
+      response.ok,
+      false,
+      "calendar.freebusy was accepted for events.list — the scope no longer bounds what this " +
+        "grant can read, and §1.5's occupancy design leaks session detail between trainers",
+    );
+    // 401 would mean the token is simply dead, which is a different failure and would make the
+    // assertion above pass for the wrong reason — the suite's other tests would be failing too.
+    assert.equal(
+      response.status,
+      403,
+      `expected 403 insufficient scope, got ${response.status}`,
+    );
   });
 
   test("an unreadable calendar is reported per-calendar, not as a failed request", async () => {
