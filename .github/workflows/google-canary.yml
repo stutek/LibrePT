@@ -98,7 +98,11 @@ jobs:
       # laptop, so the CI path cannot rot separately, and no secret is ever placed in the process
       # environment. `.private/` is gitignored, and the runner is destroyed after the job.
       - name: Fetch the test credential from Secret Manager
-        if: steps.auth.outputs.access_token != ''
+        # Both conditions, not just the token: federation and the vault are set up in separate steps
+        # of the runbook, and between them `GOOGLE_LIVE_SECRET` is empty. Without this guard curl
+        # would request `…/v1//versions/latest:access` and `--fail` would turn a half-finished setup
+        # into a red canary — indistinguishable, at a glance, from Google having broken something.
+        if: steps.auth.outputs.access_token != '' && vars.GOOGLE_LIVE_SECRET != ''
         env:
           ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
           SECRET_RESOURCE: ${{ vars.GOOGLE_LIVE_SECRET }}
@@ -116,11 +120,20 @@ jobs:
           echo "::add-mask::$(jq -r '.refresh_token' .private/google-live.json)"
           echo "::add-mask::$(jq -r '.client_secret' .private/google-live.json)"
 
+      # A skip must never be silent: the suite reports "skipped" either way, and without these the
+      # run page would show a green canary that tested nothing (AGENT_RULES §2.A.3).
       - name: Report missing federation setup
         if: vars.GOOGLE_WIF_PROVIDER == ''
         run: |
           echo "::warning::GOOGLE_WIF_PROVIDER is not set — the live suite will skip." \
                "See .private/google-cloud-setup.md for the one-time GCP setup."
+
+      - name: Report missing credential vault
+        if: vars.GOOGLE_WIF_PROVIDER != '' && vars.GOOGLE_LIVE_SECRET == ''
+        run: |
+          echo "::warning::GOOGLE_LIVE_SECRET is not set — federation works but there is no" \
+               "credential to fetch, so the live suite will skip. See B6a in" \
+               ".private/google-cloud-setup.md."
 
       - name: Run Live Google API Tests
         # No credential env var by design — the suite reads .private/google-live.json, written above

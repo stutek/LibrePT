@@ -130,6 +130,22 @@ def test_a_runtime_fetched_secret_is_masked():
     )
 
 
+def test_a_half_configured_setup_skips_loudly_instead_of_failing():
+    """Federation and the credential vault are set up in separate runbook steps, so there is a real
+    window where `GOOGLE_WIF_PROVIDER` is set and `GOOGLE_LIVE_SECRET` is not. In that window the
+    canary must SKIP with a warning: a red run there is indistinguishable at a glance from Google
+    breaking something, and a silent green one would be a canary testing nothing."""
+    steps = _canary_document()["jobs"]["live-google-canary"]["steps"]
+    fetch = next(s for s in steps if "Secret Manager" in s.get("name", ""))
+    assert "vars.GOOGLE_LIVE_SECRET != ''" in fetch.get("if", ""), (
+        "the fetch step must not run without a secret to fetch"
+    )
+    warnings = [s for s in steps if "::warning::" in str(s.get("run", ""))]
+    assert any("GOOGLE_LIVE_SECRET" in str(s["run"]) for s in warnings), (
+        "a missing credential vault must announce itself, not skip silently"
+    )
+
+
 def test_canary_declares_its_own_minimal_permissions():
     """`id-token: write` is what lets this job mint a Google token, so it is declared at the job's
     own workflow rather than inherited — and `contents` stays read-only, since a canary has no
