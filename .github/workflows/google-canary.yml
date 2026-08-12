@@ -11,23 +11,23 @@ name: Live Google API Canary
 # real and worth waking up to — it just is not a reason to stop shipping. This file has exactly one
 # job, so pipeline_gates' "exactly one terminal job" invariant holds here trivially.
 #
-# **Nothing long-lived in THIS repository, by design.** Workload Identity Federation exchanges
-# GitHub's OIDC assertion for a short-lived Google access token, so there is no stored Google secret
-# here for an attacker to exfiltrate or for anyone to rotate. The provider's attribute condition in
-# GCP MUST pin `assertion.repository` (see TODO §1.5) — without it, any repository on GitHub could
-# mint tokens as this service account. Note also what is NOT here: no `pull_request_target` trigger,
-# which is the standard way workflows leak credentials to untrusted fork code.
+# **Why a stored credential, after two attempts at avoiding one.** Workload Identity Federation was
+# built here and removed on 2026-08-12, because the only identity it can produce is a SERVICE
+# ACCOUNT, and Google removed service-account Drive storage quota: `files.list` against
+# `appDataFolder` answers, the multipart upload returns 403, and their published remedies reach
+# neither case (an `appDataFolder` cannot live in a shared drive; domain-wide delegation needs
+# Workspace, not a consumer Gmail). A service account can read the Drive API and can never write to
+# it, which would leave multipart upload — the one hand-rolled wire format in driveAppData.js —
+# permanently unwatched. Only a real Google account can write, only the consent flow produces one,
+# and a refresh token is the sole artifact that survives that consent without a browser.
 #
-# **Why there are two steps rather than one — a service account cannot write to Drive.** The federated
-# token proves WHO the run is; the identity that actually touches Drive and Calendar is a consumer
-# account whose refresh token lives in Secret Manager, unlocked by that federated token. This was
-# built, removed on 2026-08-12 as buying no coverage, and restored the same day when the first live
-# run proved otherwise: `findSyncFile` (a list) succeeded and `createSyncFile` (the upload) came back
-# **403**. Google removed service-account Drive storage quota, and their own remedy — a shared drive,
-# or domain-wide delegation — reaches neither case here: `appDataFolder` cannot live in a shared
-# drive, and delegation needs Workspace. So a service account can READ the API and can never write
-# to it, which makes it useless for the half of the contract most likely to break (multipart upload).
-# TODO §1.5.1 named exactly this as the one reason to bring the vault back.
+# **So the trade is explicit rather than hidden**: one long-lived credential exists, in this
+# repository's Actions secrets, and the OAuth app's *Testing* publishing status expires it every 7
+# days (see the runbook — publishing to In production ends that). Everything else about the design
+# is aimed at bounding it: the grant is `drive.appdata` (one hidden folder, one probe file) plus
+# `calendar.freebusy` (busy intervals, never an event body), it is never echoed into a log, and
+# there is no `pull_request_target` trigger — the standard way a public repository hands its
+# secrets to untrusted fork code.
 
 on:
   schedule:
@@ -35,12 +35,16 @@ on:
     # delays runs that pile up there.
     - cron: '17 5 * * *'
   workflow_dispatch:
+    inputs:
+      access_token:
+        description: 'Optional short-lived Google access token (see runbook B7) — overrides the stored credential for this run only. Never paste a refresh token here.'
+        required: false
+        type: string
 
-# Read-only against the repo; the OIDC token is the only thing this workflow can actually do
-# anything with. Scoped here rather than inherited so the grant is visible next to its one use.
+# No `id-token: write`: nothing here mints anything any more, so the token that used to make this
+# workflow interesting to an attacker is simply gone. Read-only against the repo.
 permissions:
   contents: read
-  id-token: write
 
 jobs:
   live-google-canary:
@@ -48,8 +52,8 @@ jobs:
     # stage and enforces stage ordering. This job belongs to no stage.
     name: Live · Google Drive & Calendar Contract
     runs-on: ubuntu-latest
-    # Forks do not run scheduled workflows, but they can run workflow_dispatch — and a fork has no
-    # WIF grant, so the run would fail confusingly rather than skip. Say so explicitly.
+    # Forks do not run scheduled workflows, but they can run workflow_dispatch — and a fork holds no
+    # copy of this repository's secrets, so the run would fail confusingly rather than skip.
     if: github.repository == 'stutek/LibrePT'
     steps:
       - uses: actions/checkout@v4
@@ -65,78 +69,40 @@ jobs:
           .venv/bin/pip install --upgrade pip
           .venv/bin/pip install -r requirements.txt
 
-      # Repository *variables*, not secrets: a WIF provider path and a service account email are
-      # both non-sensitive identifiers (the security boundary is the provider's attribute condition
-      # in GCP, not the secrecy of these strings). Keeping them as vars means a missing setup is a
-      # readable skip below rather than an empty-secret authentication error.
-      # Step 1 of 2: prove WHO this run is, without a stored credential. GitHub mints a short-lived
-      # OIDC assertion ("this run is stutek/LibrePT on main"), Google verifies GitHub's signature and
-      # returns an hour-long token. Nothing is stored on either side, so there is no key to rotate
-      # and nothing an exfiltrating job could steal that outlives the run.
-      - name: Authenticate to Google (Workload Identity Federation)
-        id: auth
-        if: vars.GOOGLE_WIF_PROVIDER != ''
-        uses: google-github-actions/auth@v2
-        with:
-          workload_identity_provider: ${{ vars.GOOGLE_WIF_PROVIDER }}
-          service_account: ${{ vars.GOOGLE_TEST_SERVICE_ACCOUNT }}
-          token_format: 'access_token'
-          # cloud-platform is the ONLY scope Secret Manager accepts — it publishes no narrower one.
-          # The real boundary is therefore IAM, not this scope: the service account holds
-          # `secretmanager.secretAccessor` on ONE secret and no project roles at all, so a leaked
-          # token of this kind reads that one secret and reaches nothing else.
-          #
-          # Note what is deliberately ABSENT: no drive.appdata, no calendar.freebusy. The federated
-          # identity never holds app scopes — it could not use them anyway (see the header: Drive
-          # refuses its writes), and granting them would let the canary pass on an identity no
-          # trainer has while the consumer grant actually under test was broken.
-          access_token_scopes: 'https://www.googleapis.com/auth/cloud-platform'
-
-      # Step 2 of 2: fetch the consumer test account's refresh token from Secret Manager and drop it
-      # exactly where a developer's own credential lives. That is the point of writing a file rather
-      # than exporting env vars: tests/live/_credentials.mjs then runs the SAME path in CI as on a
-      # laptop, so the CI path cannot rot separately, and no secret is ever placed in the process
-      # environment. `.private/` is gitignored, and the runner is destroyed after the job.
-      - name: Fetch the test credential from Secret Manager
-        # Both conditions, not just the token: federation and the vault are set up in separate steps
-        # of the runbook, and between them `GOOGLE_LIVE_SECRET` is empty. Without this guard curl
-        # would request `…/v1//versions/latest:access` and `--fail` would turn a half-finished setup
-        # into a red canary — indistinguishable, at a glance, from Google having broken something.
-        if: steps.auth.outputs.access_token != '' && vars.GOOGLE_LIVE_SECRET != ''
+      # Written to the SAME path a developer's own credential lives at, rather than exported as an
+      # environment variable, so tests/live/_credentials.mjs runs one code path in CI and on a
+      # laptop — there is no CI-only branch to rot unnoticed. `.private/` is gitignored and the
+      # runner is destroyed when the job ends.
+      # One step rather than an install/report pair, because a step's own `env:` is not visible to
+      # that step's `if:` — so the "is there a credential" test has to happen in the shell anyway.
+      - name: Install the stored credential
         env:
-          ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
-          SECRET_RESOURCE: ${{ vars.GOOGLE_LIVE_SECRET }}
+          GOOGLE_LIVE_CREDENTIALS: ${{ secrets.GOOGLE_LIVE_CREDENTIALS }}
+          DISPATCH_TOKEN: ${{ inputs.access_token }}
         run: |
-          # pipefail matters here: without it a failed curl still yields a zero exit through the
-          # pipe, and the job would carry on with an empty credential file and "skip" the suite —
-          # a silently disarmed canary, which AGENT_RULES §2.A.3 treats as a failure, not a pass.
           set -euo pipefail
+          if [ -z "${GOOGLE_LIVE_CREDENTIALS}" ]; then
+            # A skip must never be silent (AGENT_RULES §2.A.3): the suite reports "skipped" either
+            # way, so without this the run page would show a green canary that tested nothing.
+            if [ -z "${DISPATCH_TOKEN}" ]; then
+              echo "::warning::No Google credential — the live suite will skip. Set the" \
+                   "GOOGLE_LIVE_CREDENTIALS secret (runbook B6), or dispatch this workflow with" \
+                   "an access_token input (runbook B7)."
+            fi
+            exit 0
+          fi
           mkdir -p .private
-          curl -sS --fail \
-            -H "Authorization: Bearer ${ACCESS_TOKEN}" \
-            "https://secretmanager.googleapis.com/v1/${SECRET_RESOURCE}/versions/latest:access" \
-            | jq -r '.payload.data' | base64 -d > .private/google-live.json
-          # A secret fetched at RUNTIME is not masked automatically — only ones GitHub injected are.
-          echo "::add-mask::$(jq -r '.refresh_token' .private/google-live.json)"
-          echo "::add-mask::$(jq -r '.client_secret' .private/google-live.json)"
-
-      # A skip must never be silent: the suite reports "skipped" either way, and without these the
-      # run page would show a green canary that tested nothing (AGENT_RULES §2.A.3).
-      - name: Report missing federation setup
-        if: vars.GOOGLE_WIF_PROVIDER == ''
-        run: |
-          echo "::warning::GOOGLE_WIF_PROVIDER is not set — the live suite will skip." \
-               "See .private/google-cloud-setup.md for the one-time GCP setup."
-
-      - name: Report missing credential vault
-        if: vars.GOOGLE_WIF_PROVIDER != '' && vars.GOOGLE_LIVE_SECRET == ''
-        run: |
-          echo "::warning::GOOGLE_LIVE_SECRET is not set — federation works but there is no" \
-               "credential to fetch, so the live suite will skip. See B6a in" \
-               ".private/google-cloud-setup.md."
+          # printf, not echo, and quoted: the payload is JSON and must reach the file byte-for-byte.
+          printf '%s' "${GOOGLE_LIVE_CREDENTIALS}" > .private/google-live.json
+          # GitHub masks a secret's own value automatically, but not values DERIVED from it — the
+          # two fields below are what a later `set -x` or an error dump would otherwise print.
+          echo "::add-mask::$(python -c "import json;print(json.load(open('.private/google-live.json'))['refresh_token'])")"
+          echo "::add-mask::$(python -c "import json;print(json.load(open('.private/google-live.json'))['client_secret'])")"
 
       - name: Run Live Google API Tests
-        # No credential env var by design — the suite reads .private/google-live.json, written above
-        # when federation is configured and simply absent otherwise, which _credentials.mjs treats as
-        # a skip rather than a failure.
+        env:
+          # A dispatch input, when given, short-circuits everything in _credentials.mjs — that is
+          # what makes a one-off run against a PR branch possible without touching the stored
+          # secret. Empty on a scheduled run, where the credential file above is the source.
+          GOOGLE_LIVE_ACCESS_TOKEN: ${{ inputs.access_token }}
         run: .venv/bin/python -c "from build import run_live_google_tests; run_live_google_tests()"

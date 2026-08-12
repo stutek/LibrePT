@@ -1,10 +1,17 @@
 # tests/unit/test_google_canary_workflow.py
-# The live-Google canary is the one workflow that mints a real Google credential, so the properties
+# The live-Google canary is the one workflow that holds a real Google credential, so the properties
 # that keep it safe are worth enforcing mechanically rather than trusting to review — each of these
 # is a mistake that would look harmless in a diff and be invisible until exploited or until the
 # canary quietly stopped testing anything real.
 #
-# Static analysis of the workflow YAML, because actually running it needs GCP federation configured.
+# The design changed on 2026-08-12, and what these tests guard changed with it. Workload Identity
+# Federation stored nothing, so the rule then was "no stored Google secret, ever". It could only
+# ever mint a SERVICE ACCOUNT token, and Google refuses a service account's appDataFolder writes for
+# lack of storage quota — so the canary now carries a real account's refresh token in an Actions
+# secret. The secret is no longer the thing to forbid; LEAKING it is, and so is a canary that
+# reports confidence it has not earned.
+#
+# Static analysis of the workflow YAML, because actually running it needs a live credential.
 
 import pathlib
 import re
@@ -15,33 +22,22 @@ REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 WORKFLOW_DIR = REPO_ROOT / ".github" / "workflows"
 CANARY = WORKFLOW_DIR / "google-canary.yml"
 DRIVE_CONFIG = REPO_ROOT / "src" / "data" / "driveSyncConfig.js"
-
-# Scopes that would make the canary pass while the app's real, narrow scopes were broken — and that
-# would hand a leaked token far more reach than the app ever needs. `drive.appdata` is bounded to
-# this app's own hidden folder and `calendar.freebusy` authorises one endpoint that cannot read an
-# event body; every entry below escapes one of those bounds.
-OVERBROAD_SCOPES = (
-    "https://www.googleapis.com/auth/drive ",
-    "https://www.googleapis.com/auth/drive,",
-    "https://www.googleapis.com/auth/drive'",
-    "/auth/drive.file",
-    "/auth/drive.readonly",
-    "/auth/calendar ",
-    "/auth/calendar,",
-    "/auth/calendar'",
-    "/auth/calendar.readonly",
-    "/auth/calendar.events",
-)
+SCOPE_TEST = REPO_ROOT / "tests" / "live" / "tokenScopes.live.test.mjs"
 
 
 def _canary_document():
     return yaml.safe_load(CANARY.read_text(encoding="utf-8"))
 
 
+def _canary_steps():
+    return _canary_document()["jobs"]["live-google-canary"]["steps"]
+
+
 def test_no_workflow_uses_pull_request_target():
-    """`pull_request_target` runs in the BASE repo's context WITH secrets and OIDC, while checking
-    out a fork's head — the standard way a public repository leaks credentials to untrusted code.
-    Nothing here needs it, so the safe state is that no workflow may ever grow one."""
+    """`pull_request_target` runs in the BASE repo's context WITH secrets, while checking out a
+    fork's head — the standard way a public repository leaks credentials to untrusted code. It was
+    always forbidden here; now that a real refresh token sits in Actions secrets, it is the single
+    change that would turn this workflow into a credential giveaway."""
     for workflow in sorted(WORKFLOW_DIR.glob("*.yml")) + sorted(
         WORKFLOW_DIR.glob("*.yaml")
     ):
@@ -53,110 +49,97 @@ def test_no_workflow_uses_pull_request_target():
         )
 
 
-def test_canary_stores_no_long_lived_google_secret():
-    """The whole point of Workload Identity Federation here is that no Google credential is stored
-    in the repository at all. A `secrets.GOOGLE_*` reference means someone reintroduced one —
-    reverting the property this design was chosen for."""
+def test_the_credential_is_a_secret_not_a_variable():
+    """`vars.` is world-readable to anyone who can see the repository's settings, and prints in
+    plain text in logs. The three identifiers this workflow used to read really were addresses, but
+    the credential that replaced them is a refresh token — so the moment it moves to `vars.` it is
+    published rather than stored."""
     text = CANARY.read_text(encoding="utf-8")
-    leaked = re.findall(r"secrets\.GOOGLE[A-Z_]*", text)
+    leaked = re.findall(r"vars\.GOOGLE[A-Z_]*", text)
     assert not leaked, (
-        f"canary references stored Google secrets {leaked}; use WIF instead"
+        f"canary reads Google credentials from variables {leaked}; use secrets."
+    )
+    assert "secrets.GOOGLE_LIVE_CREDENTIALS" in text, (
+        "canary reads no stored credential at all — it would skip on every scheduled run"
     )
 
 
-def test_the_federated_identity_holds_no_app_scopes():
-    """The WIF token exists to read ONE secret, and must never carry Drive or Calendar access.
+def test_derived_secret_fields_are_masked():
+    """GitHub masks a secret's own value, not values DERIVED from it. The credential is a JSON blob
+    whose `refresh_token` and `client_secret` are what an error dump or a `set -x` would print, and
+    neither matches the blob byte-for-byte, so neither is masked automatically."""
+    text = CANARY.read_text(encoding="utf-8")
+    assert text.count("::add-mask::") >= 2, (
+        "both the refresh token and the client secret must be masked after being written"
+    )
 
-    That separation is the whole security story: `cloud-platform` is the only scope Secret Manager
-    accepts, so the real boundary is IAM — `secretmanager.secretAccessor` on a single secret, no
-    project roles. If app scopes were added here the federated identity would become a way into
-    trainer-shaped data, and a canary could also pass while the CONSUMER grant (the thing actually
-    under test) was broken.
 
-    Granting them is also the tempting 'fix' for the 403 that produced this design: Drive refuses a
-    service account's `appDataFolder` writes for lack of storage quota, and no scope list repairs
-    that — see tests/live/_credentials.mjs."""
-    scope_lines = [
-        line
-        for line in CANARY.read_text(encoding="utf-8").splitlines()
-        if "access_token_scopes" in line
-    ]
-    assert scope_lines, "canary declares no access_token_scopes"
-    scopes = scope_lines[0]
-    for app_scope in OVERBROAD_SCOPES + (
-        "/auth/drive.appdata",
-        "/auth/calendar.freebusy",
-    ):
-        assert app_scope not in scopes, (
-            f"federated identity must not request {app_scope.strip()} — "
-            "Drive/Calendar access comes only from the consumer refresh token"
-        )
+def test_the_credential_install_cannot_fail_silently():
+    """A half-written credential file would make the suite report "skipped" rather than fail — a
+    disarmed canary reporting green, which AGENT_RULES §2.A.3 calls a failure, not a pass."""
+    steps = _canary_steps()
+    install = next(s for s in steps if "credential" in s.get("name", "").lower())
+    assert "set -euo pipefail" in install["run"], (
+        "the credential install must not swallow a mid-pipeline failure"
+    )
+    assert "::warning::" in install["run"], (
+        "an absent credential must announce itself; a silent skip is a canary testing nothing"
+    )
+
+
+def test_a_manual_run_can_supply_its_own_short_lived_token():
+    """Testing a PR branch against real Google must not require touching the stored secret.
+
+    The dispatch input is deliberately an ACCESS token, not the refresh token: a workflow_dispatch
+    input is echoed back on the run's own page, so on a public repository it should be treated as
+    published the moment it is submitted. An access token expires within the hour and can be revoked
+    immediately after; a refresh token pasted there would be a standing grant on a real account."""
+    document = _canary_document()
+    triggers = document.get("on", document.get(True)) or {}
+    dispatch_inputs = (triggers.get("workflow_dispatch") or {}).get("inputs") or {}
+    assert "access_token" in dispatch_inputs, (
+        "no way to run this against a PR branch by hand"
+    )
+    assert not dispatch_inputs["access_token"].get("required", False), (
+        "a scheduled run supplies no input, so requiring one would break the daily canary"
+    )
+    description = dispatch_inputs["access_token"].get("description", "")
+    assert "refresh token" in description.lower(), (
+        "the input must say, where it is typed, that a refresh token does not belong there"
+    )
+
+    run_step = next(s for s in _canary_steps() if "Run Live" in s.get("name", ""))
+    assert "inputs.access_token" in str(run_step.get("env", {})), (
+        "the dispatch token never reaches the suite"
+    )
+
+
+def test_the_canary_mints_nothing():
+    """`id-token: write` let this workflow exchange GitHub's OIDC assertion for a Google token. That
+    design is gone, and the permission must go with it: leaving it behind grants the ability to
+    authenticate as whatever federation is configured later, with nothing in the workflow using
+    it — a capability nobody would notice was still granted."""
+    permissions = _canary_document().get("permissions") or {}
+    assert "id-token" not in permissions, (
+        "canary no longer uses federation; id-token: write is a standing capability with no user"
+    )
+    assert permissions.get("contents") == "read", (
+        "canary must not hold write access to the repo"
+    )
 
 
 def test_the_shipping_drive_scope_is_asserted_against_the_live_grant():
-    """The canary must exercise the SAME Drive scope production asks for, and since the grant now
-    lives on a consent screen rather than in this YAML, the check moved into the live suite —
+    """The canary must exercise the SAME Drive scope production asks for, and since the grant lives
+    on a consent screen rather than in this YAML, the check lives in the live suite —
     tests/live/tokenScopes.live.test.mjs asks the token itself. Pin that it still imports the
     shipping constant, so deleting the constant cannot quietly leave the drift unchecked."""
     shipped = re.search(
         r'GOOGLE_DRIVE_SCOPE\s*=\s*"([^"]+)"', DRIVE_CONFIG.read_text(encoding="utf-8")
     )
     assert shipped, "could not read GOOGLE_DRIVE_SCOPE from driveSyncConfig.js"
-    scope_test = (REPO_ROOT / "tests" / "live" / "tokenScopes.live.test.mjs").read_text(
-        encoding="utf-8"
-    )
+    scope_test = SCOPE_TEST.read_text(encoding="utf-8")
     assert "GOOGLE_DRIVE_SCOPE" in scope_test and "driveSyncConfig.js" in scope_test, (
         "the live scope test must import the shipping GOOGLE_DRIVE_SCOPE, not restate it"
-    )
-
-
-def test_the_credential_fetch_cannot_fail_silently():
-    """A curl piped into jq returns the PIPE's exit code, so a failed fetch would leave an empty
-    credential file and the suite would 'skip' — a disarmed canary reporting green, which
-    AGENT_RULES §2.A.3 calls a failure rather than a pass."""
-    text = CANARY.read_text(encoding="utf-8")
-    assert "set -euo pipefail" in text, (
-        "the fetch step must not swallow a mid-pipe failure"
-    )
-    assert "--fail" in text, "curl must exit non-zero on an HTTP error"
-
-
-def test_a_runtime_fetched_secret_is_masked():
-    """GitHub masks secrets it injected, not ones a job fetched at runtime — those must be masked
-    explicitly or a later `set -x` or error dump could print them."""
-    text = CANARY.read_text(encoding="utf-8")
-    assert text.count("::add-mask::") >= 2, (
-        "both the refresh token and client secret must be masked after fetching"
-    )
-
-
-def test_a_half_configured_setup_skips_loudly_instead_of_failing():
-    """Federation and the credential vault are set up in separate runbook steps, so there is a real
-    window where `GOOGLE_WIF_PROVIDER` is set and `GOOGLE_LIVE_SECRET` is not. In that window the
-    canary must SKIP with a warning: a red run there is indistinguishable at a glance from Google
-    breaking something, and a silent green one would be a canary testing nothing."""
-    steps = _canary_document()["jobs"]["live-google-canary"]["steps"]
-    fetch = next(s for s in steps if "Secret Manager" in s.get("name", ""))
-    assert "vars.GOOGLE_LIVE_SECRET != ''" in fetch.get("if", ""), (
-        "the fetch step must not run without a secret to fetch"
-    )
-    warnings = [s for s in steps if "::warning::" in str(s.get("run", ""))]
-    assert any("GOOGLE_LIVE_SECRET" in str(s["run"]) for s in warnings), (
-        "a missing credential vault must announce itself, not skip silently"
-    )
-
-
-def test_canary_declares_its_own_minimal_permissions():
-    """`id-token: write` is what lets this job mint a Google token, so it is declared at the job's
-    own workflow rather than inherited — and `contents` stays read-only, since a canary has no
-    business writing to the repository."""
-    document = _canary_document()
-    permissions = document.get("permissions") or {}
-    assert permissions.get("id-token") == "write", (
-        "canary needs id-token: write for WIF"
-    )
-    assert permissions.get("contents") == "read", (
-        "canary must not hold write access to the repo"
     )
 
 

@@ -10,23 +10,27 @@
 //   * **Locally** the developer writes it once. `.private/` is gitignored and must stay that way —
 //     unlike the OAuth *client id* (which ships in driveSyncConfig.js by design), a client secret
 //     and refresh token are real secrets.
-//   * **In CI** the canary workflow authenticates with **no stored credential at all**: GitHub mints
-//     a short-lived OIDC assertion, Google verifies GitHub's signature and returns a token, and that
-//     token reads the credential from **GCP Secret Manager** and writes this same file into the
-//     ephemeral runner. So the vault is on Google's side, with IAM and audit logs, and GitHub holds
-//     nothing secret — only two non-sensitive variables naming the provider and service account.
+//   * **In CI** the canary workflow writes it from the `GOOGLE_LIVE_CREDENTIALS` Actions secret.
+//     Same path, same code, so the CI branch cannot rot separately from the one a developer uses.
 //
 // **A consumer refresh token is not a preference here, it is the only identity that can write.**
-// Running the canary as the federated service account itself was tried on 2026-08-12 and lasted one
-// run: Drive answered the `files.list` and returned **403** to the `appDataFolder` upload. Google
-// removed service-account Drive storage quota, and neither remedy they offer applies — an
-// `appDataFolder` cannot live in a shared drive, and domain-wide delegation needs Workspace. A
-// read-only canary would have left multipart upload, the most fragile part of the contract,
-// unwatched. The federated identity therefore holds no Drive or Calendar scope at all — only
-// permission to read one secret.
+// Two attempts at storing nothing came first, and both ended at the same wall. Workload Identity
+// Federation can only produce a SERVICE ACCOUNT token, and on 2026-08-12 that lasted exactly one
+// run: Drive answered the `files.list` and returned **403** to the `appDataFolder` upload, because
+// Google removed service-account Drive storage quota. Neither remedy they publish reaches this case
+// — an `appDataFolder` cannot live in a shared drive, and domain-wide delegation needs Workspace,
+// not a consumer Gmail. Nor can the folder be seeded by hand: `appDataFolder` is written only by
+// the owning account specifying `parents: ["appDataFolder"]`, so a manual upload is the same
+// refused request. A service account can read the Drive API and can never write to it, which would
+// have left multipart upload — the one hand-rolled wire format in driveAppData.js — unwatched, and
+// with it every test that needs a file to exist at all.
 //
-// `GOOGLE_LIVE_ACCESS_TOKEN` still short-circuits everything below, for ad-hoc runs against a token
-// obtained some other way.
+// **The cost is stated rather than hidden**: one long-lived credential exists, in GitHub Actions
+// secrets, and it expires every 7 days while the OAuth app is in Google's *Testing* status.
+//
+// `GOOGLE_LIVE_ACCESS_TOKEN` short-circuits everything below. That is what a manual
+// `workflow_dispatch` run supplies for a one-off check against a PR branch, and what a developer
+// can export for an ad-hoc run against a token obtained some other way.
 //
 // **Absence is a skip, not a failure.** Most runs — every contributor, every gated `build check` —
 // have neither source, and must not go red for it. The live suite is a canary for changes on
@@ -65,8 +69,9 @@ async function exchangeRefreshToken({ client_id, client_secret, refresh_token })
     throw new Error(
       "Google refused the stored refresh token (invalid_grant). While the OAuth app is in " +
         "Testing mode refresh tokens expire after 7 days — re-grant and rewrite " +
-        `${path.relative(REPO_ROOT, LOCAL_CREDENTIALS_PATH)} (in CI, add a new Secret Manager ` +
-        "version). The durable fix is to set the consent screen's publishing status to In " +
+        `${path.relative(REPO_ROOT, LOCAL_CREDENTIALS_PATH)} (in CI, update the ` +
+        "GOOGLE_LIVE_CREDENTIALS secret). The durable fix is to set the consent screen's " +
+        "publishing status to In " +
         "production: the 7-day expiry is tied to Testing, not to verification, so it ends there " +
         "and a weekly-red canary stops being noise.",
     );

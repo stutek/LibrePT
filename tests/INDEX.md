@@ -40,11 +40,11 @@ the one question the hermetic suites structurally cannot: **has Google changed s
 `unit_js/data/driveAppData.test.mjs` pins our request shapes against an injected `fetchImpl` and
 catches every regression *we* can cause; it cannot see a deprecated endpoint or a reclassified scope.
 So this runs as a scheduled canary (`.github/workflows/google-canary.yml`) and, locally, off
-`.private/google-live.json`. In CI that same file is written from GCP Secret Manager, unlocked by a
-Workload Identity Federation token, so this repository stores no Google credential of its own. The
-identity in the file is a **consumer account, not the federated service account** — Google refuses a
-service account's `appDataFolder` writes for lack of storage quota, so the federated identity can
-read the Drive API and never write to it (verified 2026-08-12; [TODO §1.5.1](../TODO.md)).
+`.private/google-live.json` — in CI that same file is written from the `GOOGLE_LIVE_CREDENTIALS`
+Actions secret, so there is one code path rather than two. The identity is a **real Google account,
+not a service account**: Google refuses a service account's `appDataFolder` writes for lack of
+storage quota, and the folder cannot be seeded by hand either, so a service-account canary could
+only ever list an empty folder (verified 2026-08-12; [TODO §1.5.1](../TODO.md)).
 With no credentials present it **skips rather than fails**, which is the correct outcome for almost
 every run. See [TODO §1.5](../TODO.md).
 

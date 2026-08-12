@@ -8,10 +8,10 @@
 // switches to importing it** and the inline fetch below goes away — the assertions stay as they are,
 // because they are about Google's contract, not ours.
 //
-// **What it is really for.** A Workload Identity Federation token is minted with a scope list, and a
-// scope that was requested but not actually granted fails at the FIRST call that needs it, not at
-// mint time. Without this file a broken calendar scope would surface months later, inside whatever
-// change first built occupancy, looking like that change's bug. It costs one request to know now.
+// **What it is really for.** A scope that was consented to but is no longer honoured fails at the
+// FIRST call that needs it, not when the token is issued. Without this file a broken calendar scope
+// would surface months later, inside whatever change first built occupancy, looking like that
+// change's bug. It costs one request to know now.
 //
 // **freeBusy, never events.** The production scope is `calendar.freebusy`, the narrowest Google
 // publishes: it authorises this endpoint and nothing else, so a token minted with it CANNOT read an

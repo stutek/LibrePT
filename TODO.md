@@ -147,52 +147,60 @@ Cross-referenced from [PRIVACY.md](PRIVACY.md).
 **Built 2026-08-10**: [tests/live/](tests/live/), `.github/workflows/google-canary.yml`,
 `build.run_live_google_tests`. Still needs the one-time GCP setup below before it does anything.
 
-**Settled 2026-08-12, after removing the vault and putting it straight back — worth recording in
-full, because the reasoning that removed it is seductive and wrong.** The design where the canary
-runs as a real consumer account (refresh token in GCP Secret Manager, unlocked keylessly by the same
-federation) was built, reverted as buying no coverage, and restored hours later by the first live
-run. The revert's argument was that the ONLY thing a consumer identity exercises that a service
-account cannot is the consent flow — unautomatable anyway, since Google fingerprints and blocks
-driven browsers on `accounts.google.com` — so every endpoint a token can reach behaves identically
-for either identity.
+**Settled 2026-08-12, after two attempts at storing no secret at all — worth recording in full,
+because both attempts were reasonable and both were wrong.** The goal was never "test Google", it
+was **"test Google from a public repository without a credential to leak."** Workload Identity
+Federation answered that exactly: GitHub's OIDC assertion exchanged for a short-lived token at run
+time, nothing stored on either side. A vaulted consumer refresh token (Secret Manager, unlocked by
+that same federation) was built alongside it, then removed as buying no coverage — the argument
+being that the only thing a consumer identity exercises that a service account cannot is the consent
+flow, which no CI can drive anyway since Google fingerprints and blocks automated browsers on
+`accounts.google.com`.
 
-**That last clause is false, and the canary said so on its first dispatch:** `findSyncFile` (a list)
+**That last step is false, and the canary said so on its first dispatch:** `findSyncFile` (a list)
 answered, `createSyncFile` (the multipart upload) returned **403**. Google removed service-account
-Drive storage quota, and both remedies they publish miss this case — an `appDataFolder` cannot live
-in a shared drive, and domain-wide delegation needs Workspace, not a consumer Gmail. A service
-account can therefore READ the Drive API and can never write to it, which would have left multipart
-upload — the most fragile part of the contract — permanently unwatched. This section had named that
-exact condition as the one reason to bring the vault back; it fired the same day.
+Drive storage quota, and neither remedy they publish reaches this case — an `appDataFolder` cannot
+live in a shared drive, and domain-wide delegation needs Workspace, not a consumer Gmail. Seeding
+the folder by hand does not work either: `appDataFolder` is written only by the owning account
+specifying `parents: ["appDataFolder"]`, so a manual upload is the identical refused request, and a
+file shared into the account lands in "Shared with me" where `spaces=appDataFolder` will never see
+it.
 
-**Two consequences worth carrying forward.** The 7-day refresh-token expiry that counted against the
-vaulted design is a *Testing*-mode property, not a verification one: setting the consent screen to
-**In production** (unverified is fine, the 100-user cap stays) ends it, which is what keeps a weekly
-canary from going red on schedule. And the static "canary requests the app's scopes" check could not
-survive the move — the grant now lives on a consent screen, not in the workflow YAML — so it became
+**A service account can therefore read the Drive API and can never write to it** — and because the
+folder stays permanently empty, everything downstream of a file existing goes with it: download,
+update, and the `modifiedTime` assertion `driveSyncService`'s conflict detection depends on. What
+was left was one call on its empty-result path. Multipart upload, the one hand-rolled wire format in
+`driveAppData.js` and the likeliest thing to break, would have been unwatched.
+
+**So the design is now a plain stored credential, and the cost is stated rather than engineered
+around**: a real account's refresh token in the `GOOGLE_LIVE_CREDENTIALS` Actions secret, written
+into `.private/google-live.json` at run time so CI and a laptop run one code path. WIF, Secret
+Manager and `agent_tools/wif_audit.py` are all deleted — a federation with no consumer is a standing
+capability nobody would notice was still granted. Bounding what the credential can do is what
+replaces bounding whether it exists: the grant is `drive.appdata` (one hidden folder, one probe
+file) plus `calendar.freebusy` (busy intervals, never an event body), and there is no
+`pull_request_target` trigger.
+
+**Two consequences worth carrying forward.** The 7-day refresh-token expiry is a *Testing*-mode
+property, not a verification one: setting the consent screen to **In production** (unverified is
+fine, the 100-user cap stays) ends it. Until that happens the secret needs re-uploading weekly, and
+a lapsed one makes the canary skip with a warning rather than fail. And the static "canary requests
+the app's scopes" check could not survive the move — the grant lives on a consent screen now, not in
+the workflow YAML — so it became
 [tests/live/tokenScopes.live.test.mjs](tests/live/tokenScopes.live.test.mjs), which asks `tokeninfo`
-what the token was actually granted. That is strictly better: it catches an over-broad grant (a
-`drive` scope left from debugging) that would keep every Drive test green while production's narrow
+what the token was actually granted. Strictly better: it also catches an OVER-broad grant (a `drive`
+scope left from debugging) that would keep every Drive test green while production's narrow
 `drive.appdata` was broken.
 
-**Also built 2026-08-12: [agent_tools/wif_audit.py](agent_tools/wif_audit.py)**, because the two
-settings this whole design rests on live in GCP rather than in the repo, so no code review can
-confirm them and both fail *silently* — everything works, the canary stays green, and strangers can
-mint tokens as the service account. It checks that the provider's `attributeCondition` pins
-`assertion.repository`, and that the service-account binding names `attribute.repository/<owner>/<repo>`
-rather than the whole pool (the same hole one layer down, and the likelier mistake since it is what
-copy-pasted snippets show). It also rejects conditions that look protective and are not: `!=` admits
-every repository but one, `startsWith` admits every repository an owner ever creates.
-
-The problem this solves is not "how do we test Google" but **"how do we test Google from a public
-repository without a secret to leak."** A refresh token stored *in GitHub* would be exfiltratable by
-any workflow change; WIF stores nothing here, exchanging GitHub's OIDC assertion for a short-lived
-token at run time, and that token is what reads the real credential out of Secret Manager — a vault
-with IAM and audit logs, on Google's side.
-
-- **A service account is a fine CALENDAR fixture and a useless Drive one.** Its own calendar models
-  this section's room resource calendars exactly — those are non-human calendars by definition. Its
-  own `appDataFolder` is read-only in practice, per the 403 above, which is why the Drive half runs
-  as a consumer account instead.
+- **A service account remains a fine CALENDAR fixture.** `freeBusy` needs no storage, so that half
+  would still run keylessly — and this section's room resource calendars are non-human calendars by
+  definition, which a service-account calendar models exactly. It is not worth a second credential
+  path to save one account's involvement in one test.
+- **Testing a PR branch by hand** uses the workflow's `access_token` dispatch input, which
+  short-circuits `_credentials.mjs`. Deliberately an ACCESS token, not the refresh token: a
+  dispatch input is echoed on the run's own page, so on a public repository treat it as published
+  the moment it is submitted. An hour-long token that is revoked afterwards bounds that; a refresh
+  token pasted there would be a standing grant on a real account.
 - **Not a deploy gate, deliberately.** It sits outside `deploy.yml` rather than joining the chain, so
   Google's uptime can never block a release. `pipeline_gates.py`'s one-terminal-job rule holds
   trivially in a single-job workflow. What it cannot cover — the consent UI — is unautomatable
