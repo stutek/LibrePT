@@ -213,12 +213,14 @@ erDiagram
     CLIENT {
         string id PK
         string name "PII — replaced on anonymization"
+        string alias "PII — how the trainer tells two same-named clients apart"
         string email "PII"
         string phone "PII"
         string goals
         string injury
         bool active
         object gdprConsent "consent flag, signed date, form version + language — see §5"
+        object erasure "erasedAt + requestedOn, set once an Art. 17 request is honoured — see §5"
     }
     EXERCISE {
         string id PK
@@ -632,6 +634,14 @@ Four consequences that are easy to get wrong:
   **fresh salt per entry** so two devices' registers can be merged; it travels inside backup files
   and is **unioned, never replaced**, on import, which is how it survives a reinstall. A restore that
   the register filtered says so in the import status rather than quietly differing from the file.
+
+**Two things are in the model; one deliberately is not.** `CLIENT.alias` and `CLIENT.erasure` are
+declared fields ([recordSchemas.js](../src/data/recordSchemas.js)), so they are projected, validated
+and carried into backups like any other. The **erasure register is not** — it lives in
+localStorage's origin-global set ([storageNamespace.js](../src/data/storageNamespace.js)), is
+destructured out of any restored payload before that payload becomes the live state, and is written
+into a backup file only at export time. That boundary is the whole point of it: a register kept
+inside the database would be replaced by the very restore it exists to filter.
 
 **What erasure cannot reach** is itemised for the trainer rather than glossed over
 ([erasureChecklist.js](../src/data/erasureChecklist.js)): the gym calendar (reachable on the Google
