@@ -49,6 +49,40 @@ def test_sync_badge_shows_real_zero_ahead_and_unknown_behind_before_any_sync(
     assert "cloud status unknown" in aria
 
 
+def test_counters_are_legible_and_grow_on_desktop(page, local_server):
+    """The counts must be readable on both form factors.
+
+    They shipped at 10px with 9px arrows — AGENT_RULES §2.D's own example of what not to do ("9px of
+    text is nothing to aim at") — in the surface a trainer checks to know whether their work is safe.
+
+    The desktop half is pinned because its media query is `(min-width: 700px) and (pointer: fine)`,
+    and the pointer clause is easy to get silently wrong: a rule that never matches would leave the
+    desktop path shipped but unexercised. Width alone would be the wrong test anyway, since a phone
+    in landscape clears 700px and is exactly where vertical space is scarcest.
+    """
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#app-header")
+
+    def badge_font_px():
+        return page.evaluate(
+            "parseFloat(getComputedStyle(document.querySelector('#sync-badge')).fontSize)"
+        )
+
+    page.set_viewport_size({"width": 390, "height": 844})
+    assert badge_font_px() >= 12, "phone counters must clear the 9px anti-pattern"
+
+    page.set_viewport_size({"width": 1440, "height": 900})
+    assert badge_font_px() >= 14, (
+        "desktop step did not apply — check the pointer media query"
+    )
+    header_height = page.evaluate(
+        "getComputedStyle(document.documentElement).getPropertyValue('--hdr-height').trim()"
+    )
+    assert header_height == "76px", (
+        f"expected the taller desktop header, got {header_height}"
+    )
+
+
 def test_backup_modal_opens_and_closes(page, local_server):
     load_with_stub(page, local_server, STUB)
     page.wait_for_selector("#app-header")

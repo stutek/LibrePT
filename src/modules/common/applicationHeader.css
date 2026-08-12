@@ -343,12 +343,17 @@ select.menu-select {
   padding-left: 0;
   padding-right: 0;
 }
+/* 12px, not the 10px this shipped with. AGENT_RULES §2.D's own example of what not to do is "9px of
+   text is nothing to aim at with a sweaty thumb", and the counters were 10px with 9px arrows — the
+   anti-pattern, in the surface a trainer checks to know whether their work is safe. Raised for EVERY
+   viewport rather than only desktop: a phone held at arm's length mid-session is the harder read,
+   not the easier one. */
 .sync-badge {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   line-height: 1;
   margin-top: -2px;
@@ -379,7 +384,30 @@ select.menu-select {
   color: #f59e0b;
 } /* offline cached code (amber warning) */
 .sync-badge i {
-  font-size: 9px;
+  font-size: 11px;
+}
+
+/* Desktop gets a taller header and larger counters — the one axis actually available, since the app
+   body is a 480px centred column at every width, so there is no extra HORIZONTAL room to spend.
+   `pointer: fine` rather than width alone: a phone in landscape clears 700px easily and is exactly
+   where vertical space is scarcest, so keying on the pointer type asks the real question ("is this a
+   device with room to spare?") instead of a proxy for it. */
+@media (min-width: 700px) and (pointer: fine) {
+  :root {
+    --hdr-height: 76px;
+  }
+  .sync-backup-btn {
+    height: 52px;
+  }
+  .cloud-sync-icon .fa-cloud {
+    font-size: 20px;
+  }
+  .sync-badge {
+    font-size: 14px;
+  }
+  .sync-badge i {
+    font-size: 13px;
+  }
 }
 
 /* Attribution block in the About dialog. Collapsed by default so the dialog still opens on the
