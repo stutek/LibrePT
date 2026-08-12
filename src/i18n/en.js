@@ -300,6 +300,9 @@ export const en = {
   drive_sync_status_ok_conflicts: "Synced with conflicts to review",
   drive_sync_status_error: "Sync failed: {error}",
   drive_sync_status_reauth: "Session expired — tap to reconnect.",
+  drive_sync_status_denied:
+    "Google hasn't approved this account for sync yet. Your data is safe on this device.",
+  drive_sync_status_declined: "Not connected — you can connect any time.",
   drive_sync_review_conflicts: "Review conflicts",
   drive_conflict_type_add_add: "Created on both devices",
   drive_conflict_type_edit_edit: "Edited on both devices",

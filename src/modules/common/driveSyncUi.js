@@ -36,6 +36,21 @@ function formatLastSync(status) {
     if (error === "auth_required") {
       return tr("drive_sync_status_reauth", `Session expired — tap to reconnect (${when}).`);
     }
+    // Google refused the account outright. Said plainly because the trainer did nothing wrong and
+    // retrying cannot help: while the OAuth app is in Testing only listed test users may grant
+    // access. Deliberately NOT worded as "preview mode" — that phrase already means the data-loss
+    // warning in this app (docs/PREVIEW.md, the header PREVIEW tag), and collapsing the two would
+    // blunt the one that matters more.
+    if (error === "access_denied") {
+      return tr(
+        "drive_sync_status_denied",
+        "Google hasn't approved this account for sync yet. Your data is safe on this device.",
+      );
+    }
+    // Closing the consent popup is a choice, not a fault — acknowledge and stop.
+    if (error === "consent_declined") {
+      return tr("drive_sync_status_declined", "Not connected — you can connect any time.");
+    }
     return tr("drive_sync_status_error", `Sync failed at ${when}: ${error}`).replace(
       "{error}",
       String(error),

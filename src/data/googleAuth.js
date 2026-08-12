@@ -31,6 +31,24 @@ let gisLoadPromise = null;
 let tokenClient = null;
 let accessToken = null;
 let tokenExpiresAt = 0;
+// Why the last failure is remembered at all: `requestAccessToken` resolves to null on every failure
+// so no call site has to try/catch, but "the trainer closed the popup" and "Google refused this
+// account" both land there and want very different things said. Read via `lastAuthFailure()`.
+let lastAuthError = null;
+let lastAuthWasInteractive = false;
+
+/** Why the last token request failed, or null if the last one succeeded.
+ *
+ * `denied` means Google refused the account — while the OAuth app is in Testing that is almost
+ * always "not on the test-user list", which no amount of retrying fixes and which the trainer cannot
+ * diagnose from a generic failure. Only reported for an INTERACTIVE attempt: the same code arrives
+ * when a silent background refresh finds no usable session, which is routine and not worth a word.
+ */
+export function lastAuthFailure() {
+  if (!lastAuthError) return null;
+  if (!lastAuthWasInteractive) return "silent";
+  return lastAuthError === "access_denied" ? "denied" : "failed";
+}
 
 function loadGisScript() {
   if (gisLoadPromise) return gisLoadPromise;
@@ -91,9 +109,18 @@ export async function requestAccessToken({ interactive = false } = {}) {
   return new Promise((resolve) => {
     client.callback = (response) => {
       if (response?.error || !response?.access_token) {
+        // Why the reason is kept rather than flattened to null: while the OAuth app is in Google's
+        // *Testing* publishing status, only explicitly-listed test users can grant access and
+        // everyone else is refused with `access_denied` — which is indistinguishable, from here,
+        // from the trainer simply closing the popup. Both arrive as the same error code, so this
+        // records WHICH call it was: an interactive attempt that came back denied is the one worth
+        // explaining, since the trainer did everything right and the app still said no.
+        lastAuthError = response?.error || "no_token";
+        lastAuthWasInteractive = interactive;
         resolve(null);
         return;
       }
+      lastAuthError = null;
       accessToken = response.access_token;
       // expires_in is seconds; 30s safety margin so a call in flight doesn't straddle expiry.
       tokenExpiresAt = Date.now() + (Number(response.expires_in) || 0) * 1000 - 30_000;
@@ -106,6 +133,19 @@ export async function requestAccessToken({ interactive = false } = {}) {
       resolve(null);
     }
   });
+}
+
+/** Forget this device's connection state WITHOUT calling Google's revoke endpoint.
+ *
+ * For the case where Google has already told us the grant is gone (a 401 mid-sync): the token is
+ * dead, so there is nothing to revoke, but `hasStoredConsent()` would keep reporting "connected" off
+ * the persisted flag and the card would keep offering "Sync Now" for a session that cannot succeed.
+ * Distinct from `revokeAccess()`, which is the trainer deliberately disconnecting and does need the
+ * network call. */
+export function forgetStoredConsent() {
+  accessToken = null;
+  tokenExpiresAt = 0;
+  localStorage.removeItem(CONNECTED_KEY);
 }
 
 /** Revoke the current grant and forget local connection state. Does not throw on network failure —

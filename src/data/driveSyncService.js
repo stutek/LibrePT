@@ -42,7 +42,13 @@
 // Injected dependencies: none at the module level — call sites are the UI layer (driveSyncUi.js) and
 // app.js's lifecycle hook.
 
-import { createSyncFile, downloadSyncFile, findSyncFile, updateSyncFile } from "./driveAppData.js";
+import {
+  createSyncFile,
+  downloadSyncFile,
+  findSyncFile,
+  isAuthFailure,
+  updateSyncFile,
+} from "./driveAppData.js";
 import { isDriveSyncConfigured } from "./driveSyncConfig.js";
 import { syncErasureRegister } from "./erasureRegisterSync.js";
 import {
@@ -50,7 +56,13 @@ import {
   readSuppressionList,
   writeSuppressionList,
 } from "./erasureSuppression.js";
-import { hasStoredConsent, requestAccessToken, revokeAccess } from "./googleAuth.js";
+import {
+  forgetStoredConsent,
+  hasStoredConsent,
+  lastAuthFailure,
+  requestAccessToken,
+  revokeAccess,
+} from "./googleAuth.js";
 import { COLLECTIONS } from "./recordProjections.js";
 import {
   getState,
@@ -68,8 +80,9 @@ let lastSyncResult = null;
 // The real ahead/behind counters (replaces the header badge's former hardcoded mock, TODO §3.9).
 // `cachedAncestor` is the last-synced snapshot, kept in memory so `getAheadCount()` can be
 // synchronous (every render-badge call site is sync) without re-reading IndexedDB each time. `null`
-// until `primeAheadCache()` resolves at boot or a sync completes — "ahead" reads 0 until then, which
-// is the honest answer: with no known ancestor there is nothing yet to compare against.
+// until `primeAheadCache()` resolves at boot or a sync completes — and while it is null every local
+// record counts as ahead, because none of them has reached Drive. See getAheadCount below for why
+// that replaced an earlier "report 0 until we have something to diff against".
 let cachedAncestor = null;
 
 /** Populates `cachedAncestor` from IndexedDB meta — a local-only read, no network. Called once at
@@ -223,7 +236,12 @@ export function startPeriodicSync() {
 export async function connectDriveSync() {
   const token = await requestAccessToken({ interactive: true });
   if (!token) {
-    const result = { ok: false, error: "consent_declined_or_unavailable", at: Date.now() };
+    // "Declined or unavailable" covered both cases with one message and helped neither. A trainer
+    // who closed the popup needs nothing said; one Google REFUSED needs to know it is not their
+    // mistake and not something a retry fixes — while the OAuth app is in Testing, only listed test
+    // users can grant at all.
+    const error = lastAuthFailure() === "denied" ? "access_denied" : "consent_declined";
+    const result = { ok: false, error, at: Date.now() };
     lastSyncResult = result;
     return result;
   }
@@ -337,6 +355,16 @@ export async function syncNow() {
     lastSyncResult = result;
     return result;
   } catch (error) {
+    // A dead or revoked grant is the one failure a trainer can actually act on, and it is
+    // indistinguishable from a transport error once flattened to a message string. Naming it here
+    // is what turns an unactionable "sync failed" into "tap to reconnect" — and forgetting the
+    // stored consent is what stops the card offering "Sync Now" for a session that cannot succeed.
+    if (isAuthFailure(error)) {
+      forgetStoredConsent();
+      const result = { ok: false, error: "auth_required", at: Date.now() };
+      lastSyncResult = result;
+      return result;
+    }
     const result = { ok: false, error: String(error?.message || error), at: Date.now() };
     lastSyncResult = result;
     return result;

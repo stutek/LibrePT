@@ -21,12 +21,38 @@ export const SYNC_FILENAME = "librept_sync.json";
 // filter. As its own file it is only ever unioned — an append-only set that cannot regress.
 export const ERASURE_REGISTER_FILENAME = "librept_erasure_register.json";
 
+/** A failed Drive call, carrying the HTTP status so callers can tell "reconnect" from "retry".
+ *
+ * The status matters because an access token is OPAQUE — Google's `ya29.` tokens are not JWTs, so
+ * `expires_in` at grant time is the only expiry signal, and a locally-computed expiry is a guess.
+ * A token can die before it: the trainer revokes the grant at myaccount.google.com, the account
+ * password changes, Google invalidates it, or the device clock is skewed. In every one of those the
+ * ONLY signal is a 401 from the call itself, so folding it into a generic message is what leaves a
+ * trainer tapping "Sync Now" forever on a grant that can never succeed. */
+export class DriveApiError extends Error {
+  constructor(message, status) {
+    super(message);
+    this.name = "DriveApiError";
+    this.status = status;
+  }
+}
+
+/** True when the failure means the GRANT is gone, not that the request was bad — 401 for a dead or
+ * revoked token, and 403 specifically for missing scope (a 403 for quota is not an auth problem, so
+ * the reason string is checked rather than the bare status). Both are fixed by reconnecting and by
+ * nothing else. */
+export function isAuthFailure(error) {
+  if (error?.status === 401) return true;
+  return error?.status === 403 && /insufficient|insufficientPermissions/i.test(error.message || "");
+}
+
 async function driveFetch(url, options, fetchImpl) {
   const response = await fetchImpl(url, options);
   if (!response.ok) {
     const body = await response.text().catch(() => "");
-    throw new Error(
+    throw new DriveApiError(
       `Drive API ${options?.method || "GET"} ${url} failed: ${response.status} ${body}`,
+      response.status,
     );
   }
   return response;

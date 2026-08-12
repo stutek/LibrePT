@@ -298,6 +298,9 @@ export const sl = {
   drive_sync_status_ok_conflicts: "Sinhronizirano, s konflikti za pregled",
   drive_sync_status_error: "Sinhronizacija ni uspela: {error}",
   drive_sync_status_reauth: "Seja je potekla — dotaknite se za ponovno povezavo.",
+  drive_sync_status_denied:
+    "Google tega računa še ni odobril za sinhronizacijo. Vaši podatki so varni na tej napravi.",
+  drive_sync_status_declined: "Ni povezano — povežete se lahko kadar koli.",
   drive_sync_review_conflicts: "Preglej konflikte",
   drive_conflict_type_add_add: "Ustvarjeno na obeh napravah",
   drive_conflict_type_edit_edit: "Urejeno na obeh napravah",
