@@ -365,6 +365,38 @@ export async function writeDriveSyncMeta(meta) {
   });
 }
 
+// "When was this device's data last captured anywhere it could survive the browser evicting
+// IndexedDB" — written by BOTH a completed Drive sync and a downloaded JSON backup (TODO §3.8).
+//
+// **Deliberately its own key, not a field on `driveSync` above.** That meta holds the merge
+// ancestor, and a three-way merge is only correct if the ancestor is exactly the state Drive last
+// saw; letting an export touch that record would silently corrupt the next merge. These two facts
+// look adjacent and must not share a home.
+//
+// Local-only and never synced, because it is a fact about THIS device: a backup file downloaded on
+// the trainer's phone does nothing for their tablet, so a synced value would claim safety the other
+// device does not have.
+const BACKUP_HISTORY_META_KEY = "backupHistory";
+
+export async function readBackupHistory() {
+  if (!indexedDbSupported()) return null;
+  const db = await getDb();
+  const entry = await readMeta(db, BACKUP_HISTORY_META_KEY);
+  return entry?.value || null;
+}
+
+/** Record that the data reached durable storage. `kind` is "drive" or "file". */
+export async function recordBackupTaken(kind) {
+  if (!indexedDbSupported()) return;
+  const db = await getDb();
+  await withTransaction(db, [META_STORE], "readwrite", ({ store }) => {
+    store(META_STORE).put({
+      key: BACKUP_HISTORY_META_KEY,
+      value: { at: Date.now(), kind },
+    });
+  });
+}
+
 export async function resetLibrePTData(options = {}) {
   const { demo = true } = options || {};
   for (const k of Object.keys(localStorage)) {

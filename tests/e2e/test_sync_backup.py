@@ -45,6 +45,61 @@ def test_ahead_count_reflects_real_local_edits_since_the_synced_ancestor(
     assert "1 local change to push" in aria
 
 
+READ_BACKUP_HISTORY = """
+async () => {
+    const stateStore = await import(new URL('data/stateStore.js', document.baseURI).href);
+    return await stateStore.readBackupHistory();
+}
+"""
+
+
+def test_downloading_a_backup_records_it_without_involving_drive(page, local_server):
+    """A downloaded file is a real backup, and must be recorded as one.
+
+    This is what keeps TODO §3.8's coming unbacked warning honest: a trainer who exports weekly has
+    to be able to clear it WITHOUT connecting Google. If only a Drive sync counted, a safety
+    indicator would quietly be a prompt to enable an integration, and trainers can tell.
+    """
+    page.goto(local_server + "clients")
+    page.wait_for_selector("#view-client-directory.active")
+
+    page.locator("#backup-btn").click()
+    with page.expect_download():
+        page.locator("#btn-export-db").click()
+
+    # The handler does not await the IndexedDB write, so poll rather than assume it has landed.
+    page.wait_for_function(READ_BACKUP_HISTORY)
+    history = page.evaluate(READ_BACKUP_HISTORY)
+    assert history["kind"] == "file"
+    assert history["at"] > 0
+
+
+def test_never_synced_counts_the_whole_dataset_as_ahead(page, local_server):
+    """No ancestor means nothing has EVER reached Drive, so everything local is ahead.
+
+    This inverts the previous behaviour, which short-circuited to 0 with no ancestor. That was
+    defensible only while no deployment had an OAuth client id and so nobody could sync at all; once
+    one shipped, "connected but never synced" became reachable, and a 0 there does not read as
+    "nothing to report" — it reads as "everything is backed up" while nothing is. The same answer is
+    right for a trainer who never connects: their data really is in one evictable place.
+
+    Deliberately NOT seeding an ancestor — the absence is the condition under test.
+    """
+    page.goto(local_server + "clients")
+    page.wait_for_selector("#view-client-directory.active")
+
+    page.locator("#btn-add-client").click()
+    page.locator("#client-name").fill("Unbacked Client")
+    page.locator("#dialog-client button[type='submit']").click()
+
+    # The seeded demo database plus this new client is comfortably past 9, so the cell shows the
+    # over-nine treatment rather than a digit; the exact number rides in the aria-label.
+    aria = page.locator("#sync-badge").get_attribute("aria-label") or ""
+    assert "local changes to push" in aria
+    count = int(aria.split(" local change")[0])
+    assert count > 1, f"expected the whole dataset counted as ahead, got {count}"
+
+
 def test_sync_badge_caps_over_nine_with_second_arrow(page, local_server):
     page.goto(local_server + "clients")
     page.wait_for_selector("#view-client-directory.active")

@@ -55,6 +55,7 @@ import { COLLECTIONS } from "./recordProjections.js";
 import {
   getState,
   readDriveSyncMeta,
+  recordBackupTaken,
   saveToLocalStorage,
   setState,
   writeDriveSyncMeta,
@@ -78,12 +79,29 @@ export async function primeAheadCache() {
   cachedAncestor = meta?.ancestor || null;
 }
 
-/** Real, live count of local records changed since the last-synced ancestor — "how many of my own
- * edits haven't reached Drive yet". 0 when never synced: with no ancestor there is no meaningful
- * "since" to diff against, and showing the whole dataset as "ahead" would be noise, not signal. */
+/** Real, live count of local records that have never reached Drive.
+ *
+ * **With no ancestor this counts the WHOLE dataset, and that changed on 2026-08-12.** It used to
+ * return 0, reasoning that with no known ancestor there was nothing to diff against and showing
+ * everything as ahead would be noise. That held only while `GOOGLE_DRIVE_CLIENT_ID` was blank and
+ * nobody could sync at all — "never synced" was universal, so a 0 misled no one. Once a real client
+ * id shipped, "connected, never synced" became reachable, and there a 0 does not read as "nothing to
+ * report", it reads as "everything is backed up" while in fact nothing is.
+ *
+ * The same answer is right for a trainer who has never connected: treating their silence as an
+ * informed choice to go local-only is a guess, and the cost of guessing wrong is every client record
+ * lost to a browser cache clear (docs/PREVIEW.md says this can happen). A count is a fact, not a nag.
+ *
+ * Note this is a DRIVE-relative fact — "not on Drive" — so a downloaded JSON backup does not reduce
+ * it, and should not: the data really is absent from Drive either way. What a file backup does clear
+ * is the *escalation* (TODO §3.8's warning), which reads `readBackupHistory()` rather than this
+ * count, because that question is "is this data anywhere durable at all". Keeping the two separate is
+ * what stops a safety indicator from quietly becoming a prompt to enable Google.
+ */
 export function getAheadCount() {
-  if (!cachedAncestor) return 0;
-  return countChangedRecords(COLLECTIONS, cachedAncestor, getState());
+  // An empty ancestor makes countChangedRecords see every record as an addition — the honest
+  // reading of "none of this has ever been pushed".
+  return countChangedRecords(COLLECTIONS, cachedAncestor || {}, getState());
 }
 
 // "Remote changes not yet pulled" — kept live by refreshSyncCounts() below, not by a sync pass:
@@ -311,6 +329,9 @@ export async function syncNow() {
     if (fileId) await updateSyncFile(token, fileId, mergedState);
     await writeDriveSyncMeta({ fileId: writtenFileId, ancestor: mergedState });
     cachedAncestor = mergedState;
+    // The data now exists somewhere the browser cannot evict — the other half of TODO §3.8's
+    // question, which a downloaded backup file answers equally well.
+    await recordBackupTaken("drive");
 
     const result = { ok: true, at: Date.now(), conflicts, reErased: reErasedOnSync };
     lastSyncResult = result;

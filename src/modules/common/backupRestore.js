@@ -23,6 +23,7 @@ import {
 } from "../../data/erasureSuppression.js";
 import { DEFAULT_SESSIONS } from "../../data/index.js";
 import { describeMigration, migrateState } from "../../data/schemaMigrations.js";
+import { recordBackupTaken } from "../../data/stateStore.js";
 import { catalogToCsv, catalogToInterchange } from "../../domain/exerciseStandard.js";
 import { BUILD_INFO } from "../../version.js";
 import { isOfflineCachedActive } from "./applicationHeader.js";
@@ -347,6 +348,11 @@ export function setupBackupRestore() {
         `librept_backup_${new Date().toISOString().substring(0, 10)}.json`,
         "application/json",
       );
+      // A downloaded file is a real backup, so it answers TODO §3.8's "is this data anywhere
+      // durable" exactly as a Drive sync does. Recording it is what keeps the coming unbacked
+      // warning honest — a trainer who exports weekly must be able to clear it WITHOUT connecting
+      // Google, or a safety indicator becomes a prompt to enable an integration.
+      recordBackupTaken("file");
     });
   }
 

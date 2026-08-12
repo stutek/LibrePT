@@ -37,9 +37,12 @@ def test_sync_badge_shows_real_zero_ahead_and_unknown_behind_before_any_sync(
     assert badge.is_visible()
     assert "hidden" not in (badge.get_attribute("class") or "")
 
-    # This deployment ships with no Drive OAuth client id configured (TODO §3.3) and no sync has
-    # ever run, so the real ahead count is 0 (nothing yet to diff against) and behind is genuinely
-    # unknown ("?") rather than a fabricated number.
+    # Ahead is 0 here because this store is genuinely EMPTY (clean_start), not because no sync has
+    # run. That distinction became load-bearing on 2026-08-12: getAheadCount() used to short-circuit
+    # to 0 whenever there was no ancestor, and now counts the whole dataset instead, so "never
+    # synced" no longer implies 0 — only "no records" does. A store with content and no ancestor
+    # reports all of it (tests/e2e/test_sync_backup.py pins that half, which needs the real store).
+    # Behind is still genuinely unknown ("?") rather than a fabricated number.
     assert page.locator("#sync-badge .sync-zero").inner_text().strip() == "0"
     aria = badge.get_attribute("aria-label")
     assert "0 local changes to push" in aria

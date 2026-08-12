@@ -238,6 +238,26 @@ Nothing on screen says so.
   export/sync is stale ("never" being the obvious first case). Distinct from the offline indicator
   and from §3.9's ahead/behind badge: those say "not pushed *yet*", this says "nothing anywhere but
   this browser profile".
+- **The input now exists (2026-08-12)**: `recordBackupTaken()` / `readBackupHistory()` in
+  [stateStore.js](src/data/stateStore.js), written by **both** a completed Drive sync and a
+  downloaded JSON backup. Deliberately its own meta key rather than a field on `driveSync`, whose
+  ancestor is merge-critical — a three-way merge is only correct if that snapshot is exactly what
+  Drive last saw, so letting an export touch it would corrupt the next merge. Local-only and never
+  synced: a file downloaded on the phone does nothing for the tablet.
+- **Trigger shape decided**: a change COUNT or a time interval since the last backup, whichever
+  fires first (constants, so they are tunable) — not a binary "never backed up". Catches both "lots
+  of work" and "a little work, long ago".
+- **The rule that keeps it a safety feature**: it must be clearable **without Google**. A downloaded
+  backup resolves it exactly as a sync does. Otherwise a warning colour is a growth prompt, and
+  trainers can tell the difference.
+- **Not the same number as the ahead count.** §3.9's ↑ is Drive-relative ("not on Drive"), so a file
+  backup does not reduce it and should not. This banner is backup-relative ("not anywhere durable").
+  Keeping the two separate is what lets the count stay factual while the escalation stays honest.
+- **Escalation, not animation**: no persistent pulsing. A permanent animation in a fixed header is
+  ignored within a day, competes with the live session for peripheral attention, needs
+  `prefers-reduced-motion` handling anyway, and devalues the PREVIEW badge beside it. Static colour;
+  weight it with `storageDurability.js`'s `atRisk` / `not-persisted`, which is real evidence of
+  eviction risk rather than a proxy for it.
 - **Not permanently dismissible** while the condition holds. Session-scoped at most.
 - **Wording is the whole feature** — honest without alarming a PT mid-session ("Only copy — no backup
   yet" beats "DATA LOSS RISK"), and it must name the fix in the same breath.
