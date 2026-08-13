@@ -37,7 +37,7 @@ on:
   workflow_dispatch:
     inputs:
       access_token:
-        description: 'Optional short-lived Google access token (see runbook B7) — overrides the stored credential for this run only. Never paste a refresh token here.'
+        description: 'Optional short-lived Google access token (see runbook B6) — overrides the stored credential for this run only. Never paste a refresh token here.'
         required: false
         type: string
 
@@ -93,14 +93,15 @@ jobs:
                 refresh tokens expire every 7 days, which is the most likely
                 reason you are reading this on a repo that was already working.
             B1  Create a Desktop OAuth client.
-            B2  Consent once, in a browser, as the test account.
-            B3  Exchange the code for a refresh token.
-            B4  Prove it locally:
+            B2  Mint the credential — one command, which consents in a browser,
+                exchanges the code and checks the granted scopes:
+                  .venv/bin/python -m agent_tools.google_credential
+            B3  Prove it locally:
                   .venv/bin/python -c "from build import run_live_google_tests; run_live_google_tests()"
-            B5  gh secret set GOOGLE_LIVE_CREDENTIALS < .private/google-live.json
+            B4  gh secret set GOOGLE_LIVE_CREDENTIALS < .private/google-live.json
 
           To test a PR branch without touching the stored secret, dispatch this
-          workflow with a short-lived access_token input instead (Part B, B7).
+          workflow with a short-lived access_token input instead (Part B, B6).
           ────────────────────────────────────────────────────────────────────────
 
           INSTRUCTIONS

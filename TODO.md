@@ -202,11 +202,14 @@ scope left from debugging) that would keep every Drive test green while producti
   Google's uptime can never block a release. `pipeline_gates.py`'s one-terminal-job rule holds
   trivially in a single-job workflow. What it cannot cover — the consent UI — is unautomatable
   anyway: Google fingerprints and blocks driven browsers on `accounts.google.com`.
-- **Remaining maintainer action**: consent once as the dedicated test account (or the maintainer's
-  account), exchange the returned code for a refresh token, prove it locally, then store the JSON as
-  the `GOOGLE_LIVE_CREDENTIALS` GitHub Actions secret. The private runbook specifies the supported
-  Desktop loopback callback flow; Google's retired copy/paste OOB callback cannot work for an app
-  that is In production.
+- **Remaining maintainer action**: run `python -m agent_tools.google_credential`, which consents in a
+  browser, exchanges the returned code and verifies the granted scopes in one step, then store its
+  JSON as the `GOOGLE_LIVE_CREDENTIALS` GitHub Actions secret. It uses the supported Desktop loopback
+  callback; Google's retired copy/paste OOB callback cannot work for an app that is In production.
+  **No new account is needed** — the project's existing admin account is non-personal and, being an
+  ordinary consumer account rather than a service account, has the Drive storage quota this needs.
+  The tool exists because the flow was three hand-run steps around a **single-use** authorization
+  code, so any stumble after the code was written to disk meant starting the consent over.
 - **Not built**: a live test importing a real `calendarFreeBusy.js`, because §1.3's occupancy module
   does not exist yet. `calendarFreeBusy.live.test.mjs` probes the endpoint directly meanwhile, which
   is what proves the minted token actually carries the calendar scope.
