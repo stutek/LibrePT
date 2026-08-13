@@ -219,6 +219,42 @@ def verify_binary_integrity(
     )
 
 
+# Two retries after the first try, so three attempts spanning ~4s. Long enough to ride out a
+# dropped connection or a CDN edge briefly refusing; short enough that a genuinely dead host still
+# fails Stage 1 inside its 60s budget rather than hanging the pipeline.
+_DOWNLOAD_RETRY_DELAYS = (1, 3)
+
+
+def _with_download_retries(describe, attempt):
+    """Run `attempt()`, retrying briefly before letting the failure through.
+
+    Every vendored tool here is fetched from a third party — GitHub Releases, nodejs.org, the ZAP
+    marketplace — and on 2026-08-13 a single `RemoteDisconnected` mid-download of Biome failed the
+    whole deploy, on a push that touched none of it. A remote closing a connection says nothing
+    about our code, and one attempt makes the pipeline's reliability a function of someone else's
+    worst minute.
+
+    **The retry unit is the whole attempt — fetch AND verification — not just the HTTP call.** A
+    truncated transfer leaves a file on disk that fails its checksum, so re-verifying the same bad
+    bytes would only fail again; each attempt must re-download and be safe to repeat. The cost is
+    that a genuinely wrong pinned hash now fails three times before reporting, which is a few
+    seconds spent to make transport failures self-healing.
+
+    The final attempt is deliberately outside the loop so its exception propagates untouched: every
+    caller already distinguishes CI (fail loudly) from local (warn and degrade), and that judgement
+    stays theirs.
+
+    Stdlib only — `ensure_zap_addons` calls this from a CI job with no venv and no `pip install`.
+    """
+    for delay in _DOWNLOAD_RETRY_DELAYS:
+        try:
+            return attempt()
+        except Exception as error:
+            print(f"  ! {describe} failed ({error}); retrying in {delay}s...")
+            time.sleep(delay)
+    return attempt()
+
+
 def ensure_biome_binary():
     """Detects platform and architecture, downloads the precompiled Biome binary if missing."""
     import platform
@@ -261,7 +297,7 @@ def ensure_biome_binary():
     version = "1.9.4"  # Pinned stable version
     url = f"https://github.com/biomejs/biome/releases/download/cli%2Fv{version}/biome-{platform_suffix}"
 
-    try:
+    def fetch_biome():
         response = requests.get(url, stream=True, timeout=15)
         response.raise_for_status()
         os.makedirs(venv_bin, exist_ok=True)
@@ -278,7 +314,10 @@ def ensure_biome_binary():
             biome_path, os_name, platform_suffix, expected_magics, expected_hashes
         ):
             raise ValueError("Integrity check failed after download.")
+        return biome_path
 
+    try:
+        _with_download_retries("Biome download", fetch_biome)
         print("  ✓ Biome binary downloaded and verified successfully.")
         return biome_path
     except Exception as e:
@@ -357,7 +396,7 @@ def ensure_node_binary():
     archive_name = f"node-v{NODE_VERSION}-{platform_suffix}.{ext}"
     url = f"https://nodejs.org/dist/v{NODE_VERSION}/{archive_name}"
 
-    try:
+    def fetch_node_archive():
         response = requests.get(url, stream=True, timeout=30)
         response.raise_for_status()
         os.makedirs(NODE_INSTALL_DIR, exist_ok=True)
@@ -392,7 +431,10 @@ def ensure_node_binary():
 
         if not os.path.exists(node_path):
             raise ValueError(f"Extracted archive did not produce {node_path}.")
+        return node_path
 
+    try:
+        _with_download_retries("Node.js download", fetch_node_archive)
         print("  ✓ Node.js runtime downloaded and verified successfully.")
         return node_path
     except Exception as e:
@@ -1062,7 +1104,10 @@ def ensure_zap_addons():
                 path
             )  # corrupt or superseded — never scan with an unverified rule set
         print(f"  Downloading ZAP add-on {name}...")
-        try:
+
+        def fetch_addon(url=url, path=path, name=name, expected_hash=expected_hash):
+            # Defaults bind the loop variables per iteration — a bare closure would capture the
+            # NAME, so a retry after the loop advanced would fetch the wrong add-on.
             with (
                 urllib.request.urlopen(url, timeout=60) as response,
                 open(path, "wb") as f,
@@ -1074,6 +1119,9 @@ def ensure_zap_addons():
                 raise ValueError(
                     f"SHA256 mismatch for {name}\n    Expected: {expected_hash}\n    Got:      {actual}"
                 )
+
+        try:
+            _with_download_retries(f"ZAP add-on {name} download", fetch_addon)
         except Exception as e:
             print(f"  ✗ Failed to download/verify ZAP add-on {name}: {e}")
             return None
