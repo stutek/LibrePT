@@ -6,6 +6,7 @@
 # it. These tests fail if it ever does.
 
 import pathlib
+import re
 
 from agent_tools import render_docs
 
@@ -77,6 +78,86 @@ def test_rendered_pages_load_no_scripts_and_declare_a_strict_policy():
     # Styles come from a real file, so the policy needs no 'unsafe-inline' — stricter than the app's
     # own CSP, which does need it.
     assert "'unsafe-inline'" not in page
+
+
+def test_a_link_to_a_shipped_doc_becomes_its_sibling_page():
+    """The docs link to each other as repository files do. Rendered into a flat src/, those paths do
+    not exist — so a shipped doc has to become its generated sibling, or the trainer taps a 404."""
+    # From docs/PREVIEW.md, one level up to the repo root.
+    assert (
+        render_docs.rewrite_link("../PRIVACY.md", "docs/PREVIEW.md") == "./privacy.html"
+    )
+    # A sibling inside docs/.
+    assert (
+        render_docs.rewrite_link("BUG_REPORTING.md", "docs/PREVIEW.md")
+        == "./bug-reporting.html"
+    )
+    # Down into a subdirectory.
+    assert (
+        render_docs.rewrite_link(
+            "templates/en/Client_Consent_Form.md", "docs/PREVIEW.md"
+        )
+        == "./consent-form-en.html"
+    )
+
+
+def test_a_link_to_an_unshipped_doc_becomes_an_absolute_github_url():
+    """Developer-facing files stay on GitHub deliberately — but the link must still RESOLVE, so it
+    becomes absolute rather than being left as a relative path into a directory that ships nothing."""
+    assert (
+        render_docs.rewrite_link("../docs/DATA_MODEL.md", "docs/PREVIEW.md")
+        == f"{render_docs.REPO_BLOB_URL}/docs/DATA_MODEL.md"
+    )
+
+
+def test_anchors_survive_rewriting():
+    """A link into a section must keep its fragment, or it silently lands at the top of the page."""
+    assert (
+        render_docs.rewrite_link("../PRIVACY.md#retention", "docs/PREVIEW.md")
+        == "./privacy.html#retention"
+    )
+    assert (
+        render_docs.rewrite_link("#local-section", "docs/PREVIEW.md")
+        == "#local-section"
+    )
+
+
+def test_absolute_and_mailto_links_are_left_alone():
+    for href in (
+        "https://github.com/stutek/LibrePT/issues",
+        "http://example.com",
+        "mailto:someone@example.com",
+    ):
+        assert render_docs.rewrite_link(href, "docs/PREVIEW.md") == href
+
+
+def test_no_relative_link_survives_rewriting():
+    """The property that makes a shipped page safe to hand a trainer: nothing relative is left.
+
+    This replaced a runtime guard that raised on "unrewritten" links. Writing this test is what
+    showed the guard could never fire — the two destinations are exhaustive over relative hrefs, so
+    an unmatched path becomes an absolute GitHub URL rather than surviving. Pinning the property
+    beats keeping an unreachable branch that reads like a safety net.
+    """
+    for href, source in (
+        ("./nope.md", "docs/PREVIEW.md"),
+        ("../README.md", "docs/BUG_REPORTING.md"),
+        ("deep/nested/thing.md", "PRIVACY.md"),
+    ):
+        rewritten = render_docs.rewrite_link(href, source)
+        assert rewritten.startswith(("./", "http")), f"{href} left as {rewritten}"
+        if rewritten.endswith(".md"):
+            assert rewritten.startswith("http"), "a .md destination must be absolute"
+
+
+def test_generated_pages_carry_no_relative_markdown_links():
+    """The same property, asserted end-to-end against every page actually shipped."""
+    for _source, output_name, _title in render_docs.DOCUMENTS:
+        page = (REPO_ROOT / output_name).read_text(encoding="utf-8")
+        for href in re.findall(r'href="([^"]*)"', page):
+            assert not (href.endswith(".md") and not href.startswith("http")), (
+                f"{output_name} ships a relative Markdown link: {href}"
+            )
 
 
 def test_every_declared_document_exists_and_is_current():

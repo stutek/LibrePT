@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self'; img-src 'self' data:; font-src 'self'; base-uri 'none'; form-action 'none'">
+<title>LibrePT Preview Build — Risks &amp; Data-Loss Notice</title>
+<link rel="stylesheet" href="./docs.css">
+</head>
+<body>
+<main class="doc">
+<h1>⚠️ You are running a PREVIEW build</h1>
+<p>The amber <strong>PREVIEW</strong> tag in the header means this is a <strong>pre-release build under active development</strong>. It is here so you can try LibrePT and give feedback — <strong>not</strong> for running your real business on yet.</p>
+<p>Please read this before you put any data you care about into it.</p>
+<hr />
+<h2>What &quot;preview&quot; means</h2>
+<ul>
+<li><strong>Unfinished and changing.</strong> Features are added, changed, and removed between builds without notice. What works today may move or disappear tomorrow.</li>
+<li><strong>Not warranted.</strong> The app is provided <em>as is</em>, with no guarantee of correctness, availability, or fitness for any purpose. (See <a href="./privacy.html">PRIVACY.md</a> and the in-app Terms.)</li>
+<li><strong>Not professional advice.</strong> LibrePT is a tool for a qualified trainer's own workflow; it is not medical, legal, or professional advice.</li>
+</ul>
+<h2>⚠️ How you can lose data</h2>
+<p>Your data lives <strong>only in this browser</strong>, on this device (<code>localStorage</code>). That has real consequences in a preview build:</p>
+<ul>
+<li><strong>A new build can wipe or migrate your data.</strong> Preview builds change how data is stored. An update may reset the database, or migrate it imperfectly, and there is <strong>no server-side backup</strong> to fall back on.</li>
+<li><strong>Clearing browser data deletes everything.</strong> Clearing site data / history, &quot;reset the app&quot;, private-window sessions, or browser storage limits can erase your records permanently.</li>
+<li><strong>No cloud sync yet.</strong> Data does <strong>not</strong> sync anywhere. There is no copy but the one on this device — lose the device or the browser profile, lose the data.</li>
+<li><strong>Storage is capped.</strong> The browser limits local storage (~5 MB). A large history can hit that ceiling and cause saves to fail.</li>
+</ul>
+<h2>How to protect yourself</h2>
+<ol>
+<li><strong>Don't put real, irreplaceable client data in a preview build.</strong> Use demo/sample data, or data you can afford to lose.</li>
+<li><strong>Export your data regularly.</strong> Use <strong>Sync &amp; Backup → Export</strong> to download a JSON copy, and keep it somewhere safe. This is your only backup.</li>
+<li><strong>Re-import after an update</strong> if a build resets your data (<strong>Sync &amp; Backup → Import</strong>).</li>
+<li><strong>Handle client personal data lawfully.</strong> If you do enter real client information, you are the Data Controller — see <a href="./privacy.html">PRIVACY.md</a> and the <a href="./consent-form-en.html">client consent template</a>.</li>
+</ol>
+<hr />
+<h2>🐛 Bug Reporting</h2>
+<p>Questions or problems? Read our <a href="./bug-reporting.html">Bug Reporting Guide</a> for instructions on how to capture details, and open an issue on the <a href="https://github.com/stutek/LibrePT/issues">LibrePT</a> repository. Including the small <strong>build stamp</strong> shown next to the logo (the commit hash) helps pin your report to an exact build.</p>
+</main>
+<p class="doc-back"><a href="./index.html">Back to LibrePT</a></p>
+</body>
+</html>

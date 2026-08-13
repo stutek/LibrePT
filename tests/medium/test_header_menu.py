@@ -56,11 +56,12 @@ def test_menu_items_present_and_github_link(page, local_server):
     assert github.get_attribute("href") == "https://github.com/stutek/LibrePT"
     assert github.get_attribute("target") == "_blank"
 
+    # The privacy policy is a SHIPPED page now, not a GitHub link — which is what makes it readable
+    # offline and what OAuth verification requires (a policy on a domain we own). The distinction
+    # from #menu-github above is the point: the repo link goes off-site on purpose, this one must not.
     privacy = page.locator("#menu-privacy")
-    assert (
-        privacy.get_attribute("href")
-        == "https://github.com/stutek/LibrePT/blob/main/PRIVACY.md"
-    )
+    assert privacy.get_attribute("href") == "./privacy.html"
+    assert "github.com" not in (privacy.get_attribute("href") or "")
     assert privacy.get_attribute("target") == "_blank"
 
 

@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self'; img-src 'self' data:; font-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Informative Client Consent Letter &amp; Intake Template</title>
+<link rel="stylesheet" href="./docs.css">
+</head>
+<body>
+<main class="doc">
+<h1>Informative Client Consent Letter Template</h1>
+<p>The letter below is the wording LibrePT itself sends. The app's <strong>Email form</strong> button (Add/Edit
+Client → <em>Data Protection (GDPR)</em>) opens your mail client prefilled with exactly this text, and its
+<strong>Send link by SMS</strong> button sends a one-line message pointing at the
+<a href="./privacy-notice-en.html">Client Privacy Notice</a>. Print it, email it, or adapt it — but if you
+adapt it, see <em>Versioning</em> below.</p>
+<p>The runtime copy lives in <a href="https://github.com/stutek/LibrePT/blob/main/src/i18n/consent/en.js">src/i18n/consent/en.js</a> — one file per
+language, delivered by <a href="https://github.com/stutek/LibrePT/blob/main/src/modules/common/consentForm.js">consentForm.js</a> — and the two are
+pinned to each other by
+<a href="https://github.com/stutek/LibrePT/blob/main/tests/unit_js/modules/common/consentForm.test.mjs">tests/unit_js/modules/common/consentForm.test.mjs</a>,
+so this document cannot silently drift out of step with what the app actually sends.</p>
+<h2>The letter</h2>
+<pre><code class="language-markdown">Subject: Personal Training — Data Privacy &amp; Cloud Storage Consent
+
+Hi [Client Name],
+
+To prepare our workout schedules, track your strength progression, and ensure safe training, I use LibrePT to log our session results, exercise weights, and any relevant mobility or injury notes.
+
+In accordance with data protection regulations (GDPR), I want to make sure you are fully informed about how your coaching data is managed:
+
+1. Storage &amp; Security: Your workout logs and training notes are stored on my own device and, optionally, backed up to my personal cloud storage strictly for coaching continuity and preparation.
+2. No Third-Party Tracking or Selling: Your data is never sold, shared with advertisers, or transferred to third parties.
+3. Artificial Intelligence Safety: If I utilize AI tools to assist in periodizing or analyzing workout volume, your records are strictly anonymized (all names and identifying personal information are stripped) prior to analysis.
+4. Your Rights: You have the right at any time to request a complete export of your workout history, request corrections, or ask for your personal records to be permanently deleted. You may also withdraw this consent at any time and in any form — withdrawal stops any further processing and does not affect the lawfulness of processing carried out before it.
+
+The full privacy notice is here: https://stutek.github.io/LibrePT/privacy-notice-en.html
+
+Please reply &quot;I CONSENT&quot; to this email (or sign the printed form) to confirm that you understand and agree to these privacy practices for our personal training sessions.
+
+Consent form version: 2026-08-09
+
+Best regards,
+Your Personal Trainer
+</code></pre>
+<h2>Printed form — signature block</h2>
+<p>Append this to the printed version. <strong>You keep the signed sheet.</strong> LibrePT never stores a photo,
+scan, or signature — only the fact of consent, the date on this sheet, and the form version above.</p>
+<pre><code class="language-markdown">Client Signature: ___________________________   Date: _______________
+
+Trainer Signature: __________________________   Date: _______________
+</code></pre>
+<h2>Versioning</h2>
+<p>Consent is consent to <em>a specific wording</em>, so LibrePT stamps the version a client signed under onto
+their record (<code>gdprConsent.formVersion</code>, see <a href="https://github.com/stutek/LibrePT/blob/main/docs/DATA_MODEL.md">DATA_MODEL §1</a>) alongside the signed
+date. That stamp is what lets you answer &quot;who is still covered?&quot; after the letter changes.</p>
+<ul>
+<li><strong>Bump the version</strong> when the <em>substance</em> changes — a new purpose, a new recipient or processor, a
+change to retention or to the rights on offer. Clients on an older version should re-sign.</li>
+<li><strong>Do not bump it</strong> for typos, formatting, or translation of unchanged meaning: those clients
+consented to the same thing, and a bump would send every one of them a form to re-sign for nothing.
+The 2026-08-10 terminology audit is the worked example — the Slovenian edition changed
+substantially (consent became <em>privolitev</em> throughout, per the
+<a href="https://github.com/stutek/LibrePT/blob/main/docs/templates/sl/INDEX.md">terminology map</a>) and both editions gained an explicit Art. 7(3) sentence on
+withdrawal, yet <strong><code>2026-08-09</code> stayed</strong>: the purposes, the recipients, the retention and the rights
+on offer are all unchanged, and stating a right the client already held more plainly does not make
+the earlier consent cover less than it did.</li>
+<li><strong>The version is a full ISO date (<code>YYYY-MM-DD</code>) — the day the current wording was adopted, not the
+day the file was last touched.</strong> A month alone cannot separate two substantive revisions that land
+in the same month, and separating them is the only thing the stamp is for. It is deliberately not
+the app's commit SHA or data schema — those are the <em>code</em> and <em>data shape</em> axes and change
+constantly, while this letter does not (see <a href="https://github.com/stutek/LibrePT/blob/main/AGENT_RULES.md">AGENT_RULES §2.D.3</a>).</li>
+<li><strong>One version spans every language.</strong> The translations state the same promises, so versioning them
+separately would make the stamp stop meaning &quot;which promises were made&quot;. Bumping therefore means
+editing, in one change: <code>CONSENT_FORM_VERSION</code> in
+<a href="https://github.com/stutek/LibrePT/blob/main/src/modules/common/consentForm.js">consentForm.js</a>, the letter body in <strong>every</strong>
+<code>src/i18n/consent/&lt;lang&gt;.js</code>, and the matching <code>docs/templates/&lt;lang&gt;/Client_Consent_Form.md</code> —
+the unit test fails until they agree.</li>
+</ul>
+<h2>Related</h2>
+<ul>
+<li><a href="./privacy-notice-en.html">Client Privacy Notice</a> — the plain-language notice this letter links to</li>
+<li><a href="./consent-form-sl.html">Slovenian edition</a> — the same letter, as the app sends it in Slovenian</li>
+<li><a href="https://github.com/stutek/LibrePT/blob/main/docs/templates/INDEX.md">templates INDEX</a> — every language this form exists in</li>
+<li><a href="https://github.com/stutek/LibrePT/blob/main/docs/PRIVACY_FOR_TRAINERS.md">Trainer Privacy Guide</a> — your obligations as data controller</li>
+<li><a href="./privacy.html">PRIVACY.md</a> — what LibrePT itself does and does not do with data</li>
+</ul>
+</main>
+<p class="doc-back"><a href="./index.html">Back to LibrePT</a></p>
+</body>
+</html>

@@ -239,16 +239,19 @@ def test_changing_the_language_rebuilds_both_delivery_links(page, local_server):
     page.wait_for_selector("#view-client-directory.active")
     _open_edit(page, "c-new")
 
-    assert "templates%2Fen%2FClient_Privacy_Notice.md" in page.locator(
-        "#btn-consent-email"
-    ).get_attribute("href")
+    # The notice URL is asserted by its LANGUAGE marker, not its path shape: the documents moved
+    # from github.com/…/templates/<lang>/ to shipped pages, and an assertion spelling out the old
+    # location failed on a change no client could notice.
+    assert "privacy-notice-en.html" in page.locator("#btn-consent-email").get_attribute(
+        "href"
+    )
 
     page.locator("#client-consent-lang").select_option("sl")
     # Both links, not only the one most recently touched: the SMS body carries the notice URL too.
     assert "PRIVOL" in page.locator("#btn-consent-email").get_attribute("href")
-    assert "templates%2Fsl%2FClient_Privacy_Notice.md" in page.locator(
-        "#btn-consent-sms"
-    ).get_attribute("href")
+    assert "privacy-notice-sl.html" in page.locator("#btn-consent-sms").get_attribute(
+        "href"
+    )
 
 
 def test_the_chosen_language_is_recorded_on_save(page, local_server):

@@ -351,7 +351,32 @@ The failure notification is **synthetic, never stored in `state.notifications`**
 would ride into the backup file and the Drive snapshot and count as a local change, so a failed
 sync would increment the very ahead counter it failed to clear.
 
-### 3.12 [ ] Ship the remaining trainer-facing docs as pages, not GitHub links
+### 3.12 [x] Ship the remaining trainer-facing docs as pages, not GitHub links
+
+**Shipped 2026-08-13** — six more pages (PREVIEW, bug reporting, and the consent form + privacy
+notice in `en` and `sl`), the four in-app links repointed, and `privacy.html` finally linked from the
+menu: it had been generated on 2026-08-12 and the link left on `github.com`, so the page shipped for
+a day while nobody could reach it.
+
+Two things worth keeping from the build:
+
+- **Link rewriting is the real work, not the table row.** The docs link to each other as repository
+  files do (`../PRIVACY.md`, `templates/en/Client_Consent_Form.md`), and rendered into a flat `src/`
+  every one of those is a 404. `rewrite_link()` sends a shipped doc to its sibling page and anything
+  else to an absolute GitHub URL. A runtime guard against "unrewritten" links was written first, and
+  its own test proved it could never fire — the two destinations are exhaustive — so it was deleted
+  and the property is pinned by a test instead.
+- **The consent URLs had to stay absolute.** They are interpolated into the email a trainer sends a
+  client, where a relative `./privacy-notice-en.html` is meaningless. `consentForm.js` derives them
+  from `import.meta.url` rather than importing `routerController`'s `BASE_PATH`, since `controllers/`
+  is a layer above `modules/common/`.
+
+**Deliberately not done**: `README.md#about-demo-data` ([messages.js](src/data/messages.js)) still
+points at GitHub. The README is developer-facing and stays there by this section's own rule — the
+right fix is not a seventh page but moving that explanation in-app, which belongs with §9.3/§9.5's
+demo-data and onboarding work rather than here.
+
+<details><summary>Original scope</summary>
 
 [render_docs.py](agent_tools/render_docs.py) shipped 2026-08-12 with PRIVACY.md as its only entry.
 Four in-app links still point at `github.com`, each aimed at someone who will never have a GitHub
@@ -371,6 +396,8 @@ the links, cache-manifest entries for offline, and the per-language pages doubli
 Developer-facing docs (README, DATA_MODEL, ROUTING, SRC_MODULES, use_cases, INDEX files) stay on
 GitHub — the test is whether a non-developer reaches it from the app, or a regulator needs it at a
 stable URL on a domain we own.
+
+</details>
 
 ### 4.1 [ ] Theme redesign
 Light mode needs a nicer design (reference:

@@ -47,7 +47,7 @@ V skladu s Splošno uredbo o varstvu podatkov (Uredba (EU) 2016/679 — GDPR) in
 3. Varna uporaba umetne inteligence: Če si pri načrtovanju ali analizi obsega vadbe pomagam z orodji umetne inteligence, so zapisi pred tem anonimizirani (odstranjeni so ime in vsi podatki, po katerih bi te bilo mogoče prepoznati).
 4. Tvoje pravice: Kadar koli lahko zahtevaš dostop do svojih podatkov in njihovo kopijo, popravek ali trajen izbris svojih osebnih zapisov. Privolitev lahko kadar koli in na kakršen koli način prekličeš — preklic ustavi nadaljnjo obdelavo in ne vpliva na zakonitost obdelave, ki je potekala pred njim.
 
-Celotno obvestilo o obdelavi osebnih podatkov je na voljo tukaj: https://github.com/stutek/LibrePT/blob/main/docs/templates/sl/Client_Privacy_Notice.md
+Celotno obvestilo o obdelavi osebnih podatkov je na voljo tukaj: https://stutek.github.io/LibrePT/privacy-notice-sl.html
 
 Prosim, da na to sporočilo odgovoriš s "PRIVOLIM" (ali podpišeš natisnjen obrazec) in s tem potrdiš, da si s temi informacijami seznanjen(-a) in privoliš v opisano obdelavo svojih osebnih podatkov.
 

@@ -216,8 +216,11 @@ export function renderHeaderShell() {
            aria-label and an external link, which is the hover problem in another costume
            (AGENT_RULES §2.D.1) for what is a data-loss warning. -->
       <div class="header-build-stack">
+        <!-- The data-loss notice ships as a page (agent_tools/render_docs.py). It used to open
+             github.com, which needs signal — so the one warning that tells a trainer their data can
+             vanish was itself unreachable in the basement gym this app is built for. -->
         <a id="preview-badge" class="preview-badge"
-           href="https://github.com/stutek/LibrePT/blob/main/docs/PREVIEW.md"
+           href="./preview.html"
            target="_blank" rel="noopener noreferrer"
            aria-label="Preview build — pre-release, may lose data. Open the risks & data-loss notice.">
           <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
@@ -303,7 +306,7 @@ export function renderHeaderShell() {
               <a id="menu-github" class="session-menu-item" role="menuitem" href="https://github.com/stutek/LibrePT" target="_blank" rel="noopener noreferrer">
                 <i class="fa-brands fa-github"></i> GitHub project
               </a>
-              <a id="menu-bug-report" class="session-menu-item" role="menuitem" href="https://github.com/stutek/LibrePT/blob/main/docs/BUG_REPORTING.md" target="_blank" rel="noopener noreferrer">
+              <a id="menu-bug-report" class="session-menu-item" role="menuitem" href="./bug-reporting.html" target="_blank" rel="noopener noreferrer">
                 <i class="fa-solid fa-bug"></i> Bug Reporting
               </a>
               <button id="menu-about" class="session-menu-item" role="menuitem">
@@ -312,7 +315,7 @@ export function renderHeaderShell() {
               <button id="menu-terms" class="session-menu-item" role="menuitem">
                 <i class="fa-solid fa-shield-halved"></i> Terms &amp; disclaimer
               </button>
-              <a id="menu-privacy" class="session-menu-item" role="menuitem" href="https://github.com/stutek/LibrePT/blob/main/PRIVACY.md" target="_blank" rel="noopener noreferrer">
+              <a id="menu-privacy" class="session-menu-item" role="menuitem" href="./privacy.html" target="_blank" rel="noopener noreferrer">
                 <i class="fa-solid fa-lock"></i> Privacy &amp; GDPR Statement
               </a>
             </div>

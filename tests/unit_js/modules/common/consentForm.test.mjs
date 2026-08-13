@@ -24,6 +24,7 @@ import {
 import { TRANSLATIONS } from "../../../../src/i18n/index.js";
 import {
   CONSENT_FORM_VERSION,
+  clientConsentFormUrl,
   clientPrivacyNoticeUrl,
   consentEmailBody,
   consentEmailHref,
@@ -69,9 +70,28 @@ test("each letter names the client, the version, and its own language's notice",
 
     assert.ok(body.includes("Jane Doe"), `${lang}: client name missing`);
     assert.ok(body.includes(CONSENT_FORM_VERSION), `${lang}: version stamp missing`);
-    // The notice must be the one the client can actually read — not the English folder.
+    // The notice must be the one the client can actually read — not the English one.
     assert.ok(body.includes(clientPrivacyNoticeUrl(lang)), `${lang}: wrong notice URL`);
-    assert.ok(clientPrivacyNoticeUrl(lang).includes(`/templates/${lang}/`));
+  }
+
+  // Language-specific, asserted as a difference rather than by matching a path segment: the URL
+  // shape changed once already (github.com/…/templates/<lang>/ → a shipped page) and an assertion
+  // spelling out the old one failed on a change that broke nothing a client would notice.
+  assert.notEqual(clientPrivacyNoticeUrl("en"), clientPrivacyNoticeUrl("sl"));
+});
+
+test("the notice link a client receives is absolute and points at the deployed site", () => {
+  // The property that matters is where this URL is READ: in an email, an SMS, and printed on a
+  // signed paper form — by someone who has never opened the app, on a device that never loaded it.
+  //
+  // Deriving it from the running origin (import.meta.url) was tried and is wrong precisely there: a
+  // trainer testing against the local dev server would send a client a `localhost:8081` link, and
+  // under Node it resolved to `file:///…`. Anything origin-relative fails the same way.
+  for (const lang of LANGS) {
+    for (const url of [clientPrivacyNoticeUrl(lang), clientConsentFormUrl(lang)]) {
+      assert.ok(url.startsWith("https://"), `${lang}: ${url} is not an absolute https URL`);
+      assert.ok(!url.includes("localhost"), `${lang}: ${url} points at a dev server`);
+    }
   }
 });
 

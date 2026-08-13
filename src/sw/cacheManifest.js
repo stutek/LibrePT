@@ -20,6 +20,12 @@ self.swCacheManifest = (() => {
     // the reason they were brought in-app at all: a trainer in a basement gym tapping "Privacy"
     // used to reach github.com, which needs signal. These must work with none.
     "./privacy.html",
+    "./preview.html",
+    "./bug-reporting.html",
+    "./consent-form-en.html",
+    "./privacy-notice-en.html",
+    "./consent-form-sl.html",
+    "./privacy-notice-sl.html",
     "./docs.css",
     // Per-module stylesheets (TODO §14.5 / §18.10) — index.css's shared foundation is loaded
     // first; these add only what their module owns.

@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self'; img-src 'self' data:; font-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Obrazec privolitve stranke (informativno pismo)</title>
+<link rel="stylesheet" href="./docs.css">
+</head>
+<body>
+<main class="doc">
+<h1>Obrazec privolitve stranke</h1>
+<p>Spodnje besedilo je natanko tisto, ki ga pošlje aplikacija. Gumb <strong>Pošlji obrazec po e-pošti</strong>
+(Stranka → <em>Varstvo osebnih podatkov (GDPR)</em>, ko je za jezik obrazca izbrana slovenščina) odpre
+poštnega odjemalca s tem besedilom, gumb <strong>Pošlji povezavo po SMS</strong> pa pošlje eno vrstico s povezavo
+na <a href="./privacy-notice-sl.html">Obvestilo o obdelavi osebnih podatkov</a>.</p>
+<p>Izvorna kopija v aplikaciji je <a href="https://github.com/stutek/LibrePT/blob/main/src/i18n/consent/sl.js">src/i18n/consent/sl.js</a>; test
+<a href="https://github.com/stutek/LibrePT/blob/main/tests/unit_js/modules/common/consentForm.test.mjs">consentForm.test.mjs</a> prepreči, da bi se
+dokument in poslano besedilo razšla.</p>
+<blockquote>
+<p>⚠ <strong>Izrazje je usklajeno, pravni pregled pa ni opravljen.</strong> Izrazje je 2026-08-10 preverjeno po
+uradnem slovenskem besedilu Uredbe (EU) 2016/679 in ZVOP-2 — preslikava izrazov in viri so v
+<a href="https://github.com/stutek/LibrePT/blob/main/docs/templates/sl/INDEX.md">kazalu slovenskih predlog</a>. Vsebinsko je dokument enak angleškemu izvirniku
+(<a href="./consent-form-en.html">Client_Consent_Form.md</a>); pred uporabo v sporu naj ga pregleda
+pravnik za varstvo osebnih podatkov.</p>
+</blockquote>
+<h2>Pismo</h2>
+<pre><code class="language-markdown">Zadeva: Osebno treniranje — privolitev v obdelavo osebnih podatkov
+
+Pozdravljen(-a) [Ime stranke],
+
+Za pripravo vadbenih načrtov, spremljanje tvojega napredka in varno treniranje uporabljam LibrePT, kjer beležim rezultate najinih treningov, uporabljene uteži ter morebitne opombe o gibljivosti in poškodbah.
+
+V skladu s Splošno uredbo o varstvu podatkov (Uredba (EU) 2016/679 — GDPR) in Zakonom o varstvu osebnih podatkov (ZVOP-2) te pred privolitvijo seznanjam s tem, kako obdelujem tvoje osebne podatke:
+
+1. Hramba in varnost: Tvoji zapisi treningov in opombe so shranjeni na moji napravi in po želji varnostno kopirani v mojo osebno shrambo v oblaku (ponudnik shrambe pri tem nastopa kot obdelovalec), izključno za pripravo in kontinuiteto treningov.
+2. Brez sledenja in posredovanja tretjim osebam: Tvojih osebnih podatkov ne prodajam, ne delim z oglaševalci in jih ne posredujem tretjim osebam.
+3. Varna uporaba umetne inteligence: Če si pri načrtovanju ali analizi obsega vadbe pomagam z orodji umetne inteligence, so zapisi pred tem anonimizirani (odstranjeni so ime in vsi podatki, po katerih bi te bilo mogoče prepoznati).
+4. Tvoje pravice: Kadar koli lahko zahtevaš dostop do svojih podatkov in njihovo kopijo, popravek ali trajen izbris svojih osebnih zapisov. Privolitev lahko kadar koli in na kakršen koli način prekličeš — preklic ustavi nadaljnjo obdelavo in ne vpliva na zakonitost obdelave, ki je potekala pred njim.
+
+Celotno obvestilo o obdelavi osebnih podatkov je na voljo tukaj: https://stutek.github.io/LibrePT/privacy-notice-sl.html
+
+Prosim, da na to sporočilo odgovoriš s &quot;PRIVOLIM&quot; (ali podpišeš natisnjen obrazec) in s tem potrdiš, da si s temi informacijami seznanjen(-a) in privoliš v opisano obdelavo svojih osebnih podatkov.
+
+Različica obrazca privolitve: 2026-08-09
+
+Lep pozdrav,
+Tvoj osebni trener
+</code></pre>
+<h2>Natisnjen obrazec — podpisni del</h2>
+<p>Dodaj spodnje vrstice natisnjeni različici. <strong>Podpisan izvod hraniš ti.</strong> LibrePT nikoli ne shrani
+fotografije, skena ali podpisa — le podatek, da je bila privolitev dana, datum s tega lista in zgoraj
+navedeno različico obrazca.</p>
+<pre><code class="language-markdown">Podpis stranke: ___________________________   Datum: _______________
+
+Podpis trenerja: __________________________   Datum: _______________
+</code></pre>
+<h2>Različice</h2>
+<p>Privolitev je privolitev <em>določenemu besedilu</em>, zato LibrePT ob datumu podpisa shrani tudi različico,
+ki jo je stranka podpisala (<code>gdprConsent.formVersion</code>, glej <a href="https://github.com/stutek/LibrePT/blob/main/docs/DATA_MODEL.md">DATA_MODEL §1</a>). Le
+tako je po spremembi besedila mogoče odgovoriti na vprašanje, katere stranke so še pokrite.</p>
+<p>Pravila za dvig različice so enaka v vseh jezikih in so zapisana v angleški izdaji —
+<a href="./consent-form-en.html">Versioning</a>. Na kratko: dvigni ob <strong>vsebinski</strong> spremembi (nov namen,
+nov prejemnik, druga hramba ali pravice), ne pa ob tipkarski napaki ali popravku prevoda. Ena
+različica velja za vse jezike hkrati in je zapisana kot polni datum ISO (<code>LLLL-MM-DD</code>) — dan, ko je
+bilo sprejeto veljavno besedilo, ne dan zadnjega urejanja datoteke.</p>
+<h2>Povezano</h2>
+<ul>
+<li><a href="./privacy-notice-sl.html">Obvestilo o obdelavi osebnih podatkov</a> — obvestilo, na katero se pismo sklicuje</li>
+<li><a href="./consent-form-en.html">English edition</a> — izvirnik</li>
+<li><a href="https://github.com/stutek/LibrePT/blob/main/docs/templates/INDEX.md">Kazalo predlog</a> — vsi jeziki teh dokumentov</li>
+<li><a href="https://github.com/stutek/LibrePT/blob/main/docs/PRIVACY_FOR_TRAINERS.md">Trainer Privacy Guide</a> — obveznosti trenerja kot upravljavca</li>
+</ul>
+</main>
+<p class="doc-back"><a href="./index.html">Back to LibrePT</a></p>
+</body>
+</html>

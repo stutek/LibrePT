@@ -37,14 +37,31 @@ export const CONSENT_FORM_VERSION = "2026-08-09";
 // The docs are read on the CLIENT's device, by someone who has no LibrePT install and should not
 // need one to read what they are agreeing to — so a GitHub URL, not an in-app route. One folder per
 // locale (docs/templates/<lang>/), same filenames throughout, so the URL is mechanical.
-const DOCS_BASE_URL = "https://github.com/stutek/LibrePT/blob/main/docs/templates";
+// These documents now ship as real pages (agent_tools/render_docs.py) instead of pointing at
+// github.com, where a gym client handed a consent form met a blob view with a "Sign in" header.
+//
+// **Hardcoded to the deployed site, deliberately — NOT derived from `import.meta.url`.** This URL is
+// interpolated into an email and an SMS sent to a CLIENT, and printed onto the paper consent form
+// they sign. It is read by someone who has never opened the app, on a device that has never loaded
+// it, possibly months later.
+//
+// Deriving it from wherever the module happens to be running was tried first and is wrong in exactly
+// the case that matters: a trainer testing on the local dev server would send their client a
+// `localhost:8081` link, and running under Node it resolves to `file:///…`. The consent-form drift
+// test caught both. A link that leaves the app has to name the app's real home, so the one thing it
+// must not do is follow the current origin.
+const PUBLIC_SITE_URL = "https://stutek.github.io/LibrePT";
+
+function shippedDocUrl(filename) {
+  return `${PUBLIC_SITE_URL}/${filename}`;
+}
 
 export function clientPrivacyNoticeUrl(lang) {
-  return `${DOCS_BASE_URL}/${resolveConsentLang(lang)}/Client_Privacy_Notice.md`;
+  return shippedDocUrl(`privacy-notice-${resolveConsentLang(lang)}.html`);
 }
 
 export function clientConsentFormUrl(lang) {
-  return `${DOCS_BASE_URL}/${resolveConsentLang(lang)}/Client_Consent_Form.md`;
+  return shippedDocUrl(`consent-form-${resolveConsentLang(lang)}.html`);
 }
 
 export function consentEmailSubject(lang) {

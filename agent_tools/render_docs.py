@@ -43,6 +43,7 @@ from the bare-system-Python CI jobs that install nothing (tests/unit/test_ci_bar
 
 import html
 import pathlib
+import re
 import sys
 
 import yaml
@@ -55,7 +56,42 @@ REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
 # DATA_MODEL, ROUTING, SRC_MODULES, use_cases and the INDEX files are developer-facing, and GitHub
 # is the right home for those. The test for inclusion is whether a non-developer reaches it from
 # the app, or a regulator needs it at a stable URL on a domain we own.
-DOCUMENTS = (("PRIVACY.md", "src/privacy.html", "Privacy & GDPR Statement — LibrePT"),)
+DOCUMENTS = (
+    ("PRIVACY.md", "src/privacy.html", "Privacy & GDPR Statement — LibrePT"),
+    ("docs/PREVIEW.md", "src/preview.html", "Preview Build — Data Loss Notice"),
+    (
+        "docs/BUG_REPORTING.md",
+        "src/bug-reporting.html",
+        "Reporting a Problem — LibrePT",
+    ),
+    # Per language, and both documents per language: these are handed to a CLIENT, so the language is
+    # the client's (gdprConsent.formLang), not the app's. consentForm.js links the pair matching each
+    # client's chosen form language.
+    (
+        "docs/templates/en/Client_Consent_Form.md",
+        "src/consent-form-en.html",
+        "Client Consent Form",
+    ),
+    (
+        "docs/templates/en/Client_Privacy_Notice.md",
+        "src/privacy-notice-en.html",
+        "Client Privacy Notice",
+    ),
+    (
+        "docs/templates/sl/Client_Consent_Form.md",
+        "src/consent-form-sl.html",
+        "Obrazec za privolitev",
+    ),
+    (
+        "docs/templates/sl/Client_Privacy_Notice.md",
+        "src/privacy-notice-sl.html",
+        "Obvestilo o zasebnosti",
+    ),
+)
+
+# Where a link that is NOT shipped as a page has to point instead. Repo-relative, so it survives a
+# rename of the Pages site.
+REPO_BLOB_URL = "https://github.com/stutek/LibrePT/blob/main"
 
 # Documents need no script execution whatsoever, so this is far tighter than the app's own policy:
 # no 'unsafe-inline' for styles (the stylesheet is a real file), and no script source at all.
@@ -97,11 +133,67 @@ def strip_frontmatter(text):
     return text[closing + 5 :], metadata
 
 
-def render_page(markdown_text, title):
+def rewrite_link(href, source_name):
+    """Point one Markdown link at something that resolves from a shipped page.
+
+    The docs link to each other the way repository files do — `../PRIVACY.md`,
+    `templates/en/Client_Consent_Form.md`, `BUG_REPORTING.md`. Rendered into a FLAT `src/`, every one
+    of those is a 404: the directory structure they were written against does not exist there. This
+    is the whole reason shipping a second document is more than a table row.
+
+    Two destinations, and the choice is what keeps the set honest:
+      * a doc that IS shipped becomes its sibling page, so the trainer stays in the app and offline;
+      * anything else becomes an absolute GitHub URL, so it still resolves — just off-app, which is
+        the correct outcome for a developer-facing file nobody put in DOCUMENTS.
+
+    Absolute URLs, mailto: and bare anchors are returned untouched.
+    """
+    if not href or href.startswith(("http://", "https://", "mailto:", "#")):
+        return href
+    anchor = ""
+    if "#" in href:
+        href, _, anchor = href.partition("#")
+        anchor = f"#{anchor}"
+    if not href:
+        return anchor
+    # Resolve against the source's own directory, exactly as a reader of the repo would.
+    target = (pathlib.PurePosixPath(source_name).parent / href).as_posix()
+    target = pathlib.PurePosixPath(target)
+    resolved = []
+    for part in target.parts:
+        if part == "..":
+            if resolved:
+                resolved.pop()
+        elif part != ".":
+            resolved.append(part)
+    repo_relative = "/".join(resolved)
+
+    for source, output, _title in DOCUMENTS:
+        if source == repo_relative:
+            return f"./{pathlib.PurePosixPath(output).name}{anchor}"
+    return f"{REPO_BLOB_URL}/{repo_relative}{anchor}"
+
+
+def rewrite_links(rendered_html, source_name):
+    """Apply `rewrite_link` to every href in a rendered page."""
+    return re.sub(
+        r'href="([^"]*)"',
+        lambda match: f'href="{html.escape(rewrite_link(match.group(1), source_name), quote=True)}"',
+        rendered_html,
+    )
+
+
+def render_page(markdown_text, title, source_name="PRIVACY.md"):
     """The complete HTML document for one source file, as bytes-identical output every run."""
     body, metadata = strip_frontmatter(markdown_text)
     page_title = metadata.get("title") or title
-    content = build_renderer().render(body)
+    # No "unrewritten link" guard here, deliberately. rewrite_link's two destinations are exhaustive
+    # over relative hrefs — a path either matches DOCUMENTS and becomes a sibling page, or it does
+    # not and becomes an absolute GitHub URL — so nothing relative can survive. A guard was written
+    # first and its own test proved it could never fire; an unreachable branch that looks like a
+    # safety net is worse than none, because it invites trusting a check that does nothing.
+    # test_no_relative_link_survives_rewriting pins the property instead.
+    content = rewrite_links(build_renderer().render(body), source_name)
     return (
         "<!doctype html>\n"
         '<html lang="en">\n'
@@ -128,7 +220,7 @@ def render_all(check_only=False):
     for source_name, output_name, title in DOCUMENTS:
         source = REPO_ROOT / source_name
         output = REPO_ROOT / output_name
-        rendered = render_page(source.read_text(encoding="utf-8"), title)
+        rendered = render_page(source.read_text(encoding="utf-8"), title, source_name)
         current = output.read_text(encoding="utf-8") if output.exists() else None
         if current == rendered:
             continue
