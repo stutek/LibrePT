@@ -71,6 +71,7 @@ the thing that must happen first, not merely what it touches.
 | **Tests & docs** | §6.2, §12.3, §12.4, §12.5, §12.6, §25.6 | Medium-tier overflow harness | Nothing; all small |
 | **Routing decisions** | §19.2, §19.3 | The URL-privacy invariant | One decision, then both unblock |
 | **Data-subject rights** | §27.4 | One-tap withdrawal in the consent letter | Nothing; the other four shipped 2026-08-11 |
+| **Client self-service** | §26 | Intake page the client fills, consent signed on their own phone | Nothing — restored 08-13; §27.1/§27.2 shipping discharged what parked it |
 
 ---
 
@@ -1453,6 +1454,118 @@ false positives came first, each buying a rule now written into the tool — see
 
 ---
 
+## 26. [Brainstorm] Client self-onboarding — an intake page the client fills on their own phone
+
+The trainer hands over a QR or a link; the client enters their own details and signs consent on
+their own device; the record comes back for the trainer to review and save. Today every client
+record is typed by the trainer, at the desk, from something the client said — which is both the
+slowest part of taking on a client and the least accurate.
+
+**There is no backend, so the return path is the design problem, not the form.** Everything below
+follows from that one fact.
+
+**History, because it is the whole of this section's status**: written 2026-08-11, pruned the same
+evening, restored 2026-08-13. It was pruned on one objection — a self-onboarding page is a *new
+intake surface*, and §27 had just found the app could neither erase a client nor export one client's
+data, so it would have collected more personal data, from more people, faster, with no way to hand it
+back. **That objection is discharged**: §27.1, §27.2, §27.3 and §27.5 all shipped on the evening of
+08-11. Nothing now blocks this section — it is unranked because it is a feature competing on merit,
+not because it is gated.
+
+**Pairs with §27.4**, the one data-subject right still open. Both are about the client's own device
+holding their own decision: §26.6 captures consent there, §27.4 withdraws it from there, and both
+reuse [consentForm.js](src/modules/common/consentForm.js)'s delivery. §27.4 is far smaller and should
+go first regardless.
+
+### 26.1 One app, one route — not a second PWA
+**Decided**: `#/intake` inside the same build. A second PWA means a second service worker, CSP,
+deploy target and test tier for what is ~200 lines of form; the client simply never installs the one
+that exists. The constraint this buys is worth stating: intake must render on a **stock, cold
+browser** — no IndexedDB write, no demo seed, no service-worker dependency, no boot of the trainer's
+app state. It is the only route in the app that is stateless by design, and a medium test should
+pin that rather than trusting it.
+
+### 26.2 The payload, and why it lives in the fragment
+Name / email / phone / goals / injury plus `gdprConsent` is ~400–600 bytes of JSON;
+`CompressionStream('deflate-raw')` + base64url takes it to ~250–400 characters. The codec belongs in
+`src/data/` with a round-trip unit test in [tests/unit_js/](tests/unit_js/) — pure logic, no DOM, no
+persistence.
+
+**In the fragment (`#`), never the query string.** A fragment is not sent to the host, so it never
+reaches GitHub Pages logs or a `Referer`, and WhatsApp's link-preview crawler cannot fetch it. This
+is §19.2's URL-privacy question in its sharpest form — the payload is names, phone numbers and
+health data rather than an opaque id — and the fragment is what keeps it off every wire except the
+two devices that already hold it.
+
+### 26.3 Return path — share first, mail/SMS second, QR third
+1. **`navigator.share()`** — one tap surfaces every channel the phone has (WhatsApp, Viber, Signal,
+   mail, AirDrop) with no trainer address baked in at authoring time.
+2. **`mailto:` / `sms:`** — reuse the shape and the hard-won iOS `?&body=` quirk already encoded in
+   [consentForm.js](src/modules/common/consentForm.js); the trainer's address rides in the outbound
+   QR as `#/intake?to=…`. Email's real advantage is that it leaves the trainer a **durable copy in
+   an inbox**, which is worth something as consent evidence. Some phones have no mail client
+   configured, so it is never the only button.
+3. **QR shown on the client's screen, decoded by the trainer's NATIVE camera app.** Both iOS and
+   Android decode a QR from the stock camera and offer to open the URL, which launches LibrePT with
+   the payload — so this needs an **encoder only, on the client side only**: no `getUserMedia`, no
+   `BarcodeDetector` (absent on iOS Safari), no camera permission in our app. ~250–400 characters is
+   QR byte-mode version ~10–13 of 40, which scans off a phone screen at arm's length. This is the
+   only path that works with **no network and no messaging app** — the basement gym, or the client
+   who would rather not hand their trainer a phone number. Cost is one vendored ~10–15KB pure-JS
+   encoder, pinned and checksummed the way Node and Biome already are ([AGENT_RULES.md](AGENT_RULES.md) §5.2)
+   — no npm, so nothing a JS-side dependency audit would need to cover.
+
+### 26.4 The trainer's own QR needs no code at all
+It encodes a **static** URL, so it is a pre-rendered SVG in `assets/` — printable, stickable on the
+gym wall, one file per language variant. No runtime encoder on the trainer side in either phase.
+
+### 26.5 Import is a review, never an auto-save
+Anyone who photographs the wall QR can craft a payload, so the review dialog is the trust boundary,
+not a nicety. It also carries **dedupe**: match email/phone against existing clients and offer
+"update existing" rather than minting a second Jane Doe — the same key
+[UC4](use_cases/uc4_client_self_subscription.md) already uses to reconcile bookings, so the two
+should agree on it. Sits naturally inside §5.2's "creation is a minimal modal, editing is inline"
+decision.
+
+### 26.6 Consent is the actual prize, and it does not overturn §3.5
+Paper stays the evidence — the 2026-07-22 decision holds. But a client ticking the box on **their
+own device** produces a materially better record than a trainer typing a date afterwards: the date
+is genuinely theirs, the language is the one they read (`en`/`sl` already exist in
+[src/i18n/consent/](src/i18n/consent/)), and `CONSENT_FORM_VERSION` is stamped at the moment they
+were shown *that* version rather than whichever is current at save time.
+
+**Open**: whether a checkbox on the client's own phone counts as retained evidence at all, or is
+only a better-attested claim about the paper. `PRIVACY_FOR_TRAINERS.md` needs a paragraph either
+way, and §3.5's still-open translation gap applies here twice over — this is the first surface a
+client reads unaccompanied.
+
+### 26.7 Phasing
+- [ ] **Phase 1** — the `#/intake` route and form, the codec, the import-review dialog, and
+      share / `mailto:` / `sms:` delivery. **No new dependency and no CSP change** (`connect-src`
+      untouched; it is all local).
+- [ ] **Phase 2** — the vendored QR encoder and client-side QR display, plus the static trainer-side
+      QR asset. Additive: both phases land on the same review dialog. Worth deferring until the
+      messaging handoff has actually been tried in a gym.
+- [ ] **Tests** — `tests/unit_js/` for codec round-trip and rejection of malformed/oversized
+      payloads; `tests/medium/` for the intake form mounted cold and for the review dialog;
+      `tests/e2e/` for the full link → review → saved-client loop. A new use case file
+      (`uc8_client_self_onboarding.md`) plus its [INDEX](use_cases/INDEX.md) row ships with phase 1.
+
+### 26.8 Known gaps
+- **First load needs network.** The client's phone has never cached the app, and the basement gym is
+  exactly where it will not be able to. The trainer's device is no help — it is the wrong device.
+  Either a printed fallback, or accept that intake happens at the desk and not on the floor.
+- **The payload has no authenticity, deliberately.** Signing would need a key exchange, which needs
+  the server this project does not have. §26.5's review dialog is the mitigation, and it is enough
+  because the stakes are one reviewable record.
+- **Real-world URL length is untested.** Chat clients wrap, truncate and sometimes re-render long
+  links; measure an actual payload through WhatsApp, Viber and SMS before committing to share-as-url
+  over share-as-text.
+- **No photo or avatar.** Out of scope — derive initials the way the seed data in
+  [clients.js](src/data/clients.js) does.
+
+---
+
 ## 27. Data-subject rights the app documents but cannot perform
 
 [PRIVACY_FOR_TRAINERS.md §5](docs/PRIVACY_FOR_TRAINERS.md) tabulates four data-subject rights against
@@ -1468,8 +1581,10 @@ existed. **Only §27.4 is still open.** The lesson is the one this repo already 
 comments: a note about work is only as good as the pass that re-reads it, so a section that ships
 gets closed *in the shipping change*, not later.
 
-Numbering note: section 26 (client self-onboarding via an intake deep-link) was pruned the same day
-it was written — the idea is in the git history if it is ever wanted back.
+§26 is the reason this section exists: it was written first, and reading the trainer doc against
+`src/` while sizing its consent step is what surfaced these gaps. It was then pruned *because* of
+them, and restored on 08-13 once this section closed — the sequencing objection it carried is
+discharged by §27.1 and §27.2 having shipped.
 
 ### 27.1 [x] Erasure (Art. 17) — shipped 2026-08-11
 Built as `clientErasure.js`; see [CHANGELOG](CHANGELOG.md) and §17.3. The framing this section
