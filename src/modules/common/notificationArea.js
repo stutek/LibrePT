@@ -7,9 +7,13 @@
 //   - Priority-ordered notification feed: Live/Upcoming session → Welcome/Demo message → Reservations/Cancellations.
 //
 // Dependencies injected via initNotificationArea({ getState, getActiveSession, t, escapeHTML,
-// navigateToPath, getSyncFailure }) — `getSyncFailure` is an accessor rather than a value because a
-// sync can fail at any moment after boot, and it keeps this module unaware of Drive entirely.
+// navigateToPath, getSyncFailure, seedDemoData }) — `getSyncFailure` is an accessor rather than a
+// value because a sync can fail at any moment after boot, and it keeps this module unaware of Drive
+// entirely. `seedDemoData` used to be reached as `window.seedMockData`, which no layering gate can
+// see: a global is not an import, so the feed was calling into the app entry point and nothing said
+// so.
 
+import { stateHasData } from "../../data/stateStore.js";
 import { readVersionScoped, writeVersionScoped } from "../../data/storageNamespace.js";
 import { resolveNotificationItems } from "../../domain/notificationItems.js";
 import { renderMarkupOnce } from "./dom.js";
@@ -37,16 +41,59 @@ function loadReadNotificationIds() {
   }
 }
 
-function renderEmptyNotificationState(
-  container,
-  t,
-  escapeHTML,
+// The collapsed bar reads from the same three elements whatever the feed contains, so both empty
+// states set them the same way.
+function setNotificationSummary(
   { summaryTitleEl, summaryDescEl, summaryIconEl },
+  title,
+  desc,
+  icon,
 ) {
-  if (summaryTitleEl) summaryTitleEl.textContent = t("notif_welcome_title") || "Interactive Demo";
-  if (summaryDescEl) summaryDescEl.textContent = t("notif_welcome_desc") || "Run demo";
-  if (summaryIconEl)
-    summaryIconEl.className = "fa-solid fa-wand-magic-sparkles notification-bell-icon";
+  if (summaryTitleEl) summaryTitleEl.textContent = title;
+  if (summaryDescEl) summaryDescEl.textContent = desc;
+  if (summaryIconEl) summaryIconEl.className = `${icon} notification-bell-icon`;
+}
+
+// An empty feed means one of two opposite things, and they were rendered identically until
+// 2026-08-13. A database with nothing in it gets the offer below; a database with a real gym in it
+// and nothing outstanding gets this. Sharing one card told the trainer with nothing saved that
+// their "workspace is preloaded with live training data" — false — and told the one with ten real
+// clients the same thing, under a button that would have seeded thirty fake people into their
+// records. Nothing is offered here on purpose: someone already up to date needs no action, and the
+// demo seed is the specific action they must not be handed.
+function renderCaughtUpState(container, t, escapeHTML, summaryEls) {
+  setNotificationSummary(
+    summaryEls,
+    t("notif_empty_title"),
+    t("notif_empty_desc"),
+    "fa-solid fa-check",
+  );
+
+  container.innerHTML = `
+    <div class="notification-empty">
+      <div class="notification-card caught-up read" data-notification-id="caught-up">
+        <div class="notification-card-icon">
+          <i class="fa-solid fa-check"></i>
+        </div>
+        <div class="notification-card-content">
+          <h4 class="notification-card-title">${escapeHTML(t("notif_empty_title"))}</h4>
+          <p class="notification-card-desc">${escapeHTML(t("notif_empty_desc"))}</p>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// The way back to an offer the splash made first. Someone who chose "Start with an empty app" at
+// first run has no other route to the sample gym, so this stays — but the label says what the
+// button does, because it writes records rather than navigating anywhere.
+function renderSeedDemoInvitation(container, t, escapeHTML, summaryEls, seedDemoData) {
+  setNotificationSummary(
+    summaryEls,
+    t("notif_seed_demo_title"),
+    t("notif_seed_demo_desc"),
+    "fa-solid fa-wand-magic-sparkles",
+  );
 
   container.innerHTML = `
     <div class="notification-empty">
@@ -55,23 +102,19 @@ function renderEmptyNotificationState(
           <i class="fa-solid fa-wand-magic-sparkles"></i>
         </div>
         <div class="notification-card-content">
-          <h4 class="notification-card-title">${escapeHTML(t("notif_welcome_title"))} <span class="unread-dot" title="Unread"></span></h4>
-          <p class="notification-card-desc">${escapeHTML(t("notif_welcome_desc"))}</p>
+          <h4 class="notification-card-title">${escapeHTML(t("notif_seed_demo_title"))} <span class="unread-dot" title="Unread"></span></h4>
+          <p class="notification-card-desc">${escapeHTML(t("notif_seed_demo_desc"))}</p>
           <div class="notification-actions">
-            <button type="button" class="notification-btn primary" id="btn-run-inapp-demo">${escapeHTML(t("notif_demo_btn") || "Run Live Demo")}</button>
+            <button type="button" class="notification-btn primary" id="btn-seed-demo-data">${escapeHTML(t("notif_seed_demo_btn"))}</button>
           </div>
         </div>
       </div>
     </div>
   `;
 
-  const demoBtn = container.querySelector("#btn-run-inapp-demo");
-  demoBtn?.addEventListener("click", (e) => {
+  container.querySelector("#btn-seed-demo-data")?.addEventListener("click", (e) => {
     e.stopPropagation();
-    if (typeof window.seedMockData === "function") {
-      window.seedMockData();
-      window.location.reload();
-    }
+    seedDemoData?.();
   });
 }
 
@@ -188,57 +231,65 @@ function wireNotificationCardActions(container, deps, t, readIds) {
   }
 }
 
+// The same unread/all count appears in two places — the collapsed bar and the open feed's header —
+// and the "mark all read" footer only earns its space when there is something to mark. One function
+// for all three, so they cannot disagree about a number they all read off the same list.
+function paintFeedCounts(items, t) {
+  const unreadCount = items.filter((item) => !item.read).length;
+  const countText = (t("notif_count_badge") || "{unread} unread / {all} all")
+    .replace("{unread}", unreadCount.toString())
+    .replace("{all}", items.length.toString());
+
+  for (const countEl of [
+    document.getElementById("notification-summary-count"),
+    document.getElementById("notification-feed-count"),
+  ]) {
+    if (!countEl) continue;
+    countEl.textContent = countText;
+    countEl.classList.toggle("has-unread", unreadCount > 0);
+  }
+
+  const markAllFooter = document.querySelector(".notification-feed-footer");
+  if (markAllFooter) markAllFooter.style.display = unreadCount > 0 ? "flex" : "none";
+}
+
 export function renderNotificationArea() {
   if (!deps) return;
   const { t, escapeHTML } = deps;
 
   const container = document.getElementById("notification-list-container");
-  const summaryCountEl = document.getElementById("notification-summary-count");
-  const feedCountEl = document.getElementById("notification-feed-count");
-  const summaryTitleEl = document.getElementById("notification-summary-title");
-  const summaryDescEl = document.getElementById("notification-summary-desc");
-  const summaryIconEl = document.getElementById("notification-summary-icon");
   if (!container) return;
+  const summaryEls = {
+    summaryTitleEl: document.getElementById("notification-summary-title"),
+    summaryDescEl: document.getElementById("notification-summary-desc"),
+    summaryIconEl: document.getElementById("notification-summary-icon"),
+  };
 
   const readIds = loadReadNotificationIds();
   const state = deps.getState?.() || {};
   const items = resolveNotificationItems(state, t, readIds, deps.getSyncFailure?.() || null);
-
-  const allCount = items.length;
-  const unreadCount = items.filter((i) => !i.read).length;
-  const countText = (t("notif_count_badge") || "{unread} unread / {all} all")
-    .replace("{unread}", unreadCount.toString())
-    .replace("{all}", allCount.toString());
-
-  if (summaryCountEl) {
-    summaryCountEl.textContent = countText;
-    summaryCountEl.classList.toggle("has-unread", unreadCount > 0);
-  }
-  if (feedCountEl) {
-    feedCountEl.textContent = countText;
-    feedCountEl.classList.toggle("has-unread", unreadCount > 0);
-  }
-
-  const markAllFooter = document.querySelector(".notification-feed-footer");
-  if (markAllFooter) {
-    markAllFooter.style.display = unreadCount > 0 ? "flex" : "none";
-  }
+  paintFeedCounts(items, t);
 
   if (items.length === 0) {
-    renderEmptyNotificationState(container, t, escapeHTML, {
-      summaryTitleEl,
-      summaryDescEl,
-      summaryIconEl,
-    });
+    if (stateHasData(state)) {
+      renderCaughtUpState(container, t, escapeHTML, summaryEls);
+    } else {
+      renderSeedDemoInvitation(container, t, escapeHTML, summaryEls, deps.seedDemoData);
+    }
     syncNotificationBarState();
     return;
   }
 
+  // The collapsed bar previews the top item, minus its wave: "👋 " reads as a greeting in a card
+  // and as noise in a one-line status strip. The bell is the same fallback the card itself uses,
+  // so an item without an icon cannot leave the previous item's glyph stranded in the bar.
   const firstItem = items[0];
-  if (summaryTitleEl) summaryTitleEl.textContent = firstItem.title.replace("👋 ", "");
-  if (summaryDescEl) summaryDescEl.textContent = firstItem.description;
-  if (summaryIconEl && firstItem.icon)
-    summaryIconEl.className = `${firstItem.icon} notification-bell-icon`;
+  setNotificationSummary(
+    summaryEls,
+    firstItem.title.replace("👋 ", ""),
+    firstItem.description,
+    firstItem.icon || "fa-solid fa-bell",
+  );
 
   container.innerHTML = items.map((item) => buildNotificationCardHTML(item, escapeHTML)).join("");
 

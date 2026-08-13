@@ -639,10 +639,14 @@ An overlay driving the demo one action at a time: it explains the next action, w
 and waits for "Show me" again. Each step binds a real DOM target to a short explanation, covering the
 core flows (open a session, switch client, log a signal, complete a round, review an adjustment).
 
-- **⚠ A shipped button already promises this.** The demo notification in
-  [messages.js](src/data/messages.js) offers "Explore Walkthrough" and merely navigates to
-  `/clients`. Either the copy stops promising it or this gets built — a button that under-delivers is
-  the worst of the three options. **Ranked #2 in Where to start.**
+- **✅ The premature promise is gone (2026-08-13).** The demo notification's "Explore Walkthrough"
+  button offered this and navigated to `/clients`; the copy was chosen over the build, since the
+  engine is rank 6 and the button was shipping every day in between. See [CHANGELOG](CHANGELOG.md).
+  **The one surviving announcement is the splash's own `#splash-walkthrough`** — disabled, marked
+  "soon" — which is deliberately the only place this is promised: it is where a first-run user is
+  choosing how to start, and one dead control there costs less than a dead control in a feed
+  consulted mid-session. **When this ships, that button is what to enable**; do not re-add an entry
+  point to the notification feed without deciding it earns the thumb space.
 
 ### 9.6 [ ] [TBD] Install as an offline Android / iOS app
 Already a PWA (manifest + service-worker precache). Open: install-prompt/A2HS UX, fully-offline first

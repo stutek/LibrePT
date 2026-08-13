@@ -20,6 +20,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-08-13 — The demo feed stops promising what the app cannot do
+
+### Changed
+- **The demo notification's buttons do what they say** (TODO §9.5) — "Explore Walkthrough" offered the unbuilt guided walkthrough and navigated to the client list; "Open Live Demo" linked to the app's own public URL from *inside* the running app, which is a reload on the hosted origin and a jump into a stranger's instance from any other, dead without signal either way; "About demo data" sent a trainer with no GitHub account to a README on `github.com`. The walkthrough is now announced in exactly one place — the splash's disabled, "soon"-marked `#splash-walkthrough`, where a first-run user is choosing how to start — rather than twice, once honestly and once not. The README link was **dropped rather than repointed at a rendered page** ([TODO §3.12](TODO.md) left it here for the decision): the cleanup screen it sat beside already itemises what counts as demo data and what survives, so the link led to a worse copy of a screen one tap away.
+- **An empty feed means two opposite things, and now renders as two** — a database with nothing in it gets the offer to seed the sample gym; a database with a real gym in it and nothing outstanding gets "you're all caught up", a pair of strings that had been defined in both locales and used nowhere since the branch that would show them did not exist. One card served both, so a trainer with ten real clients was told their "workspace is preloaded with live training data" and given a button that would have written the demo dataset in among their records — under the label "Open Live Demo", which reads as navigation. The seeder is now an injected `seedDemoData` rather than a `window.seedMockData` reached out of the global scope: **a global is not an import**, so `agent_tools/import_layers.py` could not see that a `modules/common/` component was calling into the app entry point, and nothing else said so either.
+
 ## 2026-08-12 — Drive sync works for real users; the counter stops lying; docs come in-app
 
 ### Added

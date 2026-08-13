@@ -209,7 +209,6 @@ onStateSaved(refreshBackupBadge);
 onBackupRecorded(primeBackupHealth);
 
 window.resetLibrePTData = resetLibrePTData;
-window.seedMockData = seedMockData;
 window.stateHasData = () => stateHasData(getState());
 
 async function init() {
@@ -412,6 +411,11 @@ async function init() {
     // A full re-render rather than a targeted patch: clearing the demo touches every collection, so
     // every view showing one is stale at once.
     onRemoved: () => window.location.reload(),
+    // The same reasoning in the opposite direction, for the empty feed's offer to seed one.
+    seedDemoData: () => {
+      seedMockData();
+      window.location.reload();
+    },
   });
 
   // After bootNotificationArea: the clipboard bar mounts into the notification area's handle bar,

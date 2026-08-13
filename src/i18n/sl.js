@@ -335,18 +335,19 @@ export const sl = {
   notif_summary_title: "Obvestila in pregled stanja",
   notif_empty_title: "Ni obvestil",
   notif_empty_desc: "Vse je pregledano — trenutno tukaj ni ničesar.",
+  notif_seed_demo_title: "👋 Dobrodošli v LibrePT",
+  notif_seed_demo_desc:
+    "Shranjenega še ni nič. Naložite vzorčni fitnes — stranke, rutine in eno sejo, ki že poteka — in si oglejte, kako LibrePT deluje, preden vnesete koga resničnega.",
+  notif_seed_demo_btn: "Naloži vzorčne podatke",
   notif_demo_mode_title: "⚠️ Predstavitveni način — naloženi vzorčni podatki",
   notif_demo_mode_desc:
-    "Aplikacija deluje v predstavitvenem načinu, vnaprej napolnjena z vzorčnimi strankami, rutinami in sejami. Preden jo začnete uporabljati za resnično, poklicno delo, vam močno priporočamo, da najprej počistite predstavitvene podatke — sledite postopku za čiščenje v dokumentaciji.",
-  notif_demo_mode_btn: "O predstavitvenih podatkih",
+    "Aplikacija deluje na vzorčnih strankah, rutinah in sejah. Počistite jih, preden jo uporabite za resnično delo: čiščenje natančno našteje, kaj odstrani, in ohrani katalog vaj, tako da vse, kar ste zgradili na njem, še naprej deluje.",
   filter_participants_placeholder: "Filtriraj stranke...",
   notif_demo_mode_reset_btn: "Počisti podatke in zapusti predstavitveni način",
-  confirm_reset_demo_data:
-    "Počistim vse vzorčne predstavitvene podatke in ponastavim na prazno stanje?",
-  notif_welcome_title: "👋 Dobrodošli v LibrePT: Interaktivni predstavitvi",
+  notif_welcome_title: "👋 Raziskujete z vzorčnimi podatki",
   notif_welcome_desc:
-    "Povabilo k zagonu celovite predstavitve: Preizkusite vodenje osebnih seans. Ker vaša aplikacija že vsebuje aktivne podatke, si oglejte dokumentacijo z navodili ali odprite interaktivno predstavitev na stutek.github.io/LibrePT/.",
-  notif_demo_btn: "Odpri predstavitev v živo",
+    "Stranke, rutine in seje tukaj so vzorčni fitnes, vključno z eno sejo, ki že poteka. Raziskujte brez skrbi — nihče od teh ljudi ni resničen.",
+  notif_welcome_clients_btn: "Poglej vzorčne stranke",
 
   // Pogovorno okno s podatki o gradnji: odpre se z dotikom oznake v glavi (namig ob prehodu miške na telefonu ni dosegljiv).
   build_info_title: "Ta gradnja",
@@ -356,7 +357,6 @@ export const sl = {
   build_info_copy: "Kopiraj podatke o gradnji",
   build_info_copied: "Kopirano",
   build_info_copy_failed: "Označi in kopiraj besedilo zgoraj",
-  notif_walkthrough_btn: "Oglej si navodila",
   notif_spot_res_title: "📅 Rezervacija mesta za stranko",
   notif_spot_res_desc: "Alex Smith je rezerviral mesto za petkov HIIT.",
   notif_spot_cancel_title: "⚠️ Odpoved rezervacije",

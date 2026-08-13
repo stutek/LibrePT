@@ -339,17 +339,19 @@ export const en = {
   notif_summary_title: "Notifications & Status Feed",
   notif_empty_title: "No notifications",
   notif_empty_desc: "You're all caught up — there's nothing here right now.",
+  notif_seed_demo_title: "👋 Welcome to LibrePT",
+  notif_seed_demo_desc:
+    "Nothing saved yet. Load a sample gym — clients, routines and a session already under way — to see how LibrePT works before you enter anyone real.",
+  notif_seed_demo_btn: "Load sample data",
   notif_demo_mode_title: "⚠️ Demo mode — sample data loaded",
   notif_demo_mode_desc:
-    "This app is running in demo mode, preloaded with sample clients, routines, and sessions. Before you start using it for real, professional work, we strongly recommend clearing the demo data first — follow the clean-up procedure in the documentation.",
-  notif_demo_mode_btn: "About demo data",
+    "This app is running on sample clients, routines and sessions. Clear them before you use it for real work: clearing lists exactly what it removes and keeps the movement catalog, so anything you have built on top of it keeps working.",
   filter_participants_placeholder: "Filter clients...",
   notif_demo_mode_reset_btn: "Clear Demo Data & Exit Demo Mode",
-  confirm_reset_demo_data: "Clear all sample demo data and reset to a clean, empty slate?",
-  notif_welcome_title: "👋 Welcome to LibrePT: Interactive Demo",
+  notif_welcome_title: "👋 You're exploring with sample data",
   notif_welcome_desc:
-    "Invite to run the demo end-to-end: Experience personal training orchestration. Since your workspace is preloaded with live training data, explore the interactive walkthrough documentation or open the live interactive demo at stutek.github.io/LibrePT/.",
-  notif_demo_btn: "Open Live Demo",
+    "The clients, routines and sessions here are a sample gym, including one session already under way. Explore freely — none of these people are real.",
+  notif_welcome_clients_btn: "See the sample clients",
 
   // Build-info dialog: reachable by tapping the header stamp (a tooltip is unreachable on a phone).
   build_info_title: "This build",
@@ -359,7 +361,6 @@ export const en = {
   build_info_copy: "Copy build details",
   build_info_copied: "Copied",
   build_info_copy_failed: "Select and copy the text above",
-  notif_walkthrough_btn: "Explore Walkthrough",
   notif_spot_res_title: "📅 Client Spot Reservation",
   notif_spot_res_desc: "Alex Smith booked a spot in Friday HIIT session.",
   notif_spot_cancel_title: "⚠️ Spot Cancellation",
