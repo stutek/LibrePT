@@ -169,6 +169,45 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav {
 .preview-badge-label {
   white-space: nowrap;
 }
+/* TODO §3.8's unbacked-data warning. Sits beside the PREVIEW badge and must not be mistaken for it:
+   PREVIEW is solid amber and permanent, so `due` here is OUTLINED — present, legible, clearly a
+   different kind of statement — and only `urgent` fills in, which happens solely when the browser
+   reports this origin's storage as evictable. Escalation is carried by weight and colour; there is
+   deliberately no animation, because a permanent pulse in a fixed header is ignored within a day and
+   would devalue the data-loss badge next to it. */
+.unbacked-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  /* Not the 9px the badges beside it use: this is a warning about losing every client record, and
+     AGENT_RULES §2.D names 9px as unaimable. It is also a real touch target at this padding. */
+  padding: 5px 9px;
+  border: 1.5px solid var(--danger, #ef4444);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--danger, #ef4444);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  line-height: 1;
+  cursor: pointer;
+}
+.unbacked-badge.hidden {
+  display: none;
+}
+.unbacked-badge-label {
+  white-space: nowrap;
+}
+.unbacked-badge-urgent {
+  border-color: var(--danger, #ef4444);
+  background: var(--danger, #ef4444);
+  color: #fff;
+}
+.unbacked-badge:hover,
+.unbacked-badge:focus-visible {
+  transform: scale(1.08);
+}
 .preview-badge:hover,
 .preview-badge:focus-visible {
   transform: scale(1.15);

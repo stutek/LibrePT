@@ -62,6 +62,53 @@ function renderSyncCloudIcon(status) {
     ?.setAttribute("aria-label", `${SYNC_BUTTON_BASE_LABEL} — ${stateLabel}`);
 }
 
+/** The unbacked-data warning (TODO §3.8), driven by backupHealthController's assessment.
+ *
+ * **Spelled out, never an icon alone**, for the same reason the PREVIEW badge spells itself out: a
+ * bare coloured triangle is an unexplained warning whose meaning lives only in an aria-label, which
+ * is the hover problem in another costume (AGENT_RULES §2.D.1) — and this one is about losing a
+ * trainer's entire client history.
+ *
+ * **Static, never animated.** A permanent pulse in a fixed header is ignored within a day, competes
+ * with the live session for peripheral attention, and would devalue the PREVIEW badge beside it.
+ * Escalation is carried by colour and wording, and only `urgent` — the browser reporting this
+ * origin's storage as evictable — earns the loud treatment.
+ */
+export function renderBackupBadge(health) {
+  const badge = document.getElementById("unbacked-badge");
+  if (!badge) return;
+
+  const level = health?.level || "none";
+  badge.classList.toggle("hidden", level === "none");
+  badge.classList.toggle("unbacked-badge-urgent", level === "urgent");
+  if (level === "none") return;
+
+  const count = health.unbackedCount;
+  const label =
+    level === "urgent"
+      ? deps?.t
+        ? deps.t("unbacked_urgent")
+        : "AT RISK — BACK UP"
+      : deps?.t
+        ? deps.t("unbacked_due")
+        : "NOT BACKED UP";
+  // Static markup, then textContent for the one dynamic part — the label never reaches an HTML sink,
+  // so there is nothing here for an escaping audit to have to reason about.
+  badge.innerHTML =
+    '<i class="fa-solid fa-shield-halved" aria-hidden="true"></i>' +
+    '<span class="unbacked-badge-label"></span>';
+  badge.querySelector(".unbacked-badge-label").textContent = label;
+  // The count rides in the accessible name rather than the pill, which stays narrow beside PREVIEW —
+  // and "23 changes" is the part that makes the warning concrete when read aloud.
+  // Both the noun and the VERB agree: "1 change exist" is the kind of wrongness a screen-reader
+  // user hears in full, on the one message that is asking them to act.
+  const changes = count === 1 ? "1 change exists" : `${count} changes exist`;
+  badge.setAttribute(
+    "aria-label",
+    `${label} — ${changes} only on this device. Open Sync & Backup.`,
+  );
+}
+
 export function renderSyncBadge() {
   const badge = document.getElementById("sync-badge");
   if (!badge) return;
@@ -226,6 +273,11 @@ export function renderHeaderShell() {
           <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
           <span id="preview-badge-label" class="preview-badge-label">PREVIEW</span>
         </a>
+        <!-- TODO §3.8. Hidden until there is unbacked work worth naming; filled by
+             renderBackupBadge(). A BUTTON, not a link to an explainer: the remedy is the Sync &
+             Backup dialog, which offers both a downloaded file and a Drive sync, so tapping the
+             warning lands on the two things that resolve it rather than on prose about them. -->
+        <button type="button" id="unbacked-badge" class="unbacked-badge hidden" aria-haspopup="dialog"></button>
         <!-- Tappable: the long build identity used to live in a \`title\` tooltip, which a phone
              cannot reach. Opens #dialog-build-info instead. -->
         <button type="button" id="app-version" class="app-version" aria-label="Build version — tap for details" aria-haspopup="dialog"></button>
@@ -427,6 +479,9 @@ function setupAppMenu() {
   // opened the dialog, so "Export data as a file" silently did something else entirely. The header
   // button's behaviour is now state-dependent; these two are not, so they must not borrow it.
   on("menu-connect-cloud", () => goto(deps.urlFor("backup")));
+  // The warning's remedy, one tap away: the dialog holds both a downloaded backup and a Drive sync,
+  // and §3.8 turns on either being available — not on connecting Google.
+  on("unbacked-badge", () => goto(deps.urlFor("backup")));
   // Export data — reuse the existing Sync & Backup modal (it holds JSON export/restore).
   on("menu-export-data", () => goto(deps.urlFor("backup")));
   // For a CLIENT who was emailed their data export, not for the trainer — which is why it sits in

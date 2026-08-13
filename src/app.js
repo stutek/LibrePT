@@ -22,6 +22,7 @@ import {
   startWorkoutSession as startWorkoutSessionController,
   syncSessionFocusUrl,
 } from "./controllers/activeSessionController.js";
+import { primeBackupHealth, refreshBackupBadge } from "./controllers/backupHealthController.js";
 import {
   openExerciseCreateDialog,
   setupExerciseForms as setupExerciseFormsController,
@@ -54,6 +55,7 @@ import { newRecordId } from "./data/recordId.js";
 import {
   getState,
   loadSavedState,
+  onBackupRecorded,
   onStateSaved,
   removeDemoData,
   resetLibrePTData,
@@ -197,6 +199,14 @@ function saveState() {
 // yet.
 onStateSaved(renderSyncBadge);
 onSyncCountsChanged(renderSyncBadge);
+
+// TODO §3.8's unbacked warning rides the same seams, plus one of its own. onStateSaved covers "the
+// trainer just made another change that exists nowhere else"; onBackupRecorded covers the moment
+// that stops being true — and it is needed separately because a downloaded FILE never touches state,
+// so onStateSaved cannot see it. Without it the badge would keep warning after the very action that
+// resolved it, which is how a warning teaches people to ignore it.
+onStateSaved(refreshBackupBadge);
+onBackupRecorded(primeBackupHealth);
 
 window.resetLibrePTData = resetLibrePTData;
 window.seedMockData = seedMockData;
@@ -444,6 +454,10 @@ async function init() {
   // empty cache (reading 0) even when a prior sync's ancestor is sitting right there in storage.
   await primeAheadCache();
   renderSyncBadge();
+  // Awaited for the same reason: both inputs are local reads, and a first paint that renders "no
+  // warning" from an empty cache would flash the wrong answer to precisely the trainer who needs
+  // the right one.
+  await primeBackupHealth();
 }
 
 // --- BOUND VIEW & CONTROLLER ACTIONS ---

@@ -22,7 +22,7 @@
 // Deterministic deep-equality for change detection: two records built from the same domain object
 // must compare equal even if key insertion order differs (e.g. one round-tripped through JSON, the
 // other didn't), so equality is over a canonical (sorted-key) serialization, not raw JSON.stringify.
-function stableStringify(value) {
+export function stableStringify(value) {
   if (Array.isArray(value)) return `[${value.map(stableStringify).join(",")}]`;
   if (value && typeof value === "object") {
     const keys = Object.keys(value).sort();

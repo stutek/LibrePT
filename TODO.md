@@ -273,7 +273,29 @@ prerequisite for §23.6, not a code task.
 Engine decision and sizing live in §18.6. The Export/Import JSON backup remains the user-facing
 escape hatch (§3.3, §18.7).
 
-### 3.8 [ ] Unbacked-data warning banner — same weight as the PREVIEW badge
+### 3.8 [x] Unbacked-data warning banner — same weight as the PREVIEW badge
+
+**Shipped 2026-08-13.** [backupHealth.js](src/data/backupHealth.js) decides,
+[backupHealthController.js](src/controllers/backupHealthController.js) keeps it current, and
+`renderBackupBadge` shows it beside the PREVIEW tag. Three things worth not re-deriving:
+
+- **A `{id, hash}` fingerprint, not a snapshot.** Counting "changes since the last backup" needs a
+  reference point and records carry no `updatedAt`. Storing a full state copy (as the Drive ancestor
+  does) works and was rejected: it roughly doubles what the database holds, and a feature that exists
+  to warn about STORAGE EVICTION must not be a cause of it. `countChangedRecords` diffs two
+  fingerprints unchanged, since it compares any two state-shaped objects.
+- **Time alone never fires.** A database backed up a year ago and untouched since is still backed up;
+  warning there teaches the trainer the badge means nothing. Never-backed-up is judged on count
+  alone, because there is no timestamp to measure an interval from and inventing one would nag
+  someone still evaluating the app with three test clients.
+- **`onStateSaved` had to become additive first**, and that is the sharp lesson. It stored ONE
+  listener in one slot, which was indistinguishable from correct while the ahead/behind badge was its
+  only consumer. Registering this feature's listener silently *unsubscribed* the badge, which then
+  showed whatever it had last rendered — nothing threw, and the only symptom was a number that had
+  been right a moment earlier. Pinned now by `tests/unit_js/data/stateSavedListeners.test.mjs`.
+  `onSyncCountsChanged` still has the single-slot shape and one consumer; it is the next one to trip.
+
+<details><summary>Original scope</summary>
 **Raised 2026-07-26 (Simon). Ranked #3 in Where to start** — now that §18.7 ships a real backup and
 restore, the banner has a fix to name in the same breath, which was the missing half. The database
 holds the **only** copy of a trainer's records
@@ -306,6 +328,8 @@ Nothing on screen says so.
   `prefers-reduced-motion` handling anyway, and devalues the PREVIEW badge beside it. Static colour;
   weight it with `storageDurability.js`'s `atRisk` / `not-persisted`, which is real evidence of
   eviction risk rather than a proxy for it.
+
+</details>
 - **Not permanently dismissible** while the condition holds. Session-scoped at most.
 - **Wording is the whole feature** — honest without alarming a PT mid-session ("Only copy — no backup
   yet" beats "DATA LOSS RISK"), and it must name the fix in the same breath.

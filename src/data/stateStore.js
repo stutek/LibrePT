@@ -10,6 +10,7 @@
 // an async per-client fetch, which is separate, larger follow-up work.
 
 import { BUILD_INFO } from "../version.js";
+import { fingerprintState } from "./backupHealth.js";
 import { applyDemoRemoval, brokenDependenciesAfter, planDemoRemoval } from "./demoDataRemoval.js";
 import {
   DEFAULT_CLIENTS,
@@ -323,10 +324,16 @@ export async function loadSavedState() {
 // app.js's `saveState()` wrapper — so notifying here is notifying for all of them, unconditionally.
 // The previous design (an optional `incrementLocalSyncFn` parameter) under-reported for exactly the
 // reason a call-site-by-call-site convention always does: most callers didn't pass it.
-let stateSavedListener = null;
+// **A list, not a single slot, and that distinction cost a shipped feature once.** This was
+// `stateSavedListener = listener` — an assignment — while the doc above describes it as "a listener
+// registered ONCE". Both were true with one consumer. When TODO §3.8's unbacked warning registered a
+// second, it silently REPLACED the ahead/behind badge's, so the badge stopped updating on every
+// write and simply showed whatever it last rendered. Nothing errored; a subscribe call just did not
+// subscribe. Registering is now additive, so the next consumer cannot unsubscribe the previous one.
+const stateSavedListeners = [];
 
 export function onStateSaved(listener) {
-  stateSavedListener = listener;
+  if (typeof listener === "function") stateSavedListeners.push(listener);
 }
 
 export function saveToLocalStorage() {
@@ -340,7 +347,7 @@ export function saveToLocalStorage() {
   }
   // Fired immediately, not after the (possibly still-queued) IndexedDB write completes: `state` is
   // already mutated in memory at this point, which is all a live ahead-count diff needs.
-  if (typeof stateSavedListener === "function") stateSavedListener();
+  for (const listener of stateSavedListeners) listener();
 }
 
 // Google Drive sync's own bookkeeping (TODO §1.5/§3.3): the Drive file id and the merge ancestor
@@ -385,16 +392,35 @@ export async function readBackupHistory() {
   return entry?.value || null;
 }
 
-/** Record that the data reached durable storage. `kind` is "drive" or "file". */
+/** Record that the data reached durable storage. `kind` is "drive" or "file".
+ *
+ * Stores a FINGERPRINT of what was captured, not just when — `{id, h}` per record, which is what
+ * lets TODO §3.8 count "changes since the last backup" without per-record timestamps and without
+ * keeping a second full snapshot beside the Drive ancestor. See backupHealth.js for why the cheap
+ * shape matters: a warning about storage eviction should not itself be a significant consumer.
+ */
 export async function recordBackupTaken(kind) {
   if (!indexedDbSupported()) return;
   const db = await getDb();
+  const fingerprint = fingerprintState(state);
   await withTransaction(db, [META_STORE], "readwrite", ({ store }) => {
     store(META_STORE).put({
       key: BACKUP_HISTORY_META_KEY,
-      value: { at: Date.now(), kind },
+      value: { at: Date.now(), kind, fingerprint },
     });
   });
+  if (typeof backupRecordedListener === "function") backupRecordedListener();
+}
+
+// A third single-listener seam, alongside onStateSaved above and driveSyncService's
+// onSyncCountsChanged — same reasoning, a different event. TODO §3.8's badge has to clear the
+// moment a backup lands, and a downloaded FILE never touches state, so `onStateSaved` cannot see it:
+// without this the badge would keep warning until the trainer's next unrelated edit, which is
+// exactly the "warning that ignores what you just did" that teaches people to ignore warnings.
+let backupRecordedListener = null;
+
+export function onBackupRecorded(listener) {
+  backupRecordedListener = listener;
 }
 
 export async function resetLibrePTData(options = {}) {

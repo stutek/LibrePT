@@ -380,6 +380,8 @@ export const en = {
   planning: "Planning",
   btn_plan_program: "Plan Program",
   offline_cached_badge: "Offline (Cached Code)",
+  unbacked_due: "NOT BACKED UP",
+  unbacked_urgent: "AT RISK — BACK UP",
   offline_cached_desc:
     "HTTP server unreachable. Running off cached code; unable to check for updates.",
   offline_cached_status: "HTTP server is currently unreachable. You are running off cached code.",

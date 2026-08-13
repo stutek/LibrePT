@@ -29,6 +29,20 @@ def test_ahead_count_reflects_real_local_edits_since_the_synced_ancestor(
 ):
     page.goto(local_server + "clients")
     page.wait_for_selector("#view-client-directory.active")
+    # Wait for the demo seed to have LANDED before snapshotting the ancestor. `.active` is set when
+    # the view mounts, which is BEFORE boot finishes writing demo data — so seeding on activation
+    # alone captures a near-empty ancestor, and every record that arrives afterwards counts as a
+    # change since it. Measured while diagnosing: 90 changes immediately after a seed that should
+    # have read 0. The race was always here; an unrelated `await` added to init() for TODO §3.8 just
+    # changed the interleaving enough to lose it.
+    # Waiting on MARKUP is not enough — `#clients-list` gets an empty-state child before any record
+    # exists, so a DOM wait passes while the store is still empty. Wait on the store itself.
+    page.wait_for_function(
+        """async () => {
+            const s = await import(new URL('data/stateStore.js', document.baseURI).href);
+            return (s.getState().clients || []).length > 0;
+        }"""
+    )
     page.evaluate(SEED_ANCESTOR_TO_CURRENT_STATE)
 
     # clientFormsController.js calls stateStore's saveToLocalStorage() directly (not through

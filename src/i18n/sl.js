@@ -377,6 +377,8 @@ export const sl = {
   planning: "Načrtovanje",
   btn_plan_program: "Načrtuj program",
   offline_cached_badge: "Brez povezave (predpomnjena koda)",
+  unbacked_due: "NI VARNOSTNE KOPIJE",
+  unbacked_urgent: "OGROŽENO — NAREDI KOPIJO",
   offline_cached_desc:
     "Strežnik HTTP ni dosegljiv. Zagon iz predpomnjene kode; preverjanje posodobitev ni mogoče.",
   offline_cached_status: "Strežnik HTTP trenutno ni dosegljiv. Delujete v predpomnjeni kodi.",
