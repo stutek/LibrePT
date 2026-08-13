@@ -77,13 +77,48 @@ def test_derived_secret_fields_are_masked():
 def test_the_credential_install_cannot_fail_silently():
     """A half-written credential file would make the suite report "skipped" rather than fail — a
     disarmed canary reporting green, which AGENT_RULES §2.A.3 calls a failure, not a pass."""
-    steps = _canary_steps()
-    install = next(s for s in steps if "credential" in s.get("name", "").lower())
+    install = next(
+        s for s in _canary_steps() if s.get("name") == "Install the stored credential"
+    )
     assert "set -euo pipefail" in install["run"], (
         "the credential install must not swallow a mid-pipeline failure"
     )
-    assert "::warning::" in install["run"], (
-        "an absent credential must announce itself; a silent skip is a canary testing nothing"
+
+
+def test_a_missing_credential_fails_the_job_before_it_wastes_a_runner():
+    """No credential means the suite can only skip, so the run must go RED rather than green — and
+    it must do so in seconds.
+
+    Discovering it after a checkout, a Python setup and a pip install burns ~40s and buries the
+    reason three screens into the run page, so this is pinned as the FIRST step. The job is already
+    fenced to this repository, so there is no legitimate "unconfigured fork" case left to be gentle
+    about: a missing credential here means the secret was deleted or the refresh token expired,
+    which is precisely what a canary is for."""
+    first = _canary_steps()[0]
+    assert first.get("name") == "Require a Google credential", (
+        f"the credential check is not the first step; found {first.get('name')!r}"
+    )
+    assert "uses" not in first, (
+        "the check must need no action, or it cannot run before checkout"
+    )
+    assert "::error" in first["run"], (
+        "a missing credential must annotate the run, not just log"
+    )
+    assert "exit 1" in first["run"], "the job must fail, not warn and carry on"
+
+
+def test_the_failure_message_says_where_the_instructions_are():
+    """An error a maintainer has to reverse-engineer six months later is barely better than a
+    silent skip. The message carries the runbook path AND the public TODO section, since the runbook
+    itself is gitignored and unreadable to anyone but the maintainer."""
+    first = _canary_steps()[0]
+    assert "google-cloud-setup.md" in first["run"], "no pointer to the setup runbook"
+    assert "1.5.1" in first["run"], "no pointer to the public rationale in TODO.md"
+    assert "GOOGLE_LIVE_CREDENTIALS" in first["run"], "does not name the secret to set"
+    # The likeliest cause on a repo that WAS working is the Testing-mode 7-day expiry, so the
+    # message names it rather than leaving the reader to rediscover it.
+    assert "7 days" in first["run"], (
+        "the message should name the expiry that most often causes this"
     )
 
 

@@ -32,10 +32,16 @@
 // `workflow_dispatch` run supplies for a one-off check against a PR branch, and what a developer
 // can export for an ad-hoc run against a token obtained some other way.
 //
-// **Absence is a skip, not a failure.** Most runs — every contributor, every gated `build check` —
-// have neither source, and must not go red for it. The live suite is a canary for changes on
-// GOOGLE's side, not a gate on ours; the hermetic `fetchImpl` tests in tests/unit_js/ are what pin
-// our own request shapes, and they run everywhere.
+// **Absence is a skip HERE, not a failure.** Most runs — every contributor, every gated
+// `build check` — have neither source, and must not go red for it. The live suite is a canary for
+// changes on GOOGLE's side, not a gate on ours; the hermetic `fetchImpl` tests in tests/unit_js/
+// are what pin our own request shapes, and they run everywhere.
+//
+// **CI is the exception, and it never gets this far.** The canary workflow fails on a missing
+// credential in its first step, before the checkout, because on that one repository "no credential"
+// means the secret was deleted or the refresh token expired — a canary that silently stopped
+// watching, which AGENT_RULES §2.A.3 treats as a failure rather than a pass. Keeping the skip here
+// is what lets the same file stay quiet on a laptop that never configured one.
 //
 // Injected dependencies: none — reads `process.env` and the filesystem.
 

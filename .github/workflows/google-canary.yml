@@ -56,6 +56,56 @@ jobs:
     # copy of this repository's secrets, so the run would fail confusingly rather than skip.
     if: github.repository == 'stutek/LibrePT'
     steps:
+      # FIRST step, before even the checkout: with no credential this job can only skip, and
+      # discovering that after a checkout, a Python setup and a pip install is ~40s of wasted runner
+      # time and a run page you have to read three screens into. It fails in seconds instead.
+      #
+      # A hard failure rather than the warning-and-skip this used to do. The old behaviour was
+      # right when the repository might legitimately have no credential; it no longer can — the job
+      # is already fenced to `stutek/LibrePT` so no fork reaches here, and on this repository a
+      # missing credential means the secret was deleted or the refresh token expired. Both are
+      # exactly the states a canary exists to shout about, and a green run that tested nothing is
+      # what AGENT_RULES §2.A.3 calls a failure, not a pass.
+      - name: Require a Google credential
+        env:
+          GOOGLE_LIVE_CREDENTIALS: ${{ secrets.GOOGLE_LIVE_CREDENTIALS }}
+          DISPATCH_TOKEN: ${{ inputs.access_token }}
+        run: |
+          set -euo pipefail
+          if [ -n "${GOOGLE_LIVE_CREDENTIALS}" ] || [ -n "${DISPATCH_TOKEN}" ]; then
+            exit 0
+          fi
+          # The annotation is the one-line summary GitHub pins to the top of the run; the block
+          # below is what someone actually follows. Both, because the annotation cannot hold steps.
+          echo "::error title=No Google credential — the live canary cannot run::Set the GOOGLE_LIVE_CREDENTIALS secret (see .private/google-cloud-setup.md Part B, or TODO.md section 1.5.1)."
+          cat <<'INSTRUCTIONS'
+
+          ────────────────────────────────────────────────────────────────────────
+          The live Google canary has no credential, so it would test nothing.
+
+          This is expected exactly once — before the one-time setup — and after
+          that it means the secret was deleted, or the refresh token expired.
+
+          TO FIX, follow Part B of .private/google-cloud-setup.md (maintainer's
+          local runbook; the reasoning behind it is public in TODO.md 1.5.1):
+
+            B0  Publish the OAuth consent screen.  Skipping this is what makes
+                refresh tokens expire every 7 days, which is the most likely
+                reason you are reading this on a repo that was already working.
+            B1  Create a Desktop OAuth client.
+            B2  Consent once, in a browser, as the test account.
+            B3  Exchange the code for a refresh token.
+            B4  Prove it locally:
+                  .venv/bin/python -c "from build import run_live_google_tests; run_live_google_tests()"
+            B5  gh secret set GOOGLE_LIVE_CREDENTIALS < .private/google-live.json
+
+          To test a PR branch without touching the stored secret, dispatch this
+          workflow with a short-lived access_token input instead (Part B, B7).
+          ────────────────────────────────────────────────────────────────────────
+
+          INSTRUCTIONS
+          exit 1
+
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
@@ -73,22 +123,16 @@ jobs:
       # environment variable, so tests/live/_credentials.mjs runs one code path in CI and on a
       # laptop — there is no CI-only branch to rot unnoticed. `.private/` is gitignored and the
       # runner is destroyed when the job ends.
-      # One step rather than an install/report pair, because a step's own `env:` is not visible to
-      # that step's `if:` — so the "is there a credential" test has to happen in the shell anyway.
+      # The "neither is set" case cannot reach here — the first step fails the job on it. What
+      # remains is a dispatch run supplying its own token and no stored secret, which needs no file.
+      # A step's own `env:` is not visible to that step's `if:`, so the test is in the shell.
       - name: Install the stored credential
         env:
           GOOGLE_LIVE_CREDENTIALS: ${{ secrets.GOOGLE_LIVE_CREDENTIALS }}
-          DISPATCH_TOKEN: ${{ inputs.access_token }}
         run: |
           set -euo pipefail
           if [ -z "${GOOGLE_LIVE_CREDENTIALS}" ]; then
-            # A skip must never be silent (AGENT_RULES §2.A.3): the suite reports "skipped" either
-            # way, so without this the run page would show a green canary that tested nothing.
-            if [ -z "${DISPATCH_TOKEN}" ]; then
-              echo "::warning::No Google credential — the live suite will skip. Set the" \
-                   "GOOGLE_LIVE_CREDENTIALS secret (runbook B6), or dispatch this workflow with" \
-                   "an access_token input (runbook B7)."
-            fi
+            echo "Using the dispatch-supplied access token; no stored credential to install."
             exit 0
           fi
           mkdir -p .private

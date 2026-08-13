@@ -45,8 +45,11 @@ Actions secret, so there is one code path rather than two. The identity is a **r
 not a service account**: Google refuses a service account's `appDataFolder` writes for lack of
 storage quota, and the folder cannot be seeded by hand either, so a service-account canary could
 only ever list an empty folder (verified 2026-08-12; [TODO §1.5.1](../TODO.md)).
-With no credentials present it **skips rather than fails**, which is the correct outcome for almost
-every run. See [TODO §1.5](../TODO.md).
+With no credentials present it **skips rather than fails** — the correct outcome on every machine
+that never configured one. **CI is the exception**: the canary workflow fails on a missing
+credential in its first step, before the checkout, because there "no credential" means an expired
+token or a deleted secret, i.e. a canary that quietly stopped watching. See
+[TODO §1.5](../TODO.md).
 
 **What a test may assert, in any tier: the behaviour a caller depends on, never the mechanics that
 produce it** ([AGENT_RULES §5.8](../AGENT_RULES.md)). The tier decides how much of the app boots;
