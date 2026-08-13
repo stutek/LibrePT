@@ -21,37 +21,36 @@ Canonical context: [README.md](README.md) (architecture & features), [use_cases/
 (workflows), [CONTRIBUTING.md](CONTRIBUTING.md) (conventions). Durable engineering lessons live in
 [AGENT_RULES.md](AGENT_RULES.md), not here — this file records *work*, not process.
 
-## Where to start (ranked 2026-08-11)
+## Where to start (ranked 2026-08-13)
 
 The governing fact is [docs/PREVIEW.md](docs/PREVIEW.md): the app tells its own users it can wipe
 their data. Nothing trainer-facing can be promoted until that is false, so the ranking is **data
 safety → showability → everything else**.
 
-**What moved since the 08-09 ranking**: §18.7's core shipped (backups written at a stable numbered
-schema, a frozen five-file restore corpus, a confirmation before a restore replaces real data), so
-data safety drops out of the top slots and *showability* now leads. §3.5 consent, §25's geometry
-gate and §1.5.1's Google canary all shipped in the same window. **§27 is new and enters at rank 3**:
-reading the trainer-facing privacy doc against `src/` found two documented data-subject rights with
-no code behind them at all.
+**What moved since the 08-11 ranking — the whole top of it, which is why this is a re-rank rather
+than an edit**: §9.5's premature walkthrough promise (rank 1) is gone, §3.8's unbacked banner (3) and
+§3.12's in-app doc pages (3=) shipped, and rank 2 turned out to have shipped *before the ranking was
+written* — §27.1/§27.2/§27.3/§27.5 all landed on the evening of 08-11 and sat marked open for two
+days. Nothing above rank 4 survived. **Showability now leads on its own**, since it is the only
+remaining thing standing between the app and someone using it.
 
 | Rank | Item | Why now |
 | :--- | :--- | :--- |
-| 1 | §9.5's promise in the demo notification | A shipped button offers a walkthrough that does not exist — copy change or build it, not both |
-| 2 | §27.5, then §27.2/§27.1 | The trainer doc promises an erasure and an export the app does not have; the doc half is a paragraph and a statutory clock runs on the other |
-| 3 | §3.8 unbacked-data banner | The honesty surface for the eviction risk; §18.7 gave it a fix to name in the same breath, and 2026-08-12 built its input (`readBackupHistory`) |
-| 3= | §3.12 remaining docs as pages | Four in-app links still open GitHub for people with no GitHub account, and none of them work offline — the machinery already exists, so each is one table row plus a repoint |
-| 4 | §23.5 demo recording + landing page | Gates every outreach channel, and §23.6's autumn window is a real deadline |
-| 5 | §18.7 remainder — `formatVersion` on the envelope | Must land *before* compression or encryption, or every existing file becomes unparseable |
-| 6 | §9.5 guided walkthrough | Blank-app churn; big, so not before the above |
+| 1 | §23.5 recording + landing page | Nobody adopts a UI tool they cannot see, and no screenshot or video exists anywhere in the repo. Gates every outreach channel; §23.6's autumn window is a real deadline. An afternoon of work, blocked on nothing technical |
+| 2 | §18.7 remainder — `formatVersion` on the envelope | Ordering, not urgency: it must land *before* compression or encryption (§18.8 is the likely trigger), or every file already written becomes unparseable |
+| 3 | §27.4 withdrawal route | The last data-subject right with no code, and the smallest item in this file by a wide margin — a prefilled `mailto:`/`sms:` reusing what consent delivery already builds. Makes §3.5's shipped flow symmetrical |
+| 4 | §7.2 feedback button state | The real defect among the gym-floor four: a control that does not show whether it is on is one a trainer taps twice mid-set |
+| 5 | §9.5 guided walkthrough (with §9.4, §9.2) | The blank-app churn §23.5 names. Big, and now the only thing that would let the splash's disabled "soon" button be enabled |
 
 **Cheap wins, unranked** — each small enough to ride along with adjacent work: §12.5's reflog expiry
 (one maintainer command), §19.3's exercise-library filter reset (a real bug needing no URL decision),
 §12.6's glyph subsetting (prerequisite already built), §18.11's retention basis (one paragraph, in
-the privacy policy), §21's 60s → 30s navigation timeout (the cause it was raised for is fixed), and
-§25.6's medium-tier overflow harness (the sweep already exists).
+the privacy policy — the only bullet left in that section), §21's 60s → 30s navigation timeout (the
+cause it was raised for is fixed), and §25.6's medium-tier overflow harness (the sweep already
+exists).
 
 Deprioritised on purpose: §24.5/§24.7 remainders and §24.8's rename (optional by their own text),
-§11/§5.1/§4.1 (large UI churn with no users yet to aim it), §17.2–§17.4 and §18.8–§18.12 (decided on
+§11/§5.1/§4.1 (large UI churn with no users yet to aim it), §17.2/§17.4 and §18.8–§18.12 (decided on
 paper, correctly parked), §12.7 (measured, closed — do not reopen).
 
 ### Open work at a glance
@@ -61,17 +60,17 @@ the thing that must happen first, not merely what it touches.
 
 | Theme | Open | Lead item | Blocked on |
 | :--- | :--- | :--- | :--- |
-| **Launch prerequisites** | §3.3, §23.5, §9.5, §3.8 | Recording + landing page + a real OAuth id | Maintainer actions; nothing technical |
+| **Launch prerequisites** | §23.5, §9.5 | Recording + landing page | Maintainer actions; nothing technical |
 | **Data safety remainder** | §18.7, §18.8, §18.9, §18.11, §18.12 | `formatVersion` envelope | Nothing — but only §18.7 is urgent |
 | **Scheduling** | §1.2, §1.3, §1.4, §1.5 | Room occupancy via `freebusy.query` | §1.5's OAuth/verification path |
 | **Gym-floor UX** | §7.2, §8.1, §8.7, §8.8 | Feedback buttons showing their own state | Nothing; §7.2 is the real defect of the four |
-| **History & templates** | §17.1, §17.2, §17.3, §17.4, §17.5 | Modality into the history snapshot | Decided on paper, parked deliberately |
+| **History & templates** | §17.1, §17.2, §17.4, §17.5 | Modality into the history snapshot | Decided on paper, parked deliberately |
 | **UI redesign** | §4.1, §5.1, §5.2, §11.1, §11.2 | Tabbed client view | Deliberately waiting for real users to aim it |
 | **Go-to-market** | §23.1–§23.6 | Decide what "winning" means | §23.1 gates every channel choice |
 | **Refactor remainders** | §24.4d, §24.5, §24.7, §24.8 | One movement → plan item mapping | Optional by their own text |
 | **Tests & docs** | §6.2, §12.3, §12.4, §12.5, §12.6, §25.6 | Medium-tier overflow harness | Nothing; all small |
 | **Routing decisions** | §19.2, §19.3 | The URL-privacy invariant | One decision, then both unblock |
-| **Data-subject rights** | §27.1–§27.5 | Correct the doc, then build per-client export | Nothing; §27.1 needs the redact-vs-cascade decision first |
+| **Data-subject rights** | §27.4 | One-tap withdrawal in the consent letter | Nothing; the other four shipped 2026-08-11 |
 
 ---
 
@@ -836,19 +835,15 @@ copy-to-a-new-session from a template, never an edit of the past. The only permi
    never touches the execution record.
 3. **Anonymization** (§17.3) — never deletion.
 
-### 17.3 [ ] Erasure = anonymization only (never delete); design pseudonymization
-**Decided (2026-07-22): no hard delete of history.** Erasure strips/replaces identity and retains the
-execution records for aggregate analytics.
+### 17.3 [x] Erasure = anonymization only (never delete) — shipped 2026-08-11
+Decided 2026-07-22, built 2026-08-11 as `clientErasure.js`. See [CHANGELOG](CHANGELOG.md).
 
-- Replace PII (name, email, contact) with an anonymous token; session/program/log data stays.
-- **Pseudonymization, to design**: a stable pseudonymous id keeps a client's records linkable in
-  aggregate (longitudinal volume/1RM curves survive) without being identifiable. Decide **reversible
-  vs irreversible** — a true erasure request wants irreversible; "hide but recoverable" wants the
-  opposite — and **where a re-identification key could live**, given there is no server, so a
-  reversible scheme would keep the mapping in the same local store it is trying to protect. See
-  §18.11 for the backup-plus-mapping re-identification gap this creates.
-- §17.4's template extraction already strips person/day-specific magnitudes, so a routine derived from
-  an anonymized session carries no identity anyway.
+The one open question this section carried — **reversible vs irreversible**, and where a
+re-identification key could live — is settled as **irreversible**, and the reasoning is worth not
+re-deriving: a reversible scheme needs a mapping, and with no server the mapping would live in the
+database it is protecting, making one file that un-erases everyone. Deriving the pseudonym from the
+record's own opaque id instead means there is nothing extra stored to reverse, so the key-location
+question stops existing rather than being answered.
 
 ### 17.4 [ ] Save a past session as a routine template (library fills itself from history)
 With §17.1 preserving the full program, "Save as routine" on a history record extracts a reusable
@@ -1026,7 +1021,7 @@ Quotas are orders of magnitude clear of that table, so sizing is not the constra
   checksum, multi-part, encryption) and `schemaVersion` on the payload (how to read the records). One
   number cannot distinguish "old container, new payload" from the reverse — and the day compression or
   encryption is added, every existing file must still parse. **Land this before either** (§18.8's
-  backup encryption is the likely trigger). Ranked #5 in Where to start.
+  backup encryption is the likely trigger). Ranked #2 in Where to start.
 - **Forward-migration consent at import.** Today's prompt covers *what you lose from this device*;
   it does not yet say what the import does to the file's own portability: *"This backup is from
   schema 3. Importing brings it forward; it will no longer open in older builds."* Declining must
@@ -1074,20 +1069,21 @@ Resolved in favour of the one-build model. Three deep-link invariants that follo
 retained forever, so a link to a retired behaviour resolves to the nearest surviving ancestor rather
 than erroring; and **deep links carry the `lineageId`**, never a per-schema id (§18.2).
 
-### 18.11 [ ] [Open] Legal gaps this design creates
+### 18.11 [~] [Open] Legal gaps this design creates
 - **Retention basis is undocumented.** No-deletes + anonymization-only + fan-out is technically fine,
   but GDPR Art. 5(1)(e) wants a *stated* retention period. "Retained indefinitely for aggregate
   analytics" is lawful only if written down; neither [PRIVACY.md](PRIVACY.md) nor §17.3 says it.
-  **Cheapest item in this file — one paragraph.**
-- **Re-identification via backups + the mapping table.** A pre-erasure backup contains
-  `abc123 → "Jane Doe"` and the mapping says `abc123 → xyz789`; together they re-identify an anonymized
-  record. The usual defence is that backups rotate out — **§18.7's indefinite-restore requirement
-  removes it.** A "record of forgotten ids" closes the gap, but needs two properties it does not have
-  yet: applied **at import**, not just at erasure (or a restore resurrects the PII), and keyed on the
-  stable **`lineageId`** (a per-schema key silently fails to match a backup from another schema).
-  Feeds §17.3's unresolved key-location tension.
-- **Minimize the suppression list itself** — a retained list of erased people's identifiers is lawful
-  (you need it *to honour* the erasure) but should store a salted hash of the id and nothing else.
+  **Cheapest item in this file — one paragraph.** The only bullet here still open.
+- **[x] Re-identification via backups + the mapping table — closed 2026-08-11.** A pre-erasure backup
+  names Jane; restoring it brought her back, and **§18.7's indefinite-restore requirement removes**
+  the usual "backups rotate out" defence. The register ships with both properties this bullet
+  demanded: applied **at import**, before the data becomes live, and keyed so a backup written under
+  another schema still matches. See [CHANGELOG](CHANGELOG.md). §17.3's key-location tension is gone
+  rather than resolved — a derived pseudonym stores no mapping to re-identify against.
+- **[x] Minimize the suppression list itself — done.** Salted hashes of the id and nothing else, with
+  a **fresh salt per entry** rather than one install-wide: the register is unioned across devices on
+  import, which a shared salt cannot survive. The side effect is strictly better, since duplicates
+  become unscannable.
 - **Taxonomy licensing — checked 2026-07-26, currently clear.** wger's *application* is AGPLv3 but no
   wger code is linked; its *dataset* is CC-BY-SA 4.0 but
   [exerciseStandard.js](src/domain/exerciseStandard.js) vendors ~17 generic category and equipment
@@ -1268,7 +1264,7 @@ one job they all hate, and expand from there.
 - [ ] **No screenshots or video exist anywhere in the repo.** Nobody adopts a UI tool they cannot see.
       A 20–30s recording of a real set logged one-handed — tap, `⬆ Load Up Next`, next participant — is
       the single highest-leverage asset and is an afternoon of work. **Blocks everything else here**,
-      and is ranked #4 in Where to start.
+      and is ranked #1 in Where to start.
 - [ ] **No landing page.** [README.md](README.md) is developer-facing (correctly) and the app boots
       empty. A trainer needs one screen: what it is, the recording, "try it now", "add to home screen".
 - [ ] **Share only the demo deep-link, never the bare URL.** `?init=demo_data_load&lang=…&theme=…` is
@@ -1460,56 +1456,48 @@ false positives came first, each buying a rule now written into the tool — see
 ## 27. Data-subject rights the app documents but cannot perform
 
 [PRIVACY_FOR_TRAINERS.md §5](docs/PRIVACY_FOR_TRAINERS.md) tabulates four data-subject rights against
-"what to do in LibrePT". **Two of the four have no code behind them** (verified 2026-08-11): there is
-no way to delete a client, and no way to export one client's data. The document is not wrong about
-the law — it is wrong about the app, which is worse, because it is written for trainers who will rely
-on it while answering a request under a one-month deadline.
+"what to do in LibrePT". Two of the four had no code behind them when this section was filed at 20:10
+on 2026-08-11 — no way to delete a client, no way to export one client's data. The document was not
+wrong about the law; it was wrong about the app, which is worse, because it is written for trainers
+who will rely on it while answering a request under a one-month deadline.
+
+**All of that shipped 44 minutes later, in the same evening** (see [CHANGELOG](CHANGELOG.md)) — and
+then sat here marked open until 2026-08-13, still ranked second in *Where to start*, because nobody
+came back to the file. Two sessions began by reading it and nearly rebuilt an export that already
+existed. **Only §27.4 is still open.** The lesson is the one this repo already states for suppression
+comments: a note about work is only as good as the pass that re-reads it, so a section that ships
+gets closed *in the shipping change*, not later.
 
 Numbering note: section 26 (client self-onboarding via an intake deep-link) was pruned the same day
 it was written — the idea is in the git history if it is ever wanted back.
 
-### 27.1 [ ] Erasure (Art. 17) — there is no way to delete a client
-The only deletion primitives in `src/` are [`removeDemoData()`](src/data/stateStore.js) and
-[`deleteDatabase()`](src/data/indexedDb.js): remove the demo fixture, or destroy everything. No
-single-record delete exists at any layer, and [recordDependencies.js](src/data/recordDependencies.js)
-declares clients *leaves* — nothing in the codebase describes what removing one would have to take
-with it.
+### 27.1 [x] Erasure (Art. 17) — shipped 2026-08-11
+Built as `clientErasure.js`; see [CHANGELOG](CHANGELOG.md) and §17.3. The framing this section
+argued for survived into the implementation: **per-field redaction inside shared records**, not row
+removal, because a completed group session with three participants is simultaneously two *other*
+clients' training record. Art. 17 is not absolute either, so what a trainer gets is "redact identity,
+keep the training record" rather than a delete button.
 
-**The reason this is not a one-line delete, and the decision to settle first**: a completed group
-session with three participants is simultaneously two *other* clients' training record. Erasing one
-participant must not delete the other two's history, so erasure here is **per-field redaction inside
-shared records**, not row removal. It needs the inverse of `recordDependencies` — what points *at* a
-client (sessions by `clientId`, group sessions by participant list, plans and routines, the
-`weightHistory` and notes inside the record itself) — and a per-referrer decision between cascade and
-redact-in-place. Art. 17 is also not absolute: a session already invoiced may be retained on another
-basis, so the action a trainer needs is closer to **"redact identity, keep the training record"** than
-to a delete button.
+What the section did not anticipate, and is the part worth remembering: **two Jane Does is ordinary
+in a gym**, and it is where a name-based sweep does real damage. Prose in records the client *owns*
+is rewritten; text several clients share is left as typed and reported for a human pass.
 
-### 27.2 [ ] Access & portability (Art. 15, 20) — no per-client export
-The whole-database backup is the only export, and it is exactly what must **never** be sent to a
-client: it carries every other client's Art. 9 health data, so honouring an access request with it
-would itself be a personal-data breach. The doc meanwhile instructs trainers to "export the client's
-history (JSON or Markdown) and send it" as though the action existed.
+### 27.2 [x] Access & portability (Art. 15, 20) — shipped 2026-08-11
+Built as `clientDataExport.js` + `encryptedExport.js`; see [CHANGELOG](CHANGELOG.md). Whitelist-scoped
+to one client, so this section's central hazard — the whole-database backup carries every *other*
+client's Art. 9 health data, and sending it to answer an access request would itself be a breach — is
+structurally hard to hit rather than filtered against. Both renderings landed: Markdown for Art. 12(1)
+legibility, JSON for portability, from one projection.
 
-Needed: a per-client projection over [backupFile.js](src/data/backupFile.js)'s format, plus a
-**Markdown rendering** — Art. 12(1) asks for "concise, transparent, intelligible" form, and a raw
-JSON dump handed to a lay person arguably is not. The Markdown view is the compliance-relevant half;
-the JSON is the portability half. Both come from one projection.
+### 27.3 [x] Erasure does not reach the copies — closed 2026-08-11 by the register
+Settled as **prune on restore**, the option this section thought was the less obvious one. The
+recursion it flagged is real and is what shaped the answer: the register stores a **salted hash per
+entry** and nothing else, so what is retained after an erasure request is the minimum needed to
+honour it. Applied at import, before restored data becomes live. See §18.11 and [CHANGELOG](CHANGELOG.md).
 
-### 27.3 [ ] Erasure does not reach the copies
-Deleting the record leaves the Drive `appData` backups already written, any local export the trainer
-took, and the frozen restore corpus. The doc's "it goes from this device and from the next cloud
-backup" is true of the *next* backup and false of the ones already sitting in Drive — restore an
-older one and the erased client is back. Two honest options, and the cheap one may be the right one:
-
-- **Document it** — "erasure also requires deleting backups taken before today" — one paragraph, no
-  code, correct.
-- **Prune on restore** — a tombstone list the restore path filters against. Note the recursion: a
-  tombstone must survive the erasure it records, and a tombstone keyed by client id is itself
-  minimal personal data retained after an erasure request. Not obviously the better answer.
-
-Interacts with §18.7's backup work; whichever way it goes, it should be decided before backups gain
-compression or encryption.
+The half that is still true: a backup file sitting in Drive **still contains the name**. The register
+neutralises it on the way back in, which is what protects the trainer's own database; it does nothing
+about a copy someone else holds. That belongs in the retention paragraph §18.11 still owes.
 
 ### 27.4 [ ] Withdrawal as easy as consent (Art. 7(3)) — the cheap one
 The consent letter the client receives should carry a one-tap withdrawal route back to the trainer: a
@@ -1519,16 +1507,20 @@ arrives as a message the trainer acts on — which is compliant, since withdrawa
 automated. Smallest item in this section by a wide margin, and it makes §3.5's shipped consent flow
 symmetrical.
 
-### 27.5 [ ] Until 27.1 and 27.2 ship, the doc must describe what a trainer can actually do
-A compliance document naming a button that does not exist is worse than one that says "do this by
-hand", because the trainer discovers the gap while a statutory clock is running. Either the doc's §5
-rows change to the manual procedure, or they ship. **This half is a paragraph and should not wait for
-the other half.**
+### 27.5 [x] The doc describes what a trainer can actually do — 2026-08-11
+Resolved by the other branch: [PRIVACY_FOR_TRAINERS.md §5](docs/PRIVACY_FOR_TRAINERS.md)'s rows name
+**Export data (GDPR)** and **Erase client (GDPR)**, and both now exist. The rule stands for whatever
+this doc promises next — a compliance document naming a button that does not exist is worse than one
+saying "do this by hand", because the trainer discovers the gap while a statutory clock is running.
 
 ### 27.6 What this architecture already gets for free
-Worth stating so effort goes to the two hard rights rather than the easy ones: **identity
-verification** (Art. 12(6)) is trivial here — the trainer knows the client by face, with no account,
-no recovery flow and no impersonation vector, where a SaaS has to build for it. And with data never
-leaving the device (the trainer's own Drive aside), there is no processor relationship to paper.
-The asymmetry is the point: **this architecture makes verification easy and erasure hard**, the exact
-inverse of a hosted product, so the backlog should be weighted accordingly.
+**Identity verification** (Art. 12(6)) is trivial here — the trainer knows the client by face, with
+no account, no recovery flow and no impersonation vector, where a SaaS has to build for it. And with
+data never leaving the device (the trainer's own Drive aside), there is no processor relationship to
+paper.
+
+The asymmetry is the point, and the 08-11 build proved the prediction: **this architecture makes
+verification easy and erasure hard**, the exact inverse of a hosted product. Erasure took a
+derived-pseudonym scheme, a same-name safeguard, a register applied at import and an itemised
+receipt of what it cannot reach — where a hosted product would have written one `DELETE`. Weight
+future compliance work the same way.
