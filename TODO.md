@@ -142,10 +142,11 @@ Cross-referenced from [PRIVACY.md](PRIVACY.md).
   for the OAuth review may not be possible, and the privacy policy needs hosting on the app's own
   domain regardless. A custom domain resolves both and is on the launch path anyway.
 
-#### 1.5.1 [~] Live-Google testing without a stored credential (Workload Identity Federation)
+#### 1.5.1 [~] Live-Google testing with a bounded stored credential
 
 **Built 2026-08-10**: [tests/live/](tests/live/), `.github/workflows/google-canary.yml`,
-`build.run_live_google_tests`. Still needs the one-time GCP setup below before it does anything.
+`build.run_live_google_tests`. The canary workflow is complete; it needs only its one-time consumer
+credential before it can run live.
 
 **Settled 2026-08-12, after two attempts at storing no secret at all — worth recording in full,
 because both attempts were reasonable and both were wrong.** The goal was never "test Google", it
@@ -182,20 +183,16 @@ file) plus `calendar.freebusy` (busy intervals, never an event body), and there 
 `pull_request_target` trigger.
 
 **Two consequences worth carrying forward.** The 7-day refresh-token expiry is a *Testing*-mode
-property, not a verification one: setting the consent screen to **In production** (unverified is
-fine, the 100-user cap stays) ends it. Until that happens the secret needs re-uploading weekly, and
-a lapsed one makes the canary skip with a warning rather than fail. And the static "canary requests
-the app's scopes" check could not survive the move — the grant lives on a consent screen now, not in
-the workflow YAML — so it became
+property, not a verification one: the consent screen is now **In production** (unverified is fine,
+the 100-user cap stays), so the credential remains valid until revoked, changed, or unused for six
+months. A missing or expired credential makes the canary fail before checkout rather than report a
+green run that watched nothing. The static "canary requests the app's scopes" check could not
+survive the move — the grant lives on a consent screen now, not in the workflow YAML — so it became
 [tests/live/tokenScopes.live.test.mjs](tests/live/tokenScopes.live.test.mjs), which asks `tokeninfo`
 what the token was actually granted. Strictly better: it also catches an OVER-broad grant (a `drive`
 scope left from debugging) that would keep every Drive test green while production's narrow
 `drive.appdata` was broken.
 
-- **A service account remains a fine CALENDAR fixture.** `freeBusy` needs no storage, so that half
-  would still run keylessly — and this section's room resource calendars are non-human calendars by
-  definition, which a service-account calendar models exactly. It is not worth a second credential
-  path to save one account's involvement in one test.
 - **Testing a PR branch by hand** uses the workflow's `access_token` dispatch input, which
   short-circuits `_credentials.mjs`. Deliberately an ACCESS token, not the refresh token: a
   dispatch input is echoed on the run's own page, so on a public repository treat it as published
@@ -205,18 +202,11 @@ scope left from debugging) that would keep every Drive test green while producti
   Google's uptime can never block a release. `pipeline_gates.py`'s one-terminal-job rule holds
   trivially in a single-job workflow. What it cannot cover — the consent UI — is unautomatable
   anyway: Google fingerprints and blocks driven browsers on `accounts.google.com`.
-- **The one setting that must not be wrong**: the WIF provider's attribute condition must pin
-  `assertion.repository == 'stutek/LibrePT'`. Without it, *any* repository on GitHub can mint tokens
-  as this service account — the classic WIF misconfiguration, exploited in the wild.
-- **Blast radius, designed down**: put the service account in a separate GCP project from the
-  production OAuth client and give it **zero IAM roles** — it needs none to use its own Drive and
-  Calendar, so a leaked token reaches only disposable test data.
-- **Remaining maintainer action**: create the pool/provider/service account and store the consumer
-  account's refresh token as a Secret Manager secret the service account can read, then set three
-  repository *variables* (not secrets — none of the three strings is sensitive)
-  `GOOGLE_WIF_PROVIDER`, `GOOGLE_TEST_SERVICE_ACCOUNT` and `GOOGLE_LIVE_SECRET`. Until the first
-  exists the canary skips with a warning. Set the consent screen to **In production** while there,
-  or the refresh token expires every 7 days.
+- **Remaining maintainer action**: consent once as the dedicated test account (or the maintainer's
+  account), exchange the returned code for a refresh token, prove it locally, then store the JSON as
+  the `GOOGLE_LIVE_CREDENTIALS` GitHub Actions secret. The private runbook specifies the supported
+  Desktop loopback callback flow; Google's retired copy/paste OOB callback cannot work for an app
+  that is In production.
 - **Not built**: a live test importing a real `calendarFreeBusy.js`, because §1.3's occupancy module
   does not exist yet. `calendarFreeBusy.live.test.mjs` probes the endpoint directly meanwhile, which
   is what proves the minted token actually carries the calendar scope.
