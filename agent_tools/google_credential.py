@@ -1,6 +1,7 @@
 """`python -m agent_tools.google_credential` — mint the live canary's Google credential.
 
-Why this exists: the private runbook's Part B asked the maintainer to export three shell variables,
+Why this exists: the setup runbook's Part B (docs/GOOGLE_CLOUD_SETUP.md) asked the maintainer to
+export three shell variables,
 paste a 45-line Python heredoc into a terminal, then run a separate `curl` pipeline to trade the
 authorization code for a refresh token. That is precisely the improvised script AGENT_RULES §6 says
 to build once and keep — and it will run again, because a refresh token has to be re-minted whenever

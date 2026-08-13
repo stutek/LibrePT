@@ -237,8 +237,10 @@ reporting "not configured". Two consequences worth knowing:
   tier — Google fingerprints and blocks automated browsers on `accounts.google.com` — which is what
   [tests/live/](tests/live/) exists for.
 
-Setup steps and the console field-by-field walkthrough are kept out of this repo, in
-`.private/google-cloud-setup.md` (they name accounts and project ids).
+Setup steps and the console field-by-field walkthrough live in
+[docs/GOOGLE_CLOUD_SETUP.md](docs/GOOGLE_CLOUD_SETUP.md). It is written against role handles
+(`admin@`, `maintainer@`) and names no credential, so the procedure is reviewable in the open; only
+the mapping from handle to real address is kept private.
 
 **Not built**: incremental sync via the Drive Changes API. Every pass moves the whole file — correct,
 not bandwidth-minimal.

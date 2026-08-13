@@ -8,7 +8,7 @@ no signal, tapping "Privacy" gets nothing. That last part is a real defect in an
 independent of anything Google asks for.
 
 It is also a hard requirement for OAuth verification: Google demands the privacy policy live on a
-domain we can prove we own, and `github.com` is not one (see `.private/google-cloud-setup.md`).
+domain we can prove we own, and `github.com` is not one (see `docs/GOOGLE_CLOUD_SETUP.md`).
 
 **The Markdown stays canonical and stays where it is.** AGENT_RULES §5.6 forbids documentation under
 `src/` because `run_build` copies that tree wholesale into `dist/`. That rule is about agent-facing
