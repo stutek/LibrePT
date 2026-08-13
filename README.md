@@ -17,9 +17,9 @@ tags:
 [![Stack](https://img.shields.io/badge/stack-vanilla%20JS%20%7C%20HTML5%20%7C%20CSS-f7df1e.svg)](#-technical-stack)
 [![Tests](https://img.shields.io/badge/tests-pytest%20%2B%20playwright-10b981.svg)](tests/)
 
-LibrePT is a comprehensive, client-centric, and business-enabling software ecosystem designed for personal trainers (PTs) to manage schedules, publish slots, handle client bookings, orchestrate workout sessions, track execution, create and manage asynchronous session scenarios, and collect granular exercise feedback to enable planning of client progression. 
+LibrePT is a client-centric platform for personal trainers (PTs), built around a **mobile-first, offline PWA Gym Clipboard** — the real-time tracking interface used on the gym floor. Around that core it manages clients and their consent, builds and adjusts routines, runs single- and multi-participant sessions, records structured set-by-set history, and collects granular exercise feedback to plan client progression.
 
-While the **mobile-first, offline PWA Gym Clipboard** is the core real-time tracking interface used on the gym floor, LibrePT is built as an end-to-end system that connects the trainer's scheduling back-office, client calendar invites, and program adjustments into a single unified database.
+**What is built, and what is not.** Everything above runs today, offline, with optional cross-device sync via Google Drive. **Scheduling is the deliberate gap**: sessions are created and assigned inside LibrePT, and a newly-assigned client is invited by a downloadable `.ics` file plus a prefilled email — not by an API call. Client self-booking, participant/RSVP sync, and room occupancy are **designed but not built**, and are the app's largest open area ([TODO §1](TODO.md)). Read the subsystem list below with that split in mind; each entry says which side it is on.
 
 ---
 
@@ -49,7 +49,7 @@ Then open <http://localhost:8081>; it redirects to <http://localhost:8081/LibreP
 
 > **Note for Developers**: Serve over HTTP rather than opening `index.html` via `file://` — the app loads ES modules and registers a Service Worker, both of which require an HTTP origin.
 
-**Data & privacy**: all state lives in the browser's `localStorage` under the `librept_db` key. Use the header's cloud **Sync & Backup** button (cloud + ↻, with mock ahead/behind change counters) to export/restore the database as JSON.
+**Data & privacy**: all state lives on the device, in the browser's **IndexedDB** ([`data/indexedDb.js`](src/data/indexedDb.js) — one object store per live data schema; see [Architectural Invariants](#architectural-invariants) below). Nothing is sent anywhere unless you connect Google Drive yourself. Use the header's cloud **Sync & Backup** button (cloud + ↻) to export/restore the database as JSON, or to sync it to Drive's app-private `appDataFolder`; the ahead/behind counters on that badge are a real count of records not yet on Drive.
 
 ### About Demo Data
 
@@ -67,11 +67,13 @@ LibrePT can be reset back to a first-run clean slate at any time by clearing sto
 - **Mobile Firefox (Android / iOS)** — Tap the lock icon `padlock` to the left of the address bar, select **Clear cookies and site data** (or tap **Clear** next to storage), and confirm. Alternatively, go to Firefox **Settings** → **Delete browsing data** → check **Cookies and site data** → tap **Delete browsing data**.
 - **iOS Safari (iPhone / iPad)** — Open iOS **Settings** → **Safari** → scroll down to **Advanced** → **Website Data** → search for your domain/host → swipe left or tap **Edit** → tap **Delete**. (If saved to Home Screen as a PWA, deleting the Home Screen icon removes all offline data for that standalone PWA).
 - **In-App (Demo Mode Notification)** — When running in demo mode (with sample data), open the bottom **Notification & Status Feed**, locate the **Demo mode** notice card, and click **Clear Demo Data & Exit Demo Mode**.
-- **Browser DevTools** — DevTools → **Application** (Chrome/Edge) or **Storage** (Firefox) → **Local storage** → select the origin → delete the `librept_*` keys, or use **Clear site data**.
+- **Browser DevTools** — DevTools → **Application** (Chrome/Edge) or **Storage** (Firefox) → **Clear site data**. Deleting only the `librept_*` **Local storage** keys is *not* enough: the live database is in **IndexedDB** (`librept`), and must be deleted there too.
 - **DevTools Console** — Execute `window.resetLibrePTData({ demo: false })` in the console.
 - **A private/incognito window** — Always starts clean and discards everything on close.
 
-To land back on demo data instead of an empty app after clearing, reopen with `?init=demo_data_load`. For reference, the app writes these `localStorage` keys: `librept_db` (all data), `librept_active_session` (live session cache), `librept_read_notifications`, `librept-theme`, and `librept_terms_accepted` (first-run agreement); `openpt_*` are legacy keys migrated on first load.
+To land back on demo data instead of an empty app after clearing, reopen with `?init=demo_data_load`.
+
+For reference, the app stores data in two places. **IndexedDB** holds everything live: one database, `librept`, with one object store per data schema (`schema2`, `schema3`, …) plus a `meta` store. **`localStorage`** holds only the small keys around it — `librept_active_session` (live session cache), `librept_active_timers`, `librept_workout_setup_draft`, `librept_read_notifications`, `librept-theme`, and `librept_terms_accepted` (first-run agreement). `librept_db` also lives there, but is **no longer a live store**: it is read once as the legacy import source when a device moves onto the IndexedDB engine, then left untouched as the rollback snapshot ([`data/storageNamespace.js`](src/data/storageNamespace.js)). `openpt_*` are older legacy keys migrated on first load.
 
 ---
 
@@ -115,11 +117,11 @@ LibrePT is comprised of three major subsystems:
    - **Low-Interaction Progression & Safety Signals**: One-tap action buttons to record *"Load Up Next Weight"* (progression), *"Step Back Load"* (regression), or *"Pain / Injury Flag"* without typing on a phone keyboard.
    - **Reversible Plan Pivot & Placeholder Injection**: Low friction session wipe/pivot with full undo capability. Low friction ability to inject generic placeholder cards when client fatigue or equipment delays force a sudden plan change.
 
-2. **Google Calendar Booking & Sync Integration (Cloud APIs)**
-   - **No Custom Client Web App Needed**: Rather than building and hosting a custom booking portal, LibrePT leverages **Google Calendar Appointment Schedules** out of the box.
-   - **For Trainers**: PT publishes slots/schedules directly via Google Calendar (supporting recurring slot rules and guest capacity limits).
-   - **For Clients**: Clients self-subscribe to slots via the standard Google-hosted scheduling page.
-   - **Active Sync**: The LibrePT app queries the Google Calendar API to fetch session participant guest lists, automatically pre-loading the active clipboard with checked-in clients.
+2. **Google Calendar Booking & Sync Integration (Cloud APIs) — DESIGNED, NOT BUILT**
+   The app makes **no Google Calendar API calls today**. The design below is settled ([TODO §1.5](TODO.md#15--brainstorm-google-calendar-integration--source-of-truth-occupancy-and-data-processor-exposure)) and blocked on the OAuth consent-screen verification path, not on the code.
+   - **Planned — no custom client web app**: rather than building and hosting a booking portal, LibrePT would lean on **Google Calendar Appointment Schedules**: the PT publishes slots (recurring rules, guest capacity) from Calendar itself, and clients self-subscribe via the standard Google-hosted scheduling page.
+   - **Planned — active sync**: query the Calendar API for a session's guest list to pre-load the clipboard with checked-in clients ([TODO §1.2](TODO.md)); read per-room resource calendars via `freebusy.query` for occupancy shading ([TODO §1.3](TODO.md)).
+   - **Built instead, today**: the PT assigns clients to a session inside LibrePT, and each newly-assigned client gets a downloadable **`.ics` invite** plus a prefilled `mailto:` compose ([`data/calendarInvite.js`](src/data/calendarInvite.js), [`modules/session/sessionInviteDialog.js`](src/modules/session/sessionInviteDialog.js)). There is no backend or SMTP relay to send mail on the trainer's behalf, so this is the no-network equivalent of Calendar's own invite email.
 
 3. **Trainer Program Adjustments Deck (Back-Office)**
    - The desk-side workspace where feedback alerts and details are reviewed to asynchronously edit client routine templates and plan progressive overload trajectories.
@@ -247,7 +249,7 @@ LibrePT/
 *   **Core**: HTML5, Vanilla JavaScript (ES6+ ES modules), and Vanilla CSS custom properties driving a 5-theme system (Midnight, Daylight, Red, Blossom, Nebula) — no hard-coded theme colours.
 *   **Internationalization**: Built-in EN/SL dictionaries with locale-aware date formatting via `Intl`.
 *   **Data Sync**: No backend of our own — Google Calendar is the planned source of truth for bookings/RSVP (not yet built, [TODO §1.5](TODO.md#15--brainstorm-google-calendar-integration--source-of-truth-occupancy-and-data-processor-exposure)), and Google Drive's `appDataFolder` covers optional cross-device sync of app-only data — **built**, see [TODO §3.3](TODO.md#33-x-google-drive-periodic-sync). A Firestore/Firebase relay was considered and set aside as the default: it would make the operator a GDPR data processor for PT/client data, which this design avoids.
-*   **Third-Party APIs**: Google Calendar API + Google Drive API (OAuth 2.0).
+*   **Third-Party APIs**: Google Drive API (OAuth 2.0, `drive.appdata` scope) — the only third-party API the app calls today. The Google Calendar API is planned, not integrated.
 *   **Native Wrap**: **Capacitor** to wrap the HTML/CSS/JS code into native Android (.apk) and iOS (.ipa) app packages.
 
 ---
