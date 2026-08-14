@@ -18,6 +18,12 @@
 //
 // deps: injected { t } via initClientConsentSection; reads/writes only its own form controls.
 
+import {
+  consentSignedDate,
+  isConsentActive,
+  isConsentWithdrawn,
+  withdrawConsent,
+} from "../../data/clientConsent.js";
 import { CONSENT_LANG_LABELS } from "../../i18n/consent/index.js";
 import {
   CONSENT_FORM_VERSION,
@@ -60,6 +66,12 @@ export function consentSectionMarkup() {
           <p class="consent-meta" id="client-consent-version"></p>
         </div>
 
+        <div class="form-group consent-date-group" id="client-withdrawn-date-group" hidden>
+          <label for="client-withdrawn-date" id="label-client-withdrawn-date">Date withdrawn</label>
+          <input type="date" id="client-withdrawn-date" class="form-control">
+          <p class="consent-meta" id="client-withdrawn-note"></p>
+        </div>
+
         <div class="form-group consent-lang-group">
           <label for="client-consent-lang" id="label-client-consent-lang">Form language</label>
           <select id="client-consent-lang" class="form-control">
@@ -95,7 +107,7 @@ export function renderConsentInfoDialog() {
       <button class="modal-close-btn" aria-label="Close modal"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div class="modal-body consent-info-body">
-      <p id="consent-info-body-text">LibrePT records only that consent was given and on which date — never a photo, scan, or signature. As the data controller you are responsible for archiving the signed form yourself, for as long as you hold this client's records, so you can prove the consent if you are ever asked to. If the client withdraws consent, delete their records here and note the withdrawal on your copy.</p>
+      <p id="consent-info-body-text">LibrePT records only that consent was given and on which date — never a photo, scan, or signature. As the data controller you are responsible for archiving the signed form yourself, for as long as you hold this client's records, so you can prove the consent if you are ever asked to. If the client withdraws consent, untick the box above — that records the withdrawal and stops further processing while keeping proof that consent was once given. Withdrawal is not the same as erasure: delete their records only if they ask you to.</p>
     </div>
     <div class="modal-actions">
       <button type="button" class="btn primary-btn modal-cancel" id="btn-consent-info-close">Got it</button>
@@ -147,7 +159,34 @@ export function fillConsentSection(client) {
   if (langSelect) langSelect.value = resolveConsentLang(consent?.formLang || readUiLang());
 
   syncConsentDateVisibility(consent?.formVersion);
+  syncWithdrawalVisibility(consent);
   applyDeliveryLinks(client);
+}
+
+export function withdrawalDateFromSection() {
+  return $id("client-withdrawn-date")?.value || todayDateString();
+}
+
+// Shown only when there is something to end or something already ended. A date-withdrawn field on a
+// client who never consented is a question with no meaning, and on the Add dialog it is noise in a
+// form a trainer fills in with a client waiting.
+function syncWithdrawalVisibility(consent) {
+  const group = $id("client-withdrawn-date-group");
+  const dateInput = $id("client-withdrawn-date");
+  const note = $id("client-withdrawn-note");
+  if (!group || !dateInput) return;
+
+  const withdrawn = isConsentWithdrawn(consent);
+  group.hidden = !withdrawn;
+  dateInput.value = withdrawn ? consent.withdrawnDate : "";
+
+  if (note) {
+    // The signed date is what a supervisory authority asks about, so it stays legible next to the
+    // withdrawal rather than being replaced by it.
+    const signed = consentSignedDate(consent);
+    note.textContent =
+      withdrawn && signed ? `${translate("consent_date_label", "Date signed")}: ${signed}` : "";
+  }
 }
 
 export function selectedConsentLang() {
@@ -210,14 +249,26 @@ function applyDeliveryLink(anchor, href, labels) {
 export function readConsentFromSection(previousConsent) {
   const consented = Boolean($id("client-gdpr-consent")?.checked);
   if (!consented) {
+    // Unticking a client who HAD consent is how a trainer honours a withdrawal, so it records one
+    // rather than blanking the record: Art. 7(1) asks them to demonstrate consent was obtained, and
+    // the old blank-everything branch destroyed that proof at exactly the moment it was needed
+    // (TODO §27.7). A client who never consented still has nothing on file.
+    if (isConsentActive(previousConsent)) {
+      return withdrawConsent(previousConsent, withdrawalDateFromSection());
+    }
     return { cloudSync: false, timestamp: "", consentDate: "", formVersion: "", formLang: "" };
   }
 
+  // Re-ticking is a NEW consent, not an undo: the client signed again, so the stale withdrawal date
+  // must not ride along and claim this consent is already over.
+  const { withdrawnDate: _endedEarlier, ...priorConsent } = previousConsent || {};
+
   return {
+    ...priorConsent,
     cloudSync: true,
-    timestamp: previousConsent?.timestamp || new Date().toISOString(),
+    timestamp: priorConsent.timestamp || new Date().toISOString(),
     consentDate: $id("client-consent-date")?.value || todayDateString(),
-    formVersion: previousConsent?.formVersion || CONSENT_FORM_VERSION,
+    formVersion: priorConsent.formVersion || CONSENT_FORM_VERSION,
     // The language chosen NOW, not the one first recorded: switching it is how a trainer corrects a
     // wrong guess, and the next re-send must follow the correction.
     formLang: selectedConsentLang(),

@@ -19,6 +19,7 @@
 //
 // Injected dependencies: none.
 
+import { consentSignedDate, isConsentActive, isConsentWithdrawn } from "./clientConsent.js";
 import { clientDisambiguator } from "./clientErasure.js";
 
 export const EXPORT_FORMAT_VERSION = "1";
@@ -128,10 +129,23 @@ function aboutYouLines(subject) {
     `- Training goals: ${subject.goals || "—"}`,
     `- Notes kept by your trainer: ${subject.trainerNotes || "—"}`,
     `- Injury / mobility notes: ${subject.injuryNotes || "—"}`,
-    subject.consent?.cloudSync
-      ? `- Consent recorded: signed ${subject.consent.consentDate || "—"}, form version ${subject.consent.formVersion || "—"}`
-      : "- Consent recorded: none on file",
+    consentLine(subject.consent),
   ];
+}
+
+// Three outcomes, because "none on file" would misreport a client who consented and withdrew as one
+// who never agreed — and the subject reading their own export is the person most entitled to see
+// that their withdrawal was acted on.
+function consentLine(consent) {
+  const signed = consentSignedDate(consent) || "—";
+  const version = consent?.formVersion || "—";
+  if (isConsentWithdrawn(consent)) {
+    return `- Consent recorded: signed ${signed} (form version ${version}), withdrawn ${consent.withdrawnDate}`;
+  }
+  if (isConsentActive(consent)) {
+    return `- Consent recorded: signed ${signed}, form version ${version}`;
+  }
+  return "- Consent recorded: none on file";
 }
 
 function sessionLines(sessions) {

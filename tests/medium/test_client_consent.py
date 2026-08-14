@@ -186,7 +186,18 @@ def test_editing_a_consented_client_keeps_the_version_they_signed_under(
     assert consent["consentDate"] == "2026-02-28"
 
 
-def test_unticking_consent_clears_the_date_and_version(page, local_server):
+def test_unticking_consent_records_a_withdrawal_and_keeps_the_evidence(
+    page, local_server
+):
+    """REPLACES an earlier test that asserted unticking blanked the whole record (TODO §27.7).
+
+    That behaviour was chosen to stop a stale stamp claiming a live consent — a real concern, but it
+    paid for it with the wrong thing. Art. 7(1) requires the controller to DEMONSTRATE that consent
+    was obtained, so a trainer honouring a withdrawal by unticking the box destroyed their own proof
+    that consent ever existed. The original worry is now handled structurally instead: `cloudSync`
+    goes false, which is the single flag every caller reads before processing, and `withdrawnDate`
+    makes the record self-describing rather than ambiguous.
+    """
     load_with_stub(page, local_server, STUB)
     page.wait_for_selector("#view-client-directory.active")
     _open_edit(page, "c-signed")
@@ -196,14 +207,52 @@ def test_unticking_consent_clears_the_date_and_version(page, local_server):
     page.locator("#form-client button[type=submit]").click()
 
     consent = page.evaluate("() => window.__consentOf('c-signed')")
-    # Withdrawal leaves no stale stamp behind claiming a live consent (GDPR Art. 7(3)).
-    assert consent == {
-        "cloudSync": False,
-        "timestamp": "",
-        "consentDate": "",
-        "formVersion": "",
-        "formLang": "",
-    }
+    # Processing stops...
+    assert consent["cloudSync"] is False
+    assert consent["withdrawnDate"], (
+        "the withdrawal itself must be recorded, not just implied"
+    )
+    # ...but what was signed, when, and under which wording survives it.
+    assert consent["consentDate"] == "2026-02-28"
+    assert consent["formVersion"] == "2025-01-15"
+    assert consent["formLang"] == "sl"
+
+
+def test_re_ticking_consent_is_a_new_consent_not_an_undo(page, local_server):
+    """A client who signs again has given fresh consent, so the old withdrawal date must not ride
+    along and describe the new one as already over."""
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#view-client-directory.active")
+
+    _open_edit(page, "c-signed")
+    page.locator("#client-gdpr-consent").uncheck()
+    page.locator("#form-client button[type=submit]").click()
+    assert page.evaluate("() => window.__consentOf('c-signed')")["withdrawnDate"]
+
+    _open_edit(page, "c-signed")
+    page.locator("#client-gdpr-consent").check()
+    page.locator("#form-client button[type=submit]").click()
+
+    consent = page.evaluate("() => window.__consentOf('c-signed')")
+    assert consent["cloudSync"] is True
+    assert not consent.get("withdrawnDate"), (
+        "a live consent must not carry a withdrawal date"
+    )
+
+
+def test_a_client_who_never_consented_gains_no_withdrawal_date(page, local_server):
+    """A withdrawal date on a client who never agreed would assert a consent that never existed —
+    worse than silence, because it reads as evidence."""
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#view-client-directory.active")
+    _open_edit(page, "c-new")
+
+    page.locator("#client-goals").fill("Rehab")
+    page.locator("#form-client button[type=submit]").click()
+
+    consent = page.evaluate("() => window.__consentOf('c-new')")
+    assert consent["cloudSync"] is False
+    assert not consent.get("withdrawnDate")
 
 
 def test_form_language_defaults_to_the_ui_language(page, local_server):

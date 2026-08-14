@@ -389,6 +389,7 @@ export const en = {
   consent_legend: "Data Protection (GDPR)",
   consent_signed_label: "Client signed the consent form (data storage & cloud sync)",
   consent_date_label: "Date signed",
+  consent_withdrawn_label: "Date withdrawn",
   consent_form_version: "Consent form version",
   consent_lang_label: "Form language",
   consent_send_email: "Email form",

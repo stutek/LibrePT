@@ -1,3 +1,8 @@
+import {
+  consentSignedDate,
+  isConsentActive,
+  isConsentWithdrawn,
+} from "../../data/clientConsent.js";
 import { isErased } from "../../data/clientErasure.js";
 import { consentEmailHref } from "../common/consentForm.js";
 import { renderMarkupOnce } from "../common/dom.js";
@@ -258,12 +263,20 @@ function renderConsentStatus(client) {
   if (!statusEl) return;
 
   const consent = client.gdprConsent;
-  if (!consent?.cloudSync) {
+  if (isConsentWithdrawn(consent)) {
+    // Distinct from "never consented": processing must stop for both, but only one of them is a
+    // client the trainer must still be able to prove once agreed (Art. 7(1)).
+    const dates = [consentSignedDate(consent), consent.withdrawnDate].filter(Boolean).join(" → ");
+    const safeDates = escapeHTML(dates);
+    statusEl.innerHTML = `<span class="badge badge-warning"><i class="fa-solid fa-ban mr-1"></i> Consent Withdrawn (${safeDates})</span>`;
+    return;
+  }
+  if (!isConsentActive(consent)) {
     statusEl.innerHTML = `<span class="badge badge-warning"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Not Consented (Local Only)</span>`;
     return;
   }
 
-  const signedOn = consent.consentDate || (consent.timestamp || "").split("T")[0];
+  const signedOn = consentSignedDate(consent);
   const detail = [signedOn, consent.formVersion && `v${consent.formVersion}`]
     .filter(Boolean)
     .join(" · ");
