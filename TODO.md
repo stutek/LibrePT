@@ -1635,13 +1635,42 @@ The half that is still true: a backup file sitting in Drive **still contains the
 neutralises it on the way back in, which is what protects the trainer's own database; it does nothing
 about a copy someone else holds. That belongs in the retention paragraph §18.11 still owes.
 
-### 27.4 [ ] Withdrawal as easy as consent (Art. 7(3)) — the cheap one
-The consent letter the client receives should carry a one-tap withdrawal route back to the trainer: a
-prefilled `mailto:`/`sms:` in the client's own language, reusing what
-[consentForm.js](src/modules/common/consentForm.js) already builds for delivery. No server, so it
-arrives as a message the trainer acts on — which is compliant, since withdrawal must be *easy*, not
-automated. Smallest item in this section by a wide margin, and it makes §3.5's shipped consent flow
-symmetrical.
+### 27.4 [x] Withdrawal as easy as consent (Art. 7(3)) — 2026-08-14
+The letter now carries the route, not just the right. Consent is given by replying **"I CONSENT"** /
+**"PRIVOLIM"**; withdrawal is replying **"WITHDRAW"** / **"PREKLICUJEM"** to the same message. That
+symmetry *is* the Art. 7(3) standard — withdrawal must be as easy as consent, and the same reply to
+the same person is exactly as easy, not merely possible.
+
+**No prefilled `mailto:` to the trainer, because the app stores no trainer contact** — and it does
+not need to. The letter reaches the client *from* the trainer's own address (a `mailto:` opens the
+trainer's mail client), so reply is already the one-tap route, and it survives the trainer changing
+address. A stored contact would have been a second thing to keep correct for no gain.
+
+Both channels carry it: a client sent the short SMS variant never receives the email letter, so a
+route living only in the email is missing for exactly the clients reached by the shorter channel.
+
+`CONSENT_FORM_VERSION` deliberately **not** bumped, on the 2026-08-10 precedent recorded in
+[the template](docs/templates/en/Client_Consent_Form.md): purposes, recipients, retention and the
+rights on offer are unchanged, and making an existing right easier to exercise does not make earlier
+consent cover less. A bump would have asked every signed client to re-sign for nothing.
+
+**Still open, and a different item: nothing RECORDS a withdrawal.** `gdprConsent` holds
+`{cloudSync, consentDate, formLang, formVersion, timestamp}` and no withdrawal state, so a trainer
+acting on the reply can only untick the box — which destroys the evidence that consent was ever
+given. Art. 7(1) requires being able to demonstrate that it was. See §27.7.
+
+### 27.7 [ ] Record a withdrawal instead of erasing the consent
+Surfaced building §27.4. Withdrawal arrives as a message; the trainer's only way to act on it today
+is to untick the consent box, which leaves a record indistinguishable from a client who never
+consented at all. Art. 7(1) requires demonstrating that consent *was* obtained, and §3.5's
+`formVersion` stamp exists precisely to answer "who is still covered?" — a question that needs
+"consented on X, withdrew on Y" rather than silence.
+
+Cheap in storage terms: `gdprConsent` is `type: "object"` in
+[recordSchemas.js](src/data/recordSchemas.js) with no inner schema, so a `withdrawnDate` needs **no
+schema version bump and no migration** — unlike §1.3's room dimension. The work is UI and the
+question of what withdrawal should *stop*: it halts further processing, but it is not an erasure
+request (§27.2), and conflating the two would delete records the client did not ask to lose.
 
 ### 27.5 [x] The doc describes what a trainer can actually do — 2026-08-11
 Resolved by the other branch: [PRIVACY_FOR_TRAINERS.md §5](docs/PRIVACY_FOR_TRAINERS.md)'s rows name

@@ -46,6 +46,8 @@ The full privacy notice is here: https://stutek.github.io/LibrePT/privacy-notice
 
 Please reply "I CONSENT" to this email (or sign the printed form) to confirm that you understand and agree to these privacy practices for our personal training sessions.
 
+To withdraw later, reply "WITHDRAW" to this message. Withdrawing is exactly as easy as giving consent — the same reply, no form and no account — and you do not have to give a reason.
+
 Consent form version: 2026-08-09
 
 Best regards,

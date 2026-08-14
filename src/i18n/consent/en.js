@@ -31,11 +31,13 @@ The full privacy notice is here: ${noticeUrl}
 
 Please reply "I CONSENT" to this email (or sign the printed form) to confirm that you understand and agree to these privacy practices for our personal training sessions.
 
+To withdraw later, reply "WITHDRAW" to this message. Withdrawing is exactly as easy as giving consent — the same reply, no form and no account — and you do not have to give a reason.
+
 Consent form version: ${version}
 
 Best regards,
 Your Personal Trainer`,
 
   share: ({ clientName, noticeUrl }) =>
-    `Hi ${clientName}, before I log your training data I need your consent under GDPR. Please read the short privacy notice here: ${noticeUrl} — reply CONSENT to agree, or sign the printed form at the gym.`,
+    `Hi ${clientName}, before I log your training data I need your consent under GDPR. Please read the short privacy notice here: ${noticeUrl} — reply CONSENT to agree, or sign the printed form at the gym. Reply WITHDRAW any time to take it back.`,
 };

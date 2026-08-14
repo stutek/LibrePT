@@ -38,11 +38,13 @@ Celotno obvestilo o obdelavi osebnih podatkov je na voljo tukaj: ${noticeUrl}
 
 Prosim, da na to sporočilo odgovoriš s "PRIVOLIM" (ali podpišeš natisnjen obrazec) in s tem potrdiš, da si s temi informacijami seznanjen(-a) in privoliš v opisano obdelavo svojih osebnih podatkov.
 
+Privolitev lahko kadar koli prekličeš tako, da na to sporočilo odgovoriš s "PREKLICUJEM". Preklic je natanko tako preprost kot privolitev — enak odgovor, brez obrazca in brez računa — in zanj ti ni treba navesti razloga.
+
 Različica obrazca privolitve: ${version}
 
 Lep pozdrav,
 Tvoj osebni trener`,
 
   share: ({ clientName, noticeUrl }) =>
-    `Pozdravljen(-a) ${clientName}, pred beleženjem podatkov o tvojih treningih potrebujem tvojo privolitev po GDPR. Kratko obvestilo o obdelavi osebnih podatkov je tukaj: ${noticeUrl} — odgovori s PRIVOLIM ali podpiši natisnjen obrazec v fitnesu.`,
+    `Pozdravljen(-a) ${clientName}, pred beleženjem podatkov o tvojih treningih potrebujem tvojo privolitev po GDPR. Kratko obvestilo o obdelavi osebnih podatkov je tukaj: ${noticeUrl} — odgovori s PRIVOLIM ali podpiši natisnjen obrazec v fitnesu. Privolitev lahko kadar koli prekličeš z odgovorom PREKLICUJEM.`,
 };

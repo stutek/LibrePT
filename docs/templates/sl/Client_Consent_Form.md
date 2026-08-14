@@ -51,6 +51,8 @@ Celotno obvestilo o obdelavi osebnih podatkov je na voljo tukaj: https://stutek.
 
 Prosim, da na to sporočilo odgovoriš s "PRIVOLIM" (ali podpišeš natisnjen obrazec) in s tem potrdiš, da si s temi informacijami seznanjen(-a) in privoliš v opisano obdelavo svojih osebnih podatkov.
 
+Privolitev lahko kadar koli prekličeš tako, da na to sporočilo odgovoriš s "PREKLICUJEM". Preklic je natanko tako preprost kot privolitev — enak odgovor, brez obrazca in brez računa — in zanj ti ni treba navesti razloga.
+
 Različica obrazca privolitve: 2026-08-09
 
 Lep pozdrav,

@@ -106,6 +106,42 @@ test("the SMS variant is a link, not the whole letter", () => {
   }
 });
 
+test("withdrawing is offered by the same route as consenting (Art. 7(3))", () => {
+  // The legal standard is not "withdrawal is possible" — the letter already said that — it is that
+  // withdrawal be AS EASY as giving consent. Since consent is given by replying with a word, the
+  // only route that meets the standard is replying with a word, in the same message, to the same
+  // person. Anything requiring a form, an account or a different channel is a harder path back out
+  // than in, which is the failure Art. 7(3) names.
+  const keywords = { en: ["I CONSENT", "WITHDRAW"], sl: ["PRIVOLIM", "PREKLICUJEM"] };
+
+  for (const lang of LANGS) {
+    const [consentWord, withdrawWord] = keywords[lang];
+    const body = consentEmailBody("Jane Doe", lang);
+
+    assert.ok(body.includes(consentWord), `${lang}: the consent keyword vanished`);
+    assert.ok(body.includes(withdrawWord), `${lang}: no reply keyword to withdraw with`);
+
+    // Both instructions must reach the client in the SAME message: a withdrawal route that only
+    // exists in the separate privacy notice is a route most clients never see.
+    assert.ok(
+      body.indexOf(consentWord) < body.indexOf(withdrawWord),
+      `${lang}: withdrawal should follow the consent instruction it mirrors`,
+    );
+  }
+});
+
+test("the SMS variant offers withdrawal too, since some clients only ever get that one", () => {
+  // A client sent the link by SMS never receives the email letter, so a withdrawal route that lives
+  // only in the email is absent for exactly the clients reached by the shorter channel.
+  const keywords = { en: "WITHDRAW", sl: "PREKLICUJEM" };
+  for (const lang of LANGS) {
+    assert.ok(
+      consentShareText("Jane Doe", lang).includes(keywords[lang]),
+      `${lang}: the share text offers no way back out`,
+    );
+  }
+});
+
 test("delivery links are built only when there is an address to send to", () => {
   assert.equal(consentEmailHref({ name: "Jane", phone: "+386 40 123 456" }, "en"), "");
   assert.equal(consentSmsHref({ name: "Jane", email: "jane@example.com" }, "en"), "");
