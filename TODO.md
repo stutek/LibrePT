@@ -210,6 +210,24 @@ scope left from debugging) that would keep every Drive test green while producti
   ordinary consumer account rather than a service account, has the Drive storage quota this needs.
   The tool exists because the flow was three hand-run steps around a **single-use** authorization
   code, so any stumble after the code was written to disk meant starting the consent over.
+- **The six-month expiry is a rotation deadline, not a diary entry — and this is the subtle part.**
+  Google revokes a refresh token that has gone **six months unused**, and that clock is reset by
+  every use, so the daily canary keeps the credential alive indefinitely and no renewal ever falls
+  due while things work. The clock only starts advancing once the canary **stops**, and every way it
+  stops is quiet: GitHub disables scheduled workflows after 60 days of repository inactivity, a
+  workflow edit can break the `cron`, a repository can be archived. By the time anyone notices there
+  is nothing to notice — the credential is simply dead, and the fix is the full consent flow again.
+  So there is nothing observable to alert on, and a calendar reminder would be exactly the
+  silently-expiring, nobody's-job artefact [AGENT_RULES §2.A.3](AGENT_RULES.md) rejects for gate
+  suppressions. Instead `python -m agent_tools.google_credential` stamps a `minted` date and
+  `python -m agent_tools.credential_expiry` runs **inside the canary**, failing it from **150 days**
+  — a month inside Google's 180 — so a live canary turns red with runway, and a canary that stopped
+  comes back red the moment it next runs. It is deliberately a hard failure rather than a warning
+  ([AGENT_RULES §2.A.3](AGENT_RULES.md) forbids a gate that warns and returns success); a month of
+  daily red is the action item.
+  It cannot live in `build check` Stage 1, because a contributor's clone holds no credential and a
+  check that skips on a missing file gates nothing — so Stage 1 asserts the *workflow still runs it*
+  instead, via [tests/unit/test_google_canary_workflow.py](tests/unit/test_google_canary_workflow.py).
 - **Not built**: a live test importing a real `calendarFreeBusy.js`, because §1.3's occupancy module
   does not exist yet. `calendarFreeBusy.live.test.mjs` probes the endpoint directly meanwhile, which
   is what proves the minted token actually carries the calendar scope.

@@ -1,9 +1,8 @@
 """`python -m agent_tools.google_credential` — mint the live canary's Google credential.
 
 Why this exists: the setup runbook's Part B (docs/GOOGLE_CLOUD_SETUP.md) asked the maintainer to
-export three shell variables,
-paste a 45-line Python heredoc into a terminal, then run a separate `curl` pipeline to trade the
-authorization code for a refresh token. That is precisely the improvised script AGENT_RULES §6 says
+export three shell variables, paste a 45-line Python heredoc into a terminal, then run a separate
+`curl` pipeline to trade the authorization code for a refresh token. That is precisely the improvised script AGENT_RULES §6 says
 to build once and keep — and it will run again, because a refresh token has to be re-minted whenever
 it is revoked, the scopes change, or the account sits unused for six months.
 
@@ -35,6 +34,7 @@ Usage:
 """
 
 import argparse
+import datetime
 import getpass
 import http.server
 import json
@@ -46,6 +46,8 @@ import urllib.error
 import urllib.parse
 import urllib.request
 import webbrowser
+
+from agent_tools import credential_expiry
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
 CREDENTIAL_PATH = REPO_ROOT / ".private" / "google-live.json"
@@ -108,12 +110,19 @@ def scope_problems(granted, required=REQUIRED_SCOPES, overbroad=OVERBROAD_SCOPES
     return problems
 
 
-def credential_document(client_id, client_secret, refresh_token):
-    """The exact three keys tests/live/_credentials.mjs reads back out of the file."""
+def credential_document(client_id, client_secret, refresh_token, minted=None):
+    """The three keys tests/live/_credentials.mjs reads back out of the file, plus the mint date.
+
+    `minted` is not part of the OAuth exchange — it is stamped here because nothing else ever
+    knows it. Google revokes a refresh token unused for six months, and that clock is invisible
+    from the token itself; agent_tools.credential_expiry measures the rotation deadline from this
+    field. _credentials.mjs destructures only the three it needs, so the extra key is inert there.
+    """
     return {
         "client_id": client_id,
         "client_secret": client_secret,
         "refresh_token": refresh_token,
+        "minted": (minted or datetime.date.today()).isoformat(),
     }
 
 
@@ -270,13 +279,18 @@ def main(argv=None):
             "grant at https://myaccount.google.com/permissions first."
         )
 
-    path = write_credential(
-        credential_document(client_id, client_secret, refresh_token)
-    )
+    document = credential_document(client_id, client_secret, refresh_token)
+    path = write_credential(document)
     relative = path.relative_to(REPO_ROOT)
     print(f"\nWrote {relative} (0600), granting exactly:")
     for scope in granted:
         print(f"  · {scope}")
+    minted = datetime.date.fromisoformat(document["minted"])
+    due = minted + datetime.timedelta(days=credential_expiry.ROTATE_AFTER_DAYS)
+    print(
+        f"\nRotate by {due.isoformat()} — the canary fails from that date, "
+        f"{credential_expiry.ROTATION_WARNING_DAYS} days before Google's unused-token expiry."
+    )
     print("\nNext:")
     print(
         '  .venv/bin/python -c "from build import run_live_google_tests; run_live_google_tests()"'

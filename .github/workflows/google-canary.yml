@@ -37,7 +37,7 @@ on:
   workflow_dispatch:
     inputs:
       access_token:
-        description: 'Optional short-lived Google access token (see runbook B6) — overrides the stored credential for this run only. Never paste a refresh token here.'
+        description: 'Optional short-lived Google access token (see runbook B7) — overrides the stored credential for this run only. Never paste a refresh token here.'
         required: false
         type: string
 
@@ -101,7 +101,7 @@ jobs:
             B4  gh secret set GOOGLE_LIVE_CREDENTIALS < .private/google-live.json
 
           To test a PR branch without touching the stored secret, dispatch this
-          workflow with a short-lived access_token input instead (Part B, B6).
+          workflow with a short-lived access_token input instead (Part B, B7).
           ────────────────────────────────────────────────────────────────────────
 
           INSTRUCTIONS
@@ -143,6 +143,15 @@ jobs:
           # two fields below are what a later `set -x` or an error dump would otherwise print.
           echo "::add-mask::$(python -c "import json;print(json.load(open('.private/google-live.json'))['refresh_token'])")"
           echo "::add-mask::$(python -c "import json;print(json.load(open('.private/google-live.json'))['client_secret'])")"
+
+      # Google revokes a refresh token that has gone six months UNUSED, and the daily run below
+      # resets that clock — so the expiry never arrives while the canary works, and starts advancing
+      # only once it silently stops (GitHub disables scheduled workflows after 60 days of repository
+      # inactivity). There is nothing to observe until it is already dead, so this is a rotation
+      # deadline measured from the mint stamp instead: red for a month before Google's boundary,
+      # starting the moment the canary next runs.
+      - name: Check the credential's rotation deadline
+        run: .venv/bin/python -m agent_tools.credential_expiry
 
       - name: Run Live Google API Tests
         env:

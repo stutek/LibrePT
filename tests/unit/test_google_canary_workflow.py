@@ -33,6 +33,41 @@ def _canary_steps():
     return _canary_document()["jobs"]["live-google-canary"]["steps"]
 
 
+def test_the_canary_checks_its_credential_rotation_deadline():
+    """The rotation deadline is only enforced if the canary actually runs the check, and this is the
+    one part of that guard a local `build check` can see. Google's six-month clock resets on every
+    use, so a stopped canary is what kills the credential — dropping this step would remove the only
+    warning anyone gets, and would look like a harmless workflow tidy-up in a diff.
+
+    It must also run BEFORE the live tests: on a credential that is already expired those fail with
+    `invalid_grant`, and the rotation message is what explains that error rather than repeating it.
+    """
+    # Only steps that EXECUTE, not the pre-checkout step that prints the setup instructions — that
+    # message quotes the live-suite command as step B3, so a naive scan finds the live run at index
+    # 0 and every ordering assertion below inverts.
+    executed = [
+        (index, step.get("run", ""))
+        for index, step in enumerate(_canary_steps())
+        if step.get("run", "").strip().startswith(".venv/bin/python")
+    ]
+
+    deadline_index = next(
+        (i for i, run in executed if "agent_tools.credential_expiry" in run), None
+    )
+    assert deadline_index is not None, (
+        "the canary no longer checks its rotation deadline"
+    )
+
+    live_index = next(
+        (i for i, run in executed if "run_live_google_tests" in run), None
+    )
+    assert live_index is not None, "the canary no longer runs the live suite"
+    assert deadline_index < live_index, (
+        "the rotation check must precede the live suite, or an expired credential reports "
+        "invalid_grant with no explanation"
+    )
+
+
 def test_no_workflow_uses_pull_request_target():
     """`pull_request_target` runs in the BASE repo's context WITH secrets, while checking out a
     fork's head — the standard way a public repository leaks credentials to untrusted code. It was

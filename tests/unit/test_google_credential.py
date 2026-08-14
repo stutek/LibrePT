@@ -108,11 +108,21 @@ def test_a_scope_on_neither_list_is_left_to_the_live_test():
 def test_the_credential_document_is_what_the_live_suite_reads_back():
     """tests/live/_credentials.mjs destructures exactly these three keys off the parsed JSON."""
     document = google_credential.credential_document("cid", "csec", "rtok")
-    assert document == {
-        "client_id": "cid",
-        "client_secret": "csec",
-        "refresh_token": "rtok",
-    }
+    assert document["client_id"] == "cid"
+    assert document["client_secret"] == "csec"
+    assert document["refresh_token"] == "rtok"
+
+
+def test_the_credential_is_stamped_with_its_mint_date():
+    """Nothing else ever knows when the token was issued — Google's six-month unused-token clock is
+    invisible from the token itself — so agent_tools.credential_expiry has only this field to
+    measure a rotation deadline from."""
+    import datetime
+
+    document = google_credential.credential_document(
+        "cid", "csec", "rtok", minted=datetime.date(2026, 8, 13)
+    )
+    assert document["minted"] == "2026-08-13"
 
 
 def test_the_written_credential_is_not_world_readable(tmp_path):

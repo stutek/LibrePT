@@ -450,6 +450,7 @@ there, along with the `librept-test` GCP project, the `librept-canary` service a
 | :--- | :--- |
 | Job fails before checkout with *"No Google credential"* | B4 — wrong tab, or misspelt secret name |
 | `invalid_grant` from the token exchange | The refresh token was revoked, changed, or unused for six months — repeat B2–B4 |
+| *"credential is due for rotation"* before the live suite | Working as intended — see B7. Repeat B2–B4 |
 | `403` on `createSyncFile` only, list calls fine | The credential is a service account, not a real account — see this part's preamble |
 | `403 ACCESS_TOKEN_SCOPE_INSUFFICIENT` | Drive or Calendar API not enabled in Part A's project (A2) |
 | `tokeninfo` test fails on a broader scope | B2 — re-consent with only the two scopes |
@@ -463,7 +464,33 @@ notices. It also cannot cover the consent UI, which no CI can drive: Google fing
 automated browsers on `accounts.google.com`, so A8's hand check is that step's only coverage. It is
 **not** a deploy gate, so Google's uptime can never block a release.
 
-## B6. Testing a PR branch by hand
+## B6. Rotate before Google revokes it
+
+Google revokes a refresh token that has gone **six months unused**. The catch is that the clock
+resets on every use, so the daily canary keeps the credential alive and nothing ever falls due while
+things work — the clock only starts advancing once the canary **stops**, and it stops quietly
+(GitHub disables scheduled workflows after 60 days of repository inactivity). There is nothing to
+observe until the credential is already dead.
+
+So the canary enforces a **rotation deadline** instead, measured from the `minted` stamp
+`agent_tools.google_credential` writes into the credential:
+
+| | |
+| :--- | :--- |
+| Google revokes after | 180 days unused |
+| The canary fails from | **150 days** after minting |
+| Runway that leaves | 30 days |
+
+`python -m agent_tools.credential_expiry` runs before the live suite on every canary run, and the
+minting tool prints the rotation date when it writes the file. A live canary therefore turns red a
+month early; one that had stopped comes back red the moment it next runs, which is when someone is
+looking. It is a hard failure rather than a warning on purpose — [AGENT_RULES §2.A.3](../AGENT_RULES.md)
+forbids a gate step that warns and returns success.
+
+**To rotate**: repeat B2 (the same one command), then B4. Nothing else changes — same client, same
+scopes, same secret name.
+
+## B7. Testing a PR branch by hand
 
 A scheduled canary runs `main`. To check a branch that changes `src/data/driveAppData.js` before
 merging, dispatch the workflow against that branch with a one-off token.
