@@ -102,7 +102,15 @@ programme. Relates to [uc1_gym_floor_clipboard.md](use_cases/uc1_gym_floor_clipb
 - **Other PTs' bookings for the same room** render read-only and shaded — occupancy only, not
   launchable, no participant detail.
 - Implies a **room/resource** dimension the data model lacks. Source decided in §1.5: a per-room
-  Google resource calendar read via `freebusy.query`, not a backend of our own.
+  Google resource calendar read via `freebusy.query`, not a backend of our own. **The read half is
+  built** — [src/data/calendarFreeBusy.js](src/data/calendarFreeBusy.js) batches every room into one
+  request and is exercised against the real endpoint by the canary. What remains here is the room
+  dimension in the data model, and the renderer.
+- **An unreadable room must never draw as free.** Google reports a calendar it could not read inside
+  an HTTP 200, per-calendar, so the shape that ignores it turns "we don't know" into "available" —
+  and on a gym floor that is a trainer booking a room someone else is already in. `queryFreeBusy`
+  therefore returns `unreadable` alongside `busyByCalendar`, and the renderer owes that list a
+  visibly distinct state (hatched, "can't see this room") rather than blank space.
 - Must be legible inside the continuous timeline §4.3 shipped.
 
 ### 1.4 [ ] Calendar preferences — holidays and non-working days

@@ -11,6 +11,8 @@
 // Injected dependencies: `fetchImpl` (defaults to the global `fetch`) so tests can supply a stub
 // without a real network call or a live access token.
 
+import { GoogleApiError, isAuthFailure } from "./googleApiError.js";
+
 const API_BASE = "https://www.googleapis.com/drive/v3";
 const UPLOAD_BASE = "https://www.googleapis.com/upload/drive/v3";
 export const SYNC_FILENAME = "librept_sync.json";
@@ -21,30 +23,18 @@ export const SYNC_FILENAME = "librept_sync.json";
 // filter. As its own file it is only ever unioned — an append-only set that cannot regress.
 export const ERASURE_REGISTER_FILENAME = "librept_erasure_register.json";
 
-/** A failed Drive call, carrying the HTTP status so callers can tell "reconnect" from "retry".
- *
- * The status matters because an access token is OPAQUE — Google's `ya29.` tokens are not JWTs, so
- * `expires_in` at grant time is the only expiry signal, and a locally-computed expiry is a guess.
- * A token can die before it: the trainer revokes the grant at myaccount.google.com, the account
- * password changes, Google invalidates it, or the device clock is skewed. In every one of those the
- * ONLY signal is a 401 from the call itself, so folding it into a generic message is what leaves a
- * trainer tapping "Sync Now" forever on a grant that can never succeed. */
-export class DriveApiError extends Error {
+/** A failed Drive call. The status handling and the reconnect/retry question it answers live in
+ * googleApiError.js, shared with the Calendar client — see there for why an opaque access token
+ * makes the HTTP status the only expiry signal there is. */
+export class DriveApiError extends GoogleApiError {
   constructor(message, status) {
-    super(message);
+    super(message, status);
     this.name = "DriveApiError";
-    this.status = status;
   }
 }
 
-/** True when the failure means the GRANT is gone, not that the request was bad — 401 for a dead or
- * revoked token, and 403 specifically for missing scope (a 403 for quota is not an auth problem, so
- * the reason string is checked rather than the bare status). Both are fixed by reconnecting and by
- * nothing else. */
-export function isAuthFailure(error) {
-  if (error?.status === 401) return true;
-  return error?.status === 403 && /insufficient|insufficientPermissions/i.test(error.message || "");
-}
+// Re-exported so callers keep importing their auth predicate from the client they already use.
+export { isAuthFailure };
 
 async function driveFetch(url, options, fetchImpl) {
   const response = await fetchImpl(url, options);

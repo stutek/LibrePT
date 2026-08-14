@@ -19,16 +19,18 @@
 
 import assert from "node:assert/strict";
 import { before, describe, test } from "node:test";
+import { GOOGLE_CALENDAR_FREEBUSY_SCOPE } from "../../src/data/calendarFreeBusy.js";
 import { GOOGLE_DRIVE_SCOPE } from "../../src/data/driveSyncConfig.js";
 import { resolveAccessToken, skipReason } from "./_credentials.mjs";
 
 const accessToken = await resolveAccessToken();
 const TOKENINFO_ENDPOINT = "https://oauth2.googleapis.com/tokeninfo";
 
-// The narrowest scope Google publishes for occupancy reads — see calendarFreeBusy.live.test.mjs. It
-// has no shipping constant to import because TODO §1.3's calendar module does not exist yet; when it
-// lands, this moves next to GOOGLE_DRIVE_SCOPE and is imported like it.
-const CALENDAR_FREEBUSY_SCOPE = "https://www.googleapis.com/auth/calendar.freebusy";
+// Imported from the shipping module now that src/data/calendarFreeBusy.js exists, so the scope the
+// canary checks and the scope the app will ask for cannot drift apart. It is not yet in the grant
+// googleAuth.js requests — §1.5 adds a scope in the change that ships its feature — but the consent
+// screen it is checked against already carries it.
+const CALENDAR_FREEBUSY_SCOPE = GOOGLE_CALENDAR_FREEBUSY_SCOPE;
 
 // Every one of these would keep the Drive tests green while reaching far beyond the hidden per-app
 // folder production is bounded to.

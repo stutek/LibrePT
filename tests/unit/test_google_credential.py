@@ -21,6 +21,7 @@ from agent_tools import google_credential
 REPO_ROOT = google_credential.REPO_ROOT
 DRIVE_SYNC_CONFIG = REPO_ROOT / "src" / "data" / "driveSyncConfig.js"
 TOKEN_SCOPES_TEST = REPO_ROOT / "tests" / "live" / "tokenScopes.live.test.mjs"
+CALENDAR_FREEBUSY = REPO_ROOT / "src" / "data" / "calendarFreeBusy.js"
 
 
 def _js_string_const(source, name):
@@ -43,8 +44,10 @@ def test_the_required_scopes_mirror_the_shipping_constants():
     drive_scope = _js_string_const(
         DRIVE_SYNC_CONFIG.read_text(encoding="utf-8"), "GOOGLE_DRIVE_SCOPE"
     )
+    # Reads the shipping module, not the live test — the calendar scope earned a real constant when
+    # src/data/calendarFreeBusy.js landed, and the live test now imports it rather than restating it.
     freebusy_scope = _js_string_const(
-        TOKEN_SCOPES_TEST.read_text(encoding="utf-8"), "CALENDAR_FREEBUSY_SCOPE"
+        CALENDAR_FREEBUSY.read_text(encoding="utf-8"), "GOOGLE_CALENDAR_FREEBUSY_SCOPE"
     )
     assert set(google_credential.REQUIRED_SCOPES) == {drive_scope, freebusy_scope}
 
