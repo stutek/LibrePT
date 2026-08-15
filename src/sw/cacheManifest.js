@@ -11,7 +11,7 @@
 // atomic version. The worker's own sub-scripts (sw.js + this sw/ folder) are deliberately NOT in ASSETS:
 // they are the worker's script resources, kept coherent by the browser's own SW-update mechanism.
 self.swCacheManifest = (() => {
-  const CACHE_NAME = "librept-v75";
+  const CACHE_NAME = "librept-v76";
   const ASSETS = [
     "./",
     "./index.html",
@@ -19,6 +19,7 @@ self.swCacheManifest = (() => {
     // Generated documentation pages (agent_tools/render_docs.py) and their stylesheet. Cached for
     // the reason they were brought in-app at all: a trainer in a basement gym tapping "Privacy"
     // used to reach github.com, which needs signal. These must work with none.
+    "./landing.html",
     "./privacy.html",
     "./preview.html",
     "./bug-reporting.html",

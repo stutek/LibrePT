@@ -57,6 +57,10 @@ REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
 # is the right home for those. The test for inclusion is whether a non-developer reaches it from
 # the app, or a regulator needs it at a stable URL on a domain we own.
 DOCUMENTS = (
+    # The trainer-facing front door (TODO §23.5). README.md is developer-facing and correctly stays
+    # that way; a trainer arriving from a forum post needs one screen — what it is, a demo they can
+    # drive themselves, and how to keep it on their phone.
+    ("docs/LANDING.md", "src/landing.html", "LibrePT — the trainer's clipboard"),
     ("PRIVACY.md", "src/privacy.html", "Privacy & GDPR Statement — LibrePT"),
     ("docs/PREVIEW.md", "src/preview.html", "Preview Build — Data Loss Notice"),
     (

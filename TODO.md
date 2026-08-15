@@ -1339,11 +1339,22 @@ one job they all hate, and expand from there.
       circuit, the first session card is a one-client session with no second participant to switch
       to, and switching participant correctly re-renders the deck.
 
-      **Still to do here**: a screen capture OF the tour for channels that need a video file
-      (Instagram, §23.3's item 5) — but now it is a recording of something that cannot silently
-      rot, and re-shooting it is replaying the tour.
-- [ ] **No landing page.** [README.md](README.md) is developer-facing (correctly) and the app boots
-      empty. A trainer needs one screen: what it is, the recording, "try it now", "add to home screen".
+      **[x] The video exists too**, and is not authored:
+      [`demo_recording.py`](agent_tools/demo_recording.py) points a camera at the same script and
+      writes a phone-sized `.webm`. Re-shooting after a UI change is running the command again, and
+      it **refuses to write a file when the tour fails** — a recorder that saved one regardless
+      would give back the stale, confident-looking asset a script was chosen to avoid, only now
+      showing a broken app. Two defects on the first takes both had a clean exit code and are pinned
+      in its comments: the first-run Terms modal covering the demo (the recorder skipped what
+      conftest applies to every browser test), and grey letterboxing from filming a 1280x720 window
+      around a 390x844 page. Check footage by eye, not by return value.
+- [x] **A landing page — 2026-08-16.** [docs/LANDING.md](docs/LANDING.md) → `src/landing.html`
+      through the same gated render as the privacy and consent pages, so it ships offline, lives on
+      a domain we own, and cannot drift from its source. One screen: what it is, **two** demo links
+      (watch it drive itself, or drive it yourself), why a trainer would care, and add-to-home-screen
+      for both platforms. It leads with the preview warning rather than burying it —
+      [PREVIEW.md](docs/PREVIEW.md) is the reason nothing here is promoted yet, so a landing page
+      that hid it would be the dishonest version of the same problem.
 - [ ] **Share only the demo deep-link, never the bare URL.** `?init=demo_data_load&lang=…&theme=…` is
       an unfair advantage no competitor can match — comment to working clipboard in three seconds, no
       email gate. It also papers over the missing onboarding below.
