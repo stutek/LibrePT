@@ -1321,10 +1321,27 @@ PT software" — switching costs are brutal and they already have a system. Pitc
 one job they all hate, and expand from there.
 
 ### 23.5 [ ] Launch prerequisites — these block promotion more than channel choice does
-- [ ] **No screenshots or video exist anywhere in the repo.** Nobody adopts a UI tool they cannot see.
-      A 20–30s recording of a real set logged one-handed — tap, `⬆ Load Up Next`, next participant — is
-      the single highest-leverage asset and is an afternoon of work. **Blocks everything else here**,
-      and is ranked #1 in Where to start.
+- [~] **A scripted demo instead of a recording — built 2026-08-16.** `?init=demo_data_load&demo=gym_floor`
+      plays a tour that drives the REAL controls with a visible pointer: open the group session,
+      focus a circuit, signal Too Easy, switch participant. Four taps, no typing, no menus —
+      §23.4's wedge, not a feature tour.
+
+      **Why not the recording this asked for.** A video goes stale the first time a control moves
+      and nothing tells you; the asset keeps playing, showing an app that no longer exists, to
+      exactly the people being asked to trust it. The same script runs in
+      [tests/e2e/test_demo_tour.py](tests/e2e/test_demo_tour.py), so a change that breaks the demo
+      turns the build red instead of the marketing quietly wrong. It is also live, localised, and
+      always current — a visitor can watch the real app rather than a picture of it.
+
+      **Every step carries an expectation**, enforced by `validateTour`: a step that cannot fail is
+      a recording again, and a tour of such steps would keep "succeeding" against a broken app.
+      Writing it caught three real things on the first runs — the seeded session leads with a
+      circuit, the first session card is a one-client session with no second participant to switch
+      to, and switching participant correctly re-renders the deck.
+
+      **Still to do here**: a screen capture OF the tour for channels that need a video file
+      (Instagram, §23.3's item 5) — but now it is a recording of something that cannot silently
+      rot, and re-shooting it is replaying the tour.
 - [ ] **No landing page.** [README.md](README.md) is developer-facing (correctly) and the app boots
       empty. A trainer needs one screen: what it is, the recording, "try it now", "add to home screen".
 - [ ] **Share only the demo deep-link, never the bare URL.** `?init=demo_data_load&lang=…&theme=…` is

@@ -159,3 +159,24 @@ export function bootViewDismiss(deps) {
 export function bootSplashScreen(deps) {
   return dismissSplashWhenReady(deps);
 }
+
+// The scripted demo tour (TODO §23.5). LAST boot step by construction: it drives the real controls,
+// so every one of them has to be wired and rendered first — and unlike the other steps it is inert
+// unless the URL asked for it, so ordering it late costs nothing on a normal boot.
+//
+// Failures are reported, never thrown: a tour that cannot run is a broken marketing asset, not a
+// broken app, and a trainer who happened to open a stale link must still get their session.
+export async function bootDemoTour({ shareDemo, hasData, onResults } = {}) {
+  const { DEMO_TOUR_GYM_FLOOR } = await import("./modules/common/shareLink.js");
+  if (shareDemo !== DEMO_TOUR_GYM_FLOOR || !hasData) return null;
+
+  const [{ playTour }, { mountDemoHand }, { GYM_FLOOR_TOUR }] = await Promise.all([
+    import("./modules/demo/demoTourPlayer.js"),
+    import("./modules/demo/demoHand.js"),
+    import("./modules/demo/gymFloorTour.js"),
+  ]);
+
+  const results = await playTour(GYM_FLOOR_TOUR, { hand: mountDemoHand() });
+  onResults?.(results);
+  return results;
+}

@@ -228,7 +228,7 @@ async function init() {
   // fully populated once this resolves, exactly as when the call was synchronous.
   const state = await loadSavedState();
 
-  const { lang: shareLang, init: shareInit } = getShareParams();
+  const { lang: shareLang, init: shareInit, demo: shareDemo } = getShareParams();
   if (isSupportedLang(shareLang)) state.lang = shareLang;
 
   if (shareInit === INIT_DEMO_DATA && !stateHasData(state)) {
@@ -462,6 +462,17 @@ async function init() {
   // warning" from an empty cache would flash the wrong answer to precisely the trainer who needs
   // the right one.
   await primeBackupHealth();
+
+  // Results are published on `window` rather than only logged, because the e2e suite replays this
+  // exact tour and asserts on them (tests/e2e/test_demo_tour.py) — the demo and the test are one
+  // artifact, which is the point of scripting it instead of recording it.
+  await appBoot.bootDemoTour({
+    shareDemo,
+    hasData: stateHasData(getState()),
+    onResults: (results) => {
+      window.__demoTourResults = results;
+    },
+  });
 }
 
 // --- BOUND VIEW & CONTROLLER ACTIONS ---

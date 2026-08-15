@@ -1,0 +1,104 @@
+// src/modules/demo/demoTourPlayer.js — runs a scripted tour against the REAL app (TODO §23.5).
+//
+// Single responsibility: for each step, put the hand on the target, tap the actual control, then
+// check the step's expectation and record what happened. The pass-fail rule is pure and lives in
+// domain/demoTour.js; the pointer is modules/demo/demoHand.js; the script is gymFloorTour.js.
+//
+// **It taps real controls, and that is the entire value.** Calling app functions directly would be
+// easier and would prove nothing: the demo exists to show the app working, and a test built on it
+// is only worth something if the path it drives is the path a trainer's thumb drives. So a step
+// resolves a selector, scrolls it into view, and dispatches a genuine click.
+//
+// **Scrolling is done here rather than by the caller** because the deck lives inside its own scroll
+// container — tests/e2e/test_gym_floor_flow.py documents Playwright being unable to reach into it
+// from outside. Running inside the page turns that from an obstacle into a non-issue, which is one
+// reason the tour is app code rather than a test fixture.
+//
+// **A failed expectation STOPS the tour.** Continuing would show a viewer a sequence that no longer
+// makes sense, and would let the e2e suite report the later steps as passing on top of a broken
+// one. The recorded results say which step failed and why.
+//
+// Injected dependencies: `doc`, `hand` (optional — no pointer in CI), `wait`, `onStep`.
+
+import { checkExpectation, validateTour } from "../../domain/demoTour.js";
+import { moveDemoHand, pulseDemoHand } from "./demoHand.js";
+
+const DEFAULT_STEP_PAUSE_MS = 900;
+
+function probe(doc, selector) {
+  const el = doc.querySelector(selector);
+  if (!el) return { present: false, visible: false, text: "" };
+  // offsetParent is null for a display:none element and for anything inside one, which is the
+  // "can the viewer actually see this?" question — not the same as being in the document.
+  const visible = Boolean(el.offsetParent) || el.getClientRects().length > 0;
+  return { present: true, visible, text: el.textContent || "" };
+}
+
+function centreOf(el) {
+  const box = el.getBoundingClientRect();
+  return { x: box.left + box.width / 2, y: box.top + box.height / 2 };
+}
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** The control a step acts on. `targetText` picks among matches by their text, which is how a script
+ * says "the Group Strength card" rather than "the first card" — position in a seeded list is not a
+ * property the demo should depend on, and the first attempt at this tour broke precisely because it
+ * did. Falls back to the first match when no text is given. */
+function resolveTarget(doc, step) {
+  const matches = [...doc.querySelectorAll(step.target)];
+  if (!step.targetText) return matches[0] || null;
+  const wanted = step.targetText.toLowerCase();
+  return matches.find((el) => (el.textContent || "").toLowerCase().includes(wanted)) || null;
+}
+
+/**
+ * Plays `tour`, returning one result per step attempted:
+ *   `[{ id, ok, reason }]`
+ *
+ * Stops at the first failure, so the last entry is the one that broke. A caller comparing these ids
+ * against `tourStepIds(tour)` can tell a tour that finished from one that stopped early — which is
+ * what the e2e test does, because a player reporting only the steps it managed would otherwise pass
+ * by simply doing less.
+ */
+export async function playTour(tour, { doc = document, hand = null, wait = sleep, onStep } = {}) {
+  const problems = validateTour(tour);
+  if (problems.length > 0) {
+    return [{ id: "tour", ok: false, reason: problems.join("; ") }];
+  }
+
+  const results = [];
+  for (const step of tour.steps) {
+    const target = resolveTarget(doc, step);
+    if (!target) {
+      const qualifier = step.targetText ? ` containing ${JSON.stringify(step.targetText)}` : "";
+      results.push({
+        id: step.id,
+        ok: false,
+        reason: `no control matched ${step.target}${qualifier}`,
+      });
+      break;
+    }
+
+    target.scrollIntoView({ block: "center", inline: "nearest" });
+    // Let the scroll settle before reading a box for the pointer, or the hand lands where the
+    // control used to be.
+    await wait(120);
+
+    if (hand) {
+      const { x, y } = centreOf(target);
+      moveDemoHand(hand, x, y);
+      await wait(step.travelMs ?? 420);
+      pulseDemoHand(hand);
+    }
+
+    target.click();
+    await wait(step.settleMs ?? DEFAULT_STEP_PAUSE_MS);
+
+    const outcome = checkExpectation(step.expect, probe(doc, step.expect.selector));
+    results.push({ id: step.id, ...outcome });
+    onStep?.({ id: step.id, ...outcome });
+    if (!outcome.ok) break;
+  }
+  return results;
+}
