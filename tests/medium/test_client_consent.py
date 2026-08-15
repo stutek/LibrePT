@@ -170,9 +170,13 @@ def test_saving_records_the_signed_date_and_the_current_form_version(
     # INSTANT rather than as today's date: it is a UTC moment, so its date part legitimately differs
     # from the local calendar day for anyone not on UTC — comparing the two failed nightly between
     # local midnight and the UTC rollover, which is how the consentDate timezone bug was found.
-    written = datetime.datetime.fromisoformat(consent["timestamp"].replace("Z", "+00:00"))
+    written = datetime.datetime.fromisoformat(
+        consent["timestamp"].replace("Z", "+00:00")
+    )
     age = datetime.datetime.now(datetime.UTC) - written
-    assert abs(age.total_seconds()) < 300, f"write timestamp is not recent: {consent['timestamp']}"
+    assert abs(age.total_seconds()) < 300, (
+        f"write timestamp is not recent: {consent['timestamp']}"
+    )
     assert not consent["timestamp"].startswith(consent["consentDate"])
 
 
