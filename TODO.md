@@ -513,7 +513,7 @@ Do we allow a 1-click resolve on pending plan-adjustment reminders? Tension: one
 low-interaction principle, but plan adjustments are exactly the decisions that deserve deliberate
 review at the desk ([uc2](use_cases/uc2_async_plan_adjustments.md)).
 
-### 7.2 [ ] Feedback button must show its own state — toggled, and "notes exist"
+### 7.2 [~] Feedback button must show its own state — toggled, and "notes exist"
 **Raised 2026-07-26 (Simon).** The three signal buttons on a deck card
 ([exerciseCard.js](src/modules/clipboard/exerciseCard.js)) and the `.circuit-sig` trio look identical
 before and after use, so a PT who tapped *Too Hard* taps again and logs a second signal.
@@ -527,11 +527,31 @@ Three things the control must express, and they are not the same signal:
 3. **Notes present** — a *separate* mark for "a written/voice note is attached here", independent of
    any signal. A card can have either, both or neither.
 
-- **Toggling off** must clear the stored feedback, not just the button class. Decide whether clearing
-  deletes the record or supersedes it — the uc2 deck reads these.
-- `getExerciseSignalColor` already resolves the signal; the notes indicator needs an equivalent
-  "does this item have a note/voice payload" lookup.
-- Applies to standalone cards **and** circuit member rows, and both must agree.
+- **[x] Toggling off already cleared the stored feedback** — `removeQuickSignal` drops the ids from
+  BOTH `activeSession.feedback` and `state.planUpdates`, and only ever touches *plain* taps, so
+  something the trainer wrote is never deleted by a toggle aimed at a tag. Nothing to decide.
+- **[x] The notes lookup** is `hasExerciseNote` in [quickSignals.js](src/domain/quickSignals.js),
+  written as the exact inverse of `isPlainQuickSignal` rather than as its own condition, so "safe to
+  un-tap" and "has a note worth marking" cannot disagree about the same entry.
+- **[x] Standalone cards and circuit member rows agree** — same lookups, same glyph swap, same mark.
+
+**[x] Shipped 2026-08-15**, with one item's requirement met differently than written:
+
+- **Point 1 (filled background) was already there** for Too Easy / Too Hard.
+- **Point 2 (icon changes with state) could NOT be done as specified.** "Outline for available,
+  solid for set" needs Font Awesome's *regular* weight, and that face was deliberately deleted from
+  [fontawesome.css](src/fonts/fontawesome.css) on 2026-08-06 to save 29KB — on the then-true grounds
+  that nothing used it. An `fa-regular` class today still matches the stylesheet and silently
+  renders **solid**, so the two states would look identical, and `icon_coverage.py` cannot catch it
+  because it checks glyph renderability, not weight availability. The intent — a state cue that
+  survives greyscale and colour-blindness — is met with a different SOLID glyph instead
+  (`fa-circle-check` when set), which costs no payload and does not reverse a measured decision.
+- **Point 3 (notes mark) is a corner dot, not a fill**, because unlike the toggles the feedback
+  button is not a toggle: tapping it opens the modal whether or not a note exists. Reusing the
+  pressed fill would collapse two independent states into one.
+
+**Still open**: the mark is rendered but only lightly covered — a medium-tier test mounting the deck
+with a noted exercise would pin it against the real markup rather than the lookup alone.
 
 ### 7.3 [~] [Brainstorm] Session-level "Pending Review" flag, unscheduled sessions, and a shared scrollable-deck component
 **Raised 2026-07-27 (Simon).** A bundle of separable proposals; the label rename shipped, and (8) —

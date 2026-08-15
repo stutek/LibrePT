@@ -275,6 +275,7 @@ export const sl = {
   signal_too_easy: "Prelahko",
   signal_too_hard: "Pretežko",
   feedback_short: "Opombe",
+  feedback_has_note: "Povratna informacija (opomba priložena)",
   round_label: "Krog",
   complete_round: "Zaključi krog",
   finish_circuit: "Zaključi sklop",

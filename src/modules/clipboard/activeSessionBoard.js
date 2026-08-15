@@ -18,7 +18,7 @@
 //   enterEditMode(), exitEditMode()           — mode switches that render
 //   saveActiveSessionToCache()
 //   openAddExercise(), openCatalogPicker(opts)
-//   buildCircuitUnits, getExerciseSignalColor, hasQuickSignal, logQuickSignal,
+//   buildCircuitUnits, getExerciseSignalColor, hasExerciseNote, hasQuickSignal, logQuickSignal,
 //   completeCircuitRound, focusExerciseByIndex, startRestTimer  — deck card callbacks
 //   newRecordId()
 
@@ -223,6 +223,7 @@ function renderLiveDeck(deckContainer, activeClientId, activeClientState) {
     escapeHTML,
     buildCircuitUnits: deps.buildCircuitUnits,
     getExerciseSignalColor: deps.getExerciseSignalColor,
+    hasExerciseNote: deps.hasExerciseNote,
     hasQuickSignal: deps.hasQuickSignal,
     logQuickSignal: deps.logQuickSignal,
     openFeedbackModal,

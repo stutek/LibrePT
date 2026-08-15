@@ -7,6 +7,7 @@ import {
 import { modalityOf, primaryMetricOf } from "../domain/exerciseModality.js";
 import {
   buildQuickSignalEntries,
+  hasExerciseNote as hasPlainExerciseNote,
   hasQuickSignal as hasPlainQuickSignal,
   oppositeQuickSignal,
   plainQuickSignalIds,
@@ -146,6 +147,7 @@ initActiveSessionBoard({
     ) || openCatalogPicker(opts),
   buildCircuitUnits,
   getExerciseSignalColor,
+  hasExerciseNote,
   hasQuickSignal,
   logQuickSignal,
   completeCircuitRound,
@@ -551,6 +553,12 @@ export function logQuickSignal(tag, exId) {
   if (saveToLocalStorage) saveToLocalStorage();
   if (renderPendingPlanAdjustments) renderPendingPlanAdjustments();
   renderActiveGroupBoard();
+}
+
+// "Is there a written or voice note on this exercise?" — the deck's note mark. Same wrapper shape
+// as hasQuickSignal above, for the same reason: the rule is pure and lives in domain/quickSignals.js.
+export function hasExerciseNote(clientId, exerciseName) {
+  return hasPlainExerciseNote(activeSession?.feedback, clientId, exerciseName);
 }
 
 export function getExerciseSignalColor(clientId, exerciseName) {

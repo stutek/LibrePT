@@ -86,6 +86,29 @@
 .deck-action-feedback:hover {
   background: rgba(239, 68, 68, 0.12);
 }
+/* "A note is attached here" — a SEPARATE mark from any signal (TODO §7.2): a card can carry a note,
+   a signal, both or neither, so this must not reuse the pressed fill the toggles use or the two
+   states become one. A corner dot rather than a fill, because unlike the toggles this button is not
+   a toggle — tapping it opens the modal whether or not a note exists. */
+.deck-action-feedback.has-note,
+.circuit-sig.note.has-note {
+  position: relative;
+  border-color: var(--danger);
+}
+.deck-action-feedback.has-note::after,
+.circuit-sig.note.has-note::after {
+  content: "";
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--danger);
+  /* Ringed in the card's own background so the dot stays legible against the button border it
+     overlaps, at arm's length on a bright floor. */
+  box-shadow: 0 0 0 2px var(--card-bg, #1b1f24);
+}
 .deck-card-past-summary {
   font-family: var(--font-mono);
   font-size: 10px;

@@ -45,6 +45,19 @@ export function hasQuickSignal(feedback, clientId, exerciseName, tag) {
   );
 }
 
+// Whether the trainer WROTE something here — a typed note or a voice memo — as opposed to having
+// tapped a bare signal. Deliberately the exact inverse of isPlainQuickSignal rather than its own
+// condition, so "safe to un-tap" and "has a note worth marking" can never disagree about the same
+// entry (TODO §7.2). Independent of any signal: a card can carry either, both or neither.
+export function hasExerciseNote(feedback, clientId, exerciseName) {
+  return (feedback || []).some(
+    (entry) =>
+      entry.clientId === clientId &&
+      entry.exerciseName === exerciseName &&
+      !isPlainQuickSignal(entry),
+  );
+}
+
 // The ids of every untouched quick-signal entry matching (clientId, exerciseName, tag). Returned
 // as a Set rather than removed here, because the same ids have to be dropped from BOTH
 // activeSession.feedback and state.planUpdates — a mis-tap that cleared only one would leave a

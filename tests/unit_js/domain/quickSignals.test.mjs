@@ -10,6 +10,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   buildQuickSignalEntries,
+  hasExerciseNote,
   hasQuickSignal,
   isPlainQuickSignal,
   oppositeQuickSignal,
@@ -98,4 +99,65 @@ test("signal colour ranks written feedback above either quick tap", () => {
 
   const voiced = [entry({ tag: TOO_HARD }), entry({ id: "v", hasVoiceNote: true })];
   assert.equal(quickSignalColor(voiced, "c1", "Bench Press"), "var(--danger)");
+});
+
+// TODO §7.2: the note mark is a THIRD state, independent of the two signals.
+test("an exercise the trainer wrote a note on is marked as having one", () => {
+  const feedback = [
+    {
+      id: "1",
+      clientId: "c1",
+      exerciseName: "Squat",
+      tag: "Too Hard - Reduce Load",
+      note: "knee twinge",
+      hasVoiceNote: false,
+    },
+  ];
+  assert.equal(hasExerciseNote(feedback, "c1", "Squat"), true);
+});
+
+test("a voice memo counts as a note even with nothing typed", () => {
+  const feedback = [
+    { id: "1", clientId: "c1", exerciseName: "Squat", tag: "", note: "", hasVoiceNote: true },
+  ];
+  assert.equal(hasExerciseNote(feedback, "c1", "Squat"), true);
+});
+
+test("a bare quick tap is not a note", () => {
+  // The distinction the mark exists to draw: a tap is disposable, something written is not.
+  const feedback = [
+    {
+      id: "1",
+      clientId: "c1",
+      exerciseName: "Squat",
+      tag: "Too Easy - Increase Load",
+      note: "",
+      hasVoiceNote: false,
+    },
+  ];
+  assert.equal(hasExerciseNote(feedback, "c1", "Squat"), false);
+});
+
+test("whitespace is not a note", () => {
+  const feedback = [
+    { id: "1", clientId: "c1", exerciseName: "Squat", tag: "", note: "   ", hasVoiceNote: false },
+  ];
+  assert.equal(hasExerciseNote(feedback, "c1", "Squat"), false);
+});
+
+test("a note on one exercise does not mark another, or another client's", () => {
+  const feedback = [
+    {
+      id: "1",
+      clientId: "c1",
+      exerciseName: "Squat",
+      tag: "",
+      note: "knee twinge",
+      hasVoiceNote: false,
+    },
+  ];
+  assert.equal(hasExerciseNote(feedback, "c1", "Bench"), false);
+  assert.equal(hasExerciseNote(feedback, "c2", "Squat"), false);
+  assert.equal(hasExerciseNote([], "c1", "Squat"), false);
+  assert.equal(hasExerciseNote(undefined, "c1", "Squat"), false);
 });

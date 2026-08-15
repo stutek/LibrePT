@@ -277,6 +277,7 @@ export const en = {
   signal_too_easy: "Too Easy",
   signal_too_hard: "Too Hard",
   feedback_short: "Notes",
+  feedback_has_note: "Feedback (note attached)",
   round_label: "Round",
   complete_round: "Complete round",
   finish_circuit: "Finish circuit",

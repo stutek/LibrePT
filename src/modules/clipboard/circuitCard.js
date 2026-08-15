@@ -61,6 +61,11 @@ function buildCircuitExerciseRowHTML(ex, ctx, isFirstExercise) {
   // is already logged for this exercise, so a second tap (which un-logs it) reads right.
   const isEasyActive = hasQuickSignal(activeClientId, ex.name, "Too Easy - Increase Load");
   const isHardActive = hasQuickSignal(activeClientId, ex.name, "Too Hard - Reduce Load");
+  // Circuit member rows and standalone cards must agree (TODO §7.2) — same lookups, same glyph
+  // swap, same note mark, or the trainer learns one vocabulary and meets another mid-session.
+  const hasNote = ctx.hasExerciseNote?.(activeClientId, ex.name) || false;
+  const easyIcon = isEasyActive ? "fa-circle-check" : "fa-feather";
+  const hardIcon = isHardActive ? "fa-circle-check" : "fa-weight-hanging";
 
   return `
         <div class="circuit-ex-row" data-ex-id="${escapeHTML(ex.id)}">
@@ -70,12 +75,12 @@ function buildCircuitExerciseRowHTML(ex, ctx, isFirstExercise) {
           </div>
           <div class="circuit-ex-actions">
             <button type="button" class="circuit-sig easy${isEasyActive ? " active" : ""}" data-sig="easy" aria-pressed="${isEasyActive}" aria-label="${t("signal_too_easy")}">
-              <i class="fa-solid fa-feather"></i><span>${t("signal_too_easy")}</span>
+              <i class="fa-solid ${easyIcon}"></i><span>${t("signal_too_easy")}</span>
             </button>
             <button type="button" class="circuit-sig hard${isHardActive ? " active" : ""}" data-sig="hard" aria-pressed="${isHardActive}" aria-label="${t("signal_too_hard")}">
-              <i class="fa-solid fa-weight-hanging"></i><span>${t("signal_too_hard")}</span>
+              <i class="fa-solid ${hardIcon}"></i><span>${t("signal_too_hard")}</span>
             </button>
-            <button type="button"${idAttr} class="circuit-sig note" data-sig="note" aria-label="${t("btn_log_feedback")}">
+            <button type="button"${idAttr} class="circuit-sig note${hasNote ? " has-note" : ""}" data-sig="note" aria-label="${hasNote ? t("feedback_has_note") : t("btn_log_feedback")}">
               <i class="fa-solid fa-note-sticky"></i><span>${t("feedback_short")}</span>
             </button>
           </div>

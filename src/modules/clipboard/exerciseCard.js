@@ -83,6 +83,17 @@ export class ExerciseDeckCard extends DeckCard {
     // already logged, so a second tap (which un-logs it) reads correctly the moment it lands.
     const isEasyActive = hasQuickSignal(activeClientId, item.name, "Too Easy - Increase Load");
     const isHardActive = hasQuickSignal(activeClientId, item.name, "Too Hard - Reduce Load");
+    // A written or voice note is INDEPENDENT of any signal — a card can carry either, both or
+    // neither — so the feedback button marks its own state rather than borrowing the signal's.
+    const hasNote = this.ctx.hasExerciseNote?.(activeClientId, item.name) || false;
+
+    // The SHAPE changes with state, not just the colour: on a sunlit gym floor, and for a
+    // colour-blind trainer, a filled background alone is a lightness cue that a phone at an angle
+    // can lose. Font Awesome's outline weight is not an option — the regular face was dropped from
+    // src/fonts/fontawesome.css on 2026-08-06 and an `fa-regular` class silently renders solid — so
+    // the state is carried by a different SOLID glyph, which costs no payload and reads in greyscale.
+    const easyIcon = isEasyActive ? "fa-circle-check" : "fa-feather";
+    const hardIcon = isHardActive ? "fa-circle-check" : "fa-weight-hanging";
 
     // Expanded focus card is the primary logging surface: target stats plus the
     // one-tap outcome signals that replaced the per-set stepper grid
@@ -115,12 +126,12 @@ export class ExerciseDeckCard extends DeckCard {
       </div>
       <div class="deck-card-actions">
         <button type="button" class="deck-action-btn deck-action-easy${isEasyActive ? " active" : ""}" aria-pressed="${isEasyActive}" aria-label="${t("signal_too_easy")}">
-          <i class="fa-solid fa-feather"></i><span>${t("signal_too_easy")}</span>
+          <i class="fa-solid ${easyIcon}"></i><span>${t("signal_too_easy")}</span>
         </button>
         <button type="button" class="deck-action-btn deck-action-hard${isHardActive ? " active" : ""}" aria-pressed="${isHardActive}" aria-label="${t("signal_too_hard")}">
-          <i class="fa-solid fa-weight-hanging"></i><span>${t("signal_too_hard")}</span>
+          <i class="fa-solid ${hardIcon}"></i><span>${t("signal_too_hard")}</span>
         </button>
-        <button type="button" id="btn-log-feedback" class="deck-action-btn deck-action-feedback" aria-label="${t("btn_log_feedback")}">
+        <button type="button" id="btn-log-feedback" class="deck-action-btn deck-action-feedback${hasNote ? " has-note" : ""}" aria-label="${hasNote ? t("feedback_has_note") : t("btn_log_feedback")}">
           <i class="fa-solid fa-note-sticky"></i><span>${t("feedback_short")}</span>
         </button>
       </div>
