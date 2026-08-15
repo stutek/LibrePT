@@ -16,6 +16,27 @@
 // SCHEMA_4 plus `startDate`), so the newest is a strict superset of the rest and older copies would
 // store strictly less information at full size. Restore re-derives every live store anyway.
 //
+// **ONE version number, on the envelope, shared by the container and the records (TODO §18.7).**
+// `formatVersion` sits outside any future compression or encryption, so it is the first thing
+// readable — it answers "can I open this box?" — and it is the SAME integer as `schemaVersion`, so
+// it also answers "how do I read what is inside?". A container change and a record change both bump
+// it; the number is a single monotonic history of the file format as a whole.
+//
+// **Two independent numbers were considered and rejected** (Simon, 2026-08-15), and the two
+// objections to sharing both fall down on this architecture:
+//   * "A container-only change forces a record-schema bump with no migration to run." True, and the
+//     cost is one no-op step in the chain. That is cheap, and it keeps the chain's history complete.
+//   * "An older build then refuses a file whose container it understands." It should. §18.7's
+//     guarantee is retain READERS forever — new builds open old files — and that is unaffected. Old
+//     builds opening NEW files was never promised, and refusing is already what the restore path
+//     does, because a newer file may hold records this build cannot faithfully represent.
+// What sharing buys is that there is no way to express, or accidentally ship, a file whose two
+// numbers disagree.
+//
+// The table below records which containers this build can open. **A row is never edited, only
+// added**: files carrying version N are in the wild forever, so row N must keep describing what N
+// meant when it was written.
+//
 // Injected dependencies: none.
 
 import { CURRENT_SCHEMA_VERSION } from "./migrationSteps.js";
@@ -25,6 +46,42 @@ import { BACKUP_SCHEMA } from "./recordSchemas.js";
 // Settings that belong to the database rather than to any record. `schemaVersion` is set from
 // BACKUP_SCHEMA, not copied from the live state, which is the whole point of this module.
 const SETTINGS_KEYS = ["lang"];
+
+/** How to open a file at each version. **Add rows; never edit one** — files declaring a version are
+ * permanent, so the row is the only record of what that version promised.
+ *
+ * Keyed by the shared version integer, which is also the record schema: version 4 is schema 4 in a
+ * plain-JSON container. §18.8's encryption becomes version 5 with `container: "aes-gcm"`, and a
+ * no-op 4→5 step in the migration chain, since the records will not have changed. */
+export const BACKUP_FORMATS = {
+  4: { container: "json" },
+};
+
+/** The version written today. Tied to BACKUP_SCHEMA rather than restated, because they are one
+ * number by design and a second literal here is the one place they could drift apart. */
+export const CURRENT_BACKUP_FORMAT = BACKUP_SCHEMA;
+
+/** Decides how to open a parsed file and how to read its records, from the single envelope integer.
+ *
+ * Returns `{ formatVersion, container, schema, legacy }`, or `{ unsupported: true, formatVersion }`
+ * for a version this build has never heard of — which is a REFUSAL, not a guess. A file from a newer
+ * build may be compressed, encrypted, or shaped in a way this reader would misparse into an empty
+ * database and then write over the trainer's real one.
+ *
+ * A file with no `formatVersion` predates this field (every backup written before 2026-08-15) and is
+ * plain JSON whose payload states its own `schemaVersion` — "retain readers forever" means that path
+ * stays supported permanently, not until it becomes inconvenient.
+ */
+export function resolveBackupFormat(parsed) {
+  const declared = parsed?.formatVersion;
+  if (declared === undefined || declared === null) {
+    return { formatVersion: null, container: "json", schema: parsed?.schemaVersion, legacy: true };
+  }
+  const known = BACKUP_FORMATS[declared];
+  if (!known) return { unsupported: true, formatVersion: declared };
+  // schema === the version itself: one number, by design.
+  return { formatVersion: declared, schema: declared, ...known, legacy: false };
+}
 
 /**
  * Build the backup payload for `state`.
@@ -40,6 +97,12 @@ export function buildBackupPayload(
   { buildSha = null, now = new Date(), suppressions = null } = {},
 ) {
   const payload = {
+    // The envelope integer, first key in the file so it is the first thing a reader (or a human in a
+    // text editor) meets. It binds container and record schema together — see BACKUP_FORMATS.
+    formatVersion: CURRENT_BACKUP_FORMAT,
+    // The SAME number, written twice: the migration chain has always keyed off `schemaVersion` and
+    // every file ever written already depends on it, so it stays. A test asserts the two agree —
+    // which makes a disagreement a corrupt or hand-edited file, never a legitimate combination.
     schemaVersion: BACKUP_SCHEMA,
     // Recorded so a future migration needing a temporal anchor has one, instead of reaching for
     // `new Date()` at restore time and dating a two-year-old backup as though it were taken today.

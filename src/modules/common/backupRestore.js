@@ -14,7 +14,11 @@
 //   t
 // }
 
-import { buildBackupPayload, summarizeReplacement } from "../../data/backupFile.js";
+import {
+  buildBackupPayload,
+  resolveBackupFormat,
+  summarizeReplacement,
+} from "../../data/backupFile.js";
 import {
   applySuppressions,
   mergeSuppressionLists,
@@ -409,6 +413,17 @@ export function setupBackupRestore() {
             Array.isArray(importedData.clients) &&
             Array.isArray(importedData.exercises)
           ) {
+            // The envelope is read BEFORE anything else touches the file (TODO §18.7). A version
+            // this build does not know may be compressed or encrypted, and the collection check
+            // above would then see no arrays and this reader would import an empty database over
+            // the trainer's real one. Refusing is the only safe answer to "I cannot open this".
+            const format = resolveBackupFormat(importedData);
+            if (format.unsupported) {
+              throw new Error(
+                `This backup is format version ${format.formatVersion}, which this version of LibrePT cannot open. Update LibrePT and try again — the file is unchanged.`,
+              );
+            }
+
             // A backup is restored WHOLE. Rebuilding a fixed set of collections here silently
             // dropped everything not listed — sessions, plan updates, notifications — so a restore
             // quietly destroyed data the export had faithfully written out. Anything the file

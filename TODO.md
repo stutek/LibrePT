@@ -1039,11 +1039,29 @@ Quotas are orders of magnitude clear of that table, so sizing is not the constra
 
 **Still open**:
 
-- **Two version numbers, not one.** `formatVersion` on the envelope (how to open the box: gzip,
-  checksum, multi-part, encryption) and `schemaVersion` on the payload (how to read the records). One
-  number cannot distinguish "old container, new payload" from the reverse — and the day compression or
-  encryption is added, every existing file must still parse. **Land this before either** (§18.8's
-  backup encryption is the likely trigger). Ranked #2 in Where to start.
+- **[x] ONE version number, on the envelope — 2026-08-15.** `formatVersion` is written outside any
+  future compression or encryption, so it is the first thing readable, and it is the **same integer**
+  as `schemaVersion`: a container change and a record change both bump it. Version 4 is schema 4 in a
+  plain-JSON container; [BACKUP_FORMATS](src/data/backupFile.js) records how to open each version and
+  is **append-only**, since files declaring a version are in the wild forever. An unknown version is
+  refused before anything touches the database — a newer file may be compressed, so this reader would
+  otherwise find no `clients` array and restore an empty database over the trainer's real one.
+
+  **Two independent numbers were the original plan and were rejected** (Simon, 2026-08-15). Both
+  arguments for splitting fail on this architecture:
+  - *"A container-only change forces a record bump with no migration to run."* It does, and the cost
+    is one no-op step in the chain. Cheap, and it keeps the chain's history complete.
+  - *"An older build then refuses a file whose container it understands."* It should. The guarantee
+    here is retain **readers** forever — new builds open old files — and that is untouched. Old builds
+    opening NEW files was never promised, and refusing is already what the restore path does, since a
+    newer file may hold records this build cannot faithfully represent.
+
+  What sharing buys: there is no way to express, or accidentally ship, a file whose two numbers
+  disagree. Files written before today carry no `formatVersion` and stay readable permanently via the
+  payload's own `schemaVersion` — the frozen corpus is all of that shape.
+
+  §18.8's encryption becomes **version 5**, a new row with `container: "aes-gcm"`, plus a no-op 4→5
+  record step.
 - **Forward-migration consent at import.** Today's prompt covers *what you lose from this device*;
   it does not yet say what the import does to the file's own portability: *"This backup is from
   schema 3. Importing brings it forward; it will no longer open in older builds."* Declining must
