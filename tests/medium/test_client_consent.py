@@ -166,8 +166,14 @@ def test_saving_records_the_signed_date_and_the_current_form_version(
     assert consent["cloudSync"] is True
     assert consent["consentDate"] == "2026-07-04"
     assert consent["formVersion"] == "2026-08-09"
-    # The write timestamp is recorded alongside, and is NOT the consent date.
-    assert consent["timestamp"].startswith(_today())
+    # The write timestamp is recorded alongside, and is NOT the consent date. Asserted as a recent
+    # INSTANT rather than as today's date: it is a UTC moment, so its date part legitimately differs
+    # from the local calendar day for anyone not on UTC — comparing the two failed nightly between
+    # local midnight and the UTC rollover, which is how the consentDate timezone bug was found.
+    written = datetime.datetime.fromisoformat(consent["timestamp"].replace("Z", "+00:00"))
+    age = datetime.datetime.now(datetime.UTC) - written
+    assert abs(age.total_seconds()) < 300, f"write timestamp is not recent: {consent['timestamp']}"
+    assert not consent["timestamp"].startswith(consent["consentDate"])
 
 
 def test_editing_a_consented_client_keeps_the_version_they_signed_under(
