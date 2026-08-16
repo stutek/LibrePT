@@ -29,6 +29,11 @@ Two independent setups. Either works without the other.
 | :--- | :--- | :--- | :--- |
 | **Part A** — Production OAuth client | Trainers connecting their own Drive and Calendar | OAuth **client ID** — public, not a secret | Committed in `src/data/driveSyncConfig.js` |
 | **Part B** — CI canary | The pipeline, checking Google has not changed their API | A real account's OAuth **refresh token** — genuinely secret | One GitHub Actions *secret*, `GOOGLE_LIVE_CREDENTIALS` |
+| **Part B** — its Desktop client (B1) | Minting that refresh token, and nothing else | Client **ID + secret** — the secret is not a real one (B1), but it travels with the token | **Nowhere in this repo.** Read them off the Cloud Console when B2 asks; they end up inside the same Actions secret |
+
+**No value above is restated in this file, on purpose.** Each has exactly one home, and a copy in
+prose is a copy that goes stale the day it is rotated — the client ID in particular is *public*, so
+the reason it is not reproduced here is drift, not secrecy. Look them up where the table says.
 
 **Do Part A first** — it is what makes cross-device sync exist for users at all. Part B only protects
 it from breaking silently later, and can be deferred indefinitely.
