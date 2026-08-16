@@ -9,6 +9,11 @@
 // deps: { getState, t }
 
 import { buildIcsContent, buildIcsFilename } from "../../data/calendarInvite.js";
+import {
+  looksLikeEmail,
+  readTrainerIdentity,
+  writeTrainerIdentity,
+} from "../../data/trainerIdentity.js";
 import { closeModal, openModal, renderMarkupOnce } from "../common/dom.js";
 import { downloadFile } from "../common/download.js";
 
@@ -19,6 +24,9 @@ export function initSessionInviteDialog(d) {
 }
 
 function renderInviteDialogShell() {
+  // The markup is injected once, but this function runs on every open — so the listeners below have
+  // to be guarded too, or each open stacks another copy of them on the same buttons.
+  const alreadyBuilt = Boolean(document.getElementById("dialog-session-invite"));
   renderMarkupOnce(
     "dialogs-root",
     (root) => root.querySelector("#dialog-session-invite"),
@@ -30,6 +38,11 @@ function renderInviteDialogShell() {
     </div>
     <div class="modal-body-scroll">
       <p id="session-invite-desc" class="dialog-desc"></p>
+      <div class="form-group">
+        <label for="session-invite-organizer" id="session-invite-organizer-label">Replies come back to</label>
+        <input type="email" id="session-invite-organizer" class="form-control" autocomplete="email" placeholder="you@example.com">
+        <p id="session-invite-organizer-hint" class="text-sm text-muted"></p>
+      </div>
       <div id="session-invite-list"></div>
     </div>
     <div class="modal-actions">
@@ -39,10 +52,37 @@ function renderInviteDialogShell() {
 `,
   );
   const dialog = document.getElementById("dialog-session-invite");
-  if (!dialog) return;
+  if (!dialog || alreadyBuilt) return;
   for (const btn of dialog.querySelectorAll(".modal-close-btn, .modal-cancel")) {
     btn.addEventListener("click", () => closeModal("dialog-session-invite"));
   }
+  dialog
+    .querySelector("#session-invite-organizer")
+    ?.addEventListener("input", () => renderOrganizerHint(deps.t));
+}
+
+// The organizer address is read at CLICK time, not when the dialog opened: the trainer typing their
+// address is very often the last thing they do before sending the first invite, and capturing it at
+// render would put an invite with no return address into exactly that case.
+function currentOrganizer() {
+  const typed = document.getElementById("session-invite-organizer")?.value.trim() || "";
+  return looksLikeEmail(typed) ? typed : "";
+}
+
+// Persisted on the way out rather than on every keystroke — a half-typed address is not an address,
+// and `readTrainerIdentity` promises that whatever it returns is one.
+function rememberOrganizer() {
+  const typed = document.getElementById("session-invite-organizer")?.value.trim() || "";
+  if (looksLikeEmail(typed)) writeTrainerIdentity({ email: typed });
+}
+
+function renderOrganizerHint(t) {
+  const hint = document.getElementById("session-invite-organizer-hint");
+  if (!hint) return;
+  hint.textContent = currentOrganizer()
+    ? t("session_invite_organizer_hint") || "Acceptances arrive as email replies to this address."
+    : t("session_invite_organizer_missing") ||
+      "Without an address, a calendar app has nowhere to send an acceptance.";
 }
 
 // One click both downloads the .ics (so the trainer has a file to attach) and, via the anchor's
@@ -81,6 +121,7 @@ function buildInviteRow(client, sessionInfo, t) {
   btn.href = `mailto:${encodeURIComponent(client.email)}?subject=${subject}&body=${body}`;
   btn.title = `${t("session_invite_send_to") || "Send invite to"} ${client.email}`;
   btn.addEventListener("click", () => {
+    rememberOrganizer();
     const ics = buildIcsContent({
       uid: `${sessionInfo.sessionId}-${client.id}`,
       title: sessionInfo.sessionName,
@@ -88,6 +129,8 @@ function buildInviteRow(client, sessionInfo, t) {
       startDate: sessionInfo.startDate,
       endDate: sessionInfo.endDate,
       attendeeEmail: client.email,
+      attendeeName: client.name,
+      organizerEmail: currentOrganizer(),
     });
     downloadFile(ics, buildIcsFilename(sessionInfo.sessionName), "text/calendar");
     btn.classList.add("session-invite-sent");
@@ -118,6 +161,16 @@ export function openSessionInviteDialog(sessionInfo) {
       t("session_invite_desc") ||
       "Newly assigned participants can be sent a calendar invite for this session.";
   }
+  const organizerLabel = document.getElementById("session-invite-organizer-label");
+  if (organizerLabel) {
+    organizerLabel.textContent = t("session_invite_organizer") || "Replies come back to";
+  }
+  const organizerInput = document.getElementById("session-invite-organizer");
+  if (organizerInput && !organizerInput.value) {
+    organizerInput.value = readTrainerIdentity().email;
+  }
+  renderOrganizerHint(t);
+
   const list = document.getElementById("session-invite-list");
   if (list) {
     list.replaceChildren();

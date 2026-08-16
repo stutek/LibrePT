@@ -273,6 +273,27 @@ committed to, and on a phone the submit button is nowhere near the time inputs.
   ([googleAuth.js](src/data/googleAuth.js) requests Drive's scope only today) and the trainer's own
   primary calendar read via `queryFreeBusy`. Room calendars are §1.3; this one is the PT's own, and
   §1.5 is explicit that it is never mixed into the room read.
+**Shipped alongside it — the invite has a return address now.** An `.ics` carrying
+`ATTENDEE;RSVP=TRUE` and no `ORGANIZER` is an invitation with nowhere to reply to (RFC 5546 requires
+the property for a `METHOD:REQUEST`), so acceptances were not merely unread by the app — most
+calendar clients never generated one. The invite dialog asks for the address once and remembers it
+([trainerIdentity.js](src/data/trainerIdentity.js)). **This does not put RSVPs into the app**: the
+reply is an email, arriving in the trainer's mailbox, which a backendless PWA cannot read. It means
+the trainer finds out. Acceptance is a manual read for now, by decision (2026-08-17).
+
+- **Open — the confirm link.** Raised 2026-08-17: since no reply can reach the app on its own, the
+  invite could carry a prefilled `mailto:`/`sms:` "Confirm" link aimed at the trainer, whose body is
+  a LibrePT deep link (`?rsvp=…`, on the existing `shareLink.js` param machinery). The client taps
+  Confirm, the trainer receives the reply, taps the link once, and the RSVP lands in their own store.
+  It is the only shape that moves a bit of data without a server. Open questions: the token is a
+  capability anyone holding the link can replay (low stakes — it writes only to the trainer's local
+  store), and it must carry no client PII in the URL.
+- **Open — SMS as a second channel.** `sms:` opens the messaging app prefilled, and clients answer
+  texts far more reliably than email. But an SMS cannot carry an attachment, so it cannot deliver a
+  calendar event at all — it is a better channel for the RESPONSE and a useless one for the INVITE.
+  If both ship, email carries the `.ics` and SMS carries the confirm link; clients already have a
+  `phone` field. `sms:` body prefill is inconsistent across Android OEMs, and a trainer on a desktop
+  has no messaging app at all, so it can never be the only route.
 - **Found on the way, fixed**: opening a scheduled session for edit showed the next half hour instead
   of the session's own slot — the form read `timeLabel`/`date`, the live clipboard meta's field
   names, while a stored record carries `time`/`startDate`. Re-saving silently moved the session to

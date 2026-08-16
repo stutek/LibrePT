@@ -225,6 +225,10 @@ export const en = {
   session_invite_title: "Send calendar invites",
   session_invite_desc:
     "Newly assigned participants can be sent a calendar invite for this session.",
+  session_invite_organizer: "Replies come back to",
+  session_invite_organizer_hint: "Acceptances arrive as email replies to this address.",
+  session_invite_organizer_missing:
+    "Without an address, a calendar app has nowhere to send an acceptance.",
   session_invite_send: "Send invite",
   session_invite_sent: "Invite sent",
   session_invite_no_email: "No email address on client profile",

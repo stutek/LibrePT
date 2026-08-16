@@ -224,6 +224,10 @@ export const sl = {
   session_completed: "Zaključeno",
   session_invite_title: "Pošlji vabila v koledar",
   session_invite_desc: "Na novo dodeljenim udeležencem lahko pošljete vabilo v koledar za to sejo.",
+  session_invite_organizer: "Odgovori naj prispejo na",
+  session_invite_organizer_hint: "Potrditve prispejo kot e-poštni odgovori na ta naslov.",
+  session_invite_organizer_missing:
+    "Brez naslova koledarska aplikacija nima kam poslati potrditve.",
   session_invite_send: "Pošlji vabilo",
   session_invite_sent: "Vabilo poslano",
   session_invite_no_email: "Na profilu stranke ni e-poštnega naslova",

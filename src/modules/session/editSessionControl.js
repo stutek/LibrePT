@@ -236,14 +236,19 @@ function notifyNewlyAssignedParticipants(
   if (!deps.openSessionInviteDialog) return;
   const newlyAssignedIds = newlyAssignedParticipantIds(previousParticipants, clientRoutines);
   if (newlyAssignedIds.length === 0) return;
+  const slot = slotFromForm({ date: sessionDate, startTime, endTime });
+  if (!slot) return;
   deps.openSessionInviteDialog({
     sessionId,
     sessionName: sessionName || t("workout_setup_title") || "Workout Session",
     location,
     dateLabel: sessionDate,
     timeLabel: computeTimeLabel(startTime, endTime, t("date_unknown") || "Date Unknown"),
-    startDate: new Date(`${sessionDate}T${startTime || "00:00"}`),
-    endDate: new Date(`${sessionDate}T${endTime || startTime || "00:00"}`),
+    // Through slotFromForm rather than a second `new Date(...)`: an end at or before the start
+    // crosses midnight, and building it here directly gave a 22:00-00:00 session an invite whose
+    // DTEND preceded its DTSTART — which a calendar client is entitled to reject outright.
+    startDate: new Date(slot.startMs),
+    endDate: new Date(slot.endMs),
     clientIds: newlyAssignedIds,
   });
 }
