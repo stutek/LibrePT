@@ -179,10 +179,22 @@ def rewrite_link(href, source_name):
 
 
 def rewrite_links(rendered_html, source_name):
-    """Apply `rewrite_link` to every href in a rendered page."""
+    """Apply `rewrite_link` to every href in a rendered page.
+
+    UNESCAPES before rewriting and escapes once after. The hrefs being matched here have already
+    been escaped by markdown-it, so escaping them again turned `&` into `&amp;amp;` — which a
+    browser reads as the literal text `&amp;`, renaming the query parameter after it. That shipped
+    on the landing page's "watch the demo" link, where `&demo=gym_floor` became `&amp;demo=...`, so
+    the one link whose entire job was to start the tour silently did not. Latent until then, because
+    no earlier doc link carried a query string.
+    """
     return re.sub(
         r'href="([^"]*)"',
-        lambda match: f'href="{html.escape(rewrite_link(match.group(1), source_name), quote=True)}"',
+        lambda match: 'href="{}"'.format(
+            html.escape(
+                rewrite_link(html.unescape(match.group(1)), source_name), quote=True
+            )
+        ),
         rendered_html,
     )
 

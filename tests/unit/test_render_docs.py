@@ -169,3 +169,28 @@ def test_every_declared_document_exists_and_is_current():
             f"missing generated page {output_name}"
         )
     assert render_docs.render_all(check_only=True) == []
+
+
+def test_a_query_string_survives_rendering_intact():
+    """markdown-it escapes hrefs, so escaping them a second time produced `&amp;amp;` — read by a
+    browser as the literal `&amp;`, which renames the parameter after it. The landing page's
+    "watch the demo" link shipped that way and quietly did not start the tour."""
+    page = render_docs.render_page(
+        "[demo](https://example.test/app/?init=demo_data_load&demo=gym_floor)",
+        "T",
+        source_name="docs/LANDING.md",
+    )
+    assert "&amp;amp;" not in page, "href was escaped twice"
+    assert "?init=demo_data_load&amp;demo=gym_floor" in page
+
+
+def test_the_landing_page_demo_links_reach_the_app_not_a_code_host():
+    """A relative link from docs/ is rewritten to a github.com blob URL for anything not shipped —
+    correct for a developer file, catastrophic for this page, whose two calls to action are the
+    whole point and whose readers will never have a GitHub account (TODO §3.12's defect)."""
+    source = (render_docs.REPO_ROOT / "docs" / "LANDING.md").read_text(encoding="utf-8")
+    demo_links = re.findall(r"\]\((\S*init=demo_data_load[^)]*)\)", source)
+    assert demo_links, "the landing page no longer links to the demo at all"
+    for link in demo_links:
+        assert link.startswith("https://"), f"{link} will be rewritten to a blob URL"
+        assert "github.com" not in link

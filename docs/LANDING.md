@@ -11,6 +11,13 @@ tags:
 
 # LibrePT
 
+<!-- The two demo links below are ABSOLUTE, deliberately, for the same reason consentForm.js
+hardcodes PUBLIC_SITE_URL: a relative link here is rewritten by render_docs.py into a github.com
+blob URL — which is what shipped in 1b3c9e1 and pointed this page's only two calls to action at a
+code host, aimed at trainers who will never have a GitHub account (the exact defect §3.12 fixed).
+A link that has to work from a rendered page, from GitHub, and from a shared URL must name the
+app's real home. -->
+
 **The clipboard, not another gym CRM.** Log a set one-handed, mid-session, with a client waiting —
 then move to the next person in the group without leaving the screen.
 
@@ -18,11 +25,11 @@ Free, no subscription, no signup, no account.
 
 ## See it working
 
-**[▶ Watch the demo](../?init=demo_data_load&demo=gym_floor)** — the app drives itself through a
+**[▶ Watch the demo](https://stutek.github.io/LibrePT/?init=demo_data_load&demo=gym_floor)** — the app drives itself through a
 real group session: open it, focus a circuit, mark a lift too easy, switch participant. Nothing is
 pre-rendered; that is the actual app running in your browser.
 
-**[Try it yourself](../?init=demo_data_load)** — the same sample gym, yours to poke at. Three
+**[Try it yourself](https://stutek.github.io/LibrePT/?init=demo_data_load)** — the same sample gym, yours to poke at. Three
 clients, a session already under way, nothing real and nothing to sign up for.
 
 ## Why trainers use it
