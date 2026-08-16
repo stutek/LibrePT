@@ -357,21 +357,51 @@ credential is a failing canary, never a false green.
 
 ## B1. A second OAuth client — Desktop, not Web
 
-Part A's client is a **Web application** using the browser implicit flow, which never issues a
-refresh token. A second client in the same project fixes that, and staying in Part A's project is
-deliberate: both clients share one consent screen, so the canary exercises the same scopes, the same
-publishing status and the same test-user list real trainers meet.
+### You will end up with TWO clients. Know which is which before you start.
 
-**APIs & Services → Credentials → Create OAuth client ID → Application type: Desktop app**, name
-`librept-canary-cli`. No origins or redirect URIs to configure — Desktop clients use the
-out-of-band/loopback flows.
+This is the step people get wrong, so it is stated before the instructions rather than after:
 
-Leave that page open — B2 asks you to paste both values it shows you.
+| | `LibrePT web` (Part A) | `librept-canary-cli` (this step) |
+| :--- | :--- | :--- |
+| Type | Web application | **Desktop app** |
+| Who uses it | Every trainer, in their browser | Only the CI canary |
+| Created in | A6, already done | **Here, now — it does not exist yet** |
+| Client ID lives in | `src/data/driveSyncConfig.js`, committed | Cloud Console only; you copy it in B2 |
+| Has a client secret | No | Yes (and see below — it is not really secret) |
+| Issues a refresh token | **Never** | Yes |
 
-A Desktop client's "secret" is not a real secret by design — an installed app cannot keep one, and
-Google's own docs say so. It is a client identifier, and the security boundary is the consent grant,
-not this string. It still goes in the GitHub *secret* rather than a variable, because it travels
-inside the same JSON as the refresh token.
+**The Web client cannot do this job**, so substituting it fails twice over: it rejects the
+`http://127.0.0.1:8765` loopback because that is not a registered redirect URI, and the browser
+implicit flow it exists for issues access tokens only. A refresh token is the one artifact that
+survives consent without a browser, which is the entire reason a second client exists.
+
+### Create it
+
+Signed in as `admin@`, **in Part A's existing project** — not a new one. Staying there is
+deliberate: both clients then share one consent screen, so the canary exercises the same scopes, the
+same publishing status and the same test-user list real trainers meet.
+
+1. <https://console.cloud.google.com> → confirm **LibrePT** is the selected project in the top bar.
+2. **APIs & Services → Credentials**.
+3. **+ Create Credentials → OAuth client ID**.
+4. **Application type: `Desktop app`**. The form collapses to a single Name field — if you are still
+   being asked for JavaScript origins or redirect URIs, the type is still set to Web application.
+5. Name: `librept-canary-cli`. The name is cosmetic and only ever seen by you.
+6. **Create**.
+
+Google shows a panel with **Client ID** and **Client secret**. Both are needed in B2, so leave it
+open, or reopen it any time from **Credentials → OAuth 2.0 Client IDs → librept-canary-cli**. The
+values are not written down anywhere in this repository, by design — see the table at the top of
+this file.
+
+The Client ID ends `.apps.googleusercontent.com` and looks confusingly like Part A's. Check the
+**name** beside it in the Credentials list, not the shape of the string.
+
+**A Desktop client's "secret" is not a real secret**, and this surprises people who then handle it
+as one. An installed app cannot keep a secret, and Google's own documentation says so; it is a
+client identifier, and the security boundary is the consent grant, not this string. It still travels
+inside the GitHub *secret* rather than a variable — but only because it shares a JSON file with the
+refresh token, which genuinely is one.
 
 ## B2. Consent once, by hand
 
@@ -384,15 +414,32 @@ The consent screen is **In production**, so `canary@` can grant without being on
 Add it there anyway — the list costs nothing and is what would matter if the app ever returned to
 Testing.
 
-Run one command from the repository root:
+### Run it
+
+One command, from the repository root:
 
 ```bash
 .venv/bin/python -m agent_tools.google_credential
 ```
 
-It asks for B1's client ID and secret (the secret is not echoed), opens the consent screen, catches
-the redirect on a loopback listener, exchanges the code, checks the granted scopes and writes
-`.private/google-live.json`. Approve in the browser **signed in as `canary@`**.
+What happens, in order, so nothing below is a surprise:
+
+1. It prints `Desktop OAuth client from the runbook's B1` and asks for **Client ID**. Paste B1's —
+   not the one in `driveSyncConfig.js`.
+2. It asks for **Client secret**. *Nothing appears as you type or paste* — that is deliberate, not a
+   hung prompt. Press Enter.
+3. It lists the two scopes it is about to request, then opens your browser. If no browser opens, the
+   URL is printed above — paste it yourself, or re-run with `--no-browser`.
+4. **In the browser: pick `canary@`.** If it signs you in as someone else automatically, use *Use
+   another account*. The account that approves here is the account the canary runs as forever.
+5. You will see an **unverified app** warning. That is expected until OAuth verification (see
+   *Before public launch*); continue via **Advanced → Go to LibrePT (unsafe)**.
+6. Tick **exactly the two scopes listed** — see the warning below — and **Continue**.
+7. The browser lands on a blank page reading *Authorization complete. You can close this tab.* The
+   terminal takes it from there: it exchanges the code, checks the grant, and writes
+   `.private/google-live.json`.
+8. It prints the file it wrote, the scopes actually granted, and a **rotation date**. Put that date
+   in your calendar now — nothing else will remind you (see B6).
 
 ⚠️ **Grant exactly the two scopes it lists and nothing else.** The tool checks the grant against
 `tokeninfo` before writing, and refuses on anything broader — a stray `drive` scope would keep every
@@ -416,6 +463,27 @@ by hand for any reason — it is blocked for apps in production. The loopback fl
 supported Desktop path.
 
 `.private/` is gitignored and must stay that way; the tool also writes the file `0600`.
+
+### When it goes wrong
+
+Every row here is a real message you may see, not a hypothetical. The tool writes nothing until the
+whole exchange has succeeded, so a failure never leaves a half-made credential behind — re-running
+is always safe.
+
+| What you see | What it means | Fix |
+| :--- | :--- | :--- |
+| `redirect_uri_mismatch` in the browser | You pasted the **Web** client ID. It has no loopback redirect registered, and never will | Use `librept-canary-cli`'s ID (B1) |
+| `Access blocked: LibrePT has not completed the Google verification process` | Expected while unverified | **Advanced → Go to LibrePT (unsafe)** |
+| `403: access_denied` after choosing an account | The consent screen is back in *Testing* and this account is not on A4's list | Publish it (B0), or add the account in A4 |
+| `Google returned no refresh token` | This client already holds a live grant for this account, so Google reissued an access token only | Revoke at <https://myaccount.google.com/permissions> and re-run |
+| `The grant does not match what production asks for` | You ticked more (or fewer) than the two scopes | Re-run and tick exactly two; revoke first if Google stops asking |
+| `Cannot listen on 127.0.0.1:8765` | Something else holds the port | `--port 9000`, and it is used for that run only |
+| `No response within 300s` | The browser tab was closed, or consent was never completed | Re-run; nothing was written |
+| Terminal appears stuck at `Client secret:` | It is waiting — the secret is deliberately not echoed | Paste and press Enter |
+
+If the browser and terminal disagree — the tab says complete but the terminal reports a failure —
+believe the terminal. The browser only ever confirms that Google redirected; the terminal is what
+exchanged the code and inspected the result.
 
 ## B3. Prove it locally before touching CI
 
