@@ -29,11 +29,17 @@ Two independent setups. Either works without the other.
 | :--- | :--- | :--- | :--- |
 | **Part A** — Production OAuth client | Trainers connecting their own Drive and Calendar | OAuth **client ID** — public, not a secret | Committed in `src/data/driveSyncConfig.js` |
 | **Part B** — CI canary | The pipeline, checking Google has not changed their API | A real account's OAuth **refresh token** — genuinely secret | One GitHub Actions *secret*, `GOOGLE_LIVE_CREDENTIALS` |
-| **Part B** — its Desktop client (B1) | Minting that refresh token, and nothing else | Client **ID + secret** — the secret is not a real one (B1), but it travels with the token | **Nowhere in this repo.** Read them off the Cloud Console when B2 asks; they end up inside the same Actions secret |
+| **Part B** — its Desktop client (B1) | Minting that refresh token, and nothing else | Client **ID + secret** — the secret is not a real one (B1), but it travels with the token | Cloud Console, **and** `.private/client_secret_*.json` if you downloaded it there. Not in version control |
 
 **No value above is restated in this file, on purpose.** Each has exactly one home, and a copy in
 prose is a copy that goes stale the day it is rotated — the client ID in particular is *public*, so
 the reason it is not reproduced here is drift, not secrecy. Look them up where the table says.
+
+**`.private/` is not "nowhere".** It is gitignored, so nothing there is published — but it is on the
+maintainer's disk and it is where both Part B artifacts accumulate: the client JSON downloaded from
+the console, and `google-live.json` once B2 has run. An earlier revision of this table said the
+Desktop client lived "nowhere in this repo", which sent someone to the console for a file already
+sitting in `.private/`.
 
 **Do Part A first** — it is what makes cross-device sync exist for users at all. Part B only protects
 it from breaking silently later, and can be deferred indefinitely.
@@ -375,6 +381,17 @@ This is the step people get wrong, so it is stated before the instructions rathe
 implicit flow it exists for issues access tokens only. A refresh token is the one artifact that
 survives consent without a browser, which is the entire reason a second client exists.
 
+### Check whether you already have it
+
+```bash
+ls .private/client_secret_*.json
+```
+
+If that matches, the Desktop client already exists and Google's downloaded JSON is sitting there —
+`installed.client_id` and `installed.client_secret` are the two values B2 asks for, and the
+`installed` key is itself the proof it is a Desktop client rather than a Web one (a Web client's
+JSON is keyed `web`). Skip to B2.
+
 ### Create it
 
 Signed in as `admin@`, **in Part A's existing project** — not a new one. Staying there is
@@ -463,6 +480,16 @@ by hand for any reason — it is blocked for apps in production. The loopback fl
 supported Desktop path.
 
 `.private/` is gitignored and must stay that way; the tool also writes the file `0600`.
+
+**A credential minted before this tool existed will be REJECTED, and that is deliberate.** Files
+written by the old hand-run flow carry `client_id`, `client_secret` and `refresh_token` but no
+`minted` date, and `agent_tools.credential_expiry` treats an unstamped credential as due for
+rotation rather than assuming it is fresh — unstamped is indistinguishable from ancient, and
+guessing "fresh" would hide exactly the case the check exists for. So the canary fails with *"no
+usable `minted` stamp"* on a credential that is otherwise perfectly valid.
+
+Re-run B2 rather than hand-editing a date in. It takes two minutes, and it is the moment to move the
+grant onto `canary@` if an older credential was minted as a different account.
 
 ### When it goes wrong
 
