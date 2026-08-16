@@ -464,7 +464,24 @@ Drive test green while production's narrow `drive.appdata` was broken, which is 
 confidence it has not earned. `tests/live/tokenScopes.live.test.mjs` enforces the same rule on every
 run; the tool just moves the discovery from "some scheduled morning" to now.
 
-Add `--no-browser` to print the URL instead of opening one, or `--port N` if 8765 is taken.
+**Use `--account` so the wrong identity cannot slip through:**
+
+```bash
+.venv/bin/python -m agent_tools.google_credential --account <the canary@ address>
+```
+
+It pre-selects that account at the consent screen — which is the accident worth removing, since a
+browser already signed in elsewhere often skips the chooser entirely and consents as whoever is
+already there. That is only a *hint* though; a human can still switch. So after the exchange the
+tool asks Drive which account the token actually belongs to and **refuses to write the file** on a
+mismatch. Nothing is stored, so re-running costs nothing.
+
+The check needs no extra scope: Drive's `about.get` is readable with `drive.appdata` alone. Asking
+for `email` merely to learn who consented would widen the very grant this tool exists to keep narrow.
+
+Add `--no-browser` to print the URL instead of opening one, or `--port N` if 8765 is taken. Pasting
+the printed URL into an **incognito window** is the other reliable way to control which account
+answers.
 
 **Why a tool rather than the steps it replaces**: this used to be two shell exports, a 45-line
 heredoc and a `curl` pipeline. Authorization codes are single-use, so writing one to a file between

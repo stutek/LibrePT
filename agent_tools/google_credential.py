@@ -55,6 +55,12 @@ CREDENTIAL_PATH = REPO_ROOT / ".private" / "google-live.json"
 AUTH_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth"
 TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token"
 TOKENINFO_ENDPOINT = "https://oauth2.googleapis.com/tokeninfo"
+# Drive's `about.get` is readable with `drive.appdata` alone, so the account a token belongs to
+# can be confirmed without asking for `email`/`openid`. Widening the grant merely to find out who
+# granted it would defeat the point of the narrow scopes this whole tool exists to protect.
+DRIVE_ABOUT_ENDPOINT = (
+    "https://www.googleapis.com/drive/v3/about?fields=user/emailAddress"
+)
 
 # Mirrors of shipping constants, not new decisions: GOOGLE_DRIVE_SCOPE in src/data/driveSyncConfig.js
 # and CALENDAR_FREEBUSY_SCOPE in tests/live/tokenScopes.live.test.mjs. A unit test asserts the mirror
@@ -76,7 +82,9 @@ OVERBROAD_SCOPES = (
 )
 
 
-def build_consent_url(client_id, redirect_uri, state, scopes=REQUIRED_SCOPES):
+def build_consent_url(
+    client_id, redirect_uri, state, scopes=REQUIRED_SCOPES, login_hint=None
+):
     """The authorization URL, with the two parameters whose absence is only felt much later:
     `access_type=offline` is what makes Google issue a refresh token at all, and `prompt=consent`
     forces a fresh one even if this client was granted before (a re-grant otherwise returns an
@@ -92,6 +100,11 @@ def build_consent_url(client_id, redirect_uri, state, scopes=REQUIRED_SCOPES):
             "state": state,
         }
     )
+    # A HINT, not an enforcement: Google pre-selects this account, which removes the common accident
+    # of a browser already signed in as someone else consenting silently — but a human can still
+    # switch. That is why the token is checked against it afterwards rather than trusted.
+    if login_hint:
+        query += f"&login_hint={urllib.parse.quote(login_hint)}"
     return f"{AUTH_ENDPOINT}?{query}"
 
 
@@ -108,6 +121,35 @@ def scope_problems(granted, required=REQUIRED_SCOPES, overbroad=OVERBROAD_SCOPES
         f"granted overbroad scope {scope}" for scope in overbroad if scope in granted
     ]
     return problems
+
+
+def account_mismatch(expected, actual):
+    """The complaint to make when a token turned out to belong to the wrong account, or "" when it
+    did not. Gmail treats addresses case-insensitively, so `LibrePT.test@` and `librept.test@` are
+    the same mailbox and must not read as a mismatch."""
+    if not expected:
+        return ""
+    if not actual:
+        return (
+            f"could not confirm which account granted this — expected {expected}. Drive refused the "
+            "check, so re-run without --account if you are certain, or check the grant by hand."
+        )
+    if expected.strip().lower() != actual.strip().lower():
+        return f"granted by {actual}, but --account asked for {expected}"
+    return ""
+
+
+def granted_account_email(access_token, fetch=None):
+    """Which account this token belongs to, or "" when Drive will not say."""
+    request = urllib.request.Request(
+        DRIVE_ABOUT_ENDPOINT, headers={"Authorization": f"Bearer {access_token}"}
+    )
+    opener = fetch or urllib.request.urlopen
+    try:
+        with opener(request, timeout=30) as response:
+            return json.load(response).get("user", {}).get("emailAddress", "")
+    except (urllib.error.URLError, ValueError, KeyError):
+        return ""
 
 
 def credential_document(client_id, client_secret, refresh_token, minted=None):
@@ -219,6 +261,11 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--port", type=int, default=8765, help="loopback callback port")
     parser.add_argument(
+        "--account",
+        help="the Google address this credential must belong to; pre-selects it at the consent "
+        "screen and refuses to write the file if a different account granted it",
+    )
+    parser.add_argument(
         "--no-browser",
         action="store_true",
         help="print the consent URL instead of opening it (headless machines)",
@@ -235,10 +282,14 @@ def main(argv=None):
 
     redirect_uri = f"http://127.0.0.1:{args.port}"
     state = secrets.token_urlsafe(32)
-    consent_url = build_consent_url(client_id, redirect_uri, state)
+    consent_url = build_consent_url(
+        client_id, redirect_uri, state, login_hint=args.account
+    )
 
     print(
-        "\nApprove as the account the canary should run as, granting both scopes and nothing else:"
+        f"\nApprove as {args.account}, granting both scopes and nothing else:"
+        if args.account
+        else "\nApprove as the account the canary should run as, granting both scopes and nothing else:"
     )
     for scope in REQUIRED_SCOPES:
         print(f"  · {scope}")
@@ -267,6 +318,16 @@ def main(argv=None):
             "Google returned no refresh token. This client had a live grant already; revoke it at "
             "https://myaccount.google.com/permissions and run this again."
         )
+
+    # WHO granted it, checked rather than assumed. `login_hint` only pre-selects an account; a
+    # browser already signed in elsewhere can still consent as someone else, and the resulting
+    # credential would work perfectly while belonging to the wrong person — a silent failure that
+    # surfaces months later as an unexplained standing grant on somebody's personal account.
+    wrong_account = account_mismatch(
+        args.account, granted_account_email(payload.get("access_token", ""))
+    )
+    if wrong_account:
+        raise SystemExit(f"Nothing was written: {wrong_account}")
 
     granted = (payload.get("scope") or "").split()
     problems = scope_problems(granted)

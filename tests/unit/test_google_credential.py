@@ -136,3 +136,48 @@ def test_the_written_credential_is_not_world_readable(tmp_path):
 
     assert json.loads(target.read_text(encoding="utf-8")) == {"refresh_token": "rtok"}
     assert not stat.S_IMODE(target.stat().st_mode) & 0o077
+
+
+def test_the_account_hint_reaches_the_consent_url():
+    """`login_hint` pre-selects the account, which removes the accident this flag exists for: a
+    browser already signed in elsewhere consenting silently as the wrong person."""
+    url = google_credential.build_consent_url(
+        "cid", "http://127.0.0.1:8765", "st", login_hint="LibrePT.test@gmail.com"
+    )
+    assert "login_hint=LibrePT.test%40gmail.com" in url
+
+
+def test_no_account_asked_for_means_no_hint():
+    url = google_credential.build_consent_url("cid", "http://127.0.0.1:8765", "st")
+    assert "login_hint" not in url
+
+
+def test_the_right_account_is_accepted_whatever_its_capitalisation():
+    # Gmail addresses are case-insensitive, so the same mailbox spelled two ways is not a mismatch.
+    assert (
+        google_credential.account_mismatch(
+            "LibrePT.test@gmail.com", "librept.test@gmail.com"
+        )
+        == ""
+    )
+
+
+def test_the_wrong_account_is_refused_and_both_are_named():
+    complaint = google_credential.account_mismatch(
+        "canary@example.com", "personal@example.com"
+    )
+    assert "personal@example.com" in complaint and "canary@example.com" in complaint
+
+
+def test_an_unconfirmable_account_is_refused_rather_than_assumed_right():
+    """The hint is not enforcement — Google lets a human switch — so "could not check" must not
+    quietly pass. A credential belonging to the wrong person works perfectly and only surfaces
+    months later as an unexplained standing grant on somebody's personal account."""
+    complaint = google_credential.account_mismatch("canary@example.com", "")
+    assert complaint
+    assert "--account" in complaint, "the message must say how to proceed"
+
+
+def test_no_account_requested_means_nothing_to_check():
+    assert google_credential.account_mismatch("", "whoever@example.com") == ""
+    assert google_credential.account_mismatch(None, "") == ""
