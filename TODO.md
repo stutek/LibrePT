@@ -214,8 +214,13 @@ scope left from debugging) that would keep every Drive test green while producti
   browser, exchanges the returned code and verifies the granted scopes in one step, then store its
   JSON as the `GOOGLE_LIVE_CREDENTIALS` GitHub Actions secret. It uses the supported Desktop loopback
   callback; Google's retired copy/paste OOB callback cannot work for an app that is In production.
-  **No new account is needed** — the project's existing admin account is non-personal and, being an
-  ordinary consumer account rather than a service account, has the Drive storage quota this needs.
+  Run it as the **dedicated throwaway** created 2026-08-16 (`canary@` in the runbook). Google's
+  per-phone-number signup limit blocked an earlier attempt, which is why this section briefly said to
+  use the admin account instead; retrying worked. The throwaway is the better identity for the one
+  place a long-lived refresh token is stored — the admin account owns both GCP projects, and while
+  the grant could never administer them (an OAuth token carries only its scopes), an account holding
+  nothing is a smaller thing to lose. Being an ordinary consumer account, it has the Drive storage
+  quota a service account lacks, which is the whole reason a human account is needed here.
   The tool exists because the flow was three hand-run steps around a **single-use** authorization
   code, so any stumble after the code was written to disk meant starting the consent over.
 - **The six-month expiry is a rotation deadline, not a diary entry — and this is the subtle part.**

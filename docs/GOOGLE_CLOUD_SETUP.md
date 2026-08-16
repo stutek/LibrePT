@@ -37,11 +37,12 @@ Background and the decisions behind all of this: [TODO.md](../TODO.md) §1.5.
 
 ## Accounts
 
-Two roles, two real Gmail accounts. The addresses live in the private notes, not here.
+Three roles, three real Gmail accounts. The addresses live in the private notes, not here.
 
 | Role | What it is | Used for |
 | :--- | :--- | :--- |
-| `admin@` | A project-branded account, not a person | Owns the GCP project, is the consent screen's user support address, and is the identity the CI canary runs as |
+| `admin@` | A project-branded account, not a person | Owns the GCP project and is the consent screen's user support address |
+| `canary@` | A dedicated throwaway, holding nothing | The identity the CI canary runs as — the only account whose refresh token is stored anywhere |
 | `maintainer@` | The maintainer's own daily inbox | Google's developer contact for verification and deprecation notices, and the hand-test identity for A8 |
 
 **A human test account IS needed, and this was learned the hard way (2026-08-12).** The canary was
@@ -52,11 +53,17 @@ Google removed service-account Drive storage quota. Neither remedy they publish 
 service account can read the Drive API and can never write to it**, so the canary runs as a real
 account (Part B).
 
-A third, dedicated throwaway account was attempted and blocked by Google's signup anti-abuse, which
-rate-limits new accounts per phone number. It is not worth retrying: `admin@` is already
-project-branded rather than personal, which is all a throwaway was ever for, and it already has the
-Drive storage quota a service account lacks. Running as `maintainer@` would also work, but means a
-daily job holding a token on a personal account. Either way the exposure is bounded — the
+**`canary@` is a dedicated throwaway, created 2026-08-16**, and it is the right identity for Part B
+even though `admin@` would work. The canary is the one place a long-lived refresh token is stored, so
+the account it belongs to should own nothing else — `admin@` owns both GCP projects, and while the
+grant could never administer them (an OAuth token carries only its scopes), an account holding
+nothing is simply a smaller thing to lose. Running as `maintainer@` would also work and is the worst
+option: a daily job holding a token on a personal account.
+
+Google's signup anti-abuse blocked the first attempt at this account, rate-limiting per phone number,
+which is why an earlier revision of this file said not to bother retrying. Retrying worked.
+
+The exposure is bounded whichever account is used — the
 grant is `drive.appdata` (a hidden folder holding one probe file, unreadable by any other app) plus
 `calendar.freebusy` (busy/free intervals only, never an event body, and the suite asserts shape
 without logging it).
@@ -199,6 +206,7 @@ addresses as known hand-test identities.
 
 ```
 <the admin@ address>
+<the canary@ address>
 <the maintainer@ address>
 ```
 
@@ -362,12 +370,14 @@ inside the same JSON as the refresh token.
 
 ## B2. Consent once, by hand
 
-Decide **which account** first — use **`admin@`**. It already exists, it is already on
-A4's test-user list, and being an ordinary Gmail account it has the Drive storage quota a service
-account lacks, which is the whole reason this step needs a human account at all. A dedicated
-A dedicated throwaway was attempted and blocked by Google's per-phone-number signup rate limit, and
-is not worth retrying: `admin@` is already project-branded rather than personal, which is all a
-throwaway was ever for.
+Decide **which account** first — use **`canary@`**, the dedicated throwaway. Being an ordinary Gmail
+account it has the Drive storage quota a service account lacks, which is the whole reason this step
+needs a human account at all; and holding nothing else, it is the smallest thing that can be lost if
+the stored refresh token ever leaks.
+
+The consent screen is **In production**, so `canary@` can grant without being on A4's test-user list.
+Add it there anyway — the list costs nothing and is what would matter if the app ever returned to
+Testing.
 
 Run one command from the repository root:
 
@@ -377,7 +387,7 @@ Run one command from the repository root:
 
 It asks for B1's client ID and secret (the secret is not echoed), opens the consent screen, catches
 the redirect on a loopback listener, exchanges the code, checks the granted scopes and writes
-`.private/google-live.json`. Approve in the browser **signed in as `admin@`**.
+`.private/google-live.json`. Approve in the browser **signed in as `canary@`**.
 
 ⚠️ **Grant exactly the two scopes it lists and nothing else.** The tool checks the grant against
 `tokeninfo` before writing, and refuses on anything broader — a stray `drive` scope would keep every
