@@ -150,7 +150,7 @@ Cross-referenced from [PRIVACY.md](PRIVACY.md).
   for the OAuth review may not be possible, and the privacy policy needs hosting on the app's own
   domain regardless. A custom domain resolves both and is on the launch path anyway.
 
-#### 1.5.1 [~] Live-Google testing with a bounded stored credential
+#### 1.5.1 [x] Live-Google testing with a bounded stored credential — 2026-08-16
 
 **Built 2026-08-10**: [tests/live/](tests/live/), `.github/workflows/google-canary.yml`,
 `build.run_live_google_tests`. The canary workflow is complete; it needs only its one-time consumer
@@ -210,7 +210,14 @@ scope left from debugging) that would keep every Drive test green while producti
   Google's uptime can never block a release. `pipeline_gates.py`'s one-terminal-job rule holds
   trivially in a single-job workflow. What it cannot cover — the consent UI — is unautomatable
   anyway: Google fingerprints and blocks driven browsers on `accounts.google.com`.
-- **Remaining maintainer action**: run `python -m agent_tools.google_credential`, which consents in a
+- **[x] Done 2026-08-16.** The credential is minted on the dedicated throwaway account, stored as the
+  `GOOGLE_LIVE_CREDENTIALS` secret, and the first live canary run passed — so Drive `appDataFolder`,
+  the multipart upload, `freeBusy.query`, the granted scopes and the rotation deadline are all
+  verified against the real Google, not against a stub. The rotation date is in the maintainer's
+  calendar, which is the one part of this no code in the repo can guarantee (see the rotation bullet
+  above: a guard inside the repo can only fire when someone touches the repo).
+
+  How it was done: run `python -m agent_tools.google_credential`, which consents in a
   browser, exchanges the returned code and verifies the granted scopes in one step, then store its
   JSON as the `GOOGLE_LIVE_CREDENTIALS` GitHub Actions secret. It uses the supported Desktop loopback
   callback; Google's retired copy/paste OOB callback cannot work for an app that is In production.
