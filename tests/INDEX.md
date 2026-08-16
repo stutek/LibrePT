@@ -21,7 +21,7 @@ localises the fault better, and a test placed too low simply cannot express what
 | [tests/unit/](unit/) (21 files + `test_app.py`, 133 tests) | pytest, stage 1 | nothing — static analysis of the repo | It inspects files/structure: layout rules, i18n parity, doc links, generated catalogs. |
 | [tests/unit_js/](unit_js/) (38 files, 247 tests) | `node:test`, stage 1 | one ES module, no DOM | It pins **pure logic** — schema/migration transforms, id generation, merge algorithms, projections, domain rules. Mirrors the `src/` subpath it covers, so `src/domain/sessionClock.js` → `unit_js/domain/sessionClock.test.mjs`. |
 | [tests/unit_js/security/](unit_js/security/) (3 files, 10 tests) | `node:test`, stage 1 | one ES module, no DOM | It pins a **security property** with no DOM: injection into a generated file, attacker-controlled object keys. Its own gate task and its own CI job (`security-tests`), so a regression is named as a security one instead of a generic unit-test failure. Excluded from the glob above — it is gated separately, not twice. |
-| [tests/medium/](medium/) (24 files, 94 tests) | Playwright, stage 2 | one component against real `index.html` markup | It needs the **DOM/CSS** but not navigation, persistence or a real app boot. Four shapes, all in [_harness.py](medium/_harness.py): `HEADER_STUB` (header + its route-backed dialogs), `SESSIONS_STUB` (the dashboard timeline), `clipboard_stub()` (the live session, fed an injected `activeSession`), and `view_stub()` to build one for any other view — shell markup → activate → render. |
+| [tests/medium/](medium/) (25 files, 96 tests) | Playwright, stage 2 | one component against real `index.html` markup | It needs the **DOM/CSS** but not navigation, persistence or a real app boot. Four shapes, all in [_harness.py](medium/_harness.py): `HEADER_STUB` (header + its route-backed dialogs), `SESSIONS_STUB` (the dashboard timeline), `clipboard_stub()` (the live session, fed an injected `activeSession`), and `view_stub()` to build one for any other view — shell markup → activate → render. |
 | [tests/e2e/](e2e/) (38 files, 146 tests) | Playwright, stage 3 | the whole app | It needs the router, IndexedDB, the service worker, reload/deep-link behaviour, or a multi-step flow across views. |
 
 **One e2e file is not about behaviour at all**: [test_layout_overflow.py](e2e/test_layout_overflow.py)
@@ -31,6 +31,13 @@ is silently clipped inside its own box ([TODO §25](../TODO.md)). It lives here 
 `medium/` because an overflow is a property of the **composed** page: the same component fits alone
 and breaks beside a long client name. The sweep itself is
 [agent_tools/overflow_scan.py](../agent_tools/overflow_scan.py), shared with the by-hand diagnostic.
+
+**The other geometry test sits one tier down**:
+[medium/test_clipboard_deck_legibility.py](medium/test_clipboard_deck_legibility.py) asserts that a
+collapsed deck card's peeking first line is not swallowed by the card stacked on top of it. Same kind
+of claim, different failure — occlusion by a sibling rather than overflow past a boundary — and it
+needs only the deck, so it does not pay for a full app boot. The tier rule decides that, not the
+subject matter: geometry is not inherently an e2e concern.
 
 **A fifth directory that is deliberately not a tier**: [tests/live/](live/) runs the real
 [driveAppData.js](../src/data/driveAppData.js) against the real Google Drive and Calendar APIs. It is

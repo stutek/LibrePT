@@ -180,6 +180,10 @@
   flex-direction: column;
   padding: 8px 6px 14px;
   perspective: 1400px;
+  /* How far each collapsed card slides up over the one before it. Phone-first: vertical space is
+     the scarce resource on a gym-floor phone, so the stack packs tight and the deck is scrolled.
+     Widened on a desktop viewport below, where that scarcity does not apply. */
+  --deck-collapsed-overlap: -28px;
 }
 .exercise-deck-card {
   width: 100%;
@@ -200,7 +204,7 @@
    tilted back for a physical-deck depth cue. The depth comes from the scale/tilt/shadow, not
    from element opacity — a translucent card here let the overlapped card below bleed through. */
 .exercise-deck-card:not(.in-focus) {
-  margin-bottom: -28px;
+  margin-bottom: var(--deck-collapsed-overlap, -28px);
   transform: scale(0.955) rotateX(6deg);
   box-shadow: 0 -3px 10px rgba(0, 0, 0, 0.18);
   position: relative;
@@ -209,6 +213,18 @@
 .exercise-deck-card:not(.in-focus):hover {
   opacity: 1;
   transform: scale(0.975) rotateX(3deg);
+}
+/* Desktop: the phone-first overlap left only ~11px of a ~37px card showing, which clipped the
+   peeking row's own text — the exercise/circuit name renders at y=8-25 inside the card, so a
+   trainer scanning the deck on a laptop read the top three pixels of every glyph and nothing
+   more. A wider viewport has the vertical room the phone does not, so back the overlap off far
+   enough that the whole compact row (counter, name, target) clears the card stacked on top of
+   it. The depth cue is unchanged — it comes from the scale/tilt/shadow, not from how much is
+   hidden. */
+@media (min-width: 600px) {
+  .exercise-vertical-list {
+    --deck-collapsed-overlap: -8px;
+  }
 }
 .exercise-deck-card:last-child {
   margin-bottom: 0;
