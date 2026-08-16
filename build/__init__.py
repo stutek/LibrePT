@@ -1340,10 +1340,50 @@ def run_owasp_zap_scan():
     sys.exit(1)
 
 
-def run_stage_1_parallel():
-    """Stage 1: Runs Python Lint, Frontend Lint, Dependency Scan, and Unit Tests concurrently."""
+def _run_tasks_concurrently(tasks):
+    """Run a {display name: callable} mapping in parallel; return the names that failed."""
     import concurrent.futures
 
+    failures = []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=len(tasks)) as executor:
+        future_to_name = {
+            executor.submit(_timed_task, name, task): name
+            for name, task in tasks.items()
+        }
+        for future in concurrent.futures.as_completed(future_to_name):
+            name = future_to_name[future]
+            try:
+                future.result()
+            except SystemExit as e:
+                if e.code != 0:
+                    failures.append(name)
+            except Exception as e:
+                print(f"  ✗ Task '{name}' raised exception: {e}")
+                failures.append(name)
+    return failures
+
+
+# The two Stage 1 tasks that REWRITE the tree rather than only reading it (`ruff format` /
+# `ruff check --fix`, `biome check --write`). Every other task in the stage reads those same files,
+# so running all of them in one fan-out means a formatter can be rewriting a file while a test
+# process is importing it.
+#
+# That is not theoretical. Seen 2026-08-16: Biome reflowed a newly-added `src/domain/` module while
+# node:test was importing it, Node read a file with no ESM syntax in it, decided it was CommonJS,
+# and failed the suite with `Named export not found` — an error naming neither the formatter nor
+# the real cause. It reproduces only when a file actually needs rewriting, which means on almost
+# every newly-added file and almost never on the re-run used to check, so it presents exactly as a
+# flake and would keep being dismissed as one.
+#
+# So the writers run first, alone (in parallel with each other — Ruff touches only `.py`, Biome only
+# `.js`/`.css`, so neither reads what the other writes). Costs about two seconds; buys a stage whose
+# result is a fact about the change rather than about scheduling. If they fail, the readers are
+# skipped: their input is not the tree that would be committed anyway.
+FORMATTING_TASKS = ("Python Lint (Ruff)", "Frontend Lint (Biome)")
+
+
+def run_stage_1_parallel():
+    """Stage 1: formatting first, then lint/scan/test tasks concurrently (see FORMATTING_TASKS)."""
     print(
         "\n=== Stage 1: Linting, Security Scans & Unit Tests (Parallel Execution) ==="
     )
@@ -1367,22 +1407,13 @@ def run_stage_1_parallel():
     }
 
     stage_start = time.monotonic()
-    failures = []
-    with concurrent.futures.ThreadPoolExecutor(max_workers=len(tasks)) as executor:
-        future_to_name = {
-            executor.submit(_timed_task, name, task): name
-            for name, task in tasks.items()
-        }
-        for future in concurrent.futures.as_completed(future_to_name):
-            name = future_to_name[future]
-            try:
-                future.result()
-            except SystemExit as e:
-                if e.code != 0:
-                    failures.append(name)
-            except Exception as e:
-                print(f"  ✗ Task '{name}' raised exception: {e}")
-                failures.append(name)
+    failures = _run_tasks_concurrently(
+        {name: task for name, task in tasks.items() if name in FORMATTING_TASKS}
+    )
+    if not failures:
+        failures = _run_tasks_concurrently(
+            {name: task for name, task in tasks.items() if name not in FORMATTING_TASKS}
+        )
     stage_elapsed = time.monotonic() - stage_start
 
     if failures:

@@ -5,6 +5,7 @@ failure while the release ships anyway. Nothing about a workflow file makes that
 why it is asserted rather than reviewed.
 """
 
+import re
 import textwrap
 
 import pytest
@@ -206,3 +207,19 @@ def test_the_real_workflow_labels_every_job_with_its_actual_stage():
     )
 
     assert problems == []
+
+
+def test_the_formatting_tasks_are_real_stage_1_task_names():
+    """The two tree-REWRITING tasks are separated from the rest of Stage 1 by display name, so a
+    rename would silently put them back in the fan-out alongside the tests that read what they
+    write — the race described on build.FORMATTING_TASKS, which presents as an unrelated test
+    failing on a file that had just been reformatted."""
+    import build
+
+    source = pipeline_gates.BUILD_MODULE.read_text(encoding="utf-8")
+    table = pipeline_gates.STAGE_1_TABLE.search(source)
+    declared = set(re.findall(r'"([^"]+)": run_', table.group(1)))
+
+    assert set(build.FORMATTING_TASKS) <= declared, (
+        "FORMATTING_TASKS must name tasks that are actually in the Stage 1 table"
+    )
