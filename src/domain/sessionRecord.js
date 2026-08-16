@@ -36,6 +36,20 @@ export function computeSessionDayBucket(startDateTime) {
   return "yesterday";
 }
 
+// The local calendar date a session falls on, as `YYYY-MM-DD` — the day timeline's grouping key, and
+// what the edit form puts back in its date field.
+//
+// LOCAL getters, not `toISOString().split("T")[0]`: `startDate` is built from a local Date at seed
+// and migration time, so reading it back in UTC moves a late-evening session to the following day —
+// onto a timeline column the trainer does not think of it as belonging to.
+export function sessionCalendarDate(session) {
+  if (!session?.startDate) return null;
+  const date = new Date(session.startDate);
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${date.getFullYear()}-${month}-${day}`;
+}
+
 // Merge over an existing row rather than replacing it: a stored session carries fields this form
 // never edits (`completed`, `duration`, stamped by finishing a session), and a wholesale replace
 // would silently drop them.

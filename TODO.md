@@ -252,6 +252,32 @@ scope left from debugging) that would keep every Drive test green while producti
   does not exist yet. `calendarFreeBusy.live.test.mjs` probes the endpoint directly meanwhile, which
   is what proves the minted token actually carries the calendar scope.
 
+### 1.6 [~] Double-booking warning while the slot is being typed
+**Raised 2026-08-16 (Simon)**, as the first of three calendar asks: warn the PT when they are busy or
+their own sessions overlap; then read gym-location calendars; then send invites that a gym inbox or a
+client can accept.
+
+**Shipped**: the local half. [src/domain/scheduleConflicts.js](src/domain/scheduleConflicts.js)
+classifies every collision the app can already see, and the setup form renders it live under the time
+fields rather than at submit — a clash mentioned only on save is one the trainer has already
+committed to, and on a phone the submit button is nowhere near the time inputs.
+
+- **The distinction the whole feature rests on**: two of the trainer's sessions overlapping IN THE
+  SAME PLACE is §1.2's merged clipboard, a supported flow, and warning about it would fire on the
+  ordinary case. Being in two PLACES at once is impossible. So a clash needs both slots to name a
+  location and the names to differ; a blank location is never read as "somewhere else".
+- **A warning, never a block.** The trainer knows things the app does not — the other booking was
+  cancelled, someone is covering — so a clash is a confirm, not a refusal.
+- **Still open**: the external half. `busy` intervals are already a first-class input to the rules,
+  but nothing supplies them yet; that needs `calendar.freebusy` added to the grant
+  ([googleAuth.js](src/data/googleAuth.js) requests Drive's scope only today) and the trainer's own
+  primary calendar read via `queryFreeBusy`. Room calendars are §1.3; this one is the PT's own, and
+  §1.5 is explicit that it is never mixed into the room read.
+- **Found on the way, fixed**: opening a scheduled session for edit showed the next half hour instead
+  of the session's own slot — the form read `timeLabel`/`date`, the live clipboard meta's field
+  names, while a stored record carries `time`/`startDate`. Re-saving silently moved the session to
+  whenever the trainer had opened it.
+
 ---
 
 ## 3. Data Sync

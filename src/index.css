@@ -520,6 +520,35 @@ h6 {
   color: #f59e0b;
   border: 1px solid rgba(245, 158, 11, 0.35);
 }
+/* Double-booking readout under the session setup form's time fields (TODO §1.6). The two states are
+   deliberately different colours rather than one styled list: a clash is a warning about something
+   impossible, while the merged-clipboard line is confirmation that the app understood two
+   simultaneous sessions as one. Rendering them alike would teach the trainer to skim past both. */
+.setup-conflict-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.setup-conflict-list li {
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  line-height: 1.35;
+}
+.schedule-clash {
+  background: var(--danger-light);
+  color: var(--danger);
+  border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent);
+}
+.schedule-note {
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+  color: var(--text-muted);
+  border: 1px solid var(--card-border);
+}
+
 .text-primary,
 .text-cyan {
   color: var(--primary) !important;

@@ -234,6 +234,11 @@ export const en = {
   session_invite_body: "You've been scheduled for a session",
   session_invite_body_attach:
     "The calendar invite file just downloaded — attach it to this email before sending.",
+  schedule_conflict_double_booked: "You are booked elsewhere then",
+  schedule_conflict_busy_elsewhere: "Your calendar shows you busy",
+  schedule_conflict_merged: "Runs alongside — opens as one clipboard",
+  schedule_conflict_confirm:
+    "This slot clashes with something you are already booked for. Schedule it anyway?",
   session_start_time_title: "Session started off schedule",
   session_start_time_desc:
     "Scheduled for {scheduled}, started {minutes} min {direction}. Move the session to when it is actually running?",

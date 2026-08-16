@@ -82,6 +82,7 @@ self.swCacheManifest = (() => {
     "./domain/notificationItems.js",
     "./domain/overlapLanes.js",
     "./domain/timeRange.js",
+    "./domain/scheduleConflicts.js",
     "./domain/sessionRecord.js",
     // Common modules & helpers
     "./modules/common/utils.js",

@@ -233,6 +233,11 @@ export const sl = {
   session_invite_body: "Razporejeni ste na sejo",
   session_invite_body_attach:
     "Datoteka z vabilom v koledar se je pravkar prenesla — pred pošiljanjem jo priložite temu e-poštnemu sporočilu.",
+  schedule_conflict_double_booked: "Takrat ste zasedeni drugje",
+  schedule_conflict_busy_elsewhere: "Vaš koledar kaže, da ste zasedeni",
+  schedule_conflict_merged: "Poteka vzporedno — odpre se kot ena podloga",
+  schedule_conflict_confirm:
+    "Ta termin se prekriva z nečim, kar že imate. Želite sejo vseeno razporediti?",
   session_start_time_title: "Seja se je začela izven urnika",
   session_start_time_desc:
     "Načrtovano ob {scheduled}, začeto {minutes} min {direction}. Želite sejo premakniti na dejanski čas izvedbe?",

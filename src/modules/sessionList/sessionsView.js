@@ -1,5 +1,6 @@
 import { modalityOf, primaryMetricOf } from "../../domain/exerciseModality.js";
 import { loadUnitForEquipment } from "../../domain/repsAndLoad.js";
+import { sessionCalendarDate } from "../../domain/sessionRecord.js";
 import { renderMarkupOnce } from "../common/dom.js";
 import { buildSessionMeta, escapeHTML, getOverlappingSessions } from "../common/utils.js";
 import { updateSessionBarTimer } from "../session/sessionBar.js";
@@ -184,17 +185,6 @@ export function launchClipboardDirectly({ sessionId, state, startWorkoutSession 
   );
 }
 
-// Local calendar date (not UTC) a session's `startDate` falls on — the grouping key for the
-// timeline. `startDate` is built from a local Date at seed/migration time (src/data/sessions.js,
-// migrationSteps.js), so reading it back through local getters keeps a late-evening session on the
-// day the trainer actually thinks of it as.
-function calendarDayKey(session) {
-  const d = new Date(session.startDate);
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${d.getFullYear()}-${month}-${day}`;
-}
-
 function compareByStartDate(a, b) {
   return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
 }
@@ -244,7 +234,7 @@ export function renderSessions({
     let currentList = null;
     const groupMeta = []; // [{ key, group, footer }], in order — filled in with next-day info below
     for (const session of sorted) {
-      const key = calendarDayKey(session);
+      const key = sessionCalendarDate(session);
       if (key !== currentKey) {
         currentKey = key;
         const { weekday, date, isToday } = formatCalendarDayLabel(key);

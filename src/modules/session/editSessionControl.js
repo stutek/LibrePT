@@ -10,11 +10,19 @@ import {
   writeVersionScoped,
 } from "../../data/storageNamespace.js";
 import {
+  BUSY_ELSEWHERE,
+  MERGES_INTO_ONE_CLIPBOARD,
+  findScheduleConflicts,
+  hasBlockingConflict,
+  slotFromForm,
+} from "../../domain/scheduleConflicts.js";
+import {
   buildPlanningSessionMeta,
   buildRealSessionMeta,
   buildSessionRecord,
   computeTimeLabel,
   newlyAssignedParticipantIds,
+  sessionCalendarDate,
   upsertSessionRecord,
 } from "../../domain/sessionRecord.js";
 
@@ -119,6 +127,72 @@ function collectSelectedClientRoutines() {
     }
   }
   return clientRoutines;
+}
+
+// ── Double-booking readout (TODO §1.6) ─────────────────────────────────────────────────────────
+// The trainer sees this WHILE typing a time, not after saving: a clash the app only mentions on
+// submit is one they have already committed to in their head, and on a phone the submit button is
+// usually off-screen from the time fields anyway.
+
+const clockLabel = (millis) =>
+  new Date(millis).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+function describeConflict(conflict, t) {
+  if (conflict.kind === BUSY_ELSEWHERE) {
+    const { start, end } = conflict.interval;
+    return `${t("schedule_conflict_busy_elsewhere")} ${clockLabel(new Date(start))} - ${clockLabel(new Date(end))}`;
+  }
+  const lead =
+    conflict.kind === MERGES_INTO_ONE_CLIPBOARD
+      ? t("schedule_conflict_merged")
+      : t("schedule_conflict_double_booked");
+  const { title, time, location } = conflict.session;
+  const where = location ? ` @ ${location}` : "";
+  return `${lead}: ${title || t("untitled_session")} · ${time}${where}`;
+}
+
+// What the form currently describes, against everything already known: the trainer's own sessions
+// plus whatever external calendar they have connected (none today — see getExternalBusyIntervals in
+// the deps; the domain rules take both from the start because a clash is a clash whichever calendar
+// knows about it).
+function currentScheduleConflicts() {
+  const fieldValue = (id) => document.getElementById(id)?.value.trim() || "";
+  const state = deps.getState?.() || {};
+  return findScheduleConflicts(
+    {
+      slot: slotFromForm({
+        date: fieldValue("setup-session-date"),
+        startTime: fieldValue("setup-start-time"),
+        endTime: fieldValue("setup-end-time"),
+      }),
+      sessionId: editingSessionId,
+      location: fieldValue("setup-location"),
+    },
+    { sessions: state.sessions || [], busy: deps.getExternalBusyIntervals?.() || [] },
+  );
+}
+
+export function refreshScheduleConflictNotice() {
+  const list = document.getElementById("setup-schedule-conflicts");
+  if (!list || !deps) return;
+  const conflicts = currentScheduleConflicts();
+  list.replaceChildren();
+  list.hidden = conflicts.length === 0;
+  for (const conflict of conflicts) {
+    const row = document.createElement("li");
+    row.className =
+      conflict.kind === MERGES_INTO_ONE_CLIPBOARD ? "schedule-note" : "schedule-clash";
+    row.textContent = describeConflict(conflict, deps.t);
+    list.appendChild(row);
+  }
+}
+
+// A clash is a warning, never a block: a trainer moving a session on the gym floor knows things the
+// app does not (the other booking was cancelled, someone is covering). Confirming is the trainer
+// saying so — silently refusing the save would be the app overruling the person in the room.
+function confirmScheduleConflictIfNeeded(t) {
+  if (!hasBlockingConflict(currentScheduleConflicts())) return true;
+  return confirm(t("schedule_conflict_confirm"));
 }
 
 // Confirms removing a participant who already has recorded feedback data on this session — returns
@@ -261,6 +335,8 @@ export function setupEditSessionControl() {
   // Auto-save draft on any input change
   form.addEventListener("input", saveEditSessionDraft);
   form.addEventListener("change", saveEditSessionDraft);
+  form.addEventListener("input", refreshScheduleConflictNotice);
+  form.addEventListener("change", refreshScheduleConflictNotice);
 
   const nameInputEl = document.getElementById("setup-session-name");
   if (nameInputEl) {
@@ -285,6 +361,7 @@ export function setupEditSessionControl() {
     }
 
     if (!confirmParticipantRemovalIfNeeded(editingSessionId, deps, clientRoutines)) return;
+    if (!confirmScheduleConflictIfNeeded(t)) return;
 
     const { sessionName, sessionDate, startTime, endTime, location, timeLabel } =
       readSessionFormFields(t);
@@ -403,12 +480,18 @@ function computeDefaultSessionTimes() {
   };
 }
 
-// Shared by start/end time inputs: draft value wins, else the target session's own time label
+// Shared by start/end time inputs: draft value wins, else the target session's own slot label
 // (split on "-"), else the rounded default.
+//
+// `time` is the field a STORED session carries — `timeLabel` is the live clipboard's meta shape, and
+// reading only that one meant editing a scheduled session found nothing and fell through to "now".
+// Re-saving then silently moved the session to the current hour, which is the kind of edit nobody
+// notices making and everybody notices later.
 function resolveTimeInputValue(draftValue, targetSession, partIndex, defaultValue) {
   if (draftValue) return draftValue;
-  if (targetSession?.timeLabel) {
-    const parts = targetSession.timeLabel.split("-").map((s) => s.trim());
+  const slotLabel = targetSession?.time || targetSession?.timeLabel;
+  if (slotLabel) {
+    const parts = slotLabel.split("-").map((s) => s.trim());
     return parts[partIndex] || defaultValue;
   }
   return defaultValue;
@@ -424,7 +507,16 @@ function populateSessionFormFields(
     nameInput.value =
       draft?.sessionName ?? (targetSession?.title || targetSession?.titles?.[0] || "");
   }
-  if (dateInput) dateInput.value = draft?.date || targetSession?.date || defaults.defaultDate;
+  // A stored session's day comes from its own `startDate`; `date` is the clipboard meta's field.
+  // Neither used to be consulted for a record, so opening any scheduled session for edit showed
+  // today — and saving moved it here.
+  if (dateInput) {
+    dateInput.value =
+      draft?.date ||
+      targetSession?.date ||
+      sessionCalendarDate(targetSession) ||
+      defaults.defaultDate;
+  }
   if (startInput) {
     startInput.value = resolveTimeInputValue(
       draft?.startTime,
@@ -604,6 +696,7 @@ export function openEditSessionControlModal(
   );
 
   updateSessionNameSubtitle();
+  refreshScheduleConflictNotice();
 
   const clientsList = state?.clients || [];
   const rowCtx = {

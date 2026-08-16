@@ -69,6 +69,11 @@ export function renderEditSessionView(targetElement) {
             </div>
           </div>
 
+          <!-- Live double-booking readout for the slot above (TODO §1.6). aria-live because it
+               appears in response to typing elsewhere in the form, with no focus change to
+               announce it, and it is the one thing here that can make a save wrong. -->
+          <ul id="setup-schedule-conflicts" class="setup-conflict-list mb-3" role="status" aria-live="polite" hidden></ul>
+
           <p id="setup-session-name-subtitle" class="text-sm text-muted font-semibold mb-2"></p>
 
           <div class="participant-filter-bar mb-2 flex items-center justify-between gap-2">
