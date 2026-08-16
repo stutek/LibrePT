@@ -7,12 +7,8 @@
 //         activeId, saveToLocalStorage, rerenderSessions }
 
 import { computeActiveSessionCountdown } from "../../domain/sessionClock.js";
-import {
-  formatDurationHM,
-  formatDurationHourMin,
-  parseDurationHM,
-  parseTimeRange,
-} from "../common/utils.js";
+import { parseTimeRange } from "../../domain/timeRange.js";
+import { formatDurationHM, formatDurationHourMin, parseDurationHM } from "../common/utils.js";
 import { getSessionDayDate } from "./sessionTimeline.js";
 
 // A single interval ticks every clock-driven status line that isn't the launched clipboard's own

@@ -6,7 +6,6 @@ import * as appBoot from "./appBoot.js";
 import {
   cancelWorkoutSession as cancelWorkoutSessionController,
   enforceQuickSignalExclusivity,
-  focusExerciseByIndex,
   focusIndexFromRef,
   getActiveExercise as getActiveExerciseController,
   getActiveSession,
@@ -16,7 +15,6 @@ import {
   renderActiveGroupBoard as renderActiveGroupBoardController,
   saveActiveSessionToCache as saveActiveSessionToCacheController,
   sessionFocusPath,
-  setActiveSession,
   setClipboardEditMode,
   startSessionTimer,
   startWorkoutSession as startWorkoutSessionController,
@@ -30,7 +28,6 @@ import {
 import {
   activeRouteIsDialog,
   activeRouteName,
-  focusActiveSessionCard,
   getBasePath,
   handlePathChange,
   navigateToPath,
@@ -41,7 +38,6 @@ import {
   setHeaderState,
   setupNavigation,
   showErrorView as showErrorViewController,
-  showSessionView,
   switchView as switchViewController,
   toRoute,
   urlFor,
@@ -67,18 +63,12 @@ import {
 import { repsPresetsDatalistHTML } from "./domain/repsAndLoad.js";
 import { applyStaticDOMMappings } from "./i18n/domMappings.js";
 import { dictionaryFor, hasChosenLanguage, isSupportedLang, resolveLang } from "./i18n/index.js";
-import { renderClientsDirectory } from "./modules/clients/clientsDirectory.js";
 import {
   renderClientsList as clientsViewRender,
   showClientDetails as clientsViewShowDetails,
   renderClientDetailViewShell,
   renderClientDirectoryViewShell,
 } from "./modules/clients/clientsView.js";
-import { renderExerciseDeck } from "./modules/clipboard/exerciseDeck.js";
-import {
-  renderActiveUsersList,
-  updateClientTabsFadeState,
-} from "./modules/common/activeUsersList.js";
 import {
   renderHeaderShell,
   renderSyncBadge,
@@ -95,21 +85,14 @@ import { registerShellRender, runShellRenders } from "./modules/common/renderReg
 import { INIT_DEMO_DATA, getShareParams } from "./modules/common/shareLink.js";
 import { applyThemeSwitcherLabels, initTheme } from "./modules/common/theme.js";
 import {
-  buildSessionMeta,
   escapeHTML,
   formatClockFromMinutes,
-  formatDateStr,
   formatDuration,
   formatDurationHourMin,
   formatSignedDuration,
   getClientDisplayNameHTML,
   getISODateForColumn,
   getISODateString,
-  getInitials,
-  getOverlappingSessions,
-  isTimeOverlapping,
-  parseTimeRange,
-  truncateString,
 } from "./modules/common/utils.js";
 import {
   renderExercisesList as exercisesViewRender,
@@ -130,26 +113,13 @@ import {
   renderRoutinesViewShell,
   renderRoutinesList as routinesViewRender,
 } from "./modules/plans/plansView.js";
-import {
-  initEditSessionControl,
-  openEditSessionControlModal,
-  openWorkoutSetupModal,
-  setupEditSessionControl,
-} from "./modules/session/editSessionControl.js";
-import {
-  renderEditSessionView,
-  renderWorkoutSetupViewShell,
-} from "./modules/session/editSessionView.js";
-import {
-  renderClipboardBar,
-  renderClipboardBarShell,
-  updateSessionBarTimer,
-} from "./modules/session/sessionBar.js";
+import { openWorkoutSetupModal } from "./modules/session/editSessionControl.js";
+import { renderWorkoutSetupViewShell } from "./modules/session/editSessionView.js";
+import { renderClipboardBar } from "./modules/session/sessionBar.js";
 import { openSessionInviteDialog } from "./modules/session/sessionInviteDialog.js";
 import { renderSessionTitle } from "./modules/session/sessionTitleBar.js";
 import {
   focusSessionsColumn,
-  getSessionDayDate,
   renderSessionsTitleBar,
   scheduleTimelineSettle,
   setupSessionsDayNav,

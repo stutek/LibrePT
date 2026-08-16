@@ -2,11 +2,16 @@
 // General stateless utility helpers for formatting, time conversions, HTML escaping, and scheduling
 // time checks. Used widely by components and the app entry.
 //
+// Slot parsing and interval collision are NOT here — see domain/timeRange.js. They are training
+// vocabulary rather than formatting, and the domain layer cannot import upwards from here.
+//
 // Record id generation deliberately does NOT live here — see modules/common/recordId.js. It was the
 // one helper in this file whose correctness the stored data depends on, and it earned its own module
 // when it became UUIDv7 (TODO §18.2).
 //
 // deps: none
+
+import { isTimeOverlapping, parseTimeRange } from "../../domain/timeRange.js";
 
 // Generate initials for avatar text representation
 // Initials are rendered into HTML, so they are restricted to letters and digits rather than trusted
@@ -145,36 +150,6 @@ export function getClientDisplayNameHTML(client, isShort = false) {
     return `<span class="client-name-with-injury" style="display: inline-flex; align-items: center; gap: 4px;">${escapeHTML(nameText)} <i class="fa-solid fa-triangle-exclamation text-red" style="font-size: 11px; color: #ef4444;" title="Has recorded injury: ${escapeHTML(client.injury || client.notes || "")}"></i></span>`;
   }
   return escapeHTML(nameText);
-}
-
-// Parse scheduled AM/PM range to numerical start/end minutes
-export function parseTimeRange(timeStr) {
-  const parts = timeStr.split("-");
-  if (parts.length !== 2) return null;
-  const parseTime = (s) => {
-    const m = s.trim().match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
-    if (!m) return 0;
-    let hour = parseInt(m[1], 10);
-    const min = parseInt(m[2], 10);
-    const ampm = m[3] ? m[3].toUpperCase() : null;
-    if (ampm === "PM" && hour !== 12) hour += 12;
-    if (ampm === "AM" && hour === 12) hour = 0;
-    return hour * 60 + min;
-  };
-  const start = parseTime(parts[0]);
-  let end = parseTime(parts[1]);
-  // A range whose end is at or before its start crosses midnight (e.g. "22:00 - 00:00"): treat the
-  // end as the next day so overlap and duration maths stay correct. Without this a late-evening
-  // session reads as an inverted range and overlaps nothing — not even itself — so its card
-  // silently fails to launch (getOverlappingSessions returns []).
-  if (end <= start) end += 24 * 60;
-  return { start, end };
-}
-
-// Check if two time ranges overlap
-export function isTimeOverlapping(rangeA, rangeB) {
-  if (!rangeA || !rangeB) return false;
-  return rangeA.start < rangeB.end && rangeB.start < rangeA.end;
 }
 
 // Return list of sessions overlapping with target session
