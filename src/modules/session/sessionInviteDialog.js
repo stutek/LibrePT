@@ -6,9 +6,17 @@
 // backend/SMTP relay (TODO §1.5), so this is the honest, no-network equivalent of Google
 // Calendar's own invite email.
 //
+// **The invite also carries a link the client can actually answer** (TODO §1.6's confirm link). An
+// `.ics` only collects an acceptance from a calendar client that speaks iMIP, which is not what a gym
+// client has — so every invite carries a LibrePT reply link too, and the client taps one of three
+// answers on a page rather than replying in prose. SMS is offered beside email where the client has a
+// number (ruled 2026-08-17): a text cannot carry the `.ics`, so email keeps the calendar file and the
+// text carries the link. Both, never one instead of the other.
+//
 // deps: { getState, t }
 
 import { buildIcsContent, buildIcsFilename } from "../../data/calendarInvite.js";
+import { SESSION_INVITE } from "../../data/sessionEventPayload.js";
 import {
   looksLikeEmail,
   readTrainerIdentity,
@@ -16,6 +24,7 @@ import {
 } from "../../data/trainerIdentity.js";
 import { closeModal, openModal, renderMarkupOnce } from "../common/dom.js";
 import { downloadFile } from "../common/download.js";
+import { buildEventLink } from "../common/eventTransports.js";
 
 let deps = null;
 
@@ -43,6 +52,11 @@ function renderInviteDialogShell() {
         <input type="email" id="session-invite-organizer" class="form-control" autocomplete="email" placeholder="you@example.com">
         <p id="session-invite-organizer-hint" class="text-sm text-muted"></p>
       </div>
+      <div class="form-group">
+        <label for="session-invite-phone" id="session-invite-phone-label">Your number, for replies by text</label>
+        <input type="tel" id="session-invite-phone" class="form-control" autocomplete="tel" inputmode="tel" placeholder="+386 …">
+        <p id="session-invite-phone-hint" class="text-sm text-muted"></p>
+      </div>
       <div id="session-invite-list"></div>
     </div>
     <div class="modal-actions">
@@ -59,6 +73,13 @@ function renderInviteDialogShell() {
   dialog
     .querySelector("#session-invite-organizer")
     ?.addEventListener("input", () => renderOrganizerHint(deps.t));
+  // The rows carry the reply link, and the link carries these two fields — so a row built before the
+  // trainer finished typing would send an invite that cannot be answered by text. Re-rendered on
+  // input rather than read at click time (the organizer email's trick) because an <a href> is
+  // resolved by the browser, not by our handler.
+  for (const id of ["session-invite-organizer", "session-invite-phone"]) {
+    dialog.querySelector(`#${id}`)?.addEventListener("input", () => renderInviteRows());
+  }
 }
 
 // The organizer address is read at CLICK time, not when the dialog opened: the trainer typing their
@@ -71,9 +92,43 @@ function currentOrganizer() {
 
 // Persisted on the way out rather than on every keystroke — a half-typed address is not an address,
 // and `readTrainerIdentity` promises that whatever it returns is one.
+// Not validated the way the email is: phone numbers are written a dozen ways, the app never dials it,
+// and it is only ever handed to the client's own messaging app. Rejecting a real number would be the
+// expensive mistake here.
+function currentOrganizerPhone() {
+  return document.getElementById("session-invite-phone")?.value.trim() || "";
+}
+
 function rememberOrganizer() {
   const typed = document.getElementById("session-invite-organizer")?.value.trim() || "";
-  if (looksLikeEmail(typed)) writeTrainerIdentity({ email: typed });
+  const phone = currentOrganizerPhone();
+  if (looksLikeEmail(typed)) writeTrainerIdentity({ email: typed, phone });
+  else if (phone) writeTrainerIdentity({ email: readTrainerIdentity().email, phone });
+}
+
+/** The invite as an event, which is what the reply link carries. */
+function inviteEventFor(client, sessionInfo) {
+  return {
+    kind: SESSION_INVITE,
+    sessionId: sessionInfo.sessionId,
+    clientId: client.id,
+    title: sessionInfo.sessionName,
+    startsAt: sessionInfo.startDate ? new Date(sessionInfo.startDate).getTime() : undefined,
+    durationMinutes:
+      sessionInfo.startDate && sessionInfo.endDate
+        ? Math.round((new Date(sessionInfo.endDate) - new Date(sessionInfo.startDate)) / 60000)
+        : undefined,
+    location: sessionInfo.location,
+    organizerEmail: currentOrganizer(),
+    organizerName: readTrainerIdentity().name,
+    organizerPhone: currentOrganizerPhone(),
+  };
+}
+
+/** The app's own URL, which the reply link must be absolute against: the client opens it on a
+ *  different device, so a relative link is meaningless (the same reason consentForm.js is absolute). */
+function appUrl() {
+  return new URL(".", new URL("../../", import.meta.url)).toString();
 }
 
 function renderOrganizerHint(t) {
@@ -85,18 +140,31 @@ function renderOrganizerHint(t) {
       "Without an address, a calendar app has nowhere to send an acceptance.";
 }
 
-// One click both downloads the .ics (so the trainer has a file to attach) and, via the anchor's
-// own href, opens the device's mail client on a prefilled compose — mirrors the consent-email
-// button in clientsView.js, the app's one other mailto precedent.
-function buildInviteRow(client, sessionInfo, t) {
-  const row = document.createElement("div");
-  row.className = "session-invite-row card";
+/** The email body, as LINES rather than a `+` chain: the message grew a conditional paragraph (the
+ *  reply link) and the concatenation stopped being readable at exactly that point. A list of lines
+ *  also makes the blank lines explicit instead of hiding them inside string fragments. */
+function inviteEmailBody(client, sessionInfo, replyLink, t) {
+  const lines = [
+    `${t("session_invite_body_greeting") || "Hi"} ${client.name},`,
+    "",
+    `${t("session_invite_body") || "You've been scheduled for a session"}: ${sessionInfo.sessionName}`,
+    `${sessionInfo.dateLabel} ${sessionInfo.timeLabel}${sessionInfo.location ? ` @ ${sessionInfo.location}` : ""}`,
+    "",
+    t("session_invite_body_attach") ||
+      "The calendar invite file just downloaded — attach it to this email before sending.",
+  ];
+  // The answer route. An .ics collects an acceptance only from a calendar client that speaks iMIP;
+  // this is what a gym client on a phone can actually use.
+  if (replyLink) {
+    lines.push("", t("session_invite_body_reply") || "Let me know if you can make it:", replyLink);
+  }
+  return lines.join("\n");
+}
 
-  const name = document.createElement("span");
-  name.className = "session-invite-name";
-  name.textContent = client.name;
-  row.appendChild(name);
-
+// One click both downloads the .ics (so the trainer has a file to attach) and, via the anchor's own
+// href, opens the device's mail client on a prefilled compose — mirrors the consent-email button in
+// clientsView.js, the app's one other mailto precedent.
+function buildEmailInviteButton(client, sessionInfo, replyLink, t) {
   const btn = document.createElement("a");
   btn.className = "btn secondary-btn session-invite-send-btn";
   btn.textContent = t("session_invite_send") || "Send invite";
@@ -105,76 +173,132 @@ function buildInviteRow(client, sessionInfo, t) {
     btn.classList.add("disabled");
     btn.href = "#";
     btn.title = t("session_invite_no_email") || "No email address on client profile";
-    row.appendChild(btn);
-    return row;
+    return btn;
   }
 
   const subject = encodeURIComponent(
     `${t("session_invite_subject") || "Training session"}: ${sessionInfo.sessionName}`,
   );
-  const body = encodeURIComponent(
-    `${t("session_invite_body_greeting") || "Hi"} ${client.name},\n\n` +
-      `${t("session_invite_body") || "You've been scheduled for a session"}: ${sessionInfo.sessionName}\n` +
-      `${sessionInfo.dateLabel} ${sessionInfo.timeLabel}${sessionInfo.location ? ` @ ${sessionInfo.location}` : ""}\n\n` +
-      `${t("session_invite_body_attach") || "The calendar invite file just downloaded — attach it to this email before sending."}`,
-  );
+  const body = encodeURIComponent(inviteEmailBody(client, sessionInfo, replyLink, t));
   btn.href = `mailto:${encodeURIComponent(client.email)}?subject=${subject}&body=${body}`;
   btn.title = `${t("session_invite_send_to") || "Send invite to"} ${client.email}`;
   btn.addEventListener("click", () => {
     rememberOrganizer();
-    const ics = buildIcsContent({
-      uid: `${sessionInfo.sessionId}-${client.id}`,
-      title: sessionInfo.sessionName,
-      location: sessionInfo.location,
-      startDate: sessionInfo.startDate,
-      endDate: sessionInfo.endDate,
-      attendeeEmail: client.email,
-      attendeeName: client.name,
-      organizerEmail: currentOrganizer(),
-    });
-    downloadFile(ics, buildIcsFilename(sessionInfo.sessionName), "text/calendar");
+    downloadFile(
+      buildIcsContent({
+        uid: `${sessionInfo.sessionId}-${client.id}`,
+        title: sessionInfo.sessionName,
+        location: sessionInfo.location,
+        startDate: sessionInfo.startDate,
+        endDate: sessionInfo.endDate,
+        attendeeEmail: client.email,
+        attendeeName: client.name,
+        organizerEmail: currentOrganizer(),
+      }),
+      buildIcsFilename(sessionInfo.sessionName),
+      "text/calendar",
+    );
     btn.classList.add("session-invite-sent");
     btn.textContent = t("session_invite_sent") || "Invite sent";
   });
-  row.appendChild(btn);
+  return btn;
+}
+
+/** The text channel, beside email rather than instead of it (TODO §1.6, SMS ruled in 2026-08-17): an
+ *  SMS cannot carry the .ics, so email keeps the calendar file and the text carries the link a client
+ *  is far more likely to answer. Returns null where the client has no number, so most rows stay a
+ *  single button rather than growing a dead one. */
+function buildSmsInviteButton(client, sessionInfo, replyLink, t) {
+  if (!client.phone || !replyLink) return null;
+
+  const sms = document.createElement("a");
+  sms.className = "btn secondary-btn session-invite-sms-btn";
+  sms.textContent = t("session_invite_send_sms") || "Text it";
+  // `?&body=` is the shape both iOS and Android honour — the same form eventTransports.js uses.
+  sms.href = `sms:${encodeURIComponent(client.phone)}?&body=${encodeURIComponent(
+    `${t("session_invite_sms_text") || "Training session"}: ${sessionInfo.sessionName} — ${replyLink}`,
+  )}`;
+  sms.addEventListener("click", () => rememberOrganizer());
+  return sms;
+}
+
+function buildInviteRow(client, sessionInfo, t) {
+  const replyLink = buildEventLink(inviteEventFor(client, sessionInfo), appUrl());
+  const row = document.createElement("div");
+  row.className = "session-invite-row card";
+
+  const name = document.createElement("span");
+  name.className = "session-invite-name";
+  name.textContent = client.name;
+  row.append(name, buildEmailInviteButton(client, sessionInfo, replyLink, t));
+
+  const sms = buildSmsInviteButton(client, sessionInfo, replyLink, t);
+  if (sms) row.appendChild(sms);
   return row;
 }
 
+// The rows, rebuilt whenever the organizer fields change: each row's mailto/sms href embeds the reply
+// link, which embeds those fields, and an <a href> is resolved by the browser rather than by a handler
+// that could read them later. The last-rendered arguments are kept so an input listener can re-run this
+// without the dialog having to be reopened.
+let renderedFor = null;
+
+function renderInviteRows(clients = renderedFor?.clients, sessionInfo = renderedFor?.sessionInfo) {
+  if (!clients || !sessionInfo) return;
+  renderedFor = { clients, sessionInfo };
+  const list = document.getElementById("session-invite-list");
+  if (!list) return;
+  list.replaceChildren();
+  for (const client of clients) list.appendChild(buildInviteRow(client, sessionInfo, deps.t));
+}
+
 // sessionInfo: { sessionId, sessionName, location, dateLabel, timeLabel, startDate, endDate, clientIds }
+/** Static copy and the two remembered organizer fields. Split out of `openSessionInviteDialog` because
+ *  it is a dozen "if the element exists, set its text" steps that say nothing about when the dialog
+ *  should open — and together they pushed that function past the complexity gate. */
+function renderDialogChrome(t) {
+  const text = [
+    ["session-invite-title", t("session_invite_title") || "Send calendar invites"],
+    [
+      "session-invite-desc",
+      t("session_invite_desc") ||
+        "Newly assigned participants can be sent a calendar invite for this session.",
+    ],
+    ["session-invite-organizer-label", t("session_invite_organizer") || "Replies come back to"],
+    ["session-invite-phone-label", t("session_invite_phone") || "Your number, for replies by text"],
+    [
+      "session-invite-phone-hint",
+      t("session_invite_phone_hint") ||
+        "Optional. With it, a client can answer the invite with a text instead of an email.",
+    ],
+  ];
+  for (const [id, value] of text) {
+    const element = document.getElementById(id);
+    if (element) element.textContent = value;
+  }
+
+  // Prefilled only when empty, so reopening the dialog never overwrites what the trainer just typed.
+  const identity = readTrainerIdentity();
+  for (const [id, value] of [
+    ["session-invite-organizer", identity.email],
+    ["session-invite-phone", identity.phone],
+  ]) {
+    const input = document.getElementById(id);
+    if (input && !input.value) input.value = value;
+  }
+}
+
 export function openSessionInviteDialog(sessionInfo) {
   if (!deps || !sessionInfo?.clientIds?.length) return;
   const { getState, t } = deps;
-  const state = getState();
   const clients = sessionInfo.clientIds
-    .map((id) => state.clients.find((c) => c.id === id))
+    .map((id) => getState().clients.find((c) => c.id === id))
     .filter(Boolean);
   if (clients.length === 0) return;
 
   renderInviteDialogShell();
-
-  const title = document.getElementById("session-invite-title");
-  if (title) title.textContent = t("session_invite_title") || "Send calendar invites";
-
-  const desc = document.getElementById("session-invite-desc");
-  if (desc) {
-    desc.textContent =
-      t("session_invite_desc") ||
-      "Newly assigned participants can be sent a calendar invite for this session.";
-  }
-  const organizerLabel = document.getElementById("session-invite-organizer-label");
-  if (organizerLabel) {
-    organizerLabel.textContent = t("session_invite_organizer") || "Replies come back to";
-  }
-  const organizerInput = document.getElementById("session-invite-organizer");
-  if (organizerInput && !organizerInput.value) {
-    organizerInput.value = readTrainerIdentity().email;
-  }
+  renderDialogChrome(t);
   renderOrganizerHint(t);
-
-  const list = document.getElementById("session-invite-list");
-  if (list) {
-    list.replaceChildren();
-    for (const client of clients) list.appendChild(buildInviteRow(client, sessionInfo, t));
-  }
+  renderInviteRows(clients, sessionInfo);
   openModal("dialog-session-invite");
 }

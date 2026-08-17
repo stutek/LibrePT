@@ -320,14 +320,19 @@ segment is 160 characters, which is why a session summary travels and a program 
   low stakes (it writes only to the trainer's own store, and an RSVP is not destructive) but is not
   *nothing*: a forwarded invite lets a third party answer for the client. Not yet decided.
 
-  **Still open — two pieces before the loop closes.** (1) The invite leg: nothing in the app builds an
-  `?evt=` link yet — [eventTransports.js](src/modules/common/eventTransports.js) shipped this morning
-  ahead of its consumer, and the invite dialog still sends only a `mailto:` + `.ics`. It also needs the
-  trainer's PHONE on file (trainerIdentity) for SMS to be offerable at all. (2) Trainer-side ingestion:
-  a `?evt=<rsvp>` currently falls through to the normal boot and is ignored, because nothing yet stores
-  an answer — `sessions` has no field for it, so that needs either an unconstrained object (additive,
-  no bump) or a schema bump under §18.4's expand-first staging. **That storage call is the next
-  decision.**
+  **[x] The invite leg — built 2026-08-17.** Every invite now carries the reply link, and a client with
+  a phone number gets a **Text it** button beside the email one: a text cannot carry the `.ics`, so
+  email keeps the calendar file and the text carries the link. `organizerPhone` comes from
+  [trainerIdentity.js](src/data/trainerIdentity.js), which gained a third string for exactly this and
+  prefills it the way the organizer email already does. Rows rebuild on organizer-field input, because
+  an `<a href>` is resolved by the browser rather than by a handler that could read those fields later.
+
+  **Still open — trainer-side ingestion, and it needs a decision first.** A returning `?evt=<rsvp>`
+  falls through to the normal boot and is ignored, because nothing stores an answer: `sessions` has no
+  field for one. Two ways, and the choice is the maintainer's — an **unconstrained object** on the
+  session (additive, no schema bump, the `gdprConsent` precedent) or a **declared field with a schema
+  bump** under §18.4's expand-first staging. The first is cheap and slightly dishonest about the data
+  model; the second is correct and pulls in star-write staging.
 - **[x] SMS as a second channel — decided 2026-08-17 (Simon: "let us have SMS too, for sure").** It is
   in on BOTH legs, including the reply, and the question it settles was specifically whether a channel
   with unreliable body prefill is worth shipping: it is, because clients answer texts. So email is

@@ -301,6 +301,12 @@ export const en = {
   transport_share: "Share…",
   transport_copy: "Copy link",
   session_invite_organizer: "Replies come back to",
+  session_invite_phone: "Your number, for replies by text",
+  session_invite_phone_hint:
+    "Optional. With it, a client can answer the invite with a text instead of an email.",
+  session_invite_body_reply: "Let me know if you can make it:",
+  session_invite_send_sms: "Text it",
+  session_invite_sms_text: "Training session",
   session_invite_organizer_hint: "Acceptances arrive as email replies to this address.",
   session_invite_organizer_missing:
     "Without an address, a calendar app has nowhere to send an acceptance.",

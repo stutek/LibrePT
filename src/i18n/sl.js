@@ -291,6 +291,12 @@ export const sl = {
   transport_share: "Deli…",
   transport_copy: "Kopiraj povezavo",
   session_invite_organizer: "Odgovori naj prispejo na",
+  session_invite_phone: "Tvoja številka, za odgovore po SMS",
+  session_invite_phone_hint:
+    "Neobvezno. S tem lahko stranka na vabilo odgovori s sporočilom namesto z e-pošto.",
+  session_invite_body_reply: "Sporoči mi, ali lahko prideš:",
+  session_invite_send_sms: "Pošlji SMS",
+  session_invite_sms_text: "Trening",
   session_invite_organizer_hint: "Potrditve prispejo kot e-poštni odgovori na ta naslov.",
   session_invite_organizer_missing:
     "Brez naslova koledarska aplikacija nima kam poslati potrditve.",
