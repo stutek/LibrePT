@@ -21,33 +21,37 @@ Canonical context: [README.md](README.md) (architecture & features), [use_cases/
 (workflows), [CONTRIBUTING.md](CONTRIBUTING.md) (conventions). Durable engineering lessons live in
 [AGENT_RULES.md](AGENT_RULES.md), not here — this file records *work*, not process.
 
-## Where to start (ranked 2026-08-13)
+## Where to start (ranked 2026-08-17)
 
 The governing fact is [docs/PREVIEW.md](docs/PREVIEW.md): the app tells its own users it can wipe
 their data. Nothing trainer-facing can be promoted until that is false, so the ranking is **data
 safety → showability → everything else**.
 
-**What moved since the 08-11 ranking — the whole top of it, which is why this is a re-rank rather
-than an edit**: §9.5's premature walkthrough promise (rank 1) is gone, §3.8's unbacked banner (3) and
-§3.12's in-app doc pages (3=) shipped, and rank 2 turned out to have shipped *before the ranking was
-written* — §27.1/§27.2/§27.3/§27.5 all landed on the evening of 08-11 and sat marked open for two
-days. Nothing above rank 4 survived. **Showability now leads on its own**, since it is the only
-remaining thing standing between the app and someone using it.
+**Every ranked item from 08-13 has shipped, which is why this is a re-rank rather than an edit**:
+§23.5's recording+landing page (rank 1, shipped 08-16 as a *script* plus a recorder that cannot rot),
+§18.7's `formatVersion` envelope (2, 08-15), §27.4's withdrawal route (3, 08-14, plus the §27.7 it
+surfaced), §7.2's feedback button state (4, 08-15), and §9.5's guided walkthrough (5, today). **The
+08-13 ranking also sat stale for four days** while four of those shipped — the same failure it was
+written to correct, so: re-read this table against `src/` before trusting it, and close items in the
+commit that ships them.
 
 | Rank | Item | Why now |
 | :--- | :--- | :--- |
-| 1 | §23.5 recording + landing page | Nobody adopts a UI tool they cannot see, and no screenshot or video exists anywhere in the repo. Gates every outreach channel; §23.6's autumn window is a real deadline. An afternoon of work, blocked on nothing technical |
-| 2 | §18.7 remainder — `formatVersion` on the envelope | Ordering, not urgency: it must land *before* compression or encryption (§18.8 is the likely trigger), or every file already written becomes unparseable |
-| 3 | §27.4 withdrawal route | The last data-subject right with no code, and the smallest item in this file by a wide margin — a prefilled `mailto:`/`sms:` reusing what consent delivery already builds. Makes §3.5's shipped flow symmetrical |
-| 4 | §7.2 feedback button state | The real defect among the gym-floor four: a control that does not show whether it is on is one a trainer taps twice mid-set |
-| 5 | §9.5 guided walkthrough (with §9.4, §9.2) | The blank-app churn §23.5 names. Big, and now the only thing that would let the splash's disabled "soon" button be enabled |
+| 1 | §26 / §1.7 client self-onboarding | **Decided 2026-08-17 (Simon): this is next.** The intake page a client fills on their own phone, with consent signed there. §27.1/§27.2 shipping discharged what parked it, and the whole GDPR surface it needs now exists |
+| 2 | §23.5 remainder — a feedback route a non-developer will use | The last launch prerequisite with nothing technical in its way. GitHub issues is a wall to a PT; one address or form, linked in-app. Best done with §12.4 (global `error`/`unhandledrejection` capture), or the report still asks a trainer to retype a build stamp by hand |
+| 3 | §18.7 remainder — forward-migration consent at import | Ordering, not urgency: a restore silently brings a file forward, and the trainer is not told it will no longer open in older builds. Small, and it must precede §18.8's encryption |
+| 4 | §8.7 / §8.8 gym-floor remainders | With §7.2 done these are what is left of the four, and both are cheap next to anything else here |
+
+**Waiting on a ruling, not on work** — §1.6's confirm link (a replayable capability token aimed at the
+trainer's own store) and SMS as the response channel; §19.2's URL-privacy invariant, which unblocks
+§19.3. Each is a question in its own section, deliberately not folded into the ranking above.
 
 **Cheap wins, unranked** — each small enough to ride along with adjacent work: §12.5's reflog expiry
 (one maintainer command), §19.3's exercise-library filter reset (a real bug needing no URL decision),
-§12.6's glyph subsetting (prerequisite already built), §18.11's retention basis (one paragraph, in
-the privacy policy — the only bullet left in that section), §21's 60s → 30s navigation timeout (the
-cause it was raised for is fixed), and §25.6's medium-tier overflow harness (the sweep already
-exists).
+§12.6's glyph subsetting (prerequisite already built, and §7.2 wants the regular weight it would
+restore), §18.11's retention basis (one paragraph, in the privacy policy — the only bullet left in
+that section), §21's 60s → 30s navigation timeout (the cause it was raised for is fixed), and §25.6's
+medium-tier overflow harness (the sweep already exists).
 
 Deprioritised on purpose: §24.5/§24.7 remainders and §24.8's rename (optional by their own text),
 §11/§5.1/§4.1 (large UI churn with no users yet to aim it), §17.2/§17.4 and §18.8–§18.12 (decided on
@@ -60,7 +64,7 @@ the thing that must happen first, not merely what it touches.
 
 | Theme | Open | Lead item | Blocked on |
 | :--- | :--- | :--- | :--- |
-| **Launch prerequisites** | §23.5, §9.5 | Recording + landing page | Maintainer actions; nothing technical |
+| **Launch prerequisites** | §23.5 | A feedback route a non-developer will use | Maintainer actions; nothing technical |
 | **Data safety remainder** | §18.7, §18.8, §18.9, §18.11, §18.12 | `formatVersion` envelope | Nothing — but only §18.7 is urgent |
 | **Scheduling** | §1.2, §1.3, §1.4, §1.5 | Room occupancy via `freebusy.query` | §1.5's OAuth/verification path |
 | **Gym-floor UX** | §7.2, §8.1, §8.7, §8.8 | Feedback buttons showing their own state | Nothing; §7.2 is the real defect of the four |
@@ -71,7 +75,7 @@ the thing that must happen first, not merely what it touches.
 | **Tests & docs** | §6.2, §12.3, §12.4, §12.5, §12.6, §25.6 | Medium-tier overflow harness | Nothing; all small |
 | **Routing decisions** | §19.2, §19.3 | The URL-privacy invariant | One decision, then both unblock |
 | **Data-subject rights** | §27.4 | One-tap withdrawal in the consent letter | Nothing; the other four shipped 2026-08-11 |
-| **Client self-service** | §26 | Intake page the client fills, consent signed on their own phone | Nothing — restored 08-13; §27.1/§27.2 shipping discharged what parked it |
+| **Client self-service** | §26, §1.7 | Intake page the client fills, consent signed on their own phone | Nothing — and it is next, decided 2026-08-17 |
 
 ---
 
@@ -787,24 +791,41 @@ Slots now follow the real clock and may cross midnight, each session's `day` buc
 from its timestamp rather than asserted alongside it, and an overdue card flips its label to
 "Overdue" instead of printing a minus sign.
 
-### 9.4 [ ] `src/demo/` — simulated finger / touch controller
-A separate `src/demo/` folder for demo controls. First module: an on-screen pointer that moves to a
-target element and taps it (animated move + ripple), then dispatches the real interaction.
+### 9.4 [x] Simulated finger / touch controller — 2026-08-16
+Shipped as [demoHand.js](src/modules/demo/demoHand.js): an overlay pointer that travels to a target,
+pulses as a tap, and lets the player dispatch the real interaction underneath it.
 
-### 9.5 [ ] Guided walkthrough engine (step overlay)
-An overlay driving the demo one action at a time: it explains the next action, with **Back**,
-**"Show me"** and **Next**. "Show me" triggers §9.4's finger and then becomes "Next"; Next advances
-and waits for "Show me" again. Each step binds a real DOM target to a short explanation, covering the
-core flows (open a session, switch client, log a signal, complete a round, review an adjustment).
+**It lives in `src/modules/demo/`, not the `src/demo/` this asked for.** Every other feature sits in
+`modules/<feature>/` and `import_layers.py` derives a module's layer from that path, so a top-level
+`src/demo/` would have been a directory outside the layering with no rule saying what it may import.
+The folder was the incidental part of this item; the pointer was the point.
 
-- **✅ The premature promise is gone (2026-08-13).** The demo notification's "Explore Walkthrough"
-  button offered this and navigated to `/clients`; the copy was chosen over the build, since the
-  engine is rank 6 and the button was shipping every day in between. See [CHANGELOG](CHANGELOG.md).
-  **The one surviving announcement is the splash's own `#splash-walkthrough`** — disabled, marked
-  "soon" — which is deliberately the only place this is promised: it is where a first-run user is
-  choosing how to start, and one dead control there costs less than a dead control in a feed
-  consulted mid-session. **When this ships, that button is what to enable**; do not re-add an entry
-  point to the notification feed without deciding it earns the thumb space.
+### 9.5 [x] Guided walkthrough engine (step overlay) — 2026-08-17
+Shipped: [walkthroughOverlay.js](src/modules/demo/walkthroughOverlay.js) over
+[domain/walkthrough.js](src/domain/walkthrough.js), reached by `?demo=walkthrough` and by the splash's
+own button. **Back / "Show me" / Next**, one step at a time, over the real app.
+
+- **It plays the SAME script as the automatic demo** ([gymFloorTour.js](src/modules/demo/gymFloorTour.js)),
+  and shares its tap (`performStep`). Two scripts would have been two things that must stay true of
+  the app, which is the failure mode §23.5 chose a script over a recording to avoid — and the demo's
+  e2e replay already keeps this one honest.
+- **The trainer doing the step themselves is what advances it** — beyond what this item asked for, and
+  the reason the app stays fully tappable underneath with no scrim. Completion is the step's own
+  expectation becoming true, watched on a poll, so it does not care who caused it. A walkthrough that
+  only advanced on its own buttons would be teaching its own buttons.
+- **"Show me" is the escape hatch, not the path**, and it withdraws once the step is done: an offer to
+  do something already done is a control that does nothing.
+- **Back re-explains; it does not undo.** An inverse for every step is an undo stack for a
+  demonstration. A step returned to stays done, so re-reading what Too Easy meant cannot log a second
+  signal.
+- **The splash button is enabled and the "soon" pill is gone** — that control was the last place in
+  the app announcing something unbuilt. It carries `?init=demo_data_load` with it, because the script
+  drives the seeded group session and a walkthrough over an empty app would point at nothing.
+- **Still open — the script is four steps, not six.** This item listed "complete a round" and "review
+  an adjustment" too; the shipped script is §23.4's wedge (open the session, focus a circuit, signal
+  Too Easy, switch participant). Adding either is a data change in `gymFloorTour.js` plus a caption —
+  worth doing only if a viewer is demonstrably left wanting them, since every step is one more thing
+  between a stranger and the point.
 
 ### 9.6 [ ] [TBD] Install as an offline Android / iOS app
 Already a PWA (manifest + service-worker precache). Open: install-prompt/A2HS UX, fully-offline first
@@ -1479,8 +1500,9 @@ one job they all hate, and expand from there.
       Drive sync is now live (§3.3, client id installed 2026-08-12) but reaches only the ≤100
       explicitly-listed test users until the OAuth app is published, so the pitch can promise it only
       with that caveat — or wait for Production-unverified, which drops the list and keeps the cap.
-- [ ] **No onboarding for an empty app** (§9.5 unbuilt). A trainer landing on a blank client list
-      churns in ten seconds.
+- [x] **Onboarding for an empty app — 2026-08-17.** §9.5's guided walkthrough shipped, reached from the
+      splash a first-run trainer is already looking at. The blank-client-list churn this named is now
+      answered by a route that carries the sample gym with it.
 - [ ] **No feedback route a non-developer will use.** GitHub issues is a wall to a PT; one email
       address or form, linked in-app. See [docs/BUG_REPORTING.md](docs/BUG_REPORTING.md).
 

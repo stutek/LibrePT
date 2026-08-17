@@ -18,6 +18,11 @@
 // makes sense, and would let the e2e suite report the later steps as passing on top of a broken
 // one. The recorded results say which step failed and why.
 //
+// **One step is performable on its own** (`performStep`), because the guided walkthrough (TODO §9.5)
+// runs the same script one tap at a time and must reach the control, the pointer and the pass-fail
+// check by the same route the automatic tour does. A walkthrough with its own copy of "resolve,
+// scroll, tap, check" would be a second definition of what the demo means.
+//
 // Injected dependencies: `doc`, `hand` (optional — no pointer in CI), `wait`, `onStep`.
 
 import { checkExpectation, validateTour } from "../../domain/demoTour.js";
@@ -25,7 +30,7 @@ import { moveDemoHand, pulseDemoHand } from "./demoHand.js";
 
 const DEFAULT_STEP_PAUSE_MS = 900;
 
-function probe(doc, selector) {
+export function probe(doc, selector) {
   const el = doc.querySelector(selector);
   if (!el) return { present: false, visible: false, text: "" };
   // offsetParent is null for a display:none element and for anything inside one, which is the
@@ -45,11 +50,50 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
  * says "the Group Strength card" rather than "the first card" — position in a seeded list is not a
  * property the demo should depend on, and the first attempt at this tour broke precisely because it
  * did. Falls back to the first match when no text is given. */
-function resolveTarget(doc, step) {
+export function resolveTarget(doc, step) {
   const matches = [...doc.querySelectorAll(step.target)];
   if (!step.targetText) return matches[0] || null;
   const wanted = step.targetText.toLowerCase();
   return matches.find((el) => (el.textContent || "").toLowerCase().includes(wanted)) || null;
+}
+
+/** Whether a step's expectation holds against the page as it stands, with no tap. The walkthrough
+ *  polls this to notice the trainer doing the step themselves, and to recognise a step already done
+ *  when they walk Back into it. */
+export function stepOutcomeNow(step, doc = document) {
+  return { id: step.id, ...checkExpectation(step.expect, probe(doc, step.expect.selector)) };
+}
+
+/**
+ * Performs ONE step — resolve the control, scroll it into view, move and pulse the pointer, dispatch
+ * a genuine click, then check the expectation. Returns `{ id, ok, reason }`.
+ *
+ * Shared with the guided walkthrough's "Show me", so the two cannot drift on what a step's tap
+ * actually is.
+ */
+export async function performStep(step, { doc = document, hand = null, wait = sleep } = {}) {
+  const target = resolveTarget(doc, step);
+  if (!target) {
+    const qualifier = step.targetText ? ` containing ${JSON.stringify(step.targetText)}` : "";
+    return { id: step.id, ok: false, reason: `no control matched ${step.target}${qualifier}` };
+  }
+
+  target.scrollIntoView({ block: "center", inline: "nearest" });
+  // Let the scroll settle before reading a box for the pointer, or the hand lands where the control
+  // used to be.
+  await wait(120);
+
+  if (hand) {
+    const { x, y } = centreOf(target);
+    moveDemoHand(hand, x, y);
+    await wait(step.travelMs ?? 420);
+    pulseDemoHand(hand);
+  }
+
+  target.click();
+  await wait(step.settleMs ?? DEFAULT_STEP_PAUSE_MS);
+
+  return stepOutcomeNow(step, doc);
 }
 
 /**
@@ -69,35 +113,9 @@ export async function playTour(tour, { doc = document, hand = null, wait = sleep
 
   const results = [];
   for (const step of tour.steps) {
-    const target = resolveTarget(doc, step);
-    if (!target) {
-      const qualifier = step.targetText ? ` containing ${JSON.stringify(step.targetText)}` : "";
-      results.push({
-        id: step.id,
-        ok: false,
-        reason: `no control matched ${step.target}${qualifier}`,
-      });
-      break;
-    }
-
-    target.scrollIntoView({ block: "center", inline: "nearest" });
-    // Let the scroll settle before reading a box for the pointer, or the hand lands where the
-    // control used to be.
-    await wait(120);
-
-    if (hand) {
-      const { x, y } = centreOf(target);
-      moveDemoHand(hand, x, y);
-      await wait(step.travelMs ?? 420);
-      pulseDemoHand(hand);
-    }
-
-    target.click();
-    await wait(step.settleMs ?? DEFAULT_STEP_PAUSE_MS);
-
-    const outcome = checkExpectation(step.expect, probe(doc, step.expect.selector));
-    results.push({ id: step.id, ...outcome });
-    onStep?.({ id: step.id, ...outcome });
+    const outcome = await performStep(step, { doc, hand, wait });
+    results.push(outcome);
+    onStep?.(outcome);
     if (!outcome.ok) break;
   }
   return results;

@@ -1,0 +1,141 @@
+/* src/modules/demo/walkthrough.css — the guided walkthrough's panel and spotlight (TODO §9.5).
+   The app underneath keeps its own appearance and stays fully usable: the whole point is that the
+   trainer performs the step on the real control, so nothing here may cover or restyle it.
+   The pointer is styled in demoTour.css — shared with the automatic demo, which is the same tap. */
+
+.walkthrough {
+  position: fixed;
+  inset: 0;
+  /* Above the clipboard overlay (activeSessionOverlay.css, 120/130), below the demo hand (9999) so
+     the pointer reads as being over the app rather than behind the panel. No backdrop and no
+     pointer-events: the app must stay tappable, since the trainer doing the step IS the walkthrough. */
+  z-index: 9400;
+  pointer-events: none;
+}
+
+/* A ring around the control the step is about, drawn OUTSIDE its box so it never obscures a label or
+   an icon a trainer is being asked to recognise. */
+.walkthrough-spotlight {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--spot-w, 0);
+  height: var(--spot-h, 0);
+  transform: translate3d(var(--spot-x, 0), var(--spot-y, 0), 0);
+  border-radius: var(--border-radius-md, 12px);
+  box-shadow: 0 0 0 3px var(--primary, #6366f1), 0 0 0 9px
+    color-mix(in srgb, var(--primary, #6366f1) 28%, transparent);
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.28s ease, width 0.28s ease, height 0.28s ease;
+}
+
+.walkthrough-spotlight.is-visible {
+  opacity: 1;
+}
+
+.walkthrough-panel {
+  position: absolute;
+  left: 50%;
+  bottom: calc(12px + var(--safe-bottom, 0px));
+  transform: translateX(-50%);
+  width: min(calc(100% - 24px), var(--app-max-width, 480px));
+  padding: 14px 16px calc(14px + var(--safe-bottom, 0px)) 16px;
+  background: var(--card-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--card-border);
+  border-radius: var(--border-radius-lg, 16px);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28);
+  color: var(--text-main);
+  /* The panel itself IS interactive — only the transparent frame around it is not. */
+  pointer-events: auto;
+}
+
+/* The control this step is about sits where the panel would be, so the panel gets out of the way
+   rather than hiding it (walkthroughOverlay.js's keepPanelClearOf). */
+.walkthrough.is-top .walkthrough-panel {
+  top: calc(var(--hdr-height, 64px) + 12px);
+  bottom: auto;
+}
+
+.walkthrough-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.walkthrough-progress {
+  font-family: var(--font-header);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+/* 44px of target for a 14px glyph: leaving the walkthrough must be reachable with a thumb, not just
+   visible (AGENT_RULES §2.D.1). */
+.walkthrough-exit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin: -12px -12px -12px 0;
+  border: 0;
+  background: none;
+  color: var(--text-main);
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.walkthrough-caption {
+  margin: 6px 0 0 0;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.walkthrough-problem {
+  margin: 8px 0 0 0;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  color: var(--danger);
+}
+
+.walkthrough-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.walkthrough-btn {
+  flex: 1 1 auto;
+  min-height: 46px;
+  padding: 0 14px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--btn-radius, 12px);
+  background: transparent;
+  color: var(--text-main);
+  font-family: var(--font-header);
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.walkthrough-btn-primary {
+  background: var(--primary-gradient);
+  color: var(--on-primary);
+  border-color: transparent;
+}
+
+.walkthrough-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* Someone who asked for less motion still gets the guide: only the travel of the ring stops. */
+@media (prefers-reduced-motion: reduce) {
+  .walkthrough-spotlight {
+    transition: opacity 0.2s ease;
+  }
+}

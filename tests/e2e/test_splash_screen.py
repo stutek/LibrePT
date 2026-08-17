@@ -108,8 +108,9 @@ def test_splash_offers_onboarding_while_the_database_is_empty(page, local_server
     onboarding.wait_for(state="visible", timeout=15000)
     assert page.locator("#splash-load-demo").is_visible()
     assert page.locator("#splash-start-empty").is_visible()
-    # Announced but not built yet — it must not pretend to work.
-    assert page.locator("#splash-walkthrough").is_disabled()
+    # Built since 2026-08-17 (TODO §9.5). It was the last control in the app announcing something
+    # that did not exist, so "enabled" is the assertion that promise is now kept.
+    assert page.locator("#splash-walkthrough").is_enabled()
 
     page.wait_for_timeout(1500)
     assert onboarding.is_visible(), "the offer must wait for a choice, not expire"
@@ -137,6 +138,22 @@ def test_demo_data_choice_loads_the_dataset_and_stops_offering(page, local_serve
     page.locator("#app-splash").wait_for(state="hidden", timeout=15000)
     assert page.evaluate("() => window.stateHasData()"), "demo data should be seeded"
     assert page.locator("#app-splash-onboarding").is_hidden()
+
+
+@pytest.mark.clean_start
+@pytest.mark.keep_splash
+def test_walkthrough_choice_arrives_with_data_to_walk_through(page, local_server):
+    """The walkthrough drives the seeded group session, so its entry point has to bring the dataset
+    with it. A walkthrough started on the empty app a first-run trainer is looking at would be a
+    panel pointing at nothing — which is why this button reloads through ?init=demo_data_load too,
+    rather than only setting ?demo=."""
+    page.goto(local_server)
+    _answer_language_step(page)
+    page.locator("#splash-walkthrough").click(timeout=15000)
+
+    page.wait_for_url("**init=demo_data_load**", timeout=15000)
+    assert "demo=walkthrough" in page.url
+    page.locator("#walkthrough-overlay").wait_for(state="visible", timeout=20000)
 
 
 @pytest.mark.clean_start

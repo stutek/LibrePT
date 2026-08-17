@@ -269,6 +269,22 @@ export const sl = {
   demo_cleanup_exercises: "vzorčnih vaj",
   demo_cleanup_notifications: "vzorčnih obvestil",
   demo_cleanup_remove: "Odstrani",
+  walkthrough_title: "Vodeni ogled",
+  walkthrough_progress: "Korak {step} od {count}",
+  walkthrough_back: "Nazaj",
+  walkthrough_show: "Pokaži mi",
+  walkthrough_next: "Naprej",
+  walkthrough_done: "Končaj",
+  walkthrough_exit: "Zapri vodeni ogled",
+  walkthrough_finished: "To je celoten krog — ena seja, ena podloga, štirje dotiki.",
+  walkthrough_stuck:
+    "Tega koraka ni bilo mogoče zaključiti. Zapri vodeni ogled in raziskuj naprej — tvoji podatki so nedotaknjeni.",
+  tour_step_open_session: "Odpri skupinsko sejo. Ena podloga pokriva vse v njej.",
+  tour_step_focus_exercise:
+    "Dotakni se kroga, da pride v fokus. Njegovi gumbi pridejo na doseg palca.",
+  tour_step_signal: "Označi krog kot prelahek. En dotik ga zabeleži in pusti opombo za načrt.",
+  tour_step_next_participant:
+    "Preklopi na naslednjega udeleženca — ista seja, njegov lasten načrt.",
   today: "Danes",
   tomorrow: "Jutri",
   yesterday: "Včeraj",

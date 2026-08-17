@@ -180,3 +180,23 @@ export async function bootDemoTour({ shareDemo, hasData, onResults } = {}) {
   onResults?.(results);
   return results;
 }
+
+// The guided walkthrough (TODO §9.5) — the same script as bootDemoTour, driven by the trainer.
+//
+// Its own boot step rather than a mode inside the one above: they share the script and the tap, and
+// nothing else. One reads a URL value and plays; the other mounts a panel that outlives init() and
+// waits for someone. Folding them together would mean a branch in a boot step for the benefit of one
+// shared import (AGENT_RULES §5.9).
+//
+// Returns the walkthrough handle (`{ stop }`) so a caller can end it; null when the URL did not ask.
+export async function bootWalkthrough({ shareDemo, hasData, t } = {}) {
+  const { DEMO_WALKTHROUGH } = await import("./modules/common/shareLink.js");
+  if (shareDemo !== DEMO_WALKTHROUGH || !hasData) return null;
+
+  const [{ startGuidedWalkthrough }, { GYM_FLOOR_TOUR }] = await Promise.all([
+    import("./modules/demo/walkthroughOverlay.js"),
+    import("./modules/demo/gymFloorTour.js"),
+  ]);
+
+  return startGuidedWalkthrough({ tour: GYM_FLOOR_TOUR, t });
+}

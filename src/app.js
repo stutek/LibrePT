@@ -443,6 +443,8 @@ async function init() {
       window.__demoTourResults = results;
     },
   });
+
+  await appBoot.bootWalkthrough({ shareDemo, hasData: stateHasData(getState()), t });
 }
 
 // --- BOUND VIEW & CONTROLLER ACTIONS ---

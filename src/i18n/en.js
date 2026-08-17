@@ -271,6 +271,25 @@ export const en = {
   demo_cleanup_exercises: "sample exercises",
   demo_cleanup_notifications: "sample notifications",
   demo_cleanup_remove: "Remove",
+  // The guided walkthrough (TODO §9.5) and the captions of the script it shares with the automatic
+  // demo (modules/demo/gymFloorTour.js). Each caption names the control by what it DOES, never by
+  // where it is on screen — the panel is read on a phone whose layout is not the one this was
+  // written on.
+  walkthrough_title: "Guided walkthrough",
+  walkthrough_progress: "Step {step} of {count}",
+  walkthrough_back: "Back",
+  walkthrough_show: "Show me",
+  walkthrough_next: "Next",
+  walkthrough_done: "Done",
+  walkthrough_exit: "Leave the walkthrough",
+  walkthrough_finished: "That's the whole loop — one session, one clipboard, four taps.",
+  walkthrough_stuck:
+    "This step didn't complete. Leave the walkthrough and keep exploring — your data is untouched.",
+  tour_step_open_session: "Open the group session. One clipboard covers everybody in it.",
+  tour_step_focus_exercise:
+    "Tap the circuit to bring it into focus. Its controls come within thumb reach.",
+  tour_step_signal: "Mark the round Too Easy. One tap logs it and leaves a note for the plan.",
+  tour_step_next_participant: "Switch to the next participant — same session, their own plan.",
   today: "Today",
   tomorrow: "Tomorrow",
   yesterday: "Yesterday",

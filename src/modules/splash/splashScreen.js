@@ -10,6 +10,11 @@
 // screen from first paint, and a module that runs after app.js parses would appear too late to
 // cover anything. This module only takes it away.
 
+// The `?demo=` value is imported rather than spelled again here: the splash writes the link and
+// app.js's boot step reads it, and a typo in either would produce a button that silently starts
+// nothing.
+import { DEMO_WALKTHROUGH } from "../common/shareLink.js";
+
 // How long the mark stays up, measured from navigation start rather than from the moment boot
 // finishes: a slow cold boot should be absorbed by this window, not added on top of it. So the
 // splash is visible for max(this, boot time) — 5s on a normal boot, longer only if the app is not
@@ -40,6 +45,7 @@ const DEMO_INIT_PARAM = "init";
 const DEMO_INIT_VALUE = "demo_data_load";
 const SPLASH_PARAM = "splash";
 const SPLASH_OPT_OUT = "off";
+const WALKTHROUGH_PARAM = "demo";
 
 /** `?splash=off` turns the splash off entirely — no hold, and no onboarding offer either. It is
  *  the "put me straight into the app" parameter, the same deep-link convention as `?init`, `?lang`
@@ -87,6 +93,18 @@ export function demoDataUrl(href = window.location.href) {
   const url = new URL(href);
   url.searchParams.set(DEMO_INIT_PARAM, DEMO_INIT_VALUE);
   url.searchParams.set(SPLASH_PARAM, SPLASH_OPT_OUT);
+  return url.toString();
+}
+
+/** The URL that starts the guided walkthrough (TODO §9.5): the demo dataset, plus the `?demo=`
+ *  value app.js's last boot step reads.
+ *
+ *  It carries the demo data deliberately — the walkthrough drives the seeded group session, so a
+ *  walkthrough over an empty app would be a panel pointing at nothing. That is also why this is the
+ *  same reload as the demo link and not a mode toggled in place. */
+export function walkthroughUrl(href = window.location.href) {
+  const url = new URL(demoDataUrl(href));
+  url.searchParams.set(WALKTHROUGH_PARAM, DEMO_WALKTHROUGH);
   return url.toString();
 }
 
@@ -140,6 +158,9 @@ function revealOnboarding(splash, resolve) {
 
   document.getElementById("splash-load-demo")?.addEventListener("click", () => {
     window.location.assign(demoDataUrl());
+  });
+  document.getElementById("splash-walkthrough")?.addEventListener("click", () => {
+    window.location.assign(walkthroughUrl());
   });
   document.getElementById("splash-start-empty")?.addEventListener("click", () => {
     fadeOut(splash, resolve);

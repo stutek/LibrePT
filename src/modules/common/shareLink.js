@@ -11,10 +11,14 @@
 //   theme  colour theme (daylight, midnight, red, blossom, nebula) or a legacy alias. Unknown or
 //          since-renamed → default theme. Validation lives at the point of application
 //          (applicationHeader resolveTheme for theme; app.js init for lang).
-//   demo   scripted tour to play once the app has booted. `demo=gym_floor` drives the real
-//          controls with a visible pointer (modules/demo/) — the automated replacement for the
-//          screen recording §23.5 asked for, and the same script the e2e suite replays. Requires
-//          demo data, so it is ignored unless the app has something to demonstrate.
+//   demo   what to do with the demo script once the app has booted, one of two explicit values
+//          (modules/demo/). Both need demo data, so both are ignored unless the app has something
+//          to demonstrate.
+//            gym_floor    plays itself: drives the real controls with a visible pointer — the
+//                         automated replacement for the screen recording §23.5 asked for, and the
+//                         same script the e2e suite replays.
+//            walkthrough  the trainer drives, one step at a time, with the guided panel over the
+//                         real app (§9.5). Same script; who taps is the only difference.
 //   init   demo-data initializer. The app boots to a clean, empty slate; init=demo_data_load
 //          populates the full demo dataset — but ONLY on a genuinely empty app. When any data is
 //          already present it is ignored, so it never overwrites a real user's records. Applied
@@ -30,8 +34,11 @@ export const SHARE_DEMO_PARAM = "demo";
 // The single recognized value for ?init=. Any other value is treated as absent.
 export const INIT_DEMO_DATA = "demo_data_load";
 
-// The single recognized value for ?demo=. Any other value is treated as absent, same as ?init=.
+// The recognized values for ?demo=. Anything else is treated as absent, same as ?init=. Two named
+// constants rather than one value plus a mode flag: each is read by its own boot step, so a link
+// that asks for one cannot accidentally start the other.
 export const DEMO_TOUR_GYM_FLOOR = "gym_floor";
+export const DEMO_WALKTHROUGH = "walkthrough";
 
 // Read the preselected language/theme/init from the current URL. Absent params return null so
 // callers can distinguish "share link asked for X" from "use the saved/default value".

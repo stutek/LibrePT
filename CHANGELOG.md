@@ -20,6 +20,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-08-17 — A guided walkthrough, and the last unbuilt promise is kept
+
+### Added
+- **The guided walkthrough ships** (TODO §9.5, with §9.4) — `?demo=walkthrough`, and the splash's own `#splash-walkthrough` button, which was **disabled and marked "soon" until today**: the last control in the app announcing something that did not exist. It explains one step at a time over the real app, with **Back / "Show me" / Next**. Four decisions worth not re-deriving:
+  - **One script, not two.** It plays the same [gymFloorTour.js](src/modules/demo/gymFloorTour.js) the automatic demo plays, through the same `performStep` tap. A second script would be a second thing that has to stay true of the app — exactly the drift §23.5 chose a script over a screen recording to avoid — and the demo's e2e replay already keeps this one honest.
+  - **The trainer doing the step themselves is what advances it.** Completion is the step's own expectation becoming true, watched on a poll, so it does not care who caused it: no scrim, no backdrop, the app fully tappable underneath. A walkthrough that only advanced on its own buttons would be teaching its own buttons. "Show me" is the escape hatch for someone who cannot find the control, and it withdraws once the step is done, because an offer to do something already done is a control that does nothing.
+  - **A step cannot be skipped, and that is the app's constraint rather than a teaching choice** — there is no circuit card before the clipboard is open and no Too Easy button before a card is in focus, so a Next that worked before the step happened would point at nothing.
+  - **Back re-explains; it does not undo.** An inverse for every step is an undo stack for a demonstration. A step returned to stays done, so re-reading what Too Easy meant cannot log a second signal — and leaving is one tap that keeps whatever the trainer already did.
+
+  The panel **moves to the top of the screen when it would cover the control it is pointing at**: a guide that hides the thing it is highlighting is worse than no guide on a phone, where there is nowhere else to look. The pure cursor is [domain/walkthrough.js](src/domain/walkthrough.js) (7 `node:test` cases); [tests/e2e/test_walkthrough.py](tests/e2e/test_walkthrough.py) drives the real controls, including a case that pins the caption is **translated copy and not an i18n key** — a missing translation renders the key itself, which is invisible to every other test and is the first thing a trainer would read.
+
+### Changed
+- **The landing page offers three doors instead of two** (TODO §23.5) — watch it drive itself, walk through it with the guide, or poke at the sample gym unguided. The middle one is what a trainer who liked the video but does not want to be dropped into an unfamiliar app actually needs.
+
 ## 2026-08-13 — The demo feed stops promising what the app cannot do
 
 ### Changed

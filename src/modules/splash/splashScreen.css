@@ -240,25 +240,6 @@
   color: var(--on-primary, #fff);
 }
 
-/* The walkthrough is announced but not built yet (it waits on the UI settling). Disabled and
-   visibly labelled rather than hidden: a trainer deciding whether to invest time in this app is
-   told what is coming, and nothing here pretends to work and then does nothing. */
-.app-splash-action:disabled {
-  cursor: default;
-  opacity: 0.55;
-}
-
-.app-splash-soon {
-  padding: 2px 7px;
-  border-radius: 999px;
-  background: var(--primary-light, rgba(16, 185, 129, 0.16));
-  color: var(--primary);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
-}
-
 .app-splash-skip {
   padding: 10px 8px; /* a real target, not just the 14px of text */
   border: 0;
