@@ -281,6 +281,11 @@ calendar clients never generated one. The invite dialog asks for the address onc
 reply is an email, arriving in the trainer's mailbox, which a backendless PWA cannot read. It means
 the trainer finds out. Acceptance is a manual read for now, by decision (2026-08-17).
 
+**Decided 2026-08-17 (Simon) — the channels are EMAIL and SMS.** Everything client-facing is
+addressed to one of those two. The share sheet and clipboard entries stay in the registry as they
+are: clipboard is what keeps the list from ever being empty, and neither is a channel the app
+designs around.
+
 **Shipped — the transport seam.** Decided 2026-08-17: what an event IS
 ([sessionEventPayload.js](src/data/sessionEventPayload.js)) is separated from how it TRAVELS
 ([eventTransports.js](src/modules/common/eventTransports.js)), so a channel can be chosen per
@@ -306,6 +311,32 @@ segment is 160 characters, which is why a session summary travels and a program 
   of the session's own slot — the form read `timeLabel`/`date`, the live clipboard meta's field
   names, while a stored record carries `time`/`startDate`. Re-saving silently moved the session to
   whenever the trainer had opened it.
+
+### 1.7 [ ] Client self-onboarding and GDPR consent from a QR on a leaflet
+**Wanted 2026-08-17 (Simon).** A code on a gym wall or a printed leaflet that a prospective client
+scans to introduce themselves and give consent, so a PT acquires a client without typing anything.
+Rides the same seam §1.6 built: an event, encoded into a link, carried by email or SMS.
+
+- **The QR is static and generic** — one code per trainer, not per client, so it carries only the
+  trainer's return channel (~100 bytes, prints crisply at leaflet size). It therefore does **not**
+  force the in-app QR-generation question: a code needed once, for printing, can be produced by any
+  tool outside the app. An in-app generator is a separate convenience, and the only thing that would
+  make a vendored QR library necessary.
+- **The consent it produces must be the same record a PT-captured consent is** —
+  `{cloudSync, consentDate, formVersion, formLang}` per [clientConsent.js](src/data/clientConsent.js).
+  Art. 7(1) requires being able to DEMONSTRATE consent, so the wording version and the language it
+  was given under have to travel with it; a self-served consent that loses those is not evidence of
+  anything. The notice and form pages already exist in both languages
+  ([privacy-notice-en.html](src/privacy-notice-en.html), and the `sl` pair).
+- **Proposed, not decided — keep special-category data out of the transport.** Goals and injuries are
+  health data under Art. 9. If the self-onboarding form collects identity and contact only, nothing
+  sensitive ever travels in a URL, through a carrier, or into two phones' message histories, and the
+  PT takes the training detail in conversation as they already do. The alternative — collecting it on
+  the form — needs a story for that exposure. Simon's call.
+- **Open**: whether the landing page is a generated static page (the `privacy.html` pattern — own
+  CSP, offline-cached) or a route inside the app; and what the PT sees on arrival, since accepting a
+  stranger's submission into the client register should be a deliberate act rather than a silent
+  write.
 
 ---
 
