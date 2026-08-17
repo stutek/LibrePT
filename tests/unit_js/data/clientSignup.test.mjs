@@ -66,14 +66,37 @@ test("a submission needs a name and one way to reach the person", () => {
   assert.ok(buildClientSignup(filledForm({ phone: "" })));
 });
 
-test("goals and injuries cannot ride along even when the sender puts them in", () => {
-  // §1.7's proposal: special-category data stays out of the transport, so it cannot appear in a URL,
-  // a carrier's logs, or two phones' message histories. A sender who adds it anyway is ignored.
+test("goals and an injury travel when the client offers them", () => {
+  // Ruled 2026-08-17: the client provides these if they decide to. They are Art. 9 data, which is why
+  // they may only ride in the shared FILE and never in a link — see the module header.
   const signup = buildClientSignup({
     ...filledForm(),
-    goals: "lose 10kg",
+    goals: "back to squatting after the knee",
     injury: "knee reconstruction 2024",
+  });
+
+  assert.equal(signup.goals, "back to squatting after the knee");
+  assert.equal(signup.injury, "knee reconstruction 2024");
+});
+
+test("saying nothing about health is a complete submission, and reads as a choice", () => {
+  const silent = buildClientSignup(filledForm());
+  const blank = buildClientSignup({ ...filledForm(), goals: "   ", injury: "" });
+
+  // Absent, not "" — so the trainer can tell "chose not to say" from a field nobody has filled yet.
+  for (const signup of [silent, blank]) {
+    assert.equal("goals" in signup, false);
+    assert.equal("injury" in signup, false);
+    assert.ok(signup.name, "the submission is still valid and usable");
+  }
+});
+
+test("nothing outside the declared fields rides along, however the sender labels it", () => {
+  const signup = buildClientSignup({
+    ...filledForm(),
     hasInjury: true,
+    medications: "insulin",
+    notes: "trainer-only field",
   });
 
   assert.deepEqual(Object.keys(signup).sort(), ["email", "gdprConsent", "name", "phone", "v"]);
@@ -89,6 +112,15 @@ test("a submission from a build that has moved on is refused, not misread", () =
   const fromTheFuture = { ...buildClientSignup(filledForm()), v: 99 };
 
   assert.equal(parseClientSignup(fromTheFuture), null);
+});
+
+test("a page of prose is refused rather than truncated into something plausible", () => {
+  // Truncating would store a sentence that stops mid-clause and reads as the client's own words —
+  // worse than refusing, when the field describes an injury a trainer will program around.
+  const signup = buildClientSignup({ ...filledForm(), injury: "x".repeat(1001) });
+
+  assert.equal("injury" in signup, false);
+  assert.ok(signup.name, "the rest of the submission still arrives");
 });
 
 test("nothing the sender invents reaches the trainer's register", () => {

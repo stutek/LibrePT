@@ -5,12 +5,14 @@
 // here** — that is a transport's job (modules/common/eventTransports.js), the seam §1.6 established
 // on 2026-08-17: a new channel is then a new entry in one list rather than a new payload format.
 //
-// **The record is identity and contact only — no goals, no injuries.** Those are Art. 9 health data,
-// and this is the one record in the app that leaves the trainer's device and passes through a
-// stranger's phone, a carrier, or two message histories. §1.7 proposes keeping special-category data
-// out of the transport entirely and taking training detail in conversation, as trainers already do;
-// that proposal is not yet ruled on, so this ships the conservative subset. Adding a field later is
-// additive and reversible; having shipped health data through a URL is neither.
+// **Goals and injuries are the client's to offer, never required** (Simon, 2026-08-17: "customer
+// should provide goals and injuries if they decide to do so"). They are Art. 9 health data, so two
+// things hold them in place. They are optional at every level — a submission with neither is
+// complete, and a blank field is absent from the record rather than stored as an empty string, so the
+// trainer can tell "chose not to say" from "said nothing yet". And they travel **only inside the
+// shared file** (§1.7's share transport, ruled 2026-08-17), never in a URL: a link's payload would sit
+// in a carrier's logs and in two phones' message histories, which is not somewhere health data may
+// rest. A transport that cannot carry them privately must not carry them at all.
 //
 // **The consent stamp travels with the submission, and that is the actual prize.** Art. 7(1) requires
 // being able to DEMONSTRATE consent, so `formVersion` and `formLang` are captured at the moment the
@@ -37,10 +39,13 @@ export const SIGNUP_FORMAT_VERSION = 1;
 // push a megabyte of text into the DOM or into storage.
 const MAX_NAME_LENGTH = 120;
 const MAX_CONTACT_LENGTH = 200;
+// Prose, so the cap is generous: someone describing a knee reconstruction and what they want out of
+// training needs sentences. The file transport has no size budget, so nothing but sanity limits this.
+const MAX_PROSE_LENGTH = 1000;
 
 // The fields a client may state about themselves, and nothing else. Anything absent from this list is
 // dropped on the way in, including a field the trainer's own client record happens to have.
-const SIGNUP_TEXT_FIELDS = ["name", "email", "phone"];
+const SIGNUP_TEXT_FIELDS = ["name", "email", "phone", "goals", "injury"];
 
 function readText(value, maxLength) {
   if (typeof value !== "string") return "";
@@ -86,6 +91,13 @@ export function buildClientSignup(input) {
   const signup = { v: SIGNUP_FORMAT_VERSION, name };
   if (email) signup.email = email;
   if (phone) signup.phone = phone;
+
+  // Offered, not asked for. A blank field is left OUT rather than written as "", so a trainer reading
+  // the review can tell a client who chose not to say from one who has not been asked yet.
+  const goals = readText(input?.goals, MAX_PROSE_LENGTH);
+  const injury = readText(input?.injury, MAX_PROSE_LENGTH);
+  if (goals) signup.goals = goals;
+  if (injury) signup.injury = injury;
 
   const consent = readConsent(input?.gdprConsent);
   if (consent) signup.gdprConsent = consent;

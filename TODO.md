@@ -332,12 +332,19 @@ Rides the same seam §1.6 built: an event, encoded into a link, carried by email
   was given under have to travel with it; a self-served consent that loses those is not evidence of
   anything. The notice and form pages already exist in both languages
   ([privacy-notice-en.html](src/privacy-notice-en.html), and the `sl` pair).
-- **Proposed, not decided — keep special-category data out of the transport.** Goals and injuries are
-  health data under Art. 9. If the self-onboarding form collects identity and contact only, nothing
-  sensitive ever travels in a URL, through a carrier, or into two phones' message histories, and the
-  PT takes the training detail in conversation as they already do. The alternative — collecting it on
-  the form — needs a story for that exposure. Simon's call.
-- **Recommended (2026-08-17), awaiting a go**: the submission travels as a FILE attached to an email,
+- **Decided 2026-08-17 (Simon) — the client offers goals and injuries if they choose to.** So the form
+  does collect Art. 9 health data, and the exposure story is the transport: those fields ride **only
+  inside the shared file**, never in a URL, so they never sit in a carrier's logs or two phones'
+  message histories. They are optional at every level, and a blank field is absent from the record
+  rather than stored as an empty string — "chose not to say" and "not asked yet" are different things
+  for a trainer reading the review. Pinned in [clientSignup.js](src/data/clientSignup.js).
+- **Decided 2026-08-17 (Simon: "use shares")** — the submission travels as a FILE, not a payload in a
+  link. This retires §26.2's fragment codec for phase 1: there is no URL payload to compress, so
+  nothing needs `CompressionStream` and the §19.2 URL-privacy question does not arise here at all.
+  Built: [signupFile.js](src/data/signupFile.js) (the artifact, both declarations) and
+  [signupDelivery.js](src/modules/intake/signupDelivery.js) (share sheet, with the permanent download
+  fallback — `canShare({files})` is false on every desktop and on iOS below 15).
+- **The original recommendation, kept for the reasoning**: the submission travels as a FILE attached to an email,
   not as a payload in a link — `navigator.share({ files })` puts it in the client's mail app in one
   tap, and `mailto:` cannot attach anything, so a link-based version would have a stranger hand-
   attaching a download. Three things follow. Nothing sensitive crosses a carrier or sits in a URL, so
@@ -1716,7 +1723,13 @@ browser** — no IndexedDB write, no demo seed, no service-worker dependency, no
 app state. It is the only route in the app that is stateless by design, and a medium test should
 pin that rather than trusting it.
 
-### 26.2 The payload, and why it lives in the fragment
+### 26.2 [Superseded 2026-08-17] The payload, and why it lives in the fragment
+**The transport is a shared FILE, not a link** (§1.7, ruled by Simon). Nothing below is being built:
+there is no URL payload, so there is no codec, no fragment, and no compression. The reasoning is kept
+because it is the argument for why a URL was never the right place for this data — which is the same
+argument that makes the file transport correct.
+
+
 Name / email / phone / goals / injury plus `gdprConsent` is ~400–600 bytes of JSON;
 `CompressionStream('deflate-raw')` + base64url takes it to ~250–400 characters. The codec belongs in
 `src/data/` with a round-trip unit test in [tests/unit_js/](tests/unit_js/) — pure logic, no DOM, no
@@ -1777,11 +1790,11 @@ client reads unaccompanied.
       this section that both live designs share, so it could ship while §1.7's two open questions
       (below) are still open. Health fields are **excluded for now**, since shipping them and
       retracting them is not reversible while adding them later is.
-- [ ] **Phase 1** — the `#/intake` route and form, the codec, the import-review dialog, and
-      share / `mailto:` / `sms:` delivery. **No new dependency and no CSP change** (`connect-src`
-      untouched; it is all local). **Blocked on two rulings, not on work** — §1.7's file-vs-link
-      transport (which decides whether the codec here is needed at all) and whether the form collects
-      health data. Both are marked *Simon's call* in §1.7 and neither has been answered.
+- [~] **Phase 1 — both rulings landed 2026-08-17, and the transport half is built.** Shared file
+      (§1.7) rather than a link, so §26.2's codec is retired unbuilt; goals and injuries collected at
+      the client's discretion. Done: the record, the file artifact, and share/save delivery. **Left:
+      the `/intake` route and form itself, and the trainer-side import-review dialog with dedupe.**
+      Still **no new dependency and no CSP change** — `connect-src` untouched, it is all local.
 - [ ] **Phase 2** — the vendored QR encoder and client-side QR display, plus the static trainer-side
       QR asset. Additive: both phases land on the same review dialog. Worth deferring until the
       messaging handoff has actually been tried in a gym.
