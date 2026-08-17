@@ -6,6 +6,7 @@
 // facade of operations a route is allowed to perform.
 
 import { renderMarkupOnce } from "../modules/common/dom.js";
+import { EVENT_PARAM } from "../modules/common/eventTransports.js";
 import { SHARE_INIT_PARAM } from "../modules/common/shareLink.js";
 import { DialogRoute } from "./routes/dialogRoute.js";
 import { buildRouteTable } from "./routes/routeTable.js";
@@ -42,7 +43,10 @@ const routerOps = {
 // A promo param that is consumed once at boot and must NOT be carried onward: it seeds demo data, so
 // a sticky `?init=` would turn any URL the trainer copies out of the address bar into a link that
 // seeds someone else's empty app.
-const BOOT_ONLY_PARAMS = [SHARE_INIT_PARAM];
+// `?evt=` joins it for the same reason plus one of its own: it is APPLIED at boot (an RSVP is written
+// to the store), so carrying it onward would re-apply the same answer on every navigation, and a URL
+// the trainer copied out of the address bar would replay it on any device that opened it.
+const BOOT_ONLY_PARAMS = [SHARE_INIT_PARAM, EVENT_PARAM];
 
 // What a navigation carries over from the current URL: the presentational share params (`?lang`,
 // `?theme`) survive, because a promo link must still look like itself after the first tap. Before

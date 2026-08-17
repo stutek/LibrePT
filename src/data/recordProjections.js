@@ -28,6 +28,10 @@ export const projectSession = (session) => toRecord("sessions", session);
 export const projectHistory = (historyEntry) => toRecord("history", historyEntry);
 export const projectPlanUpdate = (update) => toRecord("planUpdates", update);
 export const projectNotification = (notification) => toRecord("notifications", notification);
+// An invitation, and with it the RSVP that came back (TODO §1.6). Declaring it here is what makes it
+// persist at all: COLLECTIONS is derived from this table, and the fan-out and the backup file both
+// walk that list.
+export const projectInvite = (invite) => toRecord("invites", invite);
 
 const PROJECTORS = {
   clients: projectClient,
@@ -37,6 +41,7 @@ const PROJECTORS = {
   history: projectHistory,
   planUpdates: projectPlanUpdate,
   notifications: projectNotification,
+  invites: projectInvite,
 };
 
 export function projectCollection(collection, domainObject) {
@@ -57,6 +62,26 @@ export function projectionIssues(collection, domainObject, schema = SCHEMA_4) {
 // Every collection this build projects — the boot-time read (TODO §18.6 part 4) groups a flat
 // IndexedDB record list back into this shape, so it needs the same set PROJECTORS was built from.
 export const COLLECTIONS = Object.keys(PROJECTORS);
+
+/**
+ * Whether a schema declares this collection at all — the staging boundary, made checkable (§18.4).
+ *
+ * Until 2026-08-17 nothing asked this question: the fan-out wrote every projected record into every
+ * live store, and the backup file walked the projector table, which knows nothing about schemas. So
+ * "expand-first staging, P is disposable and 4 is durable" held only because no preview-only
+ * collection had ever existed. The first one (`invites`) would have landed in schema 4 and in every
+ * backup, undeclared — which is exactly the failure a rollout plan exists to prevent, found here
+ * because the maintainer chose to exercise the plan rather than take the shortcut.
+ */
+export function schemaAcceptsCollection(schema, collection) {
+  return Boolean(schema?.[collection]);
+}
+
+/** The collections one schema carries, in projector order. What a store is written with, and what a
+ *  backup file at that schema contains. */
+export function collectionsForSchema(schema) {
+  return COLLECTIONS.filter((collection) => schemaAcceptsCollection(schema, collection));
+}
 
 // Inverse of projectCollection: drop the routing field a stored record carries, recovering the
 // domain object exactly as it was before projection. `collection` is redundant once a record has

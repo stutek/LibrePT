@@ -113,6 +113,7 @@ export const sl = {
     "Izvozi svoj katalog gibov, preslikan v odprto taksonomijo wger, da ostane izmenljiv z zunanjimi orodji.",
   btn_export_catalog_json: "Izvozi katalog JSON",
   btn_export_catalog_csv: "Izvozi katalog CSV",
+  restore_preview_only_lost: "teh datoteka ne vsebuje in se ne morejo vrniti",
   backup_import_title: "Uvozi varnostno kopijo",
   backup_import_desc:
     "Naloži obstoječo .json datoteko. To bo združilo ali prepisalo trenutno bazo.",
@@ -392,6 +393,11 @@ export const sl = {
   drive_sync_glyph_failed: "Zadnja sinhronizacija ni uspela",
   drive_sync_glyph_disconnected: "Sinhronizacija v oblak ni povezana",
   drive_sync_glyph_idle: "Sinhronizacija v oblak je povezana",
+  notif_rsvp_title: "Odgovori na vabila",
+  notif_rsvp_unknown_client: "Stranka",
+  rsvp_answer_yes: "pride",
+  rsvp_answer_no: "ne more",
+  rsvp_answer_maybe: "še ne ve",
   notif_sync_failed_title: "Sinhronizacija v oblak ni uspela",
   drive_sync_desc_connected:
     "Ohrani stranke, programe in zgodovino vadb usklajene med svojimi napravami, v skriti mapi, ki jo v vašem Google Drivu vidi samo LibrePT.",

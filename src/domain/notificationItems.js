@@ -117,11 +117,47 @@ export function buildSyncFailureItem(syncFailure, t) {
   };
 }
 
+// Answers that came back (TODO §1.6). Synthetic for the same reason the two above are: the answer
+// already lives on the invitation, and a stored copy would ride into the backup and the Drive
+// snapshot as a second source of truth for one fact.
+//
+// It exists because tapping a reply link is otherwise an invisible act — the trainer opens a message,
+// the app writes a record, and nothing on screen says so. This is what says so.
+//
+// An answer from a client no longer in the register is still reported: they may have been erased
+// (§27.2) between answering and the trainer opening the link, and the answer is a fact about an
+// invitation rather than about a row that has to still exist.
+export function buildRsvpAnswersItem(state, t) {
+  const answered = (state?.invites || []).filter((invite) => invite.answer);
+  if (answered.length === 0) return null;
+
+  const nameFor = (clientId) =>
+    (state.clients || []).find((client) => client.id === clientId)?.name ||
+    t("notif_rsvp_unknown_client") ||
+    "A client";
+  const lines = answered.map(
+    (invite) =>
+      `${nameFor(invite.clientId)}: ${t(`rsvp_answer_${invite.answer}`) || invite.answer}`,
+  );
+
+  return {
+    // Keyed on the answers themselves, so a NEW answer arrives unread rather than being silenced by
+    // a "mark read" the trainer tapped for an earlier one.
+    id: `synthetic-rsvp-${answered.map((invite) => `${invite.id}:${invite.answer}`).join("|")}`,
+    type: "info",
+    icon: "fa-solid fa-envelope-circle-check",
+    title: t("notif_rsvp_title") || "RSVP replies",
+    description: lines.join(" · "),
+    actions: [],
+  };
+}
+
 export function resolveNotificationItems(state, t, readIds = [], syncFailure = null) {
   const synthetic = [
     // A fault leads: it is the only item here reporting that something the trainer asked for did
     // not happen.
     buildSyncFailureItem(syncFailure, t),
+    buildRsvpAnswersItem(state, t),
     buildUnscheduledPlansItem(state, t),
     buildPendingSessionsItem(state, t),
   ]

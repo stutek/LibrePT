@@ -327,12 +327,27 @@ segment is 160 characters, which is why a session summary travels and a program 
   prefills it the way the organizer email already does. Rows rebuild on organizer-field input, because
   an `<a href>` is resolved by the browser rather than by a handler that could read those fields later.
 
-  **Still open — trainer-side ingestion, and it needs a decision first.** A returning `?evt=<rsvp>`
-  falls through to the normal boot and is ignored, because nothing stores an answer: `sessions` has no
-  field for one. Two ways, and the choice is the maintainer's — an **unconstrained object** on the
-  session (additive, no schema bump, the `gdprConsent` precedent) or a **declared field with a schema
-  bump** under §18.4's expand-first staging. The first is cheap and slightly dishonest about the data
-  model; the second is correct and pulls in star-write staging.
+  **[x] Trainer-side ingestion — 2026-08-17, and the storage question was answered by ruling rather
+  than by either option I offered.** Decided (Simon): *"invites should host the RSVP status, sessions
+  should host attendees list (by reference only for easier anonymization)"* and *"not all attendees
+  need an invitation, some will be added manually"*. So `invites` is its own collection
+  ([inviteRecord.js](src/data/inviteRecord.js)): an RSVP is a fact about a message that was sent, not
+  a property of a person or of a session, and `sessions.participants` stays authoritative — an
+  attendee added by hand simply has no invitation. A tap on a reply link upserts the answer and
+  **never touches `participants`**: a "no" is an answer, not a withdrawal.
+
+  Also decided: **no "late" mark, record the response time** — `answeredAt` and `sentAt` are both UTC
+  instants, so subtracting them is correct across timezones and the reader compares. The convention is
+  written down now ([DATA_MODEL §1](docs/DATA_MODEL.md)): instants are UTC, calendar dates are local,
+  and the consent date is the case that proves the distinction matters.
+
+  **Declared in the PREVIEW schema, deliberately** (Simon: *"we can afford [the] shortcut of modifying
+  schema 4 now, but not modifying it would actually test our rollout plans"*). It did test them, and
+  they failed: nothing enforced staging at all. The fan-out wrote every record into every store and the
+  backup file walked the projector table, so a preview-only collection would have landed in schema 4
+  and in every backup, undeclared. Enforced now in both places, with the restore prompt naming what a
+  file cannot carry — see §18.4 and DATA_MODEL §1. **The cost is accepted and visible: an RSVP does not
+  survive a restore until schema 5 is minted from P.**
 - **[x] SMS as a second channel — decided 2026-08-17 (Simon: "let us have SMS too, for sure").** It is
   in on BOTH legs, including the reply, and the question it settles was specifically whether a channel
   with unreliable body prefill is worth shipping: it is, because clients answer texts. So email is

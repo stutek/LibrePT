@@ -40,7 +40,13 @@ import {
   readStoreName,
   rebuildPreviewSchemaIfBuildChanged,
 } from "./readSchema.js";
-import { COLLECTIONS, groupRecordsByCollection, projectCollection } from "./recordProjections.js";
+import {
+  COLLECTIONS,
+  groupRecordsByCollection,
+  projectCollection,
+  schemaAcceptsCollection,
+} from "./recordProjections.js";
+import { LIVE_SCHEMAS } from "./recordSchemas.js";
 import { describeMigration, migrateState } from "./schemaMigrations.js";
 import { stampAsSeeded } from "./seedProvenance.js";
 import { readVersionScoped, writeVersionScoped } from "./storageNamespace.js";
@@ -73,6 +79,10 @@ export function emptyState() {
     history: [],
     planUpdates: [],
     sessions: [],
+    // Invitations sent, and the answers that came back (TODO §1.6). Separate from `sessions` because
+    // an RSVP is a fact about a message, and separate from `clients` because the same person answers
+    // differently per session.
+    invites: [],
     notifications: [],
     // null, not "en": the language nobody has chosen yet must stay distinguishable from a chosen
     // English, or the splash cannot tell who to offer the choice to (see i18n/index.js).
@@ -180,14 +190,22 @@ async function starWrite(db, currentState) {
   const storeNames = [...SCHEMAS.map(storeNameForSchema), META_STORE];
   await withTransaction(db, storeNames, "readwrite", ({ store }) => {
     for (const collection of COLLECTIONS) {
+      // Only into stores whose schema DECLARES this collection (TODO §18.4's staging, enforced
+      // 2026-08-17). Without this the fan-out wrote everything everywhere, so a preview-only
+      // collection was preview-only in name and durable in fact — and nothing said so.
+      const targets = SCHEMAS.filter((schema) =>
+        schemaAcceptsCollection(LIVE_SCHEMAS[schema], collection),
+      );
       for (const record of currentState[collection] || []) {
         const projected = projectCollection(collection, record);
-        for (const schema of SCHEMAS) {
+        for (const schema of targets) {
           store(storeNameForSchema(schema)).put(projected);
         }
       }
+      // Deletes follow the same set: a store that never held the record has nothing to reconcile,
+      // and issuing the delete anyway would be a write to a shape that does not know the collection.
       for (const id of staleIdsByCollection[collection]) {
-        for (const schema of SCHEMAS) {
+        for (const schema of targets) {
           store(storeNameForSchema(schema)).delete(id);
         }
       }

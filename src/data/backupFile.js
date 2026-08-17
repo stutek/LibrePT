@@ -40,8 +40,8 @@
 // Injected dependencies: none.
 
 import { CURRENT_SCHEMA_VERSION } from "./migrationSteps.js";
-import { COLLECTIONS, projectCollection } from "./recordProjections.js";
-import { BACKUP_SCHEMA } from "./recordSchemas.js";
+import { COLLECTIONS, collectionsForSchema, projectCollection } from "./recordProjections.js";
+import { BACKUP_SCHEMA, LIVE_SCHEMAS } from "./recordSchemas.js";
 
 // Settings that belong to the database rather than to any record. `schemaVersion` is set from
 // BACKUP_SCHEMA, not copied from the live state, which is the whole point of this module.
@@ -122,7 +122,11 @@ export function buildBackupPayload(
 
   for (const key of SETTINGS_KEYS) payload[key] = state?.[key] ?? null;
 
-  for (const collection of COLLECTIONS) {
+  // The collections of the schema this file is WRITTEN AT, not everything the build can project. A
+  // preview-only collection is excluded by construction rather than by convention — see §18.4 and
+  // recordProjections.collectionsForSchema. The cost is stated where it is chosen (recordSchemas.js):
+  // a preview-only collection does not survive a restore until it graduates to a numbered shape.
+  for (const collection of collectionsForSchema(LIVE_SCHEMAS[BACKUP_SCHEMA])) {
     const records = Array.isArray(state?.[collection]) ? state[collection] : [];
     // Through the same projection path the star-write fan-out uses, so the file cannot drift from
     // what the store would have written for this shape.
@@ -146,6 +150,11 @@ export function isBackupPayload(parsed) {
  * A restore is a whole-database replace, not a merge — the file is a snapshot, and merging two
  * databases without a common ancestor is guesswork (that ancestor is exactly what Drive sync's
  * three-way merge has and a file import does not). Replacing is right; replacing silently is not.
+ *
+ * Counts every LIVE collection, not only the ones a file can carry, plus `notCarried`: the preview-only
+ * collections that a file written at the stable schema has no room for (§18.4's staging). Those are the
+ * records a restore destroys and cannot bring back, which makes them the ones most worth naming — the
+ * warning DATA_MODEL §1 says a preview shape needs and did not have.
  */
 export function summarizeReplacement(currentState) {
   const counts = {};
@@ -153,5 +162,7 @@ export function summarizeReplacement(currentState) {
     const records = Array.isArray(currentState?.[collection]) ? currentState[collection] : [];
     if (records.length > 0) counts[collection] = records.length;
   }
-  return { counts, total: Object.values(counts).reduce((sum, n) => sum + n, 0) };
+  const carried = collectionsForSchema(LIVE_SCHEMAS[BACKUP_SCHEMA]);
+  const notCarried = Object.keys(counts).filter((collection) => !carried.includes(collection));
+  return { counts, notCarried, total: Object.values(counts).reduce((sum, n) => sum + n, 0) };
 }

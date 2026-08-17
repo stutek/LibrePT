@@ -141,6 +141,42 @@ different deployment. The data schema is the only axis storage is keyed on.
 A schema major is bumped **only** when a migration step is added. A "patch" to a schema is either a
 migration step or it is nothing.
 
+### Staging is enforced, not merely intended (2026-08-17)
+
+Adding the first preview-only collection (`invites`) found that none of the above was enforced
+anywhere: the star-write fan-out wrote **every** projected record into **every** live store, and the
+backup file walked the projector table, which knows nothing about schemas. A "preview-only" shape
+would therefore have landed in `schema4` and in every backup, undeclared — the exact failure staging
+exists to prevent, and invisible until someone tried it.
+
+It is enforced now, in two places, both keyed off `recordProjections.schemaAcceptsCollection`: a
+record is written only to stores whose schema **declares** its collection, and a backup carries the
+collections of the schema it is **written at**. The maintainer chose to exercise the rollout plan
+rather than take the shortcut of widening schema 4 — which is what surfaced this.
+
+**The cost is now real rather than theoretical**, and the restore prompt says so: a preview-only
+collection cannot be in a stable-schema file, so a restore replaces it with nothing. `summarizeReplacement`
+returns `notCarried` for exactly those, and the confirmation names them separately from everything
+else, because every other collection is *replaced* while these are simply *gone*.
+
+### Time values: instants are UTC, calendar dates are local
+
+Two different kinds of value, and mixing them is a silent, off-by-one-day bug:
+
+| Kind | Stored as | Examples |
+| :--- | :--- | :--- |
+| **Instant** — a moment that happened | ISO-8601 **UTC** (`toISOString()`), or epoch ms on the wire | `invites.sentAt` / `answeredAt`, `sessions.startDate`, `gdprConsent.timestamp`, an event payload's `startsAt` |
+| **Calendar date** — a fact about someone's calendar | **Local** `YYYY-MM-DD`, no zone (`getISODateString`) | `gdprConsent.consentDate`, a session's `day` bucket, export filenames |
+
+The rule of thumb: **if a human would say "at", it is UTC; if they would say "on", it is a local
+calendar date.** The consent date is the case that proves it — `toISOString()` was used there and was
+wrong, because a trainer in Ljubljana ticking the box at 00:30 signed *today*, and UTC filed it as
+yesterday ([clientConsentSection.js](../src/modules/clients/clientConsentSection.js)).
+
+Response times follow from this: an answer's `answeredAt` and an invitation's `sentAt` are both
+instants, so subtracting them is correct across any pair of timezones — which is why a reply carries
+no "late" flag (decided 2026-08-17: record the response time, and let the reader compare).
+
 ---
 
 ## 2. Physical layout — one database, one store per schema
@@ -202,7 +238,9 @@ enforced, field-exact source of truth, checked in CI against real data — see �
 
 ```mermaid
 erDiagram
-    CLIENT }o--o{ SESSION : "participates in"
+    CLIENT }o--o{ SESSION : "participates in (session.participants, ids only)"
+    SESSION ||--o{ INVITE : "was offered to"
+    CLIENT ||--o{ INVITE : "answered"
     CLIENT ||--o{ HISTORY : "performed"
     CLIENT ||--o{ PLAN_UPDATE : "about"
     ROUTINE ||--o{ SESSION_ITEM : "prescribes"
@@ -234,6 +272,16 @@ erDiagram
     ROUTINE {
         string id PK
         string name
+    }
+    INVITE {
+        string id PK
+        string sessionId FK
+        string clientId FK
+        string channel "email|sms — how it was sent"
+        string sentAt "INSTANT, UTC"
+        string status "sent|answered"
+        string answer "yes|no|maybe — the RSVP lives HERE, not on the session"
+        string answeredAt "INSTANT, UTC — response time is answeredAt - sentAt"
     }
     SESSION {
         string id PK

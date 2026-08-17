@@ -15,6 +15,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   buildPendingSessionsItem,
+  buildRsvpAnswersItem,
   buildUnscheduledPlansItem,
   resolveNotificationItems,
 } from "../../../src/domain/notificationItems.js";
@@ -177,4 +178,70 @@ test("a later failure arrives unread even after the previous one was dismissed",
 test("no failure means no card at all, not an empty one", () => {
   assert.equal(resolveNotificationItems({}, t, [], null).length, 0);
   assert.equal(resolveNotificationItems({}, t, []).length, 0);
+});
+
+// --- Answers that came back (TODO §1.6). Synthetic, like every other item derived from state: an
+// RSVP already lives on the invitation, and a stored copy would ride into the backup and the Drive
+// snapshot as a second source of truth for the same fact. ---
+
+test("answers that came back are surfaced, so a tap on a reply link is visibly not a no-op", () => {
+  const state = {
+    invites: [
+      {
+        id: "i1",
+        sessionId: "s1",
+        clientId: "c1",
+        status: "answered",
+        answer: "yes",
+        answeredAt: "2026-08-17T18:00:00.000Z",
+      },
+      { id: "i2", sessionId: "s1", clientId: "c2", status: "sent" },
+    ],
+    clients: [
+      { id: "c1", name: "Jana Novak" },
+      { id: "c2", name: "Mark Kos" },
+    ],
+    sessions: [{ id: "s1", title: "Group Strength", participants: ["c1", "c2"] }],
+  };
+
+  const item = buildRsvpAnswersItem(state, (key) => key);
+
+  assert.ok(item, "an answered invitation produces an item");
+  assert.ok(item.description.includes("Jana Novak"), "it names who answered");
+  assert.equal(
+    item.description.includes("Mark Kos"),
+    false,
+    "an unanswered invite is not an answer",
+  );
+});
+
+test("nothing is said when nobody has answered", () => {
+  const quiet = {
+    invites: [{ id: "i1", sessionId: "s1", clientId: "c1", status: "sent" }],
+    clients: [],
+    sessions: [],
+  };
+
+  assert.equal(
+    buildRsvpAnswersItem(quiet, (key) => key),
+    null,
+  );
+  assert.equal(
+    buildRsvpAnswersItem({}, (key) => key),
+    null,
+  );
+});
+
+test("an answer from someone no longer in the register still reports itself", () => {
+  // The client may have been erased (§27.2) between answering and the trainer opening the link. The
+  // answer is still a fact about an invitation, and silently dropping it would lose it.
+  const state = {
+    invites: [{ id: "i1", sessionId: "s1", clientId: "gone", status: "answered", answer: "no" }],
+    clients: [],
+    sessions: [],
+  };
+
+  const item = buildRsvpAnswersItem(state, (key) => key);
+
+  assert.ok(item, "the answer is still reported");
 });

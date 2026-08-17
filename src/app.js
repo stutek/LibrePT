@@ -47,8 +47,9 @@ import {
   setupRoutineForms as setupRoutineFormsController,
 } from "./controllers/routineFormsController.js";
 import { driveSyncStatus, onSyncCountsChanged, primeAheadCache } from "./data/driveSyncService.js";
+import { recordRsvp } from "./data/inviteRecord.js";
 import { newRecordId } from "./data/recordId.js";
-import { SESSION_INVITE, decodeSessionEvent } from "./data/sessionEventPayload.js";
+import { SESSION_INVITE, SESSION_RSVP, decodeSessionEvent } from "./data/sessionEventPayload.js";
 import {
   getState,
   loadSavedState,
@@ -272,6 +273,18 @@ async function init() {
     localStorage.removeItem("librept_active_session");
   }
 
+  // A reply the trainer just tapped (TODO §1.6). The answer lands on the INVITATION — decided
+  // 2026-08-17: sessions host attendees, invites host the RSVP — so `participants` is deliberately
+  // untouched. A "no" is an answer, not a withdrawal, and a client's reply must not silently remove
+  // someone the trainer put in the session.
+  if (inboundEvent?.kind === SESSION_RSVP) {
+    state.invites = recordRsvp(state.invites || [], inboundEvent, {
+      now: new Date().toISOString(),
+      newId: newRecordId,
+    });
+    saveState();
+  }
+
   // Wire router dependencies
   appBoot.bootRouter({
     getState,
@@ -336,7 +349,7 @@ async function init() {
   setupRoutineForms();
   setupExerciseForms();
 
-  appBoot.bootSessionInviteDialog({ getState, t });
+  appBoot.bootSessionInviteDialog({ getState, t, saveState, newInviteId: newRecordId });
 
   appBoot.bootWorkoutSetup({
     getState,

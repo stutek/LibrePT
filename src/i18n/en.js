@@ -115,6 +115,7 @@ export const en = {
     "Export your movement catalog mapped to the open wger taxonomy, so it stays interchangeable with external tools.",
   btn_export_catalog_json: "Export Catalog JSON",
   btn_export_catalog_csv: "Export Catalog CSV",
+  restore_preview_only_lost: "these are not in the file and cannot come back",
   backup_import_title: "Import Data Backup",
   backup_import_desc:
     "Load an existing .json backup file. This will merge or overwrite your current database.",
@@ -408,6 +409,11 @@ export const en = {
   drive_sync_glyph_failed: "Last sync failed",
   drive_sync_glyph_disconnected: "Cloud sync not connected",
   drive_sync_glyph_idle: "Cloud sync connected",
+  notif_rsvp_title: "RSVP replies",
+  notif_rsvp_unknown_client: "A client",
+  rsvp_answer_yes: "coming",
+  rsvp_answer_no: "can't make it",
+  rsvp_answer_maybe: "not sure",
   notif_sync_failed_title: "Cloud sync failed",
   drive_sync_desc_connected:
     "Keep your clients, routines and session history mirrored across your own devices, in a hidden app folder only LibrePT can see in your Google Drive.",

@@ -16,6 +16,11 @@
 export const REFERENCES = {
   history: { clientId: "clients" },
   planUpdates: { clientId: "clients" },
+  // An invitation is meaningless without both ends: it records that THIS session was offered to THIS
+  // person. Losing either row does not stale a label, it leaves a record that cannot be read — which
+  // is exactly the test this file applies. Still acyclic: invites point at sessions and clients, and
+  // neither points back.
+  invites: { sessionId: "sessions", clientId: "clients" },
 };
 
 const WHITE = 0;

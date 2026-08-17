@@ -13,9 +13,15 @@
 // number (ruled 2026-08-17): a text cannot carry the `.ics`, so email keeps the calendar file and the
 // text carries the link. Both, never one instead of the other.
 //
-// deps: { getState, t }
+// **Sending records an invitation** (TODO §1.6): a row in `invites` saying this session was offered
+// to this client, on which channel, when. That is what an RSVP later lands on. It is recorded on the
+// tap that opens the mail or messaging app rather than on some later confirmation, because there is
+// no confirmation to wait for — the app hands the message to another app and never hears back.
+//
+// deps: { getState, t, saveState, newInviteId }
 
 import { buildIcsContent, buildIcsFilename } from "../../data/calendarInvite.js";
+import { buildInvite } from "../../data/inviteRecord.js";
 import { SESSION_INVITE } from "../../data/sessionEventPayload.js";
 import {
   looksLikeEmail,
@@ -106,6 +112,41 @@ function rememberOrganizer() {
   else if (phone) writeTrainerIdentity({ email: readTrainerIdentity().email, phone });
 }
 
+/** Records that an invitation went out, so the answer has something to land on.
+ *
+ * Idempotent per session/client pair: a trainer who taps Send twice — or sends by email and then by
+ * text — has invited one person once, and a second row would double-count in every reading of who was
+ * asked. The channel is overwritten because the latest one is how it was actually sent.
+ *
+ * `sentAt` is an INSTANT in UTC, never a local calendar date: it is compared against an answer's
+ * `answeredAt` to give a response time, and that subtraction is only correct if both are absolute.
+ */
+function recordInviteSent(client, sessionInfo, channel) {
+  if (!deps?.saveState) return;
+  const state = deps.getState();
+  if (!state.invites) state.invites = [];
+  const invites = state.invites;
+  const existing = invites.find(
+    (invite) => invite.sessionId === sessionInfo.sessionId && invite.clientId === client.id,
+  );
+  const sentAt = new Date().toISOString();
+
+  if (existing) {
+    existing.channel = channel;
+    existing.sentAt = sentAt;
+  } else {
+    const invite = buildInvite({
+      id: deps.newInviteId(),
+      sessionId: sessionInfo.sessionId,
+      clientId: client.id,
+      channel,
+      sentAt,
+    });
+    if (invite) invites.push(invite);
+  }
+  deps.saveState();
+}
+
 /** The invite as an event, which is what the reply link carries. */
 function inviteEventFor(client, sessionInfo) {
   return {
@@ -184,6 +225,7 @@ function buildEmailInviteButton(client, sessionInfo, replyLink, t) {
   btn.title = `${t("session_invite_send_to") || "Send invite to"} ${client.email}`;
   btn.addEventListener("click", () => {
     rememberOrganizer();
+    recordInviteSent(client, sessionInfo, "email");
     downloadFile(
       buildIcsContent({
         uid: `${sessionInfo.sessionId}-${client.id}`,
@@ -218,7 +260,10 @@ function buildSmsInviteButton(client, sessionInfo, replyLink, t) {
   sms.href = `sms:${encodeURIComponent(client.phone)}?&body=${encodeURIComponent(
     `${t("session_invite_sms_text") || "Training session"}: ${sessionInfo.sessionName} — ${replyLink}`,
   )}`;
-  sms.addEventListener("click", () => rememberOrganizer());
+  sms.addEventListener("click", () => {
+    rememberOrganizer();
+    recordInviteSent(client, sessionInfo, "sms");
+  });
   return sms;
 }
 

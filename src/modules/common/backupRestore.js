@@ -95,7 +95,16 @@ function showReplaceConfirmation(replacing) {
   const parts = Object.entries(replacing.counts).map(
     ([collection, count]) => `${count} ${collection}`,
   );
-  detail.textContent = parts.join(", ");
+  // Preview-only collections are named SEPARATELY, because they are worse off than the rest: every
+  // other collection is replaced by whatever the file holds, while these are simply gone — a file
+  // written at the stable schema has nowhere to put them (§18.4's staging, recordSchemas.js). This is
+  // the warning DATA_MODEL §1 says a preview shape needs; it had none until 2026-08-17.
+  const lost = (replacing.notCarried || []).map(
+    (collection) => `${replacing.counts[collection]} ${collection}`,
+  );
+  detail.textContent = lost.length
+    ? `${parts.join(", ")} — ${deps.t("restore_preview_only_lost") || "and these are not in the file and cannot come back"}: ${lost.join(", ")}`
+    : parts.join(", ");
   box.hidden = false;
 }
 

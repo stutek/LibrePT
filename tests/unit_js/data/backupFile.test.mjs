@@ -157,3 +157,35 @@ test("settings that belong to the database, not to a record, are carried", () =>
   const unasked = backup.buildBackupPayload({ ...database(), lang: null });
   assert.equal(unasked.lang, null);
 });
+
+test("a preview-only collection is not in the file, and the trainer is warned it will be lost", () => {
+  // The cost of staging (§18.4), made visible at the one moment it bites. `invites` lives in the
+  // preview schema only, so a backup written at the stable schema cannot carry it — and a restore is
+  // a whole-database replace, which means those records go. Saying so beforehand is the difference
+  // between a documented limitation and a surprise.
+  //
+  // Unit-level on purpose (Simon, 2026-08-17: "we can unit test P backups if needed, but not e-2-e"):
+  // what a file carries is a fact about projection, not about a browser.
+  const state = {
+    schemaVersion: "P",
+    clients: [{ id: "c1", name: "Jana", active: true }],
+    sessions: [],
+    exercises: [],
+    routines: [],
+    history: [],
+    planUpdates: [],
+    notifications: [],
+    invites: [{ id: "i1", sessionId: "s1", clientId: "c1", status: "answered", answer: "yes" }],
+  };
+
+  const file = backup.buildBackupPayload(state);
+  assert.equal("invites" in file, false, "a schema-4 file cannot carry a preview-only collection");
+
+  const summary = backup.summarizeReplacement(state);
+  assert.equal(summary.counts.invites, 1, "the trainer is told the invitations would be replaced");
+  assert.equal(
+    summary.notCarried.includes("invites"),
+    true,
+    "and that a restore cannot bring them back",
+  );
+});

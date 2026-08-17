@@ -143,3 +143,49 @@ test("an older schemas writer missing a newer required field is caught", () => {
     "schema P requires startDate — an old-shaped record must be caught, not silently accepted",
   );
 });
+
+// --- Staging is enforced, not merely intended (TODO §18.4). Decided 2026-08-17: a new collection goes
+// into the PREVIEW schema first, because doing it that way "would actually test our rollout plans".
+// It did — it found that nothing enforced the boundary. These are that enforcement. ---
+
+test("a schema declares which collections belong in it, and preview-only ones are not in the stable shape", () => {
+  // `invites` is the first preview-only collection. The point of the pair is that the two shapes
+  // genuinely differ — if this ever passes trivially, staging has stopped being exercised.
+  assert.ok(schemas.SCHEMA_P.invites, "P declares invites");
+  assert.equal(schemas.SCHEMA_4.invites, undefined, "4 does not");
+});
+
+test("a record is written only to schemas that declare its collection", () => {
+  // The invariant the fan-out has to hold. Before this, every projected record went into every live
+  // store regardless — so a preview-only collection was preview-only in name and durable in fact.
+  assert.equal(proj.schemaAcceptsCollection(schemas.SCHEMA_P, "invites"), true);
+  assert.equal(proj.schemaAcceptsCollection(schemas.SCHEMA_4, "invites"), false);
+  // Everything that is not preview-only still goes everywhere, or staging would have quietly become
+  // a way to lose ordinary records.
+  for (const collection of ["clients", "sessions", "history", "planUpdates"]) {
+    assert.equal(proj.schemaAcceptsCollection(schemas.SCHEMA_4, collection), true, collection);
+    assert.equal(proj.schemaAcceptsCollection(schemas.SCHEMA_P, collection), true, collection);
+  }
+});
+
+test("the collections a backup carries come from the schema it is written at, not from what happens to be projectable", () => {
+  // This is the half that had no enforcement at all: backupFile walked the PROJECTOR table, which
+  // knows nothing about schemas, so anything projectable rode into the file whatever shape it
+  // belonged to.
+  const carried = proj.collectionsForSchema(schemas.LIVE_SCHEMAS[schemas.BACKUP_SCHEMA]);
+
+  assert.equal(carried.includes("invites"), false, "a preview-only collection is not in a backup");
+  assert.ok(carried.includes("clients"));
+  assert.ok(carried.includes("sessions"));
+});
+
+test("every projectable collection is declared by at least one live schema", () => {
+  // The inverse mistake: a projector with no schema anywhere would write records nothing validates,
+  // and the new filter would silently drop them into no store at all.
+  for (const collection of proj.COLLECTIONS) {
+    const declaredSomewhere = Object.values(schemas.LIVE_SCHEMAS).some((schema) =>
+      proj.schemaAcceptsCollection(schema, collection),
+    );
+    assert.ok(declaredSomewhere, `${collection} is declared by no live schema`);
+  }
+});

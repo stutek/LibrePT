@@ -150,6 +150,39 @@ export const SCHEMA_P = {
     ...SCHEMA_4.sessions,
     startDate: { required: true, type: "string" },
   },
+  // Invitations (TODO §1.6, decided 2026-08-17): an RSVP is a fact about an invitation — it was
+  // sent, and this came back — not a property of a person or of a session. `sessions.participants`
+  // stays the authoritative attendee list, and an attendee the trainer added by hand simply has no
+  // invitation here.
+  //
+  // BY REFERENCE ONLY, deliberately: two ids and the facts about the message, with no name, email or
+  // phone. That is what makes anonymisation cheap — erasing a client rewrites one client record and
+  // leaves every invitation structurally valid, with nothing in it to redact.
+  //
+  // PREVIEW-ONLY, deliberately (Simon, 2026-08-17: "not modifying [schema 4] would actually test our
+  // rollout plans"). Declaring a new collection here is the first real exercise of §18.4's
+  // expand-first staging — and it exposed that the staging was a convention nobody enforced: the
+  // fan-out wrote every projected record into every store regardless of what that store's schema
+  // declared, so a "preview-only" collection would have landed in schema 4 and in backups anyway,
+  // undeclared. It is enforced now (stateStore.js's starWrite, backupFile.js).
+  //
+  // The cost is real and is the point: an RSVP does not survive a restore or reach a Drive snapshot
+  // until schema 5 is minted from P. That is what a preview shape MEANS, and it is cheaper to learn
+  // it now, on invitations, than on a trainer's client records later.
+  //
+  // `answeredAt` and `sentAt` are INSTANTS — ISO-8601 UTC — never local calendar dates. A response
+  // time is only comparable against a cutoff if both are absolute (Simon, 2026-08-17: record the
+  // response time rather than marking a reply late).
+  invites: {
+    id: { required: true, type: "string" },
+    sessionId: { required: true, type: "string" },
+    clientId: { required: true, type: "string" },
+    channel: { required: false, type: "string" },
+    sentAt: { required: false, type: "string" },
+    status: { required: true, type: "string" },
+    answer: { required: false, type: "string" },
+    answeredAt: { required: false, type: "string" },
+  },
 };
 
 // Every schema major this build still knows how to write. A build can only write schemas it knows
