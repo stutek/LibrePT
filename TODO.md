@@ -360,6 +360,11 @@ Rides the same seam §1.6 built: an event, encoded into a link, carried by email
   CSP, offline-cached) or a route inside the app; and what the PT sees on arrival, since accepting a
   stranger's submission into the client register should be a deliberate act rather than a silent
   write.
+- **Started anyway, because it depends on none of the above (2026-08-17)**: the submission RECORD is
+  built and tested ([clientSignup.js](src/data/clientSignup.js), §26.7 phase 0). Identity, contact and
+  the consent stamp are the same under every option on the table; the file-vs-link question and the
+  health-data question both decide *transport and form*, not the record. The record ships with health
+  fields excluded, which is the option that stays reversible whichever way the ruling goes.
 
 ---
 
@@ -1766,9 +1771,17 @@ way, and §3.5's still-open translation gap applies here twice over — this is 
 client reads unaccompanied.
 
 ### 26.7 Phasing
+- [~] **Phase 0 — what a submission IS, 2026-08-17.** [clientSignup.js](src/data/clientSignup.js):
+      identity + contact + the consent stamp, built and parsed in one place, with the register match
+      that stops a second Jane Doe being minted. Deliberately **transport-free** — it is the half of
+      this section that both live designs share, so it could ship while §1.7's two open questions
+      (below) are still open. Health fields are **excluded for now**, since shipping them and
+      retracting them is not reversible while adding them later is.
 - [ ] **Phase 1** — the `#/intake` route and form, the codec, the import-review dialog, and
       share / `mailto:` / `sms:` delivery. **No new dependency and no CSP change** (`connect-src`
-      untouched; it is all local).
+      untouched; it is all local). **Blocked on two rulings, not on work** — §1.7's file-vs-link
+      transport (which decides whether the codec here is needed at all) and whether the form collects
+      health data. Both are marked *Simon's call* in §1.7 and neither has been answered.
 - [ ] **Phase 2** — the vendored QR encoder and client-side QR display, plus the static trainer-side
       QR asset. Additive: both phases land on the same review dialog. Worth deferring until the
       messaging handoff has actually been tried in a gym.
