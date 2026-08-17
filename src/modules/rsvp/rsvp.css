@@ -1,0 +1,108 @@
+/* src/modules/rsvp/rsvp.css — the invite-reply page (TODO §1.6's confirm link).
+   Client-facing, like the intake page: no header chrome, no bottom nav, one screen read once on a
+   phone from a message. Reuses index.css's buttons rather than restyling them. */
+
+.rsvp-view {
+  padding: 24px 16px calc(32px + var(--safe-bottom, 0px)) 16px;
+}
+
+.rsvp-brand {
+  margin: 0 0 20px 0;
+  font-family: var(--font-header);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.rsvp-brand-accent {
+  color: var(--primary);
+}
+
+.rsvp-unreadable {
+  padding: 14px 16px;
+  border-radius: var(--border-radius-md, 12px);
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
+  color: var(--danger);
+  line-height: 1.45;
+}
+
+.rsvp-title {
+  margin: 0 0 14px 0;
+  font-family: var(--font-header);
+  font-size: 1.5rem;
+  line-height: 1.2;
+  color: var(--text-main);
+}
+
+.rsvp-details {
+  margin: 0 0 22px 0;
+  padding: 14px 16px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--border-radius-md, 12px);
+  background: color-mix(in srgb, var(--primary) 5%, transparent);
+}
+
+.rsvp-details dt {
+  margin-top: 10px;
+  font-size: 0.75rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.rsvp-details dt:first-of-type {
+  margin-top: 0;
+}
+
+.rsvp-details dd {
+  margin: 2px 0 0 0;
+  color: var(--text-main);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.rsvp-question {
+  margin: 0 0 12px 0;
+  font-family: var(--font-header);
+  font-size: 1.15rem;
+  color: var(--text-main);
+}
+
+.rsvp-answers,
+.rsvp-send {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Three answers, each a full-width target: this is tapped once, possibly one-handed, possibly by
+   someone who has never opened this app before. */
+.rsvp-answer,
+.rsvp-send-btn {
+  min-height: 52px;
+  font-size: 1rem;
+}
+
+/* The chosen answer stays visibly chosen — the send button below is a second step, and a client who
+   cannot see what they picked will not trust what they are about to send. */
+.rsvp-answer.is-chosen {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.rsvp-send {
+  margin-top: 22px;
+}
+
+.rsvp-chosen {
+  margin: 0;
+  color: var(--text-main);
+  line-height: 1.45;
+}
+
+.rsvp-hint {
+  margin: 4px 0 0 0;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--text-muted);
+}

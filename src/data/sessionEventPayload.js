@@ -46,6 +46,11 @@ const INVITE_FIELDS = {
   l: "location",
   o: "organizerEmail",
   n: "organizerName",
+  // The trainer's phone, so a reply can be a TEXT and not only an email (§1.6's confirm link, SMS
+  // ruled in 2026-08-17). It is here rather than derived at reply time because the client's device
+  // knows nothing about the trainer except what the invite told it — an invite carrying only an email
+  // address can only ever be answered by email, whatever the client would rather use.
+  p: "organizerPhone",
 };
 const RSVP_FIELDS = {
   s: "sessionId",
@@ -137,6 +142,29 @@ export function decodeSessionEvent(encoded) {
   if (!event.sessionId) return null;
   if (event.kind === SESSION_RSVP && !RSVP_ANSWERS.has(event.answer)) return null;
   return event;
+}
+
+/**
+ * The answer to an invite, ready to travel back (TODO §1.6's confirm link).
+ *
+ * **It carries ids and one word, and that is a privacy decision rather than a size one.** A reply
+ * crosses a carrier and comes to rest in two message histories, so it names no client, no session
+ * title and no location: a title like "Post-surgery rehab" would disclose a medical fact about a
+ * named person to every system the message passes through. The trainer's own store already knows
+ * which session and which client those ids mean.
+ *
+ * Returns null for an answer nobody could have given, or an invite that cannot be answered — an
+ * invite with no client would produce a reply from nobody, which the trainer could not act on.
+ */
+export function replyToInvite(invite, answer) {
+  if (!invite?.sessionId || !invite?.clientId) return null;
+  if (!RSVP_ANSWERS.has(answer)) return null;
+  return {
+    kind: SESSION_RSVP,
+    sessionId: invite.sessionId,
+    clientId: invite.clientId,
+    answer,
+  };
 }
 
 /** How many bytes this event costs on the wire — the number every transport is budgeted against

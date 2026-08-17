@@ -40,6 +40,7 @@ import {
 } from "./modules/common/notificationArea.js";
 import { renderIntakeViewShell, setupIntakeForm } from "./modules/intake/intakeView.js";
 import { initPlansView } from "./modules/plans/plansView.js";
+import { renderRsvpViewShell, setupRsvpReply } from "./modules/rsvp/rsvpView.js";
 import { initWorkoutSetup, setupWorkoutSetup } from "./modules/session/editSessionControl.js";
 import { renderWorkoutSetupView } from "./modules/session/editSessionView.js";
 import { initSessionBar, renderClipboardBarShell } from "./modules/session/sessionBar.js";
@@ -212,6 +213,18 @@ export function bootIntake(deps) {
   if (view) view.classList.add("active");
   setupIntakeForm(deps);
   return view;
+}
+
+// The invite-reply page (TODO §1.6's confirm link) — the second CLIENT-facing boot, and stateless for
+// the same reason as bootIntake: this is not the trainer's device. Separate from bootIntake because the
+// two share only the document; one collects a person's details, the other answers a session invite.
+export function bootRsvpReply(deps) {
+  const splash = document.getElementById("app-splash");
+  if (splash) splash.hidden = true;
+
+  renderRsvpViewShell();
+  document.getElementById("view-rsvp")?.classList.add("active");
+  return setupRsvpReply(deps);
 }
 
 // The guided walkthrough (TODO §9.5) — the same script as bootDemoTour, driven by the trainer.

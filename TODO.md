@@ -298,19 +298,44 @@ text message, mail compose, system share sheet, clipboard. The wire format is ve
 short-keyed against a measured budget — a QR that scans phone-to-phone holds ~300 bytes and an SMS
 segment is 160 characters, which is why a session summary travels and a program never will.
 
-- **Open — the confirm link.** Raised 2026-08-17: since no reply can reach the app on its own, the
-  invite could carry a prefilled `mailto:`/`sms:` "Confirm" link aimed at the trainer, whose body is
-  a LibrePT deep link (`?rsvp=…`, on the existing `shareLink.js` param machinery). The client taps
-  Confirm, the trainer receives the reply, taps the link once, and the RSVP lands in their own store.
-  It is the only shape that moves a bit of data without a server. Open questions: the token is a
-  capability anyone holding the link can replay (low stakes — it writes only to the trainer's local
-  store), and it must carry no client PII in the URL.
-- **Open — SMS as a second channel.** `sms:` opens the messaging app prefilled, and clients answer
-  texts far more reliably than email. But an SMS cannot carry an attachment, so it cannot deliver a
-  calendar event at all — it is a better channel for the RESPONSE and a useless one for the INVITE.
-  If both ship, email carries the `.ics` and SMS carries the confirm link; clients already have a
-  `phone` field. `sms:` body prefill is inconsistent across Android OEMs, and a trainer on a desktop
-  has no messaging app at all, so it can never be the only route.
+- **[~] The confirm link — decided and half-built, 2026-08-17.** No reply can reach the app on its own,
+  so the client's answer travels as a message to the trainer whose body carries a LibrePT deep link the
+  trainer taps once. **Built:** `replyToInvite` in [sessionEventPayload.js](src/data/sessionEventPayload.js),
+  `organizerPhone` on the invite, and the client-facing reply page
+  ([rsvpView.js](src/modules/rsvp/rsvpView.js), `bootRsvpReply`) offering both channels.
+
+  **A PAGE, not two links in the invite body** — the original sketch here. An `sms:` URI inside an SMS
+  body is not linkified by most messaging apps, so the SMS leg would have had no working confirm route
+  at all; both invite channels carry a plain `https` link instead, and the reply URI is built at tap
+  time. It needed **no new route**: an invite link is already the app root with `?evt=`, so the boot
+  decision turns on what the payload IS — an invite means the client is answering, an RSVP means the
+  trainer is collecting one. Inventing `/rsvp` would have stranded links already sent.
+
+  **The PII question is answered by construction**: a reply carries `{sessionId, clientId, answer}` and
+  nothing else — no name, no title (a title like "Post-surgery rehab" would disclose a medical fact
+  about a named person to every system the message passes through), no location. Pinned by a test that
+  greps the encoded payload for each of those.
+
+  **Still open — the replay question.** The link is a capability anyone holding it can re-send, which is
+  low stakes (it writes only to the trainer's own store, and an RSVP is not destructive) but is not
+  *nothing*: a forwarded invite lets a third party answer for the client. Not yet decided.
+
+  **Still open — two pieces before the loop closes.** (1) The invite leg: nothing in the app builds an
+  `?evt=` link yet — [eventTransports.js](src/modules/common/eventTransports.js) shipped this morning
+  ahead of its consumer, and the invite dialog still sends only a `mailto:` + `.ics`. It also needs the
+  trainer's PHONE on file (trainerIdentity) for SMS to be offerable at all. (2) Trainer-side ingestion:
+  a `?evt=<rsvp>` currently falls through to the normal boot and is ignored, because nothing yet stores
+  an answer — `sessions` has no field for it, so that needs either an unconstrained object (additive,
+  no bump) or a schema bump under §18.4's expand-first staging. **That storage call is the next
+  decision.**
+- **[x] SMS as a second channel — decided 2026-08-17 (Simon: "let us have SMS too, for sure").** It is
+  in on BOTH legs, including the reply, and the question it settles was specifically whether a channel
+  with unreliable body prefill is worth shipping: it is, because clients answer texts. So email is
+  never removed — `sms:` prefill is inconsistent across Android OEMs and a mangled body is a reply with
+  no link in it, which email does not do — and neither is the only route. An SMS still cannot carry an
+  attachment, so the `.ics` remains email-only; SMS carries the link. Consequence, now built: the invite
+  has to carry `organizerPhone`, since the client's device knows nothing about the trainer beyond what
+  the invite told it.
 - **Found on the way, fixed**: opening a scheduled session for edit showed the next half hour instead
   of the session's own slot — the form read `timeLabel`/`date`, the live clipboard meta's field
   names, while a stored record carries `time`/`startDate`. Re-saving silently moved the session to

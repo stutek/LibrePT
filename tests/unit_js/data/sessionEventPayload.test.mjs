@@ -14,7 +14,9 @@ import {
   decodeSessionEvent,
   encodeSessionEvent,
   encodedSize,
+  replyToInvite,
 } from "../../../src/data/sessionEventPayload.js";
+import { SMS_SEGMENT_CHARACTERS } from "../../../src/modules/common/eventTransports.js";
 
 const INVITE = {
   kind: SESSION_INVITE,
@@ -76,4 +78,68 @@ test("nothing that is not a payload ever throws", () => {
   for (const hostile of ["", "not-base64!!", "eyJ2IjoxfQ", "%%%", "a".repeat(5000), null, 42, {}]) {
     assert.equal(decodeSessionEvent(hostile), null, `should refuse: ${String(hostile)}`);
   }
+});
+
+// --- The reply leg (TODO §1.6's confirm link). SMS was ruled in on 2026-08-17, and these pin what
+// that costs: the invite has to carry the trainer's PHONE, since `sms:` needs a number to address and
+// an invite that only knows an email address can only ever be answered by email. ---
+
+test("an invite carries the trainer's phone, so the reply can be a text", () => {
+  const invite = {
+    kind: SESSION_INVITE,
+    sessionId: "s1",
+    clientId: "c1",
+    organizerEmail: "pt@example.com",
+    organizerPhone: "+386 41 234 567",
+  };
+
+  const reopened = decodeSessionEvent(encodeSessionEvent(invite));
+
+  assert.equal(reopened.organizerPhone, "+386 41 234 567");
+});
+
+test("a reply names the session, the client and the answer — and nothing else", () => {
+  const invite = {
+    kind: SESSION_INVITE,
+    sessionId: "s1",
+    clientId: "c1",
+    title: "Group Strength",
+    location: "Studio 2",
+    organizerEmail: "pt@example.com",
+    organizerPhone: "+386 41 234 567",
+  };
+
+  const reply = replyToInvite(invite, "yes");
+
+  assert.deepEqual(reply, { kind: SESSION_RSVP, sessionId: "s1", clientId: "c1", answer: "yes" });
+  // The reply travels through a carrier and sits in two message histories, so it must carry no PII:
+  // no name, no title that hints at a medical class, no location. Opaque ids and one word.
+  const wire = encodeSessionEvent(reply);
+  const decoded = JSON.stringify(decodeSessionEvent(wire));
+  for (const leak of ["Group Strength", "Studio 2", "pt@example.com", "386"]) {
+    assert.equal(decoded.includes(leak), false, `${leak} must not ride in a reply`);
+  }
+});
+
+test("a reply nobody could have given is refused rather than sent", () => {
+  const invite = { kind: SESSION_INVITE, sessionId: "s1", clientId: "c1" };
+
+  assert.equal(replyToInvite(invite, "maybe-later"), null);
+  assert.equal(replyToInvite(invite, ""), null);
+  assert.equal(replyToInvite(null, "yes"), null);
+  // An invite with no client cannot be answered: the trainer would receive an answer from nobody.
+  assert.equal(replyToInvite({ kind: SESSION_INVITE, sessionId: "s1" }, "yes"), null);
+});
+
+test("a reply fits in one SMS segment, which is the whole reason it is this small", () => {
+  const reply = replyToInvite(
+    {
+      kind: SESSION_INVITE,
+      sessionId: "abcdefghijklmnopqrstuv",
+      clientId: "abcdefghijklmnopqrstuv",
+    },
+    "yes",
+  );
+
+  assert.ok(encodedSize(reply) < SMS_SEGMENT_CHARACTERS, "a reply must not be split by a carrier");
 });

@@ -48,6 +48,7 @@ import {
 } from "./controllers/routineFormsController.js";
 import { driveSyncStatus, onSyncCountsChanged, primeAheadCache } from "./data/driveSyncService.js";
 import { newRecordId } from "./data/recordId.js";
+import { SESSION_INVITE, decodeSessionEvent } from "./data/sessionEventPayload.js";
 import {
   getState,
   loadSavedState,
@@ -84,6 +85,7 @@ import {
 } from "./modules/common/consentForm.js";
 import { driveSyncFailureNotice, prepareDriveSyncCard } from "./modules/common/driveSyncUi.js";
 import { openEncryptedFileReader } from "./modules/common/encryptedFileReader.js";
+import { EVENT_PARAM, browserPlatform } from "./modules/common/eventTransports.js";
 import { openFeedbackModal } from "./modules/common/feedbackModal.js";
 import { renderNotificationArea } from "./modules/common/notificationArea.js";
 import { populateDropdownSelectors as populateDropdownsController } from "./modules/common/populateDropdownSelectors.js";
@@ -196,6 +198,32 @@ async function init() {
   // away leaves nothing on their own phone. `initTheme` is skipped for exactly that reason (it
   // persists the resolved theme); theme-boot.js has already put the right class on <html> before
   // paint, and it writes nothing.
+  // An invite link is the app's own root with `?evt=` (eventTransports.buildEventLink), so WHO is
+  // holding the phone is decided by what the payload turns out to be — not by a path. An INVITE means
+  // the client is answering one; an RSVP means the trainer is collecting an answer, and that falls
+  // through to the normal boot below. There is deliberately no `/rsvp` route: the link shape already
+  // existed and inventing a second one would strand links already sent.
+  const inboundEvent = decodeSessionEvent(
+    new URLSearchParams(window.location.search).get(EVENT_PARAM),
+  );
+  const mangledEvent =
+    !inboundEvent && Boolean(new URLSearchParams(window.location.search).get(EVENT_PARAM));
+  if (inboundEvent?.kind === SESSION_INVITE || mangledEvent) {
+    // A mangled link lands here too, on purpose: a messaging app that wrapped the URL must produce
+    // "ask your trainer to send it again" rather than the trainer's dashboard, which would tell the
+    // client nothing and show them someone else's app.
+    appBoot.bootRsvpReply({
+      encodedEvent: new URLSearchParams(window.location.search).get(EVENT_PARAM),
+      t: (key) =>
+        dictionaryFor(resolveIntakeLang(getShareParams().lang, navigator.languages || []))[key] ||
+        key,
+      lang: resolveIntakeLang(getShareParams().lang, navigator.languages || []),
+      appUrl: window.location.origin + getBasePath(),
+      platform: browserPlatform(),
+    });
+    return;
+  }
+
   if (isIntakeLocation(window.location.pathname)) {
     let intakeLang = resolveIntakeLang(
       getShareParams().lang,
