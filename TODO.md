@@ -333,6 +333,25 @@ Rides the same seam §1.6 built: an event, encoded into a link, carried by email
   sensitive ever travels in a URL, through a carrier, or into two phones' message histories, and the
   PT takes the training detail in conversation as they already do. The alternative — collecting it on
   the form — needs a story for that exposure. Simon's call.
+- **Recommended (2026-08-17), awaiting a go**: the submission travels as a FILE attached to an email,
+  not as a payload in a link — `navigator.share({ files })` puts it in the client's mail app in one
+  tap, and `mailto:` cannot attach anything, so a link-based version would have a stranger hand-
+  attaching a download. Three things follow. Nothing sensitive crosses a carrier or sits in a URL, so
+  the Art. 9 question above may simply stop applying. The file is a RETAINABLE artifact — notice
+  version, language, timestamp, what was ticked — which is far better Art. 7(1) evidence than a query
+  parameter. And there is no size budget, so a signature or photo becomes possible later. The
+  trainer-side fallback already exists in [encryptedFileReader.js](src/modules/common/encryptedFileReader.js)
+  ("pick the file someone sent you, opened on this device, no copy kept"), so this is buildable with
+  no manifest work; `file_handlers`/`share_target` registration later upgrades it from *find the
+  file* to *tap the attachment*. iOS Safari supports neither, so the fallback is permanent, not
+  temporary.
+- **Decided 2026-08-17 (Simon) — one media type per handling surface, not one generic type with a
+  `kind` field inside.** `application/vnd.librept.signup+json` (RFC 6838 vendor tree, RFC 6839 `+json`
+  suffix) plus a distinctive extension, because the mechanisms key off different things: an Android
+  share intent routes on the MIME type, an OS file association routes on the extension, and email
+  frequently relabels the type to `application/octet-stream` so only the extension survives that hop.
+  Declaring both is not redundancy. **Marked for reconsideration** if the number of file kinds grows
+  enough that per-kind declarations become the larger cost.
 - **Open**: whether the landing page is a generated static page (the `privacy.html` pattern — own
   CSP, offline-cached) or a route inside the app; and what the PT sees on arrival, since accepting a
   stranger's submission into the client register should be a deliberate act rather than a silent

@@ -286,6 +286,27 @@ parallel without collisions, and make the directory tree itself act as documenta
    client on the way in" beats "applySuppressions works". The name is what a future reader diffs
    against the behaviour they are about to change.
 
+9. **When the choice is between saying a thing several times and adding a layer that says it once,
+   say it several times.** Stated 2026-08-17 (Simon): *"I prefer verbosity in action over another
+   layer of abstraction."* Several explicit declarations a reader can follow beat one generic
+   mechanism plus the indirection needed to reach it — a registry keyed on a discriminator, a config
+   table that has to be cross-referenced, a dispatcher standing between the caller and what actually
+   happens. The explicit version is longer to write and shorter to understand, which is the same
+   trade §5.1 makes by preferring many small files to one large one.
+
+   **This is not licence to duplicate logic.** The same *behaviour* written twice is still
+   duplication and still gets extracted — §5.3's injected helpers and `domain/` modules exist for
+   exactly that. What this rejects is inventing an intermediary whose only job is to *choose*: a
+   `kind` field plus a dispatcher, where separate concrete things routed directly would have done.
+   It sits with the preference for polymorphism over branchy dispatch — each thing does its own
+   thing, rather than one thing switching on a field.
+
+   The first application: one media type per handling surface rather than one generic
+   `application/vnd.librept+json` discriminated inside ([TODO §1.7](TODO.md)).
+
+   **Marked for reconsideration** when the count of explicit declarations becomes the larger cost.
+   Say so when you notice it — do not quietly start abstracting.
+
 ---
 
 ## 6. Agent Tooling: Build the Tool, Don't Re-Improvise the Script
