@@ -4,6 +4,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
+  DEFAULT_EXPIRY_PADDING_HOURS,
   looksLikeEmail,
   readTrainerIdentity,
   writeTrainerIdentity,
@@ -37,9 +38,13 @@ test("what was stored is what comes back", () => {
 });
 
 test("an install that has never been told reports empty strings, not null", () => {
-  // The invite dialog puts these straight into an input's value; null would render as "null". That
-  // holds for every field this returns, so it is asserted over all of them rather than a fixed list.
-  for (const [field, value] of Object.entries(readTrainerIdentity(fakeStore()))) {
+  // The invite dialog puts these straight into an input's value; null would render as "null". Asserted
+  // over every STRING-valued field rather than a hardcoded list — the settings this also returns
+  // (expiryPaddingHours) have their own defaults and are pinned separately below.
+  const identity = readTrainerIdentity(fakeStore());
+  const textFields = Object.entries(identity).filter(([, value]) => typeof value === "string");
+  assert.ok(textFields.length >= 3, "the contact fields are still strings");
+  for (const [field, value] of textFields) {
     assert.equal(value, "", `${field} should be an empty string on a fresh install`);
   }
 });
@@ -101,4 +106,36 @@ test("clearing the phone removes it rather than storing a blank", () => {
   assert.equal(readTrainerIdentity(store).phone, "");
   // The email survived: writing one field must not clear the others a trainer already gave.
   assert.equal(readTrainerIdentity(store).email, "pt@example.com");
+});
+
+// --- The expiry padding (TODO §1.6, asked for 2026-08-17). A setting, not a record: it belongs to the
+// install the way `lang` does, and it is stamped onto each invite at send time so the cutoff can travel. ---
+
+test("the padding a trainer sets is remembered in hours", () => {
+  const store = fakeStore();
+
+  writeTrainerIdentity({ email: "pt@librept.test", expiryPaddingHours: 4 }, store);
+
+  assert.equal(readTrainerIdentity(store).expiryPaddingHours, 4);
+});
+
+test("a trainer who has set nothing gets the default rather than no deadline at all", () => {
+  // Zero would mean "never expires", which is a different intention from "has not chosen".
+  assert.equal(readTrainerIdentity(fakeStore()).expiryPaddingHours, DEFAULT_EXPIRY_PADDING_HOURS);
+});
+
+test("a trainer can turn expiry off, and that survives being read back", () => {
+  const store = fakeStore();
+
+  writeTrainerIdentity({ expiryPaddingHours: 0 }, store);
+
+  assert.equal(readTrainerIdentity(store).expiryPaddingHours, 0, "0 is a choice, not an absence");
+});
+
+test("nonsense in the padding falls back to the default instead of producing a bogus cutoff", () => {
+  const store = fakeStore();
+
+  writeTrainerIdentity({ expiryPaddingHours: "four-ish" }, store);
+
+  assert.equal(readTrainerIdentity(store).expiryPaddingHours, DEFAULT_EXPIRY_PADDING_HOURS);
 });

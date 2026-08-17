@@ -176,3 +176,47 @@ def test_the_trainers_phone_is_remembered_between_sessions(page, local_server):
         page.evaluate("() => localStorage.getItem('librept_trainer_phone')")
         == "+386 41 234 567"
     )
+
+
+def test_the_invite_carries_the_cutoff_the_trainer_set(page, local_server):
+    """§1.6's expiry: the padding is the trainer's setting, and it has to travel as an absolute instant,
+    because the client's device cannot compute a deadline it was never told about."""
+    load_with_stub(page, local_server, INVITE_WITH_PHONE_STUB)
+    page.fill("#session-invite-organizer", "pt@librept.test")
+    page.fill("#session-invite-expiry", "4")
+    page.dispatch_event("#session-invite-expiry", "input")
+
+    payload = _payload_in(
+        page.locator(".session-invite-send-btn").first.get_attribute("href")
+    )
+
+    # `x` is expiresAt on the wire, `w` the session start: four hours before, in ms.
+    assert payload["x"] == payload["w"] - 4 * 60 * 60 * 1000
+
+
+def test_a_trainer_can_turn_expiry_off_and_the_invite_carries_no_cutoff(
+    page, local_server
+):
+    """Zero is a choice — "answerable until the session" — and distinct from having set nothing."""
+    load_with_stub(page, local_server, INVITE_WITH_PHONE_STUB)
+    page.fill("#session-invite-organizer", "pt@librept.test")
+    page.fill("#session-invite-expiry", "0")
+    page.dispatch_event("#session-invite-expiry", "input")
+
+    payload = _payload_in(
+        page.locator(".session-invite-send-btn").first.get_attribute("href")
+    )
+
+    assert "x" not in payload
+
+
+def test_the_expiry_setting_is_remembered_like_the_others(page, local_server):
+    load_with_stub(page, local_server, INVITE_WITH_PHONE_STUB)
+    page.fill("#session-invite-expiry", "6")
+
+    page.locator(".session-invite-send-btn").first.click()
+
+    assert (
+        page.evaluate("() => localStorage.getItem('librept_invite_expiry_hours')")
+        == "6"
+    )

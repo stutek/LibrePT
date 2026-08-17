@@ -32,6 +32,7 @@ import {
   decodeSessionEvent,
   replyToInvite,
 } from "../../data/sessionEventPayload.js";
+import { isInviteExpired, minutesUntilExpiry } from "../../domain/inviteExpiry.js";
 import { $id, renderMarkupOnce } from "../common/dom.js";
 import { buildEventLink } from "../common/eventTransports.js";
 
@@ -55,6 +56,9 @@ export function renderRsvpViewShell() {
           <dt id="rsvp-who-label" hidden></dt>
           <dd id="rsvp-who" hidden></dd>
         </dl>
+
+        <p id="rsvp-expired" class="rsvp-expired" hidden></p>
+        <p id="rsvp-deadline" class="rsvp-hint" hidden></p>
 
         <p id="rsvp-question" class="rsvp-question"></p>
         <div id="rsvp-answers" class="rsvp-answers">
@@ -105,6 +109,16 @@ function formatWhen(startsAt, durationMinutes, lang) {
   return durationMinutes ? `${when} (${durationMinutes} min)` : when;
 }
 
+/** "3 h 20 min" / "45 min" — a duration a person can act on, in their own language. Hours first
+ *  because "200 min" is a number nobody converts while standing in a queue. */
+function formatRemaining(minutes, t) {
+  const hours = Math.floor(minutes / 60);
+  const rest = minutes % 60;
+  if (hours === 0) return `${rest} ${t("rsvp_minutes") || "min"}`;
+  if (rest === 0) return `${hours} ${t("rsvp_hours") || "h"}`;
+  return `${hours} ${t("rsvp_hours") || "h"} ${rest} ${t("rsvp_minutes") || "min"}`;
+}
+
 export function setupRsvpReply({ encodedEvent, t, appUrl, platform, lang = "en" }) {
   const invite = decodeSessionEvent(encodedEvent);
   if (!invite || invite.kind !== SESSION_INVITE) {
@@ -126,6 +140,32 @@ export function setupRsvpReply({ encodedEvent, t, appUrl, platform, lang = "en" 
   );
   showDetail("rsvp-where-label", "rsvp-where", t("rsvp_where"), invite.location);
   showDetail("rsvp-who-label", "rsvp-who", t("rsvp_who"), invite.organizerName);
+
+  // Expiry, checked once on open against the cutoff the invite carried (domain/inviteExpiry.js). Not
+  // polled: this page is opened, answered and closed within a minute or two, and a countdown that
+  // flipped to "too late" under someone's thumb mid-tap would be worse than either state.
+  //
+  // Advisory, and the copy says so rather than claiming a guarantee — two devices, two clocks, and no
+  // server to arbitrate. A late answer that reaches the trainer anyway is still recorded, with its
+  // response time (§1.6: record the time, do not mark the reply).
+  const expired = isInviteExpired(invite.expiresAt, Date.now());
+  if (expired) {
+    const notice = $id("rsvp-expired");
+    notice.textContent = t("rsvp_expired");
+    notice.hidden = false;
+    // The details above stay on screen: the client still needs to know WHICH session they are too late
+    // for, and who to talk to about it.
+    $id("rsvp-answers").classList.add("hidden");
+    $id("rsvp-send").classList.add("hidden");
+    return invite;
+  }
+
+  const minutesLeft = minutesUntilExpiry(invite.expiresAt, Date.now());
+  if (minutesLeft !== null) {
+    const deadline = $id("rsvp-deadline");
+    deadline.textContent = `${t("rsvp_deadline")} ${formatRemaining(minutesLeft, t)}`.trim();
+    deadline.hidden = false;
+  }
 
   $id("rsvp-question").textContent = t("rsvp_question");
   $id("rsvp-yes").textContent = t("rsvp_yes");

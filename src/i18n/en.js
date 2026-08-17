@@ -278,6 +278,11 @@ export const en = {
   // The invite-reply page (TODO §1.6). Written FOR the client, like the intake page: "your trainer",
   // and no jargon about payloads or deep links — they tap an answer and send a message.
   rsvp_unreadable: "This invite link is incomplete — ask your trainer to send it again.",
+  rsvp_expired:
+    "This invitation has closed — the session is too soon to answer here. Message your trainer directly if something has changed.",
+  rsvp_deadline: "You can answer here for another",
+  rsvp_hours: "h",
+  rsvp_minutes: "min",
   rsvp_untitled_session: "Training session",
   rsvp_when: "When",
   rsvp_where: "Where",
@@ -302,6 +307,9 @@ export const en = {
   transport_share: "Share…",
   transport_copy: "Copy link",
   session_invite_organizer: "Replies come back to",
+  session_invite_expiry: "Close replies this many hours before",
+  session_invite_expiry_hint:
+    "0 keeps replies open until the session starts. Applies to invites you send from now on.",
   session_invite_phone: "Your number, for replies by text",
   session_invite_phone_hint:
     "Optional. With it, a client can answer the invite with a text instead of an email.",

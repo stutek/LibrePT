@@ -176,3 +176,52 @@ def test_a_broken_or_stale_link_says_so_instead_of_showing_a_blank_page(
 
     expect(page.locator("#rsvp-unreadable")).to_be_visible()
     expect(page.locator("#rsvp-answers")).to_be_hidden()
+
+
+# --- Expiry (TODO §1.6, asked for 2026-08-17: "PT sets the expiry padding — example 4 hours before
+# session"). The page is where it is enforced, because the page is on the device that is deciding. It is
+# advisory by nature — two clocks, no server — so what matters is that it never silently swallows an
+# answer, and never claims more certainty than it has. ---
+
+EXPIRED_STUB = RSVP_STUB.replace(
+    "  organizerPhone: window.__organizerPhone === null ? undefined : '+386 41 234 567',",
+    "  organizerPhone: '+386 41 234 567',\n  expiresAt: Date.now() - 60 * 60 * 1000,",
+)
+
+OPEN_STUB = RSVP_STUB.replace(
+    "  organizerPhone: window.__organizerPhone === null ? undefined : '+386 41 234 567',",
+    "  organizerPhone: '+386 41 234 567',\n  expiresAt: Date.now() + 3 * 60 * 60 * 1000,",
+)
+
+
+def test_a_client_who_is_too_late_is_told_so_and_told_what_to_do(page, local_server):
+    """The deadline passed. Answering here would send the trainer something they can no longer act on,
+    so the page says so and points at the one route that still works — talking to them."""
+    load_with_stub(page, local_server, EXPIRED_STUB)
+    expect(page.locator("#view-rsvp")).to_be_visible()
+
+    expect(page.locator("#rsvp-expired")).to_be_visible()
+    expect(page.locator("#rsvp-answers")).to_be_hidden()
+    # The session details stay on screen: they still need to know WHICH session they are too late for.
+    expect(page.locator("#rsvp-title")).to_contain_text("Group Strength")
+
+
+def test_a_client_inside_the_window_is_told_how_long_is_left(page, local_server):
+    """A number, not a boolean: someone deciding whether to answer now needs to know it is three hours
+    and not three minutes."""
+    load_with_stub(page, local_server, OPEN_STUB)
+    expect(page.locator("#view-rsvp")).to_be_visible()
+
+    expect(page.locator("#rsvp-expired")).to_be_hidden()
+    expect(page.locator("#rsvp-deadline")).to_be_visible()
+    expect(page.locator("#rsvp-answers")).to_be_visible()
+
+
+def test_an_invite_with_no_deadline_says_nothing_about_one(page, local_server):
+    """A trainer who set no padding has not asked for expiry, and every invite sent before the field
+    existed carries none. Neither should grow an invented deadline."""
+    _mount(page, local_server)
+
+    expect(page.locator("#rsvp-expired")).to_be_hidden()
+    expect(page.locator("#rsvp-deadline")).to_be_hidden()
+    expect(page.locator("#rsvp-answers")).to_be_visible()

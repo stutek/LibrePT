@@ -268,6 +268,11 @@ export const sl = {
   signup_review_unreadable:
     "Ta datoteka ni LibrePT predstavitev stranke — preveri, ali si izbral pravo priponko.",
   rsvp_unreadable: "Ta povezava do vabila ni popolna — prosi trenerja, naj jo pošlje znova.",
+  rsvp_expired:
+    "To vabilo je zaprto — do treninga je premalo časa za odgovor tukaj. Če se je kaj spremenilo, piši trenerju neposredno.",
+  rsvp_deadline: "Tukaj lahko odgovoriš še",
+  rsvp_hours: "h",
+  rsvp_minutes: "min",
   rsvp_untitled_session: "Trening",
   rsvp_when: "Kdaj",
   rsvp_where: "Kje",
@@ -292,6 +297,9 @@ export const sl = {
   transport_share: "Deli…",
   transport_copy: "Kopiraj povezavo",
   session_invite_organizer: "Odgovori naj prispejo na",
+  session_invite_expiry: "Zapri odgovore toliko ur prej",
+  session_invite_expiry_hint:
+    "0 pomeni, da so odgovori odprti do začetka treninga. Velja za vabila, ki jih pošlješ od zdaj naprej.",
   session_invite_phone: "Tvoja številka, za odgovore po SMS",
   session_invite_phone_hint:
     "Neobvezno. S tem lahko stranka na vabilo odgovori s sporočilom namesto z e-pošto.",

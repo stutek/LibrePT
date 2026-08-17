@@ -51,6 +51,11 @@ const INVITE_FIELDS = {
   // knows nothing about the trainer except what the invite told it — an invite carrying only an email
   // address can only ever be answered by email, whatever the client would rather use.
   p: "organizerPhone",
+  // When the invitation stops being answerable (domain/inviteExpiry.js), as an absolute instant. It
+  // TRAVELS because the trainer's padding setting lives on the trainer's phone and the client's device
+  // knows only what the invite told it — the same reason `organizerPhone` is here. Absent means no
+  // deadline, which is both a trainer who wants none and every invite sent before the field existed.
+  x: "expiresAt",
 };
 const RSVP_FIELDS = {
   s: "sessionId",
@@ -66,7 +71,7 @@ const FIELDS_BY_KIND = {
 // Which fields are numbers, decided by the FORMAT rather than by what arrived. Reading the type off
 // the incoming value instead let `startsAt: "soon"` through as a string, which every consumer would
 // then have done date arithmetic on.
-const NUMERIC_FIELDS = new Set(["startsAt", "durationMinutes"]);
+const NUMERIC_FIELDS = new Set(["startsAt", "durationMinutes", "expiresAt"]);
 
 function toUrlSafeBase64(bytes) {
   let binary = "";

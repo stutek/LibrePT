@@ -26,6 +26,17 @@
   line-height: 1.45;
 }
 
+/* Closed, not broken — amber rather than the red an unreadable link gets: the client did nothing
+   wrong, they are simply late, and the page still tells them who to talk to. */
+.rsvp-expired {
+  margin: 0 0 14px 0;
+  padding: 14px 16px;
+  border-radius: var(--border-radius-md, 12px);
+  background: color-mix(in srgb, var(--timer-warn-peak-color, #c97a2a) 14%, transparent);
+  color: var(--text-main);
+  line-height: 1.45;
+}
+
 .rsvp-title {
   margin: 0 0 14px 0;
   font-family: var(--font-header);

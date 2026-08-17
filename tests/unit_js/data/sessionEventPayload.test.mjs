@@ -143,3 +143,29 @@ test("a reply fits in one SMS segment, which is the whole reason it is this smal
 
   assert.ok(encodedSize(reply) < SMS_SEGMENT_CHARACTERS, "a reply must not be split by a carrier");
 });
+
+test("an invite carries its cutoff, because the client's device cannot compute one", () => {
+  // The trainer's padding setting lives on the trainer's phone. The client knows only what the invite
+  // told them — the same constraint that put organizerPhone on the wire.
+  const invite = { ...INVITE, expiresAt: Date.UTC(2026, 7, 20, 14, 0, 0) };
+
+  const reopened = decodeSessionEvent(encodeSessionEvent(invite));
+
+  assert.equal(reopened.expiresAt, Date.UTC(2026, 7, 20, 14, 0, 0));
+});
+
+test("a cutoff that is not a number does not travel as one", () => {
+  // Read as a NUMBER by the format, not by what arrived: `expiresAt: "soon"` reaching the reply page
+  // would be compared against Date.now() and quietly decide every invitation had expired.
+  const decoded = decodeSessionEvent(encodeSessionEvent({ ...INVITE, expiresAt: "soon" }));
+
+  assert.equal(decoded.expiresAt, undefined);
+});
+
+test("an invite with no cutoff is still a valid invite", () => {
+  // A trainer who wants no deadline, and every invite sent before this field existed.
+  const decoded = decodeSessionEvent(encodeSessionEvent(INVITE));
+
+  assert.equal("expiresAt" in decoded, false);
+  assert.equal(decoded.sessionId, INVITE.sessionId);
+});

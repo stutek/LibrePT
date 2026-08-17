@@ -28,6 +28,7 @@ import {
   readTrainerIdentity,
   writeTrainerIdentity,
 } from "../../data/trainerIdentity.js";
+import { inviteExpiresAt } from "../../domain/inviteExpiry.js";
 import { closeModal, openModal, renderMarkupOnce } from "../common/dom.js";
 import { downloadFile } from "../common/download.js";
 import { buildEventLink } from "../common/eventTransports.js";
@@ -59,6 +60,11 @@ function renderInviteDialogShell() {
         <p id="session-invite-organizer-hint" class="text-sm text-muted"></p>
       </div>
       <div class="form-group">
+        <label for="session-invite-expiry" id="session-invite-expiry-label">Close replies this many hours before</label>
+        <input type="number" id="session-invite-expiry" class="form-control" min="0" max="168" step="1" inputmode="numeric">
+        <p id="session-invite-expiry-hint" class="text-sm text-muted"></p>
+      </div>
+      <div class="form-group">
         <label for="session-invite-phone" id="session-invite-phone-label">Your number, for replies by text</label>
         <input type="tel" id="session-invite-phone" class="form-control" autocomplete="tel" inputmode="tel" placeholder="+386 …">
         <p id="session-invite-phone-hint" class="text-sm text-muted"></p>
@@ -83,7 +89,7 @@ function renderInviteDialogShell() {
   // trainer finished typing would send an invite that cannot be answered by text. Re-rendered on
   // input rather than read at click time (the organizer email's trick) because an <a href> is
   // resolved by the browser, not by our handler.
-  for (const id of ["session-invite-organizer", "session-invite-phone"]) {
+  for (const id of ["session-invite-organizer", "session-invite-phone", "session-invite-expiry"]) {
     dialog.querySelector(`#${id}`)?.addEventListener("input", () => renderInviteRows());
   }
 }
@@ -105,11 +111,21 @@ function currentOrganizerPhone() {
   return document.getElementById("session-invite-phone")?.value.trim() || "";
 }
 
+/** Hours of padding as typed, or the stored setting when the field is empty. A blank field is "I have
+ *  not touched this", not "no deadline" — 0 is how a trainer says that, and the two must not collapse. */
+function currentExpiryPaddingHours() {
+  const typed = document.getElementById("session-invite-expiry")?.value.trim() ?? "";
+  if (typed === "") return readTrainerIdentity().expiryPaddingHours;
+  const hours = Number(typed);
+  return Number.isFinite(hours) && hours >= 0 ? hours : readTrainerIdentity().expiryPaddingHours;
+}
+
 function rememberOrganizer() {
   const typed = document.getElementById("session-invite-organizer")?.value.trim() || "";
   const phone = currentOrganizerPhone();
-  if (looksLikeEmail(typed)) writeTrainerIdentity({ email: typed, phone });
-  else if (phone) writeTrainerIdentity({ email: readTrainerIdentity().email, phone });
+  const expiryPaddingHours = currentExpiryPaddingHours();
+  if (looksLikeEmail(typed)) writeTrainerIdentity({ email: typed, phone, expiryPaddingHours });
+  else writeTrainerIdentity({ email: readTrainerIdentity().email, phone, expiryPaddingHours });
 }
 
 /** Records that an invitation went out, so the answer has something to land on.
@@ -163,6 +179,14 @@ function inviteEventFor(client, sessionInfo) {
     organizerEmail: currentOrganizer(),
     organizerName: readTrainerIdentity().name,
     organizerPhone: currentOrganizerPhone(),
+    // The cutoff, as an absolute instant — computed here because only this device knows the trainer's
+    // padding setting, and carried on the wire because the client's device knows only what the invite
+    // told it. Null (no deadline) simply does not travel.
+    expiresAt:
+      inviteExpiresAt(
+        sessionInfo.startDate ? new Date(sessionInfo.startDate).getTime() : null,
+        currentExpiryPaddingHours(),
+      ) ?? undefined,
   };
 }
 
@@ -327,6 +351,8 @@ function renderDialogChrome(t) {
   for (const [id, value] of [
     ["session-invite-organizer", identity.email],
     ["session-invite-phone", identity.phone],
+    // String(), because 0 is a real setting and `!input.value` would treat the number zero as unset.
+    ["session-invite-expiry", String(identity.expiryPaddingHours)],
   ]) {
     const input = document.getElementById(id);
     if (input && !input.value) input.value = value;

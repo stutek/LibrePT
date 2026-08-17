@@ -348,6 +348,20 @@ segment is 160 characters, which is why a session summary travels and a program 
   and in every backup, undeclared. Enforced now in both places, with the restore prompt naming what a
   file cannot carry — see §18.4 and DATA_MODEL §1. **The cost is accepted and visible: an RSVP does not
   survive a restore until schema 5 is minted from P.**
+- **[x] Invitations expire — asked for and built 2026-08-17.** Simon: *"can invitations expire (PT sets
+  the expiry padding — example 4 hours before session)"*. Yes: the trainer sets hours-before in the
+  invite dialog (remembered like the organizer email), the cutoff is computed as an absolute instant and
+  **travels in the payload**, and the reply page closes with "message your trainer directly" once it
+  passes. Three properties worth keeping:
+  - **Derived, never stored.** Nothing runs at the cutoff — a phone in a pocket writes nothing — so an
+    `expired` status would only become true if the app happened to be open. `now > expiresAt` is right
+    the first time anyone looks ([inviteExpiry.js](src/domain/inviteExpiry.js)).
+  - **Advisory, and it says so.** Two devices, two clocks, no server to arbitrate. The page declines to
+    SEND; nothing recalls a message in flight, and a late answer that arrives anyway is still recorded —
+    which is exactly why there is no "late" flag, only a response time.
+  - **0 means "no deadline" and is different from unset.** A trainer who turned expiry off must not have
+    it reinstated by a default, so absence and zero are told apart in the setting
+    ([trainerIdentity.js](src/data/trainerIdentity.js)).
 - **[x] SMS as a second channel — decided 2026-08-17 (Simon: "let us have SMS too, for sure").** It is
   in on BOTH legs, including the reply, and the question it settles was specifically whether a channel
   with unreliable body prefill is worth shipping: it is, because clients answer texts. So email is
