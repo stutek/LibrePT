@@ -158,3 +158,36 @@ export function findExistingClientForSignup(signup, clients = []) {
 function digitsOf(value) {
   return typeof value === "string" ? value.replace(/\D/g, "") : "";
 }
+
+/**
+ * The client-record fields this submission supplies — what a trainer would otherwise have typed from
+ * something the person said at the desk.
+ *
+ * **Only what the client actually said.** A field they skipped is absent from the result, never blank,
+ * because the review dialog offers "update existing" for a returning client: a mapping that filled in
+ * empty strings would wipe the trainer's own notes and goals for the crime of the client leaving those
+ * boxes alone.
+ *
+ * **`hasInjury` is DERIVED here, never carried on the wire.** The client says what happened to their
+ * knee; whether the app raises its safety advisory follows from there being text at all. Taking the
+ * flag from the sender would let a crafted file — or an honest mistake — produce a warning banner with
+ * nothing in it.
+ *
+ * **Nothing that identifies a record is included**, and that is the security half: no `id`, no
+ * `active`, no `erasure`. Otherwise a submission could name the record it lands on, and a stranger
+ * could aim their file at an existing client.
+ */
+export function clientFieldsFromSignup(signup) {
+  if (!signup) return {};
+
+  const fields = { name: signup.name };
+  if (signup.email) fields.email = signup.email;
+  if (signup.phone) fields.phone = signup.phone;
+  if (signup.goals) fields.goals = signup.goals;
+  if (signup.injury) {
+    fields.injury = signup.injury;
+    fields.hasInjury = true;
+  }
+  if (signup.gdprConsent) fields.gdprConsent = { ...signup.gdprConsent };
+  return fields;
+}

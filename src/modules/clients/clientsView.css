@@ -336,3 +336,82 @@
   white-space: pre-wrap;
   word-break: break-word;
 }
+
+/* Reviewing a submission a client sent in (signupReviewDialog.js, TODO §26.5). Lives with the client
+   styles because what it produces is a client record; the person using it is the trainer. */
+.signup-review-lede {
+  margin: 0 0 14px 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+/* A definition list, not a table: this is one record read top to bottom on a phone, and a two-column
+   table at 390px puts the client's own words in a 90px gutter. */
+.signup-review-fields {
+  margin: 14px 0 0 0;
+  padding: 12px 14px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--border-radius-md, 12px);
+  background: color-mix(in srgb, var(--primary) 5%, transparent);
+}
+
+.signup-review-fields dt {
+  margin-top: 10px;
+  font-size: 0.75rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.signup-review-fields dt:first-child {
+  margin-top: 0;
+}
+
+.signup-review-fields dd {
+  margin: 2px 0 0 0;
+  color: var(--text-main);
+  line-height: 1.4;
+  /* A stranger's free text, so it must wrap rather than stretch the dialog off screen. */
+  overflow-wrap: anywhere;
+}
+
+.signup-review-status {
+  margin: 12px 0 0 0;
+  padding: 10px 12px;
+  border-radius: var(--border-radius-md, 12px);
+  font-size: 0.88rem;
+  line-height: 1.4;
+  background: var(--border-color);
+  color: var(--text-main);
+}
+
+.signup-review-status.is-error {
+  background: color-mix(in srgb, var(--danger) 14%, transparent);
+  color: var(--danger);
+}
+
+.signup-review-match {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1px solid color-mix(in srgb, var(--primary) 32%, transparent);
+  border-radius: var(--border-radius-md, 12px);
+}
+
+/* The whole sentence is the target — deciding "same person or new person" is the one judgement in this
+   dialog, and it should not hinge on hitting a 16px box. */
+.signup-review-match-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 1.45;
+  cursor: pointer;
+}
+
+.signup-review-match-row input {
+  width: 22px;
+  height: 22px;
+  margin-top: 1px;
+  flex: 0 0 auto;
+  accent-color: var(--primary);
+}

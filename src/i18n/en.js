@@ -256,6 +256,24 @@ export const en = {
   intake_err_identity: "Please add your name, and either an email or a phone number.",
   intake_err_consent:
     "Please tick the consent box — your trainer cannot store your details without it.",
+  // Reviewing a submission a client sent in (TODO §26.5). The labels name the FIELD, and the consent
+  // rows show the three things that make consent demonstrable under Art. 7(1) rather than a tick.
+  signup_review_lede:
+    "Open the file your client sent you. Nothing is added to your clients until you accept it — the file was written on their phone and anyone could send you one.",
+  signup_review_file: "The file they sent",
+  signup_review_name: "Name",
+  signup_review_email: "Email",
+  signup_review_phone: "Phone",
+  signup_review_goals: "Their goals",
+  signup_review_injury: "Injuries and notes they gave",
+  signup_review_consent_date: "Consent given",
+  signup_review_consent_version: "Consent wording",
+  signup_review_consent_lang: "Language they read",
+  signup_review_no_consent: "Not given — you may not store their details yet",
+  signup_review_match_label: "Update the client you already have:",
+  signup_review_save: "Add to my clients",
+  signup_review_unreadable:
+    "That file is not a LibrePT client introduction — check you picked the right attachment.",
   transport_sms: "Text message",
   transport_email: "Email",
   transport_share: "Share…",

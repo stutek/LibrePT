@@ -1763,7 +1763,7 @@ two devices that already hold it.
 It encodes a **static** URL, so it is a pre-rendered SVG in `assets/` — printable, stickable on the
 gym wall, one file per language variant. No runtime encoder on the trainer side in either phase.
 
-### 26.5 Import is a review, never an auto-save
+### 26.5 [x] Import is a review, never an auto-save — 2026-08-17
 Anyone who photographs the wall QR can craft a payload, so the review dialog is the trust boundary,
 not a nicety. It also carries **dedupe**: match email/phone against existing clients and offer
 "update existing" rather than minting a second Jane Doe — the same key
@@ -1811,13 +1811,19 @@ client reads unaccompanied.
       every `.btn` in this app sets `display: flex`, which beats the UA stylesheet's `[hidden]` rule —
       so a desktop visitor would have been offered a file share their browser cannot do. It uses the
       `.hidden` class now.
+
+- [x] **Phase 1 COMPLETE — 2026-08-17.** The review dialog (§26.5) closed the loop, and
+      [UC8](use_cases/uc8_client_self_onboarding.md) documents the whole flow with spec↔test
+      traceability. End to end, proven in one e2e test: a stranger fills in `/intake`, shares the file,
+      and the trainer accepts them into the register without typing anything.
 - [ ] **Phase 2** — the vendored QR encoder and client-side QR display, plus the static trainer-side
       QR asset. Additive: both phases land on the same review dialog. Worth deferring until the
       messaging handoff has actually been tried in a gym.
-- [ ] **Tests** — `tests/unit_js/` for codec round-trip and rejection of malformed/oversized
-      payloads; `tests/medium/` for the intake form mounted cold and for the review dialog;
-      `tests/e2e/` for the full link → review → saved-client loop. A new use case file
-      (`uc8_client_self_onboarding.md`) plus its [INDEX](use_cases/INDEX.md) row ships with phase 1.
+- [x] **Tests — done 2026-08-17.** `tests/unit_js/` for the record, the file artifact and delivery
+      (the "codec round-trip" became file round-trip, since the transport is a file);
+      `tests/medium/` for the intake form mounted cold and for the review dialog; `tests/e2e/` for the
+      full intake → file → review → saved-client loop, plus the boot decision. UC8 and its
+      [INDEX](use_cases/INDEX.md) row shipped with it.
 
 ### 26.8 Known gaps
 - **First load needs network.** The client's phone has never cached the app, and the basement gym is

@@ -135,3 +135,37 @@ def test_menu_labels_translate_to_slovenian(page, local_server):
     # The relocated control labels translate too.
     assert page.locator("#menu-label-lang").inner_text().strip() == "Jezik"
     assert page.locator("#menu-label-theme").inner_text().strip() == "Tema"
+
+
+def test_every_menu_item_is_reachable_on_a_phone(page, local_server):
+    """The menu grew past the screen and nothing said so — items below the fold were simply
+    untappable, which on a phone is the same as not existing (AGENT_RULES §2.D.1).
+
+    Found on 2026-08-17: adding one item pushed `#menu-terms` out of the viewport and broke
+    test_terms_modal_opens_and_agree_closes_it. The menu now caps its height under the header and
+    scrolls, so this asserts the property that was missing rather than the item count that happened to
+    fit — the next item added must not be able to reintroduce it.
+
+    Asserted at 390x844 (iPhone 14, the narrowest real device in tests/e2e/test_layout_overflow.py)
+    because the shortest viewport is where a tall menu fails first.
+    """
+    page.set_viewport_size({"width": 390, "height": 844})
+    load_with_stub(page, local_server, HEADER_STUB)
+    page.wait_for_selector("#app-header")
+    _open_menu(page)
+
+    menu = page.locator("#app-menu")
+    # The menu fits the space under the header rather than running past the bottom of the screen.
+    fits = page.evaluate("""() => {
+      const menu = document.getElementById('app-menu');
+      const box = menu.getBoundingClientRect();
+      return box.bottom <= window.innerHeight + 1;
+    }""")
+    assert fits, "the app menu extends past the bottom of the viewport"
+
+    # And the last item is genuinely reachable: scrollable into view inside the menu, then clickable.
+    last_item = menu.locator(".session-menu-item, a.session-menu-item").last
+    last_item.scroll_into_view_if_needed()
+    assert last_item.is_visible()
+    box = last_item.bounding_box()
+    assert box["y"] + box["height"] <= 844 + 1, "the last menu item sits below the fold"

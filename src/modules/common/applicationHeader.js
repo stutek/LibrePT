@@ -352,6 +352,9 @@ export function renderHeaderShell() {
               <button id="menu-export-data" class="session-menu-item" role="menuitem">
                 <i class="fa-solid fa-file-export"></i> Export data as a file
               </button>
+              <button id="menu-review-signup" class="session-menu-item" role="menuitem">
+                <i class="fa-solid fa-user-check"></i> Add a client from their own details
+              </button>
               <button id="menu-open-encrypted" class="session-menu-item" role="menuitem">
                 <i class="fa-solid fa-lock-open"></i> Open an encrypted file
               </button>
@@ -486,6 +489,13 @@ function setupAppMenu() {
   on("menu-export-data", () => goto(deps.urlFor("backup")));
   // For a CLIENT who was emailed their data export, not for the trainer — which is why it sits in
   // the app menu and not on a client record: the person opening it has no client record.
+  // A submission a prospective client sent in (TODO §26.5). Sits in the app menu beside the encrypted
+  // reader because both answer "someone sent me a file" — but this one is FOR the trainer, and what it
+  // produces is a client record, which is why the review is a deliberate act and never an auto-import.
+  on("menu-review-signup", () => {
+    closeMenu();
+    deps.openSignupReview?.();
+  });
   on("menu-open-encrypted", () => {
     closeMenu();
     deps.openEncryptedFileReader?.();

@@ -69,6 +69,7 @@ import {
   renderClientDetailViewShell,
   renderClientDirectoryViewShell,
 } from "./modules/clients/clientsView.js";
+import { openSignupReview } from "./modules/clients/signupReviewDialog.js";
 import {
   renderHeaderShell,
   renderSyncBadge,
@@ -384,6 +385,7 @@ async function init() {
     renderActiveGroupBoard,
     renderClipboardBar,
     openEncryptedFileReader,
+    openSignupReview,
   });
 
   appBoot.bootSessionTimeline({
@@ -535,6 +537,15 @@ function renderGlobalHistory() {
 }
 
 function setupClientDataRights() {
+  appBoot.bootSignupReview({
+    getState,
+    t,
+    saveState,
+    renderClientsList: () => renderClientsList(),
+    newClientId: newRecordId,
+    todayIso: () => getISODateString(Date.now()),
+  });
+
   appBoot.bootClientDataRights({
     getState,
     // The erasure rewrites four collections at once, so it hands back a whole new state rather than

@@ -19,6 +19,7 @@ import { setupClientForms } from "./controllers/clientFormsController.js";
 import { setupViewDismiss } from "./controllers/gestureController.js";
 import { initRouter } from "./controllers/routerController.js";
 import { initClientDataRights, setupClientDataRights } from "./modules/clients/clientDataRights.js";
+import { initSignupReview, setupSignupReview } from "./modules/clients/signupReviewDialog.js";
 import { initRestTimer, setupRestTimer } from "./modules/clipboard/exerciseAndRestTimer.js";
 import {
   initApplicationHeader,
@@ -80,6 +81,13 @@ export function bootClientForms(deps) {
 // client form only ever edits one record.
 export function bootEncryptedFileReader() {
   setupEncryptedFileReader();
+}
+
+// The review dialog for a submission a client sent in (TODO §26.5). Boots with the client feature
+// rather than with intake: the person using it is the trainer, and what it produces is a client record.
+export function bootSignupReview(deps) {
+  initSignupReview(deps);
+  setupSignupReview();
 }
 
 export function bootClientDataRights(deps) {

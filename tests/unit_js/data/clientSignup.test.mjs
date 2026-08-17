@@ -11,6 +11,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   buildClientSignup,
+  clientFieldsFromSignup,
   findExistingClientForSignup,
   parseClientSignup,
   signupHasConsent,
@@ -166,4 +167,43 @@ test("a returning client is recognised, and two different people are never merge
   // matching on the name would merge two clients, which is an incident rather than a tidy-up.
   const namesake = buildClientSignup(filledForm({ email: "third@example.com", phone: "" }));
   assert.equal(findExistingClientForSignup(namesake, register), null);
+});
+
+test("a submission becomes the client record fields a trainer would have typed", () => {
+  const signup = buildClientSignup(
+    filledForm({ goals: "back to squatting", injury: "knee reconstruction 2024" }),
+  );
+
+  const fields = clientFieldsFromSignup(signup);
+
+  assert.equal(fields.name, "Jana Novak");
+  assert.equal(fields.email, "jana@example.com");
+  assert.equal(fields.goals, "back to squatting");
+  assert.equal(fields.injury, "knee reconstruction 2024");
+  // hasInjury is DERIVED, never taken from the sender: the client says what happened to their knee,
+  // and whether the app shows a safety advisory follows from there being text at all. A sender who
+  // set the flag with no text would otherwise raise a warning banner with nothing in it.
+  assert.equal(fields.hasInjury, true);
+  assert.deepEqual(fields.gdprConsent, signup.gdprConsent);
+});
+
+test("what the client did not say leaves the trainer's own fields alone", () => {
+  // The dialog offers "update existing" for a returning client, so this mapping must not overwrite a
+  // trainer's notes and goals with blanks just because the client skipped those boxes.
+  const fields = clientFieldsFromSignup(buildClientSignup(filledForm()));
+
+  assert.equal("goals" in fields, false);
+  assert.equal("injury" in fields, false);
+  assert.equal("hasInjury" in fields, false);
+});
+
+test("nothing that identifies a record comes from the submission", () => {
+  // A crafted file must not be able to name the record it lands on, or a stranger could aim their
+  // submission at an existing client and overwrite them.
+  const fields = clientFieldsFromSignup(
+    parseClientSignup({ ...buildClientSignup(filledForm()), id: "c1", active: false }),
+  );
+
+  assert.equal("id" in fields, false);
+  assert.equal("active" in fields, false);
 });
