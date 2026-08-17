@@ -281,6 +281,14 @@ calendar clients never generated one. The invite dialog asks for the address onc
 reply is an email, arriving in the trainer's mailbox, which a backendless PWA cannot read. It means
 the trainer finds out. Acceptance is a manual read for now, by decision (2026-08-17).
 
+**Shipped — the transport seam.** Decided 2026-08-17: what an event IS
+([sessionEventPayload.js](src/data/sessionEventPayload.js)) is separated from how it TRAVELS
+([eventTransports.js](src/modules/common/eventTransports.js)), so a channel can be chosen per
+recipient and a new one is a new entry in one list rather than a new payload format. Four to start:
+text message, mail compose, system share sheet, clipboard. The wire format is versioned and
+short-keyed against a measured budget — a QR that scans phone-to-phone holds ~300 bytes and an SMS
+segment is 160 characters, which is why a session summary travels and a program never will.
+
 - **Open — the confirm link.** Raised 2026-08-17: since no reply can reach the app on its own, the
   invite could carry a prefilled `mailto:`/`sms:` "Confirm" link aimed at the trainer, whose body is
   a LibrePT deep link (`?rsvp=…`, on the existing `shareLink.js` param machinery). The client taps

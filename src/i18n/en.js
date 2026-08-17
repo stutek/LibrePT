@@ -225,6 +225,10 @@ export const en = {
   session_invite_title: "Send calendar invites",
   session_invite_desc:
     "Newly assigned participants can be sent a calendar invite for this session.",
+  transport_sms: "Text message",
+  transport_email: "Email",
+  transport_share: "Share…",
+  transport_copy: "Copy link",
   session_invite_organizer: "Replies come back to",
   session_invite_organizer_hint: "Acceptances arrive as email replies to this address.",
   session_invite_organizer_missing:

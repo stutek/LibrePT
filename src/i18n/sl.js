@@ -224,6 +224,10 @@ export const sl = {
   session_completed: "Zaključeno",
   session_invite_title: "Pošlji vabila v koledar",
   session_invite_desc: "Na novo dodeljenim udeležencem lahko pošljete vabilo v koledar za to sejo.",
+  transport_sms: "SMS sporočilo",
+  transport_email: "E-pošta",
+  transport_share: "Deli…",
+  transport_copy: "Kopiraj povezavo",
   session_invite_organizer: "Odgovori naj prispejo na",
   session_invite_organizer_hint: "Potrditve prispejo kot e-poštni odgovori na ta naslov.",
   session_invite_organizer_missing:
