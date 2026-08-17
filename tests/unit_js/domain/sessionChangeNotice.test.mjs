@@ -14,6 +14,7 @@ import { test } from "node:test";
 import {
   clientsToNotify,
   materialSessionChanges,
+  sessionModalityProfile,
 } from "../../../src/domain/sessionChangeNotice.js";
 
 const BEFORE = {
@@ -92,4 +93,87 @@ test("a client who has left the session is not chased about it", () => {
 test("no invitations means the prompt never appears", () => {
   assert.deepEqual(clientsToNotify([], "s1", ["c1"]), []);
   assert.deepEqual(clientsToNotify(undefined, "s1", ["c1"]), []);
+});
+
+// --- Refined 2026-08-17 (Simon): "offer resending invitations only if time changes or if PT would change
+// from leg strength to cardio or similar (but it is up to PT to resend invitations) and / or change
+// invitee list". So the trigger list grows by two, and both are about the client's own preparation: what
+// KIND of session it is (shoes, food, how hard they eat beforehand), and who else will be there. ---
+
+const withModalities = (session, modalities) => ({ ...session, modalities });
+
+test("a session that turns from strength into cardio is a change the client prepares differently for", () => {
+  const before = withModalities(BEFORE, ["strength"]);
+  const after = withModalities(BEFORE, ["cardio"]);
+
+  assert.deepEqual(materialSessionChanges(before, after), ["focus"]);
+});
+
+test("the same kind of session with a different plan inside it is not a change of kind", () => {
+  // Swapping one press for another, or reordering, leaves a strength session a strength session. This is
+  // the line that keeps the prompt off ordinary programming work.
+  const before = withModalities({ ...BEFORE, routineId: "r1" }, ["strength"]);
+  const after = withModalities({ ...BEFORE, routineId: "r2" }, ["strength"]);
+
+  assert.deepEqual(materialSessionChanges(before, after), []);
+});
+
+test("adding cardio to a strength session counts, because the client's evening changes", () => {
+  const before = withModalities(BEFORE, ["strength"]);
+  const after = withModalities(BEFORE, ["cardio", "strength"]);
+
+  assert.deepEqual(materialSessionChanges(before, after), ["focus"]);
+});
+
+test("the order modalities happen to be listed in is not a change", () => {
+  const before = withModalities(BEFORE, ["strength", "cardio"]);
+  const after = withModalities(BEFORE, ["cardio", "strength"]);
+
+  assert.deepEqual(materialSessionChanges(before, after), []);
+});
+
+test("a changed invitee list is a change, because who else is there is part of what was accepted", () => {
+  const joined = materialSessionChanges(BEFORE, { ...BEFORE, participants: ["c1", "c2", "c3"] });
+  const left = materialSessionChanges(BEFORE, { ...BEFORE, participants: ["c1"] });
+
+  assert.deepEqual(joined, ["participants"]);
+  assert.deepEqual(left, ["participants"]);
+});
+
+test("the same people in a different order is not a change", () => {
+  assert.deepEqual(materialSessionChanges(BEFORE, { ...BEFORE, participants: ["c2", "c1"] }), []);
+});
+
+test("several changes at once are all reported, so the trainer sees the whole picture", () => {
+  const changes = materialSessionChanges(withModalities(BEFORE, ["strength"]), {
+    ...withModalities(BEFORE, ["cardio"]),
+    time: "07:00 - 08:00",
+    startDate: "2026-08-20T05:00:00.000Z",
+    participants: ["c1"],
+  });
+
+  assert.deepEqual(changes.sort(), ["focus", "participants", "time"]);
+});
+
+test("a session's kind is the set of modalities its routines prescribe", () => {
+  const exercises = [
+    { id: "e1", modality: "strength" },
+    { id: "e2", modality: "cardio" },
+    // No modality declared is strength by default (exerciseModality.js), and must not read as a change.
+    { id: "e3" },
+  ];
+  const routines = [
+    { id: "r1", exercises: [{ exerciseId: "e1" }, { exerciseId: "e3" }] },
+    { id: "r2", exercises: [{ exerciseId: "e2" }] },
+    { id: "r3", exercises: [] },
+  ];
+
+  assert.deepEqual(sessionModalityProfile(["r1"], routines, exercises), ["strength"]);
+  assert.deepEqual(sessionModalityProfile(["r1", "r2"], routines, exercises), [
+    "cardio",
+    "strength",
+  ]);
+  // An empty or unknown routine contributes nothing rather than inventing a kind.
+  assert.deepEqual(sessionModalityProfile(["r3", "nope"], routines, exercises), []);
+  assert.deepEqual(sessionModalityProfile([], routines, exercises), []);
 });

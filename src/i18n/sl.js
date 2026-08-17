@@ -225,6 +225,8 @@ export const sl = {
   session_completed: "Zaključeno",
   session_changed_resend:
     "Ta seja se je spremenila — želiš poslati nove podatke strankam, ki si jih že povabil?",
+  session_change_focus: "druga vrsta treninga",
+  session_change_participants: "drugi povabljeni",
   session_change_time: "nov čas",
   session_change_location: "nov prostor",
   session_invite_title: "Pošlji vabila v koledar",

@@ -352,11 +352,14 @@ segment is 160 characters, which is why a session summary travels and a program 
   changed, PT should be asked if they want to resend invitations"*. Saving an edit that moved the slot or
   the room asks once, names what moved, and on yes reopens the ordinary invite dialog for the people who
   were already invited. **Which changes count is the design**
-  ([sessionChangeNotice.js](src/domain/sessionChangeNotice.js)): a rename or a plan edit asks nothing,
-  because a prompt that fires on a typo is a prompt that gets dismissed on the change that mattered. Only
-  clients who were **invited and are still participants** are offered — a hand-added attendee was never
-  sent anything, and turning a time change into their first invitation is not what was asked. Saying no
-  sends nothing: the trainer has decided to tell them another way.
+  ([sessionChangeNotice.js](src/domain/sessionChangeNotice.js)). **Refined the same day** to exactly four
+  triggers: the slot, the room, the session's KIND — *"if PT would change from leg strength to cardio or
+  similar"*, derived from the modalities its routine prescribes — and the invitee list. A rename, or a
+  reshuffled plan of the same kind, asks nothing: a prompt that fires on a typo is a prompt that gets
+  dismissed on the change that mattered. Only clients who were **invited and are still participants** are
+  offered — a hand-added attendee was never sent anything, and turning a time change into their first
+  invitation is not what was asked. **The trainer always decides** (*"it is up to PT to resend
+  invitations"*): saying no sends nothing, and this surface only ever offers.
 - **[x] Invitations expire — asked for and built 2026-08-17.** Simon: *"can invitations expire (PT sets
   the expiry padding — example 4 hours before session)"*. Yes: the trainer sets hours-before in the
   invite dialog (remembered like the organizer email), the cutoff is computed as an absolute instant and

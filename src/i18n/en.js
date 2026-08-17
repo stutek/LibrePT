@@ -225,6 +225,8 @@ export const en = {
   session_completed: "Completed",
   session_changed_resend:
     "This session changed — send the new details to the clients you already invited?",
+  session_change_focus: "different kind of session",
+  session_change_participants: "different people invited",
   session_change_time: "new time",
   session_change_location: "new place",
   session_invite_title: "Send calendar invites",

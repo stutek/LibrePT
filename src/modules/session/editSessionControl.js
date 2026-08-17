@@ -16,7 +16,11 @@ import {
   hasBlockingConflict,
   slotFromForm,
 } from "../../domain/scheduleConflicts.js";
-import { clientsToNotify, materialSessionChanges } from "../../domain/sessionChangeNotice.js";
+import {
+  clientsToNotify,
+  materialSessionChanges,
+  sessionModalityProfile,
+} from "../../domain/sessionChangeNotice.js";
 import {
   buildPlanningSessionMeta,
   buildRealSessionMeta,
@@ -254,13 +258,30 @@ function notifyNewlyAssignedParticipants(
   });
 }
 
-/**
- * Asks whether the clients who were already invited should be told, when a session moves.
+/** The session's KIND, as the set of modalities its routine prescribes — "leg strength" versus "cardio".
  *
- * Only for changes a client would ACT on — the slot or the room (domain/sessionChangeNotice.js) — and
- * only for people who were actually invited and are still participants. A prompt that fired on a
+ * Derived rather than stored: a session record names a routine, and what that routine IS depends on the
+ * exercises it prescribes, which the trainer may edit independently. Reading it at comparison time is
+ * what makes "this became a cardio session" detectable at all.
+ */
+function sessionKindOf(state, session) {
+  const routineIds = session?.routineId ? [session.routineId] : [];
+  return sessionModalityProfile(routineIds, state.routines || [], state.exercises || []);
+}
+
+/**
+ * Asks whether the clients who were already invited should be told, when a session changes.
+ *
+ * Only for changes a client would ACT on (domain/sessionChangeNotice.js) — refined 2026-08-17 to: the
+ * slot, the room, the session's KIND (leg strength becoming cardio, which changes how someone eats and
+ * what they bring), and the invitee list (a one-to-one that becomes a group of five is a different
+ * offer). A rename or a reshuffled plan of the same kind asks nothing.
+ *
+ * And only for people who were actually invited and are still participants. A prompt that fired on a
  * renamed session would teach the trainer to dismiss it, and then be dismissed on the change that
  * mattered.
+ *
+ * **The trainer decides, always** — "it is up to PT to resend invitations". This offers; it never sends.
  *
  * It reuses the ordinary invite dialog rather than inventing a "resend" flow: the message a client needs
  * for a moved session is the same message they needed for the original one, and sending it again
@@ -308,11 +329,15 @@ function commitRealSession(
   const title = sessionName || t("workout_setup_title") || "Workout Session";
   const identity = { sessionId, sessionName: title, sessionDate, timeLabel, location };
 
-  // Snapshot BEFORE the upsert, because it edits in place: the resend prompt below compares the slot
-  // and the room the clients were told about against what they are now (TODO §1.6, asked for
-  // 2026-08-17 — "when a session gets changed, PT should be asked if they want to resend invitations").
+  // Snapshot BEFORE the upsert, because it edits in place: the resend prompt below compares what the
+  // clients were told against what the session is now (TODO §1.6, asked for 2026-08-17 — "when a session
+  // gets changed, PT should be asked if they want to resend invitations").
+  //
+  // The snapshot carries the session's KIND alongside its fields, because "leg strength became cardio"
+  // is one of the changes that counts (refined the same day) and it is not a field on the record — it
+  // has to be derived from the routines the participants were given.
   const before = state.sessions.find((session) => session.id === sessionId);
-  const asTold = before ? { ...before } : null;
+  const asTold = before ? { ...before, modalities: sessionKindOf(state, before) } : null;
 
   upsertSessionRecord(
     state.sessions,
@@ -321,9 +346,10 @@ function commitRealSession(
   deps.saveToLocalStorage?.();
   deps.rerenderSessions?.();
 
+  const saved = state.sessions.find((session) => session.id === sessionId);
   offerResendAfterChange(deps, {
     asTold,
-    now: state.sessions.find((session) => session.id === sessionId),
+    now: saved ? { ...saved, modalities: sessionKindOf(state, saved) } : null,
     identity,
     startTime,
     t,

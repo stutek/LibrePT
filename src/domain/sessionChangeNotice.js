@@ -27,8 +27,26 @@
 const TIME_FIELDS = ["startDate", "time"];
 const PLACE_FIELD = "location";
 
+/** Two lists are the same set regardless of the order they happen to be stored in — a reordered
+ *  participant array is not news, and neither is a differently-ordered modality profile. */
+function sameSet(before = [], after = []) {
+  if (before.length !== after.length) return false;
+  const seen = new Set(before);
+  return after.every((value) => seen.has(value));
+}
+
 /**
- * The material differences between two versions of a session: `["time"]`, `["location"]`, both, or none.
+ * The material differences between two versions of a session: any of `"time"`, `"location"`, `"focus"`
+ * and `"participants"`, or none.
+ *
+ * `focus` is the session's KIND — the set of modalities its routines prescribe, which the caller
+ * supplies as `modalities` (see `sessionModalityProfile`). Refined 2026-08-17: a session that turns from
+ * leg strength into cardio is something a client prepares differently for — shoes, food, how hard they
+ * work that morning — while the same kind of session with a different plan inside it is ordinary
+ * programming work and asks nothing.
+ *
+ * `participants` is the invitee list, because who else is in the room is part of what a client accepted:
+ * a one-to-one that becomes a group of five is a different offer.
  *
  * Empty for a session that did not exist before — creating one already opens the invite dialog on its
  * own, and treating creation as a change would ask about the same invitations twice.
@@ -41,7 +59,40 @@ export function materialSessionChanges(before, after) {
     changes.push("time");
   }
   if ((before[PLACE_FIELD] || "") !== (after[PLACE_FIELD] || "")) changes.push(PLACE_FIELD);
+  if (!sameSet(before.modalities, after.modalities)) changes.push("focus");
+  if (!sameSet(before.participants, after.participants)) changes.push("participants");
   return changes;
+}
+
+/**
+ * The KIND of session its routines add up to: a sorted, unique list of modalities.
+ *
+ * A set rather than a dominant one, deliberately: "strength, and now also cardio" is exactly the change
+ * a client needs to hear about, and picking a single headline modality would hide it. Sorted so two
+ * profiles compare by content and not by the order routines happened to be listed in.
+ *
+ * An unknown or empty routine contributes nothing rather than inventing a kind — a session whose plan is
+ * not written yet has no character to have changed.
+ */
+export function sessionModalityProfile(routineIds = [], routines = [], exercises = []) {
+  const modalityById = new Map(
+    exercises.map((exercise) => [
+      exercise.id,
+      // Absent means strength, the same default exerciseModality.js applies — otherwise every seeded
+      // strength movement would read as a modality change the first time this ran.
+      exercise.modality || "strength",
+    ]),
+  );
+
+  const found = new Set();
+  for (const routineId of routineIds) {
+    const routine = routines.find((candidate) => candidate.id === routineId);
+    for (const item of routine?.exercises || []) {
+      const modality = modalityById.get(item.exerciseId);
+      if (modality) found.add(modality);
+    }
+  }
+  return [...found].sort();
 }
 
 /**
