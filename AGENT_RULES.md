@@ -307,6 +307,35 @@ parallel without collisions, and make the directory tree itself act as documenta
    **Marked for reconsideration** when the count of explicit declarations becomes the larger cost.
    Say so when you notice it — do not quietly start abstracting.
 
+10. **Write the test first.** Stated 2026-08-17 (Simon): *"test first is a good strategy."* For each
+    new behaviour, add the test to the tier §5.2 puts it in, watch it fail, then implement until it
+    passes.
+
+    **Why, in the terms this file already uses.** A test written first has to state the promise in the
+    CALLER's words, because there is no implementation to describe yet — which is exactly what §5.8
+    asks for and what a test written afterwards tends to miss, since the easiest thing to assert is
+    whatever the code already does. It also fails once for the right reason, which is the only moment
+    you learn the test can fail at all; §5.8's warning about a test that passes while the behaviour is
+    broken starts here.
+
+    **It replaces the ad-hoc probe, and that is most of the saving.** The habit it corrects is
+    build-then-poke: write the module, drive a browser or a heredoc at it, read the output, move on.
+    That leaves nothing behind — the same waste §6.4 describes for one-off scripts — and it verifies
+    against the shape the code happens to have rather than the shape a caller needs.
+
+    **Evidence from the day it was raised.** The intake page's share button set `hidden` and stayed on
+    screen anyway, because every `.btn` here sets `display: flex`, which beats the UA stylesheet's
+    `[hidden]` rule. A browser probe written after the code had already reported the page "working";
+    the medium test written before the wiring failed on it immediately. Every device that cannot share
+    a file — all desktops, iOS below 15 — would have been offered a button that throws
+    ([TODO §26.7](TODO.md)).
+
+    **Boundaries, so this does not become a ritual.** It does not replace the gate: §2.A.3's full
+    `build check` still runs before every code commit. It does not mean writing a test for a typo fix
+    or a copy change. And where the shape genuinely is not knowable until something renders — a
+    layout, a geometry assertion (§25) — build first and **say that is why**, rather than leaving the
+    order unexplained.
+
 ---
 
 ## 6. Agent Tooling: Build the Tool, Don't Re-Improvise the Script
