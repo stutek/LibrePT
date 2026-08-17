@@ -223,6 +223,10 @@ export const en = {
   program_not_defined: "Program Not Defined",
   no_members_assigned: "No Participants",
   session_completed: "Completed",
+  session_changed_resend:
+    "This session changed — send the new details to the clients you already invited?",
+  session_change_time: "new time",
+  session_change_location: "new place",
   session_invite_title: "Send calendar invites",
   session_invite_desc:
     "Newly assigned participants can be sent a calendar invite for this session.",

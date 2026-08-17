@@ -16,6 +16,7 @@ import {
   hasBlockingConflict,
   slotFromForm,
 } from "../../domain/scheduleConflicts.js";
+import { clientsToNotify, materialSessionChanges } from "../../domain/sessionChangeNotice.js";
 import {
   buildPlanningSessionMeta,
   buildRealSessionMeta,
@@ -253,6 +254,45 @@ function notifyNewlyAssignedParticipants(
   });
 }
 
+/**
+ * Asks whether the clients who were already invited should be told, when a session moves.
+ *
+ * Only for changes a client would ACT on — the slot or the room (domain/sessionChangeNotice.js) — and
+ * only for people who were actually invited and are still participants. A prompt that fired on a
+ * renamed session would teach the trainer to dismiss it, and then be dismissed on the change that
+ * mattered.
+ *
+ * It reuses the ordinary invite dialog rather than inventing a "resend" flow: the message a client needs
+ * for a moved session is the same message they needed for the original one, and sending it again
+ * refreshes `sentAt` on their existing invitation while keeping the answer they had already given —
+ * which, because both are UTC instants, is legible afterwards as "answered before this went out".
+ */
+function offerResendAfterChange(deps, { asTold, now, identity, startTime, t }) {
+  if (!deps.openSessionInviteDialog || !now) return;
+  const changes = materialSessionChanges(asTold, now);
+  if (changes.length === 0) return;
+
+  const invited = clientsToNotify(deps.getState().invites, identity.sessionId, now.participants);
+  if (invited.length === 0) return;
+
+  const what = changes.map((change) => t(`session_change_${change}`) || change).join(", ");
+  // A confirm() is the right weight here, unlike §9.3's per-record cleanup: this is one yes/no about one
+  // session, and the alternative is a dialog stacked on top of the dialog the trainer just submitted.
+  if (!window.confirm(`${t("session_changed_resend") || "This session changed"} (${what}).`))
+    return;
+
+  const slot = slotFromForm({ date: identity.sessionDate, startTime, endTime: "" });
+  deps.openSessionInviteDialog({
+    ...identity,
+    sessionName: identity.sessionName,
+    dateLabel: identity.sessionDate,
+    timeLabel: identity.timeLabel,
+    startDate: slot ? new Date(slot.startMs) : null,
+    endDate: slot ? new Date(slot.endMs) : null,
+    clientIds: invited,
+  });
+}
+
 // Planning mode never touches the sessions list (it's a routine-adjustment flow, not a scheduled
 // session — see activeSessionController's `!ss.isPlanning` guards). A real session must be added
 // here: startWorkoutSession only stashes sessionMeta into the ephemeral active-session cache, it
@@ -268,12 +308,26 @@ function commitRealSession(
   const title = sessionName || t("workout_setup_title") || "Workout Session";
   const identity = { sessionId, sessionName: title, sessionDate, timeLabel, location };
 
+  // Snapshot BEFORE the upsert, because it edits in place: the resend prompt below compares the slot
+  // and the room the clients were told about against what they are now (TODO §1.6, asked for
+  // 2026-08-17 — "when a session gets changed, PT should be asked if they want to resend invitations").
+  const before = state.sessions.find((session) => session.id === sessionId);
+  const asTold = before ? { ...before } : null;
+
   upsertSessionRecord(
     state.sessions,
     buildSessionRecord({ ...identity, startTime, clientRoutines }),
   );
   deps.saveToLocalStorage?.();
   deps.rerenderSessions?.();
+
+  offerResendAfterChange(deps, {
+    asTold,
+    now: state.sessions.find((session) => session.id === sessionId),
+    identity,
+    startTime,
+    t,
+  });
 
   return buildRealSessionMeta(identity);
 }

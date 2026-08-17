@@ -223,6 +223,10 @@ export const sl = {
   program_not_defined: "Program ni določen",
   no_members_assigned: "Ni udeležencev",
   session_completed: "Zaključeno",
+  session_changed_resend:
+    "Ta seja se je spremenila — želiš poslati nove podatke strankam, ki si jih že povabil?",
+  session_change_time: "nov čas",
+  session_change_location: "nov prostor",
   session_invite_title: "Pošlji vabila v koledar",
   session_invite_desc: "Na novo dodeljenim udeležencem lahko pošljete vabilo v koledar za to sejo.",
   intake_title: "Predstavi se svojemu trenerju",

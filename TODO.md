@@ -348,6 +348,15 @@ segment is 160 characters, which is why a session summary travels and a program 
   and in every backup, undeclared. Enforced now in both places, with the restore prompt naming what a
   file cannot carry — see §18.4 and DATA_MODEL §1. **The cost is accepted and visible: an RSVP does not
   survive a restore until schema 5 is minted from P.**
+- **[x] A changed session offers to tell the clients — 2026-08-17.** Simon: *"when a session gets
+  changed, PT should be asked if they want to resend invitations"*. Saving an edit that moved the slot or
+  the room asks once, names what moved, and on yes reopens the ordinary invite dialog for the people who
+  were already invited. **Which changes count is the design**
+  ([sessionChangeNotice.js](src/domain/sessionChangeNotice.js)): a rename or a plan edit asks nothing,
+  because a prompt that fires on a typo is a prompt that gets dismissed on the change that mattered. Only
+  clients who were **invited and are still participants** are offered — a hand-added attendee was never
+  sent anything, and turning a time change into their first invitation is not what was asked. Saying no
+  sends nothing: the trainer has decided to tell them another way.
 - **[x] Invitations expire — asked for and built 2026-08-17.** Simon: *"can invitations expire (PT sets
   the expiry padding — example 4 hours before session)"*. Yes: the trainer sets hours-before in the
   invite dialog (remembered like the organizer email), the cutoff is computed as an absolute instant and
