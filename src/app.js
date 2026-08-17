@@ -76,6 +76,11 @@ import {
 } from "./modules/common/applicationHeader.js";
 import { prepareBackupDialog } from "./modules/common/backupRestore.js";
 import { renderBuildInfo } from "./modules/common/buildInfoDialog.js";
+import {
+  CONSENT_FORM_VERSION,
+  clientConsentFormUrl,
+  clientPrivacyNoticeUrl,
+} from "./modules/common/consentForm.js";
 import { driveSyncFailureNotice, prepareDriveSyncCard } from "./modules/common/driveSyncUi.js";
 import { openEncryptedFileReader } from "./modules/common/encryptedFileReader.js";
 import { openFeedbackModal } from "./modules/common/feedbackModal.js";
@@ -102,6 +107,8 @@ import {
   renderGlobalHistory as historyViewRender,
   renderHistoryViewShell,
 } from "./modules/history/historyView.js";
+import { isIntakeLocation, resolveIntakeLang } from "./modules/intake/intakeRoute.js";
+import { browserSignupPlatform } from "./modules/intake/signupDelivery.js";
 import {
   openAdjustmentWizardComponent,
   renderAdjustmentsViewShell,
@@ -182,6 +189,34 @@ window.resetLibrePTData = resetLibrePTData;
 window.stateHasData = () => stateHasData(getState());
 
 async function init() {
+  // The intake page is a different app for a different person, and it returns before any of the
+  // trainer's boot happens (TODO §1.7/§26.1). No state load, no seed, no service worker, no terms
+  // modal, no splash hold — and crucially NO WRITE: a prospective client who fills this in and walks
+  // away leaves nothing on their own phone. `initTheme` is skipped for exactly that reason (it
+  // persists the resolved theme); theme-boot.js has already put the right class on <html> before
+  // paint, and it writes nothing.
+  if (isIntakeLocation(window.location.pathname)) {
+    let intakeLang = resolveIntakeLang(
+      getShareParams().lang,
+      navigator.languages || [navigator.language],
+    );
+    appBoot.bootIntake({
+      // A dictionary read straight from the chosen language, never through `state.lang` — there is no
+      // state on this path and nothing to write a choice into.
+      t: (key) => dictionaryFor(intakeLang)[key] || key,
+      lang: () => intakeLang,
+      onChooseLanguage: (chosen) => {
+        intakeLang = resolveIntakeLang(chosen, []);
+      },
+      platform: browserSignupPlatform(),
+      todayIso: () => getISODateString(Date.now()),
+      consentVersion: CONSENT_FORM_VERSION,
+      noticeUrlFor: clientPrivacyNoticeUrl,
+      formUrlFor: clientConsentFormUrl,
+    });
+    return;
+  }
+
   initTheme();
   // The header shell renders before anything else: appBoot.bootAppLifecycle() below stamps the
   // build commit into #app-version synchronously, and several setup functions later in this file

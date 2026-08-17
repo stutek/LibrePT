@@ -1,0 +1,155 @@
+/* src/modules/intake/intake.css — the client-facing intake page (TODO §1.7/§26).
+   Its own stylesheet because its user is not the trainer: no header chrome, no bottom nav, and a
+   single column read once on a phone that has never seen this app before. It reuses index.css's form
+   controls and buttons rather than restyling them — a client filling this in and a trainer editing a
+   record should be typing into the same-looking field. */
+
+.intake-view {
+  padding: 20px 16px calc(32px + var(--safe-bottom, 0px)) 16px;
+}
+
+.intake-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.intake-brand {
+  margin: 0;
+  font-family: var(--font-header);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.intake-brand-accent {
+  color: var(--primary);
+}
+
+.intake-langs {
+  display: flex;
+  gap: 6px;
+}
+
+/* A real target, not just the 13px of text — this is the first control on the page and it decides
+   which language everything else, including the consent wording, is read in. */
+.intake-lang {
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.intake-lang.is-active {
+  border-color: transparent;
+  background: var(--primary-light);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.intake-title {
+  margin: 0 0 8px 0;
+  font-family: var(--font-header);
+  font-size: 1.5rem;
+  line-height: 1.2;
+  color: var(--text-main);
+}
+
+.intake-lede {
+  margin: 0 0 22px 0;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.intake-form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.intake-hint {
+  margin: -6px 0 10px 0;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+.intake-consent {
+  margin: 12px 0 4px 0;
+  padding: 14px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--border-radius-md, 12px);
+  background: color-mix(in srgb, var(--primary) 6%, transparent);
+}
+
+/* The whole row is the label, so the tick target is the sentence and not a 16px box. */
+.intake-consent-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 1.45;
+  cursor: pointer;
+}
+
+.intake-consent-row input {
+  width: 22px;
+  height: 22px;
+  margin-top: 2px;
+  flex: 0 0 auto;
+  accent-color: var(--primary);
+}
+
+.intake-consent-links {
+  margin: 10px 0 0 0;
+  font-size: 0.85rem;
+}
+
+.intake-consent-links a {
+  color: var(--primary);
+  /* Underlined, not colour-only: this is the link to the wording someone is being asked to agree to,
+     and it has to read as a link in greyscale and to a colour-blind reader. */
+  text-decoration: underline;
+}
+
+.intake-status {
+  margin: 14px 0 0 0;
+  padding: 10px 12px;
+  border-radius: var(--border-radius-md, 12px);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  background: var(--border-color);
+  color: var(--text-main);
+}
+
+.intake-status.is-error {
+  background: color-mix(in srgb, var(--danger) 14%, transparent);
+  color: var(--danger);
+}
+
+.intake-status.is-done {
+  background: color-mix(in srgb, var(--success, #10b981) 16%, transparent);
+  color: var(--text-main);
+}
+
+.intake-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.intake-btn {
+  min-height: 52px;
+  font-size: 1rem;
+}
+
+.intake-privacy-note {
+  margin-top: 14px;
+}

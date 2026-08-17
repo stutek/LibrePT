@@ -1790,11 +1790,27 @@ client reads unaccompanied.
       this section that both live designs share, so it could ship while §1.7's two open questions
       (below) are still open. Health fields are **excluded for now**, since shipping them and
       retracting them is not reversible while adding them later is.
-- [~] **Phase 1 — both rulings landed 2026-08-17, and the transport half is built.** Shared file
-      (§1.7) rather than a link, so §26.2's codec is retired unbuilt; goals and injuries collected at
-      the client's discretion. Done: the record, the file artifact, and share/save delivery. **Left:
-      the `/intake` route and form itself, and the trainer-side import-review dialog with dedupe.**
-      Still **no new dependency and no CSP change** — `connect-src` untouched, it is all local.
+- [~] **Phase 1 — both rulings landed 2026-08-17; the client's half is built.** Shared file (§1.7)
+      rather than a link, so §26.2's codec is retired unbuilt; goals and injuries collected at the
+      client's discretion. Done: the record, the file artifact, share/save delivery, and the `/intake`
+      page itself — [intakeView.js](src/modules/intake/intakeView.js) behind its own boot step
+      (`appBoot.bootIntake`), which is what makes §26.1's stateless promise structural rather than
+      disciplinary. **Left: the trainer-side import-review dialog with dedupe** (§26.5). Still **no new
+      dependency and no CSP change** — `connect-src` untouched, it is all local.
+
+      **A separate boot, not a flag through the normal one.** Every step of the trainer's boot writes
+      something or asks something — state load, seed, service worker, terms modal, splash hold, and
+      `initTheme`, which persists the resolved theme. Threading "unless this is a client" through all
+      of them would work until the day one was missed, and the failure would be a stranger's phone
+      holding a LibrePT database or a terms modal in front of the form. Pinned at both tiers:
+      [test_intake_form.py](tests/medium/test_intake_form.py) mounts the boot step and asserts nothing
+      is written; [test_intake.py](tests/e2e/test_intake.py) navigates for real and asserts the boot
+      DECISION, which the medium tier cannot see.
+
+      **Found by writing the test first**: the send button set `hidden` and stayed on screen, because
+      every `.btn` in this app sets `display: flex`, which beats the UA stylesheet's `[hidden]` rule —
+      so a desktop visitor would have been offered a file share their browser cannot do. It uses the
+      `.hidden` class now.
 - [ ] **Phase 2** — the vendored QR encoder and client-side QR display, plus the static trainer-side
       QR asset. Additive: both phases land on the same review dialog. Worth deferring until the
       messaging handoff has actually been tried in a gym.

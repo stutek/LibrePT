@@ -37,6 +37,7 @@ import {
   initNotificationArea,
   setupNotificationGestures,
 } from "./modules/common/notificationArea.js";
+import { renderIntakeViewShell, setupIntakeForm } from "./modules/intake/intakeView.js";
 import { initPlansView } from "./modules/plans/plansView.js";
 import { initWorkoutSetup, setupWorkoutSetup } from "./modules/session/editSessionControl.js";
 import { renderWorkoutSetupView } from "./modules/session/editSessionView.js";
@@ -179,6 +180,30 @@ export async function bootDemoTour({ shareDemo, hasData, onResults } = {}) {
   const results = await playTour(GYM_FLOOR_TOUR, { hand: mountDemoHand() });
   onResults?.(results);
   return results;
+}
+
+// The client intake page (TODO §1.7/§26) — the ONE boot path whose user is not the trainer.
+//
+// **A separate boot, not a flag threaded through the normal one.** §26.1's constraint is that intake
+// renders on a stock, cold browser: no state load, no demo seed, no service worker, no first-run
+// agreement, no splash hold, and above all no write — a stranger who fills this in and walks away
+// leaves nothing on their own phone. Every one of those is something the trainer's boot deliberately
+// does, so the two paths share the document and nothing else. Written as a branch inside `init()`
+// instead, each of those steps would need its own "unless this is a client" condition, and the day
+// one of them was missed a prospective client would get a terms modal in front of the form, or an
+// IndexedDB database on their phone (AGENT_RULES §5.9).
+//
+// The splash is hidden rather than dismissed: it exists to cover a boot that, here, is not happening.
+export function bootIntake(deps) {
+  const splash = document.getElementById("app-splash");
+  if (splash) splash.hidden = true;
+
+  renderIntakeViewShell();
+  const view = document.getElementById("view-intake");
+  // No router on this path, so the view is activated directly — the class the stylesheet keys on.
+  if (view) view.classList.add("active");
+  setupIntakeForm(deps);
+  return view;
 }
 
 // The guided walkthrough (TODO §9.5) — the same script as bootDemoTour, driven by the trainer.

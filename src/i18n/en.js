@@ -225,6 +225,37 @@ export const en = {
   session_invite_title: "Send calendar invites",
   session_invite_desc:
     "Newly assigned participants can be sent a calendar invite for this session.",
+  // The client intake page (TODO §1.7/§26) — the only screen in the app written FOR the client, so
+  // the voice is theirs and not the trainer's: "your trainer", never "the client". It says where each
+  // answer goes, because someone disclosing an injury to a person they have not trained with yet is
+  // entitled to know that before they type it.
+  intake_title: "Introduce yourself to your trainer",
+  intake_lede:
+    "Fill this in and send it to your trainer. It creates a file on your phone and nothing else — LibrePT has no account to make and no server that sees any of this.",
+  intake_name: "Your name",
+  intake_email: "Email",
+  intake_phone: "Phone",
+  intake_contact_hint: "One of the two is enough — whichever your trainer should use.",
+  intake_goals: "What you want out of training (optional)",
+  intake_injury: "Injuries or anything a trainer should know (optional)",
+  intake_health_hint:
+    "Only if you want to. It goes in the file you send your trainer, and nowhere else — not into a text message, and not into any link.",
+  intake_consent:
+    "I agree to my trainer storing and using these details to plan and log my training.",
+  intake_notice_link: "What happens to your data",
+  intake_form_link: "The full consent wording",
+  intake_send: "Send to my trainer",
+  intake_save: "Save the file to send yourself",
+  intake_privacy_note:
+    "Nothing is saved on this phone and nothing is uploaded. Close this page and it is gone.",
+  intake_share_title: "My details for training",
+  intake_share_text: "Here are my details — this file opens in LibrePT.",
+  intake_sent: "Sent. Your trainer will add you from that file.",
+  intake_saved: "Saved. Attach that file to a message to your trainer.",
+  intake_send_failed: "That didn't send. Try “Save the file” instead and attach it yourself.",
+  intake_err_identity: "Please add your name, and either an email or a phone number.",
+  intake_err_consent:
+    "Please tick the consent box — your trainer cannot store your details without it.",
   transport_sms: "Text message",
   transport_email: "Email",
   transport_share: "Share…",
