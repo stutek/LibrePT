@@ -16,6 +16,7 @@
 // and reacting to a tap all belong to the module that owns the DOM.
 
 import { crashIssueUrl } from "../data/crashReport.js";
+import { walkthroughDataPresent } from "./walkthroughReadiness.js";
 
 // A planning-mode session is never "finished" (it has no Start/Complete footer), so it lives on in
 // state.history as `isPlanning: true` — which means it survives being replaced by the next session
@@ -90,6 +91,7 @@ function resolveStoredItem(notification, t, readIds) {
       url: action.url,
       view: action.view,
       resetDemo: action.resetDemo,
+      startWalkthrough: action.startWalkthrough,
       primary: action.primary,
     })),
     read: readIds.includes(notification.id),
@@ -246,8 +248,17 @@ export function resolveNotificationItems(
   ]
     .filter(Boolean)
     .map((item) => ({ ...item, read: readIds.includes(item.id) }));
+  // An offer the store cannot honour is worse than no offer: the walkthrough drives real controls,
+  // so on a database missing what its steps need it stops on the first one, in front of the person
+  // being shown the product (TODO §28.14).
+  const canWalkThrough = walkthroughDataPresent(state);
   const stored = groupScheduleChurn(
-    (state.notifications || []).map((notification) => resolveStoredItem(notification, t, readIds)),
+    (state.notifications || [])
+      .map((notification) => resolveStoredItem(notification, t, readIds))
+      .map((item) => ({
+        ...item,
+        actions: item.actions.filter((action) => canWalkThrough || !action.startWalkthrough),
+      })),
   );
   return [...synthetic, ...stored];
 }

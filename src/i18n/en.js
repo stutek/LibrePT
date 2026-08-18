@@ -481,6 +481,7 @@ export const en = {
   notif_demo_mode_desc:
     "This app is running on sample clients, routines and sessions. Clear them before you use it for real work: clearing lists exactly what it removes and keeps the movement catalog, so anything you have built on top of it keeps working.",
   filter_participants_placeholder: "Filter clients...",
+  notif_demo_walkthrough_btn: "Show me around",
   notif_demo_mode_reset_btn: "Clear Demo Data & Exit Demo Mode",
   notif_welcome_title: "👋 You're exploring with sample data",
   notif_welcome_desc:

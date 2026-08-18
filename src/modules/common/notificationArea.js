@@ -123,6 +123,9 @@ function buildNotificationActionHTML(act, itemId, escapeHTML) {
   if (act.resetDemo) {
     return `<button type="button" class="notification-btn ${primaryCls}" data-action-reset="true" data-action-id="${escapeHTML(itemId)}">${escapeHTML(act.label)}</button>`;
   }
+  if (act.startWalkthrough) {
+    return `<button type="button" class="notification-btn ${primaryCls}" data-action-walkthrough="true" data-action-id="${escapeHTML(itemId)}">${escapeHTML(act.label)}</button>`;
+  }
   if (act.resumePlanId) {
     return `<button type="button" class="notification-btn ${primaryCls}" data-action-resume="${escapeHTML(act.resumePlanId)}" data-action-id="${escapeHTML(itemId)}">${escapeHTML(act.label)}</button>`;
   }
@@ -180,6 +183,16 @@ function wireNotificationCardActions(container, deps, t, readIds) {
     btn.addEventListener("click", (e) => {
       e.stopPropagation();
       deps.openDemoCleanup?.();
+    });
+  }
+
+  // Start the guided walkthrough (TODO §28.14). Injected rather than imported: the walkthrough
+  // reloads the app with its own deep link, and that URL is built in modules/splash — which this
+  // module may not reach across (AGENT_RULES §5.3).
+  for (const btn of container.querySelectorAll("button[data-action-walkthrough]")) {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      deps.startWalkthrough?.();
     });
   }
 

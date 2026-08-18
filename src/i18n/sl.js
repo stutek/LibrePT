@@ -465,6 +465,7 @@ export const sl = {
   notif_demo_mode_desc:
     "Aplikacija deluje na vzorčnih strankah, rutinah in sejah. Počistite jih, preden jo uporabite za resnično delo: čiščenje natančno našteje, kaj odstrani, in ohrani katalog vaj, tako da vse, kar ste zgradili na njem, še naprej deluje.",
   filter_participants_placeholder: "Filtriraj stranke...",
+  notif_demo_walkthrough_btn: "Razglej se",
   notif_demo_mode_reset_btn: "Počisti podatke in zapusti predstavitveni način",
   notif_welcome_title: "👋 Raziskujete z vzorčnimi podatki",
   notif_welcome_desc:

@@ -143,6 +143,7 @@ import {
   renderSessions as sessionsViewRender,
   seedDemoActiveSession as sessionsViewSeedDemo,
 } from "./modules/sessionList/sessionsView.js";
+import { walkthroughUrl } from "./modules/splash/splashScreen.js";
 
 function t(key) {
   // resolveLang, not `|| "en"`: an unchosen language is null and must still render in English
@@ -493,6 +494,10 @@ async function init() {
       seedMockData();
       window.location.reload();
     },
+    // The walkthrough runs from a deep link and a reload, exactly as the splash's own offer does
+    // (TODO §28.14) — the same URL builder, so the two entry points cannot drift into starting
+    // different things.
+    startWalkthrough: () => window.location.assign(walkthroughUrl()),
   });
 
   // After bootNotificationArea: the clipboard bar mounts into the notification area's handle bar,

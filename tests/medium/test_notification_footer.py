@@ -36,6 +36,7 @@ const state = {state_js};
 
 window.__seeded = 0;
 window.__navigated = [];
+window.__walkthroughStarted = 0;
 
 bootNotificationArea({{
   getState: () => state,
@@ -45,6 +46,7 @@ bootNotificationArea({{
   navigateToPath: (path) => window.__navigated.push(path),
   openSessionFromHistory: () => {{}},
   seedDemoData: () => {{ window.__seeded += 1; }},
+  startWalkthrough: () => {{ window.__walkthroughStarted += 1; }},
 }});
 renderNotificationArea();
 """
@@ -208,3 +210,45 @@ def test_accumulated_schedule_news_renders_as_separate_lines(page, local_server)
     # inner_text() reflects rendered line breaks, so this fails on a run-on paragraph while passing
     # on a stack of lines — which is the whole difference a trainer sees.
     assert len(description.inner_text().strip().splitlines()) == 3
+
+
+WALKTHROUGH_READY = """{
+  notifications: structuredClone(DEFAULT_MESSAGES),
+  sessions: [{ id: 's1', participants: ['c1', 'c2'], routineId: 'r1' }],
+  routines: [{ id: 'r1', exercises: [{ id: 'e1', circuitId: 'z1' }] }],
+}"""
+
+WALKTHROUGH_NOT_READY = """{
+  notifications: structuredClone(DEFAULT_MESSAGES),
+  sessions: [{ id: 's1', participants: ['c1'], routineId: 'r1' }],
+  routines: [{ id: 'r1', exercises: [{ id: 'e1' }] }],
+}"""
+
+
+def test_the_demo_card_offers_to_start_the_walkthrough(page, local_server):
+    """TODO §28.14: the splash offers the walkthrough on a first run, and a trainer who dismissed it
+    had nowhere else to find it. The demo card is where they are already being told they are looking
+    at sample data."""
+    load_with_stub(page, local_server, stub(WALKTHROUGH_READY))
+    page.wait_for_selector("#notification-area")
+    expand_feed(page)
+
+    walkthrough = page.locator("button[data-action-walkthrough]")
+    assert walkthrough.count() == 1
+    assert walkthrough.is_visible()
+
+    walkthrough.click()
+    assert page.evaluate("() => window.__walkthroughStarted") == 1
+
+
+def test_no_walkthrough_button_when_the_data_it_needs_is_gone(page, local_server):
+    """Offered against a store that cannot satisfy the steps, the guide stops on its first one — in
+    front of the person being shown the product. Which shapes qualify is pinned in
+    tests/unit_js/domain/walkthroughReadiness.test.mjs; this is the button obeying it."""
+    load_with_stub(page, local_server, stub(WALKTHROUGH_NOT_READY))
+    page.wait_for_selector("#notification-area")
+    expand_feed(page)
+
+    assert page.locator("button[data-action-walkthrough]").count() == 0
+    # The card itself stays — the trainer still needs to be told they are on demo data.
+    assert page.locator(".notification-card.demo-mode").count() == 1
