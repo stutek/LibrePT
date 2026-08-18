@@ -2355,3 +2355,29 @@ file.
   is also what decides whether a movement earns the CUSTOM tag.
 - **A use case is still owed**: this is a workflow, so it needs a file under
   [use_cases/](use_cases/INDEX.md) like every other one ([AGENT_RULES §4](AGENT_RULES.md)).
+
+---
+
+## 30. Reported 2026-08-18 (evening) — demo and feed polish
+
+### 30.1 [ ] BUG — loading demo data from the message button freezes the app for a while
+
+Reported: tapping the empty feed's "load demo data" offer appears to hang the app briefly. The
+handler seeds the whole dataset and then reloads
+([app.js](src/app.js)'s `seedDemoData`), so the freeze is probably the synchronous seed of the full
+demo database on the main thread, the write queue flushing behind it, or the reload landing while
+those writes are still in flight. Measure before choosing: the fix is different for each — a yielded
+seed, a progress state on the button, or reloading only once the queue has drained.
+
+### 30.2 [ ] CHANGE — the demo should end with a thank you and two ways onward
+
+Wanted 2026-08-18: when the walkthrough finishes it should say thank you and invite the trainer to
+either play around or clear the demo data. Today it simply closes and leaves them inside the live
+clipboard it just showed them — deliberate ([the walkthrough e2e](tests/e2e/test_walkthrough.py)
+pins that they are not thrown back to a start screen), but it says nothing at all.
+
+Both onward paths already exist and should be reused rather than rebuilt: the demo card in the
+message feed offers the cleanup dialog, and "play around" is simply dismissing the panel. The open
+question is WHERE it says this — a final walkthrough step with no control to tap, or a card in the
+feed — and that decides whether the guide can be exited before reading it.
+
