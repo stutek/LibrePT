@@ -77,7 +77,7 @@ the thing that must happen first, not merely what it touches.
 | **Data-subject rights** | §27.4 | One-tap withdrawal in the consent letter | Nothing; the other four shipped 2026-08-11 |
 | **Reported 2026-08-18** | §28.2 | Which contributor-facing docs get BUILT, so their addresses are injected rather than written out | Everything else in §28 shipped the same day |
 | **Client self-service** | §26, §1.7 | Intake page the client fills, consent signed on their own phone | Nothing — and it is next, decided 2026-08-17 |
-| **Program import** | §29 | Two product calls: paste vs file, and what happens to an unknown movement | Nothing technical — the intake flow, the media-type rule and the catalog crosswalk all already exist |
+| **Program import** | §29 | Nothing — shape decided 2026-08-18, and the editor-as-review answers the fragility question | The parser and its frozen corpus; the intake flow, media-type rule and catalog crosswalk already exist |
 
 ---
 
@@ -2265,47 +2265,71 @@ moving target never re-ran it.
 ## 29. Easy program import — the trainer writes the plan in an external tool
 
 **Wanted 2026-08-18 (Simon):** *"easy program import (use case using external tools to create the
-program)"*. Recorded as a spec rather than started, because two of its decisions are product calls.
+program)"*, with the shape decided the same day (below). Not started; specced.
 
 **The case.** A trainer plans in something other than LibrePT — an LLM, a spreadsheet, a PDF a
 federation published, a plan a colleague sent — and today the only way in is retyping it into the
-routine builder. That is the single largest block of typing the app still asks for, and §23.4's
-positioning ("pitch the clipboard — the one job trainers hate") argues the same way about authoring:
-the app's advantage is the gym floor, not the desk.
+routine builder. That is the largest block of typing the app still asks for, and §23.4's positioning
+argues the same way about authoring as about the gym floor: the app's advantage is not the desk.
 
-**The design is already in the repository, twice, and should be copied rather than invented.**
+### 29.1 Decided 2026-08-18 (Simon)
 
-- **[§26](TODO.md)'s intake is the same shape**: a document another party produced arrives, is
-  REVIEWED against what the trainer already has, and is written only on their explicit yes
-  ([signupFile.js](src/data/signupFile.js) → [signupReviewDialog.js](src/modules/clients/signupReviewDialog.js)).
-  A program import is that flow with a routine instead of a person. Nothing about it is new
-  plumbing.
-- **[§1.7](TODO.md)'s media-type ruling applies directly**: one media type per handling surface, not
-  a generic envelope discriminated inside. So a program is `application/vnd.librept.program+json`,
-  its own kind, and the intake file stays its own.
+- **A movement the catalog does not have is ALLOWED**, not refused and not silently normalised. It
+  carries **a small tag marking it as having no official taxonomy backing** — so a trainer can see at
+  a glance which movements in a plan are standard and which came in with it.
+  - Recommended glyph `fa-pencil` ("hand-written"), with the word **CUSTOM** beside it, since
+    [AGENT_RULES §2.D.1](AGENT_RULES.md) forbids meaning that lives only in an icon. `fa-asterisk`,
+    `fa-puzzle-piece`, `fa-user-pen`, `fa-wand-magic-sparkles` and `fa-tag` all ship too, if the
+    reading should be "with a caveat" rather than "yours". Not a decision — the maintainer asked
+    whether a glyph exists, and the answer is that several do.
+  - This does NOT retire §13's taxonomy work: the tag is what keeps a custom movement visibly
+    distinct instead of quietly becoming the fortieth spelling of "Bench Press".
+- **The import surface carries four inputs, every one of them optional**:
+  - a **client picker** — the client's permanent id, displayed as their name;
+  - a **session picker**;
+  - a **text area to paste into**;
+  - a **read from file** button.
+- **The result is the session EDIT view, prepopulated** — the same editor used during a session, not
+  a bespoke review screen. That is the decision that makes the rest cheap (see §29.2).
+
+### 29.2 Why the editor-as-review makes ingestion robust
+
+The maintainer's open question: *"How do we make the data ingestion not fragile, that I don't know"*.
+The answer starts with the decision already made — **the import lands in an editor, not in the
+database** — which turns "parse correctly" into "parse usefully": a wrong guess is a field the
+trainer retypes, not a corrupted record. On top of that, in order of what it buys:
+
+1. **Ship the prompt; do not guess the format.** Most variance is at the source. A copyable prompt
+   specifying the exact shape, including a `"format": "librept.program/1"` marker, means a paste
+   either announces itself or is rejected with a useful message rather than half-understood. The
+   marker is also how "not our JSON" is told apart from "our JSON, one field wrong". No API key, no
+   integration, no egress — it works with whichever assistant the trainer already has.
+2. **Liberal at the edges, strict at the centre.** Strip markdown fences, accept an object or a bare
+   array, accept a NAMED alias per field (`reps`/`repetitions`, `weight`/`load`/`kg`,
+   `sets`/`series`), coerce `"3x10"` and `"3 × 10"`. Every alias is an explicit table entry with a
+   test — never a generic fuzzy matcher, which fails unpredictably and cannot be reasoned about
+   ([AGENT_RULES §5.9](AGENT_RULES.md): verbosity over a clever mechanism).
+3. **Per-item parsing, never all-or-nothing.** Item 7 being unreadable must not lose items 1–6; an
+   unparsed line survives into the editor carrying its raw text, so the trainer fixes one row rather
+   than starting over. This is the whole difference between fragile and merely annoying.
+4. **A frozen corpus — the real answer.** Exactly the pattern
+   [frozenBackupCorpus.test.mjs](tests/unit_js/data/frozenBackupCorpus.test.mjs) already uses for
+   backups: a fixture folder of REAL pasted outputs (Claude's, ChatGPT's, a spreadsheet paste, one
+   with prose wrapped around the JSON) that must keep parsing. Every paste that fails in real use
+   joins the corpus and never regresses. Nothing else keeps a parser honest over time.
+5. **No second write path.** The editor's own save is the write, the same one a hand-built session
+   uses, so there is no import-specific persistence to keep correct.
+
+### 29.3 What is already in the repository, and should be copied rather than invented
+
+- **[§26](TODO.md)'s intake** is the same shape — a document another party produced, reviewed before
+  anything is written ([signupFile.js](src/data/signupFile.js) →
+  [signupReviewDialog.js](src/modules/clients/signupReviewDialog.js)). The file half of §29.1's input
+  list is that flow with a routine instead of a person.
+- **[§1.7](TODO.md)'s media-type ruling**: one media type per handling surface, so a program is
+  `application/vnd.librept.program+json` and the intake file stays its own.
 - **[exerciseStandard.js](src/domain/exerciseStandard.js)** already maps a movement name onto the
-  catalog by canonical name (the wger crosswalk, UC6 §6). That is the exercise-resolution half
-  solved — an imported "Barbell Back Squat" has to become a catalog id or a new record, and this is
-  what decides which.
-
-**The part worth building that is NOT a copy: a prompt the trainer can paste into any LLM.** No API
-key, no integration, no egress from the app, and it works with whichever assistant they already pay
-for. The app offers a copyable prompt that specifies the schema; the trainer pastes their programme
-description into their assistant of choice and pastes the JSON back. That is what makes "use external
-tools" real without LibrePT integrating with any of them.
-
-**Two decisions before this is buildable, and both are the maintainer's:**
-
-1. **Paste, file, or both?** A file is the intake flow verbatim and works offline. A paste box is
-   fewer taps for an LLM round trip, where the answer is already on the clipboard. Recommendation:
-   both, with paste as the default surface — but a paste box is a new input shape the app has
-   nowhere else, so it is worth an explicit yes.
-2. **What happens to a movement the catalog does not have?** Create it silently, offer to create it
-   in the review, or refuse the import until the trainer maps it. Recommendation: offer it in the
-   review, listed separately from the matched ones — silently creating catalog entries from a
-   machine's spelling is how a catalog becomes forty variants of "Bench Press", and §13's taxonomy
-   work exists precisely to prevent that.
-
-**Not a question**: the review step. A file from outside is never written without one, exactly as
-§26.4 argues for intake and §18.7 for restore.
-
+  catalog by canonical name (the wger crosswalk, UC6 §6) — that is the matching half solved, and it
+  is also what decides whether a movement earns the CUSTOM tag.
+- **A use case is still owed**: this is a workflow, so it needs a file under
+  [use_cases/](use_cases/INDEX.md) like every other one ([AGENT_RULES §4](AGENT_RULES.md)).
