@@ -34,6 +34,20 @@ LEGACY_BACKUP = {
 }
 
 
+CURRENT_BACKUP = {
+    # Already at this build's shape: importing it moves nothing forward, which is what makes it the
+    # genuinely consequence-free restore.
+    "schemaVersion": current_schema_version(),
+    "clients": [{"id": "c1", "name": "Restored", "active": True}],
+    "exercises": [],
+    "routines": [],
+    "history": [],
+    "planUpdates": [],
+    "sessions": [],
+    "notifications": [],
+}
+
+
 def _import(page, payload, confirm=True):
     """Restore `payload`, confirming the replace prompt when it appears.
 
@@ -261,8 +275,13 @@ def test_the_replace_prompt_names_what_would_be_lost(page, local_server):
 
 
 def test_a_restore_onto_an_empty_device_does_not_ask(page, local_server):
-    """The prompt appears only when there is something to lose — a warning shown every time is a
-    warning nobody reads."""
+    """The prompt appears only when something is at stake — a warning shown every time is a warning
+    nobody reads.
+
+    Rewritten 2026-08-18 for TODO §18.7: this used to import the LEGACY backup and assert silence, which
+    stopped being right once forward-migration consent existed. Bringing an old file forward IS something
+    at stake — it stops opening in an older build — so the no-prompt case is now a file already at this
+    build's shape, which is the one that truly costs nothing. The old-file case is asserted below."""
     page.goto(local_server)
     page.wait_for_selector(".session-card")
     page.wait_for_timeout(300)
@@ -285,11 +304,60 @@ def test_a_restore_onto_an_empty_device_does_not_ask(page, local_server):
             {
                 "name": "librept_backup.json",
                 "mimeType": "application/json",
-                "buffer": json.dumps(LEGACY_BACKUP).encode(),
+                "buffer": json.dumps(CURRENT_BACKUP).encode(),
             }
         ],
     )
     page.wait_for_timeout(600)
 
     assert page.locator("#restore-confirm:not([hidden])").count() == 0
-    assert [c["name"] for c in _state(page)["clients"]] == ["Restored Client"]
+    assert [c["name"] for c in _state(page)["clients"]] == ["Restored"]
+
+
+@pytest.mark.clean_start
+def test_an_old_backup_asks_before_bringing_the_file_forward(page, local_server):
+    """TODO §18.7's last item. The prompt has always covered what a trainer loses from THIS DEVICE, so an
+    empty device skipped it entirely — and that is exactly the case where the other consequence still
+    applies: bringing a schema-1 file forward means it stops opening in an older build they may still
+    have on a second phone. A one-way door is worth a sentence beforehand."""
+    page.goto(local_server)
+    page.wait_for_selector("#app-header", timeout=15_000)
+
+    # Inline rather than through `_import`, which answers the prompt for you — this test is about the
+    # prompt itself, so it has to be read before it is dismissed.
+    page.click("#backup-btn")
+    page.wait_for_selector("#dialog-backup[open]")
+    page.set_input_files(
+        "#import-db-file",
+        files=[
+            {
+                "name": "librept_backup.json",
+                "mimeType": "application/json",
+                "buffer": json.dumps(LEGACY_BACKUP).encode(),
+            }
+        ],
+    )
+    page.wait_for_timeout(600)
+
+    assert page.locator("#restore-confirm:not([hidden])").count() == 1
+    assert page.locator("#restore-confirm-forward:not([hidden])").count() == 1
+    assert "older builds" in page.locator("#restore-confirm-forward-text").inner_text()
+
+    page.click("#btn-restore-cancel")
+    page.wait_for_timeout(400)
+    # Declining is a refusal, not a delay: nothing was written and the file is untouched on disk.
+    assert _state(page)["clients"] == []
+
+
+@pytest.mark.clean_start
+def test_a_current_backup_onto_an_empty_device_still_restores_in_one_step(
+    page, local_server
+):
+    """The consent must not become a toll on the ordinary case — yesterday's backup restored today moves
+    nothing forward and has nothing to replace, so it should not stop to ask."""
+    page.goto(local_server)
+    page.wait_for_selector("#app-header", timeout=15_000)
+
+    _import(page, CURRENT_BACKUP)
+
+    assert [client["name"] for client in _state(page)["clients"]] == ["Restored"]

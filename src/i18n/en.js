@@ -115,6 +115,8 @@ export const en = {
     "Export your movement catalog mapped to the open wger taxonomy, so it stays interchangeable with external tools.",
   btn_export_catalog_json: "Export Catalog JSON",
   btn_export_catalog_csv: "Export Catalog CSV",
+  restore_brings_forward:
+    "this brings the file's data forward, and it will no longer open in older builds of LibrePT",
   restore_preview_only_lost: "these are not in the file and cannot come back",
   backup_import_title: "Import Data Backup",
   backup_import_desc:

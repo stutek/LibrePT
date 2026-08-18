@@ -225,3 +225,41 @@ test("P ranks above every numbered version and below the next stable one", () =>
     assert.equal(step.from, MIGRATION_STEPS[index].to, `gap before step v${step.from}→v${step.to}`);
   }
 });
+
+// --- Forward-migration consent (TODO §18.7's last open item). The restore prompt says what a trainer
+// loses from THIS DEVICE; it never said what importing does to the FILE. Bringing a schema-3 backup
+// forward means it stops being openable by the older build the trainer may still have on another phone —
+// a one-way door, and the kind a person is entitled to be told about before walking through it. ---
+
+test("a file that has to be brought forward is reported as such", () => {
+  const older = m.migrateState({ schemaVersion: 1, clients: [], exercises: [] });
+
+  assert.equal(m.bringsDataForward(older.summary), true);
+  assert.ok(m.describeMigration(older.summary).length > 0, "and it can say what moved");
+});
+
+test("a file already at this build's shape moves nothing, and asks nothing", () => {
+  // The common case — yesterday's backup restored today. A consent prompt here would be a dialog with
+  // no consequence behind it, which is how prompts stop being read.
+  const current = m.migrateState({
+    schemaVersion: CURRENT_SCHEMA_VERSION,
+    clients: [],
+    exercises: [],
+  });
+
+  assert.equal(m.bringsDataForward(current.summary), false);
+});
+
+test("a refused file is not reported as bringing anything forward", () => {
+  // Nothing was applied, because nothing could be. Reporting a migration here would offer consent for
+  // an import that is not going to happen.
+  const refused = m.migrateState({ schemaVersion: 99, clients: [], exercises: [] });
+
+  assert.equal(refused.ok, false);
+  assert.equal(m.bringsDataForward(refused.summary), false);
+});
+
+test("no summary at all is not a migration", () => {
+  assert.equal(m.bringsDataForward(null), false);
+  assert.equal(m.bringsDataForward(undefined), false);
+});

@@ -1303,10 +1303,20 @@ Quotas are orders of magnitude clear of that table, so sizing is not the constra
 
   §18.8's encryption becomes **version 5**, a new row with `container: "aes-gcm"`, plus a no-op 4→5
   record step.
-- **Forward-migration consent at import.** Today's prompt covers *what you lose from this device*;
-  it does not yet say what the import does to the file's own portability: *"This backup is from
-  schema 3. Importing brings it forward; it will no longer open in older builds."* Declining must
-  leave the `.json` byte-identical — no half-import, no helpful in-place upgrade.
+- **[x] Forward-migration consent at import — 2026-08-18.** The prompt covered *what you lose from this
+  device*; it now also says what the import does to the FILE: the steps in the trainer's own words, then
+  *"this brings the file's data forward, and it will no longer open in older builds of LibrePT"*.
+
+  **The case it was missing was the empty device**, which skipped the prompt entirely — and that is
+  exactly where the replace warning has nothing to say while the one-way door still applies. Consent is
+  now asked when EITHER consequence is real, and the two lines show independently.
+
+  Declining leaves the `.json` untouched (the app never writes to it) and the database unwritten — no
+  half-import, asserted on a clean device. A file already at this build's shape still restores in one
+  step: `bringsDataForward` is false when nothing was applied, so the ordinary case — yesterday's backup
+  restored today — gained no toll. One existing test had to be **rewritten rather than kept**: it
+  asserted that an empty device never asks, using an OLD file, which stopped being right the moment
+  portability became something to lose.
 
 ### 18.8 [ ] [Open] Encryption, device theft, and storage durability
 - **IndexedDB is not encrypted by the app**; at rest it relies on OS full-disk encryption. A stolen
@@ -1409,6 +1419,21 @@ the same 4 the migration chain ends at. See [CHANGELOG](CHANGELOG.md). Two rules
 - **Non-numeric schema keys must be threaded, never coerced.** `Number("P")` is `NaN`;
   `Object.keys(LIVE_SCHEMAS).map(Number)` once sent every star write to a `schemaNaN` store that does
   not exist, failing 139 of 141 e2e tests on a splash timeout. Use `liveSchemas()`.
+
+---
+
+### 18.15 [ ] A hard reload can outrun a queued write
+
+Found 2026-08-18 while landing §18.7's import consent: `tests/e2e/test_signup_round_trip.py` failed under
+a parallel run and passed alone, because it accepted a client and then navigated with a FULL page load —
+which re-reads IndexedDB before the enqueued write ([writeQueue.js](src/data/writeQueue.js)) has flushed.
+
+The test now waits for the stored row, which is the assertion it wanted anyway ("it survived", not "the
+list re-rendered"). **The app-side question is left open deliberately**: the real window is milliseconds
+and only on a hard reload or a tab close immediately after a write, so it has never been observed by a
+trainer — but there is no flush-on-`pagehide` and nothing that would tell anyone if it bit. Worth deciding
+whether the queue should drain on `visibilitychange`, or whether the risk is acceptable and should simply
+be written down.
 
 ---
 

@@ -113,6 +113,8 @@ export const sl = {
     "Izvozi svoj katalog gibov, preslikan v odprto taksonomijo wger, da ostane izmenljiv z zunanjimi orodji.",
   btn_export_catalog_json: "Izvozi katalog JSON",
   btn_export_catalog_csv: "Izvozi katalog CSV",
+  restore_brings_forward:
+    "s tem se podatki datoteke posodobijo in se ne bodo več odprli v starejših različicah LibrePT",
   restore_preview_only_lost: "teh datoteka ne vsebuje in se ne morejo vrniti",
   backup_import_title: "Uvozi varnostno kopijo",
   backup_import_desc:

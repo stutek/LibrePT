@@ -20,6 +20,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-08-18 — A restore says what it does to the file, not just to the device
+
+### Added
+- **Forward-migration consent at import** (TODO §18.7's last open item) — restoring an older backup now says what the import does to the FILE, not only what it replaces on the device: the migration steps in plain words, then *"this brings the file's data forward, and it will no longer open in older builds of LibrePT"*. **The case it was missing was the empty device**, which skipped the prompt entirely — precisely where the replace warning has nothing to say while the one-way door still applies. Consent is asked when either consequence is real, and the two lines appear independently. Declining writes nothing at all, asserted on a clean device; a file already at this build's shape still restores in one step, so the ordinary case gained no toll. An existing test that asserted "an empty device never asks" was **rewritten rather than kept** — it used an old file, and that stopped being right the moment portability became something to lose.
+
+---
+
 ## 2026-08-17 — Clients introduce themselves; a walkthrough that drives the real app
 
 ### Added

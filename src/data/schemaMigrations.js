@@ -165,6 +165,23 @@ export function migrateState(rawState) {
 }
 
 // One line per applied step, for the "what will this upgrade do" confirmation a PT is shown.
+/**
+ * Whether importing this file will bring its data FORWARD — i.e. whether any step actually applied.
+ *
+ * The restore prompt has always said what a trainer loses from this DEVICE; this is the other half
+ * (TODO §18.7): what the import does to the FILE. A schema-3 backup brought forward stops being
+ * openable by an older build the trainer may still have on a second phone, and that is a one-way door
+ * they are entitled to be told about first.
+ *
+ * False for a file already at this shape — the common case, yesterday's backup restored today, where a
+ * consent prompt would be a dialog with no consequence behind it. False for a refused file too:
+ * nothing was applied because nothing could be, and offering consent for an import that will not happen
+ * is worse than silence.
+ */
+export function bringsDataForward(summary) {
+  return (summary?.applied?.length ?? 0) > 0;
+}
+
 export function describeMigration(summary) {
   if (!summary) return [];
   if (summary.problems.length > 0) return summary.problems;

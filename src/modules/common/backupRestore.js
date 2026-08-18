@@ -26,7 +26,7 @@ import {
   writeSuppressionList,
 } from "../../data/erasureSuppression.js";
 import { DEFAULT_SESSIONS } from "../../data/index.js";
-import { describeMigration, migrateState } from "../../data/schemaMigrations.js";
+import { bringsDataForward, describeMigration, migrateState } from "../../data/schemaMigrations.js";
 import { recordBackupTaken } from "../../data/stateStore.js";
 import { catalogToCsv, catalogToInterchange } from "../../domain/exerciseStandard.js";
 import { BUILD_INFO } from "../../version.js";
@@ -88,10 +88,29 @@ function renderImportSuccess(summary, reErased) {
 
 // Names what is about to be overwritten, per collection. "Replace 12 clients and 40 sessions?" is a
 // sentence a trainer can weigh; "Are you sure?" is not.
-function showReplaceConfirmation(replacing) {
+function showReplaceConfirmation(replacing, migrationSummary) {
   const box = document.getElementById("restore-confirm");
   const detail = document.getElementById("restore-confirm-detail");
   if (!box || !detail) return;
+
+  // What the import does to the FILE, shown whether or not there is anything on this device to lose.
+  const forward = document.getElementById("restore-confirm-forward");
+  const forwardText = document.getElementById("restore-confirm-forward-text");
+  const movingForward = bringsDataForward(migrationSummary);
+  if (forward && forwardText) {
+    forward.hidden = !movingForward;
+    if (movingForward) {
+      // The steps in the trainer's own words, then the consequence. `describeMigration` already
+      // produces the per-step notes the import banner shows.
+      forwardText.textContent = `${describeMigration(migrationSummary).join("; ")} — ${
+        deps.t("restore_brings_forward") ||
+        "this brings the file's data forward, and it will no longer open in older builds of LibrePT."
+      }`;
+    }
+  }
+  // The replace half is only about THIS device, so it hides when there is nothing here to lose.
+  const replaceLine = document.getElementById("restore-confirm-replace");
+  if (replaceLine) replaceLine.hidden = replacing.total === 0;
   const parts = Object.entries(replacing.counts).map(
     ([collection, count]) => `${count} ${collection}`,
   );
@@ -145,9 +164,17 @@ export function renderBackupDialog() {
       <!-- Shown only when a restore would overwrite existing records. Hidden by default so the
            common case (restoring onto an empty device) stays one step. -->
       <div id="restore-confirm" class="restore-confirm" hidden>
-        <p><i class="fa-solid fa-triangle-exclamation"></i>
+        <p id="restore-confirm-replace"><i class="fa-solid fa-triangle-exclamation"></i>
           <strong>Restoring replaces everything on this device.</strong>
           You would lose: <span id="restore-confirm-detail"></span>.
+        </p>
+        <!-- The other half of the consent (TODO §18.7): what the import does to the FILE. Bringing an
+             older backup forward means it stops being openable by an older build the trainer may still
+             have on a second phone — a one-way door, and one they should be told about before walking
+             through it rather than after. Shown independently of the replace warning, because a restore
+             onto an EMPTY device still walks through it. -->
+        <p id="restore-confirm-forward" hidden><i class="fa-solid fa-arrow-up-right-dots"></i>
+          <span id="restore-confirm-forward-text"></span>
         </p>
         <div class="restore-confirm-actions">
           <button type="button" class="btn-secondary" id="btn-restore-cancel">Keep what I have</button>
@@ -450,11 +477,14 @@ export function setupBackupRestore() {
             // a trainer setting up a new phone who has already entered a client would lose it with
             // no warning. So when there is anything to lose, the restore waits for a confirmation
             // that names what it is about to overwrite.
+            // Consent is needed for either consequence: losing what is on this device, OR taking the
+            // file through a one-way door. The second is why an empty device is no longer a silent
+            // restore — it was the case that skipped the prompt entirely (TODO §18.7).
             const replacing = summarizeReplacement(deps.getState());
-            if (replacing.total > 0 && !confirmedRestore) {
+            if ((replacing.total > 0 || bringsDataForward(summary)) && !confirmedRestore) {
               pendingRestore = restored;
               pendingSummary = summary;
-              showReplaceConfirmation(replacing);
+              showReplaceConfirmation(replacing, summary);
               return;
             }
             const reErased = await applyRestoredState(restored);
