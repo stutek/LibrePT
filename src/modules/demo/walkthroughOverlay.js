@@ -162,11 +162,28 @@ export function startGuidedWalkthrough({
     el.spotlight.classList.add("is-visible");
   }
 
+  /** Move the panel to the top of the screen if it would cover the step's control, and back down
+   * when it would not (TODO §28.15).
+   *
+   * **Asked on every poll tick, not once per step.** It used to run only in `enterStep`, immediately
+   * after `scrollIntoView` — which measures the layout as it was BEFORE the scroll settled, so the
+   * answer was right or wrong depending on timing, and nothing ever revisited it. Any later scroll
+   * (the deck is its own scroll container, and steps 2 and 4 both move it) could slide the control
+   * under a panel that had already decided where to sit. Reported as the panel covering the button
+   * "sometimes".
+   *
+   * The decision is re-derived from the CURRENT geometry each time rather than latched, so it also
+   * moves back down once the control is no longer underneath — a panel that fled to the top and
+   * stayed there would cover whatever the next step points at up there.
+   */
   function keepPanelClearOf(target) {
     if (!target) return;
-    const panelTop = el.panel.getBoundingClientRect().top;
-    const targetBottom = target.getBoundingClientRect().bottom;
-    el.overlay.classList.toggle("is-top", targetBottom > panelTop - PANEL_CLEARANCE_PX);
+    // Measured with the panel where it is NOW, which is why this reads the bottom edge the panel
+    // would occupy at the bottom of the viewport rather than its live top: once `is-top` is on, the
+    // panel's own top is at the top of the screen and would answer "no overlap" forever.
+    const panelHeight = el.panel.getBoundingClientRect().height;
+    const wouldSitAbove = doc.documentElement.clientHeight - panelHeight - PANEL_CLEARANCE_PX;
+    el.overlay.classList.toggle("is-top", target.getBoundingClientRect().bottom > wouldSitAbove);
   }
 
   function render() {
@@ -243,6 +260,7 @@ export function startGuidedWalkthrough({
     if (!step || showing) return;
     const target = resolveTarget(doc, step);
     positionSpotlight(target);
+    keepPanelClearOf(target);
     if (stepOutcomeNow(step, doc).ok) {
       state = completeWalkthroughStep(state, step.id);
       render();
