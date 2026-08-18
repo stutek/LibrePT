@@ -299,3 +299,102 @@ test("with nowhere to report it, nothing is offered rather than a dead link", ()
     null,
   );
 });
+
+// ── Schedule churn, accumulated (TODO §28.10) ──────────────────────────────────────────────────
+// Every cancellation and booking used to arrive as its own card, so an evening where three clients
+// rearranged pushed everything else off a phone screen. They are the same KIND of news — "who is
+// coming, who is not" — so they belong on one card, one line each.
+
+const scheduleFeed = (...notifications) => ({ notifications });
+
+const booking = (id, description) => ({
+  id,
+  type: "reservation",
+  icon: "fa-solid fa-calendar-check",
+  title: "Spot booked",
+  description,
+  actions: [],
+});
+
+const cancellation = (id, description) => ({
+  id,
+  type: "cancellation",
+  icon: "fa-solid fa-calendar-xmark",
+  title: "Spot cancelled",
+  description,
+  actions: [],
+});
+
+test("bookings and cancellations accumulate on one card, one line each", () => {
+  const items = resolveNotificationItems(
+    scheduleFeed(
+      booking("b1", "Ana booked Tuesday 18:00"),
+      cancellation("c1", "Marko cancelled Wednesday 07:00"),
+      cancellation("c2", "Eva cancelled Thursday 19:30"),
+    ),
+    t,
+    [],
+  );
+
+  assert.equal(items.length, 1, "three arrivals, one card");
+  const [card] = items;
+  for (const line of [
+    "Ana booked Tuesday 18:00",
+    "Marko cancelled Wednesday 07:00",
+    "Eva cancelled Thursday 19:30",
+  ]) {
+    assert.ok(card.description.includes(line), `missing line: ${line}`);
+  }
+});
+
+test("the accumulated card sits where its first arrival did, not at the top", () => {
+  // The demo-mode notice is deliberately first — it is what a trainer reads collapsed. Grouping
+  // must not reorder the feed around it.
+  const items = resolveNotificationItems(
+    scheduleFeed(
+      { id: "demo", type: "demo-mode", title: "Demo data", description: "…", actions: [] },
+      booking("b1", "Ana booked Tuesday 18:00"),
+      { id: "welcome", type: "info", title: "Welcome", description: "…", actions: [] },
+      cancellation("c1", "Marko cancelled Wednesday 07:00"),
+    ),
+    t,
+    [],
+  );
+
+  assert.deepEqual(
+    items.map((item) => item.title),
+    ["Demo data", "Spot booked", "Welcome"],
+    "the group takes the place of the first of its members",
+  );
+});
+
+test("a new arrival makes the card unread again, even after the earlier ones were dismissed", () => {
+  const first = resolveNotificationItems(scheduleFeed(booking("b1", "Ana booked")), t, []);
+  const dismissed = [first[0].id];
+  assert.equal(
+    resolveNotificationItems(scheduleFeed(booking("b1", "Ana booked")), t, dismissed)[0].read,
+    true,
+  );
+
+  const afterCancellation = resolveNotificationItems(
+    scheduleFeed(booking("b1", "Ana booked"), cancellation("c1", "Marko cancelled")),
+    t,
+    dismissed,
+  );
+  assert.equal(
+    afterCancellation[0].read,
+    false,
+    "news the trainer has not seen must not inherit a dismissal",
+  );
+});
+
+test("one arrival on its own is still just that message", () => {
+  const [card] = resolveNotificationItems(
+    scheduleFeed(cancellation("c1", "Marko cancelled")),
+    t,
+    [],
+  );
+
+  assert.equal(card.description, "Marko cancelled");
+  assert.equal(card.title, "Spot cancelled", "a single cancellation reads as itself");
+});

@@ -174,3 +174,37 @@ def test_the_welcome_card_goes_where_its_label_says(page, local_server):
 
     action.click()
     assert page.evaluate("() => window.__navigated") == ["/clients"]
+
+
+SCHEDULE_CHURN = """{ notifications: [
+  { id: 'b1', type: 'reservation', icon: 'fa-solid fa-calendar-check',
+    title: 'Spot booked', description: 'Ana booked Tuesday 18:00', actions: [] },
+  { id: 'c1', type: 'cancellation', icon: 'fa-solid fa-calendar-xmark',
+    title: 'Spot cancelled', description: 'Marko cancelled Wednesday 07:00', actions: [] },
+  { id: 'c2', type: 'cancellation', icon: 'fa-solid fa-calendar-xmark',
+    title: 'Spot cancelled', description: 'Eva cancelled Thursday 19:30', actions: [] },
+] }"""
+
+
+def test_accumulated_schedule_news_renders_as_separate_lines(page, local_server):
+    """One card, three readable lines (TODO §28.10).
+
+    Which arrivals get grouped is pure logic and is pinned in
+    tests/unit_js/domain/notificationItems.test.mjs. What only a browser can answer is whether the
+    joined text actually renders as a list: HTML collapses newlines, so a card built by joining
+    lines is one run-on paragraph unless the stylesheet says otherwise.
+    """
+    load_with_stub(page, local_server, stub(SCHEDULE_CHURN))
+    page.wait_for_selector("#notification-area")
+    expand_feed(page)
+
+    cards = page.locator(".notification-card")
+    assert cards.count() == 1, "three arrivals must arrive as one card"
+
+    description = cards.first.locator(".notification-card-desc")
+    for line in ("Ana booked", "Marko cancelled", "Eva cancelled"):
+        assert line in description.inner_text()
+
+    # inner_text() reflects rendered line breaks, so this fails on a run-on paragraph while passing
+    # on a stack of lines — which is the whole difference a trainer sees.
+    assert len(description.inner_text().strip().splitlines()) == 3

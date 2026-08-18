@@ -185,6 +185,47 @@ export function buildCrashReportItem(crashes, t, repoUrl) {
   };
 }
 
+// The two stored types that report the same kind of news — who is coming and who is not — and so
+// belong on one card rather than one each (TODO §28.10). An evening where three clients rearrange
+// used to push everything else off a phone screen.
+const SCHEDULE_CHURN_TYPES = new Set(["reservation", "cancellation"]);
+
+/**
+ * Every booking and cancellation folded into one item, taking the place of the FIRST of them.
+ *
+ * Position matters: the demo-mode notice is deliberately the first record in the seed because it is
+ * what a trainer reads while the drawer is collapsed, so grouping must not float the group to the
+ * top of the feed.
+ *
+ * A single arrival is left exactly as it was — its own title and its own description — because a
+ * lone cancellation grouped with nothing reads worse as "Schedule changes: 1" than as itself.
+ *
+ * The id is keyed on the members, like the RSVP item above and for the same reason: a booking that
+ * lands after the trainer dismissed yesterday's cancellations is news, and must not inherit that
+ * dismissal.
+ */
+function groupScheduleChurn(resolved) {
+  const churn = resolved.filter((item) => SCHEDULE_CHURN_TYPES.has(item.type));
+  if (churn.length < 2) return resolved;
+
+  const grouped = {
+    id: `grouped-schedule-${churn.map((item) => item.id).join("|")}`,
+    type: "schedule",
+    icon: "fa-solid fa-calendar-day",
+    title: churn[0].title,
+    // One line per arrival, in the order they were stored — a list a trainer reads top to bottom,
+    // not a count they have to open something to expand.
+    description: churn.map((item) => item.description).join("\n"),
+    actions: churn.flatMap((item) => item.actions),
+    read: churn.every((item) => item.read),
+  };
+
+  const [first] = churn;
+  return resolved
+    .filter((item) => !SCHEDULE_CHURN_TYPES.has(item.type) || item === first)
+    .map((item) => (item === first ? grouped : item));
+}
+
 export function resolveNotificationItems(
   state,
   t,
@@ -205,8 +246,8 @@ export function resolveNotificationItems(
   ]
     .filter(Boolean)
     .map((item) => ({ ...item, read: readIds.includes(item.id) }));
-  const stored = (state.notifications || []).map((notification) =>
-    resolveStoredItem(notification, t, readIds),
+  const stored = groupScheduleChurn(
+    (state.notifications || []).map((notification) => resolveStoredItem(notification, t, readIds)),
   );
   return [...synthetic, ...stored];
 }

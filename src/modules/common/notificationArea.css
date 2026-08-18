@@ -418,6 +418,11 @@ body:has(#active-session-overlay:not(.hidden))
   color: var(--text-muted);
   margin: 0 0 10px 0;
   line-height: 1.4;
+  /* An accumulated card carries one arrival per LINE (TODO §28.10) — "Ana booked Tuesday 18:00",
+     "Marko cancelled Wednesday 07:00" — and HTML collapses the newlines that separate them into
+     spaces, so without this the card a trainer scans at arm's length is one run-on paragraph.
+     pre-line rather than pre: the lines themselves must still wrap on a phone. */
+  white-space: pre-line;
 }
 .notification-actions {
   display: flex;
