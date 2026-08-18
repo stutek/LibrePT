@@ -409,6 +409,8 @@ export const sl = {
   drive_sync_glyph_failed: "Zadnja sinhronizacija ni uspela",
   drive_sync_glyph_disconnected: "Sinhronizacija v oblak ni povezana",
   drive_sync_glyph_idle: "Sinhronizacija v oblak je povezana",
+  notif_crash_title: "Nekaj je šlo narobe",
+  notif_crash_report: "Prijavi to",
   notif_rsvp_title: "Odgovori na vabila",
   notif_rsvp_unknown_client: "Stranka",
   rsvp_answer_yes: "pride",

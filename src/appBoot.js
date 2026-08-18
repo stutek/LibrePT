@@ -14,7 +14,11 @@ import {
   initActiveSessionController,
   setupActiveSession,
 } from "./controllers/activeSessionController.js";
-import { initAppLifecycle } from "./controllers/appLifecycleController.js";
+import {
+  captureUncaughtErrors,
+  crashLog,
+  initAppLifecycle,
+} from "./controllers/appLifecycleController.js";
 import { setupClientForms } from "./controllers/clientFormsController.js";
 import { setupViewDismiss } from "./controllers/gestureController.js";
 import { initRouter } from "./controllers/routerController.js";
@@ -48,6 +52,17 @@ import { initSessionInviteDialog } from "./modules/session/sessionInviteDialog.j
 import { initSessionTitleBar } from "./modules/session/sessionTitleBar.js";
 import { initSessionTimeline } from "./modules/sessionList/sessionTimeline.js";
 import { dismissSplashWhenReady } from "./modules/splash/splashScreen.js";
+
+// Global error capture (TODO §12.4). Its own step, called before every other one: the crash worth
+// catching most is the one that happens while the app is still starting.
+export function bootCrashCapture(deps) {
+  captureUncaughtErrors(deps);
+}
+
+// Re-EXPORTED, not merely imported: `appBoot.crashLog` was undefined until this line existed, so the
+// feed asked for the crash log, got nothing, and rendered no offer — silently, because a missing
+// optional dep looks exactly like "no crashes yet". An e2e case pins it now.
+export { crashLog };
 
 export function bootAppLifecycle(deps) {
   initAppLifecycle(deps);

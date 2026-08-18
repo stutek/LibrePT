@@ -267,7 +267,10 @@ export function renderNotificationArea() {
 
   const readIds = loadReadNotificationIds();
   const state = deps.getState?.() || {};
-  const items = resolveNotificationItems(state, t, readIds, deps.getSyncFailure?.() || null);
+  const items = resolveNotificationItems(state, t, readIds, deps.getSyncFailure?.() || null, {
+    crashes: deps.getCrashes?.() || [],
+    repoUrl: deps.repoUrl || "",
+  });
   paintFeedCounts(items, t);
 
   if (items.length === 0) {

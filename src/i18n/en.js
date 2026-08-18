@@ -425,6 +425,8 @@ export const en = {
   drive_sync_glyph_failed: "Last sync failed",
   drive_sync_glyph_disconnected: "Cloud sync not connected",
   drive_sync_glyph_idle: "Cloud sync connected",
+  notif_crash_title: "Something went wrong",
+  notif_crash_report: "Report this",
   notif_rsvp_title: "RSVP replies",
   notif_rsvp_unknown_client: "A client",
   rsvp_answer_yes: "coming",

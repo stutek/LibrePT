@@ -14,6 +14,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
+  buildCrashReportItem,
   buildPendingSessionsItem,
   buildRsvpAnswersItem,
   buildUnscheduledPlansItem,
@@ -244,4 +245,57 @@ test("an answer from someone no longer in the register still reports itself", ()
   const item = buildRsvpAnswersItem(state, (key) => key);
 
   assert.ok(item, "the answer is still reported");
+});
+
+// --- A crash the trainer can report (TODO §12.4). Synthetic, and deliberately the LAST thing offered:
+// it must never interrupt a live session, and a modal over a set is worse than the original bug. ---
+
+test("a captured crash is offered as something to report, not as an alert", () => {
+  const item = buildCrashReportItem(
+    [
+      {
+        message: "Cannot read properties of undefined",
+        stack: "at deck.js:7",
+        build: "abc1234",
+        count: 1,
+      },
+    ],
+    (key) => key,
+    "https://github.com/stutek/LibrePT",
+  );
+
+  assert.ok(item);
+  assert.match(item.description, /Cannot read properties/);
+  // A link the trainer chooses to follow — never an automatic send, because there is no server and an
+  // issue is public.
+  assert.equal(item.actions.length, 1);
+  assert.match(item.actions[0].url, /issues\/new/);
+});
+
+test("a crash that repeated says so, because once and forty times are different bugs", () => {
+  const item = buildCrashReportItem(
+    [{ message: "boom", stack: "at x.js:1", build: "b", count: 40 }],
+    (key) => key,
+    "https://github.com/stutek/LibrePT",
+  );
+
+  assert.match(item.description, /40/);
+});
+
+test("no crashes, no item", () => {
+  assert.equal(
+    buildCrashReportItem([], (key) => key, "https://x/y"),
+    null,
+  );
+  assert.equal(
+    buildCrashReportItem(undefined, (key) => key, "https://x/y"),
+    null,
+  );
+});
+
+test("with nowhere to report it, nothing is offered rather than a dead link", () => {
+  assert.equal(
+    buildCrashReportItem([{ message: "boom", count: 1 }], (key) => key, ""),
+    null,
+  );
 });

@@ -15,6 +15,8 @@
 // Pure (TODO §24.7): state in, item list out. Rendering it, persisting which items have been read,
 // and reacting to a tap all belong to the module that owns the DOM.
 
+import { crashIssueUrl } from "../data/crashReport.js";
+
 // A planning-mode session is never "finished" (it has no Start/Complete footer), so it lives on in
 // state.history as `isPlanning: true` — which means it survives being replaced by the next session
 // the trainer opens, but they have no other place to rediscover it. One action per plan resumes it.
@@ -152,11 +154,51 @@ export function buildRsvpAnswersItem(state, t) {
   };
 }
 
-export function resolveNotificationItems(state, t, readIds = [], syncFailure = null) {
+// A crash the trainer can report (TODO §12.4). Offered, never sent: there is no server, an issue is
+// public, and automatic reporting would be an unannounced egress of a trainer's data. The action is a
+// link to a PREFILLED issue the trainer reads on GitHub before submitting — the review happens on the
+// page that shows them exactly what they are about to publish.
+//
+// It lives in the feed rather than in a dialog because of §12.4's own warning: a handler that renders a
+// modal over a live session mid-set is worse than the original bug. The feed waits.
+//
+// Null with nowhere to report to, so a build with no tracker configured renders no control rather than
+// a dead one.
+export function buildCrashReportItem(crashes, t, repoUrl) {
+  const latest = (crashes || [])[crashes?.length - 1];
+  if (!latest) return null;
+  const href = crashIssueUrl(latest, repoUrl);
+  if (!href) return null;
+
+  const repeated = (latest.count || 1) > 1;
+  return {
+    // Keyed on the crash itself, so a NEW one arrives unread rather than being silenced by a "mark
+    // read" the trainer tapped for an earlier one.
+    id: `synthetic-crash-${latest.message}-${latest.count || 1}`,
+    type: "alert",
+    icon: "fa-solid fa-bug",
+    title: t("notif_crash_title") || "Something went wrong",
+    description: repeated ? `${latest.message} (${latest.count}\u00d7)` : latest.message,
+    // `url`, the field the feed's action renderer already understands — a second name for "a link"
+    // would render as a dead button with no href at all.
+    actions: [{ label: t("notif_crash_report") || "Report this", url: href }],
+  };
+}
+
+export function resolveNotificationItems(
+  state,
+  t,
+  readIds = [],
+  syncFailure = null,
+  { crashes = [], repoUrl = "" } = {},
+) {
   const synthetic = [
     // A fault leads: it is the only item here reporting that something the trainer asked for did
     // not happen.
     buildSyncFailureItem(syncFailure, t),
+    // A crash outranks the RSVPs below it but not a failed sync: both are faults, and the sync one is
+    // about the trainer's data being at risk right now.
+    buildCrashReportItem(crashes, t, repoUrl),
     buildRsvpAnswersItem(state, t),
     buildUnscheduledPlansItem(state, t),
     buildPendingSessionsItem(state, t),

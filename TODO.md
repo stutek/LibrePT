@@ -940,7 +940,7 @@ plan-adjustments deck and wizard, the Client Directory grid and search are all c
 open**: the demo walkthrough (§9.5) is unbuilt, so it has no tests. Confirm every extracted component
 has at least one exercised path.
 
-### 12.4 [ ] [Brainstorm] Capture exceptions and offer semi-automatic bug reporting
+### 12.4 [x] Capture exceptions and offer semi-automatic bug reporting — 2026-08-18
 **Raised 2026-07-26 (Simon).** Nothing installs `window.onerror` or an `unhandledrejection` handler,
 so a thrown error dies in a console the PT will never open while
 [docs/BUG_REPORTING.md](docs/BUG_REPORTING.md) asks them to retype the build stamp by hand.
@@ -961,6 +961,32 @@ so a thrown error dies in a console the PT will never open while
 - **Watch the failure mode**: a handler that itself throws, or that renders a modal over a live
   session mid-set, is worse than the original bug. Non-blocking, never steals focus, survives being
   called before boot completes.
+
+**Shipped 2026-08-18.** [crashReport.js](src/data/crashReport.js) builds the payload,
+[appLifecycleController.js](src/controllers/appLifecycleController.js) installs the listeners as the
+FIRST boot step (a crash during boot is the one a trainer can least describe), and the notification feed
+offers it. What each bullet above became:
+
+- **Non-identifying by construction, as specified.** A fixed field list — message, stack, route, build,
+  time — and anything else a caller passes is dropped. A unit test hands it a client's name, notes and an
+  injury and asserts none of it can appear.
+- **Offer, never send.** The action is a link to a prefilled issue; the review happens on GitHub, on the
+  page that shows the trainer exactly what they are about to publish. No server was added and no
+  `connect-src` changed.
+- **The feed, not a modal** — §12.4's own warning made testable: an e2e case asserts no dialog opens and
+  the app stays usable after an uncaught throw.
+- **The handler cannot throw.** Everything inside it is wrapped, and a failure there is deliberately
+  silent: there is nowhere left to report a failure to report.
+- **A repeat collapses into a count**, so a render loop throwing every frame cannot evict the report that
+  explains how it started.
+
+**A wiring bug the tests caught**: `appBoot.crashLog` was imported but never re-exported, so the feed
+asked for the crash log, got `undefined`, and rendered nothing — silently, because a missing optional dep
+looks exactly like "no crashes yet". The e2e case exists for that class of failure.
+
+**Still open, and it needs a decision: §23.5's "no feedback route a non-developer will use".** This gives
+a PT with a GitHub account a good path. A PT without one still has none, and that is a maintainer choice
+— an email address, or a form — not something to invent.
 
 ### 12.5 [ ] Local git housekeeping (trademark refs)
 The trademark was scrubbed and force-pushed; the remote is clean and no `refs/original/…` or backup

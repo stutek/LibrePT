@@ -46,6 +46,7 @@ import {
   openRoutineCreateDialog,
   setupRoutineForms as setupRoutineFormsController,
 } from "./controllers/routineFormsController.js";
+import { ISSUE_TRACKER_URL } from "./data/crashReport.js";
 import { driveSyncStatus, onSyncCountsChanged, primeAheadCache } from "./data/driveSyncService.js";
 import { recordRsvp } from "./data/inviteRecord.js";
 import { newRecordId } from "./data/recordId.js";
@@ -193,6 +194,11 @@ window.resetLibrePTData = resetLibrePTData;
 window.stateHasData = () => stateHasData(getState());
 
 async function init() {
+  // FIRST, before anything else can throw: a crash during boot is exactly the one a trainer is least
+  // able to describe, and §12.4's whole point is that it currently dies in a console nobody opens.
+  // Re-renders the feed rather than interrupting — nothing steals focus (TODO §12.4).
+  appBoot.bootCrashCapture({ onCaptured: () => renderNotificationArea() });
+
   // The intake page is a different app for a different person, and it returns before any of the
   // trainer's boot happens (TODO §1.7/§26.1). No state load, no seed, no service worker, no terms
   // modal, no splash hold — and crucially NO WRITE: a prospective client who fills this in and walks
@@ -446,6 +452,11 @@ async function init() {
   appBoot.bootBuildInfoDialog({ t, navigateToPath, urlFor });
 
   appBoot.bootNotificationArea({
+    // The crash log lives in the lifecycle controller (in memory only) and the tracker URL is a
+    // constant — the feed decides IF and WHEN to mention a crash, which is what keeps §12.4's handler
+    // from interrupting a live session.
+    getCrashes: appBoot.crashLog,
+    repoUrl: ISSUE_TRACKER_URL,
     getState,
     getActiveSession: () => getActiveSession(),
     t,

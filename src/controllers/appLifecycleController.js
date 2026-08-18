@@ -2,6 +2,7 @@
 // Single responsibility: Handles PWA screen orientation lock, dev phone viewport resizing,
 // build stamp header rendering, Service Worker registration, and network connectivity state monitoring.
 
+import { buildCrashReport, recordCrash } from "../data/crashReport.js";
 import {
   driveSyncStatus,
   refreshSyncCounts,
@@ -154,6 +155,50 @@ export function setupDriveSyncOnResume() {
     if (!driveSyncStatus().connected) return;
     refreshSyncCounts();
   });
+}
+
+// Crashes the trainer can report (TODO §12.4). Nothing installed `window.onerror` before this, so a
+// thrown error died in a console a PT will never open — while docs/BUG_REPORTING.md asked them to
+// retype the build stamp by hand.
+//
+// **In memory only, and never rendered from here.** The feed decides when to mention it
+// (domain/notificationItems.js), because §12.4's own warning is that a handler rendering a modal over a
+// live session mid-set is worse than the original bug. Nothing steals focus and nothing blocks.
+//
+// **The handler cannot be allowed to throw**, so everything inside it is wrapped: a reporter that fails
+// while reporting turns one bug into an unrecoverable loop.
+let capturedCrashes = [];
+
+/** The crashes captured so far, newest last. Read by the notification feed. */
+export function crashLog() {
+  return capturedCrashes;
+}
+
+function captureThrown(thrown) {
+  try {
+    capturedCrashes = recordCrash(
+      capturedCrashes,
+      buildCrashReport(thrown, {
+        // The failing URL is the best reproduction instruction there is, and its ids are opaque (UC5).
+        route: window.location.pathname + window.location.search,
+        buildSha: BUILD_INFO.commit,
+        at: new Date().toISOString(),
+      }),
+    );
+    onCrashCaptured?.();
+  } catch {
+    // Deliberately silent: there is nowhere left to report a failure to report.
+  }
+}
+
+let onCrashCaptured = null;
+
+/** Installs the global handlers. Separate from initAppLifecycle's other work and called FIRST, so a
+ *  crash during the rest of boot is still captured — the case a trainer is least able to describe. */
+export function captureUncaughtErrors({ onCaptured } = {}) {
+  onCrashCaptured = onCaptured;
+  window.addEventListener("error", (event) => captureThrown(event.error || event.message));
+  window.addEventListener("unhandledrejection", (event) => captureThrown(event.reason));
 }
 
 export function initAppLifecycle({ basePath, setOfflineCachedState, t }) {
