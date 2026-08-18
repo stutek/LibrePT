@@ -55,3 +55,26 @@ def test_the_drawer_survives_actions_that_are_not_navigation(page, local_server)
     page.keyboard.press("Escape")
 
     assert page.evaluate(IS_EXPANDED)
+
+
+def test_the_drawer_stays_open_when_nothing_changed_view(page, local_server):
+    """The other half of §28.7, and the regression it caused (reported 2026-08-18: "the message area
+    can't be expanded").
+
+    Expanding the drawer settles the timeline, which rewrites the URL to the focused day — so the
+    router re-enters the SAME route, and a rule that collapsed on every switchView collapsed the
+    drawer 3ms after it opened. From a trainer's side the pane simply would not open at all.
+    Collapsing belongs to an actual change of view, not to every call at that seam.
+    """
+    page.goto(local_server)
+    page.wait_for_selector("#app-header")
+
+    # The trainer's own control, not the module function the other tests call: the collapse is
+    # provoked by what EXPANDING does to the layout, so reaching past the handle would skip the bug.
+    page.locator("#notification-grabber-btn").click()
+    # Long enough for the timeline settle and any route re-entry it provokes.
+    page.wait_for_timeout(1500)
+
+    assert page.evaluate(IS_EXPANDED), (
+        "the drawer closed itself with nobody navigating anywhere"
+    )

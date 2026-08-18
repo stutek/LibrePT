@@ -160,6 +160,12 @@ export function toUrl(route) {
 }
 
 export function switchView(viewId, { focusSessionsColumn } = {}) {
+  // Read before the sweep below clears it: whether this is a CHANGE of view or a re-entry of the
+  // one already on screen decides what the messages drawer does (see below).
+  const wasAlreadyOnScreen = Boolean(
+    document.getElementById(`view-${viewId}`)?.classList.contains("active"),
+  );
+
   for (const view of document.querySelectorAll(".app-view")) {
     view.classList.remove("active");
   }
@@ -192,7 +198,12 @@ export function switchView(viewId, { focusSessionsColumn } = {}) {
   // Here rather than in the menu's handler: every route lands through switchView, and the feed's own
   // actions already collapse the drawer by hand before navigating. Doing it once at the seam is what
   // makes the promise true for the next navigation route somebody adds.
-  toggleNotificationArea(false);
+  //
+  // **Only on an actual CHANGE of view**, and that qualifier was paid for. Collapsing on every call
+  // here shipped on 2026-08-18 and made the drawer impossible to open at all: expanding it settles
+  // the timeline, which rewrites the URL to the focused day, so the router re-enters the SAME route
+  // and the drawer was collapsed 3ms after it opened. A trainer saw a pane that would not open.
+  if (!wasAlreadyOnScreen) toggleNotificationArea(false);
 
   const fnColumn = focusSessionsColumn || routerDeps?.focusSessionsColumn;
   if (viewId === "clients" && fnColumn) {
