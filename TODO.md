@@ -75,7 +75,7 @@ the thing that must happen first, not merely what it touches.
 | **Tests & docs** | §6.2, §12.3, §12.4, §12.5, §12.6, §25.6 | Medium-tier overflow harness | Nothing; all small |
 | **Routing decisions** | §19.2, §19.3 | The URL-privacy invariant | One decision, then both unblock |
 | **Data-subject rights** | §27.4 | One-tap withdrawal in the consent letter | Nothing; the other four shipped 2026-08-11 |
-| **Reported 2026-08-18** | §28.1–§28.10 | Seven bugs/changes plus the constants-in-prose sweep | Nothing — captured unverified, to be reproduced first in a clean session |
+| **Reported 2026-08-18** | §28.1–§28.12 | The four still open: §28.7 menu, §28.8 strikethrough, §28.10 message card, §28.11 splash | §28.11 waits on one ruling — may an empty store override a deep link? |
 | **Client self-service** | §26, §1.7 | Intake page the client fills, consent signed on their own phone | Nothing — and it is next, decided 2026-08-17 |
 
 ---
@@ -2183,12 +2183,11 @@ constant's literal appears only at its declaration. Self-limiting: the list grow
 constant is declared, which is exactly when the protection is wanted. It catches re-introduction, not
 first introduction — the audit covers the rest.
 
-### 28.4 [ ] BUG — a collapsed deck card's first line is unreadable unless it is a past card
+### 28.4 [x] BUG — a collapsed deck card's first line is unreadable — fixed 2026-08-18
 
-Reported 2026-08-18: in the clipboard view, the **non-past** cards (the ones not rendered purple) do not
-show a readable first line while collapsed. Past cards do. A trainer scanning a collapsed deck cannot
-tell what a card is. Related: `2fe2464` fixed a collapsed card's first line once already, so check
-whether that fix covers only one card state.
+See [CHANGELOG](CHANGELOG.md). The "unless it is a past card" half of the report was the clue: the past
+card is LAST in the deck, so nothing is stacked on it. Nothing about past cards was involved, and the
+`2fe2464` pointer was right — that fix covered desktop only.
 
 ### 28.5 [x] BUG — backup warnings appear in DEMO mode — fixed 2026-08-18
 
@@ -2214,12 +2213,17 @@ should use a **highly visible colour signalling an unhealthy state**, not a subt
 [AGENT_RULES §2.D](AGENT_RULES.md) reserves the warning colour for real failures and §3.8's hazard —
 this is one, so it qualifies.
 
-### 28.9 [ ] CHANGE — a DEMO tag replaces the PREVIEW tag while in demo mode
+### 28.9 [x] CHANGE — a DEMO tag replaces the PREVIEW tag in demo mode — shipped 2026-08-18
 
-Wanted 2026-08-18. The header currently shows PREVIEW always. In demo mode it should show DEMO instead,
-so the state a trainer is actually in is the one named. Open: whether both matter at once (a preview
-build running demo data) and, if so, which wins — the answer decides whether this is a swap or a second
-badge.
+See [CHANGELOG](CHANGELOG.md). The open question — whether both matter at once — was answered by the
+one slot: DEMO while the store holds nothing but the demo, PREVIEW from the trainer's first real
+record, because that is when data loss stops being hypothetical.
+
+### 28.10 [ ] CHANGE — cancellations and bookings accumulate in one message card
+
+Wanted 2026-08-18: the message area should show cancellations and booking lists **cumulatively — same
+card, multiple lines** — rather than one card per event. Today each arrives as its own notification,
+which pushes everything else off the screen when several land together.
 
 ### 28.11 [ ] BUG — a cleared browser boots to a splash with no demo or animation offer
 
@@ -2251,8 +2255,23 @@ boots separately and is unaffected, but an RSVP reply (`?evt=`) goes through the
 unscoped override would show a client on a fresh phone a language picker and a "load the demo?"
 offer before they could answer the invitation.
 
-### 28.10 [ ] CHANGE — cancellations and bookings accumulate in one message card
+### 28.12 [ ] CHANGE — the guided walkthrough wants a glow, instructions and a real hand
 
-Wanted 2026-08-18: the message area should show cancellations and booking lists **cumulatively — same
-card, multiple lines** — rather than one card per event. Today each arrives as its own notification,
-which pushes everything else off the screen when several land together.
+Wanted 2026-08-18 (Simon): *"nice to have a glow around the elements to click at and instructions
+overlay - add an animated hand with extended index finger too"*. Three parts, and two of them already
+have most of their machinery:
+
+- **Glow around the target.** [walkthroughOverlay.js](src/modules/demo/walkthroughOverlay.js) already
+  rings the step's control, drawn outside its box so the label stays readable and with no backdrop (a
+  scrim would block the tap the walkthrough is asking for). This is a treatment change in
+  [walkthrough.css](src/modules/demo/walkthrough.css), not new plumbing — decide whether the glow
+  replaces the ring or sits under it.
+- **Instructions overlay.** The panel exists and already moves to the top of the screen when it would
+  cover the control it points at. Open: whether the ask is more instruction per step, or a persistent
+  one that never overlaps at all.
+- **An actual hand.** This is the real gap. [demoHand.js](src/modules/demo/demoHand.js) is named for a
+  hand and draws a **white dot** — a radial-gradient circle with a tap pulse. An extended index finger
+  needs real artwork; inline SVG built with `createElement` keeps the module's no-`innerHTML` property
+  and ships no new asset to hash. Note the hand is mounted only by the scripted TOUR
+  ([demoTourPlayer.js](src/modules/demo/demoTourPlayer.js)), not by the guided walkthrough, so pointing
+  it at the current step is a second, smaller piece of wiring.
