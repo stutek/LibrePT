@@ -234,9 +234,24 @@ export function startGuidedWalkthrough({
     render();
     const outcome = await performStep(step, { doc, hand });
     showing = false;
-    if (outcome.ok) state = completeWalkthroughStep(state, step.id);
-    else reportProblem(outcome.reason);
-    render();
+    if (!outcome.ok) {
+      reportProblem(outcome.reason);
+      return render();
+    }
+
+    state = completeWalkthroughStep(state, step.id);
+    // Delegating a step advances the guide; doing it YOURSELF does not (reported 2026-08-18: "show
+    // me clicks the button right, but the demo step did not advance"). The distinction is who is
+    // driving. A trainer who tapped the control themselves is learning by doing and may want to
+    // read the caption against what just happened, so Next stays theirs. A trainer who asked to be
+    // shown handed the step over — leaving them to acknowledge it is two taps for one action, and
+    // from their side the guide simply did not move.
+    //
+    // The LAST step is the exception: advancing off it closes the walkthrough, and doing that on
+    // their behalf would make the panel vanish mid-gesture. Done stays a deliberate tap.
+    if (walkthroughControls(tour, state).isLastStep) return render();
+    state = advanceWalkthrough(tour, state);
+    enterStep();
   });
 
   el.next.addEventListener("click", () => {

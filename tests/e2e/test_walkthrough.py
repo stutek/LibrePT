@@ -36,10 +36,30 @@ def _open_walkthrough(page, local_server):
 
 
 def _do_current_step(page):
-    """Ask to be shown, then move on — the two-tap loop a trainer who cannot find a control uses."""
+    """Ask to be shown, and take whichever exit the step offers.
+
+    Since 2026-08-18 a delegated step advances by itself, so on every step but the last this is the
+    WHOLE loop. The last one still ends on the trainer's own tap, because advancing off it closes
+    the walkthrough (see test_the_last_step_still_ends_on_the_trainers_tap)."""
+    progress_before = page.locator(PROGRESS).inner_text()
+    # Which exit to expect is decided BEFORE the tap, from the step number. Waiting for "progress
+    # changed OR Next enabled" instead was racy: Next is briefly enabled between the step completing
+    # and the guide advancing, so the wait could return while the panel was still mid-transition.
+    step_now, step_count = (int(n) for n in re.findall(r"\d+", progress_before))
+
     page.locator(SHOW_ME).click()
-    expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
-    page.locator(NEXT).click()
+
+    if step_now == step_count:
+        expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
+        page.locator(NEXT).click()
+    else:
+        # Matched on the step NUMBER, case-insensitively, rather than against the string read back
+        # from inner_text(): the panel uppercases its progress line in CSS, so inner_text() returns
+        # "STEP 1 OF 4" while the assertion compares something else — and "not this text" was
+        # therefore true before anything had happened at all.
+        expect(page.locator(PROGRESS)).to_have_text(
+            re.compile(rf"step\s+{step_now + 1}\s+of", re.I), timeout=15_000
+        )
 
 
 def test_the_panel_asks_for_one_step_and_offers_no_way_past_it(page, local_server):
@@ -88,8 +108,40 @@ def test_show_me_taps_the_control_for_a_trainer_who_cannot_find_it(page, local_s
 
     page.locator(SHOW_ME).click()
 
+    expect(page.locator("#active-session-client-tabs")).to_be_visible(timeout=15_000)
+
+
+def test_asking_to_be_shown_moves_on_by_itself(page, local_server):
+    """Reported 2026-08-18: "show me clicks the button right, but the demo step did not advance".
+
+    It completed the step and then waited for Next, which is two taps for the one thing the trainer
+    had just delegated — from their side, asking to be shown did nothing to the guide. Doing it
+    THEMSELVES still leaves Next to them: there they are learning by doing and may want to read the
+    caption against what just happened. Delegating is the case where the guide should carry on.
+    """
+    _open_walkthrough(page, local_server)
+    expect(page.locator(PROGRESS)).to_contain_text("1")
+
+    page.locator(SHOW_ME).click()
+
+    expect(page.locator(PROGRESS)).to_contain_text("2", timeout=15_000)
+    # And it is asking for the NEXT step, not still explaining the last one.
+    expect(page.locator(NEXT)).to_be_disabled()
+    expect(page.locator(SHOW_ME)).to_be_visible()
+
+
+def test_the_last_step_still_ends_on_the_trainers_tap(page, local_server):
+    """Advancing off the final step CLOSES the walkthrough. Doing that on their behalf would make
+    the guide vanish mid-gesture, so Done stays a deliberate tap even when the step was delegated."""
+    _open_walkthrough(page, local_server)
+    for _ in range(3):
+        _do_current_step(page)
+    expect(page.locator(PROGRESS)).to_contain_text("4")
+
+    page.locator(SHOW_ME).click()
+
     expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
-    expect(page.locator("#active-session-client-tabs")).to_be_visible()
+    expect(page.locator(PANEL)).to_be_visible()
 
 
 def test_going_back_re_reads_a_step_without_asking_for_it_again(page, local_server):
