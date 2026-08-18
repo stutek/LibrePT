@@ -382,15 +382,19 @@ select.menu-select {
 .cloud-sync-icon.is-failed .fa-triangle-exclamation {
   color: var(--danger, #ef4444);
 }
-/* Not connected is INFORMATIONAL, never a fault: PRIVACY.md tells trainers local-first is the
-   point, so declining cloud sync is a supported choice. Muted, and the slash is drawn larger than
-   the other overlays because it has to read as crossing the whole cloud rather than sitting on it.
-   The cloud itself desaturates too, or a bright cloud under a grey slash reads as connected. */
-.cloud-sync-icon.is-disconnected .fa-cloud,
+/* Not connected reads as UNHEALTHY (TODO §28.8), which reverses the earlier treatment on the
+   maintainer's ruling. It used to be muted grey, reasoning that PRIVACY.md makes local-first a
+   supported choice and painting it as a fault would spend the warning vocabulary. What that
+   produced was a line nobody read as a problem — reported in exactly those words. Declining cloud
+   sync is still no moral failing, but it does mean every client record lives in one evictable
+   place, and that is a state worth seeing across a gym.
+
+   Warning amber, not the danger red a genuine sync FAILURE gets above: the ladder still has two
+   rungs, and "you have not connected" is not "the thing you asked for did not happen". The cloud
+   keeps its own colour so the slash is what carries the state; the slash is drawn larger than the
+   other overlays because it has to read as crossing the whole cloud rather than sitting on it. */
 .cloud-sync-icon.is-disconnected .fa-slash {
-  color: var(--text-muted);
-}
-.cloud-sync-icon.is-disconnected .fa-slash {
+  color: var(--warning, #f59e0b);
   font-size: 16px;
   top: 50%;
 } /* When there are pending changes the cloud button grows into a pill to seat the ahead/behind

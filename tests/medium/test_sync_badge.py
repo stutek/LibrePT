@@ -80,15 +80,19 @@ def test_counters_are_legible_and_grow_on_desktop(page, local_server):
     )
 
 
-def test_an_unconnected_cloud_is_informational_not_a_warning(page, local_server):
-    """With no Drive grant the header shows a muted slashed cloud — never an ✕, never warning
-    colour (TODO §3.11).
+def test_an_unconnected_cloud_reads_as_unhealthy(page, local_server):
+    """With no Drive grant the slashed cloud carries the warning colour, not a muted grey.
 
-    PRIVACY.md tells trainers that local-first is the point, so declining cloud sync is a supported
-    choice; painting it as a fault would spend the warning vocabulary that TODO §3.8's real hazard
-    and a genuine sync failure need. The colour is asserted by comparison — cloud and slash agree,
-    and neither is the danger token — rather than against a literal hex, so a theme may restyle both
-    and only a warning-coloured regression fails.
+    **This reverses the 2026-07 decision, on the maintainer's ruling (TODO §28.8).** The old
+    reasoning was that PRIVACY.md makes local-first a supported choice, so declining cloud sync is
+    not a fault and must not spend the warning vocabulary. What that produced in practice was a
+    subtle line nobody read as a problem — reported directly: *"the strikethrough marking backup as
+    unavailable does not read as a problem [it] should use a highly visible colour signalling an
+    unhealthy state"*. Not connected is not a moral failing, but it does mean every client record
+    lives in exactly one evictable place, and that is a state worth seeing across a gym.
+
+    Asserted by comparison against the theme's own tokens rather than a literal hex, so a theme may
+    restyle everything and only a return to the muted treatment fails.
     """
     load_with_stub(page, local_server, STUB)
     page.wait_for_selector("#app-header")
@@ -98,24 +102,29 @@ def test_an_unconnected_cloud_is_informational_not_a_warning(page, local_server)
         "expected a slashed cloud when not connected"
     )
 
-    cloud_color, slash_color, danger = page.evaluate(
+    slash_color, muted, warning = page.evaluate(
         """() => {
-            const probe = document.createElement('span');
-            probe.style.color = 'var(--danger)';
-            document.body.appendChild(probe);
-            const danger = getComputedStyle(probe).color;
-            probe.remove();
+            const tokenColor = (token) => {
+              const probe = document.createElement('span');
+              probe.style.color = `var(${token})`;
+              document.body.appendChild(probe);
+              const value = getComputedStyle(probe).color;
+              probe.remove();
+              return value;
+            };
             return [
-              getComputedStyle(document.querySelector('#sync-cloud-icon .fa-cloud')).color,
               getComputedStyle(document.querySelector('#sync-cloud-overlay')).color,
-              danger,
+              tokenColor('--text-muted'),
+              tokenColor('--warning'),
             ];
         }"""
     )
-    assert slash_color == cloud_color, (
-        "a bright cloud under a grey slash reads as connected — both must mute together"
+    assert slash_color != muted, (
+        "a muted slash is the thing that was reported as unreadable as a problem"
     )
-    assert slash_color != danger, "not-connected must not borrow the warning colour"
+    assert slash_color == warning, (
+        f"the unhealthy state must speak the theme's warning colour, got {slash_color}"
+    )
 
     # The meaning is spoken, not left to the shape: on a phone there is no hover to reveal it, and
     # a screen reader gets nothing from an aria-hidden glyph (AGENT_RULES §2.D.1).

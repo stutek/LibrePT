@@ -9,10 +9,12 @@
 // a failure outranks "not connected" because a trainer who connected and then failed needs the
 // fault, not the invitation.
 //
-// **Why "not connected" is not a warning.** PRIVACY.md tells trainers that local-first is the point,
-// so declining cloud sync is a supported choice, not a fault. It gets a muted slashed cloud —
-// informational, never an ✕ and never warning colour, which stays reserved for a genuine failure
-// here and for TODO §3.8's unbacked-data hazard.
+// **"Not connected" now reads as unhealthy** (TODO §28.8, the maintainer's ruling on 2026-08-18).
+// It used to be deliberately muted: PRIVACY.md makes local-first a supported choice, so declining
+// cloud sync is no fault. In practice that produced a line nobody read as a problem, while the state
+// it described — every client record in one evictable place — is worth seeing across a gym. The
+// slashed cloud keeps its own name and label and takes warning amber; danger red stays reserved for
+// a sync that actually FAILED, so the ladder still has two distinct rungs.
 //
 // **Every state also carries a LABEL**, not just a colour and a shape. A glyph alone is a hover
 // tooltip's problem in another costume (AGENT_RULES §2.D.1): unreachable on touch, and invisible to
