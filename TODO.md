@@ -2275,3 +2275,13 @@ have most of their machinery:
   and ships no new asset to hash. Note the hand is mounted only by the scripted TOUR
   ([demoTourPlayer.js](src/modules/demo/demoTourPlayer.js)), not by the guided walkthrough, so pointing
   it at the current step is a second, smaller piece of wiring.
+
+### 28.13 [ ] BUG — a walkthrough reloaded by deep link points at the wrong element
+
+Reported 2026-08-18: reloading during the guided walkthrough (the demo deep-link reload) leaves the
+spotlight on the wrong element — one belonging to a different view. The walkthrough resolves its
+target by selector against whatever is on screen
+([walkthroughOverlay.js](src/modules/demo/walkthroughOverlay.js) polls for the step's expectation),
+so a reload that restores a step without restoring the VIEW that step belongs to will find a
+matching selector in the wrong place, or ring a control that happens to share it. Check what the
+reload restores: the step index alone, or the step plus its route.
