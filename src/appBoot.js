@@ -250,14 +250,22 @@ export function bootRsvpReply(deps) {
 // shared import (AGENT_RULES §5.9).
 //
 // Returns the walkthrough handle (`{ stop }`) so a caller can end it; null when the URL did not ask.
-export async function bootWalkthrough({ shareDemo, hasData, t } = {}) {
+export async function bootWalkthrough({ shareDemo, hasData, t, goHome } = {}) {
   const { DEMO_WALKTHROUGH } = await import("./modules/common/shareLink.js");
   if (shareDemo !== DEMO_WALKTHROUGH || !hasData) return null;
 
-  const [{ startGuidedWalkthrough }, { GYM_FLOOR_TOUR }] = await Promise.all([
-    import("./modules/demo/walkthroughOverlay.js"),
-    import("./modules/demo/gymFloorTour.js"),
-  ]);
+  const [{ startGuidedWalkthrough }, { GYM_FLOOR_TOUR }, { stepPreconditionMet }] =
+    await Promise.all([
+      import("./modules/demo/walkthroughOverlay.js"),
+      import("./modules/demo/gymFloorTour.js"),
+      import("./modules/demo/demoTourPlayer.js"),
+    ]);
+
+  // Put the app where the SCRIPT begins, not where the URL happened to point (TODO §30.3, reported
+  // as "refreshing deep link starts demo at wrong step"). A pasted or refreshed `?demo=` link can
+  // carry any route — a clipboard, a client — and step 1 asking the trainer to open a session that
+  // is already open in front of them reads as a guide that has lost its place.
+  if (!stepPreconditionMet(GYM_FLOOR_TOUR.steps[0])) goHome?.();
 
   return startGuidedWalkthrough({ tour: GYM_FLOOR_TOUR, t });
 }

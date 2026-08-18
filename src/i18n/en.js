@@ -377,6 +377,8 @@ export const en = {
   walkthrough_done: "Done",
   walkthrough_exit: "Leave the walkthrough",
   walkthrough_finished: "That's the whole loop — one session, one clipboard, four taps.",
+  walkthrough_wrong_place:
+    "This step needs a different screen — go back to the sessions board and start it again.",
   walkthrough_stuck:
     "This step didn't complete. Leave the walkthrough and keep exploring — your data is untouched.",
   tour_step_open_session: "Open the group session. One clipboard covers everybody in it.",

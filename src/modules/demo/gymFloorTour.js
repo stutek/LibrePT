@@ -29,6 +29,15 @@ export const GYM_FLOOR_TOUR = {
       // to — a demo must not depend on the order a seeded list happens to render in.
       target: ".session-card",
       targetText: "Group Strength",
+      // What has to be TRUE before this step can be asked (TODO §30.3): the board, with cards on
+      // it. A pasted or refreshed `?demo=` link can open the app anywhere, and a step asking the
+      // trainer to open a session that is already open reads as a broken guide.
+      requires: [
+        { selector: ".session-card", visible: true },
+        // ...and the board is what the trainer is LOOKING at. The cards stay in the DOM behind an
+        // open clipboard, so "a card is visible" alone is satisfied by a screen showing none.
+        { selector: "#active-session-overlay", visible: false },
+      ],
       caption: "tour_step_open_session",
       expect: { selector: "#active-session-client-tabs", visible: true },
     },
@@ -41,6 +50,8 @@ export const GYM_FLOOR_TOUR = {
       // no standalone exercise at all — which the first e2e run reported rather than leaving the
       // demo to fail in front of a viewer. It is also the better story: one clipboard driving a
       // group through a circuit is the thing no competitor makes easy (§23.4).
+      // The clipboard has to be open: its deck does not exist on the board.
+      requires: [{ selector: "#active-exercise-scroll-deck", visible: true }],
       target: "#active-exercise-scroll-deck .exercise-deck-card.circuit-card",
       caption: "tour_step_focus_exercise",
       expect: { selector: ".circuit-sig.easy", visible: true },
@@ -49,6 +60,7 @@ export const GYM_FLOOR_TOUR = {
       id: "signal-too-easy",
       // The one-tap outcome signal that replaced the per-set stepper grid — the gesture the whole
       // clipboard exists to make cheap.
+      requires: [{ selector: ".circuit-sig.easy", visible: true }],
       target: ".circuit-sig.easy",
       caption: "tour_step_signal",
       // Proves the tap REGISTERED, not merely that it was clickable: §7.2's active state is what a
@@ -59,6 +71,7 @@ export const GYM_FLOOR_TOUR = {
       id: "next-participant",
       // Group training is the differentiator — one clipboard, several people — so the tour ends on
       // the move nobody else's software makes easy.
+      requires: [{ selector: "#active-session-client-tabs", visible: true }],
       target: "#active-session-client-tabs .client-tab-btn:nth-child(2)",
       caption: "tour_step_next_participant",
       expect: {

@@ -560,7 +560,12 @@ async function init() {
     },
   });
 
-  await appBoot.bootWalkthrough({ shareDemo, hasData: stateHasData(getState()), t });
+  await appBoot.bootWalkthrough({
+    shareDemo,
+    hasData: stateHasData(getState()),
+    t,
+    goHome: () => navigateToPath("/"),
+  });
 }
 
 // --- BOUND VIEW & CONTROLLER ACTIONS ---

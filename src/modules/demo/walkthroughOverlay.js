@@ -39,7 +39,12 @@ import {
   walkthroughControls,
 } from "../../domain/walkthrough.js";
 import { mountDemoHand, unmountDemoHand } from "./demoHand.js";
-import { performStep, resolveTarget, stepOutcomeNow } from "./demoTourPlayer.js";
+import {
+  performStep,
+  resolveTarget,
+  stepOutcomeNow,
+  stepPreconditionMet,
+} from "./demoTourPlayer.js";
 
 const OVERLAY_ID = "walkthrough-overlay";
 // How often the trainer's own progress is noticed. Fast enough that a tap feels acknowledged, slow
@@ -212,6 +217,10 @@ export function startGuidedWalkthrough({
   function enterStep() {
     el.problem.hidden = true;
     const step = currentWalkthroughStep(tour, state);
+    // Asserted as the card loads (TODO §30.3): a step whose control cannot exist yet would otherwise
+    // fail confusingly the moment anyone tapped Show me, and the trainer would have read a whole
+    // caption first.
+    if (step && !stepPreconditionMet(step, doc)) reportProblem(t("walkthrough_wrong_place"));
     const target = step ? resolveTarget(doc, step) : null;
     if (target) {
       target.scrollIntoView({ block: "center", inline: "nearest" });

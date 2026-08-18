@@ -86,6 +86,25 @@ export function resolveTarget(doc, step) {
   return matches.find((el) => (el.textContent || "").toLowerCase().includes(wanted)) || null;
 }
 
+/** Whether the app is where a step expects to find it, BEFORE anything is asked of the trainer
+ * (TODO §30.3). Steps with no `requires` are always ready — most of a script's steps are only
+ * reachable in order anyway, and demanding a declaration for each would be ceremony.
+ *
+ * Checked when the step's card loads rather than when Show me is tapped: a guide asking someone to
+ * tap a control that cannot exist is worse than one saying which state it needs, and the trainer
+ * finds out at the moment they start reading rather than at the moment they act.
+ */
+export function stepPreconditionMet(step, doc = document) {
+  const requirements = step?.requires;
+  if (!requirements?.length) return true;
+  // A LIST, because one condition is rarely the whole state: the first step needs a session card on
+  // screen AND no clipboard covering it — the cards stay in the DOM behind an open overlay, so the
+  // first condition alone is satisfied by a screen showing none of them.
+  return requirements.every(
+    (requirement) => checkExpectation(requirement, probe(doc, requirement.selector)).ok,
+  );
+}
+
 /** Whether a step's expectation holds against the page as it stands, with no tap. The walkthrough
  *  polls this to notice the trainer doing the step themselves, and to recognise a step already done
  *  when they walk Back into it. */

@@ -236,3 +236,52 @@ def test_no_walkthrough_without_something_to_walk_through(page, local_server):
     page.wait_for_timeout(1_500)
 
     assert page.evaluate("() => document.getElementById('walkthrough-overlay')") is None
+
+
+def test_a_deep_link_starts_the_walkthrough_where_the_script_starts(page, local_server):
+    """Reported 2026-08-18: refreshing a clipboard URL that carries `?demo=walkthrough` "starts demo
+    at wrong step".
+
+    It started at step 1 correctly — and step 1 says "open the group session" while the session was
+    already open behind the panel, which from a trainer's side is the guide asking for something
+    that has plainly happened. A pasted or refreshed link can point anywhere, so the walkthrough
+    puts the app where its script begins rather than trusting the URL it was opened with.
+    """
+    page.goto(
+        f"{local_server}session/s01f2e3d/client/c1a9f0e2/circuit/z06a2b3c"
+        "?init=demo_data_load&splash=off&demo=walkthrough"
+    )
+    page.locator(PANEL).wait_for(state="visible", timeout=30_000)
+
+    expect(page.locator(PROGRESS)).to_contain_text("1")
+    # The state step 1 is written against: the board, not a clipboard already open over it.
+    expect(page.locator("#active-session-overlay")).to_have_class(
+        re.compile(r"\bhidden\b")
+    )
+    expect(page.locator(".session-card").first).to_be_visible()
+
+
+def test_a_step_says_so_when_the_app_is_not_where_it_expects(page, local_server):
+    """Wanted 2026-08-18: "when the demo card for step loads, it should assert the app state is right
+    (right view, right data)".
+
+    A step whose control cannot exist yet is a step that will fail confusingly the moment anyone taps
+    Show me. Checking when the card LOADS turns that into a sentence the trainer can read, and is the
+    same evidence the step's own expectation uses.
+    """
+    _open_walkthrough(page, local_server)
+    _do_current_step(page)
+    expect(page.locator(PROGRESS)).to_contain_text("2")
+
+    # Leave the clipboard the way a trainer might: step 2 now has nothing to point at.
+    page.locator("#active-session-overlay .view-grabber").click()
+    page.wait_for_timeout(600)
+
+    # Re-entering the step is when its card loads, which is when the check runs. Checking on every
+    # poll tick instead was considered and left alone: a message that appears mid-transition, while
+    # a view is still swapping, would cry wolf on the one surface a newcomer is reading closely.
+    page.locator(BACK).click()
+    page.locator(NEXT).click()
+
+    expect(page.locator(PROGRESS)).to_contain_text("2")
+    expect(page.locator(".walkthrough-problem")).to_be_visible(timeout=5_000)

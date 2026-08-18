@@ -362,6 +362,8 @@ export const sl = {
   walkthrough_done: "Končaj",
   walkthrough_exit: "Zapri vodeni ogled",
   walkthrough_finished: "To je celoten krog — ena seja, ena podloga, štirje dotiki.",
+  walkthrough_wrong_place:
+    "Ta korak potrebuje drug zaslon — vrni se na pregled sej in ga zaženi znova.",
   walkthrough_stuck:
     "Tega koraka ni bilo mogoče zaključiti. Zapri vodeni ogled in raziskuj naprej — tvoji podatki so nedotaknjeni.",
   tour_step_open_session: "Odpri skupinsko sejo. Ena podloga pokriva vse v njej.",
