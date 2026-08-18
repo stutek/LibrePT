@@ -142,8 +142,8 @@ def test_a_tap_leaves_a_visible_mark_where_it_landed(page, local_server):
     # waits for the same reason (performStep's travelMs).
     page.wait_for_timeout(600)
     page.evaluate("() => window.__tap()")
-    ripple = page.locator(".demo-tour-ripple")
-    assert ripple.count() == 1
+    ripple = page.locator(".demo-tour-ripple").first
+    assert page.locator(".demo-tour-ripple").count() >= 1
 
     # A tolerance, not containment: the ring is mid-animation whenever it is sampled, so its box is
     # 7px across at one instant and 58px at another. What has to be true is that the mark is on the
@@ -170,3 +170,42 @@ def test_the_mark_cleans_up_after_itself(page, local_server):
     page.wait_for_timeout(1200)
 
     assert page.locator(".demo-tour-ripple").count() == 0
+
+
+def test_the_fingertip_stays_put_while_the_hand_presses(page, local_server):
+    """Reported 2026-08-18: "finger is also jumping after every click".
+
+    The press animates the hand's scale, and scaling about its centre drags the fingertip toward the
+    middle of the palm and back — 4px of travel at the one moment the eye is on the contact point,
+    which reads as the finger hopping. A real finger presses from its tip: the contact point is the
+    one part that must not move.
+    """
+    load_with_stub(page, local_server, RIPPLE_STUB)
+    page.wait_for_selector("#demo-tour-hand")
+    page.wait_for_timeout(600)
+
+    hand = page.locator("#demo-tour-hand")
+    before = hand.bounding_box()
+    page.evaluate("() => window.__tap()")
+    # Mid-press: the scale keyframe bottoms out at 55% of a 0.36s animation.
+    page.wait_for_timeout(200)
+    during = hand.bounding_box()
+
+    assert abs(during["x"] - before["x"]) < 1.5, (
+        f"fingertip moved {during['x'] - before['x']}px"
+    )
+    assert abs(during["y"] - before["y"]) < 1.5, (
+        f"fingertip moved {during['y'] - before['y']}px"
+    )
+
+
+def test_a_tap_sends_more_than_one_wave_out(page, local_server):
+    """Wanted 2026-08-18: waves spreading like something touching a water surface. One ring reads as
+    a highlight; several, staggered and fading, read as an impact."""
+    load_with_stub(page, local_server, RIPPLE_STUB)
+    page.wait_for_selector("#demo-tour-hand")
+    page.wait_for_timeout(600)
+
+    page.evaluate("() => window.__tap()")
+
+    assert page.locator(".demo-tour-ripple").count() >= 2

@@ -72,6 +72,10 @@ export function moveDemoHand(hand, x, y) {
 /** Pulses the pointer to read as a tap. Returns immediately — the caller owns the wait, because the
  * tap must land on the real control whether or not the animation has finished. */
 const RIPPLE_CLASS = "demo-tour-ripple";
+// How many rings a tap sends out. Waves, not a single highlight (wanted 2026-08-18): one ring says
+// "here"; a set that keeps arriving says something LANDED here. The stagger and the fading are in
+// demoTour.css, keyed off each ring's position in the group.
+const RIPPLE_WAVES = 3;
 // Matches the animation in demoTour.css. Kept in sync by hand for the same reason the splash's
 // fade duration is: reading it back out of getComputedStyle to save one constant would cost a
 // layout flush on every tap.
@@ -87,18 +91,27 @@ const RIPPLE_LIFETIME_MS = 620;
  * an animationend listener that never fires (reduced motion, a background tab) would leave a ring
  * on screen permanently.
  */
-function flashTapRipple(hand) {
-  const doc = hand.ownerDocument;
-  const ripple = doc.createElement("div");
+function buildRipple(hand) {
+  const ripple = hand.ownerDocument.createElement("div");
   ripple.className = RIPPLE_CLASS;
-  ripple.setAttribute("aria-hidden", "true");
   // Positioned from the hand's own coordinates, so the ring lands on the FINGERTIP rather than on
   // the middle of the hand — the two are 30px apart, which at tap size is the whole point.
   const rect = hand.getBoundingClientRect();
   ripple.style.setProperty("--ripple-x", `${Math.round(rect.left)}px`);
   ripple.style.setProperty("--ripple-y", `${Math.round(rect.top)}px`);
-  doc.body.appendChild(ripple);
-  hand.ownerDocument.defaultView.setTimeout(() => ripple.remove(), RIPPLE_LIFETIME_MS);
+  return ripple;
+}
+
+/** The rings a tap sends out, wrapped together so the stylesheet can stagger them by position and
+ * one timer clears the whole set. */
+function flashTapRipple(hand) {
+  const doc = hand.ownerDocument;
+  const waves = doc.createElement("div");
+  waves.className = "demo-tour-waves";
+  waves.setAttribute("aria-hidden", "true");
+  for (let index = 0; index < RIPPLE_WAVES; index += 1) waves.appendChild(buildRipple(hand));
+  doc.body.appendChild(waves);
+  doc.defaultView.setTimeout(() => waves.remove(), RIPPLE_LIFETIME_MS);
 }
 
 export function pulseDemoHand(hand) {
