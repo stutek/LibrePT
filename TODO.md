@@ -75,7 +75,7 @@ the thing that must happen first, not merely what it touches.
 | **Tests & docs** | §6.2, §12.3, §12.4, §12.5, §12.6, §25.6 | Medium-tier overflow harness | Nothing; all small |
 | **Routing decisions** | §19.2, §19.3 | The URL-privacy invariant | One decision, then both unblock |
 | **Data-subject rights** | §27.4 | One-tap withdrawal in the consent letter | Nothing; the other four shipped 2026-08-11 |
-| **Reported 2026-08-18** | §28.1–§28.12 | The four still open: §28.7 menu, §28.8 strikethrough, §28.10 message card, §28.11 splash | §28.11 waits on one ruling — may an empty store override a deep link? |
+| **Reported 2026-08-18** | §28.2 | Which contributor-facing docs get BUILT, so their addresses are injected rather than written out | Everything else in §28 shipped the same day |
 | **Client self-service** | §26, §1.7 | Intake page the client fills, consent signed on their own phone | Nothing — and it is next, decided 2026-08-17 |
 
 ---
@@ -2210,19 +2210,15 @@ at both counters — the reports were two symptoms of the same wrong question.
 See [CHANGELOG](CHANGELOG.md). The `seededDemo` stamp pointer in the original note was right, and the
 committed seed id set covered the databases minted before it existed.
 
-### 28.7 [ ] BUG — the header menu does not work while the messages pane is expanded
+### 28.7 [x] BUG — the header menu does not work while the messages pane is expanded — fixed 2026-08-18
 
-Reported 2026-08-18: with the notification/messages pane expanded, the ☰ menu appears not to respond —
-specifically, navigating to the client registry does nothing. Suspect a stacking or event-capture
-interaction between the expanded pane and the menu. Note the menu grew a scroll container on 2026-08-17
-(`753985a`), so check whether that is involved.
+See [CHANGELOG](CHANGELOG.md). The menu worked; the expanded drawer covered the view it navigated to.
+The `753985a` scroll-container suspicion in the original note was a red herring.
 
-### 28.8 [ ] BUG — the disabled-backup strikethrough is not visible enough
+### 28.8 [x] BUG — the disabled-backup strikethrough is not visible enough — fixed 2026-08-18
 
-Reported 2026-08-18: the strikethrough marking backup as unavailable does not read as a problem. It
-should use a **highly visible colour signalling an unhealthy state**, not a subtle line. Note
-[AGENT_RULES §2.D](AGENT_RULES.md) reserves the warning colour for real failures and §3.8's hazard —
-this is one, so it qualifies.
+See [CHANGELOG](CHANGELOG.md). This reverses §3.11's deliberate "informational, never a warning"
+treatment on the maintainer's ruling; the reasoning for the reversal is in the commit and the test.
 
 ### 28.9 [x] CHANGE — a DEMO tag replaces the PREVIEW tag in demo mode — shipped 2026-08-18
 
@@ -2230,86 +2226,28 @@ See [CHANGELOG](CHANGELOG.md). The open question — whether both matter at once
 one slot: DEMO while the store holds nothing but the demo, PREVIEW from the trainer's first real
 record, because that is when data loss stops being hypothetical.
 
-### 28.10 [ ] CHANGE — cancellations and bookings accumulate in one message card
+### 28.10 [x] CHANGE — cancellations and bookings accumulate in one message card — shipped 2026-08-18
 
-Wanted 2026-08-18: the message area should show cancellations and booking lists **cumulatively — same
-card, multiple lines** — rather than one card per event. Today each arrives as its own notification,
-which pushes everything else off the screen when several land together.
+See [CHANGELOG](CHANGELOG.md). The group takes the place of the FIRST of its members rather than
+floating to the top, so the demo-mode notice stays the collapsed summary.
 
-### 28.11 [ ] BUG — a cleared browser boots to a splash with no demo or animation offer
+### 28.11 [x] BUG — a cleared browser boots to a splash with no demo or animation offer — fixed 2026-08-18
 
-Reported 2026-08-18: after deleting browser data, the loading screen no longer offers the demo or
-the animation. That is precisely the first-run state the offers exist for — a trainer arriving with
-an empty store and nothing to look at — so it is invisible to anyone whose store already has data.
+See [CHANGELOG](CHANGELOG.md). The maintainer's diagnosis was right: the deep link, not the empty
+store. Only the `?splash=off` half was overridden — the language half was tried and reverted, because
+a share link naming a language must open in it ([test_share_deeplink.py](tests/e2e/test_share_deeplink.py)).
 
-**Diagnosed the same day by the maintainer: it is the deep link, not the empty store.** Clearing the
-browser leaves the URL in the address bar, and the reload arrives carrying the parameters of
-whatever link was open. Two of them independently suppress the first run:
+### 28.12 [x] CHANGE — the guided walkthrough wants a glow, instructions and a real hand — shipped 2026-08-18
 
-- `?lang=` is written straight into `state.lang` ([app.js](src/app.js)) *before* the splash asks
-  `hasChosenLanguage(getState().lang)` — so a language the LINK supplied is indistinguishable from
-  one the trainer picked, and the step that exists to ask them never runs.
-- `?splash=off` gates both the language step and the onboarding panel in
-  [splashScreen.js](src/modules/splash/splashScreen.js). Every demo link carries it.
+See [CHANGELOG](CHANGELOG.md). Two of the three were built: the glow, and a hand that is actually a
+hand. The instructions overlay already existed and was left alone.
 
-**Open question, raised by the maintainer and NOT decided**: *"is there a way to override deep links
-on empty data (language not selected)?"* The recommendation given was that on an empty store a URL
-parameter should be a HINT, not an answer — `needsLanguageChoice` reading the PERSISTED language
-rather than the overlaid one, and `?splash=off` losing its power to skip either screen while the
-store is empty. That costs the demo links nothing, since `?init=demo_data_load` seeds before the
-splash boots and so arrives with data. It reuses an argument the module already makes about the
-dismiss X: an early tap landing where the X will be must not become a way around a step that exists
-because there is nothing to dismiss TO.
+### 28.13 [x] BUG — a walkthrough reloaded by deep link points at the wrong element — fixed 2026-08-18
 
-The carve-out to weigh: a link carrying a payload is a purposeful arrival, not a first run. Intake
-boots separately and is unaffected, but an RSVP reply (`?evt=`) goes through the normal boot, so an
-unscoped override would show a client on a fresh phone a language picker and a "load the demo?"
-offer before they could answer the invitation.
+See [CHANGELOG](CHANGELOG.md). Target resolution now skips anything with a zero-sized box, so an
+inactive view's copy of a selector can never win.
 
-### 28.12 [ ] CHANGE — the guided walkthrough wants a glow, instructions and a real hand
+### 28.14 [x] CHANGE — the demo-mode message offers to start the walkthrough — shipped 2026-08-18
 
-Wanted 2026-08-18 (Simon): *"nice to have a glow around the elements to click at and instructions
-overlay - add an animated hand with extended index finger too"*. Three parts, and two of them already
-have most of their machinery:
-
-- **Glow around the target.** [walkthroughOverlay.js](src/modules/demo/walkthroughOverlay.js) already
-  rings the step's control, drawn outside its box so the label stays readable and with no backdrop (a
-  scrim would block the tap the walkthrough is asking for). This is a treatment change in
-  [walkthrough.css](src/modules/demo/walkthrough.css), not new plumbing — decide whether the glow
-  replaces the ring or sits under it.
-- **Instructions overlay.** The panel exists and already moves to the top of the screen when it would
-  cover the control it points at. Open: whether the ask is more instruction per step, or a persistent
-  one that never overlaps at all.
-- **An actual hand.** This is the real gap. [demoHand.js](src/modules/demo/demoHand.js) is named for a
-  hand and draws a **white dot** — a radial-gradient circle with a tap pulse. An extended index finger
-  needs real artwork; inline SVG built with `createElement` keeps the module's no-`innerHTML` property
-  and ships no new asset to hash. Note the hand is mounted only by the scripted TOUR
-  ([demoTourPlayer.js](src/modules/demo/demoTourPlayer.js)), not by the guided walkthrough, so pointing
-  it at the current step is a second, smaller piece of wiring.
-
-### 28.13 [ ] BUG — a walkthrough reloaded by deep link points at the wrong element
-
-Reported 2026-08-18: reloading during the guided walkthrough (the demo deep-link reload) leaves the
-spotlight on the wrong element — one belonging to a different view. The walkthrough resolves its
-target by selector against whatever is on screen
-([walkthroughOverlay.js](src/modules/demo/walkthroughOverlay.js) polls for the step's expectation),
-so a reload that restores a step without restoring the VIEW that step belongs to will find a
-matching selector in the wrong place, or ring a control that happens to share it. Check what the
-reload restores: the step index alone, or the step plus its route.
-
-### 28.14 [ ] CHANGE — the demo-mode message offers to start the walkthrough
-
-Wanted 2026-08-18 (Simon): *"demo mode message in the notifications area should have a start
-walkthrough button too (and verify all needed data is there)"*.
-
-The demo-mode card ([messages.js](src/data/messages.js)) currently offers one action, the cleanup
-screen. It USED to carry an "Explore Walkthrough" action, dropped because it navigated to `/clients`
-standing in for a walkthrough engine that did not exist — a dead control. That reason has expired:
-[walkthroughOverlay.js](src/modules/demo/walkthroughOverlay.js) shipped 2026-08-17, and the splash
-already offers the walkthrough on a first run. The card is where a trainer who dismissed the splash
-can still find it.
-
-"Verify all needed data is there" is the load-bearing half: the walkthrough drives the seeded group
-session, so the button must not appear when the records its steps target are absent — a trainer who
-cleared the demo people but kept the catalog would otherwise get a walkthrough that rings nothing.
-Check the step targets against the store before offering it, rather than assuming the seed.
+See [CHANGELOG](CHANGELOG.md). The "verify all needed data is there" half became
+[walkthroughReadiness.js](src/domain/walkthroughReadiness.js), keyed on shape rather than seed ids.
