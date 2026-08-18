@@ -206,3 +206,52 @@ def test_backup_modal_opens_and_closes(page, local_server):
 
     page.locator("#dialog-backup .modal-close-btn").click()
     assert dialog.get_attribute("open") is None
+
+
+def test_the_whole_cluster_greys_out_when_no_cloud_is_connected(page, local_server):
+    """Wanted 2026-08-18: the cloud AND the ahead/behind counters read as inactive with no Drive.
+
+    The counters are the reason. "3 up, 0 down" in green and red states a relationship with a cloud
+    that does not exist — the numbers are real, but the colour promises a sync that cannot happen.
+    Grey says "these are facts about a thing you have not set up", which is what they are.
+
+    **This does not undo TODO §28.8.** The SLASH keeps its warning colour: it is the one part
+    reporting a state worth acting on (every client record in one evictable place), and it was made
+    visible that morning after being reported as unreadable. Greying the cloud body around it is what
+    §3.11 originally had and what this restores — a bright cloud under a grey slash reads as
+    connected.
+    """
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#app-header")
+
+    colors = page.evaluate(
+        """() => {
+            const tokenColor = (token) => {
+              const probe = document.createElement('span');
+              probe.style.color = `var(${token})`;
+              document.body.appendChild(probe);
+              const value = getComputedStyle(probe).color;
+              probe.remove();
+              return value;
+            };
+            const of = (selector) => getComputedStyle(document.querySelector(selector)).color;
+            return {
+              cloud: of('#sync-cloud-icon .fa-cloud'),
+              slash: of('#sync-cloud-overlay'),
+              ahead: of('#sync-badge .sync-ahead, #sync-badge .sync-zero'),
+              muted: tokenColor('--text-muted'),
+              warning: tokenColor('--warning'),
+              success: tokenColor('--success'),
+            };
+        }"""
+    )
+
+    assert colors["cloud"] == colors["muted"], (
+        "a bright cloud under a grey slash reads as connected"
+    )
+    assert colors["ahead"] == colors["muted"], (
+        "a green counter promises a sync that cannot happen"
+    )
+    assert colors["ahead"] != colors["success"]
+    # The one part that still speaks up, and the reason it does is TODO §28.8.
+    assert colors["slash"] == colors["warning"]

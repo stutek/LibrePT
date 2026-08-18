@@ -399,6 +399,20 @@ select.menu-select {
   color: var(--warning, #f59e0b);
   font-size: 16px;
   top: 50%;
+}
+/* Everything AROUND the slash goes quiet (wanted 2026-08-18): the cloud body, and the ahead/behind
+   counters beside it. The counters are the reason — "3 up, 0 down" in green and red states a
+   relationship with a cloud that does not exist, and while the numbers are true the colour promises
+   a sync that cannot happen. Grey says "facts about something you have not set up", which is what
+   they are.
+
+   The slash above keeps its warning colour deliberately (TODO §28.8): it is the one part reporting
+   a state worth acting on. Greying the cloud around it also restores what §3.11 always had and
+   §28.8 dropped by accident — a bright cloud under a grey slash reads as connected. */
+.cloud-sync-icon.is-disconnected .fa-cloud,
+.sync-badge.is-disconnected .sync-ahead,
+.sync-badge.is-disconnected .sync-behind {
+  color: var(--text-muted);
 } /* When there are pending changes the cloud button grows into a pill to seat the ahead/behind
    counters beside the icon; fully synced, the badge hides and it reads as a round icon again. */
 .sync-backup-btn {

@@ -194,6 +194,11 @@ export function renderSyncBadge() {
   const behindClass = remote === 0 && !isUnreachable ? "sync-zero" : "sync-behind";
 
   badge.classList.remove("hidden");
+  // The counters go quiet with the cloud when there is nothing to sync WITH (wanted 2026-08-18).
+  // Set here rather than derived in CSS from a sibling's state: the answer is already known at this
+  // point, and a `:has()` selector reaching across the header would make the colour depend on the
+  // markup's ORDER, which nothing else about it does.
+  badge.classList.toggle("is-disconnected", !isCloudConfigured || !isCloudReachable);
   badge.innerHTML =
     `<span class="${aheadClass}">${cell(local, "up")}</span>` +
     `<span class="${behindClass}">${cell(remote, "down", true)}</span>`;
