@@ -216,6 +216,32 @@ def locally_gated_only(workflow_texts):
     return sorted(task for task in stage_1_tasks() if task not in invoked)
 
 
+def local_actions_before_checkout(workflow_path):
+    """Jobs that `uses:` a local `./` action before checking the repository out.
+
+    A local action is read from the WORKSPACE, so the checkout that puts it there cannot itself live
+    inside it — GitHub fails the job with "Can't find 'action.yml' ... Did you forget to run
+    actions/checkout before running your local action?", which is the runner naming the cycle. The
+    shared python-env action shipped with exactly that shape on 2026-08-18 and took every job in the
+    deploy down.
+
+    It is asserted here rather than reviewed because nothing else can see it: the workflow file is
+    valid YAML, no gate stage reads it, and the whole failure lives on the runner. That is the same
+    "local green is not CI green" gap AGENT_RULES §6.6 describes.
+    """
+    document = yaml.safe_load(workflow_path.read_text(encoding="utf-8"))
+    problems = []
+    for name, body in (document.get("jobs") or {}).items():
+        checked_out = False
+        for step in (body or {}).get("steps") or []:
+            uses = str(step.get("uses", ""))
+            if uses.startswith("actions/checkout"):
+                checked_out = True
+            elif uses.startswith("./") and not checked_out:
+                problems.append(f"job '{name}' uses {uses} before actions/checkout")
+    return problems
+
+
 def workflow_failures(workflow):
     """Every gating problem in one workflow file, already prefixed with its path.
 
@@ -248,6 +274,10 @@ def workflow_failures(workflow):
         f"{rel}: stage label wrong — {problem}"
         for problem in mislabelled_stages(commands, load_job_names(workflow))
     ]
+    failures += [
+        f"{rel}: local action unreachable — {problem}"
+        for problem in local_actions_before_checkout(workflow)
+    ]
     return failures
 
 
@@ -272,6 +302,12 @@ def main():
         )
         print(
             "    `needs:` the earlier one, so CI fails in the order build check does."
+        )
+        print(
+            "    For an unreachable local action, add `- uses: actions/checkout@v5` as that job's"
+        )
+        print(
+            "    first step — the workspace has to hold the action before GitHub can read it."
         )
         return 1
 

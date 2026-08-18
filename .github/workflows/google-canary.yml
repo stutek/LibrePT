@@ -107,6 +107,7 @@ jobs:
           INSTRUCTIONS
           exit 1
 
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/python-env
 
       # Written to the SAME path a developer's own credential lives at, rather than exported as an

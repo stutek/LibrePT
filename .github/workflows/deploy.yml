@@ -50,6 +50,7 @@ jobs:
     name: Stage 1 · Python Lint & Format (Ruff)
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/python-env
       - name: Run Ruff
         run: .venv/bin/python -c "from build import run_python_lint; run_python_lint()"
@@ -60,6 +61,7 @@ jobs:
     steps:
       # Needs the full history only for `git ls-files`, which a shallow checkout still serves — but
       # the checker reads the working tree, so no fetch-depth tuning is required here.
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/python-env
       - name: Check documentation cross-references
         run: .venv/bin/python -c "from build import run_doc_graph_check; run_doc_graph_check()"
@@ -68,6 +70,7 @@ jobs:
     name: Stage 1 · Frontend Lint & Format (Biome)
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/python-env
       - name: Run Biome
         run: .venv/bin/python -c "from build import run_frontend_lint; run_frontend_lint()"
@@ -76,6 +79,7 @@ jobs:
     name: Stage 1 · Dependency Security Scan (pip-audit)
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/python-env
       - name: Run pip-audit
         run: .venv/bin/python -c "from build import run_security_audit; run_security_audit()"
@@ -84,6 +88,7 @@ jobs:
     name: Stage 1 · Unit Tests
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/python-env
       - name: Run Unit Tests
         run: .venv/bin/python -c "from build import run_unit_tests; run_unit_tests()"
@@ -92,6 +97,7 @@ jobs:
     name: Stage 1 · JavaScript Unit Tests (node:test)
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/python-env
       - name: Run JavaScript Unit Tests
         # No actions/setup-node: build.ensure_node_binary() vendors Node the same way
@@ -110,6 +116,7 @@ jobs:
     name: Stage 1 · Security Tests
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/python-env
       - name: Run Security Tests
         run: .venv/bin/python -c "from build import run_security_tests; run_security_tests()"
@@ -122,6 +129,7 @@ jobs:
     name: Stage 1 · Structural Invariants (catalog, icons, layering, gating, complexity, test assertions)
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/python-env
       - name: Module catalog coverage
         run: .venv/bin/python -c "from build import run_catalog_coverage_check; run_catalog_coverage_check()"
@@ -152,6 +160,7 @@ jobs:
     name: Stage 1 · Static Security Audits (CSP parity & HTML sinks)
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/python-env
         with:
           install: 'false'
@@ -181,6 +190,7 @@ jobs:
       ]
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/python-env
         with:
           browsers: 'true'
@@ -194,6 +204,7 @@ jobs:
     needs: [medium-tests]
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/python-env
         with:
           browsers: 'true'
@@ -209,6 +220,7 @@ jobs:
     needs: [e2e-tests]
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/python-env
         with:
           install: 'false'
@@ -224,6 +236,7 @@ jobs:
       # Through the same entry point as every other job, with no venv: this step bundles with system
       # `python3`, and before 2026-08-18 that was whatever the runner image happened to carry — the very
       # divergence the single declaration exists to remove, one job further along.
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/python-env
         with:
           install: 'false'

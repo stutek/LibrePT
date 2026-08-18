@@ -223,3 +223,62 @@ def test_the_formatting_tasks_are_real_stage_1_task_names():
     assert set(build.FORMATTING_TASKS) <= declared, (
         "FORMATTING_TASKS must name tasks that are actually in the Stage 1 table"
     )
+
+
+@pytest.fixture
+def workflow_file(tmp_path):
+    def write(body):
+        path = tmp_path / "wf.yml"
+        path.write_text(textwrap.dedent(body), encoding="utf-8")
+        return path
+
+    return write
+
+
+def test_a_local_action_used_before_checkout_is_reported(workflow_file):
+    """The 2026-08-18 deploy failure, in one job.
+
+    A local action is read from the workspace, so the repository has to be on disk before GitHub can
+    find its action.yml at all. Putting `actions/checkout` inside the shared composite action looks
+    like the right de-duplication and cannot work: every job failed with "Can't find 'action.yml'".
+    Nothing local can observe this — the workflow file parses, and no gate stage reads it — so it
+    surfaced only after a push.
+    """
+    path = workflow_file("""
+        jobs:
+          lint:
+            steps:
+              - uses: ./.github/actions/python-env
+              - run: echo hello
+        """)
+    assert pipeline_gates.local_actions_before_checkout(path) == [
+        "job 'lint' uses ./.github/actions/python-env before actions/checkout"
+    ]
+
+
+def test_a_checkout_first_job_is_accepted(workflow_file):
+    path = workflow_file("""
+        jobs:
+          lint:
+            steps:
+              - uses: actions/checkout@v5
+              - uses: ./.github/actions/python-env
+        """)
+    assert pipeline_gates.local_actions_before_checkout(path) == []
+
+
+def test_a_job_using_only_published_actions_needs_no_checkout(workflow_file):
+    """Nothing to resolve from the workspace, so demanding a checkout would be noise."""
+    path = workflow_file("""
+        jobs:
+          notify:
+            steps:
+              - uses: actions/setup-python@v6
+              - run: echo hello
+        """)
+    assert pipeline_gates.local_actions_before_checkout(path) == []
+
+
+def test_the_real_workflows_check_out_before_their_local_actions():
+    for workflow in pipeline_gates.WORKFLOW_DIR.glob("*.yml"):
+        assert pipeline_gates.local_actions_before_checkout(workflow) == [], workflow

@@ -1,7 +1,7 @@
 name: LibrePT Python environment
 description: >
-  Checkout, the ONE declared Python, and optionally the project venv and browsers. Every job in every
-  workflow enters through here so the setup exists in one place rather than in thirteen copies.
+  The ONE declared Python, and optionally the project venv and browsers. Every job in every workflow
+  enters through here so the setup exists in one place rather than in thirteen copies.
 
 # Why this exists (2026-08-18): thirteen jobs repeated the same checkout + setup-python + venv + pip
 # block, which is how a Python version came to be pinned in thirteen literals and then diverged from the
@@ -10,6 +10,13 @@ description: >
 #
 # The version itself is NOT an input: it lives in `.python-version`, which `actions/setup-python` reads
 # directly and `agent_tools/python_version.py` gates against re-introducing a literal.
+#
+# **`actions/checkout` is the one step that CANNOT move in here, and it was tried.** A local action is
+# read from the workspace, so GitHub has to have the repository on disk before it can find this file at
+# all — putting the checkout inside meant every job failed with "Can't find 'action.yml' ... Did you
+# forget to run actions/checkout before running your local action?", which is the runner naming the
+# cycle exactly. So each job checks out first and enters here second, and that one repeated line is the
+# floor, not an oversight to tidy up later.
 
 inputs:
   install:
@@ -27,8 +34,6 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: actions/checkout@v5
-
     - uses: actions/setup-python@v6
       with:
         python-version-file: .python-version
