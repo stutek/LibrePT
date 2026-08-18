@@ -7,6 +7,7 @@
 
 import { renderMarkupOnce } from "../modules/common/dom.js";
 import { EVENT_PARAM } from "../modules/common/eventTransports.js";
+import { toggleNotificationArea } from "../modules/common/notificationArea.js";
 import { SHARE_INIT_PARAM } from "../modules/common/shareLink.js";
 import { DialogRoute } from "./routes/dialogRoute.js";
 import { buildRouteTable } from "./routes/routeTable.js";
@@ -182,6 +183,16 @@ export function switchView(viewId, { focusSessionsColumn } = {}) {
 
   const mainContent = document.getElementById("main-content");
   if (mainContent) mainContent.scrollTop = 0;
+
+  // The messages drawer covers everything below the header when expanded, so a view revealed under
+  // it is a view nobody sees (TODO §28.7). Reported as "the ☰ menu does not work while the messages
+  // pane is expanded" — the menu worked, the route changed, and the screen did not move, which is
+  // indistinguishable from a dead button.
+  //
+  // Here rather than in the menu's handler: every route lands through switchView, and the feed's own
+  // actions already collapse the drawer by hand before navigating. Doing it once at the seam is what
+  // makes the promise true for the next navigation route somebody adds.
+  toggleNotificationArea(false);
 
   const fnColumn = focusSessionsColumn || routerDeps?.focusSessionsColumn;
   if (viewId === "clients" && fnColumn) {
