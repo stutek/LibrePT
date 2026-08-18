@@ -169,6 +169,19 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav {
 .preview-badge-label {
   white-space: nowrap;
 }
+/* TODO §28.9: the same pill, naming the demo instead. A demo is a FACT, not a hazard — so it drops
+   the amber and the pulse (the animation block below is scoped away from it) and takes a calm
+   informational blue. Same size, same word-first treatment, same link to the data-loss notice: the
+   build is still a preview, only the more urgent of the two claims has changed. */
+.preview-badge.is-demo {
+  background: #6366f1;
+  color: #f5f3ff;
+  box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.5), 0 2px 6px rgba(99, 102, 241, 0.4);
+}
+.preview-badge.is-demo:hover,
+.preview-badge.is-demo:focus-visible {
+  box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.9), 0 3px 10px rgba(99, 102, 241, 0.6);
+}
 /* TODO §3.8's unbacked-data warning. Sits beside the PREVIEW badge and must not be mistaken for it:
    PREVIEW is solid amber and permanent, so `due` here is OUTLINED — present, legible, clearly a
    different kind of statement — and only `urgent` fills in, which happens solely when the browser
@@ -214,13 +227,14 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav {
   box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.9), 0 3px 10px rgba(245, 158, 11, 0.6);
   outline: none;
 }
-.preview-badge .fa-triangle-exclamation {
+.preview-badge .fa-triangle-exclamation,
+.preview-badge .fa-flask {
   font-size: 8px;
 }
 /* A gentle but clearly-visible pulse (opacity + glow), never a flash — and only for viewers who
    haven't asked to reduce motion, who keep a steady pill instead. */
 @media (prefers-reduced-motion: no-preference) {
-  .preview-badge {
+  .preview-badge:not(.is-demo) {
     animation: previewPulse 1.8s ease-in-out infinite;
   }
   @keyframes previewPulse {

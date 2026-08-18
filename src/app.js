@@ -74,6 +74,7 @@ import {
 } from "./modules/clients/clientsView.js";
 import { openSignupReview } from "./modules/clients/signupReviewDialog.js";
 import {
+  renderBuildStateBadge,
   renderHeaderShell,
   renderSyncBadge,
   setOfflineCachedState,
@@ -189,6 +190,11 @@ onSyncCountsChanged(renderSyncBadge);
 // resolved it, which is how a warning teaches people to ignore it.
 onStateSaved(refreshBackupBadge);
 onBackupRecorded(primeBackupHealth);
+
+// TODO §28.9's build-state badge rides the SAME write seam, for a reason the two above share: what
+// it names changes the moment the store stops being only the demo — the trainer's first real client
+// — and that is a write like any other, arriving through call sites app.js never sees.
+onStateSaved(() => renderBuildStateBadge(getState()));
 
 window.resetLibrePTData = resetLibrePTData;
 window.stateHasData = () => stateHasData(getState());
@@ -517,6 +523,10 @@ async function init() {
   // empty cache (reading 0) even when a prior sync's ancestor is sitting right there in storage.
   await primeAheadCache();
   renderSyncBadge();
+  // First paint of the build-state badge, after the demo seed above has landed — the markup ships
+  // PREVIEW, so painting before the store is populated would flash the wrong word at exactly the
+  // trainer who just asked for the demo.
+  renderBuildStateBadge(getState());
   // Awaited for the same reason: both inputs are local reads, and a first paint that renders "no
   // warning" from an empty cache would flash the wrong answer to precisely the trainer who needs
   // the right one.

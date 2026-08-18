@@ -95,6 +95,30 @@ export function stampAsSeeded(record) {
  * Non-collection fields (`lang`, `theme`, …) pass through, so the result stays state-shaped and can
  * be handed to anything that reads a whole state.
  */
+/**
+ * Whether this store is the demo and nothing else — the header badge's question (TODO §28.9).
+ *
+ * "Only the demo" rather than "any demo", because the badge names ONE state and PREVIEW is the
+ * other candidate: a build that may lose data. Both are true after `?init=demo` on a fresh device,
+ * and DEMO wins there because there is nothing of the trainer's to lose. The first record they
+ * create makes the loss real, and PREVIEW takes the slot back.
+ *
+ * The seeded exercise catalog does not count as demo presence. `demoDataRemoval.js` keeps it by
+ * default for the reason it states — 48 movements are a starter catalog, not a stain — so a trainer
+ * who cleared the fake people has finished evaluating, and calling that a demo would be wrong.
+ */
+export function isDemoOnlyStore(state) {
+  const demoPeopleAndWork = seededCollections()
+    .filter((collection) => collection !== "exercises")
+    .some((collection) =>
+      (state?.[collection] || []).some((record) => isSeedRecord(collection, record)),
+    );
+  if (!demoPeopleAndWork) return false;
+
+  const theirs = withoutSeedRecords(state);
+  return COLLECTIONS.every((collection) => (theirs[collection] || []).length === 0);
+}
+
 export function withoutSeedRecords(state) {
   const mine = { ...state };
   for (const collection of COLLECTIONS) {

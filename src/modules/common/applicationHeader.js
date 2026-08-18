@@ -21,6 +21,7 @@
 
 import { driveSyncStatus } from "../../data/driveSyncService.js";
 import { ISSUE_TRACKER_URL } from "../../data/publicUrls.js";
+import { isDemoOnlyStore } from "../../data/seedProvenance.js";
 import { resolveLang } from "../../i18n/index.js";
 import { renderMarkupOnce } from "./dom.js";
 import { syncGlyphFor } from "./syncStatusGlyph.js";
@@ -107,6 +108,35 @@ export function renderBackupBadge(health) {
   badge.setAttribute(
     "aria-label",
     `${label} — ${changes} only on this device. Open Sync & Backup.`,
+  );
+}
+
+/**
+ * Names the build state the trainer is actually in: DEMO while the store holds nothing but the
+ * seeded demo, PREVIEW otherwise (TODO §28.9).
+ *
+ * One slot, two competing claims, and `isDemoOnlyStore` is where the ordering is argued. The badge
+ * keeps its link to the data-loss notice in BOTH states — it is still a preview build either way,
+ * and that notice is the only place the risk is explained without signal.
+ *
+ * A demo is not a hazard, so the demo state drops the warning triangle and the pulse the CSS gives
+ * the amber pill; it states a fact, in a word, at the same size.
+ */
+export function renderBuildStateBadge(state) {
+  const badge = document.getElementById("preview-badge");
+  if (!badge) return;
+
+  const showingDemo = isDemoOnlyStore(state);
+  badge.classList.toggle("is-demo", showingDemo);
+  badge.querySelector(".preview-badge-label").textContent = showingDemo ? "DEMO" : "PREVIEW";
+  badge.querySelector("i").className = showingDemo
+    ? "fa-solid fa-flask"
+    : "fa-solid fa-triangle-exclamation";
+  badge.setAttribute(
+    "aria-label",
+    showingDemo
+      ? "Demo data — nothing here is your own work. Open the risks & data-loss notice."
+      : "Preview build — pre-release, may lose data. Open the risks & data-loss notice.",
   );
 }
 
