@@ -75,6 +75,7 @@ the thing that must happen first, not merely what it touches.
 | **Tests & docs** | §6.2, §12.3, §12.4, §12.5, §12.6, §25.6 | Medium-tier overflow harness | Nothing; all small |
 | **Routing decisions** | §19.2, §19.3 | The URL-privacy invariant | One decision, then both unblock |
 | **Data-subject rights** | §27.4 | One-tap withdrawal in the consent letter | Nothing; the other four shipped 2026-08-11 |
+| **Reported 2026-08-18** | §28.1–§28.10 | Seven bugs/changes plus the constants-in-prose sweep | Nothing — captured unverified, to be reproduced first in a clean session |
 | **Client self-service** | §26, §1.7 | Intake page the client fills, consent signed on their own phone | Nothing — and it is next, decided 2026-08-17 |
 
 ---
@@ -2136,3 +2137,95 @@ verification easy and erasure hard**, the exact inverse of a hosted product. Era
 derived-pseudonym scheme, a same-name safeguard, a register applied at import and an itemised
 receipt of what it cannot reach — where a hosted product would have written one `DELETE`. Weight
 future compliance work the same way.
+
+---
+
+## 28. Reported 2026-08-18 — bugs and changes, unverified
+
+Captured verbatim from the maintainer and **deliberately not investigated**: recorded at the end of a
+long session so a clean one can pick them up with fresh context. Each is as-reported, so the first job
+on any of them is to reproduce it, not to trust this description. Section numbers below are for
+reference only and imply no ordering.
+
+### 28.1 [ ] Comments and docstrings must name a constant, not repeat its value
+
+**Decided 2026-08-18 (Simon).** The centralization in `a9cad18` left the literal `8081` in comments and
+docstrings, and the URLs in prose, on the reasoning that prose is not configuration. That is wrong at the
+scale that matters: *"if we ever change the port or domain, we want to change in one place not 100s"*. A
+comment saying `:8081` is a copy like any other — it goes stale silently, and the next reader believes it.
+
+- **Comments and docstrings reference the NAME** (`DEV_SERVER_PORT`, `PUBLIC_SITE_URL`), not the value.
+  The cost is real and accepted: a reader has to look the constant up. That is the price of one source.
+- **Sweep what exists**: `build/__init__.py`, `deploy/local_http_server.py`, `tests/conftest.py`,
+  `AGENT_RULES.md` (which quotes `:8081` in several places), and the module headers written today.
+- **Then the check becomes cheap and honest** — this is what makes §28.2's grep viable, because the
+  legitimate-exception list mostly disappears.
+- **Candidate for [AGENT_RULES §5.7](AGENT_RULES.md)** once applied, since it is a rule about how code is
+  written rather than a one-off task.
+
+### 28.2 [ ] Documentation moves to GitHub Pages and is BUILT, with values injected
+
+**Wanted 2026-08-18 (Simon).** Docs currently hardcode the domain and other constants in prose. They
+should be built the way `src/landing.html` already is ([render_docs.py](agent_tools/render_docs.py)) —
+placeholders in the Markdown, values injected at build time from the same declarations the app reads
+(`src/data/publicUrls.js`, `.python-version`, `DEV_SERVER_PORT`) — and published to GitHub Pages.
+
+Open: which docs are trainer-facing (Pages) versus contributor-facing (repo only); whether the injection
+reads the JS declaration directly or a shared manifest both sides consume.
+
+### 28.3 [ ] A declared constant must appear in exactly one place — as an agent tool first
+
+Discussed 2026-08-18. NOT a gate yet, per [AGENT_RULES §6.2](AGENT_RULES.md): written as an agent tool,
+run in the fortnightly duplication sweep, and wired into Stage 1 only once it has caught something. It
+inverts the obvious design — instead of "no hardcoded ports anywhere" (which needs an ever-growing
+exemption list, and an ignore file is where findings go to disappear), it asserts that each DECLARED
+constant's literal appears only at its declaration. Self-limiting: the list grows only when a shared
+constant is declared, which is exactly when the protection is wanted. It catches re-introduction, not
+first introduction — the audit covers the rest.
+
+### 28.4 [ ] BUG — a collapsed deck card's first line is unreadable unless it is a past card
+
+Reported 2026-08-18: in the clipboard view, the **non-past** cards (the ones not rendered purple) do not
+show a readable first line while collapsed. Past cards do. A trainer scanning a collapsed deck cannot
+tell what a card is. Related: `2fe2464` fixed a collapsed card's first line once already, so check
+whether that fix covers only one card state.
+
+### 28.5 [ ] BUG — backup warnings appear in DEMO mode
+
+Reported 2026-08-18. §3.8's unbacked-data warning fires while the app is running on the demo dataset,
+where there is nothing worth backing up and the warning is noise that teaches trainers to ignore it. It
+should be suppressed in demo mode.
+
+### 28.6 [ ] BUG — loading demo data increments the ahead counter
+
+Reported 2026-08-18. Seeding the demo dataset counts as local changes, so §3.9's ahead counter reports
+work to sync that nobody did. Asked directly: *"can we have demo data excluded from ahead count?"* — the
+provenance stamp `seededDemo` ([seedProvenance.js](src/data/seedProvenance.js)) already distinguishes
+those records, so the count can likely exclude them by the same test §9.3's cleanup uses.
+
+### 28.7 [ ] BUG — the header menu does not work while the messages pane is expanded
+
+Reported 2026-08-18: with the notification/messages pane expanded, the ☰ menu appears not to respond —
+specifically, navigating to the client registry does nothing. Suspect a stacking or event-capture
+interaction between the expanded pane and the menu. Note the menu grew a scroll container on 2026-08-17
+(`753985a`), so check whether that is involved.
+
+### 28.8 [ ] BUG — the disabled-backup strikethrough is not visible enough
+
+Reported 2026-08-18: the strikethrough marking backup as unavailable does not read as a problem. It
+should use a **highly visible colour signalling an unhealthy state**, not a subtle line. Note
+[AGENT_RULES §2.D](AGENT_RULES.md) reserves the warning colour for real failures and §3.8's hazard —
+this is one, so it qualifies.
+
+### 28.9 [ ] CHANGE — a DEMO tag replaces the PREVIEW tag while in demo mode
+
+Wanted 2026-08-18. The header currently shows PREVIEW always. In demo mode it should show DEMO instead,
+so the state a trainer is actually in is the one named. Open: whether both matter at once (a preview
+build running demo data) and, if so, which wins — the answer decides whether this is a swap or a second
+badge.
+
+### 28.10 [ ] CHANGE — cancellations and bookings accumulate in one message card
+
+Wanted 2026-08-18: the message area should show cancellations and booking lists **cumulatively — same
+card, multiple lines** — rather than one card per event. Today each arrives as its own notification,
+which pushes everything else off the screen when several land together.
