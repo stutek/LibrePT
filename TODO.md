@@ -2225,10 +2225,31 @@ badge.
 
 Reported 2026-08-18: after deleting browser data, the loading screen no longer offers the demo or
 the animation. That is precisely the first-run state the offers exist for — a trainer arriving with
-an empty store and nothing to look at — so the regression is invisible to anyone whose store already
-has data. Suspect the empty-store branch of [splashScreen.js](src/modules/splash/splashScreen.js);
-note the same path deliberately withdraws the dismiss X on an empty database (`tests/conftest.py`
-budgets 1.5s for that), so whatever decides "nothing here yet" is already load-bearing.
+an empty store and nothing to look at — so it is invisible to anyone whose store already has data.
+
+**Diagnosed the same day by the maintainer: it is the deep link, not the empty store.** Clearing the
+browser leaves the URL in the address bar, and the reload arrives carrying the parameters of
+whatever link was open. Two of them independently suppress the first run:
+
+- `?lang=` is written straight into `state.lang` ([app.js](src/app.js)) *before* the splash asks
+  `hasChosenLanguage(getState().lang)` — so a language the LINK supplied is indistinguishable from
+  one the trainer picked, and the step that exists to ask them never runs.
+- `?splash=off` gates both the language step and the onboarding panel in
+  [splashScreen.js](src/modules/splash/splashScreen.js). Every demo link carries it.
+
+**Open question, raised by the maintainer and NOT decided**: *"is there a way to override deep links
+on empty data (language not selected)?"* The recommendation given was that on an empty store a URL
+parameter should be a HINT, not an answer — `needsLanguageChoice` reading the PERSISTED language
+rather than the overlaid one, and `?splash=off` losing its power to skip either screen while the
+store is empty. That costs the demo links nothing, since `?init=demo_data_load` seeds before the
+splash boots and so arrives with data. It reuses an argument the module already makes about the
+dismiss X: an early tap landing where the X will be must not become a way around a step that exists
+because there is nothing to dismiss TO.
+
+The carve-out to weigh: a link carrying a payload is a purposeful arrival, not a first run. Intake
+boots separately and is unaffected, but an RSVP reply (`?evt=`) goes through the normal boot, so an
+unscoped override would show a client on a fresh phone a language picker and a "load the demo?"
+offer before they could answer the invitation.
 
 ### 28.10 [ ] CHANGE — cancellations and bookings accumulate in one message card
 
