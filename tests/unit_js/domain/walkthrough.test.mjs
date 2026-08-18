@@ -43,15 +43,17 @@ test("a fresh walkthrough asks for the first step and offers no way past it", ()
   assert.equal(controls.stepCount, 3);
 });
 
-test("completing the step swaps the offer to show for the offer to move on", () => {
+test("completing the step adds the offer to move on, and keeps the offer to be shown", () => {
+  // Show me used to disappear here, on the reasoning that an offer to do a done thing is a control
+  // that does nothing. Reported 2026-08-18 ("moving back and forward in the demo loses show me
+  // buttons"): walking back through a finished tour left a guide with no Show me anywhere, because
+  // every step behind you is done. On a revisited step it no longer TAPS — it points at the control
+  // again (walkthroughOverlay.js), which is what someone re-reading a step actually wants and is
+  // also what keeps "a step returned to asks nothing of the trainer a second time" true.
   const state = completeWalkthroughStep(startWalkthrough(), "first");
 
   const controls = walkthroughControls(TOUR, state);
-  assert.equal(
-    controls.canShowMe,
-    false,
-    "an offer to do a done thing is a control that does nothing",
-  );
+  assert.equal(controls.canShowMe, true);
   assert.equal(controls.canAdvance, true);
 });
 
@@ -87,7 +89,8 @@ test("going back re-asks nothing: a step already done stays done", () => {
     true,
     "Next is there without doing it again",
   );
-  assert.equal(walkthroughControls(TOUR, back).canShowMe, false);
+  // Still offered, as a POINTER rather than a second tap — see the note above.
+  assert.equal(walkthroughControls(TOUR, back).canShowMe, true);
 });
 
 test("the last step offers a finish rather than another step", () => {

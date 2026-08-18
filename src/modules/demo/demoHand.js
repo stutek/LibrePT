@@ -79,7 +79,7 @@ const RIPPLE_WAVES = 3;
 // Matches the animation in demoTour.css. Kept in sync by hand for the same reason the splash's
 // fade duration is: reading it back out of getComputedStyle to save one constant would cost a
 // layout flush on every tap.
-const RIPPLE_LIFETIME_MS = 620;
+const RIPPLE_LIFETIME_MS = 1000;
 
 /** A ring that expands from the point of contact and removes itself.
  *
@@ -96,9 +96,13 @@ function buildRipple(hand) {
   ripple.className = RIPPLE_CLASS;
   // Positioned from the hand's own coordinates, so the ring lands on the FINGERTIP rather than on
   // the middle of the hand — the two are 30px apart, which at tap size is the whole point.
-  const rect = hand.getBoundingClientRect();
-  ripple.style.setProperty("--ripple-x", `${Math.round(rect.left)}px`);
-  ripple.style.setProperty("--ripple-y", `${Math.round(rect.top)}px`);
+  // Placed at the point the pointer was SENT to, read back from the properties moveDemoHand set,
+  // rather than derived from the hand's bounding box. The box's corner is not the fingertip — the
+  // drawn finger sits ~10px inside it — so measuring the box put the rings on the knuckle
+  // (reported 2026-08-18: "not centered around index finger"). Reading the target point needs no
+  // offset constant duplicated between here and the stylesheet, and cannot drift from the artwork.
+  ripple.style.setProperty("--ripple-x", hand.style.getPropertyValue("--hand-x") || "0px");
+  ripple.style.setProperty("--ripple-y", hand.style.getPropertyValue("--hand-y") || "0px");
   return ripple;
 }
 

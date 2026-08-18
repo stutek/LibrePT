@@ -145,19 +145,14 @@ def test_a_tap_leaves_a_visible_mark_where_it_landed(page, local_server):
     ripple = page.locator(".demo-tour-ripple").first
     assert page.locator(".demo-tour-ripple").count() >= 1
 
-    # A tolerance, not containment: the ring is mid-animation whenever it is sampled, so its box is
-    # 7px across at one instant and 58px at another. What has to be true is that the mark is on the
-    # fingertip rather than on the palm or on the previous control — half a fingertip of slack says
-    # exactly that, and fails on the tens-of-pixels errors that composing two transforms produced.
+    # Measured against the point the pointer was SENT to (120, 200 in the stub), which is what the
+    # ring is supposed to mark — the contact point. Comparing it against the hand's bounding box
+    # instead let a 10px error hide, because the box's corner is not where the finger is: the drawn
+    # fingertip sits inside it (reported 2026-08-18: "not centered around index finger").
     box = ripple.bounding_box()
-    hand_box = page.locator("#demo-tour-hand").bounding_box()
     centre_x, centre_y = box["x"] + box["width"] / 2, box["y"] + box["height"] / 2
-    assert abs(centre_x - hand_box["x"]) < 15, (
-        f"ring at x={centre_x}, fingertip at {hand_box['x']}"
-    )
-    assert abs(centre_y - hand_box["y"]) < 15, (
-        f"ring at y={centre_y}, fingertip at {hand_box['y']}"
-    )
+    assert abs(centre_x - 120) < 5, f"ring centred at x={centre_x}, finger touched 120"
+    assert abs(centre_y - 200) < 5, f"ring centred at y={centre_y}, finger touched 200"
 
 
 def test_the_mark_cleans_up_after_itself(page, local_server):
@@ -209,3 +204,28 @@ def test_a_tap_sends_more_than_one_wave_out(page, local_server):
     page.evaluate("() => window.__tap()")
 
     assert page.locator(".demo-tour-ripple").count() >= 2
+
+
+def test_the_waves_take_the_theme_colour(page, local_server):
+    """Wanted 2026-08-18: rings coloured by the selected scheme. White read as a screenshot artefact
+    on a pale theme and as glare on a dark one; the app's own accent says LibrePT is doing this."""
+    load_with_stub(page, local_server, RIPPLE_STUB)
+    page.wait_for_selector("#demo-tour-hand")
+    page.wait_for_timeout(600)
+    page.evaluate("() => window.__tap()")
+
+    colors = page.evaluate(
+        """() => {
+            const probe = document.createElement('span');
+            probe.style.color = 'var(--primary)';
+            document.body.appendChild(probe);
+            const primary = getComputedStyle(probe).color;
+            probe.remove();
+            const ring = document.querySelector('.demo-tour-ripple');
+            return { border: getComputedStyle(ring).borderTopColor, primary };
+        }"""
+    )
+
+    assert colors["border"] == colors["primary"], (
+        f"ring is {colors['border']}, theme accent is {colors['primary']}"
+    )

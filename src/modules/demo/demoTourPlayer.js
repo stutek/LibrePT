@@ -120,7 +120,13 @@ export async function performStep(step, { doc = document, hand = null, wait = sl
     await wait(TAP_LANDING_MS);
   }
 
-  target.click();
+  // IDEMPOTENT, and that is the contract rather than an optimisation (decided 2026-08-18: "show me
+  // should always start from the same state and execute the same action idempotently"). A step whose
+  // outcome already holds is demonstrated — pointer, press, ripple — but not re-tapped, because
+  // several of these controls are TOGGLES: a second Too Easy clears the first, so replaying a step
+  // the trainer walked back to would undo the very thing it was showing them. Pressing Show me once
+  // or ten times leaves the same state.
+  if (!stepOutcomeNow(step, doc).ok) target.click();
   await wait(step.settleMs ?? DEFAULT_STEP_PAUSE_MS);
 
   return stepOutcomeNow(step, doc);

@@ -9,8 +9,10 @@
   top: 0;
   left: 0;
   /* Offset so the FINGERTIP lands on the point the pointer was moved to, not the middle of the
-     hand — the drawing's tip is at the top-left of its box. */
-  margin: -4px 0 0 -6px;
+     hand. The drawn finger is a column at x≈10.5 of the 26-wide box with its tip at y≈0.5, so those
+     are the numbers — -6/-4 put the box's CORNER on the target, which is a knuckle's width away and
+     was visible as soon as the tap rings were drawn at the real point. */
+  margin: -1px 0 0 -10px;
   line-height: 0;
   opacity: 0;
   /* Never intercepts the tap it is illustrating — the player clicks the real control underneath. */
@@ -83,14 +85,26 @@
      scale. */
   left: var(--ripple-x, 0);
   top: var(--ripple-y, 0);
-  width: 18px;
-  height: 18px;
+  /* Bigger and brighter than the first attempt, which was reported as not noticeable enough: on a
+     laptop this is the only thing saying a tap happened, and it is competing with whatever the app
+     itself does in response. */
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.9);
-  box-shadow: 0 0 12px rgba(255, 255, 255, 0.55), inset 0 0 8px rgba(255, 255, 255, 0.35);
+  /* The theme's own accent, not white (wanted 2026-08-18): white reads as a screenshot artefact on
+     a pale theme and as glare on a dark one, while the app's accent says LibrePT is doing this.
+     The fallback matters — this file is loaded by the demo alone, and a theme that somehow did not
+     define --primary would otherwise draw nothing at all. */
+  border: 3px solid var(--primary, #6366f1);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--primary, #6366f1) 70%, transparent), inset 0 0 10px
+    color-mix(in srgb, var(--primary, #6366f1) 45%, transparent);
   pointer-events: none;
-  transform: translate(-50%, -50%);
-  animation: demo-tour-ripple 0.62s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  /* Centred with a MARGIN, not a translate. The animated `scale` composes outside `transform`, so a
+     centring translate is scaled along with the ring — at scale 0.35 the -13px offset became -4.5px
+     and the whole set drifted off the contact point as it grew. A margin is laid out before any
+     transform runs, so the centre stays put at every size. Half the width, kept in step with it. */
+  margin: -13px 0 0 -13px;
+  animation: demo-tour-ripple 0.78s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 /* The wrapper exists so one timer clears the whole set and the stylesheet can stagger the rings by
    position. It is inert and occupies nothing: every ring inside is position:fixed against the
@@ -121,11 +135,14 @@
 
 @keyframes demo-tour-ripple {
   0% {
-    scale: 0.4;
-    opacity: 0.95;
+    scale: 0.35;
+    opacity: 1;
+  }
+  40% {
+    opacity: 0.9;
   }
   100% {
-    scale: 3.2;
+    scale: 4;
     opacity: 0;
   }
 }

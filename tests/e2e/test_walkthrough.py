@@ -98,7 +98,6 @@ def test_the_trainer_doing_the_step_themselves_is_what_advances_it(page, local_s
     page.locator(".session-card", has_text="Group Strength").first.click()
 
     expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
-    expect(page.locator(SHOW_ME)).to_be_hidden()
     # And the app really did what the step said, not merely the panel's opinion of it.
     expect(page.locator("#active-session-client-tabs")).to_be_visible()
 
@@ -146,8 +145,7 @@ def test_the_last_step_still_ends_on_the_trainers_tap(page, local_server):
 
 def test_going_back_re_reads_a_step_without_asking_for_it_again(page, local_server):
     """Back re-explains against an app that has already moved on — it cannot undo a tap, and must not
-    pretend to. So a step returned to stays done: no second Too Easy signal logged because the
-    trainer wanted to re-read what the first one meant."""
+    pretend to. So a step returned to stays done, and Next is there without doing it again."""
     _open_walkthrough(page, local_server)
     _do_current_step(page)
     expect(page.locator(PROGRESS)).to_contain_text("2")
@@ -156,7 +154,35 @@ def test_going_back_re_reads_a_step_without_asking_for_it_again(page, local_serv
 
     expect(page.locator(PROGRESS)).to_contain_text("1")
     expect(page.locator(NEXT)).to_be_enabled()
-    expect(page.locator(SHOW_ME)).to_be_hidden()
+    # Show me is still offered here (reported 2026-08-18: walking back left a guide with no Show me
+    # anywhere, because every step behind you is done). It is safe because the action is idempotent
+    # — see test_re_showing_a_done_step_changes_nothing.
+    expect(page.locator(SHOW_ME)).to_be_visible()
+
+
+def test_re_showing_a_done_step_changes_nothing(page, local_server):
+    """Decided 2026-08-18: "show me should always start from the same state and execute the same
+    action idempotently".
+
+    Step 3 signals Too Easy, and that control is a TOGGLE — replaying its tap would clear the signal
+    it had just demonstrated, which is worse than the missing button this fixes. So the demonstration
+    runs again (pointer, press, ripple) while the action does not: pressing Show me once or five
+    times leaves the same state.
+    """
+    _open_walkthrough(page, local_server)
+    for _ in range(3):
+        _do_current_step(page)
+    expect(page.locator(PROGRESS)).to_contain_text("4")
+    signal = page.locator(".circuit-sig.easy.active")
+
+    page.locator(BACK).click()
+    expect(page.locator(PROGRESS)).to_contain_text("3")
+    for _ in range(3):
+        page.locator(SHOW_ME).click()
+        page.wait_for_timeout(2200)
+
+    expect(signal.first).to_be_visible()
+    expect(page.locator(PROGRESS)).to_contain_text("3"), "a replay is not progress"
 
 
 def test_walking_the_whole_script_ends_with_the_app_in_the_state_it_showed(

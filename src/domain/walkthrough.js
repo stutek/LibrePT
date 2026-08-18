@@ -78,7 +78,12 @@ export function walkthroughControls(tour, state) {
     stepNumber: state.stepIndex + 1,
     stepCount,
     canGoBack: state.stepIndex > 0 && !state.finished,
-    canShowMe: Boolean(step) && !done,
+    // Offered on a done step too (reported 2026-08-18: walking back through a finished tour left a
+    // guide with no Show me anywhere, since every step behind you is done). Safe there because the
+    // action itself is idempotent (demoTourPlayer.performStep): a step already satisfied is
+    // demonstrated again without being re-fired, so the promise below — a step returned to asks
+    // nothing of the trainer a second time — is kept by the player rather than by hiding a button.
+    canShowMe: Boolean(step),
     canAdvance: done,
     isLastStep: stepCount > 0 && state.stepIndex === stepCount - 1,
     isFinished: state.finished,

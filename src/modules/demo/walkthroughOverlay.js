@@ -14,8 +14,10 @@
 // buttons.
 //
 // **"Show me" is the escape hatch, not the path.** A trainer who cannot find the control gets it
-// tapped for them, with the same pointer the automatic demo uses. It disappears once the step is
-// done, because an offer to do something already done is a control that does nothing.
+// tapped for them, with the same pointer the automatic demo uses. On a step already DONE it points
+// instead of tapping: re-firing the tap would undo the very thing it demonstrated (a second Too Easy
+// clears the first), and walking back through a finished tour without it left a guide offering
+// nothing at all.
 //
 // **The panel moves out of its own way.** If the step's control sits where the panel would cover it,
 // the panel goes to the top of the screen instead. A guide that hides the thing it is pointing at is
@@ -31,6 +33,7 @@ import {
   advanceWalkthrough,
   completeWalkthroughStep,
   currentWalkthroughStep,
+  isWalkthroughStepDone,
   retreatWalkthrough,
   startWalkthrough,
   walkthroughControls,
@@ -232,8 +235,18 @@ export function startGuidedWalkthrough({
     if (!step || showing) return;
     showing = true;
     render();
+
+    const alreadyDone = isWalkthroughStepDone(state, step.id);
+    // One path, whether or not the step has been done before: performStep is idempotent, so a step
+    // walked back to is demonstrated again without its action being fired twice.
     const outcome = await performStep(step, { doc, hand });
     showing = false;
+    // Re-showing a step the trainer has already done is a replay, not progress: it must not carry
+    // them forward to a step they have not seen.
+    if (alreadyDone) {
+      if (!outcome.ok) reportProblem(outcome.reason);
+      return render();
+    }
     if (!outcome.ok) {
       reportProblem(outcome.reason);
       return render();
