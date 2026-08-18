@@ -21,10 +21,48 @@ from build.frontend_audit import audit_html_sinks, compare_csp
 from build.testreport import REPORT_DIR, failed_test_ids, print_digest, run_logged
 
 
+# How far the wall clock may run ahead of the monotonic one before a task is called interrupted.
+# Generously above an NTP nudge (fractions of a second) and a laptop rejoining a network (a few), and far
+# below the minutes a real suspend costs — a false suspend teaches people to ignore the warning, which is
+# worse than not printing one.
+SUSPEND_DRIFT_SECONDS = 10.0
+
+
+def suspend_suspected(monotonic_elapsed, wall_elapsed):
+    """Whether the machine likely slept during a task.
+
+    A monotonic clock does not advance across a suspend; the wall clock does. So a task whose wall time
+    exceeds its monotonic time by more than scheduling noise was interrupted rather than slow — which
+    AGENT_RULES §2.A.3 says to treat as suspect rather than as a regression, and which until now relied
+    on somebody noticing the timestamps by eye.
+
+    A merely STARVED task is not this: host contention stretches both clocks together (a game at 141% CPU
+    doubled two stages on 2026-08-17 and tripped nothing here).
+    """
+    return (wall_elapsed - monotonic_elapsed) > SUSPEND_DRIFT_SECONDS
+
+
+def _warn_if_suspended(name, monotonic_elapsed, wall_elapsed):
+    """Says so, loudly, when a task spanned a suspend — including on the failure paths, which is where
+    it matters: those failures are the ones that would otherwise be investigated as real."""
+    if not suspend_suspected(monotonic_elapsed, wall_elapsed):
+        return
+    slept = wall_elapsed - monotonic_elapsed
+    print(
+        f"    ⚠ {name} spanned a ~{slept / 60:.0f} min gap in wall time that it did not spend working "
+        "— the machine probably slept. Treat any failure from this run as suspect and re-run before "
+        "investigating it (AGENT_RULES §2.A.3)."
+    )
+
+
 def _timed_task(name, fn):
     """Run one pipeline task, always printing its wall-clock time — pass or fail — so a slow gate
     step is visible without re-running it under `time` by hand. Re-raises whatever `fn` raised
-    (SystemExit or otherwise) so the caller's existing failure handling is unchanged."""
+    (SystemExit or otherwise) so the caller's existing failure handling is unchanged.
+
+    Also reports a suspend: a run that spanned one produces failures that look exactly like real ones
+    (dropped sockets, blown timing budgets) on a change that could not have caused them."""
+    wall_start = time.time()
     start = time.monotonic()
     try:
         fn()
@@ -32,14 +70,17 @@ def _timed_task(name, fn):
         elapsed = time.monotonic() - start
         mark = "✓" if e.code in (0, None) else "✗"
         print(f"    ⏱ {name}: {elapsed:.1f}s {mark}")
+        _warn_if_suspended(name, elapsed, time.time() - wall_start)
         raise
     except Exception:
         elapsed = time.monotonic() - start
         print(f"    ⏱ {name}: {elapsed:.1f}s ✗")
+        _warn_if_suspended(name, elapsed, time.time() - wall_start)
         raise
     else:
         elapsed = time.monotonic() - start
         print(f"    ⏱ {name}: {elapsed:.1f}s ✓")
+        _warn_if_suspended(name, elapsed, time.time() - wall_start)
 
 
 # Records which requirements.txt the venv was last installed from, so an unchanged one is not

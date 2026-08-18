@@ -2,6 +2,8 @@
 # Fixtures live here so both the e2e (browser) tests and the unit (static) tests can use them
 # without duplicating setup. Applies to every test under tests/ (including subfolders).
 
+from datetime import datetime, timezone
+
 import hashlib
 import re
 import json
@@ -242,6 +244,61 @@ def demo_data_script():
     return SEED_DEMO_DATA_SCRIPT
 
 
+# A fixed instant every browser test sees as "now". Chosen deliberately: a WEDNESDAY late morning, so the
+# demo seed's day buckets ("today", "tomorrow") are unambiguous and no seeded session sits near midnight
+# where a slot could cross a date boundary under a test's feet.
+#
+# A datetime, not a number: Playwright's `set_fixed_time` takes SECONDS when given a number, and passing
+# milliseconds put the app in the year 58,600 — where every date rendered as nonsense and the failure
+# looked like an unrelated broken feature. A tz-aware datetime cannot be misread that way.
+FROZEN_NOW = datetime(2026, 8, 19, 9, 0, 0, tzinfo=timezone.utc)
+
+
+def frozen_today_iso():
+    """The date every browser test's app believes it is, as `YYYY-MM-DD`.
+
+    Tests used to call `datetime.date.today()` and compare it against a URL the app derived from its own
+    clock. That agreed by luck: it was already a midnight race (a test starting at 23:59:59 and asserting
+    at 00:00:01 fails), and it broke outright once the app's clock was frozen. One source for "today"
+    removes both.
+    """
+    return frozen_today().strftime("%Y-%m-%d")
+
+
+def frozen_today():
+    """The frozen "today" as a `date`, for tests that need to do arithmetic on it (tomorrow, +3 days)."""
+    return FROZEN_NOW.astimezone().date()
+
+
+def frozen_now():
+    """The frozen instant itself, for tests asserting that the app wrote a timestamp "just now"."""
+    return FROZEN_NOW
+
+
+@pytest.fixture(autouse=True)
+def freeze_wall_clock(request):
+    """Pin `Date.now()` for browser tests, so what the app calls "now" does not depend on when the suite
+    happens to run.
+
+    **This exists because CI caught what three local runs did not** (2026-08-18): the demo seed generates
+    sessions RELATIVE TO NOW (src/data/sessions.js), so a test typing a literal time collided with a
+    seeded session at some hours and not others. The failure surfaced as an unrelated schedule-conflict
+    dialog and read as a broken feature. Anything derived from the clock — seeded slots, day buckets,
+    overdue labels — is now the same at 03:00 as at 23:00.
+
+    **`set_fixed_time`, NOT `install()`.** Installing a fake clock replaces the timers too, which would
+    stop the rest timer, the session clock and the splash hold from advancing at all — tests that measure
+    elapsed time would then be asserting against a clock nobody is winding. Fixing only the wall clock
+    leaves every timer running for real.
+
+    Opt out with `@pytest.mark.real_clock` for a test whose subject IS the passage of wall-clock time.
+    """
+    if "page" in request.fixturenames and "real_clock" not in request.keywords:
+        page = request.getfixturevalue("page")
+        page.clock.set_fixed_time(FROZEN_NOW)
+    yield
+
+
 @pytest.fixture(autouse=True)
 def seed_demo_data(request):
     """Populate the demo dataset for browser tests that rely on it. The app boots empty; the demo
@@ -263,6 +320,10 @@ def pytest_configure(config):
     config.addinivalue_line(
         "markers",
         "keep_splash: leave the cold-start splash up (skip the auto-dismiss) — for testing it",
+    )
+    config.addinivalue_line(
+        "markers",
+        "real_clock: let the wall clock run (skip the frozen Date.now) — for tests about elapsed time",
     )
 
 

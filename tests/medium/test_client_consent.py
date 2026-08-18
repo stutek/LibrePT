@@ -16,6 +16,7 @@ import datetime
 import pytest
 from playwright.sync_api import expect
 
+from tests.conftest import frozen_now, frozen_today
 from tests.medium._harness import load_with_stub, view_stub
 
 pytestmark = pytest.mark.clean_start
@@ -86,7 +87,9 @@ def _open_edit(page, client_id):
 
 
 def _today():
-    return datetime.date.today().isoformat()
+    """The date the APP believes it is — browser tests run on a frozen clock (tests/conftest.py), so
+    deriving this from the host clock would compare two different "todays"."""
+    return frozen_today().isoformat()
 
 
 def test_date_field_appears_only_once_consent_is_ticked(page, local_server):
@@ -173,7 +176,7 @@ def test_saving_records_the_signed_date_and_the_current_form_version(
     written = datetime.datetime.fromisoformat(
         consent["timestamp"].replace("Z", "+00:00")
     )
-    age = datetime.datetime.now(datetime.UTC) - written
+    age = frozen_now() - written
     assert abs(age.total_seconds()) < 300, (
         f"write timestamp is not recent: {consent['timestamp']}"
     )

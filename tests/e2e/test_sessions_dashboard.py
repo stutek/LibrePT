@@ -7,6 +7,8 @@
 import datetime
 from urllib.parse import urlparse
 
+from tests.conftest import frozen_today, frozen_today_iso
+
 
 def _route_path(page):
     """The URL path alone, without the query string. Assertions here are about which day the router
@@ -90,8 +92,7 @@ def test_sessions_day_navigation(page, local_server):
     # scheduling rather than anything under this app's control (see test_sessions_dashboard.py's
     # sibling tests, which use the polling form successfully for their simpler single-scroll cases).
     _wait_for_timeline_settled(page)
-    today = datetime.date.today()
-    today_iso = today.strftime("%Y-%m-%d")
+    today_iso = frozen_today_iso()
 
     # Dashboard opens focused on today
     page.wait_for_timeout(900)
@@ -101,7 +102,7 @@ def test_sessions_day_navigation(page, local_server):
     )
 
     # Scrolling the timeline to another day-group must retitle the URL to the date it settles on
-    tomorrow = today + datetime.timedelta(days=1)
+    tomorrow = frozen_today() + datetime.timedelta(days=1)
     tomorrow_iso = tomorrow.strftime("%Y-%m-%d")
     page.evaluate(
         """(iso) => {
@@ -147,7 +148,7 @@ def test_scrolling_the_timeline_updates_the_focused_day(page, local_server):
     page.wait_for_selector(".sessions-day-group")
     _wait_for_timeline_settled(page)
 
-    today_iso = datetime.date.today().strftime("%Y-%m-%d")
+    today_iso = frozen_today_iso()
     _wait_for_focused_date(page, today_iso)
 
     page.evaluate("() => { document.getElementById('main-content').scrollTop += 900; }")
@@ -163,11 +164,10 @@ def test_date_jump_control_scrolls_to_chosen_date(page, local_server):
     page.wait_for_selector(".sessions-day-group")
     _wait_for_timeline_settled(page)
 
-    today = datetime.date.today()
-    today_iso = today.strftime("%Y-%m-%d")
+    today_iso = frozen_today_iso()
     _wait_for_focused_date(page, today_iso)
 
-    far_future = (today + datetime.timedelta(days=3)).strftime("%Y-%m-%d")
+    far_future = (frozen_today() + datetime.timedelta(days=3)).strftime("%Y-%m-%d")
     page.locator("#sessions-date-jump-input").fill(far_future)
     page.locator("#sessions-date-jump-input").dispatch_event("change")
 

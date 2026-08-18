@@ -18,8 +18,15 @@ def _boot(page, local_server):
 
 
 def _throw_in_the_app(page, message="probe explosion"):
-    """Throw the way a real bug does — from a task, not from an evaluate() the harness would catch."""
-    page.evaluate(f"() => setTimeout(() => {{ throw new Error({message!r}); }}, 0)")
+    """Throw the way a real bug does — from a scheduled task, not from an evaluate() the harness catches.
+
+    A MICROTASK rather than a `setTimeout`, and that is not arbitrary: the suite freezes `Date.now`
+    (tests/conftest.py), and Playwright's clock instrumentation swallows an exception thrown inside a
+    timer callback — it never reaches `window.onerror` at all. A microtask throw is just as real a bug
+    and survives the instrumentation, so this test keeps the deterministic clock instead of opting out
+    of it.
+    """
+    page.evaluate(f"() => queueMicrotask(() => {{ throw new Error({message!r}); }})")
     page.wait_for_timeout(400)
 
 

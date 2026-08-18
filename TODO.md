@@ -1463,6 +1463,30 @@ be written down.
 
 ---
 
+### 18.16 [x] Local runs stopped disagreeing with CI about what time it is — 2026-08-18
+
+Asked for after CI failed on a test that had passed locally three times ("how we can improve reliability
+of local test?"). Four divergence classes were visible in one day's evidence; the two cheapest to close
+were closed:
+
+- **Wall-clock dependence — closed.** Browser tests now run on a frozen `Date.now`
+  ([conftest.py](tests/conftest.py)), so the demo seed's relative session times, day buckets and overdue
+  labels are identical whatever hour the suite runs. Four existing tests were deriving "today" from the
+  HOST clock and comparing it against the app's — agreement by luck, and already a midnight race. They
+  take it from one source now.
+- **Suspend detection — closed.** `_timed_task` compares monotonic against wall time and says so when a
+  task spanned a gap it did not spend working ([build/__init__.py](build/__init__.py)).
+  [AGENT_RULES §2.A.3](AGENT_RULES.md) has always said to treat a time jump as interruption rather than
+  a regression; it relied on somebody noticing timestamps by eye, which failed twice in one session.
+
+**Left deliberately**, because on the evidence they are theoretical rather than observed: an opt-in
+stress mode (higher worker count, to surface write-queue-style races on purpose) and randomized test
+order with a printed seed. **Still open and the maintainer's call: CI runs Python 3.11 and this machine
+runs 3.14.4** — the quietest divergence of the four, and the one most likely to produce a "works locally"
+that is not about tests at all.
+
+---
+
 ## 19. Deep-linkable app state
 
 **The rule agreed for scope: anything a page reload would change belongs in the URL.** Design,
