@@ -42,9 +42,16 @@ def _keep_cached_session_fresh(page):
 
 
 def _enter_edit_mode(page):
-    page.locator("#btn-edit-plan").click()
+    _open_plan_editor(page)
     page.wait_for_selector(".clipboard-editor")
     page.wait_for_timeout(300)
+
+
+def _open_plan_editor(page):
+    """Edit moved into the ⋯ session menu on 2026-08-18, to give the clipboard title its space back."""
+    page.click("#btn-session-menu")
+    page.wait_for_selector("#session-menu:not(.hidden)")
+    page.click("#btn-edit-plan")
 
 
 def test_add_from_catalog_is_addressable(page, local_server):

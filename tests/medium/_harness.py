@@ -386,3 +386,15 @@ renderActiveGroupBoard();
 """
         + extra_body,
     ).replace("__SESSION__", session_js)
+
+
+def open_plan_editor(page):
+    """Enter plan-edit mode from the clipboard.
+
+    Edit moved into the ⋯ session menu on 2026-08-18: beside the title it took 48px of a 390px bar
+    where the title itself had 169, and the report was that clipboard titles are unreadable. Every
+    test that edits a plan goes through here, so the next move costs one edit rather than six.
+    """
+    page.click("#btn-session-menu")
+    page.wait_for_selector("#session-menu:not(.hidden)")
+    page.click("#btn-edit-plan")

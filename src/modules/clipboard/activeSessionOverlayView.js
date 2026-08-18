@@ -99,9 +99,6 @@ export function renderActiveSessionOverlayShell() {
             <span id="overlay-session-duration">00:00</span>
           </div>
         </div>
-        <button id="btn-edit-plan" class="icon-btn" aria-label="Edit plan" title="Edit plan">
-          <i class="fa-solid fa-pen-to-square"></i>
-        </button>
         <!-- Shown only in edit mode (see renderActiveGroupBoard): finishing the plan edit lives on
              the title line next to the mode label, so the editor body needs no header of its own. -->
         <button id="btn-done-edit" class="btn primary-btn btn-sm hidden" aria-label="Done editing plan">
@@ -111,7 +108,16 @@ export function renderActiveSessionOverlayShell() {
           <button id="btn-session-menu" class="icon-btn" aria-label="Session options" aria-haspopup="true" aria-expanded="false">
             <i class="fa-solid fa-ellipsis-vertical"></i>
           </button>
+          <!-- Edit lives in here rather than beside the title (reported 2026-08-18: "the three dots
+               menu and edit icon take too much space from the title label"). Measured on a 390px
+               phone, the two icons plus their gaps took 48px of a bar where the title had 169 —
+               under half. Folding one in gives the title the larger share without shrinking a touch
+               target or costing a row of height, and it also gives this menu a second reason to
+               exist: it held nothing but Delete. -->
           <div id="session-menu" class="session-menu hidden" role="menu">
+            <button id="btn-edit-plan" class="session-menu-item" role="menuitem" aria-label="Edit plan">
+              <i class="fa-solid fa-pen-to-square"></i> <span data-i18n="edit_plan">Edit plan</span>
+            </button>
             <button id="btn-delete-session" class="session-menu-item session-menu-item-danger" role="menuitem">
               <i class="fa-solid fa-trash-can"></i> Delete Session
             </button>

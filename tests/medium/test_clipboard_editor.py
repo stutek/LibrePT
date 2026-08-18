@@ -10,6 +10,7 @@
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
 from tests.medium._harness import (
+    open_plan_editor,
     active_session_fixture,
     clipboard_stub,
     exercise_item,
@@ -29,7 +30,7 @@ def _mount(page, local_server, plan, edit_mode=True):
     )
     page.wait_for_selector("#active-session-overlay:not(.hidden)")
     if edit_mode:
-        page.click("#btn-edit-plan")
+        open_plan_editor(page)
         page.wait_for_selector(".clipboard-editor")
 
 

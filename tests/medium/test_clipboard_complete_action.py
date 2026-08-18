@@ -17,6 +17,7 @@
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
 from tests.medium._harness import (
+    open_plan_editor,
     active_session_fixture,
     clipboard_stub,
     exercise_item,
@@ -59,7 +60,7 @@ def test_started_live_session_offers_complete(page, local_server):
 def test_editing_the_plan_withdraws_complete_until_done(page, local_server):
     _mount(page, local_server)
 
-    page.click("#btn-edit-plan")
+    open_plan_editor(page)
     page.wait_for_selector(".clipboard-editor")
 
     assert _footer_visible(page) is False, (
@@ -90,7 +91,7 @@ def test_planning_programme_never_offers_complete(page, local_server):
     # Leaving edit mode does not turn it into a live session either. The workout-setup flow drops
     # the trainer straight INTO the editor on create, which a directly-built session does not
     # reproduce — so enter it explicitly first, or the Done below would assert nothing.
-    page.click("#btn-edit-plan")
+    open_plan_editor(page)
     page.wait_for_selector(".clipboard-editor")
     assert _footer_visible(page) is False
 

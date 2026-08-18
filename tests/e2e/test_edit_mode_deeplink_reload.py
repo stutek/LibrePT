@@ -20,12 +20,19 @@ def _open_session(page, local_server):
     page.wait_for_timeout(400)
 
 
+def _open_plan_editor(page):
+    """Edit moved into the ⋯ session menu on 2026-08-18, to give the clipboard title its space back."""
+    page.click("#btn-session-menu")
+    page.wait_for_selector("#session-menu:not(.hidden)")
+    page.click("#btn-edit-plan")
+
+
 def test_edit_mode_deeplinks_and_survives_reload(page, local_server):
     _open_session(page, local_server)
     base = _base(page)
 
     # Enter edit mode; the URL upgrades to the /edit deep link.
-    page.click("#btn-edit-plan")
+    _open_plan_editor(page)
     page.wait_for_selector(".clipboard-editor")
     page.wait_for_timeout(200)
     url = page.evaluate("() => location.pathname")
@@ -81,7 +88,7 @@ def test_edit_deeplink_typed_directly_restores_editor(page, local_server):
     # Open + enter edit so a real session exists and is cached, capture its edit URL, leave to the
     # live deck, then navigate straight to the edit URL: it must reopen the editor.
     _open_session(page, local_server)
-    page.click("#btn-edit-plan")
+    _open_plan_editor(page)
     page.wait_for_selector(".clipboard-editor")
     page.wait_for_timeout(200)
     edit_url = page.evaluate("() => location.pathname")

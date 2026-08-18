@@ -10,6 +10,7 @@
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
 from tests.medium._harness import (
+    open_plan_editor,
     active_session_fixture,
     clipboard_stub,
     exercise_item,
@@ -38,7 +39,7 @@ def _mount_clipboard(page, local_server):
 
 
 def _enter_edit_mode(page):
-    page.click("#btn-edit-plan")
+    open_plan_editor(page)
     page.wait_for_selector(".clipboard-editor")
 
 
@@ -57,11 +58,17 @@ def _visible(page, selector):
 def test_edit_chrome_is_on_the_title_bar(page, local_server):
     _mount_clipboard(page, local_server)
 
-    # Live deck: Done hidden, ✎ trigger visible, no editor header anywhere.
+    # Live deck: Done hidden, and the way into edit mode is offered. Since 2026-08-18 that lives in
+    # the ⋯ menu rather than on the title bar, so "offered" means the menu shows it — the bar itself
+    # deliberately has one icon fewer, to give the session title back its space. Asserted on the way
+    # THROUGH rather than by opening the menu twice: choosing Edit closes it, so a second open would
+    # be toggling a menu this test had left standing.
     assert page.locator("#btn-done-edit").is_visible() is False
+    page.click("#btn-session-menu")
+    page.wait_for_selector("#session-menu:not(.hidden)")
     assert page.locator("#btn-edit-plan").is_visible() is True
-
-    _enter_edit_mode(page)
+    page.click("#btn-edit-plan")
+    page.wait_for_selector(".clipboard-editor")
 
     state = page.evaluate(
         """() => ({
@@ -86,7 +93,11 @@ def test_titlebar_done_exits_to_live_deck(page, local_server):
     page.wait_for_selector(".clipboard-editor", state="detached")
 
     assert page.locator("#btn-done-edit").is_visible() is False
-    assert page.locator("#btn-edit-plan").is_visible() is True
+    # Offered again, in the menu it now lives in.
+    assert (
+        page.locator("#btn-edit-plan").evaluate("el => el.classList.contains('hidden')")
+        is False
+    )
 
 
 def test_edit_mode_hides_chrome_and_shows_client_focus(page, local_server):

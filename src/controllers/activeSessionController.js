@@ -845,6 +845,11 @@ function wireSessionMenuAndActions(t) {
 
   document.getElementById("btn-edit-plan")?.addEventListener("click", (e) => {
     e.stopPropagation();
+    // Closing the menu is part of choosing from it, exactly as Delete below does. It became
+    // load-bearing when Edit moved INTO the menu (2026-08-18): left open, the panel sits over the
+    // editor it just opened, and the trainer's next tap on ⋯ reads as "nothing happened" because it
+    // is toggling a menu they thought was already gone.
+    closeSessionMenu();
     enterClipboardEditMode();
   });
 
