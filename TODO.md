@@ -2190,18 +2190,15 @@ show a readable first line while collapsed. Past cards do. A trainer scanning a 
 tell what a card is. Related: `2fe2464` fixed a collapsed card's first line once already, so check
 whether that fix covers only one card state.
 
-### 28.5 [ ] BUG — backup warnings appear in DEMO mode
+### 28.5 [x] BUG — backup warnings appear in DEMO mode — fixed 2026-08-18
 
-Reported 2026-08-18. §3.8's unbacked-data warning fires while the app is running on the demo dataset,
-where there is nothing worth backing up and the warning is noise that teaches trainers to ignore it. It
-should be suppressed in demo mode.
+See [CHANGELOG](CHANGELOG.md). Fixed together with §28.6: one predicate, `withoutSeedRecords`, applied
+at both counters — the reports were two symptoms of the same wrong question.
 
-### 28.6 [ ] BUG — loading demo data increments the ahead counter
+### 28.6 [x] BUG — loading demo data increments the ahead counter — fixed 2026-08-18
 
-Reported 2026-08-18. Seeding the demo dataset counts as local changes, so §3.9's ahead counter reports
-work to sync that nobody did. Asked directly: *"can we have demo data excluded from ahead count?"* — the
-provenance stamp `seededDemo` ([seedProvenance.js](src/data/seedProvenance.js)) already distinguishes
-those records, so the count can likely exclude them by the same test §9.3's cleanup uses.
+See [CHANGELOG](CHANGELOG.md). The `seededDemo` stamp pointer in the original note was right, and the
+committed seed id set covered the databases minted before it existed.
 
 ### 28.7 [ ] BUG — the header menu does not work while the messages pane is expanded
 
