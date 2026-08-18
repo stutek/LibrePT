@@ -1479,6 +1479,19 @@ were closed:
   [AGENT_RULES §2.A.3](AGENT_RULES.md) has always said to treat a time jump as interruption rather than
   a regression; it relied on somebody noticing timestamps by eye, which failed twice in one session.
 
+- **One Python declaration — closed 2026-08-18.** CI ran 3.11 while this machine ran 3.14.4 with nothing
+  saying so. The first fix bumped thirteen `python-version:` literals and added a checker that they
+  agreed, which the maintainer rejected outright — *"12 pins for python? that is not single source of
+  truth"*. There is one declaration now (`.python-version`), read by every job via
+  `python-version-file:` and by pyenv directly, so drift is impossible rather than detected.
+  [python_version.py](agent_tools/python_version.py) keeps what a file cannot: this machine on the
+  declared minor, plus a regression guard against literals coming back.
+- **A shared wait for durable writes.** Two tests raced the write queue in one day (signup, then RSVP
+  ingestion): both wrote, then did a full page load that re-read IndexedDB before the enqueued write had
+  flushed. `wait_for_stored_record` in [conftest.py](tests/conftest.py) is the one wait now, and it takes
+  a field/value dict rather than a JS predicate — the first draft used `new Function`, which the app's own
+  CSP forbids.
+
 **Left deliberately**, because on the evidence they are theoretical rather than observed: an opt-in
 stress mode (higher worker count, to surface write-queue-style races on purpose) and randomized test
 order with a printed seed. **Still open and the maintainer's call: CI runs Python 3.11 and this machine

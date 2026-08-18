@@ -254,6 +254,45 @@ def demo_data_script():
 FROZEN_NOW = datetime(2026, 8, 19, 9, 0, 0, tzinfo=timezone.utc)
 
 
+def wait_for_stored_record(page, collection, matches, timeout=10_000):
+    """Block until a record the app just wrote is DURABLE in IndexedDB.
+
+    Saves are enqueued (src/data/writeQueue.js), so a test that writes and then does a full page load —
+    a reload, or a `goto` — re-reads the store before the write has flushed and sees nothing. It wins
+    that race alone and loses it under a parallel run, which is the worst way for a test to fail: it
+    looks like the feature is broken. Written after hitting it twice on 2026-08-18 (the signup round
+    trip, then the RSVP ingestion). Waiting for the stored row is also the assertion those tests actually
+    want — "it survived", not "the page re-rendered".
+
+    `matches` is a plain dict of field → value, compared with `===`. Deliberately NOT a JS expression:
+    the first draft built a predicate with `new Function`, which the app's own CSP forbids
+    (`script-src 'self'`) — the same constraint that put the JS unit tests in Node rather than a browser.
+    """
+    page.wait_for_function(
+        """async ([collection, matches]) => {
+          const db = await new Promise((resolve) => {
+            const request = indexedDB.open('librept');
+            request.onsuccess = () => resolve(request.result);
+          });
+          if (!db.objectStoreNames.contains('schemaP')) return false;
+          const rows = await new Promise((resolve) => {
+            const request = db
+              .transaction('schemaP', 'readonly')
+              .objectStore('schemaP')
+              .index('byCollection')
+              .getAll(collection);
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => resolve([]);
+          });
+          return rows.some((row) =>
+            Object.entries(matches).every(([field, value]) => row[field] === value),
+          );
+        }""",
+        arg=[collection, matches],
+        timeout=timeout,
+    )
+
+
 def frozen_today_iso():
     """The date every browser test's app believes it is, as `YYYY-MM-DD`.
 

@@ -13,6 +13,8 @@ import json
 import pytest
 from playwright.sync_api import expect
 
+from tests.conftest import wait_for_stored_record
+
 
 def _client_file(tmp_path, page, local_server):
     """Fill in the real intake page and return the path of the file it actually produced."""
@@ -62,30 +64,9 @@ def test_a_stranger_becomes_a_client_without_the_trainer_typing_anything(
     page.click("#signup-review-save")
     expect(page.locator("#dialog-signup-review")).to_be_hidden()
 
-    # Wait for the record to be DURABLE before reloading. The save is enqueued (data/writeQueue.js) and
-    # the next line is a full page load, which re-reads from IndexedDB — so navigating immediately races
-    # the write. That race is what made this test fail under a parallel run and pass alone, and waiting
-    # for the stored row is the assertion this test actually wants: not "the list re-rendered" but "it
-    # survived". The app's own window for this is milliseconds and only on a hard reload; noted in
-    # TODO §18.6 rather than papered over here.
-    page.wait_for_function(
-        """async () => {
-          const db = await new Promise((resolve) => {
-            const request = indexedDB.open('librept');
-            request.onsuccess = () => resolve(request.result);
-          });
-          const rows = await new Promise((resolve) => {
-            const request = db
-              .transaction('schemaP', 'readonly')
-              .objectStore('schemaP')
-              .index('byCollection')
-              .getAll('clients');
-            request.onsuccess = () => resolve(request.result);
-          });
-          return rows.some((row) => row.name === 'Nova Oseba');
-        }""",
-        timeout=10_000,
-    )
+    # Durable before reloading — the save is enqueued and the next line is a full page load, so this
+    # is the difference between asserting "it survived" and racing the write (tests/conftest.py).
+    wait_for_stored_record(page, "clients", {"name": "Nova Oseba"})
 
     # In the register, and still there after a reload — through real IndexedDB, not an in-memory state.
     page.goto(f"{local_server}clients")

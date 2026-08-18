@@ -15,6 +15,8 @@ import json
 import pytest
 from playwright.sync_api import expect
 
+from tests.conftest import wait_for_stored_record
+
 
 def _encoded(event):
     raw = json.dumps(event, separators=(",", ":")).encode("utf-8")
@@ -73,6 +75,9 @@ def test_the_answer_lands_on_the_invitation_and_survives_a_reload(page, local_se
         page, local_server, f"?evt={_rsvp(ids['sessionId'], ids['clientId'], 'yes')}"
     )
 
+    # Durable BEFORE reloading: the ingestion enqueues its write and a reload re-reads the store. Racing
+    # that is how this passed alone and failed under a parallel run (tests/conftest.py explains it).
+    wait_for_stored_record(page, "invites", {"answer": "yes"})
     page.reload()
     page.wait_for_selector("#app-header", timeout=15_000)
     invites = _collection(page, "invites")

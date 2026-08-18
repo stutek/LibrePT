@@ -614,6 +614,19 @@ def run_pipeline_gate_check():
         sys.exit(1)
 
 
+def run_python_version_check():
+    """Verifies there is ONE Python declaration and this machine is on it — agent_tools/python_version.py.
+
+    A local gate that ran on a different language version than the deploy is not evidence about the
+    deploy, and nothing else in the repository would say so.
+    """
+    print("\n  Checking the Python version declaration...")
+    from agent_tools import python_version
+
+    if python_version.main() != 0:
+        sys.exit(1)
+
+
 def run_complexity_check():
     """Cyclomatic complexity gate for the frontend JS — see agent_tools/complexity.py.
 
@@ -1442,6 +1455,7 @@ def run_stage_1_parallel():
         "Icon Coverage": run_icon_coverage_check,
         "Import Layering": run_import_layer_check,
         "Pipeline Gating": run_pipeline_gate_check,
+        "Python Version": run_python_version_check,
         "Cyclomatic Complexity": run_complexity_check,
         "Test Assertions": run_test_assertion_check,
         "Rendered Docs": run_docs_render_check,
