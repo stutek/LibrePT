@@ -51,13 +51,27 @@ def _a_scheduled_session(page):
     )
 
 
-def _answer_prompts(page, accept=False):
-    """Record every confirm() the app raises, answering them all the same way."""
+def _answer_prompts(page, accept_resend=False):
+    """Record every confirm() the app raises, answering each according to what it asks.
+
+    Answering them all the same way was wrong and CI proved it: the SAVE PATH has its own confirm — the
+    schedule-conflict warning — and dismissing that one aborts the submit entirely
+    (`confirmScheduleConflictIfNeeded`), so the resend prompt is never reached and the failure reads as
+    "the feature does not work".
+
+    It passed locally and failed on CI because the demo seed generates sessions **relative to now**
+    (data/sessions.js), so whether a fixed 07:15 clashes with a seeded one depends on the hour the suite
+    happens to run. Anything that is not the resend prompt is therefore accepted — the test is about what
+    happens AFTER a successful save.
+    """
     seen = []
 
     def handle(dialog):
         seen.append(dialog.message)
-        dialog.accept() if accept else dialog.dismiss()
+        if "invited" in dialog.message.lower():
+            dialog.accept() if accept_resend else dialog.dismiss()
+        else:
+            dialog.accept()
 
     page.on("dialog", handle)
     return seen
@@ -102,7 +116,7 @@ def test_saying_no_sends_nothing_and_leaves_no_dialog_behind(page, local_server)
     session = _a_scheduled_session(page)
     page.evaluate(INVITED_SESSION, [session["id"], session["clientId"]])
 
-    _answer_prompts(page, accept=False)
+    _answer_prompts(page, accept_resend=False)
     _edit_the_time(page, local_server, session)
     page.wait_for_timeout(1_500)
 
