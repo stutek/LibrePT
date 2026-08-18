@@ -77,6 +77,7 @@ the thing that must happen first, not merely what it touches.
 | **Data-subject rights** | §27.4 | One-tap withdrawal in the consent letter | Nothing; the other four shipped 2026-08-11 |
 | **Reported 2026-08-18** | §28.2 | Which contributor-facing docs get BUILT, so their addresses are injected rather than written out | Everything else in §28 shipped the same day |
 | **Client self-service** | §26, §1.7 | Intake page the client fills, consent signed on their own phone | Nothing — and it is next, decided 2026-08-17 |
+| **Program import** | §29 | Two product calls: paste vs file, and what happens to an unknown movement | Nothing technical — the intake flow, the media-type rule and the catalog crosswalk all already exist |
 
 ---
 
@@ -2251,3 +2252,60 @@ inactive view's copy of a selector can never win.
 
 See [CHANGELOG](CHANGELOG.md). The "verify all needed data is there" half became
 [walkthroughReadiness.js](src/domain/walkthroughReadiness.js), keyed on shape rather than seed ids.
+
+### 28.15 [x] BUG — the walkthrough panel covers the control it points at — fixed 2026-08-18
+
+See [CHANGELOG](CHANGELOG.md). Reported as steps 2 and 4, "sometimes", after scrolling — and both
+halves of the "sometimes" were timing: the clearance check ran once per step, right after
+`scrollIntoView` and therefore before the scroll settled, and the poll that keeps the spotlight on a
+moving target never re-ran it.
+
+---
+
+## 29. Easy program import — the trainer writes the plan in an external tool
+
+**Wanted 2026-08-18 (Simon):** *"easy program import (use case using external tools to create the
+program)"*. Recorded as a spec rather than started, because two of its decisions are product calls.
+
+**The case.** A trainer plans in something other than LibrePT — an LLM, a spreadsheet, a PDF a
+federation published, a plan a colleague sent — and today the only way in is retyping it into the
+routine builder. That is the single largest block of typing the app still asks for, and §23.4's
+positioning ("pitch the clipboard — the one job trainers hate") argues the same way about authoring:
+the app's advantage is the gym floor, not the desk.
+
+**The design is already in the repository, twice, and should be copied rather than invented.**
+
+- **[§26](TODO.md)'s intake is the same shape**: a document another party produced arrives, is
+  REVIEWED against what the trainer already has, and is written only on their explicit yes
+  ([signupFile.js](src/data/signupFile.js) → [signupReviewDialog.js](src/modules/clients/signupReviewDialog.js)).
+  A program import is that flow with a routine instead of a person. Nothing about it is new
+  plumbing.
+- **[§1.7](TODO.md)'s media-type ruling applies directly**: one media type per handling surface, not
+  a generic envelope discriminated inside. So a program is `application/vnd.librept.program+json`,
+  its own kind, and the intake file stays its own.
+- **[exerciseStandard.js](src/domain/exerciseStandard.js)** already maps a movement name onto the
+  catalog by canonical name (the wger crosswalk, UC6 §6). That is the exercise-resolution half
+  solved — an imported "Barbell Back Squat" has to become a catalog id or a new record, and this is
+  what decides which.
+
+**The part worth building that is NOT a copy: a prompt the trainer can paste into any LLM.** No API
+key, no integration, no egress from the app, and it works with whichever assistant they already pay
+for. The app offers a copyable prompt that specifies the schema; the trainer pastes their programme
+description into their assistant of choice and pastes the JSON back. That is what makes "use external
+tools" real without LibrePT integrating with any of them.
+
+**Two decisions before this is buildable, and both are the maintainer's:**
+
+1. **Paste, file, or both?** A file is the intake flow verbatim and works offline. A paste box is
+   fewer taps for an LLM round trip, where the answer is already on the clipboard. Recommendation:
+   both, with paste as the default surface — but a paste box is a new input shape the app has
+   nowhere else, so it is worth an explicit yes.
+2. **What happens to a movement the catalog does not have?** Create it silently, offer to create it
+   in the review, or refuse the import until the trainer maps it. Recommendation: offer it in the
+   review, listed separately from the matched ones — silently creating catalog entries from a
+   machine's spelling is how a catalog becomes forty variants of "Bench Press", and §13's taxonomy
+   work exists precisely to prevent that.
+
+**Not a question**: the review step. A file from outside is never written without one, exactly as
+§26.4 argues for intake and §18.7 for restore.
+
