@@ -108,6 +108,9 @@ function applyTranslations(lang) {
 // the router's route.enter() calls the component's own "prepare, then show" pair. This fake just
 // does that same pairing directly, keyed on what urlFor() named the route.
 function navigateToPath(path) {
+  // Recorded as well as acted on, so a test can ask where a control tried to go — the header's app
+  // name has no other observable effect with no router mounted.
+  window.__navigatedTo = path;
   if (path.includes('backup')) {
     prepareBackupDialog();
     document.getElementById('dialog-backup').showModal();

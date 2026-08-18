@@ -181,3 +181,37 @@ def test_every_menu_item_is_reachable_on_a_phone(page, local_server):
     assert last_item.is_visible()
     box = last_item.bounding_box()
     assert box["y"] + box["height"] <= 844 + 1, "the last menu item sits below the fold"
+
+
+# ── The app name is the way home (reported 2026-08-18) ─────────────────────────────────────────
+# "clicking on application header application name does not link to homepage, seems to be a noop on
+# the session list page". Two things were true. It was a <div> with a click handler — not a link at
+# all, so it could not be focused, could not be opened in a new tab, and was announced as nothing;
+# and on the dashboard it navigated to the route already on screen, which looks like a dead control
+# whatever the router did underneath.
+
+
+def test_the_app_name_is_a_real_link(page, local_server):
+    load_with_stub(page, local_server, HEADER_STUB)
+    page.wait_for_selector("#app-header")
+
+    logo = page.locator("#logo-area")
+    assert logo.evaluate("el => el.tagName") == "A", "the way home has to BE a link"
+    assert logo.get_attribute("href"), "a link with no href is a div wearing a costume"
+    # Reachable without a pointer: a link a keyboard cannot get to is not a link either.
+    page.keyboard.press("Tab")
+    assert page.evaluate("() => document.activeElement?.id") == "logo-area"
+
+
+def test_tapping_it_goes_home_without_letting_the_browser_leave(page, local_server):
+    """The href is what makes it a link; the handler is what keeps it a single-page app. Both, or
+    the tap reloads the whole app from the network — which in a basement gym is the one thing that
+    must never be required."""
+    load_with_stub(page, local_server, HEADER_STUB)
+    page.wait_for_selector("#app-header")
+    url_before = page.url
+
+    page.locator("#logo-area").click()
+
+    assert page.evaluate("() => window.__navigatedTo") == "/"
+    assert page.url == url_before, "the browser must not have followed the href"

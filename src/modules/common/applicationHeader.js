@@ -280,10 +280,15 @@ export function renderHeaderShell() {
     (header) => header.querySelector(".header-container"),
     `
     <div class="header-container">
-      <div class="logo-area" id="logo-area">
+      <!-- An anchor, not a div with a click handler (reported 2026-08-18: "does not link to
+           homepage"). It was literally not a link — nothing to focus, nothing to open in a new tab,
+           and a screen reader announced it as nothing. The href is the app's own root and the
+           handler below cancels the browser's navigation, so it stays a single-page app: a real
+           page load in a basement gym is the one thing that must never be required. -->
+      <a class="logo-area" id="logo-area" href="./">
         <img class="logo-icon" src="icons/icon-96.png" alt="" width="34" height="34">
         <h1>LibrePT</h1>
-      </div>
+      </a>
 
       <!-- Both build markers stack here, PREVIEW over the version stamp: they answer the same
            question ("what am I running?"), and side by side in the logo row the pill was taking
@@ -426,10 +431,17 @@ export function setupApplicationHeader() {
     const link = document.getElementById(id);
     if (link) link.href = ISSUE_TRACKER_URL;
   }
-  // Logo Area home click handler
+  // The app name is the way home. It cancels the browser's own navigation and routes in place —
+  // the href exists so this is a real link (focusable, openable in a new tab, announced as one),
+  // not so a tap reloads the app.
+  //
+  // A modified click is left alone deliberately: ctrl/cmd/middle-click means "open a copy", and
+  // swallowing that would be the second half of the same bug this fixes.
   const logoArea = document.getElementById("logo-area");
   if (logoArea) {
-    logoArea.addEventListener("click", () => {
+    logoArea.addEventListener("click", (event) => {
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
+      event.preventDefault();
       deps.navigateToPath("/");
     });
   }
