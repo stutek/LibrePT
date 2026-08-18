@@ -93,9 +93,51 @@ DOCUMENTS = (
     ),
 )
 
-# Where a link that is NOT shipped as a page has to point instead. Repo-relative, so it survives a
-# rename of the Pages site.
-REPO_BLOB_URL = "https://github.com/stutek/LibrePT/blob/main"
+# The values a document may ask for by name instead of writing out (TODO §28.1/§28.2). Each is read
+# from the ONE place the repository declares it, so a document cannot hold a stale copy of an address
+# or a port: `{{PUBLIC_SITE_URL}}` in the Markdown becomes the deployed address at render time, and
+# the Stage 1 `--check` fails if a committed page no longer matches.
+#
+# **Read from the JS declaration directly, not from a shared manifest.** Both were on the table when
+# this was written; the direct read needs no new file and no second thing to keep in step, which is
+# the whole point. A manifest earns its place only if a value ever needs to reach somewhere that
+# cannot parse `publicUrls.js` — say a GitHub Action — and that has not happened.
+PUBLIC_URLS_SOURCE = REPO_ROOT / "src" / "data" / "publicUrls.js"
+
+
+def declared_url(name):
+    """One exported string constant, read out of src/data/publicUrls.js."""
+    match = re.search(
+        rf'^export const {name} = "([^"]+)"',
+        PUBLIC_URLS_SOURCE.read_text("utf-8"),
+        re.M,
+    )
+    if not match:
+        raise SystemExit(f"render_docs: {PUBLIC_URLS_SOURCE.name} declares no {name}")
+    return match.group(1)
+
+
+def placeholder_values():
+    """`{{NAME}}` → value, for every value a document may name rather than repeat."""
+    from deploy.local_http_server import dev_server_url
+
+    return {
+        "{{PUBLIC_SITE_URL}}": declared_url("PUBLIC_SITE_URL"),
+        "{{ISSUE_TRACKER_URL}}": declared_url("ISSUE_TRACKER_URL"),
+        "{{DEV_SERVER_URL}}": dev_server_url(),
+    }
+
+
+def inject_declared_values(markdown_text):
+    """Substitute every `{{NAME}}` placeholder before the document is rendered."""
+    for placeholder, value in placeholder_values().items():
+        markdown_text = markdown_text.replace(placeholder, value)
+    return markdown_text
+
+
+# Where a link that is NOT shipped as a page has to point instead. Repo-relative, and built from the
+# tracker's own declaration so it cannot drift from it.
+REPO_BLOB_URL = f"{declared_url('ISSUE_TRACKER_URL')}/blob/main"
 
 # Documents need no script execution whatsoever, so this is far tighter than the app's own policy:
 # no 'unsafe-inline' for styles (the stylesheet is a real file), and no script source at all.
@@ -236,7 +278,11 @@ def render_all(check_only=False):
     for source_name, output_name, title in DOCUMENTS:
         source = REPO_ROOT / source_name
         output = REPO_ROOT / output_name
-        rendered = render_page(source.read_text(encoding="utf-8"), title, source_name)
+        rendered = render_page(
+            inject_declared_values(source.read_text(encoding="utf-8")),
+            title,
+            source_name,
+        )
         current = output.read_text(encoding="utf-8") if output.exists() else None
         if current == rendered:
             continue

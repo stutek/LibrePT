@@ -942,7 +942,7 @@ stops being read. Whoever is working runs them on the cadence and records what c
 
 | Every two weeks | What to look for | Last done |
 | :--- | :--- | :--- |
-| **Duplication sweep** | Values or blocks that have quietly acquired copies — a version, a URL, a port, a repeated CI step. The question is always "should this be declared once?", which no tool can answer for you. A general copy-paste detector was considered and rejected: the standard one is an npm package, and this repo vendors Node with **no npm dependency at all** ([AGENT_RULES §5.2](AGENT_RULES.md)) | 2026-08-18 |
+| **Duplication sweep** | Start with `python -m agent_tools.constant_copies` (§28.3), which answers the mechanical half: every DECLARED constant's literal appears only at its declaration. Then the half no tool can answer — values or blocks that have quietly acquired copies and are not declared anywhere yet, where the question is "should this be declared once?". A general copy-paste detector was considered and rejected: the standard one is an npm package, and this repo vendors Node with **no npm dependency at all** ([AGENT_RULES §5.2](AGENT_RULES.md)) | 2026-08-18 |
 | **ZAP suppression review** | Every `IGNORE` in `deploy/zap/zap-baseline.conf` still true, re-derived from the code rather than from its own comment ([AGENT_RULES §2.A.3](AGENT_RULES.md)) | 2026-08-12 |
 | **Timing budget re-measure** | [AGENT_RULES §2.A.3](AGENT_RULES.md)'s per-stage table against an **idle** machine. Stage 3 currently runs 90–180s against a table that says 45s, mostly because ~30 browser tests were added on 2026-08-17 | never — overdue |
 | **TODO ranking** | Verify "Where to start" against `src/` before trusting it. It has gone stale twice (08-11, 08-13), both times because shipped work was never closed | 2026-08-17 |
@@ -2147,41 +2147,52 @@ long session so a clean one can pick them up with fresh context. Each is as-repo
 on any of them is to reproduce it, not to trust this description. Section numbers below are for
 reference only and imply no ordering.
 
-### 28.1 [ ] Comments and docstrings must name a constant, not repeat its value
+### 28.1 [x] Comments and docstrings must name a constant, not repeat its value — 2026-08-18
 
-**Decided 2026-08-18 (Simon).** The centralization in `a9cad18` left the literal `8081` in comments and
-docstrings, and the URLs in prose, on the reasoning that prose is not configuration. That is wrong at the
-scale that matters: *"if we ever change the port or domain, we want to change in one place not 100s"*. A
-comment saying `:8081` is a copy like any other — it goes stale silently, and the next reader believes it.
+See [CHANGELOG](CHANGELOG.md). Swept: `deploy/local_http_server.py`, `build/__init__.py`,
+`src/modules/common/consentForm.js`, the three `agent_tools/` usage docstrings, `AGENT_RULES.md`, and
+the tests that had a deployment address written into them (those now use obviously foreign hosts,
+which is also the better test — they pin how a link is BUILT, not where this app is deployed).
+`dev_server_url()` was added alongside, so nothing has to write out the port and base path together.
 
-- **Comments and docstrings reference the NAME** (`DEV_SERVER_PORT`, `PUBLIC_SITE_URL`), not the value.
-  The cost is real and accepted: a reader has to look the constant up. That is the price of one source.
-- **Sweep what exists**: `build/__init__.py`, `deploy/local_http_server.py`, `tests/conftest.py`,
-  `AGENT_RULES.md` (which quotes `:8081` in several places), and the module headers written today.
-- **Then the check becomes cheap and honest** — this is what makes §28.2's grep viable, because the
-  legitimate-exception list mostly disappears.
-- **Candidate for [AGENT_RULES §5.7](AGENT_RULES.md)** once applied, since it is a rule about how code is
-  written rather than a one-off task.
+**What remains, and it is §28.2's, not this one's**: `README.md`, `CONTRIBUTING.md` and
+`docs/GOOGLE_CLOUD_SETUP.md` still spell out addresses, because every one of them is a string a human
+copy-pastes into a shell, a browser or the Google console — `git clone {{ISSUE_TRACKER_URL}}` helps
+nobody. Those files are not built, so they cannot be injected into; which contributor-facing docs get
+built is exactly §28.2's open question. `constant_copies` reports them meanwhile, so they are a list
+rather than a forgotten corner.
 
-### 28.2 [ ] Documentation moves to GitHub Pages and is BUILT, with values injected
+### 28.2 [~] Documentation is BUILT, with values injected
 
-**Wanted 2026-08-18 (Simon).** Docs currently hardcode the domain and other constants in prose. They
-should be built the way `src/landing.html` already is ([render_docs.py](agent_tools/render_docs.py)) —
-placeholders in the Markdown, values injected at build time from the same declarations the app reads
-(`src/data/publicUrls.js`, `.python-version`, `DEV_SERVER_PORT`) — and published to GitHub Pages.
+**Wanted 2026-08-18 (Simon).** Docs hardcoded the domain and other constants in prose. They should be
+built the way `src/landing.html` already is ([render_docs.py](agent_tools/render_docs.py)) —
+placeholders in the Markdown, values injected at build time from the same declarations the app reads —
+and published to GitHub Pages.
 
-Open: which docs are trainer-facing (Pages) versus contributor-facing (repo only); whether the injection
-reads the JS declaration directly or a shared manifest both sides consume.
+**Shipped 2026-08-18**: the injection itself. `render_docs.py` resolves `{{PUBLIC_SITE_URL}}`,
+`{{ISSUE_TRACKER_URL}}` and `{{DEV_SERVER_URL}}` before rendering, and all eight generated pages now
+carry placeholders in their sources — the renders are byte-identical, which is what proves the
+substitution is faithful. `REPO_BLOB_URL` is derived from the tracker's declaration rather than
+written out. Of the two options in the original note, the injection **reads the JS declaration
+directly**: a shared manifest needs a new file and a second thing to keep in step, and earns its place
+only if a value ever has to reach somewhere that cannot parse `publicUrls.js` (a GitHub Action, say).
 
-### 28.3 [ ] A declared constant must appear in exactly one place — as an agent tool first
+**Still open, and it is the maintainer's call**: which contributor-facing docs get built.
+`README.md`, `CONTRIBUTING.md` and `docs/GOOGLE_CLOUD_SETUP.md` are read raw on GitHub, so a
+placeholder in them renders as `{{PUBLIC_SITE_URL}}` to every reader — building them means generating
+the repository's own front page from a source file, which changes how everyone edits it. Until that is
+decided their addresses stay written out, and `constant_copies` lists them.
 
-Discussed 2026-08-18. NOT a gate yet, per [AGENT_RULES §6.2](AGENT_RULES.md): written as an agent tool,
-run in the fortnightly duplication sweep, and wired into Stage 1 only once it has caught something. It
-inverts the obvious design — instead of "no hardcoded ports anywhere" (which needs an ever-growing
-exemption list, and an ignore file is where findings go to disappear), it asserts that each DECLARED
-constant's literal appears only at its declaration. Self-limiting: the list grows only when a shared
-constant is declared, which is exactly when the protection is wanted. It catches re-introduction, not
-first introduction — the audit covers the rest.
+### 28.3 [x] A declared constant must appear in exactly one place — shipped 2026-08-18
+
+See [CHANGELOG](CHANGELOG.md). `python -m agent_tools.constant_copies`, a **diagnostic and not a
+gate**, exactly as decided: it earns a Stage 1 task by catching something twice, not before. It is now
+the first step of the fortnightly duplication sweep above.
+
+One row was dropped during the build and the reason is worth keeping: `DEV_SERVER_BASE_PATH`'s value is
+the repository's own name, so its literal matches every absolute path on the maintainer's disk and
+every link into the GitHub repo. A constant whose value collides with unrelated text is not trackable
+this way, and a check that cries wolf is one nobody runs.
 
 ### 28.4 [x] BUG — a collapsed deck card's first line is unreadable — fixed 2026-08-18
 

@@ -16,6 +16,7 @@ import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 
+import { PUBLIC_SITE_URL } from "../../../../src/data/publicUrls.js";
 import {
   CONSENT_LANG_LABELS,
   CONSENT_LETTERS,
@@ -85,7 +86,7 @@ test("the notice link a client receives is absolute and points at the deployed s
   // signed paper form — by someone who has never opened the app, on a device that never loaded it.
   //
   // Deriving it from the running origin (import.meta.url) was tried and is wrong precisely there: a
-  // trainer testing against the local dev server would send a client a `localhost:8081` link, and
+  // trainer testing against the local dev server would send a client a localhost link, and
   // under Node it resolved to `file:///…`. Anything origin-relative fails the same way.
   for (const lang of LANGS) {
     for (const url of [clientPrivacyNoticeUrl(lang), clientConsentFormUrl(lang)]) {
@@ -172,7 +173,11 @@ test("the sms href uses the ?&body= form both mobile platforms accept", () => {
 
 test("every shipped letter is verbatim its printable template", () => {
   for (const lang of LANGS) {
-    const template = templateFor(lang);
+    // The template names the deployed address rather than writing it out (TODO §28.2), the same
+    // placeholder render_docs.py resolves when it builds the client-facing page. Resolved here from
+    // the SAME declaration the app reads, so this stays a drift test between the letter and the
+    // template rather than a second place the URL is written.
+    const template = templateFor(lang).replaceAll("{{PUBLIC_SITE_URL}}", PUBLIC_SITE_URL);
     const fenced = template.match(/```markdown\n([\s\S]*?)```/);
     assert.ok(fenced, `${lang}: the letter must stay in a \`\`\`markdown fence`);
 

@@ -98,5 +98,5 @@ For personal trainers and data controllers seeking further official legal guidan
 ## 6. Contact & Repository Information
 
 LibrePT is an open-source community project developed under the MIT License.
-- **Source Code & Contributions:** <https://github.com/stutek/LibrePT>
-- **Issue Tracker & Questions:** <https://github.com/stutek/LibrePT/issues>
+- **Source Code & Contributions:** <{{ISSUE_TRACKER_URL}}>
+- **Issue Tracker & Questions:** <{{ISSUE_TRACKER_URL}}/issues>

@@ -1273,7 +1273,7 @@ def _is_port_open(port):
 
 
 def _ensure_zap_target_up():
-    """Guarantee the app is actually being served on :8081 before ZAP scans it.
+    """Guarantee the app is actually being served on DEV_SERVER_PORT before ZAP scans it.
 
     A scan that reaches nothing exits "clean" and gives false assurance (AGENT_RULES §2.A.3),
     so if the dev server / e2e fixture has not already bound the port we start our own copy and
@@ -1301,7 +1301,7 @@ def run_owasp_zap_scan():
     """Runs the OWASP ZAP baseline scan against the live app and FAILS the build on any finding.
 
     Enforcement (AGENT_RULES §2.A.3): the container runs with host networking so it truly reaches
-    the app on :8081, alerts are triaged by deploy/zap/zap-baseline.conf (each ignore justified in
+    the app on DEV_SERVER_PORT, alerts are triaged by deploy/zap/zap-baseline.conf (each ignore justified in
     that file), and a non-zero ZAP exit — code 1 (FAIL), 2 (WARN), or 3 (scan error / unreachable) —
     fails the build. Nothing is printed-and-passed.
     """
@@ -1506,7 +1506,7 @@ def run_stage_3_e2e():
     separate jobs on separate runners, each hitting its own dev server, so they never contend —
     CI chains them regardless, so both paths stage identically (see PIPELINE_STAGES). The
     local `build check`/`build` path used to run them concurrently via one ThreadPoolExecutor
-    against the SAME local :8081 server — ZAP's baseline scan floods it with requests while
+    against the SAME local dev server (DEV_SERVER_PORT) — ZAP's baseline scan floods it with requests while
     pytest-xdist's workers are mid-suite, and that contention produced `Page.goto` timeouts across
     unrelated specs (seen 2026-08-03: 30 failures, all `Timeout 30000ms exceeded`, with no relation
     to whatever the change under test touched). Running sequentially locally too trades some wall

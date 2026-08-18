@@ -25,15 +25,15 @@ Free, no subscription, no signup, no account.
 
 ## See it working
 
-**[▶ Watch the demo](https://stutek.github.io/LibrePT/?init=demo_data_load&demo=gym_floor)** — the app drives itself through a
+**[▶ Watch the demo]({{PUBLIC_SITE_URL}}/?init=demo_data_load&demo=gym_floor)** — the app drives itself through a
 real group session: open it, focus a circuit, mark a lift too easy, switch participant. Nothing is
 pre-rendered; that is the actual app running in your browser.
 
-**[Walk through it yourself](https://stutek.github.io/LibrePT/?init=demo_data_load&demo=walkthrough)** — the same four taps, but
+**[Walk through it yourself]({{PUBLIC_SITE_URL}}/?init=demo_data_load&demo=walkthrough)** — the same four taps, but
 you do them. A panel explains each one and taps it for you if you would rather watch; leave it
 whenever you like.
 
-**[Or just poke at it](https://stutek.github.io/LibrePT/?init=demo_data_load)** — the same sample gym, no guide. Three clients, a
+**[Or just poke at it]({{PUBLIC_SITE_URL}}/?init=demo_data_load)** — the same sample gym, no guide. Three clients, a
 session already under way, nothing real and nothing to sign up for.
 
 ## Why trainers use it

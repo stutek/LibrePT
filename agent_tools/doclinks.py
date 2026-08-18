@@ -27,7 +27,11 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
-EXTERNAL_LINK = re.compile(r"^(https?:|mailto:|tel:|data:|//)")
+# A link that leaves the repository, so there is no file to resolve. `{{NAME}}` counts: a document
+# rendered by agent_tools/render_docs.py names an address rather than writing it out (TODO §28.2), and
+# every placeholder resolves to an absolute URL at render time — checking it as a relative path here
+# would report the mechanism working as a dead link.
+EXTERNAL_LINK = re.compile(r"^(https?:|mailto:|tel:|data:|//|\{\{[A-Z_]+\}\})")
 MD_LINK = re.compile(r"\[([^\]]*)\]\(([^)\s]+)(?:\s+\"[^\"]*\")?\)")
 HEADING = re.compile(r"^(#{1,6})\s+(.*?)\s*$")
 FENCE = re.compile(r"^\s*(```|~~~)")

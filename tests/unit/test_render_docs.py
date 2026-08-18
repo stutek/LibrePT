@@ -124,7 +124,7 @@ def test_anchors_survive_rewriting():
 
 def test_absolute_and_mailto_links_are_left_alone():
     for href in (
-        "https://github.com/stutek/LibrePT/issues",
+        "https://forge.example.test/acme/tracker/issues",
         "http://example.com",
         "mailto:someone@example.com",
     ):
@@ -188,7 +188,11 @@ def test_the_landing_page_demo_links_reach_the_app_not_a_code_host():
     """A relative link from docs/ is rewritten to a github.com blob URL for anything not shipped —
     correct for a developer file, catastrophic for this page, whose two calls to action are the
     whole point and whose readers will never have a GitHub account (TODO §3.12's defect)."""
-    source = (render_docs.REPO_ROOT / "docs" / "LANDING.md").read_text(encoding="utf-8")
+    # Read AFTER the placeholders are resolved (TODO §28.2): the source now names the deployed
+    # address rather than writing it out, and what matters is where the rendered link points.
+    source = render_docs.inject_declared_values(
+        (render_docs.REPO_ROOT / "docs" / "LANDING.md").read_text(encoding="utf-8")
+    )
     demo_links = re.findall(r"\]\((\S*init=demo_data_load[^)]*)\)", source)
     assert demo_links, "the landing page no longer links to the demo at all"
     for link in demo_links:

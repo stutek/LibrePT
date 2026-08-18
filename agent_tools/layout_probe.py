@@ -12,7 +12,10 @@ browser and a running server, so it is a manual diagnostic an agent runs on dema
 wired into `build check`. "Failure" here means a requested selector was never found on the page.
 
 Usage:
-  python -m agent_tools.layout_probe --url http://localhost:8081/LibrePT/?init=demo_data_load \\
+  # The dev server's address is deploy.local_http_server.dev_server_url() — one declaration of
+  # the port and base path (TODO §28.1), so nothing here writes either out.
+  python -m agent_tools.layout_probe --url "$(.venv/bin/python -c \
+      'from deploy.local_http_server import dev_server_url; print(dev_server_url("?init=demo_data_load"))')" \\
       --selector ".sessions-day-group-footer" --selector ".floating-action-btn" \\
       --css bottom --css position \\
       --wait-selector "#view-clients.active" \\

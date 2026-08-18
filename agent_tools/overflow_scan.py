@@ -48,7 +48,10 @@ A `diagnostic`, not a `check` (see agent_tools/INDEX.md): it needs a browser and
 so it is not wired into a gate — the e2e suite is what gates these invariants.
 
 Usage:
-  python -m agent_tools.overflow_scan --url http://localhost:8081/LibrePT/?init=demo_data_load \\
+  # The dev server's address is deploy.local_http_server.dev_server_url() — one declaration of
+  # the port and base path (TODO §28.1), so nothing here writes either out.
+  python -m agent_tools.overflow_scan --url "$(.venv/bin/python -c \
+      'from deploy.local_http_server import dev_server_url; print(dev_server_url("?init=demo_data_load"))')" \\
       --device iphone-14 --wait-selector "#view-clients.active"
   python -m agent_tools.overflow_scan --url ... --viewport 412x915 --invariant A
 """

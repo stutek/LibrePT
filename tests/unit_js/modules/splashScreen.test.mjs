@@ -55,7 +55,7 @@ test("a boot slower than the minimum owes no further hold", () => {
 });
 
 test("the demo link reuses the app's own deep-link params, and suppresses the splash", () => {
-  const url = new URL(demoDataUrl("http://localhost:8081/LibrePT/?lang=sl"));
+  const url = new URL(demoDataUrl("https://app.example.test/LibrePT/?lang=sl"));
   assert.equal(url.searchParams.get("init"), "demo_data_load");
   assert.equal(url.searchParams.get("splash"), "off");
   // Whatever else was on the URL survives — a demo link can still carry a language or theme.
@@ -64,7 +64,7 @@ test("the demo link reuses the app's own deep-link params, and suppresses the sp
 });
 
 test("the demo link overwrites a contradictory splash param rather than appending one", () => {
-  const url = new URL(demoDataUrl("http://localhost:8081/LibrePT/?splash=on"));
+  const url = new URL(demoDataUrl("https://app.example.test/LibrePT/?splash=on"));
   assert.deepEqual(url.searchParams.getAll("splash"), ["off"]);
 });
 

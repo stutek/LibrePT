@@ -18,7 +18,7 @@ Thank you for helping improve **LibrePT**! Whether you encountered a glitch on t
 
 ## 🚀 How to Submit a Bug Report
 
-1. Open the [LibrePT Issue Tracker](https://github.com/stutek/LibrePT/issues).
+1. Open the [LibrePT Issue Tracker]({{ISSUE_TRACKER_URL}}/issues).
 2. Click **New Issue** to open a new bug report.
 3. Fill out the report details described below.
 

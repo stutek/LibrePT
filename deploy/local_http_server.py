@@ -18,8 +18,9 @@ Behaviour (BASE = "/LibrePT"):
                                    boots the app, which resolves the route client-side or shows
                                    the in-app not-found view.
 
-Run:  python3 -m deploy.local_http_server [--port 8081]   (or: python3 deploy/local_http_server.py)
-Then open http://localhost:8081/  (it redirects to /LibrePT/).
+Run:  python3 -m deploy.local_http_server   (or: python3 deploy/local_http_server.py)
+      --port overrides DEV_SERVER_PORT below, which is where the default lives.
+Then open the URL it prints on startup — the root redirects to DEV_SERVER_BASE_PATH.
 """
 
 import argparse
@@ -34,12 +35,22 @@ from urllib.parse import urlsplit
 
 # The one declaration of the dev-server port. `build` (the ZAP target), `tests/conftest.py` (which starts
 # and health-checks this server) and this module's own default all read it from here — before
-# 2026-08-18 the number 8081 appeared in six places, which is the same shape of problem as the thirteen
-# Python pins: nothing wrong until one of them moves.
+# 2026-08-18 it appeared in six places, which is the same shape of problem as the thirteen Python
+# pins: nothing wrong until one of them moves. Prose names it too (TODO §28.1): a comment quoting the
+# number is a copy that goes stale silently, and `python -m agent_tools.constant_copies` finds those.
 DEV_SERVER_PORT = 8081
 
 # Where the app is mounted, so a link the tests build matches what the server actually serves.
 DEV_SERVER_BASE_PATH = "/LibrePT/"
+
+
+def dev_server_url(path=""):
+    """The address the dev server actually answers on, built from the two declarations above.
+
+    Exists so no caller — a test, an agent tool, a usage example — has to write the port or the base
+    path out again (TODO §28.1). `path` is appended to the base, e.g. `?init=demo_data_load`.
+    """
+    return f"http://localhost:{DEV_SERVER_PORT}{DEV_SERVER_BASE_PATH}{path}"
 
 
 # This file lives in deploy/, so the repo root (which holds src/) is one level up.

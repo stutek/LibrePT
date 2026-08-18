@@ -261,7 +261,7 @@ test("a captured crash is offered as something to report, not as an alert", () =
       },
     ],
     (key) => key,
-    "https://github.com/stutek/LibrePT",
+    "https://forge.example.test/acme/tracker",
   );
 
   assert.ok(item);
@@ -276,7 +276,7 @@ test("a crash that repeated says so, because once and forty times are different 
   const item = buildCrashReportItem(
     [{ message: "boom", stack: "at x.js:1", build: "b", count: 40 }],
     (key) => key,
-    "https://github.com/stutek/LibrePT",
+    "https://forge.example.test/acme/tracker",
   );
 
   assert.match(item.description, /40/);

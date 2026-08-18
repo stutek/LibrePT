@@ -80,7 +80,7 @@ Every response and tool action must drive measurable, continuous progress toward
    **Stage 4 (only if Stage 3 is clean):** an OWASP ZAP baseline scan against that same dev
    server. **Sequential with Stage 3, not concurrent** (`build/__init__.py`'s `run_stage_3_e2e`/
    `run_stage_4_zap`) — the two used to run in one `ThreadPoolExecutor`, and ZAP's request flood
-   against the SAME local `:8081` server while `pytest-xdist` workers were mid-suite produced
+   against the SAME local dev server (`DEV_SERVER_PORT`) while `pytest-xdist` workers were mid-suite produced
    `Page.goto` timeouts across specs with no relation to whatever change was under test (seen
    2026-08-03: 30 failures, all `Timeout 30000ms exceeded`). In CI this was never a *correctness*
    issue — e2e and ZAP are separate jobs on separate runners, each with its own dev server — so
@@ -144,7 +144,7 @@ Every response and tool action must drive measurable, continuous progress toward
      - **Re-verify by reading the code, not by re-reading the comment.** On 2026-08-12 rule `10202`'s note said "re-verify once the Google OAuth integration ships" — it had shipped that afternoon, and the trigger was caught only because the maintainer asked what the skips were. The re-check itself took one grep (`googleAuth.js` uses GIS's implicit token flow and registers no redirect URI, so there is no redirect to forge against), but nothing in the pipeline would ever have raised it.
      - **A suppression whose rationale you cannot re-derive today is not justified — delete it and let the finding print.** Re-adding it with a fresh, true rationale is cheap; carrying one nobody understands is how an ignore file becomes a place findings go to disappear.
    - **Never swallow a non-zero exit code.** A gate step that exits non-zero (including ZAP exit `2` = warnings and exit `3` = the scan errored / could not reach the target) MUST fail the build. Printing "completed with warnings" and returning success is forbidden — that pattern once hid a ZAP scan that was not even reaching the running app. If a stage cannot run, that is a failure to fix, not a pass to log.
-   - **A security scan that scans nothing is a failed scan.** Confirm the scanner actually reaches the app under test (the ZAP container needs host networking to hit the dev server on `:8081`); a scan that connects to nothing and exits "clean" gives false assurance and is treated as a failure.
+   - **A security scan that scans nothing is a failed scan.** Confirm the scanner actually reaches the app under test (the ZAP container needs host networking to hit the dev server on `DEV_SERVER_PORT`); a scan that connects to nothing and exits "clean" gives false assurance and is treated as a failure.
    - **Lint/format must be clean, always.** If the formatter complains, auto-fix (`biome format --write`, `ruff format`) and re-run — never commit a tree you know is dirty.
    - **Your change must add no new test failures.** Absolute green is the goal; if pre-existing failures exist ask for an excemption. Never silence a failure.
    - **Full pipeline execution mandatory.** Running a single test file or subset is NOT sufficient to authorize a commit. Always run `.venv/bin/python -m build check` to completion.
@@ -174,9 +174,9 @@ Every response and tool action must drive measurable, continuous progress toward
 5. **Evaluate every prompt, not just the code it produces.** Before or alongside acting on a non-trivial request, give a short, honest read of the request itself: is it well-scoped or does it bundle unrelated asks that would be clearer split apart; what's missing (constraints, acceptance criteria, edge cases the user likely hasn't considered); and an economic read — is the ask proportionate to the effort/compute/time it costs, is there a cheaper way to get the same outcome, would a smaller model or a simpler approach do. This is feedback on the *request*, separate from executing it — don't let it become a reason to stall or interrogate; state the assessment in a sentence or two and proceed. Skip it for small, unambiguous asks (a typo fix, a one-line question) where it would just be noise.
 
 ### C. Local Dev Server: Leave It Running
-1. **Keep it up.** Once the local dev server (`python -m deploy.local_http_server --port 8081`, served under `/LibrePT/`) is started, leave it running across tasks — the user relies on it to test changes in the browser. Do **not** kill it as an end-of-task tidy-up.
+1. **Keep it up.** Once the local dev server (`python -m deploy.local_http_server`, which listens on `DEV_SERVER_PORT` under `DEV_SERVER_BASE_PATH` — both declared in that module, TODO §28.1) is started, leave it running across tasks — the user relies on it to test changes in the browser. Do **not** kill it as an end-of-task tidy-up.
 2. **The user kills it, not the agent.** Stopping the server is the user's call. Only stop or restart it when the user asks, or when a change genuinely requires a restart (and say so first).
-3. **Reuse before starting.** Check whether it is already listening on `:8081` and reuse it rather than spawning a duplicate.
+3. **Reuse before starting.** Check whether it is already listening on `DEV_SERVER_PORT` and reuse it rather than spawning a duplicate.
 
 ### D. Product Constraints That Outlive Any One Feature
 

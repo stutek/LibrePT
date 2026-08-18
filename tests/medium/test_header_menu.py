@@ -12,6 +12,16 @@ from tests.medium._harness import HEADER_STUB, load_with_stub
 pytestmark = pytest.mark.clean_start
 
 
+def _issue_tracker_url(page):
+    """The address src/data/publicUrls.js declares, read in the page rather than repeated here."""
+    return page.evaluate(
+        """async () => {
+            const urls = await import(new URL('data/publicUrls.js', document.baseURI).href);
+            return urls.ISSUE_TRACKER_URL;
+        }"""
+    )
+
+
 def _open_menu(page):
     page.locator("#btn-app-menu").click()
     page.wait_for_selector("#app-menu:not(.hidden)")
@@ -53,7 +63,10 @@ def test_menu_items_present_and_github_link(page, local_server):
         assert text in el.inner_text()
 
     github = page.locator("#menu-github")
-    assert github.get_attribute("href") == "https://github.com/stutek/LibrePT"
+    # Compared against the app's own declaration rather than a second copy of the URL: what this
+    # asserts is that the menu points at the tracker publicUrls.js names, not that the tracker is
+    # any particular address (TODO §28.1).
+    assert github.get_attribute("href") == _issue_tracker_url(page)
     assert github.get_attribute("target") == "_blank"
 
     # The privacy policy is a SHIPPED page now, not a GitHub link — which is what makes it readable
@@ -84,9 +97,8 @@ def test_about_modal_opens_and_closes(page, local_server):
     page.locator("#menu-about").click()
     about = page.locator("#dialog-about")
     assert about.get_attribute("open") is not None
-    assert (
-        page.locator("#about-repo-link").get_attribute("href")
-        == "https://github.com/stutek/LibrePT"
+    assert page.locator("#about-repo-link").get_attribute("href") == _issue_tracker_url(
+        page
     )
 
     page.locator("#dialog-about .modal-close-btn").click()

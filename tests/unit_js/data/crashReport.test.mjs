@@ -120,9 +120,9 @@ test("the same crash repeating does not fill the log with copies of itself", () 
 test("the issue link is prefilled and points at a real tracker", () => {
   const report = buildCrashReport(anError(), { route: "/clients", buildSha: "abc1234", at: AT });
 
-  const url = new URL(crashIssueUrl(report, "https://github.com/stutek/LibrePT"));
+  const url = new URL(crashIssueUrl(report, "https://forge.example.test/acme/tracker"));
 
-  assert.equal(url.origin + url.pathname, "https://github.com/stutek/LibrePT/issues/new");
+  assert.equal(url.origin + url.pathname, "https://forge.example.test/acme/tracker/issues/new");
   const body = url.searchParams.get("body");
   assert.match(url.searchParams.get("title"), /reading 'reps'/);
   assert.match(body, /abc1234/, "the build stamp nobody should have to retype");
@@ -131,6 +131,6 @@ test("the issue link is prefilled and points at a real tracker", () => {
 });
 
 test("the link never invents a report for nothing", () => {
-  assert.equal(crashIssueUrl(null, "https://github.com/stutek/LibrePT"), "");
+  assert.equal(crashIssueUrl(null, "https://forge.example.test/acme/tracker"), "");
   assert.equal(crashIssueUrl({ message: "x" }, ""), "");
 });

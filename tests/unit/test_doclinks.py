@@ -149,3 +149,16 @@ def test_repository_documentation_graph_is_intact():
     assert not findings, (
         f"{len(findings)} unresolved documentation reference(s):\n{detail}"
     )
+
+
+def test_a_render_time_placeholder_is_not_a_dead_link(docs):
+    """`{{PUBLIC_SITE_URL}}/?init=demo_data_load` resolves to an absolute URL when render_docs.py
+    builds the page (TODO §28.2). Treating it as a relative path here would report the mechanism
+    working as a broken link — and the fix would be to write the address out again, which is the
+    duplication the placeholder exists to remove."""
+    page = docs(
+        "docs/LANDING.md",
+        "# Landing\n\n[Watch the demo]({{PUBLIC_SITE_URL}}/?init=demo_data_load)\n",
+    )
+
+    assert findings_for(page, [page]) == []

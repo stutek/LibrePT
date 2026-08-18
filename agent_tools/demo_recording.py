@@ -18,7 +18,7 @@ binary artifact. AGENT_RULES §2.A.3 also forbids blanket video capture in the g
 turned a ~4-minute e2e stage into 12+ — so recording is on demand, here, and never a suite flag.
 
 Usage:
-  # with the dev server already up on :8081 (AGENT_RULES §2.C: leave it running)
+  # with the dev server already up on DEV_SERVER_PORT (AGENT_RULES §2.C: leave it running)
   .venv/bin/python -m agent_tools.demo_recording
   .venv/bin/python -m agent_tools.demo_recording --viewport 390x844 --out .build-reports/demo.webm
 """
@@ -28,8 +28,10 @@ import pathlib
 import shutil
 import sys
 
+from deploy.local_http_server import dev_server_url
+
 REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
-DEFAULT_URL = "http://localhost:8081/LibrePT/?init=demo_data_load&demo=gym_floor"
+DEFAULT_URL = dev_server_url("?init=demo_data_load&demo=gym_floor")
 DEFAULT_OUT = REPO_ROOT / ".build-reports" / "demo-tour.webm"
 
 # A phone, because that is where the app is used and what the footage has to look like. iPhone 14 —
