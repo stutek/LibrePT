@@ -22,6 +22,7 @@ import {
   remainingHoldMs,
   requestedMinimumVisibleMs,
   splashSuppressed,
+  walkthroughUrl,
 } from "../../../src/modules/splash/splashScreen.js";
 
 test("?splash=off asks for no hold at all", () => {
@@ -124,4 +125,30 @@ test("no ?splash=off, nothing to override", () => {
     false,
   );
   assert.equal(splashSuppressed({ search: "", firstRun: false, linkBringsContent: false }), false);
+});
+
+// ── Where a demo or walkthrough link starts (wanted 2026-08-18) ────────────────────────────────
+// "show me around should start from the sessions list view". The links are built from the CURRENT
+// URL, so tapping the offer from a deep route — a client page, a live clipboard — started the guide
+// wherever the trainer happened to be, and the first step looks for a session card.
+
+test("a demo link starts at the app root, whatever route it was built from", () => {
+  const url = new URL(
+    demoDataUrl("https://app.example.test/LibrePT/session/s1/client/c2?lang=sl", "/LibrePT/"),
+  );
+
+  assert.equal(url.pathname, "/LibrePT/");
+  // The deep-link params still survive: a promo link keeps its language and theme.
+  assert.equal(url.searchParams.get("lang"), "sl");
+  assert.equal(url.searchParams.get("init"), "demo_data_load");
+});
+
+test("a walkthrough link starts there too — its first step looks for a session card", () => {
+  const url = new URL(
+    walkthroughUrl("https://app.example.test/LibrePT/clients/c2?theme=nebula", "/LibrePT/"),
+  );
+
+  assert.equal(url.pathname, "/LibrePT/");
+  assert.equal(url.searchParams.get("theme"), "nebula");
+  assert.ok(url.searchParams.get("demo"));
 });

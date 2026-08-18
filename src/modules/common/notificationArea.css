@@ -429,6 +429,21 @@ body:has(#active-session-overlay:not(.hidden))
   flex-wrap: wrap;
   gap: 8px;
 }
+/* A destructive action in the feed takes the FAR END of its row (reported 2026-08-18: "show me
+   around button in the message is too close to delete demo data"). The demo card offers the
+   friendliest and the most destructive things in the app 8px apart, which on a phone is one thumb
+   width. Same rule the modal footers already use for `.danger-link-btn`, and the same reasoning:
+   available, never competing for a thumb aiming at its neighbour. Outlined rather than filled so it
+   still reads as a button — see index.css, where dropping the edge as well made one unrecognisable. */
+.notification-btn[data-action-reset] {
+  /* Its OWN line, not merely the far end of a shared one: `margin-left: auto` inside a phone-width
+     card left 18px between them, which is still one thumb. A row of its own cannot be mis-hit while
+     reaching for the button above it. */
+  flex-basis: 100%;
+  margin-top: 10px;
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 45%, transparent);
+}
 .notification-btn {
   background: var(--bg-color);
   border: 1px solid var(--card-border);

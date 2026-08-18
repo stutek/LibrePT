@@ -111,8 +111,14 @@ export function remainingHoldMs(minimumVisibleMs, elapsedMs) {
  *  rendered against the empty state it booted with — and the alternative, injecting a re-render of
  *  everything into this module, would couple the splash to the whole app. A reload reuses the boot
  *  path that is already tested. */
-export function demoDataUrl(href = window.location.href) {
+export function demoDataUrl(href = window.location.href, rootPath = appRootPathname()) {
   const url = new URL(href);
+  // Start at the app root — the sessions list — rather than wherever the trainer happened to be
+  // (wanted 2026-08-18). The offer is now reachable from the message feed as well as the splash, so
+  // it can be tapped from a client page or a live clipboard, and a walkthrough whose first step
+  // looks for a session card must not begin somewhere without one. The QUERY survives: a promo link
+  // keeps its language and theme.
+  if (rootPath) url.pathname = rootPath;
   url.searchParams.set(DEMO_INIT_PARAM, DEMO_INIT_VALUE);
   url.searchParams.set(SPLASH_PARAM, SPLASH_OPT_OUT);
   return url.toString();
@@ -124,10 +130,18 @@ export function demoDataUrl(href = window.location.href) {
  *  It carries the demo data deliberately — the walkthrough drives the seeded group session, so a
  *  walkthrough over an empty app would be a panel pointing at nothing. That is also why this is the
  *  same reload as the demo link and not a mode toggled in place. */
-export function walkthroughUrl(href = window.location.href) {
-  const url = new URL(demoDataUrl(href));
+export function walkthroughUrl(href = window.location.href, rootPath = appRootPathname()) {
+  const url = new URL(demoDataUrl(href, rootPath));
   url.searchParams.set(WALKTHROUGH_PARAM, DEMO_WALKTHROUGH);
   return url.toString();
+}
+
+/** The app's own root, read from the `<base>` the server rewrites per deployment. Null where there
+ * is no document at all (the Node unit tests), so a caller passing an explicit href there keeps the
+ * path it passed rather than having one invented for it. */
+function appRootPathname() {
+  if (typeof document === "undefined" || !document.baseURI) return null;
+  return new URL("./", document.baseURI).pathname;
 }
 
 function fadeOut(splash, resolve) {

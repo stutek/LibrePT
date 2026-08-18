@@ -252,3 +252,32 @@ def test_no_walkthrough_button_when_the_data_it_needs_is_gone(page, local_server
     assert page.locator("button[data-action-walkthrough]").count() == 0
     # The card itself stays — the trainer still needs to be told they are on demo data.
     assert page.locator(".notification-card.demo-mode").count() == 1
+
+
+def test_the_destructive_action_is_not_thumb_adjacent_to_the_one_you_want(
+    page, local_server
+):
+    """Reported 2026-08-18: "show me around button in the message is too close to delete demo data".
+
+    The two actions on the demo card are the friendliest and the most destructive things the feed
+    offers, 8px apart. The app already has a rule for this shape — a destructive action sharing a row
+    takes the far end of it (`.modal-actions .danger-link-btn`) — and this is the same shape in a
+    different component.
+    """
+    load_with_stub(page, local_server, stub(WALKTHROUGH_READY))
+    page.wait_for_selector("#notification-area")
+    expand_feed(page)
+
+    walkthrough = page.locator("button[data-action-walkthrough]").bounding_box()
+    reset = page.locator("button[data-action-reset]").bounding_box()
+
+    on_the_same_line = abs(walkthrough["y"] - reset["y"]) < 8
+    if on_the_same_line:
+        gap = reset["x"] - (walkthrough["x"] + walkthrough["width"])
+        assert gap >= 24, f"only {gap}px between 'show me around' and 'clear demo data'"
+    else:
+        # Its own line is the stronger answer, and the one this card takes: a row apart cannot be
+        # mis-hit while reaching for the button above it. The margin still has to be real, though —
+        # stacked at the default 8px gap is no better than side by side at 8px.
+        gap = reset["y"] - (walkthrough["y"] + walkthrough["height"])
+        assert gap >= 10, f"only {gap}px between them when stacked"
