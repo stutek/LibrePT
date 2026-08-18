@@ -46,12 +46,29 @@ function centreOf(el) {
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+/** Is this element actually on screen? Every view lives in the DOM at once — the router activates
+ * one and leaves the rest in place — so a hidden view's copy has a zero-sized box while the one a
+ * trainer is looking at does not. Cheaper and more honest than reading `.active` off an ancestor:
+ * it also excludes a collapsed drawer, a closed dialog and anything display:none for its own
+ * reasons. */
+function isOnScreen(element) {
+  const rect = element.getBoundingClientRect();
+  return rect.width > 0 && rect.height > 0;
+}
+
 /** The control a step acts on. `targetText` picks among matches by their text, which is how a script
  * says "the Group Strength card" rather than "the first card" — position in a seeded list is not a
  * property the demo should depend on, and the first attempt at this tour broke precisely because it
- * did. Falls back to the first match when no text is given. */
+ * did. Falls back to the first match when no text is given.
+ *
+ * **Only ever a control that is VISIBLE** (TODO §28.13). A selector as ordinary as `.session-card`
+ * matches cards in views nobody is looking at, and a document query returns them in DOM order — so
+ * a walkthrough reloaded onto a different route (`walkthroughUrl()` keeps whatever path was open)
+ * put its spotlight on an element belonging to another view. With nothing visible this returns null
+ * and the step reports "no control matched", which stops the walkthrough loudly rather than guiding
+ * someone to a place they cannot see. */
 export function resolveTarget(doc, step) {
-  const matches = [...doc.querySelectorAll(step.target)];
+  const matches = [...doc.querySelectorAll(step.target)].filter(isOnScreen);
   if (!step.targetText) return matches[0] || null;
   const wanted = step.targetText.toLowerCase();
   return matches.find((el) => (el.textContent || "").toLowerCase().includes(wanted)) || null;

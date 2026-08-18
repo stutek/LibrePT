@@ -33,6 +33,28 @@
   opacity: 1;
 }
 
+/* A breathing GLOW around the ring (TODO §28.12), asked for directly: the static ring said "this
+   one" and nothing said "now". The pulse is on the outer halo only — the inner 3px ring stays put,
+   so the control's own edge never appears to move while a trainer is aiming at it with a thumb.
+   Dropped entirely under prefers-reduced-motion below. */
+@media (prefers-reduced-motion: no-preference) {
+  .walkthrough-spotlight.is-visible {
+    animation: walkthroughGlow 1.9s ease-in-out infinite;
+  }
+  @keyframes walkthroughGlow {
+    0%,
+    100% {
+      box-shadow: 0 0 0 3px var(--primary, #6366f1), 0 0 0 9px
+        color-mix(in srgb, var(--primary, #6366f1) 28%, transparent);
+    }
+    50% {
+      box-shadow: 0 0 0 3px var(--primary, #6366f1), 0 0 0 15px
+        color-mix(in srgb, var(--primary, #6366f1) 10%, transparent), 0 0 22px 6px
+        color-mix(in srgb, var(--primary, #6366f1) 45%, transparent);
+    }
+  }
+}
+
 .walkthrough-panel {
   position: absolute;
   left: 50%;

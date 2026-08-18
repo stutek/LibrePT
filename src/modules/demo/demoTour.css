@@ -8,42 +8,43 @@
   z-index: 9999;
   top: 0;
   left: 0;
-  width: 34px;
-  height: 34px;
-  margin: -6px 0 0 -6px;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle at 34% 30%,
-    rgba(255, 255, 255, 0.95),
-    rgba(255, 255, 255, 0.4) 55%,
-    rgba(255, 255, 255, 0) 70%
-  );
-  border: 2px solid rgba(255, 255, 255, 0.85);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+  /* Offset so the FINGERTIP lands on the point the pointer was moved to, not the middle of the
+     hand — the drawing's tip is at the top-left of its box. */
+  margin: -4px 0 0 -6px;
+  line-height: 0;
   opacity: 0;
   /* Never intercepts the tap it is illustrating — the player clicks the real control underneath. */
   pointer-events: none;
   transform: translate3d(var(--hand-x, 0), var(--hand-y, 0), 0);
   transition: transform 0.42s cubic-bezier(0.33, 0.1, 0.25, 1), opacity 0.2s ease;
 }
+/* Light fill with a dark edge, so the hand stays legible over both a pale dashboard and the dark
+   live-session overlay without knowing which it is on. */
+.demo-tour-hand svg {
+  display: block;
+  fill: rgba(255, 255, 255, 0.96);
+  stroke: rgba(15, 23, 42, 0.55);
+  stroke-width: 1.1;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.45));
+}
 
 .demo-tour-hand.is-visible {
   opacity: 0.92;
 }
 
+/* The tap is now the HAND moving, not a ring expanding out of a dot: a short press toward the
+   screen and back, which is what the gesture actually looks like. */
 .demo-tour-hand.is-tapping {
   animation: demo-tour-tap 0.36s ease-out;
 }
 
 @keyframes demo-tour-tap {
-  0% {
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45), 0 0 0 0 rgba(255, 255, 255, 0.55);
-  }
-  60% {
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45), 0 0 0 16px rgba(255, 255, 255, 0);
-  }
+  0%,
   100% {
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45), 0 0 0 0 rgba(255, 255, 255, 0);
+    scale: 1;
+  }
+  55% {
+    scale: 0.82;
   }
 }
 
