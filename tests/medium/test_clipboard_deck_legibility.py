@@ -82,10 +82,7 @@ def _mount(page, local_server, viewport):
     return page.evaluate(COLLAPSED_CARD_GEOMETRY)
 
 
-def test_a_collapsed_cards_first_line_is_fully_visible_on_desktop(page, local_server):
-    """A trainer scanning the deck on a laptop can read what every upcoming card is. Exercise,
-    circuit and rest cards alike: the card stacked on top must not cut into the peeking row."""
-    cards = _mount(page, local_server, DESKTOP)
+def _assert_every_first_line_clears_the_card_above(cards):
     assert len(cards) >= 4, f"expected a stack of collapsed cards, got {cards}"
 
     clipped = [c for c in cards if c["uncovered"] < c["lineNeeds"]]
@@ -100,9 +97,27 @@ def test_a_collapsed_cards_first_line_is_fully_visible_on_desktop(page, local_se
     )
 
 
+def test_a_collapsed_cards_first_line_is_fully_visible_on_desktop(page, local_server):
+    """A trainer scanning the deck on a laptop can read what every upcoming card is. Exercise,
+    circuit and rest cards alike: the card stacked on top must not cut into the peeking row."""
+    _assert_every_first_line_clears_the_card_above(_mount(page, local_server, DESKTOP))
+
+
+def test_a_collapsed_cards_first_line_is_fully_visible_on_a_phone(page, local_server):
+    """The same promise on the device this app is actually used on (TODO §28.4).
+
+    The phone was left out of the 2026-08-16 fix on the reasoning that a tight stack is right where
+    vertical space is scarce. What that traded away was the whole point of the peeking row: 11px of
+    a 37px card, against the 29px the compact row needs. The one card a trainer reported being able
+    to read was the PAST card — which is last in the deck, so nothing covers it, and its legibility
+    said nothing about the cards above it.
+    """
+    _assert_every_first_line_clears_the_card_above(_mount(page, local_server, PHONE))
+
+
 def test_the_deck_stays_a_stack_on_a_phone(page, local_server):
-    """The overlap is the point on a gym-floor phone, where vertical space is the scarce resource —
-    widening it for desktop legibility must not flatten the deck into a plain list everywhere."""
+    """Legible is not the same as flat: the cards must still overlap and read as a deck, or the
+    depth cue that says "there is more below" is gone."""
     cards = _mount(page, local_server, PHONE)
     assert len(cards) >= 4, f"expected a stack of collapsed cards, got {cards}"
 

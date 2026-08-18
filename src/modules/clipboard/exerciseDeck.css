@@ -180,10 +180,13 @@
   flex-direction: column;
   padding: 8px 6px 14px;
   perspective: 1400px;
-  /* How far each collapsed card slides up over the one before it. Phone-first: vertical space is
-     the scarce resource on a gym-floor phone, so the stack packs tight and the deck is scrolled.
-     Widened on a desktop viewport below, where that scarcity does not apply. */
-  --deck-collapsed-overlap: -28px;
+  /* How far each collapsed card slides up over the one before it. ONE value for every viewport
+     (TODO §28.4): the peeking row exists to be read, and the compact row needs 29px of a 37px
+     card, so anything tighter than this hides the thing the stack is for. It was -28px on a phone
+     until 2026-08-18 on the reasoning that vertical space is scarcer there — true, and it bought
+     20px per card by showing 11px of a row that needs 29. The only card a trainer could read was
+     the past card, which is LAST in the deck with nothing stacked on it. */
+  --deck-collapsed-overlap: -8px;
 }
 .exercise-deck-card {
   width: 100%;
@@ -213,18 +216,6 @@
 .exercise-deck-card:not(.in-focus):hover {
   opacity: 1;
   transform: scale(0.975) rotateX(3deg);
-}
-/* Desktop: the phone-first overlap left only ~11px of a ~37px card showing, which clipped the
-   peeking row's own text — the exercise/circuit name renders at y=8-25 inside the card, so a
-   trainer scanning the deck on a laptop read the top three pixels of every glyph and nothing
-   more. A wider viewport has the vertical room the phone does not, so back the overlap off far
-   enough that the whole compact row (counter, name, target) clears the card stacked on top of
-   it. The depth cue is unchanged — it comes from the scale/tilt/shadow, not from how much is
-   hidden. */
-@media (min-width: 600px) {
-  .exercise-vertical-list {
-    --deck-collapsed-overlap: -8px;
-  }
 }
 .exercise-deck-card:last-child {
   margin-bottom: 0;
