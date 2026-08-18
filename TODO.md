@@ -2221,6 +2221,15 @@ so the state a trainer is actually in is the one named. Open: whether both matte
 build running demo data) and, if so, which wins — the answer decides whether this is a swap or a second
 badge.
 
+### 28.11 [ ] BUG — a cleared browser boots to a splash with no demo or animation offer
+
+Reported 2026-08-18: after deleting browser data, the loading screen no longer offers the demo or
+the animation. That is precisely the first-run state the offers exist for — a trainer arriving with
+an empty store and nothing to look at — so the regression is invisible to anyone whose store already
+has data. Suspect the empty-store branch of [splashScreen.js](src/modules/splash/splashScreen.js);
+note the same path deliberately withdraws the dismiss X on an empty database (`tests/conftest.py`
+budgets 1.5s for that), so whatever decides "nothing here yet" is already load-bearing.
+
 ### 28.10 [ ] CHANGE — cancellations and bookings accumulate in one message card
 
 Wanted 2026-08-18: the message area should show cancellations and booking lists **cumulatively — same
