@@ -2285,3 +2285,20 @@ target by selector against whatever is on screen
 so a reload that restores a step without restoring the VIEW that step belongs to will find a
 matching selector in the wrong place, or ring a control that happens to share it. Check what the
 reload restores: the step index alone, or the step plus its route.
+
+### 28.14 [ ] CHANGE — the demo-mode message offers to start the walkthrough
+
+Wanted 2026-08-18 (Simon): *"demo mode message in the notifications area should have a start
+walkthrough button too (and verify all needed data is there)"*.
+
+The demo-mode card ([messages.js](src/data/messages.js)) currently offers one action, the cleanup
+screen. It USED to carry an "Explore Walkthrough" action, dropped because it navigated to `/clients`
+standing in for a walkthrough engine that did not exist — a dead control. That reason has expired:
+[walkthroughOverlay.js](src/modules/demo/walkthroughOverlay.js) shipped 2026-08-17, and the splash
+already offers the walkthrough on a first run. The card is where a trainer who dismissed the splash
+can still find it.
+
+"Verify all needed data is there" is the load-bearing half: the walkthrough drives the seeded group
+session, so the button must not appear when the records its steps target are absent — a trainer who
+cleared the demo people but kept the catalog would otherwise get a walkthrough that rings nothing.
+Check the step targets against the store before offering it, rather than assuming the seed.
