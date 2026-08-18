@@ -21,6 +21,7 @@ import {
   isSplashDisabled,
   remainingHoldMs,
   requestedMinimumVisibleMs,
+  splashSuppressed,
 } from "../../../src/modules/splash/splashScreen.js";
 
 test("?splash=off asks for no hold at all", () => {
@@ -84,4 +85,43 @@ test("the hold is paid once per session, not on every load", () => {
 
 test("splash=off still wins even on the first load of a session", () => {
   assert.equal(requestedMinimumVisibleMs("?splash=off", false), 0);
+});
+
+// ── A first run outranks a leftover deep link (TODO §28.11) ────────────────────────────────────
+// Clearing browser data does not clear the ADDRESS BAR, so the reload arrives carrying whatever
+// link was open — and `?splash=off`, which every demo link sets and every later navigation carries
+// forward, suppresses both first-run screens. The trainer is then dropped into an empty app having
+// been asked nothing and offered nothing.
+
+test("a leftover ?splash=off does not suppress a first run the link brought nothing to", () => {
+  assert.equal(
+    splashSuppressed({ search: "?splash=off", firstRun: true, linkBringsContent: false }),
+    false,
+    "an empty store and a link with no content is a first run, whatever the URL says",
+  );
+});
+
+test("a link that brings content still decides — it is a purposeful arrival", () => {
+  // ?init= seeds the demo, ?demo= runs the walkthrough, ?evt= carries an invitation a client is
+  // answering. All three furnish the app, so the parameter is a choice rather than a leftover, and
+  // stopping a client on a fresh phone to pick a language would be its own bug.
+  assert.equal(
+    splashSuppressed({ search: "?splash=off", firstRun: true, linkBringsContent: true }),
+    true,
+  );
+});
+
+test("with a furnished store the parameter means exactly what it always meant", () => {
+  assert.equal(
+    splashSuppressed({ search: "?splash=off", firstRun: false, linkBringsContent: false }),
+    true,
+  );
+});
+
+test("no ?splash=off, nothing to override", () => {
+  assert.equal(
+    splashSuppressed({ search: "?lang=sl", firstRun: true, linkBringsContent: false }),
+    false,
+  );
+  assert.equal(splashSuppressed({ search: "", firstRun: false, linkBringsContent: false }), false);
 });

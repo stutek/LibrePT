@@ -60,6 +60,28 @@ export function isSplashDisabled(search = window.location.search) {
   return new URLSearchParams(search).get(SPLASH_PARAM) === SPLASH_OPT_OUT;
 }
 
+/** Whether `?splash=off` actually suppresses the splash here (TODO §28.11).
+ *
+ * The parameter is honoured everywhere except one case: a FIRST RUN that the link brought nothing
+ * to. Clearing browser data does not clear the address bar, so the reload arrives carrying whatever
+ * URL was open — and `?splash=off` is set by every demo link and carried forward by every later
+ * navigation, so a trainer who clears their data is dropped into an empty app having been asked no
+ * language and offered no demo. There the parameter is a leftover, not a choice.
+ *
+ * `linkBringsContent` is the carve-out and it matters: `?init=` seeds the demo, `?demo=` runs the
+ * walkthrough, `?evt=` carries an invitation a client is answering. Those links furnish the app, so
+ * they get exactly what they asked for — stopping a client on a fresh phone to pick a language
+ * before they can answer an invitation would be a worse bug than the one this fixes.
+ */
+export function splashSuppressed({
+  search = window.location.search,
+  firstRun = false,
+  linkBringsContent = false,
+} = {}) {
+  if (!isSplashDisabled(search)) return false;
+  return linkBringsContent || !firstRun;
+}
+
 export function hasHeldThisSession() {
   return sessionStorage.getItem(HELD_THIS_SESSION_KEY) === "1";
 }
@@ -178,6 +200,7 @@ export function dismissSplashWhenReady({
   minimumVisibleMs = requestedMinimumVisibleMs(window.location.search, alreadyHeld),
   offerOnboarding = false,
   needsLanguageChoice = false,
+  linkBringsContent = false,
   onChooseLanguage = () => {},
 } = {}) {
   const splash = document.getElementById(SPLASH_ID);
@@ -187,7 +210,15 @@ export function dismissSplashWhenReady({
   // way, so a load that skips the hold still waits for a fully wired app before it lifts.
   rememberHeldThisSession();
 
-  const askForLanguage = needsLanguageChoice && !isSplashDisabled();
+  // Both first-run screens honour the same override: `?splash=off` cannot skip them on an arrival
+  // that brought nothing (TODO §28.11). The language step in particular has never had an exit —
+  // there is nothing to dismiss TO when every word on screen is in a language nobody chose — and a
+  // query parameter must not become the way around it that the dismiss X deliberately is not.
+  const suppressed = splashSuppressed({
+    firstRun: needsLanguageChoice || offerOnboarding,
+    linkBringsContent,
+  });
+  const askForLanguage = needsLanguageChoice && !suppressed;
 
   // A tap on the X that landed while the app was still booting, captured by theme-boot.js because
   // this module was not loaded yet to hear it. Honouring it here is what makes that close DELAYED
@@ -200,7 +231,7 @@ export function dismissSplashWhenReady({
     return new Promise((resolve) => fadeOut(splash, resolve));
   }
 
-  const onboarding = offerOnboarding && !isSplashDisabled();
+  const onboarding = offerOnboarding && !suppressed;
   return new Promise((resolve) => {
     const continueAfterLanguage = () => {
       // The hold is measured from navigation start, so whatever the language step consumed already

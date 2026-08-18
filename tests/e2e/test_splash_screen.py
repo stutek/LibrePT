@@ -306,3 +306,36 @@ def test_a_chosen_language_is_never_asked_for_again(page, local_server):
     page.goto(local_server)
     page.locator("#app-splash").wait_for(state="hidden", timeout=20000)
     assert page.locator("#app-splash-language").is_hidden()
+
+
+@pytest.mark.clean_start
+@pytest.mark.keep_splash
+def test_a_leftover_splash_off_does_not_skip_the_first_run(page, local_server):
+    """The reported flow (TODO §28.11): clear browser data, reload the URL still in the address bar.
+
+    `?splash=off` is set by every demo link and carried forward by every later navigation, while
+    `?init=` is stripped as a boot-only param — so the URL a trainer has open after using the demo
+    suppresses the splash and furnishes nothing. Cleared data plus that URL used to drop them into
+    an empty app having been asked no language and offered no demo, which is exactly the first run
+    both screens exist for.
+    """
+    page.goto(local_server + "?splash=off")
+
+    _answer_language_step(page)
+    page.locator("#app-splash-onboarding").wait_for(state="visible", timeout=15000)
+    assert page.locator("#splash-load-demo").is_visible()
+    assert page.locator("#splash-walkthrough").is_visible()
+
+
+@pytest.mark.keep_splash
+def test_a_furnished_link_still_gets_the_boot_it_asked_for(page, local_server):
+    """The carve-out: a link that BRINGS something is a purposeful arrival, not a first run.
+
+    Without it, a client opening an invitation on a fresh phone would be stopped to choose a
+    language and offered a demo dataset before they could answer — a worse bug than the one above.
+    Driven here with the demo link, which is the same shape and needs no encoded payload.
+    """
+    page.goto(local_server + "?init=demo_data_load&splash=off")
+
+    page.locator("#app-splash").wait_for(state="hidden", timeout=20000)
+    assert page.locator("#app-splash-language").is_hidden()

@@ -199,6 +199,13 @@ onStateSaved(() => renderBuildStateBadge(getState()));
 window.resetLibrePTData = resetLibrePTData;
 window.stateHasData = () => stateHasData(getState());
 
+/** Whether this arrival was FURNISHED by its link: the demo seed, the walkthrough, or an invitation
+ * being answered. Those links get exactly the boot they asked for, first run or not (TODO §28.11).
+ */
+function linkFurnishesTheApp({ shareInit, shareDemo, inboundEvent }) {
+  return Boolean(shareInit || shareDemo || inboundEvent);
+}
+
 async function init() {
   // FIRST, before anything else can throw: a crash during boot is exactly the one a trainer is least
   // able to describe, and §12.4's whole point is that it currently dies in a console nobody opens.
@@ -378,7 +385,12 @@ async function init() {
     rerenderSessions: renderSessions,
     openSessionInviteDialog,
   });
-  setupActiveSession();
+  // The splash's first-run decisions ride along from here because they are facts about THIS
+  // arrival — what the link carried, and what language was stored before it was applied — and
+  // setupActiveSession is where the splash is taken down (TODO §28.11).
+  setupActiveSession({
+    linkBringsContent: linkFurnishesTheApp({ shareInit, shareDemo, inboundEvent }),
+  });
 
   appBoot.bootFeedbackModal({
     getState,
@@ -685,7 +697,7 @@ function startWorkoutSession(clientRoutines, sessionMeta = null, options = {}) {
   renderSessions();
 }
 
-function setupActiveSession() {
+function setupActiveSession({ linkBringsContent } = {}) {
   appBoot.bootActiveSession({
     state: getState(),
     t,
@@ -710,7 +722,17 @@ function setupActiveSession() {
   // an empty database, it becomes the onboarding entry point and waits for a choice.
   appBoot.bootSplashScreen({
     offerOnboarding: !stateHasData(getState()),
+    // `?lang=` still ANSWERS this, deliberately (TODO §28.11). The first attempt made a URL
+    // parameter a mere preselection that the step would ask about anyway — which is a defensible
+    // rule and breaks a shipped promise: a share link naming a language must open in it, pinned by
+    // tests/e2e/test_share_deeplink.py. `?splash=off` is different, and that is the half kept: it
+    // says nothing about language or onboarding, so on a first run it is a leftover rather than an
+    // answer.
     needsLanguageChoice: !hasChosenLanguage(getState().lang),
+    // Whether this arrival was FURNISHED by its link — the demo seed, the walkthrough, an
+    // invitation being answered. Those get exactly the boot they asked for; a bare `?splash=off`
+    // left in the address bar after a trainer cleared their browser does not (TODO §28.11).
+    linkBringsContent,
     onChooseLanguage: (lang) => {
       applyTranslations(lang);
       saveState();
