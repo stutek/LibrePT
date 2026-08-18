@@ -71,8 +71,42 @@ export function moveDemoHand(hand, x, y) {
 
 /** Pulses the pointer to read as a tap. Returns immediately — the caller owns the wait, because the
  * tap must land on the real control whether or not the animation has finished. */
+const RIPPLE_CLASS = "demo-tour-ripple";
+// Matches the animation in demoTour.css. Kept in sync by hand for the same reason the splash's
+// fade duration is: reading it back out of getComputedStyle to save one constant would cost a
+// layout flush on every tap.
+const RIPPLE_LIFETIME_MS = 620;
+
+/** A ring that expands from the point of contact and removes itself.
+ *
+ * The hand pressing toward the screen is the GESTURE; this is what says the press landed (wanted
+ * 2026-08-18). On a laptop there is no finger to watch, so without it a control simply changes and
+ * a viewer cannot tell whether something tapped it or the app did it on its own.
+ *
+ * Removed on a timer rather than on `animationend`: the element is decorative and short-lived, and
+ * an animationend listener that never fires (reduced motion, a background tab) would leave a ring
+ * on screen permanently.
+ */
+function flashTapRipple(hand) {
+  const doc = hand.ownerDocument;
+  const ripple = doc.createElement("div");
+  ripple.className = RIPPLE_CLASS;
+  ripple.setAttribute("aria-hidden", "true");
+  // Positioned from the hand's own coordinates, so the ring lands on the FINGERTIP rather than on
+  // the middle of the hand — the two are 30px apart, which at tap size is the whole point.
+  const rect = hand.getBoundingClientRect();
+  ripple.style.setProperty("--ripple-x", `${Math.round(rect.left)}px`);
+  ripple.style.setProperty("--ripple-y", `${Math.round(rect.top)}px`);
+  doc.body.appendChild(ripple);
+  hand.ownerDocument.defaultView.setTimeout(() => ripple.remove(), RIPPLE_LIFETIME_MS);
+}
+
 export function pulseDemoHand(hand) {
   if (!hand) return;
+  // The ring is placed BEFORE the press animation starts: `is-tapping` scales the hand, which moves
+  // its measured box, and reading the fingertip mid-scale puts the mark a few pixels off the thing
+  // it is marking.
+  flashTapRipple(hand);
   hand.classList.remove("is-tapping");
   // Reading offsetWidth forces the class removal to take effect before it is re-added, so a second
   // tap on the same control restarts the animation instead of being swallowed as "no change".

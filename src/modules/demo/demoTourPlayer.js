@@ -28,7 +28,19 @@
 import { checkExpectation, validateTour } from "../../domain/demoTour.js";
 import { moveDemoHand, pulseDemoHand } from "./demoHand.js";
 
-const DEFAULT_STEP_PAUSE_MS = 900;
+// How long a tapped control is left on screen before the next step begins. Raised from 900ms on
+// 2026-08-18: "on web browser the button and clicks are about 50% too fast". A phone viewer follows
+// a finger; on a laptop there is no finger to follow, so the eye has to find the control, register
+// that it changed, and read the caption — and the demo was moving on before the second of those.
+const DEFAULT_STEP_PAUSE_MS = 1350;
+// Time given to the pointer's travel across the screen, and to the scroll that precedes it. Same
+// report, same reasoning: a pointer that arrives before you have looked at it has not shown you
+// anything.
+const DEFAULT_TRAVEL_MS = 650;
+const SCROLL_SETTLE_MS = 200;
+// A beat between the press landing and the click firing, so the tap READS as the cause of what
+// happens next rather than as something simultaneous with it.
+const TAP_LANDING_MS = 160;
 
 export function probe(doc, selector) {
   const el = doc.querySelector(selector);
@@ -98,13 +110,14 @@ export async function performStep(step, { doc = document, hand = null, wait = sl
   target.scrollIntoView({ block: "center", inline: "nearest" });
   // Let the scroll settle before reading a box for the pointer, or the hand lands where the control
   // used to be.
-  await wait(120);
+  await wait(SCROLL_SETTLE_MS);
 
   if (hand) {
     const { x, y } = centreOf(target);
     moveDemoHand(hand, x, y);
-    await wait(step.travelMs ?? 420);
+    await wait(step.travelMs ?? DEFAULT_TRAVEL_MS);
     pulseDemoHand(hand);
+    await wait(TAP_LANDING_MS);
   }
 
   target.click();

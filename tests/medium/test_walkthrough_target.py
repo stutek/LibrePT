@@ -115,3 +115,58 @@ def test_the_hand_is_taller_than_it_is_wide_because_it_is_a_hand(page, local_ser
 
     box = page.locator("#demo-tour-hand").bounding_box()
     assert box["height"] > box["width"]
+
+
+RIPPLE_STUB = """
+import { mountDemoHand, moveDemoHand, pulseDemoHand } from './modules/demo/demoHand.js';
+const hand = mountDemoHand();
+moveDemoHand(hand, 120, 200);
+window.__tap = () => pulseDemoHand(hand);
+"""
+
+
+def test_a_tap_leaves_a_visible_mark_where_it_landed(page, local_server):
+    """Wanted 2026-08-18: "make some click visual effect when show me clicks".
+
+    The hand pressing toward the screen is the gesture; a ripple is what says the press LANDED. On a
+    laptop, where there is no finger to watch, the two are what separate "a control changed" from "a
+    control changed because something tapped it".
+    """
+    load_with_stub(page, local_server, RIPPLE_STUB)
+    page.wait_for_selector("#demo-tour-hand")
+
+    assert page.locator(".demo-tour-ripple").count() == 0, "nothing to see before a tap"
+
+    # The pointer travels to its target over 0.42s; tapping mid-flight would put the ring where the
+    # hand WAS, which is correct behaviour and a meaningless thing to assert against. The real player
+    # waits for the same reason (performStep's travelMs).
+    page.wait_for_timeout(600)
+    page.evaluate("() => window.__tap()")
+    ripple = page.locator(".demo-tour-ripple")
+    assert ripple.count() == 1
+
+    # A tolerance, not containment: the ring is mid-animation whenever it is sampled, so its box is
+    # 7px across at one instant and 58px at another. What has to be true is that the mark is on the
+    # fingertip rather than on the palm or on the previous control — half a fingertip of slack says
+    # exactly that, and fails on the tens-of-pixels errors that composing two transforms produced.
+    box = ripple.bounding_box()
+    hand_box = page.locator("#demo-tour-hand").bounding_box()
+    centre_x, centre_y = box["x"] + box["width"] / 2, box["y"] + box["height"] / 2
+    assert abs(centre_x - hand_box["x"]) < 15, (
+        f"ring at x={centre_x}, fingertip at {hand_box['x']}"
+    )
+    assert abs(centre_y - hand_box["y"]) < 15, (
+        f"ring at y={centre_y}, fingertip at {hand_box['y']}"
+    )
+
+
+def test_the_mark_cleans_up_after_itself(page, local_server):
+    """It is a flash, not a residue: one per tap, and four steps must not leave four rings behind."""
+    load_with_stub(page, local_server, RIPPLE_STUB)
+    page.wait_for_selector("#demo-tour-hand")
+
+    page.evaluate("() => window.__tap()")
+    page.evaluate("() => window.__tap()")
+    page.wait_for_timeout(1200)
+
+    assert page.locator(".demo-tour-ripple").count() == 0

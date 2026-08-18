@@ -58,3 +58,43 @@
     animation: none;
   }
 }
+
+/* The mark a tap leaves where it landed (wanted 2026-08-18). Sits with the hand rather than in the
+   walkthrough's stylesheet because both the scripted demo and "Show me" produce it — it belongs to
+   the pointer, not to the guide. Never intercepts anything, and honours reduced motion by simply
+   not being drawn: a static ring left on screen would say a tap is still happening. */
+.demo-tour-ripple {
+  position: fixed;
+  z-index: 9998;
+  /* Placed with left/top and centred with a translate, NOT with a translate3d of the coordinates:
+     the ring also animates `scale`, and composing the two moved the mark tens of pixels off the
+     point it was meant to mark. With the offset in the transform, the centre stays put at every
+     scale. */
+  left: var(--ripple-x, 0);
+  top: var(--ripple-y, 0);
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.55), inset 0 0 8px rgba(255, 255, 255, 0.35);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  animation: demo-tour-ripple 0.62s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes demo-tour-ripple {
+  0% {
+    scale: 0.4;
+    opacity: 0.95;
+  }
+  100% {
+    scale: 3.2;
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .demo-tour-ripple {
+    display: none;
+  }
+}
