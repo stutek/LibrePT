@@ -32,6 +32,16 @@ from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlsplit
 
+# The one declaration of the dev-server port. `build` (the ZAP target), `tests/conftest.py` (which starts
+# and health-checks this server) and this module's own default all read it from here — before
+# 2026-08-18 the number 8081 appeared in six places, which is the same shape of problem as the thirteen
+# Python pins: nothing wrong until one of them moves.
+DEV_SERVER_PORT = 8081
+
+# Where the app is mounted, so a link the tests build matches what the server actually serves.
+DEV_SERVER_BASE_PATH = "/LibrePT/"
+
+
 # This file lives in deploy/, so the repo root (which holds src/) is one level up.
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC_DIR = os.path.join(REPO_ROOT, "src")
@@ -284,7 +294,10 @@ def main():
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
     parser.add_argument(
-        "--port", type=int, default=8081, help="port to listen on (default: 8081)"
+        "--port",
+        type=int,
+        default=DEV_SERVER_PORT,
+        help=f"port to listen on (default: {DEV_SERVER_PORT})",
     )
     parser.add_argument(
         "--verbose",

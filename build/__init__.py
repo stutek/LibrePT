@@ -20,6 +20,8 @@ import time
 from build.frontend_audit import audit_html_sinks, compare_csp
 from build.testreport import REPORT_DIR, failed_test_ids, print_digest, run_logged
 
+from deploy.local_http_server import DEV_SERVER_BASE_PATH, DEV_SERVER_PORT
+
 
 # How far the wall clock may run ahead of the monotonic one before a task is called interrupted.
 # Generously above an NTP nudge (fractions of a second) and a laptop rejoining a network (a few), and far
@@ -1087,8 +1089,10 @@ def _csp_parity():
 
 
 # The ZAP scan's target: the local dev server, which serves src/ under the production sub-path.
-ZAP_TARGET = "http://localhost:8081/LibrePT/"
-ZAP_PORT = 8081
+# Read from the server that actually serves it, rather than restated — one moved port used to mean six
+# edits, one of which would be missed (2026-08-18).
+ZAP_PORT = DEV_SERVER_PORT
+ZAP_TARGET = f"http://localhost:{DEV_SERVER_PORT}{DEV_SERVER_BASE_PATH}"
 
 ZAP_ADDONS_DIR = os.path.join(".venv", "zap-addons")
 

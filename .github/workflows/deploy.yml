@@ -50,16 +50,7 @@ jobs:
     name: Stage 1 · Python Lint & Format (Ruff)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v6
-        with:
-          python-version-file: .python-version
-          cache: 'pip'
-      - name: Install Dependencies
-        run: |
-          python -m venv .venv
-          .venv/bin/pip install --upgrade pip
-          .venv/bin/pip install -r requirements.txt
+      - uses: ./.github/actions/python-env
       - name: Run Ruff
         run: .venv/bin/python -c "from build import run_python_lint; run_python_lint()"
 
@@ -69,16 +60,7 @@ jobs:
     steps:
       # Needs the full history only for `git ls-files`, which a shallow checkout still serves — but
       # the checker reads the working tree, so no fetch-depth tuning is required here.
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v6
-        with:
-          python-version-file: .python-version
-          cache: 'pip'
-      - name: Install Dependencies
-        run: |
-          python -m venv .venv
-          .venv/bin/pip install --upgrade pip
-          .venv/bin/pip install -r requirements.txt
+      - uses: ./.github/actions/python-env
       - name: Check documentation cross-references
         run: .venv/bin/python -c "from build import run_doc_graph_check; run_doc_graph_check()"
 
@@ -86,16 +68,7 @@ jobs:
     name: Stage 1 · Frontend Lint & Format (Biome)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v6
-        with:
-          python-version-file: .python-version
-          cache: 'pip'
-      - name: Install Dependencies
-        run: |
-          python -m venv .venv
-          .venv/bin/pip install --upgrade pip
-          .venv/bin/pip install -r requirements.txt
+      - uses: ./.github/actions/python-env
       - name: Run Biome
         run: .venv/bin/python -c "from build import run_frontend_lint; run_frontend_lint()"
 
@@ -103,16 +76,7 @@ jobs:
     name: Stage 1 · Dependency Security Scan (pip-audit)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v6
-        with:
-          python-version-file: .python-version
-          cache: 'pip'
-      - name: Install Dependencies
-        run: |
-          python -m venv .venv
-          .venv/bin/pip install --upgrade pip
-          .venv/bin/pip install -r requirements.txt
+      - uses: ./.github/actions/python-env
       - name: Run pip-audit
         run: .venv/bin/python -c "from build import run_security_audit; run_security_audit()"
 
@@ -120,16 +84,7 @@ jobs:
     name: Stage 1 · Unit Tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v6
-        with:
-          python-version-file: .python-version
-          cache: 'pip'
-      - name: Install Dependencies
-        run: |
-          python -m venv .venv
-          .venv/bin/pip install --upgrade pip
-          .venv/bin/pip install -r requirements.txt
+      - uses: ./.github/actions/python-env
       - name: Run Unit Tests
         run: .venv/bin/python -c "from build import run_unit_tests; run_unit_tests()"
 
@@ -137,16 +92,7 @@ jobs:
     name: Stage 1 · JavaScript Unit Tests (node:test)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v6
-        with:
-          python-version-file: .python-version
-          cache: 'pip'
-      - name: Install Dependencies
-        run: |
-          python -m venv .venv
-          .venv/bin/pip install --upgrade pip
-          .venv/bin/pip install -r requirements.txt
+      - uses: ./.github/actions/python-env
       - name: Run JavaScript Unit Tests
         # No actions/setup-node: build.ensure_node_binary() vendors Node the same way
         # ensure_biome_binary() vendors Biome, so this stays on the same Python-only toolchain
@@ -164,16 +110,7 @@ jobs:
     name: Stage 1 · Security Tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v6
-        with:
-          python-version-file: .python-version
-          cache: 'pip'
-      - name: Install Dependencies
-        run: |
-          python -m venv .venv
-          .venv/bin/pip install --upgrade pip
-          .venv/bin/pip install -r requirements.txt
+      - uses: ./.github/actions/python-env
       - name: Run Security Tests
         run: .venv/bin/python -c "from build import run_security_tests; run_security_tests()"
 
@@ -185,16 +122,7 @@ jobs:
     name: Stage 1 · Structural Invariants (catalog, icons, layering, gating, complexity, test assertions)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v6
-        with:
-          python-version-file: .python-version
-          cache: 'pip'
-      - name: Install Dependencies
-        run: |
-          python -m venv .venv
-          .venv/bin/pip install --upgrade pip
-          .venv/bin/pip install -r requirements.txt
+      - uses: ./.github/actions/python-env
       - name: Module catalog coverage
         run: .venv/bin/python -c "from build import run_catalog_coverage_check; run_catalog_coverage_check()"
       - name: Module self-path headers
@@ -224,10 +152,9 @@ jobs:
     name: Stage 1 · Static Security Audits (CSP parity & HTML sinks)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v6
+      - uses: ./.github/actions/python-env
         with:
-          python-version-file: .python-version
+          install: 'false'
       - name: Run Static Security Audits
         run: python -c "from build import run_static_security_checks; run_static_security_checks()"
 
@@ -254,17 +181,9 @@ jobs:
       ]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v6
+      - uses: ./.github/actions/python-env
         with:
-          python-version-file: .python-version
-          cache: 'pip'
-      - name: Install Dependencies & Browsers
-        run: |
-          python -m venv .venv
-          .venv/bin/pip install --upgrade pip
-          .venv/bin/pip install -r requirements.txt
-          .venv/bin/playwright install chromium --with-deps
+          browsers: 'true'
       - name: Run Medium Component Tests
         run: .venv/bin/python -c "from build import run_medium_tests; run_medium_tests()"
 
@@ -275,17 +194,9 @@ jobs:
     needs: [medium-tests]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v6
+      - uses: ./.github/actions/python-env
         with:
-          python-version-file: .python-version
-          cache: 'pip'
-      - name: Install Dependencies & Browsers
-        run: |
-          python -m venv .venv
-          .venv/bin/pip install --upgrade pip
-          .venv/bin/pip install -r requirements.txt
-          .venv/bin/playwright install chromium --with-deps
+          browsers: 'true'
       - name: Run E2E Tests
         run: .venv/bin/python -c "from build import run_e2e_tests; run_e2e_tests()"
 
@@ -298,10 +209,9 @@ jobs:
     needs: [e2e-tests]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v6
+      - uses: ./.github/actions/python-env
         with:
-          python-version-file: .python-version
+          install: 'false'
       - name: Run OWASP ZAP Scan
         run: python -c "from build import run_owasp_zap_scan; run_owasp_zap_scan()"
 
@@ -311,7 +221,12 @@ jobs:
     needs: [owasp-zap-scan]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      # Through the same entry point as every other job, with no venv: this step bundles with system
+      # `python3`, and before 2026-08-18 that was whatever the runner image happened to carry — the very
+      # divergence the single declaration exists to remove, one job further along.
+      - uses: ./.github/actions/python-env
+        with:
+          install: 'false'
 
       # The runtime app lives under src/. Publish that whole tree (index.html + app.js +
       # index.css + manifest.json + sw.js + i18n/ + components/ + icons/) flattened to the dist

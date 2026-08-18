@@ -18,6 +18,7 @@
 //
 // deps: src/i18n/consent/ for the letters; no DOM, no storage.
 
+import { PUBLIC_SITE_URL } from "../../data/publicUrls.js";
 import { consentLetterFor, resolveConsentLang } from "../../i18n/consent/index.js";
 
 export { resolveConsentLang };
@@ -50,7 +51,8 @@ export const CONSENT_FORM_VERSION = "2026-08-09";
 // `localhost:8081` link, and running under Node it resolves to `file:///…`. The consent-form drift
 // test caught both. A link that leaves the app has to name the app's real home, so the one thing it
 // must not do is follow the current origin.
-const PUBLIC_SITE_URL = "https://stutek.github.io/LibrePT";
+// Declared in data/publicUrls.js — the consent letter, the crash reporter and the header all point
+// at the same deployment, and four of the five copies would have been updated when it moved.
 
 function shippedDocUrl(filename) {
   return `${PUBLIC_SITE_URL}/${filename}`;

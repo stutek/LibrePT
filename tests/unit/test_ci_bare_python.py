@@ -24,15 +24,40 @@ WORKFLOW = REPO_ROOT / ".github" / "workflows" / "deploy.yml"
 # it; anything else must be stdlib.
 ALLOWED_NON_STDLIB = {"yaml"}
 
+# Repo-local packages. Importing one on a bare runner is fine — it ships with the checkout — provided the
+# module itself reaches nothing pip installed, which the last test in this file checks.
+FIRST_PARTY = {"build", "deploy", "agent_tools"}
+
+
+SETUP_ACTION = "./.github/actions/python-env"
+
+
+def _installs_dependencies(steps):
+    """Whether a job ends up with the venv.
+
+    Follows the shared setup action (2026-08-18): the `pip install` used to sit in each job's own steps,
+    and detecting it by grep was fine while thirteen jobs each carried a copy. Now one composite action
+    installs unless a job opts out with `install: 'false'`, so reading the steps alone would classify
+    EVERY job as bare and make this whole file vacuously pass.
+    """
+    for step in steps:
+        if "pip install" in (step.get("run") or ""):
+            return True
+        if (step.get("uses") or "").strip() == SETUP_ACTION:
+            return (
+                str((step.get("with") or {}).get("install", "true")).lower() != "false"
+            )
+    return False
+
 
 def _bare_python_jobs():
-    """{job_name: [build functions it calls]} for jobs that never run `pip install`."""
+    """{job_name: [build functions it calls]} for jobs that never install dependencies."""
     document = yaml.safe_load(WORKFLOW.read_text(encoding="utf-8"))
     jobs = {}
     for name, body in (document.get("jobs") or {}).items():
         steps = (body or {}).get("steps") or []
         commands = [step.get("run") or "" for step in steps]
-        if any("pip install" in command for command in commands):
+        if _installs_dependencies(steps):
             continue
         called = [
             function
@@ -122,6 +147,34 @@ def test_the_module_itself_imports_only_stdlib_at_top_level():
         for module in top_level
         if module not in sys.stdlib_module_names
         and module not in ALLOWED_NON_STDLIB
-        and module != "build"
+        and module not in FIRST_PARTY
     }
     assert not non_stdlib, f"module-level third-party imports in build/: {non_stdlib}"
+
+
+def test_first_party_modules_build_reaches_are_themselves_stdlib_only():
+    """A repo-local import is fine on a bare runner — but only as far as ITS imports are.
+
+    `build` imports `deploy.local_http_server` for the dev-server port (declared once there since
+    2026-08-18). That is safe precisely because the server module is stdlib-only; the day it grows a
+    third-party import, three CI jobs start failing on a machine where the venv does not exist, and this
+    is what says so first.
+    """
+    offenders = {}
+    for module_path in [REPO_ROOT / "deploy" / "local_http_server.py"]:
+        tree = ast.parse(module_path.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                names = [alias.name.split(".")[0] for alias in node.names]
+            elif isinstance(node, ast.ImportFrom) and node.module and node.level == 0:
+                names = [node.module.split(".")[0]]
+            else:
+                continue
+            for name in names:
+                if name not in sys.stdlib_module_names and name not in FIRST_PARTY:
+                    offenders.setdefault(module_path.name, []).append(name)
+
+    assert not offenders, (
+        "build/ imports these first-party modules at top level, so they must be stdlib-only too "
+        f"or three bare-python CI jobs break: {offenders}"
+    )

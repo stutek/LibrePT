@@ -107,18 +107,7 @@ jobs:
           INSTRUCTIONS
           exit 1
 
-      - uses: actions/checkout@v5
-
-      - uses: actions/setup-python@v6
-        with:
-          python-version-file: .python-version
-          cache: 'pip'
-
-      - name: Install Dependencies
-        run: |
-          python -m venv .venv
-          .venv/bin/pip install --upgrade pip
-          .venv/bin/pip install -r requirements.txt
+      - uses: ./.github/actions/python-env
 
       # Written to the SAME path a developer's own credential lives at, rather than exported as an
       # environment variable, so tests/live/_credentials.mjs runs one code path in CI and on a

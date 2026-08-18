@@ -932,6 +932,26 @@ simplifies the deck/tabs/title-bar wiring and unifies router handling.
 
 ---
 
+## Audit schedule — every two weeks
+
+Decided 2026-08-18 (Simon: *"I assume it is just better we do an audit every 2 weeks"*). These are the
+checks whose findings need **judgement rather than a pass/fail**, so they are deliberately NOT gates: a
+build that fails on a judgement call teaches people to silence it, and a rule that fires on every commit
+stops being read. Whoever is working runs them on the cadence and records what changed.
+
+| Every two weeks | What to look for | Last done |
+| :--- | :--- | :--- |
+| **Duplication sweep** | Values or blocks that have quietly acquired copies — a version, a URL, a port, a repeated CI step. The question is always "should this be declared once?", which no tool can answer for you. A general copy-paste detector was considered and rejected: the standard one is an npm package, and this repo vendors Node with **no npm dependency at all** ([AGENT_RULES §5.2](AGENT_RULES.md)) | 2026-08-18 |
+| **ZAP suppression review** | Every `IGNORE` in `deploy/zap/zap-baseline.conf` still true, re-derived from the code rather than from its own comment ([AGENT_RULES §2.A.3](AGENT_RULES.md)) | 2026-08-12 |
+| **Timing budget re-measure** | [AGENT_RULES §2.A.3](AGENT_RULES.md)'s per-stage table against an **idle** machine. Stage 3 currently runs 90–180s against a table that says 45s, mostly because ~30 browser tests were added on 2026-08-17 | never — overdue |
+| **TODO ranking** | Verify "Where to start" against `src/` before trusting it. It has gone stale twice (08-11, 08-13), both times because shipped work was never closed | 2026-08-17 |
+
+**A tool may graduate out of this table into `build/`** once it has proven value and demand
+([AGENT_RULES §6.2](AGENT_RULES.md)) — write it for yourself, use it on real work, and wire it into
+Stage 1 only when it has actually caught something more than once.
+
+---
+
 ## 12. Documentation, Tests, OKF & Housekeeping
 
 ### 12.3 [~] Test completeness

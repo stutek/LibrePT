@@ -7,6 +7,8 @@ suite, not its unit suite, owns anything that starts a browser.
 
 import pytest
 
+from deploy.local_http_server import DEV_SERVER_PORT
+
 from agent_tools import layout_probe
 
 
@@ -49,7 +51,7 @@ def test_build_parser_accepts_repeated_selectors_and_css_props():
     args = parser.parse_args(
         [
             "--url",
-            "http://localhost:8081/",
+            f"http://localhost:{DEV_SERVER_PORT}/",
             "--selector",
             ".a",
             "--selector",

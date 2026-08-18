@@ -24,10 +24,9 @@
 //
 // deps: none — pure functions over plain values.
 
-/** Where a report goes when the trainer chooses to send it. Declared here rather than passed from a
- *  call site, because the module that builds the link is the one place that has to know it — and a
- *  second copy is how a moved repository ends up with one dead link nobody notices. */
-export const ISSUE_TRACKER_URL = "https://github.com/stutek/LibrePT";
+// Where a report goes is not this module's fact to own — it is the repository's, and the header links to
+// the same place. Re-exported so existing callers keep one import (data/publicUrls.js is the declaration).
+export { ISSUE_TRACKER_URL } from "./publicUrls.js";
 
 /** Small on purpose: this is a diagnostic aid, not a log file, and it must never grow into the storage
  *  budget (§18.6). */

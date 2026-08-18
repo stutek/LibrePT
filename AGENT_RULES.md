@@ -351,6 +351,17 @@ nothing behind for the next agent. When a check will be needed again, it belongs
    deterministic.** All three, or just run the command — the bar and the rationale are in
    [agent_tools/INDEX.md](agent_tools/INDEX.md). Something that fails only the second test belongs in
    the test suite instead.
+
+   **Build it for yourself first; integrate it once it has proven value and demand** (Simon,
+   2026-08-18). A tool an agent runs by hand costs nothing but the writing. A tool wired into Stage 1
+   costs every commit, forever, and acquires a second job — being maintained — before anyone knows
+   whether it earns one. So the order is: write it, use it on real work, and only when it has actually
+   caught something more than once does it get a gate task, a CI job and a catalog row (rule 3).
+
+   The corollary is that **not every recurring check wants to be a gate at all**. Some are better as a
+   periodic audit — a duplication sweep, an ignore-file review, a stale-budget re-measure — run on a
+   cadence by whoever is working, because their findings need judgement rather than a pass/fail. Those
+   live in [TODO.md](TODO.md)'s audit schedule, not in `build/`.
 3. **Adding a tool means all of it**: the module (docstring stating *why it exists*), a catalog row, a
    unit test in [tests/unit/](tests/unit/), and a Stage 1 task in [build/](build/) if it should gate
    commits. A tool nobody runs is worse than no tool — it rots and then misleads.

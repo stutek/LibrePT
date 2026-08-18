@@ -15,6 +15,8 @@ import urllib.request
 from pathlib import Path
 
 import pytest
+
+from deploy.local_http_server import DEV_SERVER_BASE_PATH, DEV_SERVER_PORT
 from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 
 # tests/conftest.py -> parents[1] is the repo root; the runtime app lives in src/.
@@ -402,18 +404,18 @@ def assert_server_is_current(base_url):
     if _running_revision(base_url) == _source_revision():
         return
     raise RuntimeError(
-        "The dev server on :8081 is running a DIFFERENT revision of "
+        f"The dev server on :{DEV_SERVER_PORT} is running a DIFFERENT revision of "
         "deploy/local_http_server.py than the working tree (or is too old to report one).\n"
         "    Its behaviour — listen backlog, headers, SPA fallback — is therefore not what this "
         "checkout says it is, and any result from this run is untrustworthy.\n"
         "    Restart it:  pkill -f local_http_server && "
-        ".venv/bin/python -m deploy.local_http_server --port 8081"
+        f".venv/bin/python -m deploy.local_http_server --port {DEV_SERVER_PORT}"
     )
 
 
 @pytest.fixture(scope="session")
 def local_server():
-    """Serve the app on :8081 via deploy/local_http_server.py, which mounts src/ under the
+    """Serve the app on the declared dev-server port via deploy/local_http_server.py, which mounts src/ under the
     /LibrePT/ sub-path just like GitHub Pages (base rewrite + SPA fallback). Browser tests
     therefore run against the real production base path. Only started when an e2e test requests
     it; reuses a running server.
@@ -424,13 +426,13 @@ def local_server():
     ERR_CONNECTION_REFUSED). Leaving it running also matches AGENT_RULES.md §C: the user,
     not the agent, is responsible for stopping the dev server.
     """
-    if not is_port_open(8081):
+    if not is_port_open(DEV_SERVER_PORT):
         subprocess.Popen(
             [
                 sys.executable,
                 str(REPO_ROOT / "deploy" / "local_http_server.py"),
                 "--port",
-                "8081",
+                str(DEV_SERVER_PORT),
             ],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
@@ -439,12 +441,12 @@ def local_server():
         # blind sleep — parallel workers with -n auto race to connect and the
         # server was sometimes not ready in time with a fixed 1.5 s delay.
         deadline = time.monotonic() + 10
-        while not is_port_open(8081):
+        while not is_port_open(DEV_SERVER_PORT):
             if time.monotonic() >= deadline:
                 raise RuntimeError("Local server did not start within 10 s")
             time.sleep(0.1)
 
-    base_url = "http://localhost:8081/LibrePT/"
+    base_url = f"http://localhost:{DEV_SERVER_PORT}{DEV_SERVER_BASE_PATH}"
     # Whether we just started it or reused one that was already up, prove it is THIS revision
     # before a single test runs — see assert_server_is_current for what a stale one costs.
     assert_server_is_current(base_url)

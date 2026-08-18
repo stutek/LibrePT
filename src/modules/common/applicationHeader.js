@@ -20,6 +20,7 @@
 // }
 
 import { driveSyncStatus } from "../../data/driveSyncService.js";
+import { ISSUE_TRACKER_URL } from "../../data/publicUrls.js";
 import { resolveLang } from "../../i18n/index.js";
 import { renderMarkupOnce } from "./dom.js";
 import { syncGlyphFor } from "./syncStatusGlyph.js";
@@ -187,7 +188,7 @@ export function renderAboutDialog() {
     </div>
     <div class="modal-body-scroll">
       <p id="about-body" class="dialog-desc">LibrePT is a free, open-source, offline-first clipboard for personal trainers — schedule sessions, run them on the gym floor, and track client progress. All data stays on your device.</p>
-      <a id="about-repo-link" class="btn secondary-btn w-full" href="https://github.com/stutek/LibrePT" target="_blank" rel="noopener noreferrer">
+      <a id="about-repo-link" class="btn secondary-btn w-full" target="_blank" rel="noopener noreferrer">
         <i class="fa-brands fa-github"></i> View the project on GitHub
       </a>
       <!-- Attribution has to be reachable from the INSTALLED app, not only the repository:
@@ -358,7 +359,7 @@ export function renderHeaderShell() {
               <button id="menu-open-encrypted" class="session-menu-item" role="menuitem">
                 <i class="fa-solid fa-lock-open"></i> Open an encrypted file
               </button>
-              <a id="menu-github" class="session-menu-item" role="menuitem" href="https://github.com/stutek/LibrePT" target="_blank" rel="noopener noreferrer">
+              <a id="menu-github" class="session-menu-item" role="menuitem" target="_blank" rel="noopener noreferrer">
                 <i class="fa-brands fa-github"></i> GitHub project
               </a>
               <a id="menu-bug-report" class="session-menu-item" role="menuitem" href="./bug-reporting.html" target="_blank" rel="noopener noreferrer">
@@ -386,6 +387,15 @@ export function setupApplicationHeader() {
   renderHeaderShell();
   renderAboutDialog();
   renderTermsDialog();
+
+  // Both repository links read the ONE declaration (data/publicUrls.js) rather than carrying a copy in
+  // markup — the address appeared in five places before 2026-08-18, and a moved repository would have
+  // left the ones nobody grepped for. Assigned here rather than interpolated into the markup string,
+  // which keeps the template free of anything build/frontend_audit.py has to read as a sink.
+  for (const id of ["about-repo-link", "menu-github"]) {
+    const link = document.getElementById(id);
+    if (link) link.href = ISSUE_TRACKER_URL;
+  }
   // Logo Area home click handler
   const logoArea = document.getElementById("logo-area");
   if (logoArea) {

@@ -1,0 +1,50 @@
+name: LibrePT Python environment
+description: >
+  Checkout, the ONE declared Python, and optionally the project venv and browsers. Every job in every
+  workflow enters through here so the setup exists in one place rather than in thirteen copies.
+
+# Why this exists (2026-08-18): thirteen jobs repeated the same checkout + setup-python + venv + pip
+# block, which is how a Python version came to be pinned in thirteen literals and then diverged from the
+# machine anyone actually runs the gate on. `uses:` cannot be interpolated in GitHub Actions, so a
+# composite action is the only way to declare a step once and have every job read it.
+#
+# The version itself is NOT an input: it lives in `.python-version`, which `actions/setup-python` reads
+# directly and `agent_tools/python_version.py` gates against re-introducing a literal.
+
+inputs:
+  install:
+    description: >
+      Create `.venv` and install requirements.txt. Two Stage 1 jobs deliberately run bare system Python
+      with no install at all (AGENT_RULES §6.6) — anything they reach must import with the stdlib alone,
+      and that constraint only stays real if those jobs actually run without the venv.
+    required: false
+    default: "true"
+  browsers:
+    description: Also install the Chromium Playwright uses. Only the two browser tiers need it.
+    required: false
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v5
+
+    - uses: actions/setup-python@v6
+      with:
+        python-version-file: .python-version
+        # Caching pip is pointless for a job that never installs anything, and asking for it there
+        # produced a warning about a lockfile the job does not use.
+        cache: ${{ inputs.install == 'true' && 'pip' || '' }}
+
+    - name: Install dependencies
+      if: inputs.install == 'true'
+      shell: bash
+      run: |
+        python -m venv .venv
+        .venv/bin/pip install --upgrade pip
+        .venv/bin/pip install -r requirements.txt
+
+    - name: Install browsers
+      if: inputs.browsers == 'true'
+      shell: bash
+      run: .venv/bin/playwright install chromium --with-deps
