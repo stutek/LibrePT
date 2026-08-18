@@ -13,6 +13,7 @@
 // controller may import downward, AGENT_RULES §5.3); everything else comes from the data layer.
 
 import { assessBackupHealth, fingerprintState } from "../data/backupHealth.js";
+import { withoutSeedRecords } from "../data/seedProvenance.js";
 import { getState, readBackupHistory } from "../data/stateStore.js";
 import { assessDurability } from "../data/storageDurability.js";
 import { renderBackupBadge } from "../modules/common/applicationHeader.js";
@@ -33,9 +34,22 @@ export async function primeBackupHealth() {
 export function refreshBackupBadge() {
   renderBackupBadge(
     assessBackupHealth({
-      history: cachedHistory,
-      currentFingerprint: fingerprintState(getState()),
+      history: withoutSeededHistory(cachedHistory),
+      currentFingerprint: fingerprintState(withoutSeedRecords(getState())),
       durability: cachedDurability,
     }),
   );
+}
+
+/**
+ * The stored fingerprint with the demo dropped from it too (TODO §28.5).
+ *
+ * Filtering only the live state would turn every seeded record in an older backup's fingerprint
+ * into a phantom REMOVAL, so the warning this change exists to silence would fire even harder. The
+ * fingerprint is `{id, h}` per record, which is enough: a record written before the seed stamp
+ * existed is still recognised by the committed seed id set.
+ */
+function withoutSeededHistory(history) {
+  if (!history?.fingerprint) return history;
+  return { ...history, fingerprint: withoutSeedRecords(history.fingerprint) };
 }

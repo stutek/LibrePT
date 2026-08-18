@@ -29,6 +29,7 @@ import {
   DEFAULT_ROUTINES,
   DEFAULT_SESSIONS,
 } from "./index.js";
+import { COLLECTIONS } from "./recordProjections.js";
 
 // The flag written onto every seeded record. Named for what it means to a reader of raw stored
 // JSON, not for the function that sets it.
@@ -80,4 +81,26 @@ export function isSeedRecord(collection, record) {
  */
 export function stampAsSeeded(record) {
   return { ...record, [SEED_PROVENANCE_FIELD]: true };
+}
+
+/**
+ * The same state with every seeded record removed — "what of this is the trainer's own work?".
+ *
+ * Both counters that answer a question ABOUT THE TRAINER read state through this (TODO §28.5,
+ * §28.6): §3.9's ahead count ("records not on Drive") and §3.8's unbacked-data warning ("this
+ * exists in one evictable place"). Loading the demo tripped both, which was true about the records
+ * and wrong about the person — a sales demo is not work to protect, and an indicator that fires
+ * over one is an indicator a trainer learns to ignore.
+ *
+ * Non-collection fields (`lang`, `theme`, …) pass through, so the result stays state-shaped and can
+ * be handed to anything that reads a whole state.
+ */
+export function withoutSeedRecords(state) {
+  const mine = { ...state };
+  for (const collection of COLLECTIONS) {
+    mine[collection] = (state?.[collection] || []).filter(
+      (record) => !isSeedRecord(collection, record),
+    );
+  }
+  return mine;
 }

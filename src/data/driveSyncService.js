@@ -64,6 +64,7 @@ import {
   revokeAccess,
 } from "./googleAuth.js";
 import { COLLECTIONS } from "./recordProjections.js";
+import { withoutSeedRecords } from "./seedProvenance.js";
 import {
   getState,
   readDriveSyncMeta,
@@ -114,7 +115,16 @@ export async function primeAheadCache() {
 export function getAheadCount() {
   // An empty ancestor makes countChangedRecords see every record as an addition — the honest
   // reading of "none of this has ever been pushed".
-  return countChangedRecords(COLLECTIONS, cachedAncestor || {}, getState());
+  //
+  // Seeded demo records are excluded from BOTH sides (TODO §28.6): the count is about work the
+  // trainer would lose, and a sales demo is not that. Filtering the ancestor too keeps the diff
+  // symmetric, so a demo record that reached Drive before this rule shipped cannot come back as a
+  // phantom deletion.
+  return countChangedRecords(
+    COLLECTIONS,
+    withoutSeedRecords(cachedAncestor || {}),
+    withoutSeedRecords(getState()),
+  );
 }
 
 // "Remote changes not yet pulled" — kept live by refreshSyncCounts() below, not by a sync pass:

@@ -88,30 +88,38 @@ def test_downloading_a_backup_records_it_without_involving_drive(page, local_ser
     assert history["at"] > 0
 
 
-def test_never_synced_counts_the_whole_dataset_as_ahead(page, local_server):
-    """No ancestor means nothing has EVER reached Drive, so everything local is ahead.
+def test_never_synced_counts_every_record_of_the_trainers_own(page, local_server):
+    """No ancestor means nothing has EVER reached Drive, so everything of theirs is ahead.
 
-    This inverts the previous behaviour, which short-circuited to 0 with no ancestor. That was
-    defensible only while no deployment had an OAuth client id and so nobody could sync at all; once
-    one shipped, "connected but never synced" became reachable, and a 0 there does not read as
+    This inverts the behaviour before 2026-08-12, which short-circuited to 0 with no ancestor. That
+    was defensible only while no deployment had an OAuth client id and so nobody could sync at all;
+    once one shipped, "connected but never synced" became reachable, and a 0 there does not read as
     "nothing to report" — it reads as "everything is backed up" while nothing is. The same answer is
     right for a trainer who never connects: their data really is in one evictable place.
+
+    The demo dataset loaded around these clients is NOT theirs and is not counted (TODO §28.6), so
+    the number here is exactly the three records they created — the two claims are one assertion.
 
     Deliberately NOT seeding an ancestor — the absence is the condition under test.
     """
     page.goto(local_server + "clients")
     page.wait_for_selector("#view-client-directory.active")
+    page.wait_for_function(
+        """async () => {
+            const s = await import(new URL('data/stateStore.js', document.baseURI).href);
+            return (s.getState().clients || []).length > 0;
+        }"""
+    )
 
-    page.locator("#btn-add-client").click()
-    page.locator("#client-name").fill("Unbacked Client")
-    page.locator("#dialog-client button[type='submit']").click()
+    for index in range(3):
+        page.locator("#btn-add-client").click()
+        page.locator("#client-name").fill(f"Unbacked Client {index}")
+        page.locator("#dialog-client button[type='submit']").click()
 
-    # The seeded demo database plus this new client is comfortably past 9, so the cell shows the
-    # over-nine treatment rather than a digit; the exact number rides in the aria-label.
     aria = page.locator("#sync-badge").get_attribute("aria-label") or ""
     assert "local changes to push" in aria
     count = int(aria.split(" local change")[0])
-    assert count > 1, f"expected the whole dataset counted as ahead, got {count}"
+    assert count == 3, f"expected only the trainer's three records counted, got {count}"
 
 
 def test_more_than_nine_unpushed_changes_reads_as_an_alarm(page, local_server):
