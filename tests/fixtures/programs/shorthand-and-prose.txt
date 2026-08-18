@@ -1,0 +1,10 @@
+Sure — here is the session.
+
+{"format": "librept.program/1", "title": "Leg Day", "items": [
+  {"name": "Back Squat", "sets": "5x5", "weight": 100, "unit": "kg"},
+  {"name": "Romanian Deadlift", "sets": "3 × 10", "weight": 80},
+  {"notes": "then 10 minutes easy bike"},
+  {"name": "Standing Calf Raise", "sets": "4x12"}
+]}
+
+Warm up thoroughly before the first working set.

@@ -1,0 +1,6 @@
+[
+  {"exercise": "Goblet Squat", "series": "3", "repetitions": "12", "load": "24", "units": "kg"},
+  {"exercise": "Walking Lunge", "series": "3", "repetitions": "10 each leg"},
+  {"pause": "60"},
+  {"movement": "Plank", "sets": "3", "reps": "45s"}
+]

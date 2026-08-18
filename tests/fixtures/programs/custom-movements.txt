@@ -1,0 +1,9 @@
+{
+  "format": "librept.program/1",
+  "title": "Rehab — shoulder",
+  "items": [
+    { "name": "Bench Press", "sets": 3, "reps": 8 },
+    { "name": "Banded Scap Retraction With Pause", "sets": 3, "reps": 12 },
+    { "name": "Prone Y-T-W Complex", "sets": 2, "reps": 10 }
+  ]
+}

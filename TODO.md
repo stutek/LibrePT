@@ -2291,6 +2291,13 @@ argues the same way about authoring as about the gym floor: the app's advantage 
   - a **read from file** button.
 - **The result is the session EDIT view, prepopulated** — the same editor used during a session, not
   a bespoke review screen. That is the decision that makes the rest cheap (see §29.2).
+- **A downloadable TEMPLATE of the format**, so a trainer has a working example to follow rather than
+  a schema to interpret. Generated from `programImport.js` and parsed by a test: an example that
+  stopped being readable would be the app handing out a demonstration of how to fail.
+- **Every parsing failure is shown BEFORE the editor opens** — all of them, not the first. A trainer
+  who lands in an editor and only then notices three blank rows has been handed a puzzle; one told
+  "3 of 12 lines could not be read, here they are" can fix the paste, or go in knowing exactly what
+  to repair. Each failure carries its position and its raw text, so the report points at a line.
 
 ### 29.2 Why the editor-as-review makes ingestion robust
 
@@ -2320,7 +2327,22 @@ trainer retypes, not a corrupted record. On top of that, in order of what it buy
 5. **No second write path.** The editor's own save is the write, the same one a hand-built session
    uses, so there is no import-specific persistence to keep correct.
 
-### 29.3 What is already in the repository, and should be copied rather than invented
+### 29.3 Built so far (2026-08-18)
+
+The pure core, test-first, with nothing wired to a screen yet:
+
+- [programImport.js](src/domain/programImport.js) — the parser, its refusals, `programTemplate()`,
+  and the all-failures report.
+- [catalogMatch.js](src/domain/catalogMatch.js) — catalog id or the CUSTOM mark.
+- [tests/fixtures/programs/](tests/fixtures/programs/) + [the corpus test](tests/unit_js/domain/frozenProgramCorpus.test.mjs)
+  — four real pasted shapes that must keep parsing, and the rule that every paste which fails in real
+  use joins them.
+
+**Still to build**: the import surface (§29.1's four optional inputs, the template download, the
+failure report), the CUSTOM tag in the editor and deck, the copyable prompt, i18n, and the use case
+file.
+
+### 29.4 What is already in the repository, and should be copied rather than invented
 
 - **[§26](TODO.md)'s intake** is the same shape — a document another party produced, reviewed before
   anything is written ([signupFile.js](src/data/signupFile.js) →

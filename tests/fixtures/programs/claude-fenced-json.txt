@@ -1,0 +1,18 @@
+Here's a 4-week upper body progression to get you started:
+
+```json
+{
+  "format": "librept.program/1",
+  "title": "Upper Body — Week 1",
+  "items": [
+    { "name": "Barbell Bench Press", "sets": 4, "reps": 5, "weight": 70, "unit": "kg" },
+    { "rest": 120 },
+    { "name": "Bent-Over Row", "sets": 4, "reps": 8, "weight": 55, "unit": "kg" },
+    { "rest": 90 },
+    { "name": "Overhead Press", "sets": 3, "reps": 8, "weight": 35, "unit": "kg" },
+    { "name": "Face Pull", "sets": 3, "reps": 15, "weight": 20, "unit": "kg" }
+  ]
+}
+```
+
+Let me know if you'd like the weights adjusted for a different starting point.
