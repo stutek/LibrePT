@@ -131,8 +131,14 @@ Every response and tool action must drive measurable, continuous progress toward
      machine that slept mid-run — a suspend drops open sockets, so a network-dependent step like
      `pip-audit` fails with a connection error that reads like a finding but is not one.
 
+     **The run states this itself, on its first line** (`build/__init__.py`'s `print_run_header`,
+     wanted 2026-08-19): every entry point prints label, clock time, cores, browser workers, load
+     average and free memory before it starts working. Quote that line's time rather than a
+     separately-read clock, and read its load figure before blaming a slow stage on the change —
+     the same numbers taken AFTERWARDS measure the pipeline's own exhaust, not the machine it began on.
+
      If a stage blows past its "investigate" column, say so and diagnose — do not keep reporting
-     "still running" indefinitely. Check host load first (`uptime`; this box has 16 cores, so a
+     "still running" indefinitely. Check the header's load figure first (this box has 16 cores, so a
      1-minute load average near or above that means the machine is oversubscribed and the run is
      being starved rather than stuck), then the stage's own log under `.build-reports/`.
    - **Squeaky clean, always — zero warnings, not just zero failures.** The bar is a *clean* build, not a *green-enough* one. Every gate stage — lint, format, unit, e2e, dependency audit, dynamic security, **and the OWASP ZAP scan** — must report **no warnings and no findings**. For ZAP specifically that means `WARN-NEW: 0` **and** `FAIL-NEW: 0`, not merely no FAILs. A warning is either **fixed** at its source or **explicitly suppressed with a written justification** — never left to print and pass.

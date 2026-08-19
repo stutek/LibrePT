@@ -16,6 +16,8 @@ import sys
 import shutil
 import subprocess
 import time
+from collections import namedtuple
+from datetime import datetime
 
 from build.frontend_audit import audit_html_sinks, compare_csp
 from build.testreport import REPORT_DIR, failed_test_ids, print_digest, run_logged
@@ -28,6 +30,84 @@ from deploy.local_http_server import DEV_SERVER_BASE_PATH, DEV_SERVER_PORT
 # below the minutes a real suspend costs — a false suspend teaches people to ignore the warning, which is
 # worse than not printing one.
 SUSPEND_DRIFT_SECONDS = 10.0
+
+
+# What the run is about to compete with, sampled once before any work starts.
+# `load` is the three getloadavg figures and `available_gb` the memory a process could still take;
+# either is None on a platform that will not say, and neither is ever a reason to fail a build.
+HostSnapshot = namedtuple("HostSnapshot", "cores workers load available_gb")
+
+
+def _load_average():
+    """The 1/5/15-minute run queue, or None where the platform has no such thing (Windows)."""
+    try:
+        return os.getloadavg()
+    except (OSError, AttributeError):
+        return None
+
+
+def _available_memory_gb():
+    """MemAvailable, in GiB — what a new process could actually get, which is the number that
+    matters here; MemFree excludes the page cache the kernel would hand back and reads alarmingly
+    low on a healthy machine. Linux only, and None everywhere else rather than a guess."""
+    try:
+        with open("/proc/meminfo", encoding="utf-8") as meminfo:
+            for line in meminfo:
+                if line.startswith("MemAvailable:"):
+                    return int(line.split()[1]) / (1024 * 1024)
+    except (OSError, ValueError, IndexError):
+        return None
+    return None
+
+
+def host_snapshot():
+    """The host as it stands right now. Never raises: it is printed by every entry point, on every
+    platform CI runs, and a status line is not worth a failed build."""
+    cores = os.cpu_count() or 2
+    return HostSnapshot(
+        cores=cores,
+        workers=_playwright_worker_count(),
+        load=_load_average(),
+        available_gb=_available_memory_gb(),
+    )
+
+
+def format_run_header(label, when, snapshot):
+    """The one line printed before a run starts (wanted 2026-08-19).
+
+    It answers the two questions asked AFTER a slow run, at the only moment they can be answered
+    honestly — the start. "When did this begin?" is what AGENT_RULES §2.A.3 makes the agent quote as
+    a wall-clock time, and "was the box busy?" decides whether a stage that blew past its budget is
+    a regression or a machine that was oversubscribed. Sampling the load average afterwards reads
+    the pipeline's own exhaust (see `_playwright_worker_count` for where that misreading already
+    cost three minutes), so it is taken here instead.
+
+    Browser workers are printed beside the core count because they, not the cores, are what explains
+    a slow Stage 2 or 3 — and the two differ by design.
+    """
+    load = (
+        "load n/a"
+        if snapshot.load is None
+        else "load " + " ".join(f"{value:.2f}" for value in snapshot.load)
+    )
+    memory = (
+        "RAM free n/a"
+        if snapshot.available_gb is None
+        else f"{snapshot.available_gb:.1f} GiB RAM free"
+    )
+    return (
+        f">>> {label} · {when} · {snapshot.cores} cores "
+        f"({snapshot.workers} browser workers) · {load} · {memory}"
+    )
+
+
+def print_run_header(label):
+    """Prints the header for `label`, reading the clock and the host at the moment of the call."""
+    print(
+        format_run_header(
+            label, datetime.now().strftime("%Y-%m-%d %H:%M:%S"), host_snapshot()
+        )
+    )
 
 
 def suspend_suspected(monotonic_elapsed, wall_elapsed):

@@ -7,6 +7,7 @@ import time
 from . import (
     PIPELINE_STAGES,
     check_environment,
+    print_run_header,
     run_lint,
     run_tests,
     run_build,
@@ -52,8 +53,11 @@ def _print_summary(verdict, total_seconds, stage_seconds):
 
 if __name__ == "__main__":
     start = time.monotonic()
-    check_environment()
     arg = sys.argv[1] if len(sys.argv) > 1 else ""
+    # Before the environment check, not after: the header is what tells anyone watching that the run
+    # started and when, and `check_environment` can itself spend a minute installing requirements.
+    print_run_header(f"build {arg}".strip())
+    check_environment()
 
     if arg == "lint":
         run_lint()
