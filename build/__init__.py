@@ -269,8 +269,17 @@ _task_cpu = threading.local()
 
 
 def record_task_cpu(run):
-    """Adds one logged run's CPU to the task currently executing on this thread."""
+    """Adds one logged run's cost to the task currently executing on this thread.
+
+    CPU and IO accumulate across a task's several subprocesses because that is what the task spent;
+    peak memory takes the maximum, because two runs of 500MB one after the other never needed a
+    gigabyte.
+    """
     _task_cpu.seconds = getattr(_task_cpu, "seconds", 0.0) + run.cpu_seconds
+    _task_cpu.rss_mb = max(getattr(_task_cpu, "rss_mb", 0.0), run.max_rss_mb)
+    _task_cpu.io_bytes = (
+        getattr(_task_cpu, "io_bytes", 0) + run.io_read_bytes + run.io_write_bytes
+    )
 
 
 # Every task's wall and CPU seconds, in completion order, for the run summary and the history line.
@@ -289,20 +298,35 @@ def _timed_task(name, fn):
     wall_start = time.time()
     start = time.monotonic()
     _task_cpu.seconds = 0.0
+    _task_cpu.rss_mb = 0.0
+    _task_cpu.io_bytes = 0
 
     def report(mark):
         elapsed = time.monotonic() - start
         cpu = getattr(_task_cpu, "seconds", 0.0)
+        rss_mb = getattr(_task_cpu, "rss_mb", 0.0)
+        io_mb = getattr(_task_cpu, "io_bytes", 0) / (1024 * 1024)
         TASK_TIMINGS.append(
-            {"task": name, "wall": round(elapsed, 1), "cpu": round(cpu, 1)}
+            {
+                "task": name,
+                "wall": round(elapsed, 1),
+                "cpu": round(cpu, 1),
+                "peak_rss_mb": round(rss_mb),
+                "io_mb": round(io_mb, 1),
+            }
         )
         # CPU only where a subprocess actually burned some. A pure-Python check that never shells
         # out has none to report, and neither does a task whose work happens inside a container —
         # `docker run` costs this process almost nothing while ZAP works elsewhere. Printing
         # "0.0s cpu" for either would read as a task that did nothing.
-        cost = (
-            f"{elapsed:.1f}s" if cpu < 0.1 else f"{elapsed:.1f}s wall · {cpu:.1f}s cpu"
-        )
+        cost = f"{elapsed:.1f}s"
+        if cpu >= 0.1:
+            cost = f"{elapsed:.1f}s wall · {cpu:.1f}s cpu · {rss_mb:.0f}MB peak"
+            # Disk only when the run actually reached the device. On a warm page cache this is zero,
+            # and printing "0MB io" every time trains the eye to skip the line that matters on the
+            # run where it is not.
+            if io_mb >= 1:
+                cost += f" · {io_mb:.0f}MB io"
         print(f"    ⏱ {name}: {cost} {mark}")
         _warn_if_suspended(name, elapsed, time.time() - wall_start)
 

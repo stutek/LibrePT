@@ -25,6 +25,7 @@ pytestmark = pytest.mark.skipif(
 )
 
 BURN = "x = 0\nfor i in range(4_000_000):\n    x += i\nprint(x)\n"
+HOG = "block = bytearray(300_000_000)\nfor i in range(0, len(block), 4096):\n    block[i] = 1\nprint(len(block))\n"
 SLEEP = "import time\ntime.sleep(0.4)\n"
 
 
@@ -58,3 +59,36 @@ def test_the_result_names_its_fields(tmp_path, monkeypatch):
     assert "ok" in run.output
     assert run.path.endswith("plain.log")
     assert run.cpu_seconds >= 0
+
+
+def test_a_memory_hungry_child_reports_its_peak(tmp_path, monkeypatch):
+    """Peak RSS, from the same rusage as the CPU. It answers the question wall and CPU cannot: a
+    stage that slowed down while its memory grew is swapping or being reclaimed, not doing more work.
+
+    It is a MAXIMUM over the child and its descendants, not a sum — with eight browser workers under
+    one pytest, this is the biggest single worker, which is the number that decides whether the run
+    fits in the machine."""
+    monkeypatch.setattr(testreport, "REPORT_DIR", str(tmp_path))
+
+    small = testreport.run_logged([sys.executable, "-c", "print('ok')"], "small")
+    large = testreport.run_logged([sys.executable, "-c", HOG], "large")
+
+    assert small.max_rss_mb > 0
+    # A large margin, not an exact figure: how much of the allocation stays resident depends on page
+    # faulting, and the promise is only that a hungry child is distinguishable from a small one.
+    assert large.max_rss_mb > small.max_rss_mb + 100, (
+        f"a 300MB allocation should show: {small.max_rss_mb}MB vs {large.max_rss_mb}MB"
+    )
+
+
+def test_disk_io_is_reported_in_bytes_and_is_zero_when_the_cache_serves_it(
+    tmp_path, monkeypatch
+):
+    """ru_inblock counts blocks that actually reached the device, so a warm page cache reports zero —
+    which is the honest answer, not a missing measurement: nothing was read from disk."""
+    monkeypatch.setattr(testreport, "REPORT_DIR", str(tmp_path))
+
+    run = testreport.run_logged([sys.executable, "-c", "print('ok')"], "io")
+
+    assert run.io_read_bytes >= 0
+    assert run.io_write_bytes >= 0

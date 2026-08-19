@@ -9,6 +9,7 @@
 import os
 import re
 import subprocess
+import sys
 from typing import NamedTuple
 
 REPORT_DIR = ".build-reports"
@@ -26,24 +27,41 @@ def log_path(name):
     return os.path.join(REPORT_DIR, f"{name}.log")
 
 
+# A rusage block count is 512 bytes, always — the unit is fixed by the kernel interface rather than
+# by the filesystem's block size.
+RUSAGE_BLOCK_BYTES = 512
+
+
 class RunResult(NamedTuple):
-    """What a logged run produced. Unpacks as the (returncode, output, path) every caller in build/
-    already destructures — `cpu_seconds` is read by name, so adding it rewrote no call site."""
+    """What a logged run produced, and what it cost the machine.
+
+    Read by name rather than unpacked: each field answers a question the others cannot. Wall says a
+    task got slower. CPU says whether it did more work or got less machine. Peak RSS says whether it
+    is close to not fitting. IO says whether it actually touched a disk or the page cache served it.
+    """
 
     returncode: int
     output: str
     path: str
     cpu_seconds: float = 0.0
+    # The MAXIMUM over the child and its descendants, not a sum: with eight browser workers under one
+    # pytest, this is the largest single worker — the number that decides whether the run fits.
+    max_rss_mb: float = 0.0
+    # Blocks that actually reached the device. A warm page cache reports zero, which is the honest
+    # answer rather than a missing measurement: nothing was read from disk.
+    io_read_bytes: int = 0
+    io_write_bytes: int = 0
 
 
 def _spawn_and_reap(cmd, timeout):
-    """Runs `cmd` and returns (returncode, output, cpu_seconds) with the CPU that child ACTUALLY
-    burned — its own plus every worker it spawned and reaped.
+    """Runs `cmd` and returns (returncode, output, rusage) — what that child ACTUALLY cost, its own
+    plus every worker it spawned and reaped.
 
     `os.wait4` rather than a process-wide `getrusage(RUSAGE_CHILDREN)` reading, because the gate runs
     its tasks concurrently: a process-wide delta would charge the e2e suite for the demo suite
     running beside it, which is precisely the comparison the number exists to make. Falls back to
-    plain `subprocess.run` where `wait4` does not exist (Windows), reporting 0.0 rather than a guess.
+    plain `subprocess.run` where `wait4` does not exist (Windows), reporting nothing rather than a
+    guess.
     """
     if not hasattr(os, "wait4"):
         finished = subprocess.run(
@@ -53,7 +71,7 @@ def _spawn_and_reap(cmd, timeout):
             text=True,
             timeout=timeout,
         )
-        return finished.returncode, finished.stdout or "", 0.0
+        return finished.returncode, finished.stdout or "", None
 
     process = subprocess.Popen(
         cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True
@@ -63,9 +81,15 @@ def _spawn_and_reap(cmd, timeout):
     finally:
         if process.stdout:
             process.stdout.close()
-    _, status, usage = os.wait4(process.pid, 0)
+    try:
+        _, status, usage = os.wait4(process.pid, 0)
+    except ChildProcessError:
+        # Something else in this interpreter reaped the child first — a SIGCHLD handler, another
+        # library's cleanup. The run still succeeded or failed on its own terms; only the resource
+        # figures are lost, and a lost measurement must never fail a build.
+        return process.wait(), output, None
     process.returncode = os.waitstatus_to_exitcode(status)
-    return process.returncode, output, usage.ru_utime + usage.ru_stime
+    return process.returncode, output, usage
 
 
 def run_logged(cmd, log_name, timeout=None):
@@ -83,7 +107,7 @@ def run_logged(cmd, log_name, timeout=None):
     """
     path = log_path(log_name)
     try:
-        returncode, output, cpu_seconds = _spawn_and_reap(cmd, timeout)
+        returncode, output, usage = _spawn_and_reap(cmd, timeout)
     except subprocess.TimeoutExpired as expired:
         # .stdout is None on POSIX (communicate() raises before collecting) and str on Windows in
         # text mode, so normalise rather than assuming either.
@@ -97,7 +121,20 @@ def run_logged(cmd, log_name, timeout=None):
 
     with open(path, "w", encoding="utf-8") as f:
         f.write(output)
-    return RunResult(returncode, output, path, cpu_seconds)
+    if usage is None:
+        return RunResult(returncode, output, path)
+    return RunResult(
+        returncode,
+        output,
+        path,
+        cpu_seconds=usage.ru_utime + usage.ru_stime,
+        # ru_maxrss is kilobytes on Linux and bytes on macOS: the kernel interface differs, so
+        # normalise here rather than reporting two different units under one name.
+        max_rss_mb=usage.ru_maxrss
+        / (1024 * 1024 if sys.platform == "darwin" else 1024),
+        io_read_bytes=usage.ru_inblock * RUSAGE_BLOCK_BYTES,
+        io_write_bytes=usage.ru_oublock * RUSAGE_BLOCK_BYTES,
+    )
 
 
 def failed_test_ids(output):
