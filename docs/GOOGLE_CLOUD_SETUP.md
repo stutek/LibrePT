@@ -487,7 +487,7 @@ answers.
 heredoc and a `curl` pipeline. Authorization codes are single-use, so writing one to a file between
 steps meant any stumble after that — a mistyped secret, a stale shell — burned it and the remedy was
 to start over. The exchange now happens in the same process, and the scopes are no longer retyped per
-run. See [AGENT_RULES: Agent Tooling](../AGENT_RULES.md) and [agent_tools/INDEX.md](../agent_tools/INDEX.md).
+run. See [agent_tools/INDEX.md](../agent_tools/INDEX.md).
 
 If it reports **no refresh token**, this client already holds a live grant: revoke it at
 <https://myaccount.google.com/permissions> and run the command again.
@@ -611,8 +611,8 @@ So the canary enforces a **rotation deadline** instead, measured from the `minte
 `python -m agent_tools.credential_expiry` runs before the live suite on every canary run, and the
 minting tool prints the rotation date when it writes the file. A live canary therefore turns red a
 month early; one that had stopped comes back red the moment it next runs, which is when someone is
-looking. It is a hard failure rather than a warning on purpose — [AGENT_RULES: run the gate in full](../AGENT_RULES.md)
-forbids a gate step that warns and returns success.
+looking. It is a hard failure rather than a warning on purpose: a gate step that prints a warning and
+returns success gives false assurance, which is worse than no check at all.
 
 **To rotate**: repeat B2 (the same one command), then B4. Nothing else changes — same client, same
 scopes, same secret name.

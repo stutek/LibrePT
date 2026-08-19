@@ -264,34 +264,57 @@ def _check_section_refs(line, links, path, rel, number, cache, all_files):
     return findings
 
 
-# A rule cited by NUMBER, anywhere — "AGENT_RULES §2.1", "AGENT_RULES.md §4", and the same forms
-# inside the rules file itself. The number is a position in a list that is reordered whenever a
-# lesson lands, so a citation of one makes "put the important rule first" an edit across the
-# repository: on 2026-08-19 it made a rules reorder touch 87 files. Rules are cited by NAME.
-RULE_NUMBER_REF = re.compile(r"AGENT_RULES(?:\.md)?\)?[ :]*§\s*\d")
-# Inside AGENT_RULES.md the citation usually drops the file name — "the tier AGENT_RULES §4.2 names"
-# is caught above, but a bare "see §4.2" is not, and there it means a rule. A § qualified by ANOTHER
-# document (`TODO §6.4`, `docs/DATA_MODEL.md §1`) is that document's own numbering and is fine: the
-# rules file is allowed to point outward, just not at itself.
-SELF_RULE_REF = re.compile(r"(?<![\w./])(?<!\.md )§\s*\d")
-QUALIFIED_REF = re.compile(r"(?<![\w./])(?!AGENT_RULES\b)[\w./]+ §\s*\d")
+# The agent rules are for AGENT consumption only. Any other document that mentions them has made the
+# rulebook a dependency of itself: rewording or reordering a rule then reaches files that describe
+# behaviour, requirements or work — measured once at 87 source and test files. A document states its
+# own requirement instead.
+RULE_MENTION = re.compile(r"AGENT_RULES")
+# The only files that may name it: the three loaders an agent reads on arrival, the two document maps
+# that catalogue every file in the repository, and the contributor onboarding note. All of them POINT
+# at the rules; none of them leans on one.
+RULE_POINTERS = {
+    "AGENT_RULES.md",
+    "CLAUDE.md",
+    "GEMINI.md",
+    "AGENTS.md",
+    "INDEX.md",
+    "README.md",
+    "CONTRIBUTING.md",
+}
 
 
 def _check_rule_citations(line, path, rel, number):
-    """Rule citations must name the rule, never its number — see RULE_NUMBER_REF."""
-    is_rules_file = path.name == "AGENT_RULES.md"
-    if is_rules_file:
-        line = QUALIFIED_REF.sub("", line)
-    pattern = SELF_RULE_REF if is_rules_file else RULE_NUMBER_REF
-    if not pattern.search(line):
+    """The rules are read by agents, never referenced by documents — see RULE_MENTION."""
+    if path.name in RULE_POINTERS or not RULE_MENTION.search(line):
         return []
-    where = "this file's own rules" if is_rules_file else "a rule"
     return [
         (
             rel,
             number,
-            f"cites {where} by number — cite it by name instead, so reordering the rules "
-            "changes nothing outside AGENT_RULES.md",
+            "mentions the agent rules — state the requirement itself instead, so this file does "
+            "not depend on how the rules are worded or ordered",
+        )
+    ]
+
+
+# Inside AGENT_RULES.md a bare "see §4.2" means a rule, and a rule's number is a position that
+# changes whenever the order does. A § qualified by ANOTHER document (`TODO §6.4`) is that
+# document's own numbering and is fine: the rules file may point outward, just not at itself.
+SELF_RULE_REF = re.compile(r"(?<![\w./])§\s*\d")
+QUALIFIED_REF = re.compile(r"(?<![\w./])(?!AGENT_RULES\b)[\w./]+ §\s*\d")
+
+
+def _check_self_rule_refs(line, path, rel, number):
+    if path.name != "AGENT_RULES.md":
+        return []
+    if not SELF_RULE_REF.search(QUALIFIED_REF.sub("", line)):
+        return []
+    return [
+        (
+            rel,
+            number,
+            "refers to one of its own rules by number — name it, so the rules can be reordered "
+            "by importance without rewriting the references to them",
         )
     ]
 
@@ -309,6 +332,7 @@ def check_file(path, cache, all_files):
             _check_section_refs(line, links, path, rel, number, cache, all_files)
         )
         findings.extend(_check_rule_citations(line, path, rel, number))
+        findings.extend(_check_self_rule_refs(line, path, rel, number))
 
     return findings
 

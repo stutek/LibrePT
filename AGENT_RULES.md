@@ -144,11 +144,10 @@ Corrections are the most expensive thing the maintainer produces. One given twic
 5. **Edit and reorder the rules; do not only append.** A lesson usually belongs *inside* an existing
    rule, sharpening it — find that rule first and extend it. A file that only grows stops being read,
    at which point every rule in it is decorative.
-6. **Reorder freely: a rule's number is a position, never an identifier.** Importance decides the
-   order, and importance changes — so renumbering must cost nothing anywhere. That holds only
-   because **no file, including this one, ever cites a rule by number**: rules are cited by NAME, so
-   moving one changes exactly one file. Gated by `agent_tools/doclinks.py`, which fails the build on
-   a numbered rule citation in any Markdown file.
+6. **Reorder freely: this file is read, never referenced.** Importance decides the order, and
+   importance changes, so reordering must cost nothing anywhere — which holds only because nothing
+   points back here. Numbers are positions for a reader, not identifiers, and even this file names
+   its own rules rather than numbering them. Gated by `agent_tools/doclinks.py`.
 7. **Write the rule and the evidence, never the apology.** Evidence is one clause, not a story.
 8. **Quote the new or changed rule VERBATIM in the reply**, saying which rule it extends or that it
    is new. It binds every future session, so rejecting it must cost one sentence rather than three
@@ -158,13 +157,19 @@ Corrections are the most expensive thing the maintainer produces. One given twic
    checkable; the test is whether an agent that read the rule and nothing else behaves correctly.
    **The rules live HERE and nowhere else** — [CLAUDE.md](CLAUDE.md) and [GEMINI.md](GEMINI.md) load
    this file, [INDEX.md](INDEX.md) maps to it, [TODO.md](TODO.md) and [CHANGELOG.md](CHANGELOG.md)
-   record work rather than rules. Any of them may NAME a rule; none may restate one or carry its
-   number.
-10. **Code and tests reference use cases only.** [use_cases/](use_cases/) states WHY the app behaves
-    as it does — which is what a test protects and what a comment may point at. This file states HOW
-    work is done, and changes for reasons the code does not care about, so a comment or a test that
-    cites it has coupled the two: reordering the rules once made 87 source and test files need
-    editing. A comment states its own reason in its own words.
+   record work rather than rules — and none of them cites one (see below).
+10. **These rules are for agent consumption only — nothing in the repository cites them.** Code and
+    tests work from behaviour and requirements: [use_cases/](use_cases/) states WHY the app behaves
+    as it does, which is what a test protects and what a comment may point at. Documents state their
+    own requirement in their own words. This file states HOW work is done and changes for reasons
+    none of them care about, so a citation couples them to it — reordering these rules once made 87
+    source and test files need editing.
+
+    Only the three loaders an agent reads on arrival ([CLAUDE.md](CLAUDE.md),
+    [GEMINI.md](GEMINI.md), `AGENTS.md`), the document maps ([INDEX.md](INDEX.md),
+    [README.md](README.md)) and [CONTRIBUTING.md](CONTRIBUTING.md) may name this file at all. They
+    POINT at it; they do not lean on it. `agent_tools/doclinks.py` fails the build on any other
+    mention.
 
 ---
 

@@ -167,16 +167,49 @@ def test_a_render_time_placeholder_is_not_a_dead_link(docs):
 # --- rule citations must not point at a number --------------------------------------------------
 
 
-def test_a_rule_cited_by_number_is_a_finding(docs):
-    """A rule's number is a position in a list that gets reordered whenever a lesson lands. Any file
-    that cites one turns "put the important rule first" into an edit across the repository — which is
-    what happened on 2026-08-19, when reordering the rules touched 87 files."""
-    path = docs("TODO.md", "Gated because AGENT_RULES §2.1 requires it.\n")
+def test_citing_a_rule_at_all_is_a_finding(docs):
+    """Code, tests and docs work from behaviour and requirements, never from the rules that govern
+    how the work is done. A document that justifies itself by pointing at a rule has made the
+    rulebook a dependency of the thing it describes — so the requirement is stated locally, and the
+    rules are read rather than referenced."""
+    path = docs(
+        "TODO.md", "Gated because AGENT_RULES: run the gate in full requires it.\n"
+    )
 
     findings = findings_for(path, [path])
 
-    assert findings, "a numbered rule citation must not pass"
-    assert "by name" in findings[0]
+    assert findings, "citing a rule must not pass"
+    assert "state the requirement" in findings[0]
+
+
+def test_a_citation_cannot_hide_inside_a_link(docs):
+    """`[AGENT_RULES.md](AGENT_RULES.md): Agent Tooling says…` is a citation wearing a pointer's
+    clothes. Only the document maps and the loaders may name the file at all."""
+    path = docs(
+        "TODO.md", "Per [AGENT_RULES.md](AGENT_RULES.md): Agent Tooling, one module.\n"
+    )
+    rules = docs("AGENT_RULES.md", "# Rules\n")
+
+    assert findings_for(path, [path, rules])
+
+
+def test_pointing_AT_the_rules_document_is_not_citing_a_rule(docs):
+    """An index row or a "read this first" pointer names the FILE; it does not lean on a rule to
+    justify anything, and an agent has to be able to find the rules."""
+    index = docs(
+        "INDEX.md", "| [AGENT_RULES.md](AGENT_RULES.md) | `guidelines` | The rules. |\n"
+    )
+    rules = docs("AGENT_RULES.md", "# Rules\n")
+
+    assert findings_for(index, [index, rules]) == []
+
+
+def test_a_rule_cited_by_number_is_a_finding_too(docs):
+    """The numbered form is the same coupling, plus a number that moves whenever the rules are
+    ordered by importance."""
+    path = docs("TODO.md", "Gated because AGENT_RULES §2.1 requires it.\n")
+
+    assert findings_for(path, [path])
 
 
 def test_the_rules_file_may_not_cite_its_own_numbers_either(docs):
@@ -187,10 +220,10 @@ def test_the_rules_file_may_not_cite_its_own_numbers_either(docs):
     assert findings_for(path, [path])
 
 
-def test_a_rule_cited_by_name_passes(docs):
-    """The whole point: naming the rule survives any reordering, and reads without a second file."""
+def test_a_loader_may_still_tell_an_agent_to_read_them(docs):
+    """CLAUDE.md, GEMINI.md and AGENTS.md exist to load the rules; that is their whole content."""
     path = docs(
-        "TODO.md", "Gated because AGENT_RULES: run the gate in full requires it.\n"
+        "GEMINI.md", "Before anything else, read and follow `AGENT_RULES.md`.\n"
     )
 
     assert findings_for(path, [path]) == []
