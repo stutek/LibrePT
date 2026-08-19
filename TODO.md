@@ -2707,3 +2707,28 @@ established. Two candidates, both trades:
   reliable rather than less, since a sleep tuned to one machine is a race on another.
 
 **Not worth doing:** `--dist=worksteal` (46.9s vs 47.4s, noise), and raising workers (see above).
+
+---
+
+## 36. [nice to have] Rename the `main` branch to `trunk`
+
+**Wanted 2026-08-19 (Simon), explicitly a nice-to-have.** The repo is trunk-based by rule — no
+feature branches, one releasable line — and the branch name is the last place that does not say so.
+Cosmetic, so it waits for a quiet day rather than riding alongside feature work.
+
+**Not destructive; history is untouched.** The cost is everything that NAMES the branch, and the
+order is the whole risk:
+
+1. `git branch -m main trunk`, push `trunk`, set its upstream.
+2. **Switch the GitHub default branch to `trunk` BEFORE deleting `main`.** The default branch is what
+   GitHub Pages deploys from; deleting `main` while it is still the default takes the live site down
+   until someone notices.
+3. Update `.github/workflows/deploy.yml`'s `branches: [main]` **in the same push**. This is the bad
+   failure mode: miss it and the deploy simply stops firing — a green tree and no deploy, with
+   nothing red to tell you.
+4. Re-apply branch protection; rules do not follow a rename.
+5. Sweep the prose mentions (`AGENT_RULES.md`, `CONTRIBUTING.md`, a few docs) BY HAND — `grep -w main`
+   also matches `#main-content`.
+6. Each existing clone: `git branch -m`, `git fetch`, `git branch -u origin/trunk`.
+
+Everything above is reversible except the Pages outage step 2 exists to avoid.
