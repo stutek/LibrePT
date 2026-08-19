@@ -16,39 +16,32 @@ Binding on every AI agent contributing to **LibrePT** (Claude, Gemini, Codex, Cu
 outcome everything serves: **an elegant, low-interaction, offline-first Personal Trainer platform**,
 used one-handed on a gym floor.
 
-Rules are short on purpose, ordered by how much they cost when broken, and carry evidence only where
-they are counter-intuitive without it. Keep responses the same way: decisions, trade-offs, progress —
-no fluff.
+Rules are ordered by what they cost when broken, and kept short so all of them stay read. Evidence
+appears only where a rule is counter-intuitive without it.
 
 ---
 
 ## 1. Values
 
-Every rule below is one of these applied to a specific situation. When a rule does not cover the
-case in front of you, decide by these — and when a rule stops serving them, change the rule.
+Every rule below applies one of these. When no rule covers the case, decide by these — and when a
+rule stops serving them, change the rule.
 
-- **Separation of concerns** — one reason to change per file, per module, per document. Behaviour,
-  requirements and process are three different things and never share a home.
-- **Single source of truth** — a value, a rule or a decision is written once. A second copy is
-  correct on the day it is written and silently wrong afterwards.
-- **Locality** — the reason lives next to the thing. A comment at the code beats a pointer to a
-  document; a requirement stated in place beats a citation.
-- **Light coupling** — nothing depends on how something else is worded, ordered or built
-  internally. If reordering one file edits another, that is the defect.
-- **Anti-fragility** — prefer the design where the mistake cannot be made over the one that
-  forbids it. A property that survives carelessness beats a rule that needs remembering.
-- **Simplicity** — the explicit version a reader can follow beats the clever one. Verbosity in
-  action, not another layer of abstraction.
-- **Self-documenting code** — names carry *what*; comments carry *why*. A reader should rarely
-  need a second file open.
-- **Validation automation** — anything that must stay true gets a check that fails the build. A
-  convention nobody can verify is a convention that has already drifted.
-- **Test first** — the test states the promise in the caller's words, and failing once is the only
-  proof it can fail at all.
-- **Test isolation** — every test starts from a known state and can fail alone. Sharing state
-  between tests buys seconds and sells the thing tests are for: order-dependent failures cascade,
-  point at innocent code, and turn one bug into a screen of red.
-- **Small incremental changes** — one coherent change per commit, verified before the next starts.
+- **Separation of concerns** — one reason to change per file. Behaviour, requirements and process
+  never share a home.
+- **Single source of truth** — write a value, rule or decision once. A copy is correct the day it is
+  written and silently wrong after.
+- **Locality** — the reason lives next to the thing: a comment at the code, not a pointer to a
+  document.
+- **Light coupling** — nothing depends on how something else is worded, ordered or built inside. If
+  reordering one file edits another, that is the defect.
+- **Anti-fragility** — prefer the design where the mistake cannot be made over the rule that forbids
+  it.
+- **Simplicity** — the explicit version a reader can follow beats the clever one.
+- **Self-documenting code** — names carry *what*, comments carry *why*.
+- **Validation automation** — anything that must stay true gets a check that fails the build.
+- **Test first** — the test states the promise in the caller's words; failing once proves it can.
+- **Test isolation** — every test starts from a known state and can fail alone.
+- **Small increments** — one coherent change per commit, verified before the next starts.
 
 ---
 
@@ -56,107 +49,78 @@ case in front of you, decide by these — and when a rule stops serving them, ch
 
 1. **Apply edits directly**, choosing the best architectural option, without waiting for
    clarification.
-2. **Auto-commit coherent work** to `main` without being asked: stage the files this change touched,
-   one logical change per commit, so the user can review or roll back. Never sweep in unrelated or
-   concurrently-edited files.
-3. **Work directly on `main`** — no feature branches. `main` must stay releasable — the
-   GitHub Pages deploy runs on every push.
+2. **Auto-commit coherent work** to `main` unasked: stage what this change touched, one logical
+   change per commit. Never sweep in unrelated or concurrently-edited files.
+3. **Work directly on `main`** — no feature branches. It must stay releasable; the Pages deploy runs
+   on every push.
 4. **Never push.** The user pushes; that is their deploy trigger.
-5. **Write commit messages in this format** — the subject becomes a title in `git log`, CI and PRs:
-   - `type(scope): imperative summary`, lowercase, no trailing period, **≤72 chars** (aim ~60).
-   - Blank line, then a body wrapped at 72 columns explaining **why**: the constraint, the decision,
-     what was measured. Not a restatement of the diff.
-   - Footer `Co-Authored-By: <the model actually running> <noreply@anthropic.com>`.
-   - Never put the body in a CI `run-name` — Actions expressions cannot split a string.
+5. **Write commit messages as `type(scope): imperative summary`** — lowercase, no trailing period,
+   ≤72 chars. Blank line, then a body wrapped at 72 columns saying **why**: the constraint, the
+   decision, what was measured. Footer `Co-Authored-By: <the model actually running>
+   <noreply@anthropic.com>`. Never put the body in a CI `run-name` — Actions cannot split a string.
 6. **No interactive modals.** Questions, options and recommendations go in the chat response.
-7. **Stage from `git status --short`, never from the paths you remember touching.** A forgotten file
+7. **Stage from `git status --short`**, never from the paths you remember touching. A forgotten file
    leaves HEAD broken while your own tree passes, because the gate certifies the tree it ran on.
-   Re-read `git status` between commits when splitting a change.
 
 ---
 
 ## 3. The Pipeline Gate
 
 1. **Run `.venv/bin/python -m build check` in full before every code commit, and report the result.**
-   A test subset is not verification — it skips lint, the frontend audit and the dependency scan. Fix
-   pre-existing failures rather than tolerating them.
+   A test subset is not verification. Fix pre-existing failures rather than tolerating them.
 
-   **Prose-only exception.** A commit touching *only* Markdown that no gate reads as data runs
-   `.venv/bin/python -m agent_tools.doclinks` instead, and says so. Gate INPUT is not prose:
-   `docs/SRC_MODULES.md`, any `INDEX.md` a tool parses, and this file when it changes a rule a tool
-   enforces. Mixed code+Markdown commits are code commits. When unsure, run the gate.
+   **Prose-only exception**: a commit touching *only* Markdown that no gate reads as data runs
+   `.venv/bin/python -m agent_tools.doclinks` instead, and says so. Gate INPUT is not prose —
+   `docs/SRC_MODULES.md`, any `INDEX.md` a tool parses, this file when it changes a rule a tool
+   enforces. Mixed commits are code commits.
 
    | Command | What it does |
    | :--- | :--- |
-   | `.venv/bin/python -m build check` | The gate: stages 1→4, each running only if the previous was clean |
-   | `.venv/bin/python -m build` | Gate, then bundle `src/` into `dist/` |
-   | `.venv/bin/python -m deploy` | Publish the built `dist/` |
+   | `python -m build check` | The gate: stages 1→4, each running only if the previous was clean |
+   | `python -m build` | Gate, then bundle `src/` into `dist/` |
+   | `python -m deploy` | Publish the built `dist/` |
 
    | Stage | What runs | Typical | Investigate past |
    | :--- | :--- | :--- | :--- |
-   | 1 | Ruff, Biome, `pip-audit`, `tests/unit/`, `tests/unit_js/`, static audits (HTML-sink/CSP, doc graph, pipeline gating, catalog, layering, complexity) — parallel | ~4s (~13s on a cold pip-audit) | 60s |
-   | 2 | `tests/medium/` — 193 tests, ~240s of call time at 8 workers | ~48s | 90s |
-   | 3 | Two tasks side by side: `tests/e2e/` at 7 workers, the demo/walkthrough suite at 1 | ~2min | 4min |
-   | 4 | OWASP ZAP baseline scan | ~15s (~75s on a cold `.venv`) | 3min (killed at 20min) |
-   | **all** | | **~3m** | **6min** |
+   | 1 | Ruff, Biome, `pip-audit`, `tests/unit/`, `tests/unit_js/`, static audits | ~4s | 60s |
+   | 2 | `tests/medium/` — 193 tests | ~48s | 90s |
+   | 3 | `tests/e2e/` at 7 workers ∥ demo suite at 1 | ~2min | 4min |
+   | 4 | OWASP ZAP baseline scan | ~15s | 3min |
+   | **all** | | **~3min** | **6min** |
 
-   Re-measured 2026-08-19 on a quiet 16-core box. The browser stages had drifted 3–4x past the
-   previous numbers purely by growth — the suites gained ~120 tests — and both now run near their
-   parallel floor (e2e at 81% efficiency), so the only remaining lever is total call time, not
-   scheduling. Re-measure when a stage moves without tests being added.
-
-   Both browser stages use `build._playwright_worker_count` (half the cores), never `-n auto`:
-   full-core parallelism starves compositor frames AND bursts past the dev server's TCP listen
-   backlog, producing `Page.goto` timeouts unrelated to the change. Stage 4 is sequential with stage
-   3 for the same reason — ZAP flooding the dev server mid-suite cost 30 spurious failures
-   (2026-08-03). CI reproduces the same four stages in the same order, declared once in
-   `build/__init__.py`'s `PIPELINE_STAGES` and asserted by `agent_tools/pipeline_gates.py`
-   ([TODO §6.4](TODO.md)).
-2. **Announce a WALL-CLOCK finish time before starting anything long.** For `build` commands
-   `print_run_header` prints it (last run's duration on this machine, plus the time this one should
-   land by) — quote that line. Elsewhere read `date`. "Running the pipeline…" with no number leaves
-   the user unable to tell a normal run from a hung one.
-3. **Read the header's second line before blaming a slow stage on the change**: cores, browser
-   workers, free memory, and the load average with its per-core verdict. The budgets above assume a
-   quiet box; measured afterwards, load is the pipeline's own exhaust. If a stage passes its
-   "investigate" column, say so and diagnose from `.build-reports/` — do not report "still running"
-   indefinitely.
-4. **Finish with zero warnings, not just zero failures** — every stage, ZAP included (`WARN-NEW: 0` *and*
-   `FAIL-NEW: 0`). Fix at the source or suppress with a written justification; never let one print
-   and pass. Lint and format are always clean: auto-fix (`biome format --write`, `ruff format`) and
-   re-run.
-5. **Suppress only what is genuinely not an issue; never defer one.** Legitimate only for a false
-   positive or something inapplicable to this architecture. Never for a real finding — no gate may
-   carry an allowlist for unfixed debt, and no bare `# noqa` without a non-applicability rationale.
-6. **Give every `IGNORE` line a rationale AND a `RE-CHECK` condition** — an invalidating
-   condition, not a date ("if `googleAuth.js` moves to `initCodeClient`, validate a `state`
-   parameter"). When a change fires that condition, re-verify **in that change**, by reading the code
-   rather than the comment. A rationale nobody can re-derive today is deleted, not carried.
-7. **Ask the user for permission to audit the suppressions when they fall due, and say what is
-   overdue.** A green gate proves nothing about what it was told to ignore: `WARN-NEW: 0` counts
-   only what `deploy/zap/zap-baseline.conf` does not already silence, and the same blindness applies
-   to every `# noqa`, `biome-ignore`, named carve-out and allowlist in the repository. Read the audit
-   schedule's "Last done" dates in [TODO.md](TODO.md) at the start of any session that touches the
-   gate; when one is past its cadence, say so and ask before spending the time — it is minutes of
-   work whose findings need judgement, so it is the user's call, not a silent one either way.
-   Re-verify by reading the code each rationale claims, never by re-reading the rationale itself,
-   then record the date and what changed.
+   Both browser stages take half the cores (`build._playwright_worker_count`), never `-n auto`:
+   full-core parallelism starves compositor frames and bursts the dev server's TCP backlog, giving
+   `Page.goto` timeouts unrelated to the change. Stage 4 is sequential with 3 for the same reason.
+   CI reproduces the four stages from `PIPELINE_STAGES`, asserted by `agent_tools/pipeline_gates.py`.
+2. **Announce a WALL-CLOCK finish time before starting anything long.** `build` prints its own —
+   quote that line; elsewhere read `date`.
+3. **Read the run header before blaming a slow stage on the change.** It gives cores, workers, free
+   memory and load; each stage prints the cores the machine averaged, and the closing line reports IO
+   stall and swapping. Budgets above assume a quiet box.
+4. **Finish with zero warnings, not just zero failures** — every stage, ZAP included (`WARN-NEW: 0`
+   *and* `FAIL-NEW: 0`). Lint and format are always clean: auto-fix and re-run.
+5. **Suppress only what is genuinely not an issue; never defer one.** No gate may carry an allowlist
+   for unfixed debt, and no bare `# noqa` without a non-applicability rationale.
+6. **Give every `IGNORE` line a rationale AND a `RE-CHECK` condition** — an invalidating condition,
+   not a date. When a change fires it, re-verify in that change by reading the code, not the comment.
+   A rationale nobody can re-derive is deleted, not carried.
+7. **Ask permission to audit the suppressions when they fall due, and say what is overdue.** A green
+   gate proves nothing about what it was told to ignore. Read the audit dates in [TODO.md](TODO.md)
+   at the start of any session that touches the gate; the findings need judgement, so running it is
+   the user's call.
 8. **Never swallow a non-zero exit code**, including ZAP's `2` (warnings) and `3` (scan errored). A
-   stage that cannot run is a failure, not a pass to log. **A scan that reaches nothing is a failed
-   scan** — the ZAP container needs host networking to hit the dev server.
-9. **Add no new test failures, and never silence one.** **A failing e2e test fails the build — no
-   automatic re-run**: retry-and-forgive once hid a real `requestAnimationFrame` race for weeks.
-   Root-cause it; never call a failure "probably flaky".
-10. **Treat a detected time jump as interruption, not regression.** Wall time inconsistent with the work
-   done = the machine slept, dropping sockets and stalling timers. Re-run before investigating.
-11. **Read the digest, don't re-run blind.** `.build-reports/*.log` plus the printed exceptions, call
-    chain and failing node ids come first.
-12. **Capture no artifacts in a gated run** — not tracing, video, or screenshots.
-    `--screenshot=only-on-failure` cost ~23% of a green e2e stage while writing nothing. Escalate per
-    failure instead: re-run the one node id with `--screenshot=on` or `--tracing=on`.
-13. **Run the gate as its own command, through the front door.** Importing `build`'s `run_*`
-    functions skips the staging that gives the gate its meaning, and folding it onto a heredoc edit
-    makes the one command everything rests on unverifiable at a glance.
+   scan that reaches nothing is a failed scan.
+9. **Add no new test failures, and never silence one. A failing e2e test fails the build — no
+   automatic re-run.** Retry-and-forgive once hid a real `requestAnimationFrame` race for weeks; never
+   call a failure "probably flaky".
+10. **Treat a detected time jump as interruption, not regression** — the machine slept, dropping
+    sockets and stalling timers. Re-run before investigating.
+11. **Read the digest, don't re-run blind**: `.build-reports/*.log` plus the printed exception, call
+    chain and failing node ids.
+12. **Capture no artifacts in a gated run** — screenshots cost ~23% of a green e2e stage while
+    writing nothing. Escalate per failure with `--screenshot=on` or `--tracing=on`.
+13. **Run the gate as its own command, unpiped, through the front door.** Importing `build`'s `run_*`
+    skips the staging that gives the gate its meaning, and its output is already the report.
 
 ---
 
@@ -164,234 +128,165 @@ case in front of you, decide by these — and when a rule stops serving them, ch
 
 Corrections are the most expensive thing the maintainer produces. One given twice was not captured.
 
-1. **Capture every correction as a learning event, in the SAME change** — as is a repeated mistake,
-   a *"why are you doing X?"*, or any expressed dissatisfaction. Not "noted for next time": the next
-   session is a different context window.
-
-   **A lesson does not have to arrive as a complaint.** A stated value, preference, principle or
-   standard — calm, declarative, often appended to something else — is the most durable kind, and
-   the easiest to read as background. Every trigger listed above is the shape of an objection, which
-   is exactly why a paragraph naming ten engineering values went uncaptured until it was asked about.
-
-   **Mine every prompt for a pattern worth keeping, not only the ones that correct you.** Ask of
-   each: is there a general practice here that these rules do not yet state? Adopt it only if it is
-   generic and generally accepted wisdom — something that would hold on another project, in another
-   language, for another agent. Anything true only of this task belongs in the code comment, the
-   [TODO.md](TODO.md) entry or the test, and adding it here would cost every future session a
-   paragraph to read.
-
-   **Read a message for ALL of its items before acting on any.** A request to DO something and a
-   statement of how things should BE routinely arrive together; acting on the first and treating the
-   rest as framing loses the half that outlives the task. Name the items back in the reply — an
-   omission is then visible immediately, to both of us, rather than a session later.
-2. **Place each lesson by asking one question: who needs this next?**
+1. **Capture every correction as a learning event, in the SAME change** — also a repeated mistake, a
+   *"why are you doing X?"*, or any dissatisfaction. The next session is a different context window.
+2. **A lesson need not arrive as a complaint.** A stated value, preference or standard — calm,
+   declarative, often appended to something else — is the most durable kind and the easiest to miss.
+3. **Mine every prompt for a general practice these rules do not state**, and adopt it only if it is
+   generic and generally accepted wisdom. Anything true only of this task goes in the comment, the
+   TODO entry or the test.
+4. **Read a message for ALL of its items before acting on any**, and name them back in the reply, so
+   an omission is visible at once rather than a session later.
+5. **Place each lesson by asking who needs it next:**
 
    | The lesson is about… | It belongs in… |
    | :--- | :--- |
    | how any agent must work here | **this file** |
    | why one piece of code is the way it is | a comment **at that code** |
-   | work still to do, or a decision taken | [TODO.md](TODO.md), dated, naming who decided |
+   | work to do, or a decision taken | [TODO.md](TODO.md), dated, naming who decided |
    | what shipped | [CHANGELOG.md](CHANGELOG.md) |
-   | a behaviour that must not regress | **a test**, in the tier that matches how much of the app it boots |
+   | a behaviour that must not regress | **a test**, in the tier that matches how much it boots |
    | the maintainer's context and preferences | the agent's private memory |
 
-3. **Never leave a rule governing work here in private memory alone** — unreadable, unreviewable,
-   uncommitted, different per agent. Memory may point at a rule; it may not be its home.
-4. **Detect dissatisfaction proactively and ask rather than guess.** On *"why are you…"*, *"no"*, a
-   repeated instruction or a small correction: stop, state what you think the problem is, and ask
-   whether the answer changes what you write — in prose, never an interactive modal.
-5. **Edit and reorder the rules; do not only append.** A lesson usually belongs *inside* an existing
-   rule, sharpening it — find that rule first and extend it. A file that only grows stops being read,
-   at which point every rule in it is decorative.
-6. **Reorder freely: this file is read, never referenced.** Importance decides the order, and
-   importance changes, so reordering must cost nothing anywhere — which holds only because nothing
-   points back here. Numbers are positions for a reader, not identifiers, and even this file names
-   its own rules rather than numbering them. Gated by `agent_tools/doclinks.py`.
-7. **Write the rule and the evidence, never the apology.** Evidence is one clause, not a story.
-   **Write it as an instruction** — imperative, addressed to the agent doing the work: "Stage from
-   `git status`", not "staging from remembered paths has caused problems". A rule a reader has to
-   convert into an action first is a rule that gets skipped under time pressure.
-8. **Quote the new or changed rule VERBATIM in the reply**, saying which rule it extends or that it
-   is new. It binds every future session, so rejecting it must cost one sentence rather than three
-   sessions of work done under it.
-9. **Refactor the neighbourhood on every entry**: merge overlapping bullets, delete
-   what is obsolete, move a rule to the section it belongs in. Rules stay short, concrete and
-   checkable; the test is whether an agent that read the rule and nothing else behaves correctly.
-   **The rules live HERE and nowhere else** — [CLAUDE.md](CLAUDE.md) and [GEMINI.md](GEMINI.md) load
-   this file, [INDEX.md](INDEX.md) maps to it, [TODO.md](TODO.md) and [CHANGELOG.md](CHANGELOG.md)
-   record work rather than rules — and none of them cites one (see below).
-10. **Cite these rules nowhere — they are for agent consumption only.** Code and
-    tests work from behaviour and requirements: [use_cases/](use_cases/) states WHY the app behaves
-    as it does, which is what a test protects and what a comment may point at. Documents state their
-    own requirement in their own words. This file states HOW work is done and changes for reasons
-    none of them care about, so a citation couples them to it — reordering these rules once made 87
-    source and test files need editing.
-
-    Only the three loaders an agent reads on arrival ([CLAUDE.md](CLAUDE.md),
-    [GEMINI.md](GEMINI.md), `AGENTS.md`), the document maps ([INDEX.md](INDEX.md),
-    [README.md](README.md)) and [CONTRIBUTING.md](CONTRIBUTING.md) may name this file at all. They
-    POINT at it; they do not lean on it. `agent_tools/doclinks.py` fails the build on any other
-    mention.
+6. **Never leave a rule governing work here in private memory alone** — unreadable, unreviewable,
+   different per agent. Memory may point at a rule; it may not be its home.
+7. **Detect dissatisfaction proactively and ask rather than guess.** Stop, say what you think the
+   problem is, and ask whether the answer changes what you write — in prose, never a modal.
+8. **Edit and reorder the rules; do not only append.** A lesson usually belongs *inside* an existing
+   rule. A file that only grows stops being read, at which point every rule in it is decorative.
+9. **Reorder freely: this file is read, never referenced.** Numbers are positions for a reader, not
+   identifiers — nothing points back here, including this file. Gated by `agent_tools/doclinks.py`.
+10. **Write the rule and the evidence, never the apology**, and write it as an instruction: "Stage
+    from `git status`", not "staging from remembered paths has caused problems".
+11. **Quote the new or changed rule VERBATIM in the reply**, saying what it extends. Rejecting it
+    then costs one sentence rather than sessions of work done under it.
+12. **Refactor the neighbourhood on every entry**: merge overlapping bullets, delete what is
+    obsolete, move a rule to the section it belongs in. The test is whether an agent that read the
+    rule and nothing else behaves correctly.
+13. **Cite these rules nowhere — they are for agent consumption only.** Code and tests work from
+    behaviour and requirements: [use_cases/](use_cases/) states WHY the app behaves as it does.
+    Documents state their own requirement in their own words. Only the loaders
+    ([CLAUDE.md](CLAUDE.md), [GEMINI.md](GEMINI.md), `AGENTS.md`), the maps
+    ([INDEX.md](INDEX.md), [README.md](README.md)) and [CONTRIBUTING.md](CONTRIBUTING.md) may name
+    this file at all.
 
 ---
 
 ## 5. Code & Test Architecture
 
 The front end is a buildless native-ES-module app under `src/`. Many small single-responsibility
-files beat few large ones: less context to load, fewer collisions, and a directory tree that
-documents itself.
+files beat few large ones: less context to load, fewer collisions, a tree that documents itself.
 
 1. **Give each file one responsibility.** Extract a unit as soon as it grows inside `src/app.js`.
 2. **Organise by concern**: UI in `src/components/`, seed data in `src/data/`, and tests in the tier
    that matches how much of the app they boot —
-   - `tests/unit_js/` — pure logic, no DOM, no persistence, mirroring the `src/` subpath. Runs under
-     Node's built-in `node:test` (Stage 1) with a vendored, checksum-verified Node
-     (`build.ensure_node_binary`) and no npm dependency at all.
-   - `tests/medium/` — ONE component mounted via a `src/appBoot.js` boot step against the real
-     `index.html` markup, with `app.js` intercepted (`tests/medium/_harness.py`'s `load_with_stub`).
-     No router, IndexedDB, service worker or demo seed.
-   - `tests/e2e/` — full flows that need navigation, persistence or a real boot.
+   - `tests/unit_js/` — pure logic, no DOM, no persistence, mirroring the `src/` subpath. Node's
+     built-in `node:test` under a vendored, checksum-verified Node; no npm dependency at all.
+   - `tests/medium/` — ONE component mounted via a `src/appBoot.js` boot step against real
+     `index.html` markup, `app.js` intercepted (`tests/medium/_harness.py`). No router, IndexedDB,
+     service worker or demo seed.
+   - `tests/e2e/` — full flows needing navigation, persistence or a real boot.
    - `tests/unit/` — Python static and unit tests.
 
    Group by feature, not one file per test.
-3. **Decouple by dependency injection, not cross-imports.** Extracted components receive `state`,
-   `t`, `escapeHTML`, launch callbacks; for reassigned globals pass an accessor
-   (`getActiveSession()`). Layering is gated by `agent_tools/import_layers.py`: `data/` → `domain/` →
-   `modules/common/` → `modules/<feature>/` → `controllers/` → `app.js`, each importing only from
-   strictly below. `data/` is records at rest; `domain/` is the training vocabulary (pure, no DOM, no
-   storage). Cross-feature imports are allowed; importing *up* is not, because that is what costs a
-   module its independent mountability.
-4. **Head every module with a short comment**: its single responsibility and its injected
-   dependencies. Descriptive names over clever ones.
-5. **Keep `src/` to the runtime app, nothing else.** Dev tooling, docs and CI stay out of the app tree; no
-   source files loose at the repo root.
+3. **Decouple by dependency injection, not cross-imports.** Components receive `state`, `t`,
+   `escapeHTML`, callbacks; reassigned globals are passed as accessors. Layering is gated by
+   `agent_tools/import_layers.py`: `data/` → `domain/` → `modules/common/` → `modules/<feature>/` →
+   `controllers/` → `app.js`, importing only from strictly below. `data/` is records at rest;
+   `domain/` is the training vocabulary, pure. Importing *up* costs a module its independent
+   mountability, which `tests/medium/` depends on.
+4. **Head every module with a comment** naming its single responsibility and injected dependencies.
+5. **Keep `src/` to the runtime app** — it ships wholesale to `dist/`, so no docs, tooling or CI
+   there, and no source loose at the repo root.
 6. **Update [docs/SRC_MODULES.md](docs/SRC_MODULES.md) in the same change** as any module added,
-   moved or removed — gated by `agent_tools/catalog_coverage.py`. The catalog lives in `docs/`, never
-   under `src/`: `run_build` copies that tree wholesale into `dist/`, so anything there ships.
-7. **Write self-documenting code inside each module too.** Names carry *what*; comments carry *why* — the
-   constraint, edge case or decision the code cannot state itself. Delete dead code rather than
-   commenting it out.
+   moved or removed — gated by `agent_tools/catalog_coverage.py`.
+7. **Write self-documenting code inside each module too.** Comments carry the constraint or decision
+   the code cannot state. Delete dead code rather than commenting it out.
 8. **Assert the BEHAVIOUR a caller depends on, never the mechanics that produce it.** Ask: if I
-   rewrote the internals and kept the contract, would this assertion hold? A test pinned to mechanics
-   fails on harmless refactors and passes while the behaviour is broken.
+   rewrote the internals and kept the contract, would this assertion hold?
 
    | Pinned to mechanics | Pinned to behaviour |
    | :--- | :--- |
    | `erasurePseudonym(id) === "Client #JANE-A"` | the label is stable, differs per client, carries no PII |
    | `drive.created === 1` | the register ends up holding both erasures |
-   | `assert.deepEqual(health, {…})` | `lost` reports the shortfall the caller reads |
    | `el.classList.contains("hidden")` | `expect(el).to_be_hidden()` |
    | `id.length === 22` | ids are unique, sortable, URL-safe |
 
-   Carve-outs: a class name that IS a contract for another module or stylesheet (say which); an
-   avoided side effect ("a second sync writes nothing to Drive"); and a persisted format — a stored
-   field, a file, a bookmarked URL — because changing it breaks data already written. Name tests for
-   the promise, not the function.
-9. **Prefer saying a thing several times over adding a layer that says it once.**
-   Explicit declarations beat a registry keyed on a discriminator, a config table, or a dispatcher
-   standing between caller and effect. This is **not** licence to duplicate logic — the same
-   behaviour written twice still gets extracted; what is rejected is an intermediary whose only job
-   is to *choose*. Say so when the count of explicit declarations becomes the larger cost.
-10. **Write the test first.** It states the promise in the caller's words, and
-    failing once is the only proof the test can fail at all. It replaces the build-then-poke probe,
-    which leaves nothing behind. Where the shape is not knowable until something renders (layout,
-    geometry), build first and **say that is why**.
-11. **Scope a side effect added at a shared seam to the event that motivated it.** Enumerate
-    what else calls that seam, **including re-entry with identical arguments**: collapsing the
-    messages drawer on every `switchView` broke the drawer, because expanding it rewrote the URL and
-    re-entered the same route 3ms later. Test the seam's OTHER caller, through the real control.
+   Three carve-outs, each NAMED in the test: a class that IS a contract, an avoided side effect ("a
+   second sync writes nothing"), and a persisted format that outlives the code. Name tests for the
+   promise, not the function.
+9. **Prefer saying a thing several times over adding a layer that says it once.** What is rejected is
+   an intermediary whose only job is to *choose* — a `kind` field plus a dispatcher. Duplicated
+   *logic* still gets extracted.
+10. **Write the test first.** Where the shape is not knowable until something renders, build first
+    and say that is why.
+11. **Scope a side effect added at a shared seam to the event that motivated it.** Enumerate what
+    else calls that seam, including re-entry with identical arguments, and test the other caller
+    through the real control.
 
 ---
 
 ## 6. Working With the Maintainer
 
 1. **Evaluate what the user brings — the request and their own edits alike.** In a sentence or two:
-   is it well-scoped, what is missing, is the effort proportionate (would a cheaper approach or a
-   smaller model do), and how does an edit of theirs refine the domain model? Then proceed. Skip it
-   for small unambiguous asks.
-2. **Raise what they cannot see from where they sit** — real-world gym friction (basement offline
-   states, sweaty hands, equipment pivots, group-session distraction) and architectural
-   opportunities. Proactively, before being asked.
+   scope, what is missing, whether the effort is proportionate. Then proceed. Skip it for small asks.
+2. **Raise what they cannot see from where they sit** — gym friction (offline basements, sweaty
+   hands, equipment pivots, group sessions) and architectural opportunities, before being asked.
 3. **Answer a question; never record it as a decision.** "Any reason for X?" explores the option
-   space. Answer, recommend, leave it open — do not record it in [TODO.md](TODO.md) as **Decided**,
-   narrate it back as settled, or drop the option from later work. Mark something Decided only when
-   the user said so in words that decide it, dated to when they said it.
+   space: answer, recommend, leave it open. Mark something Decided only when they said so, dated.
 
 ---
 
 ## 7. Product Constraints That Outlive Any One Feature
 
-1. **Never put meaning only in a hover.** LibrePT is used on a phone on the gym floor: a `title` tooltip
-   is unreachable on touch, so hover-only information is information nobody has. Touch targets need
-   real padding, not just visible text.
-2. **In support surfaces, prefer the exact always-present identifier over the pretty one.** The
-   header stamp is the **commit SHA** — every build has one, while most deploys sit between tags.
-   Richer identity (schema, build time) goes one tap away, and copyable.
-3. **Keep code version and data-schema version as separate axes.** The commit SHA identifies the code
-   (there are no release tags — [TODO §16](TODO.md)); `schemaVersion` identifies the data shape and
-   is the only axis storage is keyed on. See [docs/DATA_MODEL.md §1](docs/DATA_MODEL.md).
+1. **Never put meaning only in a hover.** On a phone a tooltip is unreachable, so hover-only
+   information is information nobody has. Touch targets need real padding.
+2. **In support surfaces, prefer the exact always-present identifier**: the commit SHA, which every
+   build has, over a tag most deploys sit between. Richer identity goes one tap away, copyable.
+3. **Keep code version and data-schema version as separate axes.** The SHA identifies the code;
+   `schemaVersion` identifies the data shape and is the only axis storage is keyed on.
 
 ---
 
 ## 8. Documentation & the Knowledge Graph (OKF v0.1)
 
-1. **Never duplicate feature lists or domain specs.** Architecture and features:
-   [README.md](README.md). Workflows: [use_cases/](use_cases/). One vocabulary across docs and code.
-2. **Give every Markdown file YAML frontmatter**: at minimum `type` (`overview`, `guidelines`,
-   `use_case`, `index`), plus `title`, `description`, `status`, `tags`.
-3. **Keep an `INDEX.md` in every knowledge directory** catalog table: file, `type`, link.
-4. **Link related concepts explicitly** with relative Markdown links, so agents can traverse the
-   graph.
-5. **Navigate BY the graph.** [docs/SRC_MODULES.md](docs/SRC_MODULES.md) (one line per runtime
-   module) and the feature's `§` in [TODO.md](TODO.md) reach the code in one read and carry the
-   rationale with it. Grep for a symbol, never for a concept.
+1. **Never duplicate feature lists or domain specs.** Architecture: [README.md](README.md).
+   Workflows: [use_cases/](use_cases/).
+2. **Give every Markdown file YAML frontmatter**: `type`, `title`, `description`, `status`, `tags`.
+3. **Keep an `INDEX.md` in every knowledge directory** — file, `type`, link.
+4. **Link related concepts explicitly**, with relative links, so agents can traverse the graph.
+5. **Navigate BY the graph**: [docs/SRC_MODULES.md](docs/SRC_MODULES.md) and the feature's `§` in
+   [TODO.md](TODO.md) reach the code in one read, with the rationale attached. Grep for a symbol,
+   never for a concept.
 
 ---
 
 ## 9. Agent Tooling: Build the Tool, Don't Re-Improvise the Script
 
-1. **Check [agent_tools/INDEX.md](agent_tools/INDEX.md) before improvising**; run
-   `python -m agent_tools.<name>` rather than rebuilding its logic in a shell pipeline.
+1. **Check [agent_tools/INDEX.md](agent_tools/INDEX.md) before improvising.**
 2. **Promote a script to a tool when it will run again, fails silently otherwise, and is cheap and
-   deterministic** — all three. **Build it for yourself first; wire it into the gate only once it has
-   caught something more than once**: a hand-run tool costs only its writing,
-   while a Stage 1 task costs every commit forever. Some recurring checks want to stay periodic
-   audits in [TODO.md](TODO.md) instead, because their findings need judgement.
-3. **Ship a tool complete**: the module (docstring saying *why it exists*), a catalog row, a unit
-   test in [tests/unit/](tests/unit/), and a Stage 1 task if it should gate commits.
-4. **On small files, just make the edit.** A heredoc that rewrites two lines costs more tokens than
-   the direct edit, is written blind, discards the read-before-edit guard, and shows no reviewable
-   diff. A script earns its keep only on volume — many exact replacements in one pass. Scripting the
-   same shape twice means it wants to be a tool.
-
-   **And a bulk pass may only match an ANCHOR, never a shape.** Measured in one session: 60 explicit `(file, exact old text, new text)` replacements applied with zero
-   collateral and reported the three that did not match; two regexes matching by shape — a bare
-   `" ()"`, and a substitution table applied twice over the same line — broke arrow functions in
-   eleven modules, renumbered references twice, and cost a full regeneration from `HEAD`. So:
-   - **Assert every intended site applied.** A silent no-op is the failure mode that ships broken
-     code, and the list of misses is the only proof the pass did what it claimed.
-   - **Match text that cannot occur outside the target.** `" ()"` occurs in every arrow function;
-     `§N` occurs in another document's numbering. If the pattern needs a lookahead to be safe, it is
-     the wrong pattern.
-   - **Verify structurally before anything else** — parse every touched file, then lint, then the
-     gate. A syntax error found by the formatter three steps later has already been built on.
-   - **When repair starts, stop repairing.** Regenerate the touched files from `HEAD` and re-apply
-     the anchored edits; chasing the damage forward costs more than the pass saved. That recovery is
-     only available if the edits were written as explicit replacements in the first place.
-5. **Keep cross-references alive** — gated: `agent_tools/doclinks.py` fails the build on a dead
-   link, anchor or `§N.M`.
-6. **Make every pipeline task gate something.** A CI job nothing lists in `needs:` reports red while
-   the deploy ships anyway; a Stage 1 check with no CI job blocks your commit but not the deploy.
-   `agent_tools/pipeline_gates.py` enforces both directions. Group fast pure-analysis checks into one
-   job — a fresh runner costs ~30s apiece. **Local green is not CI green**: `owasp-zap-scan` and
-   `static-security-audits` run bare system Python with no `pip install`, so check what the calling
-   job installs.
+   deterministic** — all three. Build it for yourself first; wire it into the gate only once it has
+   caught something more than once. Checks needing judgement stay periodic audits in
+   [TODO.md](TODO.md).
+3. **Ship a tool complete**: the module with a docstring saying why it exists, a catalog row, a unit
+   test, and a Stage 1 task if it should gate commits.
+4. **On small files, just make the edit.** A script earns its keep only on volume, and then may match
+   only an ANCHOR — exact known text — never a shape: a bare `" ()"` cleanup broke arrow functions in
+   eleven modules. Assert every intended site applied, parse every touched file before linting, and
+   if repair starts, regenerate from `HEAD` and re-apply rather than chasing the damage forward.
+5. **Keep cross-references alive** — `agent_tools/doclinks.py` fails the build on a dead link, anchor
+   or `§N.M`.
+6. **Make every pipeline task gate something.** A CI job nothing `needs:` reports red while the
+   deploy ships; a Stage 1 check with no CI job blocks your commit but not the deploy.
+   `agent_tools/pipeline_gates.py` enforces both directions. Group fast checks into one job — a fresh
+   runner costs ~30s. **Local green is not CI green**: the ZAP and static-audit jobs run bare system
+   Python with no `pip install`.
 
 ---
 
 ## 10. Local Dev Server
 
-1. **Leave it running** across tasks (`python -m deploy.local_http_server`, on `DEV_SERVER_PORT`
-   under `DEV_SERVER_BASE_PATH`, [TODO §28.1](TODO.md)) — the user tests changes in the browser.
-2. **Leave stopping it to the user**, not the agent, unless a change genuinely needs a restart (say so first).
-3. **Reuse it** if it is already listening; do not spawn a duplicate.
+1. **Leave it running** across tasks (`python -m deploy.local_http_server`, `DEV_SERVER_PORT` under
+   `DEV_SERVER_BASE_PATH`) — the user tests changes in the browser.
+2. **Leave stopping it to the user**, unless a change genuinely needs a restart (say so first).
+3. **Reuse it** if it is already listening; never spawn a duplicate.
