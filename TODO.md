@@ -2676,12 +2676,18 @@ other side (12 workers bought 5% over 8).
 established. Two candidates, both trades:
 
 - **The page load is ~0.32s of every medium test** (route + goto + boot + splash removal, measured
-  directly) — about 60s of the tier. Several files already share one load across their tests via a
-  fixture; five more load per test from a single stub constant and could do the same, at the cost of
-  isolation between tests in a file.
+  directly) — about 60s of the tier. **Rejected**, on three counts. No file shares a page today (an
+  earlier note here claimed some did; it had counted `_mount()` helper DEFINITIONS, not navigations —
+  16 tests still produce 16 loads). Sharing would leak state between tests in a file: not just DOM,
+  but ES-module state that no DOM cleanup resets, in exactly the components that keep some. It would
+  make tests order-dependent, so one early failure cascades into unrelated red. And it would not even
+  pay: `--dist=load` spreads a file's tests across workers, so a module-scoped page is built once per
+  WORKER unless files are pinned with `--dist=loadfile` — which was removed on 2026-08-07 because it
+  made a stage as slow as its heaviest file (215s → 98s when dropped).
 - **`tests/e2e/` holds 144 fixed sleeps totalling ~70s** (`wait_for_timeout`), against 26 totalling
   ~10s in `tests/medium/`. Each is a duration where an expectation would do — the walkthrough test
   fixed on 2026-08-19 went from 2.2s of sleeping to ~0.1s of waiting for the thing it actually
-  needed. This is the larger and safer of the two.
+  needed. **This is the one to do**: it trades no isolation, and every fix makes its test MORE
+  reliable rather than less, since a sleep tuned to one machine is a race on another.
 
 **Not worth doing:** `--dist=worksteal` (46.9s vs 47.4s, noise), and raising workers (see above).
