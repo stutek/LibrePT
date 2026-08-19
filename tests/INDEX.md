@@ -168,3 +168,24 @@ new one when a version is added.
 `local_server` — which refuses to run against a dev server whose revision does not match the working
 tree, because a long-lived server silently outliving its own source once invalidated a full day of
 measurements.
+
+**Two Playwright assertions that lie quietly**, both found on 2026-08-18 when a harness helper let a
+suite race ahead of the app:
+
+- **`inner_text()` is rendered text; `expect(...).to_have_text()` compares something else.** The
+  walkthrough panel uppercases its progress line in CSS, so `inner_text()` returns `"STEP 1 OF 4"`
+  while the assertion sees the source casing — and `not_to_have_text(progress_before)` was therefore
+  true before anything had happened at all. Match a regex on the part that carries meaning (the step
+  NUMBER, case-insensitively) rather than comparing against a string read back out of the DOM.
+- **A wait on "A **or** B" can return in a state that is neither.** Waiting for "the step advanced OR
+  Next became enabled" looked robust and was not: Next is briefly enabled between a step completing
+  and the guide advancing, so the wait returned mid-transition and the next click landed on a button
+  that was disabled again by the time it arrived. Decide which outcome to expect BEFORE the action —
+  here, from the step number — and wait for exactly that one.
+
+**The frozen programme corpus** lives in [tests/fixtures/programs/](fixtures/programs/) — real pasted
+shapes an assistant or a spreadsheet actually produces, which
+[unit_js/domain/frozenProgramCorpus](unit_js/domain/frozenProgramCorpus.test.mjs) must keep parsing
+(TODO §29.2). Same rule as the backup corpus: never edit one, and **every paste that fails in real
+use joins it**. A parser tested only against examples its author invented drifts toward the shapes
+that author imagined.

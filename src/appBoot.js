@@ -267,5 +267,8 @@ export async function bootWalkthrough({ shareDemo, hasData, t, goHome } = {}) {
   // is already open in front of them reads as a guide that has lost its place.
   if (!stepPreconditionMet(GYM_FLOOR_TOUR.steps[0])) goHome?.();
 
-  return startGuidedWalkthrough({ tour: GYM_FLOOR_TOUR, t });
+  // `navigate` is the same function, injected so the walkthrough can restore a step's own view when
+  // the trainer walks Back into it — the overlay knows WHICH route from the script, and nothing
+  // about how this app performs one.
+  return startGuidedWalkthrough({ tour: GYM_FLOOR_TOUR, t, navigate: goHome && ((_) => goHome()) });
 }
