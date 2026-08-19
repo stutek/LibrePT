@@ -2507,3 +2507,122 @@ pacing.
    `wait`, because `performStep` already takes one. Two e2e tests stay behind to prove the real thing
    end to end, and one asserts the PACING itself, which is currently asserted nowhere.
 3. **Leave it.** 15s of wall time per run against a day's work is not obviously worth the churn.
+
+---
+
+## 35. The demo STORY — a chaptered scenario, not a longer tour
+
+**Brainstormed 2026-08-19 (Simon).** §23.5's `gym_floor` tour is a four-tap wedge: a stranger sees a
+working clipboard in three seconds. This is the other artifact — a narrative that follows three
+friends from a leaflet to their second session, and shows the parts a wedge cannot: intake, consent,
+a mid-session injury, the feedback loop closing, and a one-off reschedule. **Both must exist and stay
+separate.** A stranger gets the wedge; someone who already leaned in gets the story.
+
+### 35.1 Shape before content
+
+- **Chapters, each independently playable and each ending somewhere useful.** ~23 events is 4–6
+  minutes at the current pace, and nobody watches an unbroken five-minute demo of software they do
+  not yet use. `?demo=story` plays the lot; `?demo=story&chapter=floor` plays one. A chapter is a
+  tour in the existing sense, so the engine ([demoTourPlayer.js](src/modules/demo/demoTourPlayer.js),
+  [domain/demoTour.js](src/domain/demoTour.js)) is unchanged and a chapter is DATA.
+- **Every step still carries an expectation**, including the narrated ones — the rule `validateTour`
+  enforces, and the reason a script was chosen over a recording. A paper-action card is not exempt:
+  its expectation is that the card is on screen and dismissible. What is NOT allowed is a step that
+  claims something about the app while asserting nothing about it.
+- **The paper track is TEXT on a paper-textured card, never a mock screenshot.** LibrePT's honest
+  claim is that a PT can stay on paper for the parts that are legally happier on paper; a rendered
+  fake of a signed form would be exactly the stale-asset problem §23.5 refused, only forged.
+- **The split screen is the one genuinely new engine capability.** Desktop shows trainer and client
+  side by side; mobile transitions between them. **Recommendation: the client half is a real second
+  app instance in an iframe**, driven by the same player, because the intake, consent and RSVP
+  surfaces are already real pages ([signupDelivery.js](src/modules/intake/signupDelivery.js),
+  `consent-form-*.html`, [rsvpView.js](src/modules/rsvp/rsvpView.js)). A hand-built "client phone"
+  panel would be a recording with extra steps, and would drift the day those pages change.
+- **Two hands, or one hand and a label.** With two panes live, a viewer must never have to guess who
+  acted; each pane is labelled and only the acting pane is lit.
+
+### 35.2 The events
+
+**Chapter A — three friends arrive.**
+
+1. The trainer's board, with the message feed and no pending work — the before state the story moves
+   away from.
+2. The trainer books the pair of weekly slots: muscle gain, 2× a week, fixed day and time, 60-minute
+   slot, three participants. **Needs the recurrence model (35.3a).**
+3. The trainer shares one self-onboarding link per friend, each carrying the calendar invite for the
+   series.
+4. **The screen splits** — trainer left, a friend's phone right (mobile: a transition, not a split).
+5. On the phone: the introduction form — name, contact, goal, and injuries *offered, never demanded*
+   (§1.7's ruling, [clientSignup.js](src/data/clientSignup.js)).
+6. Consent, with the notice version and the language it was given under stamped into the record —
+   Art. 7(1) is about being able to DEMONSTRATE it later.
+7. The paper card, narrated: the same consent on a printed form, signed and dated, filed by the
+   trainer, its form version recorded (§3.5). Same record, different pen.
+8. The submission travels as a FILE; the trainer reviews it and decides
+   ([signupReviewDialog.js](src/modules/clients/signupReviewDialog.js)) — the feature's trust
+   boundary, and the beat where the story says a stranger cannot write into the register.
+9. The other two are compressed into one beat, not replayed. A demo that shows the same form three
+   times teaches that the app is slow.
+10. Back on the phone: the invite is answered ([rsvpView.js](src/modules/rsvp/rsvpView.js)) and the
+    trainer's board fills in.
+
+**Chapter B — the first programme.**
+
+11. The trainer builds the session as circuits, with rests as real items (§8.6), to **45 minutes net
+    inside the 60-minute slot** — the net-vs-slot number is the whole point of this chapter and
+    should be visible while it is being built. **Needs the net-time meter (35.3b).**
+12. The same circuit is bound to all three participants at once. **Needs §8.1.**
+
+**Chapter C — on the floor.**
+
+13. The session opens: one clipboard, three participant tabs, the circuit running.
+14. Mid-circuit a client mentions a recent minor injury; the trainer records it **without leaving the
+    session and without stopping the clock**. **Needs an in-session injury capture (35.3c).**
+15. The trainer swaps that one movement **for that one participant**; the other two are untouched and
+    the demo shows they are untouched.
+16. On the deadlift the trainer sees bad posture and leaves a coaching note against that client's
+    exercise — one-handed, mid-set. It is a note about a MOVEMENT, so it must resurface the next time
+    that movement is programmed for that client, not only in a session log. **Needs 35.3d.**
+17. Circuits progress; Too Easy is signalled once, so the story keeps §23.4's wedge inside it.
+18. The last circuit completes; the session is marked complete, net time against slot time shown.
+
+**Chapter D — the evening after.**
+
+19. The trainer switches to the dark theme, and the rest of the story runs in it — the only "look at
+    our settings" beat that earns its place, because it is what an evening at home actually looks
+    like.
+20. Planning the next session: the injury swap and the deadlift note are **already there**, waiting
+    against the right client. This is the payoff for events 14–16 and the reason they are in the
+    story at all.
+21. A pre-agreed one-off move of the NEXT occurrence two hours later — **the series does not change**
+    — which lands 30 minutes across a 1-to-1 cardio session. The occupancy grid shows the two side by
+    side ([overlapLanes.js](src/domain/overlapLanes.js)); the overlap is accepted deliberately, on
+    screen, rather than warned away. **Needs 35.3a and §1.3.**
+22. The updated invite goes out to the three; the replies land on the board.
+23. Thank you, and the two ways onward already decided in §30.2 — play around, or clear the demo
+    data.
+
+### 35.3 What the story needs that does not exist
+
+The scenario is worth writing down now precisely because it names these; each is a product gap the
+demo would otherwise paper over.
+
+a. **A recurrence model.** Sessions today are individual records. "2× a week, fixed" (event 2) and
+   "move only the next occurrence" (event 21) are one concept — a series plus per-occurrence
+   exceptions — and it is the largest unbuilt piece in the story. It also decides what a second
+   `.ics` means: `SEQUENCE`/`RECURRENCE-ID` on one occurrence, not a new event
+   ([calendarInvite.js](src/data/calendarInvite.js)).
+b. **A net-vs-slot time meter** while a programme is being authored (event 11).
+c. **In-session injury capture** (event 14) — one-handed, non-blocking, and it must reach the client
+   record rather than being a session-only note, since the whole point is that it changes future
+   programming.
+d. **A movement-scoped coaching note** (event 16) that resurfaces when that movement is next
+   programmed for that client. Neighbour of §7's feedback loop; not the same thing as a plan
+   adjustment.
+e. **The split-screen / persona-transition presentation** (event 4), per 35.1.
+f. **Shared exercise binding across participants** (event 12) — §8.1.
+
+**So the order to build it in is: chapter C first** (it needs c and d, and is the chapter closest to
+what already runs), then D, then A. Chapter B is blocked on §8.1. Written this way each chapter ships
+as a demo the moment its feature does, and no chapter waits on the recurrence model except the two
+events that genuinely need it.
