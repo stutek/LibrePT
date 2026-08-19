@@ -11,7 +11,7 @@ The check is a pure text comparison, no font parsing and no `fonttools`: the shi
 declares `.fa-NAME:before{content:"\\fXXX"}` for exactly the glyphs it can render, so the CSS is a
 faithful manifest of the font beside it — the two are generated together and cannot disagree. That
 keeps this dependency-free and fast enough for Stage 1, and it means subsetting never has to add a
-build-time dependency: regeneration stays a deliberate, committed act (AGENT_RULES §6), the same
+build-time dependency: regeneration stays a deliberate, committed act, the same
 way Node, Biome and the ZAP rules are vendored rather than fetched.
 
 **Runtime-built class names are the whole difficulty.** Three call sites assemble the name from a

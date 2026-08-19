@@ -10,7 +10,7 @@ independent of anything Google asks for.
 It is also a hard requirement for OAuth verification: Google demands the privacy policy live on a
 domain we can prove we own, and `github.com` is not one (see `docs/GOOGLE_CLOUD_SETUP.md`).
 
-**The Markdown stays canonical and stays where it is.** AGENT_RULES §5.6 forbids documentation under
+**The Markdown stays canonical and stays where it is.** Documentation may not live under
 `src/` because `run_build` copies that tree wholesale into `dist/`. That rule is about agent-facing
 knowledge files shipping by accident; here shipping is the entire point, so the resolution is to keep
 every source `.md` in the doc graph (still gated by `doclinks`) and generate the HTML from it. One

@@ -11,7 +11,7 @@
 # Like `/intake`, this is a CLIENT-facing route and therefore stateless: no store, no boot of the
 # trainer's app, nothing written to a phone that is not theirs.
 #
-# Written before the page existed, per AGENT_RULES §5.10.
+# Written before the page existed.
 
 import json
 import urllib.parse

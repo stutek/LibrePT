@@ -14,11 +14,11 @@ e2e suite has already gone red and told you which step, rather than this quietly
 would reintroduce exactly the problem — an asset that looks fine and shows a broken app.
 
 Not a gate (see agent_tools/INDEX.md): it needs a browser, a running dev server, and produces a
-binary artifact. AGENT_RULES §2.A.3 also forbids blanket video capture in the gated run — it once
+binary artifact. Blanket video capture is also forbidden in the gated run — it once
 turned a ~4-minute e2e stage into 12+ — so recording is on demand, here, and never a suite flag.
 
 Usage:
-  # with the dev server already up on DEV_SERVER_PORT (AGENT_RULES §2.C: leave it running)
+  # with the dev server already up on DEV_SERVER_PORT
   .venv/bin/python -m agent_tools.demo_recording
   .venv/bin/python -m agent_tools.demo_recording --viewport 390x844 --out .build-reports/demo.webm
 """

@@ -198,7 +198,7 @@ def dismiss_splash(request):
 # Raised for NAVIGATION ONLY. Action and `expect()` timeouts stay at 30s on purpose: "the page took
 # a while to connect" is a latency fact about a contended dev box, but "an element was not
 # actionable for 30 seconds" is a claim about the app, and inflating that would launder a real bug
-# into a pass (AGENT_RULES §2.A.3 — never forgive a failure you have not root-caused).
+# into a pass.
 NAVIGATION_TIMEOUT_MS = 60000
 
 
@@ -393,7 +393,7 @@ def _running_revision(base_url):
 def assert_server_is_current(base_url):
     """Refuse to test against a dev server running code older than the working tree.
 
-    AGENT_RULES §2.C keeps this server alive across tasks on purpose, so it can outlive edits to
+    The dev server is kept alive across tasks on purpose, so it can outlive edits to
     its own source — and when it does, nothing says so. On 2026-08-04 a server started four days
     earlier was still serving with the default listen backlog of 5, long after the fix raising it
     to 128 had been committed and "verified": every parallel browser run in between had been
@@ -423,8 +423,8 @@ def local_server():
     The server is intentionally left running after the test session ends. With -n auto,
     each xdist worker has its own session teardown, so terminating the process in teardown
     would kill the server while other workers still have live browser connections (causing
-    ERR_CONNECTION_REFUSED). Leaving it running also matches AGENT_RULES.md §C: the user,
-    not the agent, is responsible for stopping the dev server.
+    ERR_CONNECTION_REFUSED). Leaving it running is also the convention here: the user,
+    not the agent, stops the dev server.
     """
     if not is_port_open(DEV_SERVER_PORT):
         subprocess.Popen(

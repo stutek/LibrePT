@@ -1,8 +1,8 @@
 # tests/unit/test_suspend_detection.py
 # Telling "the machine slept" apart from "the change is slow" (build/__init__.py).
 #
-# AGENT_RULES §2.A.3 already says a detected time jump means assume interruption rather than a
-# regression — but it relied on the agent NOTICING, which is exactly what a rule cannot enforce. A
+# A detected time jump means assume interruption rather than a regression — but that relied on the
+# agent NOTICING, which is exactly what a rule cannot enforce. A
 # suspend/resume drops sockets and stalls timers, producing failed fetches and timing-budget overruns on
 # a change that could not plausibly cause them; labelling the run is the difference between chasing a
 # ghost and re-running it.

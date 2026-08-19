@@ -86,7 +86,7 @@ def test_verification_is_retried_with_the_download_not_separately(_no_real_sleep
 
 
 def test_the_backoff_is_bounded_enough_to_fail_inside_the_stage_budget():
-    """AGENT_RULES §2.A.3 budgets Stage 1 at ~60s before it wants investigating. A retry policy
+    """Stage 1 is budgeted at ~60s before it wants investigating. A retry policy
     generous enough to blow that would turn a dead host into a run nobody can read."""
     assert sum(_DOWNLOAD_RETRY_DELAYS) <= 10, (
         f"retry backoff totals {sum(_DOWNLOAD_RETRY_DELAYS)}s, which crowds Stage 1's budget"

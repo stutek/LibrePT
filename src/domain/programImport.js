@@ -13,7 +13,7 @@
 // bare array instead of the envelope, numbers as strings, `"3x10"` — all understood. Field names are
 // matched against a NAMED alias table, never by fuzzy similarity: an explicit list can be read,
 // tested and argued with, while a similarity score fails unpredictably and nobody can say why
-// (AGENT_RULES §5.9).
+//.
 //
 // **The format marker earns its place** by separating "this is not our JSON" from "this is ours and
 // one field is wrong". Without it, someone else's plausibly-shaped export would be adopted silently.

@@ -1,7 +1,7 @@
 // tests/unit_js/data/sessionEventPayload.test.mjs
 // The event that travels between two phones (src/data/sessionEventPayload.js).
 //
-// This is a PERSISTED FORMAT in the sense AGENT_RULES §5.8 carves out: a link lives in someone's
+// This is a PERSISTED FORMAT, the carve-out that makes pinning bytes right: a link lives in someone's
 // messages for weeks and is opened by a build that has moved on. So the round trip and the version
 // gate are pinned deliberately — and so is the size, because the budget it has to fit in (a QR that
 // scans, an SMS that is not split) is the constraint the whole design was shaped by.

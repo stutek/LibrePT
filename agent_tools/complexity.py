@@ -6,7 +6,7 @@ ever sees the Python tooling (`build/`, `deploy/`, `tests/`, `agent_tools/`), ne
 that has quietly grown into a dozen nested branches reads fine one `if` at a time in review — the
 only thing that catches it is counting the decision points across the whole function at once, which
 is exactly what a human reviewer does not do reliably. `activeSessionController.js` and
-`formsController.js` both grew past a reasonable single responsibility (AGENT_RULES §5.1) partly
+`formsController.js` both grew past a reasonable single responsibility partly
 because nothing measured the individual functions inside them as they grew.
 
 Parses with `tree_sitter_javascript` (a real grammar, not a regex heuristic) rather than trying to
@@ -143,7 +143,7 @@ def over_limit(findings):
 
 
 def main():
-    """AGENT_RULES §2.A.3: no gate may carry a mechanism for allowlisting real, unfixed debt — an
+    """No gate may carry a mechanism for allowlisting real, unfixed debt — an
     over-limit function fails the build every time, unconditionally. There used to be a
     PRE_EXISTING_ALLOWLIST here (removed 2026-08-01 once its last entry was fixed); do not
     reintroduce one — split the function instead.

@@ -113,7 +113,7 @@ def test_the_tool_runs_against_the_real_tree():
 
     Asserting `main() == 0` here would quietly make this a gate — Stage 1 runs the unit tests — and
     TODO §28.3 rules the opposite: an agent tool first, wired into the pipeline only once it has
-    caught something more than once (AGENT_RULES §6.2). What this does prevent is the other failure
+    caught something more than once. What this does prevent is the other failure
     mode of a hand-run tool: rotting until it cannot run at all.
     """
     assert constant_copies.main() in (0, 1)

@@ -36,7 +36,7 @@ export function renderActiveUsersList(tabsContainer, activeSession, ctx) {
     // Width-side chrome (padding/gap/avatar size) trimmed further so more tabs fit per row — a
     // group session with 6-7+ participants wraps to fewer rows this way, which is what actually
     // saves vertical space (fewer rows, not shorter rows). minHeight stays at 44px, a real tap
-    // target (AGENT_RULES §2.D.1) — vertical padding alone can't shrink below that floor anyway,
+    // target — vertical padding alone can't shrink below that floor anyway,
     // so trimming it further would do nothing; the name is also capped+ellipsized so one long name
     // can't force an otherwise-compact row to wrap early.
     tab.style.display = "flex";

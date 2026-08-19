@@ -134,7 +134,7 @@ body:has(#active-session-overlay:not(.hidden))
 /* Live-clipboard bar, sharing the handle bar with the notification summary */
 .notification-area .clipboard-bar {
   /* A <button>, so the whole strip is the tap target rather than the 14px of title inside it
-     (AGENT_RULES §2.D.1) — these three reset the UA button styling the rest of the rule replaces. */
+     — these three reset the UA button styling the rest of the rule replaces. */
   border: none;
   font: inherit;
   text-align: left;

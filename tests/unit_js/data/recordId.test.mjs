@@ -10,7 +10,7 @@ import * as m from "../../../src/data/recordId.js";
 
 // The width and alphabet ARE the contract here, not mechanics: ids are written into stored records
 // and into shareable deep links, so changing the format breaks data and URLs already in the world
-// (AGENT_RULES §5.8's persisted-format carve-out). Pinned deliberately, and stated so the next
+//. Pinned deliberately, and stated so the next
 // reader does not "simplify" this away as over-specification.
 test("id is fixed width base62 and recognised", () => {
   const ids = Array.from({ length: 200 }, () => m.newRecordId());

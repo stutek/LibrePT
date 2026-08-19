@@ -3,7 +3,7 @@
 // MUST load as a classic (non-module, non-deferred) <script> in <head> so it runs BEFORE the
 // body paints: it sets the resolved theme class on <html> up front to prevent a flash of the
 // wrong theme (FOUC). Kept as an external file — instead of an inline <script> — so the Content-
-// Security-Policy can drop 'unsafe-inline' from script-src (see AGENT_RULES §2.A.3 / ZAP 10055).
+// Security-Policy can drop 'unsafe-inline' from script-src.
 // It also force-upgrades http→https on non-localhost origins before anything else loads.
 (() => {
   try {

@@ -215,7 +215,7 @@ export async function bootDemoTour({ shareDemo, hasData, onResults } = {}) {
 // does, so the two paths share the document and nothing else. Written as a branch inside `init()`
 // instead, each of those steps would need its own "unless this is a client" condition, and the day
 // one of them was missed a prospective client would get a terms modal in front of the form, or an
-// IndexedDB database on their phone (AGENT_RULES §5.9).
+// IndexedDB database on their phone.
 //
 // The splash is hidden rather than dismissed: it exists to cover a boot that, here, is not happening.
 export function bootIntake(deps) {
@@ -247,7 +247,7 @@ export function bootRsvpReply(deps) {
 // Its own boot step rather than a mode inside the one above: they share the script and the tap, and
 // nothing else. One reads a URL value and plays; the other mounts a panel that outlives init() and
 // waits for someone. Folding them together would mean a branch in a boot step for the benefit of one
-// shared import (AGENT_RULES §5.9).
+// shared import.
 //
 // Returns the walkthrough handle (`{ stop }`) so a caller can end it; null when the URL did not ask.
 export async function bootWalkthrough({ shareDemo, hasData, t, goHome } = {}) {

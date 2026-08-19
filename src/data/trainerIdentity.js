@@ -31,7 +31,7 @@ const EXPIRY_PADDING_KEY = "librept_invite_expiry_hours";
  *  it is long enough to act on a "no" — the point of a deadline is a usable gap, not a formality.
  *
  *  Declared HERE rather than in domain/inviteExpiry.js, which does the arithmetic: `data` may not import
- *  `domain` (AGENT_RULES §5.3, and the gate says so), and this is the default value of a stored setting
+ *  `domain`, and this is the default value of a stored setting
  *  rather than a rule about training. The domain module takes the padding as an argument and has no
  *  opinion about where it came from. */
 export const DEFAULT_EXPIRY_PADDING_HOURS = 4;

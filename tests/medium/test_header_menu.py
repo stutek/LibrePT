@@ -151,7 +151,7 @@ def test_menu_labels_translate_to_slovenian(page, local_server):
 
 def test_every_menu_item_is_reachable_on_a_phone(page, local_server):
     """The menu grew past the screen and nothing said so — items below the fold were simply
-    untappable, which on a phone is the same as not existing (AGENT_RULES §2.D.1).
+    untappable, which on a phone is the same as not existing.
 
     Found on 2026-08-17: adding one item pushed `#menu-terms` out of the viewport and broke
     test_terms_modal_opens_and_agree_closes_it. The menu now caps its height under the header and

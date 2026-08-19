@@ -10,7 +10,7 @@
 // current state, diff it, compare to the thresholds — runs on each write.
 //
 // Injected dependencies: `renderBackupBadge` is imported directly from the header module (a
-// controller may import downward, AGENT_RULES §5.3); everything else comes from the data layer.
+// controller may import downward); everything else comes from the data layer.
 
 import { assessBackupHealth, fingerprintState } from "../data/backupHealth.js";
 import { withoutSeedRecords } from "../data/seedProvenance.js";

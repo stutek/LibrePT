@@ -65,7 +65,7 @@ jobs:
       # is already fenced to `stutek/LibrePT` so no fork reaches here, and on this repository a
       # missing credential means the secret was deleted or the refresh token expired. Both are
       # exactly the states a canary exists to shout about, and a green run that tested nothing is
-      # what AGENT_RULES §2.A.3 calls a failure, not a pass.
+      # a failure, not a pass.
       - name: Require a Google credential
         env:
           GOOGLE_LIVE_CREDENTIALS: ${{ secrets.GOOGLE_LIVE_CREDENTIALS }}

@@ -1,7 +1,7 @@
 // tests/unit_js/data/calendarInvite.test.mjs
 // The .ics a session invite is (src/data/calendarInvite.js).
 //
-// This is a PERSISTED FORMAT in the sense AGENT_RULES §5.8 carves out: the bytes leave the app and
+// This is a PERSISTED FORMAT, the carve-out that makes pinning bytes right: they leave the app and
 // are parsed by Google Calendar, Outlook and Apple Calendar, none of which we can fix. So the tests
 // pin the wire format deliberately — the properties another program reads, not how they are built.
 

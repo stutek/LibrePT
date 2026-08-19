@@ -40,7 +40,7 @@
 // **CI is the exception, and it never gets this far.** The canary workflow fails on a missing
 // credential in its first step, before the checkout, because on that one repository "no credential"
 // means the secret was deleted or the refresh token expired — a canary that silently stopped
-// watching, which AGENT_RULES §2.A.3 treats as a failure rather than a pass. Keeping the skip here
+// watching, which is a failure rather than a pass. Keeping the skip here
 // is what lets the same file stay quiet on a laptop that never configured one.
 //
 // Injected dependencies: none — reads `process.env` and the filesystem.

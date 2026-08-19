@@ -16,7 +16,7 @@
 // different phone. Saving the file and attaching it by hand is two more taps and always works.
 //
 // **Both paths are declared explicitly rather than routed through one "deliver" abstraction**
-// (AGENT_RULES §5.9): they share the file and nothing else — one asks the OS to hand over a File
+//: they share the file and nothing else — one asks the OS to hand over a File
 // object, the other writes bytes to disk through an anchor. A dispatcher between the button and the
 // hand-over would be a layer whose only job is to choose.
 //

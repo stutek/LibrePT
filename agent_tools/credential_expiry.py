@@ -14,8 +14,8 @@ is older than five months, one month inside Google's six. A canary that has been
 passing until then and fails loudly with a month of margin; a canary that stopped comes back red the
 moment it runs again, which is exactly when someone is looking.
 
-This is deliberately a hard failure and not a warning. AGENT_RULES §2.A.3 forbids a gate step that
-prints a warning and returns success — that pattern is what let a ZAP scan reach nothing and still
+This is deliberately a hard failure and not a warning. No gate step may print a warning and return
+success — that pattern is what let a ZAP scan reach nothing and still
 report clean. A month of daily red is the point: it is an action item, not a notification.
 
 Runs inside the canary workflow rather than `build check` Stage 1, because the credential only

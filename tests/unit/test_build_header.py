@@ -6,7 +6,7 @@
 # label and current time + CPU load + free memory + cores available?", then "expand the label to be
 # human readable similar to 'Running $0'" with the host state on a second line.
 #
-# The reason it earns two lines is AGENT_RULES §2.A.3: a gate run is minutes of dead air, and the two
+# The reason it earns two lines: a gate run is minutes of dead air, and the two
 # questions asked of it afterwards are "when will this be done?" and "was the box busy?" — a run well
 # outside its budget is usually the environment rather than the change. Both answers have to be
 # captured at the START, because by the time the run is slow the load average has moved.

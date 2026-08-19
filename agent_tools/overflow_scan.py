@@ -40,8 +40,8 @@ What is deliberately NOT reported, and why each would otherwise be noise:
 
 `data-clip="intentional"` on an element opts it out of B where the clipping is genuine but not
 expressible via the ellipsis idiom (a circular avatar crop, a decorative bleed). The opt-out lives
-in the MARKUP on purpose: a Python allowlist here would be a way to park real debt, which
-AGENT_RULES §2 forbids, whereas an attribute is reviewable in the diff and travels with the
+in the MARKUP on purpose: a Python allowlist here would be a way to park real debt, which no
+gate may offer, whereas an attribute is reviewable in the diff and travels with the
 component.
 
 A `diagnostic`, not a `check` (see agent_tools/INDEX.md): it needs a browser and a running server,

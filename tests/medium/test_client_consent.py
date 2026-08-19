@@ -6,7 +6,7 @@
 #
 # What only a DOM tier can hold: the date field appearing when consent is ticked and defaulting to
 # today, the two delivery links being built from the record on the screen, the archiving reminder
-# actually opening as a dialog (not a tooltip — AGENT_RULES §2.D.1), and the round-trip into
+# actually opening as a dialog (not a tooltip —), and the round-trip into
 # `gdprConsent`. The letter's wording and the href shapes are pure strings and are pinned in
 # tests/unit_js/modules/common/consentForm.test.mjs instead.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.

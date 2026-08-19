@@ -1,6 +1,6 @@
 """`python -m agent_tools.import_layers` — verify the app's import graph still flows one way.
 
-Why this exists: AGENT_RULES §5.3 builds the whole front-end on dependency injection — a component
+Why this exists: the whole front-end is built on dependency injection — a component
 receives what it needs as parameters rather than importing it — and the payoff is that any module
 can be mounted on its own (which is exactly what `tests/medium/` does through `src/appBoot.js`).
 That property is held together purely by discipline, and a single `import` in the wrong direction
@@ -11,7 +11,7 @@ Measured before this gate existed, the graph was in good shape — the data laye
 imports — with exactly one inversion: `modules/history/historyView.js` imported
 `controllers/activeSessionController.js` to open a session from a history card. It was fixed by
 injection (the established pattern) rather than allowlisted, because a gate that ships with an
-exemption is a gate that documents debt instead of preventing it (AGENT_RULES §2.A.3).
+exemption is a gate that documents debt instead of preventing it.
 
 The layering, bottom to top — each may import only from layers strictly below it:
 
@@ -134,7 +134,7 @@ def main():
     if found:
         print(
             f"  ✗ Import layering: {len(found)} upward import(s). Inject the dependency instead "
-            "(AGENT_RULES §5.3) — importing up costs the module its independent mountability."
+            " — importing up costs the module its independent mountability."
         )
     if broken:
         print(f"  ✗ Import layering: {len(broken)} import(s) resolve to nothing.")

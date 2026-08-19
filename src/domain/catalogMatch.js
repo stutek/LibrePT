@@ -12,7 +12,7 @@
 // **Matching is exact after normalisation, deliberately.** Case and spacing differences are the same
 // movement; anything else is not. "Incline Barbell Bench Press" is not "Barbell Bench Press", and a
 // similarity score that decided otherwise would be wrong in a way nobody could predict or argue with
-// (AGENT_RULES §5.9). The trainer picks the catalog entry themselves in the editor if the parser
+//. The trainer picks the catalog entry themselves in the editor if the parser
 // guessed too conservatively — which is the cheap direction to be wrong in.
 //
 // Injected dependencies: none.

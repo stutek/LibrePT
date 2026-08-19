@@ -1,7 +1,7 @@
 // Owns the Client create/edit dialog: its markup (renderClientDialog) and its wiring
 // (setupClientForms — open/edit triggers, save, and the client-list search box).
 // Split 2026-08-01 out of the old formsController.js, which bundled Client, Routine, and Exercise
-// forms in one file despite the three sharing nothing but boilerplate (AGENT_RULES §5.1).
+// forms in one file despite the three sharing nothing but boilerplate.
 
 import { clientDisambiguator, clientsSharingName } from "../data/clientErasure.js";
 import { newRecordId } from "../data/recordId.js";

@@ -77,7 +77,7 @@ token or a deleted secret, i.e. a canary that quietly stopped watching. See
 [TODO §1.5](../TODO.md).
 
 **What a test may assert, in any tier: the behaviour a caller depends on, never the mechanics that
-produce it** ([AGENT_RULES §5.8](../AGENT_RULES.md)). The tier decides how much of the app boots;
+produce it** ([AGENT_RULES §4.8](../AGENT_RULES.md)). The tier decides how much of the app boots;
 that rule decides what the assertions are allowed to look at once it has. Three things are fair game
 even though they look internal, each needing a stated reason: a class name another module keys off,
 an avoided side effect (a sync that writes nothing is a promise about someone's battery), and a

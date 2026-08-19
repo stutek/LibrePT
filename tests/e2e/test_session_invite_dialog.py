@@ -49,7 +49,7 @@ def test_new_session_with_participants_opens_invite_dialog(page, local_server):
         ".session-invite-send-btn"
     )
     # The download itself is the proof the button was live — an exact class string would break on
-    # any restyle while proving nothing a trainer can see (AGENT_RULES §5.8).
+    # any restyle while proving nothing a trainer can see.
     with page.expect_download():
         send_btn.click()
     expect(send_btn).to_have_text("Invite sent")

@@ -8,7 +8,7 @@ changes, so nothing fails until someone reads a stale value and believes it.
 
 **It inverts the obvious design, deliberately.** The natural check is "no hardcoded ports anywhere",
 which needs an ever-growing exemption list — and an ignore file is where findings go to disappear
-(AGENT_RULES §2.A.3). This asserts the opposite: for each constant the repository has DECLARED as
+. This asserts the opposite: for each constant the repository has DECLARED as
 shared, its literal appears only at that declaration. The list grows only when someone declares a
 shared constant, which is exactly when the protection is wanted, and it needs no exemptions because
 an undeclared value is simply not its business.
@@ -16,7 +16,7 @@ an undeclared value is simply not its business.
 It therefore catches RE-INTRODUCTION, not first introduction. The first copy of a new value is a
 judgement call a reader has to make; the second copy of a value already declared is mechanical.
 
-**Not a gate, on purpose** (AGENT_RULES §6.2, ruled the same day): a tool an agent runs by hand costs
+**Not a gate, on purpose**: a tool an agent runs by hand costs
 nothing but the writing, while a Stage 1 task costs every commit forever and acquires a second job —
 being maintained — before anyone knows whether it earns one. Run it in the duplication sweep. If it
 catches something more than once, it earns a gate task, a CI job and a catalog row.

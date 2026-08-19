@@ -139,7 +139,7 @@ test("syncing twice changes nothing the second time", async () => {
   });
 
   // Counting writes is normally implementation-coupling, but AN AVOIDED SIDE EFFECT IS BEHAVIOUR
-  // (AGENT_RULES §5.8): the promise here is that a poll on a trainer's phone does not spend a Drive
+  //: the promise here is that a poll on a trainer's phone does not spend a Drive
   // request, and their battery and quota, to upload a file that has not changed.
   assert.equal(drive.created + drive.updated, writesAfterFirst);
   assert.equal(again.pushed, false);

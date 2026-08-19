@@ -1,6 +1,6 @@
 """`python -m agent_tools.test_assertions` — keep tests pinned to behaviour, not mechanics.
 
-Why this exists: AGENT_RULES §5.8 says a test must assert the behaviour a caller depends on, never
+Why this exists: a test must assert the behaviour a caller depends on, never
 the mechanics that produce it. A test that encodes *how* the code works fails on every refactor that
 changes nothing observable — so it punishes cleanup — and it passes while the behaviour is broken,
 as long as the mechanics survive. Neither failure is visible in review: the assertion looks precise,
@@ -21,10 +21,11 @@ each found in the wild here:
   4. a stub counter that is incremented and never asserted — dead weight implying a coupling that
      does not exist.
 
-**Every finding is escapable by writing the reason, and only by writing the reason.** §5.8 has three
+**Every finding is escapable by writing the reason, and only by writing the reason.** There are three
 legitimate carve-outs (a class name another module keys off, an AVOIDED side effect, a persisted
-format that outlives the code). A comment mentioning §5.8 on or just above the line clears it. That
-is not an allowlist of unfixed debt (AGENT_RULES §2.A.3 forbids those): the rule's own carve-outs
+format that outlives the code). A comment NAMING the one that applies, on or just above the line,
+clears it. That
+is not an allowlist of unfixed debt: the rule's own carve-outs
 require a stated reason, so the escape hatch and the rule are the same requirement.
 
 Regex over lines, not a parse tree — unlike complexity.py, which genuinely needs a grammar to count
@@ -44,10 +45,12 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 TESTS_DIR = REPO_ROOT / "tests"
 
-# A comment naming the rule clears the line — see the module docstring on why this is a stated
-# reason rather than an allowlist.
+# A comment NAMING the carve-out clears the line — see the module docstring on why this is a stated
+# reason rather than an allowlist. Named in words, never by a rule number: a test says what it is
+# pinning ("a persisted format"), so reordering the rulebook can never require editing a test.
 JUSTIFICATION = re.compile(
-    r"§5\.8|AGENT_RULES.*5\.8|behaviour carve-out", re.IGNORECASE
+    r"persisted[- ]format|behaviour carve-out|is the contract|avoided side effect",
+    re.IGNORECASE,
 )
 
 # 1. `to_have_class("a b c")` / `.to_have_class('a b')` — two or more classes in one string is an
@@ -112,7 +115,7 @@ def _findings_for_lines(path, lines):
                     path,
                     index + 1,
                     f'exact class string "{match.group(1)}" — assert what the user sees '
-                    "(to_be_visible / to_have_text), or say which class is the contract (§5.8)",
+                    "(to_be_visible / to_have_text), or say which class is the contract",
                 )
             )
 
@@ -122,7 +125,7 @@ def _findings_for_lines(path, lines):
                     path,
                     index + 1,
                     "asserts a stub's call count — assert the outcome those calls produced, or "
-                    "state that the AVOIDED side effect is the behaviour (§5.8)",
+                    "state that the AVOIDED side effect is the behaviour",
                 )
             )
 
@@ -137,7 +140,7 @@ def _findings_for_lines(path, lines):
                     path,
                     index + 1,
                     f"assert.equal({identity.group(1)}, {identity.group(2)}) compares references — "
-                    "use deepEqual if the promise is 'unchanged' (§5.8)",
+                    "use deepEqual if the promise is 'unchanged'",
                 )
             )
     return findings
@@ -162,7 +165,7 @@ def _dead_counter_findings(path, lines):
                     path,
                     index + 1,
                     f"`{name}` is maintained but never asserted — delete it, or assert the "
-                    "behaviour it was meant to prove (§5.8)",
+                    "behaviour it was meant to prove",
                 )
             )
     return findings
@@ -199,7 +202,8 @@ def main():
             print(f"    {path}:{line}  {message}")
         print(
             "\n    Ask of each: if the internals were rewritten and the contract kept, would this\n"
-            "    line still hold? See AGENT_RULES §5.8 for the three carve-outs and how to state one."
+            "    line still hold? A deliberate exception is cleared by NAMING it in a comment: a persisted\n"
+            "    format, an avoided side effect, or a class that is the contract."
         )
         return 1
 

@@ -121,7 +121,7 @@ def test_tapping_the_bar_returns_to_the_clipboard(page, local_server):
 
 
 def test_the_whole_strip_is_the_tap_target(page, local_server):
-    """AGENT_RULES §2.D.1 — 14px of title is nothing to aim at with a sweaty thumb, so the bar is a
+    """14px of title is nothing to aim at with a sweaty thumb, so the bar is a
     <button> and the strip itself is what you hit."""
     load_with_stub(page, local_server, _bar_stub(_session_js(MERGED)))
 

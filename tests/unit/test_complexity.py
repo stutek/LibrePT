@@ -2,7 +2,7 @@
 
 Covers the counting rules (what pushes a function over MAX_COMPLEXITY, what doesn't) and the
 nested-function boundary (an inner function is scored on its own, not folded into its parent).
-There is no allowlist mechanism (AGENT_RULES §2.A.3: no gate may carry one) — an over-limit
+There is no allowlist mechanism — an over-limit
 function fails the build unconditionally, every time.
 """
 

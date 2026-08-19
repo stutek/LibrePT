@@ -1,11 +1,7 @@
 {
-  "clients": [
-    { "id": "c1", "name": "Legacy Client", "active": true }
-  ],
+  "clients": [{ "id": "c1", "name": "Legacy Client", "active": true }],
   "exercises": [],
   "routines": [],
   "history": [],
-  "bookings": [
-    { "id": "b1", "day": "today", "titles": ["Legacy Session"] }
-  ]
+  "bookings": [{ "id": "b1", "day": "today", "titles": ["Legacy Session"] }]
 }

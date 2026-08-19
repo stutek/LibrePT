@@ -42,7 +42,7 @@ MANIFEST = SRC / "manifest.json"
 
 # The master lives OUTSIDE src/ deliberately: run_build copies that tree wholesale into dist/, so a
 # ~900KB design source parked there would ship to production and be hashed into the integrity
-# catalog for nothing. It is design tooling, not a runtime asset (AGENT_RULES §5.5).
+# catalog for nothing. It is design tooling, not a runtime asset.
 MASTER = REPO_ROOT / "assets" / "icon-master.png"
 
 # The plate the artwork is composited onto for the LAUNCHER icons, which must be opaque — a PWA

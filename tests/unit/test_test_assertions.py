@@ -1,5 +1,5 @@
 # tests/unit/test_test_assertions.py
-# The §5.8 assertion gate (agent_tools/test_assertions.py).
+# The behaviour-not-mechanics assertion gate (agent_tools/test_assertions.py).
 #
 # A detector is only worth what its NEGATIVE tests prove: this one shipped with three false
 # positives on its first run (named scalar constants read as identity checks, a synchronisation
@@ -91,9 +91,9 @@ def test_a_counter_read_by_a_wait_predicate_is_not_dead(tmp_path):
 
 
 def test_naming_the_rule_clears_a_finding(tmp_path):
-    # The one escape hatch, and it costs a written reason — §5.8's carve-outs require exactly that.
+    # The one escape hatch, and it costs a written reason: the carve-out has to be NAMED.
     source = (
-        "// An avoided side effect IS behaviour here (AGENT_RULES §5.8): a second sync must not\n"
+        "// An avoided side effect IS behaviour here: a second sync must not\n"
         "// spend a Drive request on an unchanged file.\n"
         "assert.equal(drive.created + drive.updated, writesAfterFirst);\n"
     )

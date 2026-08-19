@@ -5,7 +5,7 @@
 // A route never imports a view module: everything it needs arrives per call in
 // `ctx = { path, params, route, previousRoute, isBootPass, deps, router }`, where `deps` is the
 // injected routerDeps and `router` is the small facade of operations the router exposes to its routes
-// (AGENT_RULES §5 — dependency injection, not cross-imports). That is what lets a route be
+//. That is what lets a route be
 // constructed and matched with no DOM and no booted app, so the registry is unit-testable.
 
 // A pattern segment is either a literal or `:name`, optionally constrained inline as `:name(regex)`.

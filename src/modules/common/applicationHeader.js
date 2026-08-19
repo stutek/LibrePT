@@ -48,7 +48,7 @@ const SYNC_BUTTON_BASE_LABEL = "Sync & Backup Data";
 
 /** Repaints the header cloud's overlay glyph for the current sync state, and says in the button's
  * aria-label what that glyph MEANS — the shape alone would be a hover tooltip's problem in another
- * costume (AGENT_RULES §2.D.1), unreachable on touch and silent to a screen reader. */
+ * costume, unreachable on touch and silent to a screen reader. */
 function renderSyncCloudIcon(status) {
   const wrap = document.getElementById("sync-cloud-icon");
   const overlay = document.getElementById("sync-cloud-overlay");
@@ -68,7 +68,7 @@ function renderSyncCloudIcon(status) {
  *
  * **Spelled out, never an icon alone**, for the same reason the PREVIEW badge spells itself out: a
  * bare coloured triangle is an unexplained warning whose meaning lives only in an aria-label, which
- * is the hover problem in another costume (AGENT_RULES §2.D.1) — and this one is about losing a
+ * is the hover problem in another costume — and this one is about losing a
  * trainer's entire client history.
  *
  * **Static, never animated.** A permanent pulse in a fixed header is ignored within a day, competes
@@ -231,7 +231,7 @@ export function renderAboutDialog() {
            user would never see it. CC BY 4.0 requires attribution and the SIL OFL requires its
            notice to travel with each redistributed copy — and these fonts are redistributed to
            every visitor. A <details> keeps it one tap away instead of hidden behind a hover, which
-           on a touch device would mean not present at all (AGENT_RULES §2.D.1).
+           on a touch device would mean not present at all.
            Copyright lines and licence names are deliberately NOT translated: they are legal
            identifiers, and altering them defeats the notice. Only the summary label is. -->
       <details class="about-attribution">
@@ -302,7 +302,7 @@ export function renderHeaderShell() {
            The word PREVIEW is spelled out, not reduced to an icon. It briefly wasn't — a bare
            pulsing triangle is an unexplained warning, with its meaning reachable only through an
            aria-label and an external link, which is the hover problem in another costume
-           (AGENT_RULES §2.D.1) for what is a data-loss warning. -->
+           for what is a data-loss warning. -->
       <div class="header-build-stack">
         <!-- The data-loss notice ships as a page (agent_tools/render_docs.py). It used to open
              github.com, which needs signal — so the one warning that tells a trainer their data can

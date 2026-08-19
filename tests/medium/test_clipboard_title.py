@@ -55,7 +55,7 @@ def test_the_title_gets_the_larger_half_of_its_own_bar(page, local_server):
 
 def test_every_control_on_the_line_is_still_reachable(page, local_server):
     """Making room must not come from shrinking targets below what a thumb can hit
-    (AGENT_RULES §2.D.1)."""
+    ."""
     _mount(page, local_server)
 
     for selector in ("#btn-edit-plan", "#btn-session-menu"):

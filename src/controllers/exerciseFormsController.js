@@ -3,7 +3,7 @@
 // category chips). `openExerciseCreateDialog` is the seam the router calls through for
 // `/exercises/new` without this controller needing to know about routing.
 // Split 2026-08-01 out of the old formsController.js, which bundled Client, Routine, and Exercise
-// forms in one file despite the three sharing nothing but boilerplate (AGENT_RULES §5.1).
+// forms in one file despite the three sharing nothing but boilerplate.
 
 import { newRecordId } from "../data/recordId.js";
 import { metricOptionsFor } from "../domain/exerciseModality.js";

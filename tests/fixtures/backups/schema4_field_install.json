@@ -6,7 +6,11 @@
   ],
   "exercises": [{ "id": "e1", "name": "Deadlift", "category": "Back", "equipment": "Barbell" }],
   "routines": [
-    { "id": "r1", "name": "Pull Day", "exercises": [{ "id": "e1", "sets": 5, "reps": 3, "weight": 120 }] }
+    {
+      "id": "r1",
+      "name": "Pull Day",
+      "exercises": [{ "id": "e1", "sets": 5, "reps": 3, "weight": 120 }]
+    }
   ],
   "history": [
     {
@@ -17,7 +21,11 @@
       "date": "2026-08-01T08:00:00.000Z",
       "duration": 3000,
       "exercises": [
-        { "id": "e1", "name": "Deadlift", "sets": [{ "reps": 3, "weight": 120, "completed": true }] }
+        {
+          "id": "e1",
+          "name": "Deadlift",
+          "sets": [{ "reps": 3, "weight": 120, "completed": true }]
+        }
       ]
     }
   ],

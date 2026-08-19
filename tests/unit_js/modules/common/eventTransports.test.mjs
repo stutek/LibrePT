@@ -99,7 +99,8 @@ test("the share sheet is handed the link rather than a copy of it in the text", 
   const link = send("share", {}, platform);
 
   // What reaches the platform IS this transport's whole contract — a transport produces no value
-  // and changes no state, so there is nothing else to observe (§5.8).
+  // and changes no state, so what reaches the platform is the contract and there is nothing
+  // else to observe.
   assert.equal(platform.calls.shared[0].url, link);
 });
 
@@ -107,7 +108,7 @@ test("copying puts the link itself on the clipboard, nothing else", () => {
   const platform = fakePlatform();
   const link = send("copy", {}, platform);
 
-  // What lands on the clipboard is the entire promise of this transport (§5.8).
+  // What lands on the clipboard is the entire promise of this transport — it is the contract.
   assert.deepEqual(platform.calls.copied, [link]);
 });
 
@@ -117,7 +118,7 @@ test("an event that cannot be represented is not sent at all", () => {
   const result = sendEvent("copy", { kind: SESSION_INVITE }, { baseUrl: BASE_URL, platform });
 
   assert.equal(result, null);
-  // The AVOIDED side effect is the behaviour (§5.8): a half-formed link on someone's clipboard is
+  // The AVOIDED side effect is the behaviour here: a half-formed link on someone's clipboard is
   // worse than an obvious refusal, because they will paste it and it will not open anything.
   assert.deepEqual(platform.calls.copied, []);
 });
@@ -126,7 +127,7 @@ test("an unknown transport sends nothing rather than guessing", () => {
   const platform = fakePlatform();
 
   assert.equal(send("carrier-pigeon", {}, platform), null);
-  // The AVOIDED side effect is the behaviour (§5.8): falling back to some other channel would send
+  // The AVOIDED side effect is the behaviour here: falling back to some other channel would send
   // a client's session details somewhere the trainer did not choose.
   assert.deepEqual(platform.calls.opened, []);
 });

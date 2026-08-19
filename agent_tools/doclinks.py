@@ -1,6 +1,6 @@
 """`python -m agent_tools.doclinks` — verify the OKF knowledge graph actually connects.
 
-Why this exists: AGENT_RULES §4.3 makes cross-document Markdown links load-bearing — agents traverse
+Why this exists: cross-document Markdown links are load-bearing here — agents traverse
 them to find context. Nothing enforced them, so a renumbered or deleted section left dangling `§N.M`
 references and dead `(#anchor)` links behind, silently, and the next agent followed them into
 nothing. Dropping TODO §16's multi-version hosting items (2026-07-27) produced fourteen such
@@ -294,7 +294,7 @@ def main():
         print(
             "\n    Fix the reference or the heading — a broken link is a dead end for the"
         )
-        print("    next agent traversing the knowledge graph (AGENT_RULES §4).")
+        print("    next agent traversing the knowledge graph.")
         return 1
 
     print(

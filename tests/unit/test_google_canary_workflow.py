@@ -111,7 +111,7 @@ def test_derived_secret_fields_are_masked():
 
 def test_the_credential_install_cannot_fail_silently():
     """A half-written credential file would make the suite report "skipped" rather than fail — a
-    disarmed canary reporting green, which AGENT_RULES §2.A.3 calls a failure, not a pass."""
+    disarmed canary reporting green, which is a failure, not a pass."""
     install = next(
         s for s in _canary_steps() if s.get("name") == "Install the stored credential"
     )

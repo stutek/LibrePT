@@ -85,7 +85,7 @@ date. That stamp is what lets you answer "who is still covered?" after the lette
   day the file was last touched.** A month alone cannot separate two substantive revisions that land
   in the same month, and separating them is the only thing the stamp is for. It is deliberately not
   the app's commit SHA or data schema — those are the *code* and *data shape* axes and change
-  constantly, while this letter does not (see [AGENT_RULES §2.D.3](../../../AGENT_RULES.md)).
+  constantly, while this letter does not.
 - **One version spans every language.** The translations state the same promises, so versioning them
   separately would make the stamp stop meaning "which promises were made". Bumping therefore means
   editing, in one change: `CONSENT_FORM_VERSION` in

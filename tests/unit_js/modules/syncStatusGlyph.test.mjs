@@ -62,7 +62,7 @@ describe("header cloud sync glyph", () => {
 
   test("every state can be spoken, not only shown", () => {
     // The glyph is the only sync signal in the header, and a shape with no words is unreachable on
-    // touch and silent to a screen reader (AGENT_RULES §2.D.1).
+    // touch and silent to a screen reader.
     for (const state of Object.values(SYNC_GLYPH_STATES)) {
       const glyph = syncGlyphFor(
         {

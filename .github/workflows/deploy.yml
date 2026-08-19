@@ -5,7 +5,7 @@ name: Build, Verify and Deploy to GitHub Pages
 # format, join, toJSON and friends). Using it therefore flattened every commit body into the run
 # title, producing a paragraph where a title belongs. GitHub's own default titles a push run with
 # the head commit's subject line, which is exactly what was wanted — so the fix is to stop
-# overriding it, and to keep subjects short enough to read (AGENT_RULES §2.A.7).
+# overriding it, and to keep subjects short enough to read.
 
 # Publishes ONLY the runtime app (a freshly assembled dist/) to GitHub Pages on every
 # push to main. Publishes only src/, so tests/, use_cases/, build/, deploy/, and the Markdown docs

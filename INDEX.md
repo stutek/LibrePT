@@ -41,7 +41,7 @@ This index provides AI agents and contributors with a structured navigation map 
 ## 3. Directory Catalogs
 
 Each directory owns the catalog of its own contents, so a module move touches the index next to the
-code rather than a single shared file every change has to queue behind (AGENT_RULES §4.2, §5.6).
+code rather than a single shared file every change has to queue behind (AGENT_RULES §7.3, §4.6).
 `agent_tools/catalog_coverage.py` gates these: every runtime module is listed exactly once, and
 every listed path exists.
 

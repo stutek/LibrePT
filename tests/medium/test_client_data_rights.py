@@ -122,7 +122,7 @@ def test_erasure_anonymizes_the_record_and_reports_what_it_could_not_reach(
     receipt = page.locator("#client-erase-receipt")
     expect(receipt).to_be_visible()
     # What the trainer must be able to see: the client is gone from their own receipt, replaced by
-    # some stable label. The label's exact spelling is the module's business (AGENT_RULES §5.8).
+    # some stable label. The label's exact spelling is the module's business.
     expect(receipt).not_to_contain_text("Jane Doe")
     expect(receipt).to_contain_text("Erased in the app as")
     # The honest half: the surfaces LibrePT cannot touch are listed, not glossed as "done".

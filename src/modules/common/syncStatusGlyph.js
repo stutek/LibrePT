@@ -17,7 +17,7 @@
 // a sync that actually FAILED, so the ladder still has two distinct rungs.
 //
 // **Every state also carries a LABEL**, not just a colour and a shape. A glyph alone is a hover
-// tooltip's problem in another costume (AGENT_RULES §2.D.1): unreachable on touch, and invisible to
+// tooltip's problem in another costume: unreachable on touch, and invisible to
 // a screen reader. applicationHeader.js resolves the key and puts it in the button's aria-label.
 //
 // Injected dependencies: none — a pure mapping over the object driveSyncStatus() returns.

@@ -295,7 +295,7 @@ function renderConsentDelivery(client, lang) {
   const href = consentEmailHref(client, lang);
   mailtoBtn.href = href || "#";
   mailtoBtn.classList.toggle("disabled", !href);
-  // The label carries the reason, not only the tooltip — a phone cannot hover (AGENT_RULES §2.D.1).
+  // The label carries the reason, not only the tooltip — a phone cannot hover.
   const label = mailtoBtn.querySelector("span");
   if (label) label.textContent = href ? "Send Consent Form" : "No email on file";
 }

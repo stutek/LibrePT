@@ -3,7 +3,7 @@
 Why this exists: diagnosing a reported CSS positioning bug (a sticky/fixed element stopping at the
 wrong offset, an unexpected overlap, a custom property not cascading where expected) means looking
 at actual bounding boxes and computed styles, not re-deriving them by eye from the stylesheet. Before
-this tool that meant writing a fresh throwaway Playwright script per bug (see AGENT_RULES §6) —
+this tool that meant writing a fresh throwaway Playwright script per bug —
 2026-07-28's sticky day-footer/FAB/notification-bar offset bug took three such scripts to pin down.
 This is that script, generalized and kept.
 

@@ -61,7 +61,7 @@ BASE = "/LibrePT"  # mirror the GitHub Pages project sub-path (the repo name)
 INTEGRITY_CATALOG_NAME = "integrity.json"
 
 # A reserved path that reports which REVISION of this file the running process was started from.
-# AGENT_RULES §2.C deliberately keeps this server alive across tasks, which means a long-lived
+# This server is deliberately kept alive across tasks, which means a long-lived
 # process can silently outlive edits to its own source: on 2026-08-04 a server started Jul 31 was
 # still serving with `socketserver`'s default listen backlog of 5, four days after the fix raising
 # it to 128 had been committed — so the fix was never once in effect, every parallel browser run

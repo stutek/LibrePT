@@ -101,7 +101,7 @@ def main():
         print()
         print(
             "    One declaration, and this machine on it — a green local gate that ran on a\n"
-            "    different language version is not evidence about the deploy (AGENT_RULES §6.6)."
+            "    different language version is not evidence about the deploy."
         )
         return 1
 

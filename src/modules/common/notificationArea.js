@@ -188,7 +188,7 @@ function wireNotificationCardActions(container, deps, t, readIds) {
 
   // Start the guided walkthrough (TODO §28.14). Injected rather than imported: the walkthrough
   // reloads the app with its own deep link, and that URL is built in modules/splash — which this
-  // module may not reach across (AGENT_RULES §5.3).
+  // module may not reach across.
   for (const btn of container.querySelectorAll("button[data-action-walkthrough]")) {
     btn.addEventListener("click", (e) => {
       e.stopPropagation();

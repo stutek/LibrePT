@@ -28,14 +28,14 @@ def log_path(name):
 def run_logged(cmd, log_name, timeout=None):
     """Run `cmd`, capturing stdout+stderr to .build-reports/<log_name>.log.
 
-    Returns (returncode, combined_output, path_to_log). Output is captured rather than streamed so
-    parallel stages don't interleave; the log keeps the full detail a digest necessarily drops.
+     Returns (returncode, combined_output, path_to_log). Output is captured rather than streamed so
+     parallel stages don't interleave; the log keeps the full detail a digest necessarily drops.
 
-    `timeout` (seconds) bounds the run. On expiry the partial output collected so far is still
-    written to the log — a runner that hung is exactly the case where you most want to see how far
-    it got — and `subprocess.TimeoutExpired` is re-raised for the caller to turn into a build
-    failure. A gate step that cannot finish is a failure to fix, not a pass to log
-    (AGENT_RULES §2.A.3).
+     `timeout` (seconds) bounds the run. On expiry the partial output collected so far is still
+     written to the log — a runner that hung is exactly the case where you most want to see how far
+     it got — and `subprocess.TimeoutExpired` is re-raised for the caller to turn into a build
+     failure. A gate step that cannot finish is a failure to fix, not a pass to log
+    .
     """
     path = log_path(log_name)
     try:

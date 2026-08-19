@@ -34,7 +34,7 @@ export function initSessionBar(d) {
 }
 
 // The whole strip is the tap target, not the text inside it — 14px of title is nothing to aim at
-// with a sweaty thumb (AGENT_RULES §2.D.1). A <button> gets that, plus keyboard and screen-reader
+// with a sweaty thumb. A <button> gets that, plus keyboard and screen-reader
 // behaviour, without a click handler on a <div>.
 export function renderClipboardBarShell() {
   renderMarkupOnce(

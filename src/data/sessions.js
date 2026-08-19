@@ -16,7 +16,7 @@ export const DEFAULT_SESSIONS = (() => {
 
   // Which coarse bucket a date falls in, compared at MIDNIGHT — "tomorrow" is a calendar fact, not
   // a count of elapsed hours. Computed locally rather than imported from domain/sessionRecord.js:
-  // `data/` sits below `domain/` in the import layering (AGENT_RULES §5.3), so reaching up for it
+  // `data/` sits below `domain/` in the import layering, so reaching up for it
   // would invert the graph the Stage 1 gate enforces.
   const dayBucketFor = (date) => {
     const startOfToday = new Date(now);

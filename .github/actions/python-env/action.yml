@@ -22,7 +22,7 @@ inputs:
   install:
     description: >
       Create `.venv` and install requirements.txt. Two Stage 1 jobs deliberately run bare system Python
-      with no install at all (AGENT_RULES §6.6) — anything they reach must import with the stdlib alone,
+      with no install at all — anything they reach must import with the stdlib alone,
       and that constraint only stays real if those jobs actually run without the venv.
     required: false
     default: "true"

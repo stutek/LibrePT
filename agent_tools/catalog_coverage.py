@@ -1,6 +1,6 @@
 """`python -m agent_tools.catalog_coverage` — verify the module catalog actually covers the modules.
 
-Why this exists: AGENT_RULES §5.6 requires the catalog to be updated whenever a module is added,
+Why this exists: the catalog must be updated whenever a module is added,
 moved or removed, and nothing enforced it. `doclinks` is the neighbouring check and deliberately
 does not cover this — it verifies that every link RESOLVES, which says nothing about the module that
 was never linked in the first place. So the failure mode was silent in exactly the direction that
@@ -17,7 +17,7 @@ Two directions, because only checking one is a half-map:
 Scope is `src/` only: it is the deployable tree, so "what modules exist" is exactly the question
 the catalog answers. The catalog lives in `docs/`, NOT in `src/`, because `run_build` copies `src/`
 wholesale into `dist/` — an INDEX.md there would ship to production and be hashed into the
-integrity catalog (AGENT_RULES §5.5).
+integrity catalog.
 
 Pure file analysis, no network and no browser, so it runs in Stage 1.
 Exit code is 1 when the catalog and the tree disagree, so it can gate a commit.
@@ -74,7 +74,7 @@ def main():
     relative_catalog = CATALOG.relative_to(REPO_ROOT)
 
     for path in uncatalogued:
-        print(f"  ✗ {path} is not in {relative_catalog} (AGENT_RULES §5.6)")
+        print(f"  ✗ {path} is not in {relative_catalog}")
     for path in stale:
         print(f"  ✗ {relative_catalog} lists {path}, which no longer exists")
 

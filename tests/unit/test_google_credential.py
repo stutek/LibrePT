@@ -3,8 +3,8 @@
 The tool is interactive and network-bound, so what is testable here is the part that goes wrong
 SILENTLY: the scopes it asks for, and the shape of the file it leaves behind. Both are contracts
 with something outside this module — Google's consent screen, and `tests/live/_credentials.mjs`
-reading the JSON back — so both are pinned as contracts rather than as internals (AGENT_RULES §5.8's
-"a format that outlives the code" carve-out).
+reading the JSON back — so both are pinned as contracts rather than as internals — a persisted
+format, which outlives the code that writes it.
 
 The parity tests are the ones with teeth. The tool mirrors two scope constants it cannot import
 across the Python/JavaScript line; if the shipping constants move and the mirror does not, the tool

@@ -1,8 +1,6 @@
 {
   "schemaVersion": 2,
-  "clients": [
-    { "id": "c1", "name": "Schema2 Client", "active": true }
-  ],
+  "clients": [{ "id": "c1", "name": "Schema2 Client", "active": true }],
   "exercises": [],
   "routines": [],
   "history": [],

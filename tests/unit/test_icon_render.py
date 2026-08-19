@@ -85,7 +85,7 @@ def test_every_manifest_icon_and_the_favicon_are_rendered(src_dir):
 
 def test_master_artwork_is_not_inside_the_shipped_tree():
     """run_build copies src/ wholesale into dist/, so the ~900KB design master must stay out of it
-    (AGENT_RULES §5.5) or it ships to production and is hashed into the integrity catalog."""
+    or it ships to production and is hashed into the integrity catalog."""
     assert icon_render.MASTER.exists(), "the icon master artwork is missing"
     assert icon_render.SRC not in icon_render.MASTER.parents
 

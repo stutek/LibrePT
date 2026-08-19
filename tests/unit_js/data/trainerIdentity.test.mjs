@@ -30,7 +30,7 @@ test("what was stored is what comes back", () => {
   writeTrainerIdentity({ name: "Sam Ray", email: "pt@librept.test" }, store);
 
   // Field by field, not deepEqual against the whole object: the shape is not the contract, the
-  // round trip is (AGENT_RULES §5.8). Pinning the shape meant that adding `phone` — a real field
+  // round trip is. Pinning the shape meant that adding `phone` — a real field
   // with its own tests, breaking nothing a caller can observe — failed three tests here.
   const identity = readTrainerIdentity(store);
   assert.equal(identity.name, "Sam Ray");

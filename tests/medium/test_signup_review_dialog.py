@@ -6,7 +6,7 @@
 # which needs the server this project does not have). So every test here is about the same promise:
 # nothing enters the trainer's register that they did not look at and accept.
 #
-# Written before the dialog existed, per AGENT_RULES §5.10.
+# Written before the dialog existed.
 
 import json
 

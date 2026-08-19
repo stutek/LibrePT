@@ -74,7 +74,7 @@ def test_it_stays_quieter_than_the_button_beside_it(page, local_server):
 
 
 def test_it_is_a_real_touch_target_not_a_hover_sized_link(page, local_server):
-    """AGENT_RULES §2.D.1: this app is used on a phone, with a sweaty thumb."""
+    """This app is used on a phone, with a sweaty thumb."""
     load_with_stub(page, local_server, STUB)
     page.wait_for_selector("#the-quiet-one")
 

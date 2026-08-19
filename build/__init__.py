@@ -53,7 +53,7 @@ RUN_PHRASES = {
 RUN_HISTORY_PATH = os.path.join(REPORT_DIR, "last-run.json")
 
 # A 1-minute load average per core, above which the box is doing more than it has cores for and the
-# stage budgets in AGENT_RULES §2.A.3 stop applying. Below the lower figure there is nothing to say.
+# documented stage budgets stop applying. Below the lower figure there is nothing to say.
 LOAD_BUSY_PER_CORE = 0.7
 LOAD_OVERSUBSCRIBED_PER_CORE = 1.0
 
@@ -136,7 +136,7 @@ def format_elapsed(seconds):
 
 
 def _load_verdict(load, cores):
-    """The division AGENT_RULES §2.A.3 asks the reader to do first when a stage overruns. Doing it
+    """The division a reader has to do first when a stage overruns. Doing it
     here means nobody has to know how many cores this particular box has."""
     per_core = load[0] / max(1, cores)
     if per_core >= LOAD_OVERSUBSCRIBED_PER_CORE:
@@ -202,9 +202,9 @@ def suspend_suspected(monotonic_elapsed, wall_elapsed):
     """Whether the machine likely slept during a task.
 
     A monotonic clock does not advance across a suspend; the wall clock does. So a task whose wall time
-    exceeds its monotonic time by more than scheduling noise was interrupted rather than slow — which
-    AGENT_RULES §2.A.3 says to treat as suspect rather than as a regression, and which until now relied
-    on somebody noticing the timestamps by eye.
+    exceeds its monotonic time by more than scheduling noise was interrupted rather than slow, and is to be
+    treated as suspect rather than as a regression — which until now relied on somebody noticing the
+    timestamps by eye.
 
     A merely STARVED task is not this: host contention stretches both clocks together (a game at 141% CPU
     doubled two stages on 2026-08-17 and tripped nothing here).
@@ -221,7 +221,7 @@ def _warn_if_suspended(name, monotonic_elapsed, wall_elapsed):
     print(
         f"    ⚠ {name} spanned a ~{slept / 60:.0f} min gap in wall time that it did not spend working "
         "— the machine probably slept. Treat any failure from this run as suspect and re-run before "
-        "investigating it (AGENT_RULES §2.A.3)."
+        "investigating it."
     )
 
 
@@ -760,7 +760,7 @@ def run_catalog_coverage_check():
 def run_module_header_check():
     """Verifies a module that names its own path names the right one — see agent_tools/module_headers.py.
 
-    AGENT_RULES §5.4 makes line 1 a module's self-documentation, and moving a file is both what
+    Line 1 is a module's self-documentation, and moving a file is both what
     invalidates it and the moment nobody thinks to look at line 1. Left unchecked it had rotted to 28
     modules naming directories the repo no longer has, which does not merely fail to help — it points
     a reader at somewhere that does not exist.
@@ -813,7 +813,7 @@ def run_complexity_check():
 def run_test_assertion_check():
     """Verifies tests assert behaviour, not mechanics — see agent_tools/test_assertions.py.
 
-    AGENT_RULES §5.8 exists because a mechanics-pinned test fails on refactors that change nothing
+    A mechanics-pinned test fails on refactors that change nothing
     observable and passes while the behaviour is broken. Neither is visible in review — the
     assertion looks precise, which is what makes it convincing — so it needs a machine.
     """
@@ -996,7 +996,7 @@ def run_live_google_tests():
     never calls it and no workflow job can `needs:` it. That is not an oversight to be tidied up
     later — it is the design. This suite depends on a third party's availability and on a credential
     that is absent on every contributor's machine, which are precisely the properties a commit gate
-    must not have (AGENT_RULES §2.A.3: squeaky clean, always). Gating the deploy on Google's uptime
+    must not have. Gating the deploy on Google's uptime
     would block a release for an outage no change of ours caused and no revert could fix.
 
     What it is instead: a scheduled canary (.github/workflows/google-canary.yml) answering the one
@@ -1156,7 +1156,6 @@ def run_e2e_tests():
     surfaced this way and went unnoticed for a while), and "passed on retry" is not evidence a test
     is reliable, only that it didn't fail *that* time. Flaky tests get fixed at the root — a race in
     the app, an under-specified wait in the test — not laundered through a second chance.
-    See AGENT_RULES.md §2.A.3.
 
     What makes a failure here investigable without re-deriving it from scratch is `--tb=long` (the
     full call chain, not just the assertion line — parallel runs are isolated into their own log, so
@@ -1277,7 +1276,7 @@ ZAP_ADDONS_DIR = os.path.join(".venv", "zap-addons")
 # the beta rules never load, and the scan happily reports `WARN-NEW: 0 / PASS: 57` having quietly
 # stopped checking six things — including Source Code Disclosure [10099] and Dangerous JS Functions
 # [10110], both squarely relevant to this app. A scan that checks LESS and still says clean is the
-# false assurance AGENT_RULES §2.A.3 forbids. Vendoring the add-ons and THEN passing `-silent`
+# false assurance of a scan that reaches nothing. Vendoring the add-ons and THEN passing `-silent`
 # keeps the full 67-rule set (verified by diffing rule ids against a marketplace run) at the fast
 # path's speed.
 #
@@ -1443,7 +1442,7 @@ def _is_port_open(port):
 def _ensure_zap_target_up():
     """Guarantee the app is actually being served on DEV_SERVER_PORT before ZAP scans it.
 
-    A scan that reaches nothing exits "clean" and gives false assurance (AGENT_RULES §2.A.3),
+    A scan that reaches nothing exits "clean" and gives false assurance,
     so if the dev server / e2e fixture has not already bound the port we start our own copy and
     wait for it. Returns the Popen we started (to leave running — the user owns the dev server)
     or None if the port was already up.
@@ -1468,7 +1467,7 @@ def _ensure_zap_target_up():
 def run_owasp_zap_scan():
     """Runs the OWASP ZAP baseline scan against the live app and FAILS the build on any finding.
 
-    Enforcement (AGENT_RULES §2.A.3): the container runs with host networking so it truly reaches
+    Enforcement: the container runs with host networking so it truly reaches
     the app on DEV_SERVER_PORT, alerts are triaged by deploy/zap/zap-baseline.conf (each ignore justified in
     that file), and a non-zero ZAP exit — code 1 (FAIL), 2 (WARN), or 3 (scan error / unreachable) —
     fails the build. Nothing is printed-and-passed.
@@ -1488,7 +1487,7 @@ def run_owasp_zap_scan():
 
     # Fail CLOSED. Without these the scan still runs and still reports "clean", just with six fewer
     # rules — a weaker gate that looks identical in the log. Same reasoning as "a security scan that
-    # scans nothing is a failed scan" (AGENT_RULES §2.A.3): silently scanning LESS is the same
+    # scans nothing is a failed scan": silently scanning LESS is the same
     # false assurance, only harder to notice.
     addons_dir = ensure_zap_addons()
     if not addons_dir:
@@ -1506,7 +1505,7 @@ def run_owasp_zap_scan():
     # genuine hang (or, observed 2026-08-04, severe host CPU contention — 8 Playwright workers
     # plus the operator's own browser tabs pushed 1-min load average to 13+/16 cores) into a gate
     # that never fails, never passes, and never tells you why: "a stage that cannot run is a
-    # failure to fix, not a pass to log" (AGENT_RULES §2.A.3) applies to hanging, not just crashing.
+    # failure to fix, not a pass to log" applies to hanging, not just crashing.
     timeout_seconds = 1200
     try:
         # Logged like every other runner (build/testreport.py) rather than captured and thrown away
@@ -1678,8 +1677,8 @@ def run_stage_3_e2e():
     pytest-xdist's workers are mid-suite, and that contention produced `Page.goto` timeouts across
     unrelated specs (seen 2026-08-03: 30 failures, all `Timeout 30000ms exceeded`, with no relation
     to whatever the change under test touched). Running sequentially locally too trades some wall
-    time for a gate that does not spuriously fail — matching AGENT_RULES' "never hand-wave a
-    failure as probably flaky" stance: this was traceable to a real, avoidable contention source,
+    time for a gate that does not spuriously fail — and never hand-waving a
+    failure as probably flaky: this was traceable to a real, avoidable contention source,
     not an unexplained flake to shrug off.
     """
     print("\n=== Stage 3: E2E Browser Tests ===")

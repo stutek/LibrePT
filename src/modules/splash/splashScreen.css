@@ -12,8 +12,7 @@
    JS-driven animation, nothing that competes with the boot happening behind it. The whole thing is
    cut to a static frame under prefers-reduced-motion (bottom of file).
 
-   Styles live here rather than in index.css so the overlay ships with its module (AGENT_RULES
-   §5.2), and are loaded in <head> — a splash that paints after its own stylesheet arrives would
+   Styles live here rather than in index.css so the overlay ships with its module, and are loaded in <head> — a splash that paints after its own stylesheet arrives would
    flash unstyled markup, which is the one thing it exists to prevent. */
 
 .app-splash {
@@ -125,7 +124,7 @@
 }
 
 /* The escape hatch, top-left. 44x44 because it is a real touch target on a phone even though the
-   glyph inside it is small (AGENT_RULES §2.D.1) — and it sits inside the safe-area inset so it is
+   glyph inside it is small — and it sits inside the safe-area inset so it is
    not under a notch or a rounded corner on a device with one. */
 .app-splash-dismiss {
   position: absolute;

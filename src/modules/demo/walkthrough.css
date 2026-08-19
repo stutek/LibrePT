@@ -100,7 +100,7 @@
 }
 
 /* 44px of target for a 14px glyph: leaving the walkthrough must be reachable with a thumb, not just
-   visible (AGENT_RULES §2.D.1). */
+   visible. */
 .walkthrough-exit {
   display: flex;
   align-items: center;

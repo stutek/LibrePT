@@ -1,6 +1,6 @@
 """`python -m agent_tools.module_headers` — verify a module that names its own path names the right one.
 
-Why this exists: AGENT_RULES §5.4 makes the first line of every module its self-documentation, and
+Why this exists: the first line of every module is its self-documentation, and
 most modules here open by naming themselves — `// src/domain/sessionClock.js — reconciles …`. That
 line is the first thing a reader (or an agent grepping for a file) sees, so when it is wrong it does
 not merely fail to help, it actively misdirects toward a directory that has not existed for months.
@@ -79,7 +79,7 @@ def main(argv=None):
         return 0
 
     for actual, claimed in wrong:
-        print(f"  ✗ {actual} calls itself {claimed} (AGENT_RULES §5.4)")
+        print(f"  ✗ {actual} calls itself {claimed}")
 
     if wrong:
         print(

@@ -13,7 +13,7 @@
 //     at the desk. An invisible `timestamp` of when a checkbox got ticked is not the date the
 //     client consented, and it is the client's date a supervisory authority asks about.
 //   * The archiving reminder is a DIALOG, not a `title` tooltip. This app is used on a phone, where
-//     a tooltip is unreachable (AGENT_RULES §2.D.1) — and "you, not LibrePT, hold the signed form"
+//     a tooltip is unreachable — and "you, not LibrePT, hold the signed form"
 //     is exactly the sentence a trainer must not be able to miss.
 //
 // deps: injected { t } via initClientConsentSection; reads/writes only its own form controls.
@@ -35,7 +35,7 @@ import { $id, closeModal, openModal, renderMarkupOnce } from "../common/dom.js";
 
 let translate = (_key, fallback) => fallback;
 // An accessor, not a value: the trainer can switch UI language between two openings of the dialog,
-// and the default offered has to follow (AGENT_RULES §5.3).
+// and the default offered has to follow.
 let readUiLang = () => null;
 // The client currently in the form, so a language change can rebuild the delivery links without the
 // controller having to re-open the dialog.

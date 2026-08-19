@@ -15,7 +15,7 @@
 // (decided 2026-08-17, §1.7): an Android share intent routes on the MIME type, an OS file association
 // routes on the extension, and email frequently relabels the type to `application/octet-stream` — so
 // only the extension survives that hop. Declaring both is not redundancy. One media type per handling
-// surface rather than one generic type with a `kind` field inside, per [AGENT_RULES](../../AGENT_RULES.md) §5.9.
+// surface rather than one generic type with a `kind` field inside.
 //
 // **The file is plain, readable JSON on purpose.** It is a person's own data about themselves, in
 // transit between their phone and their trainer's; a format they cannot open would make the artifact

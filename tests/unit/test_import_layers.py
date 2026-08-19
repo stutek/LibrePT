@@ -1,6 +1,6 @@
 # tests/unit/test_import_layers.py
-# The import-layering gate (agent_tools/import_layers.py). It defends the property AGENT_RULES §5.3
-# buys with dependency injection — that any module can be mounted on its own, which is what
+# The import-layering gate (agent_tools/import_layers.py). It defends the property dependency injection
+# buys — that any module can be mounted on its own, which is what
 # tests/medium/ relies on — by refusing an import that points UP a layer. These pin the layer
 # resolution and both directions of the verdict; the tool's own main() runs against the real tree
 # every Stage 1.

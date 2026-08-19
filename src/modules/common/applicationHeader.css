@@ -148,7 +148,7 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav {
    tried, and a lone pulsing triangle is an unexplained warning (see the comment in
    applicationHeader.js).
    The padding is sized for a thumb, not for the 9px text — the text is small, but the tap target
-   must not be (AGENT_RULES §2.D.1). It never shrinks, so the wordmark ellipsizes first rather
+   must not be. It never shrinks, so the wordmark ellipsizes first rather
    than the warning being squeezed away. */
 .preview-badge {
   display: inline-flex;
@@ -196,7 +196,7 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav {
   gap: 4px;
   flex-shrink: 0;
   /* Not the 9px the badges beside it use: this is a warning about losing every client record, and
-     AGENT_RULES §2.D names 9px as unaimable. It is also a real touch target at this padding. */
+     9px of text is unaimable with a thumb. It is also a real touch target at this padding. */
   padding: 5px 9px;
   border: 1.5px solid var(--danger, #ef4444);
   border-radius: 999px;
@@ -437,8 +437,8 @@ select.menu-select {
   padding-left: 0;
   padding-right: 0;
 }
-/* 12px, not the 10px this shipped with. AGENT_RULES §2.D's own example of what not to do is "9px of
-   text is nothing to aim at with a sweaty thumb", and the counters were 10px with 9px arrows — the
+/* 12px, not the 10px this shipped with. the canonical example of what not to do is 9px of
+   text, which is nothing to aim at with a sweaty thumb, and the counters were 10px with 9px arrows — the
    anti-pattern, in the surface a trainer checks to know whether their work is safe. Raised for EVERY
    viewport rather than only desktop: a phone held at arm's length mid-session is the harder read,
    not the easier one. */
@@ -508,7 +508,7 @@ select.menu-select {
    product description, but reachable in ONE tap — the notices must be present in the installed app,
    not only in the repository (run_build ships src/ only, so THIRD_PARTY_NOTICES.md never reaches a
    phone). The summary is a real touch target, not 9px of text: licence text is exactly the kind of
-   thing a support request needs and a sweaty thumb has to hit (AGENT_RULES §2.D.1). */
+   thing a support request needs and a sweaty thumb has to hit. */
 .about-attribution {
   margin-top: 0.75rem;
   border-top: 1px solid var(--border-color, rgba(128, 128, 128, 0.25));

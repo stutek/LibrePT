@@ -39,7 +39,7 @@ def test_the_warning_names_itself_rather_than_relying_on_colour(page, local_serv
     badge = page.locator("#unbacked-badge")
     assert badge.is_visible()
     # Spelled out, not a bare coloured triangle: a wordless warning has its meaning only in an
-    # aria-label, which is the hover problem in another costume (AGENT_RULES §2.D.1) — and this one
+    # aria-label, which is the hover problem in another costume — and this one
     # is about losing a trainer's whole client history.
     assert "NOT BACKED UP" in badge.inner_text()
     # The count is what makes it concrete, and it belongs in the accessible name rather than the

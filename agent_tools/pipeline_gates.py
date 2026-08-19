@@ -15,8 +15,8 @@ hand in two files, so CI ran the medium and e2e suites concurrently while the lo
 `out_of_order_stages()` asserts the workflow reproduces it — a job running a Stage N check must have
 every Stage N-1 job in its transitive closure.
 
-AGENT_RULES §2.A.3 already required this ("a gate step that exits non-zero MUST fail the build") —
-the workflow just did not implement it. This is that rule, made mechanical.
+The standing rule already required this — a gate step that exits non-zero MUST fail the build —
+and the workflow just did not implement it. This is that rule, made mechanical.
 """
 
 import re
@@ -227,7 +227,7 @@ def local_actions_before_checkout(workflow_path):
 
     It is asserted here rather than reviewed because nothing else can see it: the workflow file is
     valid YAML, no gate stage reads it, and the whole failure lives on the runner. That is the same
-    "local green is not CI green" gap AGENT_RULES §6.6 describes.
+    "local green is not CI green" gap.
     """
     document = yaml.safe_load(workflow_path.read_text(encoding="utf-8"))
     problems = []
