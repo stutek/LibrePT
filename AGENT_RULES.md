@@ -45,6 +45,9 @@ case in front of you, decide by these — and when a rule stops serving them, ch
   convention nobody can verify is a convention that has already drifted.
 - **Test first** — the test states the promise in the caller's words, and failing once is the only
   proof it can fail at all.
+- **Test isolation** — every test starts from a known state and can fail alone. Sharing state
+  between tests buys seconds and sells the thing tests are for: order-dependent failures cascade,
+  point at innocent code, and turn one bug into a screen of red.
 - **Small incremental changes** — one coherent change per commit, verified before the next starts.
 
 ---
