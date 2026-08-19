@@ -261,13 +261,14 @@ def test_a_deep_link_starts_the_walkthrough_where_the_script_starts(page, local_
     expect(page.locator(".session-card").first).to_be_visible()
 
 
-def test_a_step_says_so_when_the_app_is_not_where_it_expects(page, local_server):
+def test_a_step_whose_ground_was_pulled_away_rebuilds_it(page, local_server):
     """Wanted 2026-08-18: "when the demo card for step loads, it should assert the app state is right
-    (right view, right data)".
+    (right view, right data)" — and 2026-08-19, what to DO about it: rebuild the state, do not tell
+    the trainer to start over.
 
-    A step whose control cannot exist yet is a step that will fail confusingly the moment anyone taps
-    Show me. Checking when the card LOADS turns that into a sentence the trainer can read, and is the
-    same evidence the step's own expectation uses.
+    A step whose control cannot exist yet will fail confusingly the moment anyone taps Show me. The
+    check runs when the card LOADS; what follows is the guide replaying the steps that build the
+    state — here, reopening the clipboard the trainer closed behind it.
     """
     _open_walkthrough(page, local_server)
     _do_current_step(page)
@@ -284,7 +285,8 @@ def test_a_step_says_so_when_the_app_is_not_where_it_expects(page, local_server)
     page.locator(NEXT).click()
 
     expect(page.locator(PROGRESS)).to_contain_text("2")
-    expect(page.locator(".walkthrough-problem")).to_be_visible(timeout=5_000)
+    expect(page.locator("#active-exercise-scroll-deck")).to_be_visible(timeout=15_000)
+    expect(page.locator(".walkthrough-problem")).to_be_hidden()
 
 
 def test_show_me_brings_a_scrolled_away_control_into_view_before_tapping(
@@ -366,10 +368,11 @@ def test_the_diagnosis_goes_to_the_console_not_to_the_trainer(page, local_server
     """Decided 2026-08-19: "the red assertion text is helpful to me for investigations, but should not
     be customer visible".
 
-    A failed step's reason is a CSS selector and an unmet expectation — exactly what someone
-    debugging the script needs, and exactly what a trainer can do nothing with. It moves to the
-    console rather than being deleted: the alternative to showing it is putting it where an
-    investigator already looks.
+    A step's diagnosis is a CSS selector and an unmet expectation — exactly what someone debugging
+    the script needs, and exactly what a trainer can do nothing with. It goes to the console rather
+    than being deleted: the alternative to showing it is putting it where an investigator already
+    looks. Here the app recovers, so the trainer is told nothing at all — and the console still says
+    which step needed rebuilding.
     """
     warnings = []
     page.on("console", lambda message: warnings.append(message.text))
@@ -381,15 +384,12 @@ def test_the_diagnosis_goes_to_the_console_not_to_the_trainer(page, local_server
     page.wait_for_timeout(600)
     page.locator(BACK).click()
     page.locator(NEXT).click()
-    expect(page.locator(".walkthrough-problem")).to_be_visible(timeout=5_000)
+    expect(page.locator("#active-exercise-scroll-deck")).to_be_visible(timeout=15_000)
 
-    shown = page.locator(".walkthrough-problem").inner_text()
-    assert "#" not in shown and "." not in shown.split()[0], (
-        f"selector leaked into the panel: {shown}"
-    )
     assert any("[walkthrough]" in text for text in warnings), (
         f"nothing diagnosable reached the console: {warnings}"
     )
+    expect(page.locator(".walkthrough-problem")).to_be_hidden()
 
 
 def test_the_spotlight_follows_the_page_immediately_when_it_scrolls(page, local_server):
@@ -473,3 +473,26 @@ def test_the_ring_appears_where_it_belongs_rather_than_flying_in(page, local_ser
     )
 
     assert drift <= 4, f"ring was {drift}px from its control on the frame it appeared"
+
+
+def test_back_off_the_last_step_rebuilds_the_state_that_step_needs(page, local_server):
+    """Reported 2026-08-19: "After completing demo I click back and get: This step needs a different
+    screen — go back to the sessions board and start it again. that is not acceptable".
+
+    Step 4 switches participant, which re-renders the deck for somebody else — so the Too Easy signal
+    step 3 asks for is no longer on screen, through no fault of the trainer. A button they were
+    offered must leave the app in the state the step it lands on needs: the walkthrough performs the
+    preceding steps itself rather than telling them to start over.
+    """
+    _open_walkthrough(page, local_server)
+    for _ in range(3):
+        _do_current_step(page)
+    expect(page.locator(PROGRESS)).to_contain_text("4")
+    page.locator(SHOW_ME).click()
+    expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
+
+    page.locator(BACK).click()
+
+    expect(page.locator(PROGRESS)).to_contain_text("3")
+    expect(page.locator(".walkthrough-problem")).to_be_hidden()
+    expect(page.locator(".circuit-sig.easy").first).to_be_visible(timeout=15_000)

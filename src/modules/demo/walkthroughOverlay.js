@@ -52,6 +52,12 @@ const OVERLAY_ID = "walkthrough-overlay";
 const DEFAULT_POLL_MS = 250;
 // Space kept clear under the panel before it gives up the bottom of the screen and moves to the top.
 const PANEL_CLEARANCE_PX = 12;
+// How long the app is given to settle between the taps of a rebuild. Deliberately far shorter than
+// the demonstration's own pauses (demoTourPlayer.js): those exist so a viewer can follow a finger,
+// while this is the guide putting back a state the trainer never saw leave.
+const RESTORE_SETTLE_MS = 150;
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function iconButton(doc, { id, className, icon, label }) {
   const button = doc.createElement("button");
@@ -232,20 +238,70 @@ export function startGuidedWalkthrough({
     positionSpotlight(step ? resolveTarget(doc, step) : null);
   }
 
-  function enterStep() {
+  /**
+   * Puts the app back where a step needs it, by REPLAYING the steps that build that state (reported
+   * 2026-08-19: "After completing demo I click back and get: This step needs a different screen —
+   * go back to the sessions board and start it again. that is not acceptable").
+   *
+   * A button the guide itself offers must land somewhere usable. Back off the last step is the case
+   * that made this unarguable: step 4 switches participant, which re-renders the deck for somebody
+   * else, so the Too Easy signal step 3 asks for is gone through no fault of the trainer — and the
+   * old code answered a legitimate tap by telling them to start the tour over.
+   *
+   * **Rebuilt from the step's own anchor, not patched.** The anchor is the nearest preceding step
+   * that owns a `route`: everything after it happens inside the view it opened, so navigating there
+   * and replaying forward reconstructs the ground the same way every time, whatever state the app
+   * had drifted into. Replay stops the moment the target step's precondition holds, so a Back that
+   * only needs one tap undone does not tear the whole clipboard down first.
+   *
+   * Safe to replay because `performStep` is idempotent (demoTourPlayer.js): a step whose outcome
+   * already holds is not re-tapped, which matters here because several of these controls are
+   * toggles. Fast waits rather than the demonstration's own pauses — this is repair, not teaching,
+   * and the trainer is waiting on a panel they already tapped.
+   */
+  async function restoreGroundFor(step) {
+    const index = tour.steps.indexOf(step);
+    let anchor = index;
+    while (anchor > 0 && !tour.steps[anchor].route) anchor -= 1;
+
+    const route = tour.steps[anchor].route;
+    console.info(
+      `[walkthrough] step ${step.id} precondition not met — rebuilding from ${anchor + 1}`,
+    );
+    if (route) {
+      navigate?.(route);
+      await sleep(RESTORE_SETTLE_MS);
+    }
+    for (const earlier of tour.steps.slice(anchor, index)) {
+      if (stepPreconditionMet(step, doc)) break;
+      await performStep(earlier, { doc, wait: (ms) => sleep(Math.min(ms, RESTORE_SETTLE_MS)) });
+    }
+    // Only a state the script itself cannot rebuild is the trainer's problem to hear about.
+    if (!stepPreconditionMet(step, doc)) {
+      reportProblem(
+        `step ${step.id} precondition still unmet after rebuild`,
+        t("walkthrough_wrong_place"),
+      );
+    }
+  }
+
+  async function enterStep() {
     el.problem.hidden = true;
     const step = currentWalkthroughStep(tour, state);
     // Asserted as the card loads (TODO §30.3): a step whose control cannot exist yet would otherwise
     // fail confusingly the moment anyone tapped Show me, and the trainer would have read a whole
-    // caption first.
-    //
-    // A step that owns a ROUTE puts the app back there first rather than complaining — that is what
-    // Back across a view boundary means (reported 2026-08-19): step 1 lives on the board, so
-    // returning to it has to take the clipboard down, not just re-read its caption over the top.
-    // Only when there is nowhere declared to go does it say so.
+    // caption first. What follows from the assertion is a REPAIR, not a complaint — see
+    // restoreGroundFor.
     if (step && !stepPreconditionMet(step, doc)) {
-      if (step.route) navigate?.(step.route);
-      else reportProblem(`step ${step.id} precondition not met`, t("walkthrough_wrong_place"));
+      // Same busy flag the demonstration uses: it greys out Back / Show me / Next while the app is
+      // being moved under the panel, so a second tap cannot start a second rebuild on top of one.
+      showing = true;
+      render();
+      try {
+        await restoreGroundFor(step);
+      } finally {
+        showing = false;
+      }
     }
     const target = step ? resolveTarget(doc, step) : null;
     if (target) {
