@@ -301,6 +301,23 @@ documents itself.
    the direct edit, is written blind, discards the read-before-edit guard, and shows no reviewable
    diff. A script earns its keep only on volume — many exact replacements in one pass. Scripting the
    same shape twice is rule 2.
+
+   **And a bulk pass may only match an ANCHOR, never a shape** (Simon, 2026-08-19: *"the tool
+   shortcut is more expensive, due to repairs, than executing changes file per file"*). Measured in
+   one session: 60 explicit `(file, exact old text, new text)` replacements applied with zero
+   collateral and reported the three that did not match; two regexes matching by shape — a bare
+   `" ()"`, and a substitution table applied twice over the same line — broke arrow functions in
+   eleven modules, renumbered references twice, and cost a full regeneration from `HEAD`. So:
+   - **Assert every intended site applied.** A silent no-op is the failure mode that ships broken
+     code, and the list of misses is the only proof the pass did what it claimed.
+   - **Match text that cannot occur outside the target.** `" ()"` occurs in every arrow function;
+     `§N` occurs in another document's numbering. If the pattern needs a lookahead to be safe, it is
+     the wrong pattern.
+   - **Verify structurally before anything else** — parse every touched file, then lint, then the
+     gate. A syntax error found by the formatter three steps later has already been built on.
+   - **When repair starts, stop repairing.** Regenerate the touched files from `HEAD` and re-apply
+     the anchored edits; chasing the damage forward costs more than the pass saved. That recovery is
+     only available if the edits were written as explicit replacements in the first place.
 5. **Documentation cross-references are gated**: `agent_tools/doclinks.py` fails the build on a dead
    link, anchor or `§N.M`.
 6. **Every pipeline task must gate something.** A CI job nothing lists in `needs:` reports red while
