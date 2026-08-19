@@ -945,7 +945,7 @@ stops being read. Whoever is working runs them on the cadence and records what c
 | :--- | :--- | :--- |
 | **Duplication sweep** | Start with `python -m agent_tools.constant_copies` (§28.3), which answers the mechanical half: every DECLARED constant's literal appears only at its declaration. Then the half no tool can answer — values or blocks that have quietly acquired copies and are not declared anywhere yet, where the question is "should this be declared once?". A general copy-paste detector was considered and rejected: the standard one is an npm package, and this repo vendors Node with **no npm dependency at all** | 2026-08-18 |
 | **ZAP suppression review** | Every `IGNORE` in `deploy/zap/zap-baseline.conf` still true, re-derived from the code rather than from its own comment | 2026-08-12 |
-| **Timing budget re-measure** | The per-stage budget table against an **idle** machine. Stage 3 currently runs 90–180s against a table that says 45s, mostly because ~30 browser tests were added on 2026-08-17 | never — overdue |
+| **Timing budget re-measure** | The per-stage budget table against an **idle** machine. Re-measure when a stage moves without tests being added — growth is expected and gets a table update, a jump on a fixed test count is a defect | 2026-08-19 |
 | **TODO ranking** | Verify "Where to start" against `src/` before trusting it. It has gone stale twice (08-11, 08-13), both times because shipped work was never closed | 2026-08-17 |
 
 **A tool may graduate out of this table into `build/`** once it has proven value and demand
@@ -2471,3 +2471,39 @@ module has one); the reason restated in the comment itself (always possible, cos
 nothing (cheapest, loses the trail). Doing this as one 495-site mechanical strip would rewrite
 half the repository's comments blind, so the plan is to convert them **as files are touched**,
 starting with the modules whose §-refs point at sections that have already shipped.
+
+---
+
+## 34. Browser-suite cost: what an audit of test durations found
+
+**Measured 2026-08-19** on a quiet 16-core box, `--durations=0` over both browser tiers. The headline
+is that nothing is broken: the duration distribution is smooth (51 tests near 3s, 48 near 2s, 31 near
+4s), so there is **no cluster of near-identical times** — the signature of a swallowed timeout, which
+is what the 2026-08-07 investigation found. This is real work, and both tiers run near their parallel
+floor: e2e at 81% efficiency (755s of call time, 94s floor at 8 workers, 116s actual), medium at 63%
+(238s call, 30s floor, 48s actual).
+
+So the only lever left is **total call time**, and it is concentrated in deliberate waiting:
+
+| Where | Cost | What it is |
+| :--- | :--- | :--- |
+| `test_walkthrough.py` | 117s / 20 tests | the demo's own pacing:each step is 520ms scroll + 650ms hand travel + 160ms tap + 1350ms settle ≈ 2.7s, and a test that walks the script pays ~11s |
+| `test_demo_tour.py` | 41s / 4 tests | same constants, whole script per test |
+| `test_splash_screen.py` | 63s / 19 tests | the splash's deliberate minimum hold |
+| `test_layout_overflow.py` | 45s / 4 tests | genuine geometry sweeps across four viewports and two languages |
+
+**158s of 755s (21%) is the app deliberately waiting so a human viewer can follow a finger.** Those
+constants exist for a viewer (raised 2026-08-18: "on web browser the button and clicks are about 50%
+too fast"); the tests pay them 24 times per gate run to assert step logic that has nothing to do with
+pacing.
+
+**Three candidate fixes, none started — the second is the recommended one:**
+
+1. **A URL knob for the pace** (`?demo=walkthrough&pace=fast`). Cheapest to write, and wrong: it adds
+   product surface whose only consumer is the test suite.
+2. **Move the step-logic tests down a tier.** Most of `test_walkthrough.py` asserts panel behaviour —
+   which control is offered, what Back rebuilds, what the caption says — and needs no router, no
+   persistence and no real boot. Mounted in `tests/medium/` via a stub, each can inject its own
+   `wait`, because `performStep` already takes one. Two e2e tests stay behind to prove the real thing
+   end to end, and one asserts the PACING itself, which is currently asserted nowhere.
+3. **Leave it.** 15s of wall time per run against a day's work is not obviously worth the churn.

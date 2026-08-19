@@ -91,11 +91,16 @@ case in front of you, decide by these — and when a rule stops serving them, ch
 
    | Stage | What runs | Typical | Investigate past |
    | :--- | :--- | :--- | :--- |
-   | 1 | Ruff, Biome, `pip-audit`, `tests/unit/`, `tests/unit_js/`, static audits (HTML-sink/CSP, doc graph, pipeline gating, catalog, layering, complexity) — parallel | ~6s | 60s |
-   | 2 | `tests/medium/` component suite | ~13s | 90s |
-   | 3 | `tests/e2e/` Playwright suite | ~45s | 2min |
-   | 4 | OWASP ZAP baseline scan | ~15s | 3min (killed at 20min) |
-   | **all** | | **~1m20s** | **3min** |
+   | 1 | Ruff, Biome, `pip-audit`, `tests/unit/`, `tests/unit_js/`, static audits (HTML-sink/CSP, doc graph, pipeline gating, catalog, layering, complexity) — parallel | ~4s (~13s on a cold pip-audit) | 60s |
+   | 2 | `tests/medium/` — 193 tests, ~240s of call time at 8 workers | ~48s | 90s |
+   | 3 | `tests/e2e/` — 205 tests, ~755s of call time at 8 workers | ~2min | 4min |
+   | 4 | OWASP ZAP baseline scan | ~15s (~75s on a cold `.venv`) | 3min (killed at 20min) |
+   | **all** | | **~3m** | **6min** |
+
+   Re-measured 2026-08-19 on a quiet 16-core box. The browser stages had drifted 3–4x past the
+   previous numbers purely by growth — the suites gained ~120 tests — and both now run near their
+   parallel floor (e2e at 81% efficiency), so the only remaining lever is total call time, not
+   scheduling. Re-measure when a stage moves without tests being added.
 
    Both browser stages use `build._playwright_worker_count` (half the cores), never `-n auto`:
    full-core parallelism starves compositor frames AND bursts past the dev server's TCP listen
