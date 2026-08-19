@@ -162,3 +162,54 @@ def test_a_render_time_placeholder_is_not_a_dead_link(docs):
     )
 
     assert findings_for(page, [page]) == []
+
+
+# --- rule citations must not point at a number --------------------------------------------------
+
+
+def test_a_rule_cited_by_number_is_a_finding(docs):
+    """A rule's number is a position in a list that gets reordered whenever a lesson lands. Any file
+    that cites one turns "put the important rule first" into an edit across the repository — which is
+    what happened on 2026-08-19, when reordering the rules touched 87 files."""
+    path = docs("TODO.md", "Gated because AGENT_RULES §2.1 requires it.\n")
+
+    findings = findings_for(path, [path])
+
+    assert findings, "a numbered rule citation must not pass"
+    assert "by name" in findings[0]
+
+
+def test_the_rules_file_may_not_cite_its_own_numbers_either(docs):
+    """Anti-fragility has to hold inside the file too: a rule that says "see §4.2" breaks the moment
+    §4.2 moves, and it is the one document guaranteed to be reordered."""
+    path = docs("AGENT_RULES.md", "Test it in the tier AGENT_RULES §4.2 names.\n")
+
+    assert findings_for(path, [path])
+
+
+def test_a_rule_cited_by_name_passes(docs):
+    """The whole point: naming the rule survives any reordering, and reads without a second file."""
+    path = docs(
+        "TODO.md", "Gated because AGENT_RULES: run the gate in full requires it.\n"
+    )
+
+    assert findings_for(path, [path]) == []
+
+
+def test_another_document_may_still_use_section_numbers(docs):
+    """Only RULE citations are numberless. TODO.md's own §-numbering is how its sections are
+    addressed, and doclinks still resolves those normally."""
+    todo = docs("TODO.md", "## 12. A thing\n\nSee TODO §12 for the plan.\n")
+
+    assert findings_for(todo, [todo]) == []
+
+
+def test_the_rules_file_may_still_cite_another_documents_sections(docs):
+    """Only RULE numbers are forbidden. `[TODO §6.4](TODO.md)` inside AGENT_RULES.md addresses
+    another document's own numbering, which nothing about reordering the rules can break."""
+    rules = docs(
+        "AGENT_RULES.md", "CI reproduces the four stages ([TODO §6.4](TODO.md)).\n"
+    )
+    todo = docs("TODO.md", "## 6. CI\n\n### 6.4 Stages\n")
+
+    assert findings_for(rules, [rules, todo]) == []

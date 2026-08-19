@@ -74,7 +74,7 @@ The patterns, named:
   default.
 - **Chain of Responsibility ordered by a computed key** — see §3.
 - **Strategy / dependency injection** — a route never imports a view module and never touches
-  `document`. Everything arrives in `ctx` (§4), per AGENT_RULES §4.
+  `document`. Everything arrives in `ctx` (§4), per AGENT_RULES: Code & Test Architecture.
 - **Reverse routing** — `build()` is the inverse of `match()`, so a URL is spelled from a route name
   plus params and never by hand (§5).
 

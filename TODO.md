@@ -244,12 +244,12 @@ scope left from debugging) that would keep every Drive test green while producti
   workflow edit can break the `cron`, a repository can be archived. By the time anyone notices there
   is nothing to notice — the credential is simply dead, and the fix is the full consent flow again.
   So there is nothing observable to alert on, and a calendar reminder would be exactly the
-  silently-expiring, nobody's-job artefact [AGENT_RULES §2.1](AGENT_RULES.md) rejects for gate
+  silently-expiring, nobody's-job artefact [AGENT_RULES: run the gate in full](AGENT_RULES.md) rejects for gate
   suppressions. Instead `python -m agent_tools.google_credential` stamps a `minted` date and
   `python -m agent_tools.credential_expiry` runs **inside the canary**, failing it from **150 days**
   — a month inside Google's 180 — so a live canary turns red with runway, and a canary that stopped
   comes back red the moment it next runs. It is deliberately a hard failure rather than a warning
-  ([AGENT_RULES §2.1](AGENT_RULES.md) forbids a gate that warns and returns success); a month of
+  ([AGENT_RULES: run the gate in full](AGENT_RULES.md) forbids a gate that warns and returns success); a month of
   daily red is the action item.
   It cannot live in `build check` Stage 1, because a contributor's clone holds no credential and a
   check that skips on a missing file gates nothing — so Stage 1 asserts the *workflow still runs it*
@@ -707,7 +707,7 @@ restored.
 
 ### 6.4 [x] CI runs medium and e2e in parallel; the local gate runs them staged — RESOLVED: keep parallel
 Resolved 2026-08-08 (Simon): **CI mirrors the local gate**, four stages chained from one declaration
-(`PIPELINE_STAGES`). See [AGENT_RULES §2.1](AGENT_RULES.md) for the standing rule and
+(`PIPELINE_STAGES`). See [AGENT_RULES: run the gate in full](AGENT_RULES.md) for the standing rule and
 [CHANGELOG](CHANGELOG.md) for the cost this was overruled on.
 
 ---
@@ -943,13 +943,13 @@ stops being read. Whoever is working runs them on the cadence and records what c
 
 | Every two weeks | What to look for | Last done |
 | :--- | :--- | :--- |
-| **Duplication sweep** | Start with `python -m agent_tools.constant_copies` (§28.3), which answers the mechanical half: every DECLARED constant's literal appears only at its declaration. Then the half no tool can answer — values or blocks that have quietly acquired copies and are not declared anywhere yet, where the question is "should this be declared once?". A general copy-paste detector was considered and rejected: the standard one is an npm package, and this repo vendors Node with **no npm dependency at all** ([AGENT_RULES §4.2](AGENT_RULES.md)) | 2026-08-18 |
-| **ZAP suppression review** | Every `IGNORE` in `deploy/zap/zap-baseline.conf` still true, re-derived from the code rather than from its own comment ([AGENT_RULES §2.1](AGENT_RULES.md)) | 2026-08-12 |
-| **Timing budget re-measure** | [AGENT_RULES §2.1](AGENT_RULES.md)'s per-stage table against an **idle** machine. Stage 3 currently runs 90–180s against a table that says 45s, mostly because ~30 browser tests were added on 2026-08-17 | never — overdue |
+| **Duplication sweep** | Start with `python -m agent_tools.constant_copies` (§28.3), which answers the mechanical half: every DECLARED constant's literal appears only at its declaration. Then the half no tool can answer — values or blocks that have quietly acquired copies and are not declared anywhere yet, where the question is "should this be declared once?". A general copy-paste detector was considered and rejected: the standard one is an npm package, and this repo vendors Node with **no npm dependency at all** ([AGENT_RULES: organise by concern](AGENT_RULES.md)) | 2026-08-18 |
+| **ZAP suppression review** | Every `IGNORE` in `deploy/zap/zap-baseline.conf` still true, re-derived from the code rather than from its own comment ([AGENT_RULES: run the gate in full](AGENT_RULES.md)) | 2026-08-12 |
+| **Timing budget re-measure** | [AGENT_RULES: run the gate in full](AGENT_RULES.md)'s per-stage table against an **idle** machine. Stage 3 currently runs 90–180s against a table that says 45s, mostly because ~30 browser tests were added on 2026-08-17 | never — overdue |
 | **TODO ranking** | Verify "Where to start" against `src/` before trusting it. It has gone stale twice (08-11, 08-13), both times because shipped work was never closed | 2026-08-17 |
 
 **A tool may graduate out of this table into `build/`** once it has proven value and demand
-([AGENT_RULES §8.2](AGENT_RULES.md)) — write it for yourself, use it on real work, and wire it into
+([AGENT_RULES: promote a script to a tool](AGENT_RULES.md)) — write it for yourself, use it on real work, and wire it into
 Stage 1 only when it has actually caught something more than once.
 
 ---
@@ -1498,7 +1498,7 @@ were closed:
   take it from one source now.
 - **Suspend detection — closed.** `_timed_task` compares monotonic against wall time and says so when a
   task spanned a gap it did not spend working ([build/__init__.py](build/__init__.py)).
-  [AGENT_RULES §2.1](AGENT_RULES.md) has always said to treat a time jump as interruption rather than
+  [AGENT_RULES: run the gate in full](AGENT_RULES.md) has always said to treat a time jump as interruption rather than
   a regression; it relied on somebody noticing timestamps by eye, which failed twice in one session.
 
 - **One Python declaration — closed 2026-08-18.** CI ran 3.11 while this machine ran 3.14.4 with nothing
@@ -1587,7 +1587,7 @@ engine.
 **The cause was the Font Awesome CDN stylesheet (§12.6), vendored 2026-08-05.** The measurements, and
 the list of things ruled out so they are not re-derived, are in [CHANGELOG](CHANGELOG.md); the
 per-stage budget and the diagnostic that generalises (**a tight cluster of near-identical durations
-is a timeout, not work**) are in [AGENT_RULES §2.1](AGENT_RULES.md).
+is a timeout, not work**) are in [AGENT_RULES: run the gate in full](AGENT_RULES.md).
 
 **One loose end**: the navigation timeout was raised 30s → 60s while chasing this. With the cause
 fixed, consider reverting it so any future stall fails fast and cheap.
@@ -1852,7 +1852,7 @@ route list against `routeTable.js`, so a route added later fails until someone d
 view can overflow.
 
 ### 25.4 [x] One sweep, two consumers
-Per [AGENT_RULES.md](AGENT_RULES.md) §8 the JS lives in ONE module, used by the e2e suite and
+Per [AGENT_RULES.md](AGENT_RULES.md): Agent Tooling the JS lives in ONE module, used by the e2e suite and
 runnable directly as a diagnostic (`--device`, `--viewport`, `--invariant`). Its own tool rather than
 a flag on [layout_probe.py](agent_tools/layout_probe.py), which stays about *named selectors*.
 
@@ -1937,7 +1937,7 @@ two devices that already hold it.
    QR byte-mode version ~10–13 of 40, which scans off a phone screen at arm's length. This is the
    only path that works with **no network and no messaging app** — the basement gym, or the client
    who would rather not hand their trainer a phone number. Cost is one vendored ~10–15KB pure-JS
-   encoder, pinned and checksummed the way Node and Biome already are ([AGENT_RULES.md](AGENT_RULES.md) §4.2)
+   encoder, pinned and checksummed the way Node and Biome already are ([AGENT_RULES.md](AGENT_RULES.md): organise by concern)
    — no npm, so nothing a JS-side dependency audit would need to cover.
 
 ### 26.4 The trainer's own QR needs no code at all
@@ -2278,7 +2278,7 @@ argues the same way about authoring as about the gym floor: the app's advantage 
   carries **a small tag marking it as having no official taxonomy backing** — so a trainer can see at
   a glance which movements in a plan are standard and which came in with it.
   - Recommended glyph `fa-pencil` ("hand-written"), with the word **CUSTOM** beside it, since
-    [AGENT_RULES §6.1](AGENT_RULES.md) forbids meaning that lives only in an icon. `fa-asterisk`,
+    [AGENT_RULES: nothing lives only in a hover](AGENT_RULES.md) forbids meaning that lives only in an icon. `fa-asterisk`,
     `fa-puzzle-piece`, `fa-user-pen`, `fa-wand-magic-sparkles` and `fa-tag` all ship too, if the
     reading should be "with a caveat" rather than "yours". Not a decision — the maintainer asked
     whether a glyph exists, and the answer is that several do.
@@ -2315,7 +2315,7 @@ trainer retypes, not a corrupted record. On top of that, in order of what it buy
    array, accept a NAMED alias per field (`reps`/`repetitions`, `weight`/`load`/`kg`,
    `sets`/`series`), coerce `"3x10"` and `"3 × 10"`. Every alias is an explicit table entry with a
    test — never a generic fuzzy matcher, which fails unpredictably and cannot be reasoned about
-   ([AGENT_RULES §4.9](AGENT_RULES.md): verbosity over a clever mechanism).
+   ([AGENT_RULES: verbosity over another layer](AGENT_RULES.md): verbosity over a clever mechanism).
 3. **Per-item parsing, never all-or-nothing.** Item 7 being unreadable must not lose items 1–6; an
    unparsed line survives into the editor carrying its raw text, so the trainer fixes one row rather
    than starting over. This is the whole difference between fragile and merely annoying.
@@ -2354,7 +2354,7 @@ file.
   catalog by canonical name (the wger crosswalk, UC6 §6) — that is the matching half solved, and it
   is also what decides whether a movement earns the CUSTOM tag.
 - **A use case is still owed**: this is a workflow, so it needs a file under
-  [use_cases/](use_cases/INDEX.md) like every other one ([AGENT_RULES §7](AGENT_RULES.md)).
+  [use_cases/](use_cases/INDEX.md) like every other one ([AGENT_RULES: Documentation & the Knowledge Graph](AGENT_RULES.md)).
 
 ---
 

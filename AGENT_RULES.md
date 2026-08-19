@@ -133,24 +133,22 @@ Corrections are the most expensive thing the maintainer produces. One given twic
    | why one piece of code is the way it is | a comment **at that code** |
    | work still to do, or a decision taken | [TODO.md](TODO.md), dated, naming who decided |
    | what shipped | [CHANGELOG.md](CHANGELOG.md) |
-   | a behaviour that must not regress | **a test**, in the tier AGENT_RULES §4.2 names |
+   | a behaviour that must not regress | **a test**, in the tier that matches how much of the app it boots |
    | the maintainer's context and preferences | the agent's private memory |
 
 3. **A rule governing work here may never live only in private memory** — unreadable, unreviewable,
    uncommitted, different per agent. Memory may point at a rule; it may not be its home.
 4. **Detect dissatisfaction proactively and ask rather than guess.** On *"why are you…"*, *"no"*, a
    repeated instruction or a small correction: stop, state what you think the problem is, and ask
-   whether the answer changes what you write — in prose, never a modal (AGENT_RULES §1.6).
+   whether the answer changes what you write — in prose, never an interactive modal.
 5. **Edit and reorder the rules; do not only append.** A lesson usually belongs *inside* an existing
    rule, sharpening it — find that rule first and extend it. A file that only grows stops being read,
    at which point every rule in it is decorative.
-6. **Renumbering is allowed, and order must reflect importance** (Simon, 2026-08-19: *"numbering
-   should be changeable, don't be afraid of refactors; make sure the importance is reflected in order
-   and numbering"*). A number is still an identifier cited from `src/`, `tests/` and
-   [TODO.md](TODO.md), and `doclinks` only checks that a section exists — so a renumber is a
-   **repo-wide rename in the same commit**: rewrite every numbered citation, then prove it with
-   `grep -rn "AGENT_RULES.*§" .` and the gate. Never leave a citation pointing at a rule that moved —
-   and see rule 10, which keeps that rename inside Markdown.
+6. **Reorder freely: a rule's number is a position, never an identifier.** Importance decides the
+   order, and importance changes — so renumbering must cost nothing anywhere. That holds only
+   because **no file, including this one, ever cites a rule by number**: rules are cited by NAME, so
+   moving one changes exactly one file. Gated by `agent_tools/doclinks.py`, which fails the build on
+   a numbered rule citation in any Markdown file.
 7. **Write the rule and the evidence, never the apology.** Evidence is one clause, not a story.
 8. **Quote the new or changed rule VERBATIM in the reply**, saying which rule it extends or that it
    is new. It binds every future session, so rejecting it must cost one sentence rather than three
@@ -160,16 +158,13 @@ Corrections are the most expensive thing the maintainer produces. One given twic
    checkable; the test is whether an agent that read the rule and nothing else behaves correctly.
    **The rules live HERE and nowhere else** — [CLAUDE.md](CLAUDE.md) and [GEMINI.md](GEMINI.md) load
    this file, [INDEX.md](INDEX.md) maps to it, [TODO.md](TODO.md) and [CHANGELOG.md](CHANGELOG.md)
-   record work rather than rules. They may point at a rule; none may restate one.
-
-10. **Code and tests reference use cases only** (Simon, 2026-08-19: *"the code and tests are allowed
-    to reference only use cases"*, after *"why do we need to change tests when agent rules change,
-    that seems an unnecessary dependency?"*). [use_cases/](use_cases/) specifies WHAT the app must
-    do, which is what a test protects and what a comment may point at. This file and the other
-    process documents govern HOW work is done and change for reasons the code does not care about —
-    citing them from `src/` or `tests/` made a rules reorder touch 87 source and test files for no
-    behavioural reason. A comment states its own reason in its own words; only Markdown carries
-    numbered rule citations, where `doclinks` can verify them.
+   record work rather than rules. Any of them may NAME a rule; none may restate one or carry its
+   number.
+10. **Code and tests reference use cases only.** [use_cases/](use_cases/) states WHY the app behaves
+    as it does — which is what a test protects and what a comment may point at. This file states HOW
+    work is done, and changes for reasons the code does not care about, so a comment or a test that
+    cites it has coupled the two: reordering the rules once made 87 source and test files need
+    editing. A comment states its own reason in its own words.
 
 ---
 
@@ -225,12 +220,12 @@ documents itself.
    avoided side effect ("a second sync writes nothing to Drive"); and a persisted format — a stored
    field, a file, a bookmarked URL — because changing it breaks data already written. Name tests for
    the promise, not the function.
-9. **Prefer saying a thing several times over adding a layer that says it once** (Simon, 2026-08-17).
+9. **Prefer saying a thing several times over adding a layer that says it once.**
    Explicit declarations beat a registry keyed on a discriminator, a config table, or a dispatcher
    standing between caller and effect. This is **not** licence to duplicate logic — the same
    behaviour written twice still gets extracted; what is rejected is an intermediary whose only job
    is to *choose*. Say so when the count of explicit declarations becomes the larger cost.
-10. **Write the test first** (Simon, 2026-08-17). It states the promise in the caller's words, and
+10. **Write the test first.** It states the promise in the caller's words, and
     failing once is the only proof the test can fail at all. It replaces the build-then-poke probe,
     which leaves nothing behind. Where the shape is not knowable until something renders (layout,
     geometry), build first and **say that is why**.
@@ -250,7 +245,7 @@ documents itself.
 4. **A question is not a decision.** "Any reason for X?" explores the option space. Answer,
    recommend, leave it open — do not record it in [TODO.md](TODO.md) as **Decided**, narrate it back
    as settled, or drop the option from later work. Mark something Decided only when the user said so
-   in words that decide it, dated to when they said it (raised 2026-08-17).
+   in words that decide it, dated to when they said it.
 5. **Evaluate the prompt, not just the code.** In a sentence or two: is it well-scoped, what's
    missing, and is the effort proportionate — would a cheaper approach or a smaller model do? Then
    proceed. Skip it for small unambiguous asks.
@@ -282,7 +277,7 @@ documents itself.
    graph.
 5. **Navigate BY the graph.** [docs/SRC_MODULES.md](docs/SRC_MODULES.md) (one line per runtime
    module) and the feature's `§` in [TODO.md](TODO.md) reach the code in one read and carry the
-   rationale with it. Grep for a symbol, never for a concept (raised 2026-08-18).
+   rationale with it. Grep for a symbol, never for a concept.
 
 ---
 
@@ -292,7 +287,7 @@ documents itself.
    `python -m agent_tools.<name>` rather than rebuilding its logic in a shell pipeline.
 2. **Promote a script to a tool when it will run again, fails silently otherwise, and is cheap and
    deterministic** — all three. **Build it for yourself first; wire it into the gate only once it has
-   caught something more than once** (Simon, 2026-08-18): a hand-run tool costs only its writing,
+   caught something more than once**: a hand-run tool costs only its writing,
    while a Stage 1 task costs every commit forever. Some recurring checks want to stay periodic
    audits in [TODO.md](TODO.md) instead, because their findings need judgement.
 3. **A tool means all of it**: the module (docstring saying *why it exists*), a catalog row, a unit
@@ -300,11 +295,9 @@ documents itself.
 4. **On small files, just make the edit.** A heredoc that rewrites two lines costs more tokens than
    the direct edit, is written blind, discards the read-before-edit guard, and shows no reviewable
    diff. A script earns its keep only on volume — many exact replacements in one pass. Scripting the
-   same shape twice is rule 2.
+   same shape twice means it wants to be a tool.
 
-   **And a bulk pass may only match an ANCHOR, never a shape** (Simon, 2026-08-19: *"the tool
-   shortcut is more expensive, due to repairs, than executing changes file per file"*). Measured in
-   one session: 60 explicit `(file, exact old text, new text)` replacements applied with zero
+   **And a bulk pass may only match an ANCHOR, never a shape.** Measured in one session: 60 explicit `(file, exact old text, new text)` replacements applied with zero
    collateral and reported the three that did not match; two regexes matching by shape — a bare
    `" ()"`, and a substitution table applied twice over the same line — broke arrow functions in
    eleven modules, renumbered references twice, and cost a full regeneration from `HEAD`. So:

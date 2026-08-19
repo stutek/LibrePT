@@ -264,6 +264,38 @@ def _check_section_refs(line, links, path, rel, number, cache, all_files):
     return findings
 
 
+# A rule cited by NUMBER, anywhere — "AGENT_RULES §2.1", "AGENT_RULES.md §4", and the same forms
+# inside the rules file itself. The number is a position in a list that is reordered whenever a
+# lesson lands, so a citation of one makes "put the important rule first" an edit across the
+# repository: on 2026-08-19 it made a rules reorder touch 87 files. Rules are cited by NAME.
+RULE_NUMBER_REF = re.compile(r"AGENT_RULES(?:\.md)?\)?[ :]*§\s*\d")
+# Inside AGENT_RULES.md the citation usually drops the file name — "the tier AGENT_RULES §4.2 names"
+# is caught above, but a bare "see §4.2" is not, and there it means a rule. A § qualified by ANOTHER
+# document (`TODO §6.4`, `docs/DATA_MODEL.md §1`) is that document's own numbering and is fine: the
+# rules file is allowed to point outward, just not at itself.
+SELF_RULE_REF = re.compile(r"(?<![\w./])(?<!\.md )§\s*\d")
+QUALIFIED_REF = re.compile(r"(?<![\w./])(?!AGENT_RULES\b)[\w./]+ §\s*\d")
+
+
+def _check_rule_citations(line, path, rel, number):
+    """Rule citations must name the rule, never its number — see RULE_NUMBER_REF."""
+    is_rules_file = path.name == "AGENT_RULES.md"
+    if is_rules_file:
+        line = QUALIFIED_REF.sub("", line)
+    pattern = SELF_RULE_REF if is_rules_file else RULE_NUMBER_REF
+    if not pattern.search(line):
+        return []
+    where = "this file's own rules" if is_rules_file else "a rule"
+    return [
+        (
+            rel,
+            number,
+            f"cites {where} by number — cite it by name instead, so reordering the rules "
+            "changes nothing outside AGENT_RULES.md",
+        )
+    ]
+
+
 def check_file(path, cache, all_files):
     findings = []
     rel = display_path(path)
@@ -276,6 +308,7 @@ def check_file(path, cache, all_files):
         findings.extend(
             _check_section_refs(line, links, path, rel, number, cache, all_files)
         )
+        findings.extend(_check_rule_citations(line, path, rel, number))
 
     return findings
 

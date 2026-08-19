@@ -77,7 +77,7 @@ token or a deleted secret, i.e. a canary that quietly stopped watching. See
 [TODO §1.5](../TODO.md).
 
 **What a test may assert, in any tier: the behaviour a caller depends on, never the mechanics that
-produce it** ([AGENT_RULES §4.8](../AGENT_RULES.md)). The tier decides how much of the app boots;
+produce it** ([AGENT_RULES: assert behaviour, not mechanics](../AGENT_RULES.md)). The tier decides how much of the app boots;
 that rule decides what the assertions are allowed to look at once it has. Three things are fair game
 even though they look internal, each needing a stated reason: a class name another module keys off,
 an avoided side effect (a sync that writes nothing is a promise about someone's battery), and a
@@ -99,7 +99,7 @@ justify a migration on total wall clock — it will not deliver that.
 
 **Those numbers were taken under `--dist=loadfile`, which both Playwright stages have since
 dropped** (2026-08-07 — see `run_e2e_tests`, and the budget table in
-[AGENT_RULES.md §2](../AGENT_RULES.md)). The conclusion above survives the change, but its
+[AGENT_RULES.md: The Pipeline Gate](../AGENT_RULES.md)). The conclusion above survives the change, but its
 arithmetic shifts: with the file no longer pinned to a worker, a stage's floor is its slowest
 *test* rather than its heaviest *file*, so moving a slow test down now removes close to its full
 cost from stage 3 instead of a share of one worker's queue. **Before migrating anything for speed,
