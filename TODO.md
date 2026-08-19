@@ -2381,3 +2381,42 @@ message feed offers the cleanup dialog, and "play around" is simply dismissing t
 question is WHERE it says this — a final walkthrough step with no control to tap, or a card in the
 feed — and that decides whether the guide can be exited before reading it.
 
+---
+
+## 31. A support data-wipe link
+
+**Wanted 2026-08-19 (Simon):** a link support can send by SMS or email that opens a **consent dialog**
+asking the trainer to confirm a data wipe. *"Link should not be advocated"*, it should offer a wipe
+**per schema version (plus unversioned data)**, and it must carry the note that **exports and backups
+are not removed from storage the app does not own.**
+
+### 31.1 The one invariant
+
+**The link carries no authority.** Opening it can only ever OPEN A DIALOG; there is no parameter that
+performs the wipe, no `confirm=1`, no auto-run after a delay. A URL that destroys data on open would
+be one forwarded message away from destroying a stranger's — and support links are, by their nature,
+sent to people who are already confused and inclined to tap.
+
+That makes the dialog the whole security boundary, so it: names the device it is about to erase,
+lists what will go by schema, states what it CANNOT reach, and requires a deliberate confirmation
+rather than a default-focused OK.
+
+### 31.2 What it wipes, and what it cannot
+
+Storage is `librept` in IndexedDB — one store per live schema (`schema4`, `schemaP`, and any older
+store a long-lived device still carries) plus a `meta` store — and a set of `librept*` localStorage
+keys. So the offer is per schema store, plus **unversioned**: `meta` and localStorage, which is where
+the active session, read-notification ids, the terms acceptance and the Drive sync meta live.
+
+**Not reachable, and the dialog must say so**: a downloaded backup file, a Drive sync file, an
+encrypted export a client was sent, a consent letter already in someone's mailbox. The app can erase
+what it holds; it cannot reach into storage it does not own, and a support wipe that implied
+otherwise would be worse than none.
+
+### 31.3 Not advocated
+
+No menu entry, no notification card, no link from anywhere in the app. It exists at a URL support
+sends deliberately. The support runbook can document it; the product must not offer it — a
+"wipe everything" control one tap from the gym floor is a support ticket waiting to happen, which is
+also why §9.3's demo cleanup is selective rather than a reset.
+
