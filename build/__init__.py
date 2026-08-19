@@ -84,6 +84,115 @@ def _memory_gb():
     return (fields.get("MemAvailable"), fields.get("MemTotal"))
 
 
+# Where the kernel accounts for time LOST rather than time spent. `total` is cumulative
+# microseconds during which work was stalled waiting for the resource — the IO wait that throttles a
+# run, in the only unit that matters. `full` counts stalls where nothing could run at all; `some`
+# also counts one blocked thread while others worked, which on a parallel gate is normal and not
+# news.
+IO_PRESSURE_PATH = "/proc/pressure/io"
+MEMORY_PRESSURE_PATH = "/proc/pressure/memory"
+VMSTAT_PATH = "/proc/vmstat"
+# A stall shorter than this over a whole run is scheduling noise, not a finding worth a line.
+STALL_NOTEWORTHY_SECONDS = 0.5
+# 4 KiB pages, so a thousand pages is ~4MB of swap traffic — small enough to ignore, and the
+# threshold below which "the machine swapped" would be alarmist.
+SWAP_NOTEWORTHY_PAGES = 1000
+
+
+def read_stall_seconds(path):
+    """{some, full} seconds of stall from a /proc/pressure file, or None where the kernel does not
+    account for pressure at all. None rather than zero: zero claims the machine was never stalled,
+    absent says nobody measured, and the difference matters when the number is read as evidence."""
+    try:
+        with open(path, encoding="utf-8") as pressure:
+            lines = pressure.read().splitlines()
+    except OSError:
+        return None
+    stalled = {}
+    for line in lines:
+        fields = line.split()
+        if not fields:
+            continue
+        for field in fields[1:]:
+            if field.startswith("total="):
+                stalled[fields[0]] = int(field.removeprefix("total=")) / 1_000_000
+    return stalled or None
+
+
+def read_swap_pages(path=VMSTAT_PATH):
+    """Pages actually moved to and from disk. SwapTotal/SwapFree describe what is POSSIBLE; these
+    describe what happened — a machine with 50GB of swap and no traffic is healthy, one with 2GB and
+    constant traffic is not."""
+    try:
+        with open(path, encoding="utf-8") as vmstat:
+            fields = dict(
+                line.split(maxsplit=1)
+                for line in vmstat.read().splitlines()
+                if " " in line
+            )
+    except OSError:
+        return None
+    try:
+        return {"in": int(fields["pswpin"]), "out": int(fields["pswpout"])}
+    except (KeyError, ValueError):
+        return None
+
+
+def read_host_pressure():
+    """What the machine has stalled on so far, to be differenced against the same reading later."""
+    return {
+        "io": read_stall_seconds(IO_PRESSURE_PATH),
+        "memory": read_stall_seconds(MEMORY_PRESSURE_PATH),
+        "swap": read_swap_pages(),
+    }
+
+
+def pressure_delta(before, after):
+    """What the RUN cost the machine: stall seconds and swap pages between two readings."""
+
+    def stalled(resource):
+        start, end = (before or {}).get(resource), (after or {}).get(resource)
+        if not start or not end:
+            return None
+        return max(0.0, end.get("full", 0.0) - start.get("full", 0.0))
+
+    swap_before, swap_after = (before or {}).get("swap"), (after or {}).get("swap")
+    swapped = None
+    if swap_before and swap_after:
+        swapped = {
+            "in": max(0, swap_after["in"] - swap_before["in"]),
+            "out": max(0, swap_after["out"] - swap_before["out"]),
+        }
+    return {"io": stalled("io"), "memory": stalled("memory"), "swap": swapped}
+
+
+def print_pressure_delta(before, after):
+    """One line saying whether the machine itself was in the way.
+
+    Printed even when it was not, because "the machine was fine" is the useful half of the answer on
+    the run where a stage looks slow — a missing line reads as a missing measurement.
+    """
+    delta = pressure_delta(before, after)
+    if delta["io"] is None and delta["swap"] is None:
+        print("    HOST: no pressure accounting on this kernel")
+        return delta
+
+    notes = []
+    if delta["io"] and delta["io"] >= STALL_NOTEWORTHY_SECONDS:
+        notes.append(f"{delta['io']:.1f}s stalled on IO")
+    if delta["memory"] and delta["memory"] >= STALL_NOTEWORTHY_SECONDS:
+        notes.append(f"{delta['memory']:.1f}s stalled on memory")
+    swapped = delta["swap"] or {"in": 0, "out": 0}
+    if swapped["in"] + swapped["out"] >= SWAP_NOTEWORTHY_PAGES:
+        moved = (swapped["in"] + swapped["out"]) * 4096 / (1024 * 1024)
+        notes.append(
+            f"{moved:.0f}MB swapped ({swapped['in']} in, {swapped['out']} out)"
+        )
+
+    print(f"    HOST: {' · '.join(notes) if notes else 'no IO stall, no swapping'}")
+    return delta
+
+
 def host_snapshot():
     """The host as it stands right now. Never raises: it is printed by every entry point, on every
     platform CI runs, and a status line is not worth a failed build."""
@@ -104,7 +213,9 @@ def host_snapshot():
 RUN_LOG_PATH = os.path.join(REPORT_DIR, "run-history.jsonl")
 
 
-def record_run(label, started, ended, seconds, stage_seconds, verdict):
+def record_run(
+    label, started, ended, seconds, stage_seconds, verdict, host_pressure=None
+):
     """Records a finished run: one history line always, plus the estimate for the next run.
 
     Only a PASSED run updates the estimate — a run that failed in stage 1 stopped early, so its
@@ -121,6 +232,8 @@ def record_run(label, started, ended, seconds, stage_seconds, verdict):
         # Per task, so a trend can be read at the level that changed: wall says the stage got slower,
         # CPU says whether it did more work or got less machine.
         "tasks": list(TASK_TIMINGS),
+        # And what the machine was doing to it: stall seconds and swap traffic over the run.
+        "host": host_pressure,
     }
     try:
         os.makedirs(REPORT_DIR, exist_ok=True)
@@ -321,10 +434,11 @@ def _timed_task(name, fn):
         # "0.0s cpu" for either would read as a task that did nothing.
         cost = f"{elapsed:.1f}s"
         if cpu >= 0.1:
-            cost = f"{elapsed:.1f}s wall · {cpu:.1f}s cpu · {rss_mb:.0f}MB peak"
+            cost = f"{elapsed:.1f}s wall · {cpu:.1f}s cpu"
             # Disk only when the run actually reached the device. On a warm page cache this is zero,
             # and printing "0MB io" every time trains the eye to skip the line that matters on the
-            # run where it is not.
+            # run where it is not. Peak RSS is recorded but not printed: a task touching 300MB is not
+            # in trouble and one that swaps is, at any size — the run's HOST line answers that.
             if io_mb >= 1:
                 cost += f" · {io_mb:.0f}MB io"
         print(f"    ⏱ {name}: {cost} {mark}")
