@@ -4,12 +4,13 @@
 
 import sys
 import time
+from datetime import datetime
 from . import (
     PIPELINE_STAGES,
     check_environment,
     format_elapsed,
     print_run_header,
-    record_run_seconds,
+    record_run,
     run_lint,
     run_tests,
     run_build,
@@ -26,15 +27,15 @@ def run_all_stages():
 
 
 def _finish(label, verdict, total_seconds, stage_seconds):
-    """The closing report, and the measurement the NEXT run's header estimates from — recorded here
-    so a command cannot print a summary without leaving the evidence behind (build.record_run_seconds).
-    Only a clean run is recorded: a gate that failed in Stage 1 says nothing about how long a whole
-    one takes."""
-    record_run_seconds(label, total_seconds)
-    _print_summary(verdict, total_seconds, stage_seconds)
+    """The closing report, and the history line the NEXT run's header estimates from — recorded here
+    so a command cannot print a summary without leaving the evidence behind (build.record_run)."""
+    ended = datetime.now()
+    started = datetime.fromtimestamp(ended.timestamp() - total_seconds)
+    record_run(label, started, ended, total_seconds, stage_seconds, verdict="PASSED")
+    _print_summary(verdict, total_seconds, stage_seconds, started=started, ended=ended)
 
 
-def _print_summary(verdict, total_seconds, stage_seconds):
+def _print_summary(verdict, total_seconds, stage_seconds, started=None, ended=None):
     """The last line anyone reads, so it must not need interpreting.
 
     It previously said "Check finished (staged parallel validation passed). (2m53s)", which never
@@ -49,7 +50,17 @@ def _print_summary(verdict, total_seconds, stage_seconds):
     """
     print("\n=== Report ===\n")
     print(f"  ✓ {verdict}")
-    print(f"    TOTAL WALL TIME: {format_elapsed(total_seconds)}")
+    if started and ended:
+        # Clock times, not just a duration: the question asked later is "was that the run from just
+        # after lunch?", and `.build-reports/run-history.jsonl` holds the same line for every run
+        # whose scrollback is long gone.
+        print(
+            f"    STARTED {started.strftime('%Y-%m-%d %H:%M:%S')}"
+            f" · FINISHED {ended.strftime('%H:%M:%S')}"
+            f" · TOOK {format_elapsed(total_seconds)}"
+        )
+    else:
+        print(f"    TOTAL WALL TIME: {format_elapsed(total_seconds)}")
     if stage_seconds:
         breakdown = "  ".join(
             f"stage {n} {seconds:.0f}s" for n, seconds in enumerate(stage_seconds, 1)
@@ -66,26 +77,46 @@ if __name__ == "__main__":
     print_run_header(label)
     check_environment()
 
-    if arg == "lint":
-        run_lint()
-        _finish(label, "LINT PASSED", time.monotonic() - start, [])
-    elif arg == "test":
-        run_tests()
-        _finish(label, "TESTS PASSED", time.monotonic() - start, [])
-    elif arg == "check":
-        stages = run_all_stages()
-        _finish(
+    def record_failure(exit_code):
+        """A failed run is the row most often asked about later ("when did this last break?"), and it
+        is the one the summary never prints — the stage runners exit from deep inside. Recorded here,
+        where every exit passes, and deliberately not used as the next run's estimate."""
+        ended = datetime.now()
+        elapsed = time.monotonic() - start
+        record_run(
             label,
-            f"build check PASSED — all {len(stages)} stages green",
-            time.monotonic() - start,
-            stages,
+            datetime.fromtimestamp(ended.timestamp() - elapsed),
+            ended,
+            elapsed,
+            [],
+            verdict=f"FAILED({exit_code})",
         )
-    else:
-        stages = run_all_stages()
-        run_build()
-        _finish(
-            label,
-            f"build PASSED — all {len(stages)} stages green, dist/ ready to deploy",
-            time.monotonic() - start,
-            stages,
-        )
+
+    try:
+        if arg == "lint":
+            run_lint()
+            _finish(label, "LINT PASSED", time.monotonic() - start, [])
+        elif arg == "test":
+            run_tests()
+            _finish(label, "TESTS PASSED", time.monotonic() - start, [])
+        elif arg == "check":
+            stages = run_all_stages()
+            _finish(
+                label,
+                f"build check PASSED — all {len(stages)} stages green",
+                time.monotonic() - start,
+                stages,
+            )
+        else:
+            stages = run_all_stages()
+            run_build()
+            _finish(
+                label,
+                f"build PASSED — all {len(stages)} stages green, dist/ ready to deploy",
+                time.monotonic() - start,
+                stages,
+            )
+    except SystemExit as failure:
+        if failure.code:
+            record_failure(failure.code)
+        raise

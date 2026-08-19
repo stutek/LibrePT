@@ -17,6 +17,22 @@ import re
 from playwright.sync_api import expect
 import pytest
 
+
+@pytest.fixture(scope="session")
+def browser_context_args(browser_context_args):
+    """Run the guided walkthrough as a viewer who asked for reduced motion.
+
+    The demo's pauses — 520ms scroll, 650ms of hand travel, 1350ms settle per step — exist so a human
+    eye can follow a finger. A headless run has no eye, and a reduced-motion viewer has asked for the
+    hand not to glide at all, so both wait for nothing: `demoPace` returns zero and each step advances
+    the moment its expectation holds. That is a real user mode rather than a test switch, and it is
+    the whole difference between a suite that costs 158s and one that costs a fraction of it. The
+    pacing a motion-preferring viewer actually sees is asserted in
+    tests/e2e/test_demo_pacing.py, which is the only place that pays for it.
+    """
+    return {**browser_context_args, "reduced_motion": "reduce"}
+
+
 PANEL = "#walkthrough-overlay"
 CAPTION = "#walkthrough-overlay .walkthrough-caption"
 PROGRESS = "#walkthrough-overlay .walkthrough-progress"
@@ -179,7 +195,11 @@ def test_re_showing_a_done_step_changes_nothing(page, local_server):
     expect(page.locator(PROGRESS)).to_contain_text("3")
     for _ in range(3):
         page.locator(SHOW_ME).click()
-        page.wait_for_timeout(2200)
+        # Assert the PROMISE after each press — the signal this step demonstrated is still set —
+        # rather than waiting on the button's transient disabled state. That state is a mechanic, and
+        # once the demo stopped pacing a viewer's eye the demonstration finished before a test could
+        # observe it. (The fixed 2.2s sleep this replaced was tuned to the old pacing.)
+        expect(signal.first).to_be_visible(timeout=15_000)
 
     expect(signal.first).to_be_visible()
     expect(page.locator(PROGRESS)).to_contain_text("3"), "a replay is not progress"

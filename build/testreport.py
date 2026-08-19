@@ -9,6 +9,7 @@
 import os
 import re
 import subprocess
+from typing import NamedTuple
 
 REPORT_DIR = ".build-reports"
 SUMMARY_MARKER = "short test summary info"
@@ -25,11 +26,54 @@ def log_path(name):
     return os.path.join(REPORT_DIR, f"{name}.log")
 
 
+class RunResult(NamedTuple):
+    """What a logged run produced. Unpacks as the (returncode, output, path) every caller in build/
+    already destructures — `cpu_seconds` is read by name, so adding it rewrote no call site."""
+
+    returncode: int
+    output: str
+    path: str
+    cpu_seconds: float = 0.0
+
+
+def _spawn_and_reap(cmd, timeout):
+    """Runs `cmd` and returns (returncode, output, cpu_seconds) with the CPU that child ACTUALLY
+    burned — its own plus every worker it spawned and reaped.
+
+    `os.wait4` rather than a process-wide `getrusage(RUSAGE_CHILDREN)` reading, because the gate runs
+    its tasks concurrently: a process-wide delta would charge the e2e suite for the demo suite
+    running beside it, which is precisely the comparison the number exists to make. Falls back to
+    plain `subprocess.run` where `wait4` does not exist (Windows), reporting 0.0 rather than a guess.
+    """
+    if not hasattr(os, "wait4"):
+        finished = subprocess.run(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            timeout=timeout,
+        )
+        return finished.returncode, finished.stdout or "", 0.0
+
+    process = subprocess.Popen(
+        cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True
+    )
+    try:
+        output = process.stdout.read() if process.stdout else ""
+    finally:
+        if process.stdout:
+            process.stdout.close()
+    _, status, usage = os.wait4(process.pid, 0)
+    process.returncode = os.waitstatus_to_exitcode(status)
+    return process.returncode, output, usage.ru_utime + usage.ru_stime
+
+
 def run_logged(cmd, log_name, timeout=None):
     """Run `cmd`, capturing stdout+stderr to .build-reports/<log_name>.log.
 
-     Returns (returncode, combined_output, path_to_log). Output is captured rather than streamed so
-     parallel stages don't interleave; the log keeps the full detail a digest necessarily drops.
+     Returns a RunResult — (returncode, combined_output, path_to_log) plus the CPU seconds that child
+     and its workers burned. Output is captured rather than streamed so parallel stages don't
+     interleave; the log keeps the full detail a digest necessarily drops.
 
      `timeout` (seconds) bounds the run. On expiry the partial output collected so far is still
      written to the log — a runner that hung is exactly the case where you most want to see how far
@@ -39,13 +83,7 @@ def run_logged(cmd, log_name, timeout=None):
     """
     path = log_path(log_name)
     try:
-        result = subprocess.run(
-            cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-            timeout=timeout,
-        )
+        returncode, output, cpu_seconds = _spawn_and_reap(cmd, timeout)
     except subprocess.TimeoutExpired as expired:
         # .stdout is None on POSIX (communicate() raises before collecting) and str on Windows in
         # text mode, so normalise rather than assuming either.
@@ -57,10 +95,9 @@ def run_logged(cmd, log_name, timeout=None):
         expired.log_path = path
         raise
 
-    output = result.stdout or ""
     with open(path, "w", encoding="utf-8") as f:
         f.write(output)
-    return result.returncode, output, path
+    return RunResult(returncode, output, path, cpu_seconds)
 
 
 def failed_test_ids(output):

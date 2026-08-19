@@ -27,26 +27,12 @@
 
 import { checkExpectation, validateTour } from "../../domain/demoTour.js";
 import { moveDemoHand, pulseDemoHand } from "./demoHand.js";
+import { demoPace, prefersReducedMotion } from "./demoPace.js";
 
-// How long a tapped control is left on screen before the next step begins. Raised from 900ms on
-// 2026-08-18: "on web browser the button and clicks are about 50% too fast". A phone viewer follows
-// a finger; on a laptop there is no finger to follow, so the eye has to find the control, register
-// that it changed, and read the caption — and the demo was moving on before the second of those.
-const DEFAULT_STEP_PAUSE_MS = 1350;
-// Time given to the pointer's travel across the screen, and to the scroll that precedes it. Same
-// report, same reasoning: a pointer that arrives before you have looked at it has not shown you
-// anything.
-const DEFAULT_TRAVEL_MS = 650;
-// The scroll is part of the demonstration, not setup for it (reported 2026-08-19: "when session list
-// is scrolled, the highlighted element gets out of view, show me should scroll the view into middle
-// screen first before clicking"). It always DID scroll the control to the middle before tapping —
-// measured, the card was centred at the moment of the click — but instantly and 200ms before the
-// hand arrived, so what a viewer saw was a list that teleported and a control that changed. Smooth,
-// and given time to finish, it reads as the app going to fetch the thing it is about to tap.
-const SCROLL_SETTLE_MS = 520;
-// A beat between the press landing and the click firing, so the tap READS as the cause of what
-// happens next rather than as something simultaneous with it.
-const TAP_LANDING_MS = 160;
+// How long a step will keep asking whether its expectation has come true. Correctness lives here
+// rather than in a pause: the player used to sleep a fixed 1350ms and then check once, which meant
+// the pause could not go to zero without racing any handler that re-renders on a later frame.
+const OUTCOME_POLL_MS = 25;
 
 export function probe(doc, selector) {
   const el = doc.querySelector(selector);
@@ -118,31 +104,51 @@ export function stepOutcomeNow(step, doc = document) {
   return { id: step.id, ...checkExpectation(step.expect, probe(doc, step.expect.selector)) };
 }
 
+/** Waits for a step's expectation to come true, up to a budget, rather than sleeping and hoping.
+ *  This is where a step's CORRECTNESS lives now: the pause that follows is for a viewer's eye and
+ *  goes to zero under reduced motion, so nothing may depend on it having happened. */
+async function waitForOutcome(step, doc, wait, budgetMs) {
+  const deadline = Date.now() + budgetMs;
+  let outcome = stepOutcomeNow(step, doc);
+  while (!outcome.ok && Date.now() < deadline) {
+    await wait(OUTCOME_POLL_MS);
+    outcome = stepOutcomeNow(step, doc);
+  }
+  return outcome;
+}
+
 /**
  * Performs ONE step — resolve the control, scroll it into view, move and pulse the pointer, dispatch
- * a genuine click, then check the expectation. Returns `{ id, ok, reason }`.
+ * a genuine click, then wait for the expectation. Returns `{ id, ok, reason }`.
  *
  * Shared with the guided walkthrough's "Show me", so the two cannot drift on what a step's tap
  * actually is.
  */
 export async function performStep(step, { doc = document, hand = null, wait = sleep } = {}) {
+  const pace = demoPace(prefersReducedMotion(doc));
   const target = resolveTarget(doc, step);
   if (!target) {
     const qualifier = step.targetText ? ` containing ${JSON.stringify(step.targetText)}` : "";
     return { id: step.id, ok: false, reason: `no control matched ${step.target}${qualifier}` };
   }
 
-  target.scrollIntoView({ block: "center", inline: "nearest", behavior: "smooth" });
+  // `auto` under reduced motion: a smooth scroll is motion, and one nobody asked to watch also has
+  // to be waited for before the pointer can be placed.
+  target.scrollIntoView({
+    block: "center",
+    inline: "nearest",
+    behavior: pace.scrollSettleMs > 0 ? "smooth" : "auto",
+  });
   // Let the scroll settle before reading a box for the pointer, or the hand lands where the control
   // used to be.
-  await wait(SCROLL_SETTLE_MS);
+  await wait(pace.scrollSettleMs);
 
   if (hand) {
     const { x, y } = centreOf(target);
     moveDemoHand(hand, x, y);
-    await wait(step.travelMs ?? DEFAULT_TRAVEL_MS);
+    await wait(step.travelMs ?? pace.travelMs);
     pulseDemoHand(hand);
-    await wait(TAP_LANDING_MS);
+    await wait(pace.tapLandingMs);
   }
 
   // IDEMPOTENT, and that is the contract rather than an optimisation (decided 2026-08-18: "show me
@@ -152,9 +158,11 @@ export async function performStep(step, { doc = document, hand = null, wait = sl
   // the trainer walked back to would undo the very thing it was showing them. Pressing Show me once
   // or ten times leaves the same state.
   if (!stepOutcomeNow(step, doc).ok) target.click();
-  await wait(step.settleMs ?? DEFAULT_STEP_PAUSE_MS);
+  // Wait for the app, then — and only at full motion — for the viewer.
+  const outcome = await waitForOutcome(step, doc, wait, pace.outcomeBudgetMs);
+  await wait(step.settleMs ?? pace.stepPauseMs);
 
-  return stepOutcomeNow(step, doc);
+  return outcome;
 }
 
 /**

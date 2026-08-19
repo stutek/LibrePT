@@ -93,7 +93,7 @@ case in front of you, decide by these — and when a rule stops serving them, ch
    | :--- | :--- | :--- | :--- |
    | 1 | Ruff, Biome, `pip-audit`, `tests/unit/`, `tests/unit_js/`, static audits (HTML-sink/CSP, doc graph, pipeline gating, catalog, layering, complexity) — parallel | ~4s (~13s on a cold pip-audit) | 60s |
    | 2 | `tests/medium/` — 193 tests, ~240s of call time at 8 workers | ~48s | 90s |
-   | 3 | `tests/e2e/` — 205 tests, ~755s of call time at 8 workers | ~2min | 4min |
+   | 3 | Two tasks side by side: `tests/e2e/` at 7 workers, the demo/walkthrough suite at 1 | ~2min | 4min |
    | 4 | OWASP ZAP baseline scan | ~15s (~75s on a cold `.venv`) | 3min (killed at 20min) |
    | **all** | | **~3m** | **6min** |
 

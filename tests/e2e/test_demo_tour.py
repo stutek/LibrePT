@@ -18,7 +18,25 @@ import pathlib
 import re
 
 import pytest
+
+
 from playwright.sync_api import expect
+
+
+@pytest.fixture(scope="session")
+def browser_context_args(browser_context_args):
+    """Run the scripted demo as a viewer who asked for reduced motion.
+
+    The demo's pauses — 520ms scroll, 650ms of hand travel, 1350ms settle per step — exist so a human
+    eye can follow a finger. A headless run has no eye, and a reduced-motion viewer has asked for the
+    hand not to glide at all, so both wait for nothing: `demoPace` returns zero and each step advances
+    the moment its expectation holds. That is a real user mode rather than a test switch, and it is
+    the whole difference between a suite that costs 158s and one that costs a fraction of it. The
+    pacing a motion-preferring viewer actually sees is asserted in
+    tests/e2e/test_demo_pacing.py, which is the only place that pays for it.
+    """
+    return {**browser_context_args, "reduced_motion": "reduce"}
+
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 TOUR_SOURCE = REPO_ROOT / "src" / "modules" / "demo" / "gymFloorTour.js"

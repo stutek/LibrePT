@@ -15,9 +15,11 @@
 # not have to decode, when it should land, and the host it is competing with — plus that a platform
 # which will not answer one of those degrades to a readable "n/a" instead of taking the gate down.
 
+import json
 import pathlib
 from datetime import datetime
 
+import build as build_module
 from build import (
     HostSnapshot,
     format_run_header,
@@ -25,6 +27,7 @@ from build import (
     read_last_run_seconds,
     record_run_seconds,
 )
+from build.__main__ import _print_summary
 
 
 FULL = HostSnapshot(
@@ -148,3 +151,65 @@ def test_every_entry_point_prints_the_header_before_it_works():
     # One call, on the shared path above the argument branch — a per-branch copy is how one of them
     # ends up without a header.
     assert body.count("print_run_header(") == 1
+
+
+# --- the closing status line, and the history behind it -----------------------------------------
+
+
+def test_a_finished_run_is_appended_to_a_queryable_history(tmp_path, monkeypatch):
+    """Wanted 2026-08-19: a status line with the wall end time and the duration, "so we can always
+    query past build data".
+
+    One line per run, appended: the terminal scrollback is gone by tomorrow, and the question asked
+    later is always about a run nobody was watching — was it slower than usual, when did it last
+    pass, how long has the e2e stage been creeping up. A `.jsonl` file answers those with a one-line
+    shell command and costs nothing to write.
+    """
+    monkeypatch.setattr("build.RUN_HISTORY_PATH", str(tmp_path / "last-run.json"))
+    monkeypatch.setattr("build.RUN_LOG_PATH", str(tmp_path / "run-history.jsonl"))
+
+    build_module.record_run(
+        "build check",
+        started=datetime(2026, 8, 19, 14, 3, 46),
+        ended=datetime(2026, 8, 19, 14, 7, 1),
+        seconds=195.0,
+        stage_seconds=[3.8, 48.9, 117.3, 15.1],
+        verdict="PASSED",
+    )
+    build_module.record_run(
+        "build check",
+        started=datetime(2026, 8, 19, 15, 0, 0),
+        ended=datetime(2026, 8, 19, 15, 1, 0),
+        seconds=60.0,
+        stage_seconds=[3.5],
+        verdict="FAILED",
+    )
+
+    entries = [
+        json.loads(line)
+        for line in pathlib.Path(tmp_path / "run-history.jsonl")
+        .read_text()
+        .splitlines()
+    ]
+    assert [entry["verdict"] for entry in entries] == ["PASSED", "FAILED"]
+    assert entries[0]["started"].startswith("2026-08-19T14:03:46")
+    assert entries[0]["ended"].startswith("2026-08-19T14:07:01")
+    assert entries[0]["seconds"] == 195.0
+    assert entries[0]["stage_seconds"] == [3.8, 48.9, 117.3, 15.1]
+    # A FAILED run must not become the next run's estimate — it stopped early, so its duration says
+    # nothing about how long the gate takes.
+    assert build_module.read_last_run_seconds("build check") == 195.0
+
+
+def test_the_closing_line_states_when_the_run_ended_and_how_long_it_took(capsys):
+    _print_summary(
+        "build check PASSED",
+        195.0,
+        [3.8, 48.9, 117.3, 15.1],
+        started=datetime(2026, 8, 19, 14, 3, 46),
+        ended=datetime(2026, 8, 19, 14, 7, 1),
+    )
+    out = capsys.readouterr().out
+
+    assert "14:03:46" in out and "14:07:01" in out
+    assert "3m15s" in out

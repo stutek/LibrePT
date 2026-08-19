@@ -211,13 +211,28 @@ jobs:
       - name: Run E2E Tests
         run: .venv/bin/python -c "from build import run_e2e_tests; run_e2e_tests()"
 
+  # Beside e2e, not after it: the two are bound by different things, and a broken demo — the surface
+  # a prospective trainer is shown — should fail a job that says so rather than two red node ids
+  # inside a suite of 205.
+  demo-tests:
+    name: Stage 3 · Demo & Walkthrough Tests
+    needs: [medium-tests]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/python-env
+        with:
+          browsers: 'true'
+      - name: Run Demo & Walkthrough Tests
+        run: .venv/bin/python -c "from build import run_demo_tests; run_demo_tests()"
+
   # === STAGE 4 === Only if Stage 3 is clean. Locally that ordering is mandatory: ZAP's request flood
   # against the SAME dev server a mid-suite pytest-xdist run is using produced Page.goto timeouts
   # across unrelated specs. Here it is not mandatory — separate runners, separate servers — but it is
   # kept so the stage numbering means one thing in both places.
   owasp-zap-scan:
     name: Stage 4 · OWASP ZAP Security Scan
-    needs: [e2e-tests]
+    needs: [e2e-tests, demo-tests]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5

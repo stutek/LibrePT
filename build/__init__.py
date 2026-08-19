@@ -15,6 +15,7 @@ import os
 import sys
 import shutil
 import subprocess
+import threading
 import time
 from collections import namedtuple
 from datetime import datetime
@@ -94,6 +95,41 @@ def host_snapshot():
         available_gb=available_gb,
         total_gb=total_gb,
     )
+
+
+# One line per finished run, appended. The terminal scrollback is gone by tomorrow, and the questions
+# asked afterwards are always about a run nobody was watching: was that slower than usual, when did
+# the gate last pass, how long has stage 3 been creeping up. A `.jsonl` answers those with one shell
+# command, and costs a single append.
+RUN_LOG_PATH = os.path.join(REPORT_DIR, "run-history.jsonl")
+
+
+def record_run(label, started, ended, seconds, stage_seconds, verdict):
+    """Records a finished run: one history line always, plus the estimate for the next run.
+
+    Only a PASSED run updates the estimate — a run that failed in stage 1 stopped early, so its
+    duration says nothing about how long the gate takes and would promise a finish time no full run
+    could meet.
+    """
+    entry = {
+        "label": label,
+        "verdict": verdict,
+        "started": started.isoformat(timespec="seconds"),
+        "ended": ended.isoformat(timespec="seconds"),
+        "seconds": round(seconds, 1),
+        "stage_seconds": [round(value, 1) for value in stage_seconds],
+        # Per task, so a trend can be read at the level that changed: wall says the stage got slower,
+        # CPU says whether it did more work or got less machine.
+        "tasks": list(TASK_TIMINGS),
+    }
+    try:
+        os.makedirs(REPORT_DIR, exist_ok=True)
+        with open(RUN_LOG_PATH, "a", encoding="utf-8") as handle:
+            handle.write(json.dumps(entry) + "\n")
+    except OSError:
+        pass
+    if verdict == "PASSED":
+        record_run_seconds(label, seconds)
 
 
 def record_run_seconds(label, seconds):
@@ -225,6 +261,24 @@ def _warn_if_suspended(name, monotonic_elapsed, wall_elapsed):
     )
 
 
+# CPU burned by the subprocesses of the task running on THIS thread. Thread-local because the gate
+# runs its tasks concurrently in a ThreadPoolExecutor: a shared counter would charge the e2e suite
+# for the demo suite running beside it, which is exactly the comparison the number exists to make.
+# A task that shells out several times accumulates, which is what its total cost is.
+_task_cpu = threading.local()
+
+
+def record_task_cpu(run):
+    """Adds one logged run's CPU to the task currently executing on this thread."""
+    _task_cpu.seconds = getattr(_task_cpu, "seconds", 0.0) + run.cpu_seconds
+
+
+# Every task's wall and CPU seconds, in completion order, for the run summary and the history line.
+# Wall alone cannot separate "more work" from "less machine": a suite whose CPU stays flat while its
+# wall time grows is being starved rather than doing more, which is the trend worth watching.
+TASK_TIMINGS = []
+
+
 def _timed_task(name, fn):
     """Run one pipeline task, always printing its wall-clock time — pass or fail — so a slow gate
     step is visible without re-running it under `time` by hand. Re-raises whatever `fn` raised
@@ -234,23 +288,34 @@ def _timed_task(name, fn):
     (dropped sockets, blown timing budgets) on a change that could not have caused them."""
     wall_start = time.time()
     start = time.monotonic()
+    _task_cpu.seconds = 0.0
+
+    def report(mark):
+        elapsed = time.monotonic() - start
+        cpu = getattr(_task_cpu, "seconds", 0.0)
+        TASK_TIMINGS.append(
+            {"task": name, "wall": round(elapsed, 1), "cpu": round(cpu, 1)}
+        )
+        # CPU only where a subprocess actually burned some. A pure-Python check that never shells
+        # out has none to report, and neither does a task whose work happens inside a container —
+        # `docker run` costs this process almost nothing while ZAP works elsewhere. Printing
+        # "0.0s cpu" for either would read as a task that did nothing.
+        cost = (
+            f"{elapsed:.1f}s" if cpu < 0.1 else f"{elapsed:.1f}s wall · {cpu:.1f}s cpu"
+        )
+        print(f"    ⏱ {name}: {cost} {mark}")
+        _warn_if_suspended(name, elapsed, time.time() - wall_start)
+
     try:
         fn()
     except SystemExit as e:
-        elapsed = time.monotonic() - start
-        mark = "✓" if e.code in (0, None) else "✗"
-        print(f"    ⏱ {name}: {elapsed:.1f}s {mark}")
-        _warn_if_suspended(name, elapsed, time.time() - wall_start)
+        report("✓" if e.code in (0, None) else "✗")
         raise
     except Exception:
-        elapsed = time.monotonic() - start
-        print(f"    ⏱ {name}: {elapsed:.1f}s ✗")
-        _warn_if_suspended(name, elapsed, time.time() - wall_start)
+        report("✗")
         raise
     else:
-        elapsed = time.monotonic() - start
-        print(f"    ⏱ {name}: {elapsed:.1f}s ✓")
-        _warn_if_suspended(name, elapsed, time.time() - wall_start)
+        report("✓")
 
 
 # Records which requirements.txt the venv was last installed from, so an unchanged one is not
@@ -917,7 +982,7 @@ def venv_python_path():
 def run_unit_tests():
     """Runs fast unit tests (tests/unit/ and tests/test_app.py)."""
     print("\n  Running Unit Tests...")
-    returncode, output, path = run_logged(
+    run = run_logged(
         [
             venv_python_path(),
             "-m",
@@ -929,6 +994,8 @@ def run_unit_tests():
         ],
         "unit-tests",
     )
+    returncode, output, path = run.returncode, run.output, run.path
+    record_task_cpu(run)
     if returncode != 0:
         print_digest("Unit tests", output, path)
         print(f"  ✗ Unit tests failed with exit code: {returncode}")
@@ -949,7 +1016,7 @@ def run_javascript_unit_tests():
     node_path = ensure_node_binary()
     if not node_path:
         return
-    returncode, output, path = run_logged(
+    run = run_logged(
         # A bare directory arg fails on this Node build (misresolves as a CJS module
         # rather than a glob root); the explicit glob is what actually recurses.
         # tests/unit_js/security/ is EXCLUDED here and gated by run_security_tests() instead, so a
@@ -957,6 +1024,8 @@ def run_javascript_unit_tests():
         [node_path, "--test", "tests/unit_js/!(security)/**/*.test.mjs"],
         "unit-js-tests",
     )
+    returncode, output, path = run.returncode, run.output, run.path
+    record_task_cpu(run)
     if returncode != 0:
         print_digest("JavaScript unit tests", output, path)
         print(f"  ✗ JavaScript unit tests failed with exit code: {returncode}")
@@ -1011,10 +1080,12 @@ def run_live_google_tests():
     node_path = ensure_node_binary()
     if not node_path:
         return
-    returncode, output, path = run_logged(
+    run = run_logged(
         [node_path, "--test", "tests/live/**/*.live.test.mjs"],
         "live-google-tests",
     )
+    returncode, output, path = run.returncode, run.output, run.path
+    record_task_cpu(run)
     if returncode != 0:
         print_digest("Live Google API tests", output, path)
         print(f"  ✗ Live Google API tests failed with exit code: {returncode}")
@@ -1043,10 +1114,12 @@ def run_security_tests():
     node_path = ensure_node_binary()
     if not node_path:
         return
-    returncode, output, path = run_logged(
+    run = run_logged(
         [node_path, "--test", "tests/unit_js/security/**/*.test.mjs"],
         "security-tests",
     )
+    returncode, output, path = run.returncode, run.output, run.path
+    record_task_cpu(run)
     if returncode != 0:
         print_digest("Security tests", output, path)
         print(f"  ✗ Security tests FAILED with exit code: {returncode}")
@@ -1104,6 +1177,73 @@ def _playwright_worker_count():
     return max(1, cpu_count // 2)
 
 
+# The demo suite, split out of the e2e task and run beside it (Stage 3).
+#
+# Its own task because a broken demo should say so: this is the surface a prospective trainer is
+# shown, and it used to fail as two red node ids inside a suite of 205. Running CONCURRENTLY with the
+# rest of the suite rather than after it, because the two tasks are bound by different things — the
+# demo waits on scripted steps, the e2e suite on browsers doing work — so overlapping them costs
+# nothing.
+#
+# These files were 158s of the suite's 755s of call time on 2026-08-19, almost all of it the demo
+# pacing a viewer's eye. They now run as a reduced-motion viewer (`demoPace`), which is zero waiting,
+# and cost about a tenth of that. tests/e2e/test_demo_pacing.py is the one place that still pays full
+# price, on purpose.
+DEMO_TEST_FILES = (
+    "tests/e2e/test_demo_tour.py",
+    "tests/e2e/test_walkthrough.py",
+    "tests/e2e/test_demo_pacing.py",
+)
+
+
+def demo_worker_count():
+    """Workers for the demo task, taken OUT of the shared Playwright budget rather than added to it.
+
+    ONE, because two schedulers cannot balance across each other: the stage takes as long as the
+    slower task, so the split is only free if the two finish together. Measured 2026-08-19 with the
+    demo suite at ~90s of call time and the rest of e2e at ~600s: at 2 and 6 workers they finished in
+    50s and 120s (the stage paying 120s for work that fits in 100s), at 1 and 7 they land within a
+    few seconds of each other. Re-derive this if either suite's call time moves substantially — the
+    ratio, not the number, is what matters.
+    """
+    return 1
+
+
+def e2e_worker_count():
+    """What is left of the budget for the rest of the suite. The two tasks run at the same time
+    against one dev server, so their workers come out of one allowance — see
+    _playwright_worker_count for the two failure modes that allowance exists to avoid."""
+    return max(1, _playwright_worker_count() - demo_worker_count())
+
+
+def run_demo_tests():
+    """Runs the demo and guided-walkthrough suites (Stage 3, beside the e2e task).
+
+    Same rules as the e2e task: no automatic re-run, no artifact capture, digest on failure.
+    """
+    print("\n  Running Demo & Walkthrough Tests (parallel)...")
+    run = run_logged(
+        [
+            venv_python_path(),
+            "-m",
+            "pytest",
+            "-n",
+            str(demo_worker_count()),
+            *DEMO_TEST_FILES,
+            "-q",
+            "--tb=long",
+        ],
+        "demo-tests",
+    )
+    returncode, output, path = run.returncode, run.output, run.path
+    record_task_cpu(run)
+    if returncode != 0:
+        print_digest("Demo & walkthrough tests", output, path)
+        print(f"  ✗ Demo & walkthrough tests failed with exit code: {returncode}")
+        sys.exit(returncode)
+    print("  ✓ Demo & walkthrough tests passed successfully!")
+
+
 def run_medium_tests():
     """Runs the medium-tier Playwright suite (tests/medium/): one component mounted via a
     src/appBoot.js boot step, real index.html markup, no router/IndexedDB/service worker/demo-data
@@ -1112,7 +1252,7 @@ def run_medium_tests():
     though it isn't timing-sensitive the way full e2e is.
     """
     print("\n  Running Medium Component Tests (parallel)...")
-    returncode, output, path = run_logged(
+    run = run_logged(
         [
             venv_python_path(),
             "-m",
@@ -1129,6 +1269,8 @@ def run_medium_tests():
         ],
         "medium-parallel",
     )
+    returncode, output, path = run.returncode, run.output, run.path
+    record_task_cpu(run)
     if returncode == 0:
         print("  ✓ Medium component tests passed successfully!")
         return
@@ -1175,8 +1317,8 @@ def run_e2e_tests():
     """
     print("\n  Running E2E Browser Tests (parallel)...")
     venv_python = venv_python_path()
-    worker_count = _playwright_worker_count()
-    returncode, output, path = run_logged(
+    worker_count = e2e_worker_count()
+    run = run_logged(
         [
             venv_python,
             "-m",
@@ -1217,9 +1359,13 @@ def run_e2e_tests():
             "-q",
             "--tb=long",
             "tests/e2e/",
+            # Run by run_demo_tests instead, beside this task — see DEMO_TEST_FILES.
+            *[f"--ignore={name}" for name in DEMO_TEST_FILES],
         ],
         "e2e-parallel",
     )
+    returncode, output, path = run.returncode, run.output, run.path
+    record_task_cpu(run)
     if returncode == 0:
         print("  ✓ E2E browser tests passed successfully!")
         return
@@ -1513,7 +1659,7 @@ def run_owasp_zap_scan():
         # its usual 3-4 (2026-08-04) there was no artifact to diagnose from, because the output was
         # only ever printed on failure. A stage you cannot explain the duration of is a stage you
         # cannot tune.
-        returncode, output, path = run_logged(
+        run = run_logged(
             [
                 docker_bin,
                 "run",
@@ -1541,6 +1687,8 @@ def run_owasp_zap_scan():
             "zap-baseline",
             timeout=timeout_seconds,
         )
+        returncode, output, path = run.returncode, run.output, run.path
+        record_task_cpu(run)
     except subprocess.TimeoutExpired as e:
         # `docker run --rm` without -d is attached; killing the client process alone can leave the
         # container running server-side, so stop it explicitly rather than trust SIGTERM to propagate.
@@ -1683,8 +1831,19 @@ def run_stage_3_e2e():
     """
     print("\n=== Stage 3: E2E Browser Tests ===")
     stage_start = time.monotonic()
-    _timed_task("E2E Browser Tests", run_e2e_tests)
+    failures = _run_tasks_concurrently(
+        {
+            "E2E Browser Tests": run_e2e_tests,
+            "Demo & Walkthrough Tests": run_demo_tests,
+        }
+    )
     stage_elapsed = time.monotonic() - stage_start
+    if failures:
+        print(
+            f"\n  ✗ Stage 3 failed in tasks: {', '.join(failures)} ({stage_elapsed:.1f}s)"
+        )
+        print("    Digests above; full runner logs in .build-reports/")
+        sys.exit(1)
     print(f"\n  ✓ Stage 3 completed cleanly! ({stage_elapsed:.1f}s)")
     return stage_elapsed
 
@@ -1715,7 +1874,7 @@ def run_stage_4_zap():
 PIPELINE_STAGES = (
     (1, run_stage_1_parallel, ()),
     (2, run_stage_2_medium, ("run_medium_tests",)),
-    (3, run_stage_3_e2e, ("run_e2e_tests",)),
+    (3, run_stage_3_e2e, ("run_e2e_tests", "run_demo_tests")),
     (4, run_stage_4_zap, ("run_owasp_zap_scan",)),
 )
 

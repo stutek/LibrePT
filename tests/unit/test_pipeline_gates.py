@@ -121,7 +121,10 @@ def test_stage_leaves_reads_every_stage_from_the_build_table():
     assert set(stages) == {1, 2, 3, 4}
     assert "run_python_lint" in stages[1]
     assert stages[2] == {"run_medium_tests"}
-    assert stages[3] == {"run_e2e_tests"}
+    # Stage 3 holds two tasks that run side by side: the e2e suite and the demo/walkthrough suite,
+    # which is its own gate so a broken demo names itself rather than appearing as red node ids
+    # inside a suite of 205.
+    assert stages[3] == {"run_e2e_tests", "run_demo_tests"}
     assert stages[4] == {"run_owasp_zap_scan"}
 
 
