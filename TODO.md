@@ -2420,3 +2420,38 @@ sends deliberately. The support runbook can document it; the product must not of
 "wipe everything" control one tap from the gym floor is a support ticket waiting to happen, which is
 also why §9.3's demo cleanup is selective rather than a reset.
 
+---
+
+## 32. Application log storage — a seven-day sliding window
+
+**Wanted 2026-08-19 (Simon), and deliberately deferred to its own session** ("let us make logs a
+separate feature in new session"). Recorded here so the shape is not re-derived.
+
+**The ask**: application logs kept in storage, in schema **P and 5**, as a sliding window of the last
+seven days.
+
+**Why it is its own session, and not a small job.** It names schema **5**, which does not exist —
+provisioning a numbered schema is the star-write model's one genuinely expensive move
+([docs/DATA_MODEL.md](docs/DATA_MODEL.md) §4, [§18.1](TODO.md)): a new store, a projection per live
+schema, backup-file and integrity consequences, and the staging rule §18.4 exists to enforce. Log
+records are also the first collection whose retention is TIME-based rather than trainer-driven, so
+the sliding window is a new idea in the data layer rather than a new table in it.
+
+**What to settle first, before any of that:**
+
+- **What a log entry IS.** §12.4 already captures crashes into an in-memory ring buffer, offered as a
+  prefilled issue and never stored. Are these the same records finally given a home, or a wider
+  stream (navigation, sync attempts, writes)? The answer decides the volume and therefore the
+  eviction cost.
+- **PII, and it is the hard part.** §12.4's crash payload is non-identifying BY CONSTRUCTION — a
+  fixed field list, with anything else a caller passes dropped, because a redaction pass that strips
+  known-bad keys fails the first time someone adds a field nobody remembered to strip. A log stream
+  that quietly records client names would put PII into the backup file, the Drive snapshot, and any
+  support bundle. The same construction rule has to hold here from the first line.
+- **Who reads them, and how they leave the device.** A log nobody can retrieve is storage cost with
+  no benefit; a log that leaves automatically is an unannounced egress ([PRIVACY.md](PRIVACY.md)).
+  §31's support surfaces are the obvious neighbour — the same person asking for a wipe is the person
+  who would ask for logs.
+- **When the window slides.** On write, at boot, or on a timer — and what stops a busy day evicting
+  the very entries a support call is about.
+
