@@ -124,22 +124,29 @@ case in front of you, decide by these — and when a rule stops serving them, ch
    condition, not a date ("if `googleAuth.js` moves to `initCodeClient`, validate a `state`
    parameter"). When a change fires that condition, re-verify **in that change**, by reading the code
    rather than the comment. A rationale nobody can re-derive today is deleted, not carried.
-   `WARN-NEW: 0` says nothing about what `deploy/zap/zap-baseline.conf` already silences, so audit
-   the skips on their own schedule.
-7. **Never swallow a non-zero exit code**, including ZAP's `2` (warnings) and `3` (scan errored). A
+7. **Ask the user for permission to audit the suppressions when they fall due, and say what is
+   overdue.** A green gate proves nothing about what it was told to ignore: `WARN-NEW: 0` counts
+   only what `deploy/zap/zap-baseline.conf` does not already silence, and the same blindness applies
+   to every `# noqa`, `biome-ignore`, named carve-out and allowlist in the repository. Read the audit
+   schedule's "Last done" dates in [TODO.md](TODO.md) at the start of any session that touches the
+   gate; when one is past its cadence, say so and ask before spending the time — it is minutes of
+   work whose findings need judgement, so it is the user's call, not a silent one either way.
+   Re-verify by reading the code each rationale claims, never by re-reading the rationale itself,
+   then record the date and what changed.
+8. **Never swallow a non-zero exit code**, including ZAP's `2` (warnings) and `3` (scan errored). A
    stage that cannot run is a failure, not a pass to log. **A scan that reaches nothing is a failed
    scan** — the ZAP container needs host networking to hit the dev server.
-8. **Add no new test failures, and never silence one.** **A failing e2e test fails the build — no
+9. **Add no new test failures, and never silence one.** **A failing e2e test fails the build — no
    automatic re-run**: retry-and-forgive once hid a real `requestAnimationFrame` race for weeks.
    Root-cause it; never call a failure "probably flaky".
-9. **Treat a detected time jump as interruption, not regression.** Wall time inconsistent with the work
+10. **Treat a detected time jump as interruption, not regression.** Wall time inconsistent with the work
    done = the machine slept, dropping sockets and stalling timers. Re-run before investigating.
-10. **Read the digest, don't re-run blind.** `.build-reports/*.log` plus the printed exceptions, call
+11. **Read the digest, don't re-run blind.** `.build-reports/*.log` plus the printed exceptions, call
     chain and failing node ids come first.
-11. **Capture no artifacts in a gated run** — not tracing, video, or screenshots.
+12. **Capture no artifacts in a gated run** — not tracing, video, or screenshots.
     `--screenshot=only-on-failure` cost ~23% of a green e2e stage while writing nothing. Escalate per
     failure instead: re-run the one node id with `--screenshot=on` or `--tracing=on`.
-12. **Run the gate as its own command, through the front door.** Importing `build`'s `run_*`
+13. **Run the gate as its own command, through the front door.** Importing `build`'s `run_*`
     functions skips the staging that gives the gate its meaning, and folding it onto a heredoc edit
     makes the one command everything rests on unverifiable at a glance.
 
