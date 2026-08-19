@@ -232,7 +232,11 @@ files beat few large ones: less context to load, fewer collisions, a tree that d
    scope, what is missing, whether the effort is proportionate. Then proceed. Skip it for small asks.
 2. **Raise what they cannot see from where they sit** — gym friction (offline basements, sweaty
    hands, equipment pivots, group sessions) and architectural opportunities, before being asked.
-3. **Answer a question; never record it as a decision.** "Any reason for X?" explores the option
+3. **Say the point in plain words first, then the one clause of why.** A sentence that only parses
+   if the reader is holding an internal invariant, a `§`-reference or an earlier decision in their
+   head has not been read — it has been re-asked, and the second telling costs more than the plain
+   one would have. Name the thing to do or the thing that is true, then the reason.
+4. **Answer a question; never record it as a decision.** "Any reason for X?" explores the option
    space: answer, recommend, leave it open. Mark something Decided only when they said so, dated.
 
 ---

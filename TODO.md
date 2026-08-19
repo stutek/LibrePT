@@ -2555,17 +2555,21 @@ separate.** A stranger gets the wedge; someone who already leaned in gets the st
   enforces, and the reason a script was chosen over a recording. A paper-action card is not exempt:
   its expectation is that the card is on screen and dismissible. What is NOT allowed is a step that
   claims something about the app while asserting nothing about it.
-- **The paper track is TEXT on a paper-textured card, never a mock screenshot.** LibrePT's honest
-  claim is that a PT can stay on paper for the parts that are legally happier on paper; a rendered
-  fake of a signed form would be exactly the stale-asset problem §23.5 refused, only forged.
-- **The split screen is the one genuinely new engine capability.** Desktop shows trainer and client
-  side by side; mobile transitions between them. **Recommendation: the client half is a real second
-  app instance in an iframe**, driven by the same player, because the intake, consent and RSVP
-  surfaces are already real pages ([signupDelivery.js](src/modules/intake/signupDelivery.js),
-  `consent-form-*.html`, [rsvpView.js](src/modules/rsvp/rsvpView.js)). A hand-built "client phone"
-  panel would be a recording with extra steps, and would drift the day those pages change.
-- **Two hands, or one hand and a label.** With two panes live, a viewer must never have to guess who
-  acted; each pane is labelled and only the acting pane is lit.
+- **The paper track is TEXT on a paper-textured card, never a picture of a form.** The card SAYS what
+  happens on paper — the client signs the printed consent, the trainer dates and files it, the form
+  version is recorded — over a paper texture that marks it as narration. Do not draw a form that
+  looks like a screenshot: everything else in the demo is the live app, so a drawn surface among them
+  reads as a real screen, and the first viewer who tries to find it in the app has been misled.
+- **ONE persona on screen at a time, with a transition between them** (decided 2026-08-19, Simon:
+  *"we don't really need split screen, transition is enough"*). Desktop gets the same treatment as
+  mobile — no side-by-side pane, no second layout to keep working at every width, and the handover
+  itself becomes the thing the viewer reads. Each persona's screen is labelled with whose phone it
+  is, because the app looks the same on both sides of the handover.
+- **The client's screens are the real ones.** Intake, consent and RSVP already exist as pages
+  ([signupDelivery.js](src/modules/intake/signupDelivery.js), `consent-form-*.html`,
+  [rsvpView.js](src/modules/rsvp/rsvpView.js)), so the client chapter drives those rather than a
+  mock-up of them. A hand-built "client phone" would be a recording with extra steps, stale the day
+  those pages change.
 
 ### 35.2 The events
 
@@ -2577,7 +2581,8 @@ separate.** A stranger gets the wedge; someone who already leaned in gets the st
    slot, three participants. **Needs the recurrence model (35.3a).**
 3. The trainer shares one self-onboarding link per friend, each carrying the calendar invite for the
    series.
-4. **The screen splits** — trainer left, a friend's phone right (mobile: a transition, not a split).
+4. **The demo hands over to the client** — a labelled transition from the trainer's app to a friend's
+   phone, on every screen size.
 5. On the phone: the introduction form — name, contact, goal, and injuries *offered, never demanded*
    (§1.7's ruling, [clientSignup.js](src/data/clientSignup.js)).
 6. Consent, with the notice version and the language it was given under stamped into the record —
@@ -2603,12 +2608,19 @@ separate.** A stranger gets the wedge; someone who already leaned in gets the st
 
 13. The session opens: one clipboard, three participant tabs, the circuit running.
 14. Mid-circuit a client mentions a recent minor injury; the trainer records it **without leaving the
-    session and without stopping the clock**. **Needs an in-session injury capture (35.3c).**
+    session and without stopping the clock**, TAGGED to that one participant. **Needs an in-session
+    injury capture (35.3c).**
 15. The trainer swaps that one movement **for that one participant**; the other two are untouched and
     the demo shows they are untouched.
 16. On the deadlift the trainer sees bad posture and leaves a coaching note against that client's
     exercise — one-handed, mid-set. It is a note about a MOVEMENT, so it must resurface the next time
     that movement is programmed for that client, not only in a session log. **Needs 35.3d.**
+
+    **What events 14 and 16 are in the story FOR** (refined 2026-08-19, Simon): not the capture
+    itself, which is two taps and unremarkable to watch, but the **review pane** they feed and the
+    **per-client tagging** that gets them there. The demo's claim is that a note taken one-handed
+    mid-circuit lands against the right person and comes back at the right moment — so the capture
+    beats are short, and the pane in event 20 is where the camera stays.
 17. Circuits progress; Too Easy is signalled once, so the story keeps §23.4's wedge inside it.
 18. The last circuit completes; the session is marked complete, net time against slot time shown.
 
@@ -2633,7 +2645,8 @@ separate.** A stranger gets the wedge; someone who already leaned in gets the st
 The scenario is worth writing down now precisely because it names these; each is a product gap the
 demo would otherwise paper over.
 
-a. **A recurrence model.** Sessions today are individual records. "2× a week, fixed" (event 2) and
+a. **A recurrence model** — known unbuilt, and the story is written to want it anyway (Simon,
+   2026-08-19). Sessions today are individual records. "2× a week, fixed" (event 2) and
    "move only the next occurrence" (event 21) are one concept — a series plus per-occurrence
    exceptions — and it is the largest unbuilt piece in the story. It also decides what a second
    `.ics` means: `SEQUENCE`/`RECURRENCE-ID` on one occurrence, not a new event
@@ -2644,8 +2657,11 @@ c. **In-session injury capture** (event 14) — one-handed, non-blocking, and it
    programming.
 d. **A movement-scoped coaching note** (event 16) that resurfaces when that movement is next
    programmed for that client. Neighbour of §7's feedback loop; not the same thing as a plan
-   adjustment.
-e. **The split-screen / persona-transition presentation** (event 4), per 35.1.
+   adjustment. With (c) it shares one requirement the demo makes visible: both are captured against a
+   PARTICIPANT inside a shared group session and both surface in a review pane — so build the tagging
+   and the pane once, for both kinds of note, rather than an injury path and a coaching path.
+e. **The persona transition** (event 4), per 35.1 — one screen at a time, so this is a labelled
+   handover and a route into the client pages, not a second layout.
 f. **Shared exercise binding across participants** (event 12) — §8.1.
 
 **So the order to build it in is: chapter C first** (it needs c and d, and is the chapter closest to
