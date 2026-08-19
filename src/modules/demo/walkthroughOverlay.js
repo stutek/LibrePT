@@ -141,6 +141,7 @@ export function startGuidedWalkthrough({
   t = (key) => key,
   doc = document,
   pollMs = DEFAULT_POLL_MS,
+  navigate = null,
 } = {}) {
   const el = buildOverlay(doc, t);
   const hand = mountDemoHand(doc);
@@ -153,6 +154,8 @@ export function startGuidedWalkthrough({
       clearInterval(ticker);
       ticker = 0;
     }
+    view.removeEventListener("scroll", followTarget, { capture: true });
+    view.removeEventListener("resize", followTarget);
     unmountDemoHand(doc);
     el.overlay.remove();
   }
@@ -163,6 +166,15 @@ export function startGuidedWalkthrough({
       return;
     }
     const box = target.getBoundingClientRect();
+    // A control scrolled up behind the app header has nothing to point AT, and a ring drawn there
+    // points at the header instead (reported 2026-08-19). Hidden rather than clamped: a ring that
+    // slid to the edge and stayed would claim something is there.
+    const headerBottom = doc.getElementById("app-header")?.getBoundingClientRect().bottom ?? 0;
+    const viewportHeight = doc.documentElement.clientHeight;
+    if (box.bottom <= headerBottom || box.top >= viewportHeight) {
+      el.spotlight.classList.remove("is-visible");
+      return;
+    }
     el.spotlight.style.setProperty("--spot-x", `${Math.round(box.left)}px`);
     el.spotlight.style.setProperty("--spot-y", `${Math.round(box.top)}px`);
     el.spotlight.style.setProperty("--spot-w", `${Math.round(box.width)}px`);
@@ -220,10 +232,20 @@ export function startGuidedWalkthrough({
     // Asserted as the card loads (TODO §30.3): a step whose control cannot exist yet would otherwise
     // fail confusingly the moment anyone tapped Show me, and the trainer would have read a whole
     // caption first.
-    if (step && !stepPreconditionMet(step, doc)) reportProblem(t("walkthrough_wrong_place"));
+    //
+    // A step that owns a ROUTE puts the app back there first rather than complaining — that is what
+    // Back across a view boundary means (reported 2026-08-19): step 1 lives on the board, so
+    // returning to it has to take the clipboard down, not just re-read its caption over the top.
+    // Only when there is nowhere declared to go does it say so.
+    if (step && !stepPreconditionMet(step, doc)) {
+      if (step.route) navigate?.(step.route);
+      else reportProblem(`step ${step.id} precondition not met`, t("walkthrough_wrong_place"));
+    }
     const target = step ? resolveTarget(doc, step) : null;
     if (target) {
-      target.scrollIntoView({ block: "center", inline: "nearest" });
+      // Smooth here too, so entering a step and being shown one move the page the same way — the
+      // spotlight follows on the poll, and a jump would leave it behind for a frame.
+      target.scrollIntoView({ block: "center", inline: "nearest", behavior: "smooth" });
       keepPanelClearOf(target);
     }
     // A step re-entered from Back — or one the trainer completed before reading the panel — is
@@ -234,8 +256,19 @@ export function startGuidedWalkthrough({
     render();
   }
 
-  function reportProblem(reason) {
-    el.problem.textContent = `${t("walkthrough_stuck")} (${reason})`;
+  /**
+   * Says something went wrong, in the trainer's words — and puts the DIAGNOSIS in the console
+   * (decided 2026-08-19: "the red assertion text is helpful to me for investigations, but should not
+   * be customer visible").
+   *
+   * The reason is a selector and a failed expectation: precisely what someone debugging the script
+   * needs, and precisely what a trainer cannot act on. It stays available where an investigator
+   * already looks, rather than being deleted — the alternative to showing it is not hiding it, it is
+   * putting it somewhere it belongs.
+   */
+  function reportProblem(reason, trainerMessage = t("walkthrough_stuck")) {
+    console.warn(`[walkthrough] ${reason}`);
+    el.problem.textContent = trainerMessage;
     el.problem.hidden = false;
   }
 
@@ -292,6 +325,18 @@ export function startGuidedWalkthrough({
   // The trainer doing the step themselves is the expected case, so it is watched for continuously
   // rather than inferred from a click listener — the tap may land on a child element, may be a
   // keyboard activation, and may take a render to become true.
+  // The ring tracks the page itself, not the poll: anything that moves the layout between ticks —
+  // the timeline settling to the day in a deep link, right after boot — left the ring drawn where
+  // the control HAD been, up to a quarter second behind (reported 2026-08-19). Passive and capturing
+  // so it also hears scrolls inside the deck and the board, which are their own scroll containers.
+  const followTarget = () => {
+    const step = currentWalkthroughStep(tour, state);
+    positionSpotlight(step ? resolveTarget(doc, step) : null);
+  };
+  const view = doc.defaultView;
+  view.addEventListener("scroll", followTarget, { passive: true, capture: true });
+  view.addEventListener("resize", followTarget, { passive: true });
+
   ticker = setInterval(() => {
     const step = currentWalkthroughStep(tour, state);
     if (!step || showing) return;

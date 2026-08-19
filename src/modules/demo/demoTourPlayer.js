@@ -37,7 +37,13 @@ const DEFAULT_STEP_PAUSE_MS = 1350;
 // report, same reasoning: a pointer that arrives before you have looked at it has not shown you
 // anything.
 const DEFAULT_TRAVEL_MS = 650;
-const SCROLL_SETTLE_MS = 200;
+// The scroll is part of the demonstration, not setup for it (reported 2026-08-19: "when session list
+// is scrolled, the highlighted element gets out of view, show me should scroll the view into middle
+// screen first before clicking"). It always DID scroll the control to the middle before tapping —
+// measured, the card was centred at the moment of the click — but instantly and 200ms before the
+// hand arrived, so what a viewer saw was a list that teleported and a control that changed. Smooth,
+// and given time to finish, it reads as the app going to fetch the thing it is about to tap.
+const SCROLL_SETTLE_MS = 520;
 // A beat between the press landing and the click firing, so the tap READS as the cause of what
 // happens next rather than as something simultaneous with it.
 const TAP_LANDING_MS = 160;
@@ -126,7 +132,7 @@ export async function performStep(step, { doc = document, hand = null, wait = sl
     return { id: step.id, ok: false, reason: `no control matched ${step.target}${qualifier}` };
   }
 
-  target.scrollIntoView({ block: "center", inline: "nearest" });
+  target.scrollIntoView({ block: "center", inline: "nearest", behavior: "smooth" });
   // Let the scroll settle before reading a box for the pointer, or the hand lands where the control
   // used to be.
   await wait(SCROLL_SETTLE_MS);

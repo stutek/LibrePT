@@ -285,3 +285,167 @@ def test_a_step_says_so_when_the_app_is_not_where_it_expects(page, local_server)
 
     expect(page.locator(PROGRESS)).to_contain_text("2")
     expect(page.locator(".walkthrough-problem")).to_be_visible(timeout=5_000)
+
+
+def test_show_me_brings_a_scrolled_away_control_into_view_before_tapping(
+    page, local_server
+):
+    """Reported 2026-08-19: "when session list is scrolled, the highlighted element gets out of view,
+    show me should scroll the view into middle screen first before clicking".
+
+    Measured at 390px: scrolling the board to its last day puts the step's card ~1000px above the
+    viewport, and the spotlight follows it off screen. Tapping Show me then produced a control
+    changing somewhere nobody could see — the tap worked, which is the worst version of this, because
+    the demo appears to skip a step.
+
+    The rect is captured ON THE CLICK, which is the only moment that matters: a check afterwards
+    would pass on a page that scrolled there later.
+    """
+    page.set_viewport_size({"width": 390, "height": 844})
+    _open_walkthrough(page, local_server)
+    page.wait_for_timeout(800)
+
+    page.evaluate(
+        """() => {
+            window.__clickedAt = null;
+            const card = [...document.querySelectorAll('.session-card')]
+                .find((c) => c.textContent.includes('Group Strength'));
+            card.addEventListener('click', () => {
+                const r = card.getBoundingClientRect();
+                window.__clickedAt = { top: r.top, bottom: r.bottom, height: window.innerHeight };
+            }, { capture: true });
+            const headers = [...document.querySelectorAll('[data-date]')];
+            headers[headers.length - 1]?.scrollIntoView({ block: 'start' });
+        }"""
+    )
+    page.wait_for_timeout(600)
+
+    page.locator(SHOW_ME).click()
+    page.wait_for_function("() => window.__clickedAt !== null", timeout=15_000)
+
+    where = page.evaluate("() => window.__clickedAt")
+    assert where["top"] >= 0 and where["bottom"] <= where["height"], (
+        f"tapped a card at {where['top']}..{where['bottom']} of a {where['height']}px viewport"
+    )
+    # "Into middle screen", which is what was asked for and is stronger than merely on-screen: a
+    # control tapped at the very edge is one a viewer's eye never reaches in time. A quarter of the
+    # viewport of slack, because a card near the end of a scroll container cannot always be centred.
+    centre = (where["top"] + where["bottom"]) / 2
+    assert abs(centre - where["height"] / 2) < where["height"] / 4, (
+        f"tapped a card centred at {centre} in a {where['height']}px viewport"
+    )
+
+
+def test_going_back_across_a_view_boundary_returns_to_that_view(page, local_server):
+    """Reported 2026-08-19: "clicking back in demo needs to also switch back to previous view".
+
+    Step 1 happens on the sessions board and step 2 inside the clipboard it opens. Going back left
+    the clipboard covering the board, so the panel asked the trainer to open a session while the
+    session sat open on top of it — the same confusion a refreshed deep link produced, arrived at
+    from the other direction.
+    """
+    _open_walkthrough(page, local_server)
+    _do_current_step(page)
+    expect(page.locator(PROGRESS)).to_contain_text("2")
+    expect(page.locator("#active-session-overlay")).not_to_have_class(
+        re.compile(r"\bhidden\b")
+    )
+
+    page.locator(BACK).click()
+
+    expect(page.locator(PROGRESS)).to_contain_text("1")
+    expect(page.locator("#active-session-overlay")).to_have_class(
+        re.compile(r"\bhidden\b"), timeout=10_000
+    )
+    expect(page.locator(".session-card").first).to_be_visible()
+    # And having restored the ground the step needs, it must not also be complaining about it.
+    expect(page.locator(".walkthrough-problem")).to_be_hidden()
+
+
+def test_the_diagnosis_goes_to_the_console_not_to_the_trainer(page, local_server):
+    """Decided 2026-08-19: "the red assertion text is helpful to me for investigations, but should not
+    be customer visible".
+
+    A failed step's reason is a CSS selector and an unmet expectation — exactly what someone
+    debugging the script needs, and exactly what a trainer can do nothing with. It moves to the
+    console rather than being deleted: the alternative to showing it is putting it where an
+    investigator already looks.
+    """
+    warnings = []
+    page.on("console", lambda message: warnings.append(message.text))
+    _open_walkthrough(page, local_server)
+    _do_current_step(page)
+    expect(page.locator(PROGRESS)).to_contain_text("2")
+
+    page.locator("#active-session-overlay .view-grabber").click()
+    page.wait_for_timeout(600)
+    page.locator(BACK).click()
+    page.locator(NEXT).click()
+    expect(page.locator(".walkthrough-problem")).to_be_visible(timeout=5_000)
+
+    shown = page.locator(".walkthrough-problem").inner_text()
+    assert "#" not in shown and "." not in shown.split()[0], (
+        f"selector leaked into the panel: {shown}"
+    )
+    assert any("[walkthrough]" in text for text in warnings), (
+        f"nothing diagnosable reached the console: {warnings}"
+    )
+
+
+def test_the_spotlight_follows_the_page_immediately_when_it_scrolls(page, local_server):
+    """Reported 2026-08-19 on a `?demo=walkthrough` deep link into a dated board: "highlight box is
+    above the application header, not highlighting the right card".
+
+    The ring was repositioned only by the 250ms poll, so anything that moved the page between ticks —
+    the timeline settling to the day in the URL, right after boot — left it drawn where the card had
+    been, which on a scrolled board is over the header. Sampled a frame after a scroll, not a tick.
+    """
+    page.set_viewport_size({"width": 390, "height": 844})
+    _open_walkthrough(page, local_server)
+    page.wait_for_timeout(900)
+
+    page.evaluate(
+        "() => window.scrollBy(0, 220) || document.scrollingElement.scrollBy(0, 220)"
+    )
+    page.wait_for_timeout(80)  # far under the poll interval
+
+    drift = page.evaluate(
+        """() => {
+            const spot = document.querySelector('.walkthrough-spotlight').getBoundingClientRect();
+            const card = [...document.querySelectorAll('.session-card')]
+                .find((c) => c.textContent.includes('Group Strength'));
+            if (!card) return null;
+            const box = card.getBoundingClientRect();
+            return Math.round(Math.abs(spot.top - box.top));
+        }"""
+    )
+    if drift is not None:
+        assert drift <= 2, f"ring is {drift}px from the card it is meant to be on"
+
+
+def test_the_spotlight_does_not_draw_over_the_header(page, local_server):
+    """The visible half of the same report: a ring for a control scrolled up behind the header has
+    nothing to point at, and drawing it there points at the header instead."""
+    page.set_viewport_size({"width": 390, "height": 844})
+    _open_walkthrough(page, local_server)
+    page.wait_for_timeout(900)
+
+    page.evaluate(
+        """() => {
+            const headers = [...document.querySelectorAll('[data-date]')];
+            headers[headers.length - 1]?.scrollIntoView({ block: 'start' });
+        }"""
+    )
+    page.wait_for_timeout(500)
+
+    state = page.evaluate(
+        """() => {
+            const spot = document.querySelector('.walkthrough-spotlight');
+            const box = spot.getBoundingClientRect();
+            const header = document.getElementById('app-header').getBoundingClientRect();
+            return { visible: spot.classList.contains('is-visible'), top: box.top, header: header.bottom };
+        }"""
+    )
+    assert not state["visible"] or state["top"] >= state["header"], (
+        f"ring at y={state['top']} with the header ending at {state['header']}"
+    )

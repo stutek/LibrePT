@@ -32,6 +32,10 @@ export const GYM_FLOOR_TOUR = {
       // What has to be TRUE before this step can be asked (TODO §30.3): the board, with cards on
       // it. A pasted or refreshed `?demo=` link can open the app anywhere, and a step asking the
       // trainer to open a session that is already open reads as a broken guide.
+      // Where this step LIVES. The overlay navigates here when the app is somewhere else — walking
+      // Back out of the clipboard, or arriving on a refreshed deep link (TODO §30.3). Only the steps
+      // that own a view need it: 2-4 are inside the clipboard step 1 opens, so they follow from it.
+      route: "/",
       requires: [
         { selector: ".session-card", visible: true },
         // ...and the board is what the trainer is LOOKING at. The cards stay in the DOM behind an
