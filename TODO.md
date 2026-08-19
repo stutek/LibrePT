@@ -2497,7 +2497,33 @@ constants exist for a viewer (raised 2026-08-18: "on web browser the button and 
 too fast"); the tests pay them 24 times per gate run to assert step logic that has nothing to do with
 pacing.
 
-**Three candidate fixes, none started — the second is the recommended one:**
+**Done 2026-08-19** — the second option, plus the reason the first was wrong. The demo now runs at
+`demoPace` zero under `prefers-reduced-motion`, which is a real user mode rather than a test switch,
+and the suites moved into their own Stage 3 task beside the e2e one. `test_demo_tour.py` 41s -> 6s,
+`test_walkthrough.py` 117s -> 22s, whole gate 3m13s -> 2m46s.
+
+**Is more parallelism worth it for the demo task? No — measured after the change:**
+
+| Configuration | Wall |
+| :--- | :--- |
+| Combined, one scheduler, 8 workers (208 tests) | 111s |
+| Split as shipped: e2e at 7 ∥ demo at 1 | **104s** (e2e 104s, demo 76s) |
+| Demo alone, 2 workers | 25s |
+| Demo alone, 4 workers | 17s |
+
+The stage costs `max(e2e, demo)` and e2e is the long pole, so the demo task already has ~28s of
+slack; more workers there can only come out of e2e's seven and push the long pole further out. Note
+also that its 76s inside the stage is CONTENTION, not cost — standalone it is a quarter of that — so
+nobody should read that number as the demo suite being slow. And the split is 7s FASTER than one
+scheduler over everything: two schedulers avoid the tail where one worker holds the last slow file
+while the others idle.
+
+The remaining lever for Stage 3 is e2e's own call time (437s of CPU over 182 tests), not
+parallelism. Raising the total worker count above half the cores has been measured and rejected
+twice — compositor starvation and the dev server's listen backlog, both surfacing as `Page.goto`
+timeouts unrelated to any change.
+
+**The three candidates as they were assessed, for the record:**
 
 1. **A URL knob for the pace** (`?demo=walkthrough&pace=fast`). Cheapest to write, and wrong: it adds
    product surface whose only consumer is the test suite.
