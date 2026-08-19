@@ -485,6 +485,10 @@ twice was not captured the first time, and the cost of that is paid in their tim
    rule, sharpening it. A file that only grows stops being read, at which point every rule in it is
    decorative — the same failure §3 describes for duplicated documentation, applied to this file.
 
+   **So read before you write: find the rule that already covers this and extend it.** Two bullets
+   saying nearly the same thing are worse than one, because the next agent has to work out which
+   one governs. Only when nothing here covers the lesson does it become a rule of its own.
+
    **But never RENUMBER to make room.** A rule's number is an identifier: `§5.9` is cited from `src/`,
    `tests/` and `TODO.md`, and inserting a rule above it silently repoints every one of those to a
    different rule. `doclinks` cannot catch that — it checks a section EXISTS, not that it still means
@@ -494,4 +498,25 @@ twice was not captured the first time, and the cost of that is paid in their tim
 6. **Write the rule and the evidence, never the apology.** "Stage from `git status`, because a
    forgotten file left HEAD failing while the working tree passed" is a rule. "I'm sorry I forgot to
    stage a file" is not; it teaches nobody anything and it is not what the next agent needs to read.
+
+7. **Quote the new or changed rule VERBATIM in the reply, so it can be confirmed or rejected.** A
+   rule written into this file is binding on every future session, which makes it the one edit the
+   maintainer must not have to go looking for in a diff. Show the exact text — the bullet as it now
+   reads, not a summary of what you captured — and say which rule it extends or that it is new.
+   Rejecting a rule then costs one sentence; noticing an unwanted one three sessions later costs
+   however much work was done under it.
+
+8. **Every entry is also a small refactor of its neighbourhood.** Having written a rule, read the
+   rules around it and leave that section coherent: merge bullets that now overlap, delete what the
+   new one made obsolete, and move a rule that has ended up in the wrong section (subject to
+   AGENT_RULES §7.5 — consolidate content, never renumber). Rules stay short, concrete and checkable; the test is
+   whether an agent that has read the rule and nothing else behaves correctly, without needing the
+   discussion that produced it.
+
+   **The rules live HERE and nowhere else.** [CLAUDE.md](CLAUDE.md) and [GEMINI.md](GEMINI.md) are
+   loaders for this file; [INDEX.md](INDEX.md) is a map to it; [TODO.md](TODO.md) and
+   [CHANGELOG.md](CHANGELOG.md) record work and decisions, not the rules that govern work
+   (AGENT_RULES §7.2). Any of them may point at a rule; none of them may restate one — a copy is a
+   rule that will silently disagree with this file the first time it is edited (AGENT_RULES §3), and
+   private agent memory is already forbidden as a home for the same reason (AGENT_RULES §7.3).
 
