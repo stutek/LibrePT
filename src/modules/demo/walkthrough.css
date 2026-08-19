@@ -32,6 +32,11 @@
 .walkthrough-spotlight.is-visible {
   opacity: 1;
 }
+/* The frame it is placed on. Position and size arrive instantly; only the fade is kept, so the ring
+   appears ON its control rather than travelling to it from wherever the last one was. */
+.walkthrough-spotlight.is-arriving {
+  transition: opacity 0.2s ease;
+}
 
 /* A breathing GLOW around the ring (TODO §28.12), asked for directly: the static ring said "this
    one" and nothing said "now". The pulse is on the outer halo only — the inner 3px ring stays put,

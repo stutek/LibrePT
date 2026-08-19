@@ -449,3 +449,27 @@ def test_the_spotlight_does_not_draw_over_the_header(page, local_server):
     assert not state["visible"] or state["top"] >= state["header"], (
         f"ring at y={state['top']} with the header ending at {state['header']}"
     )
+
+
+def test_the_ring_appears_where_it_belongs_rather_than_flying_in(page, local_server):
+    """Asked 2026-08-19: "pulse is ok, but why it needs to fly in with delay?".
+
+    The ring transitions its position and size so that moving between steps reads as one ring
+    travelling rather than two rings blinking. The side effect was its FIRST appearance sliding in
+    from the corner of the screen, which is not information — it is a wait before the guide starts.
+    Sampled one frame after it becomes visible.
+    """
+    _open_walkthrough(page, local_server)
+    page.wait_for_selector(".walkthrough-spotlight.is-visible", timeout=30_000)
+
+    drift = page.evaluate(
+        """() => new Promise((resolve) => requestAnimationFrame(() => {
+            const spot = document.querySelector('.walkthrough-spotlight').getBoundingClientRect();
+            const card = [...document.querySelectorAll('.session-card')]
+                .find((c) => c.textContent.includes('Group Strength'));
+            const box = card.getBoundingClientRect();
+            resolve(Math.round(Math.hypot(spot.left - box.left, spot.top - box.top)));
+        }))"""
+    )
+
+    assert drift <= 4, f"ring was {drift}px from its control on the frame it appeared"

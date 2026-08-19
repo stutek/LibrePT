@@ -175,11 +175,23 @@ export function startGuidedWalkthrough({
       el.spotlight.classList.remove("is-visible");
       return;
     }
+    // Placed WITHOUT the travel transition when it is not already on screen (asked 2026-08-19: "why
+    // does it need to fly in with delay?"). The transition exists so moving between steps reads as
+    // one ring travelling rather than two rings blinking — information. Its first appearance sliding
+    // in from the corner is not information, it is a wait before the guide begins.
+    const appearing = !el.spotlight.classList.contains("is-visible");
+    el.spotlight.classList.toggle("is-arriving", appearing);
     el.spotlight.style.setProperty("--spot-x", `${Math.round(box.left)}px`);
     el.spotlight.style.setProperty("--spot-y", `${Math.round(box.top)}px`);
     el.spotlight.style.setProperty("--spot-w", `${Math.round(box.width)}px`);
     el.spotlight.style.setProperty("--spot-h", `${Math.round(box.height)}px`);
     el.spotlight.classList.add("is-visible");
+    if (appearing) {
+      // Read a layout property so the placement above lands while transitions are still off; without
+      // it the class removal is coalesced into the same frame and the ring flies in anyway.
+      void el.spotlight.offsetWidth;
+      el.spotlight.classList.remove("is-arriving");
+    }
   }
 
   /** Move the panel to the top of the screen if it would cover the step's control, and back down
