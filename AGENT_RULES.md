@@ -152,6 +152,16 @@ Corrections are the most expensive thing the maintainer produces. One given twic
 1. **Every correction is a learning event, captured in the SAME change** — as is a repeated mistake,
    a *"why are you doing X?"*, or any expressed dissatisfaction. Not "noted for next time": the next
    session is a different context window.
+
+   **A lesson does not have to arrive as a complaint.** A stated value, preference, principle or
+   standard — calm, declarative, often appended to something else — is the most durable kind, and
+   the easiest to read as background. Every trigger listed above is the shape of an objection, which
+   is exactly why a paragraph naming ten engineering values went uncaptured until it was asked about.
+
+   **Read a message for ALL of its items before acting on any.** A request to DO something and a
+   statement of how things should BE routinely arrive together; acting on the first and treating the
+   rest as framing loses the half that outlives the task. Name the items back in the reply — an
+   omission is then visible immediately, to both of us, rather than a session later.
 2. **Where it goes is decided by one question: who needs this next?**
 
    | The lesson is about… | It belongs in… |
