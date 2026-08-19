@@ -22,7 +22,34 @@ no fluff.
 
 ---
 
-## 1. Execution & Git Flow
+## 1. Values
+
+Every rule below is one of these applied to a specific situation. When a rule does not cover the
+case in front of you, decide by these — and when a rule stops serving them, change the rule.
+
+- **Separation of concerns** — one reason to change per file, per module, per document. Behaviour,
+  requirements and process are three different things and never share a home.
+- **Single source of truth** — a value, a rule or a decision is written once. A second copy is
+  correct on the day it is written and silently wrong afterwards.
+- **Locality** — the reason lives next to the thing. A comment at the code beats a pointer to a
+  document; a requirement stated in place beats a citation.
+- **Light coupling** — nothing depends on how something else is worded, ordered or built
+  internally. If reordering one file edits another, that is the defect.
+- **Anti-fragility** — prefer the design where the mistake cannot be made over the one that
+  forbids it. A property that survives carelessness beats a rule that needs remembering.
+- **Simplicity** — the explicit version a reader can follow beats the clever one. Verbosity in
+  action, not another layer of abstraction.
+- **Self-documenting code** — names carry *what*; comments carry *why*. A reader should rarely
+  need a second file open.
+- **Validation automation** — anything that must stay true gets a check that fails the build. A
+  convention nobody can verify is a convention that has already drifted.
+- **Test first** — the test states the promise in the caller's words, and failing once is the only
+  proof it can fail at all.
+- **Small incremental changes** — one coherent change per commit, verified before the next starts.
+
+---
+
+## 2. Execution & Git Flow
 
 1. **Apply edits directly**, choosing the best architectural option, without waiting for
    clarification.
@@ -45,7 +72,7 @@ no fluff.
 
 ---
 
-## 2. The Pipeline Gate
+## 3. The Pipeline Gate
 
 1. **Run `.venv/bin/python -m build check` in full before every code commit, and report the result.**
    A test subset is not verification — it skips lint, the frontend audit and the dependency scan. Fix
@@ -118,7 +145,7 @@ no fluff.
 
 ---
 
-## 3. Learning: a lesson lands in the repository, not in an agent's head
+## 4. Learning: a lesson lands in the repository, not in an agent's head
 
 Corrections are the most expensive thing the maintainer produces. One given twice was not captured.
 
@@ -173,7 +200,7 @@ Corrections are the most expensive thing the maintainer produces. One given twic
 
 ---
 
-## 4. Code & Test Architecture
+## 5. Code & Test Architecture
 
 The front end is a buildless native-ES-module app under `src/`. Many small single-responsibility
 files beat few large ones: less context to load, fewer collisions, and a directory tree that
@@ -241,7 +268,7 @@ documents itself.
 
 ---
 
-## 5. Working With the Maintainer
+## 6. Working With the Maintainer
 
 1. **Evaluate the user's own changes** and say how they refine the domain model or gym ergonomics.
 2. **Call out real-world friction**: basement-gym offline states, sweaty hands, equipment pivots,
@@ -257,7 +284,7 @@ documents itself.
 
 ---
 
-## 6. Product Constraints That Outlive Any One Feature
+## 7. Product Constraints That Outlive Any One Feature
 
 1. **Nothing lives only in a hover.** LibrePT is used on a phone on the gym floor: a `title` tooltip
    is unreachable on touch, so hover-only information is information nobody has. Touch targets need
@@ -271,7 +298,7 @@ documents itself.
 
 ---
 
-## 7. Documentation & the Knowledge Graph (OKF v0.1)
+## 8. Documentation & the Knowledge Graph (OKF v0.1)
 
 1. **Never duplicate feature lists or domain specs.** Architecture and features:
    [README.md](README.md). Workflows: [use_cases/](use_cases/). One vocabulary across docs and code.
@@ -286,7 +313,7 @@ documents itself.
 
 ---
 
-## 8. Agent Tooling: Build the Tool, Don't Re-Improvise the Script
+## 9. Agent Tooling: Build the Tool, Don't Re-Improvise the Script
 
 1. **Check [agent_tools/INDEX.md](agent_tools/INDEX.md) before improvising**; run
    `python -m agent_tools.<name>` rather than rebuilding its logic in a shell pipeline.
@@ -327,7 +354,7 @@ documents itself.
 
 ---
 
-## 9. Local Dev Server
+## 10. Local Dev Server
 
 1. **Leave it running** across tasks (`python -m deploy.local_http_server`, on `DEV_SERVER_PORT`
    under `DEV_SERVER_BASE_PATH`, [TODO §28.1](TODO.md)) — the user tests changes in the browser.
