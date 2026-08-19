@@ -87,3 +87,26 @@ def test_a_quiet_machine_says_so_in_one_line(capsys):
     # Still printed, because "the machine was not the problem" is the useful half of the answer on
     # the run where a stage looks slow.
     assert "no" in out.lower()
+
+
+# --- what the MACHINE did, as opposed to what we could account for ------------------------------
+
+
+def test_machine_busy_seconds_counts_every_process_not_just_ours(tmp_path):
+    """The per-task CPU figure comes from `wait4` on our own child, and for a browser task that
+    misses most of the work: Playwright's Chromium processes are not reaped through the worker, so
+    the medium tier reported 5.0 cores while the machine was doing 14.4 (measured 2026-08-19).
+
+    A stage-level reading from /proc/stat has no such blind spot — it counts everything — which is
+    what makes "is this stage saturating the box?" answerable at all."""
+    stat = tmp_path / "stat"
+    stat.write_text("cpu  100 20 30 400 5 0 0 0 0 0\ncpu0 1 2 3 4 5\n")
+
+    busy = build.read_machine_busy_seconds(str(stat))
+
+    ticks = build.CLOCK_TICKS
+    assert busy == (100 + 20 + 30) / ticks
+
+
+def test_a_platform_without_proc_stat_reports_nothing(tmp_path):
+    assert build.read_machine_busy_seconds(str(tmp_path / "absent")) is None

@@ -92,6 +92,7 @@ def _memory_gb():
 IO_PRESSURE_PATH = "/proc/pressure/io"
 MEMORY_PRESSURE_PATH = "/proc/pressure/memory"
 VMSTAT_PATH = "/proc/vmstat"
+MACHINE_STAT_PATH = "/proc/stat"
 # A stall shorter than this over a whole run is scheduling noise, not a finding worth a line.
 STALL_NOTEWORTHY_SECONDS = 0.5
 # 4 KiB pages, so a thousand pages is ~4MB of swap traffic — small enough to ignore, and the
@@ -136,6 +137,32 @@ def read_swap_pages(path=VMSTAT_PATH):
         return {"in": int(fields["pswpin"]), "out": int(fields["pswpout"])}
     except (KeyError, ValueError):
         return None
+
+
+# Kernel tick rate, for turning /proc/stat's jiffies into seconds.
+CLOCK_TICKS = os.sysconf("SC_CLK_TCK") if hasattr(os, "sysconf") else 100
+
+
+def read_machine_busy_seconds(path=MACHINE_STAT_PATH):
+    """Total CPU-seconds the WHOLE machine has spent working (user + nice + system).
+
+    Differenced across a stage, this is the only honest measure of what a browser suite costs. The
+    per-task figure comes from `wait4` on our own child and misses Playwright's Chromium processes
+    entirely: measured 2026-08-19, the medium tier reported 5.0 cores while the machine was doing
+    14.4 of 16. It counts other people's work too, which is a fair trade for counting all of ours.
+    """
+    try:
+        with open(path, encoding="utf-8") as stat:
+            fields = stat.readline().split()
+    except OSError:
+        return None
+    if not fields or not fields[0].startswith("cpu"):
+        return None
+    try:
+        user, nice, system = (int(value) for value in fields[1:4])
+    except ValueError:
+        return None
+    return (user + nice + system) / CLOCK_TICKS
 
 
 def read_host_pressure():
@@ -1919,6 +1946,7 @@ def run_stage_1_parallel():
     }
 
     stage_start = time.monotonic()
+    machine_busy_at_start = read_machine_busy_seconds()
     failures = _run_tasks_concurrently(
         {name: task for name, task in tasks.items() if name in FORMATTING_TASKS}
     )
@@ -1934,8 +1962,25 @@ def run_stage_1_parallel():
         )
         print(f"    Digests above; full runner logs in {REPORT_DIR}/")
         sys.exit(1)
-    print(f"\n  ✓ Stage 1 completed cleanly! ({stage_elapsed:.1f}s)")
+    print(
+        f"\n  ✓ Stage 1 completed cleanly! ({stage_elapsed:.1f}s)"
+        f"{_stage_machine_load(machine_busy_at_start, stage_elapsed)}"
+    )
     return stage_elapsed
+
+
+def _stage_machine_load(started_busy, elapsed):
+    """How many cores the machine averaged over a stage, or "" where /proc/stat is unavailable.
+
+    Printed beside the stage's wall time because the per-task CPU figures cannot answer the question
+    that matters when a stage looks slow: is the box saturated? For the browser tiers they are not
+    even close — they miss Playwright's Chromium processes, which is most of the work.
+    """
+    finished_busy = read_machine_busy_seconds()
+    if started_busy is None or finished_busy is None or elapsed <= 0:
+        return ""
+    cores = (finished_busy - started_busy) / elapsed
+    return f" — machine averaged {cores:.1f} of {os.cpu_count() or '?'} cores"
 
 
 def run_stage_2_medium():
@@ -1945,9 +1990,13 @@ def run_stage_2_medium():
     the slower, harder-to-diagnose full-flow suite."""
     print("\n=== Stage 2: Medium Component Tests ===")
     stage_start = time.monotonic()
+    machine_busy_at_start = read_machine_busy_seconds()
     _timed_task("Medium Component Tests", run_medium_tests)
     stage_elapsed = time.monotonic() - stage_start
-    print(f"\n  ✓ Stage 2 completed cleanly! ({stage_elapsed:.1f}s)")
+    print(
+        f"\n  ✓ Stage 2 completed cleanly! ({stage_elapsed:.1f}s)"
+        f"{_stage_machine_load(machine_busy_at_start, stage_elapsed)}"
+    )
     return stage_elapsed
 
 
@@ -1969,6 +2018,7 @@ def run_stage_3_e2e():
     """
     print("\n=== Stage 3: E2E Browser Tests ===")
     stage_start = time.monotonic()
+    machine_busy_at_start = read_machine_busy_seconds()
     failures = _run_tasks_concurrently(
         {
             "E2E Browser Tests": run_e2e_tests,
@@ -1982,7 +2032,10 @@ def run_stage_3_e2e():
         )
         print("    Digests above; full runner logs in .build-reports/")
         sys.exit(1)
-    print(f"\n  ✓ Stage 3 completed cleanly! ({stage_elapsed:.1f}s)")
+    print(
+        f"\n  ✓ Stage 3 completed cleanly! ({stage_elapsed:.1f}s)"
+        f"{_stage_machine_load(machine_busy_at_start, stage_elapsed)}"
+    )
     return stage_elapsed
 
 
@@ -1992,9 +2045,13 @@ def run_stage_4_zap():
     with e2e locally."""
     print("\n=== Stage 4: OWASP ZAP Security Scan ===")
     stage_start = time.monotonic()
+    machine_busy_at_start = read_machine_busy_seconds()
     _timed_task("OWASP ZAP Scan", run_owasp_zap_scan)
     stage_elapsed = time.monotonic() - stage_start
-    print(f"\n  ✓ Stage 4 completed cleanly! ({stage_elapsed:.1f}s)")
+    print(
+        f"\n  ✓ Stage 4 completed cleanly! ({stage_elapsed:.1f}s)"
+        f"{_stage_machine_load(machine_busy_at_start, stage_elapsed)}"
+    )
     return stage_elapsed
 
 

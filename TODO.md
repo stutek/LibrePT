@@ -2652,3 +2652,36 @@ f. **Shared exercise binding across participants** (event 12) — §8.1.
 what already runs), then D, then A. Chapter B is blocked on §8.1. Written this way each chapter ships
 as a demo the moment its feature does, and no chapter waits on the recurrence model except the two
 events that genuinely need it.
+
+---
+
+## 35. The browser tiers are CPU-SATURATED, and the pipeline was under-reporting it
+
+**Measured 2026-08-19**, chasing "where does the medium tier lose its time?". The premise was wrong,
+and so was the instrument.
+
+**The per-task CPU figure misses most of the work.** It comes from `wait4` on the runner's own child,
+and Playwright's Chromium processes are not reaped through that tree. For one medium file at four
+workers: 19.6s reported, 51.4s of machine CPU actually burned. Across the whole tier the report said
+5.0 cores while the machine was doing **14.4 of 16**. Every "efficiency" figure derived from the task
+CPU was therefore an artifact — including the 62% that started this. Each stage now also prints what
+the machine averaged, read from `/proc/stat`, which has no such blind spot.
+
+**The worker count does nothing.** Wall time for `tests/medium` at 4, 6 and 8 workers: 47.3s, 45.7s,
+48.0s — all within noise, machine pinned near 14 cores throughout. The box saturates well before the
+worker count becomes the constraint, which is the same wall the 2026-08-08 measurement hit from the
+other side (12 workers bought 5% over 8).
+
+**So the only lever left is work per test, and it lands 1:1 in wall time** now that saturation is
+established. Two candidates, both trades:
+
+- **The page load is ~0.32s of every medium test** (route + goto + boot + splash removal, measured
+  directly) — about 60s of the tier. Several files already share one load across their tests via a
+  fixture; five more load per test from a single stub constant and could do the same, at the cost of
+  isolation between tests in a file.
+- **`tests/e2e/` holds 144 fixed sleeps totalling ~70s** (`wait_for_timeout`), against 26 totalling
+  ~10s in `tests/medium/`. Each is a duration where an expectation would do — the walkthrough test
+  fixed on 2026-08-19 went from 2.2s of sleeping to ~0.1s of waiting for the thing it actually
+  needed. This is the larger and safer of the two.
+
+**Not worth doing:** `--dist=worksteal` (46.9s vs 47.4s, noise), and raising workers (see above).
