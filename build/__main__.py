@@ -7,7 +7,9 @@ import time
 from . import (
     PIPELINE_STAGES,
     check_environment,
+    format_elapsed,
     print_run_header,
+    record_run_seconds,
     run_lint,
     run_tests,
     run_build,
@@ -23,9 +25,13 @@ def run_all_stages():
     return [runner() for _, runner, _ in PIPELINE_STAGES]
 
 
-def _fmt_elapsed(seconds):
-    minutes, secs = divmod(round(seconds), 60)
-    return f"{minutes}m{secs:02d}s" if minutes else f"{secs}s"
+def _finish(label, verdict, total_seconds, stage_seconds):
+    """The closing report, and the measurement the NEXT run's header estimates from — recorded here
+    so a command cannot print a summary without leaving the evidence behind (build.record_run_seconds).
+    Only a clean run is recorded: a gate that failed in Stage 1 says nothing about how long a whole
+    one takes."""
+    record_run_seconds(label, total_seconds)
+    _print_summary(verdict, total_seconds, stage_seconds)
 
 
 def _print_summary(verdict, total_seconds, stage_seconds):
@@ -43,7 +49,7 @@ def _print_summary(verdict, total_seconds, stage_seconds):
     """
     print("\n=== Report ===\n")
     print(f"  ✓ {verdict}")
-    print(f"    TOTAL WALL TIME: {_fmt_elapsed(total_seconds)}")
+    print(f"    TOTAL WALL TIME: {format_elapsed(total_seconds)}")
     if stage_seconds:
         breakdown = "  ".join(
             f"stage {n} {seconds:.0f}s" for n, seconds in enumerate(stage_seconds, 1)
@@ -54,20 +60,22 @@ def _print_summary(verdict, total_seconds, stage_seconds):
 if __name__ == "__main__":
     start = time.monotonic()
     arg = sys.argv[1] if len(sys.argv) > 1 else ""
+    label = f"build {arg}".strip()
     # Before the environment check, not after: the header is what tells anyone watching that the run
     # started and when, and `check_environment` can itself spend a minute installing requirements.
-    print_run_header(f"build {arg}".strip())
+    print_run_header(label)
     check_environment()
 
     if arg == "lint":
         run_lint()
-        _print_summary("LINT PASSED", time.monotonic() - start, [])
+        _finish(label, "LINT PASSED", time.monotonic() - start, [])
     elif arg == "test":
         run_tests()
-        _print_summary("TESTS PASSED", time.monotonic() - start, [])
+        _finish(label, "TESTS PASSED", time.monotonic() - start, [])
     elif arg == "check":
         stages = run_all_stages()
-        _print_summary(
+        _finish(
+            label,
             f"build check PASSED — all {len(stages)} stages green",
             time.monotonic() - start,
             stages,
@@ -75,7 +83,8 @@ if __name__ == "__main__":
     else:
         stages = run_all_stages()
         run_build()
-        _print_summary(
+        _finish(
+            label,
             f"build PASSED — all {len(stages)} stages green, dist/ ready to deploy",
             time.monotonic() - start,
             stages,

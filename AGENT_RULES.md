@@ -94,9 +94,13 @@ Every response and tool action must drive measurable, continuous progress toward
      leaves the user unable to tell a normal run from a hung one — they end up asking "done yet?",
      which is the agent's failure, not theirs. "~5 minutes" still makes them do the arithmetic and
      then remember when they started reading; **"started 16:59, expect done by ~17:04"** does not.
-     So: run `date` when you kick a long task off, and quote both the duration and the clock time
-     it should land by. Applies to anything long enough to wait on — the gate, a full e2e run, a
-     container build, a scan — not only `build check`. Per-stage budget the run is measured against
+     So: quote both the duration and the clock time it should land by. Applies to anything long
+     enough to wait on — the gate, a full e2e run, a container build, a scan — not only
+     `build check`. **For a `build` command the run says it itself, and that line is the one to
+     quote** (`build/__init__.py`'s `print_run_header`): it opens with what is running in words,
+     how long the LAST run of that same command took on this machine, and the clock time this one
+     should finish by — a measurement rather than a budget written into the source, so it cannot
+     drift, and no promise at all on a first run. For anything else, read `date` yourself. Per-stage budget the run is measured against
      (typical on this 16-core dev box, from `_timed_task`'s own output):
 
      | Stage | Typical | Investigate past |
@@ -131,16 +135,16 @@ Every response and tool action must drive measurable, continuous progress toward
      machine that slept mid-run — a suspend drops open sockets, so a network-dependent step like
      `pip-audit` fails with a connection error that reads like a finding but is not one.
 
-     **The run states this itself, on its first line** (`build/__init__.py`'s `print_run_header`,
-     wanted 2026-08-19): every entry point prints label, clock time, cores, browser workers, load
-     average and free memory before it starts working. Quote that line's time rather than a
-     separately-read clock, and read its load figure before blaming a slow stage on the change —
-     the same numbers taken AFTERWARDS measure the pipeline's own exhaust, not the machine it began on.
+     **The run states its own environment too, on the second header line** (wanted 2026-08-19):
+     cores, browser workers, free and total memory, and the load average with the per-core division
+     already done — `quiet`, `busy` or `OVERSUBSCRIBED`. Read it before blaming a slow stage on the
+     change: the same numbers taken AFTERWARDS measure the pipeline's own exhaust, not the machine
+     it began on, and the budgets in the table above assume a quiet box.
 
      If a stage blows past its "investigate" column, say so and diagnose — do not keep reporting
-     "still running" indefinitely. Check the header's load figure first (this box has 16 cores, so a
-     1-minute load average near or above that means the machine is oversubscribed and the run is
-     being starved rather than stuck), then the stage's own log under `.build-reports/`.
+     "still running" indefinitely. Check the header's load verdict first (an oversubscribed machine
+     is starving the run rather than the run being stuck), then the stage's own log under
+     `.build-reports/`.
    - **Squeaky clean, always — zero warnings, not just zero failures.** The bar is a *clean* build, not a *green-enough* one. Every gate stage — lint, format, unit, e2e, dependency audit, dynamic security, **and the OWASP ZAP scan** — must report **no warnings and no findings**. For ZAP specifically that means `WARN-NEW: 0` **and** `FAIL-NEW: 0`, not merely no FAILs. A warning is either **fixed** at its source or **explicitly suppressed with a written justification** — never left to print and pass.
    - **A suppression is only ever a statement that there is no issue, never a way to defer one.** A gate suppression is legitimate in exactly one case: the finding is a false positive or genuinely does not apply to this architecture (e.g. a ZAP `-c` ignore for a CSRF check on an app with no server-side state-changing form). It is never legitimate as a way to park a *real* finding — a complexity violation, a genuine lint issue — for later. If the gate is right that something is wrong, fix it in the same change; do not add it to an allowlist, `# noqa`, or ignore file "for now." **No pipeline gate may carry a mechanism for allowlisting real, unfixed debt** (e.g. `agent_tools/complexity.py`'s old `PRE_EXISTING_ALLOWLIST`, or a bare `# noqa: C901` with no non-applicability justification) — every function a gate flags gets fixed in the change that touches the gate, full stop. Each justified suppression must also be periodically re-verified against the current architecture, not assumed valid forever — a false-positive rationale can stop being true as the app changes (e.g. adding a server-side form would retire the CSRF ignore).
    - **Audit the skips, not just the result — a suppression list is the one place a gate lies to you quietly.** `WARN-NEW: 0` counts only what the ignore file does not already silence, so a clean ZAP run says nothing whatsoever about the rules in `deploy/zap/zap-baseline.conf`. Those need auditing on their own schedule, and the rules are:

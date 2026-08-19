@@ -33,9 +33,29 @@ SUSPEND_DRIFT_SECONDS = 10.0
 
 
 # What the run is about to compete with, sampled once before any work starts.
-# `load` is the three getloadavg figures and `available_gb` the memory a process could still take;
-# either is None on a platform that will not say, and neither is ever a reason to fail a build.
-HostSnapshot = namedtuple("HostSnapshot", "cores workers load available_gb")
+# `load`, `available_gb` and `total_gb` are None on a platform that will not say, and none of them is
+# ever a reason to fail a build.
+HostSnapshot = namedtuple("HostSnapshot", "cores workers load available_gb total_gb")
+
+# What each entry point is, in words. `build check` means nothing to a reader who has not memorised
+# the four sub-commands, and the header's whole job is to be readable at a glance while a terminal
+# sits still for minutes.
+RUN_PHRASES = {
+    "build": "the full build (gate, then bundle src/ into dist/)",
+    "build check": "the full pipeline gate",
+    "build lint": "lint and format only",
+    "build test": "the test suites only",
+}
+
+# Where the last run's wall time is remembered, so the next one can promise a finish time. Under
+# `.build-reports/` with the stage logs: it is a measurement of this machine, not a fact about the
+# repository, and it is gitignored for the same reason.
+RUN_HISTORY_PATH = os.path.join(REPORT_DIR, "last-run.json")
+
+# A 1-minute load average per core, above which the box is doing more than it has cores for and the
+# stage budgets in AGENT_RULES §2.A.3 stop applying. Below the lower figure there is nothing to say.
+LOAD_BUSY_PER_CORE = 0.7
+LOAD_OVERSUBSCRIBED_PER_CORE = 1.0
 
 
 def _load_average():
@@ -46,58 +66,126 @@ def _load_average():
         return None
 
 
-def _available_memory_gb():
-    """MemAvailable, in GiB — what a new process could actually get, which is the number that
-    matters here; MemFree excludes the page cache the kernel would hand back and reads alarmingly
-    low on a healthy machine. Linux only, and None everywhere else rather than a guess."""
+def _memory_gb():
+    """(available, total) in GiB, from MemAvailable rather than MemFree: what a new process could
+    actually get is the number that matters here, while MemFree excludes the page cache the kernel
+    would hand straight back and reads alarmingly low on a healthy machine. Linux only, and
+    (None, None) everywhere else rather than a guess."""
+    fields = {}
     try:
         with open("/proc/meminfo", encoding="utf-8") as meminfo:
             for line in meminfo:
-                if line.startswith("MemAvailable:"):
-                    return int(line.split()[1]) / (1024 * 1024)
+                name, _, rest = line.partition(":")
+                if name in ("MemAvailable", "MemTotal"):
+                    fields[name] = int(rest.split()[0]) / (1024 * 1024)
     except (OSError, ValueError, IndexError):
-        return None
-    return None
+        return (None, None)
+    return (fields.get("MemAvailable"), fields.get("MemTotal"))
 
 
 def host_snapshot():
     """The host as it stands right now. Never raises: it is printed by every entry point, on every
     platform CI runs, and a status line is not worth a failed build."""
-    cores = os.cpu_count() or 2
+    available_gb, total_gb = _memory_gb()
     return HostSnapshot(
-        cores=cores,
+        cores=os.cpu_count() or 2,
         workers=_playwright_worker_count(),
         load=_load_average(),
-        available_gb=_available_memory_gb(),
+        available_gb=available_gb,
+        total_gb=total_gb,
     )
 
 
-def format_run_header(label, when, snapshot):
-    """The one line printed before a run starts (wanted 2026-08-19).
+def record_run_seconds(label, seconds):
+    """Remembers how long `label` took, for the next run's estimate.
 
-    It answers the two questions asked AFTER a slow run, at the only moment they can be answered
-    honestly — the start. "When did this begin?" is what AGENT_RULES §2.A.3 makes the agent quote as
-    a wall-clock time, and "was the box busy?" decides whether a stage that blew past its budget is
-    a regression or a machine that was oversubscribed. Sampling the load average afterwards reads
-    the pipeline's own exhaust (see `_playwright_worker_count` for where that misreading already
-    cost three minutes), so it is taken here instead.
+    Measured rather than declared: a typical-duration constant in the source is correct on the day
+    it is written and drifts silently afterwards — the failure agent_tools/constant_copies.py exists
+    for — and it would be one number for machines that differ by an order of magnitude. Failures to
+    write are swallowed: the estimate is a courtesy, and a read-only workspace must not turn it into
+    a red build.
+    """
+    history = _run_history()
+    history[label] = round(seconds, 1)
+    try:
+        os.makedirs(REPORT_DIR, exist_ok=True)
+        with open(RUN_HISTORY_PATH, "w", encoding="utf-8") as handle:
+            json.dump(history, handle)
+    except OSError:
+        pass
+
+
+def _run_history():
+    try:
+        with open(RUN_HISTORY_PATH, encoding="utf-8") as handle:
+            history = json.load(handle)
+    except (OSError, ValueError):
+        return {}
+    return history if isinstance(history, dict) else {}
+
+
+def read_last_run_seconds(label):
+    """How long `label` took last time on this machine, or None if it has never finished here."""
+    seconds = _run_history().get(label)
+    return float(seconds) if isinstance(seconds, (int, float)) else None
+
+
+def format_elapsed(seconds):
+    minutes, secs = divmod(round(seconds), 60)
+    return f"{minutes}m{secs:02d}s" if minutes else f"{secs}s"
+
+
+def _load_verdict(load, cores):
+    """The division AGENT_RULES §2.A.3 asks the reader to do first when a stage overruns. Doing it
+    here means nobody has to know how many cores this particular box has."""
+    per_core = load[0] / max(1, cores)
+    if per_core >= LOAD_OVERSUBSCRIBED_PER_CORE:
+        return f"{per_core:.2f}/core, OVERSUBSCRIBED — expect stages past their budgets"
+    if per_core >= LOAD_BUSY_PER_CORE:
+        return f"{per_core:.2f}/core, busy"
+    return f"{per_core:.2f}/core, quiet"
+
+
+def format_run_header(label, when, snapshot, previous_seconds=None):
+    """The two lines printed before a run starts (wanted 2026-08-19).
+
+    They answer, at the only moment either can be answered honestly, the two questions asked AFTER a
+    slow run. "When will this be done?" is what §2.A.3 makes the agent quote as a wall-clock time,
+    and it comes from the last run of this same command on this same machine — no estimate at all on
+    the first run, because a made-up number is furthest out exactly when nobody can check it. "Was
+    the box busy?" decides whether a stage past its budget is a regression or an oversubscribed
+    machine; sampled afterwards the load average reads the pipeline's own exhaust (see
+    `_playwright_worker_count` for where that misreading already cost three minutes).
 
     Browser workers are printed beside the core count because they, not the cores, are what explains
     a slow Stage 2 or 3 — and the two differ by design.
     """
-    load = (
-        "load n/a"
-        if snapshot.load is None
-        else "load " + " ".join(f"{value:.2f}" for value in snapshot.load)
-    )
+    phrase = RUN_PHRASES.get(label, label)
+    if previous_seconds:
+        eta = when.timestamp() + previous_seconds
+        expectation = (
+            f"last run took {format_elapsed(previous_seconds)}, "
+            f"expect done by ~{datetime.fromtimestamp(eta).strftime('%H:%M')}"
+        )
+    else:
+        expectation = "first run on this machine, so no estimate yet"
+
     memory = (
-        "RAM free n/a"
-        if snapshot.available_gb is None
-        else f"{snapshot.available_gb:.1f} GiB RAM free"
+        "n/a"
+        if snapshot.available_gb is None or snapshot.total_gb is None
+        else f"{snapshot.available_gb:.1f} of {snapshot.total_gb:.1f} GiB free"
+    )
+    load = (
+        "n/a"
+        if snapshot.load is None
+        else " ".join(f"{value:.2f}" for value in snapshot.load)
+        + f" ({_load_verdict(snapshot.load, snapshot.cores)})"
     )
     return (
-        f">>> {label} · {when} · {snapshot.cores} cores "
-        f"({snapshot.workers} browser workers) · {load} · {memory}"
+        f">>> Running {phrase} ({label}) — {expectation}\n"
+        f"    Environment status at {when.strftime('%H:%M:%S')} : "
+        f"CPU {snapshot.cores} cores ({snapshot.workers} browser workers) - "
+        f"MEM {memory} - Load: {load}"
     )
 
 
@@ -105,7 +193,7 @@ def print_run_header(label):
     """Prints the header for `label`, reading the clock and the host at the moment of the call."""
     print(
         format_run_header(
-            label, datetime.now().strftime("%Y-%m-%d %H:%M:%S"), host_snapshot()
+            label, datetime.now(), host_snapshot(), read_last_run_seconds(label)
         )
     )
 

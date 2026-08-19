@@ -6,7 +6,8 @@
 # under Stage 4's own timing, so an unlabelled number reads as that stage's), and the per-stage
 # breakdown the total is the sum of.
 
-from build.__main__ import _fmt_elapsed, _print_summary
+from build import format_elapsed
+from build.__main__ import _print_summary
 
 
 def test_report_banner_precedes_the_verdict(capsys):
@@ -41,7 +42,9 @@ def test_lint_and_test_verdicts_omit_the_stage_breakdown(capsys):
 
 
 def test_elapsed_formatting_spans_the_minute_boundary():
-    assert _fmt_elapsed(3.2) == "3s"
-    assert _fmt_elapsed(59.6) == "1m00s"  # rounds up ACROSS the boundary, not to "60s"
-    assert _fmt_elapsed(240.0) == "4m00s"
-    assert _fmt_elapsed(154.48) == "2m34s"
+    assert format_elapsed(3.2) == "3s"
+    assert (
+        format_elapsed(59.6) == "1m00s"
+    )  # rounds up ACROSS the boundary, not to "60s"
+    assert format_elapsed(240.0) == "4m00s"
+    assert format_elapsed(154.48) == "2m34s"
