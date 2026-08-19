@@ -173,6 +173,19 @@ Every response and tool action must drive measurable, continuous progress toward
    - **Footer**: `Co-Authored-By: <the agent's own model name> <noreply@anthropic.com>` (or the equivalent for a non-Claude agent) — name the model actually running, not a fixed one.
    - **Never put the body in a CI `run-name`** or any other title field. GitHub Actions expressions cannot split a string, so `head_commit.message` interpolates the entire message; rely on GitHub's default run title instead.
 
+8. **Stage from `git status`, never from the paths you remember touching.** Read
+   `git status --short` immediately before `git add`, and stage every listed file belonging to the
+   change. Assembling `git add` from directories you believe you edited leaves HEAD broken while your
+   own tree passes: on 2026-08-19 a walkthrough fix was committed without `src/appBoot.js`, so the
+   commit carried a test asserting behaviour the commit could not perform, and the gate had been
+   green only because it ran against the WORKING TREE. A gate run certifies the tree it ran on, and
+   that is the commit only if nothing was left behind. When splitting a change into several commits,
+   re-read `git status` between them — the second commit is the one that quietly inherits the
+   forgotten file.
+
+   *(Appended here rather than placed beside the other commit rules, because §2.A.3 alone is cited
+   38 times across `src/`, `tests/` and the docs — see §7.5 on why a rule's number is an identifier.)*
+
 ### B. Evaluate Changes, Call Out Gaps & Propose Opportunities
 1. **Evaluate User Changes**: Explicitly evaluate user modifications and input, highlighting how they refine the LibrePT domain model or improve real-world gym ergonomics.
 2. **Call Out Gaps & Edge Cases**: Actively identify real-world training friction (e.g., basement gym offline states, sweaty hands, quick equipment pivots, group session distractions).
@@ -212,6 +225,13 @@ All specifications, architectural documentation, and use cases in this repositor
 1. **Mandatory YAML Frontmatter**: Every Markdown file MUST begin with YAML frontmatter containing at minimum the `type` field (`overview`, `guidelines`, `use_case`, `index`), along with `title`, `description`, `status`, and `tags`.
 2. **Directory Indexing (`INDEX.md`)**: Every directory containing knowledge files MUST maintain an `INDEX.md` catalog table listing its files, their `type`, and clickable Markdown links.
 3. **Graph Interconnectivity**: Use explicit Markdown links (`[label](path/to/file)`) to connect related concepts across files so AI agents can traverse the repository knowledge graph reliably. Relative links must be used to avoid local machine dependencies.
+4. **Navigate BY the graph — that is what it is for.** To find the code behind a report, read
+   [docs/SRC_MODULES.md](docs/SRC_MODULES.md) (one line per runtime module) and the `§` entry in
+   [TODO.md](TODO.md) for the feature, which usually links the files already. Grepping `src/` for a
+   concept instead — "ahead", "backup", "menu" — costs several file reads to reach what the catalog
+   states in a sentence, and throws away the rationale that sentence carries. Raised 2026-08-18:
+   *"why do you need to search for ahead counters and similar? that is exactly why we have okf"*.
+   Grep after the graph, and grep for a symbol rather than for an idea.
 
 ---
 
@@ -346,6 +366,18 @@ parallel without collisions, and make the directory tree itself act as documenta
     layout, a geometry assertion (§25) — build first and **say that is why**, rather than leaving the
     order unexplained.
 
+11. **A side effect added at a shared seam must be scoped to the event that motivated it.** Putting
+   behaviour where every caller passes — a router's `switchView`, the store's save listener, a render
+   entry point — is usually right: it makes the promise true for callers nobody has written yet
+   (§5.3). Doing it UNCONDITIONALLY is the trap. Collapsing the messages drawer on every `switchView`
+   call fixed a menu navigation that looked like a dead button, and broke the drawer entirely:
+   expanding it settles the timeline, which rewrites the URL, which re-enters the SAME route — so the
+   drawer was collapsed 3ms after it opened, and reported the next day as a different bug. Before
+   adding one, enumerate what else calls that seam, **including re-entry with identical arguments**,
+   and condition the effect on the real event. Then test the seam's OTHER caller: the regression test
+   here had to click the real handle, because reaching past it to the toggle function skipped the bug
+   — which is why the component tier never saw it.
+
 ---
 
 ## 6. Agent Tooling: Build the Tool, Don't Re-Improvise the Script
@@ -413,3 +445,53 @@ nothing behind for the next agent. When a check will be needed again, it belongs
    `pip install`, so anything they reach must import with the stdlib alone (a `requests` import
    added to `ensure_zap_addons` passed every local run and would have failed the deploy). When a
    change touches a function CI calls, check *which* job calls it and *what that job installs*.
+
+---
+
+## 7. Learning: a lesson lands in the repository, not in an agent's head
+
+Corrections are the most expensive thing the maintainer produces. A correction that has to be given
+twice was not captured the first time, and the cost of that is paid in their time, not the agent's.
+
+1. **Every correction is a learning event, captured in the SAME change.** So is a repeated mistake, a
+   *"why are you doing X?"* question, and any expressed dissatisfaction. Not "noted for next time" —
+   written down before the work continues, because the next session is a different context window.
+
+2. **Where it goes is decided by one question: who needs this next?**
+
+   | The lesson is about… | It belongs in… |
+   | :--- | :--- |
+   | how any agent must work in this repository | **this file** |
+   | why one piece of code is the way it is | a comment **at that code** |
+   | work still to do, or a decision taken | [TODO.md](TODO.md), dated, naming who decided |
+   | what shipped | [CHANGELOG.md](CHANGELOG.md) |
+   | a behaviour that must not regress | **a test**, in the tier [§5.2](AGENT_RULES.md) names |
+   | the maintainer's own context and preferences, which are not project rules | the agent's private memory |
+
+3. **A rule governing work here may NOT live only in an agent's private memory.** That store is
+   unreadable by the maintainer, unreviewable, uncommitted, and different for every agent — which is
+   the definition of drift, and §3 forbids it for documentation for exactly the same reason. Private
+   memory may hold a pointer to a rule; it may not be the rule's home. When the maintainer says
+   "record your learnings", the artifact they can read is the point.
+
+4. **Detect dissatisfaction proactively, and ask rather than guess.** The signals are cheap to
+   recognise and easy to talk past: *"why are you…"*, *"no"*, *"I don't like…"*, an instruction
+   repeated, a question about something already answered, a correction to something small. On any of
+   them: stop the current line of work, state plainly what you believe the problem is, and **ask if
+   the answer would change what you write** — in chat prose, never an interactive modal
+   ([§2.A.6](AGENT_RULES.md)). Then write the rule and show it.
+
+5. **Edit the rules; do not only append to them.** A new lesson usually belongs *inside* an existing
+   rule, sharpening it. A file that only grows stops being read, at which point every rule in it is
+   decorative — the same failure §3 describes for duplicated documentation, applied to this file.
+
+   **But never RENUMBER to make room.** A rule's number is an identifier: `§5.9` is cited from `src/`,
+   `tests/` and `TODO.md`, and inserting a rule above it silently repoints every one of those to a
+   different rule. `doclinks` cannot catch that — it checks a section EXISTS, not that it still means
+   what the citation meant. So a genuinely new rule is appended at the end of its section even when
+   it would read better in the middle; only its content is consolidated.
+
+6. **Write the rule and the evidence, never the apology.** "Stage from `git status`, because a
+   forgotten file left HEAD failing while the working tree passed" is a rule. "I'm sorry I forgot to
+   stage a file" is not; it teaches nobody anything and it is not what the next agent needs to read.
+
