@@ -26,16 +26,15 @@
   box-shadow: 0 0 0 3px var(--primary, #6366f1), 0 0 0 9px
     color-mix(in srgb, var(--primary, #6366f1) 28%, transparent);
   opacity: 0;
-  transition: opacity 0.2s ease, transform 0.28s ease, width 0.28s ease, height 0.28s ease;
+  /* Only the fade. The ring does not travel between controls (decided 2026-08-19): across a step
+     that also changes view, gliding from one control to another is motion between two things that
+     never shared a screen — and the HAND already carries movement, which is the familiar version of
+     it. Without the position/size transitions, the ring simply is where the control is. */
+  transition: opacity 0.2s ease;
 }
 
 .walkthrough-spotlight.is-visible {
   opacity: 1;
-}
-/* The frame it is placed on. Position and size arrive instantly; only the fade is kept, so the ring
-   appears ON its control rather than travelling to it from wherever the last one was. */
-.walkthrough-spotlight.is-arriving {
-  transition: opacity 0.2s ease;
 }
 
 /* A breathing GLOW around the ring (TODO §28.12), asked for directly: the static ring said "this
@@ -161,8 +160,12 @@
 }
 
 /* Someone who asked for less motion still gets the guide: only the travel of the ring stops. */
+/* Reduced motion used to strip the ring's travel here. The ring no longer travels for anybody
+   (2026-08-19), so the only motion left on it is the glow, which its own no-preference block adds
+   and this therefore has nothing to undo. Kept as a marker rather than deleted silently: the next
+   person adding motion to the spotlight should find the place where motion is opted out of. */
 @media (prefers-reduced-motion: reduce) {
   .walkthrough-spotlight {
-    transition: opacity 0.2s ease;
+    animation: none;
   }
 }

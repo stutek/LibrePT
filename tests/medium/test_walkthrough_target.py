@@ -229,3 +229,39 @@ def test_the_waves_take_the_theme_colour(page, local_server):
     assert colors["border"] == colors["primary"], (
         f"ring is {colors['border']}, theme accent is {colors['primary']}"
     )
+
+
+BROKEN_TOUR_STUB = """
+import { startGuidedWalkthrough } from './modules/demo/walkthroughOverlay.js';
+window.__walkthrough = startGuidedWalkthrough({
+  pollMs: 60,
+  tour: {
+    id: 'broken',
+    steps: [
+      {
+        id: 'nowhere',
+        target: '#this-control-does-not-exist',
+        caption: 'walkthrough_progress',
+        expect: { selector: '#nor-does-this', visible: true },
+      },
+    ],
+  },
+});
+"""
+
+
+def test_a_failed_show_me_does_not_leave_the_panel_stuck_busy(page, local_server):
+    """The panel disables Next and Show me while a demonstration is in flight, and re-enables them
+    when it finishes. If a demonstration could end without finishing — a throw on the way — both
+    would stay greyed with nothing on screen explaining why, which is indistinguishable from a dead
+    guide. Driven with a step pointing at a control that does not exist, the closest reachable
+    version of "the demonstration did not complete".
+    """
+    load_with_stub(page, local_server, BROKEN_TOUR_STUB)
+    page.wait_for_selector("#walkthrough-overlay")
+
+    page.locator("#walkthrough-show").click()
+    page.wait_for_timeout(1500)
+
+    assert page.locator(".walkthrough-problem").is_visible(), "a failure has to say so"
+    assert page.locator("#walkthrough-show").is_enabled(), "the offer must come back"

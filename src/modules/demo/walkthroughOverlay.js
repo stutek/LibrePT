@@ -175,23 +175,17 @@ export function startGuidedWalkthrough({
       el.spotlight.classList.remove("is-visible");
       return;
     }
-    // Placed WITHOUT the travel transition when it is not already on screen (asked 2026-08-19: "why
-    // does it need to fly in with delay?"). The transition exists so moving between steps reads as
-    // one ring travelling rather than two rings blinking — information. Its first appearance sliding
-    // in from the corner is not information, it is a wait before the guide begins.
-    const appearing = !el.spotlight.classList.contains("is-visible");
-    el.spotlight.classList.toggle("is-arriving", appearing);
+    // The ring never travels — it is placed (decided 2026-08-19). Travel was kept at first because a
+    // ring gliding from one control to the next reads as one object rather than two blinks; that
+    // argument dies the moment a step change is also a VIEW change, which in this script it is:
+    // gliding across a board that has just been replaced by a clipboard is motion between two things
+    // that never shared a screen. The HAND is the movement, and a finger travelling to what it is
+    // about to tap is the familiar version of that idea. The ring's job is "this one, here".
     el.spotlight.style.setProperty("--spot-x", `${Math.round(box.left)}px`);
     el.spotlight.style.setProperty("--spot-y", `${Math.round(box.top)}px`);
     el.spotlight.style.setProperty("--spot-w", `${Math.round(box.width)}px`);
     el.spotlight.style.setProperty("--spot-h", `${Math.round(box.height)}px`);
     el.spotlight.classList.add("is-visible");
-    if (appearing) {
-      // Read a layout property so the placement above lands while transitions are still off; without
-      // it the class removal is coalesced into the same frame and the ring flies in anyway.
-      void el.spotlight.offsetWidth;
-      el.spotlight.classList.remove("is-arriving");
-    }
   }
 
   /** Move the panel to the top of the screen if it would cover the step's control, and back down
@@ -293,8 +287,19 @@ export function startGuidedWalkthrough({
     const alreadyDone = isWalkthroughStepDone(state, step.id);
     // One path, whether or not the step has been done before: performStep is idempotent, so a step
     // walked back to is demonstrated again without its action being fired twice.
-    const outcome = await performStep(step, { doc, hand });
-    showing = false;
+    //
+    // `showing` is cleared in a finally, not after the await. It disables both Next and Show me
+    // while a demonstration is in flight, so a throw on the way through — a control detached
+    // mid-scroll, an app error under the tap — would otherwise leave the whole panel greyed out with
+    // nothing on screen to say why, which is indistinguishable from a guide that has died.
+    let outcome;
+    try {
+      outcome = await performStep(step, { doc, hand });
+    } catch (error) {
+      outcome = { id: step.id, ok: false, reason: `demonstration threw: ${error?.message}` };
+    } finally {
+      showing = false;
+    }
     // Re-showing a step the trainer has already done is a replay, not progress: it must not carry
     // them forward to a step they have not seen.
     if (alreadyDone) {
