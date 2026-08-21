@@ -42,19 +42,36 @@ export function renderExercisesViewShell() {
   );
 }
 
-export function renderExercisesList({ state, t, filterQuery = "", categoryFilter = "All" }) {
+// The active filter has no copy in state — the search box and the chip ARE it. A caller that
+// re-renders for its own reason (an exercise added, the language switched, a backup restored)
+// passes no filter, and must get the list the visible controls describe rather than the whole
+// catalog under a chip that still says Chest.
+function visibleFilter() {
+  const search = document.getElementById("search-exercises");
+  const activeChip = document.querySelector(".filter-chips .chip.active");
+  return {
+    filterQuery: search ? search.value : "",
+    categoryFilter: activeChip ? activeChip.getAttribute("data-filter") : "All",
+  };
+}
+
+export function renderExercisesList({ state, t, filterQuery, categoryFilter }) {
   const container = document.getElementById("exercises-list");
   if (!container) return;
   container.innerHTML = "";
 
+  const visible = visibleFilter();
+  const query = filterQuery ?? visible.filterQuery;
+  const category = categoryFilter ?? visible.categoryFilter;
+
   let filtered = state.exercises;
 
-  if (categoryFilter !== "All") {
-    filtered = filtered.filter((e) => e.category === categoryFilter);
+  if (category !== "All") {
+    filtered = filtered.filter((e) => e.category === category);
   }
 
-  if (filterQuery) {
-    const q = filterQuery.toLowerCase();
+  if (query) {
+    const q = query.toLowerCase();
     filtered = filtered.filter(
       (e) =>
         e.name.toLowerCase().includes(q) ||

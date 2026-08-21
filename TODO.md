@@ -51,7 +51,8 @@ trainer's own store) and SMS as the response channel; §19.2's URL-privacy invar
 §12.6's glyph subsetting (prerequisite already built, and §7.2 wants the regular weight it would
 restore), §18.11's retention basis (one paragraph, in the privacy policy — the only bullet left in
 that section), §21's 60s → 30s navigation timeout (the cause it was raised for is fixed), and §25.6's
-medium-tier overflow harness (the sweep already exists).
+medium-tier overflow harness (the sweep already exists). §19.3's exercise-library filter reset is
+done (2026-08-21).
 
 Deprioritised on purpose: §24.5/§24.7 remainders and §24.8's rename (optional by their own text),
 §11/§5.1/§4.1 (large UI churn with no users yet to aim it), §17.2/§17.4 and §18.8–§18.12 (decided on
@@ -1450,9 +1451,10 @@ database is device-local, so a copied id dereferences to nothing elsewhere.
 ### 19.3 Undecided — decide per use case
 - [ ] **Filter and search state.** Enumerated chips (muscle, equipment, category) are a closed,
       non-personal vocabulary and could be path segments; **free-text search must not be**, since a
-      typed client name would land in history, screenshots and shared links. **Separately and needing
-      no URL decision: the exercise library silently resets its chip and search box whenever
-      `renderExercisesList()` is called with no arguments — a real bug, and a cheap fix.**
+      typed client name would land in history, screenshots and shared links. **[x] Separately, needing
+      no URL decision: the exercise library showed the whole catalog under a chip that still said
+      Chest whenever `renderExercisesList()` was called with no arguments — fixed 2026-08-21, see
+      [CHANGELOG](CHANGELOG.md).**
 - [ ] **Transient chrome** — the ☰ menu, the session ⋮ menu, the notification drawer, a drag in
       progress. A reload closes them, which is arguably correct; a URL that reopens a menu is noise in
       history and fights the outside-click handlers. Recorded so the decision is explicit.

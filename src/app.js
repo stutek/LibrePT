@@ -613,7 +613,9 @@ function renderClientsList(filterQuery = "") {
 function renderRoutinesList() {
   routinesViewRender({ state: getState(), t, openWorkoutSetupModal });
 }
-function renderExercisesList(filterQuery = "", categoryFilter = "All") {
+function renderExercisesList(filterQuery, categoryFilter) {
+  // Left undefined on purpose when a caller passes nothing: the view then reads the visible
+  // search box and chip, instead of this wrapper resetting them to "" / "All".
   exercisesViewRender({ state: getState(), t, filterQuery, categoryFilter });
 }
 function renderGlobalHistory() {

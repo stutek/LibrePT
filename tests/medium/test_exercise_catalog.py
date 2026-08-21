@@ -148,3 +148,36 @@ def test_create_cardio_exercise_reveals_metric_and_persists(page, local_server):
     assert saved is not None, "the custom cardio exercise should persist to the store"
     assert saved["modality"] == "cardio"
     assert saved["metric"] == "distance"
+
+
+def test_filter_survives_a_re_render_it_did_not_trigger(page, local_server):
+    """The chip and the search box ARE the filter — no copy of it lives in state, so any re-render
+    with no filter arguments (adding an exercise, switching language, restoring a backup) must read
+    them back. It used to show the whole catalog under a chip that still said Chest."""
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#view-exercises.active")
+
+    page.click(".filter-chips .chip[data-filter='Chest']")
+    page.wait_for_timeout(200)
+    chest_only = page.locator("#view-exercises .exercise-item").count()
+    assert chest_only > 0, (
+        "the seeded catalog should hold chest movements to filter down to"
+    )
+
+    # Creating an exercise re-renders the list through the controller, passing no filter.
+    page.click("#btn-add-exercise")
+    page.wait_for_selector("#dialog-exercise[open]")
+    page.fill("#exercise-name", "Test Rower Sprint")
+    page.select_option("#exercise-category", "Cardio")
+    page.select_option("#exercise-equipment", "Machine")
+    page.select_option("#exercise-pattern", "Conditioning")
+    page.locator("#form-exercise button[type='submit']").click()
+    page.wait_for_timeout(200)
+
+    assert (
+        page.locator(".filter-chips .chip.active").get_attribute("data-filter")
+        == "Chest"
+    )
+    assert page.locator("#view-exercises .exercise-item").count() == chest_only, (
+        "the list must still show what the visible chip says, not the whole catalog"
+    )
