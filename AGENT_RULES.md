@@ -236,6 +236,10 @@ files beat few large ones: less context to load, fewer collisions, a tree that d
    if the reader is holding an internal invariant, a `§`-reference or an earlier decision in their
    head has not been read — it has been re-asked, and the second telling costs more than the plain
    one would have. Name the thing to do or the thing that is true, then the reason.
+   **Never coin a term, least of all in the maintainer's own language.** A word invented for the
+   occasion — a literal translation, a shortened label, a name for a step — reads as jargon they
+   are expected to already know, so the reply costs a round trip instead of saving one. Use the
+   ordinary word, or spell the thing out.
 4. **Answer a question; never record it as a decision.** "Any reason for X?" explores the option
    space: answer, recommend, leave it open. Mark something Decided only when they said so, dated.
 5. **Separate what you measured from what you assume, and scope every count.** Say which numbers
