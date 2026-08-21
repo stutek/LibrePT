@@ -223,6 +223,10 @@ files beat few large ones: less context to load, fewer collisions, a tree that d
 11. **Scope a side effect added at a shared seam to the event that motivated it.** Enumerate what
     else calls that seam, including re-entry with identical arguments, and test the other caller
     through the real control.
+12. **Hide a control with the `.hidden` CLASS, never the `hidden` attribute.** Every `.btn` here sets
+    `display: flex`, which beats the UA stylesheet's `[hidden]` rule, so the button stays on screen
+    and only a test notices. Cost twice: the intake page's send button, and the story's cleanup
+    button.
 
 ---
 
