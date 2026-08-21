@@ -23,7 +23,14 @@
 // markup, so there is no escaping question for build/frontend_audit.py to reason about and no CSP
 // exposure. Every string arrives through `t`.
 //
-// Injected dependencies: `doc` (defaults to `document`) and `t`.
+// **The last card is where the story hands the app over** (TODO §30.2, wanted 2026-08-18): a thank
+// you, and the two ways onward that already exist — keep exploring, or clear the demo data. Both are
+// reused rather than rebuilt: dismissing IS "play around", and the cleanup dialog is the one the
+// demo notice in the feed already opens.
+//
+// Injected dependencies: `doc` (defaults to `document`), `t`, and `onClearDemoData` (optional — the
+// second way onward; the button is left out entirely when no caller offers one, rather than
+// rendering a control that does nothing).
 
 const CARD_ID = "story-card";
 const CONTINUE_ID = "story-card-continue";
@@ -37,7 +44,7 @@ function element(doc, tag, className, id) {
   return node;
 }
 
-function buildCard(doc, t) {
+function buildCard(doc, t, onClearDemoData) {
   const card = element(doc, "div", "story-card", CARD_ID);
   // A live region: the card replaces its own text between beats without focus ever moving, so a
   // screen reader has nothing else to notice the change by.
@@ -55,8 +62,26 @@ function buildCard(doc, t) {
     card.hidden = true;
   });
 
-  card.append(kicker, title, body, button);
-  return { card, kicker, title, body, button };
+  // The second way onward. Hidden until a card asks for it, because it is an offer only the last
+  // beat of the story is entitled to make.
+  // The `.hidden` CLASS, not the `hidden` attribute: every `.btn` in this app sets
+  // `display: flex`, which beats the UA stylesheet's `[hidden]` rule — the same trap that once left
+  // the intake page's send button on screen after it was hidden (TODO §26.7).
+  const cleanup = element(
+    doc,
+    "button",
+    "btn secondary-btn story-card-cleanup hidden",
+    "story-card-cleanup",
+  );
+  cleanup.type = "button";
+  cleanup.textContent = t("story_clear_demo_data");
+  cleanup.addEventListener("click", () => {
+    card.hidden = true;
+    onClearDemoData?.();
+  });
+
+  card.append(kicker, title, body, button, cleanup);
+  return { card, kicker, title, body, button, cleanup };
 }
 
 /** Mounts the narration surface and returns `{ showStep, unmount }`.
@@ -64,11 +89,11 @@ function buildCard(doc, t) {
  * `showStep` is called BEFORE each step is performed, so a narrated step finds its card already on
  * screen and can tap Continue — the player's own hand, on a real control, like every other beat.
  */
-export function mountStoryNarration({ doc = document, t } = {}) {
+export function mountStoryNarration({ doc = document, t, onClearDemoData } = {}) {
   const existing = doc.getElementById(CARD_ID);
   if (existing) existing.remove();
 
-  const { card, kicker, title, body } = buildCard(doc, t);
+  const { card, kicker, title, body, cleanup } = buildCard(doc, t, onClearDemoData);
   const persona = element(doc, "p", "story-persona", PERSONA_ID);
   persona.hidden = true;
   const caption = element(doc, "p", "story-caption", CAPTION_ID);
@@ -90,6 +115,7 @@ export function mountStoryNarration({ doc = document, t } = {}) {
       kicker.textContent = step.narrate.kickerKey ? t(step.narrate.kickerKey) : "";
       title.textContent = t(step.narrate.titleKey);
       body.textContent = t(step.narrate.bodyKey);
+      cleanup.classList.toggle("hidden", !(step.narrate.onward && onClearDemoData));
       card.hidden = false;
       // A caption under a card would be the same beat said twice, in two places.
       caption.hidden = true;

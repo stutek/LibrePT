@@ -235,7 +235,9 @@ export async function bootDemoStory({ shareDemo, shareChapter, hasData, t, onRes
     return results;
   }
 
-  const narration = mountStoryNarration({ t });
+  // The way onward the last card offers (§30.2): the SAME dialog the demo notice in the feed
+  // opens, not a second cleanup path that could drift from it.
+  const narration = mountStoryNarration({ t, onClearDemoData: openDemoCleanupDialog });
   // Flattened to one step list and handed to the SAME player the wedge uses — a chapter is a tour,
   // which is what keeps the engine free of the story (§35.1).
   const steps = story.storyStepsFor(DEMO_STORY, shareChapter);

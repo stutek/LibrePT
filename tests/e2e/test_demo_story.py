@@ -60,6 +60,14 @@ def test_the_story_plays_every_beat_it_declares(page, local_server):
         "focus-exercise",
         "signal-too-easy",
         "next-participant",
+        "back-to-first",
+        "refocus-circuit",
+        "capture-open",
+        "capture-tag",
+        "capture-keep",
+        "capture-submit",
+        "open-session-menu",
+        "plan-editor-shows-the-floor",
         "floor-close",
     ]
 
@@ -93,10 +101,11 @@ def test_the_story_left_the_app_where_it_says_it_did(page, local_server):
     """Independent verification, because the assertions above trust the app's own grading."""
     _play(page, local_server)
 
-    expect(page.locator("#active-session-client-tabs")).to_be_visible()
-    expect(
-        page.locator("#active-session-client-tabs .client-tab-btn:nth-child(2)")
-    ).to_have_class(re.compile(r"\bactive\b"))
+    # It ends where the chapter says it does: the plan being shaped, with what the floor said a few
+    # beats earlier already waiting against this participant. Asserted here rather than trusting the
+    # player's own grading of its last step.
+    expect(page.locator("#client-focus-floor")).to_be_visible()
+    expect(page.locator("#client-focus-floor")).to_contain_text("Joint Pain")
     # The closing card was dismissed by its own step, so the app is left usable rather than behind
     # a card nobody can get past.
     expect(page.locator("#story-card")).to_be_hidden()

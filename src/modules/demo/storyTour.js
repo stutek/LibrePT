@@ -38,13 +38,14 @@ const CARD_DISMISSED = { selector: "#story-card", visible: false };
 const CARD_TARGET = "#story-card-continue";
 
 function narration(id, kind, titleKey, bodyKey, extra = {}) {
+  const { onward, ...step } = extra;
   return {
     id,
     persona: TRAINER,
-    narrate: { kind, titleKey, bodyKey },
+    narrate: { kind, titleKey, bodyKey, onward },
     target: CARD_TARGET,
     expect: CARD_DISMISSED,
-    ...extra,
+    ...step,
   };
 }
 
@@ -63,7 +64,90 @@ const FLOOR_CHAPTER = {
     { ...wedge["focus-exercise"], persona: TRAINER },
     { ...wedge["signal-too-easy"], persona: TRAINER },
     { ...wedge["next-participant"], persona: TRAINER },
-    narration("floor-close", "chapter", "story_chapter_floor", "story_floor_close_body"),
+    {
+      // Back to the first friend, which is also the claim the wedge's own e2e test makes: their
+      // Too Easy is still set. Per-participant state that quietly belongs to whoever is on screen
+      // is the failure a viewer would never notice and a trainer would.
+      id: "back-to-first",
+      persona: TRAINER,
+      target: "#active-session-client-tabs .client-tab-btn:nth-child(1)",
+      caption: "story_step_back_to_first",
+      expect: {
+        selector: "#active-session-client-tabs .client-tab-btn:nth-child(1).active",
+        visible: true,
+      },
+    },
+    {
+      // Switching participants re-renders the deck collapsed, so the card has to come back into
+      // focus before its actions are reachable. Idempotent: if it is already in focus, the player
+      // demonstrates the tap without repeating it.
+      id: "refocus-circuit",
+      persona: TRAINER,
+      target: "#active-exercise-scroll-deck .exercise-deck-card.circuit-card",
+      caption: "story_step_refocus",
+      expect: { selector: "#btn-log-feedback", visible: true },
+    },
+    {
+      // Event 14. What the beat is FOR is the pane four steps down, not the capture — so this is
+      // deliberately short: the trainer is mid-circuit with one hand.
+      id: "capture-open",
+      persona: TRAINER,
+      target: "#btn-log-feedback",
+      caption: "story_step_capture_open",
+      expect: { selector: "#dialog-feedback", visible: true },
+    },
+    {
+      // The tag carries the meaning — the player taps, it never types, which is also how a trainer
+      // uses this with a barbell in the other hand.
+      id: "capture-tag",
+      persona: TRAINER,
+      target: '#form-feedback input[value="Joint Pain / Discomfort"]',
+      caption: "story_step_capture_tag",
+      // No `visible` flag: a checked radio is a fact about the form, and asking whether the input
+      // is on screen would be asserting the chip's styling instead.
+      expect: { selector: '#form-feedback input[value="Joint Pain / Discomfort"]:checked' },
+    },
+    {
+      // §35.3c: this is the beat that makes the note outlive the session. Without it the twinge is
+      // an alert that gets resolved away within the week.
+      id: "capture-keep",
+      persona: TRAINER,
+      target: "#feedback-keep-on-record",
+      caption: "story_step_capture_keep",
+      expect: { selector: "#feedback-keep-on-record:checked" },
+    },
+    {
+      id: "capture-submit",
+      persona: TRAINER,
+      target: "#form-feedback button[type=submit]",
+      caption: "story_step_capture_submit",
+      // Present but not visible: the dialog closes, and a removed element would read as "nothing
+      // matched" (domain/demoTour.js).
+      expect: { selector: "#dialog-feedback", visible: false },
+    },
+    {
+      id: "open-session-menu",
+      persona: TRAINER,
+      target: "#btn-session-menu",
+      caption: "story_step_session_menu",
+      expect: { selector: "#session-menu:not(.hidden)", visible: true },
+    },
+    {
+      // The payoff, and the expectation says so: opening the plan editor shows what the floor
+      // already said about this person. Event 20 lives in chapter D over a longer arc; this is the
+      // same claim inside one session, which is as far as the story can honestly go today.
+      id: "plan-editor-shows-the-floor",
+      persona: TRAINER,
+      target: "#btn-edit-plan",
+      caption: "story_step_plan_editor",
+      expect: { selector: "#client-focus-floor", visible: true },
+    },
+    // The last beat of the story so far, so it is the one that hands the app over (§30.2): thank
+    // you, and the two ways onward that already exist. Dismissing IS "play around" — the app is
+    // left exactly where the story put it, not on a start screen.
+    narration("floor-close", "chapter", "story_thanks_title", "story_floor_close_body", {
+      onward: true,
+    }),
   ],
 };
 

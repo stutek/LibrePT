@@ -43,11 +43,17 @@
   color: var(--text-secondary, #475569);
 }
 
-/* A real touch target, because the hand taps it and a viewer may too (no-hover rule, §7.1). */
-.story-card-continue {
+/* Real touch targets, because the hand taps them and a viewer may too (no-hover rule, §7.1). */
+.story-card-continue,
+.story-card-cleanup {
   min-height: 44px;
   width: 100%;
   justify-content: center;
+}
+/* The second way onward sits under the first, and reads as the quieter of the two: the story's
+   own ending is "keep tapping around", and clearing the demo is the deliberate act. */
+.story-card-cleanup {
+  margin-top: 0.5rem;
 }
 
 /* The PAPER track (§35.1): what happens off-screen, on a printed form — narrated as text on a

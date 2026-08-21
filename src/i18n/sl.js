@@ -378,10 +378,22 @@ export const sl = {
   story_continue: "Naprej",
   story_persona_trainer: "Telefon trenerja",
   story_chapter_floor: "Na parketu",
+  story_thanks_title: "To je bil parket",
+  story_clear_demo_data: "Počisti demo podatke",
+  story_step_back_to_first: "Nazaj k prvemu prijatelju — njegov signal je še vedno tam.",
+  story_step_refocus: "Vrni krog v fokus. Njegova kartica, njegov načrt.",
+  story_step_capture_open:
+    "Sredi kroga omeni koleno. Odpri zapis, ne da bi zapustil sejo — ura teče naprej.",
+  story_step_capture_tag: "Označi. Brez tipkanja: trener ima prosto eno roko.",
+  story_step_capture_keep: "Shrani v kartoteko te osebe, da ostane tudi po nocojšnji seji.",
+  story_step_capture_submit: "Zabeleženo, pri tem udeležencu in pri tej vaji.",
+  story_step_session_menu: "Odpri meni seje.",
+  story_step_plan_editor:
+    "Oblikovanje načrta — in zapis izpred treh minut je že tu, pri pravi osebi.",
   story_floor_open_body:
     "Torek zvečer. Trije prijatelji, en 60-minutni termin, ena skupna podloga. Trener ima polne roke, zato je vsak korak tu en sam dotik.",
   story_floor_close_body:
-    "Signali so zabeleženi, nihče ni ničesar tipkal in ura se ni ustavila. Nocojšnje načrtovanje že ima vse, kar potrebuje.",
+    "Hvala za ogled. Signali so zabeleženi, nihče ni ničesar tipkal, ura se ni ustavila — in načrt že ve za koleno. Kar raziskuj naprej ali počisti demo podatke in začni s svojimi.",
   today: "Danes",
   tomorrow: "Jutri",
   yesterday: "Včeraj",

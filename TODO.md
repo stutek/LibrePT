@@ -2290,6 +2290,13 @@ message feed offers the cleanup dialog, and "play around" is simply dismissing t
 question is WHERE it says this — a final walkthrough step with no control to tap, or a card in the
 feed — and that decides whether the guide can be exited before reading it.
 
+**Answered for the STORY, 2026-08-21, and only for it**: `?demo=story` ends on its own narration
+card, which is a surface the walkthrough does not have. Thank you, then the two ways onward —
+dismissing IS "play around" (the app is left where the story put it, never a start screen), and the
+second button opens the same cleanup dialog the feed's demo notice does. The walkthrough's placement
+is still open, and the story's answer does not settle it: a card that appears between steps is not
+available to a guide whose steps are the trainer's own taps.
+
 ---
 
 ## 31. A support data-wipe link
@@ -2600,8 +2607,18 @@ events that genuinely need it.
 - [x] **35.3c and 35.3d shipped — 2026-08-21**, before the demo beats that show them: the *keep on
       the client's record* tick and the *From the floor* block in the client focus panel. One pane
       for both kinds of note, as 35.3d required.
-- [ ] **Chapter C's remaining events** — 14 and 16 (now buildable), then 15 (swap one movement for
-      one participant) and 18 (complete, net vs slot).
+- [x] **Chapter C's capture and payoff — 2026-08-21.** The floor chapter is 14 beats: the wedge,
+      back to the first friend (their signal still set), the injury captured mid-circuit and kept on
+      the record, and the plan editor opened to find it already waiting — the expectation of that
+      last step IS the pane, so the payoff is a claim the build checks. Event 16 is deliberately not
+      a second beat: it uses the same modal, and a demo that shows one form twice teaches that the
+      app is slow (§35.2 event 9's rule). The story also ends properly now — see §30.2.
+- [ ] **Chapter C's remaining events** — 15 (swap one movement for one participant) and 18
+      (complete, net vs slot; 18 needs 35.3b).
+- [ ] **Event 19, the theme switch, is NOT scriptable today**: the theme control is a `<select>`,
+      and the player performs TAPS. Scripting it needs a second action kind in the engine, which is
+      a bigger decision than one beat — and the first thing that decision buys is typing (event 5's
+      intake form), so make it once, for both.
 - [ ] **Chapter D**, then **A**. B stays blocked on §8.1.
 
 ---

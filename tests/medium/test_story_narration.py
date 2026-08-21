@@ -21,9 +21,18 @@ NARRATION_STUB = """
 import { mountStoryNarration } from './modules/demo/storyNarration.js';
 import { TRANSLATIONS } from './i18n/index.js';
 
-window.__narration = mountStoryNarration({ t: (key) => TRANSLATIONS.en[key] || key });
+window.__cleared = 0;
+window.__narration = mountStoryNarration({
+  t: (key) => TRANSLATIONS.en[key] || key,
+  onClearDemoData: () => { window.__cleared += 1; },
+});
 window.__show = (step) => window.__narration.showStep(step);
 """
+
+# The same stub with nobody offering a way onward — a caller that cannot clear demo data.
+NO_ONWARD_STUB = NARRATION_STUB.replace(
+    "  onClearDemoData: () => { window.__cleared += 1; },\n", ""
+)
 
 CHAPTER_STEP = {
     "id": "floor-open",
@@ -122,3 +131,46 @@ def test_the_narration_fits_the_phone_the_story_is_watched_on(page, local_server
     assert_component_fits(
         page, "#story-card", label="story narration card", viewport=None
     )
+
+
+ONWARD_STEP = {
+    **CHAPTER_STEP,
+    "id": "floor-close",
+    "narrate": {**CHAPTER_STEP["narrate"], "onward": True},
+}
+
+
+def test_the_last_card_offers_the_two_ways_onward(page, local_server):
+    """§30.2: the demo used to end by simply closing, leaving a trainer inside the clipboard it had
+    just shown them with nothing said. Dismissing IS "play around" — the app stays where the story
+    put it — and the other way is the cleanup dialog the demo notice already opens."""
+    _mount(page, local_server)
+
+    _show(page, ONWARD_STEP)
+
+    expect(page.locator("#story-card")).to_contain_text("Clear the demo data")
+    page.click("#story-card-cleanup")
+
+    assert page.evaluate("() => window.__cleared") == 1
+    expect(page.locator("#story-card")).to_be_hidden()
+
+
+def test_a_mid_story_card_makes_no_such_offer(page, local_server):
+    """Only the last beat is entitled to hand the app over; offering it earlier reads as the demo
+    asking to be stopped."""
+    _mount(page, local_server)
+    _show(page, ONWARD_STEP)
+
+    _show(page, CHAPTER_STEP)
+
+    expect(page.locator("#story-card-cleanup")).to_be_hidden()
+
+
+def test_nothing_is_offered_when_there_is_nothing_to_offer(page, local_server):
+    """A button that does nothing is worse than no button."""
+    page.set_viewport_size({"width": 390, "height": 844})
+    load_with_stub(page, local_server, NO_ONWARD_STUB)
+
+    _show(page, ONWARD_STEP)
+
+    expect(page.locator("#story-card-cleanup")).to_be_hidden()
