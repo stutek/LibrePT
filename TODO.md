@@ -451,32 +451,26 @@ Rides the same seam §1.6 built: an event, encoded into a link, carried by email
 ## 3. Data Sync
 
 ### 3.3 [x] Google Drive periodic sync
+
 Shipped 2026-08-02, manual-only as of §3.10 — [CHANGELOG](CHANGELOG.md) carries the decisions worth
 not re-litigating (no visible Drive file ever; three-way merge, so no Lamport pair and no tombstones).
+Setup steps live in [docs/GOOGLE_CLOUD_SETUP.md](docs/GOOGLE_CLOUD_SETUP.md), written against role
+handles and naming no credential, so the procedure is reviewable in the open.
 
-**Unblocked 2026-08-12**: a real GCP OAuth client id is installed in
-[driveSyncConfig.js](src/data/driveSyncConfig.js), so the card now offers a live Connect instead of
-reporting "not configured". Two consequences worth knowing:
+**Unblocked 2026-08-12** by a real OAuth client id in
+[driveSyncConfig.js](src/data/driveSyncConfig.js). Two consequences worth knowing:
 
-- **Only listed test users can actually grant access.** The OAuth app is in *Testing*, capped at 100
-  explicitly-listed accounts; anyone else gets `403: access_denied`. Demo users are unaffected —
-  `?init=demo_data_load` is local seed data that never contacts Google, and the app is offline-first
-  — but cloud sync is a you-and-known-pilots feature until the app is published. Publishing WITHOUT
-  verification is the useful middle state: it drops the manual list while keeping a 100-user cap and
-  an "unverified app" warning, and it ends the 7-day refresh-token expiry that Testing imposes.
-- **The unconfigured card is now unreachable**, so `tests/medium/test_drive_sync_ui.py` pins the
-  configured-but-not-connected state instead. The connected state cannot be reached by any Playwright
-  tier — Google fingerprints and blocks automated browsers on `accounts.google.com` — which is what
-  [tests/live/](tests/live/) exists for.
-
-Setup steps and the console field-by-field walkthrough live in
-[docs/GOOGLE_CLOUD_SETUP.md](docs/GOOGLE_CLOUD_SETUP.md). It is written against role handles
-(`admin@`, `maintainer@`) and names no credential, so the procedure is reviewable in the open; only
-the mapping from handle to real address is kept private.
+- **Only listed test users can grant access.** The OAuth app is in *Testing*: 100 explicitly-listed
+  accounts, everyone else gets `403: access_denied`, and refresh tokens expire after 7 days. Demo
+  users are unaffected (`?init=demo_data_load` never contacts Google). Publishing WITHOUT verification
+  is the useful middle state — it drops the manual list and the 7-day expiry, keeping the 100-user cap
+  and an "unverified app" warning.
+- **The connected state is unreachable from any Playwright tier** — Google fingerprints and blocks
+  automated browsers on `accounts.google.com`, which is what [tests/live/](tests/live/) exists for.
+  `tests/medium/test_drive_sync_ui.py` pins configured-but-not-connected instead.
 
 **Not built**: incremental sync via the Drive Changes API. Every pass moves the whole file — correct,
 not bandwidth-minimal.
-
 ### 3.5 [x] Paper consent — checkbox, signed date, form version, and delivery
 **Decided 2026-07-22: KISS — consent lives on paper.** The client signs a form kept at the gym; that
 physical file is the evidence. No photo capture, no image storage, no IMAP — considered and dropped,
@@ -522,47 +516,7 @@ escape hatch (§3.3, §18.7).
   been right a moment earlier. Pinned now by `tests/unit_js/data/stateSavedListeners.test.mjs`.
   `onSyncCountsChanged` still has the single-slot shape and one consumer; it is the next one to trip.
 
-<details><summary>Original scope</summary>
-**Raised 2026-07-26 (Simon). Ranked #3 in Where to start** — now that §18.7 ships a real backup and
-restore, the banner has a fix to name in the same breath, which was the missing half. The database
-holds the **only** copy of a trainer's records
-([DATA_MODEL §6](docs/DATA_MODEL.md)) and a browser can evict IndexedDB under storage pressure.
-Nothing on screen says so.
-
-- **Surface**: a persistent header banner styled and placed like `#preview-badge`, tappable through
-  to a short explanation of the risk and the fix.
-- **Condition**: no secured external copy — no cloud target configured, or the last successful
-  export/sync is stale ("never" being the obvious first case). Distinct from the offline indicator
-  and from §3.9's ahead/behind badge: those say "not pushed *yet*", this says "nothing anywhere but
-  this browser profile".
-- **The input now exists (2026-08-12)**: `recordBackupTaken()` / `readBackupHistory()` in
-  [stateStore.js](src/data/stateStore.js), written by **both** a completed Drive sync and a
-  downloaded JSON backup. Deliberately its own meta key rather than a field on `driveSync`, whose
-  ancestor is merge-critical — a three-way merge is only correct if that snapshot is exactly what
-  Drive last saw, so letting an export touch it would corrupt the next merge. Local-only and never
-  synced: a file downloaded on the phone does nothing for the tablet.
-- **Trigger shape decided**: a change COUNT or a time interval since the last backup, whichever
-  fires first (constants, so they are tunable) — not a binary "never backed up". Catches both "lots
-  of work" and "a little work, long ago".
-- **The rule that keeps it a safety feature**: it must be clearable **without Google**. A downloaded
-  backup resolves it exactly as a sync does. Otherwise a warning colour is a growth prompt, and
-  trainers can tell the difference.
-- **Not the same number as the ahead count.** §3.9's ↑ is Drive-relative ("not on Drive"), so a file
-  backup does not reduce it and should not. This banner is backup-relative ("not anywhere durable").
-  Keeping the two separate is what lets the count stay factual while the escalation stays honest.
-- **Escalation, not animation**: no persistent pulsing. A permanent animation in a fixed header is
-  ignored within a day, competes with the live session for peripheral attention, needs
-  `prefers-reduced-motion` handling anyway, and devalues the PREVIEW badge beside it. Static colour;
-  weight it with `storageDurability.js`'s `atRisk` / `not-persisted`, which is real evidence of
-  eviction risk rather than a proxy for it.
-
-</details>
-- **Not permanently dismissible** while the condition holds. Session-scoped at most.
-- **Wording is the whole feature** — honest without alarming a PT mid-session ("Only copy — no backup
-  yet" beats "DATA LOSS RISK"), and it must name the fix in the same breath.
-- [storageDurability.js](src/data/storageDurability.js) already measures eviction risk by
-  consequence, so the banner can escalate when the browser has *refused* persistence rather than
-  merely not been asked.
+Three requirements from the original scope still bind any change: it must be clearable **without Google** (a downloaded backup resolves it exactly as a sync does, or a warning colour is a growth prompt and trainers can tell); it is **not the same number as §3.9's ↑**, which is Drive-relative while this is backup-relative; and it escalates by **colour, never animation** — a permanent pulse in a fixed header is ignored within a day and devalues the PREVIEW badge beside it.
 
 ### 3.9 [x] [Decided] Every write increments the ahead counter on the Sync & Backup button
 Shipped 2026-08-03, fixed at the seam (`onStateSaved`) rather than the ~21 call sites —
@@ -627,28 +581,6 @@ points at GitHub. The README is developer-facing and stays there by this section
 right fix is not a seventh page but moving that explanation in-app, which belongs with §9.3/§9.5's
 demo-data and onboarding work rather than here.
 
-<details><summary>Original scope</summary>
-
-[render_docs.py](agent_tools/render_docs.py) shipped 2026-08-12 with PRIVACY.md as its only entry.
-Four in-app links still point at `github.com`, each aimed at someone who will never have a GitHub
-account, and each dead without signal — which is a defect in an offline-first app before Google's
-verification requirements enter into it.
-
-| Link | Where | Audience |
-| :--- | :--- | :--- |
-| `docs/PREVIEW.md` | header PREVIEW tag | the **data-loss notice** |
-| `docs/BUG_REPORTING.md` | app menu | trainer |
-| `docs/templates/**` (en + sl) | [consentForm.js](src/modules/common/consentForm.js) | **gym clients** — a legal form handed to a client |
-| `README.md#about-demo-data` | [messages.js](src/data/messages.js) | trainer |
-
-The templates are the worst of these: a trainer hands a client a consent form and the link opens a
-blob view with a "Sign in" header. Adding a row to `DOCUMENTS` ships a page; the work is repointing
-the links, cache-manifest entries for offline, and the per-language pages doubling the count.
-Developer-facing docs (README, DATA_MODEL, ROUTING, SRC_MODULES, use_cases, INDEX files) stay on
-GitHub — the test is whether a non-developer reaches it from the app, or a regulator needs it at a
-stable URL on a domain we own.
-
-</details>
 
 ### 4.1 [ ] Theme redesign
 Light mode needs a nicer design (reference:
@@ -963,53 +895,30 @@ open**: the demo walkthrough (§9.5) is unbuilt, so it has no tests. Confirm eve
 has at least one exercised path.
 
 ### 12.4 [x] Capture exceptions and offer semi-automatic bug reporting — 2026-08-18
-**Raised 2026-07-26 (Simon).** Nothing installs `window.onerror` or an `unhandledrejection` handler,
-so a thrown error dies in a console the PT will never open while
-[docs/BUG_REPORTING.md](docs/BUG_REPORTING.md) asks them to retype the build stamp by hand.
+**Raised 2026-07-26 (Simon); shipped 2026-08-18.** [crashReport.js](src/data/crashReport.js) builds
+the payload, [appLifecycleController.js](src/controllers/appLifecycleController.js) installs the
+`error`/`unhandledrejection` listeners as the FIRST boot step (a crash during boot is the one a
+trainer can least describe), and the notification feed offers it. Five constraints that still bind:
 
-- **Capture**: global `error` + `unhandledrejection` listeners recording message, stack, route and
-  build stamp. A small in-memory ring buffer, only the most recent persisted, so a crash log can
-  never grow into the storage budget (§18.6).
-- **Offer, never send.** No server, no telemetry: automatic reporting would be an unannounced egress
-  of a PT's data. The flow opens a **prefilled GitHub issue URL** the PT reviews and submits.
-- **Redaction is the hard part and it decides the design.** A stack is safe; the state around it is
-  not — names, notes and injuries are PII (§17.3) and the issue is public. Prefer a payload
-  non-identifying **by construction** (error, stack, route, version, opaque ids only) — and show it
-  for review anyway.
-- **Deep-link the failure**: routes are durable (UC5), so a report can carry the URL that failed —
-  reproduction becomes "open this link".
-- Keep distinct from the integrity error page (`sw/integrity.js`): a corrupt download must never be
-  reported as an app bug.
-- **Watch the failure mode**: a handler that itself throws, or that renders a modal over a live
-  session mid-set, is worse than the original bug. Non-blocking, never steals focus, survives being
-  called before boot completes.
+- **Non-identifying by construction, not by redaction** — a fixed field list (message, stack, route,
+  build, time) and anything else a caller passes is dropped, because a pass that strips known-bad keys
+  fails the first time someone adds a field nobody remembered to strip. Names, notes and injuries are
+  Art. 9 data (§17.3) and the issue is public.
+- **Offer, never send.** A prefilled GitHub issue URL the trainer reviews and submits; no server, no
+  telemetry, no `connect-src` change. Automatic reporting would be unannounced egress of a PT's data.
+- **The feed, not a modal** — a handler rendering over a live session mid-set is worse than the bug it
+  reports. An e2e case asserts no dialog opens and the app stays usable after an uncaught throw.
+- **The handler cannot throw**, and a failure inside it is deliberately silent: there is nowhere left
+  to report a failure to report.
+- **A repeat collapses into a count**, so a render loop throwing every frame cannot evict the report
+  that explains how it started. Kept distinct from the integrity error page (`sw/integrity.js`) — a
+  corrupt download must never be reported as an app bug.
 
-**Shipped 2026-08-18.** [crashReport.js](src/data/crashReport.js) builds the payload,
-[appLifecycleController.js](src/controllers/appLifecycleController.js) installs the listeners as the
-FIRST boot step (a crash during boot is the one a trainer can least describe), and the notification feed
-offers it. What each bullet above became:
+**The wiring bug the tests caught**, and the reason that e2e case exists: `appBoot.crashLog` was
+imported but never re-exported, so the feed asked for the crash log, got `undefined`, and rendered
+nothing — silently, because a missing optional dep looks exactly like "no crashes yet".
 
-- **Non-identifying by construction, as specified.** A fixed field list — message, stack, route, build,
-  time — and anything else a caller passes is dropped. A unit test hands it a client's name, notes and an
-  injury and asserts none of it can appear.
-- **Offer, never send.** The action is a link to a prefilled issue; the review happens on GitHub, on the
-  page that shows the trainer exactly what they are about to publish. No server was added and no
-  `connect-src` changed.
-- **The feed, not a modal** — §12.4's own warning made testable: an e2e case asserts no dialog opens and
-  the app stays usable after an uncaught throw.
-- **The handler cannot throw.** Everything inside it is wrapped, and a failure there is deliberately
-  silent: there is nowhere left to report a failure to report.
-- **A repeat collapses into a count**, so a render loop throwing every frame cannot evict the report that
-  explains how it started.
-
-**A wiring bug the tests caught**: `appBoot.crashLog` was imported but never re-exported, so the feed
-asked for the crash log, got `undefined`, and rendered nothing — silently, because a missing optional dep
-looks exactly like "no crashes yet". The e2e case exists for that class of failure.
-
-**Still open, and it needs a decision: §23.5's "no feedback route a non-developer will use".** This gives
-a PT with a GitHub account a good path. A PT without one still has none, and that is a maintainer choice
-— an email address, or a form — not something to invent.
-
+**Still open, and a maintainer decision: §23.5's feedback route for a PT without a GitHub account.**
 ### 12.5 [ ] Local git housekeeping (trademark refs)
 The trademark was scrubbed and force-pushed; the remote is clean and no `refs/original/…` or backup
 branch remains. The old blobs survive only in reflog entries. **Maintainer action** — it was blocked
@@ -1487,39 +1396,32 @@ be written down.
 
 ### 18.16 [x] Local runs stopped disagreeing with CI about what time it is — 2026-08-18
 
-Asked for after CI failed on a test that had passed locally three times ("how we can improve reliability
-of local test?"). Four divergence classes were visible in one day's evidence; the two cheapest to close
-were closed:
+Asked for after CI failed on a test that had passed locally three times. Four divergence classes were
+visible in one day's evidence; three were closed:
 
-- **Wall-clock dependence — closed.** Browser tests now run on a frozen `Date.now`
-  ([conftest.py](tests/conftest.py)), so the demo seed's relative session times, day buckets and overdue
-  labels are identical whatever hour the suite runs. Four existing tests were deriving "today" from the
-  HOST clock and comparing it against the app's — agreement by luck, and already a midnight race. They
-  take it from one source now.
-- **Suspend detection — closed.** `_timed_task` compares monotonic against wall time and says so when a
-  task spanned a gap it did not spend working ([build/__init__.py](build/__init__.py)).
-  A detected time jump has always meant treating the run as interrupted rather than as
-  a regression; it relied on somebody noticing timestamps by eye, which failed twice in one session.
-
-- **One Python declaration — closed 2026-08-18.** CI ran 3.11 while this machine ran 3.14.4 with nothing
-  saying so. The first fix bumped thirteen `python-version:` literals and added a checker that they
-  agreed, which the maintainer rejected outright — *"12 pins for python? that is not single source of
-  truth"*. There is one declaration now (`.python-version`), read by every job via
-  `python-version-file:` and by pyenv directly, so drift is impossible rather than detected.
-  [python_version.py](agent_tools/python_version.py) keeps what a file cannot: this machine on the
-  declared minor, plus a regression guard against literals coming back.
+- **Wall-clock dependence.** Browser tests run on a frozen `Date.now` ([conftest.py](tests/conftest.py)),
+  so the demo seed's relative times, day buckets and overdue labels are identical whatever hour the
+  suite runs. Four tests had been deriving "today" from the HOST clock and comparing it against the
+  app's — agreement by luck, and already a midnight race.
+- **Suspend detection.** `_timed_task` compares monotonic against wall time and says so when a task
+  spanned a gap it did not spend working ([build/__init__.py](build/__init__.py)). A time jump means
+  the run was interrupted, not that the change regressed — it previously relied on somebody noticing
+  timestamps by eye, which failed twice in one session.
+- **One Python declaration.** CI ran 3.11 while this machine ran 3.14.4 with nothing saying so. The
+  first fix bumped thirteen `python-version:` literals and added a checker that they agreed, which the
+  maintainer rejected outright — *"12 pins for python? that is not single source of truth"*. There is
+  one declaration now (`.python-version`), read by every job via `python-version-file:` and by pyenv,
+  so drift is impossible rather than detected. [python_version.py](agent_tools/python_version.py)
+  keeps what a file cannot: this machine on the declared minor, plus a guard against literals
+  returning.
 - **A shared wait for durable writes.** Two tests raced the write queue in one day (signup, then RSVP
-  ingestion): both wrote, then did a full page load that re-read IndexedDB before the enqueued write had
-  flushed. `wait_for_stored_record` in [conftest.py](tests/conftest.py) is the one wait now, and it takes
-  a field/value dict rather than a JS predicate — the first draft used `new Function`, which the app's own
-  CSP forbids.
+  ingestion): both wrote, then did a full page load that re-read IndexedDB before the enqueued write
+  had flushed. `wait_for_stored_record` in [conftest.py](tests/conftest.py) is the one wait now, taking
+  a field/value dict rather than a JS predicate — the first draft used `new Function`, which the app's
+  own CSP forbids.
 
-**Left deliberately**, because on the evidence they are theoretical rather than observed: an opt-in
-stress mode (higher worker count, to surface write-queue-style races on purpose) and randomized test
-order with a printed seed. **Still open and the maintainer's call: CI runs Python 3.11 and this machine
-runs 3.14.4** — the quietest divergence of the four, and the one most likely to produce a "works locally"
-that is not about tests at all.
-
+**Left deliberately**, as theoretical rather than observed: an opt-in stress mode (higher worker count,
+to surface write-queue races on purpose) and randomized test order with a printed seed.
 ---
 
 ## 19. Deep-linkable app state
