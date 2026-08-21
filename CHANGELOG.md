@@ -20,6 +20,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-08-21 — The live session stops being one file
+
+### Changed
+- **`activeSessionController.js` split into nine modules** (TODO §24) — at 1,216 lines it was the largest file in `src/` and the one place a reader had to load the whole live-session surface to change any part of it: lifecycle, timers, quick signals, plan editing, focus URLs and the cache write path shared one file and one pair of module-level globals. **The globals were what held it together, so they moved first**: `activeSessionStore.js` owns the single `activeSession` slot and `appDeps` behind accessors, since a reassigned binding cannot be imported directly. That makes the rest an acyclic stack — store → cache → {timers, focus URL, quick signals, circuits, plan editing, schedule adjustment} → lifecycle → controller. The one edge that would have closed a cycle, the schedule dialog's Delete needing `deleteScheduledSession` from lifecycle, is **injected as a callback rather than imported**. `activeSessionController.js` stays the seam at 278 lines: app.js, appBoot.js, the router, the deck and the medium tests are wired against its names, so it re-exports them and keeps what is genuinely composition — the board wiring, edit mode and the overlay's title-bar chrome. No behaviour changed.
+- **`TODO.md` and `CHANGELOG.md` compressed** — TODO's own preamble says a shipped item graduates here and leaves a one-line stub so its `§N.M` keeps resolving, and 69 shipped entries were carrying 47.5 KB of body instead, the longest holding their pre-shipping scope *and* what it became. Cut to what this file does not already carry, keeping every standing decision. The changelog's four largest entries lost restatement and doubled-back clauses at a consistent 8–13% each — **that ratio is the finding**: nearly every clause here carries its own decision, so tightening wording has a floor, and going below it is a question about what a changelog is for rather than an edit.
+
+---
+
 ## 2026-08-18 — A restore says what it does to the file, not just to the device
 
 ### Added
