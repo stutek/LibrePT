@@ -13,6 +13,7 @@ import json
 from playwright.sync_api import expect
 
 from tests.medium._harness import load_with_stub
+from tests.medium._overflow import assert_component_fits
 
 # Mounts the dialog with an in-memory register, so a test can read what was written without a real
 # store. `window.__saved` is the state the app would have persisted.
@@ -212,3 +213,19 @@ def test_a_submission_cannot_name_the_record_it_lands_on(page, local_server):
     assert clients[0]["name"] == "Jana Novak", "the existing record is untouched"
     assert clients[1]["id"] == "new-client-id", "the sender's id was ignored"
     assert clients[1]["active"] is True
+
+
+def test_the_review_fits_the_phone_the_trainer_reads_it_on(page, local_server):
+    """A dialog is where a long label meets a narrow box, and this one carries names, emails and
+    free text a stranger typed — none of it length-checked."""
+    _mount(page, local_server)
+
+    _open(
+        page,
+        _submission(
+            name="Marija Novak-Kovacic Podpecnik",
+            email="marija.novak.kovacic@zelo-dolga-domena.example.com",
+        ),
+    )
+
+    assert_component_fits(page, "#dialog-signup-review", label="signup review dialog")

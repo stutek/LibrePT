@@ -51,8 +51,8 @@ trainer's own store) and SMS as the response channel; §19.2's URL-privacy invar
 §12.6's glyph subsetting (prerequisite already built, and §7.2 wants the regular weight it would
 restore), §18.11's retention basis (one paragraph, in the privacy policy — the only bullet left in
 that section), §21's 60s → 30s navigation timeout (the cause it was raised for is fixed), and §25.6's
-medium-tier overflow harness (the sweep already exists). §19.3's exercise-library filter reset is
-done (2026-08-21).
+medium-tier overflow harness (the sweep already exists). §19.3's exercise-library filter reset and
+§25.6's harness are both done (2026-08-21).
 
 Deprioritised on purpose: §24.5/§24.7 remainders and §24.8's rename (optional by their own text),
 §11/§5.1/§4.1 (large UI churn with no users yet to aim it), §17.2/§17.4 and §18.8–§18.12 (decided on
@@ -73,7 +73,7 @@ the thing that must happen first, not merely what it touches.
 | **UI redesign** | §4.1, §5.1, §5.2, §11.1, §11.2 | Tabbed client view | Deliberately waiting for real users to aim it |
 | **Go-to-market** | §23.1–§23.6 | Decide what "winning" means | §23.1 gates every channel choice |
 | **Refactor remainders** | §24.4d, §24.5, §24.7, §24.8 | One movement → plan item mapping | Optional by their own text |
-| **Tests & docs** | §6.2, §12.3, §12.4, §12.5, §12.6, §25.6 | Medium-tier overflow harness | Nothing; all small |
+| **Tests & docs** | §6.2, §12.3, §12.5, §12.6 | Vendor Font Awesome locally | Nothing; all small |
 | **Routing decisions** | §19.2, §19.3 | The URL-privacy invariant | One decision, then both unblock |
 | **Data-subject rights** | §27.4 | One-tap withdrawal in the consent letter | Nothing; the other four shipped 2026-08-11 |
 | **Reported 2026-08-18** | §28.2 | Which contributor-facing docs get BUILT, so their addresses are injected rather than written out | Everything else in §28 shipped the same day |
@@ -1770,8 +1770,13 @@ false positives came first, each buying a rule now written into the tool — see
 
 ### 25.6 Status
 - [x] The tool, its unit tests, and the four-device e2e suite; full gate green 2026-08-10.
-- [ ] `tests/medium/_overflow.py`, so an existing component test adds one line after mount and gets
-      per-component attribution. Cheap, and the sweep already exists.
+- [x] `tests/medium/_overflow.py` — 2026-08-21. `assert_component_fits(page, root)` after mount; the
+      sweep gained a `root` selector that scopes which elements are asserted, not what they are
+      measured against, so the boundary is still the real page's. Defaults to a 390px phone, because
+      a medium test that set no viewport sweeps at a desktop default where nothing is tight enough to
+      break, and a missing root fails rather than sweeping nothing. Its own tests plant an overflow
+      and assert the failure names the element; wired into the clipboard title bar (§25.5's defect)
+      and the signup review dialog.
 
 **Cost, measured**: ~50s of call time across the four walks, ~13s on stage 3's floor once fanned out.
 

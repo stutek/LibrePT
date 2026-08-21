@@ -16,6 +16,7 @@ from tests.medium._harness import (
     exercise_item,
     load_with_stub,
 )
+from tests.medium._overflow import assert_component_fits
 
 pytestmark = pytest.mark.clean_start
 
@@ -64,3 +65,14 @@ def test_every_control_on_the_line_is_still_reachable(page, local_server):
             continue
         box = control.bounding_box()
         assert min(box["width"], box["height"]) >= 32, f"{selector} is {box}"
+
+
+def test_nothing_in_the_title_bar_is_pushed_out_of_it(page, local_server):
+    """§25.5's defect was here: with the title ellipsised, the edit-mode chip beside it was pushed
+    169px outside the bar and vanished entirely. Geometry, in the test that owns this component —
+    the route walk in tests/e2e/ sees the same thing but names only the route it happened on."""
+    _mount(page, local_server)
+
+    assert_component_fits(
+        page, ".session-title-block", label="clipboard title bar", viewport=None
+    )

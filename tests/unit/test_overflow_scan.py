@@ -72,3 +72,28 @@ def test_format_findings_names_the_context_and_every_finding():
 
 def test_format_findings_says_so_when_there_is_nothing_to_report():
     assert "no overflow" in overflow_scan.format_findings("clients at 390px", [])
+
+
+class _RecordingPage:
+    """Enough of a Playwright page to see what scan() asks the browser for."""
+
+    def __init__(self):
+        self.options = None
+
+    def evaluate(self, script, options):
+        self.options = options
+        return []
+
+
+def test_scan_sweeps_the_whole_body_by_default():
+    page = _RecordingPage()
+    overflow_scan.scan(page)
+    assert page.options["root"] is None
+
+
+def test_scan_scopes_to_one_component_when_given_a_root():
+    """The medium tier mounts ONE component into the real index.html, so a body-wide sweep would
+    report the surrounding shell that no component test owns (TODO §25.6)."""
+    page = _RecordingPage()
+    overflow_scan.scan(page, root="#active-session-overlay")
+    assert page.options["root"] == "#active-session-overlay"

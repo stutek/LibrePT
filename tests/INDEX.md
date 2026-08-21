@@ -18,11 +18,11 @@ localises the fault better, and a test placed too low simply cannot express what
 
 | Tier | Runner | Boots | Put a test here when… |
 | :--- | :--- | :--- | :--- |
-| [tests/unit/](unit/) (23 files + `test_app.py`, 145 tests) | pytest, stage 1 | nothing — static analysis of the repo | It inspects files/structure: layout rules, i18n parity, doc links, generated catalogs. |
+| [tests/unit/](unit/) (34 files + `test_app.py`, 268 tests) | pytest, stage 1 | nothing — static analysis of the repo | It inspects files/structure: layout rules, i18n parity, doc links, generated catalogs. |
 | [tests/unit_js/](unit_js/) (62 files, 490 tests) | `node:test`, stage 1 | one ES module, no DOM | It pins **pure logic** — schema/migration transforms, id generation, merge algorithms, projections, domain rules. Mirrors the `src/` subpath it covers, so `src/domain/sessionClock.js` → `unit_js/domain/sessionClock.test.mjs`. |
 | [tests/unit_js/security/](unit_js/security/) (4 files, 15 tests) | `node:test`, stage 1 | one ES module, no DOM | It pins a **security property** with no DOM: injection into a generated file, attacker-controlled object keys. Its own gate task and its own CI job (`security-tests`), so a regression is named as a security one instead of a generic unit-test failure. Excluded from the glob above — it is gated separately, not twice. |
-| [tests/medium/](medium/) (31 files, 164 tests) | Playwright, stage 2 | one component against real `index.html` markup | It needs the **DOM/CSS** but not navigation, persistence or a real app boot. Four shapes, all in [_harness.py](medium/_harness.py): `HEADER_STUB` (header + its route-backed dialogs), `SESSIONS_STUB` (the dashboard timeline), `clipboard_stub()` (the live session, fed an injected `activeSession`), and `view_stub()` to build one for any other view — shell markup → activate → render. |
-| [tests/e2e/](e2e/) (46 files, 187 tests) | Playwright, stage 3 | the whole app | It needs the router, IndexedDB, the service worker, reload/deep-link behaviour, or a multi-step flow across views. |
+| [tests/medium/](medium/) (37 files, 199 tests) | Playwright, stage 2 | one component against real `index.html` markup | It needs the **DOM/CSS** but not navigation, persistence or a real app boot. Four shapes, all in [_harness.py](medium/_harness.py): `HEADER_STUB` (header + its route-backed dialogs), `SESSIONS_STUB` (the dashboard timeline), `clipboard_stub()` (the live session, fed an injected `activeSession`), and `view_stub()` to build one for any other view — shell markup → activate → render. |
+| [tests/e2e/](e2e/) (49 files, 208 tests) | Playwright, stage 3 | the whole app | It needs the router, IndexedDB, the service worker, reload/deep-link behaviour, or a multi-step flow across views. |
 
 **Browser tests run on a FROZEN wall clock** (`tests/conftest.py`'s `freeze_wall_clock`). `Date.now()`
 is pinned to one instant for every test using the shared `page` fixture, so anything the app derives from
@@ -48,7 +48,11 @@ Slovenian pass, and asserts *geometry* — that nothing extends past its clippin
 is silently clipped inside its own box ([TODO §25](../TODO.md)). It lives here rather than in
 `medium/` because an overflow is a property of the **composed** page: the same component fits alone
 and breaks beside a long client name. The sweep itself is
-[agent_tools/overflow_scan.py](../agent_tools/overflow_scan.py), shared with the by-hand diagnostic.
+[agent_tools/overflow_scan.py](../agent_tools/overflow_scan.py), shared with the by-hand diagnostic. A
+component test can run that same sweep on itself in one line —
+`assert_component_fits(page, "#its-root")` from [medium/_overflow.py](medium/_overflow.py) — which
+buys **attribution**: the route walk says which route broke, the scoped sweep says which component
+did, in the test that can fix it. Neither replaces the other, for the composition reason above.
 
 **The other geometry test sits one tier down**:
 [medium/test_clipboard_deck_legibility.py](medium/test_clipboard_deck_legibility.py) asserts that a

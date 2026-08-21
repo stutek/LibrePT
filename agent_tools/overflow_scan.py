@@ -201,7 +201,20 @@ OVERFLOW_SCAN_JS = r"""
 
   const FORM_CONTROLS = new Set(["INPUT", "TEXTAREA", "SELECT"]);
 
-  for (const element of document.body.querySelectorAll("*")) {
+  // A scoped sweep is how the medium tier gets per-component attribution: one component is
+  // mounted into the real index.html, so a body-wide sweep would also report the surrounding
+  // shell, which that test does not own and cannot fix. Ancestors are still walked for the
+  // boundary, so a component clipped by its real parent is still seen. The root itself is
+  // included — a component overflowing its OWN box is exactly what the caller is asking about —
+  // while a body-wide sweep keeps its historical element set, which starts below <body>.
+  const scope = options.root ? document.querySelector(options.root) : document.body;
+  if (!scope) throw new Error("overflow scan root not found: " + options.root);
+  const elements =
+    scope === document.body
+      ? [...scope.querySelectorAll("*")]
+      : [scope, ...scope.querySelectorAll("*")];
+
+  for (const element of elements) {
     const style = styleOf(element);
     const rect = element.getBoundingClientRect();
     if (!isRendered(element, style, rect)) continue;
@@ -275,11 +288,16 @@ OVERFLOW_SCAN_JS = r"""
 """
 
 
-def scan(page, tolerance=DEFAULT_TOLERANCE_PX, invariants=("A", "B")):
-    """Run the sweep on an already-loaded Playwright page. Returns a list of finding dicts."""
+def scan(page, tolerance=DEFAULT_TOLERANCE_PX, invariants=("A", "B"), root=None):
+    """Run the sweep on an already-loaded Playwright page. Returns a list of finding dicts.
+
+    `root` is a CSS selector limiting WHICH elements are asserted, not what they are measured
+    against: a component mounted alone still has the real page's ancestors above it. Default None
+    sweeps the whole body, which is what a route walk wants.
+    """
     return page.evaluate(
         OVERFLOW_SCAN_JS,
-        {"tolerance": tolerance, "invariants": list(invariants)},
+        {"tolerance": tolerance, "invariants": list(invariants), "root": root},
     )
 
 
@@ -327,6 +345,11 @@ def build_parser():
     parser.add_argument(
         "--wait-selector", default=None, help="wait for this selector before sweeping"
     )
+    parser.add_argument(
+        "--root",
+        default=None,
+        help="CSS selector to sweep inside, e.g. one component; default the whole body",
+    )
     parser.add_argument("--tolerance", type=float, default=DEFAULT_TOLERANCE_PX)
     parser.add_argument("--timeout-ms", type=int, default=10000)
     return parser
@@ -358,7 +381,7 @@ def main(argv=None):
         page.wait_for_timeout(
             300
         )  # settle post-render animations/observers before measuring
-        findings = scan(page, args.tolerance, args.invariants or ("A", "B"))
+        findings = scan(page, args.tolerance, args.invariants or ("A", "B"), args.root)
         browser.close()
 
     print(json.dumps(findings, indent=2))
