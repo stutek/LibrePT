@@ -2613,8 +2613,13 @@ events that genuinely need it.
       last step IS the pane, so the payoff is a claim the build checks. Event 16 is deliberately not
       a second beat: it uses the same modal, and a demo that shows one form twice teaches that the
       app is slow (§35.2 event 9's rule). The story also ends properly now — see §30.2.
-- [ ] **Chapter C's remaining events** — 15 (swap one movement for one participant) and 18
-      (complete, net vs slot; 18 needs 35.3b).
+- [x] **Event 15 — 2026-08-21.** The swap happens inside one participant's plan, through the row's
+      own catalog button, and the replacement is chosen BY NAME from what the picker actually offers
+      (it opens filtered to that row's category, so a catalogue-wide pick would be a movement the UI
+      never shows). The expectation is the editor's own **Swapped** badge: the movement's name lives
+      in an input VALUE, which is not text content and cannot be probed — a lesson worth keeping for
+      the next beat that acts on a form.
+- [ ] **Chapter C's last event** — 18 (complete, net vs slot), which needs 35.3b's meter.
 - [ ] **Event 19, the theme switch, is NOT scriptable today**: the theme control is a `<select>`,
       and the player performs TAPS. Scripting it needs a second action kind in the engine, which is
       a bigger decision than one beat — and the first thing that decision buys is typing (event 5's

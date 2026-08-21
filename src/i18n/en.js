@@ -400,17 +400,20 @@ export const en = {
   story_step_back_to_first: "Back to the first friend — their signal is still where they left it.",
   story_step_refocus: "Bring the circuit back into focus. Their card, their plan.",
   story_step_capture_open:
-    "Mid-circuit, a knee gets mentioned. Open the note without leaving the session — the clock keeps running.",
+    "Mid-circuit, a client mentions a twinge. Open the note without leaving the session — the clock keeps running.",
   story_step_capture_tag: "Tag it. No typing: the trainer has one hand free.",
   story_step_capture_keep: "Keep it on this person's record, so it outlives tonight.",
   story_step_capture_submit: "Logged, against this participant and this movement.",
   story_step_session_menu: "Open the session menu.",
+  story_step_swap_open: "Swap the movement that hurt — for this participant only.",
+  story_step_swap_pick:
+    "Something gentler for the same muscle group. The other two plans are untouched.",
   story_step_plan_editor:
     "Shaping the plan — and the note from three minutes ago is already here, against the right person.",
   story_floor_open_body:
     "Tuesday evening. Three friends, one 60-minute slot, one clipboard between them. The trainer's hands are busy, so every beat here is a single tap.",
   story_floor_close_body:
-    "Thanks for watching. Signals logged, nobody typed anything, the clock never stopped — and the plan already knows about the knee. Keep tapping around, or clear the demo data and start with your own.",
+    "Thanks for watching. Signals logged, nobody typed anything, the clock never stopped — and the plan already knows about the twinge. Keep tapping around, or clear the demo data and start with your own.",
   today: "Today",
   tomorrow: "Tomorrow",
   yesterday: "Yesterday",

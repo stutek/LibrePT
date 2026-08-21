@@ -142,6 +142,31 @@ const FLOOR_CHAPTER = {
       caption: "story_step_plan_editor",
       expect: { selector: "#client-focus-floor", visible: true },
     },
+    {
+      // Event 15: the swap happens HERE, inside one participant's plan — the other two are
+      // untouched because they have their own, which is the thing no other clipboard makes easy.
+      id: "swap-open-catalog",
+      persona: TRAINER,
+      target: ".editor-row-catalog",
+      caption: "story_step_swap_open",
+      expect: { selector: "#dialog-catalog-picker", visible: true },
+    },
+    {
+      // Chosen BY NAME, never by position: a seeded catalog's order is not a property the demo may
+      // depend on, and the first attempt at the wedge broke on exactly that.
+      id: "swap-pick-movement",
+      persona: TRAINER,
+      target: ".picker-item",
+      // The picker opens filtered to the row's own category, so the replacement has to be one the
+      // trainer would actually be offered — a lighter movement for the same muscle group, not a
+      // catalogue-wide free choice the UI never shows.
+      targetText: "Lat Pulldown",
+      caption: "story_step_swap_pick",
+      // The PLAN says it was swapped — the claim being made, rather than "a dialog closed". The
+      // movement's name lives in an input's value, which is not text content and cannot be probed;
+      // the editor's own Swapped badge is the visible fact.
+      expect: { selector: ".editor-added-badge", visible: true, containsText: "Swapped" },
+    },
     // The last beat of the story so far, so it is the one that hands the app over (§30.2): thank
     // you, and the two ways onward that already exist. Dismissing IS "play around" — the app is
     // left exactly where the story put it, not on a start screen.

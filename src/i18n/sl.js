@@ -383,17 +383,20 @@ export const sl = {
   story_step_back_to_first: "Nazaj k prvemu prijatelju — njegov signal je še vedno tam.",
   story_step_refocus: "Vrni krog v fokus. Njegova kartica, njegov načrt.",
   story_step_capture_open:
-    "Sredi kroga omeni koleno. Odpri zapis, ne da bi zapustil sejo — ura teče naprej.",
+    "Sredi kroga stranka omeni bolečino. Odpri zapis, ne da bi zapustil sejo — ura teče naprej.",
   story_step_capture_tag: "Označi. Brez tipkanja: trener ima prosto eno roko.",
   story_step_capture_keep: "Shrani v kartoteko te osebe, da ostane tudi po nocojšnji seji.",
   story_step_capture_submit: "Zabeleženo, pri tem udeležencu in pri tej vaji.",
   story_step_session_menu: "Odpri meni seje.",
+  story_step_swap_open: "Zamenjaj vajo, ki je bolela — samo pri tem udeležencu.",
+  story_step_swap_pick:
+    "Nekaj bolj prizanesljivega za isto mišično skupino. Načrta drugih dveh se to ne dotakne.",
   story_step_plan_editor:
     "Oblikovanje načrta — in zapis izpred treh minut je že tu, pri pravi osebi.",
   story_floor_open_body:
     "Torek zvečer. Trije prijatelji, en 60-minutni termin, ena skupna podloga. Trener ima polne roke, zato je vsak korak tu en sam dotik.",
   story_floor_close_body:
-    "Hvala za ogled. Signali so zabeleženi, nihče ni ničesar tipkal, ura se ni ustavila — in načrt že ve za koleno. Kar raziskuj naprej ali počisti demo podatke in začni s svojimi.",
+    "Hvala za ogled. Signali so zabeleženi, nihče ni ničesar tipkal, ura se ni ustavila — in načrt že ve za bolečino. Kar raziskuj naprej ali počisti demo podatke in začni s svojimi.",
   today: "Danes",
   tomorrow: "Jutri",
   yesterday: "Včeraj",

@@ -68,6 +68,8 @@ def test_the_story_plays_every_beat_it_declares(page, local_server):
         "capture-submit",
         "open-session-menu",
         "plan-editor-shows-the-floor",
+        "swap-open-catalog",
+        "swap-pick-movement",
         "floor-close",
     ]
 
