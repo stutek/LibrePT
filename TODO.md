@@ -2578,9 +2578,26 @@ what already runs), then D, then A. Chapter B is blocked on §8.1. Written this 
 as a demo the moment its feature does, and no chapter waits on the recurrence model except the two
 events that genuinely need it.
 
+### 35.4 Build log
+
+- [x] **The spine, and chapter C's existing beats — 2026-08-21.** `?demo=story` plays the lot,
+      `?demo=story&chapter=floor` plays one; an unknown chapter plays the whole story rather than
+      nothing, because these links are typed by hand and an empty step list looks like a failed boot.
+      A chapter is a tour, so the engine is untouched apart from one awaited `beforeStep` hook — the
+      narration card is the control its own step taps, which is how a narrated beat carries a real
+      expectation instead of a pause. New: [domain/demoStory.js](src/domain/demoStory.js) (chapter
+      rules), [storyTour.js](src/modules/demo/storyTour.js) (the script, reusing the wedge's steps
+      rather than restating its selectors), [storyNarration.js](src/modules/demo/storyNarration.js)
+      (cards, persona pill, caption bar). Events 14, 15, 16 and 18 are NOT in it: 14 and 16 need
+      35.3c/d, and a demo step that pretends is what a scripted demo exists to avoid.
+- [ ] **Chapter C's remaining events** — 14 and 16 need the in-session capture and the review pane
+      (35.3c, 35.3d); 15 (swap one movement for one participant) and 18 (complete, net vs slot) are
+      next after them.
+- [ ] **Chapter D**, then **A**. B stays blocked on §8.1.
+
 ---
 
-## 35. The browser tiers are CPU-SATURATED, and the pipeline was under-reporting it
+## 37. The browser tiers are CPU-SATURATED, and the pipeline was under-reporting it
 
 **Measured 2026-08-19**, chasing "where does the medium tier lose its time?". The premise was wrong,
 and so was the instrument.

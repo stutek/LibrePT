@@ -23,7 +23,10 @@
 // check by the same route the automatic tour does. A walkthrough with its own copy of "resolve,
 // scroll, tap, check" would be a second definition of what the demo means.
 //
-// Injected dependencies: `doc`, `hand` (optional — no pointer in CI), `wait`, `onStep`.
+// Injected dependencies: `doc`, `hand` (optional — no pointer in CI), `wait`, `onStep`,
+// `beforeStep` (optional — the story's narration draws the card a narrated step then dismisses,
+// TODO §35; a hook rather than a second player, because two copies of "resolve, scroll, tap, check"
+// is exactly what performStep was extracted to prevent).
 
 import { checkExpectation, validateTour } from "../../domain/demoTour.js";
 import { moveDemoHand, pulseDemoHand } from "./demoHand.js";
@@ -174,7 +177,10 @@ export async function performStep(step, { doc = document, hand = null, wait = sl
  * what the e2e test does, because a player reporting only the steps it managed would otherwise pass
  * by simply doing less.
  */
-export async function playTour(tour, { doc = document, hand = null, wait = sleep, onStep } = {}) {
+export async function playTour(
+  tour,
+  { doc = document, hand = null, wait = sleep, onStep, beforeStep } = {},
+) {
   const problems = validateTour(tour);
   if (problems.length > 0) {
     return [{ id: "tour", ok: false, reason: problems.join("; ") }];
@@ -182,6 +188,9 @@ export async function playTour(tour, { doc = document, hand = null, wait = sleep
 
   const results = [];
   for (const step of tour.steps) {
+    // Awaited: whatever a caller puts on screen before a step has to BE there before the hand
+    // reaches for it — the story's narration card is the control its own step taps.
+    await beforeStep?.(step);
     const outcome = await performStep(step, { doc, hand, wait });
     results.push(outcome);
     onStep?.(outcome);

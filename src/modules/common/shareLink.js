@@ -19,6 +19,10 @@
 //                         same script the e2e suite replays.
 //            walkthrough  the trainer drives, one step at a time, with the guided panel over the
 //                         real app (§9.5). Same script; who taps is the only difference.
+//            story        the long demo (§35): a chaptered scenario that plays itself, narrated by
+//                         cards between the taps. `chapter` names one chapter to play alone.
+//   chapter  which chapter of ?demo=story to play, e.g. floor. Absent or unknown plays the whole
+//            story — a mistyped chapter in a pasted link should still show a stranger the demo.
 //   init   demo-data initializer. The app boots to a clean, empty slate; init=demo_data_load
 //          populates the full demo dataset — but ONLY on a genuinely empty app. When any data is
 //          already present it is ignored, so it never overwrites a real user's records. Applied
@@ -30,6 +34,7 @@ export const SHARE_LANG_PARAM = "lang";
 export const SHARE_THEME_PARAM = "theme";
 export const SHARE_INIT_PARAM = "init";
 export const SHARE_DEMO_PARAM = "demo";
+export const SHARE_CHAPTER_PARAM = "chapter";
 
 // The single recognized value for ?init=. Any other value is treated as absent.
 export const INIT_DEMO_DATA = "demo_data_load";
@@ -39,6 +44,7 @@ export const INIT_DEMO_DATA = "demo_data_load";
 // that asks for one cannot accidentally start the other.
 export const DEMO_TOUR_GYM_FLOOR = "gym_floor";
 export const DEMO_WALKTHROUGH = "walkthrough";
+export const DEMO_STORY = "story";
 
 // Read the preselected language/theme/init from the current URL. Absent params return null so
 // callers can distinguish "share link asked for X" from "use the saved/default value".
@@ -49,5 +55,6 @@ export function getShareParams() {
     theme: p.get(SHARE_THEME_PARAM),
     init: p.get(SHARE_INIT_PARAM),
     demo: p.get(SHARE_DEMO_PARAM),
+    chapter: p.get(SHARE_CHAPTER_PARAM),
   };
 }

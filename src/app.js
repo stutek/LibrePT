@@ -283,7 +283,12 @@ async function init() {
   // fully populated once this resolves, exactly as when the call was synchronous.
   const state = await loadSavedState();
 
-  const { lang: shareLang, init: shareInit, demo: shareDemo } = getShareParams();
+  const {
+    lang: shareLang,
+    init: shareInit,
+    demo: shareDemo,
+    chapter: shareChapter,
+  } = getShareParams();
   if (isSupportedLang(shareLang)) state.lang = shareLang;
 
   if (shareInit === INIT_DEMO_DATA && !stateHasData(state)) {
@@ -557,6 +562,18 @@ async function init() {
     hasData: stateHasData(getState()),
     onResults: (results) => {
       window.__demoTourResults = results;
+    },
+  });
+
+  // The long story (TODO §35). Same publication of results as the wedge above, and for the same
+  // reason: tests/e2e/test_demo_story.py replays it and asserts on them.
+  await appBoot.bootDemoStory({
+    shareDemo,
+    shareChapter,
+    hasData: stateHasData(getState()),
+    t,
+    onResults: (results) => {
+      window.__demoStoryResults = results;
     },
   });
 

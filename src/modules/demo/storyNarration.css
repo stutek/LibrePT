@@ -1,0 +1,111 @@
+/* src/modules/demo/storyNarration.css — the long demo's narration: cards, persona label, captions
+   (TODO §35).
+
+   The app underneath keeps its own appearance, like every other demo surface here: the story is the
+   live app being used, and a demo that restyled what it demonstrates would be showing a different
+   product. Only the words wrapped around it are drawn here. */
+
+/* The narration card. Above the clipboard overlay (120/130) and the walkthrough panel (9400), below
+   the hand (9999) — the pointer has to read as being over the card it is about to tap. */
+.story-card {
+  position: fixed;
+  left: 50%;
+  bottom: 14vh;
+  z-index: 9500;
+  width: min(30rem, calc(100vw - 2.5rem));
+  transform: translateX(-50%);
+  padding: 1.25rem 1.35rem 1.1rem;
+  border-radius: var(--border-radius-lg, 16px);
+  background: var(--bg-secondary, #ffffff);
+  color: var(--text-primary, #0f172a);
+  border: 1px solid var(--border-color, rgba(15, 23, 42, 0.12));
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.35);
+  text-align: left;
+}
+
+.story-card-kicker {
+  margin: 0 0 0.2rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary, #64748b);
+}
+
+.story-card-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.15rem;
+  line-height: 1.25;
+}
+
+.story-card-body {
+  margin: 0 0 1rem;
+  line-height: 1.45;
+  color: var(--text-secondary, #475569);
+}
+
+/* A real touch target, because the hand taps it and a viewer may too (no-hover rule, §7.1). */
+.story-card-continue {
+  min-height: 44px;
+  width: 100%;
+  justify-content: center;
+}
+
+/* The PAPER track (§35.1): what happens off-screen, on a printed form — narrated as text on a
+   paper-textured card, never drawn as a form. Everything else in this demo is the live app, so a
+   drawn surface among them reads as a real screen and misleads the first viewer who looks for it.
+   The texture is what says "this beat is not a screen": warm ground, a ruled left margin, no app
+   chrome. Generated, so it costs no asset and cannot go missing from a cache. */
+.story-card--paper {
+  background: repeating-linear-gradient(
+      transparent 0 1.55rem,
+      color-mix(in srgb, #94a3b8 22%, transparent) 1.55rem 1.6rem
+    ), linear-gradient(180deg, #fdfaf1 0%, #f6efdf 100%);
+  color: #3b3423;
+  border-color: color-mix(in srgb, #a8a29e 55%, transparent);
+  border-left: 3px solid color-mix(in srgb, #dc2626 45%, transparent);
+}
+
+.story-card--paper .story-card-kicker,
+.story-card--paper .story-card-body {
+  color: #6b5f45;
+}
+
+/* Whose phone is on screen. One persona at a time was the ruling (§35.1), so this label is the only
+   thing distinguishing the trainer's app from a client's — they look the same. Top-centre, clear of
+   the header's own controls, and never over the thing being demonstrated. */
+.story-persona {
+  position: fixed;
+  top: 0.55rem;
+  left: 50%;
+  z-index: 9500;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text-primary, #0f172a) 82%, transparent);
+  color: var(--bg-primary, #ffffff);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+/* What the current tap is FOR. The wedge needs no captions — four taps at one screen explain
+   themselves — but a four-minute story does, and reading it must not cost a tap. */
+.story-caption {
+  position: fixed;
+  left: 50%;
+  bottom: 1.1rem;
+  z-index: 9500;
+  transform: translateX(-50%);
+  width: min(30rem, calc(100vw - 2rem));
+  margin: 0;
+  padding: 0.7rem 1rem;
+  border-radius: var(--border-radius-md, 12px);
+  background: color-mix(in srgb, var(--text-primary, #0f172a) 88%, transparent);
+  color: var(--bg-primary, #ffffff);
+  font-size: 0.92rem;
+  line-height: 1.4;
+  text-align: center;
+  pointer-events: none;
+}

@@ -372,6 +372,13 @@ export const sl = {
   tour_step_signal: "Označi krog kot prelahek. En dotik ga zabeleži in pusti opombo za načrt.",
   tour_step_next_participant:
     "Preklopi na naslednjega udeleženca — ista seja, njegov lasten načrt.",
+  story_continue: "Naprej",
+  story_persona_trainer: "Telefon trenerja",
+  story_chapter_floor: "Na parketu",
+  story_floor_open_body:
+    "Torek zvečer. Trije prijatelji, en 60-minutni termin, ena skupna podloga. Trener ima polne roke, zato je vsak korak tu en sam dotik.",
+  story_floor_close_body:
+    "Signali so zabeleženi, nihče ni ničesar tipkal in ura se ni ustavila. Nocojšnje načrtovanje že ima vse, kar potrebuje.",
   today: "Danes",
   tomorrow: "Jutri",
   yesterday: "Včeraj",

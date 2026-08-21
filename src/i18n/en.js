@@ -386,6 +386,16 @@ export const en = {
     "Tap the circuit to bring it into focus. Its controls come within thumb reach.",
   tour_step_signal: "Mark the round Too Easy. One tap logs it and leaves a note for the plan.",
   tour_step_next_participant: "Switch to the next participant — same session, their own plan.",
+  // The long demo (TODO §35): chapter titles, the narration cards' bodies, and the labels the
+  // narration surface itself needs. Captions for taps that the story shares with the wedge stay
+  // under tour_step_* — the same beat, said once.
+  story_continue: "Continue",
+  story_persona_trainer: "Trainer's phone",
+  story_chapter_floor: "On the floor",
+  story_floor_open_body:
+    "Tuesday evening. Three friends, one 60-minute slot, one clipboard between them. The trainer's hands are busy, so every beat here is a single tap.",
+  story_floor_close_body:
+    "Signals logged, nobody typed anything, and the clock never stopped. Tonight's planning already has what it needs.",
   today: "Today",
   tomorrow: "Tomorrow",
   yesterday: "Yesterday",

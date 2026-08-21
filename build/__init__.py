@@ -1356,6 +1356,7 @@ def _playwright_worker_count():
 # price, on purpose.
 DEMO_TEST_FILES = (
     "tests/e2e/test_demo_tour.py",
+    "tests/e2e/test_demo_story.py",
     "tests/e2e/test_walkthrough.py",
     "tests/e2e/test_demo_pacing.py",
 )
