@@ -238,6 +238,11 @@ files beat few large ones: less context to load, fewer collisions, a tree that d
    one would have. Name the thing to do or the thing that is true, then the reason.
 4. **Answer a question; never record it as a decision.** "Any reason for X?" explores the option
    space: answer, recommend, leave it open. Mark something Decided only when they said so, dated.
+5. **Separate what you measured from what you assume, and scope every count.** Say which numbers
+   came from a command and which are estimates, and exclude vendored and generated trees
+   (`.venv/`, `node_modules/`, `dist/`) — `git ls-files` is the honest denominator. An unlabelled
+   guess sitting in a list of measurements is read as a measurement, and the user is then left
+   arguing with a number nobody took.
 
 ---
 
