@@ -2561,14 +2561,21 @@ a. **A recurrence model** — known unbuilt, and the story is written to want it
    `.ics` means: `SEQUENCE`/`RECURRENCE-ID` on one occurrence, not a new event
    ([calendarInvite.js](src/data/calendarInvite.js)).
 b. **A net-vs-slot time meter** while a programme is being authored (event 11).
-c. **In-session injury capture** (event 14) — one-handed, non-blocking, and it must reach the client
-   record rather than being a session-only note, since the whole point is that it changes future
-   programming.
-d. **A movement-scoped coaching note** (event 16) that resurfaces when that movement is next
-   programmed for that client. Neighbour of §7's feedback loop; not the same thing as a plan
-   adjustment. With (c) it shares one requirement the demo makes visible: both are captured against a
-   PARTICIPANT inside a shared group session and both surface in a review pane — so build the tagging
-   and the pane once, for both kinds of note, rather than an injury path and a coaching path.
+c. [x] **In-session injury capture** (event 14) — **2026-08-21**: the feedback modal gained one
+   tick, *keep this on the client's record*, which appends the dated note to `client.notes` — the
+   text every future plan is written against, durable in the stable schema, and already shown by the
+   client focus panel. Off by default, because most signals are about today's load and a record that
+   collects everything is one nobody reads. Deliberately does NOT set `hasInjury`: deciding which
+   tags mean "injury" would be a guess made from a string, and that call is the trainer's.
+d. [x] **A movement-scoped coaching note** (event 16) that resurfaces when that movement is next
+   programmed for that client — **2026-08-21**. Built as ONE pane for both kinds of note, as this
+   asked: the client focus panel, already open while a plan is being edited, gained a *From the
+   floor* block listing that client's unanswered signals and notes,
+   [floorNotes.js](src/domain/floorNotes.js) putting the ones about movements in THIS plan first and
+   marking them. **No new record type was needed** — a note is already captured against
+   (participant, movement) in `planUpdates`; what was missing was it coming back at the moment it
+   can change something. Resolved notes stay gone; four rows, then a `+N`, because the panel shares
+   a 390px screen with the plan itself.
 e. **The persona transition** (event 4), per 35.1 — one screen at a time, so this is a labelled
    handover and a route into the client pages, not a second layout.
 f. **Shared exercise binding across participants** (event 12) — §8.1.
@@ -2590,9 +2597,11 @@ events that genuinely need it.
       rather than restating its selectors), [storyNarration.js](src/modules/demo/storyNarration.js)
       (cards, persona pill, caption bar). Events 14, 15, 16 and 18 are NOT in it: 14 and 16 need
       35.3c/d, and a demo step that pretends is what a scripted demo exists to avoid.
-- [ ] **Chapter C's remaining events** — 14 and 16 need the in-session capture and the review pane
-      (35.3c, 35.3d); 15 (swap one movement for one participant) and 18 (complete, net vs slot) are
-      next after them.
+- [x] **35.3c and 35.3d shipped — 2026-08-21**, before the demo beats that show them: the *keep on
+      the client's record* tick and the *From the floor* block in the client focus panel. One pane
+      for both kinds of note, as 35.3d required.
+- [ ] **Chapter C's remaining events** — 14 and 16 (now buildable), then 15 (swap one movement for
+      one participant) and 18 (complete, net vs slot).
 - [ ] **Chapter D**, then **A**. B stays blocked on §8.1.
 
 ---

@@ -12,6 +12,7 @@
 //   renderPendingPlanAdjustments()
 // }
 
+import { notesWithFloorNote } from "../../domain/floorNotes.js";
 import { $id, closeModal, openModal, renderMarkupOnce } from "./dom.js";
 
 let deps = null;
@@ -42,6 +43,8 @@ export function openFeedbackModal(exId) {
   $id("feedback-client-display-name").textContent = client.name;
   $id("feedback-ex-display-name").textContent = curEx.name;
   $id("feedback-custom-note").value = "";
+  $id("feedback-keep-on-record").checked = false;
+  $id("feedback-keep-on-record-label").textContent = t("feedback_keep_on_record");
 
   // Reset voice recorder state
   feedbackIsRecording = false;
@@ -139,6 +142,19 @@ export function renderFeedbackDialog() {
       <div class="form-group">
         <label for="feedback-custom-note">Custom Details / Notes</label>
         <input type="text" id="feedback-custom-note" placeholder="e.g. Left knee clicks, reduced load..." class="form-control">
+      </div>
+
+      <!-- Mid-session capture that OUTLIVES the session (TODO §35.3c). A twinge mentioned between
+           rounds changes how this person is programmed for months; logged only as an alert it waits
+           on the Pending Review screen and is resolved away. Ticking this appends it to the client's
+           own record, which is the text every future plan is written against. Off by default: most
+           signals are about today's load, and a record that collects everything is one nobody
+           reads. The whole row is the target, not the 16px box. -->
+      <div class="form-group">
+        <label class="feedback-keep-row" for="feedback-keep-on-record">
+          <input type="checkbox" id="feedback-keep-on-record">
+          <span id="feedback-keep-on-record-label">Keep this on the client's record</span>
+        </label>
       </div>
       
       <div class="modal-actions">
@@ -283,6 +299,20 @@ export function setupFeedbackForms() {
       };
 
       state.planUpdates.push(newFeedback);
+
+      // Kept on the person, not only on the session (TODO §35.3c). A twinge mentioned between
+      // rounds is the kind of thing that changes programming for months, and an alert on the
+      // Pending Review screen is resolved away within the week. Appended to the notes the trainer
+      // already writes by hand — the same text the client focus panel shows while their next plan
+      // is being shaped. Deliberately NOT setting `hasInjury`: which tags mean "injury" would be a
+      // guess made from a string, and the trainer's own record is where that call belongs.
+      if (client && $id("feedback-keep-on-record").checked) {
+        client.notes = notesWithFloorNote(client.notes, {
+          on: new Date().toISOString().slice(0, 10),
+          exerciseName: exName,
+          tag: newFeedback.tag,
+        });
+      }
 
       // Save to active session so it carries into client history log
       if (activeSession) {

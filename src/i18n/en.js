@@ -389,6 +389,9 @@ export const en = {
   // The long demo (TODO §35): chapter titles, the narration cards' bodies, and the labels the
   // narration surface itself needs. Captions for taps that the story shares with the wedge stay
   // under tour_step_* — the same beat, said once.
+  floor_notes_label: "From the floor",
+  floor_note_in_this_plan: "in this plan",
+  feedback_keep_on_record: "Keep this on the client's record",
   story_continue: "Continue",
   story_persona_trainer: "Trainer's phone",
   story_chapter_floor: "On the floor",

@@ -46,4 +46,17 @@
   }
 }
 
-/* --- SESSION BOOKING CARD --- */
+/* Keeping a note on the client's record (TODO §35.3c). The whole row is the target — a 16px tick
+   box is not something a trainer hits one-handed with the other hand on a barbell (§7.1). */
+.feedback-keep-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  cursor: pointer;
+}
+.feedback-keep-row input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+}

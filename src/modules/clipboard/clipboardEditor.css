@@ -56,6 +56,47 @@
   line-height: 1.45;
   color: var(--text-main);
 }
+/* What the floor already said about this client (TODO §35.3d). Rows, not prose: each is one signal
+   about one movement, and a trainer scans them while their other hand is on a barbell. */
+.floor-note-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.floor-note {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--text-main);
+}
+.floor-note-movement {
+  font-weight: 700;
+}
+.floor-note-tag {
+  color: var(--text-muted);
+}
+/* The reason an entry is at the top: it is about a movement in the plan on screen. Said in words
+   rather than by colour alone — the ordering reads as arbitrary otherwise, and on a phone the
+   trainer sees the top two rows and nothing else. */
+.floor-note.is-in-plan .floor-note-movement {
+  color: var(--primary);
+}
+.floor-note-here {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--primary);
+}
+.floor-note-more {
+  font-size: 11px;
+  color: var(--text-muted);
+}
 /* The edit-mode title bar. `min-width: 0` on both the row and the name is what actually lets the
    name shrink — a flex item's default `min-width: auto` refuses to go below its content, which is
    how the name ended up pushed out of the bar rather than ellipsised inside it. */

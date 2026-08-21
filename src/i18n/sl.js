@@ -372,6 +372,9 @@ export const sl = {
   tour_step_signal: "Označi krog kot prelahek. En dotik ga zabeleži in pusti opombo za načrt.",
   tour_step_next_participant:
     "Preklopi na naslednjega udeleženca — ista seja, njegov lasten načrt.",
+  floor_notes_label: "S parketa",
+  floor_note_in_this_plan: "v tem načrtu",
+  feedback_keep_on_record: "Shrani to v kartoteko stranke",
   story_continue: "Naprej",
   story_persona_trainer: "Telefon trenerja",
   story_chapter_floor: "Na parketu",

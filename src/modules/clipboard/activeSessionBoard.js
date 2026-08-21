@@ -22,6 +22,7 @@
 //   completeCircuitRound, focusExerciseByIndex, startRestTimer  — deck card callbacks
 //   newRecordId()
 
+import { floorNotesForPlan } from "../../domain/floorNotes.js";
 import { renderActiveUsersList } from "../common/activeUsersList.js";
 import { openFeedbackModal } from "../common/feedbackModal.js";
 import { escapeHTML, getClientDisplayNameHTML, getInitials } from "../common/utils.js";
@@ -67,9 +68,65 @@ function renderInjuryAlertBanner(activeClient) {
   }
 }
 
+// How many floor notes the panel shows before it starts hiding them. The panel shares a 390px
+// screen with the plan being edited, and a list long enough to scroll is one nobody reads to the
+// end of; the rest stay one tap away on the Pending Review screen, which is where they already are.
+const FLOOR_NOTES_SHOWN = 4;
+
+// What the floor already said about this client (TODO §35.3d). Text goes in with textContent, never
+// markup: a tag carries whatever the trainer typed into the feedback note.
+function renderFloorNotes(activeClient, activeClientState) {
+  const block = document.getElementById("client-focus-floor");
+  const list = document.getElementById("client-focus-floor-notes");
+  if (!block || !list) return;
+
+  const { state, t } = deps.getAppDeps();
+  const notes = floorNotesForPlan({
+    planUpdates: state.planUpdates,
+    clientId: activeClient.id,
+    planExerciseNames: (activeClientState?.exercises || []).map((item) => item.name),
+  });
+
+  document.getElementById("client-focus-floor-label").textContent = t("floor_notes_label");
+  list.textContent = "";
+  block.classList.toggle("hidden", notes.length === 0);
+
+  for (const note of notes.slice(0, FLOOR_NOTES_SHOWN)) {
+    const row = document.createElement("li");
+    // Marked, not merely first: a trainer reading a list has no way to tell an entry about the
+    // movement in front of them from one about last week's bench press.
+    row.className = note.inThisPlan ? "floor-note is-in-plan" : "floor-note";
+    const movement = document.createElement("span");
+    movement.className = "floor-note-movement";
+    movement.textContent = note.exerciseName || "";
+    const tag = document.createElement("span");
+    tag.className = "floor-note-tag";
+    tag.textContent = note.tag || "";
+    row.append(movement, tag);
+    // Says WHY this row is at the top, in words. A colour or a bullet would leave the ordering
+    // reading as arbitrary to anyone who cannot see the difference — and on a phone the trainer
+    // reads the first two rows and nothing else.
+    if (note.inThisPlan) {
+      const here = document.createElement("span");
+      here.className = "floor-note-here";
+      here.textContent = t("floor_note_in_this_plan");
+      row.appendChild(here);
+    }
+    list.appendChild(row);
+  }
+
+  const hidden = notes.length - FLOOR_NOTES_SHOWN;
+  if (hidden > 0) {
+    const more = document.createElement("li");
+    more.className = "floor-note-more";
+    more.textContent = `+${hidden}`;
+    list.appendChild(more);
+  }
+}
+
 // Only shown while editing the plan (CSS-gated by .editing-plan), so it's cheap to keep populated
 // on every render.
-function renderClientFocusPanel(activeClient) {
+function renderClientFocusPanel(activeClient, activeClientState) {
   if (!activeClient) return;
   const { t } = deps.getAppDeps();
   const goalsLabel = document.getElementById("client-focus-goals-label");
@@ -80,6 +137,7 @@ function renderClientFocusPanel(activeClient) {
   if (notesLabel) notesLabel.textContent = t("notes_injuries") || "Notes";
   if (goalsEl) goalsEl.textContent = activeClient.goals || t("no_goals_specified") || "";
   if (notesEl) notesEl.textContent = activeClient.notes || t("no_notes_specified") || "";
+  renderFloorNotes(activeClient, activeClientState);
 }
 
 // Repurpose the session title bar for edit mode: show WHICH client's plan is open and its temporal
@@ -299,7 +357,7 @@ export function renderActiveSessionBoard() {
 
   renderClientTabsBar(activeClientId);
   renderInjuryAlertBanner(activeClient);
-  renderClientFocusPanel(activeClient);
+  renderClientFocusPanel(activeClient, activeClientState);
   renderTitleBarForEditMode(activeClient);
 
   const started = !!activeSession.started;
