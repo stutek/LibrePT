@@ -21,26 +21,26 @@ Canonical context: [README.md](README.md) (architecture & features), [use_cases/
 (workflows), [CONTRIBUTING.md](CONTRIBUTING.md) (conventions). Durable engineering lessons live
 with the agent operating rules, not here — this file records *work*, not process.
 
-## Where to start (ranked 2026-08-17)
+## Where to start (ranked 2026-08-22)
 
 The governing fact is [docs/PREVIEW.md](docs/PREVIEW.md): the app tells its own users it can wipe
 their data. Nothing trainer-facing can be promoted until that is false, so the ranking is **data
 safety → showability → everything else**.
 
-**Every ranked item from 08-13 has shipped, which is why this is a re-rank rather than an edit**:
-§23.5's recording+landing page (rank 1, shipped 08-16 as a *script* plus a recorder that cannot rot),
-§18.7's `formatVersion` envelope (2, 08-15), §27.4's withdrawal route (3, 08-14, plus the §27.7 it
-surfaced), §7.2's feedback button state (4, 08-15), and §9.5's guided walkthrough (5, today). **The
-08-13 ranking also sat stale for four days** while four of those shipped — the same failure it was
-written to correct, so: re-read this table against `src/` before trusting it, and close items in the
-commit that ships them.
+**Every ranked item from 08-17 has shipped**: §26/§1.7's self-onboarding (rank 1, 08-17), §18.7's
+import consent (3, 08-18), and §8.7/§8.8's neighbourhood (4) is now the only gym-floor work left.
+What replaced them, on 08-21/08-22, was the long demo and everything it needed — which is why this
+re-rank looks different: §35's story named four product gaps, and building the story built them
+(§8.1's shared plan, §35.3a's recurrence model, §35.3b's fit meter, §35.3c/d's gym notes).
+
+Re-read this table against `src/` before trusting it, and close items in the commit that ships them.
 
 | Rank | Item | Why now |
 | :--- | :--- | :--- |
-| 1 | §26 / §1.7 client self-onboarding | **Decided 2026-08-17 (Simon): this is next.** The intake page a client fills on their own phone, with consent signed there. §27.1/§27.2 shipping discharged what parked it, and the whole GDPR surface it needs now exists |
-| 2 | §23.5 remainder — a feedback route a non-developer will use | The last launch prerequisite with nothing technical in its way. GitHub issues is a wall to a PT; one address or form, linked in-app. Best done with §12.4 (global `error`/`unhandledrejection` capture), or the report still asks a trainer to retype a build stamp by hand |
-| 3 | §18.7 remainder — forward-migration consent at import | Ordering, not urgency: a restore silently brings a file forward, and the trainer is not told it will no longer open in older builds. Small, and it must precede §18.8's encryption |
-| 4 | §8.7 / §8.8 gym-floor remainders | With §7.2 done these are what is left of the four, and both are cheap next to anything else here |
+| 1 | §23.5 remainder — a feedback route a non-developer will use | The last launch prerequisite, and now the only one. GitHub issues is a wall to a PT; one address or form, linked in-app. Needs a maintainer decision about the address, not code |
+| 2 | §12.6 — vendor the remaining Font Awesome weight | The last CDN dependency, and §7.2 wants the regular weight it would restore. Prerequisite already built |
+| 3 | §8.7 / §8.8 gym-floor remainders | §8.7 is a question rather than work (does completing a round stop its timer); §8.8's copy-program icon is cheap and its open questions are answerable now that §8.1 exists |
+| 4 | §29 program import | The shape is decided and every prerequisite exists — the parser and its frozen corpus are the whole of it |
 
 **Waiting on a ruling, not on work** — §1.6's confirm link (a replayable capability token aimed at the
 trainer's own store) and SMS as the response channel; §19.2's URL-privacy invariant, which unblocks
@@ -64,18 +64,19 @@ the thing that must happen first, not merely what it touches.
 | Theme | Open | Lead item | Blocked on |
 | :--- | :--- | :--- | :--- |
 | **Launch prerequisites** | §23.5 | A feedback route a non-developer will use | Maintainer actions; nothing technical |
-| **Data safety remainder** | §18.7, §18.8, §18.9, §18.11, §18.12 | `formatVersion` envelope | Nothing — but only §18.7 is urgent |
+| **Data safety remainder** | §18.8, §18.9, §18.12 | Encrypt the backups, not the live DB | Nothing; decided on paper and parked |
 | **Scheduling** | §1.2, §1.3, §1.4, §1.5 | Room occupancy via `freebusy.query` | §1.5's OAuth/verification path |
-| **Gym-floor UX** | §7.2, §8.1, §8.7, §8.8 | Feedback buttons showing their own state | Nothing; §7.2 is the real defect of the four |
+| **Gym-floor UX** | §8.7, §8.8 | Copy-program icon on the clipboard | Nothing; §8.7 is a question, not work |
 | **History & templates** | §17.1, §17.2, §17.4, §17.5 | Modality into the history snapshot | Decided on paper, parked deliberately |
 | **UI redesign** | §4.1, §5.1, §5.2, §11.1, §11.2 | Tabbed client view | Deliberately waiting for real users to aim it |
 | **Go-to-market** | §23.1–§23.6 | Decide what "winning" means | §23.1 gates every channel choice |
 | **Refactor remainders** | §24.4d, §24.5, §24.7, §24.8 | One movement → plan item mapping | Optional by their own text |
 | **Tests & docs** | §6.2, §12.3, §12.5, §12.6 | Vendor Font Awesome locally | Nothing; all small |
+| **The long demo** | §35's two unscriptable beats | The trainer opening the file Ana sent | A demo-only hook into the review dialog would be the mock the whole approach avoids |
 | **Routing decisions** | §19.2, §19.3 | The URL-privacy invariant | One decision, then both unblock |
 | **Data-subject rights** | §27.4 | One-tap withdrawal in the consent letter | Nothing; the other four shipped 2026-08-11 |
 | **Reported 2026-08-18** | §28.2 | Which contributor-facing docs get BUILT, so their addresses are injected rather than written out | Everything else in §28 shipped the same day |
-| **Client self-service** | §26, §1.7 | Intake page the client fills, consent signed on their own phone | Nothing — and it is next, decided 2026-08-17 |
+| **Client self-service** | §26.7 phase 2 | The vendored QR encoder and the wall poster | Deferred on purpose until the messaging handover has been tried in a gym; the link route shipped 08-22 |
 | **Program import** | §29 | Nothing — shape decided 2026-08-18, and the editor-as-review answers the fragility question | The parser and its frozen corpus; the intake flow, media-type rule and catalog crosswalk already exist |
 
 ---
