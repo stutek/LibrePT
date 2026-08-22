@@ -49,6 +49,10 @@ export function renderFeedbackRouteDialog() {
     <!-- The bug half is deliberately below and quieter: most of what a trainer wants to say is not a
          bug, and leading with a bug report tells them the app expects to be broken. -->
     <p id="feedback-route-bug-lede" class="text-sm text-muted"></p>
+    <!-- The tracker is PUBLIC and a screenshot of this app shows real people. Said before the
+         button rather than inside the issue body, because by the time they are reading the issue
+         they have already chosen the image. -->
+    <p id="feedback-route-public-warning" class="text-sm feedback-route-warning"></p>
     <a id="feedback-route-issue" class="btn secondary-btn feedback-route-btn" target="_blank" rel="noopener noreferrer" href="#">
       <i class="fa-solid fa-bug"></i> <span id="feedback-route-issue-label"></span>
     </a>
@@ -82,6 +86,7 @@ export function openFeedbackRouteDialog() {
     ["feedback-route-lede", t("feedback_route_lede")],
     ["feedback-route-mail-label", t("feedback_route_mail")],
     ["feedback-route-bug-lede", t("feedback_route_bug_lede")],
+    ["feedback-route-public-warning", t("feedback_route_public_warning")],
     ["feedback-route-issue-label", t("feedback_route_issue")],
     ["feedback-route-diagnostics-label", t("feedback_route_diagnostics")],
     ["feedback-route-diagnostics", diagnostics],
@@ -106,8 +111,10 @@ export function openFeedbackRouteDialog() {
     diagnostics,
   });
   issue.href = issueUrl || "#";
-  // No repository to file against means no button, rather than one that goes nowhere.
+  // No repository to file against means no button, rather than one that goes nowhere — and no
+  // warning about a public tracker nobody is being sent to.
   issue.classList.toggle("hidden", !issueUrl);
+  document.getElementById("feedback-route-public-warning").classList.toggle("hidden", !issueUrl);
 
   document
     .querySelector("#dialog-feedback-route .modal-close-btn")

@@ -56,10 +56,26 @@ test("a bug goes to an issue, and the issue asks for the screenshot in words", (
   });
 
   assert.match(url, /github\.com\/stutek\/LibrePT\/issues\/new/);
-  assert.match(decodeURIComponent(url), /screenshot/i);
-  assert.match(decodeURIComponent(url), /abc1234/);
+  const readable = decodeURIComponent(url.replace(/\+/g, "%20"));
+  assert.match(readable, /screenshot/i);
+  assert.match(readable, /abc1234/);
 });
 
 test("nowhere to send it means no link, not a dead one", () => {
   assert.equal(bugIssueUrl({ repoUrl: "", title: "x", whatHappened: "", diagnostics: "" }), "");
+});
+
+test("the issue body repeats the warning where the image is actually attached", () => {
+  const url = bugIssueUrl({
+    repoUrl: "https://github.com/stutek/LibrePT",
+    title: "x",
+    whatHappened: "",
+    diagnostics: DIAGNOSTICS,
+  });
+
+  // `+` for space is what a query string means (GitHub reads it back as a space); decodeURIComponent
+  // alone does not, which is a property of the decoder rather than of the link.
+  const body = decodeURIComponent(url.replace(/\+/g, "%20"));
+  assert.match(body, /PUBLIC/);
+  assert.match(body, /identifies a client/i);
 });

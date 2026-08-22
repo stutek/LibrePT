@@ -41,6 +41,14 @@ Re-read this table against `src/` before trusting it, and close items in the com
 | 2 | §8.7 / §8.8 gym-floor remainders | §8.7 is a question rather than work (does completing a round stop its timer); §8.8's copy-program icon is cheap, and its open questions are answerable now that §8.1 exists |
 | 3 | §23.6 / §23.1 — what "winning" means, then a channel | Nothing technical is left in front of a launch: the feedback route and the icon subsetting both shipped 2026-08-22 |
 
+**Asked 2026-08-22 (Simon), answered rather than decided**: should the email go and everything run
+through GitHub issues, praise included? Recommendation is no, on two grounds — the tracker is
+**public**, and a screenshot of this app shows real people, which makes "post it publicly" bad advice
+in an app built around client confidentiality; and praise is precisely the feedback that does not
+survive the friction of opening an account. If one channel is wanted anyway, the honest version is
+email only, with the maintainer filing issues from it. The public-tracker warning shipped regardless,
+since it holds as long as the GitHub route exists at all.
+
 **Both 08-22 ranks shipped the day they were written**: §23.5's feedback route (an address that needs
 no account, plus the bug half pointed at an issue with a screenshot) and §12.6's subsetting.
 

@@ -75,6 +75,15 @@
   margin: 8px 0;
   text-decoration: none;
 }
+/* Said before the button, in the app's warning colour: by the time a trainer is looking at the
+   issue form they have already picked the image. */
+.feedback-route-warning {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border-left: 3px solid var(--danger, #dc2626);
+  background: color-mix(in srgb, var(--danger, #dc2626) 10%, transparent);
+  color: var(--text-main);
+}
 .feedback-route-diagnostics {
   margin: 4px 0 0;
   padding: 8px 10px;

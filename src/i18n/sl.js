@@ -545,6 +545,8 @@ export const sl = {
   feedback_route_intro: "Kar sem hotel povedati:",
   feedback_route_bug_lede:
     "Gre za napako? Odpri prijavo na GitHubu in pripni zaslonsko sliko — to je najbolj uporabno, kar lahko pošlješ, in aplikacija je ne more posneti namesto tebe.",
+  feedback_route_public_warning:
+    "Prijave na GitHubu so javne. Preden pripneš zaslonsko sliko, odreži ali zamegli vse, kar razkriva stranko — napaka je ponovljiva tudi brez njenih imen.",
   feedback_route_issue: "Prijavi napako na GitHubu",
   feedback_route_issue_title: "Napaka: ",
   feedback_route_issue_placeholder: "<!-- Kaj si počel in kaj si pričakoval namesto tega? -->",

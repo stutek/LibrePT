@@ -567,6 +567,8 @@ export const en = {
   feedback_route_intro: "What I wanted to say:",
   feedback_route_bug_lede:
     "Something broken instead? Open an issue and attach a screenshot — it is the most useful thing you can send, and the app cannot take it for you.",
+  feedback_route_public_warning:
+    "GitHub issues are public. Crop or blur anything that identifies a client before attaching a screenshot — a bug is reproducible without their names.",
   feedback_route_issue: "Report a bug on GitHub",
   feedback_route_issue_title: "Bug: ",
   feedback_route_issue_placeholder:

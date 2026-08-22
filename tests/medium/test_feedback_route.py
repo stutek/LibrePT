@@ -43,6 +43,18 @@ def test_a_bug_is_pointed_at_where_a_bug_belongs_with_a_screenshot(page, local_s
     expect(page.locator("#feedback-route-bug-lede")).to_contain_text("screenshot")
 
 
+def test_the_trainer_is_told_the_tracker_is_public_before_they_choose_an_image(
+    page, local_server
+):
+    """A screenshot of this app shows real people. Said before the button, not inside the issue
+    body: by the time they are reading the issue form they have already picked the image."""
+    _open(page, local_server)
+
+    warning = page.locator("#feedback-route-public-warning")
+    expect(warning).to_be_visible()
+    expect(warning).to_contain_text("public")
+
+
 def test_what_would_be_sent_is_on_screen_first(page, local_server):
     _open(page, local_server)
 
