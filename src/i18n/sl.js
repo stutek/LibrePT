@@ -433,6 +433,10 @@ export const sl = {
   story_programme_close_body:
     "En načrt, trije ljudje, in gre v uro. Torek je zdaj lahko o vadbi in ne o telefonu.",
   story_step_evening_menu: "Doma, pozneje zvečer.",
+  story_step_evening_move:
+    "Torek se premakne za dve uri — dogovorjeno z vsemi tremi po vadbi. Obrazec to izrecno pove: samo ta večer.",
+  story_step_evening_move_time:
+    "Ob osmih namesto ob šestih. Naslednji torek in tisti za njim ostaneta točno tam, kjer sta bila.",
   story_step_evening_theme: "Temno, ker je pol enajstih in trener sedi na kavču.",
   story_evening_open_body:
     "Seja je končana in vsi so šli domov. To je polovica, ki je nihče ne snema: kaj se zgodi z zapiski, nastalimi med serijami.",

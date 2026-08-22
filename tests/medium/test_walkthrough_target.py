@@ -26,7 +26,8 @@ stage.innerHTML = `
     <div class="session-card">Group Strength &amp; Conditioning</div>
   </section>
   <section class="app-view active" id="view-visible-one">
-    <div class="session-card">Group Strength &amp; Conditioning</div>
+    <div class="session-card">Group Strength &amp; Conditioning<button class="btn-edit-session"></button></div>
+    <div class="session-card">Tuesday &amp; Thursday Strength<button class="btn-edit-session"></button></div>
     <button class="only-here">Solo</button>
   </section>
 `;
@@ -35,6 +36,10 @@ document.body.appendChild(stage);
 window.__resolve = (step) => {
   const found = resolveTarget(document, step);
   return found ? (found.closest('.app-view')?.id ?? 'no-view') : null;
+};
+window.__resolveCard = (step) => {
+  const found = resolveTarget(document, step);
+  return found ? found.closest('.session-card')?.textContent.trim() : null;
 };
 """
 
@@ -265,3 +270,36 @@ def test_a_failed_show_me_does_not_leave_the_panel_stuck_busy(page, local_server
 
     assert page.locator(".walkthrough-problem").is_visible(), "a failure has to say so"
     assert page.locator("#walkthrough-show").is_enabled(), "the offer must come back"
+
+
+def test_an_icon_button_is_named_by_the_card_it_sits_on(page, local_server):
+    """An icon button carries no text of its own, so a step can only ever have named it by position —
+    which is exactly what broke the first gym-floor tour. `targetWithin` says what a person says:
+    the edit button on the card called this."""
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#view-visible-one")
+
+    resolved = page.evaluate(
+        """() => window.__resolveCard({
+          targetWithin: '.session-card',
+          targetText: 'Tuesday & Thursday',
+          target: '.btn-edit-session',
+        })"""
+    )
+    assert resolved.startswith("Tuesday & Thursday")
+
+
+def test_a_card_that_is_not_on_screen_is_not_searched_inside(page, local_server):
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#view-visible-one")
+
+    assert (
+        page.evaluate(
+            """() => window.__resolveCard({
+              targetWithin: '.session-card',
+              targetText: 'no such session',
+              target: '.btn-edit-session',
+            })"""
+        )
+        is None
+    )

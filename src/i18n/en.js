@@ -450,6 +450,10 @@ export const en = {
   story_programme_close_body:
     "One plan, three people, and it fits the hour. Tuesday can now be about the training rather than about the phone.",
   story_step_evening_menu: "Home, later that night.",
+  story_step_evening_move:
+    "Tuesday moves two hours later — agreed with all three after the session. The form says it out loud: this evening only.",
+  story_step_evening_move_time:
+    "Eight instead of six. Next Tuesday, and the one after, stay exactly where they were.",
   story_step_evening_theme: "Dark, because it is half past ten and the trainer is on a sofa.",
   story_evening_open_body:
     "The session is over and everyone has gone home. This is the half nobody films: what happens to the notes taken between sets.",

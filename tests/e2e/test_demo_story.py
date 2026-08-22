@@ -100,9 +100,13 @@ def test_the_story_tells_a_story_rather_than_naming_features(page, local_server)
 
 
 def test_the_story_leaves_the_note_on_the_person_it_was_about(page, local_server):
-    """The evening's point, verified independently of the guide's own grading: what was typed
-    mid-circuit is on that participant's record and in the plan being shaped for them."""
-    _open_story(page, local_server)
+    """The gym chapter's point, verified independently of the guide's own grading: what was typed
+    mid-circuit is on that participant's record and in the plan being shaped for them.
+
+    Walked as its own chapter, which is also what the claim is about — the story now runs on past
+    this into the evening, and asserting it from the end would be asserting where the LAST chapter
+    happens to leave the app."""
+    _open_story(page, local_server, "?init=demo_data_load&demo=story&chapter=gym")
 
     _walk_the_whole_story(page)
 

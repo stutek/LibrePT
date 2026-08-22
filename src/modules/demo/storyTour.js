@@ -380,6 +380,26 @@ const EVENING_CHAPTER = {
       caption: "story_step_evening_theme",
       expect: { selector: "html.midnight-theme", visible: true },
     },
+    {
+      // Event 21: the pre-agreed one-off move. The story's claim is what the form SAYS while it is
+      // open — this evening only, the series untouched — so that is the expectation.
+      id: "evening-move",
+      persona: TRAINER,
+      route: "/",
+      targetWithin: ".session-card",
+      targetText: "Tuesday & Thursday",
+      target: ".btn-edit-session",
+      caption: "story_step_evening_move",
+      expect: { selector: "#setup-occurrence-scope", visible: true },
+    },
+    {
+      id: "evening-move-time",
+      persona: TRAINER,
+      target: "#setup-start-time",
+      enter: "20:00",
+      caption: "story_step_evening_move_time",
+      expect: { selector: "#setup-start-time", hasValue: "20:00" },
+    },
     narration("evening-close", "chapter", "story_thanks_title", "story_gym_close_body", {
       onward: true,
     }),

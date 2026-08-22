@@ -80,6 +80,17 @@ function isOnScreen(element) {
  * and the step reports "no control matched", which stops the walkthrough loudly rather than guiding
  * someone to a place they cannot see. */
 export function resolveTarget(doc, step) {
+  // "The edit button on the card called X" — which is how a person says it, and the only way to name
+  // an ICON button among several: it carries no text of its own, so `targetText` on the button can
+  // never find it, and picking by position is the thing that broke the first gym-floor tour.
+  if (step.targetWithin) {
+    const wanted = (step.targetText || "").toLowerCase();
+    const container = [...doc.querySelectorAll(step.targetWithin)]
+      .filter(isOnScreen)
+      .find((el) => (el.textContent || "").toLowerCase().includes(wanted));
+    const inside = container?.querySelector(step.target);
+    return inside && isOnScreen(inside) ? inside : null;
+  }
   const matches = [...doc.querySelectorAll(step.target)].filter(isOnScreen);
   if (!step.targetText) return matches[0] || null;
   const wanted = step.targetText.toLowerCase();

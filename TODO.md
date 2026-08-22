@@ -2717,10 +2717,15 @@ events that genuinely need it.
       ones, so a drawn "client phone" would have been a recording with extra steps. The chapter is
       marked as belonging to the client's surface, which is what keeps it out of the trainer's walk
       — folding it in would leave the guide pointing at a form that is not on screen.
-- [ ] **What the story still cannot show**: the trainer opening the file Ana sent (§26.5's review
+- [x] **Event 21, the one-off move — 2026-08-22.** The evening chapter opens the repeating session's
+      next evening and moves it two hours later; the expectation is what the FORM says while it is
+      open — this evening only, the series untouched — because that is the claim the beat exists to
+      make. Naming the edit button needed one engine addition: `targetWithin` says "the edit button
+      on the card called X", which is how a person says it and the only way to name an icon button
+      among several without falling back on position — the thing that broke the first gym-floor tour.
+- [ ] **The one beat the story cannot show**: the trainer opening the file Ana sent. §26.5's review
       dialog needs a real file, and a demo-only hook into it would be the mock this whole approach
-      exists to avoid), and event 21's one-off move of the next occurrence — the model is there now,
-      the UI beat is not.
+      exists to avoid. The intake chapter says what happens next in words instead.
 
 ---
 
