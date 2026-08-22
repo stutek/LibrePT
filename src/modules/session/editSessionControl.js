@@ -30,6 +30,12 @@ import {
   sessionCalendarDate,
   upsertSessionRecord,
 } from "../../domain/sessionRecord.js";
+import { validateSeries } from "../../domain/sessionSeries.js";
+import {
+  readRepeatFields,
+  resetRepeatControls,
+  setupRepeatControls,
+} from "./sessionRepeatControls.js";
 
 let deps = null;
 let isPlanningModeActive = false;
@@ -319,6 +325,45 @@ function offerResendAfterChange(deps, { asTold, now, identity, startTime, t }) {
 // here: startWorkoutSession only stashes sessionMeta into the ephemeral active-session cache, it
 // never writes to state.sessions, so without this the new session launches the clipboard but never
 // appears on the homepage list.
+/** Writes the repeating RULE the form describes, when the trainer ticked "repeats" (TODO §35.3a).
+ *
+ * Returns the series, or null when this is an ordinary one-off — which is most sessions, and why
+ * the control is off by default.
+ *
+ * A malformed rule is dropped with a console warning rather than stored: a series with no days
+ * produces no evenings, and a silent nothing is the worst answer a scheduler can give.
+ */
+function commitSeriesIfRepeating(
+  deps,
+  { sessionName, sessionDate, timeLabel, location, clientRoutines, t },
+) {
+  const state = deps.getState();
+  const series = readRepeatFields({
+    id: newRecordId(),
+    session: {
+      title: sessionName || t("workout_setup_title") || "Workout Session",
+      sessionDate,
+      timeLabel,
+      location,
+      participants: clientRoutines.map((assignment) => assignment.clientId),
+      routineId: clientRoutines[0]?.routineId || "",
+    },
+  });
+  if (!series) return null;
+
+  const problems = validateSeries(series);
+  if (problems.length > 0) {
+    console.warn(`[series] not saved: ${problems.join("; ")}`);
+    return null;
+  }
+
+  state.sessionSeries = [...(state.sessionSeries || []), series];
+  deps.saveToLocalStorage?.();
+  deps.rerenderSessions?.();
+  resetRepeatControls();
+  return series;
+}
+
 function commitRealSession(
   deps,
   { sessionId, sessionName, sessionDate, startTime, timeLabel, location, clientRoutines, t },
@@ -428,6 +473,8 @@ export function setupEditSessionControl() {
     nameInputEl.addEventListener("input", updateSessionNameSubtitle);
   }
 
+  setupRepeatControls({ lang: deps.getState?.().lang || "en" });
+
   form.addEventListener("submit", (e) => {
     e.preventDefault();
 
@@ -458,6 +505,19 @@ export function setupEditSessionControl() {
     const previousParticipants = editingSessionId
       ? (deps.getState().sessions || []).find((s) => s.id === editingSessionId)?.participants || []
       : [];
+
+    // A repeating slot is saved as the RULE (TODO §35.3a), and the board derives its evenings — so
+    // there is nothing to write into `sessions` for the weeks ahead, and editing "Tuesdays at six"
+    // later is one record rather than a sweep. The session in front of the trainer is still created
+    // and still launches, because they filled this form in to run something now.
+    commitSeriesIfRepeating(deps, {
+      sessionName,
+      sessionDate,
+      timeLabel,
+      location,
+      clientRoutines,
+      t,
+    });
 
     const sessionMeta = isPlanningModeActive
       ? buildPlanningSessionMeta({
@@ -763,6 +823,19 @@ export function openEditSessionControlModal(
   const targetSession = preselectedSessionId
     ? sessions.find((b) => b.id === preselectedSessionId)
     : null;
+
+  // Which evening of a repeating session this is, if it is one (TODO §35.3a). Said out loud
+  // because the alternative is a trainer changing next Tuesday and finding out later that every
+  // Tuesday moved — or, worse, believing it did when it did not. A one-off says nothing at all.
+  const occurrenceNote = document.getElementById("setup-occurrence-note");
+  if (occurrenceNote) {
+    const partOfSeries = Boolean(targetSession?.seriesId);
+    occurrenceNote.textContent = partOfSeries ? t("session_one_of_a_series") : "";
+    occurrenceNote.hidden = !partOfSeries;
+  }
+  // A repeating slot is authored on the session being CREATED; an existing evening is edited on its
+  // own, so the controls start clean every time the form opens.
+  resetRepeatControls();
 
   const draft = getEditSessionDraft();
   const defaults = computeDefaultSessionTimes();

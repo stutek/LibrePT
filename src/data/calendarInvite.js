@@ -42,6 +42,28 @@ function icsDisplayNameParam(value) {
   return cleaned ? `;CN="${cleaned}"` : "";
 }
 
+/** The `RRULE` line for a repeating session, or nothing for a one-off (TODO §35.3a).
+ *
+ * Weekdays arrive as JavaScript day numbers (0 = Sunday) — the app's one convention — and leave as
+ * the two-letter codes RFC 5545 uses, which is the only place the two vocabularies meet.
+ */
+const ICS_WEEKDAYS = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
+
+export function buildIcsRecurrenceRule({ weekdays, interval, until } = {}) {
+  if (!Array.isArray(weekdays) || weekdays.length === 0) return "";
+  const days = weekdays
+    .map((day) => ICS_WEEKDAYS[((day % 7) + 7) % 7])
+    .filter(Boolean)
+    .join(",");
+  if (!days) return "";
+  const parts = ["FREQ=WEEKLY", `BYDAY=${days}`];
+  if (interval > 1) parts.push(`INTERVAL=${interval}`);
+  // An inclusive last DAY on the trainer's calendar, expressed as the instant that day ends —
+  // `UNTIL` is exclusive of anything after it, and a bare date would cut the final evening.
+  if (until) parts.push(`UNTIL=${String(until).replace(/-/g, "")}T235959Z`);
+  return `RRULE:${parts.join(";")}`;
+}
+
 export function buildIcsContent({
   uid,
   title,
@@ -53,6 +75,9 @@ export function buildIcsContent({
   attendeeName,
   organizerEmail,
   organizerName,
+  recurrence,
+  recurrenceId,
+  sequence,
 }) {
   const lines = [
     "BEGIN:VCALENDAR",
@@ -66,6 +91,17 @@ export function buildIcsContent({
     `DTEND:${formatIcsDateUTC(endDate)}`,
     `SUMMARY:${escapeIcsText(title)}`,
   ];
+  // ONE evening of a repeating session, addressed by the instant it was ORIGINALLY scheduled for
+  // (TODO §35.3a). This is what makes a second file a change to that evening rather than a new
+  // event beside it — and why a moved session keeps the date the series gave it. `SEQUENCE` is how
+  // a calendar knows which of two files about the same evening is the newer one; without it an
+  // update is silently ignored by most clients.
+  if (recurrenceId) lines.push(`RECURRENCE-ID:${formatIcsDateUTC(recurrenceId)}`);
+  if (sequence) lines.push(`SEQUENCE:${sequence}`);
+  const rule = recurrence ? buildIcsRecurrenceRule(recurrence) : "";
+  // A rule and a single-occurrence override are mutually exclusive by construction: the series file
+  // carries the rule, the exception file carries the id of the evening it replaces.
+  if (rule && !recurrenceId) lines.push(rule);
   if (location) lines.push(`LOCATION:${escapeIcsText(location)}`);
   if (description) lines.push(`DESCRIPTION:${escapeIcsText(description)}`);
   if (organizerEmail) {

@@ -373,6 +373,11 @@ export const sl = {
   tour_step_next_participant:
     "Preklopi na naslednjega udeleženca — ista seja, njegov lasten načrt.",
   gym_notes_label: "V telovadnici",
+  label_repeats: "Ponovi vsak teden",
+  label_repeat_days: "Na te dneve",
+  label_repeat_until: "Do (neobvezno)",
+  session_one_of_a_series:
+    "To je en večer ponavljajoče se seje. Kar spremeniš tukaj, velja samo za ta večer.",
   gym_note_in_this_plan: "v tem načrtu",
   feedback_keep_on_record: "Shrani to v kartoteko stranke",
   story_continue: "Naprej",

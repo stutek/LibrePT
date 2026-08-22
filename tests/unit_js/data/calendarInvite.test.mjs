@@ -7,7 +7,11 @@
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { buildIcsContent, buildIcsFilename } from "../../../src/data/calendarInvite.js";
+import {
+  buildIcsContent,
+  buildIcsFilename,
+  buildIcsRecurrenceRule,
+} from "../../../src/data/calendarInvite.js";
 
 const BASE = {
   uid: "s1-c1",
@@ -78,4 +82,46 @@ test("the filename is a slug of the session, never empty", () => {
   assert.equal(buildIcsFilename("Hypertrophy Upper!"), "hypertrophy-upper.ics");
   assert.equal(buildIcsFilename("!!!"), "session.ics");
   assert.equal(buildIcsFilename(""), "session.ics");
+});
+
+// ── A session that repeats (TODO §35.3a) ──────────────────────────────────────────────────────
+// The whole point of getting this right is that a client's calendar holds ONE entry for "Tuesdays
+// and Thursdays at six", and that moving next Tuesday moves next Tuesday in it — not that it gains
+// a second event beside the first.
+
+test("a repeating session travels as one entry with a rule", () => {
+  const out = lines({ recurrence: { weekdays: [2, 4] } });
+
+  assert.ok(out.includes("RRULE:FREQ=WEEKLY;BYDAY=TU,TH"), out.join("\n"));
+  assert.equal(out.filter((line) => line.startsWith("BEGIN:VEVENT")).length, 1);
+});
+
+test("every other week says so, and an end date keeps its last evening", () => {
+  const rule = buildIcsRecurrenceRule({ weekdays: [2], interval: 2, until: "2026-12-31" });
+
+  assert.match(rule, /INTERVAL=2/);
+  // The last evening is ON the 31st, so the cutoff is the end of that day rather than its start.
+  assert.match(rule, /UNTIL=20261231T235959Z/);
+});
+
+test("a rule with no days is no rule at all", () => {
+  assert.equal(buildIcsRecurrenceRule({ weekdays: [] }), "");
+  assert.equal(buildIcsRecurrenceRule(), "");
+});
+
+test("moving one evening addresses the evening it replaces, and says it is newer", () => {
+  const original = new Date("2026-08-25T18:00:00Z");
+  const out = lines({
+    startDate: new Date("2026-08-25T20:00:00Z"),
+    recurrenceId: original,
+    sequence: 1,
+  });
+
+  assert.ok(
+    out.some((line) => line.startsWith("RECURRENCE-ID:")),
+    out.join("\n"),
+  );
+  assert.ok(out.includes("SEQUENCE:1"));
+  // No rule on an exception: this file speaks for one evening, not for the series.
+  assert.ok(!out.some((line) => line.startsWith("RRULE:")));
 });

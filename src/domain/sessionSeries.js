@@ -151,3 +151,36 @@ export function occurrenceAsSession(occurrence, id) {
   const { fromSeries: _derived, id: _derivedId, ...session } = occurrence;
   return { ...session, id };
 }
+
+/** The instant a series scheduled one of its evenings for — the evening's identity, independent of
+ * where it was later moved to. */
+export function scheduledStartFor(series, occurrenceDate) {
+  const slot = parseTimeRange(series?.time);
+  if (!slot || !occurrenceDate) return null;
+  const start = atMidnight(occurrenceDate);
+  start.setHours(Math.floor(slot.start / 60), slot.start % 60, 0, 0);
+  return start;
+}
+
+/** What a calendar file has to say about a session that belongs to a series (TODO §35.3a).
+ *
+ * Two cases, and they are mutually exclusive:
+ *   • the evening is still where the rule put it — the file carries the RULE, so the client's
+ *     calendar holds ONE entry for "Tuesdays and Thursdays at six" rather than one per evening;
+ *   • the evening was moved — the file carries the id of the evening it REPLACES, so the client's
+ *     calendar changes that entry instead of gaining a second one beside it.
+ *
+ * `sequence` is 1 rather than a running count: a calendar only needs the newer file to outrank the
+ * original (which is 0), and a counter would be a second thing to keep true about an evening that
+ * already knows when it was moved.
+ */
+export function occurrenceCalendarFields(series, session) {
+  if (!series || !session?.occurrenceDate) return {};
+  const scheduled = scheduledStartFor(series, session.occurrenceDate);
+  const actual = session.startDate ? new Date(session.startDate) : null;
+  const moved = scheduled && actual && scheduled.getTime() !== actual.getTime();
+  if (moved) return { recurrenceId: scheduled, sequence: 1 };
+  return {
+    recurrence: { weekdays: series.weekdays, interval: series.interval, until: series.until },
+  };
+}

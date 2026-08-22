@@ -69,6 +69,28 @@ export function renderEditSessionView(targetElement) {
             </div>
           </div>
 
+          <!-- Repeating slot (TODO §35.3a). A trainer's week is mostly the same week: "Tuesdays and
+               Thursdays at six" is ONE thing to set up, and the board owes every evening it
+               produces. Off by default, because a one-off is still the thing being created most
+               often and a repeat left ticked by accident fills eight weeks. -->
+          <div class="setup-repeat mb-3">
+            <label class="setup-repeat-toggle" for="setup-repeat">
+              <input type="checkbox" id="setup-repeat">
+              <span id="setup-repeat-label" data-i18n="label_repeats">Repeats every week</span>
+            </label>
+            <div id="setup-repeat-detail" class="setup-repeat-detail hidden">
+              <p id="setup-repeat-days-label" class="text-sm text-muted m-0" data-i18n="label_repeat_days">On these days</p>
+              <div id="setup-repeat-days" class="setup-repeat-days"></div>
+              <label for="setup-repeat-until" class="text-sm" data-i18n="label_repeat_until">Until (optional)</label>
+              <input type="date" id="setup-repeat-until" class="form-control" placeholder="YYYY-MM-DD">
+            </div>
+          </div>
+
+          <!-- Which evening of a repeating session is being edited (TODO §35.3a). Shown only when
+               the answer is "one of them", because that is when a trainer needs to know that what
+               they change here does not touch next week. -->
+          <p id="setup-occurrence-note" class="setup-occurrence-note text-sm mb-3" role="status" hidden></p>
+
           <!-- Live double-booking readout for the slot above (TODO §1.6). aria-live because it
                appears in response to typing elsewhere in the form, with no focus change to
                announce it, and it is the one thing here that can make a save wrong. -->

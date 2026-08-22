@@ -84,3 +84,53 @@
   height: 16px;
   cursor: pointer;
 }
+
+/* The repeating slot (TODO §35.3a). Off by default and quiet when off: a one-off session is still
+   what a trainer creates most often, so this must not read as a decision they owe an answer to. */
+.setup-repeat-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  cursor: pointer;
+}
+.setup-repeat-toggle input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+}
+.setup-repeat-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 0 0;
+}
+/* Seven targets that have to fit a 390px phone and still be hittable with a thumb: they wrap rather
+   than shrink, because a 30px day button is a miss waiting to happen. */
+.setup-repeat-days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.setup-repeat-day {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  cursor: pointer;
+}
+.setup-repeat-day input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+}
+/* Which evening is being edited. A statement, not a warning — nothing has gone wrong. */
+.setup-occurrence-note {
+  padding: 8px 10px;
+  border-left: 3px solid var(--primary);
+  border-radius: 6px;
+  background: var(--primary-light);
+  color: var(--text-main);
+}

@@ -29,6 +29,7 @@ import {
   writeTrainerIdentity,
 } from "../../data/trainerIdentity.js";
 import { inviteExpiresAt } from "../../domain/inviteExpiry.js";
+import { occurrenceCalendarFields } from "../../domain/sessionSeries.js";
 import { closeModal, openModal, renderMarkupOnce } from "../common/dom.js";
 import { downloadFile } from "../common/download.js";
 import { buildEventLink } from "../common/eventTransports.js";
@@ -260,6 +261,11 @@ function buildEmailInviteButton(client, sessionInfo, replyLink, t) {
         attendeeEmail: client.email,
         attendeeName: client.name,
         organizerEmail: currentOrganizer(),
+        // If this evening belongs to a repeating session, the file says so — the whole rule while
+        // the evening is where the rule put it, and the id of the evening it REPLACES once it has
+        // been moved (TODO §35.3a). Resolved here rather than passed in, because every caller of
+        // this dialog would otherwise have to know what a series is.
+        ...recurrenceFieldsFor(sessionInfo),
       }),
       buildIcsFilename(sessionInfo.sessionName),
       "text/calendar",
@@ -268,6 +274,19 @@ function buildEmailInviteButton(client, sessionInfo, replyLink, t) {
     btn.textContent = t("session_invite_sent") || "Invite sent";
   });
   return btn;
+}
+
+/** What this session's calendar file has to say about repeating, if anything (TODO §35.3a).
+ *
+ * Empty for a one-off, which is most sessions — the rule and the exception are the two cases a
+ * repeating one can be in, and domain/sessionSeries.js owns which.
+ */
+function recurrenceFieldsFor(sessionInfo) {
+  const state = deps?.getState?.();
+  const session = (state?.sessions || []).find((row) => row.id === sessionInfo.sessionId);
+  if (!session?.seriesId) return {};
+  const series = (state?.sessionSeries || []).find((row) => row.id === session.seriesId);
+  return occurrenceCalendarFields(series, session);
 }
 
 /** The text channel, beside email rather than instead of it (TODO §1.6, SMS ruled in 2026-08-17): an

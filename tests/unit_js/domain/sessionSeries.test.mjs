@@ -10,6 +10,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   occurrenceAsSession,
+  occurrenceCalendarFields,
   occurrenceKey,
   seriesOccurrences,
   sessionsWithSeries,
@@ -143,4 +144,33 @@ test("touching an evening turns it into a session that the series still recognis
     shown.map((s) => s.id),
     ["s-new"],
   );
+});
+
+test("an evening still where the rule put it travels as the whole series", () => {
+  // One entry in the client's calendar for "Tuesdays and Thursdays at six", not one per evening.
+  const [first] = seriesOccurrences(SERIES, { from: "2026-08-24", to: "2026-08-26" });
+
+  const fields = occurrenceCalendarFields(SERIES, occurrenceAsSession(first, "s1"));
+
+  assert.deepEqual(fields.recurrence.weekdays, [2, 4]);
+  assert.equal(fields.recurrenceId, undefined);
+});
+
+test("a moved evening names the evening it replaces", () => {
+  const moved = {
+    id: "s1",
+    seriesId: "ser1",
+    occurrenceDate: "2026-08-25",
+    startDate: new Date("2026-08-25T20:00:00").toISOString(),
+  };
+
+  const fields = occurrenceCalendarFields(SERIES, moved);
+
+  assert.equal(fields.recurrence, undefined, "an exception does not carry the rule");
+  assert.equal(fields.recurrenceId.getHours(), 18, "it points at where the rule had put it");
+  assert.equal(fields.sequence, 1, "and says it is the newer word on that evening");
+});
+
+test("a one-off session has nothing to say about recurrence", () => {
+  assert.deepEqual(occurrenceCalendarFields(null, { id: "s1" }), {});
 });

@@ -390,6 +390,11 @@ export const en = {
   // narration surface itself needs. Captions for taps that the story shares with the wedge stay
   // under tour_step_* — the same beat, said once.
   gym_notes_label: "In the gym",
+  label_repeats: "Repeats every week",
+  label_repeat_days: "On these days",
+  label_repeat_until: "Until (optional)",
+  session_one_of_a_series:
+    "This is one evening of a repeating session. What you change here changes this evening only.",
   gym_note_in_this_plan: "in this plan",
   feedback_keep_on_record: "Keep this on the client's record",
   story_continue: "Continue",

@@ -2590,9 +2590,18 @@ a. [~] **A recurrence model** — **the rule and the board shipped 2026-08-22**,
    sessions and do. The board draws eight weeks ahead and one back: an open-ended rule is infinite,
    and beyond a term it is a list of identical Tuesdays nobody scrolls to.
 
-   **Still open**: authoring a series in the session form, moving ONE occurrence from the UI, and
-   the `.ics` half — `RRULE` on the series, `SEQUENCE`/`RECURRENCE-ID` on a moved occurrence
-   ([calendarInvite.js](src/data/calendarInvite.js)).
+   **Authoring and the calendar file shipped the same day.** The session form has a "repeats every
+   week" tick that reveals seven weekday toggles with the session's own day already chosen — a
+   trainer who says "this repeats" means "this, again", and a rule with no day silently produces
+   nothing. The calendar file carries `RRULE` while an evening is where the rule put it, and
+   `RECURRENCE-ID` + `SEQUENCE` once it has moved, so a client's calendar holds ONE entry for
+   "Tuesdays and Thursdays at six" and a change lands on the evening it belongs to.
+
+   Moving one occurrence needs no separate UI: opening an evening from the board makes it a record,
+   and the form then says, out loud, that what is changed there changes that evening only.
+
+   **Still open**: editing the SERIES itself (today the rule is created and then only its evenings
+   are edited), and `cancelled` has a schema field and no control behind it yet.
 b. **A net-vs-slot time meter** while a programme is being authored (event 11).
 c. [x] **In-session injury capture** (event 14) — **2026-08-21**: the feedback modal gained one
    tick, *keep this on the client's record*, which appends the dated note to `client.notes` — the
