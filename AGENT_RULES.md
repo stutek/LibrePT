@@ -243,7 +243,15 @@ files beat few large ones: less context to load, fewer collisions, a tree that d
    **Never coin a term, least of all in the maintainer's own language.** A word invented for the
    occasion — a literal translation, a shortened label, a name for a step — reads as jargon they
    are expected to already know, so the reply costs a round trip instead of saving one. Use the
-   ordinary word, or spell the thing out.
+   ordinary word, or spell the thing out. **The codebase's own English names are the trap**: they
+   are the words in your head, and translating one word-for-word produces a term that exists in no
+   language — "deck" became *paluba*, a ship's deck, in a sentence about exercise cards. Name what
+   is on screen ("the buttons on an exercise card"), never the internal thing.
+   **Describe what a person SEES, not the mechanism.** "The rows now carry the same classes, so one
+   place decides the look" is a sentence about CSS; "the buttons look the same everywhere now, and
+   they are no longer too small to hit" is the same fix, told to the person who reported it. Both
+   halves of this were handed back in one reply — the coined word and the mechanism — which is what
+   this paragraph is for.
    **Write for someone who has not opened the repository today**: no `§`-numbers, no file names used
    as nouns, no test vocabulary — say what a person would SEE. A reply full of pointers is a reading
    assignment, and it was handed back to be rewritten.
