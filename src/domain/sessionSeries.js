@@ -184,3 +184,19 @@ export function occurrenceCalendarFields(series, session) {
     recurrence: { weekdays: series.weekdays, interval: series.interval, until: series.until },
   };
 }
+
+/** What removing an evening MEANS, given whether it belongs to a series (TODO §35.3a).
+ *
+ * A one-off is deleted: the row was the only thing saying that evening existed. An evening of a
+ * repeating session cannot be, because the rule would simply produce it again on the next render —
+ * so it is kept as a cancelled record, which is the only way to say "not this Tuesday" to a rule
+ * that says "every Tuesday".
+ */
+export function sessionsAfterRemoving(sessions, removedIds) {
+  const ids = new Set(removedIds);
+  return (sessions || []).flatMap((session) => {
+    if (!ids.has(session.id)) return [session];
+    if (!session.seriesId) return [];
+    return [{ ...session, cancelled: true }];
+  });
+}

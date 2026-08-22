@@ -16,6 +16,7 @@ import {
   buildClientStateFromRoutine,
 } from "../domain/sessionPlanFactory.js";
 import { sessionBelongsToSlot } from "../domain/sessionRecord.js";
+import { sessionsAfterRemoving } from "../domain/sessionSeries.js";
 import { renderClientsList } from "../modules/clients/clientsView.js";
 import { renderActiveSessionBoard } from "../modules/clipboard/activeSessionBoard.js";
 import { markEditorRow, setClipboardEditModeFlag } from "../modules/clipboard/editModeState.js";
@@ -216,8 +217,15 @@ export function deleteScheduledSession() {
     if (plan?.exercises?.length) state.history.push(plan);
   }
 
-  state.sessions = (state.sessions || []).filter(
-    (session) => !sessionBelongsToSlot(session, sourceSession),
+  // Deleting an evening of a REPEATING session cannot mean removing the row: the rule would produce
+  // that evening again on the next render, and the trainer would watch a session they just deleted
+  // come back (TODO §35.3a). It is kept as cancelled, which is the only way to say "not this
+  // Tuesday" to a rule that says "every Tuesday". A one-off is deleted, as it always was.
+  state.sessions = sessionsAfterRemoving(
+    state.sessions || [],
+    (state.sessions || [])
+      .filter((session) => sessionBelongsToSlot(session, sourceSession))
+      .map((session) => session.id),
   );
   if (saveToLocalStorage) saveToLocalStorage();
 

@@ -13,6 +13,7 @@ import {
   occurrenceCalendarFields,
   occurrenceKey,
   seriesOccurrences,
+  sessionsAfterRemoving,
   sessionsWithSeries,
   validateSeries,
 } from "../../../src/domain/sessionSeries.js";
@@ -173,4 +174,25 @@ test("a moved evening names the evening it replaces", () => {
 
 test("a one-off session has nothing to say about recurrence", () => {
   assert.deepEqual(occurrenceCalendarFields(null, { id: "s1" }), {});
+});
+
+test("deleting a one-off evening removes it", () => {
+  const oneOff = { id: "s1", title: "Assessment" };
+
+  assert.deepEqual(sessionsAfterRemoving([oneOff], ["s1"]), []);
+});
+
+test("deleting an evening of a repeating session keeps it as cancelled", () => {
+  // Removing the row outright would be undone by the next render: the rule still says every
+  // Tuesday, so the evening would come straight back.
+  const occurrence = { id: "s1", seriesId: "ser1", occurrenceDate: "2026-08-25" };
+
+  const after = sessionsAfterRemoving([occurrence], ["s1"]);
+
+  assert.equal(after.length, 1);
+  assert.equal(after[0].cancelled, true);
+  assert.deepEqual(
+    sessionsWithSeries(after, [SERIES], { from: "2026-08-24", to: "2026-08-26" }),
+    [],
+  );
 });

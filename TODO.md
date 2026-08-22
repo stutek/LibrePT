@@ -2600,8 +2600,12 @@ a. [~] **A recurrence model** — **the rule and the board shipped 2026-08-22**,
    Moving one occurrence needs no separate UI: opening an evening from the board makes it a record,
    and the form then says, out loud, that what is changed there changes that evening only.
 
-   **Still open**: editing the SERIES itself (today the rule is created and then only its evenings
-   are edited), and `cancelled` has a schema field and no control behind it yet.
+   **Deleting an evening of a series CANCELS it** rather than removing the row — the rule would
+   otherwise produce that evening again on the next render, and a trainer would watch a session they
+   just deleted come back.
+
+   **Still open**: editing the SERIES itself. Today a rule is created and then only its evenings are
+   edited, which covers "move the next one" (§35.2 event 21) but not "we are moving to Wednesdays".
 b. **A net-vs-slot time meter** while a programme is being authored (event 11).
 c. [x] **In-session injury capture** (event 14) — **2026-08-21**: the feedback modal gained one
    tick, *keep this on the client's record*, which appends the dated note to `client.notes` — the
