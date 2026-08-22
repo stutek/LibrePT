@@ -149,6 +149,14 @@ export const SCHEMA_P = {
   sessions: {
     ...SCHEMA_4.sessions,
     startDate: { required: true, type: "string" },
+    // Which evening of which series this row SPEAKS FOR (TODO §35.3a). `occurrenceDate` is the date
+    // the series originally scheduled, never the date the session was moved to: that is what makes
+    // a second invitation a change to the same evening rather than a new one, and what lets the
+    // board show a moved evening once instead of twice.
+    seriesId: { required: false, type: "string" },
+    occurrenceDate: { required: false, type: "string" },
+    // A cancelled evening is a RECORD, not a deletion — the rule would simply produce it again.
+    cancelled: { required: false, type: "boolean" },
   },
   // Invitations (TODO §1.6, decided 2026-08-17): an RSVP is a fact about an invitation — it was
   // sent, and this came back — not a property of a person or of a session. `sessions.participants`
@@ -182,6 +190,30 @@ export const SCHEMA_P = {
     status: { required: true, type: "string" },
     answer: { required: false, type: "string" },
     answeredAt: { required: false, type: "string" },
+  },
+  // A session that repeats (TODO §35.3a): the RULE, not the evenings it produces. Fifty stored rows
+  // for "Tuesdays and Thursdays at six" would make every later edit a fifty-row migration and would
+  // make moving one evening indistinguishable from re-timing the lot, so occurrences are derived
+  // (domain/sessionSeries.js) and only an evening something happened to becomes a `sessions` row.
+  //
+  // PREVIEW-ONLY, like `invites` above and for the same reason: schema 4 is durable and this shape
+  // is still moving. The cost is stated rather than hidden — a series does not survive a restore or
+  // reach a Drive snapshot until schema 5 is minted from P. The evenings a trainer has actually
+  // touched are ordinary sessions and DO survive, which is the half that matters most.
+  //
+  // `weekdays` is JavaScript's own numbering (0 = Sunday), the same `getDay()` returns.
+  sessionSeries: {
+    id: { required: true, type: "string" },
+    title: { required: false, type: "string" },
+    startDate: { required: true, type: "string" },
+    until: { required: false, type: "string" },
+    time: { required: true, type: "string" },
+    weekdays: { required: true, type: "array" },
+    interval: { required: false, type: "number" },
+    location: { required: false, type: "string" },
+    participants: { required: false, type: "array" },
+    routineId: { required: false, type: "string" },
+    maxCapacity: { required: false, type: "number" },
   },
 };
 

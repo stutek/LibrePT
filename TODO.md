@@ -2579,11 +2579,19 @@ separate.** A stranger gets the wedge; someone who already leaned in gets the st
 The scenario is worth writing down now precisely because it names these; each is a product gap the
 demo would otherwise paper over.
 
-a. **A recurrence model** — known unbuilt, and the story is written to want it anyway (Simon,
-   2026-08-19). Sessions today are individual records. "2× a week, fixed" (event 2) and
-   "move only the next occurrence" (event 21) are one concept — a series plus per-occurrence
-   exceptions — and it is the largest unbuilt piece in the story. It also decides what a second
-   `.ics` means: `SEQUENCE`/`RECURRENCE-ID` on one occurrence, not a new event
+a. [~] **A recurrence model** — **the rule and the board shipped 2026-08-22**, on Simon's ruling to
+   implement it. [sessionSeries.js](src/domain/sessionSeries.js) holds the rule; the evenings are
+   DERIVED, and only an evening something happened to becomes a `sessions` row that speaks for it,
+   addressed by the series and its ORIGINAL date. Fifty stored rows would have made every later edit
+   a fifty-row migration and moving one evening indistinguishable from re-timing the lot.
+
+   The collection is **preview-only** (§18.4's staging, the same exercise `invites` is), so a series
+   does not survive a restore until schema 5 — the evenings a trainer has touched are ordinary
+   sessions and do. The board draws eight weeks ahead and one back: an open-ended rule is infinite,
+   and beyond a term it is a list of identical Tuesdays nobody scrolls to.
+
+   **Still open**: authoring a series in the session form, moving ONE occurrence from the UI, and
+   the `.ics` half — `RRULE` on the series, `SEQUENCE`/`RECURRENCE-ID` on a moved occurrence
    ([calendarInvite.js](src/data/calendarInvite.js)).
 b. **A net-vs-slot time meter** while a programme is being authored (event 11).
 c. [x] **In-session injury capture** (event 14) — **2026-08-21**: the feedback modal gained one

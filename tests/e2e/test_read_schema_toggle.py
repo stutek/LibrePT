@@ -40,19 +40,27 @@ def _open_db(page):
     """
 
 
-def _records_in_schema(page, schema):
+def _records_in_schema(page, schema, collections=None):
     """The ids actually present in ONE schema's store — never in-memory state, which would report
-    the same answer whichever store was really being read."""
+    the same answer whichever store was really being read.
+
+    `collections` narrows the comparison, which is what makes it fair across schemas that do not
+    declare the same set: a PREVIEW-ONLY collection (§18.4's expand-first staging — `invites`,
+    `sessionSeries`) is deliberately absent from the stable store, and counting it as a difference
+    would report the staging rule working as though it were broken."""
     return _evaluate(
         page,
         _open_db(page)
         + """
         const name = indexedDb.storeNameForSchema(%s);
+        const wanted = %s;
         const all = await indexedDb.getAll(db.transaction([name], 'readonly').objectStore(name));
         db.close();
-        return all.map((r) => r.id);
+        return all
+          .filter((r) => !wanted || wanted.includes(r.collection))
+          .map((r) => r.id);
         """
-        % json.dumps(schema),
+        % (json.dumps(schema), json.dumps(collections)),
     )
 
 
@@ -65,7 +73,24 @@ def test_every_live_schema_is_current_without_anyone_switching(page, local_serve
     live = _evaluate(page, "return readSchema.liveSchemas();")
     assert len(live) >= 2, "this test is meaningless with only one live schema"
 
-    per_schema = {schema: sorted(_records_in_schema(page, schema)) for schema in live}
+    # Only what EVERY live schema declares: a preview-only collection is staged ahead of the stable
+    # shape on purpose, and the promise being checked is that nothing a schema carries is missing
+    # from it — not that two deliberately different shapes hold identical rows.
+    shared = _evaluate(
+        page,
+        """
+        const projections = await import(new URL('data/recordProjections.js', document.baseURI).href);
+        const schemas = await import(new URL('data/recordSchemas.js', document.baseURI).href);
+        return projections.COLLECTIONS.filter((collection) =>
+          Object.values(schemas.LIVE_SCHEMAS).every((schema) =>
+            projections.schemaAcceptsCollection(schema, collection),
+          ),
+        );
+        """,
+    )
+    per_schema = {
+        schema: sorted(_records_in_schema(page, schema, shared)) for schema in live
+    }
     first = per_schema[live[0]]
     assert first, "the demo dataset must have landed in the store"
     for schema, ids in per_schema.items():

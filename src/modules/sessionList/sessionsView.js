@@ -1,6 +1,7 @@
 import { modalityOf, primaryMetricOf } from "../../domain/exerciseModality.js";
 import { loadUnitForEquipment } from "../../domain/repsAndLoad.js";
 import { sessionCalendarDate } from "../../domain/sessionRecord.js";
+import { occurrenceAsSession, sessionsWithSeries } from "../../domain/sessionSeries.js";
 import { renderMarkupOnce } from "../common/dom.js";
 import { buildSessionMeta, escapeHTML, getOverlappingSessions } from "../common/utils.js";
 import { updateSessionBarTimer } from "../session/sessionBar.js";
@@ -152,7 +153,10 @@ export function seedDemoActiveSession({ state }) {
 }
 
 export function launchClipboardDirectly({ sessionId, state, startWorkoutSession }, options = {}) {
-  const sessions = state.sessions || [];
+  // The same set the board drew, so an evening that is still only a rule can be opened from a deep
+  // link as well as from a tap — overlap merging then sees the derived evenings too, which is what
+  // keeps a repeating group and a one-off rehab session in the same clipboard.
+  const sessions = visibleSessions(state);
   const session = sessions.find((s) => s.id === sessionId);
   if (!session) return;
 
@@ -189,6 +193,32 @@ function compareByStartDate(a, b) {
   return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
 }
 
+// How far ahead the board draws evenings a series still owes. An open-ended rule is infinite, so
+// some horizon is unavoidable; eight weeks is what a trainer plans within, and beyond it the board
+// would be a list of identical Tuesdays nobody scrolls to. Behind, the window reaches back far
+// enough to keep the past week's evenings on the board beside the ones that were actually run.
+const SERIES_HORIZON_DAYS = 56;
+const SERIES_LOOKBACK_DAYS = 7;
+
+function seriesWindow(now = new Date()) {
+  const day = (offset) => {
+    const date = new Date(now);
+    date.setDate(date.getDate() + offset);
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    return `${date.getFullYear()}-${month}-${String(date.getDate()).padStart(2, "0")}`;
+  };
+  return { from: day(-SERIES_LOOKBACK_DAYS), to: day(SERIES_HORIZON_DAYS) };
+}
+
+/** Every evening the board should show: the stored sessions, plus what each series still owes.
+ *
+ * Exported because the clipboard launch has to resolve the same set — a trainer tapping an evening
+ * that only exists as a rule must reach the same thing they are looking at.
+ */
+export function visibleSessions(state) {
+  return sessionsWithSeries(state.sessions || [], state.sessionSeries || [], seriesWindow());
+}
+
 export function renderSessions({
   state,
   t,
@@ -199,20 +229,34 @@ export function renderSessions({
   navigateToPath,
   urlFor,
   focusSessionsColumn,
+  newRecordId,
 }) {
   const container = document.getElementById("sessions-categories-grid");
   if (!container) return;
 
   renderSessionsTitleBar();
 
-  const sessions = state.sessions || [];
+  const sessions = visibleSessions(state);
   const activeSession = getActiveSession();
+
+  // An evening that exists only as a rule becomes a RECORD the moment the trainer acts on it
+  // (TODO §35.3a). Done here, at the board, because this is where every tap on a derived evening
+  // starts — the alternative is every downstream lookup learning what a series is.
+  const store = (sessionId) => {
+    if ((state.sessions || []).some((session) => session.id === sessionId)) return sessionId;
+    const derived = sessions.find((session) => session.id === sessionId && session.fromSeries);
+    if (!derived) return sessionId;
+    const stored = occurrenceAsSession(derived, newRecordId ? newRecordId() : derived.id);
+    state.sessions = [...(state.sessions || []), stored];
+    saveToLocalStorage?.();
+    return stored.id;
+  };
 
   const cardDeps = {
     state,
     t,
     escapeHTML,
-    launchClipboardDirectly: (sessionId) => launchClipboardDirectly(sessionId),
+    launchClipboardDirectly: (sessionId) => launchClipboardDirectly(store(sessionId)),
     sessionDayTemporal,
     activeId: activeSession ? activeSession.id : null,
     getActiveSession,
@@ -220,6 +264,9 @@ export function renderSessions({
     rerenderSessions,
     navigateToPath,
     urlFor,
+    // Given to the card rather than hidden inside `urlFor`: a URL built while RENDERING would then
+    // silently write a record for every evening on the board. Conversion belongs to the tap.
+    storeSession: store,
   };
 
   container.innerHTML = "";

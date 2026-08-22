@@ -20,6 +20,7 @@ import {
   DEFAULT_PLAN_UPDATES,
   DEFAULT_ROUTINES,
   DEFAULT_SESSIONS,
+  DEFAULT_SESSION_SERIES,
 } from "./index.js";
 import {
   COLLECTION_INDEX,
@@ -83,6 +84,10 @@ export function emptyState() {
     // an RSVP is a fact about a message, and separate from `clients` because the same person answers
     // differently per session.
     invites: [],
+    // Repeating sessions (TODO §35.3a): the RULE only. The evenings it produces are derived at read
+    // time (domain/sessionSeries.js), and an evening the trainer moved, cancelled or ran is a row in
+    // `sessions` above that speaks for it.
+    sessionSeries: [],
     notifications: [],
     // null, not "en": the language nobody has chosen yet must stay distinguishable from a chosen
     // English, or the splash cannot tell who to offer the choice to (see i18n/index.js).
@@ -91,9 +96,15 @@ export function emptyState() {
 }
 
 export function stateHasData(s = state) {
-  return ["clients", "exercises", "routines", "history", "planUpdates", "sessions"].some(
-    (k) => Array.isArray(s[k]) && s[k].length > 0,
-  );
+  return [
+    "clients",
+    "exercises",
+    "routines",
+    "history",
+    "planUpdates",
+    "sessions",
+    "sessionSeries",
+  ].some((k) => Array.isArray(s[k]) && s[k].length > 0);
 }
 
 // Every seeded record is STAMPED (data/seedProvenance.js) so a later "clear the demo data" can tell
@@ -108,6 +119,7 @@ export function seedMockData() {
   state.history = seeded(DEFAULT_HISTORY);
   state.planUpdates = seeded(DEFAULT_PLAN_UPDATES);
   state.sessions = seeded(DEFAULT_SESSIONS);
+  state.sessionSeries = seeded(DEFAULT_SESSION_SERIES);
   state.notifications = seeded(DEFAULT_MESSAGES);
   // `lang` is deliberately UNTOUCHED. It used to be defaulted to "en" here, which made seeding the
   // demo answer the splash's language question on a store that had never chosen one — so a trainer

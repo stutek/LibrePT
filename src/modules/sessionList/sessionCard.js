@@ -365,7 +365,12 @@ export function renderSessionCard(b, colContainer, deps) {
   if (editBtn) {
     editBtn.addEventListener("click", (e) => {
       e.stopPropagation();
-      deps.navigateToPath?.(deps.urlFor("session.setup", { sessionId: b.id }));
+      // Through `storeSession` first: an evening that exists only as a repeating rule has no
+      // record to edit yet, and editing is exactly the act that makes it one (TODO §35.3a). The
+      // board owns that conversion; the card just says which evening was tapped.
+      deps.navigateToPath?.(
+        deps.urlFor("session.setup", { sessionId: deps.storeSession?.(b.id) ?? b.id }),
+      );
     });
   }
 

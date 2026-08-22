@@ -850,6 +850,9 @@ function renderSessions() {
     navigateToPath,
     urlFor,
     focusSessionsColumn,
+    // What an evening from a repeating series is given when the trainer first acts on it and it
+    // stops being a rule (TODO §35.3a).
+    newRecordId,
   });
 }
 

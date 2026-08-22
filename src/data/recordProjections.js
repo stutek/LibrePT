@@ -32,6 +32,9 @@ export const projectNotification = (notification) => toRecord("notifications", n
 // persist at all: COLLECTIONS is derived from this table, and the fan-out and the backup file both
 // walk that list.
 export const projectInvite = (invite) => toRecord("invites", invite);
+// A repeating session (TODO §35.3a). Declared here for the same reason invitations are: COLLECTIONS
+// is derived from this table, and a collection missing from it does not persist at all.
+export const projectSessionSeries = (series) => toRecord("sessionSeries", series);
 
 const PROJECTORS = {
   clients: projectClient,
@@ -42,6 +45,7 @@ const PROJECTORS = {
   planUpdates: projectPlanUpdate,
   notifications: projectNotification,
   invites: projectInvite,
+  sessionSeries: projectSessionSeries,
 };
 
 export function projectCollection(collection, domainObject) {

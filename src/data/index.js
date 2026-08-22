@@ -8,4 +8,5 @@ export { DEFAULT_ROUTINES } from "./routines.js";
 export { DEFAULT_HISTORY } from "./history.js";
 export { DEFAULT_PLAN_UPDATES } from "./planUpdates.js";
 export { DEFAULT_SESSIONS } from "./sessions.js";
+export { DEFAULT_SESSION_SERIES } from "./sessionSeriesSeed.js";
 export { DEFAULT_MESSAGES } from "./messages.js";

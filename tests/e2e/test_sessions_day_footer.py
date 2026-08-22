@@ -60,7 +60,11 @@ def _tall_day_sessions(id_prefix, offset_days, count=10):
 
 def _seed_sessions(page, local_server, sessions):
     """Replace state.sessions outright and reload, so every test's day-group shape is exactly what
-    it declares — never dependent on the demo dataset's own (evolving) content."""
+    it declares — never dependent on the demo dataset's own (evolving) content.
+
+    Repeating sessions are cleared for the same reason (TODO §35.3a): a rule the trainer set up
+    produces evenings nobody wrote down, and a test declaring its own two day-groups would silently
+    be measuring eight weeks of somebody else's Tuesdays."""
     page.goto(local_server)
     page.wait_for_selector("#view-clients.active")
     page.evaluate(
@@ -71,6 +75,7 @@ def _seed_sessions(page, local_server, sessions):
             const queue = await import(queueUrl);
             const state = store.getState();
             state.sessions = sessions;
+            state.sessionSeries = [];
             store.saveToLocalStorage();
             // The write is write-behind onto IndexedDB now (TODO §18.6 part 4): a reload must wait
             // for it to land, or it can race the write and read back stale data.

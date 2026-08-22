@@ -250,8 +250,9 @@ files beat few large ones: less context to load, fewer collisions, a tree that d
 4. **Answer a question; never record it as a decision.** "Any reason for X?" explores the option
    space: answer, recommend, leave it open. Mark something Decided only when they said so, dated.
    **A decision already given is not re-opened as a plan for approval.** Once they have said build
-   it, build it — the shape belongs in the commit, not in a numbered plan handed back for a second
-   yes. Ask again only if proceeding either way would be unsafe or would waste the work.
+   it, build it. Plan as much as you like for YOURSELF; what reaches them is the work, and the shape
+   is explained in the commit. Ask again only if proceeding either way would be unsafe or would
+   waste the work.
 5. **Separate what you measured from what you assume, and scope every count.** Say which numbers
    came from a command and which are estimates, and exclude vendored and generated trees
    (`.venv/`, `node_modules/`, `dist/`) — `git ls-files` is the honest denominator. An unlabelled
