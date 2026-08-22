@@ -244,6 +244,9 @@ files beat few large ones: less context to load, fewer collisions, a tree that d
    occasion — a literal translation, a shortened label, a name for a step — reads as jargon they
    are expected to already know, so the reply costs a round trip instead of saving one. Use the
    ordinary word, or spell the thing out.
+   **Write for someone who has not opened the repository today**: no `§`-numbers, no file names used
+   as nouns, no test vocabulary — say what a person would SEE. A reply full of pointers is a reading
+   assignment, and it was handed back to be rewritten.
 4. **Answer a question; never record it as a decision.** "Any reason for X?" explores the option
    space: answer, recommend, leave it open. Mark something Decided only when they said so, dated.
 5. **Separate what you measured from what you assume, and scope every count.** Say which numbers
