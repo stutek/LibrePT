@@ -378,25 +378,33 @@ export const sl = {
   story_continue: "Naprej",
   story_persona_trainer: "Telefon trenerja",
   story_chapter_gym: "V telovadnici",
-  story_thanks_title: "To je bila vadba",
+  story_thanks_title: "To je bila ena vadba",
   story_clear_demo_data: "Počisti demo podatke",
-  story_step_back_to_first: "Nazaj k prvemu prijatelju — njegov signal je še vedno tam.",
-  story_step_refocus: "Vrni krog v fokus. Njegova kartica, njegov načrt.",
+  story_step_open_session:
+    "Torek, 18:00. Jane in John imata skupen termin, Sarah v isti uri dela svoj rehabilitacijski načrt. En dotik in vsi trije so na eni podlogi.",
+  story_step_focus_exercise:
+    "Janein krog pride na vrsto. Njena serija, njene številke, vse na dosegu palca.",
+  story_step_signal_too_easy:
+    "Šlo ji je prelahko. En dotik to pove — in nocojšnji načrt bo to izvedel.",
+  story_step_next_participant: "Zdaj John. Ista seja, njegov lasten načrt, brez vračanja k mizi.",
+  story_step_refocus: "Njegov krog pride v fokus.",
   story_step_capture_open:
-    "Sredi kroga stranka omeni bolečino. Odpri zapis, ne da bi zapustil sejo — ura teče naprej.",
-  story_step_capture_tag: "Označi. Brez tipkanja: trener ima prosto eno roko.",
-  story_step_capture_keep: "Shrani v kartoteko te osebe, da ostane tudi po nocojšnji seji.",
-  story_step_capture_submit: "Zabeleženo, pri tem udeležencu in pri tej vaji.",
-  story_step_session_menu: "Odpri meni seje.",
-  story_step_swap_open: "Zamenjaj vajo, ki je bolela — samo pri tem udeležencu.",
-  story_step_swap_pick:
-    "Nekaj bolj prizanesljivega za isto mišično skupino. Načrta drugih dveh se to ne dotakne.",
+    "Med serijama omeni koleno — tisto, ki so mu ga leta 2024 operirali. Ura teče naprej, zapis se odpre kar čez sejo.",
+  story_step_capture_tag: "Bolečina v sklepu, pri tej vaji.",
+  story_step_capture_note: "In kar je dejansko rekel, natipkano z enim palcem.",
+  story_step_capture_keep:
+    "Shranjeno v Johnovo kartoteko. Ne gre za nocojšnjo obremenitev, gre za naslednje tri mesece.",
+  story_step_capture_submit: "Zabeleženo — pri Johnu in pri tej vaji.",
+  story_step_session_menu: "Meni same seje.",
   story_step_plan_editor:
-    "Oblikovanje načrta — in zapis izpred treh minut je že tu, pri pravi osebi.",
+    "Johnov načrt in zapis izpred minute je že v njem. Nihče ga ni šel iskat.",
+  story_step_swap_open: "Ta vaja gre torej ven — samo pri Johnu.",
+  story_step_swap_pick:
+    "Nekaj bolj prizanesljivega za iste mišice. Jane in Sarah obdržita svoja načrta.",
   story_gym_open_body:
-    "Torek zvečer. Trije prijatelji, en 60-minutni termin, ena skupna podloga. Trener ima polne roke, zato je vsak korak tu en sam dotik.",
+    "Torek, deset čez šest. Jane in John se ogrevata skupaj, Sarah v kotu dela rehabilitacijski načrt, en trener pa vse tri vodi s telefona. Nič od tega ni maketa: večer boš odigral sam, korak za korakom.",
   story_gym_close_body:
-    "Hvala za ogled. Signali so zabeleženi, nihče ni ničesar tipkal, ura se ni ustavila — in načrt že ve za bolečino. Kar raziskuj naprej ali počisti demo podatke in začni s svojimi.",
+    "To je bil en večer in nič ni bilo zapisano dvakrat. Johnovo koleno je v njegovi kartoteki, njegov načrt to že ve, Jane in Sarah pa nista bili prekinjeni. Kar raziskuj naprej ali počisti demo podatke in začni s svojimi strankami.",
   today: "Danes",
   tomorrow: "Jutri",
   yesterday: "Včeraj",

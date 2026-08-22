@@ -44,6 +44,10 @@ function narration(id, kind, titleKey, bodyKey, extra = {}) {
     persona: TRAINER,
     narrate: { kind, titleKey, bodyKey, onward },
     target: CARD_TARGET,
+    // The guide's panel says the SHORT thing (the chapter's name) while the card holds the prose:
+    // two surfaces are on screen at once now that the story is driven rather than watched, and
+    // repeating the paragraph in both is how a viewer learns to read neither.
+    caption: titleKey,
     expect: CARD_DISMISSED,
     ...step,
   };
@@ -60,27 +64,23 @@ const GYM_CHAPTER = {
       // what the viewer is about to watch, and it should say it over the screen it happens on.
       route: "/",
     }),
-    { ...wedge["open-session"], persona: TRAINER },
-    { ...wedge["focus-exercise"], persona: TRAINER },
-    { ...wedge["signal-too-easy"], persona: TRAINER },
-    { ...wedge["next-participant"], persona: TRAINER },
+    // The wedge's steps, with the story's own words over them. The selectors, preconditions and
+    // expectations are REUSED — one claim about one control, kept true in one place — while the
+    // caption changes, because the wedge explains a feature in three seconds and the story is
+    // telling someone about an evening.
+    { ...wedge["open-session"], persona: TRAINER, caption: "story_step_open_session" },
+    { ...wedge["focus-exercise"], persona: TRAINER, caption: "story_step_focus_exercise" },
+    { ...wedge["signal-too-easy"], persona: TRAINER, caption: "story_step_signal_too_easy" },
+    { ...wedge["next-participant"], persona: TRAINER, caption: "story_step_next_participant" },
     {
-      // Back to the first friend, which is also the claim the wedge's own e2e test makes: their
-      // Too Easy is still set. Per-participant state that quietly belongs to whoever is on screen
-      // is the failure a viewer would never notice and a trainer would.
-      id: "back-to-first",
-      persona: TRAINER,
-      target: "#active-session-client-tabs .client-tab-btn:nth-child(1)",
-      caption: "story_step_back_to_first",
-      expect: {
-        selector: "#active-session-client-tabs .client-tab-btn:nth-child(1).active",
-        visible: true,
-      },
-    },
-    {
-      // Switching participants re-renders the deck collapsed, so the card has to come back into
-      // focus before its actions are reachable. Idempotent: if it is already in focus, the player
-      // demonstrates the tap without repeating it.
+      // The story stays with the SECOND participant from here on, and that is a data decision as
+      // much as a narrative one: the seeded John Smith carries a 2024 knee reconstruction in his own
+      // record, so the twinge two beats later is the app telling the truth about the person on
+      // screen rather than a line invented for the demo.
+      //
+      // Switching participants re-renders the deck collapsed, so his card has to come into focus
+      // before its actions are reachable. Idempotent: if it is already in focus, the guide points
+      // rather than tapping again.
       id: "refocus-circuit",
       persona: TRAINER,
       target: "#active-exercise-scroll-deck .exercise-deck-card.circuit-card",
@@ -106,6 +106,18 @@ const GYM_CHAPTER = {
       // No `visible` flag: a checked radio is a fact about the form, and asking whether the input
       // is on screen would be asserting the chip's styling instead.
       expect: { selector: '#form-feedback input[value="Joint Pain / Discomfort"]:checked' },
+    },
+    {
+      // Typed, not tapped — the demo shows every action a trainer performs, and half of what this
+      // app receives is entered rather than pressed (wanted 2026-08-22). What the client actually
+      // said is the part no tag can carry.
+      id: "capture-note",
+      persona: TRAINER,
+      target: "#feedback-custom-note",
+      enter: "left knee, third round",
+      caption: "story_step_capture_note",
+      // `hasValue`, because a field HOLDS what was typed and SAYS nothing.
+      expect: { selector: "#feedback-custom-note", hasValue: "left knee" },
     },
     {
       // §35.3c: this is the beat that makes the note outlive the session. Without it the twinge is

@@ -763,11 +763,17 @@ export function renderClipboardEditor(container, deps) {
     // Ignore taps inside the editor itself, inside any open modal dialog (e.g. Add exercise), on the
     // session ⋯ menu (its "Delete Plan" action is edit-mode-only), or on the title-bar Done button —
     // its own click handler already exits, so tap-outside must not race it.
+    //
+    // The GUIDE's surfaces are not "outside" either (found 2026-08-22 walking the long story): its
+    // panel floats over the app, so tapping "Show me" while the plan is being edited closed the
+    // editor under the trainer, and the next step then pointed at a control that no longer existed.
+    // Anything the guide draws belongs to what the trainer is doing, not to the app behind it.
     if (
       editorEl.contains(e.target) ||
       e.target.closest?.("dialog") ||
       e.target.closest?.(".session-menu-wrap") ||
-      e.target.closest?.("#btn-done-edit")
+      e.target.closest?.("#btn-done-edit") ||
+      e.target.closest?.("#walkthrough-overlay, #story-card")
     )
       return;
     doExit();

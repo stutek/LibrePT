@@ -219,23 +219,28 @@ export async function whenDemoCanBeWatched(splashDown) {
   await whenTermsAgreed();
 }
 
-// The long demo (TODO §35) — the chaptered story, played by itself with narration between the taps.
+// The long demo (TODO §35) — the chaptered story, DRIVEN BY THE TRAINER with narration cards
+// between the steps.
 //
-// Its own boot step beside bootDemoTour rather than a mode inside it: they share the player and
+// **It is guided, not played** (decided 2026-08-22, Simon: "autoplay reduces the effect, a person
+// loses focus; Show me is the best middle ground"). Four taps can be watched; four minutes cannot,
+// and a viewer who is only watching stops watching. So the story runs on the same panel the
+// walkthrough uses — the trainer performs each beat, or asks to be shown it — and the narration
+// cards are the storytelling around that.
+//
+// Its own boot step beside bootWalkthrough rather than a mode inside it: they share the guide and
 // nothing else. The wedge is four taps at one screen; this one carries a narration surface, a
-// persona label and a chapter chosen by the link, and each of those is a reason the two would have
-// grown a branch apiece.
+// persona label and a chapter chosen by the link.
 //
 // Failures are reported, never thrown, for the same reason the wedge's are: a story that cannot play
 // is a broken marketing asset, not a broken app.
-export async function bootDemoStory({ shareDemo, shareChapter, hasData, t, onResults } = {}) {
+export async function bootDemoStory({ shareDemo, shareChapter, hasData, t, goHome } = {}) {
   const { DEMO_STORY: DEMO_STORY_PARAM } = await import("./modules/common/shareLink.js");
   if (shareDemo !== DEMO_STORY_PARAM || !hasData) return null;
 
-  const [{ playTour }, { mountDemoHand }, { mountStoryNarration }, { DEMO_STORY }, story] =
+  const [{ startGuidedWalkthrough }, { mountStoryNarration }, { DEMO_STORY }, story] =
     await Promise.all([
-      import("./modules/demo/demoTourPlayer.js"),
-      import("./modules/demo/demoHand.js"),
+      import("./modules/demo/walkthroughOverlay.js"),
       import("./modules/demo/storyNarration.js"),
       import("./modules/demo/storyTour.js"),
       import("./domain/demoStory.js"),
@@ -243,23 +248,23 @@ export async function bootDemoStory({ shareDemo, shareChapter, hasData, t, onRes
 
   const problems = story.validateStory(DEMO_STORY);
   if (problems.length > 0) {
-    const results = [{ id: "story", ok: false, reason: problems.join("; ") }];
-    onResults?.(results);
-    return results;
+    // A malformed script is a broken marketing asset, not a broken app — it says so where an
+    // investigator looks, and the trainer keeps a working clipboard.
+    console.warn(`[story] ${problems.join("; ")}`);
+    return null;
   }
 
   // The way onward the last card offers (§30.2): the SAME dialog the demo notice in the feed
   // opens, not a second cleanup path that could drift from it.
   const narration = mountStoryNarration({ t, onClearDemoData: openDemoCleanupDialog });
-  // Flattened to one step list and handed to the SAME player the wedge uses — a chapter is a tour,
-  // which is what keeps the engine free of the story (§35.1).
+  // Flattened to one step list: a chapter is a tour, which is what lets the guide run it unchanged.
   const steps = story.storyStepsFor(DEMO_STORY, shareChapter);
-  const results = await playTour(
-    { id: DEMO_STORY.id, steps },
-    { hand: mountDemoHand(), beforeStep: (step) => narration.showStep(step) },
-  );
-  onResults?.(results);
-  return results;
+  return startGuidedWalkthrough({
+    tour: { id: DEMO_STORY.id, steps },
+    t,
+    navigate: goHome && ((path) => goHome(path)),
+    onStep: (step) => narration.showStep(step),
+  });
 }
 
 // The client intake page (TODO §1.7/§26) — the ONE boot path whose user is not the trainer.

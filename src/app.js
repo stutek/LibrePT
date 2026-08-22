@@ -589,9 +589,7 @@ async function startDemoWhenWatchable({ splashDown, shareDemo, shareChapter }) {
     shareChapter,
     hasData: stateHasData(getState()),
     t,
-    onResults: (results) => {
-      window.__demoStoryResults = results;
-    },
+    goHome: (path) => navigateToPath(path || "/"),
   });
 
   await appBoot.bootWalkthrough({

@@ -27,7 +27,9 @@
 // textContent, so translated copy cannot become markup (build/frontend_audit.py) and there is no CSP
 // exposure.
 //
-// Injected dependencies: `tour` (the script), `t` (translator), `doc`, `pollMs`.
+// Injected dependencies: `tour` (the script), `t` (translator), `doc`, `pollMs`, `onStep` (optional
+// — called with each step as it is entered, which is how the long story draws its narration cards
+// around a guide it otherwise knows nothing about).
 
 import {
   advanceWalkthrough,
@@ -148,6 +150,7 @@ export function startGuidedWalkthrough({
   doc = document,
   pollMs = DEFAULT_POLL_MS,
   navigate = null,
+  onStep = null,
 } = {}) {
   const el = buildOverlay(doc, t);
   const hand = mountDemoHand(doc);
@@ -218,7 +221,25 @@ export function startGuidedWalkthrough({
     el.overlay.classList.toggle("is-top", target.getBoundingClientRect().bottom > wouldSitAbove);
   }
 
+  /** Keeps the guide TAPPABLE when the app opens one of its own modals.
+   *
+   * A `<dialog>` opened with showModal() puts itself in the top layer and makes everything else on
+   * the page inert — including this panel, so Show me and Next stop responding the moment the story
+   * reaches the note dialog. Found by walking the story: the guide sat there looking normal while
+   * every tap on it was swallowed.
+   *
+   * The fix is to move the panel INTO the open dialog while it is open, which is what puts it in the
+   * top layer too, and back to the body afterwards. It is `position: fixed`, so it draws in exactly
+   * the same place either way; only its reachability changes.
+   */
+  function keepPanelReachable() {
+    const openDialog = doc.querySelector("dialog[open]");
+    const wanted = openDialog || doc.body;
+    if (el.overlay.parentElement !== wanted) wanted.appendChild(el.overlay);
+  }
+
   function render() {
+    keepPanelReachable();
     const controls = walkthroughControls(tour, state);
     const step = currentWalkthroughStep(tour, state);
 
@@ -288,6 +309,9 @@ export function startGuidedWalkthrough({
   async function enterStep() {
     el.problem.hidden = true;
     const step = currentWalkthroughStep(tour, state);
+    // BEFORE the precondition and the target lookup: a narrated beat's own control is the card the
+    // narration puts on screen, so it has to exist before anything goes looking for it.
+    onStep?.(step);
     // Asserted as the card loads (TODO §30.3): a step whose control cannot exist yet would otherwise
     // fail confusingly the moment anyone tapped Show me, and the trainer would have read a whole
     // caption first. What follows from the assertion is a REPAIR, not a complaint — see
@@ -411,6 +435,9 @@ export function startGuidedWalkthrough({
   view.addEventListener("resize", followTarget, { passive: true });
 
   ticker = setInterval(() => {
+    // Also on the tick: a dialog can open or close without the guide's own step changing — the
+    // trainer may close the note themselves — and a panel left behind an inert page is dead.
+    keepPanelReachable();
     const step = currentWalkthroughStep(tour, state);
     if (!step || showing) return;
     const target = resolveTarget(doc, step);

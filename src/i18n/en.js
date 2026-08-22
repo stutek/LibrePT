@@ -395,25 +395,36 @@ export const en = {
   story_continue: "Continue",
   story_persona_trainer: "Trainer's phone",
   story_chapter_gym: "In the gym",
-  story_thanks_title: "That was a session",
+  story_thanks_title: "That was one session",
   story_clear_demo_data: "Clear the demo data",
-  story_step_back_to_first: "Back to the first friend — their signal is still where they left it.",
-  story_step_refocus: "Bring the circuit back into focus. Their card, their plan.",
+  // The story's own voice. It names the people the seed puts on screen — Jane, John, Sarah — because
+  // a demo that says "the client" is describing software, and one that says "John, whose knee was
+  // rebuilt in 2024" is telling you what the evening was like.
+  story_step_open_session:
+    "Tuesday, 18:00. Jane and John share a slot, Sarah works her rehab plan in the same hour. One tap, and all three are on one clipboard.",
+  story_step_focus_exercise:
+    "Jane's circuit comes up. Her round, her numbers, everything in thumb reach.",
+  story_step_signal_too_easy:
+    "She flew through it. One tap says so — and tonight's plan will hear about it.",
+  story_step_next_participant: "John is next. Same session, his own plan, no going back to a desk.",
+  story_step_refocus: "His circuit comes into focus.",
   story_step_capture_open:
-    "Mid-circuit, a client mentions a twinge. Open the note without leaving the session — the clock keeps running.",
-  story_step_capture_tag: "Tag it. No typing: the trainer has one hand free.",
-  story_step_capture_keep: "Keep it on this person's record, so it outlives tonight.",
-  story_step_capture_submit: "Logged, against this participant and this movement.",
-  story_step_session_menu: "Open the session menu.",
-  story_step_swap_open: "Swap the movement that hurt — for this participant only.",
-  story_step_swap_pick:
-    "Something gentler for the same muscle group. The other two plans are untouched.",
+    "Between rounds he mentions his knee — the one that was rebuilt in 2024. The clock keeps running; the note opens over the session.",
+  story_step_capture_tag: "Joint pain, on this movement.",
+  story_step_capture_note: "And what he actually said, typed with one thumb.",
+  story_step_capture_keep:
+    "Kept on John's record. This is not about tonight's load, it is about the next three months.",
+  story_step_capture_submit: "Saved — against John, and against this movement.",
+  story_step_session_menu: "The session's own menu.",
   story_step_plan_editor:
-    "Shaping the plan — and the note from three minutes ago is already here, against the right person.",
+    "John's plan, and the note from a minute ago is already waiting in it. Nobody went looking for it.",
+  story_step_swap_open: "So that movement goes — for John only.",
+  story_step_swap_pick:
+    "Something gentler for the same muscles. Jane and Sarah keep the plans they were given.",
   story_gym_open_body:
-    "Tuesday evening. Three friends, one 60-minute slot, one clipboard between them. The trainer's hands are busy, so every beat here is a single tap.",
+    "Tuesday, ten past six. Jane and John are warming up together, Sarah is in the corner working through a rehab plan, and one trainer is running all three from a phone. Nothing here is a mock-up: you are about to do the evening yourself, one tap at a time.",
   story_gym_close_body:
-    "Thanks for watching. Signals logged, nobody typed anything, the clock never stopped — and the plan already knows about the twinge. Keep tapping around, or clear the demo data and start with your own.",
+    "That was one evening, and nothing was written twice. John's knee is on his record, his plan already knows about it, and Jane and Sarah were never interrupted. Keep tapping around, or clear the demo data and start with your own clients.",
   today: "Today",
   tomorrow: "Tomorrow",
   yesterday: "Yesterday",

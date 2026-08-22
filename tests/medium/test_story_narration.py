@@ -16,7 +16,7 @@ from tests.medium._overflow import assert_component_fits
 pytestmark = pytest.mark.clean_start
 
 # Mounts the real narration surface with the real translation dict, and exposes its handle so a test
-# can show one step the way the player's beforeStep hook does.
+# can show one step the way the guide does when it enters one.
 NARRATION_STUB = """
 import { mountStoryNarration } from './modules/demo/storyNarration.js';
 import { TRANSLATIONS } from './i18n/index.js';
@@ -67,7 +67,7 @@ def test_a_narrated_beat_is_read_and_then_dismissed_by_a_tap(page, local_server)
     card = page.locator("#story-card")
     expect(card).to_be_visible()
     expect(card).to_contain_text("In the gym")
-    expect(card).to_contain_text("one clipboard")
+    expect(card).to_contain_text("Jane and John")
 
     page.click("#story-card-continue")
 

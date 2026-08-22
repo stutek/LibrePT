@@ -2638,10 +2638,25 @@ events that genuinely need it.
       in an input VALUE, which is not text content and cannot be probed — a lesson worth keeping for
       the next beat that acts on a form.
 - [ ] **Chapter C's last event** — 18 (complete, net vs slot), which needs 35.3b's meter.
-- [ ] **Event 19, the theme switch, is NOT scriptable today**: the theme control is a `<select>`,
-      and the player performs TAPS. Scripting it needs a second action kind in the engine, which is
-      a bigger decision than one beat — and the first thing that decision buys is typing (event 5's
-      intake form), so make it once, for both.
+- [x] **The story is GUIDED, and the demo can type — 2026-08-22 (Simon).** *"Autoplay reduces the
+      effect, a person loses focus; Show me is the best middle ground."* So `?demo=story` mounts the
+      walkthrough panel with the story script: the viewer performs each beat, or asks to be shown it,
+      and the narration cards ride along on an `onStep` hook. The wedge keeps its autoplay — three
+      seconds is watchable, four minutes is not. A step can now `enter` text and `choose` from a
+      list, firing the events a real keystroke and a real selection fire; expectations gained
+      `hasValue`, because a field HOLDS what was typed and SAYS nothing. Event 19's theme switch is
+      a `<select>` and is therefore scriptable now.
+- [x] **The story TELLS a story — 2026-08-22 (Simon):** *"I want the demo to be storytelling, not
+      just a demonstration of functionality."* Every caption names the people the seed puts on
+      screen: Jane's round, John's rebuilt knee, Sarah's rehab plan in the same hour. The injury beat
+      moved to John precisely because his seeded record carries a 2024 knee reconstruction — the app
+      telling the truth about the person on screen rather than a line written for the demo.
+      Pinned by a test that reads the captions back and looks for the names.
+
+      **Two defects the walk exposed, both real for a trainer and not only for the demo**: the guide
+      was unreachable while any modal dialog was open (a modal makes the rest of the page inert, so
+      Show me silently stopped working), and tapping the guide while editing a plan CLOSED the editor
+      — the editor's tap-outside rule did not know the guide is part of what the trainer is doing.
 - [ ] **Chapter D**, then **A**. B stays blocked on §8.1.
 
 ---

@@ -92,3 +92,22 @@ test("the step ids are reported in order, so a short run is detectable", () => {
   };
   assert.deepEqual(tourStepIds(tour), ["one", "two"]);
 });
+
+// ── What a step TYPED, as opposed to what it tapped (wanted 2026-08-22) ───────────────────────
+// A demo that only taps cannot show the half of the app a trainer types into, and the first beat
+// that needed it — the note behind a client's twinge — could not be asserted at all: a field's value
+// is not its text content, which is how a step once polled for something that could never come true.
+
+test("a field is checked by what was typed into it, not by its text", () => {
+  const typed = { present: true, visible: true, text: "", value: "left knee, last rep" };
+
+  assert.equal(checkExpectation({ selector: "#note", hasValue: "left knee" }, typed).ok, true);
+});
+
+test("an empty field fails the step that was supposed to fill it", () => {
+  const empty = { present: true, visible: true, text: "", value: "" };
+
+  const outcome = checkExpectation({ selector: "#note", hasValue: "left knee" }, empty);
+  assert.equal(outcome.ok, false);
+  assert.match(outcome.reason, /#note/);
+});

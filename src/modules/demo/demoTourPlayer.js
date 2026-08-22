@@ -23,10 +23,13 @@
 // check by the same route the automatic tour does. A walkthrough with its own copy of "resolve,
 // scroll, tap, check" would be a second definition of what the demo means.
 //
-// Injected dependencies: `doc`, `hand` (optional — no pointer in CI), `wait`, `onStep`,
-// `beforeStep` (optional — the story's narration draws the card a narrated step then dismisses,
-// TODO §35; a hook rather than a second player, because two copies of "resolve, scroll, tap, check"
-// is exactly what performStep was extracted to prevent).
+// **A step can type and pick, not only tap** (wanted 2026-08-22). Half of what a trainer does to
+// this app is entering something — a note, a name, a length — and a demo that can only tap has to
+// skip exactly those screens, which are the ones a viewer most wants to see filled in. `enter` and
+// `choose` fire the events a real keystroke and a real selection fire, so the app cannot tell the
+// difference between the demo and a thumb.
+//
+// Injected dependencies: `doc`, `hand` (optional — no pointer in CI), `wait`, `onStep`.
 
 import { checkExpectation, validateTour } from "../../domain/demoTour.js";
 import { moveDemoHand, pulseDemoHand } from "./demoHand.js";
@@ -39,11 +42,13 @@ const OUTCOME_POLL_MS = 25;
 
 export function probe(doc, selector) {
   const el = doc.querySelector(selector);
-  if (!el) return { present: false, visible: false, text: "" };
+  if (!el) return { present: false, visible: false, text: "", value: "" };
   // offsetParent is null for a display:none element and for anything inside one, which is the
   // "can the viewer actually see this?" question — not the same as being in the document.
   const visible = Boolean(el.offsetParent) || el.getClientRects().length > 0;
-  return { present: true, visible, text: el.textContent || "" };
+  // `value` is reported separately from `text` and never folded into it: a field holds one and says
+  // the other, and conflating them would make an expectation ambiguous about which it meant.
+  return { present: true, visible, text: el.textContent || "", value: el.value ?? "" };
 }
 
 function centreOf(el) {
@@ -120,9 +125,35 @@ async function waitForOutcome(step, doc, wait, budgetMs) {
   return outcome;
 }
 
+/** What the step DOES to the control it found (wanted 2026-08-22: the demo should show every action
+ * a trainer performs, filling fields included).
+ *
+ * Three physical acts, because a person performs three: they tap a button, they type into a field,
+ * they pick from a list. Each is done the way the app would see a person do it — the events a real
+ * keystroke or a real selection fires — so the demo drives the same handlers a thumb does. A step
+ * declares the one it means by which value it carries; nothing here decides anything else.
+ */
+function interactWith(target, step) {
+  if (step.enter !== undefined) {
+    target.focus();
+    target.value = step.enter;
+    // `input` is what a keystroke fires and what live handlers listen to; `change` is what a field
+    // fires when it is left. Both, so neither kind of listener is missed.
+    target.dispatchEvent(new Event("input", { bubbles: true }));
+    target.dispatchEvent(new Event("change", { bubbles: true }));
+    return;
+  }
+  if (step.choose !== undefined) {
+    target.value = step.choose;
+    target.dispatchEvent(new Event("change", { bubbles: true }));
+    return;
+  }
+  target.click();
+}
+
 /**
- * Performs ONE step — resolve the control, scroll it into view, move and pulse the pointer, dispatch
- * a genuine click, then wait for the expectation. Returns `{ id, ok, reason }`.
+ * Performs ONE step — resolve the control, scroll it into view, move and pulse the pointer, then do
+ * what the step says (tap, type or pick) and wait for the expectation. Returns `{ id, ok, reason }`.
  *
  * Shared with the guided walkthrough's "Show me", so the two cannot drift on what a step's tap
  * actually is.
@@ -160,7 +191,7 @@ export async function performStep(step, { doc = document, hand = null, wait = sl
   // several of these controls are TOGGLES: a second Too Easy clears the first, so replaying a step
   // the trainer walked back to would undo the very thing it was showing them. Pressing Show me once
   // or ten times leaves the same state.
-  if (!stepOutcomeNow(step, doc).ok) target.click();
+  if (!stepOutcomeNow(step, doc).ok) interactWith(target, step);
   // Wait for the app, then — and only at full motion — for the viewer.
   const outcome = await waitForOutcome(step, doc, wait, pace.outcomeBudgetMs);
   await wait(step.settleMs ?? pace.stepPauseMs);
@@ -177,10 +208,7 @@ export async function performStep(step, { doc = document, hand = null, wait = sl
  * what the e2e test does, because a player reporting only the steps it managed would otherwise pass
  * by simply doing less.
  */
-export async function playTour(
-  tour,
-  { doc = document, hand = null, wait = sleep, onStep, beforeStep } = {},
-) {
+export async function playTour(tour, { doc = document, hand = null, wait = sleep, onStep } = {}) {
   const problems = validateTour(tour);
   if (problems.length > 0) {
     return [{ id: "tour", ok: false, reason: problems.join("; ") }];
@@ -188,9 +216,6 @@ export async function playTour(
 
   const results = [];
   for (const step of tour.steps) {
-    // Awaited: whatever a caller puts on screen before a step has to BE there before the hand
-    // reaches for it — the story's narration card is the control its own step taps.
-    await beforeStep?.(step);
     const outcome = await performStep(step, { doc, hand, wait });
     results.push(outcome);
     onStep?.(outcome);

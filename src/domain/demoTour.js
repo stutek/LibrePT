@@ -28,7 +28,7 @@
  * the on-screen abort, so it names the selector rather than describing the concept. */
 export function checkExpectation(expectation, probe) {
   if (!expectation) return { ok: true, reason: "" };
-  const { selector, visible, containsText } = expectation;
+  const { selector, visible, containsText, hasValue } = expectation;
 
   if (!probe?.present) {
     return { ok: false, reason: `nothing matched ${selector}` };
@@ -39,6 +39,20 @@ export function checkExpectation(expectation, probe) {
   if (visible === false && probe.visible) {
     return { ok: false, reason: `${selector} should have been hidden` };
   }
+  // What a field HOLDS, which is not what it says: an input's value never appears in its text
+  // content, so a step that fills one in can only be checked this way. Learned the hard way — a
+  // step once polled `containsText` for a movement name that lives in an input value, and waited
+  // out its whole budget for something that could never become true.
+  if (hasValue) {
+    const actual = (probe.value || "").trim();
+    if (!actual.toLowerCase().includes(hasValue.toLowerCase())) {
+      return {
+        ok: false,
+        reason: `${selector} holds ${JSON.stringify(actual.slice(0, 60))}, expected to contain ${JSON.stringify(hasValue)}`,
+      };
+    }
+  }
+
   if (containsText) {
     const actual = (probe.text || "").trim();
     if (!actual.toLowerCase().includes(containsText.toLowerCase())) {
