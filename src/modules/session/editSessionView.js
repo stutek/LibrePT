@@ -89,7 +89,13 @@ export function renderEditSessionView(targetElement) {
           <!-- Which evening of a repeating session is being edited (TODO §35.3a). Shown only when
                the answer is "one of them", because that is when a trainer needs to know that what
                they change here does not touch next week. -->
-          <p id="setup-occurrence-note" class="setup-occurrence-note text-sm mb-3" role="status" hidden></p>
+          <div id="setup-occurrence-scope" class="setup-occurrence-note mb-3" hidden>
+            <p id="setup-occurrence-note" class="text-sm m-0" role="status"></p>
+            <label class="setup-repeat-toggle" for="setup-apply-to-series">
+              <input type="checkbox" id="setup-apply-to-series">
+              <span id="setup-apply-to-series-label" data-i18n="label_apply_to_series">Change every evening of this session</span>
+            </label>
+          </div>
 
           <!-- Live double-booking readout for the slot above (TODO §1.6). aria-live because it
                appears in response to typing elsewhere in the form, with no focus change to

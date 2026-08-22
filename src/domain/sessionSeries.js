@@ -200,3 +200,22 @@ export function sessionsAfterRemoving(sessions, removedIds) {
     return [{ ...session, cancelled: true }];
   });
 }
+
+/** The series after a trainer edited one of its evenings and asked for it to apply to all of them
+ * (TODO §35.3a).
+ *
+ * What travels is what the rule DESCRIBES — the title, the slot, the place, who is in it — and not
+ * the date: a date belongs to one evening, and "we are moving to Wednesdays" is a change to
+ * `weekdays`, which is a different sentence and a different control.
+ */
+export function seriesWithEdit(series, { title, time, location, participants, routineId } = {}) {
+  if (!series) return series;
+  return {
+    ...series,
+    title: title ?? series.title,
+    time: time || series.time,
+    location: location ?? series.location,
+    participants: participants ? [...participants] : series.participants,
+    routineId: routineId || series.routineId,
+  };
+}

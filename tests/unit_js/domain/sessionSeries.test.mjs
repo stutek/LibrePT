@@ -13,6 +13,7 @@ import {
   occurrenceCalendarFields,
   occurrenceKey,
   seriesOccurrences,
+  seriesWithEdit,
   sessionsAfterRemoving,
   sessionsWithSeries,
   validateSeries,
@@ -195,4 +196,23 @@ test("deleting an evening of a repeating session keeps it as cancelled", () => {
     sessionsWithSeries(after, [SERIES], { from: "2026-08-24", to: "2026-08-26" }),
     [],
   );
+});
+
+test("editing the whole series changes what the rule describes, not which days it falls on", () => {
+  const edited = seriesWithEdit(SERIES, {
+    title: "Group Strength & Conditioning",
+    time: "19:00 - 20:00",
+    participants: ["jane", "john", "sarah"],
+  });
+
+  assert.equal(edited.title, "Group Strength & Conditioning");
+  assert.equal(edited.time, "19:00 - 20:00");
+  assert.deepEqual(edited.participants, ["jane", "john", "sarah"]);
+  // The days are the rule's own sentence — "we are moving to Wednesdays" is a different edit.
+  assert.deepEqual(edited.weekdays, [2, 4]);
+  assert.equal(edited.startDate, SERIES.startDate);
+});
+
+test("an edit that says nothing leaves the rule as it was", () => {
+  assert.deepEqual(seriesWithEdit(SERIES, {}), SERIES);
 });

@@ -2604,9 +2604,18 @@ a. [~] **A recurrence model** — **the rule and the board shipped 2026-08-22**,
    otherwise produce that evening again on the next render, and a trainer would watch a session they
    just deleted come back.
 
-   **Still open**: editing the SERIES itself. Today a rule is created and then only its evenings are
-   edited, which covers "move the next one" (§35.2 event 21) but not "we are moving to Wednesdays".
-b. **A net-vs-slot time meter** while a programme is being authored (event 11).
+   **Editing the series shipped too** (2026-08-22): editing one of its evenings offers *change every
+   evening of this session*, which puts the edit on the RULE and drops the exception row, so the
+   evening follows the rule again. What travels is what the rule DESCRIBES — title, slot, place, who
+   is in it — never the date: "we are moving to Wednesdays" is a change to `weekdays`, a different
+   sentence and a different control, and still unbuilt.
+b. [x] **A net-vs-slot time meter** while a programme is being authored (event 11) — 2026-08-22.
+   [planDuration.js](src/domain/planDuration.js) plus a pill in the plan editor's toolbar: minutes
+   of work against minutes of slot, quiet while it fits and marked when it does not. An ESTIMATE,
+   and it says so — a working set is ONE constant (45s), because per-movement durations would mean
+   inventing a number for all 48 seeded movements and every custom one a trainer adds. Timed work
+   counts its own seconds, rests count (they are what a slot is spent on), a circuit costs its
+   rounds, and a session with no slot is never judged.
 c. [x] **In-session injury capture** (event 14) — **2026-08-21**: the feedback modal gained one
    tick, *keep this on the client's record*, which appends the dated note to `client.notes` — the
    text every future plan is written against, durable in the stable schema, and already shown by the

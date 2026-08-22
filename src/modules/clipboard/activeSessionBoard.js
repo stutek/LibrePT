@@ -256,6 +256,9 @@ function renderPlanEditor(deckContainer, activeClientId, activeClientState, call
   return renderClipboardEditor(deckContainer, {
     activeClientState,
     clientName: editClient ? editClient.name : "",
+    // The slot the plan has to fit in (TODO §35.3b). Read from the session the clipboard is running,
+    // which is also the only place that knows whether there IS one — a planning programme has none.
+    slotLabel: deps.getActiveSession()?.sourceSession?.timeLabel || "",
     allExerciseNames: (state.exercises || []).map((e) => e.name),
     t,
     escapeHTML,

@@ -658,3 +658,21 @@
 }
 
 /* Mobile responsive scaling */
+
+/* How long the plan runs against its slot (TODO §35.3b). Beside the plan being built, because that
+   is the only moment the answer can still change. Quiet while it fits — a trainer is reading the
+   plan, not the meter — and marked when it does not, since "over" is the whole message. */
+.editor-plan-fit {
+  margin-left: auto;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: monospace;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--text-main) 8%, transparent);
+}
+.editor-plan-fit.is-over {
+  color: var(--danger, #dc2626);
+  background: color-mix(in srgb, var(--danger, #dc2626) 14%, transparent);
+}

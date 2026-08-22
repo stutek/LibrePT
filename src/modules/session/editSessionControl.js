@@ -30,7 +30,7 @@ import {
   sessionCalendarDate,
   upsertSessionRecord,
 } from "../../domain/sessionRecord.js";
-import { validateSeries } from "../../domain/sessionSeries.js";
+import { seriesWithEdit, validateSeries } from "../../domain/sessionSeries.js";
 import {
   readRepeatFields,
   resetRepeatControls,
@@ -364,6 +364,37 @@ function commitSeriesIfRepeating(
   return series;
 }
 
+/** Applies this evening's edit to the RULE, when the trainer asked for it (TODO §35.3a).
+ *
+ * The exception row is dropped afterwards: it existed to say "this evening is different", and the
+ * trainer has just said it is not. Leaving it would show the old values on the one evening they
+ * edited, which is the exact opposite of what they asked for.
+ */
+function applyEditToSeriesIfAsked(
+  deps,
+  { sessionId, sessionName, timeLabel, location, clientRoutines },
+) {
+  if (!document.getElementById("setup-apply-to-series")?.checked) return;
+  const state = deps.getState();
+  const session = (state.sessions || []).find((row) => row.id === sessionId);
+  if (!session?.seriesId) return;
+
+  state.sessionSeries = (state.sessionSeries || []).map((series) =>
+    series.id === session.seriesId
+      ? seriesWithEdit(series, {
+          title: sessionName || series.title,
+          time: timeLabel,
+          location,
+          participants: clientRoutines.map((assignment) => assignment.clientId),
+          routineId: clientRoutines[0]?.routineId,
+        })
+      : series,
+  );
+  state.sessions = (state.sessions || []).filter((row) => row.id !== sessionId);
+  deps.saveToLocalStorage?.();
+  deps.rerenderSessions?.();
+}
+
 function commitRealSession(
   deps,
   { sessionId, sessionName, sessionDate, startTime, timeLabel, location, clientRoutines, t },
@@ -517,6 +548,16 @@ export function setupEditSessionControl() {
       location,
       clientRoutines,
       t,
+    });
+
+    // "Change every evening of this session" (TODO §35.3a): the rule takes the edit, and this
+    // evening stops being an exception so it follows the rule again like the others.
+    applyEditToSeriesIfAsked(deps, {
+      sessionId,
+      sessionName,
+      timeLabel,
+      location,
+      clientRoutines,
     });
 
     const sessionMeta = isPlanningModeActive
@@ -787,6 +828,32 @@ function buildParticipantRow(client, ctx) {
   return row;
 }
 
+/** The form's repeating half, set for whichever session it was opened on (TODO §35.3a).
+ *
+ * Which evening of a repeating session this is gets said OUT LOUD, because the alternative is a
+ * trainer changing next Tuesday and finding out later that every Tuesday moved — or, worse,
+ * believing it did when it did not. A one-off says nothing at all.
+ *
+ * Split out of `openEditSessionControlModal` rather than inlined: that function was already at the
+ * complexity gate's limit, and this is a self-contained "put these three controls in the right
+ * state" step that says nothing about when the form opens.
+ */
+function renderRepeatSection(targetSession, t) {
+  const scope = document.getElementById("setup-occurrence-scope");
+  const note = document.getElementById("setup-occurrence-note");
+  const applyToSeries = document.getElementById("setup-apply-to-series");
+  const partOfSeries = Boolean(targetSession?.seriesId);
+
+  if (note) note.textContent = partOfSeries ? t("session_one_of_a_series") : "";
+  if (scope) scope.hidden = !partOfSeries;
+  // Unticked every time the form opens: "change all of them" is a bigger act than the one the
+  // trainer came here to do, and a box left ticked from last time would do it silently.
+  if (applyToSeries) applyToSeries.checked = false;
+  // A repeating slot is authored on the session being CREATED; an existing evening is edited on its
+  // own, so the controls start clean every time.
+  resetRepeatControls();
+}
+
 export function openEditSessionControlModal(
   preselectedClientId = null,
   preselectedRoutineId = null,
@@ -824,18 +891,7 @@ export function openEditSessionControlModal(
     ? sessions.find((b) => b.id === preselectedSessionId)
     : null;
 
-  // Which evening of a repeating session this is, if it is one (TODO §35.3a). Said out loud
-  // because the alternative is a trainer changing next Tuesday and finding out later that every
-  // Tuesday moved — or, worse, believing it did when it did not. A one-off says nothing at all.
-  const occurrenceNote = document.getElementById("setup-occurrence-note");
-  if (occurrenceNote) {
-    const partOfSeries = Boolean(targetSession?.seriesId);
-    occurrenceNote.textContent = partOfSeries ? t("session_one_of_a_series") : "";
-    occurrenceNote.hidden = !partOfSeries;
-  }
-  // A repeating slot is authored on the session being CREATED; an existing evening is edited on its
-  // own, so the controls start clean every time the form opens.
-  resetRepeatControls();
+  renderRepeatSection(targetSession, t);
 
   const draft = getEditSessionDraft();
   const defaults = computeDefaultSessionTimes();

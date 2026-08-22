@@ -28,6 +28,7 @@
 import { newRecordId } from "../../data/recordId.js";
 import { collectCircuitsMeta, normalizeCircuits } from "../../domain/circuitGrouping.js";
 import { metricLabelKey, usesLoad } from "../../domain/exerciseModality.js";
+import { planFitsSlot } from "../../domain/planDuration.js";
 import {
   formatLoad,
   formatReps,
@@ -41,6 +42,27 @@ import {
 import { isRestRecord as isRest } from "../../domain/sessionItemRecord.js";
 
 const DEFAULT_SERIES = 3;
+
+/** How long this plan runs, against the slot it has to fit in (TODO §35.3b).
+ *
+ * Beside the plan while it is still being built, because that is the only moment the answer can
+ * change anything: after the session, "it overran" is history. Shown as minutes, never seconds — a
+ * number to the second would claim a precision an estimate does not have.
+ *
+ * Silent when there is no slot (a planning programme has none), and marked when the plan is over:
+ * the number a trainer scans for is not "45", it is "over".
+ */
+function planFitMeterHTML(deps, tr) {
+  const { activeClientState, slotLabel } = deps;
+  const fit = planFitsSlot(activeClientState?.exercises || [], slotLabel || "");
+  if (!fit.slotSeconds) return "";
+  const minutes = (seconds) => Math.round(seconds / 60);
+  const label = `${minutes(fit.netSeconds)} / ${minutes(fit.slotSeconds)} min`;
+  return `<span class="editor-plan-fit${fit.fits ? "" : " is-over"}" title="${tr(
+    "plan_fit_hint",
+    "Estimated working time against the session slot",
+  )}">${label}</span>`;
+}
 const DEFAULT_REST = 30; // seconds, when injecting a fresh rest
 
 // The editor's Esc / tap-outside handlers live on `document`, so they must be torn down before a
@@ -341,6 +363,7 @@ export function renderClipboardEditor(container, deps) {
         <button type="button" class="btn secondary-btn btn-sm editor-catalog-btn">
           <i class="fa-solid fa-book-open"></i> ${tr("add_from_catalog", "Add from catalog")}
         </button>
+        ${planFitMeterHTML(deps, tr)}
       </div>
       <ul class="editor-list">${items.length ? unitsHtml : `<li class="editor-empty">${tr("no_exercises_injected", "No exercises yet.")}</li>${insertBar(0, { allowCircuit: true })}`}</ul>
       <p class="clipboard-editor-hint">${tr("edit_exit_hint", "Tap Done, press Esc, or tap outside to finish.")}</p>
