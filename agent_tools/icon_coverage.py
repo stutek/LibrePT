@@ -108,6 +108,22 @@ MODIFIERS = {
 
 # `class="…"` / `class='…'`, including the interpolated halves of a template literal.
 CLASS_ATTR = re.compile(r"""class\s*=\s*["']([^"']*)["']""")
+# An icon class list declared as a STRING rather than in markup — `overlayIcon: "fa-solid fa-slash"`,
+# `item.icon || "fa-solid fa-bell"`, a lookup table of status glyphs. Reported 2026-08-22: two
+# header icons vanished when the font was subset, because this check never counted them and the
+# subset therefore never included them. Anchored on a STYLE token (`fa-solid`/`fa-brands`/…), which
+# is why it cannot make the mistake an earlier loose grep made: prose like "far too early" has no
+# style token in it, and neither does a CSS selector.
+ICON_STRING = re.compile(
+    r"""["'`]([^"'`]*\bfa-(?:solid|brands|regular|classic|light|thin|duotone)\b[^"'`]*)["'`]"""
+)
+# A string that is NOTHING BUT icon tokens — `const easyIcon = isEasyActive ? "fa-circle-check" :
+# "fa-feather"`, which the deck's cards then interpolate into a class. Reported 2026-08-22: the
+# circuit cards' Too Easy / Too Hard glyphs disappeared with the subset, and neither pattern above
+# could see them (no style token in the string, and the class attribute holds only `fa-solid ${…}`,
+# whose truncated prefix is deliberately dropped). Anchored on the WHOLE string being icon names,
+# which is what keeps prose and selectors out.
+ICON_ONLY_STRING = re.compile(r"""["'`]((?:fa-[a-z0-9-]+\s*)+)["'`]""")
 FA_TOKEN = re.compile(r"\bfa-([a-z0-9-]+)")
 # A glyph the stylesheet can actually render. Font Awesome GROUPS aliases onto one rule —
 # `.fa-magnifying-glass:before,.fa-search:before{content:"\f002"}` — so a pattern anchored on
@@ -132,17 +148,45 @@ def scanned_files():
     )
 
 
+# Comments are stripped before any of the three patterns run. Widening the scan to strings made the
+# tool read its own explanations: a comment naming `fa-sparkles` as a Pro glyph was counted as a
+# USAGE of it, and the check then demanded the app ship the very icon the comment says it cannot.
+# Prose is not code, and a scanner that cannot tell them apart accuses the person documenting a
+# decision (found immediately, 2026-08-22).
+BLOCK_COMMENT = re.compile(r"/\*.*?\*/", re.S)
+LINE_COMMENT = re.compile(r"(^|\s)//[^\n]*", re.M)
+HTML_COMMENT = re.compile(r"<!--.*?-->", re.S)
+
+
+def _code_only(text):
+    """The file with its comments removed — enough for matching icon names, not a parser."""
+    text = BLOCK_COMMENT.sub(" ", text)
+    text = HTML_COMMENT.sub(" ", text)
+    return LINE_COMMENT.sub(" ", text)
+
+
 def used_icons(paths):
     """Icon names requested by the source, as {name: {file, …}}.
 
-    Only `class` attributes are read. Scanning raw text instead would drag in prose ("far too
-    early"), CSS selectors and unrelated identifiers — an earlier loose grep did exactly that and
-    reported `far` as used when nothing used it.
+    Three shapes are read: a `class` attribute; a string naming a style (`"fa-solid fa-slash"`), which
+    is how the sync glyph, the feed's icons and several status maps declare theirs; and a string that
+    is nothing but icon names (`"fa-circle-check"`), which is how the deck's cards pick a glyph before
+    interpolating it into a class. Missing the last two cost four visible icons the day the font was
+    subset — the check said every icon shipped, and the ones it had never counted were not in it.
+
+    Raw text is still not scanned. Prose ("far too early"), CSS selectors and unrelated identifiers
+    were what an earlier loose grep dragged in, reporting `far` as used when nothing used it; both
+    patterns here are anchored — one on the attribute, one on a style token.
     """
     found = {}
     for path in paths:
-        text = path.read_text(encoding="utf-8", errors="ignore")
-        for attr in CLASS_ATTR.findall(text):
+        text = _code_only(path.read_text(encoding="utf-8", errors="ignore"))
+        candidates = (
+            CLASS_ATTR.findall(text)
+            + ICON_STRING.findall(text)
+            + ICON_ONLY_STRING.findall(text)
+        )
+        for attr in candidates:
             # Drop the truncated prefix of a runtime-built name (`fa-arrow-` in `fa-arrow-${dir}`);
             # RUNTIME_BUILT carries the real names instead.
             cleaned = TEMPLATE_TOKEN.sub(" ", attr)

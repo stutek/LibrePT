@@ -44,8 +44,8 @@ Licence text: <https://openfontlicense.org> (SIL OFL 1.1). Each upstream reposit
 ## Font Awesome Free 6.4.0
 
 Copyright 2023 Fonticons, Inc. Vendored as [`src/fonts/fontawesome.css`](src/fonts/fontawesome.css)
-plus `fa-solid-900.woff2` and `fa-brands-400.woff2`. Full licence:
-<https://fontawesome.com/license/free>.
+plus `librept-icons.woff2` and `librept-icons-brands.woff2`, which are **subsets** of the upstream
+`fa-solid-900` and `fa-brands-400` faces. Full licence: <https://fontawesome.com/license/free>.
 
 - **Icons** — CC BY 4.0
 - **Fonts** — SIL OFL 1.1, Reserved Font Name *"Font Awesome"*
@@ -56,8 +56,20 @@ plus `fa-solid-900.woff2` and `fa-brands-400.woff2`. Full licence:
 - The stylesheet was edited — `url()` targets repointed to the local files, the `.ttf` fallbacks
   dropped, and the `@font-face` blocks for faces this build does not use removed. The upstream
   licence banner is retained verbatim at the top of the file.
-- The `woff2` binaries are **unmodified** and byte-identical to upstream. No Modified Version of the
-  font software exists, so the Reserved Font Name clause is not engaged. **If the font is ever
+- The `woff2` binaries are **subsets** of the upstream faces (2026-08-22): the ~1900 glyphs the app
+  never draws were removed, leaving the 72 it does, and 252KB became 7KB. That makes them Modified
+  Versions under OFL 1.1, so — as the Reserved Font Name clause requires — they are **renamed**:
+  the families are `LibrePT Icons` and `LibrePT Icons Brands`, and the copyright and licence
+  statements travel inside each font's own name table. The subsets are produced by
+  [`agent_tools/font_subset.py`](agent_tools/font_subset.py) from the upstream files, which the
+  script's own header records; `fonttools` is installed for that run and removed again, so it never
+  becomes a build dependency. The two faces are kept SEPARATE rather than merged because they share
+  96 codepoints, and merging silently redrew two brand icons as something else — caught by
+  [`agent_tools/glyph_render.py`](agent_tools/glyph_render.py), which compares every icon's rendered
+  shape against a recorded baseline.
+- The icons themselves are CC BY 4.0; the set has been subset, which is stated here as that licence
+  requires changes to be indicated.
+- **Historical note.** Until 2026-08-22 the binaries were byte-identical to upstream. **If the font is ever
   subset** (see [TODO §12.6](TODO.md)), that changes: deleting glyphs creates a Modified Version,
   and clause 3 then forbids presenting it under the name "Font Awesome" — the `font-family` would
   have to be renamed.

@@ -57,7 +57,11 @@ export const DEFAULT_MESSAGES = [
   {
     id: "demo-welcome",
     type: "welcome",
-    icon: "fa-solid fa-sparkles",
+    // `fa-sparkles` is a Font Awesome PRO glyph and has never been in the free set this app ships,
+    // so the demo's own welcome card has been rendering an invisible gap since it was written. Found
+    // 2026-08-22, when icon_coverage.py learned to read icon names declared as strings rather than
+    // only in `class="…"` markup.
+    icon: "fa-solid fa-wand-magic-sparkles",
     titleKey: "notif_welcome_title",
     descKey: "notif_welcome_desc",
     actions: [{ labelKey: "notif_welcome_clients_btn", view: "/clients", primary: true }],

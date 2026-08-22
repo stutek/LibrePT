@@ -945,7 +945,22 @@ git reflog expire --expire=now --all && git gc --prune=now
 **Vendored 2026-08-05** ([CHANGELOG](CHANGELOG.md)); it was the root cause of §21's `Page.goto`
 stalls.
 
-**Still open — glyph subsetting**, and it is now safe to do: 2 woff2 files remain (252KB) using 48
+**[x] Glyph subsetting — done 2026-08-22.** 252KB of two whole faces became **7KB** of two subsets,
+72 glyphs, on the first load that matters most. Three things worth not re-deriving:
+
+- **Two subsets, not one merged font.** The first attempt merged both faces into one family and two
+  brand icons silently became other glyphs: the faces share 96 codepoints (both map ASCII, and
+  `fa-plus` genuinely lives at U+002B), so merging forces a winner per codepoint. Upstream's own
+  separation is kept.
+- **The check had to come first, and it caught exactly that.** `icon_coverage.py` compares NAMES;
+  [glyph_render.py](agent_tools/glyph_render.py) compares rendered SHAPES against a recorded
+  baseline — a 16×16 grid per icon, so a re-encode's antialiasing (3-17 cells) passes and a wrong
+  glyph (114) does not.
+- **The upstream faces moved to `assets/fontawesome-upstream/`**, out of the shipped app but in the
+  repository, so regenerating after an icon is added needs nothing else. `fonttools` is installed
+  for the run and removed again.
+
+**The original note, kept for the reasoning:** 2 woff2 files remain (252KB) using 48
 glyphs of ~1400 plus 2 brand glyphs; the codepoints do not collide, so merging would land ~381KB of
 font+CSS at roughly 24KB. The prerequisite is built —
 [agent_tools/icon_coverage.py](agent_tools/icon_coverage.py) gates every `fa-` class in `src/`

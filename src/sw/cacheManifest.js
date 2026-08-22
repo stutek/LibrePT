@@ -11,7 +11,7 @@
 // atomic version. The worker's own sub-scripts (sw.js + this sw/ folder) are deliberately NOT in ASSETS:
 // they are the worker's script resources, kept coherent by the browser's own SW-update mechanism.
 self.swCacheManifest = (() => {
-  const CACHE_NAME = "librept-v103";
+  const CACHE_NAME = "librept-v104";
   const ASSETS = [
     "./",
     "./index.html",
@@ -267,8 +267,8 @@ self.swCacheManifest = (() => {
     // Font Awesome, vendored 2026-08-05 (TODO §12.6 / §21) — same-origin now, so it joins the
     // atomic, integrity-verified shell instead of being a best-effort external fetch.
     "./fonts/fontawesome.css",
-    "./fonts/fa-solid-900.woff2",
-    "./fonts/fa-brands-400.woff2",
+    "./fonts/librept-icons.woff2",
+    "./fonts/librept-icons-brands.woff2",
   ];
 
   // Every asset is same-origin since Font Awesome was vendored (TODO §12.6), so the whole list IS
