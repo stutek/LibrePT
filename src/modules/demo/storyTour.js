@@ -10,13 +10,13 @@
 // the feedback loop closing. Both exist and stay separate: a stranger gets the wedge, someone who
 // already leaned in gets the story.
 //
-// **The floor chapter REUSES the wedge's steps rather than restating them.** Both make the same
+// **The gym chapter REUSES the wedge's steps rather than restating them.** Both make the same
 // claim about the same controls, and two copies of a selector are two things that must be kept true
 // of the app, one of which nobody is watching. Importing them means a change to the clipboard breaks
 // both loudly, in company — the same reason the wedge was built on selectors the e2e suite already
 // relies on.
 //
-// **Chapters are built in the order §35.3 sets out**: the floor first, because it is the chapter
+// **Chapters are built in the order §35.3 sets out**: the gym chapter first, because it is the chapter
 // closest to what already runs. The events that need unbuilt product — the recurrence model, the
 // net-vs-slot meter, shared binding across participants — are absent rather than mocked. A demo
 // step that pretends is the failure mode a scripted demo exists to avoid.
@@ -49,13 +49,13 @@ function narration(id, kind, titleKey, bodyKey, extra = {}) {
   };
 }
 
-// Chapter C — on the floor. §35.3's build order starts here: it is the chapter that needs the least
+// Chapter C — in the gym. §35.3's build order starts here: it is the chapter that needs the least
 // that does not exist, and the one whose beats the wedge already proves.
-const FLOOR_CHAPTER = {
-  id: "floor",
-  titleKey: "story_chapter_floor",
+const GYM_CHAPTER = {
+  id: "gym",
+  titleKey: "story_chapter_gym",
   steps: [
-    narration("floor-open", "chapter", "story_chapter_floor", "story_floor_open_body", {
+    narration("gym-open", "chapter", "story_chapter_gym", "story_gym_open_body", {
       // The board, not wherever a refreshed link happened to point: the chapter opens by saying
       // what the viewer is about to watch, and it should say it over the screen it happens on.
       route: "/",
@@ -133,14 +133,14 @@ const FLOOR_CHAPTER = {
       expect: { selector: "#session-menu:not(.hidden)", visible: true },
     },
     {
-      // The payoff, and the expectation says so: opening the plan editor shows what the floor
+      // The payoff, and the expectation says so: opening the plan editor shows what the gym
       // already said about this person. Event 20 lives in chapter D over a longer arc; this is the
       // same claim inside one session, which is as far as the story can honestly go today.
-      id: "plan-editor-shows-the-floor",
+      id: "plan-editor-shows-the-notes",
       persona: TRAINER,
       target: "#btn-edit-plan",
       caption: "story_step_plan_editor",
-      expect: { selector: "#client-focus-floor", visible: true },
+      expect: { selector: "#client-focus-gym", visible: true },
     },
     {
       // Event 15: the swap happens HERE, inside one participant's plan — the other two are
@@ -170,7 +170,7 @@ const FLOOR_CHAPTER = {
     // The last beat of the story so far, so it is the one that hands the app over (§30.2): thank
     // you, and the two ways onward that already exist. Dismissing IS "play around" — the app is
     // left exactly where the story put it, not on a start screen.
-    narration("floor-close", "chapter", "story_thanks_title", "story_floor_close_body", {
+    narration("gym-close", "chapter", "story_thanks_title", "story_gym_close_body", {
       onward: true,
     }),
   ],
@@ -178,5 +178,5 @@ const FLOOR_CHAPTER = {
 
 export const DEMO_STORY = {
   id: "story",
-  chapters: [FLOOR_CHAPTER],
+  chapters: [GYM_CHAPTER],
 };

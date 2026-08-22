@@ -56,9 +56,9 @@
   line-height: 1.45;
   color: var(--text-main);
 }
-/* What the floor already said about this client (TODO §35.3d). Rows, not prose: each is one signal
+/* What the gym already said about this client (TODO §35.3d). Rows, not prose: each is one signal
    about one movement, and a trainer scans them while their other hand is on a barbell. */
-.floor-note-list {
+.gym-note-list {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -66,7 +66,7 @@
   padding: 0;
   list-style: none;
 }
-.floor-note {
+.gym-note {
   display: flex;
   flex-wrap: wrap;
   gap: 2px 8px;
@@ -74,26 +74,26 @@
   line-height: 1.35;
   color: var(--text-main);
 }
-.floor-note-movement {
+.gym-note-movement {
   font-weight: 700;
 }
-.floor-note-tag {
+.gym-note-tag {
   color: var(--text-muted);
 }
 /* The reason an entry is at the top: it is about a movement in the plan on screen. Said in words
    rather than by colour alone — the ordering reads as arbitrary otherwise, and on a phone the
    trainer sees the top two rows and nothing else. */
-.floor-note.is-in-plan .floor-note-movement {
+.gym-note.is-in-plan .gym-note-movement {
   color: var(--primary);
 }
-.floor-note-here {
+.gym-note-here {
   font-size: 10px;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.4px;
   color: var(--primary);
 }
-.floor-note-more {
+.gym-note-more {
   font-size: 11px;
   color: var(--text-muted);
 }

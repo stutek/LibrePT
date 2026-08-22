@@ -1,5 +1,5 @@
-// tests/unit_js/domain/floorNotes.test.mjs
-// What the floor already said about one client (src/domain/floorNotes.js) — TODO §35.3c/d.
+// tests/unit_js/domain/gymNotes.test.mjs
+// What the floor already said about one client (src/domain/gymNotes.js) — TODO §35.3c/d.
 //
 // The promise: a signal or note taken one-handed mid-circuit comes back at the moment the trainer
 // plans that client's next session, and the ones about movements in the plan they are looking at
@@ -8,7 +8,7 @@
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { floorNotesForPlan, notesWithFloorNote } from "../../../src/domain/floorNotes.js";
+import { gymNotesForPlan, notesWithGymNote } from "../../../src/domain/gymNotes.js";
 
 const UPDATES = [
   {
@@ -46,7 +46,7 @@ const UPDATES = [
 ];
 
 const forJane = (planExerciseNames) =>
-  floorNotesForPlan({ planUpdates: UPDATES, clientId: "jane", planExerciseNames });
+  gymNotesForPlan({ planUpdates: UPDATES, clientId: "jane", planExerciseNames });
 
 test("only this client's floor notes come back", () => {
   assert.deepEqual(
@@ -94,16 +94,16 @@ test("a movement is matched by name, whatever case it was typed in", () => {
 
 test("nothing logged yet is an empty list, not a failure", () => {
   assert.deepEqual(
-    floorNotesForPlan({ planUpdates: [], clientId: "jane", planExerciseNames: [] }),
+    gymNotesForPlan({ planUpdates: [], clientId: "jane", planExerciseNames: [] }),
     [],
   );
-  assert.deepEqual(floorNotesForPlan({}), []);
+  assert.deepEqual(gymNotesForPlan({}), []);
 });
 
 test("a note kept on the record is added to what the trainer already wrote", () => {
   // §35.3c: it has to reach the CLIENT record, because that is the text the next plan is written
   // against — and it must not replace notes the trainer typed themselves.
-  const notes = notesWithFloorNote("Prefers morning sessions.", {
+  const notes = notesWithGymNote("Prefers morning sessions.", {
     on: "2026-08-21",
     exerciseName: "Deadlift",
     tag: "Joint Pain / Discomfort - left knee",
@@ -116,12 +116,12 @@ test("a note kept on the record is added to what the trainer already wrote", () 
 });
 
 test("a client with no notes yet gets the line and nothing else", () => {
-  const notes = notesWithFloorNote("", { on: "2026-08-21", exerciseName: "Deadlift", tag: "sore" });
+  const notes = notesWithGymNote("", { on: "2026-08-21", exerciseName: "Deadlift", tag: "sore" });
 
   assert.ok(!notes.startsWith("\n"));
   assert.equal(notes.split("\n").length, 1);
 });
 
 test("nothing to say leaves the record exactly as it was", () => {
-  assert.equal(notesWithFloorNote("Existing.", { on: "2026-08-21" }), "Existing.");
+  assert.equal(notesWithGymNote("Existing.", { on: "2026-08-21" }), "Existing.");
 });

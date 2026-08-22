@@ -389,13 +389,13 @@ export const en = {
   // The long demo (TODO §35): chapter titles, the narration cards' bodies, and the labels the
   // narration surface itself needs. Captions for taps that the story shares with the wedge stay
   // under tour_step_* — the same beat, said once.
-  floor_notes_label: "From the floor",
-  floor_note_in_this_plan: "in this plan",
+  gym_notes_label: "In the gym",
+  gym_note_in_this_plan: "in this plan",
   feedback_keep_on_record: "Keep this on the client's record",
   story_continue: "Continue",
   story_persona_trainer: "Trainer's phone",
-  story_chapter_floor: "On the floor",
-  story_thanks_title: "That was the floor",
+  story_chapter_gym: "In the gym",
+  story_thanks_title: "That was a session",
   story_clear_demo_data: "Clear the demo data",
   story_step_back_to_first: "Back to the first friend — their signal is still where they left it.",
   story_step_refocus: "Bring the circuit back into focus. Their card, their plan.",
@@ -410,9 +410,9 @@ export const en = {
     "Something gentler for the same muscle group. The other two plans are untouched.",
   story_step_plan_editor:
     "Shaping the plan — and the note from three minutes ago is already here, against the right person.",
-  story_floor_open_body:
+  story_gym_open_body:
     "Tuesday evening. Three friends, one 60-minute slot, one clipboard between them. The trainer's hands are busy, so every beat here is a single tap.",
-  story_floor_close_body:
+  story_gym_close_body:
     "Thanks for watching. Signals logged, nobody typed anything, the clock never stopped — and the plan already knows about the twinge. Keep tapping around, or clear the demo data and start with your own.",
   today: "Today",
   tomorrow: "Tomorrow",

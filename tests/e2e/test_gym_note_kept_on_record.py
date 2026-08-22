@@ -1,4 +1,4 @@
-# tests/e2e/test_floor_note_kept_on_record.py
+# tests/e2e/test_gym_note_kept_on_record.py
 # A note taken mid-session can be kept on the CLIENT's record (TODO §35.3c).
 #
 # Why that matters: a twinge a client mentions between rounds changes how they are programmed for
@@ -9,7 +9,7 @@
 # It needs the whole app: the real #dialog-feedback form writing to the real client record, and the
 # record then read back by a different surface (the client focus panel) — two components and the
 # store between them, which is the seam a component test cannot hold. The append RULE itself is
-# pinned without a browser in tests/unit_js/domain/floorNotes.test.mjs.
+# pinned without a browser in tests/unit_js/domain/gymNotes.test.mjs.
 #
 # Note on style: each test inlines its own literal `page.evaluate` body — the app ships
 # `script-src 'self'` with no `unsafe-eval`, so a helper building one via `new Function` is refused
@@ -78,7 +78,7 @@ def test_a_kept_note_lands_on_the_person_and_not_only_on_the_session(
     notes = _client_notes(page)
     assert "left knee clicks on the last rep" in notes
     assert "Barbell Row" in notes
-    # What the trainer wrote themselves is never replaced by what the floor added.
+    # What the trainer wrote themselves is never replaced by what the gym added.
     assert before.strip() in notes
 
 

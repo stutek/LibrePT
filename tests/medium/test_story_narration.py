@@ -35,12 +35,12 @@ NO_ONWARD_STUB = NARRATION_STUB.replace(
 )
 
 CHAPTER_STEP = {
-    "id": "floor-open",
+    "id": "gym-open",
     "persona": "story_persona_trainer",
     "narrate": {
         "kind": "chapter",
-        "titleKey": "story_chapter_floor",
-        "bodyKey": "story_floor_open_body",
+        "titleKey": "story_chapter_gym",
+        "bodyKey": "story_gym_open_body",
     },
     "target": "#story-card-continue",
 }
@@ -66,7 +66,7 @@ def test_a_narrated_beat_is_read_and_then_dismissed_by_a_tap(page, local_server)
 
     card = page.locator("#story-card")
     expect(card).to_be_visible()
-    expect(card).to_contain_text("On the floor")
+    expect(card).to_contain_text("In the gym")
     expect(card).to_contain_text("one clipboard")
 
     page.click("#story-card-continue")
@@ -135,7 +135,7 @@ def test_the_narration_fits_the_phone_the_story_is_watched_on(page, local_server
 
 ONWARD_STEP = {
     **CHAPTER_STEP,
-    "id": "floor-close",
+    "id": "gym-close",
     "narrate": {**CHAPTER_STEP["narrate"], "onward": True},
 }
 

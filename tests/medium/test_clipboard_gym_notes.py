@@ -1,11 +1,11 @@
-# tests/medium/test_clipboard_floor_notes.py
-# What the floor already said about this client, shown where their next plan is being shaped
+# tests/medium/test_clipboard_gym_notes.py
+# What the gym already said about this client, shown where their next plan is being shaped
 # (TODO §35.3d).
 #
 # The claim under test is the one §35's story is built around: a signal taken one-handed mid-circuit
 # comes back at the moment it can change something, against the right person, with the ones about
 # movements in THIS plan first. The selection and ordering rules are pinned without a browser in
-# tests/unit_js/domain/floorNotes.test.mjs; what needs the DOM is that the panel shows them, marks
+# tests/unit_js/domain/gymNotes.test.mjs; what needs the DOM is that the panel shows them, marks
 # the in-plan ones, and stays out of the way when there is nothing to say.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
@@ -55,12 +55,12 @@ def _mount(page, local_server, extra_body=""):
     page.wait_for_selector(".clipboard-editor")
 
 
-def test_the_trainer_sees_what_the_floor_said_while_shaping_the_next_plan(
+def test_the_trainer_sees_what_the_gym_said_while_shaping_the_next_plan(
     page, local_server
 ):
     _mount(page, local_server, SEEDED_NOTES)
 
-    block = page.locator("#client-focus-floor")
+    block = page.locator("#client-focus-gym")
     expect(block).to_be_visible()
     expect(block).to_contain_text("Barbell Row")
     expect(block).to_contain_text("Too Hard")
@@ -74,7 +74,7 @@ def test_a_note_about_a_movement_in_this_plan_comes_first_and_says_so(
     and an unexplained order reads as arbitrary — so the in-plan entry is also marked."""
     _mount(page, local_server, SEEDED_NOTES)
 
-    rows = page.locator("#client-focus-floor-notes .floor-note")
+    rows = page.locator("#client-focus-gym-notes .gym-note")
     expect(rows.first).to_contain_text("Barbell Row")
     # Marked in WORDS, not by position or colour: a trainer reading two rows on a phone has no
     # other way to tell an entry about the movement in front of them from last week's bench press.
@@ -98,11 +98,11 @@ renderActiveGroupBoard();
         % CLIENT_ID,
     )
 
-    expect(page.locator("#client-focus-floor")).to_be_hidden()
+    expect(page.locator("#client-focus-gym")).to_be_hidden()
 
 
 def test_nothing_logged_costs_the_plan_no_space(page, local_server):
     """The panel shares a 390px screen with the plan being edited, so an empty block is not free."""
     _mount(page, local_server)
 
-    expect(page.locator("#client-focus-floor")).to_be_hidden()
+    expect(page.locator("#client-focus-gym")).to_be_hidden()

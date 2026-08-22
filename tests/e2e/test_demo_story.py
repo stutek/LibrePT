@@ -55,7 +55,7 @@ def test_the_story_plays_every_beat_it_declares(page, local_server):
     # The player stops at the first failure, so a story that broke halfway would otherwise report a
     # short, all-green list. Both the narrated cards and the taps are in here.
     assert [r["id"] for r in results] == [
-        "floor-open",
+        "gym-open",
         "open-session",
         "focus-exercise",
         "signal-too-easy",
@@ -67,10 +67,10 @@ def test_the_story_plays_every_beat_it_declares(page, local_server):
         "capture-keep",
         "capture-submit",
         "open-session-menu",
-        "plan-editor-shows-the-floor",
+        "plan-editor-shows-the-notes",
         "swap-open-catalog",
         "swap-pick-movement",
-        "floor-close",
+        "gym-close",
     ]
 
 
@@ -103,11 +103,11 @@ def test_the_story_left_the_app_where_it_says_it_did(page, local_server):
     """Independent verification, because the assertions above trust the app's own grading."""
     _play(page, local_server)
 
-    # It ends where the chapter says it does: the plan being shaped, with what the floor said a few
+    # It ends where the chapter says it does: the plan being shaped, with what the gym said a few
     # beats earlier already waiting against this participant. Asserted here rather than trusting the
     # player's own grading of its last step.
-    expect(page.locator("#client-focus-floor")).to_be_visible()
-    expect(page.locator("#client-focus-floor")).to_contain_text("Joint Pain")
+    expect(page.locator("#client-focus-gym")).to_be_visible()
+    expect(page.locator("#client-focus-gym")).to_contain_text("Joint Pain")
     # The closing card was dismissed by its own step, so the app is left usable rather than behind
     # a card nobody can get past.
     expect(page.locator("#story-card")).to_be_hidden()

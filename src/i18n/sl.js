@@ -372,13 +372,13 @@ export const sl = {
   tour_step_signal: "Označi krog kot prelahek. En dotik ga zabeleži in pusti opombo za načrt.",
   tour_step_next_participant:
     "Preklopi na naslednjega udeleženca — ista seja, njegov lasten načrt.",
-  floor_notes_label: "S parketa",
-  floor_note_in_this_plan: "v tem načrtu",
+  gym_notes_label: "V telovadnici",
+  gym_note_in_this_plan: "v tem načrtu",
   feedback_keep_on_record: "Shrani to v kartoteko stranke",
   story_continue: "Naprej",
   story_persona_trainer: "Telefon trenerja",
-  story_chapter_floor: "Na parketu",
-  story_thanks_title: "To je bil parket",
+  story_chapter_gym: "V telovadnici",
+  story_thanks_title: "To je bila vadba",
   story_clear_demo_data: "Počisti demo podatke",
   story_step_back_to_first: "Nazaj k prvemu prijatelju — njegov signal je še vedno tam.",
   story_step_refocus: "Vrni krog v fokus. Njegova kartica, njegov načrt.",
@@ -393,9 +393,9 @@ export const sl = {
     "Nekaj bolj prizanesljivega za isto mišično skupino. Načrta drugih dveh se to ne dotakne.",
   story_step_plan_editor:
     "Oblikovanje načrta — in zapis izpred treh minut je že tu, pri pravi osebi.",
-  story_floor_open_body:
+  story_gym_open_body:
     "Torek zvečer. Trije prijatelji, en 60-minutni termin, ena skupna podloga. Trener ima polne roke, zato je vsak korak tu en sam dotik.",
-  story_floor_close_body:
+  story_gym_close_body:
     "Hvala za ogled. Signali so zabeleženi, nihče ni ničesar tipkal, ura se ni ustavila — in načrt že ve za bolečino. Kar raziskuj naprej ali počisti demo podatke in začni s svojimi.",
   today: "Danes",
   tomorrow: "Jutri",

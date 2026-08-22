@@ -12,7 +12,7 @@
 //   renderPendingPlanAdjustments()
 // }
 
-import { notesWithFloorNote } from "../../domain/floorNotes.js";
+import { notesWithGymNote } from "../../domain/gymNotes.js";
 import { $id, closeModal, openModal, renderMarkupOnce } from "./dom.js";
 
 let deps = null;
@@ -307,7 +307,7 @@ export function setupFeedbackForms() {
       // is being shaped. Deliberately NOT setting `hasInjury`: which tags mean "injury" would be a
       // guess made from a string, and the trainer's own record is where that call belongs.
       if (client && $id("feedback-keep-on-record").checked) {
-        client.notes = notesWithFloorNote(client.notes, {
+        client.notes = notesWithGymNote(client.notes, {
           on: new Date().toISOString().slice(0, 10),
           exerciseName: exName,
           tag: newFeedback.tag,

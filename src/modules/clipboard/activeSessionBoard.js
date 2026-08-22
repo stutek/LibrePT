@@ -22,7 +22,7 @@
 //   completeCircuitRound, focusExerciseByIndex, startRestTimer  — deck card callbacks
 //   newRecordId()
 
-import { floorNotesForPlan } from "../../domain/floorNotes.js";
+import { gymNotesForPlan } from "../../domain/gymNotes.js";
 import { renderActiveUsersList } from "../common/activeUsersList.js";
 import { openFeedbackModal } from "../common/feedbackModal.js";
 import { escapeHTML, getClientDisplayNameHTML, getInitials } from "../common/utils.js";
@@ -68,39 +68,39 @@ function renderInjuryAlertBanner(activeClient) {
   }
 }
 
-// How many floor notes the panel shows before it starts hiding them. The panel shares a 390px
+// How many gym notes the panel shows before it starts hiding them. The panel shares a 390px
 // screen with the plan being edited, and a list long enough to scroll is one nobody reads to the
 // end of; the rest stay one tap away on the Pending Review screen, which is where they already are.
-const FLOOR_NOTES_SHOWN = 4;
+const GYM_NOTES_SHOWN = 4;
 
-// What the floor already said about this client (TODO §35.3d). Text goes in with textContent, never
+// What the gym already said about this client (TODO §35.3d). Text goes in with textContent, never
 // markup: a tag carries whatever the trainer typed into the feedback note.
-function renderFloorNotes(activeClient, activeClientState) {
-  const block = document.getElementById("client-focus-floor");
-  const list = document.getElementById("client-focus-floor-notes");
+function renderGymNotes(activeClient, activeClientState) {
+  const block = document.getElementById("client-focus-gym");
+  const list = document.getElementById("client-focus-gym-notes");
   if (!block || !list) return;
 
   const { state, t } = deps.getAppDeps();
-  const notes = floorNotesForPlan({
+  const notes = gymNotesForPlan({
     planUpdates: state.planUpdates,
     clientId: activeClient.id,
     planExerciseNames: (activeClientState?.exercises || []).map((item) => item.name),
   });
 
-  document.getElementById("client-focus-floor-label").textContent = t("floor_notes_label");
+  document.getElementById("client-focus-gym-label").textContent = t("gym_notes_label");
   list.textContent = "";
   block.classList.toggle("hidden", notes.length === 0);
 
-  for (const note of notes.slice(0, FLOOR_NOTES_SHOWN)) {
+  for (const note of notes.slice(0, GYM_NOTES_SHOWN)) {
     const row = document.createElement("li");
     // Marked, not merely first: a trainer reading a list has no way to tell an entry about the
     // movement in front of them from one about last week's bench press.
-    row.className = note.inThisPlan ? "floor-note is-in-plan" : "floor-note";
+    row.className = note.inThisPlan ? "gym-note is-in-plan" : "gym-note";
     const movement = document.createElement("span");
-    movement.className = "floor-note-movement";
+    movement.className = "gym-note-movement";
     movement.textContent = note.exerciseName || "";
     const tag = document.createElement("span");
-    tag.className = "floor-note-tag";
+    tag.className = "gym-note-tag";
     tag.textContent = note.tag || "";
     row.append(movement, tag);
     // Says WHY this row is at the top, in words. A colour or a bullet would leave the ordering
@@ -108,17 +108,17 @@ function renderFloorNotes(activeClient, activeClientState) {
     // reads the first two rows and nothing else.
     if (note.inThisPlan) {
       const here = document.createElement("span");
-      here.className = "floor-note-here";
-      here.textContent = t("floor_note_in_this_plan");
+      here.className = "gym-note-here";
+      here.textContent = t("gym_note_in_this_plan");
       row.appendChild(here);
     }
     list.appendChild(row);
   }
 
-  const hidden = notes.length - FLOOR_NOTES_SHOWN;
+  const hidden = notes.length - GYM_NOTES_SHOWN;
   if (hidden > 0) {
     const more = document.createElement("li");
-    more.className = "floor-note-more";
+    more.className = "gym-note-more";
     more.textContent = `+${hidden}`;
     list.appendChild(more);
   }
@@ -137,7 +137,7 @@ function renderClientFocusPanel(activeClient, activeClientState) {
   if (notesLabel) notesLabel.textContent = t("notes_injuries") || "Notes";
   if (goalsEl) goalsEl.textContent = activeClient.goals || t("no_goals_specified") || "";
   if (notesEl) notesEl.textContent = activeClient.notes || t("no_notes_specified") || "";
-  renderFloorNotes(activeClient, activeClientState);
+  renderGymNotes(activeClient, activeClientState);
 }
 
 // Repurpose the session title bar for edit mode: show WHICH client's plan is open and its temporal

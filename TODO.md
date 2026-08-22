@@ -2596,7 +2596,7 @@ d. [x] **A movement-scoped coaching note** (event 16) that resurfaces when that 
    programmed for that client — **2026-08-21**. Built as ONE pane for both kinds of note, as this
    asked: the client focus panel, already open while a plan is being edited, gained a *From the
    floor* block listing that client's unanswered signals and notes,
-   [floorNotes.js](src/domain/floorNotes.js) putting the ones about movements in THIS plan first and
+   [gymNotes.js](src/domain/gymNotes.js) putting the ones about movements in THIS plan first and
    marking them. **No new record type was needed** — a note is already captured against
    (participant, movement) in `planUpdates`; what was missing was it coming back at the moment it
    can change something. Resolved notes stay gone; four rows, then a `+N`, because the panel shares
@@ -2623,7 +2623,7 @@ events that genuinely need it.
       (cards, persona pill, caption bar). Events 14, 15, 16 and 18 are NOT in it: 14 and 16 need
       35.3c/d, and a demo step that pretends is what a scripted demo exists to avoid.
 - [x] **35.3c and 35.3d shipped — 2026-08-21**, before the demo beats that show them: the *keep on
-      the client's record* tick and the *From the floor* block in the client focus panel. One pane
+      the client's record* tick and the *In the gym* block in the client focus panel. One pane
       for both kinds of note, as 35.3d required.
 - [x] **Chapter C's capture and payoff — 2026-08-21.** The floor chapter is 14 beats: the wedge,
       back to the first friend (their signal still set), the injury captured mid-circuit and kept on

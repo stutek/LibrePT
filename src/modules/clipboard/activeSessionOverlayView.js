@@ -157,17 +157,17 @@ export function renderActiveSessionOverlayShell() {
           </span>
           <p id="client-focus-notes"></p>
         </div>
-        <!-- What the floor already said about this client (TODO §35.3d): the signals and notes
+        <!-- What the gym already said about this client (TODO §35.3d): the signals and notes
              taken one-handed mid-circuit, waiting where they are finally useful — the moment their
              next plan is being shaped. The ones about movements in THIS plan come first, or the
              ordering reads as arbitrary. Hidden when there is nothing, since an empty block on a
              390px panel costs the plan itself. -->
-        <div class="client-focus-item hidden" id="client-focus-floor">
+        <div class="client-focus-item hidden" id="client-focus-gym">
           <span class="client-focus-label">
             <i class="fa-solid fa-bell-concierge"></i>
-            <span id="client-focus-floor-label">From the floor</span>
+            <span id="client-focus-gym-label">In the gym</span>
           </span>
-          <ul id="client-focus-floor-notes" class="floor-note-list"></ul>
+          <ul id="client-focus-gym-notes" class="gym-note-list"></ul>
         </div>
       </div>
 
