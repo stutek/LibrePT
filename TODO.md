@@ -2319,6 +2319,32 @@ demo database on the main thread, the write queue flushing behind it, or the rel
 those writes are still in flight. Measure before choosing: the fix is different for each — a yielded
 seed, a progress state on the button, or reloading only once the queue has drained.
 
+### 30.4 [x] BUG — the guide asked for a screen the trainer was already past — fixed 2026-08-22
+
+**Reported 2026-08-22 (Simon), with a screenshot**: "step 1 of 4 on the clipboard view" — the panel
+said *open the group session* over an already-open clipboard. The app opens a live session on its own
+(the demo seed has one in progress), so the first step was satisfied before anyone read it.
+
+**The fix is to move past it, not to undo it.** The first attempt re-checked the PRECONDITION on
+every poll tick and rebuilt the ground when it failed — which turned the guide against the trainer:
+tapping the session card themselves opened the clipboard, and the guide navigated straight back out
+of it. A test caught that within the minute. What is right is narrower: a step already satisfied when
+the guide ARRIVES at it is one the trainer is past, so the guide advances to the one they are not.
+Never on Back, where a step returned to stays done and stays put — otherwise Back does nothing at all
+and gets tapped twice.
+
+Two more from the same session, both real beyond the demo:
+
+- **The highlight lagged the control.** "When Show me clicks a collapsed card, the card expands way
+  faster than the surrounding border highlight" — a card expanding fires no scroll and no window
+  resize, so the ring sat on the old geometry until the next poll tick, up to a quarter second. A
+  `ResizeObserver` on the target sees it in the same frame.
+- **Two looks for the same three buttons.** Too Easy / Too Hard / Notes were grey and 32px tall
+  inside a circuit and coloured and 40px on a standalone card. §7.2 already said in words that the
+  two must agree; the circuit rows now wear the deck's own classes, so the look comes from one place,
+  and [test_signal_buttons_match.py](tests/medium/test_signal_buttons_match.py) says it in a way that
+  fails.
+
 ### 30.3 [x] BUG — a cleared browser plays the demo to an empty room — fixed 2026-08-22
 
 **Reported 2026-08-21 (Simon):** clear the browser data, open a demo deep link, and you get neither

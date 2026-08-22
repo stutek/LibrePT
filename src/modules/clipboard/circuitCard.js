@@ -74,13 +74,13 @@ function buildCircuitExerciseRowHTML(ex, ctx, isFirstExercise) {
             <span class="circuit-ex-target">${repsHTML}${repLabel ? `<span class="circuit-ex-reps">${repLabel}</span>` : ""}</span>
           </div>
           <div class="circuit-ex-actions">
-            <button type="button" class="circuit-sig easy${isEasyActive ? " active" : ""}" data-sig="easy" aria-pressed="${isEasyActive}" aria-label="${t("signal_too_easy")}">
+            <button type="button" class="deck-action-btn deck-action-easy circuit-sig easy${isEasyActive ? " active" : ""}" data-sig="easy" aria-pressed="${isEasyActive}" aria-label="${t("signal_too_easy")}">
               <i class="fa-solid ${easyIcon}"></i><span>${t("signal_too_easy")}</span>
             </button>
-            <button type="button" class="circuit-sig hard${isHardActive ? " active" : ""}" data-sig="hard" aria-pressed="${isHardActive}" aria-label="${t("signal_too_hard")}">
+            <button type="button" class="deck-action-btn deck-action-hard circuit-sig hard${isHardActive ? " active" : ""}" data-sig="hard" aria-pressed="${isHardActive}" aria-label="${t("signal_too_hard")}">
               <i class="fa-solid ${hardIcon}"></i><span>${t("signal_too_hard")}</span>
             </button>
-            <button type="button"${idAttr} class="circuit-sig note${hasNote ? " has-note" : ""}" data-sig="note" aria-label="${hasNote ? t("feedback_has_note") : t("btn_log_feedback")}">
+            <button type="button"${idAttr} class="deck-action-btn deck-action-feedback circuit-sig note${hasNote ? " has-note" : ""}" data-sig="note" aria-label="${hasNote ? t("feedback_has_note") : t("btn_log_feedback")}">
               <i class="fa-solid fa-note-sticky"></i><span>${t("feedback_short")}</span>
             </button>
           </div>

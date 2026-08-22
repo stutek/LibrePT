@@ -157,6 +157,9 @@ export function startGuidedWalkthrough({
   let state = startWalkthrough();
   let showing = false;
   let ticker = 0;
+  // Declared here because stop() closes over it and runs before the observer is created on a torn
+  // down guide.
+  let shapeWatcher = null;
 
   function stop() {
     if (ticker) {
@@ -165,6 +168,7 @@ export function startGuidedWalkthrough({
     }
     view.removeEventListener("scroll", followTarget, { capture: true });
     view.removeEventListener("resize", followTarget);
+    shapeWatcher?.disconnect();
     unmountDemoHand(doc);
     el.overlay.remove();
   }
@@ -306,7 +310,7 @@ export function startGuidedWalkthrough({
     }
   }
 
-  async function enterStep() {
+  async function enterStep({ viaBack = false } = {}) {
     el.problem.hidden = true;
     const step = currentWalkthroughStep(tour, state);
     // BEFORE the precondition and the target lookup: a narrated beat's own control is the card the
@@ -338,6 +342,22 @@ export function startGuidedWalkthrough({
     // already satisfied, and must not be asked for again.
     if (step && stepOutcomeNow(step, doc).ok) {
       state = completeWalkthroughStep(state, step.id);
+      // ...and if it was ALREADY true when the guide arrived here, the trainer is past it: move on
+      // rather than asking for something done (reported 2026-08-22, with a screenshot: "step 1 of 4,
+      // open the group session" over an already-open clipboard — the app restores a live session by
+      // itself, so the guide's first step can be satisfied before anyone reads it).
+      //
+      // This does NOT undo the 2026-08-18 decision that doing a step yourself leaves Next to you.
+      // That is about a step performed while its card is on screen, where the trainer may want to
+      // read the caption against what just happened. This is about a step they never saw.
+      // Never when they walked BACK here: a step returned to stays done and stays put, which is the
+      // whole of "Back re-explains, it does not undo". Skipping forward again would make Back do
+      // nothing at all, and the trainer would tap it twice wondering why.
+      const controls = walkthroughControls(tour, state);
+      if (!viaBack && !controls.isLastStep) {
+        state = advanceWalkthrough(tour, state);
+        return enterStep();
+      }
     }
     render();
   }
@@ -414,7 +434,7 @@ export function startGuidedWalkthrough({
 
   el.back.addEventListener("click", () => {
     state = retreatWalkthrough(state);
-    enterStep();
+    enterStep({ viaBack: true });
   });
 
   el.exit.addEventListener("click", stop);
@@ -434,6 +454,18 @@ export function startGuidedWalkthrough({
   view.addEventListener("scroll", followTarget, { passive: true, capture: true });
   view.addEventListener("resize", followTarget, { passive: true });
 
+  // The ring also follows the control CHANGING SHAPE (reported 2026-08-22: "when Show me clicks a
+  // collapsed card, the card expands way faster than the surrounding border highlight"). A tap that
+  // expands a card moves nothing the listeners above hear — no scroll, no window resize — so the
+  // ring sat on the old geometry until the next poll tick, up to a quarter second later, which on
+  // screen reads as the highlight sliding after the fact. A ResizeObserver on the target sees it in
+  // the same frame the layout changes.
+  shapeWatcher = new view.ResizeObserver(followTarget);
+  const watchTarget = (target) => {
+    shapeWatcher.disconnect();
+    if (target) shapeWatcher.observe(target);
+  };
+
   ticker = setInterval(() => {
     // Also on the tick: a dialog can open or close without the guide's own step changing — the
     // trainer may close the note themselves — and a panel left behind an inert page is dead.
@@ -443,6 +475,7 @@ export function startGuidedWalkthrough({
     const target = resolveTarget(doc, step);
     positionSpotlight(target);
     keepPanelClearOf(target);
+    watchTarget(target);
     if (stepOutcomeNow(step, doc).ok) {
       state = completeWalkthroughStep(state, step.id);
       render();

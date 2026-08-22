@@ -65,56 +65,21 @@
   display: flex;
   gap: 6px;
 } /* Labeled per-exercise feedback trio (Easy / Hard / Note) */
+/* The same three actions as a standalone exercise card, so they LOOK the same (reported 2026-08-22:
+   "comparing the Assault Bike card with the Leg & Hinge circuit shows 2 incompatible button
+   styles"). The look now comes from `.deck-action-*` in exerciseCard.css, which these rows carry as
+   well — a second set of colours here was two things to keep in agreement, and they had already
+   drifted: grey and 32px tall against coloured and 40px, for the same tap with the same meaning.
+   What stays is what is genuinely true of a row inside a circuit rather than of a card: it shares
+   its width with two siblings. */
 .circuit-sig {
   flex: 1;
-  height: 32px;
-  border-radius: var(--btn-radius);
-  border: 1px solid var(--border-color);
-  background: rgba(255, 255, 255, 0.04);
-  color: var(--text-muted);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  font-weight: 700;
   padding: 0 8px;
   gap: 5px;
-  transition: all 0.15s ease;
 }
 .circuit-sig > span {
   font-size: 12px;
   font-weight: 700;
-}
-.circuit-sig > i {
-  font-size: 13px;
-}
-.circuit-sig.easy:hover {
-  color: var(--success);
-  border-color: var(--success);
-  background: rgba(16, 185, 129, 0.12);
-}
-/* Pressed state: the tap already registered, so the fill carries the same weight as a real toggle
-   switch rather than a hover tint — a second tap here is what un-registers it. */
-.circuit-sig.easy.active {
-  color: var(--text-dark);
-  border-color: var(--success);
-  background: var(--success);
-}
-.circuit-sig.hard:hover {
-  color: #f59e0b;
-  border-color: #f59e0b;
-  background: rgba(245, 158, 11, 0.12);
-}
-.circuit-sig.hard.active {
-  color: var(--text-dark);
-  border-color: #f59e0b;
-  background: #f59e0b;
-}
-.circuit-sig.note:hover {
-  color: var(--danger);
-  border-color: var(--danger);
-  background: rgba(239, 68, 68, 0.12);
 } /* Rest is part of the work — the "Rest" label reads like an exercise name and the duration
    like a rep count (mono, accent), in a subtle pill so it's as visible as an exercise row. */
 .circuit-break-row {
