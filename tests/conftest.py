@@ -225,14 +225,28 @@ def raise_navigation_timeout(request):
 # ?init=demo_data_load deep-link param (see src/helper/shareLink.js). This rewrites the URL to
 # carry that param before app.js reads it, so a test sees the populated demo state exactly as a
 # promo deep-link visitor would. Idempotent, and a no-op once the param is already present.
+#
+# It also NAMES A LANGUAGE, unless the test named one itself. Seeding the demo used to set `lang` on
+# the way past (a store that had never chosen one came out looking as though it had), which quietly
+# answered the splash's language question for the whole suite; that was a real bug for a trainer who
+# cleared their browser (TODO §30.3) and is fixed. A link that names a language answers the question
+# in production too, so this keeps the suite representing the case it means: someone who already has
+# an app, not someone meeting it for the first time. Tests about the first run build their own
+# context and get neither this nor the terms auto-accept.
 SEED_DEMO_DATA_SCRIPT = """
 (() => {
   try {
     const u = new URL(window.location.href);
+    let changed = false;
     if (u.searchParams.get('init') !== 'demo_data_load') {
       u.searchParams.set('init', 'demo_data_load');
-      window.history.replaceState(null, '', u);
+      changed = true;
     }
+    if (!u.searchParams.get('lang')) {
+      u.searchParams.set('lang', 'en');
+      changed = true;
+    }
+    if (changed) window.history.replaceState(null, '', u);
   } catch (e) {}
 })();
 """

@@ -601,3 +601,20 @@ function setupFirstRunTerms() {
     if (!dlg.open) dlg.showModal();
   }
 }
+
+/** Resolves once the first-run agreement is out of the way — immediately when it was accepted on an
+ * earlier visit.
+ *
+ * Exists because the demo may not play while a MANDATORY modal is on top of it (reported
+ * 2026-08-21): on a cleared browser the tour used to run its whole script behind the agreement, and
+ * the trainer tapped "I agree" onto an app that had already finished showing itself.
+ */
+export function whenTermsAgreed() {
+  const dlg = document.getElementById("dialog-terms");
+  if (!dlg?.classList.contains("first-run")) return Promise.resolve();
+  return new Promise((resolve) => {
+    // The `close` event, not the button: Agree is one way out and the only one today, but a modal
+    // that closes for any other reason must not leave the demo waiting forever.
+    dlg.addEventListener("close", () => resolve(), { once: true });
+  });
+}

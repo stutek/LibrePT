@@ -393,8 +393,10 @@ async function init() {
   });
   // The splash's first-run decisions ride along from here because they are facts about THIS
   // arrival — what the link carried, and what language was stored before it was applied — and
-  // setupActiveSession is where the splash is taken down (TODO §28.11).
-  setupActiveSession({
+  // setupActiveSession is where the splash is taken down (TODO §28.11). Its promise is handed back
+  // rather than awaited: the splash may sit on screen until someone answers a question, and the
+  // rest of the boot must finish either way — the demo is what waits for it.
+  const splashDown = setupActiveSession({
     linkBringsContent: linkFurnishesTheApp({ shareInit, shareDemo, inboundEvent }),
   });
 
@@ -554,9 +556,26 @@ async function init() {
   // the right one.
   await primeBackupHealth();
 
-  // Results are published on `window` rather than only logged, because the e2e suite replays this
-  // exact tour and asserts on them (tests/e2e/test_demo_tour.py) — the demo and the test are one
-  // artifact, which is the point of scripting it instead of recording it.
+  // Started, never awaited: it waits for the splash and the first-run agreement, which may take as
+  // long as the trainer takes to read them.
+  startDemoWhenWatchable({ splashDown, shareDemo, shareChapter });
+}
+
+/** Everything a `?demo=` link asks for, started only once someone can actually watch it.
+ *
+ * Not part of init()'s body: the demo used to start the moment the app was wired, which on a first
+ * run is behind the mandatory terms modal and the splash's own language question (reported
+ * 2026-08-21). It ran its whole script to an empty room. `splashDown` is the splash's own promise,
+ * so this also waits out the language step — and the demo then narrates itself in the language the
+ * viewer just picked.
+ *
+ * Results are published on `window` rather than only logged, because the e2e suite replays these
+ * exact scripts and asserts on them — the demo and the test are one artifact, which is the point of
+ * scripting it instead of recording it.
+ */
+async function startDemoWhenWatchable({ splashDown, shareDemo, shareChapter }) {
+  await appBoot.whenDemoCanBeWatched(splashDown);
+
   await appBoot.bootDemoTour({
     shareDemo,
     hasData: stateHasData(getState()),
@@ -565,8 +584,6 @@ async function init() {
     },
   });
 
-  // The long story (TODO §35). Same publication of results as the wedge above, and for the same
-  // reason: tests/e2e/test_demo_story.py replays it and asserts on them.
   await appBoot.bootDemoStory({
     shareDemo,
     shareChapter,
@@ -749,7 +766,7 @@ function setupActiveSession({ linkBringsContent } = {}) {
   // Deliberately last: the splash comes down only once every component above is wired. It may not
   // come down on its own at all — first it asks for a language if none has been chosen, then, with
   // an empty database, it becomes the onboarding entry point and waits for a choice.
-  appBoot.bootSplashScreen({
+  return appBoot.bootSplashScreen({
     offerOnboarding: !stateHasData(getState()),
     // `?lang=` still ANSWERS this, deliberately (TODO §28.11). The first attempt made a URL
     // parameter a mere preselection that the step would ask about anyway — which is a defensible

@@ -2278,6 +2278,24 @@ demo database on the main thread, the write queue flushing behind it, or the rel
 those writes are still in flight. Measure before choosing: the fix is different for each — a yielded
 seed, a progress state on the button, or reloading only once the queue has drained.
 
+### 30.3 [x] BUG — a cleared browser plays the demo to an empty room — fixed 2026-08-22
+
+**Reported 2026-08-21 (Simon):** clear the browser data, open a demo deep link, and you get neither
+the language choice nor the demo. Two independent causes, both invisible to the whole e2e suite
+because the shared fixtures auto-accept the terms and auto-dismiss the splash — so the first test
+written for this had to build its own browser context
+([test_first_run_deeplink.py](tests/e2e/test_first_run_deeplink.py)).
+
+- **Seeding the demo answered the language question.** `seedMockData()` set `lang = state.lang ||
+  "en"`, so a store that had never chosen one came out of the seed looking as though it had, and the
+  splash skipped the step. Seeding is about RECORDS; the preference is the person's to give. The
+  line is gone.
+- **The demo started as soon as the app was wired**, which on a first run is BEHIND the mandatory
+  terms modal — measured: all sixteen beats played out and finished at ~44s while the agreement was
+  still on screen. It now waits on the splash's own promise (which also covers the language step, so
+  the demo narrates itself in the language just chosen) and on the agreement being closed. Started,
+  never awaited: `init()` must finish wiring whatever the trainer is reading.
+
 ### 30.2 [ ] CHANGE — the demo should end with a thank you and two ways onward
 
 Wanted 2026-08-18: when the walkthrough finishes it should say thank you and invite the trainer to

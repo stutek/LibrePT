@@ -52,4 +52,6 @@ def test_it_returns_from_another_day_too(page, local_server):
     page.wait_for_selector("#view-clients.active")
 
     page.locator("#logo-area").click()
-    page.wait_for_url("**/sessions/2026-08-19", timeout=5000)
+    # Trailing `*`: a share link's `?lang=` rides along on every navigation by design
+    # (test_share_deeplink.py pins that), and this test is about the DAY the logo resolves to.
+    page.wait_for_url("**/sessions/2026-08-19*", timeout=5000)

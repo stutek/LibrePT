@@ -101,7 +101,6 @@ export function stateHasData(s = state) {
 // mutates: DEFAULT_* are module singletons, and marking them in place would leave the seed arrays
 // flagged for the lifetime of the page.
 export function seedMockData() {
-  const currentLang = state.lang || "en";
   const seeded = (records) => records.map(stampAsSeeded);
   state.clients = seeded(DEFAULT_CLIENTS);
   state.exercises = seeded(DEFAULT_EXERCISES);
@@ -110,7 +109,11 @@ export function seedMockData() {
   state.planUpdates = seeded(DEFAULT_PLAN_UPDATES);
   state.sessions = seeded(DEFAULT_SESSIONS);
   state.notifications = seeded(DEFAULT_MESSAGES);
-  state.lang = currentLang;
+  // `lang` is deliberately UNTOUCHED. It used to be defaulted to "en" here, which made seeding the
+  // demo answer the splash's language question on a store that had never chosen one — so a trainer
+  // who cleared their browser and opened a demo link was never asked, and got a narrated demo in a
+  // language they may not read (reported 2026-08-21). Seeding is about RECORDS; a preference is
+  // the person's to give.
   saveToLocalStorage();
 }
 
