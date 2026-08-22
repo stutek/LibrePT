@@ -189,17 +189,16 @@ def dismiss_splash(request):
     yield
 
 
-# Playwright's default `page.goto()` budget is 30s. Under contention on the shared local dev server
-# (parallel xdist workers' browser contexts each opening ~6 connections to fetch one page's ~89
-# assets, worse when the host has other load) that 30s can be spent waiting in the kernel's
-# connection queue alone, before the app or Chromium has done anything wrong — seen 2026-08-04,
-# unrelated tests failing `Page.goto: Timeout 30000ms` in batches while the box was loaded.
+# Back to Playwright's own 30s default (2026-08-22, TODO §21). It was raised to 60s on 2026-08-04,
+# when a contended dev server could spend the whole budget in the kernel's connection queue before
+# the app or Chromium had done anything wrong — but the CAUSE of that contention was root-caused and
+# fixed (§21: the dev server's backlog, plus the worker count that was starving it), and a doubled
+# budget outliving its reason is a suite that takes twice as long to tell you something is stuck.
 #
-# Raised for NAVIGATION ONLY. Action and `expect()` timeouts stay at 30s on purpose: "the page took
-# a while to connect" is a latency fact about a contended dev box, but "an element was not
-# actionable for 30 seconds" is a claim about the app, and inflating that would launder a real bug
-# into a pass.
-NAVIGATION_TIMEOUT_MS = 60000
+# Action and `expect()` timeouts were never raised, for the reason that still applies: "the page took
+# a while to connect" is a latency fact about a contended box, while "an element was not actionable
+# for 30 seconds" is a claim about the app, and inflating that would launder a real bug into a pass.
+NAVIGATION_TIMEOUT_MS = 30000
 
 
 @pytest.fixture(autouse=True)

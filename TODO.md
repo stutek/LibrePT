@@ -46,13 +46,11 @@ commit that ships them.
 trainer's own store) and SMS as the response channel; §19.2's URL-privacy invariant, which unblocks
 §19.3. Each is a question in its own section, deliberately not folded into the ranking above.
 
-**Cheap wins, unranked** — each small enough to ride along with adjacent work: §12.5's reflog expiry
-(one maintainer command), §19.3's exercise-library filter reset (a real bug needing no URL decision),
-§12.6's glyph subsetting (prerequisite already built, and §7.2 wants the regular weight it would
-restore), §18.11's retention basis (one paragraph, in the privacy policy — the only bullet left in
-that section), §21's 60s → 30s navigation timeout (the cause it was raised for is fixed), and §25.6's
-medium-tier overflow harness (the sweep already exists). §19.3's exercise-library filter reset and
-§25.6's harness are both done (2026-08-21).
+**Cheap wins, unranked** — each small enough to ride along with adjacent work. What is LEFT of the
+list: §12.5's reflog expiry (one maintainer command) and §12.6's glyph subsetting (prerequisite
+already built, and §7.2 wants the regular weight it would restore). Done since it was written:
+§19.3's exercise-library filter reset and §25.6's overflow harness (2026-08-21), §18.11's retention
+paragraph and §21's 60s → 30s navigation timeout (2026-08-22).
 
 Deprioritised on purpose: §24.5/§24.7 remainders and §24.8's rename (optional by their own text),
 §11/§5.1/§4.1 (large UI churn with no users yet to aim it), §17.2/§17.4 and §18.8–§18.12 (decided on
@@ -1332,10 +1330,17 @@ retained forever, so a link to a retired behaviour resolves to the nearest survi
 than erroring; and **deep links carry the `lineageId`**, never a per-schema id (§18.2).
 
 ### 18.11 [~] [Open] Legal gaps this design creates
-- **Retention basis is undocumented.** No-deletes + anonymization-only + fan-out is technically fine,
-  but GDPR Art. 5(1)(e) wants a *stated* retention period. "Retained indefinitely for aggregate
-  analytics" is lawful only if written down; neither [PRIVACY.md](PRIVACY.md) nor §17.3 says it.
-  **Cheapest item in this file — one paragraph.** The only bullet here still open.
+- **[x] Retention basis is documented — 2026-08-22.** [PRIVACY.md](PRIVACY.md) §3.3 now states it:
+  nothing is deleted on a schedule, records stay until the trainer removes them, and the anonymised
+  remains of an erased client are kept indefinitely because a training history with the person taken
+  out of it is no longer personal data (Recital 26). The trainer's own retention period stays the
+  trainer's obligation, and the paragraph says what to do when theirs is shorter.
+
+  **Writing it found a worse bug than the missing paragraph**: the same section claimed deleting a
+  client "instantly purges their records", which is not what this app does and has not been since
+  §17.3 — the exact class of error §27 was filed about, a document that is wrong about the app rather
+  than about the law. It now describes anonymisation, its irreversibility, and the two things it
+  cannot reach.
 - **[x] Re-identification via backups + the mapping table — closed 2026-08-11.** A pre-erasure backup
   names Jane; restoring it brought her back, and **§18.7's indefinite-restore requirement removes**
   the usual "backups rotate out" defence. The register ships with both properties this bullet
