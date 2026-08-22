@@ -22,6 +22,7 @@ import {
 import { setupClientForms } from "./controllers/clientFormsController.js";
 import { setupViewDismiss } from "./controllers/gestureController.js";
 import { initRouter } from "./controllers/routerController.js";
+import { ISSUE_TRACKER_URL } from "./data/publicUrls.js";
 import { initClientDataRights, setupClientDataRights } from "./modules/clients/clientDataRights.js";
 import { initSignupReview, setupSignupReview } from "./modules/clients/signupReviewDialog.js";
 import { initRestTimer, setupRestTimer } from "./modules/clipboard/exerciseAndRestTimer.js";
@@ -39,6 +40,10 @@ import { initDriveSyncUi, setupDriveSyncUi } from "./modules/common/driveSyncUi.
 import { setupEncryptedFileReader } from "./modules/common/encryptedFileReader.js";
 import { initFeedbackModal, setupFeedbackForms } from "./modules/common/feedbackModal.js";
 import {
+  initFeedbackRouteDialog,
+  openFeedbackRouteDialog,
+} from "./modules/common/feedbackRouteDialog.js";
+import {
   initNotificationArea,
   setupNotificationGestures,
 } from "./modules/common/notificationArea.js";
@@ -52,6 +57,7 @@ import { initSessionInviteDialog } from "./modules/session/sessionInviteDialog.j
 import { initSessionTitleBar } from "./modules/session/sessionTitleBar.js";
 import { initSessionTimeline } from "./modules/sessionList/sessionTimeline.js";
 import { dismissSplashWhenReady } from "./modules/splash/splashScreen.js";
+import { BUILD_INFO } from "./version.js";
 
 // Global error capture (TODO §12.4). Its own step, called before every other one: the crash worth
 // catching most is the one that happens while the app is still starting.
@@ -141,7 +147,16 @@ export function bootDriveSyncUi(deps) {
 }
 
 export function bootHeader(deps) {
-  initApplicationHeader(deps);
+  // The feedback route rides along with the header because that is where its menu entry lives, and
+  // it needs nothing else booted (TODO §23.5).
+  initFeedbackRouteDialog({
+    t: deps.t,
+    getState: deps.getState,
+    buildSha: () => BUILD_INFO.commit,
+    route: () => window.location.pathname + window.location.search,
+    repoUrl: ISSUE_TRACKER_URL,
+  });
+  initApplicationHeader({ ...deps, openFeedbackRoute: openFeedbackRouteDialog });
   setupApplicationHeader();
 }
 

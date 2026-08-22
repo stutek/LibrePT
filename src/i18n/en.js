@@ -558,6 +558,20 @@ export const en = {
   drive_conflict_remote: "Other device",
   drive_conflict_none: "No conflicts left to review.",
   menu_github: "GitHub project",
+  menu_feedback: "Send feedback",
+  feedback_route_title: "Tell us what you think",
+  feedback_route_lede:
+    "Ideas, questions, or anything that felt awkward on the gym floor — one email, no account needed.",
+  feedback_route_mail: "Write an email",
+  feedback_route_subject: "LibrePT feedback",
+  feedback_route_intro: "What I wanted to say:",
+  feedback_route_bug_lede:
+    "Something broken instead? Open an issue and attach a screenshot — it is the most useful thing you can send, and the app cannot take it for you.",
+  feedback_route_issue: "Report a bug on GitHub",
+  feedback_route_issue_title: "Bug: ",
+  feedback_route_issue_placeholder:
+    "<!-- What were you doing, and what did you expect instead? -->",
+  feedback_route_diagnostics: "Sent with it — you can delete any of it before sending:",
   menu_bug_report: "Bug Reporting",
   menu_about: "About",
   menu_terms: "Terms & disclaimer",

@@ -37,10 +37,12 @@ Re-read this table against `src/` before trusting it, and close items in the com
 
 | Rank | Item | Why now |
 | :--- | :--- | :--- |
-| 1 | §23.5 remainder — a feedback route a non-developer will use | The last launch prerequisite, and now the only one. GitHub issues is a wall to a PT; one address or form, linked in-app. Needs a maintainer decision about the address, not code |
-| 2 | §12.6 — vendor the remaining Font Awesome weight | The last CDN dependency, and §7.2 wants the regular weight it would restore. Prerequisite already built |
-| 3 | §8.7 / §8.8 gym-floor remainders | §8.7 is a question rather than work (does completing a round stop its timer); §8.8's copy-program icon is cheap and its open questions are answerable now that §8.1 exists |
-| 4 | §29 program import | The shape is decided and every prerequisite exists — the parser and its frozen corpus are the whole of it |
+| 1 | §29 program import | The shape is decided and every prerequisite exists — the parser and its frozen corpus are the whole of it |
+| 2 | §8.7 / §8.8 gym-floor remainders | §8.7 is a question rather than work (does completing a round stop its timer); §8.8's copy-program icon is cheap, and its open questions are answerable now that §8.1 exists |
+| 3 | §23.6 / §23.1 — what "winning" means, then a channel | Nothing technical is left in front of a launch: the feedback route and the icon subsetting both shipped 2026-08-22 |
+
+**Both 08-22 ranks shipped the day they were written**: §23.5's feedback route (an address that needs
+no account, plus the bug half pointed at an issue with a screenshot) and §12.6's subsetting.
 
 **Waiting on a ruling, not on work** — §1.6's confirm link (a replayable capability token aimed at the
 trainer's own store) and SMS as the response channel; §19.2's URL-privacy invariant, which unblocks
@@ -63,7 +65,7 @@ the thing that must happen first, not merely what it touches.
 
 | Theme | Open | Lead item | Blocked on |
 | :--- | :--- | :--- | :--- |
-| **Launch prerequisites** | §23.5 | A feedback route a non-developer will use | Maintainer actions; nothing technical |
+| **Launch prerequisites** | — | Nothing left | §23.5 shipped 2026-08-22; what remains of a launch is §23.1's own decision |
 | **Data safety remainder** | §18.8, §18.9, §18.12 | Encrypt the backups, not the live DB | Nothing; decided on paper and parked |
 | **Scheduling** | §1.2, §1.3, §1.4, §1.5 | Room occupancy via `freebusy.query` | §1.5's OAuth/verification path |
 | **Gym-floor UX** | §8.7, §8.8 | Copy-program icon on the clipboard | Nothing; §8.7 is a question, not work |

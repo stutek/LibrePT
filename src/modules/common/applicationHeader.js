@@ -402,6 +402,12 @@ export function renderHeaderShell() {
               <a id="menu-github" class="session-menu-item" role="menuitem" target="_blank" rel="noopener noreferrer">
                 <i class="fa-brands fa-github"></i> GitHub project
               </a>
+              <!-- The route out for someone with no GitHub account (TODO §23.5) — which is most
+                   personal trainers. Above the bug-reporting page because most of what a trainer
+                   wants to say is not a bug. -->
+              <button id="menu-feedback" class="session-menu-item" role="menuitem">
+                <i class="fa-solid fa-comment-dots"></i> <span data-i18n="menu_feedback">Send feedback</span>
+              </button>
               <a id="menu-bug-report" class="session-menu-item" role="menuitem" href="./bug-reporting.html" target="_blank" rel="noopener noreferrer">
                 <i class="fa-solid fa-bug"></i> Bug Reporting
               </a>
@@ -560,6 +566,10 @@ function setupAppMenu() {
   // GitHub project, Bug reporting, and Privacy statement are real <a target="_blank">; just dismiss the menu.
   on("menu-github", () => closeMenu());
   on("menu-bug-report", () => closeMenu());
+  on("menu-feedback", () => {
+    closeMenu();
+    deps.openFeedbackRoute?.();
+  });
   on("menu-privacy", () => closeMenu());
   // About / Terms are routes, not just modals: the router opens the dialog, so Back closes it and a
   // reload reopens it. Their ✕ buttons below need no change — closing pops the entry (see

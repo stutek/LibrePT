@@ -60,3 +60,30 @@
   height: 20px;
   flex: 0 0 auto;
 }
+
+/* The way out of the app for someone with something to say (TODO §23.5). Full-width buttons, because
+   this is read once and acted on once — and the diagnostics are SHOWN rather than merely attached:
+   sending something about a person's own app without showing them what it contains would be the
+   opposite of what this app is for. */
+.feedback-route-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  margin: 8px 0;
+  text-decoration: none;
+}
+.feedback-route-diagnostics {
+  margin: 4px 0 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--border-color);
+  font-size: 11px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-x: auto;
+  color: var(--text-muted);
+}
