@@ -961,6 +961,13 @@ strip from the name table. The icons are separately CC BY 4.0, so attribution mu
 the set was subset. **Today is compliant and relies on none of this**: both woff2 files are
 byte-identical to upstream (SHA-256 verified), so no Modified Version exists yet.
 
+**What is still missing is a check, not the script** (established 2026-08-22): `fonttools` installs
+cleanly into the venv as a one-off (`pip install fonttools brotli`, then uninstall — it must not
+become a build dependency), so writing the merge is the small half. The large half is that
+[icon_coverage.py](agent_tools/icon_coverage.py) compares NAMES, and a subset's failure mode is a
+correct name whose glyph is a blank box — which a name-level gate cannot see. Do the render check
+first, the way §12.6's own note argues the coverage gate had to come before subsetting.
+
 **Subsetting cannot affect names in any language** — Font Awesome is Private Use Area only and
 contains no letters. Non-Latin coverage is a `fonts.css` question (latin + latin-ext only, deliberate
 since a CJK webfont is megabytes per trainer), and `getInitials()` derives real initials from
