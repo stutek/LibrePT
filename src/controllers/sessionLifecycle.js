@@ -9,6 +9,7 @@
 
 import { newRecordId } from "../data/recordId.js";
 import { clearActiveSessionCache, readActiveSessionCache } from "../data/sessionCache.js";
+import { boundClientRoutines } from "../domain/participantBinding.js";
 import { isCachedSessionStale } from "../domain/sessionClock.js";
 import { buildSessionHistoryRecord } from "../domain/sessionHistoryRecord.js";
 import {
@@ -339,6 +340,14 @@ export function recoverActiveSession() {
   try {
     setActiveSession(parsed);
     const activeSession = parsed;
+    // Bound participants SHARE one plan object, and object identity does not survive JSON (TODO
+    // §8.1) — so a session restored from the cache would come back silently unbound, logging each
+    // set for one person. The list of bindings is what does survive; the sharing is re-applied from
+    // it here, at the one place a cached session becomes a live one again.
+    activeSession.clientRoutines = boundClientRoutines(
+      activeSession.clientRoutines,
+      activeSession.bindings,
+    );
     activeSession.duration = activeSession.started
       ? Math.floor((Date.now() - activeSession.startTime) / 1000)
       : 0;

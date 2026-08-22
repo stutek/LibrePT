@@ -118,6 +118,13 @@ export function renderActiveSessionOverlayShell() {
             <button id="btn-edit-plan" class="session-menu-item" role="menuitem" aria-label="Edit plan">
               <i class="fa-solid fa-pen-to-square"></i> <span data-i18n="edit_plan">Edit plan</span>
             </button>
+            <!-- Everybody on the same plan (TODO §8.1). Two or three people doing the identical
+                 circuit in lockstep should cost the trainer ONE tap per set, not one per person —
+                 and what each of them thought of it stays their own, because feedback is not part
+                 of the plan. -->
+            <button id="btn-bind-participants" class="session-menu-item" role="menuitem">
+              <i class="fa-solid fa-link"></i> <span data-i18n="bind_participants">Everyone on this plan</span>
+            </button>
             <button id="btn-delete-session" class="session-menu-item session-menu-item-danger" role="menuitem">
               <i class="fa-solid fa-trash-can"></i> Delete Session
             </button>

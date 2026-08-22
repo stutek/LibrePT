@@ -376,6 +376,9 @@ export const sl = {
   label_repeats: "Ponovi vsak teden",
   label_repeat_days: "Na te dneve",
   label_repeat_until: "Do (neobvezno)",
+  bind_participants: "Vsi na ta načrt",
+  unbind_participants: "Vsak svoj načrt",
+  bound_group_label: "Skupaj",
   plan_fit_hint: "Ocenjen delovni čas glede na trajanje termina",
   label_apply_to_series: "Spremeni vse večere te seje",
   session_one_of_a_series:

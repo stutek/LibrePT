@@ -53,6 +53,7 @@ function renderClientTabsBar(activeClientId) {
     getInitials,
     getClientDisplayNameHTML,
     navigateToPath,
+    t: deps.getAppDeps().t,
   });
 }
 

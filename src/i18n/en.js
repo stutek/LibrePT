@@ -393,6 +393,9 @@ export const en = {
   label_repeats: "Repeats every week",
   label_repeat_days: "On these days",
   label_repeat_until: "Until (optional)",
+  bind_participants: "Everyone on this plan",
+  unbind_participants: "Give everyone their own plan",
+  bound_group_label: "Together",
   plan_fit_hint: "Estimated working time against the session slot",
   label_apply_to_series: "Change every evening of this session",
   session_one_of_a_series:

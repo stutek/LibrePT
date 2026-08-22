@@ -5,6 +5,40 @@
 // function that a caller can forget to pass is an escaping function that will eventually be missing.
 import { escapeHTML } from "./utils.js";
 
+function isBound(activeSession, clientId) {
+  return (activeSession?.bindings || []).some((group) => group.includes(clientId));
+}
+
+/** The single tab a bound group gets, or null when nobody is bound.
+ *
+ * It carries every member's initials and behaves like any other tab — tapping it puts the shared
+ * plan on screen. Per-person work is still one tap away: unbinding from the session menu gives
+ * everyone their own tab back, which is where a signal that belongs to one of them is logged.
+ */
+function boundGroupTab(activeSession, ctx) {
+  const { clients, activeClientId, getInitials, navigateToPath, t } = ctx;
+  const group = (activeSession?.bindings || [])[0];
+  if (!group || group.length < 2) return null;
+  const members = (activeSession.participants || []).filter((id) => group.includes(id));
+  if (members.length < 2) return null;
+
+  const isActive = members.includes(activeClientId);
+  const tab = document.createElement("button");
+  tab.className = `client-tab-btn client-tab-bound ${isActive ? "active" : ""}`;
+  tab.style.minHeight = "44px";
+  const initials = members
+    .map((id) => clients.find((client) => client.id === id))
+    .filter(Boolean)
+    .map((client) => client.avatar || getInitials(client.name))
+    .join(" · ");
+  // textContent, not innerHTML: initials come from client names a trainer typed.
+  tab.textContent = `${t ? t("bound_group_label") : "Together"} ${initials}`;
+  tab.addEventListener("click", () => {
+    navigateToPath(`/session/${activeSession.id}/client/${members[0]}`);
+  });
+  return tab;
+}
+
 export function updateClientTabsFadeState() {
   const el = document.getElementById("active-session-client-tabs");
   if (!el) return;
@@ -20,11 +54,18 @@ export function updateClientTabsFadeState() {
 }
 
 export function renderActiveUsersList(tabsContainer, activeSession, ctx) {
-  const { clients, activeClientId, getInitials, getClientDisplayNameHTML, navigateToPath } = ctx;
+  const { clients, activeClientId, getInitials, getClientDisplayNameHTML, navigateToPath, t } = ctx;
   if (!tabsContainer) return;
   tabsContainer.innerHTML = "";
 
+  // People training ONE plan read as ONE tab (TODO §8.1): the trainer is looking at a single
+  // programme, and three tabs that always show the same thing invite three taps to check. The
+  // members are still named on it, because a tab that says "group" tells nobody who is in it.
+  const bound = boundGroupTab(activeSession, ctx);
+  if (bound) tabsContainer.appendChild(bound);
+
   for (const pId of activeSession.participants) {
+    if (isBound(activeSession, pId)) continue;
     const client = clients.find((c) => c.id === pId);
     if (!client) continue;
 

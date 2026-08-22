@@ -11,6 +11,13 @@
 // the seam.
 
 import { newRecordId } from "../data/recordId.js";
+import {
+  bindingFor,
+  boundClientRoutines,
+  unboundClientRoutines,
+  withBinding,
+  withoutBinding,
+} from "../domain/participantBinding.js";
 import { focusIndexFromRef, isCircuitFocus } from "../domain/sessionFocus.js";
 import { clampFocusIndex, ensureRestItems, isRestItem } from "../domain/sessionPlanFactory.js";
 import {
@@ -230,6 +237,41 @@ function wireSessionMenuAndActions(t) {
     });
   }
 
+  /** Puts every participant on the plan currently on screen — or gives them their own back (TODO §8.1).
+   *
+   * Applied to the live session immediately, so the very next set logged counts for the whole group:
+   * bound participants SHARE one plan object (domain/participantBinding.js), which is what makes one
+   * tap do the work of three without a single logging site knowing that bindings exist.
+   */
+  function toggleParticipantBinding() {
+    const activeSession = getActiveSession();
+    if (!activeSession) return;
+    const participants = activeSession.participants || [];
+    if (participants.length < 2) return;
+
+    const group = bindingFor(activeSession.bindings, activeSession.activeClientId);
+    if (group) {
+      // Everyone in the group goes back to their own plan — a COPY of what they were training, since
+      // dropping the binding alone would leave them holding one object and the next set logged would
+      // still appear for both.
+      activeSession.bindings = group.reduce(
+        (bindings, clientId) => withoutBinding(bindings, clientId),
+        activeSession.bindings,
+      );
+      activeSession.clientRoutines = unboundClientRoutines(activeSession.clientRoutines, group);
+    } else {
+      activeSession.bindings = withBinding(activeSession.bindings, participants);
+      // Applied here rather than at render: the identity of these objects IS the binding, and a
+      // render that rebuilt it would quietly discard whatever was logged into the shared plan.
+      activeSession.clientRoutines = boundClientRoutines(
+        activeSession.clientRoutines,
+        activeSession.bindings,
+      );
+    }
+    saveActiveSessionToCache();
+    renderActiveGroupBoard();
+  }
+
   document.getElementById("btn-edit-plan")?.addEventListener("click", (e) => {
     e.stopPropagation();
     // Closing the menu is part of choosing from it, exactly as Delete below does. It became
@@ -238,6 +280,14 @@ function wireSessionMenuAndActions(t) {
     // is toggling a menu they thought was already gone.
     closeSessionMenu();
     enterClipboardEditMode();
+  });
+
+  // Everyone on one plan, and back again (TODO §8.1). One control rather than two: the trainer is
+  // answering a single question — are these people doing the same thing right now — and a menu that
+  // offers both directions at once makes them read which one applies before they can answer it.
+  document.getElementById("btn-bind-participants")?.addEventListener("click", () => {
+    closeSessionMenu();
+    toggleParticipantBinding();
   });
 
   document.getElementById("btn-delete-session")?.addEventListener("click", () => {

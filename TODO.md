@@ -726,17 +726,30 @@ Still open, in the order they should be done:
 
 ## 8. Clipboard Interactions
 
-### 8.1 [ ] Bind multiple clients to one shared set of exercises
+### 8.1 [x] Bind multiple clients to one shared set of exercises — shipped 2026-08-22
 Two or more participants bound to the same exercises, merged into a single combined view — they train
 the identical programme in lockstep, so the trainer logs it once instead of switching tabs.
 
 - The **cards are shared**: navigating/logging advances the plan for the whole group.
 - **Feedback stays per-person** — one client can find a shared set too hard while another finds it
   too easy.
-- Decide the model: `clientRoutines[clientId]` owns its own `exercises` + `logs` today. Either a
-  shared exercise reference with per-client log/feedback overlays, or a group pseudo-participant
-  that fans feedback back out.
-- Interacts with §1.2 and the participant tabs — a bound group should read as one tab, expandable.
+- **The model, decided by building it**: bound participants SHARE one `clientState` object
+  ([participantBinding.js](src/domain/participantBinding.js)). Every existing write — a set logged, a
+  round completed, an exercise swapped in the editor — then lands for the whole group without a
+  single write site learning that bindings exist; a mirror-on-write would have been a side effect at
+  a dozen seams, each of which could be missed. Feedback needed no work at all: it lives on the
+  SESSION keyed by client, never in the plan, so "too hard for one, too easy for another" was
+  already true.
+- **A bound group is one tab**, named with its members' initials — three tabs that always show the
+  same plan invite three taps to check whether they still do. One control in the ⋯ menu binds and
+  unbinds; unbinding hands each member a COPY of what they were training, because dropping the
+  binding alone would leave them holding one object and the next set would still appear for both
+  (found by a test, not by reasoning).
+- **The bindings are stored beside the plans they join**, because the live session is cached as JSON
+  and object identity does not survive it — a restored session would otherwise come back silently
+  unbound, logging each set for one person.
+- Still open: §1.2's multi-line titles, and per-person signals from INSIDE the bound tab (today the
+  trainer unbinds, or switches to that person's tab, to log one).
 
 ### 8.3 [x] Inline Clipboard Editor — shipped, see CHANGELOG
 
