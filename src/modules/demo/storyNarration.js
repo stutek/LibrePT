@@ -80,8 +80,15 @@ function buildCard(doc, t, onClearDemoData) {
     onClearDemoData?.();
   });
 
-  card.append(kicker, title, body, button, cleanup);
-  return { card, kicker, title, body, button, cleanup };
+  // The handover (TODO §35.1/§35.3e). One persona at a time was the ruling, and the client's screens
+  // are the REAL ones — so a beat that moves to the client's phone moves the BROWSER, to the page a
+  // client would actually open. A drawn "client phone" would be a recording with extra steps, stale
+  // the day that page changes.
+  const handover = doc.createElement("a");
+  handover.id = "story-card-handover";
+  handover.className = "btn btn-primary story-card-handover hidden";
+  card.append(kicker, title, body, button, cleanup, handover);
+  return { card, kicker, title, body, button, cleanup, handover };
 }
 
 /** Mounts the narration surface and returns `{ showStep, unmount }`.
@@ -93,7 +100,7 @@ export function mountStoryNarration({ doc = document, t, onClearDemoData } = {})
   const existing = doc.getElementById(CARD_ID);
   if (existing) existing.remove();
 
-  const { card, kicker, title, body, cleanup } = buildCard(doc, t, onClearDemoData);
+  const { card, kicker, title, body, cleanup, handover } = buildCard(doc, t, onClearDemoData);
   const persona = element(doc, "p", "story-persona", PERSONA_ID);
   persona.hidden = true;
   const caption = element(doc, "p", "story-caption", CAPTION_ID);
@@ -116,6 +123,12 @@ export function mountStoryNarration({ doc = document, t, onClearDemoData } = {})
       title.textContent = t(step.narrate.titleKey);
       body.textContent = t(step.narrate.bodyKey);
       cleanup.classList.toggle("hidden", !(step.narrate.onward && onClearDemoData));
+      const goTo = step.narrate.continueUrl;
+      handover.classList.toggle("hidden", !goTo);
+      if (goTo) {
+        handover.href = goTo;
+        handover.textContent = t(step.narrate.continueLabelKey || "story_continue");
+      }
       card.hidden = false;
       // A caption under a card would be the same beat said twice, in two places.
       caption.hidden = true;

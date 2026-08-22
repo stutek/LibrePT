@@ -36,10 +36,22 @@ export function renderClientDirectoryViewShell() {
       <div class="view-header view-titlebar">
         <button class="view-grabber" type="button" aria-label="Return to home"></button>
         <h2>Client Directory</h2>
+        <!-- Let the person fill their own details in (TODO §26.3). Beside Add Client rather than
+             replacing it: a trainer standing with someone at the desk still types the two fields
+             themselves, and a trainer who has just been asked about training sends a link. -->
+        <button id="btn-invite-client" class="btn secondary-btn btn-sm">
+          <i class="fa-solid fa-share-nodes"></i> <span data-i18n="btn_invite_client">Send an intake link</span>
+        </button>
         <button id="btn-add-client" class="btn primary-btn btn-sm">
           <i class="fa-solid fa-user-plus"></i> Add Client
         </button>
       </div>
+
+      <!-- Where the intake link goes when the browser refuses the clipboard (it does so headlessly,
+           and on some phones without a fresh gesture). Read-only and pre-selected: the trainer
+           copies it by hand, which always works. Hidden until that happens, because the ordinary
+           path says "Link sent" on the button and needs nothing here. -->
+      <input type="text" id="intake-invite-link" class="form-control mb-2 hidden" readonly>
 
       <div class="search-bar-container">
         <i class="fa-solid fa-magnifying-glass search-icon"></i>

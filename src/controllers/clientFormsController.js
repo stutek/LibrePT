@@ -17,6 +17,11 @@ import {
   renderClientsList,
   showClientDetails,
 } from "../modules/clients/clientsView.js";
+import {
+  browserInvitePlatform,
+  intakeInviteUrl,
+  sendIntakeInvite,
+} from "../modules/clients/intakeInvite.js";
 import { $id, closeModal, openModal, renderMarkupOnce } from "../modules/common/dom.js";
 import { getInitials } from "../modules/common/utils.js";
 
@@ -108,6 +113,39 @@ export function setupClientForms({
   setupClientConsentSection();
   const cancelBtn = dialog.querySelector(".modal-cancel");
   const closeBtn = dialog.querySelector(".modal-close-btn");
+
+  // The link that lets someone fill their own details in (TODO §26.3). What happened is said back
+  // on the button itself: on a phone the share sheet takes over the screen and on a desktop the
+  // clipboard changes with no visible sign at all, so silence would leave the trainer guessing
+  // whether anything was sent.
+  $id("btn-invite-client")?.addEventListener("click", async () => {
+    const button = $id("btn-invite-client");
+    const outcome = await sendIntakeInvite({
+      platform: browserInvitePlatform(),
+      t,
+      lang: state.lang,
+    });
+    // Every outcome except a cancelled share says something back: on a phone the share sheet covers
+    // the screen and on a desktop the clipboard changes invisibly, so a button that looks untouched
+    // is a trainer wondering whether they tapped it.
+    const said = {
+      shared: "intake_invite_sent",
+      copied: "intake_invite_copied",
+      unavailable: "intake_invite_ready",
+    }[outcome];
+    const label = button.querySelector("span");
+    if (label && said) label.textContent = t(said);
+    // The link itself goes on screen whichever route the browser allowed, not only when the
+    // clipboard was refused: a trainer who just sent it often wants to send it to the second and
+    // third friend too, and a link they can see is one they can send again without tapping back
+    // through a share sheet.
+    const field = $id("intake-invite-link");
+    if (field && outcome !== "cancelled") {
+      field.value = intakeInviteUrl({ lang: state.lang });
+      field.classList.remove("hidden");
+      field.select();
+    }
+  });
 
   $id("btn-add-client").addEventListener("click", () => {
     $id("client-modal-title").textContent = "Add New Client";

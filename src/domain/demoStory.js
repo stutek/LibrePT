@@ -30,10 +30,17 @@ export function chapterTitleKeys(story) {
  * An UNKNOWN chapter plays the whole story rather than nothing. These links are pasted into chat
  * apps and typed by hand, and a mistyped or since-renamed chapter should still show a stranger the
  * demo — a player handed an empty step list looks exactly like an app that failed to boot. */
-export function storyStepsFor(story, chapterId = null) {
+export function storyStepsFor(story, chapterId = null, { surface = "trainer" } = {}) {
   const chapters = story?.chapters || [];
   const wanted = chapters.find((chapter) => chapter.id === chapterId);
-  const playing = wanted ? [wanted] : chapters;
+  // A chapter that happens on the CLIENT's own page is not part of the trainer's run: it lives in a
+  // different boot, on a different device in the story, and flattening it in would leave the guide
+  // pointing at a form that is not on screen. The story crosses to it by handing over the browser,
+  // which is what a person following the link actually does. Naming a chapter still plays it,
+  // whichever surface it belongs to — that IS the link doing its job.
+  const playing = wanted
+    ? [wanted]
+    : chapters.filter((chapter) => (chapter.surface || "trainer") === surface);
   return playing.flatMap((chapter) =>
     // The chapter each step belongs to travels WITH the step: once flattened, the player sees one
     // list, and the narration surface still has to say which chapter is on screen.

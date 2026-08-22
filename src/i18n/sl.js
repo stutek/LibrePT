@@ -376,6 +376,12 @@ export const sl = {
   label_repeats: "Ponovi vsak teden",
   label_repeat_days: "Na te dneve",
   label_repeat_until: "Do (neobvezno)",
+  btn_invite_client: "Pošlji povezavo za prijavo",
+  intake_invite_message:
+    "Izpolni svoje podatke za najin trening — vzame minuto in na tvojem telefonu ne ostane nič:",
+  intake_invite_ready: "Povezava pripravljena — kopiraj jo spodaj",
+  intake_invite_sent: "Povezava poslana",
+  intake_invite_copied: "Povezava kopirana",
   bind_participants: "Vsi na ta načrt",
   unbind_participants: "Vsak svoj načrt",
   bound_group_label: "Skupaj",
@@ -388,6 +394,48 @@ export const sl = {
   story_continue: "Naprej",
   story_persona_trainer: "Telefon trenerja",
   story_chapter_gym: "V telovadnici",
+  story_persona_client: "Anin telefon",
+  story_chapter_arrive: "Prijatelji se oglasijo",
+  story_chapter_intake: "Na Aninem telefonu",
+  story_handover_title: "Zdaj Ana",
+  story_open_client_phone: "Odpri Anin telefon",
+  story_step_arrive_menu: "Meni — kjer je vse, kar ni nocojšnja vadba.",
+  story_step_arrive_clients: "Kartoteka — osem ljudi in nihče ni ničesar tipkal dvakrat.",
+  story_step_arrive_invite:
+    "Ana je po vadbi vprašala za trening. Namesto da bi ji podatke zapisoval kar na hodniku, ji trener pošlje povezavo.",
+  story_step_intake_name:
+    "Ana vpiše svoje ime. To je njen telefon in nič od tega se nanj ne shrani.",
+  story_step_intake_email: "Kam naj ji pošlje termine.",
+  story_step_intake_injury:
+    "Rama, ki jo še vedno kdaj čuti — ponujeno, nikoli zahtevano, in stran pove, kam gre odgovor.",
+  story_step_intake_consent:
+    "Privolitev, dana tukaj in ne predpostavljena: z njo se zapiše tudi besedilo in jezik, v katerem ga je prebrala.",
+  story_arrive_open_body:
+    "Začne se tako kot običajno: trije prijatelji po vadbi vprašajo za skupen trening. Nič ni še dogovorjeno in nikogar ni v kartoteki.",
+  story_handover_body:
+    "Povezava je na poti. Od tu naprej si na DRUGEM telefonu — Aninem — in tisto, kar boš videl, ni maketa strankinega zaslona, ampak stran, ki jo res odpre.",
+  story_intake_open_body:
+    "Anin telefon, s povezave iz sporočila. Ni ničesar za namestiti in na tem telefonu ne ostane nič: izpolni obrazec, pošlje ga in s tega telefona je izginil.",
+  story_intake_close_body:
+    "Anin del je opravljen. Dotik gumba Pošlji izroči datoteko trenerju, ki jo prebere in se odloči — neznanec se ne more sam vpisati v nikogaršnjo kartoteko.",
+  story_chapter_programme: "Program",
+  story_chapter_evening: "Večer po vadbi",
+  story_step_programme_open_session:
+    "Nedelja zvečer. Torkova seja je že na plošči — trener jo odpre, da sestavi, kar bo dejansko izpeljal.",
+  story_step_programme_editor:
+    "Načrt in ob njem številka, ki šteje: koliko dela gre v uro, ki jo je rezerviral.",
+  story_step_programme_done: "Končano — nazaj k skupini.",
+  story_step_programme_menu_again: "Še nekaj pred torkom.",
+  story_step_programme_bind:
+    "Jane, John in Sarah delajo isti krog, zato gredo na en načrt — in torkove serije se zabeležijo enkrat namesto trikrat.",
+  story_programme_open_body:
+    "Dva dni prej, na kavču. Nič od tega ni nujno, in prav zato se splača zdaj: večer v telovadnici teče drugače, če načrt že obstaja.",
+  story_programme_close_body:
+    "En načrt, trije ljudje, in gre v uro. Torek je zdaj lahko o vadbi in ne o telefonu.",
+  story_step_evening_menu: "Doma, pozneje zvečer.",
+  story_step_evening_theme: "Temno, ker je pol enajstih in trener sedi na kavču.",
+  story_evening_open_body:
+    "Seja je končana in vsi so šli domov. To je polovica, ki je nihče ne snema: kaj se zgodi z zapiski, nastalimi med serijami.",
   story_thanks_title: "To je bila ena vadba",
   story_clear_demo_data: "Počisti demo podatke",
   story_step_open_session:

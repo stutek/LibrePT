@@ -179,10 +179,208 @@ const GYM_CHAPTER = {
       // the editor's own Swapped badge is the visible fact.
       expect: { selector: ".editor-added-badge", visible: true, containsText: "Swapped" },
     },
-    // The last beat of the story so far, so it is the one that hands the app over (§30.2): thank
-    // you, and the two ways onward that already exist. Dismissing IS "play around" — the app is
-    // left exactly where the story put it, not on a start screen.
-    narration("gym-close", "chapter", "story_thanks_title", "story_gym_close_body", {
+    // Not the end any more — the evening chapter is — so this one just closes the session and hands
+    // over to it. The way out (§30.2) belongs on the LAST card, or a viewer is offered the exit
+    // twice and takes it before the story is done.
+    narration("gym-close", "chapter", "story_chapter_gym", "story_gym_close_body"),
+  ],
+};
+
+// Whose phone the viewer is looking at once the story hands over (§35.1's one-persona-at-a-time
+// ruling): the label is the only thing distinguishing the two sides, because the app looks the same
+// on both.
+const CLIENT = "story_persona_client";
+
+// Chapter A — three friends arrive. The trainer's half ends by handing the browser to the page a
+// client would really open: the client's screens are the REAL ones (§35.1), and `/intake` is a
+// separate boot on purpose — a stranger's phone gets no database, no seed and no terms modal — so
+// the story crosses to it by navigating, exactly as a person following a link would.
+const ARRIVE_CHAPTER = {
+  id: "arrive",
+  titleKey: "story_chapter_arrive",
+  steps: [
+    narration("arrive-open", "chapter", "story_chapter_arrive", "story_arrive_open_body", {
+      route: "/",
+    }),
+    {
+      // The register lives behind the ☰ menu, so getting there is two taps and the story shows
+      // both: a demo that arrives at a screen without showing the way to it teaches nothing.
+      id: "arrive-menu",
+      persona: TRAINER,
+      route: "/",
+      target: "#btn-app-menu",
+      caption: "story_step_arrive_menu",
+      expect: { selector: "#app-menu:not(.hidden)", visible: true },
+    },
+    {
+      id: "arrive-clients",
+      persona: TRAINER,
+      route: "/clients",
+      target: "#menu-clients-register",
+      caption: "story_step_arrive_clients",
+      expect: { selector: "#btn-invite-client", visible: true },
+    },
+    {
+      // Nothing is created here, and that is the point: a person exists in the register only once
+      // they have sent their own details and the trainer has accepted them (§26.5).
+      id: "arrive-invite",
+      persona: TRAINER,
+      target: "#btn-invite-client",
+      caption: "story_step_arrive_invite",
+      // The link ends up ON SCREEN, whichever route the browser allowed — shared, copied, or left
+      // to be copied by hand. That is the claim worth making, and it is the one a trainer sending
+      // the same link to the second and third friend depends on.
+      expect: { selector: "#intake-invite-link", visible: true },
+    },
+    narration("arrive-handover", "chapter", "story_handover_title", "story_handover_body", {
+      continueUrl: "intake?demo=story&chapter=intake",
+      continueLabelKey: "story_open_client_phone",
+    }),
+  ],
+};
+
+// The client's own half, played on the client's own page. It is its own chapter because it runs in
+// a different BOOT — nothing here has a database, a seed or a trainer's session behind it.
+const INTAKE_CHAPTER = {
+  id: "intake",
+  titleKey: "story_chapter_intake",
+  // Not part of the trainer's run: this one is played on the client's own page, reached by the
+  // handover above (domain/demoStory.js decides what a surface means for a whole-story walk).
+  surface: "client",
+  steps: [
+    narration("intake-open", "chapter", "story_chapter_intake", "story_intake_open_body"),
+    {
+      id: "intake-name",
+      persona: CLIENT,
+      target: "#intake-name",
+      enter: "Ana Novak",
+      caption: "story_step_intake_name",
+      expect: { selector: "#intake-name", hasValue: "Ana" },
+    },
+    {
+      id: "intake-email",
+      persona: CLIENT,
+      target: "#intake-email",
+      enter: "ana.novak@example.com",
+      caption: "story_step_intake_email",
+      expect: { selector: "#intake-email", hasValue: "@" },
+    },
+    {
+      // Offered, never demanded (§1.7's ruling) — the copy beside the field says where the answer
+      // goes, and the demo fills it in because a client who trusts the trainer usually does.
+      id: "intake-injury",
+      persona: CLIENT,
+      target: "#intake-injury",
+      enter: "shoulder, two years ago",
+      caption: "story_step_intake_injury",
+      expect: { selector: "#intake-injury", hasValue: "shoulder" },
+    },
+    {
+      id: "intake-consent",
+      persona: CLIENT,
+      target: "#intake-consent",
+      caption: "story_step_intake_consent",
+      expect: { selector: "#intake-consent:checked" },
+    },
+    narration("intake-close", "chapter", "story_chapter_intake", "story_intake_close_body"),
+  ],
+};
+
+// Chapter B — the programme. It comes AFTER the gym chapter in the story's order of build (§35.3),
+// because it needed the two features the floor chapter did not: a plan that says whether it fits its
+// slot, and one plan bound to several people.
+const PROGRAMME_CHAPTER = {
+  id: "programme",
+  titleKey: "story_chapter_programme",
+  steps: [
+    narration("programme-open", "chapter", "story_chapter_programme", "story_programme_open_body", {
+      route: "/",
+    }),
+    {
+      ...wedge["open-session"],
+      id: "programme-open-session",
+      persona: TRAINER,
+      caption: "story_step_programme_open_session",
+    },
+    {
+      id: "programme-menu",
+      persona: TRAINER,
+      target: "#btn-session-menu",
+      caption: "story_step_session_menu",
+      expect: { selector: "#session-menu:not(.hidden)", visible: true },
+    },
+    {
+      // The meter is the point of this chapter: 45 minutes of work inside a 60-minute slot is the
+      // number a trainer is actually solving for, and it is on screen while they can still change
+      // it.
+      id: "programme-editor",
+      persona: TRAINER,
+      target: "#btn-edit-plan",
+      caption: "story_step_programme_editor",
+      expect: { selector: ".editor-plan-fit", visible: true },
+    },
+    {
+      // Out of the editor first: the participant tabs are hidden while a plan is being edited (the
+      // trainer is looking at one person's programme, not at the room), so the binding this chapter
+      // is about could not be seen from in there.
+      id: "programme-done",
+      persona: TRAINER,
+      target: "#btn-done-edit",
+      caption: "story_step_programme_done",
+      expect: { selector: "#active-exercise-scroll-deck .exercise-deck-card", visible: true },
+    },
+    {
+      id: "programme-menu-again",
+      persona: TRAINER,
+      target: "#btn-session-menu",
+      caption: "story_step_programme_menu_again",
+      expect: { selector: "#session-menu:not(.hidden)", visible: true },
+    },
+    {
+      // Event 12: the same plan for everyone in the room, logged once.
+      id: "programme-bind",
+      persona: TRAINER,
+      target: "#btn-bind-participants",
+      caption: "story_step_programme_bind",
+      expect: { selector: ".client-tab-bound", visible: true },
+    },
+    narration(
+      "programme-close",
+      "chapter",
+      "story_chapter_programme",
+      "story_programme_close_body",
+    ),
+  ],
+};
+
+// Chapter D — the evening after. The trainer is at home; this is where the notes taken on the floor
+// turn into next week's plan, and where the theme beat finally earns its place (§35.2 event 19):
+// an evening at home is genuinely what dark mode is for.
+const EVENING_CHAPTER = {
+  id: "evening",
+  titleKey: "story_chapter_evening",
+  steps: [
+    narration("evening-open", "chapter", "story_chapter_evening", "story_evening_open_body", {
+      route: "/",
+    }),
+    {
+      id: "evening-menu",
+      persona: TRAINER,
+      target: "#btn-app-menu",
+      caption: "story_step_evening_menu",
+      expect: { selector: "#app-menu:not(.hidden)", visible: true },
+    },
+    {
+      // PICKED from a list, not tapped — the control is a `<select>`, and the demo performs what a
+      // trainer performs (wanted 2026-08-22).
+      id: "evening-theme",
+      persona: TRAINER,
+      target: "#theme-switcher",
+      choose: "midnight",
+      caption: "story_step_evening_theme",
+      expect: { selector: "html.midnight-theme", visible: true },
+    },
+    narration("evening-close", "chapter", "story_thanks_title", "story_gym_close_body", {
       onward: true,
     }),
   ],
@@ -190,5 +388,7 @@ const GYM_CHAPTER = {
 
 export const DEMO_STORY = {
   id: "story",
-  chapters: [GYM_CHAPTER],
+  // In the order the evening happens, not the order they were built: a viewer watching the whole
+  // story should meet the programme before the session it produced.
+  chapters: [ARRIVE_CHAPTER, INTAKE_CHAPTER, PROGRAMME_CHAPTER, GYM_CHAPTER, EVENING_CHAPTER],
 };

@@ -2700,7 +2700,21 @@ events that genuinely need it.
       was unreachable while any modal dialog was open (a modal makes the rest of the page inert, so
       Show me silently stopped working), and tapping the guide while editing a plan CLOSED the editor
       — the editor's tap-outside rule did not know the guide is part of what the trainer is doing.
-- [ ] **Chapter D**, then **A**. B stays blocked on §8.1.
+- [x] **All five chapters play — 2026-08-22.** The story is
+      **arrive → intake → programme → gym → evening**, 33 beats, guided end to end. B and D were
+      unblocked by the features built for them the same day (§8.1's binding, §35.3b's meter, the
+      recurrence model, and the player's ability to pick from a list); A was unblocked by giving the
+      trainer something real to tap — [intakeInvite.js](src/modules/clients/intakeInvite.js), the
+      link that lets someone fill in their own details.
+- [x] **35.3e, the persona transition — 2026-08-22.** The story crosses to the client by NAVIGATING
+      to `/intake`, and the guide picks up there in its own boot: the client's screens are the real
+      ones, so a drawn "client phone" would have been a recording with extra steps. The chapter is
+      marked as belonging to the client's surface, which is what keeps it out of the trainer's walk
+      — folding it in would leave the guide pointing at a form that is not on screen.
+- [ ] **What the story still cannot show**: the trainer opening the file Ana sent (§26.5's review
+      dialog needs a real file, and a demo-only hook into it would be the mock this whole approach
+      exists to avoid), and event 21's one-off move of the next occurrence — the model is there now,
+      the UI beat is not.
 
 ---
 

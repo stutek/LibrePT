@@ -135,3 +135,36 @@ def test_the_story_does_not_run_without_demo_data(page, local_server):
 
     assert page.locator(PANEL).count() == 0
     assert page.evaluate("() => document.getElementById('story-card')") is None
+
+
+@pytest.mark.clean_start
+def test_the_client_half_is_played_on_the_client_page(page, local_server):
+    """§35.3e's handover. One persona at a time, and the client's screens are the REAL ones — so the
+    story crosses to `/intake` by NAVIGATING, exactly as someone following the trainer's link does,
+    and the guide picks up there. A drawn "client phone" would be a recording with extra steps."""
+    page.goto(f"{local_server}intake?demo=story&chapter=intake")
+
+    page.locator(PANEL).wait_for(state="visible", timeout=30_000)
+    _walk_the_whole_story(page)
+
+    # She filled her own form in, on her own phone...
+    assert page.input_value("#intake-name") == "Ana Novak"
+    assert page.locator("#intake-consent").is_checked()
+    # ...and the page still wrote nothing of the app's to it, which is the promise the whole
+    # stateless boot exists for. The one key present is the suite's own terms auto-accept
+    # (tests/e2e/test_intake.py names it the same way).
+    written = page.evaluate(
+        "() => Object.keys(localStorage).filter((key) => key.startsWith('librept') "
+        "&& key !== 'librept_terms_accepted')"
+    )
+    assert written == [], written
+
+
+def test_the_trainer_walk_does_not_wander_onto_the_client_page(page, local_server):
+    """The client's chapter lives in a different boot on a different device; folding it into the
+    trainer's run would leave the guide pointing at a form that is not on screen."""
+    _open_story(page, local_server)
+
+    captions = _walk_the_whole_story(page)
+
+    assert not any("Ana types her own name" in caption for caption in captions)

@@ -288,7 +288,36 @@ export function bootIntake(deps) {
   // No router on this path, so the view is activated directly — the class the stylesheet keys on.
   if (view) view.classList.add("active");
   setupIntakeForm(deps);
+  bootIntakeStoryChapter(deps);
   return view;
+}
+
+// The long story's client-side chapter, played on the client's own page (TODO §35.3e).
+//
+// It runs HERE rather than being folded into the trainer's walk because this is a different boot on
+// a different device in the story — and because the client's screens are the real ones, which is the
+// whole reason the handover navigates instead of drawing a phone. Everything the stateless boot
+// promises still holds: the guide reads the form and points at it, and writes nothing.
+async function bootIntakeStoryChapter({ shareDemo, shareChapter, t } = {}) {
+  const { DEMO_STORY: DEMO_STORY_PARAM } = await import("./modules/common/shareLink.js");
+  if (shareDemo !== DEMO_STORY_PARAM) return null;
+
+  const [{ startGuidedWalkthrough }, { mountStoryNarration }, { DEMO_STORY }, story] =
+    await Promise.all([
+      import("./modules/demo/walkthroughOverlay.js"),
+      import("./modules/demo/storyNarration.js"),
+      import("./modules/demo/storyTour.js"),
+      import("./domain/demoStory.js"),
+    ]);
+
+  const steps = story.storyStepsFor(DEMO_STORY, shareChapter || "intake", { surface: "client" });
+  if (steps.length === 0) return null;
+  const narration = mountStoryNarration({ t });
+  return startGuidedWalkthrough({
+    tour: { id: "story-intake", steps },
+    t,
+    onStep: (step) => narration.showStep(step),
+  });
 }
 
 // The invite-reply page (TODO §1.6's confirm link) — the second CLIENT-facing boot, and stateless for

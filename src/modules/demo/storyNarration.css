@@ -52,8 +52,18 @@
 }
 /* The second way onward sits under the first, and reads as the quieter of the two: the story's
    own ending is "keep tapping around", and clearing the demo is the deliberate act. */
-.story-card-cleanup {
+.story-card-cleanup,
+.story-card-handover {
   margin-top: 0.5rem;
+}
+/* The handover is a LINK, so it looks like the primary way on: it is the story continuing, not an
+   exit from it. */
+.story-card-handover {
+  display: inline-flex;
+  text-decoration: none;
+}
+.story-card-handover.hidden {
+  display: none;
 }
 
 /* The PAPER track (§35.1): what happens off-screen, on a printed form — narrated as text on a

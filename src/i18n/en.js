@@ -393,6 +393,12 @@ export const en = {
   label_repeats: "Repeats every week",
   label_repeat_days: "On these days",
   label_repeat_until: "Until (optional)",
+  btn_invite_client: "Send an intake link",
+  intake_invite_message:
+    "Fill in your details for our training — it takes a minute, and nothing is stored on your phone:",
+  intake_invite_ready: "Link ready — copy it below",
+  intake_invite_sent: "Link sent",
+  intake_invite_copied: "Link copied",
   bind_participants: "Everyone on this plan",
   unbind_participants: "Give everyone their own plan",
   bound_group_label: "Together",
@@ -405,6 +411,48 @@ export const en = {
   story_continue: "Continue",
   story_persona_trainer: "Trainer's phone",
   story_chapter_gym: "In the gym",
+  story_persona_client: "Ana's phone",
+  story_chapter_arrive: "Three friends arrive",
+  story_chapter_intake: "On Ana's phone",
+  story_handover_title: "Over to Ana",
+  story_open_client_phone: "Open Ana's phone",
+  story_step_arrive_menu: "The menu — where everything that is not tonight lives.",
+  story_step_arrive_clients: "The register — eight people, and nobody typed a word of it twice.",
+  story_step_arrive_invite:
+    "Ana asked about training after a class. Instead of taking her details standing in a corridor, the trainer sends her a link.",
+  story_step_intake_name:
+    "Ana types her own name. It is her phone, and nothing here is stored on it.",
+  story_step_intake_email: "Somewhere to send the session times.",
+  story_step_intake_injury:
+    "The shoulder she still feels sometimes — offered, never demanded, and the page says where the answer goes.",
+  story_step_intake_consent:
+    "Consent, given here rather than assumed: the wording and the language she read it in are recorded with it.",
+  story_arrive_open_body:
+    "It starts the way it usually does: three friends ask about training together after a class. Nothing has been agreed yet, and nobody is in the register.",
+  story_handover_body:
+    "The link is on its way. From here you are on the OTHER phone — Ana's — and what you are about to see is not a mock-up of a client screen, it is the page she actually opens.",
+  story_intake_open_body:
+    "Ana's phone, from a link in a message. There is no app to install and nothing will be stored on this phone: she fills the form in, sends it, and it is gone from here.",
+  story_intake_close_body:
+    "That is Ana's part done. Tapping Send hands the file to the trainer, who reads it and decides — a stranger cannot write themselves into anybody's register.",
+  story_chapter_programme: "The programme",
+  story_chapter_evening: "The evening after",
+  story_step_programme_open_session:
+    "Sunday night. Tuesday's session is already on the board — the trainer opens it to build what they will actually run.",
+  story_step_programme_editor:
+    "The plan, with the number that matters beside it: how much work fits in the hour they booked.",
+  story_step_programme_done: "Done — back to the room.",
+  story_step_programme_menu_again: "One more thing before Tuesday.",
+  story_step_programme_bind:
+    "Jane, John and Sarah are doing the same circuit, so they go on one plan — and Tuesday's sets get logged once instead of three times.",
+  story_programme_open_body:
+    "Two days earlier, on the sofa. Nothing here is urgent, which is exactly why it is worth doing now: the evening in the gym goes differently when the plan already exists.",
+  story_programme_close_body:
+    "One plan, three people, and it fits the hour. Tuesday can now be about the training rather than about the phone.",
+  story_step_evening_menu: "Home, later that night.",
+  story_step_evening_theme: "Dark, because it is half past ten and the trainer is on a sofa.",
+  story_evening_open_body:
+    "The session is over and everyone has gone home. This is the half nobody films: what happens to the notes taken between sets.",
   story_thanks_title: "That was one session",
   story_clear_demo_data: "Clear the demo data",
   // The story's own voice. It names the people the seed puts on screen — Jane, John, Sarah — because

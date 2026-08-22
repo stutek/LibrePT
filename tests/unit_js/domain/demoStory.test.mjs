@@ -114,3 +114,27 @@ test("every step still needs an expectation, narrated ones included", () => {
 test("a story with no chapters says so rather than playing empty", () => {
   assert.match(validateStory({ id: "empty", chapters: [] }).join(" "), /chapter/);
 });
+
+test("a chapter played on the client's own page is not part of the trainer's walk", () => {
+  // It lives in a different boot on a different device; flattening it into the trainer's run would
+  // leave the guide pointing at a form that is not on screen (TODO §35.3e).
+  const withClient = {
+    id: "s",
+    chapters: [
+      ...STORY.chapters,
+      {
+        id: "intake",
+        surface: "client",
+        titleKey: "k",
+        steps: [{ id: "i1", target: ".x", expect: { selector: ".x" } }],
+      },
+    ],
+  };
+
+  assert.ok(!storyStepsFor(withClient).some((step) => step.id === "i1"));
+  // ...and naming it still plays it, which is exactly what the handover link does.
+  assert.deepEqual(
+    storyStepsFor(withClient, "intake").map((step) => step.id),
+    ["i1"],
+  );
+});

@@ -263,6 +263,10 @@ async function init() {
       consentVersion: CONSENT_FORM_VERSION,
       noticeUrlFor: clientPrivacyNoticeUrl,
       formUrlFor: clientConsentFormUrl,
+      // The story's client-side chapter, when the handover sent them here (TODO §35.3e). Read from
+      // the link like everything else on this path; it writes nothing either.
+      shareDemo: getShareParams().demo,
+      shareChapter: getShareParams().chapter,
     });
     return;
   }
