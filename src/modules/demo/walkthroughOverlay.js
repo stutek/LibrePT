@@ -252,6 +252,13 @@ export function startGuidedWalkthrough({
    * top layer too, and back to the body afterwards. It is `position: fixed`, so it draws in exactly
    * the same place either way; only its reachability changes.
    */
+  /** Whether the app is already on a step's route. Compared on the path the script writes — the
+   * scripts name routes as the app's own paths, and the base path is the same for both. */
+  function currentPathIs(route) {
+    const here = doc.defaultView.location.pathname;
+    return here === route || here.endsWith(route);
+  }
+
   function keepPanelReachable() {
     const openDialog = doc.querySelector("dialog[open]");
     const wanted = openDialog || doc.body;
@@ -304,19 +311,35 @@ export function startGuidedWalkthrough({
    * and the trainer is waiting on a panel they already tapped.
    */
   async function restoreGroundFor(step) {
+    // Nothing to rebuild when the app is already where the step starts — and rebuilding anyway is
+    // not free: navigating to the anchor route mid-session tears down the very clipboard a later
+    // beat is standing on. Show me asks for this on every tap, so the cheap answer has to be the
+    // common one.
+    if (stepPreconditionMet(step, doc)) return;
     const index = tour.steps.indexOf(step);
     let anchor = index;
     while (anchor > 0 && !tour.steps[anchor].route) anchor -= 1;
+    // Where the REPLAY starts. Normally the anchor, but a step that owns its own route anchors on
+    // itself and would replay nothing at all — which is how a second Show me on the beat that opens
+    // the register found the menu closed by its own first success, could not see the control, and
+    // told the trainer the step had failed (reported 2026-08-23). Backing up to the previous
+    // route-owner gives that beat the taps that set it up; nothing is re-tapped that already holds,
+    // and the loop still stops the moment the step's own preconditions are satisfied.
+    let from = anchor;
+    if (from === index && index > 0) {
+      from = index - 1;
+      while (from > 0 && !tour.steps[from].route) from -= 1;
+    }
 
     const route = tour.steps[anchor].route;
-    console.info(
-      `[walkthrough] step ${step.id} precondition not met — rebuilding from ${anchor + 1}`,
-    );
-    if (route) {
+    console.info(`[walkthrough] rebuilding ground for step ${step.id} from ${anchor + 1}`);
+    // Only when the app is not already there: a navigate to the route you are on re-renders the
+    // view under the trainer for nothing, and Show me now asks for this on every tap.
+    if (route && !currentPathIs(route)) {
       navigate?.(route);
       await sleep(RESTORE_SETTLE_MS);
     }
-    for (const earlier of tour.steps.slice(anchor, index)) {
+    for (const earlier of tour.steps.slice(from, index)) {
       if (stepPreconditionMet(step, doc)) break;
       await performStep(earlier, { doc, wait: (ms) => sleep(Math.min(ms, RESTORE_SETTLE_MS)) });
     }
@@ -401,6 +424,14 @@ export function startGuidedWalkthrough({
     render();
 
     const alreadyDone = isWalkthroughStepDone(state, step.id);
+    // Put the app back where this step starts BEFORE demonstrating it — the same rebuild a card
+    // arriving does (reported 2026-08-23: "multiple clicks on Show me should always reset state
+    // first"). Without it the second tap demonstrated into whatever the first one left behind: on
+    // the beat that opens the register from the menu, the menu was closed by its own success, the
+    // control could not be found, and the guide told the trainer the step had failed when it had
+    // worked. Idempotent all the way down, so a first tap on an app already in place replays
+    // nothing and navigates nowhere.
+    await restoreGroundFor(step);
     // One path, whether or not the step has been done before: performStep is idempotent, so a step
     // walked back to is demonstrated again without its action being fired twice.
     //

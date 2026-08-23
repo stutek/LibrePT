@@ -31,11 +31,13 @@ const wedge = Object.fromEntries(GYM_FLOOR_TOUR.steps.map((step) => [step.id, st
 // screen — so this label is the only thing saying which side of a handover is on screen.
 const TRAINER = "story_persona_trainer";
 
-// What every narrated step expects: the card was on screen and could be dismissed. Present but not
-// visible, which is what `hidden` leaves behind — a removed element would read as "nothing matched"
-// and fail (domain/demoTour.js's checkExpectation).
-const CARD_DISMISSED = { selector: "#story-card", visible: false };
-const CARD_TARGET = "#story-card-continue";
+// A beat that is only a card has nothing to do but be read, so what it expects is that the card is
+// THERE: a missing translation or a card that never rendered still fails it, which is the whole
+// point of an expectation. It is not "the card was dismissed" any more — the card used to carry its
+// own Continue button, and a second way onward sitting beside a greyed-out Next is what made beat 4
+// look broken (reported 2026-08-23). Next moves the guide, everywhere, including here.
+const CARD_ON_SCREEN = { selector: "#story-card", visible: true };
+const CARD_TARGET = "#story-card";
 
 function narration(id, kind, titleKey, bodyKey, extra = {}) {
   const { onward, continueUrl, continueLabelKey, ...step } = extra;
@@ -49,7 +51,7 @@ function narration(id, kind, titleKey, bodyKey, extra = {}) {
     // thing in the same box. The handover and the thank-you say something more specific and pass
     // their own caption in.
     caption: "story_step_read_on",
-    expect: CARD_DISMISSED,
+    expect: CARD_ON_SCREEN,
     ...step,
   };
 }
@@ -255,6 +257,12 @@ const ARRIVE_CHAPTER = {
       persona: TRAINER,
       route: "/clients",
       target: "#menu-clients-register",
+      // Declared, because this control lives INSIDE the menu the previous beat opened — and the
+      // beat's own success closes it again. Without saying so, a second Show me looked for a row
+      // that was no longer on screen and told the trainer the step had failed (reported
+      // 2026-08-23). With it, the guide re-opens the menu first, the way it does for any step whose
+      // ground has drifted.
+      requires: [{ selector: "#app-menu:not(.hidden)", visible: true }],
       caption: "story_step_arrive_clients",
       expect: { selector: "#btn-invite-client", visible: true },
     },
@@ -276,7 +284,10 @@ const ARRIVE_CHAPTER = {
     // it for the same reason it is hidden on any card: the two buttons are right there, and having
     // the guide press Continue for you would dismiss the handover without ever making it.
     narration("arrive-handover", "chapter", "story_handover_title", "story_handover_body", {
-      continueUrl: "intake?demo=story&chapter=intake",
+      // A DIFFERENT theme on the other side (asked for 2026-08-23: the two phones should not look
+      // alike). The intake page reads `?theme=` before it paints and writes nothing, so the client's
+      // phone is unmistakably not the trainer's and the trainer's own choice is left alone.
+      continueUrl: "intake?demo=story&chapter=intake&theme=midnight",
       continueLabelKey: "story_open_client_phone",
       caption: "story_step_handover",
       showMe: false,

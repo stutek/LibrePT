@@ -84,14 +84,13 @@
 }
 
 /* Real touch targets, because the hand taps them and a viewer may too (no-hover rule, §7.1). */
-.story-card-continue,
 .story-card-cleanup {
   min-height: 44px;
   width: 100%;
   justify-content: center;
 }
-/* The second way onward sits under the first, and reads as the quieter of the two: the story's
-   own ending is "keep tapping around", and clearing the demo is the deliberate act. */
+/* Both sit under the words, and clearing the demo reads as the quieter of the two: the story's own
+   ending is "keep tapping around", and emptying it out is the deliberate act. */
 .story-card-cleanup,
 .story-card-handover {
   margin-top: 0.5rem;
@@ -136,9 +135,22 @@
   color: #3b3423;
 }
 
-/* Whose phone is on screen. One persona at a time was the ruling (§35.1), so this label is the only
-   thing distinguishing the trainer's app from a client's — they look the same. Top-centre, clear of
-   the header's own controls, and never over the thing being demonstrated. */
+/* In the guide's head, beside the step counter: read in the same glance as "step 4 of 31", which is
+   when a viewer wonders whose phone this is. It used to be a black tag over the app's own header,
+   where it went unnoticed and read as one of the app's controls (reported 2026-08-23). */
+.walkthrough-head .story-persona {
+  position: static;
+  transform: none;
+  z-index: auto;
+  margin-right: auto;
+  background: none;
+  color: var(--text-secondary, #64748b);
+  padding: 0;
+}
+
+/* Standing on its own — mounted without a guide around it, which is how it is tested alone. One
+   persona at a time was the ruling (§35.1), so this label is the only thing distinguishing the
+   trainer's app from a client's: they look the same. */
 .story-persona {
   position: fixed;
   top: 0.55rem;

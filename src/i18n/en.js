@@ -441,8 +441,7 @@ export const en = {
     "This is one evening of a repeating session. What you change here changes this evening only.",
   gym_note_in_this_plan: "in this plan",
   feedback_keep_on_record: "Keep this on the client's record",
-  story_continue: "Continue",
-  story_persona_trainer: "Trainer's phone",
+  story_persona_trainer: "Your phone",
   story_chapter_gym: "In the gym",
   story_persona_client: "Ana's phone",
   story_chapter_arrive: "Three friends arrive",
@@ -455,11 +454,11 @@ export const en = {
     "In the menu that just dropped down, tap Clients Directory — the row with three little people next to it, at the top of the list. Eight people are already in that directory.",
   story_step_arrive_invite:
     "Tap Send an intake link — the button just under the Clients heading, at the top of the list of people. Ana asked about training after a class, and instead of taking her details standing in a corridor, the trainer sends her a link she fills in herself.",
-  story_step_read_on: "Read that, then tap Continue just below it to take on the next task.",
+  story_step_read_on: "Read that, then tap Next to take on the task it sets.",
   story_step_handover:
-    "Tap Open Ana's phone — the green button just below this text. The browser leaves the trainer's app and goes to the page Ana really opens from the link in her message, and the story carries on there.",
+    "Tap Open Ana's phone — the green button just below this text. The browser leaves your own app and goes to the page Ana really opens from the link in her message, and the story carries on there.",
   story_step_thanks:
-    "Every task is done, from a question after a class to next week already in the diary. Tap Continue to put this card away and keep exploring the app on your own, or Clear the demo data to empty it out and start with your own clients.",
+    "Every task is done, from a question after a class to next week already in the diary. Tap Done to put the guide away and keep exploring the app on your own, or Clear the demo data to empty it out and start with your own clients.",
   story_step_intake_name:
     "Ana types her own name. It is her phone, and nothing here is stored on it.",
   story_step_intake_email: "Somewhere to send the session times.",

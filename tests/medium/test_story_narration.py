@@ -42,7 +42,7 @@ CHAPTER_STEP = {
         "titleKey": "story_chapter_gym",
         "bodyKey": "story_gym_open_body",
     },
-    "target": "#story-card-continue",
+    "target": "#story-card",
 }
 
 TAP_STEP = {"id": "open-session", "caption": "tour_step_open_session"}
@@ -57,9 +57,12 @@ def _show(page, step):
     page.evaluate("(step) => window.__show(step)", step)
 
 
-def test_a_narrated_beat_is_read_and_then_dismissed_by_a_tap(page, local_server):
-    """§35.1's rule for narrated steps: the card is on screen, and it is DISMISSIBLE — which is what
-    makes it a step with a real expectation rather than a pause the player hoped was long enough."""
+def test_a_narrated_beat_puts_its_words_on_screen(page, local_server):
+    """§35.1's rule for narrated steps: the words are ON SCREEN and they are the story's, not a key.
+
+    The card carried its own Continue button until 2026-08-23, when a beat whose only control was
+    that button left the guide's own Next greyed out beside it — two ways on, one of them dead. The
+    words are all this surface owns now; moving the story along belongs to the guide."""
     _mount(page, local_server)
 
     _show(page, CHAPTER_STEP)
@@ -69,10 +72,6 @@ def test_a_narrated_beat_is_read_and_then_dismissed_by_a_tap(page, local_server)
     expect(card).to_contain_text("In the gym")
     expect(card).to_contain_text("Jane and John")
 
-    page.click("#story-card-continue")
-
-    expect(card).to_be_hidden()
-
 
 def test_the_viewer_is_told_whose_phone_they_are_looking_at(page, local_server):
     """One persona at a time was the ruling (§35.1), so this label is the ONLY thing separating the
@@ -81,7 +80,7 @@ def test_the_viewer_is_told_whose_phone_they_are_looking_at(page, local_server):
 
     _show(page, CHAPTER_STEP)
 
-    expect(page.locator("#story-persona")).to_have_text("Trainer's phone")
+    expect(page.locator("#story-persona")).to_have_text("Your phone")
 
 
 def test_a_beat_with_nothing_to_read_shows_no_card(page, local_server):

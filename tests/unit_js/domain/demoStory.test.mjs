@@ -103,7 +103,7 @@ test("every step still needs an expectation, narrated ones included", () => {
       {
         id: "one",
         titleKey: "k",
-        steps: [{ id: "card", narrate: { kind: "paper" }, target: "#story-card-continue" }],
+        steps: [{ id: "card", narrate: { kind: "paper" }, target: "#story-card" }],
       },
     ],
   };

@@ -53,7 +53,8 @@ def _step_numbers(page):
     return [int(n) for n in re.findall(r"\d+", page.locator(PROGRESS).inner_text())]
 
 
-CARD_CONTINUE = "#story-card-continue"
+# A card beat has no control of its own: it is read, and the guide's own Next is the way on
+# (2026-08-23). What used to be a tap on the card is now no tap at all.
 
 
 # What is worth knowing about the screen when a beat does not complete — the questions someone
@@ -104,8 +105,6 @@ def _walk_the_whole_story(page):
         # guide, on every beat including the last, which is why there is no longer a branch here.
         if page.locator(SHOW_ME).is_visible():
             page.locator(SHOW_ME).click()
-        else:
-            page.locator(CARD_CONTINUE).click()
         try:
             expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
         except AssertionError:
@@ -194,9 +193,8 @@ def test_a_reload_comes_back_on_the_beat_it_left(page, local_server):
     through twice. The step names itself in the address, so the address is enough to come back to."""
     _open_story(page, local_server)
     for _ in range(2):
-        page.locator(
-            SHOW_ME if page.locator(SHOW_ME).is_visible() else CARD_CONTINUE
-        ).click()
+        if page.locator(SHOW_ME).is_visible():
+            page.locator(SHOW_ME).click()
         expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
         page.locator(NEXT).click()
     expect(page.locator(PROGRESS)).to_have_text(re.compile(r"step\s+3\s+of", re.I))
@@ -211,21 +209,18 @@ def test_a_reload_comes_back_on_the_beat_it_left(page, local_server):
     expect(page.locator(BACK)).to_be_visible()
 
 
-def test_the_card_holds_still_on_a_beat_whose_control_is_its_own_button(
-    page, local_server
-):
+def test_the_card_holds_still_on_a_beat_that_points_at_itself(page, local_server):
     """Reported 2026-08-23: "4 of 31 jumps up and down". The guide moves its panel off whatever a
-    step points at — and that beat points at the Continue button on the panel, so moving it moved
+    step points at — and a card beat points at the card, which is IN the panel, so moving it moved
     the target too and the answer flipped on every tick. Measured, not eyeballed: the card is where
     it was a second and a half later."""
     _open_story(page, local_server)
     for _ in range(3):
-        page.locator(
-            SHOW_ME if page.locator(SHOW_ME).is_visible() else CARD_CONTINUE
-        ).click()
+        if page.locator(SHOW_ME).is_visible():
+            page.locator(SHOW_ME).click()
         expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
         page.locator(NEXT).click()
-    expect(page.locator(CARD_CONTINUE)).to_be_visible()
+    expect(page.locator("#story-card")).to_be_visible()
 
     seen = []
     for _ in range(10):
@@ -238,6 +233,31 @@ def test_the_card_holds_still_on_a_beat_whose_control_is_its_own_button(
         page.wait_for_timeout(150)
 
     assert len(set(seen)) == 1, f"the card moved while nobody touched it: {seen}"
+
+
+def test_asking_to_be_shown_again_rebuilds_what_the_first_time_used_up(
+    page, local_server
+):
+    """Reported 2026-08-23: "multiple clicks on Show me should always reset state first".
+
+    The beat that opens the register taps a row inside the menu — and succeeding closes that menu,
+    so a second Show me looked for a row that was no longer there and told the trainer the step had
+    failed when it had worked. Whatever the trainer has done to the app in between, asking again
+    starts from where the beat starts."""
+    _open_story(page, local_server)
+    page.locator(SHOW_ME).click()
+    expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
+    page.locator(NEXT).click()
+    expect(page.locator(PROGRESS)).to_have_text(re.compile(r"step\s+2\s+of", re.I))
+
+    for _ in range(3):
+        page.locator(SHOW_ME).click()
+        expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
+        assert page.locator(PROBLEM).is_hidden(), (
+            f"the guide reported a failure on a repeat: {page.locator(PROBLEM).inner_text()}"
+        )
+
+    expect(page.locator("#btn-invite-client")).to_be_visible()
 
 
 def test_one_chapter_can_be_walked_on_its_own(page, local_server):

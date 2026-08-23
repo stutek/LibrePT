@@ -45,7 +45,6 @@
 import { isGuideSurface } from "../common/dom.js";
 
 const CARD_ID = "story-card";
-const CONTINUE_ID = "story-card-continue";
 const PERSONA_ID = "story-persona";
 
 function element(doc, tag, className, id) {
@@ -66,13 +65,6 @@ function buildCard(doc, t, onClearDemoData) {
   const kicker = element(doc, "p", "story-card-kicker");
   const title = element(doc, "h2", "story-card-title");
   const body = element(doc, "p", "story-card-body");
-  const button = element(doc, "button", "btn btn-primary story-card-continue", CONTINUE_ID);
-  button.type = "button";
-  button.textContent = t("story_continue");
-  button.addEventListener("click", () => {
-    card.hidden = true;
-  });
-
   // The second way onward. Hidden until a card asks for it, because it is an offer only the last
   // beat of the story is entitled to make.
   // The `.hidden` CLASS, not the `hidden` attribute: every `.btn` in this app sets
@@ -98,8 +90,8 @@ function buildCard(doc, t, onClearDemoData) {
   const handover = doc.createElement("a");
   handover.id = "story-card-handover";
   handover.className = "btn btn-primary story-card-handover hidden";
-  card.append(kicker, title, body, button, cleanup, handover);
-  return { card, kicker, title, body, button, cleanup, handover };
+  card.append(kicker, title, body, cleanup, handover);
+  return { card, kicker, title, body, cleanup, handover };
 }
 
 /** Mounts the narration surface and returns `{ showStep, unmount }`.
@@ -111,11 +103,7 @@ export function mountStoryNarration({ doc = document, t, onClearDemoData } = {})
   const existing = doc.getElementById(CARD_ID);
   if (existing) existing.remove();
 
-  const { card, kicker, title, body, button, cleanup, handover } = buildCard(
-    doc,
-    t,
-    onClearDemoData,
-  );
+  const { card, kicker, title, body, cleanup, handover } = buildCard(doc, t, onClearDemoData);
   const persona = element(doc, "p", "story-persona", PERSONA_ID);
   persona.hidden = true;
 
@@ -151,8 +139,17 @@ export function mountStoryNarration({ doc = document, t, onClearDemoData } = {})
    */
   function homeInPanel() {
     const panel = doc.querySelector(".walkthrough-panel");
-    if (!panel || card.parentElement === panel) return;
-    panel.insertBefore(card, panel.querySelector(".walkthrough-caption"));
+    if (!panel) return;
+    if (card.parentElement !== panel) {
+      panel.insertBefore(card, panel.querySelector(".walkthrough-caption"));
+    }
+    // Whose phone you are looking at belongs NEXT TO the step counter, not on a black tag over the
+    // app's own header (reported 2026-08-23: nobody notices it up there, and it sits among the
+    // app's real controls as if it were one). In the panel head it is read in the same glance as
+    // "step 4 of 31", which is when the question actually comes up.
+    const head = panel.querySelector(".walkthrough-head");
+    const progress = head?.querySelector(".walkthrough-progress");
+    if (progress && persona.parentElement !== head) progress.after(persona);
   }
 
   function showStep(step) {
@@ -169,18 +166,12 @@ export function mountStoryNarration({ doc = document, t, onClearDemoData } = {})
       kicker.textContent = step.narrate.kickerKey ? t(step.narrate.kickerKey) : "";
       title.textContent = t(step.narrate.titleKey);
       body.textContent = t(step.narrate.bodyKey);
-      // Continue belongs to a beat whose control IS this button — a card closing a chapter, the
-      // handover, the thank-you. Where the card rides on a real step instead, the trainer's action
-      // is on the app and the guide's Next advances it, so a second button that only erased half of
-      // what they are reading would be one button too many (reported 2026-08-23).
-      const ownsTheBeat = step.target === `#${CONTINUE_ID}`;
-      button.classList.toggle("hidden", !ownsTheBeat);
       cleanup.classList.toggle("hidden", !(step.narrate.onward && onClearDemoData));
       const goTo = step.narrate.continueUrl;
       handover.classList.toggle("hidden", !goTo);
       if (goTo) {
         handover.href = goTo;
-        handover.textContent = t(step.narrate.continueLabelKey || "story_continue");
+        handover.textContent = t(step.narrate.continueLabelKey || "story_open_client_phone");
       }
       card.hidden = false;
       return;

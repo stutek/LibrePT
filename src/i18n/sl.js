@@ -424,8 +424,7 @@ export const sl = {
     "To je en večer ponavljajoče se seje. Kar spremeniš tukaj, velja samo za ta večer.",
   gym_note_in_this_plan: "v tem načrtu",
   feedback_keep_on_record: "Shrani to v kartoteko stranke",
-  story_continue: "Naprej",
-  story_persona_trainer: "Telefon trenerja",
+  story_persona_trainer: "Tvoj telefon",
   story_chapter_gym: "V telovadnici",
   story_persona_client: "Anin telefon",
   story_chapter_arrive: "Prijatelji se oglasijo",
@@ -438,12 +437,11 @@ export const sl = {
     "V meniju, ki se je pravkar spustil, pritisni Seznam strank (klientov) — vrstica z znakom treh ljudi, na vrhu seznama. V njem je že osem ljudi.",
   story_step_arrive_invite:
     "Pritisni Pošlji vpisni vprašalnik — gumb tik pod naslovom Stranke, na vrhu seznama ljudi. Ana je po vadbi vprašala za trening; namesto da bi ji trener podatke zapisoval kar na hodniku, ji pošlje povezavo, ki jo izpolni sama.",
-  story_step_read_on:
-    "Preberi to, nato pritisni Naprej tik pod besedilom in se loti naslednje naloge.",
+  story_step_read_on: "Preberi to, nato pritisni Naprej in se loti naloge, ki jo postavlja.",
   story_step_handover:
-    "Pritisni Odpri Anin telefon — zeleni gumb tik pod tem besedilom. Brskalnik zapusti trenerjevo aplikacijo in odpre stran, ki jo Ana res odpre iz povezave v sporočilu, zgodba pa se nadaljuje tam.",
+    "Pritisni Odpri Anin telefon — zeleni gumb tik pod tem besedilom. Brskalnik zapusti tvojo aplikacijo in odpre stran, ki jo Ana res odpre iz povezave v sporočilu, zgodba pa se nadaljuje tam.",
   story_step_thanks:
-    "Vse naloge so opravljene, od vprašanja po vadbi do naslednjega tedna, ki je že v koledarju. Pritisni Naprej, da to kartico pospraviš in aplikacijo naprej raziskuješ sam, ali Počisti demo podatke, da jo izprazniš in začneš s svojimi strankami.",
+    "Vse naloge so opravljene, od vprašanja po vadbi do naslednjega tedna, ki je že v koledarju. Pritisni Končaj, da vodnika pospraviš in aplikacijo naprej raziskuješ sam, ali Počisti demo podatke, da jo izprazniš in začneš s svojimi strankami.",
   story_step_intake_name:
     "Ana vpiše svoje ime. To je njen telefon in nič od tega se nanj ne shrani.",
   story_step_intake_email: "Kam naj ji pošlje termine.",
