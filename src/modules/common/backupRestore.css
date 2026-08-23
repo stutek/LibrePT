@@ -151,3 +151,33 @@
   min-height: 44px;
   padding: 0 16px;
 }
+
+/* The support data-wipe (TODO §31). Rows a person reads under pressure, on the phone to someone who
+   is helping them: real targets, real tick boxes, nothing decorative. */
+.data-wipe-targets {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 4px 0 12px;
+}
+.data-wipe-target {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  cursor: pointer;
+}
+.data-wipe-target input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+}
+/* Said every time, never conditionally — the moment it is omitted "because this device has no Drive
+   connection", somebody reads the dialog as a promise about the copy they emailed last week. */
+.data-wipe-unreachable {
+  margin: 4px 0 12px;
+  padding-left: 20px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}

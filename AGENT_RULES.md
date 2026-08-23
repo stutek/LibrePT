@@ -119,8 +119,11 @@ rule stops serving them, change the rule.
     chain and failing node ids.
 12. **Capture no artifacts in a gated run** — screenshots cost ~23% of a green e2e stage while
     writing nothing. Escalate per failure with `--screenshot=on` or `--tracing=on`.
-13. **Run the gate as its own command, unpiped, through the front door.** Importing `build`'s `run_*`
-    skips the staging that gives the gate its meaning, and its output is already the report.
+13. **Run the gate as its own command, unpiped, through the front door**: `.venv/bin/python -m build
+    check` and nothing after it. No `| tail`, no `| grep`, no `2>&1 | …`, no wrapper script —
+    its output IS the report, and a pipe throws away the run header and the digests that say what
+    to do next. Importing `build`'s `run_*` skips the staging that gives the gate its meaning.
+    Corrected twice; if you are reaching for a pipe, you are about to break this rule.
 
 ---
 
@@ -313,7 +316,10 @@ files beat few large ones: less context to load, fewer collisions, a tree that d
    [TODO.md](TODO.md).
 4. **Ship a tool complete**: the module with a docstring saying why it exists, a catalog row, a unit
    test, and a Stage 1 task if it should gate commits.
-5. **On small files, just make the edit.** A script earns its keep only on volume, and then may match
+5. **Edit files with the editing tool, never a shell heredoc.** A `python - <<'PY'` that rewrites
+   source is unreviewable in the transcript, no-ops in silence when its anchor has drifted, and
+   cannot be re-run or debugged by the maintainer. Corrected twice.
+   **On small files, just make the edit.** A script earns its keep only on volume, and then may match
    only an ANCHOR — exact known text — never a shape: a bare `" ()"` cleanup broke arrow functions in
    eleven modules. Assert every intended site applied, parse every touched file before linting, and
    if repair starts, regenerate from `HEAD` and re-apply rather than chasing the damage forward.

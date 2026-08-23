@@ -2481,12 +2481,29 @@ available to a guide whose steps are the trainer's own taps.
 
 ---
 
-## 31. A support data-wipe link
+## 31. [x] A support data-wipe link — shipped 2026-08-23
 
 **Wanted 2026-08-19 (Simon):** a link support can send by SMS or email that opens a **consent dialog**
 asking the trainer to confirm a data wipe. *"Link should not be advocated"*, it should offer a wipe
 **per schema version (plus unversioned data)**, and it must carry the note that **exports and backups
 are not removed from storage the app does not own.**
+
+**Shipped as `/wipe`**, every one of those honoured. Asked on 2026-08-23 whether it existed yet: the
+pure planner ([dataWipe.js](src/data/dataWipe.js)) had been built with the spec and nothing called
+it, which is the shape of a feature that looks done in a diff and does nothing in an app.
+
+- **The stores are read from the DATABASE, not from this build's schema list**
+  ([listDatabaseStores](src/data/indexedDb.js)). A long-lived install accumulates stores from builds
+  this one never made, and a wipe that cleared only the familiar ones would leave a trainer's data
+  behind while telling them it was gone.
+- **Stores are EMPTIED, not dropped.** Dropping one needs a version change, and a half-applied
+  upgrade is a worse state than the one they called support about. An empty store reads as no data
+  everywhere in this app.
+- **It reloads afterwards.** Every module in the page is holding state from a database that no longer
+  has it; asking a dozen of them to notice would be a dozen places to be wrong.
+- **Linked from nowhere**, as asked. No menu item, no button — a permanent "erase everything" control
+  on a phone used one-handed is a mis-tap waiting to happen, and anyone who has not been sent here by
+  someone helping them has no reason to be here.
 
 ### 31.1 The one invariant
 

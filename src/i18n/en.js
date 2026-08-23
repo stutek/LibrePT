@@ -399,6 +399,15 @@ export const en = {
   intake_invite_ready: "Link ready — copy it below",
   intake_invite_sent: "Link sent",
   intake_invite_copied: "Link copied",
+  data_wipe_title: "Erase this device's LibrePT data",
+  data_wipe_lede:
+    "Someone helping you sent you this. Nothing has been erased yet — it happens when you confirm below, and only on this device.",
+  data_wipe_found: "Found on this device:",
+  data_wipe_nothing: "There is nothing stored on this device to erase.",
+  data_wipe_schema_store: "Records stored as {store}",
+  data_wipe_unversioned: "Settings, the open session, and this device's own bookkeeping",
+  data_wipe_unreachable: "What this cannot reach:",
+  data_wipe_confirm: "Erase it",
   menu_import_program: "Import a programme",
   program_import_title: "Import a programme",
   program_import_lede:

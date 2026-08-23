@@ -207,6 +207,19 @@ export function buildRouteTable() {
     registry.register(new GlobalDialogRoute({ name, segment, dialogId, open, home: sessionsDay }));
   }
 
+  // The support data-wipe (TODO §31). Routed like any dialog, and deliberately linked from NOWHERE:
+  // support sends this address by SMS or email, and opening it can only ever OPEN the dialog. The
+  // link carries no authority — the trainer's confirmation is the whole of it.
+  registry.register(
+    new GlobalDialogRoute({
+      name: "wipe",
+      segment: "/wipe",
+      dialogId: "dialog-data-wipe",
+      home: sessionsDay,
+      open: (ctx) => ctx.deps.openDataWipe?.(),
+    }),
+  );
+
   registry.register(
     new GlobalDialogRoute({
       name: "terms",

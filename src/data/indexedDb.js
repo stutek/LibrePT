@@ -212,3 +212,36 @@ export function countAll(store) {
 export function deleteDatabase(name = DATABASE_NAME, factory = globalThis.indexedDB) {
   return requestToPromise(factory.deleteDatabase(name));
 }
+
+/** Every object store this database actually holds, INCLUDING ones this build has never heard of.
+ *
+ * Read from the database rather than derived from the current schema list, because that difference
+ * is the whole point at the one place it is used (TODO §31): a long-lived install accumulates stores
+ * from builds that came before, and a support wipe that only cleared the ones this build knows about
+ * would leave a trainer's data behind while telling them it was gone.
+ */
+export async function listDatabaseStores(name = DATABASE_NAME) {
+  const db = await requestToPromise(globalThis.indexedDB.open(name));
+  const stores = [...db.objectStoreNames];
+  db.close();
+  return stores;
+}
+
+/** Empties the named stores, leaving the database itself in place.
+ *
+ * Emptied rather than deleted: dropping a store needs a version change, and a half-applied upgrade
+ * is a worse state than the one the trainer called support about. An empty store reads as no data
+ * everywhere in this app, which is what they asked for.
+ */
+export async function clearDatabaseStores(names, name = DATABASE_NAME) {
+  const wanted = (names || []).filter(Boolean);
+  if (wanted.length === 0) return;
+  const db = await requestToPromise(globalThis.indexedDB.open(name));
+  const present = wanted.filter((store) => db.objectStoreNames.contains(store));
+  if (present.length > 0) {
+    await withTransaction(db, present, "readwrite", ({ store }) => {
+      for (const name of present) store(name).clear();
+    });
+  }
+  db.close();
+}

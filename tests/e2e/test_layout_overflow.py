@@ -62,6 +62,9 @@ STATIC_ROUTE_WALK = [
     ("build", "/build"),
     ("backup", "/backup"),
     ("terms", "/terms"),
+    # Support sends this one by SMS, so it is read on whatever phone the trainer is holding while
+    # already having a bad day — and its rows are store names, the longest labels in the app.
+    ("wipe", "/wipe"),
 ]
 DASHBOARD_ROUTE = "sessions.day"
 RECORD_DETAIL_ROUTES = ["client.detail", "routine.edit", "adjustment.apply"]

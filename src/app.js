@@ -49,6 +49,7 @@ import {
 } from "./controllers/routineFormsController.js";
 import { ISSUE_TRACKER_URL } from "./data/crashReport.js";
 import { driveSyncStatus, onSyncCountsChanged, primeAheadCache } from "./data/driveSyncService.js";
+import { clearDatabaseStores, listDatabaseStores } from "./data/indexedDb.js";
 import { recordRsvp } from "./data/inviteRecord.js";
 import { newRecordId } from "./data/recordId.js";
 import { SESSION_INVITE, SESSION_RSVP, decodeSessionEvent } from "./data/sessionEventPayload.js";
@@ -87,6 +88,7 @@ import {
   clientConsentFormUrl,
   clientPrivacyNoticeUrl,
 } from "./modules/common/consentForm.js";
+import { initDataWipeDialog, openDataWipeDialog } from "./modules/common/dataWipeDialog.js";
 import { driveSyncFailureNotice, prepareDriveSyncCard } from "./modules/common/driveSyncUi.js";
 import { openEncryptedFileReader } from "./modules/common/encryptedFileReader.js";
 import { EVENT_PARAM, browserPlatform } from "./modules/common/eventTransports.js";
@@ -340,6 +342,9 @@ async function init() {
     setHeaderState,
     prepareBackupDialog,
     prepareDriveSyncCard,
+    // The support data-wipe (TODO §31): reachable only by the address support sends, and even then
+    // only as far as its confirmation.
+    openDataWipe: openDataWipeDialog,
     renderBuildInfo,
     openRoutineCreateDialog,
     openExerciseCreateDialog,
@@ -403,6 +408,17 @@ async function init() {
   // rest of the boot must finish either way — the demo is what waits for it.
   const splashDown = setupActiveSession({
     linkBringsContent: linkFurnishesTheApp({ shareInit, shareDemo, inboundEvent }),
+  });
+
+  initDataWipeDialog({
+    t,
+    storeNames: listDatabaseStores,
+    localStorageKeys: () => Object.keys(localStorage),
+    clearStores: clearDatabaseStores,
+    removeKeys: (keys) => {
+      for (const key of keys) localStorage.removeItem(key);
+    },
+    reload: () => window.location.reload(),
   });
 
   appBoot.bootFeedbackModal({

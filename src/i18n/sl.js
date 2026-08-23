@@ -382,6 +382,15 @@ export const sl = {
   intake_invite_ready: "Povezava pripravljena — kopiraj jo spodaj",
   intake_invite_sent: "Povezava poslana",
   intake_invite_copied: "Povezava kopirana",
+  data_wipe_title: "Izbriši podatke LibrePT na tej napravi",
+  data_wipe_lede:
+    "To ti je poslal nekdo, ki ti pomaga. Zaenkrat ni izbrisano nič — zgodi se, ko spodaj potrdiš, in samo na tej napravi.",
+  data_wipe_found: "Najdeno na tej napravi:",
+  data_wipe_nothing: "Na tej napravi ni shranjenega ničesar, kar bi se dalo izbrisati.",
+  data_wipe_schema_store: "Zapisi, shranjeni kot {store}",
+  data_wipe_unversioned: "Nastavitve, odprta seja in evidenca te naprave",
+  data_wipe_unreachable: "Česa to ne doseže:",
+  data_wipe_confirm: "Izbriši",
   menu_import_program: "Uvozi program",
   program_import_title: "Uvozi program",
   program_import_lede:
