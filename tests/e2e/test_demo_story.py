@@ -215,12 +215,25 @@ def test_the_card_holds_still_on_a_beat_that_points_at_itself(page, local_server
     the target too and the answer flipped on every tick. Measured, not eyeballed: the card is where
     it was a second and a half later."""
     _open_story(page, local_server)
-    for _ in range(3):
-        if page.locator(SHOW_ME).is_visible():
-            page.locator(SHOW_ME).click()
+    # Walk until a beat whose only control is the card itself — the guide hides Show me on exactly
+    # those. Found rather than counted, so adding a beat to the story does not silently move this
+    # test onto a different one.
+    for _ in range(8):
+        if not page.locator(SHOW_ME).is_visible():
+            break
+        page.locator(SHOW_ME).click()
         expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
         page.locator(NEXT).click()
+    else:
+        raise AssertionError("no card-only beat in the story's opening chapter")
     expect(page.locator("#story-card")).to_be_visible()
+    # Let the beat finish arriving before measuring: the panel settles into place once, which is not
+    # what this test is about. What it is about is whether it ever stops.
+    # The guide's ring pulses forever on purpose, so an endless animation is not "still settling".
+    page.wait_for_function(
+        """() => document.getAnimations().every((a) =>
+             a.playState !== 'running' || a.effect?.getTiming?.().iterations === Infinity)"""
+    )
 
     seen = []
     for _ in range(10):

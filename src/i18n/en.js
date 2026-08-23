@@ -397,6 +397,21 @@ export const en = {
   intake_invite_message:
     "Fill in your details for our training — it takes a minute, and nothing is stored on your phone:",
   intake_invite_ready: "Link ready — copy it below",
+  intake_invite_title: "Send an intake link",
+  intake_invite_lede:
+    "They fill in their own details and their consent on their own phone, and send it back to you. Nothing is created here until you have read what they send.",
+  intake_invite_contact_label: "Their phone number or email address",
+  intake_invite_send_sms: "Write the text message",
+  intake_invite_send_email: "Write the email",
+  intake_invite_send_disabled: "Nowhere to send it yet",
+  intake_invite_opens_sms:
+    "This opens your own messages app with the invitation already written. You press send there.",
+  intake_invite_opens_email:
+    "This opens your own mail app with the invitation already written. You press send there.",
+  intake_invite_needs_contact:
+    "Type a phone number or an email address, or use the other ways below.",
+  intake_invite_other_ways: "Other ways to send it",
+  intake_invite_subject: "Your details for our training",
   intake_invite_sent: "Link sent",
   intake_invite_copied: "Link copied",
   data_wipe_title: "Erase this device's LibrePT data",
@@ -454,6 +469,8 @@ export const en = {
     "In the menu that just dropped down, tap Clients Directory — the row with three little people next to it, at the top of the list. Eight people are already in that directory.",
   story_step_arrive_invite:
     "Tap Send an intake link — the button just under the Clients heading, at the top of the list of people. Ana asked about training after a class, and instead of taking her details standing in a corridor, the trainer sends her a link she fills in herself.",
+  story_step_arrive_contact:
+    "Type the number Ana just read out, into the one box that takes either a number or an email address. The app works out which it is: a number gets a text message, an address gets an email. Nothing is saved about her yet — she is not in your register until she has sent her own details back.",
   story_step_read_on: "Read that, then tap Next to take on the task it sets.",
   story_step_handover:
     "Tap Open Ana's phone — the green button just below this text. The browser leaves your own app and goes to the page Ana really opens from the link in her message, and the story carries on there.",

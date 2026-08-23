@@ -17,11 +17,11 @@ import {
   renderClientsList,
   showClientDetails,
 } from "../modules/clients/clientsView.js";
+import { browserInvitePlatform, sendIntakeInvite } from "../modules/clients/intakeInvite.js";
 import {
-  browserInvitePlatform,
-  intakeInviteUrl,
-  sendIntakeInvite,
-} from "../modules/clients/intakeInvite.js";
+  initIntakeInviteDialog,
+  openIntakeInviteDialog,
+} from "../modules/clients/intakeInviteDialog.js";
 import { $id, closeModal, openModal, renderMarkupOnce } from "../modules/common/dom.js";
 import { getInitials } from "../modules/common/utils.js";
 
@@ -114,41 +114,18 @@ export function setupClientForms({
   const cancelBtn = dialog.querySelector(".modal-cancel");
   const closeBtn = dialog.querySelector(".modal-close-btn");
 
-  // The link that lets someone fill their own details in (TODO §26.3). What happened is said back
-  // on the button itself: on a phone the share sheet takes over the screen and on a desktop the
-  // clipboard changes with no visible sign at all, so silence would leave the trainer guessing
-  // whether anything was sent.
-  $id("btn-invite-client")?.addEventListener("click", async () => {
-    const button = $id("btn-invite-client");
-    const outcome = await sendIntakeInvite({
-      platform: browserInvitePlatform(),
+  // The link that lets someone fill their own details in (TODO §26.3). The button OPENS the
+  // sending dialog rather than sending: since 2026-08-23 the trainer can address the invitation to
+  // the number or the email they were just given, which is the ordinary case — they are standing in
+  // front of the person. The share sheet is still in there, one tap further in, for every channel a
+  // phone has and for when there is no contact detail at all.
+  $id("btn-invite-client")?.addEventListener("click", () => {
+    initIntakeInviteDialog({
       t,
-      lang: state.lang,
+      getLang: () => state.lang,
+      onShare: () => sendIntakeInvite({ platform: browserInvitePlatform(), t, lang: state.lang }),
     });
-    // Every outcome except a cancelled share says something back: on a phone the share sheet covers
-    // the screen and on a desktop the clipboard changes invisibly, so a button that looks untouched
-    // is a trainer wondering whether they tapped it.
-    const said = {
-      shared: "intake_invite_sent",
-      copied: "intake_invite_copied",
-      unavailable: "intake_invite_ready",
-    }[outcome];
-    const label = button.querySelector("span");
-    if (label && said) label.textContent = t(said);
-    // The outcome, named on the button in a language nothing has to translate. The words are what
-    // the trainer reads; this is what the guided story grades the step by, so the demo does not
-    // depend on which of three English sentences the browser's share route produced.
-    if (said) button.dataset.inviteSaid = outcome;
-    // The link goes on screen only when neither route worked. A share sheet or a "Link copied" on
-    // the button already tells the trainer what happened (ruled 2026-08-23); adding a text field
-    // beside it made the demo look like the send had failed and offered a second thing to do for an
-    // action that was already done.
-    const field = $id("intake-invite-link");
-    if (field && outcome === "unavailable") {
-      field.value = intakeInviteUrl({ lang: state.lang });
-      field.classList.remove("hidden");
-      field.select();
-    }
+    openIntakeInviteDialog();
   });
 
   $id("btn-add-client").addEventListener("click", () => {

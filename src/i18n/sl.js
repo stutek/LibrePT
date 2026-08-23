@@ -380,6 +380,20 @@ export const sl = {
   intake_invite_message:
     "Izpolni svoje podatke za najin trening — vzame minuto in na tvojem telefonu ne ostane nič:",
   intake_invite_ready: "Povezava pripravljena — kopiraj jo spodaj",
+  intake_invite_title: "Pošlji vpisni vprašalnik",
+  intake_invite_lede:
+    "Svoje podatke in privolitev izpolni sam na svojem telefonu in ti jih pošlje nazaj. Tu se ne ustvari nič, dokler ne prebereš, kaj je poslal.",
+  intake_invite_contact_label: "Njegova telefonska številka ali e-naslov",
+  intake_invite_send_sms: "Napiši sporočilo SMS",
+  intake_invite_send_email: "Napiši e-pošto",
+  intake_invite_send_disabled: "Ni še kam poslati",
+  intake_invite_opens_sms:
+    "To odpre tvojo aplikacijo za sporočila z že napisanim vabilom. Pošlješ ga tam.",
+  intake_invite_opens_email:
+    "To odpre tvojo poštno aplikacijo z že napisanim vabilom. Pošlješ ga tam.",
+  intake_invite_needs_contact: "Vpiši telefonsko številko ali e-naslov ali uporabi poti spodaj.",
+  intake_invite_other_ways: "Druge poti pošiljanja",
+  intake_invite_subject: "Tvoji podatki za najin trening",
   intake_invite_sent: "Povezava poslana",
   intake_invite_copied: "Povezava kopirana",
   data_wipe_title: "Izbriši podatke LibrePT na tej napravi",
@@ -437,6 +451,8 @@ export const sl = {
     "V meniju, ki se je pravkar spustil, pritisni Seznam strank (klientov) — vrstica z znakom treh ljudi, na vrhu seznama. V njem je že osem ljudi.",
   story_step_arrive_invite:
     "Pritisni Pošlji vpisni vprašalnik — gumb tik pod naslovom Stranke, na vrhu seznama ljudi. Ana je po vadbi vprašala za trening; namesto da bi ji trener podatke zapisoval kar na hodniku, ji pošlje povezavo, ki jo izpolni sama.",
+  story_step_arrive_contact:
+    "Vpiši številko, ki jo je Ana pravkar povedala, v edino polje, ki sprejme številko ali e-naslov. Aplikacija sama ugotovi, kaj je: številka dobi SMS, naslov e-pošto. O njej se še nič ne shrani — v tvojem seznamu je šele, ko ti sama pošlje svoje podatke.",
   story_step_read_on: "Preberi to, nato pritisni Naprej in se loti naloge, ki jo postavlja.",
   story_step_handover:
     "Pritisni Odpri Anin telefon — zeleni gumb tik pod tem besedilom. Brskalnik zapusti tvojo aplikacijo in odpre stran, ki jo Ana res odpre iz povezave v sporočilu, zgodba pa se nadaljuje tam.",

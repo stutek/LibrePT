@@ -19,6 +19,7 @@
 // Injected dependencies: `platform` = { canShare, share, copy } and `t`.
 
 import { PUBLIC_SITE_URL } from "../../data/publicUrls.js";
+import { contactChannelFor, dialledForm } from "../../domain/contactChannel.js";
 
 /** The browser's own sharing and clipboard, wrapped so nothing above touches `navigator`. */
 export function browserInvitePlatform() {
@@ -66,4 +67,32 @@ export async function sendIntakeInvite({ platform, t, lang } = {}) {
     // outcome that has to be impossible, so the caller shows them the link to copy by hand.
     return "unavailable";
   }
+}
+
+/** The link ready to send to one person, by the channel their contact implies (TODO §26.3 step 2).
+ *
+ * Returns `null` when there is nothing to send to yet, so a caller has one thing to check before
+ * offering the control — an anchor with no href is the shape the consent section already uses for
+ * "there is a way to send this, you just have no number for them yet".
+ *
+ * **Why a link the trainer taps rather than a send the app performs.** Neither `sms:` nor `mailto:`
+ * sends anything: they open the phone's own composer with the message already in it, and the
+ * trainer presses send there. That is the honest arrangement — the message leaves from their own
+ * number or address, lands in their own sent items, and this app never touches a carrier or a
+ * mail server.
+ */
+export function intakeInviteHref({ contact, lang, t } = {}) {
+  const channel = contactChannelFor(contact);
+  if (!channel) return null;
+  const text = intakeInviteMessage({ url: intakeInviteUrl({ lang }), t });
+  if (channel === "sms") {
+    // `?&body=` rather than `?body=`: iOS only honours the body after a leading `&`, Android takes
+    // either. The same one form the consent letter settled on (modules/common/consentForm.js).
+    return { channel, href: `sms:${dialledForm(contact)}?&body=${encodeURIComponent(text)}` };
+  }
+  const subject = encodeURIComponent(t("intake_invite_subject"));
+  return {
+    channel,
+    href: `mailto:${encodeURIComponent(contact.trim())}?subject=${subject}&body=${encodeURIComponent(text)}`,
+  };
 }

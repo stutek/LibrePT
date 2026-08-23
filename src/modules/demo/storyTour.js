@@ -273,12 +273,18 @@ const ARRIVE_CHAPTER = {
       persona: TRAINER,
       target: "#btn-invite-client",
       caption: "story_step_arrive_invite",
-      // The trainer is TOLD what happened, whichever route the browser allowed — shared, copied, or
-      // left ready to copy by hand. That is the claim worth making: a share sheet covers the screen
-      // and a clipboard changes invisibly, so a button that looks untouched is a trainer wondering
-      // whether they tapped it. Graded on the button's own outcome mark rather than on the link
-      // field, which since 2026-08-23 appears only when neither route worked.
-      expect: { selector: "#btn-invite-client[data-invite-said]", visible: true },
+      expect: { selector: "#dialog-intake-invite", visible: true },
+    },
+    {
+      // Typed, not tapped, and typed into the ONE field that takes either kind of contact: this is
+      // the beat that answers "how does it actually reach her?", which a demo that only opened a
+      // share sheet never showed (asked 2026-08-23).
+      id: "arrive-contact",
+      persona: TRAINER,
+      target: "#intake-invite-contact",
+      enter: "+386 41 234 567",
+      caption: "story_step_arrive_contact",
+      expect: { selector: "#intake-invite-send", containsText: "text message" },
     },
     // The handover keeps its own beat because GOING THERE is the action — and Show me is hidden on
     // it for the same reason it is hidden on any card: the two buttons are right there, and having
