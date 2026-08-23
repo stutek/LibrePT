@@ -236,6 +236,10 @@ files beat few large ones: less context to load, fewer collisions, a tree that d
     beat declared itself done before it started and the guide skipped two of them in a blink.
     Anything measuring a node's visibility inherits every ancestor's — a closed `<dialog>` draws
     nothing, so everything parented inside it reads as invisible.
+14. **A rule that moves A to clear B must not be able to move B.** Re-evaluated on a timer, such a
+    rule oscillates forever: the guide moved its panel off the control a step points at, that step's
+    control was a button ON the panel, and the card bounced between the top and bottom of the screen
+    four times a second. Ask what the rule's own effect does to its inputs, then exclude the case.
 
 ---
 

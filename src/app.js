@@ -34,6 +34,7 @@ import {
   navigateToPath,
   pushRoute,
   renderErrorViewShell,
+  replaceQueryParam,
   replaceRoute,
   resolveRoute,
   setHeaderState,
@@ -583,7 +584,7 @@ async function init() {
 
   // Started, never awaited: it waits for the splash and the first-run agreement, which may take as
   // long as the trainer takes to read them.
-  startDemoWhenWatchable({ splashDown, shareDemo, shareChapter });
+  startDemoWhenWatchable({ splashDown, shareDemo, shareChapter, shareStep: getShareParams().step });
 }
 
 /** Everything a `?demo=` link asks for, started only once someone can actually watch it.
@@ -598,7 +599,7 @@ async function init() {
  * exact scripts and asserts on them — the demo and the test are one artifact, which is the point of
  * scripting it instead of recording it.
  */
-async function startDemoWhenWatchable({ splashDown, shareDemo, shareChapter }) {
+async function startDemoWhenWatchable({ splashDown, shareDemo, shareChapter, shareStep }) {
   await appBoot.whenDemoCanBeWatched(splashDown);
 
   await appBoot.bootDemoTour({
@@ -612,6 +613,8 @@ async function startDemoWhenWatchable({ splashDown, shareDemo, shareChapter }) {
   await appBoot.bootDemoStory({
     shareDemo,
     shareChapter,
+    shareStep,
+    rememberStep: (stepId) => replaceQueryParam("step", stepId),
     hasData: stateHasData(getState()),
     t,
     goHome: (path) => navigateToPath(path || "/"),

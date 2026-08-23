@@ -452,7 +452,7 @@ export const en = {
   story_step_arrive_menu:
     "Tap the ☰ button — three stacked lines, in the top right corner of the screen, in the dark bar with the app's name. It opens the menu, and the client register, the movements and the history all live in there.",
   story_step_arrive_clients:
-    "In the menu that just dropped down, tap Clients Directory — the row with two little people next to it, at the top of the list. Eight people are already in that register, and nobody typed a word of it twice.",
+    "In the menu that just dropped down, tap Clients Directory — the row with three little people next to it, at the top of the list. Eight people are already in that directory.",
   story_step_arrive_invite:
     "Tap Send an intake link — the button just under the Clients heading, at the top of the list of people. Ana asked about training after a class, and instead of taking her details standing in a corridor, the trainer sends her a link she fills in herself.",
   story_step_read_on: "Read that, then tap Continue just below it to take on the next task.",

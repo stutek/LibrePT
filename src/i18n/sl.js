@@ -376,7 +376,7 @@ export const sl = {
   label_repeats: "Ponovi vsak teden",
   label_repeat_days: "Na te dneve",
   label_repeat_until: "Do (neobvezno)",
-  btn_invite_client: "Pošlji povezavo za prijavo",
+  btn_invite_client: "Pošlji vpisni vprašalnik",
   intake_invite_message:
     "Izpolni svoje podatke za najin trening — vzame minuto in na tvojem telefonu ne ostane nič:",
   intake_invite_ready: "Povezava pripravljena — kopiraj jo spodaj",
@@ -435,9 +435,9 @@ export const sl = {
   story_step_arrive_menu:
     "Pritisni gumb ☰ — tri vodoravne črtice, zgoraj desno v temni vrstici z imenom aplikacije. Odpre meni, v katerem so seznam strank, vaje in zgodovina.",
   story_step_arrive_clients:
-    "V meniju, ki se je pravkar spustil, pritisni Seznam strank (klientov) — vrstica z znakom dveh ljudi, na vrhu seznama. V njem je že osem ljudi in nihče ni ničesar tipkal dvakrat.",
+    "V meniju, ki se je pravkar spustil, pritisni Seznam strank (klientov) — vrstica z znakom treh ljudi, na vrhu seznama. V njem je že osem ljudi.",
   story_step_arrive_invite:
-    "Pritisni Pošlji povezavo za prijavo — gumb tik pod naslovom Stranke, na vrhu seznama ljudi. Ana je po vadbi vprašala za trening; namesto da bi ji trener podatke zapisoval kar na hodniku, ji pošlje povezavo, ki jo izpolni sama.",
+    "Pritisni Pošlji vpisni vprašalnik — gumb tik pod naslovom Stranke, na vrhu seznama ljudi. Ana je po vadbi vprašala za trening; namesto da bi ji trener podatke zapisoval kar na hodniku, ji pošlje povezavo, ki jo izpolni sama.",
   story_step_read_on:
     "Preberi to, nato pritisni Naprej tik pod besedilom in se loti naslednje naloge.",
   story_step_handover:

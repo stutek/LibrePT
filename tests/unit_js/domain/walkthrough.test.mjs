@@ -14,6 +14,7 @@ import {
   completeWalkthroughStep,
   currentWalkthroughStep,
   isWalkthroughStepDone,
+  resumeWalkthroughAt,
   retreatWalkthrough,
   startWalkthrough,
   walkthroughControls,
@@ -114,4 +115,22 @@ test("a walkthrough left on its first step can still be walked out of backwards 
   const state = startWalkthrough();
 
   assert.deepEqual(retreatWalkthrough(state), state);
+});
+
+test("a story picked up from a link starts on the step the link names, ready to go on", () => {
+  // A demo is watched in interruptions — a reload, a phone that locked, a link sent to a colleague
+  // half way through — and starting again from the top is the one thing a viewer will not do twice.
+  const state = resumeWalkthroughAt(TOUR, "second");
+
+  assert.equal(currentWalkthroughStep(TOUR, state).id, "second");
+  // Everything behind it counts as done, or the guide could not move forward from where it landed.
+  assert.equal(isWalkthroughStepDone(state, "first"), true);
+  assert.equal(walkthroughControls(TOUR, state).canGoBack, true);
+});
+
+test("a link naming a step that is not in the script starts the story from the beginning", () => {
+  // These links are typed by hand and pasted into chat apps, and scripts get rewritten. A viewer
+  // with a stale link is a viewer with a wrong URL, not someone to show an error to.
+  assert.deepEqual(resumeWalkthroughAt(TOUR, "a-step-that-was-renamed"), startWalkthrough());
+  assert.deepEqual(resumeWalkthroughAt(TOUR, null), startWalkthrough());
 });

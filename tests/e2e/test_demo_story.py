@@ -24,6 +24,7 @@ CAPTION = "#walkthrough-overlay .walkthrough-caption"
 PROBLEM = "#walkthrough-overlay .walkthrough-problem"
 SHOW_ME = "#walkthrough-show"
 NEXT = "#walkthrough-next"
+BACK = "#walkthrough-back"
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 STORY_SOURCE = REPO_ROOT / "src" / "modules" / "demo" / "storyTour.js"
@@ -98,17 +99,19 @@ def _walk_the_whole_story(page):
     while True:
         caption = page.locator(CAPTION).inner_text()
         seen.append(caption)
-        shown = page.locator(SHOW_ME).is_visible()
-        if shown:
+        # Do the beat — delegated where there is something to demonstrate, read where there is not —
+        # and then tap Next. Since 2026-08-23 that second tap is the ONLY thing that moves the
+        # guide, on every beat including the last, which is why there is no longer a branch here.
+        if page.locator(SHOW_ME).is_visible():
             page.locator(SHOW_ME).click()
         else:
             page.locator(CARD_CONTINUE).click()
+        try:
             expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
-            page.locator(NEXT).click()
+        except AssertionError:
+            raise AssertionError(_stuck(page, step_now, caption)) from None
+        page.locator(NEXT).click()
         if step_now == step_count:
-            if shown:
-                expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
-                page.locator(NEXT).click()
             return seen
         try:
             expect(page.locator(PROGRESS)).to_have_text(
@@ -182,6 +185,59 @@ def test_the_story_and_the_guide_are_one_numbered_card(page, local_server):
     step_now, step_count = _step_numbers(page)
     assert step_now == 1, f"the first card a viewer reads is step {step_now}, not 1"
     assert step_count > 1
+
+
+def test_a_reload_comes_back_on_the_beat_it_left(page, local_server):
+    """Reported 2026-08-23: a reload part-way through the story came back at somebody else's first
+    card. A demo is watched in interruptions — a phone that locks, a tab restored, a link forwarded
+    to a colleague half way through — and starting again from the top is what a viewer will not sit
+    through twice. The step names itself in the address, so the address is enough to come back to."""
+    _open_story(page, local_server)
+    for _ in range(2):
+        page.locator(
+            SHOW_ME if page.locator(SHOW_ME).is_visible() else CARD_CONTINUE
+        ).click()
+        expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
+        page.locator(NEXT).click()
+    expect(page.locator(PROGRESS)).to_have_text(re.compile(r"step\s+3\s+of", re.I))
+    caption_before = page.locator(CAPTION).inner_text()
+
+    page.reload()
+    page.locator(PANEL).wait_for(state="visible", timeout=30_000)
+
+    expect(page.locator(PROGRESS)).to_have_text(re.compile(r"step\s+3\s+of", re.I))
+    assert page.locator(CAPTION).inner_text() == caption_before
+    # And it can be carried on from, rather than being a picture of where you were.
+    expect(page.locator(BACK)).to_be_visible()
+
+
+def test_the_card_holds_still_on_a_beat_whose_control_is_its_own_button(
+    page, local_server
+):
+    """Reported 2026-08-23: "4 of 31 jumps up and down". The guide moves its panel off whatever a
+    step points at — and that beat points at the Continue button on the panel, so moving it moved
+    the target too and the answer flipped on every tick. Measured, not eyeballed: the card is where
+    it was a second and a half later."""
+    _open_story(page, local_server)
+    for _ in range(3):
+        page.locator(
+            SHOW_ME if page.locator(SHOW_ME).is_visible() else CARD_CONTINUE
+        ).click()
+        expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
+        page.locator(NEXT).click()
+    expect(page.locator(CARD_CONTINUE)).to_be_visible()
+
+    seen = []
+    for _ in range(10):
+        seen.append(
+            page.evaluate(
+                "() => Math.round("
+                "  document.querySelector('.walkthrough-panel').getBoundingClientRect().top)"
+            )
+        )
+        page.wait_for_timeout(150)
+
+    assert len(set(seen)) == 1, f"the card moved while nobody touched it: {seen}"
 
 
 def test_one_chapter_can_be_walked_on_its_own(page, local_server):

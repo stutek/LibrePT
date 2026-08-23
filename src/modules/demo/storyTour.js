@@ -265,10 +265,12 @@ const ARRIVE_CHAPTER = {
       persona: TRAINER,
       target: "#btn-invite-client",
       caption: "story_step_arrive_invite",
-      // The link ends up ON SCREEN, whichever route the browser allowed — shared, copied, or left
-      // to be copied by hand. That is the claim worth making, and it is the one a trainer sending
-      // the same link to the second and third friend depends on.
-      expect: { selector: "#intake-invite-link", visible: true },
+      // The trainer is TOLD what happened, whichever route the browser allowed — shared, copied, or
+      // left ready to copy by hand. That is the claim worth making: a share sheet covers the screen
+      // and a clipboard changes invisibly, so a button that looks untouched is a trainer wondering
+      // whether they tapped it. Graded on the button's own outcome mark rather than on the link
+      // field, which since 2026-08-23 appears only when neither route worked.
+      expect: { selector: "#btn-invite-client[data-invite-said]", visible: true },
     },
     // The handover keeps its own beat because GOING THERE is the action — and Show me is hidden on
     // it for the same reason it is hidden on any card: the two buttons are right there, and having

@@ -135,12 +135,16 @@ export function setupClientForms({
     }[outcome];
     const label = button.querySelector("span");
     if (label && said) label.textContent = t(said);
-    // The link itself goes on screen whichever route the browser allowed, not only when the
-    // clipboard was refused: a trainer who just sent it often wants to send it to the second and
-    // third friend too, and a link they can see is one they can send again without tapping back
-    // through a share sheet.
+    // The outcome, named on the button in a language nothing has to translate. The words are what
+    // the trainer reads; this is what the guided story grades the step by, so the demo does not
+    // depend on which of three English sentences the browser's share route produced.
+    if (said) button.dataset.inviteSaid = outcome;
+    // The link goes on screen only when neither route worked. A share sheet or a "Link copied" on
+    // the button already tells the trainer what happened (ruled 2026-08-23); adding a text field
+    // beside it made the demo look like the send had failed and offered a second thing to do for an
+    // action that was already done.
     const field = $id("intake-invite-link");
-    if (field && outcome !== "cancelled") {
+    if (field && outcome === "unavailable") {
       field.value = intakeInviteUrl({ lang: state.lang });
       field.classList.remove("hidden");
       field.select();

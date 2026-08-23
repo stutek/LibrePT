@@ -28,6 +28,24 @@ export function startWalkthrough() {
   return { stepIndex: 0, completedIds: [], finished: false };
 }
 
+/** A walkthrough resumed at a named step — what a deep link into the demo lands on (reported
+ *  2026-08-23: a reload mid-story restarted it elsewhere, losing the step the viewer was on).
+ *
+ *  Every earlier step counts as done, because the viewer got there by doing them and because
+ *  `advanceWalkthrough` refuses to move off a step that is not: a resumed guide that could not go
+ *  forward would be worse than one that forgot. An unknown id starts from the beginning rather than
+ *  failing — a stale or hand-edited link is a viewer with a wrong URL, not an error to show them. */
+export function resumeWalkthroughAt(tour, stepId) {
+  const steps = tour?.steps || [];
+  const index = steps.findIndex((step) => step.id === stepId);
+  if (index <= 0) return startWalkthrough();
+  return {
+    stepIndex: index,
+    completedIds: steps.slice(0, index).map((step) => step.id),
+    finished: false,
+  };
+}
+
 /** The step the trainer is being asked to perform, or null once the walkthrough has finished. */
 export function currentWalkthroughStep(tour, state) {
   if (state.finished) return null;

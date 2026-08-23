@@ -35,6 +35,9 @@ export const SHARE_THEME_PARAM = "theme";
 export const SHARE_INIT_PARAM = "init";
 export const SHARE_DEMO_PARAM = "demo";
 export const SHARE_CHAPTER_PARAM = "chapter";
+/** The step a demo link lands on. A story is watched in interruptions — a reload, a phone that
+ * locked, a link sent to a colleague mid-way — and without this the viewer starts again. */
+export const SHARE_STEP_PARAM = "step";
 
 // The single recognized value for ?init=. Any other value is treated as absent.
 export const INIT_DEMO_DATA = "demo_data_load";
@@ -56,5 +59,6 @@ export function getShareParams() {
     init: p.get(SHARE_INIT_PARAM),
     demo: p.get(SHARE_DEMO_PARAM),
     chapter: p.get(SHARE_CHAPTER_PARAM),
+    step: p.get(SHARE_STEP_PARAM),
   };
 }

@@ -112,6 +112,20 @@ export function replaceRoute(route) {
   return writeHistory(route, { replace: true });
 }
 
+/** Sets one query parameter on the address bar without leaving the route — what a demo step uses to
+ * name itself, so a reload resumes on the step being watched. Here rather than at the caller because
+ * the router owns every history write (tests/unit/test_url_writers.py): the rule exists because five
+ * scattered writers each dropped the query string, and a sixth would re-open that hole. */
+export function replaceQueryParam(name, value) {
+  const url = new URL(window.location.href);
+  if (value === null || value === undefined || value === "") url.searchParams.delete(name);
+  else url.searchParams.set(name, value);
+  const next = url.pathname + url.search;
+  if (next === window.location.pathname + window.location.search) return false;
+  window.history.replaceState(window.history.state, "", next);
+  return true;
+}
+
 // The route on screen right now, by name — for callers that must behave differently depending on
 // where the user is without re-parsing the path themselves.
 export function activeRouteName() {

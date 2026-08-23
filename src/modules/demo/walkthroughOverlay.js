@@ -36,6 +36,7 @@ import {
   completeWalkthroughStep,
   currentWalkthroughStep,
   isWalkthroughStepDone,
+  resumeWalkthroughAt,
   retreatWalkthrough,
   startWalkthrough,
   walkthroughControls,
@@ -151,10 +152,13 @@ export function startGuidedWalkthrough({
   pollMs = DEFAULT_POLL_MS,
   navigate = null,
   onStep = null,
+  startAtStepId = null,
 } = {}) {
   const el = buildOverlay(doc, t);
   const hand = mountDemoHand(doc);
-  let state = startWalkthrough();
+  // A deep link names the step, so a reload lands where the viewer was rather than at the top of a
+  // tour they have already watched (reported 2026-08-23).
+  let state = startAtStepId ? resumeWalkthroughAt(tour, startAtStepId) : startWalkthrough();
   let showing = false;
   let ticker = 0;
   // Declared here because stop() closes over it and runs before the observer is created on a torn
@@ -223,6 +227,12 @@ export function startGuidedWalkthrough({
    */
   function keepPanelClearOf(target) {
     if (!target) return;
+    // A control that lives ON the panel — the story card's Continue, the handover link — cannot be
+    // got out of the way of: moving the panel takes the target with it, so the answer flips every
+    // time it is asked. It did, four times a second, and the card visibly bounced between the top
+    // and the bottom of the screen (reported 2026-08-23 at story step 4 of 31). Nothing to do here:
+    // a button on the card is never covered by the card.
+    if (el.panel.contains(target)) return;
     // Measured with the panel where it is NOW, which is why this reads the bottom edge the panel
     // would occupy at the bottom of the viewport rather than its live top: once `is-top` is on, the
     // panel's own top is at the top of the screen and would answer "no overlap" forever.
@@ -319,7 +329,7 @@ export function startGuidedWalkthrough({
     }
   }
 
-  async function enterStep({ viaBack = false } = {}) {
+  async function enterStep() {
     // FIRST, before anything is shown or graded: a dialog the previous step closed leaves the panel
     // parented inside it, and a closed `<dialog>` is `display: none` — so the panel and everything
     // in it measure as invisible until the next poll tick puts them back. Harmless while the panel
@@ -357,23 +367,13 @@ export function startGuidedWalkthrough({
     // A step re-entered from Back — or one the trainer completed before reading the panel — is
     // already satisfied, and must not be asked for again.
     if (step && stepOutcomeNow(step, doc).ok) {
+      // Marked done so Next is offered — never walked forward on the viewer's behalf. Entering a
+      // step used to skip it when its expectation already held (2026-08-22); with Show me no longer
+      // advancing either, that skip became the only thing that moved the guide, and it could move it
+      // into a step whose ground restore satisfied the next one again: enterStep called itself in a
+      // circle and the screen flickered (reported 2026-08-23, at story step 3). Advancing belongs to
+      // one control now, and this recursion is gone with it.
       state = completeWalkthroughStep(state, step.id);
-      // ...and if it was ALREADY true when the guide arrived here, the trainer is past it: move on
-      // rather than asking for something done (reported 2026-08-22, with a screenshot: "step 1 of 4,
-      // open the group session" over an already-open clipboard — the app restores a live session by
-      // itself, so the guide's first step can be satisfied before anyone reads it).
-      //
-      // This does NOT undo the 2026-08-18 decision that doing a step yourself leaves Next to you.
-      // That is about a step performed while its card is on screen, where the trainer may want to
-      // read the caption against what just happened. This is about a step they never saw.
-      // Never when they walked BACK here: a step returned to stays done and stays put, which is the
-      // whole of "Back re-explains, it does not undo". Skipping forward again would make Back do
-      // nothing at all, and the trainer would tap it twice wondering why.
-      const controls = walkthroughControls(tour, state);
-      if (!viaBack && !controls.isLastStep) {
-        state = advanceWalkthrough(tour, state);
-        return enterStep();
-      }
     }
     render();
   }
@@ -428,18 +428,12 @@ export function startGuidedWalkthrough({
     }
 
     state = completeWalkthroughStep(state, step.id);
-    // Delegating a step advances the guide; doing it YOURSELF does not (reported 2026-08-18: "show
-    // me clicks the button right, but the demo step did not advance"). The distinction is who is
-    // driving. A trainer who tapped the control themselves is learning by doing and may want to
-    // read the caption against what just happened, so Next stays theirs. A trainer who asked to be
-    // shown handed the step over — leaving them to acknowledge it is two taps for one action, and
-    // from their side the guide simply did not move.
-    //
-    // The LAST step is the exception: advancing off it closes the walkthrough, and doing that on
-    // their behalf would make the panel vanish mid-gesture. Done stays a deliberate tap.
-    if (walkthroughControls(tour, state).isLastStep) return render();
-    state = advanceWalkthrough(tour, state);
-    enterStep();
+    // Show me demonstrates the step; it never moves the guide. Next is always the trainer's tap
+    // (reported 2026-08-23: "sometimes show me advances demo step sometimes not"). The earlier rule
+    // — delegating advances, doing it yourself does not — made the guide advance under some taps
+    // and not others, and the last step was a third case again; from the floor that reads as a bug,
+    // not as a distinction. One rule the trainer can predict beats a rule that saves them one tap.
+    render();
   });
 
   el.next.addEventListener("click", () => {
@@ -450,7 +444,7 @@ export function startGuidedWalkthrough({
 
   el.back.addEventListener("click", () => {
     state = retreatWalkthrough(state);
-    enterStep({ viaBack: true });
+    enterStep();
   });
 
   el.exit.addEventListener("click", stop);

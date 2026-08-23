@@ -268,7 +268,15 @@ export async function whenDemoCanBeWatched(splashDown) {
 //
 // Failures are reported, never thrown, for the same reason the wedge's are: a story that cannot play
 // is a broken marketing asset, not a broken app.
-export async function bootDemoStory({ shareDemo, shareChapter, hasData, t, goHome } = {}) {
+export async function bootDemoStory({
+  shareDemo,
+  shareChapter,
+  shareStep,
+  rememberStep,
+  hasData,
+  t,
+  goHome,
+} = {}) {
   const { DEMO_STORY: DEMO_STORY_PARAM } = await import("./modules/common/shareLink.js");
   if (shareDemo !== DEMO_STORY_PARAM || !hasData) return null;
 
@@ -297,7 +305,15 @@ export async function bootDemoStory({ shareDemo, shareChapter, hasData, t, goHom
     tour: { id: DEMO_STORY.id, steps },
     t,
     navigate: goHome && ((path) => goHome(path)),
-    onStep: (step) => narration.showStep(step),
+    startAtStepId: shareStep,
+    // Each step names itself in the URL, so a reload — or a link sent to a colleague mid-story —
+    // lands on the step being watched instead of restarting the tour (reported 2026-08-23: a reload
+    // came back on another tour's first card). replaceState, not push: the browser's Back belongs to
+    // the app's own navigation, and a 31-entry history of one demo would bury it.
+    onStep: (step) => {
+      rememberStep?.(step?.id);
+      narration.showStep(step);
+    },
   });
 }
 
