@@ -676,3 +676,20 @@
   color: var(--danger, #dc2626);
   background: color-mix(in srgb, var(--danger, #dc2626) 14%, transparent);
 }
+
+/* A movement that came in with an imported programme and is not in the catalogue (TODO §29.1). The
+   word carries the meaning and the glyph decorates it — on a phone a tooltip is unreachable, so an
+   icon alone would be a mark nobody can read. */
+.editor-custom-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  border: 1px dashed var(--border-color);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}

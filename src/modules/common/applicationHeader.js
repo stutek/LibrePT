@@ -390,6 +390,12 @@ export function renderHeaderShell() {
               <button id="menu-connect-cloud" class="session-menu-item" role="menuitem">
                 <i class="fa-solid fa-cloud-arrow-up"></i> Connect cloud storage
               </button>
+              <!-- A programme written somewhere else (TODO §29) — a chat window, a spreadsheet, a
+                   colleague's file. Beside the data actions rather than in the session menu: this is
+                   a desk activity, done before anybody is in the gym. -->
+              <button id="menu-import-program" class="session-menu-item" role="menuitem">
+                <i class="fa-solid fa-file-import"></i> <span data-i18n="menu_import_program">Import a programme</span>
+              </button>
               <button id="menu-export-data" class="session-menu-item" role="menuitem">
                 <i class="fa-solid fa-file-export"></i> Export data as a file
               </button>
@@ -552,6 +558,10 @@ function setupAppMenu() {
   on("unbacked-badge", () => goto(deps.urlFor("backup")));
   // Export data — reuse the existing Sync & Backup modal (it holds JSON export/restore).
   on("menu-export-data", () => goto(deps.urlFor("backup")));
+  on("menu-import-program", () => {
+    closeMenu();
+    deps.openProgramImport?.();
+  });
   // For a CLIENT who was emailed their data export, not for the trainer — which is why it sits in
   // the app menu and not on a client record: the person opening it has no client record.
   // A submission a prospective client sent in (TODO §26.5). Sits in the app menu beside the encrypted

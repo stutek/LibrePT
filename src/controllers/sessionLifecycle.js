@@ -117,6 +117,15 @@ export function startWorkoutSession(clientRoutines, sessionMeta = null, deps = {
       exercises: state.exercises,
       emptyPlanName: t("custom_empty_plan") || "Custom / Empty Plan",
     });
+    // An IMPORTED programme arrives as plan items rather than as a routine (TODO §29), so it
+    // replaces what the routine would have supplied. Handled here, at the one place a plan is built,
+    // rather than by writing over the session afterwards — an import that patched a session the
+    // moment after it was created would be a second way to construct one.
+    if (options.plan) {
+      session.clientRoutines[cr.clientId].exercises = options.plan;
+      session.clientRoutines[cr.clientId].logs = {};
+      session.clientRoutines[cr.clientId].routineName = sessionMeta?.titles?.[0] || "";
+    }
   }
 
   setClipboardEditModeFlag(!!sessionMeta?.isPlanning);

@@ -6,6 +6,7 @@ import * as appBoot from "./appBoot.js";
 import {
   cancelWorkoutSession as cancelWorkoutSessionController,
   enforceQuickSignalExclusivity,
+  enterClipboardEditMode as enterClipboardEditModeController,
   focusIndexFromRef,
   getActiveExercise as getActiveExerciseController,
   getActiveSession,
@@ -447,6 +448,10 @@ async function init() {
   appBoot.bootHeader({
     getState,
     t,
+    // An imported programme lands in the ordinary plan editor (TODO §29): the same clipboard a
+    // trainer builds a session in, so its save is the write and there is no import-specific
+    // persistence to keep correct.
+    onProgramImported: openImportedProgramme,
     saveToLocalStorage: saveState,
     applyTranslations,
     navigateToPath,
@@ -841,6 +846,37 @@ function renderActiveGroupBoard() {
 function launchClipboardDirectly(arg, options = {}) {
   const sessionId = arg && typeof arg === "object" ? arg.sessionId : arg;
   sessionsViewLaunchClipboard({ sessionId, state: getState(), startWorkoutSession }, options);
+}
+
+/** Opens an imported programme in the plan editor (TODO §29).
+ *
+ * As a PLANNING session when no session was named: a programme written at a desk has no slot yet,
+ * and planning mode is exactly the mode this app already has for a plan with no clock — no
+ * countdown, no Start, no completion stamp. Naming a session instead attaches it to that evening.
+ *
+ * Nothing is persisted here. The editor's own save is the write, which is why an import that guessed
+ * a field wrong is a field the trainer retypes rather than a record anybody has to repair.
+ */
+function openImportedProgramme({ title, items, clientId, sessionId }) {
+  const state = getState();
+  const client =
+    state.clients.find((row) => row.id === clientId) || state.clients.find((row) => row.active);
+  const routineId = state.routines[0]?.id || "";
+  const sessionName = title || t("program_import_title");
+
+  startWorkoutSession(
+    [{ clientId: client?.id, routineId }],
+    {
+      id: sessionId || newRecordId(),
+      isPlanning: !sessionId,
+      titles: [sessionName],
+      date: getISODateString(Date.now()),
+      timeLabel: "",
+      location: "",
+    },
+    { plan: items },
+  );
+  enterClipboardEditModeController();
 }
 
 function renderSessions() {

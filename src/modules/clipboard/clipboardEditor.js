@@ -201,6 +201,15 @@ export function renderClipboardEditor(container, deps) {
   // narrow row. A row the catalog filled in (injected or swapped) takes no focus and reads as
   // ordinary, so it keeps a label saying what just happened to it. A row restored from the URL after
   // a reload gets neither: nothing just happened to it, and calling it New would be a lie.
+  // A movement the catalogue does not have is ALLOWED, and MARKED (TODO §29.1). Marked because
+  // silently adopting whatever the catalogue has nearest is how it becomes forty spellings of
+  // "Bench Press" under forty ids — the failure §13's taxonomy exists to prevent. In WORDS beside a
+  // glyph, never a glyph alone: this is read on a phone, where a tooltip is unreachable.
+  const customBadge = (it) =>
+    it.custom
+      ? `<span class="editor-custom-badge" title="${tr("program_import_custom_hint", "Not in your catalogue")}"><i class="fa-solid fa-pencil"></i> ${tr("program_import_custom_tag", "CUSTOM")}</span>`
+      : "";
+
   const newBadge = (it) =>
     isCalledOut(it) && !callout.focus && callout.kind !== "restored"
       ? `<span class="editor-added-badge">${
@@ -263,7 +272,7 @@ export function renderClipboardEditor(container, deps) {
           <div class="editor-row-name-wrap">
             <input class="editor-row-name" type="text" list="${datalistId}" value="${escapedName}" aria-label="${tr("exercise", "Exercise")}" placeholder="${tr("exercise", "Exercise")}">
             <button type="button" class="editor-row-catalog" aria-label="${tr("browse_catalog", "Browse exercise catalog")}" title="${tr("browse_catalog", "Browse exercise catalog")}"><i class="fa-solid fa-book-open"></i></button>
-            ${newBadge(ex)}
+            ${newBadge(ex)}${customBadge(ex)}
             <button type="button" class="editor-row-toggle" aria-expanded="${expanded}" aria-label="${toggleLabel}" title="${toggleLabel}"><i class="fa-solid fa-chevron-${expanded ? "up" : "down"}"></i></button>
           </div>
           ${fieldsHTML}

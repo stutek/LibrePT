@@ -2316,9 +2316,26 @@ The pure core, test-first, with nothing wired to a screen yet:
   — four real pasted shapes that must keep parsing, and the rule that every paste which fails in real
   use joins them.
 
-**Still to build**: the import surface (§29.1's four optional inputs, the template download, the
-failure report), the CUSTOM tag in the editor and deck, the copyable prompt, i18n, and the use case
-file.
+### 29.5 Shipped 2026-08-23
+
+The surface, and everything §29.1 decided about it: the four optional inputs, the failure report
+before anything opens, the CUSTOM tag, the copyable prompt, i18n, and
+[UC9](use_cases/uc9_program_import.md).
+
+- **The template is shown in the box, not downloaded.** It is there to be READ and then replaced,
+  and a file in a downloads folder is one more thing to find. (§29.1 said "downloadable"; this is the
+  same intent with less to lose.)
+- **A file and a paste are one path** from the moment the file is read: its text lands in the same
+  box, so it can be corrected before anything opens.
+- **The import opens a PLANNING session** when no session was named — a programme written at a desk
+  has no slot, and planning mode is exactly the mode this app already has for a plan with no clock.
+  Naming a session attaches it to that evening instead.
+- **`startWorkoutSession` learned one option**, `plan`, applied at the single place a plan is built.
+  An import that patched the session immediately after creating it would have been a second way to
+  construct one.
+
+**Still open**: the CUSTOM tag in the live DECK (it is in the editor, which is where an import is
+reviewed), and a second frozen corpus entry whenever a real paste fails.
 
 ### 29.4 What is already in the repository, and should be copied rather than invented
 

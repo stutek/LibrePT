@@ -49,6 +49,10 @@ import {
 } from "./modules/common/notificationArea.js";
 import { renderIntakeViewShell, setupIntakeForm } from "./modules/intake/intakeView.js";
 import { initPlansView } from "./modules/plans/plansView.js";
+import {
+  initProgramImportDialog,
+  openProgramImportDialog,
+} from "./modules/plans/programImportDialog.js";
 import { renderRsvpViewShell, setupRsvpReply } from "./modules/rsvp/rsvpView.js";
 import { initWorkoutSetup, setupWorkoutSetup } from "./modules/session/editSessionControl.js";
 import { renderWorkoutSetupView } from "./modules/session/editSessionView.js";
@@ -147,6 +151,17 @@ export function bootDriveSyncUi(deps) {
 }
 
 export function bootHeader(deps) {
+  // Both of the header menu's own dialogs are wired here, for the same reason: their entry points
+  // are menu items, and neither needs anything else booted first.
+  initProgramImportDialog({
+    t: deps.t,
+    getState: deps.getState,
+    onImport: deps.onProgramImported,
+    // Injected rather than reached for, so nothing in the dialog touches a FileReader — and a test
+    // hands it a string instead of a file.
+    readFileText: (file) => file.text(),
+  });
+
   // The feedback route rides along with the header because that is where its menu entry lives, and
   // it needs nothing else booted (TODO §23.5).
   initFeedbackRouteDialog({
@@ -156,7 +171,11 @@ export function bootHeader(deps) {
     route: () => window.location.pathname + window.location.search,
     repoUrl: ISSUE_TRACKER_URL,
   });
-  initApplicationHeader({ ...deps, openFeedbackRoute: openFeedbackRouteDialog });
+  initApplicationHeader({
+    ...deps,
+    openFeedbackRoute: openFeedbackRouteDialog,
+    openProgramImport: openProgramImportDialog,
+  });
   setupApplicationHeader();
 }
 
