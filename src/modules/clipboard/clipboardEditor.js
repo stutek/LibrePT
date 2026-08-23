@@ -40,6 +40,7 @@ import {
   repsPresetListId,
 } from "../../domain/repsAndLoad.js";
 import { isRestRecord as isRest } from "../../domain/sessionItemRecord.js";
+import { isGuideSurface } from "../common/dom.js";
 
 const DEFAULT_SERIES = 3;
 
@@ -796,7 +797,7 @@ export function renderClipboardEditor(container, deps) {
       e.target.closest?.("dialog") ||
       e.target.closest?.(".session-menu-wrap") ||
       e.target.closest?.("#btn-done-edit") ||
-      e.target.closest?.("#walkthrough-overlay, #story-card")
+      isGuideSurface(e.target)
     )
       return;
     doExit();

@@ -11,9 +11,11 @@
 // screen, and the first viewer who goes looking for it in the app has been misled. The card SAYS
 // what happens on paper, over a texture that marks it as narration.
 //
-// **The card is DISMISSED, not timed out.** A step's tap is what closes it, which is what lets a
-// narrated beat carry a real expectation (§35.1: the card was on screen and could be dismissed)
-// instead of being a pause the player hopes was long enough to read.
+// **A card belongs to the step it introduces, not to a step of its own.** Asking a guide to
+// demonstrate "tap Continue" spends three seconds moving a pointer to a button already under the
+// reader's thumb, which is indistinguishable from the guide doing nothing (reported 2026-08-22). So
+// the card is shown WITH the step it explains, and the trainer's first tap — on Continue, or on the
+// control the step is about — takes it away.
 //
 // **The persona label is permanent while a persona is on screen.** One persona at a time was the
 // ruling (§35.1) — no split screen — so the only thing telling a viewer whose phone they are looking
@@ -32,10 +34,11 @@
 // second way onward; the button is left out entirely when no caller offers one, rather than
 // rendering a control that does nothing).
 
+import { isGuideSurface } from "../common/dom.js";
+
 const CARD_ID = "story-card";
 const CONTINUE_ID = "story-card-continue";
 const PERSONA_ID = "story-persona";
-const CAPTION_ID = "story-caption";
 
 function element(doc, tag, className, id) {
   const node = doc.createElement(tag);
@@ -103,11 +106,25 @@ export function mountStoryNarration({ doc = document, t, onClearDemoData } = {})
   const { card, kicker, title, body, cleanup, handover } = buildCard(doc, t, onClearDemoData);
   const persona = element(doc, "p", "story-persona", PERSONA_ID);
   persona.hidden = true;
-  const caption = element(doc, "p", "story-caption", CAPTION_ID);
-  caption.setAttribute("role", "status");
-  caption.hidden = true;
 
-  doc.body.append(persona, caption, card);
+  doc.body.append(persona, card);
+
+  // A card is READ and then got out of the way: acting on the app is what says it has been read, so
+  // the first tap anywhere else dismisses it (reported 2026-08-22 — a card sitting over the control
+  // its own step points at). Capture phase, so the tap still reaches the app underneath.
+  doc.addEventListener(
+    "pointerdown",
+    (event) => {
+      if (card.hidden) return;
+      // The GUIDE is not the app: a tap on its panel — Show me, Next — is not the trainer acting on
+      // what the card is about, and taking the card away there breaks the very step being
+      // demonstrated (the pointer then reaches for a button that is no longer on screen). The same
+      // distinction the plan editor's tap-outside rule had to learn the same day.
+      if (isGuideSurface(event.target)) return;
+      if (!card.contains(event.target)) card.hidden = true;
+    },
+    true,
+  );
 
   function showStep(step) {
     if (step?.persona) {
@@ -130,22 +147,15 @@ export function mountStoryNarration({ doc = document, t, onClearDemoData } = {})
         handover.textContent = t(step.narrate.continueLabelKey || "story_continue");
       }
       card.hidden = false;
-      // A caption under a card would be the same beat said twice, in two places.
-      caption.hidden = true;
       return;
     }
 
     card.hidden = true;
-    if (step?.caption) {
-      caption.textContent = t(step.caption);
-      caption.hidden = false;
-    }
   }
 
   function unmount() {
     card.remove();
     persona.remove();
-    caption.remove();
   }
 
   return { showStep, unmount };

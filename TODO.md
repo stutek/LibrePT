@@ -2329,6 +2329,58 @@ demo database on the main thread, the write queue flushing behind it, or the rel
 those writes are still in flight. Measure before choosing: the fix is different for each — a yielded
 seed, a progress state on the button, or reloading only once the queue has drained.
 
+### 30.5 [x] BUG — Show me did nothing on a card, and a second caption sat on the panel — fixed 2026-08-22
+
+**Reported 2026-08-22 (Simon)**, walking the story in the browser:
+
+- *"Show me for three friends arrive does nothing."* It did something, and that was the problem: it
+  spent three seconds walking a pointer to the **Continue button already under the reader's thumb**.
+  From outside, a guide that pauses for three seconds and then closes a card is a guide that has
+  stopped working.
+
+  **Fix, in his words: "for steps that have no Show me, merge them with the next one".** A card is
+  now attached to the step it introduces — read it, then do the thing it is about, and the first tap
+  anywhere takes it away. One rule, [foldCards](src/modules/demo/storyTour.js), so the chapters stay
+  readable as a sequence: the card is still written where it belongs in the story. A card with
+  nowhere to ride — the last beat, or the handover to the client's phone — stays a step and declares
+  `showMe: false`, and the guide hides the button rather than offering a dead one. The story went
+  from 35 beats to 31, all of them things a person does.
+
+- *"Steps 3 and 4 have an overlapping black subtitle over the buttons."* The story's own caption bar,
+  fixed to the bottom of the screen, over the guide's panel — which carries the same caption. The bar
+  was written when the story played itself and nothing else showed captions; it has had no reason to
+  exist since the story became guided. Gone, and the card now sits in the upper half so it cannot
+  cover the panel either.
+
+- **Found while fixing the first**: dismissing the card on the first tap ALSO fired for taps on the
+  guide's own panel, so Show me made the card vanish before the pointer reached it.
+
+- *"Step 2 of 31 … this step didn't complete."* The ☰ menu closes on any click outside it, and Show
+  me is outside it — so the guide closed the menu holding the item its next step points at.
+
+**Asked while fixing this (Simon): "do you have other TOOLS that should really be tests? fix
+them."** One did, and it was the one written the same day: the icon RENDER check. It asserts
+something that has to stay true — every icon draws, and draws the shape it drew before — so it is
+[tests/e2e/test_icons_render.py](tests/e2e/test_icons_render.py) now, importing the rendering from
+the tool rather than reimplementing it. What stayed a command is recording the baseline, which is a
+deliberate act taken with a regenerated font. The same question was asked of the rest of the catalog:
+the gates are already gates, and what is left (the font subsetter, the icon rasteriser, the demo
+recorder, the layout probe, the credential minter) either PRODUCES a committed artifact or explores a
+running page, and neither is a claim a build can hold.
+
+A story walker was written and deleted in the same hour for the same reason: the e2e suite already
+walks the story, so a second walker was a second thing to keep true. What it was really offering was
+a readable failure, which is now what the suite gives — the beat, its caption, what the guide said,
+and what was on screen.
+
+**Three surfaces, one rule, now declared once**: [isGuideSurface](src/modules/common/dom.js). Every
+"tap outside closes me" rule in this app means *outside the thing you are working on*, and the guide
+floats over the app: its panel and its story card are the trainer working the GUIDE. The plan editor,
+the ☰ menu, the session menu and the card's own dismissal all ask the same question of the same
+helper now. Pinned by [test_guide_is_not_the_app.py](tests/medium/test_guide_is_not_the_app.py),
+which tests the TAP — the demo's own walk missed all three, because it taps Show me at moments where
+the closure happens to do no harm.
+
 ### 30.4 [x] BUG — the guide asked for a screen the trainer was already past — fixed 2026-08-22
 
 **Reported 2026-08-22 (Simon), with a screenshot**: "step 1 of 4 on the clipboard view" — the panel

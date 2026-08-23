@@ -35,6 +35,7 @@ import {
   setClipboardEditModeFlag,
 } from "../modules/clipboard/editModeState.js";
 import { updateClientTabsFadeState } from "../modules/common/activeUsersList.js";
+import { isGuideSurface } from "../modules/common/dom.js";
 import { saveActiveSessionToCache } from "./activeSessionCache.js";
 import {
   currentPlanMode,
@@ -231,6 +232,9 @@ function wireSessionMenuAndActions(t) {
       sessionMenuBtn.setAttribute("aria-expanded", String(!isOpen));
     });
     document.addEventListener("click", (e) => {
+      // The guide is not the app (modules/common/dom.js): a tap on Show me must not close the menu
+      // the next step is about to point at.
+      if (isGuideSurface(e.target)) return;
       if (!sessionMenu.classList.contains("hidden") && !e.target.closest(".session-menu-wrap")) {
         closeSessionMenu();
       }

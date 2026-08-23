@@ -38,11 +38,11 @@ const CARD_DISMISSED = { selector: "#story-card", visible: false };
 const CARD_TARGET = "#story-card-continue";
 
 function narration(id, kind, titleKey, bodyKey, extra = {}) {
-  const { onward, ...step } = extra;
+  const { onward, continueUrl, continueLabelKey, ...step } = extra;
   return {
     id,
     persona: TRAINER,
-    narrate: { kind, titleKey, bodyKey, onward },
+    narrate: { kind, titleKey, bodyKey, onward, continueUrl, continueLabelKey },
     target: CARD_TARGET,
     // The guide's panel says the SHORT thing (the chapter's name) while the card holds the prose:
     // two surfaces are on screen at once now that the story is driven rather than watched, and
@@ -53,12 +53,49 @@ function narration(id, kind, titleKey, bodyKey, extra = {}) {
   };
 }
 
+/** Folds a card into the step it introduces (asked for 2026-08-22: "for steps that have no Show me,
+ * merge them with the next one").
+ *
+ * A card written as a step of its own is a step whose only action is tapping Continue — and asking
+ * the guide to demonstrate THAT walks a pointer for three seconds to a button already under the
+ * reader's thumb, which from the outside is a guide doing nothing. So the prose rides on the next
+ * real beat: read it, then do the thing it is about, and the first tap takes the card away.
+ *
+ * Written as one rule here rather than by hand at each chapter, so the chapters stay readable as a
+ * sequence — the card still appears in the list where it belongs in the story.
+ *
+ * Two cards in a row keep the FIRST: a chapter's closing note and the next chapter's opening note
+ * say related things, and stacking both on one beat is two paragraphs nobody reads.
+ *
+ * A card with nowhere to ride — the last beat of a chapter — stays a step, with `showMe: false`:
+ * there is genuinely nothing to demonstrate, so the guide hides the button instead of offering a
+ * dead one. A card that hands the browser to another device keeps its own step for the same reason
+ * its button is a link: going there IS the action.
+ */
+function foldCards(steps) {
+  const folded = [];
+  let pending = null;
+  for (const step of steps) {
+    const isCard = Boolean(step.narrate) && step.target === CARD_TARGET;
+    const staysAStep = isCard && (step.narrate.continueUrl || step.narrate.onward);
+    if (isCard && !staysAStep) {
+      pending = pending || step;
+      continue;
+    }
+    folded.push(pending && !isCard ? { ...step, narrate: pending.narrate } : step);
+    if (isCard && pending) folded.splice(-1, 0, { ...pending, showMe: false });
+    pending = null;
+  }
+  if (pending) folded.push({ ...pending, showMe: false });
+  return folded;
+}
+
 // Chapter C — in the gym. §35.3's build order starts here: it is the chapter that needs the least
 // that does not exist, and the one whose beats the wedge already proves.
 const GYM_CHAPTER = {
   id: "gym",
   titleKey: "story_chapter_gym",
-  steps: [
+  steps: foldCards([
     narration("gym-open", "chapter", "story_chapter_gym", "story_gym_open_body", {
       // The board, not wherever a refreshed link happened to point: the chapter opens by saying
       // what the viewer is about to watch, and it should say it over the screen it happens on.
@@ -183,7 +220,7 @@ const GYM_CHAPTER = {
     // over to it. The way out (§30.2) belongs on the LAST card, or a viewer is offered the exit
     // twice and takes it before the story is done.
     narration("gym-close", "chapter", "story_chapter_gym", "story_gym_close_body"),
-  ],
+  ]),
 };
 
 // Whose phone the viewer is looking at once the story hands over (§35.1's one-persona-at-a-time
@@ -198,7 +235,7 @@ const CLIENT = "story_persona_client";
 const ARRIVE_CHAPTER = {
   id: "arrive",
   titleKey: "story_chapter_arrive",
-  steps: [
+  steps: foldCards([
     narration("arrive-open", "chapter", "story_chapter_arrive", "story_arrive_open_body", {
       route: "/",
     }),
@@ -236,7 +273,7 @@ const ARRIVE_CHAPTER = {
       continueUrl: "intake?demo=story&chapter=intake",
       continueLabelKey: "story_open_client_phone",
     }),
-  ],
+  ]),
 };
 
 // The client's own half, played on the client's own page. It is its own chapter because it runs in
@@ -247,7 +284,7 @@ const INTAKE_CHAPTER = {
   // Not part of the trainer's run: this one is played on the client's own page, reached by the
   // handover above (domain/demoStory.js decides what a surface means for a whole-story walk).
   surface: "client",
-  steps: [
+  steps: foldCards([
     narration("intake-open", "chapter", "story_chapter_intake", "story_intake_open_body"),
     {
       id: "intake-name",
@@ -283,7 +320,7 @@ const INTAKE_CHAPTER = {
       expect: { selector: "#intake-consent:checked" },
     },
     narration("intake-close", "chapter", "story_chapter_intake", "story_intake_close_body"),
-  ],
+  ]),
 };
 
 // Chapter B — the programme. It comes AFTER the gym chapter in the story's order of build (§35.3),
@@ -292,7 +329,7 @@ const INTAKE_CHAPTER = {
 const PROGRAMME_CHAPTER = {
   id: "programme",
   titleKey: "story_chapter_programme",
-  steps: [
+  steps: foldCards([
     narration("programme-open", "chapter", "story_chapter_programme", "story_programme_open_body", {
       route: "/",
     }),
@@ -350,7 +387,7 @@ const PROGRAMME_CHAPTER = {
       "story_chapter_programme",
       "story_programme_close_body",
     ),
-  ],
+  ]),
 };
 
 // Chapter D — the evening after. The trainer is at home; this is where the notes taken on the floor
@@ -359,7 +396,7 @@ const PROGRAMME_CHAPTER = {
 const EVENING_CHAPTER = {
   id: "evening",
   titleKey: "story_chapter_evening",
-  steps: [
+  steps: foldCards([
     narration("evening-open", "chapter", "story_chapter_evening", "story_evening_open_body", {
       route: "/",
     }),
@@ -403,7 +440,7 @@ const EVENING_CHAPTER = {
     narration("evening-close", "chapter", "story_thanks_title", "story_gym_close_body", {
       onward: true,
     }),
-  ],
+  ]),
 };
 
 export const DEMO_STORY = {

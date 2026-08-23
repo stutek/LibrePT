@@ -10,7 +10,9 @@
 .story-card {
   position: fixed;
   left: 50%;
-  bottom: 14vh;
+  /* ABOVE the middle, because the guide's own panel owns the bottom of the screen and a card
+     floating over its buttons is what a reader tries to tap through (reported 2026-08-22). */
+  top: 12vh;
   z-index: 9500;
   width: min(30rem, calc(100vw - 2.5rem));
   transform: translateX(-50%);
@@ -103,25 +105,5 @@
   font-size: 0.72rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  pointer-events: none;
-}
-
-/* What the current tap is FOR. The wedge needs no captions — four taps at one screen explain
-   themselves — but a four-minute story does, and reading it must not cost a tap. */
-.story-caption {
-  position: fixed;
-  left: 50%;
-  bottom: 1.1rem;
-  z-index: 9500;
-  transform: translateX(-50%);
-  width: min(30rem, calc(100vw - 2rem));
-  margin: 0;
-  padding: 0.7rem 1rem;
-  border-radius: var(--border-radius-md, 12px);
-  background: color-mix(in srgb, var(--text-primary, #0f172a) 88%, transparent);
-  color: var(--bg-primary, #ffffff);
-  font-size: 0.92rem;
-  line-height: 1.4;
-  text-align: center;
   pointer-events: none;
 }

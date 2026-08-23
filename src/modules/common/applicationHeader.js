@@ -23,7 +23,7 @@ import { driveSyncStatus } from "../../data/driveSyncService.js";
 import { ISSUE_TRACKER_URL } from "../../data/publicUrls.js";
 import { isDemoOnlyStore } from "../../data/seedProvenance.js";
 import { resolveLang } from "../../i18n/index.js";
-import { renderMarkupOnce } from "./dom.js";
+import { isGuideSurface, renderMarkupOnce } from "./dom.js";
 import { syncGlyphFor } from "./syncStatusGlyph.js";
 import { setupThemeSwitcher } from "./theme.js";
 
@@ -514,8 +514,10 @@ function setupAppMenu() {
     menu.classList.toggle("hidden", isOpen);
     menuBtn.setAttribute("aria-expanded", String(!isOpen));
   });
-  // Dismiss on any outside click.
+  // Dismiss on any outside click — except on the guide, which is not the app (dom.js explains why:
+  // reported 2026-08-22, the demo's step 2 pointed at a menu item that Show me had just closed).
   document.addEventListener("click", (e) => {
+    if (isGuideSurface(e.target)) return;
     if (!menu.classList.contains("hidden") && !e.target.closest(".app-menu-wrap")) {
       closeMenu();
     }

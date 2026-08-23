@@ -84,18 +84,27 @@ def test_the_viewer_is_told_whose_phone_they_are_looking_at(page, local_server):
     expect(page.locator("#story-persona")).to_have_text("Trainer's phone")
 
 
-def test_a_tap_beat_gets_a_caption_and_no_card_over_the_app(page, local_server):
-    """The story narrates the taps too, but a card would cover the control being demonstrated — and
-    the whole claim of a scripted demo is that the viewer watches the real app being used."""
+def test_a_beat_with_nothing_to_read_shows_no_card(page, local_server):
+    """A card left on screen would cover the control the step is about, and the whole claim of a
+    scripted demo is that the viewer watches the real app being used."""
     _mount(page, local_server)
     _show(page, CHAPTER_STEP)
 
     _show(page, TAP_STEP)
 
     expect(page.locator("#story-card")).to_be_hidden()
-    caption = page.locator("#story-caption")
-    expect(caption).to_be_visible()
-    expect(caption).to_contain_text("group session")
+
+
+def test_the_first_tap_on_the_app_takes_the_card_away(page, local_server):
+    """A card is READ and then got out of the way — acting on the app is what says it has been read
+    (reported 2026-08-22: a card sitting over the control its own step points at)."""
+    _mount(page, local_server)
+    _show(page, CHAPTER_STEP)
+    expect(page.locator("#story-card")).to_be_visible()
+
+    page.mouse.click(10, 400)
+
+    expect(page.locator("#story-card")).to_be_hidden()
 
 
 def test_the_paper_track_is_words_not_a_drawn_form(page, local_server):

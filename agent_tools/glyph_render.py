@@ -1,4 +1,4 @@
-"""`python -m agent_tools.glyph_render` — render every icon the app uses and prove it is not blank.
+"""`python -m agent_tools.glyph_render --baseline` — record how every icon the app uses is drawn.
 
 Why this exists: [icon_coverage.py](icon_coverage.py) compares NAMES — every `fa-` class in `src/`
 against the classes the stylesheet declares — and that is the right Stage 1 check because it is pure
@@ -20,13 +20,19 @@ never change is which glyph appears: a subset that maps a codepoint to the wrong
 notdef box, is a defect that renders perfectly happily and looks like an X in a rectangle. At 16×16
 those are different grids and a nudged edge is not.
 
-A diagnostic, not a gate (see agent_tools/INDEX.md): it needs a browser and a running dev server.
-The baseline file is committed, so the comparison is available to whoever changes the font next
-rather than only to the session that subset it.
+**The CHECK is a test, not a command anyone has to remember.** What this module owns is the
+rendering and the comparison rule; tests/e2e/test_icons_render.py imports both and fails the build
+when an icon draws nothing or draws something else. A check that only runs when somebody thinks to
+run it is a check that reports on whichever font was current the last time somebody thought of it.
+
+What stays a command is RECORDING the baseline, because that is a deliberate act: the font was
+regenerated on purpose, the new render was looked at, and the record is committed with it. `--check`
+remains for the same session that regenerates, so the answer arrives before the commit rather than
+from the pipeline afterwards.
 
 Usage:
-  python -m agent_tools.glyph_render --baseline    # record what the current font renders
-  python -m agent_tools.glyph_render --check       # re-render and compare against the record
+  python -m agent_tools.glyph_render --baseline    # after regenerating the font, on purpose
+  python -m agent_tools.glyph_render --check       # the same comparison the e2e suite runs
 """
 
 import argparse

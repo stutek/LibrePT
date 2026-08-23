@@ -399,8 +399,9 @@ export const sl = {
   story_chapter_intake: "Na Aninem telefonu",
   story_handover_title: "Zdaj Ana",
   story_open_client_phone: "Odpri Anin telefon",
-  story_step_arrive_menu: "Meni — kjer je vse, kar ni nocojšnja vadba.",
-  story_step_arrive_clients: "Kartoteka — osem ljudi in nihče ni ničesar tipkal dvakrat.",
+  story_step_arrive_menu: "Odpri meni. Tu so kartoteka strank, vaje in zgodovina.",
+  story_step_arrive_clients:
+    "Odpri kartoteko strank — osem ljudi in nihče ni ničesar tipkal dvakrat.",
   story_step_arrive_invite:
     "Ana je po vadbi vprašala za trening. Namesto da bi ji podatke zapisoval kar na hodniku, ji trener pošlje povezavo.",
   story_step_intake_name:
@@ -425,14 +426,14 @@ export const sl = {
   story_step_programme_editor:
     "Načrt in ob njem številka, ki šteje: koliko dela gre v uro, ki jo je rezerviral.",
   story_step_programme_done: "Končano — nazaj k skupini.",
-  story_step_programme_menu_again: "Še nekaj pred torkom.",
+  story_step_programme_menu_again: "Znova odpri meni seje — še nekaj pred torkom.",
   story_step_programme_bind:
     "Jane, John in Sarah delajo isti krog, zato gredo na en načrt — in torkove serije se zabeležijo enkrat namesto trikrat.",
   story_programme_open_body:
     "Dva dni prej, na kavču. Nič od tega ni nujno, in prav zato se splača zdaj: večer v telovadnici teče drugače, če načrt že obstaja.",
   story_programme_close_body:
     "En načrt, trije ljudje, in gre v uro. Torek je zdaj lahko o vadbi in ne o telefonu.",
-  story_step_evening_menu: "Doma, pozneje zvečer.",
+  story_step_evening_menu: "Doma, pozneje zvečer. Odpri meni.",
   story_step_evening_move:
     "Torek se premakne za dve uri — dogovorjeno z vsemi tremi po vadbi. Obrazec to izrecno pove: samo ta večer.",
   story_step_evening_move_time:
@@ -449,7 +450,7 @@ export const sl = {
   story_step_signal_too_easy:
     "Šlo ji je prelahko. En dotik to pove — in nocojšnji načrt bo to izvedel.",
   story_step_next_participant: "Zdaj John. Ista seja, njegov lasten načrt, brez vračanja k mizi.",
-  story_step_refocus: "Njegov krog pride v fokus.",
+  story_step_refocus: "Dotakni se njegovega kroga, da pride v fokus.",
   story_step_capture_open:
     "Med serijama omeni koleno — tisto, ki so mu ga leta 2024 operirali. Ura teče naprej, zapis se odpre kar čez sejo.",
   story_step_capture_tag: "Bolečina v sklepu, pri tej vaji.",
@@ -457,7 +458,7 @@ export const sl = {
   story_step_capture_keep:
     "Shranjeno v Johnovo kartoteko. Ne gre za nocojšnjo obremenitev, gre za naslednje tri mesece.",
   story_step_capture_submit: "Zabeleženo — pri Johnu in pri tej vaji.",
-  story_step_session_menu: "Meni same seje.",
+  story_step_session_menu: "Odpri meni seje.",
   story_step_plan_editor:
     "Johnov načrt in zapis izpred minute je že v njem. Nihče ga ni šel iskat.",
   story_step_swap_open: "Ta vaja gre torej ven — samo pri Johnu.",

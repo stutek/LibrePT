@@ -416,8 +416,10 @@ export const en = {
   story_chapter_intake: "On Ana's phone",
   story_handover_title: "Over to Ana",
   story_open_client_phone: "Open Ana's phone",
-  story_step_arrive_menu: "The menu — where everything that is not tonight lives.",
-  story_step_arrive_clients: "The register — eight people, and nobody typed a word of it twice.",
+  story_step_arrive_menu:
+    "Open the menu. The client register, the movements and the history all live in here.",
+  story_step_arrive_clients:
+    "Open the client register — eight people, and nobody typed a word of it twice.",
   story_step_arrive_invite:
     "Ana asked about training after a class. Instead of taking her details standing in a corridor, the trainer sends her a link.",
   story_step_intake_name:
@@ -442,14 +444,14 @@ export const en = {
   story_step_programme_editor:
     "The plan, with the number that matters beside it: how much work fits in the hour they booked.",
   story_step_programme_done: "Done — back to the room.",
-  story_step_programme_menu_again: "One more thing before Tuesday.",
+  story_step_programme_menu_again: "Open the session menu again — one more thing before Tuesday.",
   story_step_programme_bind:
     "Jane, John and Sarah are doing the same circuit, so they go on one plan — and Tuesday's sets get logged once instead of three times.",
   story_programme_open_body:
     "Two days earlier, on the sofa. Nothing here is urgent, which is exactly why it is worth doing now: the evening in the gym goes differently when the plan already exists.",
   story_programme_close_body:
     "One plan, three people, and it fits the hour. Tuesday can now be about the training rather than about the phone.",
-  story_step_evening_menu: "Home, later that night.",
+  story_step_evening_menu: "Home, later that night. Open the menu.",
   story_step_evening_move:
     "Tuesday moves two hours later — agreed with all three after the session. The form says it out loud: this evening only.",
   story_step_evening_move_time:
@@ -469,7 +471,7 @@ export const en = {
   story_step_signal_too_easy:
     "She flew through it. One tap says so — and tonight's plan will hear about it.",
   story_step_next_participant: "John is next. Same session, his own plan, no going back to a desk.",
-  story_step_refocus: "His circuit comes into focus.",
+  story_step_refocus: "Tap his circuit to bring it into focus.",
   story_step_capture_open:
     "Between rounds he mentions his knee — the one that was rebuilt in 2024. The clock keeps running; the note opens over the session.",
   story_step_capture_tag: "Joint pain, on this movement.",
@@ -477,7 +479,7 @@ export const en = {
   story_step_capture_keep:
     "Kept on John's record. This is not about tonight's load, it is about the next three months.",
   story_step_capture_submit: "Saved — against John, and against this movement.",
-  story_step_session_menu: "The session's own menu.",
+  story_step_session_menu: "Open the session menu.",
   story_step_plan_editor:
     "John's plan, and the note from a minute ago is already waiting in it. Nobody went looking for it.",
   story_step_swap_open: "So that movement goes — for John only.",

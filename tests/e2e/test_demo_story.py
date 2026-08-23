@@ -52,27 +52,71 @@ def _step_numbers(page):
     return [int(n) for n in re.findall(r"\d+", page.locator(PROGRESS).inner_text())]
 
 
-def _walk_the_whole_story(page):
-    """Tap Show me through every beat, the way a trainer who wants to be shown would.
+CARD_CONTINUE = "#story-card-continue"
 
-    A delegated step advances the guide by itself (walkthroughOverlay.js), so this is the whole loop
-    until the last one, which stays the trainer's own tap because advancing off it closes the guide.
+
+# What is worth knowing about the screen when a beat does not complete — the questions someone
+# debugging a stuck guide asks next, answered in the failure itself rather than by re-running with a
+# hand-written browser script. Short on purpose: it is read by a person, not parsed.
+ON_SCREEN = """
+() => ({
+  dialogs: [...document.querySelectorAll("dialog[open]")].map((d) => d.id),
+  card: document.getElementById("story-card")?.hidden === false ? "shown" : "hidden",
+  appMenu: !document.getElementById("app-menu")?.classList.contains("hidden"),
+  sessionMenu: !document.getElementById("session-menu")?.classList.contains("hidden"),
+  clipboard: !document.getElementById("active-session-overlay")?.classList.contains("hidden"),
+  route: location.pathname + location.search,
+})
+"""
+
+
+def _stuck(page, step_now, caption):
+    """The message a stuck beat leaves behind: which beat, what it asked for, what the guide said,
+    and what was actually on screen."""
+    problem = page.locator(PROBLEM).inner_text().strip()
+    return (
+        f"the guide stopped at step {step_now}: {caption!r}\n"
+        f"  guide said: {problem or '(nothing)'}\n"
+        f"  on screen:  {page.evaluate(ON_SCREEN)}"
+    )
+
+
+def _walk_the_whole_story(page):
+    """Walk every beat the way a trainer would: ask to be shown where there is something to show,
+    and read the card where there is not.
+
+    A step carrying only a narration card hides Show me — there is nothing to demonstrate about a
+    button already under your thumb — so the card's own Continue is the action, and Next is then the
+    trainer's, exactly as it is for any step they performed themselves.
+
+    To WATCH it rather than read a failure, run this file with `--headed --slowmo 400`; that is why
+    there is no separate walker script beside it — a second implementation of the walk is a second
+    thing to keep true, and this one is already the thing the build gates.
     """
     seen = []
     step_now, step_count = _step_numbers(page)
     while True:
-        seen.append(page.locator(CAPTION).inner_text())
-        page.locator(SHOW_ME).click()
-        if step_now == step_count:
+        caption = page.locator(CAPTION).inner_text()
+        seen.append(caption)
+        shown = page.locator(SHOW_ME).is_visible()
+        if shown:
+            page.locator(SHOW_ME).click()
+        else:
+            page.locator(CARD_CONTINUE).click()
             expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
             page.locator(NEXT).click()
+        if step_now == step_count:
+            if shown:
+                expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
+                page.locator(NEXT).click()
             return seen
-        expect(page.locator(PROGRESS)).to_have_text(
-            re.compile(rf"step\s+{step_now + 1}\s+of", re.I), timeout=20_000
-        )
-        assert page.locator(PROBLEM).is_hidden(), (
-            f"the guide got stuck on step {step_now}: {page.locator(PROBLEM).inner_text()}"
-        )
+        try:
+            expect(page.locator(PROGRESS)).to_have_text(
+                re.compile(rf"step\s+{step_now + 1}\s+of", re.I), timeout=20_000
+            )
+        except AssertionError:
+            raise AssertionError(_stuck(page, step_now, caption)) from None
+        assert page.locator(PROBLEM).is_hidden(), _stuck(page, step_now, caption)
         step_now += 1
 
 

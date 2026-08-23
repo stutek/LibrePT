@@ -4,6 +4,25 @@ export function $id(id) {
   return document.getElementById(id);
 }
 
+/** Is this tap on the GUIDE rather than on the app?
+ *
+ * Every "tap outside closes me" rule in this app — the ☰ menu, the session menu, the plan editor —
+ * means "outside the thing you are working on". The guided demo floats its panel and its story card
+ * over the app, and a tap on those is the trainer working the guide, not dismissing what the guide
+ * is pointing at. Three separate rules learned this on 2026-08-22, one bug each: the plan editor
+ * closed under Show me, and the menus closed themselves so the next step pointed at an item that
+ * was no longer on screen.
+ *
+ * Declared here, once, because the next surface with a tap-outside rule will have the same
+ * question and no reason to know the answer. Pinned by
+ * tests/medium/test_guide_is_not_the_app.py, which tests the TAP rather than a demo flow — the
+ * demo's own walk did not catch this, because it taps Show me at moments where the closure happens
+ * to do no harm.
+ */
+export function isGuideSurface(target) {
+  return Boolean(target?.closest?.("#walkthrough-overlay, #story-card"));
+}
+
 export function $(selector, parent = document) {
   return parent.querySelector(selector);
 }

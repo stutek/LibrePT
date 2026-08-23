@@ -255,7 +255,10 @@ export function startGuidedWalkthrough({
     el.back.textContent = t("walkthrough_back");
     el.back.hidden = !controls.canGoBack;
     el.show.textContent = t("walkthrough_show");
-    el.show.hidden = !controls.canShowMe;
+    // `showMe: false` is a step saying there is nothing to demonstrate — a card whose only control
+    // is the Continue button already under the reader's thumb. Offering to walk a pointer to it
+    // spends three seconds looking like a guide that has stopped working (reported 2026-08-22).
+    el.show.hidden = !controls.canShowMe || step?.showMe === false;
     el.show.disabled = showing;
     el.next.textContent = controls.isLastStep ? t("walkthrough_done") : t("walkthrough_next");
     el.next.disabled = !controls.canAdvance || showing;

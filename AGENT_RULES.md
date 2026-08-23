@@ -271,11 +271,16 @@ files beat few large ones: less context to load, fewer collisions, a tree that d
 
 ## 7. Product Constraints That Outlive Any One Feature
 
-1. **Never put meaning only in a hover.** On a phone a tooltip is unreachable, so hover-only
+1. **Copy the app SHIPS is held to the same plain-words rule as a reply, and a step that asks for an
+   action says the action.** "The menu — where everything that is not tonight lives" was handed back
+   as word salad, and rightly: it never says *open the menu*, and the reader has to unpack a
+   metaphor to find out there is nothing to unpack. Imperative first, then at most one clause of
+   why. Cleverness in copy is a cost paid by every reader, forever.
+2. **Never put meaning only in a hover.** On a phone a tooltip is unreachable, so hover-only
    information is information nobody has. Touch targets need real padding.
-2. **In support surfaces, prefer the exact always-present identifier**: the commit SHA, which every
+3. **In support surfaces, prefer the exact always-present identifier**: the commit SHA, which every
    build has, over a tag most deploys sit between. Richer identity goes one tap away, copyable.
-3. **Keep code version and data-schema version as separate axes.** The SHA identifies the code;
+4. **Keep code version and data-schema version as separate axes.** The SHA identifies the code;
    `schemaVersion` identifies the data shape and is the only axis storage is keyed on.
 
 ---
@@ -296,19 +301,25 @@ files beat few large ones: less context to load, fewer collisions, a tree that d
 ## 9. Agent Tooling: Build the Tool, Don't Re-Improvise the Script
 
 1. **Check [agent_tools/INDEX.md](agent_tools/INDEX.md) before improvising.**
-2. **Promote a script to a tool when it will run again, fails silently otherwise, and is cheap and
+2. **Ask first whether it is a TEST.** Anything asserting something that must stay true is a test,
+   whatever it needs to run — a browser and a server are what `tests/e2e/` is for. A command nobody
+   has to remember beats a tool everybody must; a tool that reports on the state of the app is a
+   test with worse timing. What stays a tool: producing a committed artifact, exploring a running
+   page, and anything needing a human to look. Asked directly on 2026-08-22, and the answer moved
+   the icon-render check into the suite.
+3. **Promote a script to a tool when it will run again, fails silently otherwise, and is cheap and
    deterministic** — all three. Build it for yourself first; wire it into the gate only once it has
    caught something more than once. Checks needing judgement stay periodic audits in
    [TODO.md](TODO.md).
-3. **Ship a tool complete**: the module with a docstring saying why it exists, a catalog row, a unit
+4. **Ship a tool complete**: the module with a docstring saying why it exists, a catalog row, a unit
    test, and a Stage 1 task if it should gate commits.
-4. **On small files, just make the edit.** A script earns its keep only on volume, and then may match
+5. **On small files, just make the edit.** A script earns its keep only on volume, and then may match
    only an ANCHOR — exact known text — never a shape: a bare `" ()"` cleanup broke arrow functions in
    eleven modules. Assert every intended site applied, parse every touched file before linting, and
    if repair starts, regenerate from `HEAD` and re-apply rather than chasing the damage forward.
-5. **Keep cross-references alive** — `agent_tools/doclinks.py` fails the build on a dead link, anchor
+6. **Keep cross-references alive** — `agent_tools/doclinks.py` fails the build on a dead link, anchor
    or `§N.M`.
-6. **Make every pipeline task gate something.** A CI job nothing `needs:` reports red while the
+7. **Make every pipeline task gate something.** A CI job nothing `needs:` reports red while the
    deploy ships; a Stage 1 check with no CI job blocks your commit but not the deploy.
    `agent_tools/pipeline_gates.py` enforces both directions. Group fast checks into one job — a fresh
    runner costs ~30s. **Local green is not CI green**: the ZAP and static-audit jobs run bare system
