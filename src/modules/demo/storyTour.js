@@ -269,9 +269,13 @@ const ARRIVE_CHAPTER = {
       // the same link to the second and third friend depends on.
       expect: { selector: "#intake-invite-link", visible: true },
     },
+    // The handover keeps its own beat because GOING THERE is the action — and Show me is hidden on
+    // it for the same reason it is hidden on any card: the two buttons are right there, and having
+    // the guide press Continue for you would dismiss the handover without ever making it.
     narration("arrive-handover", "chapter", "story_handover_title", "story_handover_body", {
       continueUrl: "intake?demo=story&chapter=intake",
       continueLabelKey: "story_open_client_phone",
+      showMe: false,
     }),
   ]),
 };

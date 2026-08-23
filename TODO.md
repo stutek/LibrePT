@@ -782,9 +782,27 @@ trainer is not looking at.
 No behaviour change until this is settled; the entry exists so the asymmetry is recorded rather than
 re-discovered.
 
-### 8.8 [ ] Copy-program icon on the clipboard view
-**Raised 2026-08-09 (Simon).** A control on the live clipboard that copies the current program —
-one tap to reuse today's plan rather than re-authoring it. Open questions before building:
+### 8.8 [x] Copy the program to another participant — shipped 2026-08-22
+**Raised 2026-08-09 (Simon); built once §8.1 made its open questions answerable.** *Copy this plan
+to…* in the session ⋯ menu, listing the other participants by name.
+
+**Every open question below, answered by building it:**
+
+- **To whom** — a participant in the same clipboard, which was named here as the common case (a
+  walk-in joining a session underway). Listed by NAME rather than performed by a single action,
+  because "to whom" is the entire question and a control that guessed would answer it for them. The
+  same client's next session and a routine template stay §17.4's business.
+- **What** — the prescription only ([planCopy.js](src/domain/planCopy.js)): movements, targets, rests
+  and circuits. Logged sets and completions stay with whoever did them, or a copy would write a
+  stranger's numbers into this person's history.
+- **Placement** — the ⋯ menu, beside *Everyone on this plan*, rather than the title bar: the bar was
+  measured at 48px of icons against 169px of title on a 390px phone (§30.1's neighbourhood), and the
+  unit being copied is the whole programme, not a card.
+- **Against §8.1** — the two are deliberately adjacent and deliberately different, and the menu now
+  states both in one place: a copy DIVERGES the moment either plan is edited, a binding never does.
+  Each item gets a fresh id, circuits remapped together, so nothing is shared by accident.
+
+The original notes, kept because they are what made the answers obvious:
 
 - **Copy to what?** The three plausible targets are a different participant in the same clipboard
   (the common case when a walk-in joins a session already underway), the same client's next session,

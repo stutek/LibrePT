@@ -125,6 +125,15 @@ export function renderActiveSessionOverlayShell() {
             <button id="btn-bind-participants" class="session-menu-item" role="menuitem">
               <i class="fa-solid fa-link"></i> <span data-i18n="bind_participants">Everyone on this plan</span>
             </button>
+            <!-- Give someone else tonight's plan (TODO §8.8) — the walk-in who joins a session
+                 already underway. A COPY, not a binding: it diverges the moment either plan is
+                 edited, which is what a trainer wants when two people do the same session at their
+                 own loads. The participants are listed by name, because "copy to whom" is the whole
+                 question and a menu item that guesses would be answering it for them. -->
+            <button id="btn-copy-plan" class="session-menu-item" role="menuitem" aria-haspopup="true">
+              <i class="fa-solid fa-copy"></i> <span data-i18n="copy_plan_to">Copy this plan to…</span>
+            </button>
+            <div id="copy-plan-targets" class="session-menu-sub hidden" role="menu"></div>
             <button id="btn-delete-session" class="session-menu-item session-menu-item-danger" role="menuitem">
               <i class="fa-solid fa-trash-can"></i> Delete Session
             </button>

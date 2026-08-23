@@ -18,6 +18,7 @@ import {
   withBinding,
   withoutBinding,
 } from "../domain/participantBinding.js";
+import { copyPlanForParticipant } from "../domain/planCopy.js";
 import { focusIndexFromRef, isCircuitFocus } from "../domain/sessionFocus.js";
 import { clampFocusIndex, ensureRestItems, isRestItem } from "../domain/sessionPlanFactory.js";
 import {
@@ -223,6 +224,9 @@ function wireSessionMenuAndActions(t) {
   const closeSessionMenu = () => {
     if (sessionMenu) sessionMenu.classList.add("hidden");
     if (sessionMenuBtn) sessionMenuBtn.setAttribute("aria-expanded", "false");
+    // The "copy to whom" list closes with the menu that holds it — reopening ⋯ to find a submenu
+    // already unfolded from last time reads as the app having remembered a decision nobody made.
+    document.getElementById("copy-plan-targets")?.classList.add("hidden");
   };
   if (sessionMenuBtn && sessionMenu) {
     sessionMenuBtn.addEventListener("click", (e) => {
@@ -275,6 +279,73 @@ function wireSessionMenuAndActions(t) {
     saveActiveSessionToCache();
     renderActiveGroupBoard();
   }
+
+  /** Lists who tonight's plan can be given to, inside the ⋯ menu (TODO §8.8).
+   *
+   * Names rather than a single "copy" action, because *to whom* is the entire question — the common
+   * case is a walk-in joining a session already underway, and a menu item that guessed would be
+   * answering it for the trainer. Built with createElement and textContent: these are client names.
+   */
+  function renderCopyPlanTargets() {
+    const list = document.getElementById("copy-plan-targets");
+    const activeSession = getActiveSession();
+    if (!list || !activeSession) return;
+    const { state, t } = getAppDeps();
+    list.textContent = "";
+
+    const others = (activeSession.participants || []).filter(
+      (clientId) => clientId !== activeSession.activeClientId,
+    );
+    for (const clientId of others) {
+      const client = (state.clients || []).find((row) => row.id === clientId);
+      const option = document.createElement("button");
+      option.type = "button";
+      option.className = "session-menu-item";
+      option.setAttribute("role", "menuitem");
+      option.dataset.copyTo = clientId;
+      option.textContent = client?.name || t("unknown_client");
+      option.addEventListener("click", () => {
+        closeSessionMenu();
+        copyPlanTo(clientId);
+      });
+      list.appendChild(option);
+    }
+    // Nobody to copy to is a menu that says so rather than an empty box that looks broken.
+    if (others.length === 0) {
+      const empty = document.createElement("p");
+      empty.className = "session-menu-empty";
+      empty.textContent = t("copy_plan_nobody");
+      list.appendChild(empty);
+    }
+  }
+
+  /** Gives another participant a copy of the plan on screen.
+   *
+   * A COPY, never a share: the two diverge from this moment on (domain/planCopy.js), which is the
+   * difference from binding them (§8.1) and the reason both controls exist. What travels is the
+   * prescription; what stays behind is what anybody did.
+   */
+  function copyPlanTo(clientId) {
+    const activeSession = getActiveSession();
+    const source = activeSession?.clientRoutines?.[activeSession.activeClientId];
+    const target = activeSession?.clientRoutines?.[clientId];
+    if (!source || !target) return;
+
+    target.exercises = copyPlanForParticipant(source.exercises, { newId: newRecordId });
+    // Their own logs are dropped with the plan they belonged to: the old ones name items that no
+    // longer exist, and leaving them would attach this person's history to nothing.
+    target.logs = {};
+    target.activeExerciseIndex = 0;
+    target.routineName = source.routineName;
+    saveActiveSessionToCache();
+    renderActiveGroupBoard();
+  }
+
+  document.getElementById("btn-copy-plan")?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    renderCopyPlanTargets();
+    document.getElementById("copy-plan-targets")?.classList.toggle("hidden");
+  });
 
   document.getElementById("btn-edit-plan")?.addEventListener("click", (e) => {
     e.stopPropagation();

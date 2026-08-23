@@ -230,3 +230,18 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
     min-height: 48px !important;
   }
 }
+
+/* The "copy to whom" list, unfolded inside the ⋯ menu (TODO §8.8). Indented so it reads as belonging
+   to the item above it rather than as three more session actions. */
+.session-menu-sub {
+  display: flex;
+  flex-direction: column;
+  border-left: 2px solid var(--primary);
+  margin-left: 10px;
+}
+.session-menu-empty {
+  margin: 0;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: var(--text-muted);
+}

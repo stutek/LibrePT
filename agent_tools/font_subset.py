@@ -13,6 +13,10 @@ pipeline needs this module to be runnable.
 for", runtime-built names included. A second list here would be a second thing to keep true, and the
 day the two disagreed the app would ship a blank box with a green gate behind it.
 
+**Adding an icon means running this again.** The e2e suite fails on an icon that is not in the
+subset — that is what caught `fa-copy` an hour after the subsetting shipped, in the commit that added
+it — and the fix is one command plus a re-recorded baseline, not a debate.
+
 **Verify with agent_tools/glyph_render.py, not by eye.** Take a baseline BEFORE running this, run it,
 then `--check`: every used icon must render byte-identically to how the full font rendered it. "It
 still renders something" is not enough — the wrong glyph at the right codepoint is also something.
