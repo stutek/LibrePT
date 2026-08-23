@@ -29,12 +29,17 @@ def _state(page):
 
 
 def _boot_with_demo_and_real_work(page, local_server):
-    """Demo data loaded, then a real client and a real routine built on a seeded exercise —
-    the exact situation a trainer is in when the demo becomes a stain."""
-    # The demo dataset arrives via conftest's autouse ?init=demo_data_load injection.
-    page.goto(local_server)
+    """Demo data loaded ONCE, then a real client and a real routine built on a seeded exercise —
+    the exact situation a trainer is in when the demo becomes a stain.
+
+    Seeded by hand rather than by the suite's autouse injection, and the test is `clean_start` for
+    the same reason: that injection puts `?init=demo_data_load` on EVERY navigation, so the reload
+    this test is about would seed the demo data straight back in. It passed for months because a
+    fixed 700ms wait happened to read the state before the re-seed finished — a test about what
+    survives storage, decided by a stopwatch.
+    """
+    page.goto(f"{local_server}?init=demo_data_load&lang=en")
     page.wait_for_selector(".session-card")
-    page.wait_for_timeout(400)
 
     page.evaluate(
         """async () => {
@@ -51,9 +56,9 @@ def _boot_with_demo_and_real_work(page, local_server):
             store.saveToLocalStorage();
         }"""
     )
-    page.wait_for_timeout(300)
 
 
+@pytest.mark.clean_start
 def test_removal_survives_a_reload(page, local_server):
     _boot_with_demo_and_real_work(page, local_server)
 
@@ -64,14 +69,28 @@ def test_removal_survives_a_reload(page, local_server):
     result = page.evaluate(
         """async () => {
             const store = await import(new URL('data/stateStore.js', document.baseURI).href);
-            return store.removeDemoData();
+            const outcome = store.removeDemoData();
+            // The removal returns as soon as memory is right; the DATABASE write it queued is what
+            // this test is about, so wait for the queue to drain before the page goes away. Without
+            // this the reload raced a write that had not been made yet.
+            const queue = await import(new URL('data/writeQueue.js', document.baseURI).href);
+            await queue.flushWrites();
+            return outcome;
         }"""
     )
     assert result["ok"] is True
-    page.wait_for_timeout(400)
 
-    page.reload()
-    page.wait_for_timeout(700)
+    # Back in with NO seed parameter: what is on screen after this came out of storage.
+    page.goto(f"{local_server}?lang=en")
+    # Waited on the records being loaded, not on a duration — the app reads IndexedDB after the page
+    # is interactive, and on a busy machine a fixed wait lands before that finishes.
+    page.wait_for_function(
+        """async () => {
+            const store = await import(new URL('data/stateStore.js', document.baseURI).href);
+            return store.getState().clients.length > 0;
+        }""",
+        timeout=20_000,
+    )
     after = _state(page)
 
     # The whole point: the demo clients are gone from STORAGE, not just from the page that ran it.

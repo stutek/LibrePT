@@ -177,9 +177,15 @@ def test_dismiss_x_cancels_the_hold_instead_of_waiting_it_out(page, local_server
 
 
 @pytest.mark.keep_splash
+@pytest.mark.keep_splash
 def test_dismissed_splash_leaves_the_app_usable(page, local_server):
     """Dismissing must remove it from the layout, not just fade it — otherwise a transparent
-    full-screen overlay goes on eating every tap."""
+    full-screen overlay goes on eating every tap.
+
+    `keep_splash` because this test does the dismissing: without it the suite's own auto-dismiss has
+    already tapped that X, and the two race for it. They agreed often enough to pass for months, and
+    disagreed the moment the machine was busy — the click landed on an X that was already on its way
+    out."""
     page.goto(local_server)
     page.locator("#splash-dismiss").click(timeout=15000)
     page.locator("#app-splash").wait_for(state="hidden", timeout=5000)

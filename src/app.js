@@ -97,8 +97,13 @@ import { openFeedbackModal } from "./modules/common/feedbackModal.js";
 import { renderNotificationArea } from "./modules/common/notificationArea.js";
 import { populateDropdownSelectors as populateDropdownsController } from "./modules/common/populateDropdownSelectors.js";
 import { registerShellRender, runShellRenders } from "./modules/common/renderRegistry.js";
-import { INIT_DEMO_DATA, getShareParams } from "./modules/common/shareLink.js";
-import { applyThemeSwitcherLabels, initTheme } from "./modules/common/theme.js";
+import { DEMO_STORY, INIT_DEMO_DATA, getShareParams } from "./modules/common/shareLink.js";
+import {
+  applyTheme,
+  applyThemeSwitcherLabels,
+  getInitialTheme,
+  initTheme,
+} from "./modules/common/theme.js";
 import {
   escapeHTML,
   formatClockFromMinutes,
@@ -118,7 +123,7 @@ import {
   renderHistoryViewShell,
 } from "./modules/history/historyView.js";
 import { isIntakeLocation, resolveIntakeLang } from "./modules/intake/intakeRoute.js";
-import { browserSignupPlatform } from "./modules/intake/signupDelivery.js";
+import { browserSignupPlatform, storySignupPlatform } from "./modules/intake/signupDelivery.js";
 import {
   openAdjustmentWizardComponent,
   renderAdjustmentsViewShell,
@@ -254,6 +259,11 @@ async function init() {
       getShareParams().lang,
       navigator.languages || [navigator.language],
     );
+    // The theme the link named, on screen only: `theme-boot.js` put it on <html> before paint, but
+    // every theme stylesheet declares its tokens against `html.X, body.X` and <body> still wears the
+    // light class from the document. Applied without persisting, because this phone belongs to a
+    // stranger and the whole boot writes nothing (§26.1).
+    applyTheme(getInitialTheme(), { persist: false });
     appBoot.bootIntake({
       // A dictionary read straight from the chosen language, never through `state.lang` — there is no
       // state on this path and nothing to write a choice into.
@@ -262,7 +272,11 @@ async function init() {
       onChooseLanguage: (chosen) => {
         intakeLang = resolveIntakeLang(chosen, []);
       },
-      platform: browserSignupPlatform(),
+      // The story's client chapter must not drop a file into a viewer's Downloads folder, so when
+      // the demo is what brought them here the last inch is a recorder rather than a share sheet
+      // (modules/intake/signupDelivery.js). Everything before it is the real page.
+      platform:
+        getShareParams().demo === DEMO_STORY ? storySignupPlatform() : browserSignupPlatform(),
       todayIso: () => getISODateString(Date.now()),
       consentVersion: CONSENT_FORM_VERSION,
       noticeUrlFor: clientPrivacyNoticeUrl,

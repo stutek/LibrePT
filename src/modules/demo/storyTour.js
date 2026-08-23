@@ -81,8 +81,10 @@ function foldCards(steps) {
   for (const step of steps) {
     const isCard = Boolean(step.narrate) && step.target === CARD_TARGET;
     // A card that leaves this page keeps its own beat for the same reason the last one does: going
-    // there IS the action, and it is the guide's Next that makes it.
-    const staysAStep = isCard && (step.advanceTo || step.narrate.onward);
+    // there IS the action, and it is the guide's Next that makes it. So does a card the viewer is
+    // meant to LOOK at rather than read past — the message arriving on a phone, the file landing on
+    // the trainer's — because folding it onto the next beat hides it behind that beat's own words.
+    const staysAStep = isCard && (step.advanceTo || step.narrate.onward || step.keepOwnBeat);
     if (isCard && !staysAStep) {
       pending = pending || step;
       continue;
@@ -316,7 +318,20 @@ const INTAKE_CHAPTER = {
   // handover above (domain/demoStory.js decides what a surface means for a whole-story walk).
   surface: "client",
   steps: foldCards([
-    narration("intake-open", "chapter", "story_chapter_intake", "story_intake_open_body"),
+    // What Ana actually receives, drawn as the message it is — the trainer's text with the link in
+    // it. The paper track's rule holds (§35.1): a beat that happens OUTSIDE this app is narrated on
+    // a card that could never be mistaken for one of its screens. A message is not our surface at
+    // all, so nobody goes looking for it in the app; what matters is that the viewer sees the thing
+    // Ana taps, rather than being teleported onto a form (asked for 2026-08-23).
+    narration("intake-message", "message", "story_message_title", "story_message_body", {
+      persona: CLIENT,
+      keepOwnBeat: true,
+      caption: "story_step_message",
+      showMe: false,
+    }),
+    narration("intake-open", "chapter", "story_chapter_intake", "story_intake_open_body", {
+      persona: CLIENT,
+    }),
     {
       id: "intake-name",
       persona: CLIENT,
@@ -350,13 +365,34 @@ const INTAKE_CHAPTER = {
       caption: "story_step_intake_consent",
       expect: { selector: "#intake-consent:checked" },
     },
+    {
+      // The send itself — the beat the chapter was missing. The button is the real one and the file
+      // it builds is the real file; only the last inch is mocked, because a demo may not drop a
+      // `.librept-signup` into the Downloads folder of everyone who watches
+      // (modules/intake/signupDelivery.js).
+      id: "intake-send",
+      persona: CLIENT,
+      target: "#intake-send",
+      caption: "story_step_intake_send",
+      expect: { selector: "#intake-status", containsText: "Shared" },
+    },
+    // Where that file went, on the other phone. Narrated rather than drawn for the same reason as
+    // the message above: this happens in the trainer's messaging app, not in ours.
+    narration("intake-arrived", "message", "story_arrived_title", "story_arrived_body", {
+      persona: CLIENT,
+      keepOwnBeat: true,
+      caption: "story_step_arrived",
+      showMe: false,
+    }),
     // ...and back to the trainer's own phone, by the step id rather than the chapter: the trainer's
     // run is one numbered sequence, and returning to "chapter 3, beat 1" would restart the count in
     // the middle of a story the viewer is four beats into. Resuming by step is what the address
     // already does after a reload.
     narration("intake-close", "chapter", "story_chapter_intake", "story_intake_close_body", {
+      persona: CLIENT,
       advanceTo: "?demo=story&step=programme-open-session",
       nextLabelKey: "story_back_to_your_phone",
+      caption: "story_step_back_to_your_phone",
       showMe: false,
     }),
   ]),

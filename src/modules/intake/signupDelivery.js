@@ -46,6 +46,27 @@ export function browserSignupPlatform() {
   };
 }
 
+/** The platform the guided STORY runs on, in place of the browser's own (TODO §35.3e).
+ *
+ * **A demo must not put a file on a stranger's phone.** The real routes are a share sheet, which a
+ * scripted demonstration cannot drive, and a download, which would drop a `.librept-signup` file
+ * into the Downloads folder of everyone who watched. So the story hands the file to a recorder
+ * instead: everything up to that point is the real page doing the real thing — the form, the
+ * validation, the file that gets built — and only the last inch is mocked.
+ *
+ * `onSent` is what draws the "it is on its way" card; the file itself is passed through so the story
+ * can say what was actually produced rather than a sentence somebody typed.
+ */
+export function storySignupPlatform({ onSent } = {}) {
+  return {
+    // Always yes: the point of the beat is to show the send, and a device without a share sheet
+    // would otherwise send the story down the save-a-file path it must not take.
+    canShareFiles: () => true,
+    shareFiles: async (data) => onSent?.(data?.files?.[0] || null),
+    saveFile: async (file) => onSent?.(file),
+  };
+}
+
 /** The `File` the client is about to send, or null if the submission cannot be represented — a
  *  half-written introduction is worse than an obvious refusal to send one. */
 export function buildSignupFile(signup, isoDate, FileImpl = File) {

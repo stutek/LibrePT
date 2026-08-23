@@ -86,7 +86,12 @@ export function getInitialTheme() {
 //
 // classList.remove/add, never `className =`: the root and body are shared surfaces — assigning the
 // whole attribute would silently drop any other class a feature had put there.
-export function applyTheme(themeKey) {
+/** Puts a theme on screen. `persist: false` puts it on screen and NOWHERE else — which is what the
+ * client's intake page needs: a link may name a theme, and a stranger's phone must come away with
+ * nothing written on it (§26.1). It is also why that page could not simply call this before: the
+ * write was not optional, so the page applied no theme at all and `<body>` kept the light class
+ * while `<html>` wore the one the link asked for. */
+export function applyTheme(themeKey, { persist = true } = {}) {
   const resolved = resolveTheme(themeKey);
 
   for (const themeClass of Object.values(THEME_BODY_CLASS)) {
@@ -104,10 +109,12 @@ export function applyTheme(themeKey) {
   const themeSwitcher = document.getElementById("theme-switcher");
   if (themeSwitcher) themeSwitcher.value = resolved;
 
-  try {
-    localStorage.setItem("librept-theme", resolved);
-  } catch (err) {
-    console.warn("Failed to persist theme choice to localStorage:", err);
+  if (persist) {
+    try {
+      localStorage.setItem("librept-theme", resolved);
+    } catch (err) {
+      console.warn("Failed to persist theme choice to localStorage:", err);
+    }
   }
 
   return resolved;

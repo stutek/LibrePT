@@ -484,6 +484,19 @@ export const en = {
     "Tap Open Ana's phone — the green button just below this text. The browser leaves your own app and goes to the page Ana really opens from the link in her message, and the story carries on there.",
   story_step_thanks:
     "Every task is done, from a question after a class to next week already in the diary. Tap Done to put the guide away and keep exploring the app on your own, or Clear the demo data to empty it out and start with your own clients.",
+  story_message_title: "A message from your trainer",
+  story_message_body:
+    "Fill in your details for our training — it takes a minute and nothing stays on your phone: librept.app/intake — Sam, +386 40 111 222",
+  story_arrived_title: "It lands on the trainer's phone",
+  story_arrived_body:
+    "The file Ana sent arrives in the trainer's own messages, like any other attachment. Nothing went through a server on the way: it left her phone and reached his, and he decides whether she joins the register.",
+  story_step_intake_send:
+    "Tap Share with my trainer — the green button at the bottom. On a real phone this opens the share sheet, so Ana picks the same conversation the link arrived in. Nothing is uploaded anywhere; a file leaves her phone and that is all.",
+  story_step_message:
+    "This is what lands on Ana's phone: the trainer's own message, with the link in it. Read it, then tap Next — from here on you are on her side of the story.",
+  story_step_arrived: "Read what happened to the file, then tap Next.",
+  story_step_back_to_your_phone:
+    "Tap Back to your own phone — the browser leaves Ana's page and the story carries on where you left it, on your own.",
   story_step_intake_name:
     "Ana types her own name. It is her phone, and nothing here is stored on it.",
   story_step_intake_email: "Somewhere to send the session times.",

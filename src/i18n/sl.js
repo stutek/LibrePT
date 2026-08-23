@@ -463,6 +463,19 @@ export const sl = {
     "Pritisni Odpri Anin telefon — zeleni gumb tik pod tem besedilom. Brskalnik zapusti tvojo aplikacijo in odpre stran, ki jo Ana res odpre iz povezave v sporočilu, zgodba pa se nadaljuje tam.",
   story_step_thanks:
     "Vse naloge so opravljene, od vprašanja po vadbi do naslednjega tedna, ki je že v koledarju. Pritisni Končaj, da vodnika pospraviš in aplikacijo naprej raziskuješ sam, ali Počisti demo podatke, da jo izprazniš in začneš s svojimi strankami.",
+  story_message_title: "Sporočilo od trenerja",
+  story_message_body:
+    "Izpolni svoje podatke za najin trening — vzame minuto in na tvojem telefonu ne ostane nič: librept.app/intake — Sam, +386 40 111 222",
+  story_arrived_title: "Prispe na trenerjev telefon",
+  story_arrived_body:
+    "Datoteka, ki jo je Ana poslala, pride v trenerjeva sporočila kot vsaka druga priponka. Nič ni šlo prek strežnika: odšla je z njenega telefona in prispela na njegovega, on pa se odloči, ali jo sprejme v seznam.",
+  story_step_intake_send:
+    "Pritisni Deli s trenerjem — zeleni gumb spodaj. Na pravem telefonu se odpre sistemsko deljenje in Ana izbere isti pogovor, po katerem je prišla povezava. Nikamor se nič ne naloži; z njenega telefona odide datoteka in to je vse.",
+  story_step_message:
+    "To pride na Anin telefon: trenerjevo sporočilo s povezavo. Preberi ga in pritisni Naprej — od tu naprej si na njeni strani zgodbe.",
+  story_step_arrived: "Preberi, kaj se je zgodilo z datoteko, in pritisni Naprej.",
+  story_step_back_to_your_phone:
+    "Pritisni Nazaj na tvoj telefon — brskalnik zapusti Anino stran in zgodba se nadaljuje tam, kjer si ostal.",
   story_step_intake_name:
     "Ana vpiše svoje ime. To je njen telefon in nič od tega se nanj ne shrani.",
   story_step_intake_email: "Kam naj ji pošlje termine.",

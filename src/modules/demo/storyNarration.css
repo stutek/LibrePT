@@ -125,6 +125,28 @@
   color: #3b3423;
 }
 
+/* The MESSAGE track: a beat that happens in a messaging app, not in this one — the link arriving on
+   the client's phone, and her file arriving on the trainer's. Drawn as a bubble because that is what
+   the viewer is being told to picture, and because it could never be mistaken for a screen of this
+   app, which is the whole rule the paper track exists for (§35.1). */
+.story-card--message {
+  background: color-mix(in srgb, #22c55e 12%, var(--bg-secondary, #ffffff));
+  border-color: color-mix(in srgb, #22c55e 40%, transparent);
+  border-left: 3px solid #22c55e;
+}
+
+.walkthrough-panel .story-card--message {
+  padding: 0.75rem 0.9rem;
+  border-radius: var(--border-radius, 12px);
+  border-left: 3px solid #22c55e;
+}
+
+/* The message itself is somebody's words, so it is set in the quotation the reader would see on
+   their own phone rather than in the story's narrating voice. */
+.story-card--message .story-card-body {
+  font-style: italic;
+}
+
 /* In the guide's head, beside the step counter: read in the same glance as "step 4 of 31", which is
    when a viewer wonders whose phone this is. It used to be a black tag over the app's own header,
    where it went unnoticed and read as one of the app's controls (reported 2026-08-23). */
