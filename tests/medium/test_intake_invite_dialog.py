@@ -29,9 +29,12 @@ import {
 window.__shareOutcome = 'shared';
 window.__shareCalls = 0;
 
+// The trainer's own details are a setting of the install (data/trainerIdentity.js); handed in here
+// so this tier does not depend on what happens to be in localStorage.
 initIntakeInviteDialog({
   t,
   getLang: () => 'en',
+  getTrainer: () => ({ name: 'Sam Trainer', phone: '+386 40 111 222' }),
   onShare: () => { window.__shareCalls += 1; return Promise.resolve(window.__shareOutcome); },
 });
 window.__open = () => openIntakeInviteDialog();
@@ -72,6 +75,9 @@ def test_a_phone_number_prepares_a_text_message_and_says_so(page, local_server):
     # ...and the invitation travels with it, because a bare URL in a text is indistinguishable from
     # a phishing attempt.
     assert "body=" in href and "intake" in href
+    # Signed: a bare URL in a text message is indistinguishable from phishing, and the trainer's
+    # number written in it is the closest thing to a contact card a text can carry.
+    assert "Sam%20Trainer" in href and "111" in href
 
 
 def test_an_email_address_prepares_a_mail_instead(page, local_server):

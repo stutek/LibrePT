@@ -16,7 +16,9 @@
 // none lets the visitor's own phone decide (modules/intake/intakeRoute.js), which is a better guess
 // than the trainer's app language.
 //
-// Injected dependencies: `platform` = { canShare, share, copy } and `t`.
+// Injected dependencies: `platform` = { canShare, share, copy }, `t`, and `trainer` — who signs the
+// message. Injected rather than read here: this module is a browser away from `localStorage`, and a
+// default that reached for it would make every caller depend on a browser having one.
 
 import { PUBLIC_SITE_URL } from "../../data/publicUrls.js";
 import { contactChannelFor, dialledForm } from "../../domain/contactChannel.js";
@@ -35,8 +37,23 @@ export function intakeInviteUrl({ lang } = {}) {
   return lang ? `${base}?lang=${encodeURIComponent(lang)}` : base;
 }
 
-export function intakeInviteMessage({ url, t }) {
-  return `${t("intake_invite_message")} ${url}`;
+/** The message the invitation travels in, signed by the trainer when the install knows who they are.
+ *
+ * **Signed, because the person receiving it has usually met the trainer once.** A bare URL in a text
+ * is indistinguishable from phishing; a URL under a name and a number is somebody they just spoke
+ * to. The number is also the practical half of "can the invitation carry your contact?" (asked
+ * 2026-08-23): neither `sms:` nor `mailto:` can attach a vCard, but a number written in a message
+ * is tappable on both phones and reaches the address book in two taps.
+ *
+ * Nothing is added when the trainer has not filled their details in — those exist for calendar
+ * invites (data/trainerIdentity.js) and are not required — because a signature reading "— ," is
+ * worse than none.
+ */
+export function intakeInviteMessage({ url, t, trainer } = {}) {
+  const signature = [trainer?.name, trainer?.phone].filter(Boolean).join(", ");
+  return signature
+    ? `${t("intake_invite_message")} ${url}\n\n— ${signature}`
+    : `${t("intake_invite_message")} ${url}`;
 }
 
 /** Sends the link the way the device can: the share sheet if there is one, the clipboard otherwise.
@@ -45,9 +62,9 @@ export function intakeInviteMessage({ url, t }) {
  * a decision rather than a failure, and reporting it as sent is the one outcome that costs a client
  * their appointment. Same distinction signupDelivery.js makes on the other side of this flow.
  */
-export async function sendIntakeInvite({ platform, t, lang } = {}) {
+export async function sendIntakeInvite({ platform, t, lang, trainer } = {}) {
   const url = intakeInviteUrl({ lang });
-  const text = intakeInviteMessage({ url, t });
+  const text = intakeInviteMessage({ url, t, trainer });
   if (platform?.canShare?.()) {
     try {
       await platform.share({ text, url });
@@ -81,10 +98,14 @@ export async function sendIntakeInvite({ platform, t, lang } = {}) {
  * number or address, lands in their own sent items, and this app never touches a carrier or a
  * mail server.
  */
-export function intakeInviteHref({ contact, lang, t } = {}) {
+export function intakeInviteHref({ contact, lang, t, trainer } = {}) {
   const channel = contactChannelFor(contact);
   if (!channel) return null;
-  const text = intakeInviteMessage({ url: intakeInviteUrl({ lang }), t });
+  const text = intakeInviteMessage({
+    url: intakeInviteUrl({ lang }),
+    t,
+    trainer,
+  });
   if (channel === "sms") {
     // `?&body=` rather than `?body=`: iOS only honours the body after a leading `&`, Android takes
     // either. The same one form the consent letter settled on (modules/common/consentForm.js).

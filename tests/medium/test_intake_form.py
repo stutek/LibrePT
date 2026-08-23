@@ -123,6 +123,23 @@ def test_the_file_carries_what_the_client_typed_and_what_they_ticked(
     assert delivered[0]["name"] == "jana-novak-2026-08-17.librept-signup.json"
 
 
+def test_the_tick_itself_says_what_is_being_agreed_to(page, local_server):
+    """Informed consent rests on full disclosure or it is void (ruled 2026-08-23).
+
+    The line beside the box is the only thing most people read — the notice and the full wording are
+    one tap away and stay there for the detail, but the substance may not hide behind them. So the
+    sentence names where the details live, the backup copy in the trainer's own Drive, that nobody
+    else receives them, and the right to withdraw."""
+    _mount(page, local_server)
+
+    agreed = page.locator("label[for='intake-consent']").inner_text()
+
+    for disclosed in ("device", "backup", "Drive", "no other service", "withdraw"):
+        assert disclosed.lower() in agreed.lower(), (
+            f"the consent line does not disclose {disclosed!r}: {agreed!r}"
+        )
+
+
 def test_nothing_is_sent_until_the_consent_box_is_ticked(page, local_server):
     """A trainer may not store a stranger's details without it, so the form refuses to produce the
     file at all — and says which of the two problems it is, rather than one generic error."""
@@ -204,4 +221,4 @@ def test_where_sharing_works_it_is_the_one_tap_route(page, local_server):
     delivered = _deliver(page, "#intake-send")
 
     assert [entry["how"] for entry in delivered] == ["share"]
-    expect(page.locator("#intake-status")).to_contain_text("Sent")
+    expect(page.locator("#intake-status")).to_contain_text("Shared")

@@ -5,6 +5,7 @@
 
 import { clientDisambiguator, clientsSharingName } from "../data/clientErasure.js";
 import { newRecordId } from "../data/recordId.js";
+import { readTrainerIdentity } from "../data/trainerIdentity.js";
 import {
   consentSectionMarkup,
   fillConsentSection,
@@ -123,7 +124,14 @@ export function setupClientForms({
     initIntakeInviteDialog({
       t,
       getLang: () => state.lang,
-      onShare: () => sendIntakeInvite({ platform: browserInvitePlatform(), t, lang: state.lang }),
+      getTrainer: () => readTrainerIdentity(),
+      onShare: () =>
+        sendIntakeInvite({
+          platform: browserInvitePlatform(),
+          t,
+          lang: state.lang,
+          trainer: readTrainerIdentity(),
+        }),
     });
     openIntakeInviteDialog();
   });

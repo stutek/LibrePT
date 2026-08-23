@@ -23,8 +23,8 @@
 // trainer has accepted them (§26.5), and a half-remembered phone number sitting in storage would be
 // a client record nobody consented to.
 //
-// Injected dependencies: `t`, `getLang()`, `onShare()` (the share-sheet/clipboard route, so this
-// module owns no `navigator`).
+// Injected dependencies: `t`, `getLang()`, `getTrainer()` (who signs the invitation) and `onShare()`
+// (the share-sheet/clipboard route, so this module owns no `navigator`).
 
 import { closeModal, openModal, renderMarkupOnce } from "../common/dom.js";
 import { intakeInviteHref, intakeInviteUrl } from "./intakeInvite.js";
@@ -71,7 +71,12 @@ export function renderIntakeInviteDialog() {
 function syncSendControl() {
   const { t } = deps;
   const contact = document.getElementById("intake-invite-contact")?.value || "";
-  const ready = intakeInviteHref({ contact, lang: deps.getLang(), t });
+  const ready = intakeInviteHref({
+    contact,
+    lang: deps.getLang(),
+    t,
+    trainer: deps.getTrainer?.(),
+  });
   const anchor = document.getElementById("intake-invite-send");
   const label = anchor?.querySelector("span");
   const channelLine = document.getElementById("intake-invite-channel");

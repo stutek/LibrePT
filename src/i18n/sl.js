@@ -245,18 +245,19 @@ export const sl = {
   intake_health_hint:
     "Samo če želiš. Gre v datoteko, ki jo pošlješ trenerju, in nikamor drugam — ne v SMS in ne v nobeno povezavo.",
   intake_consent:
-    "Strinjam se, da trener hrani in uporablja te podatke za načrtovanje in beleženje mojega treninga.",
+    "Strinjam se, da moj trener hrani te podatke in jih uporablja za načrtovanje in beleženje mojega treninga. Ostanejo na trenerjevi napravi, lahko pa se hranijo tudi kot varnostna kopija v njegovem osebnem Google Drive — nobena druga storitev jih ne prejme. Privolitev lahko kadarkoli prekličem, tako da to povem trenerju.",
   intake_notice_link: "Kaj se zgodi s tvojimi podatki",
   intake_form_link: "Celotno besedilo privolitve",
-  intake_send: "Pošlji trenerju",
-  intake_save: "Shrani datoteko in pošlji sam",
+  intake_send: "Deli s trenerjem",
+  intake_save: "Shrani datoteko za deljenje",
   intake_privacy_note:
     "Na tem telefonu se nič ne shrani in nič se ne naloži v splet. Ko zapreš to stran, je vsega konec.",
   intake_share_title: "Moji podatki za trening",
   intake_share_text: "Tu so moji podatki — datoteka se odpre v LibrePT.",
-  intake_sent: "Poslano. Trener te bo dodal iz te datoteke.",
-  intake_saved: "Shranjeno. Datoteko pripni sporočilu za trenerja.",
-  intake_send_failed: "Pošiljanje ni uspelo. Uporabi »Shrani datoteko« in jo pripni sam.",
+  intake_sent: "Deljeno. Trener te bo dodal iz te datoteke.",
+  intake_saved: "Shranjeno. Datoteko deli s trenerjem — pripni jo sporočilu.",
+  intake_send_failed:
+    "Deljenje ni uspelo. Uporabi »Shrani datoteko za deljenje« in jo pripni sporočilu.",
   intake_err_identity: "Prosim dodaj svoje ime in e-pošto ali telefonsko številko.",
   intake_err_consent: "Prosim označi privolitev — brez nje trener ne sme hraniti tvojih podatkov.",
   signup_review_lede:

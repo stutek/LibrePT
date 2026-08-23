@@ -249,19 +249,23 @@ export const en = {
   intake_injury: "Injuries or anything a trainer should know (optional)",
   intake_health_hint:
     "Only if you want to. It goes in the file you send your trainer, and nowhere else — not into a text message, and not into any link.",
+  // Informed consent rests on full disclosure or it is void (ruled 2026-08-23). The one line a
+  // client actually reads has to name what the linked notice says: the trainer's own device, the
+  // optional backup in their personal Google Drive, nobody else, and the right to withdraw. The
+  // links stay for the detail; they are not where the substance is allowed to hide.
   intake_consent:
-    "I agree to my trainer storing and using these details to plan and log my training.",
+    "I agree to my trainer keeping these details and using them to plan and log my training. They stay on my trainer's own device, and may also be kept as a backup copy in my trainer's personal Google Drive — no other service receives them. I can withdraw this at any time by telling my trainer.",
   intake_notice_link: "What happens to your data",
   intake_form_link: "The full consent wording",
-  intake_send: "Send to my trainer",
-  intake_save: "Save the file to send yourself",
+  intake_send: "Share with my trainer",
+  intake_save: "Save the file to share",
   intake_privacy_note:
     "Nothing is saved on this phone and nothing is uploaded. Close this page and it is gone.",
   intake_share_title: "My details for training",
   intake_share_text: "Here are my details — this file opens in LibrePT.",
-  intake_sent: "Sent. Your trainer will add you from that file.",
-  intake_saved: "Saved. Attach that file to a message to your trainer.",
-  intake_send_failed: "That didn't send. Try “Save the file” instead and attach it yourself.",
+  intake_sent: "Shared. Your trainer will add you from that file.",
+  intake_saved: "Saved. Share that file with your trainer — attach it to a message.",
+  intake_send_failed: "That didn't share. Use “Save the file to share” and attach it to a message.",
   intake_err_identity: "Please add your name, and either an email or a phone number.",
   intake_err_consent:
     "Please tick the consent box — your trainer cannot store your details without it.",
