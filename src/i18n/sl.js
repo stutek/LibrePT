@@ -432,11 +432,18 @@ export const sl = {
   story_chapter_intake: "Na Aninem telefonu",
   story_handover_title: "Zdaj Ana",
   story_open_client_phone: "Odpri Anin telefon",
-  story_step_arrive_menu: "Odpri meni. Tu so kartoteka strank, vaje in zgodovina.",
+  story_step_arrive_menu:
+    "Pritisni gumb ☰ — tri vodoravne črtice, zgoraj desno v temni vrstici z imenom aplikacije. Odpre meni, v katerem so seznam strank, vaje in zgodovina.",
   story_step_arrive_clients:
-    "Odpri kartoteko strank — osem ljudi in nihče ni ničesar tipkal dvakrat.",
+    "V meniju, ki se je pravkar spustil, pritisni Seznam strank (klientov) — vrstica z znakom dveh ljudi, na vrhu seznama. V njem je že osem ljudi in nihče ni ničesar tipkal dvakrat.",
   story_step_arrive_invite:
-    "Ana je po vadbi vprašala za trening. Namesto da bi ji podatke zapisoval kar na hodniku, ji trener pošlje povezavo.",
+    "Pritisni Pošlji povezavo za prijavo — gumb tik pod naslovom Stranke, na vrhu seznama ljudi. Ana je po vadbi vprašala za trening; namesto da bi ji trener podatke zapisoval kar na hodniku, ji pošlje povezavo, ki jo izpolni sama.",
+  story_step_read_on:
+    "Ko to prebereš, pritisni Nadaljuj tik pod besedilom in zgodba gre naprej na to, kar trener naredi zatem.",
+  story_step_handover:
+    "Pritisni Odpri Anin telefon — zeleni gumb tik pod tem besedilom. Brskalnik zapusti trenerjevo aplikacijo in odpre stran, ki jo Ana res odpre iz povezave v sporočilu, zgodba pa se nadaljuje tam.",
+  story_step_thanks:
+    "To je cel večer, od vprašanja po vadbi do naslednjega tedna, ki je že v koledarju. Pritisni Nadaljuj, da to kartico pospraviš in aplikacijo naprej raziskuješ sam, ali Počisti demo podatke, da jo izprazniš in začneš s svojimi strankami.",
   story_step_intake_name:
     "Ana vpiše svoje ime. To je njen telefon in nič od tega se nanj ne shrani.",
   story_step_intake_email: "Kam naj ji pošlje termine.",

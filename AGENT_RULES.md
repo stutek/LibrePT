@@ -230,6 +230,12 @@ files beat few large ones: less context to load, fewer collisions, a tree that d
     `display: flex`, which beats the UA stylesheet's `[hidden]` rule, so the button stays on screen
     and only a test notices. Cost twice: the intake page's send button, and the story's cleanup
     button.
+13. **A condition that can already hold when a step begins cannot detect that step finishing.**
+    Before writing "wait until X", ask what X is at the first instant. The story graded a beat by
+    "the card is gone" while the card measured as invisible for a quarter second at entry, so the
+    beat declared itself done before it started and the guide skipped two of them in a blink.
+    Anything measuring a node's visibility inherits every ancestor's — a closed `<dialog>` draws
+    nothing, so everything parented inside it reads as invisible.
 
 ---
 
@@ -279,6 +285,10 @@ files beat few large ones: less context to load, fewer collisions, a tree that d
    as word salad, and rightly: it never says *open the menu*, and the reader has to unpack a
    metaphor to find out there is nothing to unpack. Imperative first, then at most one clause of
    why. Cleverness in copy is a cost paid by every reader, forever.
+   **An instruction to tap something names the control, its glyph and where it is**: "Tap the ☰
+   button — three stacked lines, in the top right corner". "Open the menu" assumes the reader
+   already knows which of forty things on screen is the menu, which is exactly what they do not.
+   Never shorten these to save room; give them the room.
 2. **Never put meaning only in a hover.** On a phone a tooltip is unreachable, so hover-only
    information is information nobody has. Touch targets need real padding.
 3. **In support surfaces, prefer the exact always-present identifier**: the commit SHA, which every

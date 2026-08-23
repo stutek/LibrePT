@@ -450,11 +450,17 @@ export const en = {
   story_handover_title: "Over to Ana",
   story_open_client_phone: "Open Ana's phone",
   story_step_arrive_menu:
-    "Open the menu. The client register, the movements and the history all live in here.",
+    "Tap the ☰ button — three stacked lines, in the top right corner of the screen, in the dark bar with the app's name. It opens the menu, and the client register, the movements and the history all live in there.",
   story_step_arrive_clients:
-    "Open the client register — eight people, and nobody typed a word of it twice.",
+    "In the menu that just dropped down, tap Clients Directory — the row with two little people next to it, at the top of the list. Eight people are already in that register, and nobody typed a word of it twice.",
   story_step_arrive_invite:
-    "Ana asked about training after a class. Instead of taking her details standing in a corridor, the trainer sends her a link.",
+    "Tap Send an intake link — the button just under the Clients heading, at the top of the list of people. Ana asked about training after a class, and instead of taking her details standing in a corridor, the trainer sends her a link she fills in herself.",
+  story_step_read_on:
+    "When you have read that, tap Continue just below it, and the story goes on to the next thing the trainer does.",
+  story_step_handover:
+    "Tap Open Ana's phone — the green button just below this text. The browser leaves the trainer's app and goes to the page Ana really opens from the link in her message, and the story carries on there.",
+  story_step_thanks:
+    "That is the whole evening, from a question after a class to next week already in the diary. Tap Continue to put this card away and keep tapping around the app on your own, or Clear the demo data to empty it out and start with your own clients.",
   story_step_intake_name:
     "Ana types her own name. It is her phone, and nothing here is stored on it.",
   story_step_intake_email: "Somewhere to send the session times.",

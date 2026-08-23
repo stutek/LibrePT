@@ -182,9 +182,15 @@ export function startGuidedWalkthrough({
     // A control scrolled up behind the app header has nothing to point AT, and a ring drawn there
     // points at the header instead (reported 2026-08-19). Hidden rather than clamped: a ring that
     // slid to the edge and stayed would claim something is there.
-    const headerBottom = doc.getElementById("app-header")?.getBoundingClientRect().bottom ?? 0;
+    // ...but a control that LIVES in the header is not scrolled away, it is exactly where it
+    // belongs, and hiding its ring left the story's first beat — "open the menu" — with nothing
+    // marked on screen at all (reported 2026-08-23). The test is where the control lives, not where
+    // it sits: everything in the header is above the header's own bottom edge by definition.
+    const header = doc.getElementById("app-header");
+    const headerBottom = header?.getBoundingClientRect().bottom ?? 0;
     const viewportHeight = doc.documentElement.clientHeight;
-    if (box.bottom <= headerBottom || box.top >= viewportHeight) {
+    const behindHeader = box.bottom <= headerBottom && !header?.contains(target);
+    if (behindHeader || box.top >= viewportHeight) {
       el.spotlight.classList.remove("is-visible");
       return;
     }
@@ -314,6 +320,13 @@ export function startGuidedWalkthrough({
   }
 
   async function enterStep({ viaBack = false } = {}) {
+    // FIRST, before anything is shown or graded: a dialog the previous step closed leaves the panel
+    // parented inside it, and a closed `<dialog>` is `display: none` — so the panel and everything
+    // in it measure as invisible until the next poll tick puts them back. Harmless while the panel
+    // held only text; once the story's card lives in it, a beat that ends when the card goes away
+    // graded itself finished the moment it began, and the guide skipped two beats in a blink
+    // (found 2026-08-23, walking the story after the two cards were merged into one).
+    keepPanelReachable();
     el.problem.hidden = true;
     const step = currentWalkthroughStep(tour, state);
     // BEFORE the precondition and the target lookup: a narrated beat's own control is the card the

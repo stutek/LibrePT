@@ -160,6 +160,30 @@ def test_the_story_leaves_the_note_on_the_person_it_was_about(page, local_server
     assert "left knee, third round" in notes
 
 
+def test_the_story_and_the_guide_are_one_numbered_card(page, local_server):
+    """Reported 2026-08-23: the story's words and the guide's controls were two separate boxes, so
+    the first thing a viewer read carried no step number and the second looked mis-numbered — "1 of
+    31" on what was plainly the second card, with no way back from either.
+
+    The promise is one box: the words, the count and the way back are read together, and it starts
+    at one."""
+    _open_story(page, local_server)
+
+    expect(page.locator("#story-card")).to_be_visible()
+    # Compared in the page: a DOM node does not survive the trip out, so identity has to be decided
+    # where the nodes are.
+    together = page.evaluate(
+        "() => { const box = (s) => document.querySelector(s)?.closest('.walkthrough-panel');"
+        "        const words = box('#story-card');"
+        "        return Boolean(words) && words === box('.walkthrough-progress'); }"
+    )
+    assert together, "the story's words and the step count must be in the same card"
+
+    step_now, step_count = _step_numbers(page)
+    assert step_now == 1, f"the first card a viewer reads is step {step_now}, not 1"
+    assert step_count > 1
+
+
 def test_one_chapter_can_be_walked_on_its_own(page, local_server):
     """Chapters exist because nobody watches five unbroken minutes of software they do not use yet,
     so a link naming one has to open that one."""

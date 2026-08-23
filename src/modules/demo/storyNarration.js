@@ -17,6 +17,14 @@
 // the card is shown WITH the step it explains, and the trainer's first tap — on Continue, or on the
 // control the step is about — takes it away.
 //
+// **The story and the guide are ONE card on screen, not two** (reported 2026-08-23). They used to be
+// separate boxes: the story's words floated above the middle of the screen with no step number and
+// no way back, while the guide's own panel sat at the bottom saying "Step 1 of 31" — so the first
+// thing a viewer read looked unnumbered and the second looked mis-numbered. The narration is
+// therefore drawn INSIDE the guide's panel, above its caption: one box, one step number, one Back
+// button, in reading order — the story, then what to do about it. It falls back to the body when
+// there is no panel, which is how it can be mounted and tested on its own.
+//
 // **The persona label is permanent while a persona is on screen.** One persona at a time was the
 // ruling (§35.1) — no split screen — so the only thing telling a viewer whose phone they are looking
 // at is this label. The app looks the same on both sides of a handover.
@@ -103,7 +111,11 @@ export function mountStoryNarration({ doc = document, t, onClearDemoData } = {})
   const existing = doc.getElementById(CARD_ID);
   if (existing) existing.remove();
 
-  const { card, kicker, title, body, cleanup, handover } = buildCard(doc, t, onClearDemoData);
+  const { card, kicker, title, body, button, cleanup, handover } = buildCard(
+    doc,
+    t,
+    onClearDemoData,
+  );
   const persona = element(doc, "p", "story-persona", PERSONA_ID);
   persona.hidden = true;
 
@@ -121,12 +133,30 @@ export function mountStoryNarration({ doc = document, t, onClearDemoData } = {})
       // demonstrated (the pointer then reaches for a button that is no longer on screen). The same
       // distinction the plan editor's tap-outside rule had to learn the same day.
       if (isGuideSurface(event.target)) return;
+      // Only while the card stands on its own. Inside the guide's panel it is a SECTION of the card
+      // the trainer is reading, and taking half of that away on the first tap makes the panel jump
+      // under a thumb already on its way to a button.
+      if (card.closest(".walkthrough-panel")) return;
       if (!card.contains(event.target)) card.hidden = true;
     },
     true,
   );
 
+  /** Re-homes the card into the guide's panel, above its caption.
+   *
+   * Done at every beat rather than once at mount: the guide's panel does not exist yet when the
+   * narration mounts, and the panel itself moves between the body and an open dialog to stay
+   * reachable in the top layer — the card has to travel with it or the story would be left behind
+   * on a page that has gone inert.
+   */
+  function homeInPanel() {
+    const panel = doc.querySelector(".walkthrough-panel");
+    if (!panel || card.parentElement === panel) return;
+    panel.insertBefore(card, panel.querySelector(".walkthrough-caption"));
+  }
+
   function showStep(step) {
+    homeInPanel();
     if (step?.persona) {
       persona.textContent = t(step.persona);
       persona.hidden = false;
@@ -139,6 +169,12 @@ export function mountStoryNarration({ doc = document, t, onClearDemoData } = {})
       kicker.textContent = step.narrate.kickerKey ? t(step.narrate.kickerKey) : "";
       title.textContent = t(step.narrate.titleKey);
       body.textContent = t(step.narrate.bodyKey);
+      // Continue belongs to a beat whose control IS this button — a card closing a chapter, the
+      // handover, the thank-you. Where the card rides on a real step instead, the trainer's action
+      // is on the app and the guide's Next advances it, so a second button that only erased half of
+      // what they are reading would be one button too many (reported 2026-08-23).
+      const ownsTheBeat = step.target === `#${CONTINUE_ID}`;
+      button.classList.toggle("hidden", !ownsTheBeat);
       cleanup.classList.toggle("hidden", !(step.narrate.onward && onClearDemoData));
       const goTo = step.narrate.continueUrl;
       handover.classList.toggle("hidden", !goTo);

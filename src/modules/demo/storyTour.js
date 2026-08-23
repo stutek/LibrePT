@@ -44,10 +44,11 @@ function narration(id, kind, titleKey, bodyKey, extra = {}) {
     persona: TRAINER,
     narrate: { kind, titleKey, bodyKey, onward, continueUrl, continueLabelKey },
     target: CARD_TARGET,
-    // The guide's panel says the SHORT thing (the chapter's name) while the card holds the prose:
-    // two surfaces are on screen at once now that the story is driven rather than watched, and
-    // repeating the paragraph in both is how a viewer learns to read neither.
-    caption: titleKey,
+    // The story and the guide are ONE card now (reported 2026-08-23), so the caption is the line
+    // under the prose that says what to DO — never the title again, which is already the first
+    // thing in the same box. The handover and the thank-you say something more specific and pass
+    // their own caption in.
+    caption: "story_step_read_on",
     expect: CARD_DISMISSED,
     ...step,
   };
@@ -275,6 +276,7 @@ const ARRIVE_CHAPTER = {
     narration("arrive-handover", "chapter", "story_handover_title", "story_handover_body", {
       continueUrl: "intake?demo=story&chapter=intake",
       continueLabelKey: "story_open_client_phone",
+      caption: "story_step_handover",
       showMe: false,
     }),
   ]),
@@ -443,6 +445,7 @@ const EVENING_CHAPTER = {
     },
     narration("evening-close", "chapter", "story_thanks_title", "story_gym_close_body", {
       onward: true,
+      caption: "story_step_thanks",
     }),
   ]),
 };

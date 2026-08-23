@@ -5,7 +5,45 @@
    live app being used, and a demo that restyled what it demonstrates would be showing a different
    product. Only the words wrapped around it are drawn here. */
 
-/* The narration card. Above the clipboard overlay (120/130) and the walkthrough panel (9400), below
+/* Inside the guide's panel, the narration is a SECTION of that card, not a card of its own
+   (reported 2026-08-23: two boxes, one unnumbered and one apparently mis-numbered). It keeps only
+   its words and its spacing — the border, the shadow and the placement belong to the panel around
+   it, which already carries the step number, the exit and the Back button. */
+.walkthrough-panel .story-card {
+  position: static;
+  z-index: auto;
+  width: auto;
+  max-width: none;
+  transform: none;
+  margin: 0;
+  padding: 0 0 0.35rem;
+  /* The prose SCROLLS rather than growing the panel. The guide moves its panel out of the way of
+     the control a step is about, and it can only do that while there is screen left over — a panel
+     grown to half the phone by a long paragraph ends up over the very thing it is pointing at, which
+     is how the story first got stuck mid-swap. The text is never shortened for this; it is the box
+     that is bounded. */
+  max-height: 32vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  color: inherit;
+}
+
+/* The story's own words sit above the instruction, so the seam between them is a rule rather than
+   a gap: a viewer reads the paragraph, then the one line telling them what to do with it. */
+.walkthrough-panel .story-card::after {
+  content: "";
+  display: block;
+  height: 1px;
+  margin-top: 0.6rem;
+  background: var(--card-border, rgba(15, 23, 42, 0.12));
+}
+
+/* The narration card when it stands alone — mounted without a guide around it, which is how it is
+   tested on its own. Above the clipboard overlay (120/130) and the walkthrough panel (9400), below
    the hand (9999) — the pointer has to read as being over the card it is about to tap. */
 .story-card {
   position: fixed;
@@ -86,6 +124,16 @@
 .story-card--paper .story-card-kicker,
 .story-card--paper .story-card-body {
   color: #6b5f45;
+}
+
+/* Inside the guide's panel the paper keeps its texture — it is what says "this beat happens on
+   paper, not on a screen" — but becomes an inset sheet rather than the whole card, since the card
+   is now the guide's. */
+.walkthrough-panel .story-card--paper {
+  padding: 0.75rem 0.9rem;
+  border-radius: var(--border-radius, 12px);
+  border-left: 3px solid color-mix(in srgb, #dc2626 45%, transparent);
+  color: #3b3423;
 }
 
 /* Whose phone is on screen. One persona at a time was the ruling (§35.1), so this label is the only
