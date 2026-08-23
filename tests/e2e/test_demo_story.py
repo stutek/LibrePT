@@ -83,53 +83,79 @@ def _stuck(page, step_now, caption):
     )
 
 
-def _walk_the_whole_story(page):
-    """Walk every beat the way a trainer would: ask to be shown where there is something to show,
-    and read the card where there is not.
+def _past_the_splash(page):
+    """A crossing to the other phone is a real navigation, so the cold-start splash can be in front
+    of the guide — a viewer taps it away, and so does this. The suite's own auto-dismiss only fires
+    on navigations the TEST makes; this one is made by the app."""
+    splash = page.locator("#splash-dismiss")
+    if not splash.count() or not splash.first.is_visible():
+        return
+    try:
+        splash.first.click(timeout=2_000)
+    except Exception:
+        # It took itself down between the look and the tap — the same outcome, which is the only
+        # reason this swallows anything: what matters next is whether the guide comes back, and the
+        # walk asserts that either way.
+        pass
 
-    A step carrying only a narration card hides Show me — there is nothing to demonstrate about a
-    button already under your thumb — so the card's own Continue is the action, and Next is then the
-    trainer's, exactly as it is for any step they performed themselves.
+
+def _walk_the_whole_story(page, limit=60):
+    """Walk every beat the way a trainer would: ask to be shown where there is something to show,
+    read the card where there is not, and tap Next — which is the only thing that moves the guide.
+
+    It follows the story ACROSS the two phones. A beat whose way on is another page (the handover to
+    the client's own form, and the hand back afterwards) carries that page on Next itself, so the
+    walk simply keeps tapping and the guide comes back up on the other side.
 
     To WATCH it rather than read a failure, run this file with `--headed --slowmo 400`; that is why
     there is no separate walker script beside it — a second implementation of the walk is a second
     thing to keep true, and this one is already the thing the build gates.
     """
     seen = []
-    step_now, step_count = _step_numbers(page)
-    while True:
+    for _ in range(limit):
+        _past_the_splash(page)
+        page.locator(PANEL).wait_for(state="visible", timeout=30_000)
+        step_now, _ = _step_numbers(page)
         caption = page.locator(CAPTION).inner_text()
         seen.append(caption)
-        # Do the beat — delegated where there is something to demonstrate, read where there is not —
-        # and then tap Next. Since 2026-08-23 that second tap is the ONLY thing that moves the
-        # guide, on every beat including the last, which is why there is no longer a branch here.
+
         if page.locator(SHOW_ME).is_visible():
             page.locator(SHOW_ME).click()
         try:
             expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
         except AssertionError:
             raise AssertionError(_stuck(page, step_now, caption)) from None
-        page.locator(NEXT).click()
-        if step_now == step_count:
-            return seen
-        try:
-            expect(page.locator(PROGRESS)).to_have_text(
-                re.compile(rf"step\s+{step_now + 1}\s+of", re.I), timeout=20_000
-            )
-        except AssertionError:
-            raise AssertionError(_stuck(page, step_now, caption)) from None
         assert page.locator(PROBLEM).is_hidden(), _stuck(page, step_now, caption)
-        step_now += 1
+
+        page.locator(NEXT).click()
+        # The last beat of a SEQUENCE is not the end of the story: the handover and the hand back are
+        # both last beats that navigate, and the guide comes back up on the other side. So the end is
+        # "no panel returned", never "this was beat n of n" — reading it the other way stopped the
+        # walk at the client's phone and called the story finished.
+        _past_the_splash(page)
+        try:
+            page.locator(PANEL).wait_for(state="visible", timeout=6_000)
+        except Exception:
+            return seen
+    raise AssertionError(
+        f"the story did not end after {limit} beats; last was {seen[-1]!r}"
+    )
 
 
 def test_the_whole_story_can_be_walked_with_show_me(page, local_server):
     _open_story(page, local_server)
 
-    _, step_count = _step_numbers(page)
+    _, trainer_beats = _step_numbers(page)
     captions = _walk_the_whole_story(page)
 
-    # Every beat was reached, and the guide closed on the last one rather than stalling halfway.
-    assert len(captions) == step_count
+    # Every beat of the trainer's own run, PLUS the client's chapter it crosses into and comes back
+    # from — the story is one walk over two phones since 2026-08-23, so counting only one leg would
+    # pass on a story that never made the crossing.
+    assert len(captions) > trainer_beats, len(captions)
+    assert any("Ana types her own name" in caption for caption in captions), (
+        "the walk never reached the client's own phone"
+    )
+    # ...and the guide closed on the last beat rather than stalling halfway.
     expect(page.locator(PANEL)).to_be_hidden()
 
 
@@ -306,7 +332,13 @@ def test_the_client_half_is_played_on_the_client_page(page, local_server):
     page.goto(f"{local_server}intake?demo=story&chapter=intake")
 
     page.locator(PANEL).wait_for(state="visible", timeout=30_000)
-    _walk_the_whole_story(page)
+    # Up to the chapter's last beat, and no further: that beat's Next hands the browser back to the
+    # trainer's phone, and everything asserted below lives on this one.
+    while "Back to" not in page.locator(NEXT).inner_text():
+        if page.locator(SHOW_ME).is_visible():
+            page.locator(SHOW_ME).click()
+        expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
+        page.locator(NEXT).click()
 
     # She filled her own form in, on her own phone...
     assert page.input_value("#intake-name") == "Ana Novak"
@@ -321,11 +353,30 @@ def test_the_client_half_is_played_on_the_client_page(page, local_server):
     assert written == [], written
 
 
-def test_the_trainer_walk_does_not_wander_onto_the_client_page(page, local_server):
-    """The client's chapter lives in a different boot on a different device; folding it into the
-    trainer's run would leave the guide pointing at a form that is not on screen."""
+def test_the_client_chapter_is_counted_and_played_on_its_own_phone(page, local_server):
+    """The client's chapter lives in a different boot on a different device, so it is never folded
+    into the trainer's numbered run — the guide would be pointing at a form that is not on screen.
+
+    It is reached by GOING there, which since 2026-08-23 is what the guide's own Next does on that
+    beat (reported: "why is Open Ana's phone a different button from Next, and why does Next skip the
+    intake form?"). So the trainer's counter never counts her beats, and the walk still visits them.
+    """
     _open_story(page, local_server)
+    _, trainer_beats = _step_numbers(page)
 
-    captions = _walk_the_whole_story(page)
+    # Up to the handover, then across.
+    while "Open Ana" not in page.locator(NEXT).inner_text():
+        if page.locator(SHOW_ME).is_visible():
+            page.locator(SHOW_ME).click()
+        expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
+        page.locator(NEXT).click()
+    page.locator(NEXT).click()
 
-    assert not any("Ana types her own name" in caption for caption in captions)
+    page.locator(PANEL).wait_for(state="visible", timeout=30_000)
+    assert "/intake" in page.url, page.url
+    _, client_beats = _step_numbers(page)
+    assert client_beats < trainer_beats, (
+        f"the client's chapter is counted on its own ({client_beats}), not as part of the "
+        f"trainer's {trainer_beats}"
+    )
+    expect(page.locator("#intake-form")).to_be_visible()

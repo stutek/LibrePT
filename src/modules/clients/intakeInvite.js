@@ -22,6 +22,7 @@
 
 import { PUBLIC_SITE_URL } from "../../data/publicUrls.js";
 import { contactChannelFor, dialledForm } from "../../domain/contactChannel.js";
+import { senderFragment } from "../../domain/intakeSender.js";
 
 /** The browser's own sharing and clipboard, wrapped so nothing above touches `navigator`. */
 export function browserInvitePlatform() {
@@ -32,9 +33,16 @@ export function browserInvitePlatform() {
   };
 }
 
-export function intakeInviteUrl({ lang } = {}) {
+/** The link itself, naming who sent it.
+ *
+ * The trainer's name and number ride in the FRAGMENT (domain/intakeSender.js): the page can then say
+ * who it is for, which is the only check the person receiving it can actually perform, and a `#` is
+ * never sent to a server, logged, or passed on in a `Referer`.
+ */
+export function intakeInviteUrl({ lang, trainer } = {}) {
   const base = `${PUBLIC_SITE_URL}/intake`;
-  return lang ? `${base}?lang=${encodeURIComponent(lang)}` : base;
+  const withLang = lang ? `${base}?lang=${encodeURIComponent(lang)}` : base;
+  return `${withLang}${senderFragment(trainer)}`;
 }
 
 /** The message the invitation travels in, signed by the trainer when the install knows who they are.
@@ -63,7 +71,7 @@ export function intakeInviteMessage({ url, t, trainer } = {}) {
  * their appointment. Same distinction signupDelivery.js makes on the other side of this flow.
  */
 export async function sendIntakeInvite({ platform, t, lang, trainer } = {}) {
-  const url = intakeInviteUrl({ lang });
+  const url = intakeInviteUrl({ lang, trainer });
   const text = intakeInviteMessage({ url, t, trainer });
   if (platform?.canShare?.()) {
     try {
@@ -101,11 +109,7 @@ export async function sendIntakeInvite({ platform, t, lang, trainer } = {}) {
 export function intakeInviteHref({ contact, lang, t, trainer } = {}) {
   const channel = contactChannelFor(contact);
   if (!channel) return null;
-  const text = intakeInviteMessage({
-    url: intakeInviteUrl({ lang }),
-    t,
-    trainer,
-  });
+  const text = intakeInviteMessage({ url: intakeInviteUrl({ lang, trainer }), t, trainer });
   if (channel === "sms") {
     // `?&body=` rather than `?body=`: iOS only honours the body after a leading `&`, Android takes
     // either. The same one form the consent letter settled on (modules/common/consentForm.js).

@@ -68,6 +68,30 @@
   line-height: 1.45;
 }
 
+/* Who the link says it came from. Set apart from the page's own words — a bordered block above the
+   form — because it is the one thing here that a stranger wrote, and the reader is being asked to
+   compare it with what they already know rather than to believe it. */
+.intake-sender {
+  margin: 0 0 20px 0;
+  padding: 12px 14px;
+  border: 1px solid var(--border-color, rgba(15, 23, 42, 0.14));
+  border-left: 3px solid var(--primary, #6366f1);
+  border-radius: var(--border-radius, 12px);
+  background: color-mix(in srgb, var(--primary, #6366f1) 6%, transparent);
+}
+
+.intake-sender-for {
+  margin: 0 0 6px 0;
+  font-weight: 600;
+  line-height: 1.35;
+  /* A crafted link can hold a very long name: it wraps rather than pushing the page sideways. */
+  overflow-wrap: anywhere;
+}
+
+.intake-sender .intake-hint {
+  margin: 0;
+}
+
 .intake-form {
   display: flex;
   flex-direction: column;

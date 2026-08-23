@@ -35,8 +35,12 @@
 //
 // **The last card is where the story hands the app over** (TODO §30.2, wanted 2026-08-18): a thank
 // you, and the two ways onward that already exist — keep exploring, or clear the demo data. Both are
-// reused rather than rebuilt: dismissing IS "play around", and the cleanup dialog is the one the
-// demo notice in the feed already opens.
+// reused rather than rebuilt: closing the guide IS "play around", and the cleanup dialog is the one
+// the demo notice in the feed already opens.
+//
+// **Crossing to the client's phone is the GUIDE's Next, not a button here** (reported 2026-08-23).
+// This card used to carry its own link, which sat beside a Next that advanced the guide past the
+// whole client chapter — two buttons, and the plain-looking one did the wrong thing.
 //
 // Injected dependencies: `doc` (defaults to `document`), `t`, and `onClearDemoData` (optional — the
 // second way onward; the button is left out entirely when no caller offers one, rather than
@@ -83,15 +87,8 @@ function buildCard(doc, t, onClearDemoData) {
     onClearDemoData?.();
   });
 
-  // The handover (TODO §35.1/§35.3e). One persona at a time was the ruling, and the client's screens
-  // are the REAL ones — so a beat that moves to the client's phone moves the BROWSER, to the page a
-  // client would actually open. A drawn "client phone" would be a recording with extra steps, stale
-  // the day that page changes.
-  const handover = doc.createElement("a");
-  handover.id = "story-card-handover";
-  handover.className = "btn btn-primary story-card-handover hidden";
-  card.append(kicker, title, body, cleanup, handover);
-  return { card, kicker, title, body, cleanup, handover };
+  card.append(kicker, title, body, cleanup);
+  return { card, kicker, title, body, cleanup };
 }
 
 /** Mounts the narration surface and returns `{ showStep, unmount }`.
@@ -103,7 +100,7 @@ export function mountStoryNarration({ doc = document, t, onClearDemoData } = {})
   const existing = doc.getElementById(CARD_ID);
   if (existing) existing.remove();
 
-  const { card, kicker, title, body, cleanup, handover } = buildCard(doc, t, onClearDemoData);
+  const { card, kicker, title, body, cleanup } = buildCard(doc, t, onClearDemoData);
   const persona = element(doc, "p", "story-persona", PERSONA_ID);
   persona.hidden = true;
 
@@ -167,12 +164,6 @@ export function mountStoryNarration({ doc = document, t, onClearDemoData } = {})
       title.textContent = t(step.narrate.titleKey);
       body.textContent = t(step.narrate.bodyKey);
       cleanup.classList.toggle("hidden", !(step.narrate.onward && onClearDemoData));
-      const goTo = step.narrate.continueUrl;
-      handover.classList.toggle("hidden", !goTo);
-      if (goTo) {
-        handover.href = goTo;
-        handover.textContent = t(step.narrate.continueLabelKey || "story_open_client_phone");
-      }
       card.hidden = false;
       return;
     }

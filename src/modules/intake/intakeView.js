@@ -31,6 +31,7 @@
 // `noticeUrlFor`, `formUrlFor`.
 
 import { buildClientSignup } from "../../data/clientSignup.js";
+import { senderFromFragment } from "../../domain/intakeSender.js";
 import { $id, renderMarkupOnce } from "../common/dom.js";
 import {
   buildSignupFile,
@@ -55,6 +56,17 @@ export function renderIntakeViewShell() {
 
       <h1 id="intake-title" class="intake-title"></h1>
       <p id="intake-lede" class="intake-lede"></p>
+
+      <!-- Who this link says it came from, read from the URL fragment and only ever DISPLAYED
+           (domain/intakeSender.js). It proves nothing — anybody can craft a link naming anybody —
+           and it is not meant to: it gives the reader something to CHECK, which is the name in the
+           message, the name here and the person they just spoke to all agreeing. Without it the
+           page asked a stranger for health details while identifying nobody, which is the shape of
+           a phishing attempt (asked 2026-08-23). -->
+      <div id="intake-sender" class="intake-sender" hidden>
+        <p id="intake-sender-for" class="intake-sender-for"></p>
+        <p id="intake-sender-check" class="intake-hint"></p>
+      </div>
 
       <form id="intake-form" class="intake-form" novalidate>
         <div class="form-group">
@@ -130,6 +142,7 @@ const TEXT_BY_ELEMENT = {
   "intake-send": "intake_send",
   "intake-save": "intake_save",
   "intake-privacy-note": "intake_privacy_note",
+  "intake-sender-check": "intake_sender_check",
 };
 
 function setStatus(t, key, tone) {
@@ -195,6 +208,17 @@ export function setupIntakeForm(deps) {
     for (const [id, key] of Object.entries(TEXT_BY_ELEMENT)) {
       const element = $id(id);
       if (element) element.textContent = t(key);
+    }
+    // The sender's own words are theirs, not ours, so they are set apart from the translated line:
+    // `{who}` is replaced rather than concatenated, because word order differs between languages.
+    const sender = senderFromFragment(window.location.hash);
+    const senderBox = $id("intake-sender");
+    if (senderBox) {
+      senderBox.hidden = !sender;
+      if (sender) {
+        const who = [sender.name, sender.phone].filter(Boolean).join(", ");
+        $id("intake-sender-for").textContent = t("intake_sender_for").replace("{who}", who);
+      }
     }
     const notice = $id("intake-notice-link");
     if (notice) notice.href = noticeUrlFor(current);

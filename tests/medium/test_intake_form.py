@@ -23,6 +23,10 @@ INTAKE_STUB = """
 import * as appBoot from './appBoot.js';
 import { TRANSLATIONS } from './i18n/index.js';
 
+// A real invitation arrives with the sender in its fragment; the harness always navigates to the
+// bare root, so a test that is about that fragment puts it on before the page reads it.
+if (window.__intakeHash) window.location.hash = window.__intakeHash;
+
 window.__delivered = [];
 let lang = 'en';
 
@@ -121,6 +125,35 @@ def test_the_file_carries_what_the_client_typed_and_what_they_ticked(
         "formLang": "en",
     }
     assert delivered[0]["name"] == "jana-novak-2026-08-17.librept-signup.json"
+
+
+def test_the_page_says_who_the_link_came_from(page, local_server):
+    """Asked 2026-08-23: "how would she know this is not phishing?" — the page asked a stranger for
+    health details while saying only "your trainer", naming nobody.
+
+    It cannot PROVE who sent it, and does not try: with no server there is no identity to check. What
+    it gives the reader is something to compare — the name in the message, the name here, and the
+    person they just spoke to — plus the plain fact that this page sends nothing on its own."""
+    page.add_init_script(
+        "window.__intakeHash = '#from=' + encodeURIComponent('Sam Trainer|+386 40 111 222');"
+    )
+    _mount(page, local_server)
+
+    sender = page.locator("#intake-sender")
+    expect(sender).to_be_visible()
+    expect(sender).to_contain_text("Sam Trainer")
+    expect(sender).to_contain_text("+386 40 111 222")
+    # And the reader is told what to do about it, in the one place they are looking.
+    expect(sender).to_contain_text("do not fill it in")
+    expect(sender).to_contain_text("sends nothing by itself")
+
+
+def test_a_link_naming_nobody_claims_nothing(page, local_server):
+    """A leaflet QR and a link from an install that never filled the trainer's own details in both
+    arrive without a name. Saying "sent by —" would look like something had been checked."""
+    _mount(page, local_server)
+
+    expect(page.locator("#intake-sender")).to_be_hidden()
 
 
 def test_the_tick_itself_says_what_is_being_agreed_to(page, local_server):

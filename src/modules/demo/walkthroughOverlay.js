@@ -283,7 +283,16 @@ export function startGuidedWalkthrough({
     // spends three seconds looking like a guide that has stopped working (reported 2026-08-22).
     el.show.hidden = !controls.canShowMe || step?.showMe === false;
     el.show.disabled = showing;
-    el.next.textContent = controls.isLastStep ? t("walkthrough_done") : t("walkthrough_next");
+    // A step may name its own way on. The story's handover beat leaves this page for the client's
+    // own — so Next says "Open Ana's phone" and does exactly that, rather than sitting beside a
+    // second button that does the real thing (reported 2026-08-23: "why is Open Ana's phone a
+    // different button from Next, and why does Next skip the intake form?" — it skipped it because
+    // advancing the guide and going to the other phone were two different actions).
+    el.next.textContent = step?.nextLabelKey
+      ? t(step.nextLabelKey)
+      : controls.isLastStep
+        ? t("walkthrough_done")
+        : t("walkthrough_next");
     el.next.disabled = !controls.canAdvance || showing;
 
     positionSpotlight(step ? resolveTarget(doc, step) : null);
@@ -468,6 +477,15 @@ export function startGuidedWalkthrough({
   });
 
   el.next.addEventListener("click", () => {
+    const step = currentWalkthroughStep(tour, state);
+    // Going THERE is the way on, and the guide follows: the next chapter runs on the page it lands
+    // on, reading the story's position out of the address like any other resumed link.
+    if (step?.advanceTo) {
+      // Resolved against the app's BASE, not the address currently showing: the story is deep in
+      // `/sessions/2026-08-23` when it crosses, and a plain relative jump would land beside that.
+      doc.defaultView.location.assign(new URL(step.advanceTo, doc.baseURI).href);
+      return;
+    }
     state = advanceWalkthrough(tour, state);
     if (state.finished) return stop();
     enterStep();

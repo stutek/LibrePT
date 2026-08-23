@@ -40,11 +40,11 @@ const CARD_ON_SCREEN = { selector: "#story-card", visible: true };
 const CARD_TARGET = "#story-card";
 
 function narration(id, kind, titleKey, bodyKey, extra = {}) {
-  const { onward, continueUrl, continueLabelKey, ...step } = extra;
+  const { onward, ...step } = extra;
   return {
     id,
     persona: TRAINER,
-    narrate: { kind, titleKey, bodyKey, onward, continueUrl, continueLabelKey },
+    narrate: { kind, titleKey, bodyKey, onward },
     target: CARD_TARGET,
     // The story and the guide are ONE card now (reported 2026-08-23), so the caption is the line
     // under the prose that says what to DO — never the title again, which is already the first
@@ -80,7 +80,9 @@ function foldCards(steps) {
   let pending = null;
   for (const step of steps) {
     const isCard = Boolean(step.narrate) && step.target === CARD_TARGET;
-    const staysAStep = isCard && (step.narrate.continueUrl || step.narrate.onward);
+    // A card that leaves this page keeps its own beat for the same reason the last one does: going
+    // there IS the action, and it is the guide's Next that makes it.
+    const staysAStep = isCard && (step.advanceTo || step.narrate.onward);
     if (isCard && !staysAStep) {
       pending = pending || step;
       continue;
@@ -293,8 +295,12 @@ const ARRIVE_CHAPTER = {
       // A DIFFERENT theme on the other side (asked for 2026-08-23: the two phones should not look
       // alike). The intake page reads `?theme=` before it paints and writes nothing, so the client's
       // phone is unmistakably not the trainer's and the trainer's own choice is left alone.
-      continueUrl: "intake?demo=story&chapter=intake&theme=midnight",
-      continueLabelKey: "story_open_client_phone",
+      //
+      // The way on IS this journey, so it is the guide's own Next that makes it, wearing the words
+      // for what it does. A second button beside a Next that quietly skipped the whole chapter was
+      // the thing reported.
+      advanceTo: "intake?demo=story&chapter=intake&theme=midnight",
+      nextLabelKey: "story_open_client_phone",
       caption: "story_step_handover",
       showMe: false,
     }),
@@ -344,7 +350,15 @@ const INTAKE_CHAPTER = {
       caption: "story_step_intake_consent",
       expect: { selector: "#intake-consent:checked" },
     },
-    narration("intake-close", "chapter", "story_chapter_intake", "story_intake_close_body"),
+    // ...and back to the trainer's own phone, by the step id rather than the chapter: the trainer's
+    // run is one numbered sequence, and returning to "chapter 3, beat 1" would restart the count in
+    // the middle of a story the viewer is four beats into. Resuming by step is what the address
+    // already does after a reload.
+    narration("intake-close", "chapter", "story_chapter_intake", "story_intake_close_body", {
+      advanceTo: "?demo=story&step=programme-open-session",
+      nextLabelKey: "story_back_to_your_phone",
+      showMe: false,
+    }),
   ]),
 };
 

@@ -89,20 +89,10 @@
   width: 100%;
   justify-content: center;
 }
-/* Both sit under the words, and clearing the demo reads as the quieter of the two: the story's own
-   ending is "keep tapping around", and emptying it out is the deliberate act. */
-.story-card-cleanup,
-.story-card-handover {
+/* Under the words, and quieter than the guide's own Next: the story's ending is "keep tapping
+   around", and emptying the demo out is the deliberate act. */
+.story-card-cleanup {
   margin-top: 0.5rem;
-}
-/* The handover is a LINK, so it looks like the primary way on: it is the story continuing, not an
-   exit from it. */
-.story-card-handover {
-  display: inline-flex;
-  text-decoration: none;
-}
-.story-card-handover.hidden {
-  display: none;
 }
 
 /* The PAPER track (§35.1): what happens off-screen, on a printed form — narrated as text on a

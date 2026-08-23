@@ -143,7 +143,7 @@ async function shareAnyWay() {
   }
   if (outcome === "unavailable") {
     const field = document.getElementById("intake-invite-link");
-    field.value = intakeInviteUrl({ lang: deps.getLang() });
+    field.value = intakeInviteUrl({ lang: deps.getLang(), trainer: deps.getTrainer?.() });
     field.classList.remove("hidden");
     field.select();
   }

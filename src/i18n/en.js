@@ -255,6 +255,9 @@ export const en = {
   // links stay for the detail; they are not where the substance is allowed to hide.
   intake_consent:
     "I agree to my trainer keeping these details and using them to plan and log my training. They stay on my trainer's own device, and may also be kept as a backup copy in my trainer's personal Google Drive — no other service receives them. I can withdraw this at any time by telling my trainer.",
+  intake_sender_for: "You are filling this in for {who}.",
+  intake_sender_check:
+    "If that is not the person who gave you this link, do not fill it in. This page sends nothing by itself: your answers become a file on this phone, and you choose who to share it with.",
   intake_notice_link: "What happens to your data",
   intake_form_link: "The full consent wording",
   intake_send: "Share with my trainer",
@@ -466,6 +469,7 @@ export const en = {
   story_chapter_arrive: "Three friends arrive",
   story_chapter_intake: "On Ana's phone",
   story_handover_title: "Over to Ana",
+  story_back_to_your_phone: "Back to your own phone",
   story_open_client_phone: "Open Ana's phone",
   story_step_arrive_menu:
     "Tap the ☰ button — three stacked lines, in the top right corner of the screen, in the dark bar with the app's name. It opens the menu, and the client register, the movements and the history all live in there.",
