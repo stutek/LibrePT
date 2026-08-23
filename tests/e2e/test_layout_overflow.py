@@ -89,6 +89,29 @@ def _base(page):
     return page.evaluate("() => new URL(document.baseURI).pathname").rstrip("/")
 
 
+def _settle(page):
+    """Wait until the app has finished drawing, rather than for a fixed number of milliseconds.
+
+    This scan measures LAYOUT, so it must not read the page mid-transition: a view still sliding in
+    reports an overflow no trainer ever sees. That is what the fixed waits here were buying, and
+    asking for it directly is both truer and cheaper — at ~21 navigations per walk across four
+    walks, the sleeps alone were about 25 seconds of this suite.
+
+    Endless animations (a spinner, a pulsing highlight) are excluded, or the wait would never end;
+    they also never settle in real use, so waiting on them would mean never scanning at all.
+    """
+    page.wait_for_function(
+        """() => document.getAnimations().every((animation) =>
+             animation.playState !== 'running' ||
+             animation.effect?.getTiming?.().iterations === Infinity)"""
+    )
+    # One painted frame after the last animation stopped: layout read before the paint is the
+    # previous frame's, which is the same wrong answer a mid-transition read gives.
+    page.evaluate(
+        "() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)))"
+    )
+
+
 def _nav(page, path):
     """Drive the client-side router the way an opened deep link would — no reload, so one page
     context covers the whole walk instead of paying a cold navigation per route."""
@@ -97,7 +120,7 @@ def _nav(page, path):
         "         window.dispatchEvent(new PopStateEvent('popstate')); }",
         path,
     )
-    page.wait_for_timeout(250)
+    _settle(page)
 
 
 def _sweep(page, findings, label):
@@ -126,21 +149,21 @@ def _walk_record_details(page, base, findings):
     client_card = page.locator("#clients-list .client-card").first
     if client_card.count():
         client_card.click()
-        page.wait_for_timeout(300)
+        _settle(page)
         _sweep(page, findings, "client.detail")
 
     _nav(page, base + "/routines")
     routine_card = page.locator(".routine-card").first
     if routine_card.count():
         routine_card.click()
-        page.wait_for_timeout(300)
+        _settle(page)
         _sweep(page, findings, "routine.edit")
 
     _nav(page, base + "/adjustments")
     adjustment_card = page.locator(".adjustment-card").first
     if adjustment_card.count():
         adjustment_card.locator("button").first.click()
-        page.wait_for_timeout(300)
+        _settle(page)
         _sweep(page, findings, "adjustment.apply")
 
 
@@ -154,7 +177,7 @@ def _walk_live_session(page, base, findings):
         return
     session_card.click()
     page.wait_for_selector("#active-session-overlay:not(.hidden)", timeout=15000)
-    page.wait_for_timeout(400)
+    _settle(page)
     _sweep(page, findings, "session.focus (live overlay)")
 
     match = re.search(
@@ -179,7 +202,7 @@ def _walk_live_session(page, base, findings):
 def _walk_the_app(page, local_server, findings, query=""):
     page.goto(local_server + query)
     page.wait_for_selector("#view-clients.active")
-    page.wait_for_timeout(400)
+    _settle(page)
     base = _base(page)
 
     _sweep(page, findings, "sessions.day (dashboard)")
