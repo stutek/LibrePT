@@ -439,11 +439,11 @@ export const sl = {
   story_step_arrive_invite:
     "Pritisni Pošlji povezavo za prijavo — gumb tik pod naslovom Stranke, na vrhu seznama ljudi. Ana je po vadbi vprašala za trening; namesto da bi ji trener podatke zapisoval kar na hodniku, ji pošlje povezavo, ki jo izpolni sama.",
   story_step_read_on:
-    "Ko to prebereš, pritisni Nadaljuj tik pod besedilom in zgodba gre naprej na to, kar trener naredi zatem.",
+    "Preberi to, nato pritisni Naprej tik pod besedilom in se loti naslednje naloge.",
   story_step_handover:
     "Pritisni Odpri Anin telefon — zeleni gumb tik pod tem besedilom. Brskalnik zapusti trenerjevo aplikacijo in odpre stran, ki jo Ana res odpre iz povezave v sporočilu, zgodba pa se nadaljuje tam.",
   story_step_thanks:
-    "To je cel večer, od vprašanja po vadbi do naslednjega tedna, ki je že v koledarju. Pritisni Nadaljuj, da to kartico pospraviš in aplikacijo naprej raziskuješ sam, ali Počisti demo podatke, da jo izprazniš in začneš s svojimi strankami.",
+    "Vse naloge so opravljene, od vprašanja po vadbi do naslednjega tedna, ki je že v koledarju. Pritisni Naprej, da to kartico pospraviš in aplikacijo naprej raziskuješ sam, ali Počisti demo podatke, da jo izprazniš in začneš s svojimi strankami.",
   story_step_intake_name:
     "Ana vpiše svoje ime. To je njen telefon in nič od tega se nanj ne shrani.",
   story_step_intake_email: "Kam naj ji pošlje termine.",
@@ -452,13 +452,13 @@ export const sl = {
   story_step_intake_consent:
     "Privolitev, dana tukaj in ne predpostavljena: z njo se zapiše tudi besedilo in jezik, v katerem ga je prebrala.",
   story_arrive_open_body:
-    "Ana, Maja in Nik po vadbi vprašajo za skupen trening. Za vodenje na poti do moči so izbrali tebe — prvi korak je torej, da jih sprejmeš med stranke.",
+    "Ana, Maja in Nik po vadbi vprašajo za skupen trening. Za vodenje na poti do moči so izbrali tebe. Prva naloga: spravi jih v svoj seznam strank — ne da bi zanje sam zapisal en sam podatek.",
   story_handover_body:
-    "Povezava je na poti. Od tu naprej si na DRUGEM telefonu — Aninem — in tisto, kar boš videl, ni maketa strankinega zaslona, ampak stran, ki jo res odpre.",
+    "Anina povezava je na poti in tvoj telefon je svoje opravil. Zdaj odigraš Anino stran, na njenem telefonu, na strani, ki jo res odpre iz sporočila. Nič od tega, kar sledi, ni maketa.",
   story_intake_open_body:
-    "Anin telefon, s povezave iz sporočila. Ni ničesar za namestiti in na tem telefonu ne ostane nič: izpolni obrazec, pošlje ga in s tega telefona je izginil.",
+    "Zdaj si Ana, pred studiem, s povezavo v sporočilu. Ni ničesar za namestiti in na tem telefonu ne ostane nič: izpolni, pošlji in s tega telefona je izginilo.",
   story_intake_close_body:
-    "Anin del je opravljen. Dotik gumba Pošlji izroči datoteko trenerju, ki jo prebere in se odloči — neznanec se ne more sam vpisati v nikogaršnjo kartoteko.",
+    "Anin del je opravljen in z njim prva naloga. Gumb Pošlji izroči njeno datoteko tebi, trenerju, in ti si tisti, ki jo prebere in se odloči — neznanec se nikoli sam ne vpiše v tvoj seznam. Nazaj na svoj telefon.",
   story_chapter_programme: "Program",
   story_chapter_evening: "Večer po vadbi",
   story_step_programme_open_session:
@@ -470,9 +470,9 @@ export const sl = {
   story_step_programme_bind:
     "Jane, John in Sarah delajo isti krog, zato gredo na en načrt — in torkove serije se zabeležijo enkrat namesto trikrat.",
   story_programme_open_body:
-    "Dva dni prej, na kavču. Nič od tega ni nujno, in prav zato se splača zdaj: večer v telovadnici teče drugače, če načrt že obstaja.",
+    "Nedelja, dva dni prej, na kavču. Anina datoteka je prispela in njena prva vadba je še pred vami; torek pripada Jane, Johnu in Sarah, ki pri tebi vadijo že dlje. Naslednja naloga: njihova ura naj bo pripravljena, preden kdo stoji pred teboj.",
   story_programme_close_body:
-    "En načrt, trije ljudje, in gre v uro. Torek je zdaj lahko o vadbi in ne o telefonu.",
+    "En načrt, trije ljudje, in gre v uro. Naloga opravljena — torek je lahko o vadbi in ne o telefonu.",
   story_step_evening_menu: "Doma, pozneje zvečer. Odpri meni.",
   story_step_evening_move:
     "Torek se premakne za dve uri — dogovorjeno z vsemi tremi po vadbi. Obrazec to izrecno pove: samo ta večer.",
@@ -480,8 +480,8 @@ export const sl = {
     "Ob osmih namesto ob šestih. Naslednji torek in tisti za njim ostaneta točno tam, kjer sta bila.",
   story_step_evening_theme: "Temno, ker je pol enajstih in trener sedi na kavču.",
   story_evening_open_body:
-    "Seja je končana in vsi so šli domov. To je polovica, ki je nihče ne snema: kaj se zgodi z zapiski, nastalimi med serijami.",
-  story_thanks_title: "To je bila ena vadba",
+    "Vadba je končana, vsi so šli domov, ti pa si spet na kavču. To je polovica, ki je nihče ne snema: kaj se zgodi z zapiski, ki si jih naredil med serijami. Še zadnja naloga, potem je večer tvoj.",
+  story_thanks_title: "Večer je dobljen",
   story_clear_demo_data: "Počisti demo podatke",
   story_step_open_session:
     "Torek, 18:00. Jane in John imata skupen termin, Sarah v isti uri dela svoj rehabilitacijski načrt. En dotik in vsi trije so na eni podlogi.",
@@ -505,9 +505,9 @@ export const sl = {
   story_step_swap_pick:
     "Nekaj bolj prizanesljivega za iste mišice. Jane in Sarah obdržita svoja načrta.",
   story_gym_open_body:
-    "Torek, deset čez šest. Jane in John se ogrevata skupaj, Sarah v kotu dela rehabilitacijski načrt, en trener pa vse tri vodi s telefona. Nič od tega ni maketa: večer boš odigral sam, korak za korakom.",
+    "Torek, deset čez šest. Jane in John se ogrevata skupaj, Sarah v kotu dela svoj rehabilitacijski načrt, vse tri pa vodiš z enega telefona. To je tisto, za kar sta bili prejšnji dve nalogi priprava — in to boš odigral sam, dotik za dotikom, z uro, ki teče.",
   story_gym_close_body:
-    "To je bil en večer in nič ni bilo zapisano dvakrat. Johnovo koleno je v njegovi kartoteki, njegov načrt to že ve, Jane in Sarah pa nista bili prekinjeni. Kar raziskuj naprej ali počisti demo podatke in začni s svojimi strankami.",
+    "Ura je odpeljana in nič ni bilo zapisano dvakrat. Johnovo koleno je v njegovi kartoteki, njegov načrt to že ve, Jane in Sarah pa nista bili prekinjeni. Kar raziskuj naprej ali počisti demo podatke in začni s svojimi strankami.",
   today: "Danes",
   tomorrow: "Jutri",
   yesterday: "Včeraj",

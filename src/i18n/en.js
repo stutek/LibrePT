@@ -455,12 +455,11 @@ export const en = {
     "In the menu that just dropped down, tap Clients Directory — the row with two little people next to it, at the top of the list. Eight people are already in that register, and nobody typed a word of it twice.",
   story_step_arrive_invite:
     "Tap Send an intake link — the button just under the Clients heading, at the top of the list of people. Ana asked about training after a class, and instead of taking her details standing in a corridor, the trainer sends her a link she fills in herself.",
-  story_step_read_on:
-    "When you have read that, tap Continue just below it, and the story goes on to the next thing the trainer does.",
+  story_step_read_on: "Read that, then tap Continue just below it to take on the next task.",
   story_step_handover:
     "Tap Open Ana's phone — the green button just below this text. The browser leaves the trainer's app and goes to the page Ana really opens from the link in her message, and the story carries on there.",
   story_step_thanks:
-    "That is the whole evening, from a question after a class to next week already in the diary. Tap Continue to put this card away and keep tapping around the app on your own, or Clear the demo data to empty it out and start with your own clients.",
+    "Every task is done, from a question after a class to next week already in the diary. Tap Continue to put this card away and keep exploring the app on your own, or Clear the demo data to empty it out and start with your own clients.",
   story_step_intake_name:
     "Ana types her own name. It is her phone, and nothing here is stored on it.",
   story_step_intake_email: "Somewhere to send the session times.",
@@ -471,13 +470,13 @@ export const en = {
   // Named, and new: Ana, Maja and Nik are not in the seeded register — the story is about getting
   // them into it. The people already there (Jane, John, Sarah) are the ones the gym chapter trains.
   story_arrive_open_body:
-    "Ana, Maja and Nik ask about training together after a class. They have chosen you to guide them through their strength journey — so your first move is to get them on board as clients.",
+    "Ana, Maja and Nik ask about training together after a class. They have chosen you to guide them through their strength journey. First task: get them into your register — without writing down a single detail for them yourself.",
   story_handover_body:
-    "The link is on its way. From here you are on the OTHER phone — Ana's — and what you are about to see is not a mock-up of a client screen, it is the page she actually opens.",
+    "Ana's link is on its way, and your own phone has done its part. Now you play Ana's side of it, on her phone, on the page she really opens from the message. Nothing ahead is a mock-up.",
   story_intake_open_body:
-    "Ana's phone, from a link in a message. There is no app to install and nothing will be stored on this phone: she fills the form in, sends it, and it is gone from here.",
+    "You are Ana now, standing outside the studio with a link in a message. There is no app to install and nothing is kept on this phone: fill it in, send it, and it is gone from here.",
   story_intake_close_body:
-    "That is Ana's part done. Tapping Send hands the file to the trainer, who reads it and decides — a stranger cannot write themselves into anybody's register.",
+    "Ana's part is done, and the first task with it. Send hands her file to you, the trainer, and you are the one who reads it and decides — a stranger never writes themselves into your register. Back to your own phone.",
   story_chapter_programme: "The programme",
   story_chapter_evening: "The evening after",
   story_step_programme_open_session:
@@ -488,10 +487,13 @@ export const en = {
   story_step_programme_menu_again: "Open the session menu again — one more thing before Tuesday.",
   story_step_programme_bind:
     "Jane, John and Sarah are doing the same circuit, so they go on one plan — and Tuesday's sets get logged once instead of three times.",
+  // The friends who arrive in chapter one are new; Tuesday's session is with Jane, John and Sarah,
+  // who are already in the seeded register. Said out loud here, because a viewer who noticed the
+  // different names and was told nothing would assume the demo had lost track of its own people.
   story_programme_open_body:
-    "Two days earlier, on the sofa. Nothing here is urgent, which is exactly why it is worth doing now: the evening in the gym goes differently when the plan already exists.",
+    "Sunday, two days out, on the sofa. Ana's file has landed and her first session is still to come; Tuesday belongs to Jane, John and Sarah, who have been training with you a while. Next task: have their hour ready before anyone is standing in front of you.",
   story_programme_close_body:
-    "One plan, three people, and it fits the hour. Tuesday can now be about the training rather than about the phone.",
+    "One plan, three people, and it fits the hour. Task done — Tuesday can be about the training instead of about the phone.",
   story_step_evening_menu: "Home, later that night. Open the menu.",
   story_step_evening_move:
     "Tuesday moves two hours later — agreed with all three after the session. The form says it out loud: this evening only.",
@@ -499,8 +501,8 @@ export const en = {
     "Eight instead of six. Next Tuesday, and the one after, stay exactly where they were.",
   story_step_evening_theme: "Dark, because it is half past ten and the trainer is on a sofa.",
   story_evening_open_body:
-    "The session is over and everyone has gone home. This is the half nobody films: what happens to the notes taken between sets.",
-  story_thanks_title: "That was one session",
+    "The session is over, everyone has gone home, and you are back on the sofa. This is the half nobody films: what happens to the notes you took between sets. One last task, then the evening is yours.",
+  story_thanks_title: "The evening is won",
   story_clear_demo_data: "Clear the demo data",
   // The story's own voice. It names the people the seed puts on screen — Jane, John, Sarah — because
   // a demo that says "the client" is describing software, and one that says "John, whose knee was
@@ -527,9 +529,9 @@ export const en = {
   story_step_swap_pick:
     "Something gentler for the same muscles. Jane and Sarah keep the plans they were given.",
   story_gym_open_body:
-    "Tuesday, ten past six. Jane and John are warming up together, Sarah is in the corner working through a rehab plan, and one trainer is running all three from a phone. Nothing here is a mock-up: you are about to do the evening yourself, one tap at a time.",
+    "Tuesday, ten past six. Jane and John are warming up together, Sarah is in the corner working through her rehab plan, and all three are yours to run from one phone. This is what the last two tasks were preparation for — and you do this one yourself, tap by tap, with the clock running.",
   story_gym_close_body:
-    "That was one evening, and nothing was written twice. John's knee is on his record, his plan already knows about it, and Jane and Sarah were never interrupted. Keep tapping around, or clear the demo data and start with your own clients.",
+    "The hour is done and nothing was written twice. John's knee is on his record, his plan already knows about it, and Jane and Sarah were never interrupted. Keep tapping around, or clear the demo data and start with your own clients.",
   today: "Today",
   tomorrow: "Tomorrow",
   yesterday: "Yesterday",
