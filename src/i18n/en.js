@@ -468,8 +468,10 @@ export const en = {
     "The shoulder she still feels sometimes — offered, never demanded, and the page says where the answer goes.",
   story_step_intake_consent:
     "Consent, given here rather than assumed: the wording and the language she read it in are recorded with it.",
+  // Named, and new: Ana, Maja and Nik are not in the seeded register — the story is about getting
+  // them into it. The people already there (Jane, John, Sarah) are the ones the gym chapter trains.
   story_arrive_open_body:
-    "It starts the way it usually does: three friends ask about training together after a class. Nothing has been agreed yet, and nobody is in the register.",
+    "Ana, Maja and Nik ask about training together after a class. They have chosen you to guide them through their strength journey — so your first move is to get them on board as clients.",
   story_handover_body:
     "The link is on its way. From here you are on the OTHER phone — Ana's — and what you are about to see is not a mock-up of a client screen, it is the page she actually opens.",
   story_intake_open_body:

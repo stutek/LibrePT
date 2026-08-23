@@ -452,7 +452,7 @@ export const sl = {
   story_step_intake_consent:
     "Privolitev, dana tukaj in ne predpostavljena: z njo se zapiše tudi besedilo in jezik, v katerem ga je prebrala.",
   story_arrive_open_body:
-    "Začne se tako kot običajno: trije prijatelji po vadbi vprašajo za skupen trening. Nič ni še dogovorjeno in nikogar ni v kartoteki.",
+    "Ana, Maja in Nik po vadbi vprašajo za skupen trening. Za vodenje na poti do moči so izbrali tebe — prvi korak je torej, da jih sprejmeš med stranke.",
   story_handover_body:
     "Povezava je na poti. Od tu naprej si na DRUGEM telefonu — Aninem — in tisto, kar boš videl, ni maketa strankinega zaslona, ampak stran, ki jo res odpre.",
   story_intake_open_body:
