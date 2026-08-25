@@ -299,6 +299,44 @@ def test_asking_to_be_shown_again_rebuilds_what_the_first_time_used_up(
     expect(page.locator("#btn-invite-client")).to_be_visible()
 
 
+def test_the_trainer_reads_what_ana_sent_and_she_lands_in_the_register(
+    page, local_server
+):
+    """The beat the story used to skip, and the one the whole first chapter is FOR: a person exists
+    in the register only once they sent their own details and the trainer accepted them (§26.5).
+
+    It was called unscriptable because opening a file needs the operating system's picker, which no
+    page can drive. The seam moved rather than the refusal — the demo puts a real file on the real
+    input, the way the picker does, and the app reads it, matches it and saves it unchanged. What
+    this asserts is the outcome a trainer cares about: she is in the register, and nobody typed her
+    in."""
+    # On the register, which is where the hand back from Ana's phone lands — and where the result of
+    # this chapter has to be visible.
+    _open_story(
+        page,
+        local_server,
+        "clients?init=demo_data_load&demo=story&step=review-open-menu",
+    )
+
+    for _ in range(4):
+        if page.locator(SHOW_ME).is_visible():
+            page.locator(SHOW_ME).click()
+        expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
+        assert page.locator(PROBLEM).is_hidden(), page.locator(PROBLEM).inner_text()
+        page.locator(NEXT).click()
+
+    expect(page.locator("#clients-list")).to_contain_text("Ana Novak")
+    # Her own words came with her — the shoulder she mentioned is on the record the trainer will
+    # write every plan against, which is the difference between a form and a client.
+    assert "shoulder" in page.evaluate(
+        """async () => {
+            const store = await import(new URL('data/stateStore.js', document.baseURI).href);
+            const ana = store.getState().clients.find((c) => c.name === 'Ana Novak');
+            return JSON.stringify(ana);
+        }"""
+    )
+
+
 def test_one_chapter_can_be_walked_on_its_own(page, local_server):
     """Chapters exist because nobody watches five unbroken minutes of software they do not use yet,
     so a link naming one has to open that one."""

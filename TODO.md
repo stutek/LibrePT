@@ -82,7 +82,7 @@ the thing that must happen first, not merely what it touches.
 | **Go-to-market** | §23.1–§23.6 | Decide what "winning" means | §23.1 gates every channel choice |
 | **Refactor remainders** | §24.4d, §24.5, §24.7, §24.8 | One movement → plan item mapping | Optional by their own text |
 | **Tests & docs** | §6.2, §12.3, §12.5, §12.6 | Vendor Font Awesome locally | Nothing; all small |
-| **The long demo** | §35's two unscriptable beats | The trainer opening the file Ana sent | A demo-only hook into the review dialog would be the mock the whole approach avoids |
+| **The long demo** | Nothing blocking | — | The trainer opening Ana's file shipped 2026-08-25: the demo engine attaches a real file to the real input, so no hook was added to the shipped app |
 | **Routing decisions** | §19.2, §19.3 | The URL-privacy invariant | One decision, then both unblock |
 | **Data-subject rights** | §27.4 | One-tap withdrawal in the consent letter | Nothing; the other four shipped 2026-08-11 |
 | **Reported 2026-08-18** | §28.2 | Which contributor-facing docs get BUILT, so their addresses are injected rather than written out | Everything else in §28 shipped the same day |

@@ -24,6 +24,7 @@
 // Injected dependencies: none — a plain data module.
 
 import { GYM_FLOOR_TOUR } from "./gymFloorTour.js";
+import { STORY_SIGNUP_NAME, storySignupFileText } from "./storySignupFile.js";
 
 const wedge = Object.fromEntries(GYM_FLOOR_TOUR.steps.map((step) => [step.id, step]));
 
@@ -433,13 +434,61 @@ const INTAKE_CHAPTER = {
     // already does after a reload.
     narration("intake-close", "chapter", "story_chapter_intake", "story_intake_close_body", {
       persona: CLIENT,
-      advanceTo: "?demo=story&step=programme-open-session",
+      advanceTo: "clients?demo=story&step=review-open-menu",
       nextLabelKey: "story_back_to_your_phone",
       caption: "story_step_back_to_your_phone",
       showMe: false,
     }),
   ]),
 };
+
+// The beat the story used to skip: what the trainer does with what Ana sent. It belongs to the
+// trainer's run, right after the hand back, because that is when it happens — her file is in his
+// messages before he ever opens the app again.
+const REVIEW_STEPS = [
+  {
+    id: "review-open-menu",
+    persona: TRAINER,
+    // On the register, because that is where the result has to be VISIBLE: accepting re-renders the
+    // client list, and a beat that claimed "she is in your register" while the register was behind
+    // the dashboard would be asserting something the viewer cannot see.
+    route: "/clients",
+    target: "#btn-app-menu",
+    caption: "story_step_review_menu",
+    expect: { selector: "#app-menu:not(.hidden)", visible: true },
+  },
+  {
+    id: "review-open",
+    persona: TRAINER,
+    target: "#menu-review-signup",
+    requires: [{ selector: "#app-menu:not(.hidden)", visible: true }],
+    caption: "story_step_review_open",
+    expect: { selector: "#dialog-signup-review", visible: true },
+  },
+  {
+    // The file itself, put on the real input the way the operating system's picker puts one there
+    // (demoTourPlayer.js's `attach`). Everything after this is the app: it reads the file, refuses
+    // anything it does not recognise, and looks for a client this might already be.
+    id: "review-attach",
+    persona: TRAINER,
+    target: "#signup-review-file",
+    attach: {
+      name: "ana-novak.librept-signup.json",
+      type: "application/vnd.librept.signup+json",
+      text: storySignupFileText(new Date().toISOString().slice(0, 10)),
+    },
+    caption: "story_step_review_attach",
+    expect: { selector: "#dialog-signup-review", containsText: STORY_SIGNUP_NAME },
+  },
+  {
+    id: "review-accept",
+    persona: TRAINER,
+    target: "#signup-review-save",
+    caption: "story_step_review_accept",
+    // The register is the claim: she is in it, and the trainer typed none of it.
+    expect: { selector: "#clients-list", visible: true, containsText: STORY_SIGNUP_NAME },
+  },
+];
 
 // Chapter B — the programme. It comes AFTER the gym chapter in the story's order of build (§35.3),
 // because it needed the two features the floor chapter did not: a plan that says whether it fits its
@@ -448,6 +497,7 @@ const PROGRAMME_CHAPTER = {
   id: "programme",
   titleKey: "story_chapter_programme",
   steps: foldCards([
+    ...REVIEW_STEPS,
     narration("programme-open", "chapter", "story_chapter_programme", "story_programme_open_body", {
       route: "/",
     }),

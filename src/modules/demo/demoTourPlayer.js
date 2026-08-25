@@ -159,12 +159,27 @@ function interactWith(target, step) {
     target.dispatchEvent(new Event("change", { bubbles: true }));
     return;
   }
+  if (step.attach !== undefined) {
+    // What the operating system's file picker does, done on the real control: a `File` is put on
+    // the input and the same `change` event fires, so the app's own handler reads it exactly as it
+    // reads a file a person chose. The picker itself cannot be driven by a page — which is why the
+    // story could not show the trainer opening the file a client sent, and why the alternative
+    // considered was a "hand me a submission" hook INSIDE the shipped app (deliberately refused in
+    // modules/clients/signupReviewDialog.js). This keeps the seam in the demo, where it belongs.
+    const transfer = new DataTransfer();
+    transfer.items.add(
+      new File([step.attach.text], step.attach.name, { type: step.attach.type || "text/plain" }),
+    );
+    target.files = transfer.files;
+    target.dispatchEvent(new Event("change", { bubbles: true }));
+    return;
+  }
   target.click();
 }
 
 /**
  * Performs ONE step — resolve the control, scroll it into view, move and pulse the pointer, then do
- * what the step says (tap, type or pick) and wait for the expectation. Returns `{ id, ok, reason }`.
+ * what the step says (tap, type, pick or attach a file) and wait for the expectation. Returns `{ id, ok, reason }`.
  *
  * Shared with the guided walkthrough's "Show me", so the two cannot drift on what a step's tap
  * actually is.
