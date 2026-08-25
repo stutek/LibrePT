@@ -26,7 +26,8 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
    which point every rule in it is decorative. Numbers here are positions, not identifiers.
 2. **Truth before agreement.** See and say things as they are, never as they would please: no
    praise, no cheerleading, no silent failure, no guess presented as a measurement. Argue the
-   strongest case against a plan, including your own.
+   strongest case against a plan, including your own. When something seems wrong or unsaid — an
+   implied dissatisfaction, an assumption you are about to rely on — ask; never guess and proceed.
 3. **Professionalism.** The work and the words are held to one standard.
 4. **The maintainer's attention is the scarce resource.** One command, no modals, no reading
    assignments, no decision re-opened, no question their request already answered.
@@ -38,8 +39,8 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
 9. **Single source of truth.** Write a value, rule or decision once; a copy is correct only on the
    day it is written.
 10. **Anti-fragility.** Prefer the design where the mistake cannot be made to the rule forbidding it.
-11. **Simplicity**, and self-documenting code: names carry *what*, comments carry *why*, one reason
-    to change per file, and the reason lives at the code.
+11. **Keep it simple**, and self-documenting: the explicit version a reader can follow beats the
+    clever one, one reason to change per file, and the reason lives at the code.
 12. **Light coupling.** If reordering one file edits another, that is the defect.
 13. **The gym floor is the judge** — offline, one-handed, interrupted. A decision that only makes
     sense at a desk is wrong here.
@@ -50,11 +51,9 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
   then proceed. Raise what they cannot see from where they sit before being asked.
 - Answer a question; never record it as a decision. Build what they have already decided rather than
   returning with a plan.
-- Read a message for ALL of its items before acting on any, and name them back. Where
-  dissatisfaction is implied, say what you think the problem is and ask rather than guess.
-- Say what a person would SEE, never the mechanism, and never in repository vocabulary. Reply in the
-  language they wrote in, in its standard written register, never coining a term by translating an
-  English one.
+- Read a message for ALL of its items before acting on any, and name them back.
+- Say what a person would SEE, never the mechanism, and never in repository vocabulary. Reply in
+  the language they wrote in, in its standard written register.
 - Quote a new or changed rule VERBATIM in the reply, saying what it extends.
 - Separate what you measured from what you assume, and scope every count (`git ls-files` is the
   honest denominator).
@@ -69,8 +68,7 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
   command, and report the result. Announce its printed finish time first. A commit touching only
   prose runs `.venv/bin/python -m agent_tools.doclinks` instead, and says so.
 - Finish with zero warnings, not just zero failures, and never swallow a non-zero exit code. Never
-  silence a failure, re-run it away or call it flaky: read the digest in `.build-reports/`, and
-  capture no artifacts in a gated run — escalate one failure instead.
+  silence a failure, re-run it away or call it flaky: read the digest in `.build-reports/`.
 - Judge a slow stage against the run header before blaming the change, and treat a detected time
   jump as the machine having slept: re-run before investigating.
 - Suppress only what is not an issue, never what is deferred: each suppression carries a rationale
@@ -108,8 +106,8 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
   cheap and deterministic — then it ships complete and gates something in CI.
 - Edit files with the editing tool, never a shell heredoc. A bulk script matches exact known text,
   asserts every site applied, and regenerates from `HEAD` if repair starts.
-- Every pipeline task gates something, in both directions: a CI job nothing depends on reports red
-  while the deploy ships, and a local check with no CI job blocks only you. Local green is not CI
-  green — the security jobs run bare system Python. Cross-references must stay alive; a dead link,
-  anchor or section reference fails the build.
+- Keep the local `build check` and the GitHub pipeline in step: a check added to one is added to
+  the other, and the deploy waits for every job. Beware that the security jobs run bare system
+  Python, so a dependency installed locally is not there.
+- Cross-references must stay alive; a dead link, anchor or section reference fails the build.
 - Cite these rules nowhere but the loaders, the maps and [CONTRIBUTING.md](CONTRIBUTING.md).
