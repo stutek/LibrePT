@@ -458,9 +458,19 @@ export const sl = {
     "Pritisni Pošlji vpisni vprašalnik — gumb tik pod naslovom Stranke, na vrhu seznama ljudi. Ana je po vadbi vprašala za trening; namesto da bi ji trener podatke zapisoval kar na hodniku, ji pošlje povezavo, ki jo izpolni sama.",
   story_step_arrive_contact:
     "Vpiši številko, ki jo je Ana pravkar povedala, v edino polje, ki sprejme številko ali e-naslov. Aplikacija sama ugotovi, kaj je: številka dobi SMS, naslov e-pošto. O njej se še nič ne shrani — v tvojem seznamu je šele, ko ti sama pošlje svoje podatke.",
+  story_step_arrive_contact_email:
+    "Maja da e-naslov namesto številke. Vpiši ga kar čez številko v isto polje — aplikacija prebere, kaj je, in gumb iz sporočila SMS spremeni v e-pošto. Eno polje, ker trener s telefonom v roki ne bi smel izbirati, kakšen kontakt je dobil.",
+  story_step_arrive_close_invite:
+    "Zapri to z ✕ v zgornjem desnem kotu okna. Dva od treh sta na poti.",
+  story_step_arrive_add_manually:
+    "Nik stoji tu in svoje podatke pove na glas, zato pritisni Dodaj stranko — zeleni gumb na vrhu seznama, takoj ob tistem, ki si ga pravkar uporabil. Povezava ni edina pot noter.",
+  story_step_arrive_type_name:
+    "Njegovo ime, vpisano enkrat. To je vse, kar stranka potrebuje, da obstaja v seznamu; vse drugo lahko pride kasneje, od njega ali od tebe.",
+  story_step_arrive_save_client:
+    "Pritisni Shrani stranko na dnu obrazca. Zdaj je v seznamu — eden od treh prijateljev, vsak po svoji poti, ti pa si natipkal štiri besede.",
   story_step_read_on: "Preberi to, nato pritisni Naprej in se loti naloge, ki jo postavlja.",
   story_step_handover:
-    "Pritisni Odpri Anin telefon — zeleni gumb tik pod tem besedilom. Brskalnik zapusti tvojo aplikacijo in odpre stran, ki jo Ana res odpre iz povezave v sporočilu, zgodba pa se nadaljuje tam.",
+    "Pritisni Odpri Anin telefon — gumb vodnika, spodaj desno. Brskalnik zapusti tvojo aplikacijo in odpre stran, ki jo Ana res odpre iz povezave v sporočilu, zgodba pa se nadaljuje tam, na njeni strani.",
   story_step_thanks:
     "Vse naloge so opravljene, od vprašanja po vadbi do naslednjega tedna, ki je že v koledarju. Pritisni Končaj, da vodnika pospraviš in aplikacijo naprej raziskuješ sam, ali Počisti demo podatke, da jo izprazniš in začneš s svojimi strankami.",
   story_message_title: "Sporočilo od trenerja",

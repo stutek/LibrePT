@@ -290,6 +290,49 @@ const ARRIVE_CHAPTER = {
       caption: "story_step_arrive_contact",
       expect: { selector: "#intake-invite-send", containsText: "text message" },
     },
+    {
+      // The SECOND friend, and the other channel. The same one box, retyped: what the trainer does
+      // when the next person is standing there, and the beat that shows the app reading an address
+      // where it read a number a moment ago (asked for 2026-08-23 — both channels, on screen).
+      id: "arrive-contact-email",
+      persona: TRAINER,
+      target: "#intake-invite-contact",
+      enter: "maja.kos@example.com",
+      caption: "story_step_arrive_contact_email",
+      expect: { selector: "#intake-invite-send", containsText: "email" },
+    },
+    {
+      id: "arrive-close-invite",
+      persona: TRAINER,
+      target: "#dialog-intake-invite .modal-close-btn",
+      caption: "story_step_arrive_close_invite",
+      expect: { selector: "#btn-add-client", visible: true },
+    },
+    {
+      // The THIRD friend, by hand — because the link is not the only way in, and a trainer who has
+      // someone's details already should not have to send them a form to type them back.
+      id: "arrive-add-manually",
+      persona: TRAINER,
+      target: "#btn-add-client",
+      caption: "story_step_arrive_add_manually",
+      expect: { selector: "#dialog-client", visible: true },
+    },
+    {
+      id: "arrive-type-name",
+      persona: TRAINER,
+      target: "#client-name",
+      enter: "Nik Zupan",
+      caption: "story_step_arrive_type_name",
+      expect: { selector: "#client-name", hasValue: "Nik" },
+    },
+    {
+      id: "arrive-save-client",
+      persona: TRAINER,
+      target: "#form-client button[type=submit]",
+      caption: "story_step_arrive_save_client",
+      // The register itself is the claim: he is in it, from two words typed at a desk.
+      expect: { selector: "#clients-list", visible: true, containsText: "Nik Zupan" },
+    },
     // The handover keeps its own beat because GOING THERE is the action — and Show me is hidden on
     // it for the same reason it is hidden on any card: the two buttons are right there, and having
     // the guide press Continue for you would dismiss the handover without ever making it.

@@ -244,7 +244,7 @@ def test_the_card_holds_still_on_a_beat_that_points_at_itself(page, local_server
     # Walk until a beat whose only control is the card itself — the guide hides Show me on exactly
     # those. Found rather than counted, so adding a beat to the story does not silently move this
     # test onto a different one.
-    for _ in range(8):
+    for _ in range(12):
         if not page.locator(SHOW_ME).is_visible():
             break
         page.locator(SHOW_ME).click()

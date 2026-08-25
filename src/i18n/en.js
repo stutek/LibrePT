@@ -479,9 +479,19 @@ export const en = {
     "Tap Send an intake link — the button just under the Clients heading, at the top of the list of people. Ana asked about training after a class, and instead of taking her details standing in a corridor, the trainer sends her a link she fills in herself.",
   story_step_arrive_contact:
     "Type the number Ana just read out, into the one box that takes either a number or an email address. The app works out which it is: a number gets a text message, an address gets an email. Nothing is saved about her yet — she is not in your register until she has sent her own details back.",
+  story_step_arrive_contact_email:
+    "Maja gives an email address instead. Type it over the number in the same box — the app reads what it is and swaps the button from a text message to an email. One box, because a trainer holding a phone should not have to pick which kind of contact they were given.",
+  story_step_arrive_close_invite:
+    "Close this with the ✕ in the top right corner of the box. Two of the three are on their way.",
+  story_step_arrive_add_manually:
+    "Nik is standing right here and reads his details out, so tap Add Client — the green button at the top of the list, next to the one you just used. The link is not the only way in.",
+  story_step_arrive_type_name:
+    "His name, typed once. That is all a client needs to exist in the register; everything else can arrive later, from him or from you.",
+  story_step_arrive_save_client:
+    "Tap Save Client at the bottom of the form. He is in the register now — one of three friends in by three different routes, and you typed four words in total.",
   story_step_read_on: "Read that, then tap Next to take on the task it sets.",
   story_step_handover:
-    "Tap Open Ana's phone — the green button just below this text. The browser leaves your own app and goes to the page Ana really opens from the link in her message, and the story carries on there.",
+    "Tap Open Ana's phone — the guide's own button, bottom right. The browser leaves your app and goes to the page Ana really opens from the link in her message, and the story carries on over there, on her side.",
   story_step_thanks:
     "Every task is done, from a question after a class to next week already in the diary. Tap Done to put the guide away and keep exploring the app on your own, or Clear the demo data to empty it out and start with your own clients.",
   story_message_title: "A message from your trainer",
