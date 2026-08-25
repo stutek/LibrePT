@@ -39,8 +39,9 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
 9. **Single source of truth.** Write a value, rule or decision once; a copy is correct only on the
    day it is written.
 10. **Anti-fragility.** Prefer the design where the mistake cannot be made to the rule forbidding it.
-11. **Keep it simple**, and self-documenting: the explicit version a reader can follow beats the
-    clever one, one reason to change per file, and the reason lives at the code.
+11. **Keep it simple — everywhere.** In a reply, an architectural decision, a scenario, a diagram
+    and the code alike: the version a reader can follow beats the clever one. Self-documenting, one
+    reason to change per file, and the reason lives at the thing it explains.
 12. **Light coupling.** If reordering one file edits another, that is the defect.
 13. **The gym floor is the judge** — offline, one-handed, interrupted. A decision that only makes
     sense at a desk is wrong here.
