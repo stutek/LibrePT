@@ -2968,3 +2968,13 @@ that predates §35. Invisible in the code, because the story runs on the same gu
 symptom was the step counter saying 1 / 4. Fixed by making that builder write `?demo=story`, and by
 pinning the VALUE in the tests, which had asserted only that some `?demo=` was set. The wedge keeps
 its own link for the engine's tests; nothing in the app offers it.
+
+### 38.2 [x] CHANGE — the demo-mode notice leads the whole feed
+
+**Wanted 2026-08-25 (Simon):** *"DEMO mode message should be the 1st one on the message area, above
+bookings and cancelations"*. It led the STORED messages already, but synthetic work items — pending
+sessions, unscheduled plans — lead the feed by rule, and the demo seed generates those, so the card
+was pushed below them. It is now the one exception to that rule, and the reason is not politeness:
+every other item is a claim about the trainer's own gym, and reading one before knowing the data is
+a fiction is reading it wrong. It is also the collapsed drawer's summary line and the only way back
+to the guided demo and the cleanup screen.

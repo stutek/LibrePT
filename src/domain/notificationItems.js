@@ -10,7 +10,8 @@
 //     feedback signals nobody has reviewed. Storing them would mean maintaining a second copy of a
 //     truth that already lives in `state.history` / `state.planUpdates`, and the two would drift.
 //
-// Synthetic items lead the feed for that reason: outstanding work outranks FYI.
+// Synthetic items lead the feed for that reason: outstanding work outranks FYI. The ONE exception
+// is the demo-mode notice — see DEMO_NOTICE_TYPE below.
 //
 // Pure (TODO §24.7): state in, item list out. Rendering it, persisting which items have been read,
 // and reacting to a tap all belong to the module that owns the DOM.
@@ -192,12 +193,18 @@ export function buildCrashReportItem(crashes, t, repoUrl) {
 // used to push everything else off a phone screen.
 const SCHEDULE_CHURN_TYPES = new Set(["reservation", "cancellation"]);
 
+// The stored item that says "this is sample data", and the one thing that outranks outstanding work
+// (wanted 2026-08-25). Everything else in the feed is a claim about the trainer's own gym — bookings
+// they must answer, plans they owe someone — and reading any of it before knowing it is a fiction
+// is reading it wrong. It is also the collapsed drawer's summary line and the only way back to the
+// guided demo and the cleanup screen, so burying it under a demo-generated booking hides both.
+const DEMO_NOTICE_TYPE = "demo-mode";
+
 /**
  * Every booking and cancellation folded into one item, taking the place of the FIRST of them.
  *
- * Position matters: the demo-mode notice is deliberately the first record in the seed because it is
- * what a trainer reads while the drawer is collapsed, so grouping must not float the group to the
- * top of the feed.
+ * Position matters: the demo-mode notice leads the whole feed (DEMO_NOTICE_TYPE) because it is what
+ * a trainer reads while the drawer is collapsed, so grouping must not float the group above it.
  *
  * A single arrival is left exactly as it was — its own title and its own description — because a
  * lone cancellation grouped with nothing reads worse as "Schedule changes: 1" than as itself.
@@ -248,7 +255,7 @@ export function resolveNotificationItems(
   ]
     .filter(Boolean)
     .map((item) => ({ ...item, read: readIds.includes(item.id) }));
-  // An offer the store cannot honour is worse than no offer: the walkthrough drives real controls,
+  // An offer the store cannot honour is worse than no offer: the guided demo drives real controls,
   // so on a database missing what its steps need it stops on the first one, in front of the person
   // being shown the product (TODO §28.14).
   const canWalkThrough = walkthroughDataPresent(state);
@@ -260,5 +267,6 @@ export function resolveNotificationItems(
         actions: item.actions.filter((action) => canWalkThrough || !action.startWalkthrough),
       })),
   );
-  return [...synthetic, ...stored];
+  const demoNotice = stored.filter((item) => item.type === DEMO_NOTICE_TYPE);
+  return [...demoNotice, ...synthetic, ...stored.filter((item) => item.type !== DEMO_NOTICE_TYPE)];
 }

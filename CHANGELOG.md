@@ -22,6 +22,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ## 2026-08-25 — The demo's own front door
 
+### Changed
+- **The demo-mode notice is the first thing in the message area** — it led the stored messages, but the feed puts work the trainer owes above FYI, and the demo data generates exactly that work, so the card that says "none of this is real" sat below sample bookings and pending sessions. It now leads everything. Every other item is a claim about the trainer's own gym, and reading one before knowing the data is a fiction is reading it wrong — and this card is also the collapsed drawer's summary line and the only way back to the guided demo and the cleanup screen.
+
 ### Fixed
 - **"Show me around" starts the story, not the four-tap tour it replaced** — reported as "the message in the notification area starts the old 1/4 demo, not the new 1/31", and the splash's offer did the same, because both build their link from one function and that function still asked for the old script. Nothing looked wrong in the code: the story runs on the same guided panel, so the only symptom was the counter saying 1 of 4 in front of whoever accepted the invitation. The tests now name the script the button must start instead of checking that it starts something.
 

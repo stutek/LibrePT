@@ -129,6 +129,24 @@ test("work the trainer owes leads the feed, ahead of FYI messages", () => {
   );
 });
 
+test("the demo-mode notice leads everything, even the work items", () => {
+  // Wanted 2026-08-25: it was sitting under demo-generated bookings and pending work. Every other
+  // item is a claim about the trainer's own gym — reading one before knowing the data is a fiction
+  // is reading it wrong — and this card is also the collapsed drawer's summary line.
+  const state = {
+    notifications: [
+      { id: "spot-reservation-1", type: "reservation", title: "Booked", actions: [] },
+      { id: "demo-mode-notice", type: "demo-mode", title: "Demo data", actions: [] },
+    ],
+    history: [{ id: "h1", isPlanning: true, title: "Draft", clientName: "Ana" }],
+  };
+
+  assert.deepEqual(
+    resolveNotificationItems(state, t, []).map((item) => item.id),
+    ["demo-mode-notice", "synthetic-unscheduled-plans", "spot-reservation-1"],
+  );
+});
+
 test("read state applies to synthetic items too, or they could never be dismissed", () => {
   const state = {
     notifications: [{ id: "n1", title: "FYI", actions: [] }],
