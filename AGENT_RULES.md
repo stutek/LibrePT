@@ -253,6 +253,11 @@ files beat few large ones: less context to load, fewer collisions, a tree that d
    if the reader is holding an internal invariant, a `§`-reference or an earlier decision in their
    head has not been read — it has been re-asked, and the second telling costs more than the plain
    one would have. Name the thing to do or the thing that is true, then the reason.
+   **Write in the STANDARD register of the maintainer's language** (asked for 2026-08-25). Slovenian
+   replies are `knjižni jezik`: whole sentences with a verb in them, standard vocabulary, and none of
+   the clipped headline fragments a status report drifts into ("Zeleno, oddano"). Informality reads
+   as carelessness about the work being reported, and it compounds with the rule below — a literal
+   translation of an English technical word is both invented and colloquial at once.
    **Never coin a term, least of all in the maintainer's own language.** A word invented for the
    occasion — a literal translation, a shortened label, a name for a step — reads as jargon they
    are expected to already know, so the reply costs a round trip instead of saving one. Use the
