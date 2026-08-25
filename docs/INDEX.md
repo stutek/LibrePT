@@ -13,6 +13,7 @@ tags:
 
 | Document / Template | Type | Description |
 | :--- | :--- | :--- |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | `architecture` | Code architecture — file granularity, the import layering and dependency injection, and the design and UI invariants a change must respect |
 | [DATA_MODEL.md](DATA_MODEL.md) | `architecture` | Data model & storage schema — IndexedDB layout, record model, star-write projections, migration and retention |
 | [ROUTING.md](ROUTING.md) | `architecture` | Routing architecture — the Route class hierarchy, the registry, specificity ordering, and the invariants a new route must respect |
 | [PREVIEW.md](PREVIEW.md) | `guidelines` | Pre-release PREVIEW build risks & data-loss notice (linked from the header PREVIEW tag) |
