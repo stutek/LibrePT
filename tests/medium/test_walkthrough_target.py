@@ -4,7 +4,7 @@
 # Every view lives in the DOM at once — the router activates one and leaves the rest in place — so a
 # selector as ordinary as `.session-card` matches cards in views nobody is looking at. Reported after
 # a reload during the guided walkthrough put the spotlight on an element belonging to a different
-# view: `walkthroughUrl()` keeps whatever route was open, so the step resolved against a page it was
+# view: `guidedDemoUrl()` keeps whatever route was open, so the step resolved against a page it was
 # never written for.
 #
 # Medium rather than unit_js: `resolveTarget` is pure logic over a DOM, and Node has no DOM. Medium

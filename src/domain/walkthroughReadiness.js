@@ -12,6 +12,9 @@
 // perfectly well; one who cleared half the demo cannot. Keying on the seeded ids would get both
 // backwards.
 //
+// Since 2026-08-25 the offer it gates starts the STORY (§35), whose gym chapter replays exactly
+// these steps — so the same shape still decides, and the check stayed as it is.
+//
 // Injected dependencies: none.
 
 /** Does this routine prescribe at least one circuit? The walkthrough's second step focuses one. */

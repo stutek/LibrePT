@@ -18,11 +18,11 @@ import { test } from "node:test";
 
 import {
   demoDataUrl,
+  guidedDemoUrl,
   isSplashDisabled,
   remainingHoldMs,
   requestedMinimumVisibleMs,
   splashSuppressed,
-  walkthroughUrl,
 } from "../../../src/modules/splash/splashScreen.js";
 
 test("?splash=off asks for no hold at all", () => {
@@ -143,12 +143,14 @@ test("a demo link starts at the app root, whatever route it was built from", () 
   assert.equal(url.searchParams.get("init"), "demo_data_load");
 });
 
-test("a walkthrough link starts there too — its first step looks for a session card", () => {
+test("a guided-demo link starts there too — its first step looks for a session card", () => {
   const url = new URL(
-    walkthroughUrl("https://app.example.test/LibrePT/clients/c2?theme=nebula", "/LibrePT/"),
+    guidedDemoUrl("https://app.example.test/LibrePT/clients/c2?theme=nebula", "/LibrePT/"),
   );
 
   assert.equal(url.pathname, "/LibrePT/");
   assert.equal(url.searchParams.get("theme"), "nebula");
-  assert.ok(url.searchParams.get("demo"));
+  // The STORY, named exactly: both offers ran the four-step gym-floor tour until 2026-08-25, and
+  // asserting only that SOME `?demo=` value is set is what let that pass unnoticed.
+  assert.equal(url.searchParams.get("demo"), "story");
 });

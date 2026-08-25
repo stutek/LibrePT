@@ -2952,3 +2952,19 @@ order is the whole risk:
 6. Each existing clone: `git branch -m`, `git fetch`, `git branch -u origin/trunk`.
 
 Everything above is reversible except the Pages outage step 2 exists to avoid.
+
+---
+
+## 38. [x] Reported 2026-08-25 — the demo's own entry points — fixed 2026-08-25
+
+See [CHANGELOG](CHANGELOG.md).
+
+### 38.1 [x] BUG — "show me around" started the old four-tap tour, not the story
+
+**Reported 2026-08-25 (Simon):** *"Message in notification area starts the old 1/4 demo not the new
+1/31"*, and on the same walk *"same with guided walkthrough on the splash screen"*. Both offers built
+their URL from one function, and that function still wrote `?demo=walkthrough` — the gym-floor wedge
+that predates §35. Invisible in the code, because the story runs on the same guided panel: the only
+symptom was the step counter saying 1 / 4. Fixed by making that builder write `?demo=story`, and by
+pinning the VALUE in the tests, which had asserted only that some `?demo=` was set. The wedge keeps
+its own link for the engine's tests; nothing in the app offers it.

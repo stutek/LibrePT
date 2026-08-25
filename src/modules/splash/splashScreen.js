@@ -13,7 +13,7 @@
 // The `?demo=` value is imported rather than spelled again here: the splash writes the link and
 // app.js's boot step reads it, and a typo in either would produce a button that silently starts
 // nothing.
-import { DEMO_WALKTHROUGH } from "../common/shareLink.js";
+import { DEMO_STORY } from "../common/shareLink.js";
 
 // How long the mark stays up, measured from navigation start rather than from the moment boot
 // finishes: a slow cold boot should be absorbed by this window, not added on top of it. So the
@@ -45,7 +45,7 @@ const DEMO_INIT_PARAM = "init";
 const DEMO_INIT_VALUE = "demo_data_load";
 const SPLASH_PARAM = "splash";
 const SPLASH_OPT_OUT = "off";
-const WALKTHROUGH_PARAM = "demo";
+const DEMO_SCRIPT_PARAM = "demo";
 
 /** `?splash=off` turns the splash off entirely — no hold, and no onboarding offer either. It is
  *  the "put me straight into the app" parameter, the same deep-link convention as `?init`, `?lang`
@@ -124,15 +124,21 @@ export function demoDataUrl(href = window.location.href, rootPath = appRootPathn
   return url.toString();
 }
 
-/** The URL that starts the guided walkthrough (TODO §9.5): the demo dataset, plus the `?demo=`
- *  value app.js's last boot step reads.
+/** The URL behind every "show me around" offer — the splash's and the message feed's: the demo
+ *  dataset, plus the `?demo=` value app.js's boot step reads.
  *
- *  It carries the demo data deliberately — the walkthrough drives the seeded group session, so a
- *  walkthrough over an empty app would be a panel pointing at nothing. That is also why this is the
- *  same reload as the demo link and not a mode toggled in place. */
-export function walkthroughUrl(href = window.location.href, rootPath = appRootPathname()) {
+ *  It starts the STORY (§35), not the four-step gym-floor tour (`?demo=walkthrough`) these buttons
+ *  started until 2026-08-25. Both run in the same guided panel, so the mistake was invisible from
+ *  the code and plain on screen: a trainer who accepted the offer was counted "1 / 4" through the
+ *  wedge that predates the story, and never saw the 31 beats the demo now IS. The old tour keeps
+ *  its own link for the tests that exercise the engine; nothing offers it.
+ *
+ *  It carries the demo data deliberately — the script drives the seeded sessions, so a guide over an
+ *  empty app would be a panel pointing at nothing. That is also why this is the same reload as the
+ *  demo link and not a mode toggled in place. */
+export function guidedDemoUrl(href = window.location.href, rootPath = appRootPathname()) {
   const url = new URL(demoDataUrl(href, rootPath));
-  url.searchParams.set(WALKTHROUGH_PARAM, DEMO_WALKTHROUGH);
+  url.searchParams.set(DEMO_SCRIPT_PARAM, DEMO_STORY);
   return url.toString();
 }
 
@@ -196,7 +202,7 @@ function revealOnboarding(splash, resolve) {
     window.location.assign(demoDataUrl());
   });
   document.getElementById("splash-walkthrough")?.addEventListener("click", () => {
-    window.location.assign(walkthroughUrl());
+    window.location.assign(guidedDemoUrl());
   });
   document.getElementById("splash-start-empty")?.addEventListener("click", () => {
     fadeOut(splash, resolve);

@@ -143,16 +143,20 @@ def test_demo_data_choice_loads_the_dataset_and_stops_offering(page, local_serve
 @pytest.mark.clean_start
 @pytest.mark.keep_splash
 def test_walkthrough_choice_arrives_with_data_to_walk_through(page, local_server):
-    """The walkthrough drives the seeded group session, so its entry point has to bring the dataset
-    with it. A walkthrough started on the empty app a first-run trainer is looking at would be a
+    """The guided demo drives the seeded sessions, so its entry point has to bring the dataset
+    with it. A guide started on the empty app a first-run trainer is looking at would be a
     panel pointing at nothing — which is why this button reloads through ?init=demo_data_load too,
-    rather than only setting ?demo=."""
+    rather than only setting ?demo=.
+
+    It names the script, not just "some demo": until 2026-08-25 this button started the four-step
+    gym-floor tour instead of the story the demo now is (reported for the message feed's copy of the
+    same offer)."""
     page.goto(local_server)
     _answer_language_step(page)
     page.locator("#splash-walkthrough").click(timeout=15000)
 
     page.wait_for_url("**init=demo_data_load**", timeout=15000)
-    assert "demo=walkthrough" in page.url
+    assert "demo=story" in page.url
     page.locator("#walkthrough-overlay").wait_for(state="visible", timeout=20000)
 
 

@@ -20,6 +20,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-08-25 — The demo's own front door
+
+### Fixed
+- **"Show me around" starts the story, not the four-tap tour it replaced** — reported as "the message in the notification area starts the old 1/4 demo, not the new 1/31", and the splash's offer did the same, because both build their link from one function and that function still asked for the old script. Nothing looked wrong in the code: the story runs on the same guided panel, so the only symptom was the counter saying 1 of 4 in front of whoever accepted the invitation. The tests now name the script the button must start instead of checking that it starts something.
+
+---
+
 ## 2026-08-21 — The live session stops being one file
 
 ### Changed

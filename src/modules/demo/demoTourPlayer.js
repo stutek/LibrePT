@@ -75,7 +75,7 @@ function isOnScreen(element) {
  *
  * **Only ever a control that is VISIBLE** (TODO §28.13). A selector as ordinary as `.session-card`
  * matches cards in views nobody is looking at, and a document query returns them in DOM order — so
- * a walkthrough reloaded onto a different route (`walkthroughUrl()` keeps whatever path was open)
+ * a walkthrough reloaded onto a different route (`guidedDemoUrl()` keeps whatever path was open)
  * put its spotlight on an element belonging to another view. With nothing visible this returns null
  * and the step reports "no control matched", which stops the walkthrough loudly rather than guiding
  * someone to a place they cannot see. */
