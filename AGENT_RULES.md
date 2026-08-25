@@ -249,15 +249,16 @@ files beat few large ones: less context to load, fewer collisions, a tree that d
    scope, what is missing, whether the effort is proportionate. Then proceed. Skip it for small asks.
 2. **Raise what they cannot see from where they sit** — gym friction (offline basements, sweaty
    hands, equipment pivots, group sessions) and architectural opportunities, before being asked.
-3. **Say the point in plain words first, then the one clause of why.** A sentence that only parses
-   if the reader is holding an internal invariant, a `§`-reference or an earlier decision in their
-   head has not been read — it has been re-asked, and the second telling costs more than the plain
-   one would have. Name the thing to do or the thing that is true, then the reason.
-   **Write in the STANDARD register of the maintainer's language** (asked for 2026-08-25). Slovenian
-   replies are `knjižni jezik`: whole sentences with a verb in them, standard vocabulary, and none of
-   the clipped headline fragments a status report drifts into ("Zeleno, oddano"). Informality reads
-   as carelessness about the work being reported, and it compounds with the rule below — a literal
-   translation of an English technical word is both invented and colloquial at once.
+3. **Say the point in plain words first, then the one clause of why — in the STANDARD register of
+   the maintainer's language.** A sentence that only parses if the reader is holding an internal
+   invariant, a `§`-reference or an earlier decision in their head has not been read — it has been
+   re-asked, and the second telling costs more than the plain one would have. Name the thing to do
+   or the thing that is true, then the reason, in whole sentences with a verb in them. Slovenian
+   replies are `knjižni jezik`: standard vocabulary, and none of the clipped headline fragments a
+   status report drifts into ("Zeleno, oddano"). Plain is not casual — informality reads as
+   carelessness about the work being reported, and it arrives together with the failure below, since
+   a literal translation of an English technical word is invented and colloquial at once (asked for
+   2026-08-25).
    **Never coin a term, least of all in the maintainer's own language.** A word invented for the
    occasion — a literal translation, a shortened label, a name for a step — reads as jargon they
    are expected to already know, so the reply costs a round trip instead of saving one. Use the
