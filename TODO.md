@@ -2969,6 +2969,41 @@ symptom was the step counter saying 1 / 4. Fixed by making that builder write `?
 pinning the VALUE in the tests, which had asserted only that some `?demo=` was set. The wedge keeps
 its own link for the engine's tests; nothing in the app offers it.
 
+### 38.3 [x] BUG — the guide and the app's own modals — fixed 2026-08-26
+
+**Reported 2026-08-25 (Simon)**, walking the story: *"step 3/41 does not ensure menu closed"*, then
+*"send intake link does not count the steps right, back button keeps the app stuck in the modal, the
+modal for intake sharing is hijacking the demo step card and the card is covering the controls"*.
+Four symptoms, three causes, all of them at the seam where the guide meets a `<dialog>` or a
+dropdown it opened itself.
+
+- **A control behind an open modal counted as visible.** `showModal()` makes the rest of the page
+  inert, but the buttons under it keep their boxes — so the beat that closes the intake-invite
+  dialog, which claimed only "the register button is visible", was satisfied the moment the dialog
+  OPENED. The guide lit Next, the viewer walked on, and every beat after it happened over a modal
+  nobody had closed, with the whole app inert behind it: the miscounted steps and the Back that
+  could not escape are both this. `probe` and `resolveTarget` now read reachable, not painted, and
+  the beat claims what it is about — the dialog gone.
+- **The modal took the card over.** Every dialog here is a glass card, and `backdrop-filter` makes
+  an element the containing block for `position: fixed` descendants — so the guide's full-screen
+  frame collapsed onto the dialog the moment the panel was moved inside it (which is what keeps it
+  tappable). The card drew INSIDE the modal, over the controls the beat was asking for, and on the
+  taller new-client form the scroll carried it off the top of the screen. The frame is measured back
+  onto the viewport by hand, the dialog's own scroll included.
+- **A rebuild could not undo, and a modal is the one state nothing else escapes.** Restoring a
+  beat's ground navigates and replays forward; neither reaches out of a modal, because everything
+  outside it is inert. The rebuild now closes a modal the beat does not live in, through the
+  dialog's own ✕.
+- **The ground a rebuild puts back has to be taken away again by the beat that is already done.**
+  The register opens from the ☰ menu and the tap that opens it closes the menu; walking back into
+  that beat re-opened the menu over the register, and the tap that would have closed it was skipped
+  as redundant. Both the entry rebuild and Show me now re-fire a done beat's action after a rebuild
+  — after one, the app is by construction back BEFORE the step, so it is a replay rather than a
+  double tap.
+
+Pinned by [tests/medium/test_walkthrough_modal.py](tests/medium/test_walkthrough_modal.py) (three
+rules, one stub) plus the menu-closed assertion in the story's own repeat-Show-me test.
+
 ### 38.2 [x] CHANGE — the demo-mode notice leads the whole feed
 
 **Wanted 2026-08-25 (Simon):** *"DEMO mode message should be the 1st one on the message area, above

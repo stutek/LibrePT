@@ -241,17 +241,6 @@ export function startGuidedWalkthrough({
     el.overlay.classList.toggle("is-top", target.getBoundingClientRect().bottom > wouldSitAbove);
   }
 
-  /** Keeps the guide TAPPABLE when the app opens one of its own modals.
-   *
-   * A `<dialog>` opened with showModal() puts itself in the top layer and makes everything else on
-   * the page inert — including this panel, so Show me and Next stop responding the moment the story
-   * reaches the note dialog. Found by walking the story: the guide sat there looking normal while
-   * every tap on it was swallowed.
-   *
-   * The fix is to move the panel INTO the open dialog while it is open, which is what puts it in the
-   * top layer too, and back to the body afterwards. It is `position: fixed`, so it draws in exactly
-   * the same place either way; only its reachability changes.
-   */
   /** Whether the app is already on a step's route. Compared on the path the script writes — the
    * scripts name routes as the app's own paths, and the base path is the same for both. */
   function currentPathIs(route) {
@@ -259,10 +248,51 @@ export function startGuidedWalkthrough({
     return here === route || here.endsWith(route);
   }
 
+  /** Keeps the guide TAPPABLE when the app opens one of its own modals, without letting the modal
+   * take the panel over.
+   *
+   * A `<dialog>` opened with showModal() puts itself in the top layer and makes everything else on
+   * the page inert — including this panel, so Show me and Next stop responding the moment the story
+   * reaches the note dialog. Found by walking the story: the guide sat there looking normal while
+   * every tap on it was swallowed. So the panel moves INTO the open dialog while it is open, which
+   * puts it in the top layer too, and back to the body afterwards.
+   *
+   * **Moving it changes where it draws, which cost a walk to find out** (reported 2026-08-25: "the
+   * modal for intake sharing is hijacking the demo step card and the card is covering the
+   * controls"). Every dialog in this app is a glass card, and `backdrop-filter` makes an element the
+   * containing block for `position: fixed` descendants — so the guide's full-screen frame collapsed
+   * onto the dialog's padding box the moment it was appended: the card was drawn INSIDE the modal,
+   * over the controls the beat was asking for, and on a tall modal it left the screen entirely.
+   *
+   * So the frame is put back onto the viewport by hand while it lives in there. Measured on every
+   * tick, because a dialog can be scrolled or resized under it and the arithmetic is one rect.
+   */
   function keepPanelReachable() {
-    const openDialog = doc.querySelector("dialog[open]");
+    // The LAST open dialog, because one can be opened over another and the panel has to live in the
+    // topmost to be tappable at all.
+    const openDialog = [...doc.querySelectorAll("dialog[open]")].pop() || null;
     const wanted = openDialog || doc.body;
     if (el.overlay.parentElement !== wanted) wanted.appendChild(el.overlay);
+
+    const frame = el.overlay.style;
+    if (!openDialog) {
+      // Back to the stylesheet's own `inset: 0` against the viewport.
+      frame.left = frame.top = frame.width = frame.height = "";
+      return;
+    }
+    const box = openDialog.getBoundingClientRect();
+    const style = doc.defaultView.getComputedStyle(openDialog);
+    // The containing block is the dialog's PADDING box, so its border is part of the offset — and
+    // the dialog's own SCROLL, because a fixed child of a filtered ancestor scrolls with that
+    // ancestor's content. Without it the card left the top of the screen on the beat that saves a
+    // new client: that form is taller than the phone, so reaching its Save button scrolls the modal
+    // 233px and took the guide with it.
+    const originX = box.left + Number.parseFloat(style.borderLeftWidth || "0");
+    const originY = box.top + Number.parseFloat(style.borderTopWidth || "0");
+    frame.left = `${openDialog.scrollLeft - originX}px`;
+    frame.top = `${openDialog.scrollTop - originY}px`;
+    frame.width = `${doc.documentElement.clientWidth}px`;
+    frame.height = `${doc.documentElement.clientHeight}px`;
   }
 
   function render() {
@@ -298,6 +328,33 @@ export function startGuidedWalkthrough({
     positionSpotlight(step ? resolveTarget(doc, step) : null);
   }
 
+  /** Closes a modal the beat being restored does not live in — the one repair replaying forward
+   * cannot make.
+   *
+   * A `<dialog>` opened with showModal() makes the rest of the page inert, so a modal left standing
+   * from an earlier beat is not merely in the way: every control the rebuild would tap is
+   * unreachable, and so is every control the trainer might tap to get out. Walking Back out of the
+   * intake-invite modal landed exactly there (reported 2026-08-25, "the back button keeps the app
+   * stuck in the modal").
+   *
+   * Undoing is otherwise not something this guide does — Back re-explains, it does not undo. This is
+   * not an exception to that: it is the same repair as navigating to the anchor route, which the
+   * rebuild has always done. Through the dialog's own ✕ where it has one, so the app runs whatever
+   * it runs when a person closes it.
+   */
+  function dismissStaleModal(step) {
+    const modal = [...doc.querySelectorAll("dialog[open]")].pop() || null;
+    if (!modal) return false;
+    // A beat whose own control is inside this modal belongs to it — that is the ground, not a
+    // leftover.
+    const target = step?.target ? doc.querySelector(step.target) : null;
+    if (target && modal.contains(target)) return false;
+    const closer = modal.querySelector(".modal-close-btn");
+    if (closer) closer.click();
+    else modal.close();
+    return true;
+  }
+
   /**
    * Puts the app back where a step needs it, by REPLAYING the steps that build that state (reported
    * 2026-08-19: "After completing demo I click back and get: This step needs a different screen —
@@ -324,7 +381,8 @@ export function startGuidedWalkthrough({
     // not free: navigating to the anchor route mid-session tears down the very clipboard a later
     // beat is standing on. Show me asks for this on every tap, so the cheap answer has to be the
     // common one.
-    if (stepPreconditionMet(step, doc)) return;
+    if (stepPreconditionMet(step, doc)) return false;
+    dismissStaleModal(step);
     const index = tour.steps.indexOf(step);
     let anchor = index;
     while (anchor > 0 && !tour.steps[anchor].route) anchor -= 1;
@@ -359,6 +417,9 @@ export function startGuidedWalkthrough({
         t("walkthrough_wrong_place"),
       );
     }
+    // Says the app was MOVED, which is what makes a satisfied-looking outcome stale — see the Show
+    // me handler's `replay`.
+    return true;
   }
 
   async function enterStep() {
@@ -384,7 +445,20 @@ export function startGuidedWalkthrough({
       showing = true;
       render();
       try {
-        await restoreGroundFor(step);
+        const rebuilt = await restoreGroundFor(step);
+        // A beat that is ALREADY DONE has just had its starting state put back on top of a screen
+        // that moved past it — the ☰ menu re-opened over the register the beat itself opened
+        // (reported 2026-08-25 at story step 3, "does not ensure menu closed"). Nothing else was
+        // then left to close it, and the next beat's control sat underneath it. The step's own
+        // action is exactly what takes that ground away, so run it: idempotent, no pointer, repair
+        // pace — this is not a demonstration, it is the app being put where the story says it is.
+        if (rebuilt && stepOutcomeNow(step, doc).ok) {
+          await performStep(step, {
+            doc,
+            wait: (ms) => sleep(Math.min(ms, RESTORE_SETTLE_MS)),
+            replay: true,
+          });
+        }
       } finally {
         showing = false;
       }
@@ -440,7 +514,14 @@ export function startGuidedWalkthrough({
     // control could not be found, and the guide told the trainer the step had failed when it had
     // worked. Idempotent all the way down, so a first tap on an app already in place replays
     // nothing and navigates nowhere.
-    await restoreGroundFor(step);
+    //
+    // TRUE when the app was actually moved. That makes the step's own outcome reading stale: a beat
+    // that dismisses its ground to reach its outcome — the ☰ menu closing as the register opens —
+    // still reads "done" with the menu freshly re-opened on top of it, so performStep's idempotence
+    // would skip the tap and leave the menu covering the next beat's control (reported 2026-08-25).
+    // After a rebuild the app is by construction back BEFORE the step, so firing the action is a
+    // replay, not a double tap.
+    const rebuilt = await restoreGroundFor(step);
     // One path, whether or not the step has been done before: performStep is idempotent, so a step
     // walked back to is demonstrated again without its action being fired twice.
     //
@@ -450,7 +531,7 @@ export function startGuidedWalkthrough({
     // nothing on screen to say why, which is indistinguishable from a guide that has died.
     let outcome;
     try {
-      outcome = await performStep(step, { doc, hand });
+      outcome = await performStep(step, { doc, hand, replay: rebuilt });
     } catch (error) {
       outcome = { id: step.id, ok: false, reason: `demonstration threw: ${error?.message}` };
     } finally {

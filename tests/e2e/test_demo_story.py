@@ -282,7 +282,11 @@ def test_asking_to_be_shown_again_rebuilds_what_the_first_time_used_up(
     The beat that opens the register taps a row inside the menu — and succeeding closes that menu,
     so a second Show me looked for a row that was no longer there and told the trainer the step had
     failed when it had worked. Whatever the trainer has done to the app in between, asking again
-    starts from where the beat starts."""
+    starts from where the beat starts.
+
+    And it has to FINISH there too (reported 2026-08-25: "step 3/41 does not ensure menu closed").
+    Rebuilding re-opens the menu; skipping the tap because the register was already open then left
+    it hanging over the next beat's control."""
     _open_story(page, local_server)
     page.locator(SHOW_ME).click()
     expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
@@ -297,6 +301,9 @@ def test_asking_to_be_shown_again_rebuilds_what_the_first_time_used_up(
         )
 
     expect(page.locator("#btn-invite-client")).to_be_visible()
+    assert page.locator("#app-menu.hidden").count() == 1, (
+        "the menu the rebuild re-opened is still covering the register"
+    )
 
 
 def test_the_trainer_reads_what_ana_sent_and_she_lands_in_the_register(

@@ -307,7 +307,12 @@ const ARRIVE_CHAPTER = {
       persona: TRAINER,
       target: "#dialog-intake-invite .modal-close-btn",
       caption: "story_step_arrive_close_invite",
-      expect: { selector: "#btn-add-client", visible: true },
+      // The DIALOG being gone, like the note beat above — not the register button behind it. That
+      // button is painted the whole time the modal is open, so the weaker claim was satisfied
+      // before the beat happened: the guide lit Next, the viewer walked on, and the invite modal
+      // stayed open over every beat that followed with the whole app inert behind it (reported
+      // 2026-08-25). Present but not visible, because a closed dialog stays in the DOM.
+      expect: { selector: "#dialog-intake-invite", visible: false },
     },
     {
       // The THIRD friend, by hand — because the link is not the only way in, and a trainer who has

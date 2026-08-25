@@ -40,12 +40,33 @@ import { demoPace, prefersReducedMotion } from "./demoPace.js";
 // the pause could not go to zero without racing any handler that re-renders on a later frame.
 const OUTCOME_POLL_MS = 25;
 
+/** Is this element sitting BEHIND a modal the app has open?
+ *
+ * A `<dialog>` opened with showModal() makes the rest of the page inert: the controls under it are
+ * still painted, still have boxes, and cannot be tapped by anyone. So "visible" has to mean
+ * reachable, or a step grades itself done against a button nobody could press — which is exactly
+ * what happened to the beat that closes the intake-invite modal (reported 2026-08-25, "the back
+ * button keeps the app stuck in the modal"): it asked only for the register button behind the
+ * dialog, was satisfied the moment the dialog opened, and the story walked on through a modal it
+ * never closed, with every later beat pointing at controls the trainer could not reach.
+ *
+ * The guide's own panel is moved INTO the open dialog so it stays tappable, so it counts as inside.
+ */
+function behindOpenModal(doc, el) {
+  // ALL of them, not the first: a dialog can be opened over another, and the topmost is not the one
+  // a document query happens to return. Inside any open dialog is reachable; outside every one of
+  // them is not.
+  const modals = [...(doc.querySelectorAll?.("dialog[open]") ?? [])];
+  return modals.length > 0 && !modals.some((modal) => modal.contains(el));
+}
+
 export function probe(doc, selector) {
   const el = doc.querySelector(selector);
   if (!el) return { present: false, visible: false, text: "", value: "" };
   // offsetParent is null for a display:none element and for anything inside one, which is the
   // "can the viewer actually see this?" question — not the same as being in the document.
-  const visible = Boolean(el.offsetParent) || el.getClientRects().length > 0;
+  const visible =
+    (Boolean(el.offsetParent) || el.getClientRects().length > 0) && !behindOpenModal(doc, el);
   // `value` is reported separately from `text` and never folded into it: a field holds one and says
   // the other, and conflating them would make an expectation ambiguous about which it meant.
   return { present: true, visible, text: el.textContent || "", value: el.value ?? "" };
@@ -65,7 +86,10 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
  * reasons. */
 function isOnScreen(element) {
   const rect = element.getBoundingClientRect();
-  return rect.width > 0 && rect.height > 0;
+  if (rect.width <= 0 || rect.height <= 0) return false;
+  // Same rule as `probe`: a control the app's own modal has made inert is not a control to send a
+  // thumb at, and the ring around it would point somewhere nothing can happen.
+  return !behindOpenModal(element.ownerDocument, element);
 }
 
 /** The control a step acts on. `targetText` picks among matches by their text, which is how a script
@@ -184,7 +208,10 @@ function interactWith(target, step) {
  * Shared with the guided walkthrough's "Show me", so the two cannot drift on what a step's tap
  * actually is.
  */
-export async function performStep(step, { doc = document, hand = null, wait = sleep } = {}) {
+export async function performStep(
+  step,
+  { doc = document, hand = null, wait = sleep, replay = false } = {},
+) {
   const pace = demoPace(prefersReducedMotion(doc));
   const target = resolveTarget(doc, step);
   if (!target) {
@@ -217,7 +244,14 @@ export async function performStep(step, { doc = document, hand = null, wait = sl
   // several of these controls are TOGGLES: a second Too Easy clears the first, so replaying a step
   // the trainer walked back to would undo the very thing it was showing them. Pressing Show me once
   // or ten times leaves the same state.
-  if (!stepOutcomeNow(step, doc).ok) interactWith(target, step);
+  //
+  // `replay` says the caller has just REBUILT the ground under this step, which makes that reading
+  // stale: the app is back before the step, so an outcome still reading true belongs to the run
+  // being replayed, not to the state on screen. Skipping the tap there leaves whatever the rebuild
+  // re-opened standing — the ☰ menu over the register the beat had already opened (reported
+  // 2026-08-25 at story step 3). The toggle case never reaches this: a toggle's outcome lives on the
+  // same screen as its control, so a ground worth rebuilding has taken the outcome with it.
+  if (replay || !stepOutcomeNow(step, doc).ok) interactWith(target, step);
   // Wait for the app, then — and only at full motion — for the viewer.
   const outcome = await waitForOutcome(step, doc, wait, pace.outcomeBudgetMs);
   await wait(step.settleMs ?? pace.stepPauseMs);
