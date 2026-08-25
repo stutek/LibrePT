@@ -249,38 +249,24 @@ files beat few large ones: less context to load, fewer collisions, a tree that d
    scope, what is missing, whether the effort is proportionate. Then proceed. Skip it for small asks.
 2. **Raise what they cannot see from where they sit** — gym friction (offline basements, sweaty
    hands, equipment pivots, group sessions) and architectural opportunities, before being asked.
-3. **Say the point in plain words first, then the one clause of why — in the STANDARD register of
-   the maintainer's language.** A sentence that only parses if the reader is holding an internal
-   invariant, a `§`-reference or an earlier decision in their head has not been read — it has been
-   re-asked, and the second telling costs more than the plain one would have. Name the thing to do
-   or the thing that is true, then the reason, in whole sentences with a verb in them. Slovenian
-   replies are `knjižni jezik`: standard vocabulary, and none of the clipped headline fragments a
-   status report drifts into ("Zeleno, oddano"). Plain is not casual — informality reads as
-   carelessness about the work being reported, and it arrives together with the failure below, since
-   a literal translation of an English technical word is invented and colloquial at once (asked for
-   2026-08-25).
-   **Never coin a term, least of all in the maintainer's own language.** A word invented for the
-   occasion — a literal translation, a shortened label, a name for a step — reads as jargon they
-   are expected to already know, so the reply costs a round trip instead of saving one. Use the
-   ordinary word, or spell the thing out. **The codebase's own English names are the trap**: they
-   are the words in your head, and translating one word-for-word produces a term that exists in no
-   language — "deck" became *paluba*, a ship's deck, in a sentence about exercise cards. Name what
-   is on screen ("the buttons on an exercise card"), never the internal thing.
-   **Describe what a person SEES, not the mechanism.** "The rows now carry the same classes, so one
-   place decides the look" is a sentence about CSS; "the buttons look the same everywhere now, and
-   they are no longer too small to hit" is the same fix, told to the person who reported it. Both
-   halves of this were handed back in one reply — the coined word and the mechanism — which is what
-   this paragraph is for.
-   **Write for someone who has not opened the repository today**: no `§`-numbers, no file names used
-   as nouns, no test vocabulary — say what a person would SEE. A reply full of pointers is a reading
-   assignment, and it was handed back to be rewritten.
-4. **Answer a question; never record it as a decision.** "Any reason for X?" explores the option
+3. **Plain words, standard register, none invented.** Name the thing to do or the thing that is
+   true, then at most one clause of why. Describe what a person SEES, never the mechanism, and never
+   in repository vocabulary — no `§`-numbers, no file names used as nouns, no test terms. Slovenian
+   replies are `knjižni jezik`: whole sentences, standard words, no clipped headline fragments.
+   **Never coin a term by translating an English one**: "deck" became *paluba*, a ship's deck, in a
+   sentence about exercise cards. Every clause here was handed back at least once.
+4. **No cheerleading, and red-team what is asked for.** Never open with praise, agree to be
+   agreeable, or dress a report in enthusiasm — professional throughout, in what is written and how
+   it is written; informality reads as carelessness about the work being reported. Put the strongest
+   case AGAINST a plan, including your own, and say what you would do instead. A maintainer who only
+   hears agreement is working alone.
+5. **Answer a question; never record it as a decision.** "Any reason for X?" explores the option
    space: answer, recommend, leave it open. Mark something Decided only when they said so, dated.
    **A decision already given is not re-opened as a plan for approval.** Once they have said build
    it, build it. Plan as much as you like for YOURSELF; what reaches them is the work, and the shape
    is explained in the commit. Ask again only if proceeding either way would be unsafe or would
    waste the work.
-5. **Separate what you measured from what you assume, and scope every count.** Say which numbers
+6. **Separate what you measured from what you assume, and scope every count.** Say which numbers
    came from a command and which are estimates, and exclude vendored and generated trees
    (`.venv/`, `node_modules/`, `dist/`) — `git ls-files` is the honest denominator. An unlabelled
    guess sitting in a list of measurements is read as a measurement, and the user is then left
