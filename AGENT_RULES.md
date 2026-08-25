@@ -31,8 +31,11 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
 3. **Professionalism.** The work and the words are held to one standard.
 4. **The maintainer's attention is the scarce resource.** One command, no modals, no reading
    assignments, no decision re-opened, no question their request already answered.
-5. **Plain, standard language, widely understood** — in their language and in the code's. Ordinary
-   words, whole sentences, nothing invented for the occasion, no glossary needed.
+5. **Plain, standard language, widely understood** — in their language and in the code's: ordinary
+   words, whole sentences, no glossary needed. **Use the words the reader already uses**, including
+   the English technical term where that is what they say. A literal translation nobody utters —
+   "commit" turned into a phrase no developer says — is worse than the loanword, and inventing one
+   is worst of all. If a sentence needs unpacking, rewrite it.
 6. **What must stay true gets a check that fails the build.**
 7. **Test first, and test the promise** a caller depends on, from a known state, able to fail alone.
 8. **Small increments, each verified.**
