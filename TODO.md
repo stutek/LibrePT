@@ -2969,6 +2969,22 @@ symptom was the step counter saying 1 / 4. Fixed by making that builder write `?
 pinning the VALUE in the tests, which had asserted only that some `?demo=` was set. The wedge keeps
 its own link for the engine's tests; nothing in the app offers it.
 
+### 38.4 [x] CHANGE — the invitation text says who it is from and what happens to the data
+
+**Wanted 2026-08-26 (Simon)**, from the message as it arrived on a phone: it should name the
+trainer, say it is an invitation to fill the signup form, and carry the privacy statement.
+
+The old opening — *"Fill in your details for our training"* — is exactly what a phishing text says,
+and the trainer's name only appeared as a signature under the link. The name now leads, the app is
+named with it, and the notice comes WITH the invitation rather than as small print on a form
+somebody has already started filling in. It is [consentForm.js](src/modules/common/consentForm.js)'s
+`clientPrivacyNoticeUrl` — the same shipped page the consent letter links to, in the language the
+link opens in — so the two cannot drift.
+
+An install that does not know the trainer's name sends an unsigned line rather than a message with a
+gap in it. Around 300 characters with both links, so two or three SMS parts; the alternative is a
+bare URL, which is the thing being fixed.
+
 ### 38.3 [x] BUG — the guide and the app's own modals — fixed 2026-08-26
 
 **Reported 2026-08-25 (Simon)**, walking the story: *"step 3/41 does not ensure menu closed"*, then
@@ -3063,7 +3079,15 @@ element at its own centre and a real tap lands on it. Not for a dialog that need
 — the new-client form is taller than a phone, and a form that cannot scroll is worse to hand someone
 than a card in the way — so that one keeps the card docked inside.
 
-Pinned by [tests/medium/test_walkthrough_modal.py](tests/medium/test_walkthrough_modal.py) (five
+**A repeat Show me stopped blinking the dialog** — *"show me on step 3/41 seems to loop"*. The beat
+that opens the invite dialog puts its own control, the button on the page behind, out of reach by
+succeeding. Asking to be shown it again therefore closed the dialog to get at that button, tapped
+it, and opened the dialog afresh — the app blinking, and anything typed in the meantime gone, since
+the dialog empties its field on every open. A beat that is done and whose control its own success
+removed has nothing left to demonstrate, so Show me does nothing there. Quietly: a complaint about a
+beat that worked is worse than silence.
+
+Pinned by [tests/medium/test_walkthrough_modal.py](tests/medium/test_walkthrough_modal.py) (six
 rules, one stub), the story's own back-and-forth walk across the invite dialog, and the menu-closed
 assertion in its repeat-Show-me test.
 

@@ -53,6 +53,8 @@ stage.innerHTML = `
 `;
 document.body.appendChild(stage);
 const modal = document.getElementById('the-modal');
+window.__closes = 0;
+modal.addEventListener('close', () => { window.__closes += 1; });
 const smallModal = document.getElementById('the-small-modal');
 smallModal.querySelector('.modal-close-btn').addEventListener('click', () => smallModal.close());
 document.getElementById('open-modal').addEventListener('click', () => modal.showModal());
@@ -277,4 +279,31 @@ def test_the_card_leaves_a_modal_that_does_not_need_to_scroll(page, local_server
     assert not seen["scrolls"], f"the modal gained a scrollbar: {seen}"
     assert seen["onTop"] == "walkthrough-next", (
         f"the card is not what is on screen: {seen}"
+    )
+
+
+def test_showing_a_done_beat_again_does_not_blink_what_it_opened(page, local_server):
+    """Reported 2026-08-26: "show me on step 3/41 seems to loop". The beat that opens the invite
+    dialog puts its own control — the button on the page behind — out of reach by succeeding. Asking
+    to be shown it again therefore meant closing the dialog to get at the button, tapping it, and
+    opening the dialog afresh: from the outside, the app blinking, and anything typed in the meantime
+    gone. There is nothing left to demonstrate on a beat like that, so nothing happens."""
+    steps = """[
+      { id: 'open-it', target: '#open-modal', caption: 'walkthrough_progress',
+        expect: { selector: '#the-modal', visible: true } }
+    ]"""
+    _start(page, local_server, _stub(steps))
+
+    page.locator("#walkthrough-show").click()
+    expect(page.locator("#walkthrough-next")).to_be_enabled(timeout=15_000)
+    assert page.evaluate("() => document.getElementById('the-modal').open") is True
+
+    page.locator("#walkthrough-show").click()
+    page.wait_for_timeout(1500)
+
+    closes = page.evaluate("() => window.__closes")
+    assert closes == 0, "the dialog was torn down and rebuilt"
+    assert page.evaluate("() => document.getElementById('the-modal').open") is True
+    assert page.locator(".walkthrough-problem").is_hidden(), (
+        "silence, not a complaint: the beat worked"
     )

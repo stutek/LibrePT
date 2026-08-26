@@ -684,6 +684,16 @@ export function startGuidedWalkthrough({
     render();
 
     const alreadyDone = isWalkthroughStepDone(state, step.id);
+    // A beat that is DONE, and whose control its own success put out of reach: the register button
+    // is behind the dialog it opened, the ✕ is gone with the dialog it closed. Showing it again
+    // means undoing what the trainer is looking at and building it back, and tapping Show me twice
+    // then reads as the app blinking rather than as a guide (reported 2026-08-26, "show me on step
+    // 3/41 seems to loop"). There is nothing left to demonstrate here, so nothing happens — quietly,
+    // because a complaint about a beat that worked is worse than silence.
+    if (alreadyDone && stepOutcomeNow(step, doc).ok && !resolveTarget(doc, step)) {
+      showing = false;
+      return render();
+    }
     // Put the app back where this step starts BEFORE demonstrating it — the same rebuild a card
     // arriving does (reported 2026-08-23: "multiple clicks on Show me should always reset state
     // first"). Without it the second tap demonstrated into whatever the first one left behind: on
