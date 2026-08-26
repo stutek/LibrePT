@@ -59,6 +59,10 @@ const PANEL_CLEARANCE_PX = 12;
 // the demonstration's own pauses (demoTourPlayer.js): those exist so a viewer can follow a finger,
 // while this is the guide putting back a state the trainer never saw leave.
 const RESTORE_SETTLE_MS = 150;
+// How long a rebuilt app is given to actually show the beat's control before the trainer is told
+// anything. A view renders a frame or two after the tap that opened it, and a guide that says "wrong
+// screen" and then works is worse than one that waits a beat.
+const READY_SETTLE_MS = 2500;
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -336,8 +340,66 @@ export function startGuidedWalkthrough({
     positionSpotlight(step ? resolveTarget(doc, step) : null);
   }
 
-  /** Closes a modal the beat being restored does not live in — the one repair replaying forward
-   * cannot make.
+  /** Waits, briefly, for the app to actually be where the beat can happen.
+   *
+   * Counted in TICKS, not against a clock. The browser suites pin `Date.now()` to one instant so the
+   * seed's times cannot drift between test runs (tests/INDEX.md), and a deadline of "now plus a
+   * second" never arrives there — this waited for ever the first time it was written that way, and
+   * the guide sat with every button greyed out.
+   */
+  async function settlesReady(step, budgetMs = READY_SETTLE_MS) {
+    for (let waited = 0; waited < budgetMs; waited += RESTORE_SETTLE_MS) {
+      if (stepIsReady(step)) return true;
+      await sleep(RESTORE_SETTLE_MS);
+    }
+    return stepIsReady(step);
+  }
+
+  /** Is the app where this beat can HAPPEN? Its declared preconditions, and its own control being
+   * reachable.
+   *
+   * The second half is most of the answer in practice, because most beats declare no preconditions
+   * at all — `requires` exists for the states a selector cannot see (a clipboard covering the cards
+   * that are still in the DOM behind it). Reported 2026-08-26: "back and forth for demo steps
+   * surrounding sending intake link don't work". Walking Back out of the invite modal closes it, as
+   * it must; walking forward again then stepped through four beats whose controls were inside that
+   * closed dialog, marking each done — they were done, from the first pass — over a screen where
+   * none of it was happening. Nothing detected it, because none of those beats declares a
+   * precondition and the app never says "this control is not here".
+   */
+  function stepIsReady(step) {
+    if (!stepPreconditionMet(step, doc)) return false;
+    const target = resolveTarget(doc, step);
+    return Boolean(target) && !isCovered(target);
+  }
+
+  /** Is something DRAWN ON TOP of this control? Asked at the control's own centre, because that is
+   * where the hand is about to land, and a rect cannot answer it: an element under an open menu has
+   * a perfectly good box.
+   *
+   * Wanted 2026-08-26 (Simon), reproducing the menu report: *"manually open menu and click show me
+   * -> observe menu is not closed (no state enforcement)"*. A demonstration under a dropped-down
+   * menu shows a hand tapping something the viewer cannot see; the beat starts from a clean screen
+   * or it is not being shown at all.
+   */
+  function isCovered(target) {
+    const box = target.getBoundingClientRect();
+    const view = doc.documentElement;
+    const x = Math.min(Math.max(box.left + box.width / 2, 1), view.clientWidth - 1);
+    const y = Math.min(Math.max(box.top + box.height / 2, 1), view.clientHeight - 1);
+    const onTop = doc.elementFromPoint(x, y);
+    if (!onTop) return true;
+    // The GUIDE is not "something in the way": its own card already has a rule for stepping aside
+    // (keepPanelClearOf), and counting it here would send the guide off rebuilding the app to
+    // escape itself — from a state its own next tick fixes.
+    if (el.overlay.contains(onTop)) return false;
+    // The deepest element at that point is usually the control's own icon or label, and sometimes a
+    // wrapper it sits in — either way it is the same control answering.
+    return !(target.contains(onTop) || onTop.contains(target));
+  }
+
+  /** Closes what the app has left open on top of the beat being restored — the one repair replaying
+   * forward cannot make.
    *
    * A `<dialog>` opened with showModal() makes the rest of the page inert, so a modal left standing
    * from an earlier beat is not merely in the way: every control the rebuild would tap is
@@ -350,13 +412,31 @@ export function startGuidedWalkthrough({
    * rebuild has always done. Through the dialog's own ✕ where it has one, so the app runs whatever
    * it runs when a person closes it.
    */
-  function dismissStaleModal(step) {
+  function dismissStaleOverlays(step, { menus = true } = {}) {
+    const target = step?.target ? doc.querySelector(step.target) : null;
+    let dismissed = false;
+
+    // The app's own dropdowns. Not modal, so nothing is inert and nothing looks broken — they just
+    // COVER, and a beat demonstrated under one is a hand tapping a control nobody can see. Closed
+    // the way a person closes one, through the control that opened it, so the app runs its own
+    // handler and the button's aria-expanded stays honest.
+    //
+    // Called twice around a replay, because a replayed beat can re-open the very menu that was in
+    // the way — several of them exist to open one — and because a modal has to go before anything
+    // can be replayed at all: the page it covers is inert.
+    for (const menu of menus ? doc.querySelectorAll('[role="menu"]:not(.hidden)') : []) {
+      if (target && menu.contains(target)) continue;
+      const toggle = menu.parentElement?.querySelector('button[aria-expanded="true"]');
+      if (toggle) toggle.click();
+      else menu.classList.add("hidden");
+      dismissed = true;
+    }
+
     const modal = [...doc.querySelectorAll("dialog[open]")].pop() || null;
-    if (!modal) return false;
+    if (!modal) return dismissed;
     // A beat whose own control is inside this modal belongs to it — that is the ground, not a
     // leftover.
-    const target = step?.target ? doc.querySelector(step.target) : null;
-    if (target && modal.contains(target)) return false;
+    if (target && modal.contains(target)) return dismissed;
     const closer = modal.querySelector(".modal-close-btn");
     if (closer) closer.click();
     else modal.close();
@@ -384,42 +464,64 @@ export function startGuidedWalkthrough({
    * toggles. Fast waits rather than the demonstration's own pauses — this is repair, not teaching,
    * and the trainer is waiting on a panel they already tapped.
    */
-  async function restoreGroundFor(step, { force = false } = {}) {
-    // Nothing to rebuild when the app is already where the step starts — and rebuilding anyway is
-    // not free: navigating to the anchor route mid-session tears down the very clipboard a later
-    // beat is standing on. Show me asks for this on every tap, so the cheap answer has to be the
-    // common one.
-    if (!force && stepPreconditionMet(step, doc)) return false;
-    dismissStaleModal(step);
+  /** Which stretch of the script rebuilds this beat's ground, and the route it happens on.
+   *
+   * The ANCHOR is the nearest preceding step that owns a `route`: everything after it happens inside
+   * the view it opened, so navigating there and replaying forward reconstructs the ground the same
+   * way every time. The replay normally starts at that anchor — except for a step that owns its own
+   * route, which anchors on itself and would replay nothing at all. That is how a second Show me on
+   * the beat that opens the register found the menu closed by its own first success, could not see
+   * the control, and told the trainer the step had failed (reported 2026-08-23). Backing up to the
+   * previous route-owner gives that beat the taps that set it up.
+   */
+  function replayRangeFor(step) {
     const index = tour.steps.indexOf(step);
     let anchor = index;
     while (anchor > 0 && !tour.steps[anchor].route) anchor -= 1;
-    // Where the REPLAY starts. Normally the anchor, but a step that owns its own route anchors on
-    // itself and would replay nothing at all — which is how a second Show me on the beat that opens
-    // the register found the menu closed by its own first success, could not see the control, and
-    // told the trainer the step had failed (reported 2026-08-23). Backing up to the previous
-    // route-owner gives that beat the taps that set it up; nothing is re-tapped that already holds,
-    // and the loop still stops the moment the step's own preconditions are satisfied.
     let from = anchor;
     if (from === index && index > 0) {
       from = index - 1;
       while (from > 0 && !tour.steps[from].route) from -= 1;
     }
+    return { index, from, anchor, route: tour.steps[anchor].route };
+  }
 
-    const route = tour.steps[anchor].route;
-    console.info(`[walkthrough] rebuilding ground for step ${step.id} from ${anchor + 1}`);
+  async function restoreGroundFor(step) {
+    // Nothing to rebuild when the app is already where the step starts — and rebuilding anyway is
+    // not free: navigating to the anchor route mid-session tears down the very clipboard a later
+    // beat is standing on. Show me asks for this on every tap, so the cheap answer has to be the
+    // common one.
+    if (stepIsReady(step)) return false;
+    // The CHEAP repair first: something the app left open on top of the beat — a menu the trainer
+    // dropped down, a modal an earlier beat opened — is not a reason to replay anything. Reported
+    // 2026-08-26 through the story's evening chapter, where the beat after the theme switch is
+    // covered by the very menu that switch lives in: rebuilding it re-ran the beats that open that
+    // menu, and the guide ended up complaining about a screen it had just been on.
+    dismissStaleOverlays(step);
+    if (stepIsReady(step)) return false;
+    const { index, from, route } = replayRangeFor(step);
+    console.info(`[walkthrough] rebuilding ground for step ${step.id} from ${from + 1}`);
     // Only when the app is not already there: a navigate to the route you are on re-renders the
     // view under the trainer for nothing, and Show me now asks for this on every tap.
+    let moved = false;
     if (route && !currentPathIs(route)) {
+      moved = true;
       navigate?.(route);
       await sleep(RESTORE_SETTLE_MS);
     }
     for (const earlier of tour.steps.slice(from, index)) {
-      if (stepPreconditionMet(step, doc)) break;
+      if (stepIsReady(step)) break;
+      moved = true;
       await performStep(earlier, { doc, wait: (ms) => sleep(Math.min(ms, RESTORE_SETTLE_MS)) });
     }
-    // Only a state the script itself cannot rebuild is the trainer's problem to hear about.
-    if (!stepPreconditionMet(step, doc)) {
+    // Whatever the replay itself left open on top of the beat — see dismissStaleOverlays.
+    if (!stepIsReady(step)) dismissStaleOverlays(step);
+    // Only a state the script itself cannot rebuild is the trainer's problem to hear about — and
+    // only once the app has had its moment to render what the replay just asked for. No moment is
+    // owed when nothing was asked: a rebuild that navigated nowhere and replayed nothing has an app
+    // that is not about to change, and standing there with every button greyed out is the guide
+    // looking dead rather than careful.
+    if (!(await settlesReady(step, moved ? READY_SETTLE_MS : 0))) {
       reportProblem(
         `step ${step.id} precondition still unmet after rebuild`,
         t("walkthrough_wrong_place"),
@@ -447,12 +549,20 @@ export function startGuidedWalkthrough({
     // fail confusingly the moment anyone tapped Show me, and the trainer would have read a whole
     // caption first. What follows from the assertion is a REPAIR, not a complaint — see
     // restoreGroundFor.
-    if (step && !stepPreconditionMet(step, doc)) {
-      // Same busy flag the demonstration uses: it greys out Back / Show me / Next while the app is
-      // being moved under the panel, so a second tap cannot start a second rebuild on top of one.
+    if (step && !stepIsReady(step)) {
+      // Same busy flag the demonstration uses, and set BEFORE the first await: it greys out Back /
+      // Show me / Next while the app is being moved under the panel, so a second tap cannot start a
+      // second rebuild on top of one — and cannot be silently dropped by the handler that ignores
+      // taps while one is running, which is what a tap on a live-looking button in this window was.
       showing = true;
       render();
       try {
+        // Decided on ONE reading, deliberately. Waiting for the app to look ready sounds kinder and
+        // is not: an overlay mid-transition measures as gone for a frame, and a guide that samples
+        // until it likes the answer will take that frame — which is how walking Back out of the
+        // clipboard stopped tearing it down (found while fixing this, in the test that covers it).
+        // A beat's control arriving late is handled where it belongs, in the rebuild, which waits
+        // before it complains.
         const rebuilt = await restoreGroundFor(step);
         // A beat that is ALREADY DONE has just had its starting state put back on top of a screen
         // that moved past it — the ☰ menu re-opened over the register the beat itself opened
@@ -523,18 +633,13 @@ export function startGuidedWalkthrough({
     // worked. Idempotent all the way down, so a first tap on an app already in place replays
     // nothing and navigates nowhere.
     //
-    // A beat's own success can put its control OUT OF REACH — the invite dialog covers the button
-    // that opened it — and a precondition that reads "met" says nothing about that. Without forcing
-    // the rebuild there, a second Show me found no control and told the trainer the beat had failed
-    // when it had worked, which is the complaint this rebuild exists to answer in the first place.
-    const outOfReach = !resolveTarget(doc, step);
     // TRUE when the app was actually moved. That makes the step's own outcome reading stale: a beat
     // that dismisses its ground to reach its outcome — the ☰ menu closing as the register opens —
     // still reads "done" with the menu freshly re-opened on top of it, so performStep's idempotence
     // would skip the tap and leave the menu covering the next beat's control (reported 2026-08-25).
     // After a rebuild the app is by construction back BEFORE the step, so firing the action is a
     // replay, not a double tap.
-    const rebuilt = await restoreGroundFor(step, { force: outOfReach });
+    const rebuilt = await restoreGroundFor(step);
     // One path, whether or not the step has been done before: performStep is idempotent, so a step
     // walked back to is demonstrated again without its action being fired twice.
     //
@@ -625,6 +730,13 @@ export function startGuidedWalkthrough({
     keepPanelReachable();
     const step = currentWalkthroughStep(tour, state);
     if (!step || showing) return;
+    // A complaint is about a state, and states pass: the trainer may have opened the screen the
+    // guide was asking for, or the beat may simply have WORKED after a slow board finished drawing
+    // its cards. A message left standing over a guide that is fine is the guide being wrong out
+    // loud, and the story's evening chapter ended every full walk that way.
+    if (!el.problem.hidden && (stepIsReady(step) || stepOutcomeNow(step, doc).ok)) {
+      el.problem.hidden = true;
+    }
     const target = resolveTarget(doc, step);
     positionSpotlight(target);
     keepPanelClearOf(target);

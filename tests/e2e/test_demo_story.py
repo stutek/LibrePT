@@ -306,6 +306,42 @@ def test_asking_to_be_shown_again_rebuilds_what_the_first_time_used_up(
     )
 
 
+def test_walking_back_out_of_a_dialog_and_forward_again_reopens_it(page, local_server):
+    """Reported 2026-08-26: "back and forth for demo steps surrounding sending intake link don't
+    work".
+
+    Back out of the invite modal CLOSES it, which is right — the beat before it happens on the
+    register page. Walking forward again then stepped through four beats whose controls were inside
+    that closed dialog, lighting Next on each because each was done on the first pass, over a screen
+    where none of it was happening. Nothing detected it: none of those beats declares a
+    precondition, and a control inside a closed dialog is not something a selector complains about.
+    Being READY now includes the beat's own control being reachable."""
+    _open_story(page, local_server)
+
+    # Forward to the beat that types a phone number into the invite dialog.
+    for _ in range(4):
+        page.locator(SHOW_ME).click()
+        expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
+        page.locator(NEXT).click()
+    expect(page.locator(PROGRESS)).to_have_text(re.compile(r"step\s+5\s+of", re.I))
+    expect(page.locator("#dialog-intake-invite")).to_be_visible()
+
+    for _ in range(3):
+        page.locator(BACK).click()
+        page.wait_for_timeout(400)
+    expect(page.locator(PROGRESS)).to_have_text(re.compile(r"step\s+2\s+of", re.I))
+    expect(page.locator("#dialog-intake-invite")).to_be_hidden()
+
+    for _ in range(2):
+        page.locator(NEXT).click()
+        page.wait_for_timeout(600)
+
+    expect(page.locator(PROGRESS)).to_have_text(re.compile(r"step\s+4\s+of", re.I))
+    # The beat asks for a number to be typed into a field in that dialog, so the dialog is back.
+    expect(page.locator("#dialog-intake-invite")).to_be_visible(timeout=15_000)
+    assert page.locator(PROBLEM).is_hidden(), page.locator(PROBLEM).inner_text()
+
+
 def test_the_trainer_reads_what_ana_sent_and_she_lands_in_the_register(
     page, local_server
 ):

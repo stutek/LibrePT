@@ -1,6 +1,6 @@
 # tests/medium/test_walkthrough_modal.py
-# The guide and the app's own MODALS — three rules learned the same evening (TODO §38.3), all of
-# them invisible from the code and plain on screen.
+# The guide and whatever the app has left on top of the beat — its MODALS and its dropdown MENUS
+# (TODO §38.3). Every rule here was invisible from the code and plain on screen.
 #
 # A `<dialog>` opened with showModal() makes the rest of the page inert. The guide answers that by
 # moving its panel INTO the open dialog, which is what keeps Show me and Next tappable. That single
@@ -34,6 +34,13 @@ stage.className = 'app-view active';
 stage.innerHTML = `
   <button id="open-modal">Open the modal</button>
   <button id="outside">Outside</button>
+  <div class="menu-wrap" style="position: relative">
+    <button id="open-menu" aria-haspopup="true" aria-expanded="false">Menu</button>
+    <div id="the-menu" class="session-menu hidden" role="menu"
+         style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; max-height: none; background: #333; z-index: 50">
+      <button role="menuitem">Something else</button>
+    </div>
+  </div>
   <dialog id="the-modal" class="dialog-modal card glassmorphic">
     <button class="modal-close-btn">Close</button>
     <div style="height: 900px"></div>
@@ -46,6 +53,12 @@ document.getElementById('open-modal').addEventListener('click', () => modal.show
 modal.querySelector('.modal-close-btn').addEventListener('click', () => modal.close());
 document.getElementById('outside').addEventListener('click', (e) => {
   e.target.textContent = 'tapped';
+});
+const menu = document.getElementById('the-menu');
+const menuBtn = document.getElementById('open-menu');
+menuBtn.addEventListener('click', () => {
+  const open = !menu.classList.toggle('hidden');
+  menuBtn.setAttribute('aria-expanded', String(open));
 });
 """
 
@@ -168,3 +181,42 @@ def test_the_guide_closes_a_modal_the_beat_it_is_restoring_is_not_in(
     expect(page.locator("#outside")).to_have_text("tapped", timeout=15_000)
 
     assert page.evaluate("() => document.getElementById('the-modal').open") is False
+
+
+def test_an_open_menu_is_closed_before_the_beat_is_demonstrated(page, local_server):
+    """Wanted 2026-08-26 (Simon), reproducing it by hand: "manually open menu and click show me ->
+    observe menu is not closed (no state enforcement)".
+
+    A dropdown is not modal, so nothing is inert and nothing looks broken — it just COVERS, and a
+    demonstration under one is a hand tapping a control the viewer cannot see. Whether a control is
+    reachable is therefore asked at its own centre, not from its rectangle: an element under an open
+    menu has a perfectly good box, which is why nothing detected this."""
+    steps = """[
+      { id: 'tap-outside', target: '#outside', caption: 'walkthrough_progress',
+        expect: { selector: '#outside', containsText: 'tapped' } }
+    ]"""
+    _start(page, local_server, _stub(steps))
+
+    # The trainer opens the menu themselves, mid-beat, and it lands over the control.
+    page.locator("#open-menu").click()
+    page.wait_for_timeout(200)
+    covered = page.evaluate(
+        """() => {
+            const box = document.getElementById('outside').getBoundingClientRect();
+            const onTop = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2);
+            return onTop.id || onTop.parentElement?.id;
+        }"""
+    )
+    assert covered == "the-menu", (
+        f"the stub's menu is not covering the control: {covered}"
+    )
+
+    page.locator("#walkthrough-show").click()
+    expect(page.locator("#outside")).to_have_text("tapped", timeout=15_000)
+
+    assert page.locator("#the-menu.hidden").count() == 1, (
+        "the beat was shown under an open menu"
+    )
+    assert page.locator("#open-menu").get_attribute("aria-expanded") == "false", (
+        "the menu was hidden behind the app's back rather than closed through its own control"
+    )

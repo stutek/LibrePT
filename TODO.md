@@ -3023,8 +3023,40 @@ A second Show me on the beat that OPENS a modal also told the trainer it had fai
 success puts its control behind the dialog, and a precondition that reads "met" says nothing about
 that. The rebuild is now forced whenever the beat's own control cannot be reached.
 
-Pinned by [tests/medium/test_walkthrough_modal.py](tests/medium/test_walkthrough_modal.py) (three
-rules, one stub) plus the menu-closed assertion in the story's own repeat-Show-me test.
+**Back and forth, and the state nothing was checking** — *"back and forth for demo steps
+surrounding sending intake link don't work"*, and, reproducing the menu report by hand, *"manually
+open menu and click show me -> observe menu is not closed (no state enforcement)"*.
+
+One cause. The guide asked only whether a beat's declared `requires` held, and almost no beat
+declares any — `requires` was written for the states a selector cannot see. So nothing noticed that
+a beat's own CONTROL was gone or buried: walking Back out of the invite modal closes it, correctly,
+and walking forward again then stepped through four beats whose controls were inside that closed
+dialog, lighting Next on each because each was done on the first pass, over a screen where none of
+it was happening. A dropped-down menu is the same defect a layer up — it covers, so the
+demonstration is a hand tapping something the viewer cannot see.
+
+**Being READY now means: preconditions hold, the control resolves, and nothing is drawn on top of
+it** — asked with `elementFromPoint` at the control's own centre, since a rect cannot answer it. And
+what the app has left lying on top is cleared before anything is replayed: a menu through the
+control that opened it, a modal through its own ✕. Cheap repair first, replay only if that was not
+the whole problem, because several beats exist to OPEN a menu and rebuilding through them re-opens
+the very thing that was in the way.
+
+**Three things this taught, all of them about instrumentation rather than the guide:**
+
+- A geometry check passes on a clipped element, and a `requires` check passes on a buried one. Where
+  the question is "can a person see and tap this", only a hit test answers it.
+- **Waiting for a state to look right will take the first frame where it does.** Waiting for
+  readiness before deciding whether to rebuild made the guide stop tearing the clipboard down on
+  Back: an overlay mid-transition measures as gone for one frame. That decision is taken on one
+  reading; only the complaint waits, and only when the rebuild actually moved the app.
+- **The browser suites pin `Date.now()`**, so a `Date.now() + budget` deadline never arrives there.
+  A settle loop written that way hung for ever, with every button on the panel greyed out. Count
+  ticks.
+
+Pinned by [tests/medium/test_walkthrough_modal.py](tests/medium/test_walkthrough_modal.py) (four
+rules, one stub), the story's own back-and-forth walk across the invite dialog, and the menu-closed
+assertion in its repeat-Show-me test.
 
 ### 38.2 [x] CHANGE — the demo-mode notice leads the whole feed
 
