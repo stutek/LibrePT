@@ -84,6 +84,21 @@
   bottom: auto;
 }
 
+/* Inside one of the app's own modals the frame is the DIALOG's visible box, not the screen
+   (walkthroughOverlay.js's keepPanelReachable explains why it has to be). Two consequences, both
+   about staying inside that box: there is no app header to clear up there, and a card that outgrew
+   the modal would be clipped by it — a dialog clips what hangs off its edges, which is exactly how
+   the card disappeared when the frame was stretched over the viewport instead. */
+.walkthrough.is-in-dialog.is-top .walkthrough-panel {
+  top: 12px;
+}
+
+.walkthrough.is-in-dialog .walkthrough-panel {
+  max-height: calc(100% - 24px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
 .walkthrough-head {
   display: flex;
   align-items: center;

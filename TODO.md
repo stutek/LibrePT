@@ -3001,6 +3001,28 @@ dropdown it opened itself.
   — after one, the app is by construction back BEFORE the step, so it is a replay rather than a
   double tap.
 
+**The frame fix above was wrong, and the same evening said so twice more** — *"send intake link
+modal has some really long scroll bars (should have none)"*, then *"send intake link modal does not
+display demo card anymore, so I can't click show me or next or back"*. Stretching the guide's frame
+back over the viewport from inside the dialog does not work in either direction: a dialog's UA
+`overflow: auto` CLIPS what hangs off its top and left — which is where the card went — and what
+hangs off its bottom becomes scrollable overflow, which is where the scrollbars came from. Living
+outside the dialog is not available either: a popover in the top layer is still not clickable while
+a modal is open (measured, not assumed).
+
+So while the guide is inside a dialog, **the dialog is its screen**: the frame becomes the dialog's
+own visible box, scroll offset included, and the card docks inside it — top or bottom by the same
+rule that keeps it off the control everywhere else. The ring is placed in frame coordinates for the
+same reason.
+
+**And the lesson that cost the third report**: the geometry was verified by reading boxes, and a
+clipped element still reports a perfectly good box. Where the question is "can a person see and tap
+this", `elementFromPoint` at the control's own centre is the check; a rect is not.
+
+A second Show me on the beat that OPENS a modal also told the trainer it had failed — the beat's own
+success puts its control behind the dialog, and a precondition that reads "met" says nothing about
+that. The rebuild is now forced whenever the beat's own control cannot be reached.
+
 Pinned by [tests/medium/test_walkthrough_modal.py](tests/medium/test_walkthrough_modal.py) (three
 rules, one stub) plus the menu-closed assertion in the story's own repeat-Show-me test.
 

@@ -68,35 +68,64 @@ def _start(page, local_server, stub):
     page.wait_for_timeout(400)
 
 
-def test_the_guide_draws_against_the_screen_even_inside_a_glass_modal(
-    page, local_server
-):
-    """Reported 2026-08-25: "the modal for intake sharing is hijacking the demo step card and the
-    card is covering the controls". The frame has to measure the viewport, whichever parent it is
-    hanging from — and the modal here is deliberately taller than the phone, because the scroll that
-    reaching its lower half costs used to carry the card off the top of the screen."""
+def test_the_guide_stays_inside_the_modal_it_had_to_move_into(page, local_server):
+    """Reported over one evening, three ways: the card "hijacked" by the modal and covering its
+    controls; then — once the frame was stretched back over the viewport — "really long scroll bars"
+    down the modal; and finally "does not display demo card anymore, so I can't click show me or
+    next or back".
+
+    All three are one box. A dialog with a backdrop-filter is the frame of reference for anything
+    fixed inside it, it CLIPS whatever hangs off its edges, and what hangs off the bottom becomes
+    scrollable overflow. So the guide's frame is the dialog's own visible box — and the assertions
+    are about what a person can SEE and TAP, because a geometry check passed while the card was
+    being clipped out of sight, which is how the third report happened at all.
+
+    The stub's modal is deliberately taller than the phone: reaching a control in its lower half
+    scrolls it, and the guide has to come along."""
     steps = """[
       { id: 'inside', target: '#inside', caption: 'walkthrough_progress',
         expect: { selector: '#never-happens', visible: true } }
     ]"""
     _start(page, local_server, _stub(steps, open_at_start=True))
 
-    frame = page.evaluate(
+    seen = page.evaluate(
         """() => {
-            const box = document.querySelector('.walkthrough').getBoundingClientRect();
-            return { x: Math.round(box.x), y: Math.round(box.y),
-                     w: Math.round(box.width), h: Math.round(box.height),
-                     vw: document.documentElement.clientWidth,
-                     vh: document.documentElement.clientHeight,
-                     parent: document.querySelector('.walkthrough').parentElement.id };
+            const overlay = document.querySelector('.walkthrough');
+            const modal = document.getElementById('the-modal');
+            const frame = overlay.getBoundingClientRect();
+            const box = modal.getBoundingClientRect();
+            const next = document.getElementById('walkthrough-next').getBoundingClientRect();
+            const onTop = document.elementFromPoint(next.left + next.width / 2,
+                                                    next.top + next.height / 2);
+            return {
+              parent: overlay.parentElement.id,
+              inside: frame.top >= box.top - 1 && frame.bottom <= box.bottom + 1
+                      && frame.left >= box.left - 1 && frame.right <= box.right + 1,
+              // What the guide ADDS to the modal's own scroll. The stub's content is deliberately
+              // longer than the box, so the modal scrolls either way; the reported scrollbars were
+              // the guide's frame reaching past the bottom edge, and that is what must be zero.
+              addedScroll: (() => {
+                const withGuide = modal.scrollHeight;
+                overlay.style.display = 'none';
+                const without = modal.scrollHeight;
+                overlay.style.display = '';
+                return withGuide - without;
+              })(),
+              onTop: onTop ? onTop.id : null,
+            };
         }"""
     )
-    assert frame["parent"] == "the-modal", (
+    assert seen["parent"] == "the-modal", (
         "the panel has to be inside the modal to be tappable"
     )
-    assert (frame["x"], frame["y"]) == (0, 0), f"the frame starts at {frame}"
-    assert (frame["w"], frame["h"]) == (frame["vw"], frame["vh"]), (
-        f"the frame is {frame}"
+    assert seen["inside"], f"the frame hangs outside the dialog that clips it: {seen}"
+    assert seen["addedScroll"] == 0, (
+        f"the guide added {seen['addedScroll']}px of scroll to the modal"
+    )
+    # The decisive one. Layout said the card was on screen while the dialog clipped it out of sight;
+    # only "what answers a tap at this point" can tell the difference.
+    assert seen["onTop"] == "walkthrough-next", (
+        f"the card is not what is on screen: {seen}"
     )
 
 

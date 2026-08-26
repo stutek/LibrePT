@@ -204,8 +204,12 @@ export function startGuidedWalkthrough({
     // gliding across a board that has just been replaced by a clipboard is motion between two things
     // that never shared a screen. The HAND is the movement, and a finger travelling to what it is
     // about to tap is the familiar version of that idea. The ring's job is "this one, here".
-    el.spotlight.style.setProperty("--spot-x", `${Math.round(box.left)}px`);
-    el.spotlight.style.setProperty("--spot-y", `${Math.round(box.top)}px`);
+    // Frame-relative, because the frame is not always the screen: inside a dialog it is the
+    // dialog's visible box, and a ring placed at viewport coordinates would sit that far off the
+    // control it is naming.
+    const frame = el.overlay.getBoundingClientRect();
+    el.spotlight.style.setProperty("--spot-x", `${Math.round(box.left - frame.left)}px`);
+    el.spotlight.style.setProperty("--spot-y", `${Math.round(box.top - frame.top)}px`);
     el.spotlight.style.setProperty("--spot-w", `${Math.round(box.width)}px`);
     el.spotlight.style.setProperty("--spot-h", `${Math.round(box.height)}px`);
     el.spotlight.classList.add("is-visible");
@@ -237,7 +241,10 @@ export function startGuidedWalkthrough({
     // would occupy at the bottom of the viewport rather than its live top: once `is-top` is on, the
     // panel's own top is at the top of the screen and would answer "no overlap" forever.
     const panelHeight = el.panel.getBoundingClientRect().height;
-    const wouldSitAbove = doc.documentElement.clientHeight - panelHeight - PANEL_CLEARANCE_PX;
+    // The FRAME's bottom, not the screen's: inside a dialog the panel docks to the dialog's own
+    // visible box, so that is the edge it would be sitting on.
+    const frame = el.overlay.getBoundingClientRect();
+    const wouldSitAbove = frame.bottom - panelHeight - PANEL_CLEARANCE_PX;
     el.overlay.classList.toggle("is-top", target.getBoundingClientRect().bottom > wouldSitAbove);
   }
 
@@ -257,15 +264,20 @@ export function startGuidedWalkthrough({
    * every tap on it was swallowed. So the panel moves INTO the open dialog while it is open, which
    * puts it in the top layer too, and back to the body afterwards.
    *
-   * **Moving it changes where it draws, which cost a walk to find out** (reported 2026-08-25: "the
-   * modal for intake sharing is hijacking the demo step card and the card is covering the
-   * controls"). Every dialog in this app is a glass card, and `backdrop-filter` makes an element the
-   * containing block for `position: fixed` descendants — so the guide's full-screen frame collapsed
-   * onto the dialog's padding box the moment it was appended: the card was drawn INSIDE the modal,
-   * over the controls the beat was asking for, and on a tall modal it left the screen entirely.
+   * **Moving it changes where it draws, and there is no getting the screen back** (reported
+   * 2026-08-25: "the modal for intake sharing is hijacking the demo step card"). Every dialog here
+   * is a glass card, and `backdrop-filter` makes an element the containing block for
+   * `position: fixed` descendants — so the guide's full-screen frame collapses onto the dialog's
+   * padding box the moment it is appended. Stretching it back over the viewport was tried and is
+   * worse: a dialog's UA `overflow: auto` CLIPS whatever hangs off its top and left, so the card
+   * vanished, and what hung off the bottom became scrollbars down the side of the modal (both
+   * reported the same evening). Nor can the guide live outside: a popover in the top layer is
+   * still not clickable while a modal is open — measured, not assumed.
    *
-   * So the frame is put back onto the viewport by hand while it lives in there. Measured on every
-   * tick, because a dialog can be scrolled or resized under it and the arithmetic is one rect.
+   * So while the guide is in a dialog, the dialog IS its screen: the frame becomes exactly the
+   * dialog's VISIBLE box — scroll offset included, so it follows a form taller than the phone — and
+   * the panel docks inside it, top or bottom, by the same rule that keeps it off the control
+   * everywhere else. Measured on every tick, because a dialog can be scrolled or resized under it.
    */
   function keepPanelReachable() {
     // The LAST open dialog, because one can be opened over another and the panel has to live in the
@@ -275,24 +287,20 @@ export function startGuidedWalkthrough({
     if (el.overlay.parentElement !== wanted) wanted.appendChild(el.overlay);
 
     const frame = el.overlay.style;
+    el.overlay.classList.toggle("is-in-dialog", Boolean(openDialog));
     if (!openDialog) {
       // Back to the stylesheet's own `inset: 0` against the viewport.
       frame.left = frame.top = frame.width = frame.height = "";
       return;
     }
-    const box = openDialog.getBoundingClientRect();
-    const style = doc.defaultView.getComputedStyle(openDialog);
-    // The containing block is the dialog's PADDING box, so its border is part of the offset — and
-    // the dialog's own SCROLL, because a fixed child of a filtered ancestor scrolls with that
-    // ancestor's content. Without it the card left the top of the screen on the beat that saves a
-    // new client: that form is taller than the phone, so reaching its Save button scrolls the modal
-    // 233px and took the guide with it.
-    const originX = box.left + Number.parseFloat(style.borderLeftWidth || "0");
-    const originY = box.top + Number.parseFloat(style.borderTopWidth || "0");
-    frame.left = `${openDialog.scrollLeft - originX}px`;
-    frame.top = `${openDialog.scrollTop - originY}px`;
-    frame.width = `${doc.documentElement.clientWidth}px`;
-    frame.height = `${doc.documentElement.clientHeight}px`;
+    // Offsets are in the dialog's PADDING box, which is what a positioned child measures from. The
+    // scroll offset is what puts the frame over the part of the dialog a person is looking at: a
+    // fixed child of a filtered ancestor scrolls with that ancestor's content, so on the taller
+    // new-client form the guide used to ride 233px off the top of the screen.
+    frame.left = `${openDialog.scrollLeft}px`;
+    frame.top = `${openDialog.scrollTop}px`;
+    frame.width = `${openDialog.clientWidth}px`;
+    frame.height = `${openDialog.clientHeight}px`;
   }
 
   function render() {
@@ -376,12 +384,12 @@ export function startGuidedWalkthrough({
    * toggles. Fast waits rather than the demonstration's own pauses — this is repair, not teaching,
    * and the trainer is waiting on a panel they already tapped.
    */
-  async function restoreGroundFor(step) {
+  async function restoreGroundFor(step, { force = false } = {}) {
     // Nothing to rebuild when the app is already where the step starts — and rebuilding anyway is
     // not free: navigating to the anchor route mid-session tears down the very clipboard a later
     // beat is standing on. Show me asks for this on every tap, so the cheap answer has to be the
     // common one.
-    if (stepPreconditionMet(step, doc)) return false;
+    if (!force && stepPreconditionMet(step, doc)) return false;
     dismissStaleModal(step);
     const index = tour.steps.indexOf(step);
     let anchor = index;
@@ -515,13 +523,18 @@ export function startGuidedWalkthrough({
     // worked. Idempotent all the way down, so a first tap on an app already in place replays
     // nothing and navigates nowhere.
     //
+    // A beat's own success can put its control OUT OF REACH — the invite dialog covers the button
+    // that opened it — and a precondition that reads "met" says nothing about that. Without forcing
+    // the rebuild there, a second Show me found no control and told the trainer the beat had failed
+    // when it had worked, which is the complaint this rebuild exists to answer in the first place.
+    const outOfReach = !resolveTarget(doc, step);
     // TRUE when the app was actually moved. That makes the step's own outcome reading stale: a beat
     // that dismisses its ground to reach its outcome — the ☰ menu closing as the register opens —
     // still reads "done" with the menu freshly re-opened on top of it, so performStep's idempotence
     // would skip the tap and leave the menu covering the next beat's control (reported 2026-08-25).
     // After a rebuild the app is by construction back BEFORE the step, so firing the action is a
     // replay, not a double tap.
-    const rebuilt = await restoreGroundFor(step);
+    const rebuilt = await restoreGroundFor(step, { force: outOfReach });
     // One path, whether or not the step has been done before: performStep is idempotent, so a step
     // walked back to is demonstrated again without its action being fired twice.
     //
