@@ -23,6 +23,7 @@
 import { PUBLIC_SITE_URL } from "../../data/publicUrls.js";
 import { contactChannelFor, dialledForm } from "../../domain/contactChannel.js";
 import { senderFragment } from "../../domain/intakeSender.js";
+import { clientPrivacyNoticeUrl } from "../common/consentForm.js";
 
 /** The browser's own sharing and clipboard, wrapped so nothing above touches `navigator`. */
 export function browserInvitePlatform() {
@@ -57,11 +58,17 @@ export function intakeInviteUrl({ lang, trainer } = {}) {
  * invites (data/trainerIdentity.js) and are not required — because a signature reading "— ," is
  * worse than none.
  */
-export function intakeInviteMessage({ url, t, trainer } = {}) {
+export function intakeInviteMessage({ url, t, trainer, lang } = {}) {
+  const opening = trainer?.name
+    ? t("intake_invite_message").replace("{trainer}", trainer.name)
+    : t("intake_invite_message_unsigned");
+  // The notice the person is agreeing to, in the message that asks them to — not a line of small
+  // print on the form after they have already started typing (wanted 2026-08-26). It is the same
+  // shipped page the consent letter links to, built by the same function, so the two cannot drift.
+  const privacy = `${t("intake_invite_privacy")} ${clientPrivacyNoticeUrl(lang)}`;
   const signature = [trainer?.name, trainer?.phone].filter(Boolean).join(", ");
-  return signature
-    ? `${t("intake_invite_message")} ${url}\n\n— ${signature}`
-    : `${t("intake_invite_message")} ${url}`;
+  const body = `${opening}\n${url}\n\n${privacy}`;
+  return signature ? `${body}\n\n— ${signature}` : body;
 }
 
 /** Sends the link the way the device can: the share sheet if there is one, the clipboard otherwise.
@@ -72,7 +79,7 @@ export function intakeInviteMessage({ url, t, trainer } = {}) {
  */
 export async function sendIntakeInvite({ platform, t, lang, trainer } = {}) {
   const url = intakeInviteUrl({ lang, trainer });
-  const text = intakeInviteMessage({ url, t, trainer });
+  const text = intakeInviteMessage({ url, t, trainer, lang });
   if (platform?.canShare?.()) {
     try {
       await platform.share({ text, url });
@@ -109,7 +116,7 @@ export async function sendIntakeInvite({ platform, t, lang, trainer } = {}) {
 export function intakeInviteHref({ contact, lang, t, trainer } = {}) {
   const channel = contactChannelFor(contact);
   if (!channel) return null;
-  const text = intakeInviteMessage({ url: intakeInviteUrl({ lang, trainer }), t, trainer });
+  const text = intakeInviteMessage({ url: intakeInviteUrl({ lang, trainer }), t, trainer, lang });
   if (channel === "sms") {
     // `?&body=` rather than `?body=`: iOS only honours the body after a leading `&`, Android takes
     // either. The same one form the consent letter settled on (modules/common/consentForm.js).

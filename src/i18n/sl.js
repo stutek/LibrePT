@@ -382,7 +382,10 @@ export const sl = {
   label_repeat_until: "Do (neobvezno)",
   btn_invite_client: "Pošlji vpisni vprašalnik",
   intake_invite_message:
-    "Izpolni svoje podatke za najin trening — vzame minuto in na tvojem telefonu ne ostane nič:",
+    "{trainer} te vabi, da izpolniš svoje podatke za trening, prek aplikacije LibrePT. Vzame minuto:",
+  intake_invite_message_unsigned:
+    "Vabljen(-a) si, da izpolniš svoje podatke za trening, prek aplikacije LibrePT. Vzame minuto:",
+  intake_invite_privacy: "Kaj se zgodi s tvojimi podatki:",
   intake_invite_ready: "Povezava pripravljena — kopiraj jo spodaj",
   intake_invite_title: "Pošlji vpisni vprašalnik",
   intake_invite_lede:

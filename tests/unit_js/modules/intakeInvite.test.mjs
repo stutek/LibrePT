@@ -35,6 +35,47 @@ test("the message says what the link is for, because a bare URL is a phishing te
   assert.ok(message.length > "https://example.test/intake".length);
 });
 
+// Keys back as text, with the two the message is built from written the way the dictionary writes
+// them — the placeholder is part of the contract between the copy and this module.
+const say = (key) =>
+  ({
+    intake_invite_message: "{trainer} is inviting you to fill in your details:",
+    intake_invite_message_unsigned: "You are invited to fill in your details:",
+    intake_invite_privacy: "What happens to your data:",
+  })[key] || key;
+
+test("the trainer's name leads the message, because the reader has met them once", () => {
+  // A bare URL in a text is indistinguishable from phishing; the name at the front is the one thing
+  // the person receiving it can check against the person they just spoke to.
+  const message = intakeInviteMessage({
+    url: "https://example.test/intake",
+    t: say,
+    trainer: { name: "Ana Kos", phone: "+386 41 000 000" },
+  });
+
+  assert.ok(message.startsWith("Ana Kos is inviting you"), message);
+  assert.ok(message.includes("— Ana Kos, +386 41 000 000"), "and signs it with a number to save");
+});
+
+test("an install that does not know the trainer says so rather than leaving a gap", () => {
+  const message = intakeInviteMessage({ url: "https://example.test/intake", t: say });
+
+  assert.ok(message.startsWith("You are invited"), message);
+  assert.ok(!message.includes("{trainer}"), "an unfilled placeholder would ship as literal text");
+  assert.ok(!message.includes("—"), "and no signature line with nothing after it");
+});
+
+test("the message carries the privacy notice, in the language the link opens", () => {
+  // Asked for 2026-08-26. The notice comes with the invitation rather than waiting on the form the
+  // person has already started filling in, and it is the SAME page the consent letter links to.
+  const slovene = intakeInviteMessage({ url: "https://example.test/intake", t: say, lang: "sl" });
+  const english = intakeInviteMessage({ url: "https://example.test/intake", t: say, lang: "en" });
+
+  assert.match(slovene, /privacy-notice-sl\.html/);
+  assert.match(english, /privacy-notice-en\.html/);
+  assert.match(slovene, /^https:\/\//m, "a link that leaves the app has to be absolute");
+});
+
 test("sharing goes through the share sheet when the phone has one", async () => {
   const shared = [];
   const platform = { canShare: () => true, share: (data) => shared.push(data) };

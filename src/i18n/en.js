@@ -401,8 +401,14 @@ export const en = {
   label_repeat_days: "On these days",
   label_repeat_until: "Until (optional)",
   btn_invite_client: "Send an intake link",
+  // The trainer's own name leads the message, because the person reading it met them once and has
+  // no other way to tell this from a phishing text. {trainer} is filled in by intakeInvite.js; the
+  // unsigned line is what an install that does not know the trainer's name sends instead.
   intake_invite_message:
-    "Fill in your details for our training — it takes a minute, and nothing is stored on your phone:",
+    "{trainer} is inviting you to fill in your own details for training, through an app called LibrePT. It takes a minute:",
+  intake_invite_message_unsigned:
+    "You are invited to fill in your own details for training, through an app called LibrePT. It takes a minute:",
+  intake_invite_privacy: "What happens to your data:",
   intake_invite_ready: "Link ready — copy it below",
   intake_invite_title: "Send an intake link",
   intake_invite_lede:
