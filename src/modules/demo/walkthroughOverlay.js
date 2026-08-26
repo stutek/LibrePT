@@ -164,6 +164,9 @@ export function startGuidedWalkthrough({
   // tour they have already watched (reported 2026-08-23).
   let state = startAtStepId ? resumeWalkthroughAt(tour, startAtStepId) : startWalkthrough();
   let showing = false;
+  // The dialog whose clipping the guide has lifted, so its own rule can be put back — see
+  // clipEscapedDialog.
+  let escapedDialog = null;
   let ticker = 0;
   // Declared here because stop() closes over it and runs before the observer is created on a torn
   // down guide.
@@ -178,6 +181,9 @@ export function startGuidedWalkthrough({
     view.removeEventListener("resize", followTarget);
     shapeWatcher?.disconnect();
     unmountDemoHand(doc);
+    // Before the panel goes: a dialog left with the guide's `overflow: visible` on it would spill
+    // its own content the next time it holds more than fits.
+    releaseDialogClipping();
     el.overlay.remove();
   }
 
@@ -291,20 +297,73 @@ export function startGuidedWalkthrough({
     if (el.overlay.parentElement !== wanted) wanted.appendChild(el.overlay);
 
     const frame = el.overlay.style;
-    el.overlay.classList.toggle("is-in-dialog", Boolean(openDialog));
     if (!openDialog) {
+      releaseDialogClipping();
+      el.overlay.classList.remove("is-in-dialog");
       // Back to the stylesheet's own `inset: 0` against the viewport.
       frame.left = frame.top = frame.width = frame.height = "";
       return;
     }
-    // Offsets are in the dialog's PADDING box, which is what a positioned child measures from. The
-    // scroll offset is what puts the frame over the part of the dialog a person is looking at: a
-    // fixed child of a filtered ancestor scrolls with that ancestor's content, so on the taller
-    // new-client form the guide used to ride 233px off the top of the screen.
+
+    // Out of the modal's box entirely where that is possible (asked for 2026-08-26: "can you move
+    // the demo card outside of modal please?" — a card the size of the guide's inside a small dialog
+    // IS the dialog). What keeps it in there is the dialog's UA `overflow: auto`, which clips its
+    // children; lifting that lets the card draw at the bottom of the SCREEN while staying a child of
+    // the dialog, which is what keeps it tappable at all. Measured: it is then the topmost thing at
+    // its own centre and a real tap lands on it.
+    //
+    // Only for a dialog that does not need its own scrolling. The new-client form is taller than a
+    // phone, and a form that cannot scroll is a worse thing to hand someone than a card in the way,
+    // so that one keeps the card docked inside it.
+    const escapes = !dialogScrollsItself(openDialog);
+    el.overlay.classList.toggle("is-in-dialog", !escapes);
+    if (escapes) {
+      clipEscapedDialog(openDialog);
+      const box = openDialog.getBoundingClientRect();
+      const style = doc.defaultView.getComputedStyle(openDialog);
+      // Positioned children measure from the PADDING box, so the border is part of the offset back
+      // to the viewport's own origin.
+      frame.left = `${-(box.left + Number.parseFloat(style.borderLeftWidth || "0"))}px`;
+      frame.top = `${-(box.top + Number.parseFloat(style.borderTopWidth || "0"))}px`;
+      frame.width = `${doc.documentElement.clientWidth}px`;
+      frame.height = `${doc.documentElement.clientHeight}px`;
+      return;
+    }
+
+    releaseDialogClipping();
+    // Docked inside: the frame is the dialog's own visible box. The scroll offset is what keeps it
+    // over the part a person is looking at — a fixed child of a filtered ancestor scrolls with that
+    // ancestor's content, so on the taller form the guide used to ride 233px off the top.
     frame.left = `${openDialog.scrollLeft}px`;
     frame.top = `${openDialog.scrollTop}px`;
     frame.width = `${openDialog.clientWidth}px`;
     frame.height = `${openDialog.clientHeight}px`;
+  }
+
+  /** Does this dialog scroll its OWN content? Asked with the guide taken out of the layout, because
+   * the guide's frame is deliberately bigger than the box it is hanging in and would answer yes
+   * every time. */
+  function dialogScrollsItself(dialog) {
+    const shown = el.overlay.style.display;
+    el.overlay.style.display = "none";
+    const scrolls = dialog.scrollHeight > dialog.clientHeight + 1;
+    el.overlay.style.display = shown;
+    return scrolls;
+  }
+
+  /** Lets a dialog draw outside its own box while the guide is hanging in it, and puts its own rule
+   * back afterwards — the app styles no dialog this way, so the inline value is ours to clear. */
+  function clipEscapedDialog(dialog) {
+    if (escapedDialog === dialog) return;
+    releaseDialogClipping();
+    escapedDialog = dialog;
+    dialog.style.overflow = "visible";
+  }
+
+  function releaseDialogClipping() {
+    if (!escapedDialog) return;
+    escapedDialog.style.overflow = "";
+    escapedDialog = null;
   }
 
   function render() {
@@ -655,6 +714,11 @@ export function startGuidedWalkthrough({
     } finally {
       showing = false;
     }
+    // A demonstration that WORKED settles the question, whatever the rebuild before it thought of
+    // the app's state: the beat just happened on screen. Cleared here rather than left to the poll,
+    // so nobody reads a complaint about a screen they are looking at (the story's evening chapter
+    // rebuilds a board whose cards arrive a beat later, and said so out loud each time).
+    if (outcome.ok) el.problem.hidden = true;
     // Re-showing a step the trainer has already done is a replay, not progress: it must not carry
     // them forward to a step they have not seen.
     if (alreadyDone) {

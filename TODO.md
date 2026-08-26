@@ -3054,7 +3054,16 @@ the very thing that was in the way.
   A settle loop written that way hung for ever, with every button on the panel greyed out. Count
   ticks.
 
-Pinned by [tests/medium/test_walkthrough_modal.py](tests/medium/test_walkthrough_modal.py) (four
+**And the card is OUT of the modal** — *"step 4 of 41 card is still trapped in the modal view and
+covers the interface, can you move the demo card outside of modal please?"*. What kept it in there
+was the dialog's own UA `overflow: auto` clipping its children; lifting that lets the card draw at
+the bottom of the SCREEN while staying a child of the dialog, which is the only thing that keeps it
+tappable while the rest of the page is inert. Measured before it was built: it is then the topmost
+element at its own centre and a real tap lands on it. Not for a dialog that needs its own scrolling
+— the new-client form is taller than a phone, and a form that cannot scroll is worse to hand someone
+than a card in the way — so that one keeps the card docked inside.
+
+Pinned by [tests/medium/test_walkthrough_modal.py](tests/medium/test_walkthrough_modal.py) (five
 rules, one stub), the story's own back-and-forth walk across the invite dialog, and the menu-closed
 assertion in its repeat-Show-me test.
 

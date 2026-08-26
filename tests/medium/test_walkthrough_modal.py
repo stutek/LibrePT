@@ -46,9 +46,15 @@ stage.innerHTML = `
     <div style="height: 900px"></div>
     <button id="inside">Inside</button>
   </dialog>
+  <dialog id="the-small-modal" class="dialog-modal card glassmorphic">
+    <button class="modal-close-btn">Close</button>
+    <button id="inside-small">Inside</button>
+  </dialog>
 `;
 document.body.appendChild(stage);
 const modal = document.getElementById('the-modal');
+const smallModal = document.getElementById('the-small-modal');
+smallModal.querySelector('.modal-close-btn').addEventListener('click', () => smallModal.close());
 document.getElementById('open-modal').addEventListener('click', () => modal.showModal());
 modal.querySelector('.modal-close-btn').addEventListener('click', () => modal.close());
 document.getElementById('outside').addEventListener('click', (e) => {
@@ -63,11 +69,11 @@ menuBtn.addEventListener('click', () => {
 """
 
 
-def _stub(tour_steps, open_at_start=False):
+def _stub(tour_steps, open_at_start=""):
     return f"""
 import {{ startGuidedWalkthrough }} from './modules/demo/walkthroughOverlay.js';
 {STAGE}
-{"modal.showModal();" if open_at_start else ""}
+{open_at_start}
 window.__walkthrough = startGuidedWalkthrough({{
   tour: {{ id: 'modal-test', steps: {tour_steps} }},
   pollMs: 60,
@@ -99,7 +105,7 @@ def test_the_guide_stays_inside_the_modal_it_had_to_move_into(page, local_server
       { id: 'inside', target: '#inside', caption: 'walkthrough_progress',
         expect: { selector: '#never-happens', visible: true } }
     ]"""
-    _start(page, local_server, _stub(steps, open_at_start=True))
+    _start(page, local_server, _stub(steps, open_at_start="modal.showModal();"))
 
     seen = page.evaluate(
         """() => {
@@ -151,7 +157,7 @@ def test_a_control_behind_the_modal_does_not_finish_a_step(page, local_server):
       { id: 'close-it', target: '#the-modal .modal-close-btn', caption: 'walkthrough_progress',
         expect: { selector: '#outside', visible: true } }
     ]"""
-    _start(page, local_server, _stub(steps, open_at_start=True))
+    _start(page, local_server, _stub(steps, open_at_start="modal.showModal();"))
 
     assert page.locator("#walkthrough-next").is_disabled(), (
         "the step was finished by a button nobody could press"
@@ -175,7 +181,7 @@ def test_the_guide_closes_a_modal_the_beat_it_is_restoring_is_not_in(
         requires: [{ selector: '#outside', visible: true }],
         expect: { selector: '#outside', containsText: 'tapped' } }
     ]"""
-    _start(page, local_server, _stub(steps, open_at_start=True))
+    _start(page, local_server, _stub(steps, open_at_start="modal.showModal();"))
 
     page.locator("#walkthrough-show").click()
     expect(page.locator("#outside")).to_have_text("tapped", timeout=15_000)
@@ -219,4 +225,56 @@ def test_an_open_menu_is_closed_before_the_beat_is_demonstrated(page, local_serv
     )
     assert page.locator("#open-menu").get_attribute("aria-expanded") == "false", (
         "the menu was hidden behind the app's back rather than closed through its own control"
+    )
+
+
+def test_the_card_leaves_a_modal_that_does_not_need_to_scroll(page, local_server):
+    """Asked for 2026-08-26 (Simon): "step 4 of 41 card is still trapped in the modal view and covers
+    the interface — can you move the demo card outside of modal please?"
+
+    What kept it in there is the dialog's own UA `overflow: auto`, which clips its children. Lifting
+    that lets the card draw at the bottom of the SCREEN while staying a child of the dialog — and
+    being a child of it is the only thing that keeps it tappable while the rest of the page is inert.
+
+    Only for a dialog that does not need its own scrolling: the modal in the tests above is taller
+    than the phone, and a form that cannot scroll is a worse thing to hand someone than a card in the
+    way."""
+    steps = """[
+      { id: 'inside', target: '#inside-small', caption: 'walkthrough_progress',
+        expect: { selector: '#never-happens', visible: true } }
+    ]"""
+    _start(page, local_server, _stub(steps, open_at_start="smallModal.showModal();"))
+
+    seen = page.evaluate(
+        """() => {
+            const overlay = document.querySelector('.walkthrough');
+            const modal = document.getElementById('the-small-modal');
+            const panel = document.querySelector('.walkthrough-panel').getBoundingClientRect();
+            const box = modal.getBoundingClientRect();
+            const next = document.getElementById('walkthrough-next').getBoundingClientRect();
+            const onTop = document.elementFromPoint(next.left + next.width / 2,
+                                                    next.top + next.height / 2);
+            return {
+              parent: overlay.parentElement.id,
+              belowTheModal: panel.top >= box.bottom,
+              atTheScreenBottom:
+                Math.abs(panel.bottom - document.documentElement.clientHeight) < 40,
+              scrolls: getComputedStyle(modal).overflow !== 'visible'
+                       && modal.scrollHeight > modal.clientHeight,
+              onTop: onTop ? onTop.id : null,
+            };
+        }"""
+    )
+    assert seen["parent"] == "the-small-modal", (
+        "it still has to live in the modal to be tappable"
+    )
+    assert seen["belowTheModal"], f"the card is still inside the modal's box: {seen}"
+    assert seen["atTheScreenBottom"], (
+        f"the card is not where the guide always sits: {seen}"
+    )
+    # The escape must not be paid for with scrollbars down the modal, which is how the FIRST attempt
+    # at getting the card out of there was reported.
+    assert not seen["scrolls"], f"the modal gained a scrollbar: {seen}"
+    assert seen["onTop"] == "walkthrough-next", (
+        f"the card is not what is on screen: {seen}"
     )
