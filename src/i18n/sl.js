@@ -365,6 +365,9 @@ export const sl = {
   walkthrough_next: "Naprej",
   walkthrough_done: "Končaj",
   walkthrough_exit: "Zapri vodeni ogled",
+  walkthrough_off_track: "Zapustil(-a) si mesto, kjer se demo odvija. Vrni ga ali ga ustavi.",
+  walkthrough_return: "Nazaj v demo",
+  walkthrough_leave: "Ustavi demo",
   walkthrough_finished: "To je celoten krog — ena seja, ena podloga, štirje dotiki.",
   walkthrough_wrong_place:
     "Ta korak potrebuje drug zaslon — vrni se na pregled sej in ga zaženi znova.",

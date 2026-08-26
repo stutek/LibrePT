@@ -2969,6 +2969,36 @@ symptom was the step counter saying 1 / 4. Fixed by making that builder write `?
 pinning the VALUE in the tests, which had asserted only that some `?demo=` was set. The wedge keeps
 its own link for the engine's tests; nothing in the app offers it.
 
+### 38.5 [x] CHANGE — the card follows the app, and says so when the trainer goes exploring
+
+**Decided 2026-08-26 (Simon)**, after reporting the same thing three ways in one session — a modal
+closed by hand with the card still asking for it, and two "Show me does not fill the form" reports
+where the filling was the NEXT beat:
+
+> *"make Show me fill in the fields and point to the action and execute it, when performs the
+> expected action the card should advance, but if user explores on its own we should display a demo
+> card with 2 buttons 'return to demo' and 'exit demo mode' (same as x on demo card)"*
+
+**A beat completed in front of the viewer carries the card on**, whoever completed it — the trainer's
+own tap or Show me. This reverses the 2026-08-23 rule (only Next advances), which was itself a fix
+for THREE rules: Show me advancing on some beats and not others. What makes one rule safe now is the
+guard that did not exist then: **a beat whose expectation was already true when its card appeared is
+read, not performed**, and is never advanced past on its own. Narrated cards are exactly that — a
+card is satisfied by being on screen — and so are beats the previous screen already answers, which
+is what "skipped two beats in a blink" was. Never off the LAST beat either: finishing is a decision,
+and the thank-you card would have closed itself before anyone read it.
+
+**Going exploring is not a fault, so it no longer looks like one.** When the beat's control is not on
+this screen at all — the trainer opened another view — the card says so and offers exactly two ways
+on: *Back to the demo*, which is the same rebuild Back and Next already use, and *Stop the demo*,
+which is the ✕. Deliberately weaker than the readiness test: a control merely scrolled out of view or
+under a menu is still on the beat's own screen, and the guide handles both by itself. It takes three
+consecutive polls, because one reading is a view mid-render.
+
+The e2e walkers gained ONE definition of "do the beat on screen" (`_do_beat`, `_card_moved_on`) —
+they had four copies of Show-me-then-Next between them, and each copy was a place the rule could be
+half-changed.
+
 ### 38.4 [x] CHANGE — the invitation text says who it is from and what happens to the data
 
 **Wanted 2026-08-26 (Simon)**, from the message as it arrived on a phone: it should name the

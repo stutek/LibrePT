@@ -63,6 +63,9 @@ const RESTORE_SETTLE_MS = 150;
 // anything. A view renders a frame or two after the tap that opened it, and a guide that says "wrong
 // screen" and then works is worse than one that waits a beat.
 const READY_SETTLE_MS = 2500;
+// Consecutive polls a beat has to be impossible before the guide says the trainer has left its
+// place. One reading is a view mid-render; three is somebody who went somewhere else.
+const OFF_TRACK_TICKS = 3;
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -133,13 +136,31 @@ function buildOverlay(doc, t) {
     id: "walkthrough-next",
     className: "walkthrough-btn walkthrough-btn-primary",
   });
-  actions.append(back, show, next);
+  const returnToDemo = actionButton(doc, {
+    id: "walkthrough-return",
+    className: "walkthrough-btn walkthrough-btn-primary",
+  });
+  const leave = actionButton(doc, { id: "walkthrough-leave", className: "walkthrough-btn" });
+  actions.append(back, show, next, returnToDemo, leave);
 
   panel.append(head, caption, problem, actions);
   overlay.append(spotlight, panel);
   doc.body.appendChild(overlay);
 
-  return { overlay, spotlight, panel, progress, caption, problem, back, show, next, exit };
+  return {
+    overlay,
+    spotlight,
+    panel,
+    progress,
+    caption,
+    problem,
+    back,
+    show,
+    next,
+    returnToDemo,
+    leave,
+    exit,
+  };
 }
 
 /**
@@ -167,6 +188,19 @@ export function startGuidedWalkthrough({
   // The dialog whose clipping the guide has lifted, so its own rule can be put back — see
   // clipEscapedDialog.
   let escapedDialog = null;
+  // Whether the beat's expectation ALREADY held when its card appeared. A beat like that is not
+  // advanced past on its own: a narrated card is satisfied by being on screen, and several beats are
+  // satisfied by a screen the previous one left behind — advancing on those raced through the story
+  // two beats at a time (the flicker reported 2026-08-23). Only a beat completed IN FRONT of the
+  // viewer moves the card on (wanted 2026-08-26).
+  let enteredSatisfied = false;
+  // Consecutive ticks the current beat has been impossible to perform. The trainer exploring on
+  // their own is the expected case, not a fault, so it takes more than one reading to say so.
+  let offTrackTicks = 0;
+  let offTrack = false;
+  // Re-entrancy guard for the advance above: enterStep is async, and a second tick landing inside it
+  // would advance twice on one completed beat.
+  let advancing = false;
   let ticker = 0;
   // Declared here because stop() closes over it and runs before the observer is created on a torn
   // down guide.
@@ -376,13 +410,23 @@ export function startGuidedWalkthrough({
       .replace("{count}", String(controls.stepCount));
     el.caption.textContent = step ? t(step.caption) : t("walkthrough_finished");
 
+    el.returnToDemo.textContent = t("walkthrough_return");
+    el.leave.textContent = t("walkthrough_leave");
+    el.returnToDemo.hidden = !offTrack;
+    el.leave.hidden = !offTrack;
+    el.returnToDemo.disabled = showing;
+    el.leave.disabled = showing;
+    // Off the demo's place in the app, the beat's own instruction is a lie — the control it names is
+    // not there. The card says where they are instead, and offers the only two things that make
+    // sense from there.
+    if (offTrack) el.caption.textContent = t("walkthrough_off_track");
     el.back.textContent = t("walkthrough_back");
-    el.back.hidden = !controls.canGoBack;
+    el.back.hidden = !controls.canGoBack || offTrack;
     el.show.textContent = t("walkthrough_show");
     // `showMe: false` is a step saying there is nothing to demonstrate — a card whose only control
     // is the Continue button already under the reader's thumb. Offering to walk a pointer to it
     // spends three seconds looking like a guide that has stopped working (reported 2026-08-22).
-    el.show.hidden = !controls.canShowMe || step?.showMe === false;
+    el.show.hidden = !controls.canShowMe || step?.showMe === false || offTrack;
     el.show.disabled = showing;
     // A step may name its own way on. The story's handover beat leaves this page for the client's
     // own — so Next says "Open Ana's phone" and does exactly that, rather than sitting beside a
@@ -394,6 +438,7 @@ export function startGuidedWalkthrough({
       : controls.isLastStep
         ? t("walkthrough_done")
         : t("walkthrough_next");
+    el.next.hidden = offTrack;
     el.next.disabled = !controls.canAdvance || showing;
 
     positionSpotlight(step ? resolveTarget(doc, step) : null);
@@ -600,6 +645,8 @@ export function startGuidedWalkthrough({
     // (found 2026-08-23, walking the story after the two cards were merged into one).
     keepPanelReachable();
     el.problem.hidden = true;
+    offTrack = false;
+    offTrackTicks = 0;
     const step = currentWalkthroughStep(tour, state);
     // BEFORE the precondition and the target lookup: a narrated beat's own control is the card the
     // narration puts on screen, so it has to exist before anything goes looking for it.
@@ -647,6 +694,9 @@ export function startGuidedWalkthrough({
       target.scrollIntoView({ block: "center", inline: "nearest", behavior: "smooth" });
       keepPanelClearOf(target);
     }
+    // Recorded BEFORE anything else can satisfy it: a beat that arrives already true is read, not
+    // performed, so the poll must not carry the viewer past it. See the ticker.
+    enteredSatisfied = Boolean(step) && stepOutcomeNow(step, doc).ok;
     // A step re-entered from Back — or one the trainer completed before reading the panel — is
     // already satisfied, and must not be asked for again.
     if (step && stepOutcomeNow(step, doc).ok) {
@@ -769,6 +819,24 @@ export function startGuidedWalkthrough({
     enterStep();
   });
 
+  // Back to where the beat can happen — the same rebuild Back and Next use, asked for rather than
+  // performed under the trainer (wanted 2026-08-26). Exploring the app is the point of a demo on a
+  // real app; being yanked out of what you are looking at is not.
+  el.returnToDemo.addEventListener("click", async () => {
+    if (showing) return;
+    showing = true;
+    render();
+    try {
+      await restoreGroundFor(currentWalkthroughStep(tour, state));
+    } finally {
+      showing = false;
+      offTrack = false;
+      offTrackTicks = 0;
+    }
+    render();
+  });
+
+  el.leave.addEventListener("click", stop);
   el.exit.addEventListener("click", stop);
 
   // The trainer doing the step themselves is the expected case, so it is watched for continuously
@@ -815,10 +883,37 @@ export function startGuidedWalkthrough({
     positionSpotlight(target);
     keepPanelClearOf(target);
     watchTarget(target);
-    if (stepOutcomeNow(step, doc).ok) {
-      state = completeWalkthroughStep(state, step.id);
+
+    const done = stepOutcomeNow(step, doc).ok;
+    // Off-track is about a beat that cannot happen WHERE THE APP NOW IS: its control is not on this
+    // screen at all, or its declared ground is gone. Deliberately weaker than `stepIsReady` — a
+    // control merely scrolled out of view, or under a menu, is still on the screen the beat belongs
+    // to, and the guide handles both by itself. Scrolling the board is not leaving the demo.
+    const wandered = !done && (!stepPreconditionMet(step, doc) || !resolveTarget(doc, step));
+    offTrackTicks = wandered ? offTrackTicks + 1 : 0;
+    if (offTrack !== offTrackTicks >= OFF_TRACK_TICKS) {
+      offTrack = offTrackTicks >= OFF_TRACK_TICKS;
       render();
     }
+    if (!done) return;
+
+    state = completeWalkthroughStep(state, step.id);
+    // The card follows the app (wanted 2026-08-26: "when performs the expected action the card
+    // should advance"). Only for a beat that was NOT already satisfied when its card appeared —
+    // see enteredSatisfied — and never while a demonstration is still running, or the card would
+    // move out from under the pointer that is still finishing the tap.
+    // Never off the LAST beat: finishing is a decision, and a demo that closed itself the moment the
+    // final tap landed would take the thank-you card with it before anyone read it.
+    const isLastStep = state.stepIndex >= tour.steps.length - 1;
+    if (!enteredSatisfied && !advancing && !isLastStep) {
+      advancing = true;
+      state = advanceWalkthrough(tour, state);
+      enterStep().finally(() => {
+        advancing = false;
+      });
+      return;
+    }
+    render();
   }, pollMs);
 
   enterStep();

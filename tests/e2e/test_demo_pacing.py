@@ -12,6 +12,7 @@
 #
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
+import re
 import time
 
 from playwright.sync_api import expect
@@ -26,9 +27,11 @@ def test_a_viewer_who_wants_motion_gets_a_step_they_can_follow(page, local_serve
 
     started = time.monotonic()
     page.locator("#walkthrough-show").click()
-    # Timed to the step being DONE, not to the guide moving on: since 2026-08-23 only Next moves it,
-    # and what has to stay watchable is the demonstration itself.
-    expect(page.locator("#walkthrough-next")).to_be_enabled(timeout=30_000)
+    # Timed to the step being DONE, which since 2026-08-26 is also the moment the card follows the
+    # app onto the next beat. What has to stay watchable is the demonstration itself.
+    expect(page.locator("#walkthrough-overlay .walkthrough-progress")).to_have_text(
+        re.compile(r"step\s+2\s+of", re.I), timeout=30_000
+    )
     elapsed = time.monotonic() - started
 
     assert elapsed > 1.5, (

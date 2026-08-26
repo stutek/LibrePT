@@ -51,17 +51,40 @@ def _open_walkthrough(page, local_server):
     page.locator(PANEL).wait_for(state="visible", timeout=30_000)
 
 
-def _do_current_step(page):
-    """Ask to be shown, then tap Next — the same two taps on every step, including the last.
+def _card_moved_on(page, step_now, timeout=8_000):
+    """Did the card follow the app off this beat, or is it still waiting for a tap?
 
-    Since 2026-08-23 nothing moves the guide except Next (reported as "sometimes show me advances
-    the demo step, sometimes not"). Being shown a step completes it and stops there."""
+    Asked rather than assumed, because both are legitimate since 2026-08-26: a beat DONE in front of
+    the viewer carries the card on, and a beat that arrived already satisfied — a narrated card, the
+    last beat of a tour — waits for Next. Polling for it also avoids the race that reading the number
+    once creates: the advance can land between the read and the tap, and then Next is disabled
+    because the NEXT beat has not happened yet.
+    """
+    try:
+        expect(page.locator(PROGRESS)).not_to_have_text(
+            re.compile(rf"step\s+{step_now}\s+of", re.I), timeout=timeout
+        )
+        return True
+    except AssertionError:
+        return False
+
+
+def _do_current_step(page):
+    """Ask to be shown, and let the card follow the app.
+
+    Since 2026-08-26 a beat COMPLETED in front of the viewer carries the card on by itself (wanted:
+    "when performs the expected action the card should advance"). Next is still there, and is still
+    the only way past a beat that arrived already satisfied — a narrated card, or one the previous
+    beat's screen answers — because advancing on those would race through the story two beats at a
+    time.
+    """
     progress_before = page.locator(PROGRESS).inner_text()
     step_now, step_count = (int(n) for n in re.findall(r"\d+", progress_before))
 
     page.locator(SHOW_ME).click()
-    expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
-    page.locator(NEXT).click()
+    if not _card_moved_on(page, step_now):
+        expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
+        page.locator(NEXT).click()
 
     if step_now < step_count:
         # Matched on the step NUMBER, case-insensitively, rather than against the string read back
@@ -108,7 +131,8 @@ def test_the_trainer_doing_the_step_themselves_is_what_advances_it(page, local_s
 
     page.locator(".session-card", has_text="Group Strength").first.click()
 
-    expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
+    # The card follows the app, exactly as it does when Show me is the one that taps (2026-08-26).
+    expect(page.locator(PROGRESS)).to_contain_text("2", timeout=15_000)
     # And the app really did what the step said, not merely the panel's opinion of it.
     expect(page.locator("#active-session-client-tabs")).to_be_visible()
 
@@ -121,22 +145,22 @@ def test_show_me_taps_the_control_for_a_trainer_who_cannot_find_it(page, local_s
     expect(page.locator("#active-session-client-tabs")).to_be_visible(timeout=15_000)
 
 
-def test_being_shown_a_step_completes_it_and_stops_there(page, local_server):
-    """Reported 2026-08-23: "sometimes show me advances the demo step, sometimes not".
+def test_a_step_done_in_front_of_the_viewer_carries_the_card_on(page, local_server):
+    """Wanted 2026-08-26 (Simon): "when performs the expected action the card should advance".
 
-    It used to advance when the trainer delegated the step but not when they did it themselves, and
-    the last step was a third case again. Three rules for one button reads as a bug from the gym
-    floor, whichever way it falls on the day. One rule now: Show me demonstrates, Next moves."""
+    Reported three ways in one session — a modal closed by hand and the card still asking for it, a
+    Show me that "did not fill the form" because the filling was the next beat. The card now follows
+    the app. One rule, and it does not care who acted: the same thing happens when the trainer taps
+    the control themselves.
+
+    The rule it replaces (only Next moves the guide, 2026-08-23) was itself a fix for THREE rules —
+    Show me advancing on some steps and not others. The guard that keeps this one honest is
+    elsewhere: a beat whose expectation was already true when its card appeared is read, not
+    performed, and is never advanced past on its own."""
     _open_walkthrough(page, local_server)
     expect(page.locator(PROGRESS)).to_contain_text("1")
 
     page.locator(SHOW_ME).click()
-
-    # Done — the way on is offered — but still on the step the trainer was reading.
-    expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
-    expect(page.locator(PROGRESS)).to_contain_text("1")
-
-    page.locator(NEXT).click()
 
     expect(page.locator(PROGRESS)).to_contain_text("2", timeout=15_000)
     expect(page.locator(NEXT)).to_be_disabled()
@@ -296,15 +320,17 @@ def test_a_step_whose_ground_was_pulled_away_rebuilds_it(page, local_server):
     page.locator("#active-session-overlay .view-grabber").click()
     page.wait_for_timeout(600)
 
-    # Re-entering the step is when its card loads, which is when the check runs. Checking on every
-    # poll tick instead was considered and left alone: a message that appears mid-transition, while
-    # a view is still swapping, would cry wolf on the one surface a newcomer is reading closely.
-    page.locator(BACK).click()
-    page.locator(NEXT).click()
+    # Since 2026-08-26 the guide does not put this back under the trainer's hands: closing the
+    # clipboard is somebody looking around their own app, so the card says where they are and offers
+    # the way back (TODO §38.5). The rebuild is the same one — it is now asked for.
+    expect(page.locator("#walkthrough-return")).to_be_visible(timeout=15_000)
+    expect(page.locator(SHOW_ME)).to_be_hidden()
+    page.locator("#walkthrough-return").click()
 
     expect(page.locator(PROGRESS)).to_contain_text("2")
     expect(page.locator("#active-exercise-scroll-deck")).to_be_visible(timeout=15_000)
     expect(page.locator(".walkthrough-problem")).to_be_hidden()
+    expect(page.locator(SHOW_ME)).to_be_visible()
 
 
 def test_show_me_brings_a_scrolled_away_control_into_view_before_tapping(

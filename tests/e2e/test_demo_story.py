@@ -99,9 +99,35 @@ def _past_the_splash(page):
         pass
 
 
+def _do_beat(page):
+    """One beat, the way a viewer spends one: ask to be shown it where there is something to show,
+    and tap Next only if the card has not already followed the app (2026-08-26)."""
+    step_now = _step_numbers(page)[0]
+    if page.locator(SHOW_ME).is_visible():
+        page.locator(SHOW_ME).click()
+    if not _card_moved_on(page, step_now):
+        expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
+        page.locator(NEXT).click()
+
+
+def _card_moved_on(page, step_now, timeout=8_000):
+    """Whether the card followed the app off this beat by itself (2026-08-26), or still wants Next."""
+    try:
+        expect(page.locator(PROGRESS)).not_to_have_text(
+            re.compile(rf"step\s+{step_now}\s+of", re.I), timeout=timeout
+        )
+        return True
+    except AssertionError:
+        return False
+
+
 def _walk_the_whole_story(page, limit=60):
     """Walk every beat the way a trainer would: ask to be shown where there is something to show,
-    read the card where there is not, and tap Next — which is the only thing that moves the guide.
+    read the card where there is not, and tap Next where the card has not already moved on.
+
+    Since 2026-08-26 a beat completed in front of the viewer carries the card on by itself, so the
+    walk taps Next only when the beat it just did was one the card was already satisfied by — a
+    narrated card, or a beat whose screen the previous one left behind.
 
     It follows the story ACROSS the two phones. A beat whose way on is another page (the handover to
     the client's own form, and the hand back afterwards) carries that page on Next itself, so the
@@ -121,13 +147,18 @@ def _walk_the_whole_story(page, limit=60):
 
         if page.locator(SHOW_ME).is_visible():
             page.locator(SHOW_ME).click()
-        try:
-            expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
-        except AssertionError:
-            raise AssertionError(_stuck(page, step_now, caption)) from None
-        assert page.locator(PROBLEM).is_hidden(), _stuck(page, step_now, caption)
 
-        page.locator(NEXT).click()
+        # A beat done in front of the viewer carries the card on by itself; one that arrived already
+        # satisfied waits for Next. Both are the guide working, so the walk asks which happened
+        # rather than tapping Next regardless — which would skip the beat after it.
+        if not _card_moved_on(page, step_now):
+            try:
+                expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
+            except AssertionError:
+                raise AssertionError(_stuck(page, step_now, caption)) from None
+            assert page.locator(PROBLEM).is_hidden(), _stuck(page, step_now, caption)
+            page.locator(NEXT).click()
+        assert page.locator(PROBLEM).is_hidden(), _stuck(page, step_now, caption)
         # The last beat of a SEQUENCE is not the end of the story: the handover and the hand back are
         # both last beats that navigate, and the guide comes back up on the other side. So the end is
         # "no panel returned", never "this was beat n of n" — reading it the other way stopped the
@@ -219,10 +250,7 @@ def test_a_reload_comes_back_on_the_beat_it_left(page, local_server):
     through twice. The step names itself in the address, so the address is enough to come back to."""
     _open_story(page, local_server)
     for _ in range(2):
-        if page.locator(SHOW_ME).is_visible():
-            page.locator(SHOW_ME).click()
-        expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
-        page.locator(NEXT).click()
+        _do_beat(page)
     expect(page.locator(PROGRESS)).to_have_text(re.compile(r"step\s+3\s+of", re.I))
     caption_before = page.locator(CAPTION).inner_text()
 
@@ -247,9 +275,7 @@ def test_the_card_holds_still_on_a_beat_that_points_at_itself(page, local_server
     for _ in range(12):
         if not page.locator(SHOW_ME).is_visible():
             break
-        page.locator(SHOW_ME).click()
-        expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
-        page.locator(NEXT).click()
+        _do_beat(page)
     else:
         raise AssertionError("no card-only beat in the story's opening chapter")
     expect(page.locator("#story-card")).to_be_visible()
@@ -286,19 +312,25 @@ def test_asking_to_be_shown_again_rebuilds_what_the_first_time_used_up(
 
     And it has to FINISH there too (reported 2026-08-25: "step 3/41 does not ensure menu closed").
     Rebuilding re-opens the menu; skipping the tap because the register was already open then left
-    it hanging over the next beat's control."""
+    it hanging over the next beat's control.
+
+    Walked BACK into rather than repeated in place, because since 2026-08-26 a beat done in front of
+    the viewer carries the card on — so "asking again" is what you do after returning to it."""
     _open_story(page, local_server)
-    page.locator(SHOW_ME).click()
-    expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
-    page.locator(NEXT).click()
+    _do_beat(page)
+    _do_beat(page)
+    expect(page.locator(PROGRESS)).to_have_text(re.compile(r"step\s+3\s+of", re.I))
+
+    page.locator(BACK).click()
     expect(page.locator(PROGRESS)).to_have_text(re.compile(r"step\s+2\s+of", re.I))
 
     for _ in range(3):
         page.locator(SHOW_ME).click()
-        expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
+        page.wait_for_timeout(1200)
         assert page.locator(PROBLEM).is_hidden(), (
             f"the guide reported a failure on a repeat: {page.locator(PROBLEM).inner_text()}"
         )
+        expect(page.locator(PROGRESS)).to_have_text(re.compile(r"step\s+2\s+of", re.I))
 
     expect(page.locator("#btn-invite-client")).to_be_visible()
     assert page.locator("#app-menu.hidden").count() == 1, (
@@ -320,9 +352,7 @@ def test_walking_back_out_of_a_dialog_and_forward_again_reopens_it(page, local_s
 
     # Forward to the beat that types a phone number into the invite dialog.
     for _ in range(4):
-        page.locator(SHOW_ME).click()
-        expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
-        page.locator(NEXT).click()
+        _do_beat(page)
     expect(page.locator(PROGRESS)).to_have_text(re.compile(r"step\s+5\s+of", re.I))
     expect(page.locator("#dialog-intake-invite")).to_be_visible()
 
@@ -362,11 +392,8 @@ def test_the_trainer_reads_what_ana_sent_and_she_lands_in_the_register(
     )
 
     for _ in range(4):
-        if page.locator(SHOW_ME).is_visible():
-            page.locator(SHOW_ME).click()
-        expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
+        _do_beat(page)
         assert page.locator(PROBLEM).is_hidden(), page.locator(PROBLEM).inner_text()
-        page.locator(NEXT).click()
 
     expect(page.locator("#clients-list")).to_contain_text("Ana Novak")
     # Her own words came with her — the shoulder she mentioned is on the record the trainer will
@@ -416,10 +443,7 @@ def test_the_client_half_is_played_on_the_client_page(page, local_server):
     # Up to the chapter's last beat, and no further: that beat's Next hands the browser back to the
     # trainer's phone, and everything asserted below lives on this one.
     while "Back to" not in page.locator(NEXT).inner_text():
-        if page.locator(SHOW_ME).is_visible():
-            page.locator(SHOW_ME).click()
-        expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
-        page.locator(NEXT).click()
+        _do_beat(page)
 
     # She filled her own form in, on her own phone...
     assert page.input_value("#intake-name") == "Ana Novak"
@@ -447,10 +471,7 @@ def test_the_client_chapter_is_counted_and_played_on_its_own_phone(page, local_s
 
     # Up to the handover, then across.
     while "Open Ana" not in page.locator(NEXT).inner_text():
-        if page.locator(SHOW_ME).is_visible():
-            page.locator(SHOW_ME).click()
-        expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
-        page.locator(NEXT).click()
+        _do_beat(page)
     page.locator(NEXT).click()
 
     page.locator(PANEL).wait_for(state="visible", timeout=30_000)

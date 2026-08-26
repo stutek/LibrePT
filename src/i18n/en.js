@@ -383,6 +383,11 @@ export const en = {
   walkthrough_next: "Next",
   walkthrough_done: "Done",
   walkthrough_exit: "Leave the walkthrough",
+  // Shown when the trainer has taken the app somewhere the current beat cannot happen. It says what
+  // is true — they went exploring — rather than blaming them, and gives the two ways on.
+  walkthrough_off_track: "You have left the demo's place in the app. Bring it back, or stop here.",
+  walkthrough_return: "Back to the demo",
+  walkthrough_leave: "Stop the demo",
   walkthrough_finished: "That's the whole loop — one session, one clipboard, four taps.",
   walkthrough_wrong_place:
     "This step needs a different screen — go back to the sessions board and start it again.",
