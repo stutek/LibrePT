@@ -176,13 +176,14 @@ def _walk_the_whole_story(page, limit=60):
 def test_the_whole_story_can_be_walked_with_show_me(page, local_server):
     _open_story(page, local_server)
 
-    _, trainer_beats = _step_numbers(page)
+    _, story_length = _step_numbers(page)
     captions = _walk_the_whole_story(page)
 
-    # Every beat of the trainer's own run, PLUS the client's chapter it crosses into and comes back
-    # from — the story is one walk over two phones since 2026-08-23, so counting only one leg would
-    # pass on a story that never made the crossing.
-    assert len(captions) > trainer_beats, len(captions)
+    # The whole story, exactly once each — both phones. Since 2026-08-27 the counter says how long
+    # the STORY is rather than how long this leg of it is (§38.9), so the walk and the denominator
+    # are directly comparable: anything less means the walk stopped somewhere, and anything more
+    # means it went round twice.
+    assert len(captions) == story_length, len(captions)
     assert any("Ana types her own name" in caption for caption in captions), (
         "the walk never reached the client's own phone"
     )
@@ -437,16 +438,30 @@ def test_the_trainer_reads_what_ana_sent_and_she_lands_in_the_register(
 
 def test_one_chapter_can_be_walked_on_its_own(page, local_server):
     """Chapters exist because nobody watches five unbroken minutes of software they do not use yet,
-    so a link naming one has to open that one."""
+    so a link naming one has to open that one.
+
+    It opens where that chapter SITS in the story, not at "1 of its own length" (§38.9): someone
+    handed a link to the gym chapter is joining a story part-way, and the count is what tells them
+    so. The whole story opened from the top still reads step 1, which is what makes this a place
+    rather than an offset.
+    """
     chapters = _chapter_ids()
     assert chapters, "the story declares no chapters"
+
+    _open_story(page, local_server)
+    first_step, story_length = _step_numbers(page)
+    assert first_step == 1, "the story opened from the top starts at its first step"
 
     _open_story(
         page, local_server, f"?init=demo_data_load&demo=story&chapter={chapters[0]}"
     )
 
     expect(page.locator(PANEL)).to_be_visible()
-    assert _step_numbers(page)[0] == 1
+    chapter_step, chapter_total = _step_numbers(page)
+    assert chapter_total == story_length, (
+        f"the chapter reports a story {chapter_total} steps long, the story itself {story_length}"
+    )
+    assert 1 <= chapter_step <= story_length
 
 
 @pytest.mark.clean_start
@@ -486,27 +501,33 @@ def test_the_client_half_is_played_on_the_client_page(page, local_server):
     assert written == [], written
 
 
-def test_the_client_chapter_is_counted_and_played_on_its_own_phone(page, local_server):
-    """The client's chapter lives in a different boot on a different device, so it is never folded
-    into the trainer's numbered run — the guide would be pointing at a form that is not on screen.
+def test_crossing_to_the_client_phone_carries_the_story_count_over(page, local_server):
+    """Asked for 2026-08-27 (Simon): "zakaj je anin telefon demo števec 1/10, zakaj ne nadaljuje po
+    demo števcu z enakim slogom kot do sedaj" — the counter restarted when the story crossed phones.
+
+    Her chapter is still not folded into the trainer's step list: it lives in a different boot on a
+    different device, and a guide walking those steps on his phone would point at a form that is not
+    there. What crosses is the NUMBER. A viewer watching "step 10 of 41" become "step 1 of 8" reads
+    it as having left the story and started something else, which is exactly what they have not done
+    (§38.9).
 
     It is reached by GOING there, which since 2026-08-23 is what the guide's own Next does on that
-    beat (reported: "why is Open Ana's phone a different button from Next, and why does Next skip the
-    intake form?"). So the trainer's counter never counts her beats, and the walk still visits them.
+    step (reported: "why is Open Ana's phone a different button from Next, and why does Next skip the
+    intake form?").
     """
     _open_story(page, local_server)
-    _, trainer_beats = _step_numbers(page)
 
     # Up to the handover, then across.
     while "Open Ana" not in page.locator(NEXT).inner_text():
         _do_beat(page)
+    handover_step, story_length = _step_numbers(page)
     page.locator(NEXT).click()
 
     page.locator(PANEL).wait_for(state="visible", timeout=30_000)
     assert "/intake" in page.url, page.url
-    _, client_beats = _step_numbers(page)
-    assert client_beats < trainer_beats, (
-        f"the client's chapter is counted on its own ({client_beats}), not as part of the "
-        f"trainer's {trainer_beats}"
+    her_step, her_total = _step_numbers(page)
+    assert (her_step, her_total) == (handover_step + 1, story_length), (
+        f"the story crossed from step {handover_step} of {story_length} to step {her_step} of "
+        f"{her_total} — a viewer reads that as a different demo starting"
     )
     expect(page.locator("#intake-form")).to_be_visible()

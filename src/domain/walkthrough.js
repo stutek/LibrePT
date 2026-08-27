@@ -79,6 +79,51 @@ export function retreatWalkthrough(state) {
   return { ...state, stepIndex: state.stepIndex - 1, finished: false };
 }
 
+/** How a run counts itself: its own steps, one to however many it has.
+ *
+ * This is the ordinary case and the only one the wedge tour (modules/demo/gymFloorTour.js) needs —
+ * four taps, played in one sitting, in one browser.
+ */
+class TourNumbering {
+  constructor(steps) {
+    this.steps = steps;
+  }
+
+  get count() {
+    return this.steps.length;
+  }
+
+  numberOf(index) {
+    return index + 1;
+  }
+}
+
+/** How the long story counts itself: a step's place in the STORY, whichever run it is playing in.
+ *
+ * The story hands the browser to the client's own page half way through and takes it back four steps
+ * later, and each of those is a separate boot with its own step list. Counting the run made the
+ * viewer watch "step 10 of 41" become "step 1 of 8" and then "step 11 of 41" — one story, three
+ * numberings, and nothing on screen saying why (reported 2026-08-27, TODO §38.9). Each step carries
+ * where it belongs (`storyPosition`, from domain/demoStory.js), so both boots say the same thing
+ * without sharing any state.
+ */
+class StoryNumbering extends TourNumbering {
+  get count() {
+    return this.steps[0]?.storyPosition?.count ?? this.steps.length;
+  }
+
+  numberOf(index) {
+    return this.steps[index]?.storyPosition?.number ?? index + 1;
+  }
+}
+
+/** The numbering a tour counts by. The one place that decides between them — a step that knows its
+ *  place in a story is counted by the story, and everything else counts itself. */
+export function walkthroughNumbering(tour) {
+  const steps = tour?.steps || [];
+  return steps[0]?.storyPosition ? new StoryNumbering(steps) : new TourNumbering(steps);
+}
+
 /**
  * What the panel can offer right now:
  *   `{ stepNumber, stepCount, canGoBack, canShowMe, canAdvance, isLastStep, isFinished }`
@@ -88,13 +133,18 @@ export function retreatWalkthrough(state) {
  * the gym floor, one step further up the stack.
  */
 export function walkthroughControls(tour, state) {
-  const stepCount = tour?.steps?.length ?? 0;
+  // Two different questions, deliberately answered by two different numbers. What the viewer READS
+  // is where they are in the story, which may be longer than this run. What the BUTTONS obey is the
+  // run itself: the last step of the trainer's walk is the last one it can advance past, whatever
+  // number the story gives it.
+  const runLength = tour?.steps?.length ?? 0;
+  const numbering = walkthroughNumbering(tour);
   const step = currentWalkthroughStep(tour, state);
   const done = step ? isWalkthroughStepDone(state, step.id) : false;
 
   return {
-    stepNumber: state.stepIndex + 1,
-    stepCount,
+    stepNumber: numbering.numberOf(state.stepIndex),
+    stepCount: numbering.count,
     canGoBack: state.stepIndex > 0 && !state.finished,
     // Offered on a done step too (reported 2026-08-18: walking back through a finished tour left a
     // guide with no Show me anywhere, since every step behind you is done). Safe there because the
@@ -103,7 +153,7 @@ export function walkthroughControls(tour, state) {
     // nothing of the trainer a second time — is kept by the player rather than by hiding a button.
     canShowMe: Boolean(step),
     canAdvance: done,
-    isLastStep: stepCount > 0 && state.stepIndex === stepCount - 1,
+    isLastStep: runLength > 0 && state.stepIndex === runLength - 1,
     isFinished: state.finished,
   };
 }

@@ -2959,6 +2959,36 @@ Everything above is reversible except the Pages outage step 2 exists to avoid.
 
 See [CHANGELOG](CHANGELOG.md).
 
+### 38.9 [x] CHANGE — one story, one count, across both phones
+
+**Asked 2026-08-27 (Simon):** *"zakaj je anin telefon demo števec 1/10, zakaj ne nadaljuje po demo
+števcu z enakim slogom kot do sedaj"*. Walked and measured: the story went **step 10 of 41 → step 1
+of 8 → step 19 of 41**, three numberings for one story, with nothing on screen saying why.
+
+Nobody decided that. The counter counted the TOUR, and the story is played by two of them: the
+client's chapter runs in its own boot on the intake page — no database, no seed, no terms modal,
+because in the story it is a stranger's phone — so it has its own step list, and
+`storyStepsFor` deliberately keeps those steps out of the trainer's run (the guide would otherwise
+point at a form that is not on his screen). The script already held the opposite value one step
+later: the hand back is written by step id rather than by chapter *"because the trainer's run is one
+numbered sequence, and returning to 'chapter 3, beat 1' would restart the count in the middle of a
+story the viewer is four beats into"*. Going the other way had no such rule.
+
+**A step's number is now its place in the STORY**, attached by `storyStepsFor` as `storyPosition`
+and carried with the step — the one thing both boots can agree on while sharing no state, because it
+is a property of the script and both of them have the script. Measured after: **10 of 49 → 11 of 49
+→ 19 of 49**.
+
+**Two numbers, deliberately** ([domain/walkthrough.js](src/domain/walkthrough.js)): what the viewer
+READS is their place in the story; what the buttons OBEY is this run ending. Counting the story for
+`isLastStep` would leave the client's page unable to finish, waiting for step 49 on a page that has
+eight. The choice between them is a `TourNumbering` / `StoryNumbering` pair rather than a condition
+at the point of use — a run whose steps know where they belong is counted by the story, everything
+else counts itself, and the wedge tour is untouched.
+
+A chapter link now opens at that chapter's place in the story (30 of 49), not at 1 of its own
+length: someone handed one is joining a story part-way, and the count is what tells them so.
+
 ### 38.8 [x] BUG — the story card was painted with tokens this app has never had
 
 **Reported 2026-08-27 (Simon):** *"2/8 kartica je slabo berljiva"* — the demo's card on the client's

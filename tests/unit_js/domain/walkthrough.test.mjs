@@ -134,3 +134,51 @@ test("a link naming a step that is not in the script starts the story from the b
   assert.deepEqual(resumeWalkthroughAt(TOUR, "a-step-that-was-renamed"), startWalkthrough());
   assert.deepEqual(resumeWalkthroughAt(TOUR, null), startWalkthrough());
 });
+
+// A run that is only PART of a story — which is what each side of the demo's handover is. The
+// client's page boots on its own, with the three steps that happen on her phone and nothing else,
+// and used to count them 1, 2, 3 in the middle of a story the viewer was ten steps into (reported
+// 2026-08-27, TODO §38.9).
+const HANDED_OVER_RUN = {
+  id: "story-intake",
+  steps: [
+    {
+      id: "i1",
+      target: ".a",
+      expect: { selector: ".a" },
+      storyPosition: { number: 11, count: 49 },
+    },
+    {
+      id: "i2",
+      target: ".b",
+      expect: { selector: ".b" },
+      storyPosition: { number: 12, count: 49 },
+    },
+  ],
+};
+
+test("a run that is part of a story counts by the story, not by itself", () => {
+  const controls = walkthroughControls(HANDED_OVER_RUN, startWalkthrough());
+
+  assert.equal(controls.stepNumber, 11, "the viewer is eleven steps into the story");
+  assert.equal(controls.stepCount, 49, "…of which there are forty-nine, not two");
+});
+
+test("the buttons still obey the run, whatever the story calls its steps", () => {
+  // The two questions are different and are answered by different numbers: what the viewer READS is
+  // their place in the story, what Next OBEYS is this run ending. Counting the story here would
+  // leave the client's page unable to finish, waiting for step 49 on a page that has two.
+  let state = startWalkthrough();
+  state = completeWalkthroughStep(state, "i1");
+  state = advanceWalkthrough(HANDED_OVER_RUN, state);
+
+  assert.equal(walkthroughControls(HANDED_OVER_RUN, state).isLastStep, true);
+  assert.equal(walkthroughControls(HANDED_OVER_RUN, state).stepNumber, 12);
+});
+
+test("a tour with no story behind it counts itself, as it always did", () => {
+  const controls = walkthroughControls(TOUR, startWalkthrough());
+
+  assert.equal(controls.stepNumber, 1);
+  assert.equal(controls.stepCount, 3);
+});

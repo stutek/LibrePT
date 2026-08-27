@@ -33,6 +33,15 @@ export function chapterTitleKeys(story) {
 export function storyStepsFor(story, chapterId = null, { surface = "trainer" } = {}) {
   const chapters = story?.chapters || [];
   const wanted = chapters.find((chapter) => chapter.id === chapterId);
+  // Where each step sits in the WHOLE story, worked out before anything is filtered out. The story
+  // hands the browser to the client's own page half way through and takes it back four steps later,
+  // and each side is a separate boot with its own step list — so a run that numbered itself made the
+  // viewer watch "step 10 of 41" become "step 1 of 8" and then "step 11 of 41", as if they had
+  // wandered into something else (reported 2026-08-27, TODO §38.9). A place in the story is the one
+  // number both boots can agree on while sharing no state at all: it is a property of the script,
+  // which both of them have. Keyed by step id, which `validateStory` already requires to be unique.
+  const everyStep = chapters.flatMap((chapter) => chapter.steps || []);
+  const storyPlaces = new Map(everyStep.map((step, index) => [step.id, index + 1]));
   // A chapter that happens on the CLIENT's own page is not part of the trainer's run: it lives in a
   // different boot, on a different device in the story, and flattening it in would leave the guide
   // pointing at a form that is not on screen. The story crosses to it by handing over the browser,
@@ -43,8 +52,14 @@ export function storyStepsFor(story, chapterId = null, { surface = "trainer" } =
     : chapters.filter((chapter) => (chapter.surface || "trainer") === surface);
   return playing.flatMap((chapter) =>
     // The chapter each step belongs to travels WITH the step: once flattened, the player sees one
-    // list, and the narration surface still has to say which chapter is on screen.
-    (chapter.steps || []).map((step) => ({ ...step, chapterId: chapter.id })),
+    // list, and the narration surface still has to say which chapter is on screen. Its place in the
+    // story travels the same way, for the same reason — by the time the guide counts, all it has is
+    // this list.
+    (chapter.steps || []).map((step) => ({
+      ...step,
+      chapterId: chapter.id,
+      storyPosition: { number: storyPlaces.get(step.id), count: everyStep.length },
+    })),
   );
 }
 

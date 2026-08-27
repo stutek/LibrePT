@@ -138,3 +138,58 @@ test("a chapter played on the client's own page is not part of the trainer's wal
     ["i1"],
   );
 });
+
+// The story hands the browser over to the client's page mid-way and takes it back four steps later.
+// Each side is a separate boot with its own step list, so each side used to count from one: the
+// viewer watched "step 10 of 41" become "step 1 of 8" and then "step 11 of 41", as if they had
+// started something else and come back. Reported 2026-08-27 (TODO §38.9). A step's number is now its
+// place in the STORY, which is the one thing both boots can agree on without sharing any state.
+const HANDOVER_STORY = {
+  id: "handover",
+  chapters: [
+    {
+      id: "arrive",
+      titleKey: "k",
+      steps: [
+        { id: "a1", target: ".a", expect: { selector: ".a" } },
+        { id: "a2", target: ".b", expect: { selector: ".b" } },
+      ],
+    },
+    {
+      id: "intake",
+      surface: "client",
+      titleKey: "k",
+      steps: [{ id: "i1", target: ".c", expect: { selector: ".c" } }],
+    },
+    {
+      id: "review",
+      titleKey: "k",
+      steps: [{ id: "r1", target: ".d", expect: { selector: ".d" } }],
+    },
+  ],
+};
+
+test("a step knows its place in the whole story, not in the run it happens to be in", () => {
+  const trainer = storyStepsFor(HANDOVER_STORY);
+  assert.deepEqual(
+    trainer.map((step) => step.storyPosition.number),
+    // Not 1, 2, 3: the client's step sits between a2 and r1 and keeps its place in the count.
+    [1, 2, 4],
+  );
+  assert.ok(trainer.every((step) => step.storyPosition.count === 4));
+});
+
+test("the client's own page continues the story's count instead of restarting it", () => {
+  const [clientStep] = storyStepsFor(HANDOVER_STORY, "intake", { surface: "client" });
+
+  assert.equal(clientStep.storyPosition.number, 3);
+  assert.equal(clientStep.storyPosition.count, 4);
+});
+
+test("a chapter opened straight from a link is numbered where it belongs", () => {
+  // A link to one chapter is a person joining the story part-way, not starting a shorter one — the
+  // count tells them how much of it they are seeing.
+  const [step] = storyStepsFor(HANDOVER_STORY, "review");
+
+  assert.equal(step.storyPosition.number, 4);
+});
