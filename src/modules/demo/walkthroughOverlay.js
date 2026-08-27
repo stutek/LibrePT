@@ -66,6 +66,13 @@ const READY_SETTLE_MS = 2500;
 // Consecutive polls a beat has to be impossible before the guide says the trainer has left its
 // place. One reading is a view mid-render; three is somebody who went somewhere else.
 const OFF_TRACK_TICKS = 3;
+// How far back a rebuild will go to restore what the story has already SHOWN, when the beat itself
+// is already performable. The last few taps are what a card describes — "type it over the number"
+// wants the number in the box — while the state behind a chapter boundary is long gone and trying
+// to replay it freezes the guide for tens of seconds (found walking the whole story: resuming the
+// trainer's run after the client's phone made every programme beat try to rebuild the arrive
+// chapter). A beat that cannot be performed at all still replays from its anchor.
+const GROUND_REPLAY_BEATS = 3;
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -201,6 +208,8 @@ export function startGuidedWalkthrough({
   // Re-entrancy guard for the advance above: enterStep is async, and a second tick landing inside it
   // would advance twice on one completed beat.
   let advancing = false;
+  // Whether the message on the panel is about WHERE the app is — see reportProblem.
+  let problemIsAboutGround = false;
   let ticker = 0;
   // Declared here because stop() closes over it and runs before the observer is created on a torn
   // down guide.
@@ -459,6 +468,26 @@ export function startGuidedWalkthrough({
     return stepIsReady(step);
   }
 
+  /** Is the app where this beat STARTS — everything the story has already shown still true?
+   *
+   * Reported 2026-08-26: walking back from beat 7 to beat 4 left the invite dialog open with an
+   * empty contact field, under a card reading "type it over the number". Being able to PERFORM a
+   * beat is not the same as standing where it begins: the rebuild had reopened the dialog, which
+   * empties its field, and then stopped — the beat's own control was reachable, so nothing looked
+   * wrong. What the earlier beats put on screen is part of this beat's ground, and a card describing
+   * a screen the app is not showing is the demo lying about the app.
+   */
+  function groundIntact(step) {
+    const { from, index } = replayRangeFor(step);
+    // The beat IMMEDIATELY before, not every beat back to the anchor. Most of what a story does is
+    // undone on purpose by what comes after it — the invite dialog is opened by one beat and closed
+    // by another four beats later — so demanding that every earlier outcome still holds would have
+    // the guide re-opening dialogs the story had deliberately shut, on every entry. What the beat
+    // before left on screen IS this beat's starting position.
+    const previous = index > from ? tour.steps[index - 1] : null;
+    return !previous || stepOutcomeNow(previous, doc).ok;
+  }
+
   /** Is the app where this beat can HAPPEN? Its declared preconditions, and its own control being
    * reachable.
    *
@@ -590,36 +619,67 @@ export function startGuidedWalkthrough({
     return { index, from, anchor, route: tour.steps[anchor].route };
   }
 
+  /** Replays `beats` until the repair asked for is done, and says whether anything was actually
+   * performed — which is what buys the app its moment to render before any complaint.
+   *
+   * Stops on the same condition that started the repair: a beat that could not be performed at all
+   * needs only its control back, while one whose immediate history is wrong needs that history. A
+   * beat whose outcome already holds costs one probe and is skipped, so an app one tap behind
+   * replays one tap.
+   */
+  async function replayBeats(beats, step, groundOnly) {
+    let performed = false;
+    for (const earlier of beats) {
+      if (groundOnly ? groundIntact(step) : stepIsReady(step)) break;
+      if (stepOutcomeNow(earlier, doc).ok) continue;
+      performed = true;
+      await performStep(earlier, { doc, wait: (ms) => sleep(Math.min(ms, RESTORE_SETTLE_MS)) });
+    }
+    return performed;
+  }
+
   async function restoreGroundFor(step) {
     // Nothing to rebuild when the app is already where the step starts — and rebuilding anyway is
     // not free: navigating to the anchor route mid-session tears down the very clipboard a later
     // beat is standing on. Show me asks for this on every tap, so the cheap answer has to be the
     // common one.
-    if (stepIsReady(step)) return false;
+    if (stepIsReady(step) && groundIntact(step)) return false;
     // The CHEAP repair first: something the app left open on top of the beat — a menu the trainer
     // dropped down, a modal an earlier beat opened — is not a reason to replay anything. Reported
     // 2026-08-26 through the story's evening chapter, where the beat after the theme switch is
     // covered by the very menu that switch lives in: rebuilding it re-ran the beats that open that
     // menu, and the guide ended up complaining about a screen it had just been on.
     dismissStaleOverlays(step);
-    if (stepIsReady(step)) return false;
+    if (stepIsReady(step) && groundIntact(step)) return false;
     const { index, from, route } = replayRangeFor(step);
     console.info(`[walkthrough] rebuilding ground for step ${step.id} from ${from + 1}`);
     // Only when the app is not already there: a navigate to the route you are on re-renders the
     // view under the trainer for nothing, and Show me now asks for this on every tap.
+    // TWO different repairs, and telling them apart is what keeps this quick. A beat that cannot be
+    // performed at all needs its view back and nothing more — replay from the anchor, stop the moment
+    // its control is reachable. A beat that CAN be performed but whose immediate history is wrong —
+    // the invite dialog reopened with an empty box under a card reading "type it over the number" —
+    // needs the last few taps put back, and nothing further back than that: trying to rebuild a
+    // chapter the story has long left froze the guide for tens of seconds at the programme chapter.
+    const groundOnly = stepIsReady(step);
+    const replayFrom = groundOnly ? Math.max(from, index - GROUND_REPLAY_BEATS) : from;
     let moved = false;
     if (route && !currentPathIs(route)) {
       moved = true;
       navigate?.(route);
       await sleep(RESTORE_SETTLE_MS);
     }
-    for (const earlier of tour.steps.slice(from, index)) {
-      if (stepIsReady(step)) break;
-      moved = true;
-      await performStep(earlier, { doc, wait: (ms) => sleep(Math.min(ms, RESTORE_SETTLE_MS)) });
-    }
+    // EVERY earlier beat, not "until this one becomes performable". Stopping early is what left the
+    // invite dialog open with nothing typed in it: reopening the dialog made the next beat's field
+    // reachable, and the two beats that fill it were never replayed. A beat whose outcome already
+    // holds costs one probe and is skipped, so an app that is merely one tap behind still replays
+    // one tap.
+    moved = (await replayBeats(tour.steps.slice(replayFrom, index), step, groundOnly)) || moved;
     // Whatever the replay itself left open on top of the beat — see dismissStaleOverlays.
     if (!stepIsReady(step)) dismissStaleOverlays(step);
+    // A beat that CAN be performed is not a problem to report, whatever the rebuild made of the
+    // screens behind it — the trainer is looking at a card whose control is right there.
+    if (stepIsReady(step)) return true;
     // Only a state the script itself cannot rebuild is the trainer's problem to hear about — and
     // only once the app has had its moment to render what the replay just asked for. No moment is
     // owed when nothing was asked: a rebuild that navigated nowhere and replayed nothing has an app
@@ -629,6 +689,7 @@ export function startGuidedWalkthrough({
       reportProblem(
         `step ${step.id} precondition still unmet after rebuild`,
         t("walkthrough_wrong_place"),
+        { aboutGround: true },
       );
     }
     // Says the app was MOVED, which is what makes a satisfied-looking outcome stale — see the Show
@@ -655,7 +716,7 @@ export function startGuidedWalkthrough({
     // fail confusingly the moment anyone tapped Show me, and the trainer would have read a whole
     // caption first. What follows from the assertion is a REPAIR, not a complaint — see
     // restoreGroundFor.
-    if (step && !stepIsReady(step)) {
+    if (step && (!stepIsReady(step) || !groundIntact(step))) {
       // Same busy flag the demonstration uses, and set BEFORE the first await: it greys out Back /
       // Show me / Next while the app is being moved under the panel, so a second tap cannot start a
       // second rebuild on top of one — and cannot be silently dropped by the handler that ignores
@@ -721,7 +782,12 @@ export function startGuidedWalkthrough({
    * already looks, rather than being deleted — the alternative to showing it is not hiding it, it is
    * putting it somewhere it belongs.
    */
-  function reportProblem(reason, trainerMessage = t("walkthrough_stuck")) {
+  function reportProblem(reason, trainerMessage = t("walkthrough_stuck"), { aboutGround } = {}) {
+    // WHICH question the message answers, because that decides when it stops being true. A message
+    // about the app being in the wrong place expires the moment it is in the right one; one about a
+    // demonstration that failed is about something that happened, and stands until the beat is done
+    // or the card changes.
+    problemIsAboutGround = Boolean(aboutGround);
     console.warn(`[walkthrough] ${reason}`);
     el.problem.textContent = trainerMessage;
     el.problem.hidden = false;
@@ -872,13 +938,14 @@ export function startGuidedWalkthrough({
     keepPanelReachable();
     const step = currentWalkthroughStep(tour, state);
     if (!step || showing) return;
-    // A complaint is about a state, and states pass: the trainer may have opened the screen the
-    // guide was asking for, or the beat may simply have WORKED after a slow board finished drawing
-    // its cards. A message left standing over a guide that is fine is the guide being wrong out
-    // loud, and the story's evening chapter ended every full walk that way.
-    if (!el.problem.hidden && (stepIsReady(step) || stepOutcomeNow(step, doc).ok)) {
-      el.problem.hidden = true;
-    }
+    // A complaint about the app's PLACE is about a state, and states pass: the trainer may have
+    // opened the screen the guide was asking for, or the beat may simply have WORKED after a slow
+    // board finished drawing its cards. A message left standing over a guide that is fine is the
+    // guide being wrong out loud, and the story's evening chapter ended every full walk that way.
+    const cleared = problemIsAboutGround
+      ? stepIsReady(step) || stepOutcomeNow(step, doc).ok
+      : stepOutcomeNow(step, doc).ok;
+    if (!el.problem.hidden && cleared) el.problem.hidden = true;
     const target = resolveTarget(doc, step);
     positionSpotlight(target);
     keepPanelClearOf(target);

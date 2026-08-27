@@ -151,9 +151,14 @@ export function stepOutcomeNow(step, doc = document) {
  *  This is where a step's CORRECTNESS lives now: the pause that follows is for a viewer's eye and
  *  goes to zero under reduced motion, so nothing may depend on it having happened. */
 async function waitForOutcome(step, doc, wait, budgetMs) {
-  const deadline = Date.now() + budgetMs;
+  // Counted in POLLS, not against a clock. The browser suites pin `Date.now()` so the seed's times
+  // cannot drift between runs (tests/INDEX.md), and a deadline of "now plus a budget" never arrives
+  // there: a step whose expectation stays false waits for ever, with every button on the guide's
+  // panel greyed out. Found 2026-08-27, and the same trap the walkthrough's own settle loop fell
+  // into — it is not a test-only concern, it is a timeout that depends on the wrong instrument.
+  const polls = Math.max(1, Math.ceil(budgetMs / OUTCOME_POLL_MS));
   let outcome = stepOutcomeNow(step, doc);
-  while (!outcome.ok && Date.now() < deadline) {
+  for (let waited = 0; !outcome.ok && waited < polls; waited += 1) {
     await wait(OUTCOME_POLL_MS);
     outcome = stepOutcomeNow(step, doc);
   }

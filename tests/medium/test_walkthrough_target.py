@@ -12,6 +12,7 @@
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
 import pytest
+from playwright.sync_api import expect
 
 from tests.medium._harness import load_with_stub
 
@@ -236,8 +237,19 @@ def test_the_waves_take_the_theme_colour(page, local_server):
     )
 
 
+# A control that EXISTS and a claim that never comes true — a demonstration that runs and fails,
+# rather than one that cannot start. Pointing the step at nothing was the earlier version and is now
+# a different case entirely: since 2026-08-26 a beat whose control is not on screen is the trainer
+# having wandered off, and the panel swaps itself for the two-button card (TODO §38.5). That card is
+# the answer to "never leave a dead-looking guide" for THAT case; this stub keeps the other one.
 BROKEN_TOUR_STUB = """
 import { startGuidedWalkthrough } from './modules/demo/walkthroughOverlay.js';
+
+const stage = document.createElement('div');
+stage.className = 'app-view active';
+stage.innerHTML = '<button id="a-real-button" style="height: 44px">Tap me</button>';
+document.body.appendChild(stage);
+
 window.__walkthrough = startGuidedWalkthrough({
   pollMs: 60,
   tour: {
@@ -245,7 +257,7 @@ window.__walkthrough = startGuidedWalkthrough({
     steps: [
       {
         id: 'nowhere',
-        target: '#this-control-does-not-exist',
+        target: '#a-real-button',
         caption: 'walkthrough_progress',
         expect: { selector: '#nor-does-this', visible: true },
       },
@@ -266,10 +278,11 @@ def test_a_failed_show_me_does_not_leave_the_panel_stuck_busy(page, local_server
     page.wait_for_selector("#walkthrough-overlay")
 
     page.locator("#walkthrough-show").click()
-    page.wait_for_timeout(1500)
 
-    assert page.locator(".walkthrough-problem").is_visible(), "a failure has to say so"
-    assert page.locator("#walkthrough-show").is_enabled(), "the offer must come back"
+    # Waited FOR rather than waited OUT: a fixed sleep here fails on a loaded machine and passes on
+    # a quiet one, which says nothing about the promise. Both of these are what the trainer sees.
+    expect(page.locator(".walkthrough-problem")).to_be_visible(timeout=15_000)
+    expect(page.locator("#walkthrough-show")).to_be_enabled(timeout=15_000)
 
 
 def test_an_icon_button_is_named_by_the_card_it_sits_on(page, local_server):

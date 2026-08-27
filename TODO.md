@@ -2969,6 +2969,35 @@ symptom was the step counter saying 1 / 4. Fixed by making that builder write `?
 pinning the VALUE in the tests, which had asserted only that some `?demo=` was set. The wedge keeps
 its own link for the engine's tests; nothing in the app offers it.
 
+### 38.6 [x] BUG — walking back left the card describing a screen the app was not showing
+
+**Reported 2026-08-26 (Simon):** *"going back in demo from step 7 to step 4 does not clear/update the
+intake address / number"*. Worse than stale: every one of those beats showed an EMPTY contact box,
+under cards reading "type the number" and "type it over the number".
+
+Being able to PERFORM a beat is not the same as standing where it begins. The rebuild reopened the
+invite dialog — which empties its field on every open, correctly, since it is the next person's
+invitation — and then stopped, because the beat's own control was now reachable and nothing looked
+wrong. The two beats that fill that box were never replayed.
+
+**A beat's ground now includes what the beat before it left on screen**, and the rebuild replays
+until that holds rather than until the control is merely tappable.
+
+**Two repairs, told apart, and that distinction is the whole cost of this fix.** Conflating them
+froze the guide for tens of seconds at the programme chapter — resuming the trainer's run after the
+client's phone made every beat try to rebuild the arrive chapter, one unsatisfiable replay at a
+time, with every button greyed out. So:
+
+- a beat that **cannot be performed** replays from its anchor and stops the moment its control is
+  reachable, exactly as before;
+- a beat that **can** be performed but whose immediate history is wrong restores at most the last
+  three taps, and never reports a problem — the trainer is looking at a card whose control is right
+  there.
+
+Only the beat IMMEDIATELY before counts as ground. Most of what a story does is undone on purpose by
+what comes later — the invite dialog is opened by one beat and closed four beats on — so demanding
+every earlier outcome would have the guide re-opening dialogs the story had deliberately shut.
+
 ### 38.5 [x] CHANGE — the card follows the app, and says so when the trainer goes exploring
 
 **Decided 2026-08-26 (Simon)**, after reporting the same thing three ways in one session — a modal

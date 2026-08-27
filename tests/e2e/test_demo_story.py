@@ -372,6 +372,34 @@ def test_walking_back_out_of_a_dialog_and_forward_again_reopens_it(page, local_s
     assert page.locator(PROBLEM).is_hidden(), page.locator(PROBLEM).inner_text()
 
 
+def test_walking_back_puts_the_screen_the_card_describes_back(page, local_server):
+    """Reported 2026-08-26: "going back in demo from step 7 to step 4 does not clear/update the
+    intake address / number".
+
+    Being able to PERFORM a beat is not the same as standing where it begins. The rebuild reopened
+    the invite dialog — which empties its contact field — and stopped there, because the beat's own
+    control was now reachable and nothing looked wrong. The card then read "type it over the number"
+    over an empty box. Every beat the story has already shown is part of the next one's ground."""
+    _open_story(
+        page, local_server, "clients?init=demo_data_load&demo=story&step=arrive-invite"
+    )
+    for _ in range(4):
+        _do_beat(page)
+    expect(page.locator(PROGRESS)).to_have_text(re.compile(r"step\s+7\s+of", re.I))
+
+    for _ in range(3):
+        page.locator(BACK).click()
+        page.wait_for_timeout(1500)
+
+    # Beat 4 typed the number, and it is back in the box the card is talking about.
+    expect(page.locator(PROGRESS)).to_have_text(re.compile(r"step\s+4\s+of", re.I))
+    expect(page.locator("#dialog-intake-invite")).to_be_visible()
+    assert page.input_value("#intake-invite-contact") == "+386 41 234 567", (
+        "the card asks for a number the app is not showing"
+    )
+    expect(page.locator("#intake-invite-send")).to_contain_text("text message")
+
+
 def test_the_trainer_reads_what_ana_sent_and_she_lands_in_the_register(
     page, local_server
 ):
