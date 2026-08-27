@@ -289,7 +289,7 @@
   flex-shrink: 0;
 }
 .deck-history-load {
-  color: var(--text-color);
+  color: inherit;
   font-weight: 600;
 }
 .deck-history-note {
@@ -381,7 +381,7 @@
 .deck-card-name {
   margin: 0 0 4px 0;
   font-size: 14px;
-  color: var(--text-color);
+  color: inherit;
   font-weight: 700;
   line-height: 1.2;
   text-overflow: ellipsis;

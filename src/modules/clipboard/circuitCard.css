@@ -7,7 +7,7 @@
 .circuit-title {
   font-size: 13px;
   font-weight: 700;
-  color: var(--text-color);
+  color: inherit;
   display: inline-flex;
   align-items: center;
   gap: 8px;

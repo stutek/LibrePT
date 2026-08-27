@@ -154,7 +154,7 @@
 } /* Card title stays one neutral color regardless of the card's temporal state (past/live/future)
    or theme — only the status bar beneath it carries the past/future tint now. */
 .session-card-title {
-  color: var(--text-color);
+  color: inherit;
 } /* --- SESSIONS DAY TITLE BAR --- */
 /* Home view title bar. The "Sessions Schedule" label (.view-title-label) is the conceptual view
    title on the left; the Today/jump-to-date controls (rendered by sessionTimeline.js into
@@ -268,7 +268,7 @@
   font-family: var(--font-sans);
   font-size: 13px;
   font-weight: 700;
-  color: var(--text-color);
+  color: inherit;
   cursor: pointer;
 }
 .sessions-day-group-header:hover,
@@ -410,7 +410,7 @@
   bottom: calc(72px + var(--safe-bottom));
   right: max(16px, calc((100vw - var(--app-max-width, 480px)) / 2 + 16px));
   z-index: 120;
-  border-radius: var(--border-radius-pill, 9999px);
+  border-radius: 9999px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
   padding: 12px 20px;
   font-weight: 600;

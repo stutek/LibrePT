@@ -76,7 +76,7 @@
   padding: 12px 14px;
   border: 1px solid var(--border-color, rgba(15, 23, 42, 0.14));
   border-left: 3px solid var(--primary, #6366f1);
-  border-radius: var(--border-radius, 12px);
+  border-radius: var(--border-radius-md);
   background: color-mix(in srgb, var(--primary, #6366f1) 6%, transparent);
 }
 

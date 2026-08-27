@@ -57,7 +57,7 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav {
   font-weight: 600;
 }
 .header-nav .nav-item:hover {
-  background: var(--bg-surface);
+  background: var(--card-bg);
   color: var(--text-main);
 }
 .header-nav .nav-item.active {

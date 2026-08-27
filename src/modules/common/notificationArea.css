@@ -295,7 +295,7 @@ body:has(#active-session-overlay:not(.hidden))
   white-space: nowrap;
 }
 .notification-card {
-  background: var(--bg-surface);
+  background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-left: 3px solid transparent;
   border-radius: var(--border-radius-md);
@@ -308,7 +308,7 @@ body:has(#active-session-overlay:not(.hidden))
 }
 .notification-card.unread {
   border-left-color: var(--primary);
-  background: color-mix(in srgb, var(--primary) 5%, var(--bg-surface));
+  background: color-mix(in srgb, var(--primary) 5%, var(--card-bg));
 }
 .notification-card:hover {
   border-color: color-mix(in srgb, var(--primary) 35%, var(--card-border));
@@ -518,7 +518,7 @@ body:has(#active-session-overlay:not(.hidden))
   font-size: 12px;
   padding: 2px 8px;
   border-radius: 10px;
-  background: var(--surface-2, rgba(127, 127, 127, 0.15));
+  background: color-mix(in srgb, var(--text-main) 12%, transparent);
 }
 
 .demo-cleanup-retained-list {
@@ -529,7 +529,7 @@ body:has(#active-session-overlay:not(.hidden))
 
 .demo-cleanup-retained-list li {
   padding: 8px 0;
-  border-top: 1px solid var(--border, rgba(127, 127, 127, 0.2));
+  border-top: 1px solid var(--card-border);
 }
 
 .demo-cleanup-retained-name {

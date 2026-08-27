@@ -972,6 +972,27 @@ def run_icon_coverage_check():
         sys.exit(1)
 
 
+def run_css_token_check():
+    """Verifies every `var(--token)` names a property something defines — see
+    agent_tools/css_tokens.py.
+
+    The failure it catches is silent by construction: an undefined property does not warn and does
+    not render as nothing, it takes the fallback written beside it — a colour frozen on the day the
+    line was typed, which then stops following the theme. The demo's story card asked for four
+    properties this app has never had and painted itself in light-theme slate everywhere, which was
+    correct on the Daylight palette by coincidence and 2.38:1 body text on Midnight — the palette
+    the story's own handover link forces on the client's phone (TODO §38.8).
+
+    The parity half is the same failure one level up: the five palettes are alternatives, so a
+    property only one of them defines is undefined for everyone on the other four.
+    """
+    print("\n  Checking CSS custom properties...")
+    from agent_tools import css_tokens
+
+    if css_tokens.main() != 0:
+        sys.exit(1)
+
+
 def run_catalog_coverage_check():
     """Verifies the module catalog still describes the tree — see agent_tools/catalog_coverage.py.
 
@@ -1938,6 +1959,7 @@ def run_stage_1_parallel():
         "Module Catalog Coverage": run_catalog_coverage_check,
         "Module Headers": run_module_header_check,
         "Icon Coverage": run_icon_coverage_check,
+        "CSS Tokens": run_css_token_check,
         "Import Layering": run_import_layer_check,
         "Pipeline Gating": run_pipeline_gate_check,
         "Python Version": run_python_version_check,

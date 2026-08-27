@@ -27,6 +27,42 @@ window.__narration = mountStoryNarration({
   onClearDemoData: () => { window.__cleared += 1; },
 });
 window.__show = (step) => window.__narration.showStep(step);
+
+// Every palette the trainer can pick, read from the app rather than listed here: a sixth theme must
+// be readable too, and a test with its own copy of the list would not know it exists.
+import { THEME_BODY_CLASS, applyTheme } from './modules/common/theme.js';
+window.__themes = Object.keys(THEME_BODY_CLASS);
+window.__wearTheme = (key) => applyTheme(key, { persist: false });
+
+// Contrast of one element's text against the surface actually behind it — the first ancestor that
+// paints, since the card itself is transparent inside the guide's panel.
+window.__contrast = (selector) => {
+  const el = document.querySelector(selector);
+  if (!el) return null;
+  // Chromium reports a `color-mix()` result as `color(srgb 0.98 0.98 0.98 / 0.82)` — 0-1 floats,
+  // not the 0-255 of `rgb()`. Read as 0-255 they all collapse to black, and every mixed surface
+  // scores a flat 1:1, which looks exactly like a real failure. Scale by the notation, not a guess.
+  const channels = (colour) => {
+    const numbers = (colour.match(/[\\d.]+/g) || []).slice(0, 3).map(Number);
+    return colour.startsWith('color(') ? numbers.map((v) => v * 255) : numbers;
+  };
+  const luminance = (colour) => {
+    const [r, g, b] = channels(colour).map((v) => {
+      const channel = v / 255;
+      return channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+    });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  let ground = getComputedStyle(document.body).backgroundColor;
+  for (let node = el; node; node = node.parentElement) {
+    const painted = getComputedStyle(node).backgroundColor;
+    if (painted && !painted.startsWith('rgba(0, 0, 0, 0)')) { ground = painted; break; }
+  }
+  const [lighter, darker] = [luminance(getComputedStyle(el).color), luminance(ground)].sort(
+    (a, b) => b - a,
+  );
+  return Math.round(((lighter + 0.05) / (darker + 0.05)) * 100) / 100;
+};
 """
 
 # The same stub with nobody offering a way onward — a caller that cannot clear demo data.
@@ -172,6 +208,40 @@ def test_a_mid_story_card_makes_no_such_offer(page, local_server):
     _show(page, CHAPTER_STEP)
 
     expect(page.locator("#story-card-cleanup")).to_be_hidden()
+
+
+# WCAG AA for body text. The story card is a paragraph somebody reads on a phone, not a decorative
+# label, so this is the bar it has to clear — on every palette, not on the one it was written under.
+MIN_CONTRAST = 4.5
+
+
+def test_the_card_is_readable_on_every_theme(page, local_server):
+    """Reported 2026-08-27: "the 2/8 card is hard to read" — measured at 2.38:1 on Midnight, which is
+    the palette the story's handover link forces on the client's phone.
+
+    The card painted itself with `--text-primary` / `--text-secondary` / `--bg-secondary`, none of
+    which this app has ever defined, so all five declarations fell through to the light-theme
+    constants typed beside them. On Daylight that was right by coincidence; on the four dark palettes
+    it was slate on near-black. The card now reads the app's own tokens, and this measures what a
+    viewer's eye gets rather than which token was named.
+    """
+    _mount(page, local_server)
+
+    unreadable = []
+    for theme in page.evaluate("() => window.__themes"):
+        page.evaluate("(theme) => window.__wearTheme(theme)", theme)
+        _show(page, CHAPTER_STEP)
+        for selector in (
+            ".story-card-title",
+            ".story-card-body",
+            ".story-card-kicker",
+            "#story-persona",
+        ):
+            contrast = page.evaluate("(sel) => window.__contrast(sel)", selector)
+            if contrast is not None and contrast < MIN_CONTRAST:
+                unreadable.append(f"{theme}: {selector} at {contrast}:1")
+
+    assert not unreadable, "story card text below AA: " + "; ".join(unreadable)
 
 
 def test_nothing_is_offered_when_there_is_nothing_to_offer(page, local_server):

@@ -68,34 +68,6 @@
 }
 
 /* Preview-build warning on the backup/sync surface. Amber is the warning cue used consistently for
-   preview markers; it stays a full sentence rather than an icon because the gap it describes — that
-   preview-only fields are not in the file — is not guessable from a symbol. */
-.backup-preview-warning {
-  display: flex;
-  gap: 10px;
-  align-items: flex-start;
-  margin: 0 0 14px;
-  padding: 10px 12px;
-  border-radius: 8px;
-  font-size: 13px;
-  line-height: 1.45;
-  color: var(--warning-text, #7a5200);
-  background: var(--warning-bg, rgba(255, 176, 32, 0.15));
-  border: 1px solid var(--warning-border, rgba(255, 176, 32, 0.4));
-}
-
-.backup-preview-warning i {
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-
-@media (prefers-color-scheme: dark) {
-  .backup-preview-warning {
-    color: var(--warning-text-dark, #ffce7a);
-  }
-}
-
-/* Preview-build warning on the backup/sync surface. Amber is the warning cue used consistently for
    preview markers, and it stays a full sentence rather than an icon because the gap it describes —
    that preview-only fields are not written into the file — is not guessable from a symbol. */
 .backup-preview-warning {
@@ -107,9 +79,9 @@
   border-radius: 8px;
   font-size: 13px;
   line-height: 1.45;
-  color: var(--warning-text, #7a5200);
-  background: var(--warning-bg, rgba(255, 176, 32, 0.15));
-  border: 1px solid var(--warning-border, rgba(255, 176, 32, 0.4));
+  color: var(--warning);
+  background: color-mix(in srgb, var(--warning) 15%, transparent);
+  border: 1px solid color-mix(in srgb, var(--warning) 40%, transparent);
 }
 
 .backup-preview-warning i {
@@ -117,11 +89,11 @@
   margin-top: 2px;
 }
 
-@media (prefers-color-scheme: dark) {
-  .backup-preview-warning {
-    color: var(--warning-text-dark, #ffce7a);
-  }
-}
+/* No `prefers-color-scheme` override any more, and that is the point: this app themes by CHOICE —
+   five palettes the trainer picks between — so the operating system's light/dark preference is a
+   second axis that can only contradict the first. The amber now comes from `--warning`, which every
+   theme defines for itself, so a warning on the Midnight palette is that palette's amber whatever
+   the phone is set to. */
 
 /* Restore confirmation. Shown only when a restore would overwrite something, because a warning that
    appears every time is a warning nobody reads. The destructive action is styled as destructive and
@@ -130,8 +102,8 @@
   margin: 0 0 14px;
   padding: 12px;
   border-radius: 8px;
-  background: var(--danger-bg, rgba(220, 60, 60, 0.12));
-  border: 1px solid var(--danger-border, rgba(220, 60, 60, 0.4));
+  background: var(--danger-light);
+  border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent);
   font-size: 13px;
   line-height: 1.45;
 }

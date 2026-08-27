@@ -39,7 +39,7 @@
   display: block;
   height: 1px;
   margin-top: 0.6rem;
-  background: var(--card-border, rgba(15, 23, 42, 0.12));
+  background: var(--card-border);
 }
 
 /* The narration card when it stands alone — mounted without a guide around it, which is how it is
@@ -55,10 +55,10 @@
   width: min(30rem, calc(100vw - 2.5rem));
   transform: translateX(-50%);
   padding: 1.25rem 1.35rem 1.1rem;
-  border-radius: var(--border-radius-lg, 16px);
-  background: var(--bg-secondary, #ffffff);
-  color: var(--text-primary, #0f172a);
-  border: 1px solid var(--border-color, rgba(15, 23, 42, 0.12));
+  border-radius: var(--border-radius-lg);
+  background: var(--card-bg);
+  color: var(--text-main);
+  border: 1px solid var(--card-border);
   box-shadow: 0 18px 45px rgba(15, 23, 42, 0.35);
   text-align: left;
 }
@@ -68,7 +68,7 @@
   font-size: 0.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--text-secondary, #64748b);
+  color: var(--text-muted);
 }
 
 .story-card-title {
@@ -80,7 +80,7 @@
 .story-card-body {
   margin: 0 0 1rem;
   line-height: 1.45;
-  color: var(--text-secondary, #475569);
+  color: var(--text-muted);
 }
 
 /* Real touch targets, because the hand taps them and a viewer may too (no-hover rule, §7.1). */
@@ -120,7 +120,7 @@
    is now the guide's. */
 .walkthrough-panel .story-card--paper {
   padding: 0.75rem 0.9rem;
-  border-radius: var(--border-radius, 12px);
+  border-radius: var(--border-radius-md);
   border-left: 3px solid color-mix(in srgb, #dc2626 45%, transparent);
   color: #3b3423;
 }
@@ -130,14 +130,14 @@
    the viewer is being told to picture, and because it could never be mistaken for a screen of this
    app, which is the whole rule the paper track exists for (§35.1). */
 .story-card--message {
-  background: color-mix(in srgb, #22c55e 12%, var(--bg-secondary, #ffffff));
+  background: color-mix(in srgb, #22c55e 12%, var(--card-bg));
   border-color: color-mix(in srgb, #22c55e 40%, transparent);
   border-left: 3px solid #22c55e;
 }
 
 .walkthrough-panel .story-card--message {
   padding: 0.75rem 0.9rem;
-  border-radius: var(--border-radius, 12px);
+  border-radius: var(--border-radius-md);
   border-left: 3px solid #22c55e;
 }
 
@@ -156,7 +156,7 @@
   z-index: auto;
   margin-right: auto;
   background: none;
-  color: var(--text-secondary, #64748b);
+  color: var(--text-muted);
   padding: 0;
 }
 
@@ -172,8 +172,8 @@
   margin: 0;
   padding: 0.25rem 0.75rem;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--text-primary, #0f172a) 82%, transparent);
-  color: var(--bg-primary, #ffffff);
+  background: color-mix(in srgb, var(--text-main) 82%, transparent);
+  color: var(--bg-color);
   font-size: 0.72rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;

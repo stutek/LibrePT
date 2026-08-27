@@ -2959,6 +2959,46 @@ Everything above is reversible except the Pages outage step 2 exists to avoid.
 
 See [CHANGELOG](CHANGELOG.md).
 
+### 38.8 [x] BUG — the story card was painted with tokens this app has never had
+
+**Reported 2026-08-27 (Simon):** *"2/8 kartica je slabo berljiva"* — the demo's card on the client's
+phone. Measured before touching anything: **2.38:1** body text on the Midnight palette, against the
+4.5:1 a paragraph needs. Title and caption were 17.29:1, which is why it read as one broken half.
+
+[storyNarration.css](src/modules/demo/storyNarration.css) asked for `--text-primary`,
+`--text-secondary`, `--bg-secondary` and `--bg-primary`. This app defines `--text-main`,
+`--text-muted`, `--card-bg` and `--bg-color`. **An undefined custom property does not fail** — CSS
+takes the fallback written beside it, and a fallback is a colour someone typed on the day they wrote
+the line. So all five declarations froze at light-theme slate: right on Daylight by coincidence, and
+dark-on-dark everywhere else — including the palette the story's own handover link **forces** on the
+client's phone (`theme=midnight`), which is why this surfaced there and nowhere else.
+
+**The check is the real fix** ([agent_tools/css_tokens.py](agent_tools/css_tokens.py), Stage 1): a
+`var()` naming a property nobody writes fails the build. Its first run found **38 reads of 17
+properties across 12 files** — the story card was one of them. The rest, all fixed here:
+
+- `.notification-card` and the header's nav hover painted `var(--bg-surface)`, which is invalid at
+  computed-value time and therefore **transparent** — feed cards had a border, a radius and no
+  surface;
+- seven `color: var(--text-color)` declarations that quietly did nothing (the property is inherited,
+  so an invalid value inherits) — said out loud as `color: inherit`, since each sits on a fixed dark
+  overlay where naming a theme token would be wrong on half the palettes;
+- the backup warnings' frozen amber, now `--warning` mixed the way `index.css` already mixes
+  `--danger`, which retired a `prefers-color-scheme` override that contradicted the trainer's own
+  theme choice — and a byte-identical duplicate of the whole rule beside it;
+- two dead middle links (`var(--card-bg, var(--bg-surface, #fff))`).
+
+**The check's second half is palette parity**: the five themes are alternatives, not layers, so a
+property only one of them defines is undefined for everyone on the other four. It holds today (33
+properties × 5) and now cannot quietly stop holding.
+
+**Found by the test that pins it**: `--text-muted` on Blossom was 4.28:1 — under AA for **every**
+muted line in the app on that palette, not just this card. Deepened to `#96617f`, same hue.
+
+Pinned by [test_story_narration.py](tests/medium/test_story_narration.py), which measures what an eye
+gets — the card's four text elements against the surface actually behind them, on every palette the
+app ships, read from the app rather than listed in the test.
+
 ### 38.7 [x] BUG — the tap's rings landed on the screen the tap had already opened
 
 **Reported 2026-08-27 (Simon):** *"show me click ripple effect is sometimes too late as application
