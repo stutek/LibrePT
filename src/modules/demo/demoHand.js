@@ -17,6 +17,8 @@
 //
 // Injected dependencies: `doc` (defaults to `document`) so tests can mount it anywhere.
 
+import { RIPPLE_RING_MS, RIPPLE_STAGGER_MS } from "./demoPace.js";
+
 const HAND_ID = "demo-tour-hand";
 const SVG_NS = "http://www.w3.org/2000/svg";
 
@@ -73,13 +75,17 @@ export function moveDemoHand(hand, x, y) {
  * tap must land on the real control whether or not the animation has finished. */
 const RIPPLE_CLASS = "demo-tour-ripple";
 // How many rings a tap sends out. Waves, not a single highlight (wanted 2026-08-18): one ring says
-// "here"; a set that keeps arriving says something LANDED here. The stagger and the fading are in
-// demoTour.css, keyed off each ring's position in the group.
-const RIPPLE_WAVES = 3;
-// Matches the animation in demoTour.css. Kept in sync by hand for the same reason the splash's
-// fade duration is: reading it back out of getComputedStyle to save one constant would cost a
-// layout flush on every tap.
-const RIPPLE_LIFETIME_MS = 1000;
+// "here"; a set that keeps arriving says something LANDED here. How each ring FADES is in
+// demoTour.css, keyed off its position in the group; how long it lives is not — see below.
+export const RIPPLE_WAVES = 3;
+// The set's whole life, from the first ring appearing to the last one gone — derived from the
+// player's own pacing rather than copied from the stylesheet. Until 2026-08-27 this was a constant
+// "kept in sync by hand" with an animation the CSS owned, and the player waited its own unrelated
+// 160ms before tapping: three numbers that had to agree and no check that they did, which is how
+// the rings ended up still arriving after the tap had replaced the screen. Now the duration is
+// declared once (demoPace.js), stamped onto the elements below for the stylesheet to animate with,
+// and used here to clear them — so a slower ring lengthens the wait and the cleanup together.
+const RIPPLE_LIFETIME_MS = RIPPLE_RING_MS + RIPPLE_STAGGER_MS * (RIPPLE_WAVES - 1);
 
 /** A ring that expands from the point of contact and removes itself.
  *
@@ -91,9 +97,13 @@ const RIPPLE_LIFETIME_MS = 1000;
  * an animationend listener that never fires (reduced motion, a background tab) would leave a ring
  * on screen permanently.
  */
-function buildRipple(hand) {
+function buildRipple(hand, index) {
   const ripple = hand.ownerDocument.createElement("div");
   ripple.className = RIPPLE_CLASS;
+  // Its own timing, handed to the stylesheet: how long it takes to expand, and how long after the
+  // first ring it is sent. The rings behind the first arrive late on purpose — a set that keeps
+  // coming reads as an impact — and the player's wait before the real click covers all of them.
+  ripple.style.setProperty("--ripple-delay", `${RIPPLE_STAGGER_MS * index}ms`);
   // Positioned from the hand's own coordinates, so the ring lands on the FINGERTIP rather than on
   // the middle of the hand — the two are 30px apart, which at tap size is the whole point.
   // Placed at the point the pointer was SENT to, read back from the properties moveDemoHand set,
@@ -113,7 +123,9 @@ function flashTapRipple(hand) {
   const waves = doc.createElement("div");
   waves.className = "demo-tour-waves";
   waves.setAttribute("aria-hidden", "true");
-  for (let index = 0; index < RIPPLE_WAVES; index += 1) waves.appendChild(buildRipple(hand));
+  // Inherited by every ring inside, so the duration is written once per tap rather than per ring.
+  waves.style.setProperty("--ripple-ms", `${RIPPLE_RING_MS}ms`);
+  for (let index = 0; index < RIPPLE_WAVES; index += 1) waves.appendChild(buildRipple(hand, index));
   doc.body.appendChild(waves);
   doc.defaultView.setTimeout(() => waves.remove(), RIPPLE_LIFETIME_MS);
 }

@@ -2959,6 +2959,41 @@ Everything above is reversible except the Pages outage step 2 exists to avoid.
 
 See [CHANGELOG](CHANGELOG.md).
 
+### 38.7 [x] BUG — the tap's rings landed on the screen the tap had already opened
+
+**Reported 2026-08-27 (Simon):** *"show me click ripple effect is sometimes too late as application
+already loads new view when the effect fires. Try to animate the effect a bit before the actual
+click."*
+
+The click is what changes the screen, so the mark can only be spent BEFORE it. It was not: the
+player waited 160ms — the time a finger takes to land — and then tapped, while the rings need most
+of a second. The trailing two had not even been SENT when the view changed, so the whole set played
+out over a screen it had never touched. What a viewer sees then is not a late effect; it is a tap on
+the screen that just arrived.
+
+**The pointer's mark and the real click are one gesture, so one module times both.** The ring's
+duration moved out of the stylesheet into [demoPace.js](src/modules/demo/demoPace.js) — the module
+that already owns every wait a step takes — and the wait before the tap IS that duration.
+[demoHand.js](src/modules/demo/demoHand.js) stamps it onto the rings for the CSS to animate with,
+and clears them on it. Three numbers that had to agree became one, which is the actual repair: the
+old comment said "kept in sync by hand", and they were not.
+
+By the time the app is told anything, a whole ring has expanded over the control being tapped and
+the two behind it are past their peak. What crosses the view change is their tail — the echo of the
+tap that left.
+
+**Found while fixing it:** the delayed rings were painted at their full 26px until their turn came,
+because the animation filled `forwards` only. Three rings appeared as one hard blob at the contact
+point, snapped back to a third of their size, and only then rippled. Filling `both` starts each one
+where its own animation starts. The per-ring fading was dead for the same reason and is now carried
+inside the keyframes, so the group still reads as waves rather than as a target reticle.
+
+Pinned at both tiers: [demoPace.test.mjs](tests/unit_js/modules/demo/demoPace.test.mjs) holds the
+lead to the ring's own duration, and
+[test_walkthrough_target.py](tests/medium/test_walkthrough_target.py) times the real player's
+gesture on its own injected clock — the rings must be out and the first one finished before the
+control is touched — and measures the rings at the instant of contact.
+
 ### 38.1 [x] BUG — "show me around" started the old four-tap tour, not the story
 
 **Reported 2026-08-25 (Simon):** *"Message in notification area starts the old 1/4 demo not the new

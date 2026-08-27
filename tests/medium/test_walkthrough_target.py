@@ -128,6 +128,15 @@ import { mountDemoHand, moveDemoHand, pulseDemoHand } from './modules/demo/demoH
 const hand = mountDemoHand();
 moveDemoHand(hand, 120, 200);
 window.__tap = () => pulseDemoHand(hand);
+// Measured in the SAME synchronous block as the tap, so "at the moment of contact" is exact rather
+// than a race against a wait_for_timeout.
+window.__tapAndMeasureRings = () => {
+  pulseDemoHand(hand);
+  return [...document.querySelectorAll('.demo-tour-ripple')].map((ring) => ({
+    width: ring.getBoundingClientRect().width,
+    opacity: Number(getComputedStyle(ring).opacity),
+  }));
+};
 """
 
 
@@ -212,6 +221,33 @@ def test_a_tap_sends_more_than_one_wave_out(page, local_server):
     assert page.locator(".demo-tour-ripple").count() >= 2
 
 
+def test_the_waiting_rings_are_not_painted_at_full_size_first(page, local_server):
+    """Found 2026-08-27 while fixing the mark's timing: the rings behind the first are sent on a
+    delay, and a `forwards`-only fill leaves them in their UNANIMATED state until their turn — drawn
+    at the full 26px right at the contact point, then snapping back to 0.35 to begin expanding. Three
+    rings appear at once as a hard blob, and only then does anything ripple.
+
+    Each ring must begin where its own animation begins: small, and no brighter than its place in
+    the group.
+    """
+    load_with_stub(page, local_server, RIPPLE_STUB)
+    page.wait_for_selector("#demo-tour-hand")
+    page.wait_for_timeout(600)
+
+    rings = page.evaluate("() => window.__tapAndMeasureRings()")
+
+    assert len(rings) >= 2
+    for index, ring in enumerate(rings):
+        assert ring["width"] < 20, (
+            f"ring {index + 1} is {ring['width']}px wide at the moment of contact — it is waiting "
+            "its turn at full size instead of at the start of its own expansion"
+        )
+    # And the group fades back to front, which is what keeps it from reading as a target reticle.
+    assert rings[-1]["opacity"] < rings[0]["opacity"], (
+        f"every ring goes out at the same brightness ({rings[0]['opacity']})"
+    )
+
+
 def test_the_waves_take_the_theme_colour(page, local_server):
     """Wanted 2026-08-18: rings coloured by the selected scheme. White read as a screenshot artefact
     on a pale theme and as glare on a dark one; the app's own accent says LibrePT is doing this."""
@@ -234,6 +270,71 @@ def test_the_waves_take_the_theme_colour(page, local_server):
 
     assert colors["border"] == colors["primary"], (
         f"ring is {colors['border']}, theme accent is {colors['primary']}"
+    )
+
+
+# The rings and the real click are ONE gesture, and the click is what can replace the whole screen.
+# So the order between them is a product property, not an implementation detail — measured here in
+# the player's own injected clock rather than against the wall, which makes it exact instead of
+# flaky: `wait` is the only thing the player ever sleeps on, so summing what it was asked for IS the
+# demo's timeline.
+LEAD_STUB = """
+import { performStep } from './modules/demo/demoTourPlayer.js';
+import { mountDemoHand } from './modules/demo/demoHand.js';
+import { RIPPLE_RING_MS } from './modules/demo/demoPace.js';
+
+const hand = mountDemoHand();
+const control = document.createElement('button');
+control.id = 'the-control';
+control.textContent = 'Tap me';
+// What every real target does and what makes the bug visible: the tap changes what is on screen.
+control.addEventListener('click', () => { control.textContent = 'done'; });
+document.body.appendChild(control);
+
+window.__timeGesture = async () => {
+  const marks = { ringMs: RIPPLE_RING_MS };
+  let clock = 0;
+  control.addEventListener('click', () => { marks.clickAt = clock; });
+  const wait = (ms) => {
+    if (marks.ringsAt === undefined && document.querySelector('.demo-tour-ripple')) {
+      marks.ringsAt = clock;
+    }
+    clock += ms;
+    return Promise.resolve();
+  };
+  const outcome = await performStep(
+    { id: 'lead', target: '#the-control', expect: { selector: '#the-control', containsText: 'done' } },
+    { doc: document, hand, wait },
+  );
+  return { ...marks, ok: outcome.ok };
+};
+"""
+
+
+def test_the_rings_are_drawn_and_played_before_the_tap_reaches_the_app(
+    page, local_server
+):
+    """Reported 2026-08-27: "the ripple is sometimes too late — the application already loads the new
+    view when the effect fires".
+
+    The click is what changes the view, so the mark has to be spent before it: by the time the app is
+    told anything, a full ring has already expanded over the control being tapped. What crosses the
+    view change is the tail of a ring past its peak, which reads as the echo of the tap that left —
+    not as a fresh tap on the screen that arrived.
+    """
+    load_with_stub(page, local_server, LEAD_STUB)
+    page.wait_for_selector("#the-control")
+
+    marks = page.evaluate("() => window.__timeGesture()")
+
+    assert marks["ok"], "the step itself must pass, or the timings mean nothing"
+    assert marks.get("ringsAt") is not None, (
+        "the rings were never drawn before the click"
+    )
+    lead = marks["clickAt"] - marks["ringsAt"]
+    assert lead >= marks["ringMs"], (
+        f"the app was tapped {lead}ms after the rings appeared, and a ring lasts "
+        f"{marks['ringMs']}ms — the rest of it plays over whatever the tap opened"
     )
 
 

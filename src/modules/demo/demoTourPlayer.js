@@ -240,7 +240,12 @@ export async function performStep(
     moveDemoHand(hand, x, y);
     await wait(step.travelMs ?? pace.travelMs);
     pulseDemoHand(hand);
-    await wait(pace.tapLandingMs);
+    // The mark is spent BEFORE the app is told anything, because the click below is what replaces
+    // the screen (reported 2026-08-27: the rings arriving on the view the tap had just opened, which
+    // reads as a tap on the screen that arrived rather than on the one that left). The wait is a
+    // whole ring long (demoPace.js), so every ring is out and the first one finished by the time the
+    // control is touched.
+    await wait(pace.tapLeadMs);
   }
 
   // IDEMPOTENT, and that is the contract rather than an optimisation (decided 2026-08-18: "show me
