@@ -340,7 +340,7 @@ def test_the_rings_are_drawn_and_played_before_the_tap_reaches_the_app(
 
 # A control that EXISTS and a claim that never comes true — a demonstration that runs and fails,
 # rather than one that cannot start. Pointing the step at nothing was the earlier version and is now
-# a different case entirely: since 2026-08-26 a beat whose control is not on screen is the trainer
+# a different case entirely: since 2026-08-26 a step whose control is not on screen is the trainer
 # having wandered off, and the panel swaps itself for the two-button card (TODO §38.5). That card is
 # the answer to "never leave a dead-looking guide" for THAT case; this stub keeps the other one.
 BROKEN_TOUR_STUB = """

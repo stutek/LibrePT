@@ -4,7 +4,7 @@
 // shape the intake page writes, so the trainer's chapter can open it.
 //
 // **Why this exists at all.** The story showed Ana filling her form and sending it, then quietly
-// skipped the beat that matters most to the trainer: reading what arrived and deciding. That beat
+// skipped the step that matters most to the trainer: reading what arrived and deciding. That step
 // was called unscriptable because opening a file needs the operating system's picker, which no page
 // can drive — and the alternative considered was a "hand me a submission" hook inside the shipped
 // app, which [signupReviewDialog.js](../clients/signupReviewDialog.js) refuses on purpose.
@@ -15,7 +15,7 @@
 // is exactly what the picker would have — a file.
 //
 // **It must stay identical to what the client chapter typed.** A trainer watching the story read a
-// name that did not match the one Ana entered two beats ago would be watching a lie, so the values
+// name that did not match the one Ana entered two steps ago would be watching a lie, so the values
 // here are the ones storyTour.js enters, and a test holds the two together.
 //
 // Injected dependencies: none — a plain data module.

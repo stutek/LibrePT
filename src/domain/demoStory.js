@@ -1,7 +1,7 @@
 // src/domain/demoStory.js — what a chaptered demo story IS, and which steps a link asks for (TODO §35).
 //
 // Single responsibility: the chapter vocabulary and its validation. No DOM, no timing, no narration
-// surface — modules/demo/storyTour.js is the content, modules/demo/storyNarration.js draws the cards,
+// surface — modules/demo/storyTour.js is the content, modules/demo/demoNarratorCard.js draws the cards,
 // and modules/demo/demoTourPlayer.js plays the steps, unchanged.
 //
 // **Why chapters, when the wedge tour needed none.** The gym-floor tour (§23.5) is four taps and

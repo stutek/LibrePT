@@ -1,5 +1,5 @@
 # tests/medium/test_walkthrough_modal.py
-# The guide and whatever the app has left on top of the beat — its MODALS and its dropdown MENUS
+# The guide and whatever the app has left on top of the step — its MODALS and its dropdown MENUS
 # (TODO §38.3). Every rule here was invisible from the code and plain on screen.
 #
 # A `<dialog>` opened with showModal() makes the rest of the page inert. The guide answers that by
@@ -11,9 +11,9 @@
 #     collapsed onto the dialog and drew the card INSIDE the modal, over the controls it was asking
 #     for.
 #   • "Visible" stopped meaning "reachable": a step could grade itself done against a button painted
-#     behind the modal, which is how the beat that closes the intake-invite dialog was finished
+#     behind the modal, which is how the step that closes the intake-invite dialog was finished
 #     before it happened.
-#   • And a modal left standing from an earlier beat cannot be walked out of — everything the guide
+#   • And a modal left standing from an earlier step cannot be walked out of — everything the guide
 #     or the trainer might tap to escape it is inert.
 #
 # Medium rather than e2e: the rules are about the DOM, the top layer and real CSS, and a tour is
@@ -151,7 +151,7 @@ def test_the_guide_stays_inside_the_modal_it_had_to_move_into(page, local_server
 
 
 def test_a_control_behind_the_modal_does_not_finish_a_step(page, local_server):
-    """The beat that CLOSES a modal, in miniature. Its control is the dialog's ✕ and its claim is
+    """The step that CLOSES a modal, in miniature. Its control is the dialog's ✕ and its claim is
     that the dialog is gone; a claim about anything painted behind the modal would be true from the
     moment the modal opened — which is how the story walked on through an invite dialog it never
     closed, with the whole app inert behind it."""
@@ -172,10 +172,10 @@ def test_a_control_behind_the_modal_does_not_finish_a_step(page, local_server):
     assert page.evaluate("() => document.getElementById('the-modal').open") is False
 
 
-def test_the_guide_closes_a_modal_the_beat_it_is_restoring_is_not_in(
+def test_the_guide_closes_a_modal_the_step_it_is_restoring_is_not_in(
     page, local_server
 ):
-    """Reported 2026-08-25: "the back button keeps the app stuck in the modal". Rebuilding a beat's
+    """Reported 2026-08-25: "the back button keeps the app stuck in the modal". Rebuilding a step's
     ground can navigate and replay forward, and neither reaches out of a modal — so the one thing
     the guide could not repair was the one state nothing else could escape either."""
     steps = """[
@@ -191,7 +191,7 @@ def test_the_guide_closes_a_modal_the_beat_it_is_restoring_is_not_in(
     assert page.evaluate("() => document.getElementById('the-modal').open") is False
 
 
-def test_an_open_menu_is_closed_before_the_beat_is_demonstrated(page, local_server):
+def test_an_open_menu_is_closed_before_the_step_is_demonstrated(page, local_server):
     """Wanted 2026-08-26 (Simon), reproducing it by hand: "manually open menu and click show me ->
     observe menu is not closed (no state enforcement)".
 
@@ -205,7 +205,7 @@ def test_an_open_menu_is_closed_before_the_beat_is_demonstrated(page, local_serv
     ]"""
     _start(page, local_server, _stub(steps))
 
-    # The trainer opens the menu themselves, mid-beat, and it lands over the control.
+    # The trainer opens the menu themselves, mid-step, and it lands over the control.
     page.locator("#open-menu").click()
     page.wait_for_timeout(200)
     covered = page.evaluate(
@@ -223,7 +223,7 @@ def test_an_open_menu_is_closed_before_the_beat_is_demonstrated(page, local_serv
     expect(page.locator("#outside")).to_have_text("tapped", timeout=15_000)
 
     assert page.locator("#the-menu.hidden").count() == 1, (
-        "the beat was shown under an open menu"
+        "the step was shown under an open menu"
     )
     assert page.locator("#open-menu").get_attribute("aria-expanded") == "false", (
         "the menu was hidden behind the app's back rather than closed through its own control"
@@ -282,12 +282,12 @@ def test_the_card_leaves_a_modal_that_does_not_need_to_scroll(page, local_server
     )
 
 
-def test_showing_a_done_beat_again_does_not_blink_what_it_opened(page, local_server):
-    """Reported 2026-08-26: "show me on step 3/41 seems to loop". The beat that opens the invite
+def test_showing_a_done_step_again_does_not_blink_what_it_opened(page, local_server):
+    """Reported 2026-08-26: "show me on step 3/41 seems to loop". The step that opens the invite
     dialog puts its own control — the button on the page behind — out of reach by succeeding. Asking
     to be shown it again therefore meant closing the dialog to get at the button, tapping it, and
     opening the dialog afresh: from the outside, the app blinking, and anything typed in the meantime
-    gone. There is nothing left to demonstrate on a beat like that, so nothing happens."""
+    gone. There is nothing left to demonstrate on a step like that, so nothing happens."""
     steps = """[
       { id: 'open-it', target: '#open-modal', caption: 'walkthrough_progress',
         expect: { selector: '#the-modal', visible: true } }
@@ -305,5 +305,5 @@ def test_showing_a_done_beat_again_does_not_blink_what_it_opened(page, local_ser
     assert closes == 0, "the dialog was torn down and rebuilt"
     assert page.evaluate("() => document.getElementById('the-modal').open") is True
     assert page.locator(".walkthrough-problem").is_hidden(), (
-        "silence, not a complaint: the beat worked"
+        "silence, not a complaint: the step worked"
     )

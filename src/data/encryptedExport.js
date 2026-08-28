@@ -60,7 +60,7 @@ async function deriveKey(passphrase, salt, iterations, cryptoImpl) {
 /**
  * A passphrase a trainer can read down a phone line and a client can type without a typo.
  *
- * Six words from a small, deliberately unambiguous alphabet-free list beats a random character
+ * Six words from a small, deliberately unambiguous alphabet-free list steps a random character
  * string here: the failure mode is not brute force (600k PBKDF2 rounds over ~77 bits of entropy is
  * far past what an email interceptor would spend), it is the trainer picking "gym2024" because the
  * generated one was unreadable over a bad connection.

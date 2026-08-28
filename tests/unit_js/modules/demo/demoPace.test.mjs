@@ -22,7 +22,7 @@ import {
 test("full motion paces for an eye following a finger", () => {
   const pace = demoPace(false);
 
-  // The settle is the longest beat: it is what lets a viewer see the RESULT of the tap.
+  // The settle is the longest wait: it is what lets a viewer see the RESULT of the tap.
   assert.ok(pace.stepPauseMs >= 1000, "a step must stay readable at full motion");
   assert.ok(pace.travelMs > 0, "the hand travels, so the travel must be waited for");
 });
@@ -30,7 +30,7 @@ test("full motion paces for an eye following a finger", () => {
 test("reduced motion waits for nothing at all", () => {
   const pace = demoPace(true);
 
-  // Every one of these is a beat for a human eye, and there is no eye to pace: the hand does not
+  // Every one of these is a pause for a human eye, and there is no eye to pace: the hand does not
   // glide (the CSS cuts it), so nothing is travelling, settling or landing to be waited for.
   assert.equal(pace.scrollSettleMs, 0);
   assert.equal(pace.travelMs, 0);

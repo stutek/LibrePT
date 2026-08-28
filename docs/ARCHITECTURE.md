@@ -12,7 +12,7 @@ tags:
 # LibrePT Code Architecture
 
 The front end is a **buildless native-ES-module app** under `src/`: no bundler, no npm at runtime,
-every file served as written. Many small single-responsibility files beat few large ones — less
+every file served as written. Many small single-responsibility files step few large ones — less
 context to load, fewer collisions, and a tree that documents itself.
 
 Related: [SRC_MODULES.md](SRC_MODULES.md) catalogues every module; [DATA_MODEL.md](DATA_MODEL.md)

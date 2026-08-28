@@ -1202,7 +1202,7 @@ Revisit near ~50k records, where the single transaction it relies on becomes a s
   **re-derivation**, not a restore from a point in time — which is also why §18.7 rejects a snapshot
   tier.
 - **Yields to user writes**: migration breaks on any interaction write and resumes when the burst
-  ends. Gym-floor latency beats migration throughput.
+  ends. Gym-floor latency steps migration throughput.
 - **Ordinary use accelerates migration**: a star write to a not-yet-migrated record populates the new
   bucket and marks it migrated. Safe to interleave in both directions.
 - **The invariant that makes the accelerator sound**: migration must be
@@ -1590,7 +1590,7 @@ none.
 ### 23.2 [ ] Two motions, sequenced — dev audience now, trainers only after PREVIEW comes off
 - **Now**: developers expect pre-release software and are not harmed by it. r/selfhosted (angle: no
   backend, no account, data never leaves the browser), r/opensource, r/webdev, r/PWA. **Show HN is a
-  one-shot** and should be spent only once §23.5's recording exists. Durable placements beat any
+  one-shot** and should be spent only once §23.5's recording exists. Durable placements step any
   single post: a PR to **awesome-selfhosted**, an **AlternativeTo** listing against Trainerize /
   TrueCoach / My PT Hub / PT Distinction, and **F-Droid** if §9.6 ever lands. Product Hunt is largely
   vanity.
@@ -2377,9 +2377,9 @@ seed, a progress state on the button, or reloading only once the queue has drain
   now attached to the step it introduces — read it, then do the thing it is about, and the first tap
   anywhere takes it away. One rule, [foldCards](src/modules/demo/storyTour.js), so the chapters stay
   readable as a sequence: the card is still written where it belongs in the story. A card with
-  nowhere to ride — the last beat, or the handover to the client's phone — stays a step and declares
+  nowhere to ride — the last step, or the handover to the client's phone — stays a step and declares
   `showMe: false`, and the guide hides the button rather than offering a dead one. The story went
-  from 35 beats to 31, all of them things a person does.
+  from 35 steps to 31, all of them things a person does.
 
 - *"Steps 3 and 4 have an overlapping black subtitle over the buttons."* The story's own caption bar,
   fixed to the bottom of the screen, over the guide's panel — which carries the same caption. The bar
@@ -2405,7 +2405,7 @@ running page, and neither is a claim a build can hold.
 
 A story walker was written and deleted in the same hour for the same reason: the e2e suite already
 walks the story, so a second walker was a second thing to keep true. What it was really offering was
-a readable failure, which is now what the suite gives — the beat, its caption, what the guide said,
+a readable failure, which is now what the suite gives — the step, its caption, what the guide said,
 and what was on screen.
 
 **Three surfaces, one rule, now declared once**: [isGuideSurface](src/modules/common/dom.js). Every
@@ -2455,7 +2455,7 @@ written for this had to build its own browser context
   splash skipped the step. Seeding is about RECORDS; the preference is the person's to give. The
   line is gone.
 - **The demo started as soon as the app was wired**, which on a first run is BEHIND the mandatory
-  terms modal — measured: all sixteen beats played out and finished at ~44s while the agreement was
+  terms modal — measured: all sixteen steps played out and finished at ~44s while the agreement was
   still on screen. It now waits on the splash's own promise (which also covers the language step, so
   the demo narrates itself in the language just chosen) and on the agreement being closed. Started,
   never awaited: `init()` must finish wiring whatever the trainer is reading.
@@ -2706,8 +2706,8 @@ separate.** A stranger gets the wedge; someone who already leaned in gets the st
    trainer, its form version recorded (§3.5). Same record, different pen.
 8. The submission travels as a FILE; the trainer reviews it and decides
    ([signupReviewDialog.js](src/modules/clients/signupReviewDialog.js)) — the feature's trust
-   boundary, and the beat where the story says a stranger cannot write into the register.
-9. The other two are compressed into one beat, not replayed. A demo that shows the same form three
+   boundary, and the step where the story says a stranger cannot write into the register.
+9. The other two are compressed into one step, not replayed. A demo that shows the same form three
    times teaches that the app is slow.
 10. Back on the phone: the invite is answered ([rsvpView.js](src/modules/rsvp/rsvpView.js)) and the
     trainer's board fills in.
@@ -2735,14 +2735,14 @@ separate.** A stranger gets the wedge; someone who already leaned in gets the st
     itself, which is two taps and unremarkable to watch, but the **review pane** they feed and the
     **per-client tagging** that gets them there. The demo's claim is that a note taken one-handed
     mid-circuit lands against the right person and comes back at the right moment — so the capture
-    beats are short, and the pane in event 20 is where the camera stays.
+    steps are short, and the pane in event 20 is where the camera stays.
 17. Circuits progress; Too Easy is signalled once, so the story keeps §23.4's wedge inside it.
 18. The last circuit completes; the session is marked complete, net time against slot time shown.
 
 **Chapter D — the evening after.**
 
 19. The trainer switches to the dark theme, and the rest of the story runs in it — the only "look at
-    our settings" beat that earns its place, because it is what an evening at home actually looks
+    our settings" step that earns its place, because it is what an evening at home actually looks
     like.
 20. Planning the next session: the injury swap and the deadlift note are **already there**, waiting
     against the right client. This is the payoff for events 14–16 and the reason they are in the
@@ -2823,35 +2823,35 @@ events that genuinely need it.
 
 ### 35.4 Build log
 
-- [x] **The spine, and chapter C's existing beats — 2026-08-21.** `?demo=story` plays the lot,
+- [x] **The spine, and chapter C's existing steps — 2026-08-21.** `?demo=story` plays the lot,
       `?demo=story&chapter=floor` plays one; an unknown chapter plays the whole story rather than
       nothing, because these links are typed by hand and an empty step list looks like a failed boot.
       A chapter is a tour, so the engine is untouched apart from one awaited `beforeStep` hook — the
-      narration card is the control its own step taps, which is how a narrated beat carries a real
+      narration card is the control its own step taps, which is how a narrated step carries a real
       expectation instead of a pause. New: [domain/demoStory.js](src/domain/demoStory.js) (chapter
       rules), [storyTour.js](src/modules/demo/storyTour.js) (the script, reusing the wedge's steps
-      rather than restating its selectors), [storyNarration.js](src/modules/demo/storyNarration.js)
+      rather than restating its selectors), [demoNarratorCard.js](src/modules/demo/demoNarratorCard.js)
       (cards, persona pill, caption bar). Events 14, 15, 16 and 18 are NOT in it: 14 and 16 need
       35.3c/d, and a demo step that pretends is what a scripted demo exists to avoid.
-- [x] **35.3c and 35.3d shipped — 2026-08-21**, before the demo beats that show them: the *keep on
+- [x] **35.3c and 35.3d shipped — 2026-08-21**, before the demo steps that show them: the *keep on
       the client's record* tick and the *In the gym* block in the client focus panel. One pane
       for both kinds of note, as 35.3d required.
-- [x] **Chapter C's capture and payoff — 2026-08-21.** The floor chapter is 14 beats: the wedge,
+- [x] **Chapter C's capture and payoff — 2026-08-21.** The floor chapter is 14 steps: the wedge,
       back to the first friend (their signal still set), the injury captured mid-circuit and kept on
       the record, and the plan editor opened to find it already waiting — the expectation of that
       last step IS the pane, so the payoff is a claim the build checks. Event 16 is deliberately not
-      a second beat: it uses the same modal, and a demo that shows one form twice teaches that the
+      a second step: it uses the same modal, and a demo that shows one form twice teaches that the
       app is slow (§35.2 event 9's rule). The story also ends properly now — see §30.2.
 - [x] **Event 15 — 2026-08-21.** The swap happens inside one participant's plan, through the row's
       own catalog button, and the replacement is chosen BY NAME from what the picker actually offers
       (it opens filtered to that row's category, so a catalogue-wide pick would be a movement the UI
       never shows). The expectation is the editor's own **Swapped** badge: the movement's name lives
       in an input VALUE, which is not text content and cannot be probed — a lesson worth keeping for
-      the next beat that acts on a form.
+      the next step that acts on a form.
 - [ ] **Chapter C's last event** — 18 (complete, net vs slot), which needs 35.3b's meter.
 - [x] **The story is GUIDED, and the demo can type — 2026-08-22 (Simon).** *"Autoplay reduces the
       effect, a person loses focus; Show me is the best middle ground."* So `?demo=story` mounts the
-      walkthrough panel with the story script: the viewer performs each beat, or asks to be shown it,
+      walkthrough panel with the story script: the viewer performs each step, or asks to be shown it,
       and the narration cards ride along on an `onStep` hook. The wedge keeps its autoplay — three
       seconds is watchable, four minutes is not. A step can now `enter` text and `choose` from a
       list, firing the events a real keystroke and a real selection fire; expectations gained
@@ -2859,7 +2859,7 @@ events that genuinely need it.
       a `<select>` and is therefore scriptable now.
 - [x] **The story TELLS a story — 2026-08-22 (Simon):** *"I want the demo to be storytelling, not
       just a demonstration of functionality."* Every caption names the people the seed puts on
-      screen: Jane's round, John's rebuilt knee, Sarah's rehab plan in the same hour. The injury beat
+      screen: Jane's round, John's rebuilt knee, Sarah's rehab plan in the same hour. The injury step
       moved to John precisely because his seeded record carries a 2024 knee reconstruction — the app
       telling the truth about the person on screen rather than a line written for the demo.
       Pinned by a test that reads the captions back and looks for the names.
@@ -2869,7 +2869,7 @@ events that genuinely need it.
       Show me silently stopped working), and tapping the guide while editing a plan CLOSED the editor
       — the editor's tap-outside rule did not know the guide is part of what the trainer is doing.
 - [x] **All five chapters play — 2026-08-22.** The story is
-      **arrive → intake → programme → gym → evening**, 33 beats, guided end to end. B and D were
+      **arrive → intake → programme → gym → evening**, 33 steps, guided end to end. B and D were
       unblocked by the features built for them the same day (§8.1's binding, §35.3b's meter, the
       recurrence model, and the player's ability to pick from a list); A was unblocked by giving the
       trainer something real to tap — [intakeInvite.js](src/modules/clients/intakeInvite.js), the
@@ -2881,11 +2881,11 @@ events that genuinely need it.
       — folding it in would leave the guide pointing at a form that is not on screen.
 - [x] **Event 21, the one-off move — 2026-08-22.** The evening chapter opens the repeating session's
       next evening and moves it two hours later; the expectation is what the FORM says while it is
-      open — this evening only, the series untouched — because that is the claim the beat exists to
+      open — this evening only, the series untouched — because that is the claim the step exists to
       make. Naming the edit button needed one engine addition: `targetWithin` says "the edit button
       on the card called X", which is how a person says it and the only way to name an icon button
       among several without falling back on position — the thing that broke the first gym-floor tour.
-- [ ] **The one beat the story cannot show**: the trainer opening the file Ana sent. §26.5's review
+- [ ] **The one step the story cannot show**: the trainer opening the file Ana sent. §26.5's review
       dialog needs a real file, and a demo-only hook into it would be the mock this whole approach
       exists to avoid. The intake chapter says what happens next in words instead.
 
@@ -2959,6 +2959,75 @@ Everything above is reversible except the Pages outage step 2 exists to avoid.
 
 See [CHANGELOG](CHANGELOG.md).
 
+### 38.11 [ ] GAP — muted text sits ON the AA bar on the light palettes
+
+Found 2026-08-27 while measuring the demo's cards, and it is not about the demo. `--text-muted`
+measures **4.76:1** on Daylight and **4.87:1** on Blossom (after §38.8 deepened Blossom's from
+4.28:1) against those palettes' cards. The bar for body text is 4.5:1, so both pass — with so little
+margin that **any** tinted surface puts the text under it. That is exactly what happened to the
+demo's message card at 4.28:1, and it will happen again to the next component that tints a card:
+warnings, selected rows, anything mixing an accent into `--card-bg`.
+
+The dark palettes have room (Midnight 7.1:1, Nebula and Red similar), so this is a light-palette
+question only.
+
+**Not fixed here, because it is an app-wide colour decision, not a demo one.** Deepening
+`--text-muted` on Daylight and Blossom changes every muted line in the app — timestamps, hints,
+secondary labels, the lot. Worth doing deliberately, with the change visible on a few real screens
+rather than as a side effect of a demo bug fix. The check that would catch the next instance is a
+contrast sweep over the app's own components, which does not exist yet
+([tests/medium/test_demo_narrator_card.py](tests/medium/test_demo_narrator_card.py) measures the
+demo's cards only).
+
+**Re-check condition:** whenever a component tints a card surface, or when the light palettes are
+next revisited.
+
+### 38.10 [x] CHANGE — one definition for every card the demo shows, and one word for a step
+
+**Asked 2026-08-27 (Simon):** *"poenoti vse demo kartice, da bodo enotne, uporabi
+polimorfizem/objektno orientirano abstrakcijo"*, and then *"poskrbi, da bo terminologija jasna:
+nadomesti Beat z DemoNarratorCard ali ekvivalentom (sledi self-documenting code načelu)"* and
+*"posodobi tudi prose da bo razumljiv, ne samo code"*.
+
+**What they were.** A `kind` string interpolated into a class name
+(`story-card--${step.narrate.kind}`), two stylesheet blocks that knew about two of those kinds, and
+— for the guide's own "you have wandered off" state — no card at all, just the caption line
+overwritten in place beside two buttons. Four things to read, three shapes, and a typo'd kind
+produced a real box with no styling and no complaint.
+
+**What they are.** `DemoNarratorCard` owns the shell, the three slots, the reading behaviour and the
+one rule about the way out of the demo; a subclass declares only what makes its kind different:
+
+- `ChapterNarratorCard` — the story's own narrating voice;
+- `MessageNarratorCard` — words from another app, set as the `blockquote` they are (the italics said
+  that to a reader and nothing at all to a screen reader);
+- `PaperNarratorCard` — the paper track, whose texture is its declaration (§35.1);
+- `OffTrackNarratorCard` — the guide's own card, which takes its words from the GUIDE because the
+  step's instruction names a control that is not on screen, and refuses the way-out offer that only
+  a closing card is entitled to make.
+
+A kind with no class now draws nothing rather than an unstyled box, and
+[demoNarratorCard.test.mjs](tests/unit_js/modules/demo/demoNarratorCard.test.mjs) walks the shipped
+script demanding a class for every kind it names. That check lives in a test rather than in
+`validateStory` because the import layering keeps a `modules/` registry out of `domain/`.
+
+**The guide always has a card surface now**, whether or not a story is being told through it: the
+long story mounts its own and hands it in (it narrates through the same one), and anything else — the
+four-tap wedge — gets one from the overlay and has it torn down with the guide.
+
+**Measured while unifying them**, by extending the contrast walk to every kind on every palette: the
+message card's tint pushed muted text to 4.28:1 on Daylight and 4.37:1 on Blossom. A card that tints
+itself owns its own text colours. The general fact behind it is recorded in §38.11.
+
+**Terminology.** "Beat" was this codebase's private word for a step, used 345 times across code,
+tests, docs, `TODO.md` and `CHANGELOG.md` while every identifier around it said `step`
+(`tour.steps`, `stepIndex`, `currentWalkthroughStep`, "Step 4 of 49"). One thing, two words, and the
+one a reader could not look up. Now: a **step** is a unit of the script, a **DemoNarratorCard** is
+what narrates one, and the animation's own pauses are called waits — they were "beats" too, in a
+different sense, which is exactly the confusion the word was causing. `replayBeats` → `replaySteps`,
+`keepOwnBeat` → `keepOwnStep`, `_do_beat` → `_do_step`, `#story-card` → `#demo-narrator-card`.
+Nine sites where "beats" is a verb were left alone by name rather than by guess.
+
 ### 38.9 [x] CHANGE — one story, one count, across both phones
 
 **Asked 2026-08-27 (Simon):** *"zakaj je anin telefon demo števec 1/10, zakaj ne nadaljuje po demo
@@ -2971,8 +3040,8 @@ because in the story it is a stranger's phone — so it has its own step list, a
 `storyStepsFor` deliberately keeps those steps out of the trainer's run (the guide would otherwise
 point at a form that is not on his screen). The script already held the opposite value one step
 later: the hand back is written by step id rather than by chapter *"because the trainer's run is one
-numbered sequence, and returning to 'chapter 3, beat 1' would restart the count in the middle of a
-story the viewer is four beats into"*. Going the other way had no such rule.
+numbered sequence, and returning to 'chapter 3, step 1' would restart the count in the middle of a
+story the viewer is four steps into"*. Going the other way had no such rule.
 
 **A step's number is now its place in the STORY**, attached by `storyStepsFor` as `storyPosition`
 and carried with the step — the one thing both boots can agree on while sharing no state, because it
@@ -2995,7 +3064,7 @@ length: someone handed one is joining a story part-way, and the count is what te
 phone. Measured before touching anything: **2.38:1** body text on the Midnight palette, against the
 4.5:1 a paragraph needs. Title and caption were 17.29:1, which is why it read as one broken half.
 
-[storyNarration.css](src/modules/demo/storyNarration.css) asked for `--text-primary`,
+[demoNarratorCard.css](src/modules/demo/demoNarratorCard.css) asked for `--text-primary`,
 `--text-secondary`, `--bg-secondary` and `--bg-primary`. This app defines `--text-main`,
 `--text-muted`, `--card-bg` and `--bg-color`. **An undefined custom property does not fail** — CSS
 takes the fallback written beside it, and a fallback is a colour someone typed on the day they wrote
@@ -3025,7 +3094,7 @@ properties × 5) and now cannot quietly stop holding.
 **Found by the test that pins it**: `--text-muted` on Blossom was 4.28:1 — under AA for **every**
 muted line in the app on that palette, not just this card. Deepened to `#96617f`, same hue.
 
-Pinned by [test_story_narration.py](tests/medium/test_story_narration.py), which measures what an eye
+Pinned by [test_demo_narrator_card.py](tests/medium/test_demo_narrator_card.py), which measures what an eye
 gets — the card's four text elements against the surface actually behind them, on every palette the
 app ships, read from the app rather than listed in the test.
 
@@ -3077,59 +3146,59 @@ its own link for the engine's tests; nothing in the app offers it.
 ### 38.6 [x] BUG — walking back left the card describing a screen the app was not showing
 
 **Reported 2026-08-26 (Simon):** *"going back in demo from step 7 to step 4 does not clear/update the
-intake address / number"*. Worse than stale: every one of those beats showed an EMPTY contact box,
+intake address / number"*. Worse than stale: every one of those steps showed an EMPTY contact box,
 under cards reading "type the number" and "type it over the number".
 
-Being able to PERFORM a beat is not the same as standing where it begins. The rebuild reopened the
+Being able to PERFORM a step is not the same as standing where it begins. The rebuild reopened the
 invite dialog — which empties its field on every open, correctly, since it is the next person's
-invitation — and then stopped, because the beat's own control was now reachable and nothing looked
-wrong. The two beats that fill that box were never replayed.
+invitation — and then stopped, because the step's own control was now reachable and nothing looked
+wrong. The two steps that fill that box were never replayed.
 
-**A beat's ground now includes what the beat before it left on screen**, and the rebuild replays
+**A step's ground now includes what the step before it left on screen**, and the rebuild replays
 until that holds rather than until the control is merely tappable.
 
 **Two repairs, told apart, and that distinction is the whole cost of this fix.** Conflating them
 froze the guide for tens of seconds at the programme chapter — resuming the trainer's run after the
-client's phone made every beat try to rebuild the arrive chapter, one unsatisfiable replay at a
+client's phone made every step try to rebuild the arrive chapter, one unsatisfiable replay at a
 time, with every button greyed out. So:
 
-- a beat that **cannot be performed** replays from its anchor and stops the moment its control is
+- a step that **cannot be performed** replays from its anchor and stops the moment its control is
   reachable, exactly as before;
-- a beat that **can** be performed but whose immediate history is wrong restores at most the last
+- a step that **can** be performed but whose immediate history is wrong restores at most the last
   three taps, and never reports a problem — the trainer is looking at a card whose control is right
   there.
 
-Only the beat IMMEDIATELY before counts as ground. Most of what a story does is undone on purpose by
-what comes later — the invite dialog is opened by one beat and closed four beats on — so demanding
+Only the step IMMEDIATELY before counts as ground. Most of what a story does is undone on purpose by
+what comes later — the invite dialog is opened by one step and closed four steps on — so demanding
 every earlier outcome would have the guide re-opening dialogs the story had deliberately shut.
 
 ### 38.5 [x] CHANGE — the card follows the app, and says so when the trainer goes exploring
 
 **Decided 2026-08-26 (Simon)**, after reporting the same thing three ways in one session — a modal
 closed by hand with the card still asking for it, and two "Show me does not fill the form" reports
-where the filling was the NEXT beat:
+where the filling was the NEXT step:
 
 > *"make Show me fill in the fields and point to the action and execute it, when performs the
 > expected action the card should advance, but if user explores on its own we should display a demo
 > card with 2 buttons 'return to demo' and 'exit demo mode' (same as x on demo card)"*
 
-**A beat completed in front of the viewer carries the card on**, whoever completed it — the trainer's
+**A step completed in front of the viewer carries the card on**, whoever completed it — the trainer's
 own tap or Show me. This reverses the 2026-08-23 rule (only Next advances), which was itself a fix
-for THREE rules: Show me advancing on some beats and not others. What makes one rule safe now is the
-guard that did not exist then: **a beat whose expectation was already true when its card appeared is
+for THREE rules: Show me advancing on some steps and not others. What makes one rule safe now is the
+guard that did not exist then: **a step whose expectation was already true when its card appeared is
 read, not performed**, and is never advanced past on its own. Narrated cards are exactly that — a
-card is satisfied by being on screen — and so are beats the previous screen already answers, which
-is what "skipped two beats in a blink" was. Never off the LAST beat either: finishing is a decision,
+card is satisfied by being on screen — and so are steps the previous screen already answers, which
+is what "skipped two steps in a blink" was. Never off the LAST step either: finishing is a decision,
 and the thank-you card would have closed itself before anyone read it.
 
-**Going exploring is not a fault, so it no longer looks like one.** When the beat's control is not on
+**Going exploring is not a fault, so it no longer looks like one.** When the step's control is not on
 this screen at all — the trainer opened another view — the card says so and offers exactly two ways
 on: *Back to the demo*, which is the same rebuild Back and Next already use, and *Stop the demo*,
 which is the ✕. Deliberately weaker than the readiness test: a control merely scrolled out of view or
-under a menu is still on the beat's own screen, and the guide handles both by itself. It takes three
+under a menu is still on the step's own screen, and the guide handles both by itself. It takes three
 consecutive polls, because one reading is a view mid-render.
 
-The e2e walkers gained ONE definition of "do the beat on screen" (`_do_beat`, `_card_moved_on`) —
+The e2e walkers gained ONE definition of "do the step on screen" (`_do_step`, `_card_moved_on`) —
 they had four copies of Show-me-then-Next between them, and each copy was a place the rule could be
 half-changed.
 
@@ -3158,26 +3227,26 @@ Four symptoms, three causes, all of them at the seam where the guide meets a `<d
 dropdown it opened itself.
 
 - **A control behind an open modal counted as visible.** `showModal()` makes the rest of the page
-  inert, but the buttons under it keep their boxes — so the beat that closes the intake-invite
+  inert, but the buttons under it keep their boxes — so the step that closes the intake-invite
   dialog, which claimed only "the register button is visible", was satisfied the moment the dialog
-  OPENED. The guide lit Next, the viewer walked on, and every beat after it happened over a modal
+  OPENED. The guide lit Next, the viewer walked on, and every step after it happened over a modal
   nobody had closed, with the whole app inert behind it: the miscounted steps and the Back that
   could not escape are both this. `probe` and `resolveTarget` now read reachable, not painted, and
-  the beat claims what it is about — the dialog gone.
+  the step claims what it is about — the dialog gone.
 - **The modal took the card over.** Every dialog here is a glass card, and `backdrop-filter` makes
   an element the containing block for `position: fixed` descendants — so the guide's full-screen
   frame collapsed onto the dialog the moment the panel was moved inside it (which is what keeps it
-  tappable). The card drew INSIDE the modal, over the controls the beat was asking for, and on the
+  tappable). The card drew INSIDE the modal, over the controls the step was asking for, and on the
   taller new-client form the scroll carried it off the top of the screen. The frame is measured back
   onto the viewport by hand, the dialog's own scroll included.
 - **A rebuild could not undo, and a modal is the one state nothing else escapes.** Restoring a
-  beat's ground navigates and replays forward; neither reaches out of a modal, because everything
-  outside it is inert. The rebuild now closes a modal the beat does not live in, through the
+  step's ground navigates and replays forward; neither reaches out of a modal, because everything
+  outside it is inert. The rebuild now closes a modal the step does not live in, through the
   dialog's own ✕.
-- **The ground a rebuild puts back has to be taken away again by the beat that is already done.**
+- **The ground a rebuild puts back has to be taken away again by the step that is already done.**
   The register opens from the ☰ menu and the tap that opens it closes the menu; walking back into
-  that beat re-opened the menu over the register, and the tap that would have closed it was skipped
-  as redundant. Both the entry rebuild and Show me now re-fire a done beat's action after a rebuild
+  that step re-opened the menu over the register, and the tap that would have closed it was skipped
+  as redundant. Both the entry rebuild and Show me now re-fire a done step's action after a rebuild
   — after one, the app is by construction back BEFORE the step, so it is a replay rather than a
   double tap.
 
@@ -3199,18 +3268,18 @@ same reason.
 clipped element still reports a perfectly good box. Where the question is "can a person see and tap
 this", `elementFromPoint` at the control's own centre is the check; a rect is not.
 
-A second Show me on the beat that OPENS a modal also told the trainer it had failed — the beat's own
+A second Show me on the step that OPENS a modal also told the trainer it had failed — the step's own
 success puts its control behind the dialog, and a precondition that reads "met" says nothing about
-that. The rebuild is now forced whenever the beat's own control cannot be reached.
+that. The rebuild is now forced whenever the step's own control cannot be reached.
 
 **Back and forth, and the state nothing was checking** — *"back and forth for demo steps
 surrounding sending intake link don't work"*, and, reproducing the menu report by hand, *"manually
 open menu and click show me -> observe menu is not closed (no state enforcement)"*.
 
-One cause. The guide asked only whether a beat's declared `requires` held, and almost no beat
+One cause. The guide asked only whether a step's declared `requires` held, and almost no step
 declares any — `requires` was written for the states a selector cannot see. So nothing noticed that
-a beat's own CONTROL was gone or buried: walking Back out of the invite modal closes it, correctly,
-and walking forward again then stepped through four beats whose controls were inside that closed
+a step's own CONTROL was gone or buried: walking Back out of the invite modal closes it, correctly,
+and walking forward again then stepped through four steps whose controls were inside that closed
 dialog, lighting Next on each because each was done on the first pass, over a screen where none of
 it was happening. A dropped-down menu is the same defect a layer up — it covers, so the
 demonstration is a hand tapping something the viewer cannot see.
@@ -3219,7 +3288,7 @@ demonstration is a hand tapping something the viewer cannot see.
 it** — asked with `elementFromPoint` at the control's own centre, since a rect cannot answer it. And
 what the app has left lying on top is cleared before anything is replayed: a menu through the
 control that opened it, a modal through its own ✕. Cheap repair first, replay only if that was not
-the whole problem, because several beats exist to OPEN a menu and rebuilding through them re-opens
+the whole problem, because several steps exist to OPEN a menu and rebuilding through them re-opens
 the very thing that was in the way.
 
 **Three things this taught, all of them about instrumentation rather than the guide:**
@@ -3243,13 +3312,13 @@ element at its own centre and a real tap lands on it. Not for a dialog that need
 — the new-client form is taller than a phone, and a form that cannot scroll is worse to hand someone
 than a card in the way — so that one keeps the card docked inside.
 
-**A repeat Show me stopped blinking the dialog** — *"show me on step 3/41 seems to loop"*. The beat
+**A repeat Show me stopped blinking the dialog** — *"show me on step 3/41 seems to loop"*. The step
 that opens the invite dialog puts its own control, the button on the page behind, out of reach by
 succeeding. Asking to be shown it again therefore closed the dialog to get at that button, tapped
 it, and opened the dialog afresh — the app blinking, and anything typed in the meantime gone, since
-the dialog empties its field on every open. A beat that is done and whose control its own success
+the dialog empties its field on every open. A step that is done and whose control its own success
 removed has nothing left to demonstrate, so Show me does nothing there. Quietly: a complaint about a
-beat that worked is worse than silence.
+step that worked is worse than silence.
 
 Pinned by [tests/medium/test_walkthrough_modal.py](tests/medium/test_walkthrough_modal.py) (six
 rules, one stub), the story's own back-and-forth walk across the invite dialog, and the menu-closed

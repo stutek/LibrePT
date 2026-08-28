@@ -7,7 +7,7 @@
 // **Why this exists at all.** Signals and notes are captured one-handed mid-circuit and land in
 // `state.planUpdates`, where they wait on the Pending Review screen — a place a trainer visits when
 // they think of it. The moment they actually need them is the one they are never on: shaping this
-// client's next plan. §35's story is built around that payoff, and the capture beats are short
+// client's next plan. §35's story is built around that payoff, and the capture steps are short
 // precisely because the pane is the point.
 //
 // **In-plan first, then newest.** Ordering by date alone buries the deadlift note under an

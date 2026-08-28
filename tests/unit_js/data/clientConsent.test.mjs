@@ -81,7 +81,7 @@ test("withdrawing twice keeps the first date", () => {
 
 test("the signed date falls back to the write timestamp for older records", () => {
   // Records written before the date field existed carry only the ISO write time; its date part is
-  // the closest thing they have to a consent date, and beats showing nothing.
+  // the closest thing they have to a consent date, and steps showing nothing.
   assert.equal(
     consentSignedDate({ cloudSync: true, timestamp: "2026-05-04T09:12:00.000Z" }),
     "2026-05-04",

@@ -8,7 +8,7 @@
 #   1. Seeding the demo used to stamp `lang = "en"` on a store that had never chosen one, so the
 #      splash's language question saw an answer nobody gave and skipped itself.
 #   2. The demo started as soon as the app was wired — which on a first run is BEHIND the mandatory
-#      terms modal. It played itself out, all sixteen beats, while the trainer was still reading the
+#      terms modal. It played itself out, all sixteen steps, while the trainer was still reading the
 #      agreement; by the time they tapped "I agree" there was nothing left to watch.
 #
 # These build their own browser context for that reason: the conftest fixtures would hide both.

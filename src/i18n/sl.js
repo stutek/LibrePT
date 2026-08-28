@@ -365,6 +365,7 @@ export const sl = {
   walkthrough_next: "Naprej",
   walkthrough_done: "Končaj",
   walkthrough_exit: "Zapri vodeni ogled",
+  walkthrough_off_track_title: "Zašel(-la) si drugam",
   walkthrough_off_track: "Zapustil(-a) si mesto, kjer se demo odvija. Vrni ga ali ga ustavi.",
   walkthrough_return: "Nazaj v demo",
   walkthrough_leave: "Ustavi demo",

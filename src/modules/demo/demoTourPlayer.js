@@ -45,10 +45,10 @@ const OUTCOME_POLL_MS = 25;
  * A `<dialog>` opened with showModal() makes the rest of the page inert: the controls under it are
  * still painted, still have boxes, and cannot be tapped by anyone. So "visible" has to mean
  * reachable, or a step grades itself done against a button nobody could press — which is exactly
- * what happened to the beat that closes the intake-invite modal (reported 2026-08-25, "the back
+ * what happened to the step that closes the intake-invite modal (reported 2026-08-25, "the back
  * button keeps the app stuck in the modal"): it asked only for the register button behind the
  * dialog, was satisfied the moment the dialog opened, and the story walked on through a modal it
- * never closed, with every later beat pointing at controls the trainer could not reach.
+ * never closed, with every later step pointing at controls the trainer could not reach.
  *
  * The guide's own panel is moved INTO the open dialog so it stays tappable, so it counts as inside.
  */
@@ -258,7 +258,7 @@ export async function performStep(
   // `replay` says the caller has just REBUILT the ground under this step, which makes that reading
   // stale: the app is back before the step, so an outcome still reading true belongs to the run
   // being replayed, not to the state on screen. Skipping the tap there leaves whatever the rebuild
-  // re-opened standing — the ☰ menu over the register the beat had already opened (reported
+  // re-opened standing — the ☰ menu over the register the step had already opened (reported
   // 2026-08-25 at story step 3). The toggle case never reaches this: a toggle's outcome lives on the
   // same screen as its control, so a ground worth rebuilding has taken the outcome with it.
   if (replay || !stepOutcomeNow(step, doc).ok) interactWith(target, step);

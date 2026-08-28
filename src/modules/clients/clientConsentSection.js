@@ -204,7 +204,7 @@ export function selectedConsentLang() {
 }
 
 // Records written before the date field existed carry only the ISO write timestamp. Showing its
-// date part beats showing nothing: it is the closest thing to a consent date those records have,
+// date part steps showing nothing: it is the closest thing to a consent date those records have,
 // and the trainer can correct it in the field it now appears in.
 function legacyConsentDate(consent) {
   return typeof consent?.timestamp === "string" ? consent.timestamp.substring(0, 10) : "";

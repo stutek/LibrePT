@@ -52,13 +52,13 @@ def _open_walkthrough(page, local_server):
 
 
 def _card_moved_on(page, step_now, timeout=8_000):
-    """Did the card follow the app off this beat, or is it still waiting for a tap?
+    """Did the card follow the app off this step, or is it still waiting for a tap?
 
-    Asked rather than assumed, because both are legitimate since 2026-08-26: a beat DONE in front of
-    the viewer carries the card on, and a beat that arrived already satisfied — a narrated card, the
-    last beat of a tour — waits for Next. Polling for it also avoids the race that reading the number
+    Asked rather than assumed, because both are legitimate since 2026-08-26: a step DONE in front of
+    the viewer carries the card on, and a step that arrived already satisfied — a narrated card, the
+    last step of a tour — waits for Next. Polling for it also avoids the race that reading the number
     once creates: the advance can land between the read and the tap, and then Next is disabled
-    because the NEXT beat has not happened yet.
+    because the NEXT step has not happened yet.
     """
     try:
         expect(page.locator(PROGRESS)).not_to_have_text(
@@ -72,10 +72,10 @@ def _card_moved_on(page, step_now, timeout=8_000):
 def _do_current_step(page):
     """Ask to be shown, and let the card follow the app.
 
-    Since 2026-08-26 a beat COMPLETED in front of the viewer carries the card on by itself (wanted:
+    Since 2026-08-26 a step COMPLETED in front of the viewer carries the card on by itself (wanted:
     "when performs the expected action the card should advance"). Next is still there, and is still
-    the only way past a beat that arrived already satisfied — a narrated card, or one the previous
-    beat's screen answers — because advancing on those would race through the story two beats at a
+    the only way past a step that arrived already satisfied — a narrated card, or one the previous
+    step's screen answers — because advancing on those would race through the story two steps at a
     time.
     """
     progress_before = page.locator(PROGRESS).inner_text()
@@ -149,13 +149,13 @@ def test_a_step_done_in_front_of_the_viewer_carries_the_card_on(page, local_serv
     """Wanted 2026-08-26 (Simon): "when performs the expected action the card should advance".
 
     Reported three ways in one session — a modal closed by hand and the card still asking for it, a
-    Show me that "did not fill the form" because the filling was the next beat. The card now follows
+    Show me that "did not fill the form" because the filling was the next step. The card now follows
     the app. One rule, and it does not care who acted: the same thing happens when the trainer taps
     the control themselves.
 
     The rule it replaces (only Next moves the guide, 2026-08-23) was itself a fix for THREE rules —
     Show me advancing on some steps and not others. The guard that keeps this one honest is
-    elsewhere: a beat whose expectation was already true when its card appeared is read, not
+    elsewhere: a step whose expectation was already true when its card appeared is read, not
     performed, and is never advanced past on its own."""
     _open_walkthrough(page, local_server)
     expect(page.locator(PROGRESS)).to_contain_text("1")

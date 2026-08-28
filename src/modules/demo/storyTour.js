@@ -2,7 +2,7 @@
 //
 // Single responsibility: the CONTENT of the story. The chapter rules are domain/demoStory.js, the
 // pass-fail rule is domain/demoTour.js, the engine is demoTourPlayer.js and the words are drawn by
-// storyNarration.js — this file is data, and adding a beat is a data change.
+// demoNarratorCard.js — this file is data, and adding a step is a data change.
 //
 // **This is the other artifact, not a longer wedge** (§35). `gymFloorTour.js` is four taps that show
 // a stranger a working clipboard in three seconds; the story follows three friends from a leaflet to
@@ -32,13 +32,13 @@ const wedge = Object.fromEntries(GYM_FLOOR_TOUR.steps.map((step) => [step.id, st
 // screen — so this label is the only thing saying which side of a handover is on screen.
 const TRAINER = "story_persona_trainer";
 
-// A beat that is only a card has nothing to do but be read, so what it expects is that the card is
+// A step that is only a card has nothing to do but be read, so what it expects is that the card is
 // THERE: a missing translation or a card that never rendered still fails it, which is the whole
 // point of an expectation. It is not "the card was dismissed" any more — the card used to carry its
-// own Continue button, and a second way onward sitting beside a greyed-out Next is what made beat 4
+// own Continue button, and a second way onward sitting beside a greyed-out Next is what made step 4
 // look broken (reported 2026-08-23). Next moves the guide, everywhere, including here.
-const CARD_ON_SCREEN = { selector: "#story-card", visible: true };
-const CARD_TARGET = "#story-card";
+const CARD_ON_SCREEN = { selector: "#demo-narrator-card", visible: true };
+const CARD_TARGET = "#demo-narrator-card";
 
 function narration(id, kind, titleKey, bodyKey, extra = {}) {
   const { onward, ...step } = extra;
@@ -63,15 +63,15 @@ function narration(id, kind, titleKey, bodyKey, extra = {}) {
  * A card written as a step of its own is a step whose only action is tapping Continue — and asking
  * the guide to demonstrate THAT walks a pointer for three seconds to a button already under the
  * reader's thumb, which from the outside is a guide doing nothing. So the prose rides on the next
- * real beat: read it, then do the thing it is about, and the first tap takes the card away.
+ * real step: read it, then do the thing it is about, and the first tap takes the card away.
  *
  * Written as one rule here rather than by hand at each chapter, so the chapters stay readable as a
  * sequence — the card still appears in the list where it belongs in the story.
  *
  * Two cards in a row keep the FIRST: a chapter's closing note and the next chapter's opening note
- * say related things, and stacking both on one beat is two paragraphs nobody reads.
+ * say related things, and stacking both on one step is two paragraphs nobody reads.
  *
- * A card with nowhere to ride — the last beat of a chapter — stays a step, with `showMe: false`:
+ * A card with nowhere to ride — the last step of a chapter — stays a step, with `showMe: false`:
  * there is genuinely nothing to demonstrate, so the guide hides the button instead of offering a
  * dead one. A card that hands the browser to another device keeps its own step for the same reason
  * its button is a link: going there IS the action.
@@ -81,11 +81,11 @@ function foldCards(steps) {
   let pending = null;
   for (const step of steps) {
     const isCard = Boolean(step.narrate) && step.target === CARD_TARGET;
-    // A card that leaves this page keeps its own beat for the same reason the last one does: going
+    // A card that leaves this page keeps its own step for the same reason the last one does: going
     // there IS the action, and it is the guide's Next that makes it. So does a card the viewer is
     // meant to LOOK at rather than read past — the message arriving on a phone, the file landing on
-    // the trainer's — because folding it onto the next beat hides it behind that beat's own words.
-    const staysAStep = isCard && (step.advanceTo || step.narrate.onward || step.keepOwnBeat);
+    // the trainer's — because folding it onto the next step hides it behind that step's own words.
+    const staysAStep = isCard && (step.advanceTo || step.narrate.onward || step.keepOwnStep);
     if (isCard && !staysAStep) {
       pending = pending || step;
       continue;
@@ -99,7 +99,7 @@ function foldCards(steps) {
 }
 
 // Chapter C — in the gym. §35.3's build order starts here: it is the chapter that needs the least
-// that does not exist, and the one whose beats the wedge already proves.
+// that does not exist, and the one whose steps the wedge already proves.
 const GYM_CHAPTER = {
   id: "gym",
   titleKey: "story_chapter_gym",
@@ -120,7 +120,7 @@ const GYM_CHAPTER = {
     {
       // The story stays with the SECOND participant from here on, and that is a data decision as
       // much as a narrative one: the seeded John Smith carries a 2024 knee reconstruction in his own
-      // record, so the twinge two beats later is the app telling the truth about the person on
+      // record, so the twinge two steps later is the app telling the truth about the person on
       // screen rather than a line invented for the demo.
       //
       // Switching participants re-renders the deck collapsed, so his card has to come into focus
@@ -133,7 +133,7 @@ const GYM_CHAPTER = {
       expect: { selector: "#btn-log-feedback", visible: true },
     },
     {
-      // Event 14. What the beat is FOR is the pane four steps down, not the capture — so this is
+      // Event 14. What the step is FOR is the pane four steps down, not the capture — so this is
       // deliberately short: the trainer is mid-circuit with one hand.
       id: "capture-open",
       persona: TRAINER,
@@ -165,7 +165,7 @@ const GYM_CHAPTER = {
       expect: { selector: "#feedback-custom-note", hasValue: "left knee" },
     },
     {
-      // §35.3c: this is the beat that makes the note outlive the session. Without it the twinge is
+      // §35.3c: this is the step that makes the note outlive the session. Without it the twinge is
       // an alert that gets resolved away within the week.
       id: "capture-keep",
       persona: TRAINER,
@@ -262,8 +262,8 @@ const ARRIVE_CHAPTER = {
       persona: TRAINER,
       route: "/clients",
       target: "#menu-clients-register",
-      // Declared, because this control lives INSIDE the menu the previous beat opened — and the
-      // beat's own success closes it again. Without saying so, a second Show me looked for a row
+      // Declared, because this control lives INSIDE the menu the previous step opened — and the
+      // step's own success closes it again. Without saying so, a second Show me looked for a row
       // that was no longer on screen and told the trainer the step had failed (reported
       // 2026-08-23). With it, the guide re-opens the menu first, the way it does for any step whose
       // ground has drifted.
@@ -282,7 +282,7 @@ const ARRIVE_CHAPTER = {
     },
     {
       // Typed, not tapped, and typed into the ONE field that takes either kind of contact: this is
-      // the beat that answers "how does it actually reach her?", which a demo that only opened a
+      // the step that answers "how does it actually reach her?", which a demo that only opened a
       // share sheet never showed (asked 2026-08-23).
       id: "arrive-contact",
       persona: TRAINER,
@@ -293,7 +293,7 @@ const ARRIVE_CHAPTER = {
     },
     {
       // The SECOND friend, and the other channel. The same one box, retyped: what the trainer does
-      // when the next person is standing there, and the beat that shows the app reading an address
+      // when the next person is standing there, and the step that shows the app reading an address
       // where it read a number a moment ago (asked for 2026-08-23 — both channels, on screen).
       id: "arrive-contact-email",
       persona: TRAINER,
@@ -307,10 +307,10 @@ const ARRIVE_CHAPTER = {
       persona: TRAINER,
       target: "#dialog-intake-invite .modal-close-btn",
       caption: "story_step_arrive_close_invite",
-      // The DIALOG being gone, like the note beat above — not the register button behind it. That
+      // The DIALOG being gone, like the note step above — not the register button behind it. That
       // button is painted the whole time the modal is open, so the weaker claim was satisfied
-      // before the beat happened: the guide lit Next, the viewer walked on, and the invite modal
-      // stayed open over every beat that followed with the whole app inert behind it (reported
+      // before the step happened: the guide lit Next, the viewer walked on, and the invite modal
+      // stayed open over every step that followed with the whole app inert behind it (reported
       // 2026-08-25). Present but not visible, because a closed dialog stays in the DOM.
       expect: { selector: "#dialog-intake-invite", visible: false },
     },
@@ -339,7 +339,7 @@ const ARRIVE_CHAPTER = {
       // The register itself is the claim: he is in it, from two words typed at a desk.
       expect: { selector: "#clients-list", visible: true, containsText: "Nik Zupan" },
     },
-    // The handover keeps its own beat because GOING THERE is the action — and Show me is hidden on
+    // The handover keeps its own step because GOING THERE is the action — and Show me is hidden on
     // it for the same reason it is hidden on any card: the two buttons are right there, and having
     // the guide press Continue for you would dismiss the handover without ever making it.
     narration("arrive-handover", "chapter", "story_handover_title", "story_handover_body", {
@@ -368,13 +368,13 @@ const INTAKE_CHAPTER = {
   surface: "client",
   steps: foldCards([
     // What Ana actually receives, drawn as the message it is — the trainer's text with the link in
-    // it. The paper track's rule holds (§35.1): a beat that happens OUTSIDE this app is narrated on
+    // it. The paper track's rule holds (§35.1): a step that happens OUTSIDE this app is narrated on
     // a card that could never be mistaken for one of its screens. A message is not our surface at
     // all, so nobody goes looking for it in the app; what matters is that the viewer sees the thing
     // Ana taps, rather than being teleported onto a form (asked for 2026-08-23).
     narration("intake-message", "message", "story_message_title", "story_message_body", {
       persona: CLIENT,
-      keepOwnBeat: true,
+      keepOwnStep: true,
       caption: "story_step_message",
       showMe: false,
     }),
@@ -415,7 +415,7 @@ const INTAKE_CHAPTER = {
       expect: { selector: "#intake-consent:checked" },
     },
     {
-      // The send itself — the beat the chapter was missing. The button is the real one and the file
+      // The send itself — the step the chapter was missing. The button is the real one and the file
       // it builds is the real file; only the last inch is mocked, because a demo may not drop a
       // `.librept-signup` into the Downloads folder of everyone who watches
       // (modules/intake/signupDelivery.js).
@@ -429,13 +429,13 @@ const INTAKE_CHAPTER = {
     // the message above: this happens in the trainer's messaging app, not in ours.
     narration("intake-arrived", "message", "story_arrived_title", "story_arrived_body", {
       persona: CLIENT,
-      keepOwnBeat: true,
+      keepOwnStep: true,
       caption: "story_step_arrived",
       showMe: false,
     }),
     // ...and back to the trainer's own phone, by the step id rather than the chapter: the trainer's
-    // run is one numbered sequence, and returning to "chapter 3, beat 1" would restart the count in
-    // the middle of a story the viewer is four beats into. Resuming by step is what the address
+    // run is one numbered sequence, and returning to "chapter 3, step 1" would restart the count in
+    // the middle of a story the viewer is four steps into. Resuming by step is what the address
     // already does after a reload.
     narration("intake-close", "chapter", "story_chapter_intake", "story_intake_close_body", {
       persona: CLIENT,
@@ -447,7 +447,7 @@ const INTAKE_CHAPTER = {
   ]),
 };
 
-// The beat the story used to skip: what the trainer does with what Ana sent. It belongs to the
+// The step the story used to skip: what the trainer does with what Ana sent. It belongs to the
 // trainer's run, right after the hand back, because that is when it happens — her file is in his
 // messages before he ever opens the app again.
 const REVIEW_STEPS = [
@@ -455,7 +455,7 @@ const REVIEW_STEPS = [
     id: "review-open-menu",
     persona: TRAINER,
     // On the register, because that is where the result has to be VISIBLE: accepting re-renders the
-    // client list, and a beat that claimed "she is in your register" while the register was behind
+    // client list, and a step that claimed "she is in your register" while the register was behind
     // the dashboard would be asserting something the viewer cannot see.
     route: "/clients",
     target: "#btn-app-menu",
@@ -564,7 +564,7 @@ const PROGRAMME_CHAPTER = {
 };
 
 // Chapter D — the evening after. The trainer is at home; this is where the notes taken on the floor
-// turn into next week's plan, and where the theme beat finally earns its place (§35.2 event 19):
+// turn into next week's plan, and where the theme step finally earns its place (§35.2 event 19):
 // an evening at home is genuinely what dark mode is for.
 const EVENING_CHAPTER = {
   id: "evening",

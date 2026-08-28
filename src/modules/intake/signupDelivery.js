@@ -59,7 +59,7 @@ export function browserSignupPlatform() {
  */
 export function storySignupPlatform({ onSent } = {}) {
   return {
-    // Always yes: the point of the beat is to show the send, and a device without a share sheet
+    // Always yes: the point of the step is to show the send, and a device without a share sheet
     // would otherwise send the story down the save-a-file path it must not take.
     canShareFiles: () => true,
     shareFiles: async (data) => onSent?.(data?.files?.[0] || null),

@@ -31,7 +31,7 @@
 export const RIPPLE_RING_MS = 520;
 export const RIPPLE_STAGGER_MS = 70;
 
-// Full-motion beats, in the order a step performs them.
+// The full-motion waits, in the order a step performs them.
 const SCROLL_SETTLE_MS = 520;
 const TRAVEL_MS = 650;
 // The head start the mark gets on the real click, which is a whole ring (reported 2026-08-27: "the

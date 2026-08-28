@@ -106,7 +106,7 @@ def record(url, out_path, viewport, timeout_ms=60_000):
             "() => Array.isArray(window.__demoTourResults)", timeout=timeout_ms
         )
         results = page.evaluate("() => window.__demoTourResults")
-        # A beat on the finished state, so the last frame is not the instant of the final tap.
+        # A step on the finished state, so the last frame is not the instant of the final tap.
         page.wait_for_timeout(1_200)
         video = page.video
         # The file is only flushed when the context closes, and its path can only be read while

@@ -383,8 +383,9 @@ export const en = {
   walkthrough_next: "Next",
   walkthrough_done: "Done",
   walkthrough_exit: "Leave the walkthrough",
-  // Shown when the trainer has taken the app somewhere the current beat cannot happen. It says what
+  // Shown when the trainer has taken the app somewhere the current step cannot happen. It says what
   // is true — they went exploring — rather than blaming them, and gives the two ways on.
+  walkthrough_off_track_title: "You have wandered off",
   walkthrough_off_track: "You have left the demo's place in the app. Bring it back, or stop here.",
   walkthrough_return: "Back to the demo",
   walkthrough_leave: "Stop the demo",
@@ -400,7 +401,7 @@ export const en = {
   tour_step_next_participant: "Switch to the next participant — same session, their own plan.",
   // The long demo (TODO §35): chapter titles, the narration cards' bodies, and the labels the
   // narration surface itself needs. Captions for taps that the story shares with the wedge stay
-  // under tour_step_* — the same beat, said once.
+  // under tour_step_* — the same step, said once.
   gym_notes_label: "In the gym",
   label_repeats: "Repeats every week",
   label_repeat_days: "On these days",

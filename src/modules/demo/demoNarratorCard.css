@@ -1,4 +1,4 @@
-/* src/modules/demo/storyNarration.css — the long demo's narration: cards, persona label, captions
+/* src/modules/demo/demoNarratorCard.css — the long demo's narration: cards, persona label, captions
    (TODO §35).
 
    The app underneath keeps its own appearance, like every other demo surface here: the story is the
@@ -9,7 +9,7 @@
    (reported 2026-08-23: two boxes, one unnumbered and one apparently mis-numbered). It keeps only
    its words and its spacing — the border, the shadow and the placement belong to the panel around
    it, which already carries the step number, the exit and the Back button. */
-.walkthrough-panel .story-card {
+.walkthrough-panel .demo-narrator-card {
   position: static;
   z-index: auto;
   width: auto;
@@ -34,7 +34,7 @@
 
 /* The story's own words sit above the instruction, so the seam between them is a rule rather than
    a gap: a viewer reads the paragraph, then the one line telling them what to do with it. */
-.walkthrough-panel .story-card::after {
+.walkthrough-panel .demo-narrator-card::after {
   content: "";
   display: block;
   height: 1px;
@@ -45,7 +45,7 @@
 /* The narration card when it stands alone — mounted without a guide around it, which is how it is
    tested on its own. Above the clipboard overlay (120/130) and the walkthrough panel (9400), below
    the hand (9999) — the pointer has to read as being over the card it is about to tap. */
-.story-card {
+.demo-narrator-card {
   position: fixed;
   left: 50%;
   /* ABOVE the middle, because the guide's own panel owns the bottom of the screen and a card
@@ -63,7 +63,7 @@
   text-align: left;
 }
 
-.story-card-kicker {
+.demo-narrator-kicker {
   margin: 0 0 0.2rem;
   font-size: 0.75rem;
   letter-spacing: 0.08em;
@@ -71,36 +71,37 @@
   color: var(--text-muted);
 }
 
-.story-card-title {
+.demo-narrator-title {
   margin: 0 0 0.5rem;
   font-size: 1.15rem;
   line-height: 1.25;
 }
 
-.story-card-body {
+/* Every kind sets its words the same way, whichever element carries them: a message card's body is
+   a `blockquote`, because it IS a quotation from another app, and a blockquote arrives with a
+   browser indent nobody asked for. */
+.demo-narrator-body {
   margin: 0 0 1rem;
   line-height: 1.45;
   color: var(--text-muted);
 }
 
-/* Real touch targets, because the hand taps them and a viewer may too (no-hover rule, §7.1). */
-.story-card-cleanup {
+/* Real touch targets, because the hand taps them and a viewer may too (no-hover rule, §7.1). Under
+   the words, and quieter than the guide's own Next: the story's ending is "keep tapping around",
+   and emptying the demo out is the deliberate act. */
+.demo-narrator-cleanup {
   min-height: 44px;
   width: 100%;
   justify-content: center;
-}
-/* Under the words, and quieter than the guide's own Next: the story's ending is "keep tapping
-   around", and emptying the demo out is the deliberate act. */
-.story-card-cleanup {
   margin-top: 0.5rem;
 }
 
 /* The PAPER track (§35.1): what happens off-screen, on a printed form — narrated as text on a
    paper-textured card, never drawn as a form. Everything else in this demo is the live app, so a
    drawn surface among them reads as a real screen and misleads the first viewer who looks for it.
-   The texture is what says "this beat is not a screen": warm ground, a ruled left margin, no app
+   The texture is what says "this step is not a screen": warm ground, a ruled left margin, no app
    chrome. Generated, so it costs no asset and cannot go missing from a cache. */
-.story-card--paper {
+.demo-narrator-card--paper {
   background: repeating-linear-gradient(
       transparent 0 1.55rem,
       color-mix(in srgb, #94a3b8 22%, transparent) 1.55rem 1.6rem
@@ -110,47 +111,73 @@
   border-left: 3px solid color-mix(in srgb, #dc2626 45%, transparent);
 }
 
-.story-card--paper .story-card-kicker,
-.story-card--paper .story-card-body {
+.demo-narrator-card--paper .demo-narrator-kicker,
+.demo-narrator-card--paper .demo-narrator-body {
   color: #6b5f45;
 }
 
-/* Inside the guide's panel the paper keeps its texture — it is what says "this beat happens on
+/* Inside the guide's panel the paper keeps its texture — it is what says "this step happens on
    paper, not on a screen" — but becomes an inset sheet rather than the whole card, since the card
    is now the guide's. */
-.walkthrough-panel .story-card--paper {
+.walkthrough-panel .demo-narrator-card--paper {
   padding: 0.75rem 0.9rem;
   border-radius: var(--border-radius-md);
   border-left: 3px solid color-mix(in srgb, #dc2626 45%, transparent);
   color: #3b3423;
 }
 
-/* The MESSAGE track: a beat that happens in a messaging app, not in this one — the link arriving on
+/* The MESSAGE track: a step that happens in a messaging app, not in this one — the link arriving on
    the client's phone, and her file arriving on the trainer's. Drawn as a bubble because that is what
    the viewer is being told to picture, and because it could never be mistaken for a screen of this
    app, which is the whole rule the paper track exists for (§35.1). */
-.story-card--message {
+.demo-narrator-card--message {
   background: color-mix(in srgb, #22c55e 12%, var(--card-bg));
   border-color: color-mix(in srgb, #22c55e 40%, transparent);
   border-left: 3px solid #22c55e;
 }
 
-.walkthrough-panel .story-card--message {
+.walkthrough-panel .demo-narrator-card--message {
   padding: 0.75rem 0.9rem;
   border-radius: var(--border-radius-md);
   border-left: 3px solid #22c55e;
 }
 
-/* The message itself is somebody's words, so it is set in the quotation the reader would see on
-   their own phone rather than in the story's narrating voice. */
-.story-card--message .story-card-body {
+/* The message itself is somebody's words, so it is set apart from the story's narrating voice. It
+   is a real `blockquote` since 2026-08-27 (§38.10) — the italics said "not our words" to a reader
+   and nothing at all to a screen reader — which brings a browser indent this puts back. */
+.demo-narrator-card--message .demo-narrator-body {
   font-style: italic;
+  margin-inline: 0;
+}
+
+/* Full strength on this card, not the muted grey the narrating voice uses. Two reasons, and the
+   second is the one that failed a measurement: its body IS the thing being read — the message
+   itself, not an aside about it — and the muted grey over this card's green tint measured 4.28:1 on
+   Daylight and 4.37:1 on Blossom, under the bar for a paragraph (§38.10). The muted tokens sit near
+   that bar on the light palettes to begin with, so any tinted surface eats the margin; a card that
+   tints itself owns its own text colours. */
+.demo-narrator-card--message .demo-narrator-body,
+.demo-narrator-card--message .demo-narrator-kicker {
+  color: var(--text-main);
+}
+
+/* The guide's own card: the trainer has walked away from where the step happens, and the step's
+   instruction is not what is on screen. Nothing decorative — it is the same card, and the two
+   buttons under it are the panel's own — but it is not the story speaking, so it carries the
+   guide's accent rather than a track's colour (§38.10). */
+.demo-narrator-card--off-track {
+  border-left: 3px solid var(--primary);
+}
+
+.walkthrough-panel .demo-narrator-card--off-track {
+  padding-left: 0.75rem;
+  border-left: 3px solid var(--primary);
 }
 
 /* In the guide's head, beside the step counter: read in the same glance as "step 4 of 31", which is
    when a viewer wonders whose phone this is. It used to be a black tag over the app's own header,
    where it went unnoticed and read as one of the app's controls (reported 2026-08-23). */
-.walkthrough-head .story-persona {
+.walkthrough-head .demo-narrator-persona {
   position: static;
   transform: none;
   z-index: auto;
@@ -163,7 +190,7 @@
 /* Standing on its own — mounted without a guide around it, which is how it is tested alone. One
    persona at a time was the ruling (§35.1), so this label is the only thing distinguishing the
    trainer's app from a client's: they look the same. */
-.story-persona {
+.demo-narrator-persona {
   position: fixed;
   top: 0.55rem;
   left: 50%;

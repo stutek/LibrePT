@@ -10,7 +10,7 @@
 // **The estimate is one constant, deliberately.** A working set is counted at 45 seconds — a set of
 // moderate reps plus the moment either side of it — because a model with per-exercise durations
 // would need a duration on every one of the 48 seeded movements and on every custom movement a
-// trainer ever adds, all of them invented. One number that is honestly approximate beats a hundred
+// trainer ever adds, all of them invented. One number that is honestly approximate steps a hundred
 // that look precise. Held and timed work is exempt: it carries its own seconds and is counted in
 // them.
 //

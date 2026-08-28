@@ -44,7 +44,7 @@ def test_the_header_menu_survives_a_tap_on_the_guide(page, local_server):
 
     page.click("#fake-show-me")
 
-    # Still on screen: the next beat of the demo is about to point at it.
+    # Still on screen: the next step of the demo is about to point at it.
     expect(page.locator("#menu-clients-register")).to_be_visible()
 
 

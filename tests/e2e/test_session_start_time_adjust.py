@@ -132,7 +132,7 @@ def test_a_session_started_late_survives_a_reload(page, local_server):
 
 def _unscheduled_plan_count(page):
     # Read the live store rather than localStorage: state is persisted through IndexedDB as well,
-    # and a mirror written on a different beat is not what the feed counts.
+    # and a mirror written on a different step is not what the feed counts.
     return page.evaluate(
         """async () => {
             const store = await import(new URL('data/stateStore.js', document.baseURI).href);

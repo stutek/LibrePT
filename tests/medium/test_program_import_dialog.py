@@ -130,7 +130,7 @@ def test_the_lines_that_could_not_be_read_are_all_listed_with_their_position(
 
 
 def test_the_format_can_be_looked_at_rather_than_interpreted(page, local_server):
-    """A working example beats a schema: "show me the format" fills the box with one that parses."""
+    """A working example steps a schema: "show me the format" fills the box with one that parses."""
     _open(page, local_server)
 
     page.click("#program-import-template")

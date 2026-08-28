@@ -388,7 +388,7 @@ optimise. Three properties are on offer and no scheme gives all three:
 - **A broken pointer loses the tail, silently.** One bad `nextId` and every item after it is
   unreachable — the session simply ends early, and nothing distinguishes that from a session that
   really was that short. A bad `position` misplaces exactly one item, and the density check names it.
-  For the *only copy* of a trainer's records, a failure mode of "lose one item's place" beats "lose
+  For the *only copy* of a trainer's records, a failure mode of "lose one item's place" steps "lose
   the rest of the workout".
 - **Chains fail in ways with no correct repair.** Corruption yields cycles, forks and orphans;
   deciding which branch is the real one is guesswork. A position list fails as a hole or a duplicate,

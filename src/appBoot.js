@@ -259,7 +259,7 @@ export async function whenDemoCanBeWatched(splashDown) {
 // **It is guided, not played** (decided 2026-08-22, Simon: "autoplay reduces the effect, a person
 // loses focus; Show me is the best middle ground"). Four taps can be watched; four minutes cannot,
 // and a viewer who is only watching stops watching. So the story runs on the same panel the
-// walkthrough uses — the trainer performs each beat, or asks to be shown it — and the narration
+// walkthrough uses — the trainer performs each step, or asks to be shown it — and the narration
 // cards are the storytelling around that.
 //
 // Its own boot step beside bootWalkthrough rather than a mode inside it: they share the guide and
@@ -280,10 +280,10 @@ export async function bootDemoStory({
   const { DEMO_STORY: DEMO_STORY_PARAM } = await import("./modules/common/shareLink.js");
   if (shareDemo !== DEMO_STORY_PARAM || !hasData) return null;
 
-  const [{ startGuidedWalkthrough }, { mountStoryNarration }, { DEMO_STORY }, story] =
+  const [{ startGuidedWalkthrough }, { mountDemoNarrator }, { DEMO_STORY }, story] =
     await Promise.all([
       import("./modules/demo/walkthroughOverlay.js"),
-      import("./modules/demo/storyNarration.js"),
+      import("./modules/demo/demoNarratorCard.js"),
       import("./modules/demo/storyTour.js"),
       import("./domain/demoStory.js"),
     ]);
@@ -298,12 +298,15 @@ export async function bootDemoStory({
 
   // The way onward the last card offers (§30.2): the SAME dialog the demo notice in the feed
   // opens, not a second cleanup path that could drift from it.
-  const narration = mountStoryNarration({ t, onClearDemoData: openDemoCleanupDialog });
+  const narrator = mountDemoNarrator({ t, onClearDemoData: openDemoCleanupDialog });
   // Flattened to one step list: a chapter is a tour, which is what lets the guide run it unchanged.
   const steps = story.storyStepsFor(DEMO_STORY, shareChapter);
   return startGuidedWalkthrough({
     tour: { id: DEMO_STORY.id, steps },
     t,
+    // The guide narrates through the surface the story already owns, so the card that says "you
+    // have wandered off" is the same card as every other one the viewer has been reading (§38.10).
+    narrator,
     navigate: goHome && ((path) => goHome(path)),
     startAtStepId: shareStep,
     // Each step names itself in the URL, so a reload — or a link sent to a colleague mid-story —
@@ -312,7 +315,7 @@ export async function bootDemoStory({
     // the app's own navigation, and a 31-entry history of one demo would bury it.
     onStep: (step) => {
       rememberStep?.(step?.id);
-      narration.showStep(step);
+      narrator.showStep(step);
     },
   });
 }
@@ -352,21 +355,22 @@ async function bootIntakeStoryChapter({ shareDemo, shareChapter, t } = {}) {
   const { DEMO_STORY: DEMO_STORY_PARAM } = await import("./modules/common/shareLink.js");
   if (shareDemo !== DEMO_STORY_PARAM) return null;
 
-  const [{ startGuidedWalkthrough }, { mountStoryNarration }, { DEMO_STORY }, story] =
+  const [{ startGuidedWalkthrough }, { mountDemoNarrator }, { DEMO_STORY }, story] =
     await Promise.all([
       import("./modules/demo/walkthroughOverlay.js"),
-      import("./modules/demo/storyNarration.js"),
+      import("./modules/demo/demoNarratorCard.js"),
       import("./modules/demo/storyTour.js"),
       import("./domain/demoStory.js"),
     ]);
 
   const steps = story.storyStepsFor(DEMO_STORY, shareChapter || "intake", { surface: "client" });
   if (steps.length === 0) return null;
-  const narration = mountStoryNarration({ t });
+  const narrator = mountDemoNarrator({ t });
   return startGuidedWalkthrough({
     tour: { id: "story-intake", steps },
     t,
-    onStep: (step) => narration.showStep(step),
+    narrator,
+    onStep: (step) => narrator.showStep(step),
   });
 }
 

@@ -29,7 +29,7 @@ test("untouched record deleted remotely is dropped", () => {
   assert.deepEqual(conflicts, []);
 });
 
-test("local edit beats a remote deletion and is flagged", () => {
+test("local edit steps a remote deletion and is flagged", () => {
   const base = { widgets: [{ id: "a", name: "x" }] };
   const local = { widgets: [{ id: "a", name: "edited" }] }; // edited locally
   const remote = { widgets: [] }; // deleted remotely
@@ -52,7 +52,7 @@ test("untouched record deleted locally is dropped", () => {
   assert.deepEqual(conflicts, []);
 });
 
-test("remote edit beats a local deletion and is flagged", () => {
+test("remote edit steps a local deletion and is flagged", () => {
   const base = { widgets: [{ id: "a", name: "x" }] };
   const local = { widgets: [] }; // deleted locally
   const remote = { widgets: [{ id: "a", name: "edited-remotely" }] };

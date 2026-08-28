@@ -94,7 +94,7 @@ test("the step ids are reported in order, so a short run is detectable", () => {
 });
 
 // ── What a step TYPED, as opposed to what it tapped (wanted 2026-08-22) ───────────────────────
-// A demo that only taps cannot show the half of the app a trainer types into, and the first beat
+// A demo that only taps cannot show the half of the app a trainer types into, and the first step
 // that needed it — the note behind a client's twinge — could not be asserted at all: a field's value
 // is not its text content, which is how a step once polled for something that could never come true.
 

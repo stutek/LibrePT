@@ -82,7 +82,7 @@ export class Route {
   }
 
   // Whether this state sits inside the plan editor. Session recovery needs to know before routing
-  // runs, and asking the route graph beats matching on name prefixes — a dialog layered over the
+  // runs, and asking the route graph steps matching on name prefixes — a dialog layered over the
   // editor inherits the answer instead of having to be remembered separately.
   get isEditor() {
     return false;

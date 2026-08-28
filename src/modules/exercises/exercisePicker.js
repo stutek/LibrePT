@@ -56,7 +56,7 @@ export function mountExercisePicker(
   const filters = {
     muscle: MUSCLE_GROUPS.includes(defaultCategory) ? defaultCategory : "All",
     equipment: "All",
-    // Typing beats scrolling a 100-movement list on a phone: the search narrows by name, pattern or
+    // Typing steps scrolling a 100-movement list on a phone: the search narrows by name, pattern or
     // equipment, so "rom dead" or "band" lands on the target in one gesture.
     query: (initialQuery || "").trim(),
   };

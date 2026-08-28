@@ -1,4 +1,4 @@
-# tests/medium/test_story_narration.py
+# tests/medium/test_demo_narrator_card.py
 # The long demo's narration surface (TODO §35.1) — the cards, the persona label and the caption bar
 # that carry a four-minute story between its taps.
 #
@@ -6,6 +6,8 @@
 # on screen and dismissible, not about how a step is played. The story itself is replayed end to end
 # in tests/e2e/test_demo_story.py.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
+
+import re
 
 import pytest
 from playwright.sync_api import expect
@@ -17,16 +19,17 @@ pytestmark = pytest.mark.clean_start
 
 # Mounts the real narration surface with the real translation dict, and exposes its handle so a test
 # can show one step the way the guide does when it enters one.
-NARRATION_STUB = """
-import { mountStoryNarration } from './modules/demo/storyNarration.js';
+NARRATOR_STUB = """
+import { mountDemoNarrator } from './modules/demo/demoNarratorCard.js';
 import { TRANSLATIONS } from './i18n/index.js';
 
 window.__cleared = 0;
-window.__narration = mountStoryNarration({
+window.__narrator = mountDemoNarrator({
   t: (key) => TRANSLATIONS.en[key] || key,
   onClearDemoData: () => { window.__cleared += 1; },
 });
-window.__show = (step) => window.__narration.showStep(step);
+window.__show = (step) => window.__narrator.showStep(step);
+window.__showOffTrack = () => window.__narrator.showOffTrack(true);
 
 // Every palette the trainer can pick, read from the app rather than listed here: a sixth theme must
 // be readable too, and a test with its own copy of the list would not know it exists.
@@ -55,8 +58,16 @@ window.__contrast = (selector) => {
   };
   let ground = getComputedStyle(document.body).backgroundColor;
   for (let node = el; node; node = node.parentElement) {
-    const painted = getComputedStyle(node).backgroundColor;
-    if (painted && !painted.startsWith('rgba(0, 0, 0, 0)')) { ground = painted; break; }
+    const style = getComputedStyle(node);
+    // A TEXTURED surface cannot be reduced to one colour, and guessing one would be worse than
+    // saying so: the paper card is written on a ruled warm gradient, in ink chosen for that paper
+    // and not for the palette around it. Unmeasurable, reported as such — the caller counts what it
+    // measured, so this can never quietly empty a test.
+    if (style.backgroundImage !== 'none') return null;
+    if (style.backgroundColor && !style.backgroundColor.startsWith('rgba(0, 0, 0, 0)')) {
+      ground = style.backgroundColor;
+      break;
+    }
   }
   const [lighter, darker] = [luminance(getComputedStyle(el).color), luminance(ground)].sort(
     (a, b) => b - a,
@@ -66,7 +77,7 @@ window.__contrast = (selector) => {
 """
 
 # The same stub with nobody offering a way onward — a caller that cannot clear demo data.
-NO_ONWARD_STUB = NARRATION_STUB.replace(
+NO_ONWARD_STUB = NARRATOR_STUB.replace(
     "  onClearDemoData: () => { window.__cleared += 1; },\n", ""
 )
 
@@ -78,7 +89,7 @@ CHAPTER_STEP = {
         "titleKey": "story_chapter_gym",
         "bodyKey": "story_gym_open_body",
     },
-    "target": "#story-card",
+    "target": "#demo-narrator-card",
 }
 
 TAP_STEP = {"id": "open-session", "caption": "tour_step_open_session"}
@@ -86,24 +97,24 @@ TAP_STEP = {"id": "open-session", "caption": "tour_step_open_session"}
 
 def _mount(page, local_server):
     page.set_viewport_size({"width": 390, "height": 844})
-    load_with_stub(page, local_server, NARRATION_STUB)
+    load_with_stub(page, local_server, NARRATOR_STUB)
 
 
 def _show(page, step):
     page.evaluate("(step) => window.__show(step)", step)
 
 
-def test_a_narrated_beat_puts_its_words_on_screen(page, local_server):
+def test_a_narrated_step_puts_its_words_on_screen(page, local_server):
     """§35.1's rule for narrated steps: the words are ON SCREEN and they are the story's, not a key.
 
-    The card carried its own Continue button until 2026-08-23, when a beat whose only control was
+    The card carried its own Continue button until 2026-08-23, when a step whose only control was
     that button left the guide's own Next greyed out beside it — two ways on, one of them dead. The
     words are all this surface owns now; moving the story along belongs to the guide."""
     _mount(page, local_server)
 
     _show(page, CHAPTER_STEP)
 
-    card = page.locator("#story-card")
+    card = page.locator("#demo-narrator-card")
     expect(card).to_be_visible()
     expect(card).to_contain_text("In the gym")
     expect(card).to_contain_text("Jane and John")
@@ -116,10 +127,10 @@ def test_the_viewer_is_told_whose_phone_they_are_looking_at(page, local_server):
 
     _show(page, CHAPTER_STEP)
 
-    expect(page.locator("#story-persona")).to_have_text("Your phone")
+    expect(page.locator("#demo-narrator-persona")).to_have_text("Your phone")
 
 
-def test_a_beat_with_nothing_to_read_shows_no_card(page, local_server):
+def test_a_step_with_nothing_to_read_shows_no_card(page, local_server):
     """A card left on screen would cover the control the step is about, and the whole claim of a
     scripted demo is that the viewer watches the real app being used."""
     _mount(page, local_server)
@@ -127,7 +138,7 @@ def test_a_beat_with_nothing_to_read_shows_no_card(page, local_server):
 
     _show(page, TAP_STEP)
 
-    expect(page.locator("#story-card")).to_be_hidden()
+    expect(page.locator("#demo-narrator-card")).to_be_hidden()
 
 
 def test_the_first_tap_on_the_app_takes_the_card_away(page, local_server):
@@ -135,15 +146,15 @@ def test_the_first_tap_on_the_app_takes_the_card_away(page, local_server):
     (reported 2026-08-22: a card sitting over the control its own step points at)."""
     _mount(page, local_server)
     _show(page, CHAPTER_STEP)
-    expect(page.locator("#story-card")).to_be_visible()
+    expect(page.locator("#demo-narrator-card")).to_be_visible()
 
     page.mouse.click(10, 400)
 
-    expect(page.locator("#story-card")).to_be_hidden()
+    expect(page.locator("#demo-narrator-card")).to_be_hidden()
 
 
 def test_the_paper_track_is_words_not_a_drawn_form(page, local_server):
-    """§35.1: the paper beats SAY what happens on a printed form. A drawn form among live screens
+    """§35.1: the paper steps SAY what happens on a printed form. A drawn form among live screens
     reads as a real one, and the first viewer who goes looking for it in the app has been misled —
     so what the paper card holds is text, and its paper-ness is the surface it is written on."""
     _mount(page, local_server)
@@ -157,12 +168,12 @@ def test_the_paper_track_is_words_not_a_drawn_form(page, local_server):
         },
     )
 
-    card = page.locator("#story-card")
+    card = page.locator("#demo-narrator-card")
     expect(card).to_be_visible()
     assert card.locator("input, form, select, textarea").count() == 0
     # It has to LOOK like paper, or nothing distinguishes narration from a screen.
     background = page.evaluate(
-        "() => getComputedStyle(document.getElementById('story-card')).backgroundImage"
+        "() => getComputedStyle(document.getElementById('demo-narrator-card')).backgroundImage"
     )
     assert "gradient" in background
 
@@ -173,7 +184,7 @@ def test_the_narration_fits_the_phone_the_story_is_watched_on(page, local_server
     _show(page, CHAPTER_STEP)
 
     assert_component_fits(
-        page, "#story-card", label="story narration card", viewport=None
+        page, "#demo-narrator-card", label="demo narrator card", viewport=None
     )
 
 
@@ -192,22 +203,49 @@ def test_the_last_card_offers_the_two_ways_onward(page, local_server):
 
     _show(page, ONWARD_STEP)
 
-    expect(page.locator("#story-card")).to_contain_text("Clear the demo data")
-    page.click("#story-card-cleanup")
+    expect(page.locator("#demo-narrator-card")).to_contain_text("Clear the demo data")
+    page.click("#demo-narrator-cleanup")
 
     assert page.evaluate("() => window.__cleared") == 1
-    expect(page.locator("#story-card")).to_be_hidden()
+    expect(page.locator("#demo-narrator-card")).to_be_hidden()
 
 
 def test_a_mid_story_card_makes_no_such_offer(page, local_server):
-    """Only the last beat is entitled to hand the app over; offering it earlier reads as the demo
+    """Only the last step is entitled to hand the app over; offering it earlier reads as the demo
     asking to be stopped."""
     _mount(page, local_server)
     _show(page, ONWARD_STEP)
 
     _show(page, CHAPTER_STEP)
 
-    expect(page.locator("#story-card-cleanup")).to_be_hidden()
+    expect(page.locator("#demo-narrator-cleanup")).to_be_hidden()
+
+
+def test_the_guide_speaks_through_the_same_card_as_the_story(page, local_server):
+    """Asked 2026-08-27: "poenoti vse demo kartice, da bodo enotne".
+
+    Wandering off the demo's path used to be told in a different shape from everything else the
+    viewer had been reading — a bare caption line beside two buttons — which reads as a different
+    surface arriving at the one moment somebody is already unsure where they are. It is a card like
+    every other now, drawn by the same surface, and its words are the GUIDE's: the step's own
+    instruction names a control that is no longer on screen, so repeating it would be a lie.
+    """
+    _mount(page, local_server)
+    _show(page, CHAPTER_STEP)
+
+    page.evaluate("() => window.__showOffTrack()")
+
+    card = page.locator("#demo-narrator-card")
+    expect(card).to_be_visible()
+    expect(card).to_have_class(re.compile(r"demo-narrator-card--off-track"))
+    expect(card).to_contain_text("wandered off")
+    (
+        expect(card).not_to_contain_text("In the gym"),
+        "the story's words are not the guide's",
+    )
+    # Not an ending: the way out of the demo is the panel's own two buttons, and offering to clear
+    # the demo data here would read as the guide asking to be stopped.
+    expect(page.locator("#demo-narrator-cleanup")).to_have_count(0)
 
 
 # WCAG AA for body text. The story card is a paragraph somebody reads on a phone, not a decorative
@@ -227,21 +265,45 @@ def test_the_card_is_readable_on_every_theme(page, local_server):
     """
     _mount(page, local_server)
 
+    # Every kind, on every palette: they are one family since 2026-08-27 (§38.10), and a family is
+    # only as readable as its worst member. The off-track card is the guide's own and is drawn
+    # through the same surface, so it is walked here too.
+    kinds = ("chapter", "message", "paper")
+    slots = (
+        ".demo-narrator-title",
+        ".demo-narrator-body",
+        ".demo-narrator-kicker",
+        "#demo-narrator-persona",
+    )
     unreadable = []
+    measured = 0
     for theme in page.evaluate("() => window.__themes"):
         page.evaluate("(theme) => window.__wearTheme(theme)", theme)
-        _show(page, CHAPTER_STEP)
-        for selector in (
-            ".story-card-title",
-            ".story-card-body",
-            ".story-card-kicker",
-            "#story-persona",
-        ):
+        for kind in kinds:
+            _show(
+                page,
+                {**CHAPTER_STEP, "narrate": {**CHAPTER_STEP["narrate"], "kind": kind}},
+            )
+            for selector in slots:
+                contrast = page.evaluate("(sel) => window.__contrast(sel)", selector)
+                if contrast is None:
+                    continue
+                measured += 1
+                if contrast < MIN_CONTRAST:
+                    unreadable.append(f"{theme}/{kind}: {selector} at {contrast}:1")
+        page.evaluate("() => window.__showOffTrack()")
+        for selector in (".demo-narrator-title", ".demo-narrator-body"):
             contrast = page.evaluate("(sel) => window.__contrast(sel)", selector)
-            if contrast is not None and contrast < MIN_CONTRAST:
-                unreadable.append(f"{theme}: {selector} at {contrast}:1")
+            if contrast is None:
+                continue
+            measured += 1
+            if contrast < MIN_CONTRAST:
+                unreadable.append(f"{theme}/off-track: {selector} at {contrast}:1")
 
-    assert not unreadable, "story card text below AA: " + "; ".join(unreadable)
+    assert not unreadable, "demo card text below AA: " + "; ".join(unreadable)
+    # A textured card reports "unmeasurable" rather than a number, so a stylesheet change that made
+    # everything textured would otherwise pass this by measuring nothing at all.
+    assert measured > len(kinds), f"only {measured} readings taken across every theme"
 
 
 def test_nothing_is_offered_when_there_is_nothing_to_offer(page, local_server):
@@ -251,4 +313,4 @@ def test_nothing_is_offered_when_there_is_nothing_to_offer(page, local_server):
 
     _show(page, ONWARD_STEP)
 
-    expect(page.locator("#story-card-cleanup")).to_be_hidden()
+    expect(page.locator("#demo-narrator-cleanup")).to_be_hidden()

@@ -20,7 +20,7 @@ export function $id(id) {
  * to do no harm.
  */
 export function isGuideSurface(target) {
-  return Boolean(target?.closest?.("#walkthrough-overlay, #story-card"));
+  return Boolean(target?.closest?.("#walkthrough-overlay, #demo-narrator-card"));
 }
 
 export function $(selector, parent = document) {

@@ -130,7 +130,7 @@ export function demoDataUrl(href = window.location.href, rootPath = appRootPathn
  *  It starts the STORY (§35), not the four-step gym-floor tour (`?demo=walkthrough`) these buttons
  *  started until 2026-08-25. Both run in the same guided panel, so the mistake was invisible from
  *  the code and plain on screen: a trainer who accepted the offer was counted "1 / 4" through the
- *  wedge that predates the story, and never saw the 31 beats the demo now IS. The old tour keeps
+ *  wedge that predates the story, and never saw the 31 steps the demo now IS. The old tour keeps
  *  its own link for the tests that exercise the engine; nothing offers it.
  *
  *  It carries the demo data deliberately — the script drives the seeded sessions, so a guide over an

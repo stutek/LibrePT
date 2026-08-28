@@ -20,7 +20,7 @@ from playwright.sync_api import expect
 
 def test_a_viewer_who_wants_motion_gets_a_step_they_can_follow(page, local_server):
     """One step at full motion takes long enough to watch — the scroll, the hand's travel, the tap
-    and the beat that lets the result register. The exact constants are demoPace's business; what
+    and the pause that lets the result register. The exact constants are demoPace's business; what
     must not regress is that a step is not instantaneous for someone watching it happen."""
     page.goto(f"{local_server}?init=demo_data_load&demo=walkthrough")
     page.locator("#walkthrough-overlay").wait_for(state="visible", timeout=30_000)
@@ -28,7 +28,7 @@ def test_a_viewer_who_wants_motion_gets_a_step_they_can_follow(page, local_serve
     started = time.monotonic()
     page.locator("#walkthrough-show").click()
     # Timed to the step being DONE, which since 2026-08-26 is also the moment the card follows the
-    # app onto the next beat. What has to stay watchable is the demonstration itself.
+    # app onto the next step. What has to stay watchable is the demonstration itself.
     expect(page.locator("#walkthrough-overlay .walkthrough-progress")).to_have_text(
         re.compile(r"step\s+2\s+of", re.I), timeout=30_000
     )

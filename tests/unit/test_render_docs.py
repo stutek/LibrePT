@@ -137,7 +137,7 @@ def test_no_relative_link_survives_rewriting():
     This replaced a runtime guard that raised on "unrewritten" links. Writing this test is what
     showed the guard could never fire — the two destinations are exhaustive over relative hrefs, so
     an unmatched path becomes an absolute GitHub URL rather than surviving. Pinning the property
-    beats keeping an unreachable branch that reads like a safety net.
+    steps keeping an unreachable branch that reads like a safety net.
     """
     for href, source in (
         ("./nope.md", "docs/PREVIEW.md"),

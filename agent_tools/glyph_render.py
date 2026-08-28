@@ -78,7 +78,7 @@ SIGNATURE_JS = r"""
   const signatures = {};
   for (const name of names) {
     // Both prefixes are tried and the one that DRAWS wins. Which face carries an icon is a fact
-    // about the font, and asking the page beats keeping a list here that has to be corrected every
+    // about the font, and asking the page steps keeping a list here that has to be corrected every
     // time a brand icon is added or the faces are merged.
     let signature = "";
     for (const family of ["fa-solid", "fa-brands"]) {
