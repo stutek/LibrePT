@@ -21,8 +21,20 @@
      the control a step is about, and it can only do that while there is screen left over — a panel
      grown to half the phone by a long paragraph ends up over the very thing it is pointing at, which
      is how the story first got stuck mid-swap. The text is never shortened for this; it is the box
-     that is bounded. */
-  max-height: 32vh;
+     that is bounded.
+     The bound is the PANEL's (walkthrough.css) and this is the part that gives way to it: as the
+     flex child that may shrink, the card takes whatever is left after the step number, the
+     instruction and the buttons have their own height. A 32vh cap of its own was a second number
+     saying the same thing in different units, and on a short phone the two disagreed — the card
+     obeyed its cap while the panel it was in came to 53% of the screen (§38.15). */
+  flex: 1 1 auto;
+  min-height: 0;
+  /* The last line fades out, which is how a reader knows the paragraph carries on below the fold.
+     Always on, and invisible when there is nothing to fade: a card whose words fit ends in its own
+     bottom margin, so the gradient falls on blank space. Both spellings, because the phone this is
+     designed around is the one that needs the prefixed one. */
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 14px), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 14px), transparent);
   overflow-y: auto;
   overscroll-behavior: contain;
   border: 0;

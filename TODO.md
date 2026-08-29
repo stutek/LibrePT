@@ -2959,7 +2959,56 @@ Everything above is reversible except the Pages outage step 2 exists to avoid.
 
 See [CHANGELOG](CHANGELOG.md).
 
-### 38.15 [ ] GAP — a chapter's opening card leaves the panel nowhere to get out of the way
+### 38.17 [ ] GAP — the guide complains about the wrong screen for a second while fixing it
+
+Measured 2026-08-30 at story step 47 (the evening's session move), deep-linked at full motion:
+
+```
+t+1.5s  busy rebuilding, every button greyed
+t+3.0s  "This step needs a different screen — go back to the sessions board and start it again."
+t+4.5s  on the board, control ringed, Show me works — the message gone
+```
+
+The complaint is TRUE for a second and a half and then untrue, which is the guide being wrong out
+loud at the one moment a viewer is looking for reassurance. The rebuild navigates and the app takes
+longer than `READY_SETTLE_MS` (2500ms) to render the day the step belongs to, so the guide reports
+before its own repair has landed.
+
+**Not fixed by raising the settle** — that delays every REAL complaint by the same amount. The
+honest fix is to hold the complaint while a navigation the rebuild itself started is still settling,
+which means the rebuild has to say it navigated (it already knows: `moved`).
+
+**Re-check condition:** whenever a chapter boundary is walked at full motion, or `READY_SETTLE_MS` is
+touched.
+
+### 38.16 [x] CHANGE — the demo card is put away, not shut
+
+**Reported 2026-08-30 (Simon):** *"demo cards exiting does not allow for return to demo, find a way
+for the demo card to be collapsed only (just like message area is) that allows for the user to return
+to demo"*, with the brainstorm *"do we get rid of the x button on the demo cards?"*
+
+**Yes — and that is the fix.** The corner of the panel held a ✕ that called `stop()`: the most final
+act available, wearing the glyph that everywhere else in this app means "close this box". A trainer
+who taps it wants the card out of the way for a moment; what they got was the demo over, with no way
+back — 49 steps in, that is the whole thing gone to one tap on a glyph that promised less.
+
+- The corner now **parks** the guide, the way the message drawer parks itself: everything but the
+  head goes, leaving a bar with the one line worth reading from across the room — which step, of how
+  many, on whose phone. Tapping the bar anywhere brings the guide back.
+- **It keeps running while parked.** A trainer who does the step by hand with the card out of the way
+  comes back to a guide that moved on with them. That is what makes it a park rather than a pause,
+  and why the bar keeps the step number.
+- **Ending the demo is offered only from the parked bar** — one tap from a guide already out of the
+  way, two from one you are reading, which is the right way round for the act with nothing after it.
+  It is also the only place the ✕ appears now, on a bar that says DEMO, so it reads as "end the demo"
+  rather than "close this card".
+
+Pinned by [test_walkthrough_panel.py](tests/medium/test_walkthrough_panel.py): the bar keeps the step
+number and drops the card, the instruction and the buttons; tapping it brings them back; the ✕ is
+absent until parked and still ends the walkthrough; and the spotlight keeps following the control
+while parked, which is the proof that the guide is still watching.
+
+### 38.15 [x] BUG — a chapter's opening card left the panel nowhere to get out of the way
 
 Found 2026-08-29 in the same hand-walk as §38.13, and confirmed by looking at the screen rather than
 at a number: at **steps 23 and 30** — the openings of the programme and gym chapters — the guide's
@@ -2972,15 +3021,40 @@ carrying a paragraph AND an instruction. That makes it ~375px tall on an 844px s
 which is where the ringed card is. The pure card steps flagged by the same walk (11, 17, 18, 44, 49)
 are **not** this: their target IS the card inside the panel, so an overlap is what they mean.
 
-Not fixed here, because every fix is a product decision rather than a repair: shorten the opening
-cards, scroll the ringed control to the half of the screen the panel is not on, or let the panel
-shrink to its instruction while a card is open and expand when the card is dismissed. The third is
-the one I would try first.
+**Measured again on 2026-08-30, this time at both iPhone sizes**, after *"opravi še isti prehod dema
+na iPhone resoluciji in popravi čudno postavljene kartice"*. The numbers are worse on the short
+phone, and there was a third symptom nobody had reported:
 
-**Re-check condition:** whenever a chapter's opening card grows, or `keepPanelClearOf` is touched.
-The walk that finds it again is `scratchpad/walk_demo.py` in the session that wrote this — it is not
-a repo tool yet, and becomes one if this recurs (see [agent_tools/INDEX.md](agent_tools/INDEX.md)'s
-bar for that).
+| | iPhone 14 (390×844) | iPhone SE (375×667) |
+| :-- | :-- | :-- |
+| tallest panel | 47% of the screen | **63%** (story step 1) |
+| covers the ringed control | steps 23, 30 | steps 12, 21 |
+| **hangs off the screen** | — | step 9 |
+
+**Fixed in two halves, because one alone cannot do it.**
+
+1. **The panel is bounded** (45vh) and laid out as a column: the prose scrolls inside it, while the
+   step number, the instruction and the buttons keep their own height and stay where a thumb expects
+   them. The card's own `max-height: 32vh` is gone — it was a second number saying the same thing in
+   different units, and on a short phone the two disagreed: the card obeyed its cap while the panel
+   holding it came to 63% of the screen.
+2. **When neither end of the screen clears the control, the control moves.** A cap cannot win the
+   middle band: a control at half-height is under a panel docked low AND under the same panel docked
+   high. The board scrolls and the panel's ends do not, so the guide scrolls the control out from
+   under itself — ONCE per control, never on the poll (which asks four times a second and would be
+   wrestling the thumb), and never while a demonstration is running, because the player scrolls the
+   control into view itself and then reads its box to place the hand.
+
+Pinned by [test_walkthrough_panel.py](tests/medium/test_walkthrough_panel.py) at both phone sizes,
+with a card in the panel and the control in the middle band: the panel must not cover it, and must
+not exceed 45% of the screen.
+
+**After, walked again on both phones:** all 49 steps on each (from 23 before), tallest panel 45%,
+nothing hanging off the screen. The walk still reports two chapter openings as covered — it samples
+350ms after arriving, and what it catches is the repair in flight. Deep-linked to the same step and
+measured at 0.4s, 1.2s, 2.5s and 4s, the overlap is **0 on both phones**; the panel had settled to
+the far end of the screen from the control. A viewer sees the card land and the screen sort itself
+out inside a second, which is the honest state of it: at rest it is clear, in transit it is not.
 
 ### 38.14 [x] CHANGE — the gate refuses to run with a filter reading its output
 

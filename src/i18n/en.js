@@ -382,7 +382,9 @@ export const en = {
   walkthrough_show: "Show me",
   walkthrough_next: "Next",
   walkthrough_done: "Done",
-  walkthrough_exit: "Leave the walkthrough",
+  walkthrough_exit: "End the demo",
+  walkthrough_collapse: "Put the demo card away",
+  walkthrough_expand: "Back to the demo card",
   // Shown when the trainer has taken the app somewhere the current step cannot happen. It says what
   // is true — they went exploring — rather than blaming them, and gives the two ways on.
   walkthrough_off_track_title: "You have wandered off",

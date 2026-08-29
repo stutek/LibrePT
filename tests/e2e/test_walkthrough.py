@@ -254,11 +254,34 @@ def test_walking_the_whole_script_ends_with_the_app_in_the_state_it_showed(
     expect(page.locator(".circuit-sig.easy.active").first).to_be_visible()
 
 
-def test_leaving_is_one_tap_and_takes_nothing_with_it(page, local_server):
+def test_getting_the_guide_out_of_the_way_is_one_tap_and_takes_nothing_with_it(
+    page, local_server
+):
     """Gym-floor rule: any guide that cannot be dropped mid-set is a guide that gets in the way of a
-    client. Leaving keeps whatever the trainer already did — the signal they logged is theirs."""
+    client. One tap still does it — but what one tap does is PARK it (§38.16, decided 2026-08-30),
+    because a trainer with a client waiting needs the screen back, not 49 steps of demo destroyed.
+    The app underneath is usable immediately, which is what the rule is actually about.
+
+    Ending it outright is the second tap, and it is on the parked bar — see the test below."""
     _open_walkthrough(page, local_server)
     _do_current_step(page)
+
+    page.locator("#walkthrough-collapse").click()
+
+    # Out of the way: the instruction and the buttons are gone, and the app is usable underneath.
+    expect(page.locator(CAPTION)).to_be_hidden()
+    expect(page.locator("#active-session-client-tabs")).to_be_visible()
+    assert page.locator("#backup-btn").is_enabled()
+    # …and the guide is still there to come back to, which is the whole point of the change.
+    expect(page.locator(PROGRESS)).to_be_visible()
+
+
+def test_ending_the_demo_takes_nothing_with_it(page, local_server):
+    """The other half of the old one-tap rule: whenever the trainer does end it, everything they did
+    on the way is theirs. It is offered from the parked bar, so this is what the second tap does."""
+    _open_walkthrough(page, local_server)
+    _do_current_step(page)
+    page.locator("#walkthrough-collapse").click()
 
     page.locator(EXIT).click()
 

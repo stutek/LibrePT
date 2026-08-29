@@ -43,6 +43,7 @@ import {
 } from "../../domain/walkthrough.js";
 import { mountDemoHand, unmountDemoHand } from "./demoHand.js";
 import { mountDemoNarrator } from "./demoNarratorCard.js";
+import { prefersReducedMotion } from "./demoPace.js";
 import {
   performStep,
   resolveTarget,
@@ -56,6 +57,10 @@ const OVERLAY_ID = "walkthrough-overlay";
 const DEFAULT_POLL_MS = 250;
 // Space kept clear under the panel before it gives up the bottom of the screen and moves to the top.
 const PANEL_CLEARANCE_PX = 12;
+// How short the panel may be trimmed when a control leaves it nowhere else to go (see
+// trimPanelToFitBeside). Below this the step number, the instruction and the buttons stop fitting,
+// and a guide whose buttons are cut off is worse than one overlapping a control by a few pixels.
+const PANEL_MIN_HEIGHT_PX = 220;
 // How long the app is given to settle between the taps of a rebuild. Deliberately far shorter than
 // the demonstration's own pauses (demoTourPlayer.js): those exist so a viewer can follow a finger,
 // while this is the guide putting back a state the trainer never saw leave.
@@ -121,13 +126,27 @@ function buildOverlay(doc, t) {
   head.className = "walkthrough-head";
   const progress = doc.createElement("span");
   progress.className = "walkthrough-progress";
+  // PARK the guide, do not end it. Until 2026-08-30 this corner held a ✕ that called `stop()`: the
+  // most final act on the panel, wearing the glyph that everywhere else in this app means "close
+  // this box". Reported as "demo cards exiting does not allow for return to demo" — and the trainer
+  // who taps it wants the card out of the way for a moment, not the demo over. So it collapses, the
+  // way the message drawer does, and the way back is the bar it leaves behind.
+  const collapse = iconButton(doc, {
+    id: "walkthrough-collapse",
+    className: "walkthrough-collapse",
+    icon: "fa-solid fa-chevron-down",
+    label: t("walkthrough_collapse"),
+  });
+  // Ending the demo lives HERE, on the parked bar, and nowhere else: one tap from a guide that is
+  // already out of the way, two from one you are reading — which is the right way round for the one
+  // action with nothing after it.
   const exit = iconButton(doc, {
     id: "walkthrough-exit",
     className: "walkthrough-exit",
     icon: "fa-solid fa-xmark",
     label: t("walkthrough_exit"),
   });
-  head.append(progress, exit);
+  head.append(progress, collapse, exit);
 
   const caption = doc.createElement("p");
   caption.className = "walkthrough-caption";
@@ -167,6 +186,7 @@ function buildOverlay(doc, t) {
     next,
     returnToDemo,
     leave,
+    collapse,
     exit,
   };
 }
@@ -214,6 +234,13 @@ export function startGuidedWalkthrough({
   // their own is the expected case, not a fault, so it takes more than one reading to say so.
   let offTrackTicks = 0;
   let offTrack = false;
+  // The STEP whose control this guide has already scrolled out from under its own panel, and the
+  // step it has given up height for. By step rather than by element: a board re-renders its cards, so
+  // the element a step resolves to is a different object almost every tick.
+  let scrolledClearOf = null;
+  // Whether the guide is parked as a bar. It keeps running while it is — see setCollapsed.
+  let collapsed = false;
+  let trimmedFor = null;
   // Re-entrancy guard for the advance above: enterStep is async, and a second tick landing inside it
   // would advance twice on one completed step.
   let advancing = false;
@@ -294,6 +321,28 @@ export function startGuidedWalkthrough({
    * moves back down once the control is no longer underneath — a panel that fled to the top and
    * stayed there would cover whatever the next step points at up there.
    */
+  /** Parks the guide as a bar, or brings it back.
+   *
+   * Parked, it keeps RUNNING: the poll still watches, so a trainer who does the step by hand while
+   * the card is out of the way comes back to a guide that has moved on with them. That is what makes
+   * this a park rather than a pause, and it is why the bar keeps the step number — it is the one
+   * thing worth reading from across the room.
+   */
+  function setCollapsed(wanted) {
+    collapsed = wanted;
+    el.overlay.classList.toggle("is-collapsed", collapsed);
+    el.collapse
+      .querySelector("i")
+      ?.setAttribute("class", `fa-solid fa-chevron-${collapsed ? "up" : "down"}`);
+    el.collapse.setAttribute(
+      "aria-label",
+      t(collapsed ? "walkthrough_expand" : "walkthrough_collapse"),
+    );
+    // A parked bar is a fraction of the panel's height, so where it may sit has changed entirely.
+    const step = currentWalkthroughStep(tour, state);
+    keepPanelClearOf(step ? resolveTarget(doc, step) : null);
+  }
+
   function keepPanelClearOf(target) {
     if (!target) return;
     // A control that lives ON the panel — the story card's Continue, the handover link — cannot be
@@ -311,6 +360,88 @@ export function startGuidedWalkthrough({
     const frame = el.overlay.getBoundingClientRect();
     const wouldSitAbove = frame.bottom - panelHeight - PANEL_CLEARANCE_PX;
     el.overlay.classList.toggle("is-top", target.getBoundingClientRect().bottom > wouldSitAbove);
+    moveTargetOutFromUnderPanel(target);
+  }
+
+  /** When neither end of the screen clears the control, something has to give way to it (TODO
+   * §38.15). A control in the middle band is covered by a panel docked low AND by the same panel
+   * docked high — measured on an iPhone SE at the openings of two chapters, where the panel carries
+   * a paragraph as well as an instruction.
+   *
+   * **The panel gives up height first**, because that repair is instant and cannot fail: the prose
+   * scrolls, so nothing is lost but the reading area. Only when even the shortest panel would still
+   * be in the way does the CONTROL move instead — and that is once per step, never on the tick,
+   * because the poll asks four times a second and a guide re-scrolling the board at that rate would
+   * be wrestling the thumb trying to reach the control.
+   *
+   * Some pages can do neither: the client's intake form on a 667px phone cannot scroll at all
+   * (measured `scrollHeight === clientHeight`), which is exactly why the panel's own trim exists.
+   */
+  function moveTargetOutFromUnderPanel(target) {
+    // Never while the guide is DEMONSTRATING: the player scrolls the control into view itself and
+    // then reads its box to place the hand, so a second scroll landing between those two leaves the
+    // pointer reaching for where the control used to be. And never while it is PARKED: the trainer
+    // put it away, and a guide that answers by scrolling their board has not been put away at all.
+    if (showing || collapsed) return;
+    const panelBox = el.panel.getBoundingClientRect();
+    const box = target.getBoundingClientRect();
+    // Remembered by the STEP, never by the element. A board re-renders its cards, so the element a
+    // step resolves to is a different object almost every tick — keyed by identity, this scrolled
+    // the board four times a second for ever and never got as far as trimming (measured on an
+    // iPhone SE, story step 23, which is also why the walk stalled there).
+    const here = currentWalkthroughStep(tour, state)?.id ?? null;
+    if (box.bottom <= panelBox.top || box.top >= panelBox.bottom) {
+      // Clear of it: give back whatever height was surrendered for a different control.
+      if (trimmedFor !== here) el.panel.style.maxHeight = "";
+      return;
+    }
+    // The PANEL gives way first, because that repair is instant and cannot fail. Moving the control
+    // is animated and needs a page with somewhere to scroll — so it is what happens when giving up
+    // height is not enough, rather than a first attempt that leaves the control covered for the half
+    // second it takes the scroll to land (seen at two chapter openings, one per phone).
+    if (trimPanelToFitBeside(target, here)) return;
+    if (scrolledClearOf === here) return;
+    scrolledClearOf = here;
+    // Away from the panel, not into the middle: `center` is exactly where it already is.
+    target.scrollIntoView({
+      block: el.overlay.classList.contains("is-top") ? "end" : "start",
+      behavior: prefersReducedMotion(doc) ? "auto" : "smooth",
+    });
+  }
+
+  /** The last resort: the panel gives up height until the control is clear of it.
+   *
+   * Some pages cannot scroll. The client's intake form on a 667px phone is one — measured
+   * `scrollHeight === clientHeight`, so asking the control to move does nothing at all, and the name
+   * field sits in the middle band where a panel docked at either end still reaches it (TODO §38.15).
+   * Something has to give, and it is the prose: the card scrolls inside the panel, so the words are
+   * all still there, one thumb-flick further.
+   *
+   * The trim is computed from the CONTROL and the frame, never from the panel's own height, so it
+   * cannot chase itself; and it is held for as long as that control is the one being pointed at, so
+   * the panel does not breathe in and out at the poll's four times a second.
+   */
+  function trimPanelToFitBeside(target, step) {
+    // Never inside one of the app's own modals. There the panel is docked to the DIALOG's box and
+    // sized by a rule that keeps it inside it — and an inline height beats any stylesheet, so this
+    // trim made the panel taller than the dialog holding it and hung it off the bottom of the screen
+    // (measured on an iPhone SE at the client form, story step 9).
+    if (el.overlay.classList.contains("is-in-dialog")) return false;
+    const panelBox = el.panel.getBoundingClientRect();
+    const box = target.getBoundingClientRect();
+    // Measured from the edge the panel is PINNED to — its top when it is docked high, its bottom
+    // when it is docked low. That edge does not move when the height changes, which is what keeps
+    // this from chasing its own tail; the frame's own edge is the wrong one, because a top-docked
+    // panel starts below the app header rather than at the top of the screen.
+    const room = el.overlay.classList.contains("is-top")
+      ? box.top - panelBox.top - PANEL_CLEARANCE_PX
+      : panelBox.bottom - box.bottom - PANEL_CLEARANCE_PX;
+    trimmedFor = step;
+    el.panel.style.maxHeight = `${Math.max(PANEL_MIN_HEIGHT_PX, Math.round(room))}px`;
+    // Whether giving up height was ENOUGH. Below the floor it was not, and the caller moves the
+    // control instead — the panel keeps the floor either way, since a shorter guide is still less in
+    // the way than a taller one.
+    return room >= PANEL_MIN_HEIGHT_PX;
   }
 
   /** Whether the app is already on a step's route. Compared on the path the script writes — the
@@ -722,6 +853,11 @@ export function startGuidedWalkthrough({
     el.problem.hidden = true;
     offTrack = false;
     offTrackTicks = 0;
+    // A new step is a new question about where the panel may sit: it gets its own scroll, and the
+    // height the last one was given back.
+    scrolledClearOf = null;
+    trimmedFor = null;
+    el.panel.style.maxHeight = "";
     const step = currentWalkthroughStep(tour, state);
     // BEFORE the precondition and the target lookup: a narrated step's own control is the card the
     // narration puts on screen, so it has to exist before anything goes looking for it.
@@ -921,6 +1057,14 @@ export function startGuidedWalkthrough({
 
   el.leave.addEventListener("click", stop);
   el.exit.addEventListener("click", stop);
+
+  el.collapse.addEventListener("click", () => setCollapsed(!collapsed));
+  // Anywhere on the parked bar brings it back — the whole bar is the way in, the way the message
+  // drawer's own bar is. The two buttons on it are not: one parks, the other ends.
+  el.panel.addEventListener("click", (event) => {
+    if (!collapsed || event.target.closest("button")) return;
+    setCollapsed(false);
+  });
 
   // The trainer doing the step themselves is the expected case, so it is watched for continuously
   // rather than inferred from a click listener — the tap may land on a child element, may be a

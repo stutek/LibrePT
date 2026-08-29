@@ -64,6 +64,18 @@
   left: 50%;
   bottom: calc(12px + var(--safe-bottom, 0px));
   transform: translateX(-50%);
+  /* BOUNDED, and the bound is what lets it move at all. The panel gets out of the way of the control
+     it is pointing at by docking at the other end of the screen — which needs an end to be free. A
+     chapter's opening card rides on the first real step, so the panel carries a paragraph AND an
+     instruction, and that came to 63% of an iPhone SE at the story's own first step: docked low it
+     covered a control in the middle of the board, and flipping it high covered the same control
+     (measured 2026-08-30, TODO §38.15). The prose scrolls inside the panel now instead of pushing
+     it taller.
+     A column, so the card is the part that gives: everything else — the step number, the
+     instruction, the buttons — keeps its own height and stays where a thumb expects it. */
+  display: flex;
+  flex-direction: column;
+  max-height: 45vh;
   width: min(calc(100% - 24px), var(--app-max-width, 480px));
   padding: 14px 16px calc(14px + var(--safe-bottom, 0px)) 16px;
   background: var(--card-bg);
@@ -75,6 +87,24 @@
   color: var(--text-main);
   /* The panel itself IS interactive — only the transparent frame around it is not. */
   pointer-events: auto;
+}
+
+/* PARKED: the guide as a bar, the way the message drawer parks itself (asked for 2026-08-30 —
+   "find a way for the demo card to be collapsed only ... that allows for the user to return to
+   demo"). Everything but the head goes; the head is already the one line worth reading from across
+   the room, and tapping the bar brings the rest back. The guide keeps running while it is parked, so
+   a trainer who does the step by hand meanwhile comes back to a guide that moved on with them. */
+.walkthrough.is-collapsed .walkthrough-panel {
+  max-height: none;
+  cursor: pointer;
+}
+.walkthrough.is-collapsed .walkthrough-panel > *:not(.walkthrough-head) {
+  display: none;
+}
+/* The ✕ ENDS the demo, and it is offered only here — one tap from a guide already out of the way,
+   two from one you are reading, which is the right way round for the act with nothing after it. */
+.walkthrough:not(.is-collapsed) .walkthrough-exit {
+  display: none;
 }
 
 /* The control this step is about sits where the panel would be, so the panel gets out of the way
