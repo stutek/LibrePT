@@ -23,7 +23,7 @@ import { isRestRecord } from "./sessionItemRecord.js";
 // read naturally with.
 export const isRestItem = isRestRecord;
 
-// A fresh plan opens with every deck card collapsed (exerciseDeck.js reads this to skip rendering
+// A fresh plan opens with every deck card collapsed (exerciseDeckOfCards.js reads this to skip rendering
 // ANY card in focus) until the trainer taps one, which reveals focus for the rest of the session.
 // activeExerciseIndex still points at a real item throughout — this flag only gates whether the
 // deck's render honours it, so every OTHER consumer keeps working unmodified.

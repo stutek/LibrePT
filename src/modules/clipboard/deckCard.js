@@ -5,12 +5,12 @@
 //
 // Mirrors src/controllers/routes/route.js's Route base class (see docs/ROUTING.md §2): Template
 // Method — render() is the fixed skeleton, subclasses implement renderFocused/renderCollapsed —
-// plus Replace Conditional with Polymorphism: exerciseDeck.js's dispatch becomes "construct the
+// plus Replace Conditional with Polymorphism: exerciseDeckOfCards.js's dispatch becomes "construct the
 // right subclass," not an if/else chain re-branching on item.type at every render/click/focus
 // decision. What each card type does when collapsed, when focused, and which actions it exposes
 // lives once, in that subclass — not as a scattered `if (isRestItem(x))` guard in shared code.
 //
-// ctx: the render context threaded to every card — see exerciseDeck.js's own header for the shape.
+// ctx: the render context threaded to every card — see exerciseDeckOfCards.js's own header for the shape.
 
 export class DeckCard {
   constructor(item, ctx) {
@@ -19,7 +19,7 @@ export class DeckCard {
   }
 
   // Whether this card currently shows its expanded template. Default reads item.isInFocus, which
-  // exerciseDeck.js now computes uniformly from activeExerciseIndex for every item type — rests
+  // exerciseDeckOfCards.js now computes uniformly from activeExerciseIndex for every item type — rests
   // included, since a rest is a first-class focus target like any other plan item. A subclass
   // overrides this getter when its own "focus" means something else entirely (PastDeckCard's is
   // expandedPastId, orthogonal to activeExerciseIndex) — that override is the whole point of

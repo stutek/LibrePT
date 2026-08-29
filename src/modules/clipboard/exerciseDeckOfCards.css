@@ -1,4 +1,4 @@
-/* exerciseDeck.css — the vertical card-stack mechanics and the deck-card chrome SHARED by
+/* exerciseDeckOfCards.css — the vertical card-stack mechanics and the deck-card chrome SHARED by
    every card type it renders (exerciseCard.js, circuitCard.js, and its own rest/past cards):
    compact/top/timer/counter/status/name. Component-exclusive additions live in that
    component's own file (exerciseCard.css, circuitCard.css). Extracted from index.css

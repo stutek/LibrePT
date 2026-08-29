@@ -28,7 +28,7 @@ import { openFeedbackModal } from "../common/feedbackModal.js";
 import { escapeHTML, getClientDisplayNameHTML, getInitials } from "../common/utils.js";
 import { renderClipboardEditor } from "./clipboardEditor.js";
 import { isClipboardEditMode, markEditorRow, takePendingCallout } from "./editModeState.js";
-import { renderExerciseDeck } from "./exerciseDeck.js";
+import { renderExerciseDeck } from "./exerciseDeckOfCards.js";
 
 let deps = {};
 

@@ -4,7 +4,7 @@
 // domain/quickSignals.js — exactly the split TODO §24.4 drew. Injected dependencies: `state`,
 // `saveToLocalStorage` and `renderPendingPlanAdjustments` arrive through activeSessionStore.js.
 //
-// The (clientId, exerciseName, tag) signatures are kept because exerciseDeck.js and feedbackModal.js
+// The (clientId, exerciseName, tag) signatures are kept because exerciseDeckOfCards.js and feedbackModal.js
 // are wired against them.
 
 import {

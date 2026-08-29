@@ -32,7 +32,7 @@ self.swCacheManifest = (() => {
     // first; these add only what their module owns.
     "./modules/clipboard/activeSessionOverlay.css",
     "./modules/clipboard/clipboardEditor.css",
-    "./modules/clipboard/exerciseDeck.css",
+    "./modules/clipboard/exerciseDeckOfCards.css",
     "./modules/clipboard/exerciseCard.css",
     "./modules/intake/signupDelivery.js",
     "./modules/intake/intakeView.js",
@@ -203,7 +203,7 @@ self.swCacheManifest = (() => {
     "./modules/clipboard/clipboardEditor.js",
     "./modules/clipboard/exerciseAndRestTimer.js",
     "./modules/clipboard/exerciseCard.js",
-    "./modules/clipboard/exerciseDeck.js",
+    "./modules/clipboard/exerciseDeckOfCards.js",
     "./modules/clipboard/circuitCard.js",
     "./modules/clipboard/restDeckCard.js",
     "./modules/clipboard/pastDeckCard.js",

@@ -1,5 +1,5 @@
 // src/modules/clipboard/restDeckCard.js — a standalone rest between movements, first-class in the
-// deck exactly like an exercise or circuit. Extracted from exerciseDeck.js's inline dispatch
+// deck exactly like an exercise or circuit. Extracted from exerciseDeckOfCards.js's inline dispatch
 // (2026-07-27) into the DeckCard hierarchy (see deckCard.js) as part of making rests first-class,
 // focusable plan items — see TODO for the design.
 //

@@ -1,6 +1,6 @@
 // src/modules/clipboard/pastDeckCard.js — the client's most recent past session, shown as a
 // tappable reference card in the deck: a compact one-line summary, or (tapped) every set as
-// logged. Extracted verbatim from exerciseDeck.js's inline dispatch (2026-07-27) into the
+// logged. Extracted verbatim from exerciseDeckOfCards.js's inline dispatch (2026-07-27) into the
 // DeckCard hierarchy (see deckCard.js).
 //
 // Its "focus" is deliberately NOT activeExerciseIndex — a past record isn't part of the live plan

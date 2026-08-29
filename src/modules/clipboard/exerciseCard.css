@@ -1,6 +1,6 @@
 /* exerciseCard.css — the standalone in-focus exercise card's exclusive additions: the
    stat tiles (sets/target/load) and the one-tap Too Easy / Too Hard / Notes action row.
-   Shared deck-card chrome (compact/top/timer/counter/status/name) lives in exerciseDeck.css.
+   Shared deck-card chrome (compact/top/timer/counter/status/name) lives in exerciseDeckOfCards.css.
    Extracted from index.css 2026-07-27 (TODO §14.5 / §18.10). Inherits design tokens,
    glass-card/button/flex foundations and color scheme from index.css, loaded first. */
 
