@@ -2959,6 +2959,73 @@ Everything above is reversible except the Pages outage step 2 exists to avoid.
 
 See [CHANGELOG](CHANGELOG.md).
 
+### 38.15 [ ] GAP — a chapter's opening card leaves the panel nowhere to get out of the way
+
+Found 2026-08-29 in the same hand-walk as §38.13, and confirmed by looking at the screen rather than
+at a number: at **steps 23 and 30** — the openings of the programme and gym chapters — the guide's
+panel sits **on top of the session card its own spotlight is ringing**. The ring is visible below the
+panel's bottom edge with its top half covered.
+
+Both are folded-card steps: the chapter's opening card rides on the first real step, so the panel is
+carrying a paragraph AND an instruction. That makes it ~375px tall on an 844px screen, and
+`keepPanelClearOf` has nowhere left to put it — moving to the top covers the top half of the board,
+which is where the ringed card is. The pure card steps flagged by the same walk (11, 17, 18, 44, 49)
+are **not** this: their target IS the card inside the panel, so an overlap is what they mean.
+
+Not fixed here, because every fix is a product decision rather than a repair: shorten the opening
+cards, scroll the ringed control to the half of the screen the panel is not on, or let the panel
+shrink to its instruction while a card is open and expand when the card is dismissed. The third is
+the one I would try first.
+
+**Re-check condition:** whenever a chapter's opening card grows, or `keepPanelClearOf` is touched.
+The walk that finds it again is `scratchpad/walk_demo.py` in the session that wrote this — it is not
+a repo tool yet, and becomes one if this recurs (see [agent_tools/INDEX.md](agent_tools/INDEX.md)'s
+bar for that).
+
+### 38.14 [x] CHANGE — the gate refuses to run with a filter reading its output
+
+**Asked 2026-08-29 (Simon):** *"can we somehow prevent build checks to be run piped? to exit if pipe
+is detected?"* — after four gate runs in one session went through `| tail`, which is what the rules
+already forbid. A rule is the weakest way to hold anything (value 10), so it is now held by the gate.
+
+**A TTY check cannot do it, and that is the design problem.** `sys.stdout.isatty()` is false for an
+agent's shell whether or not anything was piped — a tool capturing output captures it the same way —
+so a TTY test refuses the honest run and the careless one alike, and the only way past it would be a
+flag, which is the same mistake with one more keystroke. **Measured**: a plain
+`.venv/bin/python -m build lint` from this session's shell is not a TTY.
+
+So the guard looks for what is actually wrong: a **truncating filter reading this process's output**,
+found by walking `/proc` for siblings under the same shell — `cmd | tail` puts both under one parent.
+`tail`, `head`, `grep`, `sed`, `awk`, `cut`, `wc`. Nothing else is refused: `| cat`, a pager and a
+redirect to a file all keep every line. `CI` is exempt, which is an escape hatch for a machine.
+
+**What piping costs, and why this is worth a guard:** the output IS the report. `| tail -20` keeps
+the closing summary and throws away the stage lines above it — a check that was skipped, a warning
+nobody failed on, a stage that suddenly takes four times as long as the header predicted. A green
+summary read through a pipe is a green summary with the evidence removed.
+
+### 38.13 [x] BUG — the evening chapter opened wherever the gym chapter had left the app
+
+Found 2026-08-29 by walking the whole demo by hand at full motion, which is not what the e2e suite
+does (it runs at reduced motion and asserts the story finishes). At **step 47 of 49** the guide greyed
+out every button for about five seconds and then said *"This step needs a different screen — go back
+to the sessions board and start it again"* — while the board was where it had just navigated.
+
+**The cause is three lines away from the symptom.** A chapter's opening card declares the screen its
+chapter happens on (`route: "/"`), and `foldCards` — which merges that card into the first real step,
+so nobody has to tap Continue on a paragraph — copied `narrate` and **dropped everything else**. The
+evening chapter therefore began wherever the gym chapter had left the app, which is deep inside the
+plan editor, and by the third step the guide was trying to rebuild ground from an anchor two chapters
+back. The other three chapters were fine only by luck: their first step happens to declare a route of
+its own.
+
+Fixed in the fold (the card's route rides along, unless the step names its own — the step is the more
+specific of the two), and pinned by
+[storyTour.test.mjs](tests/unit_js/modules/demo/storyTour.test.mjs) with the invariant behind it:
+**every chapter played on the trainer's phone says which screen it starts on.** The client's chapter
+is exempt and cannot be otherwise — it is a different page on a different device, reached by handing
+the browser over rather than by routing.
+
 ### 38.12 [x] CHANGE — a reload no longer throws away a half-filled form
 
 **Asked 2026-08-29 (Simon):** *"kadar se izpolnjujejo obrazci in se zgodi page reload poskrbi, da se

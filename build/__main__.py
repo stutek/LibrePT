@@ -2,6 +2,7 @@
 `python -m build check` — run lint analysis and tests together without bundling dist/.
 """
 
+import os
 import sys
 import time
 from datetime import datetime
@@ -17,6 +18,98 @@ from . import (
     run_tests,
     run_build,
 )
+
+
+# Commands whose whole job is to throw most of their input away. A pipe into one of these is the
+# mistake this guard exists for; a pipe into a file or a pager that keeps everything is not.
+OUTPUT_FILTERS = frozenset(
+    {"tail", "head", "grep", "egrep", "rg", "sed", "awk", "cut", "wc"}
+)
+
+
+def sibling_commands(read=None):
+    """The commands running beside us under the same shell — which, in a pipeline, is the rest of it.
+
+    `cmd | tail` makes both processes children of the same shell, so the filter is visible from here
+    as a sibling. Linux-only by construction (it reads /proc), which is what the gate runs on; a
+    machine without /proc simply reports nothing and the guard lets the run through, since a guard
+    that cannot see is not entitled to refuse.
+    """
+    read = read or _read_proc_siblings
+    try:
+        return read(os.getppid())
+    except OSError:
+        return []
+
+
+def _read_proc_siblings(parent_pid):
+    names = []
+    for entry in os.listdir("/proc"):
+        if not entry.isdigit() or int(entry) == os.getpid():
+            continue
+        try:
+            with open(f"/proc/{entry}/stat", encoding="utf-8") as handle:
+                stat = handle.read()
+        except OSError:
+            continue
+        # `comm` is parenthesised and may itself contain spaces, so the fields after it are found
+        # from the LAST closing bracket rather than by splitting the whole line.
+        close = stat.rfind(")")
+        if close < 0:
+            continue
+        comm = stat[stat.find("(") + 1 : close]
+        fields = stat[close + 2 :].split()
+        if len(fields) > 1 and fields[1] == str(parent_pid):
+            names.append(comm)
+    return names
+
+
+def output_filter_reading_us(read=None):
+    """The name of a truncating filter reading this run's output, or None."""
+    for name in sibling_commands(read):
+        if name in OUTPUT_FILTERS:
+            return name
+    return None
+
+
+def refuse_a_pipe(read=None):
+    """Stop, loudly, if this run's output is being fed to something that throws most of it away.
+
+    Asked for 2026-08-29 after the gate was run through `tail` several times in one session: "can we
+    somehow prevent build checks to be run piped? to exit if pipe is detected?" — the right instinct,
+    because the rule already existed and a rule is the weakest way to hold anything.
+
+    **What piping costs.** This output IS the report. `| tail -20` keeps the closing summary and
+    throws away every stage line above it — including the ones that say a check was skipped, a
+    warning was printed, or a stage took four times as long as last time. A green summary read
+    through a pipe is a green summary with the evidence removed, and the failure it hides looks
+    exactly like a pass.
+
+    **Not a TTY check, and that is the whole design problem.** `sys.stdout.isatty()` is false for an
+    agent's shell whether or not anything was piped — every tool that captures output captures it the
+    same way — so a TTY test refuses the honest run and the careless one alike, and the only way past
+    it would be a flag, which is the mistake with one extra keystroke. What is actually wrong is
+    specific: a `tail` is READING this. So that is what is looked for, and nothing else is refused —
+    redirecting to a file keeps every line, and is none of this function's business.
+
+    **CI is exempt** and it is a real exception: a workflow may legitimately pipe, and the runner sets
+    `CI`. That is an escape hatch for a machine, not a flag a person reaches for in a hurry.
+    """
+    if os.environ.get("CI"):
+        return
+    filter_name = output_filter_reading_us(read)
+    if not filter_name:
+        return
+    print(
+        f"\n  ✗ build refuses to run with `{filter_name}` reading its output.\n\n"
+        "    This output is the report. What a filter cuts is exactly what a green run is worth\n"
+        "    reading for: a check that was skipped, a warning nobody failed on, a stage that\n"
+        "    suddenly takes four times as long as the header predicted.\n\n"
+        "    Run it plainly:  .venv/bin/python -m build check\n"
+        "    Every stage also writes its own log to .build-reports/ to read afterwards.\n",
+        file=sys.stderr,
+    )
+    sys.exit(2)
 
 
 def run_all_stages():
@@ -102,6 +195,9 @@ if __name__ == "__main__":
     start = time.monotonic()
     arg = sys.argv[1] if len(sys.argv) > 1 else ""
     label = f"build {arg}".strip()
+    # Before anything is printed or installed: a refusal that arrives after a minute of environment
+    # setup has already wasted the minute it exists to save.
+    refuse_a_pipe()
     # Before the environment check, not after: the header is what tells anyone watching that the run
     # started and when, and `check_environment` can itself spend a minute installing requirements.
     print_run_header(label)

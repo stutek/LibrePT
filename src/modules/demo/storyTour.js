@@ -76,6 +76,23 @@ function narration(id, kind, titleKey, bodyKey, extra = {}) {
  * dead one. A card that hands the browser to another device keeps its own step for the same reason
  * its button is a link: going there IS the action.
  */
+/** One step with a card's words on it — and with what the card said about WHERE it happens.
+ *
+ * The route rides along. A chapter's opening card is where the story names the screen its chapter
+ * happens on, and until 2026-08-29 the fold copied `narrate` and dropped everything else, so the
+ * evening chapter began wherever the gym chapter had left the app — deep inside the plan editor.
+ * Two steps later the guide greyed out every button for five seconds and then complained that the
+ * trainer was on the wrong screen, while standing on the right one (TODO §38.13).
+ *
+ * Only when the step does not name a route of its own: the step is the more specific of the two, and
+ * a card must never move a step off its own screen.
+ */
+function cardRidingOn(card, step) {
+  const merged = { ...step, narrate: card.narrate };
+  if (card.route && !step.route) merged.route = card.route;
+  return merged;
+}
+
 function foldCards(steps) {
   const folded = [];
   let pending = null;
@@ -90,7 +107,7 @@ function foldCards(steps) {
       pending = pending || step;
       continue;
     }
-    folded.push(pending && !isCard ? { ...step, narrate: pending.narrate } : step);
+    folded.push(pending && !isCard ? cardRidingOn(pending, step) : step);
     if (isCard && pending) folded.splice(-1, 0, { ...pending, showMe: false });
     pending = null;
   }
