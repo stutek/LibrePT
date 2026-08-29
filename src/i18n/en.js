@@ -263,7 +263,7 @@ export const en = {
   intake_send: "Share with my trainer",
   intake_save: "Save the file to share",
   intake_privacy_note:
-    "Nothing is saved on this phone and nothing is uploaded. Close this page and it is gone.",
+    "Nothing leaves this phone and nothing is uploaded. What you type is kept only until you close the tab — close it and the form is gone.",
   intake_share_title: "My details for training",
   intake_share_text: "Here are my details — this file opens in LibrePT.",
   intake_sent: "Shared. Your trainer will add you from that file.",

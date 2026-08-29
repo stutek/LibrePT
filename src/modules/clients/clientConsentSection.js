@@ -54,7 +54,7 @@ export function consentSectionMarkup() {
         <legend id="client-consent-legend">Data Protection (GDPR)</legend>
 
         <div class="form-group checkbox-group consent-checkbox">
-          <input type="checkbox" id="client-gdpr-consent" class="form-checkbox">
+          <input type="checkbox" id="client-gdpr-consent" class="form-checkbox" data-draft="never">
           <label for="client-gdpr-consent" id="label-client-gdpr-consent">
             Client signed the consent form (data storage &amp; cloud sync)
           </label>

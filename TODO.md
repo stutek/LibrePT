@@ -2959,6 +2959,35 @@ Everything above is reversible except the Pages outage step 2 exists to avoid.
 
 See [CHANGELOG](CHANGELOG.md).
 
+### 38.12 [x] CHANGE — a reload no longer throws away a half-filled form
+
+**Asked 2026-08-29 (Simon):** *"kadar se izpolnjujejo obrazci in se zgodi page reload poskrbi, da se
+vsebina vnosnih polj ohrani"*. Measured on the client's intake page before writing anything: type a
+name, an email and a phone number, reload, all three gone.
+
+That form is the longest thing anyone is asked to fill in on their own phone, there is **no second
+copy of it anywhere**, and a reload on a gym floor is not a rare accident — a locked phone, a browser
+reclaiming memory, a mis-tap on the address bar.
+
+**The conflict this had to resolve, and the ruling.** §26.1 promises the client's phone is written to
+by nothing, and the page says so in as many words. Keeping a draft is a write. Ruled 2026-08-29
+(Simon), presented with the trade: **sessionStorage, and the wording sharpened to match** — the draft
+survives the reload and dies with the tab, so the promise's substance holds (close the page and it is
+gone) while its old letter ("Nothing is saved on this phone") does not, and a promise that is nearly
+true is worse than one that is exact. Both languages' copy, the module headers,
+[uc8](use_cases/uc8_client_self_onboarding.md) and the catalog were changed in the same commit; the
+e2e test that asserted the old promise now asserts the exact one, including that `sessionStorage`
+holds the draft and nothing else.
+
+**Consent is never restored.** A ticked consent box put back by a script is a person agreeing to
+something without being asked, on a page they have just reloaded. `data-draft="never"` exists for
+that field, on both the client's form and the trainer's.
+
+**The trainer's client form too**, keyed by who is being edited: one form is "add a client" one
+moment and "edit Jane" the next, and a draft that did not know the difference would spill half of
+Jane's details into the next person's form. Cancel and ✕ mean "throw this away", so they do — only a
+reload, the thing nobody chose, brings the form back.
+
 ### 38.11 [ ] GAP — muted text sits ON the AA bar on the light palettes
 
 Found 2026-08-27 while measuring the demo's cards, and it is not about the demo. `--text-muted`

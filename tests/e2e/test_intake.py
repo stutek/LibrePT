@@ -48,10 +48,16 @@ def test_a_client_gets_the_form_and_not_the_trainers_app(page, local_server):
 
 
 @pytest.mark.clean_start
-def test_filling_it_in_leaves_nothing_on_the_clients_device(page, local_server):
-    """§26.1's stateless promise, through a real navigation and a real IndexedDB. A prospective client
-    who fills this in and walks away — or decides not to send it — leaves no trace of themselves on
-    their own phone."""
+def test_filling_it_in_leaves_nothing_that_outlives_the_tab(page, local_server):
+    """§26.1's stateless promise, through a real navigation and a real IndexedDB, and since
+    2026-08-29 stated exactly (§38.12): nothing persists.
+
+    What she types is held in sessionStorage while the tab is open, so a reload does not throw her
+    work away — that is the test below. Everything that OUTLIVES the tab is what this one is about,
+    and it stays empty: no database, and nothing of hers in localStorage. The page's own wording was
+    sharpened with the change, because "nothing is saved on this phone" stopped being exactly true
+    the moment anything was written at all.
+    """
     page.goto(f"{local_server}intake")
     expect(page.locator("#view-intake")).to_be_visible(timeout=15_000)
 
@@ -65,6 +71,36 @@ def test_filling_it_in_leaves_nothing_on_the_clients_device(page, local_server):
         page.evaluate("async () => (await indexedDB.databases()).map((d) => d.name)")
         == []
     )
+    # The draft is real, and it is the kind of storage the promise allows: it belongs to this tab.
+    assert page.evaluate("() => Object.keys(sessionStorage)") == [
+        "librept_draft:intake"
+    ]
+
+
+def test_a_reload_does_not_cost_her_the_form(page, local_server):
+    """Reported 2026-08-29: "kadar se izpolnjujejo obrazci in se zgodi page reload poskrbi, da se
+    vsebina vnosnih polj ohrani". Measured before the fix: name, email, phone and both paragraphs,
+    all gone.
+
+    This form is the longest thing anyone is asked to fill in on their own phone, there is no second
+    copy of it anywhere, and a reload is not a rare accident — a locked phone, a browser reclaiming
+    memory, a mis-tap on the address bar. The consent tick is the one thing that does not come back:
+    agreement is given, not restored.
+    """
+    page.goto(f"{local_server}intake")
+    expect(page.locator("#view-intake")).to_be_visible(timeout=15_000)
+    page.fill("#intake-name", "Jana Novak")
+    page.fill("#intake-phone", "+386 40 111 222")
+    page.fill("#intake-injury", "knee reconstruction 2024")
+    page.check("#intake-consent")
+
+    page.reload()
+    expect(page.locator("#view-intake")).to_be_visible(timeout=15_000)
+
+    expect(page.locator("#intake-name")).to_have_value("Jana Novak")
+    expect(page.locator("#intake-phone")).to_have_value("+386 40 111 222")
+    expect(page.locator("#intake-injury")).to_have_value("knee reconstruction 2024")
+    expect(page.locator("#intake-consent")).not_to_be_checked()
 
 
 @pytest.mark.clean_start

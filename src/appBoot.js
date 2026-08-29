@@ -324,8 +324,10 @@ export async function bootDemoStory({
 //
 // **A separate boot, not a flag threaded through the normal one.** §26.1's constraint is that intake
 // renders on a stock, cold browser: no state load, no demo seed, no service worker, no first-run
-// agreement, no splash hold, and above all no write — a stranger who fills this in and walks away
-// leaves nothing on their own phone. Every one of those is something the trainer's boot deliberately
+// agreement, no splash hold, and nothing written that outlives the tab — a stranger who fills this
+// in and walks away leaves nothing on their own phone. What they type is held in sessionStorage
+// while the tab is open, so a reload does not throw their work away (TODO §38.12); closing it takes
+// the lot with it, which is what the page promises them in as many words. Every one of those is something the trainer's boot deliberately
 // does, so the two paths share the document and nothing else. Written as a branch inside `init()`
 // instead, each of those steps would need its own "unless this is a client" condition, and the day
 // one of them was missed a prospective client would get a terms modal in front of the form, or an

@@ -65,8 +65,10 @@ is the artifact.
 
 `/intake` runs its **own boot step** ([appBoot.js](../src/appBoot.js)'s `bootIntake`), not the
 trainer's boot with conditions threaded through it. The client's device gets no database, no demo seed,
-no service worker, no first-run agreement, and no splash hold — and no write of any kind, `initTheme`
-included, since that persists the resolved theme.
+no service worker, no first-run agreement, and no splash hold — and nothing written that outlives the
+tab, `initTheme` included, since that persists the resolved theme. The one thing written at all is the
+form's own draft, in `sessionStorage`, so that a reload does not throw away what somebody has typed
+(TODO §38.12); closing the page takes it with it, which is what the page says in as many words.
 
 The reason it is a separate path rather than a flag: every step of the trainer's boot writes or asks
 something, so a flag would work until the day one step was missed, and the failure would be a

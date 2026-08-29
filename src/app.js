@@ -225,7 +225,8 @@ async function init() {
   // The intake page is a different app for a different person, and it returns before any of the
   // trainer's boot happens (TODO §1.7/§26.1). No state load, no seed, no service worker, no terms
   // modal, no splash hold — and crucially NO WRITE: a prospective client who fills this in and walks
-  // away leaves nothing on their own phone. `initTheme` is skipped for exactly that reason (it
+  // away leaves nothing on their own phone (their half-typed form lives in sessionStorage until the
+  // tab closes — §38.12). `initTheme` is skipped for exactly that reason (it
   // persists the resolved theme); theme-boot.js has already put the right class on <html> before
   // paint, and it writes nothing.
   // An invite link is the app's own root with `?evt=` (eventTransports.buildEventLink), so WHO is

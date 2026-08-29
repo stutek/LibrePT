@@ -12,7 +12,8 @@
 //   service worker and no first-run agreement — appBoot's `bootIntake` is a separate boot path
 //   precisely so none of that runs. Nothing the client types is persisted anywhere; it exists in the
 //   form until they send it, and then in the file they sent. A stranger who fills this in and walks
-//   away leaves nothing behind on their own device.
+//   away leaves nothing behind on their own device. What they type is held for the life of the TAB
+//   (sessionStorage, §38.12), so a reload does not cost them the form; closing the page ends it.
 // - **The client chooses their own language**, because it is the language their consent is given in
 //   (`formLang`) and the one the notice they are agreeing to is written in. It is not inherited from
 //   whatever the trainer's device was set to.
@@ -33,6 +34,7 @@
 import { buildClientSignup } from "../../data/clientSignup.js";
 import { senderFromFragment } from "../../domain/intakeSender.js";
 import { $id, renderMarkupOnce } from "../common/dom.js";
+import { keepFormDraft } from "../common/formDraft.js";
 import {
   buildSignupFile,
   canShareSignupFile,
@@ -95,7 +97,7 @@ export function renderIntakeViewShell() {
 
         <div class="intake-consent">
           <label class="intake-consent-row" for="intake-consent">
-            <input type="checkbox" id="intake-consent">
+            <input type="checkbox" id="intake-consent" data-draft="never">
             <span id="intake-consent-label"></span>
           </label>
           <p class="intake-consent-links">
@@ -244,6 +246,14 @@ export function setupIntakeForm(deps) {
     });
   }
 
+  // What she has typed survives a reload — a locked phone, a browser reclaiming memory, a mis-tap on
+  // the address bar — and dies with the tab (TODO §38.12). This form is longer than anything else a
+  // stranger is asked to fill in on their own phone, and there is no second copy of it anywhere: a
+  // reload used to take the name, the email, the phone number and both paragraphs with it. The
+  // consent tick is the one field that does NOT come back — agreement is given, not restored.
+  const draft = keepFormDraft($id("intake-form"), () => "intake");
+  draft.restore();
+
   $id("intake-send")?.addEventListener("click", async () => {
     const file = currentFile();
     if (!file) return;
@@ -254,14 +264,20 @@ export function setupIntakeForm(deps) {
     });
     // A cancelled share leaves the form exactly as it was, with nothing said: the client chose to
     // stop, and telling them something went wrong would be false.
-    if (outcome.delivered) setStatus(t, "intake_sent", "done");
-    else if (!outcome.cancelled) setStatus(t, "intake_send_failed", "error");
+    // Delivered means the form did what it was for. A cancelled or failed share keeps the draft:
+    // she is still going to send it, and asking her to type it again would be the same loss this
+    // fixes, one step further on.
+    if (outcome.delivered) {
+      draft.forget();
+      setStatus(t, "intake_sent", "done");
+    } else if (!outcome.cancelled) setStatus(t, "intake_send_failed", "error");
   });
 
   $id("intake-save")?.addEventListener("click", () => {
     const file = currentFile();
     if (!file) return;
     saveSignupFile(file, platform);
+    draft.forget();
     setStatus(t, "intake_saved", "done");
   });
 

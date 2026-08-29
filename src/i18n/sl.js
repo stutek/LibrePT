@@ -254,7 +254,7 @@ export const sl = {
   intake_send: "Deli s trenerjem",
   intake_save: "Shrani datoteko za deljenje",
   intake_privacy_note:
-    "Na tem telefonu se nič ne shrani in nič se ne naloži v splet. Ko zapreš to stran, je vsega konec.",
+    "Nič ne zapusti tega telefona in nič se ne naloži v splet. Vpisano se hrani samo, dokler je zavihek odprt — ko ga zapreš, obrazca ni več.",
   intake_share_title: "Moji podatki za trening",
   intake_share_text: "Tu so moji podatki — datoteka se odpre v LibrePT.",
   intake_sent: "Deljeno. Trener te bo dodal iz te datoteke.",
