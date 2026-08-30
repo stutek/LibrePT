@@ -24,6 +24,14 @@ localises the fault better, and a test placed too low simply cannot express what
 | [tests/medium/](medium/) (51 files, 267 tests) | Playwright, stage 2 | one component against real `index.html` markup | It needs the **DOM/CSS** but not navigation, persistence or a real app boot. Four shapes, all in [_harness.py](medium/_harness.py): `HEADER_STUB` (header + its route-backed dialogs), `SESSIONS_STUB` (the dashboard timeline), `clipboard_stub()` (the live session, fed an injected `activeSession`), and `view_stub()` to build one for any other view — shell markup → activate → render. |
 | [tests/e2e/](e2e/) (53 files, 231 tests) | Playwright, stage 3 | the whole app | It needs the router, IndexedDB, the service worker, reload/deep-link behaviour, or a multi-step flow across views. |
 
+**Every test runs in the same environment, wherever it is run.** `tests/conftest.py`'s
+`one_environment_everywhere` clears the variables this repository's own code branches on — today that
+is `CI` alone, read by the gate's pipe guard and by the Biome and Node downloaders. A test that WANTS
+one set does it with `monkeypatch.setenv`, which still works: the fixture clears the ambient value,
+it does not forbid a declared one. Added 2026-08-30 after a unit test passed on a laptop and failed
+on the runner, having inherited an environment it never asked for. **Add to that list when something
+new branches on the environment**, or the list stops being worth having.
+
 **Browser tests run on a FROZEN wall clock** (`tests/conftest.py`'s `freeze_wall_clock`). `Date.now()`
 is pinned to one instant for every test using the shared `page` fixture, so anything the app derives from
 "now" — the demo seed's session times, day buckets, overdue labels — is the same at 03:00 as at 23:00.

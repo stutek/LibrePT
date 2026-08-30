@@ -21,6 +21,7 @@ def siblings(*names):
 
 
 def test_a_truncating_filter_is_seen():
+    # No environment involved: this half only looks at who is reading the output.
     assert output_filter_reading_us(siblings("bash", "tail")) == "tail"
     assert output_filter_reading_us(siblings("head")) == "head"
 
@@ -40,6 +41,10 @@ def test_something_that_keeps_every_line_is_not_refused():
 
 
 def test_the_run_stops_rather_than_printing_a_summary_nobody_will_read(capsys):
+    # `CI` is cleared for every test by conftest's `one_environment_everywhere` — a fixture that
+    # exists because THIS test passed on a laptop and failed on the runner: the guard steps aside
+    # when CI is set, and GitHub Actions sets it for every step.
+
     with pytest.raises(SystemExit) as stopped:
         refuse_a_pipe(siblings("tail"))
 

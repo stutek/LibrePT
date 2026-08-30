@@ -85,6 +85,30 @@ SPLASH_DISMISS_TIMEOUT_MS = 20000
 SPLASH_EARLY_TAP_TIMEOUT_MS = 1500
 
 
+# The only environment variable this repository's own code branches on. Three places read it: the
+# gate's pipe guard steps aside for it (build/__main__.py), and the Biome and Node downloaders turn a
+# failed fetch into a hard error rather than a fallback (build/__init__.py). Add to this list when
+# something new branches on the environment — that is what makes the list worth having.
+BEHAVIOUR_CHANGING_ENV = ("CI",)
+
+
+@pytest.fixture(autouse=True)
+def one_environment_everywhere(monkeypatch):
+    """Every test runs in the same environment, wherever it is run.
+
+    Added 2026-08-30 after a unit test passed on a laptop and failed on the runner: it asserted that
+    the gate refuses a piped run, and the guard steps aside when `CI` is set, which GitHub Actions
+    sets for every step. Nothing was wrong with the guard or with the assertion — the test simply
+    inherited an environment it had not asked for, and there was nothing to stop it.
+
+    A test that WANTS one of these set does it itself with `monkeypatch.setenv`, which still works:
+    this clears the ambient value, it does not forbid a declared one.
+    """
+    for name in BEHAVIOUR_CHANGING_ENV:
+        monkeypatch.delenv(name, raising=False)
+    yield
+
+
 @pytest.fixture(autouse=True)
 def accept_first_run_terms(request):
     """Auto-accept the first-run Terms modal for browser tests that use the shared `page`
