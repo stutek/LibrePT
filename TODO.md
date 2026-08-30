@@ -2959,6 +2959,31 @@ Everything above is reversible except the Pages outage step 2 exists to avoid.
 
 See [CHANGELOG](CHANGELOG.md).
 
+### 38.21 [ ] OPEN — the demo's card copy, waiting on the maintainer
+
+**Said 2026-08-30 (Simon):** *"besedila kartic so obupna, dajva jih skupaj editirati (angleška) in ti
+potem narediš ustrezne prevode"*, then *"ohrani besedila za takrat ko bom imel čas"*.
+
+The twelve cards, each with what it says today, what is wrong with it and a proposed rewrite, are in
+[docs/DEMO_CARD_COPY.md](docs/DEMO_CARD_COPY.md). Nothing there is shipped. When the proposals are
+edited, the English goes into `src/i18n/en.js` and the Slovenian is written to match.
+
+Three defects in it are worth naming here, because they are facts rather than taste:
+
+- the story's **last card is a copy-paste of the gym card** — `evening-close` reuses
+  `story_gym_close_body`, so the demo ends by describing an hour that finished two chapters earlier,
+  and the "clear the demo data" offer appears twice;
+- **four cards share a title with another card** ("On Ana's phone", "The programme", "In the gym"),
+  so a viewer cannot tell whether the story moved;
+- the **message card shows an invitation the app no longer sends** — the text replaced on 2026-08-26
+  precisely because it read like a phishing message.
+
+Separately, seven captions narrate instead of instructing ("Open the session menu.", "Joint pain, on
+this movement."), against the rule that a step asking for an action names the control, its glyph and
+where it is.
+
+**Re-check condition:** whenever the maintainer has time for the copy pass.
+
 ### 38.20 [~] IN PROGRESS — user-visible English that never reaches the translator
 
 **Reported 2026-08-30 (Simon):** *"prevodi so nekonsistentni, na slovenski strani se včasih pojavlja

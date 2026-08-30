@@ -17,6 +17,7 @@ tags:
 | [DATA_MODEL.md](DATA_MODEL.md) | `architecture` | Data model & storage schema — IndexedDB layout, record model, star-write projections, migration and retention |
 | [ROUTING.md](ROUTING.md) | `architecture` | Routing architecture — the Route class hierarchy, the registry, specificity ordering, and the invariants a new route must respect |
 | [PREVIEW.md](PREVIEW.md) | `guidelines` | Pre-release PREVIEW build risks & data-loss notice (linked from the header PREVIEW tag) |
+| [DEMO_CARD_COPY.md](DEMO_CARD_COPY.md) | `draft` | The demo story's twelve narration cards: what each says today, what is wrong with it, and a proposed rewrite. Waiting on the maintainer's edits; nothing here is shipped. |
 | [BUG_REPORTING.md](BUG_REPORTING.md) | `guidelines` | Bug Reporting Guide — how to submit issues, include build stamps, and steps to reproduce |
 | [GOOGLE_CLOUD_SETUP.md](GOOGLE_CLOUD_SETUP.md) | `guidelines` | Google Cloud setup runbook — Part A, the production OAuth client trainers consent to (scopes, consent screen, authorized domains); Part B, the stored credential the live API canary runs on. Written against role handles and naming no credential, so the procedure is reviewable in the open; only the handle-to-address mapping stays private |
 | [PRIVACY.md](../PRIVACY.md) | `guidelines` | Core Privacy Policy & GDPR Data Controller Statement |
