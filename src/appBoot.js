@@ -300,7 +300,7 @@ export async function bootDemoStory({
   // opens, not a second cleanup path that could drift from it.
   const narrator = mountDemoNarrator({ t, onClearDemoData: openDemoCleanupDialog });
   // Flattened to one step list: a chapter is a tour, which is what lets the guide run it unchanged.
-  const steps = story.storyStepsFor(DEMO_STORY, shareChapter);
+  const steps = story.storyStepsFor(DEMO_STORY, shareChapter, { t });
   return startGuidedWalkthrough({
     tour: { id: DEMO_STORY.id, steps },
     t,
@@ -365,7 +365,10 @@ async function bootIntakeStoryChapter({ shareDemo, shareChapter, t } = {}) {
       import("./domain/demoStory.js"),
     ]);
 
-  const steps = story.storyStepsFor(DEMO_STORY, shareChapter || "intake", { surface: "client" });
+  const steps = story.storyStepsFor(DEMO_STORY, shareChapter || "intake", {
+    surface: "client",
+    t,
+  });
   if (steps.length === 0) return null;
   const narrator = mountDemoNarrator({ t });
   return startGuidedWalkthrough({

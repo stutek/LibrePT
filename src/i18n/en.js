@@ -588,6 +588,11 @@ export const en = {
     "Between rounds he mentions his knee — the one that was rebuilt in 2024. The clock keeps running; the note opens over the session.",
   story_step_capture_tag: "Joint pain, on this movement.",
   story_step_capture_note: "And what he actually said, typed with one thumb.",
+  // What the demo TYPES, not what it says about typing: a Slovenian viewer watched Ana write her
+  // shoulder up in English (reported 2026-08-30, TODO §38.19). The words a person enters belong to
+  // that person, so they are translated like everything else they read.
+  story_typed_note: "left knee, third round",
+  story_typed_injury: "shoulder, two years ago",
   story_step_capture_keep:
     "Kept on John's record. This is not about tonight's load, it is about the next three months.",
   story_step_capture_submit: "Saved — against John, and against this movement.",

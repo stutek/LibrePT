@@ -51,14 +51,20 @@ def _open_walkthrough(page, local_server):
     page.locator(PANEL).wait_for(state="visible", timeout=30_000)
 
 
-def _card_moved_on(page, step_now, timeout=8_000):
+def _card_moved_on(page, step_now, timeout=20_000):
     """Did the card follow the app off this step, or is it still waiting for a tap?
 
-    Asked rather than assumed, because both are legitimate since 2026-08-26: a step DONE in front of
-    the viewer carries the card on, and a step that arrived already satisfied — a narrated card, the
-    last step of a tour — waits for Next. Polling for it also avoids the race that reading the number
-    once creates: the advance can land between the read and the tap, and then Next is disabled
-    because the NEXT step has not happened yet.
+    Asked rather than assumed, because both are legitimate: a step DONE in front of the viewer
+    carries the card on (§38.5, and since §38.18 that includes Show me doing it), while one that
+    arrived already satisfied — a narrated card, the last step of a tour — waits for Next. Polling
+    for it also avoids the race that reading the number once creates: the advance can land between
+    the read and the tap, and then Next is disabled because the NEXT step has not happened yet.
+
+    The budget is GENEROUS on purpose. Giving up early does not fail this helper — it falls through
+    and taps Next, which on a card that has already moved on skips the step after it, and the test
+    that eventually fails is three steps away from the timeout that caused it. Seen 2026-08-30 when
+    this file ran beside the story suite: alone it passed, in company it did not, and the demonstration
+    itself takes seconds at full motion under a loaded machine.
     """
     try:
         expect(page.locator(PROGRESS)).not_to_have_text(

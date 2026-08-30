@@ -212,7 +212,7 @@ export function renderClipboardEditor(container, deps) {
 
   const newBadge = (it) =>
     isCalledOut(it) && !callout.focus && callout.kind !== "restored"
-      ? `<span class="editor-added-badge">${
+      ? `<span class="editor-added-badge" data-callout="${callout.kind === "swap" ? "swap" : "new"}">${
           callout.kind === "swap" ? tr("swapped_label", "Swapped") : tr("new_label", "New")
         }</span>`
       : "";

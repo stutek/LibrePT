@@ -176,10 +176,10 @@ const GYM_CHAPTER = {
       id: "capture-note",
       persona: TRAINER,
       target: "#feedback-custom-note",
-      enter: "left knee, third round",
+      enterKey: "story_typed_note",
       caption: "story_step_capture_note",
       // `hasValue`, because a field HOLDS what was typed and SAYS nothing.
-      expect: { selector: "#feedback-custom-note", hasValue: "left knee" },
+      expect: { selector: "#feedback-custom-note", hasValueKey: "story_typed_note" },
     },
     {
       // §35.3c: this is the step that makes the note outlive the session. Without it the twinge is
@@ -239,7 +239,10 @@ const GYM_CHAPTER = {
       // The PLAN says it was swapped — the claim being made, rather than "a dialog closed". The
       // movement's name lives in an input's value, which is not text content and cannot be probed;
       // the editor's own Swapped badge is the visible fact.
-      expect: { selector: ".editor-added-badge", visible: true, containsText: "Swapped" },
+      // The badge the editor puts on a swapped movement, asked for by WHAT IT IS rather than by what
+      // it says: its word is translated, and reading that word back was one of the four expectations
+      // that made the story impossible to finish in Slovenian (TODO §38.19).
+      expect: { selector: ".editor-added-badge[data-callout='swap']", visible: true },
     },
     // Not the end any more — the evening chapter is — so this one just closes the session and hands
     // over to it. The way out (§30.2) belongs on the LAST card, or a viewer is offered the exit
@@ -306,7 +309,7 @@ const ARRIVE_CHAPTER = {
       target: "#intake-invite-contact",
       enter: "+386 41 234 567",
       caption: "story_step_arrive_contact",
-      expect: { selector: "#intake-invite-send", containsText: "text message" },
+      expect: { selector: "#intake-invite-send[data-channel='sms']", visible: true },
     },
     {
       // The SECOND friend, and the other channel. The same one box, retyped: what the trainer does
@@ -317,7 +320,7 @@ const ARRIVE_CHAPTER = {
       target: "#intake-invite-contact",
       enter: "maja.kos@example.com",
       caption: "story_step_arrive_contact_email",
-      expect: { selector: "#intake-invite-send", containsText: "email" },
+      expect: { selector: "#intake-invite-send[data-channel='email']", visible: true },
     },
     {
       id: "arrive-close-invite",
@@ -420,9 +423,9 @@ const INTAKE_CHAPTER = {
       id: "intake-injury",
       persona: CLIENT,
       target: "#intake-injury",
-      enter: "shoulder, two years ago",
+      enterKey: "story_typed_injury",
       caption: "story_step_intake_injury",
-      expect: { selector: "#intake-injury", hasValue: "shoulder" },
+      expect: { selector: "#intake-injury", hasValueKey: "story_typed_injury" },
     },
     {
       id: "intake-consent",
@@ -440,7 +443,7 @@ const INTAKE_CHAPTER = {
       persona: CLIENT,
       target: "#intake-send",
       caption: "story_step_intake_send",
-      expect: { selector: "#intake-status", containsText: "Shared" },
+      expect: { selector: "#intake-status.is-done", visible: true },
     },
     // Where that file went, on the other phone. Narrated rather than drawn for the same reason as
     // the message above: this happens in the trainer's messaging app, not in ours.

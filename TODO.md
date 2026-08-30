@@ -2959,6 +2959,87 @@ Everything above is reversible except the Pages outage step 2 exists to avoid.
 
 See [CHANGELOG](CHANGELOG.md).
 
+### 38.20 [ ] GAP — 332 user-visible strings in the app are hardcoded English
+
+**Reported 2026-08-30 (Simon):** *"prevodi so nekonsistentni, na slovenski strani se včasih pojavlja
+angleški tekst"* and *"gumb cancel se pojavi na slovenski izvedbi"*.
+
+**Not a missing-translation problem.** The dictionaries are in perfect parity — 622 keys each,
+nothing missing, and the only strings identical between them are ones that should be (`kg`, `min`,
+`LibrePT`). The English comes from copy that never passes through the translator at all: it is
+written into the markup.
+
+Measured across `src/`: **332 user-visible literal strings in 38 files.** The worst:
+
+| file | strings |
+| :-- | --: |
+| `controllers/exerciseFormsController.js` | 46 |
+| `modules/clipboard/activeSessionOverlayView.js` | 27 |
+| `modules/common/applicationHeader.js` | 24 |
+| `modules/clients/clientDataRights.js` | 22 |
+| `modules/session/editSessionView.js` | 22 |
+| `modules/clients/clientsView.js` | 19 |
+| `modules/common/backupRestore.js` | 19 |
+| `controllers/clientFormsController.js` | 16 |
+
+The reported "Cancel" is one of the sixteen in the client dialog, beside "Add New Client", "Full
+Name *", "Save Client" and "Data Protection (GDPR)". Some of the 332 are false alarms the crude scan
+picked up — a licence name, a taxonomy value, a placeholder that is an example rather than a label —
+so the number to fix is smaller than 332 and larger than any one dialog.
+
+**Not fixed in the same pass as §38.19, deliberately.** That one was a demo that could not be
+finished; this is a sweep across a third of the module tree, every string of which is a small product
+decision about wording, and doing it under the same commit would bury both. It also wants the same
+treatment as §38.19 got: a check that fails the build on a user-visible literal, or the sweep is
+undone by the next dialog somebody writes.
+
+**Re-check condition:** before any release that offers Slovenian as a supported language rather than
+a preview.
+
+### 38.19 [x] BUG — the demo could not be finished in Slovenian
+
+**Reported 2026-08-30 (Simon)**, from a Slovenian run, with the card pasted in: *"Korak 16 od 49 …
+Tega koraka ni bilo mogoče zaključiti."* Followed by *"ana poškodbo piše v angleščini?"*
+
+**The step asserted the app's English words.** `intake-send` expected
+`containsText: "Shared"`; the Slovenian page says *"Deljeno. Trener te bo dodal iz te datoteke."*
+The claim could never come true, so the story stopped dead at step 16 for every Slovenian viewer —
+and passed every test we had, because the suite runs in English.
+
+Four expectations read translated copy back to the app. All four now ask for a fact instead:
+
+| step | was | is |
+| :-- | :-- | :-- |
+| `arrive-contact` | `containsText: "text message"` | `#intake-invite-send[data-channel='sms']` |
+| `arrive-contact-email` | `containsText: "email"` | `#intake-invite-send[data-channel='email']` |
+| `intake-send` | `containsText: "Shared"` | `#intake-status.is-done` |
+| `swap-pick-movement` | `containsText: "Swapped"` | `.editor-added-badge[data-callout='swap']` |
+
+Two of those hooks did not exist and were added, which is a small improvement in its own right: the
+invite dialog now says which channel it chose (`data-channel`) and the editor says which kind of
+callout a badge is (`data-callout`), rather than only rendering a sentence about it.
+
+**And what the demo TYPES is content, so it is translated too.** Ana wrote up her shoulder in English
+on a Slovenian phone. A step now says which words with `enterKey` and the expectation that reads them
+back uses `hasValueKey` — the same key, so the two cannot drift into different languages — resolved
+by `storyStepsFor` where the story becomes a runnable list. Names, addresses, phone numbers and times
+stay literal: they are the same in every language. Measured after, in Slovenian: Ana writes *"rama,
+pred dvema letoma"*, and step 16 completes.
+
+**The check that keeps the fifth from being written**
+([storyLanguage.test.mjs](tests/unit_js/modules/demo/storyLanguage.test.mjs)): a demo step may not
+match on text the app says in English and never says in the other language. Verified by putting the
+reported bug back and watching it fail — which is also how a hole in the first version was found: it
+read the trainer's run, and step 16 is on the client's phone, so it walked straight past the one step
+it was written for.
+
+**A false alarm the check taught me something with:** matching the same key across locales flagged
+`hasValue: "Ana"` — the client's own NAME, which the demo types — because "Ana" sits inside "Ana's
+phone" and Slovenian declines it to "Anin telefon". The rule is therefore about the whole dictionary:
+what makes the four real ones real is that the word is absent from the other language altogether.
+
+**Still open, and much larger: §38.20.**
+
 ### 38.18 [x] BUG — Show me advanced the demo, or did not, depending on something invisible
 
 **Reported 2026-08-30 (Simon):** *"show me behavior is inconsistent, should it advance always or

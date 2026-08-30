@@ -554,6 +554,8 @@ export const sl = {
     "Med serijama omeni koleno — tisto, ki so mu ga leta 2024 operirali. Ura teče naprej, zapis se odpre kar čez sejo.",
   story_step_capture_tag: "Bolečina v sklepu, pri tej vaji.",
   story_step_capture_note: "In kar je dejansko rekel, natipkano z enim palcem.",
+  story_typed_note: "levo koleno, tretja runda",
+  story_typed_injury: "rama, pred dvema letoma",
   story_step_capture_keep:
     "Shranjeno v Johnovo kartoteko. Ne gre za nocojšnjo obremenitev, gre za naslednje tri mesece.",
   story_step_capture_submit: "Zabeleženo — pri Johnu in pri tej vaji.",

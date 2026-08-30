@@ -30,7 +30,30 @@ export function chapterTitleKeys(story) {
  * An UNKNOWN chapter plays the whole story rather than nothing. These links are pasted into chat
  * apps and typed by hand, and a mistyped or since-renamed chapter should still show a stranger the
  * demo — a player handed an empty step list looks exactly like an app that failed to boot. */
-export function storyStepsFor(story, chapterId = null, { surface = "trainer" } = {}) {
+/** A step with the words it TYPES resolved into the viewer's language.
+ *
+ * What a demo enters into a field is CONTENT, not a selector: Ana writing up her shoulder is Ana
+ * writing, and on a Slovenian phone she was writing it in English (reported 2026-08-30, TODO
+ * §38.19). A step says which words with `enterKey`, and the expectation that reads them back says
+ * `hasValueKey` — the same key, so the two cannot drift into different languages.
+ *
+ * Names, addresses, phone numbers and times stay literal: they are the same in every language, and a
+ * translation key for "20:00" would be ceremony.
+ */
+function inTheViewersLanguage(step, t) {
+  const spoken = { ...step };
+  if (step.enterKey) spoken.enter = t(step.enterKey);
+  if (step.expect?.hasValueKey) {
+    spoken.expect = { ...step.expect, hasValue: t(step.expect.hasValueKey) };
+  }
+  return spoken;
+}
+
+export function storyStepsFor(
+  story,
+  chapterId = null,
+  { surface = "trainer", t = (key) => key } = {},
+) {
   const chapters = story?.chapters || [];
   const wanted = chapters.find((chapter) => chapter.id === chapterId);
   // Where each step sits in the WHOLE story, worked out before anything is filtered out. The story
@@ -55,11 +78,16 @@ export function storyStepsFor(story, chapterId = null, { surface = "trainer" } =
     // list, and the narration surface still has to say which chapter is on screen. Its place in the
     // story travels the same way, for the same reason — by the time the guide counts, all it has is
     // this list.
-    (chapter.steps || []).map((step) => ({
-      ...step,
-      chapterId: chapter.id,
-      storyPosition: { number: storyPlaces.get(step.id), count: everyStep.length },
-    })),
+    (chapter.steps || []).map((step) =>
+      inTheViewersLanguage(
+        {
+          ...step,
+          chapterId: chapter.id,
+          storyPosition: { number: storyPlaces.get(step.id), count: everyStep.length },
+        },
+        t,
+      ),
+    ),
   );
 }
 

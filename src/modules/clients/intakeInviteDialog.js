@@ -82,6 +82,12 @@ function syncSendControl() {
   const channelLine = document.getElementById("intake-invite-channel");
 
   anchor?.classList.toggle("disabled", !ready);
+  // WHICH channel, said in a way that is not a sentence. The button's words change with the contact
+  // the trainer typed — a number gets a text message, an address gets an email — and until
+  // 2026-08-30 the demo asserted that by reading those words, so the story could not be completed in
+  // any language but English (TODO §38.19). What the app chose is a fact about the app, not a
+  // translation of one.
+  if (anchor) anchor.dataset.channel = ready ? ready.channel : "";
   if (ready) anchor?.setAttribute("href", ready.href);
   else anchor?.removeAttribute("href");
   if (label) {
