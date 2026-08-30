@@ -139,6 +139,8 @@ jobs:
         run: .venv/bin/python -c "from build import run_icon_coverage_check; run_icon_coverage_check()"
       - name: CSS custom properties
         run: .venv/bin/python -c "from build import run_css_token_check; run_css_token_check()"
+      - name: Untranslated interface text
+        run: .venv/bin/python -c "from build import run_ui_string_check; run_ui_string_check()"
       - name: Import layering
         run: .venv/bin/python -c "from build import run_import_layer_check; run_import_layer_check()"
       - name: Python version declaration

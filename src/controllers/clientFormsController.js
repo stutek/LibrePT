@@ -34,47 +34,47 @@ export function renderClientDialog() {
     `
 <dialog id="dialog-client" class="dialog-modal card glassmorphic">
     <div class="modal-header">
-      <h3 id="client-modal-title">Add New Client</h3>
-      <button class="modal-close-btn" aria-label="Close modal"><i class="fa-solid fa-xmark"></i></button>
+      <h3 id="client-modal-title" data-i18n="add_new_client">Add New Client</h3>
+      <button class="modal-close-btn" data-i18n-label="modal_close" aria-label="Close modal"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <form id="form-client" method="dialog" class="modal-form">
       <input type="hidden" id="client-form-id">
 
       <div class="form-group">
-        <label for="client-name">Full Name *</label>
-        <input type="text" id="client-name" required placeholder="e.g. Jane Doe" class="form-control">
+        <label for="client-name" data-i18n="client_full_name">Full Name *</label>
+        <input type="text" id="client-name" required placeholder="e.g. Jane Doe" data-i18n-placeholder="client_name_placeholder" class="form-control">
       </div>
 
       <div class="form-group">
-        <label for="client-alias">Alias (only if two clients share a name)</label>
-        <input type="text" id="client-alias" placeholder="e.g. morning, Novak, the runner" class="form-control">
+        <label for="client-alias" data-i18n="client_alias">Alias (only if two clients share a name)</label>
+        <input type="text" id="client-alias" placeholder="e.g. morning, Novak, the runner" data-i18n-placeholder="client_alias_placeholder" class="form-control">
         <p class="form-hint" id="client-name-collision" hidden></p>
       </div>
 
       <div class="form-group">
-        <label for="client-email">Email</label>
-        <input type="email" id="client-email" placeholder="e.g. jane.doe@example.com" class="form-control">
+        <label for="client-email" data-i18n="client_email">Email</label>
+        <input type="email" id="client-email" placeholder="e.g. jane.doe@example.com" data-i18n-placeholder="client_email_placeholder" class="form-control">
       </div>
 
       <div class="form-group">
-        <label for="client-phone">Phone Number</label>
-        <input type="tel" id="client-phone" placeholder="e.g. +386 40 123 456" class="form-control">
+        <label for="client-phone" data-i18n="client_phone">Phone Number</label>
+        <input type="tel" id="client-phone" placeholder="e.g. +386 40 123 456" data-i18n-placeholder="client_phone_placeholder" class="form-control">
       </div>
 
       <div class="form-group">
-        <label for="client-goals">Fitness Goals</label>
-        <textarea id="client-goals" rows="2" placeholder="e.g. Strength gain, consistency..." class="form-control"></textarea>
+        <label for="client-goals" data-i18n="goals">Fitness Goals</label>
+        <textarea id="client-goals" rows="2" placeholder="e.g. Strength gain, consistency..." data-i18n-placeholder="goals_placeholder" class="form-control"></textarea>
       </div>
 
       <div class="form-group">
-        <label for="client-notes">Trainer Notes & Injuries (Alert banner shows during workout)</label>
-        <textarea id="client-notes" rows="3" placeholder="e.g. Left knee issue; monitor squat depth..." class="form-control"></textarea>
+        <label for="client-notes" data-i18n="notes_injuries">Trainer Notes & Injuries (Alert banner shows during workout)</label>
+        <textarea id="client-notes" rows="3" placeholder="e.g. Left knee issue; monitor squat depth..." data-i18n-placeholder="notes_placeholder" class="form-control"></textarea>
       </div>
 
 ${consentSectionMarkup()}
       <div class="modal-actions">
-        <button type="button" class="btn secondary-btn modal-cancel">Cancel</button>
-        <button type="submit" class="btn primary-btn">Save Client</button>
+        <button type="button" class="btn secondary-btn modal-cancel" data-i18n="btn_cancel">Cancel</button>
+        <button type="submit" class="btn primary-btn" data-i18n="save_client">Save Client</button>
       </div>
     </form>
   </dialog>
@@ -145,7 +145,7 @@ export function setupClientForms({
   });
 
   $id("btn-add-client").addEventListener("click", () => {
-    $id("client-modal-title").textContent = "Add New Client";
+    $id("client-modal-title").textContent = t("add_new_client");
     $id("client-form-id").value = "";
     openModal("dialog-client", { resetForm: true, formId: "form-client" });
     // After the reset, never before: reset() would otherwise wipe the date the block just derived.
@@ -161,7 +161,7 @@ export function setupClientForms({
     const client = state.clients.find((c) => c.id === activeId);
     if (!client) return;
 
-    $id("client-modal-title").textContent = "Edit Client Profile";
+    $id("client-modal-title").textContent = t("edit_client_profile");
     $id("client-form-id").value = client.id;
     $id("client-name").value = client.name;
     $id("client-alias").value = client.alias || "";

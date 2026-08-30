@@ -97,3 +97,35 @@ def test_static_mappings_selectors(src_dir):
                 assert has_element, (
                     f'Element matching button[data-view="{view_val}"] not found in index.html'
                 )
+
+
+def test_every_data_i18n_attribute_is_actually_applied(src_dir):
+    """`data-i18n="key"` on an element is a promise that the element's text is translated. Until
+    2026-08-30 nothing read those attributes: 27 of them sat in the markup — the whole session
+    editor, the client register's invite button, the clipboard's plan menu — and every one shipped
+    its English placeholder text in every language (reported as "na slovenski strani se včasih
+    pojavlja angleški tekst", TODO §38.20).
+
+    The attribute is the cheaper half of the mechanism and the one a person writing markup reaches
+    for, so what has to stay true is that SOMETHING applies it.
+    """
+    applier = (src_dir / "i18n" / "domMappings.js").read_text(encoding="utf-8")
+    assert "data-i18n" in applier, (
+        "domMappings.js applies the explicit selector table but nothing reads [data-i18n], so every "
+        "element carrying one ships its English text in every language"
+    )
+
+    used = set()
+    for path in list(src_dir.rglob("*.js")) + list(src_dir.rglob("*.html")):
+        # The applier itself WRITES about the attribute — `data-i18n="key"` in its own header — and
+        # a scan that read its prose as markup would demand a translation for the word "key".
+        if "fonts" in path.parts or path.name == "domMappings.js":
+            continue
+        used.update(
+            re.findall(r'data-i18n="([\w-]+)"', path.read_text(encoding="utf-8"))
+        )
+    assert used, "no element carries data-i18n at all — has the attribute been renamed?"
+
+    dictionary = (src_dir / "i18n" / "en.js").read_text(encoding="utf-8")
+    missing = sorted(key for key in used if f"  {key}:" not in dictionary)
+    assert not missing, f"data-i18n names keys the dictionary does not have: {missing}"

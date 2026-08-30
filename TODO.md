@@ -2959,7 +2959,7 @@ Everything above is reversible except the Pages outage step 2 exists to avoid.
 
 See [CHANGELOG](CHANGELOG.md).
 
-### 38.20 [ ] GAP — 332 user-visible strings in the app are hardcoded English
+### 38.20 [~] IN PROGRESS — user-visible English that never reaches the translator
 
 **Reported 2026-08-30 (Simon):** *"prevodi so nekonsistentni, na slovenski strani se včasih pojavlja
 angleški tekst"* and *"gumb cancel se pojavi na slovenski izvedbi"*.
@@ -2993,8 +2993,36 @@ decision about wording, and doing it under the same commit would bury both. It a
 treatment as §38.19 got: a check that fails the build on a user-visible literal, or the sweep is
 undone by the next dialog somebody writes.
 
-**Re-check condition:** before any release that offers Slovenian as a supported language rather than
-a preview.
+**Started 2026-08-30, and the first two findings were mechanism rather than copy:**
+
+1. **27 elements carried `data-i18n="key"` and nothing read the attribute.** Every key existed and
+   was translated in both languages; no code ever asked for them, so the whole session editor, the
+   client register's invite button and the clipboard's plan menu shipped their English placeholder
+   text in every language. `i18n/domMappings.js` now applies the attribute — and two siblings with
+   it, `data-i18n-placeholder` and `data-i18n-label`, because a control says three different things
+   to a person: its text, the words a field shows while empty, and what a screen reader is told about
+   a button with only an icon on it.
+2. **The dialog the report came from** is converted: eighteen strings, of which the dictionary
+   already had fourteen — `add_new_client`, `btn_cancel`, `save_client`, the consent block — waiting
+   for markup that never used them. Measured after, in Slovenian: *"Dodaj novo stranko"*,
+   *"Ime in priimek *"*, *"Prekliči"*, *"Shrani stranko"*, *"npr. Ana Novak"*.
+
+Five entries were deleted from the selector table in the same pass: an element named both there and
+in its own markup is an element two files disagree about, and the table won — it said `client_name`
+("Ime stranke") where the label reads "Full Name *".
+
+**332 → 289**, and the rest is held by a ratchet
+([agent_tools/ui_strings.py](agent_tools/ui_strings.py), Stage 1 + CI): the count may not rise, and
+may not fall without the baseline following it. So the sweep can proceed a file at a time while no
+new dialog is written in English.
+
+The worst remaining, by count: `exerciseFormsController.js` (46), `activeSessionOverlayView.js` (23),
+`clientDataRights.js` (22), `applicationHeader.js` (20), `backupRestore.js` (19), `clientsView.js`
+(18).
+
+**Re-check condition:** the ratchet becomes an ordinary gate when the count reaches the irreducible
+set — a licence name, a taxonomy value that is the same word in every language — and this section
+closes then. Before any release that offers Slovenian as a supported language rather than a preview.
 
 ### 38.19 [x] BUG — the demo could not be finished in Slovenian
 

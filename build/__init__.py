@@ -993,6 +993,23 @@ def run_css_token_check():
         sys.exit(1)
 
 
+def run_ui_string_check():
+    """Holds the line on interface text that never reaches the translator — see
+    agent_tools/ui_strings.py.
+
+    Reported 2026-08-30 as "gumb cancel se pojavi na slovenski izvedbi", and it was not a missing
+    translation: the dictionaries are in exact parity, and the English is written into the markup.
+    There are hundreds, so this is a RATCHET — it fails when the number goes up, and again when it
+    goes down without the baseline following, which is what keeps a finished sweep from quietly
+    stopping the check from holding anything (TODO §38.20).
+    """
+    print("\n  Checking untranslated interface text...")
+    from agent_tools import ui_strings
+
+    if ui_strings.main() != 0:
+        sys.exit(1)
+
+
 def run_catalog_coverage_check():
     """Verifies the module catalog still describes the tree — see agent_tools/catalog_coverage.py.
 
@@ -1960,6 +1977,7 @@ def run_stage_1_parallel():
         "Module Headers": run_module_header_check,
         "Icon Coverage": run_icon_coverage_check,
         "CSS Tokens": run_css_token_check,
+        "UI Strings": run_ui_string_check,
         "Import Layering": run_import_layer_check,
         "Pipeline Gating": run_pipeline_gate_check,
         "Python Version": run_python_version_check,
