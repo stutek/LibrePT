@@ -511,12 +511,9 @@ export const en = {
     "His name, typed once. That is all a client needs to exist in the register; everything else can arrive later, from him or from you.",
   story_step_arrive_save_client:
     "Tap Save Client at the bottom of the form. He is in the register now — one of three friends in by three different routes, and you typed four words in total.",
-  story_step_review_menu:
-    "Back on your own phone, and Ana's file is sitting in your messages. Tap the ☰ button in the top right corner again.",
-  story_step_review_open:
-    "Tap Review a client's file — near the bottom of the menu. Nothing she sent has touched your register yet: a stranger never writes themselves into it, so somebody has to read it first, and that somebody is you.",
+  story_review_sender: "Ana Novak",
   story_step_review_attach:
-    "Pick the file she sent. On your own phone that opens the file picker and you choose it out of the conversation; here the demo hands it over. Read what comes up — her name, her email, the shoulder she mentioned, and the consent with the date, the wording version and the language she read it in.",
+    "Tap the attachment — ana-novak.librept-signup.json, under her message. On a real phone that file IS in your messages, and tapping it opens LibrePT with her details in front of you. Nothing has been added to your register yet.",
   story_step_review_accept:
     "Tap Add to my clients. Ana is in your register, and you typed none of it — first task done, one of three friends in without a word of retyping.",
   story_step_read_on: "Read that, then tap Next to take on the task it sets.",

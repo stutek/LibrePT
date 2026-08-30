@@ -24,7 +24,13 @@ import { setupViewDismiss } from "./controllers/gestureController.js";
 import { initRouter } from "./controllers/routerController.js";
 import { ISSUE_TRACKER_URL } from "./data/publicUrls.js";
 import { initClientDataRights, setupClientDataRights } from "./modules/clients/clientDataRights.js";
-import { initSignupReview, setupSignupReview } from "./modules/clients/signupReviewDialog.js";
+import { receiveSharedSubmissions } from "./modules/clients/signupInbox.js";
+import {
+  initSignupReview,
+  openSignupReview,
+  reviewSignupText,
+  setupSignupReview,
+} from "./modules/clients/signupReviewDialog.js";
 import { initRestTimer, setupRestTimer } from "./modules/clipboard/exerciseAndRestTimer.js";
 import {
   initApplicationHeader,
@@ -114,6 +120,20 @@ export function bootEncryptedFileReader() {
 export function bootSignupReview(deps) {
   initSignupReview(deps);
   setupSignupReview();
+}
+
+// The two ways a submission arrives without anybody going looking for it: shared into the app from
+// the messaging app it came in, or opened by tapping the file itself (§38.22).
+//
+// AFTER the splash, not during boot. A `<dialog>` opened with showModal() makes the rest of the page
+// inert — including the splash's own dismiss button — so a submission that opened during boot left
+// the trainer looking at a splash screen they could not get past, with the dialog behind it. Found
+// the first time the e2e test drove a real share through the real worker.
+export function bootSharedSubmissions() {
+  return receiveSharedSubmissions({
+    openReview: openSignupReview,
+    reviewText: reviewSignupText,
+  });
 }
 
 export function bootClientDataRights(deps) {
@@ -298,7 +318,18 @@ export async function bootDemoStory({
 
   // The way onward the last card offers (§30.2): the SAME dialog the demo notice in the feed
   // opens, not a second cleanup path that could drift from it.
-  const narrator = mountDemoNarrator({ t, onClearDemoData: openDemoCleanupDialog });
+  const narrator = mountDemoNarrator({
+    t,
+    onClearDemoData: openDemoCleanupDialog,
+    // Tapping the attachment on the story's screenshot of the trainer's messages does what tapping
+    // it on a phone does: LibrePT opens with the submission in the review dialog (§38.22). The same
+    // entry point the share target uses — the demo cannot summon the operating system, but it must
+    // not invent a path of its own either.
+    onAttachment: (attachment) => {
+      openSignupReview();
+      reviewSignupText(attachment.text);
+    },
+  });
   // Flattened to one step list: a chapter is a tour, which is what lets the guide run it unchanged.
   const steps = story.storyStepsFor(DEMO_STORY, shareChapter, { t });
   return startGuidedWalkthrough({

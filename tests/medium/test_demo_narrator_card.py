@@ -268,7 +268,7 @@ def test_the_card_is_readable_on_every_theme(page, local_server):
     # Every kind, on every palette: they are one family since 2026-08-27 (§38.10), and a family is
     # only as readable as its worst member. The off-track card is the guide's own and is drawn
     # through the same surface, so it is walked here too.
-    kinds = ("chapter", "message", "paper")
+    kinds = ("chapter", "message", "paper", "screenshot")
     slots = (
         ".demo-narrator-title",
         ".demo-narrator-body",

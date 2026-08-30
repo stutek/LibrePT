@@ -485,12 +485,9 @@ export const sl = {
     "Njegovo ime, vpisano enkrat. To je vse, kar stranka potrebuje, da obstaja v seznamu; vse drugo lahko pride kasneje, od njega ali od tebe.",
   story_step_arrive_save_client:
     "Pritisni Shrani stranko na dnu obrazca. Zdaj je v seznamu — eden od treh prijateljev, vsak po svoji poti, ti pa si natipkal štiri besede.",
-  story_step_review_menu:
-    "Nazaj na tvojem telefonu, Anina datoteka pa čaka v tvojih sporočilih. Znova pritisni gumb ☰ v zgornjem desnem kotu.",
-  story_step_review_open:
-    "Pritisni Preglej datoteko stranke — blizu dna menija. Nič od poslanega se še ni dotaknilo tvojega seznama: neznanec se vanj nikoli ne vpiše sam, zato mora nekdo to prebrati, in ta nekdo si ti.",
+  story_review_sender: "Ana Novak",
   story_step_review_attach:
-    "Izberi datoteko, ki jo je poslala. Na tvojem telefonu se odpre izbirnik datotek in jo izbereš iz pogovora; tukaj ti jo poda demo. Preberi, kaj se pokaže — njeno ime, e-naslov, ramo, ki jo je omenila, in privolitev z datumom, različico besedila in jezikom, v katerem ga je prebrala.",
+    "Tapni priponko — ana-novak.librept-signup.json, pod njenim sporočilom. Na pravem telefonu je ta datoteka v tvojih sporočilih in tap nanjo odpre LibrePT z njenimi podatki pred tabo. V imenik še ni dodano nič.",
   story_step_review_accept:
     "Pritisni Dodaj med stranke. Ana je v tvojem seznamu, ti pa nisi natipkal ničesar — prva naloga opravljena, ena od treh prijateljic notri brez ene same prepisane besede.",
   story_step_read_on: "Preberi to, nato pritisni Naprej in se loti naloge, ki jo postavlja.",

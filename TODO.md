@@ -2959,6 +2959,81 @@ Everything above is reversible except the Pages outage step 2 exists to avoid.
 
 See [CHANGELOG](CHANGELOG.md).
 
+### 38.23 [ ] WATCH — the ZAP stage failed once with a container-side write error
+
+2026-08-30, one run out of ten that day. The log:
+
+```
+Unable to copy yaml file to /zap/wrk/zap.yaml [Errno 30] Read-only file system: '/zap/wrk/zap.yaml'
+Failed to access summary file /home/zap/zap_out.json
+Using the Automation Framework
+```
+
+…then exit 3 after 11s, against a usual 17-35s. An immediate re-run with no change passed cleanly.
+
+**Not called flaky, because there is a readable hypothesis.** `zaproxy/zap-stable` is pulled rather
+than pinned, and its newer builds drive the scan through the Automation Framework, which wants to
+write a generated `zap.yaml` into `/zap/wrk` — the directory this gate mounts **read-only** on
+purpose. If that is it, the failure is the image changing under us and will recur, at which point the
+fix is either a writable scratch mount or a pinned image tag rather than a retry.
+
+The machine was also at a load of 13.7 when it failed, so a slow start under contention is the other
+candidate, and the two are not distinguishable from one log.
+
+**Re-check condition:** the next time this stage fails, compare the log against the block above. Two
+matches make it the image, and the tag gets pinned.
+
+### 38.22 [x] CHANGE — a client's file opens the app, instead of being saved and hunted for
+
+**Asked 2026-08-30 (Simon):** *"a PWA import rabi shranjevanje datoteke iz message-a in nato
+odpiranje? … a je branje datoteke preko menija sploh potrebno?"* and, for the demo, *"raje bi videl,
+da simuliraš branje sporočila s priponko in odpiranje priponke odpre LibrePT"*, with *"zunanjo
+aplikacijo simuliraj z zaslonsko sliko in kartico razlage"*.
+
+**It did.** There was one way in: save the attachment out of the messaging app, open LibrePT, open
+the ☰ menu, choose "Review a client's file", find the file in the picker. Five acts, two of them in
+somebody else's app, for a file already on the phone.
+
+**Two ways in now, and neither of them saves anything.**
+
+- **`share_target`** — the trainer taps Share on the attachment and picks LibrePT. The OS POSTs the
+  file to the app; the service worker answers that POST
+  ([sw/sharedInbox.js](src/sw/sharedInbox.js)) because there is no server to, keeps the text, and
+  redirects to the app with `?open=signup`.
+- **`file_handlers`** — the trainer taps the `.json` itself and the OS launches LibrePT with it,
+  which arrives through `launchQueue` rather than as a POST.
+
+Both end in the same review dialog, so the trust boundary is untouched: a share target accepts a
+file from any app on the phone, and a human still reads every field before a record is written
+(§26.5). What is saved is the fetching, not the reading.
+
+**The menu keeps its file picker, and that is the trade.** Both mechanisms are Chromium's and both
+need the app installed; **iOS has neither**. So the picker stops being the main road and stays as the
+one that works everywhere.
+
+**Three things had to be got right, each found by building it:**
+
+1. The inbox cache is not a version of the app shell, so `deleteObsoleteCaches` had to stop treating
+   it as an obsolete one — a deploy while an unread submission sat there threw away a client's file.
+2. A submission that opened during boot put a modal over the splash, and a modal makes the page under
+   it inert — including the splash's own dismiss button. The trainer was left on a splash screen they
+   could not get past. It now opens after the splash has gone.
+3. The submission is read once and dropped: the marker survives a reload, so leaving it in the inbox
+   re-opened the same dialog on every refresh.
+
+**The demo shows the new path.** Three steps — open the menu, choose the review, find the file — became
+one: a screenshot of the trainer's messaging app with Ana's message and her attachment under it,
+drawn rather than photographed (a picture goes stale the day either app changes and nobody notices).
+The attachment is a real button, and tapping it calls the same entry point the share target does
+rather than a path invented for the demo. The card quotes the message the app really sends
+(`intake_share_text`), so it cannot drift the way the invitation text did (§38.19). The story is 47
+steps now, down from 49.
+
+`ScreenshotNarratorCard` is the fifth kind in the card hierarchy (§38.10) and the first to draw a
+control of its own, which is what the `extras` hook is for. Its text colours are its own, like the
+message card's: a tinted card puts muted text under the AA bar on the light palettes (§38.11), and
+the contrast walk now covers it.
+
 ### 38.21 [ ] OPEN — the demo's card copy, waiting on the maintainer
 
 **Said 2026-08-30 (Simon):** *"besedila kartic so obupna, dajva jih skupaj editirati (angleška) in ti

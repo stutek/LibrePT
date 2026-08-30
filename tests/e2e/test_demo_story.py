@@ -408,19 +408,20 @@ def test_the_trainer_reads_what_ana_sent_and_she_lands_in_the_register(
     in the register only once they sent their own details and the trainer accepted them (§26.5).
 
     It was called unscriptable because opening a file needs the operating system's picker, which no
-    page can drive. The seam moved rather than the refusal — the demo puts a real file on the real
-    input, the way the picker does, and the app reads it, matches it and saves it unchanged. What
-    this asserts is the outcome a trainer cares about: she is in the register, and nobody typed her
-    in."""
+    page can drive. The seam moved rather than the refusal. Since 2026-08-30 the story shows where
+    the file actually is — an attachment under Ana's message, drawn as a screenshot of the trainer's
+    messaging app — and tapping it opens the review, which is what tapping it on a phone now does
+    (§38.22). The app then reads it, matches it and saves it unchanged. What this asserts is the
+    outcome a trainer cares about: she is in the register, and nobody typed her in."""
     # On the register, which is where the hand back from Ana's phone lands — and where the result of
     # this chapter has to be visible.
     _open_story(
         page,
         local_server,
-        "clients?init=demo_data_load&demo=story&step=review-open-menu",
+        "clients?init=demo_data_load&demo=story&step=review-message",
     )
 
-    for _ in range(4):
+    for _ in range(2):
         _do_step(page)
         assert page.locator(PROBLEM).is_hidden(), page.locator(PROBLEM).inner_text()
 

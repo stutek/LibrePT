@@ -169,8 +169,61 @@
    that bar on the light palettes to begin with, so any tinted surface eats the margin; a card that
    tints itself owns its own text colours. */
 .demo-narrator-card--message .demo-narrator-body,
-.demo-narrator-card--message .demo-narrator-kicker {
+.demo-narrator-card--message .demo-narrator-kicker,
+.demo-narrator-card--screenshot .demo-narrator-body,
+.demo-narrator-card--screenshot .demo-narrator-kicker {
   color: var(--text-main);
+}
+
+/* The SCREENSHOT track: the app the file arrived in, drawn rather than photographed (§38.22). A
+   picture would go stale the day either app changes and nobody would notice; this cannot, because it
+   is made of the same words the story is. Deliberately somebody ELSE's chrome — a title bar and a
+   bubble — so it can never be read as a screen of this app, which is the rule the paper track exists
+   for (§35.1). */
+.demo-narrator-card--screenshot {
+  background: color-mix(in srgb, var(--text-main) 6%, var(--card-bg));
+  border-color: var(--card-border);
+}
+
+.walkthrough-panel .demo-narrator-card--screenshot {
+  padding: 0.75rem 0.9rem;
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--card-border);
+  background: color-mix(in srgb, var(--text-main) 6%, transparent);
+}
+
+/* The sender's name reads as the other app's title bar, not as the story's voice. */
+.demo-narrator-card--screenshot .demo-narrator-title {
+  font-size: 0.95rem;
+}
+
+/* The attachment: a real button, because tapping it is what a trainer does with an attachment, and
+   what it does here is what it does on a phone — LibrePT opens with the submission in it. */
+.demo-narrator-attachment {
+  /* STICKY, because the card scrolls and this is the control the step is asking for: on a short
+     phone the message pushed the attachment below the fold, so the guide was pointing at a button
+     the trainer had to go looking for. It stays on the card's bottom edge while the words move
+     behind it. */
+  position: sticky;
+  bottom: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  /* A real touch target on a gym floor (§7.1's no-hover rule). */
+  min-height: 44px;
+  margin-top: 0.35rem;
+  padding: 0 0.9rem;
+  border: 1px solid var(--card-border);
+  border-radius: var(--border-radius-md);
+  background: var(--card-bg);
+  color: var(--text-main);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.demo-narrator-attachment i {
+  color: var(--text-muted);
 }
 
 /* The guide's own card: the trainer has walked away from where the step happens, and the step's

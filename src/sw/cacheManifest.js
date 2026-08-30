@@ -11,7 +11,7 @@
 // atomic version. The worker's own sub-scripts (sw.js + this sw/ folder) are deliberately NOT in ASSETS:
 // they are the worker's script resources, kept coherent by the browser's own SW-update mechanism.
 self.swCacheManifest = (() => {
-  const CACHE_NAME = "librept-v112";
+  const CACHE_NAME = "librept-v113";
   const ASSETS = [
     "./",
     "./index.html",
@@ -211,6 +211,7 @@ self.swCacheManifest = (() => {
     "./modules/clients/clientConsentSection.js",
     "./modules/clients/clientDataRights.js",
     "./modules/clients/signupReviewDialog.js",
+    "./modules/clients/signupInbox.js",
     "./modules/clients/intakeInvite.js",
     "./modules/clients/intakeInviteDialog.js",
     "./modules/clients/clientsDirectory.js",
@@ -293,9 +294,18 @@ self.swCacheManifest = (() => {
 
   // Runs on activate: delete every cache that is not the current version, so a new deploy never leaves
   // old, version-skewed files behind to be picked up piecemeal.
+  // Caches that are not a VERSION of the app shell, and so are not obsolete when the version moves.
+  // The shared inbox holds a submission a client sent that the trainer has not read yet; deploying
+  // while it sat there would have thrown their file away (TODO §38.22).
+  const KEPT_CACHES = ["librept-shared-inbox"];
+
   async function deleteObsoleteCaches() {
     const keys = await caches.keys();
-    await Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)));
+    await Promise.all(
+      keys
+        .filter((key) => key !== CACHE_NAME && !KEPT_CACHES.includes(key))
+        .map((key) => caches.delete(key)),
+    );
   }
 
   // Best-effort write-through used by the runtime fetch strategy: cache a successful, cacheable copy.

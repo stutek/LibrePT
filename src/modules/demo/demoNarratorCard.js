@@ -65,6 +65,7 @@ import { isGuideSurface } from "../common/dom.js";
 const CARD_ID = "demo-narrator-card";
 const PERSONA_ID = "demo-narrator-persona";
 const CLEANUP_ID = "demo-narrator-cleanup";
+const ATTACHMENT_ID = "demo-narrator-attachment";
 
 function element(doc, tag, className, id) {
   const node = doc.createElement(tag);
@@ -114,6 +115,12 @@ export class DemoNarratorCard {
   offersWayOnward(narration) {
     return Boolean(narration?.onward);
   }
+
+  /** Anything this kind draws BESIDE its words. Most kinds draw nothing: a card is a paragraph to
+   *  read, and a control on it competes with the one the step is about. */
+  extras() {
+    return [];
+  }
 }
 
 /** A chapter opening or closing: the story in its own narrating voice. */
@@ -131,6 +138,41 @@ export class MessageNarratorCard extends DemoNarratorCard {
 
   get bodyTag() {
     return "blockquote";
+  }
+}
+
+/** A SCREENSHOT of the app the file arrived in — the trainer's messaging app, with Ana's message and
+ * her attachment in it (TODO §38.22).
+ *
+ * Asked for 2026-08-30: "zunanjo aplikacijo simuliraj z zaslonsko sliko in kartico razlage". It is
+ * drawn rather than photographed for the same reason the paper track is text (§35.1): a picture goes
+ * stale the day either app changes, and nobody notices. And it does not break that rule's other half
+ * — never draw a surface that could be mistaken for a screen of THIS app — because it is deliberately
+ * somebody else's chrome, sitting inside a card that says so.
+ *
+ * **The attachment is a real button**, and tapping it does what tapping it on a phone does: LibrePT
+ * opens with the submission in the review dialog. The demo cannot summon the operating system's
+ * share sheet, so the chip stands in for it — and calls the same entry point the share target does,
+ * rather than a path invented for the demo.
+ */
+export class ScreenshotNarratorCard extends DemoNarratorCard {
+  static kind = "screenshot";
+
+  extras(doc, narration, { onAttachment }) {
+    const attachment = narration?.attachment;
+    if (!attachment) return [];
+    const chip = doc.createElement("button");
+    chip.type = "button";
+    chip.id = ATTACHMENT_ID;
+    chip.className = "demo-narrator-attachment";
+    const clip = doc.createElement("i");
+    clip.className = "fa-solid fa-paperclip";
+    clip.setAttribute("aria-hidden", "true");
+    const name = doc.createElement("span");
+    name.textContent = attachment.name;
+    chip.append(clip, name);
+    chip.addEventListener("click", () => onAttachment?.(attachment));
+    return [chip];
   }
 }
 
@@ -168,9 +210,13 @@ export class OffTrackNarratorCard extends DemoNarratorCard {
 // kind is an error rather than an unstyled box: `demoNarratorCardFor` returns nothing for a name
 // that is not here, and domain/demoTour.js's validation refuses to play a script that uses one.
 const KINDS = new Map(
-  [ChapterNarratorCard, MessageNarratorCard, PaperNarratorCard, OffTrackNarratorCard].map(
-    (cardClass) => [cardClass.kind, cardClass],
-  ),
+  [
+    ChapterNarratorCard,
+    MessageNarratorCard,
+    ScreenshotNarratorCard,
+    PaperNarratorCard,
+    OffTrackNarratorCard,
+  ].map((cardClass) => [cardClass.kind, cardClass]),
 );
 
 /** Every kind a script may write, for the script's own validation to check against. */
@@ -189,7 +235,7 @@ export function demoNarratorCardFor(kind, t) {
  * `showStep` is called BEFORE each step is performed, so a narrated step finds its card already on
  * screen and can tap Continue — the player's own hand, on a real control, like every other step.
  */
-export function mountDemoNarrator({ doc = document, t, onClearDemoData } = {}) {
+export function mountDemoNarrator({ doc = document, t, onClearDemoData, onAttachment } = {}) {
   doc.getElementById(CARD_ID)?.remove();
 
   const card = element(doc, "div", "demo-narrator-card", CARD_ID);
@@ -262,6 +308,8 @@ export function mountDemoNarrator({ doc = document, t, onClearDemoData } = {}) {
     const bodyNode = element(doc, narratorCard.bodyTag, "demo-narrator-body");
     bodyNode.textContent = body;
     card.append(kickerNode, titleNode, bodyNode);
+
+    card.append(...narratorCard.extras(doc, narration, { onAttachment }));
 
     if (narratorCard.offersWayOnward(narration) && onClearDemoData) {
       const cleanup = element(doc, "button", "btn secondary-btn demo-narrator-cleanup", CLEANUP_ID);

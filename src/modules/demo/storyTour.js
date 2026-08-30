@@ -24,7 +24,11 @@
 // Injected dependencies: none — a plain data module.
 
 import { GYM_FLOOR_TOUR } from "./gymFloorTour.js";
-import { STORY_SIGNUP_NAME, storySignupFileText } from "./storySignupFile.js";
+import {
+  STORY_SIGNUP_FILENAME,
+  STORY_SIGNUP_NAME,
+  storySignupFileText,
+} from "./storySignupFile.js";
 
 const wedge = Object.fromEntries(GYM_FLOOR_TOUR.steps.map((step) => [step.id, step]));
 
@@ -41,11 +45,15 @@ const CARD_ON_SCREEN = { selector: "#demo-narrator-card", visible: true };
 const CARD_TARGET = "#demo-narrator-card";
 
 function narration(id, kind, titleKey, bodyKey, extra = {}) {
-  const { onward, ...step } = extra;
+  // `attachment` belongs to the CARD, not to the step: it is something the card draws, and the card
+  // is handed its narration and nothing else. Left on the step it was simply never seen — the
+  // screenshot rendered without the file under the message (found the first time §38.22's step was
+  // driven in a browser).
+  const { onward, attachment, ...step } = extra;
   return {
     id,
     persona: TRAINER,
-    narrate: { kind, titleKey, bodyKey, onward },
+    narrate: { kind, titleKey, bodyKey, onward, attachment },
     target: CARD_TARGET,
     // The story and the guide are ONE card now (reported 2026-08-23), so the caption is the line
     // under the prose that says what to DO — never the title again, which is already the first
@@ -459,7 +467,7 @@ const INTAKE_CHAPTER = {
     // already does after a reload.
     narration("intake-close", "chapter", "story_chapter_intake", "story_intake_close_body", {
       persona: CLIENT,
-      advanceTo: "clients?demo=story&step=review-open-menu",
+      advanceTo: "clients?demo=story&step=review-message",
       nextLabelKey: "story_back_to_your_phone",
       caption: "story_step_back_to_your_phone",
       showMe: false,
@@ -471,40 +479,29 @@ const INTAKE_CHAPTER = {
 // trainer's run, right after the hand back, because that is when it happens — her file is in his
 // messages before he ever opens the app again.
 const REVIEW_STEPS = [
-  {
-    id: "review-open-menu",
+  // Her file, where it actually is: in the trainer's messaging app, as an attachment under her
+  // message. Drawn as a screenshot with the attachment as a real button (§38.22, asked for as
+  // "zunanjo aplikacijo simuliraj z zaslonsko sliko in kartico razlage"), and tapping it does what
+  // tapping it on a phone does — LibrePT opens with the submission in the review dialog.
+  //
+  // It replaces three steps: open the ☰ menu, choose "Review a client's file", find the file in the
+  // picker. That route still exists and still works — it is the only one iOS has — but it is no
+  // longer what the story shows, because it is no longer what a trainer on Android does.
+  narration("review-message", "screenshot", "story_review_sender", "intake_share_text", {
     persona: TRAINER,
+    keepOwnStep: true,
     // On the register, because that is where the result has to be VISIBLE: accepting re-renders the
     // client list, and a step that claimed "she is in your register" while the register was behind
     // the dashboard would be asserting something the viewer cannot see.
     route: "/clients",
-    target: "#btn-app-menu",
-    caption: "story_step_review_menu",
-    expect: { selector: "#app-menu:not(.hidden)", visible: true },
-  },
-  {
-    id: "review-open",
-    persona: TRAINER,
-    target: "#menu-review-signup",
-    requires: [{ selector: "#app-menu:not(.hidden)", visible: true }],
-    caption: "story_step_review_open",
-    expect: { selector: "#dialog-signup-review", visible: true },
-  },
-  {
-    // The file itself, put on the real input the way the operating system's picker puts one there
-    // (demoTourPlayer.js's `attach`). Everything after this is the app: it reads the file, refuses
-    // anything it does not recognise, and looks for a client this might already be.
-    id: "review-attach",
-    persona: TRAINER,
-    target: "#signup-review-file",
-    attach: {
-      name: "ana-novak.librept-signup.json",
-      type: "application/vnd.librept.signup+json",
+    target: "#demo-narrator-attachment",
+    attachment: {
+      name: STORY_SIGNUP_FILENAME,
       text: storySignupFileText(new Date().toISOString().slice(0, 10)),
     },
     caption: "story_step_review_attach",
     expect: { selector: "#dialog-signup-review", containsText: STORY_SIGNUP_NAME },
-  },
+  }),
   {
     id: "review-accept",
     persona: TRAINER,

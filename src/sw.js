@@ -9,6 +9,7 @@
 //   • sw/integrity.js     — SHA-256 catalog load + per-asset hash verification
 //   • sw/precache.js      — the install-time VERIFIED atomic precache (fails loud on an unverifiable build)
 //   • sw/runtimeFetch.js  — the runtime fetch strategy (network-first shell + offline cache fallback)
+//   • sw/sharedInbox.js   — the POST the phone's share sheet makes when a file is shared INTO the app
 //
 // The worker's own sub-scripts are NOT part of the app-shell cache (ASSETS); they are the worker's
 // script resources, kept coherent by the browser's SW-update mechanism (the page registers with
@@ -19,6 +20,7 @@ importScripts(
   "./sw/integrity.js",
   "./sw/precache.js",
   "./sw/runtimeFetch.js",
+  "./sw/sharedInbox.js",
 );
 
 // install: build one coherent, integrity-verified cache, then take over immediately.
@@ -31,5 +33,9 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(self.swCacheManifest.deleteObsoleteCaches().then(() => self.clients.claim()));
 });
 
-// fetch: delegate to the runtime request strategy.
-self.addEventListener("fetch", (event) => self.swRuntimeFetch.handleFetch(event));
+// fetch: the shared inbox first, because a share target is a POST and the cache strategy below is
+// written for GETs of our own files. It answers only that one URL and says whether it did.
+self.addEventListener("fetch", (event) => {
+  if (self.swSharedInbox.handleFetch(event)) return;
+  self.swRuntimeFetch.handleFetch(event);
+});
