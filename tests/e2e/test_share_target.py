@@ -35,7 +35,7 @@ async (payload) => {
   // share sheet for every JSON file somebody has (TODO §38.22).
   body.append(
     'signup',
-    new File([payload], 'ana-novak.librept-signup.json', {
+    new File([payload], 'ana-novak.json.librept-signup', {
       type: 'application/vnd.librept.signup+json',
     }),
   );

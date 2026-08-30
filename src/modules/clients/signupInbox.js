@@ -25,7 +25,7 @@
 // everywhere (§38.22 records that trade).
 //
 // **What the app claims is its own file, not JSON.** The manifest names the pair data/signupFile.js
-// declares — `application/vnd.librept.signup+json` and `.librept-signup.json` — because a share
+// declares — `application/vnd.librept.signup+json` and `.json.librept-signup` — because a share
 // target that accepted `application/json` would offer LibrePT for every JSON file on the phone.
 // Whether an OS matches the whole compound suffix or only the trailing `.json` is untested here and
 // decides the TAP path alone; a share carries the media type either way (§38.22).

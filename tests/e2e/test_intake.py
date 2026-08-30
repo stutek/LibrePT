@@ -119,7 +119,7 @@ def test_the_saved_file_is_what_the_trainer_will_open(page, local_server):
         page.click("#intake-save")
     download = download_info.value
 
-    assert download.suggested_filename.endswith(".librept-signup.json")
+    assert download.suggested_filename.endswith(".json.librept-signup")
     with open(download.path(), encoding="utf-8") as handle:
         payload = json.load(handle)
     assert payload["name"] == "Jana Novak"

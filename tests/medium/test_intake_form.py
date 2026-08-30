@@ -124,7 +124,7 @@ def test_the_file_carries_what_the_client_typed_and_what_they_ticked(
         "formVersion": "2026-08-09",
         "formLang": "en",
     }
-    assert delivered[0]["name"] == "jana-novak-2026-08-17.librept-signup.json"
+    assert delivered[0]["name"] == "jana-novak-2026-08-17.json.librept-signup"
 
 
 def test_the_page_says_who_the_link_came_from(page, local_server):

@@ -27,7 +27,7 @@ export const STORY_SIGNUP_NAME = "Ana Novak";
 // What the file is CALLED when it lands in the trainer's messages. Written beside the file it
 // names, so the screenshot the story draws of that message cannot drift from the artifact
 // signupDelivery.js produces (§38.22).
-export const STORY_SIGNUP_FILENAME = "ana-novak.librept-signup.json";
+export const STORY_SIGNUP_FILENAME = "ana-novak.json.librept-signup";
 export const STORY_SIGNUP_EMAIL = "ana.novak@example.com";
 export const STORY_SIGNUP_INJURY = "shoulder, two years ago";
 

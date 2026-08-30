@@ -513,7 +513,7 @@ export const en = {
     "Tap Save Client at the bottom of the form. He is in the register now — one of three friends in by three different routes, and you typed four words in total.",
   story_review_sender: "Ana Novak",
   story_step_review_attach:
-    "Tap the attachment — ana-novak.librept-signup.json, under her message. On a real phone that file IS in your messages, and tapping it opens LibrePT with her details in front of you. Nothing has been added to your register yet.",
+    "Tap the attachment — ana-novak.json.librept-signup, under her message. On a real phone that file IS in your messages, and tapping it opens LibrePT with her details in front of you. Nothing has been added to your register yet.",
   story_step_review_accept:
     "Tap Add to my clients. Ana is in your register, and you typed none of it — first task done, one of three friends in without a word of retyping.",
   story_step_read_on: "Read that, then tap Next to take on the task it sets.",

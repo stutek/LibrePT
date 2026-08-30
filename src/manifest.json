@@ -37,7 +37,7 @@
       "files": [
         {
           "name": "signup",
-          "accept": ["application/vnd.librept.signup+json", ".librept-signup.json"]
+          "accept": ["application/vnd.librept.signup+json", ".json.librept-signup"]
         }
       ]
     }
@@ -46,7 +46,7 @@
     {
       "action": "index.html?open=signup",
       "accept": {
-        "application/vnd.librept.signup+json": [".librept-signup.json"]
+        "application/vnd.librept.signup+json": [".json.librept-signup"]
       }
     }
   ]

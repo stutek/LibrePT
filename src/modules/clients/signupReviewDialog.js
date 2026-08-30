@@ -62,7 +62,7 @@ export function renderSignupReviewDialog() {
 
       <div class="form-group">
         <label id="signup-review-file-label" for="signup-review-file"></label>
-        <input type="file" id="signup-review-file" class="form-control" accept=".json,.librept-signup.json,application/json,application/vnd.librept.signup+json">
+        <input type="file" id="signup-review-file" class="form-control" accept=".json,.json.librept-signup,application/json,application/vnd.librept.signup+json">
       </div>
 
       <p id="signup-review-status" class="signup-review-status" hidden></p>

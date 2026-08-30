@@ -446,6 +446,13 @@ Rides the same seam §1.6 built: an event, encoded into a link, carried by email
   frequently relabels the type to `application/octet-stream` so only the extension survives that hop.
   Declaring both is not redundancy. **Marked for reconsideration** if the number of file kinds grows
   enough that per-kind declarations become the larger cost.
+- **Amended 2026-08-30 (Simon) — the distinctive part goes LAST: `.json.librept-signup`.** It was
+  `.librept-signup.json`, chosen when the trailing `.json` was what kept the file openable where no
+  association existed. Registering the app as a file handler (§38.22) made that the wrong way round:
+  **an operating system associates on the last suffix**, so a distinctive part in the middle
+  registers nothing, and claiming `.json` instead would hand LibrePT every JSON file on the phone.
+  *"daj na konec, json pred tem je namig uporabniku"* — the `.json` stays, now as a hint to the person
+  looking at the file rather than as the association.
 - **Open**: whether the landing page is a generated static page (the `privacy.html` pattern — own
   CSP, offline-cached) or a route inside the app; and what the PT sees on arrival, since accepting a
   stranger's submission into the client register should be a deliberate act rather than a silent
@@ -3025,15 +3032,20 @@ one that works everywhere.
 `application/json` and `.json`, which would have offered LibrePT in the share sheet for every JSON
 file on the phone and claimed the extension system-wide. Asked about directly: *"a nisva rekla, da
 bova imela custom mime in custom končnico za uvoz v LibrePT?"* — and the pair was already decided and
-already in the code (§1.7): `application/vnd.librept.signup+json` and `.librept-signup.json`, one
+already in the code (§1.7): `application/vnd.librept.signup+json` and `.json.librept-signup`, one
 home in [data/signupFile.js](src/data/signupFile.js). The manifest now names that pair and nothing
 wider, and a check compares the two files so they cannot drift.
 
-**One thing that cannot be tested here, and is not claimed.** Both mechanisms match a file against
-the accept list, and `.librept-signup.json` is a compound suffix. Whether Chromium matches the whole
-suffix or only the trailing `.json` decides whether TAPPING the file opens LibrePT — a share, which
-carries the media type, is unaffected. No browser in a test harness can answer that: it is an
-operating-system association. **Re-check on a real Android phone before this is called finished.**
+**The suffix order was wrong for this, and changed with it.** The file was
+`.librept-signup.json`; an operating system associates on the LAST suffix, so the distinctive part
+sat where nothing reads it and the only way to be tapped open would have been to claim `.json` —
+every JSON file on the phone. It is `.json.librept-signup` now (§1.7, amended 2026-08-30), which is
+what makes registering as a handler possible at all. The `.json` stays as a hint to whoever looks at
+the file.
+
+**Still not testable here:** whether a given OS offers the app for that suffix is an association, not
+a browser behaviour, and no test harness can answer it. **Re-check on a real Android phone before
+this is called finished.** A share is unaffected either way — it carries the media type.
 
 **The demo shows the new path.** Three steps — open the menu, choose the review, find the file — became
 one: a screenshot of the trainer's messaging app with Ana's message and her attachment under it,

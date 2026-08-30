@@ -52,7 +52,7 @@ function platformThat({ canShare = true, share = async () => {}, save = () => {}
 test("the file the client sends carries the submission, named and typed for the other end", async () => {
   const file = buildSignupFile(signup, "2026-08-17");
 
-  assert.equal(file.name, "jana-novak-2026-08-17.librept-signup.json");
+  assert.equal(file.name, "jana-novak-2026-08-17.json.librept-signup");
   assert.equal(file.type, "application/vnd.librept.signup+json");
   assert.match(await file.text(), /"injury": "knee reconstruction 2024"/);
 });

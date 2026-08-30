@@ -31,11 +31,15 @@ import { SIGNUP_FORMAT_VERSION, parseClientSignup } from "./clientSignup.js";
 export const SIGNUP_MEDIA_TYPE = "application/vnd.librept.signup+json";
 
 /** The half of the declaration that survives an email gateway relabelling the MIME type. */
-export const SIGNUP_FILE_EXTENSION = ".librept-signup.json";
+export const SIGNUP_FILE_EXTENSION = ".json.librept-signup";
 
-// Double-suffixed deliberately: `.librept-signup` carries the association, and the trailing `.json`
-// keeps the file openable by anything a client or trainer already has when the association is absent —
-// which it is on every desktop and on iOS. A file nobody can open is not evidence of anything.
+// Double-suffixed, and the ORDER changed on 2026-08-30 (Simon: "daj na konec, json pred tem je namig
+// uporabniku"). It was `.librept-signup.json` from 2026-08-17, when the trailing `.json` was what
+// kept the file openable where no association existed. Registering the app as a file handler
+// (§38.22) made that the wrong way round: an operating system matches the LAST suffix, so a
+// distinctive part in the middle associates with nothing, and claiming `.json` instead would hand
+// LibrePT every JSON file on the phone. `.librept-signup` last is the association; the `.json`
+// before it stays as a hint to the person looking at the file about what is inside.
 
 const MAX_FILE_BYTES = 64 * 1024;
 
