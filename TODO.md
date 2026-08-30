@@ -2959,6 +2959,51 @@ Everything above is reversible except the Pages outage step 2 exists to avoid.
 
 See [CHANGELOG](CHANGELOG.md).
 
+### 38.18 [x] BUG — Show me advanced the demo, or did not, depending on something invisible
+
+**Reported 2026-08-30 (Simon):** *"show me behavior is inconsistent, should it advance always or
+never?"* Measured before answering, on two kinds of step:
+
+| the step's expectation when its card arrived | Show me | what happened |
+| :-- | :-- | :-- |
+| not yet true (the ordinary case) | performs it | **the card moved on** |
+| already true — the screen the step before left behind | performs it | **the card sat still** |
+
+So it was neither always nor never: it turned on whether the expectation happened to be true on
+arrival, which nothing on screen shows. From the floor that reads as a button that sometimes works.
+
+**Two rules, laid down three days apart, had come to contradict.** The guide's own source still
+carried the first one verbatim:
+
+> *"Show me demonstrates the step; it never moves the guide. Next is always the trainer's tap
+> (reported 2026-08-23: 'sometimes show me advances demo step sometimes not')."*
+
+…and §38.5 then made the card follow the app whenever a step completed in front of the viewer. Show
+me completes a step in front of the viewer, so the second rule quietly overruled the first — except
+where `enteredSatisfied` blocked it. The 2026-08-23 ruling was correct when NOTHING advanced by
+itself; §38.5 made "never" the inconsistent choice, because doing the step yourself moved the card
+and asking to be shown it did not.
+
+**Ruled 2026-08-30: always.** One sentence, one function (`carryCardOn`): *a step completed while the
+trainer is watching carries the card on, whether their own thumb did it or they asked to be shown.*
+
+Two exceptions kept, each for its own reason and neither invisible:
+
+- **the last step waits** — finishing is a decision, and a demo that closed itself on the final tap
+  would take the thank-you card with it before anyone read it;
+- **a step walked BACK to is re-explained, not advanced past** — carrying them on from there would
+  skip the step they came back for.
+
+The second needed a distinction the code did not have. A step whose expectation arrives true is
+marked done by the very next poll, so by the time Show me is tapped, "already done" cannot tell a
+step never seen from one walked back to. `enterStep` now records both facts separately: whether the
+outcome held on arrival (`enteredSatisfied`, which the poll uses) and whether the trainer had already
+been past it (`enteredDone`, which Show me uses).
+
+Pinned by [test_walkthrough_show_me.py](tests/medium/test_walkthrough_show_me.py) over a three-step
+tour built for exactly these cases: one that arrives untrue, one that arrives already true, and the
+last one.
+
 ### 38.17 [ ] GAP — the guide complains about the wrong screen for a second while fixing it
 
 Measured 2026-08-30 at story step 47 (the evening's session move), deep-linked at full motion:

@@ -230,6 +230,8 @@ export function startGuidedWalkthrough({
   // two steps at a time (the flicker reported 2026-08-23). Only a step completed IN FRONT of the
   // viewer moves the card on (wanted 2026-08-26).
   let enteredSatisfied = false;
+  // Whether the trainer had already been past this step when its card appeared — see enterStep.
+  let enteredDone = false;
   // Consecutive ticks the current step has been impossible to perform. The trainer exploring on
   // their own is the expected case, not a fault, so it takes more than one reading to say so.
   let offTrackTicks = 0;
@@ -321,6 +323,33 @@ export function startGuidedWalkthrough({
    * moves back down once the control is no longer underneath — a panel that fled to the top and
    * stayed there would cover whatever the next step points at up there.
    */
+  /** THE CARD FOLLOWS THE APP: a step completed while the trainer is watching carries them on.
+   *
+   * One rule for both ways a step gets done — their own thumb, or Show me doing it for them (TODO
+   * §38.18). It used to be two, laid down three days apart and quietly contradicting: Show me was
+   * written never to move the guide (2026-08-23), and then the card was made to follow the app
+   * whenever a step completed in front of the viewer (2026-08-26). Show me completes a step in front
+   * of the viewer, so whether it advanced came down to whether the step's expectation happened to be
+   * true already when its card appeared — invisible from the outside, and reported 2026-08-30 as
+   * "show me behavior is inconsistent, should it advance always or never?"
+   *
+   * Returns whether it carried them on, so a caller that must render either way can tell.
+   *
+   * Never off the LAST step: finishing is a decision, and a demo that closed itself the moment the
+   * final tap landed would take the thank-you card with it before anyone read it. Never while
+   * another advance is in flight either — `enterStep` is async, and two of them would run the story
+   * two steps at a time.
+   */
+  function carryCardOn() {
+    if (advancing || state.stepIndex >= tour.steps.length - 1) return false;
+    advancing = true;
+    state = advanceWalkthrough(tour, state);
+    enterStep().finally(() => {
+      advancing = false;
+    });
+    return true;
+  }
+
   /** Parks the guide as a bar, or brings it back.
    *
    * Parked, it keeps RUNNING: the poll still watches, so a trainer who does the step by hand while
@@ -908,6 +937,12 @@ export function startGuidedWalkthrough({
     // Recorded BEFORE anything else can satisfy it: a step that arrives already true is read, not
     // performed, so the poll must not carry the viewer past it. See the ticker.
     enteredSatisfied = Boolean(step) && stepOutcomeNow(step, doc).ok;
+    // …and whether the trainer had ALREADY BEEN HERE, which is a different question with the same
+    // symptom. A step whose expectation arrives true is marked done by the very next poll, so by the
+    // time Show me is tapped the two are indistinguishable from the state alone — and telling them
+    // apart is what decides whether being shown it carries the card on (a step never seen) or
+    // re-explains where they are (a step walked back to). §38.18.
+    enteredDone = Boolean(step) && isWalkthroughStepDone(state, step.id);
     // A step re-entered from Back — or one the trainer completed before reading the panel — is
     // already satisfied, and must not be asked for again.
     if (step && stepOutcomeNow(step, doc).ok) {
@@ -997,7 +1032,11 @@ export function startGuidedWalkthrough({
     if (outcome.ok) el.problem.hidden = true;
     // Re-showing a step the trainer has already done is a replay, not progress: it must not carry
     // them forward to a step they have not seen.
-    if (alreadyDone) {
+    // A REPLAY: the trainer walked back to a step they have already been past, and being shown it
+    // again re-explains where they are. Carrying them on from here would skip the step they came
+    // back for. `enteredDone`, not the live state: a step that arrives already true is marked done
+    // by the next poll, and that is not the same thing at all (§38.18).
+    if (enteredDone) {
       if (!outcome.ok) reportProblem(outcome.reason);
       return render();
     }
@@ -1007,12 +1046,10 @@ export function startGuidedWalkthrough({
     }
 
     state = completeWalkthroughStep(state, step.id);
-    // Show me demonstrates the step; it never moves the guide. Next is always the trainer's tap
-    // (reported 2026-08-23: "sometimes show me advances demo step sometimes not"). The earlier rule
-    // — delegating advances, doing it yourself does not — made the guide advance under some taps
-    // and not others, and the last step was a third case again; from the floor that reads as a bug,
-    // not as a distinction. One rule the trainer can predict beats a rule that saves them one tap.
-    render();
+    // Asking to be shown a step is watching it happen, so the card follows exactly as it does when
+    // the trainer taps the control themselves — one rule, `carryCardOn`, and no way for the same
+    // completed step to behave two ways depending on who did it (§38.18).
+    if (!carryCardOn()) render();
   });
 
   el.next.addEventListener("click", () => {
@@ -1137,22 +1174,9 @@ export function startGuidedWalkthrough({
     if (!done) return;
 
     state = completeWalkthroughStep(state, step.id);
-    // The card follows the app (wanted 2026-08-26: "when performs the expected action the card
-    // should advance"). Only for a step that was NOT already satisfied when its card appeared —
-    // see enteredSatisfied — and never while a demonstration is still running, or the card would
-    // move out from under the pointer that is still finishing the tap.
-    // Never off the LAST step: finishing is a decision, and a demo that closed itself the moment the
-    // final tap landed would take the thank-you card with it before anyone read it.
-    const isLastStep = state.stepIndex >= tour.steps.length - 1;
-    if (!enteredSatisfied && !advancing && !isLastStep) {
-      advancing = true;
-      state = advanceWalkthrough(tour, state);
-      enterStep().finally(() => {
-        advancing = false;
-      });
-      return;
-    }
-    render();
+    // Their own thumb did it, so the card follows — unless the step was already true when its card
+    // arrived, which is not something that happened in front of them (see enteredSatisfied).
+    if (enteredSatisfied || !carryCardOn()) render();
   }, pollMs);
 
   enterStep();
