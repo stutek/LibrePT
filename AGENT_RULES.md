@@ -30,6 +30,9 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
    **Simple does not mean short**: a shorter text the reader must unpack is worse than a longer one
    that lands. Their language, its standard register, their own words including the English
    technical ones. **Never invent a term**, least of all by translating one.
+   **Write plainly.** Short sentences, one idea each. No stacked clauses, no chains of dashes, no
+   metaphor where the plain word works, no flourish at the end of a paragraph. Say what happened and
+   what it means for them. A reply that has to be re-read has failed, however true it is.
 4. **Professionalism.** The work and the words are held to one standard.
 5. **The maintainer's attention is the scarce resource.** One command, no modals, no reading
    assignments, no question their request already answered.
