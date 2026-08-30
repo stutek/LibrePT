@@ -3021,6 +3021,20 @@ one that works everywhere.
 3. The submission is read once and dropped: the marker survives a reload, so leaving it in the inbox
    re-opened the same dialog on every refresh.
 
+**The type and the extension are the app's own, not JSON's.** The first version of this declared
+`application/json` and `.json`, which would have offered LibrePT in the share sheet for every JSON
+file on the phone and claimed the extension system-wide. Asked about directly: *"a nisva rekla, da
+bova imela custom mime in custom končnico za uvoz v LibrePT?"* — and the pair was already decided and
+already in the code (§1.7): `application/vnd.librept.signup+json` and `.librept-signup.json`, one
+home in [data/signupFile.js](src/data/signupFile.js). The manifest now names that pair and nothing
+wider, and a check compares the two files so they cannot drift.
+
+**One thing that cannot be tested here, and is not claimed.** Both mechanisms match a file against
+the accept list, and `.librept-signup.json` is a compound suffix. Whether Chromium matches the whole
+suffix or only the trailing `.json` decides whether TAPPING the file opens LibrePT — a share, which
+carries the media type, is unaffected. No browser in a test harness can answer that: it is an
+operating-system association. **Re-check on a real Android phone before this is called finished.**
+
 **The demo shows the new path.** Three steps — open the menu, choose the review, find the file — became
 one: a screenshot of the trainer's messaging app with Ana's message and her attachment under it,
 drawn rather than photographed (a picture goes stale the day either app changes and nobody notices).

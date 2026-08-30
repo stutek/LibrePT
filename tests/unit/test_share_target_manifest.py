@@ -32,11 +32,44 @@ def test_the_app_offers_itself_as_a_place_to_share_a_file_to(src_dir):
 def test_a_tapped_file_opens_the_app(src_dir):
     handlers = _manifest(src_dir).get("file_handlers")
     assert handlers, (
-        "no file_handlers: tapping the .json the client sent opens something else"
+        "no file_handlers: tapping the file the client sent opens something else"
     )
-    assert any(
-        ".json" in exts for entry in handlers for exts in entry["accept"].values()
+
+
+def _declared_pair(src_dir):
+    """The media type and the extension as data/signupFile.js declares them — the one home."""
+    source = (src_dir / "data" / "signupFile.js").read_text(encoding="utf-8")
+    media = re.search(r'SIGNUP_MEDIA_TYPE = "([^"]+)"', source)
+    extension = re.search(r'SIGNUP_FILE_EXTENSION = "([^"]+)"', source)
+    assert media and extension, (
+        "signupFile.js no longer declares the type and the extension"
     )
+    return media.group(1), extension.group(1)
+
+
+def test_the_app_claims_its_own_files_and_no_others(src_dir):
+    """LibrePT declares BOTH a media type and a distinctive extension (TODO §1.7): an Android intent
+    routes on the type, an OS association on the extension, and an email gateway frequently relabels
+    the type on the way. The manifest has to name that pair and nothing wider.
+
+    The first version of §38.22 named `application/json` and `.json`, which would have offered
+    LibrePT in the share sheet for every JSON file on the phone and claimed the extension
+    system-wide. Asked about directly: "a nisva rekla, da bova imela custom mime in custom končnico
+    za uvoz v LibrePT?"
+    """
+    media, extension = _declared_pair(src_dir)
+    manifest = _manifest(src_dir)
+
+    accepted = manifest["share_target"]["params"]["files"][0]["accept"]
+    assert media in accepted, f"the share target does not accept {media}"
+    assert extension in accepted, f"the share target does not accept {extension}"
+    assert "application/json" not in accepted and ".json" not in accepted, (
+        "the share target claims every JSON file on the phone, not this app's own"
+    )
+
+    handled = manifest["file_handlers"][0]["accept"]
+    assert list(handled) == [media], f"file_handlers claims {list(handled)}"
+    assert handled[media] == [extension], handled[media]
 
 
 def test_the_manifest_the_worker_and_the_app_agree_on_the_names(src_dir):

@@ -30,9 +30,14 @@ SUBMISSION = {
 POST_THE_SHARE = """
 async (payload) => {
   const body = new FormData();
+  // The type and the name the client's own phone gives it (data/signupFile.js), not a generic JSON:
+  // that pair is what the manifest claims, and claiming anything wider would offer LibrePT in the
+  // share sheet for every JSON file somebody has (TODO §38.22).
   body.append(
     'signup',
-    new File([payload], 'ana-novak.librept-signup.json', { type: 'application/json' }),
+    new File([payload], 'ana-novak.librept-signup.json', {
+      type: 'application/vnd.librept.signup+json',
+    }),
   );
   const response = await fetch('share-target', { method: 'POST', body, redirect: 'manual' });
   return { status: response.status, type: response.type };

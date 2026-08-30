@@ -31,8 +31,10 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
    that lands. Their language, its standard register, their own words including the English
    technical ones. **Never invent a term**, least of all by translating one.
    **Write plainly.** Short sentences, one idea each. No stacked clauses, no chains of dashes, no
-   metaphor where the plain word works, no flourish at the end of a paragraph. Say what happened and
-   what it means for them. A reply that has to be re-read has failed, however true it is.
+   metaphor where the plain word works, no flourish at the end of a paragraph. **Name the thing, not
+   the principle**: which file, which value, what breaks. A sentence restating why a rule is good is
+   padding, and reads as evasion — justify when asked, not by default. A reply that has to be re-read
+   has failed, however true it is.
 4. **Professionalism.** The work and the words are held to one standard.
 5. **The maintainer's attention is the scarce resource.** One command, no modals, no reading
    assignments, no question their request already answered.

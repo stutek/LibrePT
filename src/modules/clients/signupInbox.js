@@ -24,6 +24,12 @@
 // file picker stay exactly where they are — not as the main road any more, but as the one that works
 // everywhere (§38.22 records that trade).
 //
+// **What the app claims is its own file, not JSON.** The manifest names the pair data/signupFile.js
+// declares — `application/vnd.librept.signup+json` and `.librept-signup.json` — because a share
+// target that accepted `application/json` would offer LibrePT for every JSON file on the phone.
+// Whether an OS matches the whole compound suffix or only the trailing `.json` is untested here and
+// decides the TAP path alone; a share carries the media type either way (§38.22).
+//
 // **Nothing is imported without a person.** A share target accepts a file from any app on the phone,
 // which changes nothing about the trust boundary: the submission lands in the review dialog, where a
 // human reads every field before a record is written (§26.5). What this saves is the fetching, not
