@@ -218,3 +218,32 @@ def test_leaving_the_editor_puts_the_session_back_not_the_placeholder(
     title = page.locator("#session-title-text").inner_text().strip()
     assert title != "Clipboard", "leaving the editor restored the placeholder"
     assert when in title, f"leaving the editor lost the session: {title!r}"
+
+
+def test_the_clipboard_names_the_session_without_truncating_it(page, local_server):
+    """Reported 2026-08-31 (Simon) at desktop width: "this one clips on desktop" (§39.6).
+
+    The bar read `2026-09-01 11:30 playground outside` and lost 90px to an ellipsis — one 22px line
+    led by an ISO date, carrying date, time and gym. The repo's own sweep passes it, correctly: an
+    ellipsis is visible truncation, not the silent clipping `overflow_scan`'s invariant B hunts for.
+
+    So the claim is not "nothing is ever cut" — a long enough gym name will always be. It is that
+    the SESSION'S NAME survives, because that is what says which screen you are on, and that what
+    gets cut first is the least identifying thing on the line."""
+    page.set_viewport_size({"width": 1280, "height": 800})
+    _open_session(page, local_server)
+
+    name = page.evaluate(
+        "() => JSON.parse(localStorage.getItem('librept_active_session'))"
+        "        .sourceSession.titles[0]"
+    )
+    bar = page.locator("#session-title-text")
+    assert name in bar.inner_text(), (
+        f"the clipboard does not say which session it is: {bar.inner_text()!r}"
+    )
+    lost = page.evaluate(
+        "() => { const el = document.querySelector('.clipboard-title-name');"
+        "        return el ? el.scrollWidth - el.clientWidth : null; }"
+    )
+    assert lost is not None, "the title bar has no line carrying the session's name"
+    assert lost <= 1, f"the session's own name is truncated by {lost}px"

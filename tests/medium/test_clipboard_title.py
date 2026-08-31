@@ -67,6 +67,61 @@ def test_every_control_on_the_line_is_still_reachable(page, local_server):
         assert min(box["width"], box["height"]) >= 32, f"{selector} is {box}"
 
 
+def test_the_bar_says_which_session_over_when_and_where(page, local_server):
+    """TODO §39.6, reported 2026-08-31 at desktop width: "this one clips on desktop".
+
+    The bar carried `2026-09-01 11:30 playground outside` on one 22px line — no session name
+    anywhere in the clipboard, and 90px of that line lost to an ellipsis on a desktop window. The
+    repo's own sweep passes that, correctly: an ellipsis is visible truncation, not the silent
+    clipping `overflow_scan` hunts for.
+
+    Two lines cost nothing, because the bar's height comes from the 44px touch row its buttons need
+    and the title was using 25px of it. What this pins is the ORDER, which is what survives a long
+    gym name: the session's name leads and gets the larger type, and the day, time and gym follow
+    under it — the gym last, being the least identifying thing on the bar."""
+    _mount(page, local_server)
+    # The real renderer, handed a session — not the stub's hand-set string. Its own deps, because
+    # this tier boots one component rather than the app, and the module reads its session through
+    # them (the harness wires the clipboard, not this bar).
+    page.evaluate(
+        """async () => {
+          const m = await import(new URL('modules/session/sessionTitleBar.js', document.baseURI).href);
+          m.initSessionTitleBar({
+            getActiveSession: () => ({
+              sourceSession: {
+                titles: ['Group Strength & Conditioning'],
+                day: 'today',
+                timeLabel: '17:00 - 19:00',
+                location: 'Trib gym base',
+                startDate: '2026-09-01T15:00:00.000Z',
+              },
+            }),
+            getISODateString: (d) => new Date(d).toISOString().slice(0, 10),
+            formatClockFromMinutes: () => '17:00',
+            t: (key) => key,
+          });
+          m.renderSessionTitle();
+        }"""
+    )
+    page.wait_for_timeout(200)
+
+    bar = page.locator("#session-title-text").inner_text()
+    assert "Group Strength & Conditioning" in bar, bar
+    assert "Trib gym base" in bar, bar
+
+    name = page.locator(".clipboard-title-name")
+    under = page.locator(".clipboard-title-when")
+    assert name.count(), "the bar has no line carrying the session's name"
+    assert name.bounding_box()["y"] < under.bounding_box()["y"], (
+        "the session's name must lead; when and where sit under it"
+    )
+    sizes = page.evaluate(
+        "() => ['.clipboard-title-name', '.clipboard-title-when']"
+        "        .map((s) => parseFloat(getComputedStyle(document.querySelector(s)).fontSize))"
+    )
+    assert sizes[0] > sizes[1], f"the name must be the larger of the two lines: {sizes}"
+
+
 def test_nothing_in_the_title_bar_is_pushed_out_of_it(page, local_server):
     """§25.5's defect was here: with the title ellipsised, the edit-mode chip beside it was pushed
     169px outside the bar and vanished entirely. Geometry, in the test that owns this component —

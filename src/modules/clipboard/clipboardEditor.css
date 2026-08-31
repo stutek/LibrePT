@@ -102,12 +102,35 @@
    how the name ended up pushed out of the bar rather than ellipsised inside it. */
 .edit-mode-title {
   display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 0;
+  line-height: 1.2;
+}
+.edit-mode-row {
+  display: flex;
   align-items: center;
   gap: 6px;
   min-width: 0;
+  max-width: 100%;
 }
-.edit-mode-label {
+/* Shrunk from the 22px it inherited from the bar's h3: it is a mode marker beside the name, not a
+   heading of its own. */
+.edit-mode-title i {
   flex: 0 0 auto;
+  font-size: 12px;
+  opacity: 0.72;
+}
+.edit-mode-session {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0;
 }
 .edit-mode-client {
   flex: 0 1 auto;
@@ -115,9 +138,10 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-.edit-mode-client::before {
-  content: "· ";
+  /* Set against the session's name above it, not against the bar's h3 — this is the second line. */
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
 }
 .edit-mode-chip {
   flex: 0 0 auto;

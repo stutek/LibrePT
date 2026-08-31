@@ -3944,22 +3944,49 @@ The ask is a **mandatory alias on a name clash**, decided when the second one is
 discovered later. Open question the fix has to answer: what the clipboard, the plan editor and the
 history show once an alias exists.
 
-### 39.6 [ ] BUG — the plan editor does not say whose plan it is
+### 39.6 [~] IN PROGRESS — the clipboard now says which session, and whose plan
 
 **Reported at cards 23–24:** *"the edit view is not clear which session and for whom that plan is, the
 demo card text is useless"*, and *"demonstrate actually adding one circuit please, before just saying
 done"*.
 
-Two different faults, one screen:
+Two different faults, one screen.
 
-- **The app's.** The editor opens on a plan with no line saying which session it belongs to or who is
-  in it. On a phone that screen is the whole context a trainer has.
-- **The story's.** `story_step_programme_editor` — *"The plan, with the number that matters beside
-  it"* — names nothing on screen, and the chapter jumps from opening the editor to `Done` without
-  ever adding anything. A programme chapter that builds no programme is the demo skipping its own
-  subject.
+**The app's — fixed 2026-08-31.** Measured before building, and the report was half right: *for whom*
+was already there (*Editing Jane Doe*). *Which session* was not — `Group Strength & Conditioning`
+appeared nowhere in the clipboard, in either mode, and the bar carried
+`2026-09-01 11:30 playground outside` on one 22px line. Simon then found the rest of it at desktop
+width — *"this one clips on desktop"* — where that line lost **90px** to an ellipsis. The repo's own
+sweep passes that, correctly: an ellipsis is visible truncation, not the silent clipping
+[overflow_scan](agent_tools/overflow_scan.py)'s invariant B hunts for.
 
-Also here: *"the text does not make any sense (what room are we going back to?)"* —
+**Two lines, and they cost nothing.** The bar is 76px tall because its buttons need a 44px touch row;
+the title was using 25px of it. A 15px line over a 12px line comes to ~36px — still inside height
+already spent. Measured at 390, 375 and the desktop column: same bar height, same actions width, no
+overflow, sweep clean.
+
+- **The clipboard** ([sessionTitleBar.js](src/modules/session/sessionTitleBar.js)): the session's name,
+  then `day · time · gym`. `TODAY` replaces `2026-09-01`, which is what a person standing in the gym
+  reads. The gym goes last because it is the least identifying thing on the bar and usually the same
+  one every day — **the order is the design**: what gets cut is chosen, not left to chance.
+- **The editor** ([activeSessionBoard.js](src/modules/clipboard/activeSessionBoard.js)): `✎ <session>`
+  over `[day · time] <client>`. The ✎ shrinks from 22px to 12px and moves to the name it is about.
+  **The word "Editing" is gone**, and that was decided by measurement rather than taste: rendered both
+  ways, four things on one 12px line clip the client's name at 390 *and* 375, three clip nothing. The
+  glyph says the mode and Done sits beside it.
+
+Nothing is truncated in the clipboard at any width. A long session name still ellipsises in the
+editor on a phone (12px at 390, 27px at 375) — visible, with an affordance, which is the whole point
+of choosing the order.
+
+Pinned by [test_clipboard_title.py](tests/medium/test_clipboard_title.py) (the name leads, in the
+larger type) and [test_session_deeplink.py](tests/e2e/test_session_deeplink.py) (the bar names the
+session, and that name is not the part that gets cut).
+
+**Still open — the story's.** `story_step_programme_editor` — *"The plan, with the number that matters
+beside it"* — names nothing on screen, and the chapter jumps from opening the editor to `Done` without
+ever adding anything. A programme chapter that builds no programme is the demo skipping its own
+subject. And *"the text does not make any sense (what room are we going back to?)"* —
 `story_step_programme_done` says *"Done — back to the room."* and there is no room.
 
 ### 39.7 [ ] CHANGE — the demo's cards are still not one shape

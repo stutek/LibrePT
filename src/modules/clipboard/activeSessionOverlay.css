@@ -84,6 +84,45 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/* Which session, then when and where (TODO §39.6). The bar's height is set by the 44px touch row
+   its buttons need and the title was using 25px of it, so these two lines cost nothing — measured
+   at 390 and 375: same bar height, same actions width, no overflow.
+
+   The h3's own `nowrap` has to be lifted for the column, and `min-width: 0` repeated down the chain
+   for the same reason the edit-mode title needs it: a flex item's default `min-width: auto` refuses
+   to shrink below its content, which pushes text out of the bar instead of ellipsising it inside. */
+.session-title-block h3:has(.clipboard-title) {
+  white-space: normal;
+  overflow: visible;
+}
+.clipboard-title {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 0;
+  line-height: 1.2;
+}
+.clipboard-title > span {
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.clipboard-title-name {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+/* Last on the line and first to be cut: the gym is the least identifying thing here, and usually
+   the same one every day. */
+.clipboard-title-when {
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--text-muted);
+}
 .session-title-block p {
   font-size: 12px;
   color: var(--text-muted);

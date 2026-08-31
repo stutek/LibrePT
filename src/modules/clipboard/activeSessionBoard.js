@@ -154,23 +154,32 @@ function buildEditModeTitleHTML(activeClient) {
     chipLabel = parts.join(" · ") || t("live") || "Live";
   }
   const clientNm = activeClient ? escapeHTML(activeClient.name) : "";
-  // A flex row, not a run of inline text, because the bar it lands in (#session-title-text) is
-  // `white-space: nowrap; text-overflow: ellipsis` — and an ellipsis eats whole ELEMENTS, not just
-  // the tail of a sentence. Laid out inline, the last item was 169px outside the box on a 390px
-  // phone in both languages: entirely invisible, with no "…" to say anything was missing. Ordering
-  // alone does not fix that, it only chooses the casualty — the chip trailing loses the chip, the
-  // chip leading loses the client name.
+  const sessionNm = escapeHTML(b?.titles?.[0] || t("untitled_session") || "");
+  // TWO ROWS, and the word "Editing" is gone (TODO §39.6, 2026-08-31). This bar never said WHICH
+  // session was being edited — only when it runs and whose plan is open — so the session's name now
+  // leads, with the ✎ beside it saying what is being done to it.
   //
-  // So each part declares whether it may shrink. The chip (is this session running RIGHT NOW?) and
-  // the "Editing" label do not; the client NAME does, and being the ellipsised box itself it
-  // truncates as text, with the affordance a trainer can actually see. Caught, and now kept honest,
-  // by tests/e2e/test_layout_overflow.py.
+  // Dropping the word is what makes it fit, and that was measured rather than argued: rendered both
+  // ways at 390 and 375, four things on one 12px line clip the client's name at both widths, and
+  // three do not clip at either. The ✎ says the mode and Done sits next to it, so the word was the
+  // part carrying the least.
+  //
+  // Each part still declares whether it may shrink, for the reason this bar was rebuilt once
+  // already: an ellipsis eats whole ELEMENTS, not the tail of a sentence, so an inline run put the
+  // last item 169px outside the box with no "…" to say anything was missing. The chip (is this
+  // running RIGHT NOW?) holds its width; the two names are the ellipsised boxes themselves, and
+  // truncate as text with an affordance a trainer can see. Kept honest by
+  // tests/e2e/test_layout_overflow.py and tests/medium/test_clipboard_title.py.
   return `<span class="edit-mode-title">
-    <span class="edit-mode-chip ${mode}">${escapeHTML(chipLabel)}</span>
-    <i class="fa-solid fa-pen-to-square"></i>
-    <span class="edit-mode-label">${escapeHTML(t("editing") || "Editing")}</span>${
-      clientNm ? `<strong class="edit-mode-client">${clientNm}</strong>` : ""
-    }
+    <span class="edit-mode-row">
+      <i class="fa-solid fa-pen-to-square"></i>
+      <span class="edit-mode-session">${sessionNm}</span>
+    </span>
+    <span class="edit-mode-row">
+      <span class="edit-mode-chip ${mode}">${escapeHTML(chipLabel)}</span>${
+        clientNm ? `<strong class="edit-mode-client">${clientNm}</strong>` : ""
+      }
+    </span>
   </span>`;
 }
 

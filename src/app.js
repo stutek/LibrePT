@@ -514,6 +514,8 @@ async function init() {
     getActiveSession: () => getActiveSession(),
     getISODateString,
     formatClockFromMinutes,
+    // For the day label the bar now carries — "today" reads on a gym floor, "2026-09-01" does not.
+    t,
   });
 
   appBoot.bootBuildInfoDialog({ t, navigateToPath, urlFor });
