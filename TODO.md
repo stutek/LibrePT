@@ -3812,7 +3812,7 @@ the cheapest thing here to fix and the most visible: a viewer who catches the de
 believing the rest of it. **Verified where an entry says so; the others are reported and not yet
 reproduced.**
 
-### 39.1 [ ] BUG — the story tells the viewer four things that are not true
+### 39.1 [x] BUG — the story told the viewer four things that were not true
 
 Verified against [en.js](src/i18n/en.js) and the shipped script; every one of them is a sentence, not
 a mechanism.
@@ -3825,7 +3825,23 @@ a mechanism.
 | 6 | `story_step_arrive_close_invite` | *"Two of the three are on their way."* | *"where are they going? drop the poetics!"* — nobody is going anywhere; two invitations have been written. |
 
 Simon on card 1: *"this is a lie and not needed sentence"*. The fix for each is the same shape — say
-what happened, drop the flourish — and it is one edit to both dictionaries.
+what happened, drop the flourish.
+
+**Fixed 2026-08-31**, eight strings across [en.js](src/i18n/en.js) and [sl.js](src/i18n/sl.js):
+
+- Card 1 names the three routes into the register instead of promising one that the chapter itself
+  breaks two cards later.
+- Card 10 says what is actually true of the crossing: *"The page is the real one; only her messages
+  are drawn."* That is the stronger claim as well as the honest one — the drawn messages are the
+  point of §35.1's rule, and the old sentence was disowning them.
+- Card 17 keeps the claim worth making and drops the one that is not ours to make: *"no server of
+  ours ever saw it"*.
+- Card 6 says where the three of them stand, which is also what sets up card 7: *"Ana has her link
+  and Maja has hers; Nik is still standing here."*
+
+**No check can hold this.** Whether a sentence is true of the app is not a property a test can read,
+and the two suites that walk the story pass either way. What the gate does hold is that both
+dictionaries stay in step, so a sentence cannot be corrected in one language only.
 
 ### 39.2 [ ] BUG — crossing to Ana's phone loses the language
 

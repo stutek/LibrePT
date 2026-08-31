@@ -504,7 +504,7 @@ export const en = {
   story_step_arrive_contact_email:
     "Maja gives an email address instead. Type it over the number in the same box — the app reads what it is and swaps the button from a text message to an email. One box, because a trainer holding a phone should not have to pick which kind of contact they were given.",
   story_step_arrive_close_invite:
-    "Close this with the ✕ in the top right corner of the box. Two of the three are on their way.",
+    "Close this with the ✕ in the top right corner of the box. Ana has her link and Maja has hers; Nik is still standing here.",
   story_step_arrive_add_manually:
     "Nik is standing right here and reads his details out, so tap Add Client — the green button at the top of the list, next to the one you just used. The link is not the only way in.",
   story_step_arrive_type_name:
@@ -526,7 +526,7 @@ export const en = {
     "Fill in your details for our training — it takes a minute and nothing stays on your phone: librept.app/intake — Sam, +386 40 111 222",
   story_arrived_title: "It lands on the trainer's phone",
   story_arrived_body:
-    "The file Ana sent arrives in the trainer's own messages, like any other attachment. Nothing went through a server on the way: it left her phone and reached his, and he decides whether she joins the register.",
+    "The file Ana sent arrives in the trainer's own messages, like any other attachment. It travelled the way her message travelled, and no server of ours ever saw it: it left her phone and reached his, and he decides whether she joins the register.",
   story_step_intake_send:
     "Tap Share with my trainer — the green button at the bottom. On a real phone this opens the share sheet, so Ana picks the same conversation the link arrived in. Nothing is uploaded anywhere; a file leaves her phone and that is all.",
   story_step_message:
@@ -544,9 +544,9 @@ export const en = {
   // Named, and new: Ana, Maja and Nik are not in the seeded register — the story is about getting
   // them into it. The people already there (Jane, John, Sarah) are the ones the gym chapter trains.
   story_arrive_open_body:
-    "Ana, Maja and Nik ask about training together after a class. They have chosen you to guide them through their strength journey. First task: get them into your register — without writing down a single detail for them yourself.",
+    "Ana, Maja and Nik ask about training together after a class. They have chosen you to guide them through their strength journey. First task: get all three into your register — two by sending a link they fill in themselves, the third by typing his name.",
   story_handover_body:
-    "Ana's link is on its way, and your own phone has done its part. Now you play Ana's side of it, on her phone, on the page she really opens from the message. Nothing ahead is a mock-up.",
+    "Ana's link is on its way, and your own phone has done its part. Now you play Ana's side of it, on her phone, on the page she really opens from the message. The page is the real one; only her messages are drawn.",
   story_intake_open_body:
     "You are Ana now, standing outside the studio with a link in a message. There is no app to install and nothing is kept on this phone: fill it in, send it, and it is gone from here.",
   story_intake_close_body:

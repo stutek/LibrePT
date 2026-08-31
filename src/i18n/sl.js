@@ -478,7 +478,7 @@ export const sl = {
   story_step_arrive_contact_email:
     "Maja da e-naslov namesto številke. Vpiši ga kar čez številko v isto polje — aplikacija prebere, kaj je, in gumb iz sporočila SMS spremeni v e-pošto. Eno polje, ker trener s telefonom v roki ne bi smel izbirati, kakšen kontakt je dobil.",
   story_step_arrive_close_invite:
-    "Zapri to z ✕ v zgornjem desnem kotu okna. Dva od treh sta na poti.",
+    "Zapri to z ✕ v zgornjem desnem kotu okna. Ana ima svojo povezavo, Maja svojo; Nik še vedno stoji tu.",
   story_step_arrive_add_manually:
     "Nik stoji tu in svoje podatke pove na glas, zato pritisni Dodaj stranko — zeleni gumb na vrhu seznama, takoj ob tistem, ki si ga pravkar uporabil. Povezava ni edina pot noter.",
   story_step_arrive_type_name:
@@ -500,7 +500,7 @@ export const sl = {
     "Izpolni svoje podatke za najin trening — vzame minuto in na tvojem telefonu ne ostane nič: librept.app/intake — Sam, +386 40 111 222",
   story_arrived_title: "Prispe na trenerjev telefon",
   story_arrived_body:
-    "Datoteka, ki jo je Ana poslala, pride v trenerjeva sporočila kot vsaka druga priponka. Nič ni šlo prek strežnika: odšla je z njenega telefona in prispela na njegovega, on pa se odloči, ali jo sprejme v seznam.",
+    "Datoteka, ki jo je Ana poslala, pride v trenerjeva sporočila kot vsaka druga priponka. Potovala je po isti poti kot njeno sporočilo in noben naš strežnik je ni videl: odšla je z njenega telefona in prispela na njegovega, on pa se odloči, ali jo sprejme v seznam.",
   story_step_intake_send:
     "Pritisni Deli s trenerjem — zeleni gumb spodaj. Na pravem telefonu se odpre sistemsko deljenje in Ana izbere isti pogovor, po katerem je prišla povezava. Nikamor se nič ne naloži; z njenega telefona odide datoteka in to je vse.",
   story_step_message:
@@ -516,9 +516,9 @@ export const sl = {
   story_step_intake_consent:
     "Privolitev, dana tukaj in ne predpostavljena: z njo se zapiše tudi besedilo in jezik, v katerem ga je prebrala.",
   story_arrive_open_body:
-    "Ana, Maja in Nik po vadbi vprašajo za skupen trening. Za vodenje na poti do moči so izbrali tebe. Prva naloga: spravi jih v svoj seznam strank — ne da bi zanje sam zapisal en sam podatek.",
+    "Ana, Maja in Nik po vadbi vprašajo za skupen trening. Za vodenje na poti do moči so izbrali tebe. Prva naloga: spravi vse tri v svoj seznam strank — dvema pošlješ povezavo, ki jo izpolnita sama, tretjemu vpišeš ime.",
   story_handover_body:
-    "Anina povezava je na poti in tvoj telefon je svoje opravil. Zdaj odigraš Anino stran, na njenem telefonu, na strani, ki jo res odpre iz sporočila. Nič od tega, kar sledi, ni maketa.",
+    "Anina povezava je na poti in tvoj telefon je svoje opravil. Zdaj odigraš Anino stran, na njenem telefonu, na strani, ki jo res odpre iz sporočila. Stran je prava; narisana so samo njena sporočila.",
   story_intake_open_body:
     "Zdaj si Ana, pred studiem, s povezavo v sporočilu. Ni ničesar za namestiti in na tem telefonu ne ostane nič: izpolni, pošlji in s tega telefona je izginilo.",
   story_intake_close_body:
