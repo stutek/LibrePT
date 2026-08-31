@@ -89,6 +89,31 @@ the thing that must happen first, not merely what it touches.
 | **Client self-service** | §26.7 phase 2 | The vendored QR encoder and the wall poster | Deferred on purpose until the messaging handover has been tried in a gym; the link route shipped 08-22 |
 | **Program import** | §29 | Nothing — shape decided 2026-08-18, and the editor-as-review answers the fragility question | The parser and its frozen corpus; the intake flow, media-type rule and catalog crosswalk already exist |
 
+SIMON APENDIX (classify later):
+BUG: demo card 1/47: without writing down a single detail for them yourself - this is a lie and not needed sentence
+ENH: DEMO card 3/47: would text button be better as invite customer instead send intake form?
+BUG: Demo card 5/47: button name nowhere to send it yet is way too confusing - could it be just a disabled "send invite"? make the default action button on right (unify), not left
+QUE: Demo card 5/47: other ways to send - those are chrome build in options, or do we have influence over that
+QUE: DEMO card 5/47: where did you get the demo phone number? can it be some operater sms echo service - if it exists.
+BUG: demo card 6/47: terrible text, where are they going? drop the poetics!
+BUG: demo ging back from card 7 to 6: show me fills both number and mail, never animates the x click
+BUG: demo card 8:47: adding an customer is not idempotent operation, i have multiples in DB, so on name clash alias should be mandatory, how is clipboard gona distinguish name clashes?
+BUG: demo card 9/47: first time I see drop down icon in top right (all cards should be uniform!), x buttom appears only once collapsing a card
+ENH: demo cards should have a bacground color that makes them easy to distinguish from in app controls
+BUG: demo card 10/47: Nothing ahead is a mock up is a lie - i want message recieved notification to be a mockup and a clearly marked fake screenshot of opening a text message or mail app.
+BUG: demo card 11/47: missing a few steps of (clearly marked) mock sms notification and (clearly marked) mock click on message link, make ana's phone bloosom themed
+BUG: demo card 16/47: privacy consent naj ne omeni google drive-a, naj bo generičen "PT's private cloud storage", 
+BUG: demo card 17/47: nič ni šlo prek strežnika - je laž, telekomi imajo kup strežnikov na poti
+ENH: demo card 18/47: jasno označeno ustvari mock share postopek, ki ga izvaja Ana (a smemo dati približek iPhonovega share postopka pri Ani?).
+ENH: demo card 19/47: približek kar si želim, samo naj pokaže 3rd party app za branje sporočil ali pa sms notification view screen, kjer PT klikne
+BUG: demo card 20/47: zagotovo je Ana imela nekaj slovenskih besedil, če ne kar celega UI slo, ta import pa pravi "en", consent wording naj bo jasno označen kot verzija consent agreementa, show me ne pokaže klik animacije
+BUG: demo card 23/47: the text does not make any sense (what room are we going back to?)
+BUG: demo card 24/47: the edit view is not clear which session and for whom that plan is, the demo card text is useless
+ENH: demo card 24/47: demonstrate actually adding one circuit please, before just saying done
+
+
+
+
 ---
 
 ## 1. Scheduling & Sessions
