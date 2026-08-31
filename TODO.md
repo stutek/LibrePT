@@ -89,31 +89,6 @@ the thing that must happen first, not merely what it touches.
 | **Client self-service** | §26.7 phase 2 | The vendored QR encoder and the wall poster | Deferred on purpose until the messaging handover has been tried in a gym; the link route shipped 08-22 |
 | **Program import** | §29 | Nothing — shape decided 2026-08-18, and the editor-as-review answers the fragility question | The parser and its frozen corpus; the intake flow, media-type rule and catalog crosswalk already exist |
 
-SIMON APENDIX (classify later):
-BUG: demo card 1/47: without writing down a single detail for them yourself - this is a lie and not needed sentence
-ENH: DEMO card 3/47: would text button be better as invite customer instead send intake form?
-BUG: Demo card 5/47: button name nowhere to send it yet is way too confusing - could it be just a disabled "send invite"? make the default action button on right (unify), not left
-QUE: Demo card 5/47: other ways to send - those are chrome build in options, or do we have influence over that
-QUE: DEMO card 5/47: where did you get the demo phone number? can it be some operater sms echo service - if it exists.
-BUG: demo card 6/47: terrible text, where are they going? drop the poetics!
-BUG: demo ging back from card 7 to 6: show me fills both number and mail, never animates the x click
-BUG: demo card 8:47: adding an customer is not idempotent operation, i have multiples in DB, so on name clash alias should be mandatory, how is clipboard gona distinguish name clashes?
-BUG: demo card 9/47: first time I see drop down icon in top right (all cards should be uniform!), x buttom appears only once collapsing a card
-ENH: demo cards should have a bacground color that makes them easy to distinguish from in app controls
-BUG: demo card 10/47: Nothing ahead is a mock up is a lie - i want message recieved notification to be a mockup and a clearly marked fake screenshot of opening a text message or mail app.
-BUG: demo card 11/47: missing a few steps of (clearly marked) mock sms notification and (clearly marked) mock click on message link, make ana's phone bloosom themed
-BUG: demo card 16/47: privacy consent naj ne omeni google drive-a, naj bo generičen "PT's private cloud storage", 
-BUG: demo card 17/47: nič ni šlo prek strežnika - je laž, telekomi imajo kup strežnikov na poti
-ENH: demo card 18/47: jasno označeno ustvari mock share postopek, ki ga izvaja Ana (a smemo dati približek iPhonovega share postopka pri Ani?).
-ENH: demo card 19/47: približek kar si želim, samo naj pokaže 3rd party app za branje sporočil ali pa sms notification view screen, kjer PT klikne
-BUG: demo card 20/47: zagotovo je Ana imela nekaj slovenskih besedil, če ne kar celega UI slo, ta import pa pravi "en", consent wording naj bo jasno označen kot verzija consent agreementa, show me ne pokaže klik animacije
-BUG: demo card 23/47: the text does not make any sense (what room are we going back to?)
-BUG: demo card 24/47: the edit view is not clear which session and for whom that plan is, the demo card text is useless
-ENH: demo card 24/47: demonstrate actually adding one circuit please, before just saying done
-
-
-
-
 ---
 
 ## 1. Scheduling & Sessions
@@ -3822,3 +3797,169 @@ was pushed below them. It is now the one exception to that rule, and the reason 
 every other item is a claim about the trainer's own gym, and reading one before knowing the data is
 a fiction is reading it wrong. It is also the collapsed drawer's summary line and the only way back
 to the guided demo and the cleanup screen.
+
+---
+
+## 39. Reported 2026-08-31 — the story walked card by card
+
+Twenty observations from one hand-walk of the story's 47 cards, in the maintainer's own words. His
+card numbers are the guide's counter and match this file's step ids up to card 20; from the plan
+editor on they run one lower than the shipped script, so **each item below names the step id**, which
+is what the work touches.
+
+Half of these are copy that is wrong on screen rather than a mechanism that is broken, and copy is
+the cheapest thing here to fix and the most visible: a viewer who catches the demo in a lie stops
+believing the rest of it. **Verified where an entry says so; the others are reported and not yet
+reproduced.**
+
+### 39.1 [ ] BUG — the story tells the viewer four things that are not true
+
+Verified against [en.js](src/i18n/en.js) and the shipped script; every one of them is a sentence, not
+a mechanism.
+
+| Card | Key | What it says | Why it is false |
+| :-- | :-- | :-- | :-- |
+| 1 | `story_arrive_open_body` | *"without writing down a single detail for them yourself"* | Cards 8 and 9 have the trainer typing Nik's name, and card 9 says so: *"you typed four words in total"*. |
+| 10 | `story_handover_body` | *"Nothing ahead is a mock-up."* | Cards 11, 17 and 19 are drawn message screenshots. They are honest mock-ups; the sentence is what makes them dishonest. |
+| 17 | `story_arrived_body` | *"Nothing went through a server on the way"* | A text message crosses an operator's servers. The true claim is narrower and better: nothing went through **ours**, and nothing was uploaded. |
+| 6 | `story_step_arrive_close_invite` | *"Two of the three are on their way."* | *"where are they going? drop the poetics!"* — nobody is going anywhere; two invitations have been written. |
+
+Simon on card 1: *"this is a lie and not needed sentence"*. The fix for each is the same shape — say
+what happened, drop the flourish — and it is one edit to both dictionaries.
+
+### 39.2 [ ] BUG — crossing to Ana's phone loses the language
+
+**Reported at card 20:** *"zagotovo je Ana imela nekaj slovenskih besedil, če ne kar celega UI slo, ta
+import pa pravi 'en'"*.
+
+**Found, not guessed:** [storyTour.js](src/modules/demo/storyTour.js) hands the browser over with a
+fixed address — `intake?demo=story&chapter=intake&theme=midnight` — and there is no `lang` in it.
+Ana's page is a separate boot with no database (§35.1), so it has nothing to read a language from and
+comes up in the default. A Slovenian viewer watches Ana fill in an English form, and the consent her
+file records is the language she never chose.
+
+The way back, `clients?demo=story&step=review-message`, drops it too; the trainer's own side survives
+only because his choice is in storage.
+
+**Re-check condition:** whenever a story step crosses surfaces.
+
+### 39.3 [ ] BUG — the consent Ana ticks names Google Drive
+
+**Reported at card 16:** *"privacy consent naj ne omeni google drive-a, naj bo generičen "PT's private
+cloud storage""*.
+
+Verified: [en.js:265](src/i18n/en.js) has the client agreeing to a backup *"in my trainer's personal
+Google Drive"*, and [sl.js:256](src/i18n/sl.js) says the same. The long consent letter
+([consent/en.js](src/i18n/consent/en.js)) already says *"my personal cloud storage"* and names no
+vendor — so the two texts a client reads disagree, and the shorter one is the one they actually tick.
+
+Naming the vendor in the tick is also a promise the app cannot keep across a deployment that syncs
+somewhere else, and it dates the consent record to a product decision rather than to a practice.
+
+### 39.4 [ ] CHANGE — the invite dialog's two buttons
+
+**Reported at card 5:** *"button name nowhere to send it yet is way too confusing - could it be just a
+disabled "send invite"? make the default action button on right (unify), not left"*.
+
+The dialog offers `intake_invite_send_disabled` — *"Nowhere to send it yet"* — on an anchor styled as
+the primary action ([intakeInviteDialog.js](src/modules/clients/intakeInviteDialog.js)). It reads as
+a label for a thing that has gone wrong rather than as a button waiting for input, and it is the
+first control on the row while the secondary sits to its right.
+
+Two changes, and the second is a rule rather than a one-off: the primary keeps its own name while
+disabled, and the primary action goes on the RIGHT everywhere a dialog has two.
+
+### 39.5 [ ] BUG — the register takes the same person twice
+
+**Reported at card 8:** *"adding an customer is not idempotent operation, i have multiples in DB, so on
+name clash alias should be mandatory, how is clipboard gona distinguish name clashes?"*
+
+Walking the demo more than once leaves several Nik Zupans in the register, and the clipboard shows
+people by name — so two people with one name are two rows a trainer cannot tell apart mid-session,
+on the gym floor, one-handed. The demo is how it was noticed; the defect is the app's.
+
+The ask is a **mandatory alias on a name clash**, decided when the second one is saved rather than
+discovered later. Open question the fix has to answer: what the clipboard, the plan editor and the
+history show once an alias exists.
+
+### 39.6 [ ] BUG — the plan editor does not say whose plan it is
+
+**Reported at cards 23–24:** *"the edit view is not clear which session and for whom that plan is, the
+demo card text is useless"*, and *"demonstrate actually adding one circuit please, before just saying
+done"*.
+
+Two different faults, one screen:
+
+- **The app's.** The editor opens on a plan with no line saying which session it belongs to or who is
+  in it. On a phone that screen is the whole context a trainer has.
+- **The story's.** `story_step_programme_editor` — *"The plan, with the number that matters beside
+  it"* — names nothing on screen, and the chapter jumps from opening the editor to `Done` without
+  ever adding anything. A programme chapter that builds no programme is the demo skipping its own
+  subject.
+
+Also here: *"the text does not make any sense (what room are we going back to?)"* —
+`story_step_programme_done` says *"Done — back to the room."* and there is no room.
+
+### 39.7 [ ] CHANGE — the demo's cards are still not one shape
+
+**Reported at card 9:** *"first time I see drop down icon in top right (all cards should be uniform!),
+x buttom appears only once collapsing a card"*, with *"demo cards should have a bacground color that
+makes them easy to distinguish from in app controls"*.
+
+§38.16 put the ✕ on the parked bar deliberately — it is the only place it means "end the demo" — so
+the second half of the report is a consequence of a decision, and what is left to answer is why the
+panel's chrome reads as arriving at card 9 rather than at card 1. The background ask is separate and
+straightforward: the guide's card should never be mistakable for one of the app's own.
+
+### 39.8 [ ] GAP — what the story shows of the other phone
+
+Four asks, one subject: the parts of the journey that happen outside this app are the parts a trainer
+has never seen, and the story currently narrates them.
+
+- **Card 10/11:** *"i want message recieved notification to be a mockup and a clearly marked fake
+  screenshot of opening a text message or mail app"*, and *"missing a few steps of (clearly marked)
+  mock sms notification and (clearly marked) mock click on message link"*.
+- **Card 11:** *"make ana's phone bloosom themed"* — she is on `midnight` today, which is the theme
+  the trainer might also be using.
+- **Card 18:** *"jasno označeno ustvari mock share postopek, ki ga izvaja Ana (a smemo dati približek
+  iPhonovega share postopka pri Ani?)"* — the share sheet is the one step the demo cannot drive.
+- **Card 19:** *"naj pokaže 3rd party app za branje sporočil ali pa sms notification view screen, kjer
+  PT klikne"*.
+
+Every one of these has to obey §35.1's rule — a step that happens outside this app is drawn on
+something nobody could mistake for one of its screens — and the iPhone question is a real one to
+answer before drawing anything: an approximation of somebody's share sheet is their design, not ours.
+
+### 39.9 [ ] BUG — Show me skips what it is there to show
+
+- **Cards 6→7, walked backwards:** *"show me fills both number and mail, never animates the x click"*.
+  Two steps of the arrive chapter are demonstrated as one, and the close step's own tap is never
+  drawn.
+- **Card 20:** *"show me ne pokaže klik animacije"*.
+
+Both are the player, not the script: the hand is what makes a demonstration a demonstration.
+
+### 39.10 [ ] CHANGE — the intake-link button's name
+
+**Reported at card 3:** *"would text button be better as invite customer instead send intake form?"*
+
+`Send an intake link` names our mechanism; `Invite a client` names the trainer's intent. The register
+already calls the other route `Add Client`, so the pair would read as two ways to do one thing.
+
+### 39.11 Answered 2026-08-31 — not work
+
+**"Other ways to send it — are those Chrome's built-in options, or do we have influence over that?"**
+The button is ours, and so is its wording and the payload; what it opens is not. It calls
+`navigator.share()`, which hands over to the phone's own share sheet — we choose the title, text and
+link, and nothing about which apps appear or how the sheet looks. Where the browser has no
+`navigator.share`, we write the link to the clipboard, and where that fails too we put the link on
+screen in a read-only field ([intakeInviteDialog.js](src/modules/clients/intakeInviteDialog.js),
+§26.3).
+
+**"Where did you get the demo phone number? Can it be some operator SMS echo service?"**
+`+386 41 234 567` is invented in the story script — a well-formed Slovenian mobile number with an
+obviously fake tail. It reaches nothing, and nothing is sent: the step composes the message and the
+story never taps send. I know of no Slovenian operator echo service and will not claim one exists.
+If the point is a number that is provably nobody's, the clean answer is a range a regulator has
+reserved for fiction — the UK and the US both publish one, and whether AKOS does is a question for
+their numbering plan, not something to guess at.
