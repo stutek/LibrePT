@@ -3883,7 +3883,7 @@ Both walkers now read the value the assertion reads, through a named helper rath
 the rule is in [tests/INDEX.md](tests/INDEX.md) where the next person meets it before writing the
 test rather than after.
 
-### 39.3 [ ] BUG — the consent Ana ticks names Google Drive
+### 39.3 [x] BUG — the consent Ana ticked named Google Drive
 
 **Reported at card 16:** *"privacy consent naj ne omeni google drive-a, naj bo generičen "PT's private
 cloud storage""*.
@@ -3895,6 +3895,28 @@ vendor — so the two texts a client reads disagree, and the shorter one is the 
 
 Naming the vendor in the tick is also a promise the app cannot keep across a deployment that syncs
 somewhere else, and it dates the consent record to a product decision rather than to a practice.
+
+**Fixed 2026-08-31.** The tick now says *"my trainer's own private cloud storage"* / *"njegovi osebni
+shrambi v oblaku"*, which is what the letter says.
+
+**Nothing is concealed by it**, and that is what made it safe: the privacy notice the tick links to
+names Google Drive in full, in both languages, and a processor's identity is what that notice is for.
+
+**`CONSENT_FORM_VERSION` is deliberately NOT bumped.** It stamps the letter's substance — purposes,
+recipients, rights, retention — and the letter has not changed. This makes its summary agree with it
+instead of contradicting it, adds no recipient and narrows no right, so a bump would ask every client
+already on the record to consent again to the promise they already made.
+
+**Now checked**, in [consentForm.test.mjs](tests/unit_js/modules/common/consentForm.test.mjs): no
+consent text a client ticks or signs may name a storage vendor, in any language. It is the same drift
+the letters were already pinned against — *"Google Drive/iCloud" vs "personal cloud storage" across
+three copies* — caught one artifact further out.
+
+**The gate found the rule this replaces**, which is why it is written down twice.
+[test_intake_form.py](tests/medium/test_intake_form.py) required the tick to disclose *"Drive"* by
+name, from the 2026-08-23 full-disclosure ruling. That test now asks for the KIND of recipient —
+`cloud storage` — and says why: what must be disclosed here is that a backup copy may leave the
+trainer's device, and WHO holds it is what the linked notice is for.
 
 ### 39.4 [ ] CHANGE — the invite dialog's two buttons
 

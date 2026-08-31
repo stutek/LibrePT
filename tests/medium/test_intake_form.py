@@ -161,13 +161,27 @@ def test_the_tick_itself_says_what_is_being_agreed_to(page, local_server):
 
     The line beside the box is the only thing most people read — the notice and the full wording are
     one tap away and stay there for the detail, but the substance may not hide behind them. So the
-    sentence names where the details live, the backup copy in the trainer's own Drive, that nobody
-    else receives them, and the right to withdraw."""
+    sentence names where the details live, that there may be a backup copy in cloud storage, that
+    nobody else receives them, and the right to withdraw.
+
+    **The VENDOR is not part of that list** (ruled 2026-08-31, §39.3). This asked for "Drive" until
+    then, which put it at odds with the letter it summarises — that letter says "my personal cloud
+    storage" and names nobody, and a client handed one wording while ticking another has not been
+    informed. What is disclosed here is the KIND of recipient; who it is belongs in the privacy
+    notice this line links to, which names Google Drive in full in both languages.
+    tests/unit_js/modules/common/consentForm.test.mjs holds the other half: no consent text a client
+    ticks or signs may name a vendor at all."""
     _mount(page, local_server)
 
     agreed = page.locator("label[for='intake-consent']").inner_text()
 
-    for disclosed in ("device", "backup", "Drive", "no other service", "withdraw"):
+    for disclosed in (
+        "device",
+        "backup",
+        "cloud storage",
+        "no other service",
+        "withdraw",
+    ):
         assert disclosed.lower() in agreed.lower(), (
             f"the consent line does not disclose {disclosed!r}: {agreed!r}"
         )

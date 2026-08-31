@@ -258,11 +258,18 @@ export const en = {
   intake_health_hint:
     "Only if you want to. It goes in the file you send your trainer, and nowhere else — not into a text message, and not into any link.",
   // Informed consent rests on full disclosure or it is void (ruled 2026-08-23). The one line a
-  // client actually reads has to name what the linked notice says: the trainer's own device, the
-  // optional backup in their personal Google Drive, nobody else, and the right to withdraw. The
+  // client actually reads has to say what the linked notice says: the trainer's own device, an
+  // optional backup in their own private cloud storage, nobody else, and the right to withdraw. The
   // links stay for the detail; they are not where the substance is allowed to hide.
+  //
+  // The VENDOR is not named here (§39.3, 2026-08-31). It used to say "Google Drive", while the
+  // consent letter this line summarises says "my personal cloud storage" and names nobody — two
+  // texts about one promise, disagreeing, and the shorter one is the one a client actually ticks.
+  // Nothing is hidden by dropping it: the privacy notice this line links to names Google Drive in
+  // full, in both languages, and that is where a processor's identity belongs. It is also a promise
+  // the app cannot keep for a deployment that syncs somewhere else.
   intake_consent:
-    "I agree to my trainer keeping these details and using them to plan and log my training. They stay on my trainer's own device, and may also be kept as a backup copy in my trainer's personal Google Drive — no other service receives them. I can withdraw this at any time by telling my trainer.",
+    "I agree to my trainer keeping these details and using them to plan and log my training. They stay on my trainer's own device, and may also be kept as a backup copy in my trainer's own private cloud storage — no other service receives them. I can withdraw this at any time by telling my trainer.",
   intake_sender_for: "You are filling this in for {who}.",
   intake_sender_check:
     "If that is not the person who gave you this link, do not fill it in. This page sends nothing by itself: your answers become a file on this phone, and you choose who to share it with.",

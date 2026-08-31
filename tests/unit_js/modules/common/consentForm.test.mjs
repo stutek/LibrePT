@@ -201,3 +201,37 @@ test("every shipped letter is verbatim its printable template", () => {
     );
   }
 });
+
+// Storage vendors a client-facing consent text must not name. Not an exhaustive list of providers —
+// it is the list of names that have actually appeared in this repo's consent copy.
+const STORAGE_VENDORS = [/google/i, /\bdrive\b/i, /icloud/i, /dropbox/i, /onedrive/i];
+
+test("no consent text a client ticks or signs names the storage vendor", () => {
+  // Ruled 2026-08-31 (§39.3), reported as "privacy consent naj ne omeni google drive-a". The tick on
+  // the intake form said "my trainer's personal Google Drive" while the letter it summarises said
+  // "my personal cloud storage" and named nobody — one promise, two texts, disagreeing, and the
+  // shorter one is the one a client actually ticks. This is the same drift the letters are already
+  // pinned against, one artifact further out.
+  //
+  // Nothing is concealed by the rule: the privacy notice both texts link to names Google Drive in
+  // full, in both languages, and a processor's identity is what that notice is for. Naming it here
+  // instead is also a promise the app cannot keep on a deployment that syncs somewhere else.
+  for (const [lang, dict] of Object.entries(TRANSLATIONS)) {
+    for (const vendor of STORAGE_VENDORS) {
+      assert.ok(
+        !vendor.test(dict.intake_consent),
+        `${lang}: the intake consent tick names ${vendor} — that belongs in the privacy notice`,
+      );
+    }
+  }
+
+  for (const lang of LANGS) {
+    const body = consentEmailBody("Jane Doe", lang);
+    for (const vendor of STORAGE_VENDORS) {
+      assert.ok(
+        !vendor.test(body),
+        `${lang}: the consent letter names ${vendor} — that belongs in the privacy notice`,
+      );
+    }
+  }
+});
