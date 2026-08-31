@@ -3264,27 +3264,41 @@ Pinned by [test_walkthrough_show_me.py](tests/medium/test_walkthrough_show_me.py
 tour built for exactly these cases: one that arrives untrue, one that arrives already true, and the
 last one.
 
-### 38.17 [ ] GAP — the guide complains about the wrong screen for a second while fixing it
+### 38.17 [x] BUG — the guide called the screen wrong while scrolling to it
 
-Measured 2026-08-30 at story step 47 (the evening's session move), deep-linked at full motion:
+Measured 2026-08-30 at story step 47 (the evening's session move), deep-linked on a 390×844 phone:
 
 ```
-t+1.5s  busy rebuilding, every button greyed
-t+3.0s  "This step needs a different screen — go back to the sessions board and start it again."
-t+4.5s  on the board, control ringed, Show me works — the message gone
+t+1.0s  busy rebuilding, every button greyed
+t+4.1s  "This step needs a different screen — go back to the sessions board and start it again."
+t+4.7s  the board scrolls, the control is ringed — the message gone
 ```
 
-The complaint is TRUE for a second and a half and then untrue, which is the guide being wrong out
-loud at the one moment a viewer is looking for reassurance. The rebuild navigates and the app takes
-longer than `READY_SETTLE_MS` (2500ms) to render the day the step belongs to, so the guide reports
-before its own repair has landed.
+**The screen was right the whole time**, and the first diagnosis here was wrong: nothing was slow to
+render and `READY_SETTLE_MS` was never the problem. The Tuesday & Thursday card was on the board from
+the first paint, 650px above the fold. What was wrong is the question the guide asked about it.
+`isCovered` clamped the control's centre into the viewport before asking `elementFromPoint` what was
+drawn there — so a control above the fold answered with whatever sits at the top of the screen, the
+app header. The guide then waited out its full 2500ms settle for a control nothing was going to
+uncover, said the app was on the wrong screen, and only then ran the scroll that brings it into view.
 
-**Not fixed by raising the settle** — that delays every REAL complaint by the same amount. The
-honest fix is to hold the complaint while a navigation the rebuild itself started is still settling,
-which means the rebuild has to say it navigated (it already knows: `moved`).
+**Out of view is not covered.** Two changes in
+[walkthroughOverlay.js](src/modules/demo/walkthroughOverlay.js), and neither touches the settle:
 
-**Re-check condition:** whenever a chapter boundary is walked at full motion, or `READY_SETTLE_MS` is
-touched.
+1. `isCovered` asks about the control's real centre, and a centre outside the viewport is not
+   covered. Bringing a control into view is the guide's own job — `enterStep` scrolls to it, and
+   `moveTargetOutFromUnderPanel` scrolls it out from under the panel.
+2. The stale-overlay sweep after a replay no longer asks `stepIsReady` first. It was leaning on the
+   old reading: with the control honestly off screen, the sweep stopped running and left the ☰ menu
+   the replayed theme step re-opens standing over the very card the ring was about to name.
+
+The step now settles at **t+2.4s with no message at all**, 2.8s sooner than the complaint used to
+arrive.
+
+Pinned by [test_demo_story.py](tests/e2e/test_demo_story.py): the complaint line is watched with a
+MutationObserver installed before the app boots — a message shown for half a second and withdrawn
+again is exactly what a retrying assertion is built to miss — and the ☰ menu must be closed when the
+control lands.
 
 ### 38.16 [x] CHANGE — the demo card is put away, not shut
 

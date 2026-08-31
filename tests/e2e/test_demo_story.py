@@ -532,3 +532,54 @@ def test_crossing_to_the_client_phone_carries_the_story_count_over(page, local_s
         f"{her_total} — a viewer reads that as a different demo starting"
     )
     expect(page.locator("#intake-form")).to_be_visible()
+
+
+# Every moment the guide's complaint line was on screen, kept from before the app boots so the test
+# sees a message that appears and is withdrawn again half a second later — which is exactly the
+# failure, and exactly what a retrying assertion is built to miss.
+WATCH_COMPLAINTS = """
+window.__complaints = [];
+new MutationObserver((records) => {
+  for (const record of records) {
+    const el = record.target;
+    if (el.classList?.contains("walkthrough-problem") && !el.hidden) {
+      window.__complaints.push(el.textContent.trim());
+    }
+  }
+// The DOCUMENT, not its element: this runs before the page is parsed, and
+// `document.documentElement` is null there — observing it throws, and the watch that was supposed
+// to catch the complaint silently never ran.
+}).observe(document, { subtree: true, attributes: true, attributeFilter: ["hidden"] });
+"""
+
+
+def test_the_guide_does_not_call_the_screen_wrong_while_scrolling_to_it(
+    page, local_server
+):
+    """TODO §38.17, measured at the evening's session move: the guide said "this step needs a
+    different screen" for half a second on the very screen the step lives on, then scrolled to the
+    control and withdrew it.
+
+    The card was on the board the whole time, 650px above the fold. `isCovered` clamped the
+    control's centre into the viewport before asking what was drawn there, so the answer came back
+    "the app header" — and the guide waited out its whole settle budget for a control nothing was
+    going to uncover, complained, and only then scrolled to it. Bringing a control into view is the
+    guide's own job; being out of view is not being covered."""
+    # A phone, because that is where the board runs long enough to put the card off the screen —
+    # on a desktop viewport the evening's session is already in view and there is nothing to scroll.
+    page.set_viewport_size({"width": 390, "height": 844})
+    page.add_init_script(WATCH_COMPLAINTS)
+    _open_story(page, local_server, "?init=demo_data_load&demo=story&step=evening-move")
+
+    control = page.locator(
+        ".session-card", has_text="Tuesday & Thursday"
+    ).first.locator(".btn-edit-session")
+    # The guide has finished putting the app where the step happens.
+    expect(control).to_be_in_viewport(timeout=30_000)
+    assert page.evaluate("() => window.__complaints") == [], (
+        "the guide complained about the screen it was already on"
+    )
+    # And it arrives on a clean screen: the ☰ menu the replayed theme step re-opened is closed,
+    # rather than left standing over the card the ring is about to name. The sweep that closes it
+    # used to run only because an off-screen control read as covered.
+    expect(page.locator("#app-menu")).to_be_hidden()

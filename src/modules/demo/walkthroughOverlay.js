@@ -692,8 +692,18 @@ export function startGuidedWalkthrough({
   function isCovered(target) {
     const box = target.getBoundingClientRect();
     const view = doc.documentElement;
-    const x = Math.min(Math.max(box.left + box.width / 2, 1), view.clientWidth - 1);
-    const y = Math.min(Math.max(box.top + box.height / 2, 1), view.clientHeight - 1);
+    const x = box.left + box.width / 2;
+    const y = box.top + box.height / 2;
+    // OUT OF VIEW is not COVERED, and the two used to be answered the same way: the centre was
+    // clamped into the viewport before the question was asked, so a control above the fold was
+    // reported as covered by whatever sits at the top of the screen — the app header. Measured
+    // 2026-08-30 at the evening's session move (TODO §38.17): the card was on the board from the
+    // first paint, 650px up, and the guide waited out its whole settle budget for a control nothing
+    // was going to uncover, said the app was on the wrong screen, and THEN scrolled to it. Bringing
+    // a control into view is the guide's own job — `enterStep` scrolls to it, and
+    // moveTargetOutFromUnderPanel scrolls it out from under the panel — so being off screen is not
+    // a problem to report, it is a scroll about to happen.
+    if (x < 0 || y < 0 || x >= view.clientWidth || y >= view.clientHeight) return false;
     const onTop = doc.elementFromPoint(x, y);
     if (!onTop) return true;
     // The GUIDE is not "something in the way": its own card already has a rule for stepping aside
@@ -849,8 +859,13 @@ export function startGuidedWalkthrough({
     // holds costs one probe and is skipped, so an app that is merely one tap behind still replays
     // one tap.
     moved = (await replaySteps(tour.steps.slice(replayFrom, index), step, groundOnly)) || moved;
-    // Whatever the replay itself left open on top of the step — see dismissStaleOverlays.
-    if (!stepIsReady(step)) dismissStaleOverlays(step);
+    // Whatever the replay itself left open on top of the step — see dismissStaleOverlays. Asked
+    // WHATEVER the step's own readiness says, because at this instant that answer is about geometry
+    // the app has not settled yet: the control may still be off screen, with the board about to
+    // scroll to it and a menu the replay re-opened waiting over where it lands. Guarding this on
+    // `stepIsReady` leaned on an off-screen control reading as covered — the reading §38.17 removed
+    // — and left the ☰ menu standing over the evening's session card.
+    dismissStaleOverlays(step);
     // A step that CAN be performed is not a problem to report, whatever the rebuild made of the
     // screens behind it — the trainer is looking at a card whose control is right there.
     if (stepIsReady(step)) return true;
