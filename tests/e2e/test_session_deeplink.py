@@ -159,3 +159,62 @@ def test_tapping_a_card_updates_the_deep_link(page, local_server):
     assert after != before and focus_re.match(after), (
         f"tap did not update the deep link: {after}"
     )
+
+
+def test_a_cold_deep_link_names_the_session_it_opened(page, local_server):
+    """Reported 2026-08-31 (Simon), with the link he was on: "still no title visible".
+
+    Opening a session by tapping it writes the title bar; arriving at the same address from cold
+    does not. `renderSessionTitle` runs before the overlay's markup exists, takes its `if (!el)
+    return`, and nothing calls it again — so the bar keeps the placeholder word that ships in the
+    static HTML, on a screen that knows perfectly well which session it is showing.
+
+    A deep link is how a reload, a bookmark and a shared link all arrive, so this is the common
+    case, not the exotic one."""
+    _open_session(page, local_server)
+    deep_link = page.evaluate("() => location.pathname")
+    when = page.evaluate(
+        "() => JSON.parse(localStorage.getItem('librept_active_session'))"
+        "        .sourceSession.timeLabel.slice(0, 5)"
+    )
+
+    page.goto(f"{page.evaluate('() => location.origin')}{deep_link}")
+    page.wait_for_selector("#active-session-overlay:not(.hidden)")
+    page.wait_for_timeout(600)
+
+    title = page.locator("#session-title-text").inner_text().strip()
+    assert title != "Clipboard", (
+        "the deep-linked clipboard is still showing the placeholder from index.html"
+    )
+    assert when in title, (
+        f"the bar does not say which session this is: {title!r} (session starts {when})"
+    )
+
+
+def test_leaving_the_editor_puts_the_session_back_not_the_placeholder(
+    page, local_server
+):
+    """The other half of deriving rather than stashing (§39.6's neighbour, 2026-08-31).
+
+    Edit mode repurposes the title bar. It used to keep the bar's HTML in a variable and put it back
+    verbatim on the way out — which faithfully restored whatever was there, including the
+    `Clipboard` placeholder a cold deep link leaves behind. Now the way out re-derives the title
+    from the session, so it cannot restore something that was never right."""
+    _open_session(page, local_server)
+    deep_link = page.evaluate("() => location.pathname")
+    when = page.evaluate(
+        "() => JSON.parse(localStorage.getItem('librept_active_session'))"
+        "        .sourceSession.timeLabel.slice(0, 5)"
+    )
+    page.goto(f"{page.evaluate('() => location.origin')}{deep_link}")
+    page.wait_for_selector("#active-session-overlay:not(.hidden)")
+
+    page.click("#btn-session-menu")
+    page.click("#btn-edit-plan")
+    page.wait_for_selector(".clipboard-editor")
+    page.click("#btn-done-edit")
+    page.wait_for_timeout(600)
+
+    title = page.locator("#session-title-text").inner_text().strip()
+    assert title != "Clipboard", "leaving the editor restored the placeholder"
+    assert when in title, f"leaving the editor lost the session: {title!r}"

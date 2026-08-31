@@ -4033,3 +4033,31 @@ story never taps send. I know of no Slovenian operator echo service and will not
 If the point is a number that is provably nobody's, the clean answer is a range a regulator has
 reserved for fiction — the UK and the US both publish one, and whether AKOS does is a question for
 their numbering plan, not something to guess at.
+
+### 39.12 [x] BUG — a deep-linked clipboard showed a placeholder instead of the session
+
+**Reported 2026-08-31 (Simon)**, with the address he was standing on:
+`/session/s04f2e3d/client/c1a9f0e2/circuit/z08a2b3c` — *"still no title visible"*.
+
+Not §39.6. The bar was not merely missing the session's NAME; it was showing the word `Clipboard`,
+the placeholder that ships in the static markup, on a screen that knew perfectly well it was holding
+*Morning Conditioning, 09:00 - 10:00, city park*. Tapping a session in from the board wrote the bar
+correctly; arriving at the same address from cold never did.
+
+**Traced, not guessed.** A MutationObserver on the title showed it written exactly once — at
+t+1357ms, when the overlay's markup renders — and never touched again. `renderSessionTitle` runs
+before that markup exists, takes its `if (!el) return`, and nothing calls it a second time. Calling
+it by hand on the stuck page produced the right line immediately.
+
+**A deep link is the common case, not the exotic one**: a reload, a bookmark, a link sent to a
+colleague and the app's own restored session all arrive that way.
+
+**Fixed by deriving the title instead of stashing it.** Edit mode repurposes that bar, and it used to
+keep the bar's HTML in a module variable and restore it verbatim on the way out — faithfully putting
+back whatever was there, placeholder included, which is how one wrong render spread to every later
+one. Leaving edit mode now re-derives from the session
+([activeSessionBoard.js](src/modules/clipboard/activeSessionBoard.js)), and the module variable is
+gone: a value that cannot be stale beats a rule about keeping it fresh.
+
+Pinned by [test_session_deeplink.py](tests/e2e/test_session_deeplink.py) on both halves — a cold deep
+link names the session, and so does the screen you get back after leaving the editor.

@@ -32,10 +32,6 @@ import { renderExerciseDeck } from "./exerciseDeckOfCards.js";
 
 let deps = {};
 
-// Holds the session title bar's normal content while edit mode repurposes it, so exiting restores
-// it verbatim rather than reconstructing it.
-let savedSessionTitleHTML = null;
-
 // Detaches the previous editor render's document listeners before the next render installs new ones.
 let editorCleanup = null;
 
@@ -178,19 +174,26 @@ function buildEditModeTitleHTML(activeClient) {
   </span>`;
 }
 
-// Swaps the title bar's own content between the normal session title and the edit-mode label,
-// saving/restoring the original HTML verbatim so exiting edit mode never has to reconstruct it.
+/** Swaps the title bar's own content between the normal session title and the edit-mode label.
+ *
+ * **The normal title is DERIVED here, never restored from a stash.** It used to be: entering edit
+ * mode kept the bar's HTML in a module variable and leaving put it back verbatim. That is only
+ * correct when the saved string was correct, and on a cold deep link it never is — the bar still
+ * holds `Clipboard`, the placeholder word that ships in index.html, because `renderSessionTitle`
+ * ran before the overlay's markup existed, took its `if (!el) return`, and nothing called it again
+ * (reported 2026-08-31 with the link he was standing on: "still no title visible"). The stash then
+ * spread it: enter the editor and leave, and the placeholder was restored over a screen that knows
+ * exactly which session it is showing.
+ *
+ * Deriving costs one render of a line of text and cannot be stale, which is the whole difference.
+ */
 function swapTitleBarContent(titleEl, overlay, activeClient) {
   if (isClipboardEditMode()) {
-    if (savedSessionTitleHTML === null) savedSessionTitleHTML = titleEl.innerHTML;
     titleEl.innerHTML = buildEditModeTitleHTML(activeClient);
     overlay.classList.add("editing-plan");
     return;
   }
-  if (savedSessionTitleHTML !== null) {
-    titleEl.innerHTML = savedSessionTitleHTML;
-    savedSessionTitleHTML = null;
-  }
+  deps.getAppDeps().renderSessionTitle?.();
   overlay.classList.remove("editing-plan");
 }
 
