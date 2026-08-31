@@ -51,8 +51,21 @@ def _open_walkthrough(page, local_server):
     page.locator(PANEL).wait_for(state="visible", timeout=30_000)
 
 
-def _card_moved_on(page, step_now, timeout=20_000):
+def _progress_text(page):
+    """The progress line as the ASSERTION reads it: `textContent`, never `inner_text()`.
+
+    The panel uppercases this line in CSS, so `inner_text()` says "STEP 1 OF 4" while `to_have_text`
+    compares the untransformed "Step 1 of 4". Handing one to the other made "not this text" true
+    before anything had happened, and the walk stopped tapping Next (done 2026-08-31)."""
+    return " ".join(page.locator(PROGRESS).evaluate("el => el.textContent").split())
+
+
+def _card_moved_on(page, progress_before, timeout=20_000):
     """Did the card follow the app off this step, or is it still waiting for a tap?
+
+    Compared against the progress line's OWN words rather than against "step N of": that pattern is
+    English, so in any other language it matched nothing, this answered "moved on" to every step and
+    the walk stopped tapping Next altogether (found 2026-08-31 in the story suite's copy of this).
 
     Asked rather than assumed, because both are legitimate: a step DONE in front of the viewer
     carries the card on (§38.5, and since §38.18 that includes Show me doing it), while one that
@@ -68,7 +81,7 @@ def _card_moved_on(page, step_now, timeout=20_000):
     """
     try:
         expect(page.locator(PROGRESS)).not_to_have_text(
-            re.compile(rf"step\s+{step_now}\s+of", re.I), timeout=timeout
+            progress_before, timeout=timeout
         )
         return True
     except AssertionError:
@@ -84,11 +97,11 @@ def _do_current_step(page):
     step's screen answers — because advancing on those would race through the story two steps at a
     time.
     """
-    progress_before = page.locator(PROGRESS).inner_text()
+    progress_before = _progress_text(page)
     step_now, step_count = (int(n) for n in re.findall(r"\d+", progress_before))
 
     page.locator(SHOW_ME).click()
-    if not _card_moved_on(page, step_now):
+    if not _card_moved_on(page, progress_before):
         expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
         page.locator(NEXT).click()
 

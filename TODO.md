@@ -3843,7 +3843,7 @@ what happened, drop the flourish.
 and the two suites that walk the story pass either way. What the gate does hold is that both
 dictionaries stay in step, so a sentence cannot be corrected in one language only.
 
-### 39.2 [ ] BUG — crossing to Ana's phone loses the language
+### 39.2 [x] BUG — crossing to Ana's phone lost the language
 
 **Reported at card 20:** *"zagotovo je Ana imela nekaj slovenskih besedil, če ne kar celega UI slo, ta
 import pa pravi 'en'"*.
@@ -3854,10 +3854,34 @@ Ana's page is a separate boot with no database (§35.1), so it has nothing to re
 comes up in the default. A Slovenian viewer watches Ana fill in an English form, and the consent her
 file records is the language she never chose.
 
-The way back, `clients?demo=story&step=review-message`, drops it too; the trainer's own side survives
-only because his choice is in storage.
+The way back, `clients?demo=story&step=review-message`, dropped it too; the trainer's own side
+survived only because his choice is in storage.
 
-**Re-check condition:** whenever a story step crosses surfaces.
+**Fixed 2026-08-31 at the crossing itself, not in the script.** The guide's Next puts the current
+language on any address a step hands the browser to, unless that step names one of its own
+([walkthroughOverlay.js](src/modules/demo/walkthroughOverlay.js)). Written there because the story
+already had two crossings and forgot it on both: a rule at the seam cannot be forgotten by the third
+one. The trainer's side reads it from `state.lang` at the moment of the crossing rather than at boot,
+since the ☰ menu can change it mid-story; the client's side passes on the language it was given.
+
+Pinned by [test_demo_story.py](tests/e2e/test_demo_story.py): walked in Slovenian to the handover,
+the button Ana is about to tap says *Deli s trenerjem*.
+
+**Found while writing that test, and worth more than the bug:** both story walkers asked "did the
+card move on?" by matching `step N of` — English, so in every other language the answer was always
+"yes", the walk stopped tapping Next and stalled where it stood. Every walk in the suite is English,
+so nothing had ever noticed.
+
+**And the first fix for it was worse**, which is the part worth keeping. Comparing
+`inner_text()` against `not_to_have_text` looks language-agnostic and is not: the panel uppercases
+that line in CSS, `inner_text()` returns what CSS made of it, and the assertion compares
+`textContent` — so "is it still this text?" answered *no* before anything had happened, for every
+step in every language. The walk stopped tapping Next altogether and the demo stage ran **41 minutes
+without failing** before it was killed. A comment two files away had already written this down.
+
+Both walkers now read the value the assertion reads, through a named helper rather than by hand, and
+the rule is in [tests/INDEX.md](tests/INDEX.md) where the next person meets it before writing the
+test rather than after.
 
 ### 39.3 [ ] BUG — the consent Ana ticks names Google Drive
 

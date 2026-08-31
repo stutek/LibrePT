@@ -296,6 +296,7 @@ export async function bootDemoStory({
   hasData,
   t,
   goHome,
+  getLang,
 } = {}) {
   const { DEMO_STORY: DEMO_STORY_PARAM } = await import("./modules/common/shareLink.js");
   if (shareDemo !== DEMO_STORY_PARAM || !hasData) return null;
@@ -340,6 +341,9 @@ export async function bootDemoStory({
     narrator,
     navigate: goHome && ((path) => goHome(path)),
     startAtStepId: shareStep,
+    // So the crossing to the client's phone takes the trainer's language with it: her page is a
+    // separate boot with nothing to read a choice from (§39.2).
+    getLang,
     // Each step names itself in the URL, so a reload — or a link sent to a colleague mid-story —
     // lands on the step being watched instead of restarting the tour (reported 2026-08-23: a reload
     // came back on another tour's first card). replaceState, not push: the browser's Back belongs to
@@ -384,7 +388,7 @@ export function bootIntake(deps) {
 // a different device in the story — and because the client's screens are the real ones, which is the
 // whole reason the handover navigates instead of drawing a phone. Everything the stateless boot
 // promises still holds: the guide reads the form and points at it, and writes nothing.
-async function bootIntakeStoryChapter({ shareDemo, shareChapter, t } = {}) {
+async function bootIntakeStoryChapter({ shareDemo, shareChapter, t, lang } = {}) {
   const { DEMO_STORY: DEMO_STORY_PARAM } = await import("./modules/common/shareLink.js");
   if (shareDemo !== DEMO_STORY_PARAM) return null;
 
@@ -406,6 +410,9 @@ async function bootIntakeStoryChapter({ shareDemo, shareChapter, t } = {}) {
     tour: { id: "story-intake", steps },
     t,
     narrator,
+    // The hand BACK carries it too: the trainer's own app has his choice in storage, but a viewer
+    // who opened this chapter's link directly has told us the language only in that address.
+    getLang: lang,
     onStep: (step) => narrator.showStep(step),
   });
 }

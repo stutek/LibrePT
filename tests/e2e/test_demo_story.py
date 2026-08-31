@@ -102,19 +102,35 @@ def _past_the_splash(page):
 def _do_step(page):
     """One step, the way a viewer spends one: ask to be shown it where there is something to show,
     and tap Next only if the card has not already followed the app (2026-08-26)."""
-    step_now = _step_numbers(page)[0]
+    progress_before = _progress_text(page)
     if page.locator(SHOW_ME).is_visible():
         page.locator(SHOW_ME).click()
-    if not _card_moved_on(page, step_now):
+    if not _card_moved_on(page, progress_before):
         expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
         page.locator(NEXT).click()
 
 
-def _card_moved_on(page, step_now, timeout=8_000):
-    """Whether the card followed the app off this step by itself (2026-08-26), or still wants Next."""
+def _progress_text(page):
+    """The progress line as the ASSERTION reads it: `textContent`, never `inner_text()`.
+
+    The panel uppercases this line in CSS. `inner_text()` returns "STEP 1 OF 47" while
+    `to_have_text` compares the untransformed "Step 1 of 47", so handing it one made the other's
+    "not this text" true before anything had happened — and the walk stopped tapping Next and
+    stalled where it stood (done 2026-08-31, and the warning was already written down two files
+    away)."""
+    return " ".join(page.locator(PROGRESS).evaluate("el => el.textContent").split())
+
+
+def _card_moved_on(page, progress_before, timeout=8_000):
+    """Whether the card followed the app off this step by itself (2026-08-26), or still wants Next.
+
+    Compared against the progress line's OWN words, not against "step N of" — that pattern is
+    English, so in every other language it never matched, the helper answered "yes, it moved on" to
+    every step, and a walk in Slovenian silently stopped tapping Next (found 2026-08-31 writing the
+    language-crossing test below)."""
     try:
         expect(page.locator(PROGRESS)).not_to_have_text(
-            re.compile(rf"step\s+{step_now}\s+of", re.I), timeout=timeout
+            progress_before, timeout=timeout
         )
         return True
     except AssertionError:
@@ -141,6 +157,7 @@ def _walk_the_whole_story(page, limit=60):
     for _ in range(limit):
         _past_the_splash(page)
         page.locator(PANEL).wait_for(state="visible", timeout=30_000)
+        progress_before = _progress_text(page)
         step_now, _ = _step_numbers(page)
         caption = page.locator(CAPTION).inner_text()
         seen.append(caption)
@@ -151,7 +168,7 @@ def _walk_the_whole_story(page, limit=60):
         # A step done in front of the viewer carries the card on by itself; one that arrived already
         # satisfied waits for Next. Both are the guide working, so the walk asks which happened
         # rather than tapping Next regardless — which would skip the step after it.
-        if not _card_moved_on(page, step_now):
+        if not _card_moved_on(page, progress_before):
             try:
                 expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
             except AssertionError:
@@ -583,3 +600,23 @@ def test_the_guide_does_not_call_the_screen_wrong_while_scrolling_to_it(
     # rather than left standing over the card the ring is about to name. The sweep that closes it
     # used to run only because an off-screen control read as covered.
     expect(page.locator("#app-menu")).to_be_hidden()
+
+
+def test_crossing_to_the_client_phone_carries_the_language(page, local_server):
+    """Reported 2026-08-31 (Simon) at the review card: "zagotovo je Ana imela nekaj slovenskih
+    besedil, če ne kar celega UI slo, ta import pa pravi 'en'" (§39.2).
+
+    Her page is a separate boot with no database — no state, no saved choice, nothing to read a
+    language from — so the only way it can know is the address the handover sends it to. That
+    address named the theme and forgot the language, and a Slovenian viewer watched Ana fill in an
+    English form and send back a consent recorded in a language she never chose."""
+    _open_story(page, local_server, "?init=demo_data_load&lang=sl&demo=story")
+
+    while "Anin telefon" not in page.locator(NEXT).inner_text():
+        _do_step(page)
+    page.locator(NEXT).click()
+
+    page.locator(PANEL).wait_for(state="visible", timeout=30_000)
+    assert "/intake" in page.url, page.url
+    # Her own page, in her own language — the button she is about to tap says it.
+    expect(page.locator("#intake-send")).to_have_text("Deli s trenerjem")

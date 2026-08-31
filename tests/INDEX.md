@@ -39,7 +39,7 @@ Added 2026-08-18 after CI caught what three local runs did not: the seed is gene
 a test typing a literal time collided with a seeded session at some hours and not others, and the failure
 surfaced as an unrelated dialog.
 
-Three things to know before writing one:
+Four things to know before writing one:
 
 - **Take "today" from `frozen_today()` / `frozen_today_iso()` / `frozen_now()`**, never from
   `date.today()`. Comparing the app's clock against the host's was already a midnight race; it is now
@@ -49,6 +49,11 @@ Three things to know before writing one:
 - **A throw inside a `setTimeout` callback is swallowed** by Playwright's clock instrumentation and never
   reaches `window.onerror`. `tests/e2e/test_crash_capture.py` throws from a microtask for that reason.
   Opt a test out entirely with `@pytest.mark.real_clock` when its subject IS elapsed wall time.
+- **Never feed `inner_text()` back into `to_have_text` / `not_to_have_text`.** They compare
+  `textContent`; `inner_text()` returns what CSS made of it. Any `text-transform` puts the two out of
+  step, so "is it still this text?" answers *no* before anything has happened — and a walk built on
+  that question stops tapping and stalls where it stands, with no failure to read (2026-08-31, both
+  demo walkers at once). Read the value the assertion reads: `locator.evaluate("el => el.textContent")`.
 
 **One e2e file is not about behaviour at all**: [test_layout_overflow.py](e2e/test_layout_overflow.py)
 walks every route at three real device widths (iPhone 14, Galaxy S23 Ultra, desktop) plus one

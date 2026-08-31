@@ -633,6 +633,9 @@ async function startDemoWhenWatchable({ splashDown, shareDemo, shareChapter, sha
     hasData: stateHasData(getState()),
     t,
     goHome: (path) => navigateToPath(path || "/"),
+    // Read at the moment of the crossing, not at boot: the trainer can change language mid-story
+    // from the ☰ menu, and the evening chapter does exactly that with the theme.
+    getLang: () => resolveLang(getState().lang),
   });
 
   await appBoot.bootWalkthrough({

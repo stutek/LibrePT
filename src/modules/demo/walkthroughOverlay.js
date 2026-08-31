@@ -41,6 +41,7 @@ import {
   startWalkthrough,
   walkthroughControls,
 } from "../../domain/walkthrough.js";
+import { SHARE_LANG_PARAM } from "../common/shareLink.js";
 import { mountDemoHand, unmountDemoHand } from "./demoHand.js";
 import { mountDemoNarrator } from "./demoNarratorCard.js";
 import { prefersReducedMotion } from "./demoPace.js";
@@ -207,6 +208,7 @@ export function startGuidedWalkthrough({
   onStep = null,
   startAtStepId = null,
   narrator = null,
+  getLang = null,
 } = {}) {
   const el = buildOverlay(doc, t);
   const hand = mountDemoHand(doc);
@@ -1074,7 +1076,19 @@ export function startGuidedWalkthrough({
     if (step?.advanceTo) {
       // Resolved against the app's BASE, not the address currently showing: the story is deep in
       // `/sessions/2026-08-23` when it crosses, and a plain relative jump would land beside that.
-      doc.defaultView.location.assign(new URL(step.advanceTo, doc.baseURI).href);
+      const there = new URL(step.advanceTo, doc.baseURI);
+      // The LANGUAGE rides along, because on the other side there may be nothing to read it from.
+      // The client's page is a separate boot with no database and no saved choice (§35.1), so the
+      // address is its only source — and the story's own crossing named the theme and forgot this,
+      // which had a Slovenian viewer watch Ana fill in an English form and send back a consent
+      // recorded in a language she never chose (reported 2026-08-31, §39.2). Written here rather
+      // than into each `advanceTo` so a crossing added later cannot forget it; a step that names a
+      // language of its own is left alone.
+      const lang = getLang?.();
+      if (lang && !there.searchParams.has(SHARE_LANG_PARAM)) {
+        there.searchParams.set(SHARE_LANG_PARAM, lang);
+      }
+      doc.defaultView.location.assign(there.href);
       return;
     }
     state = advanceWalkthrough(tour, state);
