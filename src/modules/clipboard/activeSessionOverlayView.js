@@ -93,7 +93,17 @@ export function renderActiveSessionOverlayShell() {
                by the live countdown-to-end (updateOverlaySessionTimer), which is what earns the
                clock icon back — a clock ticking down means something once a clock is actually
                running. -->
-          <button id="btn-start-session" class="btn primary-btn btn-sm" data-i18n="btn_start_workout_session" aria-label="Start session"><i class="fa-solid fa-circle-play"></i> Start Session</button>
+          <!-- A GLYPH, not words (asked 2026-08-31: "we probably should change start session
+               button from text to play glyph"). It was already meant to have one — the markup has
+               said fa-circle-play all along — but data-i18n on the button itself made the
+               translator replace its whole content with the label, icon included, so what shipped
+               was a 123px word button with no glyph in either language. The key moves to
+               data-i18n-label, which writes aria-label and leaves the content alone.
+               (No backticks in here: this comment lives inside a template literal, and one closed
+               it mid-markup — the overlay stopped rendering entirely.)
+               tests/unit/test_i18n_parity.py refuses the old shape now.
+               Measured: the title beside it goes from 171px to 258px on a 390px phone. -->
+          <button id="btn-start-session" class="btn primary-btn btn-glyph" data-i18n-label="btn_start_workout_session" aria-label="Start Session"><i class="fa-solid fa-circle-play"></i></button>
           <div id="overlay-session-timer" class="hidden">
             <i class="fa-solid fa-clock text-primary" id="overlay-session-duration-icon"></i>
             <span id="overlay-session-duration">00:00</span>
@@ -101,8 +111,13 @@ export function renderActiveSessionOverlayShell() {
         </div>
         <!-- Shown only in edit mode (see renderActiveGroupBoard): finishing the plan edit lives on
              the title line next to the mode label, so the editor body needs no header of its own. -->
-        <button id="btn-done-edit" class="btn primary-btn btn-sm hidden" aria-label="Done editing plan">
-          <i class="fa-solid fa-check"></i> <span data-i18n="done">Done</span>
+        <!-- A glyph for the same reason, and this one is what stopped the title truncating: with
+             the word there the editor's title block gets 206px on a 390px phone and the session's
+             name loses 12px to an ellipsis (27px at 375). Without it the block gets 246px and
+             nothing is cut at either size. ✓ beside the ✎ on the title reads as "finished with
+             this", which is exactly what it does. -->
+        <button id="btn-done-edit" class="btn primary-btn btn-glyph hidden" data-i18n-label="done_editing_plan" aria-label="Done editing plan">
+          <i class="fa-solid fa-check"></i>
         </button>
         <div class="session-menu-wrap">
           <button id="btn-session-menu" class="icon-btn" aria-label="Session options" aria-haspopup="true" aria-expanded="false">

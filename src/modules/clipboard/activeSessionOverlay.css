@@ -79,6 +79,19 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   flex: 1;
   min-width: 0;
 } /* h3 type comes from the unified view-title rule */
+/* A primary action carrying only its glyph (TODO §39.6). The width it gives up goes to the title
+   beside it — 171px to 258px for Start on a 390px phone — and the touch target is held at 44px
+   rather than shrinking with the label: a control a thumb cannot hit has not been made smaller, it
+   has been made worse. */
+.btn-glyph {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 12px;
+  gap: 0;
+}
+.btn-glyph i {
+  font-size: 18px;
+}
 .session-title-block h3 {
   white-space: nowrap;
   overflow: hidden;

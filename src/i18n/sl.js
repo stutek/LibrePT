@@ -145,6 +145,7 @@ export const sl = {
   close: "Zapri",
   remove: "Odstrani",
   done: "Končano",
+  done_editing_plan: "Končano z urejanjem načrta",
   edit_exit_hint: "Tapnite Končano, pritisnite Esc ali tapnite zunaj za zaključek.",
   reorder_hint: "Tapnite zgoraj/spodaj za premik, povlecite za prerazporeditev",
   circuit: "Sklop",

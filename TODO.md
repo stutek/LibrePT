@@ -3975,9 +3975,29 @@ overflow, sweep clean.
   ways, four things on one 12px line clip the client's name at 390 *and* 375, three clip nothing. The
   glyph says the mode and Done sits beside it.
 
-Nothing is truncated in the clipboard at any width. A long session name still ellipsises in the
-editor on a phone (12px at 390, 27px at 375) — visible, with an affordance, which is the whole point
-of choosing the order.
+**Then the buttons beside it gave the room back** (asked the same day: *"we probably should change
+start session button from text to play glyph"*). Start and Done carry only their glyph now, with
+their words in `aria-label` through `data-i18n-label`, and the touch target held at 44px by
+`.btn-glyph` — a control a thumb cannot hit has not been made smaller, it has been made worse.
+
+| | title block | session name clipped |
+| :-- | --: | --: |
+| clipboard 390, Start as words | 171px | 0 |
+| clipboard 390, Start as glyph | **258px** | 0 |
+| editor 375, Done as words | 191px | **27px** |
+| editor 375, Done as glyph | **231px** | **0** |
+
+So the editor's last truncation is gone at both phone sizes, and only a deliberately long name still
+ellipsises — visible, with an affordance, which is the whole point of choosing the order.
+
+**And the play glyph was never on screen at all.** `fa-circle-play` has been in that markup all
+along. The button was wired through BOTH translation mechanisms at once: the selector table in
+[domMappings.js](src/i18n/domMappings.js), which keeps an icon and appends the label after it, and a
+`data-i18n` on the button itself, which calls `replaceChildren` and throws the icon away. They
+disagreed on every boot and the second one won. Nothing noticed — the dictionaries were in parity,
+the label was right in both languages, the button worked, and the glyph was simply absent.
+[test_i18n_parity.py](tests/unit/test_i18n_parity.py) now refuses any element that carries
+`data-i18n` while containing markup, which is the shape that loses it.
 
 Pinned by [test_clipboard_title.py](tests/medium/test_clipboard_title.py) (the name leads, in the
 larger type) and [test_session_deeplink.py](tests/e2e/test_session_deeplink.py) (the bar names the

@@ -30,8 +30,9 @@ SRC = REPO_ROOT / "src"
 
 # The count on the day the ratchet was fitted. It only ever goes down: 332 before the sweep started,
 # then the 27 `data-i18n` attributes nothing was applying, then the client dialog somebody reported
-# "Cancel" from.
-BASELINE = 289
+# "Cancel" from, then the clipboard's Start and Done buttons becoming glyphs whose words live in
+# `aria-label` (TODO §39.6).
+BASELINE = 287
 
 # Upstream files and the dictionaries themselves: the first are not ours to translate, the second
 # ARE the translations.

@@ -45,3 +45,40 @@ def test_all_locales_have_the_same_keys(src_dir):
         name: sorted(all_keys - ks) for name, ks in keysets.items() if all_keys - ks
     }
     assert not missing, f"locales with missing translations: {missing}"
+
+
+# An element carrying `data-i18n` has its whole content replaced at runtime: domMappings.js applies
+# the key with `replaceChildren(value)`. So anything inside it — an icon, a badge, a nested span —
+# is deleted the first time a language is applied, which is every boot.
+DATA_I18N_ELEMENT = re.compile(
+    r'<(\w+)([^>]*\bdata-i18n\s*=\s*"[^"]+"[^>]*)>(.*?)</\1>', re.DOTALL
+)
+
+
+def test_no_translated_element_wraps_markup_the_translator_would_delete(src_dir):
+    """Found 2026-08-31: the clipboard's Start button shipped `<i class="fa-circle-play"></i>` in
+    its markup and had no icon on screen, in either language. Its `data-i18n` sat on the button, so
+    every boot replaced the icon and the text with the translated words.
+
+    Nothing caught it. The dictionaries were in parity, the button worked, the label was correct in
+    both languages, and the glyph the markup asks for was simply never drawn. This is the check that
+    would have: the key belongs on an inner element, or — for a control that is only a glyph —
+    `data-i18n-label` on the button, which writes `aria-label` and leaves the content alone."""
+    offenders = []
+    for path in sorted(src_dir.rglob("*.html")) + sorted(src_dir.rglob("*.js")):
+        if "i18n" in path.parts:
+            continue
+        text = path.read_text(encoding="utf-8")
+        for match in DATA_I18N_ELEMENT.finditer(text):
+            if "<" not in match.group(3):
+                continue
+            line = text[: match.start()].count("\n") + 1
+            offenders.append(
+                f"{path.relative_to(src_dir.parent)}:{line} — "
+                f"{match.group(0)[:100].replace(chr(10), ' ')}"
+            )
+
+    assert not offenders, (
+        "data-i18n replaces an element's whole content, so these lose the markup inside them "
+        "on every boot:\n  " + "\n  ".join(offenders)
+    )

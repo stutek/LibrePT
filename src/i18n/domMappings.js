@@ -116,7 +116,11 @@ export function applyStaticDOMMappings(tDict) {
     // Active session clipboard overlay
     "#btn-add-exercise-to-session": "btn_inject_exercise",
     "#btn-delete-session": "btn_delete_session",
-    "#btn-start-session": "btn_start_workout_session",
+    // NOT #btn-start-session: it is a glyph now (TODO §39.6), and its words live in `aria-label`
+    // through `data-i18n-label`. It used to be wired through BOTH mechanisms at once — this table,
+    // which keeps an icon and appends the label after it, and a `data-i18n` on the button, which
+    // replaces the whole content. They disagreed on every boot and the second one won, so the play
+    // glyph the markup has always declared was never on screen in either language.
     "#btn-finish-session": "btn_complete",
 
     "#dialog-add-session-exercise .modal-header h3": "add_ex_session_title",
