@@ -42,7 +42,7 @@ export function renderClientDirectoryViewShell() {
              the sending dialog, which is where the contact detail and the copy-by-hand fallback
              live (modules/clients/intakeInviteDialog.js). -->
         <button id="btn-invite-client" class="btn secondary-btn btn-sm">
-          <i class="fa-solid fa-share-nodes"></i> <span data-i18n="btn_invite_client">Send an intake link</span>
+          <i class="fa-solid fa-share-nodes"></i> <span data-i18n="btn_invite_client">Invite a client</span>
         </button>
         <button id="btn-add-client" class="btn primary-btn btn-sm">
           <i class="fa-solid fa-user-plus"></i> Add Client

@@ -4001,12 +4001,20 @@ answer before drawing anything: an approximation of somebody's share sheet is th
 
 Both are the player, not the script: the hand is what makes a demonstration a demonstration.
 
-### 39.10 [ ] CHANGE — the intake-link button's name
+### 39.10 [x] CHANGE — the intake-link button is named for the intent
 
 **Reported at card 3:** *"would text button be better as invite customer instead send intake form?"*
 
-`Send an intake link` names our mechanism; `Invite a client` names the trainer's intent. The register
-already calls the other route `Add Client`, so the pair would read as two ways to do one thing.
+`Send an intake link` named our mechanism; `Invite a client` names the trainer's intent. The register
+already calls the other route `Add Client`, so the pair now reads as two ways to do one thing —
+**Invite a client** / **Add Client**, *Povabi stranko* / *Dodaj stranko*.
+
+**Fixed 2026-08-31**, and in three places rather than one, because a name is not only on the control:
+
+- the button, and the dialog it opens — a dialog that opens under a different heading from the button
+  that summoned it reads as having gone somewhere else;
+- the story's own caption, which names the control the viewer has to find. It gained the glyph while
+  it was being rewritten: *"the button with the share arrows just under the Clients heading"*.
 
 ### 39.11 Answered 2026-08-31 — not work
 

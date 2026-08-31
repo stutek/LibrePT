@@ -423,7 +423,7 @@ export const en = {
   label_repeats: "Repeats every week",
   label_repeat_days: "On these days",
   label_repeat_until: "Until (optional)",
-  btn_invite_client: "Send an intake link",
+  btn_invite_client: "Invite a client",
   // The trainer's own name leads the message, because the person reading it met them once and has
   // no other way to tell this from a phishing text. {trainer} is filled in by intakeInvite.js; the
   // unsigned line is what an install that does not know the trainer's name sends instead.
@@ -433,7 +433,7 @@ export const en = {
     "You are invited to fill in your own details for training, through an app called LibrePT. It takes a minute:",
   intake_invite_privacy: "What happens to your data:",
   intake_invite_ready: "Link ready — copy it below",
-  intake_invite_title: "Send an intake link",
+  intake_invite_title: "Invite a client",
   intake_invite_lede:
     "They fill in their own details and their consent on their own phone, and send it back to you. Nothing is created here until you have read what they send.",
   intake_invite_contact_label: "Their phone number or email address",
@@ -505,7 +505,7 @@ export const en = {
   story_step_arrive_clients:
     "In the menu that just dropped down, tap Clients Directory — the row with three little people next to it, at the top of the list. Eight people are already in that directory.",
   story_step_arrive_invite:
-    "Tap Send an intake link — the button just under the Clients heading, at the top of the list of people. Ana asked about training after a class, and instead of taking her details standing in a corridor, the trainer sends her a link she fills in herself.",
+    "Tap Invite a client — the button with the share arrows just under the Clients heading, at the top of the list of people. Ana asked about training after a class, and instead of taking her details standing in a corridor, the trainer sends her a link she fills in herself.",
   story_step_arrive_contact:
     "Type the number Ana just read out, into the one box that takes either a number or an email address. The app works out which it is: a number gets a text message, an address gets an email. Nothing is saved about her yet — she is not in your register until she has sent her own details back.",
   story_step_arrive_contact_email:

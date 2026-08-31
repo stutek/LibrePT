@@ -394,14 +394,14 @@ export const sl = {
   label_repeats: "Ponovi vsak teden",
   label_repeat_days: "Na te dneve",
   label_repeat_until: "Do (neobvezno)",
-  btn_invite_client: "Pošlji vpisni vprašalnik",
+  btn_invite_client: "Povabi stranko",
   intake_invite_message:
     "{trainer} te vabi, da izpolniš svoje podatke za trening, prek aplikacije LibrePT. Vzame minuto:",
   intake_invite_message_unsigned:
     "Vabljen(-a) si, da izpolniš svoje podatke za trening, prek aplikacije LibrePT. Vzame minuto:",
   intake_invite_privacy: "Kaj se zgodi s tvojimi podatki:",
   intake_invite_ready: "Povezava pripravljena — kopiraj jo spodaj",
-  intake_invite_title: "Pošlji vpisni vprašalnik",
+  intake_invite_title: "Povabi stranko",
   intake_invite_lede:
     "Svoje podatke in privolitev izpolni sam na svojem telefonu in ti jih pošlje nazaj. Tu se ne ustvari nič, dokler ne prebereš, kaj je poslal.",
   intake_invite_contact_label: "Njegova telefonska številka ali e-naslov",
@@ -472,7 +472,7 @@ export const sl = {
   story_step_arrive_clients:
     "V meniju, ki se je pravkar spustil, pritisni Seznam strank (klientov) — vrstica z znakom treh ljudi, na vrhu seznama. V njem je že osem ljudi.",
   story_step_arrive_invite:
-    "Pritisni Pošlji vpisni vprašalnik — gumb tik pod naslovom Stranke, na vrhu seznama ljudi. Ana je po vadbi vprašala za trening; namesto da bi ji trener podatke zapisoval kar na hodniku, ji pošlje povezavo, ki jo izpolni sama.",
+    "Pritisni Povabi stranko — gumb s puščicami deljenja tik pod naslovom Stranke, na vrhu seznama ljudi. Ana je po vadbi vprašala za trening; namesto da bi ji trener podatke zapisoval kar na hodniku, ji pošlje povezavo, ki jo izpolni sama.",
   story_step_arrive_contact:
     "Vpiši številko, ki jo je Ana pravkar povedala, v edino polje, ki sprejme številko ali e-naslov. Aplikacija sama ugotovi, kaj je: številka dobi SMS, naslov e-pošto. O njej se še nič ne shrani — v tvojem seznamu je šele, ko ti sama pošlje svoje podatke.",
   story_step_arrive_contact_email:
