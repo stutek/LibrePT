@@ -3944,7 +3944,7 @@ The ask is a **mandatory alias on a name clash**, decided when the second one is
 discovered later. Open question the fix has to answer: what the clipboard, the plan editor and the
 history show once an alias exists.
 
-### 39.6 [~] IN PROGRESS — the clipboard now says which session, and whose plan
+### 39.6 [x] BUG — the clipboard says which session, and the chapter builds a programme
 
 **Reported at cards 23–24:** *"the edit view is not clear which session and for whom that plan is, the
 demo card text is useless"*, and *"demonstrate actually adding one circuit please, before just saying
@@ -3983,11 +3983,20 @@ Pinned by [test_clipboard_title.py](tests/medium/test_clipboard_title.py) (the n
 larger type) and [test_session_deeplink.py](tests/e2e/test_session_deeplink.py) (the bar names the
 session, and that name is not the part that gets cut).
 
-**Still open — the story's.** `story_step_programme_editor` — *"The plan, with the number that matters
-beside it"* — names nothing on screen, and the chapter jumps from opening the editor to `Done` without
-ever adding anything. A programme chapter that builds no programme is the demo skipping its own
-subject. And *"the text does not make any sense (what room are we going back to?)"* —
-`story_step_programme_done` says *"Done — back to the room."* and there is no room.
+**The story's — fixed 2026-08-31.** The chapter now builds something, which is what a chapter called
+*The programme* is for.
+
+- **It adds a circuit** (*"demonstrate actually adding one circuit please, before just saying done"*).
+  A new step taps `+ Circuit` on the last insert bar, so the block lands at the end where a finisher
+  belongs. Its expectation is a circuit with **no title yet**: the seeded plan's five circuits are all
+  named, so an untitled one is proof this tap made it rather than a selector that was already true —
+  measured before writing it, 5 circuits and 0 untitled before, 6 and 1 after. The story is 48 cards.
+- **Both captions name their control**, the glyph and where it is, which neither did.
+  `story_step_programme_editor` never said to tap anything at all; it now opens with *"Tap Edit plan —
+  the ✎ row in the menu that just dropped down"*.
+- **"Done — back to the room" is gone** (*"what room are we going back to?"*). It says what the tap
+  does and why the screen changes: the plan is saved, and the session comes back with everybody in it,
+  because the editor shows one person at a time and what follows is about all three.
 
 ### 39.7 [ ] CHANGE — the demo's cards are still not one shape
 

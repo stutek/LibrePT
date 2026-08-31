@@ -547,6 +547,22 @@ const PROGRAMME_CHAPTER = {
       expect: { selector: ".editor-plan-fit", visible: true },
     },
     {
+      // The chapter BUILDS something (asked 2026-08-31: "demonstrate actually adding one circuit
+      // please, before just saying done"). Until now it opened the editor and pressed Done, so a
+      // chapter called The programme never wrote a programme — the one thing a trainer opens this
+      // screen to do went undemonstrated.
+      //
+      // The LAST insert bar, so the block lands at the end of the plan where a finisher belongs,
+      // and the expectation is a circuit with no title yet: the seeded plan's five circuits are all
+      // named ("Dynamic Warmup" and its siblings), so an untitled one is proof that this tap made
+      // it, rather than a selector that was already satisfied before the step ran.
+      id: "programme-add-circuit",
+      persona: TRAINER,
+      target: ".editor-list > .editor-insert:last-child .ins-circuit",
+      caption: "story_step_programme_add_circuit",
+      expect: { selector: ".editor-circuit .editor-circuit-title[value='']", visible: true },
+    },
+    {
       // Out of the editor first: the participant tabs are hidden while a plan is being edited (the
       // trainer is looking at one person's programme, not at the room), so the binding this chapter
       // is about could not be seen from in there.

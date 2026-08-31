@@ -528,8 +528,11 @@ export const sl = {
   story_step_programme_open_session:
     "Nedelja zvečer. Torkova seja je že na plošči — trener jo odpre, da sestavi, kar bo dejansko izpeljal.",
   story_step_programme_editor:
-    "Načrt in ob njem številka, ki šteje: koliko dela gre v uro, ki jo je rezerviral.",
-  story_step_programme_done: "Končano — nazaj k skupini.",
+    "Pritisni Uredi načrt — vrstica s svinčnikom (✎) v meniju, ki se je pravkar spustil. Odpre se Janin načrt, ob naslovu pa številka, ki odloča: koliko od rezervirane ure ta načrt v resnici zapolni.",
+  story_step_programme_add_circuit:
+    "Dodaj zaključni sklop: pritisni + Sklop na dnu načrta, gumb z ikono naloženih slojev. Na koncu se doda nov sklop, pripravljen za vaje, ki gredo vanj — trener uro sestavi v nedeljo na kavču, ne šele v torek v telovadnici.",
+  story_step_programme_done:
+    "Pritisni Končano zgoraj desno. Načrt je shranjen in seja se vrne z vsemi v njej — urejevalnik načrta kaže eno osebo naenkrat, to, kar sledi, pa se tiče vseh treh.",
   story_step_programme_menu_again: "Znova odpri meni seje — še nekaj pred torkom.",
   story_step_programme_bind:
     "Jane, John in Sarah delajo isti krog, zato gredo na en načrt — in torkove serije se zabeležijo enkrat namesto trikrat.",

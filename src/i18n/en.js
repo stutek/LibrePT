@@ -563,8 +563,11 @@ export const en = {
   story_step_programme_open_session:
     "Sunday night. Tuesday's session is already on the board — the trainer opens it to build what they will actually run.",
   story_step_programme_editor:
-    "The plan, with the number that matters beside it: how much work fits in the hour they booked.",
-  story_step_programme_done: "Done — back to the room.",
+    "Tap Edit plan — the ✎ row in the menu that just dropped down. Jane's plan opens with the number that decides it beside the title: how much of the hour they booked this actually fills.",
+  story_step_programme_add_circuit:
+    "Add a finisher: tap + Circuit at the bottom of the plan, the button with the stacked-layers glyph. A new block goes in at the end, ready for the movements that go in it — this is the trainer building the hour on a sofa on Sunday, rather than finding out in the gym on Tuesday.",
+  story_step_programme_done:
+    "Tap Done, top right. The plan is saved and the session comes back with everybody in it — the plan editor shows one person at a time, and what happens next is about all three.",
   story_step_programme_menu_again: "Open the session menu again — one more thing before Tuesday.",
   story_step_programme_bind:
     "Jane, John and Sarah are doing the same circuit, so they go on one plan — and Tuesday's sets get logged once instead of three times.",
