@@ -10,6 +10,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
+  SECONDS_PER_MAX_SET,
   SECONDS_PER_REP,
   SECONDS_PER_WORKING_SET,
   SET_OVERHEAD_SECONDS,
@@ -116,16 +117,50 @@ test("a rep range is costed at its top — the number the trainer might actually
   );
 });
 
-test("reps nobody can count fall back to the plain working set rather than to zero", () => {
-  // "Max" is a real authored value (domain/repsAndLoad.js). Costing it at nothing would make a
-  // plan of failure sets look free.
-  for (const reps of ["Max", "", null, undefined, "AMRAP"]) {
+test("an unauthored rep count falls back to the plain working set rather than to zero", () => {
+  // An empty box or a band label has nothing to count. Costing it at nothing would make a whole
+  // plan of them look free.
+  for (const reps of ["", null, undefined, "Medium"]) {
     assert.equal(
       planNetSeconds([exercise({ setsTargetCount: 1, repsTarget: reps })]),
       SECONDS_PER_WORKING_SET,
       `reps ${JSON.stringify(reps)}`,
     );
   }
+});
+
+test("a set to failure costs the recovery it forces, not a rep count it does not have", () => {
+  // Ruled 2026-09-01 (Simon): "max reps should probably default to 3 or 5 min". Three — the
+  // conservative end — because at five, four such sets would eat a third of an hour on their own.
+  for (const reps of ["Max", "max", "AMRAP", "F"]) {
+    assert.equal(
+      planNetSeconds([exercise({ setsTargetCount: 1, repsTarget: reps })]),
+      SECONDS_PER_MAX_SET,
+      `reps ${JSON.stringify(reps)}`,
+    );
+  }
+  assert.ok(SECONDS_PER_MAX_SET > SECONDS_PER_WORKING_SET * 3);
+});
+
+test("per-arm reps are costed for both arms, and the description is left alone", () => {
+  // Ruled 2026-09-01: "keep the description 'X reps per arm', but when estimating duration for a
+  // card or a cycle it should return calculated time back". The plan's own text is never rewritten —
+  // this reads it. Twelve per arm is twenty-four reps performed.
+  const item = exercise({ setsTargetCount: 1, repsTarget: "12 per arm" });
+
+  assert.equal(planNetSeconds([item]), SET_OVERHEAD_SECONDS + 24 * SECONDS_PER_REP);
+  assert.equal(item.repsTarget, "12 per arm", "the authored description must survive costing");
+});
+
+test("every side word counts double, and a plain count does not", () => {
+  const cost = (reps) => planNetSeconds([exercise({ setsTargetCount: 1, repsTarget: reps })]);
+
+  for (const side of ["10 per arm", "10 per leg", "10 per side", "10 per hand", "10 per foot"]) {
+    assert.equal(cost(side), SET_OVERHEAD_SECONDS + 20 * SECONDS_PER_REP, side);
+  }
+  assert.equal(cost("10"), SET_OVERHEAD_SECONDS + 10 * SECONDS_PER_REP);
+  // "10 per minute" is a tempo, not a side.
+  assert.equal(cost("10 per minute"), SET_OVERHEAD_SECONDS + 10 * SECONDS_PER_REP);
 });
 
 // --- three states, judged on WORK ---------------------------------------------------------------

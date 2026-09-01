@@ -29,6 +29,7 @@
 //
 // Injected dependencies: none — pure functions over plain objects.
 
+import { isFailureReps } from "./repsAndLoad.js";
 import { parseTimeRange } from "./timeRange.js";
 
 // Getting into position, unracking, the breath before and the rack after — everything a set costs
@@ -39,6 +40,11 @@ export const SECONDS_PER_REP = 3;
 // A set of ten: what a working set has always been counted at here, and still is. Also the fallback
 // for reps that cannot be counted at all.
 export const SECONDS_PER_WORKING_SET = SET_OVERHEAD_SECONDS + 10 * SECONDS_PER_REP;
+// Both sides of a unilateral movement: "12 per arm" is 24 reps performed.
+export const SIDES = 2;
+// A set taken to failure, with the recovery it forces. Ruled 2026-09-01 ("max reps should probably
+// default to 3 or 5 min"); three is the conservative end.
+export const SECONDS_PER_MAX_SET = 180;
 // Where work alone starts crowding the slot. Below this the unwritten rest still fits; above it the
 // trainer is relying on rest they have not budgeted.
 export const SLOT_WARNING_RATIO = 0.75;
@@ -47,6 +53,13 @@ const isRest = (item) => item?.type === "rest";
 // Time-based work states its own duration in the same slot reps live in (domain/repsAndLoad.js), so
 // a 40-second plank is 40 seconds rather than a set.
 const isTimed = (item) => item?.metric === "time";
+// "12 per arm" is TWELVE in the description a trainer wrote and TWENTY-FOUR in the room. Ruled
+// 2026-09-01: "keep the description '12 reps per arm', but when estimating duration for a card or a
+// cycle it should return calculated time back" — so the authored text is never rewritten; the cost
+// model reads it. Any per-side wording counts double, and the side words are matched, not guessed:
+// a movement that is unilateral without saying so cannot be detected from a plan at all.
+const PER_SIDE = /\bper\s+(arm|leg|side|hand|foot)\b/i;
+const isPerSide = (item) => PER_SIDE.test(String(item?.repsTarget ?? item?.reps ?? ""));
 
 /** How many reps a set asks for, or null when the answer is not a number.
  *
@@ -63,16 +76,43 @@ function repsCount(item) {
   return plain ? Number(plain[1]) : null;
 }
 
-function setSeconds(item) {
-  const reps = repsCount(item);
-  return reps === null ? SECONDS_PER_WORKING_SET : SET_OVERHEAD_SECONDS + reps * SECONDS_PER_REP;
-}
+const setsOf = (item) => Number(item?.setsTargetCount ?? item?.sets?.length ?? 1) || 1;
+const countedSet = (reps) => SET_OVERHEAD_SECONDS + reps * SECONDS_PER_REP;
+
+/** What each SHAPE of work costs, each one answering for itself.
+ *
+ * A chain of ifs is what this was, and every new kind of work made it longer while the reader had to
+ * hold the earlier branches in their head to know which one won. Here the shapes are a list in
+ * priority order: the first whose `matches` holds answers, and adding a kind of work is adding an
+ * entry rather than another branch. The order IS the meaning — a rest is never a set, and work to
+ * failure is not costed by a rep count it does not have.
+ */
+const COST_MODELS = [
+  { matches: isRest, seconds: (item) => Number(item.rest) || 0 },
+  { matches: isTimed, seconds: (item) => setsOf(item) * (Number(item.repsTarget) || 0) },
+  {
+    // A set taken to failure has no rep count to cost, and 45 seconds is not what it takes: the set
+    // itself runs long and the recovery it forces runs longer. Ruled 2026-09-01 as "3 or 5 min" —
+    // three, being the conservative end, and the one that does not swallow a whole quarter of an
+    // hour per set (SECONDS_PER_MAX_SET is the dial if it reads short in the gym).
+    matches: (item) => isFailureReps(item?.repsTarget ?? item?.reps),
+    seconds: (item) => setsOf(item) * SECONDS_PER_MAX_SET,
+  },
+  {
+    matches: (item) => isPerSide(item) && repsCount(item) !== null,
+    seconds: (item) => setsOf(item) * countedSet(repsCount(item) * SIDES),
+  },
+  {
+    matches: (item) => repsCount(item) !== null,
+    seconds: (item) => setsOf(item) * countedSet(repsCount(item)),
+  },
+  // Nothing countable was authored at all — an empty box, a band label. Costed as the plain working
+  // set rather than as nothing, which would make a whole plan of them look free.
+  { matches: () => true, seconds: (item) => setsOf(item) * SECONDS_PER_WORKING_SET },
+];
 
 function itemSeconds(item) {
-  if (isRest(item)) return Number(item.rest) || 0;
-  const sets = Number(item.setsTargetCount ?? item.sets?.length ?? 1) || 1;
-  if (isTimed(item)) return sets * (Number(item.repsTarget) || 0);
-  return sets * setSeconds(item);
+  return COST_MODELS.find((model) => model.matches(item)).seconds(item);
 }
 
 function sumSeconds(items, keep) {

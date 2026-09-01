@@ -4223,11 +4223,61 @@ per-movement table** — the thing this module refused for good reason. Reps are
 A rep range costs its top; `Max`, a band label or an empty box fall back to the plain working set,
 because costing them at nothing would make a plan of failure sets look free.
 
-**Left undecided, deliberately:** the seed authors reps as `"10 per arm"`. Read literally that is 10;
-performed it is 20. One rule — a `per arm` / `per leg` suffix doubles the count — would handle it,
-and it would change the estimate on plans that already exist, so it is the maintainer's call.
+**Ruled 2026-09-01, and built:** *"keep the description 'X reps per arm', but when estimating
+duration for a card or a cycle it should return calculated time back"*. The authored text is never
+rewritten — the cost model reads it, and any per-side wording (`arm`, `leg`, `side`, `hand`, `foot`)
+counts double. Side words are matched, never guessed: a movement that is unilateral without saying so
+cannot be detected from a plan at all.
+
+**And a set to failure costs the recovery it forces**, ruled the same day: *"max reps should probably
+default to 3 or 5 min"*. Three, the conservative end — at five, four such sets eat a third of an hour
+by themselves. `SECONDS_PER_MAX_SET` is the dial if it reads short on the floor. `Max`, `AMRAP` and
+`F` are the tokens [repsAndLoad.js](src/domain/repsAndLoad.js) already recognises, so this needs no
+new vocabulary.
+
+**The arithmetic is a list of shapes now, not a chain of ifs** — asked for as *"in object oriented
+manner"*. Each shape of work answers for its own cost (rest, timed, to failure, per side, counted,
+uncounted) and the first whose test holds wins, so the order is the meaning and a new kind of work is
+an entry rather than another branch to hold in your head.
 
 Pinned by [planDuration.test.mjs](tests/unit_js/domain/planDuration.test.mjs) (nine new cases, from
 the pull-up/squat asymmetry to rests being excluded from the judgement but kept in the total) and
 [test_clipboard_editor.py](tests/medium/test_clipboard_editor.py) (the meter says `tight` before it
 says `over`).
+
+### 39.17 [ ] CHANGE — deleting a session earns ceremony proportional to what it destroys
+
+**Reported 2026-09-01 (Simon):** *"delete session is quite an intrusive operation, should have a
+clear warning popup / when a session was already started it should be even clearer warning / also
+delete operation should prevent misclicks or in the pocket deletes (maybe a slide button to confirm
+deletion?)"*, and *"did I understand it right and we need to define behaviour on delete? it should
+orphan all plans in that session when delete is clicked"*.
+
+**He understood it right, and that half already ships.** `deleteScheduledSession`
+([sessionLifecycle.js](src/controllers/sessionLifecycle.js)) snapshots every participant's programme
+into `state.history` as an unscheduled planning record before taking the session off the board, and
+`confirm_delete_session` already says so: *"each participant's plan is kept under Unscheduled
+plans"*. An EMPTY plan is not rescued, deliberately — there is nothing in it to re-run.
+
+**What is missing is everything around it:**
+
+- **It is a native `confirm()`** — a system dialog one tap from destruction. It cannot name the
+  session, cannot show what is in it, and cannot carry this repository's own destructive-button
+  treatment ([test_destructive_button_affordance.py](tests/medium/test_destructive_button_affordance.py)).
+- **A started session gets the identical warning as an untouched one.** There is no `started` branch,
+  so deleting mid-workout shows the same sentence while "logged progress and feedback are discarded"
+  now means sets actually performed in the gym.
+- **It deletes more than it says** on a merged clipboard — §39.13.
+
+**Design, with ceremony scaled to what is destroyed:**
+
+| | What the dialog says | To confirm |
+| :-- | :-- | :-- |
+| Future, untouched | Names the session; the plans stay under Unscheduled | Destructive button, set apart |
+| Merged | Names **every** session it removes, with the count | Same |
+| Already started | Names what cannot come back — *"4 sets logged for Jane, 2 for John"* | **Slide to confirm** |
+
+**Slide, ruled 2026-09-01:** *"I'd say slide is harder to have clicked in the pocket for delete
+operation."* It costs a keyboard and screen-reader path, and this screen already uses drag for
+reordering rows and the grabber for closing the session — so the slider is reserved for the one case
+that earns a third drag idiom, and every other delete stays a button.
