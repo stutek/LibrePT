@@ -63,14 +63,20 @@ function planFitMeterHTML(deps, tr) {
   // toolbar beside a real button, so it read as a control, and the only thing saying otherwise was
   // a `title` attribute. A phone has no hover: meaning may not live there (§7.2).
   //
-  // And the state this exists to report was in the colour alone. This file already said the number
-  // a trainer scans for is not "45", it is OVER — so "over" is a word now, legible in sunlight and
-  // to a trainer who cannot tell the red from the grey.
-  const over = fit.fits ? "" : ` · ${tr("plan_fit_over", "over")}`;
-  const label = `${minutes(fit.netSeconds)} / ${minutes(fit.slotSeconds)} min${over}`;
-  return `<span class="editor-plan-fit${fit.fits ? "" : " is-over"}" title="${tr(
+  // THREE states, and each says its own word (ruled 2026-09-01: warning past 75%, error at 100%).
+  // The state was in the colour alone before, which is the half a colour-blind trainer cannot read
+  // and the half sunlight takes first — and there was no warning state at all, so a plan at 95% of
+  // its hour looked exactly like one at 30%.
+  //
+  // The number is WORK, not the total, because that is what the level is judged on: showing one and
+  // colouring by the other would leave an amber number nobody could explain (domain/planDuration.js).
+  const state = { warning: tr("plan_fit_tight", "tight"), over: tr("plan_fit_over", "over") }[
+    fit.level
+  ];
+  const label = `${minutes(fit.workSeconds)} / ${minutes(fit.slotSeconds)} min${state ? ` · ${state}` : ""}`;
+  return `<span class="editor-plan-fit is-${fit.level}" title="${tr(
     "plan_fit_hint",
-    "Estimated working time against the session slot",
+    "Estimated working time against the session slot, rests excluded",
   )}"><i class="fa-solid fa-clock" aria-hidden="true"></i> ${label}</span>`;
 }
 const DEFAULT_REST = 30; // seconds, when injecting a fresh rest

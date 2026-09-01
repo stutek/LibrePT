@@ -455,8 +455,9 @@ export const sl = {
   bind_participants: "Vsi na ta načrt",
   unbind_participants: "Vsak svoj načrt",
   bound_group_label: "Skupaj",
-  plan_fit_hint: "Ocenjen delovni čas glede na trajanje termina",
+  plan_fit_hint: "Ocenjen delovni čas glede na trajanje termina, brez premorov",
   plan_fit_over: "čez",
+  plan_fit_tight: "na tesnem",
   label_apply_to_series: "Spremeni vse večere te seje",
   session_one_of_a_series:
     "To je en večer ponavljajoče se seje. Kar spremeniš tukaj, velja samo za ta večer.",

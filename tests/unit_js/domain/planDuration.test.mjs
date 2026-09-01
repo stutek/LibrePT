@@ -10,7 +10,9 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
+  SECONDS_PER_REP,
   SECONDS_PER_WORKING_SET,
+  SET_OVERHEAD_SECONDS,
   planFitsSlot,
   planNetSeconds,
   slotSeconds,
@@ -82,4 +84,92 @@ test("a session with no slot is not judged against one", () => {
 
   assert.equal(fit.slotSeconds, 0);
   assert.equal(fit.fits, true);
+});
+
+// --- what a set costs, by its reps -------------------------------------------------------------
+// Asked 2026-09-01 (Simon): "we should also find a way to account time for 20 bolgarian squats, or
+// 5 pullups". A flat 45s per set says those two cost the same, which no trainer believes. Reps are
+// already in the plan, so the model scales by them — an overhead for getting set up plus a cost per
+// rep — and still invents no per-movement table, which is what this module refused for good reason.
+
+test("a set costs its setup plus its reps, so five pull-ups are not twenty squats", () => {
+  const pullups = [exercise({ setsTargetCount: 1, repsTarget: 5 })];
+  const squats = [exercise({ setsTargetCount: 1, repsTarget: 20 })];
+
+  assert.equal(planNetSeconds(pullups), SET_OVERHEAD_SECONDS + 5 * SECONDS_PER_REP);
+  assert.equal(planNetSeconds(squats), SET_OVERHEAD_SECONDS + 20 * SECONDS_PER_REP);
+  assert.ok(planNetSeconds(squats) > planNetSeconds(pullups) * 2);
+});
+
+test("the common set is unchanged, so the model is calibrated where it was", () => {
+  // Ten reps is what the flat constant always meant. It still costs exactly that.
+  assert.equal(
+    planNetSeconds([exercise({ setsTargetCount: 1, repsTarget: 10 })]),
+    SECONDS_PER_WORKING_SET,
+  );
+});
+
+test("a rep range is costed at its top — the number the trainer might actually hit", () => {
+  assert.equal(
+    planNetSeconds([exercise({ setsTargetCount: 1, repsTarget: "8-12" })]),
+    SET_OVERHEAD_SECONDS + 12 * SECONDS_PER_REP,
+  );
+});
+
+test("reps nobody can count fall back to the plain working set rather than to zero", () => {
+  // "Max" is a real authored value (domain/repsAndLoad.js). Costing it at nothing would make a
+  // plan of failure sets look free.
+  for (const reps of ["Max", "", null, undefined, "AMRAP"]) {
+    assert.equal(
+      planNetSeconds([exercise({ setsTargetCount: 1, repsTarget: reps })]),
+      SECONDS_PER_WORKING_SET,
+      `reps ${JSON.stringify(reps)}`,
+    );
+  }
+});
+
+// --- three states, judged on WORK ---------------------------------------------------------------
+// Ruled 2026-09-01 (Simon): "if the plan (not counting rests) exceeds 75% of time then it should
+// mark warning and at 100% should turn error".
+//
+// Judged on work rather than on the total for a reason the module already half-admitted: rest is
+// counted only where the trainer wrote a rest row, so the total under-reads exactly the plans most
+// likely to overrun. The 25% this leaves is the rest nobody typed in.
+
+test("a plan whose work fits inside three quarters of the slot is simply fine", () => {
+  const fit = planFitsSlot([exercise({ setsTargetCount: 10, repsTarget: 10 })], "10:00 - 11:00");
+
+  assert.equal(fit.level, "ok");
+  assert.equal(fit.fits, true);
+});
+
+test("past three quarters of the slot the plan is tight, not yet over", () => {
+  // 62 sets of 10 = 46.5 min of work in a 60 min slot — 77%.
+  const fit = planFitsSlot([exercise({ setsTargetCount: 62, repsTarget: 10 })], "10:00 - 11:00");
+
+  assert.equal(fit.level, "warning");
+  assert.equal(fit.fits, true, "tight is a warning about the rest, not a plan that cannot fit");
+});
+
+test("work alone filling the slot is the error, whatever the rests say", () => {
+  const fit = planFitsSlot([exercise({ setsTargetCount: 80, repsTarget: 10 })], "10:00 - 11:00");
+
+  assert.equal(fit.level, "over");
+  assert.equal(fit.fits, false);
+});
+
+test("rests are excluded from the judgement but still counted in the total", () => {
+  const items = [exercise({ setsTargetCount: 10, repsTarget: 10 }), rest(600)];
+  const fit = planFitsSlot(items, "10:00 - 11:00");
+
+  assert.equal(fit.workSeconds, 10 * SECONDS_PER_WORKING_SET);
+  assert.equal(fit.netSeconds, fit.workSeconds + 600);
+  assert.equal(fit.level, "ok", "ten minutes of authored rest must not raise the alarm by itself");
+});
+
+test("a session with no slot has no level to report", () => {
+  const fit = planFitsSlot([exercise({ setsTargetCount: 40 })], "");
+
+  assert.equal(fit.level, "ok");
+  assert.equal(fit.slotSeconds, 0);
 });

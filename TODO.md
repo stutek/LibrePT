@@ -4191,3 +4191,43 @@ the pill is gone — plain text while the plan fits, with the tint kept only for
 attention. Pinned by [test_clipboard_editor.py](tests/medium/test_clipboard_editor.py), which had to
 teach its mount about a booked slot: the meter is silent without one, because a planning programme
 has no hour to fit into and inventing a constraint nobody set would be worse than saying nothing.
+
+### 39.16 [x] CHANGE — the fit meter warns before the hour is gone, and costs a set by its reps
+
+Two rulings from 2026-09-01, one screen apart, and they answer each other.
+
+**"If the plan (not counting rests) exceeds 75% of time then it should mark warning and at 100%
+should turn error."** There were two states, so a plan at 95% of its hour looked exactly like one at
+30% — a trainer found out it was too long by going over. Three now, each saying its own WORD (`tight`
+/ `na tesnem`, `over` / `čez`), because the state used to be in the colour alone: the half a
+colour-blind trainer cannot read, and the half sunlight takes first.
+
+**Judged on WORK, which is the part of the ruling worth keeping.** This module counts rest only where
+a trainer wrote a rest ROW; the rest they take between sets without typing it in is invisible. So a
+total that includes authored rests under-reads exactly the plans most likely to overrun, and the
+quarter of the slot the threshold leaves free IS that unwritten rest. `planFitsSlot` now reports
+`workSeconds` beside `netSeconds`, and the meter shows work — showing one number while colouring by
+the other would leave an amber reading nobody could explain.
+
+**"We should also find a way to account time for 20 bolgarian squats, or 5 pullups."** A flat 45s per
+set said those cost the same. A set is now an overhead plus a cost per rep — 15s + 3s each:
+
+| | before | now |
+| :-- | --: | --: |
+| 5 pull-ups | 45s | 30s |
+| 10 bench press | 45s | 45s |
+| 20 Bulgarian split squats | 45s | 75s |
+
+Calibrated where it always was, so the common set did not move, and it still invents **no
+per-movement table** — the thing this module refused for good reason. Reps are already in the plan.
+A rep range costs its top; `Max`, a band label or an empty box fall back to the plain working set,
+because costing them at nothing would make a plan of failure sets look free.
+
+**Left undecided, deliberately:** the seed authors reps as `"10 per arm"`. Read literally that is 10;
+performed it is 20. One rule — a `per arm` / `per leg` suffix doubles the count — would handle it,
+and it would change the estimate on plans that already exist, so it is the maintainer's call.
+
+Pinned by [planDuration.test.mjs](tests/unit_js/domain/planDuration.test.mjs) (nine new cases, from
+the pull-up/squat asymmetry to rests being excluded from the judgement but kept in the total) and
+[test_clipboard_editor.py](tests/medium/test_clipboard_editor.py) (the meter says `tight` before it
+says `over`).

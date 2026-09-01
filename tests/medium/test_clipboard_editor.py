@@ -349,3 +349,35 @@ def test_the_plan_fit_meter_says_what_its_number_means(page, local_server):
         f"still shaped like a button beside a real one: radius {shape['radius']}"
     )
     assert "min" in shape["text"], shape["text"]
+
+
+def test_the_meter_warns_before_the_plan_is_already_over(page, local_server):
+    """Ruled 2026-09-01 (Simon): "if the plan (not counting rests) exceeds 75% of time then it
+    should mark warning and at 100% should turn error".
+
+    Before this there were two states, and a plan at 95% of its hour looked exactly like one at
+    30% — the trainer found out it was too long by going over. Each state says its own WORD, so the
+    reading survives sunlight and a trainer who cannot tell the amber from the red."""
+    slot = {"timeLabel": "17:00 - 18:00", "titles": ["Group Strength"], "day": "today"}
+
+    # 47 minutes of work in an hour: past three quarters, not yet over.
+    _mount(
+        page,
+        local_server,
+        [exercise_item("e1", "Back Squat", setsTargetCount=62, repsTarget=10)],
+        source_session=slot,
+    )
+    meter = page.locator(".editor-plan-fit")
+    assert "tight" in meter.inner_text(), meter.inner_text()
+    assert "is-warning" in (meter.get_attribute("class") or "")
+
+    # And the work alone filling the hour is the error.
+    _mount(
+        page,
+        local_server,
+        [exercise_item("e1", "Back Squat", setsTargetCount=80, repsTarget=10)],
+        source_session=slot,
+    )
+    meter = page.locator(".editor-plan-fit")
+    assert "over" in meter.inner_text(), meter.inner_text()
+    assert "is-over" in (meter.get_attribute("class") or "")
