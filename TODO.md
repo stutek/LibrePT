@@ -4281,3 +4281,36 @@ plans"*. An EMPTY plan is not rescued, deliberately — there is nothing in it t
 operation."* It costs a keyboard and screen-reader path, and this screen already uses drag for
 reordering rows and the grabber for closing the session — so the slider is reserved for the one case
 that earns a third drag idiom, and every other delete stays a button.
+
+### 39.18 [x] FIX — the gate's worker split had gone stale, and it cost half the run
+
+**Asked 2026-09-01 (Simon):** *"is there a way to support local development with code graphs, so that
+tests unit, e-2-e and compliance get run on every edit premptivly to reduce wait times?"* — and the
+first thing that question deserved was a look at where the time actually went.
+
+**It went to one worker.** `demo_worker_count()` returned 1, derived on 2026-08-19 when the demo
+suite was ~90s of call time against ~600s for the rest of e2e, with its own docstring asking to
+*"re-derive this if either suite's call time moves substantially — the ratio, not the number, is what
+matters"*. Both moved, in opposite directions: the demo suite grew with the story (48 cards, walked
+twice over) while the rest of e2e got faster. Measured today: **demo 387s against e2e 192s** — the
+ratio inverted, the stage's long pole running on a single worker while seven idled beside it.
+
+The demo files alone finish in 163s at four workers. At three, inside the shared budget:
+
+| | before | after |
+| :-- | --: | --: |
+| Demo & Walkthrough | 387s | **181s** |
+| E2E Browser Tests | 192s | 162s |
+| Stage 3 | 387s | **181s** |
+| **whole gate** | **8m51s** | **4m44s** |
+
+The two tasks now land within 20s of each other, which is the property the split exists for: the
+stage costs as long as its slower half.
+
+**[test_stage_tasks.py](tests/unit/test_stage_tasks.py) pinned the number, not the rule** — it
+asserted `demo_worker_count() == 1`, so an honest re-derivation read as a regression. It now asserts
+what must stay true: both tasks come out of ONE browser allowance, neither is starved, and the shares
+add up. The number is free to follow the measurement, which is what its own docstring always asked.
+
+**Re-check condition:** whenever either suite's wall time moves substantially — the same condition as
+before, now with a test that does not fight it.

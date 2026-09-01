@@ -45,9 +45,20 @@ def test_the_worker_budget_is_shared_rather_than_doubled():
     single budget: enough simultaneous browser contexts can burst past the server's listen backlog,
     which is the documented cause of Page.goto timeouts unrelated to any change.
 
-    The demo task takes one and the e2e task takes the rest — a split chosen so the two finish
-    together, since the stage costs as long as its slower half. A machine whose whole budget IS one
-    ends up running two: nothing smaller can be split, and one extra context on a two-core box is
-    not the burst this guards against."""
-    assert build.demo_worker_count() == 1
-    assert build.e2e_worker_count() == max(1, build._playwright_worker_count() - 1)
+    What is asserted is the INVARIANT, not the split. The demo task's share is re-derived whenever
+    either suite's cost moves — it was 1 from 2026-08-19 and is 3 since 2026-09-01, when the demo
+    suite had grown into the stage's long pole while running on a single worker — and pinning the
+    number here would make every honest re-derivation look like a regression. What must stay true is
+    that the two tasks come out of ONE allowance and neither is starved.
+
+    A machine whose whole budget IS one ends up running two: nothing smaller can be split, and one
+    extra context on a two-core box is not the burst this guards against."""
+    budget = build._playwright_worker_count()
+    demo = build.demo_worker_count()
+    e2e = build.e2e_worker_count()
+
+    assert demo >= 1 and e2e >= 1, (demo, e2e)
+    assert demo + e2e <= max(2, budget), (
+        f"the two tasks take {demo} + {e2e} browser contexts out of a budget of {budget}"
+    )
+    assert e2e == max(1, budget - demo)

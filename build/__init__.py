@@ -1403,14 +1403,19 @@ DEMO_TEST_FILES = (
 def demo_worker_count():
     """Workers for the demo task, taken OUT of the shared Playwright budget rather than added to it.
 
-    ONE, because two schedulers cannot balance across each other: the stage takes as long as the
-    slower task, so the split is only free if the two finish together. Measured 2026-08-19 with the
-    demo suite at ~90s of call time and the rest of e2e at ~600s: at 2 and 6 workers they finished in
-    50s and 120s (the stage paying 120s for work that fits in 100s), at 1 and 7 they land within a
-    few seconds of each other. Re-derive this if either suite's call time moves substantially — the
-    ratio, not the number, is what matters.
+    The stage takes as long as the SLOWER task, so the split is only free if the two finish
+    together. That is the rule; the number is whatever the current ratio makes true.
+
+    It was ONE from 2026-08-19, derived when the demo suite was ~90s of call time against ~600s for
+    the rest of e2e, with this docstring asking for a re-derivation if either moved substantially.
+    Both moved, and in opposite directions: the demo suite grew as the story did (48 cards, walked
+    twice over) while the rest of e2e got faster. Measured 2026-09-01 — demo 387s against e2e 192s,
+    the ratio inverted, the long pole running on one worker while seven idled beside it. The demo
+    files alone finish in 163s at four.
+
+    THREE, so the two land together rather than one waiting on the other.
     """
-    return 1
+    return 3
 
 
 def e2e_worker_count():
