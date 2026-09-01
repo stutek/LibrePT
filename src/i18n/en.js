@@ -146,6 +146,7 @@ export const en = {
   remove: "Remove",
   done: "Done",
   done_editing_plan: "Done editing plan",
+  session_options: "Session options",
   edit_exit_hint: "Tap Done, press Esc, or tap outside to finish.",
   reorder_hint: "Tap top/bottom to move, drag to reorder",
   circuit: "Circuit",

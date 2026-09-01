@@ -4117,3 +4117,45 @@ gone: a value that cannot be stale beats a rule about keeping it fresh.
 
 Pinned by [test_session_deeplink.py](tests/e2e/test_session_deeplink.py) on both halves — a cold deep
 link names the session, and so does the screen you get back after leaving the editor.
+
+### 39.13 [ ] BUG — the ⋯ menu says "this session" and deletes several
+
+**Raised 2026-08-31 (Simon)**, from the title work: *"the new title mechanics makes also sense from
+'merged plans from overlapping sessions' too, just the ... menu does not make sense in that case (we
+might need multiple edit menu entries?)"*
+
+**Half of it was mine and is fixed.** The new title bar read `titles[0]`, so a clipboard covering two
+overlapping slots was named after whichever sorted first. `buildSessionMeta` collapses overlapping
+sessions, so `titles` and `ids` are arrays, and the collapsed clipboard bar has always joined them
+with `" + "` ([sessionBar.js](src/modules/session/sessionBar.js)). Both title builders now do the
+same, pinned by [test_clipboard_title.py](tests/medium/test_clipboard_title.py).
+
+**The other half is real, and narrower than "multiple edit entries".** Read against the code:
+
+- **Edit plan** and **Copy this plan to…** act on the ACTIVE CLIENT's plan, not on a session. They
+  mean exactly one thing whether the clipboard is merged or not.
+- **Everyone on this plan** is about the people in the room. Same.
+- **Delete Session** is the one that lies. `deleteScheduledSession` removes every session matching
+  `sessionBelongsToSlot`, which tests `sourceSession.ids.includes(session.id)` — so on a merged
+  clipboard it takes **all** the slots off the board, while `confirm_delete_session` asks about
+  *"this session"*, singular, and the trainer has no way to see how many they are agreeing to.
+
+So the menu does not need splitting; the destructive item needs to name what it will actually do.
+**Open question for the maintainer**: when a clipboard covers two slots, should Delete take both
+(saying so, with the count and the names), or offer them separately?
+
+### 39.14 [ ] QUESTION — two decisions still open on the clipboard's title bar
+
+Both raised 2026-08-31 while §39.6 was being built, both rendered for a decision rather than argued.
+
+1. **Where the ⋯ sits.** *"should we move the tree dots menu to the left of session name?"* Measured:
+   the title block gets 240px whether ⋯ leads the action cluster or trails it, and 234px at the far
+   left — so this is not about space. The far-left slot is the `.view-grabber`'s (close the session,
+   go home), and the app's own convention puts menus on the right: the ☰ is top-right, and the story
+   card teaches it as *"the top right corner"*.
+2. **Whether the editor's second line matches the clipboard's.** *"edit scrin title is not unified
+   with clipboard title"* — correct. The clipboard reads `Yesterday · 18:00 - 19:00 · Trib gym base`
+   in plain muted text; the editor wears a coloured uppercase status pill for the same day and time,
+   then the client. Two visual languages for one bar. The pill's colour is the only thing on the
+   editor's screen saying whether the session is running now — the clipboard says that with its Start
+   button and its countdown instead — so unifying them has to decide where that signal goes.

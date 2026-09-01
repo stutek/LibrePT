@@ -83,7 +83,15 @@ export function renderActiveSessionOverlayShell() {
     `
     <div class="session-title-bar view-titlebar">
       <button class="view-grabber" type="button" aria-label="Close session and return to home"></button>
-      <div class="session-title-block">
+      <!-- The title OPENS THE MENU too (asked 2026-08-31: "maybe make the ... menu open (edit,
+           copy, delete) on session name click instead of separate button"). Added to the ⋯ rather
+           than replacing it: that menu holds Delete Session, and a destructive action reachable
+           only by tapping a title with no affordance is the ✕ mistake of §38.16 again. The ⋯ stays
+           as the one visible mark saying there is more here; this buys the big target the request
+           was after. Not a <button> because it holds an h3 and a two-line block; the role, the
+           name and the expanded state are what a screen reader and a keyboard need. -->
+      <div class="session-title-block" role="button" tabindex="0" aria-haspopup="true"
+           aria-expanded="false" data-i18n-label="session_options" aria-label="Session options">
         <h3 id="session-title-text">Clipboard</h3>
       </div>
       <div class="session-title-actions">
@@ -120,7 +128,7 @@ export function renderActiveSessionOverlayShell() {
           <i class="fa-solid fa-check"></i>
         </button>
         <div class="session-menu-wrap">
-          <button id="btn-session-menu" class="icon-btn" aria-label="Session options" aria-haspopup="true" aria-expanded="false">
+          <button id="btn-session-menu" class="icon-btn" data-i18n-label="session_options" aria-label="Session options" aria-haspopup="true" aria-expanded="false">
             <i class="fa-solid fa-ellipsis-vertical"></i>
           </button>
           <!-- Edit lives in here rather than beside the title (reported 2026-08-18: "the three dots

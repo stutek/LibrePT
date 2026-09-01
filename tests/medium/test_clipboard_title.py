@@ -131,3 +131,85 @@ def test_nothing_in_the_title_bar_is_pushed_out_of_it(page, local_server):
     assert_component_fits(
         page, ".session-title-block", label="clipboard title bar", viewport=None
     )
+
+
+def test_the_session_name_opens_the_same_menu_as_the_dots(page, local_server):
+    """Asked 2026-08-31 (Simon): "maybe make the ... menu open (edit, copy, delete) on session name
+    click instead of separate button".
+
+    ADDED to the ⋯ rather than replacing it, deliberately. That menu holds Delete Session, and a
+    destructive action reachable only by tapping a title that carries no affordance is §38.16's
+    lesson again — a control that promised less than it did. The ⋯ is the one mark on this bar
+    saying there is more here; what the title buys is a much bigger target for the same action,
+    which is the ergonomics the request was actually after."""
+    _mount(page, local_server)
+
+    page.click(".session-title-block")
+    page.wait_for_selector("#session-menu:not(.hidden)", timeout=5000)
+    assert page.locator("#session-menu .session-menu-item").count() >= 2, (
+        "the title opened something, but not the session menu"
+    )
+    # The same menu, not a second one — and the ⋯ is still on the bar.
+    assert page.locator("#btn-session-menu").is_visible(), (
+        "the ⋯ is the only visible mark saying this menu exists; it must stay"
+    )
+    assert page.locator("#session-menu").count() == 1
+
+    # Tapping the title again puts it away, the way its own button does. `state="attached"`
+    # because the menu is hidden by a class: waiting for it to be VISIBLE never resolves.
+    page.click(".session-title-block")
+    page.wait_for_selector("#session-menu.hidden", state="attached", timeout=5000)
+
+
+def test_the_title_says_it_is_a_control(page, local_server):
+    """A tappable title with nothing announcing it is meaning nobody can find. It cannot carry a
+    visible affordance without becoming a button on a bar that already has three, so it carries the
+    ones a screen reader and a keyboard use: a role, a name, and the state of the menu it owns."""
+    _mount(page, local_server)
+
+    block = page.locator(".session-title-block")
+    assert block.get_attribute("role") == "button"
+    assert block.get_attribute("aria-haspopup") == "true"
+    assert block.get_attribute("aria-expanded") == "false"
+    assert (block.get_attribute("aria-label") or "").strip(), "the control has no name"
+
+    block.press("Enter")
+    page.wait_for_selector("#session-menu:not(.hidden)", timeout=5000)
+    assert block.get_attribute("aria-expanded") == "true"
+
+
+def test_a_merged_clipboard_names_every_session_in_it(page, local_server):
+    """Raised 2026-08-31 (Simon): "the new title mechanics makes also sense from 'merged plans from
+    overlapping sessions' too".
+
+    One clipboard can cover several booked slots — `buildSessionMeta` collapses overlapping ones, so
+    `titles` and `ids` are arrays. The collapsed clipboard bar has always joined them with " + "
+    (sessionBar.js); this title bar shipped reading `titles[0]` and quietly dropped the rest, so two
+    merged sessions looked like one, named after whichever sorted first."""
+    _mount(page, local_server)
+    page.evaluate(
+        """async () => {
+          const m = await import(new URL('modules/session/sessionTitleBar.js', document.baseURI).href);
+          m.initSessionTitleBar({
+            getActiveSession: () => ({
+              sourceSession: {
+                titles: ['Group Strength & Conditioning', 'Rehab Hour'],
+                day: 'today',
+                timeLabel: '17:00 - 19:00',
+                location: 'Trib gym base',
+                startDate: '2026-09-01T15:00:00.000Z',
+              },
+            }),
+            getISODateString: (d) => new Date(d).toISOString().slice(0, 10),
+            formatClockFromMinutes: () => '17:00',
+            t: (key) => key,
+          });
+          m.renderSessionTitle();
+        }"""
+    )
+    page.wait_for_timeout(200)
+
+    name = page.locator(".clipboard-title-name").inner_text()
+    assert "Group Strength & Conditioning" in name and "Rehab Hour" in name, (
+        f"a merged clipboard must name every session it covers: {name!r}"
+    )

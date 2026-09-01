@@ -154,7 +154,8 @@ function buildEditModeTitleHTML(activeClient) {
     chipLabel = parts.join(" · ") || t("live") || "Live";
   }
   const clientNm = activeClient ? escapeHTML(activeClient.name) : "";
-  const sessionNm = escapeHTML(b?.titles?.[0] || t("untitled_session") || "");
+  // Every merged title, as the clipboard bar does — see sessionTitleBar.js.
+  const sessionNm = escapeHTML(b?.titles?.join(" + ") || t("untitled_session") || "");
   // TWO ROWS, and the word "Editing" is gone (TODO §39.6, 2026-08-31). This bar never said WHICH
   // session was being edited — only when it runs and whose plan is open — so the session's name now
   // leads, with the ✎ beside it saying what is being done to it.

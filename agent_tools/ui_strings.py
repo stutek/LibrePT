@@ -32,7 +32,7 @@ SRC = REPO_ROOT / "src"
 # then the 27 `data-i18n` attributes nothing was applying, then the client dialog somebody reported
 # "Cancel" from, then the clipboard's Start and Done buttons becoming glyphs whose words live in
 # `aria-label` (TODO §39.6).
-BASELINE = 287
+BASELINE = 286
 
 # Upstream files and the dictionaries themselves: the first are not ours to translate, the second
 # ARE the translations.

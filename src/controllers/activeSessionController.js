@@ -223,17 +223,44 @@ function wireSessionMenuAndActions(t) {
   const sessionMenu = document.getElementById("session-menu");
   const closeSessionMenu = () => {
     if (sessionMenu) sessionMenu.classList.add("hidden");
-    if (sessionMenuBtn) sessionMenuBtn.setAttribute("aria-expanded", "false");
+    // BOTH openers, or the one that did not open it goes on claiming the menu is up — the title
+    // block announces itself to a screen reader the same way the ⋯ does.
+    for (const opener of [sessionMenuBtn, document.querySelector(".session-title-block")]) {
+      opener?.setAttribute("aria-expanded", "false");
+    }
     // The "copy to whom" list closes with the menu that holds it — reopening ⋯ to find a submenu
     // already unfolded from last time reads as the app having remembered a decision nobody made.
     document.getElementById("copy-plan-targets")?.classList.add("hidden");
   };
+  // The title block opens the same menu (TODO §39.6). Both openers report the same state, so a
+  // screen reader is never told the menu is closed by the control the user did not use.
+  const titleBlock = document.querySelector(".session-title-block");
+  const toggleSessionMenu = () => {
+    const isOpen = !sessionMenu.classList.contains("hidden");
+    sessionMenu.classList.toggle("hidden", isOpen);
+    for (const opener of [sessionMenuBtn, titleBlock]) {
+      opener?.setAttribute("aria-expanded", String(!isOpen));
+    }
+  };
   if (sessionMenuBtn && sessionMenu) {
     sessionMenuBtn.addEventListener("click", (e) => {
       e.stopPropagation();
-      const isOpen = !sessionMenu.classList.contains("hidden");
-      sessionMenu.classList.toggle("hidden", isOpen);
-      sessionMenuBtn.setAttribute("aria-expanded", String(!isOpen));
+      toggleSessionMenu();
+    });
+    // stopPropagation for the reason the button needs it: the document handler below closes the
+    // menu on any tap outside `.session-menu-wrap`, and the title is outside it — without this the
+    // menu opened and shut on the same click.
+    titleBlock?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleSessionMenu();
+    });
+    // A div with `role="button"` gets no keyboard behaviour of its own, and the bar is reachable by
+    // tab: Enter and Space have to be wired by hand or the role is a claim the element cannot keep.
+    titleBlock?.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      e.preventDefault();
+      e.stopPropagation();
+      toggleSessionMenu();
     });
     document.addEventListener("click", (e) => {
       // The guide is not the app (modules/common/dom.js): a tap on Show me must not close the menu
