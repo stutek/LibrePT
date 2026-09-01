@@ -132,45 +132,6 @@
   font-weight: 600;
   letter-spacing: 0;
 }
-.edit-mode-client {
-  flex: 0 1 auto;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  /* Set against the session's name above it, not against the bar's h3 — this is the second line. */
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0;
-}
-.edit-mode-chip {
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 10px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-  padding: 2px 8px;
-  border-radius: 10px;
-  vertical-align: middle;
-}
-.edit-mode-chip.live {
-  background: color-mix(in srgb, var(--danger) 15%, transparent);
-  color: var(--danger);
-  border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent);
-}
-.edit-mode-chip.future {
-  background: color-mix(in srgb, #f59e0b 15%, transparent);
-  color: #f59e0b;
-  border: 1px solid color-mix(in srgb, #f59e0b 40%, transparent);
-}
-.edit-mode-chip.planning {
-  background: var(--primary-light);
-  color: var(--primary);
-  border: 1px solid color-mix(in srgb, var(--primary) 40%, transparent);
-}
 .editor-toolbar {
   display: flex;
   justify-content: flex-end;
@@ -686,19 +647,30 @@
 /* How long the plan runs against its slot (TODO §35.3b). Beside the plan being built, because that
    is the only moment the answer can still change. Quiet while it fits — a trainer is reading the
    plan, not the meter — and marked when it does not, since "over" is the whole message. */
+/* A READING, not a control. It sat in this toolbar as a 999px pill beside a real button and was
+   taken for one (reported 2026-09-01). It is now set as text with a clock beside it: no pill, no
+   fill while the plan fits, and the tint kept only for the state that wants attention. */
 .editor-plan-fit {
   margin-left: auto;
-  padding: 4px 8px;
-  border-radius: 999px;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  padding: 4px 0;
   font-size: 11px;
   font-weight: 700;
-  font-family: monospace;
+  font-family: var(--font-mono, monospace);
   color: var(--text-muted);
-  background: color-mix(in srgb, var(--text-main) 8%, transparent);
 }
+.editor-plan-fit i {
+  font-size: 10px;
+  opacity: 0.8;
+}
+/* Over the slot: the word "over" is what says so; this only makes it findable at a glance. */
 .editor-plan-fit.is-over {
   color: var(--danger, #dc2626);
   background: color-mix(in srgb, var(--danger, #dc2626) 14%, transparent);
+  padding: 4px 8px;
+  border-radius: var(--border-radius-md, 8px);
 }
 
 /* A movement that came in with an imported programme and is not in the catalogue (TODO §29.1). The

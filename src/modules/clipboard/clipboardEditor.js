@@ -58,11 +58,20 @@ function planFitMeterHTML(deps, tr) {
   const fit = planFitsSlot(activeClientState?.exercises || [], slotLabel || "");
   if (!fit.slotSeconds) return "";
   const minutes = (seconds) => Math.round(seconds / 60);
-  const label = `${minutes(fit.netSeconds)} / ${minutes(fit.slotSeconds)} min`;
+  // A CLOCK and a word, not a number in a pill. Reported 2026-09-01: "there is a 65 / 60 min button
+  // like element that I don't know what it does" — it was a 999px-radius tinted pill sitting in a
+  // toolbar beside a real button, so it read as a control, and the only thing saying otherwise was
+  // a `title` attribute. A phone has no hover: meaning may not live there (§7.2).
+  //
+  // And the state this exists to report was in the colour alone. This file already said the number
+  // a trainer scans for is not "45", it is OVER — so "over" is a word now, legible in sunlight and
+  // to a trainer who cannot tell the red from the grey.
+  const over = fit.fits ? "" : ` · ${tr("plan_fit_over", "over")}`;
+  const label = `${minutes(fit.netSeconds)} / ${minutes(fit.slotSeconds)} min${over}`;
   return `<span class="editor-plan-fit${fit.fits ? "" : " is-over"}" title="${tr(
     "plan_fit_hint",
     "Estimated working time against the session slot",
-  )}">${label}</span>`;
+  )}"><i class="fa-solid fa-clock" aria-hidden="true"></i> ${label}</span>`;
 }
 const DEFAULT_REST = 30; // seconds, when injecting a fresh rest
 

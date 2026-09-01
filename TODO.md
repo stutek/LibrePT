@@ -4153,9 +4153,41 @@ Both raised 2026-08-31 while §39.6 was being built, both rendered for a decisio
    left — so this is not about space. The far-left slot is the `.view-grabber`'s (close the session,
    go home), and the app's own convention puts menus on the right: the ☰ is top-right, and the story
    card teaches it as *"the top right corner"*.
-2. **Whether the editor's second line matches the clipboard's.** *"edit scrin title is not unified
-   with clipboard title"* — correct. The clipboard reads `Yesterday · 18:00 - 19:00 · Trib gym base`
-   in plain muted text; the editor wears a coloured uppercase status pill for the same day and time,
-   then the client. Two visual languages for one bar. The pill's colour is the only thing on the
-   editor's screen saying whether the session is running now — the clipboard says that with its Start
-   button and its countdown instead — so unifying them has to decide where that signal goes.
+2. **~~Whether the editor's second line matches the clipboard's.~~ Done 2026-09-01**, after it was
+   reported twice: *"edit scrin title is not unified with clipboard title"*, then *"edit screen still
+   has session name in the form of a tag (button?) instead of normal title like the clipboard"*.
+
+   Measured first, and it corrected the report: the session's NAME was already identical in both —
+   15px, weight 600, no background, no border. The tag was the second line, where the editor wore a
+   10px uppercase pill with a border and a red tint for the day and time the clipboard sets as plain
+   muted text. It now borrows the clipboard's own `.clipboard-title-when` class rather than declaring
+   a twin, so the two cannot drift apart again, and the client's name joins that line.
+
+   **The pill's colour said "running right now" and nothing else did** — but the word it wrapped
+   already says it (`Today`, `Yesterday`), and colour is the half of that a colour-blind trainer
+   cannot read. Dropping the pill loses no signal; it leaves it where it was always legible. 39 lines
+   of now-dead pill CSS went with it.
+
+### 39.15 [x] BUG — the plan-fit meter looked like a button and explained itself only on hover
+
+**Reported 2026-09-01 (Simon)**, from the editor route: *"there is a 65 / 60 min button like element
+that I don't know what it does"*.
+
+Two faults in one element, and he demonstrated the first by being unable to name it:
+
+- **It was shaped like a control.** `border-radius: 999px`, a tint and padding, sitting in a toolbar
+  immediately beside *Add from catalog*, which is a real button.
+- **Its only explanation was a `title` attribute.** A phone has no hover, and this repository does not
+  accept meaning that lives there — so on the device the app is built for, the element said `65 / 60
+  min` and nothing else.
+
+**And the state it exists to report was in the colour alone.**
+[clipboardEditor.js](src/modules/clipboard/clipboardEditor.js) already said it in a comment — *the
+number a trainer scans for is not "45", it is "over"* — while encoding "over" as red text, which is
+the half a colour-blind trainer cannot read and the half sunlight takes first.
+
+**Fixed:** a clock glyph says the number is a duration, the word `over` / `čez` says the state, and
+the pill is gone — plain text while the plan fits, with the tint kept only for the case that wants
+attention. Pinned by [test_clipboard_editor.py](tests/medium/test_clipboard_editor.py), which had to
+teach its mount about a booked slot: the meter is silent without one, because a planning programme
+has no hour to fit into and inventing a constraint nobody set would be worse than saying nothing.

@@ -144,42 +144,42 @@ function buildEditModeTitleHTML(activeClient) {
   const { t } = deps.getAppDeps();
   const mode = deps.currentPlanMode();
   const b = deps.getActiveSession().sourceSession;
-  // Concrete schedule beats a vague "Live": show the day + time of the booked session, or
-  // "Unscheduled" for a date-less planning program. The chip's colour still encodes urgency.
-  let chipLabel;
-  if (mode === "planning") {
-    chipLabel = t("unscheduled") || "Unscheduled";
-  } else {
-    const parts = [b?.day ? t(b.day) || b.day : "", b?.timeLabel || ""].filter(Boolean);
-    chipLabel = parts.join(" · ") || t("live") || "Live";
-  }
-  const clientNm = activeClient ? escapeHTML(activeClient.name) : "";
   // Every merged title, as the clipboard bar does — see sessionTitleBar.js.
   const sessionNm = escapeHTML(b?.titles?.join(" + ") || t("untitled_session") || "");
-  // TWO ROWS, and the word "Editing" is gone (TODO §39.6, 2026-08-31). This bar never said WHICH
-  // session was being edited — only when it runs and whose plan is open — so the session's name now
-  // leads, with the ✎ beside it saying what is being done to it.
+  // Concrete schedule beats a vague "Live": the day and time of the booked session, or
+  // "Unscheduled" for a date-less planning programme.
+  const when =
+    mode === "planning"
+      ? t("unscheduled") || "Unscheduled"
+      : [b?.day ? t(b.day) || b.day : "", b?.timeLabel || ""].filter(Boolean).join(" · ") ||
+        t("live") ||
+        "Live";
+
+  // ONE bar in two modes, not two bars (reported twice, 2026-08-31 and 09-01: "edit scrin title is
+  // not unified with clipboard title", then "edit screen still has session name in the form of a
+  // tag"). The name was already identical in both — 15px, weight 600, no background. What read as a
+  // different app was this line: the clipboard sets day, time and gym as plain muted text, and this
+  // wore a 10px uppercase pill with a border and a red tint for the same day and time.
   //
-  // Dropping the word is what makes it fit, and that was measured rather than argued: rendered both
-  // ways at 390 and 375, four things on one 12px line clip the client's name at both widths, and
-  // three do not clip at either. The ✎ says the mode and Done sits next to it, so the word was the
-  // part carrying the least.
+  // The pill's colour said "running right now" and nothing else did — but the word it wrapped
+  // already says it (`Today`, `Yesterday`), and colour is the half of that a colour-blind trainer
+  // cannot read. So the signal is not lost by dropping the pill; it moves to the only place it was
+  // ever legible.
   //
+  // It borrows the clipboard's own class rather than declaring a twin, so the two lines cannot
+  // drift apart again.
+  const secondLine = escapeHTML([when, activeClient?.name].filter(Boolean).join(" · "));
+
   // Each part still declares whether it may shrink, for the reason this bar was rebuilt once
   // already: an ellipsis eats whole ELEMENTS, not the tail of a sentence, so an inline run put the
-  // last item 169px outside the box with no "…" to say anything was missing. The chip (is this
-  // running RIGHT NOW?) holds its width; the two names are the ellipsised boxes themselves, and
-  // truncate as text with an affordance a trainer can see. Kept honest by
-  // tests/e2e/test_layout_overflow.py and tests/medium/test_clipboard_title.py.
+  // last item 169px outside the box with no "…" to say anything was missing.
   return `<span class="edit-mode-title">
     <span class="edit-mode-row">
       <i class="fa-solid fa-pen-to-square"></i>
       <span class="edit-mode-session">${sessionNm}</span>
     </span>
     <span class="edit-mode-row">
-      <span class="edit-mode-chip ${mode}">${escapeHTML(chipLabel)}</span>${
-        clientNm ? `<strong class="edit-mode-client">${clientNm}</strong>` : ""
-      }
+      <span class="clipboard-title-when">${secondLine}</span>
     </span>
   </span>`;
 }

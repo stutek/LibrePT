@@ -489,6 +489,7 @@ export const en = {
   unbind_participants: "Give everyone their own plan",
   bound_group_label: "Together",
   plan_fit_hint: "Estimated working time against the session slot",
+  plan_fit_over: "over",
   label_apply_to_series: "Change every evening of this session",
   session_one_of_a_series:
     "This is one evening of a repeating session. What you change here changes this evening only.",

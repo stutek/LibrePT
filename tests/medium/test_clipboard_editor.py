@@ -19,14 +19,20 @@ from tests.medium._harness import (
 )
 
 
-def _mount(page, local_server, plan, edit_mode=True):
+def _mount(page, local_server, plan, edit_mode=True, source_session=None):
     """Mount the clipboard on `plan`, optionally already flipped into the editor.
 
     Edit mode is entered through the title bar's ✎ button rather than by calling
     enterClipboardEditMode() — the button is what a trainer taps, and it is wired by the same
     bootActiveSession step production uses."""
     load_with_stub(
-        page, local_server, clipboard_stub(active_session_fixture(exercises=plan))
+        page,
+        local_server,
+        clipboard_stub(
+            active_session_fixture(exercises=plan, sourceSession=source_session)
+            if source_session
+            else active_session_fixture(exercises=plan)
+        ),
     )
     page.wait_for_selector("#active-session-overlay:not(.hidden)")
     if edit_mode:
@@ -301,3 +307,45 @@ def test_dragging_reorders_the_circuit(page, local_server):
     assert circuits_after.index(new_id) < circuits_before.index(new_id), (
         f"drag did not move the circuit up: {circuits_before} -> {circuits_after}"
     )
+
+
+def test_the_plan_fit_meter_says_what_its_number_means(page, local_server):
+    """Reported 2026-09-01 (Simon), from the editor route: "there is a 65 / 60 min button like
+    element that I don't know what it does".
+
+    Two faults in one element. It was a pill — 999px radius, tinted, sitting in a toolbar next to a
+    real button — so it read as a control; and its only explanation was a `title` attribute, which
+    this project does not accept: meaning may never live in a hover alone, because a phone has none.
+
+    A trainer scanning it needs the answer this element exists to give, which its own source
+    already says in a comment — "the number a trainer scans for is not 45, it is OVER" — and that
+    was encoded in red alone, unreadable to a colour-blind trainer and invisible in sunlight."""
+    # A booked slot, because the meter is silent without one — a planning programme has no hour to
+    # fit into, and saying "45 / — min" would be inventing a constraint nobody set.
+    _mount(
+        page,
+        local_server,
+        [exercise_item("e1", "Back Squat")],
+        source_session={
+            "timeLabel": "17:00 - 18:00",
+            "titles": ["Group Strength"],
+            "day": "today",
+        },
+    )
+
+    meter = page.locator(".editor-plan-fit")
+    assert meter.count() == 1, "the editor has no plan-fit meter"
+
+    shape = page.evaluate(
+        """() => {
+          const el = document.querySelector('.editor-plan-fit');
+          const cs = getComputedStyle(el);
+          return { radius: cs.borderTopLeftRadius, hasClock: Boolean(el.querySelector('i')),
+                   text: el.textContent.replace(/\\s+/g, ' ').trim() };
+        }"""
+    )
+    assert shape["hasClock"], "nothing on the meter says the number is a duration"
+    assert shape["radius"] != "999px", (
+        f"still shaped like a button beside a real one: radius {shape['radius']}"
+    )
+    assert "min" in shape["text"], shape["text"]

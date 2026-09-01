@@ -213,3 +213,43 @@ def test_a_merged_clipboard_names_every_session_in_it(page, local_server):
     assert "Group Strength & Conditioning" in name and "Rehab Hour" in name, (
         f"a merged clipboard must name every session it covers: {name!r}"
     )
+
+
+def test_the_editor_second_line_is_set_like_the_clipboard_second_line(
+    page, local_server
+):
+    """Reported twice 2026-08-31/09-01 (Simon): "edit scrin title is not unified with clipboard
+    title", then "edit screen still has session name in the form of a tag (button?) instead of
+    normal title like the clipboard".
+
+    Measured, the session's NAME was already identical in both — 15px, weight 600, no background.
+    What made the editor look like a different app was the second line: the clipboard sets day, time
+    and gym as plain muted text, and the editor wore a 10px uppercase pill with a border, a 10px
+    radius and a red tint for the same day and time.
+
+    Nothing was lost by dropping the pill. Its colour said "this session is running now", and the
+    word it wrapped already says that: `Today` and `Yesterday` are the information, and a colour is
+    the one part of it a colour-blind trainer cannot read anyway."""
+    _mount(page, local_server)
+    page.click("#btn-session-menu")
+    page.click("#btn-edit-plan")
+    page.wait_for_selector(".clipboard-editor", timeout=5000)
+    page.wait_for_timeout(400)
+
+    assert page.locator(".edit-mode-chip").count() == 0, (
+        "the editor's title still wears a status pill the clipboard's does not"
+    )
+    style = page.evaluate(
+        """() => {
+          const el = document.querySelector('#session-title-text .clipboard-title-when');
+          if (!el) return null;
+          const cs = getComputedStyle(el);
+          return { fontSize: cs.fontSize, textTransform: cs.textTransform,
+                   background: cs.backgroundColor, radius: cs.borderTopLeftRadius };
+        }"""
+    )
+    assert style, "the editor's second line does not use the clipboard's own when-line"
+    assert style["fontSize"] == "12px", style
+    assert style["textTransform"] == "none", style
+    assert style["radius"] == "0px", style
+    assert "0)" in style["background"], f"still tinted like a pill: {style}"
