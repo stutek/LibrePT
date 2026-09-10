@@ -4366,6 +4366,8 @@ because every entry is a salted SHA-256 of an opaque record id, a shared list de
 
 ### 40.2 A separate database, not a store-name prefix
 
+**Ruled 2026-09-10 (Simon):** *"ločeni hrambi"* — separate storage.
+
 **The prefix was considered and rejected** (Simon proposed it as the simpler build, with a guard in
 the star write). Three facts decide against it:
 
@@ -4442,16 +4444,25 @@ board. **Ruled:** *"Najbolje, da zaznava zastarelost in predlagava data reset (z
 se uporabnik strinja)"* — detect staleness and offer a reset, losing the sandbox's contents with the
 trainer's agreement.
 
-- The sandbox's `meta` store carries `seededAt`.
-- Stale at **7 days**, proposed: the seed spans roughly a week back and forward, which is exactly what
-  goes flat.
+**Ruled 2026-09-10 (Simon):** *"zastarelost naredi v primeru več kot 12 ur — vprašaj ob vklopu demo
+načina s cooldown timerjem 3 ure"* — stale after **12 hours**, asked when the sandbox is entered, and
+a declined offer is not repeated for **3 hours**.
+
+- The sandbox's `meta` store carries `seededAt`, and `staleOfferDeclinedAt` beside it.
+- **Stale at 12 hours.** Not the week the seed spans: what the demo is *for* is a live and an upcoming
+  session on today's board ([sessions.js](src/data/sessions.js)), and that is gone by the next
+  morning, long before the week's edges are. A trainer who opens the sandbox in the morning and again
+  the next day is asked, which is the intent.
+- **The cooldown is 3 hours**, held in the sandbox's own `meta`. It survives declining, which is the
+  case it exists for, and dies with the reset, which is the case where it means nothing.
 - Offered **on entry**, not at boot — at boot it is a question about a workspace the trainer is not in.
 - The reset is the first-entry path: delete the database, seed again.
 - The dialog says what is lost — *what you did in the sandbox goes* — never "your data will be
   refreshed".
 
-**Open:** whether a declined offer is repeated. Proposed: not again the same day, or it becomes a
-modal in front of every entry.
+Both numbers are testable exactly, because the browser tiers run on a frozen wall clock
+([tests/INDEX.md](tests/INDEX.md)): 11h59m does not ask, 12h01m does, and a decline followed by a
+re-entry two hours later stays quiet.
 
 ### 40.5 What the trainer sees
 
