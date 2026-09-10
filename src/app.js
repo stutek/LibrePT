@@ -16,6 +16,7 @@ import {
   renderActiveGroupBoard as renderActiveGroupBoardController,
   saveActiveSessionToCache as saveActiveSessionToCacheController,
   sessionFocusPath,
+  setActiveSession,
   setClipboardEditMode,
   startSessionTimer,
   startWorkoutSession as startWorkoutSessionController,
@@ -52,6 +53,7 @@ import { ISSUE_TRACKER_URL } from "./data/crashReport.js";
 import { driveSyncStatus, onSyncCountsChanged, primeAheadCache } from "./data/driveSyncService.js";
 import { clearDatabaseStores, listDatabaseStores } from "./data/indexedDb.js";
 import { recordRsvp } from "./data/inviteRecord.js";
+import { rememberRoute, rememberedRoute } from "./data/lastRoute.js";
 import { newRecordId } from "./data/recordId.js";
 import { sandboxStaleness } from "./data/sandboxStaleness.js";
 import { SESSION_INVITE, SESSION_RSVP, decodeSessionEvent } from "./data/sessionEventPayload.js";
@@ -754,13 +756,43 @@ function renderEverything() {
  * there is a worse answer than the dashboard.
  */
 async function switchToWorkspace(name) {
+  // Where they are NOW, stored against the workspace being left (TODO §40.3).
+  rememberRoute(window.location.pathname);
   await switchWorkspace(name);
   renderEverything();
   // The clocks do not stop: what was ticking underneath becomes the visible stack and the other way
   // round (TODO §40.11). Deliberately not a teardown — a rest period must survive the switch.
   appBoot.rebindTimers();
-  navigateToPath("/");
+  returnToLastView();
   if (isSandbox()) await offerFreshSandboxIfStale();
+}
+
+/**
+ * Put the trainer back where they were in the workspace they are entering (TODO §40.3).
+ *
+ * Ruled 2026-09-10: coming back means coming back to the VIEW — the live session, the client, the
+ * exercise in focus — not to the dashboard. Stepping out to look something up and having to find
+ * your session again is three taps on a gym floor with somebody waiting.
+ *
+ * The order is boot's order, and it has to be: the URL is set WITHOUT rendering, then the live
+ * session is recovered — recovery reads the address bar to know whether the trainer was in the
+ * editor and which row they had open — and only then is the view drawn. Rendering first would paint
+ * a clipboard with no session in it.
+ *
+ * A remembered path is only used if the router still recognises it. What it names may be gone: a
+ * client deleted while the trainer was in the other workspace, or a sandbox rebuilt under its own
+ * remembered route. The dashboard is the answer when there is no better one.
+ */
+function returnToLastView() {
+  const remembered = rememberedRoute();
+  const target = remembered && resolveRoute(remembered) ? toRoute(remembered) : "/";
+  replaceRoute(target);
+  // The live session belongs to the workspace too — its cache key carries the suffix — so the one
+  // held in memory has to go before the entering workspace's is read. Without this, stepping into
+  // the sandbox keeps the trainer's real session on the clipboard bar.
+  setActiveSession(null);
+  recoverActiveSession();
+  handlePathChange();
 }
 
 // Asked on ENTRY, never at boot: at boot it is a question about a workspace the trainer is not in

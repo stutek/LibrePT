@@ -133,3 +133,46 @@ def test_a_sandbox_older_than_twelve_hours_offers_a_fresh_one(page, local_server
     _switch(page, "working")
     _switch(page, "sandbox")
     assert dialog.is_hidden(), "a declined offer must stay declined for the cooldown"
+
+
+@pytest.mark.clean_start
+def test_coming_back_returns_to_the_view_you_left(page, local_server):
+    """§40.3, ruled 2026-09-10: stepping out to look something up and coming back to the dashboard
+    means finding your session, your client and your exercise again — three taps on a gym floor with
+    somebody waiting. The route is remembered per workspace, and the live session is recovered for
+    the workspace being entered so the clipboard has something to draw."""
+    page.goto(f"{local_server}?init=demo_data_load&lang=en")
+    page.wait_for_selector(".session-card")
+
+    # Open a client's page — an ordinary view that names a record, which is what makes the return
+    # worth anything: the dashboard would have been reachable either way.
+    client_id = page.evaluate(
+        """async () => {
+            const store = await import(new URL('data/stateStore.js', document.baseURI).href);
+            return store.getState().clients[0].id;
+        }"""
+    )
+    # Through the router, not by writing a path by hand: an invented path is refused by the very
+    # check this test is about, and the failure then looks like the feature rather than the test.
+    page.evaluate(
+        """async (id) => {
+            const router = await import(new URL('controllers/routerController.js', document.baseURI).href);
+            router.navigateToPath(`/clients/${id}`);
+        }""",
+        client_id,
+    )
+    page.wait_for_timeout(300)
+    left_on = page.url
+    assert f"/clients/{client_id}" in left_on, left_on
+
+    _switch(page, "sandbox")
+    assert page.url != left_on, (
+        "the sandbox does not open on the client page of another database"
+    )
+
+    _switch(page, "working")
+    # The path, not the whole address: the deep-link query the test booted with is not part of what
+    # is being remembered, and carrying it back would be remembering the wrong thing.
+    assert f"/clients/{client_id}" in page.url, (
+        f"came back to {page.url}, left from {left_on}"
+    )

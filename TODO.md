@@ -4653,8 +4653,16 @@ that gets found by accident.
 
 **Behaviour**
 
-7. **The switch resets the route to the dashboard.** A path like `/client/<id>` names a record the
-   other workspace does not have.
+7. ~~The switch resets the route to the dashboard.~~ **Overruled 2026-09-10 (Simon):** *"vrnitev,
+   bi bila idelna, da se vrne na prejšnji view (primer clipboard, uporabnik in aktivna vaja)"* —
+   coming back returns to the view that was left, the live session included
+   ([lastRoute.js](src/data/lastRoute.js)). Stepping out to look something up and landing on the
+   dashboard costs three taps to find the session, the client and the exercise again, on a gym floor
+   with somebody waiting. A remembered path is used only if the router still recognises it: what it
+   names may have been deleted in the meantime, or rebuilt under a sandbox reset. The live session is
+   re-recovered for the workspace being entered, and the one held in memory is dropped first — its
+   cache key is per workspace, so without that the sandbox would keep showing the trainer's real
+   session on the clipboard bar.
 8. **A restore lands in the workspace the trainer is in**, and only sandbox → working is refused.
 9. **The staleness offer is a real dialog, not a `confirm()`**, and dismissing it counts as declining
    — a question closed is not a question answered yes, so the cooldown starts either way.
