@@ -4690,16 +4690,28 @@ participants one at a time on a screen with room for three.
 the width. Which clients are shown defaults to **the last ones viewed**, or at the start of a session
 to **the first three from the client list**.
 
+**Ruled 2026-09-10 (Simon):** *"to velja za clipboard view"* — this is the **clipboard**, the live
+session ([uc1_gym_floor_clipboard.md](use_cases/uc1_gym_floor_clipboard.md)), and nothing else. Not
+the plan editor, not the deck, not the client directory. That narrows it to the one screen a trainer
+is actually standing in front of a group with, and it is the screen the request came from: the
+participant switcher exists because only one client fits.
+
+So a **column is one participant's live card**, and the columns are the participants of the session
+already running. What the request calls "defaulting to the last viewed clients, or the first three
+from the client list" is then about which participants are on screen when there are more than fit —
+not about picking clients from a directory.
+
 Open before any code:
 
-- **What a column IS.** The clipboard's live card, or the plan editor, or either depending on where
-  the trainer is? The live session already has a participant switcher, so the question is whether
-  this replaces that switch or sits beside it.
+- **What the participant switcher becomes.** With three cards on screen it stops being the way to
+  reach a client and becomes the way to reach the FOURTH — a different control with the same glyph
+  is worse than either. Does it page the columns, or select which participants occupy them?
 - **How many columns, and who decides.** Three is the number in the request; the width available
   varies from an iPad in portrait to a desk monitor. A breakpoint rule, or a count the trainer sets?
-- **What the current one-column layout becomes.** Every view is built at `--app-max-width` (480px)
-  and centred. Widening is not a stylesheet switch: the deck, the header and the clipboard bar all
-  assume one column.
+- **What the clipboard's own one-column layout becomes.** It is built at `--app-max-width` (480px)
+  and centred, and the clipboard bar, the timer stack and the edit mode's drag-reorder all assume one
+  card is in focus. Widening is not a stylesheet switch. Everything OUTSIDE the clipboard keeps its
+  single column under this ruling, which is the part that makes it affordable.
 - **Whether a column is independently scrolled and independently focused**, and what "the in-focus
   card" then means for the routes, which currently name one session and one client.
 - **The gym floor stays the judge.** A tablet on a rack in front of a group is the case that earns
