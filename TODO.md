@@ -4709,7 +4709,30 @@ already running. What the request calls "defaulting to the last viewed clients, 
 from the client list" is then about which participants are on screen when there are more than fit —
 not about picking clients from a directory.
 
-Open before any code:
+**Wanted 2026-09-10 (Simon), and NOT yet decided:** *"tudi home page, si želim, da izkoristi celoten
+zaslonski estate, a še ne vem, kateri pogledi so smiselni prikazati paralelno. Morda najprej seje,
+nato stranke, nato načrti za prilagoditve?"* — the home screen should use the whole width too. Which
+views sit side by side is explicitly open; the proposal to explore is **sessions, then clients, then
+plans awaiting adjustment**.
+
+That is a second layout, not the same one: the clipboard shows the SAME view several times, once per
+participant, while the home screen would show DIFFERENT views at once. They share only the question
+of what to do with the empty space, so they are worth building in that order — the clipboard first,
+where the columns are alike and the rule for filling them is known.
+
+What decides the home screen's columns, before any code:
+
+- **What each column is FOR at that moment.** Sessions is what the trainer opens the app to see.
+  Clients and pending adjustments are things they go looking for. A column that is never looked at is
+  worse than empty space, because it makes the one that matters narrower.
+- **Whether a column is a view or a summary.** The client directory is a searchable grid; three
+  columns of it is not three times as useful. A column may need to be a shorter form of the view it
+  names rather than the view itself.
+- **Whether the columns are fixed or chosen**, and if chosen, whether that choice is worth a setting
+  — the app has none today, deliberately.
+- **What the bottom navigation becomes** when the views it switches between are all on screen.
+
+Open before any code on the clipboard:
 
 - **What the participant switcher becomes.** With three cards on screen it stops being the way to
   reach a client and becomes the way to reach the FOURTH — a different control with the same glyph
