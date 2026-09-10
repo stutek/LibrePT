@@ -327,7 +327,7 @@ One name per thing. Where the app already has a word, that word wins.
 | :-- | :-- | :-- | :-- |
 | the guided run itself | guided walkthrough | **vodeni ogled** | `walkthrough_title` |
 | the learning workspace | sandbox | **peskovnik** | [data/workspace.js](../src/data/workspace.js), [TODO §40](../TODO.md) |
-| a booked hour with clients | session | **trening** — proposed, replacing *seja* | `btn_start_group_session` |
+| a booked hour with clients | session | **trening** — ruled 2026-09-10, replacing *seja* | `btn_start_group_session` |
 | its slot in the diary | — | **termin**, and only where the slot is the point | `schedule_conflict_confirm` |
 | the person training | client | **stranka** | `btn_invite_client` |
 | getting a new client in | invitation | **povabilo** | `intake_invite_title` |
@@ -338,7 +338,9 @@ the demo is where they became visible.
 
 - **Session is three words.** `sl.js` has 53 strings using *sej-*, 18 using *trening*, 6 using
   *termin* — and `schedule_conflict_confirm` uses two of them in one sentence: *"Ta **termin** se prekriva
-  z nečim, kar že imate. Želite **sejo** vseeno razporediti?"*
+  z nečim, kar že imate. Želite **sejo** vseeno razporediti?"* **Ruled 2026-09-10: trening.** It is
+  what a trainer and a client say to each other; *seja* is first a meeting (*seja odbora*) and only
+  a session by calque. *Termin* survives where the diary slot itself is the point.
 - **The guided run is three words in one panel.** `walkthrough_title` says *Vodeni ogled*,
   `walkthrough_exit` says *Končaj demo*, `walkthrough_collapse` says *kartico demota*.
 - **The client list is two words twice over.** `clients_title` says *Imenik strank*,
