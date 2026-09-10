@@ -327,16 +327,26 @@ One name per thing. Where the app already has a word, that word wins.
 | :-- | :-- | :-- | :-- |
 | the guided run itself | guided walkthrough | **vodeni ogled** | `walkthrough_title` |
 | the learning workspace | sandbox | **peskovnik** | [data/workspace.js](../src/data/workspace.js), [TODO §40](../TODO.md) |
-| a booked hour with clients | session | **seja** | `walkthrough_finished`, `btn_start_group_session` |
+| a booked hour with clients | session | **trening** — proposed, replacing *seja* | `btn_start_group_session` |
+| its slot in the diary | — | **termin**, and only where the slot is the point | `schedule_conflict_confirm` |
 | the person training | client | **stranka** | `btn_invite_client` |
 | getting a new client in | invitation | **povabilo** | `intake_invite_title` |
+| the whole process of taking one on | onboarding | **uvajanje** — proposed | nothing says it yet |
 
-**Three inconsistencies this table exposes, all of them already shipped:**
+**Five inconsistencies this table exposes, all of them already shipped.** They are not demo faults;
+the demo is where they became visible.
 
-- `walkthrough_exit` says **"Končaj demo"** and `walkthrough_collapse` says **"kartico demota"**,
-  while `walkthrough_title` says **"Vodeni ogled"**. Three words — *demo*, *demot*, *vodeni ogled* —
-  for one thing, in one panel.
-- `demo_cleanup_sessions` says **"vzorčnih terminov"**; everywhere else a session is a **seja**.
+- **Session is three words.** `sl.js` has 53 strings using *sej-*, 18 using *trening*, 6 using
+  *termin* — and `schedule_conflict_confirm` uses two of them in one sentence: *"Ta **termin** se prekriva
+  z nečim, kar že imate. Želite **sejo** vseeno razporediti?"*
+- **The guided run is three words in one panel.** `walkthrough_title` says *Vodeni ogled*,
+  `walkthrough_exit` says *Končaj demo*, `walkthrough_collapse` says *kartico demota*.
+- **The client list is two words twice over.** `clients_title` says *Imenik strank*,
+  `menu_clients_register` says *Seznam strank (klientov)* — *imenik* against *seznam*, *stranka*
+  against *klient*.
+- **The app addresses the trainer two ways.** 41 strings use *ti* (*tvoje stranke*), 12 use *vi*
+  (*kar že imate*, *Želite*, *vaše podatke*). The formal ones are not only the legal text: the sync
+  panel, the overlap warning and the start-time question are all ordinary screens.
 - **"prijava"** must not be used for a client filling in their own details. In Slovenian software it
   reads as *login*. The app's own word is **povabilo**.
 
@@ -400,12 +410,81 @@ One name per thing. Where the app already has a word, that word wins.
   right corner and try the app unguided; the bar it leaves behind carries **✕**, which ends the
   walkthrough.
 
+### Ruled on card 1 (2026-09-10)
+
+- **It is a NEW card, in front of the chapter.** "Trije prijatelji pridejo" keeps
+  `story_chapter_arrive` and stays where it is; the welcome card gets its own keys and its own step.
+  The story becomes 50 steps.
+- **The deletion offer is gone.** The sandbox sentence replaces it: there is nothing to clear,
+  because the demo cannot reach the trainer's records at all.
+- **Leaving the sandbox costs nothing and ends nothing.** *"switching to production mode has to be
+  frictionless, to not obstruct work, demo state stays recorded for later resume (maybe never)"*.
+  So the walkthrough is **parked by the switch, never stopped by it**, and its position is kept.
+  This answers what was open here: a card MAY now promise that it carries on where you left off.
+  `resumeWalkthroughAt` already exists ([domain/walkthrough.js](../src/domain/walkthrough.js)) and
+  the story's chapter crossings already pass `?step=`; what is missing is saving the step id. It is
+  per-workspace state, so it belongs in [TODO §40.1](../TODO.md)'s meta, not beside it.
+
 ### Still open on card 1
 
-- The pause-by-leaving-the-sandbox sentence, until finding 2 has a rule.
-- Whether the card gets a third button — *Not now* — so stopping before the story starts is one tap
-  rather than ▾ then ✕.
-- Whether stopping remembers the step. `resumeWalkthroughAt` exists
-  ([domain/walkthrough.js](../src/domain/walkthrough.js)) and the story's own chapter crossings
-  already pass `?step=`; nothing saves the step id when the run is ended. Until it does, no card may
-  promise that it carries on where you left off.
+- **Whether the ✕ goes away entirely**, leaving only ▾. See the argument below.
+
+## Should the ✕ go, leaving only ▾?
+
+**Yes — but only after [TODO §40](../TODO.md) ships, and one more string has to change with it.**
+
+The ✕ was worth having while ending the run was the only way to get the guide off the screen and
+the demo data was mixed in with real records. Both of those facts have now gone:
+
+- **▾ and ✕ do the same thing, and ▾ does it better.** Park keeps the position; end throws it away.
+  Once the position is kept across a workspace switch, throwing it away is not a second thing a
+  trainer wants — it is the same thing with the memory deleted.
+- **The bar belongs to the sandbox, so leaving the sandbox is what dismisses it.** That is the
+  frictionless switch, already ruled. Nothing has to be built for it beyond §40 itself.
+- It is one fewer control on a bar read one-handed, and it removes the glyph that everywhere else in
+  this app means *close this box* from the one place where it meant *end this run* (the distinction
+  [TODO §38.16](../TODO.md) had to introduce in the first place).
+
+**What it costs, and this is the part that must not be skipped:**
+
+- **Until §40 ships there is no switch, so removing the ✕ first leaves no way out at all.** Order
+  matters: §40, then the ✕.
+- `walkthrough_off_track` still offers **"Ustavi demo"** (`walkthrough_leave`) when the trainer has
+  wandered off. If ending is gone from the bar, that button must become *park*, or the app has
+  removed a control and kept its twin two screens away.
+- `walkthrough_exit` and its icon button are referenced by the walkthrough tests; they go in the same
+  change, not after it.
+
+## The two words the maintainer asked about
+
+### "vodeni ogled" or "voden prikaz"?
+
+**Keep "vodeni ogled".** Two reasons, and the second is the deciding one.
+
+1. Nothing is demonstrated to the trainer — **they do the taps themselves**, and the step advances
+   because they did it. *Prikaz* claims the opposite.
+2. The panel already has a button called **"Pokaži mi"**. A *prikaz* containing a *pokaži mi* button
+   asks the reader what the rest of it was, if not showing.
+
+There is no second, automatic mode to reserve *prikaz* for: the auto-playing tour is gone, and the
+pointer now only runs one step at a time when *Pokaži mi* is pressed
+([walkthroughOverlay.js](../src/modules/demo/walkthroughOverlay.js)).
+
+### A Slovenian word for "onboarding"
+
+**Proposed: "uvajanje"** — for the whole process of taking a new client on, from the invitation to
+their first session.
+
+| candidate | what it actually says | verdict |
+| :-- | :-- | :-- |
+| **uvajanje** | inducting someone, the whole run-up | **proposed** — the only one that covers the process rather than one act in it |
+| vpis | enrolment; what a gym says at the counter | good and familiar, but it names the moment they are entered, not the run-up |
+| sprejem | admission — the trainer reading the file and deciding | accurate for exactly one step of this flow, and that step already has a screen |
+| prijava | login | rejected |
+
+**Card 1 does not need the word.** "od povabila do izvedbe" says the same thing in the story's own
+vocabulary, and the shorter card is the better card. The word is needed for headings and the backlog.
+
+**This one is a guess about your trade, not about the language** — *uvajanje* is what Slovenian
+usage supports, but what personal trainers say to each other is something you know and I do not.
+If they say *vpis*, that wins.

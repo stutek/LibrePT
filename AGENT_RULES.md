@@ -56,6 +56,8 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
 
 - Evaluate what they bring in a sentence or two — scope, what is missing, whether the effort fits —
   then proceed. Raise what they cannot see from where they sit before being asked.
+- **Text they hand over is a draft, not a quotation.** Fix its spelling, its terms and its
+  inconsistencies rather than transcribing them, and say what you changed.
 - Answer a question; never record it as a decision, and never return with a plan for one they have
   already made.
 - Read a message for ALL of its items before acting on any, and name them back.
