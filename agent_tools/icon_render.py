@@ -63,6 +63,11 @@ BACKGROUND = "#09090b"
 # frame. The crop is measured off the master's green pixels rather than hardcoded, so it follows the
 # artwork if the mark is redrawn.
 #
+# The crop alone is not enough: the master's whistle lies on the clipboard's opaque WHITE page, so
+# cropping to it carried that page along and the browser tab showed a white tile with a whistle in
+# it. So the favicon render also knocks the page out (`knock_out_page`), leaving the whistle on
+# transparency — which is what lets the tab bar's own colour, light or dark, show through.
+#
 # The HEADER mark is the full clipboard, and the crop is exactly why it cannot be the whistle: the
 # master's whistle sits on the clipboard's opaque white page, so cropping to it carries that page
 # along as a white plate. In the header that plate reads as a white tile on every theme AND clips
@@ -154,11 +159,56 @@ MEASURE_SCRIPT = """
 """
 
 RENDER_SCRIPT = """
-([dataUri, size, scale, background, rect]) => new Promise((resolve, reject) => {
+([dataUri, size, scale, background, rect, knockOutPage]) => new Promise((resolve, reject) => {
   const img = new Image();
   img.onerror = () => reject(new Error('master did not decode'));
   img.onload = () => {
     const [sx, sy, sw, sh] = rect ?? [0, 0, img.width, img.height];
+
+    // The source the final draw reads from. Normally the master itself; when the page is knocked
+    // out, a scratch canvas holding the crop with its white backing removed.
+    let source = img, srcX = sx, srcY = sy;
+    if (knockOutPage) {
+      const scratch = document.createElement('canvas');
+      scratch.width = sw; scratch.height = sh;
+      const scratchCtx = scratch.getContext('2d', { willReadFrequently: true });
+      scratchCtx.drawImage(img, sx, sy, sw, sh, 0, 0, sw, sh);
+      const image = scratchCtx.getImageData(0, 0, sw, sh);
+      const data = image.data;
+
+      // Flood fill inwards from the crop's border, eating the page. The artwork's black keyline is
+      // a closed outline, so the fill stops at it and never reaches the white highlights INSIDE
+      // the whistle. A pixel is page if it is near-white or already transparent; pixels part way
+      // down the keyline's antialiasing are made partly transparent and do not spread the fill,
+      // which is what keeps the rendered edge smooth instead of jagged.
+      const PAGE = 235, KEYLINE = 120;
+      const luma = (i) => 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+      const seen = new Uint8Array(sw * sh);
+      const queue = [];
+      for (let x = 0; x < sw; x++) { queue.push(x, x + (sh - 1) * sw); }
+      for (let y = 0; y < sh; y++) { queue.push(y * sw, sw - 1 + y * sw); }
+      while (queue.length) {
+        const p = queue.pop();
+        if (seen[p]) continue;
+        seen[p] = 1;
+        const i = p * 4;
+        const light = data[i + 3] < 128 ? PAGE : luma(i);
+        if (light < KEYLINE) continue;                       // the keyline: the fill stops here
+        if (light < PAGE) {                                  // its antialiased skirt: fade, no spread
+          data[i + 3] = Math.round(data[i + 3] * (PAGE - light) / (PAGE - KEYLINE));
+          continue;
+        }
+        data[i + 3] = 0;
+        const x = p % sw, y = (p - x) / sw;
+        if (x > 0) queue.push(p - 1);
+        if (x < sw - 1) queue.push(p + 1);
+        if (y > 0) queue.push(p - sw);
+        if (y < sh - 1) queue.push(p + sw);
+      }
+      scratchCtx.putImageData(image, 0, 0);
+      source = scratch; srcX = 0; srcY = 0;
+    }
+
     const canvas = document.createElement('canvas');
     canvas.width = size; canvas.height = size;
     const ctx = canvas.getContext('2d');
@@ -171,7 +221,7 @@ RENDER_SCRIPT = """
     const drawW = sw / longEdge * size * scale;
     const drawH = sh / longEdge * size * scale;
     ctx.imageSmoothingQuality = 'high';
-    ctx.drawImage(img, sx, sy, sw, sh, (size - drawW) / 2, (size - drawH) / 2, drawW, drawH);
+    ctx.drawImage(source, srcX, srcY, sw, sh, (size - drawW) / 2, (size - drawH) / 2, drawW, drawH);
     resolve(canvas.toDataURL('image/png'));
   };
   img.src = dataUri;
@@ -216,10 +266,17 @@ def measure_master(master_png):
 
 
 def render(
-    master_png, size, purpose, aspect_ratio, source_rect=None, background=BACKGROUND
+    master_png,
+    size,
+    purpose,
+    aspect_ratio,
+    source_rect=None,
+    background=BACKGROUND,
+    knock_out_page=False,
 ):
     """PNG bytes: the master artwork (or `source_rect` of it) centred at size×size, on `background`
-    — or on transparency when `background` is None."""
+    — or on transparency when `background` is None. With `knock_out_page`, the white clipboard page
+    the crop sits on is removed first, leaving the whistle alone on transparency."""
     from playwright.sync_api import sync_playwright
 
     scale = ANY_SCALE if purpose == "any" else _maskable_scale(aspect_ratio)
@@ -229,7 +286,14 @@ def render(
         page.set_content("<html><body></body></html>")
         result = page.evaluate(
             RENDER_SCRIPT,
-            [_data_uri(master_png), size, scale, background, source_rect],
+            [
+                _data_uri(master_png),
+                size,
+                scale,
+                background,
+                source_rect,
+                knock_out_page,
+            ],
         )
         browser.close()
     return base64.b64decode(result.split(",", 1)[1])
@@ -262,13 +326,15 @@ def main(argv=None):
         destination = SRC / relative_src
         entry = (size, relative_src, purpose)
         in_app = entry in DIRECT_RENDERS
+        cropped_to_whistle = entry in WHISTLE_CROP_RENDERS
         png = render(
             master_png,
             size,
             purpose,
             aspect_ratio,
-            source_rect=whistle_rect if entry in WHISTLE_CROP_RENDERS else None,
+            source_rect=whistle_rect if cropped_to_whistle else None,
             background=None if in_app else BACKGROUND,
+            knock_out_page=cropped_to_whistle,
         )
         if args.check:
             if not destination.exists() or destination.read_bytes() != png:

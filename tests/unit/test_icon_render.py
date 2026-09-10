@@ -90,13 +90,35 @@ def test_master_artwork_is_not_inside_the_shipped_tree():
     assert icon_render.SRC not in icon_render.MASTER.parents
 
 
-def _top_left_pixel_alpha(png_path):
-    """Alpha of the top-left pixel of an 8-bit RGBA PNG, decoding just the first scanline.
+def _predictor(filter_type, left, up, up_left):
+    """The value a PNG row filter predicted for one byte, from its already-decoded neighbours."""
+    if filter_type == 0:
+        return 0
+    if filter_type == 1:
+        return left
+    if filter_type == 2:
+        return up
+    if filter_type == 3:
+        return (left + up) // 2
+    if filter_type == 4:  # Paeth, ties going to left, then up
+        estimate = left + up - up_left
+        to_left, to_up, to_up_left = (
+            abs(estimate - left),
+            abs(estimate - up),
+            abs(estimate - up_left),
+        )
+        if to_left <= to_up and to_left <= to_up_left:
+            return left
+        return up if to_up <= to_up_left else up_left
+    raise AssertionError(f"unknown PNG filter type {filter_type}")
+
+
+def _decode_rgba(png_path):
+    """(width, height, pixels) for an 8-bit RGBA PNG, `pixels` being the raw RGBA bytes.
 
     Hand-rolled because this venv has no Pillow (see agent_tools/icon_render.py on why the renderer
-    uses Chromium rather than adding an imaging dependency), and stdlib zlib is all it takes: row 0
-    is enough for a corner, and every filter type reduces to its own bytes there because the
-    "previous row" a filter references is defined as zeros for the first line."""
+    uses Chromium rather than adding an imaging dependency); stdlib zlib plus the five PNG row
+    filters is all it takes."""
     import struct
     import zlib
 
@@ -116,22 +138,29 @@ def _top_left_pixel_alpha(png_path):
             break
         offset += 12 + length
 
-    _, _, bit_depth, colour_type, _, _, interlace = header
+    width, height, bit_depth, colour_type, _, _, interlace = header
     assert (bit_depth, colour_type, interlace) == (8, 6, 0), (
         f"{png_path}: expected non-interlaced 8-bit RGBA, got {header}"
     )
 
-    row = zlib.decompress(idat)[:5]
-    filter_type, pixel = row[0], list(row[1:5])
-    if filter_type in (
-        1,
-        3,
-        4,
-    ):  # Sub/Average/Paeth: left and up neighbours are zero at (0,0)
-        pass
-    elif filter_type not in (0, 2):  # None/Up: Up's previous row is zero
-        raise AssertionError(f"{png_path}: unknown PNG filter type {filter_type}")
-    return pixel[3]
+    stride = width * 4
+    filtered = zlib.decompress(idat)
+    pixels = bytearray(stride * height)
+    for y in range(height):
+        filter_type = filtered[y * (stride + 1)]
+        row = filtered[y * (stride + 1) + 1 : (y + 1) * (stride + 1)]
+        for x in range(stride):
+            left = pixels[y * stride + x - 4] if x >= 4 else 0
+            up = pixels[(y - 1) * stride + x] if y >= 1 else 0
+            up_left = pixels[(y - 1) * stride + x - 4] if (y >= 1 and x >= 4) else 0
+            predicted = _predictor(filter_type, left, up, up_left)
+            pixels[y * stride + x] = (row[x] + predicted) & 0xFF
+    return width, height, bytes(pixels)
+
+
+def _top_left_pixel_alpha(png_path):
+    """Alpha of the top-left pixel of an 8-bit RGBA PNG."""
+    return _decode_rgba(png_path)[2][3]
 
 
 def test_launcher_icons_are_opaque_and_in_app_marks_are_transparent(src_dir):
@@ -153,3 +182,24 @@ def test_launcher_icons_are_opaque_and_in_app_marks_are_transparent(src_dir):
         assert _top_left_pixel_alpha(src_dir / relative_src) == 0, (
             f"src/{relative_src} is drawn on a themed app surface and must be transparent"
         )
+
+
+def test_the_favicon_carries_no_white_plate(src_dir):
+    """The favicon crops to the whistle, and in the master the whistle lies on the clipboard's
+    opaque WHITE page. Without knocking that page out the browser tab showed a white tile with a
+    whistle on it — a transparent CORNER (the test above) does not catch it, because the plate is
+    in the middle. The whistle's own artwork is emerald and near-black, so any large opaque light
+    area is the page coming back."""
+    _, relative_src, _ = icon_render.FAVICON
+    width, height, pixels = _decode_rgba(src_dir / relative_src)
+
+    light = 0
+    for i in range(0, len(pixels), 4):
+        red, green, blue, alpha = pixels[i : i + 4]
+        luma = 0.299 * red + 0.587 * green + 0.114 * blue
+        if alpha > 200 and luma > 200:
+            light += 1
+    assert light <= width * height * 0.02, (
+        f"src/{relative_src}: {light} of {width * height} pixels are opaque and near-white — the "
+        "clipboard page is showing through the crop again"
+    )
