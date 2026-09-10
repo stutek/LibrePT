@@ -16,6 +16,7 @@
 //   onRerender()   // re-render the whole board (past-card toggle / circuit save)
 // }
 
+import { clipboardCardsExpanded } from "../../data/displayPrefs.js";
 import { newRecordId } from "../../data/recordId.js";
 import { formatMetricValue, usesLoad } from "../../domain/exerciseModality.js";
 import { formatLoad, formatReps } from "../../domain/repsAndLoad.js";
@@ -259,10 +260,10 @@ export function renderExerciseDeck(deckContainer, deps) {
   // collapses too, so exactly one card is ever expanded (the active-exercise pointer is
   // untouched, so it re-expands the moment the past card is closed).
   const pastExpanded = !!activeSession.expandedPastId;
-  // Expand ALL, asked for by a trainer who could not see the plan at a glance: every card
-  // shows what the focused one shows, and none of them ACTS like it (deckCard.js). Read off the
-  // session, so it rides the session cache and survives a reload with everything else.
-  const expandAll = !!activeSession.expandAll;
+  // Expand ALL, asked for by a trainer who could not see the plan at a glance: every card shows
+  // what the focused one shows, and none of them ACTS like it (deckCard.js). A SETTING rather than
+  // session state (TODO §42.4) — someone who wants the whole plan open wants it open tonight too.
+  const expandAll = clipboardCardsExpanded();
 
   const formatDateStr = (dateIso) => {
     if (!dateIso) return "";

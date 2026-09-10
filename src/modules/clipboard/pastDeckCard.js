@@ -48,12 +48,15 @@ export class PastDeckCard extends DeckCard {
         </div>`;
       })
       .join("");
+    // The SAME head row the collapsed card draws (TODO §42.5): tag, name, and the control at the
+    // end. Reported by a trainer — opening this card moved its Past tag onto a line of its own above
+    // the name, so one card read as two different designs depending on how open it was.
     card.innerHTML = `
-        <div class="deck-card-top">
+        <div class="deck-card-compact">
           <span class="badge deck-card-status deck-card-status-past">Past: ${escapeHTML(item.sessionDate)}</span>
+          <span class="deck-card-name deck-card-name-inline">${escapeHTML(item.name)}</span>
           <i class="fa-solid fa-chevron-up deck-history-collapse" aria-hidden="true"></i>
         </div>
-        <h5 class="deck-card-name">${escapeHTML(item.name)}</h5>
         <div class="deck-history-sets">${setRows}</div>
         <div class="deck-history-meta">${escapeHTML(item.routineName || "Completed Session")}</div>
       `;

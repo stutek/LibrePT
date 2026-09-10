@@ -39,7 +39,15 @@ export const VERSION_SCOPED_KEYS = [
 // Preferences and consents belong to the PERSON, not the build: re-accepting the terms or losing
 // the chosen theme on an update would be a bug, not isolation. By the same reasoning they belong to
 // no workspace either, so these are read and written unscoped and are shared by both.
-export const ORIGIN_GLOBAL_KEYS = ["librept_terms_accepted", "librept-theme", "librept_lang"];
+export const ORIGIN_GLOBAL_KEYS = [
+  "librept_terms_accepted",
+  "librept-theme",
+  "librept_lang",
+  // How much of a card the trainer wants to see (data/displayPrefs.js, TODO §42.4) — the same
+  // kind of fact as the theme: about the person, not about either workspace's data.
+  "librept_expand_sessions",
+  "librept_expand_clipboard",
+];
 
 export function readVersionScoped(baseKey) {
   return localStorage.getItem(scopedKey(baseKey));

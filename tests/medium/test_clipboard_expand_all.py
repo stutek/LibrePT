@@ -126,3 +126,38 @@ def test_the_menu_item_says_which_direction_it_goes(page, local_server):
     after = page.locator("#btn-expand-all-text").inner_text()
 
     assert before != after, f"the label stayed {before!r} in both states"
+
+
+# The tag's place is the report that produced §42.5: opening a card moved its status tag from the end
+# of the title row onto a line of its own above the name, so one card read as two designs. What is
+# asserted is the INVARIANT — the tag is inside the same head row as the name, in every state — not
+# the pixel position, which is the stylesheet's to move.
+TAG_ROW = """() => {
+  const cards = [...document.querySelectorAll('#active-exercise-scroll-deck .exercise-deck-card')];
+  return cards.map((card) => {
+    const tag = card.querySelector('.deck-card-status');
+    const name = card.querySelector('.deck-card-name, .deck-card-name-inline');
+    return {
+      hasTag: !!tag,
+      sameRow: !!(tag && name && tag.parentElement === name.parentElement),
+    };
+  });
+}"""
+
+
+def test_the_status_tag_sits_in_the_title_row_however_open_the_card_is(
+    page, local_server
+):
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#active-exercise-scroll-deck .exercise-deck-card")
+
+    collapsed = page.evaluate(TAG_ROW)
+    _expand(page)
+    page.wait_for_selector("#active-exercise-scroll-deck .exercise-deck-card.expanded")
+    expanded = page.evaluate(TAG_ROW)
+
+    for state, cards in (("collapsed", collapsed), ("expanded", expanded)):
+        for card in cards:
+            if not card["hasTag"]:
+                continue
+            assert card["sameRow"], f"{state}: the tag left the title row — {card}"

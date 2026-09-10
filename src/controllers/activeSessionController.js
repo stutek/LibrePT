@@ -10,6 +10,7 @@
 // and the medium tests are all wired against this module's names, and the split moved the code, not
 // the seam.
 
+import { clipboardCardsExpanded, setClipboardCardsExpanded } from "../data/displayPrefs.js";
 import { newRecordId } from "../data/recordId.js";
 import {
   bindingFor,
@@ -307,17 +308,14 @@ function wireSessionMenuAndActions(t) {
     renderActiveGroupBoard();
   }
 
-  /** Open every card in the deck, or put them all back (TODO §42).
+  /** Open every card in the deck, or put them all back (TODO §42.4).
    *
-   * The flag lives on the session, so it rides the session cache and is still true after a reload —
-   * the same place `expandedPastId` already lives, for the same reason: it is a fact about how this
-   * session is being looked at, not a preference about the app.
+   * A SETTING, kept between sessions and between visits: it was first written onto the live session,
+   * which meant a trainer who wants the whole plan open had to ask again for every session they ran.
+   * It lives beside the theme, for the same reason the theme does — it is about the person.
    */
   function toggleExpandAll() {
-    const activeSession = getActiveSession();
-    if (!activeSession) return;
-    activeSession.expandAll = !activeSession.expandAll;
-    saveActiveSessionToCache();
+    setClipboardCardsExpanded(!clipboardCardsExpanded());
     renderActiveGroupBoard();
   }
 

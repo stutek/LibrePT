@@ -7,8 +7,12 @@
 //   t,
 //   activeRouteName,
 //   pushRoute,
-//   urlFor
+//   urlFor,
+//   rerenderSessions()   // redraw the day's cards after the expand-all setting changes
 // }
+
+import { sessionCardsExpanded, setSessionCardsExpanded } from "../../data/displayPrefs.js";
+import { resetSessionCardExpansions } from "./sessionCard.js";
 
 let deps = null;
 
@@ -127,6 +131,19 @@ export function renderSessionsTitleBar() {
     const jumpLabel = deps.t("jump_to_date");
     jumpBtn.title = jumpLabel;
     jumpBtn.setAttribute("aria-label", jumpLabel);
+  }
+
+  // One control, both directions, and the glyph says which way it goes — the same chevron pair the
+  // cards' own controls use, so the day control and the card control read as the same idea.
+  const expandBtn = document.getElementById("btn-sessions-expand");
+  if (expandBtn) {
+    const expanded = sessionCardsExpanded();
+    const label = deps.t(expanded ? "collapse_all" : "expand_all");
+    expandBtn.title = label;
+    expandBtn.setAttribute("aria-label", label);
+    expandBtn.setAttribute("aria-pressed", String(expanded));
+    const icon = expandBtn.querySelector("i");
+    if (icon) icon.className = `fa-solid fa-chevron-${expanded ? "up" : "down"}`;
   }
 }
 
@@ -318,6 +335,12 @@ export function renderSessionsDatePicker() {
     <button id="btn-sessions-jump" class="sessions-nav-arrow" type="button" aria-label="Jump to date" title="Jump to date">
       <i class="fa-solid fa-calendar-days"></i>
     </button>
+    <!-- How the day's cards open, kept between visits (TODO §42.4). Beside the day controls rather
+         than in the app menu: it is about what is on this screen, and a setting two taps from the
+         thing it changes is a setting nobody finds. -->
+    <button id="btn-sessions-expand" class="sessions-nav-arrow" type="button" data-i18n-label="expand_all">
+      <i class="fa-solid fa-chevron-down"></i>
+    </button>
     <input id="sessions-date-jump-input" class="sessions-date-jump-input" type="date" tabindex="-1" aria-hidden="true" />
   `;
 }
@@ -327,6 +350,15 @@ export function setupSessionsDayNav() {
 
   const todayBtn = document.getElementById("btn-sessions-today");
   if (todayBtn) todayBtn.addEventListener("click", () => focusSessionsColumn("today"));
+
+  document.getElementById("btn-sessions-expand")?.addEventListener("click", () => {
+    setSessionCardsExpanded(!sessionCardsExpanded());
+    // A fresh default keeps none of the per-card exceptions: yesterday's exceptions on top of a new
+    // default is neither answer to "how should these open".
+    resetSessionCardExpansions();
+    deps.rerenderSessions?.();
+    renderSessionsTitleBar();
+  });
 
   // Date-jump control ("scrub to an exact date" — TODO §7.3 item 8): the visible button opens the
   // native picker on the hidden input; choosing a date there scrolls the timeline straight to it.

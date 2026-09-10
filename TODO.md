@@ -5112,3 +5112,48 @@ The other two card shapes follow the same rule:
 also drop the card chrome — border, radius, shadow — and become a plain row in a list. That would
 save another ~10px per card and make the deck read as a table, which is what a trainer scanning a
 whole session is actually doing. It is also the point where it stops looking like the app.
+
+### 42.4 Expand all is a SETTING, and there are two of them
+
+**Ruled 2026-09-10 (Simon):** *"expand all cards should be a permanent setting, and should be
+reversable with collapse all cards (ločeni nastavitvi za termine in za klipboard kartice)"*.
+
+Two corrections to what §42.1 shipped, both now in ([displayPrefs.js](src/data/displayPrefs.js)):
+
+1. **It persists.** The flag was written onto the live session, so it died with that session — a
+   trainer who wants the whole plan open wants it open tonight as well. It sits beside the theme now:
+   plain unscoped `localStorage`, shared by both workspaces, because it is a fact about the PERSON
+   and not about either workspace's data (§40.1).
+2. **Two settings, not one.** The day's session cards and the clipboard's exercise cards are read in
+   different postures — scanning tomorrow at a desk wants every session card open, mid-set wants the
+   clipboard down to the card being worked. One switch would make each answer wrong half the time.
+
+Both default OFF: a preference that changes how the app looks before anybody asks for it is a
+surprise, not a default.
+
+**Where each control lives: beside the cards it changes.** The clipboard's is in the ⋯ session menu;
+the day's is beside Today and the date jump, wearing the same chevron pair the cards' own controls
+wear. A setting two taps away from the thing it changes is a setting nobody finds — which is the
+argument against the other candidate home, a "display" section in the ☰ app menu.
+
+**The per-card control still works in both directions.** A session card's chevron is now an EXCEPTION
+to the setting rather than a list of open cards, so it opens or closes whichever way the setting
+points. Exceptions are cleared when the setting itself flips: a fresh default with yesterday's
+exceptions on top is neither answer.
+
+### 42.5 One head row, however open the card is
+
+**Reported 2026-09-10 (Simon):** *"kartice imajo zanimiv past tag v naslovni vrstici, expanded card
+pa da past tag nad ime kartice, popravi, da ostane enak izgled expanded in collapsed"*.
+
+The collapsed row put the tag at the end of the title row; the expanded card put it on a line of its
+own above the name. One card read as two designs depending on how open it was — and on the past card,
+where the tag says which session the history came from, the tag moved furthest.
+
+Every card shape now draws the SAME head row in every state: number or icon, name, tag, and whatever
+control belongs at the end. The focused card's name grows so it is still readable at arm's length
+mid-set, but the row, the order and the tag's place do not move — that is what makes three states one
+design.
+
+It also takes the first of §42.3's savings: folding the top row into the name line is ~32px off every
+expanded card, which is what "expand all" spends its screen on.

@@ -22,8 +22,9 @@ export class RestDeckCard extends DeckCard {
     const { t, escapeHTML } = this.ctx;
     const item = this.item;
     card.innerHTML = `
-      <div class="deck-card-top">
+      <div class="deck-card-compact">
         <span class="deck-card-counter"><i class="fa-solid fa-hourglass-half"></i></span>
+        <span class="deck-card-name deck-card-name-inline">${t("rest_label")}</span>
         <span class="deck-card-top-right">
           ${
             // Only when it IS in focus. The badge used to be part of the template, which was true
@@ -36,7 +37,6 @@ export class RestDeckCard extends DeckCard {
           }
         </span>
       </div>
-      <h5 class="deck-card-name">${t("rest_label")}</h5>
       <div class="rest-card-duration">${escapeHTML(String(item.rest))}<span class="rest-card-duration-unit">s</span></div>
       <button type="button" class="btn primary-btn rest-card-start">
         <i class="fa-solid fa-stopwatch"></i> ${t("start_rest")}

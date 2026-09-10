@@ -540,6 +540,7 @@ async function init() {
     activeRouteName,
     pushRoute,
     urlFor,
+    rerenderSessions: renderSessions,
   });
 
   appBoot.bootSessionTitleBar({

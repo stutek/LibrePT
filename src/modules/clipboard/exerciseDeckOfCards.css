@@ -335,6 +335,13 @@
   margin: 0;
   font-size: 12px;
 }
+/* One head row for every state (TODO §42.5), so a card looks like itself however open it is. The
+   FOCUSED card still has to be read at arm's length mid-set, so its name grows — the row, the order
+   and the tag's place stay put, which is what makes the three states one design. */
+.exercise-deck-card.in-focus .deck-card-name-inline {
+  font-size: 14px;
+  font-weight: 700;
+}
 .deck-card-compact-target {
   font-family: var(--font-mono);
   font-size: 12px;

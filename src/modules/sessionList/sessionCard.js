@@ -6,6 +6,7 @@
 // deps: { state, t, escapeHTML, launchClipboardDirectly, sessionDayTemporal,
 //         activeId, saveToLocalStorage, rerenderSessions }
 
+import { sessionCardsExpanded } from "../../data/displayPrefs.js";
 import { computeActiveSessionCountdown } from "../../domain/sessionClock.js";
 import { parseTimeRange } from "../../domain/timeRange.js";
 import { formatDurationHM, formatDurationHourMin, parseDurationHM } from "../common/utils.js";
@@ -16,11 +17,24 @@ import { getSessionDayDate } from "./sessionTimeline.js";
 // scheduled end, or an upcoming session counting down to its scheduled start. Each such element
 // carries data-end (epoch ms of the target moment); the ticker updates the text and, for the
 // countdown-to-end case only (data-overtime-aware="1"), flips the "overtime" warning past zero.
-// The clipboard is crowded with a full day's sessions — every card starts collapsed to its
-// essentials (time, title, status bar) and expands on tap of its own chevron to reveal
-// participants/program/warnings. Ephemeral (module-level, not persisted): resets on reload, which
-// matches "start collapsed" — there's no stale "I left this one open" state to restore wrong.
-const expandedCardIds = new Set();
+// The day is crowded with sessions — a card shows its essentials (time, title, status bar) and
+// opens on a tap of its own chevron to reveal participants/programme/warnings.
+//
+// **Which way a card opens is now a SETTING** (data/displayPrefs.js, TODO §42.4): the trainer says
+// once whether session cards start open or closed, and it holds between visits. This set is what
+// they have said SINCE, per card — the exceptions to that default, not a list of open cards. So the
+// chevron still works in both directions whichever way the setting points, and the exceptions are
+// cleared when the setting itself changes, because a fresh default with yesterday's exceptions on
+// top is neither answer.
+//
+// Ephemeral on purpose (module-level, not persisted): a reload starts from the setting, with no
+// stale "I left this one open" to restore wrong.
+const cardExpansionExceptions = new Set();
+
+/** Forget every per-card exception — called when the setting flips (deps.rerenderSessions redraws). */
+export function resetSessionCardExpansions() {
+  cardExpansionExceptions.clear();
+}
 
 let cardTicker = null;
 function ensureCardTicker() {
@@ -337,7 +351,9 @@ export function renderSessionCard(b, colContainer, deps) {
   const timing = computeCardTiming(b, isLaunched, activeSession, isLive, range);
   const { pastElapsedSeconds, isUpcoming, timerIsOvertime } = timing;
 
-  const isExpanded = expandedCardIds.has(b.id);
+  // The setting decides how a card opens; the set holds what the trainer has said since, per
+  // card. Expressed as a XOR rather than two branches: an exception MEANS "the other way".
+  const isExpanded = sessionCardsExpanded() !== cardExpansionExceptions.has(b.id);
 
   info.innerHTML = buildSessionCardInfoHTML({
     b,
@@ -355,8 +371,9 @@ export function renderSessionCard(b, colContainer, deps) {
   if (expandBtn) {
     expandBtn.addEventListener("click", (e) => {
       e.stopPropagation();
-      if (isExpanded) expandedCardIds.delete(b.id);
-      else expandedCardIds.add(b.id);
+      // Toggling is adding or removing an exception, whichever way the setting points.
+      if (cardExpansionExceptions.has(b.id)) cardExpansionExceptions.delete(b.id);
+      else cardExpansionExceptions.add(b.id);
       deps.rerenderSessions?.();
     });
   }

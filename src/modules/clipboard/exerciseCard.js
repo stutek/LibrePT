@@ -97,15 +97,18 @@ export class ExerciseDeckCard extends DeckCard {
 
     // Expanded focus card is the primary logging surface: target stats plus the
     // one-tap outcome signals that replaced the per-set stepper grid
+    // ONE head row, the same one the collapsed card draws: number, name, status, and nothing above
+    // the name (TODO §42.5). Reported by a trainer — expanding a card moved its status tag from the
+    // end of the title row to a line of its own above the name, so the same card read as two
+    // different designs depending on how open it was. It also cost a whole row of height on every
+    // expanded card, which is what "expand all" spends its screen on.
     card.innerHTML = `
-      <div class="deck-card-top">
+      <div class="deck-card-compact">
         <span class="deck-card-counter">${counter}</span>
-        <span class="deck-card-top-right">
-          ${statusBadge}
-          <button type="button" class="deck-card-timer" aria-label="${t("rest_timer")}" title="${t("rest_timer")}"><i class="fa-solid fa-stopwatch"></i></button>
-        </span>
+        <span class="deck-card-name deck-card-name-inline"${nameStyle}>${escapeHTML(item.name)}</span>
+        ${statusBadge}
+        <button type="button" class="deck-card-timer" aria-label="${t("rest_timer")}" title="${t("rest_timer")}"><i class="fa-solid fa-stopwatch"></i></button>
       </div>
-      <h5 class="deck-card-name"${nameStyle}>${escapeHTML(item.name)}</h5>
       <div class="deck-card-stats">
         <div class="deck-stat">
           <span class="deck-stat-value">${escapeHTML(String(item.setsTarget))}</span>

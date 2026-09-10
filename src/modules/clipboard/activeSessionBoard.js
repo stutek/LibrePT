@@ -22,6 +22,7 @@
 //   completeCircuitRound, focusExerciseByIndex, startRestTimer  — deck card callbacks
 //   newRecordId()
 
+import { clipboardCardsExpanded } from "../../data/displayPrefs.js";
 import { gymNotesForPlan } from "../../domain/gymNotes.js";
 import { renderActiveUsersList } from "../common/activeUsersList.js";
 import { openFeedbackModal } from "../common/feedbackModal.js";
@@ -223,7 +224,7 @@ function syncTitleBarEditChrome() {
   // lives and what a reload restores.
   const expandBtn = document.getElementById("btn-expand-all-text");
   if (expandBtn) {
-    const expanded = !!deps.getActiveSession()?.expandAll;
+    const expanded = clipboardCardsExpanded();
     const key = expanded ? "collapse_all" : "expand_all";
     // The attribute travels with the text, or the next language switch repaints whichever direction
     // happened to be in the markup (i18n/domMappings.js reads it).
