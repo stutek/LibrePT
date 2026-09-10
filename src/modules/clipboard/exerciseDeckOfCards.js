@@ -259,6 +259,10 @@ export function renderExerciseDeck(deckContainer, deps) {
   // collapses too, so exactly one card is ever expanded (the active-exercise pointer is
   // untouched, so it re-expands the moment the past card is closed).
   const pastExpanded = !!activeSession.expandedPastId;
+  // Expand ALL, asked for by a trainer who could not see the plan at a glance: every card
+  // shows what the focused one shows, and none of them ACTS like it (deckCard.js). Read off the
+  // session, so it rides the session cache and survives a reload with everything else.
+  const expandAll = !!activeSession.expandAll;
 
   const formatDateStr = (dateIso) => {
     if (!dateIso) return "";
@@ -310,6 +314,7 @@ export function renderExerciseDeck(deckContainer, deps) {
     let deckCard;
     if (item.type === "past") {
       deckCard = new PastDeckCard(item, {
+        expandAll,
         activeSession,
         t,
         escapeHTML,
@@ -321,6 +326,7 @@ export function renderExerciseDeck(deckContainer, deps) {
       });
     } else if (item.type === "rest") {
       deckCard = new RestDeckCard(item, {
+        expandAll,
         t,
         escapeHTML,
         isFutureSession,
@@ -332,6 +338,7 @@ export function renderExerciseDeck(deckContainer, deps) {
       deckCard = new CircuitDeckCard(item, {
         round,
         activeClientId,
+        expandAll,
         activeClientState,
         pastExpanded,
         isFutureSession,
@@ -353,6 +360,7 @@ export function renderExerciseDeck(deckContainer, deps) {
     } else {
       deckCard = new ExerciseDeckCard(item, {
         currentCount: currentExList.length,
+        expandAll,
         activeClientId,
         pastExpanded,
         isFutureSession,

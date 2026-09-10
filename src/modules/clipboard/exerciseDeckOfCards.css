@@ -219,6 +219,21 @@
 }
 .exercise-deck-card:last-child {
   margin-bottom: 0;
+}
+/* Expand all (TODO §42): the deck stops being a deck. An expanded card is full height, so the
+   overlap and the backward tilt that make a STACK readable would clip it and stack the next card
+   over its stats — the two treatments are mutually exclusive, not additive.
+   It keeps the plain card ground on purpose: the focused card's tint and ring are what say WHERE
+   the trainer is, and if every card claimed that, none of them would. */
+.exercise-deck-card.expanded {
+  margin: 0 0 8px;
+  transform: none;
+  opacity: 1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  z-index: 1;
+}
+.exercise-deck-card.expanded:hover {
+  transform: none;
 } /* The in-focus card pops forward, full-size, with breathing room around it */
 .exercise-deck-card.in-focus {
   margin: 6px 0 10px;

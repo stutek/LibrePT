@@ -430,6 +430,8 @@ export const sl = {
   data_wipe_confirm: "Izbriši",
   menu_import_program: "Uvozi program",
   menu_sandbox_enter: "Vstopi v peskovnik",
+  expand_all: "Razpri vse kartice",
+  collapse_all: "Nazaj v kup",
   sync_sandbox_note: "V peskovniku si: to sinhronizira peskovnikovo kopijo, ne tvojega dela.",
   restore_refused_sandbox_file:
     "Ta datoteka je nastala v peskovniku, zato je ni mogoče obnoviti v tvoje delo. Odpri peskovnik in jo obnovi tam.",

@@ -463,6 +463,8 @@ export const en = {
   data_wipe_confirm: "Erase it",
   menu_import_program: "Import a programme",
   menu_sandbox_enter: "Enter the sandbox",
+  expand_all: "Expand all cards",
+  collapse_all: "Back to the deck",
   sync_sandbox_note: "You are in the sandbox: this syncs the sandbox's own copy, not your work.",
   restore_refused_sandbox_file:
     "This file was made in the sandbox, so it cannot be restored into your own work. Open the sandbox and restore it there.",

@@ -218,6 +218,19 @@ function syncTitleBarEditChrome() {
   document.getElementById("btn-edit-plan")?.classList.toggle("hidden", editing);
   document.getElementById("btn-done-edit")?.classList.toggle("hidden", !editing);
 
+  // One control, both directions (TODO §42) — the label says which one it is, so there is no second
+  // menu item to leave behind in the wrong state. Read off the session, which is where the flag
+  // lives and what a reload restores.
+  const expandBtn = document.getElementById("btn-expand-all-text");
+  if (expandBtn) {
+    const expanded = !!deps.getActiveSession()?.expandAll;
+    const key = expanded ? "collapse_all" : "expand_all";
+    // The attribute travels with the text, or the next language switch repaints whichever direction
+    // happened to be in the markup (i18n/domMappings.js reads it).
+    expandBtn.setAttribute("data-i18n", key);
+    expandBtn.textContent = t(key) || expandBtn.textContent;
+  }
+
   // In edit mode the ⋯ menu's destructive action targets the PLAN (clear its exercises), not the
   // whole session — relabel it so the trainer knows which one they're deleting. Preserve the icon.
   const delBtn = document.getElementById("btn-delete-session");

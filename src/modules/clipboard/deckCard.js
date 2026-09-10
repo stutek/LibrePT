@@ -28,20 +28,47 @@ export class DeckCard {
     return !!this.item.isInFocus;
   }
 
+  // Whether this card DRAWS its expanded template. Focus implies it; "expand all" grants it to every
+  // card at once (TODO §42), asked for by a trainer who could not see the plan at a glance.
+  //
+  // **Kept apart from `isInFocus` on purpose.** Focus is a fact about the session — which item the
+  // trainer is on — and it decides the tint, the ring and, below, what a card may DO. Expansion is
+  // only about how much of the card is drawn. Folding the two together would have every card
+  // claiming to be in focus and, worse, wired as if it were.
+  get isExpanded() {
+    return this.isInFocus || !!this.ctx.expandAll;
+  }
+
   get className() {
     return "exercise-deck-card";
   }
 
   // The fixed skeleton — subclasses never override this, only the four hooks below.
+  //
+  // Three states, not two. An expanded card that is NOT in focus shows what the focused card shows
+  // and behaves like a collapsed one: its controls are removed rather than disabled, and a tap
+  // brings it into focus like any other collapsed card. That is the whole safety argument for
+  // expand-all on a gym floor — twelve open cards with live Too Easy / Too Hard / timer buttons put
+  // a mis-tap one thumb-width from logging against the wrong exercise, and a control that is drawn
+  // but inert is worse than either.
   render(card) {
     card.className = this.className;
+    // Added here rather than in every subclass's own className: expansion is a deck-wide state, and
+    // the stylesheet needs it to stop overlapping and tilting a card that is now full height.
+    if (this.isExpanded && !this.isInFocus) card.classList.add("expanded");
     if (this.isInFocus) {
       this.renderFocused(card);
       this.wireFocused(card);
-    } else {
-      this.renderCollapsed(card);
-      this.wireCollapsed(card);
+      return;
     }
+    if (this.isExpanded) {
+      this.renderFocused(card);
+      stripControls(card);
+      this.wireCollapsed(card);
+      return;
+    }
+    this.renderCollapsed(card);
+    this.wireCollapsed(card);
   }
 
   renderFocused(_card) {
@@ -63,4 +90,20 @@ export class DeckCard {
   wireCollapsed(card) {
     card.addEventListener("click", () => this.ctx.onFocus(this.item.index));
   }
+}
+
+// Every control a focused card offers, removed from the DOM rather than hidden or disabled — a card
+// the trainer cannot act on must not draw the affordance to.
+//
+// **Every BUTTON, not a list of known classes.** The first version named the action row and the
+// timer, which covered the exercise and circuit cards and missed the rest card's Start button
+// entirely — it sits in neither container, so an expanded rest card kept a live-looking control that
+// did nothing. A rule that has to be extended whenever a template gains a button is a rule that will
+// be wrong again; asking for buttons cannot miss one.
+function stripControls(card) {
+  // Inputs too, not only buttons: a circuit card carries a number field per member for reps
+  // taken to failure, and a live field on a card the trainer is only reading writes into
+  // another exercise's record exactly as a mis-tapped button would.
+  const controls = "button, input, select, textarea, .deck-card-actions";
+  for (const control of card.querySelectorAll(controls)) control.remove();
 }

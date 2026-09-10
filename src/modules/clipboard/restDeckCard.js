@@ -25,7 +25,15 @@ export class RestDeckCard extends DeckCard {
       <div class="deck-card-top">
         <span class="deck-card-counter"><i class="fa-solid fa-hourglass-half"></i></span>
         <span class="deck-card-top-right">
-          <span class="badge badge-primary deck-card-status">In Focus</span>
+          ${
+            // Only when it IS in focus. The badge used to be part of the template, which was true
+            // while this template was drawn for the focused card alone — expand-all draws it for
+            // every card (TODO §42), and a rest card claiming focus while another card holds it
+            // says the one thing the badge exists to say, wrongly.
+            this.isInFocus
+              ? `<span class="badge badge-primary deck-card-status">In Focus</span>`
+              : ""
+          }
         </span>
       </div>
       <h5 class="deck-card-name">${t("rest_label")}</h5>

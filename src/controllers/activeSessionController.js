@@ -307,6 +307,20 @@ function wireSessionMenuAndActions(t) {
     renderActiveGroupBoard();
   }
 
+  /** Open every card in the deck, or put them all back (TODO §42).
+   *
+   * The flag lives on the session, so it rides the session cache and is still true after a reload —
+   * the same place `expandedPastId` already lives, for the same reason: it is a fact about how this
+   * session is being looked at, not a preference about the app.
+   */
+  function toggleExpandAll() {
+    const activeSession = getActiveSession();
+    if (!activeSession) return;
+    activeSession.expandAll = !activeSession.expandAll;
+    saveActiveSessionToCache();
+    renderActiveGroupBoard();
+  }
+
   /** Lists who tonight's plan can be given to, inside the ⋯ menu (TODO §8.8).
    *
    * Names rather than a single "copy" action, because *to whom* is the entire question — the common
@@ -382,6 +396,14 @@ function wireSessionMenuAndActions(t) {
     // is toggling a menu they thought was already gone.
     closeSessionMenu();
     enterClipboardEditMode();
+  });
+
+  // Open every card, or put them back into the deck (TODO §42). One control in both directions, like
+  // the binding below: the trainer is answering one question — can I see the whole session — and a
+  // menu offering both ways at once makes them read which applies before they can answer.
+  document.getElementById("btn-expand-all")?.addEventListener("click", () => {
+    closeSessionMenu();
+    toggleExpandAll();
   });
 
   // Everyone on one plan, and back again (TODO §8.1). One control rather than two: the trainer is
