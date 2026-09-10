@@ -4747,3 +4747,44 @@ Open before any code on the clipboard:
   card" then means for the routes, which currently name one session and one client.
 - **The gym floor stays the judge.** A tablet on a rack in front of a group is the case that earns
   this; a desk is not. If the layout only makes sense sitting down, it is the wrong layout.
+
+---
+
+## 42. [Idea] Detect and report stale demo deep links, across versions
+
+**Asked 2026-09-10 (Simon):** *"a way to detect and report stale or dead deep links passed around
+the internet (across versions)"*.
+
+A link into the demo names a step — `?demo=story&step=swap-open-catalog`. Those links get pasted
+into chats, forum posts and user documentation, and then they sit there for months while the app
+moves on. **When the step they name is renamed or removed, nothing tells anybody.** `resumeWalkthroughAt`
+in [domain/walkthrough.js](src/domain/walkthrough.js) — the pure state function a deep link lands on —
+deliberately falls back to the start of the demo for an unknown id, because a mistyped link pasted
+into a chat should still show a stranger the demo. That kindness is what makes the rot invisible: the
+link keeps working and shows the wrong thing.
+
+**Two halves, and they are different problems.**
+
+- **Links inside this repository** are ours to check. [agent_tools/doclinks.py](agent_tools/doclinks.py)
+  already resolves every Markdown link, anchor and `§`-reference and fails the build on a dead one; a
+  fourth check resolving `step=<id>` against the story's real ids would cover them, on the commit that
+  breaks them.
+- **Links out in the world** cannot be checked from here. What is possible is for the **app** to
+  notice it was handed a step id it does not have, and report it rather than silently starting over.
+  Where such a report goes, and whether a stranger's first screen is the right place to mention it at
+  all, is the open question.
+
+**"Across versions" is the reason this is not just a build check.** There are no release tags and no
+multi-version hosting ([§16](TODO.md), [§18](TODO.md)) — one build is live at a time. So a link made a
+year ago is judged by today's script, and there is no old version to fall back to. Whatever is built
+has to answer *"this link is from an older LibrePT and the step it names is gone"* without a version
+axis to read it from.
+
+**Decided already, so it is not re-derived:** **step ids stay human-readable** — `swap-open-catalog`,
+not a UUID. A UUID prevents an accidental rename and nothing else; the build check above catches that
+too, and the id is what a failing test, a debug message and a documentation URL all show a person.
+Worse, a UUID hides the failure that no check can catch — the id staying while the step's meaning
+drifts.
+
+**Deliberately not designed further** (Simon, same day: *"I am over engineering it"*). This is the
+problem, written down.
