@@ -35,7 +35,12 @@ body.nebula-theme {
      active overrun reads as more urgent than a merely-upcoming countdown despite sharing the hue. */
   --warning: #f59e0b;
   /* Light violet past / warm amber future — cool-vs-warm split reads against the indigo field */
-  --temporal-past: #c4b5fd;
+  /* Slate, not violet. Every other theme can say "past" in purple because its primary is emerald,
+     pink or red — nebula's primary IS violet (#8b5cf6 above), so a violet past card wore the same
+     colour as the session being run, and the two stopped being tellable apart (reported 2026-09-10).
+     A cooled grey-blue is what "behind you" looks like, and it is the one hue this palette does not
+     already spend on something live. */
+  --temporal-past: #94a3b8;
   --temporal-future: #fcd34d;
   --cloud-icon-color: #38bdf8; /* sky-400 blue cloud on dark cosmic field */
   --cloud-arrows-color: #052e16; /* green-950 deep forest green arrows for 6.7:1 contrast over light blue cloud */

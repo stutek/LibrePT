@@ -261,10 +261,17 @@
 .exercise-deck-card.completed:not(.in-focus) {
   border-color: rgba(16, 185, 129, 0.3);
 }
+/* A past card takes its colour from the THEME's own past token, not from a violet written in here
+   (TODO §42.7). The hardcoded #8b5cf6 was nebula's primary spelled out: in midnight it painted
+   nebula's violet over an emerald app, and in nebula itself it painted the accent — so the session
+   the trainer is running and the session they ran in July wore the same colour. The badge in the
+   corner already read `--temporal-past`; now the card it sits on agrees with it. */
 .exercise-deck-card.past-session {
-  border-color: rgba(139, 92, 246, 0.3);
-  background-image: linear-gradient(rgba(139, 92, 246, 0.14), rgba(139, 92, 246, 0.14)),
-    linear-gradient(var(--card-bg), var(--card-bg));
+  border-color: color-mix(in srgb, var(--temporal-past) 30%, transparent);
+  background-image: linear-gradient(
+      color-mix(in srgb, var(--temporal-past) 14%, transparent),
+      color-mix(in srgb, var(--temporal-past) 14%, transparent)
+    ), linear-gradient(var(--card-bg), var(--card-bg));
 } /* Tapped past card expands in place — pops forward like the focus card (overriding the
    collapsed-stack transform), but keeps its purple identity instead of the cyan live-focus
    treatment. Higher specificity than .exercise-deck-card:not(.in-focus) so the pop wins. */
@@ -273,10 +280,13 @@
   transform: none;
   opacity: 1;
   z-index: 5;
-  border-color: rgba(139, 92, 246, 0.5);
-  background-image: linear-gradient(rgba(139, 92, 246, 0.16), rgba(139, 92, 246, 0.16)),
-    linear-gradient(var(--card-bg), var(--card-bg));
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35), 0 0 14px rgba(139, 92, 246, 0.18);
+  border-color: color-mix(in srgb, var(--temporal-past) 50%, transparent);
+  background-image: linear-gradient(
+      color-mix(in srgb, var(--temporal-past) 16%, transparent),
+      color-mix(in srgb, var(--temporal-past) 16%, transparent)
+    ), linear-gradient(var(--card-bg), var(--card-bg));
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35), 0 0 14px
+    color-mix(in srgb, var(--temporal-past) 18%, transparent);
   animation: cardFocusIn 0.34s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .deck-history-collapse {
@@ -397,7 +407,7 @@
   color: var(--text-muted);
 }
 .deck-card-status-past {
-  background: rgba(139, 92, 246, 0.2);
+  background: color-mix(in srgb, var(--temporal-past) 20%, transparent);
   color: var(--temporal-past);
 }
 .deck-card-name {

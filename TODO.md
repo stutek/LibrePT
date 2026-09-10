@@ -5157,3 +5157,44 @@ design.
 
 It also takes the first of §42.3's savings: folding the top row into the name line is ~32px off every
 expanded card, which is what "expand all" spends its screen on.
+
+### 42.6 A collapsed circuit names its movements
+
+**Asked 2026-09-10 (Simon):** *"a lahko skrčene kartice za circuit prikažejo tudi imena vaj, težo in
+ponovitve (brez gumbov)?"* — shipped the same day, see [CHANGELOG](CHANGELOG.md).
+
+"Tri-Set Metabolic Circuit" with a round badge said only that three unnamed things were coming, while
+every other collapsed card already said what the trainer was looking at. It lists each movement with
+its reps and load now, in the same rows the open card draws, minus the actions — the rule every card
+that is not in focus follows (§42.1).
+
+**Found by looking at the real app rather than the stub:** a rest INSIDE a circuit is a member like
+any other and has no name or reps, so asking it for them printed a line reading `undefined` under
+every circuit in the deck. The medium-tier fixture had no rest inside its circuit; the seeded demo
+data did.
+
+### 42.7 A theme's colours may only be written in that theme
+
+**Reported 2026-09-10 (Simon), twice, one cause:**
+
+> *"nebula tema vizualno premalo loči pretekle kartice od aktivne seje"* · *"midnight tema: past
+> kartice so obdržale nebula barvo ob preklopu na midnight?"*
+
+The deck's stylesheet painted past cards in `rgba(139, 92, 246, …)`. That is `#8b5cf6` written out,
+which is **nebula's `--primary`**. So the colour followed the app into every theme — in midnight it
+painted nebula's violet over an emerald palette — and in nebula itself it painted the accent, which
+is why the session being RUN and a session from July wore the same colour. The badge in the corner
+had been reading `--temporal-past` all along; the card under it disagreed.
+
+Both halves are fixed: the card takes its tint from `--temporal-past` through `color-mix`, and
+**nebula's own `--temporal-past` moves off its accent** to a cooled slate. Every other theme can say
+"past" in purple because its primary is emerald, pink or red; nebula's is violet.
+
+**A ratchet holds the line** ([test_theme_colours.py](tests/unit/test_theme_colours.py)): no
+component stylesheet may spell out a value a theme defines. There are **21** such colours today,
+across a dozen files, each a small judgement about which token it should have been — so the check
+fails when the number goes UP, exactly like §38.20's UI-strings sweep, and `BASELINE` comes down as
+the sweep proceeds.
+
+**Open:** the sweep itself, and whether midnight's `--temporal-past` (`#c084fc`, purple) is what its
+palette wants now that the card actually obeys it.
