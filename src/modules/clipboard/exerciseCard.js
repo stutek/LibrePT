@@ -51,9 +51,13 @@ export class ExerciseDeckCard extends DeckCard {
     // Tint the title by any feedback logged for this exercise (see getExerciseSignalColor)
     const signalColor = getExerciseSignalColor(activeClientId, item.name);
     const nameStyle = signalColor ? ` style="color: ${signalColor};"` : "";
+    // NO badge for the card in focus (ruled 2026-09-10): the tint and the border already say which
+    // card it is, in every theme, and a word repeating what the colour has said costs a slot in the
+    // title row that Completed and Upcoming actually need. Those two stay, because nothing else on
+    // the card says them.
     let statusBadge = "";
     if (this.isInFocus) {
-      statusBadge = `<span class="badge badge-primary deck-card-status">In Focus</span>`;
+      statusBadge = "";
     } else if (item.isCompleted) {
       statusBadge = `<span class="badge badge-success deck-card-status">Completed</span>`;
     } else {

@@ -5198,3 +5198,71 @@ the sweep proceeds.
 
 **Open:** the sweep itself, and whether midnight's `--temporal-past` (`#c084fc`, purple) is what its
 palette wants now that the card actually obeys it.
+
+### 42.8 [x] No badge on the card in focus — shipped 2026-09-10
+
+**Ruled (Simon):** *"do not create inFocus tag for active excersize (i like the background and border
+highlight on midnight)"*. The tint and the border already say which card it is, in every theme, and a
+word repeating what the colour has said costs a slot in the title row. **Completed** and **Upcoming**
+stay: nothing else on the card says those.
+
+### 42.9 [Open question] Does the active circuit card still need its timer?
+
+**Asked 2026-09-10 (Simon), undecided:** *"genuine question undecided — should we remove the timer
+from the active circuit card"*.
+
+What is on the card today: a ⏱ in the head row that starts a rest timer, and — since §42.6 — a
+`Rest · 60s` line for each rest the circuit actually contains.
+
+**The case for removing it:** a circuit that names its own rests already says when the trainer stops
+and for how long, and each of those break rows starts that rest itself on the open card. A second
+control that starts an unnamed timer of its own is a second answer to one question, on the card with
+the least room for it.
+
+**The case for keeping it:** the plan's rest is what was written down; the rest a trainer actually
+takes in a circuit is a decision made in the room. The ⏱ is the one that times what is happening
+rather than what was planned.
+
+**What would settle it, and it is cheap:** whether anybody uses it. Ask the trainer who reported the
+clipboard's legibility whether they have ever started a circuit's timer from the head row rather than
+from a break row.
+
+## 43. [Brainstorm] The client's own copy: their plan, their feedback
+
+**Asked 2026-09-10 (Simon):** *"should we enable plan sharing and letting clients record too hard too
+easy and notes themselves and share feedback with PT post excersize?"*
+
+Today the trainer holds the clipboard and logs everything: the sets, the Too Easy / Too Hard signals,
+the notes. The client's own device already appears in the product twice — the intake page they fill
+in themselves (§26/§1.7) and the RSVP reply (§1.6) — so the route exists and the privacy posture is
+written down. This asks for a third: the client sees their plan, and answers back on it.
+
+**Two features, and they should not be decided together:**
+
+1. **Plan sharing** — the client can SEE what they are meant to do, on their own phone, between
+   sessions. Read-only, and mostly a publishing problem: what a plan looks like with no app around
+   it, how the link is issued and revoked, and what it exposes if it is forwarded.
+2. **Client-side feedback** — the client records too easy / too hard / a note against an exercise,
+   and it reaches the trainer. That is a WRITE from a device the trainer does not control, and it
+   lands in the trainer's training record.
+
+Open before either, and the second is where the weight is:
+
+- **Where does a client's answer live until the trainer accepts it?** The app has a shape for this
+  already — an intake submission is reviewed before it becomes a client (§26.5) — and the same rule
+  looks right here: nothing a client sends edits the training record until the trainer has read it.
+- **Offline is the trainer's promise, not the client's.** The whole product works with no network; a
+  client's phone in a basement gym does not sync. What happens to feedback typed with no signal?
+- **What the link exposes.** A plan carries a person's name, their programme and their loads. A
+  forwarded link must not be a data breach, which means the same question §31 asked of the support
+  wipe: what authority does a link carry, and for how long?
+- **Whose words are they?** A client's note is their own account of their own body. It is not the
+  trainer's clinical note, and mixing the two into one field would make the record impossible to
+  read later and awkward under Art. 15 (§27).
+- **The gym floor is still the judge.** A trainer running three people cannot also be moderating an
+  inbox. If accepting feedback is not one tap from where they already are, it will not happen.
+
+**What it would be worth:** the two things a trainer currently reconstructs from memory — how the
+work actually felt, and what the client did between sessions — arrive as data instead. That is the
+same argument the asynchronous plan adjustments in
+[uc2_async_plan_adjustments.md](use_cases/uc2_async_plan_adjustments.md) already won.
