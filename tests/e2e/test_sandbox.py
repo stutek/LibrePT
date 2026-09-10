@@ -197,3 +197,29 @@ def test_the_sandbox_says_how_to_leave_it(page, local_server):
     # The destructive offer belongs to a mixed database, not to this one: clearing demo data in here
     # would empty the very thing the trainer came to look at.
     assert "clear demo data" not in feed, feed[:400]
+
+
+@pytest.mark.clean_start
+def test_the_badge_offers_nothing_to_follow_in_the_sandbox(page, local_server):
+    """§42.12. The badge links to the preview build's data-loss notice, which is the wrong
+    destination from a workspace holding sample data — and it is the one link a trainer taps
+    expecting an explanation of what they are looking at. The explanation lives in the feed
+    (§42.10); the badge becomes a marker, and gets its link back on the way out."""
+    page.goto(f"{local_server}?init=demo_data_load&lang=en")
+    page.wait_for_selector(".session-card")
+    badge = page.locator("#preview-badge")
+
+    assert badge.get_attribute("href"), (
+        "outside the sandbox it stays the route to that notice"
+    )
+
+    _switch(page, "sandbox")
+    assert badge.get_attribute("href") is None, (
+        "the sandbox badge must not offer a link"
+    )
+    assert badge.get_attribute("role") == "status"
+
+    _switch(page, "working")
+    assert badge.get_attribute("href"), (
+        "the link comes back with the trainer's own work"
+    )

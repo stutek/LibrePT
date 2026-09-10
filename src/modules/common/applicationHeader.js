@@ -117,8 +117,15 @@ export function renderBackupBadge(health) {
  * seeded demo, PREVIEW otherwise (TODO §28.9).
  *
  * One slot, two competing claims, and `isDemoOnlyStore` is where the ordering is argued. The badge
- * keeps its link to the data-loss notice in BOTH states — it is still a preview build either way,
- * and that notice is the only place the risk is explained without signal.
+ * keeps its link to the data-loss notice in both of THOSE states — it is still a preview build
+ * either way, and that notice is the only place the risk is explained without signal.
+ *
+ * **In the sandbox it is a marker and nothing else** (TODO §42.12, ruled 2026-09-10): a notice about
+ * losing the trainer's data is the wrong destination from a workspace whose contents are sample
+ * data, and what a trainer in there needs to read is one tap away in the feed's leading card
+ * (§42.10). The `href` is removed rather than pointed somewhere else — an `<a>` without one is not
+ * focusable and not clickable, so the badge stops offering what it cannot honour — and it is put
+ * back on the way out, because the same element serves every state.
  *
  * A demo is not a hazard, so the demo state drops the warning triangle and the pulse the CSS gives
  * the amber pill; it states a fact, in a word, at the same size.
@@ -134,6 +141,16 @@ export function renderBuildStateBadge(state) {
   const sandbox = isSandbox();
   const showingDemo = sandbox || isDemoOnlyStore(state);
   badge.classList.toggle("is-demo", showingDemo);
+  if (sandbox) {
+    badge.removeAttribute("href");
+    badge.removeAttribute("target");
+    // Announced as what it now is: a status, not a link somebody could follow.
+    badge.setAttribute("role", "status");
+  } else {
+    badge.setAttribute("href", "./preview.html");
+    badge.setAttribute("target", "_blank");
+    badge.removeAttribute("role");
+  }
   badge.querySelector(".preview-badge-label").textContent = sandbox
     ? deps?.t?.("sandbox_badge") || "SANDBOX"
     : showingDemo
