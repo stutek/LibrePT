@@ -430,6 +430,9 @@ export const sl = {
   data_wipe_confirm: "Izbriši",
   menu_import_program: "Uvozi program",
   menu_sandbox_enter: "Vstopi v peskovnik",
+  notif_sandbox_title: "🧪 Peskovnik — nič tukaj ni tvoje delo",
+  notif_sandbox_desc:
+    "Te stranke, načrti in seje so vzorčni fitnes. Preizkusi karkoli: nič, kar narediš tukaj, ne more doseči tvojih podatkov. Za vrnitev k svojemu delu odpri meni ☰ zgoraj desno in izberi Zapusti peskovnik — pristal boš tam, kjer si ostal.",
   expand_all: "Razpri vse kartice",
   collapse_all: "Nazaj v kup",
   sync_sandbox_note: "V peskovniku si: to sinhronizira peskovnikovo kopijo, ne tvojega dela.",

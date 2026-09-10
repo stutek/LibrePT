@@ -235,12 +235,32 @@ function groupScheduleChurn(resolved) {
     .map((item) => (item === first ? grouped : item));
 }
 
+/**
+ * The demo notice, rewritten for the sandbox (TODO §42.10).
+ *
+ * The stored record was written when sample data lived in the trainer's own database: it tells them
+ * to clear it before doing real work, and offers a button that does. In the sandbox both are wrong.
+ * There is nothing to clear — the sandbox is the safe place — and clearing would empty the very
+ * thing they came to look at. What a trainer in there actually needs is the way OUT, and the app is
+ * the only thing that can tell them: it names the menu and the item, because a step that asks for an
+ * action says the action and names the control.
+ */
+function forSandbox(item, t) {
+  return {
+    ...item,
+    title: t("notif_sandbox_title") || item.title,
+    description: t("notif_sandbox_desc") || item.description,
+    // The destructive one goes; "show me around" stays, because the sandbox is where it belongs.
+    actions: (item.actions || []).filter((action) => !action.resetDemo),
+  };
+}
+
 export function resolveNotificationItems(
   state,
   t,
   readIds = [],
   syncFailure = null,
-  { crashes = [], repoUrl = "" } = {},
+  { crashes = [], repoUrl = "", sandbox = false } = {},
 ) {
   const synthetic = [
     // A fault leads: it is the only item here reporting that something the trainer asked for did
@@ -267,6 +287,8 @@ export function resolveNotificationItems(
         actions: item.actions.filter((action) => canWalkThrough || !action.startWalkthrough),
       })),
   );
-  const demoNotice = stored.filter((item) => item.type === DEMO_NOTICE_TYPE);
+  const demoNotice = stored
+    .filter((item) => item.type === DEMO_NOTICE_TYPE)
+    .map((item) => (sandbox ? forSandbox(item, t) : item));
   return [...demoNotice, ...synthetic, ...stored.filter((item) => item.type !== DEMO_NOTICE_TYPE)];
 }

@@ -176,3 +176,24 @@ def test_coming_back_returns_to_the_view_you_left(page, local_server):
     assert f"/clients/{client_id}" in page.url, (
         f"came back to {page.url}, left from {left_on}"
     )
+
+
+@pytest.mark.clean_start
+def test_the_sandbox_says_how_to_leave_it(page, local_server):
+    """§42.10, ruled 2026-09-10: the menu is way enough out — but the trainer has to be told it is
+    there. The feed's leading card is where they are already being told none of this is real, so it
+    is where the way back belongs, naming the control rather than describing it."""
+    page.goto(f"{local_server}?init=demo_data_load&lang=en")
+    page.wait_for_selector(".session-card")
+    _switch(page, "sandbox")
+
+    page.wait_for_selector("#notification-area .notification-card", timeout=10000)
+    feed = page.locator("#notification-area").inner_text().lower()
+
+    assert "sandbox" in feed, feed[:400]
+    assert "leave the sandbox" in feed, (
+        "the card must name the menu item, not describe it"
+    )
+    # The destructive offer belongs to a mixed database, not to this one: clearing demo data in here
+    # would empty the very thing the trainer came to look at.
+    assert "clear demo data" not in feed, feed[:400]

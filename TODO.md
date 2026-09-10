@@ -5167,6 +5167,26 @@ rather than what was planned.
 clipboard's legibility whether they have ever started a circuit's timer from the head row rather than
 from a break row.
 
+### 42.10 [x] The sandbox says where its own exit is — shipped 2026-09-10
+
+**Asked, then ruled, 2026-09-10 (Simon):** *"kaj pa je hitra vrnitev iz peskovnika v produkcijo?"* —
+and, after the options were laid out: *"ne, imaš prav, uporaba menija je dovolj, bi pa bilo treba to
+uporabniku povedati, da bo vedel"*.
+
+Two taps through the ☰ menu is the way out, and it stays that way. A one-tap control was considered
+and declined: the badge beside it is the only route to the data-loss notice, and a mode switch hidden
+behind a tap on the logo is a surprise. What was missing was not a control but a sentence.
+
+**The feed's leading card says it**, because that is the card a trainer in the sandbox is already
+reading — it is what tells them none of this is real, and it is the collapsed drawer's summary line.
+In the sandbox it now says what the sandbox is, that nothing done in there can reach their own data,
+and how to get back: **the menu ☰ at the top right, and the item by its name**, per the standing rule
+that a step naming an action names the control.
+
+The stored card's other half goes with it: **"Clear demo data" is not offered in the sandbox.** It was
+written for a database where sample records sat among real ones; in here it would empty the very
+thing the trainer came to look at.
+
 ## 43. [Brainstorm] The client's own copy: their plan, their feedback
 
 **Asked 2026-09-10 (Simon):** *"should we enable plan sharing and letting clients record too hard too

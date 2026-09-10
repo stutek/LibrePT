@@ -15,6 +15,7 @@
 
 import { stateHasData } from "../../data/stateStore.js";
 import { readVersionScoped, writeVersionScoped } from "../../data/storageNamespace.js";
+import { isSandbox } from "../../data/workspace.js";
 import { resolveNotificationItems } from "../../domain/notificationItems.js";
 import { renderMarkupOnce } from "./dom.js";
 
@@ -283,6 +284,8 @@ export function renderNotificationArea() {
   const items = resolveNotificationItems(state, t, readIds, deps.getSyncFailure?.() || null, {
     crashes: deps.getCrashes?.() || [],
     repoUrl: deps.repoUrl || "",
+    // In the sandbox this card says what the sandbox is and where the way out is (TODO §42.10).
+    sandbox: isSandbox(),
   });
   paintFeedCounts(items, t);
 

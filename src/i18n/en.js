@@ -463,6 +463,9 @@ export const en = {
   data_wipe_confirm: "Erase it",
   menu_import_program: "Import a programme",
   menu_sandbox_enter: "Enter the sandbox",
+  notif_sandbox_title: "🧪 Sandbox — nothing here is your own work",
+  notif_sandbox_desc:
+    "These clients, plans and sessions are a sample gym. Try anything: nothing you do in here can reach your own data. To go back to your work, open the menu ☰ at the top right and choose Leave the sandbox — you will land where you left off.",
   expand_all: "Expand all cards",
   collapse_all: "Back to the deck",
   sync_sandbox_note: "You are in the sandbox: this syncs the sandbox's own copy, not your work.",
