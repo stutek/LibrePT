@@ -4314,3 +4314,191 @@ add up. The number is free to follow the measurement, which is what its own docs
 
 **Re-check condition:** whenever either suite's wall time moves substantially — the same condition as
 before, now with a test that does not fight it.
+
+## 40. Two workspaces — the trainer's own work, and a sandbox to learn in
+
+**Asked 2026-09-10 (Simon):** research whether demo data should be separated from the trainer's real
+data, so that they can *"preklopi kadarkoli med svojim delovnim stanjem in stanjem za učenje in
+experementiranje"* — switch at any time between their working state and a state for learning and
+experimenting. Decided in the same session; **nothing is built yet**.
+
+Today the two are the same database, told apart by a `seededDemo` stamp on each record
+([seedProvenance.js](src/data/seedProvenance.js)), and the only operation is one-way: the demo is
+*removed* (§9.3, UC7). Three
+things follow, and all three are what this section answers:
+
+- **There is no way back.** A trainer who clears the demo cannot get it back without losing their own
+  work, and one who has started working cannot put the demo aside.
+- **Experimenting on real data has nowhere to happen.** Trying a plan change on a real client's
+  programme means doing it to the client's programme.
+- **The DEMO badge is a guess.** `isDemoOnlyStore(state)` holds only until the trainer's first real
+  record, so the badge goes off while the demo is still all over the screen. With workspaces it is a
+  fact, not a heuristic.
+
+### 40.1 Two workspaces, and the line between shared and per-workspace
+
+**Two, not many** (Simon): a working workspace and a sandbox. Any number would need naming, a list,
+and a choice at boot; two keep the switch to one control.
+
+One rule decides where every stored thing lives: **a fact about the person or the device is shared; a
+fact about the data is per workspace.** That axis already exists in
+[storageNamespace.js](src/data/storageNamespace.js) as `VERSION_SCOPED_KEYS` against
+`ORIGIN_GLOBAL_KEYS` — it is renamed, not invented.
+
+| Shared | Per workspace |
+| :--- | :--- |
+| The Drive OAuth grant, `librept_drive_connected`, the client id | `driveSync` meta — **the file id and the merge ancestor** |
+| `librept_erasure_suppressions` — the erasure register | `backupHistory` meta |
+| `trainerIdentity` — name, email, phone | `librept_active_session`, `librept_active_timers`, `librept_workout_setup_draft`, `librept_read_notifications` |
+| Theme, accepted terms, chosen language | |
+
+Two of those are not preferences:
+
+**The `driveSync` ancestor MUST be per workspace.** A three-way merge is correct only if the ancestor
+is exactly what Drive last saw ([syncMerge.js](src/data/syncMerge.js)). A sandbox that overwrote it
+would silently corrupt the next merge of the trainer's real data. This is the only thing in the whole
+design that can destroy work.
+
+**The erasure register MUST be shared, as a union.** It is a grow-only set
+([erasureSuppression.js](src/data/erasureSuppression.js)), so merging is a union — associative,
+idempotent, no conflict. A promise made to a person must not be escapable by switching workspace, and
+because every entry is a salted SHA-256 of an opaque record id, a shared list describes nobody.
+
+### 40.2 A separate database, not a store-name prefix
+
+**The prefix was considered and rejected** (Simon proposed it as the simpler build, with a guard in
+the star write). Three facts decide against it:
+
+1. **An IndexedDB object store can only be created inside `onupgradeneeded`.** A prefix doubles the
+   stores at upgrade time and drags `databaseVersion()` ([indexedDb.js](src/data/indexedDb.js)) into a
+   second axis, when it is deliberately derived from the highest numbered schema and nothing else. A
+   second database changes none of that: `openDatabase({ schemas, name })` already takes `name` as an
+   injected argument, because that is how tests have always run against a throwaway database.
+2. **Resetting the sandbox is now a recurring operation (§40.4).** With its own database that is
+   `deleteDatabase("librept_sandbox")` — one call that cannot reach the trainer's records. With a
+   prefix it is deleting by name pattern *inside the database that holds them*.
+3. **A guard in the star write is a rule; a separate database is the design.** The handle points at
+   another database, so a sandbox write *cannot* touch real data — there is no check to forget and no
+   exception to argue about for sync. Value 10.
+
+Atomicity is not lost: a transaction cannot span databases, but the fan-out only ever writes within
+one workspace. The prefix would win only for a cross-workspace transaction — "move this record into
+my real data" — which is not wanted, and would be an export/import if it ever is.
+
+### 40.3 Switching re-renders; it does not reload the page
+
+**Ruled 2026-09-10 (Simon):** *"Si pa želim preklopa s ponovnim renderiranjem, ne pa reloadom
+page-a"* — the switch re-renders, it does not reload. A reload costs the splash hold (`max(5s, boot)`),
+the open view, the scroll position and any half-filled dialog, and it puts a service-worker fetch in
+the path of a switch that may happen on the gym floor.
+
+The app already replaces its whole database under a running UI — a backup restore
+([backupRestore.js](src/modules/common/backupRestore.js)) and a Drive merge
+([driveSyncService.js](src/data/driveSyncService.js)) both call `setState()` and re-render. So the
+switch is four steps, three of which exist:
+
+```js
+async function switchWorkspace(name) {
+  await flushWrites();         // writeQueue.js, already exported
+  closeDb();                   // dbPromise = null
+  setActiveWorkspace(name);    // one localStorage key
+  setState(await loadState()); // the existing boot path
+  renderEverything();          // §40.3a — does not exist yet
+  navigateToPath("/");         // a route from the old workspace must not survive
+}
+```
+
+**§40.3a `renderEverything()` is the only new piece, and it is a consolidation.** It exists three
+times by halves today: the erasure path in [app.js](src/app.js) re-renders three things, the restore
+and the Drive merge re-render others. One function used by all four callers removes that drift.
+
+**Four boot-time captures have to become accessors.** `setupClientForms`, `setupRoutineForms`,
+`setupExerciseForms` and `setupActiveSession` are each handed `state: getState()` once at boot, so
+after any `setState()` they hold the previous object. Measured: **11 `state.` uses across the four
+controllers**. This is a latent defect *today*, after every restore and every Drive merge — the switch
+does not create it, it exposes it.
+
+Measured cost of the whole switch:
+
+| Work | Size |
+| :--- | :--- |
+| `workspace.js` — active workspace, database name, key suffix | ~40 lines, new |
+| `stateStore`: workspace-scoped `getDb()` plus `switchWorkspace()` | ~30 lines |
+| `renderEverything()` extracted, used at 4 call sites | ~30 lines, mostly moved |
+| 4 controllers: `state` object → `getState` accessor | 11 references |
+| Tinted header and the switch control (§40.5) | small |
+| Sandbox lifecycle: seed, reset, staleness (§40.4) | ~80 lines |
+| [dataWipe.js](src/data/dataWipe.js): enumerate both databases | small |
+| Tests: unit_js for naming and staleness, e2e for isolation and switching | 2 files |
+
+### 40.4 The sandbox holds today's seed, and says when it has gone stale
+
+**Ruled (Simon):** the sandbox is filled exactly as the demo is filled today. No copy-of-real-data
+variant for now.
+
+Seeded sessions are generated relative to *now* ([sessions.js](src/data/sessions.js),
+[sessionSeriesSeed.js](src/data/sessionSeriesSeed.js)), so a sandbox left for a month is an empty
+board. **Ruled:** *"Najbolje, da zaznava zastarelost in predlagava data reset (z izgubo podatkov, če
+se uporabnik strinja)"* — detect staleness and offer a reset, losing the sandbox's contents with the
+trainer's agreement.
+
+- The sandbox's `meta` store carries `seededAt`.
+- Stale at **7 days**, proposed: the seed spans roughly a week back and forward, which is exactly what
+  goes flat.
+- Offered **on entry**, not at boot — at boot it is a question about a workspace the trainer is not in.
+- The reset is the first-entry path: delete the database, seed again.
+- The dialog says what is lost — *what you did in the sandbox goes* — never "your data will be
+  refreshed".
+
+**Open:** whether a declined offer is repeated. Proposed: not again the same day, or it becomes a
+modal in front of every entry.
+
+### 40.5 What the trainer sees
+
+**Agreed (Simon):** a tinted header, not only a badge. A badge read at arm's length, one-handed, mid
+session, is not enough to stop someone logging a real set into the sandbox. The DEMO/PREVIEW badge
+slot ([applicationHeader.js](src/modules/common/applicationHeader.js)) then states the workspace as a
+fact and `isDemoOnlyStore()` stops being load-bearing.
+
+**Ruled:** the sandbox survives a reload and a later visit. *"Da."* Otherwise it is a demo with a
+timer, and nothing can be learned in it across two days.
+
+### 40.6 Backup and Drive sync stay available inside the sandbox
+
+**Ruled (Simon):** *"Backup in sync ni smiseln, je pa morda uporaben za e-2-e testing in za učenje. Se
+mi zdi, da je tudi manj dela, če ohraniva polno funkcionalnost."* Keeping them is both the more useful
+and the cheaper answer: **switching them off is a condition at every sync seam — a rule in ten places
+— while isolating them is the per-workspace `driveSync` meta §40.1 already requires.**
+
+The residual cost has to be stated rather than discovered: a sync from the sandbox creates a **second
+file** in `appDataFolder` and spends the same OAuth grant. So the sandbox syncs to its own file name,
+and the sync card in the sandbox says what it is syncing — otherwise a trainer reads "synced" and
+believes their real work is safe.
+
+A downloaded backup file is harmless, and "try a restore before doing it for real" is one of the
+better things a sandbox offers.
+
+### 40.7 The e2e suite must keep testing production, not the sandbox
+
+**Simon's warning, and it lands:** *"Pozor e-2-e testi ne validirajo peskovnika temveč produkcijsko
+kodo!"*
+
+[conftest.py](tests/conftest.py) injects `?init=demo_data_load` for **every** test using the shared
+`page` fixture. If demo data came to mean *the sandbox*, the whole e2e tier (231 tests) would quietly
+start validating the sandbox instead of the app.
+
+**The rule that prevents it, which is also less work: `?init=demo_data_load` keeps meaning "seed the
+CURRENT workspace", which is the working one by default.** The sandbox is entered by a separate,
+explicit act — a `?workspace=` parameter or the header control. The existing suite is then untouched,
+and the sandbox gets its own e2e file covering exactly what is new: isolation, switching, staleness.
+
+### 40.8 What this leaves of UC7
+
+[uc7_demo_to_clean_database.md](use_cases/uc7_demo_to_clean_database.md) specifies removing demo
+records from a mixed database. With two workspaces "clear the demo" is deleting a database, and the
+fixpoint dependency planner is not needed for it — but it cannot simply retire:
+[demoDataRemoval.js](src/data/demoDataRemoval.js) (172 lines) and
+[seedProvenance.js](src/data/seedProvenance.js) (130 lines) are what a device whose database is
+*already* mixed needs on the way onto this design. **UC7 becomes the one-time migration**, and the
+document is rewritten as that rather than as a standing feature. The migration itself — what happens
+to an existing mixed install on first boot after the split — is the largest unwritten piece here.
