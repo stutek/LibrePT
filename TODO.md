@@ -4675,3 +4675,32 @@ that gets found by accident.
   live getter, so nothing downstream changed.
 - Nothing in the estimate predicted the language defect. It was not introduced by this work; it was
   **exposed** by it, which is the ordinary way a hidden coupling surfaces.
+
+## 41. [Brainstorm] A wide screen shows several clients at once
+
+**Asked 2026-09-10 (Simon):** *"desktop/tablet version should utilize whole available space by
+displaying multiple programs at once (just like split screen tabs), defaulting to last viewed
+clients or at session start, just first 3 picked from client list"*.
+
+The app is laid out for a phone held in one hand, and on a tablet or a desktop that layout is one
+narrow column with empty space either side. A trainer running a group is switching between
+participants one at a time on a screen with room for three.
+
+**The shape asked for:** several clients' programmes side by side, like split-screen tabs, filling
+the width. Which clients are shown defaults to **the last ones viewed**, or at the start of a session
+to **the first three from the client list**.
+
+Open before any code:
+
+- **What a column IS.** The clipboard's live card, or the plan editor, or either depending on where
+  the trainer is? The live session already has a participant switcher, so the question is whether
+  this replaces that switch or sits beside it.
+- **How many columns, and who decides.** Three is the number in the request; the width available
+  varies from an iPad in portrait to a desk monitor. A breakpoint rule, or a count the trainer sets?
+- **What the current one-column layout becomes.** Every view is built at `--app-max-width` (480px)
+  and centred. Widening is not a stylesheet switch: the deck, the header and the clipboard bar all
+  assume one column.
+- **Whether a column is independently scrolled and independently focused**, and what "the in-focus
+  card" then means for the routes, which currently name one session and one client.
+- **The gym floor stays the judge.** A tablet on a rack in front of a group is the case that earns
+  this; a desk is not. If the layout only makes sense sitting down, it is the wrong layout.
