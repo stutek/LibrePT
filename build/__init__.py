@@ -1400,6 +1400,13 @@ DEMO_TEST_FILES = (
 )
 
 
+# The demo task's share of the shared browser budget, measured 2026-09-01: three workers of eight
+# landed the two Stage 3 tasks within 20s of each other (demo 181s, e2e 162s). Kept as a ratio so the
+# measurement survives a machine with a different core count — the number it produces there is the
+# same decision, not a new one.
+DEMO_WORKER_SHARE = 3 / 8
+
+
 def demo_worker_count():
     """Workers for the demo task, taken OUT of the shared Playwright budget rather than added to it.
 
@@ -1413,9 +1420,19 @@ def demo_worker_count():
     the ratio inverted, the long pole running on one worker while seven idled beside it. The demo
     files alone finish in 163s at four.
 
-    THREE, so the two land together rather than one waiting on the other.
+    THREE of the sixteen-core machine's EIGHT, so the two land together rather than one waiting on
+    the other — and it is that SHARE, not the number, that was measured. A hardcoded 3 was correct on
+    the machine it was derived on and wrong everywhere smaller: CI runs on four cores, so its whole
+    budget is two, and asking for three demo workers plus one for the rest took four contexts out of
+    a budget of two. The gate caught it in CI and nowhere else, which is exactly the machine-shaped
+    mistake `_playwright_worker_count` exists to avoid making with a fixed number.
+
+    Rounded, floored at one, and never leaving the other task without a worker: on a budget of two
+    both tasks get one, which is the smallest split that is still a split.
     """
-    return 3
+    budget = _playwright_worker_count()
+    share = round(budget * DEMO_WORKER_SHARE)
+    return max(1, min(share, budget - 1)) if budget > 1 else 1
 
 
 def e2e_worker_count():

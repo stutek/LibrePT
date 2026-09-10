@@ -52,13 +52,34 @@ def test_the_worker_budget_is_shared_rather_than_doubled():
     that the two tasks come out of ONE allowance and neither is starved.
 
     A machine whose whole budget IS one ends up running two: nothing smaller can be split, and one
-    extra context on a two-core box is not the burst this guards against."""
-    budget = build._playwright_worker_count()
-    demo = build.demo_worker_count()
-    e2e = build.e2e_worker_count()
+    extra context on a two-core box is not the burst this guards against.
 
-    assert demo >= 1 and e2e >= 1, (demo, e2e)
-    assert demo + e2e <= max(2, budget), (
-        f"the two tasks take {demo} + {e2e} browser contexts out of a budget of {budget}"
-    )
-    assert e2e == max(1, budget - demo)
+    Checked across BUDGETS, not only this machine's. The split was a hardcoded 3 until 2026-09-10,
+    which was right on the sixteen-core machine it was measured on and broke CI, whose four cores
+    make a budget of two: three demo workers plus one for the rest is four contexts out of two. The
+    rule has to hold wherever the gate runs, so the test asks it wherever the gate runs."""
+    for budget in (1, 2, 3, 4, 8, 16, 32):
+        demo, e2e = _split_at(budget)
+
+        assert demo >= 1 and e2e >= 1, (budget, demo, e2e)
+        assert demo + e2e <= max(2, budget), (
+            f"at a budget of {budget} the two tasks take {demo} + {e2e} browser contexts"
+        )
+        assert e2e == max(1, budget - demo)
+
+
+def _split_at(budget):
+    """The split this machine would choose if its budget were `budget`."""
+    original = build._playwright_worker_count
+    build._playwright_worker_count = lambda: budget
+    try:
+        return build.demo_worker_count(), build.e2e_worker_count()
+    finally:
+        build._playwright_worker_count = original
+
+
+def test_the_demo_share_holds_where_it_was_measured():
+    """The ratio is the decision; the number follows the machine. Pinned at the budget it was derived
+    on (2026-09-01: three of eight landed the two tasks within 20s of each other) so a change to the
+    formula that quietly moves the measured split has to say so here."""
+    assert _split_at(8) == (3, 5)
