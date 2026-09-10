@@ -32,6 +32,10 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
    technical ones. **No trade jargon** — the reader is not a native English speaker and is not in
    your trade: say *the words on the card*, never *copy*. **Never invent a term**, least of all by
    translating one.
+   **Carry the context you are answering from.** The reader did not watch you work and does not hold
+   your notes: the first time an answer names a `§`, a file, a symbol or a term out of the code, it
+   says in the same breath what that thing is and what it does. A sentence that is only true to
+   someone who already knows it has told them nothing.
    **Write plainly.** Short sentences, one idea each. No stacked clauses, no chains of dashes, no
    metaphor where the plain word works, no flourish at the end of a paragraph. **Name the thing, not
    the principle**: which file, which value, what breaks. A sentence restating why a rule is good is
