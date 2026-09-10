@@ -4979,66 +4979,6 @@ That leaves two real questions, and they are independent of each other:
    a narrower window is which columns are visible — that is scrolling or paging, and it must not be
    confused with reordering.
 
----
-
-## 42. [Idea] Detect and report stale or dead links, across versions
-
-**Asked 2026-09-10 (Simon):** *"a way to detect and report stale or dead deep links passed around the
-internet (across versions)"*, then, on reading a first draft that covered only the demo:
-*"stale link detection ni samo za demo, temveč za vse"* — not only the demo, all of them.
-
-*(First written the same day and lost: commit `283254e` rewrote the tail of this file and deleted the
-section. Restored and broadened.)*
-
-**Every link this app hands out is a promise made to a page that will keep changing.** They get pasted
-into chats, forum posts, calendar invites and user documentation, and then they sit there for months.
-
-**The general defect: every one of them degrades silently, deliberately.**
-[shareLink.js](src/modules/common/shareLink.js) — the module that reads promo and deep-link
-parameters off the address — documents the fallback for each: an unknown `theme` gives the default
-theme, an unknown `lang` the saved one, an unknown `chapter` the whole story, an unknown `demo` or
-`init` nothing at all, and an absent or unrecognised `workspace` **the trainer's own database rather
-than the sandbox**. Routes do the same: `resumeWalkthroughAt` in
-[domain/walkthrough.js](src/domain/walkthrough.js) starts the demo from the beginning when the step
-id is gone.
-
-Each of those fallbacks is right on its own. A mistyped link pasted into a chat should still show a
-stranger something rather than an error page. Together they mean **no link can ever be observed to
-have rotted** — it keeps working and shows the wrong thing.
-
-**The links in question, and they are not all the demo's:**
-
-- demo deep links naming a step or a chapter;
-- promo links carrying `lang`, `theme`, `init`, `workspace`;
-- app routes naming a session date or a client id — a link to a client since deleted;
-- the **client intake link** in an invitation, and the privacy-notice URL sent beside it, both of
-  which leave the app and land in somebody's messages;
-- links inside this repository's own documentation.
-
-**Two halves, and they are different problems.**
-
-- **Links inside this repository** are ours to check.
-  [agent_tools/doclinks.py](agent_tools/doclinks.py) — the tool that resolves every Markdown link,
-  anchor and `§`-reference and fails the build on a dead one — could resolve the app's own link
-  vocabulary too: a `step=` that names no step, a `theme=` that names no theme.
-- **Links out in the world** cannot be checked from here. What is possible is for the **app** to
-  notice it was handed a value it does not recognise, and report it rather than silently substituting
-  a default. Where such a report goes, and whether a stranger's first screen is the right place to
-  raise it, is the open question.
-
-**"Across versions" is why this is not just a build check.** There are no release tags and no
-multi-version hosting ([§16](TODO.md), [§18](TODO.md)) — one build is live at a time. A link made a
-year ago is judged by today's code, with no older version to fall back to and no version axis to read
-the link's age from.
-
-**Decided already, so it is not re-derived:** **ids in links stay human-readable** — `swap-open-catalog`,
-not a UUID. A UUID prevents an accidental rename and nothing else; a build check catches that too, and
-the id is what a failing test, a debug message and a documentation URL all show a person. A UUID also
-hides the one failure no check can catch — the id staying while the thing it names drifts.
-
-**Deliberately not designed further** (Simon, same day: *"I am over engineering it"*). This is the
-problem, written down.
-
 ## 42. The clipboard, read at a glance — expand all, and cards worth expanding
 
 **Reported 2026-09-10 (a trainer, via Simon):** the clipboard *"mora biti bolj pregleden"* — the deck
@@ -5266,3 +5206,161 @@ Open before either, and the second is where the weight is:
 work actually felt, and what the client did between sessions — arrive as data instead. That is the
 same argument the asynchronous plan adjustments in
 [uc2_async_plan_adjustments.md](use_cases/uc2_async_plan_adjustments.md) already won.
+
+### 43.1 Three features, not two — and the aim is the third
+
+**Aimed 2026-09-10 (Simon):** *"ciljava na post workout feedback"*.
+
+The two above split into three once you ask **when** the client is holding their phone, and the three
+have different costs:
+
+1. **Plan sharing** — she looks at her programme between sessions. A publishing problem.
+2. **In-session self-report** — she presses Too Easy / Too Hard herself, on the floor, while the
+   trainer is standing there.
+3. **Post-workout feedback** — hours or days later, at home: how it felt, whether it hurt the next
+   morning, whether she slept.
+
+**The third is the target, and it is also the strongest of the three.** It carries what the trainer
+cannot get on the floor at all. Soreness arrives 48 hours after the session that caused it; the
+trainer is not there and the clipboard is closed. Today that information reaches them as a chat
+message at 21:00, against no session and no exercise, and is gone by the time next week's plan is
+written.
+
+It is also the cheapest: **once per session, tiny, asynchronous, and it has a screen already** —
+pending review, which [uc2_async_plan_adjustments.md](use_cases/uc2_async_plan_adjustments.md)
+built for exactly this shape of arrival.
+
+**Against the second.** In-session self-report is the one to be most careful with, because it looks
+like a small addition to something that already exists and is not. Too Easy / Too Hard are already
+on the cards ([exerciseCard.js](src/modules/clipboard/exerciseCard.js),
+[circuitCard.js](src/modules/clipboard/circuitCard.js)) as the **trainer's** signals. A client
+pressing the same button is **not the same measurement wearing a second author** — the trainer's is
+an observation, hers is a perception, and *the gap between them is the useful part*: she says brutal,
+the trainer saw easy, and that is the conversation. **They must never share a field.** Merged, the
+plan adjustment is fed a contradiction and nobody can tell afterwards which of the two it obeyed.
+
+### 43.2 The carrier is the problem, not the feature
+
+**There is no server, and that is the whole product.** Every client-to-trainer message today is a
+file the client sends through their own messaging app
+([signupDelivery.js](src/modules/intake/signupDelivery.js)).
+
+**That works at intake because intake happens once**, and the payoff is immediate and obvious: fill
+this in and you get to train. Post-workout feedback is the opposite — a **repeated** act with a
+diffuse payoff. A client will do it twice and then stop, and a feature that decays to nothing is
+worse than none, because the trainer will have stopped asking in person.
+
+So the design question is not what the client's screen looks like. It is **what carries a small
+message from her phone to the trainer's, every week, for a year, with no server.** Every answer has
+a cost that must be named before anything is built:
+
+- **A file per session, sent by hand.** Works today, nothing to build, and it is the one that decays.
+- **A page she keeps** that accumulates answers locally — then still has to hand them over, with the
+  same problem one step later.
+- **The trainer's Drive as a drop box.** Breaks the privacy posture: it is the trainer's own storage,
+  and giving clients write access to it is not a small change to §3.9.
+- **A server.** Answers it properly and ends the product this is.
+
+### 43.3 The cheap shape: build the ask and the filing, not a client app
+
+The version that fits the architecture instead of fighting it, and is a fraction of the work:
+
+- **The app composes the question** — the same shape as the intake invitation
+  ([intakeInvite.js](src/modules/clients/intakeInvite.js)), which already solves "a message from an
+  unknown number that must not read like phishing": the trainer's name first, one tap to send.
+- **The client answers in an ordinary chat**, which is where she already messages the trainer at
+  21:00 anyway. Nothing to install, nothing to keep, nothing to update.
+- **The app makes it one tap to file that reply** against the right session and the right client, and
+  pending review is where it lands.
+
+**A client-side app is a second product** — its own onboarding, its own updates, and support calls
+from people who are not the trainer's customers and cannot be reached. The intake page is the
+precedent for how far to go: a stateless page with no database, used once.
+
+### 43.4 Two things to decide that are not technical
+
+- **Duty to read.** If the app accepts a message saying someone is in pain, there is an expectation
+  that it is read. The product's own disclaimer says this is not medical or coaching advice, and an
+  unread pain report three days old is a professional problem rather than a bug. **Whether the app
+  may accept health information it does not promise to surface is the first question**, ahead of any
+  screen.
+- **Health data on a second device.** A client typing about her knee creates health data outside the
+  trainer's device and a channel carrying it. The consent form
+  ([docs/templates/](docs/templates/INDEX.md)) covers what the **trainer** holds. It would have to
+  cover this, in the same pass, or the feature ships ahead of the paperwork that legitimises it.
+
+### 43.5 What it fixes in the demo
+
+The evening chapter's card promises *"kaj se zgodi z zapiski, ki si jih delal med serijami"* — what
+happens to the notes taken between sets — and then changes the colour theme. A client's reply landing
+in pending review and turning into next week's plan **is** that payoff, and the chapter has been
+missing it since it was written.
+
+### 43.6 And if plan sharing is built anyway: date the copy
+
+Not the aim, but worth recording so it is not re-derived. The moment the client holds a copy, the
+trainer's clipboard is no longer the only one: a movement swapped on Tuesday leaves her copy saying
+the old one, with nothing telling either of them. That is [§44](TODO.md) — silent rot — with a person
+doing the wrong exercise at the end of it.
+
+**A read-only snapshot, stamped with the day it was taken, that says plainly it is a copy.** Naming
+the staleness defuses it. Pretending to sync without a server is what produces the injury.
+
+
+## 44. [Idea] Detect and report stale or dead links, across versions
+
+**Asked 2026-09-10 (Simon):** *"a way to detect and report stale or dead deep links passed around the
+internet (across versions)"*, then, on reading a first draft that covered only the demo:
+*"stale link detection ni samo za demo, temveč za vse"* — not only the demo, all of them.
+
+*(First written the same day and lost: commit `283254e` rewrote the tail of this file and deleted the
+section. Restored and broadened.)*
+
+**Every link this app hands out is a promise made to a page that will keep changing.** They get pasted
+into chats, forum posts, calendar invites and user documentation, and then they sit there for months.
+
+**The general defect: every one of them degrades silently, deliberately.**
+[shareLink.js](src/modules/common/shareLink.js) — the module that reads promo and deep-link
+parameters off the address — documents the fallback for each: an unknown `theme` gives the default
+theme, an unknown `lang` the saved one, an unknown `chapter` the whole story, an unknown `demo` or
+`init` nothing at all, and an absent or unrecognised `workspace` **the trainer's own database rather
+than the sandbox**. Routes do the same: `resumeWalkthroughAt` in
+[domain/walkthrough.js](src/domain/walkthrough.js) starts the demo from the beginning when the step
+id is gone.
+
+Each of those fallbacks is right on its own. A mistyped link pasted into a chat should still show a
+stranger something rather than an error page. Together they mean **no link can ever be observed to
+have rotted** — it keeps working and shows the wrong thing.
+
+**The links in question, and they are not all the demo's:**
+
+- demo deep links naming a step or a chapter;
+- promo links carrying `lang`, `theme`, `init`, `workspace`;
+- app routes naming a session date or a client id — a link to a client since deleted;
+- the **client intake link** in an invitation, and the privacy-notice URL sent beside it, both of
+  which leave the app and land in somebody's messages;
+- links inside this repository's own documentation.
+
+**Two halves, and they are different problems.**
+
+- **Links inside this repository** are ours to check.
+  [agent_tools/doclinks.py](agent_tools/doclinks.py) — the tool that resolves every Markdown link,
+  anchor and `§`-reference and fails the build on a dead one — could resolve the app's own link
+  vocabulary too: a `step=` that names no step, a `theme=` that names no theme.
+- **Links out in the world** cannot be checked from here. What is possible is for the **app** to
+  notice it was handed a value it does not recognise, and report it rather than silently substituting
+  a default. Where such a report goes, and whether a stranger's first screen is the right place to
+  raise it, is the open question.
+
+**"Across versions" is why this is not just a build check.** There are no release tags and no
+multi-version hosting ([§16](TODO.md), [§18](TODO.md)) — one build is live at a time. A link made a
+year ago is judged by today's code, with no older version to fall back to and no version axis to read
+the link's age from.
+
+**Decided already, so it is not re-derived:** **ids in links stay human-readable** — `swap-open-catalog`,
+not a UUID. A UUID prevents an accidental rename and nothing else; a build check catches that too, and
+the id is what a failing test, a debug message and a documentation URL all show a person. A UUID also
+hides the one failure no check can catch — the id staying while the thing it names drifts.
+
+**Deliberately not designed further** (Simon, same day: *"I am over engineering it"*). This is the
+problem, written down.
