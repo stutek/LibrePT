@@ -74,9 +74,11 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
   from `git status --short`. **Never push.**
 - Commit messages: `type(scope): imperative summary` (lowercase, ≤72 chars), blank line, body
   wrapped at 72 saying **why**, `Co-Authored-By:` the model actually running.
-- **Run `.venv/bin/python -m build check` in full before every code commit**, unpiped, announcing
-  its printed finish time first, and report the result. Prose-only commits run
-  `.venv/bin/python -m agent_tools.doclinks` instead, and say so.
+- **Run `.venv/bin/python -m build check` in full before every code commit**, unpiped, and report
+  the result. **Say the clock time it will finish BEFORE launching it** — `.build-reports/last-run.json`
+  holds the last duration, so that is a time, not "a few minutes"; the run's own header prints the
+  same estimate. Prose-only commits run `.venv/bin/python -m agent_tools.doclinks` instead, and
+  say so.
 - Zero warnings, not just zero failures; never swallow a non-zero exit code. Never silence a
   failure, re-run it away or call it flaky — read the digest in `.build-reports/`.
 - Blame a slow stage on the run header before the change; a detected time jump means the machine
