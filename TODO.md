@@ -4541,25 +4541,23 @@ is where they belong.
 restore must not be able to put demo data into the trainer's own database. This overrides the earlier
 working assumption that a restore simply lands wherever the trainer happens to be.
 
-**The refusal belongs at the ingestion seam, not at the button.** [backupRestore.js](src/modules/common/backupRestore.js)
-already filters incoming records once, through `applySuppressions`, for exactly this class of reason —
-something that must not come back in. Demo provenance is the second such filter, and putting it there
-covers every path in, not only the one with a file picker.
+**One exact test, not two.** The backup file **declares the workspace it was written in**, and a file
+declaring the demo workspace is refused whole on the way into the working one. A restore that silently
+landed nothing would be a failure reported as a success, so it is a refusal with a reason, not a
+filter.
 
-Provenance is answered the same two ways [seedProvenance.js](src/data/seedProvenance.js) already
-answers it, plus one that is now free:
+**Ruled 2026-09-10 (Simon):** *"produkcijski backup naj ne ločuje (starih) demo vnosov, install base
+je premajhen, da bi to skrbela"* — a file written before this ships carries no declaration, and its
+seeded records ride back in untouched. This drops the per-record filter that was proposed here.
 
-1. **The file declares its workspace.** Written by this build, exact.
-2. **The stamp and the committed seed id set.** Covers every file written before this ships.
+It costs nothing real. Such a file came from a mixed database, so restoring it returns exactly the
+database the trainer already had — no loss and no surprise — and the rule that matters holds anyway:
+nothing can flow *out of the demo workspace* into the working one, because the demo workspace only
+ever writes declared files. The heuristic half of [seedProvenance.js](src/data/seedProvenance.js) (the
+committed seed id set) is therefore not needed on this path at all; it stays only for UC7's one-time
+cleaner (§40.8).
 
-What happens on a restore into the working workspace:
-
-- A file that declares itself from the demo workspace is **refused whole**. A restore that silently
-  landed nothing would be a failure reported as a success.
-- An older file carrying seeded records has them **dropped on the way in**, and the status line says
-  how many — the same shape as the existing "N previously-erased client(s) were re-anonymised on
-  import" notice. Silently thinner data is the surprise this codebase keeps refusing to ship.
-- Into the demo workspace, nothing is filtered: it is the workspace where sample data belongs.
+Into the demo workspace nothing is refused: it is the workspace where sample data belongs.
 
 Drive sync needs no separate rule. The `driveSync` file id and ancestor are per workspace (§40.1), so
 the working workspace never reads the demo workspace's file — the isolation is the same one that keeps
