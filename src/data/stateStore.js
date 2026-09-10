@@ -50,8 +50,15 @@ import {
 import { LIVE_SCHEMAS } from "./recordSchemas.js";
 import { describeMigration, migrateState } from "./schemaMigrations.js";
 import { stampAsSeeded } from "./seedProvenance.js";
-import { readVersionScoped, writeVersionScoped } from "./storageNamespace.js";
-import { enqueueWrite } from "./writeQueue.js";
+import { clearWorkspaceKeys, readVersionScoped, writeVersionScoped } from "./storageNamespace.js";
+import {
+  SANDBOX,
+  activeWorkspace,
+  databaseNameFor,
+  isWorkspace,
+  setActiveWorkspace,
+} from "./workspace.js";
+import { enqueueWrite, flushWrites } from "./writeQueue.js";
 
 let state = emptyState();
 // What the last load's schema migration did (or refused to do) — read by the UI so an upgrade can
@@ -171,8 +178,25 @@ function indexedDbSupported() {
 }
 
 function getDb() {
-  if (!dbPromise) dbPromise = openDatabase({ schemas: SCHEMAS });
+  // Named for the ACTIVE workspace (TODO §40.2). The working workspace resolves to `librept`, which
+  // is what every install already has — the sandbox is a second database that does not exist until
+  // somebody enters it.
+  if (!dbPromise) dbPromise = openDatabase({ schemas: SCHEMAS, name: databaseNameFor() });
   return dbPromise;
+}
+
+// Let go of the open connection before the workspace changes. A connection left open would keep
+// serving the OLD database to anything still holding the promise, and — worse — would block the
+// `deleteDatabase` a sandbox reset performs, which IndexedDB signals only by never completing.
+async function closeDb() {
+  if (!dbPromise) return;
+  const pending = dbPromise;
+  dbPromise = null;
+  try {
+    (await pending).close();
+  } catch (e) {
+    console.error("Failed to close the database before switching workspace.", e);
+  }
 }
 
 async function readMeta(db, key) {
@@ -456,17 +480,106 @@ export function onBackupRecorded(listener) {
   backupRecordedListener = listener;
 }
 
+// The sandbox's own bookkeeping (TODO §40.4): when it was seeded, and when the trainer last declined
+// the offer to reseed it. Both are facts about ONE workspace, so they live in that workspace's own
+// meta store — which is also why a reset needs to remember neither: deleting the database takes them
+// with it, and after a reset there is nothing to decline.
+const SANDBOX_META_KEY = "sandbox";
+
+export async function readSandboxMeta() {
+  if (!indexedDbSupported()) return null;
+  const db = await getDb();
+  const entry = await readMeta(db, SANDBOX_META_KEY);
+  return entry?.value || null;
+}
+
+async function writeSandboxMeta(patch) {
+  if (!indexedDbSupported()) return;
+  const db = await getDb();
+  const current = (await readMeta(db, SANDBOX_META_KEY))?.value || {};
+  const value = { ...current, ...patch };
+  await withTransaction(db, [META_STORE], "readwrite", ({ store }) => {
+    store(META_STORE).put({ key: SANDBOX_META_KEY, value });
+  });
+}
+
+/** Record that the trainer said no to reseeding a stale sandbox, starting the cooldown (§40.4). */
+export async function recordSandboxOfferDeclined(now = Date.now()) {
+  await writeSandboxMeta({ staleOfferDeclinedAt: now });
+}
+
+// Fill an empty sandbox and stamp when that happened. `seededAt` is what staleness is measured
+// against — the seed generates its sessions relative to "now" (data/sessions.js), so the age of the
+// seeding is exactly the age of the board it produced.
+async function seedSandbox(now = Date.now()) {
+  seedMockData();
+  await writeSandboxMeta({ seededAt: now, staleOfferDeclinedAt: null });
+}
+
+/**
+ * Point the app at another workspace and load it (TODO §40.3).
+ *
+ * Re-renders rather than reloading the page: a reload costs the splash hold, the open view and any
+ * half-filled dialog, and it puts a service-worker fetch in the path of a switch that may happen mid
+ * session. The caller re-renders and resets the route; this function owns storage only.
+ *
+ * The queue is drained BEFORE the connection closes, or an enqueued write of the workspace being
+ * left would flush against the database being entered.
+ */
+export async function switchWorkspace(name, { now = Date.now() } = {}) {
+  if (!isWorkspace(name) || name === activeWorkspace()) return getState();
+  await flushWrites();
+  await closeDb();
+  setActiveWorkspace(name);
+  lastMigrationSummary = null;
+  await loadSavedState();
+  // An empty sandbox is one nobody has entered yet. The working workspace is never seeded here: it
+  // is seeded only by an explicit `?init=demo_data_load` (§40.7), which is what keeps the existing
+  // e2e suite testing the app the trainer will actually use.
+  if (name === SANDBOX && !stateHasData()) await seedSandbox(now);
+  return getState();
+}
+
+/**
+ * Throw away the sandbox and build a fresh one (TODO §40.4).
+ *
+ * Deleting the whole database is the point: it is one call that CANNOT reach the trainer's own
+ * records, where clearing by record or by name pattern inside a shared database could. Only ever
+ * runs against the sandbox — a guard, because this is the one operation in the app whose name does
+ * not say which database it deletes.
+ */
+export async function resetSandbox({ now = Date.now() } = {}) {
+  if (activeWorkspace() !== SANDBOX) return getState();
+  await flushWrites();
+  await closeDb();
+  clearWorkspaceKeys(SANDBOX);
+  try {
+    await deleteDatabase(databaseNameFor(SANDBOX));
+  } catch (e) {
+    console.error("Failed to delete the sandbox database during reset.", e);
+  }
+  setState(emptyState());
+  await loadSavedState();
+  await seedSandbox(now);
+  return getState();
+}
+
 export async function resetLibrePTData(options = {}) {
   const { demo = true } = options || {};
   for (const k of Object.keys(localStorage)) {
     if (k.startsWith("librept") || k.startsWith("openpt")) localStorage.removeItem(k);
   }
   if (indexedDbSupported()) {
-    dbPromise = null;
-    try {
-      await deleteDatabase(DATABASE_NAME);
-    } catch (e) {
-      console.error("Failed to delete IndexedDB database during reset.", e);
+    await closeDb();
+    // BOTH databases (TODO §40). The key sweep above already takes the sandbox's suffixed keys and
+    // the workspace pointer with it, so a reset that left the sandbox database standing would leave
+    // a database nothing points at — and a trainer who was told everything was removed.
+    for (const name of [DATABASE_NAME, databaseNameFor(SANDBOX)]) {
+      try {
+        await deleteDatabase(name);
+      } catch (e) {
+        console.error(`Failed to delete IndexedDB database "${name}" during reset.`, e);
+      }
     }
   }
   const url = new URL(window.location.href);
