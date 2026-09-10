@@ -52,6 +52,17 @@ export function removeVersionScoped(baseKey) {
   localStorage.removeItem(scopedKey(baseKey));
 }
 
+/** Read/write a per-workspace key belonging to a NAMED workspace rather than the active one — what
+ * the timer stack needs to watch the clocks of the workspace the trainer is not looking at
+ * (TODO §40.11). Kept here so localStorage key construction has one home. */
+export function readForWorkspace(baseKey, name) {
+  return localStorage.getItem(scopedKey(baseKey, name));
+}
+
+export function writeForWorkspace(baseKey, name, value) {
+  localStorage.setItem(scopedKey(baseKey, name), value);
+}
+
 /** Drop every per-workspace key belonging to `name` — what a sandbox reset clears alongside the
  * database (TODO §40.4). Total by construction: it walks the declared list rather than matching a
  * pattern, so a key added to `VERSION_SCOPED_KEYS` is swept without anybody remembering to add it

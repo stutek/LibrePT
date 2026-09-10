@@ -15,12 +15,29 @@
 //     still counts (and can already be negative).
 //   • The only control is dismiss (✕); there is no pause / ±15s — a running timer just runs.
 //
-// deps: { t } (translator; the controller resolves client name/id and passes them to startTimer)
+//   • A timer belongs to a WORKSPACE, and the clocks do not stop when the trainer steps out of one
+//     (TODO §40.11). One rule covers it: **the trainer's own work always beeps, wherever they are;
+//     the sandbox beeps only in the sandbox.** So a rest period does not pass unheard because
+//     somebody went to look something up in the demo — that being exactly when they would — and a
+//     demonstration never interrupts real work. A timer that finishes in the trainer's own work
+//     while they are in the sandbox also NAMES itself, because "a timer somewhere finished" is not
+//     something anybody can act on.
+//
+// deps: { t } (translator; the controller resolves client name/id and passes them to startTimer),
+//       { onReturnToWork } (leaves the sandbox for the workspace the expired timer belongs to)
 
-import { readVersionScoped, writeVersionScoped } from "../../data/storageNamespace.js";
+import {
+  readForWorkspace,
+  readVersionScoped,
+  writeForWorkspace,
+  writeVersionScoped,
+} from "../../data/storageNamespace.js";
+import { SANDBOX, WORKING, activeWorkspace } from "../../data/workspace.js";
+import { openSandboxTimerDialog } from "../common/sandboxDialogs.js";
 import { escapeHTML } from "../common/utils.js";
 
-// Version-scoped: a persisted timer carries the running build's session/focus shape.
+// Version-scoped: a persisted timer carries the running build's session/focus shape. Also
+// workspace-scoped (TODO §40.1), which is what lets the two sets of clocks exist side by side.
 const STORE_KEY = "librept_active_timers";
 
 let deps = {};
@@ -36,7 +53,14 @@ let deps = {};
 // A stopped timer no longer ticks — it holds at frozenSeconds (whatever remaining/elapsed was at the
 // moment it was stopped) — but stays in the stack, dismiss-only, until the trainer taps ✕.
 let timers = {};
+// The OTHER workspace's timers: ticked, never drawn. They are what makes a rest period survive the
+// trainer stepping into the sandbox — the stack shows the workspace they are looking at, while the
+// clocks of the one they left keep running underneath (TODO §40.11).
+let otherTimers = {};
 let tickIntervalId = null;
+// Set once per expiry, so the card that names an expired timer is not reopened every second while
+// it is on screen.
+let announcing = false;
 
 export function initRestTimer(d) {
   deps = d || {};
@@ -130,38 +154,73 @@ const cssEscape = (s) =>
 
 export function clearAllTimers() {
   timers = {};
-  stopTicking();
   persist();
   renderStack();
+  // Only THIS workspace's timers were cleared. A session starting in the sandbox must not silence a
+  // rest period running in the trainer's own work (TODO §40.11).
+  if (allTimers().length === 0) stopTicking();
 }
 
 // Rehydrate the stack from localStorage (called when a session is recovered on reload). Each timer
 // recomputes its remaining time from the stored absolute end time.
 export function restoreSessionTimers() {
+  timers = parseTimers(
+    safely(() => readVersionScoped(STORE_KEY)),
+    activeWorkspace(),
+  );
+  otherTimers = parseTimers(
+    safely(() => readForWorkspace(STORE_KEY, otherWorkspace())),
+    otherWorkspace(),
+  );
+  renderStack();
+  ensureTicking();
+}
+
+// The workspace the trainer is NOT in. There are two, so this is a name rather than a lookup.
+function otherWorkspace() {
+  return activeWorkspace() === SANDBOX ? WORKING : SANDBOX;
+}
+
+function safely(read) {
   try {
-    const raw = readVersionScoped(STORE_KEY);
-    timers = {};
-    if (raw) {
-      const list = JSON.parse(raw);
-      if (Array.isArray(list)) {
-        for (const timer of list) {
-          if (timer?.clientId) timers[timer.clientId] = timer;
-        }
-      }
+    return read();
+  } catch (e) {
+    console.warn("Could not read timers:", e);
+    return null;
+  }
+}
+
+// Every timer is STAMPED with the workspace it was read out of, rather than trusting a mark inside
+// the stored record: the store it came from IS the fact, and a second copy of it could disagree.
+function parseTimers(raw, workspace) {
+  const parsed = {};
+  if (!raw) return parsed;
+  try {
+    const list = JSON.parse(raw);
+    if (!Array.isArray(list)) return parsed;
+    for (const timer of list) {
+      if (timer?.clientId) parsed[timer.clientId] = { ...timer, workspace };
     }
   } catch (e) {
     console.warn("Could not restore timers:", e);
-    timers = {};
   }
-  renderStack();
-  ensureTicking();
+  return parsed;
+}
+
+/** Re-read both sets after the workspace changed under us (TODO §40.3): what was the other
+ * workspace's is now the stack, and what was the stack is now ticking underneath. The interval is
+ * deliberately NOT stopped — a running rest period must survive the switch that caused this. */
+export function rebindTimersToWorkspace() {
+  restoreSessionTimers();
 }
 
 function closeTimer(clientId) {
   delete timers[clientId];
   persist();
   renderStack();
-  if (Object.keys(timers).length === 0) stopTicking();
+  // The other workspace's clocks count here too: dismissing the last card on screen must not stop a
+  // rest period still running in the work the trainer stepped away from (TODO §40.11).
+  if (allTimers().length === 0) stopTicking();
 }
 
 // Freeze a client's timer in place — e.g. once the exercise/circuit it belongs to is marked
@@ -210,16 +269,18 @@ const elapsedOf = (timer) =>
     : null;
 
 function ensureTicking() {
-  if (tickIntervalId || Object.keys(timers).length === 0) return;
+  if (tickIntervalId || allTimers().length === 0) return;
   tickIntervalId = setInterval(tick, 1000);
 }
+
+const allTimers = () => [...Object.values(timers), ...Object.values(otherTimers)];
 function stopTicking() {
   if (tickIntervalId) clearInterval(tickIntervalId);
   tickIntervalId = null;
 }
 
 function tick() {
-  if (Object.keys(timers).length === 0) {
+  if (allTimers().length === 0) {
     stopTicking();
     return;
   }
@@ -235,7 +296,50 @@ function tick() {
     persist(); // remember the beep so a reload past zero doesn't re-alert
     playTimerAlert();
   }
+  tickTheOtherWorkspace();
   updateTimes();
+}
+
+// The workspace the trainer is not looking at. One rule decides what they hear (TODO §40.11): the
+// trainer's OWN work beeps wherever they are and says whose rest is over; the sandbox's timers
+// expire in silence while they are back at work. Either way the crossing is recorded, so returning
+// does not replay an alert for a timer that finished an hour ago.
+function tickTheOtherWorkspace() {
+  const expired = [];
+  for (const timer of Object.values(otherTimers)) {
+    if (timer.countUp || timer.beeped) continue;
+    if (remainingOf(timer) > 0) continue;
+    timer.beeped = true;
+    expired.push(timer);
+  }
+  if (expired.length === 0) return;
+  persistOtherWorkspace();
+
+  const fromTheirOwnWork = expired.filter((timer) => timer.workspace === WORKING);
+  if (fromTheirOwnWork.length === 0 || announcing) return;
+  playTimerAlert();
+  announceExpiredWork(fromTheirOwnWork[0]);
+}
+
+function announceExpiredWork(timer) {
+  announcing = true;
+  const done = () => {
+    announcing = false;
+  };
+  openSandboxTimerDialog({
+    t: (key) => t(key, key),
+    // The words a trainer can act on: whose rest, and what it was for.
+    which: [timer.clientName, timer.label].filter(Boolean).join(" — "),
+    onReturn: () => {
+      done();
+      deps.onReturnToWork?.(timer.workspace);
+    },
+    onDiscard: () => {
+      done();
+      delete otherTimers[timer.clientId];
+      persistOtherWorkspace();
+    },
+  });
 }
 
 // ---- rendering -------------------------------------------------------------------------------
@@ -245,6 +349,16 @@ function persist() {
     writeVersionScoped(STORE_KEY, JSON.stringify(Object.values(timers)));
   } catch (e) {
     console.warn("Could not persist timers:", e);
+  }
+}
+
+// Written back to the key it came out of, never to the active one — the whole point of the second
+// set is that it belongs somewhere else.
+function persistOtherWorkspace() {
+  try {
+    writeForWorkspace(STORE_KEY, otherWorkspace(), JSON.stringify(Object.values(otherTimers)));
+  } catch (e) {
+    console.warn("Could not persist the other workspace's timers:", e);
   }
 }
 

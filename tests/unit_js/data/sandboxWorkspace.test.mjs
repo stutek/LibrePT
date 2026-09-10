@@ -9,6 +9,7 @@
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { backupWorkspace, refusesRestoreInto } from "../../../src/data/backupFile.js";
 import {
   OFFER_COOLDOWN_MS,
   STALE_AFTER_MS,
@@ -124,4 +125,21 @@ test("a clock that moved backwards does not make the sandbox stale", () => {
   const seededAt = 1_000_000_000_000;
   const result = sandboxStaleness({ seededAt }, seededAt - 5 * 60 * 60 * 1000);
   assert.deepEqual({ stale: result.stale, ageMs: result.ageMs }, { stale: false, ageMs: 0 });
+});
+
+test("a backup written in the sandbox is refused into the trainer's own work", () => {
+  // TODO §40.10. One rule, one direction: sample data may never enter the working database, while a
+  // real backup restored INTO the sandbox is one of the more useful things it offers.
+  const fromSandbox = { workspace: SANDBOX, clients: [] };
+
+  assert.equal(refusesRestoreInto(fromSandbox, WORKING), true);
+  assert.equal(refusesRestoreInto(fromSandbox, SANDBOX), false);
+  assert.equal(refusesRestoreInto({ workspace: WORKING, clients: [] }, WORKING), false);
+});
+
+test("a file written before files said where they came from is restored as it always was", () => {
+  // Ruled 2026-09-10: the install base is too small to filter old mixed backups. Such a file came
+  // out of a mixed database, so restoring it returns exactly what the trainer had.
+  assert.equal(backupWorkspace({ clients: [] }), null);
+  assert.equal(refusesRestoreInto({ clients: [] }, WORKING), false);
 });

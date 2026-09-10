@@ -599,6 +599,20 @@ export async function switchWorkspace(name, { now = Date.now() } = {}) {
   return getState();
 }
 
+/** Delete the sandbox database and its keys outright, leaving nothing to build back — what a
+ * support wipe removes (TODO §40). Safe from either workspace: it names the sandbox's database
+ * explicitly and never touches the working one. */
+export async function deleteSandboxDatabase() {
+  if (activeWorkspace() === SANDBOX) await closeDb();
+  clearWorkspaceKeys(SANDBOX);
+  if (!indexedDbSupported()) return;
+  try {
+    await deleteDatabase(databaseNameFor(SANDBOX));
+  } catch (e) {
+    console.error("Failed to delete the sandbox database.", e);
+  }
+}
+
 /**
  * Throw away the sandbox and build a fresh one (TODO §40.4).
  *
@@ -610,13 +624,7 @@ export async function switchWorkspace(name, { now = Date.now() } = {}) {
 export async function resetSandbox({ now = Date.now() } = {}) {
   if (activeWorkspace() !== SANDBOX) return getState();
   await flushWrites();
-  await closeDb();
-  clearWorkspaceKeys(SANDBOX);
-  try {
-    await deleteDatabase(databaseNameFor(SANDBOX));
-  } catch (e) {
-    console.error("Failed to delete the sandbox database during reset.", e);
-  }
+  await deleteSandboxDatabase();
   setState(emptyState());
   await loadSavedState();
   await seedSandbox(now);

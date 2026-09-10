@@ -23,8 +23,14 @@
 // Drive copy, an export already in somebody's mailbox: the app erases what it holds and nothing
 // more, and a support wipe that implied otherwise would be worse than none.
 //
+// **The sandbox goes with the device's own bookkeeping, not as a target of its own** (TODO §40).
+// Its stores carry the same names as the trainer's (`schema4` in both databases), so listing them
+// beside each other would ask somebody on a support call to tell two identical rows apart. It holds
+// sample data and nothing else, so there is nothing in it worth keeping back — it is removed
+// whole, with the unversioned target.
+//
 // Injected dependencies: `t`, `storeNames()`, `localStorageKeys()`, `clearStores(names)`,
-// `removeKeys(keys)`, `reload()`.
+// `removeKeys(keys)`, `removeSandbox()`, `reload()`.
 
 import { planDataWipe, wipeOperations, wipeSummary } from "../../data/dataWipe.js";
 import { closeModal, openModal, renderMarkupOnce } from "./dom.js";
@@ -158,6 +164,7 @@ async function confirmWipe() {
   document.getElementById("data-wipe-confirm").disabled = true;
   await deps.clearStores(operations.stores);
   deps.removeKeys(operations.localStorageKeys);
+  if (operations.localStorageKeys.length > 0) await deps.removeSandbox?.();
   closeModal("dialog-data-wipe");
   deps.reload();
 }

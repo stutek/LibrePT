@@ -16,6 +16,7 @@
 
 import {
   buildBackupPayload,
+  refusesRestoreInto,
   resolveBackupFormat,
   summarizeReplacement,
 } from "../../data/backupFile.js";
@@ -28,6 +29,7 @@ import {
 import { DEFAULT_SESSIONS } from "../../data/index.js";
 import { bringsDataForward, describeMigration, migrateState } from "../../data/schemaMigrations.js";
 import { recordBackupTaken } from "../../data/stateStore.js";
+import { activeWorkspace } from "../../data/workspace.js";
 import { catalogToCsv, catalogToInterchange } from "../../domain/exerciseStandard.js";
 import { BUILD_INFO } from "../../version.js";
 import { isOfflineCachedActive } from "./applicationHeader.js";
@@ -386,6 +388,8 @@ export function setupBackupRestore() {
       // Built at the newest NUMBERED schema, not at the runtime one (data/backupFile.js): a file
       // written at the unstable preview shape is restorable only by the build that wrote it.
       const payload = buildBackupPayload(deps.getState(), {
+        // Stamped by the writer, so a restore never has to guess where a file came from (§40.10).
+        workspace: activeWorkspace(),
         buildSha: typeof BUILD_INFO?.commit === "string" ? BUILD_INFO.commit : null,
         // Carried so the erasure register survives a reinstall — see erasureSuppression.js.
         suppressions: readSuppressionList(),
@@ -458,6 +462,14 @@ export function setupBackupRestore() {
               throw new Error(
                 `This backup is format version ${format.formatVersion}, which this version of LibrePT cannot open. Update LibrePT and try again — the file is unchanged.`,
               );
+            }
+
+            // Refused WHOLE, and here rather than at the button (TODO §40.10): this is the seam
+            // every file comes in through, and the erasure register is already filtered one line
+            // further on for the same class of reason — something that must not come back in.
+            // Sample data must never enter the trainer's own database; the other direction is fine.
+            if (refusesRestoreInto(importedData, activeWorkspace())) {
+              throw new Error(deps.t("restore_refused_sandbox_file"));
             }
 
             // A backup is restored WHOLE. Rebuilding a fixed set of collections here silently

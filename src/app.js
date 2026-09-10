@@ -56,6 +56,7 @@ import { newRecordId } from "./data/recordId.js";
 import { sandboxStaleness } from "./data/sandboxStaleness.js";
 import { SESSION_INVITE, SESSION_RSVP, decodeSessionEvent } from "./data/sessionEventPayload.js";
 import {
+  deleteSandboxDatabase,
   ensureSandboxSeeded,
   getState,
   loadSavedState,
@@ -455,6 +456,10 @@ async function init() {
     removeKeys: (keys) => {
       for (const key of keys) localStorage.removeItem(key);
     },
+    // The sandbox database, deleted whole rather than emptied store by store (TODO §40): it holds
+    // sample data only, and a wipe that left a second database standing would be a wipe that left
+    // something behind.
+    removeSandbox: () => deleteSandboxDatabase(),
     reload: () => window.location.reload(),
   });
 
@@ -471,6 +476,9 @@ async function init() {
 
   appBoot.bootRestTimer({
     t,
+    // A timer that finishes in the trainer's own work while they are in the sandbox offers the way
+    // back (TODO §40.11); this is that way back.
+    onReturnToWork: (name) => switchToWorkspace(name),
     onFocusTimer: (timer) => {
       if (!timer.sessionId || !timer.clientId) return;
       let path = `/session/${timer.sessionId}/client/${timer.clientId}`;
@@ -748,6 +756,9 @@ function renderEverything() {
 async function switchToWorkspace(name) {
   await switchWorkspace(name);
   renderEverything();
+  // The clocks do not stop: what was ticking underneath becomes the visible stack and the other way
+  // round (TODO §40.11). Deliberately not a teardown — a rest period must survive the switch.
+  appBoot.rebindTimers();
   navigateToPath("/");
   if (isSandbox()) await offerFreshSandboxIfStale();
 }

@@ -463,6 +463,8 @@ export const en = {
   data_wipe_confirm: "Erase it",
   menu_import_program: "Import a programme",
   menu_sandbox_enter: "Enter the sandbox",
+  restore_refused_sandbox_file:
+    "This file was made in the sandbox, so it cannot be restored into your own work. Open the sandbox and restore it there.",
   menu_sandbox_leave: "Leave the sandbox",
   sandbox_badge: "SANDBOX",
   sandbox_badge_desc: "Sandbox — nothing here is your own work. Open the risks & data-loss notice.",

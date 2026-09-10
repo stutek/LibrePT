@@ -42,6 +42,7 @@
 import { CURRENT_SCHEMA_VERSION } from "./migrationSteps.js";
 import { COLLECTIONS, collectionsForSchema, projectCollection } from "./recordProjections.js";
 import { BACKUP_SCHEMA, LIVE_SCHEMAS } from "./recordSchemas.js";
+import { SANDBOX } from "./workspace.js";
 
 // Settings that belong to the database rather than to any record. `schemaVersion` is set from
 // BACKUP_SCHEMA, not copied from the live state, which is the whole point of this module.
@@ -94,7 +95,7 @@ export function resolveBackupFormat(parsed) {
  */
 export function buildBackupPayload(
   state,
-  { buildSha = null, now = new Date(), suppressions = null } = {},
+  { buildSha = null, now = new Date(), suppressions = null, workspace = null } = {},
 ) {
   const payload = {
     // The envelope integer, first key in the file so it is the first thing a reader (or a human in a
@@ -111,6 +112,11 @@ export function buildBackupPayload(
     // What the app was actually RUNNING when this was written — reporting only. A restore keys off
     // `schemaVersion` above; this is here so "which preview produced this file" is answerable.
     runtimeSchema: CURRENT_SCHEMA_VERSION,
+    // Which workspace this file was written in (TODO §40.10). It is what lets a restore refuse to
+    // put sample data into the trainer's own database — one exact test, made by the writer, rather
+    // than a reader guessing from the records. A file written before this existed carries nothing
+    // here, and is restored as it always was.
+    workspace,
   };
 
   // The erasure register rides along, and it is the ONE part of this file that is not a snapshot of
@@ -142,6 +148,27 @@ export function buildBackupPayload(
 /** Whether a parsed file looks like one of ours, before anything is done with it. */
 export function isBackupPayload(parsed) {
   return Boolean(parsed) && typeof parsed === "object" && !Array.isArray(parsed);
+}
+
+/** The workspace a file says it came from, or null for one written before files said (TODO §40.10). */
+export function backupWorkspace(parsed) {
+  const named = parsed?.workspace;
+  return typeof named === "string" && named ? named : null;
+}
+
+/**
+ * Whether restoring `parsed` into workspace `target` must be refused (TODO §40.10).
+ *
+ * One rule, one direction: **nothing that was written in the sandbox may enter the trainer's own
+ * work.** The other direction is free — the sandbox is where sample data belongs, and a real backup
+ * restored in there is one of the more useful things it offers.
+ *
+ * A file with no declaration is NOT inspected record by record. Ruled 2026-09-10: the install base
+ * is too small for old mixed backups to be worth filtering, and such a file came out of a mixed
+ * database anyway, so restoring it returns exactly what the trainer had.
+ */
+export function refusesRestoreInto(parsed, target) {
+  return backupWorkspace(parsed) === SANDBOX && target !== SANDBOX;
 }
 
 /**

@@ -31,7 +31,11 @@ import {
   reviewSignupText,
   setupSignupReview,
 } from "./modules/clients/signupReviewDialog.js";
-import { initRestTimer, setupRestTimer } from "./modules/clipboard/exerciseAndRestTimer.js";
+import {
+  initRestTimer,
+  rebindTimersToWorkspace,
+  setupRestTimer,
+} from "./modules/clipboard/exerciseAndRestTimer.js";
 import {
   initApplicationHeader,
   setupApplicationHeader,
@@ -158,6 +162,12 @@ export function bootFeedbackModal(deps) {
 export function bootRestTimer(deps) {
   initRestTimer(deps);
   setupRestTimer();
+}
+
+/** Re-read both workspaces' timers after a switch (TODO §40.11). Re-exported here so app.js reaches
+ * the timer stack the same way it reaches everything else it boots. */
+export function rebindTimers() {
+  rebindTimersToWorkspace();
 }
 
 export function bootBackupRestore(deps) {
