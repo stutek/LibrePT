@@ -531,3 +531,25 @@ Two of them are worth naming before the sweep:
 `drive_sync_status_reauth` says *"**Seja** je potekla — dotaknite se za ponovno povezavo."* That is a
 **Google sign-in session**, not a training session. It must not become *trening*. It is the only one,
 and it is the reason the rename is done by reading each string rather than by replacing text.
+
+### Where `termin` survives
+
+**The line is what the word points at, not which screen it is on.** *Termin* is the slot in the
+diary — the *when*. *Trening* is the thing that happens — the *what*. If *ura* or *čas* could stand
+in its place, it is a termin.
+
+**The calendar feature already agrees.** `session_invite_sms_text` and `session_invite_subject` both
+say **"Trening"** — and those two are what the client actually reads, in the SMS and the email
+subject. It is `session_invite_body` (*"Razporejeni ste na **sejo**"*) and `session_invite_desc`
+(*"vabilo v koledar za to **sejo**"*) that are out of step, on that same feature.
+
+So of the six strings that say *termin* today, three stay and three do not:
+
+| string | today | verdict |
+| :-- | :-- | :-- |
+| `schedule_conflict_confirm` | "Ta **termin** se prekriva… Želite **sejo** razporediti?" | **termin stays** — the slot is what overlaps. *seja* → *trening*, so both words end up in one sentence, each doing its own job |
+| `plan_fit_hint` | "trajanje **termina**" | **stays** — it is the booked length the plan has to fit inside |
+| `story_step_intake_email` | "Kam naj ji pošlje **termine**" | **stays** — you send someone their times |
+| `demo_cleanup_desc` | "stranke, **termini** in zapisi" | → **treningi** — these are records, not slots |
+| `demo_cleanup_sessions` | "vzorčnih **terminov**" | → **vzorčnih treningov** |
+| `story_step_open_session` | "imata skupen **termin**" | → **skupen trening** — the story means they train together |
