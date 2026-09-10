@@ -38,16 +38,36 @@
    size a peeking card can afford. Smaller and quieter than the open list on purpose — this is the
    trainer reading what is coming, not working through it, and a collapsed card that shouted as
    loudly as the focused one would take the focus away from the card that has it. */
+/* ONE LINE PER MOVEMENT, name and target in the same phrase (TODO §42.6).
+   Three shapes were tried in front of the maintainer. Right-aligned targets left short names a
+   hand's width from their own numbers ("hard to read … kadar so tako daleč odmaknjeni od imena
+   vaje"). Columns sized to the longest name closed that gap but made every card start its numbers
+   somewhere else, and left the round badge aligned to nothing ("izgled je malce neroden … števec
+   round je neusklajen"). A column that has to line up with a badge above it is a table pretending
+   to be a summary.
+   So there is no column: the target follows the name the way the collapsed exercise card already
+   writes its own ("S4 × R6 × 60kg"), and nothing has to be aligned with anything. */
 .circuit-ex-summary {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 1px;
   margin-top: 4px;
 }
 .circuit-ex-summary .circuit-ex-head {
   margin-bottom: 0;
-  gap: 8px;
-  justify-content: space-between;
+  gap: 6px;
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+  min-width: 0;
+}
+.circuit-ex-summary .circuit-ex-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex-shrink: 1;
+}
+.circuit-ex-summary .circuit-ex-target {
+  flex-shrink: 0;
 }
 .circuit-ex-summary .circuit-ex-name {
   font-size: 12px;
@@ -147,3 +167,10 @@
   border: 1px dashed rgba(16, 185, 129, 0.3);
   border-radius: 8px;
 } /* Compact (collapsed) card: single peeking row — counter, name, target, status */
+
+/* The separator that makes name and target read as one phrase rather than two columns. Quiet: it is
+   punctuation, not information. */
+.circuit-ex-summary .circuit-ex-sep {
+  opacity: 0.4;
+  font-size: 11px;
+}

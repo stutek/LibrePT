@@ -467,7 +467,12 @@ def test_the_diagnosis_goes_to_the_console_not_to_the_trainer(page, local_server
     expect(page.locator(PROGRESS)).to_contain_text("2")
 
     page.locator("#active-session-overlay .view-grabber").click()
-    page.wait_for_timeout(600)
+    # Wait for the CONDITION, not for a stopwatch. Closing the overlay makes the guide notice its
+    # step's control is gone and re-lay the panel, and a fixed 600ms was long enough on a quiet
+    # machine and not on a busy one — this failed twice in the gate under load and never in
+    # isolation. What the next line needs is the Back button being clickable, so that is what is
+    # waited for.
+    expect(page.locator(BACK)).to_be_visible(timeout=15_000)
     page.locator(BACK).click()
     page.locator(NEXT).click()
     expect(page.locator("#active-exercise-scroll-deck")).to_be_visible(timeout=15_000)

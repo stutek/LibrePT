@@ -238,6 +238,7 @@ export class CircuitDeckCard extends DeckCard {
           return `
         <div class="circuit-ex-head">
           <span class="circuit-ex-name"><i class="fa-solid fa-hourglass-half"></i> ${t("rest_label")}</span>
+          <span class="circuit-ex-sep">·</span>
           <span class="circuit-ex-target"><span class="circuit-ex-reps">${escapeHTML(String(ex.rest))}s</span></span>
         </div>`;
         }
@@ -247,6 +248,7 @@ export class CircuitDeckCard extends DeckCard {
         return `
         <div class="circuit-ex-head">
           <span class="circuit-ex-name">${escapeHTML(ex.name)}</span>
+          <span class="circuit-ex-sep">·</span>
           <span class="circuit-ex-target"><span class="circuit-ex-reps">${escapeHTML(String(ex.repsTarget))}${load}</span></span>
         </div>`;
       })
