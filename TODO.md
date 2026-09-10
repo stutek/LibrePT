@@ -4511,5 +4511,56 @@ fixpoint dependency planner is not needed for it — but it cannot simply retire
 [demoDataRemoval.js](src/data/demoDataRemoval.js) (172 lines) and
 [seedProvenance.js](src/data/seedProvenance.js) (130 lines) are what a device whose database is
 *already* mixed needs on the way onto this design. **UC7 becomes the one-time migration**, and the
-document is rewritten as that rather than as a standing feature. The migration itself — what happens
-to an existing mixed install on first boot after the split — is the largest unwritten piece here.
+document is rewritten as that rather than as a standing feature.
+
+**Ruled 2026-09-10 (Simon):** a mixed install is **not split automatically**. Everything it holds
+stays in the working workspace, and UC7's cleaner is offered once. Splitting by the stamp would tear a
+demo client the trainer renamed and has been training for months away from the real records that
+reference them — the exact case `planDemoRemoval`'s fixpoint exists to protect, and it cannot be
+protected by a rule applied at boot without a trainer looking at it.
+
+### 40.9 Both "show me around" offers now open the demo workspace
+
+**Ruled 2026-09-10 (Simon):** *"oba v demo način"* — the splash's demo-data offer and the guided
+story/walkthrough both enter the demo workspace rather than seeding the working one.
+
+That is what makes the whole design honest: today the only way to see the product is to put sample
+people into the database the trainer is about to work in.
+[splashScreen.js](src/modules/splash/splashScreen.js)'s `guidedDemoUrl()` is the single builder behind
+both offers, so both move together.
+
+**The `?init=demo_data_load` parameter keeps its own meaning — seed the CURRENT workspace** (§40.7).
+The two do not collide: the buttons change where they lead, the parameter does not change what it
+does, and [conftest.py](tests/conftest.py)'s injection keeps every existing e2e test in the working
+workspace against production paths. The demo and walkthrough tests move into the demo workspace, which
+is where they belong.
+
+### 40.10 Demo data can never enter the working workspace
+
+**Ruled 2026-09-10 (Simon):** *"restore demo podatkov ne sme biti mogoč v produkcijsko bazo"* — a
+restore must not be able to put demo data into the trainer's own database. This overrides the earlier
+working assumption that a restore simply lands wherever the trainer happens to be.
+
+**The refusal belongs at the ingestion seam, not at the button.** [backupRestore.js](src/modules/common/backupRestore.js)
+already filters incoming records once, through `applySuppressions`, for exactly this class of reason —
+something that must not come back in. Demo provenance is the second such filter, and putting it there
+covers every path in, not only the one with a file picker.
+
+Provenance is answered the same two ways [seedProvenance.js](src/data/seedProvenance.js) already
+answers it, plus one that is now free:
+
+1. **The file declares its workspace.** Written by this build, exact.
+2. **The stamp and the committed seed id set.** Covers every file written before this ships.
+
+What happens on a restore into the working workspace:
+
+- A file that declares itself from the demo workspace is **refused whole**. A restore that silently
+  landed nothing would be a failure reported as a success.
+- An older file carrying seeded records has them **dropped on the way in**, and the status line says
+  how many — the same shape as the existing "N previously-erased client(s) were re-anonymised on
+  import" notice. Silently thinner data is the surprise this codebase keeps refusing to ship.
+- Into the demo workspace, nothing is filtered: it is the workspace where sample data belongs.
+
+Drive sync needs no separate rule. The `driveSync` file id and ancestor are per workspace (§40.1), so
+the working workspace never reads the demo workspace's file — the isolation is the same one that keeps
+the merge ancestor correct.
