@@ -170,6 +170,38 @@ const SCHEMAS = liveSchemas();
 const IMPORTED_META_KEY = "imported";
 const LANG_META_KEY = "lang";
 
+// The chosen language is the PERSON's, not a workspace's (TODO §40.1) — the same reasoning that
+// already puts the theme and the accepted terms in plain, unscoped localStorage
+// (storageNamespace.js's ORIGIN_GLOBAL_KEYS). It used to live only in each database's meta store,
+// which was invisible until there were two databases: stepping into the sandbox produced a store
+// with no language in it, and the splash asked a trainer who had answered that question already.
+//
+// The meta copy is still written, and is still read when this key is absent — that is what carries
+// an install that chose its language before this existed.
+const LANG_KEY = "librept_lang";
+
+function readSharedLang() {
+  try {
+    return localStorage.getItem(LANG_KEY);
+  } catch {
+    return null;
+  }
+}
+
+// Never CLEARS the key, only sets it. A save whose state carries no language is a store that was
+// never asked, not an answer being withdrawn — and the sandbox's very first save is exactly that: a
+// fresh database, seeded empty, which was wiping the choice the trainer had already made and sending
+// them back to the language step on the way in. Forgetting a language is a full reset's job, and
+// that sweeps every `librept*` key anyway.
+function writeSharedLang(lang) {
+  if (!lang) return;
+  try {
+    localStorage.setItem(LANG_KEY, lang);
+  } catch {
+    // A browser refusing localStorage still runs the app; it just asks for the language again.
+  }
+}
+
 // Cached so boot and every subsequent save share one open connection rather than reopening it.
 let dbPromise = null;
 
@@ -214,6 +246,9 @@ async function readMeta(db, key) {
 // delete set (every id no longer present) into every live schema store plus meta bookkeeping, in
 // one transaction (TODO §18's fan-out).
 async function starWrite(db, currentState) {
+  // Outside the transaction on purpose: it is a synchronous localStorage write, and anything that
+  // is not an IDB request inside an open transaction ends it (see indexedDb.js's header).
+  writeSharedLang(currentState.lang);
   const staleIdsByCollection = {};
   // Reconciled against the store this install READS (readSchema.js) — the one whose id set is
   // authoritative for what the trainer is actually looking at.
@@ -313,6 +348,10 @@ function migrateLegacyBlob(savedData) {
 
 function finalizeLoadedState(candidate) {
   if (!candidate.sessions) candidate.sessions = [];
+  // The shared key wins over whatever this workspace's own store remembers: the trainer answered
+  // the language question once, as themselves, not once per database.
+  const shared = readSharedLang();
+  if (shared) candidate.lang = shared;
   // `lang` is deliberately NOT defaulted here. An install that predates the language prompt has
   // "en" already written to its meta store and reads back as chosen; a fresh one reads null and
   // gets asked. Filling it in would erase that difference again.
@@ -514,6 +553,26 @@ export async function recordSandboxOfferDeclined(now = Date.now()) {
 async function seedSandbox(now = Date.now()) {
   seedMockData();
   await writeSandboxMeta({ seededAt: now, staleOfferDeclinedAt: null });
+}
+
+/**
+ * Choose the workspace BOOT will load, before it loads (TODO §40.9).
+ *
+ * Separate from `switchWorkspace` below, which is the mid-session move and has a database open to
+ * drain and close. At boot there is nothing open yet, so a deep link asking for the sandbox is one
+ * assignment — and loading twice, once per workspace, is exactly the wasted work a first paint on a
+ * phone cannot afford.
+ */
+export function prepareWorkspaceForBoot(name) {
+  if (!isWorkspace(name) || name === activeWorkspace()) return;
+  setActiveWorkspace(name);
+}
+
+/** Fill the sandbox the first time anybody opens it (TODO §40.4). A no-op anywhere else — the
+ * working workspace is seeded only by an explicit `?init=demo_data_load` (§40.7). */
+export async function ensureSandboxSeeded({ now = Date.now() } = {}) {
+  if (activeWorkspace() !== SANDBOX || stateHasData()) return;
+  await seedSandbox(now);
 }
 
 /**

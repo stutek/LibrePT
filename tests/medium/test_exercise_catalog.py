@@ -52,7 +52,8 @@ function navigateToPath(path) {
 window.__state = state;
 
 setupExerciseForms({
-  state,
+  // The controller reads the state WHEN a handler runs, not when it was wired (TODO §40.3).
+  getState: () => state,
   t,
   saveToLocalStorage: noop,
   populateDropdownSelectors: noop,

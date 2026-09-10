@@ -53,19 +53,27 @@ import { driveSyncStatus, onSyncCountsChanged, primeAheadCache } from "./data/dr
 import { clearDatabaseStores, listDatabaseStores } from "./data/indexedDb.js";
 import { recordRsvp } from "./data/inviteRecord.js";
 import { newRecordId } from "./data/recordId.js";
+import { sandboxStaleness } from "./data/sandboxStaleness.js";
 import { SESSION_INVITE, SESSION_RSVP, decodeSessionEvent } from "./data/sessionEventPayload.js";
 import {
+  ensureSandboxSeeded,
   getState,
   loadSavedState,
   onBackupRecorded,
   onStateSaved,
+  prepareWorkspaceForBoot,
+  readSandboxMeta,
+  recordSandboxOfferDeclined,
   removeDemoData,
   resetLibrePTData,
+  resetSandbox,
   saveToLocalStorage,
   seedMockData,
   setState,
   stateHasData,
+  switchWorkspace,
 } from "./data/stateStore.js";
+import { isSandbox } from "./data/workspace.js";
 import { repsPresetsDatalistHTML } from "./domain/repsAndLoad.js";
 import { applyStaticDOMMappings } from "./i18n/domMappings.js";
 import { dictionaryFor, hasChosenLanguage, isSupportedLang, resolveLang } from "./i18n/index.js";
@@ -80,6 +88,7 @@ import {
   renderBuildStateBadge,
   renderHeaderShell,
   renderSyncBadge,
+  renderWorkspaceChrome,
   setOfflineCachedState,
 } from "./modules/common/applicationHeader.js";
 import { prepareBackupDialog } from "./modules/common/backupRestore.js";
@@ -97,6 +106,7 @@ import { openFeedbackModal } from "./modules/common/feedbackModal.js";
 import { renderNotificationArea } from "./modules/common/notificationArea.js";
 import { populateDropdownSelectors as populateDropdownsController } from "./modules/common/populateDropdownSelectors.js";
 import { registerShellRender, runShellRenders } from "./modules/common/renderRegistry.js";
+import { openStaleSandboxDialog } from "./modules/common/sandboxDialogs.js";
 import { DEMO_STORY, INIT_DEMO_DATA, getShareParams } from "./modules/common/shareLink.js";
 import {
   applyTheme,
@@ -302,17 +312,28 @@ async function init() {
     t,
   });
 
-  // Loading is IndexedDB-backed (TODO §18.6 part 4): everything below still assumes `state` is
-  // fully populated once this resolves, exactly as when the call was synchronous.
-  const state = await loadSavedState();
-
   const {
     lang: shareLang,
     init: shareInit,
     demo: shareDemo,
     chapter: shareChapter,
+    workspace: shareWorkspace,
   } = getShareParams();
+
+  // A link asking for the sandbox picks the workspace BEFORE the load, so boot reads one database
+  // rather than two (TODO §40.9). This is where the app's own "show me around" offers land.
+  prepareWorkspaceForBoot(shareWorkspace);
+
+  // Loading is IndexedDB-backed (TODO §18.6 part 4): everything below still assumes `state` is
+  // fully populated once this resolves, exactly as when the call was synchronous.
+  const state = await loadSavedState();
   if (isSupportedLang(shareLang)) state.lang = shareLang;
+
+  // First entry fills the sandbox. Before the `?init=` branch below, or an unseeded sandbox reads as
+  // an empty app and has its open-session key cleared out from under it. `?init=` itself is left
+  // alone by all of this: it still seeds whichever workspace is open, which is what the whole e2e
+  // suite runs on (TODO §40.7).
+  await ensureSandboxSeeded();
 
   if (shareInit === INIT_DEMO_DATA && !stateHasData(state)) {
     seedMockData();
@@ -480,6 +501,7 @@ async function init() {
   appBoot.bootHeader({
     getState,
     t,
+    onSwitchWorkspace: (name) => switchToWorkspace(name),
     // An imported programme lands in the ordinary plan editor (TODO §29): the same clipboard a
     // trainer builds a session in, so its save is the write and there is no import-specific
     // persistence to keep correct.
@@ -537,12 +559,13 @@ async function init() {
     openSessionFromHistory,
     removeDemoData,
     // A full re-render rather than a targeted patch: clearing the demo touches every collection, so
-    // every view showing one is stale at once.
-    onRemoved: () => window.location.reload(),
+    // every view showing one is stale at once. It used to reload the page for that, which is a
+    // heavy way to repaint and loses the trainer's place (TODO §40.3a).
+    onRemoved: () => renderEverything(),
     // The same reasoning in the opposite direction, for the empty feed's offer to seed one.
     seedDemoData: () => {
       seedMockData();
-      window.location.reload();
+      renderEverything();
     },
     // The guided demo runs from a deep link and a reload, exactly as the splash's own offer does
     // (TODO §28.14) — the same URL builder, so the two entry points cannot drift into starting
@@ -564,19 +587,12 @@ async function init() {
     clipboardPath: () => sessionFocusPath(),
   });
 
-  applyTranslations(getState().lang);
-
   const repsPresetHost = document.getElementById("reps-preset-datalists");
   if (repsPresetHost) repsPresetHost.innerHTML = repsPresetsDatalistHTML();
 
-  renderClientsList();
-  renderRoutinesList();
-  renderExercisesList();
-  renderGlobalHistory();
-  renderPendingPlanAdjustments();
-  renderSessions();
-  renderNotificationArea();
-  populateDropdownSelectors();
+  // The same repaint boot needs and every wholesale state replacement needs — including the build
+  // state badge, which reads the store to tell SANDBOX from the trainer's own work.
+  renderEverything();
 
   recoverActiveSession();
 
@@ -590,10 +606,6 @@ async function init() {
   // empty cache (reading 0) even when a prior sync's ancestor is sitting right there in storage.
   await primeAheadCache();
   renderSyncBadge();
-  // First paint of the build-state badge, after the demo seed above has landed — the markup ships
-  // PREVIEW, so painting before the store is populated would flash the wrong word at exactly the
-  // trainer who just asked for the demo.
-  renderBuildStateBadge(getState());
   // Awaited for the same reason: both inputs are local reads, and a first paint that renders "no
   // warning" from an empty cache would flash the wrong answer to precisely the trainer who needs
   // the right one.
@@ -702,6 +714,59 @@ function renderGlobalHistory() {
   historyViewRender({ state: getState(), t, openSessionFromHistory });
 }
 
+/**
+ * Repaint every view that reads the database, after the whole database was replaced under them
+ * (TODO §40.3a).
+ *
+ * Four things replace it wholesale — a backup restore, a Drive merge, clearing the demo, and now a
+ * workspace switch — and until this existed each of them re-rendered its own subset. Two got it
+ * wrong in the cheapest possible way: they reloaded the page. One function, one call, so the next
+ * caller cannot repaint three views out of eight and leave the trainer reading a database that is
+ * no longer there.
+ */
+function renderEverything() {
+  applyTranslations(getState().lang);
+  renderClientsList();
+  renderRoutinesList();
+  renderExercisesList();
+  renderGlobalHistory();
+  renderPendingPlanAdjustments();
+  renderSessions();
+  renderNotificationArea();
+  populateDropdownSelectors();
+  renderBuildStateBadge(getState());
+  renderWorkspaceChrome();
+}
+
+/**
+ * Move between the trainer's own work and the sandbox (TODO §40.3), without reloading the page.
+ *
+ * The route goes home rather than staying put: a path like `/client/<id>` names a record that the
+ * workspace being entered does not have, and repainting a detail view for a record that is not
+ * there is a worse answer than the dashboard.
+ */
+async function switchToWorkspace(name) {
+  await switchWorkspace(name);
+  renderEverything();
+  navigateToPath("/");
+  if (isSandbox()) await offerFreshSandboxIfStale();
+}
+
+// Asked on ENTRY, never at boot: at boot it is a question about a workspace the trainer is not in
+// (TODO §40.4). Declining starts the cooldown, which is what keeps the answer answered.
+async function offerFreshSandboxIfStale() {
+  const { ask } = sandboxStaleness(await readSandboxMeta());
+  if (!ask) return;
+  openStaleSandboxDialog({
+    t,
+    onConfirm: async () => {
+      await resetSandbox();
+      renderEverything();
+    },
+    onDecline: () => recordSandboxOfferDeclined(),
+  });
+}
+
 function setupClientDataRights() {
   appBoot.bootSignupReview({
     getState,
@@ -719,9 +784,7 @@ function setupClientDataRights() {
     saveState: (next) => {
       setState(next);
       saveState();
-      renderClientsList();
-      renderGlobalHistory();
-      populateDropdownSelectors();
+      renderEverything();
     },
     isDriveConfigured: () => driveSyncStatus().configured,
     t,
@@ -730,7 +793,7 @@ function setupClientDataRights() {
 
 function setupClientForms() {
   appBoot.bootClientForms({
-    state: getState(),
+    getState,
     t,
     navigateToPath,
     saveToLocalStorage: saveState,
@@ -742,7 +805,7 @@ function setupClientForms() {
 }
 function setupRoutineForms() {
   setupRoutineFormsController({
-    state: getState(),
+    getState,
     t,
     saveToLocalStorage: saveState,
     populateDropdownSelectors,
@@ -753,7 +816,7 @@ function setupRoutineForms() {
 }
 function setupExerciseForms() {
   setupExerciseFormsController({
-    state: getState(),
+    getState,
     t,
     saveToLocalStorage: saveState,
     populateDropdownSelectors,
@@ -770,7 +833,7 @@ function startWorkoutSession(clientRoutines, sessionMeta = null, options = {}) {
     clientRoutines,
     sessionMeta,
     {
-      state: getState(),
+      getState,
       newRecordId,
       navigateToPath,
       toRoute,
@@ -791,7 +854,7 @@ function startWorkoutSession(clientRoutines, sessionMeta = null, options = {}) {
 
 function setupActiveSession({ linkBringsContent } = {}) {
   appBoot.bootActiveSession({
-    state: getState(),
+    getState,
     t,
     navigateToPath,
     toRoute,
@@ -849,7 +912,7 @@ function saveActiveSessionToCache() {
 
 function recoverActiveSession() {
   recoverActiveSessionController({
-    state: getState(),
+    getState,
     t,
     newRecordId,
     navigateToPath,

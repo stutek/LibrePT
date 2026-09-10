@@ -113,7 +113,7 @@ export function renderExerciseDialog() {
 }
 
 export function setupExerciseForms({
-  state,
+  getState,
   t,
   saveToLocalStorage,
   populateDropdownSelectors,
@@ -173,9 +173,9 @@ export function setupExerciseForms({
       if (metricOpts) newEx.metric = $id("exercise-metric")?.value || metricOpts[0];
     }
 
-    state.exercises.push(newEx);
+    getState().exercises.push(newEx);
     saveToLocalStorage();
-    renderExercisesList({ state, t });
+    renderExercisesList({ state: getState(), t });
     populateDropdownSelectors();
     closeModal("dialog-exercise");
   });
@@ -215,7 +215,7 @@ export function setupExerciseForms({
     searchExercisesEl.addEventListener("input", (e) => {
       const activeChip = document.querySelector(".filter-chips .chip.active");
       renderExercisesList({
-        state,
+        state: getState(),
         t,
         filterQuery: e.target.value,
         categoryFilter: activeChip ? activeChip.getAttribute("data-filter") : "All",
@@ -231,7 +231,7 @@ export function setupExerciseForms({
       chip.classList.add("active");
       const cat = chip.getAttribute("data-filter");
       const searchVal = $id("search-exercises").value;
-      renderExercisesList({ state, t, filterQuery: searchVal, categoryFilter: cat });
+      renderExercisesList({ state: getState(), t, filterQuery: searchVal, categoryFilter: cat });
     });
   }
 }

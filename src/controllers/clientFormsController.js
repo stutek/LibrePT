@@ -98,7 +98,7 @@ function renderNameCollisionHint(state, client) {
 }
 
 export function setupClientForms({
-  state,
+  getState,
   t,
   navigateToPath,
   saveToLocalStorage,
@@ -111,7 +111,7 @@ export function setupClientForms({
   const dialog = $id("dialog-client");
   const form = $id("form-client");
   if (!dialog || !form) return;
-  initClientConsentSection({ t, getLang: () => state.lang });
+  initClientConsentSection({ t, getLang: () => getState().lang });
   setupClientConsentSection();
   const cancelBtn = dialog.querySelector(".modal-cancel");
   const closeBtn = dialog.querySelector(".modal-close-btn");
@@ -131,13 +131,13 @@ export function setupClientForms({
   $id("btn-invite-client")?.addEventListener("click", () => {
     initIntakeInviteDialog({
       t,
-      getLang: () => state.lang,
+      getLang: () => getState().lang,
       getTrainer: () => readTrainerIdentity(),
       onShare: () =>
         sendIntakeInvite({
           platform: browserInvitePlatform(),
           t,
-          lang: state.lang,
+          lang: getState().lang,
           trainer: readTrainerIdentity(),
         }),
     });
@@ -150,7 +150,7 @@ export function setupClientForms({
     openModal("dialog-client", { resetForm: true, formId: "form-client" });
     // After the reset, never before: reset() would otherwise wipe the date the block just derived.
     fillConsentSection(null);
-    renderNameCollisionHint(state, null);
+    renderNameCollisionHint(getState(), null);
     // Last of all, so a half-typed client interrupted by a reload comes back on top of the empty
     // form rather than under it.
     draft.restore();
@@ -158,7 +158,7 @@ export function setupClientForms({
 
   $id("btn-edit-client").addEventListener("click", () => {
     const activeId = getActiveDetailClientId();
-    const client = state.clients.find((c) => c.id === activeId);
+    const client = getState().clients.find((c) => c.id === activeId);
     if (!client) return;
 
     $id("client-modal-title").textContent = t("edit_client_profile");
@@ -170,7 +170,7 @@ export function setupClientForms({
     $id("client-goals").value = client.goals || "";
     $id("client-notes").value = client.notes || "";
     fillConsentSection(client);
-    renderNameCollisionHint(state, client);
+    renderNameCollisionHint(getState(), client);
 
     openModal("dialog-client");
     // After the stored values, never before: what is in the draft is what the trainer had typed and
@@ -204,7 +204,7 @@ export function setupClientForms({
     const todayStr = nowIso.substring(0, 10);
 
     if (id) {
-      const client = state.clients.find((c) => c.id === id);
+      const client = getState().clients.find((c) => c.id === id);
       if (client) {
         client.name = name;
         client.alias = alias;
@@ -230,18 +230,18 @@ export function setupClientForms({
         gdprConsent: readConsentFromSection(null),
         active: true,
       };
-      state.clients.push(newClient);
+      getState().clients.push(newClient);
     }
 
     saveToLocalStorage();
-    renderClientsList({ state, t, navigateToPath });
+    renderClientsList({ state: getState(), t, navigateToPath });
     populateDropdownSelectors();
 
     const activeId = getActiveDetailClientId();
     if (id && activeId === id) {
       showClientDetails({
         clientId: id,
-        state,
+        state: getState(),
         t,
         showErrorView,
         switchView,
@@ -258,8 +258,12 @@ export function setupClientForms({
   if (nameInput) {
     nameInput.addEventListener("input", () => {
       const editingId = $id("client-form-id").value;
-      const editing = state.clients.find((c) => c.id === editingId) || null;
-      renderNameCollisionHint(state, { ...(editing || {}), id: editingId, name: nameInput.value });
+      const editing = getState().clients.find((c) => c.id === editingId) || null;
+      renderNameCollisionHint(getState(), {
+        ...(editing || {}),
+        id: editingId,
+        name: nameInput.value,
+      });
     });
   }
 
@@ -268,7 +272,7 @@ export function setupClientForms({
     searchClientsEl.addEventListener("input", (e) => {
       // navigateToPath is not optional: renderClientsList wires it onto every card's click, so a
       // re-render without it leaves the filtered grid looking correct and throwing on the first tap.
-      renderClientsList({ state, t, navigateToPath, filterQuery: e.target.value });
+      renderClientsList({ state: getState(), t, navigateToPath, filterQuery: e.target.value });
     });
   }
 }

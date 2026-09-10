@@ -55,9 +55,15 @@ test("a boot slower than the minimum owes no further hold", () => {
   assert.equal(remainingHoldMs(4000, 9000), 0);
 });
 
-test("the demo link reuses the app's own deep-link params, and suppresses the splash", () => {
-  const url = new URL(demoDataUrl("https://app.example.test/LibrePT/?lang=sl"));
-  assert.equal(url.searchParams.get("init"), "demo_data_load");
+test("the demo link opens the SANDBOX, and suppresses the splash", () => {
+  // TODO §40.9: it used to carry ?init=demo_data_load, which put the sample people into the
+  // database the trainer was about to start working in. The offer now opens the sandbox instead,
+  // and the parameter keeps its own meaning for everything else that uses it (§40.7).
+  const url = new URL(demoDataUrl("https://app.example.test/LibrePT/?lang=sl&init=demo_data_load"));
+  assert.equal(url.searchParams.get("workspace"), "sandbox");
+  // A promo link minted before this change still carries the old parameter; left on, it would seed
+  // the trainer's own workspace on the way into the sandbox.
+  assert.equal(url.searchParams.get("init"), null);
   assert.equal(url.searchParams.get("splash"), "off");
   // Whatever else was on the URL survives — a demo link can still carry a language or theme.
   assert.equal(url.searchParams.get("lang"), "sl");
@@ -140,7 +146,7 @@ test("a demo link starts at the app root, whatever route it was built from", () 
   assert.equal(url.pathname, "/LibrePT/");
   // The deep-link params still survive: a promo link keeps its language and theme.
   assert.equal(url.searchParams.get("lang"), "sl");
-  assert.equal(url.searchParams.get("init"), "demo_data_load");
+  assert.equal(url.searchParams.get("workspace"), "sandbox");
 });
 
 test("a guided-demo link starts there too — its first step looks for a session card", () => {

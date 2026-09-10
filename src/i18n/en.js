@@ -462,6 +462,18 @@ export const en = {
   data_wipe_unreachable: "What this cannot reach:",
   data_wipe_confirm: "Erase it",
   menu_import_program: "Import a programme",
+  menu_sandbox_enter: "Enter the sandbox",
+  menu_sandbox_leave: "Leave the sandbox",
+  sandbox_badge: "SANDBOX",
+  sandbox_badge_desc: "Sandbox — nothing here is your own work. Open the risks & data-loss notice.",
+  sandbox_stale_title: "This sandbox is from earlier",
+  sandbox_stale_body:
+    "Its sessions were built around the day it was made, so today's board is empty. Building a fresh one throws away everything you did in the sandbox. Your own work is not touched.",
+  sandbox_stale_confirm: "Build a fresh sandbox",
+  sandbox_stale_decline: "Keep this one",
+  sandbox_timer_expired_title: "A timer finished in your own work",
+  sandbox_timer_return: "Go back to my work",
+  sandbox_timer_discard: "Ignore it",
   program_import_title: "Import a programme",
   program_import_lede:
     "Paste a programme written somewhere else — a chat window, a spreadsheet, a colleague's file. It opens in the ordinary plan editor, where you fix anything that came through wrong.",

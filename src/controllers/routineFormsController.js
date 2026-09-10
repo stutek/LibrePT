@@ -73,7 +73,7 @@ export function renderRoutineDialog() {
 }
 
 export function setupRoutineForms({
-  state,
+  getState,
   t,
   saveToLocalStorage,
   populateDropdownSelectors,
@@ -97,14 +97,14 @@ export function setupRoutineForms({
   const openRoutinePicker = () => {
     if (!pickerEl) return;
     mountExercisePicker(pickerEl, {
-      state,
+      state: getState(),
       searchLabel: t("search_movements") || "Search movements",
       muscleLabel: t("muscle") || "Muscle",
       equipmentLabel: t("equipment") || "Equipment",
       onSelect: (ex) => {
         addRoutineExerciseRow({
           preset: { id: ex.id, sets: 3, reps: 10, weight: 0, rest: 60 },
-          state,
+          state: getState(),
           t,
         });
       },
@@ -166,7 +166,7 @@ export function setupRoutineForms({
     }
 
     if (id) {
-      const routine = state.routines.find((r) => r.id === id);
+      const routine = getState().routines.find((r) => r.id === id);
       if (routine) {
         routine.name = name;
         routine.description = description;
@@ -179,11 +179,11 @@ export function setupRoutineForms({
         description: description,
         exercises: exercises,
       };
-      state.routines.push(newRoutine);
+      getState().routines.push(newRoutine);
     }
 
     saveToLocalStorage();
-    renderRoutinesList({ state, t, openWorkoutSetupModal });
+    renderRoutinesList({ state: getState(), t, openWorkoutSetupModal });
     populateDropdownSelectors();
     closeModal("dialog-routine");
   });

@@ -429,6 +429,19 @@ export const sl = {
   data_wipe_unreachable: "Česa to ne doseže:",
   data_wipe_confirm: "Izbriši",
   menu_import_program: "Uvozi program",
+  menu_sandbox_enter: "Vstopi v peskovnik",
+  menu_sandbox_leave: "Zapusti peskovnik",
+  sandbox_badge: "PESKOVNIK",
+  sandbox_badge_desc:
+    "Peskovnik — nič tukaj ni tvoje delo. Odpri obvestilo o tveganjih in izgubi podatkov.",
+  sandbox_stale_title: "Ta peskovnik je od prej",
+  sandbox_stale_body:
+    "Njegove seje so bile zgrajene okoli dneva, ko je nastal, zato je današnja plošča prazna. Nov peskovnik zavrže vse, kar si v njem naredil. Tvojega dela se ne dotakne.",
+  sandbox_stale_confirm: "Zgradi nov peskovnik",
+  sandbox_stale_decline: "Obdrži tega",
+  sandbox_timer_expired_title: "V tvojem delu je potekel časovnik",
+  sandbox_timer_return: "Nazaj na moje delo",
+  sandbox_timer_discard: "Prezri",
   program_import_title: "Uvozi program",
   program_import_lede:
     "Prilepi program, napisan drugje — v klepetu, preglednici, datoteki od kolega. Odpre se v običajnem urejevalniku načrta, kjer popraviš, kar je prišlo narobe.",

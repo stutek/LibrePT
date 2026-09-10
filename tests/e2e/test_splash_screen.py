@@ -128,13 +128,15 @@ def test_start_with_an_empty_app_dismisses_the_splash(page, local_server):
 @pytest.mark.clean_start
 @pytest.mark.keep_splash
 def test_demo_data_choice_loads_the_dataset_and_stops_offering(page, local_server):
-    """The demo button reloads through the app's own ?init=demo_data_load path. Once there is data,
-    the onboarding offer is gone — that is the whole 'until something is saved' rule."""
+    """The demo button opens the SANDBOX (TODO §40.9), which seeds itself on first entry. It used to
+    reload through ?init=demo_data_load, which put the sample people into the database the trainer
+    was about to start working in. Once there is data, the onboarding offer is gone — that is the
+    whole 'until something is saved' rule, and it holds in either workspace."""
     page.goto(local_server)
     _answer_language_step(page)
     page.locator("#splash-load-demo").click(timeout=15000)
 
-    page.wait_for_url("**init=demo_data_load**", timeout=15000)
+    page.wait_for_url("**workspace=sandbox**", timeout=15000)
     page.locator("#app-splash").wait_for(state="hidden", timeout=15000)
     assert page.evaluate("() => window.stateHasData()"), "demo data should be seeded"
     assert page.locator("#app-splash-onboarding").is_hidden()
@@ -145,8 +147,9 @@ def test_demo_data_choice_loads_the_dataset_and_stops_offering(page, local_serve
 def test_walkthrough_choice_arrives_with_data_to_walk_through(page, local_server):
     """The guided demo drives the seeded sessions, so its entry point has to bring the dataset
     with it. A guide started on the empty app a first-run trainer is looking at would be a
-    panel pointing at nothing — which is why this button reloads through ?init=demo_data_load too,
-    rather than only setting ?demo=.
+    panel pointing at nothing — which is why this button opens the sandbox too (TODO §40.9), rather
+    than only setting ?demo=. The sandbox is seeded on first entry, so the data is there by the time
+    the first step looks for it.
 
     It names the script, not just "some demo": until 2026-08-25 this button started the four-step
     gym-floor tour instead of the story the demo now is (reported for the message feed's copy of the
@@ -155,7 +158,7 @@ def test_walkthrough_choice_arrives_with_data_to_walk_through(page, local_server
     _answer_language_step(page)
     page.locator("#splash-walkthrough").click(timeout=15000)
 
-    page.wait_for_url("**init=demo_data_load**", timeout=15000)
+    page.wait_for_url("**workspace=sandbox**", timeout=15000)
     assert "demo=story" in page.url
     page.locator("#walkthrough-overlay").wait_for(state="visible", timeout=20000)
 

@@ -422,9 +422,9 @@ export function setupActiveSession(deps) {
   renderActiveSessionOverlayShell();
   renderAddSessionExerciseDialog();
   renderCatalogPickerDialog();
-  const { state, t, navigateToPath } = getAppDeps();
+  const { t, navigateToPath } = getAppDeps();
 
   wireSessionExpandBar(navigateToPath);
   wireSessionMenuAndActions(t);
-  wireAddExerciseAndCatalogDialogs(state);
+  wireAddExerciseAndCatalogDialogs();
 }

@@ -41,8 +41,11 @@ const ONBOARDING_CLASS = "is-onboarding";
 // new session and gets the full moment again, while re-entering the running app never does.
 const HELD_THIS_SESSION_KEY = "librept_splash_held";
 
+// Cleared rather than set: a promo link may carry `?init=demo_data_load` from before this changed,
+// and leaving it on would seed the trainer's own workspace on the way into the sandbox.
 const DEMO_INIT_PARAM = "init";
-const DEMO_INIT_VALUE = "demo_data_load";
+const WORKSPACE_PARAM = "workspace";
+const SANDBOX_WORKSPACE = "sandbox";
 const SPLASH_PARAM = "splash";
 const SPLASH_OPT_OUT = "off";
 const DEMO_SCRIPT_PARAM = "demo";
@@ -103,8 +106,13 @@ export function remainingHoldMs(minimumVisibleMs, elapsedMs) {
   return Math.max(0, minimumVisibleMs - elapsedMs);
 }
 
-/** The URL that loads the demo dataset: the app's existing `?init=demo_data_load` deep link, with
- *  the splash suppressed so the reload lands straight on a populated app.
+/** The URL that opens the sandbox: `?workspace=sandbox` (TODO §40.9), with the splash suppressed so
+ *  the reload lands straight on a populated app.
+ *
+ *  It used to carry `?init=demo_data_load`, which seeded the sample people into the database the
+ *  trainer was about to start working in — the very thing §40 exists to end. The parameter itself
+ *  still means what it always did and is still what the e2e suite runs on; only where this OFFER
+ *  leads has changed.
  *
  *  Reloading rather than seeding in place is deliberate. app.js seeds during init(), before the
  *  router and the views are wired, so calling seedMockData() from here would leave the app
@@ -119,7 +127,8 @@ export function demoDataUrl(href = window.location.href, rootPath = appRootPathn
   // looks for a session card must not begin somewhere without one. The QUERY survives: a promo link
   // keeps its language and theme.
   if (rootPath) url.pathname = rootPath;
-  url.searchParams.set(DEMO_INIT_PARAM, DEMO_INIT_VALUE);
+  url.searchParams.delete(DEMO_INIT_PARAM);
+  url.searchParams.set(WORKSPACE_PARAM, SANDBOX_WORKSPACE);
   url.searchParams.set(SPLASH_PARAM, SPLASH_OPT_OUT);
   return url.toString();
 }

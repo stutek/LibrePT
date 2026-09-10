@@ -22,8 +22,23 @@ export function setActiveSession(session) {
 // The composition root and the two entry points that carry their own deps (startWorkoutSession,
 // setupActiveSession) all merge rather than replace: each knows about a different slice of the app,
 // and a replace would drop whatever an earlier caller had already wired.
+//
+// **`deps.state` is a live read, not the object handed in** (TODO §40.3). Callers pass `getState`
+// and every consumer keeps writing `deps.state` as it always has. The same reasoning as the header's
+// note about `activeSession`, one level up: the whole state object is REPLACED — by a restore, by a
+// Drive merge, by a workspace switch — and a value captured when the app was wired would leave this
+// stack editing the database the trainer just left. A getter cannot go stale; the spread above would
+// flatten one, so it is reinstalled after every merge.
 export function mergeAppDeps(deps) {
-  if (deps) appDeps = { ...appDeps, ...deps };
+  if (!deps) return;
+  appDeps = { ...appDeps, ...deps };
+  if (typeof appDeps.getState === "function") {
+    Object.defineProperty(appDeps, "state", {
+      get: () => appDeps.getState(),
+      configurable: true,
+      enumerable: true,
+    });
+  }
 }
 
 export function getAppDeps() {

@@ -23,6 +23,10 @@
 //                         cards between the taps. `chapter` names one chapter to play alone.
 //   chapter  which chapter of ?demo=story to play, e.g. floor. Absent or unknown plays the whole
 //            story — a mistyped chapter in a pasted link should still show a stranger the demo.
+//   workspace  which of the two databases to open (TODO §40): `sandbox` opens the sandbox, seeding
+//          it on first entry. This is what the app's own "show me around" offers carry — sample
+//          people belong in the sandbox, not in the database the trainer is about to work in.
+//          Anything else opens the trainer's own work, which is also what an absent param means.
 //   init   demo-data initializer. The app boots to a clean, empty slate; init=demo_data_load
 //          populates the full demo dataset — but ONLY on a genuinely empty app. When any data is
 //          already present it is ignored, so it never overwrites a real user's records. Applied
@@ -38,6 +42,11 @@ export const SHARE_CHAPTER_PARAM = "chapter";
 /** The step a demo link lands on. A story is watched in interruptions — a reload, a phone that
  * locked, a link sent to a colleague mid-way — and without this the viewer starts again. */
 export const SHARE_STEP_PARAM = "step";
+/** Which workspace to open (TODO §40.9). Deliberately NOT folded into `?init=`: that parameter keeps
+ * meaning "seed the workspace I am in", which is what the whole e2e suite runs on (§40.7), and one
+ * parameter carrying two decisions is how the tests would have quietly moved off the app the trainer
+ * uses. */
+export const SHARE_WORKSPACE_PARAM = "workspace";
 
 // The single recognized value for ?init=. Any other value is treated as absent.
 export const INIT_DEMO_DATA = "demo_data_load";
@@ -60,5 +69,6 @@ export function getShareParams() {
     demo: p.get(SHARE_DEMO_PARAM),
     chapter: p.get(SHARE_CHAPTER_PARAM),
     step: p.get(SHARE_STEP_PARAM),
+    workspace: p.get(SHARE_WORKSPACE_PARAM),
   };
 }

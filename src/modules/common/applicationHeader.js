@@ -22,6 +22,7 @@
 import { driveSyncStatus } from "../../data/driveSyncService.js";
 import { ISSUE_TRACKER_URL } from "../../data/publicUrls.js";
 import { isDemoOnlyStore } from "../../data/seedProvenance.js";
+import { SANDBOX, WORKING, isSandbox } from "../../data/workspace.js";
 import { resolveLang } from "../../i18n/index.js";
 import { isGuideSurface, renderMarkupOnce } from "./dom.js";
 import { syncGlyphFor } from "./syncStatusGlyph.js";
@@ -126,18 +127,53 @@ export function renderBuildStateBadge(state) {
   const badge = document.getElementById("preview-badge");
   if (!badge) return;
 
-  const showingDemo = isDemoOnlyStore(state);
+  // The SANDBOX claim outranks both (TODO §40.5), and unlike the other two it is a fact rather than
+  // a reading of the records: the workspace either is the sandbox or it is not. `isDemoOnlyStore`
+  // still answers for the working workspace, which a `?init=demo_data_load` link can fill with
+  // sample data without any workspace being involved.
+  const sandbox = isSandbox();
+  const showingDemo = sandbox || isDemoOnlyStore(state);
   badge.classList.toggle("is-demo", showingDemo);
-  badge.querySelector(".preview-badge-label").textContent = showingDemo ? "DEMO" : "PREVIEW";
+  badge.querySelector(".preview-badge-label").textContent = sandbox
+    ? deps?.t?.("sandbox_badge") || "SANDBOX"
+    : showingDemo
+      ? "DEMO"
+      : "PREVIEW";
   badge.querySelector("i").className = showingDemo
     ? "fa-solid fa-flask"
     : "fa-solid fa-triangle-exclamation";
   badge.setAttribute(
     "aria-label",
-    showingDemo
-      ? "Demo data — nothing here is your own work. Open the risks & data-loss notice."
-      : "Preview build — pre-release, may lose data. Open the risks & data-loss notice.",
+    sandbox
+      ? deps?.t?.("sandbox_badge_desc") || "Sandbox — nothing here is your own work."
+      : showingDemo
+        ? "Demo data — nothing here is your own work. Open the risks & data-loss notice."
+        : "Preview build — pre-release, may lose data. Open the risks & data-loss notice.",
   );
+}
+
+/**
+ * Everything on the shell that says WHICH workspace the trainer is in (TODO §40.5): the tint on the
+ * whole header, and the menu item's words.
+ *
+ * **The tint, not only the badge.** A badge read at arm's length, one-handed, between sets is not
+ * enough to stop somebody logging a real set into the sandbox. The colour is on the `<body>` so a
+ * stylesheet can carry it across the header and anything else that needs it, rather than each
+ * surface asking where it is.
+ *
+ * The menu item's words flip with the same fact, so the way out is labelled as the way out.
+ */
+export function renderWorkspaceChrome() {
+  const sandbox = isSandbox();
+  document.body?.classList.toggle("in-sandbox", sandbox);
+
+  const label = document.getElementById("menu-sandbox-text");
+  if (!label) return;
+  const key = sandbox ? "menu_sandbox_leave" : "menu_sandbox_enter";
+  // The attribute stays in step with the text, or the next language switch repaints the item with
+  // whichever direction happened to be in the markup (i18n/domMappings.js reads this).
+  label.setAttribute("data-i18n", key);
+  label.textContent = deps?.t?.(key) || label.textContent;
 }
 
 export function renderSyncBadge() {
@@ -370,6 +406,13 @@ export function renderHeaderShell() {
                 </select>
               </div>
               <div class="menu-divider" role="separator"></div>
+              <!-- The mode switch, first in the list on purpose (TODO §40.5): entering the sandbox
+                   is occasional, but LEAVING it may be needed with a session about to start, and a
+                   way out that has to be hunted for is a way out that is not there. -->
+              <button id="menu-sandbox" class="session-menu-item" role="menuitem">
+                <i class="fa-solid fa-flask"></i> <span id="menu-sandbox-text" data-i18n="menu_sandbox_enter">Enter the sandbox</span>
+              </button>
+              <div class="menu-divider" role="separator"></div>
               <button id="menu-clients-register" class="session-menu-item" role="menuitem">
                 <i class="fa-solid fa-users"></i> <span id="menu-clients-register-text" data-i18n="menu_clients_register">Clients Directory</span>
               </button>
@@ -558,6 +601,12 @@ function setupAppMenu() {
   on("unbacked-badge", () => goto(deps.urlFor("backup")));
   // Export data — reuse the existing Sync & Backup modal (it holds JSON export/restore).
   on("menu-export-data", () => goto(deps.urlFor("backup")));
+  // One control, both directions — the menu item says which one it is (TODO §40.5), so there is no
+  // second item to leave behind in the wrong state.
+  on("menu-sandbox", () => {
+    closeMenu();
+    deps.onSwitchWorkspace?.(isSandbox() ? WORKING : SANDBOX);
+  });
   on("menu-import-program", () => {
     closeMenu();
     deps.openProgramImport?.();

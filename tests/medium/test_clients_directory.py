@@ -41,7 +41,8 @@ renderClientDetailViewShell();
 // the callback EXISTS and is reached, which is exactly what was broken.
 window.__navigated = [];
 bootClientForms({
-  state,
+  // The controller reads the state WHEN a handler runs, not when it was wired (TODO §40.3).
+  getState: () => state,
   t,
   navigateToPath: (path) => window.__navigated.push(path),
   saveToLocalStorage: noop,
