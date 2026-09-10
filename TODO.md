@@ -4898,11 +4898,57 @@ of open columns is a view over one session, not a resource of its own.
 | Long addresses with many columns and slot ids | local use, no server, no 2KB limit in play |
 | "Deep-link one column alone" later | that is exactly today's path form, with no `with=` — the two compose rather than conflict |
 
-**The alternative worth naming, because it is cheaper:** keep the focused column in the path as today
-and put the rest of the layout in `localStorage`, per session. A reload restores it either way; what
-is lost is the ability to SEND somebody a three-column layout. For an evening-planning feature used
-by one person on one machine, that may be worth more than it costs — the decision is whether a column
-layout is something to share or something a workspace remembers.
+**Ruled 2026-09-10 (Simon): the layout is REMEMBERED, not addressed.** *"zapis postavitve je dovolj
+dobra rešitev, saj delimo vedno povezavo za neznan prikazovalnik"* — the focused column keeps the
+path exactly as today, and the rest of the layout lives in `localStorage`.
+
+The reason is stronger than the cost argument that suggested it: **a link is always sent to a screen
+nobody can see.** A three-column layout carried in an address arrives on someone's phone, where three
+columns do not exist — so the address would be describing a state the receiving device cannot enter.
+A layout is a fact about THIS screen, and a screen is not something a URL can name.
+
+What each side then carries:
+
+| The address | The local record |
+| :--- | :--- |
+| which session, which client is focused, and — as today — whether that one opens in edit | which columns are open, each one's mode, and the row each has expanded |
+| survives being sent to anybody | survives a reload on this device only |
+
+**Precedence on arrival, and it is a rule this codebase already follows:** an address that ASKS for
+something wins over what the device remembers — the same way `?lang=` overrides the stored language
+and `?workspace=sandbox` overrides the stored workspace (§40.9). So a link naming `/edit` opens that
+column in edit whatever the record says, and the record is then updated to match. With nothing asked
+for, the record decides.
+
+### 41.7 How a reload comes back with two plans in edit
+
+**Asked 2026-09-10 (Simon):** *"kako pa reload page-a lahko ohrani 2 načrta v edit mode-u?"*
+
+**Because edit mode holds almost nothing.** It is not a transaction (§41.6): every plan change is
+written the moment it is made, so what has to survive a reload is a flag per column and, at most,
+which row is expanded — not a document, not a pending save, not a diff.
+
+Concretely, the record is per workspace and per session:
+
+```
+librept_clipboard_layout   →   { sessionId, columns: [ { clientId, mode, openRow }, … ] }
+```
+
+- **Per workspace** by the ordinary key suffix (§40.1), so a sandbox reset drops it with everything
+  else that sandbox held.
+- **Keyed by session**, so it is meaningless the moment that session is finished, and a record naming
+  another session is ignored rather than repaired.
+- **Read defensively**, the same rule the remembered route follows ([lastRoute.js](src/data/lastRoute.js)):
+  a column naming a client who is no longer a participant is dropped on read, and an `openRow` naming
+  a row that is gone is dropped by the validation the router already performs.
+
+**What is deliberately NOT restored:** anything half-typed in an input. That is a different problem
+with a different answer already shipped — [formDraft.js](src/modules/common/formDraft.js) keeps
+half-filled forms in `sessionStorage`, per subject, and drops them on submit or cancel.
+
+The order on the way back in is the order §40.3 already established for a workspace switch: the
+address is set first, the live session is recovered from its cache — which is what supplies the
+participants the columns are drawn for — and only then is the board drawn, from the record.
 
 ### 41.6 What happens when a second column is put into edit
 
