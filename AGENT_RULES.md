@@ -29,7 +29,9 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
 3. **Understood on first reading** — a reply, a decision, a scenario, a diagram, a comment, code.
    **Simple does not mean short**: a shorter text the reader must unpack is worse than a longer one
    that lands. Their language, its standard register, their own words including the English
-   technical ones. **Never invent a term**, least of all by translating one.
+   technical ones. **No trade jargon** — the reader is not a native English speaker and is not in
+   your trade: say *the words on the card*, never *copy*. **Never invent a term**, least of all by
+   translating one.
    **Write plainly.** Short sentences, one idea each. No stacked clauses, no chains of dashes, no
    metaphor where the plain word works, no flourish at the end of a paragraph. **Name the thing, not
    the principle**: which file, which value, what breaks. A sentence restating why a rule is good is
