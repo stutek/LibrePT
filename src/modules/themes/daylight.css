@@ -9,7 +9,12 @@ body.daylight-theme {
   --card-border: rgba(15, 23, 42, 0.08);
   --timer-warn-peak-color: color-mix(in srgb, #f59e0b 35%, var(--card-bg));
   --text-main: #0f172a; /* slate-900 */
-  --text-muted: #64748b; /* slate-500 */
+  /* slate-600, deepened from slate-500 (#64748b) on 2026-09-10 (TODO §38.11). Slate-500 measured
+     4.76:1 on this palette's card and 4.45:1 on the page field — already UNDER the 4.5:1 a
+     paragraph needs on the field, and with so little room on the card that any tinted surface put
+     the text under it. Slate-600 reads 7.58:1 and 7.08:1, the same room the dark themes have had
+     all along. tests/unit/test_theme_contrast.py holds it there. */
+  --text-muted: #475569; /* slate-600 */
   --border-color: #e2e8f0; /* slate-200 */
   --input-bg: #ffffff;
   --primary: #059669; /* slightly deeper emerald reads better on light */

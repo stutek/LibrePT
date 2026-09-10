@@ -12,10 +12,12 @@ body.blossom-theme {
   --card-border: rgba(190, 24, 93, 0.12);
   --timer-warn-peak-color: color-mix(in srgb, #f59e0b 35%, var(--card-bg));
   --text-main: #4a1d3f; /* deep plum */
-  /* Deepened from #9d6b8a on 2026-08-27: that plum measured 4.28:1 on this palette's card, under
-     the 4.5:1 a paragraph needs, and it is the colour EVERY muted line in the app takes here — the
-     demo's story card is only where it was first measured. Same hue, enough darker to pass. */
-  --text-muted: #96617f;
+  /* Deepened twice, same hue each time, because it is the colour EVERY muted line in the app takes
+     here. #9d6b8a measured 4.28:1 on this palette's card (2026-08-27), under the 4.5:1 a paragraph
+     needs; #96617f cleared the card at 4.84:1 but still read 4.46:1 on the page field, so it failed
+     wherever a muted line sits outside a card (2026-09-10, TODO §38.11). This one reads 6.98:1 on
+     the card and 6.43:1 on the field. tests/unit/test_theme_contrast.py holds it there. */
+  --text-muted: #7a4a64;
   --border-color: #f6d6e6;
   --input-bg: #fff7fb;
   --primary: #ec4899;

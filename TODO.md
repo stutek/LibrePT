@@ -2463,28 +2463,9 @@ The worst remaining, by count: `exerciseFormsController.js` (46), `activeSession
 set — a licence name, a taxonomy value that is the same word in every language — and this section
 closes then. Before any release that offers Slovenian as a supported language rather than a preview.
 
-### 38.11 [ ] GAP — muted text sits ON the AA bar on the light palettes
+### 38.11 [x] GAP — muted text sits ON the AA bar on the light palettes — fixed 2026-09-10
 
-Found 2026-08-27 while measuring the demo's cards, and it is not about the demo. `--text-muted`
-measures **4.76:1** on Daylight and **4.87:1** on Blossom (after §38.8 deepened Blossom's from
-4.28:1) against those palettes' cards. The bar for body text is 4.5:1, so both pass — with so little
-margin that **any** tinted surface puts the text under it. That is exactly what happened to the
-demo's message card at 4.28:1, and it will happen again to the next component that tints a card:
-warnings, selected rows, anything mixing an accent into `--card-bg`.
-
-The dark palettes have room (Midnight 7.1:1, Nebula and Red similar), so this is a light-palette
-question only.
-
-**Not fixed here, because it is an app-wide colour decision, not a demo one.** Deepening
-`--text-muted` on Daylight and Blossom changes every muted line in the app — timestamps, hints,
-secondary labels, the lot. Worth doing deliberately, with the change visible on a few real screens
-rather than as a side effect of a demo bug fix. The check that would catch the next instance is a
-contrast sweep over the app's own components, which does not exist yet
-([tests/medium/test_demo_narrator_card.py](tests/medium/test_demo_narrator_card.py) measures the
-demo's cards only).
-
-**Re-check condition:** whenever a component tints a card surface, or when the light palettes are
-next revisited.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#3811-x-gap-muted-text-sits-on-the-aa-bar-on-the-light-palettes-fixed-2026-09-10); what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ## 39. Reported 2026-08-31 — the story walked card by card
 

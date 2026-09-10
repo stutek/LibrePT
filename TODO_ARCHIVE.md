@@ -1421,6 +1421,36 @@ moment and "edit Jane" the next, and a draft that did not know the difference wo
 Jane's details into the next person's form. Cancel and ✕ mean "throw this away", so they do — only a
 reload, the thing nobody chose, brings the form back.
 
+### 38.11 [x] GAP — muted text sits ON the AA bar on the light palettes — fixed 2026-09-10
+
+Found 2026-08-27 while measuring the demo's cards, and it is not about the demo. `--text-muted`
+measured **4.76:1** on Daylight and **4.87:1** on Blossom (after §38.8 deepened Blossom's from
+4.28:1) against those palettes' cards. The bar for body text is 4.5:1, so both passed — with so
+little margin that **any** tinted surface put the text under it. That is exactly what happened to
+the demo's message card at 4.28:1, and it would have happened again to the next component that
+tints a card: warnings, selected rows, anything mixing an accent into `--card-bg`.
+
+The dark palettes have room (Midnight 7.1:1, Nebula 7.2:1, Red 9.2:1), so this was a light-palette
+question only. It was parked as "an app-wide colour decision, not a demo one" — deepening
+`--text-muted` on Daylight and Blossom changes every muted line in the app.
+
+**Fixed 2026-09-10, and the measurement that had been missing changed the answer.** The two
+palettes were measured against the PAGE FIELD as well as the card, because a muted line does not
+only sit on a card: **4.45:1 on Daylight and 4.46:1 on Blossom**, both already UNDER the 4.5:1 a
+paragraph needs. So this was not a thin margin waiting for the next tint — it was a live failure
+wherever muted text sat outside a card.
+
+Both moved, each staying in its own hue: Daylight from slate-500 to **slate-600** (`#475569`,
+7.58:1 on the card and 7.08:1 on the field) and Blossom's plum from `#96617f` to **`#7a4a64`**
+(6.98:1 and 6.43:1). Both now carry the same room the dark palettes always had.
+
+**The bar in the check is 6:1, not 4.5:1** ([test_theme_contrast.py](tests/unit/test_theme_contrast.py)):
+the gap above 4.5 is what a component is allowed to spend on tinting a surface, which is the whole
+of what went wrong here. It is a Stage 1 text test rather than a browser one because both surfaces
+come from the theme's own tokens — `--bg-color` is a plain hex and `--card-bg` is a colour with an
+alpha over it, so compositing them is arithmetic. A theme whose `--card-bg` stops being either
+fails the check instead of quietly dropping out of it.
+
 ### 38.10 [x] CHANGE — one definition for every card the demo shows, and one word for a step
 
 **Asked 2026-08-27 (Simon):** *"poenoti vse demo kartice, da bodo enotne, uporabi

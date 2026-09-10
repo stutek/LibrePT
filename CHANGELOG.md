@@ -20,6 +20,22 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-09-10 — Secondary text is readable on the light themes
+
+### Fixed
+
+- **Muted text on Daylight and Blossom was under the readability bar, on every screen.**
+  `--text-muted` is the colour of every secondary line in the app — timestamps, hints, the target
+  under an exercise name. Measured against those two palettes' page background it read 4.45:1 and
+  4.46:1, where a paragraph needs 4.5:1; on their cards it had passed, but by so little that any
+  tinted surface pushed it under, which had already happened once to the demo's story card. Each
+  colour moved deeper within its own hue — Daylight to slate-600, Blossom to a deeper plum — and
+  both now carry the same room the three dark themes always had, above 6:1 on the card and on the
+  background. A check measures every theme and fails below 6:1, so the next tinted surface has
+  something to spend.
+
+---
+
 ## 2026-08-25 — The demo's own front door
 
 ### Added
