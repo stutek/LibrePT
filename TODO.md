@@ -4519,10 +4519,10 @@ demo client the trainer renamed and has been training for months away from the r
 reference them — the exact case `planDemoRemoval`'s fixpoint exists to protect, and it cannot be
 protected by a rule applied at boot without a trainer looking at it.
 
-### 40.9 Both "show me around" offers now open the demo workspace
+### 40.9 Both "show me around" offers now open the sandbox
 
 **Ruled 2026-09-10 (Simon):** *"oba v demo način"* — the splash's demo-data offer and the guided
-story/walkthrough both enter the demo workspace rather than seeding the working one.
+story/walkthrough both enter the sandbox rather than seeding the working one.
 
 That is what makes the whole design honest: today the only way to see the product is to put sample
 people into the database the trainer is about to work in.
@@ -4532,7 +4532,7 @@ both offers, so both move together.
 **The `?init=demo_data_load` parameter keeps its own meaning — seed the CURRENT workspace** (§40.7).
 The two do not collide: the buttons change where they lead, the parameter does not change what it
 does, and [conftest.py](tests/conftest.py)'s injection keeps every existing e2e test in the working
-workspace against production paths. The demo and walkthrough tests move into the demo workspace, which
+workspace against production paths. The demo and walkthrough tests move into the sandbox, which
 is where they belong.
 
 ### 40.10 Demo data can never enter the working workspace
@@ -4542,7 +4542,7 @@ restore must not be able to put demo data into the trainer's own database. This 
 working assumption that a restore simply lands wherever the trainer happens to be.
 
 **One exact test, not two.** The backup file **declares the workspace it was written in**, and a file
-declaring the demo workspace is refused whole on the way into the working one. A restore that silently
+declaring the sandbox is refused whole on the way into the working one. A restore that silently
 landed nothing would be a failure reported as a success, so it is a refusal with a reason, not a
 filter.
 
@@ -4552,13 +4552,70 @@ seeded records ride back in untouched. This drops the per-record filter that was
 
 It costs nothing real. Such a file came from a mixed database, so restoring it returns exactly the
 database the trainer already had — no loss and no surprise — and the rule that matters holds anyway:
-nothing can flow *out of the demo workspace* into the working one, because the demo workspace only
+nothing can flow *out of the sandbox* into the working one, because the sandbox only
 ever writes declared files. The heuristic half of [seedProvenance.js](src/data/seedProvenance.js) (the
 committed seed id set) is therefore not needed on this path at all; it stays only for UC7's one-time
 cleaner (§40.8).
 
-Into the demo workspace nothing is refused: it is the workspace where sample data belongs.
+Into the sandbox nothing is refused: it is the workspace where sample data belongs.
 
 Drive sync needs no separate rule. The `driveSync` file id and ancestor are per workspace (§40.1), so
-the working workspace never reads the demo workspace's file — the isolation is the same one that keeps
+the working workspace never reads the sandbox's file — the isolation is the same one that keeps
 the merge ancestor correct.
+
+### 40.11 A running timer keeps running, and every timer knows which workspace it belongs to
+
+The case: a trainer with a session running steps into the sandbox during a rest period — the only free
+moment a session has, and exactly when a rest timer is counting down.
+
+**Nothing is lost by leaving.** A rest timer computes its remaining time from an absolute `endTime`
+([exerciseAndRestTimer.js](src/modules/clipboard/exerciseAndRestTimer.js)) and the live session is a
+per-workspace key ([sessionCache.js](src/data/sessionCache.js)), so time spent away is accounted for
+on return. What would be lost is the **beep**: the module holds its timers in memory, the switch has
+to stop the sandbox from showing the working workspace's timers, and tearing the module down stops the
+tick that beeps. Same class of defect as §40.3's four boot-time captures — module state silently bound
+to one workspace.
+
+**Ruled 2026-09-10 (Simon):** the switch does not stop the clocks. **Every timer carries a mark
+saying which workspace it belongs to**, and the mark decides who hears it:
+
+| Where the trainer is | A working-workspace timer expires | A sandbox timer expires |
+| :--- | :--- | :--- |
+| Working workspace | beeps | **expires silently** |
+| Sandbox | **beeps, and says which one** | beeps |
+
+The asymmetry is the point, and it is one sentence: **real work is never missed, and the demonstration
+never intrudes on real work.**
+
+**A working-workspace timer expiring while the trainer is in the sandbox names itself and offers two
+ways on** — *return to the working workspace*, or *ignore and discard the expired timer*. Naming it
+is possible today: a timer already carries `clientName`, `label` and `sessionId`, so the card can say
+whose rest is over rather than that some timer somewhere finished.
+
+Neither answer interrupts anything else: nothing is blocked, and a trainer who chooses to stay in the
+sandbox stays there.
+
+Implementation notes this leaves:
+
+- The mark is **stamped when the timer is loaded, from the store it came out of** — it is not a second
+  place where the truth lives.
+- The in-memory map is keyed by `clientId` today, so it becomes keyed by workspace and client. Two
+  workspaces cannot collide on an id, but a map that cannot express the pair would drop one of them.
+- Ticking is global, the display is filtered by workspace, and §40.3's `switchWorkspace()` therefore
+  must **not** tear the timer module down.
+
+### 40.12 It is called the sandbox — in the code, in the docs, and on screen
+
+**Ruled 2026-09-10 (Simon):** *"preklopiva na sandbox povsod"* — one word everywhere, against the
+recommendation of a split (screen word "demo", code word `sandbox`) made in the same session. One
+word means nothing has to be translated between what we say and what the trainer reads, and it names
+the **place** rather than its current **contents** — which is what survives if the sandbox is ever
+filled with something other than the demo seed.
+
+`sandbox` is therefore the term in module names, the database name (`librept_sandbox`), storage keys,
+i18n keys, this section and the rewritten UC7.
+
+**Open, and small: the Slovenian word on screen.** `peskovnik` is the direct translation and is
+established among developers; whether it is the right word in front of a trainer is a call about their
+register, not about the term. Proposed: `peskovnik` in the `sl` strings, `sandbox` in `en`, and the
+same key behind both.
