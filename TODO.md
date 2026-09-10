@@ -4639,6 +4639,12 @@ that gets found by accident.
 4. **`resetLibrePTData` deletes both databases.** It sweeps every `librept*` key already, so leaving
    the sandbox database standing would leave a database nothing points at — after telling the trainer
    everything was removed.
+4a. **The support wipe (§31) takes the sandbox with the device's own bookkeeping, not as a row of its
+   own.** Both databases name their stores identically — `schema4` is in each — so two identical rows
+   would ask somebody on a support call to tell them apart, and the sandbox holds sample data only,
+   which is nothing worth keeping back. **Ruled 2026-09-10 (Simon):** *"data wipe naj ostane
+   totalen"* — the offer of a separate, deselectable sandbox row was declined; a wipe removes
+   everything this device holds.
 
 **The language, which was a defect the tests found**
 
@@ -4684,107 +4690,134 @@ that gets found by accident.
 - Nothing in the estimate predicted the language defect. It was not introduced by this work; it was
   **exposed** by it, which is the ordinary way a hidden coupling surfaces.
 
-## 41. [Brainstorm] A wide screen shows several clients at once
+## 41. [Brainstorm] A wide screen shows more than one thing at once
 
 **Asked 2026-09-10 (Simon):** *"desktop/tablet version should utilize whole available space by
 displaying multiple programs at once (just like split screen tabs), defaulting to last viewed
 clients or at session start, just first 3 picked from client list"*.
 
 The app is laid out for a phone held in one hand, and on a tablet or a desktop that layout is one
-narrow column with empty space either side. A trainer running a group is switching between
-participants one at a time on a screen with room for three.
+narrow column with empty space either side. A trainer running a group switches between participants
+one at a time on a screen with room for several.
 
-**The shape asked for:** several clients' programmes side by side, like split-screen tabs, filling
-the width. Which clients are shown defaults to **the last ones viewed**, or at the start of a session
-to **the first three from the client list**.
+### 41.1 Two layouts, not one
 
-**Ruled 2026-09-10 (Simon):** *"to velja za clipboard view"* — this is the **clipboard**, the live
-session ([uc1_gym_floor_clipboard.md](use_cases/uc1_gym_floor_clipboard.md)), and nothing else. Not
-the plan editor, not the deck, not the client directory. That narrows it to the one screen a trainer
-is actually standing in front of a group with, and it is the screen the request came from: the
-participant switcher exists because only one client fits.
+**Ruled 2026-09-10 (Simon).** They share the rule for dividing the width and nothing else:
 
-So a **column is one participant's live card**, and the columns are the participants of the session
-already running. What the request calls "defaulting to the last viewed clients, or the first three
-from the client list" is then about which participants are on screen when there are more than fit —
-not about picking clients from a directory.
+| | The clipboard (live session) | The home screen |
+| :--- | :--- | :--- |
+| What a column holds | one participant's programme | one view taken from the menu |
+| How many | *"1/2/3/4/5/.. odvisno od prostora in števila udeležencev"* | as many as the same rule allows |
+| Are the columns alike? | yes — the same view, once per participant | no — different views side by side |
+| Per-column state | **each programme is independently in EDIT or EXECUTE mode** | each view is itself |
 
-**Wanted 2026-09-10 (Simon), and NOT yet decided:** *"tudi home page, si želim, da izkoristi celoten
-zaslonski estate, a še ne vem, kateri pogledi so smiselni prikazati paralelno. Morda najprej seje,
-nato stranke, nato načrti za prilagoditve?"* — the home screen should use the whole width too. Which
-views sit side by side is explicitly open; the proposal to explore is **sessions, then clients, then
-plans awaiting adjustment**.
+*"clipboard pokaže 1/2/3/4/5/.. programov hkrati odvisno od prostora in števila udeležencev, vsak
+program je individualno lahko v edit ali execute načinu (popravi deep linke)"* — so the count is not
+a fixed three: it is what the width allows, bounded by how many participants the session has.
 
-That is a second layout, not the same one: the clipboard shows the SAME view several times, once per
-participant, while the home screen would show DIFFERENT views at once. They share only the question
-of what to do with the empty space, so they are worth building in that order — the clipboard first,
-where the columns are alike and the rule for filling them is known.
+**The clipboard goes first.** Its columns are alike and the rule for filling them is already ruled;
+the home screen still has to choose what goes in them (§41.3).
 
-What decides the home screen's columns, before any code:
+### 41.2 The deep links are the hard part, and they are ruled to change
 
-- **What each column is FOR at that moment.** Sessions is what the trainer opens the app to see.
-  Clients and pending adjustments are things they go looking for. A column that is never looked at is
-  worse than empty space, because it makes the one that matters narrower.
-- **Whether a column is a view or a summary.** The client directory is a searchable grid; three
-  columns of it is not three times as useful. A column may need to be a shorter form of the view it
-  names rather than the view itself.
-- **Whether the columns are fixed or chosen**, and if chosen, whether that choice is worth a setting
-  — the app has none today, deliberately.
-- **What the bottom navigation becomes** when the views it switches between are all on screen.
+A route today names ONE session and ONE client, and three shapes carry the mode:
 
-Open before any code on the clipboard:
+```
+/session/:sessionId/client/:clientId                         execute
+/session/:sessionId/client/:clientId/edit                    edit
+/session/:sessionId/client/:clientId/edit/exercise/:slotId   edit, one row open
+```
 
-- **What the participant switcher becomes.** With three cards on screen it stops being the way to
-  reach a client and becomes the way to reach the FOURTH — a different control with the same glyph
-  is worse than either. Does it page the columns, or select which participants occupy them?
-- **How many columns, and who decides.** Three is the number in the request; the width available
-  varies from an iPad in portrait to a desk monitor. A breakpoint rule, or a count the trainer sets?
-- **What the clipboard's own one-column layout becomes.** It is built at `--app-max-width` (480px)
-  and centred, and the clipboard bar, the timer stack and the edit mode's drag-reorder all assume one
-  card is in focus. Widening is not a stylesheet switch. Everything OUTSIDE the clipboard keeps its
-  single column under this ruling, which is the part that makes it affordable.
-- **Whether a column is independently scrolled and independently focused**, and what "the in-focus
-  card" then means for the routes, which currently name one session and one client.
-- **The gym floor stays the judge.** A tablet on a rack in front of a group is the case that earns
-  this; a desk is not. If the layout only makes sense sitting down, it is the wrong layout.
+With several columns, each in its own mode, the address has to name a SET. Proposed — **the focused
+column keeps the path, the rest ride in the query**:
 
----
+```
+/session/:sessionId/client/:clientId?with=c7:edit:slot3,c9
+```
 
-## 42. [Idea] Detect and report stale demo deep links, across versions
+Why this shape rather than a new path grammar: **every link ever shared keeps working and keeps
+meaning.** A link with no `with=` is exactly today's link — that client, alone or focused — so the
+demo scripts, the walkthrough's steps and every message a trainer has already sent stay correct, and
+the multi-column state is additive.
 
-**Asked 2026-09-10 (Simon):** *"a way to detect and report stale or dead deep links passed around
-the internet (across versions)"*.
+What this touches, and why it is the schedule risk rather than the layout:
 
-A link into the demo names a step — `?demo=story&step=swap-open-catalog`. Those links get pasted
-into chats, forum posts and user documentation, and then they sit there for months while the app
-moves on. **When the step they name is renamed or removed, nothing tells anybody.** `resumeWalkthroughAt`
-in [domain/walkthrough.js](src/domain/walkthrough.js) — the pure state function a deep link lands on —
-deliberately falls back to the start of the demo for an unknown id, because a mistyped link pasted
-into a chat should still show a stranger the demo. That kindness is what makes the rot invisible: the
-link keeps working and shows the wrong thing.
+- **Recovery after a reload reads the address bar** to know whether the trainer was in the editor and
+  which row was open ([sessionLifecycle.js](src/controllers/sessionLifecycle.js)). Per-column mode
+  makes that a set of answers, in the one path where being wrong loses a session.
+- [sessionFocusUrl.js](src/controllers/sessionFocusUrl.js) syncs the focused card INTO the URL on
+  every render. With several columns, "the focused card" needs a definition before that sync can be
+  written.
+- The demo story and the guided walkthrough assert on routes (§35, §38). They are the regression net
+  for exactly this screen.
 
-**Two halves, and they are different problems.**
+### 41.3 Which views the home screen shows — the choosing rule first
 
-- **Links inside this repository** are ours to check. [agent_tools/doclinks.py](agent_tools/doclinks.py)
-  already resolves every Markdown link, anchor and `§`-reference and fails the build on a dead one; a
-  fourth check resolving `step=<id>` against the story's real ids would cover them, on the commit that
-  breaks them.
-- **Links out in the world** cannot be checked from here. What is possible is for the **app** to
-  notice it was handed a step id it does not have, and report it rather than silently starting over.
-  Where such a report goes, and whether a stranger's first screen is the right place to mention it at
-  all, is the open question.
+**Wanted 2026-09-10 (Simon):** *"domača stran pa pobere več vpogledov iz menuja in jih prikaže hkrati
+(z enako logiko porazdelitve), pomagaj mi izbrati katere"*.
 
-**"Across versions" is the reason this is not just a build check.** There are no release tags and no
-multi-version hosting ([§16](TODO.md), [§18](TODO.md)) — one build is live at a time. So a link made a
-year ago is judged by today's script, and there is no old version to fall back to. Whatever is built
-has to answer *"this link is from an older LibrePT and the step it names is gone"* without a version
-axis to read it from.
+The menu offers: **Clients Directory**, **Pending Review** (plan adjustments), **Plans**,
+**Exercises**, **History**. The dashboard already carries two more without being asked: the **session
+deck** and the **message feed**.
 
-**Decided already, so it is not re-derived:** **step ids stay human-readable** — `swap-open-catalog`,
-not a UUID. A UUID prevents an accidental rename and nothing else; the build check above catches that
-too, and the id is what a failing test, a debug message and a documentation URL all show a person.
-Worse, a UUID hides the failure that no check can catch — the id staying while the step's meaning
-drifts.
+**The rule to choose by: a column earns its place by being WORK THE TRAINER OWES, not a place to look
+something up.** A lookup is one tap away and is remembered as a need at the moment it arises. Work
+owed is what gets forgotten, and a column is worth its width only if it is looked at without being
+sought.
 
-**Deliberately not designed further** (Simon, same day: *"I am over engineering it"*). This is the
-problem, written down.
+Recommended, at desk width:
+
+| Column | What it is | Why it earns the width |
+| :--- | :--- | :--- |
+| 1 · Sessions | today's deck | it is what the app is opened for; leftmost because it is what they came for |
+| 2 · Pending Review + messages | plan adjustments awaiting a decision, and the feed | the only two surfaces that are work owed rather than reference; the feed already ranks unfinished work above FYI |
+| 3 · Plans | the programme library | what a trainer prepares between sessions, and where an adjustment is acted on |
+
+**Deliberately not columns:** Exercises and History are reference material, reached from a plan when
+a question arises. The Clients Directory is a way to REACH a person — and everyone on today's board
+is already in column 1.
+
+**The one open swap:** column 3 is Plans or Clients depending on a habit only the maintainer can
+report — after looking at today, what do you open next: the plan you are changing, or the person you
+are changing it for?
+
+### 41.4 Red team — the strongest case against the whole idea
+
+Written against it on purpose. Nothing here is a refusal; it is what has to be answered before this
+is worth building.
+
+1. **The judge is the gym floor, and this is a desk feature.** Value 13 says a decision that only
+   makes sense at a desk is wrong. A wide layout serves a trainer sitting down. Before any of it:
+   how many of the trainers in the go-to-market plan own a tablet they would carry to a session?
+   If the answer is "the maintainer's own", the audience is one.
+2. **The clipboard is where data is WRITTEN, and its narrowness is a safety property.** Sets, quick
+   signals, timers. One participant per screen with thumb-sized targets is what keeps a mis-tap from
+   logging a set against the wrong person. Five columns makes those targets smaller and puts another
+   client's row a thumb-width away — against the standing rule that touch targets get real padding.
+3. **Two modes on screen at once is the likeliest source of a data-loss bug in the whole idea.** Edit
+   mode is drag-to-reorder; execute is tap-to-log. Side by side, a drag that starts in one column and
+   ends over another is a gesture with two meanings and no obvious right answer.
+4. **The route space multiplies, in the one place that must not break.** §41.2 lists what reads a
+   route; recovery after a reload is among them. The layout is a stylesheet problem; the addressing
+   is not, and that is where the time will actually go.
+5. **The test matrix multiplies with it.** The medium tier's stubs assume one column and the e2e
+   suite asserts on "the in-focus card"; both land in the slowest stage of the gate.
+6. **The home screen risks becoming a dashboard — a thing that is READ rather than used.** And since
+   the phone still shows one column, every feature after this is designed twice.
+7. **Sequencing.** [docs/PREVIEW.md](docs/PREVIEW.md) still tells trainers this build can lose their
+   data, and the ranking at the top of this file puts data safety and showability above everything.
+   A wide-screen layout moves neither.
+
+**Two cheaper things that take most of the value, worth measuring before the full build:**
+
+- **A participant rail.** On a wide screen, a fixed strip of participant names down the side of the
+  single clipboard column: switching becomes one tap instead of a swipe, targets stay thumb-sized,
+  and **no route changes at all**. It answers the complaint the request came from — switching one at
+  a time — at a small fraction of the cost, and it is not thrown away by a later multi-column build.
+- **Two columns before five.** Pair training is the common case above one; two columns can be built
+  with the focused-column route shape and no gesture ambiguity worth the name. Five is a different
+  product decision, and it can be taken after two are in front of real trainers.
+
+For the home screen, the equivalent cheap answer is **widen rather than split**: one column at a
+comfortable measure, with the deck showing more days at once. It uses the space without inventing a
+second layout to maintain.
