@@ -4808,6 +4808,33 @@ is worth building.
    data, and the ranking at the top of this file puts data safety and showability above everything.
    A wide-screen layout moves neither.
 
+**Answered 2026-09-10 (Simon), and it moves the ground under most of the above:**
+
+> *"res je večina trenerjev ima telefon"* · *"več vrstični clipboard je feature predvsem za večerno
+> urejanje načrtov za računalnikom, ne live delo"* · *"again smiselno samo za evening planiranje sej"*
+
+**The multi-column clipboard is an EVENING PLANNING feature, at a computer — not a gym-floor one.**
+That is a different product decision from the one argued against above, and it settles three of the
+seven objections rather than answering them:
+
+- **(1) audience** — conceded and reframed. Most trainers have a phone, and the phone keeps its one
+  column. The wide layout serves the evening, on a machine that is already sitting on a desk, which
+  is the one context where a desk-shaped answer is the right one.
+- **(2) thumb-sized targets** — falls. Nobody is logging a set into five columns at arm's length; the
+  evening has a mouse and a keyboard.
+- **(3) two gesture modes at once** — falls as a hazard, and comes back as an OPPORTUNITY (§41.6):
+  with several plans open in edit at once, dragging an exercise from one client's plan into another's
+  becomes possible, and that is a thing no single-column layout can offer at all.
+
+**What survives, unchanged:** (4) the routes, (5) the test matrix, (6) the two-experience problem —
+sharper now, because the phone and the desk stop being the same layout by design rather than by
+accident — and (7) sequencing.
+
+**And one new question this reframing raises, which has to be answered before any code:** if the
+columns are for planning rather than for running a session, is the live clipboard the right home at
+all, or is this the plan editor wearing a wide layout? The clipboard is the screen a session is RUN
+on; a planning surface that happens to look like it may be a different route with a different name.
+
 **Two cheaper things that take most of the value, worth measuring before the full build:**
 
 - **A participant rail.** On a wide screen, a fixed strip of participant names down the side of the
@@ -4821,3 +4848,58 @@ is worth building.
 For the home screen, the equivalent cheap answer is **widen rather than split**: one column at a
 comfortable measure, with the deck showing more days at once. It uses the space without inventing a
 second layout to maintain.
+
+### 41.5 Is the query-string shape a problem — "it is not REST"
+
+**Asked 2026-09-10 (Simon):** *"dobra rešitev, ni pa REST, naju bo to ugriznilo kasneje?"*
+
+**REST is not the standard this has to meet.** REST is an architectural style for a SERVER's HTTP
+interface — resources, representations, verbs, statelessness between requests. There is no server
+here: the address bar is read by a client-side router, and the only three properties that matter are
+that an address identifies a state, survives being sent to somebody, and can be read back after a
+reload.
+
+Against the convention that does apply — path names the resource, query names a VIEW over it — the
+shape is orthodox rather than irregular. `?tab=`, `?sort=`, `?w=1` are the same thing everywhere on
+the web: the thing being looked at is in the path, how it is being looked at is in the query. A set
+of open columns is a view over one session, not a resource of its own.
+
+**What could bite, concretely, and what to do about each:**
+
+| Risk | Answer |
+| :--- | :--- |
+| Two strings for one view (`with=c7,c9` vs `with=c9,c7`) — history entries and cache keys multiply | the writer CANONICALISES: sorted by column position, deduplicated, empty means absent |
+| The URL churns on every render, because the focused card is synced INTO it ([sessionFocusUrl.js](src/controllers/sessionFocusUrl.js)) | canonical form again, plus write only on change — the churn is what canonicalisation exists to prevent |
+| Route matching ignores the query, so `activeRouteName()` cannot see column state | already true of `?demo=`/`?step=`, and already handled: `replaceQueryParam` lives in the router because [test_url_writers.py](tests/unit/test_url_writers.py) forbids anyone else writing history |
+| Long addresses with many columns and slot ids | local use, no server, no 2KB limit in play |
+| "Deep-link one column alone" later | that is exactly today's path form, with no `with=` — the two compose rather than conflict |
+
+**The alternative worth naming, because it is cheaper:** keep the focused column in the path as today
+and put the rest of the layout in `localStorage`, per session. A reload restores it either way; what
+is lost is the ability to SEND somebody a three-column layout. For an evening-planning feature used
+by one person on one machine, that may be worth more than it costs — the decision is whether a column
+layout is something to share or something a workspace remembers.
+
+### 41.6 What happens when a second column is put into edit
+
+**Asked 2026-09-10 (Simon):** *"a to pomeni, da edit novega stolpca zapiše prejšnji plan in prestopi
+edit mode v novem, a to hkrati zamenja vrstni red stolpcev?"*
+
+**There is nothing to write.** A plan edit is persisted the moment it is made — every splice funnels
+through `saveActiveSessionToCache()` ([sessionPlanEditing.js](src/controllers/sessionPlanEditing.js))
+and from there through the ordinary save path. **Edit mode is not a transaction**: it is a display
+mode that shows drag handles and the add/remove controls. So "entering edit elsewhere" has no plan to
+commit, and leaving edit has nothing to discard — which is also why there is no Cancel on it today.
+
+That leaves two real questions, and they are independent of each other:
+
+1. **Exclusive or concurrent edit.** Recommended: **concurrent** — the original ruling ("vsak program
+   je individualno lahko v edit ali execute načinu") is also the one that unlocks the feature only a
+   wide layout can have: **dragging an exercise from one client's plan into another's**. Exclusivity
+   would rule that out to prevent a hazard (§41.4's third objection) that the evening reframing has
+   already dissolved.
+2. **Column order.** Recommended: **fixed**, and never reordered by interaction. Order follows the
+   session's participant order. A column that moves under the hand is the classic way to make someone
+   act on the wrong one, and here "the wrong one" is another client's programme. What DOES change on
+   a narrower window is which columns are visible — that is scrolling or paging, and it must not be
+   confused with reordering.
