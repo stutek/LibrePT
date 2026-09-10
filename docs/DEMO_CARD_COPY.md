@@ -9,10 +9,17 @@ tags:
   - okf
 ---
 
-> **Status: waiting on the maintainer.** Nothing here is shipped. Edit the PROPOSED blocks (or strike
-> them out and write your own) and say when they are ready; the English then goes into
-> [src/i18n/en.js](../src/i18n/en.js) and the Slovenian is written to match. Kept in the repository
-> rather than a scratch file so it survives the session it was written in (asked 2026-08-30).
+> **Status: the pass is running, card by card, from 2026-09-10.** Nothing here is shipped, and
+> nothing under `src/` is touched while [TODO §40](../TODO.md)'s workspace rewrite is in flight —
+> that is why the agreed wording is written down here first (asked 2026-09-10).
+>
+> **[The 2026-09-10 pass](#the-2026-09-10-pass) is the live part of this file.** It carries the
+> maintainer's own wording, in Slovenian, and what a review of it found. The older sections below it
+> are where the defect list came from; they are kept because they name the faults, not because their
+> proposals still stand.
+>
+> The English goes into [src/i18n/en.js](../src/i18n/en.js) and the Slovenian into
+> [src/i18n/sl.js](../src/i18n/sl.js). Those two are the only supported languages.
 >
 > The defects listed below were found by walking the demo; the fixes that were made without waiting
 > are in [TODO.md](../TODO.md) §38.13 to §38.19.
@@ -297,3 +304,108 @@ three stacked lines, in the top right corner…"). Roughly half of the rest do n
 
 They read well as narration and fail as instructions — which is what the guide's caption line is
 for. Say the word and I will rewrite these seven to the rule, in the same pass.
+
+---
+
+# The 2026-09-10 pass
+
+The maintainer writes each card, in Slovenian; the review below each one says what it found and what
+it proposes. **Nothing is written into `src/` until [TODO §40](../TODO.md)'s workspace rewrite has
+landed** — that work is changing where demo data lives, and these cards talk about exactly that.
+
+**Two rules the maintainer set for this pass** (2026-09-10):
+
+1. A card explains **one step towards the goal**, in the voice of an adventure book, **and says how
+   to do it** — naming the control, its glyph and where it is.
+2. Every card is reviewed for **terminology consistency** and argued against, not just transcribed.
+
+## The words this demo is allowed to use
+
+One name per thing. Where the app already has a word, that word wins.
+
+| The thing | English | Slovenian | Where the app already says it |
+| :-- | :-- | :-- | :-- |
+| the guided run itself | guided walkthrough | **vodeni ogled** | `walkthrough_title` |
+| the learning workspace | sandbox | **peskovnik** | [data/workspace.js](../src/data/workspace.js), [TODO §40](../TODO.md) |
+| a booked hour with clients | session | **seja** | `walkthrough_finished`, `btn_start_group_session` |
+| the person training | client | **stranka** | `btn_invite_client` |
+| getting a new client in | invitation | **povabilo** | `intake_invite_title` |
+
+**Three inconsistencies this table exposes, all of them already shipped:**
+
+- `walkthrough_exit` says **"Končaj demo"** and `walkthrough_collapse` says **"kartico demota"**,
+  while `walkthrough_title` says **"Vodeni ogled"**. Three words — *demo*, *demot*, *vodeni ogled* —
+  for one thing, in one panel.
+- `demo_cleanup_sessions` says **"vzorčnih terminov"**; everywhere else a session is a **seja**.
+- **"prijava"** must not be used for a client filling in their own details. In Slovenian software it
+  reads as *login*. The app's own word is **povabilo**.
+
+## Card 1 · `arrive-menu` — the opening card
+
+**The maintainer's wording, verbatim (2026-09-10):**
+
+> **opis:** Dobrodošli v LibrePT, applikacija za pomoč osebnim trenerjem pri načrtoanju vadbenih sej
+> (1-1 in skupinskih) ter digitalna beležnica za upravljanje vadbe. Tale walktrough opisuje scenarij
+> treh novih strank, ki začenjajo skupinsko vadbo od prijave do izvedbe s prilagoditvami.
+>
+> **navodilo:** demonstracijo pričnete z gumbom naprej, lahko jo začasno prekinete z izklopom
+> peskovnika ali pa zaprete to kartico z ikono X in preiskušate aplikacijo brez vodenja
+
+### What the review found
+
+1. **The ✕ is not on the card, and has not been since 2026-08-30.** The card's own corner carries ▾
+   (`walkthrough_collapse`); the ✕ sits on the bar the card leaves behind
+   ([walkthroughOverlay.js:130-149](../src/modules/demo/walkthroughOverlay.js#L130-L149)). It was
+   moved there deliberately — see [TODO §38.16](../TODO.md) — because a trainer reported that
+   closing the card gave them no way back. **The intent in the wording is ▾, not ✕:** put the card
+   away and keep tapping around. The ✕ ends the run.
+2. **"izklop peskovnika" cannot be instructed yet.** The sandbox is decided and unbuilt
+   ([TODO §40](../TODO.md), same day). A worse problem than the timing: leaving the sandbox
+   mid-walkthrough leaves the guide pointing at sessions that do not exist in the working
+   workspace. The switch re-renders rather than reloads ([TODO §40.3](../TODO.md)), so the guide
+   survives the switch and breaks. **A rule is needed before this sentence can be written:** either
+   the switch parks the walkthrough, or the walkthrough refuses the switch.
+3. **The card's title is the chapter's title.** `story_chapter_arrive` — "Trije prijatelji pridejo"
+   — is used both as the chapter name and as this card's heading
+   ([storyTour.js:273-275](../src/modules/demo/storyTour.js#L273-L275)). A welcome heading needs its
+   own key, or this becomes a new card in front of the chapter.
+4. **Three words for the run in one card:** *walktrough*, *demonstracijo*, and the panel around it
+   saying *demo* and *vodeni ogled*. See the table above.
+5. **"od prijave do izvedbe"** reads as *from login to delivery*. **povabila**, not *prijave*.
+6. **The sandbox makes the old promise obsolete, and the new one is stronger.** Until now the card
+   had to offer to clear the demo data afterwards. With a separate database ([TODO §40.2](../TODO.md))
+   there is nothing to clear: the demo cannot reach the trainer's own records at all. Worth saying.
+7. Spelling: *applikacija* → **aplikacija**, *načrtoanju* → **načrtovanju**, *preiskušate* →
+   **preizkušate**, *walktrough* → dropped.
+
+### Proposed — Slovenian
+
+- **naslov:** Dobrodošli v LibrePT
+- **opis:** LibrePT je aplikacija za osebne trenerje: načrtovanje vadbenih sej, individualnih in
+  skupinskih, ter digitalna beležnica za njihovo izvedbo. Ta vodeni ogled pelje skozi zgodbo treh
+  novih strank — od povabila do skupinske vadbe, ki se med izvajanjem prilagaja. Vse se dogaja v
+  peskovniku: ljudje, seje in zapisi so izmišljeni in tvojih podatkov se ne dotaknejo.
+- **navodilo:** Z gumbom **Naprej** začneš. Kartico lahko kadar koli pospraviš z ikono **▾** v
+  njenem zgornjem desnem kotu in aplikacijo preizkušaš brez vodenja; na vrstici, ki ostane, je
+  **✕**, ki ogled konča.
+
+### Proposed — English
+
+- **title:** Welcome to LibrePT
+- **body:** LibrePT is an app for personal trainers: planning training sessions, one to one and in
+  groups, and a digital notebook for running them. This guided walkthrough follows three new clients
+  — from the invitation to a group session that is adjusted while it runs. All of it happens in a
+  sandbox: the people, the sessions and the records are invented, and they never touch your own.
+- **caption:** **Next** starts it. You can put this card away at any time with **▾** in its top
+  right corner and try the app unguided; the bar it leaves behind carries **✕**, which ends the
+  walkthrough.
+
+### Still open on card 1
+
+- The pause-by-leaving-the-sandbox sentence, until finding 2 has a rule.
+- Whether the card gets a third button — *Not now* — so stopping before the story starts is one tap
+  rather than ▾ then ✕.
+- Whether stopping remembers the step. `resumeWalkthroughAt` exists
+  ([domain/walkthrough.js](../src/domain/walkthrough.js)) and the story's own chapter crossings
+  already pass `?step=`; nothing saves the step id when the run is ended. Until it does, no card may
+  promise that it carries on where you left off.
