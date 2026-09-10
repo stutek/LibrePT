@@ -230,6 +230,10 @@ function syncTitleBarEditChrome() {
     // happened to be in the markup (i18n/domMappings.js reads it).
     expandBtn.setAttribute("data-i18n", key);
     expandBtn.textContent = t(key) || expandBtn.textContent;
+    // The glyph turns with the words, the same way the day's control and each card's own chevron
+    // do — down opens, up puts away (TODO §42.4).
+    const icon = expandBtn.parentElement?.querySelector("i");
+    if (icon) icon.className = `fa-solid fa-chevron-${expanded ? "up" : "down"}`;
   }
 
   // In edit mode the ⋯ menu's destructive action targets the PLAN (clear its exercises), not the
