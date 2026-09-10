@@ -4315,12 +4315,13 @@ add up. The number is free to follow the measurement, which is what its own docs
 **Re-check condition:** whenever either suite's wall time moves substantially — the same condition as
 before, now with a test that does not fight it.
 
-## 40. Two workspaces — the trainer's own work, and a sandbox to learn in
+## 40. [x] Two workspaces — the trainer's own work, and a sandbox to learn in — shipped 2026-09-10
 
 **Asked 2026-09-10 (Simon):** research whether demo data should be separated from the trainer's real
 data, so that they can *"preklopi kadarkoli med svojim delovnim stanjem in stanjem za učenje in
 experementiranje"* — switch at any time between their working state and a state for learning and
-experimenting. Decided in the same session; **nothing is built yet**.
+experimenting. Decided and **shipped the same day**; see [CHANGELOG](CHANGELOG.md). The subsections
+below are kept as the record of what was decided and why — every one of them is now code.
 
 Today the two are the same database, told apart by a `seededDemo` stamp on each record
 ([seedProvenance.js](src/data/seedProvenance.js)), and the only operation is one-way: the demo is
@@ -4617,3 +4618,60 @@ i18n keys, this section and the rewritten UC7.
 
 **On screen in Slovenian it is `peskovnik`** (Simon, 2026-09-10) — `sandbox` in `en`, `peskovnik` in
 `sl`, one i18n key behind both.
+
+### 40.13 What was assumed while building it
+
+Decisions taken during implementation that no ruling covered. Each is cheap to reverse; each is
+written here rather than only in a comment, because a decision nobody was asked about is the kind
+that gets found by accident.
+
+**Storage**
+
+1. **The working workspace keeps every name it already has** — the `librept` database, unsuffixed
+   keys. So the split arrived as a no-op for existing installs: nothing to migrate, and a sandbox
+   nobody has opened does not exist as a database at all.
+2. **`librept_workspace` — the pointer saying which workspace is open — belongs to neither of them.**
+   It cannot live inside a workspace: it is what selects one. Absent means the working workspace, so
+   an unreadable or unknown value fails towards the trainer's own data.
+3. **A sandbox reset keeps what belongs to the person.** It deletes the sandbox database and the keys
+   suffixed to it; the theme, the language, the accepted terms and the trainer's own name are
+   untouched, because they were never the sandbox's.
+4. **`resetLibrePTData` deletes both databases.** It sweeps every `librept*` key already, so leaving
+   the sandbox database standing would leave a database nothing points at — after telling the trainer
+   everything was removed.
+
+**The language, which was a defect the tests found**
+
+5. **`lang` moved to an origin-global key** (`librept_lang`), joining the theme and the accepted
+   terms. It had lived only in each database's meta store — invisible while there was one database,
+   and wrong the moment there were two: entering the sandbox produced a store with no language in it,
+   and the splash asked a trainer who had answered that question already. The meta copy is still
+   written and is still read when the shared key is absent, which carries an install that chose its
+   language before this existed.
+6. **A save carrying no language never clears that key.** A store that was never asked is not an
+   answer being withdrawn — and the sandbox's very first save is exactly such a store.
+
+**Behaviour**
+
+7. **The switch resets the route to the dashboard.** A path like `/client/<id>` names a record the
+   other workspace does not have.
+8. **A restore lands in the workspace the trainer is in**, and only sandbox → working is refused.
+9. **The staleness offer is a real dialog, not a `confirm()`**, and dismissing it counts as declining
+   — a question closed is not a question answered yes, so the cooldown starts either way.
+10. **A sandbox of unknown age is never stale**, and a clock that moved backwards never makes one
+    stale. Both would offer to delete somebody's work on no evidence.
+11. **The sandbox is seeded on first entry only** — when it holds nothing. It is never re-seeded
+    behind the trainer; §40.4's offer is the only other way it gets filled.
+12. **The timer rule, stated as one line in the code:** the trainer's own work beeps wherever they
+    are; the sandbox beeps only in the sandbox. The card names the client and what was being timed,
+    and "ignore" discards that timer rather than silencing all of them.
+13. **The sandbox syncs to its own Drive file** (`librept_sandbox_sync.json`), and the sync card says
+    so while the trainer is in there. The erasure register stays ONE file, shared, per §40.1.
+
+**Two things the estimate in §40.3 got wrong**, both worth remembering:
+
+- The four boot-time state captures were real and small, exactly as measured — but `appDeps` was a
+  fifth, reaching ten more call sites, and it was fixed at the seam instead: `deps.state` is now a
+  live getter, so nothing downstream changed.
+- Nothing in the estimate predicted the language defect. It was not introduced by this work; it was
+  **exposed** by it, which is the ordinary way a hidden coupling surfaces.

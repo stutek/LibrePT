@@ -1,7 +1,7 @@
 ---
 type: use_case
 title: UC7 - From Demo Data to a Clean Working Database
-description: Specification for clearing the sample dataset after a trainer has started real work, without deleting the records they created or the movement catalog their programmes depend on.
+description: The one-time migration for a database where demo and real records already coexist — clearing the sample dataset without deleting the records the trainer created or the movement catalog their programmes depend on. New installs keep sample data in the sandbox instead (TODO §40).
 status: active
 tags:
   - demo-data
@@ -12,13 +12,35 @@ tags:
 
 # Use Case 7: From Demo Data to a Clean Working Database
 
-A trainer evaluates LibrePT with the sample dataset, likes it, and starts adding real clients — all
-without ever making a deliberate "now I'm using this for real" decision. There is no such moment in
-the product, and there should not be: forcing one would mean asking someone to commit before they
-have reason to. The consequence is that **demo and real records coexist in the same database**, and
+> **Since TODO §40 this is a MIGRATION, not a standing feature.** Sample data lives in its own
+> database now — the sandbox ([workspace.js](../src/data/workspace.js)) — so "clear the demo" for
+> anyone arriving today is deleting that database, and the app's own offers never put sample people
+> in the trainer's own workspace in the first place. What this document specifies is the one-time
+> path for a database that is **already mixed**: every install that loaded the demo before the split.
+> Nothing here changes; it simply stops being reachable once a device is clean.
+
+A trainer evaluated LibrePT with the sample dataset, liked it, and started adding real clients — all
+without ever making a deliberate "now I'm using this for real" decision. There was no such moment in
+the product, and there should not have been: forcing one would mean asking someone to commit before
+they have reason to. The consequence is that **demo and real records coexist in one database**, and
 sooner or later the fake people become a stain across a dashboard being used for real work.
 
 This use case specifies removing them.
+
+**Why the split does not do this on its own** (TODO §40.8, ruled 2026-09-10): a mixed install is
+**not** divided automatically. Splitting by the stamp would tear a demo client the trainer renamed
+and has been training for months away from the real records that reference them — the exact case the
+fixpoint below exists to protect, and one no rule applied at boot can protect without a trainer
+looking at it.
+
+## Where sample data lives now
+
+| | Before §40 | Now |
+| :--- | :--- | :--- |
+| Where the demo lives | the trainer's own database, marked per record | its own database, `librept_sandbox` |
+| "Show me around" | seeded the working database | opens the sandbox |
+| Clearing it | the fixpoint planner below | delete the sandbox database |
+| This document | the feature | the migration for a mixed install |
 
 ## The problem with the obvious answer
 

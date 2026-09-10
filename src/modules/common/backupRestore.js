@@ -221,6 +221,10 @@ export function renderBackupDialog() {
             <span id="drive-sync-interval-unit">min</span>
           </div>
           <p id="drive-sync-status" class="status-msg"></p>
+          <!-- TODO §40.6: syncing FROM the sandbox writes its own file in the same Drive
+               folder and spends the same grant. Said here, or a trainer reads "synced" and
+               believes their own work is safe. Hidden outside the sandbox. -->
+          <p id="drive-sync-sandbox-note" class="status-msg" data-i18n="sync_sandbox_note" hidden></p>
           <button id="btn-drive-review-conflicts" class="btn secondary-btn w-full hidden"><i class="fa-solid fa-code-compare"></i> <span id="btn-drive-review-conflicts-text">Review conflicts</span></button>
         </div>
 

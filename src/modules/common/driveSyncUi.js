@@ -16,6 +16,7 @@ import {
   syncNow,
 } from "../../data/driveSyncService.js";
 import { preloadGoogleIdentityServices } from "../../data/googleAuth.js";
+import { isSandbox } from "../../data/workspace.js";
 import { closeModal, openModal, renderMarkupOnce } from "./dom.js";
 
 let deps = null;
@@ -146,6 +147,12 @@ function applyCardState(state) {
   set("drive-sync-status", (el) => {
     el.textContent = state.statusText;
     el.className = state.statusClass;
+  });
+  // Which database this card is about (TODO §40.6). The badge above says which workspace the app is
+  // in; this says what a sync from here would actually write, which is the thing a trainer could
+  // otherwise read as a promise about their own work.
+  set("drive-sync-sandbox-note", (el) => {
+    el.hidden = !isSandbox();
   });
   set("btn-drive-review-conflicts", (el) => el.classList.toggle("hidden", !state.reviewVisible));
   set("btn-drive-review-conflicts-text", (el) => {

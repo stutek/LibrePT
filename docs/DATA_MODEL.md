@@ -202,9 +202,22 @@ erDiagram
     }
 ```
 
-**One database is a correctness constraint, not a preference.** IndexedDB transactions cannot span
-*databases*. Giving each schema its own database would make an atomic star write impossible by
-construction — and a phone locking mid-fan-out would leave one schema written and another not.
+**One database PER SCHEMA is a correctness constraint, not a preference.** IndexedDB transactions
+cannot span *databases*. Giving each schema its own database would make an atomic star write
+impossible by construction — and a phone locking mid-fan-out would leave one schema written and
+another not.
+
+**A database per WORKSPACE is the opposite case, and it is why the two do not conflict** (TODO §40).
+The trainer's own work is `librept`; the sandbox they learn and experiment in is `librept_sandbox`
+([workspace.js](../src/data/workspace.js)). Nothing ever writes across that line — the fan-out is
+always within one workspace — so no transaction has to span the two, and the isolation is structural
+rather than a rule the star write has to remember. The alternative considered and rejected was a
+store-name prefix inside the shared database: it would put both workspaces one typo apart, and it
+would make the sandbox's routine reset a delete-by-pattern *inside the database holding the trainer's
+records*.
+
+The working workspace keeps the names every install already has, so this axis arrived as a no-op: a
+device that has never opened the sandbox has no second database at all.
 
 Store names are `schema4`, `schemaP` — one per live schema, on the SAME numbering as
 `schemaVersion` (§1). The database `version` is derived from the highest **numbered** live schema,

@@ -12,10 +12,20 @@
 // without a real network call or a live access token.
 
 import { GoogleApiError, isAuthFailure } from "./googleApiError.js";
+import { SANDBOX, activeWorkspace } from "./workspace.js";
 
 const API_BASE = "https://www.googleapis.com/drive/v3";
 const UPLOAD_BASE = "https://www.googleapis.com/upload/drive/v3";
 export const SYNC_FILENAME = "librept_sync.json";
+export const SANDBOX_SYNC_FILENAME = "librept_sandbox_sync.json";
+
+/** The snapshot file for a workspace (TODO §40.6). The sandbox syncs to its OWN file: keeping both
+ * in one would let sample data land in the snapshot a trainer restores from, and the merge ancestor
+ * for one workspace is meaningless for the other. Two files in `appDataFolder` is the visible cost,
+ * and it is the reason the sync card says which one it is writing. */
+export function syncFilename(workspace = activeWorkspace()) {
+  return workspace === SANDBOX ? SANDBOX_SYNC_FILENAME : SYNC_FILENAME;
+}
 
 // The erasure register is a SECOND file, not a key inside the snapshot, and the separation is
 // load-bearing (erasureSuppression.js): the snapshot is replaced wholesale by a restore or a merge,
@@ -55,7 +65,7 @@ function authHeaders(accessToken, extra = {}) {
 /** A file's `{id, modifiedTime}`, or null if this device's grant has never created it. */
 export async function findSyncFile(
   accessToken,
-  { fetchImpl = fetch, filename = SYNC_FILENAME } = {},
+  { fetchImpl = fetch, filename = syncFilename() } = {},
 ) {
   const query = encodeURIComponent(`name='${filename}' and trashed=false`);
   const fields = encodeURIComponent("files(id,modifiedTime)");
@@ -89,7 +99,7 @@ function buildMultipartBody(boundary, metadata, content) {
 export async function createSyncFile(
   accessToken,
   content,
-  { fetchImpl = fetch, filename = SYNC_FILENAME } = {},
+  { fetchImpl = fetch, filename = syncFilename() } = {},
 ) {
   const boundary = "librept-drive-sync";
   const metadata = { name: filename, parents: ["appDataFolder"] };
