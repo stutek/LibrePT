@@ -4615,7 +4615,5 @@ filled with something other than the demo seed.
 `sandbox` is therefore the term in module names, the database name (`librept_sandbox`), storage keys,
 i18n keys, this section and the rewritten UC7.
 
-**Open, and small: the Slovenian word on screen.** `peskovnik` is the direct translation and is
-established among developers; whether it is the right word in front of a trainer is a call about their
-register, not about the term. Proposed: `peskovnik` in the `sl` strings, `sandbox` in `en`, and the
-same key behind both.
+**On screen in Slovenian it is `peskovnik`** (Simon, 2026-09-10) — `sandbox` in `en`, `peskovnik` in
+`sl`, one i18n key behind both.
