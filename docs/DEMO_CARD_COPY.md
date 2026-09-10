@@ -346,9 +346,9 @@ the demo is where they became visible.
 - **The client list is two words twice over.** `clients_title` says *Imenik strank*,
   `menu_clients_register` says *Seznam strank (klientov)* — *imenik* against *seznam*, *stranka*
   against *klient*.
-- **The app addresses the trainer two ways.** 41 strings use *ti* (*tvoje stranke*), 12 use *vi*
-  (*kar že imate*, *Želite*, *vaše podatke*). The formal ones are not only the legal text: the sync
-  panel, the overlap warning and the start-time question are all ordinary screens.
+- **The app addresses the trainer two ways.** **Ruled 2026-09-10: tikanje everywhere, no setting.**
+  See [the register decision](#the-register-tikanje-everywhere) below for the count, the reason, and
+  the list of strings to change.
 - **"prijava"** must not be used for a client filling in their own details. In Slovenian software it
   reads as *login*. The app's own word is **povabilo**.
 
@@ -490,3 +490,44 @@ vocabulary, and the shorter card is the better card. The word is needed for head
 **This one is a guess about your trade, not about the language** — *uvajanje* is what Slovenian
 usage supports, but what personal trainers say to each other is something you know and I do not.
 If they say *vpis*, that wins.
+
+## The register: tikanje everywhere
+
+**Ruled 2026-09-10.** One register, informal, on every surface. **No per-trainer setting.**
+
+**Why tikanje.** The strongest case for vikanje is the client-facing texts — a stranger, possibly
+older, reading a consent form. Those texts have already chosen tikanje, including the legal ones:
+[docs/templates/sl/](templates/INDEX.md)'s consent form and privacy notice, and `intake_err_consent`
+(*"brez nje trener ne sme hraniti **tvojih** podatkov"*). Nobody has complained. On the trainer's own
+screens the case is easier still: it is a tool they own, held one-handed, not an institution
+addressing a customer.
+
+**Why no setting.** Slovenian register is not a word swap — it changes verb person, participle
+number and gender agreement (*"Zašel(-la) si drugam"* → *"Zašli ste drugam"*, *"Vpiši"* →
+*"Vpišite"*). So a setting means every trainer-facing string written twice, forever, in the one file
+that [TODO §38.20](../TODO.md) already records as drifting with a single variant. No check can fail
+on the branch that merely reads badly. If the choice is ever wanted, it belongs on the three or four
+**client**-facing texts and nowhere else.
+
+### The strings to change
+
+**30 of 647 strings in [sl.js](../src/i18n/sl.js) are vikanje** — count taken 2026-09-10, matching
+both the pronouns (*vaš*, *vam*, *ste*, *Želite*) and the imperatives (*Tapnite*, *Nastavite*,
+*Izberite*, *Zaženite*, *Kliknite*, *Počistite*, *hranite*). An earlier count of 12 in this session
+was wrong: it matched only the pronouns.
+
+Two of them are worth naming before the sweep:
+
+- **`story_programme_open_body` mixes both registers inside one sentence** — *"njena prva vadba je še
+  pred **vami**; torek pripada Jane, Johnu in Sarah, ki pri **tebi** vadijo že dlje"*. It is a demo
+  card, which is how this pass found the problem at all.
+- **The About and warranty texts (`about_*`) are the one place vikanje might be argued to belong**,
+  being closer to a legal notice than to a screen. They go with the rest: the privacy notice and the
+  consent form, which are actually binding, are already tikanje, so a formal About would be the only
+  formal text in the product.
+
+### One trap in the `seja` → `trening` rename
+
+`drive_sync_status_reauth` says *"**Seja** je potekla — dotaknite se za ponovno povezavo."* That is a
+**Google sign-in session**, not a training session. It must not become *trening*. It is the only one,
+and it is the reason the rename is done by reading each string rather than by replacing text.
