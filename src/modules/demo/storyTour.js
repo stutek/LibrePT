@@ -272,6 +272,20 @@ const ARRIVE_CHAPTER = {
   id: "arrive",
   titleKey: "story_chapter_arrive",
   steps: foldCards([
+    // The story's front door (TODO §38.21): what the app is, what this run is a story OF, and that
+    // it all happens in the sandbox — which is why it no longer has to offer to delete the demo data
+    // afterwards (TODO §40).
+    //
+    // It keeps its OWN step, and that is not a flag to work around the fold — its instruction is
+    // "press Next", so there is no tap for it to ride on. It also has to: `foldCards` keeps the
+    // FIRST of two cards in a row, so a welcome card folded here would silently swallow the chapter
+    // card below it, with nothing failing — a dropped card carries no expectation that can.
+    narration("welcome", "chapter", "story_welcome_title", "story_welcome_body", {
+      route: "/",
+      keepOwnStep: true,
+      caption: "story_step_welcome",
+      showMe: false,
+    }),
     narration("arrive-open", "chapter", "story_chapter_arrive", "story_arrive_open_body", {
       route: "/",
     }),

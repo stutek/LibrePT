@@ -184,6 +184,12 @@ export function renderSyncBadge() {
     // Repaint the cloud before returning, or it keeps whatever it last showed — a sync that was in
     // flight when the server went away would leave the arrows spinning here forever, and an idle
     // grant would keep claiming a connection that cannot possibly work. Running from cached code
+  // Rebuilding is offered only from inside (TODO §40.4). Toggled HERE rather than at the two call
+  // sites that switch workspaces, so an item that must never be reachable from the trainer's own
+  // work cannot be left behind by a path that forgot: this is the one function that repaints on
+  // every switch.
+  document.getElementById("menu-sandbox-reset")?.classList.toggle("hidden", !sandbox);
+
     // means no sync can succeed whatever the grant says, which is the not-connected glyph.
     renderSyncCloudIcon({ configured: false });
     badge.classList.remove("hidden");
@@ -429,6 +435,12 @@ export function renderHeaderShell() {
               <button id="menu-history" class="session-menu-item" role="menuitem">
                 <i class="fa-solid fa-clock-rotate-left"></i> History
               </button>
+              <!-- Only ever shown INSIDE the sandbox (TODO §40.4): from the trainer's own work it
+                   would be an offer to rebuild a workspace they are not looking at, wearing a red
+                   button, one row under the way in. -->
+              <button id="menu-sandbox-reset" class="session-menu-item hidden" role="menuitem">
+                <i class="fa-solid fa-arrows-rotate"></i> <span id="menu-sandbox-reset-text" data-i18n="menu_sandbox_reset">Build a fresh sandbox</span>
+              </button>
               <div class="menu-divider" role="separator"></div>
               <button id="menu-connect-cloud" class="session-menu-item" role="menuitem">
                 <i class="fa-solid fa-cloud-arrow-up"></i> Connect cloud storage
@@ -623,6 +635,12 @@ function setupAppMenu() {
   on("menu-open-encrypted", () => {
     closeMenu();
     deps.openEncryptedFileReader?.();
+  });
+  // Guarded here as well as hidden: the item is in the markup either way, and a hidden control is a
+  // styling fact, not a promise about what a click can do (TODO §40.4).
+  on("menu-sandbox-reset", () => {
+    closeMenu();
+    if (isSandbox()) deps.onResetSandbox?.();
   });
   // GitHub project, Bug reporting, and Privacy statement are real <a target="_blank">; just dismiss the menu.
   on("menu-github", () => closeMenu());

@@ -445,6 +445,11 @@ export const sl = {
   sandbox_stale_title: "Ta peskovnik je od prej",
   sandbox_stale_body:
     "Njegove seje so bile zgrajene okoli dneva, ko je nastal, zato je današnja plošča prazna. Nov peskovnik zavrže vse, kar si v njem naredil. Tvojega dela se ne dotakne.",
+  menu_sandbox_reset: "Zgradi nov peskovnik",
+  sandbox_reset_title: "Zavržem ta peskovnik?",
+  sandbox_reset_body:
+    "To izbriše vse v peskovniku in zgradi novega, z vzorčnimi strankami in treningi za danes. Ničesar zunaj peskovnika se ne dotakne.",
+  sandbox_reset_decline: "Obdrži tega",
   sandbox_stale_confirm: "Zgradi nov peskovnik",
   sandbox_stale_decline: "Obdrži tega",
   sandbox_timer_expired_title: "V tvojem delu je potekel časovnik",
@@ -484,6 +489,15 @@ export const sl = {
     "To je en večer ponavljajoče se seje. Kar spremeniš tukaj, velja samo za ta večer.",
   gym_note_in_this_plan: "v tem načrtu",
   feedback_keep_on_record: "Shrani to v kartoteko stranke",
+  // Trening, ne seja: seja je v slovenščini najprej sestanek, trening pa je beseda, ki jo trener in
+  // stranka res uporabljata. Vodeni ogled, ne demo — tako se ta tek imenuje v walkthrough_title.
+  // Pozdrav v obeh oblikah, kot že walkthrough_off_track_title in intake_invite_message_unsigned:
+  // aplikacija tika, tikanje pa je v slovenščini spolsko določeno, zato "(-la)" in ne množina.
+  story_welcome_title: "Dobrodošel(-la) v LibrePT",
+  story_welcome_body:
+    "LibrePT je aplikacija za osebne trenerje. Z njo načrtuješ individualne in skupinske treninge, med vadbo pa ti služi kot digitalna beležnica. Ta vodeni ogled pelje skozi zgodbo treh novih strank: od povabila do skupinskega treninga, ki ga sproti prilagajaš. Vse se dogaja v peskovniku: ljudje, treningi in zapisi so izmišljeni in nič, kar narediš tukaj, ne more doseči tvojih strank in treningov. Peskovnik lahko kadar koli zapustiš ali zgradiš na novo, tvojega dela pa se to ne dotakne.",
+  story_step_welcome:
+    "Z gumbom Naprej začneš. Kartico lahko kadar koli pospraviš z ikono ▾ v njenem zgornjem desnem kotu in aplikacijo preizkušaš brez vodenja; na vrstici, ki ostane, je ✕, ki vodeni ogled konča.",
   story_persona_trainer: "Tvoj telefon",
   story_chapter_gym: "V telovadnici",
   story_persona_client: "Anin telefon",

@@ -477,6 +477,15 @@ export const en = {
   sandbox_stale_title: "This sandbox is from earlier",
   sandbox_stale_body:
     "Its sessions were built around the day it was made, so today's board is empty. Building a fresh one throws away everything you did in the sandbox. Your own work is not touched.",
+  menu_sandbox_reset: "Build a fresh sandbox",
+  sandbox_reset_title: "Throw this sandbox away?",
+  // The BOUNDARY, said once — not an inventory of what survives. Listing the exemptions (their own
+  // work, their details, their cloud connection) tells a reader the act is broad enough to have
+  // needed three, and they start looking for a fourth. What actually holds is guaranteed by
+  // tests/unit_js/data/sandboxWorkspace.test.mjs, which is where a guarantee belongs.
+  sandbox_reset_body:
+    "This deletes everything in the sandbox and builds a new one, with sample clients and sessions for today. Nothing outside the sandbox changes.",
+  sandbox_reset_decline: "Keep this one",
   sandbox_stale_confirm: "Build a fresh sandbox",
   sandbox_stale_decline: "Keep this one",
   sandbox_timer_expired_title: "A timer finished in your own work",
@@ -516,6 +525,18 @@ export const en = {
     "This is one evening of a repeating session. What you change here changes this evening only.",
   gym_note_in_this_plan: "in this plan",
   feedback_keep_on_record: "Keep this on the client's record",
+  // The demo's front door, and the only card a stranger reads standing still rather than mid-tap:
+  // it says what the app is, what this run is a story OF, and that none of it can reach their own
+  // records. The sandbox line replaces the offer to delete the demo data afterwards — with a
+  // separate database (TODO §40) there is nothing to clear, which is the stronger promise.
+  story_welcome_title: "Welcome to LibrePT",
+  story_welcome_body:
+    "LibrePT is an app for personal trainers. You plan individual and group sessions with it, and it is your notebook while they run. This guided walkthrough follows three new clients: from the invitation to a group session you adjust as it goes. It all happens in a sandbox: the people, the sessions and the records are invented, and nothing you do here can reach your own clients and sessions. You can leave the sandbox at any time, or build a fresh one. Neither of those changes your own work.",
+  // The way out is named because this is where somebody decides not to do this at all. ▾ parks the
+  // card and ✕ ends the run, and the ✕ is only on the bar the parked card leaves behind
+  // (modules/demo/walkthrough.css hides it while the card is open) — so the order matters.
+  story_step_welcome:
+    "Next starts it. To try the app without the guide, put this card away with ▾ in its top right corner. A small bar stays on screen: its ✕ ends the walkthrough.",
   story_persona_trainer: "Your phone",
   story_chapter_gym: "In the gym",
   story_persona_client: "Ana's phone",

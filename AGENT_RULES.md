@@ -98,6 +98,9 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
 
 - A step that asks for an action says the action, naming the control, its glyph and where it is;
   never shortened to save room.
+- **User-visible text is read in a second language.** Plain verbs, no idiom: *this deletes
+  everything in the sandbox*, never *everything in the sandbox goes* — which asks the reader who is
+  going where. A destructive act says which word it means.
 - Never put meaning only in a hover; touch targets need real padding.
 - Support surfaces carry the commit SHA, with richer identity one tap away. Code version and
   data-schema version stay separate axes.

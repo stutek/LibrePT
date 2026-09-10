@@ -53,6 +53,19 @@ def _step_numbers(page):
     return [int(n) for n in re.findall(r"\d+", page.locator(PROGRESS).inner_text())]
 
 
+def _expect_step(page, number):
+    """On step `number`, whatever language the panel is counting in.
+
+    Tests that mean "the step which opens the register" must ANCHOR on that step's id and count
+    from where they landed — never from the top of the story. A card added anywhere ahead of them
+    shifts every absolute number behind it, and the failure that produces is a screen assertion
+    three steps later with nothing pointing at the insertion (proved 2026-09-10 by the welcome card,
+    which broke three tests here and none of them said why)."""
+    expect(page.locator(PROGRESS)).to_have_text(
+        re.compile(rf"step\s+{number}\s+of", re.I)
+    )
+
+
 # A card step has no control of its own: it is read, and the guide's own Next is the way on
 # (2026-08-23). What used to be a tap on the card is now no tap at all.
 
@@ -334,13 +347,14 @@ def test_asking_to_be_shown_again_rebuilds_what_the_first_time_used_up(
 
     Walked BACK into rather than repeated in place, because since 2026-08-26 a step done in front of
     the viewer carries the card on — so "asking again" is what you do after returning to it."""
-    _open_story(page, local_server)
+    _open_story(page, local_server, "?init=demo_data_load&demo=story&step=arrive-menu")
+    opened_on = _step_numbers(page)[0]
     _do_step(page)
     _do_step(page)
-    expect(page.locator(PROGRESS)).to_have_text(re.compile(r"step\s+3\s+of", re.I))
+    _expect_step(page, opened_on + 2)
 
     page.locator(BACK).click()
-    expect(page.locator(PROGRESS)).to_have_text(re.compile(r"step\s+2\s+of", re.I))
+    _expect_step(page, opened_on + 1)
 
     for _ in range(3):
         page.locator(SHOW_ME).click()
@@ -348,7 +362,7 @@ def test_asking_to_be_shown_again_rebuilds_what_the_first_time_used_up(
         assert page.locator(PROBLEM).is_hidden(), (
             f"the guide reported a failure on a repeat: {page.locator(PROBLEM).inner_text()}"
         )
-        expect(page.locator(PROGRESS)).to_have_text(re.compile(r"step\s+2\s+of", re.I))
+        _expect_step(page, opened_on + 1)
 
     expect(page.locator("#btn-invite-client")).to_be_visible()
     assert page.locator("#app-menu.hidden").count() == 1, (
@@ -366,25 +380,26 @@ def test_walking_back_out_of_a_dialog_and_forward_again_reopens_it(page, local_s
     where none of it was happening. Nothing detected it: none of those steps declares a
     precondition, and a control inside a closed dialog is not something a selector complains about.
     Being READY now includes the step's own control being reachable."""
-    _open_story(page, local_server)
+    _open_story(page, local_server, "?init=demo_data_load&demo=story&step=arrive-menu")
+    opened_on = _step_numbers(page)[0]
 
     # Forward to the step that types a phone number into the invite dialog.
     for _ in range(4):
         _do_step(page)
-    expect(page.locator(PROGRESS)).to_have_text(re.compile(r"step\s+5\s+of", re.I))
+    _expect_step(page, opened_on + 4)
     expect(page.locator("#dialog-intake-invite")).to_be_visible()
 
     for _ in range(3):
         page.locator(BACK).click()
         page.wait_for_timeout(400)
-    expect(page.locator(PROGRESS)).to_have_text(re.compile(r"step\s+2\s+of", re.I))
+    _expect_step(page, opened_on + 1)
     expect(page.locator("#dialog-intake-invite")).to_be_hidden()
 
     for _ in range(2):
         page.locator(NEXT).click()
         page.wait_for_timeout(600)
 
-    expect(page.locator(PROGRESS)).to_have_text(re.compile(r"step\s+4\s+of", re.I))
+    _expect_step(page, opened_on + 3)
     # The step asks for a number to be typed into a field in that dialog, so the dialog is back.
     expect(page.locator("#dialog-intake-invite")).to_be_visible(timeout=15_000)
     assert page.locator(PROBLEM).is_hidden(), page.locator(PROBLEM).inner_text()
@@ -401,16 +416,17 @@ def test_walking_back_puts_the_screen_the_card_describes_back(page, local_server
     _open_story(
         page, local_server, "clients?init=demo_data_load&demo=story&step=arrive-invite"
     )
+    opened_on = _step_numbers(page)[0]
     for _ in range(4):
         _do_step(page)
-    expect(page.locator(PROGRESS)).to_have_text(re.compile(r"step\s+7\s+of", re.I))
+    _expect_step(page, opened_on + 4)
 
     for _ in range(3):
         page.locator(BACK).click()
         page.wait_for_timeout(1500)
 
-    # Step 4 typed the number, and it is back in the box the card is talking about.
-    expect(page.locator(PROGRESS)).to_have_text(re.compile(r"step\s+4\s+of", re.I))
+    # The step that typed the number, and it is back in the box the card is talking about.
+    _expect_step(page, opened_on + 1)
     expect(page.locator("#dialog-intake-invite")).to_be_visible()
     assert page.input_value("#intake-invite-contact") == "+386 41 234 567", (
         "the card asks for a number the app is not showing"

@@ -109,7 +109,7 @@ import { openFeedbackModal } from "./modules/common/feedbackModal.js";
 import { renderNotificationArea } from "./modules/common/notificationArea.js";
 import { populateDropdownSelectors as populateDropdownsController } from "./modules/common/populateDropdownSelectors.js";
 import { registerShellRender, runShellRenders } from "./modules/common/renderRegistry.js";
-import { openStaleSandboxDialog } from "./modules/common/sandboxDialogs.js";
+import { openResetSandboxDialog, openStaleSandboxDialog } from "./modules/common/sandboxDialogs.js";
 import { DEMO_STORY, INIT_DEMO_DATA, getShareParams } from "./modules/common/shareLink.js";
 import {
   applyTheme,
@@ -512,6 +512,17 @@ async function init() {
     getState,
     t,
     onSwitchWorkspace: (name) => switchToWorkspace(name),
+    // Asked for from the menu, where the stale offer is raised at us (TODO §40.4). Same act,
+    // same `resetSandbox` — which is guarded to the sandbox in stateStore.js, so the menu item
+    // being hidden is the second lock rather than the only one.
+    onResetSandbox: () =>
+      openResetSandboxDialog({
+        t,
+        onConfirm: async () => {
+          await resetSandbox();
+          renderEverything();
+        },
+      }),
     // An imported programme lands in the ordinary plan editor (TODO §29): the same clipboard a
     // trainer builds a session in, so its save is the write and there is no import-specific
     // persistence to keep correct.

@@ -1,9 +1,15 @@
-// src/modules/common/sandboxDialogs.js — the two things the sandbox has to say out loud (TODO §40).
+// src/modules/common/sandboxDialogs.js — the things the sandbox has to say out loud (TODO §40).
 //
-// Single responsibility: the offer to rebuild a sandbox that has gone flat (§40.4), and the card
-// that names a timer which finished back in the trainer's own work while they are in here (§40.11).
-// Both are one question with two answers, and both are ABOUT the sandbox — so they share a module
-// rather than being scattered next to whatever raised them.
+// Single responsibility: the offer to rebuild a sandbox that has gone flat (§40.4), the same offer
+// made deliberately from the menu, and the card that names a timer which finished back in the
+// trainer's own work while they are in here (§40.11). Each is one question with two answers, and
+// each is ABOUT the sandbox — so they share a module rather than being scattered next to whatever
+// raised them.
+//
+// **Asked-because-stale and asked-for are two dialogs, not one with a flag.** They differ in the
+// only part that matters: the stale one explains why it is interrupting and its "no" starts a
+// cooldown, while the menu one was asked for and its "no" means nothing at all. One dialog wearing
+// both would have to explain a staleness the trainer did not raise.
 //
 // **A dialog and not a `confirm()`.** The precedent in this codebase is that a plain yes/no about
 // one thing may use `confirm()` (editSessionControl.js), and a decision with consequences a trainer
@@ -22,6 +28,7 @@ import { closeModal, openModal, renderMarkupOnce } from "./dom.js";
 
 const STALE_DIALOG_ID = "dialog-sandbox-stale";
 const TIMER_DIALOG_ID = "dialog-sandbox-timer";
+const RESET_DIALOG_ID = "dialog-sandbox-reset";
 
 function renderStaleDialog() {
   renderMarkupOnce(
@@ -37,6 +44,27 @@ function renderStaleDialog() {
     <div class="modal-actions">
       <button type="button" class="btn secondary-btn" id="sandbox-stale-decline" data-i18n="sandbox_stale_decline"></button>
       <button type="button" class="btn danger-btn" id="sandbox-stale-confirm" data-i18n="sandbox_stale_confirm"></button>
+    </div>
+  </div>
+</dialog>
+`,
+  );
+}
+
+function renderResetDialog() {
+  renderMarkupOnce(
+    "dialogs-root",
+    (root) => root.querySelector(`#${RESET_DIALOG_ID}`),
+    `
+<dialog id="${RESET_DIALOG_ID}" class="dialog-modal card glassmorphic">
+  <div class="modal-header">
+    <h3 id="sandbox-reset-title" data-i18n="sandbox_reset_title"></h3>
+  </div>
+  <div class="modal-form">
+    <p id="sandbox-reset-body" class="text-sm" data-i18n="sandbox_reset_body"></p>
+    <div class="modal-actions">
+      <button type="button" class="btn secondary-btn" id="sandbox-reset-decline" data-i18n="sandbox_reset_decline"></button>
+      <button type="button" class="btn danger-btn" id="sandbox-reset-confirm" data-i18n="sandbox_stale_confirm"></button>
     </div>
   </div>
 </dialog>
@@ -115,6 +143,35 @@ export function openStaleSandboxDialog({ t, onConfirm, onDecline }) {
   );
 
   openModal(STALE_DIALOG_ID);
+}
+
+/**
+ * Throw the sandbox away and build a fresh one, asked for from the menu rather than offered
+ * (TODO §40.4).
+ *
+ * Dismissing it is a NO and nothing else: unlike the stale offer, nobody interrupted the trainer, so
+ * there is no cooldown to start and no answer to remember. It shares the stale dialog's confirm
+ * label because it performs the identical act, and says on its own body what survives — the sandbox
+ * is not where the trainer's work, their own details or their cloud connection live, and a dialog
+ * with a red button has to say so before it is pressed.
+ */
+export function openResetSandboxDialog({ t, onConfirm }) {
+  renderResetDialog();
+  const dialog = document.getElementById(RESET_DIALOG_ID);
+  if (!dialog) return;
+
+  fill("sandbox-reset-title", t("sandbox_reset_title"));
+  fill("sandbox-reset-body", t("sandbox_reset_body"));
+  fill("sandbox-reset-decline", t("sandbox_reset_decline"));
+  fill("sandbox-reset-confirm", t("sandbox_stale_confirm"));
+
+  wire("sandbox-reset-confirm", () => {
+    closeModal(RESET_DIALOG_ID);
+    onConfirm?.();
+  });
+  wire("sandbox-reset-decline", () => closeModal(RESET_DIALOG_ID));
+
+  openModal(RESET_DIALOG_ID);
 }
 
 /**

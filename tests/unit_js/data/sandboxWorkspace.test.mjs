@@ -15,6 +15,7 @@ import {
   STALE_AFTER_MS,
   sandboxStaleness,
 } from "../../../src/data/sandboxStaleness.js";
+import { VERSION_SCOPED_KEYS, clearWorkspaceKeys } from "../../../src/data/storageNamespace.js";
 import {
   ACTIVE_WORKSPACE_KEY,
   SANDBOX,
@@ -52,6 +53,43 @@ test("a scoped key still starts with the app's own prefix", () => {
   // resetLibrePTData and the support wipe both sweep by prefix. A key they stopped recognising
   // would survive a wipe that told the trainer everything was removed.
   assert.ok(scopedKey("librept_active_timers", SANDBOX).startsWith("librept"));
+});
+
+test("rebuilding the sandbox keeps the trainer's own details and their cloud connection", () => {
+  // The promise the menu's "Build a fresh sandbox" makes (TODO §40.4), pinned where it is decided
+  // rather than where it is worded: a reset clears the sandbox's own per-workspace keys and the
+  // sandbox database, and the trainer's identity and Drive connection belong to the PERSON, so they
+  // are unscoped and must survive (§40.1). Asserted by NAME, because the isolation here is naming:
+  // the day one of these is added to VERSION_SCOPED_KEYS it starts being swept, silently.
+  const survives = [
+    "librept_trainer_name",
+    "librept_trainer_email",
+    "librept_trainer_phone",
+    "librept_invite_expiry_hours",
+    "librept_drive_connected",
+  ];
+  for (const key of survives) {
+    assert.ok(
+      !VERSION_SCOPED_KEYS.includes(key),
+      `${key} belongs to the person, so a sandbox reset must not be able to reach it`,
+    );
+  }
+
+  const store = withLocalStorage(
+    Object.fromEntries([
+      ...survives.map((k) => [k, "keep me"]),
+      ...VERSION_SCOPED_KEYS.map((k) => [scopedKey(k, SANDBOX), "sandbox"]),
+      ...VERSION_SCOPED_KEYS.map((k) => [scopedKey(k, WORKING), "the trainer's own"]),
+    ]),
+  );
+
+  clearWorkspaceKeys(SANDBOX);
+
+  for (const key of survives) assert.equal(store.get(key), "keep me", key);
+  for (const key of VERSION_SCOPED_KEYS) {
+    assert.equal(store.get(scopedKey(key, SANDBOX)), undefined, key);
+    assert.equal(store.get(scopedKey(key, WORKING)), "the trainer's own", key);
+  }
 });
 
 test("an unreadable or unknown stored workspace reads as the working one", () => {
