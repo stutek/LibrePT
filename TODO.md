@@ -2900,6 +2900,11 @@ events that genuinely need it.
 
 ## 37. The browser tiers are CPU-SATURATED, and the pipeline was under-reporting it
 
+**Note 2026-09-10 (Simon): the recent runs were on PERFORMANCE mode, not balanced.** Any timing
+compared against an older one is comparing power modes as well as code — including the demo/e2e
+ratio the Stage 3 worker split is derived from (§39.18, `demo_worker_count`). Re-derive on the
+same mode as the measurement being replaced, and say which mode it was.
+
 **Measured 2026-08-19**, chasing "where does the medium tier lose its time?". The premise was wrong,
 and so was the instrument.
 
@@ -5033,3 +5038,77 @@ hides the one failure no check can catch — the id staying while the thing it n
 
 **Deliberately not designed further** (Simon, same day: *"I am over engineering it"*). This is the
 problem, written down.
+
+## 42. The clipboard, read at a glance — expand all, and cards worth expanding
+
+**Reported 2026-09-10 (a trainer, via Simon):** the clipboard *"mora biti bolj pregleden"* — the deck
+shows one card open and the rest as peeking rows, which is compact and does not answer *what is the
+whole session*.
+
+### 42.1 [x] Expand all — shipped 2026-09-10
+
+See [CHANGELOG](CHANGELOG.md). The ⋯ menu opens every card at once, and the item says which direction
+it goes. Two decisions in it are worth keeping:
+
+- **An expanded card that is not in focus draws what the focused card draws and BEHAVES like a
+  collapsed one.** Its controls are removed from the DOM rather than disabled — twelve open cards
+  with live Too Easy / Too Hard / timer buttons put a mis-tap one thumb-width from logging against
+  the wrong exercise, and a control that is drawn but inert is worse than either. A tap focuses the
+  card, exactly as a collapsed one's does.
+- **Expansion and focus are separate states.** Focus is a fact about the session — it keeps the tint,
+  the ring, and what a card may do. Expansion only decides how much is drawn.
+
+Two defects the first version had, both found by the test rather than by reading: stripping the two
+named containers missed the rest card's Start button, which sits in neither (it strips every button
+and input now), and the rest card hardcoded an "In Focus" badge that was only true while its template
+was drawn for the focused card alone.
+
+### 42.2 Measured: why expanding alone does not finish the job
+
+A phone at 390×844, the deck stub with a four-item plan:
+
+| | Height |
+| :--- | ---: |
+| Focused card | **172px** — top row 32, name 17, stats block 52, action row 39, padding 16 |
+| Expanded, not in focus | **133px** — the same without the action row |
+| Collapsed row in the stack | **37px** |
+
+The deck's own visible area on that phone is roughly 500px once the header, the title bar and the
+clipboard bar are out. So expanding gives **under four cards on screen** where the stack gives
+eleven. For a six-item plan the trainer still scrolls — the control answers "show me everything" and
+not yet "let me see it".
+
+### 42.3 Proposal — three tiers, not two
+
+**An expanded card should not be the focused card minus its buttons. It should be the collapsed row
+plus its numbers.** The collapsed row already proves the shorthand works: it carries name and target
+on one line (`exerciseCard.js` renders `S × R × weight` there and has since the deck was built).
+
+| Tier | What it shows | Measured / estimated |
+| :--- | :--- | ---: |
+| Collapsed | name + compact target, peeking in the stack | 37px |
+| **Expanded** | name, full target line, status — flat in a list, nothing to tap | **≈55px** |
+| Focused | the big stats block and the controls | 172px |
+
+Where the ≈55px comes from, item by item:
+
+- **Fold the stats block into one line** — 52px of value-over-label for three numbers becomes ~17px
+  as `3 × 10 × 60 kg`. **Saves ~35px.** The big block stays on the FOCUSED card, where it earns its
+  height: that is the one a trainer reads at arm's length mid-set.
+- **Fold the top row into the name line** — the counter (`1/4`) and the status badge move to the
+  right of the name. **Saves ~32px.**
+- Keep the padding and the name as they are; both are what makes the card legible at all.
+
+Result: **eight or nine expanded cards on a phone screen instead of three**, and the whole of a
+typical session visible without scrolling.
+
+The other two card shapes follow the same rule:
+
+- **Circuit** — one line per member (name + target), no round controls, no failure inputs.
+- **Rest** — a single line: `Rest 90s`. Its expanded form today is a duration in display type plus a
+  Start button that expand-all now strips, which leaves a very tall card saying very little.
+
+**Open, and the reason this is a proposal rather than a commit:** whether the expanded tier should
+also drop the card chrome — border, radius, shadow — and become a plain row in a list. That would
+save another ~10px per card and make the deck read as a table, which is what a trainer scanning a
+whole session is actually doing. It is also the point where it stops looking like the app.
