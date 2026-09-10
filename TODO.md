@@ -4820,20 +4820,44 @@ seven objections rather than answering them:
 - **(1) audience** — conceded and reframed. Most trainers have a phone, and the phone keeps its one
   column. The wide layout serves the evening, on a machine that is already sitting on a desk, which
   is the one context where a desk-shaped answer is the right one.
-- **(2) thumb-sized targets** — falls. Nobody is logging a set into five columns at arm's length; the
-  evening has a mouse and a keyboard.
-- **(3) two gesture modes at once** — falls as a hazard, and comes back as an OPPORTUNITY (§41.6):
-  with several plans open in edit at once, dragging an exercise from one client's plan into another's
-  becomes possible, and that is a thing no single-column layout can offer at all.
+- **(2) thumb-sized targets** — falls for the evening. Nobody is logging a set into five columns at
+  arm's length; the evening has a mouse and a keyboard. **It does NOT fall for the live case below.**
+- **(3) two gesture modes at once** — falls as a hazard in the evening, and comes back as an
+  OPPORTUNITY (§41.6): with several plans open in edit at once, dragging an exercise from one
+  client's plan into another's becomes possible, and no single-column layout can offer that at all.
+
+**Corrected the same day, by the maintainer's own Tuesday:**
+
+> *"primer uporabe clipboarda (1 ali 3 stolpce) je moj torkov trening: tri stranke vsak svoj program
+> hkrati"*
+
+**So the live case is real, and it is the maintainer's own weekly session:** three clients training
+side by side on three different programmes. One column on a phone, three on a tablet — the count
+follows the device, which is what "odvisno od prostora" already said. Objections (2) and (3) stand
+for that case and are settled only for the evening one, so the layout has to serve both without
+carrying the evening's gestures onto the floor.
+
+**The rule that lets it: the per-column MODE is the safety boundary, and it was already ruled.**
+
+| A column in EXECUTE | A column in EDIT |
+| :--- | :--- |
+| the gym floor: logging sets, signals, timers | planning: reordering, adding, removing |
+| thumb-sized targets, no drag gestures at all | drag is the point |
+| **never accepts a drop from another column** | may exchange exercises with another EDIT column |
+
+Cross-column drag (§41.6's opportunity) is therefore allowed **only between two columns that are both
+in edit**, and an executing column is inert to it. That is one rule, it needs no mode switch of its
+own, and it means the Tuesday session on a tablet — three columns, all executing — has exactly the
+gesture surface the single-column clipboard has today.
 
 **What survives, unchanged:** (4) the routes, (5) the test matrix, (6) the two-experience problem —
 sharper now, because the phone and the desk stop being the same layout by design rather than by
 accident — and (7) sequencing.
 
-**And one new question this reframing raises, which has to be answered before any code:** if the
-columns are for planning rather than for running a session, is the live clipboard the right home at
-all, or is this the plan editor wearing a wide layout? The clipboard is the screen a session is RUN
-on; a planning surface that happens to look like it may be a different route with a different name.
+**The question the evening framing raised — whether this belongs in the plan editor rather than the
+live clipboard — is answered by the Tuesday case: the clipboard.** It is the screen a session is run
+on, and running three programmes at once is the case. The evening then uses the same screen with its
+columns in edit mode, which is what the per-column mode is for.
 
 **Two cheaper things that take most of the value, worth measuring before the full build:**
 
