@@ -161,3 +161,34 @@ def test_the_status_tag_sits_in_the_title_row_however_open_the_card_is(
             if not card["hasTag"]:
                 continue
             assert card["sameRow"], f"{state}: the tag left the title row — {card}"
+
+
+# A collapsed circuit names its movements (TODO §42.6). Asked for by the maintainer: "Tri-Set
+# Metabolic Circuit" alone says three unnamed things are coming, while every other collapsed card
+# already says what it is. The rest INSIDE a circuit is a member like any other and has no name or
+# reps to show — asking it for them printed a line reading "undefined" under every circuit.
+CIRCUIT_SUMMARY = """() => {
+  const card = [...document.querySelectorAll('.exercise-deck-card')]
+    .find((el) => el.classList.contains('circuit-card') && !el.classList.contains('in-focus'));
+  if (!card) return null;
+  return {
+    names: [...card.querySelectorAll('.circuit-ex-summary .circuit-ex-name')].map((el) => el.innerText.trim()),
+    text: card.innerText,
+    controls: card.querySelectorAll('button, input').length,
+  };
+}"""
+
+
+def test_a_collapsed_circuit_names_its_movements(page, local_server):
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#active-exercise-scroll-deck .exercise-deck-card")
+
+    summary = page.evaluate(CIRCUIT_SUMMARY)
+
+    assert summary, "the fixture has a circuit that is not in focus"
+    assert "Kettlebell Swing" in summary["names"], summary
+    assert "Push Press" in summary["names"], summary
+    assert "undefined" not in summary["text"], (
+        f"a member with no name or reps printed itself as undefined: {summary['text']!r}"
+    )
+    assert summary["controls"] == 0, "a collapsed card offers nothing to tap"

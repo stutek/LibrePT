@@ -224,12 +224,40 @@ export class CircuitDeckCard extends DeckCard {
     const { round, t, escapeHTML } = this.ctx;
     const item = this.item;
     const title = item.title ? escapeHTML(item.title) : t("combo_round_title");
+    // A collapsed circuit names its movements, with each one's reps and load (TODO §42.6). Every
+    // other collapsed card already says what the trainer is looking at — "Tri-Set Metabolic
+    // Circuit" alone says only that three unnamed things are coming. The rows are the SAME markup
+    // the open card uses, minus the actions: no signals, no failure fields, nothing to tap, which is
+    // the rule every non-focused card follows.
+    const members = (item.items || [])
+      .map((ex) => {
+        // A rest is a first-class member of a circuit, and it has no name or reps — asking it for
+        // them printed a line saying `undefined` under every circuit in the deck. It says what it
+        // is, the same way the open card's break row does.
+        if (isRestRecord(ex)) {
+          return `
+        <div class="circuit-ex-head">
+          <span class="circuit-ex-name"><i class="fa-solid fa-hourglass-half"></i> ${t("rest_label")}</span>
+          <span class="circuit-ex-target"><span class="circuit-ex-reps">${escapeHTML(String(ex.rest))}s</span></span>
+        </div>`;
+        }
+        const load = hasLoad(ex.weightTarget, ex.loadUnit)
+          ? ` · ${escapeHTML(formatLoad(ex.weightTarget, ex.loadUnit))}`
+          : "";
+        return `
+        <div class="circuit-ex-head">
+          <span class="circuit-ex-name">${escapeHTML(ex.name)}</span>
+          <span class="circuit-ex-target"><span class="circuit-ex-reps">${escapeHTML(String(ex.repsTarget))}${load}</span></span>
+        </div>`;
+      })
+      .join("");
     card.innerHTML = `
       <div class="deck-card-compact">
         <span class="deck-card-counter"><i class="fa-solid fa-layer-group"></i></span>
         <span class="deck-card-name deck-card-name-inline">${title}</span>
         ${item.isCompleted ? `<span class="badge badge-emerald deck-card-status">${t("session_completed")}</span>` : `<span class="badge deck-card-status deck-card-status-upcoming">Round ${round} of ${item.series}</span>`}
-      </div>`;
+      </div>
+      <div class="circuit-ex-list circuit-ex-summary">${members}</div>`;
   }
 
   // A circuit unit has no single .index of its own (only its members do), so collapsed tap can't

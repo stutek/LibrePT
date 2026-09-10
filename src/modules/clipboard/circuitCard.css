@@ -34,6 +34,29 @@
 .circuit-ex-list {
   gap: 2px;
 }
+/* The summary a COLLAPSED circuit shows (TODO §42.6): the same rows the open card draws, at the
+   size a peeking card can afford. Smaller and quieter than the open list on purpose — this is the
+   trainer reading what is coming, not working through it, and a collapsed card that shouted as
+   loudly as the focused one would take the focus away from the card that has it. */
+.circuit-ex-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 4px;
+}
+.circuit-ex-summary .circuit-ex-head {
+  margin-bottom: 0;
+  gap: 8px;
+  justify-content: space-between;
+}
+.circuit-ex-summary .circuit-ex-name {
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.85;
+}
+.circuit-ex-summary .circuit-ex-reps {
+  font-size: 12px;
+}
 .circuit-ex-row {
   padding: 4px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
