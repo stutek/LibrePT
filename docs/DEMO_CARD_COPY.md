@@ -427,6 +427,19 @@ the demo is where they became visible.
   the story's chapter crossings already pass `?step=`; what is missing is saving the step id. It is
   per-workspace state, so it belongs in [TODO §40.1](../TODO.md)'s meta, not beside it.
 
+### The trap in adding card 1 — it would delete card 2
+
+`foldCards` in [storyTour.js](../src/modules/demo/storyTour.js) rides a card onto the next real step,
+and its rule for two cards in a row is **keep the FIRST**. A welcome card placed in front of
+`arrive-open` is two cards in a row: the welcome becomes `pending`, `arrive-open` hits
+`pending = pending || step` and is **silently dropped**. The chapter opening would vanish from the
+story with nothing failing.
+
+**The fix is one flag: `keepOwnStep: true` on the welcome card.** It then stays a step of its own —
+which is what it should be anyway, since its instruction is *"Z gumbom Naprej začneš"* — and
+`arrive-open` folds onto `arrive-menu` exactly as it does today. The flag also gives it
+`story_step_read_on` as its caption and hides *Pokaži mi*, there being nothing to demonstrate.
+
 ### Still open on card 1
 
 - **Whether the ✕ goes away entirely**, leaving only ▾. See the argument below.
