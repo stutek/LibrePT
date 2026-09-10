@@ -4973,3 +4973,63 @@ That leaves two real questions, and they are independent of each other:
    act on the wrong one, and here "the wrong one" is another client's programme. What DOES change on
    a narrower window is which columns are visible — that is scrolling or paging, and it must not be
    confused with reordering.
+
+---
+
+## 42. [Idea] Detect and report stale or dead links, across versions
+
+**Asked 2026-09-10 (Simon):** *"a way to detect and report stale or dead deep links passed around the
+internet (across versions)"*, then, on reading a first draft that covered only the demo:
+*"stale link detection ni samo za demo, temveč za vse"* — not only the demo, all of them.
+
+*(First written the same day and lost: commit `283254e` rewrote the tail of this file and deleted the
+section. Restored and broadened.)*
+
+**Every link this app hands out is a promise made to a page that will keep changing.** They get pasted
+into chats, forum posts, calendar invites and user documentation, and then they sit there for months.
+
+**The general defect: every one of them degrades silently, deliberately.**
+[shareLink.js](src/modules/common/shareLink.js) — the module that reads promo and deep-link
+parameters off the address — documents the fallback for each: an unknown `theme` gives the default
+theme, an unknown `lang` the saved one, an unknown `chapter` the whole story, an unknown `demo` or
+`init` nothing at all, and an absent or unrecognised `workspace` **the trainer's own database rather
+than the sandbox**. Routes do the same: `resumeWalkthroughAt` in
+[domain/walkthrough.js](src/domain/walkthrough.js) starts the demo from the beginning when the step
+id is gone.
+
+Each of those fallbacks is right on its own. A mistyped link pasted into a chat should still show a
+stranger something rather than an error page. Together they mean **no link can ever be observed to
+have rotted** — it keeps working and shows the wrong thing.
+
+**The links in question, and they are not all the demo's:**
+
+- demo deep links naming a step or a chapter;
+- promo links carrying `lang`, `theme`, `init`, `workspace`;
+- app routes naming a session date or a client id — a link to a client since deleted;
+- the **client intake link** in an invitation, and the privacy-notice URL sent beside it, both of
+  which leave the app and land in somebody's messages;
+- links inside this repository's own documentation.
+
+**Two halves, and they are different problems.**
+
+- **Links inside this repository** are ours to check.
+  [agent_tools/doclinks.py](agent_tools/doclinks.py) — the tool that resolves every Markdown link,
+  anchor and `§`-reference and fails the build on a dead one — could resolve the app's own link
+  vocabulary too: a `step=` that names no step, a `theme=` that names no theme.
+- **Links out in the world** cannot be checked from here. What is possible is for the **app** to
+  notice it was handed a value it does not recognise, and report it rather than silently substituting
+  a default. Where such a report goes, and whether a stranger's first screen is the right place to
+  raise it, is the open question.
+
+**"Across versions" is why this is not just a build check.** There are no release tags and no
+multi-version hosting ([§16](TODO.md), [§18](TODO.md)) — one build is live at a time. A link made a
+year ago is judged by today's code, with no older version to fall back to and no version axis to read
+the link's age from.
+
+**Decided already, so it is not re-derived:** **ids in links stay human-readable** — `swap-open-catalog`,
+not a UUID. A UUID prevents an accidental rename and nothing else; a build check catches that too, and
+the id is what a failing test, a debug message and a documentation URL all show a person. A UUID also
+hides the one failure no check can catch — the id staying while the thing it names drifts.
+
+**Deliberately not designed further** (Simon, same day: *"I am over engineering it"*). This is the
+problem, written down.
