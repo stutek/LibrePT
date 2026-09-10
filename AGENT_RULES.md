@@ -107,8 +107,10 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
 
 ## Documents and tools
 
-- One home each: architecture [README.md](README.md), workflows [use_cases/](use_cases/), work and
-  decisions [TODO.md](TODO.md), what shipped [CHANGELOG.md](CHANGELOG.md). Every Markdown file
+- One home each: architecture [README.md](README.md), workflows [use_cases/](use_cases/), open work
+  and decisions [TODO.md](TODO.md), what shipped [CHANGELOG.md](CHANGELOG.md). **A section leaves
+  TODO.md the day it closes** — heading and pointer stay, the reasoning moves whole to
+  [TODO_ARCHIVE.md](TODO_ARCHIVE.md), and open subsections stay behind. Every Markdown file
   carries frontmatter, every knowledge directory an `INDEX.md`, and concepts link to each other.
   Navigate by that graph rather than grepping for a concept.
 - Check [agent_tools/INDEX.md](agent_tools/INDEX.md) before improvising, and ask first whether the

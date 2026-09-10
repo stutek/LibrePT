@@ -167,7 +167,9 @@ def qualifier_for(line, ref_start, links, path, all_files):
         if resolved is not None:
             return resolved
 
-    return path if path.name == "TODO.md" else None
+    # Inside the archive an unqualified § means the backlog too — the archive is TODO.md's own
+    # closed half, and its prose is full of references written while it lived there.
+    return path if path.name in ("TODO.md", "TODO_ARCHIVE.md") else None
 
 
 def nearest(fragment, anchors):
@@ -190,7 +192,20 @@ def anchors_of(path, cache):
 def sections_of(path, cache):
     if path not in cache:
         cache[path] = parse_headings(path)
-    return cache[path][1]
+    numbers = cache[path][1]
+    # TODO.md and TODO_ARCHIVE.md are ONE numbering. A closed section keeps its heading in TODO.md
+    # as a stub, but its subsections move out whole — so `§38.4` lives only in the archive while
+    # `§38` lives in both, and a reference to either is alive. Checking them separately would
+    # report every archived subsection as dangling and make archiving impossible.
+    if path.name in ("TODO.md", "TODO_ARCHIVE.md"):
+        sibling = path.parent / (
+            "TODO_ARCHIVE.md" if path.name == "TODO.md" else "TODO.md"
+        )
+        if sibling.exists():
+            if sibling not in cache:
+                cache[sibling] = parse_headings(sibling)
+            numbers = numbers | cache[sibling][1]
+    return numbers
 
 
 def list_items_of(path, cache):

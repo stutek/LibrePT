@@ -133,6 +133,8 @@ jobs:
       - uses: ./.github/actions/python-env
       - name: Module catalog coverage
         run: .venv/bin/python -c "from build import run_catalog_coverage_check; run_catalog_coverage_check()"
+      - name: TODO hygiene
+        run: .venv/bin/python -c "from build import run_todo_hygiene_check; run_todo_hygiene_check()"
       - name: Module self-path headers
         run: .venv/bin/python -c "from build import run_module_header_check; run_module_header_check()"
       - name: Icon coverage

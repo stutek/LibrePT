@@ -972,6 +972,20 @@ def run_icon_coverage_check():
         sys.exit(1)
 
 
+def run_todo_hygiene_check():
+    """Keeps TODO.md to open work — see agent_tools/todo_hygiene.py.
+
+    The rule was always in the file's own preamble and nothing enforced it, so closed sections kept
+    their bodies: 5,406 lines, 2,542 of them under headings already marked done. Every agent that
+    read the backlog for one open question paid for all of it, silently, on every read.
+    """
+    print("\n  Checking TODO hygiene...")
+    from agent_tools import todo_hygiene
+
+    if todo_hygiene.main() != 0:
+        sys.exit(1)
+
+
 def run_css_token_check():
     """Verifies every `var(--token)` names a property something defines — see
     agent_tools/css_tokens.py.
@@ -1995,6 +2009,7 @@ def run_stage_1_parallel():
         "Security Tests": run_security_tests,
         "Static Security Audits": run_static_security_checks,
         "Documentation Graph": run_doc_graph_check,
+        "TODO Hygiene": run_todo_hygiene_check,
         "Module Catalog Coverage": run_catalog_coverage_check,
         "Module Headers": run_module_header_check,
         "Icon Coverage": run_icon_coverage_check,

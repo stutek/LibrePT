@@ -19,7 +19,8 @@ This index provides AI agents and contributors with a structured navigation map 
 | :--- | :--- | :--- |
 | [README.md](README.md) | `overview` | Canonical system architecture, domain subsystem definitions, high-level feature specifications, and quick start. |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | `guidelines` | Human contributor guide: development setup, testing, code conventions, and documentation standards. |
-| [TODO.md](TODO.md) | `roadmap` | Backlog of planned features, UX changes, and unresolved design questions awaiting brainstorming. |
+| [TODO.md](TODO.md) | `roadmap` | Backlog of planned features, UX changes, and unresolved design questions awaiting brainstorming. **Open work only** — a section leaves the day it closes. |
+| [TODO_ARCHIVE.md](TODO_ARCHIVE.md) | `archive` | The reasoning behind every CLOSED TODO section, verbatim. Read it when a `§N.M` in the code points at a stub: the stub says what happened, this says why. |
 | [docs/DATA_MODEL.md](docs/DATA_MODEL.md) | `architecture` | Data model & storage schema: IndexedDB layout, logical record model, star-write projections, migration order and retention. |
 | [docs/ROUTING.md](docs/ROUTING.md) | `architecture` | Routing architecture: the Route class hierarchy and registry, specificity-based resolution, the `ctx` a route receives, routing invariants, and how to add a route. |
 | [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) | `guidelines` | Copyright notices and licences for the fonts and icon font vendored into `src/` and therefore redistributed in every published build (SIL OFL 1.1, CC BY 4.0, MIT), plus the changes made to each. |
