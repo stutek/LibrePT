@@ -127,6 +127,10 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
   cheap and deterministic — then it ships complete and gates something in CI.
 - Edit files with the editing tool, never a shell heredoc. A bulk script matches exact known text,
   asserts every site applied, and regenerates from `HEAD` if repair starts.
+- **Researching the web: a generated summary is a lead, the reference is the source.** Prefer
+  Google's AI mode where it is reachable — from here it redirects to a consent wall — then OPEN every
+  reference and quote the page itself. What survives only in the summary is not reported, a page that
+  returns nothing is dropped rather than paraphrased, and the reply cites the URLs actually read.
 - Keep `build check` and the GitHub pipeline in step: a check added to one is added to the other,
   and the deploy waits for every job. The security jobs run bare system Python, so a locally
   installed dependency is not there.
