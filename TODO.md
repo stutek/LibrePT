@@ -3920,6 +3920,10 @@ it goes through inviting somebody to a session — rather than "this is agreed, 
 
 Cheapest of the three new scenarios, and the one a trainer would use every week.
 
+### 45.16 [x] The session card, read off a screenshot — shipped 2026-09-11
+
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#4516-x-the-session-card-read-off-a-screenshot--shipped-2026-09-11); what shipped is in [CHANGELOG.md](CHANGELOG.md).
+
 ### 45.14 [ ] Found while running the gate: `_switch` waits for the wrong thing
 
 **Two sandbox tests failed on 2026-09-11**, in a Stage 3 that took 308s where earlier runs that day

@@ -2652,7 +2652,7 @@ What stayed open is the card chrome question — see §42.13.
 **Ruled 2026-09-10 (Simon):** *"expand all cards should be a permanent setting, and should be
 reversable with collapse all cards (ločeni nastavitvi za termine in za klipboard kartice)"*.
 
-Two corrections to what §42.1 shipped, both now in ([displayPrefs.js](src/data/displayPrefs.js)):
+Two corrections to what §42.1 shipped, both now in (`data/displayPrefs.js`, the module [§45.16](TODO.md) later retired):
 
 1. **It persists.** The flag was written onto the live session, so it died with that session — a
    trainer who wants the whole plan open wants it open tonight as well. It sits beside the theme now:
@@ -2717,7 +2717,7 @@ readable, and the margin is thin enough (2px on a one-line card) that anything w
 will say so.
 
 **What came off:** the ⋯ menu item and its label repaint, `clipboardCardsExpanded` in
-[displayPrefs.js](src/data/displayPrefs.js) with its `librept_expand_clipboard` key, the `expandAll`
+`data/displayPrefs.js` — retired by [§45.16](TODO.md) — with its `librept_expand_clipboard` key, the `expandAll`
 flag threaded to every card, `DeckCard.isExpanded`, and the `.expanded` layout rules. A card is now
 either the one being worked or one of the rest.
 
@@ -2803,3 +2803,37 @@ one element serves every state — pinned by a test that switches in and out.
 
 **Unchanged in the other two states.** PREVIEW and DEMO keep the link: the build is still a preview,
 and that page is still the only place the risk is explained without signal.
+
+---
+
+#### 45.16 [x] The session card, read off a screenshot — shipped 2026-09-11
+
+**Reported (Simon), with a picture:** the *Zaključeno* badge takes room in the heading row, the card
+carries a block of empty space, and the programme name is written twice.
+
+**Three complaints, one cause.** The heading row wraps. With the time, the title, the badge and two
+icon buttons in it, the EDIT button was pushed onto a line of its own — and that line, otherwise
+empty, is the "empty space". So the badge was not merely taking room; it was breaking the row.
+
+**What the card lost, and why each was costing more than it said:**
+
+- **The participants' NAMES.** They were the only thing the card hid, which is the whole reason an
+  expand control existed. A name is also the slowest thing on the card to read and the least useful
+  at a glance: the count says whether the session is full, and [§45.6](TODO.md)'s client filter now
+  answers "which sessions is Ana in" far better than reading every card on the board. An injury is
+  NOT dropped — it becomes ONE mark on the card, because that is a warning rather than a detail.
+- **The programme name when it repeats the title.** A session usually takes its name from its
+  programme, so the repeat is the common case. Compared trimmed and case-insensitively: what matters
+  is what a reader sees twice.
+- **The completed badge, out of the heading row** and into the status bar at the foot, which already
+  exists on a finished session and already reports how long it ran.
+- **The expand chevron and the expand-all control**, which now have nothing left to open.
+
+**So `data/displayPrefs.js` is gone.** It held exactly one setting, the session cards' expand-all —
+the clipboard's copy having been removed by §42.14 for the same reason, in the same words. A module
+whose only reason to exist has been retired is deleted rather than left empty. Its two localStorage
+KEYS stay listed in `storageNamespace.js`: an install that still holds one must go on being read and
+wiped unscoped, and moving a leftover value into a workspace scope would be a migration performed by
+accident.
+
+**§42.4 is thereby reversed, seven weeks after it shipped.** It was right when a card hid something.

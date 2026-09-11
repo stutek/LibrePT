@@ -40,9 +40,16 @@ export function renderClientsViewShell() {
           <div class="sessions-date-picker" id="sessions-date-picker"></div>
         </div>
 
-        <!-- Filled by sessionFilterBar.js (TODO §45.6): the date/client/location chips and, when it
-             is open, the range calendar. Its own module's markup, like the day controls above. -->
+        <!-- The filter chips. A row of their own on a phone and beside the title above 600px, which
+             is a rule the CSS states by flipping the HEADER between column and row. Measured, after
+             an attempt with the CSS order property put the chips above the title unexplainably.
+             (No backticks in this comment: the markup is a template literal.) -->
         <div class="sessions-filter-bar" id="sessions-filter-bar"></div>
+
+        <!-- The range calendar, when it is open. Below the controls rather than among them: it is a
+             panel, not a button, and it opens inside this sticky header so the list scrolls under
+             it. Filled by sessionFilterBar.js. -->
+        <div id="sessions-filter-calendar-slot"></div>
       </div>
 
       <!-- One continuous, time-ordered scroll: sessions render grouped under sticky per-day

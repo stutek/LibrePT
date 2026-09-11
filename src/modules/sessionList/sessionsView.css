@@ -169,12 +169,26 @@
   gap: 8px;
   margin-top: 0;
 }
+/* The title and the day buttons. Fixed-size, so the filters beside them (above 600px) get whatever
+   width is left. */
 .sessions-title-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 8px;
   min-width: 0;
+  flex: 0 0 auto;
+}
+
+/* Wide enough for one line: the header stops stacking and everything this screen offers — title,
+   day buttons, three filters — sits on a single row (asked 2026-09-11). Below this it stacks,
+   because measured at 390px the one-row version wrapped into three. */
+@media (min-width: 600px) {
+  .sessions-title-bar {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+  }
 }
 .sessions-date-picker {
   display: inline-flex;

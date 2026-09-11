@@ -43,8 +43,10 @@ export const ORIGIN_GLOBAL_KEYS = [
   "librept_terms_accepted",
   "librept-theme",
   "librept_lang",
-  // How much of a card the trainer wants to see (data/displayPrefs.js, TODO §42.4) — the same
-  // kind of fact as the theme: about the person, not about either workspace's data.
+  // Two retired "expand all" settings (§42.14, §45.16). The module that wrote them is gone — every
+  // card became one design with nothing left to open — but the KEYS stay listed: an install that
+  // still holds one must go on being read and wiped unscoped, and moving a leftover value into a
+  // workspace scope would be a migration performed by accident.
   "librept_expand_sessions",
   "librept_expand_clipboard",
 ];

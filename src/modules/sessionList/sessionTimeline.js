@@ -8,11 +8,7 @@
 //   activeRouteName,
 //   pushRoute,
 //   urlFor,
-//   rerenderSessions()   // redraw the day's cards after the expand-all setting changes
 // }
-
-import { sessionCardsExpanded, setSessionCardsExpanded } from "../../data/displayPrefs.js";
-import { resetSessionCardExpansions } from "./sessionCard.js";
 
 let deps = null;
 
@@ -125,19 +121,6 @@ export function renderSessionsTitleBar() {
   if (todayLabel) todayLabel.textContent = deps.t("today");
   todayBtn.title = deps.t("today");
   todayBtn.disabled = temporal === "today";
-
-  // One control, both directions, and the glyph says which way it goes — the same chevron pair the
-  // cards' own controls use, so the day control and the card control read as the same idea.
-  const expandBtn = document.getElementById("btn-sessions-expand");
-  if (expandBtn) {
-    const expanded = sessionCardsExpanded();
-    const label = deps.t(expanded ? "collapse_all" : "expand_all");
-    expandBtn.title = label;
-    expandBtn.setAttribute("aria-label", label);
-    expandBtn.setAttribute("aria-pressed", String(expanded));
-    const icon = expandBtn.querySelector("i");
-    if (icon) icon.className = `fa-solid fa-chevron-${expanded ? "up" : "down"}`;
-  }
 }
 
 // Scrolls the timeline to a given ISO date (or the literal string "today"). Every existing call
@@ -314,7 +297,7 @@ export function syncSessionTimelineAfterRender() {
   scheduleTimelineSettle(focusedSessionDate, "auto");
 }
 
-// The date-picker's own markup (Today + expand/collapse) — index.html only holds the empty
+// The date-picker's own markup (the Today control) — index.html only holds the empty
 // #sessions-date-picker slot; this module owns what goes inside it, the same way sessionsView.js
 // owns #sessions-categories-grid's contents. Text/titles are placeholders here and get their real
 // (translated) values from renderSessionsTitleBar() right after.
@@ -329,12 +312,9 @@ export function renderSessionsDatePicker() {
          SCROLLED the board to a day; the filter row's date chip now filters to that day instead,
          which says the same thing more strongly (TODO §45.6). One control, not two that both
          mean "a day". -->
-    <!-- How the day's cards open, kept between visits (TODO §42.4). Beside the day controls rather
-         than in the app menu: it is about what is on this screen, and a setting two taps from the
-         thing it changes is a setting nobody finds. -->
-    <button id="btn-sessions-expand" class="sessions-nav-arrow" type="button" data-i18n-label="expand_all">
-      <i class="fa-solid fa-chevron-down"></i>
-    </button>
+    <!-- The expand-all control was here until 2026-09-11 (TODO §45.16). Session cards became one
+         design that shows everything they have, so there was nothing left to open — the same reason
+         §42.14 removed the clipboard's copy of this setting. -->
   `;
 }
 
@@ -343,13 +323,4 @@ export function setupSessionsDayNav() {
 
   const todayBtn = document.getElementById("btn-sessions-today");
   if (todayBtn) todayBtn.addEventListener("click", () => focusSessionsColumn("today"));
-
-  document.getElementById("btn-sessions-expand")?.addEventListener("click", () => {
-    setSessionCardsExpanded(!sessionCardsExpanded());
-    // A fresh default keeps none of the per-card exceptions: yesterday's exceptions on top of a new
-    // default is neither answer to "how should these open".
-    resetSessionCardExpansions();
-    deps.rerenderSessions?.();
-    renderSessionsTitleBar();
-  });
 }

@@ -65,3 +65,51 @@ def test_upcoming_card_shows_a_starts_in_countdown(page, local_server):
 
     countdown = bar.locator(".session-live-timer").inner_text().strip()
     assert HOUR_MIN.match(countdown), f"expected '01h 32m' countdown, got {countdown!r}"
+
+
+def test_a_card_is_one_compact_design_with_nothing_left_to_open(page, local_server):
+    """Reported 2026-09-11 from a screenshot (TODO §45.16): the completed badge took space in the
+    heading row, the card carried a block of empty space, and the programme name was written twice.
+
+    The empty space was the heading row WRAPPING — the badge pushed the edit button onto a line of
+    its own. So the three complaints are one: too much in one row, and a row below it that only
+    existed to hide the participants' names. With the names gone there is nothing left to open, and
+    the expand control goes with them."""
+    load_with_stub(page, local_server, SESSIONS_STUB)
+    page.wait_for_selector(".session-card")
+
+    assert page.locator(".btn-card-expand").count() == 0, "the per-card chevron is gone"
+    assert page.locator("#btn-sessions-expand").count() == 0, (
+        "so is the expand-all control"
+    )
+
+    # Every card shows its meta line without being asked — that is what "always expanded" means.
+    cards = page.locator(".session-card")
+    assert cards.count() > 0
+    for index in range(cards.count()):
+        card = cards.nth(index)
+        assert (
+            "spots" in card.inner_text().lower() or "mest" in card.inner_text().lower()
+        ), "the participant COUNT is on every card, unasked"
+
+
+def test_the_programme_is_not_printed_twice(page, local_server):
+    """A session usually takes its name from its programme, so a card that prints both says the same
+    sentence twice — which is what the screenshot showed. The programme line appears only when it
+    adds something the heading has not."""
+    load_with_stub(page, local_server, SESSIONS_STUB)
+    page.wait_for_selector(".session-card")
+
+    doubled = page.evaluate(
+        """() => [...document.querySelectorAll('.session-card')].filter((card) => {
+            const title = card.querySelector('.session-card-title');
+            if (!title) return false;
+            const name = title.textContent.trim().toLowerCase();
+            if (!name) return false;
+            const rest = [...card.querySelectorAll('span')]
+                .filter((s) => s !== title && !s.contains(title))
+                .map((s) => s.textContent.trim().toLowerCase());
+            return rest.includes(name);
+        }).length"""
+    )
+    assert doubled == 0, f"{doubled} card(s) print their own title a second time"

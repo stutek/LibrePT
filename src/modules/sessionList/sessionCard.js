@@ -6,7 +6,6 @@
 // deps: { state, t, escapeHTML, launchClipboardDirectly, sessionDayTemporal,
 //         activeId, saveToLocalStorage, rerenderSessions }
 
-import { sessionCardsExpanded } from "../../data/displayPrefs.js";
 import { computeActiveSessionCountdown } from "../../domain/sessionClock.js";
 import { parseTimeRange } from "../../domain/timeRange.js";
 import { formatDurationHM, formatDurationHourMin, parseDurationHM } from "../common/utils.js";
@@ -20,22 +19,6 @@ import { getSessionDayDate } from "./sessionTimeline.js";
 // The day is crowded with sessions — a card shows its essentials (time, title, status bar) and
 // opens on a tap of its own chevron to reveal participants/programme/warnings.
 //
-// **Which way a card opens is now a SETTING** (data/displayPrefs.js, TODO §42.4): the trainer says
-// once whether session cards start open or closed, and it holds between visits. This set is what
-// they have said SINCE, per card — the exceptions to that default, not a list of open cards. So the
-// chevron still works in both directions whichever way the setting points, and the exceptions are
-// cleared when the setting itself changes, because a fresh default with yesterday's exceptions on
-// top is neither answer.
-//
-// Ephemeral on purpose (module-level, not persisted): a reload starts from the setting, with no
-// stale "I left this one open" to restore wrong.
-const cardExpansionExceptions = new Set();
-
-/** Forget every per-card exception — called when the setting flips (deps.rerenderSessions redraws). */
-export function resetSessionCardExpansions() {
-  cardExpansionExceptions.clear();
-}
-
 let cardTicker = null;
 function ensureCardTicker() {
   if (cardTicker) return;
@@ -203,41 +186,64 @@ function buildTimerSpan(timing, b, escapeHTML) {
   return timerText ? `<span${timerAttrs} class="${timerCls}">${escapeHTML(timerText)}</span>` : "";
 }
 
+/** ONE design, always whole (TODO §45.16, reported 2026-09-11 from a screenshot).
+ *
+ * What it dropped, and why each was costing more than it said:
+ *
+ * - **The participants' NAMES.** They were the only thing the card hid, and hiding them is what the
+ *   expand control existed for. A name is also the slowest thing on the card to read and the least
+ *   useful at a glance — the count says whether the session is full, and §45.6's client filter now
+ *   answers "which sessions is Ana in" far better than reading every card. An injury among them is
+ *   NOT dropped: it becomes one mark, because that is a warning rather than a detail.
+ * - **The routine name when it repeats the title.** The screenshot showed "Strength & Longevity
+ *   Focus" twice on one card, once as the heading and once beside a clipboard glyph. A session
+ *   usually takes its name from its programme, so the repeat is the common case, not the odd one.
+ * - **The completed badge, out of the heading row.** That row wraps, so the badge pushed the edit
+ *   button onto a line of its own — which is the empty space in the report, not a margin. A finished
+ *   session already has a status bar at the foot saying how long it ran; the tick belongs there.
+ * - **The expand chevron**, which now has nothing left to open.
+ */
 function buildSessionCardInfoHTML({
   b,
   t,
   escapeHTML,
-  isExpanded,
-  completedBadge,
-  clientNamesStr,
   clientCount,
+  anyInjury,
   routineName,
   warningHTML,
 }) {
-  const expandLabel = t(isExpanded ? "collapse" : "expand") || (isExpanded ? "Collapse" : "Expand");
+  // The programme, only when it says something the title has not. Compared trimmed and
+  // case-insensitively: "Strength & Longevity Focus" and "strength & longevity focus " are the same
+  // sentence to a reader, and the point is what the reader sees twice.
+  const sameAsTitle =
+    routineName.trim().toLowerCase() ===
+    String(b.title || "")
+      .trim()
+      .toLowerCase();
+  const programmeHTML = routineName
+    ? sameAsTitle
+      ? ""
+      : `<span style="opacity: 0.45;">&bull;</span>
+      <span><i class="fa-solid fa-clipboard-list" style="margin-right: 4px; font-size: 10px;"></i>${escapeHTML(routineName)}</span>`
+    : `<span style="opacity: 0.45;">&bull;</span>
+      <span style="color: #ef4444; font-weight: 600;"><i class="fa-solid fa-clipboard-list" style="margin-right: 4px; font-size: 10px;"></i>${escapeHTML(t("undefined"))}</span>`;
+
+  const injuryHTML = anyInjury
+    ? `<i class="fa-solid fa-triangle-exclamation" style="margin-left: 4px; font-size: 10px; color: #ef4444;" title="${escapeHTML(t("notes_injuries"))}"></i>`
+    : "";
+
   return `
     <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 1px;">
       <span class="badge badge-primary" style="font-size: 10px; padding: 2px 6px; font-weight: 700; font-family: monospace;">${escapeHTML(b.time)}</span>
       <strong class="session-card-title" style="font-size: 13px;">${escapeHTML(b.title)}</strong>
-      ${completedBadge}
-      <button class="btn-card-expand icon-btn text-muted" title="${expandLabel}" style="margin-left: auto; padding: 2px 6px; font-size: 11px;" aria-label="${expandLabel}" aria-expanded="${isExpanded}">
-        <i class="fa-solid fa-chevron-${isExpanded ? "up" : "down"}"></i>
-      </button>
-      <button class="btn-edit-session icon-btn text-muted" title="${t("edit") || "Edit"}" style="padding: 2px 6px; font-size: 11px;" aria-label="Edit session">
+      <button class="btn-edit-session icon-btn text-muted" title="${escapeHTML(t("edit") || "Edit")}" style="margin-left: auto; padding: 2px 6px; font-size: 11px;" aria-label="${escapeHTML(t("edit") || "Edit")}">
         <i class="fa-solid fa-pen-to-square"></i>
       </button>
     </div>
-    ${
-      isExpanded
-        ? `
     <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 11px; color: var(--text-muted); line-height: 1.3;">
-      <span><i class="fa-solid fa-users" style="margin-right: 4px; font-size: 10px;"></i>${clientNamesStr || `<span style="color: #ef4444;">—</span>`}
-      <span style="color: var(--primary); font-weight: 600;">(${clientCount}/${b.maxCapacity} ${t("spots_filled")})</span></span>
-      <span style="opacity: 0.45;">&bull;</span>
-      <span><i class="fa-solid fa-clipboard-list" style="margin-right: 4px; font-size: 10px;"></i>${routineName ? escapeHTML(routineName) : `<span style="color: #ef4444; font-weight: 600;">${t("undefined")}</span>`}</span>
-    </div>`
-        : ""
-    }
+      <span><i class="fa-solid fa-users" style="margin-right: 4px; font-size: 10px;"></i><span style="color: var(--primary); font-weight: 600;">${clientCount}/${b.maxCapacity} ${escapeHTML(t("spots_filled"))}</span>${injuryHTML}</span>
+      ${programmeHTML}
+    </div>
     ${warningHTML}
   `;
 }
@@ -251,6 +257,7 @@ function buildSessionCardStatusBarHTML({
   isUpcoming,
   timerIsOvertime,
   timerSpan,
+  isCompleted,
   t,
   escapeHTML,
   formatDurationHM,
@@ -268,11 +275,16 @@ function buildSessionCardStatusBarHTML({
     };
   }
   if (pastElapsedSeconds != null) {
+    // A finished session says so HERE rather than in the heading row (§45.16). The bar already
+    // exists, already reports the time, and has room for a word the heading row did not.
+    const tag = isCompleted
+      ? `<span class="session-live-tag"><i class="fa-solid fa-circle-check"></i> ${escapeHTML(t("session_completed"))}</span>`
+      : `<span class="session-live-tag"><i class="fa-solid fa-clock-rotate-left"></i> ${escapeHTML(t("elapsed") || "Elapsed")}</span>`;
     return {
       stack: true,
       html: `
     <div class="session-live-bar past">
-      <span class="session-live-tag"><i class="fa-solid fa-clock-rotate-left"></i> ${escapeHTML(t("elapsed") || "Elapsed")}</span>
+      ${tag}
       <span class="session-live-timer session-status-value" title="${escapeHTML(t("edit_elapsed_time") || "Edit elapsed time")}">${escapeHTML(formatDurationHM(pastElapsedSeconds))}</span>
     </div>`,
     };
@@ -327,14 +339,10 @@ export function renderSessionCard(b, colContainer, deps) {
   const clients = b.participants
     .map((pId) => state.clients.find((c) => c.id === pId))
     .filter(Boolean);
-  const clientHTMLs = clients.map((c) => {
-    let injuryIcon = "";
-    if (c.hasInjury) {
-      injuryIcon = ` <i class="fa-solid fa-triangle-exclamation text-red" style="font-size: 10px; color: #ef4444;" title="Has recorded injury"></i>`;
-    }
-    return `<span style="font-weight: 600; color: var(--text-color);">${escapeHTML(c.name)}${injuryIcon}</span>`;
-  });
-  const clientNamesStr = clientHTMLs.join(", ");
+  // One mark for the whole card rather than one per name: the names are gone (§45.16) and an injury
+  // is a warning, not a detail — what the trainer needs at a glance is that SOMEBODY in this session
+  // has one, and whose is a tap away on the session itself.
+  const anyInjury = clients.some((c) => c.hasInjury);
 
   // Find routine name
   const routine = state.routines.find((r) => r.id === b.routineId);
@@ -342,41 +350,23 @@ export function renderSessionCard(b, colContainer, deps) {
 
   const warningHTML = buildReadinessWarningsHTML(routineName, clients.length, t);
 
-  // A finished session is badged and de-emphasised rather than shown as launchable
-  const completedBadge = b.completed
-    ? `<span class="badge badge-success" style="font-size: 9px; padding: 2px 6px; font-weight: 700;"><i class="fa-solid fa-circle-check" style="margin-right:3px;"></i>${t("session_completed")}</span>`
-    : "";
+  // A finished session is de-emphasised rather than shown as launchable. The badge that used to say
+  // so moved into the status bar at the foot (§45.16): in the heading row it pushed the edit button
+  // onto a line of its own, and the foot already reports how long the session ran.
   if (b.completed) card.classList.add("session-completed");
 
   const timing = computeCardTiming(b, isLaunched, activeSession, isLive, range);
   const { pastElapsedSeconds, isUpcoming, timerIsOvertime } = timing;
 
-  // The setting decides how a card opens; the set holds what the trainer has said since, per
-  // card. Expressed as a XOR rather than two branches: an exception MEANS "the other way".
-  const isExpanded = sessionCardsExpanded() !== cardExpansionExceptions.has(b.id);
-
   info.innerHTML = buildSessionCardInfoHTML({
     b,
     t,
     escapeHTML,
-    isExpanded,
-    completedBadge,
-    clientNamesStr,
     clientCount: clients.length,
+    anyInjury,
     routineName,
     warningHTML,
   });
-
-  const expandBtn = info.querySelector(".btn-card-expand");
-  if (expandBtn) {
-    expandBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      // Toggling is adding or removing an exception, whichever way the setting points.
-      if (cardExpansionExceptions.has(b.id)) cardExpansionExceptions.delete(b.id);
-      else cardExpansionExceptions.add(b.id);
-      deps.rerenderSessions?.();
-    });
-  }
 
   const editBtn = info.querySelector(".btn-edit-session");
   if (editBtn) {
@@ -401,6 +391,7 @@ export function renderSessionCard(b, colContainer, deps) {
     isUpcoming,
     timerIsOvertime,
     timerSpan,
+    isCompleted: Boolean(b.completed),
     t,
     escapeHTML,
     formatDurationHM,
@@ -409,7 +400,7 @@ export function renderSessionCard(b, colContainer, deps) {
   if (timing.timerEndMs != null) ensureCardTicker();
 
   // No launch/completed button: the whole card is the tap target, and completion already shows
-  // as a badge — the button just duplicated that and ate horizontal space. Starting the session is
+  // in the status bar — the button just duplicated that and ate horizontal space. Starting the session is
   // now a clipboard title-bar action (#btn-start-session), reached by tapping the card to open it.
   card.addEventListener("click", () => {
     launchClipboardDirectly(b.id);

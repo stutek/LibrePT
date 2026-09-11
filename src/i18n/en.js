@@ -511,8 +511,6 @@ export const en = {
   notif_sandbox_title: "🧪 Sandbox — a place to try things and learn",
   notif_sandbox_desc:
     "These clients, plans and sessions are a sample gym. Try anything: nothing you do in here can reach your business data. To go back to your own work, open the menu ☰ at the top right and choose Leave the sandbox — you will land where you left off. To be walked through the app step by step, tap Show me around below.",
-  expand_all: "Expand all cards",
-  collapse_all: "Collapse all cards",
   sync_sandbox_note: "You are in the sandbox: this syncs the sandbox's own copy, not your work.",
   restore_refused_sandbox_file:
     "This file was made in the sandbox, so it cannot be restored into your own work. Open the sandbox and restore it there.",

@@ -13,6 +13,17 @@
   margin-bottom: 0;
   padding-bottom: 0;
   align-items: center;
+  gap: 6px;
+}
+
+/* A line of their own on a phone, beside the title above 600px. Squeezing three filters in next to
+   the title and the day buttons on a narrow screen was measured at 390px: three wrapped lines and a
+   170px header, half the height of a session card. The rule lives on the HEADER (sessionsView.css),
+   which flips between column and row — the header is the element that knows how much width there
+   is. */
+.sessions-filter-bar {
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
 /* A native <select> dressed as a chip: the phone's own list opens on tap, which is better than any
@@ -27,8 +38,20 @@
   background-position: calc(100% - 16px) calc(50% + 1px), calc(100% - 11px) calc(50% + 1px);
   background-size: 5px 5px, 5px 5px;
   background-repeat: no-repeat;
-  max-width: 45vw;
+  /* Narrow on purpose (asked 2026-09-11): these two say a NAME, and a name cut short with an
+     ellipsis still identifies the filter that is on — while a select wide enough for the longest
+     client name pushes the day controls onto a second row. */
+  max-width: 104px;
   text-overflow: ellipsis;
+  overflow: hidden;
+  padding-left: 10px;
+}
+
+/* Icon only: the row is full, and an × beside three lit chips needs no word to be read. The label
+   survives as the aria-label, so a screen reader still hears the sentence. */
+.filter-clear {
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
 .filter-clear[hidden] {
@@ -41,6 +64,7 @@
    looking at the board it filters, and the header measures itself so the day headings move down
    with it. */
 .filter-calendar {
+  margin-top: 8px;
   background: var(--card-bg);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius-md, 12px);

@@ -481,8 +481,6 @@ export const sl = {
   notif_sandbox_title: "🧪 Peskovnik — prostor za učenje in preizkušanje",
   notif_sandbox_desc:
     "Te stranke, načrti in treningi so vzorčna telovadnica. Preizkusi karkoli: nič, kar narediš tukaj, ne more doseči tvojih poslovnih podatkov. Za vrnitev k svojemu delu odpri meni ☰ zgoraj desno in izberi Zapusti peskovnik — pristaneš tam, kjer si ostal(-a). Za vodeni ogled aplikacije po korakih spodaj pritisni Razglej se.",
-  expand_all: "Razpri vse kartice",
-  collapse_all: "Skrči vse kartice",
   sync_sandbox_note: "V peskovniku si: to sinhronizira peskovnikovo kopijo, ne tvojega dela.",
   restore_refused_sandbox_file:
     "Ta datoteka je nastala v peskovniku, zato je ni mogoče obnoviti v tvoje delo. Odpri peskovnik in jo obnovi tam.",

@@ -38,6 +38,9 @@ import {
 import { escapeHTML } from "../common/utils.js";
 
 const BAR_ID = "sessions-filter-bar";
+// The calendar renders into its OWN slot, a row below the controls, so the chips can share one line
+// with the title and the day buttons while the panel still opens full-width beneath them.
+const CALENDAR_SLOT_ID = "sessions-filter-calendar-slot";
 const CALENDAR_ID = "sessions-filter-calendar";
 
 let deps = null;
@@ -207,11 +210,15 @@ export function renderSessionFilterBar() {
       <select id="filter-chip-location" class="chip filter-select${placeActive}" aria-label="${placeLabel}">
         ${placeOptions}
       </select>
-      <button type="button" id="filter-clear" class="chip filter-clear"${hasAnyFilter(filters) ? "" : " hidden"}>
-        <i class="fa-solid fa-xmark" aria-hidden="true"></i> ${escapeHTML(t("filter_clear"))}
+      <button type="button" id="filter-clear" class="chip filter-clear" aria-label="${escapeHTML(t("filter_clear"))}"${hasAnyFilter(filters) ? "" : " hidden"}>
+        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
       </button>
-    </div>
-    <div id="${CALENDAR_ID}" class="filter-calendar"${calendarOpen ? "" : " hidden"}>${calendarOpen ? calendarHTML() : ""}</div>`;
+    </div>`;
+
+  const slot = document.getElementById(CALENDAR_SLOT_ID);
+  if (slot) {
+    slot.innerHTML = `<div id="${CALENDAR_ID}" class="filter-calendar"${calendarOpen ? "" : " hidden"}>${calendarOpen ? calendarHTML() : ""}</div>`;
+  }
 
   wire();
 }

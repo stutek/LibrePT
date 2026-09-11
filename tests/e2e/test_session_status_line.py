@@ -1,7 +1,7 @@
 # tests/e2e/test_session_status_line.py
 # Every session card on the dashboard carries a status line (components/sessionCard.js): live
 # (existing), a countdown to the scheduled start for not-yet-started sessions, and an editable
-# elapsed-time readout for finished ones. The upcoming-countdown RENDER moved to
+# elapsed-time readout for finished ones, which also carries the completed tick (§45.16). The upcoming-countdown RENDER moved to
 # tests/medium/test_sessions_timeline.py; what stays needs a reload or the real finish-session
 # controller. The live/starts-in countdowns render "01h 32m"
 # (formatDurationHourMin); the editable elapsed-time field stays "HH:MM" (formatDurationHM,
@@ -22,7 +22,10 @@ def test_past_card_shows_editable_elapsed_time(page, local_server):
     card = page.locator(".session-card", has_text="Early Bird Strength").first
     bar = card.locator(".session-live-bar.past")
     assert bar.count() == 1
-    assert "fa-clock-rotate-left" in bar.locator("i").first.get_attribute("class")
+    # A tick, not a clock: this session is COMPLETED, and since 2026-09-11 the bar is where a card
+    # says so (TODO §45.16) — the badge that used to say it in the heading row was breaking that
+    # row's layout. A past session that was never finished still shows the clock.
+    assert "fa-circle-check" in bar.locator("i").first.get_attribute("class")
 
     value = bar.locator(".session-status-value")
     elapsed = value.inner_text().strip()
