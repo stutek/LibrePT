@@ -162,6 +162,21 @@
   color: var(--text-main);
 }
 
+/* The browser's own refusal message, under the status line. Quiet, and wrapping anywhere: it is
+   machine text of unpredictable length, and a long word must not push the form sideways. */
+.intake-status-detail {
+  margin: 6px 0 0 0;
+  padding: 0 12px;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+.intake-status-detail[hidden] {
+  display: none;
+}
+
 .intake-actions {
   display: flex;
   flex-direction: column;

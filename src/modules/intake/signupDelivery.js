@@ -96,7 +96,15 @@ export async function shareSignupFile(file, { title, text, platform }) {
     return { delivered: true, cancelled: false };
   } catch (error) {
     if (error?.name === "AbortError") return { delivered: false, cancelled: true };
-    return { delivered: false, cancelled: false, reason: error?.message || "share failed" };
+    // NAME as well as message: a browser refusing a share throws a DOMException whose name
+    // ("NotAllowedError", "DataError", "AbortError") says which rule was hit, while the message is
+    // often empty or a sentence for a developer. Both are reported because either alone has, in
+    // practice, been the half that was missing (TODO §45.4).
+    return {
+      delivered: false,
+      cancelled: false,
+      reason: [error?.name, error?.message].filter(Boolean).join(": ") || "share failed",
+    };
   }
 }
 

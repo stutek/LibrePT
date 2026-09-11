@@ -285,6 +285,7 @@ export const sl = {
   intake_share_text: "Tu so moji podatki — datoteka se odpre v LibrePT.",
   intake_sent: "Deljeno. Trener te bo dodal iz te datoteke.",
   intake_saved: "Shranjeno. Datoteko deli s trenerjem — pripni jo sporočilu.",
+  intake_send_failed_detail: "Tvoj trener bo morda potreboval tole:",
   intake_send_failed:
     "Deljenje ni uspelo. Uporabi »Shrani datoteko za deljenje« in jo pripni sporočilu.",
   intake_err_identity: "Prosim dodaj svoje ime in e-pošto ali telefonsko številko.",

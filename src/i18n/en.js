@@ -285,6 +285,9 @@ export const en = {
   intake_share_text: "Here are my details — this file opens in LibrePT.",
   intake_sent: "Shared. Your trainer will add you from that file.",
   intake_saved: "Saved. Share that file with your trainer — attach it to a message.",
+  // Precedes the browser's own untranslated message (TODO §45.4). Says who the line is for, so
+  // nobody reads a developer's error text as an instruction to them.
+  intake_send_failed_detail: "Your trainer may need this:",
   intake_send_failed: "That didn't share. Use “Save the file to share” and attach it to a message.",
   intake_err_identity: "Please add your name, and either an email or a phone number.",
   intake_err_consent:

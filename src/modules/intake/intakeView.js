@@ -108,6 +108,12 @@ export function renderIntakeViewShell() {
         </div>
 
         <p id="intake-status" class="intake-status" role="status" hidden></p>
+        <!-- What the BROWSER said, when a share was refused (TODO §45.4). Kept apart from the
+             sentence above because it is not addressed to the same reader: the status line tells the
+             client what to do, this tells whoever is helping them WHY, and without it a refusal
+             arriving from a stranger's phone carries nothing back at all. Hidden unless there is
+             something to say. -->
+        <p id="intake-status-detail" class="intake-status-detail" hidden></p>
 
         <div class="intake-actions">
           <!-- The .hidden CLASS (index.css, display:none !important), NOT the hidden attribute:
@@ -147,13 +153,20 @@ const TEXT_BY_ELEMENT = {
   "intake-sender-check": "intake_sender_check",
 };
 
-function setStatus(t, key, tone) {
+function setStatus(t, key, tone, detail = "") {
   const status = $id("intake-status");
   if (!status) return;
   status.hidden = !key;
   status.textContent = key ? t(key) : "";
   status.classList.toggle("is-error", tone === "error");
   status.classList.toggle("is-done", tone === "done");
+
+  // The browser's own words, verbatim and untranslated — a message this app did not write and must
+  // not paraphrase. It is the only evidence of a refusal that happened on somebody else's phone.
+  const detailLine = $id("intake-status-detail");
+  if (!detailLine) return;
+  detailLine.hidden = !detail;
+  detailLine.textContent = detail ? `${t("intake_send_failed_detail")} ${detail}` : "";
 }
 
 /** What the client typed, as a submission — or null, with the reason already on screen. The refusals
@@ -270,7 +283,8 @@ export function setupIntakeForm(deps) {
     if (outcome.delivered) {
       draft.forget();
       setStatus(t, "intake_sent", "done");
-    } else if (!outcome.cancelled) setStatus(t, "intake_send_failed", "error");
+    } else if (!outcome.cancelled)
+      setStatus(t, "intake_send_failed", "error", outcome.reason || "");
   });
 
   $id("intake-save")?.addEventListener("click", () => {

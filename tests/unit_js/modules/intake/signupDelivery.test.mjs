@@ -99,6 +99,23 @@ test("a share that genuinely failed is never reported as sent", async () => {
   assert.match(outcome.reason, /no handler/);
 });
 
+test("the refusal names the browser's own error, not just its message", async () => {
+  // A Galaxy S23 refused a share that `canShare` had approved (TODO §45.4), and the only evidence
+  // of why is what the browser threw. A DOMException carries that in its NAME — the message is
+  // frequently empty — so a reason built from the message alone reports nothing at all.
+  const refusal = Object.assign(new Error(""), { name: "NotAllowedError" });
+  const platform = platformThat({
+    share: async () => {
+      throw refusal;
+    },
+  });
+
+  const outcome = await shareSignupFile(buildSignupFile(signup, "2026-08-17"), { platform });
+
+  assert.equal(outcome.cancelled, false);
+  assert.match(outcome.reason, /NotAllowedError/);
+});
+
 test("saving works everywhere, which is what makes the form's advice honest", () => {
   const platform = platformThat({ canShare: false });
   const file = buildSignupFile(signup, "2026-08-17");
