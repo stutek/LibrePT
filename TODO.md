@@ -3676,10 +3676,20 @@ rendering. Duration stays on the session card's header; the skipped badge and th
 on the exercise card, which already has a place for signals. The duplicate rendering goes, which is
 the point, and nothing a trainer reads today disappears.
 
-**Open, because it leads to materially different work:** does the client view stay grouped by
-session, or become one flat stream of movement cards through time? The second reading has its own
-value — one movement's progress over months — but loses "what did we do on Tuesday". Recommendation:
-grouped by session, with the per-movement stream as a possible second view later.
+**Answered (Simon, 2026-09-11):** *"zgodovina pri stranki bi naj bila enaka kot v sejah, zaporedje
+kartic, z barvno razliko med preteklimi in ostalimi"*, and *"uporabi isto komponento in enak
+izgled"*. So: grouped by session, not a flat stream of movements — a SEQUENCE OF SESSION CARDS, the
+board's own [sessionCard.js](src/modules/sessionList/sessionCard.js), with past sessions set apart by
+colour.
+
+That settles more than the fork. The client view stops being a history widget and becomes **this
+client's timeline**: their past and their upcoming sessions in one list, the same card in both, which
+is why one colour difference is all it takes to tell them apart. `sessionDayTemporal` already
+computes past/live/upcoming for the board, so the distinction exists and is not invented for this.
+
+What still has to be placed, since the board's card was never asked to show them: the per-exercise
+feedback icons, the skipped badge and the session duration, all of which today's history card
+carries. A past card that opens into the clipboard's own item cards is where they belong.
 
 **Also still open:** whether the GLOBAL history is the same card as well, or only the same row.
 
