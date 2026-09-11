@@ -3433,9 +3433,14 @@ consults its own list of file types a page is allowed to hand to the share sheet
 manifest, installation or registration can add to. Nothing about install-time registration is
 available to try here.
 
-**Next, in order:** make the failure legible — carry the browser's own message to where a person can
-read it, instead of discarding it — then reproduce on the S23 and read what it says. Only then a
-remedy. If the extension is the cause, that remedy is a conflict to resolve rather than a patch: the
+**Done 2026-09-11: the failure is now legible.** The refusal carries the browser's error NAME as well
+as its message — a DOMException's name (`NotAllowedError`, `DataError`) is the half that says which
+rule was hit, and its message is frequently empty — and the intake page prints it under the status
+line, introduced as *"Your trainer may need this:"* so nobody reads a developer's error text as an
+instruction to them. Untranslated on purpose: it is the browser's own words and this app must not
+paraphrase them.
+
+**Next: reproduce on the S23 and read what it says.** Only then a remedy. If the extension is the cause, that remedy is a conflict to resolve rather than a patch: the
 private extension is what survives an email hop, and it may be the very thing the share sheet
 refuses. One cheap experiment then becomes available — retry a refused share once with a plainly
 named `.json` copy of the same bytes — but it trades away the association that makes the file open in
@@ -3446,17 +3451,24 @@ LibrePT on arrival, so it is a decision, not a fix, and it is not taken here.
 **Reported:** trainers want to bring in their own exercises and their own blocks from text files and
 spreadsheets.
 
-**Most of this already exists on paper.** [§29](TODO.md) and
-[uc9_program_import.md](use_cases/uc9_program_import.md) decided the shape on 2026-08-18: four
-optional inputs, a small JSON, a downloadable template that doubles as the instruction a trainer
-hands to an AI, every parsing failure reported before the editor opens, and the result landing in the
-ordinary session editor. A movement the catalogue does not have is allowed and marked, never renamed
-into the nearest thing — which is precisely what a trainer importing their own exercises needs.
+**Corrected 2026-09-11 after reading the code: §29 is BUILT, not "on paper".** This section first
+said most of it existed as a decision. It exists as software:
+[domain/programImport.js](src/domain/programImport.js) parses, `programTemplate()` generates the
+example a test parses back, [programImportDialog.js](src/modules/plans/programImportDialog.js) is the
+surface, and *Import a programme* is in the ☰ menu. **§29's own heading still says "Not started;
+specced" and the ranking table at the top of this file still ranks it first** — both stale, and
+worth a pass of their own rather than an edit buried here.
 
-**What is genuinely missing** is the other shape of input: a **list of movements with no session
-around them**. §29's format describes a programme — ordered items with sets, reps, load and rests.
-A trainer's exercise library is a flat list, and today there is no way to say "these are my
-exercises" without inventing a session to hang them on.
+**So the format is not the gap. The DESTINATION is.** `readProgram` already accepts a bare array of
+items, so a trainer's list of movements parses today — and then lands in the session plan editor,
+because that is the only place the import knows how to put anything. There is no "add these to my
+exercise catalogue" path at all. What §45.5 needs is that second destination, not a second format.
+
+**Open, and the reason this is not simply built:** an exercise in the catalogue carries an equipment
+and a movement pattern ([§13](TODO.md)'s taxonomy), and an imported line will not. Either the import
+creates them marked as having no taxonomy backing — the same CUSTOM treatment §29.1 already decided
+for a movement inside a programme — or it asks, once, per movement. The first is consistent with what
+shipped; the second is a wizard nobody wants for a list of forty.
 
 **A backup is the wrong format for this, and was considered.** Simon raised it — no new format, use a
 partial backup. Rejected, on three grounds:
@@ -3487,9 +3499,30 @@ a client waiting. The shape instead: **a row of chips under the header that show
 each removable with one tap. A modal becomes worth revisiting only if the chips stop fitting on a
 phone-width row.
 
-Open, and cheap to get wrong: whether the calendar's range selection and the chips are one control or
-two, and what the list shows when a filter matches nothing — an empty list that does not say "because
-of a filter" is the same defect in a different place.
+**Researched 2026-09-11, and it is a bigger change than "add three filters".** There is no calendar on
+the board today. The control that looks like one is *Jump to date*
+([sessionTimeline.js](src/modules/sessionList/sessionTimeline.js)): it opens the phone's native date
+picker and **scrolls** the timeline to that day. The board itself is one continuous, time-ordered
+list with sticky day headers, over a fixed window of days around today
+([sessionsView.js](src/modules/sessionList/sessionsView.js)'s `visibleSessions`).
+
+**The request changes the model, not just the control: from "take me to" to "show only".** Three
+things are built on the first model and have to be answered before any of this is written:
+
+- **Day swipes and the sticky headers.** A day is a POSITION in the list. Under a from–to filter,
+  what does swiping past the end of the range do — nothing, or widen the range?
+- **The Today button**, which today both jumps to today and shows which day is in view. What is it
+  when today is outside the chosen range?
+- **The `sessions.day` route.** The focused date is written into the URL, so a deep link names a day.
+  A filtered board has a range as well as a position, and the link has to say which it carries — this
+  is [§19](TODO.md)'s territory, not the board's alone.
+
+**Chips, not a modal, is still the answer for the client and location filters** — they are plain
+"show only these" choices and a modal hides what is on. The date range is the one that is not simply
+another chip, because the board's whole navigation is already made of dates.
+
+Also unresolved and cheap to get wrong: what the list shows when a filter matches nothing. An empty
+board that does not say "because of a filter" is the same defect in a different costume.
 
 ### 45.7 [ ] Finish "seja" → "trening", and settle on ONE form of address
 
@@ -3516,15 +3549,33 @@ than only fixed: Slovenian user-visible text is familiar-form, and a training se
 
 **Reported:** the clipboard view and the history view within a client need to be unified.
 
-**Deliberately not designed yet.** Asked what specifically differs — the card's appearance, its
-order, or what can be opened from it — the answer was to record it and **investigate it together**
-(Simon, 2026-09-11), after §45.1–§45.3 and §45.7 are done. What exists today is
-[modules/clipboard/](src/modules/clipboard/) and [modules/history/](src/modules/history/) as separate
-modules; whether the unification is one component with two states or merely a shared card is the
-question to answer with both screens open.
+**Researched 2026-09-11, and the duplication is real and nameable.** Two modules draw the same
+records, twice, in two designs:
 
-Related and already decided on paper: [§17](TODO.md)'s structured session history, which is what a
-history card would have to read from.
+- **The clipboard** draws cards through a class hierarchy
+  ([deckCard.js](src/modules/clipboard/deckCard.js) and its subclasses): an exercise, a circuit, a
+  rest, and — already — a PAST session
+  ([pastDeckCard.js](src/modules/clipboard/pastDeckCard.js)), which shows one compact line and opens
+  into every set as it was logged.
+- **The history** draws the same thing from scratch in
+  [historyView.js](src/modules/history/historyView.js)'s `renderHistoryItems` — its own circuit
+  grouping, its own rest row, its own skipped badge, its own sets text, its own CSS.
+
+So the app already contains a card that shows a past session compactly and expands to the detail —
+and the client's history does not use it. That is why the two screens do not feel like one product:
+they are not one component with two states, they are two components with one meaning.
+
+**What to settle when we look at both screens together** (Simon, 2026-09-11: record it and
+investigate it together, after §45.1–§45.3 and §45.7):
+
+- whether the history card becomes `PastDeckCard`, or both become a third thing;
+- what history has that the deck has no place for — the feedback icons per exercise, the skipped
+  badge, the session duration — since those are what the deck's past card currently leaves out;
+- whether the client's history and the global history are the same card as well, or only the same
+  row.
+
+Related and already decided on paper: [§17](TODO.md)'s structured session history, which is the
+record both of them read.
 
 ### 45.9 [ ] Running a session: keep it interactive, drop the confirming
 
@@ -3543,6 +3594,34 @@ bookkeeping the trainer is made to perform for the app's benefit.
 **So the work is to remove the confirmation taps, not the interaction.** What a tap should be for:
 something the trainer learned (too easy, too hard, pain) or something they changed. What it should
 not be for: telling the app what it can see for itself.
+
+**Researched 2026-09-11: there is exactly ONE confirmation left, and it is the circuit's.** A plain
+exercise has no "done" control at all — it is marked performed as a side effect of the trainer
+reacting to it, and the rule is already written down where it happens
+([sessionQuickSignals.js](src/controllers/sessionQuickSignals.js): *"Signalling on an exercise
+implies it was performed — the trainer is reacting to the work, not planning it, so the sets stop
+asking to be ticked off individually"*). The circuit card
+([circuitCard.js](src/modules/clipboard/circuitCard.js)) is the one that still asks: a
+**Complete round N / M** button, becoming **Finish circuit** on the last round.
+
+**This also explains the second complaint, and the two are one problem.** A circuit shows a round
+counter and a round button; a standalone exercise with four sets shows neither — because its sets are
+never counted off. That is the "an exercise has no rounds button" the report names, and it is the
+visible edge of the same inconsistency: **one item type is ticked off and the other is inferred.**
+
+**What has to be answered before the button is removed:** what advances the round. The candidates,
+none of them chosen here —
+
+- the same rule as an exercise: a signal logged on any member advances the circuit's round;
+- the last member's rest timer ending advances it;
+- the counter stays, becomes a display rather than a control, and is tappable only to CORRECT it.
+
+[§8.7](TODO.md) is next door and should be answered in the same pass: whether completing a round
+stops its timer.
+
+**And the layout half.** A circuit is a container drawing rows inside itself; an exercise is a card.
+In one list they read as two kinds of thing. Whether they converge is a design decision that follows
+the one above — if the round button goes, most of what makes them look different goes with it.
 
 **Two more, from the same reading of the screen (Simon, 2026-09-11):**
 
@@ -3575,10 +3654,18 @@ The fourth is the one that is different in kind: every other chapter *shows* som
 
 **New, and not only about the demo: the demo's links should carry the chapter as a PATH segment,
 not a query parameter** (Simon, 2026-09-11). §35 wrote them as `?demo=story&chapter=floor`.
-This touches [§19](TODO.md)'s deep-linkable app state and the service worker's routing, since a path
-that is not a real file has to be served by the app shell — so the cost is not in the demo at all.
-Decide it before §35's chapters are built, because every chapter link would have to be rewritten
-afterwards, including any a trainer has already been sent.
+
+**Researched the same day, and it is CHEAP — the opposite of what this section first said.** Clean
+deep paths already work end to end: the service worker answers any navigation with the app shell
+([runtimeFetch.js](src/sw/runtimeFetch.js)), the deploy publishes a SPA 404 fallback for the same
+reason, and the router already resolves paths client-side and has a real not-found view
+([docs/ROUTING.md](docs/ROUTING.md)). So this is declaring a route, not building a mechanism.
+
+What remains is a naming decision rather than an engineering one: `/demo/story/floor` against
+`/demo/story` with the chapter as a segment of its own, and what an unknown chapter in a path does —
+which is [§44](TODO.md)'s question about links that cannot be observed to have rotted, arriving from
+a different direction. Decide it before §35's chapters are built: every chapter link would otherwise
+have to be rewritten afterwards, including any already sent to a trainer.
 
 ### 45.11 [ ] Assessment sessions — the trainer measures, and records as they go
 
@@ -3620,3 +3707,38 @@ email or SMS. What is missing is that it is not written down as a use case, and 
 it goes through inviting somebody to a session — rather than "this is agreed, send the entry".
 
 Cheapest of the three new scenarios, and the one a trainer would use every week.
+
+### 45.14 [ ] Found while running the gate: `_switch` waits for the wrong thing
+
+**Two sandbox tests failed on 2026-09-11**, in a Stage 3 that took 308s where earlier runs that day
+took 183–196s — the same suite, a busier machine.
+`test_a_sandbox_older_than_twelve_hours_offers_a_fresh_one` was clicking the ☰ menu while
+`#dialog-sandbox-stale` sat over it, and `test_coming_back_returns_to_the_view_you_left` read the URL
+before it had been rewritten. Both pass when the file is run on its own. **This is not flakiness to
+be re-run away; it is one located defect in a test helper.**
+
+**The cause.** `_switch` ([test_sandbox.py](tests/e2e/test_sandbox.py)) waits for
+`activeWorkspace() === expected`, then sleeps 200ms. That flag flips in the MIDDLE of
+`switchToWorkspace` ([app.js](src/app.js)): `switchWorkspace()` sets it, and only afterwards come
+`renderEverything()`, `rebindTimers()`, `returnToLastView()` — which is what rewrites the URL — and
+finally `offerFreshSandboxIfStale()`, which is what opens that dialog. So the helper returns while
+the switch is still running, and 200ms is the whole of what stands between it and the rest. On a
+quiet box that is enough; under eight browser workers it is not.
+
+**[x] Fixed the same day, in the test and with no timeout.** The helper now waits for
+`body.in-sandbox` to match the workspace it asked for. That class is set by `renderWorkspaceChrome()`
+inside `renderEverything()`, which runs AFTER the switch's awaits — and `renderEverything()` through
+`returnToLastView()` is one synchronous block, so observing the class means the database is loaded
+and the address bar has moved. The app needed no new signal; it was already saying this, and the test
+was asking the wrong question.
+
+**One place also had to stop lying to the page.** The staleness test aged the sandbox and then called
+`switchWorkspace('working')` from inside `page.evaluate` — which moves the stored workspace without
+repainting, leaving `body.in-sandbox` saying "sandbox" for a workspace the app had left. Any wait on
+that class would then be satisfied by a stale fact. It now leaves and re-enters through the menu, the
+way a trainer does.
+
+**The lesson, which is why this is written down rather than just fixed:** a wait on a flag that is set
+mid-operation is a sleep wearing a better name. `setActiveWorkspace()` is called before
+`loadSavedState()` and before a first sandbox is seeded, so the flag was true for the whole expensive
+part of the switch.
