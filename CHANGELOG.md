@@ -38,8 +38,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 - **The menu row is now "Reset sandbox data"**, and so is the button on the offer that appears when
   a sandbox has gone flat. It used to say *Build a fresh sandbox*, which reads next to *Leave the
   sandbox* as though it made a second one to go to. It does not: it throws away the sandbox you are
-  standing in and builds it again. The dialog still says, in full, that this deletes everything in
-  the sandbox and that nothing outside it changes.
+  standing in and builds it again.
+- **The dialog that asks now names what is safe.** It said "Nothing outside the sandbox changes",
+  a rule about scope. It says "Your own clients, sessions and plans outside the sandbox are safe and
+  do not change" — the records themselves, because that is what somebody one tap from a delete
+  button is looking for. Its other button says **Cancel**, the word the rest of the app uses for
+  backing out, instead of *Keep this one*.
 
 ---
 

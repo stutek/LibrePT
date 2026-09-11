@@ -449,9 +449,9 @@ export const sl = {
   sandbox_reset_title: "Ponastavim podatke peskovnika?",
   sandbox_reset_body:
     "To izbriše vse v peskovniku in zgradi novega, z vzorčnimi strankami in treningi za danes. Tvoje stranke, treningi in načrti zunaj peskovnika so varni in se ne spremenijo.",
-  sandbox_reset_decline: "Obdrži tega",
+  sandbox_reset_decline: "Prekliči",
   sandbox_stale_confirm: "Ponastavi podatke peskovnika",
-  sandbox_stale_decline: "Obdrži tega",
+  sandbox_stale_decline: "Prekliči",
   sandbox_timer_expired_title: "V tvojem delu je potekel časovnik",
   sandbox_timer_return: "Nazaj na moje delo",
   sandbox_timer_discard: "Prezri",

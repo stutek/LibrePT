@@ -487,9 +487,9 @@ export const en = {
   // tests/unit_js/data/sandboxWorkspace.test.mjs, which is where a guarantee belongs.
   sandbox_reset_body:
     "This deletes everything in the sandbox and builds a new one, with sample clients and sessions for today. Your own clients, sessions and plans outside the sandbox are safe and do not change.",
-  sandbox_reset_decline: "Keep this one",
+  sandbox_reset_decline: "Cancel",
   sandbox_stale_confirm: "Reset sandbox data",
-  sandbox_stale_decline: "Keep this one",
+  sandbox_stale_decline: "Cancel",
   sandbox_timer_expired_title: "A timer finished in your own work",
   sandbox_timer_return: "Go back to my work",
   sandbox_timer_discard: "Ignore it",
