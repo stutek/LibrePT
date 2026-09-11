@@ -3,8 +3,11 @@
 // onboarding entry point.
 //
 // Injected dependencies: `offerOnboarding` (whether the database is still empty — the caller owns
-// that question, see data/stateStore.js's stateHasData). Everything else it needs is its own
-// markup and the URL, so it stays mountable without the rest of the app.
+// that question, see data/stateStore.js's stateHasData) and `mountTrainerDetails(container)`, which
+// fills the details form beside the onboarding choices (TODO §45.2). Everything else it needs is its
+// own markup and the URL, so it stays mountable without the rest of the app — and that is why the
+// details form arrives as a callback rather than an import: it reads and writes the identity store,
+// which the file that paints before the app exists must not reach into.
 //
 // The splash is in the STATIC HTML and visible by default, not created here — it has to be on
 // screen from first paint, and a module that runs after app.js parses would appear too late to
@@ -30,6 +33,7 @@ const SPLASH_ID = "app-splash";
 const DISMISS_ID = "splash-dismiss";
 const PROGRESS_ID = "app-splash-progress";
 const ONBOARDING_ID = "app-splash-onboarding";
+const TRAINER_DETAILS_ID = "splash-trainer-details";
 const LANGUAGE_ID = "app-splash-language";
 const DISMISSING_CLASS = "is-dismissing";
 const ONBOARDING_CLASS = "is-onboarding";
@@ -196,10 +200,16 @@ function revealLanguageChoice(splash, { onChooseLanguage, afterChoice }) {
   }
 }
 
-function revealOnboarding(splash, resolve) {
+function revealOnboarding(splash, resolve, mountTrainerDetails) {
   const onboarding = document.getElementById(ONBOARDING_ID);
   // Never trap the trainer behind a panel that failed to render: fall back to just leaving.
   if (!onboarding) return fadeOut(splash, resolve);
+
+  // The trainer's own details, offered beside the three choices (TODO §45.2, asked 2026-09-11).
+  // INJECTED rather than imported: this module reaches for nothing but its own markup and the URL,
+  // which is what keeps it mountable — and a splash that pulled in the identity store would drag the
+  // data layer into the one file that has to paint before the app exists.
+  mountTrainerDetails?.(document.getElementById(TRAINER_DETAILS_ID));
 
   document.getElementById(PROGRESS_ID)?.setAttribute("hidden", "");
   // The X stays. The offer does not auto-close — there is a choice to make and nothing should make
@@ -231,6 +241,7 @@ export function dismissSplashWhenReady({
   needsLanguageChoice = false,
   linkBringsContent = false,
   onChooseLanguage = () => {},
+  mountTrainerDetails = null,
 } = {}) {
   const splash = document.getElementById(SPLASH_ID);
   if (!splash) return Promise.resolve();
@@ -267,7 +278,7 @@ export function dismissSplashWhenReady({
       // counts towards it — answering a prompt is not made to be followed by a wait.
       const remaining = remainingHoldMs(minimumVisibleMs, performance.now());
       const holdTimer = window.setTimeout(() => {
-        if (onboarding) revealOnboarding(splash, resolve);
+        if (onboarding) revealOnboarding(splash, resolve, mountTrainerDetails);
         else fadeOut(splash, resolve);
       }, remaining);
 

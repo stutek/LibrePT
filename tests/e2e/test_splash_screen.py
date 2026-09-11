@@ -161,6 +161,47 @@ def test_choosing_slovenian_translates_the_offer_it_leads_to(page, local_server)
 
 @pytest.mark.clean_start
 @pytest.mark.keep_splash
+def test_the_offer_carries_the_trainers_own_details_without_demanding_them(
+    page, local_server
+):
+    """The details form is offered beside the three choices (TODO §45.2), and is an OFFER.
+
+    Two things are asserted together because together they are the promise: the fields are there and
+    they save, AND the three choices still work with nothing typed. This app's pitch is that there is
+    no signup — a form on the first screen that had to be filled in would make that false, and it is
+    the kind of thing that gets tightened by accident later."""
+    page.goto(local_server)
+    _answer_language_step(page)
+    page.locator("#app-splash-onboarding").wait_for(state="visible", timeout=15000)
+
+    for field in ["name", "phone", "email"]:
+        assert page.locator(f"#splash-trainer-{field}").is_visible()
+
+    # Nothing typed, and the way in still works — this is the half that keeps "no signup" true.
+    assert page.locator("#splash-start-empty").is_enabled()
+
+    page.locator("#splash-trainer-name").fill("Ana Kovač")
+    page.locator("#splash-trainer-email").fill("ana@example.com")
+    page.locator("#splash-trainer-save").click()
+    page.locator("#splash-trainer-saved").wait_for(state="visible", timeout=5000)
+
+    stored = page.evaluate(
+        """async () => {
+            const identity = await import(
+                new URL('data/trainerIdentity.js', document.baseURI).href
+            );
+            const { name, email } = identity.readTrainerIdentity();
+            return { name, email };
+        }"""
+    )
+    assert stored == {"name": "Ana Kovač", "email": "ana@example.com"}
+
+    # Saving is not a choice: the offer is still there afterwards, waiting for one.
+    assert page.locator("#app-splash-onboarding").is_visible()
+
+
+@pytest.mark.clean_start
+@pytest.mark.keep_splash
 def test_start_with_an_empty_app_dismisses_the_splash(page, local_server):
     page.goto(local_server)
     _answer_language_step(page)

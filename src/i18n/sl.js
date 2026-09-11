@@ -397,6 +397,9 @@ export const sl = {
   trainer_details_email: "E-pošta",
   trainer_details_email_invalid: "To ni e-poštni naslov. Popravi ga ali pusti polje prazno.",
   trainer_details_save: "Shrani moje podatke",
+  trainer_details_saved: "Shranjeno.",
+  trainer_details_splash_lede:
+    "Neobvezno, lahko tudi pozneje prek menija. Tvoje ime podpiše povabila, ki jih pošlješ strankam, telefon in e-pošta pa sta pot, po kateri ti stranka odgovori.",
   walkthrough_title: "Vodeni ogled",
   walkthrough_progress: "Korak {step} od {count}",
   walkthrough_back: "Nazaj",

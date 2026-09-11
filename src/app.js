@@ -117,6 +117,7 @@ import {
   getInitialTheme,
   initTheme,
 } from "./modules/common/theme.js";
+import { mountTrainerDetailsOnSplash } from "./modules/common/trainerDetailsDialog.js";
 import {
   escapeHTML,
   formatClockFromMinutes,
@@ -956,6 +957,10 @@ function setupActiveSession({ linkBringsContent } = {}) {
           applyTranslations(lang);
           saveState();
         },
+        // The trainer's own details, offered beside the three onboarding choices (TODO §45.2). Passed
+        // in rather than imported by the splash, which owns nothing but its markup and the URL — and
+        // it is the same module the ☰ menu opens, so there is one form and one validation rule.
+        mountTrainerDetails: mountTrainerDetailsOnSplash,
       })
       // Only once the splash is actually gone: a submission shared into the app opens a modal, and a
       // modal makes the page under it inert — splash included (§38.22).

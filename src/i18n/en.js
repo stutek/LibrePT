@@ -410,6 +410,11 @@ export const en = {
   trainer_details_email: "Email",
   trainer_details_email_invalid: "That is not an email address. Correct it, or leave it empty.",
   trainer_details_save: "Save my details",
+  trainer_details_saved: "Saved.",
+  // On the splash the same form has to say, in its own words, that it is optional — the first
+  // screen of an app whose pitch is "no signup" must not look like one (TODO §45.2).
+  trainer_details_splash_lede:
+    "Optional, and you can do it later from the menu. Your name signs the invitations you send clients; your phone and email are how they answer.",
   // The guided walkthrough (TODO §9.5) and the captions of the script it shares with the automatic
   // demo (modules/demo/gymFloorTour.js). Each caption names the control by what it DOES, never by
   // where it is on screen — the panel is read on a phone whose layout is not the one this was

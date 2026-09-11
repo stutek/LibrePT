@@ -3354,6 +3354,21 @@ not a profile that syncs anywhere.
 
 **Ruling (Simon, 2026-09-11):** implement immediately, alongside §45.1 and §45.3.
 
+**Also on the cold-start splash** (Simon, same day): the same form is offered beside the three
+onboarding choices, not only in the ☰ menu. Built as ONE form — the fields, the labels and the single
+validation rule live in
+[trainerDetailsDialog.js](src/modules/common/trainerDetailsDialog.js) and are rendered into either
+host under different id prefixes, because two copies of a form is two places for the rule to drift
+and both can be in the document at once.
+
+**It is an offer there, never a gate, and that is a product constraint rather than a preference.**
+The app's first promise is that there is no account and no signup; a form on the first screen is
+exactly what a stranger reads as one. So every field is optional, the three choices work with
+nothing typed, saving does not choose for them or dismiss anything, and the form says in its own
+words that it can be done later from the menu. The form sits BELOW the three choices for the same
+reason — a form above the way in reads as the price of entry. If that ever tightens into a required
+step, the promise on [landing.html](src/landing.html) stops being true and has to change with it.
+
 ### 45.3 [ ] The signup form asks for *"your name"* rather than first and last name
 
 `intake_name` reads *"Tvoje ime"* / *"Your name"* ([sl.js](src/i18n/sl.js),
@@ -3406,10 +3421,25 @@ nobody — client, trainer or maintainer — is told what the browser said. A fa
 cannot be fixed from a report, and this one arrives from a stranger's phone, which is the least
 reachable place in the whole product.
 
-**Next, in order:** record which browser and device this was, then make the failure legible before
-choosing a remedy. If the extension is the cause, the remedy is a conflict to resolve rather than a
-patch — the extension serves the email hop, and the share sheet refuses it — so it is not decided
-here.
+**The device: a Samsung Galaxy S23** (Simon, 2026-09-11). An Android phone with a share sheet, which
+rules out the whole class of "this browser cannot share files at all" — and leaves the file itself,
+or the browser's judgement of it, as what was refused.
+
+**Asked the same day: can the extension be registered when the app is INSTALLED?** It already is, and
+that is why it does not help. [manifest.json](src/manifest.json) declares both `file_handlers`
+(Android opens a `.json.librept-signup` with LibrePT) and `share_target` (LibrePT offers itself when
+someone shares one). Both are about RECEIVING. The failure is on the sending side, where the browser
+consults its own list of file types a page is allowed to hand to the share sheet — a list no
+manifest, installation or registration can add to. Nothing about install-time registration is
+available to try here.
+
+**Next, in order:** make the failure legible — carry the browser's own message to where a person can
+read it, instead of discarding it — then reproduce on the S23 and read what it says. Only then a
+remedy. If the extension is the cause, that remedy is a conflict to resolve rather than a patch: the
+private extension is what survives an email hop, and it may be the very thing the share sheet
+refuses. One cheap experiment then becomes available — retry a refused share once with a plainly
+named `.json` copy of the same bytes — but it trades away the association that makes the file open in
+LibrePT on arrival, so it is a decision, not a fix, and it is not taken here.
 
 ### 45.5 [ ] Import covers a programme, but not the trainer's own exercise LIBRARY
 

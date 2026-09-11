@@ -142,6 +142,12 @@
         <span data-i18n="walkthrough_title">Guided walkthrough</span>
       </button>
       <button type="button" id="splash-start-empty" class="app-splash-skip" data-i18n="splash_start_empty">Start with an empty app</button>
+      <!-- The trainer's own details, offered here as well as in the ☰ menu (asked 2026-09-11).
+           EMPTY in the markup and filled by modules/common/trainerDetailsDialog.js, so one module
+           owns the fields, their labels and the one validation rule for both places it appears.
+           BELOW the three choices deliberately: this app's first promise is that there is no signup,
+           and a form above the way in is what a stranger reads as one. -->
+      <div id="splash-trainer-details" class="app-splash-details"></div>
     </div>
   </div>
 

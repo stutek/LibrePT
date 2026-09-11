@@ -24,8 +24,14 @@
   align-items: center;
   justify-content: center;
   gap: 16px;
-  padding: 0 32px;
+  padding: 24px 32px;
   text-align: center;
+  /* The onboarding offer now carries a form as well as three buttons (TODO §45.2), which on a short
+     phone is taller than the viewport. Without this the overflow is simply cut off — and what gets
+     cut is the bottom, where the save button is. Vertical padding replaces the old `0 32px` for the
+     same reason: centred content that overflows needs room at both ends, or the first line goes
+     under the top edge. */
+  overflow-y: auto;
   background-color: var(--bg-color);
   background-image: var(--bg-gradient);
   background-attachment: fixed;
@@ -205,6 +211,37 @@
 }
 
 .app-splash-onboarding[hidden] {
+  display: none;
+}
+
+/* The trainer's own details, under the three choices (TODO §45.2). Deliberately quieter than they
+   are — smaller labels, no primary colour, a save button that shares .app-splash-action but not its
+   emphasis — because it is an offer beside the way in, not the way in. Left-aligned against the
+   splash's centred text: a form whose labels are centred is a form nobody can scan. */
+.app-splash-details {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  width: 100%;
+  margin-top: 6px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-color);
+  text-align: left;
+}
+
+.app-splash-details:empty {
+  display: none;
+}
+
+.app-splash-details-lede,
+.app-splash-details-saved {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.app-splash-details-saved[hidden] {
   display: none;
 }
 
