@@ -97,6 +97,7 @@ the thing that must happen first, not merely what it touches.
 | **Reported 2026-08-18** | §28.2 | Which contributor-facing docs get BUILT, so their addresses are injected rather than written out | Everything else in §28 shipped the same day |
 | **Client self-service** | §26.7 phase 2 | The vendored QR encoder and the wall poster | Deferred on purpose until the messaging handover has been tried in a gym; the link route shipped 08-22 |
 | **Program import** | §29 | Nothing — shape decided 2026-08-18, and the editor-as-review answers the fragility question | The parser and its frozen corpus; the intake flow, media-type rule and catalog crosswalk already exist |
+| **Trainer feedback 2026-09-11** | §45.1–§45.13 | §45.1's untranslatable first screen, then §45.2's trainer identity | Nothing for the three defects; §45.4 waits on a reproduction, §45.8 on looking at both screens together |
 
 ---
 
@@ -3298,3 +3299,271 @@ hides the one failure no check can catch — the id staying while the thing it n
 
 **Deliberately not designed further** (Simon, same day: *"I am over engineering it"*). This is the
 problem, written down.
+
+---
+
+## 45. Reported 2026-09-11 — the first trainer's feedback on using the app
+
+A working personal trainer used the app and reported back. Simon relayed the list and ruled on every
+item the same day; the rulings are marked below, and what is still a question is marked as one. This
+is feedback on **the app in use**, not on the promotional pages (Simon, 2026-09-11) — so where a
+report could mean either surface, the app is the one meant.
+
+Ordered by cost, not by the order reported: the three defects first, then the new work, then the two
+that are still questions.
+
+### 45.1 [ ] The first screen is English whatever language was chosen — BUG
+
+**Reported:** first launch, choose Slovenian, and the invitation into the demo and the walkthrough is
+still in English.
+
+**Cause, located.** The onboarding block in [index.html](src/index.html) — *Explore with demo data*,
+*Guided walkthrough*, *Start with an empty app* — is written as plain English text. It carries no
+translation key, has no entry in [domMappings.js](src/i18n/domMappings.js), and no `splash_*` key
+exists in either [sl.js](src/i18n/sl.js) or [en.js](src/i18n/en.js). The language buttons above it
+work; nothing below them can be reached by a language choice at all.
+
+The language prompt itself is correct as it stands and must not be touched: each language names
+itself, in its own language, so the choice is legible to someone who cannot read the current one.
+
+**Why it is a first-run defect specifically.** The block is shown only while the trainer has saved
+nothing of their own, so the one screen that is guaranteed to be English is the very first one a new
+trainer sees. It is also the screen that decides whether they go any further.
+
+**Ruling (Simon, 2026-09-11):** *"popravi tako, da bo prav"* — fix it properly, without first
+establishing which surface the trainer saw.
+
+**The promotional page is a SEPARATE, still-open item.** [landing.html](src/landing.html) is
+English-only by construction: it is a built document with no translation mechanism of any kind, and
+its calls to action are the same demo and walkthrough links. Translating it means giving the built
+docs a language axis, which is a larger change than this section. Not part of this fix; recorded here
+so it is not lost.
+
+### 45.2 [ ] The trainer cannot enter their own name, phone or email
+
+**Reported:** there is nowhere to put the trainer's own details.
+
+**Confirmed, and worse than a missing field.** The app already *uses* the trainer's name — the
+invitation a client receives reads *"{trainer} invites you to fill in your details"*
+([sl.js](src/i18n/sl.js), `intake_invite_body`) — while offering no place to enter it. Every record
+in the app belongs to a client; the trainer is the one person the data model does not know.
+
+**What it is for, so the scope stays honest:** the invitation and consent wording that names the
+trainer, and the contact details a client needs in order to answer. Not an account, not a login,
+not a profile that syncs anywhere.
+
+**Ruling (Simon, 2026-09-11):** implement immediately, alongside §45.1 and §45.3.
+
+### 45.3 [ ] The signup form asks for *"your name"* rather than first and last name
+
+`intake_name` reads *"Tvoje ime"* / *"Your name"* ([sl.js](src/i18n/sl.js),
+[en.js](src/i18n/en.js)). A trainer filing a client needs both names; *your name* invites one.
+
+**Ruling (Simon, 2026-09-11):** fix the label in both languages.
+
+### 45.4 [ ] The share of a filled-in signup FAILED, and fell back to saving the file
+
+**Reported:** sharing the completed signup back to the trainer did not work; the app offered to save
+the file to the phone instead. The trainer read that as *"there is no email or SMS route"*.
+
+**What the app is supposed to do.** The submission travels as a FILE, deliberately — UC8's whole
+argument is that health detail must not sit in a URL, a message body or a carrier's logs
+([uc8_client_self_onboarding.md](use_cases/uc8_client_self_onboarding.md)). `navigator.share({ files })`
+hands that file to whatever the client already uses: their mail app, WhatsApp, Signal, Viber. So the
+email route the trainer asked for exists, and the save-to-phone screen is the documented permanent
+fallback for when the browser refuses the share
+([signupDelivery.js](src/modules/intake/signupDelivery.js)), not an error path.
+
+**SMS cannot be added, and this is not a preference.** Neither `sms:` nor `mailto:` can carry an
+attachment on any platform — already established for the intake invitation
+([intakeInvite.js](src/modules/clients/intakeInvite.js)). An SMS route would mean putting the
+client's health answers into the body of a text message, where they persist in two message histories.
+That is the exact thing UC8 was built to prevent.
+
+**So the open question is why the share was refused**, on a device where it should have worked.
+Candidates: a desktop browser (where `canShare({ files })` is false everywhere), iOS below 15, an
+in-app browser inside a messaging app, or a file the browser judged unshareable. Until that is known,
+no code change is justified — but the fallback screen's wording is a fair target either way, since
+what the trainer read from it was "this route does not exist".
+
+**Status (Simon, 2026-09-11):** Simon will try to reproduce it himself. Waiting on that, not on work.
+
+### 45.5 [ ] Import covers a programme, but not the trainer's own exercise LIBRARY
+
+**Reported:** trainers want to bring in their own exercises and their own blocks from text files and
+spreadsheets.
+
+**Most of this already exists on paper.** [§29](TODO.md) and
+[uc9_program_import.md](use_cases/uc9_program_import.md) decided the shape on 2026-08-18: four
+optional inputs, a small JSON, a downloadable template that doubles as the instruction a trainer
+hands to an AI, every parsing failure reported before the editor opens, and the result landing in the
+ordinary session editor. A movement the catalogue does not have is allowed and marked, never renamed
+into the nearest thing — which is precisely what a trainer importing their own exercises needs.
+
+**What is genuinely missing** is the other shape of input: a **list of movements with no session
+around them**. §29's format describes a programme — ordered items with sets, reps, load and rests.
+A trainer's exercise library is a flat list, and today there is no way to say "these are my
+exercises" without inventing a session to hang them on.
+
+**A backup is the wrong format for this, and was considered.** Simon raised it — no new format, use a
+partial backup. Rejected, on three grounds:
+
+- a backup is keyed to the storage schema ([§16](TODO.md), [§18](TODO.md)), so every schema change
+  would silently break the instruction the trainer gives their AI;
+- importing a partial backup is a MERGE — duplicate detection, id collisions, records that reference
+  records that are not in the file — which is a harder problem than reading a list, and a data-safety
+  problem rather than an import one;
+- it is long, and a format an AI must reproduce exactly should be short enough to get right.
+
+§29's template is short, is generated from the code, and is parsed by a test, so it cannot quietly
+go stale. Extending it to cover a bare movement list is small; replacing it with a backup is not.
+
+**Ruling (Simon, 2026-09-11):** *"todo je v redu"* — the TODO shape stands. Extend §29 rather than
+design a second route.
+
+### 45.6 [ ] The session list needs filters: a date range, a client, a location
+
+**Reported:** on the home screen, the calendar should act as a from–to filter; a filter by client is
+wanted; Simon added a filter by location.
+
+**None of the three exists today.**
+
+**Not a modal (agreed, Simon 2026-09-11).** A modal costs two taps and hides what is switched on, so
+a trainer sees a short list without seeing why it is short — and this screen is read one-handed, with
+a client waiting. The shape instead: **a row of chips under the header that shows what is active**,
+each removable with one tap. A modal becomes worth revisiting only if the chips stop fitting on a
+phone-width row.
+
+Open, and cheap to get wrong: whether the calendar's range selection and the chips are one control or
+two, and what the list shows when a filter matches nothing — an empty list that does not say "because
+of a filter" is the same defect in a different place.
+
+### 45.7 [ ] Finish "seja" → "trening", and settle on ONE form of address
+
+**Reported:** the rename from *seja* (session) to *trening* (training) is not consistent, worst of all
+where a new session is planned.
+
+**Confirmed.** The rename was started and left half-done — its reasoning is recorded in the
+translation file itself ([sl.js](src/i18n/sl.js)): *seja* in Slovenian reads first as a meeting, while
+*trening* is the word a trainer and a client actually use. Above that comment sit roughly twenty
+strings still saying *seja*, including "Nastavitev seje vadbe" and "Ime seje" — the new-session
+screen the trainer named.
+
+**A second inconsistency, not reported but worse in use:** the Slovenian text switches between the
+formal and the familiar form of address. "Nastavite podrobnosti seje" in one place, "želiš poslati" in
+another. A reader notices a change of register faster than a change of noun.
+
+**Ruling (Simon, 2026-09-11):** finish the rename, and use the **familiar form (tikanje)**
+throughout — a trainer talks to a client, not an office to a citizen.
+
+**This is a rule for new text as well, not a one-time sweep**, which is why it is written here rather
+than only fixed: Slovenian user-visible text is familiar-form, and a training session is a *trening*.
+
+### 45.8 [ ] The clipboard and the client's history are two views of one thing
+
+**Reported:** the clipboard view and the history view within a client need to be unified.
+
+**Deliberately not designed yet.** Asked what specifically differs — the card's appearance, its
+order, or what can be opened from it — the answer was to record it and **investigate it together**
+(Simon, 2026-09-11), after §45.1–§45.3 and §45.7 are done. What exists today is
+[modules/clipboard/](src/modules/clipboard/) and [modules/history/](src/modules/history/) as separate
+modules; whether the unification is one component with two states or merely a shared card is the
+question to answer with both screens open.
+
+Related and already decided on paper: [§17](TODO.md)'s structured session history, which is what a
+history card would have to read from.
+
+### 45.9 [ ] Running a session: keep it interactive, drop the confirming
+
+**Reported, first reading:** *"running the session must be less interactive, so the trainer can focus
+on the client; feedback and adjustments get written after the session."*
+
+**Argued against, and the position moved.** The app's whole claim is one-handed logging **during** a
+session (UC1). Moving feedback to afterwards asks the trainer to hold sixty minutes and three clients
+in their head — which is the failure of the paper clipboard the app exists to replace.
+
+**What the trainer actually wants (clarified, Simon 2026-09-11):** the session screen **stays
+interactive**. What is unwanted is **confirming rounds and exercises** — being made to tap "done" on
+each circuit and each exercise to move the session forward. The cost is not interaction, it is
+bookkeeping the trainer is made to perform for the app's benefit.
+
+**So the work is to remove the confirmation taps, not the interaction.** What a tap should be for:
+something the trainer learned (too easy, too hard, pain) or something they changed. What it should
+not be for: telling the app what it can see for itself.
+
+**Two more, from the same reading of the screen (Simon, 2026-09-11):**
+
+- **A circuit and an exercise do not look like one another** in the list, and the layout is worse for
+  it. The list of collapsed cards is now readable enough to be used without touching it — which is
+  what makes the inconsistency visible.
+- **An exercise has no rounds button, while a circuit does.** Reported as an observation, not yet as a
+  defect: whether an exercise should have one is the question.
+
+**Still standing from the original report, and a good change:** live editing belongs to a **single
+card**, not to the whole programme at once.
+
+### 45.10 [ ] The demo in chapters — and demo links become PATHS, not query parameters
+
+**Reported:** the demo must be split into chapters.
+
+**Already specified as [§35](TODO.md)**, brainstormed 2026-08-19: chapters, each independently
+playable, each ending somewhere useful, a chapter being DATA rather than engine work.
+
+**What changes is the chapter LIST** (Simon, 2026-09-11) — these four, aimed at what a trainer
+evaluating the app needs to see:
+
+1. signup;
+2. planning a training session;
+3. moving an appointment and telling the client;
+4. a fast adjustment mid-session — **counted in taps and seconds**.
+
+The fourth is the one that is different in kind: every other chapter *shows* something, and that one
+**proves** something. A number a viewer can check is worth more than any sentence about ease of use.
+
+**New, and not only about the demo: the demo's links should carry the chapter as a PATH segment,
+not a query parameter** (Simon, 2026-09-11). §35 wrote them as `?demo=story&chapter=floor`.
+This touches [§19](TODO.md)'s deep-linkable app state and the service worker's routing, since a path
+that is not a real file has to be served by the app shell — so the cost is not in the demo at all.
+Decide it before §35's chapters are built, because every chapter link would have to be rewritten
+afterwards, including any a trainer has already been sent.
+
+### 45.11 [ ] Assessment sessions — the trainer measures, and records as they go
+
+**Wanted (Simon, 2026-09-11).** A session whose purpose is measurement rather than training: the
+trainer tests a participant's capabilities and records the results interactively, as they happen.
+
+Nothing like it exists — not in the code, not in the use cases. Open by its nature: whether this is a
+session type, a programme of a special kind, or a record that hangs off a client independently of any
+session; and what a measurement IS as data, given that [§17](TODO.md)'s history record was shaped
+around sets, reps and load.
+
+Worth noting as a reason it matters commercially: a re-test is the only thing in a trainer's work
+that demonstrates progress in a number, which is what a client renews on.
+
+### 45.12 [ ] Published slots a client picks from an INVITATION
+
+**Wanted (Simon, 2026-09-11).** A training session with published times, where the client chooses one
+themselves, having been invited.
+
+**Adjacent to, but not the same as, what exists.**
+[uc3_publish_slots.md](use_cases/uc3_publish_slots.md) and
+[uc4_client_self_subscription.md](use_cases/uc4_client_self_subscription.md) both stand on Google
+Calendar's appointment schedules — deliberately, to avoid hosting anything. This one starts from an
+invitation the trainer sends and has to work for a trainer with no Google account, which is the
+difference that makes it a separate use case rather than a variation.
+
+Where it connects: [§26](TODO.md)'s self-onboarding already sends a client a link and gets a file
+back, and the RSVP page ([rsvpView.js](src/modules/rsvp/rsvpView.js)) is already an answer coming
+back from a client. The open question is whether choosing a slot is another answer of the same kind.
+
+### 45.13 [ ] An appointment already agreed — just send the client an ICS
+
+**Wanted (Simon, 2026-09-11).** The time is agreed, nothing needs deciding, and all the client needs
+is a calendar entry.
+
+**Most of this is built.** [calendarInvite.js](src/data/calendarInvite.js) writes the ICS, and
+[sessionInviteDialog.js](src/modules/session/sessionInviteDialog.js) already hands it to a client by
+email or SMS. What is missing is that it is not written down as a use case, and that the route into
+it goes through inviting somebody to a session — rather than "this is agreed, send the entry".
+
+Cheapest of the three new scenarios, and the one a trainer would use every week.
