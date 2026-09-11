@@ -1,13 +1,15 @@
 # tests/medium/test_clipboard_expand_all.py
-# "Expand all" opens every card in the deck at once (TODO §42), asked for by a trainer who could not
-# see the whole session at a glance: one card is open and the rest are peeking rows.
+# "Expand all" lays every card in the deck out flat (TODO §42), asked for by a trainer who could not
+# see the whole session at a glance: one card is open and the rest are peeking rows, each slid up
+# over the one before it.
 #
-# Two things are asserted, and the second is the one that matters on a gym floor. Every card must
-# show its expanded body — otherwise the control did nothing — and every card that is not in focus
-# must carry NO controls, because twelve open cards with live Too Easy / Too Hard / timer buttons put
-# a mis-tap one thumb-width from logging against the wrong exercise. A control that is drawn but
-# inert would be worse than either, so they are removed rather than disabled, and that is what this
-# reads: the buttons are absent from the DOM.
+# Three things are asserted. The deck must actually stop being a deck — every card out of the stack
+# and fully visible, or the control did nothing. Every card that is not in focus must carry NOTHING
+# to tap, because twelve open cards with live Too Easy / Too Hard / timer buttons put a mis-tap one
+# thumb-width from logging against the wrong exercise; they are never drawn rather than drawn and
+# disabled, and that is what this reads — the buttons are absent from the DOM. And a card must look
+# like itself in all three states (§42.3): opening one ADDS its controls to the row the trainer was
+# already reading, instead of swapping in a second, taller design that says the same numbers again.
 #
 # Medium rather than e2e: no router, no persistence, no lifecycle — the deck renders from an injected
 # session and the ⋯ menu is wired exactly as production wires it.
@@ -21,9 +23,9 @@ from tests.medium._harness import (
     rest_item,
 )
 
-# Every card shape the deck renders. The circuit is not decoration: its expanded body carries a
-# number field per member (reps taken to failure), which a rule that only removed buttons would have
-# left live on a card the trainer is merely reading.
+# Every card shape the deck renders. The circuit is not decoration: the card in focus carries a
+# number field per member (reps taken to failure), which a rule that only kept BUTTONS off a card
+# the trainer is merely reading would have left live.
 PLAN = [
     exercise_item("exA", "Barbell Back Squat"),
     exercise_item("exB", "Romanian Deadlift"),
@@ -43,21 +45,27 @@ PLAN = [
 
 STUB = clipboard_stub(active_session_fixture(exercises=PLAN))
 
-# What each card is showing: whether it drew the expanded body (the stats block only the open card
-# has), and whether it carries any of the controls a focused card offers.
+# What each card is showing: whether it is out of the stack (nothing of it covered by the card
+# after it), and whether it carries anything the trainer could tap.
 CARD_STATES = """() => {
   const cards = [...document.querySelectorAll('#active-exercise-scroll-deck .exercise-deck-card')];
-  return cards.map((card) => ({
-    inFocus: card.classList.contains('in-focus'),
-    expanded: card.classList.contains('expanded'),
-    // Each card shape has its own expanded body: stats for an exercise, a duration for a rest, a
-    // member list for a circuit. A probe naming only the first two passed a rest card that had
-    // rendered nothing.
-    hasBody: !!card.querySelector('.deck-card-stats, .rest-card-duration, .circuit-ex-row'),
-    // EVERY button, for the same reason the code strips every button: the rest card's Start sits in
-    // neither of the two containers the first version of both named.
-    controls: card.querySelectorAll('button, input, select, textarea, .deck-card-actions').length,
-  }));
+  return cards.map((card, i) => {
+    const next = cards[i + 1];
+    const rect = card.getBoundingClientRect();
+    return {
+      name: card.querySelector('.deck-card-name-inline')?.textContent.trim() ?? '?',
+      inFocus: card.classList.contains('in-focus'),
+      expanded: card.classList.contains('expanded'),
+      // Cards are siblings at one z-index, so DOM order is paint order: the next card is what
+      // covers this one. Laid out flat, none of it is covered.
+      covered: next
+        ? Math.max(0, Math.round(rect.bottom - next.getBoundingClientRect().top))
+        : 0,
+      // EVERY control, not a list of known ones: the rest card's Start sits in neither of the two
+      // containers an earlier version of this probe named, and a circuit carries number FIELDS.
+      controls: card.querySelectorAll('button, input, select, textarea, .deck-card-actions').length,
+    };
+  });
 }"""
 
 
@@ -66,29 +74,39 @@ def _expand(page):
     page.locator("#btn-expand-all").click()
 
 
-def test_only_the_focused_card_is_open_until_it_is_asked_for(page, local_server):
+def test_only_the_focused_card_can_be_acted_on_until_expanding_is_asked_for(
+    page, local_server
+):
     load_with_stub(page, local_server, STUB)
     page.wait_for_selector("#active-exercise-scroll-deck .exercise-deck-card")
 
     states = page.evaluate(CARD_STATES)
-    open_cards = [card for card in states if card["hasBody"]]
+    live_cards = [card for card in states if card["controls"]]
 
-    assert len(open_cards) == 1, (
-        f"the deck starts with one card open, not {len(open_cards)}"
+    assert len(live_cards) == 1, (
+        f"the deck starts with one card that can be acted on, not {len(live_cards)}"
     )
-    assert open_cards[0]["inFocus"], "the open card is the one in focus"
+    assert live_cards[0]["inFocus"], "that card is the one in focus"
+    assert any(card["covered"] for card in states), (
+        "the deck starts as a stack — cards slid up over each other"
+    )
 
 
-def test_expand_all_opens_every_card(page, local_server):
+def test_expand_all_lays_every_card_out_flat(page, local_server):
     load_with_stub(page, local_server, STUB)
     page.wait_for_selector("#active-exercise-scroll-deck .exercise-deck-card")
 
     _expand(page)
     page.wait_for_selector("#active-exercise-scroll-deck .exercise-deck-card.expanded")
+    page.wait_for_timeout(
+        500
+    )  # margin and transform both transition; sample once settled
     states = page.evaluate(CARD_STATES)
 
-    assert all(card["hasBody"] for card in states), (
-        f"every card shows its body once expanded: {states}"
+    covered = [card for card in states if card["covered"]]
+    assert not covered, (
+        "every card is fully visible once expanded, none covered by the one after it:\n"
+        + "\n".join(f"  {c['name']}: {c['covered']}px covered" for c in covered)
     )
     assert sum(1 for card in states if card["inFocus"]) == 1, (
         "expanding is not focusing — exactly one card still says where the trainer is"
@@ -172,7 +190,7 @@ CIRCUIT_SUMMARY = """() => {
     .find((el) => el.classList.contains('circuit-card') && !el.classList.contains('in-focus'));
   if (!card) return null;
   return {
-    names: [...card.querySelectorAll('.circuit-ex-summary .circuit-ex-name')].map((el) => el.innerText.trim()),
+    names: [...card.querySelectorAll('.circuit-ex-list .circuit-ex-name')].map((el) => el.innerText.trim()),
     text: card.innerText,
     controls: card.querySelectorAll('button, input').length,
   };
@@ -192,3 +210,56 @@ def test_a_collapsed_circuit_names_its_movements(page, local_server):
         f"a member with no name or reps printed itself as undefined: {summary['text']!r}"
     )
     assert summary["controls"] == 0, "a collapsed card offers nothing to tap"
+
+
+# A card looks like itself however open it is (TODO §42.3, ruled 2026-09-10): "expanding the card
+# should just insert elements into existing exercise design, not load a completely different one".
+# The exercise card used to answer a tap by throwing its target line away and saying the same three
+# numbers again as a block of big tiles, so the row the trainer had been reading was replaced rather
+# than opened.
+TARGET_LINE = """(name) => {
+  const card = [...document.querySelectorAll('#active-exercise-scroll-deck .exercise-deck-card')]
+    .find((el) => el.querySelector('.deck-card-name-inline')?.textContent.trim() === name);
+  if (!card) return null;
+  return {
+    inFocus: card.classList.contains('in-focus'),
+    target: card.querySelector('.deck-card-compact-target')?.textContent.trim() ?? null,
+    // What focus ADDS, and the proof it was added to the row rather than instead of it.
+    hasActions: !!card.querySelector('.deck-card-actions'),
+    timerInHeadRow: !!card.querySelector('.deck-card-compact .deck-card-timer'),
+  };
+}"""
+
+
+def test_bringing_a_card_into_focus_keeps_the_line_it_was_showing(page, local_server):
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#active-exercise-scroll-deck .exercise-deck-card")
+
+    name = "Romanian Deadlift"
+    before = page.evaluate(TARGET_LINE, name)
+    assert before and not before["inFocus"], (
+        f"the fixture starts this card collapsed: {before}"
+    )
+    assert before["target"], "a collapsed exercise card states its target"
+
+    # A DOM click, not a synthesized pointer one: collapsed cards overlap by a negative margin, so
+    # the card above this one sits over its click point and would swallow the event.
+    page.evaluate(
+        """(name) => [...document.querySelectorAll('.exercise-deck-card')]
+             .find((el) => el.querySelector('.deck-card-name-inline')?.textContent.trim() === name)
+             .click()""",
+        name,
+    )
+    page.wait_for_selector("#active-exercise-scroll-deck .exercise-deck-card.in-focus")
+    page.wait_for_timeout(400)
+    after = page.evaluate(TARGET_LINE, name)
+
+    assert after["inFocus"], f"tapping the card brings it into focus: {after}"
+    assert after["target"] == before["target"], (
+        f"the card in focus states the same target it did collapsed — "
+        f"{before['target']!r} became {after['target']!r}"
+    )
+    assert after["hasActions"], (
+        "the card in focus adds the Too Easy / Too Hard / Feedback row"
+    )
+    assert after["timerInHeadRow"], "and its timer joins the head row it already had"

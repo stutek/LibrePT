@@ -107,7 +107,6 @@
 .participant-card-header,
 .active-set-row,
 .timer-card-head,
-.deck-card-top,
 .form-row,
 .session-title-bar {
   display: flex;
@@ -125,7 +124,6 @@
 .step-btn,
 .set-checkbox-btn,
 .timer-close,
-.circuit-done,
 .deck-action-btn,
 .collapse-btn,
 .close-btn-xs,
@@ -163,7 +161,6 @@
 .deck-history-sets,
 .form-group,
 .backup-actions,
-.deck-stat,
 .stack-list {
   display: flex;
   flex-direction: column;

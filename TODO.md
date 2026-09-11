@@ -2983,55 +2983,14 @@ whole session*.
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#421-x-expand-all-shipped-2026-09-10); what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-### 42.2 Measured: why expanding alone does not finish the job
+### 42.2 [x] Measured: why expanding alone does not finish the job — closed 2026-09-10
 
-A phone at 390×844, the deck stub with a four-item plan:
+Closed by §42.3, which re-measured the same stub after the change — the reasoning and the before
+numbers are in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#422-x-measured-why-expanding-alone-does-not-finish-the-job-closed-2026-09-10).
 
-| | Height |
-| :--- | ---: |
-| Focused card | **172px** — top row 32, name 17, stats block 52, action row 39, padding 16 |
-| Expanded, not in focus | **133px** — the same without the action row |
-| Collapsed row in the stack | **37px** |
+### 42.3 [x] One card design, opened up — ruled and shipped 2026-09-10
 
-The deck's own visible area on that phone is roughly 500px once the header, the title bar and the
-clipboard bar are out. So expanding gives **under four cards on screen** where the stack gives
-eleven. For a six-item plan the trainer still scrolls — the control answers "show me everything" and
-not yet "let me see it".
-
-### 42.3 Proposal — three tiers, not two
-
-**An expanded card should not be the focused card minus its buttons. It should be the collapsed row
-plus its numbers.** The collapsed row already proves the shorthand works: it carries name and target
-on one line (`exerciseCard.js` renders `S × R × weight` there and has since the deck was built).
-
-| Tier | What it shows | Measured / estimated |
-| :--- | :--- | ---: |
-| Collapsed | name + compact target, peeking in the stack | 37px |
-| **Expanded** | name, full target line, status — flat in a list, nothing to tap | **≈55px** |
-| Focused | the big stats block and the controls | 172px |
-
-Where the ≈55px comes from, item by item:
-
-- **Fold the stats block into one line** — 52px of value-over-label for three numbers becomes ~17px
-  as `3 × 10 × 60 kg`. **Saves ~35px.** The big block stays on the FOCUSED card, where it earns its
-  height: that is the one a trainer reads at arm's length mid-set.
-- **Fold the top row into the name line** — the counter (`1/4`) and the status badge move to the
-  right of the name. **Saves ~32px.**
-- Keep the padding and the name as they are; both are what makes the card legible at all.
-
-Result: **eight or nine expanded cards on a phone screen instead of three**, and the whole of a
-typical session visible without scrolling.
-
-The other two card shapes follow the same rule:
-
-- **Circuit** — one line per member (name + target), no round controls, no failure inputs.
-- **Rest** — a single line: `Rest 90s`. Its expanded form today is a duration in display type plus a
-  Start button that expand-all now strips, which leaves a very tall card saying very little.
-
-**Open, and the reason this is a proposal rather than a commit:** whether the expanded tier should
-also drop the card chrome — border, radius, shadow — and become a plain row in a list. That would
-save another ~10px per card and make the deck read as a table, which is what a trainer scanning a
-whole session is actually doing. It is also the point where it stops looking like the app.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#423-x-one-card-design-opened-up-ruled-and-shipped-2026-09-10); what shipped is in [CHANGELOG.md](CHANGELOG.md). The chrome question it left open is §42.13.
 
 ### 42.4 Expand all is a SETTING, and there are two of them
 
@@ -3155,6 +3114,17 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#4211-x-the-expa
 ### 42.12 [x] In the sandbox the badge is a marker, not a link — shipped 2026-09-10
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#4212-x-in-the-sandbox-the-badge-is-a-marker-not-a-link--shipped-2026-09-10).
+
+### 42.13 [Open question] Should an expanded card keep its border and shadow?
+
+Left open by §42.3. A card that is not in focus is now one line, and ten of them fit the phone. If
+the expanded tier also dropped the card chrome — border, radius, shadow — it would save perhaps
+another 10px each and the deck would read as a table, which is what a trainer scanning a whole
+session is doing. It is also the point where the deck stops looking like the app.
+
+**What would settle it:** show the trainer who reported the legibility both, on their own phone.
+Nothing in the code has to be decided first — the chrome is three lines in
+[exerciseDeckOfCards.css](src/modules/clipboard/exerciseDeckOfCards.css)'s `.expanded` rule.
 
 ## 43. [Brainstorm] The client's own copy: their plan, their feedback
 

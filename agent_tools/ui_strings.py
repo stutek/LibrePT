@@ -33,7 +33,7 @@ SRC = REPO_ROOT / "src"
 # "Cancel" from, then the clipboard's Start and Done buttons becoming glyphs whose words live in
 # `aria-label` (TODO §39.6), then the day's expand-all control, whose label the timeline sets
 # from the dictionary in both directions (TODO §42.4).
-BASELINE = 283
+BASELINE = 280
 
 # Upstream files and the dictionaries themselves: the first are not ours to translate, the second
 # ARE the translations.

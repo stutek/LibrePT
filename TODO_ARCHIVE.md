@@ -2543,6 +2543,9 @@ it goes. Two decisions in it are worth keeping:
   with live Too Easy / Too Hard / timer buttons put a mis-tap one thumb-width from logging against
   the wrong exercise, and a control that is drawn but inert is worse than either. A tap focuses the
   card, exactly as a collapsed one's does.
+  **Half superseded by §42.3:** there is no second template to draw and nothing to strip any more —
+  every card is one design and focus ADDS its controls. What survives is the promise: a card that is
+  not in focus carries nothing to tap.
 - **Expansion and focus are separate states.** Focus is a fact about the session — it keeps the tint,
   the ring, and what a card may do. Expansion only decides how much is drawn.
 
@@ -2550,6 +2553,71 @@ Two defects the first version had, both found by the test rather than by reading
 named containers missed the rest card's Start button, which sits in neither (it strips every button
 and input now), and the rest card hardcoded an "In Focus" badge that was only true while its template
 was drawn for the focused card alone.
+
+---
+
+### 42.2 [x] Measured: why expanding alone does not finish the job — closed 2026-09-10
+
+A phone at 390×844, the deck stub with a four-item plan:
+
+| | Height |
+| :--- | ---: |
+| Focused card | **172px** — top row 32, name 17, stats block 52, action row 39, padding 16 |
+| Expanded, not in focus | **133px** — the same without the action row |
+| Collapsed row in the stack | **37px** |
+
+The deck's own visible area on that phone is roughly 500px once the header, the title bar and the
+clipboard bar are out. So expanding gives **under four cards on screen** where the stack gives
+eleven. For a six-item plan the trainer still scrolls — the control answers "show me everything" and
+not yet "let me see it".
+
+---
+
+### 42.3 [x] One card design, opened up — ruled and shipped 2026-09-10
+
+**Ruled (Simon):** *"fix the card redesign, expanding the card should just insert elements into
+existing exercise design, not load a completely different one"* — and, asked whether that also
+governs the card in FOCUS: yes, all three states are one design.
+
+What was there before: every card type carried two full templates, and the deck swapped one for the
+other. The collapsed exercise row said `S4 × R6 × 60kg` on one line; the focused card threw that line
+away and said the same three numbers again as a block of big tiles 52px further down. So a tap
+replaced what the trainer was reading instead of opening it — and the two templates had to be kept in
+agreement by hand, which is how the status tag ended up in a different place in each (§42.5).
+
+**Now:** `renderCard` draws the one design, for every state. `addFocusElements` ADDS to it — the ⏱ at
+the end of the head row, the Too Easy / Too Hard / Feedback row, a rest's Start, a circuit's feedback
+trio per movement and its round button, a past card's set-by-set panel. The focused card is bigger
+only where being read at arm's length needs it: the name, the target line and a circuit's movements
+grow, and nothing moves.
+
+**The safety rule became structural.** A card that is not in focus carries nothing to tap because no
+control was ever drawn, not because a `stripControls` pass removed every button and field afterwards.
+That pass is gone, and with it the class of bug it had already produced twice (a Start button in
+neither named container; a live number field on a card being read).
+
+**What "expand all" now does, stated plainly:** it takes the cards out of the stack. Collapsed cards
+slide up over each other and only their top row peeks; an expanded card lays flat and is fully
+visible. It no longer draws MORE of a card — there is no more to draw — which is the honest version
+of what the trainer asked for: *see the whole session*.
+
+**Measured on a phone (390×844), the deck stub with a four-item plan** — the same setup §42.2
+measured before the change:
+
+| | Before | After |
+| :--- | ---: | ---: |
+| Focused card | 172px | **96px** |
+| Expanded, not in focus | 133px | **39px** |
+| Collapsed row in the stack | 37px | 37px |
+
+An expanded card is now the collapsed row laid flat, 2px taller only because it stops being scaled
+back into the stack. With its 8px gap that is a 47px pitch: **ten expanded cards** in the deck's
+~500px of visible area on that phone, against under four before.
+
+**The savings §42.3 estimated, taken:** folding the stats block into the target line (~35px) and the
+top row into the name line (~32px, taken by §42.5).
+
+What stayed open is the card chrome question — see §42.13.
 
 ---
 

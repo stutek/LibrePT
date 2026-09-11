@@ -1,10 +1,10 @@
 // src/modules/clipboard/deckCard.js — base class for one renderable unit in the active-session
 // deck: a past-session reference, a standalone rest, a standalone exercise, or a circuit.
-// Single responsibility: the shared skeleton every deck card follows (collapsed vs. focused
-// dispatch, tap-to-focus). A subclass supplies its own two templates and its own action wiring.
+// Single responsibility: the shared skeleton every deck card follows (one card design, plus what
+// focus adds to it, plus tap-to-focus). A subclass supplies its one template and its action wiring.
 //
 // Mirrors src/controllers/routes/route.js's Route base class (see docs/ROUTING.md §2): Template
-// Method — render() is the fixed skeleton, subclasses implement renderFocused/renderCollapsed —
+// Method — render() is the fixed skeleton, subclasses implement renderCard/addFocusElements —
 // plus Replace Conditional with Polymorphism: exerciseDeckOfCards.js's dispatch becomes "construct the
 // right subclass," not an if/else chain re-branching on item.type at every render/click/focus
 // decision. What each card type does when collapsed, when focused, and which actions it exposes
@@ -43,41 +43,44 @@ export class DeckCard {
     return "exercise-deck-card";
   }
 
-  // The fixed skeleton — subclasses never override this, only the four hooks below.
+  // The fixed skeleton — subclasses never override this, only the three hooks below.
   //
-  // Three states, not two. An expanded card that is NOT in focus shows what the focused card shows
-  // and behaves like a collapsed one: its controls are removed rather than disabled, and a tap
-  // brings it into focus like any other collapsed card. That is the whole safety argument for
-  // expand-all on a gym floor — twelve open cards with live Too Easy / Too Hard / timer buttons put
-  // a mis-tap one thumb-width from logging against the wrong exercise, and a control that is drawn
-  // but inert is worse than either.
+  // **One design, opened up — never a second design swapped in** (ruled 2026-09-10, TODO §42.3).
+  // Every card draws the SAME markup in every state; focus then ADDS its controls to that markup.
+  // Until then each card type carried two full templates, and they drifted: the collapsed exercise
+  // row said "S4 × R6 × 60kg" on one line while the focused card threw that line away and said the
+  // same three numbers again as a block of big tiles. Tapping a card therefore replaced what the
+  // trainer was reading instead of opening it, and the two templates had to be kept in agreement by
+  // hand — which is how the status tag ended up in a different place in each (§42.5).
+  //
+  // Three states, still. A card that is expanded but NOT in focus is this same design laid flat out
+  // of the stack, and it carries nothing to tap — not because its controls are stripped afterwards,
+  // but because `addFocusElements` never ran. That is the safety argument for expand-all on a gym
+  // floor made structural: twelve open cards with live Too Easy / Too Hard / timer buttons put a
+  // mis-tap one thumb-width from logging against the wrong exercise, and no code path can draw one.
   render(card) {
     card.className = this.className;
     // Added here rather than in every subclass's own className: expansion is a deck-wide state, and
-    // the stylesheet needs it to stop overlapping and tilting a card that is now full height.
+    // the stylesheet needs it to stop overlapping and tilting a card that is now laid out flat.
     if (this.isExpanded && !this.isInFocus) card.classList.add("expanded");
+    this.renderCard(card);
     if (this.isInFocus) {
-      this.renderFocused(card);
+      this.addFocusElements(card);
       this.wireFocused(card);
       return;
     }
-    if (this.isExpanded) {
-      this.renderFocused(card);
-      stripControls(card);
-      this.wireCollapsed(card);
-      return;
-    }
-    this.renderCollapsed(card);
     this.wireCollapsed(card);
   }
 
-  renderFocused(_card) {
-    throw new Error("renderFocused must be implemented by a DeckCard subclass");
+  // The card, in the one design it has. Drawn for every state.
+  renderCard(_card) {
+    throw new Error("renderCard must be implemented by a DeckCard subclass");
   }
 
-  renderCollapsed(_card) {
-    throw new Error("renderCollapsed must be implemented by a DeckCard subclass");
-  }
+  // What focus ADDS to that card — the timer, the signal buttons, a Start, a history panel. It
+  // appends to what renderCard drew and never rewrites it. A card type with nothing to add leaves
+  // this as the no-op it is.
+  addFocusElements(_card) {}
 
   // Most focused cards wire their own buttons (timer, feedback, complete-round, …); a subclass with
   // nothing of its own simply leaves this as a no-op.
@@ -90,20 +93,4 @@ export class DeckCard {
   wireCollapsed(card) {
     card.addEventListener("click", () => this.ctx.onFocus(this.item.index));
   }
-}
-
-// Every control a focused card offers, removed from the DOM rather than hidden or disabled — a card
-// the trainer cannot act on must not draw the affordance to.
-//
-// **Every BUTTON, not a list of known classes.** The first version named the action row and the
-// timer, which covered the exercise and circuit cards and missed the rest card's Start button
-// entirely — it sits in neither container, so an expanded rest card kept a live-looking control that
-// did nothing. A rule that has to be extended whenever a template gains a button is a rule that will
-// be wrong again; asking for buttons cannot miss one.
-function stripControls(card) {
-  // Inputs too, not only buttons: a circuit card carries a number field per member for reps
-  // taken to failure, and a live field on a card the trainer is only reading writes into
-  // another exercise's record exactly as a mis-tapped button would.
-  const controls = "button, input, select, textarea, .deck-card-actions";
-  for (const control of card.querySelectorAll(controls)) control.remove();
 }

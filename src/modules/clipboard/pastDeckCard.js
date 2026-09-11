@@ -21,8 +21,28 @@ export class PastDeckCard extends DeckCard {
     return `exercise-deck-card past-session${this.isInFocus ? " past-expanded" : ""}`;
   }
 
-  renderFocused(card) {
-    const { t, escapeHTML, formatLoad, formatReps, formatMetricValue, usesLoad } = this.ctx;
+  // The card, in every state (TODO §42.3): the tag, the name and what was lifted, on one row.
+  renderCard(card) {
+    const { escapeHTML, formatLoad, formatReps } = this.ctx;
+    const item = this.item;
+    const setsSummary = item.sets
+      .map((s) => {
+        const load = formatLoad(s.weight, item.loadUnit);
+        return `${load ? `${load} x ` : ""}${formatReps(s.reps)}`;
+      })
+      .join(", ");
+    card.innerHTML = `
+        <div class="deck-card-compact">
+          <span class="badge deck-card-status deck-card-status-past">Past: ${escapeHTML(item.sessionDate)}</span>
+          <span class="deck-card-name deck-card-name-inline">${escapeHTML(item.name)}</span>
+          <span class="deck-card-compact-target">${escapeHTML(setsSummary)}</span>
+        </div>
+      `;
+  }
+
+  // What opening it adds: every set as it was logged, and the chevron that says it closes again.
+  addFocusElements(card) {
+    const { escapeHTML, formatLoad, formatReps, formatMetricValue, usesLoad } = this.ctx;
     const item = this.item;
     // Logged history, not a target: every set is listed as-is rather than reduced to one
     // sets/reps/weight triplet, since loads and reps often vary across the sets.
@@ -48,36 +68,22 @@ export class PastDeckCard extends DeckCard {
         </div>`;
       })
       .join("");
-    // The SAME head row the collapsed card draws (TODO §42.5): tag, name, and the control at the
-    // end. Reported by a trainer — opening this card moved its Past tag onto a line of its own above
-    // the name, so one card read as two different designs depending on how open it was.
-    card.innerHTML = `
-        <div class="deck-card-compact">
-          <span class="badge deck-card-status deck-card-status-past">Past: ${escapeHTML(item.sessionDate)}</span>
-          <span class="deck-card-name deck-card-name-inline">${escapeHTML(item.name)}</span>
-          <i class="fa-solid fa-chevron-up deck-history-collapse" aria-hidden="true"></i>
-        </div>
+    // Added to the head row the card already drew (TODO §42.5), never a second head row of its own:
+    // reported by a trainer — opening this card used to move its Past tag onto a line above the
+    // name, so one card read as two different designs depending on how open it was.
+    card
+      .querySelector(".deck-card-compact")
+      .insertAdjacentHTML(
+        "beforeend",
+        `<i class="fa-solid fa-chevron-up deck-history-collapse" aria-hidden="true"></i>`,
+      );
+    card.insertAdjacentHTML(
+      "beforeend",
+      `
         <div class="deck-history-sets">${setRows}</div>
         <div class="deck-history-meta">${escapeHTML(item.routineName || "Completed Session")}</div>
-      `;
-  }
-
-  renderCollapsed(card) {
-    const { escapeHTML, formatLoad, formatReps } = this.ctx;
-    const item = this.item;
-    const setsSummary = item.sets
-      .map((s) => {
-        const load = formatLoad(s.weight, item.loadUnit);
-        return `${load ? `${load} x ` : ""}${formatReps(s.reps)}`;
-      })
-      .join(", ");
-    card.innerHTML = `
-        <div class="deck-card-compact">
-          <span class="badge deck-card-status deck-card-status-past">Past: ${escapeHTML(item.sessionDate)}</span>
-          <span class="deck-card-name deck-card-name-inline">${escapeHTML(item.name)}</span>
-          <span class="deck-card-compact-target">${escapeHTML(setsSummary)}</span>
-        </div>
-      `;
+      `,
+    );
   }
 
   // Both states share one behaviour: tap toggles the review panel open in place — there is no

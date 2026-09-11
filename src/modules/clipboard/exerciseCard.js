@@ -1,11 +1,10 @@
 // src/modules/clipboard/exerciseCard.js
-// Renders one standalone (non-circuit) exercise card inside the clipboard deck. It has two
-// states: the in-focus card is the live logging surface (target sets/reps/weight plus the
-// one-tap Too Easy / Too Hard / Feedback signals), and the compact row is a collapsed peek
-// that taps to bring the exercise into focus.
+// Renders one standalone (non-circuit) exercise card inside the clipboard deck: number, name,
+// target and status on one row. The card in focus is the same row plus what it takes to log
+// against it — the ⏱ rest timer and the one-tap Too Easy / Too Hard / Feedback signals.
 //
 // ExerciseDeckCard is a DeckCard subclass (see deckCard.js): render() is the base class's fixed
-// skeleton (collapsed vs. focused, then wire); this file supplies the four hooks.
+// skeleton (the one design, then what focus adds, then wire); this file supplies the hooks.
 //
 // ctx: {
 //   currentCount, activeClientId, pastExpanded, isFutureSession,
@@ -16,11 +15,10 @@
 import {
   formatMetricValue,
   isTimeBasedMetric,
-  metricLabelKey,
   toSeconds,
   usesLoad,
 } from "../../domain/exerciseModality.js";
-import { formatLoad, formatReps, hasLoad, loadParts } from "../../domain/repsAndLoad.js";
+import { formatLoad, formatReps, hasLoad } from "../../domain/repsAndLoad.js";
 import { DeckCard } from "./deckCard.js";
 
 export class ExerciseDeckCard extends DeckCard {
@@ -35,18 +33,15 @@ export class ExerciseDeckCard extends DeckCard {
     return `exercise-deck-card ${checkedClass}${this.ctx.isFutureSession ? " future-session" : ""}`;
   }
 
-  // Values both renderFocused and renderCollapsed need — computed once per render call rather than
-  // promoted to instance state, since only one of the two ever runs per invocation.
-  #shared() {
+  // The card, in every state (TODO §42.3). There is no second, taller template: the block of three
+  // big stat tiles the focused card used to draw said the same sets/reps/load this one line already
+  // says, in a different design and 52px further down the card, so opening a card replaced what the
+  // trainer was reading instead of adding to it.
+  renderCard(card) {
     const { activeClientId, t, escapeHTML, getExerciseSignalColor, currentCount } = this.ctx;
     const item = this.item;
     const metric = item.metric || "reps";
-    const modality = item.modality || "strength";
-    const showLoad = usesLoad(modality);
-    const primaryValue =
-      metric === "reps" ? formatReps(item.repsTarget) : formatMetricValue(item.repsTarget, metric);
-    const primaryLabel = t(metricLabelKey(metric));
-    const load = loadParts(item.weightTarget, item.loadUnit);
+    const showLoad = usesLoad(item.modality || "strength");
     const counter = `${item.index + 1}/${currentCount}`;
     // Tint the title by any feedback logged for this exercise (see getExerciseSignalColor)
     const signalColor = getExerciseSignalColor(activeClientId, item.name);
@@ -61,27 +56,38 @@ export class ExerciseDeckCard extends DeckCard {
     } else if (item.isCompleted) {
       statusBadge = `<span class="badge badge-success deck-card-status">Completed</span>`;
     } else {
-      statusBadge = `<span class="badge deck-card-status deck-card-status-upcoming">Upcoming</span>`;
+      statusBadge = `<span class="badge deck-card-status deck-card-status-upcoming">${t("upcoming")}</span>`;
     }
-    return {
-      metric,
-      showLoad,
-      primaryValue,
-      primaryLabel,
-      load,
-      counter,
-      nameStyle,
-      statusBadge,
-      escapeHTML,
-      t,
-    };
+
+    // The target is labelled S(ets) × R(eps) × weight so one line reads unambiguously, with a load
+    // axis only for load-bearing modalities:
+    //   strength "S4 × R6 × 60kg", isometric "S3 × 0:45 × 20kg", cardio "S1 × 20 cal",
+    //   stretch/balance "S2 × 0:30", agility "S4 × 0:10".
+    const compactLoad =
+      showLoad && hasLoad(item.weightTarget, item.loadUnit)
+        ? ` × ${escapeHTML(formatLoad(item.weightTarget, item.loadUnit))}`
+        : "";
+    const primaryPart =
+      metric === "reps"
+        ? `R${escapeHTML(formatReps(item.repsTarget))}`
+        : escapeHTML(formatMetricValue(item.repsTarget, metric));
+    const compactTarget = `S${escapeHTML(String(item.setsTarget))} × ${primaryPart}${compactLoad}`;
+
+    card.innerHTML = `
+      <div class="deck-card-compact">
+        <span class="deck-card-counter">${counter}</span>
+        <span class="deck-card-name deck-card-name-inline"${nameStyle}>${escapeHTML(item.name)}</span>
+        <span class="deck-card-compact-target">${compactTarget}</span>
+        ${statusBadge}
+      </div>
+    `;
   }
 
-  renderFocused(card) {
-    const { activeClientId, hasQuickSignal, escapeHTML, t } = this.ctx;
+  // What focus adds: the timer at the end of the head row — the slot §42.5 keeps for a card's own
+  // control — and the logging row under it.
+  addFocusElements(card) {
+    const { activeClientId, hasQuickSignal, t } = this.ctx;
     const item = this.item;
-    const { showLoad, primaryValue, primaryLabel, load, counter, nameStyle, statusBadge } =
-      this.#shared();
 
     // Too Easy / Too Hard are toggles: pressed state mirrors whether THIS exact quick-signal is
     // already logged, so a second tap (which un-logs it) reads correctly the moment it lands.
@@ -99,38 +105,15 @@ export class ExerciseDeckCard extends DeckCard {
     const easyIcon = isEasyActive ? "fa-circle-check" : "fa-feather";
     const hardIcon = isHardActive ? "fa-circle-check" : "fa-weight-hanging";
 
-    // Expanded focus card is the primary logging surface: target stats plus the
-    // one-tap outcome signals that replaced the per-set stepper grid
-    // ONE head row, the same one the collapsed card draws: number, name, status, and nothing above
-    // the name (TODO §42.5). Reported by a trainer — expanding a card moved its status tag from the
-    // end of the title row to a line of its own above the name, so the same card read as two
-    // different designs depending on how open it was. It also cost a whole row of height on every
-    // expanded card, which is what "expand all" spends its screen on.
-    card.innerHTML = `
-      <div class="deck-card-compact">
-        <span class="deck-card-counter">${counter}</span>
-        <span class="deck-card-name deck-card-name-inline"${nameStyle}>${escapeHTML(item.name)}</span>
-        ${statusBadge}
-        <button type="button" class="deck-card-timer" aria-label="${t("rest_timer")}" title="${t("rest_timer")}"><i class="fa-solid fa-stopwatch"></i></button>
-      </div>
-      <div class="deck-card-stats">
-        <div class="deck-stat">
-          <span class="deck-stat-value">${escapeHTML(String(item.setsTarget))}</span>
-          <span class="deck-stat-label">${t("sets")}</span>
-        </div>
-        <div class="deck-stat">
-          <span class="deck-stat-value">${escapeHTML(primaryValue)}</span>
-          <span class="deck-stat-label">${escapeHTML(primaryLabel)}</span>
-        </div>
-        ${
-          showLoad
-            ? `<div class="deck-stat">
-          <span class="deck-stat-value">${escapeHTML(load.value)}</span>
-          <span class="deck-stat-label">${escapeHTML(load.label)}</span>
-        </div>`
-            : ""
-        }
-      </div>
+    card
+      .querySelector(".deck-card-compact")
+      .insertAdjacentHTML(
+        "beforeend",
+        `<button type="button" class="deck-card-timer" aria-label="${t("rest_timer")}" title="${t("rest_timer")}"><i class="fa-solid fa-stopwatch"></i></button>`,
+      );
+    card.insertAdjacentHTML(
+      "beforeend",
+      `
       <div class="deck-card-actions">
         <button type="button" class="deck-action-btn deck-action-easy${isEasyActive ? " active" : ""}" aria-pressed="${isEasyActive}" aria-label="${t("signal_too_easy")}">
           <i class="fa-solid ${easyIcon}"></i><span>${t("signal_too_easy")}</span>
@@ -142,7 +125,8 @@ export class ExerciseDeckCard extends DeckCard {
           <i class="fa-solid fa-note-sticky"></i><span>${t("feedback_short")}</span>
         </button>
       </div>
-    `;
+    `,
+    );
   }
 
   wireFocused(card) {
@@ -172,34 +156,6 @@ export class ExerciseDeckCard extends DeckCard {
           : item.workDuration || 0;
         startRestTimer(seconds, "exercise", item.name);
       });
-  }
-
-  renderCollapsed(card) {
-    const item = this.item;
-    const { showLoad, primaryValue, counter, nameStyle, statusBadge, escapeHTML } = this.#shared();
-    const metric = item.metric || "reps";
-
-    // Compact row for the rest of the plan — tap to bring into focus. The target
-    // is labelled S(ets) × R(eps) × weight so a collapsed, single-line card still
-    // reads unambiguously (e.g. "S4 × R6 × 60kg").
-    // Sets × the primary target, with a load axis only for load-bearing modalities:
-    //   strength "S4 × R6 × 60kg", isometric "S3 × 0:45 × 20kg", cardio "S1 × 20 cal",
-    //   stretch/balance "S2 × 0:30", agility "S4 × 0:10".
-    const compactLoad =
-      showLoad && hasLoad(item.weightTarget, item.loadUnit)
-        ? ` × ${escapeHTML(formatLoad(item.weightTarget, item.loadUnit))}`
-        : "";
-    const primaryPart =
-      metric === "reps" ? `R${escapeHTML(formatReps(item.repsTarget))}` : escapeHTML(primaryValue);
-    const compactTarget = `S${escapeHTML(String(item.setsTarget))} × ${primaryPart}${compactLoad}`;
-    card.innerHTML = `
-      <div class="deck-card-compact">
-        <span class="deck-card-counter">${counter}</span>
-        <span class="deck-card-name deck-card-name-inline"${nameStyle}>${escapeHTML(item.name)}</span>
-        <span class="deck-card-compact-target">${compactTarget}</span>
-        ${statusBadge}
-      </div>
-    `;
   }
 
   // wireCollapsed: the base class default (tap → onFocus(item.index)) is exactly right here.

@@ -12,8 +12,8 @@ def _open_session(page, local_server):
     page.locator(card_sel).first.click()
     page.wait_for_selector("#active-session-overlay:not(.hidden)")
     page.wait_for_timeout(400)
-    # The deck starts fully collapsed on open (deckAllCollapsed) — .circuit-break-row only renders
-    # on the focused circuit card, so bring one into focus first.
+    # The deck starts fully collapsed on open (deckAllCollapsed), and the ⏱ on a rest row
+    # (.circuit-break-play) is only ADDED to the focused circuit card, so bring one into focus first.
     # force=True: collapsed cards use margin-bottom:-24px overlap — the first non-past card may
     # sit behind a stacked card that physically intercepts the pointer; force bypasses it.
     page.locator(".exercise-deck-card:not(.past-session)").first.click(force=True)
@@ -24,7 +24,7 @@ def _start_a_timer(page):
     # A real countdown, not the exercise (⏱) button: no exercise in the seed data sets
     # workDuration, so that button always starts a count-up stopwatch (see TODO 13.5) -- a rest
     # break's data-rest is the only place a genuine countdown (with an endTime to rewind) exists.
-    page.locator("#active-exercise-scroll-deck .circuit-break-row").first.click()
+    page.locator("#active-exercise-scroll-deck .circuit-break-play").first.click()
     page.wait_for_selector("#clipboard-timer-stack .timer-card")
     page.wait_for_timeout(150)
 
@@ -44,7 +44,7 @@ def test_timer_is_labelled_and_one_per_client(page, local_server):
     assert re.match(r"^\d+:\d\d$", time_txt), f"unexpected time format: {time_txt}"
 
     # Starting again for the same client does not add a second timer (one per client).
-    page.locator("#active-exercise-scroll-deck .circuit-break-row").first.click()
+    page.locator("#active-exercise-scroll-deck .circuit-break-play").first.click()
     page.wait_for_timeout(150)
     assert page.locator("#clipboard-timer-stack .timer-card").count() == 1
 
@@ -88,7 +88,7 @@ def test_timer_survives_reload_and_goes_overtime(page, local_server):
     )
 
     # A start on an OVERTIME timer resets it (back to a positive countdown, no longer overtime).
-    page.locator("#active-exercise-scroll-deck .circuit-break-row").first.click()
+    page.locator("#active-exercise-scroll-deck .circuit-break-play").first.click()
     page.wait_for_timeout(150)
     card = page.locator("#clipboard-timer-stack .timer-card").first
     assert "overtime" not in (card.get_attribute("class") or ""), (

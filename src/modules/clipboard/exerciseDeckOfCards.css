@@ -25,27 +25,13 @@
 .rest-card-inner .deck-card-counter {
   color: var(--primary);
 }
-/* Focused rest card: the duration reads large and centered — this is the primary content, not a
-   stat tile among several — with a full-width Start action below (§8.6's fix: starting the timer
-   is only reachable from here, never from a collapsed tap). */
-.rest-card-duration {
-  text-align: center;
-  font-family: var(--font-header);
-  font-size: 42px;
-  font-weight: 800;
-  color: var(--primary);
-  line-height: 1;
-  margin: 8px 0 14px;
-}
-.rest-card-duration-unit {
-  font-size: 20px;
-  font-weight: 700;
-  margin-left: 2px;
-  opacity: 0.8;
-}
+/* The focused rest card ADDS this button to the row it already draws (TODO §42.3) — it does not
+   redraw the duration at 42px underneath, which made a very tall card out of the one line the row
+   had already said. Starting the timer is reachable from here and nowhere else (§8.6's fix). */
 .rest-card-start {
   width: 100%;
   justify-content: center;
+  margin-top: 8px;
 }
 /* Group Matrix Grid for Active Session */
 .group-matrix-grid {
@@ -358,18 +344,12 @@
   color: var(--primary);
   font-weight: 700;
   flex-shrink: 0;
-} /* Focus card internals: counter + status on top, name, sets/reps/weight, action buttons */
-.deck-card-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-  margin-bottom: 4px;
 }
-.deck-card-top-right {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
+/* The focused card is read at arm's length mid-set, so its target line grows with its name — the
+   same treatment, on the same row, rather than a block of stat tiles further down the card that
+   said these numbers a second time (TODO §42.3). */
+.exercise-deck-card.in-focus .deck-card-compact-target {
+  font-size: 15px;
 }
 /* Per-card ⏱ timer affordance — starts the floating countdown for this exercise/circuit */
 .deck-card-timer {

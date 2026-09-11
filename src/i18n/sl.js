@@ -641,6 +641,8 @@ export const sl = {
   finish_circuit: "Zaključi sklop",
   rest_label: "Počitek",
   skipped: "Preskočeno",
+  failure_reps_label: "Opravljene ponovitve",
+  failure_reps_placeholder: "Maks.",
 
   // Application (☰) header menu + About / Terms modals
   menu_language: "Jezik",

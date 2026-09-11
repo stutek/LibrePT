@@ -66,7 +66,7 @@ def _as_rgb_literals(hex_value):
 
 
 # The count on the day the ratchet was fitted, after the past-card fix that produced it.
-BASELINE = 21
+BASELINE = 20
 
 
 def _findings(src_dir):

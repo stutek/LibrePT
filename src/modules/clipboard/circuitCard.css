@@ -1,22 +1,10 @@
-/* circuitCard.css — the circuit/giant-set card: round badge, per-exercise rows, the feedback
-   trio, break rows, complete-round button. Extracted from index.css 2026-07-27
+/* circuitCard.css — the circuit/giant-set card: round badge, per-movement rows, the feedback
+   trio, rest rows, complete-round button. Extracted from index.css 2026-07-27
    (TODO §14.5 / §18.10). Inherits design tokens, glass-card/button/flex foundations, the
    shared deck-card chrome (exerciseDeckOfCards.css) and color scheme from index.css, loaded first —
    this file adds only what circuitCard.js exclusively owns. */
 
-.circuit-title {
-  font-size: 13px;
-  font-weight: 700;
-  color: inherit;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-}
-.circuit-title > i {
-  color: var(--primary);
-} /* Subtle accent-tinted pill with bright accent text — emphasised but not a loud solid block,
+/* Subtle accent-tinted pill with bright accent text — emphasised but not a loud solid block,
    so the label keeps strong contrast against the badge. */
 .circuit-round-badge {
   font-family: var(--font-sans);
@@ -31,13 +19,7 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
-.circuit-ex-list {
-  gap: 2px;
-}
-/* The summary a COLLAPSED circuit shows (TODO §42.6): the same rows the open card draws, at the
-   size a peeking card can afford. Smaller and quieter than the open list on purpose — this is the
-   trainer reading what is coming, not working through it, and a collapsed card that shouted as
-   loudly as the focused one would take the focus away from the card that has it. */
+
 /* ONE LINE PER MOVEMENT, name and target in the same phrase (TODO §42.6).
    Three shapes were tried in front of the maintainer. Right-aligned targets left short names a
    hand's width from their own numbers ("hard to read … kadar so tako daleč odmaknjeni od imena
@@ -45,69 +27,76 @@
    somewhere else, and left the round badge aligned to nothing ("izgled je malce neroden … števec
    round je neusklajen"). A column that has to line up with a badge above it is a table pretending
    to be a summary.
-   So there is no column: the target follows the name the way the collapsed exercise card already
-   writes its own ("S4 × R6 × 60kg"), and nothing has to be aligned with anything. */
-.circuit-ex-summary {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
+   So there is no column: the target follows the name the way the exercise card already writes its
+   own ("S4 × R6 × 60kg"), and nothing has to be aligned with anything. */
+.circuit-ex-list {
   margin-top: 4px;
+  gap: 1px;
 }
-.circuit-ex-summary .circuit-ex-head {
-  margin-bottom: 0;
-  gap: 6px;
+.circuit-ex-head {
+  display: flex;
+  align-items: baseline;
   justify-content: flex-start;
   flex-wrap: nowrap;
   min-width: 0;
+  gap: 6px;
 }
-.circuit-ex-summary .circuit-ex-name {
+.circuit-ex-name {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   flex-shrink: 1;
-}
-.circuit-ex-summary .circuit-ex-target {
-  flex-shrink: 0;
-}
-.circuit-ex-summary .circuit-ex-name {
   font-size: 12px;
   font-weight: 600;
   opacity: 0.85;
 }
-.circuit-ex-summary .circuit-ex-reps {
-  font-size: 12px;
-}
-.circuit-ex-row {
-  padding: 4px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-} /* Name + target on one line, sitting right next to each other. */
-.circuit-ex-head {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 4px;
-}
-.circuit-ex-name {
-  font-weight: 700;
-  font-size: 14px;
-}
 .circuit-ex-target {
   display: inline-flex;
   align-items: baseline;
+  flex-shrink: 0;
   gap: 6px;
-} /* Reps/weight read at the same size as the name and in the accent colour so they pop. */
+}
+/* Reps/weight read in the accent colour so they pop. */
 .circuit-ex-reps {
   font-family: var(--font-mono);
-  font-size: 15px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--primary);
-} /* The feedback trio stretches across the full row so there's no empty right-hand gutter and
+}
+/* The separator that makes name and target read as one phrase rather than two columns. Quiet: it is
+   punctuation, not information. */
+.circuit-ex-sep {
+  opacity: 0.4;
+  font-size: 11px;
+}
+
+/* THE CARD IN FOCUS IS THIS SAME LIST, grown to be read at arm's length mid-set (TODO §42.3): size
+   is the only thing that changes between the states, the way the head row's name already grows and
+   nothing else moves (§42.5). It used to be a second template — a title bar of its own, rows in
+   another size, the movements written out again — so a circuit looked like two different cards
+   depending on whether the trainer was standing on it. */
+.exercise-deck-card.in-focus .circuit-ex-name {
+  font-size: 14px;
+  font-weight: 700;
+  opacity: 1;
+}
+.exercise-deck-card.in-focus .circuit-ex-reps {
+  font-size: 15px;
+}
+/* A row rules itself off from the next only on the card being worked: everywhere else the list is
+   read as one block and the lines would be drawn for nothing. */
+.exercise-deck-card.in-focus .circuit-ex-row {
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* The feedback trio stretches across the full row so there's no empty right-hand gutter and
    the buttons stay gym-floor sized. */
 .circuit-ex-actions {
   display: flex;
   gap: 6px;
-} /* Labeled per-exercise feedback trio (Easy / Hard / Note) */
+  margin-top: 4px;
+}
 /* The same three actions as a standalone exercise card, so they LOOK the same (reported 2026-08-22:
    "comparing the Assault Bike card with the Leg & Hinge circuit shows 2 incompatible button
    styles"). The look now comes from `.deck-action-*` in exerciseCard.css, which these rows carry as
@@ -123,54 +112,73 @@
 .circuit-sig > span {
   font-size: 12px;
   font-weight: 700;
-} /* Rest is part of the work — the "Rest" label reads like an exercise name and the duration
-   like a rep count (mono, accent), in a subtle pill so it's as visible as an exercise row. */
-.circuit-break-row {
-  width: 100%;
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text-main);
-  padding: 5px 10px;
-  margin: 1px 0 3px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid transparent;
-  border-radius: var(--border-radius-sm);
-  cursor: pointer;
-  text-align: left;
 }
-.circuit-break-row:hover {
-  border-color: var(--primary);
+
+/* Rest is part of the work — the "Rest" label reads like a movement's name and the duration like a
+   rep count (mono, accent), so a rest row is as visible as an exercise row. */
+.circuit-ex-rest .circuit-ex-name > i {
+  color: var(--primary);
 }
+/* The control that starts THIS rest, added to the row on the focused card (TODO §42.3). The whole
+   row used to be that button, which is a live control on a card the trainer may only be reading. */
 .circuit-break-play {
   margin-left: auto;
-  font-size: 12px;
-  color: var(--primary);
-}
-.circuit-break-row > i {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
   font-size: 14px;
   color: var(--primary);
+  cursor: pointer;
 }
+.circuit-break-play:hover {
+  background: var(--primary-light);
+}
+
+/* Reps actually done, where the target is "as many as you can". It replaces that row's target in
+   place on the focused card, so the number stays where the row already said it. */
+.circuit-failure-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.circuit-failure-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+.circuit-failure-stepper .stepper-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  user-select: none;
+}
+.circuit-failure-input {
+  width: 38px;
+  height: 22px;
+  padding: 0;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  background: var(--input-bg);
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+}
+
 .circuit-complete-btn {
   width: 100%;
   justify-content: center;
-}
-.circuit-done {
-  gap: 8px;
-  padding: 10px;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--success);
-  border: 1px dashed rgba(16, 185, 129, 0.3);
-  border-radius: 8px;
-} /* Compact (collapsed) card: single peeking row — counter, name, target, status */
-
-/* The separator that makes name and target read as one phrase rather than two columns. Quiet: it is
-   punctuation, not information. */
-.circuit-ex-summary .circuit-ex-sep {
-  opacity: 0.4;
-  font-size: 11px;
+  margin-top: 6px;
 }

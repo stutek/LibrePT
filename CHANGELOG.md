@@ -20,6 +20,29 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-09-10 — A card opens instead of being replaced
+
+### Fixed
+
+- **Opening a card no longer swaps it for a different card.** Tapping an exercise used to throw away
+  the line the trainer was reading — "S4 × R6 × 60kg" — and print the same three numbers again
+  underneath as a block of large tiles. The same happened to a rest, which redrew its duration at
+  four times the size, and to a circuit, which opened with a title bar of its own instead of the row
+  it had. Every card now has ONE design in all three states: the row is the row, and being in focus
+  adds what the trainer can do there — the stopwatch, the Too Easy / Too Hard / Feedback buttons, a
+  rest's Start, a circuit's buttons per movement and its round button. What grows is the type, so
+  the card being worked is still readable at arm's length.
+- **Half the height of an open card was that repetition.** On a phone the card in focus went from
+  172px to 96px and an opened card from 133px to 39px, so ten of them fit the screen where under
+  four did. "Open every card" now means the deck lays flat: the cards stop sliding up over each
+  other and every one of them is fully visible.
+- **A card you are only reading cannot be tapped by mistake** — and now it cannot be built wrong
+  either. Its buttons and fields are never drawn, where before they were drawn and then removed
+  again, which had already left a live Start button on one card type and a live number field on
+  another.
+
+---
+
 ## 2026-09-10 — Secondary text is readable on the light themes
 
 ### Fixed

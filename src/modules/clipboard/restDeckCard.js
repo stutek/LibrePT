@@ -5,8 +5,9 @@
 //
 // This is the fix for the reported bug: a collapsed rest card used to start its timer on ANY tap,
 // with no focus concept at all standing in the way. Under the base class's Template Method skeleton
-// that is now structurally impossible — renderCollapsed/wireCollapsed never touch the timer, only
-// the focused template does, reached by tapping the collapsed card first like every other card.
+// that is now structurally impossible — renderCard/wireCollapsed never touch the timer, and the
+// Start button is only ever ADDED by addFocusElements, reached by tapping the card first like any
+// other card.
 //
 // ctx: { t, escapeHTML, isFutureSession, startRestTimer }
 // (onFocus comes from the base class's default wireCollapsed — no override needed here.)
@@ -18,20 +19,29 @@ export class RestDeckCard extends DeckCard {
     return `exercise-deck-card rest-card${this.isInFocus ? " in-focus" : ""}${this.ctx.isFutureSession ? " future-session" : ""}`;
   }
 
-  renderFocused(card) {
+  // The card, in every state (TODO §42.3). The focused rest used to throw this row away and draw
+  // the duration again at 42px with a Start button under it — a very tall card saying the one thing
+  // the row already said.
+  renderCard(card) {
     const { t, escapeHTML } = this.ctx;
     const item = this.item;
     card.innerHTML = `
-      <div class="deck-card-compact">
+      <div class="deck-card-compact rest-card-inner">
         <span class="deck-card-counter"><i class="fa-solid fa-hourglass-half"></i></span>
         <span class="deck-card-name deck-card-name-inline">${t("rest_label")}</span>
-        <span class="deck-card-top-right"></span>
-      </div>
-      <div class="rest-card-duration">${escapeHTML(String(item.rest))}<span class="rest-card-duration-unit">s</span></div>
-      <button type="button" class="btn primary-btn rest-card-start">
+        <span class="deck-card-compact-target">${escapeHTML(String(item.rest))}s</span>
+      </div>`;
+  }
+
+  // What focus adds: the one thing a rest can be asked to do.
+  addFocusElements(card) {
+    const { t } = this.ctx;
+    card.insertAdjacentHTML(
+      "beforeend",
+      `<button type="button" class="btn primary-btn rest-card-start">
         <i class="fa-solid fa-stopwatch"></i> ${t("start_rest")}
-      </button>
-    `;
+      </button>`,
+    );
   }
 
   wireFocused(card) {
@@ -43,17 +53,6 @@ export class RestDeckCard extends DeckCard {
         startRestTimer(this.item.rest, "rest");
       });
     }
-  }
-
-  renderCollapsed(card) {
-    const { t, escapeHTML } = this.ctx;
-    const item = this.item;
-    card.innerHTML = `
-      <div class="deck-card-compact rest-card-inner">
-        <span class="deck-card-counter"><i class="fa-solid fa-hourglass-half"></i></span>
-        <span class="deck-card-name deck-card-name-inline">${t("rest_label")}</span>
-        <span class="deck-card-compact-target">${escapeHTML(String(item.rest))}s</span>
-      </div>`;
   }
 
   // wireCollapsed: the base class default (tap → onFocus(item.index)) is exactly right — this is

@@ -691,6 +691,10 @@ export const en = {
   finish_circuit: "Finish circuit",
   rest_label: "Rest",
   skipped: "Skipped",
+  // A circuit movement whose target is "as many as you can": the field takes the number that were
+  // actually done in this round.
+  failure_reps_label: "Reps done",
+  failure_reps_placeholder: "Max",
 
   // Application (☰) header menu + About / Terms modals
   menu_language: "Language",
