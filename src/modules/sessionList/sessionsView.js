@@ -1,11 +1,13 @@
 import { modalityOf, primaryMetricOf } from "../../domain/exerciseModality.js";
 import { loadUnitForEquipment } from "../../domain/repsAndLoad.js";
+import { filterSessions, hasAnyFilter } from "../../domain/sessionFilters.js";
 import { sessionCalendarDate } from "../../domain/sessionRecord.js";
 import { occurrenceAsSession, sessionsWithSeries } from "../../domain/sessionSeries.js";
 import { renderMarkupOnce } from "../common/dom.js";
 import { buildSessionMeta, escapeHTML, getOverlappingSessions } from "../common/utils.js";
 import { updateSessionBarTimer } from "../session/sessionBar.js";
 import { renderSessionCard } from "./sessionCard.js";
+import { activeSessionFilters, renderSessionFilterBar } from "./sessionFilterBar.js";
 import {
   formatCalendarDayLabel,
   getSessionDayDate,
@@ -24,10 +26,14 @@ export function renderClientsViewShell() {
       <div class="section-title sessions-title-bar view-titlebar">
         <button class="view-grabber" type="button" aria-label="Open session clipboard"></button>
         <h2 class="view-title-label" id="sessions-view-title">Sessions</h2>
-        <!-- Populated by sessionTimeline.js (renderSessionsDatePicker) — the Today/jump-to-date
+        <!-- Populated by sessionTimeline.js (renderSessionsDatePicker) — the Today and expand
              controls are that module's own concern, not shell markup. -->
         <div class="sessions-date-picker" id="sessions-date-picker"></div>
       </div>
+
+      <!-- Filled by sessionFilterBar.js (TODO §45.6): the date/client/location chips and, when it is
+           open, the range calendar. Its own module's markup, like the day controls above. -->
+      <div class="sessions-filter-bar" id="sessions-filter-bar"></div>
 
       <!-- One continuous, time-ordered scroll: sessions render grouped under sticky per-day
            headers instead of fixed yesterday/today/tomorrow/upcoming columns (TODO §7.3 item 8). -->
@@ -235,8 +241,14 @@ export function renderSessions({
   if (!container) return;
 
   renderSessionsTitleBar();
+  renderSessionFilterBar();
 
-  const sessions = visibleSessions(state);
+  // Filtered AFTER the series are resolved, never before: an evening that exists only as a repeating
+  // rule is a session on this board like any other, and filtering the stored list would quietly hide
+  // exactly the ones a trainer has not touched yet.
+  const sessions = filterSessions(visibleSessions(state), activeSessionFilters(), {
+    dateOf: sessionCalendarDate,
+  });
   const activeSession = getActiveSession();
 
   // An evening that exists only as a rule becomes a RECORD the moment the trainer acts on it
@@ -272,7 +284,12 @@ export function renderSessions({
   container.innerHTML = "";
 
   if (sessions.length === 0) {
-    container.innerHTML = `<div class="card glassmorphic text-center text-muted" style="padding: 16px;">${t("no_sessions_scheduled")}</div>`;
+    // An empty board that does not say WHY is the filter defect in a different costume: the trainer
+    // reads "no sessions" and starts looking for the data, not for the chip they left on.
+    const empty = hasAnyFilter(activeSessionFilters())
+      ? t("no_sessions_for_filters")
+      : t("no_sessions_scheduled");
+    container.innerHTML = `<div class="card glassmorphic text-center text-muted" style="padding: 16px;">${escapeHTML(empty)}</div>`;
   } else {
     // One continuous, strictly time-ordered pass — grouped under a sticky per-day header rather
     // than split into four fixed yesterday/today/tomorrow/upcoming containers (TODO §7.3 item 8).

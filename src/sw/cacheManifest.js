@@ -11,7 +11,7 @@
 // atomic version. The worker's own sub-scripts (sw.js + this sw/ folder) are deliberately NOT in ASSETS:
 // they are the worker's script resources, kept coherent by the browser's own SW-update mechanism.
 self.swCacheManifest = (() => {
-  const CACHE_NAME = "librept-v117";
+  const CACHE_NAME = "librept-v118";
   const ASSETS = [
     "./",
     "./index.html",
@@ -68,6 +68,7 @@ self.swCacheManifest = (() => {
     "./modules/session/editSessionView.css",
     "./modules/session/sessionInviteDialog.css",
     "./modules/sessionList/sessionsView.css",
+    "./modules/sessionList/sessionFilterBar.css",
     "./modules/splash/splashScreen.css",
     "./app.js",
     "./appBoot.js",
@@ -111,6 +112,7 @@ self.swCacheManifest = (() => {
     "./domain/timeRange.js",
     "./domain/scheduleConflicts.js",
     "./domain/sessionRecord.js",
+    "./domain/sessionFilters.js",
     // Common modules & helpers
     "./modules/common/utils.js",
     "./modules/common/dom.js",
@@ -236,6 +238,7 @@ self.swCacheManifest = (() => {
     "./modules/session/sessionStartTimeDialog.js",
     "./modules/session/sessionTitleBar.js",
     "./modules/sessionList/sessionCard.js",
+    "./modules/sessionList/sessionFilterBar.js",
     "./modules/sessionList/sessionTimeline.js",
     "./modules/sessionList/sessionsView.js",
     "./modules/splash/splashScreen.js",

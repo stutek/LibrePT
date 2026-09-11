@@ -23,6 +23,7 @@ import { setupClientForms } from "./controllers/clientFormsController.js";
 import { setupViewDismiss } from "./controllers/gestureController.js";
 import { initRouter } from "./controllers/routerController.js";
 import { ISSUE_TRACKER_URL } from "./data/publicUrls.js";
+import { resolveLang } from "./i18n/index.js";
 import { initClientDataRights, setupClientDataRights } from "./modules/clients/clientDataRights.js";
 import { receiveSharedSubmissions } from "./modules/clients/signupInbox.js";
 import {
@@ -73,7 +74,9 @@ import { renderWorkoutSetupView } from "./modules/session/editSessionView.js";
 import { initSessionBar, renderClipboardBarShell } from "./modules/session/sessionBar.js";
 import { initSessionInviteDialog } from "./modules/session/sessionInviteDialog.js";
 import { initSessionTitleBar } from "./modules/session/sessionTitleBar.js";
+import { initSessionFilterBar } from "./modules/sessionList/sessionFilterBar.js";
 import { initSessionTimeline } from "./modules/sessionList/sessionTimeline.js";
+import { visibleSessions } from "./modules/sessionList/sessionsView.js";
 import { dismissSplashWhenReady } from "./modules/splash/splashScreen.js";
 import { BUILD_INFO } from "./version.js";
 
@@ -220,6 +223,17 @@ export function bootHeader(deps) {
 
 export function bootSessionTimeline(deps) {
   initSessionTimeline(deps);
+  // The filter row rides with the timeline: both are chrome around the same board, both are
+  // rendered by renderSessions(), and neither needs anything else booted first (TODO §45.6).
+  initSessionFilterBar({
+    t: deps.t,
+    lang: () => resolveLang(deps.getState().lang),
+    // The board's OWN list, series resolved and unfiltered — so the client and location controls
+    // offer exactly what is on screen to filter, and never a choice that would match nothing.
+    sessionsForFilters: () => visibleSessions(deps.getState()),
+    clients: () => deps.getState().clients || [],
+    onChange: () => deps.rerenderSessions(),
+  });
 }
 
 export function bootSessionTitleBar(deps) {

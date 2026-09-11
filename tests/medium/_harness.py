@@ -173,7 +173,9 @@ SESSIONS_STUB = view_stub(
 import {
   renderClientsViewShell,
   renderSessions,
+  visibleSessions,
 } from './modules/sessionList/sessionsView.js';
+import { initSessionFilterBar } from './modules/sessionList/sessionFilterBar.js';
 import { initSessionTimeline } from './modules/sessionList/sessionTimeline.js';
 import { DEFAULT_SESSIONS, DEFAULT_CLIENTS, DEFAULT_ROUTINES } from './data/index.js';
 """,
@@ -198,17 +200,34 @@ initSessionTimeline({
   pushRoute: noop,
   urlFor: (name) => `/${name}`,
 });
-renderSessions({
-  state,
+// The filter row is part of the board, so the stub boots it the way appBoot does — otherwise
+// renderSessions() would paint a board with no filters and a test would be proving nothing about
+// what production shows (TODO §45.6).
+initSessionFilterBar({
   t,
-  getActiveSession: () => null,
-  launchClipboardDirectly: noop,
-  saveToLocalStorage: noop,
-  rerenderSessions: noop,
-  navigateToPath: noop,
-  urlFor: (name) => `/${name}`,
-  focusSessionsColumn: noop,
+  lang: () => 'en',
+  sessionsForFilters: () => visibleSessions(state),
+  clients: () => state.clients,
+  onChange: () => paint(),
 });
+
+// A real repaint, not a noop: choosing a filter re-renders the board in production, and a stub that
+// swallowed that would make every filter assertion pass against the first paint.
+function paint() {
+  renderSessions({
+    state,
+    t,
+    getActiveSession: () => null,
+    launchClipboardDirectly: noop,
+    saveToLocalStorage: noop,
+    rerenderSessions: paint,
+    navigateToPath: noop,
+    urlFor: (name) => `/${name}`,
+    focusSessionsColumn: noop,
+  });
+}
+
+paint();
 """,
 )
 

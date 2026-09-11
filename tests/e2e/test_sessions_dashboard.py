@@ -1,6 +1,6 @@
 # tests/e2e/test_sessions_dashboard.py
 # End-to-end coverage of the dashboard's continuous, time-ordered session timeline (TODO §7.3
-# item 8): the focused date reflected in the URL, today/jump-to-date navigation, a real touch
+# item 8): the focused date reflected in the URL, the Today control, a real touch
 # scroll updating the focused date, and the single-vertical-column invariant across viewports.
 # Fixtures (page, browser, local_server) come from tests/conftest.py + pytest-playwright.
 
@@ -155,22 +155,39 @@ def test_scrolling_the_timeline_updates_the_focused_day(page, local_server):
     _wait_for_focused_date_to_change_from(page, today_iso)
 
 
-def test_date_jump_control_scrolls_to_chosen_date(page, local_server):
-    """The date-jump button (TODO §7.3 item 8's "scrub to an exact date" control) opens a native
-    `<input type="date">`; choosing a date there must scroll the timeline straight to it. Playwright
-    can't drive the native OS picker `.showPicker()` opens, so this fills the (visually hidden but
-    still rendered) input directly and fires `change` — exactly what a real picker selection does."""
-    page.goto(local_server)
-    page.wait_for_selector(".sessions-day-group")
-    _wait_for_timeline_settled(page)
+# The date-jump control was removed on 2026-09-11 and its test with it (TODO §45.6). It opened a
+# native `<input type="date">` and SCROLLED the timeline to the chosen day; the filter row's date
+# chip now filters to that day, which is the stronger answer to the same need and is covered by
+# tests/medium/test_session_filters.py. The test is deleted rather than rewritten because what it
+# pinned — "reach an exact date" — is no longer reached this way at all, and a test kept alive
+# against a control nobody can see would be the worst of both.
 
-    today_iso = frozen_today_iso()
-    _wait_for_focused_date(page, today_iso)
 
-    far_future = (frozen_today() + datetime.timedelta(days=3)).strftime("%Y-%m-%d")
-    page.locator("#sessions-date-jump-input").fill(far_future)
-    page.locator("#sessions-date-jump-input").dispatch_event("change")
+def test_the_filter_calendar_survives_the_boards_own_rerender(page, local_server):
+    """Reported by Simon the day it was built: the calendar closed after the first tap (TODO §45.6).
 
-    # The seed data has nothing exactly 3 days out, so this also proves the "nearest date forward,
-    # else the latest loaded" fallback (focusSessionsColumn) lands on real content, not nowhere.
-    _wait_for_focused_date_to_change_from(page, today_iso)
+    The medium tier could not see it — the board there is rendered by the stub and nothing else — and
+    in the real app renderSessions() is called by half a dozen other things (the timers, the
+    notification area, a recovered session), each of which repaints the filter row. What must hold is
+    that a repaint carries the open calendar with it: a range takes two taps, so a calendar that
+    closes after the first can never make one."""
+    page.goto(f"{local_server}?init=demo_data_load&lang=en")
+    page.wait_for_selector(".session-card")
+
+    page.locator("#filter-chip-dates").click()
+    calendar = page.locator("#sessions-filter-calendar")
+    calendar.wait_for(state="visible", timeout=5000)
+
+    calendar.locator(".filter-day").nth(7).click()
+
+    assert calendar.is_visible(), "the calendar closed after the first tap"
+    assert calendar.locator(".filter-day-end").count() == 1
+
+    # ON SCREEN, not merely open. The board's own re-render settles the focused day to the top of the
+    # scrolling container, and this row lives above the list — so without skipSettleOnNextRender()
+    # the calendar stayed open and scrolled out of sight, which reads as having closed.
+    box = calendar.bounding_box()
+    viewport = page.viewport_size["height"]
+    assert box is not None and box["y"] < viewport, (
+        f"the calendar was scrolled out of the viewport (y={box and box['y']}, height={viewport})"
+    )

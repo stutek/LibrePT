@@ -126,13 +126,6 @@ export function renderSessionsTitleBar() {
   todayBtn.title = deps.t("today");
   todayBtn.disabled = temporal === "today";
 
-  const jumpBtn = document.getElementById("btn-sessions-jump");
-  if (jumpBtn) {
-    const jumpLabel = deps.t("jump_to_date");
-    jumpBtn.title = jumpLabel;
-    jumpBtn.setAttribute("aria-label", jumpLabel);
-  }
-
   // One control, both directions, and the glyph says which way it goes — the same chevron pair the
   // cards' own controls use, so the day control and the card control read as the same idea.
   const expandBtn = document.getElementById("btn-sessions-expand");
@@ -321,7 +314,7 @@ export function syncSessionTimelineAfterRender() {
   scheduleTimelineSettle(focusedSessionDate, "auto");
 }
 
-// The date-picker's own markup (Today + jump-to-date) — index.html only holds the empty
+// The date-picker's own markup (Today + expand/collapse) — index.html only holds the empty
 // #sessions-date-picker slot; this module owns what goes inside it, the same way sessionsView.js
 // owns #sessions-categories-grid's contents. Text/titles are placeholders here and get their real
 // (translated) values from renderSessionsTitleBar() right after.
@@ -332,16 +325,16 @@ export function renderSessionsDatePicker() {
     <button id="btn-sessions-today" class="sessions-today-btn" type="button" title="Today">
       <i class="fa-solid fa-calendar-day"></i><span class="today-btn-label">Today</span>
     </button>
-    <button id="btn-sessions-jump" class="sessions-nav-arrow" type="button" aria-label="Jump to date" title="Jump to date">
-      <i class="fa-solid fa-calendar-days"></i>
-    </button>
+    <!-- The jump-to-date button was here until 2026-09-11. It opened the OS date picker and
+         SCROLLED the board to a day; the filter row's date chip now filters to that day instead,
+         which says the same thing more strongly (TODO §45.6). One control, not two that both
+         mean "a day". -->
     <!-- How the day's cards open, kept between visits (TODO §42.4). Beside the day controls rather
          than in the app menu: it is about what is on this screen, and a setting two taps from the
          thing it changes is a setting nobody finds. -->
     <button id="btn-sessions-expand" class="sessions-nav-arrow" type="button" data-i18n-label="expand_all">
       <i class="fa-solid fa-chevron-down"></i>
     </button>
-    <input id="sessions-date-jump-input" class="sessions-date-jump-input" type="date" tabindex="-1" aria-hidden="true" />
   `;
 }
 
@@ -359,22 +352,4 @@ export function setupSessionsDayNav() {
     deps.rerenderSessions?.();
     renderSessionsTitleBar();
   });
-
-  // Date-jump control ("scrub to an exact date" — TODO §7.3 item 8): the visible button opens the
-  // native picker on the hidden input; choosing a date there scrolls the timeline straight to it.
-  const jumpBtn = document.getElementById("btn-sessions-jump");
-  const jumpInput = document.getElementById("sessions-date-jump-input");
-  if (jumpBtn && jumpInput) {
-    jumpBtn.addEventListener("click", () => {
-      jumpInput.value = focusedSessionDate;
-      if (typeof jumpInput.showPicker === "function") {
-        jumpInput.showPicker();
-      } else {
-        jumpInput.focus();
-      }
-    });
-    jumpInput.addEventListener("change", () => {
-      if (jumpInput.value) focusSessionsColumn(jumpInput.value);
-    });
-  }
 }

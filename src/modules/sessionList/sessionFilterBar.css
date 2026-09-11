@@ -1,0 +1,143 @@
+/* modules/sessionList/sessionFilterBar.css — the board's filter chips and the range calendar
+   (TODO §45.6).
+
+   Deliberately small: the chips themselves are `.chip` / `.filter-chips` from index.css, already
+   worn by the exercise library, and the two selects borrow the same class rather than getting a
+   look of their own. What is here is only what did not exist — the calendar, and the little that
+   makes a <select> sit correctly inside a chip. */
+
+.sessions-filter-chips {
+  margin-bottom: 8px;
+  align-items: center;
+}
+
+/* A native <select> dressed as a chip: the phone's own list opens on tap, which is better than any
+   popover we would write and costs nothing to maintain. Only the browser's default chrome has to go. */
+.filter-select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 28px;
+  /* The chevron is drawn rather than added as an element, so the control stays one tag. */
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: calc(100% - 16px) calc(50% + 1px), calc(100% - 11px) calc(50% + 1px);
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  max-width: 45vw;
+  text-overflow: ellipsis;
+}
+
+.filter-clear[hidden] {
+  display: none;
+}
+
+/* The calendar sits UNDER the chips, in the page, not over it. A range is chosen while looking at
+   the board it is filtering, and an overlay would hide the thing being narrowed. */
+.filter-calendar {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md, 12px);
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+.filter-calendar[hidden] {
+  display: none;
+}
+
+.filter-calendar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.filter-month-label {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--text-main);
+}
+
+/* 44px, because this is a control tapped one-handed while somebody waits. */
+.filter-month-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  background: none;
+  border: none;
+  border-radius: var(--border-radius-sm, 8px);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.filter-month-nav:hover,
+.filter-month-nav:focus-visible {
+  background: var(--input-bg);
+  color: var(--text-main);
+}
+
+.filter-arm-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.filter-weekdays,
+.filter-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.filter-weekday {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding-bottom: 4px;
+}
+
+.filter-day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  min-height: 38px;
+  background: none;
+  border: none;
+  border-radius: var(--border-radius-sm, 8px);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--text-main);
+  cursor: pointer;
+}
+
+.filter-day:hover,
+.filter-day:focus-visible {
+  background: var(--input-bg);
+}
+
+/* Days spilling in from the neighbouring months stay tappable — a range often starts in one month
+   and ends in the next — but read as clearly not part of the month on screen. */
+.filter-day-outside {
+  color: var(--text-muted);
+  opacity: 0.5;
+}
+
+/* The two ENDS are the strongest thing in the grid, and the days between them are a wash. That is
+   the documented convention (§45.6) and it is what makes "tap an end" something a person can aim at:
+   an end is a target, a day inside the range is merely covered by it. */
+.filter-day-inside {
+  background: var(--primary-light);
+  border-radius: 0;
+  color: var(--primary);
+}
+
+.filter-day-end {
+  background: var(--primary);
+  color: var(--on-primary);
+  font-weight: 700;
+}

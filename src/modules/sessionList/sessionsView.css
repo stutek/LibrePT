@@ -157,7 +157,7 @@
   color: inherit;
 } /* --- SESSIONS DAY TITLE BAR --- */
 /* Home view title bar. The "Sessions Schedule" label (.view-title-label) is the conceptual view
-   title on the left; the Today/jump-to-date controls (rendered by sessionTimeline.js into
+   title on the left; the Today and expand controls (rendered by sessionTimeline.js into
    #sessions-date-picker) sit on the right. The flush, flat-bar look + grab handle come from
    .view-titlebar; override .section-title's 24px top margin. */
 .sessions-title-bar {
@@ -229,21 +229,6 @@
 .sessions-nav-arrow:disabled {
   opacity: 0.25;
   cursor: default;
-}
-/* Visually hidden but still rendered — showPicker() throws on an element with no box (display:none
-   or visibility:hidden), so this uses the standard clip-to-1px technique instead. The visible
-   #btn-sessions-jump icon button is the actual tap target; this input only ever opens its native
-   picker and reports the chosen date via `change`. */
-.sessions-date-jump-input {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
 }
 /* --- SESSIONS TIMELINE (continuous, time-ordered — TODO §7.3 item 8) --- */
 .sessions-timeline {
@@ -331,7 +316,7 @@
   padding: 1px 6px;
 }
 @media (max-width: 600px) {
-  /* Phones keep the "Sessions" label and the Today/jump controls on a single row (no wrap). */
+  /* Phones keep the "Sessions" label and the day controls on a single row (no wrap). */
   .sessions-title-bar {
     flex-direction: row;
     align-items: center;
