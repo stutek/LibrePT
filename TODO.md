@@ -1876,14 +1876,9 @@ reviewed), and a second frozen corpus entry whenever a real paste fails.
 
 ## 30. Reported 2026-08-18 (evening) — demo and feed polish
 
-### 30.1 [ ] BUG — loading demo data from the message button freezes the app for a while
+### 30.1 [x] BUG — loading demo data from the message button freezes the app for a while — closed 2026-09-11, not reproducible
 
-Reported: tapping the empty feed's "load demo data" offer appears to hang the app briefly. The
-handler seeds the whole dataset and then reloads
-([app.js](src/app.js)'s `seedDemoData`), so the freeze is probably the synchronous seed of the full
-demo database on the main thread, the write queue flushing behind it, or the reload landing while
-those writes are still in flight. Measure before choosing: the fix is different for each — a yielded
-seed, a progress state on the button, or reloading only once the queue has drained.
+Closed — the measurement is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#301-x-bug-loading-demo-data-from-the-message-button-freezes-the-app-for-a-while-closed-2026-09-11-not-reproducible).
 
 ### 30.5 [x] BUG — Show me did nothing on a card, and a second caption sat on the panel — fixed 2026-08-22
 

@@ -916,6 +916,32 @@ moving target never re-ran it.
 
 ---
 
+### 30.1 [x] BUG — loading demo data from the message button freezes the app for a while — closed 2026-09-11, not reproducible
+
+**Reported 2026-08-18:** tapping the empty feed's "load demo data" offer appeared to hang the app
+briefly. The suspected cause was named in the report itself: the handler seeded the whole dataset
+and then RELOADED the page, so the freeze was probably the synchronous seed, the write queue
+flushing behind it, or the reload landing while those writes were still in flight. The section said
+measure before choosing, because the fix is different for each.
+
+**Measured 2026-09-11, and the freeze is gone.** An empty app, the real boot, the drawer open, the
+button tapped: the click returns in **76ms** and the browser records **no long task at all** — no
+span over 50ms in which the page could not have answered a tap. Throttled to a sixth of this
+machine's CPU, which is the order of a mid-range phone, it is **one 249ms task** and a click that
+returns in 359ms: a visible hitch on a button that writes a whole gym's records, not an app that
+hangs.
+
+**What removed it was not aimed at it.** The reload is no longer there — §40.3a replaced it with
+`renderEverything()`, so seeding now writes the records and repaints, and the report's own leading
+suspect went with the reload. The remaining 249ms is the seed plus a full re-render; the writes
+themselves are behind the queue ([writeQueue.js](src/data/writeQueue.js)) and never blocked the
+main thread.
+
+**Nothing shipped for this, so there is no CHANGELOG entry.** The measurement is the outcome, and
+it is written here so the next person who reads the report knows it was answered rather than
+forgotten. Reopen it if a trainer reports the hitch on real hardware — the cheap fix then is a
+progress state on the button, not a yielded seed.
+
 ### 30.5 [x] BUG — Show me did nothing on a card, and a second caption sat on the panel — fixed 2026-08-22
 
 **Reported 2026-08-22 (Simon)**, walking the story in the browser:
