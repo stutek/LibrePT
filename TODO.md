@@ -3517,6 +3517,13 @@ things are built on the first model and have to be answered before any of this i
   A filtered board has a range as well as a position, and the link has to say which it carries — this
   is [§19](TODO.md)'s territory, not the board's alone.
 
+**The chips live in the sticky title bar** (asked 2026-09-11, after seeing them). They shipped as a
+row below it, which meant scrolling the board took the filters off the screen while the thing they
+filter stayed on it — a filter nobody can see is the modal's defect arriving by another road. One
+sticky header now carries two rows, the title with the day controls and the filters under them, and
+the calendar opens inside it. The day headings' own sticky offset follows on its own: the timeline
+measures that header with a ResizeObserver, so a second row costs no number kept in step by hand.
+
 **Chips, not a modal, is still the answer for the client and location filters** — they are plain
 "show only these" choices and a modal hides what is on. The date range is the one that is not simply
 another chip, because the board's whole navigation is already made of dates.

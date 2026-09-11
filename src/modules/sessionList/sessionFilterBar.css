@@ -6,8 +6,12 @@
    look of their own. What is here is only what did not exist — the calendar, and the little that
    makes a <select> sit correctly inside a chip. */
 
+/* Inside the sticky header now, so the row carries no margin of its own — the header's own gap
+   spaces it from the title above, and anything more makes the bar taller than it needs to be on a
+   phone, where every pixel of header is a pixel of board. */
 .sessions-filter-chips {
-  margin-bottom: 8px;
+  margin-bottom: 0;
+  padding-bottom: 0;
   align-items: center;
 }
 
@@ -33,12 +37,15 @@
 
 /* The calendar sits UNDER the chips, in the page, not over it. A range is chosen while looking at
    the board it is filtering, and an overlay would hide the thing being narrowed. */
+/* Opens INSIDE the sticky header, over the list rather than pushing it: a range is chosen while
+   looking at the board it filters, and the header measures itself so the day headings move down
+   with it. */
 .filter-calendar {
   background: var(--card-bg);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius-md, 12px);
   padding: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 4px;
 }
 
 .filter-calendar[hidden] {

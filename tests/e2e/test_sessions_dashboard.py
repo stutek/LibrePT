@@ -191,3 +191,27 @@ def test_the_filter_calendar_survives_the_boards_own_rerender(page, local_server
     assert box is not None and box["y"] < viewport, (
         f"the calendar was scrolled out of the viewport (y={box and box['y']}, height={viewport})"
     )
+
+
+def test_the_filter_row_stays_on_screen_while_the_board_scrolls(page, local_server):
+    """The filters live in the sticky header with the title (asked 2026-09-11, TODO §45.6).
+
+    They were a row below it, which meant scrolling the board took the filters off the screen while
+    the thing they filter stayed on it — a filter you cannot see is the modal's defect arriving by
+    another road, and the board would look short with nothing on screen saying why."""
+    page.goto(f"{local_server}?init=demo_data_load&lang=en")
+    page.wait_for_selector(".session-card")
+
+    chips = page.locator("#filter-chip-dates")
+    top_before = chips.bounding_box()["y"]
+
+    page.evaluate(
+        "() => { document.getElementById('main-content').scrollTop += 1200; }"
+    )
+    page.wait_for_timeout(400)
+
+    after = chips.bounding_box()
+    assert after is not None, "the filter row left the layout when the board scrolled"
+    assert abs(after["y"] - top_before) < 4, (
+        f"the filter row scrolled with the list (y {top_before} → {after['y']}) instead of sticking"
+    )

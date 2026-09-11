@@ -23,17 +23,27 @@ export function renderClientsViewShell() {
     `
 <section id="view-clients" class="app-view active">
       <!-- Section B: Today's & Tomorrow's Sessions -->
+      <!-- ONE sticky header, two rows (asked 2026-09-11): the view title with the day controls, and
+           the filters under them. They were a sticky bar and a separate row below it, which meant
+           the filters scrolled away while the thing they filter stayed on screen — and a filter you
+           cannot see is the modal's defect arriving by another road.
+           The day headers' sticky offset follows automatically: sessionTimeline.js measures this
+           element with a ResizeObserver and writes its height into --sessions-header-sticky-top, so
+           a second row, and the calendar opening inside it, are accounted for without a number
+           being kept in step by hand. -->
       <div class="section-title sessions-title-bar view-titlebar">
         <button class="view-grabber" type="button" aria-label="Open session clipboard"></button>
-        <h2 class="view-title-label" id="sessions-view-title">Sessions</h2>
-        <!-- Populated by sessionTimeline.js (renderSessionsDatePicker) — the Today and expand
-             controls are that module's own concern, not shell markup. -->
-        <div class="sessions-date-picker" id="sessions-date-picker"></div>
-      </div>
+        <div class="sessions-title-row">
+          <h2 class="view-title-label" id="sessions-view-title">Sessions</h2>
+          <!-- Populated by sessionTimeline.js (renderSessionsDatePicker) — the Today and expand
+               controls are that module's own concern, not shell markup. -->
+          <div class="sessions-date-picker" id="sessions-date-picker"></div>
+        </div>
 
-      <!-- Filled by sessionFilterBar.js (TODO §45.6): the date/client/location chips and, when it is
-           open, the range calendar. Its own module's markup, like the day controls above. -->
-      <div class="sessions-filter-bar" id="sessions-filter-bar"></div>
+        <!-- Filled by sessionFilterBar.js (TODO §45.6): the date/client/location chips and, when it
+             is open, the range calendar. Its own module's markup, like the day controls above. -->
+        <div class="sessions-filter-bar" id="sessions-filter-bar"></div>
+      </div>
 
       <!-- One continuous, time-ordered scroll: sessions render grouped under sticky per-day
            headers instead of fixed yesterday/today/tomorrow/upcoming columns (TODO §7.3 item 8). -->

@@ -160,9 +160,21 @@
    title on the left; the Today and expand controls (rendered by sessionTimeline.js into
    #sessions-date-picker) sit on the right. The flush, flat-bar look + grab handle come from
    .view-titlebar; override .section-title's 24px top margin. */
+/* Two rows in one sticky header (TODO §45.6): the title with the day controls, then the filters.
+   The bar itself is therefore a COLUMN — .section-title makes it a flex row, and that row moved
+   down into .sessions-title-row. */
 .sessions-title-bar {
-  gap: 10px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
   margin-top: 0;
+}
+.sessions-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
 }
 .sessions-date-picker {
   display: inline-flex;
@@ -316,8 +328,10 @@
   padding: 1px 6px;
 }
 @media (max-width: 600px) {
-  /* Phones keep the "Sessions" label and the day controls on a single row (no wrap). */
-  .sessions-title-bar {
+  /* Phones keep the "Sessions" label and the day controls on a single row (no wrap). The FILTERS
+     stay on their own row underneath at every width — chips wrap, and squeezing them in beside the
+     title would be the "ran out of view" problem .filter-chips already exists to avoid. */
+  .sessions-title-row {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
