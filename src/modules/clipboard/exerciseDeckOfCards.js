@@ -16,7 +16,6 @@
 //   onRerender()   // re-render the whole board (past-card toggle / circuit save)
 // }
 
-import { clipboardCardsExpanded } from "../../data/displayPrefs.js";
 import { newRecordId } from "../../data/recordId.js";
 import { formatMetricValue, usesLoad } from "../../domain/exerciseModality.js";
 import { formatLoad, formatReps } from "../../domain/repsAndLoad.js";
@@ -260,11 +259,6 @@ export function renderExerciseDeck(deckContainer, deps) {
   // collapses too, so exactly one card is ever expanded (the active-exercise pointer is
   // untouched, so it re-expands the moment the past card is closed).
   const pastExpanded = !!activeSession.expandedPastId;
-  // Expand ALL, asked for by a trainer who could not see the plan at a glance: every card shows
-  // what the focused one shows, and none of them ACTS like it (deckCard.js). A SETTING rather than
-  // session state (TODO §42.4) — someone who wants the whole plan open wants it open tonight too.
-  const expandAll = clipboardCardsExpanded();
-
   const formatDateStr = (dateIso) => {
     if (!dateIso) return "";
     const d = new Date(dateIso);
@@ -315,7 +309,6 @@ export function renderExerciseDeck(deckContainer, deps) {
     let deckCard;
     if (item.type === "past") {
       deckCard = new PastDeckCard(item, {
-        expandAll,
         activeSession,
         t,
         escapeHTML,
@@ -327,7 +320,6 @@ export function renderExerciseDeck(deckContainer, deps) {
       });
     } else if (item.type === "rest") {
       deckCard = new RestDeckCard(item, {
-        expandAll,
         t,
         escapeHTML,
         isFutureSession,
@@ -339,7 +331,6 @@ export function renderExerciseDeck(deckContainer, deps) {
       deckCard = new CircuitDeckCard(item, {
         round,
         activeClientId,
-        expandAll,
         activeClientState,
         pastExpanded,
         isFutureSession,
@@ -361,7 +352,6 @@ export function renderExerciseDeck(deckContainer, deps) {
     } else {
       deckCard = new ExerciseDeckCard(item, {
         currentCount: currentExList.length,
-        expandAll,
         activeClientId,
         pastExpanded,
         isFutureSession,

@@ -1,18 +1,21 @@
-# tests/medium/test_clipboard_expand_all.py
-# "Expand all" lays every card in the deck out flat (TODO §42), asked for by a trainer who could not
-# see the whole session at a glance: one card is open and the rest are peeking rows, each slid up
-# over the one before it.
+# tests/medium/test_clipboard_card_design.py
+# Every deck card has ONE design (TODO §42.3), and being in focus ADDS to it rather than swapping in
+# a second, taller one. Three promises are read here, all of them things a trainer sees:
 #
-# Three things are asserted. The deck must actually stop being a deck — every card out of the stack
-# and fully visible, or the control did nothing. Every card that is not in focus must carry NOTHING
-# to tap, because twelve open cards with live Too Easy / Too Hard / timer buttons put a mis-tap one
-# thumb-width from logging against the wrong exercise; they are never drawn rather than drawn and
-# disabled, and that is what this reads — the buttons are absent from the DOM. And a card must look
-# like itself in all three states (§42.3): opening one ADDS its controls to the row the trainer was
-# already reading, instead of swapping in a second, taller design that says the same numbers again.
+#   1. The card in focus shows the same line it showed before it was tapped, plus what it takes to
+#      log against it. It used to throw that line away and say the same numbers again as big tiles.
+#   2. The tag — Completed, Upcoming, Past — stays in the title row in every state (§42.5).
+#   3. A card that is NOT in focus carries nothing to tap. Live Too Easy / Too Hard / timer buttons
+#      on a card the trainer is only reading put a mis-tap one thumb-width from logging against the
+#      wrong exercise. They are never drawn rather than drawn and then removed, so what this reads is
+#      that the buttons are absent from the DOM.
+#
+# This file was tests/medium/test_clipboard_expand_all.py until §42.14 removed that setting: once
+# every card said everything it had on its own row, "open them all" had nothing left to open. What it
+# asserted about SAFETY is what survived, and it is asserted here on the collapsed stack itself.
 #
 # Medium rather than e2e: no router, no persistence, no lifecycle — the deck renders from an injected
-# session and the ⋯ menu is wired exactly as production wires it.
+# session, the way production renders it.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
 from tests.medium._harness import (
@@ -45,38 +48,39 @@ PLAN = [
 
 STUB = clipboard_stub(active_session_fixture(exercises=PLAN))
 
-# What each card is showing: whether it is out of the stack (nothing of it covered by the card
-# after it), and whether it carries anything the trainer could tap.
+# What each card is showing: whether it is the card being worked, and whether it carries anything
+# the trainer could tap.
 CARD_STATES = """() => {
   const cards = [...document.querySelectorAll('#active-exercise-scroll-deck .exercise-deck-card')];
-  return cards.map((card, i) => {
-    const next = cards[i + 1];
-    const rect = card.getBoundingClientRect();
-    return {
-      name: card.querySelector('.deck-card-name-inline')?.textContent.trim() ?? '?',
-      inFocus: card.classList.contains('in-focus'),
-      expanded: card.classList.contains('expanded'),
-      // Cards are siblings at one z-index, so DOM order is paint order: the next card is what
-      // covers this one. Laid out flat, none of it is covered.
-      covered: next
-        ? Math.max(0, Math.round(rect.bottom - next.getBoundingClientRect().top))
-        : 0,
-      // EVERY control, not a list of known ones: the rest card's Start sits in neither of the two
-      // containers an earlier version of this probe named, and a circuit carries number FIELDS.
-      controls: card.querySelectorAll('button, input, select, textarea, .deck-card-actions').length,
-    };
-  });
+  return cards.map((card) => ({
+    name: card.querySelector('.deck-card-name-inline')?.textContent.trim() ?? '?',
+    inFocus: card.classList.contains('in-focus'),
+    // EVERY control, not a list of known ones: the rest card's Start sits in neither of the two
+    // containers an earlier version of this probe named, and a circuit carries number FIELDS.
+    controls: card.querySelectorAll('button, input, select, textarea, .deck-card-actions').length,
+  }));
 }"""
 
 
-def _expand(page):
-    page.locator("#btn-session-menu").click()
-    page.locator("#btn-expand-all").click()
+def _focus_card(page, name):
+    """Bring the named card into focus.
+
+    A DOM click, not a synthesized pointer one: cards in the stack slide up over each other by a
+    negative margin, so the card above this one sits over its click point and would swallow the
+    event — force=True would not help, since it still dispatches at coordinates.
+    """
+    page.evaluate(
+        """(name) => [...document.querySelectorAll('.exercise-deck-card')]
+             .find((el) => el.querySelector('.deck-card-name-inline')?.textContent.trim() === name)
+             .click()""",
+        name,
+    )
+    page.wait_for_selector("#active-exercise-scroll-deck .exercise-deck-card.in-focus")
+    page.wait_for_timeout(400)
 
 
-def test_only_the_focused_card_can_be_acted_on_until_expanding_is_asked_for(
-    page, local_server
-):
+def test_only_the_card_in_focus_can_be_acted_on(page, local_server):
+    """The safety half. Reading the plan must not become logging against the wrong exercise."""
     load_with_stub(page, local_server, STUB)
     page.wait_for_selector("#active-exercise-scroll-deck .exercise-deck-card")
 
@@ -84,66 +88,9 @@ def test_only_the_focused_card_can_be_acted_on_until_expanding_is_asked_for(
     live_cards = [card for card in states if card["controls"]]
 
     assert len(live_cards) == 1, (
-        f"the deck starts with one card that can be acted on, not {len(live_cards)}"
+        f"exactly one card can be acted on, not {len(live_cards)}: {states}"
     )
     assert live_cards[0]["inFocus"], "that card is the one in focus"
-    assert any(card["covered"] for card in states), (
-        "the deck starts as a stack — cards slid up over each other"
-    )
-
-
-def test_expand_all_lays_every_card_out_flat(page, local_server):
-    load_with_stub(page, local_server, STUB)
-    page.wait_for_selector("#active-exercise-scroll-deck .exercise-deck-card")
-
-    _expand(page)
-    page.wait_for_selector("#active-exercise-scroll-deck .exercise-deck-card.expanded")
-    page.wait_for_timeout(
-        500
-    )  # margin and transform both transition; sample once settled
-    states = page.evaluate(CARD_STATES)
-
-    covered = [card for card in states if card["covered"]]
-    assert not covered, (
-        "every card is fully visible once expanded, none covered by the one after it:\n"
-        + "\n".join(f"  {c['name']}: {c['covered']}px covered" for c in covered)
-    )
-    assert sum(1 for card in states if card["inFocus"]) == 1, (
-        "expanding is not focusing — exactly one card still says where the trainer is"
-    )
-
-
-def test_an_expanded_card_that_is_not_in_focus_carries_no_controls(page, local_server):
-    """The safety half. Reading the plan must not become logging against the wrong exercise."""
-    load_with_stub(page, local_server, STUB)
-    page.wait_for_selector("#active-exercise-scroll-deck .exercise-deck-card")
-
-    _expand(page)
-    page.wait_for_selector("#active-exercise-scroll-deck .exercise-deck-card.expanded")
-    states = page.evaluate(CARD_STATES)
-
-    for card in states:
-        if card["inFocus"]:
-            continue
-        assert card["controls"] == 0, (
-            f"an expanded card must offer nothing to tap: {card}"
-        )
-
-
-def test_the_menu_item_says_which_direction_it_goes(page, local_server):
-    """One control, both ways — so there is no second item to leave behind in the wrong state."""
-    load_with_stub(page, local_server, STUB)
-    page.wait_for_selector("#active-exercise-scroll-deck .exercise-deck-card")
-
-    page.locator("#btn-session-menu").click()
-    before = page.locator("#btn-expand-all-text").inner_text()
-    page.locator("#btn-expand-all").click()
-    page.wait_for_selector("#active-exercise-scroll-deck .exercise-deck-card.expanded")
-
-    page.locator("#btn-session-menu").click()
-    after = page.locator("#btn-expand-all-text").inner_text()
-
-    assert before != after, f"the label stayed {before!r} in both states"
 
 
 # The tag's place is the report that produced §42.5: opening a card moved its status tag from the end
@@ -163,18 +110,15 @@ TAG_ROW = """() => {
 }"""
 
 
-def test_the_status_tag_sits_in_the_title_row_however_open_the_card_is(
-    page, local_server
-):
+def test_the_status_tag_sits_in_the_title_row_in_every_state(page, local_server):
     load_with_stub(page, local_server, STUB)
     page.wait_for_selector("#active-exercise-scroll-deck .exercise-deck-card")
 
-    collapsed = page.evaluate(TAG_ROW)
-    _expand(page)
-    page.wait_for_selector("#active-exercise-scroll-deck .exercise-deck-card.expanded")
-    expanded = page.evaluate(TAG_ROW)
+    before = page.evaluate(TAG_ROW)
+    _focus_card(page, "Romanian Deadlift")
+    after = page.evaluate(TAG_ROW)
 
-    for state, cards in (("collapsed", collapsed), ("expanded", expanded)):
+    for state, cards in (("before", before), ("after focusing one", after)):
         for card in cards:
             if not card["hasTag"]:
                 continue
@@ -242,16 +186,7 @@ def test_bringing_a_card_into_focus_keeps_the_line_it_was_showing(page, local_se
     )
     assert before["target"], "a collapsed exercise card states its target"
 
-    # A DOM click, not a synthesized pointer one: collapsed cards overlap by a negative margin, so
-    # the card above this one sits over its click point and would swallow the event.
-    page.evaluate(
-        """(name) => [...document.querySelectorAll('.exercise-deck-card')]
-             .find((el) => el.querySelector('.deck-card-name-inline')?.textContent.trim() === name)
-             .click()""",
-        name,
-    )
-    page.wait_for_selector("#active-exercise-scroll-deck .exercise-deck-card.in-focus")
-    page.wait_for_timeout(400)
+    _focus_card(page, name)
     after = page.evaluate(TARGET_LINE, name)
 
     assert after["inFocus"], f"tapping the card brings it into focus: {after}"

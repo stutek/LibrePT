@@ -10,7 +10,6 @@
 // and the medium tests are all wired against this module's names, and the split moved the code, not
 // the seam.
 
-import { clipboardCardsExpanded, setClipboardCardsExpanded } from "../data/displayPrefs.js";
 import { newRecordId } from "../data/recordId.js";
 import {
   bindingFor,
@@ -308,17 +307,6 @@ function wireSessionMenuAndActions(t) {
     renderActiveGroupBoard();
   }
 
-  /** Open every card in the deck, or put them all back (TODO §42.4).
-   *
-   * A SETTING, kept between sessions and between visits: it was first written onto the live session,
-   * which meant a trainer who wants the whole plan open had to ask again for every session they ran.
-   * It lives beside the theme, for the same reason the theme does — it is about the person.
-   */
-  function toggleExpandAll() {
-    setClipboardCardsExpanded(!clipboardCardsExpanded());
-    renderActiveGroupBoard();
-  }
-
   /** Lists who tonight's plan can be given to, inside the ⋯ menu (TODO §8.8).
    *
    * Names rather than a single "copy" action, because *to whom* is the entire question — the common
@@ -394,14 +382,6 @@ function wireSessionMenuAndActions(t) {
     // is toggling a menu they thought was already gone.
     closeSessionMenu();
     enterClipboardEditMode();
-  });
-
-  // Open every card, or put them back into the deck (TODO §42). One control in both directions, like
-  // the binding below: the trainer is answering one question — can I see the whole session — and a
-  // menu offering both ways at once makes them read which applies before they can answer.
-  document.getElementById("btn-expand-all")?.addEventListener("click", () => {
-    closeSessionMenu();
-    toggleExpandAll();
   });
 
   // Everyone on one plan, and back again (TODO §8.1). One control rather than two: the trainer is

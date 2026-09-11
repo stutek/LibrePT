@@ -145,17 +145,6 @@ export function renderActiveSessionOverlayShell() {
                  circuit in lockstep should cost the trainer ONE tap per set, not one per person —
                  and what each of them thought of it stays their own, because feedback is not part
                  of the plan. -->
-            <!-- The SAME chevron pair the day's cards and their own controls wear (TODO §42.4): one
-                 idea, one glyph. It is also the only pair whose drawn shape is already recorded in
-                 the icon baseline — a glyph nothing else used rendered one way on this machine and
-                 another on CI, and a menu item is not worth a font question.
-                 Asked for by a trainer: the deck shows one card open and the rest as peeking rows,
-                 which is compact and does not answer "what is the whole session". This opens every
-                 card at once; the cards it opens carry no controls (deckCard.js), so reading the
-                 plan cannot become logging against the wrong exercise. -->
-            <button id="btn-expand-all" class="session-menu-item" role="menuitem">
-              <i class="fa-solid fa-chevron-down"></i> <span id="btn-expand-all-text" data-i18n="expand_all">Expand all cards</span>
-            </button>
             <button id="btn-bind-participants" class="session-menu-item" role="menuitem">
               <i class="fa-solid fa-link"></i> <span data-i18n="bind_participants">Everyone on this plan</span>
             </button>

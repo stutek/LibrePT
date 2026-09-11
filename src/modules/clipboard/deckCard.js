@@ -18,7 +18,7 @@ export class DeckCard {
     this.ctx = ctx;
   }
 
-  // Whether this card currently shows its expanded template. Default reads item.isInFocus, which
+  // Whether this is the card being worked. Default reads item.isInFocus, which
   // exerciseDeckOfCards.js now computes uniformly from activeExerciseIndex for every item type — rests
   // included, since a rest is a first-class focus target like any other plan item. A subclass
   // overrides this getter when its own "focus" means something else entirely (PastDeckCard's is
@@ -26,17 +26,6 @@ export class DeckCard {
   // polymorphism here: no call site needs to know which rule applies to which card.
   get isInFocus() {
     return !!this.item.isInFocus;
-  }
-
-  // Whether this card DRAWS its expanded template. Focus implies it; "expand all" grants it to every
-  // card at once (TODO §42), asked for by a trainer who could not see the plan at a glance.
-  //
-  // **Kept apart from `isInFocus` on purpose.** Focus is a fact about the session — which item the
-  // trainer is on — and it decides the tint, the ring and, below, what a card may DO. Expansion is
-  // only about how much of the card is drawn. Folding the two together would have every card
-  // claiming to be in focus and, worse, wired as if it were.
-  get isExpanded() {
-    return this.isInFocus || !!this.ctx.expandAll;
   }
 
   get className() {
@@ -53,16 +42,16 @@ export class DeckCard {
   // trainer was reading instead of opening it, and the two templates had to be kept in agreement by
   // hand — which is how the status tag ended up in a different place in each (§42.5).
   //
-  // Three states, still. A card that is expanded but NOT in focus is this same design laid flat out
-  // of the stack, and it carries nothing to tap — not because its controls are stripped afterwards,
-  // but because `addFocusElements` never ran. That is the safety argument for expand-all on a gym
-  // floor made structural: twelve open cards with live Too Easy / Too Hard / timer buttons put a
-  // mis-tap one thumb-width from logging against the wrong exercise, and no code path can draw one.
+  // TWO states now, not three (§42.14). "Open every card" was removed once there was nothing left
+  // for it to open: the stack already shows each card whole, so the setting only stopped the cards
+  // overlapping. A card is either the one being worked, or one of the rest.
+  //
+  // A card that is not in focus carries nothing to tap — not because its controls are stripped
+  // afterwards, but because `addFocusElements` never ran. That is the safety rule made structural:
+  // live Too Easy / Too Hard / timer buttons on a card the trainer is only reading put a mis-tap one
+  // thumb-width from logging against the wrong exercise, and no code path can draw one.
   render(card) {
     card.className = this.className;
-    // Added here rather than in every subclass's own className: expansion is a deck-wide state, and
-    // the stylesheet needs it to stop overlapping and tilting a card that is now laid out flat.
-    if (this.isExpanded && !this.isInFocus) card.classList.add("expanded");
     this.renderCard(card);
     if (this.isInFocus) {
       this.addFocusElements(card);

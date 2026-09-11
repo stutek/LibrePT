@@ -20,6 +20,22 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-09-11 — "Open every card" is gone, because there is nothing left to open
+
+### Removed
+
+- **The clipboard's "Expand all cards" is off the ⋯ menu, and the setting behind it is deleted.**
+  It answered "let me see the whole session". Now that a card says everything it has on its own row,
+  the stack already shows every card whole — measured on a phone, a circuit with three movements
+  needs 80px of room and gets 85px. What the control still did was stop the cards overlapping, which
+  is a matter of taste, not of reading. The day's session cards keep their own control: those really
+  do hide the participants and the programme.
+- **The deck's check grew to match.** It used to demand that a card's first line clear the card above
+  it. It now demands that all of the card does — with no way to open the cards, the stack is the only
+  reading there is.
+
+---
+
 ## 2026-09-10 — A card opens instead of being replaced
 
 ### Fixed

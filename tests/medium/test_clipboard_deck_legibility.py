@@ -1,9 +1,14 @@
 # tests/medium/test_clipboard_deck_legibility.py
-# The collapsed deck stack has one job: every card that is not in focus still tells the trainer what
-# it is. Cards slide up over each other by a negative margin, so the only thing keeping that peeking
-# row readable is the overlap being smaller than the row is tall — and nothing about the CSS says so
-# out loud. It was wrong for a while: at desktop width a ~37px card showed 11px, and since the name
-# renders at y=8-25 inside the card, roughly three pixels of every glyph survived.
+# The deck stack has one job: every card that is not in focus still tells the trainer what it is.
+# Cards slide up over each other by a negative margin, so the only thing keeping them readable is the
+# overlap being smaller than the content is tall — and nothing about the CSS says so out loud. It was
+# wrong for a while: at desktop width a ~37px card showed 11px, and since the name renders at y=8-25
+# inside the card, roughly three pixels of every glyph survived.
+#
+# It is ALL of a card's content now, not just its first line (§42.14). Until then a trainer who could
+# not read the stack had "open every card" to fall back on; that setting was removed once each card
+# said everything it had on its own row, so the stack is the only reading there is. A circuit names
+# its movements one per line, and the last of them has to clear the card above it too.
 #
 # Geometry rather than semantics, like tests/e2e/test_layout_overflow.py — but this is occlusion by a
 # sibling rather than overflow past a boundary, and it belongs to the deck alone (no router, no
@@ -48,7 +53,7 @@ MIXED_PLAN = [
 ]
 
 # Reads the painted geometry of the stack: for each collapsed card, how much of it the NEXT card
-# leaves uncovered, against how much of it the first line needs. Cards are siblings at the same
+# leaves uncovered, against how much of it its content needs. Cards are siblings at the same
 # z-index, so DOM order is paint order — the next card is what covers this one.
 COLLAPSED_CARD_GEOMETRY = """() => {
   const cards = [...document.querySelectorAll('#active-exercise-scroll-deck .exercise-deck-card')];
@@ -56,14 +61,16 @@ COLLAPSED_CARD_GEOMETRY = """() => {
     const next = cards[i + 1];
     if (!next || card.classList.contains('in-focus')) return null;
     const cardRect = card.getBoundingClientRect();
-    const line = card.querySelector('.deck-card-compact');
-    if (!line) return null;
-    const lineRect = line.getBoundingClientRect();
+    // The LAST thing the card draws, whatever shape it is: an exercise and a rest have only their
+    // head row, a circuit has one row per movement under it.
+    const rows = [...card.querySelectorAll('.deck-card-compact, .circuit-ex-row, .deck-history-set-row')];
+    const last = rows[rows.length - 1];
+    if (!last) return null;
     return {
       name: card.querySelector('.deck-card-name-inline')?.textContent.trim() ?? '?',
       cardHeight: Math.round(cardRect.height),
       uncovered: Math.round(next.getBoundingClientRect().top - cardRect.top),
-      lineNeeds: Math.round(lineRect.bottom - cardRect.top),
+      contentNeeds: Math.round(last.getBoundingClientRect().bottom - cardRect.top),
     };
   }).filter(Boolean);
 }"""
@@ -82,28 +89,28 @@ def _mount(page, local_server, viewport):
     return page.evaluate(COLLAPSED_CARD_GEOMETRY)
 
 
-def _assert_every_first_line_clears_the_card_above(cards):
+def _assert_every_card_clears_the_card_above(cards):
     assert len(cards) >= 4, f"expected a stack of collapsed cards, got {cards}"
 
-    clipped = [c for c in cards if c["uncovered"] < c["lineNeeds"]]
+    clipped = [c for c in cards if c["uncovered"] < c["contentNeeds"]]
     assert not clipped, (
-        "collapsed cards whose first line is cut off by the card above them:\n"
+        "collapsed cards whose content is cut off by the card above them:\n"
         + (
             "\n".join(
-                f"  {c['name']}: {c['uncovered']}px visible, first line needs {c['lineNeeds']}px"
+                f"  {c['name']}: {c['uncovered']}px visible, content needs {c['contentNeeds']}px"
                 for c in clipped
             )
         )
     )
 
 
-def test_a_collapsed_cards_first_line_is_fully_visible_on_desktop(page, local_server):
+def test_a_collapsed_card_is_fully_readable_on_desktop(page, local_server):
     """A trainer scanning the deck on a laptop can read what every upcoming card is. Exercise,
-    circuit and rest cards alike: the card stacked on top must not cut into the peeking row."""
-    _assert_every_first_line_clears_the_card_above(_mount(page, local_server, DESKTOP))
+    circuit and rest cards alike: the card stacked on top must not cut into what is written."""
+    _assert_every_card_clears_the_card_above(_mount(page, local_server, DESKTOP))
 
 
-def test_a_collapsed_cards_first_line_is_fully_visible_on_a_phone(page, local_server):
+def test_a_collapsed_card_is_fully_readable_on_a_phone(page, local_server):
     """The same promise on the device this app is actually used on (TODO §28.4).
 
     The phone was left out of the 2026-08-16 fix on the reasoning that a tight stack is right where
@@ -112,7 +119,7 @@ def test_a_collapsed_cards_first_line_is_fully_visible_on_a_phone(page, local_se
     to read was the PAST card — which is last in the deck, so nothing covers it, and its legibility
     said nothing about the cards above it.
     """
-    _assert_every_first_line_clears_the_card_above(_mount(page, local_server, PHONE))
+    _assert_every_card_clears_the_card_above(_mount(page, local_server, PHONE))
 
 
 def test_the_deck_stays_a_stack_on_a_phone(page, local_server):

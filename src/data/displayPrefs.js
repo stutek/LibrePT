@@ -1,11 +1,11 @@
 // src/data/displayPrefs.js — how much of a card the trainer wants to see, kept between visits
-// (TODO §42.4). Single responsibility: read and write the two "expand all" settings. No DOM, no
-// rendering decisions — a caller asks, and draws.
+// (TODO §42.4). Single responsibility: read and write the "expand all" setting for the day's session
+// cards. No DOM, no rendering decisions — a caller asks, and draws.
 //
-// **Two settings, not one** (ruled 2026-09-10): the day's session cards and the clipboard's exercise
-// cards are read in different postures. A trainer scanning tomorrow at a desk wants every session
-// card open; the same trainer mid-set wants the clipboard down to the one card they are on. One
-// switch for both would make each of those answers wrong half the time.
+// **There was a second setting, for the clipboard's deck, and §42.14 removed it.** Once every deck
+// card became ONE design that says everything it has on its own row (§42.3), "open them all" had
+// nothing left to open — the collapsed stack already shows every card whole. The day's session
+// cards are a different shape: theirs really does hide participants and programme, so theirs stays.
 //
 // **A setting, not session state.** It was first written onto the live session, which meant it died
 // with that session — a trainer who wants the whole plan open wants it open tonight as well. So it
@@ -13,13 +13,12 @@
 // (storageNamespace.js's ORIGIN_GLOBAL_KEYS), because it belongs to the PERSON rather than to any
 // data (§40.1).
 //
-// Both default to OFF. The compact deck is what the app has always opened as, and a preference that
-// changes how the app looks before anybody asks for it is a surprise, not a default.
+// Defaults to OFF. Compact is what the app has always opened as, and a preference that changes how
+// the app looks before anybody asks for it is a surprise, not a default.
 //
 // Injected dependencies: none.
 
 export const EXPAND_SESSIONS_KEY = "librept_expand_sessions";
-export const EXPAND_CLIPBOARD_KEY = "librept_expand_clipboard";
 
 const ON = "1";
 
@@ -48,13 +47,4 @@ export function sessionCardsExpanded() {
 
 export function setSessionCardsExpanded(on) {
   write(EXPAND_SESSIONS_KEY, on);
-}
-
-/** Whether the clipboard's deck opens with every exercise card showing its detail. */
-export function clipboardCardsExpanded() {
-  return read(EXPAND_CLIPBOARD_KEY);
-}
-
-export function setClipboardCardsExpanded(on) {
-  write(EXPAND_CLIPBOARD_KEY, on);
 }

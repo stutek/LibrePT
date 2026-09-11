@@ -467,7 +467,7 @@ export const en = {
   notif_sandbox_desc:
     "These clients, plans and sessions are a sample gym. Try anything: nothing you do in here can reach your own data. To go back to your work, open the menu ☰ at the top right and choose Leave the sandbox — you will land where you left off.",
   expand_all: "Expand all cards",
-  collapse_all: "Back to the deck",
+  collapse_all: "Collapse all cards",
   sync_sandbox_note: "You are in the sandbox: this syncs the sandbox's own copy, not your work.",
   restore_refused_sandbox_file:
     "This file was made in the sandbox, so it cannot be restored into your own work. Open the sandbox and restore it there.",

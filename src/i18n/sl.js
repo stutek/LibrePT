@@ -434,7 +434,7 @@ export const sl = {
   notif_sandbox_desc:
     "Te stranke, načrti in seje so vzorčni fitnes. Preizkusi karkoli: nič, kar narediš tukaj, ne more doseči tvojih podatkov. Za vrnitev k svojemu delu odpri meni ☰ zgoraj desno in izberi Zapusti peskovnik — pristal boš tam, kjer si ostal.",
   expand_all: "Razpri vse kartice",
-  collapse_all: "Nazaj v kup",
+  collapse_all: "Skrči vse kartice",
   sync_sandbox_note: "V peskovniku si: to sinhronizira peskovnikovo kopijo, ne tvojega dela.",
   restore_refused_sandbox_file:
     "Ta datoteka je nastala v peskovniku, zato je ni mogoče obnoviti v tvoje delo. Odpri peskovnik in jo obnovi tam.",

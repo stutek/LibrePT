@@ -2987,33 +2987,9 @@ numbers are in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#422-x-measured-why-expanding-al
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#423-x-one-card-design-opened-up-ruled-and-shipped-2026-09-10); what shipped is in [CHANGELOG.md](CHANGELOG.md). The chrome question it left open is §42.13.
 
-### 42.4 Expand all is a SETTING, and there are two of them
+### 42.4 [x] Expand all is a SETTING — shipped 2026-09-10, halved by §42.14
 
-**Ruled 2026-09-10 (Simon):** *"expand all cards should be a permanent setting, and should be
-reversable with collapse all cards (ločeni nastavitvi za termine in za klipboard kartice)"*.
-
-Two corrections to what §42.1 shipped, both now in ([displayPrefs.js](src/data/displayPrefs.js)):
-
-1. **It persists.** The flag was written onto the live session, so it died with that session — a
-   trainer who wants the whole plan open wants it open tonight as well. It sits beside the theme now:
-   plain unscoped `localStorage`, shared by both workspaces, because it is a fact about the PERSON
-   and not about either workspace's data (§40.1).
-2. **Two settings, not one.** The day's session cards and the clipboard's exercise cards are read in
-   different postures — scanning tomorrow at a desk wants every session card open, mid-set wants the
-   clipboard down to the card being worked. One switch would make each answer wrong half the time.
-
-Both default OFF: a preference that changes how the app looks before anybody asks for it is a
-surprise, not a default.
-
-**Where each control lives: beside the cards it changes.** The clipboard's is in the ⋯ session menu;
-the day's is beside Today and the date jump, wearing the same chevron pair the cards' own controls
-wear. A setting two taps away from the thing it changes is a setting nobody finds — which is the
-argument against the other candidate home, a "display" section in the ☰ app menu.
-
-**The per-card control still works in both directions.** A session card's chevron is now an EXCEPTION
-to the setting rather than a list of open cards, so it opens or closes whichever way the setting
-points. Exceptions are cleared when the setting itself flips: a fresh default with yesterday's
-exceptions on top is neither answer.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#424-x-expand-all-is-a-setting-shipped-2026-09-10-halved-by-4214). One of the two settings is left: the day's session cards.
 
 ### 42.5 One head row, however open the card is
 
@@ -3110,16 +3086,13 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#4211-x-the-expa
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#4212-x-in-the-sandbox-the-badge-is-a-marker-not-a-link--shipped-2026-09-10).
 
-### 42.13 [Open question] Should an expanded card keep its border and shadow?
+### 42.13 [x] Should an expanded card keep its border and shadow? — dissolved 2026-09-11
 
-Left open by §42.3. A card that is not in focus is now one line, and ten of them fit the phone. If
-the expanded tier also dropped the card chrome — border, radius, shadow — it would save perhaps
-another 10px each and the deck would read as a table, which is what a trainer scanning a whole
-session is doing. It is also the point where the deck stops looking like the app.
+Closed without being answered: §42.14 removed the expanded tier the question was about. The reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#4213-x-should-an-expanded-card-keep-its-border-and-shadow-dissolved-2026-09-11).
 
-**What would settle it:** show the trainer who reported the legibility both, on their own phone.
-Nothing in the code has to be decided first — the chrome is three lines in
-[exerciseDeckOfCards.css](src/modules/clipboard/exerciseDeckOfCards.css)'s `.expanded` rule.
+### 42.14 [x] The clipboard's expand-all is gone — removed 2026-09-11
+
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#4214-x-the-clipboards-expand-all-is-gone-removed-2026-09-11).
 
 ## 43. [Brainstorm] The client's own copy: their plan, their feedback
 

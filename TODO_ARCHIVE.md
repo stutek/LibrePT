@@ -2647,6 +2647,89 @@ What stayed open is the card chrome question — see §42.13.
 
 ---
 
+### 42.4 [x] Expand all is a SETTING — shipped 2026-09-10, halved by §42.14
+
+**Ruled 2026-09-10 (Simon):** *"expand all cards should be a permanent setting, and should be
+reversable with collapse all cards (ločeni nastavitvi za termine in za klipboard kartice)"*.
+
+Two corrections to what §42.1 shipped, both now in ([displayPrefs.js](src/data/displayPrefs.js)):
+
+1. **It persists.** The flag was written onto the live session, so it died with that session — a
+   trainer who wants the whole plan open wants it open tonight as well. It sits beside the theme now:
+   plain unscoped `localStorage`, shared by both workspaces, because it is a fact about the PERSON
+   and not about either workspace's data (§40.1).
+2. **Two settings, not one.** The day's session cards and the clipboard's exercise cards are read in
+   different postures — scanning tomorrow at a desk wants every session card open, mid-set wants the
+   clipboard down to the card being worked. One switch would make each answer wrong half the time.
+
+Both default OFF: a preference that changes how the app looks before anybody asks for it is a
+surprise, not a default.
+
+**Where each control lives: beside the cards it changes.** The clipboard's is in the ⋯ session menu;
+the day's is beside Today and the date jump, wearing the same chevron pair the cards' own controls
+wear. A setting two taps away from the thing it changes is a setting nobody finds — which is the
+argument against the other candidate home, a "display" section in the ☰ app menu.
+
+**The per-card control still works in both directions.** A session card's chevron is now an EXCEPTION
+to the setting rather than a list of open cards, so it opens or closes whichever way the setting
+points. Exceptions are cleared when the setting itself flips: a fresh default with yesterday's
+exceptions on top is neither answer.
+
+**Amended 2026-09-11 by §42.14:** the clipboard's half of this is removed. Everything above still
+holds for the day's session cards, which is the one setting left.
+
+---
+
+### 42.13 [x] Should an expanded card keep its border and shadow? — dissolved 2026-09-11
+
+Left open by §42.3. A card that is not in focus is now one line, and ten of them fit the phone. If
+the expanded tier also dropped the card chrome — border, radius, shadow — it would save perhaps
+another 10px each and the deck would read as a table, which is what a trainer scanning a whole
+session is doing. It is also the point where the deck stops looking like the app.
+
+**What would settle it:** show the trainer who reported the legibility both, on their own phone.
+Nothing in the code has to be decided first — the chrome is three lines in
+[exerciseDeckOfCards.css](src/modules/clipboard/exerciseDeckOfCards.css)'s `.expanded` rule.
+
+**Never answered, and no longer askable.** §42.14 removed the expanded tier the same day: there is no
+state between the stack and the card in focus for the chrome question to be about. If the deck is
+ever asked to read as a table again, the question comes back with it.
+
+---
+
+### 42.14 [x] The clipboard's expand-all is gone — removed 2026-09-11
+
+**Ruled (Simon):** *"da, odpri vse je sedaj redundantno, lahko odstraniva"* — after §42.3 made every
+deck card one design.
+
+The control answered "let me see the whole session". Once a card said everything it had on its own
+row, it had nothing left to open: what it still did was stop the cards overlapping. **Measured on a
+phone (390×844), a plan with a three-movement circuit:** the circuit card's content needs 80px and
+the stack leaves it 85px; a rest needs 29px and is left 31px. Nothing was clipped, so the setting
+was buying a layout preference, not legibility — and it cost a menu item, a stored setting, a
+deck-wide render flag, a CSS state and a third card state to reason about.
+
+**What replaces it is a check, not a promise.** The deck's legibility test used to assert that a
+collapsed card's FIRST LINE clears the card above it; it now asserts that ALL of its content does
+([test_clipboard_deck_legibility.py](tests/medium/test_clipboard_deck_legibility.py)). That is the
+guard the removed setting was standing in for: with no way to open the cards, the stack has to be
+readable, and the margin is thin enough (2px on a one-line card) that anything which grows a card
+will say so.
+
+**What came off:** the ⋯ menu item and its label repaint, `clipboardCardsExpanded` in
+[displayPrefs.js](src/data/displayPrefs.js) with its `librept_expand_clipboard` key, the `expandAll`
+flag threaded to every card, `DeckCard.isExpanded`, and the `.expanded` layout rules. A card is now
+either the one being worked or one of the rest.
+
+**One word changed with it.** `collapse_all` read *"Back to the deck"* — deck language, written for
+the clipboard. The day's session cards are the only caller left and they are not a deck, so it says
+*"Collapse all cards"* / *"Skrči vse kartice"*.
+
+**Left standing:** the day's session-card setting (§42.4). Those cards genuinely hide something —
+participants and programme — so opening them all still opens something.
+
+---
+
 ### 42.8 [x] No badge on the card in focus — shipped 2026-09-10
 
 **Ruled (Simon):** *"do not create inFocus tag for active excersize (i like the background and border

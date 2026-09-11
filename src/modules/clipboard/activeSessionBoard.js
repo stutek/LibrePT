@@ -22,7 +22,6 @@
 //   completeCircuitRound, focusExerciseByIndex, startRestTimer  — deck card callbacks
 //   newRecordId()
 
-import { clipboardCardsExpanded } from "../../data/displayPrefs.js";
 import { gymNotesForPlan } from "../../domain/gymNotes.js";
 import { renderActiveUsersList } from "../common/activeUsersList.js";
 import { openFeedbackModal } from "../common/feedbackModal.js";
@@ -218,23 +217,6 @@ function syncTitleBarEditChrome() {
   // surface the title-bar Done button in its place.
   document.getElementById("btn-edit-plan")?.classList.toggle("hidden", editing);
   document.getElementById("btn-done-edit")?.classList.toggle("hidden", !editing);
-
-  // One control, both directions (TODO §42) — the label says which one it is, so there is no second
-  // menu item to leave behind in the wrong state. Read off the session, which is where the flag
-  // lives and what a reload restores.
-  const expandBtn = document.getElementById("btn-expand-all-text");
-  if (expandBtn) {
-    const expanded = clipboardCardsExpanded();
-    const key = expanded ? "collapse_all" : "expand_all";
-    // The attribute travels with the text, or the next language switch repaints whichever direction
-    // happened to be in the markup (i18n/domMappings.js reads it).
-    expandBtn.setAttribute("data-i18n", key);
-    expandBtn.textContent = t(key) || expandBtn.textContent;
-    // The glyph turns with the words, the same way the day's control and each card's own chevron
-    // do — down opens, up puts away (TODO §42.4).
-    const icon = expandBtn.parentElement?.querySelector("i");
-    if (icon) icon.className = `fa-solid fa-chevron-${expanded ? "up" : "down"}`;
-  }
 
   // In edit mode the ⋯ menu's destructive action targets the PLAN (clear its exercises), not the
   // whole session — relabel it so the trainer knows which one they're deleting. Preserve the icon.
