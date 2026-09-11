@@ -479,12 +479,14 @@ export const en = {
     "Its sessions were built around the day it was made, so today's board is empty. Resetting the sandbox data throws away everything you did in the sandbox. Your own work is not touched.",
   menu_sandbox_reset: "Reset sandbox data",
   sandbox_reset_title: "Reset the sandbox data?",
-  // The BOUNDARY, said once — not an inventory of what survives. Listing the exemptions (their own
-  // work, their details, their cloud connection) tells a reader the act is broad enough to have
-  // needed three, and they start looking for a fourth. What actually holds is guaranteed by
+  // NAMES what survives — clients, sessions and plans — on the maintainer's ruling (2026-09-11).
+  // It used to state the boundary once instead ("Nothing outside the sandbox changes"), on the
+  // reasoning that an inventory of exemptions makes a reader hunt for a fourth. Overruled: the
+  // person reading this is one tap from deleting things, and at that moment they want their own
+  // records named rather than a rule about scope. What actually holds is still guaranteed by
   // tests/unit_js/data/sandboxWorkspace.test.mjs, which is where a guarantee belongs.
   sandbox_reset_body:
-    "This deletes everything in the sandbox and builds a new one, with sample clients and sessions for today. Nothing outside the sandbox changes.",
+    "This deletes everything in the sandbox and builds a new one, with sample clients and sessions for today. Your own clients, sessions and plans outside the sandbox are safe and do not change.",
   sandbox_reset_decline: "Keep this one",
   sandbox_stale_confirm: "Reset sandbox data",
   sandbox_stale_decline: "Keep this one",
