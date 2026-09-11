@@ -3521,6 +3521,49 @@ things are built on the first model and have to be answered before any of this i
 "show only these" choices and a modal hides what is on. The date range is the one that is not simply
 another chip, because the board's whole navigation is already made of dates.
 
+#### The date range's click model — proposed 2026-09-11 (Simon), NOT decided
+
+Proposed as booking.com's: first click selects a day; a second click on the same day clears it; a
+second click on another day makes a range; then the third click moves the first date, the fourth
+moves the second, and odd/even clicks continue that pattern. Separately proposed: a click on an
+already-selected date removes it and the range collapses back to one day.
+
+**Booking.com does not do the odd/even part.** Its rule is keyed to MEANING — first click is the
+arrival, second the departure, third starts over — not to a count of clicks.
+
+**And the count is the defect.** Under the parity rule, what the next tap does depends on how many
+taps came before, a number that is nowhere on screen. Two identical taps on the same day give
+different results, and a trainer who mis-taps cannot see why. Every rule here has to be readable from
+what is VISIBLE.
+
+**The collapse-to-one-day proposal is good and should be kept**, with one clarification: it can only
+apply to the two ENDS. A day in the middle of a range looks selected too, and removing it would split
+the range into two pieces, which a single from–to filter cannot express.
+
+**Counter-proposal — five rules, every one read off the screen:**
+
+1. nothing selected, tap A → filter is the day A;
+2. one day A, tap A again → filter cleared;
+3. one day A, tap another day B → the range between them, in either direction (a tap BEFORE A gives
+   B–A, never an inverted range);
+4. a range, tap one of its two ends → that end goes, the other stays as a single day;
+5. a range, tap any other day → the NEARER end moves there: inside the range it narrows, outside it
+   widens. An exact tie has to be settled by a fixed rule — the start, arbitrarily, and what matters
+   is only that it never changes.
+
+Rule 5 does the work parity was meant to do, without anything to remember: the edge nearest the
+finger is the one that moves. Rule 4 guarantees a way back from a range to a single day, so no state
+is a dead end.
+
+**The conservative alternative to rule 5** is booking's own: a tap anywhere else starts over with one
+day. Easier to explain, but every narrowing then costs two taps instead of one.
+
+**What this costs, and it is the largest part of §45.6.** None of it is possible with the phone's own
+date picker: every date control in this app is a native `<input type="date">`, which returns one date
+and can neither show a range nor take two taps. This means a calendar of our own — a month grid,
+swiping between months, thumb-sized targets, marked ends and marked days between them, in five themes
+and two languages. A new component, not a setting on an existing one.
+
 Also unresolved and cheap to get wrong: what the list shows when a filter matches nothing. An empty
 board that does not say "because of a filter" is the same defect in a different costume.
 
@@ -3565,14 +3608,32 @@ So the app already contains a card that shows a past session compactly and expan
 and the client's history does not use it. That is why the two screens do not feel like one product:
 they are not one component with two states, they are two components with one meaning.
 
-**What to settle when we look at both screens together** (Simon, 2026-09-11: record it and
-investigate it together, after §45.1–§45.3 and §45.7):
+**Ruled (Simon, 2026-09-11):** in the CLIENT view, the history rendering goes and the clipboard's
+cards take its place.
 
-- whether the history card becomes `PastDeckCard`, or both become a third thing;
-- what history has that the deck has no place for — the feedback icons per exercise, the skipped
-  badge, the session duration — since those are what the deck's past card currently leaves out;
-- whether the client's history and the global history are the same card as well, or only the same
-  row.
+**One correction the ruling needs, found in the code.** The clipboard's past card is not a card for a
+SESSION — it is a card for one exercise. `buildPastExerciseItems`
+([exerciseDeckOfCards.js](src/modules/clipboard/exerciseDeckOfCards.js)) deliberately flattens a past
+session to its movements ("lists movements only"), dropping rests and circuit scaffolding, because it
+answers a different question: what this person lifted last time on THIS movement, read while standing
+next to them. Swapping it in as-is would lose four things the client's history carries today — the
+session duration, the circuit and rest structure, the skipped badge, and the per-exercise feedback
+icons. The last of those are the trainer's own signals, and plausibly the reason they open history at
+all.
+
+**So the shape that does what was asked without the loss:** the client's history stays a list of
+SESSIONS, and each session opens into the clipboard's own card classes (`ExerciseDeckCard`,
+`CircuitDeckCard`, `RestDeckCard`) in an "as performed" state, instead of historyView.js's separate
+rendering. Duration stays on the session card's header; the skipped badge and the signal icons live
+on the exercise card, which already has a place for signals. The duplicate rendering goes, which is
+the point, and nothing a trainer reads today disappears.
+
+**Open, because it leads to materially different work:** does the client view stay grouped by
+session, or become one flat stream of movement cards through time? The second reading has its own
+value — one movement's progress over months — but loses "what did we do on Tuesday". Recommendation:
+grouped by session, with the per-movement stream as a possible second view later.
+
+**Also still open:** whether the GLOBAL history is the same card as well, or only the same row.
 
 Related and already decided on paper: [§17](TODO.md)'s structured session history, which is the
 record both of them read.
