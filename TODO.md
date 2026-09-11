@@ -3682,14 +3682,32 @@ izgled"*. So: grouped by session, not a flat stream of movements — a SEQUENCE 
 board's own [sessionCard.js](src/modules/sessionList/sessionCard.js), with past sessions set apart by
 colour.
 
-That settles more than the fork. The client view stops being a history widget and becomes **this
-client's timeline**: their past and their upcoming sessions in one list, the same card in both, which
-is why one colour difference is all it takes to tell them apart. `sessionDayTemporal` already
-computes past/live/upcoming for the board, so the distinction exists and is not invented for this.
+**Corrected minutes later by Simon, and this is the ruling that stands:** *"ne razumem kaj je
+različnega med zaporedjem vaj in zaporedjem sej — zgodovina pri stranki naj bo enaka kot na
+clipboardu, torej vaje"*. So the cards are the CLIPBOARD's cards — exercises and circuits — not the
+board's session cards. "Enaka kot v sejah" meant the clipboard, not the dashboard.
 
-What still has to be placed, since the board's card was never asked to show them: the per-exercise
-feedback icons, the skipped badge and the session duration, all of which today's history card
-carries. A past card that opens into the clipboard's own item cards is where they belong.
+**The difference he asked about, since it decides the layout.** The clipboard shows the items of ONE
+session, in the order they will be performed, for one client. A client's history runs across months:
+the same movement appears twenty times and nothing says which one was Tuesday's. A flat run of
+exercise cards loses the boundary between sessions — not a detail, because "what did we do last
+time" is the question the screen exists to answer.
+
+**What that resolves to, and it adds no new component:** a continuous sequence of the clipboard's own
+item cards, **divided by sticky date headers** — the pattern the board already uses for sessions
+([sessionsView.js](src/modules/sessionList/sessionsView.js) builds exactly that). The cards are the
+clipboard's; a session is a HEADER, not a card. Past is set apart by colour, as ruled.
+
+**Shared plans across several clients** (Simon, same message): the clipboard keeps its client
+selection exactly as it is — tapping a name shows that person's own sequence of exercises, and only
+the names in the selection row are joined. So "past / current / upcoming" is always asked about one
+named person's sequence, never about a plan shared by three, which is what would otherwise make the
+colouring ambiguous.
+
+What still has to be placed, since the clipboard's item cards were never asked to show them: the
+per-exercise feedback icons, the skipped badge and the session duration, all of which today's history
+card carries. The duration belongs on the date header; the other two on the exercise card, which
+already has a place for signals.
 
 **Also still open:** whether the GLOBAL history is the same card as well, or only the same row.
 
