@@ -1,7 +1,7 @@
 // src/domain/intakeSender.js — who an intake link says it came from (TODO §26.3).
 //
-// Single responsibility: put the trainer's own name and number into an intake link, and read them
-// back out on the other side. No DOM, no sending — modules/clients/intakeInvite.js builds the link,
+// Single responsibility: put the trainer's own name, number and address into an intake link, and read
+// them back out on the other side. No DOM, no sending — modules/clients/intakeInvite.js builds the link,
 // modules/intake/ shows what this reads.
 //
 // **Why this exists.** The intake page asked a stranger for their health details while saying only
@@ -20,6 +20,12 @@
 // sends nothing anywhere — the client fills in a file and chooses who to share it with — so a forged
 // link gains an attacker nothing unless the client hands them the file in person.
 //
+// **The address rides along too, since 2026-09-11.** The client usually does not have the trainer's
+// number at all when the invitation arrives — it is in the signature of a message that an email, a
+// forward, or a share sheet keeping the link and dropping the text does not carry. So the page is the
+// one place the contact reliably appears, and it can hand it over as a saveable card
+// (data/trainerVcard.js) rather than a number to copy off a screen with a thumb.
+//
 // **In the FRAGMENT, never the query.** A `#` is not sent to any server, not written to any access
 // log, and not passed on in a `Referer` — the same reason session invites carry their payload there
 // (data/sessionEventPayload.js). The trainer's own phone number is personal data too.
@@ -33,9 +39,12 @@ const SENDER_KEY = "from";
  * Empty rather than a placeholder: a page that says "sent by —" is worse than a page that admits it
  * does not know, because the first one looks like it checked something.
  */
-export function senderFragment({ name, phone } = {}) {
-  const parts = [name, phone].map((part) => (part || "").trim());
-  if (!parts[0] && !parts[1]) return "";
+export function senderFragment({ name, phone, email } = {}) {
+  const parts = [name, phone, email].map((part) => (part || "").trim());
+  if (!parts.some(Boolean)) return "";
+  // Trailing empties are dropped rather than written as "Sam||": the link is read by a person
+  // deciding whether to trust it, and every character of it is one they may have to look at.
+  while (parts.length && !parts.at(-1)) parts.pop();
   return `#${SENDER_KEY}=${encodeURIComponent(parts.join("|"))}`;
 }
 
@@ -49,7 +58,12 @@ export function senderFromFragment(hash) {
   const raw = (hash || "").replace(/^#/, "");
   const match = new URLSearchParams(raw).get(SENDER_KEY);
   if (!match) return null;
-  const [name = "", phone = ""] = match.split("|");
-  const trimmed = { name: name.trim().slice(0, 80), phone: phone.trim().slice(0, 40) };
-  return trimmed.name || trimmed.phone ? trimmed : null;
+  // Three parts since 2026-09-11; a two-part fragment is a link already sent, and it still reads.
+  const [name = "", phone = "", email = ""] = match.split("|");
+  const trimmed = {
+    name: name.trim().slice(0, 80),
+    phone: phone.trim().slice(0, 40),
+    email: email.trim().slice(0, 80),
+  };
+  return Object.values(trimmed).some(Boolean) ? trimmed : null;
 }

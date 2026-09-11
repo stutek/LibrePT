@@ -32,8 +32,15 @@
 // `noticeUrlFor`, `formUrlFor`.
 
 import { buildClientSignup } from "../../data/clientSignup.js";
+import {
+  VCARD_MEDIA_TYPE,
+  buildTrainerVcard,
+  trainerVcardFileName,
+} from "../../data/trainerVcard.js";
+import { dialledForm } from "../../domain/contactChannel.js";
 import { senderFromFragment } from "../../domain/intakeSender.js";
 import { $id, renderMarkupOnce } from "../common/dom.js";
+import { downloadFile } from "../common/download.js";
 import { keepFormDraft } from "../common/formDraft.js";
 import {
   buildSignupFile,
@@ -67,6 +74,19 @@ export function renderIntakeViewShell() {
            a phishing attempt (asked 2026-08-23). -->
       <div id="intake-sender" class="intake-sender" hidden>
         <p id="intake-sender-for" class="intake-sender-for"></p>
+        <!-- The contact itself, tappable (asked 2026-09-11). The client usually does NOT have the
+             trainer's number when the invitation arrives: it rides in the signature of a message
+             that an email, a forward, or a share sheet keeping the link and dropping the text does
+             not carry. This page is then the one place it appears, and a number to be copied off a
+             screen with a thumb is one nobody copies. The .hidden CLASS again, not the attribute,
+             for the reason spelled out at the buttons below. (No backticks in this comment: the
+             markup is a template literal.) -->
+        <p class="intake-sender-contact">
+          <a id="intake-sender-phone" class="intake-sender-link hidden"></a>
+          <a id="intake-sender-email" class="intake-sender-link hidden"></a>
+        </p>
+        <button type="button" id="intake-sender-save"
+                class="btn secondary-btn intake-sender-save hidden"></button>
         <p id="intake-sender-check" class="intake-hint"></p>
       </div>
 
@@ -205,6 +225,41 @@ function readForm(t, { todayIso, consentVersion, lang }) {
   return signup;
 }
 
+/** Who this link says it came from, and how to reach them.
+ *
+ * **The sentence names one thing, and the contact details are their own lines.** A number written
+ * into the middle of a sentence is a number to be read out and typed by hand, which on a phone
+ * nobody does; as a `tel:` line it is one tap, and as a saved card it is there tomorrow too.
+ *
+ * Everything here is a stranger's text (domain/intakeSender.js): it is written with `textContent`,
+ * and the two links are BUILT from it rather than taken from it — a crafted address carrying its own
+ * `?subject=` must not be able to write the client's mail for them.
+ */
+function showSender(sender, t) {
+  $id("intake-sender-for").textContent = t("intake_sender_for").replace(
+    "{who}",
+    sender.name || sender.phone || sender.email,
+  );
+
+  const phone = $id("intake-sender-phone");
+  phone.classList.toggle("hidden", !sender.phone);
+  phone.textContent = sender.phone;
+  // The written number keeps its spaces on screen and loses them in the link: `dialledForm` is the
+  // one place in the app that decides what a dialled number looks like (domain/contactChannel.js).
+  phone.href = `tel:${dialledForm(sender.phone)}`;
+
+  const email = $id("intake-sender-email");
+  email.classList.toggle("hidden", !sender.email);
+  email.textContent = sender.email;
+  email.href = `mailto:${encodeURIComponent(sender.email)}`;
+
+  // Offered only when there is a name to put on the card — data/trainerVcard.js says why a nameless
+  // one is worse than none.
+  const save = $id("intake-sender-save");
+  save.textContent = t("intake_sender_save");
+  save.classList.toggle("hidden", !buildTrainerVcard(sender));
+}
+
 export function setupIntakeForm(deps) {
   const {
     t,
@@ -230,10 +285,7 @@ export function setupIntakeForm(deps) {
     const senderBox = $id("intake-sender");
     if (senderBox) {
       senderBox.hidden = !sender;
-      if (sender) {
-        const who = [sender.name, sender.phone].filter(Boolean).join(", ");
-        $id("intake-sender-for").textContent = t("intake_sender_for").replace("{who}", who);
-      }
+      if (sender) showSender(sender, t);
     }
     const notice = $id("intake-notice-link");
     if (notice) notice.href = noticeUrlFor(current);
@@ -266,6 +318,15 @@ export function setupIntakeForm(deps) {
   // consent tick is the one field that does NOT come back — agreement is given, not restored.
   const draft = keepFormDraft($id("intake-form"), () => "intake");
   draft.restore();
+
+  // Built on this phone out of what the link carried: nothing is fetched, nothing is sent, and the
+  // page stays what it promises to be. Read fresh at tap time rather than closed over, so it cannot
+  // hand over a card from a fragment that has since changed.
+  $id("intake-sender-save")?.addEventListener("click", () => {
+    const sender = senderFromFragment(window.location.hash) || {};
+    const card = buildTrainerVcard(sender);
+    if (card) downloadFile(card, trainerVcardFileName(sender), VCARD_MEDIA_TYPE);
+  });
 
   $id("intake-send")?.addEventListener("click", async () => {
     const file = currentFile();

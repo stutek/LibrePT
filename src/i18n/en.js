@@ -284,6 +284,7 @@ export const en = {
   intake_consent:
     "I agree to my trainer keeping these details and using them to plan and log my training. They stay on my trainer's own device, and may also be kept as a backup copy in my trainer's own private cloud storage — no other service receives them. I can withdraw this at any time by telling my trainer.",
   intake_sender_for: "You are filling this in for {who}.",
+  intake_sender_save: "Save this contact",
   intake_sender_check:
     "If that is not the person who gave you this link, do not fill it in. This page sends nothing by itself: your answers become a file on this phone, and you choose who to share it with.",
   intake_notice_link: "What happens to your data",

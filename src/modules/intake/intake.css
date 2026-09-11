@@ -92,6 +92,34 @@
   margin: 0;
 }
 
+/* The trainer's own number and address, as things to tap rather than to copy. Laid out as separate
+   rows with real padding, because this is read at arm's length on somebody's own phone and a link
+   the width of its text is a link that gets mis-tapped. */
+.intake-sender-contact {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  margin: 0 0 8px 0;
+}
+
+.intake-sender-link {
+  padding: 8px 0;
+  font-weight: 600;
+  color: var(--primary, #6366f1);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.intake-sender-link:hover,
+.intake-sender-link:focus-visible {
+  text-decoration: underline;
+}
+
+.intake-sender-save {
+  margin: 0 0 10px 0;
+}
+
 .intake-form {
   display: flex;
   flex-direction: column;

@@ -78,6 +78,26 @@ stranger's phone holding a LibrePT database, or a terms modal in front of the in
 A trainer's link may name it (`?lang=sl`); otherwise their own device is a better guess than the app's
 default, since they have never chosen one here.
 
+## The client gets the trainer's contact, not just their name
+
+The page says who the link came from, because a page asking a stranger for health details while
+naming nobody is the shape of a phishing attempt. Since 2026-09-11 it also hands the contact over.
+
+**The client usually has no other copy of it.** The trainer's name, number and address ride in the
+link's fragment ([intakeSender.js](../src/domain/intakeSender.js)), and the invitation's own message
+signs off with the first two — but that signature is carried by an SMS and lost by an email read on a
+laptop, a forward, or a share sheet that keeps the link and drops the text. The page is the one
+surface every route arrives at.
+
+So the number and the address are **tappable lines**, not words inside a sentence, and **Save this
+contact** writes a vCard ([trainerVcard.js](../src/data/trainerVcard.js)) the phone opens straight
+into its address book. It is built on the client's own device out of what the link already told it:
+nothing is fetched, and nothing is sent. Neither `sms:` nor `mailto:` can attach a file, which is the
+same constraint that decided the submission's own transport above.
+
+A link that names no trainer offers no card. `FN` is mandatory in vCard 3.0, and a contact whose only
+name is a phone number lands in the address book as an entry the client cannot find again.
+
 ## The review dialog is the trust boundary
 
 There is no signature to verify and deliberately never will be — signing needs a key exchange, which
@@ -115,6 +135,10 @@ enters their register ([signupReviewDialog.js](../src/modules/clients/signupRevi
 | Health detail is optional, and absent rather than blank | [clientSignup.test.mjs](../tests/unit_js/data/clientSignup.test.mjs) |
 | Nothing a sender invents reaches the register | [clientSignup.test.mjs](../tests/unit_js/data/clientSignup.test.mjs) |
 | Contact-only dedupe; two namesakes never merged | [clientSignup.test.mjs](../tests/unit_js/data/clientSignup.test.mjs) |
+| The trainer's number and address are one tap, not something to copy | [test_intake_form.py](../tests/medium/test_intake_form.py) |
+| The trainer can be saved into the address book from the page | [test_intake_form.py](../tests/medium/test_intake_form.py) |
+| A card a phone refuses to open: endings, escaping, folding | [trainerVcard.test.mjs](../tests/unit_js/data/trainerVcard.test.mjs) |
+| A link written before the address travelled still reads | [intakeSender.test.mjs](../tests/unit_js/domain/intakeSender.test.mjs) |
 | Media type and extension are stable declarations | [signupFile.test.mjs](../tests/unit_js/data/signupFile.test.mjs) |
 | The wrong attachment is refused, not half-read | [signupFile.test.mjs](../tests/unit_js/data/signupFile.test.mjs) |
 | A filename cannot become a path or a spoofed extension | [signupFile.test.mjs](../tests/unit_js/data/signupFile.test.mjs) |

@@ -1543,9 +1543,29 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#262-superseded-
    encoder, pinned and checksummed the way Node and Biome already are
    — no npm, so nothing a JS-side dependency audit would need to cover.
 
-### 26.4 The trainer's own QR needs no code at all
-It encodes a **static** URL, so it is a pre-rendered SVG in `assets/` — printable, stickable on the
-gym wall, one file per language variant. No runtime encoder on the trainer side in either phase.
+**[x] The trainer's own contact reaches the client — 2026-09-11.** Asked: *"the client does not even
+know the trainer's number when the invitation arrives"*. True in more cases than the signature covers —
+an invitation sent by email, a forwarded one, or a share sheet that keeps the link and drops the text.
+So the intake page, which is the one surface every route lands on, now carries the contact itself: the
+trainer's e-mail rides in the fragment beside the name and number
+([intakeSender.js](src/domain/intakeSender.js)), both are shown as **tappable lines** rather than words
+inside a sentence, and **Save this contact** builds an RFC 6350 vCard on the client's own device
+([trainerVcard.js](src/data/trainerVcard.js)). Nothing is fetched and nothing is sent. A link written
+before the address travelled still reads. Offered only when the link named the trainer: `FN` is
+mandatory, and a card named by a phone number is an address-book entry nobody can find again.
+
+### 26.4 The trainer's own QR has to be drawn, not printed
+It was to encode a **static** URL — a pre-rendered SVG in `assets/`, printable, stickable on the gym
+wall, one file per language variant, and no runtime encoder on the trainer's side in either phase.
+
+**Revised 2026-09-11, and the reason is §26.3's own signature.** A static file is the same for
+every install, so it cannot carry `#from=` — the name, number and address that let the client check
+who sent them and save the contact. A wall QR therefore identifies nobody, which is the state the
+page was deliberately moved out of on 2026-08-23. Wanted instead (asked 2026-09-11): the trainer's
+phone **draws the QR on screen and shows it to the client**, as the alternative to typing a number or
+an address into the invite dialog at all. That needs the vendored encoder of §26.3 step 3 on the
+TRAINER's side, which Phase 2 was already going to pay for on the client's side; the printed leaflet
+stays possible as the version that names nobody.
 
 ### 26.5 [x] Import is a review, never an auto-save — 2026-08-17
 

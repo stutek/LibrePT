@@ -11,5 +11,8 @@ export function downloadFile(contents, filename, mimeType) {
   document.body.appendChild(anchor);
   anchor.click();
   document.body.removeChild(anchor);
-  URL.revokeObjectURL(url);
+  // Freed on the next tick, not in this frame: Safari reads the blob asynchronously after the click,
+  // and revoking immediately there produced an empty file (learned once already, in
+  // modules/intake/signupDelivery.js).
+  setTimeout(() => URL.revokeObjectURL(url), 0);
 }

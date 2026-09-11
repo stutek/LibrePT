@@ -15,6 +15,7 @@ test("what the trainer typed survives the trip to the client's phone", () => {
   assert.deepEqual(senderFromFragment(link), {
     name: "Sam Trainer",
     phone: "+386 40 111 222",
+    email: "",
   });
 });
 
@@ -40,6 +41,7 @@ test("half a signature is still worth showing", () => {
   assert.deepEqual(senderFromFragment(senderFragment({ name: "Sam" })), {
     name: "Sam",
     phone: "",
+    email: "",
   });
 });
 
@@ -52,4 +54,31 @@ test("a crafted link cannot push the page around", () => {
 
   assert.ok(long.name.length <= 80, long.name.length);
   assert.ok(long.phone.length <= 40, long.phone.length);
+});
+
+test("the address travels too, so the saved contact is worth saving", () => {
+  // Added 2026-09-11: the client often never sees the trainer's number at all — an invitation sent
+  // by email, forwarded, or shared through an app that keeps the link and drops the text. The page
+  // is then the only place the contact appears, and a contact without an address is half of one.
+  const link = senderFragment({
+    name: "Sam Trainer",
+    phone: "+386 40 111 222",
+    email: "sam@example.com",
+  });
+
+  assert.deepEqual(senderFromFragment(link), {
+    name: "Sam Trainer",
+    phone: "+386 40 111 222",
+    email: "sam@example.com",
+  });
+});
+
+test("a link sent before the address rode along still reads", () => {
+  // Two-part fragments are in messages already sent, and a link stops working the day it is opened,
+  // not the day it is written.
+  assert.deepEqual(senderFromFragment("#from=Sam%20Trainer%7C040111222"), {
+    name: "Sam Trainer",
+    phone: "040111222",
+    email: "",
+  });
 });

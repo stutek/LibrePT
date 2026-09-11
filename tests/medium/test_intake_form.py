@@ -269,3 +269,64 @@ def test_where_sharing_works_it_is_the_one_tap_route(page, local_server):
 
     assert [entry["how"] for entry in delivered] == ["share"]
     expect(page.locator("#intake-status")).to_contain_text("Shared")
+
+
+def test_the_trainer_contact_is_one_tap_rather_than_something_to_copy(
+    page, local_server
+):
+    """Asked 2026-09-11: "the client does not even know the trainer's number when the invitation
+    arrives". It is in the signature of a message that an email, a forward, or a share sheet keeping
+    the link and dropping the text does not carry — so this page is the one place it reliably
+    appears, and a number to be copied off a screen with a thumb is one nobody copies."""
+    page.add_init_script(
+        "window.__intakeHash = '#from=' + "
+        "encodeURIComponent('Sam Trainer|+386 40 111 222|sam@example.com');"
+    )
+    _mount(page, local_server)
+
+    phone = page.locator("#intake-sender-phone")
+    expect(phone).to_be_visible()
+    expect(phone).to_have_text("+386 40 111 222")
+    expect(phone).to_have_attribute("href", "tel:+38640111222")
+
+    email = page.locator("#intake-sender-email")
+    expect(email).to_be_visible()
+    expect(email).to_have_text("sam@example.com")
+    # Percent-encoded, the same form the invite dialog's own `mailto:` uses: the address comes out
+    # of a link fragment anybody can edit, and one carrying its own `?subject=` must not be able to
+    # write the client's mail for them.
+    expect(email).to_have_attribute("href", "mailto:sam%40example.com")
+
+
+def test_the_trainer_can_be_saved_into_the_address_book(page, local_server):
+    """One tap puts the trainer in the client's contacts, built on the client's own device out of
+    what the link carried — nothing is fetched and nothing is sent."""
+    page.add_init_script(
+        "window.__intakeHash = '#from=' + "
+        "encodeURIComponent('Sam Trainer|+386 40 111 222|sam@example.com');"
+    )
+    _mount(page, local_server)
+
+    with page.expect_download() as download_info:
+        page.click("#intake-sender-save")
+    download = download_info.value
+    assert download.suggested_filename == "sam-trainer.vcf"
+
+    with open(download.path(), encoding="utf-8") as handle:
+        card = handle.read()
+    assert "FN:Sam Trainer" in card
+    assert "TEL;TYPE=CELL:+386 40 111 222" in card
+    assert "EMAIL;TYPE=INTERNET:sam@example.com" in card
+
+
+def test_a_link_carrying_no_name_offers_no_contact_card(page, local_server):
+    """`FN` is mandatory, and a card whose only name is a phone number lands in the address book as
+    an entry the client cannot find again. The number stays tappable, which is the part that
+    matters."""
+    page.add_init_script(
+        "window.__intakeHash = '#from=' + encodeURIComponent('|+386 40 111 222');"
+    )
+    _mount(page, local_server)
+
+    expect(page.locator("#intake-sender-phone")).to_be_visible()
+    expect(page.locator("#intake-sender-save")).to_be_hidden()

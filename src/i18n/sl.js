@@ -283,6 +283,7 @@ export const sl = {
   intake_consent:
     "Strinjam se, da moj trener hrani te podatke in jih uporablja za načrtovanje in beleženje mojega treninga. Ostanejo na trenerjevi napravi, lahko pa se hranijo tudi kot varnostna kopija v njegovi osebni shrambi v oblaku — nobena druga storitev jih ne prejme. Privolitev lahko kadarkoli prekličem, tako da to povem trenerju.",
   intake_sender_for: "To izpolnjuješ za: {who}.",
+  intake_sender_save: "Shrani ta kontakt",
   intake_sender_check:
     "Če to ni oseba, ki ti je dala povezavo, obrazca ne izpolnjuj. Ta stran sama ničesar ne pošlje: iz tvojih odgovorov nastane datoteka na tem telefonu, komu jo daš, pa izbereš sama.",
   intake_notice_link: "Kaj se zgodi s tvojimi podatki",

@@ -22,6 +22,22 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ## 2026-09-11 — A new sandbox opens on a week that was worked
 
+### Added
+
+- **A client invited to sign themselves up can now keep their trainer's contact** (TODO §26.3). The
+  invitation's message signs off with the trainer's name and number, and that signature is exactly
+  what an e-mail read on a laptop, a forwarded message, or a share sheet that keeps the link and
+  drops the text does not carry — so the person filling the form in often had no way to reach back.
+  The intake page is the one surface every route arrives at, so it carries the contact itself: the
+  trainer's **e-mail address** now travels in the link beside their name and number
+  ([intakeSender.js](src/domain/intakeSender.js)), both are shown as lines you **tap** rather than
+  words buried in a sentence, and **Save this contact** writes a vCard
+  ([trainerVcard.js](src/data/trainerVcard.js)) that opens straight into the phone's address book.
+  Built on the client's own device from what the link already said — nothing is fetched and nothing
+  is sent, the same as everything else on that page. Links sent before today still work. A link that
+  names no trainer offers no card: a contact whose only name is a phone number lands in the address
+  book as an entry nobody can find again.
+
 ### Fixed
 
 - **Nothing in a freshly built sandbox is overdue by days any more.** The demo's repeating session
