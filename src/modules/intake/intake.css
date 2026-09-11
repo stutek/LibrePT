@@ -220,3 +220,16 @@
 .intake-privacy-note {
   margin-top: 14px;
 }
+
+/* The saved file, pre-addressed. Hidden until there is a file, so it never sits on screen as an
+   email somebody could send with nothing attached. */
+.intake-send-to {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.intake-send-to .intake-hint {
+  margin: 0;
+}

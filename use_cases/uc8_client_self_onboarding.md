@@ -98,6 +98,15 @@ same constraint that decided the submission's own transport above.
 A link that names no trainer offers no card. `FN` is mandatory in vCard 3.0, and a contact whose only
 name is a phone number lands in the address book as an entry the client cannot find again.
 
+**It works the other way too.** Saving the file used to end with *share it with your trainer* — a
+stranger left to find an address this page already knew. When the link carried one, the page now
+offers a `mailto:` with the address, the subject and the message already in it, and the client
+attaches the file they just saved. It appears **after** the save and never before, because an email
+sent with nothing attached is worse than typing an address by hand; not for the share route, which
+has already delivered the file; and not as a text, which cannot carry one at all. The message itself
+holds no instruction to the client — that sits on the page, where the person who must act on it is
+looking.
+
 ## The review dialog is the trust boundary
 
 There is no signature to verify and deliberately never will be — signing needs a key exchange, which
@@ -138,6 +147,8 @@ enters their register ([signupReviewDialog.js](../src/modules/clients/signupRevi
 | The trainer's number and address are one tap, not something to copy | [test_intake_form.py](../tests/medium/test_intake_form.py) |
 | The trainer can be saved into the address book from the page | [test_intake_form.py](../tests/medium/test_intake_form.py) |
 | A card a phone refuses to open: endings, escaping, folding | [trainerVcard.test.mjs](../tests/unit_js/data/trainerVcard.test.mjs) |
+| A saved file is pre-addressed to the trainer the link named | [test_intake_form.py](../tests/medium/test_intake_form.py) |
+| A link with no address offers no pre-addressed email | [test_intake_form.py](../tests/medium/test_intake_form.py) |
 | A link written before the address travelled still reads | [intakeSender.test.mjs](../tests/unit_js/domain/intakeSender.test.mjs) |
 | Media type and extension are stable declarations | [signupFile.test.mjs](../tests/unit_js/data/signupFile.test.mjs) |
 | The wrong attachment is refused, not half-read | [signupFile.test.mjs](../tests/unit_js/data/signupFile.test.mjs) |

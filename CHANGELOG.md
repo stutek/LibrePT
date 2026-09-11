@@ -36,6 +36,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   carries are settings the trainer can change. The printed
   leaflet code planned before this is **dropped**: a static file is the same for every install, so it
   can name no trainer, which is the state this page was deliberately moved out of.
+- **The file a client saves is now pre-addressed to their trainer** (TODO §26.3). Saving it used to end
+  with *share that file with your trainer* — a stranger left to find an address this page already knew.
+  When the invitation carried one, the page now offers **Write the email to <name>**: the composer opens
+  with the address, a subject and a sentence in it, and they attach the file they just saved. No
+  `mailto:` can carry a file, which is why the attaching stays theirs to do and why the page, not the
+  message, is where that instruction sits. It appears only **after** the save — an email sent with
+  nothing attached is worse than typing an address by hand — never for the share route, which has
+  already delivered the file, and never as a text message, which cannot carry one at all.
 - **A client invited to sign themselves up can now keep their trainer's contact** (TODO §26.3). The
   invitation's message signs off with the trainer's name and number, and that signature is exactly
   what an e-mail read on a laptop, a forwarded message, or a share sheet that keeps the link and

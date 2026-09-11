@@ -330,3 +330,47 @@ def test_a_link_carrying_no_name_offers_no_contact_card(page, local_server):
 
     expect(page.locator("#intake-sender-phone")).to_be_visible()
     expect(page.locator("#intake-sender-save")).to_be_hidden()
+
+
+def test_a_saved_file_is_pre_addressed_to_the_trainer(page, local_server):
+    """Asked 2026-09-11. Saving the file used to end with "share it with your trainer" — leaving a
+    stranger to find an address this page already knew. A `mailto:` cannot carry the file, so the
+    composer opens with the address and the words in it and the client attaches what they saved."""
+    page.add_init_script(
+        "window.__intakeHash = '#from=' + "
+        "encodeURIComponent('Sam Trainer|+386 40 111 222|sam@example.com');"
+    )
+    _mount(page, local_server)
+    _fill(page)
+    page.check("#intake-consent")
+
+    offer = page.locator("#intake-send-to")
+    expect(offer).to_be_hidden()
+
+    delivered = _deliver(page, "#intake-save")
+    expect(offer).to_be_visible()
+    expect(page.locator("#intake-send-to-email")).to_have_text(
+        "Write the email to Sam Trainer"
+    )
+    href = page.get_attribute("#intake-send-to-email", "href")
+    assert href.startswith("mailto:sam%40example.com?subject=")
+    # The message carries no instruction to the client — that is on the page, where they are looking.
+    assert "attach" not in href.lower()
+    expect(page.locator("#intake-send-to-hint")).to_contain_text(delivered[0]["name"])
+
+
+def test_a_link_with_no_address_offers_no_pre_addressed_email(page, local_server):
+    """A text message cannot carry a file, so there is no phone equivalent to fall back to: the page
+    says to share the file instead, which is what it has always said."""
+    page.add_init_script(
+        "window.__intakeHash = '#from=' + encodeURIComponent('Sam Trainer|+386 40 111 222');"
+    )
+    _mount(page, local_server)
+    _fill(page)
+    page.check("#intake-consent")
+    _deliver(page, "#intake-save")
+
+    expect(page.locator("#intake-send-to")).to_be_hidden()
+    expect(page.locator("#intake-status")).to_contain_text(
+        "Share that file with your trainer"
+    )

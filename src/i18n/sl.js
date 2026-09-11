@@ -296,6 +296,13 @@ export const sl = {
   intake_share_text: "Tu so moji podatki — datoteka se odpre v LibrePT.",
   intake_sent: "Deljeno. Trener te bo dodal iz te datoteke.",
   intake_saved: "Shranjeno. Datoteko deli s trenerjem — pripni jo sporočilu.",
+  // Ponujeno po shranjevanju, ne prej: naslov je uporaben šele, ko datoteka obstaja. BESEDILO je
+  // sporočilo, ki ga stranka pošlje, zato v njem ni navodil zanjo — ta so na strani, kjer jih bere
+  // tisti, ki mora po njih ravnati.
+  intake_send_to_email: "Napiši e-pošto: {who}",
+  intake_send_to_subject: "Moji podatki za trening",
+  intake_send_to_body: "Pozdravljeni, tu so moji podatki za trening.",
+  intake_send_to_hint: "Temu sporočilu pripni datoteko {file}. Telefon jo je shranil med prenose.",
   intake_send_failed_detail: "Tvoj trener bo morda potreboval tole:",
   intake_send_failed:
     "Deljenje ni uspelo. Uporabi »Shrani datoteko za deljenje« in jo pripni sporočilu.",

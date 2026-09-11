@@ -1578,6 +1578,17 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#262-superseded-
    encoder, pinned and checksummed the way Node and Biome already are
    — no npm, so nothing a JS-side dependency audit would need to cover.
 
+**[x] Step 2 built 2026-09-11 — the saved file is pre-addressed.** Saving the file used to end with
+*share it with your trainer*, leaving a stranger to find an address this page already knew. Now, when
+the link carried one, the page offers a `mailto:` with the address, a subject and a sentence already
+in it ([intakeView.js](src/modules/intake/intakeView.js)); the client attaches the file they just
+saved, because no `mailto:` can carry one. **Revealed after the save, never before** — an email sent
+with nothing attached is worse than typing the address by hand — and never for the share route, which
+has already delivered the file, nor as a text, which cannot hold one. The sketch above wanted a
+separate `?to=`; the address that arrived in `#from=` does both jobs, so there is one value and not
+two to keep in step. The MESSAGE holds no instruction to the client: that is on the page, where the
+person who has to act on it is looking.
+
 **[x] The trainer's own contact reaches the client — 2026-09-11.** Asked: *"the client does not even
 know the trainer's number when the invitation arrives"*. True in more cases than the signature covers —
 an invitation sent by email, a forwarded one, or a share sheet that keeps the link and drops the text.

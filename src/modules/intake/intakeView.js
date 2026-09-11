@@ -145,6 +145,15 @@ export function renderIntakeViewShell() {
           <button type="button" id="intake-send" class="btn primary-btn intake-btn hidden"></button>
           <button type="button" id="intake-save" class="btn secondary-btn intake-btn"></button>
         </div>
+        <!-- The saved file still has to reach somebody, and until 2026-09-11 the page said only
+             "share it with your trainer" - leaving a stranger to find an address this page already
+             knew. Revealed after the SAVE and not before: an email with nothing attached is the one
+             outcome worse than typing the address by hand. Not offered for the share route, which
+             has already delivered the file, and not as a text message, which cannot carry one. -->
+        <div id="intake-send-to" class="intake-send-to hidden">
+          <a id="intake-send-to-email" class="btn primary-btn intake-btn"></a>
+          <p id="intake-send-to-hint" class="intake-hint"></p>
+        </div>
         <p id="intake-privacy-note" class="intake-hint intake-privacy-note"></p>
       </form>
     </section>
@@ -260,6 +269,31 @@ function showSender(sender, t) {
   save.classList.toggle("hidden", !buildTrainerVcard(sender));
 }
 
+/** The saved file, pre-addressed to the trainer the link named.
+ *
+ * **A `mailto:` cannot carry the file**, which is the whole shape of this: the composer opens with
+ * the address, the subject and a sentence already in it, and the client attaches what they just
+ * saved. Offered only when the link carried an address — a text message cannot hold a file at all,
+ * so there is no phone equivalent to fall back to.
+ *
+ * The subject and the body are BUILT here and percent-encoded, because the address is a stranger's
+ * text out of a URL fragment: one carrying its own `?body=` must not get to write the message.
+ */
+function offerToEmailTheTrainer(t, fileName) {
+  const sender = senderFromFragment(window.location.hash);
+  const box = $id("intake-send-to");
+  if (!box) return;
+  box.classList.toggle("hidden", !sender?.email);
+  if (!sender?.email) return;
+
+  const subject = encodeURIComponent(t("intake_send_to_subject"));
+  const body = encodeURIComponent(t("intake_send_to_body"));
+  const link = $id("intake-send-to-email");
+  link.href = `mailto:${encodeURIComponent(sender.email)}?subject=${subject}&body=${body}`;
+  link.textContent = t("intake_send_to_email").replace("{who}", sender.name || sender.email);
+  $id("intake-send-to-hint").textContent = t("intake_send_to_hint").replace("{file}", fileName);
+}
+
 export function setupIntakeForm(deps) {
   const {
     t,
@@ -271,6 +305,10 @@ export function setupIntakeForm(deps) {
     noticeUrlFor,
     formUrlFor,
   } = deps;
+
+  // What the saved file was called, so a language switch after the save redraws the pre-addressed
+  // email in the language the reader has just asked for rather than leaving half the page behind.
+  let savedFileName = null;
 
   function applyLanguage() {
     const current = lang();
@@ -296,6 +334,7 @@ export function setupIntakeForm(deps) {
       button.classList.toggle("is-active", button.dataset.intakeLang === current);
       button.setAttribute("aria-pressed", String(button.dataset.intakeLang === current));
     }
+    if (savedFileName) offerToEmailTheTrainer(t, savedFileName);
   }
 
   function currentFile() {
@@ -354,6 +393,8 @@ export function setupIntakeForm(deps) {
     saveSignupFile(file, platform);
     draft.forget();
     setStatus(t, "intake_saved", "done");
+    savedFileName = file.name;
+    offerToEmailTheTrainer(t, savedFileName);
   });
 
   applyLanguage();

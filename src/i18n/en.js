@@ -297,6 +297,14 @@ export const en = {
   intake_share_text: "Here are my details — this file opens in LibrePT.",
   intake_sent: "Shared. Your trainer will add you from that file.",
   intake_saved: "Saved. Share that file with your trainer — attach it to a message.",
+  // Offered after the save, not before it: an address is only useful once there is a file to attach.
+  // The BODY is the message the client sends, so it holds no instructions to the client — those are
+  // on the page, where the person who has to act on them is looking.
+  intake_send_to_email: "Write the email to {who}",
+  intake_send_to_subject: "My details for training",
+  intake_send_to_body: "Hello, here are my details for training.",
+  intake_send_to_hint:
+    "Attach the file {file} to that message. Your phone saved it with your downloads.",
   // Precedes the browser's own untranslated message (TODO §45.4). Says who the line is for, so
   // nobody reads a developer's error text as an instruction to them.
   intake_send_failed_detail: "Your trainer may need this:",
