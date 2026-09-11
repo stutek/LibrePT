@@ -722,6 +722,12 @@ h6 {
   font-weight: 600;
   color: var(--text-muted);
 }
+/* What is wrong with one field, said under that field. Colour is not the message — the sentence is
+   — so this is only the emphasis on text that already says what to do. */
+.form-error {
+  color: var(--danger);
+  font-weight: 600;
+}
 .form-control {
   background-color: var(--input-bg);
   border: 1px solid var(--border-color);

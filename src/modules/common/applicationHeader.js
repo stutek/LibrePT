@@ -442,6 +442,13 @@ export function renderHeaderShell() {
                 <i class="fa-solid fa-arrows-rotate"></i> <span id="menu-sandbox-reset-text" data-i18n="menu_sandbox_reset">Reset sandbox data</span>
               </button>
               <div class="menu-divider" role="separator"></div>
+              <!-- The trainer's own name, phone and address (TODO §45.2). With the settings rather
+                   than with the clients: there is one trainer per install, and what they type here
+                   signs the invitations every client receives. -->
+              <button id="menu-trainer-details" class="session-menu-item" role="menuitem">
+                <i class="fa-solid fa-id-card"></i> <span data-i18n="menu_trainer_details">My details</span>
+              </button>
+              <div class="menu-divider" role="separator"></div>
               <button id="menu-clients-register" class="session-menu-item" role="menuitem">
                 <i class="fa-solid fa-users"></i> <span id="menu-clients-register-text" data-i18n="menu_clients_register">Clients Directory</span>
               </button>
@@ -645,6 +652,10 @@ function setupAppMenu() {
   on("menu-import-program", () => {
     closeMenu();
     deps.openProgramImport?.();
+  });
+  on("menu-trainer-details", () => {
+    closeMenu();
+    deps.openTrainerDetails?.();
   });
   // For a CLIENT who was emailed their data export, not for the trainer — which is why it sits in
   // the app menu and not on a client record: the person opening it has no client record.

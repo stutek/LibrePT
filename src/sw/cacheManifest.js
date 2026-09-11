@@ -130,6 +130,7 @@ self.swCacheManifest = (() => {
     "./modules/common/feedbackModal.js",
     "./modules/common/feedbackRouteDialog.js",
     "./modules/common/notificationArea.js",
+    "./modules/common/trainerDetailsDialog.js",
     "./modules/common/populateDropdownSelectors.js",
     "./modules/common/buildInfoDialog.js",
     "./modules/common/consentForm.js",

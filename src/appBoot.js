@@ -57,6 +57,10 @@ import {
   initNotificationArea,
   setupNotificationGestures,
 } from "./modules/common/notificationArea.js";
+import {
+  initTrainerDetailsDialog,
+  openTrainerDetailsDialog,
+} from "./modules/common/trainerDetailsDialog.js";
 import { renderIntakeViewShell, setupIntakeForm } from "./modules/intake/intakeView.js";
 import { initPlansView } from "./modules/plans/plansView.js";
 import {
@@ -201,10 +205,15 @@ export function bootHeader(deps) {
     route: () => window.location.pathname + window.location.search,
     repoUrl: ISSUE_TRACKER_URL,
   });
+  // The trainer's own name, phone and address (TODO §45.2) — another menu item with no other
+  // prerequisite, and its store is plain localStorage rather than anything that has to be booted.
+  initTrainerDetailsDialog({ t: deps.t });
+
   initApplicationHeader({
     ...deps,
     openFeedbackRoute: openFeedbackRouteDialog,
     openProgramImport: openProgramImportDialog,
+    openTrainerDetails: openTrainerDetailsDialog,
   });
   setupApplicationHeader();
 }
