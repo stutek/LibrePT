@@ -1593,7 +1593,8 @@ mandatory, and a card named by a phone number is an address-book entry nobody ca
 It was to encode a **static** URL — a pre-rendered SVG in `assets/`, printable, stickable on the gym
 wall, one file per language variant, and no runtime encoder on the trainer's side in either phase.
 
-**Revised 2026-09-11, and the reason is §26.3's own signature.** A static file is the same for
+**[x] Built 2026-09-11 as a code the trainer's phone DRAWS. Revised first, and the reason is
+§26.3's own signature.** A static file is the same for
 every install, so it cannot carry `#from=` — the name, number and address that let the client check
 who sent them and save the contact. A wall QR therefore identifies nobody, which is the state the
 page was deliberately moved out of on 2026-08-23. Wanted instead (asked 2026-09-11): the trainer's
@@ -1601,6 +1602,16 @@ phone **draws the QR on screen and shows it to the client**, as the alternative 
 an address into the invite dialog at all. That needs the vendored encoder of §26.3 step 3 on the
 TRAINER's side, which Phase 2 was already going to pay for on the client's side; the printed leaflet
 stays possible as the version that names nobody.
+
+**What shipped.** *Show a code to scan* in the invite dialog draws the invitation on the trainer's
+own screen ([intakeInviteDialog.js](src/modules/clients/intakeInviteDialog.js)), carrying the same
+`#from=` every other route carries, so the client sees who it is from and can save the contact. The
+encoder is vendored ([vendor/qrcode.js](src/vendor/qrcode.js), MIT, checksummed against upstream),
+and the app builds only the geometry ([qrCode.js](src/modules/common/qrCode.js)) — a library that
+returns markup would be markup built from a string, which this app does not do. Black on white
+whatever the theme, because it is a picture for somebody else's camera. Hidden again on every open:
+a code left up from the last invitation is one the next person scans without either of them meaning
+it.
 
 ### 26.5 [x] Import is a review, never an auto-save — 2026-08-17
 
@@ -1651,9 +1662,11 @@ client reads unaccompanied.
       [UC8](use_cases/uc8_client_self_onboarding.md) documents the whole flow with spec↔test
       traceability. End to end, proven in one e2e test: a stranger fills in `/intake`, shares the file,
       and the trainer accepts them into the register without typing anything.
-- [ ] **Phase 2** — the vendored QR encoder and client-side QR display, plus the static trainer-side
-      QR asset. Additive: both phases land on the same review dialog. Worth deferring until the
-      messaging handoff has actually been tried in a gym.
+- [~] **Phase 2 — the trainer's half built 2026-09-11.** The vendored encoder and the code on the
+      TRAINER's screen shipped (§26.4); the static leaflet asset is dropped rather than deferred,
+      since a printed file names nobody. **Left: the code on the CLIENT's screen** — the return path
+      for a phone with no messaging app and no signal, which is §26.3 step 3 and lands on the same
+      review dialog. Worth deferring until the messaging handoff has actually been tried in a gym.
 - [x] **Tests — done 2026-08-17.** `tests/unit_js/` for the record, the file artifact and delivery
       (the "codec round-trip" became file round-trip, since the transport is a file);
       `tests/medium/` for the intake form mounted cold and for the review dialog; `tests/e2e/` for the

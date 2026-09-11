@@ -13,7 +13,7 @@ tags:
 
 LibrePT's own source is MIT-licensed (see [LICENSE](LICENSE)). This file covers the third-party
 assets that are **vendored into `src/` and therefore redistributed** in every published build — the
-webfonts and the icon font. Their licences are separate from, and unaffected by, LibrePT's.
+webfonts, the icon font, and one JavaScript library. Their licences are separate from, and unaffected by, LibrePT's.
 
 **Why this file exists.** These are not build-time dependencies that stay on a developer's machine;
 they are bytes served to every visitor from GitHub Pages. The SIL Open Font License requires, in
@@ -40,6 +40,27 @@ modification; no glyph outlines were altered.
 
 Licence text: <https://openfontlicense.org> (SIL OFL 1.1). Each upstream repository ships the full
 `OFL.txt`, which is the authoritative copy.
+
+## qrcode-generator 1.5.2 — MIT
+
+Copyright (c) 2009 Kazuhiko Arase. Vendored as [`src/vendor/qrcode.js`](src/vendor/qrcode.js),
+fetched 2026-09-11 from `https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.5.2/qrcode.js`.
+Upstream: <https://github.com/kazuhikoarase/qrcode-generator>. Full licence:
+<https://opensource.org/licenses/mit-license.php>.
+
+It draws the code a trainer holds up for a client to scan
+([modules/common/qrCode.js](src/modules/common/qrCode.js)). It is here rather than fetched from a CDN
+for the reason everything else in this app is: a gym has no signal, and a code that needs the network
+to be drawn is one that fails exactly where it is used.
+
+**Changes made**: one line. `export default qrcode;` and the comment above it, appended at the end.
+The file's own UMD tail offers itself to AMD and CommonJS, and this app is plain ES modules with no
+bundler, so without an export there is no way to reach it. Nothing above that line is edited —
+[test_vendored_files.py](tests/unit/test_vendored_files.py) checksums the rest against upstream, and
+`biome.json` keeps the formatter out of `src/vendor/`.
+
+The words *QR Code* are a registered trademark of DENSO WAVE INCORPORATED, as upstream's own header
+states.
 
 ## Font Awesome Free 6.4.0
 

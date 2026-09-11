@@ -137,6 +137,17 @@ def analyze_file(path):
     return analyze_source(path.read_bytes(), str(path.relative_to(REPO_ROOT)))
 
 
+# Third-party code, redistributed as it ships (THIRD_PARTY_NOTICES.md). NOT an allowlist of the kind
+# the docstring below forbids: that one held OUR functions, which we could have split and had not.
+# These are somebody else's, byte-for-byte, and the only two ways to satisfy the gate on them are to
+# edit a vendored file — which makes the next upgrade a merge — or to drop the feature.
+VENDORED = ("vendor/",)
+
+
+def is_vendored(path):
+    return any(f"/{part}" in path.as_posix() for part in VENDORED)
+
+
 def over_limit(findings):
     """The subset of analyze_*() findings actually over MAX_COMPLEXITY."""
     return [f for f in findings if f[3] > MAX_COMPLEXITY]
@@ -150,6 +161,8 @@ def main():
     """
     findings = []
     for path in sorted(SRC_DIR.rglob("*.js")):
+        if is_vendored(path):
+            continue
         findings.extend(over_limit(analyze_file(path)))
 
     if findings:
@@ -164,7 +177,7 @@ def main():
         )
         return 1
 
-    checked = sum(1 for _ in SRC_DIR.rglob("*.js"))
+    checked = sum(1 for path in SRC_DIR.rglob("*.js") if not is_vendored(path))
     print(
         f"  ✓ Cyclomatic complexity: {checked} file(s), every function ≤ {MAX_COMPLEXITY}."
     )

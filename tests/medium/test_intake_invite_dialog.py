@@ -139,3 +139,41 @@ def test_the_next_person_starts_from_an_empty_field(page, local_server):
 
     expect(page.locator("#intake-invite-contact")).to_have_value("")
     assert page.get_attribute(SEND, "href") is None, "and nowhere to send it"
+
+
+def test_the_code_on_screen_is_the_route_that_needs_no_typing(page, local_server):
+    """Asked 2026-09-11: the two people are standing together, so the number and the address are
+    things to be spelled out and mistyped. The trainer holds up a code instead and the client's own
+    camera opens the page — no channel, no contact detail, and nothing sent anywhere."""
+    _open(page, local_server)
+
+    code = page.locator("#intake-invite-qr")
+    expect(code).to_be_hidden()
+
+    page.click("#intake-invite-qr-show")
+    expect(code).to_be_visible()
+    expect(page.locator("#intake-invite-qr-hint")).to_contain_text("camera")
+
+    # A drawn symbol, not an empty box: enough squares to be a code, in a picture with its quiet
+    # zone around it.
+    drawn = page.get_attribute("#intake-invite-qr-path", "d")
+    assert drawn.count("z") > 100, drawn[:80]
+    assert page.get_attribute("#intake-invite-qr-svg", "viewBox").startswith("-4 -4 ")
+
+    # Big enough to read off a phone held at arm's length.
+    box = page.locator("#intake-invite-qr-svg").bounding_box()
+    assert box["width"] >= 200, box
+
+
+def test_a_code_left_up_from_the_last_invitation_is_never_shown(page, local_server):
+    """The code names the trainer and opens a sign-up page. One still on screen when the dialog is
+    opened for the next person is one they scan without either of them meaning it."""
+    _open(page, local_server)
+    page.click("#intake-invite-qr-show")
+    expect(page.locator("#intake-invite-qr")).to_be_visible()
+
+    page.click("#dialog-intake-invite .modal-close-btn")
+    page.evaluate("() => window.__open()")
+    page.wait_for_selector("#dialog-intake-invite[open]")
+
+    expect(page.locator("#intake-invite-qr")).to_be_hidden()

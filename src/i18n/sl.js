@@ -460,6 +460,10 @@ export const sl = {
     "To odpre tvojo poštno aplikacijo z že napisanim vabilom. Pošlješ ga tam.",
   intake_invite_needs_contact: "Vpiši telefonsko številko ali e-naslov ali uporabi poti spodaj.",
   intake_invite_other_ways: "Druge poti pošiljanja",
+  intake_invite_show_qr: "Pokaži kodo za skeniranje",
+  intake_invite_qr_label: "Koda, ki odpre stran za prijavo",
+  intake_invite_qr_hint:
+    "Pokaži mu to kodo in ga prosi, naj vanjo usmeri kamero telefona. Odpre se ista stran za prijavo, na njej je tvoje ime.",
   intake_invite_subject: "Tvoji podatki za najin trening",
   intake_invite_sent: "Povezava poslana",
   intake_invite_copied: "Povezava kopirana",

@@ -27,6 +27,7 @@
 // (the share-sheet/clipboard route, so this module owns no `navigator`).
 
 import { closeModal, openModal, renderMarkupOnce } from "../common/dom.js";
+import { qrCodePath } from "../common/qrCode.js";
 import { intakeInviteHref, intakeInviteUrl } from "./intakeInvite.js";
 
 let deps = null;
@@ -53,9 +54,20 @@ export function renderIntakeInviteDialog() {
     <p id="intake-invite-channel" class="text-sm intake-invite-channel"></p>
     <div class="modal-actions intake-invite-actions">
       <a id="intake-invite-send" class="btn primary-btn disabled" role="button"><span></span></a>
+      <button type="button" class="btn secondary-btn" id="intake-invite-qr-show"></button>
       <button type="button" class="btn secondary-btn" id="intake-invite-share"></button>
     </div>
     <input type="text" id="intake-invite-link" class="form-input hidden" readonly />
+    <!-- The code the trainer holds up, for the person standing in front of them: no number typed,
+         no address spelled out, no channel at all (TODO §26.3 step 3). White ground and black
+         modules whatever the theme is set to - this is a picture for somebody else's camera, not a
+         surface of this app. -->
+    <div id="intake-invite-qr" class="intake-invite-qr hidden">
+      <svg id="intake-invite-qr-svg" class="intake-invite-qr-svg" role="img" viewBox="0 0 1 1">
+        <path id="intake-invite-qr-path"></path>
+      </svg>
+      <p id="intake-invite-qr-hint" class="text-sm"></p>
+    </div>
   </div>
 </dialog>
 `,
@@ -116,6 +128,18 @@ export function openIntakeInviteDialog() {
     if (element) element.textContent = t(key);
   }
 
+  const qrBox = document.getElementById("intake-invite-qr");
+  // Hidden on every open, like the field is emptied: the code on screen names the trainer, and one
+  // left up from the last invitation is a code the next person scans without either of them meaning
+  // it to happen.
+  qrBox.classList.add("hidden");
+  document.getElementById("intake-invite-qr-show").textContent = t("intake_invite_show_qr");
+  document.getElementById("intake-invite-qr-hint").textContent = t("intake_invite_qr_hint");
+  document
+    .getElementById("intake-invite-qr-svg")
+    .setAttribute("aria-label", t("intake_invite_qr_label"));
+  document.getElementById("intake-invite-qr-show").onclick = () => showCode();
+
   const field = document.getElementById("intake-invite-contact");
   // Emptied on every open: this is the next person, not the last one, and a number left in the box
   // is how the wrong client gets invited twice.
@@ -130,6 +154,27 @@ export function openIntakeInviteDialog() {
 
   openModal("dialog-intake-invite");
   field.focus();
+}
+
+/** The code on the trainer's own screen, as the alternative to typing anything at all (§26.4).
+ *
+ * **Drawn here rather than printed on a leaflet.** A static QR is the same file for every install,
+ * so it can carry no `#from=` — it would name nobody, which is the state the intake page was
+ * deliberately moved out of. This one carries the trainer's name, number and address, so the person
+ * scanning it sees who it is from and can save the contact.
+ *
+ * The field is blurred so the keyboard drops: on a phone the code is what has to be on screen, and
+ * half of it behind a keyboard is a code that will not scan.
+ */
+function showCode() {
+  const url = intakeInviteUrl({ lang: deps.getLang(), trainer: deps.getTrainer?.() });
+  const code = qrCodePath(url);
+  if (!code) return;
+  const svg = document.getElementById("intake-invite-qr-svg");
+  svg.setAttribute("viewBox", code.viewBox);
+  document.getElementById("intake-invite-qr-path").setAttribute("d", code.d);
+  document.getElementById("intake-invite-qr").classList.remove("hidden");
+  document.getElementById("intake-invite-contact").blur();
 }
 
 /** The way out that needs no contact detail: the phone's own share sheet, the clipboard behind it,
