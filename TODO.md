@@ -2170,6 +2170,14 @@ a. [~] **A recurrence model** — **the rule and the board shipped 2026-08-22**,
    evening follows the rule again. What travels is what the rule DESCRIBES — title, slot, place, who
    is in it — never the date: "we are moving to Wednesdays" is a change to `weekdays`, a different
    sentence and a different control, and still unbuilt.
+
+   **Open: an evening that went by and was never opened counts up forever.** A derived evening is
+   not a record, so nothing can mark it finished, and the board therefore shows every past evening
+   the trainer did not tap as a session still waiting to be run — red, "Overdue 64h", and growing.
+   The demo no longer shows it (2026-09-11: [sessionSeriesSeed.js](src/data/sessionSeriesSeed.js)
+   seeds the evenings already held as finished sessions), but a real trainer's board still will, and
+   the board looks one week back. Two candidate answers, both unruled: stop the count at the end of
+   the day the session was scheduled for, or let a past evening be dismissed the way a message is.
 b. [x] **A net-vs-slot time meter** while a programme is being authored (event 11) — 2026-08-22.
    [planDuration.js](src/domain/planDuration.js) plus a pill in the plan editor's toolbar: minutes
    of work against minutes of slot, quiet while it fits and marked when it does not. An ESTIMATE,

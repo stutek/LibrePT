@@ -1,5 +1,7 @@
 // src/data/sessions.js — seed sessions; times are generated relative to "now" so the demo always looks live.
 
+import { DEFAULT_SERIES_PAST_SESSIONS } from "./sessionSeriesSeed.js";
+
 // The three venues this trainer runs sessions at. Referenced by every session so the
 // session view can show a "date time location" context line (e.g. "2026-07-17 10:00 Trib gym base").
 export const LOCATIONS = {
@@ -141,7 +143,7 @@ export const DEFAULT_SESSIONS = (() => {
       maxCapacity: 2,
     },
     {
-      id: "s09f2e3d",
+      id: "s17f2e3d",
       ...slot(+4, +5),
       title: "Open Slot (Drop-in)",
       location: LOCATIONS.GYM,
@@ -204,6 +206,11 @@ export const DEFAULT_SESSIONS = (() => {
       maxCapacity: 1,
       day: "tomorrow",
     },
+    // Every seeded session whose slot is behind us is marked `completed`, these two included
+    // (reported 2026-09-11). An unfinished past session is not a neutral record: the board reads it
+    // as a session still waiting to be run and puts a red "Overdue 25h" on it. That is a true thing
+    // to say about a trainer's own forgotten evening and a false one to say about a sandbox built
+    // ninety seconds ago, where nothing has been forgotten yet.
     {
       id: "s12f2e3d",
       time: "09:00 - 10:30",
@@ -214,6 +221,7 @@ export const DEFAULT_SESSIONS = (() => {
       routineId: "r10d5e6f",
       maxCapacity: 2,
       day: "yesterday",
+      completed: true,
     },
     {
       id: "s13f2e3d",
@@ -225,6 +233,7 @@ export const DEFAULT_SESSIONS = (() => {
       routineId: "r11d5e6f",
       maxCapacity: 3,
       day: "yesterday",
+      completed: true,
     },
     {
       id: "s14f2e3d",
@@ -263,5 +272,10 @@ export const DEFAULT_SESSIONS = (() => {
       maxCapacity: 4,
       day: "upcoming",
     },
+    // The evenings the repeating session already held (sessionSeriesSeed.js). They are ordinary
+    // stored sessions, so they belong in this list rather than beside the rule that produced them:
+    // everything that asks what a seeded session is — the provenance stamp, a backup, a restore —
+    // reads this one export.
+    ...DEFAULT_SERIES_PAST_SESSIONS,
   ];
 })();

@@ -40,6 +40,10 @@ renderClientsViewShell();""",
 )
 
 
+# The rows this series produced, told apart from the demo seed's own repeating session.
+_OWN_ROWS = "window.__state.sessions.filter((s) => s.seriesId === 'ser-test')"
+
+
 def _mount(page, local_server):
     load_with_stub(page, local_server, SERIES_STUB)
     page.wait_for_selector("#sessions-categories-grid")
@@ -73,15 +77,14 @@ def test_acting_on_one_evening_makes_it_a_real_session(page, local_server):
     """Touching an evening is what makes it specific, and specific things are records — otherwise
     there is nothing to move, nothing to finish and nothing to write history against."""
     _mount(page, local_server)
-    assert (
-        page.evaluate("() => window.__state.sessions.filter((s) => s.seriesId).length")
-        == 0
-    )
+    # Scoped to THIS series: the seeded demo carries its own repeating session, whose past evenings
+    # are stored rows on purpose (src/data/sessionSeriesSeed.js).
+    assert page.evaluate(f"() => {_OWN_ROWS}.length") == 0
 
     page.locator(".session-card", has_text="Repeating Strength").first.click()
     page.wait_for_timeout(300)
 
-    stored = page.evaluate("() => window.__state.sessions.filter((s) => s.seriesId)")
+    stored = page.evaluate(f"() => {_OWN_ROWS}")
     assert len(stored) == 1, stored
     # It keeps the date the SERIES scheduled, which is what stops the rule producing it again.
     assert stored[0]["occurrenceDate"]
@@ -100,7 +103,7 @@ def test_a_cancelled_evening_stays_gone(page, local_server):
         """async () => {
           const series = await import(new URL('domain/sessionSeries.js', document.baseURI).href);
           const state = window.__state;
-          const id = state.sessions.find((s) => s.seriesId).id;
+          const id = state.sessions.find((s) => s.seriesId === 'ser-test').id;
           state.sessions = series.sessionsAfterRemoving(state.sessions, [id]);
           return series
             .sessionsWithSeries(state.sessions, state.sessionSeries, {

@@ -20,6 +20,29 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-09-11 — A new sandbox opens on a week that was worked
+
+### Fixed
+
+- **Nothing in a freshly built sandbox is overdue by days any more.** The demo's repeating session
+  ("Tuesday & Thursday Strength") starts a week back, and its past evenings existed only as output
+  of the rule — which nothing can mark finished. So a sandbox built on a Friday morning opened on a
+  Tuesday evening flagged red, *Overdue 64h*. Those evenings are now seeded as finished sessions,
+  the way an evening a trainer touches becomes a record. Yesterday's two sessions, *Core & Stability*
+  and *Mobility & Recovery*, are finished for the same reason.
+- **Two demo sessions shared one id.** *Return-to-Play Rehab* and *Open Slot (Drop-in)* were both
+  seeded as `s09f2e3d`, so the board kept one of them and silently dropped the other.
+
+### Changed
+
+- **The menu row is now "Reset sandbox data"**, and so is the button on the offer that appears when
+  a sandbox has gone flat. It used to say *Build a fresh sandbox*, which reads next to *Leave the
+  sandbox* as though it made a second one to go to. It does not: it throws away the sandbox you are
+  standing in and builds it again. The dialog still says, in full, that this deletes everything in
+  the sandbox and that nothing outside it changes.
+
+---
+
 ## 2026-09-11 — "Open every card" is gone, because there is nothing left to open
 
 ### Removed
