@@ -476,9 +476,9 @@ export const en = {
   sandbox_badge_desc: "Sandbox — nothing here is your own work. Open the risks & data-loss notice.",
   sandbox_stale_title: "This sandbox is from earlier",
   sandbox_stale_body:
-    "Its sessions were built around the day it was made, so today's board is empty. Building a fresh one throws away everything you did in the sandbox. Your own work is not touched.",
-  menu_sandbox_reset: "Build a fresh sandbox",
-  sandbox_reset_title: "Throw this sandbox away?",
+    "Its sessions were built around the day it was made, so today's board is empty. Resetting the sandbox data throws away everything you did in the sandbox. Your own work is not touched.",
+  menu_sandbox_reset: "Reset sandbox data",
+  sandbox_reset_title: "Reset the sandbox data?",
   // The BOUNDARY, said once — not an inventory of what survives. Listing the exemptions (their own
   // work, their details, their cloud connection) tells a reader the act is broad enough to have
   // needed three, and they start looking for a fourth. What actually holds is guaranteed by
@@ -486,7 +486,7 @@ export const en = {
   sandbox_reset_body:
     "This deletes everything in the sandbox and builds a new one, with sample clients and sessions for today. Nothing outside the sandbox changes.",
   sandbox_reset_decline: "Keep this one",
-  sandbox_stale_confirm: "Build a fresh sandbox",
+  sandbox_stale_confirm: "Reset sandbox data",
   sandbox_stale_decline: "Keep this one",
   sandbox_timer_expired_title: "A timer finished in your own work",
   sandbox_timer_return: "Go back to my work",
@@ -531,12 +531,12 @@ export const en = {
   // separate database (TODO §40) there is nothing to clear, which is the stronger promise.
   story_welcome_title: "Welcome to LibrePT",
   story_welcome_body:
-    "LibrePT is an app for personal trainers. You manage appointments with it and build individual and group sessions, and while a workout runs it is your notebook. This guided walkthrough follows the story of three new clients: from the decision to train together and the first invitation, to a session you adjust while it runs. The whole walkthrough happens in the sandbox: a separate copy of the app, kept for learning and trying things out. Everything you do in it is kept apart from your business data about clients, appointments and workouts. You can leave the sandbox at any time from the menu, or build a fresh one.",
+    "LibrePT is an app for personal trainers. You manage appointments with it and build individual and group sessions, and while a workout runs it is your notebook. This guided walkthrough follows the story of three new clients: from the decision to train together and the first invitation, to a session you adjust while it runs. The whole walkthrough happens in the sandbox: a separate copy of the app, kept for learning and trying things out. Everything you do in it is kept apart from your business data about clients, appointments and workouts. You can leave the sandbox at any time from the menu, or reset its data.",
   // The way out is named because this is where somebody decides not to do this at all. ▾ parks the
   // card and ✕ ends the run, and the ✕ is only on the bar the parked card leaves behind
   // (modules/demo/walkthrough.css hides it while the card is open) — so the order matters.
   story_step_welcome:
-    "Show me points out three things: the SANDBOX badge in the top bar, and in the ☰ menu the rows Leave the sandbox and Build a fresh sandbox. Next starts the walkthrough. To try the app without the guide, put this card away with ▾ in its top right corner. A small bar stays on screen: its ✕ ends the walkthrough.",
+    "Show me points out three things: the SANDBOX badge in the top bar, and in the ☰ menu the rows Leave the sandbox and Reset sandbox data. Next starts the walkthrough. To try the app without the guide, put this card away with ▾ in its top right corner. A small bar stays on screen: its ✕ ends the walkthrough.",
   story_persona_trainer: "Your phone",
   story_chapter_gym: "In the gym",
   story_persona_client: "Ana's phone",

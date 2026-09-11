@@ -444,13 +444,13 @@ export const sl = {
     "Peskovnik — nič tukaj ni tvoje delo. Odpri obvestilo o tveganjih in izgubi podatkov.",
   sandbox_stale_title: "Ta peskovnik je od prej",
   sandbox_stale_body:
-    "Njegove seje so bile zgrajene okoli dneva, ko je nastal, zato je današnja plošča prazna. Nov peskovnik zavrže vse, kar si v njem naredil. Tvojega dela se ne dotakne.",
-  menu_sandbox_reset: "Zgradi nov peskovnik",
-  sandbox_reset_title: "Zavržem ta peskovnik?",
+    "Njegove seje so bile zgrajene okoli dneva, ko je nastal, zato je današnja plošča prazna. Ponastavitev podatkov zavrže vse, kar si v peskovniku naredil. Tvojega dela se ne dotakne.",
+  menu_sandbox_reset: "Ponastavi podatke peskovnika",
+  sandbox_reset_title: "Ponastavim podatke peskovnika?",
   sandbox_reset_body:
     "To izbriše vse v peskovniku in zgradi novega, z vzorčnimi strankami in treningi za danes. Ničesar zunaj peskovnika se ne dotakne.",
   sandbox_reset_decline: "Obdrži tega",
-  sandbox_stale_confirm: "Zgradi nov peskovnik",
+  sandbox_stale_confirm: "Ponastavi podatke peskovnika",
   sandbox_stale_decline: "Obdrži tega",
   sandbox_timer_expired_title: "V tvojem delu je potekel časovnik",
   sandbox_timer_return: "Nazaj na moje delo",
@@ -495,9 +495,9 @@ export const sl = {
   // aplikacija tika, tikanje pa je v slovenščini spolsko določeno, zato "(-la)" in ne množina.
   story_welcome_title: "Dobrodošel(-la) v LibrePT",
   story_welcome_body:
-    "LibrePT je aplikacija za osebne trenerje. Z njo upravljaš termine in sestavljaš individualne in skupinske treninge, med vadbo pa ti služi kot digitalna beležnica. Ta vodeni ogled pelje skozi zgodbo treh novih strank: od odločitve za skupen trening in prvega povabila do treninga, ki ga prilagajaš med potekom. Ves ogled se dogaja v peskovniku: to je ločena kopija aplikacije, namenjena učenju in preizkušanju. Vse, kar narediš v njej, je ločeno od tvojih poslovnih podatkov o strankah, terminih in vadbah. Peskovnik lahko kadar koli zapustiš prek menija ali pa zgradiš novega.",
+    "LibrePT je aplikacija za osebne trenerje. Z njo upravljaš termine in sestavljaš individualne in skupinske treninge, med vadbo pa ti služi kot digitalna beležnica. Ta vodeni ogled pelje skozi zgodbo treh novih strank: od odločitve za skupen trening in prvega povabila do treninga, ki ga prilagajaš med potekom. Ves ogled se dogaja v peskovniku: to je ločena kopija aplikacije, namenjena učenju in preizkušanju. Vse, kar narediš v njej, je ločeno od tvojih poslovnih podatkov o strankah, terminih in vadbah. Peskovnik lahko kadar koli zapustiš prek menija ali pa ponastaviš njegove podatke.",
   story_step_welcome:
-    "Z gumbom Pokaži mi ti vodnik pokaže troje: značko PESKOVNIK v zgornji vrstici ter v meniju ☰ vrstici Zapusti peskovnik in Zgradi nov peskovnik. Z gumbom Naprej začneš. Kartico lahko kadar koli pospraviš z ikono ▾ v njenem zgornjem desnem kotu in aplikacijo preizkušaš brez vodenja; na vrstici, ki ostane, je ✕, ki vodeni ogled konča.",
+    "Z gumbom Pokaži mi ti vodnik pokaže troje: značko PESKOVNIK v zgornji vrstici ter v meniju ☰ vrstici Zapusti peskovnik in Ponastavi podatke peskovnika. Z gumbom Naprej začneš. Kartico lahko kadar koli pospraviš z ikono ▾ v njenem zgornjem desnem kotu in aplikacijo preizkušaš brez vodenja; na vrstici, ki ostane, je ✕, ki vodeni ogled konča.",
   story_persona_trainer: "Tvoj telefon",
   story_chapter_gym: "V telovadnici",
   story_persona_client: "Anin telefon",

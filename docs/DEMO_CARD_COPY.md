@@ -399,9 +399,9 @@ the demo is where they became visible.
   treninga, ki ga prilagajaš med potekom. Ves ogled se dogaja v peskovniku: to je ločena kopija
   aplikacije, namenjena učenju in preizkušanju. Vse, kar narediš v njej, je ločeno od tvojih
   poslovnih podatkov o strankah, terminih in vadbah. Peskovnik lahko kadar koli zapustiš prek menija
-  ali pa zgradiš novega.
+  ali pa ponastaviš njegove podatke.
 - **navodilo:** Z gumbom **Pokaži mi** ti vodnik pokaže troje: značko **PESKOVNIK** v zgornji
-  vrstici ter v meniju **☰** vrstici **Zapusti peskovnik** in **Zgradi nov peskovnik**. Z gumbom
+  vrstici ter v meniju **☰** vrstici **Zapusti peskovnik** in **Ponastavi podatke peskovnika**. Z gumbom
   **Naprej** začneš. Kartico lahko kadar koli pospraviš z ikono **▾** v njenem zgornjem desnem kotu
   in aplikacijo preizkušaš brez vodenja; na vrstici, ki ostane, je **✕**, ki vodeni ogled konča.
 
@@ -414,9 +414,9 @@ the demo is where they became visible.
   first invitation, to a session you adjust while it runs. The whole walkthrough happens in the
   sandbox: a separate copy of the app, kept for learning and trying things out. Everything you do in
   it is kept apart from your business data about clients, appointments and workouts. You can leave
-  the sandbox at any time from the menu, or build a fresh one.
+  the sandbox at any time from the menu, or reset its data.
 - **caption:** **Show me** points out three things: the **SANDBOX** badge in the top bar, and in the
-  **☰** menu the rows **Leave the sandbox** and **Build a fresh sandbox**. **Next** starts the
+  **☰** menu the rows **Leave the sandbox** and **Reset sandbox data**. **Next** starts the
   walkthrough. To try the app without the guide, put this card away with **▾** in its top right
   corner. A small bar stays on screen: its **✕** ends the walkthrough.
 
@@ -452,7 +452,7 @@ which is what it should be anyway, since its instruction is *"Z gumbom Naprej za
 
 - **The card HAS a Show me now, and it is a sequence.** The card promises a sandbox you can leave or
   rebuild; Show me points at the three controls that promise rests on — the SANDBOX badge, and
-  behind ☰ the rows *Leave the sandbox* and *Build a fresh sandbox* — then closes the menu again.
+  behind ☰ the rows *Leave the sandbox* and *Reset sandbox data* — then closes the menu again.
   The two rows are pointed at, never tapped: tapping either performs the act the sentence is
   describing. This replaces the 2026-09-10 `showMe: false`, whose reason (nothing to demonstrate)
   expired the moment the card made a claim about controls.

@@ -338,9 +338,9 @@ const BODY = 'LibrePT is an app for personal trainers. You manage appointments w
   + 'the first invitation, to a session you adjust while it runs. The whole walkthrough happens in '
   + 'the sandbox: a separate copy of the app, kept for learning and trying things out. Everything '
   + 'you do in it is kept apart from your business data about clients, appointments and workouts. '
-  + 'You can leave the sandbox at any time from the menu, or build a fresh one.';
+  + 'You can leave the sandbox at any time from the menu, or reset its data.';
 const CAPTION = 'Show me points out three things: the SANDBOX badge in the top bar, and in the menu '
-  + 'the rows Leave the sandbox and Build a fresh sandbox. Next starts the walkthrough.';
+  + 'the rows Leave the sandbox and Reset sandbox data. Next starts the walkthrough.';
 const words = (key) => (key === 'body' ? BODY : key === 'caption' ? CAPTION
   : key === 'title' ? 'Welcome to LibrePT' : key);
 

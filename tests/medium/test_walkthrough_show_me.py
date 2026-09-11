@@ -155,7 +155,7 @@ stage.innerHTML = `
   <button id="menu-toggle">Menu</button>
   <div id="menu" class="hidden">
     <button id="leave">Leave the sandbox</button>
-    <button id="reset">Build a fresh sandbox</button>
+    <button id="reset">Reset sandbox data</button>
   </div>
 `;
 document.body.appendChild(stage);

@@ -439,7 +439,7 @@ export function renderHeaderShell() {
                    would be an offer to rebuild a workspace they are not looking at, wearing a red
                    button, one row under the way in. -->
               <button id="menu-sandbox-reset" class="session-menu-item hidden" role="menuitem">
-                <i class="fa-solid fa-arrows-rotate"></i> <span id="menu-sandbox-reset-text" data-i18n="menu_sandbox_reset">Build a fresh sandbox</span>
+                <i class="fa-solid fa-arrows-rotate"></i> <span id="menu-sandbox-reset-text" data-i18n="menu_sandbox_reset">Reset sandbox data</span>
               </button>
               <div class="menu-divider" role="separator"></div>
               <button id="menu-clients-register" class="session-menu-item" role="menuitem">

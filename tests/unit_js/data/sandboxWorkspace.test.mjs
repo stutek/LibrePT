@@ -56,7 +56,7 @@ test("a scoped key still starts with the app's own prefix", () => {
 });
 
 test("rebuilding the sandbox keeps the trainer's own details and their cloud connection", () => {
-  // The promise the menu's "Build a fresh sandbox" makes (TODO §40.4), pinned where it is decided
+  // The promise the menu's "Reset sandbox data" makes (TODO §40.4), pinned where it is decided
   // rather than where it is worded: a reset clears the sandbox's own per-workspace keys and the
   // sandbox database, and the trainer's identity and Drive connection belong to the PERSON, so they
   // are unscoped and must survive (§40.1). Asserted by NAME, because the isolation here is naming:
