@@ -3558,6 +3558,45 @@ is a dead end.
 **The conservative alternative to rule 5** is booking's own: a tap anywhere else starts over with one
 day. Easier to explain, but every narrowing then costs two taps instead of one.
 
+##### Checked against documented practice, 2026-09-11 — and BOTH of the above are inventions
+
+Asked to test the design against the portals that built people's expectations. Every reference below
+was opened and read, not taken from a search summary.
+
+- **The third tap starts over.** eBay's design system states it plainly: the first tap sets the start,
+  the second the end, *"a third tap resets the date range and sets the new starting date"*
+  ([playbook.ebay.com](https://playbook.ebay.com/design-system/components/date-picker)). Syncfusion's
+  widely used component documents the same rule with more detail: a click when both ends are set is a
+  new start, **and a click on a date earlier than the current start is also a new start, never an
+  inverted range** ([help.syncfusion.com](https://help.syncfusion.com/js/daterangepicker/behavior-settings)).
+  Airbnb's `react-dates` behaves the same way for a selection that would be invalid — the clicked day
+  becomes the start ([github.com/airbnb/react-dates#1978](https://github.com/airbnb/react-dates/issues/1978)).
+- **Nothing uses alternation, and nothing uses "the nearer end".** Neither the parity model nor the
+  five-rule counter-proposal appears in any design system or component library found. Both are
+  patterns a trainer has met nowhere else.
+- **Booking.com — the portal this started from — edits an existing range by naming the END FIRST**:
+  *"by clicking the appropriate box for check-in/out the dates can be adjusted"*
+  ([blog.mobiscroll.com](https://blog.mobiscroll.com/how-to-build-amazing-booking-apps-calendar-tips-and-considerations/)).
+  So the visible marker both of us arrived at is real practice — with the difference that the USER
+  arms it, rather than the app alternating it.
+- **Ends styled apart from the days between them is the standard**, not a nicety: endpoints get a
+  *"distinct style"* with rounded caps, the interior a *"continuous highlight colour lighter than the
+  selection circles"* ([uxpatterns.dev](https://uxpatterns.dev/patterns/forms/date-range)). The same
+  page recommends the header text change from "Select a start date" to "Now select an end date" —
+  the marker, in words.
+- **Do not move the calendar between the two taps.** NN/g: a shifted month *"may go unnoticed and
+  cause users to slip by clicking where the intended date used to be"*
+  ([nngroup.com](https://www.nngroup.com/articles/date-input/)).
+
+**So the model to build, unless overruled:**
+
+1. first tap = start, second = end; a tap before the start becomes the start, never an inverted range;
+2. a third tap on any day starts over from that day — the one behaviour a trainer already knows;
+3. a tap on the same single day clears the filter;
+4. to move ONE end without starting over, tap the `od` or `do` chip to arm it, then tap a day. Armed
+   is visible, and chosen rather than inferred;
+5. ends drawn stronger than the days between them, and the calendar does not shift while choosing.
+
 **What this costs, and it is the largest part of §45.6.** None of it is possible with the phone's own
 date picker: every date control in this app is a native `<input type="date">`, which returns one date
 and can neither show a range nor take two taps. This means a calendar of our own — a month grid,
