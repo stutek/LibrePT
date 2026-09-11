@@ -531,7 +531,7 @@ export const en = {
   // separate database (TODO §40) there is nothing to clear, which is the stronger promise.
   story_welcome_title: "Welcome to LibrePT",
   story_welcome_body:
-    "LibrePT is an app for personal trainers. You plan individual and group sessions with it, and it is your notebook while a session runs. This guided walkthrough follows the story of three new clients: from the decision to train together and the first invitation, to a session you correct while it runs. All of it happens in the sandbox: a separate copy of the app, kept for learning and trying things out. The people, the sessions and the records in it are invented. Nothing you do here can change your real data about clients, appointments and sessions. You can leave the sandbox at any time from the menu, or build a fresh one. Neither of those two changes your own work.",
+    "LibrePT is an app for personal trainers. You manage appointments with it and build individual and group sessions, and while a workout runs it is your notebook. This guided walkthrough follows the story of three new clients: from the decision to train together and the first invitation, to a session you adjust while it runs. The whole walkthrough happens in the sandbox: a separate copy of the app, kept for learning and trying things out. Everything you do in it is kept apart from your business data about clients, appointments and workouts. You can leave the sandbox at any time from the menu, or build a fresh one.",
   // The way out is named because this is where somebody decides not to do this at all. ▾ parks the
   // card and ✕ ends the run, and the ✕ is only on the bar the parked card leaves behind
   // (modules/demo/walkthrough.css hides it while the card is open) — so the order matters.

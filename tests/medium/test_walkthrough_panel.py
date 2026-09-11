@@ -323,6 +323,55 @@ const TOUR = {
 window.__walkthrough = startGuidedWalkthrough({ tour: TOUR, pollMs: 60 });
 """
 
+# The opening card, at the length it actually ships: the welcome body is one paragraph of about 700
+# characters, and the instruction under it names three controls. Centred, it must fit on a phone
+# without scrolling — the height is free there, so a card that scrolls is a card that was not given
+# the room it could have had. Where a screen genuinely cannot hold it, it scrolls and the scrollbar
+# shows (asked 2026-09-11); what is pinned here is that a phone is not such a screen.
+CENTRED_CARD_STUB = """
+import { startGuidedWalkthrough } from './modules/demo/walkthroughOverlay.js';
+import { mountDemoNarrator } from './modules/demo/demoNarratorCard.js';
+
+const BODY = 'LibrePT is an app for personal trainers. You manage appointments with it and build '
+  + 'individual and group sessions, and while a workout runs it is your notebook. This guided '
+  + 'walkthrough follows the story of three new clients: from the decision to train together and '
+  + 'the first invitation, to a session you adjust while it runs. The whole walkthrough happens in '
+  + 'the sandbox: a separate copy of the app, kept for learning and trying things out. Everything '
+  + 'you do in it is kept apart from your business data about clients, appointments and workouts. '
+  + 'You can leave the sandbox at any time from the menu, or build a fresh one.';
+const CAPTION = 'Show me points out three things: the SANDBOX badge in the top bar, and in the menu '
+  + 'the rows Leave the sandbox and Build a fresh sandbox. Next starts the walkthrough.';
+const words = (key) => (key === 'body' ? BODY : key === 'caption' ? CAPTION
+  : key === 'title' ? 'Welcome to LibrePT' : key);
+
+const stage = document.createElement('div');
+stage.className = 'app-view active';
+stage.innerHTML = `<button id="elsewhere" style="height: 44px">Somewhere else</button>`;
+document.body.appendChild(stage);
+
+const narrator = mountDemoNarrator({ t: words });
+const TOUR = {
+  id: 'centred-card-test',
+  steps: [
+    {
+      id: 'the-welcome',
+      target: '.walkthrough-caption',
+      caption: 'caption',
+      narrate: { kind: 'chapter', titleKey: 'title', bodyKey: 'body' },
+      expect: { selector: '.walkthrough-caption', visible: true },
+    },
+  ],
+};
+
+window.__walkthrough = startGuidedWalkthrough({
+  tour: TOUR,
+  t: words,
+  pollMs: 60,
+  narrator,
+  onStep: (step) => narrator.showStep(step),
+});
+"""
+
 PANEL_BOX = """() => {
   const panel = document.querySelector('.walkthrough-panel').getBoundingClientRect();
   return {
@@ -362,4 +411,47 @@ def test_the_card_leaves_the_app_visible_down_both_sides(page, local_server):
     assert box["left"] >= 20, f"only {box['left']:.0f}px of app shows on the left"
     assert box["viewportWidth"] - box["right"] >= 20, (
         f"only {box['viewportWidth'] - box['right']:.0f}px of app shows on the right"
+    )
+
+
+CARD_OVERFLOW = """() => {
+  const card = document.getElementById('demo-narrator-card');
+  return {
+    overflow: card.scrollHeight - card.clientHeight,
+    scrollbarSuppressed: getComputedStyle(card).scrollbarWidth === 'none',
+  };
+}"""
+
+
+def test_the_opening_card_fits_a_phone_without_scrolling(page, local_server):
+    """Narrowing the panel made its text taller, and the first thing that gave way was the opening
+    card: it arrived already scrolled (asked 2026-09-11, "unintended side effect"). A centred card
+    has nothing to get out of the way of, so the height was there to be taken."""
+    page.set_viewport_size({"width": 390, "height": 844})
+    load_with_stub(page, local_server, CENTRED_CARD_STUB)
+    page.wait_for_selector("#demo-narrator-card")
+    page.wait_for_timeout(600)
+
+    seen = page.evaluate(CARD_OVERFLOW)
+
+    assert seen["overflow"] <= 1, (
+        f"the opening card is {seen['overflow']}px taller than its box"
+    )
+
+
+def test_a_card_too_long_for_the_screen_keeps_its_scrollbar(page, local_server):
+    """The smallest phone this app is designed around cannot hold this paragraph whatever the panel
+    does, and that case gets a REAL scrollbar (asked 2026-09-11). Hiding it was the first fix tried:
+    it leaves the fade at the bottom edge as the only sign that a paragraph carries on, which is a
+    hint where the reader needs a control."""
+    page.set_viewport_size({"width": 375, "height": 667})
+    load_with_stub(page, local_server, CENTRED_CARD_STUB)
+    page.wait_for_selector("#demo-narrator-card")
+    page.wait_for_timeout(600)
+
+    seen = page.evaluate(CARD_OVERFLOW)
+
+    assert seen["overflow"] > 1, "this screen was expected to be too short for the card"
+    assert not seen["scrollbarSuppressed"], (
+        "the card scrolls with no scrollbar to say so"
     )

@@ -141,13 +141,19 @@
    screen (asked 2026-09-11). That is also the reading position: the first card is a paragraph
    somebody stands still to read, not an instruction glanced at over a thumb.
 
-   Taller than a docked panel is allowed to be, because nothing is being covered that a trainer is
-   about to tap — which is what lets the whole card fit without a scrollbar. */
+   Taller than a docked panel is allowed to be, and deliberately as tall as the screen will take:
+   nothing is being covered that a trainer is about to tap, so the height is free, and height is what
+   keeps the whole card on screen at once. The 45% cap two rules down is for a panel that still has
+   to move out of the way of a control; this one has nowhere to be.
+
+   It can still overflow on a short screen, and then it scrolls WITH its scrollbar showing (asked
+   2026-09-11): hiding the bar on a box that scrolls leaves the fade as the only sign that a
+   paragraph carries on, which is a hint where a reader needs a control. */
 .walkthrough.is-centred:not(.is-collapsed):not(.is-over-dialog) .walkthrough-panel {
   top: 50%;
   bottom: auto;
   transform: translate(-50%, -50%);
-  max-height: calc(100% - 2 * var(--hdr-height, 64px));
+  max-height: calc(100% - 48px);
 }
 
 /* The control this step is about sits where the panel would be, so the panel gets out of the way
