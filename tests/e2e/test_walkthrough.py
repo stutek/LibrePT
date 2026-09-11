@@ -294,6 +294,25 @@ def test_getting_the_guide_out_of_the_way_is_one_tap_and_takes_nothing_with_it(
     # …and the guide is still there to come back to, which is the whole point of the change.
     expect(page.locator(PROGRESS)).to_be_visible()
 
+    # And it is out of the way of the MESSAGE DRAWER, not on top of it (reported 2026-09-10).
+    # Geometry rather than a class, like tests/medium/test_clipboard_deck_legibility.py: what was
+    # reported is one surface covering another, and only the painted boxes can say whether it does.
+    boxes = page.evaluate(
+        """() => {
+            const box = (sel) => {
+                const el = document.querySelector(sel);
+                return el ? el.getBoundingClientRect() : null;
+            };
+            const bar = box('.walkthrough-panel');
+            const drawer = box('.notification-area');
+            return bar && drawer ? { barBottom: bar.bottom, drawerTop: drawer.top } : null;
+        }"""
+    )
+    assert boxes, "both surfaces are on screen while the guide is parked"
+    assert boxes["barBottom"] <= boxes["drawerTop"], (
+        f"the parked guide covers the message drawer: {boxes}"
+    )
+
 
 def test_ending_the_demo_takes_nothing_with_it(page, local_server):
     """The other half of the old one-tap rule: whenever the trainer does end it, everything they did

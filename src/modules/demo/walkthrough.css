@@ -97,6 +97,14 @@
 .walkthrough.is-collapsed .walkthrough-panel {
   max-height: none;
   cursor: pointer;
+  /* ABOVE the message drawer's handle, not on top of it (reported 2026-09-10: "minimizirani demo
+     cardi pokrivajo message area, predlagam, da ga premakneva tik nad sporočila"). Parked, this bar
+     sat 12px off the bottom — exactly where the drawer's own bar lives — so the guide got out of the
+     way of the app by covering the one surface that tells the trainer what the app wants from them.
+     `--notif-handle-height` already carries the safe-area inset, so it is not added twice; the 8px
+     is the gap that keeps the two bars reading as two, and it also covers the taller handle the
+     drawer takes while a session is running, which is scoped to the drawer and not readable here. */
+  bottom: calc(var(--notif-handle-height, 56px) + 8px);
 }
 .walkthrough.is-collapsed .walkthrough-panel > *:not(.walkthrough-head) {
   display: none;

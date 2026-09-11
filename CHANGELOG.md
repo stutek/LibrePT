@@ -59,6 +59,37 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-09-10 — The demo says what it is; the sandbox can be rebuilt on purpose
+
+### Added
+
+- **A welcome card opens the guided walkthrough.** It says what LibrePT is, what the run is a story
+  of, and that everything happens in the sandbox — so it no longer has to offer to delete the demo
+  data afterwards, because the demo cannot reach the trainer's own records at all. It keeps its own
+  step: its instruction is to press Next, so there is no tap for it to ride on.
+- **Build a fresh sandbox, from the menu.** The offer existed only when the sandbox had gone stale
+  and the app raised it; now it can be asked for, from inside the sandbox only. It performs the same
+  `resetSandbox`, which is guarded to the sandbox, so the hidden menu item is the second lock rather
+  than the only one. The trainer's own work, their details and their cloud connection are outside
+  both databases and survive it — pinned by a test rather than promised in the dialog.
+
+- **See the whole session at once, and keep it that way.** The clipboard showed one card open and the rest as peeking rows, which is compact and does not answer "what is this session". A menu item now opens every card, and it is a setting rather than a mood: it holds between sessions and between visits. There are two of them, one for the day's session cards and one for the clipboard's exercise cards, because scanning tomorrow at a desk and working through a set at arm's length are not the same posture. An opened card shows what the focused card shows and offers nothing to tap — twelve live Too Easy / Too Hard buttons put a mis-tap one thumb-width from logging against the wrong exercise — so a tap on it simply brings it into focus, exactly as before.
+- **A collapsed circuit names its movements.** "Tri-Set Metabolic Circuit" with a round badge said only that three unnamed things were coming. It lists each movement with its reps and its load now, with the rests it contains named as rests, and still with nothing to tap.
+
+### Fixed
+
+- **Cards look like themselves however open they are.** Opening a card used to move its tag — Past, Completed — from the end of the title row onto a line of its own above the name, so one card read as two designs, and on a past session's card the tag moved furthest. The title row is the same in every state now, and the card in focus grows its name instead. It also gives back a row of height on every open card, which is what "expand all" spends its screen on.
+- **A past session no longer wears the colour of the session you are running.** In the violet theme, both were violet: the deck had one theme's accent written into it, so it also painted that violet over the emerald theme and the pink one. Every theme's past colour is its own now, and the violet theme's moved off its accent to a cooled grey-blue. A check refuses any new colour written into a component that a theme should own.
+- **The card you are on no longer says "In Focus".** Its tint and its border already say so, in every theme, and the word was taking the slot that Completed and Upcoming need.
+- **The sandbox says how to get out of it.** The way back is the menu — two taps — but nothing said so. The card that already tells a trainer none of this is real now also names the menu and the item, and says they will land where they left off. It no longer offers to clear demo data in there, which would have emptied the very thing they came to look at, and the SANDBOX badge is a marker rather than a link: the notice it used to open is about losing your own data, which is not what is in front of you.
+
+- **Three demo tests counted steps from the top of the story** and asserted an absolute number, so a
+  card inserted anywhere ahead of them moved the ground and they failed on a screen assertion three
+  steps later, with nothing pointing at the insertion. Each now anchors on the step it means, by id,
+  and counts from where it landed.
+
+---
+
 ## 2026-08-25 — The demo's own front door
 
 ### Added
