@@ -3595,6 +3595,15 @@ was opened and read, not taken from a search summary.
 3. a tap on the same single day clears the filter;
 4. to move ONE end without starting over, tap the `od` or `do` chip to arm it, then tap a day. Armed
    is visible, and chosen rather than inferred;
+   - **The chips are OUTSIDE the calendar grid** — in the filter row above it, beside the client and
+     location chips — so arming can never collide with rule 2 or 3. Misread once as "tap the endpoint
+     inside the grid to arm it", which is genuinely unworkable: a tap on a day already means
+     something there, and the only way left to tell the two apart would be a drag, which is the wrong
+     gesture on a phone. Booking.com places its check-in/check-out boxes outside the calendar for the
+     same reason.
+   - The same tap on a day therefore has two outcomes depending on whether a chip is armed. That is
+     only allowed because armed is VISIBLE — the whole objection to the parity model was a mode
+     nobody could see, and a mode this design cannot see either would be the same defect rebuilt;
 5. ends drawn stronger than the days between them, and the calendar does not shift while choosing.
 
 **What this costs, and it is the largest part of §45.6.** None of it is possible with the phone's own
