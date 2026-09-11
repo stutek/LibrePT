@@ -768,6 +768,14 @@ function renderEverything() {
  * there is a worse answer than the dashboard.
  */
 async function switchToWorkspace(name) {
+  // The guide goes with the workspace it was running in (TODO §42.15). Its steps drive the sandbox's
+  // seeded records, so in the trainer's own work it would point at controls for records that are not
+  // there — and parked, it would sit over their real session as a bar they did not ask for. The
+  // module is imported only when one is actually on screen, so the demo never loads on a switch.
+  if (document.getElementById("walkthrough-overlay")) {
+    const { stopGuidedWalkthrough } = await import("./modules/demo/walkthroughOverlay.js");
+    stopGuidedWalkthrough();
+  }
   // Where they are NOW, stored against the workspace being left (TODO §40.3).
   rememberRoute(window.location.pathname);
   await switchWorkspace(name);

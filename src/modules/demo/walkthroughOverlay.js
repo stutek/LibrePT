@@ -192,6 +192,20 @@ function buildOverlay(doc, t) {
   };
 }
 
+// The guide that is running, if one is. Kept at module level so a caller with no handle can end it —
+// leaving the sandbox is that caller (TODO §42.15): the story's steps drive the sandbox's seeded
+// records, so it cannot mean anything in the trainer's own work, and a parked bar left behind would
+// sit over their real session pointing at controls for records that are not there.
+let running = null;
+
+/** End the guide that is running, if any. Idempotent, and safe to call from anywhere — it goes
+ * through the same teardown the exit button uses, so there is one stop and not two. */
+export function stopGuidedWalkthrough() {
+  const guide = running;
+  running = null;
+  guide?.stop();
+}
+
 /**
  * Starts the walkthrough and returns `{ stop }`.
  *
@@ -1209,5 +1223,15 @@ export function startGuidedWalkthrough({
   }, pollMs);
 
   enterStep();
-  return { stop };
+  // One guide at a time: a second start would leave the first polling over an app it no longer
+  // matches, which is the state `stop` exists to prevent.
+  running?.stop();
+  const handle = {
+    stop() {
+      if (running === handle) running = null;
+      stop();
+    },
+  };
+  running = handle;
+  return handle;
 }

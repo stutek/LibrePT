@@ -223,3 +223,25 @@ def test_the_badge_offers_nothing_to_follow_in_the_sandbox(page, local_server):
     assert badge.get_attribute("href"), (
         "the link comes back with the trainer's own work"
     )
+
+
+@pytest.mark.clean_start
+def test_leaving_the_sandbox_takes_the_guide_with_it(page, local_server):
+    """§42.15, reported 2026-09-11: "leave sandbox did not close the (collapsed) walktrough cards".
+
+    The story's steps drive the sandbox's seeded records, so in the trainer's own work the guide
+    points at controls for records that are not there — and parked, it is a bar over their real
+    session that they did not ask for and cannot act on. Leaving ends it."""
+    page.goto(f"{local_server}?workspace=sandbox&splash=off&demo=story&lang=en")
+    page.wait_for_selector("#walkthrough-overlay", timeout=20000)
+
+    # Parked, because that is the state it was reported in: the bar survives, the panel does not.
+    page.locator("#walkthrough-collapse").click()
+    page.wait_for_timeout(400)
+    assert page.locator("#walkthrough-overlay").count() == 1
+
+    _switch(page, "working")
+
+    assert page.locator("#walkthrough-overlay").count() == 0, (
+        "the guide followed the trainer out of the sandbox"
+    )
