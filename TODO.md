@@ -728,6 +728,41 @@ Fold `#active-session-overlay` into a normal `#view-session` inside `#main-conte
 header is omnipresent and sits above it, the fixed-overlay special-casing is redundant; this
 simplifies the deck/tabs/title-bar wiring and unifies router handling.
 
+### 11.3 [ ] The ☰ menu is where everything without a home ended up
+
+**Reported 2026-09-11 (Simon):** *"☰ je natlačen morala bova zgostiti in prioritizirati, morda celo
+narediti podskupine"*.
+
+**Counted, not estimated: 21 rows plus 2 selects** in one dropdown
+([applicationHeader.js](src/modules/common/applicationHeader.js)) — language, theme, the trainer's
+details, the sandbox pair, five views, five data actions, and six support/legal rows.
+
+**Five of those rows are §11.1 arriving as a bill.** Clients, Routines, Exercises and History are
+NAVIGATION; they live here because the footer nav was replaced and they were never given a new home.
+So this section cannot be finished without §11.1 — the menu is not crowded by accident, it is holding
+somebody else's luggage.
+
+**Two foldings need no design decision at all, and are worth doing before anything is rearranged:**
+
+- ***Connect cloud storage* and *Export data as a file* open the SAME dialog.** Both are
+  `goto(urlFor("backup"))`. That is a duplicate rather than a choice — one row, and nothing is lost.
+- **Six support/legal rows are read once in a lifetime**: GitHub, Send feedback, Bug report, About,
+  Terms, Privacy. One row — *About & help* — opening a panel with all of them is five rows fewer at
+  no cost to anybody who has already read them. *Open an encrypted file* belongs in there too: by its
+  own module header it is for a CLIENT who was emailed their export, not for the trainer.
+
+That is 21 → 14 with no capability lost and no ruling needed.
+
+**Subgroups, asked about in the same message: not yet.** Headings inside a dropdown do not shorten a
+list — they add rows to it and give the reader a sense of structure over the same number of taps.
+They earn their place once the count is down. Fold first; then, if it is still long, three headings
+(settings · work · data).
+
+**Withdrawn the same day:** §45.9's note recommended moving the board's expand-all DEFAULT into this
+menu. That would make this section worse. The better answer is that the global control simply goes —
+the per-card chevron stays, and §45.6's client filter has taken over the reason anybody expanded
+every card at once (to read the names and find one person's sessions).
+
 ---
 
 ## Audit schedule — every two weeks
