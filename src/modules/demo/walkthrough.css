@@ -76,12 +76,18 @@
   display: flex;
   flex-direction: column;
   max-height: 45vh;
-  width: min(calc(100% - 24px), var(--app-max-width, 480px));
-  padding: 14px 16px calc(14px + var(--safe-bottom, 0px)) 16px;
-  background: var(--card-bg);
+  /* NARROWER than the app it sits on (asked 2026-09-11): a panel as wide as the screen reads as a
+     new screen, and a trainer waits for it to go away instead of looking past it. A margin of app
+     down both sides says the app is still there, underneath, and still theirs to tap. */
+  width: min(calc(100% - 56px), calc(var(--app-max-width, 480px) - 40px));
+  padding: 14px 16px;
+  /* Tinted, so one glance says this is the GUIDE and not a screen of the app (asked 2026-09-11).
+     Mixed into the app's own card colour rather than picked as a new one, so it lands right in both
+     themes and moves with the palette. */
+  background: color-mix(in srgb, var(--primary) 12%, var(--card-bg));
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--card-border);
+  border: 1px solid color-mix(in srgb, var(--primary) 45%, var(--card-border));
   border-radius: var(--border-radius-lg, 16px);
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28);
   color: var(--text-main);
@@ -113,6 +119,35 @@
    two from one you are reading, which is the right way round for the act with nothing after it. */
 .walkthrough:not(.is-collapsed) .walkthrough-exit {
   display: none;
+}
+
+/* ABOVE the message drawer's handle, not on it (asked 2026-09-11, the same complaint the parked bar
+   answered on 2026-09-10). The drawer's bar is where the app says what it wants from the trainer
+   next; a guide that covers it to explain the app has covered the app's own voice.
+   `--notif-handle-height` already carries the safe-area inset, so it is not added twice, and the 8px
+   is the gap that keeps the two bars reading as two.
+
+   NOT while one of the app's own modals is open: the drawer is behind it and inert, so there is
+   nothing there to clear, and lifting the card only takes room from a form. That covers both ways a
+   dialog can hold the panel — docked inside it, or escaped out over the screen. The panel's padding
+   drops the safe-area inset with the same move — nothing sits on the bottom edge any more, so
+   reserving room for the home indicator would be a second gap under the first. */
+.walkthrough:not(.is-over-dialog) .walkthrough-panel {
+  bottom: calc(var(--notif-handle-height, 56px) + 8px);
+}
+
+/* A step with nothing in the APP to point at — a card whose only control is on the card itself —
+   has no control to get out of the way of, so it stops hugging an edge and takes the middle of the
+   screen (asked 2026-09-11). That is also the reading position: the first card is a paragraph
+   somebody stands still to read, not an instruction glanced at over a thumb.
+
+   Taller than a docked panel is allowed to be, because nothing is being covered that a trainer is
+   about to tap — which is what lets the whole card fit without a scrollbar. */
+.walkthrough.is-centred:not(.is-collapsed):not(.is-over-dialog) .walkthrough-panel {
+  top: 50%;
+  bottom: auto;
+  transform: translate(-50%, -50%);
+  max-height: calc(100% - 2 * var(--hdr-height, 64px));
 }
 
 /* The control this step is about sits where the panel would be, so the panel gets out of the way

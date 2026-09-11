@@ -7,11 +7,12 @@
 //   - Priority-ordered notification feed: Live/Upcoming session → Welcome/Demo message → Reservations/Cancellations.
 //
 // Dependencies injected via initNotificationArea({ getState, getActiveSession, t, escapeHTML,
-// navigateToPath, getSyncFailure, seedDemoData }) — `getSyncFailure` is an accessor rather than a
-// value because a sync can fail at any moment after boot, and it keeps this module unaware of Drive
-// entirely. `seedDemoData` used to be reached as `window.seedMockData`, which no layering gate can
-// see: a global is not an import, so the feed was calling into the app entry point and nothing said
-// so.
+// navigateToPath, getSyncFailure, startWalkthrough, enterSandbox }) — `getSyncFailure` is an
+// accessor rather than a value because a sync can fail at any moment after boot, and it keeps this
+// module unaware of Drive entirely. The two offers on an empty app are injected for the same reason
+// the seeding one before them was: the walkthrough's deep link is built in modules/splash and
+// switching workspace is app.js's own job. Reaching either through a global — `window.seedMockData`,
+// as the old one did — is an import no layering gate can see.
 
 import { stateHasData } from "../../data/stateStore.js";
 import { readVersionScoped, writeVersionScoped } from "../../data/storageNamespace.js";
@@ -85,10 +86,19 @@ function renderCaughtUpState(container, t, escapeHTML, summaryEls) {
   `;
 }
 
-// The way back to an offer the splash made first. Someone who chose "Start with an empty app" at
-// first run has no other route to the sample gym, so this stays — but the label says what the
-// button does, because it writes records rather than navigating anywhere.
-function renderSeedDemoInvitation(container, t, escapeHTML, summaryEls, seedDemoData) {
+/** The only card an empty app has, and therefore the only thing it can say for itself.
+ *
+ * It used to offer ONE button, which seeded thirty sample people into the database the trainer was
+ * about to start working in. The sandbox ended that (TODO §40): there is now a separate copy of the
+ * app to try things in, so sample records never have to touch the trainer's own. Asked 2026-09-11 —
+ * the empty app should invite somebody to the walkthrough and to the sandbox — and the offer is
+ * those two, in that order: being shown the app is the smaller ask, trying it yourself is the
+ * larger, and both land in the same place, so neither can spoil anything.
+ *
+ * Both actions are injected rather than imported: the walkthrough's deep link is built in
+ * modules/splash and switching workspace is app.js's own job, and neither is reachable from here.
+ */
+function renderFirstRunInvitation(container, t, escapeHTML, summaryEls, deps) {
   setNotificationSummary(
     summaryEls,
     t("notif_seed_demo_title"),
@@ -106,16 +116,21 @@ function renderSeedDemoInvitation(container, t, escapeHTML, summaryEls, seedDemo
           <h4 class="notification-card-title">${escapeHTML(t("notif_seed_demo_title"))} <span class="unread-dot" title="Unread"></span></h4>
           <p class="notification-card-desc">${escapeHTML(t("notif_seed_demo_desc"))}</p>
           <div class="notification-actions">
-            <button type="button" class="notification-btn primary" id="btn-seed-demo-data">${escapeHTML(t("notif_seed_demo_btn"))}</button>
+            <button type="button" class="notification-btn primary" id="btn-first-run-walkthrough">${escapeHTML(t("notif_demo_walkthrough_btn"))}</button>
+            <button type="button" class="notification-btn" id="btn-first-run-sandbox">${escapeHTML(t("menu_sandbox_enter"))}</button>
           </div>
         </div>
       </div>
     </div>
   `;
 
-  container.querySelector("#btn-seed-demo-data")?.addEventListener("click", (e) => {
+  container.querySelector("#btn-first-run-walkthrough")?.addEventListener("click", (e) => {
     e.stopPropagation();
-    seedDemoData?.();
+    deps.startWalkthrough?.();
+  });
+  container.querySelector("#btn-first-run-sandbox")?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    deps.enterSandbox?.();
   });
 }
 
@@ -293,7 +308,7 @@ export function renderNotificationArea() {
     if (stateHasData(state)) {
       renderCaughtUpState(container, t, escapeHTML, summaryEls);
     } else {
-      renderSeedDemoInvitation(container, t, escapeHTML, summaryEls, deps.seedDemoData);
+      renderFirstRunInvitation(container, t, escapeHTML, summaryEls, deps);
     }
     syncNotificationBarState();
     return;

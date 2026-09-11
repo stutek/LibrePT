@@ -34,9 +34,9 @@ import {{ DEFAULT_MESSAGES }} from './data/messages.js';
 const t = (key) => TRANSLATIONS.en[key] || key;
 const state = {state_js};
 
-window.__seeded = 0;
 window.__navigated = [];
 window.__walkthroughStarted = 0;
+window.__sandboxEntered = 0;
 
 bootNotificationArea({{
   getState: () => state,
@@ -45,8 +45,8 @@ bootNotificationArea({{
   escapeHTML,
   navigateToPath: (path) => window.__navigated.push(path),
   openSessionFromHistory: () => {{}},
-  seedDemoData: () => {{ window.__seeded += 1; }},
   startWalkthrough: () => {{ window.__walkthroughStarted += 1; }},
+  enterSandbox: () => {{ window.__sandboxEntered += 1; }},
 }});
 renderNotificationArea();
 """
@@ -99,40 +99,41 @@ def test_expanded_footer_covers_the_whole_area_below_the_header(page, local_serv
     assert abs((box["y"] + box["height"]) - viewport_height) < 2
 
 
-def test_an_empty_database_is_offered_sample_data_by_a_button_that_says_so(
+def test_an_empty_database_is_invited_to_the_walkthrough_and_to_the_sandbox(
     page, local_server
 ):
-    """Someone who chose "Start with an empty app" at first run has no other route back to the
-    sample gym, so the offer stays. What changed is that the label names the action: its
-    predecessor read "Open Live Demo", which sounds like navigation and wrote the whole demo
-    dataset into the database instead."""
+    """What an empty app offers, asked for 2026-09-11: be shown the app, or go and try it where
+    nothing can be spoilt. Both land in the sandbox, so neither writes a sample person into the
+    records the trainer is about to start keeping — which is what the single button here used to do.
+    """
     load_with_stub(page, local_server, stub(EMPTY_DATABASE))
     page.wait_for_selector("#notification-area")
     expand_feed(page)
 
-    button = page.locator("#btn-seed-demo-data")
-    assert button.is_visible()
-    assert "sample data" in button.inner_text().lower()
+    page.locator("#btn-first-run-walkthrough").click()
+    assert page.evaluate("() => window.__walkthroughStarted") == 1
 
-    button.click()
-    assert page.evaluate("() => window.__seeded") == 1
+    page.locator("#btn-first-run-sandbox").click()
+    assert page.evaluate("() => window.__sandboxEntered") == 1
     assert page.evaluate("() => window.__navigated") == []
 
 
-def test_a_gym_with_real_clients_is_never_offered_the_demo_seed(page, local_server):
+def test_a_gym_with_real_clients_is_never_offered_the_first_run_card(
+    page, local_server
+):
     """The dangerous half of the empty state the two used to share. A trainer with real people in
     the database and nothing outstanding saw the same card as someone with nothing at all — told
-    their "workspace is preloaded with live training data" when it held their own work, and one
-    tap from having the sample gym written in among it."""
+    their "workspace is preloaded with live training data" when it held their own work, and one tap
+    from having the sample gym written in among it."""
     load_with_stub(page, local_server, stub(REAL_GYM))
     page.wait_for_selector("#notification-area")
     expand_feed(page)
 
-    assert page.locator("#btn-seed-demo-data").count() == 0
+    assert page.locator("#btn-first-run-walkthrough").count() == 0
+    assert page.locator("#btn-first-run-sandbox").count() == 0
     assert (
         "caught up" in page.locator("#notification-list-container").inner_text().lower()
     )
-    assert page.evaluate("() => window.__seeded") == 0
 
 
 def test_nothing_in_the_demo_feed_promises_a_walkthrough_or_leaves_the_app(

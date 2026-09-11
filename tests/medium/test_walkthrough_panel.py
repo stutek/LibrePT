@@ -295,3 +295,71 @@ def test_a_parked_guide_keeps_watching(page, local_server):
         }"""
     )
     assert ringed, "the ring stopped following the control while the guide was parked"
+
+
+# A card with nothing in the app to point at — the story's welcome card, whose only control is on
+# the card itself (asked 2026-09-11: "kartico 1 centriraj na sredo ekrana"). It has no control to
+# get out of the way of, so hugging an edge buys nothing and costs the reading position.
+CENTRED_STUB = """
+import { startGuidedWalkthrough } from './modules/demo/walkthroughOverlay.js';
+
+const stage = document.createElement('div');
+stage.className = 'app-view active';
+stage.innerHTML = `<button id="elsewhere" style="height: 44px">Somewhere else</button>`;
+document.body.appendChild(stage);
+
+const TOUR = {
+  id: 'centred-test',
+  steps: [
+    {
+      id: 'just-a-card',
+      target: '.walkthrough-caption',
+      caption: 'walkthrough_progress',
+      expect: { selector: '.walkthrough-caption', visible: true },
+    },
+  ],
+};
+
+window.__walkthrough = startGuidedWalkthrough({ tour: TOUR, pollMs: 60 });
+"""
+
+PANEL_BOX = """() => {
+  const panel = document.querySelector('.walkthrough-panel').getBoundingClientRect();
+  return {
+    centre: panel.top + panel.height / 2,
+    left: panel.left,
+    right: panel.right,
+    viewportHeight: window.innerHeight,
+    viewportWidth: window.innerWidth,
+  };
+}"""
+
+
+def test_a_card_with_nothing_to_point_at_sits_in_the_middle(page, local_server):
+    page.set_viewport_size({"width": 390, "height": 844})
+    load_with_stub(page, local_server, CENTRED_STUB)
+    page.wait_for_selector(".walkthrough-panel")
+    page.wait_for_timeout(400)
+
+    box = page.evaluate(PANEL_BOX)
+
+    off_centre = abs(box["centre"] - box["viewportHeight"] / 2)
+    assert off_centre < 24, (
+        f"the card sits {off_centre:.0f}px off the middle of the screen"
+    )
+
+
+def test_the_card_leaves_the_app_visible_down_both_sides(page, local_server):
+    """Narrower than the screen on purpose (asked 2026-09-11): a panel as wide as the app reads as a
+    new screen, and a margin of app down both sides says the app is still there underneath."""
+    page.set_viewport_size({"width": 390, "height": 844})
+    load_with_stub(page, local_server, CENTRED_STUB)
+    page.wait_for_selector(".walkthrough-panel")
+    page.wait_for_timeout(400)
+
+    box = page.evaluate(PANEL_BOX)
+
+    assert box["left"] >= 20, f"only {box['left']:.0f}px of app shows on the left"
+    assert box["viewportWidth"] - box["right"] >= 20, (
+        f"only {box['viewportWidth'] - box['right']:.0f}px of app shows on the right"
+    )

@@ -76,7 +76,7 @@ import {
   stateHasData,
   switchWorkspace,
 } from "./data/stateStore.js";
-import { isSandbox } from "./data/workspace.js";
+import { SANDBOX, isSandbox } from "./data/workspace.js";
 import { repsPresetsDatalistHTML } from "./domain/repsAndLoad.js";
 import { applyStaticDOMMappings } from "./i18n/domMappings.js";
 import { dictionaryFor, hasChosenLanguage, isSupportedLang, resolveLang } from "./i18n/index.js";
@@ -584,11 +584,10 @@ async function init() {
     // every view showing one is stale at once. It used to reload the page for that, which is a
     // heavy way to repaint and loses the trainer's place (TODO §40.3a).
     onRemoved: () => renderEverything(),
-    // The same reasoning in the opposite direction, for the empty feed's offer to seed one.
-    seedDemoData: () => {
-      seedMockData();
-      renderEverything();
-    },
+    // The empty app's second offer (asked 2026-09-11): the sandbox, where trying things out cannot
+    // touch the records the trainer is about to start keeping. It replaced an offer to seed sample
+    // people straight into those records, which is the thing TODO §40 exists to end.
+    enterSandbox: () => switchToWorkspace(SANDBOX),
     // The guided demo runs from a deep link and a reload, exactly as the splash's own offer does
     // (TODO §28.14) — the same URL builder, so the two entry points cannot drift into starting
     // different things.

@@ -132,3 +132,106 @@ def test_being_shown_a_step_again_does_not_carry_you_past_one_you_have_not_seen(
     page.wait_for_timeout(2_000)
 
     expect(page.locator(STEP)).to_contain_text("step 1")
+
+
+# A card whose Show me is a SEQUENCE, not one tap (asked 2026-09-11 for the story's welcome card:
+# show the SANDBOX badge, then the two sandbox rows behind the ☰ menu). Three promises live in this
+# stub, and each one is a way the shipped card could go wrong:
+#   1. a pointed-at control is never fired — tapping the real "Leave the sandbox" row would end the
+#      sandbox in the middle of the first card;
+#   2. the menu the sequence opened is closed again — two steps later the story asks the trainer to
+#      open that same menu, and one left standing grades that step done before they touch anything;
+#   3. the step itself completes, so the guide carries on rather than reporting a failure.
+SEQUENCE_STUB = """
+import { startGuidedWalkthrough } from './modules/demo/walkthroughOverlay.js';
+
+window.__fired = [];
+window.__opened = 0;
+
+const stage = document.createElement('div');
+stage.className = 'app-view active';
+stage.innerHTML = `
+  <p id="badge">SANDBOX</p>
+  <button id="menu-toggle">Menu</button>
+  <div id="menu" class="hidden">
+    <button id="leave">Leave the sandbox</button>
+    <button id="reset">Build a fresh sandbox</button>
+  </div>
+`;
+document.body.appendChild(stage);
+
+const menu = document.getElementById('menu');
+document.getElementById('menu-toggle').addEventListener('click', () => {
+  menu.classList.toggle('hidden');
+  if (!menu.classList.contains('hidden')) window.__opened += 1;
+});
+for (const id of ['leave', 'reset']) {
+  document.getElementById(id).addEventListener('click', () => window.__fired.push(id));
+}
+
+const TOUR = {
+  id: 'sequence-test',
+  steps: [
+    {
+      id: 'the-card',
+      // On the panel itself, like the story's welcome card: there is nothing in the app this step
+      // asks for, so its own expectation is simply that the card is on screen.
+      target: '.walkthrough-caption',
+      caption: 'walkthrough_progress',
+      expect: { selector: '.walkthrough-caption', visible: true },
+      demonstrate: [
+        { target: '#badge', point: true },
+        { target: '#menu-toggle', expect: { selector: '#leave', visible: true } },
+        { target: '#leave', point: true },
+        { target: '#reset', point: true },
+        { target: '#menu-toggle', expect: { selector: '#menu', visible: false } },
+      ],
+    },
+  ],
+};
+
+const words = (key) => (key === 'walkthrough_progress' ? 'step {step} of {count}' : key);
+window.__walkthrough = startGuidedWalkthrough({ tour: TOUR, t: words, pollMs: 60 });
+"""
+
+
+def _start_sequence(page, local_server):
+    page.set_viewport_size({"width": 390, "height": 844})
+    load_with_stub(page, local_server, SEQUENCE_STUB)
+    page.wait_for_selector(".walkthrough-panel")
+    page.wait_for_timeout(400)
+    page.click("#walkthrough-show")
+    # Five beats, each with its own scroll, travel, tap and pause — a wall-clock guess would either
+    # cut the sequence in half or pad every run. The guide greys its own buttons out while a
+    # demonstration is in flight, so waiting for Show me to come back is waiting for the sequence.
+    page.wait_for_function(
+        "() => !document.getElementById('walkthrough-show').disabled", timeout=40_000
+    )
+
+
+def test_a_demonstrated_sequence_points_at_controls_without_firing_them(
+    page, local_server
+):
+    """The card shows the way OUT of the sandbox and the way to start over. Firing either one is the
+    act itself, in the middle of the sentence that describes it."""
+    _start_sequence(page, local_server)
+
+    assert page.evaluate("() => window.__fired") == []
+    assert page.evaluate("() => window.__opened") >= 1
+
+
+def test_a_demonstrated_sequence_puts_the_menu_back(page, local_server):
+    """It opened the menu, so it closes it: the next step of the real story asks the trainer to open
+    that menu, and a menu left open makes that step true before they have done anything."""
+    _start_sequence(page, local_server)
+
+    expect(page.locator("#menu")).to_be_hidden()
+
+
+def test_a_demonstrated_sequence_completes_the_step(page, local_server):
+    """The step is graded on its own expectation, not on the last beat — so a sequence that ran
+    through carries the guide on instead of reporting that nothing happened."""
+    _start_sequence(page, local_server)
+
+    expect(page.locator(".walkthrough-problem")).to_be_hidden()
+    expect(page.locator("#walkthrough-next")).to_be_enabled()

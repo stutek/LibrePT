@@ -463,9 +463,9 @@ export const en = {
   data_wipe_confirm: "Erase it",
   menu_import_program: "Import a programme",
   menu_sandbox_enter: "Enter the sandbox",
-  notif_sandbox_title: "🧪 Sandbox — nothing here is your own work",
+  notif_sandbox_title: "🧪 Sandbox — a place to try things and learn",
   notif_sandbox_desc:
-    "These clients, plans and sessions are a sample gym. Try anything: nothing you do in here can reach your own data. To go back to your work, open the menu ☰ at the top right and choose Leave the sandbox — you will land where you left off.",
+    "These clients, plans and sessions are a sample gym. Try anything: nothing you do in here can reach your business data. To go back to your own work, open the menu ☰ at the top right and choose Leave the sandbox — you will land where you left off. To be walked through the app step by step, tap Show me around below.",
   expand_all: "Expand all cards",
   collapse_all: "Collapse all cards",
   sync_sandbox_note: "You are in the sandbox: this syncs the sandbox's own copy, not your work.",
@@ -531,12 +531,12 @@ export const en = {
   // separate database (TODO §40) there is nothing to clear, which is the stronger promise.
   story_welcome_title: "Welcome to LibrePT",
   story_welcome_body:
-    "LibrePT is an app for personal trainers. You plan individual and group sessions with it, and it is your notebook while they run. This guided walkthrough follows three new clients: from the invitation to a group session you adjust as it goes. It all happens in a sandbox: the people, the sessions and the records are invented, and nothing you do here can reach your own clients and sessions. You can leave the sandbox at any time, or build a fresh one. Neither of those changes your own work.",
+    "LibrePT is an app for personal trainers. You plan individual and group sessions with it, and it is your notebook while a session runs. This guided walkthrough follows the story of three new clients: from the decision to train together and the first invitation, to a session you correct while it runs. All of it happens in the sandbox: a separate copy of the app, kept for learning and trying things out. The people, the sessions and the records in it are invented. Nothing you do here can change your real data about clients, appointments and sessions. You can leave the sandbox at any time from the menu, or build a fresh one. Neither of those two changes your own work.",
   // The way out is named because this is where somebody decides not to do this at all. ▾ parks the
   // card and ✕ ends the run, and the ✕ is only on the bar the parked card leaves behind
   // (modules/demo/walkthrough.css hides it while the card is open) — so the order matters.
   story_step_welcome:
-    "Next starts it. To try the app without the guide, put this card away with ▾ in its top right corner. A small bar stays on screen: its ✕ ends the walkthrough.",
+    "Show me points out three things: the SANDBOX badge in the top bar, and in the ☰ menu the rows Leave the sandbox and Build a fresh sandbox. Next starts the walkthrough. To try the app without the guide, put this card away with ▾ in its top right corner. A small bar stays on screen: its ✕ ends the walkthrough.",
   story_persona_trainer: "Your phone",
   story_chapter_gym: "In the gym",
   story_persona_client: "Ana's phone",
@@ -777,8 +777,7 @@ export const en = {
   notif_empty_desc: "You're all caught up — there's nothing here right now.",
   notif_seed_demo_title: "👋 Welcome to LibrePT",
   notif_seed_demo_desc:
-    "Nothing saved yet. Load a sample gym — clients, routines and a session already under way — to see how LibrePT works before you enter anyone real.",
-  notif_seed_demo_btn: "Load sample data",
+    "Nothing is saved here yet. To see what the app does, tap Show me around: a guided walkthrough that follows three new clients, from the first invitation to a session in the gym. To try things for yourself, tap Enter the sandbox — a separate copy of the app, where nothing you do changes the records you keep here.",
   notif_demo_mode_title: "⚠️ Demo mode — sample data loaded",
   notif_demo_mode_desc:
     "This app is running on sample clients, routines and sessions. Clear them before you use it for real work: clearing lists exactly what it removes and keeps the movement catalog, so anything you have built on top of it keeps working.",

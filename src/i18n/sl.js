@@ -430,9 +430,9 @@ export const sl = {
   data_wipe_confirm: "Izbriši",
   menu_import_program: "Uvozi program",
   menu_sandbox_enter: "Vstopi v peskovnik",
-  notif_sandbox_title: "🧪 Peskovnik — nič tukaj ni tvoje delo",
+  notif_sandbox_title: "🧪 Peskovnik — prostor za učenje in preizkušanje",
   notif_sandbox_desc:
-    "Te stranke, načrti in seje so vzorčni fitnes. Preizkusi karkoli: nič, kar narediš tukaj, ne more doseči tvojih podatkov. Za vrnitev k svojemu delu odpri meni ☰ zgoraj desno in izberi Zapusti peskovnik — pristal boš tam, kjer si ostal.",
+    "Te stranke, načrti in treningi so vzorčna telovadnica. Preizkusi karkoli: nič, kar narediš tukaj, ne more doseči tvojih poslovnih podatkov. Za vrnitev k svojemu delu odpri meni ☰ zgoraj desno in izberi Zapusti peskovnik — pristaneš tam, kjer si ostal(-a). Za vodeni ogled aplikacije po korakih spodaj pritisni Razglej se.",
   expand_all: "Razpri vse kartice",
   collapse_all: "Skrči vse kartice",
   sync_sandbox_note: "V peskovniku si: to sinhronizira peskovnikovo kopijo, ne tvojega dela.",
@@ -495,9 +495,9 @@ export const sl = {
   // aplikacija tika, tikanje pa je v slovenščini spolsko določeno, zato "(-la)" in ne množina.
   story_welcome_title: "Dobrodošel(-la) v LibrePT",
   story_welcome_body:
-    "LibrePT je aplikacija za osebne trenerje. Z njo načrtuješ individualne in skupinske treninge, med vadbo pa ti služi kot digitalna beležnica. Ta vodeni ogled pelje skozi zgodbo treh novih strank: od povabila do skupinskega treninga, ki ga sproti prilagajaš. Vse se dogaja v peskovniku: ljudje, treningi in zapisi so izmišljeni in nič, kar narediš tukaj, ne more doseči tvojih strank in treningov. Peskovnik lahko kadar koli zapustiš ali zgradiš na novo, tvojega dela pa se to ne dotakne.",
+    "LibrePT je aplikacija za osebne trenerje. Z njo načrtuješ individualne in skupinske treninge, med vadbo pa ti služi kot digitalna beležnica. Ta vodeni ogled pelje skozi zgodbo treh novih strank: od odločitve za skupen trening in prvega povabila do treninga, ki ga popravljaš med potekom. Vse skupaj se zgodi v peskovniku: to je ločena kopija aplikacije, namenjena učenju in preizkušanju. Ljudje, treningi in zapisi v njej so izmišljeni. Nič, kar narediš tukaj, ne more spremeniti tvojih pravih podatkov o strankah, terminih in vadbah. Peskovnik lahko kadar koli zapustiš prek menija ali pa zgradiš novega. Nobena od teh dveh možnosti ne spremeni tvojega dela.",
   story_step_welcome:
-    "Z gumbom Naprej začneš. Kartico lahko kadar koli pospraviš z ikono ▾ v njenem zgornjem desnem kotu in aplikacijo preizkušaš brez vodenja; na vrstici, ki ostane, je ✕, ki vodeni ogled konča.",
+    "Z gumbom Pokaži mi ti vodnik pokaže troje: značko PESKOVNIK v zgornji vrstici ter v meniju ☰ vrstici Zapusti peskovnik in Zgradi nov peskovnik. Z gumbom Naprej začneš. Kartico lahko kadar koli pospraviš z ikono ▾ v njenem zgornjem desnem kotu in aplikacijo preizkušaš brez vodenja; na vrstici, ki ostane, je ✕, ki vodeni ogled konča.",
   story_persona_trainer: "Tvoj telefon",
   story_chapter_gym: "V telovadnici",
   story_persona_client: "Anin telefon",
@@ -720,10 +720,9 @@ export const sl = {
   notif_summary_title: "Obvestila in pregled stanja",
   notif_empty_title: "Ni obvestil",
   notif_empty_desc: "Vse je pregledano — trenutno tukaj ni ničesar.",
-  notif_seed_demo_title: "👋 Dobrodošli v LibrePT",
+  notif_seed_demo_title: "👋 Dobrodošel(-la) v LibrePT",
   notif_seed_demo_desc:
-    "Shranjenega še ni nič. Naložite vzorčni fitnes — stranke, rutine in eno sejo, ki že poteka — in si oglejte, kako LibrePT deluje, preden vnesete koga resničnega.",
-  notif_seed_demo_btn: "Naloži vzorčne podatke",
+    "Tukaj še ni ničesar shranjenega. Če želiš videti, kaj aplikacija zna, pritisni Razglej se: to je vodeni ogled, ki pelje skozi zgodbo treh novih strank, od prvega povabila do treninga v telovadnici. Če želiš preizkušati sam(-a), pritisni Vstopi v peskovnik — to je ločena kopija aplikacije, kjer nič, kar narediš, ne spremeni zapisov, ki jih hraniš tukaj.",
   notif_demo_mode_title: "⚠️ Predstavitveni način — naloženi vzorčni podatki",
   notif_demo_mode_desc:
     "Aplikacija deluje na vzorčnih strankah, rutinah in sejah. Počistite jih, preden jo uporabite za resnično delo: čiščenje natančno našteje, kaj odstrani, in ohrani katalog vaj, tako da vse, kar ste zgradili na njem, še naprej deluje.",

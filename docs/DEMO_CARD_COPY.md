@@ -390,27 +390,36 @@ the demo is where they became visible.
 7. Spelling: *applikacija* → **aplikacija**, *načrtoanju* → **načrtovanju**, *preiskušate* →
    **preizkušate**, *walktrough* → dropped.
 
-### Proposed — Slovenian
+### Shipped — Slovenian (rewritten 2026-09-11, `story_welcome_title` / `_body` / `story_step_welcome`)
 
-- **naslov:** Dobrodošli v LibrePT
-- **opis:** LibrePT je aplikacija za osebne trenerje: načrtovanje vadbenih sej, individualnih in
-  skupinskih, ter digitalna beležnica za njihovo izvedbo. Ta vodeni ogled pelje skozi zgodbo treh
-  novih strank — od povabila do skupinske vadbe, ki se med izvajanjem prilagaja. Vse se dogaja v
-  peskovniku: ljudje, seje in zapisi so izmišljeni in tvojih podatkov se ne dotaknejo.
-- **navodilo:** Z gumbom **Naprej** začneš. Kartico lahko kadar koli pospraviš z ikono **▾** v
-  njenem zgornjem desnem kotu in aplikacijo preizkušaš brez vodenja; na vrstici, ki ostane, je
-  **✕**, ki ogled konča.
+- **naslov:** Dobrodošel(-la) v LibrePT
+- **opis:** LibrePT je aplikacija za osebne trenerje. Z njo načrtuješ individualne in skupinske
+  treninge, med vadbo pa ti služi kot digitalna beležnica. Ta vodeni ogled pelje skozi zgodbo treh
+  novih strank: od odločitve za skupen trening in prvega povabila do treninga, ki ga popravljaš med
+  potekom. Vse skupaj se zgodi v peskovniku: to je ločena kopija aplikacije, namenjena učenju in
+  preizkušanju. Ljudje, treningi in zapisi v njej so izmišljeni. Nič, kar narediš tukaj, ne more
+  spremeniti tvojih pravih podatkov o strankah, terminih in vadbah. Peskovnik lahko kadar koli
+  zapustiš prek menija ali pa zgradiš novega. Nobena od teh dveh možnosti ne spremeni tvojega dela.
+- **navodilo:** Z gumbom **Pokaži mi** ti vodnik pokaže troje: značko **PESKOVNIK** v zgornji
+  vrstici ter v meniju **☰** vrstici **Zapusti peskovnik** in **Zgradi nov peskovnik**. Z gumbom
+  **Naprej** začneš. Kartico lahko kadar koli pospraviš z ikono **▾** v njenem zgornjem desnem kotu
+  in aplikacijo preizkušaš brez vodenja; na vrstici, ki ostane, je **✕**, ki vodeni ogled konča.
 
-### Proposed — English
+### Shipped — English
 
 - **title:** Welcome to LibrePT
-- **body:** LibrePT is an app for personal trainers: planning training sessions, one to one and in
-  groups, and a digital notebook for running them. This guided walkthrough follows three new clients
-  — from the invitation to a group session that is adjusted while it runs. All of it happens in a
-  sandbox: the people, the sessions and the records are invented, and they never touch your own.
-- **caption:** **Next** starts it. You can put this card away at any time with **▾** in its top
-  right corner and try the app unguided; the bar it leaves behind carries **✕**, which ends the
-  walkthrough.
+- **body:** LibrePT is an app for personal trainers. You plan individual and group sessions with it,
+  and it is your notebook while a session runs. This guided walkthrough follows the story of three
+  new clients: from the decision to train together and the first invitation, to a session you
+  correct while it runs. All of it happens in the sandbox: a separate copy of the app, kept for
+  learning and trying things out. The people, the sessions and the records in it are invented.
+  Nothing you do here can change your real data about clients, appointments and sessions. You can
+  leave the sandbox at any time from the menu, or build a fresh one. Neither of those two changes
+  your own work.
+- **caption:** **Show me** points out three things: the **SANDBOX** badge in the top bar, and in the
+  **☰** menu the rows **Leave the sandbox** and **Build a fresh sandbox**. **Next** starts the
+  walkthrough. To try the app without the guide, put this card away with **▾** in its top right
+  corner. A small bar stays on screen: its **✕** ends the walkthrough.
 
 ### Ruled on card 1 (2026-09-10)
 
@@ -439,6 +448,22 @@ story with nothing failing.
 which is what it should be anyway, since its instruction is *"Z gumbom Naprej začneš"* — and
 `arrive-open` folds onto `arrive-menu` exactly as it does today. The flag also gives it
 `story_step_read_on` as its caption and hides *Pokaži mi*, there being nothing to demonstrate.
+
+### Ruled on card 1 (2026-09-11)
+
+- **The card HAS a Show me now, and it is a sequence.** The card promises a sandbox you can leave or
+  rebuild; Show me points at the three controls that promise rests on — the SANDBOX badge, and
+  behind ☰ the rows *Leave the sandbox* and *Build a fresh sandbox* — then closes the menu again.
+  The two rows are pointed at, never tapped: tapping either performs the act the sentence is
+  describing. This replaces the 2026-09-10 `showMe: false`, whose reason (nothing to demonstrate)
+  expired the moment the card made a claim about controls.
+- **A card with nothing in the app to point at sits in the middle of the screen**, not at an edge:
+  it has no control to get out of the way of, and the middle is the reading position. Read off the
+  step's target in `keepPanelClearOf`, so no card declares its own placement.
+- **The panel is narrower than the app, tinted, and clears the message bar.** A margin of app down
+  both sides says the app is still underneath; the tint says this box is the guide and not a screen
+  of the app; the bottom edge sits above the message drawer's handle, which is where the app says
+  what it wants next.
 
 ### Still open on card 1
 

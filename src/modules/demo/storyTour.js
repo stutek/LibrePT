@@ -284,7 +284,33 @@ const ARRIVE_CHAPTER = {
       route: "/",
       keepOwnStep: true,
       caption: "story_step_welcome",
-      showMe: false,
+      // Show me here shows the three controls the card's own promise rests on (asked 2026-09-11):
+      // the SANDBOX badge in the header, and behind the ☰ menu the way out and the way to start
+      // over. A promise a reader has to take on faith is the one thing a demo can simply show, and
+      // the two menu rows are pointed at rather than tapped — tapping either would leave the
+      // sandbox or throw it away in the middle of the first card.
+      //
+      // It ends by closing the menu it opened. Two steps on, the story asks the trainer to open
+      // that same menu; left standing, that step reads as already done before they touch anything.
+      //
+      // The pauses are the difference between a tour and a flicker: a beat the viewer is meant to
+      // READ holds, and the two that only work the menu get out of the way. At the full-motion
+      // default of 1350ms each, five beats came to fifteen seconds of watching.
+      demonstrate: [
+        { target: "#preview-badge", point: true, settleMs: 900 },
+        {
+          target: "#btn-app-menu",
+          expect: { selector: "#menu-sandbox", visible: true },
+          settleMs: 400,
+        },
+        { target: "#menu-sandbox", point: true, settleMs: 900 },
+        { target: "#menu-sandbox-reset", point: true, settleMs: 900 },
+        {
+          target: "#btn-app-menu",
+          expect: { selector: "#app-menu", visible: false },
+          settleMs: 400,
+        },
+      ],
     }),
     narration("arrive-open", "chapter", "story_chapter_arrive", "story_arrive_open_body", {
       route: "/",

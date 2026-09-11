@@ -174,6 +174,11 @@ async function waitForOutcome(step, doc, wait, budgetMs) {
  * declares the one it means by which value it carries; nothing here decides anything else.
  */
 function interactWith(target, step) {
+  // POINTING is the fourth act, and it is the one a person performs when they are being shown
+  // rather than taught: the hand travels to a control, pulses, and touches nothing. The welcome
+  // card needs it — the SANDBOX badge and the two sandbox rows in the ☰ menu are things to LOOK at,
+  // and tapping either menu row would leave the sandbox or throw it away mid-sentence.
+  if (step.point) return;
   if (step.enter !== undefined) {
     target.focus();
     target.value = step.enter;
@@ -217,6 +222,12 @@ export async function performStep(
   step,
   { doc = document, hand = null, wait = sleep, replay = false } = {},
 ) {
+  // A step can be shown as a SEQUENCE of beats rather than one tap, because some of what the app
+  // promises is not one control: the welcome card says the run happens in a sandbox you can leave
+  // or rebuild, and those are a badge in the header and two rows behind the ☰ menu. Demonstrated as
+  // separate steps they would be three cards nobody asked for; demonstrated as one beat they cannot
+  // be, so the step carries its own little script.
+  if (step.demonstrate) return demonstrateBeats(step, { doc, hand, wait });
   const pace = demoPace(prefersReducedMotion(doc));
   const target = resolveTarget(doc, step);
   if (!target) {
@@ -267,6 +278,32 @@ export async function performStep(
   await wait(step.settleMs ?? pace.stepPauseMs);
 
   return outcome;
+}
+
+/** Runs a step's `demonstrate` beats in order, then grades the STEP — not the last beat.
+ *
+ * Each beat is an ordinary step, so it resolves, scrolls, points and checks by the one definition
+ * of what a step does. A beat with no expectation of its own claims the thing it points at is on
+ * screen, which is exactly what pointing at it asserts.
+ *
+ * **The beats put the app back.** A sequence that opens the ☰ menu ends by closing it, or the step
+ * after this one tells the trainer to open a menu that is already open and grades itself done
+ * before they touch anything. Each beat keeps performStep's idempotence — a beat whose outcome
+ * already holds is pointed at but not fired — so tapping Show me twice leaves the same screen.
+ */
+async function demonstrateBeats(step, { doc, hand, wait }) {
+  for (const [index, beat] of step.demonstrate.entries()) {
+    const outcome = await performStep(
+      {
+        ...beat,
+        id: `${step.id}/${index + 1}`,
+        expect: beat.expect ?? { selector: beat.target, visible: true },
+      },
+      { doc, hand, wait },
+    );
+    if (!outcome.ok) return { id: step.id, ok: false, reason: `${outcome.id}: ${outcome.reason}` };
+  }
+  return stepOutcomeNow(step, doc);
 }
 
 /**

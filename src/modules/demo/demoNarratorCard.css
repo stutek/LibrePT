@@ -37,11 +37,20 @@
   mask-image: linear-gradient(to bottom, #000 calc(100% - 14px), transparent);
   overflow-y: auto;
   overscroll-behavior: contain;
+  /* No scrollbar drawn, on a box that can still scroll (asked 2026-09-11). The panel is sized so the
+     whole card fits — a centred card gets the height for it — and a bar reserved for the rare screen
+     too short for that puts a strip of browser chrome through the middle of a story. What tells a
+     reader there is more below is the fade above, which is on whenever there is something to fade. */
+  scrollbar-width: none;
   border: 0;
   border-radius: 0;
   background: none;
   box-shadow: none;
   color: inherit;
+}
+
+.walkthrough-panel .demo-narrator-card::-webkit-scrollbar {
+  display: none;
 }
 
 /* The story's own words sit above the instruction, so the seam between them is a rule rather than

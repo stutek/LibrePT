@@ -389,13 +389,20 @@ export function startGuidedWalkthrough({
   }
 
   function keepPanelClearOf(target) {
+    // A step whose control is ON the panel has nothing in the app to get out of the way of, so the
+    // panel takes the middle of the screen instead of an edge (asked 2026-09-11). `is-top` goes with
+    // it: left standing from the step before, it would fight the centred placement for the same
+    // edge. Both are read off the target, so no step has to declare where its card sits.
+    const nothingToAvoid = Boolean(target) && el.panel.contains(target);
+    el.overlay.classList.toggle("is-centred", nothingToAvoid);
+    if (nothingToAvoid) el.overlay.classList.remove("is-top");
     if (!target) return;
     // A control that lives ON the panel — the story card's Continue, the handover link — cannot be
     // got out of the way of: moving the panel takes the target with it, so the answer flips every
     // time it is asked. It did, four times a second, and the card visibly bounced between the top
     // and the bottom of the screen (reported 2026-08-23 at story step 4 of 31). Nothing to do here:
     // a button on the card is never covered by the card.
-    if (el.panel.contains(target)) return;
+    if (nothingToAvoid) return;
     // Measured with the panel where it is NOW, which is why this reads the bottom edge the panel
     // would occupy at the bottom of the viewport rather than its live top: once `is-top` is on, the
     // panel's own top is at the top of the screen and would answer "no overlap" forever.
@@ -524,6 +531,11 @@ export function startGuidedWalkthrough({
     // The LAST open dialog, because one can be opened over another and the panel has to live in the
     // topmost to be tappable at all.
     const openDialog = [...doc.querySelectorAll("dialog[open]")].pop() || null;
+    // Whether a dialog is standing at all, which is a different question from whether the panel is
+    // docked INSIDE one: a panel that escaped a small dialog is out over the screen, and the app
+    // behind it — the message drawer's bar included — is inert either way. The bottom edge reads
+    // this to decide whether there is a drawer worth clearing (walkthrough.css).
+    el.overlay.classList.toggle("is-over-dialog", Boolean(openDialog));
     const wanted = openDialog || doc.body;
     if (el.overlay.parentElement !== wanted) wanted.appendChild(el.overlay);
 
