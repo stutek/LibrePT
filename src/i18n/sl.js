@@ -1,17 +1,33 @@
 // Slovenian (sl) translations — a flat key -> string map.
 // Keep keys in parity with every other locale in this folder.
+//
+// TWO RULES FOR EVERY STRING IN THIS FILE, both settled 2026-09-11 after the first trainer to use
+// the app read it (TODO §45.7). Neither is a matter of taste, and both were half-applied before,
+// which is how a reader met them: as an app that could not keep its own wording straight.
+//
+// 1. **A training session is a "trening", never a "seja".** In Slovenian "seja" reads first as a
+//    meeting of a committee; "trening" is the word a trainer and a client actually say. The noun
+//    changes grammatical gender with the rename (seja f. -> trening m.), so the whole sentence moves
+//    with it, not only the word. The one place "seja" survived was where it never meant training at
+//    all — an expired Google sign-in — and that now says "povezava" instead.
+// 2. **The app uses the familiar form (tikanje), to trainer and client alike.** A trainer talks to a
+//    client, not an office to a citizen. Where the familiar form would force the app to guess a
+//    person's gender, rewrite the sentence rather than pick one: say what is true of the calendar or
+//    the file instead of what is true of the reader ("Tvoj koledar kaže zasedenost", not "zasedeni
+//    ste"). Where a greeting genuinely has to address the person, both endings are written out, as
+//    in `story_welcome_title` below.
 export const sl = {
   logo_title: "LibrePT",
   preview_badge: "Predogled",
   preview_warning:
-    "To je predogledna različica — pred izdajo in v aktivnem razvoju. Funkcije se spreminjajo brez obvestila in podatki se lahko izgubijo. Redno delajte varnostne kopije in se nanjo še ne zanašajte za resnične podatke strank.",
+    "To je predogledna različica — pred izdajo in v aktivnem razvoju. Funkcije se spreminjajo brez obvestila in podatki se lahko izgubijo. Redno delaj varnostne kopije in se nanjo še ne zanašaj za resnične podatke strank.",
   tab_clients: "Stranke",
   tab_routines: "Rutine",
   tab_exercises: "Vaje",
   tab_history: "Zgodovina",
   pending_adjustments: "Čakajoče na pregled",
-  btn_start_session: "Začni sejo po meri ali skupinsko sejo",
-  btn_create_session: "Ustvari sejo",
+  btn_start_session: "Začni trening po meri ali skupinski trening",
+  btn_create_session: "Ustvari trening",
   no_pending_adjustments: "Nič ne čaka na pregled. Vsi signali s tal so usklajeni!",
   clients_title: "Imenik strank",
   placeholder_search_clients: "Išči stranke...",
@@ -40,14 +56,14 @@ export const sl = {
   history_title: "Splošna zgodovina vadb",
   no_workouts_history: "V splošni zgodovini ni zabeleženih vadb.",
   live_tracking_clipboard: "Sledenje vadbi v živo",
-  active_session: "Aktivna seja",
+  active_session: "Aktiven trening",
   add_from_catalog: "Dodaj iz kataloga",
   catalog_picker_title: "Dodaj iz kataloga vaj",
   integrity_error_title: "Preverjanje aplikacije ni uspelo",
   integrity_error_missing:
-    "Za to različico ni bilo mogoče najti kataloga integritete. Med lokalnim razvojem zaženite celoten build (python -m build) ali znova zaženite razvojni strežnik, da se katalog znova izračuna; v produkciji to pomeni nepopolno objavo.",
+    "Za to različico ni bilo mogoče najti kataloga integritete. Med lokalnim razvojem zaženi celoten build (python -m build) ali znova zaženi razvojni strežnik, da se katalog znova izračuna; v produkciji to pomeni nepopolno objavo.",
   integrity_error_mismatch:
-    "Datoteka se ni ujemala s preverjeno kontrolno vsoto — prenos je poškodovan ali ostanek druge različice. Počistite predpomnilnik in poskusite znova, da se ta različica znova prenese in preveri; če v lokalnem razvoju vztraja, znova zaženite razvojni strežnik za ponovni izračun kataloga.",
+    "Datoteka se ni ujemala s preverjeno kontrolno vsoto — prenos je poškodovan ali ostanek druge različice. Počisti predpomnilnik in poskusi znova, da se ta različica znova prenese in preveri; če v lokalnem razvoju vztraja, znova zaženi razvojni strežnik za ponovni izračun kataloga.",
   integrity_error_retry: "Počisti predpomnilnik in poskusi znova",
   btn_collapse: "Minimiziraj",
   collapse: "Strni",
@@ -57,35 +73,34 @@ export const sl = {
   btn_inject_exercise: "Vstavi vajo",
   btn_cancel: "Prekliči",
   btn_discard_changes: "Zavrzi spremembe",
-  btn_delete_session: "Izbriši sejo",
+  btn_delete_session: "Izbriši trening",
   btn_delete_plan: "Izbriši plan",
-  btn_start_workout_session: "Začni sejo",
+  btn_start_workout_session: "Začni trening",
   btn_complete: "Zaključi vadbo",
   btn_log_feedback: "Dodaj opombo",
-  alert_no_sets:
-    "Ni zabeleženih zaključenih serij. Ali ste prepričani, da želite zaključiti in shraniti prazno vadbo?",
+  alert_no_sets: "Ni zabeleženih zaključenih serij. Res želiš zaključiti in shraniti prazno vadbo?",
   confirm_finish_early:
-    "Do konca te seje je še približno {min} minut. Ali jo želite vseeno zaključiti zdaj?",
+    "Do konca tega treninga je še približno {min} minut. Ga želiš vseeno zaključiti zdaj?",
   confirm_cancel:
-    "Izbriši to sejo? Zabeležen napredek in povratne informacije bodo trajno izgubljeni.",
+    "Izbriši ta trening? Zabeležen napredek in povratne informacije bodo trajno izgubljeni.",
   confirm_delete_session:
-    "Izbriši to sejo? Odstranjena bo z urnika, zabeležen napredek in povratne informacije pa bodo izgubljeni — program vsakega udeleženca se ohrani med nenačrtovanimi programi.",
+    "Izbriši ta trening? Odstranjen bo z urnika, zabeležen napredek in povratne informacije pa bodo izgubljeni — program vsakega udeleženca se ohrani med nenačrtovanimi programi.",
   confirm_delete_plan:
     "Izbrišem vse vaje iz tega plana? Lahko ga sestaviš znova ali zapustiš urejanje.",
   warning_banner_title: "Varnostno opozorilo za stranko",
-  workout_setup_title: "Nastavitev seje vadbe",
+  workout_setup_title: "Nastavitev treninga",
   workout_setup_desc:
-    "Nastavite podrobnosti seje in izberite stranke (2–6). Posameznikom lahko dodelite ločene ali skupne predloge rutin.",
-  label_session_name: "Ime seje",
-  untitled_session: "Neimenovana seja",
+    "Nastavi podrobnosti treninga in izberi stranke (2–6). Posameznikom lahko dodeliš ločene ali skupne predloge rutin.",
+  label_session_name: "Ime treninga",
+  untitled_session: "Neimenovan trening",
   label_session_date: "Datum (YYYY-MM-DD)",
   label_start_time: "Začetni čas (24h)",
   label_end_time: "Končni čas (24h)",
   label_location: "Lokacija",
   select_participants: "Izberi udeležence in dodeli rutine",
   btn_launch_clipboard: "Odpri v beležki",
-  err_select_client: "Izbrati morate vsaj eno stranko.",
-  err_assign_routine: "Prosimo, dodelite predlogo rutine vsem izbranim strankam.",
+  err_select_client: "Izbrati moraš vsaj eno stranko.",
+  err_assign_routine: "Dodeli predlogo rutine vsem izbranim strankam.",
   add_ex_session_title: "Vstavi vajo na vadbišču",
   select_exercise: "Izberi vajo",
   sets: "Serije",
@@ -102,9 +117,9 @@ export const sl = {
   theme_dark: "Temna tema",
   backup_center: "Središče za sinhronizacijo in varnostne kopije",
   backup_desc:
-    "LibrePT hrani vaše podatke neposredno v tej napravi. Sinhronizirajte najnovejši urnik sej, prenesite varnostno kopijo ali jo uvozite za prenos na drug telefon.",
-  sync_session_title: "Sinhroniziraj podatke o sejah",
-  sync_session_desc: "Pridobi najnovejše rezervacije in urnik sej iz povezanega koledarja.",
+    "LibrePT hrani tvoje podatke neposredno v tej napravi. Sinhroniziraj najnovejši urnik treningov, prenesi varnostno kopijo ali jo uvozi za prenos na drug telefon.",
+  sync_session_title: "Sinhroniziraj podatke o treningih",
+  sync_session_desc: "Pridobi najnovejše rezervacije in urnik treningov iz povezanega koledarja.",
   backup_export_title: "Izvozi varnostno kopijo",
   backup_export_desc: "Prenesi svoje stranke, rutine in dnevnike vadb kot eno JSON datoteko.",
   btn_export_json: "Izvozi JSON",
@@ -121,17 +136,17 @@ export const sl = {
     "Naloži obstoječo .json datoteko. To bo združilo ali prepisalo trenutno bazo.",
   btn_select_json: "Izberi JSON datoteko",
   error_title: "Stran ni najdena",
-  error_desc: "Ta povezava ne vodi do seje, stranke ali pogleda v LibrePT.",
+  error_desc: "Ta povezava ne vodi do treninga, stranke ali pogleda v LibrePT.",
   btn_error_home: "Nazaj na nadzorno ploščo",
   btn_download_backup: "Prenesi varnostno kopijo JSON",
   btn_import_backup: "Uvozi varnostno kopijo JSON",
   btn_resolve: "Razreši",
   no_exercises_injected: "Ni vstavljenih vaj",
   no_exercises_desc:
-    "Prosimo, tapnite ikono za urejanje (✎) zgoraj za načrtovanje in dodajanje vaj za to stranko.",
+    "Tapni ikono za urejanje (✎) zgoraj, da načrtuješ in dodaš vaje za to stranko.",
   edit_plan: "Uredi načrt",
   editing_plan_for: "Urejanje načrta za",
-  editing_plan_session: "Urejanje načrta seje",
+  editing_plan_session: "Urejanje načrta treninga",
   add_exercise: "Dodaj vajo",
   new_label: "Novo",
   swapped_label: "Zamenjano",
@@ -146,9 +161,9 @@ export const sl = {
   remove: "Odstrani",
   done: "Končano",
   done_editing_plan: "Končano z urejanjem načrta",
-  session_options: "Možnosti seje",
-  edit_exit_hint: "Tapnite Končano, pritisnite Esc ali tapnite zunaj za zaključek.",
-  reorder_hint: "Tapnite zgoraj/spodaj za premik, povlecite za prerazporeditev",
+  session_options: "Možnosti treninga",
+  edit_exit_hint: "Tapni Končano, pritisni Esc ali tapni zunaj za zaključek.",
+  reorder_hint: "Tapni zgoraj/spodaj za premik, povleci za prerazporeditev",
   circuit: "Sklop",
   circuit_title: "Naslov sklopa",
   circuit_none: "Brez sklopa",
@@ -197,25 +212,25 @@ export const sl = {
   no_goals_specified: "Cilji niso določeni.",
   no_notes_specified: "Brez zabeleženih zdravstvenih težav ali posebnosti.",
   no_weight_records: "Ni zapisov teže.",
-  log_weights_progression: "Zabeležite teže za spremljanje napredka.",
+  log_weights_progression: "Zabeleži teže za spremljanje napredka.",
   need_two_entries: "Za grafikon potrebujete vsaj 2 zapisa.",
   no_workouts_logged: "Ni še zabeleženih vadb.",
-  no_routines_found: 'Predlog rutine ni mogoče najti. Kliknite "Ustvari rutino", da jo oblikujete.',
+  no_routines_found: 'Predlog rutine ni mogoče najti. Klikni "Ustvari rutino", da jo oblikuješ.',
   no_description: "Brez opisa.",
-  btn_start_group_session: "Začni skupinsko sejo",
+  btn_start_group_session: "Začni skupinski trening",
   no_exercises_matched: "Nobena vaja ne ustreza kriterijem filtra.",
   no_instructions: "Brez navodil.",
   min_session: "min vadba",
   less_than_minute: "< 1 min",
   set_label: "Serija",
   no_details_specified: "Podrobnosti niso navedene.",
-  no_clients_found: 'Strank ni mogoče najti. Kliknite "Dodaj stranko", da jo ustvarite.',
+  no_clients_found: 'Strank ni mogoče najti. Klikni "Dodaj stranko", da jo ustvariš.',
   no_weight_logged: "Teža ni zabeležena",
   btn_back: "Nazaj",
-  routines_desc: "Izberite ali uredite vadbene rutine. Zaženite jih za posameznike ali skupine.",
+  routines_desc: "Izberi ali uredi vadbene rutine. Zaženi jih za posameznike ali skupine.",
   filter_all: "Vse",
   history_desc: "Dnevnik vseh zaključenih vadb za vse stranke.",
-  sessions_schedule: "Seje",
+  sessions_schedule: "Treningi",
   from_date: "Od",
   btn_sync_calendar: "Sinhroniziraj",
   btn_sync_data: "Sinhroniziraj podatke",
@@ -223,10 +238,10 @@ export const sl = {
   btn_launch_clipboard_short: "Odpri v beležki",
   syncing_calendar: "Sinhronizacija...",
   calendar_synced: "Koledar je bil uspešno sinhroniziran!",
-  no_sessions_scheduled: "Ni načrtovanih sej.",
+  no_sessions_scheduled: "Ni načrtovanih treningov.",
   voice_note_label: "Glasovna opomba (zasebnost-prva)",
-  voice_ready: "Tapnite mikrofon za snemanje opombe",
-  voice_recording: "Snemanje... Tapnite ponovno za shranitev",
+  voice_ready: "Tapni mikrofon za snemanje opombe",
+  voice_recording: "Snemanje... Tapni ponovno za shranitev",
   voice_transcribing: "Lokalno prepisovanje zvoka...",
   voice_transcription_done: "Prepis v napravi je zaključen!",
   voice_playing: "Predvajanje opombe...",
@@ -236,17 +251,18 @@ export const sl = {
   no_members_assigned: "Ni udeležencev",
   session_completed: "Zaključeno",
   session_changed_resend:
-    "Ta seja se je spremenila — želiš poslati nove podatke strankam, ki si jih že povabil?",
+    "Ta trening se je spremenil — želiš poslati nove podatke strankam, ki si jih že povabil?",
   session_change_focus: "druga vrsta treninga",
   session_change_participants: "drugi povabljeni",
   session_change_time: "nov čas",
   session_change_location: "nov prostor",
   session_invite_title: "Pošlji vabila v koledar",
-  session_invite_desc: "Na novo dodeljenim udeležencem lahko pošljete vabilo v koledar za to sejo.",
+  session_invite_desc:
+    "Na novo dodeljenim udeležencem lahko pošlješ vabilo v koledar za ta trening.",
   intake_title: "Predstavi se svojemu trenerju",
   intake_lede:
     "Izpolni to in pošlji svojemu trenerju. Ustvari se le datoteka na tvojem telefonu — v LibrePT ni računa, ki bi ga bilo treba odpreti, in ni strežnika, ki bi to videl.",
-  intake_name: "Tvoje ime",
+  intake_name: "Ime in priimek",
   intake_email: "E-pošta",
   intake_phone: "Telefon",
   intake_contact_hint: "Eno od obojega je dovolj — kar naj trener uporabi.",
@@ -337,17 +353,17 @@ export const sl = {
   session_invite_send_to: "Pošlji vabilo na",
   session_invite_subject: "Trening",
   session_invite_body_greeting: "Pozdravljen/a",
-  session_invite_body: "Razporejeni ste na sejo",
+  session_invite_body: "Tvoj trening",
   session_invite_body_attach:
-    "Datoteka z vabilom v koledar se je pravkar prenesla — pred pošiljanjem jo priložite temu e-poštnemu sporočilu.",
-  schedule_conflict_double_booked: "Takrat ste zasedeni drugje",
-  schedule_conflict_busy_elsewhere: "Vaš koledar kaže, da ste zasedeni",
+    "Datoteka z vabilom v koledar se je pravkar prenesla — pred pošiljanjem jo priloži temu e-poštnemu sporočilu.",
+  schedule_conflict_double_booked: "Takrat imaš že nekaj drugega",
+  schedule_conflict_busy_elsewhere: "Tvoj koledar kaže zasedenost",
   schedule_conflict_merged: "Poteka vzporedno — odpre se kot ena podloga",
   schedule_conflict_confirm:
-    "Ta termin se prekriva z nečim, kar že imate. Želite sejo vseeno razporediti?",
-  session_start_time_title: "Seja se je začela izven urnika",
+    "Ta termin se prekriva z nečim, kar že imaš. Želiš trening vseeno razporediti?",
+  session_start_time_title: "Trening se je začel izven urnika",
   session_start_time_desc:
-    "Načrtovano ob {scheduled}, začeto {minutes} min {direction}. Želite sejo premakniti na dejanski čas izvedbe?",
+    "Načrtovano ob {scheduled}, začeto {minutes} min {direction}. Želiš trening premakniti na dejanski čas izvedbe?",
   session_start_time_late: "prepozno",
   session_start_time_early: "prezgodaj",
   session_start_time_keep: "Ohrani urnik",
@@ -368,6 +384,19 @@ export const sl = {
   demo_cleanup_exercises: "vzorčnih vaj",
   demo_cleanup_notifications: "vzorčnih obvestil",
   demo_cleanup_remove: "Odstrani",
+  splash_tagline: "Lahek in brezplačen pripomoček za tvojo podlogo, treninge in programe vadbe.",
+  splash_dismiss: "Zapri in pojdi v aplikacijo",
+  splash_load_demo: "Razišči z vzorčnimi podatki",
+  splash_start_empty: "Začni s prazno aplikacijo",
+  menu_trainer_details: "Moji podatki",
+  trainer_details_title: "Tvoji podatki",
+  trainer_details_lede:
+    "Ti podatki gredo na to, kar pošlješ stranki: tvoje ime podpiše povabilo, telefon in e-pošta pa sta pot, po kateri ti stranka odgovori. Ostanejo na tej napravi.",
+  trainer_details_name: "Ime in priimek",
+  trainer_details_phone: "Telefon",
+  trainer_details_email: "E-pošta",
+  trainer_details_email_invalid: "To ni e-poštni naslov. Popravi ga ali pusti polje prazno.",
+  trainer_details_save: "Shrani moje podatke",
   walkthrough_title: "Vodeni ogled",
   walkthrough_progress: "Korak {step} od {count}",
   walkthrough_back: "Nazaj",
@@ -381,17 +410,17 @@ export const sl = {
   walkthrough_off_track: "Zapustil(-a) si mesto, kjer se demo odvija. Vrni ga ali ga ustavi.",
   walkthrough_return: "Nazaj v demo",
   walkthrough_leave: "Ustavi demo",
-  walkthrough_finished: "To je celoten krog — ena seja, ena podloga, štirje dotiki.",
+  walkthrough_finished: "To je celoten krog — en trening, ena podloga, štirje dotiki.",
   walkthrough_wrong_place:
-    "Ta korak potrebuje drug zaslon — vrni se na pregled sej in ga zaženi znova.",
+    "Ta korak potrebuje drug zaslon — vrni se na pregled treningov in ga zaženi znova.",
   walkthrough_stuck:
     "Tega koraka ni bilo mogoče zaključiti. Zapri vodeni ogled in raziskuj naprej — tvoji podatki so nedotaknjeni.",
-  tour_step_open_session: "Odpri skupinsko sejo. Ena podloga pokriva vse v njej.",
+  tour_step_open_session: "Odpri skupinski trening. Ena podloga pokriva vse v njem.",
   tour_step_focus_exercise:
     "Dotakni se kroga, da pride v fokus. Njegovi gumbi pridejo na doseg palca.",
   tour_step_signal: "Označi krog kot prelahek. En dotik ga zabeleži in pusti opombo za načrt.",
   tour_step_next_participant:
-    "Preklopi na naslednjega udeleženca — ista seja, njegov lasten načrt.",
+    "Preklopi na naslednjega udeleženca — isti trening, njegov lasten načrt.",
   gym_notes_label: "V telovadnici",
   label_repeats: "Ponovi vsak teden",
   label_repeat_days: "Na te dneve",
@@ -425,7 +454,7 @@ export const sl = {
   data_wipe_found: "Najdeno na tej napravi:",
   data_wipe_nothing: "Na tej napravi ni shranjenega ničesar, kar bi se dalo izbrisati.",
   data_wipe_schema_store: "Zapisi, shranjeni kot {store}",
-  data_wipe_unversioned: "Nastavitve, odprta seja in evidenca te naprave",
+  data_wipe_unversioned: "Nastavitve, odprt trening in evidenca te naprave",
   data_wipe_unreachable: "Česa to ne doseže:",
   data_wipe_confirm: "Izbriši",
   menu_import_program: "Uvozi program",
@@ -444,7 +473,7 @@ export const sl = {
     "Peskovnik — nič tukaj ni tvoje delo. Odpri obvestilo o tveganjih in izgubi podatkov.",
   sandbox_stale_title: "Ta peskovnik je od prej",
   sandbox_stale_body:
-    "Njegove seje so bile zgrajene okoli dneva, ko je nastal, zato je današnja plošča prazna. Ponastavitev podatkov zavrže vse, kar si v peskovniku naredil. Tvojega dela se ne dotakne.",
+    "Njegovi treningi so bili zgrajeni okoli dneva, ko je nastal, zato je današnja plošča prazna. Ponastavitev podatkov zavrže vse, kar si v peskovniku naredil. Tvojega dela se ne dotakne.",
   menu_sandbox_reset: "Ponastavi podatke peskovnika",
   sandbox_reset_title: "Ponastavim podatke peskovnika?",
   sandbox_reset_body:
@@ -459,16 +488,16 @@ export const sl = {
   program_import_lede:
     "Prilepi program, napisan drugje — v klepetu, preglednici, datoteki od kolega. Odpre se v običajnem urejevalniku načrta, kjer popraviš, kar je prišlo narobe.",
   program_import_client: "Za koga (neobvezno)",
-  program_import_session: "Katera seja (neobvezno)",
+  program_import_session: "Kateri trening (neobvezno)",
   program_import_text: "Prilepi program sem",
   program_import_file: "Preberi datoteko",
   program_import_template: "Pokaži obliko",
   program_import_prompt: "Kopiraj navodilo",
   program_import_prompt_copied: "Navodilo kopirano",
   program_import_prompt_text:
-    'Napiši program vadbe kot JSON točno v tej obliki in nič drugega: {"format": "{format}", "title": "Ime seje", "items": [{"name": "Počep", "sets": 3, "reps": 5, "weight": 60, "unit": "kg"}, {"rest": 90}]}. Za vsako vajo ena postavka, v vrstnem redu izvajanja, in postavka {"rest": sekunde} povsod, kjer je odmor.',
+    'Napiši program vadbe kot JSON točno v tej obliki in nič drugega: {"format": "{format}", "title": "Ime treninga", "items": [{"name": "Počep", "sets": 3, "reps": 5, "weight": 60, "unit": "kg"}, {"rest": 90}]}. Za vsako vajo ena postavka, v vrstnem redu izvajanja, in postavka {"rest": sekunde} povsod, kjer je odmor.',
   program_import_no_client: "Nikogar posebej",
-  program_import_no_session: "Zaenkrat brez seje",
+  program_import_no_session: "Zaenkrat brez treninga",
   program_import_open: "Odpri v urejevalniku",
   program_import_read: "Prebranih {count} postavk, {custom} jih ni v tvojem katalogu.",
   program_import_unreadable:
@@ -476,7 +505,7 @@ export const sl = {
   program_import_custom_hint: "Ni v tvojem katalogu — prišla je s programom",
   program_import_custom_tag: "PO MERI",
   copy_plan_to: "Kopiraj ta načrt na …",
-  copy_plan_nobody: "V tej seji ni še nikogar drugega.",
+  copy_plan_nobody: "V tem treningu ni še nikogar drugega.",
   unknown_client: "Neznana stranka",
   bind_participants: "Vsi na ta načrt",
   unbind_participants: "Vsak svoj načrt",
@@ -484,13 +513,12 @@ export const sl = {
   plan_fit_hint: "Ocenjen delovni čas glede na trajanje termina, brez premorov",
   plan_fit_over: "čez",
   plan_fit_tight: "na tesnem",
-  label_apply_to_series: "Spremeni vse večere te seje",
+  label_apply_to_series: "Spremeni vse večere tega treninga",
   session_one_of_a_series:
-    "To je en večer ponavljajoče se seje. Kar spremeniš tukaj, velja samo za ta večer.",
+    "To je en večer ponavljajočega se treninga. Kar spremeniš tukaj, velja samo za ta večer.",
   gym_note_in_this_plan: "v tem načrtu",
   feedback_keep_on_record: "Shrani to v kartoteko stranke",
-  // Trening, ne seja: seja je v slovenščini najprej sestanek, trening pa je beseda, ki jo trener in
-  // stranka res uporabljata. Vodeni ogled, ne demo — tako se ta tek imenuje v walkthrough_title.
+  // Vodeni ogled, ne demo — tako se ta tek imenuje v walkthrough_title.
   // Pozdrav v obeh oblikah, kot že walkthrough_off_track_title in intake_invite_message_unsigned:
   // aplikacija tika, tikanje pa je v slovenščini spolsko določeno, zato "(-la)" in ne množina.
   story_welcome_title: "Dobrodošel(-la) v LibrePT",
@@ -565,14 +593,14 @@ export const sl = {
   story_chapter_programme: "Program",
   story_chapter_evening: "Večer po vadbi",
   story_step_programme_open_session:
-    "Nedelja zvečer. Torkova seja je že na plošči — trener jo odpre, da sestavi, kar bo dejansko izpeljal.",
+    "Nedelja zvečer. Torkov trening je že na plošči — trener ga odpre, da sestavi, kar bo dejansko izpeljal.",
   story_step_programme_editor:
     "Pritisni Uredi načrt — vrstica s svinčnikom (✎) v meniju, ki se je pravkar spustil. Odpre se Janin načrt, ob naslovu pa številka, ki odloča: koliko od rezervirane ure ta načrt v resnici zapolni.",
   story_step_programme_add_circuit:
     "Dodaj zaključni sklop: pritisni + Sklop na dnu načrta, gumb z ikono naloženih slojev. Na koncu se doda nov sklop, pripravljen za vaje, ki gredo vanj — trener uro sestavi v nedeljo na kavču, ne šele v torek v telovadnici.",
   story_step_programme_done:
-    "Pritisni Končano zgoraj desno. Načrt je shranjen in seja se vrne z vsemi v njej — urejevalnik načrta kaže eno osebo naenkrat, to, kar sledi, pa se tiče vseh treh.",
-  story_step_programme_menu_again: "Znova odpri meni seje — še nekaj pred torkom.",
+    "Pritisni Končano zgoraj desno. Načrt je shranjen in trening se vrne z vsemi v njem — urejevalnik načrta kaže eno osebo naenkrat, to, kar sledi, pa se tiče vseh treh.",
+  story_step_programme_menu_again: "Znova odpri meni treninga — še nekaj pred torkom.",
   story_step_programme_bind:
     "Jane, John in Sarah delajo isti krog, zato gredo na en načrt — in torkove serije se zabeležijo enkrat namesto trikrat.",
   story_programme_open_body:
@@ -595,10 +623,11 @@ export const sl = {
     "Janein krog pride na vrsto. Njena serija, njene številke, vse na dosegu palca.",
   story_step_signal_too_easy:
     "Šlo ji je prelahko. En dotik to pove — in nocojšnji načrt bo to izvedel.",
-  story_step_next_participant: "Zdaj John. Ista seja, njegov lasten načrt, brez vračanja k mizi.",
+  story_step_next_participant:
+    "Zdaj John. Isti trening, njegov lasten načrt, brez vračanja k mizi.",
   story_step_refocus: "Dotakni se njegovega kroga, da pride v fokus.",
   story_step_capture_open:
-    "Med serijama omeni koleno — tisto, ki so mu ga leta 2024 operirali. Ura teče naprej, zapis se odpre kar čez sejo.",
+    "Med serijama omeni koleno — tisto, ki so mu ga leta 2024 operirali. Ura teče naprej, zapis se odpre kar čez trening.",
   story_step_capture_tag: "Bolečina v sklepu, pri tej vaji.",
   story_step_capture_note: "In kar je dejansko rekel, natipkano z enim palcem.",
   story_typed_note: "levo koleno, tretja runda",
@@ -606,7 +635,7 @@ export const sl = {
   story_step_capture_keep:
     "Shranjeno v Johnovo kartoteko. Ne gre za nocojšnjo obremenitev, gre za naslednje tri mesece.",
   story_step_capture_submit: "Zabeleženo — pri Johnu in pri tej vaji.",
-  story_step_session_menu: "Odpri meni seje.",
+  story_step_session_menu: "Odpri meni treninga.",
   story_step_plan_editor:
     "Johnov načrt in zapis izpred minute je že v njem. Nihče ga ni šel iskat.",
   story_step_swap_open: "Ta vaja gre torej ven — samo pri Johnu.",
@@ -666,14 +695,14 @@ export const sl = {
   rsvp_answer_maybe: "še ne ve",
   notif_sync_failed_title: "Sinhronizacija v oblak ni uspela",
   drive_sync_desc_connected:
-    "Ohrani stranke, programe in zgodovino vadb usklajene med svojimi napravami, v skriti mapi, ki jo v vašem Google Drivu vidi samo LibrePT.",
+    "Ohrani stranke, programe in zgodovino vadb usklajene med svojimi napravami, v skriti mapi, ki jo v tvojem Google Drivu vidi samo LibrePT.",
   drive_sync_not_configured: "Sinhronizacija z Google Drive za to postavitev še ni nastavljena.",
   drive_sync_status_ok: "Sinhronizirano",
   drive_sync_status_ok_conflicts: "Sinhronizirano, s konflikti za pregled",
   drive_sync_status_error: "Sinhronizacija ni uspela: {error}",
-  drive_sync_status_reauth: "Seja je potekla — dotaknite se za ponovno povezavo.",
+  drive_sync_status_reauth: "Povezava je potekla — dotakni se za ponovno povezavo.",
   drive_sync_status_denied:
-    "Google tega računa še ni odobril za sinhronizacijo. Vaši podatki so varni na tej napravi.",
+    "Google tega računa še ni odobril za sinhronizacijo. Tvoji podatki so varni na tej napravi.",
   drive_sync_status_declined: "Ni povezano — povežete se lahko kadar koli.",
   drive_sync_review_conflicts: "Preglej konflikte",
   drive_conflict_type_add_add: "Ustvarjeno na obeh napravah",
@@ -708,12 +737,12 @@ export const sl = {
   menu_privacy: "Izjava o zasebnosti in GDPR",
   about_title: "O aplikaciji LibrePT",
   about_body:
-    "LibrePT je brezplačen odprtokoden pripomoček za osebne trenerje, ki deluje brez povezave — načrtujte seje, jih izvajajte v telovadnici in spremljajte napredek strank. Privzeto vsi podatki ostanejo na vaši lokalni napravi, razen če se odločite za sinhronizacijo s svojo osebno shrambo v oblaku.",
-  about_repo: "Oglejte si projekt na GitHubu",
+    "LibrePT je brezplačen odprtokoden pripomoček za osebne trenerje, ki deluje brez povezave — načrtuj treninge, jih izvajaj v telovadnici in spremljaj napredek strank. Privzeto vsi podatki ostanejo na tvoji lokalni napravi, razen če se odločiš za sinhronizacijo s svojo osebno shrambo v oblaku.",
+  about_repo: "Oglej si projekt na GitHubu",
   about_licenses: "Licence in zasluge",
   terms_title: "Pogoji in izjava o odgovornosti",
   terms_body:
-    'LibrePT je na voljo "kakršen je", brez kakršnega koli jamstva. Ne predstavlja zdravstvenega ali strokovnega nasveta za treniranje. Vaši podatki so shranjeni na vaši lokalni napravi (z neobveznimi integracijami osebne shrambe v oblaku/varnostnih kopij, ki jih omogočite sami), sami pa ste odgovorni za njihovo upravljanje. Uporaba je na lastno odgovornost.',
+    'LibrePT je na voljo "kakršen je", brez kakršnega koli jamstva. Ne predstavlja zdravstvenega ali strokovnega nasveta za treniranje. Tvoji podatki so shranjeni na tvoji lokalni napravi (z neobveznimi integracijami osebne shrambe v oblaku/varnostnih kopij, ki jih omogočiš sam), odgovornost za njihovo upravljanje pa je tvoja. Uporaba je na lastno odgovornost.',
   terms_agree: "Se strinjam",
 
   // Notification Area & Welcome Demo
@@ -725,13 +754,13 @@ export const sl = {
     "Tukaj še ni ničesar shranjenega. Če želiš videti, kaj aplikacija zna, pritisni Razglej se: to je vodeni ogled, ki pelje skozi zgodbo treh novih strank, od prvega povabila do treninga v telovadnici. Če želiš preizkušati sam(-a), pritisni Vstopi v peskovnik — to je ločena kopija aplikacije, kjer nič, kar narediš, ne spremeni zapisov, ki jih hraniš tukaj.",
   notif_demo_mode_title: "⚠️ Predstavitveni način — naloženi vzorčni podatki",
   notif_demo_mode_desc:
-    "Aplikacija deluje na vzorčnih strankah, rutinah in sejah. Počistite jih, preden jo uporabite za resnično delo: čiščenje natančno našteje, kaj odstrani, in ohrani katalog vaj, tako da vse, kar ste zgradili na njem, še naprej deluje.",
+    "Aplikacija deluje na vzorčnih strankah, rutinah in treningih. Počisti jih, preden jo uporabiš za resnično delo: čiščenje natančno našteje, kaj odstrani, in ohrani katalog vaj, tako da vse, kar si zgradil na njem, še naprej deluje.",
   filter_participants_placeholder: "Filtriraj stranke...",
   notif_demo_walkthrough_btn: "Razglej se",
   notif_demo_mode_reset_btn: "Počisti podatke in zapusti predstavitveni način",
   notif_welcome_title: "👋 Raziskujete z vzorčnimi podatki",
   notif_welcome_desc:
-    "Stranke, rutine in seje tukaj so vzorčni fitnes, vključno z eno sejo, ki že poteka. Raziskujte brez skrbi — nihče od teh ljudi ni resničen.",
+    "Stranke, rutine in treningi tukaj so vzorčni fitnes, vključno z enim treningom, ki že poteka. Razišči brez skrbi — nihče od teh ljudi ni resničen.",
   notif_welcome_clients_btn: "Poglej vzorčne stranke",
 
   // Pogovorno okno s podatki o gradnji: odpre se z dotikom oznake v glavi (namig ob prehodu miške na telefonu ni dosegljiv).
@@ -749,9 +778,10 @@ export const sl = {
   notif_count_badge: "{unread} neprebranih / {all} vseh",
   notif_mark_all_read: "Označi vse kot prebrano",
   notif_unscheduled_plans_title: "Nenačrtovani programi",
-  notif_unscheduled_plans_desc: "{count} program(-i/-ov) je zasnovanih, a še ni dodeljenih seji.",
-  notif_pending_sessions_title: "Seje, ki čakajo na pregled",
-  notif_pending_sessions_desc: "{count} stranka(-e/-k) ima nerešene povratne signale iz seje.",
+  notif_unscheduled_plans_desc:
+    "{count} program(-i/-ov) je zasnovanih, a še ni dodeljenih treningu.",
+  notif_pending_sessions_title: "Treningi, ki čakajo na pregled",
+  notif_pending_sessions_desc: "{count} stranka(-e/-k) ima nerešene povratne signale iz treninga.",
   client_email: "E-pošta",
   client_phone: "Telefonska številka",
   not_specified: "Ni navedeno",
@@ -779,8 +809,8 @@ export const sl = {
   consent_no_email: "E-pošta ni vpisana",
   consent_no_phone: "Telefon ni vpisan",
   consent_info_button: "Kdo hrani obrazec?",
-  consent_info_title: "Podpisan obrazec hranite vi",
+  consent_info_title: "Podpisan obrazec hraniš ti",
   consent_info_body:
-    "LibrePT zabeleži le, da je bila privolitev dana, in datum — nikoli fotografije, skena ali podpisa. Kot upravljavec osebnih podatkov ste za arhiviranje podpisanega obrazca odgovorni sami, dokler hranite podatke te stranke, da lahko privolitev kadar koli dokažete (člen 7(1) GDPR). Če stranka privolitev prekliče, tukaj izbrišite njene zapise in preklic zabeležite na svojem izvodu.",
+    "LibrePT zabeleži le, da je bila privolitev dana, in datum — nikoli fotografije, skena ali podpisa. Kot upravljavec osebnih podatkov je arhiviranje podpisanega obrazca tvoja odgovornost, dokler hraniš podatke te stranke, da lahko privolitev kadar koli dokažeš (člen 7(1) GDPR). Če stranka privolitev prekliče, tukaj izbriši njene zapise in preklic zabeleži na svojem izvodu.",
   consent_info_ack: "Razumem",
 };

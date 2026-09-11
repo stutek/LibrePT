@@ -118,6 +118,49 @@ def test_splash_offers_onboarding_while_the_database_is_empty(page, local_server
 
 @pytest.mark.clean_start
 @pytest.mark.keep_splash
+def test_choosing_slovenian_translates_the_offer_it_leads_to(page, local_server):
+    """Reported by the first trainer to use the app (TODO §45.1): pick Slovenian on first run and
+    the invitation into the demo was still in English.
+
+    The three buttons carried their English text in the markup with no translation key, so a
+    language choice could not reach them — and this is the one screen where that is guaranteed to be
+    seen, since it is shown only while nothing has been saved yet.
+
+    Asserted against the dictionary rather than against typed-out Slovenian: what must hold is that
+    these read as the chosen language, not that they say any particular sentence."""
+    page.goto(local_server)
+    _answer_language_step(page, "sl")
+
+    page.locator("#app-splash-onboarding").wait_for(state="visible", timeout=15000)
+    expected = page.evaluate(
+        """async () => {
+            const { TRANSLATIONS } = await import(
+                new URL('i18n/index.js', document.baseURI).href
+            );
+            return {
+                demo: TRANSLATIONS.sl.splash_load_demo,
+                walkthrough: TRANSLATIONS.sl.walkthrough_title,
+                empty: TRANSLATIONS.sl.splash_start_empty,
+                tagline: TRANSLATIONS.sl.splash_tagline,
+            };
+        }"""
+    )
+
+    assert page.locator("#splash-load-demo").inner_text().strip() == expected["demo"]
+    assert (
+        page.locator("#splash-walkthrough").inner_text().strip()
+        == expected["walkthrough"]
+    )
+    assert page.locator("#splash-start-empty").inner_text().strip() == expected["empty"]
+    # The tagline is painted before any dictionary exists, so English is what it starts as. The
+    # promise is that it does not STAY that way once a language has been chosen.
+    assert (
+        page.locator(".app-splash-tagline").inner_text().strip() == expected["tagline"]
+    )
+
+
+@pytest.mark.clean_start
+@pytest.mark.keep_splash
 def test_start_with_an_empty_app_dismisses_the_splash(page, local_server):
     page.goto(local_server)
     _answer_language_step(page)

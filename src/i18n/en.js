@@ -251,7 +251,7 @@ export const en = {
   intake_title: "Introduce yourself to your trainer",
   intake_lede:
     "Fill this in and send it to your trainer. It creates a file on your phone and nothing else — LibrePT has no account to make and no server that sees any of this.",
-  intake_name: "Your name",
+  intake_name: "First and last name",
   intake_email: "Email",
   intake_phone: "Phone",
   intake_contact_hint: "One of the two is enough — whichever your trainer should use.",
@@ -389,6 +389,27 @@ export const en = {
   demo_cleanup_exercises: "sample exercises",
   demo_cleanup_notifications: "sample notifications",
   demo_cleanup_remove: "Remove",
+  // The cold-start splash (index.html). These are the first words a new trainer reads, and until
+  // 2026-09-11 they were the only ones a language choice could not reach: the markup carried the
+  // English text and no key, so choosing Slovenian left the invitation into the demo in English
+  // (reported by the first trainer to use the app, TODO §45.1). The walkthrough button reuses
+  // `walkthrough_title` rather than adding a second spelling of the same name.
+  splash_tagline: "A lightweight, free app for your clipboard, sessions and training programmes.",
+  splash_dismiss: "Dismiss and continue to the app",
+  splash_load_demo: "Explore with demo data",
+  splash_start_empty: "Start with an empty app",
+  // The trainer's own details (TODO §45.2). The lede says what they are FOR, because nothing in the
+  // app shows the trainer their own name back — it is only ever read by an invitation on its way to
+  // somebody else, and a form whose purpose is invisible gets filled in wrongly or not at all.
+  menu_trainer_details: "My details",
+  trainer_details_title: "Your details",
+  trainer_details_lede:
+    "These go on what you send a client: your name signs the invitation, and your phone and email are how they answer it. They stay on this device.",
+  trainer_details_name: "First and last name",
+  trainer_details_phone: "Phone",
+  trainer_details_email: "Email",
+  trainer_details_email_invalid: "That is not an email address. Correct it, or leave it empty.",
+  trainer_details_save: "Save my details",
   // The guided walkthrough (TODO §9.5) and the captions of the script it shares with the automatic
   // demo (modules/demo/gymFloorTour.js). Each caption names the control by what it DOES, never by
   // where it is on screen — the panel is read on a phone whose layout is not the one this was

@@ -97,14 +97,17 @@
   <div id="app-splash" class="app-splash" role="status" aria-label="Loading LibrePT">
     <!-- Always live, including mid-hold and during onboarding: whatever the splash is doing, the
          trainer can leave. A 5s hold with no way out is a 5s hold you cannot skip on the gym floor. -->
-    <button type="button" id="splash-dismiss" class="app-splash-dismiss" aria-label="Dismiss and continue to the app">
+    <button type="button" id="splash-dismiss" class="app-splash-dismiss" data-i18n-label="splash_dismiss" aria-label="Dismiss and continue to the app">
       <i class="fa-solid fa-xmark" aria-hidden="true"></i>
     </button>
     <img class="app-splash-mark" src="icons/icon-mark-512.png" alt="" width="512" height="512">
     <p class="app-splash-name">Libre<span class="app-splash-name-accent">PT</span></p>
-    <!-- Static English, like the integrity-error overlay below: both paint before i18n/index.js has
-         loaded, so there is no dictionary to translate against yet. -->
-    <p class="app-splash-tagline">A lightweight, free app for your clipboard, sessions and training programmes.</p>
+    <!-- The English in the markup is what FIRST PAINT shows, and there is no way around that: this
+         line is on screen before i18n/index.js has loaded, so there is no dictionary to ask. The key
+         is what happens next — applyTranslations() rewrites it the moment one exists, which is
+         before the language step hands over to the onboarding offer below (TODO §45.1). Without the
+         key it stayed English under Slovenian buttons for the rest of the hold. -->
+    <p class="app-splash-tagline" data-i18n="splash_tagline">A lightweight, free app for your clipboard, sessions and training programmes.</p>
     <div id="app-splash-progress" class="app-splash-progress" aria-hidden="true"></div>
 
     <!-- Language choice. Shown ahead of everything else and with no way out — the app cannot speak
@@ -125,18 +128,20 @@
          one-shot: someone who skips it and closes the app gets the offer again next launch, and it
          stops appearing the moment they have real data. -->
     <div id="app-splash-onboarding" class="app-splash-onboarding" hidden>
+      <!-- The key sits on the <span>, not on the button: `data-i18n` REPLACES an element's children,
+           so a key on the button would translate the label by deleting the icon beside it. -->
       <button type="button" id="splash-load-demo" class="app-splash-action app-splash-action-primary">
         <i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i>
-        <span>Explore with demo data</span>
+        <span data-i18n="splash_load_demo">Explore with demo data</span>
       </button>
       <!-- Enabled 2026-08-17 (TODO §9.5 shipped). It was deliberately the only place the walkthrough
            was ever promised; the promise is now kept, so the "soon" marker is gone rather than
            reworded. -->
       <button type="button" id="splash-walkthrough" class="app-splash-action">
         <i class="fa-solid fa-circle-play" aria-hidden="true"></i>
-        <span>Guided walkthrough</span>
+        <span data-i18n="walkthrough_title">Guided walkthrough</span>
       </button>
-      <button type="button" id="splash-start-empty" class="app-splash-skip">Start with an empty app</button>
+      <button type="button" id="splash-start-empty" class="app-splash-skip" data-i18n="splash_start_empty">Start with an empty app</button>
     </div>
   </div>
 
