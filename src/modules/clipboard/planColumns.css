@@ -1,0 +1,46 @@
+/* modules/clipboard/planColumns.css — several participants' programmes edited side by side while
+   PLANNING (TODO §41.0).
+
+   Only the layout AROUND the editor. Everything inside a column is clipboardEditor.css, unchanged
+   and unaware that it is one of several — which is what keeps this file small and what keeps a
+   later change to the editor from having to be made twice. */
+
+.plan-columns {
+  display: grid;
+  grid-template-columns: repeat(var(--plan-column-count, 1), minmax(0, 1fr));
+  gap: 12px;
+  align-items: start;
+  /* Each column scrolls on its own. Two programmes of different lengths in one shared scroll would
+     make the shorter one's end unreachable without scrolling past the longer one — and comparing
+     them is the entire reason they are side by side. */
+  overflow: hidden;
+}
+
+.plan-column {
+  min-width: 0;
+  max-height: 100%;
+  overflow-y: auto;
+  /* A visible edge, because a drag that crosses it means something: the columns are what make
+     moving an exercise from one person's plan to another's a gesture rather than a retype. */
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md, 12px);
+  padding: 8px;
+}
+
+/* The focused participant — the name the trainer tapped to get here — is the first column and says
+   so. Marked by the accent rather than by position alone: with four columns on a wide screen,
+   "leftmost" stops being a signal at a glance. */
+.plan-column:first-child {
+  border-color: color-mix(in srgb, var(--primary) 45%, transparent);
+}
+
+/* The one place the app's single-column cap is lifted (TODO §41.0). Set by activeSessionBoard.js
+   only while several programmes are actually being edited side by side, and taken off again on a
+   live session, a phone or a session of one — a clipboard stretched across a desk with one
+   programme in it is worse than the narrow one it replaced.
+
+   The cap is what makes this necessary at all: --app-max-width holds every screen to 480px, so the
+   columns would have nowhere to go and would count themselves out of existence. */
+.active-session-overlay.planning-wide {
+  max-width: min(100%, 1600px);
+}

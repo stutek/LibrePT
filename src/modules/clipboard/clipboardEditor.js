@@ -156,6 +156,10 @@ export function renderClipboardEditor(container, deps) {
     genId,
     callout,
     markNewItem,
+    // An exercise-name list owned by the CALLER. One editor renders its own; several side by side
+    // must not (TODO §41.0) — N identical ids in one document, and `list=` then resolves to whichever
+    // came first. planColumns.js renders one list above the columns and passes its id here.
+    sharedDatalistId,
   } = deps;
   const items = activeClientState.exercises;
   const tr = (key, fallback) => t(key) || fallback;
@@ -190,10 +194,12 @@ export function renderClipboardEditor(container, deps) {
   // Regroup so each circuit's members are contiguous before we render straight from the array.
   normalizeCircuits(activeClientState);
 
-  const datalistId = "clipboard-editor-ex-names";
+  const datalistId = sharedDatalistId || "clipboard-editor-ex-names";
   const options = (allExerciseNames || [])
     .map((n) => `<option value="${escapeHTML(n)}"></option>`)
     .join("");
+  // Rendered only when this editor owns the list. Given one, it points at it and draws nothing.
+  const datalistHTML = sharedDatalistId ? "" : `<datalist id="${datalistId}">${options}</datalist>`;
 
   const circuits = collectCircuitsMeta(items);
   const circuitMetaOf = (cid) => {
@@ -392,7 +398,7 @@ export function renderClipboardEditor(container, deps) {
       </div>
       <ul class="editor-list">${items.length ? unitsHtml : `<li class="editor-empty">${tr("no_exercises_injected", "No exercises yet.")}</li>${insertBar(0, { allowCircuit: true })}`}</ul>
       <p class="clipboard-editor-hint">${tr("edit_exit_hint", "Tap Done, press Esc, or tap outside to finish.")}</p>
-      <datalist id="${datalistId}">${options}</datalist>
+      ${datalistHTML}
     </div>`;
 
   const editorEl = container.querySelector(".clipboard-editor");

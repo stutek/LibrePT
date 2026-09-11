@@ -29,6 +29,7 @@ import { escapeHTML, getClientDisplayNameHTML, getInitials } from "../common/uti
 import { renderClipboardEditor } from "./clipboardEditor.js";
 import { isClipboardEditMode, markEditorRow, takePendingCallout } from "./editModeState.js";
 import { renderExerciseDeck } from "./exerciseDeckOfCards.js";
+import { columnClientIds, planColumnCount, renderPlanColumns } from "./planColumns.js";
 
 let deps = {};
 
@@ -260,7 +261,77 @@ function syncStartCompleteVisibility(canStartSession, started) {
   }
 }
 
+/** The dependency bag one editor needs, for one client. Split out of renderPlanEditor so the column
+ *  renderer can ask for the same bag per participant without this file knowing about columns. */
+function editorDepsFor(clientId, clientState, callout) {
+  const { state, t, saveToLocalStorage } = deps.getAppDeps();
+  const persist = () => {
+    deps.saveActiveSessionToCache();
+    saveToLocalStorage?.();
+  };
+  const editClient = state.clients.find((c) => c.id === clientId);
+  return {
+    activeClientState: clientState,
+    clientName: editClient ? editClient.name : "",
+    slotLabel: deps.getActiveSession()?.sourceSession?.timeLabel || "",
+    allExerciseNames: (state.exercises || []).map((e) => e.name),
+    t,
+    escapeHTML,
+    save: persist,
+    rerender: deps.rerender,
+    openAddExercise: deps.openAddExercise,
+    openCatalogPicker: deps.openCatalogPicker,
+    exit: deps.exitEditMode,
+    genId: deps.newRecordId,
+    callout,
+    markNewItem: (id) => markEditorRow(id, { kind: "new", focus: true }),
+  };
+}
+
+/** One programme per participant, side by side, while PLANNING at a width that fits them
+ *  (TODO §41.0). Returns null when this is not that case, so the caller falls through to the single
+ *  editor it has always rendered — the live clipboard is deliberately never given columns.
+ *
+ *  The CALLOUT goes to the focused client alone: it announces a row the trainer just inserted or
+ *  swapped, which happened in one column, and repeating it across every column would point at rows
+ *  nobody touched. */
+function renderPlanColumnsIfWide(deckContainer, activeClientId, callout) {
+  const overlay = document.getElementById("active-session-overlay");
+  const session = deps.getActiveSession();
+  const participants = session?.participants || [];
+  // Measured against the SCREEN, not against this container. The container is capped at
+  // --app-max-width like everything else in the app, so asking it how much room there is would
+  // answer "one column" on a 1400px desk — and the cap is exactly what the columns lift.
+  const count =
+    deps.currentPlanMode() === "planning" && participants.length > 1
+      ? planColumnCount({ width: window.innerWidth, participants: participants.length })
+      : 1;
+
+  // Toggled here rather than beside the `editing-plan` class, because this is the one place that
+  // knows the answer — and it must come OFF again on a live session, a phone, or a single
+  // participant, or the clipboard would stay stretched with nothing to fill it.
+  overlay?.classList.toggle("planning-wide", count > 1);
+  if (count < 2) return null;
+
+  const clientIds = columnClientIds(participants, activeClientId, count);
+  const { state } = deps.getAppDeps();
+  return renderPlanColumns(deckContainer, {
+    clientIds,
+    exerciseNames: (state.exercises || []).map((e) => e.name),
+    escapeHTML,
+    editorFor: (clientId) =>
+      editorDepsFor(
+        clientId,
+        session.clientRoutines[clientId],
+        clientId === activeClientId ? callout : null,
+      ),
+  });
+}
+
 function renderPlanEditor(deckContainer, activeClientId, activeClientState, callout) {
+  const columns = renderPlanColumnsIfWide(deckContainer, activeClientId, callout);
+  if (columns) return columns;
+
   const { state, t, saveToLocalStorage } = deps.getAppDeps();
   const persist = () => {
     deps.saveActiveSessionToCache();
