@@ -2785,9 +2785,56 @@ The app is laid out for a phone held in one hand, and on a tablet or a desktop t
 narrow column with empty space either side. A trainer running a group switches between participants
 one at a time on a screen with room for several.
 
+### 41.0 REDIRECTED 2026-09-11 — planning gets the columns, the clipboard does not
+
+**Ruled (Simon):** *"večstolpični pogled raje uporabiva za načrtovanje treningov"*, and then
+*"štartaj implementacijo seje priprave načrtov"*. This overrides §41.1's "the clipboard goes first".
+Everything below stands as written; what changed is WHICH screen gets columns, and it changed for
+reasons §41.4 had already written down against itself.
+
+- **The width exists where the trainer sits.** §41.4's first objection is that the gym floor is the
+  judge and a wide layout serves a desk. Planning IS the desk activity. The objection does not apply
+  to it; it applied to the clipboard.
+- **§41.4's safety argument disappears.** The clipboard is where data is WRITTEN live — sets, quick
+  signals, timers — and one participant per screen with thumb-sized targets is what keeps a mis-tap
+  from logging a set against the wrong person. Planning writes a plan. A wrong drop is visible and
+  undone before anybody trains.
+- **Comparison is the actual need in planning.** Building a group session for three people is where
+  "the same for everyone, except Ana's knee" is decided, and that decision wants the three
+  programmes side by side. During execution the trainer looks at ONE person, because they are
+  standing in front of them.
+- **Dragging between columns is what makes it worth building, and §41.4 named it as the likeliest
+  bug.** In planning it is the feature; in execution it is a gesture with two meanings.
+- **The schedule risk drops with it.** §41.2's hard part is that recovery after a reload reads the
+  address bar. In a live session being wrong there loses a session; in planning it costs some
+  retyping. **So the first slice does not touch the route grammar at all.**
+
+**What the code already gives us, read 2026-09-11 before any of it was written:**
+
+- `currentPlanMode()` ([activeSessionStore.js](src/controllers/activeSessionStore.js)) already
+  returns `live` / `future` / `planning`, so "planning" needs no new concept — it has one.
+- The editor is already a function of ONE participant:
+  [activeSessionBoard.js](src/modules/clipboard/activeSessionBoard.js) calls
+  `renderClipboardEditor(deckContainer, { activeClientState, clientName, … })`, and the plans live
+  per client in `clientRoutines[clientId]`. Columns mean calling it N times into N containers, not
+  taking it apart.
+
+**Two obstacles, both small and both found by reading rather than by running into them:**
+
+- [clipboardEditor.js](src/modules/clipboard/clipboardEditor.js) writes one fixed
+  `id="clipboard-editor-ex-names"` — the exercise-name datalist. N editors would mean N identical
+  ids. One shared list above the columns.
+- [editModeState.js](src/modules/clipboard/editModeState.js) holds ONE `editorRowId` for the whole
+  module, meaning "which row is open". With columns that becomes an answer per column. The same
+  shape of question as §41.2's routes, but it stays inside the module and never reaches session
+  recovery.
+
+**Still ruled, and unchanged:** the clipboard stays one participant at a time until somebody shows
+that it is missing on the floor.
+
 ### 41.1 Two layouts, not one
 
-**Ruled 2026-09-10 (Simon).** They share the rule for dividing the width and nothing else:
+**Ruled 2026-09-10 (Simon), and §41.0 has since redirected which screen this applies to first.** They share the rule for dividing the width and nothing else:
 
 | | The clipboard (live session) | The home screen |
 | :--- | :--- | :--- |
