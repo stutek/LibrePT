@@ -3386,7 +3386,30 @@ in-app browser inside a messaging app, or a file the browser judged unshareable.
 no code change is justified — but the fallback screen's wording is a fair target either way, since
 what the trainer read from it was "this route does not exist".
 
-**Status (Simon, 2026-09-11):** Simon will try to reproduce it himself. Waiting on that, not on work.
+**REPRODUCED (Simon, 2026-09-11):** sending a filled-in form back to the trainer showed *"Deljenje ni
+uspelo. Uporabi »Shrani datoteko za deljenje« in jo pripni sporočilu."* — `intake_send_failed`. So the
+device is not one without a share sheet: `canShareSignupFile` returned TRUE (or the Share button
+would have been hidden, [intakeView.js](src/modules/intake/intakeView.js)), and `navigator.share()`
+then rejected with something other than `AbortError`. The browser said yes and then refused.
+
+**The first suspect is the file's own extension.** The file is named `.json.librept-signup` with the
+media type `application/vnd.librept.signup+json` ([signupFile.js](src/data/signupFile.js)) — both
+deliberate, since the extension is the only thing that survives an email hop. But Chrome's Web Share
+accepts only files whose extension is on its own allowlist, and a private extension is not on it.
+Whether that is also what makes `canShare` disagree with `share` on this device is exactly what is
+not yet known.
+
+**What blocks the fix is that the app throws the answer away.** `shareSignupFile` captures
+`error.message` as `reason` and the caller never looks at it
+([signupDelivery.js](src/modules/intake/signupDelivery.js)): the client is told the share failed, and
+nobody — client, trainer or maintainer — is told what the browser said. A failure that cannot be read
+cannot be fixed from a report, and this one arrives from a stranger's phone, which is the least
+reachable place in the whole product.
+
+**Next, in order:** record which browser and device this was, then make the failure legible before
+choosing a remedy. If the extension is the cause, the remedy is a conflict to resolve rather than a
+patch — the extension serves the email hop, and the share sheet refuses it — so it is not decided
+here.
 
 ### 45.5 [ ] Import covers a programme, but not the trainer's own exercise LIBRARY
 
