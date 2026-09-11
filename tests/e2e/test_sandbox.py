@@ -26,15 +26,27 @@ WORKSPACE = """async () => {
 
 
 def _switch(page, expected_workspace):
-    """Use the menu, not the module: the control the trainer taps is part of what is being tested."""
+    """Use the menu, not the module: the control the trainer taps is part of what is being tested.
+
+    **Waits for `body.in-sandbox`, NOT for `activeWorkspace()`** (TODO §45.14). The stored workspace
+    flag is set in the MIDDLE of the switch: `switchWorkspace` in data/stateStore.js calls
+    `setActiveWorkspace(name)` and only then awaits `loadSavedState()` and, for a first entry, seeding
+    the sandbox. A test that waited on the flag was reading the URL, and clicking the menu, while all
+    of that was still running — it passed on a quiet machine and failed under eight browser workers,
+    which is what it did on 2026-09-11.
+
+    The class is set by `renderWorkspaceChrome()` inside `renderEverything()`, which app.js's
+    `switchToWorkspace` runs after that await — and `renderEverything()` through `returnToLastView()`,
+    the call that rewrites the URL, is one synchronous block. So by the time this class can be
+    observed, the switch has loaded its database and moved the address bar. No sleep is needed and
+    none is used: a timeout here would be a guess about a machine rather than a wait for the app.
+    """
     page.locator("#btn-app-menu").click()
     page.locator("#menu-sandbox").click()
     page.wait_for_function(
-        """(expected) => import(new URL('data/workspace.js', document.baseURI).href)
-               .then((ws) => ws.activeWorkspace() === expected)""",
-        arg=expected_workspace,
+        "(inSandbox) => document.body.classList.contains('in-sandbox') === inSandbox",
+        arg=expected_workspace == "sandbox",
     )
-    page.wait_for_timeout(200)
 
 
 def _add_client(page, name):
@@ -109,7 +121,6 @@ def test_a_sandbox_older_than_twelve_hours_offers_a_fresh_one(page, local_server
     # measured against, and this is the same value seeding writes.
     page.evaluate(
         """async () => {
-            const store = await import(new URL('data/stateStore.js', document.baseURI).href);
             const idb = await import(new URL('data/indexedDb.js', document.baseURI).href);
             const db = await idb.openDatabase({ schemas: ['4'], name: 'librept_sandbox' });
             await idb.withTransaction(db, ['meta'], 'readwrite', ({ store: s }) => {
@@ -119,9 +130,13 @@ def test_a_sandbox_older_than_twelve_hours_offers_a_fresh_one(page, local_server
                 });
             });
             db.close();
-            await store.switchWorkspace('working');
         }"""
     )
+    # Out and back in through the MENU, not by calling switchWorkspace from here (TODO §45.14): a
+    # module call moves the app's stored workspace without repainting, so `body.in-sandbox` would
+    # still say sandbox and every later wait would be satisfied by a stale class. Leaving the way a
+    # trainer leaves keeps the page's own account of itself true.
+    _switch(page, "working")
     _switch(page, "sandbox")
 
     dialog = page.locator("#dialog-sandbox-stale")
