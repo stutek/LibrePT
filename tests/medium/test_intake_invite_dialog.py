@@ -31,10 +31,12 @@ window.__shareCalls = 0;
 
 // The trainer's own details are a setting of the install (data/trainerIdentity.js); handed in here
 // so this tier does not depend on what happens to be in localStorage.
+window.__trainer = { name: 'Sam Trainer', phone: '+386 40 111 222' };
+
 initIntakeInviteDialog({
   t,
   getLang: () => 'en',
-  getTrainer: () => ({ name: 'Sam Trainer', phone: '+386 40 111 222' }),
+  getTrainer: () => window.__trainer,
   onShare: () => { window.__shareCalls += 1; return Promise.resolve(window.__shareOutcome); },
 });
 window.__open = () => openIntakeInviteDialog();
@@ -144,13 +146,14 @@ def test_the_next_person_starts_from_an_empty_field(page, local_server):
 def test_the_code_on_screen_is_the_route_that_needs_no_typing(page, local_server):
     """Asked 2026-09-11: the two people are standing together, so the number and the address are
     things to be spelled out and mistyped. The trainer holds up a code instead and the client's own
-    camera opens the page — no channel, no contact detail, and nothing sent anywhere."""
+    camera opens the page — no channel, no contact detail, and nothing sent anywhere.
+
+    On screen the moment the dialog opens, with nothing to tap first: it is the route that needs no
+    typing, and the code carries the trainer rather than any one client, so there is nothing about
+    it to reveal."""
     _open(page, local_server)
 
     code = page.locator("#intake-invite-qr")
-    expect(code).to_be_hidden()
-
-    page.click("#intake-invite-qr-show")
     expect(code).to_be_visible()
     expect(page.locator("#intake-invite-qr-hint")).to_contain_text("camera")
 
@@ -165,15 +168,18 @@ def test_the_code_on_screen_is_the_route_that_needs_no_typing(page, local_server
     assert box["width"] >= 200, box
 
 
-def test_a_code_left_up_from_the_last_invitation_is_never_shown(page, local_server):
-    """The code names the trainer and opens a sign-up page. One still on screen when the dialog is
-    opened for the next person is one they scan without either of them meaning it."""
+def test_the_code_is_redrawn_from_the_trainers_details_each_time(page, local_server):
+    """The trainer's own name, number and address are settings they can change between one
+    invitation and the next, and the code carries all three. Drawn once and kept would be an
+    invitation naming details they have since corrected."""
     _open(page, local_server)
-    page.click("#intake-invite-qr-show")
-    expect(page.locator("#intake-invite-qr")).to_be_visible()
+    first = page.get_attribute("#intake-invite-qr-path", "d")
 
     page.click("#dialog-intake-invite .modal-close-btn")
+    page.evaluate(
+        "() => { window.__trainer = { name: 'Sam Trainer', phone: '+386 40 999 888' }; }"
+    )
     page.evaluate("() => window.__open()")
     page.wait_for_selector("#dialog-intake-invite[open]")
 
-    expect(page.locator("#intake-invite-qr")).to_be_hidden()
+    assert page.get_attribute("#intake-invite-qr-path", "d") != first

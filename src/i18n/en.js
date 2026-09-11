@@ -490,7 +490,6 @@ export const en = {
   intake_invite_needs_contact:
     "Type a phone number or an email address, or use the other ways below.",
   intake_invite_other_ways: "Other ways to send it",
-  intake_invite_show_qr: "Show a code to scan",
   intake_invite_qr_label: "A code that opens the sign-up page",
   intake_invite_qr_hint:
     "Hold this up and ask them to point their phone camera at it. It opens the same sign-up page, with your name on it.",

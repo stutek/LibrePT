@@ -54,15 +54,19 @@ export function renderIntakeInviteDialog() {
     <p id="intake-invite-channel" class="text-sm intake-invite-channel"></p>
     <div class="modal-actions intake-invite-actions">
       <a id="intake-invite-send" class="btn primary-btn disabled" role="button"><span></span></a>
-      <button type="button" class="btn secondary-btn" id="intake-invite-qr-show"></button>
       <button type="button" class="btn secondary-btn" id="intake-invite-share"></button>
     </div>
     <input type="text" id="intake-invite-link" class="form-input hidden" readonly />
     <!-- The code the trainer holds up, for the person standing in front of them: no number typed,
          no address spelled out, no channel at all (TODO §26.3 step 3). White ground and black
          modules whatever the theme is set to - this is a picture for somebody else's camera, not a
-         surface of this app. -->
-    <div id="intake-invite-qr" class="intake-invite-qr hidden">
+         surface of this app.
+         DRAWN ON OPEN, with nothing to tap first (asked 2026-09-11). It was behind a button until
+         then, guarded against a code left up from the last invitation being scanned by the next
+         person - and that guard protected nothing: the code carries the TRAINER and names no
+         client, so it is the same code for everybody. A route that needs no typing should not need
+         a tap to appear either. -->
+    <div id="intake-invite-qr" class="intake-invite-qr">
       <svg id="intake-invite-qr-svg" class="intake-invite-qr-svg" role="img" viewBox="0 0 1 1">
         <path id="intake-invite-qr-path"></path>
       </svg>
@@ -128,17 +132,11 @@ export function openIntakeInviteDialog() {
     if (element) element.textContent = t(key);
   }
 
-  const qrBox = document.getElementById("intake-invite-qr");
-  // Hidden on every open, like the field is emptied: the code on screen names the trainer, and one
-  // left up from the last invitation is a code the next person scans without either of them meaning
-  // it to happen.
-  qrBox.classList.add("hidden");
-  document.getElementById("intake-invite-qr-show").textContent = t("intake_invite_show_qr");
   document.getElementById("intake-invite-qr-hint").textContent = t("intake_invite_qr_hint");
   document
     .getElementById("intake-invite-qr-svg")
     .setAttribute("aria-label", t("intake_invite_qr_label"));
-  document.getElementById("intake-invite-qr-show").onclick = () => showCode();
+  showCode();
 
   const field = document.getElementById("intake-invite-contact");
   // Emptied on every open: this is the next person, not the last one, and a number left in the box
@@ -163,18 +161,15 @@ export function openIntakeInviteDialog() {
  * deliberately moved out of. This one carries the trainer's name, number and address, so the person
  * scanning it sees who it is from and can save the contact.
  *
- * The field is blurred so the keyboard drops: on a phone the code is what has to be on screen, and
- * half of it behind a keyboard is a code that will not scan.
+ * Redrawn on every open rather than once, because the trainer's own name, number and address and the
+ * app's language are all settings they can change between one invitation and the next.
  */
 function showCode() {
   const url = intakeInviteUrl({ lang: deps.getLang(), trainer: deps.getTrainer?.() });
   const code = qrCodePath(url);
   if (!code) return;
-  const svg = document.getElementById("intake-invite-qr-svg");
-  svg.setAttribute("viewBox", code.viewBox);
+  document.getElementById("intake-invite-qr-svg").setAttribute("viewBox", code.viewBox);
   document.getElementById("intake-invite-qr-path").setAttribute("d", code.d);
-  document.getElementById("intake-invite-qr").classList.remove("hidden");
-  document.getElementById("intake-invite-contact").blur();
 }
 
 /** The way out that needs no contact detail: the phone's own share sheet, the clipboard behind it,

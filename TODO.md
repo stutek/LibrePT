@@ -1603,15 +1603,18 @@ an address into the invite dialog at all. That needs the vendored encoder of §2
 TRAINER's side, which Phase 2 was already going to pay for on the client's side; the printed leaflet
 stays possible as the version that names nobody.
 
-**What shipped.** *Show a code to scan* in the invite dialog draws the invitation on the trainer's
-own screen ([intakeInviteDialog.js](src/modules/clients/intakeInviteDialog.js)), carrying the same
-`#from=` every other route carries, so the client sees who it is from and can save the contact. The
+**What shipped.** The invite dialog draws the invitation as a code on the trainer's own screen,
+under the two send buttons ([intakeInviteDialog.js](src/modules/clients/intakeInviteDialog.js)). It
+carries the same `#from=` every other route carries, so the client sees who it is from and can save
+the contact. The
 encoder is vendored ([vendor/qrcode.js](src/vendor/qrcode.js), MIT, checksummed against upstream),
 and the app builds only the geometry ([qrCode.js](src/modules/common/qrCode.js)) — a library that
 returns markup would be markup built from a string, which this app does not do. Black on white
-whatever the theme, because it is a picture for somebody else's camera. Hidden again on every open:
-a code left up from the last invitation is one the next person scans without either of them meaning
-it.
+whatever the theme, because it is a picture for somebody else's camera. **Drawn the moment the dialog
+opens** (asked 2026-09-11): it sat behind a *Show a code* button for one afternoon, guarding against a
+code left up from the last invitation — a guard that protected nothing, since the code carries the
+trainer and names no client, so it is the same code for everybody. Redrawn on each open, because the
+name, number, address and language it carries are all settings.
 
 ### 26.5 [x] Import is a review, never an auto-save — 2026-08-17
 

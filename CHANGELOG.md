@@ -26,14 +26,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 - **A trainer can invite someone by holding up a code instead of typing their number** (TODO §26.4).
   The two people are standing together, so the number or the address has to be spelled out, heard and
-  typed — which is where invitations are lost. *Show a code to scan* in the **Invite a client** dialog
-  draws the invitation on the trainer's own screen; the client points their phone's own camera at it
-  and the sign-up page opens, with the trainer's name, number and address on it exactly as every other
-  route carries them. No contact detail, no channel, and no signal needed: the encoder ships with the
+  typed — which is where invitations are lost. The **Invite a client** dialog now draws the invitation
+  as a code on the trainer's own screen, under the two send buttons and with nothing to tap first; the
+  client points their phone's own camera at it and the sign-up page opens, with the trainer's name,
+  number and address on it exactly as every other route carries them. No contact detail, no channel, and no signal needed: the encoder ships with the
   app ([vendor/qrcode.js](src/vendor/qrcode.js), MIT, checksummed against upstream). The code is drawn
   black on white whatever theme is set, because it is a picture for somebody else's camera rather than
-  a surface of this app, and it is hidden again each time the dialog opens — a code left up from the
-  last invitation is one the next person would scan without either of them meaning it. The printed
+  a surface of this app, and redrawn each time the dialog opens, since the name, number and address it
+  carries are settings the trainer can change. The printed
   leaflet code planned before this is **dropped**: a static file is the same for every install, so it
   can name no trainer, which is the state this page was deliberately moved out of.
 - **A client invited to sign themselves up can now keep their trainer's contact** (TODO §26.3). The
