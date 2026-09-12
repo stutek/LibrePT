@@ -41,8 +41,10 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
    **Write plainly.** Short sentences, one idea each. No stacked clauses, no chains of dashes, no
    metaphor where the plain word works, no flourish at the end of a paragraph. **Name the thing, not
    the principle**: which file, which value, what breaks. A sentence restating why a rule is good is
-   padding, and reads as evasion — justify when asked, not by default. A reply that has to be re-read
-   has failed, however true it is.
+   padding, and reads as evasion — justify when asked, not by default. **Cut, then cut again**: the
+   same content in fewer words is always better, and what goes is repetition, throat-clearing and the
+   sentence explaining the sentence before it. A reply that has to be re-read has failed, however
+   true it is.
 4. **Professionalism.** The work and the words are held to one standard.
 5. **The maintainer's attention is the scarce resource.** One command, no modals, no reading
    assignments, no question their request already answered.
@@ -75,23 +77,26 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
 ## Execution
 
 - Apply edits directly. Auto-commit coherent work to `main`, one logical change per commit, staged
-  from `git status --short` — your own files only, never another session's uncommitted work.
+  from `git status --short` — your own files only, and a file two sessions have touched is staged by
+  hunk, never whole.
   **Never push.** **A request that arrives mid-turn is its own commit**,
   not an addition to the one in progress: several asks landing while a gate run is in flight are
   split apart when it ends, never bulked because they happened in one turn. Where one verified tree
   yields several commits, say that the gate ran once, on the whole tree.
-- **Another agent may be working in the same tree.** Before editing, read `git status --short` and
-  `.private/AGENT_SYNC/`, and check whether a `build check` is already running; do not start a
-  second gate run or commit on top of one in flight. Announce your own work in
-  `.private/AGENT_SYNC/<model>-<topic>.md` **before the first edit**: what is in progress, and every
-  source file you are taking exclusively. A file another note claims is not yours to edit — take
-  other work or ask. **Delete your note in the same turn as the commit**; a stale note locks files
-  nobody is holding.
-- **A gate that failed on someone else's half-written file is not your failure.** Read the digest,
-  and if the failing file is one another session holds, look at `git status --short` and the notes
-  again every five minutes and judge whether a re-run is now worth it — the tree has to have
-  settled, not merely changed. Say what you are waiting for. This is the one case where re-running
-  is allowed; a failure in a file you hold is yours, and re-running it away is still forbidden.
+- **Another agent may be working in the same tree.** Before the first edit, read
+  `git status --short` and `.private/AGENT_SYNC/`; never start a second `build check` or commit on
+  top of one in flight. Claim your work in `.private/AGENT_SYNC/<model>-<topic>.md`: what is in
+  progress, and every file you take exclusively. A file another note claims is not yours — take
+  other work or ask. **Delete the note in the same turn as the commit**; a stale note locks files
+  nobody holds.
+- **The note carries state, a message carries negotiation.** `ListAgents` and `SendMessage` reach a
+  session that is alive and listening; the note reaches one that starts later, or one that died
+  mid-edit. So on finding foreign changes, read the notes first and message second, and never let a
+  message be the only record of who holds what.
+- **A gate that failed on someone else's half-written file is not your failure.** Read the digest;
+  if the failing file is another session's, re-read `git status --short` and the notes every five
+  minutes and judge whether the tree has settled. Say what you are waiting for. This is the one
+  allowed re-run; a failure in a file you hold is yours.
 - **Research and planning run in parallel** — several agents at once, each reading and reporting.
   Editing stays serial: one tree, one writer per file.
 - Commit messages: `type(scope): imperative summary` (lowercase, ≤72 chars), blank line, body
