@@ -76,7 +76,6 @@ import { initSessionInviteDialog } from "./modules/session/sessionInviteDialog.j
 import { initSessionTitleBar } from "./modules/session/sessionTitleBar.js";
 import { initSessionFilterBar } from "./modules/sessionList/sessionFilterBar.js";
 import { initSessionTimeline } from "./modules/sessionList/sessionTimeline.js";
-import { visibleSessions } from "./modules/sessionList/sessionsView.js";
 import { dismissSplashWhenReady } from "./modules/splash/splashScreen.js";
 import { BUILD_INFO } from "./version.js";
 
@@ -228,9 +227,6 @@ export function bootSessionTimeline(deps) {
   initSessionFilterBar({
     t: deps.t,
     lang: () => resolveLang(deps.getState().lang),
-    // The board's OWN list, series resolved and unfiltered — so the client and location controls
-    // offer exactly what is on screen to filter, and never a choice that would match nothing.
-    sessionsForFilters: () => visibleSessions(deps.getState()),
     clients: () => deps.getState().clients || [],
     onChange: () => deps.rerenderSessions(),
   });

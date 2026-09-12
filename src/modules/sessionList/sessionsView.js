@@ -258,12 +258,17 @@ export function renderSessions({
   if (!container) return;
 
   renderSessionsTitleBar();
-  renderSessionFilterBar();
+
+  // Resolved ONCE and used twice: the filter row offers what is on the board, and the board shows
+  // what survives the filters. Asking for it separately expanded every repeating series a second
+  // time on every render.
+  const onBoard = visibleSessions(state);
+  renderSessionFilterBar(onBoard);
 
   // Filtered AFTER the series are resolved, never before: an evening that exists only as a repeating
   // rule is a session on this board like any other, and filtering the stored list would quietly hide
   // exactly the ones a trainer has not touched yet.
-  const sessions = filterSessions(visibleSessions(state), activeSessionFilters(), {
+  const sessions = filterSessions(onBoard, activeSessionFilters(), {
     dateOf: sessionCalendarDate,
   });
   const activeSession = getActiveSession();

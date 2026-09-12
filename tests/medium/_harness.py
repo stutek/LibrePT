@@ -173,7 +173,6 @@ SESSIONS_STUB = view_stub(
 import {
   renderClientsViewShell,
   renderSessions,
-  visibleSessions,
 } from './modules/sessionList/sessionsView.js';
 import { initSessionFilterBar } from './modules/sessionList/sessionFilterBar.js';
 import { initSessionTimeline } from './modules/sessionList/sessionTimeline.js';
@@ -206,7 +205,6 @@ initSessionTimeline({
 initSessionFilterBar({
   t,
   lang: () => 'en',
-  sessionsForFilters: () => visibleSessions(state),
   clients: () => state.clients,
   onChange: () => paint(),
 });

@@ -23,8 +23,10 @@
 // neither show a range nor take two taps, so a range needs a month grid of our own — the largest
 // part of this section, and the reason nothing else here is allowed to grow.
 //
-// Injected dependencies: `t`, `lang()`, `sessionsForFilters()` (the board's own list, before
-// filtering), `clients()`, `onChange()`.
+// Injected dependencies: `t`, `lang()`, `clients()`, `onChange()`. The board's own list is PASSED to
+// `renderSessionFilterBar(sessions)` rather than fetched here: resolving it means expanding every
+// repeating series over the visible window, and the caller has just done that — asking for it again
+// did the same work twice on every render of the board.
 
 import {
   NO_SESSION_FILTERS,
@@ -176,11 +178,12 @@ function optionsHTML(rows, selected, placeholder) {
   );
 }
 
-export function renderSessionFilterBar() {
+/** `sessions` is the board's list with its series resolved and BEFORE filtering — so the client and
+ *  location controls offer exactly what is on screen to filter, and never a choice matching nothing. */
+export function renderSessionFilterBar(sessions = []) {
   const bar = document.getElementById(BAR_ID);
   if (!bar || !deps) return;
   const { t } = deps;
-  const sessions = deps.sessionsForFilters();
 
   const clientRows = participantsOf(sessions, deps.clients()).map((client) => ({
     value: client.id,
@@ -224,7 +227,9 @@ export function renderSessionFilterBar() {
 }
 
 function changed() {
-  renderSessionFilterBar();
+  // Only onChange: the board re-renders, and its render is what paints this row with the freshly
+  // filtered list. Painting here first would draw the row against the OLD selection and then
+  // immediately again — two renders where one is correct.
   deps.onChange();
 }
 
@@ -232,7 +237,7 @@ function wire() {
   document.getElementById("filter-chip-dates").addEventListener("click", () => {
     calendarOpen = !calendarOpen;
     if (calendarOpen) visibleMonth = monthStart(filters.from || isoOf(new Date()));
-    renderSessionFilterBar();
+    deps.onChange();
   });
 
   document.getElementById("filter-chip-client").addEventListener("change", (event) => {
@@ -260,7 +265,7 @@ function wire() {
       // and a shared mutable date would drift by a month per render.
       const step = Number(button.dataset.month);
       visibleMonth = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() + step, 1);
-      renderSessionFilterBar();
+      deps.onChange();
     });
   }
 
@@ -268,7 +273,7 @@ function wire() {
     button.addEventListener("click", () => {
       const end = button.dataset.arm;
       armedEnd = armedEnd === end ? null : end;
-      renderSessionFilterBar();
+      deps.onChange();
     });
   }
 
