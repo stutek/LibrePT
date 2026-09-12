@@ -12,6 +12,7 @@
 import { BUILD_INFO } from "../version.js";
 import { fingerprintState } from "./backupHealth.js";
 import { applyDemoRemoval, brokenDependenciesAfter, planDemoRemoval } from "./demoDataRemoval.js";
+import { localiseDemoRecords } from "./demoText.js";
 import {
   DEFAULT_CLIENTS,
   DEFAULT_EXERCISES,
@@ -119,7 +120,11 @@ export function stateHasData(s = state) {
 // mutates: DEFAULT_* are module singletons, and marking them in place would leave the seed arrays
 // flagged for the lifetime of the page.
 export function seedMockData() {
-  const seeded = (records) => records.map(stampAsSeeded);
+  // The demo is written in the language that is set RIGHT NOW, and stays in it (TODO §46.4). It is
+  // a snapshot, not a live translation: from here on these are ordinary records the trainer may
+  // edit, and rewriting them on a later language switch would throw that away. `lang` may still be
+  // null here — nobody has chosen yet — and the seed's own English is then what gets written.
+  const seeded = (records) => localiseDemoRecords(records, state.lang).map(stampAsSeeded);
   state.clients = seeded(DEFAULT_CLIENTS);
   state.exercises = seeded(DEFAULT_EXERCISES);
   state.routines = seeded(DEFAULT_ROUTINES);

@@ -33,7 +33,19 @@ import { COLLECTIONS } from "./recordProjections.js";
 
 // The flag written onto every seeded record. Named for what it means to a reader of raw stored
 // JSON, not for the function that sets it.
-export const SEED_PROVENANCE_FIELD = "seededDemo";
+//
+// Renamed from `seededDemo` on 2026-09-12, because that name was not true of every record carrying
+// it: the same stamp goes on the rows the browser test suite seeds through `?init=demo_data_load`,
+// and those are not a demo of anything. `testData` is true of both, and it is the word someone
+// reading a backup file needs — a trainer's exported data with these rows in it can be handed to
+// anything that strips them, and the field has to say plainly which rows are not the trainer's.
+export const SEED_PROVENANCE_FIELD = "testData";
+
+// What the same stamp was called before that. Read, never written: two preview installs are on
+// real trainers' devices with it in their databases, and they are already at schema "P", so the
+// migration chain never runs over them again. Removable once neither of those two databases is
+// live — which nothing in the app can detect, so it is a decision, not a check.
+const LEGACY_PROVENANCE_FIELD = "seededDemo";
 
 const SEED_RECORDS_BY_COLLECTION = {
   clients: DEFAULT_CLIENTS,
@@ -69,7 +81,7 @@ export function seededCollections() {
  */
 export function isSeedRecord(collection, record) {
   if (!record || typeof record !== "object") return false;
-  const stamped = record[SEED_PROVENANCE_FIELD];
+  const stamped = record[SEED_PROVENANCE_FIELD] ?? record[LEGACY_PROVENANCE_FIELD];
   if (typeof stamped === "boolean") return stamped;
   return seedIdsFor(collection).has(record.id);
 }

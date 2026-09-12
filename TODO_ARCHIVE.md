@@ -2881,3 +2881,42 @@ Pinned in [tests/medium/test_session_participant_picker.py](tests/medium/test_se
   screen. Now a coloured bar down the left of a compact line, with the two states still told apart.
 - **The form's own description still said "check clients to select participants (2-6)"** — a
   description of the picker that no longer exists, and a count the form never enforced.
+
+### 46.4 [x] The demo data speaks the trainer's language — shipped 2026-09-12
+
+**Reported 2026-09-12 (Simon), from a screenshot**: "Morning Conditioning", "Trib gym base" and
+"playground outside" read as English in a Slovenian app.
+
+**Ruled the same day**: the demo is a SNAPSHOT in the language selected when it is loaded. A later
+language switch does not rewrite it — by then those rows are the trainer's to edit, and reseeding
+them would throw that away. Reloading the demo in the other language is how to get it in the other
+language.
+
+**Why it was not a text edit.** The seed is a static dataset written into the database at load time,
+and `data/` may not import the interface dictionaries as a layer. Two things made it safe in the
+end. `data/seedProvenance.js` identifies demo rows by ID, not by text, so translating the words
+cannot break selective removal. And the dictionary lives at
+[src/data/demoText.js](src/data/demoText.js) rather than in `src/i18n/`: every `.js` in the locale
+directory is read as a LANGUAGE by the parity check, so a helper dropped there is a locale missing
+six hundred keys. Found by the gate, on another session's run.
+
+**Keyed by the seed's own English**, not by invented key names: a seed record is a sample session
+called "Morning Conditioning", and a key per record would mean two places to edit with nothing to
+catch a miss. The walk translates every string at any depth, because the words are not only on the
+record — a routine's circuits carry titles and a history entry's sets carry the note written during
+the set. Its test walks the real seed modules and failed twice while being written, on strings a
+by-hand sweep had missed.
+
+**Not translated, deliberately**: exercise names (the movement catalog's own vocabulary, used in
+English on a Slovenian gym floor), people's names, and "Trib gym base" — a gym's name, not a
+description of one.
+
+### 46.5 [x] The seed stamp says what it is — renamed 2026-09-12
+
+Every seeded record carried `seededDemo: true`. That name was not true of all of them: the browser
+suite seeds the same rows through `?init=demo_data_load`, and those are not a demo of anything. The
+field is now `testData`, which is true of both and is the word someone reading a backup needs —
+**the manual cleanup route Simon named is to hand an exported backup to an AI and have it strip
+those rows**, so the file has to say plainly which rows are not the trainer's. The old name is still
+READ, for the two preview installs that carry it and sit at schema "P", where the migration chain
+never runs again.

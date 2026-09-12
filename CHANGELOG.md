@@ -77,6 +77,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+### Changed
+
+- **The demo speaks the trainer's language** (TODO §46.4). Sample sessions, places, programmes,
+  circuits, client goals and notes, and the notes written during a set are now written in the
+  language that is set when the demo is loaded — "Jutranja kondicija" in a Slovenian app rather
+  than "Morning Conditioning". It is a snapshot, not a live translation: switching language later
+  leaves those records alone, because by then they are the trainer's to edit and rewriting them
+  would throw that away. Reloading the demo in the other language is how to get it in the other
+  language. Exercise names stay as they are — the movement catalog's vocabulary is used in English
+  on a Slovenian gym floor — and so do people's names and the gym's own name.
+- **The stamp on seeded records now says what those records are** (TODO §46.5). `seededDemo` became
+  `testData`: the same stamp goes on rows the test suite seeds, which are not a demo of anything,
+  and the word matters because an exported backup can be handed to a tool that strips them. Stores
+  written by earlier builds are still read correctly.
+
 ## 2026-09-11 — A new sandbox opens on a week that was worked
 
 ### Added
