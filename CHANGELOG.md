@@ -92,6 +92,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   and the word matters because an exported backup can be handed to a tool that strips them. Stores
   written by earlier builds are still read correctly.
 
+### Added
+
+- **The app notices when test data is in the trainer's own database** (TODO §46.7). Seeded records
+  now record WHERE they came from: the sandbox writes `demo`, the sample gym a trainer asked to
+  see, and the `?init=demo_data_load` switch writes `test`. Nothing can detect a test run — the app
+  is the same app under a test as under a thumb — so the warning is built from two plain facts
+  instead: which switch wrote the row, and whether the address carries that switch right now. A
+  test run always carries it and never sees the warning; a trainer's install never does, so a
+  single stray record raises a notice at the top of the message feed, saying how many records are
+  not theirs and where they are, with one button to remove them.
+
 ## 2026-09-11 — A new sandbox opens on a week that was worked
 
 ### Added
