@@ -97,6 +97,7 @@ the thing that must happen first, not merely what it touches.
 | **Reported 2026-08-18** | §28.2 | Which contributor-facing docs get BUILT, so their addresses are injected rather than written out | Everything else in §28 shipped the same day |
 | **Client self-service** | §26.7 phase 2 | The vendored QR encoder and the wall poster | Deferred on purpose until the messaging handover has been tried in a gym; the link route shipped 08-22 |
 | **Program import** | §29 | Nothing — shape decided 2026-08-18, and the editor-as-review answers the fragility question | The parser and its frozen corpus; the intake flow, media-type rule and catalog crosswalk already exist |
+| **Reported 2026-09-12** | §46.4 | Which language demo data is seeded in | One decision from Simon; the other three §46 items shipped the same day |
 | **Trainer feedback 2026-09-11** | §45.1–§45.13 | §45.1's untranslatable first screen, then §45.2's trainer identity | Nothing for the three defects; §45.4 waits on a reproduction, §45.8 on looking at both screens together |
 
 ---
@@ -4019,3 +4020,37 @@ way a trainer does.
 mid-operation is a sleep wearing a better name. `setActiveWorkspace()` is called before
 `loadSavedState()` and before a first sandbox is seeded, so the flag was true for the whole expensive
 part of the switch.
+
+---
+
+## 46. Reported 2026-09-12 — the setup form, read off a screenshot
+
+Simon sent one screenshot of the session setup form in Slovenian and asked what was wrong with it.
+Six things were, and the picker under them turned out to be the bigger problem.
+
+### 46.1 [x] The warning list called the whole day taken — fixed 2026-09-12
+
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#461-x-the-warning-list-called-the-whole-day-taken-fixed-2026-09-12); what shipped is in [CHANGELOG.md](CHANGELOG.md).
+
+### 46.2 [x] Choosing two clients out of a hundred — redesigned 2026-09-12
+
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#462-x-choosing-two-clients-out-of-a-hundred-redesigned-2026-09-12); what shipped is in [CHANGELOG.md](CHANGELOG.md).
+
+### 46.3 [x] Four smaller things in the same screenshot — fixed 2026-09-12
+
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#463-x-four-smaller-things-in-the-same-screenshot-fixed-2026-09-12); what shipped is in [CHANGELOG.md](CHANGELOG.md).
+
+### 46.4 [ ] The demo data is in English inside a Slovenian app
+
+"Morning Conditioning", "Trib gym base", "playground outside" read as English in every Slovenian
+screenshot. **This is not a text edit, which is why it is written down rather than done**: the seed
+([data/sessions.js](src/data/sessions.js) and its neighbours) is a static dataset, `data/` sits below
+`i18n/` in the import layering, and the records are WRITTEN to the database when the demo loads. So
+the language would have to be chosen at seeding time and would not follow a later language switch,
+and [data/seedProvenance.js](src/data/seedProvenance.js) identifies demo rows for selective removal
+(§9.3) — translating what it matches on is how that breaks quietly.
+
+**The decision to make first**: is demo data a snapshot in the language it was loaded in (cheap,
+and it goes stale on a language switch), or does the demo reseed when the language changes (honest,
+and it throws away whatever the trainer did to those rows)? Neither is obviously right, so it is
+Simon's call, not a fix to slip in.

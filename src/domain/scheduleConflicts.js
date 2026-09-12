@@ -77,15 +77,25 @@ export function slotFromSession(session) {
 
 /** The interval the setup form currently describes, or null while it is still incomplete.
  *
- * An end at or before the start crosses midnight, exactly as a stored slot's label does — so the
+ * An end BEFORE the start crosses midnight, exactly as a stored slot's label does — so the
  * 22:00-00:00 session the form is being used to create gets the same length here that it will have
- * once saved. */
+ * once saved.
+ *
+ * An end EQUAL to the start is not a 24-hour session, and neither is a missing one. Both mean the
+ * trainer has not said how long this is yet, so there is nothing to compare against anything. This
+ * used to fall through the midnight rule and produce a full day: a form left at 06:00-06:00 then
+ * overlapped every session on the date and reported the whole day as a clash, which is the one way
+ * to make a live warning worth ignoring. */
 export function slotFromForm({ date, startTime, endTime }) {
-  if (!date || !startTime) return null;
+  if (!date || !startTime || !endTime) return null;
   const startMs = toMillis(`${date}T${startTime}`);
   if (Number.isNaN(startMs)) return null;
-  const range = parseTimeRange(`${startTime} - ${endTime || startTime}`);
-  return { startMs, endMs: startMs + (range.end - range.start) * 60_000 };
+  const range = parseTimeRange(`${startTime} - ${endTime}`);
+  const minutes = range ? range.end - range.start : 0;
+  // Length is measured, not string-compared, so "9:00" and "09:00" are the same instant here as
+  // everywhere else; a full day can only come from the two times being equal.
+  if (!minutes || minutes >= 24 * 60) return null;
+  return { startMs, endMs: startMs + minutes * 60_000 };
 }
 
 /** Everything the given slot collides with, most recent commitment first in schedule order.

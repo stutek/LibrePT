@@ -2837,3 +2837,47 @@ wiped unscoped, and moving a leftover value into a workspace scope would be a mi
 accident.
 
 **§42.4 is thereby reversed, seven weeks after it shipped.** It was right when a card hid something.
+
+### 46.1 [x] The warning list called the whole day taken — fixed 2026-09-12
+
+The form sat at 06:00-06:00 and reported five collisions, none of them real. `slotFromForm`
+([scheduleConflicts.js](src/domain/scheduleConflicts.js)) handed `"06:00 - 06:00"` to
+`parseTimeRange` ([timeRange.js](src/domain/timeRange.js)), whose midnight rule reads an end at or
+before the start as the next day — right for 22:00-00:00, and a full 24-hour slot for two equal
+times. A missing end was worse: it defaulted to the start, so an untouched field meant "all day"
+too.
+
+**Fixed by measuring the length instead of trusting the pair**: no end, or a length of a full day,
+now means "the trainer has not said how long this is", and an unknown length collides with nothing.
+The rule a live warning lives or dies by is that it must not fire on the ordinary case.
+
+**And the end now follows the start**, keeping the length already chosen (an hour until the trainer
+says otherwise) — the state that produced the screenshot could not have been reached.
+
+### 46.2 [x] Choosing two clients out of a hundred — redesigned 2026-09-12
+
+The form rendered EVERY client in the base as a checkbox row carrying its own routine `<select>`,
+and opened with all of them ticked. With the eight seeded clients that is merely untidy; with a real
+base of a hundred it is a wall to scroll one-handed, a hundred `<select>` elements built on every
+open, and a session that starts out booking ninety-eight people the trainer must then remove.
+
+**What it is now**: the form opens with nobody on the session. One search field finds a client by
+name and shows at most eight matches; a tap — or Enter — puts that person on the session with their
+own programme picker and a cross to take them off again. A row exists only for someone who is
+actually training, so the rows ARE the selection and there is no checkbox to read.
+
+Pinned in [tests/medium/test_session_participant_picker.py](tests/medium/test_session_participant_picker.py).
+
+### 46.3 [x] Four smaller things in the same screenshot — fixed 2026-09-12
+
+- **The labels promised a format the control does not use.** "DATUM (YYYY-MM-DD)" sat above a field
+  showing `09/12/2026`, and "ZAČETNI ČAS (24H)" above `06:00 AM`. A `<input type="date">` or
+  `type="time"` always renders in the browser's own locale; the hint could not be honoured and was
+  only misleading. Removed from both languages.
+- **The session name appeared twice**, once in its field and again as plain text above the
+  participants. The subtitle existed because the form was long enough to scroll the name out of
+  sight — which §46.2 fixed at the cause.
+- **The warning list was five full-width tinted blocks** pushing the participant picker off a phone
+  screen. Now a coloured bar down the left of a compact line, with the two states still told apart.
+- **The form's own description still said "check clients to select participants (2-6)"** — a
+  description of the picker that no longer exists, and a count the form never enforced.

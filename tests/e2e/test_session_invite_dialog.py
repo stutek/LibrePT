@@ -6,7 +6,13 @@
 from playwright.sync_api import expect
 
 
-def _create_session_with_participants(page, local_server, client_ids, session_name):
+# The two seeded clients these tests assign, as the trainer sees them: the search field is driven by
+# the NAME, and the row that appears is identified by the client's id.
+JANE = ("c1a9f0e2", "Jane Doe")
+JOHN = ("c2b8e1d3", "John Smith")
+
+
+def _create_session_with_participants(page, local_server, participants, session_name):
     page.goto(f"{local_server}session/new")
     page.wait_for_selector("#view-workout-setup.active")
     page.fill("#setup-session-name", session_name)
@@ -15,27 +21,24 @@ def _create_session_with_participants(page, local_server, client_ids, session_na
     page.fill("#setup-end-time", "10:00")
     page.fill("#setup-location", "Studio A")
 
-    # Start from a clean slate: uncheck every preselected client, then check exactly the ones
-    # this test wants assigned.
-    for cb in page.locator(
-        "#setup-participants-assignment-list input[type=checkbox]"
-    ).all():
-        if cb.is_checked():
-            cb.uncheck()
-    for client_id in client_ids:
-        page.check(f"#setup-cb-{client_id}")
-        row = page.locator(f"#setup-cb-{client_id}").locator(
-            "xpath=ancestor::div[contains(@class,'participant-setup-row')]"
+    # The form opens with nobody on the session: each participant is searched for by name and
+    # added, which is the flow a trainer with a full client base uses.
+    for client_id, name in participants:
+        page.fill("#setup-participant-search", name)
+        page.click(
+            f"#setup-participant-matches .participant-match[data-client-id='{client_id}']"
         )
-        select = row.locator("select")
-        select.select_option(index=1)
+        row = page.locator(
+            f"#setup-participants-assignment-list .participant-setup-row[data-client-id='{client_id}']"
+        )
+        row.locator("select").select_option(index=1)
 
     page.click("#form-workout-setup button[type=submit]")
 
 
 def test_new_session_with_participants_opens_invite_dialog(page, local_server):
     _create_session_with_participants(
-        page, local_server, ["c1a9f0e2", "c2b8e1d3"], "Invite Test Session"
+        page, local_server, [JANE, JOHN], "Invite Test Session"
     )
 
     dialog = page.locator("#dialog-session-invite")
@@ -61,9 +64,7 @@ def test_new_session_with_participants_opens_invite_dialog(page, local_server):
 def test_resaving_unchanged_participants_does_not_reopen_invite_dialog(
     page, local_server
 ):
-    _create_session_with_participants(
-        page, local_server, ["c1a9f0e2"], "Repeat Save Session"
-    )
+    _create_session_with_participants(page, local_server, [JANE], "Repeat Save Session")
     dialog = page.locator("#dialog-session-invite")
     expect(dialog).to_be_visible()
     dialog.locator(".modal-cancel").click()
@@ -76,7 +77,11 @@ def test_resaving_unchanged_participants_does_not_reopen_invite_dialog(
     card.wait_for()
     card.locator(".btn-edit-session").click()
     page.wait_for_selector("#view-workout-setup.active")
-    expect(page.locator("#setup-cb-c1a9f0e2")).to_be_checked()
+    expect(
+        page.locator(
+            "#setup-participants-assignment-list .participant-setup-row[data-client-id='c1a9f0e2']"
+        )
+    ).to_be_visible()
 
     page.click("#form-workout-setup button[type=submit]")
     page.wait_for_timeout(300)

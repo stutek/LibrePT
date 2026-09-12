@@ -123,6 +123,20 @@ test("a half-filled form warns about nothing", () => {
   assert.deepEqual(findScheduleConflicts({ slot: null, location: "" }, { sessions: [] }), []);
 });
 
+test("an end that has not been moved off the start is no length, not a whole day", () => {
+  // The reported defect: the form sat at 06:00-06:00, the midnight rule read the equal end as the
+  // next day, and every session on that date came back as a clash.
+  assert.equal(slotFromForm({ date: DAY, startTime: "06:00", endTime: "06:00" }), null);
+  assert.equal(slotFromForm({ date: DAY, startTime: "06:00", endTime: "" }), null);
+  assert.deepEqual(
+    findScheduleConflicts(
+      { slot: slotAt("06:00", "06:00"), location: "Studio A" },
+      { sessions: [session("s1", "09:00", "10:00", "City park")] },
+    ),
+    [],
+  );
+});
+
 test("a session running past midnight still has its real length", () => {
   // Shares timeRange.js's midnight rule: read as inverted, a 22:00-00:00 slot would collide with
   // nothing at all, and the trainer would be told a genuine double-booking is fine.

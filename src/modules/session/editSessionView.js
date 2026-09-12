@@ -24,7 +24,7 @@ export function renderEditSessionView(targetElement) {
     <div class="card glassmorphic p-4 mb-4 max-w-2xl mx-auto" id="dialog-workout-setup">
       <form id="form-workout-setup" class="modal-form">
         <div class="form-group">
-          <p class="dialog-desc text-sm text-muted mb-3" data-i18n="workout_setup_desc">Configure session details and check clients to select participants (2–6). You can assign a distinct routine template to each individual, or select a shared routine.</p>
+          <p class="dialog-desc text-sm text-muted mb-3" data-i18n="workout_setup_desc">Set the slot and the place, then add the clients who are training. Each one can be given their own programme, or all of them the same one.</p>
 
           <div class="grid grid-2-col gap-2 mb-3">
             <div>
@@ -56,15 +56,15 @@ export function renderEditSessionView(targetElement) {
 
           <div class="grid grid-3-col gap-2 mb-3">
             <div>
-              <label for="setup-session-date" data-i18n="label_session_date">Date (YYYY-MM-DD) *</label>
-              <input type="date" id="setup-session-date" class="form-control" placeholder="YYYY-MM-DD" required>
+              <label for="setup-session-date" data-i18n="label_session_date">Date *</label>
+              <input type="date" id="setup-session-date" class="form-control" required>
             </div>
             <div>
-              <label for="setup-start-time" data-i18n="label_start_time">Start Time (24h) *</label>
+              <label for="setup-start-time" data-i18n="label_start_time">Start Time *</label>
               <input type="time" id="setup-start-time" class="form-control" placeholder="09:00" required>
             </div>
             <div>
-              <label for="setup-end-time" data-i18n="label_end_time">End Time (24h) *</label>
+              <label for="setup-end-time" data-i18n="label_end_time">End Time *</label>
               <input type="time" id="setup-end-time" class="form-control" placeholder="10:00" required>
             </div>
           </div>
@@ -82,7 +82,7 @@ export function renderEditSessionView(targetElement) {
               <p id="setup-repeat-days-label" class="text-sm text-muted m-0" data-i18n="label_repeat_days">On these days</p>
               <div id="setup-repeat-days" class="setup-repeat-days"></div>
               <label for="setup-repeat-until" class="text-sm" data-i18n="label_repeat_until">Until (optional)</label>
-              <input type="date" id="setup-repeat-until" class="form-control" placeholder="YYYY-MM-DD">
+              <input type="date" id="setup-repeat-until" class="form-control">
             </div>
           </div>
 
@@ -102,16 +102,22 @@ export function renderEditSessionView(targetElement) {
                announce it, and it is the one thing here that can make a save wrong. -->
           <ul id="setup-schedule-conflicts" class="setup-conflict-list mb-3" role="status" aria-live="polite" hidden></ul>
 
-          <p id="setup-session-name-subtitle" class="text-sm text-muted font-semibold mb-2"></p>
-
-          <div class="participant-filter-bar mb-2 flex items-center justify-between gap-2">
-            <label for="setup-participant-search" class="m-0 font-semibold" data-i18n="select_participants">Selected Participants & Assigned Routines *</label>
-            <div class="search-input-wrap text-xs" style="width: 200px;">
-              <input type="text" id="setup-participant-search" class="form-control text-xs" placeholder="Filter clients..." data-i18n-placeholder="filter_participants_placeholder" style="height: 28px; padding: 2px 8px;">
+          <!-- Who is on this session (TODO §46.2). A trainer with a hundred clients in the base is
+               choosing two of them, so the list shows the two: the search field finds a person by
+               name and a tap puts them on the session, and only the chosen ones get a row with a
+               programme to assign. The old form listed EVERY client with a checkbox and a
+               <select>, which is a wall to scroll one-handed and started with all of them ticked. -->
+          <div class="participant-picker mb-3">
+            <div class="participant-picker-head">
+              <label for="setup-participant-search" class="m-0" data-i18n="select_participants">Who is training, and on which programme *</label>
+              <span id="setup-participant-count" class="participant-count" role="status" aria-live="polite"></span>
             </div>
-          </div>
-          <div id="setup-participants-assignment-list" class="participant-setup-list">
-            <!-- Injected via JS: [Checkbox] Name | [Dropdown Select Routine] -->
+            <input type="text" id="setup-participant-search" class="form-control" placeholder="Find a client by name..." data-i18n-placeholder="filter_participants_placeholder" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="setup-participant-matches">
+            <ul id="setup-participant-matches" class="participant-match-list" role="listbox" hidden></ul>
+            <div id="setup-participants-assignment-list" class="participant-setup-list">
+              <!-- Injected via JS, one row per chosen client: Name | [programme] | [remove] -->
+            </div>
+            <p id="setup-participants-empty" class="participant-empty" data-i18n="no_participants_chosen">Nobody is on this session yet. Find a client in the field above.</p>
           </div>
         </div>
 

@@ -8,7 +8,7 @@
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { isTimeOverlapping, parseTimeRange } from "../../../src/domain/timeRange.js";
+import { isTimeOverlapping, parseTimeRange, timePlusMinutes } from "../../../src/domain/timeRange.js";
 
 test("a 24h slot reads as minutes past midnight", () => {
   assert.deepEqual(parseTimeRange("09:00 - 10:30"), { start: 540, end: 630 });
@@ -48,4 +48,12 @@ test("back-to-back slots do not collide", () => {
 
 test("an undated slot collides with nothing", () => {
   assert.equal(isTimeOverlapping(null, parseTimeRange("10:00 - 11:00")), false);
+});
+
+test("a time shifted by a length wraps around midnight", () => {
+  // What the setup form does when the trainer moves the start: the end follows, keeping the length.
+  assert.equal(timePlusMinutes("06:00", 60), "07:00");
+  assert.equal(timePlusMinutes("23:15", 90), "00:45");
+  assert.equal(timePlusMinutes("00:30", -60), "23:30");
+  assert.equal(timePlusMinutes("", 60), "", "nothing to shift while the field is still empty");
 });

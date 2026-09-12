@@ -25,11 +25,10 @@ def test_planning_programme_created_from_a_client_is_not_completable(
     page.click("#btn-plan-client-program")
     page.wait_for_selector("#view-workout-setup.active")
 
-    # The client arrives preselected; assign any routine so the programme can be created.
+    # The client arrives already on the form — the only one — so only the programme is assigned.
     row = page.locator(
         "#setup-participants-assignment-list .participant-setup-row"
     ).first
-    row.locator('input[type="checkbox"]').check()
     row.locator("select").select_option(index=1)
     # The schedule fields are required by the form even for a date-less programme.
     page.fill("#setup-session-date", "2026-08-01")

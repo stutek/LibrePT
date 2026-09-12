@@ -37,6 +37,20 @@ export function parseTimeRange(timeStr) {
   return { start, end };
 }
 
+/** The clock time `minutes` after `time` ("06:00", 90 → "07:30"), wrapping past midnight.
+ *
+ * The setup form's end time follows its start with it: moving a session an hour earlier moves both
+ * ends, because the length is what the trainer chose and the start is what they are changing. */
+export function timePlusMinutes(time, minutes) {
+  const parsed = String(time || "").match(/^(\d{1,2}):(\d{2})$/);
+  if (!parsed) return "";
+  const total =
+    (((parseInt(parsed[1], 10) * 60 + parseInt(parsed[2], 10) + minutes) % (24 * 60)) + 24 * 60) %
+    (24 * 60);
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${pad(Math.floor(total / 60))}:${pad(total % 60)}`;
+}
+
 /** Do two ranges share any time at all?
  *
  * Strict `<` on both sides: a session ending at 11:00 and one starting at 11:00 are SEQUENTIAL.

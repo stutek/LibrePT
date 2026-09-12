@@ -20,6 +20,34 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-09-12 — The setup form says who is training, and stops crying wolf
+
+### Fixed
+
+- **The double-booking warning called the whole day taken** (TODO §46.1). A setup form whose end time
+  still sat on its start — 06:00 to 06:00 — was read as a session lasting a full day, so every other
+  session on that date came back as a collision. The length is now measured: an end equal to the start,
+  or none at all, means the trainer has not said how long this is yet, and an unknown length collides
+  with nothing. A warning that fires on the ordinary case is one nobody reads.
+- **The end time follows the start**, keeping the length already chosen — an hour until the trainer
+  changes it. Moving the start used to leave the end behind, which is how the state above was reached.
+- **The date and time fields no longer promise a format they cannot keep** (TODO §46.3). "Date
+  (YYYY-MM-DD)" sat above a field showing 09/12/2026, and "Start Time (24h)" above 06:00 AM: a date or
+  time control always draws in the browser's own language, so the hint could only mislead. The session
+  name also stopped being printed twice, and the warning list is now a light line with a coloured bar
+  rather than a stack of full-width blocks that pushed the rest of the form off a phone screen.
+
+### Changed
+
+- **Choosing who is training, with a hundred clients in the base** (TODO §46.2). The form used to list
+  EVERY client with a checkbox and their own programme picker, and to open with all of them ticked —
+  a wall to scroll one-handed, and a session that started out booking everybody. It now opens with
+  nobody on the session: one field finds a client by name, shows at most eight matches, and a tap or
+  Enter puts that person on the session with their own programme and a cross to take them off again.
+  Only people who are actually training have a row.
+
+---
+
 ## 2026-09-11 — A new sandbox opens on a week that was worked
 
 ### Added

@@ -31,6 +31,8 @@ import {
   upsertSessionRecord,
 } from "../../domain/sessionRecord.js";
 import { seriesWithEdit, validateSeries } from "../../domain/sessionSeries.js";
+import { parseTimeRange, timePlusMinutes } from "../../domain/timeRange.js";
+import { formatClockFromEpoch } from "../common/utils.js";
 import {
   readRepeatFields,
   resetRepeatControls,
@@ -56,20 +58,13 @@ export function saveEditSessionDraft() {
 
   const clientRoutines = {};
   const checkedClients = [];
-  const rows =
-    document
-      .getElementById("setup-participants-assignment-list")
-      ?.querySelectorAll(".participant-setup-row") || [];
-
-  for (const row of rows) {
-    const cb = row.querySelector('input[type="checkbox"]');
+  // A row EXISTS only for a client who is on the session, so the rows are the selection.
+  for (const row of participantRows()) {
+    const clientId = row.dataset.clientId;
+    if (!clientId) continue;
+    checkedClients.push(clientId);
     const select = row.querySelector("select");
-    if (cb?.checked) {
-      checkedClients.push(cb.value);
-    }
-    if (cb && select) {
-      clientRoutines[cb.value] = select.value;
-    }
+    if (select) clientRoutines[clientId] = select.value;
   }
 
   const draft = {
@@ -113,31 +108,44 @@ export const getSetupDraft = getEditSessionDraft;
 
 let editingSessionId = null;
 
-// Session name repeated as a subtitle above the participants list — the name input sits at the top
-// of a form that can scroll well past it once several clients are listed, so the trainer loses track
-// of which session they're configuring. Live-synced from the input in both create and edit mode.
-function updateSessionNameSubtitle() {
-  const subtitleEl = document.getElementById("setup-session-name-subtitle");
-  if (!subtitleEl) return;
-  const name = document.getElementById("setup-session-name")?.value.trim();
-  subtitleEl.textContent = name || deps.t?.("untitled_session") || "Untitled Session";
+// The rows currently on the form — one per client who is training in this session.
+function participantRows() {
+  return (
+    document
+      .getElementById("setup-participants-assignment-list")
+      ?.querySelectorAll(".participant-setup-row") || []
+  );
 }
 
 function collectSelectedClientRoutines() {
   const clientRoutines = [];
-  const rows = document
-    .getElementById("setup-participants-assignment-list")
-    .querySelectorAll(".participant-setup-row");
-  for (const row of rows) {
-    const cb = row.querySelector('input[type="checkbox"]');
-    if (cb?.checked) {
-      const clientId = cb.value;
-      const select = row.querySelector("select");
-      const routineId = select ? select.value : "";
-      clientRoutines.push({ clientId, routineId });
-    }
+  for (const row of participantRows()) {
+    const clientId = row.dataset.clientId;
+    if (!clientId) continue;
+    const select = row.querySelector("select");
+    clientRoutines.push({ clientId, routineId: select ? select.value : "" });
   }
   return clientRoutines;
+}
+
+// Moving the start moves the end with it, keeping the length the trainer already chose — an hour
+// until they say otherwise. Dragging a start back to 06:00 used to leave the end behind, and a
+// session whose end is at or before its start has no length at all: the warning list then read the
+// whole day as taken (domain/scheduleConflicts.js), and the saved slot was wrong too.
+function keepSessionLengthWhenStartMoves() {
+  const startInput = document.getElementById("setup-start-time");
+  const endInput = document.getElementById("setup-end-time");
+  if (!startInput || !endInput) return;
+  startInput.addEventListener("input", () => {
+    const pairedWith = startInput.dataset.pairedWith || "";
+    startInput.dataset.pairedWith = startInput.value;
+    if (!startInput.value) return;
+    const range = parseTimeRange(`${pairedWith} - ${endInput.value}`);
+    const kept = range ? range.end - range.start : 0;
+    // A full day means the two were equal, which is the state this exists to get out of.
+    const minutes = kept > 0 && kept < 24 * 60 ? kept : 60;
+    endInput.value = timePlusMinutes(startInput.value, minutes);
+  });
 }
 
 // ── Double-booking readout (TODO §1.6) ─────────────────────────────────────────────────────────
@@ -145,13 +153,10 @@ function collectSelectedClientRoutines() {
 // submit is one they have already committed to in their head, and on a phone the submit button is
 // usually off-screen from the time fields anyway.
 
-const clockLabel = (millis) =>
-  new Date(millis).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-
 function describeConflict(conflict, t) {
   if (conflict.kind === BUSY_ELSEWHERE) {
     const { start, end } = conflict.interval;
-    return `${t("schedule_conflict_busy_elsewhere")} ${clockLabel(new Date(start))} - ${clockLabel(new Date(end))}`;
+    return `${t("schedule_conflict_busy_elsewhere")} ${formatClockFromEpoch(start)} - ${formatClockFromEpoch(end)}`;
   }
   const lead =
     conflict.kind === MERGES_INTO_ONE_CLIPBOARD
@@ -477,32 +482,15 @@ export function setupEditSessionControl() {
     btn.addEventListener("click", handleCancel);
   }
 
-  // Real-time participant filtering by client name
-  const searchInput = document.getElementById("setup-participant-search");
-  if (searchInput) {
-    searchInput.addEventListener("input", (e) => {
-      const q = e.target.value.toLowerCase().trim();
-      const rows =
-        document
-          .getElementById("setup-participants-assignment-list")
-          ?.querySelectorAll(".participant-setup-row") || [];
-      for (const row of rows) {
-        const text = row.textContent.toLowerCase();
-        row.style.display = !q || text.includes(q) ? "flex" : "none";
-      }
-    });
-  }
+  keepSessionLengthWhenStartMoves();
+
+  setupParticipantSearch();
 
   // Auto-save draft on any input change
   form.addEventListener("input", saveEditSessionDraft);
   form.addEventListener("change", saveEditSessionDraft);
   form.addEventListener("input", refreshScheduleConflictNotice);
   form.addEventListener("change", refreshScheduleConflictNotice);
-
-  const nameInputEl = document.getElementById("setup-session-name");
-  if (nameInputEl) {
-    nameInputEl.addEventListener("input", updateSessionNameSubtitle);
-  }
 
   setupRepeatControls({ lang: deps.getState?.().lang || "en" });
 
@@ -710,6 +698,8 @@ function populateSessionFormFields(
       0,
       defaults.defaultStartTime,
     );
+    // What the end is currently paired with — see keepSessionLengthWhenStartMoves.
+    startInput.dataset.pairedWith = startInput.value;
   }
   if (endInput) {
     endInput.value = resolveTimeInputValue(
@@ -722,11 +712,18 @@ function populateSessionFormFields(
   if (locInput) locInput.value = draft?.location ?? (targetSession?.location || "");
 }
 
-function determineParticipantChecked(client, draft, targetSession, preselectedClientId) {
-  if (draft?.checkedClients) return draft.checkedClients.includes(client.id);
-  if (targetSession) return targetSession.participants.includes(client.id);
-  if (preselectedClientId === client.id) return true;
-  return !preselectedClientId && client.id !== "c3c7d2c4";
+// Who the form OPENS with. A saved draft wins, then the session being edited, then the client the
+// trainer arrived from. With none of those it opens empty: the form used to tick every client in the
+// base, which is defensible with four of them and wrong with a hundred — the trainer would be
+// removing ninety-eight people to book one.
+function participantsOnOpen(clients, draft, targetSession, preselectedClientId) {
+  const chosenIds =
+    draft?.checkedClients ||
+    targetSession?.participants ||
+    (preselectedClientId ? [preselectedClientId] : []);
+  return chosenIds
+    .map((id) => clients.find((client) => client.id === id))
+    .filter((client) => client !== undefined);
 }
 
 // null means "leave the <select> unset" (its default: the first non-disabled option) — matches the
@@ -764,39 +761,16 @@ function buildParticipantRow(client, ctx) {
 
   const row = document.createElement("div");
   row.className = "participant-setup-row";
+  // The row IS the selection — there is no checkbox to read, and nothing here is listed unchosen.
+  row.dataset.clientId = client.id;
 
-  const left = document.createElement("div");
-  left.style.display = "flex";
-  left.style.alignItems = "center";
-  left.style.gap = "8px";
-
-  const cb = document.createElement("input");
-  cb.type = "checkbox";
-  cb.value = client.id;
-  cb.id = `setup-cb-${client.id}`;
-  cb.style.width = "16px";
-  cb.style.height = "16px";
-  cb.style.cursor = "pointer";
-  cb.checked = determineParticipantChecked(client, draft, targetSession, preselectedClientId);
-
-  const nameLabel = document.createElement("label");
-  nameLabel.htmlFor = `setup-cb-${client.id}`;
+  const nameLabel = document.createElement("span");
+  nameLabel.className = "participant-name";
   nameLabel.innerHTML = getClientDisplayNameHTML(client);
-  nameLabel.style.fontWeight = "600";
-  nameLabel.style.cursor = "pointer";
-  nameLabel.style.fontSize = "13px";
-
-  left.appendChild(cb);
-  left.appendChild(nameLabel);
-
-  const right = document.createElement("div");
 
   const select = document.createElement("select");
   select.className = "form-control select-routine-dropdown";
-  select.style.padding = "4px 8px";
-  select.style.fontSize = "12px";
-  select.style.width = "160px";
-  select.style.height = "30px";
+  select.setAttribute("aria-label", t("select_routine_for") || "Programme");
 
   select.innerHTML = `<option value="" disabled>${t("select_exercise")}</option>`;
   const emptyOpt = document.createElement("option");
@@ -822,10 +796,138 @@ function buildParticipantRow(client, ctx) {
   );
   if (routineValue != null) select.value = routineValue;
 
-  right.appendChild(select);
-  row.appendChild(left);
-  row.appendChild(right);
+  // Taking someone off the session is one tap, next to their name, and says so out loud for a
+  // screen reader — the trainer who added the wrong Ana must not have to hunt for how to undo it.
+  const remove = document.createElement("button");
+  remove.type = "button";
+  remove.className = "participant-remove";
+  // The glyph is built as an element rather than assigned as HTML: the client's name goes into the
+  // label right below it, and an innerHTML line above it is exactly what the escaping audit
+  // (build/frontend_audit.py) has to treat as a sink.
+  const removeIcon = document.createElement("i");
+  removeIcon.className = "fa-solid fa-xmark";
+  removeIcon.setAttribute("aria-hidden", "true");
+  remove.appendChild(removeIcon);
+  remove.setAttribute("aria-label", `${t("remove_participant") || "Remove"} ${client.name}`);
+  remove.addEventListener("click", () => {
+    row.remove();
+    refreshParticipantSummary();
+    saveEditSessionDraft();
+  });
+
+  row.appendChild(nameLabel);
+  row.appendChild(select);
+  row.appendChild(remove);
   return row;
+}
+
+// ── Finding a client among a hundred (TODO §46.2) ──────────────────────────────────────────────
+// The context the search needs to build a row, kept from the last time the form was opened: the
+// listener is bound once at init, and the draft, the session being edited and the routine list all
+// belong to the current opening.
+let participantRowContext = null;
+
+/** At most this many names at once: a suggestion list longer than the phone screen is the wall this
+ * redesign removed, and a trainer who sees eight near-matches types one more letter. */
+const MAX_PARTICIPANT_MATCHES = 8;
+
+function chosenParticipantIds() {
+  return new Set([...participantRows()].map((row) => row.dataset.clientId));
+}
+
+/** The count and the empty line, which are how the trainer knows the search did anything. */
+function refreshParticipantSummary() {
+  const chosen = participantRows().length;
+  const count = document.getElementById("setup-participant-count");
+  const empty = document.getElementById("setup-participants-empty");
+  const t = deps?.t || ((key) => key);
+  if (count) count.textContent = chosen ? `${t("participants_chosen")}: ${chosen}` : "";
+  if (empty) empty.hidden = chosen > 0;
+}
+
+function addParticipant(client) {
+  if (!participantRowContext || chosenParticipantIds().has(client.id)) return;
+  document
+    .getElementById("setup-participants-assignment-list")
+    ?.appendChild(buildParticipantRow(client, participantRowContext));
+  refreshParticipantSummary();
+  saveEditSessionDraft();
+}
+
+function matchingClients(query) {
+  const chosen = chosenParticipantIds();
+  const needle = query.trim().toLowerCase();
+  if (!needle) return [];
+  return (participantRowContext?.state?.clients || [])
+    .filter((client) => !chosen.has(client.id) && client.name.toLowerCase().includes(needle))
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .slice(0, MAX_PARTICIPANT_MATCHES);
+}
+
+function renderParticipantMatches(query) {
+  const list = document.getElementById("setup-participant-matches");
+  const search = document.getElementById("setup-participant-search");
+  if (!list) return;
+  const t = deps?.t || ((key) => key);
+  list.replaceChildren();
+  const open = query.trim().length > 0;
+  list.hidden = !open;
+  search?.setAttribute("aria-expanded", String(open));
+  if (!open) return;
+
+  const matches = matchingClients(query);
+  if (matches.length === 0) {
+    const none = document.createElement("li");
+    none.className = "participant-match-empty";
+    none.textContent = t("no_matching_clients") || "No matching clients";
+    list.appendChild(none);
+    return;
+  }
+  for (const client of matches) {
+    const item = document.createElement("li");
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "participant-match";
+    button.dataset.clientId = client.id;
+    button.innerHTML = `<span>${deps.getClientDisplayNameHTML(client)}</span><i class="fa-solid fa-plus" aria-hidden="true"></i>`;
+    button.addEventListener("click", () => {
+      addParticipant(client);
+      clearParticipantSearch();
+    });
+    item.appendChild(button);
+    list.appendChild(item);
+  }
+}
+
+function clearParticipantSearch() {
+  const search = document.getElementById("setup-participant-search");
+  if (search) search.value = "";
+  renderParticipantMatches("");
+  search?.focus();
+}
+
+// Typing a name and pressing Enter adds the first match, so a trainer at a keyboard never has to
+// leave the field — and Enter inside a form otherwise submits it, which would launch the clipboard
+// mid-search.
+function setupParticipantSearch() {
+  const search = document.getElementById("setup-participant-search");
+  if (!search) return;
+  search.addEventListener("input", () => renderParticipantMatches(search.value));
+  search.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      const [first] = matchingClients(search.value);
+      if (first) {
+        addParticipant(first);
+        clearParticipantSearch();
+      }
+      return;
+    }
+    if (event.key === "Escape" && search.value) {
+      event.preventDefault();
+      clearParticipantSearch();
+    }
+  });
 }
 
 /** The form's repeating half, set for whichever session it was opened on (TODO §35.3a).
@@ -909,11 +1011,14 @@ export function openEditSessionControlModal(
     defaults,
   );
 
-  updateSessionNameSubtitle();
+  // After the fields are filled, not at boot: the end field's marks are counted from the start
+  // field's value, and at boot there is not one yet. Mounting is idempotent, so each open re-reads
+  // the clock and re-labels the controls in the language now in force.
+
   refreshScheduleConflictNotice();
 
   const clientsList = state?.clients || [];
-  const rowCtx = {
+  participantRowContext = {
     draft,
     targetSession,
     preselectedClientId,
@@ -923,8 +1028,11 @@ export function openEditSessionControlModal(
     t,
     getClientDisplayNameHTML,
   };
-  for (const client of [...clientsList].sort((a, b) => a.name.localeCompare(b.name))) {
-    participantsList.appendChild(buildParticipantRow(client, rowCtx));
+  const onOpen = participantsOnOpen(clientsList, draft, targetSession, preselectedClientId);
+  for (const client of onOpen.sort((a, b) => a.name.localeCompare(b.name))) {
+    participantsList.appendChild(buildParticipantRow(client, participantRowContext));
   }
+  renderParticipantMatches("");
+  refreshParticipantSummary();
 }
 export const openWorkoutSetupModal = openEditSessionControlModal;
