@@ -4046,3 +4046,24 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#464-x-the-demo-
 ### 46.5 [x] The seed stamp says what it is — renamed 2026-09-12
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#465-x-the-seed-stamp-says-what-it-is--renamed-2026-09-12); what shipped is in [CHANGELOG.md](CHANGELOG.md).
+
+### 46.6 [x] [Decided] The demo-removal code stays, as a safety valve — ruled 2026-09-12
+
+Simon first said it was no longer needed: the demo lives in the sandbox now, and a sandbox is thrown
+away whole. He then asked what keeping it costs, and on the measurement ruled that it **stays**, for
+the case the sandbox does not cover — test data that reaches the working workspace, through an old
+`?init=demo_data_load` link or a restored backup.
+
+**What it costs: nothing that grows.** [seedProvenance.js](src/data/seedProvenance.js) identifies a
+record by the `testData` stamp, and failing that by the seed id set derived from the seed modules
+themselves — never by text. So translating the demo (§46.4) could not break it, and adding a demo
+record keeps it correct with nothing to remember. Seed ids are 8 characters where a real one is a
+22-character base62 UUIDv7 ([recordId.js](src/data/recordId.js)). It is 172 lines of rule, 180 of
+dialog and 447 of tests.
+
+**And it costs the trainer nothing to carry**: the button lives on a notification that is itself a
+seeded record, so an install with no test data has no card and no button.
+
+**The manual route stays the fallback** for a store nobody can reach through the app: hand the
+exported backup to a tool that strips every row stamped `testData`. That is what §46.5 renamed the
+stamp for.
