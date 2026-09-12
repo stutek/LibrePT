@@ -260,3 +260,47 @@ def test_leaving_the_sandbox_takes_the_guide_with_it(page, local_server):
     assert page.locator("#walkthrough-overlay").count() == 0, (
         "the guide followed the trainer out of the sandbox"
     )
+
+
+@pytest.mark.clean_start
+def test_the_sandbox_wears_its_own_skin_and_a_frame(page, local_server):
+    """Asked 2026-09-11: give the sandbox an orange skin of its own and a frame around the app.
+
+    It is worth a test rather than an eyeball because of what it PREVENTS — a trainer logging a real
+    set into sample data, or reading sample numbers as a client's. The skin has to arrive with the
+    workspace and leave with it: one that stayed behind would say "sandbox" over real records, which
+    is the same failure pointing the other way."""
+    page.goto(f"{local_server}?init=demo_data_load&lang=en")
+    page.wait_for_selector(".session-card")
+
+    own_work = page.evaluate(
+        "() => getComputedStyle(document.body).getPropertyValue('--primary').trim()"
+    )
+
+    _switch(page, "sandbox")
+
+    sandbox = page.evaluate(
+        """() => ({
+             primary: getComputedStyle(document.body).getPropertyValue('--primary').trim(),
+             frame: getComputedStyle(document.body, '::after').borderTopWidth,
+             frameOn: getComputedStyle(document.body, '::after').content,
+           })"""
+    )
+    assert sandbox["primary"] != own_work, (
+        "the sandbox must not look like the trainer's own work"
+    )
+    # The orange itself, not merely "different": the skin is a signal, and a later palette edit that
+    # quietly turned it green would still pass a difference check.
+    assert sandbox["primary"] == "#f97316", sandbox
+    assert sandbox["frame"] == "3px", f"no frame around the app: {sandbox}"
+
+    _switch(page, "working")
+
+    after = page.evaluate(
+        """() => ({
+             primary: getComputedStyle(document.body).getPropertyValue('--primary').trim(),
+             frame: getComputedStyle(document.body, '::after').borderTopWidth,
+           })"""
+    )
+    assert after["primary"] == own_work, "leaving puts the trainer's own theme back"
+    assert after["frame"] != "3px", "the frame left with the workspace"

@@ -285,5 +285,6 @@ module, listed in the table below alongside that module's `.js`.
 | [src/modules/themes/daylight.css](../src/modules/themes/daylight.css) | `styles` | Daylight theme palette (the default). |
 | [src/modules/themes/midnight.css](../src/modules/themes/midnight.css) | `styles` | Midnight theme palette. |
 | [src/modules/themes/red.css](../src/modules/themes/red.css) | `styles` | Red theme palette. |
+| [src/modules/themes/sandbox.css](../src/modules/themes/sandbox.css) | `styles` | The SANDBOX's own skin — warm orange on a dark ember field — plus the frame around the whole viewport. Not one of the five choices in the ☰ menu but a STATE, worn because of where the trainer is and absent from theme.js's tables, so it cannot be picked while looking at real client data. Imported LAST so it wins over whichever theme is active at equal specificity. Dark on purpose: the contrast gate asks muted text for 6:1 on both surfaces, and an orange field is exactly the kind of tint that spends that headroom. |
 | [src/modules/themes/blossom.css](../src/modules/themes/blossom.css) | `styles` | Blossom theme palette. |
 | [src/modules/themes/nebula.css](../src/modules/themes/nebula.css) | `styles` | Nebula theme palette. |

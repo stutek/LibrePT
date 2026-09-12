@@ -19,16 +19,24 @@
 }
 /* TODO §40.5 — the sandbox tints the whole header, not just the badge in it. A badge is read at
    arm's length, one-handed, between sets, and a trainer who misses it logs a real set into sample
-   data. The tint is the same indigo the DEMO pill already carries, so the two read as one statement
-   rather than two competing ones, and it is laid OVER the header's own glass rather than replacing
-   it — the app must still look like itself, or the sandbox stops demonstrating the product.
-   A left border, because the badge already covers the right: an edge is visible in the corner of
-   the eye where a pill in a scrolling row is not. */
+   data. The tint is laid OVER the header's own glass rather than replacing it — the app must still
+   look like itself, or the sandbox stops demonstrating the product. A left border, because the badge
+   already covers the right: an edge is visible in the corner of the eye where a pill in a scrolling
+   row is not.
+
+   The tint used to be a hardcoded indigo, matched to the DEMO pill. Since the sandbox got a skin of
+   its own (themes/sandbox.css, 2026-09-11) it reads `--primary` instead — which IS the sandbox
+   orange while this class is on the body. A fixed indigo would now be a second, competing statement
+   over an orange app, and the whole reason the tint was given the pill's colour was that the two
+   should read as one. */
 body.in-sandbox .app-header {
-  background: linear-gradient(to bottom, rgba(99, 102, 241, 0.22), rgba(99, 102, 241, 0.1)),
-    var(--card-bg);
-  border-bottom-color: rgba(99, 102, 241, 0.55);
-  box-shadow: inset 4px 0 0 0 #6366f1;
+  background: linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--primary) 22%, transparent),
+      color-mix(in srgb, var(--primary) 10%, transparent)
+    ), var(--card-bg);
+  border-bottom-color: color-mix(in srgb, var(--primary) 55%, transparent);
+  box-shadow: inset 4px 0 0 0 var(--primary);
 }
 .header-nav {
   max-width: var(--app-max-width, 480px);
