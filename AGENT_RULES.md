@@ -75,10 +75,20 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
 ## Execution
 
 - Apply edits directly. Auto-commit coherent work to `main`, one logical change per commit, staged
-  from `git status --short`. **Never push.** **A request that arrives mid-turn is its own commit**,
+  from `git status --short` — your own files only, never another session's uncommitted work.
+  **Never push.** **A request that arrives mid-turn is its own commit**,
   not an addition to the one in progress: several asks landing while a gate run is in flight are
   split apart when it ends, never bulked because they happened in one turn. Where one verified tree
   yields several commits, say that the gate ran once, on the whole tree.
+- **Another agent may be working in the same tree.** Before editing, read `git status --short` and
+  `.private/AGENT_SYNC/`, and check whether a `build check` is already running; do not start a
+  second gate run or commit on top of one in flight. Announce your own work in
+  `.private/AGENT_SYNC/<model>-<topic>.md` **before the first edit**: what is in progress, and every
+  source file you are taking exclusively. A file another note claims is not yours to edit — take
+  other work or ask. **Delete your note in the same turn as the commit**; a stale note locks files
+  nobody is holding.
+- **Research and planning run in parallel** — several agents at once, each reading and reporting.
+  Editing stays serial: one tree, one writer per file.
 - Commit messages: `type(scope): imperative summary` (lowercase, ≤72 chars), blank line, body
   wrapped at 72 saying **why**, `Co-Authored-By:` the model actually running.
 - **Run `.venv/bin/python -m build check` in full before every code commit**, unpiped, and report
@@ -117,7 +127,9 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
 ## Documents and tools
 
 - One home each: architecture [README.md](README.md), workflows [use_cases/](use_cases/), open work
-  and decisions [TODO.md](TODO.md), what shipped [CHANGELOG.md](CHANGELOG.md). **A section leaves
+  and decisions [TODO.md](TODO.md), what shipped [CHANGELOG.md](CHANGELOG.md). **TODO.md is written
+  as the work moves** — started, decided, blocked, closed — in that same turn, never saved up for
+  the end of a session; with several agents running it is how they see each other's plans. **A section leaves
   TODO.md the day it closes** — heading and pointer stay, the reasoning moves whole to
   [TODO_ARCHIVE.md](TODO_ARCHIVE.md), and open subsections stay behind. Every Markdown file
   carries frontmatter, every knowledge directory an `INDEX.md`, and concepts link to each other.
