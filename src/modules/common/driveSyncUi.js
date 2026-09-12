@@ -18,6 +18,7 @@ import {
 import { preloadGoogleIdentityServices } from "../../data/googleAuth.js";
 import { isSandbox } from "../../data/workspace.js";
 import { closeModal, openModal, renderMarkupOnce } from "./dom.js";
+import { formatClockFromEpoch } from "./utils.js";
 
 let deps = null;
 
@@ -32,7 +33,7 @@ function tr(key, fallback) {
 function formatLastSync(status) {
   if (!status.lastSyncResult) return "";
   const { ok, at, conflicts, error } = status.lastSyncResult;
-  const when = new Date(at).toLocaleTimeString();
+  const when = formatClockFromEpoch(at);
   if (!ok) {
     if (error === "auth_required") {
       return tr("drive_sync_status_reauth", `Session expired — tap to reconnect (${when}).`);

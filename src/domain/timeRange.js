@@ -37,6 +37,20 @@ export function parseTimeRange(timeStr) {
   return { start, end };
 }
 
+/** A single clock value ("17:30") as minutes past midnight, or null if it is not one.
+ *
+ * The strict reading of a field's contents: 24-hour only, and a value past 23:59 is not a time at
+ * all. sessionClock.js carried a copy that skipped the range check, so a schedule could be rebuilt
+ * from "25:00" as if it meant one in the morning the next day. */
+export function clockToMinutes(value) {
+  const parsed = /^(\d{1,2}):(\d{2})$/.exec(String(value || "").trim());
+  if (!parsed) return null;
+  const hour = parseInt(parsed[1], 10);
+  const minute = parseInt(parsed[2], 10);
+  if (hour > 23 || minute > 59) return null;
+  return hour * 60 + minute;
+}
+
 /** The clock time `minutes` after `time` ("06:00", 90 → "07:30"), wrapping past midnight.
  *
  * The setup form's end time follows its start with it: moving a session an hour earlier moves both
@@ -60,4 +74,24 @@ export function timePlusMinutes(time, minutes) {
 export function isTimeOverlapping(rangeA, rangeB) {
   if (!rangeA || !rangeB) return false;
   return rangeA.start < rangeB.end && rangeB.start < rangeA.end;
+}
+
+/** The next `count` clock marks strictly after `time`, on the :00/:30 grid ("17:12", 4 →
+ * ["17:30", "18:00", "18:30", "19:00"]). Wraps past midnight; `[]` if `time` is not a clock.
+ *
+ * These are the time field's shortcuts (modules/common/timeField.js). Absolute times rather than
+ * "+30 min" offsets, and anchored on the clock rather than on the field's current value, because a
+ * gym session is booked AT a time — the trainer is choosing "half past six", not adding thirty
+ * minutes to something. Strictly after, so the end field's four marks are always four lengths of
+ * session (30, 60, 90, 120 minutes) and never the start itself. */
+export function nextClockMarks(time, count = 4) {
+  const parsed = String(time || "").match(/^(\d{1,2}):(\d{2})$/);
+  if (!parsed) return [];
+  const minutes = parseInt(parsed[1], 10) * 60 + parseInt(parsed[2], 10);
+  const first = (Math.floor(minutes / 30) + 1) * 30;
+  const pad = (n) => String(n).padStart(2, "0");
+  return Array.from({ length: Math.max(0, count) }, (_, index) => {
+    const total = (first + index * 30) % (24 * 60);
+    return `${pad(Math.floor(total / 60))}:${pad(total % 60)}`;
+  });
 }

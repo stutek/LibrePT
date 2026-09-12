@@ -94,6 +94,19 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
   service worker and the app comes up behind the blocking *App verification failed* overlay — which
   then fails whatever tests happen to be running, naming none of the cause. Seven unrelated e2e
   tests, 2026-09-12. Say in your note when a run starts, and hold edits to `src/` until it ends.
+- **`pgrep -f "python -m build"` DOES NOT detect a gate.** It matches any command line containing
+  that string — including the watcher that is looking for it, and the shell wrapping the `pgrep`
+  itself. On 2026-09-12 it reported a run in flight for twenty minutes while none existed: one
+  session held back, edited anyway on a false positive, apologised to a second session for spoiling
+  a run, and accused a third of owning it. Three sessions coordinated around a process that was the
+  watcher's own reflection. Ask the gate, not the process table — `build check` holds
+  `.build-reports/gate.lock` with its pid, and a probe that cannot name the pid it found has found
+  nothing.
+- **A check whose result nothing acts on is not a check.** Putting the probe and the action in one
+  shell line prints the warning and does the thing anyway. Guard it, or read the answer in one call
+  and act in the next. **And a probe before the run proves nothing about the run**: what makes a
+  green gate trustworthy in a shared tree is a snapshot of every path and mtime under `src/` taken
+  before AND after, compared — anything less is a green light for a tree that may not have existed.
 - **The note carries state, a message carries negotiation.** `ListAgents` and `SendMessage` reach a
   session that is alive and listening; the note reaches one that starts later, or one that died
   mid-edit. So on finding foreign changes, read the notes first and message second, and never let a
@@ -142,6 +155,11 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
   everything in the sandbox*, never *everything in the sandbox goes* — which asks the reader who is
   going where. A destructive act says which word it means.
 - Never put meaning only in a hover; touch targets need real padding.
+- **A time is entered in 24-hour form everywhere**, and the format is the app's decision, never the
+  device's: `<input type="time">` and `toLocaleTimeString` both ask the phone, so a Slovenian app on
+  a US-set phone asks for AM/PM and can book an evening session in the morning. Entry goes through
+  `modules/common/timeField.js`, display through `formatClockFromMinutes`/`formatClockFromEpoch`; a
+  12-hour reading is at most a setting on that one seam, never a second field.
 - Support surfaces carry the commit SHA, with richer identity one tap away. Code version and
   data-schema version stay separate axes.
 

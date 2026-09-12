@@ -1,0 +1,90 @@
+/* modules/common/timeField.css — the app's 24-hour time entry control (timeField.js owns its
+   behaviour and builds everything below the `.form-control` itself).
+
+   Two claims this file makes on purpose:
+   - The digits are BIG and monospaced. This field is read at arm's length on a gym floor, and a
+     proportional font puts "11:10" and "17:30" at different widths, so a value the trainer has
+     already checked once moves when it changes.
+   - The marks wrap themselves. They sit in a third of the setup form's row on a phone, so the row
+     is `auto-fit` rather than four fixed columns: four across where there is room, two by two where
+     there is not, and never a chip squeezed past reading. */
+
+.time-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.time-field-dial {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* The input keeps .form-control's colours and border; only its type size and rhythm change here. */
+.time-field-dial .form-control {
+  flex: 1;
+  min-width: 0;
+  height: 56px;
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  letter-spacing: 0.08em;
+  text-align: center;
+  padding: 0 4px;
+}
+
+.time-field-steps {
+  display: flex;
+  flex-direction: column;
+  width: 44px;
+  flex: none;
+  gap: 4px;
+}
+
+.time-field-step {
+  flex: 1;
+  min-height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--input-bg);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: var(--btn-radius);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.time-field-step:active {
+  background: var(--primary-light);
+  border-color: var(--primary);
+}
+
+.time-field-marks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(58px, 1fr));
+  gap: 4px;
+  min-width: 0;
+}
+
+.time-field-mark {
+  min-height: 36px;
+  padding: 4px 2px;
+  background: var(--input-bg);
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+  border-radius: var(--btn-radius);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  white-space: nowrap;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.time-field-mark:active {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--text-main);
+}

@@ -22,7 +22,8 @@
 // needs, so a boot step would be ceremony around a single argument.
 
 import { closeModal, openModal, renderMarkupOnce } from "../common/dom.js";
-import { formatClockFromMinutes } from "../common/utils.js";
+import { mountTimeField } from "../common/timeField.js";
+import { formatClockFromEpoch } from "../common/utils.js";
 
 const DIALOG_ID = "dialog-session-start-time";
 
@@ -68,11 +69,11 @@ function ensureStartTimeDialog(t) {
         <div class="form-row">
           <div class="form-group col">
             <label id="session-start-time-start-label" for="session-start-time-start"></label>
-            <input type="time" id="session-start-time-start" class="form-control" required>
+            <input type="text" id="session-start-time-start" class="form-control" required>
           </div>
           <div class="form-group col">
             <label id="session-start-time-end-label" for="session-start-time-end"></label>
-            <input type="time" id="session-start-time-end" class="form-control" required>
+            <input type="text" id="session-start-time-end" class="form-control" required>
           </div>
         </div>
       </div>
@@ -104,12 +105,12 @@ function ensureStartTimeDialog(t) {
   dialog.querySelector("#btn-session-start-time-delete").textContent = t(
     "session_start_time_delete",
   );
+  // Re-mounted on every open for the same reason the labels are re-set: the controls speak, and
+  // the marks are the next half hours from a clock that has moved since the dialog was built.
+  const startInput = dialog.querySelector("#session-start-time-start");
+  mountTimeField(startInput, { t });
+  mountTimeField(dialog.querySelector("#session-start-time-end"), { t, anchorInput: startInput });
   return dialog;
-}
-
-function toClockValue(epochMs) {
-  const date = new Date(epochMs);
-  return formatClockFromMinutes(date.getHours() * 60 + date.getMinutes());
 }
 
 function describeDrift(driftMs, scheduledLabel, t) {
@@ -143,8 +144,8 @@ export function openSessionStartTimeDialog({
     scheduledLabel,
     t,
   );
-  dialog.querySelector("#session-start-time-start").value = toClockValue(proposedStartMs);
-  dialog.querySelector("#session-start-time-end").value = toClockValue(proposedEndMs);
+  dialog.querySelector("#session-start-time-start").value = formatClockFromEpoch(proposedStartMs);
+  dialog.querySelector("#session-start-time-end").value = formatClockFromEpoch(proposedEndMs);
 
   applyChoice = onApply;
   deleteChoice = onDelete;

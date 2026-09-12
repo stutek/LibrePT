@@ -15,6 +15,8 @@
 //      that sessions slip — a client arrives late, the previous group overruns — and the schedule,
 //      not the trainer, is what is wrong by the time Start is tapped.
 
+import { clockToMinutes } from "./timeRange.js";
+
 // A session that starts within a quarter hour of its slot is running to plan as far as the trainer
 // is concerned; past that the schedule is stale enough to be worth one tap to correct.
 export const SCHEDULE_DRIFT_TOLERANCE_MS = 15 * 60 * 1000;
@@ -107,19 +109,13 @@ export function isCachedSessionStale(activeSession, now = Date.now()) {
   return now > lastCurrentAtMs + ACTIVE_SESSION_STALE_AFTER_MS;
 }
 
-function clockValueToMinutes(value) {
-  const match = /^(\d{1,2}):(\d{2})$/.exec(String(value || "").trim());
-  if (!match) return null;
-  return parseInt(match[1], 10) * 60 + parseInt(match[2], 10);
-}
-
 // Turns the dialog's two "HH:MM" fields back into epochs, on the day the session is actually being
 // run. An end at or before the start crosses midnight and rolls to the next day, the same reading
 // `parseTimeRange` gives a "22:00 - 00:00" slot. Returns null if either field is unparseable, so a
 // bad edit is rejected rather than silently zeroing the schedule.
 export function resolveScheduleFromClockValues({ baseMs, startValue, endValue }) {
-  const startMinutes = clockValueToMinutes(startValue);
-  const endMinutes = clockValueToMinutes(endValue);
+  const startMinutes = clockToMinutes(startValue);
+  const endMinutes = clockToMinutes(endValue);
   if (startMinutes === null || endMinutes === null) return null;
 
   const midnight = new Date(baseMs);

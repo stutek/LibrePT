@@ -61,11 +61,11 @@ export function renderEditSessionView(targetElement) {
             </div>
             <div>
               <label for="setup-start-time" data-i18n="label_start_time">Start Time *</label>
-              <input type="time" id="setup-start-time" class="form-control" placeholder="09:00" required>
+              <input type="text" id="setup-start-time" class="form-control" placeholder="09:00" required>
             </div>
             <div>
               <label for="setup-end-time" data-i18n="label_end_time">End Time *</label>
-              <input type="time" id="setup-end-time" class="form-control" placeholder="10:00" required>
+              <input type="text" id="setup-end-time" class="form-control" placeholder="10:00" required>
             </div>
           </div>
 

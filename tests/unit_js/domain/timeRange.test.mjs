@@ -8,7 +8,12 @@
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { isTimeOverlapping, parseTimeRange, timePlusMinutes } from "../../../src/domain/timeRange.js";
+import {
+  isTimeOverlapping,
+  nextClockMarks,
+  parseTimeRange,
+  timePlusMinutes,
+} from "../../../src/domain/timeRange.js";
 
 test("a 24h slot reads as minutes past midnight", () => {
   assert.deepEqual(parseTimeRange("09:00 - 10:30"), { start: 540, end: 630 });
@@ -56,4 +61,20 @@ test("a time shifted by a length wraps around midnight", () => {
   assert.equal(timePlusMinutes("23:15", 90), "00:45");
   assert.equal(timePlusMinutes("00:30", -60), "23:30");
   assert.equal(timePlusMinutes("", 60), "", "nothing to shift while the field is still empty");
+});
+
+test("the shortcut marks are the next half hours, never the anchor itself", () => {
+  assert.deepEqual(nextClockMarks("17:12", 4), ["17:30", "18:00", "18:30", "19:00"]);
+  // On a mark already: the trainer asking for shortcuts from 17:30 wants the times AFTER it —
+  // offering 17:30 back would be an end time equal to its own start, which is no session at all.
+  assert.deepEqual(nextClockMarks("17:30", 4), ["18:00", "18:30", "19:00", "19:30"]);
+});
+
+test("the marks wrap past midnight rather than running off the clock", () => {
+  assert.deepEqual(nextClockMarks("23:10", 3), ["23:30", "00:00", "00:30"]);
+});
+
+test("a field that holds nothing yet offers no marks", () => {
+  assert.deepEqual(nextClockMarks(""), []);
+  assert.deepEqual(nextClockMarks("half past"), []);
 });

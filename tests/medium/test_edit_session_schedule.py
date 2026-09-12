@@ -161,3 +161,105 @@ def test_an_external_calendar_saying_the_trainer_is_busy_is_flagged(page, local_
     fill_slot(page, "15:00", "16:00", "City park")
 
     expect(page.locator(".schedule-clash")).to_be_visible()
+
+
+# ── The time field (src/modules/common/timeField.js) ───────────────────────────────────────────
+# The subject here is the CONTROL, not the slot it fills: what a trainer typing and tapping at it
+# ends up with. It is mounted by the form, so this is the tier where it can be driven at all.
+
+
+def test_a_slot_field_is_the_app_s_own_control_not_the_browser_s(page, local_server):
+    """The promise: what the field SHOWS is 24-hour, whatever the phone is set to.
+
+    `<input type="time">` draws its value through the browser's locale — the same 17:30 reads as
+    "5:30 PM" on a device set to English (US), and no attribute overrides it. A text field draws the
+    value itself, so the app decides the form (AGENT_RULES.md), and the displayed text and the
+    stored value are the same string.
+    """
+    load_with_stub(
+        page, local_server, setup_stub(SCHEDULED_SESSION, target_session="'s-edit'")
+    )
+
+    field = page.locator("#setup-start-time")
+    assert field.get_attribute("type") == "text"
+    assert field.input_value() == "14:00"
+    # Read back the way the browser holds it, not the way CSS renders it (tests/INDEX.md).
+    assert field.evaluate("el => el.value") == "14:00"
+
+
+def test_four_typed_digits_are_the_time_they_spell(page, local_server):
+    """Typing is the fastest way in, and a tap into the field starts a fresh time: the control
+    selects what is there, so "1730" replaces 14:00 rather than being appended to it."""
+    load_with_stub(
+        page, local_server, setup_stub(SCHEDULED_SESSION, target_session="'s-edit'")
+    )
+
+    page.click("#setup-start-time")
+    page.locator("#setup-start-time").press_sequentially("1730")
+
+    assert page.input_value("#setup-start-time") == "17:30"
+
+
+def test_the_end_field_s_marks_are_the_four_session_lengths(page, local_server):
+    """Counted from the START, not from the clock: half an hour, an hour, ninety minutes, two hours.
+    One tap is then a whole booked slot, which is what booking a session usually is."""
+    load_with_stub(
+        page, local_server, setup_stub(SCHEDULED_SESSION, target_session="'s-edit'")
+    )
+
+    marks = page.locator(".time-field:has(#setup-end-time) .time-field-mark")
+    assert marks.all_text_contents() == ["14:30", "15:00", "15:30", "16:00"]
+
+    marks.nth(1).click()
+    assert page.input_value("#setup-end-time") == "15:00"
+
+
+def test_moving_the_start_recounts_the_end_s_marks(page, local_server):
+    """They are offered against the start the trainer has NOW, not the one the form opened on."""
+    load_with_stub(
+        page, local_server, setup_stub(SCHEDULED_SESSION, target_session="'s-edit'")
+    )
+
+    page.fill("#setup-start-time", "18:00")
+
+    marks = page.locator(".time-field:has(#setup-end-time) .time-field-mark")
+    assert marks.all_text_contents() == ["18:30", "19:00", "19:30", "20:00"]
+
+
+def test_the_arrows_move_the_time_by_five_minutes_and_carry_the_hour(
+    page, local_server
+):
+    """The correction that is neither a retype nor a half-hour mark: a session that actually starts
+    at five past. One pair of arrows, minutes only — an hour's change is already one tap away in the
+    marks."""
+    load_with_stub(
+        page, local_server, setup_stub(SCHEDULED_SESSION, target_session="'s-edit'")
+    )
+
+    steps = page.locator(".time-field:has(#setup-start-time) .time-field-step")
+    steps.nth(0).click()
+    assert page.input_value("#setup-start-time") == "14:05"
+
+    page.fill("#setup-start-time", "13:55")
+    steps.nth(0).click()
+    assert page.input_value("#setup-start-time") == "14:00"
+
+    steps.nth(1).click()
+    assert page.input_value("#setup-start-time") == "13:55"
+
+
+def test_a_half_typed_time_does_not_wipe_the_end_of_the_slot(page, local_server):
+    """The end follows the start, and the rule used to run on every keystroke: "1" is not a time, so
+    the end was set from an unreadable value and came back empty. It is restored to a real slot when
+    the fourth digit lands."""
+    load_with_stub(
+        page, local_server, setup_stub(SCHEDULED_SESSION, target_session="'s-edit'")
+    )
+
+    page.click("#setup-start-time")
+    page.locator("#setup-start-time").press_sequentially("17")
+    assert page.input_value("#setup-end-time") == "15:30"
+
+    page.locator("#setup-start-time").press_sequentially("30")
+    assert page.input_value("#setup-start-time") == "17:30"
+    assert page.input_value("#setup-end-time") == "19:00"

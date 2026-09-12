@@ -118,6 +118,15 @@ export function formatClockFromMinutes(totalMinutes) {
   return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
 }
 
+// The same clock, from an instant rather than from minutes. THE way this app turns a timestamp into
+// a time of day: `toLocaleTimeString` asks the phone, which answers "3:00 PM" on a device set to
+// English (US) — in a Slovenian app, beside fields that read 15:00 (AGENT_RULES.md: the format is
+// ours, not the device's).
+export function formatClockFromEpoch(epochMs) {
+  const date = new Date(epochMs);
+  return formatClockFromMinutes(date.getHours() * 60 + date.getMinutes());
+}
+
 // Escape HTML characters to prevent rendering attacks/unexpected HTML injection.
 //
 // THE app's escaper — there is deliberately no second one. exerciseAndRestTimer.js carried a

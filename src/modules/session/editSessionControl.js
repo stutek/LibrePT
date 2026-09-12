@@ -31,7 +31,8 @@ import {
   upsertSessionRecord,
 } from "../../domain/sessionRecord.js";
 import { seriesWithEdit, validateSeries } from "../../domain/sessionSeries.js";
-import { parseTimeRange, timePlusMinutes } from "../../domain/timeRange.js";
+import { clockToMinutes, parseTimeRange, timePlusMinutes } from "../../domain/timeRange.js";
+import { mountTimeField } from "../common/timeField.js";
 import { formatClockFromEpoch } from "../common/utils.js";
 import {
   readRepeatFields,
@@ -132,14 +133,27 @@ function collectSelectedClientRoutines() {
 // until they say otherwise. Dragging a start back to 06:00 used to leave the end behind, and a
 // session whose end is at or before its start has no length at all: the warning list then read the
 // whole day as taken (domain/scheduleConflicts.js), and the saved slot was wrong too.
+// 24-hour entry, marks and steppers around both slot fields (modules/common/timeField.js). The end
+// field's marks count from the START rather than from the clock: its four half hours are then the
+// four session lengths a trainer actually books.
+function mountEditSessionTimeFields() {
+  const startInput = document.getElementById("setup-start-time");
+  const endInput = document.getElementById("setup-end-time");
+  const t = deps?.t;
+  mountTimeField(startInput, { t });
+  mountTimeField(endInput, { t, anchorInput: startInput });
+}
+
 function keepSessionLengthWhenStartMoves() {
   const startInput = document.getElementById("setup-start-time");
   const endInput = document.getElementById("setup-end-time");
   if (!startInput || !endInput) return;
   startInput.addEventListener("input", () => {
+    // A field mid-entry ("173" on the way to 17:30) is not a move, and treating it as one wiped the
+    // end time on every keystroke: `timePlusMinutes` cannot read it, so the end was set to "".
+    if (clockToMinutes(startInput.value) === null) return;
     const pairedWith = startInput.dataset.pairedWith || "";
     startInput.dataset.pairedWith = startInput.value;
-    if (!startInput.value) return;
     const range = parseTimeRange(`${pairedWith} - ${endInput.value}`);
     const kept = range ? range.end - range.start : 0;
     // A full day means the two were equal, which is the state this exists to get out of.
@@ -1014,6 +1028,7 @@ export function openEditSessionControlModal(
   // After the fields are filled, not at boot: the end field's marks are counted from the start
   // field's value, and at boot there is not one yet. Mounting is idempotent, so each open re-reads
   // the clock and re-labels the controls in the language now in force.
+  mountEditSessionTimeFields();
 
   refreshScheduleConflictNotice();
 

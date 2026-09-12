@@ -22,6 +22,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ## 2026-09-12 — The setup form says who is training, and stops crying wolf
 
+### Added
+
+- **The app now asks for a time in its own field, 24-hour, never AM/PM.** `<input type="time">` draws
+  in the PHONE's language, not the app's: a trainer running LibrePT in Slovenian on a phone set to
+  English (US) was asked for "5:30 PM", and no attribute overrides that. Twelve-hour entry also lets a
+  session be booked for 7 in the evening and saved as 7 in the morning. The new field takes four typed
+  digits — a tap selects what is there, so "1730" simply replaces it — and offers **the next four half
+  hours** as buttons under it: counted from the clock for a start time, and from the start for an end
+  time, where the four are the four session lengths (30, 60, 90 and 120 minutes). One tap books a whole
+  slot. Two arrows beside the digits move the time five minutes at a time and carry the hour. The field
+  still holds "HH:MM", so everything that reads a session's slot is unchanged.
+
 ### Fixed
 
 - **The double-booking warning called the whole day taken** (TODO §46.1). A setup form whose end time
@@ -36,6 +48,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   time control always draws in the browser's own language, so the hint could only mislead. The session
   name also stopped being printed twice, and the warning list is now a light line with a coloured bar
   rather than a stack of full-width blocks that pushed the rest of the form off a phone screen.
+
+- **Two more places showed the phone's clock, not the app's.** The double-booking warning under the
+  slot read "busy 3:00 PM - 4:00 PM" beside fields showing 15:00, and the Google sync line reported the
+  last sync the same way. Both now print the same 24-hour time as the rest of the app. The rule behind
+  all three is written down in `AGENT_RULES.md`: a time is entered in 24-hour form everywhere, and the
+  format is the app's decision, never the device's.
 
 ### Changed
 
