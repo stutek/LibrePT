@@ -6,9 +6,10 @@
 @import url("./modules/themes/red.css");
 @import url("./modules/themes/blossom.css");
 @import url("./modules/themes/nebula.css");
-/* LAST on purpose: the sandbox skin is not one of the five choices above but a state worn over
-   whichever of them is active, and equal specificity means the later rule wins. */
-@import url("./modules/themes/sandbox.css");
+/* LAST on purpose: the sandbox's orange marks (header, pill, frame) are not a sixth choice above
+   but a state worn over whichever of them is active, and equal specificity means the later rule
+   wins. */
+@import url("./modules/common/sandboxMarker.css");
 
 /* Design system shared, non-theme tokens (fonts, layout heights, blur) */
 :root {

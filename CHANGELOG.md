@@ -22,6 +22,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ## 2026-09-12 — The setup form says who is training, and stops crying wolf
 
+### Changed
+
+- **The sandbox no longer paints the whole app orange — only the bar at the top of the screen, the
+  SANDBOX pill in it, and the thin frame around the edge.** Yesterday's answer repainted every
+  surface: a sixth palette that had to be kept in step with the five the trainer can actually choose,
+  and an app that no longer looked like the product the sandbox exists to demonstrate. The theme they
+  picked is now left exactly as it is, and the three orange marks say where they are. The frame stays
+  because it is the only one of the three a dialog does not cover.
+
 ### Added
 
 - **And for a day in its own field, written the one way that means the same everywhere: 2026-09-12.**

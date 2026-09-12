@@ -263,13 +263,17 @@ def test_leaving_the_sandbox_takes_the_guide_with_it(page, local_server):
 
 
 @pytest.mark.clean_start
-def test_the_sandbox_wears_its_own_skin_and_a_frame(page, local_server):
-    """Asked 2026-09-11: give the sandbox an orange skin of its own and a frame around the app.
+def test_the_sandbox_marks_the_header_the_pill_and_the_frame(page, local_server):
+    """Asked 2026-09-11 as an orange skin over the whole app, narrowed 2026-09-12 to the header.
 
     It is worth a test rather than an eyeball because of what it PREVENTS — a trainer logging a real
-    set into sample data, or reading sample numbers as a client's. The skin has to arrive with the
+    set into sample data, or reading sample numbers as a client's. The marks have to arrive with the
     workspace and leave with it: one that stayed behind would say "sandbox" over real records, which
-    is the same failure pointing the other way."""
+    is the same failure pointing the other way.
+
+    The narrowing is itself asserted here: entering the sandbox must leave the trainer's chosen
+    theme alone. The orange used to BE `--primary`, so a regression that put the skin back would
+    otherwise pass every check below."""
     page.goto(f"{local_server}?init=demo_data_load&lang=en")
     page.wait_for_selector(".session-card")
 
@@ -279,41 +283,52 @@ def test_the_sandbox_wears_its_own_skin_and_a_frame(page, local_server):
 
     _switch(page, "sandbox")
 
-    sandbox = page.evaluate(
+    # orange-700, written once in modules/common/sandboxMarker.css. Asserted as the colour itself
+    # rather than as "not the theme's": a later edit that quietly turned the marks green would still
+    # be different from every theme, and would still say nothing a trainer recognises.
+    ORANGE = "rgb(194, 65, 12)"
+
+    marks = page.evaluate(
         """() => ({
              primary: getComputedStyle(document.body).getPropertyValue('--primary').trim(),
+             headerEdge: getComputedStyle(document.querySelector('.app-header')).boxShadow,
+             headerBg: getComputedStyle(document.querySelector('.app-header')).backgroundImage,
              frame: getComputedStyle(document.body, '::after').borderTopWidth,
-             frameOn: getComputedStyle(document.body, '::after').content,
+             frameColour: getComputedStyle(document.body, '::after').borderTopColor,
            })"""
     )
-    assert sandbox["primary"] != own_work, (
-        "the sandbox must not look like the trainer's own work"
+    assert marks["primary"] == own_work, (
+        "entering the sandbox must leave the trainer's own theme alone: only the header, the pill "
+        f"and the frame turn orange ({marks['primary']} vs {own_work})"
     )
-    # The orange itself, not merely "different": the skin is a signal, and a later palette edit that
-    # quietly turned it green would still pass a difference check. orange-700 rather than a brighter
-    # one because the field is white and white button labels sit on this (themes/sandbox.css).
-    assert sandbox["primary"] == "#c2410c", sandbox
-    assert sandbox["frame"] == "3px", f"no frame around the app: {sandbox}"
+    assert ORANGE in marks["headerEdge"], f"no orange edge on the header: {marks}"
+    assert "gradient" in marks["headerBg"], f"no orange wash over the header: {marks}"
+    assert marks["frame"] == "3px", f"no frame around the app: {marks}"
+    assert marks["frameColour"] == ORANGE, (
+        f"the frame is not the sandbox orange: {marks}"
+    )
 
-    # The pill in the app bar turns orange with the rest (asked 2026-09-12). Outside the sandbox the
-    # same pill marks demo data in the trainer's own workspace and keeps its blue, so this is
-    # asserted in the sandbox rather than on the class alone.
+    # The pill in the app bar (asked 2026-09-12). Outside the sandbox the same pill marks demo data
+    # in the trainer's own workspace and keeps its blue, so this is asserted in the sandbox rather
+    # than on the class alone.
     pill = page.evaluate(
         """() => getComputedStyle(document.getElementById('preview-badge')).backgroundColor"""
     )
-    assert pill == "rgb(194, 65, 12)", (
-        f"the sandbox pill is not the sandbox orange: {pill}"
-    )
+    assert pill == ORANGE, f"the sandbox pill is not the sandbox orange: {pill}"
 
     _switch(page, "working")
 
     after = page.evaluate(
         """() => ({
              primary: getComputedStyle(document.body).getPropertyValue('--primary').trim(),
+             headerEdge: getComputedStyle(document.querySelector('.app-header')).boxShadow,
              frame: getComputedStyle(document.body, '::after').borderTopWidth,
            })"""
     )
-    assert after["primary"] == own_work, "leaving puts the trainer's own theme back"
+    assert after["primary"] == own_work, "the trainer's own theme is still theirs"
+    assert ORANGE not in after["headerEdge"], (
+        f"the orange header followed the trainer out of the sandbox: {after}"
+    )
     assert after["frame"] != "3px", "the frame left with the workspace"
 
 

@@ -56,6 +56,7 @@ self.swCacheManifest = (() => {
     "./modules/clipboard/exerciseAndRestTimer.css",
     "./modules/common/activeUsersList.css",
     "./modules/common/applicationHeader.css",
+    "./modules/common/sandboxMarker.css",
     "./modules/common/notificationArea.css",
     "./modules/common/steppedField.css",
     "./modules/common/backupRestore.css",
@@ -83,7 +84,6 @@ self.swCacheManifest = (() => {
     "./modules/themes/midnight.css",
     "./modules/themes/nebula.css",
     "./modules/themes/red.css",
-    "./modules/themes/sandbox.css",
     // Domain: the training vocabulary — pure, no DOM, no storage
     "./domain/repsAndLoad.js",
     "./domain/exerciseModality.js",

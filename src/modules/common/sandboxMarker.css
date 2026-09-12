@@ -1,0 +1,115 @@
+/* modules/common/sandboxMarker.css — how the SANDBOX says where the trainer is: an orange app
+   header, the orange SANDBOX pill in it, and a thin orange frame around the viewport.
+
+   **It is no longer a skin over the whole app** (asked 2026-09-11, narrowed 2026-09-12). The first
+   answer repainted every surface orange, and it cost more than it bought: a sixth palette to keep in
+   step with the five real ones under the parity and contrast gates, and an app that no longer looked
+   like the product the sandbox exists to demonstrate. The trainer's chosen theme now survives
+   untouched; only the bar at the top of the screen and the frame around it change colour.
+
+   **Not a theme, which is why it does not live in modules/themes/.** Every file in that folder is a
+   choice in the ☰ menu and must define the whole palette. This is a STATE: it is worn because of
+   where the trainer is, taken off by leaving, and there is no way to pick it — so there is no way to
+   end up wearing it while looking at real client data.
+
+   **The orange is written here as a value, not read from `--primary`.** While the whole app was
+   orange, `--primary` WAS this orange and the header simply followed it. Now `--primary` is whatever
+   theme the trainer chose, so following it would tint the header in the app's own colour and say
+   nothing at all. One constant, defined once below and used by all three marks. */
+body.in-sandbox {
+  /* orange-700. Not a brighter orange: the pill carries white 9px bold text, which needs 4.5:1 —
+     orange-600 measures 3.56:1 on white and fails, orange-700 measures 5.18:1 and passes. */
+  --sandbox-marker: #c2410c;
+}
+
+/* The header itself. The orange is laid OVER the header's own glass rather than replacing it: the
+   app must still look like itself, and the bar holds the trainer's own text tokens — the build
+   stamp, the ☰ menu that drops out of it — which a solid orange band would leave sitting on a
+   colour they were never measured against.
+
+   Stronger than the wash it replaces (was 22% → 10%), because it used to be one signal among many
+   and is now carrying the claim almost alone. It stops here rather than going darker: the small grey
+   build stamp under the logo is the limit, and on a light theme it loses legibility before the bar
+   gains much orange.
+
+   A left border as well, because the pill already covers the right: an edge is seen in the corner of
+   the eye where a pill in a scrolling row is not. */
+body.in-sandbox .app-header {
+  background: linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--sandbox-marker) 30%, transparent),
+      color-mix(in srgb, var(--sandbox-marker) 16%, transparent)
+    ), var(--card-bg);
+  border-bottom-color: color-mix(in srgb, var(--sandbox-marker) 70%, transparent);
+  box-shadow: inset 4px 0 0 0 var(--sandbox-marker);
+}
+
+/* The SANDBOX pill in the app bar (asked 2026-09-12). Its `.is-demo` state is SHARED: the same pill
+   marks sample data sitting in the trainer's own workspace, which a `?init=demo_data_load` link can
+   produce with no workspace involved at all. That case keeps its calm informational blue — only the
+   sandbox turns orange, so the two claims stay tellable apart. */
+body.in-sandbox .preview-badge.is-demo {
+  background: var(--sandbox-marker);
+  color: #ffffff;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--sandbox-marker) 50%, transparent), 0 2px 6px
+    color-mix(in srgb, var(--sandbox-marker) 40%, transparent);
+}
+
+/* A slow breath between two oranges, so the pill is noticed rather than merely present (asked
+   2026-09-12).
+
+   **Both shades carry the label.** The text is 9px and bold, which needs 4.5:1, and measured against
+   white: orange-600 gives 3.56:1 and the midpoint 4.30:1 — both fail. orange-700 (5.18:1) and
+   orange-800 (7.31:1) pass, and the step between them is still plainly a breath. So the animation
+   moves between the two DARKEST candidates rather than the two most obvious ones.
+
+   **Four seconds, not the 1.8s the PREVIEW badge pulses at.** That one is a hazard warning about
+   losing data and is meant to nag; this one answers "where am I". A slow breath draws the eye
+   without competing with it.
+
+   The motion is emphasis and never meaning: the pill says the word SANDBOX either way, which is
+   what makes it safe to switch off entirely for a reader who has asked for less movement. */
+@media (prefers-reduced-motion: no-preference) {
+  body.in-sandbox .preview-badge.is-demo {
+    animation: sandboxBreathe 4s ease-in-out infinite;
+  }
+
+  @keyframes sandboxBreathe {
+    0%,
+    100% {
+      background-color: #c2410c; /* orange-700, the token above written out */
+    }
+    50% {
+      background-color: #9a3412; /* orange-800 */
+    }
+  }
+}
+
+body.in-sandbox .preview-badge.is-demo:hover,
+body.in-sandbox .preview-badge.is-demo:focus-visible {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--sandbox-marker) 90%, transparent), 0 3px 10px
+    color-mix(in srgb, var(--sandbox-marker) 60%, transparent);
+}
+
+/* The frame around the whole app (asked 2026-09-11, kept when the orange was narrowed to the header
+   2026-09-12). It is the only mark that survives an open dialog — a dialog covers the header, and
+   "where am I" does not stop being worth answering while one is up.
+
+   Drawn as a fixed pseudo-element rather than a border on anything real: a border would take layout
+   from every screen and would be the kind of change that moves a tap target by 4px on a phone. This
+   takes nothing and covers nothing — `pointer-events: none` is what keeps it from swallowing a tap
+   on a control underneath it.
+
+   It frames the VIEWPORT, not the 480px column `body` is capped to. On a phone those are the same
+   thing; on a desktop the frame then says the whole window is the sandbox, rather than drawing a box
+   around a column while the space beside it looks like ordinary work.
+
+   Above everything, dialogs and the splash included (they sit at 1000 and 9000). */
+body.in-sandbox::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  border: 3px solid var(--sandbox-marker);
+  pointer-events: none;
+  z-index: 10000;
+}
