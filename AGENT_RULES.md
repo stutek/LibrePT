@@ -128,8 +128,11 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
   if the failing file is another session's, re-read `git status --short` and the notes every five
   minutes and judge whether the tree has settled. Say what you are waiting for. This is the one
   allowed re-run; a failure in a file you hold is yours.
-- **Research and planning run in parallel** — several agents at once, each reading and reporting.
-  Editing stays serial: one tree, one writer per file.
+- **Research and planning run in parallel; WRITING THE TREE DOES NOT.** Several sessions reading,
+  planning and drafting at once is wanted. The working tree takes ONE writer at a time: claim it in
+  the note, write, verify, commit, release, and say so. Per-file turn-taking is not enough — three
+  sessions editing three different files broke three gate runs on 2026-09-12, because a run proves
+  a TREE and anyone else's write voids it while it is in flight.
 - Commit messages: `type(scope): imperative summary` (lowercase, ≤72 chars), blank line, body
   wrapped at 72 saying **why**, `Co-Authored-By:` the model actually running.
 - **Run `.venv/bin/python -m build check` in full before every code commit**, unpiped, and report
