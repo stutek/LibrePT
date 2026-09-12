@@ -87,6 +87,11 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
   source file you are taking exclusively. A file another note claims is not yours to edit — take
   other work or ask. **Delete your note in the same turn as the commit**; a stale note locks files
   nobody is holding.
+- **A gate that failed on someone else's half-written file is not your failure.** Read the digest,
+  and if the failing file is one another session holds, look at `git status --short` and the notes
+  again every five minutes and judge whether a re-run is now worth it — the tree has to have
+  settled, not merely changed. Say what you are waiting for. This is the one case where re-running
+  is allowed; a failure in a file you hold is yours, and re-running it away is still forbidden.
 - **Research and planning run in parallel** — several agents at once, each reading and reporting.
   Editing stays serial: one tree, one writer per file.
 - Commit messages: `type(scope): imperative summary` (lowercase, ≤72 chars), blank line, body
