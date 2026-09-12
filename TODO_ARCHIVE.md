@@ -2920,3 +2920,48 @@ field is now `testData`, which is true of both and is the word someone reading a
 those rows**, so the file has to say plainly which rows are not the trainer's. The old name is still
 READ, for the two preview installs that carry it and sit at schema "P", where the migration chain
 never runs again.
+
+### 46.6 [x] [Decided] The demo-removal code stays, as a safety valve — ruled 2026-09-12
+
+Simon first said it was no longer needed: the demo lives in the sandbox now, and a sandbox is thrown
+away whole. He then asked what keeping it costs, and on the measurement ruled that it **stays**, for
+the case the sandbox does not cover — test data that reaches the working workspace, through an old
+`?init=demo_data_load` link or a restored backup.
+
+**What it costs: nothing that grows.** [seedProvenance.js](src/data/seedProvenance.js) identifies a
+record by the `testData` stamp, and failing that by the seed id set derived from the seed modules
+themselves — never by text. So translating the demo (§46.4) could not break it, and adding a demo
+record keeps it correct with nothing to remember. Seed ids are 8 characters where a real one is a
+22-character base62 UUIDv7 ([recordId.js](src/data/recordId.js)). It is 172 lines of rule, 180 of
+dialog and 447 of tests.
+
+**And it costs the trainer nothing to carry**: the button lives on a notification that is itself a
+seeded record, so an install with no test data has no card and no button.
+
+**The manual route stays the fallback** for a store nobody can reach through the app: hand the
+exported backup to a tool that strips every row stamped `testData`. That is what §46.5 renamed the
+stamp for.
+
+### 46.7 [x] The stamp says WHICH kind, and the app notices when test data escapes — shipped 2026-09-12
+
+**Asked by Simon**: tag seeded rows as demo or test, and find a way to detect when such rows are in
+the production database outside a test run.
+
+**The stamp now carries an origin**, written when the row is created, because the two are byte-identical
+afterwards and nothing can tell them apart later. The sandbox writes `testData: "demo"` — the sample gym
+a trainer asked to see. `?init=demo_data_load` writes `testData: "test"` — the switch the browser suite
+puts on every navigation, and the only way anything reaches the WORKING database.
+
+**The app cannot detect a test run, and does not pretend to.** No page can: it is the same app under
+Playwright as under a thumb. The alarm is built from two facts instead. One is already written down —
+which switch wrote this row. The other is the current boot: does the address carry `?init=`? A test run
+always does, so it never sees the alarm; a trainer's install never does, so one escaped row shows up
+the moment the app opens. In the sandbox it says nothing, because that is where sample data belongs.
+
+**What the trainer sees**: a warning at the top of the message feed — *V tvojih podatkih so testni
+zapisi* — naming how many rows and which collections, and offering the removal screen §46.6 kept.
+
+**Two weaknesses, on the record.** Anyone can type `?init=` into a URL, so a person can create
+test-stamped rows; that is the case the alarm is FOR, not a defect in it. And the alarm stays quiet
+during the suite only while every test navigation carries the switch — a test that seeds with it and
+then reloads without it would raise the alarm on itself.

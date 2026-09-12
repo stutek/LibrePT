@@ -15,6 +15,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   buildCrashReportItem,
+  buildEscapedTestDataItem,
   buildPendingSessionsItem,
   buildRsvpAnswersItem,
   buildUnscheduledPlansItem,
@@ -415,4 +416,59 @@ test("one arrival on its own is still just that message", () => {
 
   assert.equal(card.description, "Marko cancelled");
   assert.equal(card.title, "Spot cancelled", "a single cancellation reads as itself");
+});
+
+// ── Test data that escaped into the trainer's own database (TODO §46.7) ────────────────────────
+
+const withTestRows = () => ({
+  clients: [
+    { id: "c1", name: "Jane", testData: "test" },
+    { id: "mine", name: "A real client" },
+  ],
+  sessions: [{ id: "s1", title: "Morning", testData: "test" }],
+});
+
+test("test rows in the working database are reported, with what and where", () => {
+  // A `t` that answers nothing, so the item falls back to its own English and the numbers in the
+  // sentence can be read. With a dictionary, the same sentence arrives translated.
+  const item = buildEscapedTestDataItem(withTestRows(), () => "", {});
+  assert.equal(item.id, "synthetic-escaped-test-data");
+  assert.match(item.description, /2/, "says how many rows");
+  assert.match(item.description, /clients/, "and which collections they are in");
+  assert.equal(item.actions[0].resetDemo, true, "its action is the removal the app already has");
+});
+
+test("a test run is not warned about its own data", () => {
+  // The switch that seeded these rows is on this boot too, so this IS the test run. The alarm is
+  // for the boot that finds them WITHOUT it.
+  assert.equal(
+    buildEscapedTestDataItem(withTestRows(), (key) => key, { testRun: true }),
+    null,
+  );
+});
+
+test("the sandbox is where sample data belongs, so it says nothing there", () => {
+  assert.equal(
+    buildEscapedTestDataItem(withTestRows(), (key) => key, { sandbox: true }),
+    null,
+  );
+});
+
+test("demo rows are not an escape, and neither is a clean store", () => {
+  const demo = { clients: [{ id: "c1", name: "Jane", testData: "demo" }] };
+  assert.equal(
+    buildEscapedTestDataItem(demo, (key) => key, {}),
+    null,
+  );
+  // What a build before the origin existed wrote: seeded, kind unknown, read as a demo rather than
+  // guessed into an alarm.
+  const legacy = { clients: [{ id: "c1", name: "Jane", seededDemo: true }] };
+  assert.equal(
+    buildEscapedTestDataItem(legacy, (key) => key, {}),
+    null,
+  );
+  assert.equal(
+    buildEscapedTestDataItem({ clients: [{ id: "mine" }] }, (key) => key, {}),
+    null,
+  );
 });

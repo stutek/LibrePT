@@ -17,7 +17,38 @@
 // and reacting to a tap all belong to the module that owns the DOM.
 
 import { crashIssueUrl } from "../data/crashReport.js";
+import { escapedTestRecords } from "../data/seedProvenance.js";
 import { walkthroughDataPresent } from "./walkthroughReadiness.js";
+
+/**
+ * Test data in the trainer's own database — the loudest item in the feed (TODO §46.7).
+ *
+ * The rows the browser suite seeds through `?init=demo_data_load` are stamped `test`
+ * (data/seedProvenance.js). Finding one on a boot that carries no such switch means it is not a
+ * test run and those rows are sitting in the trainer's records, where a sample client can be
+ * mistaken for a real one and a sample session can be trained.
+ *
+ * Nothing here decides whether a test is running — no page can. The caller passes `testRun`, which
+ * is simply whether THIS boot carries the switch, and `sandbox`, where sample data belongs.
+ */
+export function buildEscapedTestDataItem(state, t, { sandbox = false, testRun = false } = {}) {
+  if (sandbox || testRun) return null;
+  const { count, collections } = escapedTestRecords(state);
+  if (count === 0) return null;
+  return {
+    id: "synthetic-escaped-test-data",
+    type: "test-data-escaped",
+    icon: "fa-solid fa-triangle-exclamation",
+    title: t("notif_test_data_escaped_title") || "Test records are in your data",
+    description: (
+      t("notif_test_data_escaped_desc") ||
+      "{count} record(s) written by a test run are stored with your own work, in {collections}. They are not yours and can be removed."
+    )
+      .replace("{count}", String(count))
+      .replace("{collections}", collections.join(", ")),
+    actions: [{ labelKey: "notif_test_data_escaped_btn", resetDemo: true, primary: true }],
+  };
+}
 
 // A planning-mode session is never "finished" (it has no Start/Complete footer), so it lives on in
 // state.history as `isPlanning: true` — which means it survives being replaced by the next session
@@ -260,7 +291,7 @@ export function resolveNotificationItems(
   t,
   readIds = [],
   syncFailure = null,
-  { crashes = [], repoUrl = "", sandbox = false } = {},
+  { crashes = [], repoUrl = "", sandbox = false, testRun = false } = {},
 ) {
   const synthetic = [
     // A fault leads: it is the only item here reporting that something the trainer asked for did
@@ -269,6 +300,7 @@ export function resolveNotificationItems(
     // A crash outranks the RSVPs below it but not a failed sync: both are faults, and the sync one is
     // about the trainer's data being at risk right now.
     buildCrashReportItem(crashes, t, repoUrl),
+    buildEscapedTestDataItem(state, t, { sandbox, testRun }),
     buildRsvpAnswersItem(state, t),
     buildUnscheduledPlansItem(state, t),
     buildPendingSessionsItem(state, t),

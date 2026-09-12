@@ -41,6 +41,20 @@ import { COLLECTIONS } from "./recordProjections.js";
 // anything that strips them, and the field has to say plainly which rows are not the trainer's.
 export const SEED_PROVENANCE_FIELD = "testData";
 
+/** Where a seeded record came from, written into the stamp so the two cases can be told apart
+ * afterwards. They look identical in the database and are wanted in different places:
+ *
+ *  - `demo` — the sample gym the trainer asked to see. It belongs in the sandbox, and a trainer
+ *    who loaded it there did so on purpose.
+ *  - `test` — the same rows written by the browser suite through `?init=demo_data_load`. Those
+ *    belong in a test run and NOWHERE else; finding them in the working database means test data
+ *    escaped into the trainer's own records (`escapedTestRecords` below).
+ *
+ * The origin can only be recorded when the record is WRITTEN — the rows are byte-identical, so
+ * nothing can work it out later. */
+export const DEMO_ORIGIN = "demo";
+export const TEST_ORIGIN = "test";
+
 // What the same stamp was called before that. Read, never written: two preview installs are on
 // real trainers' devices with it in their databases, and they are already at schema "P", so the
 // migration chain never runs over them again. Removable once neither of those two databases is
@@ -82,7 +96,10 @@ export function seededCollections() {
 export function isSeedRecord(collection, record) {
   if (!record || typeof record !== "object") return false;
   const stamped = record[SEED_PROVENANCE_FIELD] ?? record[LEGACY_PROVENANCE_FIELD];
-  if (typeof stamped === "boolean") return stamped;
+  // Any origin string, or the plain `true` older builds wrote. An explicit `false` is a record the
+  // trainer made that happens to collide with a seed id, and it stays theirs.
+  if (stamped === false) return false;
+  if (stamped) return true;
   return seedIdsFor(collection).has(record.id);
 }
 
@@ -91,8 +108,21 @@ export function isSeedRecord(collection, record) {
  * singletons, and stamping them in place would mark the seed data itself for the lifetime of the
  * page — including the copy a later reseed hands out.
  */
-export function stampAsSeeded(record) {
-  return { ...record, [SEED_PROVENANCE_FIELD]: true };
+export function stampAsSeeded(record, origin = DEMO_ORIGIN) {
+  return { ...record, [SEED_PROVENANCE_FIELD]: origin };
+}
+
+/** Where this record came from — `demo`, `test`, or null for a record that is nobody's seed.
+ *
+ * A record stamped by a build before the origin existed says `true`, which is honest about being
+ * seeded and silent about which kind; it is read as a demo, the older and harmless of the two,
+ * because raising the escape alarm on a database that predates the distinction would be a guess
+ * dressed as a finding. */
+export function seedOriginOf(record) {
+  const stamped = record?.[SEED_PROVENANCE_FIELD] ?? record?.[LEGACY_PROVENANCE_FIELD];
+  if (stamped === TEST_ORIGIN) return TEST_ORIGIN;
+  if (stamped === DEMO_ORIGIN || stamped === true) return DEMO_ORIGIN;
+  return null;
 }
 
 /**
@@ -129,6 +159,34 @@ export function isDemoOnlyStore(state) {
 
   const theirs = withoutSeedRecords(state);
   return COLLECTIONS.every((collection) => (theirs[collection] || []).length === 0);
+}
+
+/**
+ * Test rows sitting in the trainer's own database — the safety valve (TODO §46.7).
+ *
+ * Returns `{ count, collections }`, both empty when the store is clean. A row counts only when its
+ * stamp says `test`: those are written by `?init=demo_data_load` and belong to a test run and
+ * nothing else. Demo rows are not counted — a trainer who loaded the sample gym did so on purpose,
+ * and it lives in the sandbox.
+ *
+ * **This cannot tell you whether a test is running, and does not try.** Nothing in a browser can:
+ * the app is the same app under Playwright as under a thumb. What it reads is a fact already
+ * written down — which switch wrote this row — and the CALLER supplies the other half: the working
+ * workspace, and a boot that carries no `?init=`. A test run carries that switch on every
+ * navigation, so it never sees the alarm; a trainer's install never carries it, so a single test
+ * row shows up the moment the app opens.
+ */
+export function escapedTestRecords(state) {
+  const collections = COLLECTIONS.filter((collection) =>
+    (state?.[collection] || []).some((record) => seedOriginOf(record) === TEST_ORIGIN),
+  );
+  const count = collections.reduce(
+    (total, collection) =>
+      total +
+      (state[collection] || []).filter((record) => seedOriginOf(record) === TEST_ORIGIN).length,
+    0,
+  );
+  return { count, collections };
 }
 
 export function withoutSeedRecords(state) {

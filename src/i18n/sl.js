@@ -849,4 +849,8 @@ export const sl = {
   consent_info_body:
     "LibrePT zabeleži le, da je bila privolitev dana, in datum — nikoli fotografije, skena ali podpisa. Kot upravljavec osebnih podatkov je arhiviranje podpisanega obrazca tvoja odgovornost, dokler hraniš podatke te stranke, da lahko privolitev kadar koli dokažeš (člen 7(1) GDPR). Če stranka privolitev prekliče, tukaj izbriši njene zapise in preklic zabeleži na svojem izvodu.",
   consent_info_ack: "Razumem",
+  notif_test_data_escaped_title: "V tvojih podatkih so testni zapisi",
+  notif_test_data_escaped_desc:
+    "{count} zapisov, ki jih je ustvaril testni zagon, je shranjenih skupaj s tvojim delom, in sicer v: {collections}. Niso tvoji; ko jih odstraniš, vse, kar si ustvaril sam, ostane nedotaknjeno.",
+  notif_test_data_escaped_btn: "Odstrani testne zapise",
 };

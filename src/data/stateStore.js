@@ -50,7 +50,7 @@ import {
 } from "./recordProjections.js";
 import { LIVE_SCHEMAS } from "./recordSchemas.js";
 import { describeMigration, migrateState } from "./schemaMigrations.js";
-import { stampAsSeeded } from "./seedProvenance.js";
+import { DEMO_ORIGIN, stampAsSeeded } from "./seedProvenance.js";
 import { clearWorkspaceKeys, readVersionScoped, writeVersionScoped } from "./storageNamespace.js";
 import {
   SANDBOX,
@@ -119,12 +119,13 @@ export function stateHasData(s = state) {
 // it from the trainer's own work without inferring anything from ids. Stamping copies rather than
 // mutates: DEFAULT_* are module singletons, and marking them in place would leave the seed arrays
 // flagged for the lifetime of the page.
-export function seedMockData() {
+export function seedMockData({ origin = DEMO_ORIGIN } = {}) {
   // The demo is written in the language that is set RIGHT NOW, and stays in it (TODO §46.4). It is
   // a snapshot, not a live translation: from here on these are ordinary records the trainer may
   // edit, and rewriting them on a later language switch would throw that away. `lang` may still be
   // null here — nobody has chosen yet — and the seed's own English is then what gets written.
-  const seeded = (records) => localiseDemoRecords(records, state.lang).map(stampAsSeeded);
+  const seeded = (records) =>
+    localiseDemoRecords(records, state.lang).map((record) => stampAsSeeded(record, origin));
   state.clients = seeded(DEFAULT_CLIENTS);
   state.exercises = seeded(DEFAULT_EXERCISES);
   state.routines = seeded(DEFAULT_ROUTINES);

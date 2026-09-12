@@ -19,6 +19,7 @@ import { readVersionScoped, writeVersionScoped } from "../../data/storageNamespa
 import { isSandbox } from "../../data/workspace.js";
 import { resolveNotificationItems } from "../../domain/notificationItems.js";
 import { renderMarkupOnce } from "./dom.js";
+import { INIT_DEMO_DATA, getShareParams } from "./shareLink.js";
 
 // Schema-scoped: which notifications a PT has read is per-build state (see data/storageNamespace).
 const READ_NOTIFICATIONS_KEY = "librept_read_notifications";
@@ -301,6 +302,10 @@ export function renderNotificationArea() {
     repoUrl: deps.repoUrl || "",
     // In the sandbox this card says what the sandbox is and where the way out is (TODO §42.10).
     sandbox: isSandbox(),
+    // Whether THIS boot carries the seeding switch — not whether a test is running, which no page
+    // can know (TODO §46.7). The browser suite puts the switch on every navigation, so the escaped
+    // test-data alarm stays silent there and speaks on a trainer's install, where it never appears.
+    testRun: getShareParams().init === INIT_DEMO_DATA,
   });
   paintFeedCounts(items, t);
 
@@ -436,11 +441,20 @@ export function setupNotificationGestures() {
       const state = deps.getState?.() || {};
       // Every id currently in the feed, synthetic ones included — resolved through the same
       // function the render uses, so "mark all read" can never miss an item the feed is showing.
+      // The same options the render uses, or "mark all read" resolves a different feed from the one
+      // on screen — it would miss the sandbox's wording and invent an escaped-test-data item that
+      // the trainer was never shown.
       const ids = resolveNotificationItems(
         state,
         deps.t,
         readIds,
         deps.getSyncFailure?.() || null,
+        {
+          crashes: deps.getCrashes?.() || [],
+          repoUrl: deps.repoUrl || "",
+          sandbox: isSandbox(),
+          testRun: getShareParams().init === INIT_DEMO_DATA,
+        },
       ).map((item) => item.id);
       for (const id of ids) {
         if (!readIds.includes(id)) readIds.push(id);

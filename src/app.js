@@ -56,6 +56,7 @@ import { recordRsvp } from "./data/inviteRecord.js";
 import { rememberRoute, rememberedRoute } from "./data/lastRoute.js";
 import { newRecordId } from "./data/recordId.js";
 import { sandboxStaleness } from "./data/sandboxStaleness.js";
+import { TEST_ORIGIN } from "./data/seedProvenance.js";
 import { SESSION_INVITE, SESSION_RSVP, decodeSessionEvent } from "./data/sessionEventPayload.js";
 import {
   deleteSandboxDatabase,
@@ -340,7 +341,11 @@ async function init() {
   await ensureSandboxSeeded();
 
   if (shareInit === INIT_DEMO_DATA && !stateHasData(state)) {
-    seedMockData();
+    // Stamped as TEST rather than demo (TODO §46.7). `?init=` is the switch the browser suite puts
+    // on every navigation, and it is the only way anything reaches the WORKING database — the
+    // trainer's own. Rows written here therefore have to be identifiable afterwards: finding one on
+    // a boot without the switch is test data that escaped into the trainer's records.
+    seedMockData({ origin: TEST_ORIGIN });
     sessionsViewSeedDemo({ state: getState() });
   } else if (!stateHasData(state)) {
     localStorage.removeItem("librept_active_session");

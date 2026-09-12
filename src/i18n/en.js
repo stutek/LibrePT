@@ -902,4 +902,8 @@ export const en = {
   consent_info_body:
     "LibrePT records only that consent was given and on which date — never a photo, scan, or signature. As the data controller you are responsible for archiving the signed form yourself, for as long as you hold this client's records, so you can prove the consent if you are ever asked to. If the client withdraws consent, delete their records here and note the withdrawal on your copy.",
   consent_info_ack: "Got it",
+  notif_test_data_escaped_title: "Test records are in your data",
+  notif_test_data_escaped_desc:
+    "{count} record(s) written by a test run are stored together with your own work, in {collections}. They are not yours, and removing them leaves everything you made untouched.",
+  notif_test_data_escaped_btn: "Remove the test records",
 };
