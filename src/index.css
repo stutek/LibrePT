@@ -20,10 +20,11 @@
 
   /* Layout tokens (shared across themes) */
   --app-max-width: 480px;
-  /* 56px, down from 64 on 2026-09-12 (asked: give the content back some height). Measured first:
-     the tallest thing in the bar is the 44px logo row, so 64 was 20px of padding around a control
-     that needed none of it. 56 leaves 6px above and below — enough to breathe, and the 44px touch
-     targets are untouched. */
+  /* A FALLBACK, not the truth. applicationHeader.js measures the real bar and writes the number
+     here, because five surfaces position themselves below it (the notification area's height, the
+     clipboard overlay's top and height, the walkthrough card's offset) and they resolve their
+     calc() on the first paint, before any JavaScript has run. This value is what they use for that
+     one frame — chosen to match what the bar actually measures, so the correction is invisible. */
   --hdr-height: 56px;
   --nav-height: 70px;
   --safe-bottom: env(safe-area-inset-bottom, 0px);

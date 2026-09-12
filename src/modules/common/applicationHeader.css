@@ -4,7 +4,11 @@
    behavior (TODO index.html/index.css single-responsibility pass). */
 
 .app-header {
-  min-height: var(--hdr-height);
+  /* No height of its own: the bar is as tall as its content plus this padding, and
+     applicationHeader.js MEASURES the result into --hdr-height for the surfaces that sit below it.
+     It used to declare `min-height: var(--hdr-height)`, which made the height a promise the bar had
+     to keep — and one it stopped keeping silently whenever its content changed. */
+  padding: 6px 0;
   background: var(--card-bg);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
@@ -93,7 +97,6 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav {
   max-width: var(--app-max-width, 480px);
   margin: 0 auto;
   padding: 0 16px;
-  height: var(--hdr-height);
   display: flex;
   align-items: center;
   justify-content: space-between;

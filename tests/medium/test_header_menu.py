@@ -7,6 +7,7 @@
 
 import pytest
 
+from agent_tools import overflow_scan
 from tests.medium._harness import HEADER_STUB, load_with_stub
 
 pytestmark = pytest.mark.clean_start
@@ -217,29 +218,45 @@ def test_tapping_it_goes_home_without_letting_the_browser_leave(page, local_serv
     assert page.url == url_before, "the browser must not have followed the href"
 
 
-def test_the_bar_is_no_taller_than_what_it_holds(page, local_server):
-    """Asked 2026-09-12: give the content back some vertical space, on the desktop and on a phone.
+def test_nothing_in_the_header_breaks_out_of_it(page, local_server):
+    """The bar has no height of its own any more (2026-09-12): it is as tall as what it holds, and
+    applicationHeader.js measures the result into --hdr-height for the five surfaces below it.
 
-    Pinned as a RELATIONSHIP rather than a number, because the number is a design choice and the
-    defect is not. The bar was 65px on a phone and 77px on a desktop around a 44px logo row — 21 and
-    33 pixels of padding around a control that needed none of it. A later change that adds a taller
-    element is fine and should raise the bar with it; one that quietly puts the padding back is what
-    this catches."""
+    So the thing worth gating changed with it. The old assertion here was that the bar spent no more
+    than 14px on padding — a number I chose, guarding a number somebody else had chosen. With the
+    height DERIVED there is no number left to regress, and what remains is the property that can
+    still break: something inside the bar overflowing it, which is a text-length bug as much as a
+    layout one and shows up first in Slovenian.
+
+    Swept with agent_tools/overflow_scan.py, the same check the route walk and a hand-run diagnosis
+    use, restricted to the header — not a second geometry check written here to drift from it."""
+    load_with_stub(page, local_server, HEADER_STUB)
+    page.wait_for_selector("#app-header")
+
+    for width, height in ((390, 844), (1280, 800)):
+        page.set_viewport_size({"width": width, "height": height})
+        findings = overflow_scan.scan(page, root=".app-header")
+        assert findings == [], (
+            f"at {width}px the header cannot hold its own content: {findings}"
+        )
+
+
+def test_the_published_height_is_the_measured_one(page, local_server):
+    """Five surfaces position themselves below the bar — the notification area's height, the
+    clipboard overlay's top and height, the walkthrough card's offset — and they need a NUMBER.
+
+    They used to read one the bar was TOLD to have, which made the bar's real size and that number
+    two facts free to disagree. Now applicationHeader.js measures and publishes, so the contract is
+    that they agree. index.css still declares a value, but only as the first-paint fallback, and a
+    fallback that drifted from reality would be invisible until something landed in the wrong place."""
     load_with_stub(page, local_server, HEADER_STUB)
     page.wait_for_selector("#app-header")
 
     measured = page.evaluate(
-        """() => {
-             const bar = document.querySelector('.app-header');
-             const kids = [...document.querySelector('.header-container').children];
-             return {
-               bar: Math.round(bar.getBoundingClientRect().height),
-               tallest: Math.max(...kids.map((el) => Math.round(el.getBoundingClientRect().height))),
-             };
-           }"""
+        """() => ({
+             bar: Math.round(document.querySelector('.app-header').getBoundingClientRect().height),
+             published: getComputedStyle(document.documentElement)
+               .getPropertyValue('--hdr-height').trim(),
+           })"""
     )
-    slack = measured["bar"] - measured["tallest"]
-    assert slack <= 14, (
-        f"the header spends {slack}px on padding around its tallest element "
-        f"(bar {measured['bar']}px, content {measured['tallest']}px)"
-    )
+    assert measured["published"] == f"{measured['bar']}px", measured

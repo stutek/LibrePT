@@ -2,10 +2,13 @@
 `python -m build check` — run lint analysis and tests together without bundling dist/.
 """
 
+import atexit
 import os
 import sys
 import time
 from datetime import datetime
+
+from . import gate_lock
 from . import (
     PIPELINE_STAGES,
     check_environment,
@@ -117,8 +120,26 @@ def run_all_stages():
 
     Driven off `PIPELINE_STAGES` rather than a hand-written call list so this order and the one
     `.github/workflows/deploy.yml` enforces cannot drift apart — see that table's comment.
+
+    **The tree is fingerprinted after stage 1 and checked at the end** (build/gate_lock.py). A green
+    is a property of a TREE, not of a run: on 2026-09-12 a run passed all four stages while the tree
+    it measured had already stopped existing, and the catalog check failed against what was on disk.
+    Taken after stage 1 because the gate's own formatter rewrites files during it — a snapshot from
+    before would report those every run, and noise is how a real difference gets waved through.
     """
-    return [runner() for _, runner, _ in PIPELINE_STAGES]
+    stages = []
+    settled = None
+    for index, (_, runner, _) in enumerate(PIPELINE_STAGES):
+        stages.append(runner())
+        if index == 0:
+            settled = gate_lock.tree_fingerprint()
+
+    moved = gate_lock.movement_report(settled, gate_lock.tree_fingerprint())
+    if moved:
+        print()
+        print(moved)
+        sys.exit(1)
+    return stages
 
 
 def _finish(label, verdict, total_seconds, stage_seconds, pressure_at_start=None):
@@ -198,6 +219,13 @@ if __name__ == "__main__":
     # Before anything is printed or installed: a refusal that arrives after a minute of environment
     # setup has already wasted the minute it exists to save.
     refuse_a_pipe()
+    # One gate at a time (build/gate_lock.py). Before the header, because a refusal that arrives
+    # after a run has announced itself reads as that run failing rather than never starting.
+    holding, refusal = gate_lock.acquire()
+    if not holding:
+        print(refusal)
+        sys.exit(1)
+    atexit.register(gate_lock.release)
     # Before the environment check, not after: the header is what tells anyone watching that the run
     # started and when, and `check_environment` can itself spend a minute installing requirements.
     print_run_header(label)

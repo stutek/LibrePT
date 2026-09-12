@@ -514,8 +514,41 @@ export function renderHeaderShell() {
   );
 }
 
+/** Measure the header and publish its height for everything that sits below it.
+ *
+ * Five surfaces need a NUMBER for the top of the app: the notification area's height, the clipboard
+ * overlay's `top` and its height, and the guided walkthrough's card offset. They used to read a
+ * height the header was TOLD to have — which made the bar's real size and the number two facts that
+ * could disagree, and they did, quietly, whenever the bar's content changed.
+ *
+ * So the bar now has no height of its own (applicationHeader.css) and this reports what it turned
+ * out to be. A ResizeObserver rather than one measurement at boot: the bar grows when a badge
+ * appears, when a Slovenian label wraps, when the font loads.
+ *
+ * The same pattern sessionTimeline.js already uses for --sessions-header-sticky-top, for the same
+ * reason and with the same shape.
+ */
+let headerHeightObserver = null;
+
+export function publishHeaderHeight() {
+  const header = document.getElementById("app-header");
+  if (!header) return;
+  const write = () => {
+    const height = Math.round(header.getBoundingClientRect().height);
+    if (height > 0) {
+      document.documentElement.style.setProperty("--hdr-height", `${height}px`);
+    }
+  };
+  headerHeightObserver?.disconnect();
+  headerHeightObserver = new ResizeObserver(write);
+  headerHeightObserver.observe(header);
+  write();
+}
+
 export function setupApplicationHeader() {
   renderHeaderShell();
+  // Right after the shell exists and before anything else measures against it.
+  publishHeaderHeight();
   renderAboutDialog();
   renderTermsDialog();
 

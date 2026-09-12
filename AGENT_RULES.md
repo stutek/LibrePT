@@ -107,6 +107,19 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
   and act in the next. **And a probe before the run proves nothing about the run**: what makes a
   green gate trustworthy in a shared tree is a snapshot of every path and mtime under `src/` taken
   before AND after, compared — anything less is a green light for a tree that may not have existed.
+  **A snapshot that differs VOIDS the run; it does not annotate it.** On 2026-09-12 a session
+  reported "green on all four stages, the fingerprint differs by exactly one added path" — and that
+  path was a file whose own Stage 1 check fails deterministically. Stage 1 had simply finished before
+  it appeared. Green obtained before the tree moved is not a verdict on the tree after.
+- **The quiet tree includes `tests/`.** Deleting or renaming a test file mid-run changes what Stage 2
+  and Stage 3 collect, which is the same damage as moving a byte under `src/` and is equally outside
+  what the lock can see.
+- **A window goes in the NOTE, not only in a message.** Announced by message, two of three sessions
+  knew and the third wrote into that window in good faith — it had read the note, which said only
+  that a window would be announced. A note is read by whoever arrives next; a message reaches only
+  who was listening at the time.
+- **A refusal from the gate means WAIT, not proceed.** The lock exists to make a second run
+  impossible, not to give anyone a reason to commit without one.
 - **The note carries state, a message carries negotiation.** `ListAgents` and `SendMessage` reach a
   session that is alive and listening; the note reaches one that starts later, or one that died
   mid-edit. So on finding foreign changes, read the notes first and message second, and never let a
