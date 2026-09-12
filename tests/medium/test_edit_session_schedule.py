@@ -7,6 +7,7 @@
 
 from playwright.sync_api import expect
 
+from tests.conftest import frozen_today_iso
 from tests.medium._harness import load_with_stub, view_stub
 
 # A fixed local datetime rather than an offset from today: the expected strings then have no
@@ -207,7 +208,7 @@ def test_the_end_field_s_marks_are_the_four_session_lengths(page, local_server):
         page, local_server, setup_stub(SCHEDULED_SESSION, target_session="'s-edit'")
     )
 
-    marks = page.locator(".time-field:has(#setup-end-time) .time-field-mark")
+    marks = page.locator(".stepped-field:has(#setup-end-time) .stepped-field-mark")
     assert marks.all_text_contents() == ["14:30", "15:00", "15:30", "16:00"]
 
     marks.nth(1).click()
@@ -222,7 +223,7 @@ def test_moving_the_start_recounts_the_end_s_marks(page, local_server):
 
     page.fill("#setup-start-time", "18:00")
 
-    marks = page.locator(".time-field:has(#setup-end-time) .time-field-mark")
+    marks = page.locator(".stepped-field:has(#setup-end-time) .stepped-field-mark")
     assert marks.all_text_contents() == ["18:30", "19:00", "19:30", "20:00"]
 
 
@@ -236,7 +237,7 @@ def test_the_arrows_move_the_time_by_five_minutes_and_carry_the_hour(
         page, local_server, setup_stub(SCHEDULED_SESSION, target_session="'s-edit'")
     )
 
-    steps = page.locator(".time-field:has(#setup-start-time) .time-field-step")
+    steps = page.locator(".stepped-field:has(#setup-start-time) .stepped-field-step")
     steps.nth(0).click()
     assert page.input_value("#setup-start-time") == "14:05"
 
@@ -263,3 +264,70 @@ def test_a_half_typed_time_does_not_wipe_the_end_of_the_slot(page, local_server)
     page.locator("#setup-start-time").press_sequentially("30")
     assert page.input_value("#setup-start-time") == "17:30"
     assert page.input_value("#setup-end-time") == "19:00"
+
+
+# ── The date field (src/modules/common/dateField.js) ───────────────────────────────────────────
+
+
+def test_the_day_is_shown_in_the_form_it_is_stored_in(page, local_server):
+    """The promise: one written date, ISO, whatever the phone is set to.
+
+    `<input type="date">` draws its value through the browser's locale, so the twelfth of September
+    reads as 09/12/2026 on a device set to English (US) and 12.09.2026 on one set to Slovenian — and
+    a date read the wrong way round puts a session three months away with nothing on screen to say
+    so. The field now shows exactly the string the app stores (AGENT_RULES.md).
+    """
+    load_with_stub(
+        page, local_server, setup_stub(SCHEDULED_SESSION, target_session="'s-edit'")
+    )
+
+    field = page.locator("#setup-session-date")
+    assert field.get_attribute("type") == "text"
+    assert field.evaluate("el => el.value") == SESSION_DATE
+
+
+def test_a_typed_day_is_read_against_the_day_on_screen(page, local_server):
+    """Two digits are a day in the month already shown — the common edit is "same week, Thursday
+    instead", and asking for eight digits to move by two days is how a form gets abandoned."""
+    load_with_stub(
+        page, local_server, setup_stub(SCHEDULED_SESSION, target_session="'s-edit'")
+    )
+
+    page.click("#setup-session-date")
+    page.locator("#setup-session-date").press_sequentially("17")
+    page.locator("#setup-location").click()
+    assert page.input_value("#setup-session-date") == "2026-09-17"
+
+    page.click("#setup-session-date")
+    page.locator("#setup-session-date").press_sequentially("20261102")
+    assert page.input_value("#setup-session-date") == "2026-11-02"
+
+
+def test_the_day_marks_are_today_tomorrow_and_the_two_days_after(page, local_server):
+    """Named, not four ISO strings: a row of dates the trainer has to decode is no faster than typing
+    one. Counted from the CLOCK, so they are the days a session is actually being booked for."""
+    load_with_stub(
+        page, local_server, setup_stub(SCHEDULED_SESSION, target_session="'s-edit'")
+    )
+
+    marks = page.locator(".stepped-field:has(#setup-session-date) .stepped-field-mark")
+    labels = marks.all_text_contents()
+    assert labels[:2] == ["today", "tomorrow"]
+    assert len(labels) == 4
+
+    marks.nth(0).click()
+    assert page.input_value("#setup-session-date") == frozen_today_iso()
+
+
+def test_the_arrows_move_the_day_by_one(page, local_server):
+    """One day a tap, so "we moved it to Wednesday" is one control and not a retyped date."""
+    load_with_stub(
+        page, local_server, setup_stub(SCHEDULED_SESSION, target_session="'s-edit'")
+    )
+
+    steps = page.locator(".stepped-field:has(#setup-session-date) .stepped-field-step")
+    steps.nth(0).click()
+    assert page.input_value("#setup-session-date") == "2026-09-16"
+    steps.nth(1).click()
+    steps.nth(1).click()
+    assert page.input_value("#setup-session-date") == "2026-09-14"

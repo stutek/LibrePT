@@ -155,11 +155,14 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
   everything in the sandbox*, never *everything in the sandbox goes* — which asks the reader who is
   going where. A destructive act says which word it means.
 - Never put meaning only in a hover; touch targets need real padding.
-- **A time is entered in 24-hour form everywhere**, and the format is the app's decision, never the
-  device's: `<input type="time">` and `toLocaleTimeString` both ask the phone, so a Slovenian app on
-  a US-set phone asks for AM/PM and can book an evening session in the morning. Entry goes through
-  `modules/common/timeField.js`, display through `formatClockFromMinutes`/`formatClockFromEpoch`; a
-  12-hour reading is at most a setting on that one seam, never a second field.
+- **A time is 24-hour and a date is ISO, everywhere, in every language**, and the written form is
+  the app's decision rather than the device's. `<input type="time">`, `<input type="date">` and
+  `toLocaleTimeString` all ask the PHONE: a Slovenian app on a US-set phone asks for AM/PM and shows
+  09/12/2026 for the twelfth of September, so an evening session can be saved in the morning and a
+  session three months away looks right. Entry goes through `modules/common/timeField.js` and
+  `dateField.js` (both on `steppedField.js`), display through `formatClockFromMinutes` /
+  `formatClockFromEpoch`. A local reading is at most a setting on those seams, never a second field —
+  and a locale passed to `toLocaleDateString` must be the APP's language, never the device default.
 - Support surfaces carry the commit SHA, with richer identity one tap away. Code version and
   data-schema version stay separate axes.
 

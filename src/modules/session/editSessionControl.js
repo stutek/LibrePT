@@ -32,6 +32,7 @@ import {
 } from "../../domain/sessionRecord.js";
 import { seriesWithEdit, validateSeries } from "../../domain/sessionSeries.js";
 import { clockToMinutes, parseTimeRange, timePlusMinutes } from "../../domain/timeRange.js";
+import { mountDateField } from "../common/dateField.js";
 import { mountTimeField } from "../common/timeField.js";
 import { formatClockFromEpoch } from "../common/utils.js";
 import {
@@ -133,15 +134,21 @@ function collectSelectedClientRoutines() {
 // until they say otherwise. Dragging a start back to 06:00 used to leave the end behind, and a
 // session whose end is at or before its start has no length at all: the warning list then read the
 // whole day as taken (domain/scheduleConflicts.js), and the saved slot was wrong too.
-// 24-hour entry, marks and steppers around both slot fields (modules/common/timeField.js). The end
-// field's marks count from the START rather than from the clock: its four half hours are then the
-// four session lengths a trainer actually books.
-function mountEditSessionTimeFields() {
+// The app's own entry controls around all four of the form's date and time fields
+// (modules/common/timeField.js, dateField.js) — 24-hour times and ISO days, whatever the phone is
+// set to. The END time's marks count from the START rather than from the clock: its four half hours
+// are then the four session lengths a trainer actually books.
+function mountEditSessionSlotFields() {
   const startInput = document.getElementById("setup-start-time");
   const endInput = document.getElementById("setup-end-time");
   const t = deps?.t;
+  const lang = deps?.getState?.()?.lang || "en";
   mountTimeField(startInput, { t });
   mountTimeField(endInput, { t, anchorInput: startInput });
+  mountDateField(document.getElementById("setup-session-date"), { t, lang });
+  // The repeating slot's last day. Mounted with the rest even though its row starts hidden: it is
+  // shown by a class, not rebuilt, so there is no later moment to mount it at.
+  mountDateField(document.getElementById("setup-repeat-until"), { t, lang });
 }
 
 function keepSessionLengthWhenStartMoves() {
@@ -1028,7 +1035,7 @@ export function openEditSessionControlModal(
   // After the fields are filled, not at boot: the end field's marks are counted from the start
   // field's value, and at boot there is not one yet. Mounting is idempotent, so each open re-reads
   // the clock and re-labels the controls in the language now in force.
-  mountEditSessionTimeFields();
+  mountEditSessionSlotFields();
 
   refreshScheduleConflictNotice();
 

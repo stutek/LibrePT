@@ -1,5 +1,6 @@
-/* modules/common/timeField.css — the app's 24-hour time entry control (timeField.js owns its
-   behaviour and builds everything below the `.form-control` itself).
+/* modules/common/steppedField.css — the skin both of the app's own entry fields wear: the 24-hour
+   time field and the ISO date field (steppedField.js builds everything around the `.form-control`,
+   timeField.js and dateField.js decide what the value means).
 
    Two claims this file makes on purpose:
    - The digits are BIG and monospaced. This field is read at arm's length on a gym floor, and a
@@ -7,16 +8,17 @@
      already checked once moves when it changes.
    - The marks wrap themselves. They sit in a third of the setup form's row on a phone, so the row
      is `auto-fit` rather than four fixed columns: four across where there is room, two by two where
-     there is not, and never a chip squeezed past reading. */
+     there is not, and never a mark squeezed past reading. A date mark ("tor 15.") is wider than a
+     time one, so the minimum column is set by the longer of the two. */
 
-.time-field {
+.stepped-field {
   display: flex;
   flex-direction: column;
   gap: 6px;
   min-width: 0;
 }
 
-.time-field-dial {
+.stepped-field-row {
   display: flex;
   align-items: stretch;
   gap: 6px;
@@ -24,7 +26,7 @@
 }
 
 /* The input keeps .form-control's colours and border; only its type size and rhythm change here. */
-.time-field-dial .form-control {
+.stepped-field-row .form-control {
   flex: 1;
   min-width: 0;
   height: 56px;
@@ -35,7 +37,15 @@
   padding: 0 4px;
 }
 
-.time-field-steps {
+/* An ISO date is ten characters where a time is five, and the setup form gives the date field a
+   third of a phone's width. Sized down here rather than by shrinking both: the time is the value
+   read across a gym, and it keeps the larger type. */
+.stepped-field--date .form-control {
+  font-size: 1.15rem;
+  letter-spacing: 0.04em;
+}
+
+.stepped-field-steps {
   display: flex;
   flex-direction: column;
   width: 44px;
@@ -43,7 +53,7 @@
   gap: 4px;
 }
 
-.time-field-step {
+.stepped-field-step {
   flex: 1;
   min-height: 26px;
   display: flex;
@@ -57,19 +67,19 @@
   cursor: pointer;
 }
 
-.time-field-step:active {
+.stepped-field-step:active {
   background: var(--primary-light);
   border-color: var(--primary);
 }
 
-.time-field-marks {
+.stepped-field-marks {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(58px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));
   gap: 4px;
   min-width: 0;
 }
 
-.time-field-mark {
+.stepped-field-mark {
   min-height: 36px;
   padding: 4px 2px;
   background: var(--input-bg);
@@ -83,7 +93,7 @@
   cursor: pointer;
 }
 
-.time-field-mark:active {
+.stepped-field-mark:active {
   background: var(--primary-light);
   border-color: var(--primary);
   color: var(--text-main);

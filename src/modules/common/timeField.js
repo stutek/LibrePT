@@ -21,13 +21,14 @@
 //      to hit with a thumb.
 //
 // **The `<input>` stays THE value.** Same id, same `required`, still "HH:MM" — every caller, draft
-// and test reads it exactly as before (`page.fill("#setup-start-time", "17:30")` still works). This
-// module only puts controls around it and normalises what is typed into it.
+// and test reads it exactly as before (`page.fill("#setup-start-time", "17:30")` still works).
 //
-// deps: `t` per mount — every control here is a glyph or a bare number, so each one carries a
-// spoken label rather than a shape alone.
+// The wrapper, the arrows and the mark row belong to steppedField.js, shared with the date field.
+// What lives here is the four answers that make this one a CLOCK: how digits are read, what one step
+// moves, which marks are offered, and what the arrows are called out loud.
 
 import { clockToMinutes, nextClockMarks } from "../../domain/timeRange.js";
+import { SteppedField, mountSteppedField } from "./steppedField.js";
 import { formatClockFromEpoch } from "./utils.js";
 
 const MINUTE_STEP = 5;
@@ -76,154 +77,70 @@ export function normalizeClockEntry(raw) {
   );
 }
 
-// Every programmatic write announces itself, because the form around this field listens: the draft
-// autosave, the double-booking readout, and the rule that moves the end time when the start moves
-// all hang off `input`/`change` on this very element.
-function writeValue(input, value) {
-  if (input.value === value) return;
-  input.value = value;
-  input.dispatchEvent(new Event("input", { bubbles: true }));
-  input.dispatchEvent(new Event("change", { bubbles: true }));
-}
-
-function stepBy(input, deltaMinutes, anchorClock) {
-  const base = clockToMinutes(input.value) ?? clockToMinutes(anchorClock()) ?? 0;
-  writeValue(input, clockFromMinutes(base + deltaMinutes));
-}
-
-function makeButton(className, label) {
-  const button = document.createElement("button");
-  // Inside a form, and a button with no type submits it — here that would save the session on the
-  // way to picking its time.
-  button.type = "button";
-  button.className = className;
-  button.setAttribute("aria-label", label);
-  return button;
-}
-
-function makeGlyphButton(className, label, glyph) {
-  const button = makeButton(className, label);
-  const icon = document.createElement("i");
-  icon.className = `fa-solid ${glyph}`;
-  button.appendChild(icon);
-  return button;
-}
-
-function buildChrome(input) {
-  const wrap = document.createElement("div");
-  wrap.className = "time-field";
-  input.parentNode.insertBefore(wrap, input);
-
-  const dial = document.createElement("div");
-  dial.className = "time-field-dial";
-  wrap.appendChild(dial);
-  dial.appendChild(input);
-
-  const steps = document.createElement("div");
-  steps.className = "time-field-steps";
-  dial.appendChild(steps);
-
-  const marks = document.createElement("div");
-  marks.className = "time-field-marks";
-  wrap.appendChild(marks);
-
-  return { wrap, steps, marks };
-}
-
-/** Turn `input` into the app's time field: 24-hour, typed or tapped, never AM/PM.
- *
- * `anchorInput` is the field the marks are counted from — the start field for an end field. With
- * none, they are counted from the clock, and recounted whenever the field is reached for, so a form
- * left open over a break does not offer times that have passed. */
-export function mountTimeField(input, { t, anchorInput = null } = {}) {
-  if (!input) return;
-  const label = (key) => (typeof t === "function" ? t(key) : key);
-  const anchorClock = () =>
-    anchorInput && clockToMinutes(anchorInput.value) !== null
-      ? anchorInput.value
-      : formatClockFromEpoch(Date.now());
-
-  const mounted = input.closest(".time-field");
-  const { wrap, steps, marks } = mounted
-    ? {
-        wrap: mounted,
-        steps: mounted.querySelector(".time-field-steps"),
-        marks: mounted.querySelector(".time-field-marks"),
-      }
-    : buildChrome(input);
-
-  input.type = "text";
-  input.inputMode = "numeric";
-  input.autocomplete = "off";
-  input.maxLength = 5;
-
-  // The four chips are built ONCE and only their text is re-read afterwards. Rebuilding them was a
-  // control that ignored the first tap: `focusin` fires on the way down, so the chip a finger had
-  // already landed on was removed from the page before the tap could complete, and nothing happened
-  // until the field was tapped a second time.
-  const renderMarks = () => {
-    const values = nextClockMarks(anchorClock(), MARK_COUNT);
-    for (const [index, chip] of [...marks.children].entries()) {
-      const mark = values[index] || "";
-      chip.textContent = mark;
-      chip.setAttribute("aria-label", label("time_field_set").replace("{time}", mark));
-      chip.hidden = !mark;
-    }
-  };
-
-  if (!mounted) {
-    for (let index = 0; index < MARK_COUNT; index += 1) {
-      const chip = makeButton("time-field-mark", "");
-      // Reads its own face at the moment it is tapped: the clock moves under a form left open, and a
-      // chip that set the time it was BUILT with would quietly set a time it no longer shows.
-      chip.addEventListener("click", () => writeValue(input, chip.textContent));
-      marks.appendChild(chip);
-    }
-
-    const later = makeGlyphButton("time-field-step", label("time_field_later"), "fa-chevron-up");
-    later.addEventListener("click", () => stepBy(input, MINUTE_STEP, anchorClock));
-    const earlier = makeGlyphButton(
-      "time-field-step",
-      label("time_field_earlier"),
-      "fa-chevron-down",
-    );
-    earlier.addEventListener("click", () => stepBy(input, -MINUTE_STEP, anchorClock));
-    steps.append(later, earlier);
-
-    // Select on focus: a tap means "I am setting this time", not "let me edit its third digit".
-    input.addEventListener("focus", () => input.select());
-    // While four digits are still arriving the field holds what was typed; the moment the fourth
-    // lands it is a time. Typing into a field already holding "17:30" starts over, because the
-    // focus handler selected it.
-    input.addEventListener("input", () => {
-      const digits = input.value.replace(/\D/g, "");
-      // Through writeValue, not a bare assignment: the listeners that pair the end time to the start
-      // one have ALREADY seen this keystroke, and what they saw was "1730" — four digits, not a time
-      // they can read. Without a second event carrying the finished value, the end of the slot stays
-      // where it was and the trainer's 90-minute session silently becomes a 15-minute one.
-      // Re-entrant by one round only: the value it writes is already normalised, so the next pass
-      // finds nothing to change.
-      if (digits.length === 4) writeValue(input, clockFromDigits(digits));
-    });
-    // Leaving the field settles whatever is in it — including three digits, which are a time this
-    // module can read but `parseTimeRange` cannot.
-    const settle = () => {
-      const settled = normalizeClockEntry(input.value);
-      if (settled && settled !== input.value) writeValue(input, settled);
-    };
-    input.addEventListener("blur", settle);
-    // Enter submits the form from inside the field, so the value has to be a time before it does.
-    input.addEventListener("keydown", (event) => {
-      if (event.key === "Enter") settle();
-    });
-    // The marks are the next half hours from NOW; the clock moves while the form is open.
-    wrap.addEventListener("focusin", renderMarks);
-    anchorInput?.addEventListener("input", renderMarks);
-  } else {
-    for (const [index, key] of ["time_field_later", "time_field_earlier"].entries()) {
-      steps.children[index]?.setAttribute("aria-label", label(key));
-    }
+class TimeField extends SteppedField {
+  constructor(input, options = {}) {
+    super(input, options);
+    this.configure(options);
   }
 
-  renderMarks();
+  /** `anchorInput` is the field the marks are counted from — the start field, for an end field. With
+   * none, they are counted from the clock and recounted whenever this field is reached for, so a
+   * form left open over a break does not offer times that have already passed. */
+  configure({ anchorInput = null } = {}) {
+    this.anchorInput = anchorInput;
+  }
+
+  bind() {
+    super.bind();
+    // An end field's marks are counted from the start field, so they are recounted when the START
+    // moves — not only when this field is reached for. Bound once, to the element named at mount:
+    // nothing in the app swaps one field's anchor for another while it is on screen.
+    this.anchorInput?.addEventListener("input", () => this.renderMarks());
+  }
+
+  get maxLength() {
+    return 5;
+  }
+
+  get kindClass() {
+    return "stepped-field--time";
+  }
+
+  get arrowLabelKeys() {
+    return { later: "time_field_later", earlier: "time_field_earlier" };
+  }
+
+  markLabel(mark) {
+    return this.label("time_field_set").replace("{time}", mark.label);
+  }
+
+  anchorClock() {
+    const anchor = this.anchorInput?.value;
+    return clockToMinutes(anchor) !== null ? anchor : formatClockFromEpoch(Date.now());
+  }
+
+  normalize(raw) {
+    return normalizeClockEntry(raw);
+  }
+
+  // While four digits are still arriving the field holds what was typed; the moment the fourth lands
+  // it is a time. Typing into a field already holding "17:30" starts over, because the focus handler
+  // selected it.
+  liveValue(raw) {
+    const digits = String(raw || "").replace(/\D/g, "");
+    return digits.length === 4 ? clockFromDigits(digits) : null;
+  }
+
+  stepped(value, direction) {
+    const base = clockToMinutes(value) ?? clockToMinutes(this.anchorClock()) ?? 0;
+    return clockFromMinutes(base + direction * MINUTE_STEP);
+  }
+
+  marks() {
+    return nextClockMarks(this.anchorClock(), MARK_COUNT).map((value) => ({ value, label: value }));
+  }
+}
+
+export function mountTimeField(input, options = {}) {
+  return mountSteppedField(TimeField, input, options);
 }

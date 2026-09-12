@@ -11,7 +11,7 @@
 // atomic version. The worker's own sub-scripts (sw.js + this sw/ folder) are deliberately NOT in ASSETS:
 // they are the worker's script resources, kept coherent by the browser's own SW-update mechanism.
 self.swCacheManifest = (() => {
-  const CACHE_NAME = "librept-v123";
+  const CACHE_NAME = "librept-v125";
   const ASSETS = [
     "./",
     "./index.html",
@@ -57,7 +57,7 @@ self.swCacheManifest = (() => {
     "./modules/common/activeUsersList.css",
     "./modules/common/applicationHeader.css",
     "./modules/common/notificationArea.css",
-    "./modules/common/timeField.css",
+    "./modules/common/steppedField.css",
     "./modules/common/backupRestore.css",
     "./modules/common/driveSyncUi.css",
     "./modules/common/buildInfoDialog.css",
@@ -136,6 +136,8 @@ self.swCacheManifest = (() => {
     "./modules/common/feedbackModal.js",
     "./modules/common/feedbackRouteDialog.js",
     "./modules/common/notificationArea.js",
+    "./modules/common/dateField.js",
+    "./modules/common/steppedField.js",
     "./modules/common/timeField.js",
     "./modules/common/trainerDetailsDialog.js",
     "./modules/common/populateDropdownSelectors.js",
@@ -155,6 +157,7 @@ self.swCacheManifest = (() => {
     "./data/inviteRecord.js",
     "./data/signupFile.js",
     "./data/clients.js",
+    "./data/demoText.js",
     "./data/routines.js",
     "./data/history.js",
     "./data/planUpdates.js",

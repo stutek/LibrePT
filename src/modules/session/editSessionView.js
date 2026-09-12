@@ -57,7 +57,7 @@ export function renderEditSessionView(targetElement) {
           <div class="grid grid-3-col gap-2 mb-3">
             <div>
               <label for="setup-session-date" data-i18n="label_session_date">Date *</label>
-              <input type="date" id="setup-session-date" class="form-control" required>
+              <input type="text" id="setup-session-date" class="form-control" required>
             </div>
             <div>
               <label for="setup-start-time" data-i18n="label_start_time">Start Time *</label>
@@ -82,7 +82,7 @@ export function renderEditSessionView(targetElement) {
               <p id="setup-repeat-days-label" class="text-sm text-muted m-0" data-i18n="label_repeat_days">On these days</p>
               <div id="setup-repeat-days" class="setup-repeat-days"></div>
               <label for="setup-repeat-until" class="text-sm" data-i18n="label_repeat_until">Until (optional)</label>
-              <input type="date" id="setup-repeat-until" class="form-control">
+              <input type="text" id="setup-repeat-until" class="form-control">
             </div>
           </div>
 

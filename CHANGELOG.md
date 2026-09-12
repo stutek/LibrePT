@@ -24,6 +24,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Added
 
+- **And for a day in its own field, written the one way that means the same everywhere: 2026-09-12.**
+  `<input type="date">` is drawn by the PHONE too, so the twelfth of September read as 09/12/2026 on a
+  device set to English (US) — a date read the wrong way round puts a session three months away and
+  nothing on screen says so. The field now shows exactly what the app stores, and the digits typed into
+  it are read against the day already on screen: eight are a whole date, four are a month and a day in
+  the year shown, and **two are a day in the month shown**, so "same week, Thursday instead" is two
+  keystrokes. Under it are today, tomorrow and the two days after by name, and the arrows move one day.
+  On a client's consent, withdrawal and erasure dates the same four marks run BACKWARDS — those record
+  a day that has already happened. There is no month grid: a date further out is typed, and the app's
+  one calendar belongs to the board's filters, where a future picker should be lifted from rather than
+  written a second time.
 - **The app now asks for a time in its own field, 24-hour, never AM/PM.** `<input type="time">` draws
   in the PHONE's language, not the app's: a trainer running LibrePT in Slovenian on a phone set to
   English (US) was asked for "5:30 PM", and no attribute overrides that. Twelve-hour entry also lets a

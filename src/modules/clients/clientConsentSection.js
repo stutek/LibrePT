@@ -31,6 +31,7 @@ import {
   consentSmsHref,
   resolveConsentLang,
 } from "../common/consentForm.js";
+import { mountDateField } from "../common/dateField.js";
 import { $id, closeModal, openModal, renderMarkupOnce } from "../common/dom.js";
 
 let translate = (_key, fallback) => fallback;
@@ -62,13 +63,13 @@ export function consentSectionMarkup() {
 
         <div class="form-group consent-date-group" id="client-consent-date-group" hidden>
           <label for="client-consent-date" id="label-client-consent-date">Date signed</label>
-          <input type="date" id="client-consent-date" class="form-control">
+          <input type="text" id="client-consent-date" class="form-control">
           <p class="consent-meta" id="client-consent-version"></p>
         </div>
 
         <div class="form-group consent-date-group" id="client-withdrawn-date-group" hidden>
           <label for="client-withdrawn-date" id="label-client-withdrawn-date">Date withdrawn</label>
-          <input type="date" id="client-withdrawn-date" class="form-control">
+          <input type="text" id="client-withdrawn-date" class="form-control">
           <p class="consent-meta" id="client-withdrawn-note"></p>
         </div>
 
@@ -119,6 +120,18 @@ export function renderConsentInfoDialog() {
 
 export function setupClientConsentSection() {
   renderConsentInfoDialog();
+
+  // The app's own day control (modules/common/dateField.js), ISO in every language — the browser's
+  // own field would draw 09/12/2026 on a phone set to English (US), and a consent dated the wrong
+  // way round is a record about a person that says something untrue. Both marks run BACKWARDS: a
+  // consent was given, and a withdrawal was made, on a day that has already happened.
+  for (const id of ["client-consent-date", "client-withdrawn-date"]) {
+    mountDateField($id(id), {
+      t: (key) => translate(key, key),
+      lang: readUiLang() || "en",
+      past: true,
+    });
+  }
 
   const checkbox = $id("client-gdpr-consent");
   if (checkbox) checkbox.addEventListener("change", () => syncConsentDateVisibility());

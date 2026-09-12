@@ -29,6 +29,7 @@ import {
   withSuppressedClient,
   writeSuppressionList,
 } from "../../data/erasureSuppression.js";
+import { mountDateField } from "../common/dateField.js";
 import { $id, closeModal, openModal, renderMarkupOnce } from "../common/dom.js";
 import { downloadFile } from "../common/download.js";
 import { escapeHTML } from "../common/utils.js";
@@ -102,7 +103,7 @@ export function renderDataRightsDialogs() {
 
       <div class="form-group">
         <label for="client-erase-requested">Date they asked</label>
-        <input type="date" id="client-erase-requested" class="form-control">
+        <input type="text" id="client-erase-requested" class="form-control">
       </div>
 
       <div class="form-group">
@@ -279,6 +280,14 @@ function renderReceipt(summary, checklist, client) {
 
 export function setupClientDataRights() {
   renderDataRightsDialogs();
+
+  // The app's own day control (modules/common/dateField.js): ISO in every language, and its marks
+  // run backwards, because the day an erasure was ASKED FOR is one that has already happened.
+  mountDateField($id("client-erase-requested"), {
+    t: (key) => deps?.t?.(key) || key,
+    lang: deps?.getState?.()?.lang || "en",
+    past: true,
+  });
 
   for (const dialogId of ["dialog-client-export", "dialog-client-erase"]) {
     const dialog = $id(dialogId);
