@@ -4055,3 +4055,42 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#466-x-decided-t
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#467-x-the-stamp-says-which-kind-and-the-app-notices-when-test-data-escapes-shipped-2026-09-12); what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
+
+## 47. Reported 2026-09-12 — what the tests do not catch, and how the app should say so
+
+Simon sent a screenshot of the sandbox: the session title on the card runs past the card's right
+edge and under the ▶ and ⋮ buttons. His verdict was about more than the title — **catching defects
+in the test phase is not enough.** A build that only reports what a test thought to look for is
+blind to everything else, on every phone that is not this one.
+
+### 47.1 [ ] The session title runs off the card
+
+Seen in the sandbox on a long title ("Group Strength & Conditioning + 1:1 Personal Training…"): the
+heading on the session card is not clipped, not wrapped and not shortened, so it crosses the card's
+right edge and disappears under the two round buttons.
+
+[agent_tools/overflow_scan.py](agent_tools/overflow_scan.py) exists for exactly this class of defect
+and did not report it. **Why it missed is not yet established** — it may be that the element does not
+clip (invariant B only looks at elements that clip), that it does not intersect its clipping
+boundary (invariant A only reports an element that sticks OUT of its box), or simply that the screen
+in the screenshot is not one the sweep visits. That question is the first half of the work; the
+title is the second. Fixing only the title leaves the scanner blind to the next one.
+
+### 47.2 [ ] The app catches its own errors, writes a log, and can send a bug report
+
+Asked 2026-09-12. Three pieces, in this order:
+
+- **Catch.** One place that hears what the app does not survive: `window.onerror`, an unhandled
+  promise rejection, a failed IndexedDB write, a render that throws. Today these reach the browser
+  console and nowhere else, and nobody on a gym floor has a console open.
+- **Write.** A log on the device, with the same rules as everything else here: it stays on the
+  phone, it is capped so it cannot grow without limit, and it holds no client's name or any other
+  personal detail — the point is what broke and where, not who it happened to.
+- **Report.** A way to hand that log over: the trainer taps one control, sees what would be sent,
+  and sends or cancels. It carries the commit SHA and the data-schema version, which is what makes a
+  report answerable at all.
+
+**Open questions, to settle before code:** where the report GOES (a GitHub issue, an e-mail, a file
+the trainer sends themselves — the app is offline-first and has no server of its own); whether the
+log survives a reset of the sandbox; and whether a crash is shown to the trainer as it happens or
+only collected quietly.
