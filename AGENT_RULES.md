@@ -89,6 +89,11 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
   progress, and every file you take exclusively. A file another note claims is not yours — take
   other work or ask. **Delete the note in the same turn as the commit**; a stale note locks files
   nobody holds.
+- **A gate needs a QUIET TREE for its whole run, not merely a free slot.** The dev server computes
+  the integrity catalog live from `src/`, so a file written mid-run changes its hash under the
+  service worker and the app comes up behind the blocking *App verification failed* overlay — which
+  then fails whatever tests happen to be running, naming none of the cause. Seven unrelated e2e
+  tests, 2026-09-12. Say in your note when a run starts, and hold edits to `src/` until it ends.
 - **The note carries state, a message carries negotiation.** `ListAgents` and `SendMessage` reach a
   session that is alive and listening; the note reaches one that starts later, or one that died
   mid-edit. So on finding foreign changes, read the notes first and message second, and never let a
@@ -106,6 +111,12 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
   holds the last duration, so that is a time, not "a few minutes"; the run's own header prints the
   same estimate. Prose-only commits run `.venv/bin/python -m agent_tools.doclinks` instead, and
   say so.
+- **Run the checks your change can break BEFORE the gate**, one at a time: `pytest <file>`,
+  `node --test <file>`, and the `agent_tools.*` check that owns the rule — a theme calls for contrast
+  and palette parity, a new module for catalog coverage and doclinks, a new icon for coverage and the
+  render baseline, new user-visible text for `ui_strings`, a closed `§` for `todo_hygiene`. The gate
+  PROVES a tree; it is not where facts are discovered. Five minutes spent learning a two-second fact
+  is the maintainer's time, and the same five minutes blocks every other agent in the tree.
 - Zero warnings, not just zero failures; never swallow a non-zero exit code. Never silence a
   failure, re-run it away or call it flaky — read the digest in `.build-reports/`.
 - Blame a slow stage on the run header before the change; a detected time jump means the machine

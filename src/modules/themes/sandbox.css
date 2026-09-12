@@ -1,5 +1,5 @@
-/* themes/sandbox.css — the SANDBOX's own skin: warm orange on a dark ember field, plus a frame
-   around the whole app (asked 2026-09-11).
+/* themes/sandbox.css — the SANDBOX's own skin: a white field with orange accents, plus a frame
+   around the whole viewport (asked 2026-09-11; moved onto a light field 2026-09-12).
 
    **Not a theme the trainer can choose, and that is the point.** Every other file in this folder is
    an option in the ☰ menu; this one is a STATE. It is worn because of where the trainer is, and it
@@ -16,47 +16,52 @@
    and go back the moment it is removed. Nothing is persisted, and the trainer's own choice is never
    written over: leaving the sandbox simply stops this file from applying.
 
-   Dark on purpose. The contrast gate (tests/unit/test_theme_contrast.py) asks muted text for 6:1 on
-   both the card and the field behind it — headroom the three dark palettes carry and the two light
-   ones barely do, and an orange field is exactly the kind of tinted surface that spends it. */
+   **The field is white, like Daylight** (asked 2026-09-12): the orange is in the accents, not under
+   the text. That SPENDS contrast headroom rather than saving it — tests/unit/test_theme_contrast.py
+   asks muted text for 6:1 on both the card and the field behind it, and the two light palettes are
+   the ones that historically struggled there. So the muted tone below is a deep warm brown rather
+   than the mid amber the palette invites, and it is held there by that gate rather than by eye. */
 body.in-sandbox {
-  --bg-color: #1b0e03;
-  --bg-gradient: radial-gradient(
-      1000px 700px at 10% -10%,
-      rgba(249, 115, 22, 0.45),
-      transparent 58%
-    ), radial-gradient(820px 560px at 110% 6%, rgba(251, 191, 36, 0.14), transparent 55%),
-    linear-gradient(180deg, #2a1605 0%, #140a02 100%);
-  --card-bg: rgba(63, 33, 8, 0.9);
-  --card-border: rgba(255, 237, 213, 0.16);
+  --bg-color: #fffaf5;
+  --bg-gradient: radial-gradient(1000px 700px at 8% -10%, rgba(249, 115, 22, 0.16), transparent 60%),
+    radial-gradient(920px 640px at 112% -2%, rgba(251, 191, 36, 0.18), transparent 55%),
+    linear-gradient(180deg, #ffffff 0%, #fff4e8 100%);
+  --card-bg: rgba(255, 255, 255, 0.96);
+  --card-border: rgba(124, 45, 18, 0.12);
   --timer-warn-peak-color: color-mix(in srgb, #f59e0b 35%, var(--card-bg));
-  --text-main: #fff7ed;
-  --text-muted: #f4c893;
-  --border-color: #7c3d0c;
-  --input-bg: #3a1e05;
-  --primary: #f97316; /* orange-500 */
-  --primary-hover: #ea580c;
-  --primary-light: rgba(249, 115, 22, 0.24);
-  --primary-gradient: linear-gradient(135deg, #fb923c 0%, #c2410c 100%);
-  --on-primary: #1b0e03; /* dark ink on a bright orange fill reads better than white does */
-  --secondary: #fb923c;
-  --secondary-hover: #f97316;
-  --secondary-light: rgba(251, 146, 60, 0.2);
-  --accent-cyan: #fcd34d; /* amber highlight, kept inside the warm family */
-  /* Red would be a third orange here and would stop reading as a warning, so danger goes to the one
-     hue this palette does not otherwise use. */
-  --danger: #f87171;
-  --danger-hover: #ef4444;
-  --danger-light: rgba(248, 113, 113, 0.18);
-  --success: #4ade80;
-  --success-hover: #22c55e;
-  --warning: #fcd34d;
-  /* Past cool, future warm — the same pairing every theme makes, held off the orange primary. */
-  --temporal-past: #c4b5fd;
-  --temporal-future: #fdba74;
-  --cloud-icon-color: #ffffff;
-  --cloud-arrows-color: #15803d;
-  --box-shadow: 0 14px 30px -14px rgba(0, 0, 0, 0.65);
+  --text-main: #2b1505;
+  /* A deep warm brown, not a mid amber. This token is every secondary line in the app — timestamps,
+     hints, the target under an exercise name — and on a white field an orange one lands near 3:1,
+     under the 4.5:1 a paragraph needs and far under the 6:1 the gate asks so a component may tint
+     the surface beneath it. */
+  --text-muted: #7c2d12; /* orange-900 */
+  --border-color: #fed7aa; /* orange-200 */
+  --input-bg: #ffffff;
+  /* orange-700, not one of the bright oranges: white button labels sit on this, and #f97316 cannot
+     carry them. Same "-700 on a light field" step Daylight makes for its own primary. */
+  --primary: #c2410c;
+  --primary-hover: #9a3412;
+  --primary-light: rgba(194, 65, 12, 0.12);
+  --primary-gradient: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+  --on-primary: #ffffff;
+  --secondary: #b45309; /* amber-700 — a second warm tone, clearly apart from the primary */
+  --secondary-hover: #92400e;
+  --secondary-light: rgba(180, 83, 9, 0.12);
+  --accent-cyan: #0e7490; /* one cool accent, so a highlight is not a third orange */
+  /* A deep red rather than red-600: on an orange app a mid red starts reading as another accent
+     instead of as a warning. */
+  --danger: #b91c1c;
+  --danger-hover: #991b1b;
+  --danger-light: rgba(185, 28, 28, 0.12);
+  --success: #15803d; /* green-700, legible on white */
+  --success-hover: #166534;
+  --warning: #a16207; /* yellow-700 — golden, or it would echo the primary */
+  /* Past cool, future warm — the pairing every theme makes, held off the orange primary. */
+  --temporal-past: #7c3aed;
+  --temporal-future: #2563eb;
+  --cloud-icon-color: #075985;
+  --cloud-arrows-color: #4ade80;
+  --box-shadow: 0 16px 34px -18px rgba(124, 45, 18, 0.22);
   /* The app's own shape, deliberately — the sandbox changes the COLOUR so it cannot be mistaken for
      the trainer's own work, and nothing else. A second difference (Red's square corners, say) would
      make the sandbox demonstrate a product that does not exist. */
@@ -64,6 +69,53 @@ body.in-sandbox {
   --border-radius-md: 12px;
   --border-radius-sm: 8px;
   --btn-radius: 10px;
+}
+
+/* The SANDBOX pill in the app bar (asked 2026-09-12). Its `.is-demo` state is SHARED: the same pill
+   marks sample data sitting in the trainer's own workspace, which a `?init=demo_data_load` link can
+   produce with no workspace involved at all. That case keeps its calm informational blue — only the
+   sandbox turns orange, so the two claims stay tellable apart. */
+body.in-sandbox .preview-badge.is-demo {
+  background: var(--primary);
+  color: var(--on-primary);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary) 50%, transparent), 0 2px 6px
+    color-mix(in srgb, var(--primary) 40%, transparent);
+}
+
+/* A slow breath between two oranges, so the pill is noticed rather than merely present (asked
+   2026-09-12).
+
+   **Both shades carry the label.** The text is 9px and bold, which needs 4.5:1, and measured against
+   white: orange-600 gives 3.56:1 and the midpoint 4.30:1 — both fail. orange-700 (5.18:1) and
+   orange-800 (7.31:1) pass, and the step between them is still plainly a breath. So the animation
+   moves between the two DARKEST candidates rather than the two most obvious ones.
+
+   **Four seconds, not the 1.8s the PREVIEW badge pulses at.** That one is a hazard warning about
+   losing data and is meant to nag; this one answers "where am I". A slow breath draws the eye
+   without competing with it.
+
+   The motion is emphasis and never meaning: the pill says the word SANDBOX either way, which is
+   what makes it safe to switch off entirely for a reader who has asked for less movement. */
+@media (prefers-reduced-motion: no-preference) {
+  body.in-sandbox .preview-badge.is-demo {
+    animation: sandboxBreathe 4s ease-in-out infinite;
+  }
+
+  @keyframes sandboxBreathe {
+    0%,
+    100% {
+      background-color: #c2410c; /* orange-700 */
+    }
+    50% {
+      background-color: #9a3412; /* orange-800 */
+    }
+  }
+}
+
+body.in-sandbox .preview-badge.is-demo:hover,
+body.in-sandbox .preview-badge.is-demo:focus-visible {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary) 90%, transparent), 0 3px 10px
+    color-mix(in srgb, var(--primary) 60%, transparent);
 }
 
 /* The frame around the whole app (asked 2026-09-11). Drawn as a fixed pseudo-element rather than a

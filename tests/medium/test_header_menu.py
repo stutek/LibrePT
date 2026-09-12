@@ -215,3 +215,31 @@ def test_tapping_it_goes_home_without_letting_the_browser_leave(page, local_serv
 
     assert page.evaluate("() => window.__navigatedTo") == "/"
     assert page.url == url_before, "the browser must not have followed the href"
+
+
+def test_the_bar_is_no_taller_than_what_it_holds(page, local_server):
+    """Asked 2026-09-12: give the content back some vertical space, on the desktop and on a phone.
+
+    Pinned as a RELATIONSHIP rather than a number, because the number is a design choice and the
+    defect is not. The bar was 65px on a phone and 77px on a desktop around a 44px logo row — 21 and
+    33 pixels of padding around a control that needed none of it. A later change that adds a taller
+    element is fine and should raise the bar with it; one that quietly puts the padding back is what
+    this catches."""
+    load_with_stub(page, local_server, HEADER_STUB)
+    page.wait_for_selector("#app-header")
+
+    measured = page.evaluate(
+        """() => {
+             const bar = document.querySelector('.app-header');
+             const kids = [...document.querySelector('.header-container').children];
+             return {
+               bar: Math.round(bar.getBoundingClientRect().height),
+               tallest: Math.max(...kids.map((el) => Math.round(el.getBoundingClientRect().height))),
+             };
+           }"""
+    )
+    slack = measured["bar"] - measured["tallest"]
+    assert slack <= 14, (
+        f"the header spends {slack}px on padding around its tallest element "
+        f"(bar {measured['bar']}px, content {measured['tallest']}px)"
+    )

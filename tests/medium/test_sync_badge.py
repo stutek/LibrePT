@@ -72,12 +72,11 @@ def test_counters_are_legible_and_grow_on_desktop(page, local_server):
     assert badge_font_px() >= 14, (
         "desktop step did not apply — check the pointer media query"
     )
-    header_height = page.evaluate(
-        "getComputedStyle(document.documentElement).getPropertyValue('--hdr-height').trim()"
-    )
-    assert header_height == "76px", (
-        f"expected the taller desktop header, got {header_height}"
-    )
+    # The header height USED to be the second witness here: desktop took 76px where a phone took 64.
+    # That is gone — on 2026-09-12 the bar became one height everywhere and gave the extra back to
+    # the content, because a desktop screen is short and wide and 33 of its 77 pixels were padding
+    # around a 44px logo row. The font step above already proves the media query matched, and how
+    # tall the bar may be is pinned where it belongs, in test_header_menu.py.
 
 
 def test_an_unconnected_cloud_reads_as_unhealthy(page, local_server):

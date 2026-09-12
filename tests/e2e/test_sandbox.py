@@ -290,9 +290,20 @@ def test_the_sandbox_wears_its_own_skin_and_a_frame(page, local_server):
         "the sandbox must not look like the trainer's own work"
     )
     # The orange itself, not merely "different": the skin is a signal, and a later palette edit that
-    # quietly turned it green would still pass a difference check.
-    assert sandbox["primary"] == "#f97316", sandbox
+    # quietly turned it green would still pass a difference check. orange-700 rather than a brighter
+    # one because the field is white and white button labels sit on this (themes/sandbox.css).
+    assert sandbox["primary"] == "#c2410c", sandbox
     assert sandbox["frame"] == "3px", f"no frame around the app: {sandbox}"
+
+    # The pill in the app bar turns orange with the rest (asked 2026-09-12). Outside the sandbox the
+    # same pill marks demo data in the trainer's own workspace and keeps its blue, so this is
+    # asserted in the sandbox rather than on the class alone.
+    pill = page.evaluate(
+        """() => getComputedStyle(document.getElementById('preview-badge')).backgroundColor"""
+    )
+    assert pill == "rgb(194, 65, 12)", (
+        f"the sandbox pill is not the sandbox orange: {pill}"
+    )
 
     _switch(page, "working")
 
@@ -304,3 +315,27 @@ def test_the_sandbox_wears_its_own_skin_and_a_frame(page, local_server):
     )
     assert after["primary"] == own_work, "leaving puts the trainer's own theme back"
     assert after["frame"] != "3px", "the frame left with the workspace"
+
+
+@pytest.mark.clean_start
+def test_the_sandbox_pill_breathes_and_stops_for_reduced_motion(page, local_server):
+    """Asked 2026-09-12: make the pill breathe slowly between two oranges so it is noticed.
+
+    The half worth a test is the SECOND one. Motion here is emphasis, never meaning — the pill says
+    the word SANDBOX either way — which is what makes it safe to switch off for a reader who has
+    asked for less movement, and exactly the kind of contract a later style edit drops without
+    noticing."""
+    page.goto(f"{local_server}?init=demo_data_load&lang=en")
+    page.wait_for_selector(".session-card")
+    _switch(page, "sandbox")
+
+    moving = page.evaluate(
+        "() => getComputedStyle(document.getElementById('preview-badge')).animationName"
+    )
+    assert moving == "sandboxBreathe", f"the pill does not breathe: {moving}"
+
+    page.emulate_media(reduced_motion="reduce")
+    still = page.evaluate(
+        "() => getComputedStyle(document.getElementById('preview-badge')).animationName"
+    )
+    assert still == "none", f"the breath ignores a request for less motion: {still}"

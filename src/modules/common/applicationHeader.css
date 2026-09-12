@@ -502,18 +502,18 @@ select.menu-select {
   font-size: 11px;
 }
 
-/* Desktop gets a taller header and larger counters — the one axis actually available, since the app
-   body is a 480px centred column at every width, so there is no extra HORIZONTAL room to spend.
-   `pointer: fine` rather than width alone: a phone in landscape clears 700px easily and is exactly
-   where vertical space is scarcest, so keying on the pointer type asks the real question ("is this a
-   device with room to spare?") instead of a proxy for it. */
+/* Desktop keeps the LARGER COUNTERS and drops the taller bar (2026-09-12).
+
+   It used to take 76px here, on the reasoning that the app body is a 480px centred column at every
+   width so the vertical axis was the only one left to spend. That was backwards: a desktop screen is
+   short and wide, so height is the scarce axis there too, and 33px of the 77 measured were padding
+   around a 44px logo row. The bar is now one height everywhere — what desktop still gets is the
+   bigger sync counters, which cost no height.
+
+   `pointer: fine` rather than width alone: a phone in landscape clears 700px easily, so keying on
+   the pointer type asks the real question ("is this a device driven by a mouse?") instead of a proxy
+   for it. */
 @media (min-width: 700px) and (pointer: fine) {
-  :root {
-    --hdr-height: 76px;
-  }
-  .sync-backup-btn {
-    height: 52px;
-  }
   .cloud-sync-icon .fa-cloud {
     font-size: 20px;
   }
