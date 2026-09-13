@@ -23,7 +23,8 @@ pytestmark = pytest.mark.clean_start
 PHONE = {"width": 390, "height": 844}
 LONG_TITLE = "Group Strength & Conditioning — Tuesday"
 # The demo seed's own merged pair (src/data/sessions.js): two sessions booked into one slot share one
-# clipboard, whose name joins both. Long enough to need an ellipsis at 390px.
+# clipboard, which names each of them on its own line. Joined on one line, they needed an ellipsis
+# at 390px.
 MERGED_TITLES = ["Group Strength & Conditioning", "Return-to-Play Rehab"]
 
 
