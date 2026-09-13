@@ -172,7 +172,11 @@ def _walk_live_session(page, base, findings):
     reads at arm's length mid-set. Opening a session upgrades the URL to carry both ids, which is
     where the editor/catalog/setup URLs below come from."""
     _nav(page, base + "/")
-    session_card = page.locator(".session-card").first
+    # The MERGED clipboard, whose name joins two sessions and is the longest title the seed has
+    # (src/data/sessions.js pairs "Group Strength & Conditioning" with "Return-to-Play Rehab" on
+    # purpose). The first card is a finished session with a short name, and opening it is why
+    # this walk never saw that name run under the ▶ and ⋮ buttons (TODO §47.1).
+    session_card = page.locator(".session-card", has_text="Group Strength").first
     if not session_card.count():
         return
     session_card.click()

@@ -9,7 +9,7 @@ This module owns the sweep itself — one function of browser-side JavaScript �
 (`tests/e2e/test_layout_overflow.py`) and an agent diagnosing a live page run the *same* check
 rather than two that drift apart.
 
-Two invariants, deliberately separate:
+Three invariants, deliberately separate:
 
   **A — nothing extends past its clipping boundary.** Not "past the viewport": `body` is
   `max-width: 480px` centred, so on a desktop window the real boundary is the app column. Each
@@ -23,6 +23,12 @@ Two invariants, deliberately separate:
   **B — clipped content.** `scrollWidth > clientWidth` (and the height equivalent) on elements that
   clip on that axis. This is the silent-clipping case: `overflow: hidden` swallowing a label with
   no scrollbar, no ellipsis and no error.
+
+  **C — nothing is wider than a parent that does not clip it.** A and B both need a box that clips,
+  and the commonest overflow has none: text too long for its slot in a row simply draws over the
+  control beside the slot. The clipboard's session name ran under its ▶ and ⋮ buttons (TODO §47.1)
+  while ending 16px inside the screen, and A and B had nothing to measure it against. C compares
+  an element in the normal flow with its parent's padding box, horizontally.
 
 What is deliberately NOT reported, and why each would otherwise be noise:
 
@@ -86,6 +92,10 @@ DEFAULT_DEVICE = "iphone-14"
 # A layout engine's subpixel rounding is not a defect; a component leaving the screen is. 1 CSS
 # pixel is above the former and far below the latter.
 DEFAULT_TOLERANCE_PX = 1.0
+
+# The invariants the sweep knows, each described in the module docstring. A scan asserts all of
+# them unless the caller names fewer.
+INVARIANTS = ("A", "B", "C")
 
 
 def device_profile(name):
@@ -201,6 +211,40 @@ OVERFLOW_SCAN_JS = r"""
 
   const FORM_CONTROLS = new Set(["INPUT", "TEXTAREA", "SELECT"]);
 
+  // Invariant C, horizontal only. An element in the normal flow that is wider than the parent it
+  // sits in, where that parent does NOT clip, is drawn over whatever stands beside the parent: the
+  // clipboard's session name under its ▶ and ⋮ buttons (TODO §47.1). Measured against the parent's
+  // PADDING box, so a bar that bleeds edge to edge in a padded card is inside it. Vertically a
+  // parent grows with its content, so the same test there would mostly report a fixed height.
+  function escapesItsParent(element, style, rect) {
+    // Placed by its author (absolute, fixed, or moved by a transform), not pushed by its content.
+    if (style.position === "absolute" || style.position === "fixed") return null;
+    if (style.transform !== "none") return null;
+    let parent = element.parentElement;
+    while (parent && styleOf(parent).display === "contents") parent = parent.parentElement;
+    if (!parent || parent === document.documentElement) return null;
+    const parentStyle = styleOf(parent);
+    // A clipping parent cuts the content instead of letting it cover anything: A's and B's case.
+    // A scrolling parent is one of those too, and its content can be reached.
+    if (clipsOn(parentStyle, "x")) return null;
+    // An inline parent is split across lines, so it has no one box to be inside.
+    if (parentStyle.display === "inline") return null;
+    const box = boxOf(parent, "x");
+    // A negative margin is the author asking to reach past the parent by that much: every view's
+    // title bar is `margin: 0 -16px` to run to the column edge. Only the rest is content pushing.
+    const left = rect.left - Math.min(0, parseFloat(style.marginLeft) || 0);
+    const right = rect.right + Math.min(0, parseFloat(style.marginRight) || 0);
+    const over = Math.max(box.start - left, right - (box.start + box.size));
+    if (over <= tolerance) return null;
+    return {
+      invariant: "C",
+      axis: "x",
+      element: describe(element),
+      boundary: describe(parent),
+      overflowPx: Math.round(over),
+    };
+  }
+
   // A scoped sweep is how the medium tier gets per-component attribution: one component is
   // mounted into the real index.html, so a body-wide sweep would also report the surrounding
   // shell, which that test does not own and cannot fix. Ancestors are still walked for the
@@ -255,6 +299,11 @@ OVERFLOW_SCAN_JS = r"""
       }
     }
 
+    if (wanted.includes("C")) {
+      const finding = escapesItsParent(element, style, rect);
+      if (finding) findings.push(finding);
+    }
+
     if (!wanted.includes("B")) continue;
     if (FORM_CONTROLS.has(element.tagName)) continue;
     if (element.dataset.clip === "intentional") continue;
@@ -288,7 +337,7 @@ OVERFLOW_SCAN_JS = r"""
 """
 
 
-def scan(page, tolerance=DEFAULT_TOLERANCE_PX, invariants=("A", "B"), root=None):
+def scan(page, tolerance=DEFAULT_TOLERANCE_PX, invariants=INVARIANTS, root=None):
     """Run the sweep on an already-loaded Playwright page. Returns a list of finding dicts.
 
     `root` is a CSS selector limiting WHICH elements are asserted, not what they are measured
@@ -338,9 +387,9 @@ def build_parser():
         "--invariant",
         action="append",
         dest="invariants",
-        choices=["A", "B"],
+        choices=INVARIANTS,
         default=None,
-        help="restrict to one invariant; repeatable, default both",
+        help="restrict to one invariant; repeatable, default all",
     )
     parser.add_argument(
         "--wait-selector", default=None, help="wait for this selector before sweeping"
@@ -381,7 +430,7 @@ def main(argv=None):
         page.wait_for_timeout(
             300
         )  # settle post-render animations/observers before measuring
-        findings = scan(page, args.tolerance, args.invariants or ("A", "B"), args.root)
+        findings = scan(page, args.tolerance, args.invariants or INVARIANTS, args.root)
         browser.close()
 
     print(json.dumps(findings, indent=2))

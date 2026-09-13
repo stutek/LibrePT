@@ -57,8 +57,10 @@ Four things to know before writing one:
 
 **One e2e file is not about behaviour at all**: [test_layout_overflow.py](e2e/test_layout_overflow.py)
 walks every route at three real device widths (iPhone 14, Galaxy S23 Ultra, desktop) plus one
-Slovenian pass, and asserts *geometry* — that nothing extends past its clipping boundary and nothing
-is silently clipped inside its own box ([TODO §25](../TODO.md)). It lives here rather than in
+Slovenian pass, and asserts *geometry* — that nothing extends past its clipping boundary, nothing
+is silently clipped inside its own box ([TODO §25](../TODO.md)), and nothing is wider than a parent
+that does not clip it ([TODO §47.1](../TODO.md)). A walk only sees the text the seed data holds, so it
+opens the clipboard with the LONGEST seeded name, not the first one. It lives here rather than in
 `medium/` because an overflow is a property of the **composed** page: the same component fits alone
 and breaks beside a long client name. The sweep itself is
 [agent_tools/overflow_scan.py](../agent_tools/overflow_scan.py), shared with the by-hand diagnostic. A
