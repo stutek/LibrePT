@@ -97,11 +97,15 @@
   font-size: 13px;
   font-weight: 600;
 }
+/* Allowed to shrink, so that a third badge wraps under the first two. With `flex-shrink: 0` the
+   row never wrapped: at 390px "CONDITIONING" ran 8px past the item's border and the name beside it
+   was squeezed to one word per line (TODO §47.1). */
 .picker-item-badges {
   display: flex;
   flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 4px;
-  flex-shrink: 0;
+  min-width: 0;
 }
 .picker-empty {
   font-size: 12px;
