@@ -485,6 +485,10 @@ body:has(#active-session-overlay:not(.hidden))
   opacity: 0.85;
   text-decoration: none;
 }
+.notification-link-icon {
+  font-size: 11px;
+  margin-left: 2px;
+}
 
 /* Clear-demo-data confirmation (modules/common/demoCleanupDialog.js). Counts are the point of the
    screen — a trainer checks "8 sample clients" against what they believe they have — so they get

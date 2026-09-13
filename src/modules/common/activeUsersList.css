@@ -20,4 +20,51 @@
 .client-tab-btn {
   flex: 0 0 auto;
   white-space: nowrap;
+  /* Real tap target (44px) for every tab, bound-group or per-participant — vertical padding
+     alone can't shrink below this floor anyway. */
+  min-height: 44px;
+}
+/* The per-participant tab (bound-group tabs stay plain, see .client-tab-bound below): unified
+   primary gradient with on-primary text on the active one for clear, vibrant emphasis. */
+.client-tab-participant {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border-radius: 24px;
+  border: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-main);
+  box-shadow: none;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  max-width: 140px;
+}
+.client-tab-participant.active {
+  border: 1px solid transparent;
+  background: var(--primary-gradient);
+  color: var(--on-primary);
+  box-shadow: 0 4px 14px -4px rgba(0, 0, 0, 0.45);
+}
+/* Chained on .client-tab-btn: clientsView.css's shared .avatar rule (width/height/background/
+   color/font-size) has the same specificity as a single class, so this must outrank it rather
+   than depend on stylesheet load order. */
+.client-tab-btn .client-tab-avatar {
+  width: 16px;
+  height: 16px;
+  font-size: 8px;
+  flex-shrink: 0;
+  background: var(--primary-light);
+  color: var(--primary);
+}
+.client-tab-btn .client-tab-avatar.active {
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
+}
+.client-tab-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 } /* --- VERTICAL EXERCISE CARD STACK --- */

@@ -444,7 +444,7 @@ export function startGuidedWalkthrough({
     const here = currentWalkthroughStep(tour, state)?.id ?? null;
     if (box.bottom <= panelBox.top || box.top >= panelBox.bottom) {
       // Clear of it: give back whatever height was surrendered for a different control.
-      if (trimmedFor !== here) el.panel.style.maxHeight = "";
+      if (trimmedFor !== here) releasePanelTrim();
       return;
     }
     // The PANEL gives way first, because that repair is instant and cannot fail. Moving the control
@@ -489,11 +489,22 @@ export function startGuidedWalkthrough({
       ? box.top - panelBox.top - PANEL_CLEARANCE_PX
       : panelBox.bottom - box.bottom - PANEL_CLEARANCE_PX;
     trimmedFor = step;
-    el.panel.style.maxHeight = `${Math.max(PANEL_MIN_HEIGHT_PX, Math.round(room))}px`;
+    el.panel.style.setProperty(
+      "--walkthrough-panel-max-height",
+      `${Math.max(PANEL_MIN_HEIGHT_PX, Math.round(room))}px`,
+    );
+    el.panel.classList.add("is-trimmed");
     // Whether giving up height was ENOUGH. Below the floor it was not, and the caller moves the
     // control instead — the panel keeps the floor either way, since a shorter guide is still less in
     // the way than a taller one.
     return room >= PANEL_MIN_HEIGHT_PX;
+  }
+
+  /** Gives the panel back whatever height was surrendered for a control that is no longer being
+   * pointed at. */
+  function releasePanelTrim() {
+    el.panel.classList.remove("is-trimmed");
+    el.panel.style.removeProperty("--walkthrough-panel-max-height");
   }
 
   /** Whether the app is already on a step's route. Compared on the path the script writes — the
@@ -587,25 +598,24 @@ export function startGuidedWalkthrough({
    * the guide's frame is deliberately bigger than the box it is hanging in and would answer yes
    * every time. */
   function dialogScrollsItself(dialog) {
-    const shown = el.overlay.style.display;
-    el.overlay.style.display = "none";
+    el.overlay.classList.add("is-measuring");
     const scrolls = dialog.scrollHeight > dialog.clientHeight + 1;
-    el.overlay.style.display = shown;
+    el.overlay.classList.remove("is-measuring");
     return scrolls;
   }
 
   /** Lets a dialog draw outside its own box while the guide is hanging in it, and puts its own rule
-   * back afterwards — the app styles no dialog this way, so the inline value is ours to clear. */
+   * back afterwards — the app styles no dialog this way, so the class is ours to clear. */
   function clipEscapedDialog(dialog) {
     if (escapedDialog === dialog) return;
     releaseDialogClipping();
     escapedDialog = dialog;
-    dialog.style.overflow = "visible";
+    dialog.classList.add("walkthrough-escaped-dialog");
   }
 
   function releaseDialogClipping() {
     if (!escapedDialog) return;
-    escapedDialog.style.overflow = "";
+    escapedDialog.classList.remove("walkthrough-escaped-dialog");
     escapedDialog = null;
   }
 
@@ -929,7 +939,7 @@ export function startGuidedWalkthrough({
     // height the last one was given back.
     scrolledClearOf = null;
     trimmedFor = null;
-    el.panel.style.maxHeight = "";
+    releasePanelTrim();
     const step = currentWalkthroughStep(tour, state);
     // BEFORE the precondition and the target lookup: a narrated step's own control is the card the
     // narration puts on screen, so it has to exist before anything goes looking for it.

@@ -77,3 +77,151 @@
   font-size: 14px;
   padding: 4px;
 }
+.routines-empty-state {
+  grid-column: 1 / -1;
+}
+/* "+N more" tag on a truncated exercise-preview list: same shape as .preview-tag, primary-tinted
+   instead of the neutral default. Chained to beat .preview-tag's own background/font-weight. */
+.preview-tag.preview-tag-more {
+  background: var(--primary-light);
+  color: var(--primary);
+  font-weight: 700;
+}
+/* Sets/Reps/Load/Rest cells in the routine builder row sit tighter than the form's default
+   .form-group gap. */
+.form-group.routine-builder-field {
+  gap: 2px;
+}
+
+/* --- Pending plan adjustments (dashboard widget) --- */
+.adjustment-count-badge {
+  display: inline-block;
+}
+.adjustments-empty-state {
+  padding: 16px;
+}
+.adjustment-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  margin-bottom: 8px;
+  border-left: 4px solid var(--primary);
+}
+.adjustment-card-info {
+  flex: 1;
+}
+.adjustment-card-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+.adjustment-client-name {
+  color: var(--text-main);
+  font-size: 13px;
+}
+/* Chained to beat .badge's own font-size/padding. */
+.badge.adjustment-tag-badge {
+  font-size: 9px;
+  padding: 2px 6px;
+}
+.adjustment-exercise-line {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.adjustment-exercise-name {
+  color: var(--primary);
+}
+.adjustment-card-actions {
+  display: flex;
+  gap: 4px;
+  flex: 0 0 auto;
+}
+.mini-audio-note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  background: var(--primary-light);
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid color-mix(in srgb, var(--primary) 25%, transparent);
+  width: fit-content;
+}
+.btn-play-adjustment-audio {
+  background: none;
+  border: none;
+  color: var(--primary);
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+}
+.adjustment-audio-play-icon {
+  font-size: 14px;
+}
+.audio-status-label {
+  font-size: 9px;
+  color: var(--text-muted);
+  font-family: monospace;
+}
+
+/* --- Apply Plan Adjustment dialog --- */
+.adjust-summary-panel {
+  background: rgba(0, 0, 0, 0.15);
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  margin-bottom: 16px;
+}
+.adjust-summary-row {
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+.adjust-summary-row-last {
+  font-size: 13px;
+}
+.adjust-summary-label {
+  color: var(--text-muted);
+}
+.adjust-voice-row {
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.adjust-voice-label {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+.adjust-voice-play-btn {
+  background: none;
+  border: none;
+  color: var(--primary);
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+.adjust-voice-play-icon {
+  font-size: 16px;
+}
+.adjust-voice-duration-label {
+  font-size: 11px;
+  font-family: monospace;
+}
+.adjust-action-type-select {
+  margin-bottom: 12px;
+}
+.adjust-modify-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+/* Chained to beat .modal-actions' own margin-top (10px, this dialog wants 20px). */
+.modal-actions.adjust-modal-actions {
+  margin-top: 20px;
+}

@@ -156,7 +156,7 @@ export function getClientDisplayNameHTML(client, isShort = false) {
   // page would leave every list — the one place the two actually sit side by side — ambiguous.
   const nameText = client.alias ? `${baseName} (${client.alias})` : baseName;
   if (client.hasInjury) {
-    return `<span class="client-name-with-injury" style="display: inline-flex; align-items: center; gap: 4px;">${escapeHTML(nameText)} <i class="fa-solid fa-triangle-exclamation text-red" style="font-size: 11px; color: #ef4444;" title="Has recorded injury: ${escapeHTML(client.injury || client.notes || "")}"></i></span>`;
+    return `<span class="client-name-with-injury">${escapeHTML(nameText)} <i class="fa-solid fa-triangle-exclamation client-name-injury-mark" title="Has recorded injury: ${escapeHTML(client.injury || client.notes || "")}"></i></span>`;
   }
   return escapeHTML(nameText);
 }

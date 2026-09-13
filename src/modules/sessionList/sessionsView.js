@@ -311,7 +311,8 @@ export function renderSessions({
     const empty = hasAnyFilter(activeSessionFilters())
       ? t("no_sessions_for_filters")
       : t("no_sessions_scheduled");
-    container.innerHTML = `<div class="card glassmorphic text-center text-muted" style="padding: 16px;">${escapeHTML(empty)}</div>`;
+    // No inline padding needed: .card already sets padding: 16px (index.css).
+    container.innerHTML = `<div class="card glassmorphic text-center text-muted">${escapeHTML(empty)}</div>`;
   } else {
     // One continuous, strictly time-ordered pass — grouped under a sticky per-day header rather
     // than split into four fixed yesterday/today/tomorrow/upcoming containers (TODO §7.3 item 8).

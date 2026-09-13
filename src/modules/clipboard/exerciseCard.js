@@ -45,7 +45,8 @@ export class ExerciseDeckCard extends DeckCard {
     const counter = `${item.index + 1}/${currentCount}`;
     // Tint the title by any feedback logged for this exercise (see getExerciseSignalColor)
     const signalColor = getExerciseSignalColor(activeClientId, item.name);
-    const nameStyle = signalColor ? ` style="color: ${signalColor};"` : "";
+    const nameClass = signalColor ? " has-signal-color" : "";
+    const nameStyle = signalColor ? ` style="--signal-color: ${signalColor};"` : "";
     // NO badge for the card in focus (ruled 2026-09-10): the tint and the border already say which
     // card it is, in every theme, and a word repeating what the colour has said costs a slot in the
     // title row that Completed and Upcoming actually need. Those two stay, because nothing else on
@@ -76,7 +77,7 @@ export class ExerciseDeckCard extends DeckCard {
     card.innerHTML = `
       <div class="deck-card-compact">
         <span class="deck-card-counter">${counter}</span>
-        <span class="deck-card-name deck-card-name-inline"${nameStyle}>${escapeHTML(item.name)}</span>
+        <span class="deck-card-name deck-card-name-inline${nameClass}"${nameStyle}>${escapeHTML(item.name)}</span>
         <span class="deck-card-compact-target">${compactTarget}</span>
         ${statusBadge}
       </div>

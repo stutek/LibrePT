@@ -25,16 +25,12 @@ export function setupViewDismiss({ navigateToPath, getActiveSession, launchClipb
     // Pin the current (open) position and force a reflow BEFORE transitioning to the down state —
     // otherwise dropping the slide-up animation and setting the target transform in one frame gives
     // the transition no start point and the overlay just snaps down.
-    overlay.style.animation = "none";
-    overlay.style.transform = "translateY(0)";
+    overlay.classList.add("is-closing");
     void overlay.offsetHeight; // reflow
-    overlay.style.transition = "transform 0.24s ease";
-    overlay.style.transform = "translateY(100%)";
+    overlay.classList.add("is-sliding-down");
     setTimeout(() => {
       goHome();
-      overlay.style.transition = "";
-      overlay.style.transform = "";
-      overlay.style.animation = "";
+      overlay.classList.remove("is-closing", "is-sliding-down");
       delete overlay.dataset.closing;
     }, 230);
   }

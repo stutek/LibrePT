@@ -40,14 +40,15 @@ function buildCircuitRestRowHTML(ex, t, escapeHTML) {
 function buildCircuitExerciseRowHTML(ex, ctx) {
   const { activeClientId, escapeHTML, getExerciseSignalColor } = ctx;
   const sig = getExerciseSignalColor(activeClientId, ex.name);
-  const nameStyle = sig ? ` style="color:${sig};"` : "";
+  const nameClass = sig ? " has-signal-color" : "";
+  const nameStyle = sig ? ` style="--signal-color:${sig};"` : "";
   const load = hasLoad(ex.weightTarget, ex.loadUnit)
     ? ` · ${escapeHTML(formatLoad(ex.weightTarget, ex.loadUnit))}`
     : "";
   return `
         <div class="circuit-ex-row" data-ex-id="${escapeHTML(ex.id)}">
           <div class="circuit-ex-head">
-            <span class="circuit-ex-name"${nameStyle}>${escapeHTML(ex.name)}</span>
+            <span class="circuit-ex-name${nameClass}"${nameStyle}>${escapeHTML(ex.name)}</span>
             <span class="circuit-ex-sep">·</span>
             <span class="circuit-ex-target"><span class="circuit-ex-reps">${escapeHTML(String(ex.repsTarget))}${load}</span></span>
           </div>

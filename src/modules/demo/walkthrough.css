@@ -13,6 +13,19 @@
   pointer-events: none;
 }
 
+/* Hidden for the instant dialogScrollsItself measures the dialog underneath — the guide's own frame
+   is deliberately bigger than the dialog and would otherwise make every dialog measure as scrolling
+   (walkthroughOverlay.js). */
+.walkthrough.is-measuring {
+  display: none;
+}
+
+/* Lets a dialog draw outside its own box while the guide is docked in it (walkthroughOverlay.js's
+   clipEscapedDialog) — the app styles no dialog this way, so this class is the walkthrough's alone. */
+.walkthrough-escaped-dialog {
+  overflow: visible;
+}
+
 /* A ring around the control the step is about, drawn OUTSIDE its box so it never obscures a label or
    an icon a trainer is being asked to recognise. */
 .walkthrough-spotlight {
@@ -176,6 +189,15 @@
   max-height: calc(100% - 24px);
   overflow-y: auto;
   overscroll-behavior: contain;
+}
+
+/* The panel gives up height to stay clear of the control it is pointing at
+   (walkthroughOverlay.js's trimPanelToFitBeside). The room is only known once the control and the
+   panel are both on screen, so JS hands it over as a custom property instead of picking a class per
+   pixel. Two classes beat the base rule's 45vh, which is the only rule this ever has to win against
+   — trimming never runs while the panel is collapsed, centred or docked inside a dialog. */
+.walkthrough-panel.is-trimmed {
+  max-height: var(--walkthrough-panel-max-height);
 }
 
 .walkthrough-head {

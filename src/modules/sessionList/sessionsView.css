@@ -13,6 +13,15 @@
   border-left: 4px solid var(--primary);
   cursor: pointer;
   transition: background 0.2s, transform 0.2s;
+}
+/* Pointer feedback — was two mouseenter/mouseleave listeners setting the same two properties
+   inline; a plain :hover replaces them with no behaviour left for JS to own. */
+.session-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-1px);
+}
+.session-card-info {
+  flex: 1;
 } /* A finished session is marked with a green edge and its "Completed" badge, not by a faded/greyed
    look — opacity dimming here used to wash out the status-line text (and undo its contrast) along
    with everything else in the card, so completion is signalled by border + badge only, leaving
@@ -155,6 +164,75 @@
    or theme — only the status bar beneath it carries the past/future tint now. */
 .session-card-title {
   color: inherit;
+  font-size: 13px;
+}
+/* Card heading row: time badge, title, edit button — from sessionCard.js's buildSessionCardInfoHTML. */
+.session-card-header-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 1px;
+}
+/* .badge already sets font-size: 11px — chained with .badge here to win over that on specificity. */
+.badge.session-card-time-badge {
+  font-size: 10px;
+  padding: 2px 6px;
+  font-weight: 700;
+  font-family: monospace;
+}
+.session-card-edit-btn {
+  margin-left: auto;
+  padding: 2px 6px;
+  font-size: 11px;
+}
+.session-card-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.3;
+}
+.session-card-capacity {
+  color: var(--primary);
+  font-weight: 600;
+}
+/* Small inline icon shared by the meta row's participant/programme lines (fa-users, fa-clipboard-list). */
+.session-card-icon {
+  margin-right: 4px;
+  font-size: 10px;
+}
+.session-card-injury-icon {
+  margin-left: 4px;
+  font-size: 10px;
+  color: var(--danger); /* was the literal #ef4444, midnight's --danger */
+}
+.session-card-dot-sep {
+  opacity: 0.45;
+}
+.session-card-undefined-programme {
+  color: var(--danger); /* was the literal #ef4444, midnight's --danger */
+  font-weight: 600;
+}
+.session-warning-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: color-mix(in srgb, var(--danger) 10%, transparent); /* was rgba(239,68,68,0.1), midnight's --danger */
+  color: var(--danger); /* was the literal #ef4444 */
+  border: 1px solid color-mix(in srgb, var(--danger) 20%, transparent); /* was rgba(239,68,68,0.2) */
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+}
+.session-warning-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
 } /* --- SESSIONS DAY TITLE BAR --- */
 /* Home view title bar. The "Sessions Schedule" label (.view-title-label) is the conceptual view
    title on the left; the Today and expand controls (rendered by sessionTimeline.js into

@@ -147,7 +147,7 @@ function buildNotificationActionHTML(act, itemId, escapeHTML) {
     return `<button type="button" class="notification-btn ${primaryCls}" data-action-resume="${escapeHTML(act.resumePlanId)}" data-action-id="${escapeHTML(itemId)}">${escapeHTML(act.label)}</button>`;
   }
   if (act.url) {
-    return `<a href="${escapeHTML(act.url)}" target="_blank" rel="noopener noreferrer" class="notification-link" data-action-id="${escapeHTML(itemId)}">${escapeHTML(act.label)} <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 11px; margin-left: 2px;"></i></a>`;
+    return `<a href="${escapeHTML(act.url)}" target="_blank" rel="noopener noreferrer" class="notification-link" data-action-id="${escapeHTML(itemId)}">${escapeHTML(act.label)} <i class="fa-solid fa-arrow-up-right-from-square notification-link-icon"></i></a>`;
   }
   return `<button type="button" class="notification-btn ${primaryCls}" data-nav-target="${escapeHTML(act.view || "")}" data-action-id="${escapeHTML(itemId)}">${escapeHTML(act.label)}</button>`;
 }
@@ -280,7 +280,7 @@ function paintFeedCounts(items, t) {
   }
 
   const markAllFooter = document.querySelector(".notification-feed-footer");
-  if (markAllFooter) markAllFooter.style.display = unreadCount > 0 ? "flex" : "none";
+  if (markAllFooter) markAllFooter.classList.toggle("hidden", unreadCount <= 0);
 }
 
 export function renderNotificationArea() {

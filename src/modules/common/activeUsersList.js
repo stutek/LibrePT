@@ -25,7 +25,6 @@ function boundGroupTab(activeSession, ctx) {
   const isActive = members.includes(activeClientId);
   const tab = document.createElement("button");
   tab.className = `client-tab-btn client-tab-bound ${isActive ? "active" : ""}`;
-  tab.style.minHeight = "44px";
   const initials = members
     .map((id) => clients.find((client) => client.id === id))
     .filter(Boolean)
@@ -71,7 +70,7 @@ export function renderActiveUsersList(tabsContainer, activeSession, ctx) {
 
     const isActive = pId === activeClientId;
     const tab = document.createElement("button");
-    tab.className = `client-tab-btn ${isActive ? "active" : ""}`;
+    tab.className = `client-tab-btn client-tab-participant ${isActive ? "active" : ""}`;
 
     // Selected tab: uses unified primary gradient with on-primary text for clear, vibrant emphasis.
     // Width-side chrome (padding/gap/avatar size) trimmed further so more tabs fit per row — a
@@ -79,27 +78,14 @@ export function renderActiveUsersList(tabsContainer, activeSession, ctx) {
     // saves vertical space (fewer rows, not shorter rows). minHeight stays at 44px, a real tap
     // target — vertical padding alone can't shrink below that floor anyway,
     // so trimming it further would do nothing; the name is also capped+ellipsized so one long name
-    // can't force an otherwise-compact row to wrap early.
-    tab.style.display = "flex";
-    tab.style.alignItems = "center";
-    tab.style.gap = "4px";
-    tab.style.padding = "6px 10px";
-    tab.style.borderRadius = "24px";
-    tab.style.border = isActive ? "1px solid transparent" : "1px solid var(--border-color)";
-    tab.style.background = isActive ? "var(--primary-gradient)" : "rgba(255,255,255,0.05)";
-    tab.style.color = isActive ? "var(--on-primary)" : "var(--text-main)";
-    tab.style.boxShadow = isActive ? "0 4px 14px -4px rgba(0, 0, 0, 0.45)" : "none";
-    tab.style.fontWeight = "700";
-    tab.style.cursor = "pointer";
-    tab.style.transition = "all 0.2s";
-    tab.style.minHeight = "44px";
-    tab.style.maxWidth = "140px";
+    // can't force an otherwise-compact row to wrap early. Look lives in activeUsersList.css
+    // (.client-tab-participant / .active); isActive only picks the state class.
 
     tab.innerHTML = `
-      <div class="avatar" style="width:16px; height:16px; font-size:8px; flex-shrink:0; background: ${isActive ? "rgba(255, 255, 255, 0.25)" : "var(--primary-light)"}; color: ${isActive ? "#fff" : "var(--primary)"};">
+      <div class="avatar client-tab-avatar ${isActive ? "active" : ""}">
         ${escapeHTML(client.avatar || getInitials(client.name))}
       </div>
-      <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0;">${getClientDisplayNameHTML(client, true)}</span>
+      <span class="client-tab-name">${getClientDisplayNameHTML(client, true)}</span>
     `;
 
     tab.addEventListener("click", () => {

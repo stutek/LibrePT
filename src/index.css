@@ -527,6 +527,17 @@ h6 {
   color: var(--danger);
   border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent);
 }
+/* A client's name plus its injury mark — rendered by getClientDisplayNameHTML (common/utils.js) and
+   used across clients, session editing and the clipboard, not owned by any one module's stylesheet. */
+.client-name-with-injury {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.client-name-injury-mark {
+  font-size: 11px;
+  color: var(--danger);
+}
 .badge-warning {
   background: rgba(245, 158, 11, 0.15);
   color: #f59e0b;

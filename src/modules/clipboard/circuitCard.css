@@ -50,6 +50,11 @@
   font-weight: 600;
   opacity: 0.85;
 }
+/* The name tinted by feedback logged for this exercise (circuitCard.js's getExerciseSignalColor) —
+   a colour only the running code knows, handed over as a custom property. */
+.circuit-ex-name.has-signal-color {
+  color: var(--signal-color);
+}
 .circuit-ex-target {
   display: inline-flex;
   align-items: baseline;

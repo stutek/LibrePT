@@ -19,7 +19,7 @@ export function renderAdjustmentsViewShell() {
       <div class="view-header view-titlebar">
         <button class="view-grabber" type="button" aria-label="Return to home"></button>
         <h2 id="pending-adjustments-title"><i class="fa-solid fa-bell-concierge text-emerald mr-1"></i> Pending Review</h2>
-        <span class="badge" id="badge-adjustments-count">0</span>
+        <span class="badge adjustment-count-badge" id="badge-adjustments-count">0</span>
       </div>
       <div id="dashboard-adjustments-list" class="stack-list mb-6">
         <!-- Injected via JS - cards with feedback tags to update programs -->
@@ -39,9 +39,9 @@ function resolveAdjustmentBadgeClass(tag) {
 function buildVoiceNoteHTML(u) {
   if (!u.hasVoiceNote) return "";
   return `
-        <div class="mini-audio-note" style="display: flex; align-items: center; gap: 6px; margin-top: 6px; background: var(--primary-light); padding: 4px 8px; border-radius: 4px; border: 1px solid color-mix(in srgb, var(--primary) 25%, transparent); width: fit-content;">
-          <button type="button" class="btn-play-adjustment-audio" data-id="${u.id}" style="background: none; border: none; color: var(--primary); cursor: pointer; padding: 0; display: inline-flex; align-items: center;"><i class="fa-solid fa-circle-play" style="font-size: 14px;"></i></button>
-          <span class="audio-status-label" style="font-size: 9px; color: var(--text-muted); font-family: monospace;">voice_memo.wav (0:04)</span>
+        <div class="mini-audio-note">
+          <button type="button" class="btn-play-adjustment-audio" data-id="${u.id}"><i class="fa-solid fa-circle-play adjustment-audio-play-icon"></i></button>
+          <span class="audio-status-label">voice_memo.wav (0:04)</span>
         </div>
       `;
 }
@@ -74,24 +74,17 @@ function buildAdjustmentCard(u, ctx) {
 
   const card = document.createElement("div");
   card.className = "adjustment-card card glassmorphic";
-  card.style.display = "flex";
-  card.style.justifyContent = "space-between";
-  card.style.alignItems = "center";
-  card.style.gap = "12px";
-  card.style.padding = "12px";
-  card.style.marginBottom = "8px";
-  card.style.borderLeft = "4px solid var(--primary)";
 
   const info = document.createElement("div");
-  info.style.flex = "1";
+  info.className = "adjustment-card-info";
   const badgeClass = resolveAdjustmentBadgeClass(u.tag);
   info.innerHTML = `
-      <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px;">
-        <strong style="color: var(--text-color); font-size: 13px;">${escapeHTML(u.clientName)}</strong>
-        <span class="badge ${badgeClass}" style="font-size: 9px; padding: 2px 6px;">${escapeHTML(u.tag)}</span>
+      <div class="adjustment-card-row">
+        <strong class="adjustment-client-name">${escapeHTML(u.clientName)}</strong>
+        <span class="badge ${badgeClass} adjustment-tag-badge">${escapeHTML(u.tag)}</span>
       </div>
-      <div style="font-size: 11px; color: var(--text-muted);">
-        ${t("exercise_of")}: <span class="font-semibold" style="color: var(--primary);">${escapeHTML(u.exerciseName)}</span>
+      <div class="adjustment-exercise-line">
+        ${t("exercise_of")}: <span class="font-semibold adjustment-exercise-name">${escapeHTML(u.exerciseName)}</span>
       </div>
       ${buildVoiceNoteHTML(u)}
     `;
@@ -100,9 +93,7 @@ function buildAdjustmentCard(u, ctx) {
   // per unresolved alert already carries client name + tag + exercise, so labelled buttons here
   // were pure repetition; the icon + tooltip says enough.
   const actions = document.createElement("div");
-  actions.style.display = "flex";
-  actions.style.gap = "4px";
-  actions.style.flex = "0 0 auto";
+  actions.className = "adjustment-card-actions";
 
   const editBtn = document.createElement("button");
   editBtn.type = "button";
@@ -151,15 +142,11 @@ export function renderPendingPlanAdjustmentsComponent(container, countBadge, ctx
 
   if (countBadge) {
     countBadge.textContent = unresolved.length;
-    if (unresolved.length === 0) {
-      countBadge.style.display = "none";
-    } else {
-      countBadge.style.display = "inline-block";
-    }
+    countBadge.classList.toggle("hidden", unresolved.length === 0);
   }
 
   if (unresolved.length === 0) {
-    container.innerHTML = `<div class="card glassmorphic text-center text-muted" style="padding: 16px;">${t("no_pending_adjustments")}</div>`;
+    container.innerHTML = `<div class="card glassmorphic text-center text-muted adjustments-empty-state">${t("no_pending_adjustments")}</div>`;
     return;
   }
 
@@ -189,26 +176,26 @@ export function renderApplyAdjustmentDialog() {
       <input type="hidden" id="adjust-routine-id">
       <input type="hidden" id="adjust-exercise-id">
       
-      <div class="form-group" style="background: rgba(0,0,0,0.15); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 16px;">
-        <div style="font-size: 13px; margin-bottom: 6px;">
-          <strong style="color: var(--text-muted);">Client:</strong> <span id="adjust-client-name" class="font-semibold text-emerald"></span>
+      <div class="form-group adjust-summary-panel">
+        <div class="adjust-summary-row">
+          <strong class="adjust-summary-label">Client:</strong> <span id="adjust-client-name" class="font-semibold text-emerald"></span>
         </div>
-        <div style="font-size: 13px; margin-bottom: 6px;">
-          <strong style="color: var(--text-muted);">Feedback:</strong> <span id="adjust-feedback-tag" class="font-semibold text-primary"></span>
+        <div class="adjust-summary-row">
+          <strong class="adjust-summary-label">Feedback:</strong> <span id="adjust-feedback-tag" class="font-semibold text-primary"></span>
         </div>
-        <div id="adjust-voice-player-container" class="hidden" style="margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
-          <strong style="color: var(--text-muted); font-size: 13px;">Voice:</strong>
-          <button type="button" id="adjust-btn-play-voice" style="background: none; border: none; color: var(--primary); cursor: pointer; padding: 0; line-height: 1;"><i class="fa-solid fa-circle-play" style="font-size: 16px;"></i></button>
-          <span style="font-size: 11px; font-family: monospace;">voice_memo.wav (0:04)</span>
+        <div id="adjust-voice-player-container" class="hidden adjust-voice-row">
+          <strong class="adjust-voice-label">Voice:</strong>
+          <button type="button" id="adjust-btn-play-voice" class="adjust-voice-play-btn"><i class="fa-solid fa-circle-play adjust-voice-play-icon"></i></button>
+          <span class="adjust-voice-duration-label">voice_memo.wav (0:04)</span>
         </div>
-        <div style="font-size: 13px;">
-          <strong style="color: var(--text-muted);">Details:</strong> <span id="adjust-details" class="italic text-color"></span>
+        <div class="adjust-summary-row-last">
+          <strong class="adjust-summary-label">Details:</strong> <span id="adjust-details" class="italic text-color"></span>
         </div>
       </div>
 
       <div class="form-group">
         <label for="adjust-action-type">Adjustment Action</label>
-        <select id="adjust-action-type" class="form-control" style="margin-bottom: 12px;">
+        <select id="adjust-action-type" class="form-control adjust-action-type-select">
           <option value="modify">Modify Target Load & Reps</option>
           <option value="swap">Swap Exercise (Regression/Progression)</option>
           <option value="dismiss">Dismiss Alert Only (No Changes)</option>
@@ -217,7 +204,7 @@ export function renderApplyAdjustmentDialog() {
 
       <!-- PANEL: Modify load & reps -->
       <div id="adjust-panel-modify" class="adjust-action-panel">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+        <div class="adjust-modify-grid">
           <div class="form-group">
             <label for="adjust-weight">Target Weight (kg)</label>
             <input type="number" step="0.5" id="adjust-weight" class="form-control">
@@ -242,7 +229,7 @@ export function renderApplyAdjustmentDialog() {
         </div>
       </div>
 
-      <div class="modal-actions" style="margin-top: 20px;">
+      <div class="modal-actions adjust-modal-actions">
         <button type="button" class="btn secondary-btn modal-cancel">Cancel</button>
         <button type="submit" class="btn primary-btn">Apply & Resolve</button>
       </div>

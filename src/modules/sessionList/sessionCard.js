@@ -103,16 +103,14 @@ function computeIsLaunched(b, activeSession, activeId) {
 // Readiness warnings — a session needs both a program and at least one participant.
 function buildReadinessWarningsHTML(routineName, clientCount, t) {
   const pill = (label) => `
-    <div class="session-warning-pill" style="display: inline-flex; align-items: center; gap: 4px; background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700;">
+    <div class="session-warning-pill">
       <i class="fa-solid fa-triangle-exclamation"></i>
       <span>${label}</span>
     </div>`;
   const warnings = [];
   if (!routineName) warnings.push(pill(t("program_not_defined")));
   if (clientCount === 0) warnings.push(pill(t("no_members_assigned")));
-  return warnings.length
-    ? `<div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px;">${warnings.join("")}</div>`
-    : "";
+  return warnings.length ? `<div class="session-warning-list">${warnings.join("")}</div>` : "";
 }
 
 // Every clock-driven field a card can show: a past session's recorded/derived elapsed time, an
@@ -223,25 +221,25 @@ function buildSessionCardInfoHTML({
   const programmeHTML = routineName
     ? sameAsTitle
       ? ""
-      : `<span style="opacity: 0.45;">&bull;</span>
-      <span><i class="fa-solid fa-clipboard-list" style="margin-right: 4px; font-size: 10px;"></i>${escapeHTML(routineName)}</span>`
-    : `<span style="opacity: 0.45;">&bull;</span>
-      <span style="color: #ef4444; font-weight: 600;"><i class="fa-solid fa-clipboard-list" style="margin-right: 4px; font-size: 10px;"></i>${escapeHTML(t("undefined"))}</span>`;
+      : `<span class="session-card-dot-sep">&bull;</span>
+      <span><i class="fa-solid fa-clipboard-list session-card-icon"></i>${escapeHTML(routineName)}</span>`
+    : `<span class="session-card-dot-sep">&bull;</span>
+      <span class="session-card-undefined-programme"><i class="fa-solid fa-clipboard-list session-card-icon"></i>${escapeHTML(t("undefined"))}</span>`;
 
   const injuryHTML = anyInjury
-    ? `<i class="fa-solid fa-triangle-exclamation" style="margin-left: 4px; font-size: 10px; color: #ef4444;" title="${escapeHTML(t("notes_injuries"))}"></i>`
+    ? `<i class="fa-solid fa-triangle-exclamation session-card-injury-icon" title="${escapeHTML(t("notes_injuries"))}"></i>`
     : "";
 
   return `
-    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 1px;">
-      <span class="badge badge-primary" style="font-size: 10px; padding: 2px 6px; font-weight: 700; font-family: monospace;">${escapeHTML(b.time)}</span>
-      <strong class="session-card-title" style="font-size: 13px;">${escapeHTML(b.title)}</strong>
-      <button class="btn-edit-session icon-btn text-muted" title="${escapeHTML(t("edit") || "Edit")}" style="margin-left: auto; padding: 2px 6px; font-size: 11px;" aria-label="${escapeHTML(t("edit") || "Edit")}">
+    <div class="session-card-header-row">
+      <span class="badge badge-primary session-card-time-badge">${escapeHTML(b.time)}</span>
+      <strong class="session-card-title">${escapeHTML(b.title)}</strong>
+      <button class="btn-edit-session icon-btn text-muted session-card-edit-btn" title="${escapeHTML(t("edit") || "Edit")}" aria-label="${escapeHTML(t("edit") || "Edit")}">
         <i class="fa-solid fa-pen-to-square"></i>
       </button>
     </div>
-    <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 11px; color: var(--text-muted); line-height: 1.3;">
-      <span><i class="fa-solid fa-users" style="margin-right: 4px; font-size: 10px;"></i><span style="color: var(--primary); font-weight: 600;">${clientCount}/${b.maxCapacity} ${escapeHTML(t("spots_filled"))}</span>${injuryHTML}</span>
+    <div class="session-card-meta-row">
+      <span><i class="fa-solid fa-users session-card-icon"></i><span class="session-card-capacity">${clientCount}/${b.maxCapacity} ${escapeHTML(t("spots_filled"))}</span>${injuryHTML}</span>
       ${programmeHTML}
     </div>
     ${warningHTML}
@@ -322,18 +320,8 @@ export function renderSessionCard(b, colContainer, deps) {
   const isLive = isLaunched;
   if (isLive) card.classList.add("session-live");
 
-  // Hover feedback style
-  card.addEventListener("mouseenter", () => {
-    card.style.background = "rgba(255, 255, 255, 0.05)";
-    card.style.transform = "translateY(-1px)";
-  });
-  card.addEventListener("mouseleave", () => {
-    card.style.background = "";
-    card.style.transform = "";
-  });
-
   const info = document.createElement("div");
-  info.style.flex = "1";
+  info.className = "session-card-info";
 
   // Resolve participants with injury checking
   const clients = b.participants

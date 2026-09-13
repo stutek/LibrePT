@@ -60,8 +60,7 @@ export function openFeedbackModal(exId) {
   if (audioPlayer) audioPlayer.classList.add("hidden");
   if (recordStatus) recordStatus.textContent = t("voice_ready");
   if (recordIcon) {
-    recordIcon.className = "fa-solid fa-microphone";
-    recordIcon.style.color = "";
+    recordIcon.className = "fa-solid fa-microphone voice-record-icon";
   }
 
   openModal("dialog-feedback", { resetForm: true, formId: "form-feedback" });
@@ -109,19 +108,19 @@ export function renderFeedbackDialog() {
       </div>
 
       <!-- Privacy-First Voice Note Group -->
-      <div class="form-group" style="margin-top: 16px;">
-        <label style="display: flex; align-items: center; justify-content: space-between;">
+      <div class="form-group feedback-voice-group">
+        <label class="feedback-voice-label">
           <span id="label-voice-note" data-i18n="voice_note_label">Privacy-First Voice Note</span>
-          <span class="badge badge-emerald" style="font-size: 8px; padding: 1px 4px;">Local Only</span>
+          <span class="badge badge-emerald feedback-local-badge">Local Only</span>
         </label>
-        <div class="voice-recorder-widget" style="display: flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.15); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color); margin-top: 4px;">
-          <button type="button" id="btn-voice-record" class="btn secondary-btn" style="width: 40px; height: 40px; border-radius: 50%; padding: 0; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; background: rgba(255,255,255,0.05); color: var(--primary); border-color: var(--border-color); flex-shrink: 0;">
-            <i class="fa-solid fa-microphone" id="voice-record-icon" style="font-size: 16px;"></i>
+        <div class="voice-recorder-widget">
+          <button type="button" id="btn-voice-record" class="btn secondary-btn voice-record-btn">
+            <i class="fa-solid fa-microphone voice-record-icon" id="voice-record-icon"></i>
           </button>
-          <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
-            <div id="voice-record-status" style="font-size: 11px; font-weight: 600; color: var(--text-muted);" data-i18n="voice_ready">Ready to record voice memo</div>
+          <div class="voice-status-col">
+            <div id="voice-record-status" class="voice-record-status-text" data-i18n="voice_ready">Ready to record voice memo</div>
             <!-- Mock audio wave visualization -->
-            <div id="voice-audio-wave" class="audio-wave-container hidden" style="display: flex; align-items: center; gap: 2px; height: 16px; margin-top: 4px;">
+            <div id="voice-audio-wave" class="audio-wave-container hidden">
               <span class="wave-bar"></span>
               <span class="wave-bar"></span>
               <span class="wave-bar"></span>
@@ -131,9 +130,9 @@ export function renderFeedbackDialog() {
               <span class="wave-bar"></span>
             </div>
             <!-- Audio player review if recorded -->
-            <div id="voice-audio-player" class="audio-player-mini hidden" style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
-              <button type="button" id="btn-play-voice-preview" style="background: none; border: none; color: var(--primary); cursor: pointer; padding: 0;"><i class="fa-solid fa-circle-play" style="font-size: 16px;"></i></button>
-              <div style="font-size: 10px; color: var(--text-color); font-family: monospace;">voice_memo.wav (0:04)</div>
+            <div id="voice-audio-player" class="audio-player-mini hidden">
+              <button type="button" id="btn-play-voice-preview" class="voice-preview-btn"><i class="fa-solid fa-circle-play voice-preview-icon"></i></button>
+              <div class="voice-memo-filename">voice_memo.wav (0:04)</div>
             </div>
           </div>
         </div>
@@ -197,8 +196,8 @@ export function setupFeedbackForms() {
         feedbackIsRecording = true;
         feedbackHasVoiceNote = false;
         if (recordIcon) {
-          recordIcon.className = "fa-solid fa-stop";
-          recordIcon.style.color = "#ef4444"; // red indicating recording active
+          // is-recording (feedbackModal.css) colors the icon var(--danger) while recording.
+          recordIcon.className = "fa-solid fa-stop voice-record-icon is-recording";
         }
         if (recordStatus) recordStatus.textContent = t("voice_recording");
         if (audioWave) {
@@ -211,8 +210,7 @@ export function setupFeedbackForms() {
         feedbackIsRecording = false;
         feedbackHasVoiceNote = true;
         if (recordIcon) {
-          recordIcon.className = "fa-solid fa-microphone";
-          recordIcon.style.color = "";
+          recordIcon.className = "fa-solid fa-microphone voice-record-icon";
         }
         if (recordStatus) recordStatus.textContent = t("voice_processing");
         if (audioWave) {
@@ -255,15 +253,15 @@ export function setupFeedbackForms() {
       const recordStatus = $id("voice-record-status");
       if (playIcon) {
         if (playIcon.classList.contains("fa-circle-play")) {
-          playIcon.className = "fa-solid fa-circle-pause";
+          playIcon.className = "fa-solid fa-circle-pause voice-preview-icon";
           if (recordStatus) recordStatus.textContent = t("voice_playing");
 
           setTimeout(() => {
-            playIcon.className = "fa-solid fa-circle-play";
+            playIcon.className = "fa-solid fa-circle-play voice-preview-icon";
             if (recordStatus) recordStatus.textContent = t("voice_transcription_done");
           }, 3000);
         } else {
-          playIcon.className = "fa-solid fa-circle-play";
+          playIcon.className = "fa-solid fa-circle-play voice-preview-icon";
           if (recordStatus) recordStatus.textContent = t("voice_transcription_done");
         }
       }

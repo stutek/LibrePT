@@ -94,3 +94,16 @@
   text-overflow: ellipsis;
   max-width: 45%;
 }
+
+/* The name tinted by feedback logged for this exercise (exerciseCard.js's getExerciseSignalColor) —
+   a colour only the running code knows, handed over as a custom property. */
+.deck-card-name.has-signal-color,
+.deck-card-name-inline.has-signal-color {
+  color: var(--signal-color);
+}
+/* Chained to beat exerciseDeckOfCards.css's future-session tint (0,3,0 specificity): a signal from
+   logged feedback always wins over the plain "this is a future plan" amber tint. */
+.exercise-deck-card.future-session .deck-card-name.has-signal-color,
+.exercise-deck-card.future-session .deck-card-name-inline.has-signal-color {
+  color: var(--signal-color);
+}

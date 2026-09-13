@@ -128,20 +128,20 @@ export function renderClientDetailViewShell() {
           </div>
         </div>
 
-        <div class="quick-workout-action" style="display: flex; gap: 8px; flex-wrap: wrap;">
-          <button id="btn-plan-client-program" class="btn primary-btn" style="flex: 1; min-width: 150px;">
+        <div class="quick-workout-action">
+          <button id="btn-plan-client-program" class="btn primary-btn">
             <i class="fa-solid fa-calendar-plus"></i> Plan Program
           </button>
-          <a id="btn-send-consent-email" class="btn secondary-btn" style="flex: 1; min-width: 150px; text-decoration: none; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+          <a id="btn-send-consent-email" class="btn secondary-btn">
             <i class="fa-solid fa-envelope"></i> <span id="btn-send-consent-email-text">Send Consent Form</span>
           </a>
-          <button id="btn-ai-safe-copy" class="btn secondary-btn" style="flex: 1; min-width: 150px;">
+          <button id="btn-ai-safe-copy" class="btn secondary-btn">
             <i class="fa-solid fa-user-shield"></i> AI Safe Copy
           </button>
-          <button id="btn-client-export" class="btn secondary-btn" style="flex: 1; min-width: 150px;">
+          <button id="btn-client-export" class="btn secondary-btn">
             <i class="fa-solid fa-file-export"></i> Export data (GDPR)
           </button>
-          <button id="btn-client-erase" class="btn secondary-btn" style="flex: 1; min-width: 150px;">
+          <button id="btn-client-erase" class="btn secondary-btn">
             <i class="fa-solid fa-user-slash"></i> Erase client (GDPR)
           </button>
         </div>

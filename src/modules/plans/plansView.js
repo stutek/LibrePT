@@ -50,7 +50,7 @@ export function renderRoutinesList({ state, t, openWorkoutSetupModal }) {
   container.innerHTML = "";
 
   if (state.routines.length === 0) {
-    container.innerHTML = `<div class="card glassmorphic text-center text-muted" style="grid-column: 1/-1;">${t("no_routines_found")}</div>`;
+    container.innerHTML = `<div class="card glassmorphic text-center text-muted routines-empty-state">${t("no_routines_found")}</div>`;
     return;
   }
 
@@ -87,7 +87,7 @@ export function renderRoutinesList({ state, t, openWorkoutSetupModal }) {
         <p>${escapeHTML(routine.description || t("no_description"))}</p>
         <div class="routine-exercise-preview-tags">
           ${tags}
-          ${moreCount ? `<span class="preview-tag" style="background:var(--primary-light); color:var(--primary); font-weight:700">${moreCount}</span>` : ""}
+          ${moreCount ? `<span class="preview-tag preview-tag-more">${moreCount}</span>` : ""}
         </div>
       </div>
       <button class="btn secondary-btn btn-sm w-full btn-launch-routine">
@@ -156,14 +156,14 @@ export function addRoutineExerciseRow({ preset = null, state, t }) {
       <option value="" disabled ${!preset ? "selected" : ""}>Select Exercise</option>
       ${optionsHTML}
     </select>
-    <div class="form-group" style="gap:2px">
+    <div class="form-group routine-builder-field">
       <input type="number" min="1" placeholder="Sets" class="form-control input-sets" value="${preset ? preset.sets : "3"}" required aria-label="Sets quantity">
     </div>
-    <div class="form-group" style="gap:2px">
+    <div class="form-group routine-builder-field">
       <input type="text" placeholder="Reps" class="form-control input-reps" list="reps-presets" value="${preset ? escapeHTML(String(preset.reps)) : "10"}" required aria-label="Primary target (reps, time, distance, or 'max' to failure — depends on the exercise's modality)">
     </div>
-    <div class="form-group load-cell" style="gap:2px"></div>
-    <div class="form-group" style="gap:2px">
+    <div class="form-group load-cell routine-builder-field"></div>
+    <div class="form-group routine-builder-field">
       <input type="number" min="0" step="5" placeholder="Rest" class="form-control input-rest" value="${preset ? preset.rest : "60"}" required aria-label="Rest duration in seconds">
     </div>
     <button type="button" class="btn-remove-row" aria-label="Remove exercise from routine"><i class="fa-solid fa-trash-can"></i></button>

@@ -222,7 +222,7 @@ export function renderActiveSessionOverlayShell() {
       </div>
 
       <!-- Active Client Level Controls -->
-      <div class="clipboard-actions-row" style="display: none !important;">
+      <div class="clipboard-actions-row hidden">
         <button id="btn-add-exercise-to-session" class="btn secondary-btn btn-sm">
           <i class="fa-solid fa-circle-plus"></i> Inject Exercise
         </button>

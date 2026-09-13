@@ -1,6 +1,12 @@
 /* modules/clients/clientsView.css — client directory cards + client detail layout (profile,
    avatar, weight-history chart). Extracted from index.css to live next to clientsView.js. */
 
+/* The "no clients" placeholder (clientsDirectory.js) spans the whole #clients-list grid instead of
+   landing in its first column. */
+.clients-empty-state {
+  grid-column: 1 / -1;
+}
+
 .client-card {
   display: flex;
   justify-content: space-between;
@@ -81,6 +87,18 @@
 .quick-workout-action {
   border-top: 1px solid var(--border-color);
   padding-top: 16px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.quick-workout-action > .btn {
+  flex: 1;
+  min-width: 150px;
+}
+/* The consent e-mail is a mailto: link wearing the button's look. */
+.quick-workout-action > a.btn {
+  text-decoration: none;
+  text-align: center;
 }
 .data-table {
   width: 100%;

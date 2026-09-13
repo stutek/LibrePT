@@ -56,6 +56,21 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
     transform: translateY(0);
   }
 }
+
+/* The reverse of the slide-up open, driven by gestureController.js's slideOverlayDownThenHome
+   (the grabber tap and the swipe-down close the same way). Two classes, added one reflow apart:
+   is-closing freezes the overlay at its open position and drops the open animation, so the
+   transition that follows has a start point instead of racing it; is-sliding-down then drives the
+   close. Both stay on the element until the close finishes, and is-sliding-down must win the
+   transform tie — it is declared after is-closing here for that reason. */
+.active-session-overlay.is-closing {
+  animation: none;
+  transform: translateY(0);
+}
+.active-session-overlay.is-sliding-down {
+  transition: transform 0.24s ease;
+  transform: translateY(100%);
+}
 .session-title-bar {
   /* Flat-bar look (padding, divider, grab handle) comes from .view-titlebar; the client tabs
      follow immediately, so no bottom margin here. */

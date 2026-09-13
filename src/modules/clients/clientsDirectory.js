@@ -30,7 +30,7 @@ export function renderClientsDirectory(container, deps) {
   );
 
   if (filtered.length === 0) {
-    container.innerHTML = `<div class="card glassmorphic text-center text-muted" style="grid-column: 1/-1;">${t("no_clients_found")}</div>`;
+    container.innerHTML = `<div class="card glassmorphic text-center text-muted clients-empty-state">${t("no_clients_found")}</div>`;
     return;
   }
 
