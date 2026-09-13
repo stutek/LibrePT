@@ -30,8 +30,21 @@
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
+  /* A pull past the top or the bottom stays in the clipboard instead of reaching the page. */
+  overscroll-behavior-y: contain;
   display: flex;
   flex-direction: column;
+}
+/* On a phone, a pull down at the top of the PAGE reloads it. The trainer scrolls the clipboard
+   to move the active card (TODO §48.1), and a short list is at its top at once, so while the
+   clipboard is open the page itself refuses to reload on a pull (asked 2026-09-13). */
+html:has(#active-session-overlay:not(.hidden)) {
+  overscroll-behavior-y: contain;
+}
+/* The room deckScrollFocus.js measures, so the last card can be scrolled up to where the first
+   card rests. */
+#active-exercise-scroll-deck {
+  padding-bottom: var(--deck-scroll-room, 0px);
 }
 body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   padding-bottom: calc(var(--notif-handle-height, 92px) + var(--safe-bottom) + 24px);

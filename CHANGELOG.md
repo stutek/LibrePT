@@ -43,6 +43,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Changed
 
+- **A short list scrolls too.** The clipboard now leaves room below the last card, so every card,
+  also on a list that fits on the screen, can be made active by scrolling. The active card stays at
+  the height where the first card starts, and the cards slide under it. A pull down on the clipboard
+  no longer reloads the page on a phone (§48.1).
+
 - **Scrolling marks the card you are looking at.** On the clipboard, the card at the focus point
   gets a coloured left edge and a thin outline: it is the ACTIVE card. Scrolling closes the card
   that was open and shows no buttons on the active one. Tap a card to open it with its controls; a

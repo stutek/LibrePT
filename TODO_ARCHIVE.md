@@ -3067,8 +3067,14 @@ also opened §50 for every other form.
 **Not changed:** the rest timer. It already starts on a tap and keeps its way back to the card that
 started it.
 
-**Known limit:** a plan short enough to fit on the screen once every card is closed cannot be
-scrolled, so there only a tap moves the active card.
+**Follow-up the same day (Simon):** *"je možno premikati aktivno kartico samo s scrollom tudi, na
+kratkih seznamih brez page reload-a?"* — then *"1+2 prosim"*. A short list could not scroll, so only a
+tap moved the active card there. Now the deck measures the room it is missing and adds it at its end,
+and the scroll works like the wheel of a time picker: how far the list has scrolled decides the card,
+and the active card rests where the first card rests. While the clipboard is open, the page and the
+clipboard's scrolling area have `overscroll-behavior-y: contain`, so a pull down does not reload the
+page on a phone. The cost, said before it was built: closed cards stand about 30px apart on a phone,
+so a short pull moves the active card by one.
 
 ## 49. [x] A theme is a stylesheet, and the Red theme becomes Spreadsheet — shipped 2026-09-13
 

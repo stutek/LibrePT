@@ -31,12 +31,12 @@ CARD_STATE = """() => [...document.querySelectorAll('#active-exercise-scroll-dec
   }))"""
 
 
-def _mount(page, local_server, **session):
+def _mount(page, local_server, exercises=LONG_PLAN):
     page.set_viewport_size(PHONE)
     load_with_stub(
         page,
         local_server,
-        clipboard_stub(active_session_fixture(exercises=LONG_PLAN, **session)),
+        clipboard_stub(active_session_fixture(exercises=exercises)),
     )
     page.wait_for_selector("#active-session-overlay:not(.hidden)")
     page.wait_for_selector(".exercise-deck-card.is-active")
@@ -53,12 +53,12 @@ def _active(cards):
     return active[0]
 
 
-def _scroll_by_hand(page, dy):
+def _scroll_by_hand(page, dy, settle_ms=600):
     # The middle of the screen, which the deck covers at any scroll position. Aiming at the deck's
     # own box would put the pointer off screen once its top edge has scrolled away.
     page.mouse.move(PHONE["width"] / 2, PHONE["height"] / 2)
     page.mouse.wheel(0, dy)
-    page.wait_for_timeout(600)
+    page.wait_for_timeout(settle_ms)
 
 
 def test_the_tapped_card_is_both_open_and_active(page, local_server):
@@ -174,3 +174,42 @@ def test_scrolling_to_either_end_reaches_the_first_and_the_last_card(
 
     _scroll_by_hand(page, -20000)
     assert _active(_cards(page))["index"] == 0
+
+
+SHORT_PLAN = [exercise_item(f"sx{n}", f"Short plan exercise {n}") for n in range(4)]
+
+ACTIVE_CARD_TOP = """() => document.querySelector(
+  '#active-exercise-scroll-deck .exercise-deck-card.is-active').getBoundingClientRect().top"""
+
+
+def test_a_short_list_scrolls_through_every_card(page, local_server):
+    """Asked 2026-09-13 (Simon): a list short enough to fit on the screen must also move the active
+    card by scrolling alone. The deck makes room to scroll, so short steps down walk through every
+    card to the last and back up to the first, and the active card stays on the screen throughout."""
+    _mount(page, local_server, exercises=SHORT_PLAN)
+
+    # Closed cards on a phone stand about 30px apart, so a step of 15px cannot jump over one.
+    seen = [_active(_cards(page))["index"]]
+    for _ in range(40):
+        _scroll_by_hand(page, 15, settle_ms=150)
+        seen.append(_active(_cards(page))["index"])
+        assert 0 <= page.evaluate(ACTIVE_CARD_TOP) < PHONE["height"], seen
+    assert sorted(set(seen)) == [0, 1, 2, 3], f"scrolling down skipped a card: {seen}"
+    assert seen[-1] == 3
+
+    _scroll_by_hand(page, -2000)
+    assert _active(_cards(page))["index"] == 0
+
+
+def test_a_pull_on_the_clipboard_does_not_reload_the_page(page, local_server):
+    """Asked 2026-09-13 (Simon). On a phone, a pull down at the top of the page reloads it, and a
+    short list reaches its top at once. While the clipboard is open, the page and the clipboard's
+    scrolling area keep a pull to themselves. A desktop browser has no pull-to-reload to trigger, so
+    what is checked is the setting the phone's browser obeys."""
+    _mount(page, local_server, exercises=SHORT_PLAN)
+
+    behaviour = page.evaluate(
+        """() => [document.documentElement, document.querySelector('.clipboard-body')]
+             .map((el) => getComputedStyle(el).overscrollBehaviorY)"""
+    )
+    assert behaviour == ["contain", "contain"], behaviour
