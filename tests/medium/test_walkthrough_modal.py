@@ -219,6 +219,9 @@ def test_an_open_menu_is_closed_before_the_step_is_demonstrated(page, local_serv
         f"the stub's menu is not covering the control: {covered}"
     )
 
+    # Since 2026-09-13 (§51) that tap interrupts the guide, so Show me is not offered from here: the
+    # card's way back closes the menu first, and the step is then shown on a clean screen.
+    page.locator("#walkthrough-return").click()
     page.locator("#walkthrough-show").click()
     expect(page.locator("#outside")).to_have_text("tapped", timeout=15_000)
 

@@ -20,6 +20,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-09-13 — A tap outside the step pauses the guided demo
+
+### Fixed
+
+- **The demo's highlight no longer stays lit over the ☰ menu.** During the guided demo, a tap on
+  any button that the step did not ask for stops the demo at that step. The ring around the step's
+  control goes away, and the demo card offers **Back to the demo** and **Stop the demo**. Back to
+  the demo closes the menu or window that the tap opened and shows the step again. A tap that does
+  the step anyway still moves the demo on (§51).
+
 ## 2026-09-13 — The active card on the clipboard
 
 ### Changed

@@ -73,6 +73,10 @@ const READY_SETTLE_MS = 2500;
 // Consecutive polls a step has to be impossible before the guide says the trainer has left its
 // place. One reading is a view mid-render; three is somebody who went somewhere else.
 const OFF_TRACK_TICKS = 3;
+// What a stray tap has to land on to count: a control. A tap on the empty board or on a card's text
+// asks the app for nothing, and interrupting the guide for it would punish a thumb resting on glass.
+const TAPPABLE =
+  'button, a[href], input, select, textarea, label, summary, [role="button"], [role="menuitem"], [role="tab"]';
 // How far back a rebuild will go to restore what the story has already SHOWN, when the step itself
 // is already performable. The last few taps are what a card describes — "type it over the number"
 // wants the number in the box — while the state behind a chapter boundary is long gone and trying
@@ -252,6 +256,10 @@ export function startGuidedWalkthrough({
   // their own is the expected case, not a fault, so it takes more than one reading to say so.
   let offTrackTicks = 0;
   let offTrack = false;
+  // A tap the step did not ask for, waiting for the next poll to judge it, and whether one has
+  // interrupted the guide — see noticeStrayTap.
+  let strayTap = false;
+  let interrupted = false;
   // The STEP whose control this guide has already scrolled out from under its own panel, and the
   // step it has given up height for. By step rather than by element: a board re-renders its cards, so
   // the element a step resolves to is a different object almost every tick.
@@ -276,6 +284,7 @@ export function startGuidedWalkthrough({
     }
     view.removeEventListener("scroll", followTarget, { capture: true });
     view.removeEventListener("resize", followTarget);
+    doc.removeEventListener("click", noticeStrayTap, { capture: true });
     shapeWatcher?.disconnect();
     unmountDemoHand(doc);
     // Only the surface this guide MOUNTED. A narrator handed in belongs to whoever built it — the
@@ -288,7 +297,9 @@ export function startGuidedWalkthrough({
   }
 
   function positionSpotlight(target) {
-    if (!target) {
+    // Off the demo's path the ring points at a control nobody is being asked to use — and after a
+    // stray tap it would be lit over whatever that tap opened (reported 2026-09-13, §51).
+    if (!target || offTrack) {
       el.spotlight.classList.remove("is-visible");
       return;
     }
@@ -935,6 +946,8 @@ export function startGuidedWalkthrough({
     el.problem.hidden = true;
     offTrack = false;
     offTrackTicks = 0;
+    strayTap = false;
+    interrupted = false;
     // A new step is a new question about where the panel may sit: it gets its own scroll, and the
     // height the last one was given back.
     scrolledClearOf = null;
@@ -1145,11 +1158,17 @@ export function startGuidedWalkthrough({
     showing = true;
     render();
     try {
-      await restoreGroundFor(currentWalkthroughStep(tour, state));
+      const step = currentWalkthroughStep(tour, state);
+      // First, whatever the stray tap opened. A menu that does not cover the step's control leaves
+      // the step "ready", so the rebuild alone would come back to a guide with the menu still down.
+      dismissStaleOverlays(step);
+      await restoreGroundFor(step);
     } finally {
       showing = false;
       offTrack = false;
       offTrackTicks = 0;
+      strayTap = false;
+      interrupted = false;
       // The step's own card comes back with the step: the guide's "you have wandered off" card was
       // standing in its place, and the app is now where the step happens again.
       cards.showStep(currentWalkthroughStep(tour, state));
@@ -1202,11 +1221,42 @@ export function startGuidedWalkthrough({
    * step's card for the guide's own (§38.10); coming back puts the step's card in its place.
    */
   function noticeWandering(step) {
-    if (offTrack === offTrackTicks >= OFF_TRACK_TICKS) return;
-    offTrack = offTrackTicks >= OFF_TRACK_TICKS;
+    const wandered = interrupted || offTrackTicks >= OFF_TRACK_TICKS;
+    if (offTrack === wandered) return;
+    offTrack = wandered;
     if (offTrack) cards.showOffTrack(true);
     else cards.showStep(step);
     render();
+  }
+
+  /** A tap the step did not ask for INTERRUPTS the guide (wanted 2026-09-13, §51).
+   *
+   * Until then the guide only noticed the trainer leaving when the step's control vanished from the
+   * screen. The ☰ menu drops down while that control is still there, so the ring stayed lit over a
+   * menu nobody had been asked to open. Now a tap on any control that is not the step's own, and not
+   * on the guide's panel, swaps the card for "you have wandered off" with its way back.
+   *
+   * Judged on the next poll rather than here: a tap beside the resolved control can still complete
+   * the step, and that is a step done, not a trainer lost. Only a person's tap counts — the guide's
+   * own demonstrations and repairs tap with `click()`, which is never `isTrusted`.
+   */
+  function noticeStrayTap(event) {
+    if (!event.isTrusted || showing || offTrack) return;
+    const tapped = event.target;
+    if (!(tapped instanceof view.Element) || !tapped.closest(TAPPABLE)) return;
+    if (el.overlay.contains(tapped) || tapped.closest("#demo-narrator-card")) return;
+    const step = currentWalkthroughStep(tour, state);
+    if (!step) return;
+    const target = resolveTarget(doc, step);
+    if (target && (target.contains(tapped) || tapped.contains(target))) return;
+    strayTap = true;
+  }
+  doc.addEventListener("click", noticeStrayTap, { capture: true });
+
+  /** A stray tap interrupts unless it turned out to do the step; a step done clears an interruption. */
+  function judgeStrayTap(done) {
+    interrupted = done ? false : interrupted || strayTap;
+    strayTap = false;
   }
 
   ticker = setInterval(() => {
@@ -1235,6 +1285,7 @@ export function startGuidedWalkthrough({
     // to, and the guide handles both by itself. Scrolling the board is not leaving the demo.
     const wandered = !done && (!stepPreconditionMet(step, doc) || !resolveTarget(doc, step));
     offTrackTicks = wandered ? offTrackTicks + 1 : 0;
+    judgeStrayTap(done);
     noticeWandering(step);
     if (!done) return;
 

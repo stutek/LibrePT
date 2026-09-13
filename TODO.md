@@ -4157,3 +4157,7 @@ trainer details and the program import.
 draft lives (`sessionStorage` dies with the tab, which a phone may close on its own); when a draft is
 thrown away (saved, cancelled, or after some time); and whether the review becomes a test that fails
 the build when a new form forgets it.
+
+## 51. [x] A tap the demo step did not ask for interrupts the guide — fixed 2026-09-13
+
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#51-x-a-tap-the-demo-step-did-not-ask-for-interrupts-the-guide--fixed-2026-09-13); what shipped is in [CHANGELOG.md](CHANGELOG.md).

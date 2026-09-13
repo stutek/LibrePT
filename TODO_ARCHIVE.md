@@ -3136,3 +3136,41 @@ header: at equal specificity it would win over the sandbox's orange header.
 restyles must still exist, since a renamed component would otherwise drop out of one theme without a
 sound. A saved `red` choice and an old `?theme=red` link open the new theme
 ([test_theme.py](tests/medium/test_theme.py)).
+
+## 51. [x] A tap the demo step did not ask for interrupts the guide — fixed 2026-09-13
+
+**Reported 2026-09-13 (Simon):** *"klik na meni ne odstrani highlightov od walkthrough-a,
+nepričakovani klik naj prekine walkthrough in kartica ponudi vrnitev"* — a tap on the menu leaves
+the walkthrough's highlight on screen; an unexpected tap should interrupt the walkthrough, and the
+card should offer the way back.
+
+**Why it happened.** The guide already had a "you have wandered off" card (§38.5), but it appeared
+only when the step's control was gone from the screen for three polls. The ☰ menu drops down while
+the step's session card is still there, so the ring stayed lit over the menu.
+
+**What changed** ([walkthroughOverlay.js](src/modules/demo/walkthroughOverlay.js)):
+
+- A real tap on a control (button, link, field, menu item) that is not the step's own control and
+  not on the guide's panel is recorded. Taps on empty space do not count.
+- The next poll judges it. If the step is not done by then, the guide is interrupted: the ring
+  goes away and the card shows *Back to the demo* / *Stop the demo*. A tap that does the step by
+  another route is a step done, so the guide moves on instead.
+- The guide's own taps (*Show me*, the rebuild) use `click()`, which is never `isTrusted`, so they
+  never interrupt.
+- *Back to the demo* first closes the menu or window the tap opened, through its own control, and
+  then rebuilds the step as before.
+
+**An earlier ruling changed with it.** On 2026-08-26 the case "open the menu by hand, then tap
+*Show me*" was answered by *Show me* closing the menu. The menu tap now interrupts the guide, so
+*Show me* is not offered there; *Back to the demo* closes the menu and *Show me* returns.
+[test_walkthrough_modal.py](tests/medium/test_walkthrough_modal.py) walks that path now. Closing the
+clipboard mid-step is also a stray tap, so the console-diagnosis test in
+[test_walkthrough.py](tests/e2e/test_walkthrough.py) returns through the card instead of Back and
+Next — it had passed only because the guide took three polls to notice.
+
+**Words unchanged, possibly worth revisiting:** the card still says *"You have left the demo's place
+in the app"*, which is loose after a menu tap on the same screen. Left for §38.21 (the demo's card
+text, waiting on the maintainer).
+
+Tested by `test_a_tap_the_step_did_not_ask_for_interrupts_the_demo` in
+[test_walkthrough.py](tests/e2e/test_walkthrough.py).

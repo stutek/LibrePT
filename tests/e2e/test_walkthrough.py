@@ -394,6 +394,35 @@ def test_a_step_whose_ground_was_pulled_away_rebuilds_it(page, local_server):
     expect(page.locator(SHOW_ME)).to_be_visible()
 
 
+def test_a_tap_the_step_did_not_ask_for_interrupts_the_demo(page, local_server):
+    """Reported 2026-09-13 (TODO §51): "klik na meni ne odstrani highlightov od walkthrough-a,
+    nepričakovani klik naj prekine walkthrough in kartica ponudi vrnitev".
+
+    The ☰ menu drops down over the board while the step's session card is still on screen, so the
+    guide did not count it as leaving: the ring stayed lit over a menu nobody was being asked to use.
+    A real tap on a control that is not the step's own now interrupts the guide, and the way back
+    closes what that tap opened.
+    """
+    _open_walkthrough(page, local_server)
+    ring = page.locator(".walkthrough-spotlight")
+    expect(ring).to_have_class(re.compile(r"\bis-visible\b"), timeout=15_000)
+
+    page.locator("#btn-app-menu").click()
+
+    expect(page.locator("#walkthrough-return")).to_be_visible(timeout=5_000)
+    expect(ring).not_to_have_class(re.compile(r"\bis-visible\b"))
+    expect(page.locator(SHOW_ME)).to_be_hidden()
+
+    page.locator("#walkthrough-return").click()
+
+    expect(page.locator("#app-menu")).to_have_class(
+        re.compile(r"\bhidden\b"), timeout=5_000
+    )
+    expect(ring).to_have_class(re.compile(r"\bis-visible\b"), timeout=5_000)
+    expect(page.locator(SHOW_ME)).to_be_visible()
+    expect(page.locator(PROGRESS)).to_contain_text("1")
+
+
 def test_show_me_brings_a_scrolled_away_control_into_view_before_tapping(
     page, local_server
 ):
@@ -486,14 +515,17 @@ def test_the_diagnosis_goes_to_the_console_not_to_the_trainer(page, local_server
     expect(page.locator(PROGRESS)).to_contain_text("2")
 
     page.locator("#active-session-overlay .view-grabber").click()
-    # Wait for the CONDITION, not for a stopwatch. Closing the overlay makes the guide notice its
-    # step's control is gone and re-lay the panel, and a fixed 600ms was long enough on a quiet
-    # machine and not on a busy one — this failed twice in the gate under load and never in
-    # isolation. What the next line needs is the Back button being clickable, so that is what is
-    # waited for.
-    expect(page.locator(BACK)).to_be_visible(timeout=15_000)
-    page.locator(BACK).click()
-    page.locator(NEXT).click()
+    # Closing the clipboard is a tap the step did not ask for, so the guide is interrupted and offers
+    # the way back (§51). Until then this walked Back and Next, which only worked while the guide took
+    # three polls to notice — a race the test won on a quiet machine. Wait for the CONDITION, not for
+    # a stopwatch — and for BOTH conditions: the interruption lands on the next poll, before the
+    # clipboard has finished closing, and a way back tapped then finds the step still ready and has
+    # nothing to rebuild (failed that way in the gate, 2026-09-13).
+    expect(page.locator("#active-session-overlay")).to_have_class(
+        re.compile(r"\bhidden\b"), timeout=15_000
+    )
+    expect(page.locator("#walkthrough-return")).to_be_visible(timeout=15_000)
+    page.locator("#walkthrough-return").click()
     expect(page.locator("#active-exercise-scroll-deck")).to_be_visible(timeout=15_000)
 
     assert any("[walkthrough]" in text for text in warnings), (
