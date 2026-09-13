@@ -137,13 +137,16 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
 - Commit messages: `type(scope): imperative summary` (lowercase, ≤72 chars), blank line, body
   wrapped at 72 saying **why**, `Co-Authored-By:` the model actually running.
 - **Run `.venv/bin/python -m build check` in full before every code commit**, unpiped, and report
-  the result. **Say the clock time it will finish BEFORE launching it** — `.build-reports/last-run.json`
-  holds the last duration, so that is a time, not "a few minutes"; the run's own header prints the
-  same estimate. Prose-only commits run `.venv/bin/python -m agent_tools.doclinks` instead, and
+  the result. **Say the clock time it will finish BEFORE launching it, in the reply, for every run —
+  a re-run too** — `.build-reports/last-run.json` holds the last duration, so that is a time such as
+  "done at 08:49", never "312 seconds" or "a few minutes", and a time written only in the note has
+  not been said; the run's own header prints the same estimate. Prose-only commits run `.venv/bin/python -m agent_tools.doclinks` instead, and
   say so.
 - **Run the checks your change can break BEFORE the gate**, one at a time: `pytest <file>`,
   `node --test <file>`, and the `agent_tools.*` check that owns the rule — a theme calls for contrast
-  and palette parity, a new module for catalog coverage and doclinks, a new icon for coverage and the
+  and palette parity, a new module for catalog coverage, doclinks and the service worker's precache
+  list (`tests/unit/test_project_layout.py`), a new route for the overflow walk
+  (`tests/e2e/test_layout_overflow.py::test_the_walk_still_covers_every_route`), a new icon for coverage and the
   render baseline, new user-visible text for `ui_strings`, a closed `§` for `todo_hygiene`. The gate
   PROVES a tree; it is not where facts are discovered. Five minutes spent learning a two-second fact
   is the maintainer's time, and the same five minutes blocks every other agent in the tree.
