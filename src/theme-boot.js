@@ -19,11 +19,17 @@
     }
     const params = new URLSearchParams(window.location.search);
     const t = params.get("theme") || localStorage.getItem("librept-theme") || "daylight";
-    const map = { dark: "midnight", light: "daylight", rose: "blossom", violet: "nebula" };
+    const map = {
+      dark: "midnight",
+      light: "daylight",
+      rose: "blossom",
+      violet: "nebula",
+      red: "spreadsheet",
+    };
     const valid = {
       midnight: "midnight-theme",
       daylight: "daylight-theme",
-      red: "red-theme",
+      spreadsheet: "spreadsheet-theme",
       blossom: "blossom-theme",
       nebula: "nebula-theme",
     };

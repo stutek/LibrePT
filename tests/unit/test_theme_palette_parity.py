@@ -45,7 +45,7 @@ def test_themes_present(src_dir):
     assert {f.stem for f in files} >= {
         "midnight",
         "daylight",
-        "red",
+        "spreadsheet",
         "blossom",
         "nebula",
     }

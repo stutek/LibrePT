@@ -420,13 +420,8 @@ export function renderHeaderShell() {
               </div>
               <div class="menu-control-row">
                 <label class="menu-control-label" for="theme-switcher"><i class="fa-solid fa-palette" aria-hidden="true"></i> <span id="menu-label-theme">Theme</span></label>
-                <select id="theme-switcher" class="form-control menu-select" aria-label="Theme / Tema">
-                  <option value="daylight" selected>Daylight</option>
-                  <option value="midnight">Midnight</option>
-                  <option value="red">Red</option>
-                  <option value="blossom">Blossom</option>
-                  <option value="nebula">Nebula</option>
-                </select>
+                <!-- Options come from THEME_SWITCHER_LABELS (theme.js), so a theme is named in one place. -->
+                <select id="theme-switcher" class="form-control menu-select" aria-label="Theme / Tema"></select>
               </div>
               <div class="menu-divider" role="separator"></div>
               <!-- The mode switch, first in the list on purpose (TODO §40.5): entering the sandbox

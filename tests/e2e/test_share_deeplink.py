@@ -57,12 +57,12 @@ def test_theme_param_preselects_theme(page, local_server):
 
 
 def test_lang_and_theme_params_combine(page, local_server):
-    page.goto(local_server + "?lang=sl&theme=red")
+    page.goto(local_server + "?lang=sl&theme=spreadsheet")
     page.wait_for_selector("#view-clients.active")
 
     assert page.locator("#lang-switcher").input_value() == "sl"
-    assert "red-theme" in _body_classes(page)
-    assert page.locator("#theme-switcher").input_value() == "red"
+    assert "spreadsheet-theme" in _body_classes(page)
+    assert page.locator("#theme-switcher").input_value() == "spreadsheet"
 
 
 def test_unknown_theme_reverts_to_default(page, local_server):

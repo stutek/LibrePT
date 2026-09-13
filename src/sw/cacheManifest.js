@@ -83,7 +83,7 @@ self.swCacheManifest = (() => {
     "./modules/themes/daylight.css",
     "./modules/themes/midnight.css",
     "./modules/themes/nebula.css",
-    "./modules/themes/red.css",
+    "./modules/themes/spreadsheet.css",
     // Domain: the training vocabulary — pure, no DOM, no storage
     "./domain/repsAndLoad.js",
     "./domain/exerciseModality.js",

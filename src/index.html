@@ -71,6 +71,16 @@
   <link rel="stylesheet" href="modules/session/sessionInviteDialog.css">
   <link rel="stylesheet" href="modules/sessionList/sessionsView.css">
   <link rel="stylesheet" href="modules/sessionList/sessionFilterBar.css">
+  <!-- Themes after every module stylesheet, so a theme's rule wins over the component's at equal
+       specificity (docs/ARCHITECTURE.md#themes-and-styling). -->
+  <link rel="stylesheet" href="modules/themes/midnight.css">
+  <link rel="stylesheet" href="modules/themes/daylight.css">
+  <link rel="stylesheet" href="modules/themes/spreadsheet.css">
+  <link rel="stylesheet" href="modules/themes/blossom.css">
+  <link rel="stylesheet" href="modules/themes/nebula.css">
+  <!-- LAST: the sandbox's orange marks are not a sixth theme but a state worn over whichever theme
+       is active, so they must win over a theme's own rules too. -->
+  <link rel="stylesheet" href="modules/common/sandboxMarker.css">
 
   <!-- Module Preloading for Core Architecture & Views -->
   <link rel="modulepreload" href="app.js">

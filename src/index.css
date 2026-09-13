@@ -1,15 +1,8 @@
 /* index.css - LibrePT Modern UI Style Guide & Design System */
 
-/* Themes & Look & Feel Selections */
-@import url("./modules/themes/midnight.css");
-@import url("./modules/themes/daylight.css");
-@import url("./modules/themes/red.css");
-@import url("./modules/themes/blossom.css");
-@import url("./modules/themes/nebula.css");
-/* LAST on purpose: the sandbox's orange marks (header, pill, frame) are not a sixth choice above
-   but a state worn over whichever of them is active, and equal specificity means the later rule
-   wins. */
-@import url("./modules/common/sandboxMarker.css");
+/* The five themes and the sandbox marks are NOT imported here. They are the last <link> tags in
+   index.html, after every module stylesheet: a theme may restyle any component
+   (docs/ARCHITECTURE.md#themes-and-styling), and at equal specificity the later rule wins. */
 
 /* Design system shared, non-theme tokens (fonts, layout heights, blur) */
 :root {

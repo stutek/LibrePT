@@ -22,6 +22,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ## 2026-09-13 — Every look lives in a stylesheet
 
+### Added
+
+- **A Spreadsheet theme, in place of Red.** A white sheet with thin grid lines in petrol blue-green.
+  The exercises on the clipboard and the day's sessions are rows of one table, and the exercise in
+  focus is the selected cell. Choose it in the ☰ menu under Theme. If you had chosen Red, the app
+  now opens in Spreadsheet (§49.2).
+
 ### Changed
 
 - **Warning pills, injury marks and the voice-recording icon take the theme's danger colour.** They

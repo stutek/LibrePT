@@ -1,5 +1,5 @@
 # tests/medium/test_theme.py
-# End-to-end coverage of the 5-theme switcher (Midnight/Daylight/Red/Blossom/Nebula): selecting
+# End-to-end coverage of the 5-theme switcher (Midnight/Daylight/Spreadsheet/Blossom/Nebula): selecting
 # a theme swaps the theme class on BOTH <html> and <body> plus the <meta name="theme-color">,
 # persists the choice to localStorage['librept-theme'], and restores it across a reload. Mounted via
 # appBoot.bootHeader() (see tests/medium/_harness.py's HEADER_STUB) — the theme switcher lives
@@ -22,7 +22,7 @@ pytestmark = pytest.mark.clean_start
 THEME_BODY_CLASS = {
     "midnight": "midnight-theme",
     "daylight": "daylight-theme",
-    "red": "red-theme",
+    "spreadsheet": "spreadsheet-theme",
     "blossom": "blossom-theme",
     "nebula": "nebula-theme",
 }
@@ -45,7 +45,7 @@ def test_default_theme_is_daylight(page, local_server):
     assert page.locator("#theme-switcher").input_value() == "daylight"
 
 
-@pytest.mark.parametrize("value", ["midnight", "red", "blossom", "nebula"])
+@pytest.mark.parametrize("value", ["midnight", "spreadsheet", "blossom", "nebula"])
 def test_selecting_a_theme_swaps_the_single_body_class(page, local_server, value):
     load_with_stub(page, local_server, HEADER_STUB)
     page.wait_for_selector("#app-header")
@@ -69,6 +69,22 @@ def test_selecting_a_theme_swaps_the_single_body_class(page, local_server, value
 
     # The choice is persisted.
     assert page.evaluate("() => localStorage.getItem('librept-theme')") == value
+
+
+@pytest.mark.parametrize("how", ["saved", "link"])
+def test_the_retired_red_theme_opens_as_spreadsheet(page, local_server, how):
+    """Red was replaced by Spreadsheet on 2026-09-13 (TODO §49.2). A trainer who had chosen Red, or
+    opens an old link naming it, lands on its replacement, not silently on the default."""
+    if how == "saved":
+        page.add_init_script("localStorage.setItem('librept-theme', 'red')")
+        load_with_stub(page, local_server, HEADER_STUB)
+    else:
+        load_with_stub(page, local_server + "?theme=red", HEADER_STUB)
+    page.wait_for_selector("#app-header")
+
+    assert "spreadsheet-theme" in _body_classes(page)
+    assert "spreadsheet-theme" in _root_classes(page)
+    assert page.locator("#theme-switcher").input_value() == "spreadsheet"
 
 
 def test_theme_persists_across_reload(page, local_server):

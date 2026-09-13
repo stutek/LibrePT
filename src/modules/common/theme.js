@@ -23,7 +23,7 @@ export const DEFAULT_THEME = "daylight";
 export const THEME_BODY_CLASS = {
   midnight: "midnight-theme",
   daylight: "daylight-theme",
-  red: "red-theme",
+  spreadsheet: "spreadsheet-theme",
   blossom: "blossom-theme",
   nebula: "nebula-theme",
 };
@@ -31,34 +31,37 @@ export const THEME_BODY_CLASS = {
 export const THEME_META_COLOR = {
   midnight: "#09090b",
   daylight: "#f6f7fb",
-  red: "#2a0407",
+  spreadsheet: "#edf3f4",
   blossom: "#fdf2f8",
   nebula: "#0b0a1f",
 };
 
-// Themes renamed once already. A saved preference or a shared link minted before the rename must
-// still resolve to the theme it named, not silently fall back to the default.
+// Themes renamed or replaced — Red became Spreadsheet on 2026-09-13 (TODO §49.2). A saved preference
+// or a shared link minted before the change must still resolve to the theme it named, not silently
+// fall back to the default.
 export const LEGACY_THEME_MAP = {
   dark: "midnight",
   light: "daylight",
   rose: "blossom",
   violet: "nebula",
+  red: "spreadsheet",
 };
 
 // Theme names are proper nouns, not UI copy, so they live here beside the theme table rather than
-// in the i18n dictionaries — a new theme is one edit, not two files.
+// in the i18n dictionaries — a new theme is one edit, not two files. The #theme-switcher's options
+// are built from this table in this order (the default first), so the header's markup names none.
 export const THEME_SWITCHER_LABELS = {
   en: {
-    midnight: "Midnight",
     daylight: "Daylight",
-    red: "Red",
+    midnight: "Midnight",
+    spreadsheet: "Spreadsheet",
     blossom: "Blossom",
     nebula: "Nebula",
   },
   sl: {
-    midnight: "Polnoč",
     daylight: "Dan",
-    red: "Rdeča",
+    midnight: "Polnoč",
+    spreadsheet: "Razpredelnica",
     blossom: "Cvet",
     nebula: "Nebula",
   },
@@ -132,8 +135,13 @@ export function applyThemeSwitcherLabels(lang = "en") {
 // The #theme-switcher's own wiring. Called by the header once its shell exists; re-applies the
 // resolved theme so the <select> and the document agree even if boot resolved from a share link.
 export function setupThemeSwitcher(lang = "en") {
-  applyTheme(getInitialTheme());
   const themeSwitcher = document.getElementById("theme-switcher");
+  // Before applyTheme, which selects the resolved theme and needs its option to exist.
+  if (themeSwitcher && themeSwitcher.options.length === 0) {
+    for (const key of Object.keys(THEME_SWITCHER_LABELS.en))
+      themeSwitcher.add(new Option(key, key));
+  }
+  applyTheme(getInitialTheme());
   themeSwitcher?.addEventListener("change", () => applyTheme(themeSwitcher.value));
   applyThemeSwitcherLabels(lang);
 }

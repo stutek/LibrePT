@@ -98,7 +98,6 @@ the thing that must happen first, not merely what it touches.
 | **Client self-service** | §26.7 phase 2 | The vendored QR encoder and the wall poster | Deferred on purpose until the messaging handover has been tried in a gym; the link route shipped 08-22 |
 | **Program import** | §29 | Nothing — shape decided 2026-08-18, and the editor-as-review answers the fragility question | The parser and its frozen corpus; the intake flow, media-type rule and catalog crosswalk already exist |
 | **Live clipboard taps — PRIORITY** | §48.1, §48.2 | Separate the active card from the open card | Nothing for §48.1; §48.2's measuring exception waits on §45.11 |
-| **Themes & styling** | §49.2 | The Spreadsheet theme replaces Red | Simon's choice of main colour; after §48.1 |
 | **Trainer feedback 2026-09-11** | §45.1–§45.13 | §45.1's untranslatable first screen, then §45.2's trainer identity | Nothing for the three defects; §45.4 waits on a reproduction, §45.8 on looking at both screens together |
 
 ---
@@ -4158,23 +4157,6 @@ session, so it is recorded as it happens.
 follow-up happens and what reminds the trainer that it is still open; and how a session is marked
 as a measuring session, which §45.11 has not decided yet.
 
-## 49. Ruled 2026-09-13 — a theme is a stylesheet, and the Red theme becomes Spreadsheet
+## 49. [x] A theme is a stylesheet, and the Red theme becomes Spreadsheet — shipped 2026-09-13
 
-Simon sent a screenshot of the spreadsheet a trainer runs her sessions from — a white sheet, thin
-grid lines, a header row, grey rows for each round — and asked for a theme modelled on it, in place
-of Red, with cell colours that appeal to as many people as possible and do not recall the orange
-sandbox marks. Asked what a palette alone could do, he ruled: *"vsaka tema rabi svoj lastni CSS
-override, ne samo barvne sheme — po principu lokalnosti in single responsibility layout ne sme biti
-pisan v kodi"*. The decision is recorded in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#themes-and-styling).
-
-### 49.1 [x] No style written in code — shipped 2026-09-13
-
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#491-x-no-style-written-in-code--shipped-2026-09-13); what shipped is in [CHANGELOG.md](CHANGELOG.md).
-
-### 49.2 [ ] The Spreadsheet theme replaces Red
-
-A saved `red` preference and an old `?theme=red` link resolve to the new theme rather than to the
-default. **Open:** the main colour. Blue is the colour most people name first, but it leans male —
-40 % of men against 24 % of women in the US
-([YouGov](https://yougov.com/en-gb/articles/12331-blue-worlds-favourite-colour)); a petrol blue-green
-is the alternative.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#49-x-a-theme-is-a-stylesheet-and-the-red-theme-becomes-spreadsheet--shipped-2026-09-13); what shipped is in [CHANGELOG.md](CHANGELOG.md).

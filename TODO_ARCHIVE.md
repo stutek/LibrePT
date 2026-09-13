@@ -3011,6 +3011,15 @@ bar in two modes. The collapsed bar at the bottom of the screen still joins name
 - **Exercise picker badges.** `flex-shrink: 0` stopped them wrapping, so "CONDITIONING" ran past the
   item's border and the name beside it was squeezed to one word per line. They now wrap.
 
+## 49. [x] A theme is a stylesheet, and the Red theme becomes Spreadsheet — shipped 2026-09-13
+
+Simon sent a screenshot of the spreadsheet a trainer runs her sessions from — a white sheet, thin
+grid lines, a header row, grey rows for each round — and asked for a theme modelled on it, in place
+of Red, with cell colours that appeal to as many people as possible and do not recall the orange
+sandbox marks. Asked what a palette alone could do, he ruled: *"vsaka tema rabi svoj lastni CSS
+override, ne samo barvne sheme — po principu lokalnosti in single responsibility layout ne sme biti
+pisan v kodi"*. The decision is recorded in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#themes-and-styling).
+
 ### 49.1 [x] No style written in code — shipped 2026-09-13
 
 Ruled 2026-09-13 (Simon) as the ground for §49.2: a theme is a whole stylesheet, and layout is not
@@ -3039,3 +3048,32 @@ gate rather than a ratchet, since the count reached zero in the same change.
 
 The conversion ran on four cheaper subagents, one set of files each; the six sites in
 `clientsView.js` were missed when the files were split and were moved by hand.
+
+### 49.2 [x] The Spreadsheet theme replaces Red — shipped 2026-09-13
+
+**The colour.** The sheet's own amber header and yellow highlights were dropped first: they recall
+the sandbox's orange marks. Blue came next, as the colour named first worldwide — YouGov, ten
+countries on four continents, 23 % to 33 % — but it leans male: 40 % of men against 24 % of women in
+the US ([YouGov](https://yougov.com/en-gb/articles/12331-blue-worlds-favourite-colour)). Simon chose
+**petrol** (`#0e7490`), between blue and green, the first two choices worldwide. It is 32° from
+Daylight's emerald on the colour wheel. Every contrast was measured: white on petrol 5.36:1, muted
+text 7.66:1 on a cell and 6.83:1 on the field.
+
+**The grid.** Tokens set the colours and 2px corners; rules under them draw the table. The clipboard's
+deck is rows sharing one line instead of a tilted stack, and the card in focus is the selected cell,
+tinted with a 2px edge, in its own row. A circuit's round count is the grey row. The day's sessions
+are rows too, pills are cells, and side-by-side plan columns share their borders. **Cost:** a
+collapsed deck card shows its whole row, 8px more per card than the stacked deck.
+
+**Found by looking, not by a test.** The overdue bar puts dark text (`#3d2600`) on `--warning`, and
+this palette's `--warning` is dark enough to be read as text on white. The theme draws that bar as a
+pale yellow cell instead (11.22:1).
+
+**Two decisions a theme has to respect.** Theme stylesheets now load after every module stylesheet,
+as the last `<link>` tags, with the sandbox marks after them. And a theme must not restyle the app
+header: at equal specificity it would win over the sandbox's orange header.
+
+**Held by** [test_theme_selectors.py](tests/unit/test_theme_selectors.py): every class a theme
+restyles must still exist, since a renamed component would otherwise drop out of one theme without a
+sound. A saved `red` choice and an old `?theme=red` link open the new theme
+([test_theme.py](tests/medium/test_theme.py)).

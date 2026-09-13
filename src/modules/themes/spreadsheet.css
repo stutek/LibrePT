@@ -1,0 +1,131 @@
+/* themes/spreadsheet.css - Spreadsheet — a white sheet, thin grid lines, petrol blue-green */
+/* Modelled on the spreadsheet a trainer runs her sessions from (TODO §49.2, 2026-09-13): cells
+   that touch, one grid line between them, a tinted row for each round, a highlighted cell for where
+   she is. Colours are NOT the sheet's: its amber and yellow would recall the sandbox's orange marks.
+   Petrol sits between blue and green, the two colours named first worldwide, without blue's lean to
+   one sex (YouGov: blue 40 % of men against 24 % of women in the US). Every contrast below was
+   measured; the reasoning is in TODO_ARCHIVE.md, §49.2.
+
+   A theme is a stylesheet, not a palette (docs/ARCHITECTURE.md#themes-and-styling): the tokens set
+   the colours, the rules under them draw the grid. This file loads after every module stylesheet.
+   It never restyles the app header — the sandbox marks it, and a theme that won there would hide
+   which workspace the trainer is in. */
+html.spreadsheet-theme,
+body.spreadsheet-theme {
+  --bg-color: #edf3f4;
+  /* A sheet has no light falling on it. */
+  --bg-gradient: linear-gradient(#edf3f4, #edf3f4);
+  --card-bg: rgba(255, 255, 255, 1);
+  --card-border: rgba(26, 37, 40, 0.18);
+  --timer-warn-peak-color: color-mix(in srgb, #f59e0b 35%, var(--card-bg));
+  --text-main: #1a2528;
+  --text-muted: #46565b; /* 7.66:1 on a cell, 6.83:1 on the field */
+  --border-color: #c8d3d6; /* the grid line */
+  --input-bg: #ffffff;
+  --primary: #0e7490; /* petrol — white text on it 5.36:1 */
+  --primary-hover: #155e75;
+  --primary-light: rgba(14, 116, 144, 0.1); /* the selected cell, #e3f3f6 over white */
+  --primary-gradient: linear-gradient(#0e7490, #0e7490);
+  --on-primary: #ffffff;
+  --secondary: #4c5fd5; /* indigo, 5.38:1 on a cell */
+  --secondary-hover: #3b4bc0;
+  --secondary-light: rgba(76, 95, 213, 0.1);
+  --accent-cyan: #0e7490;
+  --danger: #c5221f; /* 5.80:1 */
+  --danger-hover: #a51d1a;
+  --danger-light: rgba(197, 34, 31, 0.1);
+  --success: #1e7e34; /* 5.14:1 */
+  --success-hover: #17692b;
+  /* Yellow-700 rather than an orange, so the overtime alert says "caution" without borrowing the
+     sandbox's hue. 4.92:1. */
+  --warning: #a16207;
+  --temporal-past: #6b46c1; /* 6.42:1 */
+  --temporal-future: #4c5fd5;
+  --cloud-icon-color: #155e75;
+  --cloud-arrows-color: #4ade80;
+  --box-shadow: none;
+  /* A cell has corners. */
+  --border-radius-lg: 2px;
+  --border-radius-md: 2px;
+  --border-radius-sm: 2px;
+  --btn-radius: 2px;
+}
+
+/* --- The grid --- */
+
+/* The clipboard's deck: rows of one table, not a tilted stack. Each collapsed card shows its whole
+   row, and the -1px lets neighbours share one grid line. That costs 8px per card against the
+   stacked deck (--deck-collapsed-overlap), which is the price of reading the plan as a table. */
+html.spreadsheet-theme .exercise-deck-card {
+  border-radius: 0;
+  transition: background 0.2s;
+}
+html.spreadsheet-theme .exercise-deck-card:not(.in-focus),
+html.spreadsheet-theme .exercise-deck-card:not(.in-focus):hover {
+  margin-bottom: -1px;
+  transform: none;
+  box-shadow: none;
+}
+/* The card in focus is the selected cell: the tint from --primary-light and a 2px edge (its own
+   border plus one inset line), in the row where it stands rather than lifted out of the table. An
+   opened past card is selected the same way, in its own colour. */
+html.spreadsheet-theme .exercise-deck-card.in-focus,
+html.spreadsheet-theme .exercise-deck-card.past-session.past-expanded {
+  margin: 0 0 -1px;
+  animation: none;
+}
+html.spreadsheet-theme .exercise-deck-card.in-focus {
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+html.spreadsheet-theme .exercise-deck-card.past-session.past-expanded {
+  box-shadow: inset 0 0 0 1px var(--temporal-past);
+}
+
+/* A circuit's round count is the grey "3x" row of the sheet, not a pill. */
+html.spreadsheet-theme .circuit-round-badge {
+  border-radius: 0;
+  color: var(--text-main);
+  background: #edf1f2;
+  border-color: var(--border-color);
+}
+
+/* Session list: rows of the day's table. The coloured left edge stays; it says which state the
+   session is in. */
+html.spreadsheet-theme .sessions-day-group .stack-list {
+  gap: 0;
+}
+html.spreadsheet-theme .session-card {
+  margin-bottom: -1px;
+  border-radius: 0;
+}
+/* "Overdue" is a pale yellow cell, not a solid bar: the bar's dark text needs a light fill, and a
+   solid warm band down the list would read as the sandbox's orange. The edge keeps --warning. */
+html.spreadsheet-theme .session-live-bar.overtime,
+html.spreadsheet-theme .session-live-bar.upcoming.overtime,
+html.spreadsheet-theme #overlay-session-timer.overtime {
+  background: color-mix(in srgb, var(--warning) 18%, #ffffff);
+}
+
+/* Pills become cells. Left round on purpose: the sandbox pill, which is the sandbox's own mark, and
+   the drag handles, which are shaped like what they do. */
+html.spreadsheet-theme .badge,
+html.spreadsheet-theme .chip,
+html.spreadsheet-theme .client-tab-btn,
+html.spreadsheet-theme .sessions-today-btn,
+html.spreadsheet-theme .sessions-day-group-today-tag,
+html.spreadsheet-theme .floating-action-btn,
+html.spreadsheet-theme .notification-count-pill,
+html.spreadsheet-theme #overlay-session-timer {
+  border-radius: 2px;
+}
+html.spreadsheet-theme .session-card:hover {
+  transform: none;
+}
+
+/* Side-by-side plan columns are columns of one sheet. */
+html.spreadsheet-theme .plan-columns {
+  gap: 0;
+}
+html.spreadsheet-theme .plan-column + .plan-column {
+  border-left-width: 0;
+}
