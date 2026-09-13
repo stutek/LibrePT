@@ -4161,3 +4161,28 @@ the build when a new form forgets it.
 ## 51. [x] A tap the demo step did not ask for interrupts the guide — fixed 2026-09-13
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#51-x-a-tap-the-demo-step-did-not-ask-for-interrupts-the-guide--fixed-2026-09-13); what shipped is in [CHANGELOG.md](CHANGELOG.md).
+
+## 52. Reported 2026-09-13 — the Spreadsheet theme does not yet look like a sheet
+
+Simon, after §49.2 shipped: *"izgled je še vedno preveč podoben ostalim temam, pričakujem mrežo in
+razporeditev bolj podobno zaslonski sliki (z merge celicami za naslov in podobno)"*. Shown two
+layouts, he ruled: no column letters and no row numbers; a thick border round each block of the
+plan (a circuit, or an exercise outside one); history and future as columns scrolled left and
+right. Then: *"poenostaviva, pusti levo-desno scroll za prihodnost in najprej implementiraj samo
+izgled"*.
+
+### 52.1 [x] The look — shipped 2026-09-13
+
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#521-x-the-look--shipped-2026-09-13); what shipped is in [CHANGELOG.md](CHANGELOG.md).
+
+### 52.2 [ ] History and future as columns, scrolled left and right — later
+
+Deferred by Simon on 2026-09-13. What it needs, measured in the code that day: the deck draws only
+the LAST past session (`pastExList` in
+[exerciseDeckOfCards.js](src/modules/clipboard/exerciseDeckOfCards.js)), flattened without its
+circuits by `buildPastExerciseItems`, and a future session only when the one opened is itself in the
+future. Nothing uses a sideways swipe yet; the only gesture is the swipe down that closes the
+clipboard. [deckScrollFocus.js](src/modules/clipboard/deckScrollFocus.js) picks the active card
+from vertical scrolling of today's cards only, so columns beside them do not disturb it. **Open:**
+whether the columns are for this theme only (the markup draws them in every theme and the other
+themes hide them in CSS) or for every theme; and how many sessions each side.

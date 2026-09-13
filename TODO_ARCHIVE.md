@@ -3174,3 +3174,30 @@ text, waiting on the maintainer).
 
 Tested by `test_a_tap_the_step_did_not_ask_for_interrupts_the_demo` in
 [test_walkthrough.py](tests/e2e/test_walkthrough.py).
+
+### 52.1 [x] The look — shipped 2026-09-13
+
+Reported by Simon after §49.2 shipped: the Spreadsheet theme still looked too much like the other
+themes. The first version only made cards flat and square. He asked for a grid with merged cells,
+like his screenshot. He then ruled out column letters and row numbers, asked for a thick border round
+each block, and deferred the history columns (§52.2).
+
+**What changed, all in [spreadsheet.css](src/modules/themes/spreadsheet.css):**
+
+- **Blocks.** A circuit is one block, and so is an exercise or a rest outside a circuit. Each has a
+  2px border in `--text-muted`, and neighbouring blocks overlap by 2px so they share one line. A past
+  card keeps the thin grid line, because it is one movement pulled out of an old session, not a
+  block.
+- **Merged cells.** A circuit's name and round count are one grey cell across the block. Negative
+  margins cancel the card's padding so the fill meets the border. The movements under it are rows
+  divided by the thin grid line. The clipboard's title bar is the merged title cell at the top of
+  the sheet.
+- **Sheet tabs.** Client tabs are flat cells, and the client shown is underlined in petrol. The
+  component painted the active tab's initials white for its solid tab. On a white tab they vanished,
+  which the first screenshot showed, so the theme gives them a petrol disc (5.36:1).
+
+**Kept:** §48.1's active-card outline and left edge.
+
+**Not possible in a theme alone:** columns for sets, reps and load. The exercise card writes its
+target as ONE string (`compactTarget` in exerciseCard.js). It was not needed once Simon chose
+sessions, not values, as the columns.

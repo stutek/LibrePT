@@ -20,6 +20,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-09-13 — The Spreadsheet theme looks like a sheet
+
+### Changed
+
+- **In the Spreadsheet theme, each block of the plan has a thick border.** A circuit is one block,
+  and so is an exercise outside a circuit. A circuit's name and round are one grey cell across the
+  top of its block. The session's name at the top of the clipboard is a merged title cell. The client
+  tabs look like sheet tabs, and the client shown is underlined (§52.1).
+
 ## 2026-09-13 — A tap outside the step pauses the guided demo
 
 ### Fixed

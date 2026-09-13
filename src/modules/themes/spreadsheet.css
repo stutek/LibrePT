@@ -81,6 +81,66 @@ html.spreadsheet-theme .exercise-deck-card.past-session.past-expanded {
   box-shadow: inset 0 0 0 1px var(--temporal-past);
 }
 
+/* A block of the plan has a thick border, as the trainer draws one round a set of rows in her sheet
+   (Simon, 2026-09-13: "sklope loči tako, da odebeljiš obrobo okoli sklopov in vaj, ki niso del
+   sklopa"). A circuit is one block; an exercise or a rest outside a circuit is a block of its own.
+   Neighbouring blocks overlap by the border's width, so two blocks share one thick line. A past card
+   is one movement pulled out of an old session, not a block, and keeps the thin grid line. */
+html.spreadsheet-theme .exercise-deck-card:not(.past-session) {
+  border-width: 2px;
+  border-color: var(--text-muted);
+}
+html.spreadsheet-theme .exercise-deck-card:not(.past-session):not(.in-focus),
+html.spreadsheet-theme .exercise-deck-card.in-focus {
+  margin-bottom: -2px;
+}
+/* Rows inside a circuit are cells of the block, divided by the thin grid line. */
+html.spreadsheet-theme .circuit-card .circuit-ex-list {
+  margin-top: 0;
+  gap: 0;
+}
+html.spreadsheet-theme .circuit-card .circuit-ex-row {
+  margin: 0 -10px;
+  padding: 4px 10px;
+  border-top: 1px solid var(--border-color);
+}
+/* The circuit's name and round count are one merged cell across the block, in the grey of the
+   sheet's "3x" rows. The negative margins reach the card's padding, so the fill meets the border. */
+html.spreadsheet-theme .circuit-card .deck-card-compact {
+  margin: -8px -10px 0;
+  padding: 6px 10px;
+  background: #edf1f2;
+}
+
+/* The session's name, date and place are the merged title cell at the top of the sheet. */
+html.spreadsheet-theme .active-session-overlay .session-title-bar {
+  background: #d7ecef;
+  border-top: 2px solid var(--text-muted);
+  border-bottom: 2px solid var(--text-muted);
+}
+
+/* One tab per client, like the sheet tabs along the bottom of a workbook: flat cells side by side,
+   and the client being shown carries a coloured bar under the name. */
+html.spreadsheet-theme .client-tab-btn.client-tab-participant,
+html.spreadsheet-theme .client-tab-btn.client-tab-participant.active {
+  border-radius: 0;
+  border: 1px solid var(--border-color);
+  border-bottom-width: 3px;
+  background: #ffffff;
+  color: var(--text-muted);
+  box-shadow: none;
+}
+html.spreadsheet-theme .client-tab-btn.client-tab-participant.active {
+  border-bottom-color: var(--primary);
+  color: var(--primary);
+}
+/* The component paints the active tab's initials white for its solid petrol tab; on a white tab
+   they need a petrol disc of their own. */
+html.spreadsheet-theme .client-tab-btn .client-tab-avatar.active {
+  background: var(--primary);
+  color: #ffffff;
+}
+
 /* A circuit's round count is the grey "3x" row of the sheet, not a pill. */
 html.spreadsheet-theme .circuit-round-badge {
   border-radius: 0;
