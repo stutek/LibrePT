@@ -44,6 +44,8 @@ DELIBERATELY_NOT_WALKED = {
     # whatever focus the app opened with; navigating to a second card re-renders no new component.
     "session.edit.item": "same editor markup as session.edit, one row highlighted",
     "session.catalog.slot": "same picker markup as session.catalog, prefiltered",
+    # The overlay sweep opens a session with no card open, which is exactly this state (§48.1).
+    "session.focus.closed": "same overlay markup as session.focus, with no card open",
 }
 
 

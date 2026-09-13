@@ -2,7 +2,9 @@
 # The active-session view is deep-linkable down to the in-focus card:
 #   {base}/session/{sessionId}/client/{clientId}/circuit/{circuitId}
 #   {base}/session/{sessionId}/client/{clientId}/exercise/{exerciseId}
-# where {base} is the app's sub-path (/LibrePT). Opening the session upgrades the URL to the
+#   {base}/session/{sessionId}/client/{clientId}/exercise/{exerciseId}/closed
+# where {base} is the app's sub-path (/LibrePT). `/closed` names the ACTIVE card while no card is
+# open (TODO §48.1), so a reload brings back a highlighted card without opening it. Opening the session upgrades the URL to the
 # focused card; tapping a card or navigating to such a URL moves focus; a stale/unknown card id
 # is ignored (URL falls back to the real focus).
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
@@ -19,7 +21,7 @@ def _focus_re(base):
     return re.compile(
         "^"
         + re.escape(base)
-        + r"/session/([^/]+)/client/([^/]+)/(exercise|circuit|rest)/([^/]+)$"
+        + r"/session/([^/]+)/client/([^/]+)/(exercise|circuit|rest)/([^/]+)(?:/closed)?$"
     )
 
 
@@ -247,3 +249,58 @@ def test_the_clipboard_names_the_session_without_truncating_it(page, local_serve
     )
     assert lost is not None, "the title bar has no line carrying the session's name"
     assert lost <= 1, f"the session's own name is truncated by {lost}px"
+
+
+DECK_STATE = """() => {
+  const cards = [...document.querySelectorAll('#active-exercise-scroll-deck .exercise-deck-card')];
+  const pick = (cls) => cards.filter((c) => c.classList.contains(cls))
+                             .map((c) => c.dataset.planIndex);
+  return { active: pick('is-active'), open: pick('in-focus') };
+}"""
+
+
+def _reload(page):
+    page.reload()
+    page.wait_for_selector("#active-session-overlay:not(.hidden)")
+    page.wait_for_selector(".exercise-deck-card.is-active")
+    page.wait_for_timeout(600)
+
+
+def test_a_reload_keeps_the_active_card_closed_when_it_was_closed(page, local_server):
+    """Simon, 2026-09-13: a reload returns to the same state as before (TODO §48.1). The trainer
+    scrolled, so the highlight moved and no card is open. After a reload the same card is marked,
+    and it has not opened by itself."""
+    page.set_viewport_size({"width": 390, "height": 844})
+    _open_session(page, local_server)
+    page.locator(
+        "#active-exercise-scroll-deck .exercise-deck-card[data-plan-index]"
+    ).first.click()
+    page.wait_for_timeout(400)
+    box = page.locator("#active-exercise-scroll-deck").bounding_box()
+    page.mouse.move(box["x"] + box["width"] / 2, box["y"] + 150)
+    page.mouse.wheel(0, 400)
+    page.wait_for_timeout(600)
+
+    before = page.evaluate(DECK_STATE)
+    assert len(before["active"]) == 1 and before["open"] == [], before
+    assert page.evaluate("() => location.pathname").endswith("/closed")
+
+    _reload(page)
+    assert page.evaluate(DECK_STATE) == before
+
+
+def test_a_reload_keeps_the_open_card_open(page, local_server):
+    """The other half of the same promise: a card the trainer opened is still open after a
+    reload, and it is still the active one."""
+    page.set_viewport_size({"width": 390, "height": 844})
+    _open_session(page, local_server)
+    page.locator(
+        "#active-exercise-scroll-deck .exercise-deck-card[data-plan-index]"
+    ).nth(1).click()
+    page.wait_for_timeout(400)
+
+    before = page.evaluate(DECK_STATE)
+    assert len(before["open"]) == 1 and before["open"] == before["active"], before
+
+    _reload(page)
+    assert page.evaluate(DECK_STATE) == before

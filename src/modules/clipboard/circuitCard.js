@@ -268,10 +268,10 @@ export class CircuitDeckCard extends DeckCard {
     }
   }
 
-  // A circuit unit has no single .index of its own (only its members do), so collapsed tap can't
-  // use the base class's default — it focuses the first non-rest member instead, same as before.
-  wireCollapsed(card) {
+  // A circuit unit has no single .index of its own (only its members do), so a tap or a scroll
+  // makes its first non-rest member active instead — the base class's wiring does the rest.
+  get focusIndex() {
     const firstEx = this.item.items.find((it) => !isRestRecord(it)) || this.item.items[0];
-    card.addEventListener("click", () => this.ctx.onFocus(firstEx.index));
+    return firstEx.index;
   }
 }

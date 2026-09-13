@@ -17,6 +17,7 @@ export function buildCircuitUnits(list) {
       if (last && last.type === "circuit" && last.circuitId === item.circuitId) {
         last.items.push(item);
         last.isInFocus = last.isInFocus || item.isInFocus;
+        last.isActive = last.isActive || item.isActive;
         last.isCompleted = last.isCompleted && item.isCompleted;
       } else {
         units.push({
@@ -26,6 +27,7 @@ export function buildCircuitUnits(list) {
           series: item.circuitSeries || 1,
           items: [item],
           isInFocus: item.isInFocus,
+          isActive: item.isActive,
           isCompleted: item.isCompleted,
         });
       }

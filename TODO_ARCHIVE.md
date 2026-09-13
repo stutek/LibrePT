@@ -3011,6 +3011,65 @@ bar in two modes. The collapsed bar at the bottom of the screen still joins name
 - **Exercise picker badges.** `flex-shrink: 0` stopped them wrapping, so "CONDITIONING" ran past the
   item's border and the name beside it was squeezed to one word per line. They now wrap.
 
+### 48.1 [x] The active card and the open card are two different things — shipped 2026-09-13
+
+**Wanted.** On the clipboard, the card the participant is working on now (the ACTIVE card) must be
+separate from the card the trainer has opened to look at (the OPEN card). The aim is fewer taps.
+
+**What the app does today.** One value, `activeExerciseIndex` in the client's session state, does
+both jobs. The deck in [exerciseDeckOfCards.js](src/modules/clipboard/exerciseDeckOfCards.js) opens
+the card at that index, and a tap on another card calls `focusExerciseByIndex`, which moves it. So
+when the trainer opens the next card to read it ahead, the app also treats that card as the one in
+progress. Getting back costs another tap.
+
+**Decided 2026-09-13 (Simon):**
+
+- A tap on a card that is not active opens it AND makes it active, as today.
+- The active card follows the scroll: the card the trainer is looking at is the active one. Nothing
+  else moves it forward.
+- The rest timer starts on a tap and does not depend on any card. Assumed, not yet confirmed: it
+  keeps the way back to the card that started it
+  ([sessionFocus.js](src/domain/sessionFocus.js) records that card).
+- The active card has a coloured left edge and a thin outline, drawn by a class and CSS (§49.1).
+
+**Ruled 2026-09-13 (Simon), second answer:** *"scroling does collapse cards, but it only highlights
+the one in focus, so it can quickly be returned to when switching client views. We don't want to
+show any buttons on active card, to not clutter in progress session, card opens buttons and controls
+only on tap."* And, asked separately: *"fix also reload to return to same state as before"* — which
+also opened §50 for every other form.
+
+**What shipped.**
+
+- The state stayed one index per client. `activeExerciseIndex` is the active card and is always
+  marked (`is-active`); `deckAllCollapsed` now means only "no card is open".
+- [deckScrollFocus.js](src/modules/clipboard/deckScrollFocus.js) reads the card at the focus line
+  after a scroll and hands it to `activateExerciseByScroll` in
+  [sessionFocusUrl.js](src/controllers/sessionFocusUrl.js), which closes the open card. It
+  re-renders only when a card was open, so a scroll with nothing open does not rebuild the deck
+  under a moving finger.
+- Only the trainer's scrolling counts: a wheel, a touch drag or a scrolling key opens an 800 ms
+  window, and a tap closes it. Without this, the scroll the deck makes by itself after a render
+  would close a card opened low on the screen at once. The test for it was checked by removing the
+  guard and seeing it fail.
+- The focus line moves with the scroll, from the top edge at the start of the list to the bottom
+  edge at its end. **Reported by Simon while it was being built:** a line fixed a third of the way
+  down could never be reached by the first and last cards.
+- When the open card closes, the list gets shorter and the browser scrolls on its own. That scroll
+  is ignored, or it moved the mark straight back to the first card.
+- The URL keeps naming the active card, and ends in `/closed` when no card is open, so a reload
+  restores both the card and whether it was open (`session.focus.closed` in
+  [routeTable.js](src/controllers/routes/routeTable.js)).
+- The deck scrolls to the active card when no card is open, which is what a switch back to a client
+  returns to.
+- The mark is an outline and a 4px left edge, from `outline` and `::before`: neither takes layout
+  room, so the stack does not move when the mark moves.
+
+**Not changed:** the rest timer. It already starts on a tap and keeps its way back to the card that
+started it.
+
+**Known limit:** a plan short enough to fit on the screen once every card is closed cannot be
+scrolled, so there only a tap moves the active card.
+
 ## 49. [x] A theme is a stylesheet, and the Red theme becomes Spreadsheet — shipped 2026-09-13
 
 Simon sent a screenshot of the spreadsheet a trainer runs her sessions from — a white sheet, thin

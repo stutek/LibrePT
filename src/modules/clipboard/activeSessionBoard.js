@@ -19,7 +19,8 @@
 //   saveActiveSessionToCache()
 //   openAddExercise(), openCatalogPicker(opts)
 //   buildCircuitUnits, getExerciseSignalColor, hasExerciseNote, hasQuickSignal, logQuickSignal,
-//   completeCircuitRound, focusExerciseByIndex, startRestTimer  — deck card callbacks
+//   completeCircuitRound, focusExerciseByIndex, activateExerciseByScroll, startRestTimer
+//                           — deck card callbacks
 //   newRecordId()
 
 import { gymNotesForPlan } from "../../domain/gymNotes.js";
@@ -378,6 +379,7 @@ function renderLiveDeck(deckContainer, activeClientId, activeClientState) {
     openFeedbackModal,
     completeCircuitRound: deps.completeCircuitRound,
     focusExerciseByIndex: deps.focusExerciseByIndex,
+    activateExerciseByScroll: deps.activateExerciseByScroll,
     saveActiveSessionToCache: deps.saveActiveSessionToCache,
     saveToLocalStorage: appDeps.saveToLocalStorage,
     onRerender: deps.rerender,

@@ -219,6 +219,26 @@
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35), 0 0 16px var(--primary-light);
   animation: cardFocusIn 0.34s cubic-bezier(0.22, 1, 0.36, 1);
 }
+/* The ACTIVE card (TODO §48.1): the one the trainer is looking at, which a client switch and a
+   reload come back to. A thin outline and a coloured left edge, and nothing else — no button, no
+   change of size, so the stack does not move when the mark moves. Outline and ::before take no
+   layout room and leave box-shadow to the open card and to the themes. */
+.exercise-deck-card.is-active {
+  outline: 1px solid var(--primary);
+  outline-offset: -1px;
+}
+.exercise-deck-card.is-active::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 4px;
+  border-top-left-radius: inherit;
+  border-bottom-left-radius: inherit;
+  background: var(--primary);
+  pointer-events: none;
+}
 /* Each navigation re-renders the focus card, so this entrance plays on every switch */
 @keyframes cardFocusIn {
   from {

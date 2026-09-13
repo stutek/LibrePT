@@ -17,6 +17,11 @@ export class PastDeckCard extends DeckCard {
     return this.ctx.activeSession.expandedPastId === this.item.id;
   }
 
+  // Outside the live plan, so neither a tap nor a scroll can make it the active card.
+  get focusIndex() {
+    return null;
+  }
+
   get className() {
     return `exercise-deck-card past-session${this.isInFocus ? " past-expanded" : ""}`;
   }

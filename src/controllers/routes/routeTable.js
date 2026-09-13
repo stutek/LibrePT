@@ -82,6 +82,16 @@ export function buildRouteTable() {
   // `superset` is the pre-rename spelling of the circuit segment. It stays matched forever: links are
   // shared and bookmarked, and a URL that once worked must not start showing an error page. Patterns
   // are additive — removing one is a breaking change that needs a redirect left in its place.
+  // The ACTIVE card while no card is open (TODO §48.1): the trainer scrolled past what they had
+  // opened. Its own address, so a reload marks the same card without opening it.
+  registry.register(
+    new SessionRoute({
+      name: "session.focus.closed",
+      pattern:
+        "/session/:sessionId/client/:clientId/:focusType(exercise|circuit|rest|superset)/:focusId/closed",
+      mode: "closed",
+    }),
+  );
   registry.register(
     new SessionRoute({
       name: "session.focus",

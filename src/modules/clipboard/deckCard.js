@@ -28,6 +28,17 @@ export class DeckCard {
     return !!this.item.isInFocus;
   }
 
+  // Whether this is the ACTIVE card: the one the trainer is looking at, marked but not opened
+  // (TODO §48.1). An open card is always the active one; an active card is open only after a tap.
+  get isActive() {
+    return !!this.item.isActive;
+  }
+
+  // The plan index a tap or a scroll makes active, or null for a card outside the live plan.
+  get focusIndex() {
+    return this.item.index;
+  }
+
   get className() {
     return "exercise-deck-card";
   }
@@ -51,7 +62,9 @@ export class DeckCard {
   // live Too Easy / Too Hard / timer buttons on a card the trainer is only reading put a mis-tap one
   // thumb-width from logging against the wrong exercise, and no code path can draw one.
   render(card) {
-    card.className = this.className;
+    card.className = this.isActive ? `${this.className} is-active` : this.className;
+    // What deckScrollFocus.js reads to know which plan item a card on screen stands for.
+    if (this.focusIndex != null) card.dataset.planIndex = String(this.focusIndex);
     this.renderCard(card);
     if (this.isInFocus) {
       this.addFocusElements(card);
@@ -80,6 +93,6 @@ export class DeckCard {
   // only when "collapsed" means a different action entirely (PastDeckCard toggles its own review
   // panel, not the shared focus index).
   wireCollapsed(card) {
-    card.addEventListener("click", () => this.ctx.onFocus(this.item.index));
+    card.addEventListener("click", () => this.ctx.onFocus(this.focusIndex));
   }
 }

@@ -29,7 +29,7 @@ export class WorkoutSetupRoute extends Route {
 }
 
 // `/session/:sessionId[/client/:clientId[/edit | /(exercise|superset)/:focusId]]`.
-// One class, four registered instances: they differ only in which part of the focus the URL names, and
+// One class, several registered instances: they differ only in which part of the focus the URL names, and
 // showSessionView already owns the hard part (recover from cache, launch from a scheduled session, or replay a
 // history log — and the error view when the id matches none of them).
 export class SessionRoute extends Route {
@@ -50,9 +50,11 @@ export class SessionRoute extends Route {
     // Legacy `superset` links resolve to the same focus as `circuit`; syncSessionFocusUrl then
     // rewrites the address bar to the current spelling, so an old link upgrades itself on arrival.
     const type = focusType === "superset" ? "circuit" : focusType;
-    const focusRef = this.mode === "focus" ? { type, id: focusId } : null;
+    const namesACard = this.mode === "focus" || this.mode === "closed";
+    const focusRef = namesACard ? { type, id: focusId } : null;
     ctx.router.showSessionView(sessionId, clientId, focusRef, {
       edit: this.mode === "edit",
+      closed: this.mode === "closed",
       slotId,
     });
     return this;

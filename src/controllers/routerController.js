@@ -354,12 +354,12 @@ function enterActiveSessionFocus(currentActive, clientId, focusRef, opts) {
   if (focusRef) {
     const cs = currentActive.clientRoutines[currentActive.activeClientId];
     const idx = routerDeps?.focusIndexFromRef?.(cs, focusRef);
-    // A deep link naming a specific card is explicit intent to see THAT card in focus — it
-    // overrides the deck's own "start collapsed" default (activeSessionController.js's
-    // deckAllCollapsed), same as the trainer's first tap on a card would.
+    // A deep link naming a specific card makes it the active card, and opens it — same as a tap —
+    // unless the link ends in /closed: then the trainer had scrolled past what was open, and a
+    // reload must not open it again (TODO §48.1).
     if (idx >= 0) {
       cs.activeExerciseIndex = idx;
-      cs.deckAllCollapsed = false;
+      cs.deckAllCollapsed = opts.closed === true;
     }
   }
   if (opts.edit) {

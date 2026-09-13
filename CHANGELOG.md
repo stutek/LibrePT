@@ -20,6 +20,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-09-13 — The active card on the clipboard
+
+### Changed
+
+- **Scrolling marks the card you are looking at.** On the clipboard, the card at the focus point
+  gets a coloured left edge and a thin outline: it is the ACTIVE card. Scrolling closes the card
+  that was open and shows no buttons on the active one. Tap a card to open it with its controls; a
+  tap also makes it the active card. At the start of the list the first card is active, at the end
+  the last (§48.1).
+- **Coming back finds the same card.** Switch to another client and back, or reload the page, and
+  the clipboard scrolls to the active card. A reload keeps it closed if it was closed and open if it
+  was open; the address ends in `/closed` when no card is open (§48.1).
+
 ## 2026-09-13 — Every look lives in a stylesheet
 
 ### Added

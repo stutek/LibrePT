@@ -31,16 +31,24 @@ export function sessionFocusPath() {
   const cs = activeSession.clientRoutines[clientId];
   const focusRef = focusRefForItem(cs?.exercises?.[cs.activeExerciseIndex]);
   if (!focusRef) return urlFor("session.client", ids);
+  // An active card with nothing open has its own address, so a reload does not open it (§48.1).
+  const focusRoute = cs.deckAllCollapsed ? "session.focus.closed" : "session.focus";
   // Built, never spelled: the focus segment was renamed once already (superset → circuit), and a
   // hand-written path is what quietly survives the next rename as a dead link. The segment comes
   // from the same function the router resolves it back through, so the round trip cannot drift.
-  return urlFor("session.focus", { ...ids, focusType: focusRef.type, focusId: focusRef.id });
+  return urlFor(focusRoute, { ...ids, focusType: focusRef.type, focusId: focusRef.id });
 }
 
 // The session routes whose URL is the focus itself, and which the focus may therefore rewrite. A
 // dialog layered over the session is NOT one of them: it named itself in the address bar, and a
 // re-render behind it must not erase that.
-const FOCUS_OWNED_ROUTES = ["session", "session.client", "session.focus", "session.edit"];
+const FOCUS_OWNED_ROUTES = [
+  "session",
+  "session.client",
+  "session.focus",
+  "session.focus.closed",
+  "session.edit",
+];
 
 export function syncSessionFocusUrl() {
   if (!getActiveSession()) return;
@@ -81,4 +89,20 @@ export function focusExerciseByIndex(index) {
   activeSession.expandedPastId = null;
   saveActiveSessionToCache();
   renderActiveSessionBoard();
+}
+
+// The trainer scrolled a different card to the focus line (deckScrollFocus.js): that card becomes
+// active and whatever was open closes (TODO §48.1). Re-render only when a card was open — the mark
+// itself is already on the card, and rebuilding the deck under a moving finger would stall the scroll.
+export function activateExerciseByScroll(index) {
+  const activeSession = getActiveSession();
+  if (!activeSession) return;
+  const cs = activeSession.clientRoutines[activeSession.activeClientId];
+  if (!cs || !cs.exercises?.[index]) return;
+  const wasOpen = !cs.deckAllCollapsed;
+  cs.activeExerciseIndex = index;
+  cs.deckAllCollapsed = true;
+  saveActiveSessionToCache();
+  if (wasOpen) renderActiveSessionBoard();
+  else syncSessionFocusUrl();
 }

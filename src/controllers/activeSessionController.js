@@ -45,7 +45,11 @@ import {
   mergeAppDeps,
 } from "./activeSessionStore.js";
 import { buildCircuitUnits, completeCircuitRound } from "./sessionCircuits.js";
-import { focusExerciseByIndex, syncSessionFocusUrl } from "./sessionFocusUrl.js";
+import {
+  activateExerciseByScroll,
+  focusExerciseByIndex,
+  syncSessionFocusUrl,
+} from "./sessionFocusUrl.js";
 import {
   beginWorkoutSession,
   cancelWorkoutSession,
@@ -181,6 +185,7 @@ initActiveSessionBoard({
   logQuickSignal,
   completeCircuitRound,
   focusExerciseByIndex,
+  activateExerciseByScroll,
   startRestTimer: (seconds, type, label) => startClientTimer(seconds, type, label),
   newRecordId,
 });

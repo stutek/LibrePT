@@ -12,6 +12,7 @@
 //   activeSession, activeClientState, activeClientId, state,
 //   t, escapeHTML, buildCircuitUnits, getExerciseSignalColor, hasQuickSignal,
 //   logQuickSignal, openFeedbackModal, completeCircuitRound, focusExerciseByIndex,
+//   activateExerciseByScroll(index)   // the trainer scrolled another card to the focus line
 //   saveActiveSessionToCache, saveToLocalStorage,
 //   onRerender()   // re-render the whole board (past-card toggle / circuit save)
 // }
@@ -21,6 +22,7 @@ import { formatMetricValue, usesLoad } from "../../domain/exerciseModality.js";
 import { formatLoad, formatReps } from "../../domain/repsAndLoad.js";
 import { exerciseRecordsOf, isRestRecord } from "../../domain/sessionItemRecord.js";
 import { CircuitDeckCard } from "./circuitCard.js";
+import { trackDeckScroll } from "./deckScrollFocus.js";
 import { ExerciseDeckCard } from "./exerciseCard.js";
 import { PastDeckCard } from "./pastDeckCard.js";
 import { RestDeckCard } from "./restDeckCard.js";
@@ -47,7 +49,7 @@ function buildPastExerciseItems(pastSession, dateStr) {
   return items;
 }
 
-function buildRestDeckItem(ex, idx, currentExIdx) {
+function buildRestDeckItem(ex, idx, currentExIdx, activeIdx) {
   return {
     id: ex.id,
     index: idx,
@@ -59,6 +61,7 @@ function buildRestDeckItem(ex, idx, currentExIdx) {
     // Rest is a first-class plan item: isInFocus is computed the SAME way for every item type —
     // idx === currentExIdx — no more hardcoded exception for rests (TODO §8.6).
     isInFocus: idx === currentExIdx,
+    isActive: idx === activeIdx,
     // Still true regardless of focus: keeps a rest from blocking a circuit's "all members
     // complete" aggregation in buildCircuitUnits — a rest has nothing to complete.
     isCompleted: true,
@@ -74,6 +77,7 @@ function resolveExerciseTargets(ex) {
 }
 
 function buildCurrentExerciseDeckItem(ex, idx, currentExIdx, activeClientState) {
+  const activeIdx = activeClientState.activeExerciseIndex;
   const logsList = activeClientState.logs[ex.id] || [];
   const isCompleted = logsList.length > 0 && logsList.every((l) => l.completed);
   return {
@@ -83,6 +87,7 @@ function buildCurrentExerciseDeckItem(ex, idx, currentExIdx, activeClientState) 
     type: "current",
     isCompleted,
     isInFocus: idx === currentExIdx,
+    isActive: idx === activeIdx,
     instructions: ex.instructions,
     ...resolveExerciseTargets(ex),
     loadUnit: ex.loadUnit || "kg",
@@ -241,6 +246,7 @@ export function renderExerciseDeck(deckContainer, deps) {
     openFeedbackModal,
     completeCircuitRound,
     focusExerciseByIndex,
+    activateExerciseByScroll,
     saveActiveSessionToCache,
     saveToLocalStorage,
     onRerender,
@@ -281,16 +287,17 @@ export function renderExerciseDeck(deckContainer, deps) {
       ? buildPastExerciseItems(clientHistory[0], formatDateStr(clientHistory[0].date))
       : [];
 
-  // Current routine exercises. The deck starts fully collapsed on a fresh open (deckAllCollapsed,
-  // stamped by activeSessionController.js's startWorkoutSession/openSessionFromHistory, cleared by
-  // the first focusExerciseByIndex call) — -1 matches nothing, so `isInFocus: idx === currentExIdx`
-  // is false for every item below without touching activeExerciseIndex itself.
+  // Current routine exercises. activeExerciseIndex is the ACTIVE card, always marked; deckAllCollapsed
+  // says no card is OPEN (TODO §48.1). A fresh open starts collapsed (startWorkoutSession /
+  // openSessionFromHistory), a tap opens (focusExerciseByIndex), a scroll by the trainer closes
+  // (activateExerciseByScroll) — -1 matches nothing, so `isInFocus: idx === currentExIdx` is false
+  // for every item below without touching activeExerciseIndex itself.
   const currentExIdx = activeClientState.deckAllCollapsed
     ? -1
     : activeClientState.activeExerciseIndex;
   const currentExList = activeClientState.exercises.map((ex, idx) =>
     isRestRecord(ex)
-      ? buildRestDeckItem(ex, idx, currentExIdx)
+      ? buildRestDeckItem(ex, idx, currentExIdx, activeClientState.activeExerciseIndex)
       : buildCurrentExerciseDeckItem(ex, idx, currentExIdx, activeClientState),
   );
 
@@ -380,12 +387,18 @@ export function renderExerciseDeck(deckContainer, deps) {
     }
   }
 
+  if (activateExerciseByScroll) {
+    trackDeckScroll(deckContainer, { onScrollActivate: activateExerciseByScroll });
+  }
+
   // Bring whatever the trainer just acted on into view: a freshly expanded past card if
-  // there is one, otherwise the in-focus current exercise.
+  // there is one, otherwise the open card, otherwise the active one — which is what a switch back
+  // to this client returns to when nothing was open (TODO §48.1).
   setTimeout(() => {
     const focusEl =
       deckContainer.querySelector(".exercise-deck-card.past-expanded") ||
-      deckContainer.querySelector(".exercise-deck-card.in-focus");
+      deckContainer.querySelector(".exercise-deck-card.in-focus") ||
+      deckContainer.querySelector(".exercise-deck-card.is-active");
     if (focusEl) {
       focusEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
