@@ -143,6 +143,8 @@ jobs:
         run: .venv/bin/python -c "from build import run_css_token_check; run_css_token_check()"
       - name: Untranslated interface text
         run: .venv/bin/python -c "from build import run_ui_string_check; run_ui_string_check()"
+      - name: Styles written in code
+        run: .venv/bin/python -c "from build import run_inline_style_check; run_inline_style_check()"
       - name: Import layering
         run: .venv/bin/python -c "from build import run_import_layer_check; run_import_layer_check()"
       - name: Python version declaration

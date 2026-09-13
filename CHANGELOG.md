@@ -20,6 +20,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-09-13 — Every look lives in a stylesheet
+
+### Changed
+
+- **Warning pills, injury marks and the voice-recording icon take the theme's danger colour.** They
+  were a fixed red in every theme (§49.1).
+- **Nothing in the app is styled from JavaScript any more**, so a theme can restyle any part of it.
+  The build now fails if code writes a style (§49.1).
+
 ## 2026-09-13 — Nothing runs under the button beside it
 
 ### Fixed

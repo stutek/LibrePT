@@ -3010,3 +3010,32 @@ bar in two modes. The collapsed bar at the bottom of the screen still joins name
   the delete button. The exercise name is no longer cut either.
 - **Exercise picker badges.** `flex-shrink: 0` stopped them wrapping, so "CONDITIONING" ran past the
   item's border and the name beside it was squeezed to one word per line. They now wrap.
+
+### 49.1 [x] No style written in code — shipped 2026-09-13
+
+Ruled 2026-09-13 (Simon) as the ground for §49.2: a theme is a whole stylesheet, and layout is not
+written in code. A declaration on the element beats every stylesheet, so a theme could not reach it.
+
+**Measured before:** 126 declarations in 16 JavaScript files — `planAdjustments.js` 36,
+`sessionCard.js` 18, `activeUsersList.js` 17, `feedbackModal.js` 15, the rest six or fewer. Another
+25 were already custom properties and stay.
+
+**What moved, and how.** Each declaration went to its module's stylesheet as a class. Code that
+switched a look (`isActive ? … : …`, `display = cond ? "flex" : "none"`) now toggles a state class or
+`.hidden`. The overlay's slide-down is two classes with the same reflow between them. Values only the
+code knows became custom properties: the walkthrough panel's measured height
+(`--walkthrough-panel-max-height`) and an exercise's signal colour (`--signal-color`). An inline style
+used to beat every rule, so where an existing rule on the same element set the same property, the new
+selector is chained (`.badge.session-card-time-badge`, `.modal-actions.adjust-modal-actions`, …).
+
+**Visible on purpose:** the literal `#ef4444` — midnight's `--danger` — became `var(--danger)`, so
+warning pills, injury marks and the recording icon follow the theme. Two reads of `--text-color`, a
+property nothing defines, now name `--text-main`, which they were already inheriting.
+**Visible by accident, and accepted:** a session card's hover lift moved from JavaScript listeners to
+`.session-card:hover`, where a completed or live card's own background now wins over the hover tint.
+
+**Held by** [agent_tools/inline_styles.py](agent_tools/inline_styles.py) in Stage 1 and CI, a plain
+gate rather than a ratchet, since the count reached zero in the same change.
+
+The conversion ran on four cheaper subagents, one set of files each; the six sites in
+`clientsView.js` were missed when the files were split and were moved by hand.

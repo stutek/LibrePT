@@ -1024,6 +1024,20 @@ def run_ui_string_check():
         sys.exit(1)
 
 
+def run_inline_style_check():
+    """Refuses a style written in code — see agent_tools/inline_styles.py.
+
+    Ruled 2026-09-13 (TODO §49): a theme is a whole stylesheet that may restyle any component, and a
+    declaration on the element (`el.style.gap`, `style="…"`) beats every stylesheet, so a theme cannot
+    reach it. A number only the code knows still goes through, as a custom property.
+    """
+    print("\n  Checking for styles written in code...")
+    from agent_tools import inline_styles
+
+    if inline_styles.main() != 0:
+        sys.exit(1)
+
+
 def run_catalog_coverage_check():
     """Verifies the module catalog still describes the tree — see agent_tools/catalog_coverage.py.
 
@@ -2015,6 +2029,7 @@ def run_stage_1_parallel():
         "Icon Coverage": run_icon_coverage_check,
         "CSS Tokens": run_css_token_check,
         "UI Strings": run_ui_string_check,
+        "Inline Styles": run_inline_style_check,
         "Import Layering": run_import_layer_check,
         "Pipeline Gating": run_pipeline_gate_check,
         "Python Version": run_python_version_check,

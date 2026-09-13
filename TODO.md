@@ -98,7 +98,7 @@ the thing that must happen first, not merely what it touches.
 | **Client self-service** | §26.7 phase 2 | The vendored QR encoder and the wall poster | Deferred on purpose until the messaging handover has been tried in a gym; the link route shipped 08-22 |
 | **Program import** | §29 | Nothing — shape decided 2026-08-18, and the editor-as-review answers the fragility question | The parser and its frozen corpus; the intake flow, media-type rule and catalog crosswalk already exist |
 | **Live clipboard taps — PRIORITY** | §48.1, §48.2 | Separate the active card from the open card | Nothing for §48.1; §48.2's measuring exception waits on §45.11 |
-| **Themes & styling** | §49.1, §49.2 | Move every style out of code into CSS | §49.2's main colour waits on Simon |
+| **Themes & styling** | §49.2 | The Spreadsheet theme replaces Red | Simon's choice of main colour; after §48.1 |
 | **Trainer feedback 2026-09-11** | §45.1–§45.13 | §45.1's untranslatable first screen, then §45.2's trainer identity | Nothing for the three defects; §45.4 waits on a reproduction, §45.8 on looking at both screens together |
 
 ---
@@ -4155,13 +4155,9 @@ sandbox marks. Asked what a palette alone could do, he ruled: *"vsaka tema rabi 
 override, ne samo barvne sheme — po principu lokalnosti in single responsibility layout ne sme biti
 pisan v kodi"*. The decision is recorded in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#themes-and-styling).
 
-### 49.1 [ ] No style written in code
+### 49.1 [x] No style written in code — shipped 2026-09-13
 
-Measured 2026-09-13: 120 declarations written by JavaScript or templates in 15 files, which no theme
-can override — `planAdjustments.js` 36, `sessionCard.js` 18, `activeUsersList.js` 17,
-`feedbackModal.js` 15. Several carry a colour a theme has no way to change (`#ef4444`). Each moves
-to its module's stylesheet; a number only the code knows stays, as a custom property. A check that
-fails the build holds the line once the count is zero.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#491-x-no-style-written-in-code--shipped-2026-09-13); what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ### 49.2 [ ] The Spreadsheet theme replaces Red
 
