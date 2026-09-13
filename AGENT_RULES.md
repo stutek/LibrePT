@@ -78,7 +78,8 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
 
 - Apply edits directly. Auto-commit coherent work to `main`, one logical change per commit, staged
   from `git status --short` — your own files only, and a file two sessions have touched is staged by
-  hunk, never whole.
+  hunk, never whole. **Read `git diff --cached` before every commit** — a claim in a note does not
+  stop another session writing the file, and a whole-file `git add` then commits its work as yours.
   **Never push.** **A request that arrives mid-turn is its own commit**,
   not an addition to the one in progress: several asks landing while a gate run is in flight are
   split apart when it ends, never bulked because they happened in one turn. Where one verified tree

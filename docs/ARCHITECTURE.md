@@ -62,7 +62,7 @@ depends on — that tier mounts one component and nothing else.
 
 - **A theme is a stylesheet, not a palette.** Each theme owns one file in `src/modules/themes/`: its
   tokens on `html.<name>-theme`, and any component it restyles — shape, spacing, borders, shadows —
-  under the same class. Ruled 2026-09-13 (TODO §48): a palette alone cannot make a spreadsheet look
+  under the same class. Ruled 2026-09-13 (TODO §49): a palette alone cannot make a spreadsheet look
   like a spreadsheet, because the grid is spacing and edges, not colour.
 - **Theme files load after every module stylesheet**, so a theme's rule wins over the component's
   on order as well as on specificity.
