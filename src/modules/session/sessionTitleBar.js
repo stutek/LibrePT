@@ -54,11 +54,16 @@ export function renderSessionTitle() {
   if (!activeSession) return;
 
   const sourceSession = activeSession.sourceSession;
-  // EVERY title, joined the way the collapsed clipboard bar joins them (sessionBar.js): one
-  // clipboard can cover several booked slots, because `buildSessionMeta` collapses overlapping
-  // ones, so `titles` is an array. Reading `[0]` made two merged sessions look like one, named
-  // after whichever sorted first (raised 2026-08-31).
-  const name = sourceSession?.titles?.join(" + ") || deps.t?.("untitled_session") || "";
+  // EVERY title: one clipboard can cover several booked slots, because `buildSessionMeta` collapses
+  // overlapping ones, so `titles` is an array. Reading `[0]` made two merged sessions look like one,
+  // named after whichever sorted first (raised 2026-08-31).
+  //
+  // Each on its OWN line, each cut with "…" on its own (ruled 2026-09-13, TODO §47.1). Joined with
+  // " + " on one line, the joined name was cut at 390px after "Group Strength & Conditioning + ",
+  // and the second session was not named at all.
+  const titles = sourceSession?.titles?.length
+    ? sourceSession.titles
+    : [deps.t?.("untitled_session") || ""];
   // A planning programme is not on any day and is in no gym: its own line is the slot it is being
   // built against, and nothing else.
   const under = sourceSession?.isPlanning
@@ -68,10 +73,12 @@ export function renderSessionTitle() {
   const block = document.createElement("span");
   block.className = "clipboard-title";
 
-  const nameEl = document.createElement("span");
-  nameEl.className = "clipboard-title-name";
-  nameEl.textContent = name;
-  block.appendChild(nameEl);
+  for (const title of titles) {
+    const nameEl = document.createElement("span");
+    nameEl.className = "clipboard-title-name";
+    nameEl.textContent = title;
+    block.appendChild(nameEl);
+  }
 
   if (under) {
     const underEl = document.createElement("span");

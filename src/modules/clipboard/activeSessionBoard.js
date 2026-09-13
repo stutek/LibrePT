@@ -145,8 +145,11 @@ function buildEditModeTitleHTML(activeClient) {
   const { t } = deps.getAppDeps();
   const mode = deps.currentPlanMode();
   const b = deps.getActiveSession().sourceSession;
-  // Every merged title, as the clipboard bar does — see sessionTitleBar.js.
-  const sessionNm = escapeHTML(b?.titles?.join(" + ") || t("untitled_session") || "");
+  // Every merged title on its own line, as the clipboard bar does — see sessionTitleBar.js.
+  const titles = b?.titles?.length ? b.titles : [t("untitled_session") || ""];
+  const namesHTML = titles
+    .map((title) => `<span class="edit-mode-session">${escapeHTML(title)}</span>`)
+    .join("");
   // Concrete schedule beats a vague "Live": the day and time of the booked session, or
   // "Unscheduled" for a date-less planning programme.
   const when =
@@ -177,7 +180,7 @@ function buildEditModeTitleHTML(activeClient) {
   return `<span class="edit-mode-title">
     <span class="edit-mode-row">
       <i class="fa-solid fa-pen-to-square"></i>
-      <span class="edit-mode-session">${sessionNm}</span>
+      <span class="edit-mode-names">${namesHTML}</span>
     </span>
     <span class="edit-mode-row">
       <span class="clipboard-title-when">${secondLine}</span>

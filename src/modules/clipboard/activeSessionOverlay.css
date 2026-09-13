@@ -107,6 +107,10 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
 .session-title-block h3:has(.clipboard-title) {
   white-space: normal;
   overflow: visible;
+  /* The h3 is itself a flex item of .session-title-block, and was the one link in the chain
+     without this. A merged clipboard's "Group Strength & Conditioning + Return-to-Play Rehab"
+     then made it 379px wide in a 240px block, running under ▶ and ⋮ (TODO §47.1). */
+  min-width: 0;
 }
 .clipboard-title {
   display: flex;

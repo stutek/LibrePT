@@ -22,6 +22,9 @@ pytestmark = pytest.mark.clean_start
 
 PHONE = {"width": 390, "height": 844}
 LONG_TITLE = "Group Strength & Conditioning — Tuesday"
+# The demo seed's own merged pair (src/data/sessions.js): two sessions booked into one slot share one
+# clipboard, whose name joins both. Long enough to need an ellipsis at 390px.
+MERGED_TITLES = ["Group Strength & Conditioning", "Return-to-Play Rehab"]
 
 
 def _mount(page, local_server):
@@ -39,6 +42,34 @@ def _mount(page, local_server):
         LONG_TITLE,
     )
     page.wait_for_timeout(300)
+
+
+def _render_real_title(page, titles):
+    """The real renderer, handed a session, instead of the hand-set string `_mount` writes. Its own
+    deps, because this tier boots one component rather than the app, and the module reads its
+    session through them (the harness wires the clipboard, not this bar)."""
+    page.evaluate(
+        """async (titles) => {
+          const m = await import(new URL('modules/session/sessionTitleBar.js', document.baseURI).href);
+          m.initSessionTitleBar({
+            getActiveSession: () => ({
+              sourceSession: {
+                titles,
+                day: 'today',
+                timeLabel: '17:00 - 19:00',
+                location: 'Trib gym base',
+                startDate: '2026-09-01T15:00:00.000Z',
+              },
+            }),
+            getISODateString: (d) => new Date(d).toISOString().slice(0, 10),
+            formatClockFromMinutes: () => '17:00',
+            t: (key) => key,
+          });
+          m.renderSessionTitle();
+        }""",
+        titles,
+    )
+    page.wait_for_timeout(200)
 
 
 def test_the_title_gets_the_larger_half_of_its_own_bar(page, local_server):
@@ -80,30 +111,7 @@ def test_the_bar_says_which_session_over_when_and_where(page, local_server):
     gym name: the session's name leads and gets the larger type, and the day, time and gym follow
     under it — the gym last, being the least identifying thing on the bar."""
     _mount(page, local_server)
-    # The real renderer, handed a session — not the stub's hand-set string. Its own deps, because
-    # this tier boots one component rather than the app, and the module reads its session through
-    # them (the harness wires the clipboard, not this bar).
-    page.evaluate(
-        """async () => {
-          const m = await import(new URL('modules/session/sessionTitleBar.js', document.baseURI).href);
-          m.initSessionTitleBar({
-            getActiveSession: () => ({
-              sourceSession: {
-                titles: ['Group Strength & Conditioning'],
-                day: 'today',
-                timeLabel: '17:00 - 19:00',
-                location: 'Trib gym base',
-                startDate: '2026-09-01T15:00:00.000Z',
-              },
-            }),
-            getISODateString: (d) => new Date(d).toISOString().slice(0, 10),
-            formatClockFromMinutes: () => '17:00',
-            t: (key) => key,
-          });
-          m.renderSessionTitle();
-        }"""
-    )
-    page.wait_for_timeout(200)
+    _render_real_title(page, ["Group Strength & Conditioning"])
 
     bar = page.locator("#session-title-text").inner_text()
     assert "Group Strength & Conditioning" in bar, bar
@@ -127,9 +135,95 @@ def test_nothing_in_the_title_bar_is_pushed_out_of_it(page, local_server):
     169px outside the bar and vanished entirely. Geometry, in the test that owns this component —
     the route walk in tests/e2e/ sees the same thing but names only the route it happened on."""
     _mount(page, local_server)
+    _render_real_title(page, MERGED_TITLES)
 
     assert_component_fits(
         page, ".session-title-block", label="clipboard title bar", viewport=None
+    )
+
+
+_NAME_LINES = """() => {
+  const actionsLeft = document.querySelector('.session-title-actions').getBoundingClientRect().left;
+  return [...document.querySelectorAll('.clipboard-title-name')].map((name) => ({
+    text: name.textContent,
+    right: name.getBoundingClientRect().right,
+    top: Math.round(name.getBoundingClientRect().top),
+    beforeButtons: name.getBoundingClientRect().right <= actionsLeft,
+    cut: name.scrollWidth > name.clientWidth,
+    ellipsis: getComputedStyle(name).textOverflow === 'ellipsis',
+  }));
+}"""
+
+
+def test_a_merged_clipboard_gives_each_session_its_own_line(page, local_server):
+    """TODO §47.1, reported 2026-09-12 from the sandbox: the name of a merged clipboard ran under
+    the ▶ and ⋮ buttons. The fit test above passed all along, because `_mount` writes a plain
+    string into the h3 — the shape this bar had before §39.6 gave it two lines, and the one shape
+    where the h3 still shrank. Through the real renderer, the h3 was 379px wide in a 240px slot.
+
+    Cutting the joined name with "…" was measured and rejected: at 390px it showed "Group Strength &
+    Conditioning + …", and the second session was not named at all. Ruled 2026-09-13 (Simon): one
+    line for each name."""
+    _mount(page, local_server)
+    _render_real_title(page, MERGED_TITLES)
+
+    lines = page.evaluate(_NAME_LINES)
+
+    assert [line["text"] for line in lines] == MERGED_TITLES, lines
+    assert lines[0]["top"] < lines[1]["top"], f"the names share a line: {lines}"
+    assert all(line["beforeButtons"] and not line["cut"] for line in lines), (
+        f"each name must be whole and stop before the buttons: {lines}"
+    )
+
+
+def test_a_name_too_long_by_itself_ends_in_an_ellipsis_before_the_buttons(
+    page, local_server
+):
+    """Ruled with the line above: a separate line per session, and a single name that still does not
+    fit is cut with "…" rather than wrapped. The trainer can see it was cut."""
+    _mount(page, local_server)
+    _render_real_title(
+        page, ["Group Strength & Conditioning for Return-to-Play Athletes"]
+    )
+
+    [line] = page.evaluate(_NAME_LINES)
+
+    assert line["beforeButtons"], f"the session name runs under the buttons: {line}"
+    assert line["cut"] and line["ellipsis"], (
+        f"a name this long must end in an ellipsis: {line}"
+    )
+
+
+def test_the_editor_title_also_gives_each_session_its_own_line(page, local_server):
+    """The editor's title is the same bar in its other mode, and was unified with it on request
+    (2026-08-31 and 09-01). Joining names there while the clipboard splits them would undo that."""
+    page.set_viewport_size(PHONE)
+    load_with_stub(
+        page,
+        local_server,
+        clipboard_stub(
+            active_session_fixture(
+                exercises=[exercise_item("e1", "Back Squat")],
+                sourceSession={
+                    "titles": MERGED_TITLES,
+                    "day": "today",
+                    "timeLabel": "17:00 - 19:00",
+                },
+            )
+        ),
+    )
+    page.wait_for_selector("#active-session-overlay:not(.hidden)")
+    page.click("#btn-session-menu")
+    page.click("#btn-edit-plan")
+    page.wait_for_selector(".clipboard-editor", timeout=5000)
+
+    names = page.locator("#session-title-text .edit-mode-session").all_inner_texts()
+
+    assert names == MERGED_TITLES, (
+        f"the editor title must name each session on its own line: {names}"
+    )
+    assert_component_fits(
+        page, ".session-title-block", label="editor title bar", viewport=None
     )
 
 
@@ -187,31 +281,11 @@ def test_a_merged_clipboard_names_every_session_in_it(page, local_server):
     (sessionBar.js); this title bar shipped reading `titles[0]` and quietly dropped the rest, so two
     merged sessions looked like one, named after whichever sorted first."""
     _mount(page, local_server)
-    page.evaluate(
-        """async () => {
-          const m = await import(new URL('modules/session/sessionTitleBar.js', document.baseURI).href);
-          m.initSessionTitleBar({
-            getActiveSession: () => ({
-              sourceSession: {
-                titles: ['Group Strength & Conditioning', 'Rehab Hour'],
-                day: 'today',
-                timeLabel: '17:00 - 19:00',
-                location: 'Trib gym base',
-                startDate: '2026-09-01T15:00:00.000Z',
-              },
-            }),
-            getISODateString: (d) => new Date(d).toISOString().slice(0, 10),
-            formatClockFromMinutes: () => '17:00',
-            t: (key) => key,
-          });
-          m.renderSessionTitle();
-        }"""
-    )
-    page.wait_for_timeout(200)
+    _render_real_title(page, ["Group Strength & Conditioning", "Rehab Hour"])
 
-    name = page.locator(".clipboard-title-name").inner_text()
-    assert "Group Strength & Conditioning" in name and "Rehab Hour" in name, (
-        f"a merged clipboard must name every session it covers: {name!r}"
+    names = page.locator(".clipboard-title-name").all_inner_texts()
+    assert names == ["Group Strength & Conditioning", "Rehab Hour"], (
+        f"a merged clipboard must name every session it covers, each on its own line: {names!r}"
     )
 
 

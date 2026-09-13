@@ -122,9 +122,21 @@
   font-size: 12px;
   opacity: 0.72;
 }
+/* One line per session in a merged clipboard (TODO §47.1). A column beside the ✎, so a second
+   name starts under the first rather than under the icon; the row aligns on the first line's
+   baseline, which a column container takes from its first item. */
+.edit-mode-row:has(.edit-mode-names) {
+  align-items: baseline;
+}
+.edit-mode-names {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
 .edit-mode-session {
   flex: 0 1 auto;
   min-width: 0;
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
