@@ -97,6 +97,8 @@ the thing that must happen first, not merely what it touches.
 | **Reported 2026-08-18** | §28.2 | Which contributor-facing docs get BUILT, so their addresses are injected rather than written out | Everything else in §28 shipped the same day |
 | **Client self-service** | §26.7 phase 2 | The vendored QR encoder and the wall poster | Deferred on purpose until the messaging handover has been tried in a gym; the link route shipped 08-22 |
 | **Program import** | §29 | Nothing — shape decided 2026-08-18, and the editor-as-review answers the fragility question | The parser and its frozen corpus; the intake flow, media-type rule and catalog crosswalk already exist |
+| **Live clipboard taps — PRIORITY** | §48.1, §48.2 | Separate the active card from the open card | Nothing for §48.1; §48.2's measuring exception waits on §45.11 |
+| **Themes & styling** | §48.1, §48.2 | Move every style out of code into CSS | §48.2's main colour waits on Simon |
 | **Trainer feedback 2026-09-11** | §45.1–§45.13 | §45.1's untranslatable first screen, then §45.2's trainer identity | Nothing for the three defects; §45.4 waits on a reproduction, §45.8 on looking at both screens together |
 
 ---
@@ -4104,3 +4106,67 @@ of the list screen also shows the joined names, which may be what read as "names
 **Open, to settle before code:** what happens to the clipboard at 11:00 when the second session
 starts, and at 12:00 when the first one ends; and whether a trainer opening the 10:00 session at 10:15
 sees one name or both.
+
+## 48. PRIORITY — fewer taps on the live clipboard
+
+Set as a priority 2026-09-13 (Simon).
+
+### 48.1 [ ] The active card and the open card are two different things
+
+**Wanted.** On the clipboard, the card the participant is working on now (the ACTIVE card) must be
+separate from the card the trainer has opened to look at (the OPEN card). The aim is fewer taps.
+
+**What the app does today.** One value, `activeExerciseIndex` in the client's session state, does
+both jobs. The deck in [exerciseDeckOfCards.js](src/modules/clipboard/exerciseDeckOfCards.js) opens
+the card at that index, and a tap on another card calls `focusExerciseByIndex`, which moves it. So
+when the trainer opens the next card to read it ahead, the app also treats that card as the one in
+progress. Getting back costs another tap.
+
+**What it touches, to settle before code:**
+
+- Which of the two goes into the URL. [sessionFocusUrl.js](src/controllers/sessionFocusUrl.js)
+  writes the focus into the address today, and a reload must bring back the same screen (§19).
+- Which of the two the timer follows. The rest timer hangs off the focus record
+  ([sessionFocus.js](src/domain/sessionFocus.js)); §8.7's open question about circuit rounds depends
+  on the same record.
+- What moves the active card forward: completing the card, or only an explicit tap.
+- How the trainer sees at a glance which card is active when a different one is open.
+
+### 48.2 [ ] Tracking and notes are done after the session, not during it
+
+**Wanted.** During a training session the trainer does not record results or write notes. That
+work is done afterwards, as a follow-up. This keeps the live clipboard to the taps the session
+needs.
+
+**The exception** is a session for measuring performance (§45.11): there the result IS the
+session, so it is recorded as it happens.
+
+**To settle before code:** what stays on the live card from today's controls — the quick signal
+(`logQuickSignal`) and the feedback note (`openFeedbackModal`) are both on it now; where the
+follow-up happens and what reminds the trainer that it is still open; and how a session is marked
+as a measuring session, which §45.11 has not decided yet.
+
+## 48. Ruled 2026-09-13 — a theme is a stylesheet, and the Red theme becomes Spreadsheet
+
+Simon sent a screenshot of the spreadsheet a trainer runs her sessions from — a white sheet, thin
+grid lines, a header row, grey rows for each round — and asked for a theme modelled on it, in place
+of Red, with cell colours that appeal to as many people as possible and do not recall the orange
+sandbox marks. Asked what a palette alone could do, he ruled: *"vsaka tema rabi svoj lastni CSS
+override, ne samo barvne sheme — po principu lokalnosti in single responsibility layout ne sme biti
+pisan v kodi"*. The decision is recorded in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#themes-and-styling).
+
+### 48.1 [ ] No style written in code
+
+Measured 2026-09-13: 120 declarations written by JavaScript or templates in 15 files, which no theme
+can override — `planAdjustments.js` 36, `sessionCard.js` 18, `activeUsersList.js` 17,
+`feedbackModal.js` 15. Several carry a colour a theme has no way to change (`#ef4444`). Each moves
+to its module's stylesheet; a number only the code knows stays, as a custom property. A check that
+fails the build holds the line once the count is zero.
+
+### 48.2 [ ] The Spreadsheet theme replaces Red
+
+A saved `red` preference and an old `?theme=red` link resolve to the new theme rather than to the
+default. **Open:** the main colour. Blue is the colour most people name first, but it leans male —
+40 % of men against 24 % of women in the US
+([YouGov](https://yougov.com/en-gb/articles/12331-blue-worlds-favourite-colour)); a petrol blue-green
+is the alternative.

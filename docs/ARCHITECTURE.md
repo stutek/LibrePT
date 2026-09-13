@@ -58,6 +58,19 @@ depends on — that tier mounts one component and nothing else.
 - **A rule that moves A to clear B must not be able to move B**, or, re-evaluated on a timer, it
   oscillates forever.
 
+## Themes and styling
+
+- **A theme is a stylesheet, not a palette.** Each theme owns one file in `src/modules/themes/`: its
+  tokens on `html.<name>-theme`, and any component it restyles — shape, spacing, borders, shadows —
+  under the same class. Ruled 2026-09-13 (TODO §48): a palette alone cannot make a spreadsheet look
+  like a spreadsheet, because the grid is spacing and edges, not colour.
+- **Theme files load after every module stylesheet**, so a theme's rule wins over the component's
+  on order as well as on specificity.
+- **Look and layout live only in CSS.** JavaScript and templates set classes and state attributes;
+  a declaration written on the element (`el.style.gap`, `style="…"`) beats every stylesheet, so no
+  theme can reach it. A number only the running code knows — a measured height, a drag offset —
+  goes to CSS as a custom property.
+
 ## UI invariants
 
 - **Hide a control with the `.hidden` class, never the `hidden` attribute.** Every `.btn` sets
