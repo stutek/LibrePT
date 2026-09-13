@@ -2965,3 +2965,48 @@ zapisi* — naming how many rows and which collections, and offering the removal
 test-stamped rows; that is the case the alarm is FOR, not a defect in it. And the alarm stays quiet
 during the suite only while every test navigation carries the switch — a test that seeds with it and
 then reloads without it would raise the alarm on itself.
+
+### 47.1 [x] The session title runs off the card — fixed 2026-09-13
+
+The card in the screenshot is the clipboard's title bar, not a card in the session list. Its name
+was "Group Strength & Conditioning + …": two sessions booked into one slot share one clipboard, and
+the name joins both.
+
+**The title.** `h3#session-title-text` is a flex item of `.session-title-block` and had no
+`min-width: 0`, so it would not shrink below its text. At 390px it was 379px wide in a 240px slot.
+The name never reached its ellipsis and ran under ▶ and ⋮. Fixed in
+[activeSessionOverlay.css](src/modules/clipboard/activeSessionOverlay.css).
+
+**Each name on its own line — ruled 2026-09-13.** With the h3 shrinking, the joined name was cut
+with "…": at 390px it read "Group Strength & Conditioning + …", and the second session was not
+named at all. Measured options were one line with "…" or two wrapped lines (+8px of bar height).
+Simon's ruling: one line per session name, and a name too long by itself still ends in "…". Both
+the clipboard ([sessionTitleBar.js](src/modules/session/sessionTitleBar.js)) and the editor title
+([activeSessionBoard.js](src/modules/clipboard/activeSessionBoard.js)) do it, because they are one
+bar in two modes. The collapsed bar at the bottom of the screen still joins names with " + ".
+
+**Why the sweep missed it — three reasons, all measured.**
+
+1. **The walk opened the wrong clipboard.** `_walk_live_session` clicked the first card, a finished
+   session with a short name. With the seed's merged pair open, the old sweep did report the h3, by
+   5px past the screen edge. The walk now opens that pair.
+2. **No rule saw text that stays on the screen.** A name ending at 286px lies under ▶ (from 272px)
+   and inside the screen. Rule A needs a box that clips, or the screen edge; rule B needs a box that
+   clips. Nothing here clips. **New rule C**: an element in the normal flow may not be wider than a
+   parent that does not clip it, measured against the parent's padding box and allowing any negative
+   margin. Pinned against built-to-break pages in
+   [test_overflow_scan_invariants.py](tests/medium/test_overflow_scan_invariants.py).
+3. **The component test measured a shape the app no longer draws.** `_mount` in
+   [test_clipboard_title.py](tests/medium/test_clipboard_title.py) wrote a plain string into the h3.
+   Since §39.6 the renderer puts two lines there, and only that shape breaks. The fit test now goes
+   through the real renderer, with the merged name.
+
+**Rule C found two more, on its first run, on every width.**
+
+- **Plan editor rows.** At 390px a row needed 380px and had 304: the rest field and the delete
+  button sat past the screen edge. Rule A had stayed quiet because the list around the rows has
+  `overflow-y: auto`, which makes the browser compute `overflow-x: auto` too, and A reads that as
+  "can be scrolled sideways". The row now has two lines: the exercise, then the four numbers and
+  the delete button. The exercise name is no longer cut either.
+- **Exercise picker badges.** `flex-shrink: 0` stopped them wrapping, so "CONDITIONING" ran past the
+  item's border and the name beside it was squeezed to one word per line. They now wrap.

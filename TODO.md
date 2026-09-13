@@ -4063,18 +4063,9 @@ edge and under the ▶ and ⋮ buttons. His verdict was about more than the titl
 in the test phase is not enough.** A build that only reports what a test thought to look for is
 blind to everything else, on every phone that is not this one.
 
-### 47.1 [ ] The session title runs off the card
+### 47.1 [x] The session title runs off the card — fixed 2026-09-13
 
-Seen in the sandbox on a long title ("Group Strength & Conditioning + 1:1 Personal Training…"): the
-heading on the session card is not clipped, not wrapped and not shortened, so it crosses the card's
-right edge and disappears under the two round buttons.
-
-[agent_tools/overflow_scan.py](agent_tools/overflow_scan.py) exists for exactly this class of defect
-and did not report it. **Why it missed is not yet established** — it may be that the element does not
-clip (invariant B only looks at elements that clip), that it does not intersect its clipping
-boundary (invariant A only reports an element that sticks OUT of its box), or simply that the screen
-in the screenshot is not one the sweep visits. That question is the first half of the work; the
-title is the second. Fixing only the title leaves the scanner blind to the next one.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#471-x-the-session-title-runs-off-the-card--fixed-2026-09-13); what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ### 47.2 [ ] The app catches its own errors, writes a log, and can send a bug report
 
@@ -4094,3 +4085,22 @@ Asked 2026-09-12. Three pieces, in this order:
 the trainer sends themselves — the app is offline-first and has no server of its own); whether the
 log survives a reset of the sandbox; and whether a crash is shown to the trainer as it happens or
 only collected quietly.
+
+### 47.3 [ ] Sessions are merged only while they overlap
+
+Said 2026-09-13 (Simon), answering §47.1: he did not expect merged names in the list of sessions,
+only on the clipboard, where the trainer follows the session as it runs — and there only for the
+time the sessions overlap.
+
+**What the app does today.** The cards in the session list show one name each. The merge happens
+when a clipboard is opened from a card or a link (`launchClipboardDirectly` in
+[sessionsView.js](src/modules/sessionList/sessionsView.js), via `getOverlappingSessions` and
+`buildSessionMeta` in [utils.js](src/modules/common/utils.js)): every session whose slot overlaps
+the tapped one at ANY point joins it, for the whole life of that clipboard. Its time label runs from
+the earliest start to the latest end. So 10:00-12:00 and 11:00-13:00 make one clipboard from 10:00 to
+13:00 named after both, although they share only one hour. The collapsed clipboard bar at the bottom
+of the list screen also shows the joined names, which may be what read as "names in the list".
+
+**Open, to settle before code:** what happens to the clipboard at 11:00 when the second session
+starts, and at 12:00 when the first one ends; and whether a trainer opening the 10:00 session at 10:15
+sees one name or both.

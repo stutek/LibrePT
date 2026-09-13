@@ -20,6 +20,26 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-09-13 — Nothing runs under the button beside it
+
+### Fixed
+
+- **When two sessions share one clipboard, each session's name has its own line.** Joined on one
+  line, the name used to run under the ▶ and ⋮ buttons (§47.1). A name that is too long by itself
+  now ends in "…" before the buttons. The title in edit mode does the same.
+- **In the plan editor, the delete button of each exercise is on the screen again.** On a phone it
+  sat past the right edge, together with the rest field. Each row now has two lines: the exercise,
+  then its four numbers and the delete button. The exercise name is shown in full.
+- **In the exercise picker, the badges stay inside their item.** A third badge now goes to a second
+  line instead of running past the border.
+
+### Added
+
+- **The layout check has a third rule: nothing may be wider than a box that does not cut it off.**
+  The two rules before it needed a box that cuts its content off, and the clipboard name had none,
+  so the check reported nothing. The route walk also opens the clipboard with the longest seeded
+  name now, instead of the first one.
+
 ## 2026-09-12 — The setup form says who is training, and stops crying wolf
 
 ### Changed
