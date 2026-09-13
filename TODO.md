@@ -4122,15 +4122,27 @@ the card at that index, and a tap on another card calls `focusExerciseByIndex`, 
 when the trainer opens the next card to read it ahead, the app also treats that card as the one in
 progress. Getting back costs another tap.
 
-**What it touches, to settle before code:**
+**Decided 2026-09-13 (Simon):**
 
+- A tap on a card that is not active opens it AND makes it active, as today.
+- The active card follows the scroll: the card the trainer is looking at is the active one. Nothing
+  else moves it forward.
+- The rest timer starts on a tap and does not depend on any card. Assumed, not yet confirmed: it
+  keeps the way back to the card that started it
+  ([sessionFocus.js](src/domain/sessionFocus.js) records that card).
+- The active card has a coloured left edge and a thin outline, drawn by a class and CSS (§49.1).
+
+**Open, to settle before code:**
+
+- What being active gives a card that is not open. Proposal: the quick signals and the note act on
+  the active card, and a tap is still needed to see the full numbers. Alternative: scrolling also
+  opens the active card and closes the one before.
 - Which of the two goes into the URL. [sessionFocusUrl.js](src/controllers/sessionFocusUrl.js)
   writes the focus into the address today, and a reload must bring back the same screen (§19).
-- Which of the two the timer follows. The rest timer hangs off the focus record
-  ([sessionFocus.js](src/domain/sessionFocus.js)); §8.7's open question about circuit rounds depends
-  on the same record.
-- What moves the active card forward: completing the card, or only an explicit tap.
-- How the trainer sees at a glance which card is active when a different one is open.
+  Proposal: the open card, since the active one follows from where the screen is scrolled.
+- §48.2 pulls against this. A quick signal today also ticks off every set of its exercise
+  (`logQuickSignal` in [sessionQuickSignals.js](src/controllers/sessionQuickSignals.js)). If signals
+  leave the live card, "done" has to come from somewhere else.
 
 ### 48.2 [ ] Tracking and notes are done after the session, not during it
 
