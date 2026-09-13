@@ -50,8 +50,12 @@
   margin-top: 10px;
   margin-bottom: 10px;
 }
+/* Two lines: the exercise on the first, its four numbers and the remove button on the second. On
+   one line the row needed 380px; at 390px it had 304, so the rest field and the remove button sat
+   past the right edge of the screen (TODO §47.1). The exercise name is also no longer cut. */
 .routine-builder-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
   background: rgba(255, 255, 255, 0.02);
@@ -60,8 +64,7 @@
   border-radius: var(--border-radius-sm);
 }
 .routine-builder-row select {
-  flex: 2;
-  min-width: 120px;
+  flex: 1 0 100%;
 }
 .routine-builder-row input {
   width: 50px;
