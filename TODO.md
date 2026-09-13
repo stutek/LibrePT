@@ -4160,3 +4160,29 @@ as a measuring session, which §45.11 has not decided yet.
 ## 49. [x] A theme is a stylesheet, and the Red theme becomes Spreadsheet — shipped 2026-09-13
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#49-x-a-theme-is-a-stylesheet-and-the-red-theme-becomes-spreadsheet--shipped-2026-09-13); what shipped is in [CHANGELOG.md](CHANGELOG.md).
+
+## 50. A reload keeps what the trainer typed
+
+**Wanted 2026-09-13 (Simon)**, raised with §48.1: a reload has to bring the app back to the state it
+was in before. That includes every form, not only the clipboard.
+
+### 50.1 [ ] Review every form for what a reload throws away
+
+**Why it matters on the gym floor.** A phone reloads a page on its own: the browser drops a tab in
+the background, the trainer switches apps, the service worker installs a new version. Anything typed
+and not yet saved is then gone, with no warning.
+
+**What exists already.** The client's intake page keeps what the client typed in `sessionStorage`
+while the tab is open (§38.12, see the comment in [appBoot.js](src/appBoot.js)). The live clipboard
+and its plan editor save on every change (`saveActiveSessionToCache` in
+[activeSessionCache.js](src/controllers/activeSessionCache.js)). No other form is known to do either.
+
+**The review.** 37 files under `src/` draw an input, a text area or a drop-down list. For each form:
+open it, type into every field, reload, and write down what survived. Among them are the client
+form, the exercise form, the routine form, the session setup, the feedback note, the gym note, the
+trainer details and the program import.
+
+**Open, to settle before code:** one shared way to keep a draft, rather than one per form; where a
+draft lives (`sessionStorage` dies with the tab, which a phone may close on its own); when a draft is
+thrown away (saved, cancelled, or after some time); and whether the review becomes a test that fails
+the build when a new form forgets it.
