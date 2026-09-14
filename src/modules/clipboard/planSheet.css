@@ -37,8 +37,10 @@
   font-weight: 700;
 }
 
+/* Not flex: 1 — that pushed the target to the far edge, which the pulled-aside plan still covers
+   (seen on the demo data: every past row showed its name and no target). */
 .plan-sheet-name {
-  flex: 1;
+  flex: 0 1 auto;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;

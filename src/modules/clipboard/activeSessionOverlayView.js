@@ -81,6 +81,14 @@ export function renderActiveSessionOverlayShell() {
     "active-session-overlay",
     (root) => root.querySelector(".session-title-bar"),
     `
+    <!-- The "blanket" that TODO §52.2 step 3 drags aside: the title bar, client tabs and body all
+         move together, which is why they are wrapped in one element rather than left as three
+         separate overlay children. The two siblings after it (plan-peek-under-past/-future) sit
+         BEHIND it and draw the neighbouring plan the drag reveals — planPeekController.js renders
+         into them, planPeek.js (modules/clipboard/planPeek.js) only drives the gesture and classes.
+         Kept as a wrapper rather than folded into #active-session-overlay itself so the overlay's
+         own id/classes (many tests and gestureController.js's swipe-down select them) stay put. -->
+    <div id="active-session-blanket" class="plan-peek-blanket">
     <div class="session-title-bar view-titlebar">
       <button class="view-grabber" type="button" aria-label="Close session and return to home"></button>
       <!-- The title OPENS THE MENU too (asked 2026-08-31: "maybe make the ... menu open (edit,
@@ -236,6 +244,9 @@ export function renderActiveSessionOverlayShell() {
         </div>
       </div>
     </div>
+    </div>
+    <div id="plan-peek-under-past" class="plan-peek-under plan-peek-under-past"></div>
+    <div id="plan-peek-under-future" class="plan-peek-under plan-peek-under-future"></div>
 `,
   );
 }

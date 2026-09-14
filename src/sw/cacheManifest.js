@@ -11,7 +11,7 @@
 // atomic version. The worker's own sub-scripts (sw.js + this sw/ folder) are deliberately NOT in ASSETS:
 // they are the worker's script resources, kept coherent by the browser's own SW-update mechanism.
 self.swCacheManifest = (() => {
-  const CACHE_NAME = "librept-v128";
+  const CACHE_NAME = "librept-v129";
   const ASSETS = [
     "./",
     "./index.html",
@@ -36,6 +36,7 @@ self.swCacheManifest = (() => {
     "./modules/clipboard/exerciseDeckOfCards.css",
     "./modules/clipboard/exerciseCard.css",
     "./modules/clipboard/planSheet.css",
+    "./modules/clipboard/planPeek.css",
     "./modules/intake/signupDelivery.js",
     "./modules/intake/intakeView.js",
     "./modules/intake/intakeRoute.js",
@@ -225,6 +226,7 @@ self.swCacheManifest = (() => {
     "./modules/clipboard/exerciseAndRestTimer.js",
     "./modules/clipboard/exerciseCard.js",
     "./modules/clipboard/planSheet.js",
+    "./modules/clipboard/planPeek.js",
     "./modules/clipboard/planColumns.js",
     "./modules/clipboard/exerciseDeckOfCards.js",
     "./modules/clipboard/circuitCard.js",
@@ -270,6 +272,7 @@ self.swCacheManifest = (() => {
     "./controllers/sessionTimers.js",
     "./controllers/sessionQuickSignals.js",
     "./controllers/sessionCircuits.js",
+    "./controllers/planPeekController.js",
     "./controllers/sessionPlanEditing.js",
     "./controllers/sessionScheduleAdjustment.js",
     "./controllers/sessionLifecycle.js",

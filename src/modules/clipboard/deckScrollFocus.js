@@ -75,6 +75,15 @@ function fitScrollRoom(deckContainer) {
 function onScroll(deckContainer) {
   const entry = tracked.get(deckContainer);
   if (!entry || Date.now() > entry.userScrollUntil || !deckContainer.isConnected) return;
+  // The plan held or pulled aside (TODO §52.2, planPeek.js) changes shape under the finger: its rows
+  // shrink, then grow back on release, and the browser answers both with a scroll of its own. On a
+  // phone the touchmove of that same press has just opened the window above, so the reflow would pick
+  // another active card although the trainer never scrolled. Closing the window here also covers the
+  // grow-back scroll that follows the release.
+  if (deckContainer.closest(".plan-peek-blanket.is-held")) {
+    entry.userScrollUntil = 0;
+    return;
+  }
   const scroller = scrollerOf(deckContainer);
   const card = cardAt(deckContainer, scroller.scrollTop);
   if (!card || card.classList.contains("is-active")) return;

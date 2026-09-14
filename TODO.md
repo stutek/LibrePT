@@ -4236,14 +4236,27 @@ scrolling, so a sideways drag must not count as a scroll.
 **Chosen by the implementing session, not ruled** (say so if one is wrong):
 - **The back gesture:** a drag that starts within 24px of either screen edge is ignored, as in the
   prototype. It still needs trying on a real phone.
-- **A plan longer than the screen:** both plans scroll together.
+- **A plan longer than the screen:** the plan underneath shows from its top. First chosen as "both
+  scroll together", changed at step 3: in the app the deck is its own scroller, and since exercises
+  do not correspond between plans, aligning the two scroll positions says nothing.
 - **Every theme gets the drag.** It is behaviour, and a theme only styles; colours come from each
   theme's `--temporal-past` / `--temporal-future`.
 
+**Chosen at step 3, not ruled:**
+- **Held cards get denser by their own padding.** A deeper stack overlap was tried first and dropped
+  in review: it hid the row a collapsed card needs read (§28.4) and did nothing in the Spreadsheet
+  theme, which sets its own overlap.
+- **Holding or pulling the plan never changes the active card.** The rows reflow under the finger and
+  the browser scrolls on its own; on a phone the same press's touchmove would make §48.1 read that
+  as the trainer scrolling. Found in review, not by the first tests, which drive a mouse.
+- **The under-layer header repeats the neighbour's title, ISO date and client name** as plain text,
+  not the real title-bar/tabs components — nothing there is tapped, and mounting the real components
+  twice would wire two copies of every listener they carry.
+
 **Steps, one commit and one gate each:** 1) the client's previous and next plan, as a pure domain
 function (`clientSessionNeighbours.js`, shipped 2026-09-14); 2) the plan drawn under the blanket
-(`planSheet.js`, with the live card's target wording moved to one shared helper); 3) the drag, with title bar and tabs moving with the
-plan; 4) opening a neighbour, Today, and the create-a-plan card.
+(`planSheet.js`, with the live card's target wording moved to one shared helper, shipped 2026-09-14); 3) the drag, with title bar and tabs moving with the
+plan (`planPeek.js` + `planPeekController.js`, shipped 2026-09-14); 4) opening a neighbour, Today, and the create-a-plan card.
 
 ## 53. [ ] Two medium tests fail when the machine is busy
 

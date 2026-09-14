@@ -44,6 +44,7 @@ import {
   getAppDeps,
   mergeAppDeps,
 } from "./activeSessionStore.js";
+import { initPlanPeekController, refreshPlanPeek } from "./planPeekController.js";
 import { buildCircuitUnits, completeCircuitRound } from "./sessionCircuits.js";
 import {
   activateExerciseByScroll,
@@ -195,6 +196,9 @@ initActiveSessionBoard({
 // moved, the entry point did not.
 export function renderActiveGroupBoard() {
   renderActiveSessionBoard();
+  // The neighbour sheets under the blanket must always be current, whether or not the trainer ever
+  // drags — a hold that revealed a stale plan would be a worse bug than one that revealed nothing.
+  refreshPlanPeek();
 }
 
 // The dashboard mini-bar's own expand affordance + click-through, and its Enter/Space keyboard
@@ -432,4 +436,5 @@ export function setupActiveSession(deps) {
   wireSessionExpandBar(navigateToPath);
   wireSessionMenuAndActions(t);
   wireAddExerciseAndCatalogDialogs();
+  initPlanPeekController();
 }
