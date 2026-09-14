@@ -4209,7 +4209,14 @@ scrolling, so a sideways drag must not count as a scroll.
 - **The session's title bar and client tabs are part of the plan** that moves aside, and the plan
   underneath shows its own.
 - **Press and hold shrinks the plan by itself**, before any movement, so the trainer can see it can
-  be pulled. A short tap does nothing, so tapping a card is not disturbed.
+  be pulled. A short tap does nothing, so tapping a card is not disturbed. It narrows too, so the
+  edge of the previous session shows on the left and of the next one on the right.
+- **Exercise names carry the session's time**: a past session's names in `--temporal-past`, a
+  future session's in `--temporal-future`, under the blanket and when that session is opened.
+- **Signal icons are coloured**, in the active card's colours but darker: the app's `#10b981` and
+  `#f59e0b` measure 2.27:1 and 1.96:1 on the sheet's white, under the 3:1 an icon needs. The
+  prototype uses `#1e7e34` (4.38:1), `#b45309` (4.25:1) and `#c5221f` (4.75:1). **Open:** a glyph
+  for "too hard"; the prototype offers eleven beside `fa-weight-hanging`.
 - **The main colour stays `#0e7490`.** Simon compared it on the prototype with two greener
   candidates and chose it.
 
