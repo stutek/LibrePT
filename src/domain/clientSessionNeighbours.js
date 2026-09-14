@@ -18,7 +18,11 @@
 // there is no later day at all does the client's open planning draft stand in, the same order
 // `notificationItems.js` gives "unscheduled plans": a dated slot beats an undated draft.
 //
-// Pure: state in, `{ previous, next }` out. What to do with the result stays with the controller.
+// `clientSessionToday` answers the third question the sideways deck asks — where "Today" leads back
+// to — by the same rule, for the day that is today.
+//
+// Pure: state in, `{ previous, next }` (or today's entry) out. What to do with the result stays with
+// the controller.
 
 const dayOf = (date) => String(date || "").slice(0, 10);
 
@@ -30,8 +34,10 @@ function earlier(a, b) {
   return a.id < b.id;
 }
 
-export function clientSessionNeighbours(state, clientId, anchor) {
-  const anchorDay = dayOf(anchor?.date);
+// Every dated candidate for one client: finished sessions from history, and scheduled rows on days
+// that have no finished record. Shared by both answers below so "which entry stands for a day" is
+// decided once.
+function datedCandidates(state, clientId) {
   const history = (state?.history || []).filter((record) => record.clientId === clientId);
   const sessions = (state?.sessions || []).filter(
     (session) => Array.isArray(session.participants) && session.participants.includes(clientId),
@@ -56,6 +62,12 @@ export function clientSessionNeighbours(state, clientId, anchor) {
       session,
     }))
     .filter((entry) => !finishedDays.has(entry.day));
+  return { history, finished, scheduled };
+}
+
+export function clientSessionNeighbours(state, clientId, anchor) {
+  const anchorDay = dayOf(anchor?.date);
+  const { history, finished, scheduled } = datedCandidates(state, clientId);
 
   let previous = null;
   for (const entry of finished) {
@@ -80,6 +92,25 @@ export function clientSessionNeighbours(state, clientId, anchor) {
   }
 
   return { previous: strip(previous), next: strip(next) };
+}
+
+/**
+ * The client's session TODAY, or null — what the clipboard's Today control returns to after the
+ * trainer has pulled their way to another plan (TODO §52.2 step 4). Derived from the same history and
+ * schedule as the neighbours, so there is no second record of "the session launched today" to keep
+ * in step: a finished day answers with its history record, an unfinished one with its scheduled row.
+ *
+ * `nowMs` is an epoch; its day is taken from the ISO string, the same UTC reading `dayOf` gives every
+ * stored `date`/`startDate`, so the two can be compared.
+ */
+export function clientSessionToday(state, clientId, nowMs) {
+  const today = dayOf(new Date(nowMs).toISOString());
+  const { finished, scheduled } = datedCandidates(state, clientId);
+  let found = null;
+  for (const entry of [...finished, ...scheduled]) {
+    if (entry.day === today && (!found || earlier(entry, found))) found = entry;
+  }
+  return strip(found);
 }
 
 // `day` is this module's working value, not part of the answer.

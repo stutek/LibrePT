@@ -938,6 +938,7 @@ function setupActiveSession({ linkBringsContent } = {}) {
     renderSessions,
     renderSessionTitle,
     saveToLocalStorage: saveState,
+    openPlanningForClient,
   });
 
   // Deliberately last: the splash comes down only once every component above is wired. It may not
@@ -1021,6 +1022,16 @@ function renderActiveGroupBoard() {
     newRecordId,
     saveToLocalStorage: saveState,
   });
+}
+
+// The client's planning form — what the client card's "Plan Program" button opens
+// (clientsView.js) — reached from the clipboard's create-a-plan card (TODO §52.2 step 4). The route
+// goes first: `session.new` is the setup view's own address and hides the clipboard overlay, and the
+// call after it re-opens the same form in planning mode with the client chosen, which that route
+// alone cannot say.
+function openPlanningForClient(clientId) {
+  navigateToPath(urlFor("session.new"));
+  openWorkoutSetupModal(clientId, null, null, true);
 }
 
 function launchClipboardDirectly(arg, options = {}) {

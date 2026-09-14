@@ -103,6 +103,14 @@ export function renderActiveSessionOverlayShell() {
         <h3 id="session-title-text">Clipboard</h3>
       </div>
       <div class="session-title-actions">
+        <!-- Today (TODO §52.2 step 4): after a pull has opened another of this client's plans, the
+             way back to today's session. A calendar glyph WITH the word, because it is the only
+             control that says where the trainer is in time; planPeekController.js shows it only
+             when the client has a session today and the clipboard is showing a different one. -->
+        <button id="btn-plan-today" type="button" class="btn secondary-btn plan-peek-today hidden"
+                data-i18n-label="plan_peek_back_to_today" aria-label="Back to today's session">
+          <i class="fa-solid fa-calendar-day"></i> <span data-i18n="today">Today</span>
+        </button>
         <div class="session-timer-block">
           <!-- Staged-but-not-started: Start lives here (not on the dashboard card, TODO §2.3) so
                tapping it is the one explicit "begin the workout" action. Once tapped it's replaced

@@ -5,7 +5,10 @@
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { clientSessionNeighbours } from "../../../src/domain/clientSessionNeighbours.js";
+import {
+  clientSessionNeighbours,
+  clientSessionToday,
+} from "../../../src/domain/clientSessionNeighbours.js";
 
 const history = (over = {}) => ({
   id: "h1",
@@ -178,4 +181,40 @@ test("missing arrays on state are treated as empty rather than throwing", () => 
   const { previous, next } = clientSessionNeighbours({}, "ana", { date: "2026-09-14", id: "x" });
   assert.equal(previous, null);
   assert.equal(next, null);
+});
+
+// ---- clientSessionToday: where the clipboard's Today control leads back to (TODO §52.2 step 4) ----
+
+const NOW = Date.parse("2026-09-14T12:00:00.000Z");
+
+test("today: the client's scheduled session on today's date", () => {
+  const state = {
+    history: [history({ id: "h1", date: "2026-09-08" })],
+    sessions: [
+      session({ id: "s1", startDate: "2026-09-14T18:00:00.000Z" }),
+      session({ id: "s2", startDate: "2026-09-21T18:00:00.000Z" }),
+    ],
+  };
+  const today = clientSessionToday(state, "ana", NOW);
+  assert.equal(today.kind, "session");
+  assert.equal(today.id, "s1");
+});
+
+test("today: a day already finished answers with its history record, not the scheduled row", () => {
+  const state = {
+    history: [history({ id: "h9", date: "2026-09-14T19:05:00.000Z" })],
+    sessions: [session({ id: "s1", startDate: "2026-09-14T18:00:00.000Z" })],
+  };
+  assert.equal(clientSessionToday(state, "ana", NOW).id, "h9");
+});
+
+test("today: null when the client has nothing today, and another client's session never counts", () => {
+  const state = {
+    history: [history({ id: "hDraft", date: "2026-09-14", isPlanning: true })],
+    sessions: [
+      session({ id: "sBen", participants: ["ben"], startDate: "2026-09-14T18:00:00.000Z" }),
+      session({ id: "sAnaLater", startDate: "2026-09-15T18:00:00.000Z" }),
+    ],
+  };
+  assert.equal(clientSessionToday(state, "ana", NOW), null);
 });

@@ -11,8 +11,22 @@
 // starts: the trainer must never begin a hold and watch the sheets populate underneath them. The
 // gesture itself is wired ONCE per overlay mount — `initPlanPeek` is idempotent — but the sheets it
 // reveals are always the latest client/plan.
+//
+// Step 4 — opening what the pull uncovered, through the app's EXISTING entry points only:
+// - a previous/next plan opens by its route, `session.client` (`/session/:sessionId/client/:clientId`),
+//   the same URL every other way into a session writes. The router's showSessionView then picks the
+//   loader by what the id names: a scheduled row goes through launchClipboardDirectly, a history
+//   record AND a planning draft through openSessionFromHistory (drafts live in state.history, and that
+//   is how the History view and the notification feed reopen one).
+// - no next plan: the create-a-plan card opens the client's planning form, the flow the client card's
+//   "Plan Program" button opens (`openPlanningForClient`, injected by app.js).
+// - Today: the client's session today, derived by clientSessionToday from the same history and
+//   schedule — no separate "launched today" record to fall out of step.
+// A STARTED session is never left by a pull (`canOpen`): opening another session replaces the one
+// clipboard slot, and a running session's logs would go with it. Uncovering still works — comparing
+// is the point of the gesture; leaving is not.
 
-import { clientSessionNeighbours } from "../domain/clientSessionNeighbours.js";
+import { clientSessionNeighbours, clientSessionToday } from "../domain/clientSessionNeighbours.js";
 import {
   buildClientStateFromHistoryLog,
   buildClientStateFromRoutine,
@@ -62,6 +76,41 @@ function planFor(entry, { state, t }) {
   };
 }
 
+// The line under the header that says what releasing will do. BOTH wordings are in the markup, and
+// planPeek.css shows one by the `is-release-ready` class planPeek.js toggles — so a pull crossing the
+// threshold changes a class, never re-renders the layer mid-drag.
+function buildReleaseLabel(restText, releaseText) {
+  const label = document.createElement("div");
+  label.className = "plan-peek-under-label";
+  const rest = document.createElement("span");
+  rest.className = "plan-peek-label-rest";
+  rest.textContent = restText;
+  const release = document.createElement("span");
+  release.className = "plan-peek-label-release";
+  release.textContent = releaseText;
+  label.append(rest, release);
+  return label;
+}
+
+// No next plan: a card offering to create one (approved with the prototype, 2026-09-14). It looks
+// like a button but is not one — nothing under the blanket is tapped; the pull past the threshold is
+// what opens the planning form.
+function buildCreateCard(clientName, t) {
+  const card = document.createElement("div");
+  card.className = "plan-peek-create-card";
+  const text = document.createElement("strong");
+  text.textContent = t("plan_peek_no_next").replace("{client}", clientName);
+  const cell = document.createElement("span");
+  cell.className = "plan-peek-create-cell";
+  cell.textContent = t("plan_peek_create");
+  card.append(text, cell);
+  return card;
+}
+
+function isoDay(date) {
+  return date ? String(date).slice(0, 10) : "";
+}
+
 // The neighbour's own title bar + tab (ruled 2026-09-14: "the plan underneath shows its own").
 // Built with createElement/textContent throughout — a routine or plan title is trainer-authored
 // text (docs/ARCHITECTURE.md "UI invariants": no innerHTML from user text).
@@ -77,9 +126,7 @@ function buildUnderHeader(plan, clientName) {
   const meta = document.createElement("span");
   meta.className = "plan-peek-under-meta";
   // ISO date everywhere (AGENT_RULES.md "Product constraints"), never a locale-formatted string.
-  meta.textContent = [plan.date ? plan.date.slice(0, 10) : "", clientName]
-    .filter(Boolean)
-    .join(" · ");
+  meta.textContent = [isoDay(plan.date), clientName].filter(Boolean).join(" · ");
   head.appendChild(meta);
 
   const tab = document.createElement("span");
@@ -92,12 +139,36 @@ function buildUnderHeader(plan, clientName) {
 
 function renderUnderLayer(el, entry, { clientId, clientName, when, appDeps }) {
   if (!el) return;
+  const { t } = appDeps;
   el.textContent = "";
   const plan = planFor(entry, appDeps);
   el.classList.toggle("has-plan", !!plan);
-  if (!plan) return;
+  el.classList.toggle("has-create-card", !plan && when === "future");
+  el.classList.remove("is-release-ready");
+
+  if (!plan && when === "future") {
+    el.appendChild(buildReleaseLabel(t("plan_peek_next"), t("plan_peek_release_create")));
+    el.appendChild(buildCreateCard(clientName, t));
+    return;
+  }
+  if (!plan) {
+    const empty = document.createElement("p");
+    empty.className = "plan-peek-under-empty";
+    empty.textContent = t("plan_peek_no_previous");
+    el.appendChild(empty);
+    return;
+  }
 
   el.appendChild(buildUnderHeader(plan, clientName));
+  const date = isoDay(plan.date);
+  el.appendChild(
+    buildReleaseLabel(
+      [t(when === "past" ? "plan_peek_previous" : "plan_peek_next"), date]
+        .filter(Boolean)
+        .join(" · "),
+      [t("plan_peek_release_open"), date].filter(Boolean).join(" · "),
+    ),
+  );
   el.appendChild(
     renderPlanSheet({
       items: plan.items,
@@ -124,13 +195,59 @@ export function refreshPlanPeek() {
   const { state } = appDeps;
   if (!state) return;
 
-  const clientId = activeSession.activeClientId || activeSession.participants[0];
+  const clientId = activeClientOf(activeSession);
   const client = (state.clients || []).find((c) => c.id === clientId);
   const clientName = client ? client.name : "";
   const { previous, next } = clientSessionNeighbours(state, clientId, anchorFor(activeSession));
 
   renderUnderLayer(pastEl, previous, { clientId, clientName, when: "past", appDeps });
   renderUnderLayer(futureEl, next, { clientId, clientName, when: "future", appDeps });
+  refreshTodayButton(activeSession, clientId, state);
+}
+
+function activeClientOf(activeSession) {
+  return activeSession.activeClientId || activeSession.participants[0];
+}
+
+// Is the clipboard showing this entry? A launched scheduled session carries every merged slot's id
+// in sourceSession.ids (buildSessionMeta); a reopened record or draft is the record's own id.
+function isShowing(activeSession, entry) {
+  const source = activeSession.sourceSession;
+  const ids = [activeSession.id, source?.id, ...(source?.ids || [])];
+  return ids.includes(entry.id);
+}
+
+// Today shows only when there is a today to go back to and the clipboard is showing something else.
+function refreshTodayButton(activeSession, clientId, state) {
+  const button = document.getElementById("btn-plan-today");
+  if (!button) return;
+  const today = clientSessionToday(state, clientId, Date.now());
+  button.classList.toggle("hidden", !today || isShowing(activeSession, today));
+}
+
+function openRoute(sessionId, clientId) {
+  const { navigateToPath, urlFor } = getAppDeps();
+  navigateToPath?.(urlFor("session.client", { sessionId, clientId }));
+}
+
+function openNeighbour(side) {
+  const activeSession = getActiveSession();
+  const { state, openPlanningForClient } = getAppDeps();
+  if (!activeSession || !state) return;
+  const clientId = activeClientOf(activeSession);
+  const { previous, next } = clientSessionNeighbours(state, clientId, anchorFor(activeSession));
+  const entry = side === "past" ? previous : next;
+  if (entry) openRoute(entry.id, clientId);
+  else if (side === "future") openPlanningForClient?.(clientId);
+}
+
+function returnToToday() {
+  const activeSession = getActiveSession();
+  const { state } = getAppDeps();
+  if (!activeSession || !state) return;
+  const clientId = activeClientOf(activeSession);
+  const today = clientSessionToday(state, clientId, Date.now());
+  if (today) openRoute(today.id, clientId);
 }
 
 /** Wires the drag itself onto the blanket. Called once from setupActiveSession(); `initPlanPeek`
@@ -145,5 +262,8 @@ export function initPlanPeekController() {
     }),
     // The reorder drag in clipboardEditor.js owns the same pointer surface while editing.
     isDisabled: () => isClipboardEditMode(),
+    canOpen: () => !getActiveSession()?.started,
+    onOpen: openNeighbour,
   });
+  document.getElementById("btn-plan-today")?.addEventListener("click", returnToToday);
 }

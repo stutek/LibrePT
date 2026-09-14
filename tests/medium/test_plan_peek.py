@@ -1,7 +1,9 @@
 # tests/medium/test_plan_peek.py — the blanket drag (TODO §52.2 step 3): press-and-hold narrows
 # and densifies the current plan; a sideways drag pulls it aside to reveal the previous/next plan
 # drawn underneath (planSheet.js, step 2) via controllers/planPeekController.js and
-# modules/clipboard/planPeek.js.
+# modules/clipboard/planPeek.js. Step 4: a pull past the threshold opens what it uncovered, Today
+# leads back, and a client with no next plan is offered one. There is no router in this tier, so
+# those tests assert what the clipboard ASKED to open; tests/e2e/test_plan_peek_open.py opens it.
 #
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
@@ -26,30 +28,58 @@ ANCHOR_DATE = "2026-09-14T18:00:00.000Z"
 # Neighbours are sourced entirely from state.history — both a FINISHED day before the anchor and
 # one after it satisfy clientSessionNeighbours.js's `previous`/`next` without needing state.sessions
 # or a routine, which keeps the fixture small.
-EXTRA_STATE = """
+PREVIOUS_RECORD = """
 state.history.push({
   id: 'hprev1', clientId: '%(client)s', routineName: 'Prev Plan', date: '2026-09-10T18:00:00.000Z',
   duration: 1800, feedback: [],
-  exercises: [%(prev_item)s],
+  exercises: [%(item)s],
 });
+""" % {
+    "client": CLIENT_ID,
+    "item": json.dumps(exercise_item("px1", "Prev Exercise One")),
+}
+
+NEXT_RECORD = """
 state.history.push({
   id: 'hnext1', clientId: '%(client)s', routineName: 'Next Plan', date: '2026-09-18T18:00:00.000Z',
   duration: 1800, feedback: [],
-  exercises: [%(next_item)s],
+  exercises: [%(item)s],
 });
-renderActiveGroupBoard();
 """ % {
     "client": CLIENT_ID,
-    "prev_item": json.dumps(exercise_item("px1", "Prev Exercise One")),
-    "next_item": json.dumps(exercise_item("nx1", "Next Exercise One")),
+    "item": json.dumps(exercise_item("nx1", "Next Exercise One")),
 }
 
+# No router here: record what the clipboard asks to open instead of opening it.
+RECORD_OPENS_IMPORT = (
+    "import { mergeAppDeps } from './controllers/activeSessionStore.js';\n"
+)
+RECORD_OPENS = """
+window.__opened = [];
+mergeAppDeps({
+  navigateToPath: (path) => window.__opened.push(['route', path]),
+  openPlanningForClient: (clientId) => window.__opened.push(['plan', clientId]),
+});
+"""
 
-def _mount(page, local_server):
+
+def _mount(
+    page, local_server, *, previous=True, following=True, started=True, extra=""
+):
+    """`started` defaults to the fixture's own True (a running session), which is what the step 3
+    tests were written against; the step 4 tests that open something pass False."""
     page.set_viewport_size(PHONE)
+    body = (
+        (PREVIOUS_RECORD if previous else "")
+        + (NEXT_RECORD if following else "")
+        + extra
+        + RECORD_OPENS
+        + "renderActiveGroupBoard();\n"
+    )
     session = active_session_fixture(
         client_id=CLIENT_ID,
         exercises=[exercise_item(f"ex{n}", f"Live Exercise {n}") for n in range(6)],
+        started=started,
         sourceSession={
             "id": "todaySession",
             "titles": ["Today's Plan"],
@@ -60,7 +90,11 @@ def _mount(page, local_server):
             "timeLabel": "18:00 - 19:00",
         },
     )
-    load_with_stub(page, local_server, clipboard_stub(session, extra_body=EXTRA_STATE))
+    load_with_stub(
+        page,
+        local_server,
+        clipboard_stub(session, extra_imports=RECORD_OPENS_IMPORT, extra_body=body),
+    )
     page.wait_for_selector("#active-session-overlay:not(.hidden)")
     page.wait_for_selector("#active-session-blanket")
     page.wait_for_timeout(300)
@@ -259,3 +293,178 @@ def test_a_vertical_drag_is_left_as_a_scroll(page, local_server):
     assert _active_index(page) == before
 
     page.mouse.up()
+
+
+# ---- Step 4: opening what the pull uncovered -----------------------------------------------------
+
+# 70 % of a 390px phone is 273px of pull; a 300px drag lands past it under the rubber band, a 200px
+# drag well short of it. Both start clear of the 24px edge strip.
+LEFT_START = 40
+RIGHT_START = PHONE["width"] - 40
+
+
+def _drag(page, start_x, dx, *, release=True):
+    page.mouse.move(start_x, CENTER_Y)
+    page.mouse.down()
+    page.mouse.move(start_x + dx, CENTER_Y, steps=20)
+    page.wait_for_timeout(50)
+    if release:
+        page.mouse.up()
+        page.wait_for_timeout(450)
+
+
+def _opened(page):
+    return page.evaluate("() => window.__opened")
+
+
+def _label_shown(page, layer, part):
+    return page.locator(f"#plan-peek-under-{layer} .plan-peek-label-{part}").evaluate(
+        "el => getComputedStyle(el).display !== 'none'"
+    )
+
+
+def test_a_pull_past_the_threshold_says_release_to_open(page, local_server):
+    """Past 70 % of the width the uncovered plan's header swaps to "Release to open" with the plan's
+    ISO date; short of it the header keeps saying which plan this is."""
+    _mount(page, local_server, started=False)
+
+    _drag(page, LEFT_START, 200, release=False)
+    assert _label_shown(page, "past", "rest")
+    assert not _label_shown(page, "past", "release")
+    assert "Previous plan · 2026-09-10" in page.locator(
+        "#plan-peek-under-past .plan-peek-label-rest"
+    ).evaluate("el => el.textContent")
+
+    page.mouse.move(LEFT_START + 300, CENTER_Y, steps=10)
+    page.wait_for_timeout(50)
+    assert _label_shown(page, "past", "release"), "no release label past the threshold"
+    assert not _label_shown(page, "past", "rest")
+    assert (
+        page.locator("#plan-peek-under-past .plan-peek-label-release").evaluate(
+            "el => el.textContent"
+        )
+        == "Release to open · 2026-09-10"
+    )
+    page.mouse.up()
+
+
+def test_releasing_past_the_threshold_opens_the_previous_plan_for_the_same_client(
+    page, local_server
+):
+    _mount(page, local_server, started=False)
+    _drag(page, LEFT_START, 300)
+    assert _opened(page) == [["route", f"/session.client/hprev1/{CLIENT_ID}"]]
+    assert _pull(page) == 0, "the blanket was not put back after opening"
+    assert not _is_held(page)
+
+
+def test_releasing_past_the_threshold_to_the_left_opens_the_next_plan(
+    page, local_server
+):
+    _mount(page, local_server, started=False)
+    _drag(page, RIGHT_START, -300)
+    assert _opened(page) == [["route", f"/session.client/hnext1/{CLIENT_ID}"]]
+
+
+def test_releasing_short_of_the_threshold_springs_back_and_opens_nothing(
+    page, local_server
+):
+    _mount(page, local_server, started=False)
+    _drag(page, LEFT_START, 200)
+    assert _opened(page) == []
+    assert _pull(page) == 0
+
+
+def test_a_running_session_is_never_left_by_a_pull(page, local_server):
+    """Opening another session replaces the one clipboard slot, so a pull from a STARTED session
+    uncovers the plan but offers no release and opens nothing — a sweep between sets cannot throw
+    away the session's logs."""
+    _mount(page, local_server, started=True)
+    _drag(page, LEFT_START, 300, release=False)
+    assert not _label_shown(page, "past", "release")
+    page.mouse.up()
+    page.wait_for_timeout(450)
+    assert _opened(page) == []
+
+
+def test_with_no_next_plan_the_future_layer_offers_to_create_one(page, local_server):
+    _mount(page, local_server, started=False, following=False)
+    card = page.locator("#plan-peek-under-future .plan-peek-create-card")
+    assert card.evaluate("el => el.textContent").startswith(
+        "Jane Doe has no next plan yet."
+    )
+    assert (
+        card.locator(".plan-peek-create-cell").evaluate("el => el.textContent")
+        == "Create a plan"
+    )
+
+    _drag(page, RIGHT_START, -300, release=False)
+    assert _label_shown(page, "future", "release")
+    assert (
+        page.locator("#plan-peek-under-future .plan-peek-label-release").evaluate(
+            "el => el.textContent"
+        )
+        == "Release to create a plan"
+    )
+    page.mouse.up()
+    page.wait_for_timeout(450)
+    assert _opened(page) == [["plan", CLIENT_ID]]
+
+
+def test_with_no_previous_plan_the_past_layer_says_so_and_nothing_opens(
+    page, local_server
+):
+    _mount(page, local_server, started=False, previous=False)
+    assert (
+        page.locator("#plan-peek-under-past .plan-peek-under-empty").evaluate(
+            "el => el.textContent"
+        )
+        == "No previous plan."
+    )
+    _drag(page, LEFT_START, 300, release=False)
+    assert _pull(page) < 300 * 0.3, "with nothing behind it the pull did not resist"
+    page.mouse.up()
+    page.wait_for_timeout(450)
+    assert _opened(page) == []
+
+
+# The frozen clock's day (tests/conftest.py FROZEN_NOW) — the fixture's own session is 2026-09-14,
+# so a client session on this date is "today" and the clipboard is showing another one.
+TODAY_SESSION = (
+    """
+state.sessions.push({
+  id: 'sToday', title: 'Today Group', participants: ['%s'], routineId: 'r1',
+  startDate: '2026-08-19T17:00:00.000Z', time: '17:00 - 18:00',
+});
+"""
+    % CLIENT_ID
+)
+
+
+def test_today_leads_back_to_the_clients_session_today(page, local_server):
+    _mount(page, local_server, started=False, extra=TODAY_SESSION)
+    today = page.locator("#btn-plan-today")
+    assert today.is_visible(), "Today is not offered while another session is shown"
+    box = today.bounding_box()
+    assert box["height"] >= 44 and box["width"] >= 44
+    assert today.get_attribute("aria-label") == "Back to today's session"
+    assert "Today" in today.inner_text()
+
+    today.click()
+    assert _opened(page) == [["route", f"/session.client/sToday/{CLIENT_ID}"]]
+
+
+def test_today_is_not_offered_with_no_session_today(page, local_server):
+    _mount(page, local_server, started=False)
+    assert not page.locator("#btn-plan-today").is_visible()
+
+
+def test_today_is_not_offered_on_todays_own_session(page, local_server):
+    """The clipboard's own session (sourceSession id `todaySession`) is the client's session today."""
+    _mount(
+        page,
+        local_server,
+        started=False,
+        extra=TODAY_SESSION.replace("'sToday'", "'todaySession'"),
+    )
+    assert not page.locator("#btn-plan-today").is_visible()

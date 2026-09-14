@@ -20,6 +20,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-09-14 — Pull the plan aside to see the client's other plans
+
+### Added
+
+- **Press and hold the plan on the clipboard, then drag it sideways.** Holding makes the plan
+  narrower and its cards denser, and the edges of the client's previous and next plans show on the
+  left and right. Drag right to see the previous plan, drag left to see the next one. Let go, and the
+  plan springs back. The plan underneath shows what was planned, with the feather, weight and note
+  icons where a signal was logged (§52.2).
+- **Drag past the "Release to open" label to open that plan** for the same client. A **Today**
+  button, with a calendar icon, left of Start on the title bar, leads back. A session that has been
+  started is never left this way: the drag only shows the other plan.
+- **A client with no next plan gets a "Create a plan" card** under the plan; releasing on it opens
+  the client's planning form.
+
 ## 2026-09-14 — The active card stands out in the Spreadsheet theme
 
 ### Changed

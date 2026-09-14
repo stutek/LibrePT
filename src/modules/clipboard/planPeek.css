@@ -19,13 +19,22 @@
   background: var(--bg-color);
   transform: translateX(var(--plan-pull, 0px));
   /* Vertical stays the browser's own scroll; only a horizontal move is ours (planPeek.js
-     preventDefaults it once the axis locks to "x"). */
-  touch-action: pan-y;
+     preventDefaults it once the axis locks to "x"). pinch-zoom too: pan-y alone switches off the
+     two-finger zoom across the whole clipboard, which a trainer who cannot read small text needs. */
+  touch-action: pan-y pinch-zoom;
   /* A mouse drag would otherwise select the title/exercise text under the pointer, and the next
      press on selected text starts the browser's own drag instead of ours — found via the
      prototype's own comment (a pull stopping dead at 20px, pointercancel). */
   user-select: none;
   -webkit-user-select: none;
+}
+/* …and again on the body, because touch-action is only intersected up to the nearest SCROLL
+   CONTAINER: a finger on a deck card inside .clipboard-body (overflow: auto) never sees the
+   blanket's pan-y, the browser takes the sideways move as its own pan and cancels the pointer, and
+   the plan does not move at all. Found in step 4 with emulated touch; the mouse-driven tests could
+   not see it. A scroller further in (a card's own) still decides for itself. */
+.plan-peek-blanket .clipboard-body {
+  touch-action: pan-y pinch-zoom;
 }
 .plan-peek-blanket.is-springing {
   transition: transform 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.15);
@@ -39,8 +48,9 @@
 
 /* Held (press-and-hold, before any pull, or throughout a horizontal drag): the plan narrows so the
    neighbour's edge shows on each side — 60px, measured against the demo plan on a 390px phone so no
-   exercise name is cut (Simon, 2026-09-14) — and its cards get denser (below). Narrowing animates only while ANIMATING (is-animating-held), never as a permanent
-   transition — a spring-back or a client switch must not visibly "un-narrow" mid-render. */
+   exercise name is cut (Simon, 2026-09-14) — and its cards get denser (below). Narrowing animates
+   only while ANIMATING (is-animating-held), never as a permanent transition — a spring-back or a
+   client switch must not visibly "un-narrow" mid-render. */
 .plan-peek-blanket.is-held {
   margin-inline: 60px;
 }
@@ -136,10 +146,104 @@
   text-align: right;
 }
 
+/* ---- Step 4: opening what the pull uncovered ---------------------------------------------------- */
+
+/* Released past the threshold, the blanket slides the rest of the way off before the neighbour
+   opens (planPeek.js's LEAVE_MS). */
+.plan-peek-blanket.is-leaving {
+  transition: transform 0.22s ease-in;
+}
+
+/* What releasing does. Both wordings are in the markup; `is-release-ready` (planPeek.js) picks one,
+   so crossing the threshold never re-renders the layer mid-drag. The release wording sits on a
+   filled --primary cell, as in the prototype, so it reads as a different state and not a new line of
+   the plan. */
+.plan-peek-under-label {
+  display: flex;
+  padding: 0 4px 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.plan-peek-under-past .plan-peek-under-label {
+  color: var(--temporal-past);
+}
+.plan-peek-under-future .plan-peek-under-label {
+  color: var(--temporal-future);
+  justify-content: flex-end;
+}
+.plan-peek-label-release {
+  display: none;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: var(--primary);
+  color: var(--on-primary);
+}
+.plan-peek-under.is-release-ready .plan-peek-label-rest {
+  display: none;
+}
+.plan-peek-under.is-release-ready .plan-peek-label-release {
+  display: inline-block;
+}
+
+/* No previous plan: one short line where the plan would be. */
+.plan-peek-under-empty {
+  margin: 0;
+  padding: 12px 4px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* No next plan: the card offering to create one, right-aligned like the next plan it stands in for.
+   The "Create a plan" cell looks like a button without being one — nothing under the blanket is
+   tapped; the pull past the threshold opens the planning form. */
+.plan-peek-create-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  padding: 18px 12px;
+  text-align: right;
+  background: var(--card-bg);
+  border: 1px dashed var(--border-color);
+  border-radius: 8px;
+  color: var(--text-muted);
+}
+.plan-peek-create-card strong {
+  color: var(--text-main);
+}
+.plan-peek-create-cell {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--temporal-future);
+  border-radius: 6px;
+  color: var(--temporal-future);
+  font-weight: 700;
+}
+.plan-peek-under.is-release-ready .plan-peek-create-cell {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--on-primary);
+}
+
+/* Today, on the title bar: a real touch target, glyph and word on one line. */
+.plan-peek-today {
+  min-height: 44px;
+  padding: 0 12px;
+  gap: 6px;
+  white-space: nowrap;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .plan-peek-blanket,
   .plan-peek-blanket.is-springing,
-  .plan-peek-blanket.is-animating-held {
+  .plan-peek-blanket.is-animating-held,
+  .plan-peek-blanket.is-leaving {
     transition: none;
   }
 }

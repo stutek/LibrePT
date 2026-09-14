@@ -7,8 +7,14 @@
 // Knows nothing about sessions, clients or state: it drives pointer events on ONE element (the
 // blanket) and toggles classes on it and on the two under-layer elements a callback hands it. The
 // two under-layers are rendered by controllers/planPeekController.js — this module never asks what
-// is in them, only whether a side HAS a plan (the `has-plan` class the controller already put
-// there), which is what decides the quarter-distance rubber band with no neighbour.
+// is in them, only whether a side has something to uncover (`has-plan`, or `has-create-card` for the
+// "create a plan" card the controller draws when there is no next plan). That decides the
+// quarter-distance rubber band with nothing there.
+//
+// Step 4: a pull past COMMIT_PCT marks that under-layer `is-release-ready` (its header swaps to
+// "Release to open"), and releasing there slides the blanket off and calls `onOpen(side)`. WHAT
+// opening means — a route, the planning form — is the controller's; so is whether this session may
+// be left by a pull at all (`canOpen`).
 //
 // The one inline style this module sets is `--plan-pull` (docs/ARCHITECTURE.md "look and layout
 // live only in CSS" — a drag offset is exactly the kind of runtime number that rule carves out for
@@ -24,6 +30,11 @@ const MAX_PULL_PCT = 0.85; // of the blanket's own width
 const RUBBER_START_PCT = 0.8; // of MAX_PULL_PCT — beyond this the pull resists further movement
 const NO_NEIGHBOUR_FACTOR = 0.25; // how far the blanket still moves with nothing to reveal
 const SPRING_MS = 280; // must match planPeek.css's `.is-springing` transition
+// Step 4. Both measured against the overlay's width, not the narrowed blanket's, as the prototype
+// measures its phone: 70 % of a 390px phone is a 273px pull — a deliberate sweep, not a thumb
+// brushing the plan between sets.
+const COMMIT_PCT = 0.7;
+const LEAVE_MS = 220; // must match planPeek.css's `.is-leaving` transition
 
 // Rows denser while held/dragging, eased back the same way (planPeek.css's `.is-held` transition).
 const DENSE_SETTLE_MS = 220;
@@ -42,18 +53,25 @@ function clampPull(dx, width, hasNeighbour) {
   return sign * pull * (hasNeighbour ? 1 : NO_NEIGHBOUR_FACTOR);
 }
 
+function prefersReducedMotion() {
+  return Boolean(window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches);
+}
+
 /**
  * Wire the blanket gesture. `blanket` is the element wrapping the title bar, client tabs and
  * clipboard body (#active-session-blanket). `deps`:
  *   getUnderLayers()  — () => { past: HTMLElement|null, future: HTMLElement|null }
  *   isDisabled()      — () => bool; true in edit mode, where the reorder drag owns the surface
+ *   canOpen()         — () => bool; false when a release past the threshold must not leave
+ *   onOpen(side)      — ("past"|"future") => void; called once the blanket has slid off
  * Idempotent: wiring twice on the same element is a no-op (the controller calls this once).
  */
-export function initPlanPeek(blanket, { getUnderLayers, isDisabled }) {
+export function initPlanPeek(blanket, { getUnderLayers, isDisabled, canOpen, onOpen }) {
   if (!blanket || blanket.dataset.planPeekWired) return;
   blanket.dataset.planPeekWired = "1";
 
-  let drag = null; // { id, x, y, axis, side, hold, anchorEl }
+  let drag = null; // { id, x, y, axis, side, ready, hold, anchorEl }
+  let leaving = false; // the blanket is sliding off; a new press must not grab it mid-slide
 
   function setPull(px) {
     blanket.style.setProperty("--plan-pull", `${px}px`);
@@ -74,14 +92,30 @@ export function initPlanPeek(blanket, { getUnderLayers, isDisabled }) {
     blanket.classList.toggle("side-future", side === "future");
   }
 
-  function hasPlan(side) {
+  function layerFor(side) {
     const { past, future } = getUnderLayers() || {};
-    const el = side === "past" ? past : future;
-    return !!el?.classList.contains("has-plan");
+    return side === "past" ? past : future;
+  }
+
+  function hasNeighbour(side) {
+    const el = layerFor(side);
+    return !!(el?.classList.contains("has-plan") || el?.classList.contains("has-create-card"));
+  }
+
+  function setReady(side, ready) {
+    const { past, future } = getUnderLayers() || {};
+    past?.classList.toggle("is-release-ready", ready && side === "past");
+    future?.classList.toggle("is-release-ready", ready && side === "future");
+  }
+
+  // The overlay's width: the blanket itself is 120px narrower while held.
+  function fullWidth() {
+    const host = blanket.parentElement || blanket;
+    return host.getBoundingClientRect().width || 1;
   }
 
   function pointerdown(e) {
-    if (isDisabled?.()) return;
+    if (leaving || isDisabled?.()) return;
     if (e.button !== undefined && e.button !== 0) return;
     // The trainer's own control (a card, a button inside the deck) still opens/taps normally: a
     // press that never crosses LOCK_PX or HOLD_MS produces no gesture of ours at all, so we don't
@@ -98,6 +132,7 @@ export function initPlanPeek(blanket, { getUnderLayers, isDisabled }) {
       y: e.clientY,
       axis: null,
       side: null,
+      ready: false,
       anchorEl,
     };
     drag = pressed;
@@ -129,11 +164,17 @@ export function initPlanPeek(blanket, { getUnderLayers, isDisabled }) {
     e.preventDefault();
 
     const side = dx > 0 ? "past" : "future";
-    const width = blanket.getBoundingClientRect().width || 1;
-    const pull = clampPull(dx, width, hasPlan(side));
+    const width = fullWidth();
+    const neighbour = hasNeighbour(side);
+    const pull = clampPull(dx, width, neighbour);
     if (side !== drag.side) {
       drag.side = side;
       setSide(side);
+    }
+    const ready = neighbour && Math.abs(pull) >= width * COMMIT_PCT && canOpen?.() !== false;
+    if (ready !== drag.ready) {
+      drag.ready = ready;
+      setReady(side, ready);
     }
     blanket.classList.toggle("pulled-right", pull > 0);
     blanket.classList.toggle("pulled-left", pull < 0);
@@ -146,16 +187,46 @@ export function initPlanPeek(blanket, { getUnderLayers, isDisabled }) {
     clearTimeout(finished.hold);
     drag = null;
 
+    setReady(null, false);
+    // A pointercancel is the browser taking the gesture back (a scroll, a system swipe): never an
+    // instruction to open anything.
+    if (finished.axis === "x" && finished.ready && e.type === "pointerup") {
+      leave(finished.side);
+      return;
+    }
     blanket.classList.remove("pulled-right", "pulled-left");
     setSide(null);
     setHeld(false);
     if (finished.axis === "x") {
-      // Opening the neighbour past a threshold is TODO §52.2 step 4 — every release here springs
-      // back, whatever the pull was.
       blanket.classList.add("is-springing");
       setPull(0);
       setTimeout(() => blanket.classList.remove("is-springing"), SPRING_MS);
     }
+  }
+
+  // Slide off in the direction of the pull, then open. Opening re-renders the plan into this same
+  // blanket, so it is put back in place in the same task as onOpen: the new plan is what paints
+  // next, never the old one springing back. Reduced motion: no slide, same outcome, no wait.
+  function leave(side) {
+    leaving = true;
+    const reduced = prefersReducedMotion();
+    if (!reduced) {
+      blanket.classList.add("is-leaving");
+      setPull((side === "past" ? 1 : -1) * fullWidth());
+    }
+    const finish = () => {
+      try {
+        onOpen?.(side);
+      } finally {
+        blanket.classList.remove("is-leaving", "pulled-right", "pulled-left");
+        setSide(null);
+        setHeld(false);
+        setPull(0);
+        leaving = false;
+      }
+    };
+    if (reduced) finish();
+    else setTimeout(finish, LEAVE_MS);
   }
 
   blanket.addEventListener("pointerdown", pointerdown);
