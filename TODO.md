@@ -4202,8 +4202,16 @@ gesture is the swipe down that closes the clipboard.
 scrolling, so a sideways drag must not count as a scroll.
 
 **Ruled 2026-09-14 (Simon), while trying a prototype:**
-- **The previous plan always shows what was PLANNED.** No ticks. An icon marks what was recorded
-  against a row: a pen for a note, a weight for a logged load.
+- **The previous plan always shows what was PLANNED.** No ticks. An icon marks a signal recorded
+  against a row, in the active card's own glyphs (exerciseCard.js): `fa-feather` for too easy,
+  `fa-weight-hanging` for too hard, `fa-note-sticky` for a note. Corrected the same day: the first
+  record here read Simon's "pero, utež" as a pen for a note and a weight for a logged load.
+- **The session's title bar and client tabs are part of the plan** that moves aside, and the plan
+  underneath shows its own.
+- **Press and hold shrinks the plan by itself**, before any movement, so the trainer can see it can
+  be pulled. A short tap does nothing, so tapping a card is not disturbed.
+- **The main colour stays `#0e7490`.** Simon compared it on the prototype with two greener
+  candidates and chose it.
 
 **Asked 2026-09-14, being explored in a prototype, not decided:**
 - **Rows shrink while the plan is pulled aside**, animated, so more of both plans fits on the
@@ -4217,8 +4225,6 @@ scrolling, so a sideways drag must not count as a scroll.
 - **Why the live deck has no dense rows:** every collapsed card is a tap target, and a 22px row is
   too small for one thumb. Rows that are not tapped (inside a circuit, the previous plan) can be
   dense.
-- **The main colour:** `#0e7490` looks blue on the sheet. Candidates `#0f766e` (175°, white 5.47:1)
-  and `#0b6b63` (175°, 6.37:1).
 
 **Open, to settle before code:**
 - **The phone's own back gesture.** On Android gesture navigation and in Safari on the iPhone, a
