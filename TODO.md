@@ -4175,14 +4175,57 @@ izgled"*.
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#521-x-the-look--shipped-2026-09-13); what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-### 52.2 [ ] History and future as columns, scrolled left and right — later
+### 52.2 [ ] Pull the current plan aside to see the previous one — not started
 
-Deferred by Simon on 2026-09-13. What it needs, measured in the code that day: the deck draws only
-the LAST past session (`pastExList` in
-[exerciseDeckOfCards.js](src/modules/clipboard/exerciseDeckOfCards.js)), flattened without its
-circuits by `buildPastExerciseItems`, and a future session only when the one opened is itself in the
-future. Nothing uses a sideways swipe yet; the only gesture is the swipe down that closes the
-clipboard. [deckScrollFocus.js](src/modules/clipboard/deckScrollFocus.js) picks the active card
-from vertical scrolling of today's cards only, so columns beside them do not disturb it. **Open:**
-whether the columns are for this theme only (the markup draws them in every theme and the other
-themes hide them in CSS) or for every theme; and how many sessions each side.
+**What Simon described, 2026-09-14.** A way to compare a client's current plan with the previous one,
+as his sheet does with two columns side by side:
+
+> *"umikanje trenutnega načrta razkrije starega, ko prst drsanje spusti trenutni načrt skoči nazaj
+> na svoje mesto (in zakrije preteklega). Torej dokler prst drži 'odejo' sta vidna oba načrta."*
+
+- The current plan lies over the previous one. A drag from left to right moves the current plan
+  aside, and the previous plan shows underneath.
+- While the finger holds, both plans are visible. On release, the current plan springs back and
+  covers the previous one.
+- **Not** a comparison inside one row: exercises are not repeated from plan to plan, so there is
+  nothing to match a row against.
+- The whole current plan is visible at once, and the reveal shows every row of the previous plan.
+
+This replaces the sideways columns of history and future that were first proposed here on
+2026-09-13.
+
+**Measured in the code on 2026-09-13.** The deck draws only the LAST past session (`pastExList` in
+[exerciseDeckOfCards.js](src/modules/clipboard/exerciseDeckOfCards.js)), and
+`buildPastExerciseItems` flattens it without its circuits. Nothing uses a sideways drag yet; the only
+gesture is the swipe down that closes the clipboard.
+[deckScrollFocus.js](src/modules/clipboard/deckScrollFocus.js) picks the active card from vertical
+scrolling, so a sideways drag must not count as a scroll.
+
+**Open, to settle before code:**
+- **The phone's own back gesture.** On Android gesture navigation and in Safari on the iPhone, a
+  drag that starts at the left edge of the screen means "back" and would close the clipboard. The
+  drag must start away from the edge, or the plan needs a handle to pull.
+- **A plan longer than the screen.** "The whole plan at once" holds for a short plan. For a long one:
+  do both plans scroll together, or do the rows shrink to fit?
+- **Which previous plan:** what was planned for the last session, or what the client actually did in
+  it.
+- **Which themes:** Spreadsheet only, or every theme. A drag is behaviour, not look, so it could
+  work in every theme.
+
+## 53. [ ] Two medium tests fail when the machine is busy
+
+Found 2026-09-14 by the gate run for §52.1's strip between blocks, a change that cannot reach
+either test: both run in the default theme. A game was using 128 % CPU and 4.6 GB of memory, and
+Stage 2 took 263 s instead of about 95 s. Both tests passed on their own a minute later, and a second
+full run under the same load passed.
+
+- `test_scrolling_to_either_end_reaches_the_first_and_the_last_card` in
+  [test_clipboard_active_card.py](tests/medium/test_clipboard_active_card.py): after scrolling to the
+  end, card 38 was active instead of the last one, 39.
+- `test_the_panel_clears_the_control_even_while_a_card_is_open[iPhone SE]` in
+  [test_walkthrough_panel.py](tests/medium/test_walkthrough_panel.py): the walkthrough panel covered
+  the control it rings.
+
+**Open:** what in each test depends on timing. Either the test reads the screen before the app has
+finished settling, or the app itself lands in the wrong place when it is slow, which a busy phone in
+a gym would see too.
