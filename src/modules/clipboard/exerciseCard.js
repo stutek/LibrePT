@@ -13,12 +13,10 @@
 // }
 
 import {
-  formatMetricValue,
+  compactTargetString,
   isTimeBasedMetric,
   toSeconds,
-  usesLoad,
 } from "../../domain/exerciseModality.js";
-import { formatLoad, formatReps, hasLoad } from "../../domain/repsAndLoad.js";
 import { DeckCard } from "./deckCard.js";
 
 export class ExerciseDeckCard extends DeckCard {
@@ -40,8 +38,6 @@ export class ExerciseDeckCard extends DeckCard {
   renderCard(card) {
     const { activeClientId, t, escapeHTML, getExerciseSignalColor, currentCount } = this.ctx;
     const item = this.item;
-    const metric = item.metric || "reps";
-    const showLoad = usesLoad(item.modality || "strength");
     const counter = `${item.index + 1}/${currentCount}`;
     // Tint the title by any feedback logged for this exercise (see getExerciseSignalColor)
     const signalColor = getExerciseSignalColor(activeClientId, item.name);
@@ -61,18 +57,19 @@ export class ExerciseDeckCard extends DeckCard {
     }
 
     // The target is labelled S(ets) × R(eps) × weight so one line reads unambiguously, with a load
-    // axis only for load-bearing modalities:
-    //   strength "S4 × R6 × 60kg", isometric "S3 × 0:45 × 20kg", cardio "S1 × 20 cal",
-    //   stretch/balance "S2 × 0:30", agility "S4 × 0:10".
-    const compactLoad =
-      showLoad && hasLoad(item.weightTarget, item.loadUnit)
-        ? ` × ${escapeHTML(formatLoad(item.weightTarget, item.loadUnit))}`
-        : "";
-    const primaryPart =
-      metric === "reps"
-        ? `R${escapeHTML(formatReps(item.repsTarget))}`
-        : escapeHTML(formatMetricValue(item.repsTarget, metric));
-    const compactTarget = `S${escapeHTML(String(item.setsTarget))} × ${primaryPart}${compactLoad}`;
+    // axis only for load-bearing modalities — see compactTargetString's own doc for the examples.
+    // Shared with the read-only plan sheet (planSheet.js, TODO §52.2 step 2) so the wording can
+    // never drift between the live card and the sheet drawn under it.
+    const compactTarget = escapeHTML(
+      compactTargetString({
+        setsTarget: item.setsTarget,
+        repsTarget: item.repsTarget,
+        metric: item.metric || "reps",
+        modality: item.modality || "strength",
+        weightTarget: item.weightTarget,
+        loadUnit: item.loadUnit,
+      }),
+    );
 
     card.innerHTML = `
       <div class="deck-card-compact">

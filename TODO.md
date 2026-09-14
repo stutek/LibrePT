@@ -4241,7 +4241,8 @@ scrolling, so a sideways drag must not count as a scroll.
   theme's `--temporal-past` / `--temporal-future`.
 
 **Steps, one commit and one gate each:** 1) the client's previous and next plan, as a pure domain
-function; 2) the plan drawn under the blanket; 3) the drag, with title bar and tabs moving with the
+function (`clientSessionNeighbours.js`, shipped 2026-09-14); 2) the plan drawn under the blanket
+(`planSheet.js`, with the live card's target wording moved to one shared helper); 3) the drag, with title bar and tabs moving with the
 plan; 4) opening a neighbour, Today, and the create-a-plan card.
 
 ## 53. [ ] Two medium tests fail when the machine is busy

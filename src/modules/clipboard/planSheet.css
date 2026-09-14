@@ -1,0 +1,97 @@
+/* planSheet.css — the read-only plan sheet drawn under the live clipboard (TODO §52.2 step 2).
+   Dense on purpose: these rows are never tapped, so they trade the deck's 40px touch targets for
+   fitting a whole session on screen at once while the current plan is held aside.
+   Colours come only from theme tokens (docs/ARCHITECTURE.md "Themes and styling"), never a
+   literal a theme defines, so the sheet reads in every theme including the dark ones. */
+
+.plan-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.plan-sheet-block {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.plan-sheet-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 3px 10px;
+  font-size: 12px;
+  line-height: 1.35;
+  border-top: 1px solid var(--border-color);
+  color: var(--text-main);
+}
+
+.plan-sheet-row:first-child {
+  border-top: 0;
+}
+
+.plan-sheet-head {
+  background: color-mix(in srgb, var(--border-color) 45%, var(--card-bg));
+  font-weight: 700;
+}
+
+.plan-sheet-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Exercise names carry the session's time (ruled 2026-09-14): a past session's names in
+   --temporal-past, a future session's in --temporal-future — the root class decides which. The
+   head row keeps the plain text colour; it names the circuit, not a movement. */
+.plan-sheet.is-past .plan-sheet-row:not(.plan-sheet-head) .plan-sheet-name {
+  color: var(--temporal-past);
+}
+.plan-sheet.is-future .plan-sheet-row:not(.plan-sheet-head) .plan-sheet-name {
+  color: var(--temporal-future);
+}
+
+.plan-sheet-target {
+  flex: none;
+  color: var(--text-muted);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.plan-sheet-row-rest .plan-sheet-name {
+  color: var(--text-muted);
+}
+
+.plan-sheet-icons {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  flex: none;
+}
+
+.plan-sheet-signal {
+  font-size: 10px;
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+.plan-sheet-signal-easy {
+  color: var(--success);
+  background: color-mix(in srgb, var(--success) 16%, transparent);
+}
+
+.plan-sheet-signal-hard {
+  color: var(--warning);
+  background: color-mix(in srgb, var(--warning) 16%, transparent);
+}
+
+.plan-sheet-signal-note {
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 16%, transparent);
+}

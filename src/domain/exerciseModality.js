@@ -16,7 +16,7 @@
 // and is looked up alongside equipment, exactly as loadUnitForEquipment already is. Load is shown only
 // for the modalities that carry external resistance (strength, isometric) — see usesLoad.
 
-import { formatReps } from "./repsAndLoad.js";
+import { formatLoad, formatReps, hasLoad } from "./repsAndLoad.js";
 
 export const MODALITIES = ["strength", "isometric", "cardio", "stretch", "balance", "agility"];
 export const CARDIO_METRICS = ["time", "distance", "calories", "watts", "pace", "heartrate"];
@@ -121,6 +121,29 @@ export function formatMetricValue(rawValue, metric) {
     default:
       return formatReps(rawValue);
   }
+}
+
+// The plan item's target, labelled S(ets) × R(eps) × weight, on one line: "S4 × R6 × 60kg" for
+// strength, "S3 × 0:45 × 20kg" for isometric, "S1 × 20 cal" for cardio, "S2 × 0:30" for
+// stretch/balance, with a load axis only for load-bearing modalities. Single source of truth for
+// this wording (TODO §52.2 step 2): exerciseCard.js's collapsed card and the read-only plan sheet
+// both build the same phrase for the same item and must never drift apart. Returns a plain string —
+// callers escape it for their own markup context (exerciseCard.js innerHTML; planSheet.js textContent).
+export function compactTargetString({
+  setsTarget,
+  repsTarget,
+  metric = "reps",
+  modality = "strength",
+  weightTarget,
+  loadUnit = "kg",
+}) {
+  const compactLoad =
+    usesLoad(modality) && hasLoad(weightTarget, loadUnit)
+      ? ` × ${formatLoad(weightTarget, loadUnit)}`
+      : "";
+  const primaryPart =
+    metric === "reps" ? `R${formatReps(repsTarget)}` : formatMetricValue(repsTarget, metric);
+  return `S${setsTarget} × ${primaryPart}${compactLoad}`;
 }
 
 // i18n key for a metric's short unit label. Callers do t(metricLabelKey(metric)).

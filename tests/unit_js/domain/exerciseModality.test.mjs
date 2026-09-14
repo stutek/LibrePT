@@ -63,3 +63,44 @@ test("isometric agility and extended cardio metrics", () => {
   // fixed-metric modalities offer no metric choice
   assert.equal(r.strengthOpts, null);
 });
+
+test("compactTargetString: the one wording the live card and the plan sheet share (TODO §52.2)", () => {
+  const strength = m.compactTargetString({
+    setsTarget: 4,
+    repsTarget: 6,
+    metric: "reps",
+    modality: "strength",
+    weightTarget: 60,
+    loadUnit: "kg",
+  });
+  const isometric = m.compactTargetString({
+    setsTarget: 3,
+    repsTarget: "0:45",
+    metric: "hold",
+    modality: "isometric",
+    weightTarget: 20,
+    loadUnit: "kg",
+  });
+  const cardio = m.compactTargetString({
+    setsTarget: 1,
+    repsTarget: 20,
+    metric: "calories",
+    modality: "cardio",
+  });
+  const stretch = m.compactTargetString({
+    setsTarget: 2,
+    repsTarget: "0:30",
+    metric: "hold",
+    modality: "stretch",
+  });
+  assert.equal(strength, "S4 × R6 × 60 kg");
+  assert.equal(isometric, "S3 × 0:45 × 20 kg");
+  assert.equal(cardio, "S1 × 20 cal");
+  // stretch carries no load axis, even with a weightTarget left over on the item
+  assert.equal(stretch, "S2 × 0:30");
+  // no weight recorded: the load axis is dropped, not shown as "0 kg" or "× "
+  assert.equal(
+    m.compactTargetString({ setsTarget: 3, repsTarget: 10, modality: "strength", weightTarget: 0 }),
+    "S3 × R10",
+  );
+});
