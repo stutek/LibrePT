@@ -4275,3 +4275,11 @@ full run under the same load passed.
 **Open:** what in each test depends on timing. Either the test reads the screen before the app has
 finished settling, or the app itself lands in the wrong place when it is slow, which a busy phone in
 a gym would see too.
+
+## 54. [ ] The past cards on the clipboard write their date as "20. jul."
+
+Seen 2026-09-14 on the demo data, while checking §52.2. A past card's badge reads "Past: 20. jul."
+(`dateStr` passed to `buildPastExerciseItems` in
+[exerciseDeckOfCards.js](src/modules/clipboard/exerciseDeckOfCards.js)), and "Past" is English on a
+Slovenian screen. The app writes a date as ISO everywhere, in every language, so it should read
+2026-07-20, and the word should come from the dictionary.
