@@ -81,18 +81,23 @@ html.spreadsheet-theme .exercise-deck-card.past-session.past-expanded {
   box-shadow: inset 0 0 0 1px var(--temporal-past);
 }
 
-/* A block of the plan has a thick border, as the trainer draws one round a set of rows in her sheet
-   (Simon, 2026-09-13: "sklope loči tako, da odebeljiš obrobo okoli sklopov in vaj, ki niso del
-   sklopa"). A circuit is one block; an exercise or a rest outside a circuit is a block of its own.
-   Neighbouring blocks overlap by the border's width, so two blocks share one thick line. A past card
-   is one movement pulled out of an old session, not a block, and keeps the thin grid line. */
-html.spreadsheet-theme .exercise-deck-card:not(.past-session) {
-  border-width: 2px;
-  border-color: var(--text-muted);
-}
+/* Blocks of the plan are set apart by an empty strip, as the trainer's sheet leaves an empty row
+   between sections. A circuit is one block; an exercise or a rest outside a circuit is a block of
+   its own. A past card is one movement pulled out of an old session, not a block, so past cards
+   stay joined by the thin grid line.
+   It was a 2px dark border until 2026-09-14 (§52.1): Simon found it drowned the active card, whose
+   own mark is a line too. With thin lines everywhere else, the active card is the one heavy edge.
+   4px, measured on a 390px phone against 3px and 6px: a circuit reads as its own block already at
+   3px, because its grey name row starts it, but an exercise outside a circuit has no such row and
+   the strip is all that separates it. */
 html.spreadsheet-theme .exercise-deck-card:not(.past-session):not(.in-focus),
-html.spreadsheet-theme .exercise-deck-card.in-focus {
-  margin-bottom: -2px;
+html.spreadsheet-theme .exercise-deck-card:not(.past-session).in-focus {
+  margin-bottom: 4px;
+}
+/* The active card (§48.1) and the open card: a 2px petrol edge, the only heavy line on the sheet. */
+html.spreadsheet-theme .exercise-deck-card.is-active {
+  outline-width: 2px;
+  outline-offset: -2px;
 }
 /* Rows inside a circuit are cells of the block, divided by the thin grid line. */
 html.spreadsheet-theme .circuit-card .circuit-ex-list {
@@ -115,8 +120,8 @@ html.spreadsheet-theme .circuit-card .deck-card-compact {
 /* The session's name, date and place are the merged title cell at the top of the sheet. */
 html.spreadsheet-theme .active-session-overlay .session-title-bar {
   background: #d7ecef;
-  border-top: 2px solid var(--text-muted);
-  border-bottom: 2px solid var(--text-muted);
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
 }
 
 /* One tab per client, like the sheet tabs along the bottom of a workbook: flat cells side by side,

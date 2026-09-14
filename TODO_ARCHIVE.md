@@ -3204,6 +3204,13 @@ each block, and deferred the history columns (§52.2).
 
 **Kept:** §48.1's active-card outline and left edge.
 
+**Changed 2026-09-14.** Simon: *"debela obroba sklopov je premočna, se izgubi poudarek na aktivni
+kartici"*. The 2px dark block border became a 4px empty strip between blocks, the way his sheet
+leaves an empty row between sections, and every other line on the clipboard is thin, the title bar's
+included. The active card's outline went from 1px to 2px, so it is the one heavy edge on the screen.
+4px was chosen after comparing 3px and 6px on a 390px phone. A circuit is set apart at 3px already,
+by its grey name row, but an exercise outside a circuit has no such row.
+
 **Not possible in a theme alone:** columns for sets, reps and load. The exercise card writes its
 target as ONE string (`compactTarget` in exerciseCard.js). It was not needed once Simon chose
 sessions, not values, as the columns.

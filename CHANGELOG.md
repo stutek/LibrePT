@@ -20,6 +20,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-09-14 — The active card stands out in the Spreadsheet theme
+
+### Changed
+
+- **In the Spreadsheet theme, blocks of the plan are separated by a narrow empty strip, not a thick
+  border.** Every line on the clipboard is now thin, and the active card has the only thick edge, so
+  it is easy to find (§52.1).
+
 ## 2026-09-13 — The Spreadsheet theme looks like a sheet
 
 ### Changed
