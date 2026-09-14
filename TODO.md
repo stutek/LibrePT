@@ -4175,7 +4175,7 @@ izgled"*.
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#521-x-the-look--shipped-2026-09-13); what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-### 52.2 [ ] Pull the current plan aside to see the previous one — not started
+### 52.2 [ ] Pull the current plan aside to see the previous one — in progress 2026-09-14
 
 **What Simon described, 2026-09-14.** A way to compare a client's current plan with the previous one,
 as his sheet does with two columns side by side:
@@ -4222,26 +4222,27 @@ scrolling, so a sideways drag must not count as a scroll.
 - **The main colour stays `#0e7490`.** Simon compared it on the prototype with two greener
   candidates and chose it.
 
-**Asked 2026-09-14, being explored in a prototype, not decided:**
-- **Rows shrink while the plan is pulled aside**, animated, so more of both plans fits on the
-  screen; they grow back on release. The row under the finger must stay where it is while the rows
-  shrink.
-- **Sessions as a sideways deck.** A pull to the end opens the previous session's clipboard; a pull
-  from right to left shows the next plan, or, when the client has none, a card offering to create
-  one. Risk: the same drag both peeks and navigates, so a trainer can open another session by
-  mistake mid-set. The prototype marks the point of no return ("Release to open") and offers a
-  **Today** button back.
-- **Why the live deck has no dense rows:** every collapsed card is a tap target, and a 22px row is
-  too small for one thumb. Rows that are not tapped (inside a circuit, the previous plan) can be
-  dense.
+**Approved 2026-09-14 with the prototype as a whole** (*"všeč mi je! greva v implementacijo"*):
+- **Rows shrink while the plan is held or pulled aside**, animated, so more of both plans fits; they
+  grow back on release. The row under the finger stays where it is while the rows shrink.
+- **Sessions as a sideways deck.** A pull past a marked threshold ("Release to open") opens the
+  neighbouring session's clipboard; a **Today** button leads back. A pull from right to left shows
+  the next plan, or, when the client has none, a card offering to create one.
+- **The sessions are the ACTIVE CLIENT'S** (Simon, the same day): back and forward move through this
+  client's previous and next plans, not through all sessions in time order.
+- **Why the live deck keeps its row height:** every collapsed card is a tap target, and a 22px row is
+  too small for one thumb. Rows that are not tapped (the plan under the blanket) can be dense.
 
-**Open, to settle before code:**
-- **The phone's own back gesture.** On Android gesture navigation and in Safari on the iPhone, a
-  drag that starts at the left edge of the screen means "back" and would close the clipboard. The
-  drag must start away from the edge, or the plan needs a handle to pull.
-- **A plan longer than the screen:** both plans scroll together, or the rows shrink.
-- **Which themes:** Spreadsheet only, or every theme. A drag is behaviour, not look, so it could
-  work in every theme.
+**Chosen by the implementing session, not ruled** (say so if one is wrong):
+- **The back gesture:** a drag that starts within 24px of either screen edge is ignored, as in the
+  prototype. It still needs trying on a real phone.
+- **A plan longer than the screen:** both plans scroll together.
+- **Every theme gets the drag.** It is behaviour, and a theme only styles; colours come from each
+  theme's `--temporal-past` / `--temporal-future`.
+
+**Steps, one commit and one gate each:** 1) the client's previous and next plan, as a pure domain
+function; 2) the plan drawn under the blanket; 3) the drag, with title bar and tabs moving with the
+plan; 4) opening a neighbour, Today, and the create-a-plan card.
 
 ## 53. [ ] Two medium tests fail when the machine is busy
 
