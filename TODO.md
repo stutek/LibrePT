@@ -4201,14 +4201,30 @@ gesture is the swipe down that closes the clipboard.
 [deckScrollFocus.js](src/modules/clipboard/deckScrollFocus.js) picks the active card from vertical
 scrolling, so a sideways drag must not count as a scroll.
 
+**Ruled 2026-09-14 (Simon), while trying a prototype:**
+- **The previous plan always shows what was PLANNED.** No ticks. An icon marks what was recorded
+  against a row: a pen for a note, a weight for a logged load.
+
+**Asked 2026-09-14, being explored in a prototype, not decided:**
+- **Rows shrink while the plan is pulled aside**, animated, so more of both plans fits on the
+  screen; they grow back on release. The row under the finger must stay where it is while the rows
+  shrink.
+- **Sessions as a sideways deck.** A pull to the end opens the previous session's clipboard; a pull
+  from right to left shows the next plan, or, when the client has none, a card offering to create
+  one. Risk: the same drag both peeks and navigates, so a trainer can open another session by
+  mistake mid-set. The prototype marks the point of no return ("Release to open") and offers a
+  **Today** button back.
+- **Why the live deck has no dense rows:** every collapsed card is a tap target, and a 22px row is
+  too small for one thumb. Rows that are not tapped (inside a circuit, the previous plan) can be
+  dense.
+- **The main colour:** `#0e7490` looks blue on the sheet. Candidates `#0f766e` (175°, white 5.47:1)
+  and `#0b6b63` (175°, 6.37:1).
+
 **Open, to settle before code:**
 - **The phone's own back gesture.** On Android gesture navigation and in Safari on the iPhone, a
   drag that starts at the left edge of the screen means "back" and would close the clipboard. The
   drag must start away from the edge, or the plan needs a handle to pull.
-- **A plan longer than the screen.** "The whole plan at once" holds for a short plan. For a long one:
-  do both plans scroll together, or do the rows shrink to fit?
-- **Which previous plan:** what was planned for the last session, or what the client actually did in
-  it.
+- **A plan longer than the screen:** both plans scroll together, or the rows shrink.
 - **Which themes:** Spreadsheet only, or every theme. A drag is behaviour, not look, so it could
   work in every theme.
 
