@@ -140,7 +140,9 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
   the result. **Say the clock time it will finish BEFORE launching it, in the reply, for every run —
   a re-run too** — `.build-reports/last-run.json` holds the last duration, so that is a time such as
   "done at 08:49", never "312 seconds" or "a few minutes", and a time written only in the note has
-  not been said; the run's own header prints the same estimate. Prose-only commits run `.venv/bin/python -m agent_tools.doclinks` instead, and
+  not been said; the run's own header prints the same estimate. **Every clock time you give — to
+  Simon, in a note, or to another session — comes from `date` read in that turn**, never carried
+  over: a machine that slept makes an old reading hours wrong ("release by ~09:50" at 23:41). Prose-only commits run `.venv/bin/python -m agent_tools.doclinks` instead, and
   say so.
 - **Run the checks your change can break BEFORE the gate**, one at a time: `pytest <file>`,
   `node --test <file>`, and the `agent_tools.*` check that owns the rule — a theme calls for contrast
