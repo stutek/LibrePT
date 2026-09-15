@@ -123,6 +123,36 @@ function foldCards(steps) {
   return folded;
 }
 
+// First chapter of the reworked demo. It makes the trainer's own details visible without asking a
+// viewer to enter invented personal information or changing the demo identity used by invitations.
+const TRAINER_DETAILS_CHAPTER = {
+  id: "trainer-details",
+  titleKey: "story_chapter_trainer_details",
+  steps: foldCards([
+    narration(
+      "trainer-details-open",
+      "chapter",
+      "story_chapter_trainer_details",
+      "story_trainer_details_open_body",
+      { route: "/" },
+    ),
+    {
+      id: "trainer-details-menu",
+      persona: TRAINER,
+      target: "#btn-app-menu",
+      caption: "story_step_trainer_details_menu",
+      expect: { selector: "#app-menu:not(.hidden)", visible: true },
+    },
+    {
+      id: "trainer-details-show",
+      persona: TRAINER,
+      target: "#menu-trainer-details",
+      caption: "story_step_trainer_details_show",
+      expect: { selector: "#dialog-trainer-details", visible: true },
+    },
+  ]),
+};
+
 // Chapter C — in the gym. §35.3's build order starts here: it is the chapter that needs the least
 // that does not exist, and the one whose steps the wedge already proves.
 const GYM_CHAPTER = {
@@ -694,5 +724,12 @@ export const DEMO_STORY = {
   id: "story",
   // In the order the evening happens, not the order they were built: a viewer watching the whole
   // story should meet the programme before the session it produced.
-  chapters: [ARRIVE_CHAPTER, INTAKE_CHAPTER, PROGRAMME_CHAPTER, GYM_CHAPTER, EVENING_CHAPTER],
+  chapters: [
+    TRAINER_DETAILS_CHAPTER,
+    ARRIVE_CHAPTER,
+    INTAKE_CHAPTER,
+    PROGRAMME_CHAPTER,
+    GYM_CHAPTER,
+    EVENING_CHAPTER,
+  ],
 };

@@ -13,6 +13,22 @@ import { test } from "node:test";
 import { storyStepsFor } from "../../../../src/domain/demoStory.js";
 import { DEMO_STORY } from "../../../../src/modules/demo/storyTour.js";
 
+test("the trainer-details chapter only shows the identity form", () => {
+  const chapter = DEMO_STORY.chapters.find((item) => item.id === "trainer-details");
+
+  assert.equal(DEMO_STORY.chapters[0], chapter, "details come before client-facing chapters");
+  assert.equal(chapter.titleKey, "story_chapter_trainer_details");
+  assert.equal(chapter.steps.length, 2, "the opening card rides on the menu tap");
+  assert.ok(
+    chapter.steps.every((step) => step.enter === undefined),
+    "the demo saves no invented data",
+  );
+  assert.deepEqual(chapter.steps.at(-1).expect, {
+    selector: "#dialog-trainer-details",
+    visible: true,
+  });
+});
+
 test("every chapter on the trainer's phone says which screen it starts on", () => {
   // Without it a chapter begins wherever the previous one left the app. The evening chapter did
   // exactly that (§38.13): the gym chapter ends inside the plan editor, so the evening opened there,

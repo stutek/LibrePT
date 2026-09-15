@@ -604,6 +604,13 @@ export const en = {
   story_step_welcome:
     "Show me points out three things: the SANDBOX badge in the top bar, and in the ☰ menu the rows Leave the sandbox and Reset sandbox data. Next starts the walkthrough. To try the app without the guide, put this card away with ▾ in its top right corner. A small bar stays on screen: its ✕ ends the walkthrough.",
   story_persona_trainer: "Your phone",
+  story_chapter_trainer_details: "Your details",
+  story_trainer_details_open_body:
+    "Before you invite a client, LibrePT lets you check the name, phone number and email address that appear on your invitations. This walkthrough only shows the form. It does not enter or save personal details.",
+  story_step_trainer_details_menu:
+    "Tap ☰ — the three horizontal lines in the top right of the dark bar. The menu opens.",
+  story_step_trainer_details_show:
+    "Tap My details — the card icon row in the menu. The form shows the name, phone and email fields that sign client invitations. Leave them empty for this demo.",
   story_chapter_gym: "In the gym",
   story_persona_client: "Ana's phone",
   story_chapter_arrive: "Three friends arrive",
