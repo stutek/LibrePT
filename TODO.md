@@ -3606,6 +3606,10 @@ LibrePT on arrival, so it is a decision, not a fix, and it is not taken here.
   limit: 1991 bytes, version 37 (165×165); with every field at its limit it does not fit at M at
   all. Deflate compression takes those to 235, 627 and 859 bytes. NOT measured: which version
   another phone still reads off a screen. §1.6 quotes ~300 bytes and does not say how it got that number.
+- **[ ] Next, agreed 2026-09-15 (Simon): test whether a phone reads these codes.** Show the three
+  codes above (versions 13, 25 and 37, built from real signups) on one phone's screen, and scan each
+  with the stock camera of another phone, Android and iPhone. Record for each: read or not, and how
+  long it took. Only then decide whether the QR route stays or goes. Blocks that decision.
 
 **Ruled 2026-09-15 (Simon), NOT BUILT:** when a share fails, the page at once saves the file,
 and shows how to send it by hand. Saving the trainer's contact is the first step, before the form.
