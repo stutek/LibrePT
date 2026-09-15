@@ -3598,11 +3598,17 @@ LibrePT on arrival, so it is a decision, not a fix, and it is not taken here.
 - **Other routes that work on every phone:** none at a distance except saving the file. Web Bluetooth
   is absent from Safari and Firefox, and a page can only connect to a device, never be one, so two
   phones cannot connect (from memory, not re-read). A QR on the client's screen works only when both
-  are in the same place, and a full submission (up to ~2500 characters) does not fit one readable code
-  — see §26.3 step 3.
+  are in the same place — see §26.3 step 3.
+- **What a QR would have to hold — MEASURED 2026-09-15** with the real `buildClientSignup` and the
+  vendored encoder, as compact JSON, error correction M. A short signup (name, email, phone, one
+  sentence each of goals and injury): 302 bytes, version 13 (69×69 squares). About 450 characters
+  of each prose field: 957 bytes, version 25 (117×117). Both prose fields near their 1000-character
+  limit: 1991 bytes, version 37 (165×165); with every field at its limit it does not fit at M at
+  all. Deflate compression takes those to 235, 627 and 859 bytes. NOT measured: which version
+  another phone still reads off a screen. §1.6 quotes ~300 bytes and does not say how it got that number.
 
 **Ruled 2026-09-15 (Simon), NOT BUILT:** when a share fails, the page at once saves the file,
-shows how to send it by hand, and offers a button that saves the trainer's contact.
+and shows how to send it by hand. Saving the trainer's contact is the first step, before the form.
 
 - **Saving at once is allowed without a new tap.** Chromium's `download_request_limiter.cc` lets the
   first download after a tap through (`ALLOW_ONE_DOWNLOAD`). A second one without a tap asks the
@@ -3612,10 +3618,12 @@ shows how to send it by hand, and offers a button that saves the trainer's conta
   `{file}` in Downloads, open a message to the trainer, add it as an attachment. The browser's own
   words stay on the line under it. The pre-addressed email (`offerToEmailTheTrainer`) is shown as after
   a manual save.
-- **The contact button** sits with the instructions, after either kind of save, and reuses the card
-  the top of the page already builds (`intake-sender-save`, `trainerVcard.js`). It is needed most
-  when the link carried only a phone number: there is no email to pre-address, and the client has to
-  find the trainer in their own messaging app.
+- **The contact button is the FIRST step, before the form** (Simon, 2026-09-15), not a button after
+  the save. It already stands there: *Save this contact* (`intake-sender-save`, `trainerVcard.js`)
+  in the box that names the trainer, above the first field, since 2026-09-11. So nothing is added
+  after the save; the instructions only refer back to the contact saved at the start. Still open:
+  the button is hidden when the link carried no trainer name (a nameless card is refused on purpose),
+  and nothing on the page presents it as step one.
 - **No link to the file, and no link to the Downloads folder.** *Save the file to share* stays on
   screen and saves it again, so a link would do the same thing twice. A web page cannot link to a
   folder on the phone. After a download, Chrome shows its own message with *Open*.
