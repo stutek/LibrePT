@@ -26,6 +26,7 @@
 import { customCount, matchAgainstCatalog } from "../../domain/catalogMatch.js";
 import { PROGRAM_FORMAT, programTemplate, readProgram } from "../../domain/programImport.js";
 import { closeModal, openModal, renderMarkupOnce } from "../common/dom.js";
+import { finishTrainerFormDraft } from "../common/trainerFormDraft.js";
 
 let deps = null;
 
@@ -167,6 +168,7 @@ export function setupProgramImportDialog() {
     // and the trainer can see and fix what the file contained before anything opens.
     textArea.value = await deps.readFileText(file);
     readCurrent();
+    textArea.dispatchEvent(new Event("input", { bubbles: true }));
   });
 
   document.getElementById("program-import-template").addEventListener("click", () => {
@@ -174,6 +176,7 @@ export function setupProgramImportDialog() {
     // replaced, and a file in the downloads folder is one more thing to find.
     textArea.value = programTemplate();
     readCurrent();
+    textArea.dispatchEvent(new Event("input", { bubbles: true }));
   });
 
   document.getElementById("program-import-prompt").addEventListener("click", async () => {
@@ -187,6 +190,7 @@ export function setupProgramImportDialog() {
       // A browser may refuse the clipboard; the prompt then goes in the box, where it can be
       // selected by hand — never leaving the trainer with nothing.
       textArea.value = t("program_import_prompt_text").replace("{format}", PROGRAM_FORMAT);
+      textArea.dispatchEvent(new Event("input", { bubbles: true }));
     }
   });
 
@@ -200,6 +204,7 @@ export function setupProgramImportDialog() {
       clientId: document.getElementById("program-import-client").value || null,
       sessionId: document.getElementById("program-import-session").value || null,
     });
+    finishTrainerFormDraft("dialog-program-import");
   });
 
   for (const id of ["program-import-cancel"]) {

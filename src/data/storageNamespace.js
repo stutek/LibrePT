@@ -32,6 +32,7 @@ export const VERSION_SCOPED_KEYS = [
   "librept_active_session",
   "librept_active_timers",
   "librept_workout_setup_draft",
+  "librept_form_drafts",
   "librept_read_notifications",
   "librept_last_route",
 ];

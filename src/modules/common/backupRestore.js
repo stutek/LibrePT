@@ -36,6 +36,7 @@ import { isOfflineCachedActive } from "./applicationHeader.js";
 import { renderMarkupOnce } from "./dom.js";
 import { downloadFile } from "./download.js";
 import { handleHeaderCloudTap } from "./driveSyncUi.js";
+import { finishTrainerFormDraft } from "./trainerFormDraft.js";
 
 let deps = null;
 
@@ -44,6 +45,25 @@ let deps = null;
 let pendingRestore = null;
 let pendingSummary = null;
 let confirmedRestore = false;
+let pendingSource = null;
+
+export function backupDraftSource() {
+  return pendingSource;
+}
+
+/** A recovered file is reviewed again against this build and workspace. It NEVER applies itself. */
+export function restoreBackupDraft(source) {
+  if (!source || !Array.isArray(source.clients) || !Array.isArray(source.exercises)) return;
+  if (resolveBackupFormat(source).unsupported || refusesRestoreInto(source, activeWorkspace()))
+    return;
+  const result = migrateState(source);
+  if (!result.ok) return;
+  pendingSource = source;
+  pendingRestore = result.state;
+  pendingSummary = result.summary;
+  confirmedRestore = false;
+  showReplaceConfirmation(summarizeReplacement(deps.getState()), result.summary);
+}
 
 // Async because the erasure register has to be applied to the INCOMING data before it becomes the
 // live database — not after, which would leave a window where the app holds names their owners
@@ -59,7 +79,9 @@ async function applyRestoredState(restored) {
 
   deps.setState(database);
   deps.saveToLocalStorage();
+  finishTrainerFormDraft("dialog-backup");
   pendingRestore = null;
+  pendingSource = null;
   confirmedRestore = false;
   return reErased;
 }
@@ -373,6 +395,7 @@ export function setupBackupRestore() {
       // Discard the parsed file entirely rather than leaving it primed — a trainer who declined
       // once must not have it applied by an unrelated later click.
       pendingRestore = null;
+      pendingSource = null;
       pendingSummary = null;
       confirmedRestore = false;
       const box = document.getElementById("restore-confirm");
@@ -499,8 +522,10 @@ export function setupBackupRestore() {
             const replacing = summarizeReplacement(deps.getState());
             if ((replacing.total > 0 || bringsDataForward(summary)) && !confirmedRestore) {
               pendingRestore = restored;
+              pendingSource = importedData;
               pendingSummary = summary;
               showReplaceConfirmation(replacing, summary);
+              dialog.dispatchEvent(new Event("draftchange"));
               return;
             }
             const reErased = await applyRestoredState(restored);

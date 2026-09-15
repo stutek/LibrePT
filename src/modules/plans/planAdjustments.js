@@ -10,6 +10,8 @@ import { mountExercisePicker } from "../exercises/exercisePicker.js";
  * @param {HTMLElement} countBadge - The notification badge showing adjustment count.
  * @param {Object} ctx - Context holding state, translation, and navigation helpers.
  */
+import { finishTrainerFormDraft } from "../common/trainerFormDraft.js";
+
 export function renderAdjustmentsViewShell() {
   renderMarkupOnce(
     "main-content",
@@ -424,6 +426,7 @@ export function openAdjustmentWizardComponent(updateId, ctx) {
     }
 
     saveToLocalStorage();
+    finishTrainerFormDraft("dialog-apply-adjustment");
     renderPendingPlanAdjustments();
     renderRoutinesList();
     dialog.close();

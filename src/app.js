@@ -28,6 +28,11 @@ import {
   setupExerciseForms as setupExerciseFormsController,
 } from "./controllers/exerciseFormsController.js";
 import {
+  initFormRecovery,
+  resumeFormRecovery,
+  suspendFormRecovery,
+} from "./controllers/formRecoveryController.js";
+import {
   activeRouteIsDialog,
   activeRouteName,
   getBasePath,
@@ -619,12 +624,16 @@ async function init() {
 
   // The same repaint boot needs and every wholesale state replacement needs — including the build
   // state badge, which reads the store to tell SANDBOX from the trainer's own work.
+  initFormRecovery({ t, navigateToPath });
+  const requestedFormPath = location.pathname;
   renderEverything();
 
   recoverActiveSession();
 
   window.addEventListener("popstate", handlePathChange);
   handlePathChange();
+
+  resumeFormRecovery(requestedFormPath);
 
   appBoot.bootViewDismiss({ navigateToPath, getActiveSession, launchClipboardDirectly });
 
@@ -783,12 +792,14 @@ async function switchToWorkspace(name) {
   }
   // Where they are NOW, stored against the workspace being left (TODO §40.3).
   rememberRoute(window.location.pathname);
+  suspendFormRecovery();
   await switchWorkspace(name);
   renderEverything();
   // The clocks do not stop: what was ticking underneath becomes the visible stack and the other way
   // round (TODO §40.11). Deliberately not a teardown — a rest period must survive the switch.
   appBoot.rebindTimers();
   returnToLastView();
+  resumeFormRecovery();
   if (isSandbox()) await offerFreshSandboxIfStale();
 }
 

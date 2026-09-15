@@ -20,6 +20,22 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-09-15 — A reload returns the unfinished trainer form
+
+### Added
+
+- **Trainer drafts now survive a reload and a closed tab.** The app restores the interrupted form
+  after its normal defaults: clients, exercises, routines and their rows, session setup and repeat
+  choices, trainer details, imports, invitations, feedback, data-rights dialogs, adjustments and
+  session-time edits. Drafts stay separate between working and sandbox workspaces and never sync to
+  a backup or Drive.
+
+### Fixed
+
+- **A rejected save no longer loses a draft, and radio choices return correctly.** A draft clears
+  only after a successful queued write or an explicit cancel. Consent, passphrases and destructive
+  confirmations remain deliberately blank after reload (§50.1).
+
 ## 2026-09-14 — Pull the plan aside to see the client's other plans
 
 ### Added

@@ -33,6 +33,7 @@ import {
 } from "../../data/clientSignup.js";
 import { readSignupFile } from "../../data/signupFile.js";
 import { $id, closeModal, openModal, renderMarkupOnce } from "../common/dom.js";
+import { finishTrainerFormDraft } from "../common/trainerFormDraft.js";
 import { getInitials } from "../common/utils.js";
 
 const DIALOG_ID = "dialog-signup-review";
@@ -41,6 +42,10 @@ let deps = null;
 // The submission currently under review. Cleared on close, so a declined file is GONE rather than left
 // primed for a later stray tap on Save — the same rule §18.7's restore flow follows.
 let reviewed = null;
+let reviewedText = "";
+export function signupDraftText() {
+  return reviewedText;
+}
 let matchedClient = null;
 
 export function initSignupReview(injected) {
@@ -147,6 +152,7 @@ function renderMatch(client) {
 
 function clearReview() {
   reviewed = null;
+  reviewedText = "";
   matchedClient = null;
   const list = $id("signup-review-fields");
   if (list) {
@@ -178,11 +184,13 @@ export function reviewSignupText(text) {
   }
 
   reviewed = signup;
+  reviewedText = text;
   matchedClient = findExistingClientForSignup(signup, deps.getState().clients || []);
   setStatus("");
   renderSubmission(signup);
   renderMatch(matchedClient);
   $id("signup-review-save").disabled = false;
+  $id(DIALOG_ID).dispatchEvent(new Event("draftchange"));
   return signup;
 }
 
@@ -210,6 +218,7 @@ function saveReviewed() {
   }
 
   deps.saveState();
+  finishTrainerFormDraft(DIALOG_ID);
   deps.renderClientsList();
   closeModal(DIALOG_ID);
   clearReview();

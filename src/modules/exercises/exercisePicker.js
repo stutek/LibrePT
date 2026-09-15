@@ -91,6 +91,7 @@ export function mountExercisePicker(
   const listEl = container.querySelector(".picker-list");
   const countEl = container.querySelector(".picker-count");
   const searchEl = container.querySelector(".picker-search");
+  if (container.id) searchEl.dataset.draftKey = `${container.id}:search`;
 
   const matchesQuery = (ex) => {
     if (!filters.query) return true;

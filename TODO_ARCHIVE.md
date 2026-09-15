@@ -20,6 +20,37 @@ Read [CHANGELOG.md](CHANGELOG.md) for what shipped and when. This file is why.
 
 ---
 
+### 50.1 [x] Review every form for what a reload throws away — shipped 2026-09-15
+
+**Why it mattered.** A phone can reload after a lock, memory reclaim or service-worker update. An
+unfinished trainer form must return with its values and identity, rather than silently replacing the
+work with stored defaults.
+
+**Audit and decision.** The audit found that intake already kept its tab-local values, while new
+clients, exercises, routines, session setup, trainer details, imports, invitations, feedback,
+export/erasure, plan adjustments and start-time changes did not consistently recover. The shared
+helper also cleared a client draft on a rejected save and collapsed radio groups to `false`.
+
+Trainer drafts now live in a separately versioned, workspace-scoped local bucket. They never enter
+the business record graph, backups or Drive sync. A policy inventory identifies each owner and
+reopens the interrupted route or dialog after its defaults have rendered. Routine rows, session
+participants and weekdays use data adapters rather than DOM identifiers. Closing a dialog or
+leaving its route retains the draft; an explicit cancel discards it; a successful write discards it
+only after the write queue has settled without a new failure. Intake remains session-only.
+
+**Privacy boundary.** Consent checks, typed destructive confirmation and decryption passphrases are
+never restored. File inputs themselves are never restored; parsed text or a parsed backup is kept
+only for review and requires a fresh confirmation. Client erasure also clears matching unsaved work
+and pending file reviews.
+
+**Coverage.** `tests/e2e/test_form_recovery.py` covers creation, failed save, explicit cancel,
+successful save, tab closure, routine rows, session recurrence/participants and feedback. The shared
+helper covers consent, subject separation and radio values; Node tests cover workspace isolation,
+reset, erasure, storage refusal and unknown bucket versions. `tests/unit/test_form_inventory.py`
+requires every input-owning module to declare a recovery or deliberate-exclusion decision.
+
+---
+
 ### 1.1 [x] PT-side client assignment to a session
 Shipped 2026-08-04 — [CHANGELOG](CHANGELOG.md). Invites are `.ics` + `mailto:`, because there is no
 backend to send mail from (§1.5).

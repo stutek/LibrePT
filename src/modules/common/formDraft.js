@@ -1,7 +1,7 @@
 // src/modules/common/formDraft.js — what a half-filled form remembers across a reload (TODO §38.12).
 //
 // Single responsibility: hold one form's typed values while the page is open, put them back when the
-// same form comes up again, and forget them the moment the form is submitted. It knows nothing about
+// same form comes up again. The owner forgets them only after a successful save. It knows nothing about
 // clients, intake or the app's own store — a form and a key are the whole interface.
 //
 // **Why it exists.** Reported 2026-08-29: "kadar se izpolnjujejo obrazci in se zgodi page reload
@@ -29,28 +29,38 @@
 //
 // Injected dependencies: `storage` (defaults to `sessionStorage`) so tests can hand it a plain
 // object, and so a browser that refuses storage entirely degrades to no drafts rather than throwing.
+// Trainer-owned forms use trainerFormDraft.js, whose durable workspace bucket is intentionally a
+// separate lifecycle and storage policy.
 
 const PREFIX = "librept_draft:";
 
 /** Fields whose value is worth keeping: named, not a file, not opted out. */
 function draftableFields(form) {
-  return [...form.querySelectorAll("input, textarea, select")].filter(
+  const fields = form.matches("input, textarea, select")
+    ? [form]
+    : [...form.querySelectorAll("input, textarea, select")];
+  return fields.filter(
     (field) =>
-      Boolean(field.id || field.name) &&
+      Boolean(field.dataset.draftKey || field.id || field.name) &&
       field.type !== "file" &&
       field.type !== "password" &&
+      field.type !== "hidden" &&
+      !field.readOnly &&
       field.dataset.draft !== "never",
   );
 }
 
-const fieldKey = (field) => field.id || field.name;
+const fieldKey = (field) => field.dataset.draftKey || field.id || field.name;
 const isTicked = (field) => field.type === "checkbox" || field.type === "radio";
 
 /** What the form holds right now, as a plain object a JSON round-trip can carry. */
 export function readFormDraft(form) {
   const values = {};
   for (const field of draftableFields(form)) {
-    values[fieldKey(field)] = isTicked(field) ? field.checked : field.value;
+    if (field.type === "radio") {
+      values[fieldKey(field)] ??= { radio: null };
+      if (field.checked) values[fieldKey(field)] = { radio: field.value };
+    } else values[fieldKey(field)] = isTicked(field) ? field.checked : field.value;
   }
   return values;
 }
@@ -63,13 +73,18 @@ export function readFormDraft(form) {
  */
 export function applyFormDraft(form, values) {
   if (!values) return;
-  for (const field of draftableFields(form)) {
-    const remembered = values[fieldKey(field)];
-    if (remembered === undefined) continue;
-    if (isTicked(field)) field.checked = Boolean(remembered);
-    else field.value = remembered;
-    field.dispatchEvent(new Event("input", { bubbles: true }));
-    field.dispatchEvent(new Event("change", { bubbles: true }));
+  const keys = [...new Set(draftableFields(form).map(fieldKey))];
+  for (const key of keys) {
+    // A previous field's change handler may have rebuilt this field. Find the live node again.
+    for (const field of draftableFields(form).filter((candidate) => fieldKey(candidate) === key)) {
+      const remembered = values[fieldKey(field)];
+      if (remembered === undefined) continue;
+      if (field.type === "radio") field.checked = remembered?.radio === field.value;
+      else if (isTicked(field)) field.checked = Boolean(remembered);
+      else field.value = remembered;
+      field.dispatchEvent(new Event("input", { bubbles: true }));
+      field.dispatchEvent(new Event("change", { bubbles: true }));
+    }
   }
 }
 
@@ -114,16 +129,24 @@ export function clearFormDraft(key, storage = sessionStorage) {
 export function keepFormDraft(form, keyOf, { storage = sessionStorage } = {}) {
   if (!form) return { restore: () => {}, forget: () => {} };
 
-  const remember = () => saveFormDraft(keyOf(), readFormDraft(form), storage);
+  let restoring = false;
+  const remember = () => {
+    if (!restoring) saveFormDraft(keyOf(), readFormDraft(form), storage);
+  };
   // `input` for typing, `change` for the ones that never fire `input` — a select, a checkbox.
   form.addEventListener("input", remember);
   form.addEventListener("change", remember);
-  // Submitted means finished: what the form was for has happened, and a draft left behind would
-  // come back the next time the form opens, offering to redo work that is already done.
-  form.addEventListener("submit", () => clearFormDraft(keyOf(), storage));
+  // Submission may fail validation or persistence. Only the caller knows it succeeded.
 
   return {
-    restore: () => applyFormDraft(form, loadFormDraft(keyOf(), storage)),
+    restore: () => {
+      restoring = true;
+      try {
+        applyFormDraft(form, loadFormDraft(keyOf(), storage));
+      } finally {
+        restoring = false;
+      }
+    },
     forget: () => clearFormDraft(keyOf(), storage),
   };
 }

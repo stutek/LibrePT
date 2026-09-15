@@ -24,7 +24,7 @@ import {
   openIntakeInviteDialog,
 } from "../modules/clients/intakeInviteDialog.js";
 import { $id, closeModal, openModal, renderMarkupOnce } from "../modules/common/dom.js";
-import { keepFormDraft } from "../modules/common/formDraft.js";
+import { finishTrainerFormDraft } from "../modules/common/trainerFormDraft.js";
 import { getInitials } from "../modules/common/utils.js";
 
 export function renderClientDialog() {
@@ -116,12 +116,8 @@ export function setupClientForms({
   const cancelBtn = dialog.querySelector(".modal-cancel");
   const closeBtn = dialog.querySelector(".modal-close-btn");
 
-  // Half a client's details survive a reload, and go back into the form the next time it opens for
-  // the SAME subject (TODO §38.12). Keyed by who is being edited, because this one form is "add a
-  // client" one moment and "edit Jane" the next — a draft that did not know the difference would
-  // spill half of Jane's details into the next person's form. Dies with the tab, and is dropped the
-  // moment the form is submitted, which is what `keepFormDraft` does on its own.
-  const draft = keepFormDraft(form, () => `client:${$id("client-form-id").value || "new"}`);
+  // The form recovery controller restores after this opener fills defaults, keyed by client
+  // and workspace. A rejected submission keeps the draft; closing after a successful write clears it.
 
   // The link that lets someone fill their own details in (TODO §26.3). The button OPENS the
   // sending dialog rather than sending: since 2026-08-23 the trainer can address the invitation to
@@ -151,9 +147,6 @@ export function setupClientForms({
     // After the reset, never before: reset() would otherwise wipe the date the block just derived.
     fillConsentSection(null);
     renderNameCollisionHint(getState(), null);
-    // Last of all, so a half-typed client interrupted by a reload comes back on top of the empty
-    // form rather than under it.
-    draft.restore();
   });
 
   $id("btn-edit-client").addEventListener("click", () => {
@@ -173,16 +166,12 @@ export function setupClientForms({
     renderNameCollisionHint(getState(), client);
 
     openModal("dialog-client");
-    // After the stored values, never before: what is in the draft is what the trainer had typed and
-    // not yet saved, so it is the NEWER of the two and must win.
-    draft.restore();
   });
 
   // Cancel and ✕ mean "throw this away", so they do: only a reload — the thing nobody chose — brings
   // a half-filled form back. A draft that survived an explicit cancel would put words the trainer
   // deliberately abandoned in front of the next person they add.
   const handleClose = () => {
-    draft.forget();
     closeModal("dialog-client");
   };
   if (cancelBtn) cancelBtn.addEventListener("click", handleClose);
@@ -234,6 +223,7 @@ export function setupClientForms({
     }
 
     saveToLocalStorage();
+    finishTrainerFormDraft("dialog-client");
     renderClientsList({ state: getState(), t, navigateToPath });
     populateDropdownSelectors();
 

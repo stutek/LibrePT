@@ -9,6 +9,7 @@
 
 import { newRecordId } from "../data/recordId.js";
 import { clearActiveSessionCache, readActiveSessionCache } from "../data/sessionCache.js";
+import { hasSessionFormDraft } from "../data/trainerDrafts.js";
 import { boundClientRoutines } from "../domain/participantBinding.js";
 import { isCachedSessionStale } from "../domain/sessionClock.js";
 import { buildSessionHistoryRecord } from "../domain/sessionHistoryRecord.js";
@@ -366,7 +367,13 @@ export function recoverActiveSession() {
       activeSession.sourceSession.endDate = new Date(activeSession.sourceSession.endDate);
     }
 
-    if (isCachedSessionStale(activeSession)) {
+    const bootRoute = getAppDeps().resolveRoute?.(window.location.pathname);
+    // A time limit must not erase an unfinished editor or the exercise a saved note belongs to.
+    if (
+      isCachedSessionStale(activeSession) &&
+      !bootRoute?.isEditor &&
+      !hasSessionFormDraft(activeSession.id)
+    ) {
       setActiveSession(null);
       clearActiveSessionCache();
       renderClipboardBar();
@@ -384,7 +391,6 @@ export function recoverActiveSession() {
     // The row id has to be taken here too, not left to the router: recovery renders the board, that
     // render syncs the URL, and a sync with no row id would erase the very segment the router is
     // about to read. The router validates it a moment later and drops it if the row is gone.
-    const bootRoute = getAppDeps().resolveRoute?.(window.location.pathname);
     if (bootRoute?.isEditor) {
       setClipboardEditModeFlag(true);
       markEditorRow(bootRoute.params.slotId ?? null, { kind: "restored", focus: false });

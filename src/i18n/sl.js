@@ -17,6 +17,8 @@
 //    ste"). Where a greeting genuinely has to address the person, both endings are written out, as
 //    in `story_welcome_title` below.
 export const sl = {
+  draft_storage_failed:
+    "Osnutka ni bilo mogoče shraniti na tej napravi. Obrazec pusti odprt in pred osvežitvijo kopiraj vneseno besedilo.",
   logo_title: "LibrePT",
   preview_badge: "Predogled",
   preview_warning:
