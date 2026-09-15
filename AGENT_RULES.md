@@ -135,7 +135,11 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
   sessions editing three different files broke three gate runs on 2026-09-12, because a run proves
   a TREE and anyone else's write voids it while it is in flight.
 - Commit messages: `type(scope): imperative summary` (lowercase, ≤72 chars), blank line, body
-  wrapped at 72 saying **why**, `Co-Authored-By:` the model actually running.
+  wrapped at 72 saying **why**, blank line, and last a line `Co-Authored-By: <model> <email>`
+  naming the model actually running. **Write the message to a file and commit with
+  `git commit -F <file>`.** `git commit -m "…\n\n…"` stores the two characters `\` and `n`, not a
+  line break: git then finds no body and no co-author (Codex, 2026-09-15). After the commit,
+  `git log -1 --format='%(trailers:key=Co-Authored-By)'` must print that line.
 - **Run `.venv/bin/python -m build check` in full before every code commit**, unpiped, and report
   the result. **Say the clock time it will finish BEFORE launching it, in the reply, for every run —
   a re-run too** — `.build-reports/last-run.json` holds the last duration, so that is a time such as
