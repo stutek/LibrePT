@@ -64,16 +64,6 @@ export function activeSessionFilters() {
   return { ...filters };
 }
 
-/** Restore only declared filter fields; a stored draft is input, never a replacement object. */
-export function restoreSessionFilters(saved) {
-  if (!saved || typeof saved !== "object") return;
-  filters = { ...NO_SESSION_FILTERS };
-  for (const key of Object.keys(filters)) {
-    if (typeof saved[key] === "string") filters[key] = saved[key];
-  }
-  deps?.onChange();
-}
-
 export function resetSessionFilters() {
   filters = { ...NO_SESSION_FILTERS };
   armedEnd = null;

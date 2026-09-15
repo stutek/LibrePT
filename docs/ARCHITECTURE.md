@@ -73,14 +73,6 @@ depends on — that tier mounts one component and nothing else.
 
 ## UI invariants
 
-- **Unfinished trainer input is local draft state, not business data.**
-  [`data/trainerDrafts.js`](../src/data/trainerDrafts.js) keeps a separately versioned bucket per
-  workspace; it does not enter IndexedDB records, backups or Drive sync. The policy inventory in
-  [`controllers/formRecoveryPolicies.js`](../src/controllers/formRecoveryPolicies.js) gives every
-  input-owning surface an identity, opener and any structured-data adapter. A successful queued
-  write or explicit cancel removes a draft; closing or navigating away retains it. Consent,
-  passphrases and destructive confirmations opt out.
-
 - **Hide a control with the `.hidden` class, never the `hidden` attribute.** Every `.btn` sets
   `display: flex`, which beats the user-agent stylesheet's `[hidden]` rule, so the control stays on
   screen and only a test notices.

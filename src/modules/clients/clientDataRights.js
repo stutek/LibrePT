@@ -29,7 +29,6 @@ import {
   withSuppressedClient,
   writeSuppressionList,
 } from "../../data/erasureSuppression.js";
-import { forgetClientDrafts } from "../../data/trainerDrafts.js";
 import { mountDateField } from "../common/dateField.js";
 import { $id, closeModal, openModal, renderMarkupOnce } from "../common/dom.js";
 import { downloadFile } from "../common/download.js";
@@ -136,7 +135,6 @@ function currentExportPayload() {
 
 export function openClientExportDialog(clientId) {
   subjectId = clientId;
-  $id("dialog-client-export").dataset.clientId = clientId;
   const client = subject();
   if (!client) return;
 
@@ -197,7 +195,6 @@ function downloadReadableExport() {
 
 export function openClientEraseDialog(clientId) {
   subjectId = clientId;
-  $id("dialog-client-erase").dataset.clientId = clientId;
   const client = subject();
   if (!client) return;
 
@@ -235,7 +232,6 @@ async function performErasure() {
   const requestedOn = $id("client-erase-requested")?.value || "";
   const { state, summary } = eraseClientInState(deps.getState(), client.id, { requestedOn });
   if (!summary) return;
-  forgetClientDrafts(client.id);
 
   // Persist the suppression entry BEFORE the erased state, so a crash between the two leaves the
   // list ahead of the database rather than behind it: an extra entry re-erases an already-erased

@@ -28,9 +28,6 @@ stage.innerHTML = `
     <input type="email" id="mail">
     <textarea id="story"></textarea>
     <input type="checkbox" id="agreed" data-draft="never">
-    <input type="radio" name="effort" value="easy">
-    <input type="radio" name="effort" value="hard">
-    <input type="radio" name="effort" value="pain">
     <button type="submit" id="send">Send</button>
   </form>
 `;
@@ -39,10 +36,7 @@ document.body.appendChild(stage);
 // The subject the form is filled in FOR, the way the client dialog reads which client is open.
 window.__subject = 'new';
 const form = document.getElementById('the-form');
-form.addEventListener('submit', (event) => {
-  event.preventDefault();
-  if (document.getElementById('who').value !== 'reject') window.__draft.forget();
-});
+form.addEventListener('submit', (event) => event.preventDefault());
 
 // What a dependent control would do: several forms in this app decide what to show from what has
 // been typed, so a restored value that fired no event would leave those decisions made on an empty
@@ -134,22 +128,6 @@ def test_submitting_forgets(page, local_server):
     page.wait_for_selector("#the-form")
 
     expect(page.locator("#who")).to_have_value("")
-
-
-def test_a_rejected_submission_keeps_the_draft(page, local_server):
-    _mount(page, local_server)
-    _fill(page, who="reject")
-    page.click("#send")
-    page.reload()
-    expect(page.locator("#story")).to_have_value("Shoulder, sometimes.")
-
-
-def test_a_radio_group_restores_the_selected_choice(page, local_server):
-    _mount(page, local_server)
-    page.locator('[name="effort"][value="hard"]').check()
-    page.reload()
-    expect(page.locator('[name="effort"][value="hard"]')).to_be_checked()
-    expect(page.locator('[name="effort"][value="pain"]')).not_to_be_checked()
 
 
 def test_a_restored_value_tells_the_form_it_arrived(page, local_server):

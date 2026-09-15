@@ -7,7 +7,6 @@
 import { newRecordId } from "../data/recordId.js";
 import { parseLoad, parseReps } from "../domain/repsAndLoad.js";
 import { $id, closeModal, openModal, renderMarkupOnce } from "../modules/common/dom.js";
-import { finishTrainerFormDraft } from "../modules/common/trainerFormDraft.js";
 import { mountExercisePicker } from "../modules/exercises/exercisePicker.js";
 import { addRoutineExerciseRow, renderRoutinesList } from "../modules/plans/plansView.js";
 
@@ -184,7 +183,6 @@ export function setupRoutineForms({
     }
 
     saveToLocalStorage();
-    finishTrainerFormDraft("dialog-routine");
     renderRoutinesList({ state: getState(), t, openWorkoutSetupModal });
     populateDropdownSelectors();
     closeModal("dialog-routine");

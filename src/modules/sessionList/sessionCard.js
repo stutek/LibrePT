@@ -8,13 +8,6 @@
 
 import { computeActiveSessionCountdown } from "../../domain/sessionClock.js";
 import { parseTimeRange } from "../../domain/timeRange.js";
-import {
-  cancelTrainerFormDraft,
-  finishTrainerFormDraft,
-  hasTrainerFormDraft,
-  isCompletingTrainerFormDraft,
-  openTrainerFormDraft,
-} from "../common/trainerFormDraft.js";
 import { formatDurationHM, formatDurationHourMin, parseDurationHM } from "../common/utils.js";
 import { getSessionDayDate } from "./sessionTimeline.js";
 
@@ -56,7 +49,6 @@ function wireElapsedEdit(valueEl, b, deps) {
     input.type = "text";
     input.inputMode = "numeric";
     input.className = "session-status-edit-input";
-    input.id = `elapsed-draft-${b.id}`;
     input.value = formatDurationHM(b.duration ?? 0);
     input.addEventListener("click", (ev) => ev.stopPropagation());
     let cancelled = false;
@@ -67,7 +59,6 @@ function wireElapsedEdit(valueEl, b, deps) {
       } else if (ev.key === "Escape") {
         ev.preventDefault();
         cancelled = true;
-        cancelTrainerFormDraft(input.id);
         input.blur();
       }
     });
@@ -77,17 +68,11 @@ function wireElapsedEdit(valueEl, b, deps) {
         if (parsed != null) {
           b.duration = parsed;
           if (deps.saveToLocalStorage) deps.saveToLocalStorage();
-          finishTrainerFormDraft(input.id);
         }
       }
       if (deps.rerenderSessions) deps.rerenderSessions();
     });
     valueEl.replaceWith(input);
-    openTrainerFormDraft(
-      input,
-      { id: "elapsed-duration", subject: () => b.id, resume: false },
-      deps.t,
-    );
     input.focus();
     input.select();
   };
@@ -100,12 +85,6 @@ function wireElapsedEdit(valueEl, b, deps) {
       startEdit(e);
     }
   });
-  if (
-    hasTrainerFormDraft("elapsed-duration", b.id) &&
-    !isCompletingTrainerFormDraft(`elapsed-draft-${b.id}`)
-  ) {
-    startEdit({ stopPropagation() {} });
-  }
 }
 
 // A card is marked "Active session" only once the trainer has explicitly started it (matched by

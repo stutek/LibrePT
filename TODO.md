@@ -4137,11 +4137,94 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#49-x-a-theme-is
 **Wanted 2026-09-13 (Simon)**, raised with §48.1: a reload has to bring the app back to the state it
 was in before. That includes every form, not only the clipboard.
 
-### 50.1 [x] Review every form for what a reload throws away — shipped 2026-09-15
+### 50.1 [~] Review every form for what a reload throws away
 
-Closed — the audit, decisions and implementation are in
-[TODO_ARCHIVE.md](TODO_ARCHIVE.md#501-x-review-every-form-for-what-a-reload-throws-away--shipped-2026-09-15);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+**Why it matters on the gym floor.** A phone reloads a page on its own: the browser drops a tab in
+the background, the trainer switches apps, the service worker installs a new version. Anything typed
+and not yet saved is then gone, with no warning.
+
+**Started 2026-09-14 (Codex).** The first browser pass is recorded below. The earlier claim that
+only intake and the clipboard remember input was wrong: the client form also uses
+[formDraft.js](src/modules/common/formDraft.js), and session setup has a separate version-scoped,
+workspace-scoped localStorage draft in [editSessionControl.js](src/modules/session/editSessionControl.js).
+Counting files containing input markup is not counting forms: the results include comments, shared
+field builders, search controls, and several modules that draw parts of the same form.
+
+**Method.** Local Chromium, fresh temporary browser contexts with demo data; type/change fields,
+reload the page, then reopen a dialog when necessary and compare its values. No invitations sent,
+exports downloaded or records erased. Some dialogs were opened through their existing exported
+opener, so these observations prove field restoration, not the entire navigation path. No runtime
+code changed. Browser results below cover the named fields, not every possible branch of a form.
+
+| Surface and owner | Observed after reload, 2026-09-14 |
+| :--- | :--- |
+| Client intake — [intakeView.js](src/modules/intake/intakeView.js) | Existing e2e reload test passed: name, phone and injury note survive; consent remains unticked. Uses sessionStorage, deliberately limited to the tab. |
+| New client — [clientFormsController.js](src/controllers/clientFormsController.js) | Name, alias, email, phone, goals, notes, consent date and language survive after manually reopening Add client. Consent tick does not. The dialog itself does not reopen. |
+| New exercise — [exerciseFormsController.js](src/controllers/exerciseFormsController.js) | Its route reopens the dialog, but name, muscle group, equipment, movement pattern, modality, metric and instructions all revert. |
+| New routine — [routineFormsController.js](src/controllers/routineFormsController.js) | Its route reopens the dialog; name and description are lost. |
+| Existing routine — [plansView.js](src/modules/plans/plansView.js) | Reopening restores the saved record, losing the edited name, description, and the selected exercise, sets, reps and rest in all six tested rows. Load variants and structural changes still need explicit browser coverage. |
+| Session setup — [editSessionControl.js](src/modules/session/editSessionControl.js) | Name, location, date and both times survive. Repeat toggle, repeat-until date and participant search do not. Weekday buttons are also absent from the draft serializer; participant assignment and series-edit branches still need browser coverage. |
+| Trainer details — [trainerDetailsDialog.js](src/modules/common/trainerDetailsDialog.js) | Dialog name, phone and email are lost; reopening reads the saved identity. The splash variant uses the same save/prefill functions but still needs its own reload pass. |
+| Program import — [programImportDialog.js](src/modules/plans/programImportDialog.js) | Pasted text and both client/session choices are lost. File contents are copied into the same textarea; that path still needs its own reload pass. |
+| Intake invitation — [intakeInviteDialog.js](src/modules/clients/intakeInviteDialog.js) | Recipient contact is lost. Opened via the real Invite client button, which also initialises its dependencies. |
+| Session invitation — [sessionInviteDialog.js](src/modules/session/sessionInviteDialog.js) | Unsaved organizer email, phone and reply cutoff revert to stored defaults. Typing alone does not persist these; the sending controls remember them. |
+| Feedback / gym note — [feedbackModal.js](src/modules/common/feedbackModal.js) | Dialog does not reopen. Reopening loses the note and keep-on-record tick, and resets the selected pain tag to Too Easy. No feedback was submitted. |
+| Client export — [clientDataRights.js](src/modules/clients/clientDataRights.js) | Edited disclosure notes revert to the client's stored notes. Losing a redaction can put another person's information back into an export; drafts must belong to the exact client. |
+| Client erasure — [clientDataRights.js](src/modules/clients/clientDataRights.js) | In-progress request-date text resets to today; confirmation text resets to blank. The probe did not submit an erasure. |
+| Encrypted-file reader — [encryptedFileReader.js](src/modules/common/encryptedFileReader.js) | Passphrase is lost. It is a text input, so excluding only `type=password` would accidentally persist it. |
+| Plan adjustment — [planAdjustments.js](src/modules/plans/planAdjustments.js) | Selected action reverts to Modify. Metric fields and movement replacement still need separate browser passes; switching the action hid those fields in this pass. |
+| Start-time correction — [sessionStartTimeDialog.js](src/modules/session/sessionStartTimeDialog.js) | Both edited times revert to the opener's proposed times. |
+| Clipboard editor — [clipboardEditor.js](src/modules/clipboard/clipboardEditor.js) | Both existing e2e deep-link tests passed, including an exercise name surviving reload. This does not yet prove every metric, empty input or structural edit. |
+
+**Located defects in the shared mechanism, not just missing integrations:**
+
+- **A rejected save deletes the client draft.** Reproduced with a whitespace-only client name
+  and a non-empty note: Save leaves the dialog open because validation rejects the name, but reload
+  loses the note. `keepFormDraft` clears on the submit event before the caller validates or saves.
+  Clear only after successful persistence, never merely because submit fired.
+- **Radio groups cannot round-trip.** A browser probe with three radios sharing `name=signal`
+  selected the middle value; `readFormDraft` stored `{signal: false}`, and restore selected none.
+  The helper uses the shared name as a key and overwrites each preceding radio. Feedback uses
+  precisely this unnamed-id radio shape.
+- **Identity and workspace are not optional.** Client keys are `client:<id>` or `client:new`, with
+  no workspace component. Session setup has a workspace but only one draft key, with no session id.
+  Cross-subject/workspace isolation needs tests before either mechanism is extended.
+- **Dynamic rows need data, not DOM identifiers.** Routine rows and repeat weekdays have no
+  `id`/`name`; the generic helper skips them. Save stable item identities, ordering and values,
+  recreate the controls, then restore their values.
+- **Restore emits input/change one field at a time.** Dependent controls can rebuild later fields
+  or save an incomplete restored form. Restoration needs an explicit phase before autosave resumes.
+
+**Remaining inventory, inspected in source but not yet fully exercised in the browser:**
+new-client versus edit-client isolation,
+the intake's other fields, signup-file review and backup-file review, session-list filters,
+client/exercise/catalog searches, inline elapsed-duration editing on a past session card,
+the inactive add-exercise dialog, and settings. Language/theme save immediately; the Drive interval
+commits on change. File pickers cannot be repopulated as ordinary text fields. Search filters are
+view state, while the plan editor already writes live records; neither should silently become a
+second copy of business data in a generic form draft.
+
+**Proposed next implementation, awaiting the lifetime decision below:**
+
+1. Repair and test the existing helper's radio handling, restoration phase and explicit successful-save
+   lifecycle. Keep the intake's current tab-only behaviour.
+2. Add a common trainer draft store keyed by workspace, form and subject, with a format version
+   independent of the build SHA. Keep the active form identity locally so reload can reopen it.
+   Do not put field contents in a URL or in Drive sync.
+3. Integrate the client/exercise forms first; then routine rows and the complete session setup;
+   then notes, import, invitations and trainer details. Test each form's meaningful branches.
+4. Make reload coverage a maintained e2e inventory: a new form must declare its restore policy or
+   an explicit exclusion. Include failed saves, explicit cancel, two subjects, workspace switching,
+   tab closure, rejected storage, and file-derived text. A passing shared-helper test alone is not
+   form coverage.
+
+**Decision requested, not yet made:** trainer drafts survive tab closure on this device, remain
+separate between working and sandbox, and are discarded only after successful save or explicit
+cancel, without automatic expiry. Intake stays tab-only. Exclude consent/destructive confirmation
+and decryption secrets; treat attachment contents explicitly rather than pretending a file picker
+can be restored. Closing with X, Escape, Back and navigating elsewhere need an explicit distinction
+between abandoning a draft and temporarily leaving it. Finish the outstanding browser branches
+before marking this review closed.
 
 ### 50.2 [ ] What the draft commit decided without a ruling
 

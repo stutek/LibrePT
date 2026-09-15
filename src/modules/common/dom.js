@@ -35,7 +35,6 @@ export function openModal(modalId, { resetForm = false, formId = null } = {}) {
     if (form) form.reset();
   }
   modal.showModal();
-  document.dispatchEvent(new CustomEvent("formdraftopen", { detail: modalId }));
   return modal;
 }
 

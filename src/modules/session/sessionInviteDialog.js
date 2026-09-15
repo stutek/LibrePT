@@ -392,7 +392,3 @@ export function openSessionInviteDialog(sessionInfo) {
   renderInviteRows(clients, sessionInfo);
   openModal("dialog-session-invite");
 }
-
-export function sessionInviteDraftContext() {
-  return renderedFor?.sessionInfo || {};
-}

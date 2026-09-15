@@ -2,8 +2,6 @@
 // Keep keys in parity with every other locale in this folder (enforced by
 // tests/unit/test_i18n_parity.py, which iterates the registry in ./index.js).
 export const en = {
-  draft_storage_failed:
-    "This draft could not be saved on this device. Keep this form open and copy your text before reloading.",
   logo_title: "LibrePT",
   preview_badge: "Preview",
   preview_warning:

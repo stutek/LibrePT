@@ -40,7 +40,6 @@ import {
   writeTrainerIdentity,
 } from "../../data/trainerIdentity.js";
 import { closeModal, openModal, renderMarkupOnce } from "./dom.js";
-import { finishTrainerFormDraft } from "./trainerFormDraft.js";
 
 const DIALOG_PREFIX = "trainer-details";
 const SPLASH_PREFIX = "splash-trainer";
@@ -177,10 +176,7 @@ export function openTrainerDetailsDialog() {
   document.getElementById("trainer-details-cancel").onclick = () =>
     closeModal("dialog-trainer-details");
   document.getElementById("trainer-details-save").onclick = () => {
-    if (saveFields(DIALOG_PREFIX)) {
-      finishTrainerFormDraft("dialog-trainer-details");
-      closeModal("dialog-trainer-details");
-    }
+    if (saveFields(DIALOG_PREFIX)) closeModal("dialog-trainer-details");
   };
 
   openModal("dialog-trainer-details");
@@ -216,8 +212,6 @@ export function mountTrainerDetailsOnSplash(container) {
 
   const saved = document.getElementById(`${SPLASH_PREFIX}-saved`);
   document.getElementById(`${SPLASH_PREFIX}-save`).onclick = () => {
-    const success = saveFields(SPLASH_PREFIX);
-    saved.hidden = !success;
-    if (success) finishTrainerFormDraft("splash-trainer-details");
+    saved.hidden = !saveFields(SPLASH_PREFIX);
   };
 }

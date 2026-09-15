@@ -8,7 +8,6 @@
 import { newRecordId } from "../data/recordId.js";
 import { metricOptionsFor } from "../domain/exerciseModality.js";
 import { $id, closeModal, openModal, renderMarkupOnce } from "../modules/common/dom.js";
-import { finishTrainerFormDraft } from "../modules/common/trainerFormDraft.js";
 import { renderExercisesList } from "../modules/exercises/exercisesView.js";
 
 // Filled in by setupExerciseForms, and called by the create-form ROUTE — same seam pattern as
@@ -176,7 +175,6 @@ export function setupExerciseForms({
 
     getState().exercises.push(newEx);
     saveToLocalStorage();
-    finishTrainerFormDraft("dialog-exercise");
     renderExercisesList({ state: getState(), t });
     populateDropdownSelectors();
     closeModal("dialog-exercise");

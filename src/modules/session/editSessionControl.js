@@ -4,7 +4,11 @@
 // Auto-persists form drafts to localStorage so user data survives page reloads.
 
 import { newRecordId } from "../../data/recordId.js";
-import { readVersionScoped, removeVersionScoped } from "../../data/storageNamespace.js";
+import {
+  readVersionScoped,
+  removeVersionScoped,
+  writeVersionScoped,
+} from "../../data/storageNamespace.js";
 import {
   BUSY_ELSEWHERE,
   MERGES_INTO_ONE_CLIPBOARD,
@@ -30,7 +34,6 @@ import { seriesWithEdit, validateSeries } from "../../domain/sessionSeries.js";
 import { clockToMinutes, parseTimeRange, timePlusMinutes } from "../../domain/timeRange.js";
 import { mountDateField } from "../common/dateField.js";
 import { mountTimeField } from "../common/timeField.js";
-import { cancelTrainerFormDraft, finishTrainerFormDraft } from "../common/trainerFormDraft.js";
 import { formatClockFromEpoch } from "../common/utils.js";
 import {
   readRepeatFields,
@@ -49,7 +52,39 @@ export function initEditSessionControl(d) {
 export const initWorkoutSetup = initEditSessionControl;
 
 export function saveEditSessionDraft() {
-  document.getElementById("form-workout-setup")?.dispatchEvent(new Event("draftchange"));
+  const nameInput = document.getElementById("setup-session-name");
+  const dateInput = document.getElementById("setup-session-date");
+  const startInput = document.getElementById("setup-start-time");
+  const endInput = document.getElementById("setup-end-time");
+  const locInput = document.getElementById("setup-location");
+
+  const clientRoutines = {};
+  const checkedClients = [];
+  // A row EXISTS only for a client who is on the session, so the rows are the selection.
+  for (const row of participantRows()) {
+    const clientId = row.dataset.clientId;
+    if (!clientId) continue;
+    checkedClients.push(clientId);
+    const select = row.querySelector("select");
+    if (select) clientRoutines[clientId] = select.value;
+  }
+
+  const draft = {
+    sessionName: nameInput?.value || "",
+    date: dateInput?.value || "",
+    startTime: startInput?.value || "",
+    endTime: endInput?.value || "",
+    location: locInput?.value || "",
+    checkedClients,
+    clientRoutines,
+    isPlanningModeActive,
+  };
+
+  try {
+    writeVersionScoped(DRAFT_KEY, JSON.stringify(draft));
+  } catch (e) {
+    console.warn("Failed to save workout setup draft to localStorage", e);
+  }
 }
 export const saveSetupDraft = saveEditSessionDraft;
 
@@ -64,7 +99,6 @@ export const clearSetupDraft = clearEditSessionDraft;
 
 export function getEditSessionDraft() {
   try {
-    if (editingSessionId) return null; // The retired singleton never identified an edited session.
     const raw = readVersionScoped(DRAFT_KEY);
     return raw ? JSON.parse(raw) : null;
   } catch (e) {
@@ -456,7 +490,6 @@ export function setupEditSessionControl() {
   );
 
   const handleCancel = () => {
-    cancelTrainerFormDraft("form-workout-setup");
     clearEditSessionDraft();
     editingSessionId = null;
     deps.pushRoute(deps.urlFor("sessions.day", { isoDate: deps.getISODateForColumn("today") }));
@@ -475,6 +508,8 @@ export function setupEditSessionControl() {
   setupParticipantSearch();
 
   // Auto-save draft on any input change
+  form.addEventListener("input", saveEditSessionDraft);
+  form.addEventListener("change", saveEditSessionDraft);
   form.addEventListener("input", refreshScheduleConflictNotice);
   form.addEventListener("change", refreshScheduleConflictNotice);
 
@@ -568,9 +603,8 @@ export function setupEditSessionControl() {
     }
 
     clearEditSessionDraft();
-    deps.startWorkoutSession(clientRoutines, sessionMeta);
-    finishTrainerFormDraft("form-workout-setup");
     editingSessionId = null;
+    deps.startWorkoutSession(clientRoutines, sessionMeta);
   });
 }
 export const setupWorkoutSetup = setupEditSessionControl;
@@ -1022,38 +1056,5 @@ export function openEditSessionControlModal(
   }
   renderParticipantMatches("");
   refreshParticipantSummary();
-  document.dispatchEvent(new CustomEvent("formdraftopen", { detail: "form-workout-setup" }));
 }
 export const openWorkoutSetupModal = openEditSessionControlModal;
-
-/** Structure that an input snapshot cannot recreate: participants and their assigned routines. */
-export function readSetupDraftStructure() {
-  return {
-    subject: `${isPlanningModeActive ? "planning" : "session"}:${editingSessionId || "new"}`,
-    participants: [...participantRows()].map((row) => ({
-      id: row.dataset.clientId,
-      routineId: row.querySelector("select")?.value || "",
-    })),
-    weekdays: [...document.querySelectorAll("#setup-repeat-days input")]
-      .filter((field) => field.checked)
-      .map((field) => field.dataset.weekday),
-  };
-}
-
-export function restoreSetupDraftStructure(draft) {
-  if (!draft || !Array.isArray(draft.participants) || !participantRowContext) return;
-  const list = document.getElementById("setup-participants-assignment-list");
-  list.replaceChildren();
-  for (const item of draft.participants) {
-    const client = deps.getState().clients.find((candidate) => candidate.id === item.id);
-    if (!client) continue;
-    const row = buildParticipantRow(client, participantRowContext);
-    list.appendChild(row);
-    const select = row.querySelector("select");
-    if (select) select.value = item.routineId;
-  }
-  for (const field of document.querySelectorAll("#setup-repeat-days input")) {
-    field.checked = draft.weekdays?.includes(field.dataset.weekday) || false;
-  }
-  refreshParticipantSummary();
-}

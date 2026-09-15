@@ -14,7 +14,6 @@
 
 import { notesWithGymNote } from "../../domain/gymNotes.js";
 import { $id, closeModal, openModal, renderMarkupOnce } from "./dom.js";
-import { finishTrainerFormDraft } from "./trainerFormDraft.js";
 
 let deps = null;
 
@@ -38,8 +37,6 @@ export function openFeedbackModal(exId) {
     clientState.exercises[clientState.activeExerciseIndex];
   const client = state.clients.find((c) => c.id === activeClientId);
   const { t } = deps;
-
-  $id("dialog-feedback").dataset.exerciseId = curEx.id;
 
   $id("feedback-client-id").value = activeClientId;
   $id("feedback-exercise-name").value = curEx.name;
@@ -243,7 +240,6 @@ export function setupFeedbackForms() {
             } else {
               currentNoteInput.value = generatedTranscript;
             }
-            currentNoteInput.dispatchEvent(new Event("input", { bubbles: true }));
           }
         }, 1200);
       }
@@ -338,7 +334,6 @@ export function setupFeedbackForms() {
       }
 
       saveToLocalStorage();
-      finishTrainerFormDraft("dialog-feedback");
       renderPendingPlanAdjustments();
       closeModal("dialog-feedback");
     });
