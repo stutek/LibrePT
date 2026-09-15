@@ -4143,6 +4143,29 @@ Closed — the audit, decisions and implementation are in
 [TODO_ARCHIVE.md](TODO_ARCHIVE.md#501-x-review-every-form-for-what-a-reload-throws-away--shipped-2026-09-15);
 what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
+### 50.2 [ ] What the draft commit decided without a ruling
+
+Found 2026-09-15 reviewing f64d8fb (Claude). §50.1 was closed on a lifetime nobody had ruled on.
+
+- **Lifetime.** Drafts are kept on the device with no expiry. Simon has NOT ruled on it; he thinks
+  "for ever" is probably right. Blocks: closing this section.
+- **✕, Escape and Back delete the draft.** [trainerFormDraft.js](src/modules/common/trainerFormDraft.js)
+  discards on a `.modal-close-btn` click and on the dialog's `cancel` event. Android's Back gesture
+  closes a dialog with that same event, so Back loses the typed text. Read from the code, not yet
+  seen in a browser. [ARCHITECTURE.md](docs/ARCHITECTURE.md) says closing keeps the draft. Blocks: the
+  meaning of each way out of a form.
+- **A draft keeps a stale session alive.** [sessionLifecycle.js](src/controllers/sessionLifecycle.js)
+  no longer clears a stale active session while any draft names it. With no expiry, one forgotten
+  feedback note keeps an old clipboard for ever.
+- **The backup review is stored in localStorage.** The draft holds the whole imported backup, every
+  client in it, with no expiry. It is a second copy of personal data and can exceed the storage
+  limit. The file is still on the device and can be chosen again. Proposed: drop this draft.
+- **Search and filters became drafts** (client search, exercise filter, session filters), although
+  the audit called them view state.
+- **Leftover:** `getEditSessionDraft` in
+  [editSessionControl.js](src/modules/session/editSessionControl.js) still reads the old
+  `librept_workout_setup_draft` key, which nothing writes any more.
+
 ## 51. [x] A tap the demo step did not ask for interrupts the guide — fixed 2026-09-13
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#51-x-a-tap-the-demo-step-did-not-ask-for-interrupts-the-guide--fixed-2026-09-13); what shipped is in [CHANGELOG.md](CHANGELOG.md).
