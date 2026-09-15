@@ -98,7 +98,7 @@ the thing that must happen first, not merely what it touches.
 | **Client self-service** | §26.7 phase 2 | The vendored QR encoder and the wall poster | Deferred on purpose until the messaging handover has been tried in a gym; the link route shipped 08-22 |
 | **Program import** | §29 | Nothing — shape decided 2026-08-18, and the editor-as-review answers the fragility question | The parser and its frozen corpus; the intake flow, media-type rule and catalog crosswalk already exist |
 | **Live clipboard taps — PRIORITY** | §48.2 | Tracking and notes after the session | §48.2's measuring exception waits on §45.11; §48.1 shipped 2026-09-13 |
-| **Trainer feedback 2026-09-11** | §45.1–§45.13 | §45.1's untranslatable first screen, then §45.2's trainer identity | Nothing for the three defects; §45.4 waits on a reproduction, §45.8 on looking at both screens together |
+| **Trainer feedback 2026-09-11** | §45.1–§45.13 | §45.1's untranslatable first screen, then §45.2's trainer identity | Nothing for the three defects; §45.4 is ruled (2026-09-15) and waits to be built, §45.8 on looking at both screens together |
 
 ---
 
@@ -3575,6 +3575,54 @@ private extension is what survives an email hop, and it may be the very thing th
 refuses. One cheap experiment then becomes available — retry a refused share once with a plainly
 named `.json` copy of the same bytes — but it trades away the association that makes the file open in
 LibrePT on arrival, so it is a decision, not a fix, and it is not taken here.
+
+**Found 2026-09-15 by reading the browsers' source (not yet tested on a phone).**
+
+- **Chrome on Android refuses the file by its type, and `.json` would be refused too.**
+  `ShareServiceImpl.java` (Chromium `main`) accepts a file only when BOTH its extension and its
+  media type are on two fixed lists: pictures, sound, video, `pdf`, `txt`, `csv`, `html`, `css`.
+  Neither `json` nor `application/json` is on them. The page receives `NotAllowedError: Permission
+  denied`; the reason (*"Cannot share potentially dangerous … file"*) goes only to the phone's system
+  log. The retry with a `.json` copy that `.private/INTAKE_DEFECT_PROPOSAL.md` proposes fails the same
+  way, so that proposal is rejected.
+- **`canShare` does not look at the file type**, only whether there is anything to share
+  (`navigator_share.cc`). That is why the S23 showed the Share button and then refused.
+- **A second share cannot start without a new tap.** `share()` uses up the tap that started it, in
+  the Web Share specification and in both Chromium and WebKit. An automatic retry is refused before
+  it reaches the file check.
+- **No manifest entry, installation or registration can add a type to that list.** The lists are
+  constants in the browser's code.
+- **iPhone does not have this problem.** WebKit (`Navigator.cpp`, `WKShareSheet.mm`) checks no type;
+  an unknown extension is passed on as generic data. Every browser on iPhone runs WebKit. Not checked:
+  which apps offer themselves in the share menu for generic data.
+- **Other routes that work on every phone:** none at a distance except saving the file. Web Bluetooth
+  is absent from Safari and Firefox, and a page can only connect to a device, never be one, so two
+  phones cannot connect (from memory, not re-read). A QR on the client's screen works only when both
+  are in the same place, and a full submission (up to ~2500 characters) does not fit one readable code
+  — see §26.3 step 3.
+
+**Ruled 2026-09-15 (Simon), NOT BUILT:** when a share fails, the page at once saves the file,
+shows how to send it by hand, and offers a button that saves the trainer's contact.
+
+- **Saving at once is allowed without a new tap.** Chromium's `download_request_limiter.cc` lets the
+  first download after a tap through (`ALLOW_ONE_DOWNLOAD`). A second one without a tap asks the
+  person *"download multiple files?"* — which is why the contact is a BUTTON, not a second automatic
+  download.
+- **The instructions** replace `intake_send_failed`: the share did not work, the phone saved the file
+  `{file}` in Downloads, open a message to the trainer, add it as an attachment. The browser's own
+  words stay on the line under it. The pre-addressed email (`offerToEmailTheTrainer`) is shown as after
+  a manual save.
+- **The contact button** sits with the instructions, after either kind of save, and reuses the card
+  the top of the page already builds (`intake-sender-save`, `trainerVcard.js`). It is needed most
+  when the link carried only a phone number: there is no email to pre-address, and the client has to
+  find the trainer in their own messaging app.
+- **No link to the file, and no link to the Downloads folder.** *Save the file to share* stays on
+  screen and saves it again, so a link would do the same thing twice. A web page cannot link to a
+  folder on the phone. After a download, Chrome shows its own message with *Open*.
+- **Open, for whoever builds it:** whether the automatic save forgets the unsent form (the Save
+  button does, but the page cannot tell whether the download went through); the colour of the status
+  line (the share failed, yet the file is saved and the client still has to act); a medium test in
+  `tests/medium/test_intake_form.py` with a refusing `shareFiles`; the check on the S23 itself.
 
 ### 45.5 [ ] Import covers a programme, but not the trainer's own exercise LIBRARY
 
