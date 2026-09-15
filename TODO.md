@@ -4204,50 +4204,51 @@ commits on change. File pickers cannot be repopulated as ordinary text fields. S
 view state, while the plan editor already writes live records; neither should silently become a
 second copy of business data in a generic form draft.
 
-**Proposed next implementation, awaiting the lifetime decision below:**
+**The audit stays as the record of what a reload loses.** The draft store it proposed was built on
+2026-09-15 and reverted the same day; see §50.2.
 
-1. Repair and test the existing helper's radio handling, restoration phase and explicit successful-save
-   lifecycle. Keep the intake's current tab-only behaviour.
-2. Add a common trainer draft store keyed by workspace, form and subject, with a format version
-   independent of the build SHA. Keep the active form identity locally so reload can reopen it.
-   Do not put field contents in a URL or in Drive sync.
-3. Integrate the client/exercise forms first; then routine rows and the complete session setup;
-   then notes, import, invitations and trainer details. Test each form's meaningful branches.
-4. Make reload coverage a maintained e2e inventory: a new form must declare its restore policy or
-   an explicit exclusion. Include failed saves, explicit cancel, two subjects, workspace switching,
-   tab closure, rejected storage, and file-derived text. A passing shared-helper test alone is not
-   form coverage.
+### 50.2 [ ] No separate draft storage for the trainer's forms
 
-**Decision requested, not yet made:** trainer drafts survive tab closure on this device, remain
-separate between working and sandbox, and are discarded only after successful save or explicit
-cancel, without automatic expiry. Intake stays tab-only. Exclude consent/destructive confirmation
-and decryption secrets; treat attachment contents explicitly rather than pretending a file picker
-can be restored. Closing with X, Escape, Back and navigating elsewhere need an explicit distinction
-between abandoning a draft and temporarily leaving it. Finish the outstanding browser branches
-before marking this review closed.
+**Decided 2026-09-15 (Simon): the trainer's forms get no temporary storage.** Codex's draft store
+(a workspace-scoped `localStorage` bucket, a form inventory and a recovery controller) was reverted
+the same day. Reverting was cheaper than removing it: it had closed §50.1 on a draft lifetime nobody
+had ruled on, copied a whole imported backup into `localStorage`, deleted a draft on ✕, Escape and
+Android's Back gesture, and let one forgotten draft keep a stale session alive.
 
-### 50.2 [ ] What the draft commit decided without a ruling
+**Still in the code after the revert, and against this decision:**
 
-Found 2026-09-15 reviewing f64d8fb (Claude). §50.1 was closed on a lifetime nobody had ruled on.
+- The client form keeps a draft in `sessionStorage` through
+  [formDraft.js](src/modules/common/formDraft.js). It carries both defects found in §50.1: a
+  rejected save deletes the draft, and radio groups do not come back.
+- Session setup keeps a draft under `librept_workout_setup_draft` in `localStorage`
+  ([editSessionControl.js](src/modules/session/editSessionControl.js)).
 
-- **Lifetime.** Drafts are kept on the device with no expiry. Simon has NOT ruled on it; he thinks
-  "for ever" is probably right. Blocks: closing this section.
-- **✕, Escape and Back delete the draft.** [trainerFormDraft.js](src/modules/common/trainerFormDraft.js)
-  discards on a `.modal-close-btn` click and on the dialog's `cancel` event. Android's Back gesture
-  closes a dialog with that same event, so Back loses the typed text. Read from the code, not yet
-  seen in a browser. [ARCHITECTURE.md](docs/ARCHITECTURE.md) says closing keeps the draft. Blocks: the
-  meaning of each way out of a form.
-- **A draft keeps a stale session alive.** [sessionLifecycle.js](src/controllers/sessionLifecycle.js)
-  no longer clears a stale active session while any draft names it. With no expiry, one forgotten
-  feedback note keeps an old clipboard for ever.
-- **The backup review is stored in localStorage.** The draft holds the whole imported backup, every
-  client in it, with no expiry. It is a second copy of personal data and can exceed the storage
-  limit. The file is still on the device and can be chosen again. Proposed: drop this draft.
-- **Search and filters became drafts** (client search, exercise filter, session filters), although
-  the audit called them view state.
-- **Leftover:** `getEditSessionDraft` in
-  [editSessionControl.js](src/modules/session/editSessionControl.js) still reads the old
-  `librept_workout_setup_draft` key, which nothing writes any more.
+**Open, to settle before code:**
+
+- **When those two go.** Removing them now means a reload loses a half-typed client or session
+  until the replacement below exists. Blocks: removing them.
+- **The replacement proposed (Claude), not decided:** a form that edits a record writes into the
+  record as it is typed — client, exercise, routine, session, trainer details. The clipboard does
+  not do this today: the live session sits in `librept_active_session` until it ends. What a Cancel
+  button then means is open: nothing to go back to when editing, a delete when adding. Blocks: the
+  shape of every record form.
+- **Dialogs that prepare an action keep nothing** (invitations, import, export, erasure, backup
+  restore, start-time correction): losing a few typed characters to a reload costs seconds.
+- **The client's own intake page may keep its tab-only draft** (Simon, "morda"). The intake has no
+  trainer database to write into, and its `sessionStorage` draft dies with the tab. Not ruled.
+
+### 50.3 [ ] An incomplete record needs attention rather than a refusal
+
+**Raised 2026-09-15 (Simon).** He is not yet convinced that a client without a name or a session
+without a location is a problem at all. If it is, it belongs on a list of things that need the
+trainer's attention, perhaps marked by a badge — and perhaps one badge shared with sessions and
+with feedback not yet dealt with.
+
+**What exists already.** The notification feed computes work the trainer owes from state, fresh on
+every render: unscheduled plans and unreviewed feedback
+([notificationItems.js](src/domain/notificationItems.js)). An incomplete record would be one more
+item of that kind. **Open:** whether it is a problem at all, which gaps count, and whether one badge
+covers all of it. Depends on the record-form decision in §50.2.
 
 ## 51. [x] A tap the demo step did not ask for interrupts the guide — fixed 2026-09-13
 
