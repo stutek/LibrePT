@@ -3983,6 +3983,13 @@ evaluating the app needs to see:
 3. moving an appointment and telling the client;
 4. a fast adjustment mid-session — **counted in taps and seconds**.
 
+Before the chapters begin, show where the trainer enters their own name and contact details. The
+demo only opens the form and names its fields; it does not enter or save invented personal data.
+
+The planning chapter must also let the trainer peek at a past session while planning the next one.
+That is the proof that the plan uses what happened before, rather than treating history as a separate
+screen.
+
 The fourth is the one that is different in kind: every other chapter *shows* something, and that one
 **proves** something. A number a viewer can check is worth more than any sentence about ease of use.
 
