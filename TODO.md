@@ -4414,6 +4414,37 @@ Seen 2026-09-14 on the demo data, while checking §52.2. A past card's badge rea
 Slovenian screen. The app writes a date as ISO everywhere, in every language, so it should read
 2026-07-20, and the word should come from the dictionary.
 
+## 63. [ ] Migrations are tested from the oldest version, but not for ever and not on a device
+
+Asked 2026-09-17 (Simon): is there a test that covers migrations from the oldest version onward, for
+ever? Checked the same day (Claude):
+
+**What exists.** [frozenBackupCorpus.test.mjs](tests/unit_js/data/frozenBackupCorpus.test.mjs)
+migrates one frozen backup file per schema, 0 to 4, through `migrateState`, checks that the chain
+has no gap, and that every fixture on disk is used.
+[test_schema_migrations.py](tests/e2e/test_schema_migrations.py) and
+[test_indexed_db_engine.py](tests/e2e/test_indexed_db_engine.py) boot the app on an old
+`localStorage` database.
+
+**What is missing:**
+
+- **"For ever" is a comment, not a check.** A new schema must bring a fixture of the one it
+  supersedes, but the list of fixtures is written by hand; nothing fails when schema 5 arrives
+  without one. It should be derived from `MIGRATION_STEPS`: one fixture for every version a step
+  starts from.
+- **No device database at any version.** Every fixture is a backup file or a `localStorage` value.
+  What a trainer's phone holds — IndexedDB stores per schema, the meta store, the read-schema choice
+  — is never booted from a frozen copy, so store provisioning, backfill and the P rebuild are only
+  ever tested from a fresh install.
+- **No install stamped "P"** — every install today (§61), with `invites` and `sessionSeries` only in
+  the P store. The §61 change has nothing to be tested against.
+- **The migrated data is checked field by field, not used.** No test opens the app on a migrated
+  database and walks a feature on it.
+
+**Proposed (Claude), not ruled:** a frozen device database per version, derived from the chain as
+above; each booted in the browser tests, walked through a client, a routine, a repeating session and
+an invitation, under both passes of §62. Blocks: §61, which needs the "P" snapshot first.
+
 ## 62. [ ] Feature code may write only what the live schema declares
 
 **Ruled 2026-09-17 (Simon), a release constraint:** a schema is released before or together with the
@@ -4429,7 +4460,7 @@ knows. **It cannot be switched on before §61**: today it would fail at once on 
 fields and the `invites` and `sessionSeries` collections.
 
 **Asked with it (Simon): that check protects trainers — how is reading P tested in CI?**
-Proposed (Claude), not ruled: a second pass of the browser tests that reads P instead of 4, with
+**Ruled 2026-09-17 (Simon): the browser tests run twice.** Proposed shape (Claude): a second pass of the browser tests that reads P instead of 4, with
 the same check held against P's declarations. Its first boot fills P from data written at 4, so it
 proves the upcoming version works on the data trainers hold now. The pass runs only while P differs
 from the live schema — decided by comparing the two declarations, never by a setting — so right after
