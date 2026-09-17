@@ -309,15 +309,19 @@ def wait_for_stored_record(page, collection, matches, timeout=10_000):
     """
     page.wait_for_function(
         """async ([collection, matches]) => {
+          // The store the app READS, asked of the app: naming one here broke nothing until the day
+          // the read store changed from P to 4 (TODO §61).
+          const readSchema = await import(new URL('data/readSchema.js', document.baseURI).href);
+          const storeName = readSchema.readStoreName();
           const db = await new Promise((resolve) => {
             const request = indexedDB.open('librept');
             request.onsuccess = () => resolve(request.result);
           });
-          if (!db.objectStoreNames.contains('schemaP')) return false;
+          if (!db.objectStoreNames.contains(storeName)) return false;
           const rows = await new Promise((resolve) => {
             const request = db
-              .transaction('schemaP', 'readonly')
-              .objectStore('schemaP')
+              .transaction(storeName, 'readonly')
+              .objectStore(storeName)
               .index('byCollection')
               .getAll(collection);
             request.onsuccess = () => resolve(request.result);

@@ -49,7 +49,7 @@ therefore CLEARS the stored language for every pre-release database rather than 
 intent from it. One tap for someone who did want English; the alternative is a Slovene trainer
 stuck in an English app with no prompt.
 
-### The schema-version line: 1 → 4 → P, with 5 reserved
+### The schema-version line: 1 → 4, with 5 reserved
 
 `schemaVersion` is a **chain**, not a single current value. A database enters it wherever it was
 last stamped and walks only the steps it is missing.
@@ -60,9 +60,9 @@ last stamped and walks only the steps it is missing.
 | **1 → 2** | `bookings` carried over to `sessions` |
 | **2 → 3** | every session given an absolute `startDate` |
 | **3 → 4** | stored language cleared so every trainer is asked once |
-| **4** | the newest numbered version — the shape backups are written at |
-| **"P"** | the unstable preview schema this build reads and writes |
-| **5** | **does not exist yet.** Reserved for the first stable release, created from P's final state |
+| **4** | **the active schema** (since 2026-09-17, TODO §61): what this build reads, writes and stamps, and the shape backups are written at |
+| **"P"** | the preview schema installs were stamped with before 4 became active. Read as 4, never written: everything it held moved into 4 |
+| **5** | **does not exist yet.** Reserved for the first stable release. A preview shape never becomes a step on the way to it |
 
 **Every numbered version is a live input, not history.** Two preview instances are demoed on real
 PTs' devices and backups restore from 1–4, so each step has real work to do. The chain was briefly
@@ -76,22 +76,17 @@ re-asked. While collapsed, that property needed an explicit version guard to hol
 position. Reading a stored 4 as "pre-release, start over" is precisely the bug that re-asks a
 settled language question.
 
-**"P" is the value recorded — never a number.** A fraction in stored data would read as a real
-schema version to anyone looking at a database or a backup, and P is exactly the thing that is not
-one. `PREVIEW_SCHEMA_RANK` (4.5) exists only so the runner can *order* P against numbered versions,
-and it is fractional so both bounds fall out of one comparison:
+**A stored "P" reads as 4.** Until 2026-09-17 the build stamped "P"; everything P held beyond 4 moved
+into schema 4 that day (TODO §61), so `schemaRank` ranks "P" as 4 — accepted as it is, never walked
+back through the chain, which would re-ask the language question.
 
-- **above every numbered version**, so 1–4 all migrate up into P rather than reading as newer than
-  the build and being refused;
-- **below 5**, so the day 5 is minted from P's final state, every P database is already below
-  current and re-enters the chain on its own — no retirement step, no special case.
+**A preview shape is a dead branch, never a step** (ruled 2026-09-17). `PREVIEW_SCHEMA_RANK` (4.5)
+ranks every fractional version above the active schema, so a live build refuses preview data as
+newer rather than migrating it; a chain 4 → preview → 5 must not exist. Every fraction ranks the
+same: preview data is disposable, and no build promises to still understand one.
 
-**Every fraction is P.** `schemaRank` collapses 4.5, 5.5 and any other non-integer to the same rank:
-a fractional version is by definition a preview shape, preview data is disposable, and no build
-promises to still understand one. So the release that mints 5 has no old preview values to clean up.
-
-**P data is dropped on every P change** rather than migrated — that is what makes an unstable shape
-safe to iterate on, and why P needs no migration steps of its own.
+**Preview data is dropped on every preview change** rather than migrated — that is what makes an
+unstable shape safe to iterate on, and why a preview shape needs no migration steps of its own.
 
 ### Backups are written at 4, not at P
 
@@ -579,7 +574,8 @@ something that must be preserved. Preview-only fields do not survive that rebuil
 cost the backup and sync surfaces warn about, applied at the same boundary.
 
 - **Reads come from one DECLARED schema**, never derived. `DEFAULT_READ_SCHEMA` in
-  [recordSchemas.js](../src/data/recordSchemas.js) is what a fresh install reads; which schema a
+  [recordSchemas.js](../src/data/recordSchemas.js) is what a fresh install reads — schema 4 since
+  2026-09-17, P before; which schema a
   given install *actually* reads is a trainer-owned setting ([readSchema.js](../src/data/readSchema.js)).
   It used to be `Math.max(...Object.keys(LIVE_SCHEMAS))`, which made the read target a function of
   registry *membership*: registering a shape silently relocated every read in the app. "This build

@@ -37,15 +37,13 @@ function database() {
   };
 }
 
-test("a backup is stamped at the newest numbered schema, never at the runtime one", () => {
+test("a backup is stamped at the stable numbered schema, never at a preview shape", () => {
   const payload = backup.buildBackupPayload(database());
 
   assert.equal(payload.schemaVersion, BACKUP_SCHEMA);
-  assert.notEqual(
-    payload.schemaVersion,
-    CURRENT_SCHEMA_VERSION,
-    "stamping the runtime schema would make the file restorable only by this build",
-  );
+  // Since 2026-09-17 the active schema IS the stable one (TODO §61); a preview build would still
+  // write its files at the stable number, since a preview shape is restorable only by its own build.
+  assert.equal(CURRENT_SCHEMA_VERSION, BACKUP_SCHEMA);
   assert.equal(
     Number.isInteger(payload.schemaVersion),
     true,

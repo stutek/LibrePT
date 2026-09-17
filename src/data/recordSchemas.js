@@ -103,7 +103,7 @@ export const SCHEMA_4 = {
     routineId: { required: false, type: "string" },
     maxCapacity: { required: false, type: "number" },
     day: { required: false, type: "string" },
-    // The five fields below and the two collections at the end of this shape were declared only in
+    // The four fields below and the two collections at the end of this shape were declared only in
     // P until 2026-09-17, while every install already wrote them (TODO §61). Ruled that day
     // (Simon): schema 4 is the live schema and takes them, accepting that "4" then names a wider
     // shape than it did — no install or backup may lose them. `startDate` stays optional HERE only
@@ -221,13 +221,13 @@ export const SCHEMA_P = {
 // ONE numbering across both axes. These used to be 2 and 3 on a "record schema" axis independent of
 // `schemaVersion`'s migration axis — two systems using small integers for different things, which
 // cost real time in review before it was collapsed. `4` here is the SAME 4 the migration chain ends
-// at, and `P` the same P it stamps.
+// at.
 //
 // Two shapes are live, and they do different jobs:
-//   - **4** is stable and durable. It is what a backup is written at, and the copy P is rebuilt
-//     FROM when the build changes.
-//   - **P** is the preview shape this build reads. Disposable by design: its fields can change on
-//     any commit, so it is never a source of truth for anything that has to outlive the build.
+//   - **4** is the active schema (TODO §61): what this build reads and stamps, what a backup is
+//     written at, and the copy P is rebuilt FROM when the build changes.
+//   - **P** is the preview shape, still written so an install that chose to read it keeps working.
+//     Disposable by design: never a source of truth for anything that has to outlive the build.
 export const LIVE_SCHEMAS = { 4: SCHEMA_4, P: SCHEMA_P };
 
 // The durable shape, and the one P is rebuilt from. Not derived from LIVE_SCHEMAS by taking a max:
@@ -262,7 +262,8 @@ export const BACKUP_SCHEMA = STABLE_SCHEMA;
  * fan-out, so a newer one is already current and complete by the time it is offered, and moving
  * between them is a read re-point rather than a migration.
  */
-export const DEFAULT_READ_SCHEMA = "P";
+// Schema 4 since 2026-09-17: the active schema (TODO §61). It was "P", the preview shape.
+export const DEFAULT_READ_SCHEMA = 4;
 
 function typeOf(value) {
   if (Array.isArray(value)) return "array";

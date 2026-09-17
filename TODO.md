@@ -4549,8 +4549,10 @@ evening and an invitation (§63), made from today's code before any of this chan
 [previewTransfer.js](src/data/previewTransfer.js) moves what only the P store holds, once, at boot.
 **Also ruled with them (Simon): P is not an alias of PREVIEW** — P is the legacy preview store data
 is moved out of; PREVIEW is the future CI and preview schema; the two mean different things.
-**Still open:** reads still default to P (`DEFAULT_READ_SCHEMA`) and the build still calls its
-version "P" (`CURRENT_SCHEMA_VERSION`); making 4 the read and current version, retiring P, and step 3.
+**Schema 4 made active 2026-09-17:** `DEFAULT_READ_SCHEMA` and `CURRENT_SCHEMA_VERSION` are 4; a stored
+"P" ranks as 4, and a fractional preview version is refused as newer. **Still open:** replacing P with
+a PREVIEW schema for CI and previews, with a collection only it declares, for testing (asked the same
+day), and retiring the P store.
 
 **What this changes in the design (Claude):** [DATA_MODEL.md](docs/DATA_MODEL.md) ranks P at 4.5 so
 that 1–4 "migrate up into P" and a P database "re-enters the chain on its own" when 5 is minted —

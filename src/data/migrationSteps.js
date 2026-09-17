@@ -18,37 +18,36 @@
 // own small transform again, which is what lets the import banner tell a trainer what actually
 // moved rather than "upgraded from the floor".
 //
-// "P" is the unstable preview schema this build reads and writes, and the value actually RECORDED.
-// It is not a number: a fraction in stored data would read as a real schema version to anyone
-// looking at a database or a backup, and P is precisely the thing that is not one. PREVIEW_SCHEMA_RANK
-// below exists only so the runner can ORDER P against numbered versions.
+// **Schema 4 is the active schema** (Simon, 2026-09-17, TODO §61): the shape this build reads,
+// writes and stamps. Until then the build read and stamped the preview schema "P". Everything P held
+// beyond 4 was moved into schema 4 that day, so a stored "P" means schema 4 and ranks as 4 — neither
+// refused as newer nor walked back through the chain from the floor.
 //
-// 5 does not exist yet — it is reserved for the first stable release, created from P's final state.
-// The rank is fractional so both bounds fall out of one comparison: above every numbered version
-// that exists (so they all migrate up into P), and below 5 (so the day 5 is minted, every P
-// database is already below current and re-enters the chain on its own, with no retirement step).
+// A PREVIEW shape is a dead branch, never a step: newer than 4, but a chain 4 → PREVIEW → 5 must not
+// exist. A live build therefore refuses data stamped with a preview shape rather than migrating it.
 
 // Legacy databases predate the field entirely; anything without a `schemaVersion` is version 1.
 // A value BELOW the floor — 0, or anything unrecognisable — means the same thing and enters here.
 // The frozen corpus stamps 0 deliberately, so the chain's entry point is visible in the fixture.
 export const BASELINE_SCHEMA_VERSION = 1;
 
-// "P" — the unstable preview schema this build reads and writes, and the value actually RECORDED.
-export const CURRENT_SCHEMA_VERSION = "P";
+export const CURRENT_SCHEMA_VERSION = 4;
 
-// How "P" ORDERS against numbered versions — never stored, never shown. Above every numbered
-// version that exists, below the 5 reserved for the stable release.
+// The preview schema installs were stamped with before schema 4 became active. Read, never written.
+export const LEGACY_PREVIEW_VERSION = "P";
+
+// How a preview shape ORDERS against numbered versions — never stored, never shown. Above the active
+// schema, so a live build refuses preview data as newer instead of migrating it into the chain.
 export const PREVIEW_SCHEMA_RANK = 4.5;
 
 /**
- * Comparable rank for a stored version: "P", a number, or null when it is unrecognisable.
+ * Comparable rank for a stored version: a number, the legacy "P", or null when it is unrecognisable.
  *
- * **"P" is the alias for EVERY fraction, not just the current one.** A fractional version is by
- * definition a preview shape, and preview data is disposable — there is nothing to gain from
- * telling 4.5 apart from 5.5, because neither is a shape any build promises to still understand.
+ * A fractional version is a preview shape, and every one ranks the same: preview data is disposable,
+ * so there is nothing to gain from telling 4.5 apart from 5.5.
  */
 export function schemaRank(version) {
-  if (version === CURRENT_SCHEMA_VERSION) return PREVIEW_SCHEMA_RANK;
+  if (version === LEGACY_PREVIEW_VERSION) return 4;
   if (!Number.isFinite(version)) return null;
   return Number.isInteger(version) ? version : PREVIEW_SCHEMA_RANK;
 }

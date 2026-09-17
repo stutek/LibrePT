@@ -70,7 +70,8 @@ def test_tapping_the_stamp_shows_commit_and_data_schema(page, local_server):
     # answer to "why are records missing", and the commit alone cannot tell you.
     # Read out of migrationSteps.js rather than hardcoded: a migration bumps this, and a test that
     # has to be edited alongside every migration is a test that will be edited without being read.
-    assert facts["Data schema"] == str(current_schema_version())
+    # `%g`, as tests/conftest.py's schema_constant asks: the constant comes back as 4.0, the dialog says 4.
+    assert facts["Data schema"] == "%g" % current_schema_version()
     assert "Built" in facts
     assert "Version" not in facts, "no release tags any more — nothing to show here"
 

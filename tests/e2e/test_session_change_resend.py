@@ -12,40 +12,33 @@
 import pytest
 from playwright.sync_api import expect
 
+# Planted through the app's own store rather than into a named IndexedDB store: which store the app
+# reads is not this test's business, and a test that wrote into `schemaP` broke the day schema 4
+# became the one read (TODO §61).
 INVITED_SESSION = """
 async ([sessionId, clientId]) => {
-  const invite = { id: 'i-resend', sessionId, clientId, channel: 'email',
-                   sentAt: '2026-08-17T09:00:00.000Z', status: 'sent', collection: 'invites' };
-  const db = await new Promise((resolve) => {
-    const request = indexedDB.open('librept');
-    request.onsuccess = () => resolve(request.result);
-  });
-  await new Promise((resolve) => {
-    const tx = db.transaction(['schemaP', 'schema4'], 'readwrite');
-    tx.objectStore('schemaP').put(invite);
-    tx.oncomplete = resolve;
-  });
+  const store = await import(new URL('data/stateStore.js', document.baseURI).href);
+  const queue = await import(new URL('data/writeQueue.js', document.baseURI).href);
+  const state = store.getState();
+  state.invites = [
+    ...(state.invites || []),
+    { id: 'i-resend', sessionId, clientId, channel: 'email',
+      sentAt: '2026-08-17T09:00:00.000Z', status: 'sent' },
+  ];
+  store.saveToLocalStorage();
+  await queue.flushWrites();
 }
 """
 
 
 def _a_scheduled_session(page):
-    """A seeded session with participants, read from the database the app just wrote."""
+    """A seeded session with participants, as the app holds it."""
     return page.evaluate(
         """async () => {
-          const db = await new Promise((resolve) => {
-            const request = indexedDB.open('librept');
-            request.onsuccess = () => resolve(request.result);
-          });
-          const rows = await new Promise((resolve) => {
-            const request = db
-              .transaction('schemaP', 'readonly')
-              .objectStore('schemaP')
-              .index('byCollection')
-              .getAll('sessions');
-            request.onsuccess = () => resolve(request.result);
-          });
-          const session = rows.find((row) => (row.participants || []).length > 0 && !row.completed);
+          const store = await import(new URL('data/stateStore.js', document.baseURI).href);
+          const session = (store.getState().sessions || []).find(
+            (row) => (row.participants || []).length > 0 && !row.completed,
+          );
           return session ? { id: session.id, clientId: session.participants[0] } : null;
         }"""
     )

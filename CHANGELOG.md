@@ -20,6 +20,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-09-17 — Schema 4 is the active schema
+
+### Changed
+
+- **The app reads, writes and stamps schema 4**, not the preview schema P (§61). Nothing the trainer
+  sees changes: everything P held is in schema 4 since the entry below.
+- **Data stamped "P" is read as schema 4**, so a database or backup from before this change opens
+  as it did, and a trainer who chose a language is not asked again. Data stamped with a preview
+  shape is refused as newer instead of being migrated.
+
 ## 2026-09-17 — Invitations and repeating sessions reach the backup
 
 ### Fixed

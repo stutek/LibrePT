@@ -58,7 +58,7 @@ test("current database is a no op but gets stamped", () => {
 });
 
 test("pre-release sessions gain a derived start date", () => {
-  // TODO §7.3 item 8, now folded into the single 0→P step: a session with only a `day` bucket +
+  // TODO §7.3 item 8, now folded into the chain from 0: a session with only a `day` bucket +
   // free-text `time` gets a real absolute `startDate`, without disturbing `day` itself (other
   // systems still key off it) or a session that already has one. `schemaVersion: 2` is a RETIRED
   // value — it must be read as pre-release and normalised, never refused as newer-build data.
@@ -175,7 +175,7 @@ test("absent collections are filled in but corrupt ones still fail", () => {
   );
 });
 
-test("the 0 to P step clears the stored language so everyone is asked once", async () => {
+test("the chain from 0 clears the stored language so everyone is asked once", async () => {
   // Deliberately treats every existing PT as never-asked: before the splash could offer a choice,
   // `lang` was forced to "en" wherever it was absent, so a chosen English and a never-asked
   // trainer are the same stored value and cannot be told apart after the fact.
@@ -184,43 +184,33 @@ test("the 0 to P step clears the stored language so everyone is asked once", asy
   assert.equal(migrated.state.schemaVersion, CURRENT_SCHEMA_VERSION);
 });
 
-test("the 0 to P step clears a non-English stored language too", async () => {
+test("the chain from 0 clears a non-English stored language too", async () => {
   const migrated = m.migrateState({ schemaVersion: 0, lang: "sl", sessions: [] });
   assert.equal(migrated.state.lang, null);
 });
 
-test("P ranks above every numbered version and below the next stable one", () => {
-  // P is the value RECORDED; the rank is only how it sorts, and both bounds carry weight.
-  const NEXT_STABLE_VERSION = 5;
-  const currentRank = schemaRank(CURRENT_SCHEMA_VERSION);
-  const highestChainVersion = Math.max(...MIGRATION_STEPS.map((step) => step.to));
+test("schema 4 is active; a legacy P reads as 4 and a preview shape is refused", () => {
+  // Ruled 2026-09-17 (TODO §61): schema 4 is the active schema, and everything P held moved into it.
+  assert.equal(CURRENT_SCHEMA_VERSION, 4);
 
-  // A fraction must never reach storage — that is the whole reason P is a letter.
-  assert.equal(CURRENT_SCHEMA_VERSION, "P");
-  // Above every numbered version the chain produces, so they all migrate up into P rather than
-  // reading as newer than the build and being refused.
-  assert.ok(
-    currentRank > highestChainVersion,
-    `current ranks ${currentRank}, which does not sort above chain version ${highestChainVersion}`,
-  );
-  // The other half of why P is fractional: it must stay BELOW the next stable version, so that the
-  // day 5 is created from P's final state, every preview database is already below current and
-  // re-enters at the floor on its own. An integer P above 5 would instead read as newer than the
-  // release build and be refused, and release would need a retirement step to undo that.
-  assert.ok(
-    currentRank < NEXT_STABLE_VERSION,
-    `current ranks ${currentRank}, which would outrank the stable ${NEXT_STABLE_VERSION} it precedes`,
-  );
-  // Every fraction is P, not just this one — preview data is disposable, so telling 4.5 from 5.5
-  // buys nothing and would leave the release that mints 5 with old preview values to clean up.
-  assert.equal(schemaRank(5.5), currentRank);
-  assert.equal(schemaRank(4.5), currentRank);
+  // A stored "P" is schema 4 now: accepted, not walked back through the chain. Walking it from the
+  // floor would run the 3 → 4 step again and ask a trainer who chose a language to choose again.
+  assert.equal(schemaRank("P"), schemaRank(CURRENT_SCHEMA_VERSION));
+  const legacy = m.migrateState({ schemaVersion: "P", lang: "sl", sessions: [] });
+  assert.equal(legacy.ok, true);
+  assert.equal(legacy.state.schemaVersion, 4);
+  assert.equal(legacy.state.lang, "sl", "a settled language question stays settled");
+
+  // A preview shape is a dead branch, never a step: newer than 4, so a live build refuses it.
+  assert.ok(schemaRank(4.5) > schemaRank(CURRENT_SCHEMA_VERSION));
+  assert.equal(schemaRank(5.5), schemaRank(4.5), "every preview shape ranks the same");
+  assert.equal(m.migrateState({ schemaVersion: 4.5, sessions: [] }).ok, false);
   assert.equal(schemaRank("nonsense"), null);
   assert.equal(BASELINE_SCHEMA_VERSION, 1);
 
-  // The chain runs contiguously from the floor up to the highest numbered version, and P sits above
-  // that — so a database at ANY point on it walks only the steps it is missing and ends at P.
+  // The chain runs contiguously from the floor up to the active schema.
   assert.equal(MIGRATION_STEPS[0].from, BASELINE_SCHEMA_VERSION);
+  assert.equal(MIGRATION_STEPS.at(-1).to, CURRENT_SCHEMA_VERSION);
   for (const [index, step] of MIGRATION_STEPS.slice(1).entries()) {
     assert.equal(step.from, MIGRATION_STEPS[index].to, `gap before step v${step.from}→v${step.to}`);
   }
