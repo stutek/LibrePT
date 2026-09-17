@@ -7,6 +7,7 @@
 import { newRecordId } from "../data/recordId.js";
 import { parseLoad, parseReps } from "../domain/repsAndLoad.js";
 import { $id, closeModal, openModal, renderMarkupOnce } from "../modules/common/dom.js";
+import { keepRecordLive } from "../modules/common/liveRecordForm.js";
 import { mountExercisePicker } from "../modules/exercises/exercisePicker.js";
 import { addRoutineExerciseRow, renderRoutinesList } from "../modules/plans/plansView.js";
 
@@ -14,6 +15,13 @@ import { addRoutineExerciseRow, renderRoutinesList } from "../modules/plans/plan
 // builder list, and the picker are closed over by that setup, so this is the seam that lets the
 // router open a form without routineFormsController having to know about routing.
 let openRoutineCreateForm = () => {};
+// Filled in the same way: the editor (plansView.js) fills the form, then hands the record over.
+let openRoutineEditForm = () => {};
+
+/** Called by the routine editor once the form shows `routine`, so typing writes into it. */
+export function editRoutineLive(routine) {
+  openRoutineEditForm(routine);
+}
 
 export function openRoutineCreateDialog() {
   openRoutineCreateForm();
@@ -64,7 +72,7 @@ export function renderRoutineDialog() {
 
       <div class="modal-actions">
         <button type="button" class="btn secondary-btn modal-cancel">Cancel</button>
-        <button type="submit" class="btn primary-btn">Save Routine</button>
+        <button type="submit" formnovalidate class="btn primary-btn">Save</button>
       </div>
     </form>
   </dialog>
@@ -86,7 +94,6 @@ export function setupRoutineForms({
   const form = $id("form-routine");
   const builderList = $id("routine-exercises-list");
   if (!dialog || !form || !builderList) return;
-  const cancelBtn = dialog.querySelector(".modal-cancel");
   const closeBtn = dialog.querySelector(".modal-close-btn");
   const pickerEl = $id("routine-ex-picker");
 
@@ -120,6 +127,7 @@ export function setupRoutineForms({
     builderList.innerHTML = "";
     openModal("dialog-routine", { resetForm: true, formId: "form-routine" });
     openRoutinePicker();
+    live.openNew();
   };
   $id("btn-add-routine").addEventListener("click", () => navigateToPath(urlFor("routine.new")));
 
@@ -131,60 +139,51 @@ export function setupRoutineForms({
     });
   }
 
-  const handleClose = () => closeModal("dialog-routine");
-  if (cancelBtn) cancelBtn.addEventListener("click", handleClose);
-  if (closeBtn) closeBtn.addEventListener("click", handleClose);
+  // ✕ keeps what was typed, like Save; only Cancel undoes it (liveRecordForm.js).
+  if (closeBtn) closeBtn.addEventListener("click", () => closeModal("dialog-routine"));
 
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const id = $id("routine-form-id").value;
-    const name = $id("routine-name").value.trim();
-    const description = $id("routine-desc").value.trim();
-
-    if (!name) return;
-
-    const exercises = [];
-    for (const row of builderList.querySelectorAll(".routine-builder-row")) {
-      const selectEx = row.querySelector(".select-ex");
-      const inputSets = parseInt(row.querySelector(".input-sets").value);
-      const inputRest = parseInt(row.querySelector(".input-rest").value);
-
-      if (selectEx?.value && !isNaN(inputSets)) {
-        exercises.push({
+  // Every change goes into the routine record, so a reload loses nothing (TODO §50.2). An empty name
+  // or set count is written as a placeholder; a row without a movement has nothing to stand in for
+  // it and is left out.
+  const live = keepRecordLive({
+    dialog,
+    form,
+    collection: "routines",
+    getState,
+    saveToLocalStorage,
+    createRecord: () => ({
+      id: newRecordId(),
+      name: t("placeholder_routine_name"),
+      description: "",
+      exercises: [],
+    }),
+    writeFields: (routine) => {
+      routine.name = $id("routine-name").value.trim() || t("placeholder_routine_name");
+      routine.description = $id("routine-desc").value.trim();
+      routine.exercises = [];
+      for (const row of builderList.querySelectorAll(".routine-builder-row")) {
+        const selectEx = row.querySelector(".select-ex");
+        const inputSets = parseInt(row.querySelector(".input-sets").value);
+        const inputRest = parseInt(row.querySelector(".input-rest").value);
+        if (!selectEx?.value) continue;
+        routine.exercises.push({
           id: selectEx.value,
-          sets: inputSets,
+          // The same three sets a row starts with when the picker adds it.
+          sets: isNaN(inputSets) ? 3 : inputSets,
           reps: parseReps(row.querySelector(".input-reps").value),
           weight: parseLoad(row.querySelector(".input-weight")?.value),
           rest: isNaN(inputRest) ? 60 : inputRest,
         });
       }
-    }
-
-    if (exercises.length === 0) {
-      alert("Routines must include at least one exercise.");
-      return;
-    }
-
-    if (id) {
-      const routine = getState().routines.find((r) => r.id === id);
-      if (routine) {
-        routine.name = name;
-        routine.description = description;
-        routine.exercises = exercises;
-      }
-    } else {
-      const newRoutine = {
-        id: newRecordId(),
-        name: name,
-        description: description,
-        exercises: exercises,
-      };
-      getState().routines.push(newRoutine);
-    }
-
-    saveToLocalStorage();
-    renderRoutinesList({ state: getState(), t, openWorkoutSetupModal });
-    populateDropdownSelectors();
-    closeModal("dialog-routine");
+    },
+    isBlank: () =>
+      !$id("routine-name").value.trim() &&
+      !$id("routine-desc").value.trim() &&
+      !builderList.querySelector(".routine-builder-row"),
+    onChange: () => {
+      renderRoutinesList({ state: getState(), t, openWorkoutSetupModal });
+      populateDropdownSelectors();
+    },
   });
+  openRoutineEditForm = (routine) => live.openExisting(routine);
 }

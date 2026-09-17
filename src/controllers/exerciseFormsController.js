@@ -8,6 +8,7 @@
 import { newRecordId } from "../data/recordId.js";
 import { metricOptionsFor } from "../domain/exerciseModality.js";
 import { $id, closeModal, openModal, renderMarkupOnce } from "../modules/common/dom.js";
+import { keepRecordLive } from "../modules/common/liveRecordForm.js";
 import { renderExercisesList } from "../modules/exercises/exercisesView.js";
 
 // Filled in by setupExerciseForms, and called by the create-form ROUTE — same seam pattern as
@@ -104,7 +105,7 @@ export function renderExerciseDialog() {
 
       <div class="modal-actions">
         <button type="button" class="btn secondary-btn modal-cancel">Cancel</button>
-        <button type="submit" class="btn primary-btn">Save Exercise</button>
+        <button type="submit" formnovalidate class="btn primary-btn">Save</button>
       </div>
     </form>
   </dialog>
@@ -124,7 +125,6 @@ export function setupExerciseForms({
   const dialog = $id("dialog-exercise");
   const form = $id("form-exercise");
   if (!dialog || !form) return;
-  const cancelBtn = dialog.querySelector(".modal-cancel");
   const closeBtn = dialog.querySelector(".modal-close-btn");
 
   // As with routines: the route (`/exercises/new`) owns opening the form; the button navigates.
@@ -133,51 +133,53 @@ export function setupExerciseForms({
     // The form reset restores modality to strength; re-sync so a reopen never leaves a metric
     // selector showing over a fixed-metric modality.
     syncMetricField();
+    live.openNew();
   };
   const btnAddExercise = $id("btn-add-exercise");
   if (btnAddExercise) {
     btnAddExercise.addEventListener("click", () => navigateToPath(urlFor("exercise.new")));
   }
 
-  const handleClose = () => closeModal("dialog-exercise");
-  if (cancelBtn) cancelBtn.addEventListener("click", handleClose);
-  if (closeBtn) closeBtn.addEventListener("click", handleClose);
+  // ✕ keeps what was typed, like Save; only Cancel undoes it (liveRecordForm.js).
+  if (closeBtn) closeBtn.addEventListener("click", () => closeModal("dialog-exercise"));
 
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const name = $id("exercise-name").value.trim();
-    const category = $id("exercise-category").value;
-    const equipment = $id("exercise-equipment").value;
-    const pattern = $id("exercise-pattern").value;
-    const modality = $id("exercise-modality")?.value || "strength";
-    const instructions = $id("exercise-instructions").value.trim();
-
-    // Strict taxonomy inheritance (TODO §13.2 Scenario C): a new movement ID must carry its
-    // muscle group, equipment, and biomechanical pattern so volume analytics stay consistent.
-    if (!name || !category || !equipment || !pattern) return;
-
-    const newEx = {
+  // Every change goes into the exercise record, so a reload loses nothing (TODO §50.2). The
+  // selects start on a value, so a new movement always has its muscle group, equipment and pattern
+  // (TODO §13.2 Scenario C); an empty name is written as the placeholder.
+  const live = keepRecordLive({
+    dialog,
+    form,
+    collection: "exercises",
+    getState,
+    saveToLocalStorage,
+    createRecord: () => ({
       id: newRecordId(),
-      name: name,
-      category: category,
-      equipment: equipment,
-      pattern: pattern,
-      instructions: instructions,
-    };
-    // Modality decides how the movement is logged (exerciseModality.js). Omit the default so
-    // strength entries stay identical to the legacy shape; metric-choice modalities (cardio, agility)
-    // also carry the chosen effort metric.
-    if (modality && modality !== "strength") {
-      newEx.modality = modality;
+      name: t("placeholder_exercise_name"),
+      instructions: "",
+    }),
+    writeFields: (exercise) => {
+      exercise.name = $id("exercise-name").value.trim() || t("placeholder_exercise_name");
+      exercise.category = $id("exercise-category").value;
+      exercise.equipment = $id("exercise-equipment").value;
+      exercise.pattern = $id("exercise-pattern").value;
+      exercise.instructions = $id("exercise-instructions").value.trim();
+      // Modality decides how the movement is logged (exerciseModality.js). Omit the default so
+      // strength entries stay identical to the legacy shape; metric-choice modalities (cardio,
+      // agility) also carry the chosen effort metric.
+      const modality = $id("exercise-modality")?.value || "strength";
       const metricOpts = metricOptionsFor(modality);
-      if (metricOpts) newEx.metric = $id("exercise-metric")?.value || metricOpts[0];
-    }
-
-    getState().exercises.push(newEx);
-    saveToLocalStorage();
-    renderExercisesList({ state: getState(), t });
-    populateDropdownSelectors();
-    closeModal("dialog-exercise");
+      Reflect.deleteProperty(exercise, "modality");
+      Reflect.deleteProperty(exercise, "metric");
+      if (modality !== "strength") {
+        exercise.modality = modality;
+        if (metricOpts) exercise.metric = $id("exercise-metric")?.value || metricOpts[0];
+      }
+    },
+    isBlank: () => !$id("exercise-name").value.trim() && !$id("exercise-instructions").value.trim(),
+    onChange: () => {
+      renderExercisesList({ state: getState(), t });
+      populateDropdownSelectors();
+    },
   });
 
   // Modalities with a choice of effort metric (cardio, agility) reveal a metric selector, populated

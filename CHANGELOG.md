@@ -20,6 +20,23 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-09-17 — Client, exercise and routine forms save as you type
+
+### Changed
+
+- **The client, exercise and routine dialogs write into the record as it is typed**, so a reload
+  keeps what was entered. The button is now just **Save**; ✕, Escape and Back keep what was typed too, and
+  **Cancel** undoes it — an edit goes back to what it was, a new record is removed (§50.2).
+- **An empty required field is written as a placeholder, never refused.** A client without a name
+  is saved as "New client", an exercise as "New exercise", a routine as "New routine", and an
+  empty set count as 3. The routine form no longer shows an alert.
+- **A record counts as a local change only once its dialog is left.** The ahead count on the Sync &
+  Backup button and the backup warning do not rise while a record is still being typed.
+- A save that is still waiting to be written now covers the next one, instead of writing every
+  record again once per keystroke.
+
+---
+
 ## 2026-09-14 — Pull the plan aside to see the client's other plans
 
 ### Added

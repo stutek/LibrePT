@@ -207,10 +207,14 @@ export function addRoutineExerciseRow({ preset = null, state, t }) {
     applyModality(chosen);
   });
 
+  // Adding or removing a row types nothing, so the form is told directly (liveRecordForm.js).
+  const changed = () => builderList.closest("form")?.dispatchEvent(new Event("recordchange"));
   row.querySelector(".btn-remove-row").addEventListener("click", () => {
     row.remove();
+    changed();
   });
 
   builderList.appendChild(row);
+  changed();
   builderList.scrollTop = builderList.scrollHeight;
 }

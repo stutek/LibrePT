@@ -4282,27 +4282,44 @@ the same day. Reverting was cheaper than removing it: it had closed §50.1 on a 
 had ruled on, copied a whole imported backup into `localStorage`, deleted a draft on ✕, Escape and
 Android's Back gesture, and let one forgotten draft keep a stale session alive.
 
-**Still in the code after the revert, and against this decision:**
+**Ruled 2026-09-17 (Simon): a record form writes into the database as it is typed**, and the ahead
+count rises only once the trainer has finished the record. With it, ruled the same day:
 
-- The client form keeps a draft in `sessionStorage` through
-  [formDraft.js](src/modules/common/formDraft.js). It carries both defects found in §50.1: a
-  rejected save deletes the draft, and radio groups do not come back.
-- Session setup keeps a draft under `librept_workout_setup_draft` in `localStorage`
-  ([editSessionControl.js](src/modules/session/editSessionControl.js)).
+- **Any way out finishes the record** — Save, ✕, Escape, Back, a route change.
+- **Cancel undoes**: an edited record goes back to what the dialog found, an added record is removed.
+- **A new record exists from the first typed character.** An empty required field is written as a
+  placeholder ("New client", "New exercise", "New routine", 3 sets) — no alert, no refusal.
+
+**Done for the client, exercise and routine dialogs, 2026-09-17** —
+[liveRecordForm.js](src/modules/common/liveRecordForm.js), with the counts in
+[openRecordEdits.js](src/data/openRecordEdits.js). The button is still called Save (Simon,
+2026-09-17: a trainer understands it). The client form no longer
+keeps its `sessionStorage` draft. Two things the change had to fix on the way: every save wrote all
+records again, so the write queue now folds a waiting write into the next one; and unticking consent
+must be judged against the record as the dialog opened it, or the second keystroke erases the
+withdrawal the first one recorded.
+
+**Known limits, open:**
+
+- **A reload in the same instant as a keystroke loses that keystroke.** The database is written
+  behind the typing; the old `sessionStorage` draft was written at once. Measured in the e2e test,
+  which has to wait for the queue before reloading.
+- **A half-typed exercise cannot be finished after a reload.** The exercise dialog only creates;
+  there is no form to edit an exercise, so the record is kept but cannot be opened again.
+- **A reload does not reopen the client dialog.** The record is kept; the trainer opens it again.
 
 **Open, to settle before code:**
 
-- **When those two go.** Removing them now means a reload loses a half-typed client or session
-  until the replacement below exists. Blocks: removing them.
-- **The replacement proposed (Claude), not decided:** a form that edits a record writes into the
-  record as it is typed — client, exercise, routine, session, trainer details. The clipboard does
-  not do this today: the live session sits in `librept_active_session` until it ends. What a Cancel
-  button then means is open: nothing to go back to when editing, a delete when adding. Blocks: the
-  shape of every record form.
+- **Session setup** — whether it writes as it is typed too. Its button also asks about removed
+  participants and clashing sessions, creates a repeating series, offers invitations and starts
+  the session; each needs a new place first. Asked 2026-09-17, not ruled. Its
+  `librept_workout_setup_draft` in `localStorage`
+  ([editSessionControl.js](src/modules/session/editSessionControl.js)) stays until then.
 - **Dialogs that prepare an action keep nothing** (invitations, import, export, erasure, backup
   restore, start-time correction): losing a few typed characters to a reload costs seconds.
-- **The client's own intake page may keep its tab-only draft** (Simon, "morda"). The intake has no
-  trainer database to write into, and its `sessionStorage` draft dies with the tab. Not ruled.
+- **The client's own intake page** keeps its tab-only draft for now; Simon wants to think it through
+  together. Its [formDraft.js](src/modules/common/formDraft.js) still deletes the draft on a
+  rejected submit and cannot restore a radio group (§50.1).
 
 ### 50.3 [ ] An incomplete record needs attention rather than a refusal
 
@@ -4315,7 +4332,37 @@ with feedback not yet dealt with.
 every render: unscheduled plans and unreviewed feedback
 ([notificationItems.js](src/domain/notificationItems.js)). An incomplete record would be one more
 item of that kind. **Open:** whether it is a problem at all, which gaps count, and whether one badge
-covers all of it. Depends on the record-form decision in §50.2.
+covers all of it.
+
+**Proposed 2026-09-17 (Simon), not ruled: a badge on the record itself, for two reasons** — the
+record is test data, or a required field is missing. Found against it (Claude):
+
+- **Test data is already known per record** (the `testData` stamp and the seed id set,
+  [seedProvenance.js](src/data/seedProvenance.js)); no list shows it today.
+- **A missing required field can only be seen if the data keeps it empty.** A placeholder written
+  into the record ("New client") hides the gap, and a stored "needs attention" flag would be a second
+  copy of a fact the record already holds. This decides §50.2's open placeholder question in favour
+  of drawing the placeholder instead of storing it.
+- **The two reasons ask for different acts** — test data is to be removed, a gap is to be filled —
+  so one badge would have to say which. Open: one badge with a reason, or two.
+- **Which fields are required** is open per collection; only the name is certain today.
+
+**Ruled 2026-09-17 (Simon): Save and ✕ check the record when the dialog is left.** Enough filled
+in: the "unfinished" badge goes. A required field missing: it is saved anyway, with the
+"incomplete" badge. Open (Claude), each blocking the work:
+
+- **Escape, Back and a route change** — the same check as ✕, or not?
+- **"Unfinished" has to be stored**, because the case it marks is a reload before Save or ✕. It
+  would be a field on the record, so it is backed up and synced. Does such a record count towards
+  the ahead count and the backup warning after the reload? Not counting it risks a record that
+  exists only on this phone and is never backed up.
+- **Is the placeholder name drawn only**, so "incomplete" can be read from the empty field?
+
+**What an incomplete record looks like since §50.2:** a required field left empty holds a
+placeholder, so the record is named "New client", "New exercise" or "New routine" rather than
+blank. Still possible: a client with no way to reach them, a session without a location, and a
+routine with no exercises, which gives an empty plan if a session uses it. Several clients left as
+"New client" share a name, so the alias hint treats them as namesakes.
 
 ## 51. [x] A tap the demo step did not ask for interrupts the guide — fixed 2026-09-13
 

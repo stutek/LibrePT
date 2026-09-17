@@ -27,6 +27,10 @@
 // back on an input, for good reasons, and a form that came back with every field but the attachment
 // would be worse than one that came back empty — the person cannot see what is missing.
 //
+// **Only the client's intake page uses this since 2026-09-17.** The trainer's client, exercise and
+// routine dialogs write straight into the record instead (liveRecordForm.js, TODO §50.2); the intake
+// page has no trainer database to write into. Whether it keeps a draft at all is still open there.
+//
 // Injected dependencies: `storage` (defaults to `sessionStorage`) so tests can hand it a plain
 // object, and so a browser that refuses storage entirely degrades to no drafts rather than throwing.
 

@@ -13,6 +13,7 @@
 // controller may import downward); everything else comes from the data layer.
 
 import { assessBackupHealth, fingerprintState } from "../data/backupHealth.js";
+import { withoutOpenEdits } from "../data/openRecordEdits.js";
 import { withoutSeedRecords } from "../data/seedProvenance.js";
 import { getState, readBackupHistory } from "../data/stateStore.js";
 import { assessDurability } from "../data/storageDurability.js";
@@ -35,7 +36,8 @@ export function refreshBackupBadge() {
   renderBackupBadge(
     assessBackupHealth({
       history: withoutSeededHistory(cachedHistory),
-      currentFingerprint: fingerprintState(withoutSeedRecords(getState())),
+      // A record still open in its form is not counted until the form is left (TODO §50.2).
+      currentFingerprint: fingerprintState(withoutSeedRecords(withoutOpenEdits(getState()))),
       durability: cachedDurability,
     }),
   );

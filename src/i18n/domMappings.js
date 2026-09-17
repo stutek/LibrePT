@@ -183,7 +183,7 @@ export function applyStaticDOMMappings(tDict) {
     "#routine-modal-title": "create_routine_title",
     '#dialog-routine label[for="routine-name"]': "routine_name",
     '#dialog-routine label[for="routine-desc"]': "routine_desc",
-    '#dialog-routine button[type="submit"]': "btn_save_routine",
+    '#dialog-routine button[type="submit"]': "btn_save",
 
     // Custom Exercise modal (movement-taxonomy authoring). The <option> VALUES stay canonical
     // taxonomy enums (Chest, Barbell, Hinge) — shown raw elsewhere too — only the chrome is localized.
@@ -193,7 +193,7 @@ export function applyStaticDOMMappings(tDict) {
     '#dialog-exercise label[for="exercise-equipment"]': "equipment_label",
     '#dialog-exercise label[for="exercise-pattern"]': "movement_pattern_label",
     '#dialog-exercise label[for="exercise-instructions"]': "instructions_label",
-    '#dialog-exercise button[type="submit"]': "btn_save_exercise",
+    '#dialog-exercise button[type="submit"]': "btn_save",
   };
 
   for (const selector in staticMappings) {

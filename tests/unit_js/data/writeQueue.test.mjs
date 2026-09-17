@@ -103,6 +103,43 @@ test("writes enqueued while draining are picked up", async () => {
   assert.equal(m.writeQueueStatus().pending, 0);
 });
 
+test("a waiting write of the live state covers the calls queued behind it", async () => {
+  m.resetWriteQueue();
+
+  // A form writing as it is typed calls save once per keystroke; each write puts every record.
+  const live = { value: 0 };
+  const written = [];
+  const writeLive = () => async () => {
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    written.push(live.value);
+  };
+  m.enqueueWrite(writeLive(), "state", { readsLiveState: true });
+  for (let key = 1; key <= 5; key += 1) {
+    live.value = key;
+    m.enqueueWrite(writeLive(), "state", { readsLiveState: true });
+  }
+  await m.flushWrites();
+
+  // The first was already running; the five behind it collapse into one, which still lands last.
+  assert.deepEqual(written, [5, 5]);
+});
+
+test("a different write between two live-state writes keeps its place", async () => {
+  m.resetWriteQueue();
+
+  const order = [];
+  const task = (name) => async () => {
+    order.push(name);
+  };
+  m.enqueueWrite(task("state-1"), "state", { readsLiveState: true });
+  m.enqueueWrite(task("cache"), "session-cache");
+  m.enqueueWrite(task("state-2"), "state", { readsLiveState: true });
+  m.enqueueWrite(task("state-3"), "state", { readsLiveState: true });
+  await m.flushWrites();
+
+  assert.deepEqual(order, ["state-1", "cache", "state-2"]);
+});
+
 test("flush on an idle queue resolves immediately", async () => {
   // Pinned via microtask ordering, not a wall-clock budget: flushWrites() returns
   // Promise.resolve() when idle, so its .then() callback must already have run by the time a

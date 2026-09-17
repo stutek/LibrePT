@@ -80,9 +80,16 @@ async function drain() {
  *
  * `label` names the write for error reporting ("state", "session-cache"); it is what a trainer's bug
  * report will carry, so it should say which write failed rather than merely that one did.
+ *
+ * `readsLiveState` says the task reads what it writes when it RUNS, not when it was queued. Such a
+ * task still waiting at the end of the queue already covers this call, so the call adds nothing.
+ * Without this, a form that writes as it is typed (TODO §50.2) queued one write of every record per
+ * keystroke. Only the LAST queued task is checked, so nothing ever moves ahead of a different write.
  */
-export function enqueueWrite(task, label = "write") {
-  queue.push({ task, label });
+export function enqueueWrite(task, label = "write", { readsLiveState = false } = {}) {
+  const last = queue.at(-1);
+  if (readsLiveState && last?.readsLiveState && last.label === label) return;
+  queue.push({ task, label, readsLiveState });
   // Not awaited: the caller must not be blocked, and `drain` reports its own failures.
   void drain();
 }

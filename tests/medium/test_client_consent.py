@@ -232,6 +232,22 @@ def test_unticking_consent_records_a_withdrawal_and_keeps_the_evidence(
     assert consent["formLang"] == "sl"
 
 
+def test_a_withdrawal_survives_typing_after_it(page, local_server):
+    """The dialog writes the record on every keystroke (TODO §50.2). Each write must judge consent
+    against the record as the dialog opened it: judged against the previous keystroke, the second
+    write would find consent already withdrawn and blank the proof the first one recorded."""
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#view-client-directory.active")
+
+    _open_edit(page, "c-signed")
+    page.locator("#client-gdpr-consent").uncheck()
+    page.locator("#client-goals").fill("Back to running")
+
+    consent = page.evaluate("() => window.__consentOf('c-signed')")
+    assert consent["withdrawnDate"]
+    assert consent["consentDate"] == "2026-02-28"
+
+
 def test_re_ticking_consent_is_a_new_consent_not_an_undo(page, local_server):
     """A client who signs again has given fresh consent, so the old withdrawal date must not ride
     along and describe the new one as already over."""

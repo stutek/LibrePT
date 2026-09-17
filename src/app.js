@@ -46,6 +46,7 @@ import {
   urlFor,
 } from "./controllers/routerController.js";
 import {
+  editRoutineLive,
   openRoutineCreateDialog,
   setupRoutineForms as setupRoutineFormsController,
 } from "./controllers/routineFormsController.js";
@@ -395,7 +396,11 @@ async function init() {
     openRoutineCreateDialog,
     openExerciseCreateDialog,
     openCatalogPicker,
-    openRoutineEditor: (routineId) => openRoutineEditorModal({ routineId, state: getState(), t }),
+    openRoutineEditor: (routineId) => {
+      openRoutineEditorModal({ routineId, state: getState(), t });
+      const routine = getState().routines.find((item) => item.id === routineId);
+      if (routine) editRoutineLive(routine);
+    },
     openAdjustmentWizard,
   });
 

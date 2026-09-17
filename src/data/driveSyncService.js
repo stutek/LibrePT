@@ -63,6 +63,7 @@ import {
   requestAccessToken,
   revokeAccess,
 } from "./googleAuth.js";
+import { withoutOpenEdits } from "./openRecordEdits.js";
 import { COLLECTIONS } from "./recordProjections.js";
 import { withoutSeedRecords } from "./seedProvenance.js";
 import {
@@ -120,10 +121,12 @@ export function getAheadCount() {
   // trainer would lose, and a sales demo is not that. Filtering the ancestor too keeps the diff
   // symmetric, so a demo record that reached Drive before this rule shipped cannot come back as a
   // phantom deletion.
+  //
+  // A record still open in its form counts as it was before the form opened (TODO §50.2).
   return countChangedRecords(
     COLLECTIONS,
     withoutSeedRecords(cachedAncestor || {}),
-    withoutSeedRecords(getState()),
+    withoutSeedRecords(withoutOpenEdits(getState())),
   );
 }
 

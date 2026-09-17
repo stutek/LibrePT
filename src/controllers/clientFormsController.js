@@ -24,7 +24,7 @@ import {
   openIntakeInviteDialog,
 } from "../modules/clients/intakeInviteDialog.js";
 import { $id, closeModal, openModal, renderMarkupOnce } from "../modules/common/dom.js";
-import { keepFormDraft } from "../modules/common/formDraft.js";
+import { keepRecordLive } from "../modules/common/liveRecordForm.js";
 import { getInitials } from "../modules/common/utils.js";
 
 export function renderClientDialog() {
@@ -74,7 +74,7 @@ export function renderClientDialog() {
 ${consentSectionMarkup()}
       <div class="modal-actions">
         <button type="button" class="btn secondary-btn modal-cancel" data-i18n="btn_cancel">Cancel</button>
-        <button type="submit" class="btn primary-btn" data-i18n="save_client">Save Client</button>
+        <button type="submit" formnovalidate class="btn primary-btn" data-i18n="btn_save">Save</button>
       </div>
     </form>
   </dialog>
@@ -113,15 +113,62 @@ export function setupClientForms({
   if (!dialog || !form) return;
   initClientConsentSection({ t, getLang: () => getState().lang });
   setupClientConsentSection();
-  const cancelBtn = dialog.querySelector(".modal-cancel");
   const closeBtn = dialog.querySelector(".modal-close-btn");
 
-  // Half a client's details survive a reload, and go back into the form the next time it opens for
-  // the SAME subject (TODO §38.12). Keyed by who is being edited, because this one form is "add a
-  // client" one moment and "edit Jane" the next — a draft that did not know the difference would
-  // spill half of Jane's details into the next person's form. Dies with the tab, and is dropped the
-  // moment the form is submitted, which is what `keepFormDraft` does on its own.
-  const draft = keepFormDraft(form, () => `client:${$id("client-form-id").value || "new"}`);
+  const repaint = (client) => {
+    renderClientsList({ state: getState(), t, navigateToPath });
+    populateDropdownSelectors();
+    if (client && getActiveDetailClientId() === client.id) {
+      showClientDetails({
+        clientId: client.id,
+        state: getState(),
+        t,
+        showErrorView,
+        switchView,
+        openWorkoutSetupModal,
+      });
+    }
+  };
+
+  // Every keystroke goes into the client record, so a reload loses nothing (TODO §50.2). A new
+  // client exists from the first character; an empty name is written as the placeholder.
+  const live = keepRecordLive({
+    dialog,
+    form,
+    collection: "clients",
+    getState,
+    saveToLocalStorage,
+    createRecord: () => ({
+      id: newRecordId(),
+      name: t("placeholder_client_name"),
+      alias: "",
+      avatar: "",
+      joinedDate: new Date().toISOString().substring(0, 10),
+      email: "",
+      phone: "",
+      goals: "",
+      weightHistory: [],
+      notes: "",
+      gdprConsent: readConsentFromSection(null),
+      active: true,
+    }),
+    writeFields: (client, before) => {
+      client.name = $id("client-name").value.trim() || t("placeholder_client_name");
+      client.alias = $id("client-alias").value.trim();
+      client.email = $id("client-email").value.trim();
+      client.phone = $id("client-phone").value.trim();
+      client.goals = $id("client-goals").value.trim();
+      client.notes = $id("client-notes").value.trim();
+      // Initials follow the name only while the client is being added, as they always did.
+      if (!before) client.avatar = getInitials(client.name);
+      client.gdprConsent = readConsentFromSection(before?.gdprConsent ?? null);
+    },
+    isBlank: () =>
+      ["name", "alias", "email", "phone", "goals", "notes"].every(
+        (field) => !$id(`client-${field}`).value.trim(),
+      ),
+    onChange: repaint,
+  });
 
   // The link that lets someone fill their own details in (TODO §26.3). The button OPENS the
   // sending dialog rather than sending: since 2026-08-23 the trainer can address the invitation to
@@ -151,9 +198,7 @@ export function setupClientForms({
     // After the reset, never before: reset() would otherwise wipe the date the block just derived.
     fillConsentSection(null);
     renderNameCollisionHint(getState(), null);
-    // Last of all, so a half-typed client interrupted by a reload comes back on top of the empty
-    // form rather than under it.
-    draft.restore();
+    live.openNew();
   });
 
   $id("btn-edit-client").addEventListener("click", () => {
@@ -173,84 +218,11 @@ export function setupClientForms({
     renderNameCollisionHint(getState(), client);
 
     openModal("dialog-client");
-    // After the stored values, never before: what is in the draft is what the trainer had typed and
-    // not yet saved, so it is the NEWER of the two and must win.
-    draft.restore();
+    live.openExisting(client);
   });
 
-  // Cancel and ✕ mean "throw this away", so they do: only a reload — the thing nobody chose — brings
-  // a half-filled form back. A draft that survived an explicit cancel would put words the trainer
-  // deliberately abandoned in front of the next person they add.
-  const handleClose = () => {
-    draft.forget();
-    closeModal("dialog-client");
-  };
-  if (cancelBtn) cancelBtn.addEventListener("click", handleClose);
-  if (closeBtn) closeBtn.addEventListener("click", handleClose);
-
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const id = $id("client-form-id").value;
-    const name = $id("client-name").value.trim();
-    const alias = $id("client-alias").value.trim();
-    const email = $id("client-email").value.trim();
-    const phone = $id("client-phone").value.trim();
-    const goals = $id("client-goals").value.trim();
-    const notes = $id("client-notes").value.trim();
-    const nowIso = new Date().toISOString();
-
-    if (!name) return;
-
-    const todayStr = nowIso.substring(0, 10);
-
-    if (id) {
-      const client = getState().clients.find((c) => c.id === id);
-      if (client) {
-        client.name = name;
-        client.alias = alias;
-        client.email = email;
-        client.phone = phone;
-        client.goals = goals;
-        client.notes = notes;
-        client.gdprConsent = readConsentFromSection(client.gdprConsent);
-      }
-    } else {
-      const newId = newRecordId();
-      const newClient = {
-        id: newId,
-        name: name,
-        alias: alias,
-        avatar: getInitials(name),
-        joinedDate: todayStr,
-        email: email,
-        phone: phone,
-        goals: goals,
-        weightHistory: [],
-        notes: notes,
-        gdprConsent: readConsentFromSection(null),
-        active: true,
-      };
-      getState().clients.push(newClient);
-    }
-
-    saveToLocalStorage();
-    renderClientsList({ state: getState(), t, navigateToPath });
-    populateDropdownSelectors();
-
-    const activeId = getActiveDetailClientId();
-    if (id && activeId === id) {
-      showClientDetails({
-        clientId: id,
-        state: getState(),
-        t,
-        showErrorView,
-        switchView,
-        openWorkoutSetupModal,
-      });
-    }
-
-    closeModal("dialog-client");
-  });
+  // ✕ keeps what was typed, like Save; only Cancel undoes it (liveRecordForm.js).
+  if (closeBtn) closeBtn.addEventListener("click", () => closeModal("dialog-client"));
 
   // Live, not only on save: the moment a trainer types a name that already exists, the alias field
   // above is the thing they should be filling in — telling them afterwards means going back.

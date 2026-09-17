@@ -73,6 +73,13 @@ depends on — that tier mounts one component and nothing else.
 
 ## UI invariants
 
+- **A record dialog writes into the record as it is typed; it keeps no draft beside it.**
+  The client, exercise and routine dialogs go through
+  [`modules/common/liveRecordForm.js`](../src/modules/common/liveRecordForm.js): a new record exists
+  from the first typed character, Cancel undoes, and any other way out finishes the record. A record
+  still open in its dialog is counted as it was before the dialog opened
+  ([`data/openRecordEdits.js`](../src/data/openRecordEdits.js)), so the ahead count and the backup
+  warning rise only once it is finished. Ruled 2026-09-17 (TODO §50.2).
 - **Hide a control with the `.hidden` class, never the `hidden` attribute.** Every `.btn` sets
   `display: flex`, which beats the user-agent stylesheet's `[hidden]` rule, so the control stays on
   screen and only a test notices.

@@ -440,10 +440,14 @@ export function onStateSaved(listener) {
 
 export function saveToLocalStorage() {
   if (indexedDbSupported()) {
-    enqueueWrite(async () => {
-      const db = await getDb();
-      await starWrite(db, state);
-    }, "state");
+    enqueueWrite(
+      async () => {
+        const db = await getDb();
+        await starWrite(db, state);
+      },
+      "state",
+      { readsLiveState: true },
+    );
   } else {
     writeVersionScoped(DB_KEY, JSON.stringify(state));
   }
