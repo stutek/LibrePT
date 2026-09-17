@@ -4349,14 +4349,23 @@ record is test data, or a required field is missing. Found against it (Claude):
 
 **Ruled 2026-09-17 (Simon): Save and ✕ check the record when the dialog is left.** Enough filled
 in: the "unfinished" badge goes. A required field missing: it is saved anyway, with the
-"incomplete" badge. Open (Claude), each blocking the work:
+"incomplete" badge. Also ruled that day:
 
-- **Escape, Back and a route change** — the same check as ✕, or not?
-- **"Unfinished" has to be stored**, because the case it marks is a reload before Save or ✕. It
-  would be a field on the record, so it is backed up and synced. Does such a record count towards
-  the ahead count and the backup warning after the reload? Not counting it risks a record that
-  exists only on this phone and is never backed up.
-- **Is the placeholder name drawn only**, so "incomplete" can be read from the empty field?
+- **Escape, Back and a route change** check the record exactly as ✕ does.
+- **"Unfinished" is stored on the record**, because the case it marks is a reload before Save or
+  ✕, and **after a reload such a record counts** towards the ahead count and the backup warning.
+- **Required fields are the ones the form marks required** (`required` in its markup).
+- **A record carries several badges at once**: test data, incomplete, and anonymised (a client
+  erased under a data subject request, §17.3) — one record can wear all three.
+
+**Open, to discuss before code: stored placeholders and the incomplete badge.** Simon prefers the
+placeholder stored in the record, so the rest of the app never meets an empty value. Then the
+record alone cannot tell "New client" typed from "New client" filled in, so "incomplete" must be
+written down when the dialog checks the record. Proposed (Claude): **a badge is stored only when
+nothing else in the record says it.** Test data already has its `testData` stamp and an anonymised
+client its `erasure.erasedAt`, so those two are read, not stored; "unfinished" and "incomplete" have
+no other trace, so they are stored. Open with it: what other writers do (signup import, programme
+import, Drive merge), and whether existing records get "incomplete" before they are next opened.
 
 **What an incomplete record looks like since §50.2:** a required field left empty holds a
 placeholder, so the record is named "New client", "New exercise" or "New routine" rather than
@@ -4397,6 +4406,20 @@ Seen 2026-09-14 on the demo data, while checking §52.2. A past card's badge rea
 [exerciseDeckOfCards.js](src/modules/clipboard/exerciseDeckOfCards.js)), and "Past" is English on a
 Slovenian screen. The app writes a date as ISO everywhere, in every language, so it should read
 2026-07-20, and the word should come from the dictionary.
+
+## 56. [ ] A commit is not tied to the tree its gate proved
+
+Found 2026-09-17 (Claude). Commit ccacbdc (Codex, 22:47:27 on 2026-09-15) broke two demo story
+tests deterministically, yet the gate before it PASSED (22:40:56–22:46:52). So the committed tree
+was not the tree the gate proved — an edit landed during the run or in the 35 seconds after it.
+Fixed in 040bcb9. Which of the two happened cannot be told: `run-history.jsonl` does not record
+which tree a run tested.
+
+Both are already forbidden in writing — no edits while a run is in flight, a snapshot of the tree
+before and after it, a full gate before every code commit — but nothing enforces any of it. **Proposed (Claude), not ruled:** the
+gate writes a fingerprint of `src/` and `tests/` into `.build-reports/`, and a git pre-commit hook
+refuses a commit whose tree does not match it. It would bind every agent, not only the ones that read
+the rules. Blocks: nothing; it is what stops the next one.
 
 ## 55. [ ] Found while shipping §52.2
 
