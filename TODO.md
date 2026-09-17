@@ -4455,6 +4455,19 @@ has no gap, and that every fixture on disk is used.
 - **Drive sync migrates nothing and checks no version** ([driveSyncService.js](src/data/driveSyncService.js)).
   A snapshot written by another device on another build is merged as it is.
 
+**Wanted 2026-09-17 (Simon): a unit test that migrating PREVIEW data fails on the VERSION CHECK** —
+to the active schema and to the next one alike — and not merely because the next version turns out
+not to exist. Measured the same day with `migrateState` in Node:
+
+- **4.5** is refused, but only as "written by a newer version". The day schema 5 is active, 4.5
+  ranks below it and is accepted; the 4 → 5 step starts below 4.5 and is skipped, so the data would
+  be stamped 5 without that step having run.
+- **"PREVIEW"** is **accepted** (`ok: true`): an unrecognised version counts as below the floor, so
+  it walks the whole chain from 1, is stamped 4, and its stored language is cleared.
+
+The test states the rule itself: a preview version is refused as a preview, whatever the active
+schema is — so it must also hold against a made-up active schema 5 — and the refusal says why.
+
 **Proposed (Claude), not ruled:** a frozen device database per version, derived from the chain as
 above; each booted in the browser tests, walked through a client, a routine, a repeating session and
 an invitation, under both passes of §62. Blocks: §61, which needs the "P" snapshot first.
