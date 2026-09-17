@@ -4444,6 +4444,16 @@ has no gap, and that every fixture on disk is used.
   invitation are gone.
 - **The migrated data is checked field by field, not used.** No test opens the app on a migrated
   database and walks a feature on it.
+- **A phone never runs the migration chain after its first boot** (checked 2026-09-17, asked by
+  Simon). `migrateState` runs in three places only: once, when an install first moves its old
+  `localStorage` database into IndexedDB; on every boot of a browser without IndexedDB; and when a
+  backup file is restored. A new build on an IndexedDB install runs none of it, however often builds
+  are published. There a new schema reaches the data through the backfill, which projects every
+  record into the new store (`backfillSchema` in [readSchema.js](src/data/readSchema.js), whose
+  comment says a real schema change's transform will live there). So one schema change has two
+  paths — the chain for files, the projection for phones — and nothing checks that they agree.
+- **Drive sync migrates nothing and checks no version** ([driveSyncService.js](src/data/driveSyncService.js)).
+  A snapshot written by another device on another build is merged as it is.
 
 **Proposed (Claude), not ruled:** a frozen device database per version, derived from the chain as
 above; each booted in the browser tests, walked through a client, a routine, a repeating session and
