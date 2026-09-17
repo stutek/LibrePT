@@ -4436,8 +4436,12 @@ has no gap, and that every fixture on disk is used.
   What a trainer's phone holds — IndexedDB stores per schema, the meta store, the read-schema choice
   — is never booted from a frozen copy, so store provisioning, backfill and the P rebuild are only
   ever tested from a fresh install.
-- **No install stamped "P"** — every install today (§61), with `invites` and `sessionSeries` only in
-  the P store. The §61 change has nothing to be tested against.
+- **No P-era install — first snapshot added 2026-09-17.**
+  [p_era_install.json](tests/fixtures/devices/p_era_install.json), made from 0649a0f, holds the
+  demo seed, a repeating-session rule, a cancelled evening and a sent invitation;
+  [test_device_database_corpus.py](tests/e2e/test_device_database_corpus.py) boots it and checks all
+  three survive. Checked that it catches the §61 danger: booted reading schema 4, the rule and the
+  invitation are gone.
 - **The migrated data is checked field by field, not used.** No test opens the app on a migrated
   database and walks a feature on it.
 
@@ -4504,9 +4508,11 @@ ruled: swallow the inconsistency — nothing held in 4 may be lost or thrown awa
 - **The two collections: not settled.** Pointing reads at 4 today would show no invitations and no
   repeating sessions — the rules sit only in the P store, which is then discarded. They must be
   declared in `SCHEMA_4` AND copied from the P store into `schema4` once, before reads move.
-- **The stamp: not settled.** Installs are stamped "P", which ranks 4.5, above 4. A build whose
-  current version is 4 refuses data from a newer version, so "P" must be read as 4 — neither refused
-  nor sent back through the chain from 1.
+- **The stamp: not a problem on a phone — corrected the same day.** An IndexedDB install stores no
+  schema version: once its data is imported, boot runs no migration and sets the version in memory
+  (`loadSavedState` in [stateStore.js](src/data/stateStore.js)). Only the `localStorage` fallback and
+  a backup's `runtimeSchema` carry "P". The earlier claim that installs are stamped "P" and would be
+  refused was wrong.
 
 **Ruled 2026-09-17 (Simon), from schema 5 on: the P database is thrown away whenever a test run
 ends and whenever the app starts, and the app switches to the active database.** P is only ever a
@@ -4520,6 +4526,8 @@ needs P at all is the question; and nothing in the app offers a trainer the choi
 1. Schema 4 takes the four session fields and the two collections, `invites` and `sessionSeries` —
    the inconsistency is accepted.
 2. **A migration step P → 4** brings the records that exist only in the P store into `schema4`.
+   On a phone this cannot be a step of `migrateState`, which does not run on an IndexedDB boot; it is
+   a one-time store copy at boot, marked done in the meta store, like the backfill.
 3. Then the preview schema is renamed **PREVIEW**.
 4. **PREVIEW is never a step in the migration chain.** It is newer than 4 but a dead branch:
    4 → PREVIEW → 5 must not exist; the chain runs 4 → 5.

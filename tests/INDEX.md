@@ -182,6 +182,12 @@ migrates them as pure logic, and `tests/e2e/test_backup_restore.py` restores the
 import UI. **Never edit an existing fixture** — that stops it testing what it always tested; add a
 new one when a version is added.
 
+**The frozen device corpus** lives in [tests/fixtures/devices/](fixtures/devices/) — what an install's
+IndexedDB and localStorage held at one point, with its own store layout, restored and booted by
+[e2e/test_device_database_corpus.py](e2e/test_device_database_corpus.py) (TODO §63). A backup file is
+not what a phone holds: the stores per schema, the meta store and the collections that exist only in
+one store are only ever tested here. Same rule: never edit a snapshot, add one.
+
 **Shared fixtures** live in [tests/conftest.py](conftest.py) and apply to every tier, notably
 `local_server` — which refuses to run against a dev server whose revision does not match the working
 tree, because a long-lived server silently outliving its own source once invalidated a full day of

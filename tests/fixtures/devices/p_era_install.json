@@ -1,0 +1,4069 @@
+{
+ "about": {
+  "what": "The IndexedDB database and localStorage of an install stamped schema P, as the app wrote them before schema 4 became live (TODO \u00a761, \u00a763). Frozen: never edit.",
+  "madeFrom": "0649a0f",
+  "madeOn": "2026-09-17",
+  "clock": "the browser tests' frozen now, 2026-08-19T09:00:00Z",
+  "holds": "the demo seed, a repeating session rule, one cancelled evening (snapCancelled01) and one sent invitation (snapInvite01)"
+ },
+ "database": {
+  "name": "librept",
+  "version": 4,
+  "stores": [
+   {
+    "name": "meta",
+    "keyPath": "key",
+    "autoIncrement": false,
+    "indexes": [],
+    "records": [
+     {
+      "key": "backfilled:4",
+      "value": true
+     },
+     {
+      "key": "backfilled:P",
+      "value": true
+     },
+     {
+      "key": "imported",
+      "value": true
+     },
+     {
+      "key": "lang",
+      "value": "en"
+     },
+     {
+      "key": "previewBuild",
+      "value": "dev"
+     }
+    ]
+   },
+   {
+    "name": "schema4",
+    "keyPath": "id",
+    "autoIncrement": false,
+    "indexes": [
+     {
+      "name": "byClient",
+      "keyPath": "clientId",
+      "unique": false,
+      "multiEntry": false
+     },
+     {
+      "name": "byClientAndCollection",
+      "keyPath": [
+       "clientId",
+       "collection"
+      ],
+      "unique": false,
+      "multiEntry": false
+     },
+     {
+      "name": "byCollection",
+      "keyPath": "collection",
+      "unique": false,
+      "multiEntry": false
+     }
+    ],
+    "records": [
+     {
+      "id": "c1a9f0e2",
+      "name": "Jane Doe",
+      "avatar": "JD",
+      "joinedDate": "2026-03-15",
+      "email": "jane.doe@example.com",
+      "phone": "+386 40 111 222",
+      "goals": "Strength gain, building shoulder mobility, and improving squat form.",
+      "weightHistory": [],
+      "notes": "Slight left shoulder tightness during overhead movements. Keep warmups thorough. Enjoys tracking RPE (Rate of Perceived Exertion).",
+      "hasInjury": true,
+      "injury": "Slight left shoulder tightness during overhead movements",
+      "active": true,
+      "testData": "test",
+      "collection": "clients"
+     },
+     {
+      "id": "c2b8e1d3",
+      "name": "John Smith",
+      "avatar": "JS",
+      "joinedDate": "2026-05-01",
+      "email": "john.smith@example.com",
+      "phone": "+386 41 333 444",
+      "goals": "Fat loss, cardiovascular endurance, and recovering functional knee strength.",
+      "weightHistory": [],
+      "notes": "Knee reconstruction surgery in 2024. Keep back squats at moderate load and monitor depth. Avoid high-impact jumping.",
+      "hasInjury": true,
+      "injury": "Knee reconstruction surgery in 2024",
+      "active": true,
+      "testData": "test",
+      "collection": "clients"
+     },
+     {
+      "id": "c3c7d2c4",
+      "name": "Sarah Jenkins",
+      "avatar": "SJ",
+      "joinedDate": "2026-06-10",
+      "email": "sarah.j@example.com",
+      "phone": "+386 40 555 666",
+      "goals": "General conditioning, consistency, and core activation.",
+      "weightHistory": [],
+      "notes": "Prefers high-intensity interval formats. Enjoys kettlebell workouts. Heart rate spikes quickly; monitor recovery times.",
+      "hasInjury": false,
+      "injury": "",
+      "active": true,
+      "testData": "test",
+      "collection": "clients"
+     },
+     {
+      "id": "c4d6c3b5",
+      "name": "Mike Chen",
+      "avatar": "MC",
+      "joinedDate": "2026-04-02",
+      "email": "mike.chen@example.com",
+      "phone": "+386 31 777 888",
+      "goals": "Hypertrophy, upper body definition, and consistent training frequency.",
+      "weightHistory": [],
+      "notes": "No current injuries. Very consistent with sleep and nutrition tracking.",
+      "hasInjury": false,
+      "injury": "",
+      "active": true,
+      "testData": "test",
+      "collection": "clients"
+     },
+     {
+      "id": "c5e5b4a6",
+      "name": "Priya Patel",
+      "avatar": "PP",
+      "joinedDate": "2026-02-18",
+      "email": "priya.patel@example.com",
+      "phone": "+386 41 999 000",
+      "goals": "Marathon prep, aerobic base building, and injury-free mileage progression.",
+      "weightHistory": [],
+      "notes": "Mild lower back stiffness after long runs. Prioritize core stability work.",
+      "hasInjury": true,
+      "injury": "Mild lower back stiffness after long runs",
+      "active": true,
+      "testData": "test",
+      "collection": "clients"
+     },
+     {
+      "id": "c6f4a597",
+      "name": "Tom Walker",
+      "avatar": "TW",
+      "joinedDate": "2026-01-12",
+      "email": "tom.walker@example.com",
+      "phone": "+386 40 123 987",
+      "goals": "General strength maintenance and mobility as a masters athlete.",
+      "weightHistory": [],
+      "notes": "No injuries reported. Prefers morning sessions and steady progression.",
+      "hasInjury": false,
+      "injury": "",
+      "active": true,
+      "testData": "test",
+      "collection": "clients"
+     },
+     {
+      "id": "c7a39688",
+      "name": "Aisha Khan",
+      "avatar": "AK",
+      "joinedDate": "2026-05-22",
+      "email": "aisha.khan@example.com",
+      "phone": "+386 30 456 789",
+      "goals": "Postpartum strength rebuild and core recovery.",
+      "weightHistory": [],
+      "notes": "Cleared for training by physician. Avoid heavy overhead loading until week 12.",
+      "hasInjury": true,
+      "injury": "Postpartum recovery \u2014 avoid heavy overhead loading until week 12",
+      "active": true,
+      "testData": "test",
+      "collection": "clients"
+     },
+     {
+      "id": "c8b28799",
+      "name": "Simon",
+      "avatar": "S",
+      "joinedDate": "2026-06-01",
+      "email": "simon@example.com",
+      "phone": "+386 40 987 654",
+      "goals": "Reduce body fat from 17% to below 15% (but not below 10%), build strength, and optimize for health and longevity.",
+      "weightHistory": [],
+      "notes": "Focus on clean compound movements (squat, hinge, press) and metabolic conditioning to improve body composition. Focus on longevity and joint health; monitor RPE and prioritize recovery.",
+      "hasInjury": false,
+      "injury": "",
+      "active": true,
+      "testData": "test",
+      "collection": "clients"
+     },
+     {
+      "id": "demo-mode-notice",
+      "type": "demo-mode",
+      "icon": "fa-solid fa-triangle-exclamation",
+      "titleKey": "notif_demo_mode_title",
+      "descKey": "notif_demo_mode_desc",
+      "actions": [
+       {
+        "labelKey": "notif_demo_walkthrough_btn",
+        "startWalkthrough": true,
+        "primary": true
+       },
+       {
+        "labelKey": "notif_demo_mode_reset_btn",
+        "resetDemo": true
+       }
+      ],
+      "testData": "test",
+      "collection": "notifications"
+     },
+     {
+      "id": "demo-welcome",
+      "type": "welcome",
+      "icon": "fa-solid fa-wand-magic-sparkles",
+      "titleKey": "notif_welcome_title",
+      "descKey": "notif_welcome_desc",
+      "actions": [
+       {
+        "labelKey": "notif_welcome_clients_btn",
+        "view": "/clients",
+        "primary": true
+       }
+      ],
+      "testData": "test",
+      "collection": "notifications"
+     },
+     {
+      "id": "e10a2b3c",
+      "name": "Barbell Bench Press",
+      "category": "Chest",
+      "equipment": "Barbell",
+      "pattern": "Horizontal Push",
+      "instructions": "Lie flat on a bench, grip the barbell slightly wider than shoulder width, lower it to mid-chest, and push up.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e11a2b3c",
+      "name": "Dumbbell Bench Press",
+      "category": "Chest",
+      "equipment": "Dumbbell",
+      "pattern": "Horizontal Push",
+      "instructions": "Lie on a flat bench with a dumbbell in each hand, lower the dumbbells to chest level, then press them up.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e12a2b3c",
+      "name": "Incline Dumbbell Press",
+      "category": "Chest",
+      "equipment": "Dumbbell",
+      "pattern": "Horizontal Push",
+      "instructions": "Set bench to a 30-45 degree incline. Press dumbbells upwards from chest height.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e13a2b3c",
+      "name": "Cable Chest Fly",
+      "category": "Chest",
+      "equipment": "Cable",
+      "pattern": "Isolation",
+      "instructions": "Position pulleys at shoulder height, grab handles, and bring hands together in a wide hugging motion.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e14a2b3c",
+      "name": "Push-Ups",
+      "category": "Chest",
+      "equipment": "Bodyweight",
+      "pattern": "Horizontal Push",
+      "instructions": "Keep body in a straight plank, lower chest to floor, and push back up.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e15a2b3c",
+      "name": "Pull-Ups",
+      "category": "Back",
+      "equipment": "Bodyweight",
+      "pattern": "Vertical Pull",
+      "instructions": "Hang from a bar with palms facing away. Pull chest up to the bar.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e16a2b3c",
+      "name": "Lat Pulldown",
+      "category": "Back",
+      "equipment": "Cable",
+      "pattern": "Vertical Pull",
+      "instructions": "Sit at pulldown station, pull bar down to upper chest, engaging the lats.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e17a2b3c",
+      "name": "Barbell Row",
+      "category": "Back",
+      "equipment": "Barbell",
+      "pattern": "Horizontal Pull",
+      "instructions": "Hinge at hips, pull barbell towards lower abdomen keeping back straight.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e18a2b3c",
+      "name": "Single-Arm Dumbbell Row",
+      "category": "Back",
+      "equipment": "Dumbbell",
+      "pattern": "Horizontal Pull",
+      "instructions": "Place one knee/hand on bench, pull dumbbell to hip with other arm.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e19a2b3c",
+      "name": "Face Pulls",
+      "category": "Back",
+      "equipment": "Cable",
+      "pattern": "Horizontal Pull",
+      "instructions": "Pull rope attachment from high pulley towards forehead, pulling elbows wide.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e20b3c4d",
+      "name": "Barbell Back Squat",
+      "category": "Legs",
+      "equipment": "Barbell",
+      "pattern": "Squat",
+      "instructions": "Rest bar on upper back, squat down until thighs are parallel to floor, push back up.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e21b3c4d",
+      "name": "Romanian Deadlift (RDL)",
+      "category": "Legs",
+      "equipment": "Barbell",
+      "pattern": "Hinge",
+      "instructions": "Hinge at hips with micro-bend in knees, lower weight down shins, squeeze glutes to stand.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e22b3c4d",
+      "name": "Leg Press",
+      "category": "Legs",
+      "equipment": "Machine",
+      "pattern": "Squat",
+      "instructions": "Sit in machine, unlock platform, lower knees toward chest, press back up without locking knees.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e23b3c4d",
+      "name": "Dumbbell Goblet Squat",
+      "category": "Legs",
+      "equipment": "Dumbbell",
+      "pattern": "Squat",
+      "instructions": "Hold a single dumbbell vertically at chest height, squat deep.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e24b3c4d",
+      "name": "Leg Extension",
+      "category": "Legs",
+      "equipment": "Machine",
+      "pattern": "Isolation",
+      "instructions": "Sit in machine, extend legs fully, pause at top, and lower slowly.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e25b3c4d",
+      "name": "Lying Leg Curl",
+      "category": "Legs",
+      "equipment": "Machine",
+      "pattern": "Isolation",
+      "instructions": "Lie face down, curl roller pad towards glutes, control return.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e26b3c4d",
+      "name": "Standing Calf Raise",
+      "category": "Legs",
+      "equipment": "Machine",
+      "pattern": "Isolation",
+      "instructions": "Raise heels as high as possible on a block, stretch down deep.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e27b3c4d",
+      "name": "Barbell Overhead Press",
+      "category": "Shoulders",
+      "equipment": "Barbell",
+      "pattern": "Vertical Push",
+      "instructions": "Press barbell from shoulder height overhead to full lockout, head through at top.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e28b3c4d",
+      "name": "Dumbbell Lateral Raise",
+      "category": "Shoulders",
+      "equipment": "Dumbbell",
+      "pattern": "Isolation",
+      "instructions": "Stand tall, raise dumbbells out to sides until arms are parallel to the floor.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e29b3c4d",
+      "name": "Dumbbell Shoulder Press",
+      "category": "Shoulders",
+      "equipment": "Dumbbell",
+      "pattern": "Vertical Push",
+      "instructions": "Sit or stand, press dumbbells from ear level overhead.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e30c4d5e",
+      "name": "Dumbbell Bicep Curl",
+      "category": "Arms",
+      "equipment": "Dumbbell",
+      "pattern": "Isolation",
+      "instructions": "Rotate palms up as you curl dumbbells towards shoulders, keeping elbows locked at sides.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e31c4d5e",
+      "name": "Dumbbell Hammer Curl",
+      "category": "Arms",
+      "equipment": "Dumbbell",
+      "pattern": "Isolation",
+      "instructions": "Curl dumbbells with neutral grip (palms facing each other).",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e32c4d5e",
+      "name": "Cable Tricep Pushdown",
+      "category": "Arms",
+      "equipment": "Cable",
+      "pattern": "Isolation",
+      "instructions": "Push rope or bar attachment down by extending elbows, keeping upper arms still.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e33c4d5e",
+      "name": "EZ-Bar Skull Crusher",
+      "category": "Arms",
+      "equipment": "Barbell",
+      "pattern": "Isolation",
+      "instructions": "Lie on bench, lower bar to forehead by bending elbows, then extend.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e34c4d5e",
+      "name": "Plank",
+      "category": "Core",
+      "equipment": "Bodyweight",
+      "pattern": "Core",
+      "instructions": "Hold straight body line resting on forearms and toes. Squeeze core and glutes.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e35c4d5e",
+      "name": "Hanging Knee Raise",
+      "category": "Core",
+      "equipment": "Bodyweight",
+      "pattern": "Core",
+      "instructions": "Hang from pull-up bar, raise knees to chest height slowly without swinging.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e36c4d5e",
+      "name": "Abmat Sit-up",
+      "category": "Core",
+      "equipment": "Bodyweight",
+      "pattern": "Core",
+      "instructions": "Sit with soles of feet together, touch floor behind head, sit up and touch toes.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e37c4d5e",
+      "name": "Russian Twist",
+      "category": "Core",
+      "equipment": "Bodyweight",
+      "pattern": "Core",
+      "instructions": "Sit, lean back slightly, lift feet, rotate torso tapping hands side-to-side.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e38c4d5e",
+      "name": "Walking Lunges",
+      "category": "Legs",
+      "equipment": "Bodyweight",
+      "pattern": "Lunge",
+      "instructions": "Step forward lunging down, alternating legs.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e39c4d5e",
+      "name": "Shoulder & Lat Stretch",
+      "category": "Recovery",
+      "equipment": "Bodyweight",
+      "pattern": "Mobility",
+      "modality": "stretch",
+      "instructions": "Hold child pose and lateral lat stretches for 30s.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e40c4d5e",
+      "name": "Hamstring & Hip Stretch",
+      "category": "Recovery",
+      "equipment": "Bodyweight",
+      "pattern": "Mobility",
+      "modality": "stretch",
+      "instructions": "Static hamstring stretch and hip flexor stretch, hold 30s per side.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e41d5e6f",
+      "name": "Assault Bike",
+      "category": "Cardio",
+      "equipment": "Machine",
+      "pattern": "Conditioning",
+      "modality": "cardio",
+      "metric": "calories",
+      "instructions": "Sustained air-bike intervals; drive with arms and legs to the calorie target.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e42d5e6f",
+      "name": "Concept2 Rower",
+      "category": "Cardio",
+      "equipment": "Machine",
+      "pattern": "Conditioning",
+      "modality": "cardio",
+      "metric": "distance",
+      "instructions": "Row to the target distance with a strong legs-hips-arms sequence.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e43d5e6f",
+      "name": "Ski-Erg",
+      "category": "Cardio",
+      "equipment": "Machine",
+      "pattern": "Conditioning",
+      "modality": "cardio",
+      "metric": "calories",
+      "instructions": "Double-pole the ski-erg to the calorie target, hinging at the hips.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e44d5e6f",
+      "name": "Watt Bike",
+      "category": "Cardio",
+      "equipment": "Machine",
+      "pattern": "Conditioning",
+      "modality": "cardio",
+      "metric": "watts",
+      "instructions": "Hold the target power output (watts) for the prescribed effort.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e45d5e6f",
+      "name": "Treadmill Run",
+      "category": "Cardio",
+      "equipment": "Machine",
+      "pattern": "Conditioning",
+      "modality": "cardio",
+      "metric": "time",
+      "instructions": "Steady-state or interval run to the target time.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e46d5e6f",
+      "name": "Assault Bike (Time)",
+      "category": "Cardio",
+      "equipment": "Machine",
+      "pattern": "Conditioning",
+      "modality": "cardio",
+      "metric": "time",
+      "instructions": "Air-bike intervals to a fixed duration \u2014 steady pace or an all-out sprint clock.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e46e6f7a",
+      "name": "Single-Leg Balance",
+      "category": "Core",
+      "equipment": "Bodyweight",
+      "pattern": "Balance",
+      "modality": "balance",
+      "instructions": "Stand on one leg, hips level and core braced; hold for the target time per side.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e47d5e6f",
+      "name": "Assault Bike (Watts)",
+      "category": "Cardio",
+      "equipment": "Machine",
+      "pattern": "Conditioning",
+      "modality": "cardio",
+      "metric": "watts",
+      "instructions": "Hold the target power output (watts) on the air bike for the prescribed effort.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e47e6f7a",
+      "name": "BOSU Squat Hold",
+      "category": "Legs",
+      "equipment": "Bodyweight",
+      "pattern": "Balance",
+      "modality": "balance",
+      "instructions": "Hold a quarter-squat on an unstable BOSU dome, staying centred for the target time.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e48f7a8b",
+      "name": "Weighted Plank",
+      "category": "Core",
+      "equipment": "Bodyweight",
+      "pattern": "Core",
+      "modality": "isometric",
+      "instructions": "Hold a rigid plank with a plate on the upper back for the target time.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e49f7a8b",
+      "name": "Wall Sit",
+      "category": "Legs",
+      "equipment": "Bodyweight",
+      "pattern": "Squat",
+      "modality": "isometric",
+      "instructions": "Sit against the wall at 90\u00b0 knees, optionally holding a plate, for the target time.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e50f7a8b",
+      "name": "Overhead Barbell Hold",
+      "category": "Shoulders",
+      "equipment": "Barbell",
+      "pattern": "Vertical Push",
+      "modality": "isometric",
+      "instructions": "Hold a loaded barbell locked out overhead for the target time.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e51a8b9c",
+      "name": "5-10-5 Pro Agility Shuttle",
+      "category": "Cardio",
+      "equipment": "Bodyweight",
+      "pattern": "Agility",
+      "modality": "agility",
+      "metric": "time",
+      "instructions": "Sprint 5yd, back 10yd, through 5yd, changing direction sharply; log the time.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e52a8b9c",
+      "name": "Agility Ladder Drill",
+      "category": "Cardio",
+      "equipment": "Bodyweight",
+      "pattern": "Agility",
+      "modality": "agility",
+      "metric": "time",
+      "instructions": "Quick-feet ladder pattern for the target time, staying light on the balls of the feet.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e53a8b9c",
+      "name": "Cone Sprint Drill",
+      "category": "Cardio",
+      "equipment": "Bodyweight",
+      "pattern": "Agility",
+      "modality": "agility",
+      "metric": "distance",
+      "instructions": "Repeated accelerations between cones over the target distance.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e54a8b9c",
+      "name": "Outdoor Run",
+      "category": "Cardio",
+      "equipment": "Bodyweight",
+      "pattern": "Conditioning",
+      "modality": "cardio",
+      "metric": "pace",
+      "instructions": "Run holding the target pace (min/km).",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e55a8b9c",
+      "name": "Zone 2 Bike Ride",
+      "category": "Cardio",
+      "equipment": "Machine",
+      "pattern": "Conditioning",
+      "modality": "cardio",
+      "metric": "heartrate",
+      "instructions": "Steady aerobic ride keeping heart rate at the target zone (bpm).",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "h001f2e3",
+      "clientId": "c1a9f0e2",
+      "clientName": "Jane Doe",
+      "routineName": "Upper Body A",
+      "date": "2026-07-06T10:15:00.000Z",
+      "duration": 3420,
+      "exercises": [
+       {
+        "id": "e10a2b3c",
+        "name": "Barbell Bench Press",
+        "sets": [
+         {
+          "reps": 6,
+          "weight": 60,
+          "completed": true,
+          "note": "RPE 8"
+         },
+         {
+          "reps": 6,
+          "weight": 60,
+          "completed": true,
+          "note": "RPE 8.5"
+         },
+         {
+          "reps": 6,
+          "weight": 60,
+          "completed": true,
+          "note": "RPE 9"
+         },
+         {
+          "reps": 5,
+          "weight": 60,
+          "completed": true,
+          "note": "Failed 6th rep"
+         }
+        ]
+       },
+       {
+        "id": "e17a2b3c",
+        "name": "Barbell Row",
+        "sets": [
+         {
+          "reps": 8,
+          "weight": 50,
+          "completed": true
+         },
+         {
+          "reps": 8,
+          "weight": 50,
+          "completed": true
+         },
+         {
+          "reps": 8,
+          "weight": 50,
+          "completed": true
+         },
+         {
+          "reps": 8,
+          "weight": 50,
+          "completed": true,
+          "note": "Strict form"
+         }
+        ]
+       }
+      ],
+      "feedback": [
+       {
+        "id": "u001f2e3",
+        "clientId": "c1a9f0e2",
+        "exerciseName": "Barbell Bench Press",
+        "tag": "Too Easy - Increase Load",
+        "note": "Completed all 4 sets with high speed. Recommend adding 2.5kg next session."
+       }
+      ],
+      "testData": "test",
+      "collection": "history"
+     },
+     {
+      "id": "h002f2e3",
+      "clientId": "c1a9f0e2",
+      "clientName": "Jane Doe",
+      "routineName": "Upper Body A",
+      "date": "2026-07-10T09:00:00.000Z",
+      "duration": 3540,
+      "exercises": [
+       {
+        "id": "e10a2b3c",
+        "name": "Barbell Bench Press",
+        "sets": [
+         {
+          "reps": 5,
+          "weight": 60,
+          "completed": true,
+          "note": "RPE 7"
+         },
+         {
+          "reps": 5,
+          "weight": 60,
+          "completed": true,
+          "note": "RPE 8"
+         },
+         {
+          "reps": 5,
+          "weight": 60,
+          "completed": true,
+          "note": "RPE 8.5"
+         },
+         {
+          "reps": 4,
+          "weight": 60,
+          "completed": true,
+          "note": "RPE 9, last rep grind"
+         }
+        ]
+       },
+       {
+        "id": "e17a2b3c",
+        "name": "Barbell Row",
+        "sets": [
+         {
+          "reps": 8,
+          "weight": 52.5,
+          "completed": true
+         },
+         {
+          "reps": 8,
+          "weight": 52.5,
+          "completed": true
+         },
+         {
+          "reps": 7,
+          "weight": 52.5,
+          "completed": true,
+          "note": "Strict, paused"
+         }
+        ]
+       },
+       {
+        "id": "e29b3c4d",
+        "name": "Dumbbell Shoulder Press",
+        "sets": [
+         {
+          "reps": 10,
+          "weight": 16,
+          "completed": true
+         },
+         {
+          "reps": 9,
+          "weight": 16,
+          "completed": true
+         },
+         {
+          "reps": 8,
+          "weight": 16,
+          "completed": true,
+          "note": "Left side fatigued"
+         }
+        ]
+       }
+      ],
+      "feedback": [
+       {
+        "id": "udemo001",
+        "clientId": "c1a9f0e2",
+        "exerciseName": "Barbell Bench Press",
+        "tag": "Too Easy - Increase Load",
+        "note": "Pushed the weight easily. Ready for 65kg next week."
+       },
+       {
+        "id": "udemo002",
+        "clientId": "c1a9f0e2",
+        "exerciseName": "Barbell Row",
+        "tag": "Too Hard - Reduce Load",
+        "note": "Felt form breaking on last 2 reps. Keep weight at 50kg."
+       },
+       {
+        "id": "udemo003",
+        "clientId": "c1a9f0e2",
+        "exerciseName": "Dumbbell Shoulder Press",
+        "tag": "Form Break - Watch Position",
+        "note": "Shoulders shrugging too early. Keep elbows in."
+       }
+      ],
+      "testData": "test",
+      "collection": "history"
+     },
+     {
+      "id": "h003f2e3",
+      "clientId": "c2b8e1d3",
+      "clientName": "John Smith",
+      "routineName": "Upper Body A",
+      "date": "2026-07-10T09:00:00.000Z",
+      "duration": 3720,
+      "exercises": [
+       {
+        "id": "e10a2b3c",
+        "name": "Barbell Bench Press",
+        "sets": [
+         {
+          "reps": 5,
+          "weight": 67.5,
+          "completed": true,
+          "note": "RPE 8"
+         },
+         {
+          "reps": 5,
+          "weight": 67.5,
+          "completed": true,
+          "note": "RPE 8.5"
+         },
+         {
+          "reps": 5,
+          "weight": 67.5,
+          "completed": true,
+          "note": "RPE 9"
+         }
+        ]
+       },
+       {
+        "id": "e17a2b3c",
+        "name": "Barbell Row",
+        "sets": [
+         {
+          "reps": 8,
+          "weight": 57.5,
+          "completed": true
+         },
+         {
+          "reps": 8,
+          "weight": 57.5,
+          "completed": true
+         },
+         {
+          "reps": 8,
+          "weight": 57.5,
+          "completed": true
+         },
+         {
+          "reps": 7,
+          "weight": 57.5,
+          "completed": true
+         }
+        ]
+       },
+       {
+        "id": "e29b3c4d",
+        "name": "Dumbbell Shoulder Press",
+        "sets": [
+         {
+          "reps": 10,
+          "weight": 18,
+          "completed": true
+         },
+         {
+          "reps": 9,
+          "weight": 18,
+          "completed": true,
+          "note": "Left arm weaker on last set"
+         }
+        ]
+       }
+      ],
+      "feedback": [
+       {
+        "id": "udemo004",
+        "clientId": "c2b8e1d3",
+        "exerciseName": "Barbell Bench Press",
+        "tag": "Joint Pain / Discomfort",
+        "note": "Felt slight pinching in right shoulder. Ceased after 2 sets."
+       },
+       {
+        "id": "udemo005",
+        "clientId": "c2b8e1d3",
+        "exerciseName": "Barbell Row",
+        "tag": "Completed reps easily",
+        "note": "Great mind-muscle connection. Strong back activation."
+       }
+      ],
+      "testData": "test",
+      "collection": "history"
+     },
+     {
+      "id": "h004f2e3",
+      "clientId": "c8b28799",
+      "clientName": "Simon",
+      "routineName": "Strength & Longevity Focus",
+      "date": "2026-07-12T15:00:00.000Z",
+      "duration": 3300,
+      "exercises": [
+       {
+        "id": "e11a2b3c",
+        "name": "Dumbbell Bench Press",
+        "sets": [
+         {
+          "reps": 8,
+          "weight": 22,
+          "completed": true
+         },
+         {
+          "reps": 8,
+          "weight": 22,
+          "completed": true
+         },
+         {
+          "reps": 8,
+          "weight": 22,
+          "completed": true
+         },
+         {
+          "reps": 8,
+          "weight": 24,
+          "completed": true,
+          "note": "RPE 8"
+         }
+        ]
+       },
+       {
+        "id": "e21b3c4d",
+        "name": "Romanian Deadlift (RDL)",
+        "sets": [
+         {
+          "reps": 10,
+          "weight": 65,
+          "completed": true
+         },
+         {
+          "reps": 10,
+          "weight": 70,
+          "completed": true
+         },
+         {
+          "reps": 10,
+          "weight": 70,
+          "completed": true,
+          "note": "Strong hinge focus"
+         }
+        ]
+       }
+      ],
+      "feedback": [
+       {
+        "id": "u003f2e3",
+        "clientId": "c8b28799",
+        "exerciseName": "Dumbbell Bench Press",
+        "tag": "Too Easy - Increase Load",
+        "note": "Moved 24kg easily on the final set. Increase starting weight next session."
+       }
+      ],
+      "testData": "test",
+      "collection": "history"
+     },
+     {
+      "id": "h010f2e3",
+      "clientId": "c1a9f0e2",
+      "clientName": "Jane Doe",
+      "routineName": "Tri-Set Metabolic Conditioning",
+      "date": "2026-07-20T09:00:00.000Z",
+      "duration": 3300,
+      "exercises": [
+       {
+        "type": "exercise",
+        "id": "e18a2b3c",
+        "name": "Single-Arm Dumbbell Row",
+        "loadUnit": "kg",
+        "modality": "strength",
+        "metric": "reps",
+        "completed": true,
+        "circuitId": "zh10a2b3c",
+        "circuitTitle": "Tri-Set Metabolic Circuit",
+        "circuitSeries": 3,
+        "sets": [
+         {
+          "reps": 10,
+          "weight": 18,
+          "completed": true,
+          "note": ""
+         },
+         {
+          "reps": 10,
+          "weight": 18,
+          "completed": true,
+          "note": ""
+         },
+         {
+          "reps": 9,
+          "weight": 18,
+          "completed": true,
+          "note": "Grip fatigue"
+         }
+        ]
+       },
+       {
+        "type": "exercise",
+        "id": "e14a2b3c",
+        "name": "Push-Ups",
+        "loadUnit": "bw",
+        "modality": "strength",
+        "metric": "reps",
+        "completed": true,
+        "circuitId": "zh10a2b3c",
+        "circuitTitle": "Tri-Set Metabolic Circuit",
+        "circuitSeries": 3,
+        "sets": [
+         {
+          "reps": 15,
+          "weight": 0,
+          "completed": true,
+          "note": ""
+         },
+         {
+          "reps": 12,
+          "weight": 0,
+          "completed": true,
+          "note": ""
+         },
+         {
+          "reps": 10,
+          "weight": 0,
+          "completed": true,
+          "note": "To failure"
+         }
+        ]
+       },
+       {
+        "type": "rest",
+        "rest": 90,
+        "circuitId": "zh10a2b3c",
+        "circuitTitle": "Tri-Set Metabolic Circuit",
+        "circuitSeries": 3
+       },
+       {
+        "type": "exercise",
+        "id": "e41d5e6f",
+        "name": "Assault Bike",
+        "loadUnit": "kg",
+        "modality": "cardio",
+        "metric": "calories",
+        "completed": true,
+        "circuitId": null,
+        "circuitTitle": "",
+        "circuitSeries": 1,
+        "sets": [
+         {
+          "reps": 20,
+          "weight": 0,
+          "completed": true,
+          "note": "Sprinted the last 5 cal"
+         }
+        ]
+       },
+       {
+        "type": "rest",
+        "rest": 60,
+        "circuitId": null,
+        "circuitTitle": "",
+        "circuitSeries": 1
+       },
+       {
+        "type": "exercise",
+        "id": "e46e6f7a",
+        "name": "Single-Leg Balance",
+        "loadUnit": "kg",
+        "modality": "balance",
+        "metric": "hold",
+        "completed": true,
+        "circuitId": null,
+        "circuitTitle": "",
+        "circuitSeries": 1,
+        "sets": [
+         {
+          "reps": "45s",
+          "weight": 0,
+          "completed": true,
+          "note": ""
+         },
+         {
+          "reps": "45s",
+          "weight": 0,
+          "completed": true,
+          "note": "Steadier on the left"
+         }
+        ]
+       },
+       {
+        "type": "exercise",
+        "id": "e40c4d5e",
+        "name": "Hamstring & Hip Stretch",
+        "loadUnit": "kg",
+        "modality": "stretch",
+        "metric": "hold",
+        "completed": false,
+        "circuitId": null,
+        "circuitTitle": "",
+        "circuitSeries": 1,
+        "sets": [
+         {
+          "reps": "30s",
+          "weight": 0,
+          "completed": false,
+          "note": ""
+         }
+        ]
+       }
+      ],
+      "feedback": [
+       {
+        "id": "u010f2e3",
+        "clientId": "c1a9f0e2",
+        "exerciseName": "Assault Bike",
+        "tag": "Too Hard - Reduce Load",
+        "note": "Gassed by 15 cal \u2014 drop the target to 15 next session."
+       }
+      ],
+      "testData": "test",
+      "collection": "history"
+     },
+     {
+      "id": "r10d5e6f",
+      "name": "Upper Body A",
+      "description": "Strength-focused upper body session prioritizing compound presses and rows.",
+      "exercises": [
+       {
+        "id": "e10a2b3c",
+        "sets": 3,
+        "reps": 5,
+        "rest": 0,
+        "weight": 62.5,
+        "comboGroupId": "g01a2b3c",
+        "circuitId": "z01a2b3c",
+        "circuitTitle": "Chest & Back Strength Complex",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e17a2b3c",
+        "sets": 3,
+        "reps": 8,
+        "rest": 90,
+        "weight": 55,
+        "comboGroupId": "g01a2b3c",
+        "circuitId": "z01a2b3c",
+        "circuitTitle": "Chest & Back Strength Complex",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e29b3c4d",
+        "sets": 3,
+        "reps": 10,
+        "rest": 0,
+        "weight": 18,
+        "comboGroupId": "g02a2b3c",
+        "circuitId": "z02a2b3c",
+        "circuitTitle": "Shoulder & Lat Density Circuit",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e16a2b3c",
+        "sets": 3,
+        "reps": 12,
+        "rest": 90,
+        "weight": 48,
+        "comboGroupId": "g02a2b3c",
+        "circuitId": "z02a2b3c",
+        "circuitTitle": "Shoulder & Lat Density Circuit",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e32c4d5e",
+        "sets": 3,
+        "reps": 15,
+        "rest": 0,
+        "weight": 25,
+        "comboGroupId": "g03a2b3c",
+        "circuitId": "z03a2b3c",
+        "circuitTitle": "Arm Finisher Circuit",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e30c4d5e",
+        "sets": 3,
+        "reps": 14,
+        "rest": 60,
+        "weight": 14,
+        "comboGroupId": "g03a2b3c",
+        "circuitId": "z03a2b3c",
+        "circuitTitle": "Arm Finisher Circuit",
+        "circuitSeries": 3
+       }
+      ],
+      "testData": "test",
+      "collection": "routines"
+     },
+     {
+      "id": "r11d5e6f",
+      "name": "Legs & Core B",
+      "description": "Squat and hinge focus with direct core work.",
+      "exercises": [
+       {
+        "id": "e20b3c4d",
+        "sets": 3,
+        "reps": 5,
+        "rest": 0,
+        "weight": 80,
+        "comboGroupId": "g04a2b3c",
+        "circuitId": "z04a2b3c",
+        "circuitTitle": "Lower Body Strength Circuit",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e21b3c4d",
+        "sets": 3,
+        "reps": 8,
+        "rest": 120,
+        "weight": 65,
+        "comboGroupId": "g04a2b3c",
+        "circuitId": "z04a2b3c",
+        "circuitTitle": "Lower Body Strength Circuit",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e22b3c4d",
+        "sets": 3,
+        "reps": 12,
+        "rest": 0,
+        "weight": 140,
+        "comboGroupId": "g05a2b3c",
+        "circuitId": "z05a2b3c",
+        "circuitTitle": "Hypertrophy & Core Trio",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e34c4d5e",
+        "sets": 3,
+        "reps": 45,
+        "rest": 0,
+        "weight": 0,
+        "comboGroupId": "g05a2b3c",
+        "circuitId": "z05a2b3c",
+        "circuitTitle": "Hypertrophy & Core Trio",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e35c4d5e",
+        "sets": 3,
+        "reps": 15,
+        "rest": 90,
+        "weight": 0,
+        "comboGroupId": "g05a2b3c",
+        "circuitId": "z05a2b3c",
+        "circuitTitle": "Hypertrophy & Core Trio",
+        "circuitSeries": 3
+       }
+      ],
+      "testData": "test",
+      "collection": "routines"
+     },
+     {
+      "id": "r12d5e6f",
+      "name": "Tri-Set Metabolic Conditioning",
+      "description": "A comprehensive 5-phase session featuring a dynamic warmup, metabolic strength tri-sets, core work, and a longevity cooldown.",
+      "exercises": [
+       {
+        "id": "e19a2b3c",
+        "sets": 1,
+        "reps": "10 reps (light)",
+        "rest": 0,
+        "weight": 5,
+        "comboGroupId": "g06a2b3c",
+        "circuitId": "z06a2b3c",
+        "circuitTitle": "Dynamic Warmup",
+        "circuitSeries": 1
+       },
+       {
+        "id": "e38c4d5e",
+        "sets": 1,
+        "reps": "10 reps",
+        "rest": 30,
+        "weight": 0,
+        "comboGroupId": "g06a2b3c",
+        "circuitId": "z06a2b3c",
+        "circuitTitle": "Dynamic Warmup",
+        "circuitSeries": 1
+       },
+       {
+        "id": "e18a2b3c",
+        "sets": 3,
+        "reps": "10 per arm",
+        "rest": 0,
+        "weight": 18,
+        "comboGroupId": "g07a2b3c",
+        "circuitId": "z07a2b3c",
+        "circuitTitle": "Tri-Set Metabolic Circuit",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e14a2b3c",
+        "sets": 3,
+        "reps": "Max",
+        "rest": 0,
+        "weight": 0,
+        "comboGroupId": "g07a2b3c",
+        "circuitId": "z07a2b3c",
+        "circuitTitle": "Tri-Set Metabolic Circuit",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e38c4d5e",
+        "sets": 3,
+        "reps": 40,
+        "rest": 60,
+        "weight": 0,
+        "comboGroupId": "g07a2b3c",
+        "circuitId": "z07a2b3c",
+        "circuitTitle": "Tri-Set Metabolic Circuit",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e23b3c4d",
+        "sets": 3,
+        "reps": "12 reps",
+        "rest": 0,
+        "weight": 16,
+        "comboGroupId": "g08a2b3c",
+        "circuitId": "z08a2b3c",
+        "circuitTitle": "Leg & Hinge Circuit",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e21b3c4d",
+        "sets": 3,
+        "reps": "10 reps",
+        "rest": 90,
+        "weight": 45,
+        "comboGroupId": "g08a2b3c",
+        "circuitId": "z08a2b3c",
+        "circuitTitle": "Leg & Hinge Circuit",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e34c4d5e",
+        "sets": 3,
+        "reps": "45 seconds",
+        "rest": 0,
+        "weight": 0,
+        "comboGroupId": "g09a2b3c",
+        "circuitId": "z09a2b3c",
+        "circuitTitle": "Core Finish Burner",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e37c4d5e",
+        "sets": 3,
+        "reps": "20 per side",
+        "rest": 60,
+        "weight": 0,
+        "comboGroupId": "g09a2b3c",
+        "circuitId": "z09a2b3c",
+        "circuitTitle": "Core Finish Burner",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e41d5e6f",
+        "sets": 1,
+        "reps": 20,
+        "rest": 60,
+        "weight": 0
+       },
+       {
+        "id": "e46e6f7a",
+        "sets": 2,
+        "reps": "45s",
+        "rest": 30,
+        "weight": 0
+       },
+       {
+        "id": "e39c4d5e",
+        "sets": 1,
+        "reps": "30s hold",
+        "rest": 0,
+        "weight": 0,
+        "comboGroupId": "g10a2b3c",
+        "circuitId": "z10a2b3c",
+        "circuitTitle": "Longevity Cooldown & Stretching",
+        "circuitSeries": 1
+       },
+       {
+        "id": "e40c4d5e",
+        "sets": 1,
+        "reps": "30s hold",
+        "rest": 0,
+        "weight": 0,
+        "comboGroupId": "g10a2b3c",
+        "circuitId": "z10a2b3c",
+        "circuitTitle": "Longevity Cooldown & Stretching",
+        "circuitSeries": 1
+       }
+      ],
+      "testData": "test",
+      "collection": "routines"
+     },
+     {
+      "id": "r13d5e6f",
+      "name": "Postpartum Core & Mobility",
+      "description": "Gentle core activation and mobility exercises focused on deep abdominal breathing, posture, and light functional strength.",
+      "exercises": [
+       {
+        "id": "e34c4d5e",
+        "sets": 3,
+        "reps": "30s hold",
+        "rest": 0,
+        "weight": 0,
+        "comboGroupId": "g11a2b3c",
+        "circuitId": "z11a2b3c",
+        "circuitTitle": "Core & Ankle Alignment",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e26b3c4d",
+        "sets": 3,
+        "reps": 15,
+        "rest": 60,
+        "weight": 0,
+        "comboGroupId": "g11a2b3c",
+        "circuitId": "z11a2b3c",
+        "circuitTitle": "Core & Ankle Alignment",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e23b3c4d",
+        "sets": 3,
+        "reps": 10,
+        "rest": 0,
+        "weight": 8,
+        "comboGroupId": "g12a2b3c",
+        "circuitId": "z12a2b3c",
+        "circuitTitle": "Posture & Leg Strength Circuit",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e19a2b3c",
+        "sets": 3,
+        "reps": 12,
+        "rest": 90,
+        "weight": 10,
+        "comboGroupId": "g12a2b3c",
+        "circuitId": "z12a2b3c",
+        "circuitTitle": "Posture & Leg Strength Circuit",
+        "circuitSeries": 3
+       }
+      ],
+      "testData": "test",
+      "collection": "routines"
+     },
+     {
+      "id": "r14d5e6f",
+      "name": "Strength & Longevity Focus",
+      "description": "Compound strength lifts paired with posture and core stability work optimized for long-term joint health.",
+      "exercises": [
+       {
+        "id": "e11a2b3c",
+        "sets": 3,
+        "reps": 8,
+        "rest": 0,
+        "weight": 24,
+        "comboGroupId": "g13a2b3c",
+        "circuitId": "z13a2b3c",
+        "circuitTitle": "Press & Hinge Longevity Circuit",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e21b3c4d",
+        "sets": 3,
+        "reps": 10,
+        "rest": 120,
+        "weight": 70,
+        "comboGroupId": "g13a2b3c",
+        "circuitId": "z13a2b3c",
+        "circuitTitle": "Press & Hinge Longevity Circuit",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e19a2b3c",
+        "sets": 3,
+        "reps": 15,
+        "rest": 0,
+        "weight": 14,
+        "comboGroupId": "g14a2b3c",
+        "circuitId": "z14a2b3c",
+        "circuitTitle": "Posture & Core Stability Circuit",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e34c4d5e",
+        "sets": 3,
+        "reps": "60s hold",
+        "rest": 60,
+        "weight": 0,
+        "comboGroupId": "g14a2b3c",
+        "circuitId": "z14a2b3c",
+        "circuitTitle": "Posture & Core Stability Circuit",
+        "circuitSeries": 3
+       }
+      ],
+      "testData": "test",
+      "collection": "routines"
+     },
+     {
+      "id": "s00f2e3d",
+      "time": "08:00 - 09:00",
+      "startDate": "2026-08-19T06:00:00.000Z",
+      "day": "today",
+      "title": "Early Bird Strength",
+      "location": "Trib gym base",
+      "participants": [
+       "c4d6c3b5",
+       "c6f4a597"
+      ],
+      "routineId": "r10d5e6f",
+      "maxCapacity": 4,
+      "completed": true,
+      "testData": "test",
+      "collection": "sessions"
+     },
+     {
+      "id": "s01f2e3d",
+      "time": "10:00 - 12:00",
+      "startDate": "2026-08-19T08:00:00.000Z",
+      "day": "today",
+      "title": "Group Strength & Conditioning",
+      "location": "Trib gym base",
+      "participants": [
+       "c1a9f0e2",
+       "c2b8e1d3"
+      ],
+      "routineId": "r12d5e6f",
+      "maxCapacity": 7,
+      "testData": "test",
+      "collection": "sessions"
+     },
+     {
+      "id": "s02f2e3d",
+      "time": "12:00 - 13:00",
+      "startDate": "2026-08-19T10:00:00.000Z",
+      "day": "today",
+      "title": "1:1 Personal Training",
+      "location": "Trib gym base",
+      "participants": [
+       "c5e5b4a6"
+      ],
+      "routineId": "r11d5e6f",
+      "maxCapacity": 1,
+      "testData": "test",
+      "collection": "sessions"
+     },
+     {
+      "id": "s03f2e3d",
+      "time": "13:00 - 14:00",
+      "startDate": "2026-08-19T11:00:00.000Z",
+      "day": "today",
+      "title": "Express Core HIIT",
+      "location": "playground outside",
+      "participants": [
+       "c3c7d2c4"
+      ],
+      "routineId": "r11d5e6f",
+      "maxCapacity": 2,
+      "testData": "test",
+      "collection": "sessions"
+     },
+     {
+      "id": "s04f2e3d",
+      "time": "09:00 - 10:00",
+      "startDate": "2026-08-20T07:00:00.000Z",
+      "title": "Morning Conditioning",
+      "location": "city park",
+      "participants": [
+       "c1a9f0e2"
+      ],
+      "routineId": "r12d5e6f",
+      "maxCapacity": 3,
+      "day": "tomorrow",
+      "testData": "test",
+      "collection": "sessions"
+     },
+     {
+      "id": "s05f2e3d",
+      "time": "10:30 - 11:30",
+      "startDate": "2026-08-20T08:00:00.000Z",
+      "title": "Upper Body Strength",
+      "location": "Trib gym base",
+      "participants": [
+       "c2b8e1d3"
+      ],
+      "routineId": "r10d5e6f",
+      "maxCapacity": 4,
+      "day": "tomorrow",
+      "testData": "test",
+      "collection": "sessions"
+     },
+     {
+      "id": "s06f2e3d",
+      "time": "11:30 - 12:30",
+      "startDate": "2026-08-20T09:00:00.000Z",
+      "title": "Lunch Express HIIT",
+      "location": "playground outside",
+      "participants": [
+       "c3c7d2c4"
+      ],
+      "routineId": "r12d5e6f",
+      "maxCapacity": 3,
+      "day": "tomorrow",
+      "testData": "test",
+      "collection": "sessions"
+     },
+     {
+      "id": "s07f2e3d",
+      "time": "09:00 - 10:00",
+      "startDate": "2026-08-19T07:00:00.000Z",
+      "day": "today",
+      "title": "Strength & Longevity Focus",
+      "location": "Trib gym base",
+      "participants": [
+       "c8b28799"
+      ],
+      "routineId": "r14d5e6f",
+      "maxCapacity": 1,
+      "completed": true,
+      "testData": "test",
+      "collection": "sessions"
+     },
+     {
+      "id": "s08f2e3d",
+      "time": "14:00 - 15:00",
+      "startDate": "2026-08-19T12:00:00.000Z",
+      "day": "today",
+      "title": "Mobility Flow",
+      "location": "city park",
+      "participants": [
+       "c7a39688"
+      ],
+      "routineId": "r13d5e6f",
+      "maxCapacity": 2,
+      "testData": "test",
+      "collection": "sessions"
+     },
+     {
+      "id": "s09f2e3d",
+      "time": "10:00 - 12:00",
+      "startDate": "2026-08-19T08:00:00.000Z",
+      "day": "today",
+      "title": "Return-to-Play Rehab",
+      "location": "Trib gym base",
+      "participants": [
+       "c3c7d2c4"
+      ],
+      "routineId": "r13d5e6f",
+      "maxCapacity": 1,
+      "testData": "test",
+      "collection": "sessions"
+     },
+     {
+      "id": "s10f2e3d",
+      "time": "17:30 - 18:30",
+      "startDate": "2026-08-20T15:00:00.000Z",
+      "title": "Post-Work Cardio",
+      "location": "city park",
+      "participants": [
+       "c4d6c3b5"
+      ],
+      "routineId": "r11d5e6f",
+      "maxCapacity": 2,
+      "day": "tomorrow",
+      "testData": "test",
+      "collection": "sessions"
+     },
+     {
+      "id": "s11f2e3d",
+      "time": "14:00 - 15:00",
+      "startDate": "2026-08-20T12:00:00.000Z",
+      "title": "Strength & Longevity Focus",
+      "location": "Trib gym base",
+      "participants": [
+       "c8b28799"
+      ],
+      "routineId": "r14d5e6f",
+      "maxCapacity": 1,
+      "day": "tomorrow",
+      "testData": "test",
+      "collection": "sessions"
+     },
+     {
+      "id": "s12f2e3d",
+      "time": "09:00 - 10:30",
+      "startDate": "2026-08-18T07:00:00.000Z",
+      "title": "Core & Stability",
+      "location": "Trib gym base",
+      "participants": [
+       "c1a9f0e2"
+      ],
+      "routineId": "r10d5e6f",
+      "maxCapacity": 2,
+      "day": "yesterday",
+      "completed": true,
+      "testData": "test",
+      "collection": "sessions"
+     },
+     {
+      "id": "s13f2e3d",
+      "time": "16:00 - 17:00",
+      "startDate": "2026-08-18T14:00:00.000Z",
+      "title": "Mobility & Recovery",
+      "location": "city park",
+      "participants": [
+       "c2b8e1d3"
+      ],
+      "routineId": "r11d5e6f",
+      "maxCapacity": 3,
+      "day": "yesterday",
+      "completed": true,
+      "testData": "test",
+      "collection": "sessions"
+     },
+     {
+      "id": "s14f2e3d",
+      "time": "15:00 - 16:00",
+      "startDate": "2026-08-18T13:00:00.000Z",
+      "title": "Strength & Longevity Focus",
+      "location": "Trib gym base",
+      "participants": [
+       "c8b28799"
+      ],
+      "routineId": "r14d5e6f",
+      "maxCapacity": 1,
+      "day": "yesterday",
+      "completed": true,
+      "testData": "test",
+      "collection": "sessions"
+     },
+     {
+      "id": "s15f2e3d",
+      "time": "08:00 - 09:30",
+      "startDate": "2026-08-21T06:00:00.000Z",
+      "title": "Lower Body Strength",
+      "location": "Trib gym base",
+      "participants": [
+       "c3c7d2c4"
+      ],
+      "routineId": "r11d5e6f",
+      "maxCapacity": 2,
+      "day": "upcoming",
+      "testData": "test",
+      "collection": "sessions"
+     },
+     {
+      "id": "s16f2e3d",
+      "time": "10:00 - 11:00",
+      "startDate": "2026-08-23T08:00:00.000Z",
+      "title": "HIIT Conditioning",
+      "location": "playground outside",
+      "participants": [
+       "c1a9f0e2",
+       "c2b8e1d3"
+      ],
+      "routineId": "r10d5e6f",
+      "maxCapacity": 4,
+      "day": "upcoming",
+      "testData": "test",
+      "collection": "sessions"
+     },
+     {
+      "id": "s17f2e3d",
+      "time": "15:00 - 16:00",
+      "startDate": "2026-08-19T13:00:00.000Z",
+      "day": "today",
+      "title": "Open Slot (Drop-in)",
+      "location": "Trib gym base",
+      "participants": [],
+      "routineId": "r11d5e6f",
+      "maxCapacity": 3,
+      "testData": "test",
+      "collection": "sessions"
+     },
+     {
+      "seriesId": "ser01f2e3",
+      "occurrenceDate": "2026-08-13",
+      "title": "Tuesday & Thursday Strength",
+      "time": "18:00 - 19:00",
+      "startDate": "2026-08-13T16:00:00.000Z",
+      "day": "yesterday",
+      "location": "Trib gym base",
+      "participants": [
+       "c1a9f0e2",
+       "c2b8e1d3"
+      ],
+      "routineId": "r12d5e6f",
+      "maxCapacity": 6,
+      "id": "snapCancelled01",
+      "cancelled": true,
+      "collection": "sessions"
+     },
+     {
+      "id": "spot-cancellation-1",
+      "type": "cancellation",
+      "icon": "fa-solid fa-calendar-xmark",
+      "titleKey": "notif_spot_cancel_title",
+      "descKey": "notif_spot_cancel_desc",
+      "actions": [],
+      "testData": "test",
+      "collection": "notifications"
+     },
+     {
+      "id": "spot-reservation-1",
+      "type": "reservation",
+      "icon": "fa-solid fa-calendar-check",
+      "titleKey": "notif_spot_res_title",
+      "descKey": "notif_spot_res_desc",
+      "actions": [],
+      "testData": "test",
+      "collection": "notifications"
+     },
+     {
+      "id": "ss081326",
+      "seriesId": "ser01f2e3",
+      "occurrenceDate": "2026-08-13",
+      "title": "Tuesday & Thursday Strength",
+      "time": "18:00 - 19:00",
+      "startDate": "2026-08-13T16:00:00.000Z",
+      "day": "yesterday",
+      "location": "Trib gym base",
+      "participants": [
+       "c1a9f0e2",
+       "c2b8e1d3"
+      ],
+      "routineId": "r12d5e6f",
+      "maxCapacity": 6,
+      "completed": true,
+      "testData": "test",
+      "collection": "sessions"
+     },
+     {
+      "id": "ss081826",
+      "seriesId": "ser01f2e3",
+      "occurrenceDate": "2026-08-18",
+      "title": "Tuesday & Thursday Strength",
+      "time": "18:00 - 19:00",
+      "startDate": "2026-08-18T16:00:00.000Z",
+      "day": "yesterday",
+      "location": "Trib gym base",
+      "participants": [
+       "c1a9f0e2",
+       "c2b8e1d3"
+      ],
+      "routineId": "r12d5e6f",
+      "maxCapacity": 6,
+      "completed": true,
+      "testData": "test",
+      "collection": "sessions"
+     },
+     {
+      "id": "u001f2e3",
+      "clientId": "c1a9f0e2",
+      "clientName": "Jane Doe",
+      "date": "2026-07-06T11:00:00.000Z",
+      "exerciseName": "Barbell Bench Press",
+      "tag": "Too Easy - Increase Load",
+      "resolved": false,
+      "testData": "test",
+      "collection": "planUpdates"
+     },
+     {
+      "id": "u002f2e3",
+      "clientId": "c2b8e1d3",
+      "clientName": "John Smith",
+      "date": "2026-07-08T17:30:00.000Z",
+      "exerciseName": "Barbell Back Squat",
+      "tag": "Form Break - Depth Alert",
+      "resolved": false,
+      "testData": "test",
+      "collection": "planUpdates"
+     },
+     {
+      "id": "u003f2e3",
+      "clientId": "c8b28799",
+      "clientName": "Simon",
+      "date": "2026-07-12T15:10:00.000Z",
+      "exerciseName": "Dumbbell Bench Press",
+      "tag": "Too Easy - Increase Load",
+      "resolved": false,
+      "testData": "test",
+      "collection": "planUpdates"
+     }
+    ]
+   },
+   {
+    "name": "schemaP",
+    "keyPath": "id",
+    "autoIncrement": false,
+    "indexes": [
+     {
+      "name": "byClient",
+      "keyPath": "clientId",
+      "unique": false,
+      "multiEntry": false
+     },
+     {
+      "name": "byClientAndCollection",
+      "keyPath": [
+       "clientId",
+       "collection"
+      ],
+      "unique": false,
+      "multiEntry": false
+     },
+     {
+      "name": "byCollection",
+      "keyPath": "collection",
+      "unique": false,
+      "multiEntry": false
+     }
+    ],
+    "records": [
+     {
+      "id": "c1a9f0e2",
+      "name": "Jane Doe",
+      "avatar": "JD",
+      "joinedDate": "2026-03-15",
+      "email": "jane.doe@example.com",
+      "phone": "+386 40 111 222",
+      "goals": "Strength gain, building shoulder mobility, and improving squat form.",
+      "weightHistory": [],
+      "notes": "Slight left shoulder tightness during overhead movements. Keep warmups thorough. Enjoys tracking RPE (Rate of Perceived Exertion).",
+      "hasInjury": true,
+      "injury": "Slight left shoulder tightness during overhead movements",
+      "active": true,
+      "testData": "test",
+      "collection": "clients"
+     },
+     {
+      "id": "c2b8e1d3",
+      "name": "John Smith",
+      "avatar": "JS",
+      "joinedDate": "2026-05-01",
+      "email": "john.smith@example.com",
+      "phone": "+386 41 333 444",
+      "goals": "Fat loss, cardiovascular endurance, and recovering functional knee strength.",
+      "weightHistory": [],
+      "notes": "Knee reconstruction surgery in 2024. Keep back squats at moderate load and monitor depth. Avoid high-impact jumping.",
+      "hasInjury": true,
+      "injury": "Knee reconstruction surgery in 2024",
+      "active": true,
+      "testData": "test",
+      "collection": "clients"
+     },
+     {
+      "id": "c3c7d2c4",
+      "name": "Sarah Jenkins",
+      "avatar": "SJ",
+      "joinedDate": "2026-06-10",
+      "email": "sarah.j@example.com",
+      "phone": "+386 40 555 666",
+      "goals": "General conditioning, consistency, and core activation.",
+      "weightHistory": [],
+      "notes": "Prefers high-intensity interval formats. Enjoys kettlebell workouts. Heart rate spikes quickly; monitor recovery times.",
+      "hasInjury": false,
+      "injury": "",
+      "active": true,
+      "testData": "test",
+      "collection": "clients"
+     },
+     {
+      "id": "c4d6c3b5",
+      "name": "Mike Chen",
+      "avatar": "MC",
+      "joinedDate": "2026-04-02",
+      "email": "mike.chen@example.com",
+      "phone": "+386 31 777 888",
+      "goals": "Hypertrophy, upper body definition, and consistent training frequency.",
+      "weightHistory": [],
+      "notes": "No current injuries. Very consistent with sleep and nutrition tracking.",
+      "hasInjury": false,
+      "injury": "",
+      "active": true,
+      "testData": "test",
+      "collection": "clients"
+     },
+     {
+      "id": "c5e5b4a6",
+      "name": "Priya Patel",
+      "avatar": "PP",
+      "joinedDate": "2026-02-18",
+      "email": "priya.patel@example.com",
+      "phone": "+386 41 999 000",
+      "goals": "Marathon prep, aerobic base building, and injury-free mileage progression.",
+      "weightHistory": [],
+      "notes": "Mild lower back stiffness after long runs. Prioritize core stability work.",
+      "hasInjury": true,
+      "injury": "Mild lower back stiffness after long runs",
+      "active": true,
+      "testData": "test",
+      "collection": "clients"
+     },
+     {
+      "id": "c6f4a597",
+      "name": "Tom Walker",
+      "avatar": "TW",
+      "joinedDate": "2026-01-12",
+      "email": "tom.walker@example.com",
+      "phone": "+386 40 123 987",
+      "goals": "General strength maintenance and mobility as a masters athlete.",
+      "weightHistory": [],
+      "notes": "No injuries reported. Prefers morning sessions and steady progression.",
+      "hasInjury": false,
+      "injury": "",
+      "active": true,
+      "testData": "test",
+      "collection": "clients"
+     },
+     {
+      "id": "c7a39688",
+      "name": "Aisha Khan",
+      "avatar": "AK",
+      "joinedDate": "2026-05-22",
+      "email": "aisha.khan@example.com",
+      "phone": "+386 30 456 789",
+      "goals": "Postpartum strength rebuild and core recovery.",
+      "weightHistory": [],
+      "notes": "Cleared for training by physician. Avoid heavy overhead loading until week 12.",
+      "hasInjury": true,
+      "injury": "Postpartum recovery \u2014 avoid heavy overhead loading until week 12",
+      "active": true,
+      "testData": "test",
+      "collection": "clients"
+     },
+     {
+      "id": "c8b28799",
+      "name": "Simon",
+      "avatar": "S",
+      "joinedDate": "2026-06-01",
+      "email": "simon@example.com",
+      "phone": "+386 40 987 654",
+      "goals": "Reduce body fat from 17% to below 15% (but not below 10%), build strength, and optimize for health and longevity.",
+      "weightHistory": [],
+      "notes": "Focus on clean compound movements (squat, hinge, press) and metabolic conditioning to improve body composition. Focus on longevity and joint health; monitor RPE and prioritize recovery.",
+      "hasInjury": false,
+      "injury": "",
+      "active": true,
+      "testData": "test",
+      "collection": "clients"
+     },
+     {
+      "id": "demo-mode-notice",
+      "type": "demo-mode",
+      "icon": "fa-solid fa-triangle-exclamation",
+      "titleKey": "notif_demo_mode_title",
+      "descKey": "notif_demo_mode_desc",
+      "actions": [
+       {
+        "labelKey": "notif_demo_walkthrough_btn",
+        "startWalkthrough": true,
+        "primary": true
+       },
+       {
+        "labelKey": "notif_demo_mode_reset_btn",
+        "resetDemo": true
+       }
+      ],
+      "testData": "test",
+      "collection": "notifications"
+     },
+     {
+      "id": "demo-welcome",
+      "type": "welcome",
+      "icon": "fa-solid fa-wand-magic-sparkles",
+      "titleKey": "notif_welcome_title",
+      "descKey": "notif_welcome_desc",
+      "actions": [
+       {
+        "labelKey": "notif_welcome_clients_btn",
+        "view": "/clients",
+        "primary": true
+       }
+      ],
+      "testData": "test",
+      "collection": "notifications"
+     },
+     {
+      "id": "e10a2b3c",
+      "name": "Barbell Bench Press",
+      "category": "Chest",
+      "equipment": "Barbell",
+      "pattern": "Horizontal Push",
+      "instructions": "Lie flat on a bench, grip the barbell slightly wider than shoulder width, lower it to mid-chest, and push up.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e11a2b3c",
+      "name": "Dumbbell Bench Press",
+      "category": "Chest",
+      "equipment": "Dumbbell",
+      "pattern": "Horizontal Push",
+      "instructions": "Lie on a flat bench with a dumbbell in each hand, lower the dumbbells to chest level, then press them up.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e12a2b3c",
+      "name": "Incline Dumbbell Press",
+      "category": "Chest",
+      "equipment": "Dumbbell",
+      "pattern": "Horizontal Push",
+      "instructions": "Set bench to a 30-45 degree incline. Press dumbbells upwards from chest height.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e13a2b3c",
+      "name": "Cable Chest Fly",
+      "category": "Chest",
+      "equipment": "Cable",
+      "pattern": "Isolation",
+      "instructions": "Position pulleys at shoulder height, grab handles, and bring hands together in a wide hugging motion.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e14a2b3c",
+      "name": "Push-Ups",
+      "category": "Chest",
+      "equipment": "Bodyweight",
+      "pattern": "Horizontal Push",
+      "instructions": "Keep body in a straight plank, lower chest to floor, and push back up.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e15a2b3c",
+      "name": "Pull-Ups",
+      "category": "Back",
+      "equipment": "Bodyweight",
+      "pattern": "Vertical Pull",
+      "instructions": "Hang from a bar with palms facing away. Pull chest up to the bar.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e16a2b3c",
+      "name": "Lat Pulldown",
+      "category": "Back",
+      "equipment": "Cable",
+      "pattern": "Vertical Pull",
+      "instructions": "Sit at pulldown station, pull bar down to upper chest, engaging the lats.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e17a2b3c",
+      "name": "Barbell Row",
+      "category": "Back",
+      "equipment": "Barbell",
+      "pattern": "Horizontal Pull",
+      "instructions": "Hinge at hips, pull barbell towards lower abdomen keeping back straight.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e18a2b3c",
+      "name": "Single-Arm Dumbbell Row",
+      "category": "Back",
+      "equipment": "Dumbbell",
+      "pattern": "Horizontal Pull",
+      "instructions": "Place one knee/hand on bench, pull dumbbell to hip with other arm.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e19a2b3c",
+      "name": "Face Pulls",
+      "category": "Back",
+      "equipment": "Cable",
+      "pattern": "Horizontal Pull",
+      "instructions": "Pull rope attachment from high pulley towards forehead, pulling elbows wide.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e20b3c4d",
+      "name": "Barbell Back Squat",
+      "category": "Legs",
+      "equipment": "Barbell",
+      "pattern": "Squat",
+      "instructions": "Rest bar on upper back, squat down until thighs are parallel to floor, push back up.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e21b3c4d",
+      "name": "Romanian Deadlift (RDL)",
+      "category": "Legs",
+      "equipment": "Barbell",
+      "pattern": "Hinge",
+      "instructions": "Hinge at hips with micro-bend in knees, lower weight down shins, squeeze glutes to stand.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e22b3c4d",
+      "name": "Leg Press",
+      "category": "Legs",
+      "equipment": "Machine",
+      "pattern": "Squat",
+      "instructions": "Sit in machine, unlock platform, lower knees toward chest, press back up without locking knees.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e23b3c4d",
+      "name": "Dumbbell Goblet Squat",
+      "category": "Legs",
+      "equipment": "Dumbbell",
+      "pattern": "Squat",
+      "instructions": "Hold a single dumbbell vertically at chest height, squat deep.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e24b3c4d",
+      "name": "Leg Extension",
+      "category": "Legs",
+      "equipment": "Machine",
+      "pattern": "Isolation",
+      "instructions": "Sit in machine, extend legs fully, pause at top, and lower slowly.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e25b3c4d",
+      "name": "Lying Leg Curl",
+      "category": "Legs",
+      "equipment": "Machine",
+      "pattern": "Isolation",
+      "instructions": "Lie face down, curl roller pad towards glutes, control return.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e26b3c4d",
+      "name": "Standing Calf Raise",
+      "category": "Legs",
+      "equipment": "Machine",
+      "pattern": "Isolation",
+      "instructions": "Raise heels as high as possible on a block, stretch down deep.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e27b3c4d",
+      "name": "Barbell Overhead Press",
+      "category": "Shoulders",
+      "equipment": "Barbell",
+      "pattern": "Vertical Push",
+      "instructions": "Press barbell from shoulder height overhead to full lockout, head through at top.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e28b3c4d",
+      "name": "Dumbbell Lateral Raise",
+      "category": "Shoulders",
+      "equipment": "Dumbbell",
+      "pattern": "Isolation",
+      "instructions": "Stand tall, raise dumbbells out to sides until arms are parallel to the floor.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e29b3c4d",
+      "name": "Dumbbell Shoulder Press",
+      "category": "Shoulders",
+      "equipment": "Dumbbell",
+      "pattern": "Vertical Push",
+      "instructions": "Sit or stand, press dumbbells from ear level overhead.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e30c4d5e",
+      "name": "Dumbbell Bicep Curl",
+      "category": "Arms",
+      "equipment": "Dumbbell",
+      "pattern": "Isolation",
+      "instructions": "Rotate palms up as you curl dumbbells towards shoulders, keeping elbows locked at sides.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e31c4d5e",
+      "name": "Dumbbell Hammer Curl",
+      "category": "Arms",
+      "equipment": "Dumbbell",
+      "pattern": "Isolation",
+      "instructions": "Curl dumbbells with neutral grip (palms facing each other).",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e32c4d5e",
+      "name": "Cable Tricep Pushdown",
+      "category": "Arms",
+      "equipment": "Cable",
+      "pattern": "Isolation",
+      "instructions": "Push rope or bar attachment down by extending elbows, keeping upper arms still.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e33c4d5e",
+      "name": "EZ-Bar Skull Crusher",
+      "category": "Arms",
+      "equipment": "Barbell",
+      "pattern": "Isolation",
+      "instructions": "Lie on bench, lower bar to forehead by bending elbows, then extend.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e34c4d5e",
+      "name": "Plank",
+      "category": "Core",
+      "equipment": "Bodyweight",
+      "pattern": "Core",
+      "instructions": "Hold straight body line resting on forearms and toes. Squeeze core and glutes.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e35c4d5e",
+      "name": "Hanging Knee Raise",
+      "category": "Core",
+      "equipment": "Bodyweight",
+      "pattern": "Core",
+      "instructions": "Hang from pull-up bar, raise knees to chest height slowly without swinging.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e36c4d5e",
+      "name": "Abmat Sit-up",
+      "category": "Core",
+      "equipment": "Bodyweight",
+      "pattern": "Core",
+      "instructions": "Sit with soles of feet together, touch floor behind head, sit up and touch toes.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e37c4d5e",
+      "name": "Russian Twist",
+      "category": "Core",
+      "equipment": "Bodyweight",
+      "pattern": "Core",
+      "instructions": "Sit, lean back slightly, lift feet, rotate torso tapping hands side-to-side.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e38c4d5e",
+      "name": "Walking Lunges",
+      "category": "Legs",
+      "equipment": "Bodyweight",
+      "pattern": "Lunge",
+      "instructions": "Step forward lunging down, alternating legs.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e39c4d5e",
+      "name": "Shoulder & Lat Stretch",
+      "category": "Recovery",
+      "equipment": "Bodyweight",
+      "pattern": "Mobility",
+      "modality": "stretch",
+      "instructions": "Hold child pose and lateral lat stretches for 30s.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e40c4d5e",
+      "name": "Hamstring & Hip Stretch",
+      "category": "Recovery",
+      "equipment": "Bodyweight",
+      "pattern": "Mobility",
+      "modality": "stretch",
+      "instructions": "Static hamstring stretch and hip flexor stretch, hold 30s per side.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e41d5e6f",
+      "name": "Assault Bike",
+      "category": "Cardio",
+      "equipment": "Machine",
+      "pattern": "Conditioning",
+      "modality": "cardio",
+      "metric": "calories",
+      "instructions": "Sustained air-bike intervals; drive with arms and legs to the calorie target.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e42d5e6f",
+      "name": "Concept2 Rower",
+      "category": "Cardio",
+      "equipment": "Machine",
+      "pattern": "Conditioning",
+      "modality": "cardio",
+      "metric": "distance",
+      "instructions": "Row to the target distance with a strong legs-hips-arms sequence.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e43d5e6f",
+      "name": "Ski-Erg",
+      "category": "Cardio",
+      "equipment": "Machine",
+      "pattern": "Conditioning",
+      "modality": "cardio",
+      "metric": "calories",
+      "instructions": "Double-pole the ski-erg to the calorie target, hinging at the hips.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e44d5e6f",
+      "name": "Watt Bike",
+      "category": "Cardio",
+      "equipment": "Machine",
+      "pattern": "Conditioning",
+      "modality": "cardio",
+      "metric": "watts",
+      "instructions": "Hold the target power output (watts) for the prescribed effort.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e45d5e6f",
+      "name": "Treadmill Run",
+      "category": "Cardio",
+      "equipment": "Machine",
+      "pattern": "Conditioning",
+      "modality": "cardio",
+      "metric": "time",
+      "instructions": "Steady-state or interval run to the target time.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e46d5e6f",
+      "name": "Assault Bike (Time)",
+      "category": "Cardio",
+      "equipment": "Machine",
+      "pattern": "Conditioning",
+      "modality": "cardio",
+      "metric": "time",
+      "instructions": "Air-bike intervals to a fixed duration \u2014 steady pace or an all-out sprint clock.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e46e6f7a",
+      "name": "Single-Leg Balance",
+      "category": "Core",
+      "equipment": "Bodyweight",
+      "pattern": "Balance",
+      "modality": "balance",
+      "instructions": "Stand on one leg, hips level and core braced; hold for the target time per side.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e47d5e6f",
+      "name": "Assault Bike (Watts)",
+      "category": "Cardio",
+      "equipment": "Machine",
+      "pattern": "Conditioning",
+      "modality": "cardio",
+      "metric": "watts",
+      "instructions": "Hold the target power output (watts) on the air bike for the prescribed effort.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e47e6f7a",
+      "name": "BOSU Squat Hold",
+      "category": "Legs",
+      "equipment": "Bodyweight",
+      "pattern": "Balance",
+      "modality": "balance",
+      "instructions": "Hold a quarter-squat on an unstable BOSU dome, staying centred for the target time.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e48f7a8b",
+      "name": "Weighted Plank",
+      "category": "Core",
+      "equipment": "Bodyweight",
+      "pattern": "Core",
+      "modality": "isometric",
+      "instructions": "Hold a rigid plank with a plate on the upper back for the target time.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e49f7a8b",
+      "name": "Wall Sit",
+      "category": "Legs",
+      "equipment": "Bodyweight",
+      "pattern": "Squat",
+      "modality": "isometric",
+      "instructions": "Sit against the wall at 90\u00b0 knees, optionally holding a plate, for the target time.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e50f7a8b",
+      "name": "Overhead Barbell Hold",
+      "category": "Shoulders",
+      "equipment": "Barbell",
+      "pattern": "Vertical Push",
+      "modality": "isometric",
+      "instructions": "Hold a loaded barbell locked out overhead for the target time.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e51a8b9c",
+      "name": "5-10-5 Pro Agility Shuttle",
+      "category": "Cardio",
+      "equipment": "Bodyweight",
+      "pattern": "Agility",
+      "modality": "agility",
+      "metric": "time",
+      "instructions": "Sprint 5yd, back 10yd, through 5yd, changing direction sharply; log the time.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e52a8b9c",
+      "name": "Agility Ladder Drill",
+      "category": "Cardio",
+      "equipment": "Bodyweight",
+      "pattern": "Agility",
+      "modality": "agility",
+      "metric": "time",
+      "instructions": "Quick-feet ladder pattern for the target time, staying light on the balls of the feet.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e53a8b9c",
+      "name": "Cone Sprint Drill",
+      "category": "Cardio",
+      "equipment": "Bodyweight",
+      "pattern": "Agility",
+      "modality": "agility",
+      "metric": "distance",
+      "instructions": "Repeated accelerations between cones over the target distance.",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e54a8b9c",
+      "name": "Outdoor Run",
+      "category": "Cardio",
+      "equipment": "Bodyweight",
+      "pattern": "Conditioning",
+      "modality": "cardio",
+      "metric": "pace",
+      "instructions": "Run holding the target pace (min/km).",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "e55a8b9c",
+      "name": "Zone 2 Bike Ride",
+      "category": "Cardio",
+      "equipment": "Machine",
+      "pattern": "Conditioning",
+      "modality": "cardio",
+      "metric": "heartrate",
+      "instructions": "Steady aerobic ride keeping heart rate at the target zone (bpm).",
+      "testData": "test",
+      "collection": "exercises"
+     },
+     {
+      "id": "h001f2e3",
+      "clientId": "c1a9f0e2",
+      "clientName": "Jane Doe",
+      "routineName": "Upper Body A",
+      "date": "2026-07-06T10:15:00.000Z",
+      "duration": 3420,
+      "exercises": [
+       {
+        "id": "e10a2b3c",
+        "name": "Barbell Bench Press",
+        "sets": [
+         {
+          "reps": 6,
+          "weight": 60,
+          "completed": true,
+          "note": "RPE 8"
+         },
+         {
+          "reps": 6,
+          "weight": 60,
+          "completed": true,
+          "note": "RPE 8.5"
+         },
+         {
+          "reps": 6,
+          "weight": 60,
+          "completed": true,
+          "note": "RPE 9"
+         },
+         {
+          "reps": 5,
+          "weight": 60,
+          "completed": true,
+          "note": "Failed 6th rep"
+         }
+        ]
+       },
+       {
+        "id": "e17a2b3c",
+        "name": "Barbell Row",
+        "sets": [
+         {
+          "reps": 8,
+          "weight": 50,
+          "completed": true
+         },
+         {
+          "reps": 8,
+          "weight": 50,
+          "completed": true
+         },
+         {
+          "reps": 8,
+          "weight": 50,
+          "completed": true
+         },
+         {
+          "reps": 8,
+          "weight": 50,
+          "completed": true,
+          "note": "Strict form"
+         }
+        ]
+       }
+      ],
+      "feedback": [
+       {
+        "id": "u001f2e3",
+        "clientId": "c1a9f0e2",
+        "exerciseName": "Barbell Bench Press",
+        "tag": "Too Easy - Increase Load",
+        "note": "Completed all 4 sets with high speed. Recommend adding 2.5kg next session."
+       }
+      ],
+      "testData": "test",
+      "collection": "history"
+     },
+     {
+      "id": "h002f2e3",
+      "clientId": "c1a9f0e2",
+      "clientName": "Jane Doe",
+      "routineName": "Upper Body A",
+      "date": "2026-07-10T09:00:00.000Z",
+      "duration": 3540,
+      "exercises": [
+       {
+        "id": "e10a2b3c",
+        "name": "Barbell Bench Press",
+        "sets": [
+         {
+          "reps": 5,
+          "weight": 60,
+          "completed": true,
+          "note": "RPE 7"
+         },
+         {
+          "reps": 5,
+          "weight": 60,
+          "completed": true,
+          "note": "RPE 8"
+         },
+         {
+          "reps": 5,
+          "weight": 60,
+          "completed": true,
+          "note": "RPE 8.5"
+         },
+         {
+          "reps": 4,
+          "weight": 60,
+          "completed": true,
+          "note": "RPE 9, last rep grind"
+         }
+        ]
+       },
+       {
+        "id": "e17a2b3c",
+        "name": "Barbell Row",
+        "sets": [
+         {
+          "reps": 8,
+          "weight": 52.5,
+          "completed": true
+         },
+         {
+          "reps": 8,
+          "weight": 52.5,
+          "completed": true
+         },
+         {
+          "reps": 7,
+          "weight": 52.5,
+          "completed": true,
+          "note": "Strict, paused"
+         }
+        ]
+       },
+       {
+        "id": "e29b3c4d",
+        "name": "Dumbbell Shoulder Press",
+        "sets": [
+         {
+          "reps": 10,
+          "weight": 16,
+          "completed": true
+         },
+         {
+          "reps": 9,
+          "weight": 16,
+          "completed": true
+         },
+         {
+          "reps": 8,
+          "weight": 16,
+          "completed": true,
+          "note": "Left side fatigued"
+         }
+        ]
+       }
+      ],
+      "feedback": [
+       {
+        "id": "udemo001",
+        "clientId": "c1a9f0e2",
+        "exerciseName": "Barbell Bench Press",
+        "tag": "Too Easy - Increase Load",
+        "note": "Pushed the weight easily. Ready for 65kg next week."
+       },
+       {
+        "id": "udemo002",
+        "clientId": "c1a9f0e2",
+        "exerciseName": "Barbell Row",
+        "tag": "Too Hard - Reduce Load",
+        "note": "Felt form breaking on last 2 reps. Keep weight at 50kg."
+       },
+       {
+        "id": "udemo003",
+        "clientId": "c1a9f0e2",
+        "exerciseName": "Dumbbell Shoulder Press",
+        "tag": "Form Break - Watch Position",
+        "note": "Shoulders shrugging too early. Keep elbows in."
+       }
+      ],
+      "testData": "test",
+      "collection": "history"
+     },
+     {
+      "id": "h003f2e3",
+      "clientId": "c2b8e1d3",
+      "clientName": "John Smith",
+      "routineName": "Upper Body A",
+      "date": "2026-07-10T09:00:00.000Z",
+      "duration": 3720,
+      "exercises": [
+       {
+        "id": "e10a2b3c",
+        "name": "Barbell Bench Press",
+        "sets": [
+         {
+          "reps": 5,
+          "weight": 67.5,
+          "completed": true,
+          "note": "RPE 8"
+         },
+         {
+          "reps": 5,
+          "weight": 67.5,
+          "completed": true,
+          "note": "RPE 8.5"
+         },
+         {
+          "reps": 5,
+          "weight": 67.5,
+          "completed": true,
+          "note": "RPE 9"
+         }
+        ]
+       },
+       {
+        "id": "e17a2b3c",
+        "name": "Barbell Row",
+        "sets": [
+         {
+          "reps": 8,
+          "weight": 57.5,
+          "completed": true
+         },
+         {
+          "reps": 8,
+          "weight": 57.5,
+          "completed": true
+         },
+         {
+          "reps": 8,
+          "weight": 57.5,
+          "completed": true
+         },
+         {
+          "reps": 7,
+          "weight": 57.5,
+          "completed": true
+         }
+        ]
+       },
+       {
+        "id": "e29b3c4d",
+        "name": "Dumbbell Shoulder Press",
+        "sets": [
+         {
+          "reps": 10,
+          "weight": 18,
+          "completed": true
+         },
+         {
+          "reps": 9,
+          "weight": 18,
+          "completed": true,
+          "note": "Left arm weaker on last set"
+         }
+        ]
+       }
+      ],
+      "feedback": [
+       {
+        "id": "udemo004",
+        "clientId": "c2b8e1d3",
+        "exerciseName": "Barbell Bench Press",
+        "tag": "Joint Pain / Discomfort",
+        "note": "Felt slight pinching in right shoulder. Ceased after 2 sets."
+       },
+       {
+        "id": "udemo005",
+        "clientId": "c2b8e1d3",
+        "exerciseName": "Barbell Row",
+        "tag": "Completed reps easily",
+        "note": "Great mind-muscle connection. Strong back activation."
+       }
+      ],
+      "testData": "test",
+      "collection": "history"
+     },
+     {
+      "id": "h004f2e3",
+      "clientId": "c8b28799",
+      "clientName": "Simon",
+      "routineName": "Strength & Longevity Focus",
+      "date": "2026-07-12T15:00:00.000Z",
+      "duration": 3300,
+      "exercises": [
+       {
+        "id": "e11a2b3c",
+        "name": "Dumbbell Bench Press",
+        "sets": [
+         {
+          "reps": 8,
+          "weight": 22,
+          "completed": true
+         },
+         {
+          "reps": 8,
+          "weight": 22,
+          "completed": true
+         },
+         {
+          "reps": 8,
+          "weight": 22,
+          "completed": true
+         },
+         {
+          "reps": 8,
+          "weight": 24,
+          "completed": true,
+          "note": "RPE 8"
+         }
+        ]
+       },
+       {
+        "id": "e21b3c4d",
+        "name": "Romanian Deadlift (RDL)",
+        "sets": [
+         {
+          "reps": 10,
+          "weight": 65,
+          "completed": true
+         },
+         {
+          "reps": 10,
+          "weight": 70,
+          "completed": true
+         },
+         {
+          "reps": 10,
+          "weight": 70,
+          "completed": true,
+          "note": "Strong hinge focus"
+         }
+        ]
+       }
+      ],
+      "feedback": [
+       {
+        "id": "u003f2e3",
+        "clientId": "c8b28799",
+        "exerciseName": "Dumbbell Bench Press",
+        "tag": "Too Easy - Increase Load",
+        "note": "Moved 24kg easily on the final set. Increase starting weight next session."
+       }
+      ],
+      "testData": "test",
+      "collection": "history"
+     },
+     {
+      "id": "h010f2e3",
+      "clientId": "c1a9f0e2",
+      "clientName": "Jane Doe",
+      "routineName": "Tri-Set Metabolic Conditioning",
+      "date": "2026-07-20T09:00:00.000Z",
+      "duration": 3300,
+      "exercises": [
+       {
+        "type": "exercise",
+        "id": "e18a2b3c",
+        "name": "Single-Arm Dumbbell Row",
+        "loadUnit": "kg",
+        "modality": "strength",
+        "metric": "reps",
+        "completed": true,
+        "circuitId": "zh10a2b3c",
+        "circuitTitle": "Tri-Set Metabolic Circuit",
+        "circuitSeries": 3,
+        "sets": [
+         {
+          "reps": 10,
+          "weight": 18,
+          "completed": true,
+          "note": ""
+         },
+         {
+          "reps": 10,
+          "weight": 18,
+          "completed": true,
+          "note": ""
+         },
+         {
+          "reps": 9,
+          "weight": 18,
+          "completed": true,
+          "note": "Grip fatigue"
+         }
+        ]
+       },
+       {
+        "type": "exercise",
+        "id": "e14a2b3c",
+        "name": "Push-Ups",
+        "loadUnit": "bw",
+        "modality": "strength",
+        "metric": "reps",
+        "completed": true,
+        "circuitId": "zh10a2b3c",
+        "circuitTitle": "Tri-Set Metabolic Circuit",
+        "circuitSeries": 3,
+        "sets": [
+         {
+          "reps": 15,
+          "weight": 0,
+          "completed": true,
+          "note": ""
+         },
+         {
+          "reps": 12,
+          "weight": 0,
+          "completed": true,
+          "note": ""
+         },
+         {
+          "reps": 10,
+          "weight": 0,
+          "completed": true,
+          "note": "To failure"
+         }
+        ]
+       },
+       {
+        "type": "rest",
+        "rest": 90,
+        "circuitId": "zh10a2b3c",
+        "circuitTitle": "Tri-Set Metabolic Circuit",
+        "circuitSeries": 3
+       },
+       {
+        "type": "exercise",
+        "id": "e41d5e6f",
+        "name": "Assault Bike",
+        "loadUnit": "kg",
+        "modality": "cardio",
+        "metric": "calories",
+        "completed": true,
+        "circuitId": null,
+        "circuitTitle": "",
+        "circuitSeries": 1,
+        "sets": [
+         {
+          "reps": 20,
+          "weight": 0,
+          "completed": true,
+          "note": "Sprinted the last 5 cal"
+         }
+        ]
+       },
+       {
+        "type": "rest",
+        "rest": 60,
+        "circuitId": null,
+        "circuitTitle": "",
+        "circuitSeries": 1
+       },
+       {
+        "type": "exercise",
+        "id": "e46e6f7a",
+        "name": "Single-Leg Balance",
+        "loadUnit": "kg",
+        "modality": "balance",
+        "metric": "hold",
+        "completed": true,
+        "circuitId": null,
+        "circuitTitle": "",
+        "circuitSeries": 1,
+        "sets": [
+         {
+          "reps": "45s",
+          "weight": 0,
+          "completed": true,
+          "note": ""
+         },
+         {
+          "reps": "45s",
+          "weight": 0,
+          "completed": true,
+          "note": "Steadier on the left"
+         }
+        ]
+       },
+       {
+        "type": "exercise",
+        "id": "e40c4d5e",
+        "name": "Hamstring & Hip Stretch",
+        "loadUnit": "kg",
+        "modality": "stretch",
+        "metric": "hold",
+        "completed": false,
+        "circuitId": null,
+        "circuitTitle": "",
+        "circuitSeries": 1,
+        "sets": [
+         {
+          "reps": "30s",
+          "weight": 0,
+          "completed": false,
+          "note": ""
+         }
+        ]
+       }
+      ],
+      "feedback": [
+       {
+        "id": "u010f2e3",
+        "clientId": "c1a9f0e2",
+        "exerciseName": "Assault Bike",
+        "tag": "Too Hard - Reduce Load",
+        "note": "Gassed by 15 cal \u2014 drop the target to 15 next session."
+       }
+      ],
+      "testData": "test",
+      "collection": "history"
+     },
+     {
+      "id": "r10d5e6f",
+      "name": "Upper Body A",
+      "description": "Strength-focused upper body session prioritizing compound presses and rows.",
+      "exercises": [
+       {
+        "id": "e10a2b3c",
+        "sets": 3,
+        "reps": 5,
+        "rest": 0,
+        "weight": 62.5,
+        "comboGroupId": "g01a2b3c",
+        "circuitId": "z01a2b3c",
+        "circuitTitle": "Chest & Back Strength Complex",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e17a2b3c",
+        "sets": 3,
+        "reps": 8,
+        "rest": 90,
+        "weight": 55,
+        "comboGroupId": "g01a2b3c",
+        "circuitId": "z01a2b3c",
+        "circuitTitle": "Chest & Back Strength Complex",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e29b3c4d",
+        "sets": 3,
+        "reps": 10,
+        "rest": 0,
+        "weight": 18,
+        "comboGroupId": "g02a2b3c",
+        "circuitId": "z02a2b3c",
+        "circuitTitle": "Shoulder & Lat Density Circuit",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e16a2b3c",
+        "sets": 3,
+        "reps": 12,
+        "rest": 90,
+        "weight": 48,
+        "comboGroupId": "g02a2b3c",
+        "circuitId": "z02a2b3c",
+        "circuitTitle": "Shoulder & Lat Density Circuit",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e32c4d5e",
+        "sets": 3,
+        "reps": 15,
+        "rest": 0,
+        "weight": 25,
+        "comboGroupId": "g03a2b3c",
+        "circuitId": "z03a2b3c",
+        "circuitTitle": "Arm Finisher Circuit",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e30c4d5e",
+        "sets": 3,
+        "reps": 14,
+        "rest": 60,
+        "weight": 14,
+        "comboGroupId": "g03a2b3c",
+        "circuitId": "z03a2b3c",
+        "circuitTitle": "Arm Finisher Circuit",
+        "circuitSeries": 3
+       }
+      ],
+      "testData": "test",
+      "collection": "routines"
+     },
+     {
+      "id": "r11d5e6f",
+      "name": "Legs & Core B",
+      "description": "Squat and hinge focus with direct core work.",
+      "exercises": [
+       {
+        "id": "e20b3c4d",
+        "sets": 3,
+        "reps": 5,
+        "rest": 0,
+        "weight": 80,
+        "comboGroupId": "g04a2b3c",
+        "circuitId": "z04a2b3c",
+        "circuitTitle": "Lower Body Strength Circuit",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e21b3c4d",
+        "sets": 3,
+        "reps": 8,
+        "rest": 120,
+        "weight": 65,
+        "comboGroupId": "g04a2b3c",
+        "circuitId": "z04a2b3c",
+        "circuitTitle": "Lower Body Strength Circuit",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e22b3c4d",
+        "sets": 3,
+        "reps": 12,
+        "rest": 0,
+        "weight": 140,
+        "comboGroupId": "g05a2b3c",
+        "circuitId": "z05a2b3c",
+        "circuitTitle": "Hypertrophy & Core Trio",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e34c4d5e",
+        "sets": 3,
+        "reps": 45,
+        "rest": 0,
+        "weight": 0,
+        "comboGroupId": "g05a2b3c",
+        "circuitId": "z05a2b3c",
+        "circuitTitle": "Hypertrophy & Core Trio",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e35c4d5e",
+        "sets": 3,
+        "reps": 15,
+        "rest": 90,
+        "weight": 0,
+        "comboGroupId": "g05a2b3c",
+        "circuitId": "z05a2b3c",
+        "circuitTitle": "Hypertrophy & Core Trio",
+        "circuitSeries": 3
+       }
+      ],
+      "testData": "test",
+      "collection": "routines"
+     },
+     {
+      "id": "r12d5e6f",
+      "name": "Tri-Set Metabolic Conditioning",
+      "description": "A comprehensive 5-phase session featuring a dynamic warmup, metabolic strength tri-sets, core work, and a longevity cooldown.",
+      "exercises": [
+       {
+        "id": "e19a2b3c",
+        "sets": 1,
+        "reps": "10 reps (light)",
+        "rest": 0,
+        "weight": 5,
+        "comboGroupId": "g06a2b3c",
+        "circuitId": "z06a2b3c",
+        "circuitTitle": "Dynamic Warmup",
+        "circuitSeries": 1
+       },
+       {
+        "id": "e38c4d5e",
+        "sets": 1,
+        "reps": "10 reps",
+        "rest": 30,
+        "weight": 0,
+        "comboGroupId": "g06a2b3c",
+        "circuitId": "z06a2b3c",
+        "circuitTitle": "Dynamic Warmup",
+        "circuitSeries": 1
+       },
+       {
+        "id": "e18a2b3c",
+        "sets": 3,
+        "reps": "10 per arm",
+        "rest": 0,
+        "weight": 18,
+        "comboGroupId": "g07a2b3c",
+        "circuitId": "z07a2b3c",
+        "circuitTitle": "Tri-Set Metabolic Circuit",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e14a2b3c",
+        "sets": 3,
+        "reps": "Max",
+        "rest": 0,
+        "weight": 0,
+        "comboGroupId": "g07a2b3c",
+        "circuitId": "z07a2b3c",
+        "circuitTitle": "Tri-Set Metabolic Circuit",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e38c4d5e",
+        "sets": 3,
+        "reps": 40,
+        "rest": 60,
+        "weight": 0,
+        "comboGroupId": "g07a2b3c",
+        "circuitId": "z07a2b3c",
+        "circuitTitle": "Tri-Set Metabolic Circuit",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e23b3c4d",
+        "sets": 3,
+        "reps": "12 reps",
+        "rest": 0,
+        "weight": 16,
+        "comboGroupId": "g08a2b3c",
+        "circuitId": "z08a2b3c",
+        "circuitTitle": "Leg & Hinge Circuit",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e21b3c4d",
+        "sets": 3,
+        "reps": "10 reps",
+        "rest": 90,
+        "weight": 45,
+        "comboGroupId": "g08a2b3c",
+        "circuitId": "z08a2b3c",
+        "circuitTitle": "Leg & Hinge Circuit",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e34c4d5e",
+        "sets": 3,
+        "reps": "45 seconds",
+        "rest": 0,
+        "weight": 0,
+        "comboGroupId": "g09a2b3c",
+        "circuitId": "z09a2b3c",
+        "circuitTitle": "Core Finish Burner",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e37c4d5e",
+        "sets": 3,
+        "reps": "20 per side",
+        "rest": 60,
+        "weight": 0,
+        "comboGroupId": "g09a2b3c",
+        "circuitId": "z09a2b3c",
+        "circuitTitle": "Core Finish Burner",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e41d5e6f",
+        "sets": 1,
+        "reps": 20,
+        "rest": 60,
+        "weight": 0
+       },
+       {
+        "id": "e46e6f7a",
+        "sets": 2,
+        "reps": "45s",
+        "rest": 30,
+        "weight": 0
+       },
+       {
+        "id": "e39c4d5e",
+        "sets": 1,
+        "reps": "30s hold",
+        "rest": 0,
+        "weight": 0,
+        "comboGroupId": "g10a2b3c",
+        "circuitId": "z10a2b3c",
+        "circuitTitle": "Longevity Cooldown & Stretching",
+        "circuitSeries": 1
+       },
+       {
+        "id": "e40c4d5e",
+        "sets": 1,
+        "reps": "30s hold",
+        "rest": 0,
+        "weight": 0,
+        "comboGroupId": "g10a2b3c",
+        "circuitId": "z10a2b3c",
+        "circuitTitle": "Longevity Cooldown & Stretching",
+        "circuitSeries": 1
+       }
+      ],
+      "testData": "test",
+      "collection": "routines"
+     },
+     {
+      "id": "r13d5e6f",
+      "name": "Postpartum Core & Mobility",
+      "description": "Gentle core activation and mobility exercises focused on deep abdominal breathing, posture, and light functional strength.",
+      "exercises": [
+       {
+        "id": "e34c4d5e",
+        "sets": 3,
+        "reps": "30s hold",
+        "rest": 0,
+        "weight": 0,
+        "comboGroupId": "g11a2b3c",
+        "circuitId": "z11a2b3c",
+        "circuitTitle": "Core & Ankle Alignment",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e26b3c4d",
+        "sets": 3,
+        "reps": 15,
+        "rest": 60,
+        "weight": 0,
+        "comboGroupId": "g11a2b3c",
+        "circuitId": "z11a2b3c",
+        "circuitTitle": "Core & Ankle Alignment",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e23b3c4d",
+        "sets": 3,
+        "reps": 10,
+        "rest": 0,
+        "weight": 8,
+        "comboGroupId": "g12a2b3c",
+        "circuitId": "z12a2b3c",
+        "circuitTitle": "Posture & Leg Strength Circuit",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e19a2b3c",
+        "sets": 3,
+        "reps": 12,
+        "rest": 90,
+        "weight": 10,
+        "comboGroupId": "g12a2b3c",
+        "circuitId": "z12a2b3c",
+        "circuitTitle": "Posture & Leg Strength Circuit",
+        "circuitSeries": 3
+       }
+      ],
+      "testData": "test",
+      "collection": "routines"
+     },
+     {
+      "id": "r14d5e6f",
+      "name": "Strength & Longevity Focus",
+      "description": "Compound strength lifts paired with posture and core stability work optimized for long-term joint health.",
+      "exercises": [
+       {
+        "id": "e11a2b3c",
+        "sets": 3,
+        "reps": 8,
+        "rest": 0,
+        "weight": 24,
+        "comboGroupId": "g13a2b3c",
+        "circuitId": "z13a2b3c",
+        "circuitTitle": "Press & Hinge Longevity Circuit",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e21b3c4d",
+        "sets": 3,
+        "reps": 10,
+        "rest": 120,
+        "weight": 70,
+        "comboGroupId": "g13a2b3c",
+        "circuitId": "z13a2b3c",
+        "circuitTitle": "Press & Hinge Longevity Circuit",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e19a2b3c",
+        "sets": 3,
+        "reps": 15,
+        "rest": 0,
+        "weight": 14,
+        "comboGroupId": "g14a2b3c",
+        "circuitId": "z14a2b3c",
+        "circuitTitle": "Posture & Core Stability Circuit",
+        "circuitSeries": 3
+       },
+       {
+        "id": "e34c4d5e",
+        "sets": 3,
+        "reps": "60s hold",
+        "rest": 60,
+        "weight": 0,
+        "comboGroupId": "g14a2b3c",
+        "circuitId": "z14a2b3c",
+        "circuitTitle": "Posture & Core Stability Circuit",
+        "circuitSeries": 3
+       }
+      ],
+      "testData": "test",
+      "collection": "routines"
+     },
+     {
+      "id": "s00f2e3d",
+      "time": "08:00 - 09:00",
+      "startDate": "2026-08-19T06:00:00.000Z",
+      "day": "today",
+      "title": "Early Bird Strength",
+      "location": "Trib gym base",
+      "participants": [
+       "c4d6c3b5",
+       "c6f4a597"
+      ],
+      "routineId": "r10d5e6f",
+      "maxCapacity": 4,
+      "completed": true,
+      "testData": "test",
+      "collection": "sessions"
+     },
+     {
+      "id": "s01f2e3d",
+      "time": "10:00 - 12:00",
+      "startDate": "2026-08-19T08:00:00.000Z",
+      "day": "today",
+      "title": "Group Strength & Conditioning",
+      "location": "Trib gym base",
+      "participants": [
+       "c1a9f0e2",
+       "c2b8e1d3"
+      ],
+      "routineId": "r12d5e6f",
+      "maxCapacity": 7,
+      "testData": "test",
+      "collection": "sessions"
+     },
+     {
+      "id": "s02f2e3d",
+      "time": "12:00 - 13:00",
+      "startDate": "2026-08-19T10:00:00.000Z",
+      "day": "today",
+      "title": "1:1 Personal Training",
+      "location": "Trib gym base",
+      "participants": [
+       "c5e5b4a6"
+      ],
+      "routineId": "r11d5e6f",
+      "maxCapacity": 1,
+      "testData": "test",
+      "collection": "sessions"
+     },
+     {
+      "id": "s03f2e3d",
+      "time": "13:00 - 14:00",
+      "startDate": "2026-08-19T11:00:00.000Z",
+      "day": "today",
+      "title": "Express Core HIIT",
+      "location": "playground outside",
+      "participants": [
+       "c3c7d2c4"
+      ],
+      "routineId": "r11d5e6f",
+      "maxCapacity": 2,
+      "testData": "test",
+      "collection": "sessions"
+     },
+     {
+      "id": "s04f2e3d",
+      "time": "09:00 - 10:00",
+      "startDate": "2026-08-20T07:00:00.000Z",
+      "title": "Morning Conditioning",
+      "location": "city park",
+      "participants": [
+       "c1a9f0e2"
+      ],
+      "routineId": "r12d5e6f",
+      "maxCapacity": 3,
+      "day": "tomorrow",
+      "testData": "test",
+      "collection": "sessions"
+     },
+     {
+      "id": "s05f2e3d",
+      "time": "10:30 - 11:30",
+      "startDate": "2026-08-20T08:00:00.000Z",
+      "title": "Upper Body Strength",
+      "location": "Trib gym base",
+      "participants": [
+       "c2b8e1d3"
+      ],
+      "routineId": "r10d5e6f",
+      "maxCapacity": 4,
+      "day": "tomorrow",
+      "testData": "test",
+      "collection": "sessions"
+     },
+     {
+      "id": "s06f2e3d",
+      "time": "11:30 - 12:30",
+      "startDate": "2026-08-20T09:00:00.000Z",
+      "title": "Lunch Express HIIT",
+      "location": "playground outside",
+      "participants": [
+       "c3c7d2c4"
+      ],
+      "routineId": "r12d5e6f",
+      "maxCapacity": 3,
+      "day": "tomorrow",
+      "testData": "test",
+      "collection": "sessions"
+     },
+     {
+      "id": "s07f2e3d",
+      "time": "09:00 - 10:00",
+      "startDate": "2026-08-19T07:00:00.000Z",
+      "day": "today",
+      "title": "Strength & Longevity Focus",
+      "location": "Trib gym base",
+      "participants": [
+       "c8b28799"
+      ],
+      "routineId": "r14d5e6f",
+      "maxCapacity": 1,
+      "completed": true,
+      "testData": "test",
+      "collection": "sessions"
+     },
+     {
+      "id": "s08f2e3d",
+      "time": "14:00 - 15:00",
+      "startDate": "2026-08-19T12:00:00.000Z",
+      "day": "today",
+      "title": "Mobility Flow",
+      "location": "city park",
+      "participants": [
+       "c7a39688"
+      ],
+      "routineId": "r13d5e6f",
+      "maxCapacity": 2,
+      "testData": "test",
+      "collection": "sessions"
+     },
+     {
+      "id": "s09f2e3d",
+      "time": "10:00 - 12:00",
+      "startDate": "2026-08-19T08:00:00.000Z",
+      "day": "today",
+      "title": "Return-to-Play Rehab",
+      "location": "Trib gym base",
+      "participants": [
+       "c3c7d2c4"
+      ],
+      "routineId": "r13d5e6f",
+      "maxCapacity": 1,
+      "testData": "test",
+      "collection": "sessions"
+     },
+     {
+      "id": "s10f2e3d",
+      "time": "17:30 - 18:30",
+      "startDate": "2026-08-20T15:00:00.000Z",
+      "title": "Post-Work Cardio",
+      "location": "city park",
+      "participants": [
+       "c4d6c3b5"
+      ],
+      "routineId": "r11d5e6f",
+      "maxCapacity": 2,
+      "day": "tomorrow",
+      "testData": "test",
+      "collection": "sessions"
+     },
+     {
+      "id": "s11f2e3d",
+      "time": "14:00 - 15:00",
+      "startDate": "2026-08-20T12:00:00.000Z",
+      "title": "Strength & Longevity Focus",
+      "location": "Trib gym base",
+      "participants": [
+       "c8b28799"
+      ],
+      "routineId": "r14d5e6f",
+      "maxCapacity": 1,
+      "day": "tomorrow",
+      "testData": "test",
+      "collection": "sessions"
+     },
+     {
+      "id": "s12f2e3d",
+      "time": "09:00 - 10:30",
+      "startDate": "2026-08-18T07:00:00.000Z",
+      "title": "Core & Stability",
+      "location": "Trib gym base",
+      "participants": [
+       "c1a9f0e2"
+      ],
+      "routineId": "r10d5e6f",
+      "maxCapacity": 2,
+      "day": "yesterday",
+      "completed": true,
+      "testData": "test",
+      "collection": "sessions"
+     },
+     {
+      "id": "s13f2e3d",
+      "time": "16:00 - 17:00",
+      "startDate": "2026-08-18T14:00:00.000Z",
+      "title": "Mobility & Recovery",
+      "location": "city park",
+      "participants": [
+       "c2b8e1d3"
+      ],
+      "routineId": "r11d5e6f",
+      "maxCapacity": 3,
+      "day": "yesterday",
+      "completed": true,
+      "testData": "test",
+      "collection": "sessions"
+     },
+     {
+      "id": "s14f2e3d",
+      "time": "15:00 - 16:00",
+      "startDate": "2026-08-18T13:00:00.000Z",
+      "title": "Strength & Longevity Focus",
+      "location": "Trib gym base",
+      "participants": [
+       "c8b28799"
+      ],
+      "routineId": "r14d5e6f",
+      "maxCapacity": 1,
+      "day": "yesterday",
+      "completed": true,
+      "testData": "test",
+      "collection": "sessions"
+     },
+     {
+      "id": "s15f2e3d",
+      "time": "08:00 - 09:30",
+      "startDate": "2026-08-21T06:00:00.000Z",
+      "title": "Lower Body Strength",
+      "location": "Trib gym base",
+      "participants": [
+       "c3c7d2c4"
+      ],
+      "routineId": "r11d5e6f",
+      "maxCapacity": 2,
+      "day": "upcoming",
+      "testData": "test",
+      "collection": "sessions"
+     },
+     {
+      "id": "s16f2e3d",
+      "time": "10:00 - 11:00",
+      "startDate": "2026-08-23T08:00:00.000Z",
+      "title": "HIIT Conditioning",
+      "location": "playground outside",
+      "participants": [
+       "c1a9f0e2",
+       "c2b8e1d3"
+      ],
+      "routineId": "r10d5e6f",
+      "maxCapacity": 4,
+      "day": "upcoming",
+      "testData": "test",
+      "collection": "sessions"
+     },
+     {
+      "id": "s17f2e3d",
+      "time": "15:00 - 16:00",
+      "startDate": "2026-08-19T13:00:00.000Z",
+      "day": "today",
+      "title": "Open Slot (Drop-in)",
+      "location": "Trib gym base",
+      "participants": [],
+      "routineId": "r11d5e6f",
+      "maxCapacity": 3,
+      "testData": "test",
+      "collection": "sessions"
+     },
+     {
+      "id": "ser01f2e3",
+      "title": "Tuesday & Thursday Strength",
+      "startDate": "2026-08-12",
+      "weekdays": [
+       2,
+       4
+      ],
+      "time": "18:00 - 19:00",
+      "location": "Trib gym base",
+      "participants": [
+       "c1a9f0e2",
+       "c2b8e1d3"
+      ],
+      "routineId": "r12d5e6f",
+      "maxCapacity": 6,
+      "testData": "test",
+      "collection": "sessionSeries"
+     },
+     {
+      "seriesId": "ser01f2e3",
+      "occurrenceDate": "2026-08-13",
+      "title": "Tuesday & Thursday Strength",
+      "time": "18:00 - 19:00",
+      "startDate": "2026-08-13T16:00:00.000Z",
+      "day": "yesterday",
+      "location": "Trib gym base",
+      "participants": [
+       "c1a9f0e2",
+       "c2b8e1d3"
+      ],
+      "routineId": "r12d5e6f",
+      "maxCapacity": 6,
+      "id": "snapCancelled01",
+      "cancelled": true,
+      "collection": "sessions"
+     },
+     {
+      "id": "snapInvite01",
+      "sessionId": "s00f2e3d",
+      "clientId": "c4d6c3b5",
+      "channel": "email",
+      "sentAt": "2026-08-19T09:00:00.000Z",
+      "status": "sent",
+      "collection": "invites"
+     },
+     {
+      "id": "spot-cancellation-1",
+      "type": "cancellation",
+      "icon": "fa-solid fa-calendar-xmark",
+      "titleKey": "notif_spot_cancel_title",
+      "descKey": "notif_spot_cancel_desc",
+      "actions": [],
+      "testData": "test",
+      "collection": "notifications"
+     },
+     {
+      "id": "spot-reservation-1",
+      "type": "reservation",
+      "icon": "fa-solid fa-calendar-check",
+      "titleKey": "notif_spot_res_title",
+      "descKey": "notif_spot_res_desc",
+      "actions": [],
+      "testData": "test",
+      "collection": "notifications"
+     },
+     {
+      "id": "ss081326",
+      "seriesId": "ser01f2e3",
+      "occurrenceDate": "2026-08-13",
+      "title": "Tuesday & Thursday Strength",
+      "time": "18:00 - 19:00",
+      "startDate": "2026-08-13T16:00:00.000Z",
+      "day": "yesterday",
+      "location": "Trib gym base",
+      "participants": [
+       "c1a9f0e2",
+       "c2b8e1d3"
+      ],
+      "routineId": "r12d5e6f",
+      "maxCapacity": 6,
+      "completed": true,
+      "testData": "test",
+      "collection": "sessions"
+     },
+     {
+      "id": "ss081826",
+      "seriesId": "ser01f2e3",
+      "occurrenceDate": "2026-08-18",
+      "title": "Tuesday & Thursday Strength",
+      "time": "18:00 - 19:00",
+      "startDate": "2026-08-18T16:00:00.000Z",
+      "day": "yesterday",
+      "location": "Trib gym base",
+      "participants": [
+       "c1a9f0e2",
+       "c2b8e1d3"
+      ],
+      "routineId": "r12d5e6f",
+      "maxCapacity": 6,
+      "completed": true,
+      "testData": "test",
+      "collection": "sessions"
+     },
+     {
+      "id": "u001f2e3",
+      "clientId": "c1a9f0e2",
+      "clientName": "Jane Doe",
+      "date": "2026-07-06T11:00:00.000Z",
+      "exerciseName": "Barbell Bench Press",
+      "tag": "Too Easy - Increase Load",
+      "resolved": false,
+      "testData": "test",
+      "collection": "planUpdates"
+     },
+     {
+      "id": "u002f2e3",
+      "clientId": "c2b8e1d3",
+      "clientName": "John Smith",
+      "date": "2026-07-08T17:30:00.000Z",
+      "exerciseName": "Barbell Back Squat",
+      "tag": "Form Break - Depth Alert",
+      "resolved": false,
+      "testData": "test",
+      "collection": "planUpdates"
+     },
+     {
+      "id": "u003f2e3",
+      "clientId": "c8b28799",
+      "clientName": "Simon",
+      "date": "2026-07-12T15:10:00.000Z",
+      "exerciseName": "Dumbbell Bench Press",
+      "tag": "Too Easy - Increase Load",
+      "resolved": false,
+      "testData": "test",
+      "collection": "planUpdates"
+     }
+    ]
+   }
+  ]
+ },
+ "localStorage": {
+  "librept_active_session": "{\"id\":\"s01f2e3d\",\"startTime\":1787129700000,\"duration\":300,\"participants\":[\"c1a9f0e2\",\"c2b8e1d3\"],\"clientRoutines\":{\"c1a9f0e2\":{\"routineId\":\"r12d5e6f\",\"routineName\":\"Tri-Set Metabolic Conditioning\",\"activeExerciseIndex\":4,\"exercises\":[{\"id\":\"e19a2b3c\",\"name\":\"Face Pulls\",\"category\":\"Back\",\"instructions\":\"Pull rope attachment from high pulley towards forehead, pulling elbows wide.\",\"setsTargetCount\":1,\"repsTarget\":\"10 reps (light)\",\"weightTarget\":5,\"loadUnit\":\"level\",\"modality\":\"strength\",\"metric\":\"reps\",\"rest\":0,\"circuitId\":\"z06a2b3c\",\"circuitTitle\":\"Dynamic Warmup\",\"circuitSeries\":1},{\"id\":\"e38c4d5e\",\"name\":\"Walking Lunges\",\"category\":\"Legs\",\"instructions\":\"Step forward lunging down, alternating legs.\",\"setsTargetCount\":1,\"repsTarget\":\"10 reps\",\"weightTarget\":0,\"loadUnit\":\"bw\",\"modality\":\"strength\",\"metric\":\"reps\",\"rest\":30,\"circuitId\":\"z06a2b3c\",\"circuitTitle\":\"Dynamic Warmup\",\"circuitSeries\":1},{\"id\":\"e18a2b3c\",\"name\":\"Single-Arm Dumbbell Row\",\"category\":\"Back\",\"instructions\":\"Place one knee/hand on bench, pull dumbbell to hip with other arm.\",\"setsTargetCount\":3,\"repsTarget\":\"10 per arm\",\"weightTarget\":18,\"loadUnit\":\"kg\",\"modality\":\"strength\",\"metric\":\"reps\",\"rest\":0,\"circuitId\":\"z07a2b3c\",\"circuitTitle\":\"Tri-Set Metabolic Circuit\",\"circuitSeries\":3},{\"id\":\"e14a2b3c\",\"name\":\"Push-Ups\",\"category\":\"Chest\",\"instructions\":\"Keep body in a straight plank, lower chest to floor, and push back up.\",\"setsTargetCount\":3,\"repsTarget\":\"Max\",\"weightTarget\":0,\"loadUnit\":\"bw\",\"modality\":\"strength\",\"metric\":\"reps\",\"rest\":0,\"circuitId\":\"z07a2b3c\",\"circuitTitle\":\"Tri-Set Metabolic Circuit\",\"circuitSeries\":3},{\"id\":\"e38c4d5e\",\"name\":\"Walking Lunges\",\"category\":\"Legs\",\"instructions\":\"Step forward lunging down, alternating legs.\",\"setsTargetCount\":3,\"repsTarget\":40,\"weightTarget\":0,\"loadUnit\":\"bw\",\"modality\":\"strength\",\"metric\":\"reps\",\"rest\":60,\"circuitId\":\"z07a2b3c\",\"circuitTitle\":\"Tri-Set Metabolic Circuit\",\"circuitSeries\":3},{\"id\":\"e23b3c4d\",\"name\":\"Dumbbell Goblet Squat\",\"category\":\"Legs\",\"instructions\":\"Hold a single dumbbell vertically at chest height, squat deep.\",\"setsTargetCount\":3,\"repsTarget\":\"12 reps\",\"weightTarget\":16,\"loadUnit\":\"kg\",\"modality\":\"strength\",\"metric\":\"reps\",\"rest\":0,\"circuitId\":\"z08a2b3c\",\"circuitTitle\":\"Leg & Hinge Circuit\",\"circuitSeries\":3},{\"id\":\"e21b3c4d\",\"name\":\"Romanian Deadlift (RDL)\",\"category\":\"Legs\",\"instructions\":\"Hinge at hips with micro-bend in knees, lower weight down shins, squeeze glutes to stand.\",\"setsTargetCount\":3,\"repsTarget\":\"10 reps\",\"weightTarget\":45,\"loadUnit\":\"kg\",\"modality\":\"strength\",\"metric\":\"reps\",\"rest\":90,\"circuitId\":\"z08a2b3c\",\"circuitTitle\":\"Leg & Hinge Circuit\",\"circuitSeries\":3},{\"id\":\"e34c4d5e\",\"name\":\"Plank\",\"category\":\"Core\",\"instructions\":\"Hold straight body line resting on forearms and toes. Squeeze core and glutes.\",\"setsTargetCount\":3,\"repsTarget\":\"45 seconds\",\"weightTarget\":0,\"loadUnit\":\"bw\",\"modality\":\"strength\",\"metric\":\"reps\",\"rest\":0,\"circuitId\":\"z09a2b3c\",\"circuitTitle\":\"Core Finish Burner\",\"circuitSeries\":3},{\"id\":\"e37c4d5e\",\"name\":\"Russian Twist\",\"category\":\"Core\",\"instructions\":\"Sit, lean back slightly, lift feet, rotate torso tapping hands side-to-side.\",\"setsTargetCount\":3,\"repsTarget\":\"20 per side\",\"weightTarget\":0,\"loadUnit\":\"bw\",\"modality\":\"strength\",\"metric\":\"reps\",\"rest\":60,\"circuitId\":\"z09a2b3c\",\"circuitTitle\":\"Core Finish Burner\",\"circuitSeries\":3},{\"id\":\"e41d5e6f\",\"name\":\"Assault Bike\",\"category\":\"Cardio\",\"instructions\":\"Sustained air-bike intervals; drive with arms and legs to the calorie target.\",\"setsTargetCount\":1,\"repsTarget\":20,\"weightTarget\":0,\"loadUnit\":\"kg\",\"modality\":\"cardio\",\"metric\":\"calories\",\"rest\":60,\"circuitId\":null,\"circuitTitle\":\"\",\"circuitSeries\":1},{\"id\":\"e46e6f7a\",\"name\":\"Single-Leg Balance\",\"category\":\"Core\",\"instructions\":\"Stand on one leg, hips level and core braced; hold for the target time per side.\",\"setsTargetCount\":2,\"repsTarget\":\"45s\",\"weightTarget\":0,\"loadUnit\":\"bw\",\"modality\":\"balance\",\"metric\":\"hold\",\"rest\":30,\"circuitId\":null,\"circuitTitle\":\"\",\"circuitSeries\":1},{\"id\":\"e39c4d5e\",\"name\":\"Shoulder & Lat Stretch\",\"category\":\"Recovery\",\"instructions\":\"Hold child pose and lateral lat stretches for 30s.\",\"setsTargetCount\":1,\"repsTarget\":\"30s hold\",\"weightTarget\":0,\"loadUnit\":\"bw\",\"modality\":\"stretch\",\"metric\":\"hold\",\"rest\":0,\"circuitId\":\"z10a2b3c\",\"circuitTitle\":\"Longevity Cooldown & Stretching\",\"circuitSeries\":1},{\"id\":\"e40c4d5e\",\"name\":\"Hamstring & Hip Stretch\",\"category\":\"Recovery\",\"instructions\":\"Static hamstring stretch and hip flexor stretch, hold 30s per side.\",\"setsTargetCount\":1,\"repsTarget\":\"30s hold\",\"weightTarget\":0,\"loadUnit\":\"bw\",\"modality\":\"stretch\",\"metric\":\"hold\",\"rest\":0,\"circuitId\":\"z10a2b3c\",\"circuitTitle\":\"Longevity Cooldown & Stretching\",\"circuitSeries\":1}],\"logs\":{\"e19a2b3c\":[{\"reps\":\"10 reps (light)\",\"weight\":5,\"completed\":true,\"note\":\"\"}],\"e38c4d5e\":[{\"reps\":40,\"weight\":0,\"completed\":true,\"note\":\"\"},{\"reps\":40,\"weight\":0,\"completed\":true,\"note\":\"\"},{\"reps\":40,\"weight\":0,\"completed\":true,\"note\":\"\"}],\"e18a2b3c\":[{\"reps\":\"10 per arm\",\"weight\":18,\"completed\":true,\"note\":\"\"},{\"reps\":\"10 per arm\",\"weight\":18,\"completed\":true,\"note\":\"\"},{\"reps\":\"10 per arm\",\"weight\":18,\"completed\":true,\"note\":\"\"}],\"e14a2b3c\":[{\"reps\":\"Max\",\"weight\":0,\"completed\":true,\"note\":\"\"},{\"reps\":\"Max\",\"weight\":0,\"completed\":true,\"note\":\"\"},{\"reps\":\"Max\",\"weight\":0,\"completed\":true,\"note\":\"\"}],\"e23b3c4d\":[{\"reps\":\"12 reps\",\"weight\":16,\"completed\":false,\"note\":\"\"},{\"reps\":\"12 reps\",\"weight\":16,\"completed\":false,\"note\":\"\"},{\"reps\":\"12 reps\",\"weight\":16,\"completed\":false,\"note\":\"\"}],\"e21b3c4d\":[{\"reps\":\"10 reps\",\"weight\":45,\"completed\":false,\"note\":\"\"},{\"reps\":\"10 reps\",\"weight\":45,\"completed\":false,\"note\":\"\"},{\"reps\":\"10 reps\",\"weight\":45,\"completed\":false,\"note\":\"\"}],\"e34c4d5e\":[{\"reps\":\"45 seconds\",\"weight\":0,\"completed\":false,\"note\":\"\"},{\"reps\":\"45 seconds\",\"weight\":0,\"completed\":false,\"note\":\"\"},{\"reps\":\"45 seconds\",\"weight\":0,\"completed\":false,\"note\":\"\"}],\"e37c4d5e\":[{\"reps\":\"20 per side\",\"weight\":0,\"completed\":false,\"note\":\"\"},{\"reps\":\"20 per side\",\"weight\":0,\"completed\":false,\"note\":\"\"},{\"reps\":\"20 per side\",\"weight\":0,\"completed\":false,\"note\":\"\"}],\"e41d5e6f\":[{\"reps\":20,\"weight\":0,\"completed\":false,\"note\":\"\"}],\"e46e6f7a\":[{\"reps\":\"45s\",\"weight\":0,\"completed\":false,\"note\":\"\"},{\"reps\":\"45s\",\"weight\":0,\"completed\":false,\"note\":\"\"}],\"e39c4d5e\":[{\"reps\":\"30s hold\",\"weight\":0,\"completed\":false,\"note\":\"\"}],\"e40c4d5e\":[{\"reps\":\"30s hold\",\"weight\":0,\"completed\":false,\"note\":\"\"}]}},\"c2b8e1d3\":{\"routineId\":\"r12d5e6f\",\"routineName\":\"Tri-Set Metabolic Conditioning\",\"activeExerciseIndex\":2,\"exercises\":[{\"id\":\"e19a2b3c\",\"name\":\"Face Pulls\",\"category\":\"Back\",\"instructions\":\"Pull rope attachment from high pulley towards forehead, pulling elbows wide.\",\"setsTargetCount\":1,\"repsTarget\":\"10 reps (light)\",\"weightTarget\":5,\"loadUnit\":\"level\",\"modality\":\"strength\",\"metric\":\"reps\",\"rest\":0,\"circuitId\":\"z06a2b3c\",\"circuitTitle\":\"Dynamic Warmup\",\"circuitSeries\":1},{\"id\":\"e38c4d5e\",\"name\":\"Walking Lunges\",\"category\":\"Legs\",\"instructions\":\"Step forward lunging down, alternating legs.\",\"setsTargetCount\":1,\"repsTarget\":\"10 reps\",\"weightTarget\":0,\"loadUnit\":\"bw\",\"modality\":\"strength\",\"metric\":\"reps\",\"rest\":30,\"circuitId\":\"z06a2b3c\",\"circuitTitle\":\"Dynamic Warmup\",\"circuitSeries\":1},{\"id\":\"e18a2b3c\",\"name\":\"Single-Arm Dumbbell Row\",\"category\":\"Back\",\"instructions\":\"Place one knee/hand on bench, pull dumbbell to hip with other arm.\",\"setsTargetCount\":3,\"repsTarget\":\"10 per arm\",\"weightTarget\":18,\"loadUnit\":\"kg\",\"modality\":\"strength\",\"metric\":\"reps\",\"rest\":0,\"circuitId\":\"z07a2b3c\",\"circuitTitle\":\"Tri-Set Metabolic Circuit\",\"circuitSeries\":3},{\"id\":\"e14a2b3c\",\"name\":\"Push-Ups\",\"category\":\"Chest\",\"instructions\":\"Keep body in a straight plank, lower chest to floor, and push back up.\",\"setsTargetCount\":3,\"repsTarget\":\"Max\",\"weightTarget\":0,\"loadUnit\":\"bw\",\"modality\":\"strength\",\"metric\":\"reps\",\"rest\":0,\"circuitId\":\"z07a2b3c\",\"circuitTitle\":\"Tri-Set Metabolic Circuit\",\"circuitSeries\":3},{\"id\":\"e38c4d5e\",\"name\":\"Walking Lunges\",\"category\":\"Legs\",\"instructions\":\"Step forward lunging down, alternating legs.\",\"setsTargetCount\":3,\"repsTarget\":40,\"weightTarget\":0,\"loadUnit\":\"bw\",\"modality\":\"strength\",\"metric\":\"reps\",\"rest\":60,\"circuitId\":\"z07a2b3c\",\"circuitTitle\":\"Tri-Set Metabolic Circuit\",\"circuitSeries\":3},{\"id\":\"e23b3c4d\",\"name\":\"Dumbbell Goblet Squat\",\"category\":\"Legs\",\"instructions\":\"Hold a single dumbbell vertically at chest height, squat deep.\",\"setsTargetCount\":3,\"repsTarget\":\"12 reps\",\"weightTarget\":16,\"loadUnit\":\"kg\",\"modality\":\"strength\",\"metric\":\"reps\",\"rest\":0,\"circuitId\":\"z08a2b3c\",\"circuitTitle\":\"Leg & Hinge Circuit\",\"circuitSeries\":3},{\"id\":\"e21b3c4d\",\"name\":\"Romanian Deadlift (RDL)\",\"category\":\"Legs\",\"instructions\":\"Hinge at hips with micro-bend in knees, lower weight down shins, squeeze glutes to stand.\",\"setsTargetCount\":3,\"repsTarget\":\"10 reps\",\"weightTarget\":45,\"loadUnit\":\"kg\",\"modality\":\"strength\",\"metric\":\"reps\",\"rest\":90,\"circuitId\":\"z08a2b3c\",\"circuitTitle\":\"Leg & Hinge Circuit\",\"circuitSeries\":3},{\"id\":\"e34c4d5e\",\"name\":\"Plank\",\"category\":\"Core\",\"instructions\":\"Hold straight body line resting on forearms and toes. Squeeze core and glutes.\",\"setsTargetCount\":3,\"repsTarget\":\"45 seconds\",\"weightTarget\":0,\"loadUnit\":\"bw\",\"modality\":\"strength\",\"metric\":\"reps\",\"rest\":0,\"circuitId\":\"z09a2b3c\",\"circuitTitle\":\"Core Finish Burner\",\"circuitSeries\":3},{\"id\":\"e37c4d5e\",\"name\":\"Russian Twist\",\"category\":\"Core\",\"instructions\":\"Sit, lean back slightly, lift feet, rotate torso tapping hands side-to-side.\",\"setsTargetCount\":3,\"repsTarget\":\"20 per side\",\"weightTarget\":0,\"loadUnit\":\"bw\",\"modality\":\"strength\",\"metric\":\"reps\",\"rest\":60,\"circuitId\":\"z09a2b3c\",\"circuitTitle\":\"Core Finish Burner\",\"circuitSeries\":3},{\"id\":\"e41d5e6f\",\"name\":\"Assault Bike\",\"category\":\"Cardio\",\"instructions\":\"Sustained air-bike intervals; drive with arms and legs to the calorie target.\",\"setsTargetCount\":1,\"repsTarget\":20,\"weightTarget\":0,\"loadUnit\":\"kg\",\"modality\":\"cardio\",\"metric\":\"calories\",\"rest\":60,\"circuitId\":null,\"circuitTitle\":\"\",\"circuitSeries\":1},{\"id\":\"e46e6f7a\",\"name\":\"Single-Leg Balance\",\"category\":\"Core\",\"instructions\":\"Stand on one leg, hips level and core braced; hold for the target time per side.\",\"setsTargetCount\":2,\"repsTarget\":\"45s\",\"weightTarget\":0,\"loadUnit\":\"bw\",\"modality\":\"balance\",\"metric\":\"hold\",\"rest\":30,\"circuitId\":null,\"circuitTitle\":\"\",\"circuitSeries\":1},{\"id\":\"e39c4d5e\",\"name\":\"Shoulder & Lat Stretch\",\"category\":\"Recovery\",\"instructions\":\"Hold child pose and lateral lat stretches for 30s.\",\"setsTargetCount\":1,\"repsTarget\":\"30s hold\",\"weightTarget\":0,\"loadUnit\":\"bw\",\"modality\":\"stretch\",\"metric\":\"hold\",\"rest\":0,\"circuitId\":\"z10a2b3c\",\"circuitTitle\":\"Longevity Cooldown & Stretching\",\"circuitSeries\":1},{\"id\":\"e40c4d5e\",\"name\":\"Hamstring & Hip Stretch\",\"category\":\"Recovery\",\"instructions\":\"Static hamstring stretch and hip flexor stretch, hold 30s per side.\",\"setsTargetCount\":1,\"repsTarget\":\"30s hold\",\"weightTarget\":0,\"loadUnit\":\"bw\",\"modality\":\"stretch\",\"metric\":\"hold\",\"rest\":0,\"circuitId\":\"z10a2b3c\",\"circuitTitle\":\"Longevity Cooldown & Stretching\",\"circuitSeries\":1}],\"logs\":{\"e19a2b3c\":[{\"reps\":\"10 reps (light)\",\"weight\":5,\"completed\":true,\"note\":\"\"}],\"e38c4d5e\":[{\"reps\":40,\"weight\":0,\"completed\":true,\"note\":\"\"},{\"reps\":40,\"weight\":0,\"completed\":true,\"note\":\"\"},{\"reps\":40,\"weight\":0,\"completed\":true,\"note\":\"\"}],\"e18a2b3c\":[{\"reps\":\"10 per arm\",\"weight\":18,\"completed\":false,\"note\":\"\"},{\"reps\":\"10 per arm\",\"weight\":18,\"completed\":false,\"note\":\"\"},{\"reps\":\"10 per arm\",\"weight\":18,\"completed\":false,\"note\":\"\"}],\"e14a2b3c\":[{\"reps\":\"Max\",\"weight\":0,\"completed\":false,\"note\":\"\"},{\"reps\":\"Max\",\"weight\":0,\"completed\":false,\"note\":\"\"},{\"reps\":\"Max\",\"weight\":0,\"completed\":false,\"note\":\"\"}],\"e23b3c4d\":[{\"reps\":\"12 reps\",\"weight\":16,\"completed\":false,\"note\":\"\"},{\"reps\":\"12 reps\",\"weight\":16,\"completed\":false,\"note\":\"\"},{\"reps\":\"12 reps\",\"weight\":16,\"completed\":false,\"note\":\"\"}],\"e21b3c4d\":[{\"reps\":\"10 reps\",\"weight\":45,\"completed\":false,\"note\":\"\"},{\"reps\":\"10 reps\",\"weight\":45,\"completed\":false,\"note\":\"\"},{\"reps\":\"10 reps\",\"weight\":45,\"completed\":false,\"note\":\"\"}],\"e34c4d5e\":[{\"reps\":\"45 seconds\",\"weight\":0,\"completed\":false,\"note\":\"\"},{\"reps\":\"45 seconds\",\"weight\":0,\"completed\":false,\"note\":\"\"},{\"reps\":\"45 seconds\",\"weight\":0,\"completed\":false,\"note\":\"\"}],\"e37c4d5e\":[{\"reps\":\"20 per side\",\"weight\":0,\"completed\":false,\"note\":\"\"},{\"reps\":\"20 per side\",\"weight\":0,\"completed\":false,\"note\":\"\"},{\"reps\":\"20 per side\",\"weight\":0,\"completed\":false,\"note\":\"\"}],\"e41d5e6f\":[{\"reps\":20,\"weight\":0,\"completed\":false,\"note\":\"\"}],\"e46e6f7a\":[{\"reps\":\"45s\",\"weight\":0,\"completed\":false,\"note\":\"\"},{\"reps\":\"45s\",\"weight\":0,\"completed\":false,\"note\":\"\"}],\"e39c4d5e\":[{\"reps\":\"30s hold\",\"weight\":0,\"completed\":false,\"note\":\"\"}],\"e40c4d5e\":[{\"reps\":\"30s hold\",\"weight\":0,\"completed\":false,\"note\":\"\"}]}}},\"activeClientId\":\"c1a9f0e2\",\"sourceSession\":{\"id\":\"s01f2e3d\",\"titles\":[\"Group Strength & Conditioning\"],\"day\":\"today\",\"location\":\"Trib gym base\",\"startDate\":\"2026-08-19T08:55:00.000Z\",\"endDate\":\"2026-08-19T11:00:00.000Z\",\"timeLabel\":\"10:00 - 12:00\"},\"feedback\":[]}",
+  "librept_terms_accepted": "1",
+  "librept-theme": "daylight",
+  "librept_lang": "en"
+ }
+}
