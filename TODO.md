@@ -4443,13 +4443,27 @@ erasure done so far was not an anonymisation. Blocks: nothing; it is a data-prot
 
 ## 58. [ ] A preview-only FIELD reaches the backup, although the data model says it cannot
 
-Read from the code 2026-09-17 (Claude), not yet run. [DATA_MODEL.md](docs/DATA_MODEL.md) says "a
-P-only field never reaches a backup". [backupFile.js](src/data/backupFile.js) leaves out only the
+**The intent is right; the code does not carry it out** (Simon, 2026-09-17: a backup is made at
+schema 4, the newest numbered one, never at P). [DATA_MODEL.md](docs/DATA_MODEL.md) says "a P-only
+field never reaches a backup". [backupFile.js](src/data/backupFile.js) leaves out only the
 COLLECTIONS schema 4 does not declare; each record is copied whole through `projectCollection`,
-which keeps every field. So a field declared only in P — today the sessions' `seriesId`,
-`occurrenceDate` and `cancelled` — is written into a file that says it is schema 4, and the star
-write puts it into the `schema4` store too. Either the document or the code is wrong. Blocks: any
-decision to add a field in P only, such as the record badges of §50.3.
+which keeps every field.
+
+**Measured 2026-09-17 (Claude)** with `buildBackupPayload` in Node: a session holding `seriesId`,
+`occurrenceDate` and `cancelled` — fields schema 4 does not declare — came out in a file stamped
+`schemaVersion: 4` with all three. The star write does the same to the `schema4` store, so
+`rebuildPreviewSchemaIfBuildChanged` in [readSchema.js](src/data/readSchema.js) does not lose them
+either, although its comment says it does. The fix is to project a record to its schema's DECLARED
+fields. Blocks: any decision to add a field in P only, such as the record badges of §50.3.
+
+**Proposed with it (Simon), not ruled: write the preview schema as `PREVIEW` instead of `P`**, so the
+stored value says what it is. Found against it (Claude): `P` is stored, not only named — in every
+preview database's `schemaVersion`, in the `schemaP` store name, and in a backup's `runtimeSchema` —
+and two preview installs on real trainers' devices hold it. The migration runner treats an
+unrecognised version as below the floor and replays the chain from 1, which re-asks the language
+question (step 3 → 4), so "PREVIEW" must be taught to rank exactly as "P". P also stops existing the
+day schema 5 is minted. Also: P is not only for development and testing — `CURRENT_SCHEMA_VERSION`
+is "P", so every install runs on it.
 
 ## 57. [ ] The demo story tests count steps
 
