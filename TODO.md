@@ -4414,6 +4414,26 @@ Seen 2026-09-14 on the demo data, while checking §52.2. A past card's badge rea
 Slovenian screen. The app writes a date as ISO everywhere, in every language, so it should read
 2026-07-20, and the word should come from the dictionary.
 
+## 61. [ ] Every install reads the preview schema P — the live schema must not be P
+
+**Ruled 2026-09-17 (Simon): the live schema must not be P; that would be data loss for trainers in
+production.** Checked the same day (Claude), from the code:
+
+- `DEFAULT_READ_SCHEMA` is `"P"` ([recordSchemas.js](src/data/recordSchemas.js), since 93e2b1d,
+  2026-08-10) and `CURRENT_SCHEMA_VERSION` is `"P"` ([migrationSteps.js](src/data/migrationSteps.js)).
+  An install reads P unless its trainer chose another schema ([readSchema.js](src/data/readSchema.js)),
+  and its data is stamped P.
+- On the first boot of every new build, `rebuildPreviewSchemaIfBuildChanged` throws the P store away
+  and rebuilds it from `schema4`, by design losing whatever `schema4` does not hold.
+- **Nothing is lost today only by accident**: the star write copies every field into `schema4`,
+  undeclared ones included (§58), so the rebuild finds them there. The fields this protects are the
+  sessions' `startDate`, `seriesId`, `occurrenceDate` and `cancelled` — declared only in P, and used
+  by live features (a session's time, repeating sessions, cancelled evenings).
+
+**Open, to settle before code:** which numbered schema installs read and are stamped at, and how the
+four fields get into a numbered shape — added to 4 (as `alias` was, §60) or a new schema 5 with its
+own step. Blocks: §58, §60, §50.3's badges, and every change to P.
+
 ## 60. [ ] A numbered schema changed shape without a new number
 
 Raised 2026-09-17 (Simon): in a released product, adding `alias` to schema 4 would have needed a
@@ -4453,8 +4473,10 @@ which keeps every field.
 `occurrenceDate` and `cancelled` — fields schema 4 does not declare — came out in a file stamped
 `schemaVersion: 4` with all three. The star write does the same to the `schema4` store, so
 `rebuildPreviewSchemaIfBuildChanged` in [readSchema.js](src/data/readSchema.js) does not lose them
-either, although its comment says it does. The fix is to project a record to its schema's DECLARED
-fields. Blocks: any decision to add a field in P only, such as the record badges of §50.3.
+either, although its comment says it does. **Do not "fix" this by projecting a record to its
+schema's declared fields before §61 is settled**: today this copy is the only thing keeping the
+preview-only session fields alive on every install, and removing it loses them on the next deploy.
+Blocks: any decision to add a field in P only, such as the record badges of §50.3.
 
 **Proposed with it (Simon), not ruled: write the preview schema as `PREVIEW` instead of `P`**, so the
 stored value says what it is. Found against it (Claude): `P` is stored, not only named — in every
