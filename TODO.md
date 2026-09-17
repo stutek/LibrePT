@@ -4554,6 +4554,24 @@ is moved out of; PREVIEW is the future CI and preview schema; the two mean diffe
 a PREVIEW schema for CI and previews, with a collection only it declares, for testing (asked the same
 day), and retiring the P store.
 
+**Open, to settle before PREVIEW is built (Claude, 2026-09-17): where PREVIEW's data lives.**
+
+- **A store inside the main database, written on every save** (how P worked, 3c20066). Cannot be
+  added on its own: a new store needs the main database's version raised, and that version follows
+  the numbered schemas only (`databaseVersion` in [indexedDb.js](src/data/indexedDb.js)). It would
+  also keep a copy of every trainer's data in a preview store on every phone.
+- **A separate database, opened only by an install that reads PREVIEW** — CI's second pass, or the
+  preview hack — and deleted and rebuilt from schema 4 at every start. This was built on 2026-08-07
+  (59bebf0) and replaced the same day, because back then the preview was meant to be how a trainer
+  moves onto the next schema. Since 2026-09-17 that path is 4 → 5 through the chain, and PREVIEW is
+  a dead branch, which is what the separate database fits: no version raise on the database holding
+  client data, nothing on a phone that never opts in, and discarded at start as ruled. Writes while
+  previewing still reach schema 4, so nothing typed during a preview is lost; what exists only in
+  PREVIEW, such as the test collection, is gone at the next start.
+
+Proposed: the separate database. Blocks: PREVIEW, its test collection, the second browser-test pass
+of §62, and retiring the P store.
+
 **What this changes in the design (Claude):** [DATA_MODEL.md](docs/DATA_MODEL.md) ranks P at 4.5 so
 that 1–4 "migrate up into P" and a P database "re-enters the chain on its own" when 5 is minted —
 exactly the path now forbidden. The document and `schemaRank` change with step 2. Blocks: §58, §60,
