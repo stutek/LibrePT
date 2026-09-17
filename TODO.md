@@ -4545,6 +4545,13 @@ needs P at all is the question; and nothing in the app offers a trainer the choi
 Tested from a frozen device database of a P-era install holding a repeating session, a cancelled
 evening and an invitation (§63), made from today's code before any of this changes.
 
+**Steps 1 and 2 done 2026-09-17** — schema 4 declares the fields and both collections, and
+[previewTransfer.js](src/data/previewTransfer.js) moves what only the P store holds, once, at boot.
+**Also ruled with them (Simon): P is not an alias of PREVIEW** — P is the legacy preview store data
+is moved out of; PREVIEW is the future CI and preview schema; the two mean different things.
+**Still open:** reads still default to P (`DEFAULT_READ_SCHEMA`) and the build still calls its
+version "P" (`CURRENT_SCHEMA_VERSION`); making 4 the read and current version, retiring P, and step 3.
+
 **What this changes in the design (Claude):** [DATA_MODEL.md](docs/DATA_MODEL.md) ranks P at 4.5 so
 that 1–4 "migrate up into P" and a P database "re-enters the chain on its own" when 5 is minted —
 exactly the path now forbidden. The document and `schemaRank` change with step 2. Blocks: §58, §60,

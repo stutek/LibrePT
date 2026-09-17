@@ -103,6 +103,20 @@ export const SCHEMA_4 = {
     routineId: { required: false, type: "string" },
     maxCapacity: { required: false, type: "number" },
     day: { required: false, type: "string" },
+    // The five fields below and the two collections at the end of this shape were declared only in
+    // P until 2026-09-17, while every install already wrote them (TODO §61). Ruled that day
+    // (Simon): schema 4 is the live schema and takes them, accepting that "4" then names a wider
+    // shape than it did — no install or backup may lose them. `startDate` stays optional HERE only
+    // because a schema-4 file written before it existed is still restored as schema 4.
+    startDate: { required: false, type: "string" },
+    // Which evening of which series this row SPEAKS FOR (TODO §35.3a). `occurrenceDate` is the date
+    // the series originally scheduled, never the date the session was moved to: that is what makes
+    // a second invitation a change to the same evening rather than a new one, and what lets the
+    // board show a moved evening once instead of twice.
+    seriesId: { required: false, type: "string" },
+    occurrenceDate: { required: false, type: "string" },
+    // A cancelled evening is a RECORD, not a deletion — the rule would simply produce it again.
+    cancelled: { required: false, type: "boolean" },
   },
   history: {
     id: { required: true, type: "string" },
@@ -140,24 +154,6 @@ export const SCHEMA_4 = {
     descKey: { required: false, type: "string" },
     actions: { required: false, type: "array" },
   },
-};
-
-// Schema 3 (TODO §7.3 item 8 / migrationSteps.js's v2→v3 step): sessions gain a real absolute
-// `startDate` timestamp, required from here on — everything else is unchanged from schema 2.
-export const SCHEMA_P = {
-  ...SCHEMA_4,
-  sessions: {
-    ...SCHEMA_4.sessions,
-    startDate: { required: true, type: "string" },
-    // Which evening of which series this row SPEAKS FOR (TODO §35.3a). `occurrenceDate` is the date
-    // the series originally scheduled, never the date the session was moved to: that is what makes
-    // a second invitation a change to the same evening rather than a new one, and what lets the
-    // board show a moved evening once instead of twice.
-    seriesId: { required: false, type: "string" },
-    occurrenceDate: { required: false, type: "string" },
-    // A cancelled evening is a RECORD, not a deletion — the rule would simply produce it again.
-    cancelled: { required: false, type: "boolean" },
-  },
   // Invitations (TODO §1.6, decided 2026-08-17): an RSVP is a fact about an invitation — it was
   // sent, and this came back — not a property of a person or of a session. `sessions.participants`
   // stays the authoritative attendee list, and an attendee the trainer added by hand simply has no
@@ -167,16 +163,11 @@ export const SCHEMA_P = {
   // phone. That is what makes anonymisation cheap — erasing a client rewrites one client record and
   // leaves every invitation structurally valid, with nothing in it to redact.
   //
-  // PREVIEW-ONLY, deliberately (Simon, 2026-08-17: "not modifying [schema 4] would actually test our
-  // rollout plans"). Declaring a new collection here is the first real exercise of §18.4's
-  // expand-first staging — and it exposed that the staging was a convention nobody enforced: the
-  // fan-out wrote every projected record into every store regardless of what that store's schema
-  // declared, so a "preview-only" collection would have landed in schema 4 and in backups anyway,
-  // undeclared. It is enforced now (stateStore.js's starWrite, backupFile.js).
-  //
-  // The cost is real and is the point: an RSVP does not survive a restore or reach a Drive snapshot
-  // until schema 5 is minted from P. That is what a preview shape MEANS, and it is cheaper to learn
-  // it now, on invitations, than on a trainer's client records later.
+  // Declared first in P alone (Simon, 2026-08-17: "not modifying [schema 4] would actually test our
+  // rollout plans"), which exposed that staging was a convention nobody enforced; it is enforced now
+  // (stateStore.js's starWrite, backupFile.js). Moved into schema 4 on 2026-09-17 (TODO §61): installs
+  // held it in the P store alone, so no backup carried an RSVP. previewTransfer.js brings over what
+  // was written before.
   //
   // `answeredAt` and `sentAt` are INSTANTS — ISO-8601 UTC — never local calendar dates. A response
   // time is only comparable against a cutoff if both are absolute (Simon, 2026-08-17: record the
@@ -196,10 +187,7 @@ export const SCHEMA_P = {
   // make moving one evening indistinguishable from re-timing the lot, so occurrences are derived
   // (domain/sessionSeries.js) and only an evening something happened to becomes a `sessions` row.
   //
-  // PREVIEW-ONLY, like `invites` above and for the same reason: schema 4 is durable and this shape
-  // is still moving. The cost is stated rather than hidden — a series does not survive a restore or
-  // reach a Drive snapshot until schema 5 is minted from P. The evenings a trainer has actually
-  // touched are ordinary sessions and DO survive, which is the half that matters most.
+  // Moved from P into schema 4 with `invites` above, for the same reason (TODO §61).
   //
   // `weekdays` is JavaScript's own numbering (0 = Sunday), the same `getDay()` returns.
   sessionSeries: {
@@ -214,6 +202,17 @@ export const SCHEMA_P = {
     participants: { required: false, type: "array" },
     routineId: { required: false, type: "string" },
     maxCapacity: { required: false, type: "number" },
+  },
+};
+
+// The preview shape P: schema 4 with a session's `startDate` required (migrationSteps.js's v2→v3
+// step derives it). Since 2026-09-17 nothing else differs — the fields and collections P alone
+// used to declare moved into schema 4 (TODO §61).
+export const SCHEMA_P = {
+  ...SCHEMA_4,
+  sessions: {
+    ...SCHEMA_4.sessions,
+    startDate: { required: true, type: "string" },
   },
 };
 

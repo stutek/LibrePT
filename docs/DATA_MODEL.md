@@ -159,6 +159,25 @@ collection cannot be in a stable-schema file, so a restore replaces it with noth
 returns `notCarried` for exactly those, and the confirmation names them separately from everything
 else, because every other collection is *replaced* while these are simply *gone*.
 
+### Schema 4 took the preview collections (2026-09-17)
+
+Ruled by the maintainer (TODO §61): **schema 4 is the live schema**, and nothing an install holds may
+be lost. Every install had written `invites` and `sessionSeries` into its P store alone, and the
+sessions' `startDate`, `seriesId`, `occurrenceDate` and `cancelled` were declared only in P. All of
+them are declared in schema 4 now, accepting that "4" names a wider shape than it did — the
+inconsistency is the price of losing nothing. Backups written from then on carry both collections;
+older backups still do not.
+
+What an install already held in the P store alone is moved once, at boot, by
+[previewTransfer.js](../src/data/previewTransfer.js) — a store copy, not a step of the migration
+chain, because a phone never runs the chain after its first boot. It does nothing on an install with
+no P store. A frozen P-era device database
+([test_device_database_corpus.py](../tests/e2e/test_device_database_corpus.py)) proves it.
+
+**P is not PREVIEW.** P is the preview store existing installs were written with, which this moves
+data out of. The PREVIEW schema that replaces it is for CI and previews only, and is never a step
+between two live versions: a chain 4 → PREVIEW → 5 must not exist.
+
 ### Time values: instants are UTC, calendar dates are local
 
 Two different kinds of value, and mixing them is a silent, off-by-one-day bug:

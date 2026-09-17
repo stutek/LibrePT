@@ -36,6 +36,7 @@ import {
   withTransaction,
 } from "./indexedDb.js";
 import { CURRENT_SCHEMA_VERSION } from "./migrationSteps.js";
+import { transferRecordsOnlyInPreview } from "./previewTransfer.js";
 import {
   ensureLiveSchemasBackfilled,
   liveSchemas,
@@ -403,6 +404,10 @@ export async function loadSavedState() {
     // that still reads localStorage.
     await starWrite(db, migrated);
   }
+
+  // Before anything reads or refills a store: what an older build wrote into the P store alone
+  // (invitations, repeating-session rules) comes into schema 4 first, once (TODO §61).
+  await transferRecordsOnlyInPreview(db);
 
   // Pre-emptive, before the trainer opts into anything (docs/DATA_MODEL.md §4): a store this build
   // just provisioned starts empty and would otherwise only become current at the next save. Filling

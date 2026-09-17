@@ -20,6 +20,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-09-17 — Invitations and repeating sessions reach the backup
+
+### Fixed
+
+- **Invitations and the rules of repeating sessions are now part of schema 4**, so a backup carries
+  them and a restore keeps them. Before, they were kept only in the preview part of the database and
+  a restore removed them (§61).
+- **What an install already held there is moved into schema 4 once, when the app starts.** Nothing
+  the trainer sees changes; the data is simply in the place a backup reads from.
+
 ## 2026-09-17 — Client, exercise and routine forms save as you type
 
 ### Changed

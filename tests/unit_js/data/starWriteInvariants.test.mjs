@@ -148,23 +148,21 @@ test("an older schemas writer missing a newer required field is caught", () => {
 // into the PREVIEW schema first, because doing it that way "would actually test our rollout plans".
 // It did — it found that nothing enforced the boundary. These are that enforcement. ---
 
-test("a schema declares which collections belong in it, and preview-only ones are not in the stable shape", () => {
-  // `invites` is the first preview-only collection. The point of the pair is that the two shapes
-  // genuinely differ — if this ever passes trivially, staging has stopped being exercised.
-  assert.ok(schemas.SCHEMA_P.invites, "P declares invites");
-  assert.equal(schemas.SCHEMA_4.invites, undefined, "4 does not");
-});
+// Since 2026-09-17 no real collection is preview-only (TODO §61 moved `invites` and `sessionSeries`
+// into schema 4), so staging is exercised against a preview shape made up here. Without it, these
+// checks would pass trivially the day the two real shapes stopped differing — which is that day.
+const STAGED_PREVIEW = { ...schemas.SCHEMA_4, drafts: { id: { required: true, type: "string" } } };
 
 test("a record is written only to schemas that declare its collection", () => {
   // The invariant the fan-out has to hold. Before this, every projected record went into every live
   // store regardless — so a preview-only collection was preview-only in name and durable in fact.
-  assert.equal(proj.schemaAcceptsCollection(schemas.SCHEMA_P, "invites"), true);
-  assert.equal(proj.schemaAcceptsCollection(schemas.SCHEMA_4, "invites"), false);
+  assert.equal(proj.schemaAcceptsCollection(STAGED_PREVIEW, "drafts"), true);
+  assert.equal(proj.schemaAcceptsCollection(schemas.SCHEMA_4, "drafts"), false);
   // Everything that is not preview-only still goes everywhere, or staging would have quietly become
   // a way to lose ordinary records.
-  for (const collection of ["clients", "sessions", "history", "planUpdates"]) {
+  for (const collection of ["clients", "sessions", "history", "planUpdates", "invites"]) {
     assert.equal(proj.schemaAcceptsCollection(schemas.SCHEMA_4, collection), true, collection);
-    assert.equal(proj.schemaAcceptsCollection(schemas.SCHEMA_P, collection), true, collection);
+    assert.equal(proj.schemaAcceptsCollection(STAGED_PREVIEW, collection), true, collection);
   }
 });
 
@@ -172,11 +170,13 @@ test("the collections a backup carries come from the schema it is written at, no
   // This is the half that had no enforcement at all: backupFile walked the PROJECTOR table, which
   // knows nothing about schemas, so anything projectable rode into the file whatever shape it
   // belonged to.
-  const carried = proj.collectionsForSchema(schemas.LIVE_SCHEMAS[schemas.BACKUP_SCHEMA]);
+  assert.equal(proj.collectionsForSchema(STAGED_PREVIEW).includes("drafts"), false);
 
-  assert.equal(carried.includes("invites"), false, "a preview-only collection is not in a backup");
-  assert.ok(carried.includes("clients"));
-  assert.ok(carried.includes("sessions"));
+  // And what the live schema now carries: invitations and repeating-session rules reach a backup.
+  const carried = proj.collectionsForSchema(schemas.LIVE_SCHEMAS[schemas.BACKUP_SCHEMA]);
+  for (const collection of ["clients", "sessions", "invites", "sessionSeries"]) {
+    assert.ok(carried.includes(collection), collection);
+  }
 });
 
 test("every projectable collection is declared by at least one live schema", () => {

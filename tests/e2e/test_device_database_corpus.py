@@ -64,8 +64,11 @@ LOADED = """async () => {
 }"""
 
 
-def _boot_snapshot(page, local_server, name):
+def _boot_snapshot(page, local_server, name, read_schema=None):
     snapshot = json.loads((DEVICES / name).read_text())
+    if read_schema is not None:
+        # The one thing a test may add: which schema this install reads, as a trainer's choice would.
+        snapshot["localStorage"]["librept_read_schema"] = read_schema
     # A same-origin page that is not the app, so the database is in place before the app first opens it.
     page.goto(local_server + "index.css")
     page.evaluate(RESTORE, snapshot)
@@ -98,3 +101,18 @@ def test_a_p_era_install_keeps_its_repeating_sessions_invitations_and_cancelled_
     assert loaded["series"] == ["ser01f2e3"], "the repeating-session rule was lost"
     assert loaded["invites"] == ["snapInvite01"], "the sent invitation was lost"
     assert "snapCancelled01" in loaded["cancelled"], "the cancelled evening came back"
+
+
+def test_a_p_era_install_read_at_schema_4_keeps_them_too(page, local_server):
+    """Schema 4 is the live schema (TODO §61). Before the P → 4 transfer (src/data/previewTransfer.js)
+    an install reading schema 4 found no repeating-session rule and no invitation, because an older
+    build had written both into its P store alone — measured on this snapshot 2026-09-17."""
+    loaded = _boot_snapshot(page, local_server, "p_era_install.json", read_schema="4")
+
+    assert loaded["series"] == ["ser01f2e3"], (
+        "the repeating-session rule did not reach schema 4"
+    )
+    assert loaded["invites"] == ["snapInvite01"], (
+        "the sent invitation did not reach schema 4"
+    )
+    assert "snapCancelled01" in loaded["cancelled"]
