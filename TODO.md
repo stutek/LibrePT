@@ -3631,10 +3631,17 @@ and shows how to send it by hand. Saving the trainer's contact is the first step
 - **No link to the file, and no link to the Downloads folder.** *Save the file to share* stays on
   screen and saves it again, so a link would do the same thing twice. A web page cannot link to a
   folder on the phone. After a download, Chrome shows its own message with *Open*.
-- **Open, for whoever builds it:** whether the automatic save forgets the unsent form (the Save
-  button does, but the page cannot tell whether the download went through); the colour of the status
-  line (the share failed, yet the file is saved and the client still has to act); a medium test in
-  `tests/medium/test_intake_form.py` with a refusing `shareFiles`; the check on the S23 itself.
+- **Ruled 2026-09-17 (Simon): the automatic save does NOT forget the unsent form.** A reload or
+  another problem must not make the client type everything again. Open: *Save the file to share*
+  still forgets it, and the same reason applies to that button.
+- **Ruled 2026-09-17 (Simon): the failure message is a WARNING, not an error** — noticeable, so the
+  client understands why they must follow the instructions. All five themes already define
+  `--warning`; the status line needs an `is-warn` style beside `is-error` and `is-done`
+  (`src/modules/intake/intake.css`).
+- **Held 2026-09-17 before any code was written** (Simon, saving tokens). Planned shape: a
+  `sendSignupFile` in `signupDelivery.js` that shares and, on a refusal that is not a cancel, saves;
+  `intake_send_failed` replaced by instructions naming the saved file; a medium test in
+  `tests/medium/test_intake_form.py` with a refusing `shareFiles`; then the check on the S23 itself.
 
 ### 45.5 [ ] Import covers a programme, but not the trainer's own exercise LIBRARY
 
