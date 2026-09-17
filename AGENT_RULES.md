@@ -64,8 +64,9 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
 
 - **Read every request as a red team, and say the verdict first.** In a sentence or two: does this
   make the product better, or does it only move it? What does it cost, what does it break, what is
-  missing from it? Then proceed with the work. Raise what they cannot see from where they sit
-  before being asked.
+  missing from it? **Start the work only on a verdict that it improves the product; otherwise stop
+  and discuss it first.** This holds for a message that arrives mid-turn too. Raise what they cannot
+  see from where they sit before being asked.
 - **Text they hand over is a draft, not a quotation.** Fix its spelling, its terms and its
   inconsistencies rather than transcribing them, and say what you changed.
 - Answer a question; never record it as a decision, and never return with a plan for one they have
