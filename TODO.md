@@ -4423,16 +4423,36 @@ production.** Checked the same day (Claude), from the code:
   2026-08-10) and `CURRENT_SCHEMA_VERSION` is `"P"` ([migrationSteps.js](src/data/migrationSteps.js)).
   An install reads P unless its trainer chose another schema ([readSchema.js](src/data/readSchema.js)),
   and its data is stamped P.
-- On the first boot of every new build, `rebuildPreviewSchemaIfBuildChanged` throws the P store away
-  and rebuilds it from `schema4`, by design losing whatever `schema4` does not hold.
-- **Nothing is lost today only by accident**: the star write copies every field into `schema4`,
-  undeclared ones included (§58), so the rebuild finds them there. The fields this protects are the
-  sessions' `startDate`, `seriesId`, `occurrenceDate` and `cancelled` — declared only in P, and used
-  by live features (a session's time, repeating sessions, cancelled evenings).
+- On the first boot of every new build, `rebuildPreviewSchemaIfBuildChanged` copies every `schema4`
+  record over the P store. Its comments say P is discarded; `backfillSchema` only puts and never
+  clears, so what exists only in P stays.
+- **What exists only in P** (measured in Node against `SCHEMA_4` and `SCHEMA_P`): the sessions'
+  fields `startDate`, `seriesId`, `occurrenceDate` and `cancelled`, and two whole collections,
+  `invites` and `sessionSeries` — invitations and the rules of repeating sessions. All are used by
+  live features.
+- **The four fields are safe today only by accident**: the star write copies every field into
+  `schema4`, undeclared ones included (§58), so the copy over P brings them back. **The two
+  collections are in the P store alone**: the star write writes a collection only where its schema
+  declares it, and no backup carries them.
 
-**Open, to settle before code:** which numbered schema installs read and are stamped at, and how the
-four fields get into a numbered shape — added to 4 (as `alias` was, §60) or a new schema 5 with its
-own step. Blocks: §58, §60, §50.3's badges, and every change to P.
+**Ruled 2026-09-17 (Simon): schema 4 is the live schema; P is discarded at every migration.** Also
+ruled: swallow the inconsistency — nothing held in 4 may be lost or thrown away.
+
+**What that settles, and what it does not (Claude):**
+
+- **The four fields: settled.** They are already in `schema4` and in every recent backup; declaring
+  them in `SCHEMA_4` makes the schema say what the data holds, as `alias` did (§60).
+- **The two collections: not settled.** Pointing reads at 4 today would show no invitations and no
+  repeating sessions — the rules sit only in the P store, which is then discarded. They must be
+  declared in `SCHEMA_4` AND copied from the P store into `schema4` once, before reads move.
+- **The stamp: not settled.** Installs are stamped "P", which ranks 4.5, above 4. A build whose
+  current version is 4 refuses data from a newer version, so "P" must be read as 4 — neither refused
+  nor sent back through the chain from 1.
+
+**Proposed order (Claude), not ruled:** declare the fields and both collections in 4; a one-time
+boot copy of `invites` and `sessionSeries` from the P store into `schema4`; read "P" as 4; then make
+4 the read and stamped version. Tested from a fixture of a P-era database holding a repeating session,
+a cancelled evening and an invitation. Blocks: §58, §60, §50.3's badges, and every change to P.
 
 ## 60. [ ] A numbered schema changed shape without a new number
 
