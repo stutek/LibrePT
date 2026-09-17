@@ -4428,6 +4428,16 @@ without a test is a gap either way. A unit test does the same for every collecti
 knows. **It cannot be switched on before §61**: today it would fail at once on the four session
 fields and the `invites` and `sessionSeries` collections.
 
+**Asked with it (Simon): that check protects trainers — how is reading P tested in CI?**
+Proposed (Claude), not ruled: a second pass of the browser tests that reads P instead of 4, with
+the same check held against P's declarations. Its first boot fills P from data written at 4, so it
+proves the upcoming version works on the data trainers hold now. The pass runs only while P differs
+from the live schema — decided by comparing the two declarations, never by a setting — so right after
+a release, when there is no preview shape, it costs nothing. While it runs it roughly doubles the
+browser-test stage, locally and in CI alike. Today
+[test_read_schema_toggle.py](tests/e2e/test_read_schema_toggle.py) proves only that switching
+between the stores keeps them complete, not that the features work on P.
+
 **Open:** how a change to the demo is tested once the demo does not use P (Simon). Proposed: the demo
 runs in the sandbox workspace on the live schema, so its tests are the existing demo tests; a demo
 change that needs a new field needs the schema first, under this same rule.
