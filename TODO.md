@@ -4414,6 +4414,25 @@ Seen 2026-09-14 on the demo data, while checking §52.2. A past card's badge rea
 Slovenian screen. The app writes a date as ISO everywhere, in every language, so it should read
 2026-07-20, and the word should come from the dictionary.
 
+## 58. [ ] A preview-only FIELD reaches the backup, although the data model says it cannot
+
+Read from the code 2026-09-17 (Claude), not yet run. [DATA_MODEL.md](docs/DATA_MODEL.md) says "a
+P-only field never reaches a backup". [backupFile.js](src/data/backupFile.js) leaves out only the
+COLLECTIONS schema 4 does not declare; each record is copied whole through `projectCollection`,
+which keeps every field. So a field declared only in P — today the sessions' `seriesId`,
+`occurrenceDate` and `cancelled` — is written into a file that says it is schema 4, and the star
+write puts it into the `schema4` store too. Either the document or the code is wrong. Blocks: any
+decision to add a field in P only, such as the record badges of §50.3.
+
+## 57. [ ] The demo story tests count steps
+
+Raised 2026-09-17 (Simon): counting cards and steps is fragile. Two counts were removed with
+040bcb9. Still in [test_demo_story.py](tests/e2e/test_demo_story.py): walks that take a fixed
+number of steps from a named start step — "four steps on from `arrive-menu`", then three Backs —
+and one that takes two steps from the top and expects step 3. A step added inside such a stretch
+moves the test onto a different step, and the failure then names a screen, not the insertion. The
+design that cannot fail that way walks until a step with a given id is reached.
+
 ## 56. [ ] A commit is not tied to the tree its gate proved
 
 Found 2026-09-17 (Claude). Commit ccacbdc (Codex, 22:47:27 on 2026-09-15) broke two demo story
