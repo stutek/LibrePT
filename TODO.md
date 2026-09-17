@@ -4449,6 +4449,13 @@ ruled: swallow the inconsistency — nothing held in 4 may be lost or thrown awa
   current version is 4 refuses data from a newer version, so "P" must be read as 4 — neither refused
   nor sent back through the chain from 1.
 
+**Ruled 2026-09-17 (Simon), from schema 5 on: the P database is thrown away whenever a test run
+ends and whenever the app starts, and the app switches to the active database.** P is only ever a
+temporary demo or test. Open with it (Claude): a demo that must survive a reload then cannot live in
+P — the sandbox workspace (§40) is already a separate database for sample data, so whether a demo
+needs P at all is the question; and nothing in the app offers a trainer the choice to read P today
+(only a test sets `librept_read_schema`), which keeps that true only while nobody adds such a choice.
+
 **Proposed order (Claude), not ruled:** declare the fields and both collections in 4; a one-time
 boot copy of `invites` and `sessionSeries` from the P store into `schema4`; read "P" as 4; then make
 4 the read and stamped version. Tested from a fixture of a P-era database holding a repeating session,
