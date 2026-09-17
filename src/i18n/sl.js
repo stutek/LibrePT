@@ -571,6 +571,8 @@ export const sl = {
     "Pritisni ☰ — tri vodoravne črtice zgoraj desno v temni vrstici. Odpre se meni.",
   story_step_trainer_details_show:
     "V meniju pritisni Moji podatki — vrstico z ikono kartice. Obrazec pokaže polja za ime, telefon in e-pošto, ki so navedeni na povabilih za stranke. V tem ogledu jih pusti prazna.",
+  story_step_trainer_details_close:
+    "Pritisni Prekliči na dnu obrazca. Obrazec se zapre, nič se ne shrani.",
   story_chapter_gym: "V telovadnici",
   story_persona_client: "Anin telefon",
   story_chapter_arrive: "Prijatelji se oglasijo",

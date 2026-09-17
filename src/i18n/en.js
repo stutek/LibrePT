@@ -611,6 +611,8 @@ export const en = {
     "Tap ☰ — the three horizontal lines in the top right of the dark bar. The menu opens.",
   story_step_trainer_details_show:
     "Tap My details — the card icon row in the menu. The form shows the name, phone and email fields that sign client invitations. Leave them empty for this demo.",
+  story_step_trainer_details_close:
+    "Tap Cancel at the bottom of the form. The form closes and nothing is saved.",
   story_chapter_gym: "In the gym",
   story_persona_client: "Ana's phone",
   story_chapter_arrive: "Three friends arrive",

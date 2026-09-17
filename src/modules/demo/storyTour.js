@@ -150,6 +150,15 @@ const TRAINER_DETAILS_CHAPTER = {
       caption: "story_step_trainer_details_show",
       expect: { selector: "#dialog-trainer-details", visible: true },
     },
+    {
+      // The form is modal. Left open, it covers the ☰ the next chapter starts from, and the guide
+      // stops there with nothing a viewer can tap (found 2026-09-17, the gate for §50.2).
+      id: "trainer-details-close",
+      persona: TRAINER,
+      target: "#trainer-details-cancel",
+      caption: "story_step_trainer_details_close",
+      expect: { selector: "#dialog-trainer-details", visible: false },
+    },
   ]),
 };
 

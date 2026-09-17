@@ -18,14 +18,20 @@ test("the trainer-details chapter only shows the identity form", () => {
 
   assert.equal(DEMO_STORY.chapters[0], chapter, "details come before client-facing chapters");
   assert.equal(chapter.titleKey, "story_chapter_trainer_details");
-  assert.equal(chapter.steps.length, 2, "the opening card rides on the menu tap");
+  // The chapter's opening card rides on its first tap, and that tap says where the chapter starts.
+  assert.equal(chapter.steps[0].target, "#btn-app-menu");
   assert.ok(
     chapter.steps.every((step) => step.enter === undefined),
     "the demo saves no invented data",
   );
-  assert.deepEqual(chapter.steps.at(-1).expect, {
+  // It shows the form, then closes it: a modal left open covers the ☰ the next chapter starts from.
+  assert.deepEqual(chapter.steps.at(-2).expect, {
     selector: "#dialog-trainer-details",
     visible: true,
+  });
+  assert.deepEqual(chapter.steps.at(-1).expect, {
+    selector: "#dialog-trainer-details",
+    visible: false,
   });
 });
 

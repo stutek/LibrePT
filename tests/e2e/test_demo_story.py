@@ -302,13 +302,13 @@ def test_the_card_holds_still_on_a_step_that_points_at_itself(page, local_server
     _open_story(page, local_server)
     # Walk until a step whose only control is the card itself — the guide hides Show me on exactly
     # those. Found rather than counted, so adding a step to the story does not silently move this
-    # test onto a different one.
-    for _ in range(12):
-        if not page.locator(SHOW_ME).is_visible():
-            break
+    # test onto a different one. The walk stops at the story's own last step, never at a number
+    # written here: a bound of 12 broke the day a chapter went in front (2026-09-17).
+    while page.locator(SHOW_ME).is_visible():
+        step, total = _step_numbers(page)
+        if step >= total:
+            raise AssertionError("no card-only step anywhere in the story")
         _do_step(page)
-    else:
-        raise AssertionError("no card-only step in the story's opening chapter")
     expect(page.locator("#demo-narrator-card")).to_be_visible()
     # Let the step finish arriving before measuring: the panel settles into place once, which is not
     # what this test is about. What it is about is whether it ever stops.
