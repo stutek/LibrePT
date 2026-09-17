@@ -4414,6 +4414,33 @@ Seen 2026-09-14 on the demo data, while checking §52.2. A past card's badge rea
 Slovenian screen. The app writes a date as ISO everywhere, in every language, so it should read
 2026-07-20, and the word should come from the dictionary.
 
+## 60. [ ] A numbered schema changed shape without a new number
+
+Raised 2026-09-17 (Simon): in a released product, adding `alias` to schema 4 would have needed a
+new schema version. Checked against the documents (Claude): two rules disagree.
+[DATA_MODEL.md](docs/DATA_MODEL.md) says a schema major is bumped only when a migration step is
+added, and an added optional field needs no step. The same document says two files declaring the
+same numbered schema have the same shape by definition, and
+[recordSchemas.js](src/data/recordSchemas.js) that a numbered shape does not move. `alias` went into
+schema 4 on 2026-08-11 (fc51141), so "4" now names two shapes.
+
+What that costs once there are released installs: a file or a Drive copy written by the newer build
+is accepted by an older one, which keeps the field but knows nothing of it — cannot show it, and
+cannot clear it on an erasure (§59 shows the newer build forgets it too). **Proposed (Claude), not
+ruled:** after the first release, any change to a numbered shape takes a new number, even when its
+migration step changes no data; until then a new field goes into P. Blocks: where §50.3's record
+badges are declared.
+
+## 59. [ ] Erasing a client keeps their alias
+
+Read from the code 2026-09-17 (Claude), not yet run. `eraseClientRecord` in
+[clientErasure.js](src/data/clientErasure.js) copies the whole client and clears only
+`CLEARED_TEXT_FIELDS` — email, phone, goals, notes, injury. `alias` is not in that list, so an
+anonymised client keeps the trainer's label for them, and the form suggests exactly the words that
+identify a person: "Novak", "with the knee". No test in
+[clientErasure.test.mjs](tests/unit_js/data/clientErasure.test.mjs) checks it. If confirmed, an
+erasure done so far was not an anonymisation. Blocks: nothing; it is a data-protection defect.
+
 ## 58. [ ] A preview-only FIELD reaches the backup, although the data model says it cannot
 
 Read from the code 2026-09-17 (Claude), not yet run. [DATA_MODEL.md](docs/DATA_MODEL.md) says "a
