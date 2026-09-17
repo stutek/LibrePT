@@ -4414,6 +4414,24 @@ Seen 2026-09-14 on the demo data, while checking §52.2. A past card's badge rea
 Slovenian screen. The app writes a date as ISO everywhere, in every language, so it should read
 2026-07-20, and the word should come from the dictionary.
 
+## 62. [ ] Feature code may write only what the live schema declares
+
+**Ruled 2026-09-17 (Simon), a release constraint:** a schema is released before or together with the
+code of a feature that uses it, never after, or the feature breaks for the trainers using it. P is
+only for CI and for previewing an upcoming version; a demo for a client does not need it.
+
+Asked with it: can an E2E scenario cover this? **Proposed (Claude), not ruled:** not one scenario,
+but a check in every browser test. The store records each written record that has a field or a
+collection the live numbered schema does not declare, and the test fails naming it. One scenario
+would only prove the paths it walks; the whole suite walks every feature it tests, and a feature
+without a test is a gap either way. A unit test does the same for every collection a projection
+knows. **It cannot be switched on before §61**: today it would fail at once on the four session
+fields and the `invites` and `sessionSeries` collections.
+
+**Open:** how a change to the demo is tested once the demo does not use P (Simon). Proposed: the demo
+runs in the sandbox workspace on the live schema, so its tests are the existing demo tests; a demo
+change that needs a new field needs the schema first, under this same rule.
+
 ## 61. [ ] Every install reads the preview schema P — the live schema must not be P
 
 **Ruled 2026-09-17 (Simon): the live schema must not be P; that would be data loss for trainers in
