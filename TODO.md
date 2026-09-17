@@ -4441,11 +4441,11 @@ identify a person: "Novak", "with the knee". No test in
 [clientErasure.test.mjs](tests/unit_js/data/clientErasure.test.mjs) checks it. If confirmed, an
 erasure done so far was not an anonymisation. Blocks: nothing; it is a data-protection defect.
 
-## 58. [ ] A preview-only FIELD reaches the backup, although the data model says it cannot
+## 58. [ ] A preview-only field is written into a schema 4 backup
 
-**The intent is right; the code does not carry it out** (Simon, 2026-09-17: a backup is made at
-schema 4, the newest numbered one, never at P). [DATA_MODEL.md](docs/DATA_MODEL.md) says "a P-only
-field never reaches a backup". [backupFile.js](src/data/backupFile.js) leaves out only the
+**By design a backup is made at schema 4, the newest numbered one, never at P** (Simon,
+2026-09-17), so a field that exists only in P is not in it. The preview database is used only for
+testing and demonstrations, never live for a client. [backupFile.js](src/data/backupFile.js) leaves out only the
 COLLECTIONS schema 4 does not declare; each record is copied whole through `projectCollection`,
 which keeps every field.
 
@@ -4459,11 +4459,10 @@ fields. Blocks: any decision to add a field in P only, such as the record badges
 **Proposed with it (Simon), not ruled: write the preview schema as `PREVIEW` instead of `P`**, so the
 stored value says what it is. Found against it (Claude): `P` is stored, not only named — in every
 preview database's `schemaVersion`, in the `schemaP` store name, and in a backup's `runtimeSchema` —
-and two preview installs on real trainers' devices hold it. The migration runner treats an
+and the demonstration installs hold it. The migration runner treats an
 unrecognised version as below the floor and replays the chain from 1, which re-asks the language
 question (step 3 → 4), so "PREVIEW" must be taught to rank exactly as "P". P also stops existing the
-day schema 5 is minted. Also: P is not only for development and testing — `CURRENT_SCHEMA_VERSION`
-is "P", so every install runs on it.
+day schema 5 is minted.
 
 ## 57. [ ] The demo story tests count steps
 
