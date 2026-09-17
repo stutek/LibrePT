@@ -4515,10 +4515,22 @@ P — the sandbox workspace (§40) is already a separate database for sample dat
 needs P at all is the question; and nothing in the app offers a trainer the choice to read P today
 (only a test sets `librept_read_schema`), which keeps that true only while nobody adds such a choice.
 
-**Proposed order (Claude), not ruled:** declare the fields and both collections in 4; a one-time
-boot copy of `invites` and `sessionSeries` from the P store into `schema4`; read "P" as 4; then make
-4 the read and stamped version. Tested from a fixture of a P-era database holding a repeating session,
-a cancelled evening and an invitation. Blocks: §58, §60, §50.3's badges, and every change to P.
+**Ruled 2026-09-17 (Simon), the order:**
+
+1. Schema 4 takes the four session fields and the two collections, `invites` and `sessionSeries` —
+   the inconsistency is accepted.
+2. **A migration step P → 4** brings the records that exist only in the P store into `schema4`.
+3. Then the preview schema is renamed **PREVIEW**.
+4. **PREVIEW is never a step in the migration chain.** It is newer than 4 but a dead branch:
+   4 → PREVIEW → 5 must not exist; the chain runs 4 → 5.
+
+Tested from a frozen device database of a P-era install holding a repeating session, a cancelled
+evening and an invitation (§63), made from today's code before any of this changes.
+
+**What this changes in the design (Claude):** [DATA_MODEL.md](docs/DATA_MODEL.md) ranks P at 4.5 so
+that 1–4 "migrate up into P" and a P database "re-enters the chain on its own" when 5 is minted —
+exactly the path now forbidden. The document and `schemaRank` change with step 2. Blocks: §58, §60,
+§50.3's badges, and every change to P.
 
 ## 60. [ ] A numbered schema changed shape without a new number
 
