@@ -1,14 +1,3 @@
-// src/data/stateStore.js - Application State Management & Storage Persistence
-// Single responsibility: Manages central app state object, default state initialization,
-// demo data seeding, IndexedDB-backed persistence (TODO §18.6 part 4), and database resets.
-//
-// The read model stays synchronous on purpose (see writeQueue.js's header): getState() always
-// returns a fully hydrated, directly-mutable object shaped exactly as it always has, so none of
-// the app's ~115 existing `state.<collection>.push(...)`-style call sites need to change. Only
-// loading at boot and persisting on write move onto IndexedDB. True lazy per-client loading
-// (§17.1's further win) is deliberately NOT part of this — it needs those call sites converted to
-// an async per-client fetch, which is separate, larger follow-up work.
-
 import { BUILD_INFO } from "../version.js";
 import { fingerprintState } from "./backupHealth.js";
 import { applyDemoRemoval, brokenDependenciesAfter, planDemoRemoval } from "./demoDataRemoval.js";
@@ -41,7 +30,7 @@ import {
   ensureLiveSchemasBackfilled,
   liveSchemas,
   readStoreName,
-  rebuildPreviewSchemaIfBuildChanged,
+  refreshPreviewStoreIfBuildChanged,
 } from "./readSchema.js";
 import {
   COLLECTIONS,
@@ -415,11 +404,11 @@ export async function loadSavedState() {
   // every boot after the first for a given schema.
   await ensureLiveSchemasBackfilled(db);
 
-  // AFTER the backfill, so a freshly provisioned stable store is populated before P is rebuilt from
-  // it. P's shape can change on any commit and there is no migration between preview shapes, so a P
-  // store written by a different build is discarded and re-projected from the durable schema4 copy.
-  // Preview-only fields do not survive that, which is the cost the backup/sync warnings name.
-  await rebuildPreviewSchemaIfBuildChanged(db, BUILD_INFO?.commit ?? null);
+  // AFTER the backfill, so a freshly provisioned stable store is populated before PREVIEW could be
+  // filled from it. The PREVIEW store is emptied when the build changes (TODO §61): its shape can
+  // change on any commit, and preview-only records are for testing and demonstrations, never
+  // something to carry forward. Refilled only where it is read; otherwise filled at activation.
+  await refreshPreviewStoreIfBuildChanged(db, BUILD_INFO?.commit ?? null);
 
   state = finalizeLoadedState(await readStateFromIndexedDb(db));
   return state;

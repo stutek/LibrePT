@@ -4619,8 +4619,15 @@ main database, provisioned and written like schema 4 and 5 and 6 will be. Done 2
 - The P store is no longer written. It stays on disk, and [previewTransfer.js](src/data/previewTransfer.js)
   still reads it once on an install that has one.
 
-**Still open:** discarding the PREVIEW store at every app start and at the end of a test run, which
-Simon ruled for schema 5 on; and the second browser-test pass that reads PREVIEW (§62).
+**Done 2026-09-18: the PREVIEW store is emptied when the build changes**, and refilled from schema 4
+only where it is read — at activation (`setReadSchema`) or for an install already on it. Emptying at
+every start was written first, on the earlier ruling, and Simon changed it the same day: a preview
+session spans reloads, and CI's second pass reads the store on every navigation, so an empty store at
+each start left it reading nothing. Filling it for an install that never asks would cost a projection
+pass on every boot — 22ms for the demo set, about 400ms at 3,000 records.
+
+**Still open:** the second browser-test pass that reads PREVIEW (§62), and discarding preview data at
+the end of a test run.
 
 ## 60. [ ] A numbered schema changed shape without a new number
 

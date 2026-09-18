@@ -123,44 +123,51 @@ async function backfillSchema(db, schema, sourceSchema) {
 }
 
 /**
- * Pre-emptively ready every live schema, so an upgrade offer is never followed by a wait. Runs at
- * boot; a no-op on every boot after the first for a given schema, costing one meta read each.
+ * Pre-emptively ready every NUMBERED live schema, so an upgrade offer is never followed by a wait.
+ * Runs at boot; a no-op on every boot after the first for a given schema, costing one meta read each.
  *
  * The schema currently being read is the source and is authoritative by definition — it is never
  * itself backfilled, which is what stops a newly provisioned empty store from overwriting the data.
+ *
+ * PREVIEW is left out: it is discarded at every start and filled only for an install that reads it
+ * (`discardPreviewStoreAtBoot`), and filled at activation, so filling it here would be work undone.
  */
 export async function ensureLiveSchemasBackfilled(db) {
   const source = getReadSchema();
   for (const schema of liveSchemas()) {
     if (schema === source) continue;
+    if (String(schema) === String(PREVIEW_VERSION)) continue;
     if (await isBackfilled(db, schema)) continue;
     await backfillSchema(db, schema, source);
   }
 }
 
-// The build that last wrote the preview store. Absent means unknown, which is treated as stale —
-// see rebuildPreviewSchemaIfBuildChanged.
+// The build that last wrote the preview store. Absent means unknown, which counts as changed.
 const PREVIEW_BUILD_KEY = "previewBuild";
 
 /**
- * Rebuild the preview store from the stable one whenever the build has changed.
+ * Throw the PREVIEW store away when the build has changed, and refill it only for an install that
+ * reads it.
  *
- * PREVIEW's fields can change on any commit, so a PREVIEW store written by a different build cannot be
- * trusted to have the shape this build expects — and there is no migration to fix that, because
- * PREVIEW is never a version migrations run between. The answer is not to migrate it but to DISCARD
- * it: schema4 holds the durable copy, so PREVIEW is a projection that can always be rebuilt.
+ * Ruled 2026-09-17/18 (Simon, TODO §61): PREVIEW is for CI and for previewing an upcoming version,
+ * never live for a client, and it is emptied when the build number changes. Within one build it is
+ * kept, because a preview session spans reloads — CI's second pass reads it across every navigation,
+ * and emptying at every start left it reading an empty store.
  *
- * An ABSENT marker counts as changed. A database written before this bookkeeping existed cannot say
- * which build produced it, and "unknown" must resolve to the safe branch — rebuilding from the
- * stable copy costs a projection pass, while trusting an unknown shape risks reading fields that
- * are not there.
+ * Filled only where it is READ: at activation (`setReadSchema`) or here, for an install already on it.
+ * Filling a store nobody has asked for would put a projection pass on every start for every trainer —
+ * measured at 22ms for the 90-record demo set and about 400ms at 3,000 records.
  *
- * What this loses, by design: any preview-only field, since it exists in PREVIEW and not in schema4. That
- * is the same cost the backup surfaces warn about, applied at the same boundary.
+ * An ABSENT marker counts as changed: a database written before this bookkeeping existed cannot say
+ * which build produced it, and "unknown" must resolve to the safe branch. Its fields can change on any
+ * commit, so a store written by another build cannot be trusted to have the shape this build expects —
+ * and there is no migration to fix that, because PREVIEW is never a version migrations run between.
+ * Anything that exists only in PREVIEW, such as `previewProbe`, goes with the discard, which is the
+ * same cost the backup and sync surfaces warn about.
  */
-export async function rebuildPreviewSchemaIfBuildChanged(db, currentBuildSha) {
+export async function refreshPreviewStoreIfBuildChanged(db, currentBuildSha) {
   const previewStore = storeNameForSchema(PREVIEW_VERSION);
-  if (!db.objectStoreNames.contains(previewStore)) return { rebuilt: false };
+  if (!db.objectStoreNames.contains(previewStore)) return { cleared: false, filled: false };
 
   const entry = await getMetaEntry(
     db.transaction([META_STORE], "readonly").objectStore(META_STORE),
@@ -168,19 +175,26 @@ export async function rebuildPreviewSchemaIfBuildChanged(db, currentBuildSha) {
   );
   const storedBuild = entry?.value ?? null;
   if (storedBuild && currentBuildSha && storedBuild === currentBuildSha) {
-    return { rebuilt: false };
+    return { cleared: false, filled: false };
   }
 
-  await backfillSchema(db, PREVIEW_VERSION, STABLE_SCHEMA);
-  await withTransaction(db, [META_STORE], "readwrite", ({ store }) => {
+  // The rows, the "backfilled" marker and the build stamp go in ONE transaction: a kill between them
+  // would leave an empty store still claiming to be complete, which a later activation reads as ready.
+  await withTransaction(db, [previewStore, META_STORE], "readwrite", ({ store }) => {
+    store(previewStore).clear();
+    store(META_STORE).delete(backfilledKey(PREVIEW_VERSION));
     store(META_STORE).put({ key: PREVIEW_BUILD_KEY, value: currentBuildSha ?? null });
   });
-  return { rebuilt: true, from: storedBuild };
+
+  if (String(getReadSchema()) !== String(PREVIEW_VERSION)) return { cleared: true, filled: false };
+  await backfillSchema(db, PREVIEW_VERSION, STABLE_SCHEMA);
+  return { cleared: true, filled: true };
 }
 
 /**
- * Move this install onto `schema`. Backfills first if the boot pass has not already — so the switch
- * cannot land on a store that is not ready — then persists the choice. Reversible: the schema being
+ * Move this install onto `schema` — the ACTIVATION a preview schema is filled by (TODO §61). Backfills
+ * first if the boot pass has not already — so the switch cannot land on a store that is not ready —
+ * then persists the choice. Reversible: the schema being
  * left is still written by every save, so switching back is the same operation in reverse and needs
  * no migration either way.
  */

@@ -43,6 +43,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   longer written; what an install held there was already moved into schema 4.
 - **The database is upgraded only when a store is missing**, rather than by schema number. Retiring a
   preview no longer lowers the database version, which a browser refuses to open.
+- **Preview data is cleared when the app is updated**, and rebuilt only on a device that is actually
+  showing the preview. A device that never asks for it does no extra work at start.
 
 ### Fixed
 

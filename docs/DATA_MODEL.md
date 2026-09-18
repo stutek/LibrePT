@@ -571,10 +571,12 @@ The two halves of the star are asymmetric on purpose, and the asymmetry is the i
 what this build reads and stamps, what a backup is written at, and the copy `schemaPREVIEW` is rebuilt
 FROM. `schemaPREVIEW` is for CI and for previewing an upcoming version, and is disposable: its fields
 can change on any commit, so it is never a source of truth for anything that has to outlive the build. On boot, if the recorded build SHA does not match the
-running one — **or is absent, which counts as not matching** — the preview store is discarded and
-re-projected from `schema4` (`rebuildPreviewSchemaIfBuildChanged`). There is no migration between
-preview shapes, and there does not need to be: the durable copy makes PREVIEW rebuildable rather than
-something that must be preserved. Preview-only fields do not survive that rebuild, which is the same
+running one — **or is absent, which counts as not matching** — the preview store is emptied, and
+re-projected from `schema4` only for an install that READS it; otherwise it is filled at activation
+(`refreshPreviewStoreIfBuildChanged` and `setReadSchema`, TODO §61). Emptying at every start was tried
+and reverted the same day: a preview session spans reloads, and CI's second pass reads the store on
+every navigation. There is no migration between preview shapes, and there does not need to be: the
+durable copy makes PREVIEW rebuildable rather than something that must be preserved. Preview-only fields do not survive that rebuild, which is the same
 cost the backup and sync surfaces warn about, applied at the same boundary.
 
 - **Reads come from one DECLARED schema**, never derived. `DEFAULT_READ_SCHEMA` in
