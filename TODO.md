@@ -4437,7 +4437,17 @@ tree, each red in a different place:
 **Not the change under test:** boot timing measured five times on the working tree and five on HEAD —
 939/2098/1695/1686/1732 ms against 989/2033/1762/1734/1739 ms.
 
-**Open:** what the three have in common. Two are about a measurement taken before the app has settled
+- **16:19** — stage 2 again, three at once: `test_a_demo_store_is_named_a_demo` (`window.showBuildState
+  is not a function`, i.e. the stub's module never finished loading), `test_the_trainer_sees_what_the_gym
+  _said_while_shaping_the_next_plan` and `test_a_slot_field_is_the_app_s_own_control_not_the_browser_s`,
+  both timing out on a selector. The three files alone: 23 passed in 16s.
+
+**The pattern, after five runs: the gate passes on an idle machine and fails on a busy one.** The one
+green run started at load 1.45; every red one started at 3.0 or higher, with the five-minute average
+between 8 and 13 — mostly from the targeted test runs used to check the change before gating. The dev
+server is already threaded (`ThreadingHTTPServer`), so it is not the single bottleneck it looked like.
+
+**Open:** what the failures have in common. Two are about a measurement taken before the app has settled
 (a boot wait, a layout read), which is the shape that fails under load; the ZAP one is its own. A gate
 that is red for a reason nobody can name is a gate nobody will believe — and rules forbid re-running a
 failure away, so this blocks every commit while it lasts.
