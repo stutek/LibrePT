@@ -4443,8 +4443,28 @@ carries (§61) were added after the sweep was written:
 Also worth stating for the receipt: `joinedDate` and `gdprConsent` survive by design (evidence under
 Art. 7(1)), and `notifications` carry i18n keys rather than typed text.
 
+**Ruled 2026-09-18 (Simon): the erasure runs again** — after every migration, and, since walking the
+erased clients is cheap, at every start.
+
+**What that repairs, and what it cannot** (Claude, from the code):
+
+- **It repairs what needs no name:** the alias a build before 2026-09-18 left behind, and anything a
+  later sweep learns to clear. Cheap and idempotent — an erased record keeps its original dates
+  (`eraseClientRecord` returns early on `client.erasure`).
+- **It cannot repair prose.** Scrubbing a name out of a session title, a location or a feedback note
+  needs the name, and after the first erasure the name is gone. So a title that was left for the
+  trainer to review stays as typed, for ever, unless they fix it by hand.
+- **The import path is the exception, and it is the strong one.** A restored backup still carries the
+  name, and [erasureSuppression.js](src/data/erasureSuppression.js) already re-erases on the way in —
+  so there the full sweep, prose included, runs again.
+- **Who to walk.** The register stores a salted hash per id and nothing else, so it cannot be listed;
+  the erased clients are found on the records themselves (`isErased`), and the register stays what it
+  is for — recognising a record arriving from outside.
+
 **Open:** whether an erasure removes the person from a repeating rule or refuses to touch it and
-reports it like an ambiguous session title, and how the receipt says which it did.
+reports it like an ambiguous session title, and how the receipt says which it did; and whether the
+boot pass runs every time or only when the sweep itself has changed (a marker, like the preview
+store's build stamp).
 
 ## 64. [ ] The gate fails on a different test each run, and each one passes on its own
 
