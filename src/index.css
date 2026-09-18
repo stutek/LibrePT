@@ -758,6 +758,17 @@ h6 {
 .form-control:focus {
   border-color: var(--primary);
 }
+/* A field the app refused to save, and the word it refused it for (TODO §66). The border says WHICH
+   field without reading, the word says WHICH part of what was typed — the sentence under the field
+   still carries the reason, because a red edge on its own explains nothing. */
+.form-control.is-invalid,
+.form-control.is-invalid:focus {
+  border-color: var(--danger);
+}
+.form-error-word {
+  font-weight: 800;
+  text-decoration: underline;
+}
 textarea.form-control {
   resize: vertical;
 } /* Compact Workout Setup Modal Styling */

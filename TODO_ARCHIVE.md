@@ -20,6 +20,29 @@ Read [CHANGELOG.md](CHANGELOG.md) for what shipped and when. This file is why.
 
 ---
 
+### 66. [x] A session may not be named after a client — shipped 2026-09-18
+
+**Ruled 2026-09-18 (Simon)**, after asking how trainers are kept from putting names into session
+titles: check every single word against every client's name and REFUSE the save, with a message the
+trainer can act on. Then: match whole words only, outline the field, and show the offending word in
+the message, bold and coloured.
+
+**Why refusing beats cleaning up.** A name typed into a session's name or location is a name the app
+can never take out again: scrubbing prose needs the name, and after an erasure the name is gone
+(§65). The participants are already on the record as ids, so the name adds nothing the app did not
+know.
+
+**What shipped.** [clientNameWords.js](src/domain/clientNameWords.js) folds case and accents, splits
+on anything that is not a letter or a digit, and takes names, surnames and aliases from three
+characters up — two-letter names would refuse ordinary titles and leave a trainer unable to start a
+session. An erased client's pseudonym is not blocked. The session form checks the name and the
+location before anything else, outlines the field, and quotes the word back in bold.
+
+What it deliberately does not cover: free text elsewhere — a routine's name, a feedback note, a gym
+note — which stayed open as §67.
+
+---
+
 ### 59. [x] Erasing a client keeps their alias — fixed 2026-09-18
 
 Found 2026-09-17 (Claude) while checking what a numbered schema may carry: `eraseClientRecord` in

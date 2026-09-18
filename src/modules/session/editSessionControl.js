@@ -9,6 +9,7 @@ import {
   removeVersionScoped,
   writeVersionScoped,
 } from "../../data/storageNamespace.js";
+import { clientNameWords, clientNamesIn } from "../../domain/clientNameWords.js";
 import {
   BUSY_ELSEWHERE,
   MERGES_INTO_ONE_CLIPBOARD,
@@ -481,6 +482,55 @@ function readSessionFormFields(t) {
 // An untitled planning draft still needs something a trainer can recognise in the feed.
 const plannedProgramLabel = (t) => t("planned_program") || "Planned Program";
 
+// A client's name may not be typed into a session's name or location (TODO §66, ruled 2026-09-18).
+// Refused at the moment of saving, not scrubbed afterwards: prose can only be scrubbed while the name
+// is still known, and after an erasure it is gone (§65). The sentence under the field carries the
+// reason and quotes the word back, bold, so the trainer can see which part of their own title it
+// means; the field itself is outlined so they can see WHICH field without reading anything.
+function showNameWordProblem(field, message, word, t) {
+  field.classList.add("is-invalid");
+  const [before, after] = String(t(message) || "").split("{word}");
+  const line = document.getElementById(`${field.id}-error`);
+  if (!line) return;
+  line.replaceChildren();
+  line.append(before ?? "");
+  const quoted = document.createElement("strong");
+  quoted.className = "form-error-word";
+  // textContent, never markup: the word came from a person typing into a field.
+  quoted.textContent = word;
+  line.append(quoted, after ?? "");
+  line.hidden = false;
+}
+
+function clearNameWordProblem(field) {
+  field.classList.remove("is-invalid");
+  const line = document.getElementById(`${field.id}-error`);
+  if (line) {
+    line.hidden = true;
+    line.replaceChildren();
+  }
+}
+
+/** True when the form may be saved: neither the session's name nor its location names a client. */
+function sessionTextNamesNobody(deps) {
+  const words = clientNameWords(deps.getState?.().clients || []);
+  let allowed = true;
+  for (const [id, key] of [
+    ["setup-session-name", "session_name_has_client_name"],
+    ["setup-location", "session_location_has_client_name"],
+  ]) {
+    const field = document.getElementById(id);
+    if (!field) continue;
+    clearNameWordProblem(field);
+    const [named] = clientNamesIn(field.value, words);
+    if (!named) continue;
+    showNameWordProblem(field, key, named, deps.t);
+    if (allowed) field.focus();
+    allowed = false;
+  }
+  return allowed;
+}
+
 export function setupEditSessionControl() {
   const form = document.getElementById("form-workout-setup");
   if (!form) return;
@@ -510,6 +560,14 @@ export function setupEditSessionControl() {
   // Auto-save draft on any input change
   form.addEventListener("input", saveEditSessionDraft);
   form.addEventListener("change", saveEditSessionDraft);
+  // The refusal clears as soon as the trainer edits the field it named, so the red edge never
+  // outlives the word that caused it.
+  for (const id of ["setup-session-name", "setup-location"]) {
+    document.getElementById(id)?.addEventListener("input", (event) => {
+      clearNameWordProblem(event.target);
+    });
+  }
+
   form.addEventListener("input", refreshScheduleConflictNotice);
   form.addEventListener("change", refreshScheduleConflictNotice);
 
@@ -517,6 +575,10 @@ export function setupEditSessionControl() {
 
   form.addEventListener("submit", (e) => {
     e.preventDefault();
+
+    // Before the participant checks: a field problem is shown ON the field, and a trainer should see
+    // that rather than a dialog about something else (TODO §66).
+    if (!sessionTextNamesNobody(deps)) return;
 
     const clientRoutines = collectSelectedClientRoutines();
     const { t } = deps;

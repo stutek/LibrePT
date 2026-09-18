@@ -40,6 +40,7 @@ export function renderEditSessionView(targetElement) {
                 <option value="Lower Body Power"></option>
                 <option value="Personal Training 1-on-1"></option>
               </datalist>
+              <p class="form-error" id="setup-session-name-error" hidden></p>
             </div>
             <div>
               <label for="setup-location" data-i18n="label_location">Location</label>
@@ -51,6 +52,7 @@ export function renderEditSessionView(targetElement) {
                 <option value="Studio A"></option>
                 <option value="Main Gym Floor"></option>
               </datalist>
+              <p class="form-error" id="setup-location-error" hidden></p>
             </div>
           </div>
 

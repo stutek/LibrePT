@@ -58,6 +58,10 @@ export const en = {
   btn_cancel: "Cancel",
   btn_discard_changes: "Discard Changes",
   btn_save: "Save",
+  session_name_has_client_name:
+    "A session's name cannot contain a client's name, and {word} is one. The session already shows who is in it. Please write what the session is, for example Strength or 1-on-1.",
+  session_location_has_client_name:
+    "A location cannot contain a client's name, and {word} is one. Please write where you are training, for example the gym or the park.",
   placeholder_client_name: "New client",
   placeholder_exercise_name: "New exercise",
   placeholder_routine_name: "New routine",

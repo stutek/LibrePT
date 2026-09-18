@@ -4420,6 +4420,19 @@ Seen 2026-09-14 on the demo data, while checking §52.2. A past card's badge rea
 Slovenian screen. The app writes a date as ISO everywhere, in every language, so it should read
 2026-07-20, and the word should come from the dictionary.
 
+## 67. [ ] Free text elsewhere is not checked for a client's name
+
+Left open by §66 (2026-09-18): the refusal covers a session's name and location only. A routine's
+name, a feedback note and a gym note are free text too, and a note about a session is where a trainer
+has the most reason to write a person's name. Whether the same refusal belongs there is its own
+decision — refusing a note may cost more than it protects, and a note is not a label the app reuses
+on every screen the way a session's name is.
+
+## 66. [x] A session may not be named after a client — shipped 2026-09-18
+
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#66-x-a-session-may-not-be-named-after-a-client--shipped-2026-09-18);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
+
 ## 65. [ ] The erasure sweep does not reach repeating sessions
 
 Asked 2026-09-18 (Simon): is the anonymisation complete now that the alias is cleared (§59)? Read from

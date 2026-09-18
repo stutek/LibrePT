@@ -34,6 +34,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-09-18 — A session cannot be named after a client
+
+### Changed
+
+- **The app no longer saves a session whose name or location contains a client's name** (§66). The
+  field is outlined, and the message says which word it means — shown in bold — and what to write
+  instead. The people on a session are already on it, so their name adds nothing.
+- Only whole words count, so "Samurai" is fine while "Sam" is not, and names shorter than three
+  letters are left alone.
+
 ## 2026-09-18 — Erasing a client now clears their alias
 
 ### Fixed

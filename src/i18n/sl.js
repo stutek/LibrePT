@@ -73,6 +73,10 @@ export const sl = {
   btn_cancel: "Prekliči",
   btn_discard_changes: "Zavrzi spremembe",
   btn_save: "Shrani",
+  session_name_has_client_name:
+    "Ime termina ne sme vsebovati imena stranke, {word} pa je ime stranke. Termin že pokaže, kdo je na njem. Napiši, kaj termin je, na primer Moč ali Ena na ena.",
+  session_location_has_client_name:
+    "Kraj ne sme vsebovati imena stranke, {word} pa je ime stranke. Napiši, kje vadita, na primer ime fitnesa ali park.",
   placeholder_client_name: "Nova stranka",
   placeholder_exercise_name: "Nova vaja",
   placeholder_routine_name: "Nova rutina",
