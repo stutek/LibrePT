@@ -94,12 +94,12 @@ test("every seed collection projects and validates clean", () => {
   );
 });
 
-test("seed sessions also validate against schema P", () => {
+test("seed sessions also validate against the PREVIEW schema", () => {
   // Schema 3 (TODO §7.3 item 8) requires `startDate` on every session — the seed data must
   // already carry it, not just satisfy the older, looser schema 4.
   const failures = [];
   for (const record of seeds.DEFAULT_SESSIONS) {
-    const issues = proj.projectionIssues("sessions", record, m.SCHEMA_P);
+    const issues = proj.projectionIssues("sessions", record, m.SCHEMA_PREVIEW);
     if (issues.length) failures.push({ id: record.id, issues });
   }
   assert.deepEqual(failures, []);

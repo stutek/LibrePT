@@ -51,22 +51,22 @@ test("a backup is stamped at the stable numbered schema, never at a preview shap
   );
 });
 
-test("a backup is written at the STABLE shape, and P is a superset of it", () => {
+test("a backup is written at the STABLE shape, and PREVIEW is a superset of it", () => {
   // The invariant inverted when the two axes were unified. It used to be "backups use the newest
-  // live shape"; now the newest live shape is P, which is exactly what a backup must NOT be written
+  // live shape"; the newest live shape is PREVIEW, which is exactly what a backup must NOT be written
   // at. The stable shape is a decision, not an accident of ordering.
   assert.equal(BACKUP_SCHEMA, STABLE_SCHEMA);
   assert.ok(BACKUP_SCHEMA in LIVE_SCHEMAS, "the backup shape has to be one the fan-out writes");
 
-  // Every field of the stable shape exists in P. This is what makes rebuilding P from schema4 —
+  // Every field of the stable shape exists in PREVIEW. This is what makes rebuilding it from schema4 —
   // which happens whenever the build changes — lose ONLY preview-only fields, never a stable one.
   const stable = LIVE_SCHEMAS[STABLE_SCHEMA];
-  const preview = LIVE_SCHEMAS.P;
+  const preview = LIVE_SCHEMAS.PREVIEW;
   for (const [collection, shape] of Object.entries(stable)) {
     for (const field of Object.keys(shape)) {
       assert.ok(
         field in preview[collection],
-        `${collection}.${field} is in the stable shape but missing from P — rebuilding P would drop it`,
+        `${collection}.${field} is in the stable shape but missing from PREVIEW — rebuilding it would drop it`,
       );
     }
   }
@@ -154,6 +154,42 @@ test("settings that belong to the database, not to a record, are carried", () =>
   // would record a choice the trainer never made (see i18n/index.js).
   const unasked = backup.buildBackupPayload({ ...database(), lang: null });
   assert.equal(unasked.lang, null);
+});
+
+test("a PREVIEW-only collection is not in the file, and the trainer is warned it will be lost", () => {
+  // The cost of staging (§18.4), made visible at the one moment it bites. `previewProbe` lives in the
+  // PREVIEW schema only (TODO §61), so a backup written at the stable schema cannot carry it — and a
+  // restore is a whole-database replace, which means those records go. Saying so beforehand is the
+  // difference between a documented limitation and a surprise.
+  const state = {
+    clients: [{ id: "c1", name: "Jana", active: true }],
+    sessions: [],
+    exercises: [],
+    routines: [],
+    history: [],
+    planUpdates: [],
+    notifications: [],
+    previewProbe: [{ id: "probe1" }],
+  };
+
+  const file = backup.buildBackupPayload(state);
+  assert.equal(
+    "previewProbe" in file,
+    false,
+    "a schema-4 file cannot carry a preview-only collection",
+  );
+
+  const summary = backup.summarizeReplacement(state);
+  assert.equal(
+    summary.counts.previewProbe,
+    1,
+    "the trainer is told those records would be replaced",
+  );
+  assert.deepEqual(
+    summary.notCarried,
+    ["previewProbe"],
+    "and that a restore cannot bring them back",
+  );
 });
 
 test("invitations and repeating-session rules are in the file, so a restore keeps them", () => {

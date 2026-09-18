@@ -45,8 +45,8 @@ def _records_in_schema(page, schema, collections=None):
     the same answer whichever store was really being read.
 
     `collections` narrows the comparison, which is what makes it fair across schemas that do not
-    declare the same set: a PREVIEW-ONLY collection (§18.4's expand-first staging — `invites`,
-    `sessionSeries`) is deliberately absent from the stable store, and counting it as a difference
+    declare the same set: a PREVIEW-ONLY collection (§18.4's expand-first staging — `previewProbe`)
+    is deliberately absent from the stable store, and counting it as a difference
     would report the staging rule working as though it were broken."""
     return _evaluate(
         page,
@@ -172,4 +172,31 @@ def test_an_unknown_stored_schema_falls_back_instead_of_stranding_the_install(
     assert _evaluate(page, "return readSchema.getReadSchema();") in live
     assert _evaluate(page, "return store.getState().clients.length;") > 0, (
         "falling back must still load the trainer's data, not boot empty"
+    )
+
+
+def test_a_preview_only_record_is_written_to_the_preview_store_alone(
+    page, local_server
+):
+    """Staging through the real stores (TODO §61): `previewProbe` is declared by the PREVIEW schema
+    only, so saving one puts it into `schemaPREVIEW` and nowhere else — and a backup, written at the
+    stable schema, does not carry it."""
+    page.goto(local_server + "?init=demo_data_load")
+    page.wait_for_selector("#view-clients.active")
+
+    backup_has_probe = _evaluate(
+        page,
+        """
+        const backupFile = await import(new URL('data/backupFile.js', document.baseURI).href);
+        store.getState().previewProbe = [{ id: 'probe-staged' }];
+        store.saveToLocalStorage();
+        await queue.flushWrites();
+        return 'previewProbe' in backupFile.buildBackupPayload(store.getState());
+        """,
+    )
+
+    assert "probe-staged" in _records_in_schema(page, "PREVIEW", ["previewProbe"])
+    assert "probe-staged" not in _records_in_schema(page, 4, ["previewProbe"])
+    assert backup_has_probe is False, (
+        "a backup is written at schema 4, which has no such collection"
     )

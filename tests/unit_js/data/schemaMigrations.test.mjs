@@ -14,6 +14,8 @@ import {
   BASELINE_SCHEMA_VERSION,
   CURRENT_SCHEMA_VERSION,
   MIGRATION_STEPS,
+  PREVIEW_VERSION,
+  isPreviewVersion,
   schemaRank,
 } from "../../../src/data/migrationSteps.js";
 import * as m from "../../../src/data/schemaMigrations.js";
@@ -201,10 +203,6 @@ test("schema 4 is active; a legacy P reads as 4 and a preview shape is refused",
   assert.equal(legacy.state.schemaVersion, 4);
   assert.equal(legacy.state.lang, "sl", "a settled language question stays settled");
 
-  // A preview shape is a dead branch, never a step: newer than 4, so a live build refuses it.
-  assert.ok(schemaRank(4.5) > schemaRank(CURRENT_SCHEMA_VERSION));
-  assert.equal(schemaRank(5.5), schemaRank(4.5), "every preview shape ranks the same");
-  assert.equal(m.migrateState({ schemaVersion: 4.5, sessions: [] }).ok, false);
   assert.equal(schemaRank("nonsense"), null);
   assert.equal(BASELINE_SCHEMA_VERSION, 1);
 
@@ -214,6 +212,23 @@ test("schema 4 is active; a legacy P reads as 4 and a preview shape is refused",
   for (const [index, step] of MIGRATION_STEPS.slice(1).entries()) {
     assert.equal(step.from, MIGRATION_STEPS[index].to, `gap before step v${step.from}→v${step.to}`);
   }
+});
+
+test("PREVIEW data is refused by its version, towards the active schema or any later one", () => {
+  // Wanted 2026-09-17 (Simon, TODO §63): refused because it IS preview data, not because the next
+  // version happens not to exist. Before this, 4.5 was refused only as "newer" — and would have been
+  // accepted once 5 was active, stamped 5 with the 4 → 5 step skipped — while "PREVIEW" was taken for
+  // a pre-release database, walked through the whole chain and lost its stored language.
+  for (const version of [PREVIEW_VERSION, 4.5, 5.5]) {
+    assert.equal(isPreviewVersion(version), true, String(version));
+    const result = m.migrateState({ schemaVersion: version, lang: "sl", sessions: [] });
+    assert.equal(result.ok, false, `${version} must be refused`);
+    assert.match(result.summary.problems.join(" "), /preview/, "and the refusal says why");
+    assert.deepEqual(result.summary.applied, [], "no step ran on it");
+  }
+  // The rule does not depend on the active schema: a version is preview by what it is, and every
+  // numbered version that could ever be active is not one.
+  for (const version of [4, 5, 6]) assert.equal(isPreviewVersion(version), false, String(version));
 });
 
 // --- Forward-migration consent (TODO §18.7's last open item). The restore prompt says what a trainer

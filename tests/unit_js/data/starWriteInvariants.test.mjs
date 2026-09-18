@@ -62,7 +62,7 @@ test("schema evolution is additive never drops a field", () => {
   // ever ships, so a live schema's declared field set may only grow release over release, never
   // shrink — a field disappearing would silently break every OLDER build still writing it.
   const older = schemas.SCHEMA_4;
-  const newer = schemas.SCHEMA_P;
+  const newer = schemas.SCHEMA_PREVIEW;
   const dropped = [];
   for (const collection of Object.keys(older)) {
     const newerShape = newer[collection];
@@ -130,7 +130,7 @@ test("an older schemas writer missing a newer required field is caught", () => {
     // deliberately no startDate — schema 4 never declared it.
   };
   const againstSchema2 = proj.projectionIssues("sessions", oldSession, schemas.SCHEMA_4);
-  const againstSchema3 = proj.projectionIssues("sessions", oldSession, schemas.SCHEMA_P);
+  const againstSchema3 = proj.projectionIssues("sessions", oldSession, schemas.SCHEMA_PREVIEW);
 
   assert.deepEqual(
     againstSchema2,
@@ -148,16 +148,15 @@ test("an older schemas writer missing a newer required field is caught", () => {
 // into the PREVIEW schema first, because doing it that way "would actually test our rollout plans".
 // It did — it found that nothing enforced the boundary. These are that enforcement. ---
 
-// Since 2026-09-17 no real collection is preview-only (TODO §61 moved `invites` and `sessionSeries`
-// into schema 4), so staging is exercised against a preview shape made up here. Without it, these
-// checks would pass trivially the day the two real shapes stopped differing — which is that day.
-const STAGED_PREVIEW = { ...schemas.SCHEMA_4, drafts: { id: { required: true, type: "string" } } };
+// `previewProbe` is declared by the PREVIEW schema alone (TODO §61), so staging is exercised by the
+// real schemas and cannot pass trivially the day no feature happens to be in preview.
+const STAGED_PREVIEW = schemas.SCHEMA_PREVIEW;
 
 test("a record is written only to schemas that declare its collection", () => {
   // The invariant the fan-out has to hold. Before this, every projected record went into every live
   // store regardless — so a preview-only collection was preview-only in name and durable in fact.
-  assert.equal(proj.schemaAcceptsCollection(STAGED_PREVIEW, "drafts"), true);
-  assert.equal(proj.schemaAcceptsCollection(schemas.SCHEMA_4, "drafts"), false);
+  assert.equal(proj.schemaAcceptsCollection(STAGED_PREVIEW, "previewProbe"), true);
+  assert.equal(proj.schemaAcceptsCollection(schemas.SCHEMA_4, "previewProbe"), false);
   // Everything that is not preview-only still goes everywhere, or staging would have quietly become
   // a way to lose ordinary records.
   for (const collection of ["clients", "sessions", "history", "planUpdates", "invites"]) {
@@ -170,7 +169,9 @@ test("the collections a backup carries come from the schema it is written at, no
   // This is the half that had no enforcement at all: backupFile walked the PROJECTOR table, which
   // knows nothing about schemas, so anything projectable rode into the file whatever shape it
   // belonged to.
-  assert.equal(proj.collectionsForSchema(STAGED_PREVIEW).includes("drafts"), false);
+  // A projectable collection the stable schema does not declare stays out; the preview shape has it.
+  assert.equal(proj.collectionsForSchema(schemas.SCHEMA_4).includes("previewProbe"), false);
+  assert.equal(proj.collectionsForSchema(STAGED_PREVIEW).includes("previewProbe"), true);
 
   // And what the live schema now carries: invitations and repeating-session rules reach a backup.
   const carried = proj.collectionsForSchema(schemas.LIVE_SCHEMAS[schemas.BACKUP_SCHEMA]);

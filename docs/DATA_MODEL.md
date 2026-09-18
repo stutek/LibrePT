@@ -61,7 +61,7 @@ last stamped and walks only the steps it is missing.
 | **2 → 3** | every session given an absolute `startDate` |
 | **3 → 4** | stored language cleared so every trainer is asked once |
 | **4** | **the active schema** (since 2026-09-17, TODO §61): what this build reads, writes and stamps, and the shape backups are written at |
-| **"P"** | the preview schema installs were stamped with before 4 became active. Read as 4, never written: everything it held moved into 4 |
+| **"P"** | the preview schema installs were stamped with before 4 became active. Read as 4, never written: everything it held moved into 4. Replaced by **PREVIEW**, which a live build refuses rather than migrates |
 | **5** | **does not exist yet.** Reserved for the first stable release. A preview shape never becomes a step on the way to it |
 
 **Every numbered version is a live input, not history.** Two preview instances are demoed on real
@@ -80,18 +80,18 @@ settled language question.
 into schema 4 that day (TODO §61), so `schemaRank` ranks "P" as 4 — accepted as it is, never walked
 back through the chain, which would re-ask the language question.
 
-**A preview shape is a dead branch, never a step** (ruled 2026-09-17). `PREVIEW_SCHEMA_RANK` (4.5)
-ranks every fractional version above the active schema, so a live build refuses preview data as
-newer rather than migrating it; a chain 4 → preview → 5 must not exist. Every fraction ranks the
-same: preview data is disposable, and no build promises to still understand one.
+**A preview shape is a dead branch, never a step** (ruled 2026-09-17): a chain 4 → PREVIEW → 5 must
+not exist. `migrateState` refuses a preview version by WHAT IT IS — `isPreviewVersion`: the name
+PREVIEW, or any fractional number — before it compares ranks, because a rank would only refuse it
+while the active schema is lower. `PREVIEW_SCHEMA_RANK` (4.5) is left for ordering alone.
 
 **Preview data is dropped on every preview change** rather than migrated — that is what makes an
 unstable shape safe to iterate on, and why a preview shape needs no migration steps of its own.
 
-### Backups are written at 4, not at P
+### Backups are written at 4, not at PREVIEW
 
-Because P's shape can change on any commit, a backup written *at* P is restorable only by the exact
-build that wrote it. Backups are therefore written at `BACKUP_SCHEMA` — the newest **numbered**
+Because a preview shape can change on any commit, a backup written *at* PREVIEW is restorable only by
+the exact build that wrote it. Backups are therefore written at `BACKUP_SCHEMA` — the newest **numbered**
 shape ([backupFile.js](../src/data/backupFile.js)) — through the same projection path the star-write
 fan-out uses, so the file cannot drift from what the store would write for that shape. Any build can
 restore it through the chain.
@@ -105,7 +105,7 @@ Every file also carries `exportedAt` — a temporal anchor, so a future migratio
 two-year-old backup as though it were taken today — and `buildSha`, which is a **support breadcrumb
 only**. It is deliberately not consulted on restore: two files declaring the same numbered schema
 have the same shape by definition, so comparing SHAs would imply a doubt that cannot exist. The only
-shape that varies between builds is P, and P is never written to a file.
+shape that varies between builds is PREVIEW, and PREVIEW is never written to a file.
 
 ### A restore REPLACES; it does not merge
 
@@ -119,15 +119,17 @@ asks first, naming what would be lost per collection — a trainer setting up a 
 have entered real work. The prompt appears only when there is something at stake, because a warning
 shown every time is a warning nobody reads.
 
-**The cost, and it needs saying out loud: a P-only field never reaches a backup.** Add a field in P,
-back up, restore — the field is gone. The same applies to Drive sync, which is the more dangerous
-of the two because it runs unattended and offers no moment at which a trainer could be warned. Both
-surfaces need an explicit preview-mode warning naming what is not covered.
+**The cost, and it needs saying out loud: a PREVIEW-only collection or field never reaches a backup.**
+Add one, back up, restore — it is gone. `summarizeReplacement` names exactly those collections before a
+restore replaces the database, which is what `previewProbe` keeps exercised. The same applies to Drive
+sync, which is the more dangerous of the two because it runs unattended and offers no moment at which a
+trainer could be warned.
 
-Two consequences of P being unstable that the version number cannot express: two preview databases
-can both read `schemaVersion: "P"` and hold different shapes, and `migrateState` will compare P to P,
-apply nothing, and report success. Only the **commit SHA** distinguishes them — the chain numbers the
-**data**, the SHA identifies the **code**.
+Preview data is never migrated, in either direction: `migrateState` refuses a version that names a
+preview shape before it compares ranks at all (TODO §63), because ranked against a later active schema
+a preview version would sort below it and be stamped as current with the steps it skipped never run.
+Only the **commit SHA** tells two preview databases apart — the chain numbers the **data**, the SHA
+identifies the **code**.
 
 **There are no release tags and no rollback-by-navigation.** One build ships every supported
 behaviour concurrently, so switching behaviour is an in-app choice, not a different URL and not a
@@ -202,7 +204,7 @@ erDiagram
 
     DATABASE {
         string name "librept"
-        int version "max(live schemas)"
+        int version "raised by one whenever a store is missing"
     }
     META {
         string key PK "keyPath"
@@ -233,12 +235,14 @@ records*.
 The working workspace keeps the names every install already has, so this axis arrived as a no-op: a
 device that has never opened the sandbox has no second database at all.
 
-Store names are `schema4`, `schemaP` — one per live schema, on the SAME numbering as
-`schemaVersion` (§1). The database `version` is derived from the highest **numbered** live schema,
-so provisioning a schema is the only thing that triggers `onupgradeneeded`; `"P"` is skipped in that
-maximum rather than coerced, since `Number("P")` is `NaN` and would pin the version at 1 forever. Provisioning is
-additive: a retired schema's store is never dropped as a side effect of booting: discarding a bucket
-is a deliberate act.
+Store names are `schema4`, `schemaPREVIEW` — one per live schema, on the SAME naming as
+`schemaVersion` (§1). **The database `version` is not a schema number** (changed 2026-09-17, TODO §61):
+the database is opened at whatever version it holds, and only when a store is missing is it reopened
+one version higher to add it. It used to be the highest numbered live schema, which left no way to
+provision a store for PREVIEW — a name, not a number — and would have LOWERED the version the day a
+preview was retired; IndexedDB refuses to open a database below the version it holds, which would lock
+a trainer out of their own data. Provisioning is additive: a retired schema's store is never dropped as
+a side effect of booting, because discarding a bucket is a deliberate act.
 
 ### Indexes, and what they are for
 
@@ -534,7 +538,7 @@ flowchart LR
     UI["UI behaviour<br/>(any of the ones shipped)"] --> D["Domain object"]
     D --> W["Write layer"]
     W -->|project| S4["schema4 store — stable, durable"]
-    W -->|project| SP["schemaP store — preview, disposable"]
+    W -->|project| SP["schemaPREVIEW store — preview, disposable"]
     W -.->|"one IndexedDB transaction"| TX(["commit or nothing"])
 
     style W fill:#0d9488,color:#fff
@@ -563,13 +567,13 @@ The two halves of the star are asymmetric on purpose, and the asymmetry is the i
 
 - **Writes fan out and compare no versions.** Every live schema's store gets the same projected
   record on every save, so no writer decides which schema is "current".
-**The two live shapes do different jobs, and only one is durable.** `schema4` is stable — what a
-backup is written at, and the copy `schemaP` is rebuilt FROM. `schemaP` is the shape this build
-reads, and is disposable: its fields can change on any commit, so it is never a source of truth for
-anything that has to outlive the build. On boot, if the recorded build SHA does not match the
+**The two live shapes do different jobs, and only one is durable.** `schema4` is stable and active —
+what this build reads and stamps, what a backup is written at, and the copy `schemaPREVIEW` is rebuilt
+FROM. `schemaPREVIEW` is for CI and for previewing an upcoming version, and is disposable: its fields
+can change on any commit, so it is never a source of truth for anything that has to outlive the build. On boot, if the recorded build SHA does not match the
 running one — **or is absent, which counts as not matching** — the preview store is discarded and
 re-projected from `schema4` (`rebuildPreviewSchemaIfBuildChanged`). There is no migration between
-preview shapes, and there does not need to be: the durable copy makes P rebuildable rather than
+preview shapes, and there does not need to be: the durable copy makes PREVIEW rebuildable rather than
 something that must be preserved. Preview-only fields do not survive that rebuild, which is the same
 cost the backup and sync surfaces warn about, applied at the same boundary.
 

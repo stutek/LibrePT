@@ -33,13 +33,14 @@ def _rsvp(session_id, client_id, answer):
 # was PERSISTED rather than merely held in memory.
 READ_COLLECTION = """
 async (collection) => {
+  const storeName = (await import(new URL('data/readSchema.js', document.baseURI).href)).readStoreName();
   const db = await new Promise((resolve, reject) => {
     const request = indexedDB.open('librept');
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error);
   });
-  if (!db.objectStoreNames.contains('schemaP')) return [];
-  const store = db.transaction('schemaP', 'readonly').objectStore('schemaP');
+  if (!db.objectStoreNames.contains(storeName)) return [];
+  const store = db.transaction(storeName, 'readonly').objectStore(storeName);
   const rows = await new Promise((resolve) => {
     const request = store.index('byCollection').getAll(collection);
     request.onsuccess = () => resolve(request.result);

@@ -27,23 +27,24 @@ def test_the_live_app_persists_to_indexeddb_not_a_versioned_localstorage_bucket(
 
     stores = page.evaluate(
         """async () => {
+            const storeName = (await import(new URL('data/readSchema.js', document.baseURI).href)).readStoreName();
             const db = await new Promise((resolve, reject) => {
                 const req = indexedDB.open('librept');
                 req.onsuccess = () => resolve(req.result);
                 req.onerror = () => reject(req.error);
             });
             const names = [...db.objectStoreNames].sort();
-            const tx = db.transaction(['schemaP'], 'readonly');
+            const tx = db.transaction([storeName], 'readonly');
             const count = await new Promise((resolve, reject) => {
-                const req = tx.objectStore('schemaP').count();
+                const req = tx.objectStore(storeName).count();
                 req.onsuccess = () => resolve(req.result);
                 req.onerror = () => reject(req.error);
             });
             db.close();
-            return { names, count };
+            return { names, count, storeName };
         }"""
     )
-    assert "schemaP" in stores["names"]
+    assert stores["storeName"] in stores["names"]
     assert stores["count"] > 0, (
         "seeded demo data should have been star-written into IndexedDB"
     )

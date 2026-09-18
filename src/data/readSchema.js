@@ -31,6 +31,7 @@ import {
   storeNameForSchema,
   withTransaction,
 } from "./indexedDb.js";
+import { PREVIEW_VERSION } from "./migrationSteps.js";
 import { COLLECTIONS, projectCollection, toDomainObject } from "./recordProjections.js";
 import { DEFAULT_READ_SCHEMA, LIVE_SCHEMAS, STABLE_SCHEMA } from "./recordSchemas.js";
 
@@ -42,7 +43,7 @@ const READ_SCHEMA_KEY = "librept_read_schema";
 // Absent means either never provisioned or interrupted mid-backfill; both want the same answer.
 const BACKFILLED_KEY_PREFIX = "backfilled:";
 
-// Numbered schemas first, ascending, with "P" last — it is the newest shape by construction, and
+// Numbered schemas first, ascending, with PREVIEW last — it is the newest shape by construction, and
 // ordering it by string would put it before every number.
 export function liveSchemas() {
   const keys = Object.keys(LIVE_SCHEMAS);
@@ -55,7 +56,7 @@ export function liveSchemas() {
 }
 
 function isLiveSchema(schema) {
-  // Compared as strings: a schema is now either a number or "P", and Number("P") is NaN.
+  // Compared as strings: a schema is either a number or "PREVIEW", and Number("PREVIEW") is NaN.
   return liveSchemas().some((live) => String(live) === String(schema));
 }
 
@@ -68,7 +69,7 @@ export function getReadSchema() {
   try {
     const stored = localStorage.getItem(READ_SCHEMA_KEY);
     if (!isLiveSchema(stored)) return DEFAULT_READ_SCHEMA;
-    // Hand back the live key itself, so a numbered schema stays a number and "P" stays a string.
+    // Hand back the live key itself, so a numbered schema stays a number and PREVIEW stays a string.
     return liveSchemas().find((live) => String(live) === String(stored));
   } catch {
     return DEFAULT_READ_SCHEMA;
@@ -144,21 +145,21 @@ const PREVIEW_BUILD_KEY = "previewBuild";
 /**
  * Rebuild the preview store from the stable one whenever the build has changed.
  *
- * P's fields can change on any commit, so a P store written by a different build cannot be trusted
- * to have the shape this build expects — and there is no migration to fix that, because P is not a
- * version that migrations run between. The answer is not to migrate it but to DISCARD it: schema4
- * holds the durable copy, so P is a projection that can always be rebuilt.
+ * PREVIEW's fields can change on any commit, so a PREVIEW store written by a different build cannot be
+ * trusted to have the shape this build expects — and there is no migration to fix that, because
+ * PREVIEW is never a version migrations run between. The answer is not to migrate it but to DISCARD
+ * it: schema4 holds the durable copy, so PREVIEW is a projection that can always be rebuilt.
  *
  * An ABSENT marker counts as changed. A database written before this bookkeeping existed cannot say
  * which build produced it, and "unknown" must resolve to the safe branch — rebuilding from the
  * stable copy costs a projection pass, while trusting an unknown shape risks reading fields that
  * are not there.
  *
- * What this loses, by design: any preview-only field, since it exists in P and not in schema4. That
+ * What this loses, by design: any preview-only field, since it exists in PREVIEW and not in schema4. That
  * is the same cost the backup surfaces warn about, applied at the same boundary.
  */
 export async function rebuildPreviewSchemaIfBuildChanged(db, currentBuildSha) {
-  const previewStore = storeNameForSchema("P");
+  const previewStore = storeNameForSchema(PREVIEW_VERSION);
   if (!db.objectStoreNames.contains(previewStore)) return { rebuilt: false };
 
   const entry = await getMetaEntry(
@@ -170,7 +171,7 @@ export async function rebuildPreviewSchemaIfBuildChanged(db, currentBuildSha) {
     return { rebuilt: false };
   }
 
-  await backfillSchema(db, "P", STABLE_SCHEMA);
+  await backfillSchema(db, PREVIEW_VERSION, STABLE_SCHEMA);
   await withTransaction(db, [META_STORE], "readwrite", ({ store }) => {
     store(META_STORE).put({ key: PREVIEW_BUILD_KEY, value: currentBuildSha ?? null });
   });

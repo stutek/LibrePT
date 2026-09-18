@@ -22,18 +22,55 @@ def test_provisions_one_store_per_schema_plus_meta(page, local_server):
             await m.deleteDatabase(name);
             const db = await m.openDatabase({ schemas: [2, 3], name });
             const stores = [...db.objectStoreNames].sort();
-            const version = db.version;
             db.close();
             await m.deleteDatabase(name);
-            return { stores, version, expectedVersion: m.databaseVersion([2, 3]) };
+            return { stores };
         }"""
     )
     # One database, one store per schema: IndexedDB transactions cannot span databases, so this is
     # what makes an atomic star write across every live schema possible at all.
     assert r["stores"] == ["meta", "schema2", "schema3"]
-    # The DB version is derived from the highest schema, so provisioning a schema is the only thing
-    # that triggers onupgradeneeded.
-    assert r["version"] == r["expectedVersion"] == 3
+
+
+def test_the_version_rises_only_when_a_store_is_missing_and_never_falls(
+    page, local_server
+):
+    """The database version is not a schema number (TODO §61). A PREVIEW schema has a name, not a
+    number, and removing it must not lower the version: IndexedDB refuses to open a database below
+    the version it holds, which would lock a trainer out of their own data."""
+    page.goto(local_server)
+    page.wait_for_timeout(300)
+
+    r = page.evaluate(
+        """async () => {
+            const m = await import(new URL('data/indexedDb.js', document.baseURI).href);
+            const name = 'librept_test_versions';
+            await m.deleteDatabase(name);
+            const versionOf = async (schemas) => {
+                const db = await m.openDatabase({ schemas, name });
+                const seen = { version: db.version, stores: [...db.objectStoreNames].sort() };
+                db.close();
+                return seen;
+            };
+            const created = await versionOf([4]);
+            const reopened = await versionOf([4]);
+            const withPreview = await versionOf([4, 'PREVIEW']);
+            const previewRemoved = await versionOf([4]);
+            const nextRelease = await versionOf([4, 5]);
+            await m.deleteDatabase(name);
+            return { created, reopened, withPreview, previewRemoved, nextRelease };
+        }"""
+    )
+    assert r["reopened"]["version"] == r["created"]["version"], (
+        "nothing missing, nothing raised"
+    )
+    assert r["withPreview"]["version"] == r["created"]["version"] + 1
+    assert "schemaPREVIEW" in r["withPreview"]["stores"]
+    assert r["previewRemoved"]["version"] == r["withPreview"]["version"], (
+        "a retired schema must neither lower the version nor stop the database opening"
+    )
+    assert r["nextRelease"]["version"] == r["withPreview"]["version"] + 1
+    assert "schema5" in r["nextRelease"]["stores"]
 
 
 def test_adding_a_schema_is_additive_and_keeps_existing_records(page, local_server):

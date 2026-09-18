@@ -52,25 +52,6 @@ export function storeNameForSchema(schema) {
   return `schema${schema}`;
 }
 
-/**
- * The IndexedDB version number for a given set of live schemas.
- *
- * Derived from the highest NUMBERED schema rather than maintained by hand: provisioning a schema is
- * the only thing that changes the store layout, so it is also the only thing that should trigger
- * `onupgradeneeded`. IndexedDB requires this to increase monotonically, which it does — schemas are
- * only ever added, and retiring an old one does not lower the maximum.
- *
- * Non-numeric schemas ("P") are skipped here rather than coerced: `Number("P")` is NaN, which would
- * poison the max and leave the database stuck at version 1 forever, silently never provisioning
- * anything again. P's store is provisioned by whatever numbered bump ships alongside it, which is
- * sound because P never arrives on its own — it is always accompanied by the stable shape it is
- * rebuilt from.
- */
-export function databaseVersion(schemas) {
-  const numbered = schemas.map(Number).filter((value) => Number.isFinite(value));
-  return Math.max(1, ...numbered);
-}
-
 function requestToPromise(request) {
   return new Promise((resolve, reject) => {
     request.onsuccess = () => resolve(request.result);
@@ -99,25 +80,36 @@ function createSchemaStore(db, schema) {
  * so opening with a longer list only ever adds. Retired schemas are NOT dropped here — deleting a
  * bucket is a deliberate act with its own confirmation (§16.2's per-version discard), never a side
  * effect of an app that happens to boot with a shorter list.
+ *
+ * **The database version is not a schema number** (changed 2026-09-17, TODO §61). It used to be the
+ * highest numbered schema, which left no way to add a store for the PREVIEW schema — a name, not a
+ * number — and would have LOWERED the version the day a preview was removed, and IndexedDB refuses to
+ * open a database at a lower version than it holds (VersionError, measured in 59bebf0). Instead the
+ * database is opened at whatever version it has; only when a store is missing is it reopened one
+ * version higher to add it. The version therefore only ever rises, and only when the layout changes.
  */
-// `version` is normally derived from the schema list, because provisioning a store is the only
-// thing that should trigger an upgrade. The preview database (data/previewSchema.js) overrides it:
-// its store set is keyed by commit rather than by schema number, so it is REPLACED (deleted and
-// recreated at version 1) rather than upgraded — and it must never pull the main database's
-// monotonically-increasing version along with it.
-export function openDatabase({
+export async function openDatabase({
   schemas,
   factory = globalThis.indexedDB,
   name = DATABASE_NAME,
-  version = null,
 } = {}) {
-  if (!factory) return Promise.reject(new Error("IndexedDB is unavailable"));
+  if (!factory) throw new Error("IndexedDB is unavailable");
   if (!Array.isArray(schemas) || schemas.length === 0) {
-    return Promise.reject(new Error("openDatabase needs at least one schema"));
+    throw new Error("openDatabase needs at least one schema");
   }
+  const wanted = [META_STORE, ...schemas.map(storeNameForSchema)];
 
-  const request = factory.open(name, version ?? databaseVersion(schemas));
+  // No version: an existing database opens as it is, a new one is created at version 1.
+  const db = await openAt(factory, name, null, schemas);
+  if (wanted.every((store) => db.objectStoreNames.contains(store))) return db;
 
+  const next = db.version + 1;
+  db.close();
+  return openAt(factory, name, next, schemas);
+}
+
+function openAt(factory, name, version, schemas) {
+  const request = version === null ? factory.open(name) : factory.open(name, version);
   request.onupgradeneeded = () => {
     const db = request.result;
     if (!db.objectStoreNames.contains(META_STORE)) {
@@ -129,7 +121,6 @@ export function openDatabase({
       }
     }
   };
-
   return requestToPromise(request);
 }
 

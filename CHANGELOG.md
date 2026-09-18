@@ -20,6 +20,22 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-09-18 — The preview schema is PREVIEW, and it is provisioned like any other
+
+### Changed
+
+- **The preview shape is now called PREVIEW and is set up exactly like a released schema** (§61), so
+  what CI and a preview build exercise is the path a real release takes. The old preview store is no
+  longer written; what an install held there was already moved into schema 4.
+- **The database is upgraded only when a store is missing**, rather than by schema number. Retiring a
+  preview no longer lowers the database version, which a browser refuses to open.
+
+### Fixed
+
+- **Preview data is never migrated**, in either direction: it is refused because it is preview data,
+  not because of where it sorts. Before, a preview database would have been accepted once a later
+  schema became active, and stamped as current with the step it skipped never run (§63).
+
 ## 2026-09-17 — Schema 4 is the active schema
 
 ### Changed

@@ -17,6 +17,7 @@ import {
   BASELINE_SCHEMA_VERSION,
   CURRENT_SCHEMA_VERSION,
   MIGRATION_STEPS,
+  isPreviewVersion,
   schemaRank,
 } from "./migrationSteps.js";
 
@@ -90,6 +91,22 @@ function clone(state) {
     : JSON.parse(JSON.stringify(state));
 }
 
+/** Why this version must not be migrated at all, or null when it may be. */
+function refusalFor(fromVersion) {
+  // Preview data is never migrated, into the active schema or any later one (TODO §61, §63). Refused
+  // by WHAT THE VERSION IS — not by where it ranks: ranked against a later active schema a preview
+  // version would sort below it, walk past the steps it skipped, and be stamped as current.
+  if (isPreviewVersion(fromVersion)) {
+    return `the data is from the preview schema ${fromVersion}, which is for testing and demonstrations and is never migrated`;
+  }
+  // Data written by a NEWER build than this one. This is the rollback case, and it is exactly what
+  // §16.2's data-loss warning is about: the old build has no forward transform and must not guess.
+  if (schemaRank(fromVersion) > schemaRank(CURRENT_SCHEMA_VERSION)) {
+    return `this build reads schema ${CURRENT_SCHEMA_VERSION} but the data is schema ${fromVersion} — it was written by a newer version`;
+  }
+  return null;
+}
+
 /**
  * Migrate `rawState` to CURRENT_SCHEMA_VERSION.
  *
@@ -105,12 +122,9 @@ export function migrateState(rawState) {
     problems: [],
   };
 
-  // Data written by a NEWER build than this one. This is the rollback case, and it is exactly what
-  // §16.2's data-loss warning is about: the old build has no forward transform and must not guess.
-  if (schemaRank(fromVersion) > schemaRank(CURRENT_SCHEMA_VERSION)) {
-    summary.problems.push(
-      `this build reads schema ${CURRENT_SCHEMA_VERSION} but the data is schema ${fromVersion} — it was written by a newer version`,
-    );
+  const refusal = refusalFor(fromVersion);
+  if (refusal) {
+    summary.problems.push(refusal);
     return { ok: false, state: rawState, summary };
   }
 

@@ -57,14 +57,15 @@ def test_legacy_localstorage_is_imported_and_left_as_a_rollback_snapshot(
 
     count = page.evaluate(
         """async () => {
+            const storeName = (await import(new URL('data/readSchema.js', document.baseURI).href)).readStoreName();
             const db = await new Promise((resolve, reject) => {
                 const req = indexedDB.open('librept');
                 req.onsuccess = () => resolve(req.result);
                 req.onerror = () => reject(req.error);
             });
-            const tx = db.transaction(['schemaP'], 'readonly');
+            const tx = db.transaction([storeName], 'readonly');
             const c = await new Promise((resolve, reject) => {
-                const req = tx.objectStore('schemaP').count();
+                const req = tx.objectStore(storeName).count();
                 req.onsuccess = () => resolve(req.result);
                 req.onerror = () => reject(req.error);
             });
@@ -180,7 +181,7 @@ def test_a_real_save_star_writes_into_every_live_schema_store_identically(
         }"""
     )
 
-    assert set(stores.keys()) == {"schema4", "schemaP"}, (
+    assert set(stores.keys()) == {"schema4", "schemaPREVIEW"}, (
         "expected exactly the two live schema stores — update this test if a schema was added/retired"
     )
     for schema_name, record in stores.items():

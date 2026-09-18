@@ -36,6 +36,16 @@ export const CURRENT_SCHEMA_VERSION = 4;
 // The preview schema installs were stamped with before schema 4 became active. Read, never written.
 export const LEGACY_PREVIEW_VERSION = "P";
 
+// The preview schema for CI and for previewing an upcoming version (TODO §61). Not "P" renamed: P is
+// the legacy store data was moved out of, PREVIEW the dead branch a live build never migrates.
+export const PREVIEW_VERSION = "PREVIEW";
+
+/** Whether `version` names a preview shape: PREVIEW itself, or any fractional number. */
+export function isPreviewVersion(version) {
+  if (version === PREVIEW_VERSION) return true;
+  return Number.isFinite(version) && !Number.isInteger(version);
+}
+
 // How a preview shape ORDERS against numbered versions — never stored, never shown. Above the active
 // schema, so a live build refuses preview data as newer instead of migrating it into the chain.
 export const PREVIEW_SCHEMA_RANK = 4.5;
@@ -48,8 +58,9 @@ export const PREVIEW_SCHEMA_RANK = 4.5;
  */
 export function schemaRank(version) {
   if (version === LEGACY_PREVIEW_VERSION) return 4;
+  if (isPreviewVersion(version)) return PREVIEW_SCHEMA_RANK;
   if (!Number.isFinite(version)) return null;
-  return Number.isInteger(version) ? version : PREVIEW_SCHEMA_RANK;
+  return version;
 }
 
 export const MIGRATION_STEPS = [

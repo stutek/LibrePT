@@ -205,14 +205,22 @@ export const SCHEMA_4 = {
   },
 };
 
-// The preview shape P: schema 4 with a session's `startDate` required (migrationSteps.js's v2→v3
-// step derives it). Since 2026-09-17 nothing else differs — the fields and collections P alone
-// used to declare moved into schema 4 (TODO §61).
-export const SCHEMA_P = {
+// The PREVIEW shape (TODO §61): for CI and for previewing an upcoming version, never a step in the
+// migration chain. It is provisioned and written like any live schema — Simon, 2026-09-17: PREVIEW
+// uses the same mechanism as released schemas — and rebuilt from schema 4 when the build changes.
+// It replaced "P", whose fields and collections moved into schema 4 the same day.
+export const SCHEMA_PREVIEW = {
   ...SCHEMA_4,
   sessions: {
     ...SCHEMA_4.sessions,
     startDate: { required: true, type: "string" },
+  },
+  // A collection ONLY this shape declares, so staging is always exercised by the real schemas: a
+  // record of it goes into the PREVIEW store alone, a backup (written at 4) leaves it out, and a
+  // restore names it as lost. Written by tests; no screen writes it, so an install never holds one.
+  previewProbe: {
+    id: { required: true, type: "string" },
+    note: { required: false, type: "string" },
   },
 };
 
@@ -226,23 +234,24 @@ export const SCHEMA_P = {
 // Two shapes are live, and they do different jobs:
 //   - **4** is the active schema (TODO §61): what this build reads and stamps, what a backup is
 //     written at, and the copy P is rebuilt FROM when the build changes.
-//   - **P** is the preview shape, still written so an install that chose to read it keeps working.
-//     Disposable by design: never a source of truth for anything that has to outlive the build.
-export const LIVE_SCHEMAS = { 4: SCHEMA_4, P: SCHEMA_P };
+//   - **PREVIEW** is the preview shape for CI and previews, written like any live schema and rebuilt
+//     from 4 when the build changes. Disposable by design: never a source of truth for anything that
+//     has to outlive the build, and never a step in the migration chain.
+export const LIVE_SCHEMAS = { 4: SCHEMA_4, PREVIEW: SCHEMA_PREVIEW };
 
-// The durable shape, and the one P is rebuilt from. Not derived from LIVE_SCHEMAS by taking a max:
-// "P" is not a number, and the stable shape is a decision rather than an accident of ordering.
+// The durable shape, and the one PREVIEW is rebuilt from. Not derived from LIVE_SCHEMAS by taking a
+// max: PREVIEW is not a number, and the stable shape is a decision rather than an accident of ordering.
 export const STABLE_SCHEMA = 4;
 
 /**
  * The newest NUMBERED shape, and what a backup file is written at.
  *
- * A backup is not written at "P" on purpose (docs/DATA_MODEL.md §1): P's shape can change on any
+ * A backup is not written at PREVIEW on purpose (docs/DATA_MODEL.md §1): its shape can change on any
  * commit, so a file written at it is restorable only by the exact build that produced it. A
  * numbered shape does not move, so any build can restore it.
  *
  * Only ONE shape goes into a file, not every live one. Shapes only gain fields under expand-first —
- * SCHEMA_P is SCHEMA_4 plus whatever the preview adds — so P is a superset of the stable shape,
+ * SCHEMA_PREVIEW is SCHEMA_4 plus whatever the preview adds — a superset of the stable shape,
  * and an older copy alongside it stores strictly less information at full size. Restore re-derives
  * every live store from whatever it receives, through the same fan-out that keeps them current.
  */
