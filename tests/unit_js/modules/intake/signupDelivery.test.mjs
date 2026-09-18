@@ -16,6 +16,7 @@ import {
   buildSignupFile,
   canShareSignupFile,
   saveSignupFile,
+  sendSignupFile,
   shareSignupFile,
 } from "../../../../src/modules/intake/signupDelivery.js";
 
@@ -114,6 +115,51 @@ test("the refusal names the browser's own error, not just its message", async ()
 
   assert.equal(outcome.cancelled, false);
   assert.match(outcome.reason, /NotAllowedError/);
+});
+
+test("a refused share leaves the client with the file, not only with the bad news", async () => {
+  // Android Chrome shares only file types on a list of its own, and this one is not on it (TODO
+  // §45.4): the S23 that reported this refused the share after offering the button. The client was
+  // then told it failed and left holding nothing, on a phone they may not use again — so the refusal
+  // itself produces the file, and the page can go straight to explaining how to send it.
+  const refusal = Object.assign(new Error("Permission denied"), { name: "NotAllowedError" });
+  const platform = platformThat({
+    share: async () => {
+      throw refusal;
+    },
+  });
+  const file = buildSignupFile(signup, "2026-08-17");
+
+  const outcome = await sendSignupFile(file, { platform });
+
+  assert.equal(outcome.delivered, false, "a saved file is not a sent one");
+  assert.equal(outcome.saved, true);
+  assert.match(outcome.reason, /NotAllowedError/);
+  assert.deepEqual(platform.saved, [file]);
+});
+
+test("a client who changes their mind gets no file they did not ask for", async () => {
+  const abort = Object.assign(new Error("share cancelled"), { name: "AbortError" });
+  const platform = platformThat({
+    share: async () => {
+      throw abort;
+    },
+  });
+
+  const outcome = await sendSignupFile(buildSignupFile(signup, "2026-08-17"), { platform });
+
+  assert.equal(outcome.cancelled, true);
+  assert.equal(outcome.saved, undefined);
+  assert.deepEqual(platform.saved, [], "a download nobody asked for is a mess on their phone");
+});
+
+test("a share that worked puts nothing in the client's downloads", async () => {
+  const platform = platformThat();
+
+  const outcome = await sendSignupFile(buildSignupFile(signup, "2026-08-17"), { platform });
+
+  assert.equal(outcome.delivered, true);
+  assert.deepEqual(platform.saved, []);
 });
 
 test("saving works everywhere, which is what makes the form's advice honest", () => {

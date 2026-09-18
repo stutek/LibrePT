@@ -46,7 +46,7 @@ import {
   buildSignupFile,
   canShareSignupFile,
   saveSignupFile,
-  shareSignupFile,
+  sendSignupFile,
 } from "./signupDelivery.js";
 
 export function renderIntakeViewShell() {
@@ -182,12 +182,19 @@ const TEXT_BY_ELEMENT = {
   "intake-sender-check": "intake_sender_check",
 };
 
-function setStatus(t, key, tone, detail = "") {
+function setStatus(t, key, tone, { detail = "", file = "" } = {}) {
   const status = $id("intake-status");
   if (!status) return;
   status.hidden = !key;
-  status.textContent = key ? t(key) : "";
+  // `{file}` rather than a sentence built by joining: the saved file's name sits mid-sentence in
+  // English and at a different place in Slovenian, and a client who has to find it among their
+  // downloads needs to read the name this page actually gave it.
+  status.textContent = key ? t(key).replace("{file}", file) : "";
   status.classList.toggle("is-error", tone === "error");
+  // A warning is its own tone (ruled 2026-09-17): a share that was refused and a file that was saved
+  // instead is not a failure to report in red — the client is holding what they need and has one
+  // more thing to do. Red would tell them to stop.
+  status.classList.toggle("is-warn", tone === "warn");
   status.classList.toggle("is-done", tone === "done");
 
   // The browser's own words, verbatim and untranslated — a message this app did not write and must
@@ -370,21 +377,28 @@ export function setupIntakeForm(deps) {
   $id("intake-send")?.addEventListener("click", async () => {
     const file = currentFile();
     if (!file) return;
-    const outcome = await shareSignupFile(file, {
+    const outcome = await sendSignupFile(file, {
       title: t("intake_share_title"),
       text: t("intake_share_text"),
       platform,
     });
     // A cancelled share leaves the form exactly as it was, with nothing said: the client chose to
     // stop, and telling them something went wrong would be false.
-    // Delivered means the form did what it was for. A cancelled or failed share keeps the draft:
-    // she is still going to send it, and asking her to type it again would be the same loss this
-    // fixes, one step further on.
+    // Delivered means the form did what it was for. A refused share has left the file in their
+    // downloads instead (signupDelivery.js), so what is said here is not "it failed" but where the
+    // file is and what to do with it — and the draft STAYS (ruled 2026-09-17), because a reload on
+    // the page they are still standing on must not make them type the introduction again.
     if (outcome.delivered) {
       draft.forget();
       setStatus(t, "intake_sent", "done");
-    } else if (!outcome.cancelled)
-      setStatus(t, "intake_send_failed", "error", outcome.reason || "");
+    } else if (outcome.saved) {
+      setStatus(t, "intake_send_failed_saved", "warn", {
+        detail: outcome.reason || "",
+        file: file.name,
+      });
+      savedFileName = file.name;
+      offerToEmailTheTrainer(t, savedFileName);
+    }
   });
 
   $id("intake-save")?.addEventListener("click", () => {

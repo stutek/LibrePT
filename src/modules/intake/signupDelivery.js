@@ -108,6 +108,30 @@ export async function shareSignupFile(file, { title, text, platform }) {
   }
 }
 
+/**
+ * Send the file: the share sheet, and the file itself when the share sheet refuses it.
+ *
+ * **A refusal is not the end of the client's errand.** Android Chrome hands the share sheet only
+ * file types on a list of its own, and `.json.librept-signup` is not on one of them — nor would
+ * `.json` be (TODO §45.4, read out of Chromium's `ShareServiceImpl.java`). Until now that left a
+ * stranger looking at "that didn't share" with nothing in their hands, on a phone they may never
+ * open this page on again. So the refusal SAVES the file, and the page goes straight to telling them
+ * how to attach it themselves.
+ *
+ * Saving needs no second tap: the browser lets the first download after a tap through, and it is the
+ * second one that asks. That is also why the trainer's contact card stays a button of its own and is
+ * not saved here as well.
+ *
+ * A cancellation saves nothing. Someone who closed the share sheet did not ask for a file in their
+ * downloads.
+ */
+export async function sendSignupFile(file, { title, text, platform }) {
+  const outcome = await shareSignupFile(file, { title, text, platform });
+  if (outcome.delivered || outcome.cancelled) return outcome;
+  platform.saveFile(file);
+  return { ...outcome, saved: true };
+}
+
 /** Save the file so the client can attach it themselves. Always available, which is what makes the
  *  form's advice ("send it to your trainer however you like") honest on every device. */
 export function saveSignupFile(file, platform) {

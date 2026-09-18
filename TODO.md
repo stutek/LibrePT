@@ -3638,10 +3638,16 @@ and shows how to send it by hand. Saving the trainer's contact is the first step
   client understands why they must follow the instructions. All five themes already define
   `--warning`; the status line needs an `is-warn` style beside `is-error` and `is-done`
   (`src/modules/intake/intake.css`).
-- **Held 2026-09-17 before any code was written** (Simon, saving tokens). Planned shape: a
-  `sendSignupFile` in `signupDelivery.js` that shares and, on a refusal that is not a cancel, saves;
-  `intake_send_failed` replaced by instructions naming the saved file; a medium test in
-  `tests/medium/test_intake_form.py` with a refusing `shareFiles`; then the check on the S23 itself.
+- **[x] Built 2026-09-18.** `sendSignupFile` shares and, on a refusal that is not a cancel, saves the
+  file ([signupDelivery.js](src/modules/intake/signupDelivery.js)); the status line names the saved
+  file and says to attach it to a message (`intake_send_failed_saved`, replacing `intake_send_failed`),
+  in the new warning tone; the form is kept. Tests: a refused share saves and a cancelled one does not
+  ([signupDelivery.test.mjs](tests/unit_js/modules/intake/signupDelivery.test.mjs)), and the page's own
+  two cases in [test_intake_form.py](tests/medium/test_intake_form.py).
+- **Still open after that:** the check on the S23 itself — nothing here was tried on the phone that
+  reported it; whether *Save the file to share* should also keep the form, since the reason that
+  changed the refusal path applies to it too; presenting the contact card as step one, and what a
+  link that carried no trainer name shows in its place.
 
 ### 45.5 [ ] Import covers a programme, but not the trainer's own exercise LIBRARY
 

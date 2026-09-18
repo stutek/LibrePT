@@ -20,6 +20,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-09-18 — A signup a phone refuses to share is saved instead
+
+### Fixed
+
+- **A refused share now saves the introduction and says how to send it** (§45.4). A Galaxy S23
+  offered the Share button, refused the file and left the client with an error and nothing in hand:
+  Android Chrome shares only file types on a list of its own, and the signup file's type is not on
+  it. The refusal now writes the file to the phone's downloads, and the page names that file and
+  says to attach it to a message for the trainer. It reads as a warning rather than an error, and
+  what the client typed stays in the form, so a reload does not cost them the introduction. A
+  cancelled share still saves nothing.
+
+---
+
 ## 2026-09-18 — The preview schema is PREVIEW, and it is provisioned like any other
 
 ### Changed

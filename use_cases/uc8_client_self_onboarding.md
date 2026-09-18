@@ -107,6 +107,15 @@ has already delivered the file; and not as a text, which cannot carry one at all
 holds no instruction to the client — that sits on the page, where the person who must act on it is
 looking.
 
+**A refused share now leaves the client holding the file** (2026-09-18, TODO §45.4). Android Chrome
+hands the share sheet only file types on a list of its own — pictures, sound, video, `pdf`, `txt`,
+`csv`, `html` — and this one is not on it, nor would a plain `.json` be; a Galaxy S23 therefore
+offered the Share button and then refused the file. So a refusal saves the file instead of ending in
+an error, and the page names the saved file and says to attach it to a message. It reads as a
+**warning**, not a failure: nothing is broken, and the client has one step left. What they typed
+stays in the form, because a reload on the page they are still standing on must not cost them the
+whole introduction. The browser's own words stay on the line below for whoever is helping them.
+
 ## The review dialog is the trust boundary
 
 There is no signature to verify and deliberately never will be — signing needs a key exchange, which
@@ -155,6 +164,9 @@ enters their register ([signupReviewDialog.js](../src/modules/clients/signupRevi
 | A filename cannot become a path or a spoofed extension | [signupFile.test.mjs](../tests/unit_js/data/signupFile.test.mjs) |
 | A cancelled share is not reported as a failure | [signupDelivery.test.mjs](../tests/unit_js/modules/intake/signupDelivery.test.mjs) |
 | A failed share is never reported as sent | [signupDelivery.test.mjs](../tests/unit_js/modules/intake/signupDelivery.test.mjs) |
+| A refused share saves the file; a cancelled one saves nothing | [signupDelivery.test.mjs](../tests/unit_js/modules/intake/signupDelivery.test.mjs) |
+| A refused share says where the file is, as a warning | [test_intake_form.py](../tests/medium/test_intake_form.py) |
+| A refused share keeps what the client typed | [test_intake_form.py](../tests/medium/test_intake_form.py) |
 | `/intake` is recognised at any base path; language resolution | [intakeRoute.test.mjs](../tests/unit_js/modules/intake/intakeRoute.test.mjs) |
 | The form writes nothing to the client's device | [test_intake_form.py](../tests/medium/test_intake_form.py) |
 | Consent refused separately from missing identity | [test_intake_form.py](../tests/medium/test_intake_form.py) |

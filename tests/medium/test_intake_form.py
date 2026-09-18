@@ -12,6 +12,7 @@
 # lives in tests/e2e/test_intake.py.
 
 import json
+import re
 
 from playwright.sync_api import expect
 
@@ -37,6 +38,11 @@ appBoot.bootIntake({
   platform: {
     canShareFiles: () => window.__canShare !== false,
     shareFiles: async (data) => {
+      // A browser that refuses the file AFTER offering the button — the Galaxy S23 in TODO §45.4.
+      // The name is what carries the reason; a DOMException's message is frequently empty.
+      if (window.__shareRefusal) {
+        throw Object.assign(new Error('Permission denied'), { name: window.__shareRefusal });
+      }
       window.__delivered.push({ how: 'share', name: data.files[0].name, text: await data.files[0].text() });
     },
     saveFile: async (file) => {
@@ -269,6 +275,46 @@ def test_where_sharing_works_it_is_the_one_tap_route(page, local_server):
 
     assert [entry["how"] for entry in delivered] == ["share"]
     expect(page.locator("#intake-status")).to_contain_text("Shared")
+
+
+def test_a_refused_share_saves_the_file_and_says_how_to_send_it(page, local_server):
+    """Reported from a Galaxy S23 (§45.4): the phone offered the Share button, refused the file, and
+    the client was left with an error and nothing in their hands. Android Chrome shares only file
+    types on a list of its own and this one is not on it, so the refusal is permanent on that phone —
+    the file is saved instead, and the page says how to send it."""
+    page.add_init_script("window.__shareRefusal = 'NotAllowedError';")
+    _mount(page, local_server)
+    _fill(page)
+    page.check("#intake-consent")
+
+    delivered = _deliver(page, "#intake-send")
+
+    assert [entry["how"] for entry in delivered] == ["save"]
+    status = page.locator("#intake-status")
+    expect(status).to_contain_text(delivered[0]["name"])
+    expect(status).to_contain_text("attachment")
+    # A warning, not an error (ruled 2026-09-17): the sending failed, the file is in hand, and the
+    # client still has something to do — red would say the opposite of "now do this".
+    expect(status).to_have_class(re.compile(r"is-warn"))
+    expect(status).not_to_have_class(re.compile(r"is-error"))
+    # What the browser said, for whoever is helping them. Untranslated on purpose.
+    expect(page.locator("#intake-status-detail")).to_contain_text("NotAllowedError")
+
+
+def test_a_refused_share_keeps_what_the_client_typed(page, local_server):
+    """Ruled 2026-09-17: the automatic save must not clear the draft. A reload on the page they are
+    still standing on would otherwise make them type the whole introduction again — which is the loss
+    the draft exists to prevent, one step further on."""
+    page.add_init_script("window.__shareRefusal = 'NotAllowedError';")
+    _mount(page, local_server)
+    _fill(page)
+    page.check("#intake-consent")
+
+    _deliver(page, "#intake-send")
+
+    assert page.evaluate("() => Object.keys(sessionStorage)") != []
+    page.reload()
+    expect(page.locator("#intake-name")).to_have_value("Jana Novak")
 
 
 def test_the_trainer_contact_is_one_tap_rather_than_something_to_copy(

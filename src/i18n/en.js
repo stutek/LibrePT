@@ -323,7 +323,10 @@ export const en = {
   // Precedes the browser's own untranslated message (TODO §45.4). Says who the line is for, so
   // nobody reads a developer's error text as an instruction to them.
   intake_send_failed_detail: "Your trainer may need this:",
-  intake_send_failed: "That didn't share. Use “Save the file to share” and attach it to a message.",
+  // A share the browser refused has already saved the file (modules/intake/signupDelivery.js), so
+  // this says where the file is and what to do with it rather than reporting a failure and stopping.
+  intake_send_failed_saved:
+    "That didn't share, so your phone saved the file {file} with your downloads. Send it yourself: open a message to your trainer, add an attachment, and pick that file.",
   intake_err_identity: "Please add your name, and either an email or a phone number.",
   intake_err_consent:
     "Please tick the consent box — your trainer cannot store your details without it.",

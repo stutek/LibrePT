@@ -319,8 +319,8 @@ export const sl = {
   intake_send_to_body: "Pozdravljeni, tu so moji podatki za trening.",
   intake_send_to_hint: "Temu sporočilu pripni datoteko {file}. Telefon jo je shranil med prenose.",
   intake_send_failed_detail: "Tvoj trener bo morda potreboval tole:",
-  intake_send_failed:
-    "Deljenje ni uspelo. Uporabi »Shrani datoteko za deljenje« in jo pripni sporočilu.",
+  intake_send_failed_saved:
+    "Deljenje ni uspelo, zato je telefon datoteko {file} shranil med prenose. Pošlji jo tako: odpri sporočilo trenerju, dodaj prilogo in izberi to datoteko.",
   intake_err_identity: "Prosim dodaj svoje ime in e-pošto ali telefonsko številko.",
   intake_err_consent: "Prosim označi privolitev — brez nje trener ne sme hraniti tvojih podatkov.",
   signup_review_lede:

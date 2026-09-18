@@ -185,6 +185,16 @@
   color: var(--danger);
 }
 
+/* A share the browser refused, with the file saved instead (TODO §45.4, ruled 2026-09-17). Neither
+   red nor green: nothing is broken and nothing is finished — the client is holding the file and has
+   one step left. The bar down the side is what makes it noticeable without shouting, and the text
+   keeps the ordinary colour so it stays readable on every theme. */
+.intake-status.is-warn {
+  background: color-mix(in srgb, var(--warning) 16%, transparent);
+  border-inline-start: 4px solid var(--warning);
+  color: var(--text-main);
+}
+
 .intake-status.is-done {
   background: color-mix(in srgb, var(--success, #10b981) 16%, transparent);
   color: var(--text-main);
