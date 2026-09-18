@@ -20,6 +20,22 @@ Read [CHANGELOG.md](CHANGELOG.md) for what shipped and when. This file is why.
 
 ---
 
+### 59. [x] Erasing a client keeps their alias — fixed 2026-09-18
+
+Found 2026-09-17 (Claude) while checking what a numbered schema may carry: `eraseClientRecord` in
+[clientErasure.js](src/data/clientErasure.js) copied the whole client and cleared only email, phone,
+goals, notes and injury. `alias` was not in that list.
+
+**Why that mattered.** The alias is the trainer's own label for telling two same-named clients apart,
+and the form asks for exactly the words that identify one — a surname, or a detail about an injury.
+It is drawn beside the name on every screen that shows a client, so an erased record went on naming
+the person its pseudonym exists to hide: the erasure was not an anonymisation. No test checked it.
+
+**Fixed** by adding `alias` to the cleared fields, with a test that fails without it — it asserts the
+label is nowhere in the erased record, not merely that the field is empty.
+
+---
+
 ### 1.1 [x] PT-side client assignment to a session
 Shipped 2026-08-04 — [CHANGELOG](CHANGELOG.md). Invites are `.ics` + `mailto:`, because there is no
 backend to send mail from (§1.5).

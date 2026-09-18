@@ -34,6 +34,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-09-18 — Erasing a client now clears their alias
+
+### Fixed
+
+- **An erased client no longer keeps the alias** — the short label a trainer adds to tell two people
+  with the same name apart, such as a surname or a note about an injury (§59). It was left on the
+  record and shown beside the pseudonym, so the erasure did not fully anonymise the client. Erasures
+  done before this keep the alias; open the client and clear the field, or erase them again.
+
 ## 2026-09-18 — The preview schema is PREVIEW, and it is provisioned like any other
 
 ### Changed

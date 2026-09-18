@@ -87,9 +87,13 @@ test("every identifying field on the client record is cleared", () => {
   // for THIS id, not what that pseudonym happens to spell.
   assert.equal(erased.name, erasurePseudonym("c-jane-a"));
   assert.ok(!erased.name.includes("Jane"), "the erased record must not still say their name");
-  for (const field of ["email", "phone", "goals", "notes", "injury"]) {
+  for (const field of ["alias", "email", "phone", "goals", "notes", "injury"]) {
     assert.equal(erased[field], "", `${field} should be cleared`);
   }
+  // The alias was kept until 2026-09-18 (TODO §59) and it is identifying on its own: the form asks
+  // for a surname or a distinguishing detail, and it is drawn beside the name everywhere a client
+  // is shown, so an erasure that left it named the person the pseudonym is there to hide.
+  assert.ok(!JSON.stringify(erased).includes("morning"), "no trace of the trainer's own label");
   // Body weight measures the person, not the work — see CLEARED_TEXT_FIELDS' comment.
   assert.deepEqual(erased.weightHistory, []);
   assert.equal(erased.active, false);

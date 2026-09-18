@@ -34,7 +34,13 @@
 // `weightHistory` is in this list on purpose, and it is the one judgement call worth stating: body
 // weight is a measurement of the human being, not of the work performed, so it goes with the name.
 // Session loads stay because they describe what was lifted, not who lifted it.
-const CLEARED_TEXT_FIELDS = ["email", "phone", "goals", "notes", "injury"];
+//
+// `alias` was missing until 2026-09-18 (TODO §59), and an erasure without it was not an
+// anonymisation: the alias is the trainer's own label for telling two same-named people apart, and
+// the form suggests exactly the words that identify one — "Novak", "with the knee". It rides beside
+// the name on every screen that shows a client (utils.js's `getClientDisplayNameHTML`), so a kept
+// alias would have gone on naming the person the pseudonym is there to hide.
+const CLEARED_TEXT_FIELDS = ["alias", "email", "phone", "goals", "notes", "injury"];
 
 // Short and stable: the trainer needs to tell two erased records apart in a list, and the full id is
 // unreadable at a glance.

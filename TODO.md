@@ -4651,15 +4651,10 @@ ruled:** after the first release, any change to a numbered shape takes a new num
 migration step changes no data; until then a new field goes into P. Blocks: where §50.3's record
 badges are declared.
 
-## 59. [ ] Erasing a client keeps their alias
+## 59. [x] Erasing a client keeps their alias — fixed 2026-09-18
 
-Read from the code 2026-09-17 (Claude), not yet run. `eraseClientRecord` in
-[clientErasure.js](src/data/clientErasure.js) copies the whole client and clears only
-`CLEARED_TEXT_FIELDS` — email, phone, goals, notes, injury. `alias` is not in that list, so an
-anonymised client keeps the trainer's label for them, and the form suggests exactly the words that
-identify a person: "Novak", "with the knee". No test in
-[clientErasure.test.mjs](tests/unit_js/data/clientErasure.test.mjs) checks it. If confirmed, an
-erasure done so far was not an anonymisation. Blocks: nothing; it is a data-protection defect.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#59-x-erasing-a-client-keeps-their-alias--fixed-2026-09-18);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ## 58. [ ] A preview-only field is written into a schema 4 backup
 
