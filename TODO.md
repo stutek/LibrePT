@@ -4442,6 +4442,11 @@ tree, each red in a different place:
   _said_while_shaping_the_next_plan` and `test_a_slot_field_is_the_app_s_own_control_not_the_browser_s`,
   both timing out on a selector. The three files alone: 23 passed in 16s.
 
+**Where the load came from, found afterwards:** a second agent session was working in the same tree
+through the same hour and committed 15adb99 at 15:57, running its own browser suites while this one
+gated — although the claim note in `.private/AGENT_SYNC/` said the whole tree was held. Its commit
+touched only its own files, so nothing was lost; the contention was the cost.
+
 **The pattern, after five runs: the gate passes on an idle machine and fails on a busy one.** The one
 green run started at load 1.45; every red one started at 3.0 or higher, with the five-minute average
 between 8 and 13 — mostly from the targeted test runs used to check the change before gating. The dev
