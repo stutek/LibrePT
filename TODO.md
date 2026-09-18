@@ -4414,6 +4414,28 @@ Seen 2026-09-14 on the demo data, while checking §52.2. A past card's badge rea
 Slovenian screen. The app writes a date as ISO everywhere, in every language, so it should read
 2026-07-20, and the word should come from the dictionary.
 
+## 64. [ ] The gate fails on a different test each run, and each one passes on its own
+
+Measured 2026-09-18 (Claude) while gating §61's PREVIEW work. Three runs of `build check` on the same
+tree, each red in a different place:
+
+- **15:16** — stage 4, OWASP ZAP: the container stopped after 11s with a three-line log
+  (`Unable to copy yaml file to /zap/wrk/zap.yaml`, then `Failed to access summary file`). The same
+  docker command run by hand on the same tree: `WARN-NEW: 0`, exit 0.
+- **15:23** — stage 3: `test_lang_param_preselects_language` and
+  `test_getting_the_guide_out_of_the_way_is_one_tap_and_takes_nothing_with_it`, both timing out at 20s
+  on the app's boot. Alone: 2.7s, both pass. The whole e2e stage with the gate's 8 workers: 271 passed.
+- **15:33** — stage 2: `test_the_guide_stays_inside_the_modal_it_had_to_move_into`, which measured the
+  guide's frame as outside the dialog. Alone: passes in 1.1s. The whole medium stage: 394 passed.
+
+**Not the change under test:** boot timing measured five times on the working tree and five on HEAD —
+939/2098/1695/1686/1732 ms against 989/2033/1762/1734/1739 ms.
+
+**Open:** what the three have in common. Two are about a measurement taken before the app has settled
+(a boot wait, a layout read), which is the shape that fails under load; the ZAP one is its own. A gate
+that is red for a reason nobody can name is a gate nobody will believe — and rules forbid re-running a
+failure away, so this blocks every commit while it lasts.
+
 ## 63. [ ] Migrations are tested from the oldest version, but not for ever and not on a device
 
 Asked 2026-09-17 (Simon): is there a test that covers migrations from the oldest version onward, for
