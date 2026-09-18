@@ -4420,6 +4420,32 @@ Seen 2026-09-14 on the demo data, while checking §52.2. A past card's badge rea
 Slovenian screen. The app writes a date as ISO everywhere, in every language, so it should read
 2026-07-20, and the word should come from the dictionary.
 
+## 65. [ ] The erasure sweep does not reach repeating sessions
+
+Asked 2026-09-18 (Simon): is the anonymisation complete now that the alias is cleared (§59)? Read from
+the code the same day (Claude): **no.** `eraseClientInState` in
+[clientErasure.js](src/data/clientErasure.js) rebuilds four collections — clients, history,
+planUpdates, sessions — and returns everything else untouched. Two of the collections schema 4 now
+carries (§61) were added after the sweep was written:
+
+- **`sessionSeries` is not swept, and it has two problems.** Its `title` is trainer-typed and can name
+  the person, exactly as a session title can, and nothing rewrites or reports it. Worse, the erased
+  client stays in the rule's `participants`, so the board goes on producing their evenings — an erased
+  person still being scheduled.
+- **`invites` is by reference only** — two ids, a channel and two timestamps — so it names nobody.
+  It does keep the fact that this id was invited, which is execution data like a history record.
+
+- **A session's `location` is trainer-typed and is never swept.** Only `title` is checked for the
+  name, so "at Jane's flat" survives an erasure with nothing said about it. Confirmed 2026-09-18
+  (Simon asked, and it holds): a session stores its attendees as plain client ids and nothing else
+  about them, so `title` and `location` are the only places a name can sit.
+
+Also worth stating for the receipt: `joinedDate` and `gdprConsent` survive by design (evidence under
+Art. 7(1)), and `notifications` carry i18n keys rather than typed text.
+
+**Open:** whether an erasure removes the person from a repeating rule or refuses to touch it and
+reports it like an ambiguous session title, and how the receipt says which it did.
+
 ## 64. [ ] The gate fails on a different test each run, and each one passes on its own
 
 Measured 2026-09-18 (Claude) while gating §61's PREVIEW work. Three runs of `build check` on the same
