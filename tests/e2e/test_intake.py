@@ -13,18 +13,21 @@
 import json
 
 import pytest
+
+from tests.conftest import HARNESS_LOCAL_STORAGE_KEYS
 from playwright.sync_api import expect
 
 # The app's own storage keys all start with this. `librept_terms_accepted` is written by conftest's
 # autouse fixture rather than by the app, so it is excluded by name.
 APP_KEY_PREFIX = "librept"
-HARNESS_KEY = "librept_terms_accepted"
 
 
 def _app_written_keys(page):
     keys = page.evaluate("() => Object.keys(localStorage)")
     return [
-        key for key in keys if key.startswith(APP_KEY_PREFIX) and key != HARNESS_KEY
+        key
+        for key in keys
+        if key.startswith(APP_KEY_PREFIX) and key not in HARNESS_LOCAL_STORAGE_KEYS
     ]
 
 

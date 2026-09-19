@@ -16,6 +16,8 @@ import pathlib
 import re
 
 import pytest
+
+from tests.conftest import HARNESS_LOCAL_STORAGE_KEYS
 from playwright.sync_api import expect
 
 PANEL = "#walkthrough-overlay"
@@ -529,9 +531,9 @@ def test_the_client_half_is_played_on_the_client_page(page, local_server):
     # stateless boot exists for. The one key present is the suite's own terms auto-accept
     # (tests/e2e/test_intake.py names it the same way).
     written = page.evaluate(
-        "() => Object.keys(localStorage).filter((key) => key.startsWith('librept') "
-        "&& key !== 'librept_terms_accepted')"
+        "() => Object.keys(localStorage).filter((key) => key.startsWith('librept'))"
     )
+    written = [key for key in written if key not in HARNESS_LOCAL_STORAGE_KEYS]
     assert written == [], written
 
 

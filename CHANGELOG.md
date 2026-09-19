@@ -34,6 +34,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-09-19 — Session length and a few other saved details were not in the data format
+
+### Fixed
+
+- **Four things the app saves were missing from its data format**: whether a session was finished and
+  how long it ran, the small picture beside a message, and an old field kept from before sessions were
+  renamed. They were on the device but not described, which is how something goes missing from a
+  backup. They are described now, and a new test refuses to let it happen again (§62).
+
 ## 2026-09-19 — Erasing a client reaches repeating sessions and locations
 
 ### Fixed

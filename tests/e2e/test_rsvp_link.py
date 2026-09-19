@@ -13,6 +13,8 @@ import base64
 import json
 
 import pytest
+
+from tests.conftest import HARNESS_LOCAL_STORAGE_KEYS
 from playwright.sync_api import expect
 
 
@@ -64,7 +66,7 @@ def test_answering_leaves_nothing_on_the_clients_phone(page, local_server):
     page.click("#rsvp-yes")
 
     keys = page.evaluate("() => Object.keys(localStorage)")
-    assert [key for key in keys if key != "librept_terms_accepted"] == []
+    assert [key for key in keys if key not in HARNESS_LOCAL_STORAGE_KEYS] == []
     assert (
         page.evaluate("async () => (await indexedDB.databases()).map((d) => d.name)")
         == []

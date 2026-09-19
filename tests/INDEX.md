@@ -188,6 +188,16 @@ IndexedDB and localStorage held at one point, with its own store layout, restore
 not what a phone holds: the stores per schema, the meta store and the collections that exist only in
 one store are only ever tested here. Same rule: never edit a snapshot, add one.
 
+**Every browser test also checks what was stored.** After the test body,
+`stored_records_match_their_schema` reads the app's databases and fails the test if a record carries a
+field, or sits in a collection, no live schema declares (TODO §62) — a feature writing ahead of its
+schema looks fine on the device that wrote it and is missing from every backup.
+
+**The browser suite runs twice.** The first pass reads the active schema; the second, `--read-schema=PREVIEW`
+([run_e2e_preview_tests](../build/__init__.py)), reads the shape an upcoming version will, demo tests
+included, so the next release is proved against data a trainer already holds. The second pass skips
+itself when PREVIEW declares nothing beyond the active schema.
+
 **Shared fixtures** live in [tests/conftest.py](conftest.py) and apply to every tier, notably
 `local_server` — which refuses to run against a dev server whose revision does not match the working
 tree, because a long-lived server silently outliving its own source once invalidated a full day of

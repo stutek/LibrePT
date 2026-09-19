@@ -63,9 +63,13 @@ test("nested array items are validated per element", () => {
   );
 });
 
-test("every seed collection projects and validates clean", () => {
+test("every seed collection validates against EVERY live schema", () => {
   // The whole seed dataset — clients, exercises, routines, sessions, history, plan updates,
-  // notifications — is what a clean demo install writes. None of it may fail its own schema.
+  // notifications — is what a clean demo install writes. None of it may fail any live schema.
+  //
+  // Ruled 2026-09-19 (Simon): the demo must work on the active schema and go on working the day
+  // schema 5 is released. Walking LIVE_SCHEMAS rather than naming them is what makes that true by
+  // itself — adding a schema makes this test demand the demo fit it, with nothing to remember.
   const collections = {
     clients: seeds.DEFAULT_CLIENTS,
     exercises: seeds.DEFAULT_EXERCISES,
@@ -77,33 +81,28 @@ test("every seed collection projects and validates clean", () => {
   };
 
   const failures = [];
-  for (const [collection, records] of Object.entries(collections)) {
-    for (const record of records) {
-      const issues = proj.projectionIssues(collection, record, m.SCHEMA_4);
-      if (issues.length) failures.push({ collection, id: record.id, issues });
+  for (const [schema, shapes] of Object.entries(m.LIVE_SCHEMAS)) {
+    for (const [collection, records] of Object.entries(collections)) {
+      if (!proj.schemaAcceptsCollection(shapes, collection)) continue;
+      for (const record of records) {
+        const issues = proj.projectionIssues(collection, record, shapes);
+        if (issues.length) failures.push({ schema, collection, id: record.id, issues });
+      }
     }
   }
   const counts = Object.fromEntries(Object.entries(collections).map(([k, v]) => [k, v.length]));
 
   assert.deepEqual(failures, []);
+  assert.ok(
+    Object.keys(m.LIVE_SCHEMAS).length > 0,
+    "a schema registry with nothing in it proves nothing",
+  );
   // A schema that validated nothing because the seed arrays were empty would pass for free.
   assert.equal(
     Object.values(counts).every((count) => count > 0),
     true,
     JSON.stringify(counts),
   );
-});
-
-test("seed sessions also validate against the PREVIEW schema", () => {
-  // Schema 3 (TODO §7.3 item 8) requires `startDate` on every session — the seed data must
-  // already carry it, not just satisfy the older, looser schema 4.
-  const failures = [];
-  for (const record of seeds.DEFAULT_SESSIONS) {
-    const issues = proj.projectionIssues("sessions", record, m.SCHEMA_PREVIEW);
-    if (issues.length) failures.push({ id: record.id, issues });
-  }
-  assert.deepEqual(failures, []);
-  assert.ok(seeds.DEFAULT_SESSIONS.length > 0);
 });
 
 test("a live created client validates clean", () => {

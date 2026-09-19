@@ -394,6 +394,115 @@ def seed_demo_data(request):
     yield
 
 
+# Every field the app stored during a test, checked against the schema it was written at (TODO §62,
+# ruled 2026-09-17: a schema is released before or with the code that uses it). A feature writing a
+# field its shape does not declare looks perfectly fine on the device that wrote it and is missing
+# from every backup — how invitations and repeating sessions were nearly lost (§61).
+#
+# Read from the stores rather than from the write path, so no production code carries a check that
+# exists for the tests, and so it catches whatever the test actually made the app do.
+UNDECLARED_STORED_FIELDS = """async (names) => {
+    const schemas = await import(new URL('data/recordSchemas.js', document.baseURI).href);
+    const indexedDb = await import(new URL('data/indexedDb.js', document.baseURI).href);
+    const offenders = [];
+    for (const name of names) {
+        const existing = await indexedDB.databases?.();
+        if (existing && !existing.some((entry) => entry.name === name)) continue;
+        const db = await new Promise((resolve, reject) => {
+            const request = indexedDB.open(name);
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+        for (const store of [...db.objectStoreNames]) {
+            const schema = store.startsWith('schema') ? store.slice('schema'.length) : null;
+            const shapes = schema === null ? null : schemas.LIVE_SCHEMAS[schema];
+            if (!shapes) continue;
+            const rows = await indexedDb.getAll(db.transaction([store], 'readonly').objectStore(store));
+            for (const row of rows) {
+                const shape = shapes[row.collection];
+                if (!shape) {
+                    offenders.push(`${name}/${store}: collection ${row.collection} is not declared`);
+                    continue;
+                }
+                for (const field of schemas.undeclaredFields(row, shape)) {
+                    offenders.push(`${name}/${store}: ${row.collection}.${field} is not declared`);
+                }
+            }
+        }
+        db.close();
+    }
+    return [...new Set(offenders)];
+}"""
+
+
+@pytest.fixture(autouse=True)
+def stored_records_match_their_schema(request):
+    """After a browser test, nothing in the app's own databases may carry a field its schema does not
+    declare (TODO §62).
+
+    Runs on the page the test already has, after the test body: one pass over the stores, so a
+    feature that writes ahead of its schema fails the test that exercised it rather than surfacing
+    months later as records missing from a restore. A test that closed its page, or never opened the
+    app, has nothing to check.
+    """
+    yield
+    if "page" not in request.fixturenames:
+        return
+    page = request.getfixturevalue("page")
+    try:
+        offenders = page.evaluate(
+            UNDECLARED_STORED_FIELDS, ["librept", "librept_sandbox"]
+        )
+    except Exception:
+        # The page is gone (closed, crashed, or never navigated to the app) — nothing was stored
+        # through it that this could read, and failing here would blame the wrong thing.
+        return
+    assert offenders == [], (
+        "the app stored fields no live schema declares — declare them in recordSchemas.js before "
+        f"the code that writes them ships (TODO §62): {offenders}"
+    )
+
+
+# What the SUITE itself plants in localStorage, which no assertion about "the app wrote nothing"
+# should count: the terms auto-accept that skips a modal, and the schema a second pass reads
+# (--read-schema, TODO §62). Named once here because three tests assert on the client-facing pages,
+# which must leave nothing behind — and each had its own hand-written exception before.
+HARNESS_LOCAL_STORAGE_KEYS = ("librept_terms_accepted", "librept_read_schema")
+
+
+def pytest_addoption(parser):
+    """`--read-schema=PREVIEW` runs the whole browser suite against the preview shape (TODO §62).
+
+    Ruled 2026-09-17 (Simon): the browser tests run twice — once on the schema trainers read, once on
+    the one an upcoming version will. The second pass proves the next shape works on the data a
+    trainer holds today, because the preview store is filled from the live one at boot.
+
+    An option rather than an environment variable, deliberately: `one_environment_everywhere` clears
+    ambient settings so a test cannot inherit one by accident, and a second pass is not an accident —
+    it is the runner saying which schema this run is about.
+    """
+    parser.addoption(
+        "--read-schema",
+        default=None,
+        help="Which live schema the app under test reads, e.g. PREVIEW. Default: the app's own.",
+    )
+
+
+@pytest.fixture(autouse=True)
+def read_schema_choice(request):
+    """Put `--read-schema` in place before the app boots, the way a trainer's own choice would be."""
+    schema = request.config.getoption("--read-schema")
+    if schema and "page" in request.fixturenames:
+        # Only when the install has no choice of its own: this sets the starting schema, it does not
+        # re-impose it on every navigation — a test that switches schemas must still see its switch
+        # survive a reload, which is what the toggle promises a trainer.
+        request.getfixturevalue("page").add_init_script(
+            "if (!window.localStorage.getItem('librept_read_schema')) "
+            f"window.localStorage.setItem('librept_read_schema', {schema!r});"
+        )
+    yield
+
+
 def pytest_configure(config):
     config.addinivalue_line(
         "markers",

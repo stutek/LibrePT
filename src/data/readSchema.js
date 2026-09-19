@@ -174,21 +174,27 @@ export async function refreshPreviewStoreIfBuildChanged(db, currentBuildSha) {
     PREVIEW_BUILD_KEY,
   );
   const storedBuild = entry?.value ?? null;
-  if (storedBuild && currentBuildSha && storedBuild === currentBuildSha) {
-    return { cleared: false, filled: false };
+  const stale = !(storedBuild && currentBuildSha && storedBuild === currentBuildSha);
+
+  if (stale) {
+    // The rows, the "backfilled" marker and the build stamp go in ONE transaction: a kill between
+    // them would leave an empty store still claiming to be complete, which a later activation reads
+    // as ready.
+    await withTransaction(db, [previewStore, META_STORE], "readwrite", ({ store }) => {
+      store(previewStore).clear();
+      store(META_STORE).delete(backfilledKey(PREVIEW_VERSION));
+      store(META_STORE).put({ key: PREVIEW_BUILD_KEY, value: currentBuildSha ?? null });
+    });
   }
 
-  // The rows, the "backfilled" marker and the build stamp go in ONE transaction: a kill between them
-  // would leave an empty store still claiming to be complete, which a later activation reads as ready.
-  await withTransaction(db, [previewStore, META_STORE], "readwrite", ({ store }) => {
-    store(previewStore).clear();
-    store(META_STORE).delete(backfilledKey(PREVIEW_VERSION));
-    store(META_STORE).put({ key: PREVIEW_BUILD_KEY, value: currentBuildSha ?? null });
-  });
-
-  if (String(getReadSchema()) !== String(PREVIEW_VERSION)) return { cleared: true, filled: false };
+  if (String(getReadSchema()) !== String(PREVIEW_VERSION)) return { cleared: stale, filled: false };
+  // Fill it whenever this install READS preview and the store is not ready — emptied a moment ago,
+  // or provisioned empty by this very boot. Without the second case an install already on PREVIEW
+  // came up reading an empty store the first time this build gave it one (found 2026-09-19 by the
+  // PREVIEW pass of §62, on the frozen P-era device database).
+  if (await isBackfilled(db, PREVIEW_VERSION)) return { cleared: stale, filled: false };
   await backfillSchema(db, PREVIEW_VERSION, STABLE_SCHEMA);
-  return { cleared: true, filled: true };
+  return { cleared: stale, filled: true };
 }
 
 /**

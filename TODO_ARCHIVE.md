@@ -20,6 +20,56 @@ Read [CHANGELOG.md](CHANGELOG.md) for what shipped and when. This file is why.
 
 ---
 
+### 62. [x] Feature code may write only what the live schema declares — shipped 2026-09-19
+
+**Ruled 2026-09-17 (Simon), a release constraint:** a schema is released before or together with the
+code of a feature that uses it, never after, or the feature breaks for the trainers using it. P is
+only for CI and for previewing an upcoming version; a demo for a client does not need it.
+
+Asked with it: can an E2E scenario cover this? **Proposed (Claude), not ruled:** not one scenario,
+but a check in every browser test. The store records each written record that has a field or a
+collection the live numbered schema does not declare, and the test fails naming it. One scenario
+would only prove the paths it walks; the whole suite walks every feature it tests, and a feature
+without a test is a gap either way. A unit test does the same for every collection a projection
+knows. **It cannot be switched on before §61**: today it would fail at once on the four session
+fields and the `invites` and `sessionSeries` collections.
+
+**Asked with it (Simon): that check protects trainers — how is reading P tested in CI?**
+**Ruled 2026-09-17 (Simon): the browser tests run twice.** Proposed shape (Claude): a second pass of the browser tests that reads P instead of 4, with
+the same check held against P's declarations. Its first boot fills P from data written at 4, so it
+proves the upcoming version works on the data trainers hold now. The pass runs only while P differs
+from the live schema — decided by comparing the two declarations, never by a setting — so right after
+a release, when there is no preview shape, it costs nothing. While it runs it roughly doubles the
+browser-test stage, locally and in CI alike. Today
+[test_read_schema_toggle.py](tests/e2e/test_read_schema_toggle.py) proves only that switching
+between the stores keeps them complete, not that the features work on P.
+
+**Shipped 2026-09-19:**
+
+- **After every browser test, the app's own databases are read** and the test fails if any stored
+  record carries a field, or sits in a collection, no live schema declares
+  (`stored_records_match_their_schema` in [conftest.py](tests/conftest.py)). Read from the stores, so
+  no production code carries a check that exists for the tests. It found four fields the app had been
+  writing into shapes that did not know them: a session's `completed` and `duration`, a
+  notification's `icon`, and the legacy `titles` a migrated pre-rename database still carries. All
+  four are declared now.
+- **The browser suite runs a second time reading PREVIEW** (`run_e2e_preview_tests`), demo files
+  included, as a Stage 3 task and a CI job the deploy waits for. It skips itself, saying so, when
+  PREVIEW declares nothing beyond the active schema. Measured 2026-09-19: 271 tests, 3m40s per pass.
+- **Which schema a pass reads is a pytest option** (`--read-schema=PREVIEW`), not an environment
+  variable: the suite clears ambient settings on purpose, and a second pass is the runner's
+  instruction rather than something a test could inherit by accident.
+- **Ruled 2026-09-19 (Simon): every build must check that the demo still works on the active schema
+  and that it works on PREVIEW.** Both passes run the demo tests, and the seed data is validated
+  against every live schema by walking `LIVE_SCHEMAS` — so minting schema 5 makes that test demand
+  the demo fit it, with nothing to remember.
+
+It also found a real defect in the preview store: an install already reading PREVIEW came up on an
+empty store the first time a build provisioned one, because the fill only ran when the build stamp
+had changed. It now fills whenever the store is not ready.
+
+---
+
 ### 66. [x] A session may not be named after a client — shipped 2026-09-18
 
 **Ruled 2026-09-18 (Simon)**, after asking how trainers are kept from putting names into session

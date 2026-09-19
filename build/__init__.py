@@ -1640,6 +1640,89 @@ def run_e2e_tests():
     sys.exit(returncode)
 
 
+def preview_schema_differs():
+    """Whether the PREVIEW shape declares anything the active schema does not (TODO §62).
+
+    Asked of the schema declarations themselves, never of a setting: the day a release mints the next
+    number and the preview is empty, the second pass costs nothing and stops running with nothing to
+    switch off. Answered by Node because the declarations are JavaScript and this is their one
+    source of truth.
+    """
+    node_path = ensure_node_binary()
+    if not node_path:
+        return False
+    script = (
+        "const m = await import('./src/data/recordSchemas.js');"
+        "const live = m.LIVE_SCHEMAS[m.STABLE_SCHEMA];"
+        "const preview = m.LIVE_SCHEMAS.PREVIEW ?? {};"
+        "const extra = Object.entries(preview).some(([collection, shape]) =>"
+        "  !live[collection] || Object.keys(shape).some((field) => !(field in live[collection])));"
+        "console.log(extra ? 'differs' : 'same');"
+    )
+    result = subprocess.run(
+        [node_path, "--input-type=module", "-e", script],
+        capture_output=True,
+        text=True,
+    )
+    return result.stdout.strip() == "differs"
+
+
+def run_e2e_preview_tests():
+    """The whole browser suite again, with the app reading the PREVIEW schema (TODO §62).
+
+    Ruled 2026-09-17 (Simon): the browser tests run twice. The first pass protects the trainers on
+    the active schema; this one proves the shape an upcoming version will read works on the data a
+    trainer holds today — the preview store is filled from the live one at boot, so the rows it reads
+    are theirs. Ruled 2026-09-19 with it: the demo must work on the active schema AND on PREVIEW, so
+    the demo files run here too rather than being skipped as they are in the first pass.
+
+    Skipped, loudly, when PREVIEW declares nothing the active schema does not: there is then no
+    second shape to prove anything about, and the stage costs what it always did.
+    """
+    print("\n  Running E2E Browser Tests on the PREVIEW schema...")
+    if not preview_schema_differs():
+        print(
+            "  ✓ Skipped: PREVIEW declares nothing beyond the active schema, so there is nothing"
+        )
+        print(
+            "    a second pass could prove. It runs again the moment a field is staged in it."
+        )
+        return
+
+    venv_python = venv_python_path()
+    run = run_logged(
+        [
+            venv_python,
+            "-m",
+            "pytest",
+            "-n",
+            str(e2e_worker_count()),
+            "-q",
+            "--tb=long",
+            "--read-schema=PREVIEW",
+            "tests/e2e/",
+        ],
+        "e2e-preview",
+    )
+    returncode, output, path = run.returncode, run.output, run.path
+    record_task_cpu(run)
+    if returncode == 0:
+        print("  ✓ E2E browser tests passed on the PREVIEW schema!")
+        return
+
+    print_digest("E2E browser tests (PREVIEW)", output, path)
+    failed = failed_test_ids(output)
+    print("  ✗ E2E browser tests failed on the PREVIEW schema:")
+    for test_id in failed:
+        print(f"      • {test_id}")
+    print(f"    Full log: {path}")
+    print(
+        "    This pass reads the shape an upcoming version will: a failure here is the next release"
+    )
+    print("    breaking on data a trainer already has, not a broken test.")
+    sys.exit(returncode)
+
+
 def _csp_parity():
     """Extract the dev server's CSP header and index.html's <meta> CSP, and compare them."""
     import re
@@ -2116,6 +2199,7 @@ def run_stage_3_e2e():
         {
             "E2E Browser Tests": run_e2e_tests,
             "Demo & Walkthrough Tests": run_demo_tests,
+            "E2E Browser Tests (PREVIEW schema)": run_e2e_preview_tests,
         }
     )
     stage_elapsed = time.monotonic() - stage_start
@@ -2162,7 +2246,7 @@ def run_stage_4_zap():
 PIPELINE_STAGES = (
     (1, run_stage_1_parallel, ()),
     (2, run_stage_2_medium, ("run_medium_tests",)),
-    (3, run_stage_3_e2e, ("run_e2e_tests", "run_demo_tests")),
+    (3, run_stage_3_e2e, ("run_e2e_tests", "run_demo_tests", "run_e2e_preview_tests")),
     (4, run_stage_4_zap, ("run_owasp_zap_scan",)),
 )
 

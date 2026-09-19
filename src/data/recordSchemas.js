@@ -53,6 +53,12 @@ const SESSION_ITEM_SHAPE = {
   rest: { required: false, type: "number" },
 };
 
+// Fields ANY record may carry, whatever its collection, so a shape does not have to repeat them.
+// `testData` is the provenance stamp the seeder writes (data/seedProvenance.js) and `seededDemo` is
+// what it was called before — both say "this row is sample or test data", which is true of a client
+// and of a session alike and belongs to no one collection.
+export const COMMON_RECORD_FIELDS = ["testData", "seededDemo"];
+
 export const SCHEMA_4 = {
   clients: {
     id: { required: true, type: "string" },
@@ -103,6 +109,11 @@ export const SCHEMA_4 = {
     routineId: { required: false, type: "string" },
     maxCapacity: { required: false, type: "number" },
     day: { required: false, type: "string" },
+    // Legacy, from before `bookings` was renamed to `sessions` (migrationSteps.js's 1 → 2): those
+    // rows carried a `titles` array instead of a single `title`. Nothing reads it now, and it is
+    // declared rather than dropped because a migration that deletes a trainer's own words to tidy a
+    // shape is worse than a field nobody uses (§62, 2026-09-19).
+    titles: { required: false, type: "array" },
     // The four fields below and the two collections at the end of this shape were declared only in
     // P until 2026-09-17, while every install already wrote them (TODO §61). Ruled that day
     // (Simon): schema 4 is the live schema and takes them, accepting that "4" then names a wider
@@ -117,6 +128,11 @@ export const SCHEMA_4 = {
     occurrenceDate: { required: false, type: "string" },
     // A cancelled evening is a RECORD, not a deletion — the rule would simply produce it again.
     cancelled: { required: false, type: "boolean" },
+    // Stamped when a session is finished (domain/sessionRecord.js) — how long it ran, in seconds,
+    // beside the flag. Declared 2026-09-19 (TODO §62): the app had been writing both into a shape
+    // that did not know them.
+    completed: { required: false, type: "boolean" },
+    duration: { required: false, type: "number" },
   },
   history: {
     id: { required: true, type: "string" },
@@ -153,6 +169,8 @@ export const SCHEMA_4 = {
     titleKey: { required: false, type: "string" },
     descKey: { required: false, type: "string" },
     actions: { required: false, type: "array" },
+    // The glyph the feed draws beside the message (data/messages.js). Declared 2026-09-19 (§62).
+    icon: { required: false, type: "string" },
   },
   // Invitations (TODO §1.6, decided 2026-08-17): an RSVP is a fact about an invitation — it was
   // sent, and this came back — not a property of a person or of a session. `sessions.participants`
@@ -278,6 +296,20 @@ function typeOf(value) {
   if (Array.isArray(value)) return "array";
   if (value === null) return "null";
   return typeof value;
+}
+
+/**
+ * Fields on `record` that `shape` does not declare — what a feature writing ahead of its schema looks
+ * like (TODO §62, ruled 2026-09-17: the schema ships before or with the code that uses it).
+ *
+ * `collection` is the routing key the store adds, not a field of the record, and the common fields
+ * above belong to every shape, so neither counts as undeclared.
+ */
+export function undeclaredFields(record, shape) {
+  if (!record || !shape) return [];
+  return Object.keys(record).filter(
+    (field) => field !== "collection" && !COMMON_RECORD_FIELDS.includes(field) && !(field in shape),
+  );
 }
 
 // Structural problems for one record against one collection's field shape — empty means the

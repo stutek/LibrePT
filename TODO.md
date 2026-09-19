@@ -4634,33 +4634,10 @@ schema is — so it must also hold against a made-up active schema 5 — and the
 above; each booted in the browser tests, walked through a client, a routine, a repeating session and
 an invitation, under both passes of §62. Blocks: §61, which needs the "P" snapshot first.
 
-## 62. [ ] Feature code may write only what the live schema declares
+## 62. [x] Feature code may write only what the live schema declares — shipped 2026-09-19
 
-**Ruled 2026-09-17 (Simon), a release constraint:** a schema is released before or together with the
-code of a feature that uses it, never after, or the feature breaks for the trainers using it. P is
-only for CI and for previewing an upcoming version; a demo for a client does not need it.
-
-Asked with it: can an E2E scenario cover this? **Proposed (Claude), not ruled:** not one scenario,
-but a check in every browser test. The store records each written record that has a field or a
-collection the live numbered schema does not declare, and the test fails naming it. One scenario
-would only prove the paths it walks; the whole suite walks every feature it tests, and a feature
-without a test is a gap either way. A unit test does the same for every collection a projection
-knows. **It cannot be switched on before §61**: today it would fail at once on the four session
-fields and the `invites` and `sessionSeries` collections.
-
-**Asked with it (Simon): that check protects trainers — how is reading P tested in CI?**
-**Ruled 2026-09-17 (Simon): the browser tests run twice.** Proposed shape (Claude): a second pass of the browser tests that reads P instead of 4, with
-the same check held against P's declarations. Its first boot fills P from data written at 4, so it
-proves the upcoming version works on the data trainers hold now. The pass runs only while P differs
-from the live schema — decided by comparing the two declarations, never by a setting — so right after
-a release, when there is no preview shape, it costs nothing. While it runs it roughly doubles the
-browser-test stage, locally and in CI alike. Today
-[test_read_schema_toggle.py](tests/e2e/test_read_schema_toggle.py) proves only that switching
-between the stores keeps them complete, not that the features work on P.
-
-**Open:** how a change to the demo is tested once the demo does not use P (Simon). Proposed: the demo
-runs in the sandbox workspace on the live schema, so its tests are the existing demo tests; a demo
-change that needs a new field needs the schema first, under this same rule.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#62-x-feature-code-may-write-only-what-the-live-schema-declares--shipped-2026-09-19);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ## 61. [ ] Every install reads the preview schema P — the live schema must not be P
 

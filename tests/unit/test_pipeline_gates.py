@@ -124,7 +124,9 @@ def test_stage_leaves_reads_every_stage_from_the_build_table():
     # Stage 3 holds two tasks that run side by side: the e2e suite and the demo/walkthrough suite,
     # which is its own gate so a broken demo names itself rather than appearing as red node ids
     # inside a suite of 205.
-    assert stages[3] == {"run_e2e_tests", "run_demo_tests"}
+    # The PREVIEW pass is a Stage 3 task of its own (TODO §62): the same browser suite, read at the
+    # shape an upcoming version will use.
+    assert stages[3] == {"run_e2e_tests", "run_demo_tests", "run_e2e_preview_tests"}
     assert stages[4] == {"run_owasp_zap_scan"}
 
 
