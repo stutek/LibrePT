@@ -52,9 +52,41 @@ function stateWithTwoJanes() {
       { id: "p1", clientId: "c-jane-a", clientName: "Jane Doe", resolved: false },
       { id: "p2", clientId: "c-marko", clientName: "Marko Novak", resolved: false },
     ],
+    sessionSeries: [
+      {
+        id: "ser-solo",
+        title: "Jane Doe Tuesdays",
+        startDate: "2026-08-01",
+        time: "18:00 - 19:00",
+        weekdays: [2],
+        participants: ["c-jane-a"],
+      },
+      {
+        id: "ser-group",
+        title: "Jane Doe + Marko strength",
+        startDate: "2026-08-01",
+        time: "19:00 - 20:00",
+        weekdays: [4],
+        participants: ["c-jane-a", "c-marko"],
+      },
+      {
+        id: "ser-others",
+        title: "Marko only",
+        startDate: "2026-08-01",
+        time: "07:00 - 08:00",
+        weekdays: [1],
+        participants: ["c-marko"],
+      },
+    ],
     sessions: [
-      { id: "s-solo", participants: ["c-jane-a"], title: "Jane Doe 1:1" },
+      {
+        id: "s-solo",
+        participants: ["c-jane-a"],
+        title: "Jane Doe 1:1",
+        location: "Jane Doe's flat",
+      },
       { id: "s-group", participants: ["c-jane-a", "c-marko"], title: "Jane Doe + Marko" },
+      { id: "s-both-janes", participants: ["c-jane-a", "c-jane-b"], title: "Jane Doe pair" },
       { id: "s-other", participants: ["c-marko"], title: "Marko only" },
     ],
   };
@@ -103,6 +135,45 @@ test("every identifying field on the client record is cleared", () => {
   assert.equal(erased.gdprConsent.consentDate, "2026-01-05");
 });
 
+test("a repeating rule for this client alone is dropped, a shared one is kept without them", () => {
+  // Ruled 2026-09-19 (Simon, TODO §65): a rule that exists for one client exists only to keep
+  // producing their evenings, and an erased person must not still be scheduled every week. A rule
+  // with other people in it belongs to those others.
+  const { state, summary } = eraseClientInState(stateWithTwoJanes(), "c-jane-a", {});
+  const ids = state.sessionSeries.map((series) => series.id);
+
+  assert.deepEqual(ids, ["ser-group", "ser-others"], "the one-to-one rule is gone");
+  assert.equal(summary.seriesRemoved, 1);
+  assert.equal(summary.seriesKept, 1);
+
+  const group = state.sessionSeries.find((series) => series.id === "ser-group");
+  assert.deepEqual(group.participants, ["c-marko"], "only the erased client leaves the rule");
+  // Marko is not a namesake, so the rule's title is rewritten even though another Jane exists
+  // elsewhere in the book: she is not in this rule, so it cannot be about her.
+  assert.ok(!group.title.includes("Jane"), group.title);
+  assert.deepEqual(summary.reviewSeriesIds, []);
+});
+
+test("a rule the two same-named clients share keeps its title and is reported", () => {
+  const state = stateWithTwoJanes();
+  state.sessionSeries.push({
+    id: "ser-two-janes",
+    title: "Jane Doe pair",
+    startDate: "2026-08-01",
+    time: "20:00 - 21:00",
+    weekdays: [3],
+    participants: ["c-jane-a", "c-jane-b"],
+  });
+
+  const { state: erased, summary } = eraseClientInState(state, "c-jane-a", {});
+  const shared = erased.sessionSeries.find((series) => series.id === "ser-two-janes");
+
+  // Both Janes are in this one, so the name in its title could mean either.
+  assert.equal(shared.title, "Jane Doe pair");
+  assert.deepEqual(shared.participants, ["c-jane-b"]);
+  assert.deepEqual(summary.reviewSeriesIds, ["ser-two-janes"]);
+});
+
 test("the denormalised name copies are rewritten too", () => {
   // DATA_MODEL §5: "if one store keeps the name, the erasure has failed".
   const { state } = eraseClientInState(stateWithTwoJanes(), "c-jane-a", {});
@@ -123,38 +194,41 @@ test("another client with the same name is left completely untouched", () => {
   assert.equal(state.history.find((record) => record.id === "h2").clientName, "Jane Doe");
 });
 
-test("shared free text is flagged, never rewritten, when the name is ambiguous", () => {
+test("text is judged on the record it sits on, not on the whole book", () => {
+  // Ruled 2026-09-19 (Simon): check the context. A namesake who is not on this record cannot be who
+  // the text means, so only a record holding BOTH Janes is left alone.
   const { state, summary } = eraseClientInState(stateWithTwoJanes(), "c-jane-a", {});
+  const marker = "[c-jane-a]";
 
-  // A namesake exists, so no session title is rewritten — the regex cannot tell which Jane a title
-  // means, and guessing would edit the other client's session under this client's request.
-  assert.equal(state.sessions.find((session) => session.id === "s-solo").title, "Jane Doe 1:1");
+  const solo = state.sessions.find((session) => session.id === "s-solo");
+  assert.equal(solo.title, `${marker} 1:1`);
+  assert.equal(solo.location, `${marker}'s flat`, "a location names a person just as a title does");
   assert.equal(
     state.sessions.find((session) => session.id === "s-group").title,
-    "Jane Doe + Marko",
+    `${marker} + Marko`,
   );
-  assert.deepEqual(summary.reviewSessionIds, ["s-solo", "s-group"]);
+  // Both Janes are on this one, and the other did not ask to be forgotten.
+  assert.equal(
+    state.sessions.find((session) => session.id === "s-both-janes").title,
+    "Jane Doe pair",
+  );
+  assert.deepEqual(summary.reviewSessionIds, ["s-both-janes"]);
   assert.equal(summary.namesakes.length, 1);
   assert.match(summary.namesakes[0].label, /jane\.b@example\.com/);
 });
 
-test("with no namesake, a solo session title is rewritten and a group one is not", () => {
-  const state = stateWithTwoJanes();
-  state.clients = state.clients.filter((client) => client.id !== "c-jane-b");
-  state.history = state.history.filter((record) => record.id !== "h2");
-
-  const result = eraseClientInState(state, "c-jane-a", {});
-
+test("what stands in for the name is the record's own id, in brackets", () => {
+  // Ruled 2026-09-19 (Simon). The id is already in the record and says nothing about the person, so
+  // the text shows WHICH client was taken out — and two erased clients in one sentence stay two.
+  const result = eraseClientInState(stateWithTwoJanes(), "c-jane-a", {});
   const soloTitle = result.state.sessions.find((session) => session.id === "s-solo").title;
+
   assert.ok(!soloTitle.includes("Jane Doe"), "the name is gone from the title");
-  assert.ok(soloTitle.includes(erasurePseudonym("c-jane-a")), "and the pseudonym stands in for it");
+  assert.ok(soloTitle.includes("[c-jane-a]"), `the id stands in for it: ${soloTitle}`);
   assert.ok(soloTitle.includes("1:1"), "the rest of what the trainer typed survives");
-  // A group title may mean any participant, and the others did not ask to be forgotten.
-  assert.equal(
-    result.state.sessions.find((session) => session.id === "s-group").title,
-    "Jane Doe + Marko",
-  );
-  assert.deepEqual(result.summary.reviewSessionIds, ["s-group"]);
+  // The record's own label stays the short pseudonym, which is what a trainer reads in a list.
+  const erased = result.state.clients.find((client) => client.id === "c-jane-a");
+  assert.equal(erased.name, erasurePseudonym("c-jane-a"));
 });
 
 test("prose inside the client's OWN records is rewritten even with a namesake present", () => {
@@ -163,9 +237,8 @@ test("prose inside the client's OWN records is rewritten even with a namesake pr
   const { state } = eraseClientInState(stateWithTwoJanes(), "c-jane-a", {});
   const record = state.history.find((entry) => entry.id === "h1");
 
-  const pseudonym = erasurePseudonym("c-jane-a");
-  assert.equal(record.feedback[0].note, `${pseudonym} flew through this`);
-  assert.equal(record.title, `${pseudonym} — deload week`);
+  assert.equal(record.feedback[0].note, "[c-jane-a] flew through this");
+  assert.equal(record.title, "[c-jane-a] — deload week");
 });
 
 test("the disambiguator always says something, and prefers the trainer's own alias", () => {

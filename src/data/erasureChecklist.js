@@ -132,11 +132,25 @@ export function renderErasureReceipt(summary, checklist, client) {
     `- ${summary.sessions} session(s) checked; ${summary.scrubbedTextFields} free-text field(s) rewritten`,
   ];
 
+  // A rule for this client alone is removed outright, so nothing goes on scheduling them; a rule
+  // shared with others keeps running without them (TODO §65, ruled 2026-09-19).
+  if (summary.seriesRemoved > 0 || summary.seriesKept > 0) {
+    lines.push(
+      `- ${summary.seriesRemoved} repeating session(s) removed, ${summary.seriesKept} kept for the other people in them`,
+    );
+  }
+
   if (summary.namesakes?.length > 0) {
     lines.push(
       "",
       `⚠ Another client shares this name (${summary.namesakes.length}). Shared free text was NOT`,
       "  rewritten automatically, because a rewrite could have hit the wrong person's session.",
+    );
+  }
+  if (summary.reviewSeriesIds?.length > 0) {
+    lines.push(
+      `⚠ ${summary.reviewSeriesIds.length} repeating session(s) still mention this name and need a`,
+      `  manual check: ${summary.reviewSeriesIds.join(", ")}`,
     );
   }
   if (summary.reviewSessionIds?.length > 0) {

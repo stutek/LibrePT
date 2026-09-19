@@ -4474,10 +4474,25 @@ erased clients is cheap, at every start.
   the erased clients are found on the records themselves (`isErased`), and the register stays what it
   is for — recognising a record arriving from outside.
 
-**Open:** whether an erasure removes the person from a repeating rule or refuses to touch it and
-reports it like an ambiguous session title, and how the receipt says which it did; and whether the
-boot pass runs every time or only when the sweep itself has changed (a marker, like the preview
-store's build stamp).
+**Ruled and shipped 2026-09-19 (Simon):**
+
+- **A repeating rule for this client alone is removed** — it exists only to keep producing their
+  evenings, and an erased person must not still be scheduled every week. Its trainer-typed title goes
+  with it. **A rule shared with other people stays**, minus this client, because it belongs to them.
+- **Ambiguity is judged on the record, not on the whole book.** A namesake who is not on this session
+  or rule cannot be who its text means, so the name is replaced there; only a record holding both
+  same-named clients is left as typed and reported. This replaced "any namesake anywhere blocks a
+  rewrite", which left names standing on records the namesake had nothing to do with.
+- **A session's location is swept like its title** — "at Jane's flat" names a person as much as a
+  title does.
+- **What stands in for the name in prose is the record's own id in brackets**, `[c1a9f0e2]`: already
+  in the record, says nothing about the person, and keeps two erased clients in one sentence apart.
+  The client record itself keeps the short pseudonym, which is what a trainer reads in a list.
+- The receipt counts the rules removed and kept, and names the ones left for a human to read.
+
+**Still open:** the repeat sweep itself — running the erasure again after a migration and at start
+(ruled 2026-09-18), and whether that runs every time or only when the sweep has changed (a marker,
+like the preview store's build stamp).
 
 ## 64. [ ] The gate fails on a different test each run, and each one passes on its own
 

@@ -155,19 +155,43 @@ function scrubName(text, name, pseudonym) {
   return { text: next, hit: next !== text };
 }
 
+/** The mark a name leaves behind in prose: the record's own id, in brackets (TODO §65, ruled
+ * 2026-09-19 by Simon). The id is opaque and already in the record, so the text says WHICH client
+ * was taken out without saying anything about them — and two erased clients in one sentence stay
+ * two. The client record itself keeps the short pseudonym, which is what a trainer reads in a list. */
+function textMarkerFor(clientId) {
+  return `[${clientId}]`;
+}
+
+/**
+ * Whether the name in THIS record could mean somebody else: another client on the same record who
+ * answers to the same name (Simon, 2026-09-19 — "check the context; namesakes with a different user
+ * id stay"). A namesake elsewhere in the book is no longer a reason to leave a record alone: a title
+ * on a session that person is not in cannot be about them.
+ */
+function namesakeOnRecord(participantIds, state, client) {
+  const target = normalizedName(client?.name);
+  if (!target) return false;
+  return (participantIds || []).some((id) => {
+    if (id === client.id) return false;
+    const other = (state?.clients || []).find((candidate) => candidate.id === id);
+    return normalizedName(other?.name) === target;
+  });
+}
+
 // A history record belongs to exactly one client, so prose inside it is unambiguous EVEN when the
 // name is shared — a note on Jane A's session is about Jane A. Ambiguity only reaches records that
 // several clients share, which is sessions.
-function eraseHistoryRecord(record, name, pseudonym, counters) {
+function eraseHistoryRecord(record, name, pseudonym, marker, counters) {
   const feedback = Array.isArray(record.feedback)
     ? record.feedback.map((item) => {
-        const scrubbed = scrubName(item?.note, name, pseudonym);
+        const scrubbed = scrubName(item?.note, name, marker);
         if (scrubbed.hit) counters.scrubbedTextFields += 1;
         return { ...item, note: scrubbed.text };
       })
     : record.feedback;
 
-  const title = scrubName(record.title, name, pseudonym);
+  const title = scrubName(record.title, name, marker);
   if (title.hit) counters.scrubbedTextFields += 1;
 
   return { ...record, clientName: pseudonym, title: title.text, feedback };
@@ -179,12 +203,46 @@ function eraseHistoryRecord(record, name, pseudonym, counters) {
  * Returns a NEW state plus a summary of what was touched — the summary is not decoration: an
  * erasure a trainer cannot describe is one they cannot prove they performed when asked.
  */
+/**
+ * What an erasure does to ONE repeating-session rule (TODO §65, ruled 2026-09-19 by Simon).
+ *
+ * **A rule for this client alone goes.** It exists only to keep producing their evenings, and a
+ * person who asked to be forgotten must not still be scheduled every Tuesday. Its trainer-typed
+ * title goes with it, which is the cleanest possible answer to a title naming them.
+ *
+ * **A rule with other people in it stays**, minus this client: it belongs to those others, and the
+ * evenings it produces are theirs. Its title is treated exactly as a session title is — rewritten
+ * only where the name can mean nobody else, and otherwise left as typed and reported, because a
+ * regex cannot tell two Jane Does apart and a wrong rewrite edits another client's schedule.
+ */
+function sweptSeries(series, { clientId, name, marker, state, client, counters }) {
+  const participants = Array.isArray(series?.participants) ? series.participants : [];
+  if (!participants.includes(clientId)) return [series];
+
+  if (participants.length === 1) {
+    counters.seriesRemoved += 1;
+    return [];
+  }
+
+  counters.seriesKept += 1;
+  const kept = { ...series, participants: participants.filter((id) => id !== clientId) };
+  const title = scrubName(series.title, name, marker);
+  if (!title.hit) return [kept];
+  if (namesakeOnRecord(participants, state, client)) {
+    counters.reviewSeriesIds.push(series.id);
+    return [kept];
+  }
+  counters.scrubbedTextFields += 1;
+  return [{ ...kept, title: title.text }];
+}
+
 export function eraseClientInState(state, clientId, { requestedOn = "", now = new Date() } = {}) {
   const client = (state?.clients || []).find((candidate) => candidate.id === clientId);
   if (!client) return { state, summary: null };
 
   const name = client.name || "";
   const pseudonym = erasurePseudonym(clientId);
+  const marker = textMarkerFor(clientId);
   const namesakes = clientsSharingName(state, client);
   const counters = {
     history: 0,
@@ -195,6 +253,11 @@ export function eraseClientInState(state, clientId, { requestedOn = "", now = ne
     // untouched title still naming the erased client is the one thing a trainer must go and fix by
     // hand, and they can only do that if they are told which sessions to open.
     reviewSessionIds: [],
+    // Repeating rules: how many were dropped because they existed for this client alone, how many
+    // stayed for the others in them, and which of those still say the name (TODO §65).
+    seriesRemoved: 0,
+    seriesKept: 0,
+    reviewSeriesIds: [],
   };
 
   const clients = state.clients.map((candidate) =>
@@ -204,7 +267,7 @@ export function eraseClientInState(state, clientId, { requestedOn = "", now = ne
   const history = (state.history || []).map((record) => {
     if (record.clientId !== clientId) return record;
     counters.history += 1;
-    return eraseHistoryRecord(record, name, pseudonym, counters);
+    return eraseHistoryRecord(record, name, pseudonym, marker, counters);
   });
 
   const planUpdates = (state.planUpdates || []).map((record) => {
@@ -222,25 +285,30 @@ export function eraseClientInState(state, clientId, { requestedOn = "", now = ne
     }
     counters.sessions += 1;
 
-    const soleParticipant = session.participants.length === 1;
-    const mentionsName = scrubName(session.title, name, pseudonym).hit;
-    if (!mentionsName) return session;
+    // Both trainer-typed fields: the name lands in either, and "at Jane's flat" is as much a name
+    // as "Jane 1:1" is.
+    const title = scrubName(session.title, name, marker);
+    const location = scrubName(session.location, name, marker);
+    if (!title.hit && !location.hit) return session;
 
-    // Rewrite only when the erased client is unambiguously the person the title means: no namesake
-    // in the database, and nobody else in the session. Otherwise the title stays exactly as typed
-    // and is reported — a trainer reading it can tell which Jane it meant; a regex cannot, and
-    // guessing here would rewrite one client's session under another client's erasure.
-    if (namesakes.length > 0 || !soleParticipant) {
+    // Rewrite unless the name on THIS record could mean somebody else on it. A namesake who is not
+    // in this session cannot be who the title means, so their existence no longer protects the name
+    // (changed 2026-09-19). Where two same-named people really are on one session, the text stays
+    // exactly as typed and is reported: a trainer can tell them apart, a pattern cannot.
+    if (namesakeOnRecord(session.participants, state, client)) {
       counters.reviewSessionIds.push(session.id);
       return session;
     }
-    const title = scrubName(session.title, name, pseudonym);
-    counters.scrubbedTextFields += 1;
-    return { ...session, title: title.text };
+    counters.scrubbedTextFields += (title.hit ? 1 : 0) + (location.hit ? 1 : 0);
+    return { ...session, title: title.text, location: location.text };
   });
 
+  const sessionSeries = (state.sessionSeries || []).flatMap((series) =>
+    sweptSeries(series, { clientId, name, marker, state, client, counters }),
+  );
+
   return {
-    state: { ...state, clients, history, planUpdates, sessions },
+    state: { ...state, clients, history, planUpdates, sessions, sessionSeries },
     summary: {
       clientId,
       pseudonym,

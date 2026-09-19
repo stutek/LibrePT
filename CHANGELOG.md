@@ -34,6 +34,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-09-19 — Erasing a client reaches repeating sessions and locations
+
+### Fixed
+
+- **A repeating session that existed for the erased client alone is now removed**, so nothing goes on
+  scheduling them. One shared with other people keeps running without them (§65).
+- **The place a session was held is checked for the name too**, not only its name.
+- **A name is judged on the session it sits on.** Before, one other client with the same name
+  anywhere in the book stopped every rewrite; now only a session or repeating rule holding both of
+  them is left for the trainer to read, and the receipt names those.
+- **Where a name is taken out of typed text, the client's record id stands in for it** — for example
+  `[c1a9f0e2]` — so it is clear that something was removed and which record it belonged to.
+
 ## 2026-09-18 — A session cannot be named after a client
 
 ### Changed

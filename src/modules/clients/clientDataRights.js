@@ -258,14 +258,24 @@ function renderReceipt(summary, checklist, client) {
         `<li class="${item.blocking ? "todo" : "info"}"><strong>${escapeHTML(item.surface)}</strong> — ${escapeHTML(item.action)}<br><span class="why">${escapeHTML(item.why)}</span></li>`,
     )
     .join("");
+  // Left for the trainer, and named as such: a title only a person can judge (a namesake in the
+  // book, or several people in the session) stays exactly as typed — a rewrite could edit the wrong
+  // client's schedule. Repeating rules are counted beside sessions, since the trainer opens them in
+  // a different place (TODO §65).
+  const leftAlone = summary.reviewSessionIds.length + summary.reviewSeriesIds.length;
   const warning =
-    summary.reviewSessionIds.length > 0
-      ? `<p class="data-rights-warning">${escapeHTML(String(summary.reviewSessionIds.length))} session title(s) still mention this name and were left alone — a rewrite could have hit the wrong person. Open and edit them yourself.</p>`
+    leftAlone > 0
+      ? `<p class="data-rights-warning">${escapeHTML(String(summary.reviewSessionIds.length))} session title(s) and ${escapeHTML(String(summary.reviewSeriesIds.length))} repeating session(s) still mention this name and were left alone — a rewrite could have hit the wrong person. Open and edit them yourself.</p>`
+      : "";
+  const removedRules =
+    summary.seriesRemoved > 0
+      ? `<p class="data-rights-note">${escapeHTML(String(summary.seriesRemoved))} repeating session(s) for this client alone were removed, so no further evenings are scheduled for them.</p>`
       : "";
 
   receipt.innerHTML = `
     <p class="data-rights-done">Erased in the app as <strong>${escapeHTML(summary.pseudonym)}</strong>.</p>
     ${warning}
+    ${removedRules}
     <p class="data-rights-note">The rest is yours — LibrePT cannot reach these:</p>
     <ul class="data-rights-checklist">${rows}</ul>`;
   receipt.hidden = false;
