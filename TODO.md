@@ -4420,6 +4420,51 @@ Seen 2026-09-14 on the demo data, while checking §52.2. A past card's badge rea
 Slovenian screen. The app writes a date as ISO everywhere, in every language, so it should read
 2026-07-20, and the word should come from the dictionary.
 
+## 68. [ ] The paid tiers: what stays out of this app, and the tag that invites the upgrade
+
+Simon's tier idea, 2026-09-19: **Libre** (everything today, free), **PRO** (invoices and UPN payment
+orders), **ENTERPRISE** (a hosted service coordinating several trainers and gyms, plus AI when the
+trainer supplies their own API key). The reasoning, the prices and the open questions live in the
+separate private project `~/Projects/EnterprisePT` and in `.private/monetisation-tiers.md`; what is
+recorded here is only what touches THIS repository.
+
+### 68.1 [ ] UPN generation stays OUT of LibrePT — ruled 2026-09-19 (Simon); the privacy half is open
+
+A UPN payment order could be produced on the phone with the QR encoder this app already vendors. It
+still stays out, for a reason that is not technical: **a paid capability shipped inside a free,
+offline, open app cannot be enforced.** There are no accounts and no server to check a licence
+against, and a licence key checked on the device is the shape people share.
+
+**Open, and Simon named it as the thing to think about: privacy.** Moving the feature to a server
+moves the DATA to a server. A UPN order carries who is paying, to whom, how much and for what, and an
+invoice carries the client's name and address — so the tier that is easiest to enforce is also the one
+that ends LibrePT's "nothing leaves this phone" promise. Whether there is a shape that enforces
+payment without collecting the trainer's clients is the question EnterprisePT has to answer before any
+of it is built.
+
+### 68.2 [ ] A visual tag in the app that invites the upgrade
+
+Wanted 2026-09-19 (Simon): LibrePT carries a tag inviting the upgrade to PRO, and PRO carries one
+inviting ENTERPRISE.
+
+**Red team, so it is decided rather than discovered later.** This app's rules say the trainer's
+attention is the scarce resource and that the gym floor is the judge. An upgrade tag spends exactly
+that attention, and it is the one element in the app whose purpose is ours rather than theirs. So it
+has to be ruled, not styled:
+
+- **Never during a session.** The live clipboard is a one-handed surface with a client waiting; an
+  upsell there is the clearest way to make a trainer resent the app.
+- **Where, then**: candidates are the ☰ menu, the support/about surface, and the empty states of the
+  features PRO would extend. Each shows the tag to someone who is looking at the app rather than at a
+  person.
+- **Shown once, dismissible, and it stays dismissed.** A tag that returns is an advertisement.
+- **It must say what PRO does**, not "upgrade". A reader who cannot tell what they would get has been
+  asked to pay for a word.
+- **Not hover-only, real padding, both languages** — the app's ordinary rules, which an upsell does
+  not get to skip.
+- **Open:** does a free-tier tag belong in an app whose licence and pitch are "free and complete"?
+  The honest version names the paid tier without implying the free one is crippled.
+
 ## 67. [ ] Free text elsewhere is not checked for a client's name
 
 Left open by §66 (2026-09-18): the refusal covers a session's name and location only. A routine's
