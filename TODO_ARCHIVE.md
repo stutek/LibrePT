@@ -68,6 +68,23 @@ It also found a real defect in the preview store: an install already reading PRE
 empty store the first time a build provisioned one, because the fill only ran when the build stamp
 had changed. It now fills whenever the store is not ready.
 
+**Reshaped the same day, ruled by Simon: a regression suite and a stage of its own.** Running the
+whole browser suite twice — once per schema — was replaced by a clearer split:
+
+- **Stage 3 follows the work in hand** and pins its e2e and demo runs to PREVIEW while a preview shape
+  exists. One pass, so the gate does not pay for two full suites.
+- **Stage 4 is the regression suite**, [tests/regression/](tests/regression/), pinned to the released
+  schema: what the shipped version promises the trainers already on it — data survives a reload, a
+  backup carries every collection, an erasure leaves no name, the demo loads. Its own directory,
+  because when behaviour changes the schema and these tests change together.
+- **The OWASP ZAP scan became stage 5**, with the CI job graph following the same order.
+- Simon named the risk himself: keeping two suites in step when a new build lands.
+  [test_frozen_schema.py](tests/regression/test_frozen_schema.py) answers it — the suite records the
+  released schema it froze, and fails the day the app's released schema moves past it, so the review
+  is deliberate rather than forgotten.
+- **What this trades away, stated plainly:** the full suite no longer runs on the released schema.
+  Whatever the regression suite does not name is proved only against the preview shape.
+
 ---
 
 ### 66. [x] A session may not be named after a client — shipped 2026-09-18

@@ -1,7 +1,7 @@
 ---
 type: index
 title: LibrePT Test Tier Catalog
-description: The four test tiers, what each one boots, and the rule for choosing where a new test belongs.
+description: The five test tiers, what each one boots, and the rule for choosing where a new test belongs.
 status: active
 tags:
   - index
@@ -11,8 +11,8 @@ tags:
 
 # LibrePT Test Tier Catalog
 
-Four tiers, ordered by how much of the app each one boots. The gate runs them in that order
-(`build/__init__.py`, stages 1→4) so the cheapest, most localised failure surfaces first. **Put a
+Five tiers, ordered by how much of the app each one boots. The gate runs them in that order
+(`build/__init__.py`, stages 1→5) so the cheapest, most localised failure surfaces first. **Put a
 new test in the highest tier that can actually hold it** — the tier below is always faster and
 localises the fault better, and a test placed too low simply cannot express what it needs.
 
@@ -23,6 +23,7 @@ localises the fault better, and a test placed too low simply cannot express what
 | [tests/unit_js/security/](unit_js/security/) (4 files, 15 tests) | `node:test`, stage 1 | one ES module, no DOM | It pins a **security property** with no DOM: injection into a generated file, attacker-controlled object keys. Its own gate task and its own CI job (`security-tests`), so a regression is named as a security one instead of a generic unit-test failure. Excluded from the glob above — it is gated separately, not twice. |
 | [tests/medium/](medium/) (60 files, 349 tests) | Playwright, stage 2 | one component against real `index.html` markup | It needs the **DOM/CSS** but not navigation, persistence or a real app boot. Four shapes, all in [_harness.py](medium/_harness.py): `HEADER_STUB` (header + its route-backed dialogs), `SESSIONS_STUB` (the dashboard timeline), `clipboard_stub()` (the live session, fed an injected `activeSession`), and `view_stub()` to build one for any other view — shell markup → activate → render. |
 | [tests/e2e/](e2e/) (55 files, 253 tests) | Playwright, stage 3 | the whole app | It needs the router, IndexedDB, the service worker, reload/deep-link behaviour, or a multi-step flow across views. |
+| [tests/regression/](regression/) (2 files, 5 tests) | Playwright, stage 4 | the whole app, on the RELEASED schema | It states a promise the shipped version makes — data survives a reload, a backup carries every collection, an erasure leaves no name, the demo loads. Its own suite and stage (TODO §62, ruled 2026-09-19): when behaviour changes, the schema and these tests change together, so an ordinary change to a screen must not touch this directory. [test_frozen_schema.py](regression/test_frozen_schema.py) fails the day the released schema moves past the number the suite froze, which is what stops the two suites drifting apart quietly. |
 
 **Every test runs in the same environment, wherever it is run.** `tests/conftest.py`'s
 `one_environment_everywhere` clears the variables this repository's own code branches on — today that
@@ -76,7 +77,7 @@ of claim, different failure — occlusion by a sibling rather than overflow past
 needs only the deck, so it does not pay for a full app boot. The tier rule decides that, not the
 subject matter: geometry is not inherently an e2e concern.
 
-**A fifth directory that is deliberately not a tier**: [tests/live/](live/) runs the real
+**A directory that is deliberately not a tier**: [tests/live/](live/) runs the real
 [driveAppData.js](../src/data/driveAppData.js) against the real Google Drive and Calendar APIs. It is
 absent from `PIPELINE_STAGES` and from every `deploy.yml` job, because it depends on a third party's
 uptime and on a credential no contributor has — properties a commit gate must not have. It answers
@@ -170,7 +171,7 @@ DOM-free ones are collected under [unit_js/security/](unit_js/security/) and gat
 stored-XSS sink is a component test ([medium/test_xss_hardening.py](medium/test_xss_hardening.py))
 and IndexedDB injection needs the real engine ([e2e/test_indexed_db.py](e2e/test_indexed_db.py)).
 What a test must boot still decides where it lives. Worth knowing when judging coverage: **the OWASP
-ZAP baseline scan in stage 4 is PASSIVE** — it spiders and inspects responses, it never injects a
+ZAP baseline scan in stage 5 is PASSIVE** — it spiders and inspects responses, it never injects a
 payload — so it cannot see stored XSS from an imported backup, formula injection in a generated CSV,
 or prototype pollution on the boot path. None of those cross the network. ZAP is not the reason any
 of these classes is covered.
@@ -193,10 +194,10 @@ one store are only ever tested here. Same rule: never edit a snapshot, add one.
 field, or sits in a collection, no live schema declares (TODO §62) — a feature writing ahead of its
 schema looks fine on the device that wrote it and is missing from every backup.
 
-**The browser suite runs twice.** The first pass reads the active schema; the second, `--read-schema=PREVIEW`
-([run_e2e_preview_tests](../build/__init__.py)), reads the shape an upcoming version will, demo tests
-included, so the next release is proved against data a trainer already holds. The second pass skips
-itself when PREVIEW declares nothing beyond the active schema.
+**Stage 3 reads the shape the NEXT version will use.** While a preview shape exists, the e2e and demo
+runs are pinned to it (`--read-schema=PREVIEW`), so the work in hand is proved against the data a
+trainer already holds — the preview store is filled from the live one at boot. With no preview shape
+declared there is nothing to pin to and they run on the app's own default.
 
 **Shared fixtures** live in [tests/conftest.py](conftest.py) and apply to every tier, notably
 `local_server` — which refuses to run against a dev server whose revision does not match the working

@@ -31,7 +31,8 @@ concurrency:
   cancel-in-progress: true
 
 # This workflow is the same four-stage gate `python -m build check` runs locally, in the same order:
-# Stage 1 (fast checks, concurrent) → Stage 2 medium → Stage 3 e2e → Stage 4 ZAP, then the post-gate
+# Stage 1 (fast checks, concurrent) → Stage 2 medium → Stage 3 e2e → Stage 4 regression → Stage 5
+# ZAP, then the post-gate
 # assemble and deploy. The order is declared ONCE, in build/__init__.py's PIPELINE_STAGES;
 # agent_tools/pipeline_gates.py reads that table and fails Stage 1 if this file drifts from it
 # (TODO §6.4).
@@ -234,29 +235,30 @@ jobs:
       - name: Run Demo & Walkthrough Tests
         run: .venv/bin/python -c "from build import run_demo_tests; run_demo_tests()"
 
-  # The same browser suite again, with the app reading the PREVIEW schema (TODO §62). Ruled by the
-  # maintainer: the tests run twice — the first pass protects the trainers on the active schema, this
-  # one proves the shape an upcoming version will read works on the data they already hold, demo
-  # included. It skips itself when PREVIEW declares nothing beyond the active schema.
-  e2e-preview-tests:
-    name: Stage 3 · E2E Tests (PREVIEW schema)
-    needs: [medium-tests]
+  # === STAGE 4 === What the RELEASED version promises, on the schema it reads (TODO §62). Ruled by
+  # the maintainer 2026-09-19: its own suite in its own directory and its own stage, because a
+  # failure here means the version trainers are already running is broken — a different sentence
+  # from "the work in hand does not hold yet", and it should be read as one. Stage 3 above follows
+  # the work in hand and reads the PREVIEW shape.
+  regression-tests:
+    name: Stage 4 · Regression Suite (released schema)
+    needs: [e2e-tests, demo-tests]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/python-env
         with:
           browsers: 'true'
-      - name: Run E2E Tests on the PREVIEW schema
-        run: .venv/bin/python -c "from build import run_e2e_preview_tests; run_e2e_preview_tests()"
+      - name: Run the Regression Suite
+        run: .venv/bin/python -c "from build import run_regression_tests; run_regression_tests()"
 
-  # === STAGE 4 === Only if Stage 3 is clean. Locally that ordering is mandatory: ZAP's request flood
-  # against the SAME dev server a mid-suite pytest-xdist run is using produced Page.goto timeouts
-  # across unrelated specs. Here it is not mandatory — separate runners, separate servers — but it is
-  # kept so the stage numbering means one thing in both places.
+  # === STAGE 5 === Only if the suites are clean. Locally that ordering is mandatory: ZAP's request
+  # flood against the SAME dev server a mid-suite pytest-xdist run is using produced Page.goto
+  # timeouts across unrelated specs. Here it is not mandatory — separate runners, separate servers —
+  # but it is kept so the stage numbering means one thing in both places.
   owasp-zap-scan:
-    name: Stage 4 · OWASP ZAP Security Scan
-    needs: [e2e-tests, demo-tests, e2e-preview-tests]
+    name: Stage 5 · OWASP ZAP Security Scan
+    needs: [regression-tests]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5

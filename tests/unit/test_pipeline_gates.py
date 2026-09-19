@@ -118,16 +118,17 @@ def test_stage_leaves_reads_every_stage_from_the_build_table():
     """
     stages = pipeline_gates.stage_leaves()
 
-    assert set(stages) == {1, 2, 3, 4}
+    assert set(stages) == {1, 2, 3, 4, 5}
     assert "run_python_lint" in stages[1]
     assert stages[2] == {"run_medium_tests"}
     # Stage 3 holds two tasks that run side by side: the e2e suite and the demo/walkthrough suite,
     # which is its own gate so a broken demo names itself rather than appearing as red node ids
-    # inside a suite of 205.
-    # The PREVIEW pass is a Stage 3 task of its own (TODO §62): the same browser suite, read at the
-    # shape an upcoming version will use.
-    assert stages[3] == {"run_e2e_tests", "run_demo_tests", "run_e2e_preview_tests"}
-    assert stages[4] == {"run_owasp_zap_scan"}
+    # inside a suite of 205. Both follow the work in hand and read the PREVIEW shape (TODO §62).
+    assert stages[3] == {"run_e2e_tests", "run_demo_tests"}
+    # Stage 4 is what the RELEASED version promises, on the schema it reads — its own suite and its
+    # own stage, so a failure there is read as "what shipped is broken".
+    assert stages[4] == {"run_regression_tests"}
+    assert stages[5] == {"run_owasp_zap_scan"}
 
 
 def test_a_later_stage_that_does_not_wait_for_an_earlier_one_is_reported():

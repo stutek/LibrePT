@@ -857,7 +857,7 @@ origin where the entire client database lives. Everything below follows from tha
 restored backup reaches the same sinks a hand-typed one does, so "a trainer would not type that" is
 never the argument.
 
-**The OWASP ZAP baseline scan (gate stage 4) does not cover any of this**, and assuming otherwise is
+**The OWASP ZAP baseline scan (gate stage 5) does not cover any of this**, and assuming otherwise is
 the mistake this section exists to prevent. That scan is *passive* — it spiders the app and inspects
 responses, it never injects a payload — and this is an offline-first PWA that renders client-side
 from local storage. None of these paths cross the network, so there is no response for it to

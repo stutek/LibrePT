@@ -1486,6 +1486,9 @@ def run_demo_tests():
             *DEMO_TEST_FILES,
             "-q",
             "--tb=long",
+            # The demo must work on the released schema AND on the one an upcoming version reads
+            # (Simon, 2026-09-19): this pass is the second half, stage 4's regression suite the first.
+            *_read_schema_flags(),
         ],
         "demo-tests",
     )
@@ -1612,6 +1615,7 @@ def run_e2e_tests():
             # it only hides the coupling until the file is split.
             "-q",
             "--tb=long",
+            *_read_schema_flags(),
             "tests/e2e/",
             # Run by run_demo_tests instead, beside this task — see DEMO_TEST_FILES.
             *[f"--ignore={name}" for name in DEMO_TEST_FILES],
@@ -1638,6 +1642,24 @@ def run_e2e_tests():
         "    Need visual state? Re-run that one node id with --screenshot=on (or --tracing=on)."
     )
     sys.exit(returncode)
+
+
+def released_schema():
+    """The schema number the released version reads — `STABLE_SCHEMA`, asked of the declarations."""
+    node_path = ensure_node_binary()
+    if not node_path:
+        return 4
+    result = subprocess.run(
+        [
+            node_path,
+            "--input-type=module",
+            "-e",
+            "const m = await import('./src/data/recordSchemas.js'); console.log(m.STABLE_SCHEMA);",
+        ],
+        capture_output=True,
+        text=True,
+    )
+    return result.stdout.strip() or 4
 
 
 def preview_schema_differs():
@@ -1667,28 +1689,30 @@ def preview_schema_differs():
     return result.stdout.strip() == "differs"
 
 
-def run_e2e_preview_tests():
-    """The whole browser suite again, with the app reading the PREVIEW schema (TODO §62).
+def _read_schema_flags():
+    """`--read-schema=PREVIEW` for the browser suites, while a preview shape exists (TODO §62).
 
-    Ruled 2026-09-17 (Simon): the browser tests run twice. The first pass protects the trainers on
-    the active schema; this one proves the shape an upcoming version will read works on the data a
-    trainer holds today — the preview store is filled from the live one at boot, so the rows it reads
-    are theirs. Ruled 2026-09-19 with it: the demo must work on the active schema AND on PREVIEW, so
-    the demo files run here too rather than being skipped as they are in the first pass.
-
-    Skipped, loudly, when PREVIEW declares nothing the active schema does not: there is then no
-    second shape to prove anything about, and the stage costs what it always did.
+    Stage 3 is the stage for the work in hand, so it reads the shape the next version will use
+    (Simon, 2026-09-19). What the RELEASED shape promises is stage 4's regression suite, pinned to
+    the released number. With no preview shape declared there is nothing to pin to, and the suites
+    run on the app's own default.
     """
-    print("\n  Running E2E Browser Tests on the PREVIEW schema...")
-    if not preview_schema_differs():
-        print(
-            "  ✓ Skipped: PREVIEW declares nothing beyond the active schema, so there is nothing"
-        )
-        print(
-            "    a second pass could prove. It runs again the moment a field is staged in it."
-        )
-        return
+    return ["--read-schema=PREVIEW"] if preview_schema_differs() else []
 
+
+def run_regression_tests():
+    """Stage 4: the regression suite (tests/regression/), pinned to the RELEASED schema.
+
+    Ruled 2026-09-19 (Simon): a separate suite in its own directory, because when behaviour changes
+    the schema and the tests change together — so these tests are the frozen description of what the
+    released version promises, not a copy of the suite that follows the work in hand.
+
+    Pinned to the released number rather than to the app's default, so the day the default moves the
+    pin is what says which shape this suite was written against. `tests/regression/test_frozen_schema.py`
+    fails when the released schema moves past the number the suite froze, which is the only way a
+    trainer-facing promise gets re-read deliberately rather than drifting quietly.
+    """
+    print("\n  Running Regression Suite (released schema)...")
     venv_python = venv_python_path()
     run = run_logged(
         [
@@ -1699,27 +1723,26 @@ def run_e2e_preview_tests():
             str(e2e_worker_count()),
             "-q",
             "--tb=long",
-            "--read-schema=PREVIEW",
-            "tests/e2e/",
+            f"--read-schema={released_schema()}",
+            "tests/regression/",
         ],
-        "e2e-preview",
+        "regression",
     )
     returncode, output, path = run.returncode, run.output, run.path
     record_task_cpu(run)
     if returncode == 0:
-        print("  ✓ E2E browser tests passed on the PREVIEW schema!")
+        print("  ✓ Regression suite passed on the released schema!")
         return
 
-    print_digest("E2E browser tests (PREVIEW)", output, path)
+    print_digest("Regression suite", output, path)
     failed = failed_test_ids(output)
-    print("  ✗ E2E browser tests failed on the PREVIEW schema:")
+    print("  ✗ Regression suite failed on the released schema:")
     for test_id in failed:
         print(f"      • {test_id}")
     print(f"    Full log: {path}")
     print(
-        "    This pass reads the shape an upcoming version will: a failure here is the next release"
+        "    This suite is what the released version promises the trainers already using it."
     )
-    print("    breaking on data a trainer already has, not a broken test.")
     sys.exit(returncode)
 
 
@@ -2199,7 +2222,6 @@ def run_stage_3_e2e():
         {
             "E2E Browser Tests": run_e2e_tests,
             "Demo & Walkthrough Tests": run_demo_tests,
-            "E2E Browser Tests (PREVIEW schema)": run_e2e_preview_tests,
         }
     )
     stage_elapsed = time.monotonic() - stage_start
@@ -2216,17 +2238,36 @@ def run_stage_3_e2e():
     return stage_elapsed
 
 
-def run_stage_4_zap():
-    """Stage 4: Runs the OWASP ZAP baseline scan, alone, after Stage 3's e2e suite has released
+def run_stage_4_regression():
+    """Stage 4: the regression suite, on the schema the released version reads (TODO §62).
+
+    Its own stage rather than another task beside Stage 3's: a failure here means the version
+    trainers are already running is broken, which is a different sentence from "the work in hand does
+    not hold yet" — and it should be read as one.
+    """
+    print("\n=== Stage 4: Regression Suite (released schema) ===")
+    stage_start = time.monotonic()
+    machine_busy_at_start = read_machine_busy_seconds()
+    _timed_task("Regression Suite", run_regression_tests)
+    stage_elapsed = time.monotonic() - stage_start
+    print(
+        f"\n  ✓ Stage 4 completed cleanly! ({stage_elapsed:.1f}s)"
+        f"{_stage_machine_load(machine_busy_at_start, stage_elapsed)}"
+    )
+    return stage_elapsed
+
+
+def run_stage_5_zap():
+    """Stage 5: Runs the OWASP ZAP baseline scan, alone, after the browser suites have released
     the dev server — see run_stage_3_e2e's docstring for why this no longer runs concurrently
     with e2e locally."""
-    print("\n=== Stage 4: OWASP ZAP Security Scan ===")
+    print("\n=== Stage 5: OWASP ZAP Security Scan ===")
     stage_start = time.monotonic()
     machine_busy_at_start = read_machine_busy_seconds()
     _timed_task("OWASP ZAP Scan", run_owasp_zap_scan)
     stage_elapsed = time.monotonic() - stage_start
     print(
-        f"\n  ✓ Stage 4 completed cleanly! ({stage_elapsed:.1f}s)"
+        f"\n  ✓ Stage 5 completed cleanly! ({stage_elapsed:.1f}s)"
         f"{_stage_machine_load(machine_busy_at_start, stage_elapsed)}"
     )
     return stage_elapsed
@@ -2246,8 +2287,9 @@ def run_stage_4_zap():
 PIPELINE_STAGES = (
     (1, run_stage_1_parallel, ()),
     (2, run_stage_2_medium, ("run_medium_tests",)),
-    (3, run_stage_3_e2e, ("run_e2e_tests", "run_demo_tests", "run_e2e_preview_tests")),
-    (4, run_stage_4_zap, ("run_owasp_zap_scan",)),
+    (3, run_stage_3_e2e, ("run_e2e_tests", "run_demo_tests")),
+    (4, run_stage_4_regression, ("run_regression_tests",)),
+    (5, run_stage_5_zap, ("run_owasp_zap_scan",)),
 )
 
 
