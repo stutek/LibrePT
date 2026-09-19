@@ -43,6 +43,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   renamed. They were on the device but not described, which is how something goes missing from a
   backup. They are described now, and a new test refuses to let it happen again (§62).
 
+- **The build gate no longer fails because the computer was busy** (§64). Five runs of one tree in an
+  hour went red in five different places, and every one of those tests passed when run alone: the
+  machine was saturated, not the tree broken. The gate now reads the load before it starts anything.
+  On a busy machine it waits, saying what it is waiting for, and after ten minutes it stops and says
+  which machine load refused it instead of blaming a test. Nothing about the app changed.
+
 ## 2026-09-19 — Erasing a client reaches repeating sessions and locations
 
 ### Fixed

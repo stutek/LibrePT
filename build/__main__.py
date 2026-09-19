@@ -9,8 +9,10 @@ import time
 from datetime import datetime
 
 from . import gate_lock
+from .quiet_machine import wait_for_quiet_machine
 from . import (
     PIPELINE_STAGES,
+    _load_average,
     check_environment,
     format_elapsed,
     print_pressure_delta,
@@ -229,6 +231,16 @@ if __name__ == "__main__":
     # Before the environment check, not after: the header is what tells anyone watching that the run
     # started and when, and `check_environment` can itself spend a minute installing requirements.
     print_run_header(label)
+    # Only on a machine that is not already busy (build/quiet_machine.py, TODO §64). Here and
+    # nowhere later: between stages the load average is this pipeline's own exhaust, so it is only
+    # before the first stage that the reading says anything about anyone else.
+    if not wait_for_quiet_machine(
+        read_load=lambda: (_load_average() or (None,))[0],
+        cores=os.cpu_count() or 1,
+        sleep=time.sleep,
+        announce=print,
+    ):
+        sys.exit(1)
     pressure_at_start = read_host_pressure()
     check_environment()
 

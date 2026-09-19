@@ -4412,6 +4412,10 @@ full run under the same load passed.
 finished settling, or the app itself lands in the wrong place when it is slow, which a busy phone in
 a gym would see too.
 
+The gate no longer runs on a saturated machine at all (§64, `build/quiet_machine.py`), so these two
+stop appearing in gate runs. That is not this section: a phone in a gym is slow and cannot be asked
+to wait, so the question below still stands on its own.
+
 ## 54. [ ] The past cards on the clipboard write their date as "20. jul."
 
 Seen 2026-09-14 on the demo data, while checking §52.2. A past card's badge reads "Past: 20. jul."
@@ -4539,42 +4543,10 @@ erased clients is cheap, at every start.
 (ruled 2026-09-18), and whether that runs every time or only when the sweep has changed (a marker,
 like the preview store's build stamp).
 
-## 64. [ ] The gate fails on a different test each run, and each one passes on its own
+## 64. [x] The gate fails on a different test each run, and each one passes on its own — fixed 2026-09-19
 
-Measured 2026-09-18 (Claude) while gating §61's PREVIEW work. Three runs of `build check` on the same
-tree, each red in a different place:
-
-- **15:16** — stage 4, OWASP ZAP: the container stopped after 11s with a three-line log
-  (`Unable to copy yaml file to /zap/wrk/zap.yaml`, then `Failed to access summary file`). The same
-  docker command run by hand on the same tree: `WARN-NEW: 0`, exit 0.
-- **15:23** — stage 3: `test_lang_param_preselects_language` and
-  `test_getting_the_guide_out_of_the_way_is_one_tap_and_takes_nothing_with_it`, both timing out at 20s
-  on the app's boot. Alone: 2.7s, both pass. The whole e2e stage with the gate's 8 workers: 271 passed.
-- **15:33** — stage 2: `test_the_guide_stays_inside_the_modal_it_had_to_move_into`, which measured the
-  guide's frame as outside the dialog. Alone: passes in 1.1s. The whole medium stage: 394 passed.
-
-**Not the change under test:** boot timing measured five times on the working tree and five on HEAD —
-939/2098/1695/1686/1732 ms against 989/2033/1762/1734/1739 ms.
-
-- **16:19** — stage 2 again, three at once: `test_a_demo_store_is_named_a_demo` (`window.showBuildState
-  is not a function`, i.e. the stub's module never finished loading), `test_the_trainer_sees_what_the_gym
-  _said_while_shaping_the_next_plan` and `test_a_slot_field_is_the_app_s_own_control_not_the_browser_s`,
-  both timing out on a selector. The three files alone: 23 passed in 16s.
-
-**Where the load came from, found afterwards:** a second agent session was working in the same tree
-through the same hour and committed 15adb99 at 15:57, running its own browser suites while this one
-gated — although the claim note in `.private/AGENT_SYNC/` said the whole tree was held. Its commit
-touched only its own files, so nothing was lost; the contention was the cost.
-
-**The pattern, after five runs: the gate passes on an idle machine and fails on a busy one.** The one
-green run started at load 1.45; every red one started at 3.0 or higher, with the five-minute average
-between 8 and 13 — mostly from the targeted test runs used to check the change before gating. The dev
-server is already threaded (`ThreadingHTTPServer`), so it is not the single bottleneck it looked like.
-
-**Open:** what the failures have in common. Two are about a measurement taken before the app has settled
-(a boot wait, a layout read), which is the shape that fails under load; the ZAP one is its own. A gate
-that is red for a reason nobody can name is a gate nobody will believe — and rules forbid re-running a
-failure away, so this blocks every commit while it lasts.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#64-x-the-gate-fails-on-a-different-test-each-run-and-each-one-passes-on-its-own--fixed-2026-09-19);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ## 63. [ ] Migrations are tested from the oldest version, but not for ever and not on a device
 
