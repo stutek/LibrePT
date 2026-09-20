@@ -42,14 +42,24 @@ test("nothing on a fresh board is overdue by more than its own day", () => {
   const now = Date.now();
   // A session whose start has passed and which is not finished is drawn as OVERDUE. That is honest
   // about a session running late — the demo's live pair started an hour ago — and dishonest about
-  // an evening days back that the sandbox invented already finished. The cut is the start of today:
-  // anything earlier than that must arrive finished.
-  const startOfToday = new Date();
-  startOfToday.setHours(0, 0, 0, 0);
+  // an evening days back that the sandbox invented already finished.
+  //
+  // **The cut is ELAPSED TIME, not the calendar day** (TODO §69, 2026-09-21). It used to be the
+  // start of today, which failed this test for a whole hour every night: the live pair is
+  // `slot(-1, +1)` in data/sessions.js and is DELIBERATELY allowed to cross midnight — the point of
+  // that dataset is that something is running whenever a trainer opens it, and an earlier clamp
+  // holding the spread inside one calendar day was removed for exactly that reason. Run at 00:29,
+  // a pair that started at 23:29 landed on "yesterday" and was counted as stale.
+  //
+  // A day is the threshold the test's own name states, and it sits in the middle of a wide empty
+  // band rather than being tuned to pass: the only unfinished rows in the past are the live pair at
+  // one to two hours, the next unfinished row is in the FUTURE, and the defect this was written for
+  // was reported at 64 hours.
+  const A_DAY = 24 * 3600 * 1000;
 
   const stale = boardRows()
     .filter((session) => !session.completed)
-    .filter((session) => new Date(session.startDate).getTime() < startOfToday.getTime())
+    .filter((session) => now - new Date(session.startDate).getTime() > A_DAY)
     .map((session) => ({
       id: session.id,
       title: session.title,

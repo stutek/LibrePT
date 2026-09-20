@@ -20,6 +20,98 @@ Read [CHANGELOG.md](CHANGELOG.md) for what shipped and when. This file is why.
 
 ---
 
+### 69. [x] One board test fails for a whole hour every night — fixed 2026-09-21
+
+Found 2026-09-21 at 00:29 (Claude), while running the JS unit tier before the gate for §60. It had
+nothing to do with that change: it failed on a clean tree, and would have failed on any change run
+between 00:00 and 01:00 local time.
+
+`nothing on a fresh board is overdue by more than its own day` in
+[seedBoard.test.mjs](tests/unit_js/data/seedBoard.test.mjs) failed with the two seeded live
+sessions, `s01f2e3d` (Group Strength & Conditioning) and `s09f2e3d` (Return-to-Play Rehab), both
+reported overdue by one hour.
+
+**The test disagreed with the seed on purpose, and the seed was the one that was right.** Both
+sessions are `slot(-1, +1)` in [sessions.js](src/data/sessions.js) — started an hour ago, still
+running — and the helper's own comment says the spread is anchored on the real current hour and
+**allowed to cross midnight**, because the point of the dataset is that something is live whenever a
+trainer opens it. An earlier clamp that kept the spread inside one calendar day was removed for
+exactly that reason.
+
+The test then cut at the start of today and required anything earlier to have arrived finished. At
+00:29 the pair had started at 23:29 **yesterday**, so a session that is deliberately live was
+counted as stale.
+
+**Fixed by measuring elapsed time instead of the calendar day**: an unfinished row more than 24
+hours past its start is stale. That is the threshold the test's own name states, and it is not tuned
+to pass — the only unfinished rows in the past are the live pair at one to two hours, the next
+unfinished row is in the future, and the defect the test was written for was reported at 64 hours.
+
+Both directions were proved rather than assumed: the test passes on the real seed, and a probe
+session inserted three days back and unfinished was caught at 55 hours, then removed.
+
+Not the same as §53, which is two tests that fail when the machine is busy. This one was a clock
+boundary and was deterministic inside that hour.
+
+### 60. [x] A numbered schema changed shape without a new number — ruled and enforced 2026-09-21
+
+Raised 2026-09-17 (Simon): in a released product, adding `alias` to schema 4 would have needed a
+new schema version. Checked against the documents (Claude): two rules disagree.
+[DATA_MODEL.md](docs/DATA_MODEL.md) says a schema major is bumped only when a migration step is
+added, and an added optional field needs no step. The same document says two files declaring the
+same numbered schema have the same shape by definition, and
+[recordSchemas.js](src/data/recordSchemas.js) that a numbered shape does not move. `alias` went into
+schema 4 on 2026-08-11 (fc51141), so "4" now names two shapes.
+
+What that costs once there are released installs: a file or a Drive copy written by the newer build
+is accepted by an older one, which keeps the field but knows nothing of it — cannot show it, and
+cannot clear it on an erasure (§59 shows the newer build forgets it too).
+
+**Re-read from the code 2026-09-21 (Claude), and it was worse than the section said: schema 4 had
+moved four times, not twice** — `alias` (fc51141, 08-11), §61's `startDate`, `seriesId`,
+`occurrenceDate` and `cancelled` plus the `invites` and `sessionSeries` collections (09-17), and
+§62's `completed`, `duration`, `titles` and `icon` (09-19). "4" named four shapes.
+
+Found with it: the claim that costs nothing in code. The restore path accepts fields it does not
+know — `fieldIssues` says nothing about undeclared fields and `groupRecordsByCollection` accepts
+unknown collections on purpose — so an older build keeps a newer file's extra field rather than
+breaking on it. The promise "same number, same shape" was carrying one sentence in
+[backupFile.js](src/data/backupFile.js), not one line of logic.
+
+**Ruled 2026-09-21 (Simon): the schemas are frozen.** Any change to a numbered shape — a field
+added, removed, retyped or turned required — mints a new schema number, **even when the migration
+step does nothing**. Claude had argued against it on cost (a new number, a no-op step, a store and a
+fixture for one optional field); Simon ruled it anyway, and on re-reading it is the better call: it
+makes the promise true instead of deleting it, and it resolves §58 by itself, because PREVIEW is
+unnumbered and may therefore stage fields freely.
+
+**Ruled with it (Simon, same day): every numbered schema stays live**, and **retiring one is a
+deliberate decision** rather than a side effect of cutting the next. The quantity that decision
+manages is how many star writes happen at once — each live schema is one more store, one more full
+copy of the data, one more write per fan-out.
+
+**Accepted with it (Simon, same day):** an older build now refuses a backup written by a newer one
+even when the only difference is an added optional field, because `formatVersion` and
+`schemaVersion` are one number by design (decided 2026-08-15). Two independent numbers were offered
+again and declined again.
+
+**What shipped 2026-09-21:**
+
+- The rule in [DATA_MODEL.md](docs/DATA_MODEL.md), under *A numbered shape is frozen*, with the
+  retirement clause and the refusal cost stated in the same place.
+- **Schema 4 frozen as it stood that day; the history is not renumbered** — installs hold "4" data
+  in all four shapes with no way to tell them apart, so the rule runs from the next change onward.
+- `tests/fixtures/schemas/schema_4.json`, the exact shape, and two tests in
+  [recordSchemas.test.mjs](tests/unit_js/data/recordSchemas.test.mjs): one fails the build when
+  `SCHEMA_4` differs from the fixture by so much as a `required` flag, the other when a live
+  numbered schema has no frozen fixture at all. Both were proved to fail by adding a field and
+  watching them break, then reverting it.
+- The freeze written at the declaration itself in
+  [recordSchemas.js](src/data/recordSchemas.js), where someone about to add a field is looking.
+
+**Unblocked by it:** §50.3's record badges, which were waiting on where a new field may be declared.
+They go into `SCHEMA_PREVIEW`, and mint a number when they graduate.
+
 ### 54. [x] The past cards on the clipboard write their date as "20. jul." — fixed 2026-09-20
 
 Seen 2026-09-14 on the demo data, while checking §52.2. A past card's badge read "Past: 20. jul."

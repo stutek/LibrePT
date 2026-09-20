@@ -20,6 +20,37 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-09-21 — A data format that cannot quietly change under a trainer
+
+### Changed
+
+- **A numbered data format is frozen** (§60). The app describes the shape of what it stores as a
+  numbered version, and a backup file carries that number so any build knows how to read it. Four
+  times this year a field was added to version 4 without changing the number, so "4" no longer said
+  one thing — a file written in July and one written in September both claimed to be 4 and were not
+  the same. From now on any change at all to a numbered format gets the next number, even when there
+  is nothing to convert. The shape of version 4 is written down in the repository as it stands
+  today, and the build fails if the code ever differs from it.
+
+  Two decisions came with it. Every numbered format stays in use at once, so a trainer can move
+  between them by changing what the app reads rather than by converting anything; dropping one is a
+  separate, deliberate choice. And an older build will now refuse a backup written by a newer one
+  even when the only difference is one extra field — it says so rather than guessing at a shape it
+  cannot name.
+
+  Nothing a trainer sees in the app changed.
+
+### Fixed
+
+- **A build started between midnight and one in the morning no longer fails for the wrong reason**
+  (§69). One test checked that a freshly built sandbox shows no session left unfinished from days
+  back. It decided "days back" by the calendar day, while the two sample sessions that are meant to
+  be running right now are allowed to have started before midnight. Run at half past midnight, the
+  test called a live session stale. It measures how long ago a session started now, so the hour of
+  the night no longer decides the result. Nothing about the app changed.
+
+---
+
 ## 2026-09-20 — Three things the trainer sees on the clipboard
 
 ### Fixed

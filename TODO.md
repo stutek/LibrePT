@@ -4699,29 +4699,17 @@ pass on every boot — 22ms for the demo set, about 400ms at 3,000 records.
 **Still open:** the second browser-test pass that reads PREVIEW (§62), and discarding preview data at
 the end of a test run.
 
-## 60. [ ] A numbered schema changed shape without a new number
+## 60. [x] A numbered schema changed shape without a new number — ruled and enforced 2026-09-21
 
-Raised 2026-09-17 (Simon): in a released product, adding `alias` to schema 4 would have needed a
-new schema version. Checked against the documents (Claude): two rules disagree.
-[DATA_MODEL.md](docs/DATA_MODEL.md) says a schema major is bumped only when a migration step is
-added, and an added optional field needs no step. The same document says two files declaring the
-same numbered schema have the same shape by definition, and
-[recordSchemas.js](src/data/recordSchemas.js) that a numbered shape does not move. `alias` went into
-schema 4 on 2026-08-11 (fc51141), so "4" now names two shapes.
-
-What that costs once there are released installs: a file or a Drive copy written by the newer build
-is accepted by an older one, which keeps the field but knows nothing of it — cannot show it, and
-cannot clear it on an erasure (§59 shows the newer build forgets it too). **Proposed (Claude), not
-ruled:** after the first release, any change to a numbered shape takes a new number, even when its
-migration step changes no data; until then a new field goes into P. Blocks: where §50.3's record
-badges are declared.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#60-x-a-numbered-schema-changed-shape-without-a-new-number--ruled-and-enforced-2026-09-21);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ## 59. [x] Erasing a client keeps their alias — fixed 2026-09-18
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#59-x-erasing-a-client-keeps-their-alias--fixed-2026-09-18);
 what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-## 58. [ ] A preview-only field is written into a schema 4 backup
+## 58. [ ] A record is written whole, so a field cannot be staged at all
 
 **By design a backup is made at schema 4, the newest numbered one, never at P** (Simon,
 2026-09-17), so a field that exists only in P is not in it. The preview database is used only for
@@ -4733,10 +4721,45 @@ which keeps every field.
 `occurrenceDate` and `cancelled` — fields schema 4 does not declare — came out in a file stamped
 `schemaVersion: 4` with all three. The star write does the same to the `schema4` store, so
 `rebuildPreviewSchemaIfBuildChanged` in [readSchema.js](src/data/readSchema.js) does not lose them
-either, although its comment says it does. **Do not "fix" this by projecting a record to its
-schema's declared fields before §61 is settled**: today this copy is the only thing keeping the
-preview-only session fields alive on every install, and removing it loses them on the next deploy.
-Blocks: any decision to add a field in P only, such as the record badges of §50.3.
+either, although its comment says it does.
+
+**Re-measured 2026-09-21 (Claude): those three instances are gone, and the mechanism is not.** §61
+declared all three fields in schema 4 on 09-17, and `SCHEMA_PREVIEW` today is `SCHEMA_4` plus one
+collection (`previewProbe`) and a stricter `required` on `startDate` — it adds no field at all. So
+the defect has zero instances and no test holds it at zero. The way it reached zero is exactly what
+§60 was about: the fix for "a preview field leaks into the schema 4 file" was to widen schema 4.
+
+The mechanism: `projectSession` is `{ ...session, collection }` — the whole domain object. Staging
+is enforced per **collection** only (`schemaAcceptsCollection`); nothing anywhere compares a
+record's fields against the shape it is being written at. `undeclaredFields` exists in
+[recordSchemas.js](src/data/recordSchemas.js) and no live code calls it.
+
+**What §60's ruling (2026-09-21) changes here.** Numbered shapes are frozen, so a new field can no
+longer be absorbed into schema 4 — it is staged in `SCHEMA_PREVIEW` until it mints a number. That
+makes field-level staging necessary rather than hypothetical, and the earlier warning above ("do not
+fix this before §61 is settled") has expired with §61.
+
+**The obstacle, found 2026-09-21 and not yet solved.** §62's guard
+([conftest.py](tests/conftest.py), `UNDECLARED_STORED_FIELDS`) reads each store and fails the test
+when a row carries a field that store's schema does not declare. A field staged in PREVIEW alone is
+therefore written into the `schema4` store by the fan-out and **fails that guard immediately** — so
+today field staging is not merely leaky, it is impossible.
+
+Trimming a record to its target schema's declared fields fixes both, but it also blinds §62's
+guard: after trimming, the store can never hold an undeclared field, so the check can never fire,
+and a feature writing ahead of **every** schema would be silently dropped instead of reported.
+
+**Proposed (Claude), not ruled** — three parts, and the middle one is the price:
+
+1. `projectCollection` takes the target schema and trims the record to the fields it declares.
+2. **Trim on write only, never on read.** `fieldIssues` and `groupRecordsByCollection` accept
+   unknown fields and collections on purpose, so an older build survives a newer file; trimming
+   there would destroy that.
+3. §62's guard moves from the store to the write path: a field declared by **no** live schema is
+   still an error and must still fail the build.
+
+Blocks: nothing now — §50.3's record badges are unblocked by §60 and go into `SCHEMA_PREVIEW`. What
+this blocks is the first field that actually stages there reaching a trainer's backup correctly.
 
 **Proposed with it (Simon), not ruled: write the preview schema as `PREVIEW` instead of `P`**, so the
 stored value says what it is. Found against it (Claude): `P` is stored, not only named — in every
@@ -4773,4 +4796,9 @@ the rules. Blocks: nothing; it is what stops the next one.
 
 Closed — §55.1 (a reopened record is named, and offers no Start) and §55.2 (Blossom's future colour)
 are in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#551-x-a-history-record-opened-from-the-clipboard-reads-untitled-session-and-offers-start--fixed-2026-09-20);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
+
+## 69. [x] One board test fails for a whole hour every night — fixed 2026-09-21
+
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#69-x-one-board-test-fails-for-a-whole-hour-every-night--fixed-2026-09-21);
 what shipped is in [CHANGELOG.md](CHANGELOG.md).
