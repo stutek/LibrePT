@@ -98,3 +98,37 @@ def test_planning_programme_never_offers_complete(page, local_server):
     page.click("#btn-done-edit")
     page.wait_for_selector(".clipboard-editor", state="detached")
     assert _footer_visible(page) is False
+
+
+def test_a_reopened_finished_session_offers_neither_start_nor_complete(
+    page, local_server
+):
+    """TODO §55.1, seen 2026-09-14. A finished session reopened from History, or by pulling the plan
+    aside on the clipboard (§52.2), is a record being read. It came up with Start on the title bar —
+    an offer to run a session that already happened — because `canStartSession` knew only about edit
+    mode and planning mode. `finishedRecord` is what openSessionFromHistory puts on such a session,
+    and it is the third thing that answer depends on.
+
+    Start is asserted hidden with `started` FALSE, which is the state such a session is reopened in:
+    a started session hides Start anyway, so the fixture's default would have proved nothing."""
+    _mount(
+        page,
+        local_server,
+        started=False,
+        finishedRecord={"id": "h1", "title": "Morning Strength"},
+    )
+
+    assert page.locator("#btn-start-session").is_visible() is False, (
+        "a session that already happened must not offer to be started"
+    )
+    assert _footer_visible(page) is False, (
+        "nor to be completed and logged to history a second time"
+    )
+
+
+def test_a_live_session_that_has_not_started_still_offers_start(page, local_server):
+    """The other half of the rule above: without `finishedRecord`, a staged-but-not-started session
+    is exactly the case Start exists for, and hiding it there would strand the trainer."""
+    _mount(page, local_server, started=False)
+
+    assert page.locator("#btn-start-session").is_visible() is True

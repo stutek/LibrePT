@@ -4769,17 +4769,8 @@ gate writes a fingerprint of `src/` and `tests/` into `.build-reports/`, and a g
 refuses a commit whose tree does not match it. It would bind every agent, not only the ones that read
 the rules. Blocks: nothing; it is what stops the next one.
 
-## 55. [ ] Found while shipping §52.2
+## 55. [x] Found while shipping §52.2 — both fixed 2026-09-20
 
-### 55.1 [ ] A history record opened from the clipboard reads "Untitled Session" and offers Start
-
-Seen 2026-09-14. A past session opened by pulling the plan aside (§52.2), or from the History view,
-shows "Untitled Session" in the title bar and the Start button, although it is a finished record.
-Pulling makes this path far more common than it was.
-
-### 55.2 [ ] Blossom's future colour is too light for text
-
-Measured 2026-09-14 while checking §52.2: `--temporal-future` in
-[blossom.css](src/modules/themes/blossom.css) reads 2.46:1 to 2.69:1 as text on its own surfaces,
-under the 4.5:1 a line of text needs. The plan drawn under the blanket colours future exercise names
-with it, and so does the "no next plan" line.
+Closed — §55.1 (a reopened record is named, and offers no Start) and §55.2 (Blossom's future colour)
+are in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#551-x-a-history-record-opened-from-the-clipboard-reads-untitled-session-and-offers-start--fixed-2026-09-20);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).

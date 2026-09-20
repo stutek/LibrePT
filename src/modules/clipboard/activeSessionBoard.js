@@ -454,7 +454,12 @@ export function renderActiveSessionBoard() {
   renderTitleBarForEditMode(activeClient);
 
   const started = !!activeSession.started;
-  const canStartSession = !isClipboardEditMode() && deps.currentPlanMode() !== "planning";
+  // A reopened finished session is a record being read, not a workout waiting to begin: Start would
+  // offer to run a session that already happened (TODO §55.1).
+  const canStartSession =
+    !isClipboardEditMode() &&
+    deps.currentPlanMode() !== "planning" &&
+    !activeSession.finishedRecord;
   syncStartCompleteVisibility(canStartSession, started);
 
   renderDeckOrEditor(activeClientId, activeClientState);

@@ -26,6 +26,9 @@ import re
 # up to 6 is what a component is allowed to spend on tinting a surface.
 MIN_CONTRAST = 6.0
 
+# The floor for a line of text. The temporal accents below are held to this one.
+TEXT_CONTRAST = 4.5
+
 TOKEN = re.compile(r"^\s*(--[a-z-]+):\s*([^;]+);", re.MULTILINE)
 HEX = re.compile(r"^#([0-9a-fA-F]{6})$")
 RGBA = re.compile(
@@ -123,4 +126,47 @@ def test_muted_text_has_room_to_spare_in_every_theme(src_dir):
     assert not too_low, (
         f"muted text needs {MIN_CONTRAST}:1 so a tinted surface still leaves it above the 4.5:1 "
         "a paragraph needs (TODO §38.11):\n  " + "\n  ".join(too_low)
+    )
+
+
+def test_the_temporal_colours_are_readable_as_text_in_every_theme(src_dir):
+    """`--temporal-past` and `--temporal-future` colour exercise NAMES, not only borders.
+
+    planSheet.css and planPeek.css set `color:` from both tokens — the plan pulled aside under the
+    blanket writes a future session's exercises in `--temporal-future`, and so does the "no next
+    plan" line. Blossom's was rose-400 #fb7185 at 2.68:1 on its card and 2.46:1 on the field, far
+    under the bar, and nothing caught it until someone read the screen (TODO §55.2).
+
+    The bar is 4.5:1, what a line of text needs, not the 6:1 the muted text above carries: these are
+    accents on a plain surface rather than body text a component may tint further.
+    """
+    themes = _theme_files(src_dir)
+    assert themes, (
+        "no theme stylesheets found — the check would pass by measuring nothing"
+    )
+
+    too_low = []
+    for path in themes:
+        surfaces, problem = _surfaces(path)
+        assert not problem, problem
+        field, card = surfaces
+        tokens = _tokens(path)
+
+        for token in ("--temporal-past", "--temporal-future"):
+            value = tokens.get(token, "")
+            assert HEX.match(value), (
+                f"{path.name}: {token} is not a plain hex ({value!r}) — a theme that stops "
+                "declaring it as one drops silently out of this sweep"
+            )
+            text = _channels(value)
+            for where, ground in (("card", card), ("page field", field)):
+                ratio = _contrast(text, ground)
+                if ratio < TEXT_CONTRAST:
+                    too_low.append(
+                        f"{path.name} {token} {value} on the {where}: {ratio:.2f}:1"
+                    )
+
+    assert not too_low, (
+        f"a temporal colour is read as text, so it needs {TEXT_CONTRAST}:1 (TODO §55.2):\n  "
+        + "\n  ".join(too_low)
     )

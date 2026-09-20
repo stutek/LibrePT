@@ -280,6 +280,7 @@ export const sl = {
   no_members_assigned: "Ni udeležencev",
   session_completed: "Zaključeno",
   last_time: "Zadnjič",
+  finished_session: "Zaključen trening",
   session_changed_resend:
     "Ta trening se je spremenil — želiš poslati nove podatke strankam, ki si jih že povabil?",
   session_change_focus: "druga vrsta treninga",

@@ -44,6 +44,57 @@ Pinned by `test_the_past_card_writes_its_date_as_an_iso_day` in
 that already owns the deck's status tags. It seeds one history record on a fixed date — not one
 relative to the frozen clock — because what is asserted is how the date is WRITTEN.
 
+### 55.1 [x] A history record opened from the clipboard reads "Untitled Session" and offers Start — fixed 2026-09-20
+
+Seen 2026-09-14. A past session opened by pulling the plan aside (§52.2), or from the History view,
+showed "Untitled Session" in the title bar and the Start button, although it is a finished record.
+Pulling makes this path far more common than it was.
+
+**Fixed 2026-09-20 (Claude).** `openSessionFromHistory`
+([sessionLifecycle.js](src/controllers/sessionLifecycle.js)) built an active session that carried
+nothing saying which record it came from: a planning draft got a `sourceSession` with
+`isPlanning: true`, and a finished record got `null`. Everything downstream then read it as a
+session staged to be run — the title bar fell back to `untitled_session`, and `canStartSession`,
+which knew only about edit mode and planning mode, offered Start.
+
+It now sets `finishedRecord: { id, title }` on the session instead:
+
+- The title bar names the record (`finishedRecord.title`), and an unnamed one reads
+  `finished_session` — "Finished session" / "Zaključen trening" — rather than "Untitled Session",
+  which describes nothing on a screen whose whole subject is a session that already happened.
+- `canStartSession` takes it as its third term, so neither Start nor the Complete footer is offered.
+
+**Deliberately NOT a second `sourceSession`.** That field means "the booked slot this clipboard was
+launched from", and every reader of it would have been handed a slot that was never booked — the
+clipboard strip prints `sourceSession.timeLabel` straight into its meta line, and the schedule-drift
+offer writes back to the sessions a slot names.
+
+Pinned in two files, each the one that owns the rule: the title in
+[tests/medium/test_clipboard_title.py](tests/medium/test_clipboard_title.py), Start and Complete
+in [tests/medium/test_clipboard_complete_action.py](tests/medium/test_clipboard_complete_action.py)
+— the latter with `started: false`, since a started session hides Start anyway and the fixture's
+default would have proved nothing.
+
+### 55.2 [x] Blossom's future colour is too light for text — fixed 2026-09-20
+
+Measured 2026-09-14 while checking §52.2: `--temporal-future` in
+[blossom.css](src/modules/themes/blossom.css) read 2.46:1 to 2.69:1 as text on its own surfaces,
+under the 4.5:1 a line of text needs. The plan drawn under the blanket colours future exercise names
+with it, and so does the "no next plan" line.
+
+**Fixed 2026-09-20 (Claude).** Re-measured first, with the contrast test's own arithmetic: rose-400
+`#fb7185` gives 2.68:1 on the card and 2.46:1 on the page field — the reported numbers exactly. It is
+now rose-700 `#be123c`, at 6.25:1 and 5.76:1, which stays in the same rose family beside the pink
+primary. Every other theme was measured at the same time and all of them already passed; Blossom's
+past colour is 5.35:1 / 4.93:1 and stayed as it was.
+
+**What stops the next one.** [tests/unit/test_theme_contrast.py](tests/unit/test_theme_contrast.py)
+held only `--text-muted` to a bar, so an accent read as text was outside every check — which is why a
+pastel sat there unread until someone looked at the screen. It now sweeps `--temporal-past` and
+`--temporal-future` in every theme, on the card and on the page field, at 4.5:1. The bar is 4.5 and
+not the 6:1 the muted text carries: these are accents on a plain surface, not body text a component
+may tint further, and 6 would fail three themes that are perfectly readable.
+
 ### 64. [x] The gate fails on a different test each run, and each one passes on its own — fixed 2026-09-19
 
 Measured 2026-09-18 (Claude) while gating §61's PREVIEW work. Three runs of `build check` on the same

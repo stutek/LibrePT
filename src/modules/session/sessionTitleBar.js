@@ -61,9 +61,17 @@ export function renderSessionTitle() {
   // Each on its OWN line, each cut with "…" on its own (ruled 2026-09-13, TODO §47.1). Joined with
   // " + " on one line, the joined name was cut at 390px after "Group Strength & Conditioning + ",
   // and the second session was not named at all.
+  //
+  // A finished session reopened from History or from the deck has no booked slot behind it, so its
+  // name is on the record itself (`finishedRecord`, openSessionFromHistory). Without this it read
+  // "Untitled Session" even when the trainer had named it (TODO §55.1); a record that truly has no
+  // name says what it is instead, since "Untitled Session" describes nothing a trainer can act on.
+  const finished = activeSession.finishedRecord;
   const titles = sourceSession?.titles?.length
     ? sourceSession.titles
-    : [deps.t?.("untitled_session") || ""];
+    : finished
+      ? [finished.title || deps.t?.("finished_session") || ""]
+      : [deps.t?.("untitled_session") || ""];
   // A planning programme is not on any day and is in no gym: its own line is the slot it is being
   // built against, and nothing else.
   const under = sourceSession?.isPlanning

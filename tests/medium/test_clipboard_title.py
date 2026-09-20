@@ -328,3 +328,52 @@ def test_the_editor_second_line_is_set_like_the_clipboard_second_line(
     assert style["textTransform"] == "none", style
     assert style["radius"] == "0px", style
     assert "0)" in style["background"], f"still tinted like a pill: {style}"
+
+
+def _render_reopened_record(page, title):
+    """The title bar handed a FINISHED session, the way openSessionFromHistory hands it one: no
+    booked slot behind it (`sourceSession` is null), and the record's own name on `finishedRecord`.
+    `t` returns the key, so an assertion names the dictionary entry the bar chose."""
+    page.evaluate(
+        """async (title) => {
+          const m = await import(new URL('modules/session/sessionTitleBar.js', document.baseURI).href);
+          m.initSessionTitleBar({
+            getActiveSession: () => ({
+              sourceSession: null,
+              startTime: new Date('2026-07-20T17:30:00').getTime(),
+              finishedRecord: { id: 'h1', title },
+            }),
+            getISODateString: (d) => new Date(d).toISOString().slice(0, 10),
+            formatClockFromMinutes: () => '17:30',
+            t: (key) => key,
+          });
+          m.renderSessionTitle();
+        }""",
+        title,
+    )
+    page.wait_for_timeout(200)
+
+
+def test_a_reopened_finished_session_is_called_by_its_own_name(page, local_server):
+    """TODO §55.1, seen 2026-09-14. A finished session opened from History — or, since §52.2, by
+    pulling the plan aside on the clipboard — read "Untitled Session" even when the trainer had
+    named it. Its name is on the record; nothing was reading it."""
+    _mount(page, local_server)
+    _render_reopened_record(page, "Morning Strength")
+
+    names = page.locator(".clipboard-title-name").all_inner_texts()
+    assert names == ["Morning Strength"], (
+        f"a reopened record is called what the trainer called it: {names!r}"
+    )
+
+
+def test_a_finished_session_with_no_name_says_that_it_is_finished(page, local_server):
+    """A record the trainer never named still must not read "Untitled Session": that describes
+    nothing, on a screen whose whole subject is a session that already happened."""
+    _mount(page, local_server)
+    _render_reopened_record(page, "")
+
+    names = page.locator(".clipboard-title-name").all_inner_texts()
+    assert names == ["finished_session"], (
+        f"an unnamed record says what it is, from the dictionary: {names!r}"
+    )

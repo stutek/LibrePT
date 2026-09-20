@@ -73,6 +73,13 @@ export function openSessionFromHistory(log) {
           location: "",
         }
       : null,
+    // A finished session is REOPENED here, not staged to be run: from the History view, and since
+    // §52.2 far more often by pulling the plan aside on the clipboard. It carries its own name and
+    // must not offer Start — it already happened (TODO §55.1). This is deliberately not a
+    // `sourceSession`: that means "the booked slot this clipboard was launched from", and every
+    // reader of it (the clipboard strip, the schedule-drift offer, the timers) would then be
+    // handed a slot that was never booked.
+    finishedRecord: log.isPlanning ? null : { id: log.id, title: log.title || "" },
   });
 
   setClipboardEditModeFlag(!!log.isPlanning);

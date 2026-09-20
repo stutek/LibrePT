@@ -267,6 +267,9 @@ export const en = {
   session_completed: "Completed",
   // The badge on the past card in the clipboard deck, read as "Last time: 2026-07-20".
   last_time: "Last time",
+  // The title bar of a finished session reopened from the deck or from History, when the record
+  // carries no name of its own.
+  finished_session: "Finished session",
   session_changed_resend:
     "This session changed — send the new details to the clients you already invited?",
   session_change_focus: "different kind of session",

@@ -28,6 +28,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   session read "Past: 20. jul." on a Slovenian screen and "Jul 20" on an English one — the device's
   date format, with the year missing. It reads "Zadnjič: 2026-07-20" now, the ISO day this app uses
   everywhere, and the word beside it comes from the dictionary instead of the markup.
+- **A finished session is called by its name, and is not offered to be started** (§55.1). Opening a
+  past session — from History, or by pulling the plan aside on the clipboard — showed "Untitled
+  Session" in the title bar even when the trainer had named it, and put Start beside it, offering to
+  run a session that already happened. The record's own name is shown now; one with no name says
+  "Zaključen trening". Neither Start nor Complete is offered on it.
+- **The Blossom theme's future colour can be read** (§55.2). Exercise names in a future plan were
+  written in a pale rose measuring 2.5:1 against the screen behind them, where a line of text needs
+  4.5:1. They are a deeper rose now, at 5.8:1 and better. Every theme's past and future colours are
+  measured on each build from now on, so a colour this light cannot be shipped again unnoticed.
 
 ---
 
