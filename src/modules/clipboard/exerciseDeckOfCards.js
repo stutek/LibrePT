@@ -21,6 +21,7 @@ import { newRecordId } from "../../data/recordId.js";
 import { formatMetricValue, usesLoad } from "../../domain/exerciseModality.js";
 import { formatLoad, formatReps } from "../../domain/repsAndLoad.js";
 import { exerciseRecordsOf, isRestRecord } from "../../domain/sessionItemRecord.js";
+import { getISODateString } from "../common/utils.js";
 import { CircuitDeckCard } from "./circuitCard.js";
 import { trackDeckScroll } from "./deckScrollFocus.js";
 import { ExerciseDeckCard } from "./exerciseCard.js";
@@ -265,14 +266,11 @@ export function renderExerciseDeck(deckContainer, deps) {
   // collapses too, so exactly one card is ever expanded (the active-exercise pointer is
   // untouched, so it re-expands the moment the past card is closed).
   const pastExpanded = !!activeSession.expandedPastId;
-  const formatDateStr = (dateIso) => {
-    if (!dateIso) return "";
-    const d = new Date(dateIso);
-    return d.toLocaleDateString(state.lang === "sl" ? "sl-SI" : "en-US", {
-      month: "short",
-      day: "numeric",
-    });
-  };
+  // The date on a past card is ISO, like every other date in the app (TODO §54). It used to be
+  // `toLocaleDateString(..., { month: "short", day: "numeric" })`, which asked the DEVICE how to
+  // write it and dropped the year: a Slovenian screen read "20. jul." and an English one "Jul 20",
+  // neither of them saying which year the set was lifted in.
+  const formatDateStr = (dateIso) => (dateIso ? getISODateString(dateIso) : "");
 
   // Past session exercises. Excludes isPlanning drafts (syncPlanningSnapshotToHistory writes them
   // with an ever-fresh `date` on every save) — a drafted-but-unrun plan is not a performed session,

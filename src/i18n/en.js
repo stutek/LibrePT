@@ -265,6 +265,8 @@ export const en = {
   program_not_defined: "Program Not Defined",
   no_members_assigned: "No Participants",
   session_completed: "Completed",
+  // The badge on the past card in the clipboard deck, read as "Last time: 2026-07-20".
+  last_time: "Last time",
   session_changed_resend:
     "This session changed — send the new details to the clients you already invited?",
   session_change_focus: "different kind of session",

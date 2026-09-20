@@ -198,3 +198,56 @@ def test_bringing_a_card_into_focus_keeps_the_line_it_was_showing(page, local_se
         "the card in focus adds the Too Easy / Too Hard / Feedback row"
     )
     assert after["timerInHeadRow"], "and its timer joins the head row it already had"
+
+
+# The client's last session, seeded into `state.history` after the stub has mounted — the harness
+# boots with an empty history, and the deck reads it at render time, so pushing a record and
+# re-rendering is the whole setup. A fixed date, not one relative to the frozen clock: what is
+# asserted is how the date is WRITTEN, which must not move with the day the test runs.
+PAST_SESSION_DATE = "2026-07-20"
+SEED_PAST_SESSION = """
+state.history.push({
+  id: 'h1',
+  clientId: 'c1a9f0e2',
+  clientName: 'Jane Doe',
+  routineName: 'Lower Body',
+  date: '2026-07-20T17:30:00',
+  duration: 3600,
+  exercises: [
+    {
+      id: 'p1',
+      type: 'exercise',
+      name: 'Barbell Back Squat',
+      sets: [{ reps: 8, weight: 60, completed: true }],
+      loadUnit: 'kg',
+      metric: 'reps',
+      modality: 'strength',
+    },
+  ],
+  feedback: [],
+});
+renderActiveGroupBoard();
+"""
+
+PAST_STUB = clipboard_stub(
+    active_session_fixture(exercises=PLAN), extra_body=SEED_PAST_SESSION
+)
+
+
+def test_the_past_card_writes_its_date_as_an_iso_day(page, local_server):
+    """TODO §54. The badge read "Past: 20. jul." on a Slovenian screen and "Jul 20" on an English
+    one: `toLocaleDateString` asked the DEVICE how to write the date, so the same record was
+    written two ways and neither said the year. A date is ISO everywhere in this app, in every
+    language, and the word beside it comes from the dictionary rather than from the markup."""
+    load_with_stub(page, local_server, PAST_STUB)
+    page.wait_for_selector(".deck-card-status-past")
+
+    badge = page.locator(".deck-card-status-past").first.evaluate(
+        "el => el.textContent.trim()"
+    )
+
+    # The stub's `t` reads the real English dictionary (tests/medium/_harness.py), so this is the
+    # line a trainer sees, word and date together.
+    assert badge == f"Last time: {PAST_SESSION_DATE}", (
+        f"the past card says when it was, as an ISO day, in a word from the dictionary: {badge!r}"
+    )

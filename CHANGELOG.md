@@ -20,6 +20,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-09-20 — Three things the trainer sees on the clipboard
+
+### Fixed
+
+- **A past card says when it was, as a date anyone can read** (§54). The badge on the client's last
+  session read "Past: 20. jul." on a Slovenian screen and "Jul 20" on an English one — the device's
+  date format, with the year missing. It reads "Zadnjič: 2026-07-20" now, the ISO day this app uses
+  everywhere, and the word beside it comes from the dictionary instead of the markup.
+
+---
+
 ## 2026-09-18 — A signup a phone refuses to share is saved instead
 
 ### Fixed

@@ -20,6 +20,30 @@ Read [CHANGELOG.md](CHANGELOG.md) for what shipped and when. This file is why.
 
 ---
 
+### 54. [x] The past cards on the clipboard write their date as "20. jul." — fixed 2026-09-20
+
+Seen 2026-09-14 on the demo data, while checking §52.2. A past card's badge read "Past: 20. jul."
+(`dateStr` passed to `buildPastExerciseItems` in
+[exerciseDeckOfCards.js](src/modules/clipboard/exerciseDeckOfCards.js)), and "Past" was English on
+a Slovenian screen. The app writes a date as ISO everywhere, in every language, so it should read
+2026-07-20, and the word should come from the dictionary.
+
+**Fixed 2026-09-20 (Claude).** Two defects, one line each:
+
+- The deck built the date with `toLocaleDateString(state.lang === "sl" ? "sl-SI" : "en-US",
+  { month: "short", day: "numeric" })`. That asks the DEVICE how to write a date and drops the year
+  entirely, so the same record read "20. jul." on one screen and "Jul 20" on the other, and neither
+  said which year the set was lifted in. It now goes through `getISODateString`, like every other
+  date the app shows.
+- The word beside it was written into the markup as `Past:`. It comes from the dictionary now, as
+  `last_time` — "Last time" / "Zadnjič", which says what the card IS (the client's most recent
+  session) rather than naming a tense.
+
+Pinned by `test_the_past_card_writes_its_date_as_an_iso_day` in
+[tests/medium/test_clipboard_card_design.py](tests/medium/test_clipboard_card_design.py), the file
+that already owns the deck's status tags. It seeds one history record on a fixed date — not one
+relative to the frozen clock — because what is asserted is how the date is WRITTEN.
+
 ### 64. [x] The gate fails on a different test each run, and each one passes on its own — fixed 2026-09-19
 
 Measured 2026-09-18 (Claude) while gating §61's PREVIEW work. Three runs of `build check` on the same

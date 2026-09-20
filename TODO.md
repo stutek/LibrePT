@@ -4416,13 +4416,10 @@ The gate no longer runs on a saturated machine at all (§64, `build/quiet_machin
 stop appearing in gate runs. That is not this section: a phone in a gym is slow and cannot be asked
 to wait, so the question below still stands on its own.
 
-## 54. [ ] The past cards on the clipboard write their date as "20. jul."
+## 54. [x] The past cards on the clipboard write their date as "20. jul." — fixed 2026-09-20
 
-Seen 2026-09-14 on the demo data, while checking §52.2. A past card's badge reads "Past: 20. jul."
-(`dateStr` passed to `buildPastExerciseItems` in
-[exerciseDeckOfCards.js](src/modules/clipboard/exerciseDeckOfCards.js)), and "Past" is English on a
-Slovenian screen. The app writes a date as ISO everywhere, in every language, so it should read
-2026-07-20, and the word should come from the dictionary.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#54-x-the-past-cards-on-the-clipboard-write-their-date-as-20-jul--fixed-2026-09-20);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ## 68. [ ] The paid tiers: what stays out of this app, and the tag that invites the upgrade
 

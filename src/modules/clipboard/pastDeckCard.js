@@ -28,7 +28,7 @@ export class PastDeckCard extends DeckCard {
 
   // The card, in every state (TODO §42.3): the tag, the name and what was lifted, on one row.
   renderCard(card) {
-    const { escapeHTML, formatLoad, formatReps } = this.ctx;
+    const { escapeHTML, formatLoad, formatReps, t } = this.ctx;
     const item = this.item;
     const setsSummary = item.sets
       .map((s) => {
@@ -38,7 +38,7 @@ export class PastDeckCard extends DeckCard {
       .join(", ");
     card.innerHTML = `
         <div class="deck-card-compact">
-          <span class="badge deck-card-status deck-card-status-past">Past: ${escapeHTML(item.sessionDate)}</span>
+          <span class="badge deck-card-status deck-card-status-past">${escapeHTML(t("last_time"))}: ${escapeHTML(item.sessionDate)}</span>
           <span class="deck-card-name deck-card-name-inline">${escapeHTML(item.name)}</span>
           <span class="deck-card-compact-target">${escapeHTML(setsSummary)}</span>
         </div>

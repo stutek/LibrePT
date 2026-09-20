@@ -279,6 +279,7 @@ export const sl = {
   program_not_defined: "Program ni določen",
   no_members_assigned: "Ni udeležencev",
   session_completed: "Zaključeno",
+  last_time: "Zadnjič",
   session_changed_resend:
     "Ta trening se je spremenil — želiš poslati nove podatke strankam, ki si jih že povabil?",
   session_change_focus: "druga vrsta treninga",
