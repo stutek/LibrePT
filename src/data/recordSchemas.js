@@ -9,10 +9,10 @@
 //
 // Kept next to migrationSteps.js deliberately: a schema bump (a field's storage starts existing)
 // and a migration step (data moves into that field) are always a matched pair under §18.4's
-// expand-first rule — a field lands in a schema N release before the UI that writes it. Right now
-// there is exactly one live schema, so there is nothing yet to stage a field ahead of; the
-// declaration exists so that the day schema 3 is cut, staging has somewhere to write the field
-// first and something for the CI guard to compare against.
+// expand-first rule — a field lands in a schema N release before the UI that writes it. Since
+// 2026-09-21 the pair is mandatory in one direction too: a numbered shape is frozen, so a field
+// change mints the next number and brings a migration step with it, even one that does nothing.
+// SCHEMA_PREVIEW is where a field waits until it is ready for a number.
 //
 // A field descriptor is `{ required, type }` — `type` one of "string" | "number" | "boolean" |
 // "array" | "object", and an array field may add `items` (a nested field-shape, applied to every
@@ -59,6 +59,20 @@ const SESSION_ITEM_SHAPE = {
 // and of a session alike and belongs to no one collection.
 export const COMMON_RECORD_FIELDS = ["testData", "seededDemo"];
 
+// **FROZEN. Do not add, remove, retype or re-require a field here** (TODO §60, ruled 2026-09-21 by
+// the maintainer). A numbered shape does not move: any change to one mints the NEXT schema number
+// and is declared there, with a migration step that is allowed to do nothing. That is what makes
+// "two files declaring the same numbered schema have the same shape" true rather than aspirational —
+// it was false four times over before the ruling (`alias`, §61's session fields, §62's `completed`,
+// `duration`, `titles` and `icon`), each one an optional field slipped into a shape already on
+// trainers' devices.
+//
+// A field that is not ready for a number goes into SCHEMA_PREVIEW below, which is unnumbered and
+// free to change on any commit.
+//
+// Held still by tests/fixtures/schemas/schema_4.json, which recordSchemas.test.mjs compares this
+// against on every build. Editing that fixture to make a failure go away un-freezes the shape it
+// exists to hold — mint the next number instead.
 export const SCHEMA_4 = {
   clients: {
     id: { required: true, type: "string" },

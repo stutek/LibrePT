@@ -9,7 +9,9 @@
 // own seed data would be worthless the first time a real trainer's form submission diverged from it.
 
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { test } from "node:test";
+import { fileURLToPath } from "node:url";
 import * as seeds from "../../../src/data/index.js";
 import * as proj from "../../../src/data/recordProjections.js";
 import * as m from "../../../src/data/recordSchemas.js";
@@ -178,5 +180,64 @@ test("projecting into an undeclared collection fails loud", () => {
   assert.equal(
     issues.some((issue) => issue.includes("no schema declared")),
     true,
+  );
+});
+
+// --- A numbered shape does not move (TODO §60, ruled 2026-09-21 by the maintainer) ---
+//
+// Until this ruling, two rules in docs/DATA_MODEL.md disagreed: "a schema major is bumped only when
+// a migration step is added" allowed an optional field to be added to schema 4, while "two files
+// declaring the same numbered schema have the same shape by definition" said it could not. Schema 4
+// gained fields four times under the first rule (`alias` on 2026-08-11; `startDate`, `seriesId`,
+// `occurrenceDate`, `cancelled` with §61; `completed`, `duration`, `titles`, `icon` with §62), so
+// "4" named four shapes and the second rule was simply false.
+//
+// The ruling settles it the other way: ANY change to a numbered shape — a field added, removed,
+// retyped, or made required — mints a NEW schema number, even when the migration step that carries
+// it does nothing. That makes the second rule true, and this is what makes it true rather than
+// merely written down.
+//
+// The fixture is the frozen shape, captured the day of the ruling. **Never edit one.** A schema
+// whose shape must change gets a new number and a new fixture beside this one; editing this file
+// would silently un-freeze the shape it exists to hold still.
+const FROZEN_SCHEMAS_DIR = fileURLToPath(new URL("../../fixtures/schemas/", import.meta.url));
+
+// Which numbered schemas have a frozen shape on disk. A retired schema's fixture stays here after
+// the schema leaves LIVE_SCHEMAS, because files stamped with that number are in the wild for ever.
+function frozenShapeFor(schemaMajor) {
+  return JSON.parse(readFileSync(`${FROZEN_SCHEMAS_DIR}schema_${schemaMajor}.json`, "utf-8"));
+}
+
+test("a numbered schema never moves: SCHEMA_4 still matches its frozen shape", () => {
+  // The whole shape, not only its field names: a field turned required, or retyped from string to
+  // number, changes what a file at this number promises just as much as a new field does.
+  assert.deepEqual(
+    JSON.parse(JSON.stringify(m.SCHEMA_4)),
+    frozenShapeFor(4),
+    "SCHEMA_4 has changed shape. A numbered schema is frozen (TODO §60): mint the next number, " +
+      "declare the change there with a migration step that may do nothing, and freeze that number " +
+      "in its own fixture. Do not edit tests/fixtures/schemas/schema_4.json.",
+  );
+});
+
+test("every live numbered schema is frozen on disk", () => {
+  // The inverse mistake: cutting schema 5 and forgetting to freeze it would leave the new number
+  // free to drift exactly as 4 did, and nothing here would notice.
+  const unfrozen = [];
+  for (const schemaMajor of Object.keys(m.LIVE_SCHEMAS)) {
+    // PREVIEW is deliberately NOT frozen: it is the unnumbered staging shape, it may change on any
+    // commit, and it is never a step in the migration chain (docs/DATA_MODEL.md §1). A field is
+    // staged there and mints a number when it graduates.
+    if (!/^\d+$/.test(schemaMajor)) continue;
+    try {
+      frozenShapeFor(schemaMajor);
+    } catch {
+      unfrozen.push(schemaMajor);
+    }
+  }
+  assert.deepEqual(
+    unfrozen,
+    [],
+    `live numbered schemas with no frozen shape: ${unfrozen.join(", ")} — add tests/fixtures/schemas/schema_<N>.json the day the schema is cut`,
   );
 });

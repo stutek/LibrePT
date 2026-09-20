@@ -96,16 +96,17 @@ shape ([backupFile.js](../src/data/backupFile.js)) — through the same projecti
 fan-out uses, so the file cannot drift from what the store would write for that shape. Any build can
 restore it through the chain.
 
-**One shape per file, not every live one.** Shapes only gain fields under expand-first (`SCHEMA_3`
-is `SCHEMA_2` plus `startDate`), so the newest is a strict superset of every older one and an older
-copy alongside it would store strictly less information at full size. Restore re-derives every live
-store from whatever it receives.
+**One shape per file, not every live one.** Shapes only gain fields under expand-first
+(`SCHEMA_PREVIEW` is `SCHEMA_4` with a stricter `startDate` and one collection of its own), so the
+newest is a strict superset of every older one and an older copy alongside it would store strictly
+less information at full size. Restore re-derives every live store from whatever it receives.
 
 Every file also carries `exportedAt` — a temporal anchor, so a future migration never has to date a
 two-year-old backup as though it were taken today — and `buildSha`, which is a **support breadcrumb
 only**. It is deliberately not consulted on restore: two files declaring the same numbered schema
-have the same shape by definition, so comparing SHAs would imply a doubt that cannot exist. The only
-shape that varies between builds is PREVIEW, and PREVIEW is never written to a file.
+have the same shape — held still by a frozen fixture per number, see *A numbered shape is frozen*
+below — so comparing SHAs would imply a doubt that cannot exist. The only shape that varies between
+builds is PREVIEW, and PREVIEW is never written to a file.
 
 ### A restore REPLACES; it does not merge
 
@@ -135,8 +136,52 @@ identifies the **code**.
 behaviour concurrently, so switching behaviour is an in-app choice, not a different URL and not a
 different deployment. The data schema is the only axis storage is keyed on.
 
-A schema major is bumped **only** when a migration step is added. A "patch" to a schema is either a
-migration step or it is nothing.
+### A numbered shape is frozen (ruled 2026-09-21)
+
+**Any change to a numbered schema's shape mints a new schema number** — a field added, removed,
+retyped, or turned required. The migration step that carries it **may do nothing**, and a no-op step
+is a real step: it is what makes the chain's history complete and what gives the new number
+somewhere to exist.
+
+This replaced the rule that a major is bumped only when a migration step is added, which allowed an
+optional field into a shape that was already released. Schema 4 gained fields four times under it —
+`alias` on 2026-08-11, then §61's four session fields, then §62's `completed`, `duration`, `titles`
+and `icon` — so "4" named four shapes, and the promise two paragraphs up, that two files declaring
+the same numbered schema have the same shape, was simply false. The ruling makes that promise true
+instead of deleting it.
+
+**Schema 4 is frozen as it stands today; the history is not renumbered.** Installs hold data stamped
+"4" in all four of those shapes and there is no way to tell them apart, so the rule runs from the
+next change onward.
+
+**A frozen shape is held still by a fixture, not by this paragraph.** `tests/fixtures/schemas/schema_4.json`
+is the exact shape as of the ruling, and `recordSchemas.test.mjs` fails the build the moment
+`SCHEMA_4` differs from it by so much as a `required` flag. **Never edit a fixture**: a schema whose
+shape must change gets the next number and a fixture of its own beside it.
+
+**PREVIEW is not frozen and is not numbered.** It is where a field is staged, it may change on any
+commit, and it is never a step in the chain. A staged field mints a number when it graduates.
+
+#### Every numbered schema stays live; retiring one is a decision
+
+A new number does not retire the one before it. Every numbered schema remains in `LIVE_SCHEMAS`,
+written concurrently by the star-write fan-out, which is what keeps moving between them a read
+re-point rather than a migration (§4). **A schema leaves that set only by a deliberate decision**,
+never as a side effect of cutting the next one — the same rule the physical layout already follows,
+where a retired schema's store is never dropped by booting. The quantity being managed by that
+decision is **how many star writes happen at once**: each live schema costs one more store, one more
+full copy of the data, and one more write in every fan-out.
+
+#### An older build refuses a newer file, and that is now the price of one field
+
+`formatVersion` and `schemaVersion` are one number by design (2026-08-15), so a new schema number is
+also a new file-format version, and a build with no row for it in `BACKUP_FORMATS` **refuses the
+file**. Under the old rule an added optional field changed no number, and an older build would have
+opened the file and harmlessly kept the field it did not know. Under this one it will not.
+
+Accepted deliberately (2026-09-21): a reader that cannot name a file's shape is guessing, and the
+alternative — two independent numbers — was weighed and rejected in 2026-08-15 for the reason that
+there would then be a way to express a file whose two numbers disagree.
 
 ### Staging is enforced, not merely intended (2026-08-17)
 
