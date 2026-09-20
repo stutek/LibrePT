@@ -21,6 +21,7 @@ from collections import namedtuple
 from datetime import datetime
 
 from build.frontend_audit import audit_html_sinks, compare_csp
+from build.quiet_machine import QUIET_LOAD_PER_CORE
 from build.testreport import REPORT_DIR, failed_test_ids, print_digest, run_logged
 
 from deploy.local_http_server import DEV_SERVER_BASE_PATH, DEV_SERVER_PORT
@@ -54,7 +55,9 @@ RUN_PHRASES = {
 RUN_HISTORY_PATH = os.path.join(REPORT_DIR, "last-run.json")
 
 # A 1-minute load average per core, above which the box is doing more than it has cores for and the
-# documented stage budgets stop applying. Below the lower figure there is nothing to say.
+# documented stage budgets stop applying. The lower band comes from quiet_machine.py, which is what
+# actually decides whether a run may start — the header must not call a load quiet that the gate is
+# about to refuse (both words were printed about the same 2.52 on 2026-09-19).
 LOAD_BUSY_PER_CORE = 0.7
 LOAD_OVERSUBSCRIBED_PER_CORE = 1.0
 
@@ -319,6 +322,8 @@ def _load_verdict(load, cores):
         return f"{per_core:.2f}/core, OVERSUBSCRIBED — expect stages past their budgets"
     if per_core >= LOAD_BUSY_PER_CORE:
         return f"{per_core:.2f}/core, busy"
+    if per_core > QUIET_LOAD_PER_CORE:
+        return f"{per_core:.2f}/core, too busy to start — the gate will wait"
     return f"{per_core:.2f}/core, quiet"
 
 

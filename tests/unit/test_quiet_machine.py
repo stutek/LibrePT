@@ -67,3 +67,17 @@ def test_it_refuses_when_the_machine_never_settles():
     # The message has to name the cause and what to do about it, or it reads as the gate breaking.
     assert any("The machine is busy" in line for line in said)
     assert any("another agent" in line for line in said)
+
+
+def test_the_run_header_never_calls_a_load_quiet_that_the_gate_refuses():
+    """On 2026-09-19 the first two lines of a run disagreed about the same reading: the header said
+    `2.52 ... (0.16/core, quiet)` and the line under it said the machine was too busy to start. One
+    threshold decides, and the header reads it."""
+    from build import _load_verdict
+
+    refused = quiet_threshold(16) + 0.5
+    assert "quiet" not in _load_verdict([refused, 0, 0], 16)
+    assert "the gate will wait" in _load_verdict([refused, 0, 0], 16)
+
+    allowed = quiet_threshold(16) - 0.5
+    assert _load_verdict([allowed, 0, 0], 16).endswith("quiet")
