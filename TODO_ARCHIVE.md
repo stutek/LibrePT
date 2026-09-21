@@ -20,6 +20,62 @@ Read [CHANGELOG.md](CHANGELOG.md) for what shipped and when. This file is why.
 
 ---
 
+### 72. [x] Should every evening of a repeating session be stored? — decided 2026-09-21: no
+
+Asked by Simon 2026-09-21, after reading §70's rollback walk-through: does schema 4 have to store a
+repeating session as many individual evening records? And, put as a view rather than a question,
+storing them individually would be better anyway, because it allows changing times, cancelling
+evenings and skipping holidays.
+
+**The literal question, answered first: no.** Schema 4 declares both `sessions` and `sessionSeries`.
+The schema in §70's walk-through that loses the evenings is one that does NOT declare
+`sessionSeries` — schema 3, for instance.
+
+**The three things that view wants already work**, read from
+[sessionSeries.js](src/domain/sessionSeries.js) the same day (Claude). The model is not "a rule
+instead of records", it is both at once:
+
+- `sessionsWithSeries` returns the stored sessions, plus the evenings each rule still owes, minus
+  the evenings a stored session already speaks for.
+- `occurrenceAsSession` turns a derived evening into a stored record the moment a trainer touches
+  it — opening, moving, running or editing its plan.
+- Cancelling is a stored record with `cancelled: true`, not a deletion, because the rule would
+  otherwise produce the evening again.
+- Moving keeps the original `occurrenceDate` and takes a new `startDate`, which is what makes a
+  second invitation a change to the same evening rather than a new one.
+
+So changing a time, cancelling an evening and skipping a single date are all supported today. The
+two models differ only over evenings **nobody has touched**.
+
+**What storing every evening would cost:**
+
+- **An open-ended series cannot be stored at all.** `until` is optional, so "Tuesdays at six until I
+  say otherwise" has no last row. It would need a horizon and something to extend it, and with no
+  server that something runs when the app opens — a trainer who does not open it for two months
+  opens an empty board.
+- **Every edit to a rule becomes a rewrite of every future row**, and worse, moving ONE evening
+  stops being distinguishable from re-timing the whole series. Today those are two different acts.
+- **The client's calendar.** `calendarInvite` sends the RULE, so a client's calendar holds one entry
+  for "Tuesdays and Thursdays at six". Stored evenings would send fifty. That is client-facing.
+- **Erasure (§65).** The ruling there removes a rule that exists for the erased client alone: one
+  record. Stored evenings make it N records to find.
+
+**Where the view was right, and it is worth keeping:** a plain session row does survive a schema
+that knows nothing of series. That is a real advantage and it is what §70 is about — but the fix is
+§70's, so that switching to a narrower schema does not destroy what it cannot read. Changing the
+domain model to suit a storage problem would let storage dictate the domain.
+
+**The one thing the current model genuinely cannot do:** say what the schedule USED to look like. If
+a trainer changes a series' time in March, nothing recovers what the board showed in February.
+Stored evenings would. Not pursued: sessions that actually happened become `history` records
+anyway.
+
+**Decided 2026-09-21 (Simon): the model stays — the rule is stored once, and only an evening a
+trainer has touched becomes a stored record.**
+
+Holidays are open regardless of this, as §1.4: the mechanism exists (cancel that evening), what is
+missing is importing a holiday and gym-closure calendar so it need not be done by hand.
+
 ### 69. [x] One board test fails for a whole hour every night — fixed 2026-09-21
 
 Found 2026-09-21 at 00:29 (Claude), while running the JS unit tier before the gate for §60. It had

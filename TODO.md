@@ -5002,3 +5002,9 @@ live shape would also have needed §70 settled first, since schema 3 is narrower
 Red team, recorded so it is not rediscovered: as a product capability a rollback to schema 3 was
 never wanted anyway — schema 3 has no `alias`, no `invites` and no `sessionSeries`, so a trainer
 arriving there would lose their repeating sessions and invitations.
+
+## 72. [x] Should every evening of a repeating session be stored? — decided 2026-09-21: no
+
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#72-x-should-every-evening-of-a-repeating-session-be-stored--decided-2026-09-21-no).
+The model stays: the rule is stored once, and only an evening a trainer has touched becomes a stored
+record.
