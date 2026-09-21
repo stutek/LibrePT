@@ -5082,3 +5082,73 @@ that stops at a sign-in screen in front of a visitor is the failure §28.14 exis
 Open, and the reason §73.4 stopped at the structure. Each language is 6xx keys. Machine translation
 is a guess, and this app's own rule is that a guess is not reported as a measurement — so the
 decision needed is **which languages** and **who translates them**, before any file is added.
+
+## 74. [ ] The sessions board's header and its calendar
+
+Four things Simon reported on 2026-09-21, all on the board and its date filter.
+
+### 74.1 [ ] The filter chips break into two rows on a desktop
+
+**Measured at 1440px wide:** the board's column is 480px, the header gives the chips 274px of it, and
+the three chips land on two rows — *Datumi* and *Stranka* at y=75, *Lokacija* at y=112. The header
+grows to 99px to hold them.
+
+The cause is a media query reading the wrong width.
+[sessionsView.css](src/modules/sessionList/sessionsView.css) flips the header from a column to a row
+above 600px so the chips sit beside the title — but 600px is the VIEWPORT, and on a desktop this
+component lives in a 480px column beside the other views. A component asked about the window it is
+in rather than the space it has.
+
+### 74.2 [ ] Today belongs in the calendar
+
+Asked 2026-09-21: move the *Danes* button out of the title row and into the date filter's calendar
+panel. It is the one control that means a day, and the calendar is where days are chosen — the same
+argument that removed the old *jump to date* button in §45.6.
+
+Its act does not change: it takes the board to today. In the calendar it should also bring the grid
+back to the current month, or it would be a control that moves one of the two things on screen.
+
+### 74.3 [ ] The calendar's month and year are not selectable
+
+Only the days can be tapped; the month and year are a label between two arrows. Choosing a session
+three months out is three taps of an arrow, and a session next year is twelve.
+
+### 74.4 [ ] Nineteen characters the app writes are in no font it ships
+
+Reported as "missing glyphs". **Measured, in the browser, against the fonts actually loaded:** every
+one of the 93 Font Awesome icons the app uses has a glyph — that half is sound. What has no glyph is
+the app's own text: of 21 symbol and emoji characters written into user-visible strings, 19 are
+absent from the vendored typefaces — ☰ ✕ ⋯ ✎ ⚠ ▾ ↔ ✓ ≤ and the emoji 👋 🧪 📅 ⏱ 🔥 💪 📖 🚀 🔬. Only
+• ↑ ↓ are really there.
+
+They render on a developer's machine because the SYSTEM supplies them, which is exactly what this
+app does not rely on anywhere else: every typeface and every icon is vendored so a first load in a
+basement gym needs no network and no host font. On a phone without an emoji font — or any device
+with a thin font set — these are empty boxes, and one of them is the ☰ that a sandbox card names as
+the way out.
+
+**Two ways, and they are not equivalent.** Vendor a symbol subset the way the icons are vendored,
+which costs a font file, a licence note and a place in the render baseline; or take the characters
+out of the strings and let the icon font do the drawing, which is cheaper but rewrites copy in both
+languages, and cannot be done inside a sentence such as "open the menu ☰ at the top right" without
+rewording it.
+
+**Not started.**
+
+## 75. [ ] The displayed date format should be the trainer's choice
+
+Simon, 2026-09-21: "date format mora biti izbiren zato, da si ga lahko vsakdo prilagodi", and
+"date format v prikazu, zapis je vedno utc".
+
+So: **display only**. What is stored does not move — dates and times are written in UTC and stay
+that way, and nothing about a chosen display format may reach a record, a backup or a sync.
+
+**This changes a standing product rule**, which is why it is written down rather than built: the app
+currently decides the written form itself, ISO dates and 24-hour times everywhere, in every language,
+precisely so that a Slovenian app on a US-set phone cannot show 09/12/2026 for the twelfth of
+September or ask for a time in AM/PM. A trainer's own choice is a third thing, different from both
+the app deciding and the phone deciding — it keeps the device out of it, which is the part that
+matters, but the rule about the app's own decision has to be rewritten rather than quietly broken.
+
+Open: which formats are offered, where the choice lives, and whether it covers times as well as
+dates. Entry stays as it is — `timeField.js` and `dateField.js` on `steppedField.js`.
