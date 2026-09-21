@@ -4934,6 +4934,31 @@ trainer who ticked the box at 00:30 in Ljubljana as having signed *yesterday*. *
 not ruled:** a field descriptor carries that kind alongside its JS type, so question 2 can see a
 retype at all.
 
+### 71.2 [ ] The round trip is a TEST, not a runtime check — answered 2026-09-21, not ruled
+
+Asked by Simon the same day: does question 3 above go into production or into the tests? Answered
+(Claude): **into the tests**, on two grounds.
+
+A check nothing can act on is not a check. If the round trip failed mid-save, the only runtime
+responses are to refuse the trainer's save — worse than the defect, with a client standing there —
+or to log and carry on, which is not a check. And the round trip is a property of the CODE, of the
+projector/reader pair, not of any one record: proved once, it holds for every input.
+
+**Where that answer is weak, and it has to be said:** for a TIME conversion, correctness is not
+input-independent. So the corpus has to carry the value-dependent edges deliberately, or "proved"
+means nothing — an instant either side of local midnight, a daylight-saving change, a browser east
+and west of UTC, a missing field and an empty string. The first and third are exactly where
+`sessions.startDate` (an instant) and `sessionSeries.startDate` (a local calendar day) would be
+confused.
+
+**One production check IS earned, and it is a different one.** At the seams where data crosses a
+schema boundary and the app legitimately stops to speak: a restore from a file, which already asks
+before replacing and names what would be lost, and a rollback to another schema (§70). There the
+honest action is obvious — tell the trainer what this schema cannot carry. That is a one-time
+reconciliation at an event, not a round trip on every save. `backupHealth.js` is the precedent for
+the shape of it: in production it keeps a cheap per-record fingerprint rather than a snapshot,
+because the answer has to be free on a phone.
+
 ### 71.1 [ ] Schema 3 is the test subject, and stays test-only — ruled 2026-09-21, not yet built
 
 Asked by Simon whether schema 3 could be made, and whether old backups exist. Both answered the same
