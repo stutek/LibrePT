@@ -572,7 +572,7 @@ export const sl = {
   story_step_welcome:
     "Z gumbom Pokaži mi ti vodnik pokaže troje: značko PESKOVNIK v zgornji vrstici ter v meniju ☰ vrstici Zapusti peskovnik in Ponastavi podatke peskovnika. Z gumbom Naprej začneš. Kartico lahko kadar koli pospraviš z ikono ▾ v njenem zgornjem desnem kotu in aplikacijo preizkušaš brez vodenja; na vrstici, ki ostane, je ✕, ki vodeni ogled konča.",
   story_persona_trainer: "Tvoj telefon",
-  story_chapter_trainer_details: "Tvoji podatki",
+  story_chapter_trainer_details: "Vnesi svoje podatke",
   story_trainer_details_open_body:
     "Preden povabiš stranko, lahko v LibrePT preveriš ime, telefon in e-poštni naslov, ki so navedeni na povabilih. Ta ogled obrazec samo pokaže. Osebnih podatkov ne vpiše in ne shrani.",
   story_step_trainer_details_menu:
@@ -581,9 +581,9 @@ export const sl = {
     "V meniju pritisni Moji podatki — vrstico z ikono kartice. Obrazec pokaže polja za ime, telefon in e-pošto, ki so navedeni na povabilih za stranke. V tem ogledu jih pusti prazna.",
   story_step_trainer_details_close:
     "Pritisni Prekliči na dnu obrazca. Obrazec se zapre, nič se ne shrani.",
-  story_chapter_gym: "V telovadnici",
+  story_chapter_gym: "Izvedba in prilagoditve treninga",
   story_persona_client: "Anin telefon",
-  story_chapter_arrive: "Prijatelji se oglasijo",
+  story_chapter_arrive: "Sprejem treh novih strank",
   story_chapter_intake: "Na Aninem telefonu",
   story_handover_title: "Zdaj Ana",
   story_back_to_your_phone: "Nazaj na tvoj telefon",
@@ -645,7 +645,7 @@ export const sl = {
   story_intake_close_body:
     "Anin del je opravljen in z njim prva naloga. Gumb Pošlji izroči njeno datoteko tebi, trenerju, in ti si tisti, ki jo prebere in se odloči — neznanec se nikoli sam ne vpiše v tvoj seznam. Nazaj na svoj telefon.",
   story_chapter_programme: "Program",
-  story_chapter_evening: "Večer po vadbi",
+  story_chapter_evening: "Pregled zaznamkov in priprava treningov",
   story_step_programme_open_session:
     "Nedelja zvečer. Torkov trening je že na plošči — trener ga odpre, da sestavi, kar bo dejansko izpeljal.",
   story_step_programme_editor:

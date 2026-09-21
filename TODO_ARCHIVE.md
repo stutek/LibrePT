@@ -90,6 +90,24 @@ friendliest offer on the card directly under the most destructive one, *clear de
 the 2026-08-18 report all over again in a new shape; the medium test that measured that gap now
 measures it from the last chapter row.
 
+### 73.8 [x] The chapters carry Simon's own names — shipped 2026-09-21
+
+Named by Simon 2026-09-21, in Slovenian, for the four chapters the index offers:
+
+| chapter | before | now |
+| :--- | :--- | :--- |
+| `trainer-details` | Tvoji podatki | **Vnesi svoje podatke** |
+| `arrive` | Prijatelji se oglasijo | **Sprejem treh novih strank** |
+| `gym` | V telovadnici | **Izvedba in prilagoditve treninga** |
+| `evening` | Večer po vadbi | **Pregled zaznamkov in priprava treningov** |
+
+Only the capitalisation of his draft was changed, to match every other title in the app. The English
+says the same thing rather than the old wording: *Enter your own details*, *Taking on three new
+clients*, *Running the session and adjusting it*, *Reviewing the notes and preparing sessions*.
+
+A chapter's title is also the heading on the card that OPENS it, so these are read twice: once in
+the list, once by the viewer who chose it.
+
 ---
 
 ### 72. [x] Should every evening of a repeating session be stored? — decided 2026-09-21: no

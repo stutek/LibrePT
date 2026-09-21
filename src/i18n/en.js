@@ -618,7 +618,7 @@ export const en = {
   story_step_welcome:
     "Show me points out three things: the SANDBOX badge in the top bar, and in the ☰ menu the rows Leave the sandbox and Reset sandbox data. Next starts the walkthrough. To try the app without the guide, put this card away with ▾ in its top right corner. A small bar stays on screen: its ✕ ends the walkthrough.",
   story_persona_trainer: "Your phone",
-  story_chapter_trainer_details: "Your details",
+  story_chapter_trainer_details: "Enter your own details",
   story_trainer_details_open_body:
     "Before you invite a client, LibrePT lets you check the name, phone number and email address that appear on your invitations. This walkthrough only shows the form. It does not enter or save personal details.",
   story_step_trainer_details_menu:
@@ -627,9 +627,9 @@ export const en = {
     "Tap My details — the card icon row in the menu. The form shows the name, phone and email fields that sign client invitations. Leave them empty for this demo.",
   story_step_trainer_details_close:
     "Tap Cancel at the bottom of the form. The form closes and nothing is saved.",
-  story_chapter_gym: "In the gym",
+  story_chapter_gym: "Running the session and adjusting it",
   story_persona_client: "Ana's phone",
-  story_chapter_arrive: "Three friends arrive",
+  story_chapter_arrive: "Taking on three new clients",
   story_chapter_intake: "On Ana's phone",
   story_handover_title: "Over to Ana",
   story_back_to_your_phone: "Back to your own phone",
@@ -693,7 +693,7 @@ export const en = {
   story_intake_close_body:
     "Ana's part is done, and the first task with it. Send hands her file to you, the trainer, and you are the one who reads it and decides — a stranger never writes themselves into your register. Back to your own phone.",
   story_chapter_programme: "The programme",
-  story_chapter_evening: "The evening after",
+  story_chapter_evening: "Reviewing the notes and preparing sessions",
   story_step_programme_open_session:
     "Sunday night. Tuesday's session is already on the board — the trainer opens it to build what they will actually run.",
   story_step_programme_editor:

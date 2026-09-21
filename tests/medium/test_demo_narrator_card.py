@@ -116,7 +116,7 @@ def test_a_narrated_step_puts_its_words_on_screen(page, local_server):
 
     card = page.locator("#demo-narrator-card")
     expect(card).to_be_visible()
-    expect(card).to_contain_text("In the gym")
+    expect(card).to_contain_text("Running the session")
     expect(card).to_contain_text("Jane and John")
 
 
@@ -240,7 +240,7 @@ def test_the_guide_speaks_through_the_same_card_as_the_story(page, local_server)
     expect(card).to_have_class(re.compile(r"demo-narrator-card--off-track"))
     expect(card).to_contain_text("wandered off")
     (
-        expect(card).not_to_contain_text("In the gym"),
+        expect(card).not_to_contain_text("Running the session"),
         "the story's words are not the guide's",
     )
     # Not an ending: the way out of the demo is the panel's own two buttons, and offering to clear

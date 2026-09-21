@@ -44,6 +44,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   list does. Every card that offers the tour now shows the chapters straight away and no button
   beside them, including on installs where that button was saved into the database months ago.
 
+- **The tour's chapters are named for what happens in them** (§73.8): *Enter your own details*,
+  *Taking on three new clients*, *Running the session and adjusting it*, *Reviewing the notes and
+  preparing sessions*. A chapter's name is also the heading on the card that opens it, so it is read
+  twice — in the list, and by the viewer who chose it.
+
 - **The language choice is built from the languages the app actually has** (§73.4). The welcome
   screen's language question and the language list in the ☰ menu were each written out by hand, so a
   new language would have appeared in neither. Both now come from the app's own set of translations,

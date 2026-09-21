@@ -5045,6 +5045,29 @@ what shipped is in [CHANGELOG.md](CHANGELOG.md).
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#736-x-the-index-is-open-and-the-show-me-around-button-is-gone--shipped-2026-09-21);
 what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
+### 73.8 [x] The chapters carry Simon's own names — shipped 2026-09-21
+
+Closed — the names and their English are in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#738-x-the-chapters-carry-simons-own-names--shipped-2026-09-21).
+
+### 73.7 [ ] Two chapters the story does not have yet
+
+Proposed by Simon 2026-09-21, alongside the names of the four that exist:
+
+- **Ustvarjanje termina za trening** — between *Sprejem treh novih strank* and *Izvedba in
+  prilagoditve treninga*. The story never shows a session being CREATED: every session it drives was
+  already in the seeded sandbox, so the one act a trainer performs most often is the one the demo
+  skips.
+- **Varnostne kopije in uporaba več naprav** — between *Izvedba in prilagoditve treninga* and
+  *Pregled zaznamkov in priprava treningov*. A chapter about the app rather than about a client, and
+  the only one that would touch Google Drive.
+
+Neither is a rename: each is a new chapter of the guided story — steps that drive the app's real
+controls, narration in both languages, and a cold-start walk that passes (§73.2). The Drive one also
+has to decide what it demonstrates on a machine with no Drive account connected, because a guide
+that stops at a sign-in screen in front of a visitor is the failure §28.14 exists to prevent.
+
+**Not started. Agree the shape of each before the copy is written.**
+
 ### 73.5 [ ] Which official European languages, and translated by whom
 
 Open, and the reason §73.4 stopped at the structure. Each language is 6xx keys. Machine translation
