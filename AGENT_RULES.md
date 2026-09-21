@@ -39,8 +39,14 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
    says in the same breath what that thing is and what it does. A sentence that is only true to
    someone who already knows it has told them nothing.
    **Write plainly.** Short sentences, one idea each. No stacked clauses, no chains of dashes, no
-   metaphor where the plain word works, no flourish at the end of a paragraph. **Name the thing, not
-   the principle**: which file, which value, what breaks. A sentence restating why a rule is good is
+   flourish at the end of a paragraph. **Be literal — no metaphor at all**, not merely none where a
+   plain word would do: say *an evening the trainer opened, moved, cancelled, started or edited*,
+   never *an evening the trainer touched*; say what the code does, never what it feels like. A verb
+   doing figurative work is the commonest form of it, and the hardest to see on re-reading.
+   **Name the thing, not
+   the principle**: which file, which value, what breaks. **Never point at something instead of
+   naming it** — not *that decision*, *one of those costs*, *the danger in §70*: state which
+   decision, which cost, what §70 says. A sentence restating why a rule is good is
    padding, and reads as evasion — justify when asked, not by default. **Cut, then cut again**: the
    same content in fewer words is always better, and what goes is repetition, throat-clearing and the
    sentence explaining the sentence before it. A reply that has to be re-read has failed, however
