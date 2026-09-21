@@ -199,6 +199,53 @@ about a year either way, and a select holding a century is a scroll on a phone h
 
 ---
 
+### 74.5 [x] Four icons had no glyph, and the check could not see it — fixed 2026-09-21
+
+Reported by Simon as "manjkajo glyphi v aplikaciji". Four icons drew a crossed box instead of
+themselves: both of the calendar's month chevrons, `id-card` in the ☰ menu's My details row, and
+`paperclip` on the story's attachment.
+
+**The font was a month behind the app.** The subsets in `src/fonts/` were cut on 23 August; the
+calendar's arrows arrived on 11 September with §45.6, My details with §45.2, the attachment with
+§38.22. `agent_tools/font_subset.py` was never run again, so their codepoints were never cut into
+the font — and `options.notdef_outline = True` means a codepoint the font lacks draws the box rather
+than nothing.
+
+**Three checks stood between that and a trainer, and all three were green.**
+
+`icon_coverage.py` compares the class names in `src/` against the stylesheet, and the stylesheet is
+upstream's complete one — it declares every Font Awesome icon whether the subset carries it or not.
+Its own docstring calls the CSS "a faithful manifest of the font beside it"; that is true only on the
+day the font is regenerated.
+
+`test_icons_render.py` renders every icon and fails on one that "draws nothing". A notdef box is not
+nothing.
+
+And the recorded baseline held the box as those icons' correct shape, so the comparison agreed with
+itself. Six icons shared one picture in that file, which is the plainest possible sign — two
+different icons cannot look identical.
+
+**What was fixed.** The subsets were regenerated (8KB, 93 glyphs), the baseline re-recorded, and the
+renderer now compares each drawing against what that same font draws for a codepoint no icon font
+carries: a box is therefore not a drawing, and the existing "draws nothing" test fails on it. A
+second test refuses two different codepoints that draw the same picture.
+
+**The renderer was also reading two icons off the wrong face.** It tried `fa-solid` first and took
+whatever "drew something" — so for `github` and `google-drive` it took the solid font's box and never
+tried the brand face at all. The app itself drew them correctly the whole time; only the record was
+wrong. Fixing the box rule fixed that too, once the brand face was forced to LOAD: a web font is
+fetched when something lays it out, and a canvas drawing is not that, so the face the tool was
+measuring had never been downloaded.
+
+**A measurement in this same session was wrong first, and is worth keeping.** The first attempt
+compared each icon drawn in the icon font against the same codepoint drawn in a font that does not
+exist. Both draw a box; the two boxes differ slightly in metrics, so the comparison said "it draws"
+for every icon, and the report that went with it — "all 93 icons are sound" — was false. The
+comparison has to be against the SAME font's own missing-glyph mark, which is why that is what the
+tool now does.
+
+---
+
 ### 72. [x] Should every evening of a repeating session be stored? — decided 2026-09-21: no
 
 Asked by Simon 2026-09-21, after reading §70's rollback walk-through: does schema 4 have to store a

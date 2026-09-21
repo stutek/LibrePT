@@ -35,6 +35,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   SCREEN was and then had to fit three filters into a 480px column, so one of them wrapped onto a
   second line. It asks how much room it actually has.
 
+- **Four icons drew a crossed box instead of themselves** (§74.5): both arrows that move the
+  calendar a month, the card beside *My details* in the ☰ menu, and the paperclip on the tour's
+  attachment. The app's icon file was a month older than those controls, so their symbols were never
+  cut into it. The build could not see it — it asked whether an icon drew *something*, and a crossed
+  box is something — so it now compares every icon against what that same font draws for a symbol it
+  is certain not to have, and refuses two different icons that draw the same picture.
+
 ### Added
 
 - **The guided tour lists its chapters, and any one of them starts it** (§73.1). The tour follows

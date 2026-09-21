@@ -18,6 +18,8 @@
 
 import json
 
+from agent_tools.font_subset import codepoints_for
+from agent_tools.icon_coverage import ICON_CSS
 from agent_tools.glyph_render import (
     BASELINE,
     GRID,
@@ -39,13 +41,47 @@ def _signatures(page, local_server):
 
 def test_no_icon_the_app_uses_draws_nothing(page, local_server):
     """The failure a subset introduces: a class that is right, a rule that exists, and a glyph that
-    is not in the font. It renders as an invisible gap — no error, no console warning."""
+    is not in the font.
+
+    It does not render as nothing. The subsets keep their notdef outline, so what a trainer sees is a
+    crossed box where a control should be — and for a month that passed this test, because the tool
+    asked whether the icon drew SOMETHING. It now compares each drawing against what that same font
+    draws for a codepoint no icon font carries, so the box counts as not drawn and the signature is
+    empty. Found 2026-09-21 with four icons in that state: both calendar chevrons, id-card and
+    paperclip."""
     signatures = _signatures(page, local_server)
 
     blank = sorted(
         name for name, signature in signatures.items() if "1" not in signature
     )
-    assert not blank, f"these icons drew nothing at all: {', '.join(blank)}"
+    assert not blank, (
+        "these icons drew nothing, or drew the font's missing-glyph box: "
+        f"{', '.join(blank)}"
+    )
+
+
+def test_no_two_icons_draw_the_same_picture(page, local_server):
+    """Two different icons cannot look identical, so a repeat means at least one of them is wrong.
+
+    It catches what a shape baseline cannot: a subset that maps a codepoint to another icon's
+    outline, and a whole family quietly falling back. The recorded baseline held six icons sharing
+    one picture on 2026-09-21 — four missing glyphs and two brand icons read off the wrong face —
+    and every one of them had a green build behind it."""
+    signatures = _signatures(page, local_server)
+    # Two NAMES for one glyph are allowed, and the app uses a pair of them: Font Awesome renamed
+    # sticky-note to note-sticky and kept both, declaring them in one rule at one codepoint. What
+    # must not repeat is a picture across two DIFFERENT codepoints.
+    codepoints = codepoints_for(signatures.keys(), ICON_CSS.read_text(encoding="utf-8"))
+
+    seen = {}
+    repeats = []
+    for name, signature in sorted(signatures.items()):
+        twin = seen.get(signature)
+        if twin and codepoints.get(twin) != codepoints.get(name):
+            repeats.append(f"{twin} and {name}")
+        seen.setdefault(signature, name)
+
+    assert not repeats, f"these icons draw the same picture: {'; '.join(repeats)}"
 
 
 def test_every_icon_still_draws_the_shape_it_drew_before(page, local_server):

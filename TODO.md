@@ -5099,9 +5099,16 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#742-x-today-bel
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#743-x-the-calendars-month-and-year-are-chosen-not-stepped-to--shipped-2026-09-21).
 
+### 74.5 [x] Four icons had no glyph, and the check could not see it — fixed 2026-09-21
+
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#745-x-four-icons-had-no-glyph-and-the-check-could-not-see-it--fixed-2026-09-21).
+This was the reported "missing glyphs": both calendar chevrons, `id-card` and `paperclip` drew a
+crossed box. §74.4 below is the other half and is still open.
+
 ### 74.4 [ ] Nineteen characters the app writes are in no font it ships
 
-Reported as "missing glyphs". **Measured in the browser against the fonts actually loaded:** of 21 symbol and emoji characters written into user-visible strings, 19 are
+Also reported as "missing glyphs", and separate from §74.5. **Measured in the browser against the
+fonts actually loaded:** of 21 symbol and emoji characters written into user-visible strings, 19 are
 absent from the vendored typefaces — ☰ ✕ ⋯ ✎ ⚠ ▾ ↔ ✓ ≤ and the emoji 👋 🧪 📅 ⏱ 🔥 💪 📖 🚀 🔬. Only
 • ↑ ↓ are really there.
 

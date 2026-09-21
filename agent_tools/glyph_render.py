@@ -62,7 +62,7 @@ GLYPH_PX = 96
 # than something it assumes. Returns a 256-character signature per icon, and nothing else — no
 # screenshots to store, no image library to depend on.
 SIGNATURE_JS = r"""
-(options) => {
+async (options) => {
   const { names, px, grid } = options;
   const probe = document.createElement("i");
   document.body.appendChild(probe);
@@ -75,36 +75,61 @@ SIGNATURE_JS = r"""
   small.height = grid;
   const smallCtx = small.getContext("2d", { willReadFrequently: true });
 
-  const signatures = {};
-  for (const name of names) {
-    // Both prefixes are tried and the one that DRAWS wins. Which face carries an icon is a fact
-    // about the font, and asking the page steps keeping a list here that has to be corrected every
-    // time a brand icon is added or the faces are merged.
-    let signature = "";
-    for (const family of ["fa-solid", "fa-brands"]) {
-    probe.className = `${family} fa-${name}`;
-    const style = getComputedStyle(probe, "::before");
-    // The stylesheet stores the codepoint as the ::before content, which is where a class becomes a
-    // glyph — read it rather than restating it here.
-    const glyph = style.content.replace(/^["']|["']$/g, "");
-    const font = `${px}px ${getComputedStyle(probe).fontFamily}`;
+  // A codepoint no icon font carries. Whatever a family draws for THIS is that family's
+  // missing-glyph mark, and the subsets keep their notdef outline on purpose — so a glyph that is
+  // not in the font draws a crossed box rather than nothing at all. Measured 2026-09-21: four icons
+  // had been drawing that box for a month behind a green build, because "it drew something" was the
+  // only question being asked.
+  const ABSENT = "\uE9FE";
 
+  const gridOf = (font, glyph) => {
     ctx.clearRect(0, 0, px, px);
     ctx.fillStyle = "#000";
     ctx.font = font;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText(glyph, px / 2, px / 2);
-
     smallCtx.clearRect(0, 0, grid, grid);
     smallCtx.drawImage(canvas, 0, 0, grid, grid);
     const pixels = smallCtx.getImageData(0, 0, grid, grid).data;
     let drawn = "";
     for (let i = 3; i < pixels.length; i += 4) drawn += pixels[i] > 96 ? "1" : "0";
-    if (drawn.includes("1")) {
-      signature = drawn;
-      break;
-    }
+    return drawn;
+  };
+
+  // A web font is fetched when something LAYS IT OUT, and a canvas drawing is not that. Without
+  // this the brand face was never fetched, every brand icon drew the default font's box, and the
+  // tool reported the app's own icons as missing — measured 2026-09-21, twice, before it was
+  // believed. `document.fonts.status === "loaded"` does not cover a face nothing has used yet.
+  for (const family of ["fa-solid", "fa-brands"]) {
+    probe.className = family;
+    await document.fonts.load(`${px}px ${getComputedStyle(probe).fontFamily}`, "\uf00d");
+  }
+  await document.fonts.ready;
+
+  const signatures = {};
+  for (const name of names) {
+    // Both prefixes are tried and the one that draws THE ICON wins. Which face carries an icon is a
+    // fact about the font, and asking the page beats keeping a list here that has to be corrected
+    // every time a brand icon is added or the faces are merged.
+    //
+    // "Drew something" is not the question, and getting that wrong hid two defects at once: the
+    // solid face draws its missing-glyph box for a brand codepoint, that box counted as a win, and
+    // the brand faces were never even tried — so `github` and `google-drive` were recorded as the
+    // solid font's box while the app drew them correctly all along.
+    let signature = "";
+    for (const family of ["fa-solid", "fa-brands"]) {
+      probe.className = `${family} fa-${name}`;
+      const style = getComputedStyle(probe, "::before");
+      // The stylesheet stores the codepoint as the ::before content, which is where a class becomes
+      // a glyph — read it rather than restating it here.
+      const glyph = style.content.replace(/^["']|["']$/g, "");
+      const font = `${px}px ${getComputedStyle(probe).fontFamily}`;
+      const drawn = gridOf(font, glyph);
+      if (drawn.includes("1") && drawn !== gridOf(font, ABSENT)) {
+        signature = drawn;
+        break;
+      }
     }
     signatures[name] = signature;
   }
