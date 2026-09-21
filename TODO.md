@@ -5006,5 +5006,5 @@ arriving there would lose their repeating sessions and invitations.
 ## 72. [x] Should every evening of a repeating session be stored? — decided 2026-09-21: no
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#72-x-should-every-evening-of-a-repeating-session-be-stored--decided-2026-09-21-no).
-The model stays: the rule is stored once, and only an evening a trainer has touched becomes a stored
-record.
+The model stays: the rule is stored once, and an evening becomes a stored record only when the
+trainer opens, moves, cancels, starts or edits the plan of it.

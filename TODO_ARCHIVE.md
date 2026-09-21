@@ -37,15 +37,16 @@ instead of records", it is both at once:
 
 - `sessionsWithSeries` returns the stored sessions, plus the evenings each rule still owes, minus
   the evenings a stored session already speaks for.
-- `occurrenceAsSession` turns a derived evening into a stored record the moment a trainer touches
-  it — opening, moving, running or editing its plan.
+- `occurrenceAsSession` turns a derived evening into a stored record as soon as the trainer opens,
+  moves, cancels, starts or edits the plan of that evening.
 - Cancelling is a stored record with `cancelled: true`, not a deletion, because the rule would
   otherwise produce the evening again.
 - Moving keeps the original `occurrenceDate` and takes a new `startDate`, which is what makes a
   second invitation a change to the same evening rather than a new one.
 
 So changing a time, cancelling an evening and skipping a single date are all supported today. The
-two models differ only over evenings **nobody has touched**.
+two models differ only over evenings **the trainer has never opened, moved, cancelled, started or
+edited**.
 
 **What storing every evening would cost:**
 
@@ -70,8 +71,8 @@ a trainer changes a series' time in March, nothing recovers what the board showe
 Stored evenings would. Not pursued: sessions that actually happened become `history` records
 anyway.
 
-**Decided 2026-09-21 (Simon): the model stays — the rule is stored once, and only an evening a
-trainer has touched becomes a stored record.**
+**Decided 2026-09-21 (Simon): the model stays — the rule is stored once, and an evening becomes a
+stored record only when the trainer opens, moves, cancels, starts or edits the plan of it.**
 
 Holidays are open regardless of this, as §1.4: the mechanism exists (cancel that evening), what is
 missing is importing a holiday and gym-closure calendar so it need not be done by hand.
