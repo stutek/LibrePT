@@ -44,6 +44,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   list does. Every card that offers the tour now shows the chapters straight away and no button
   beside them, including on installs where that button was saved into the database months ago.
 
+- **A chapter you choose counts its own steps** (§73.10). Starting the tour at a chapter used to
+  say "step 18 of 41" — the place in the whole tour, which was right while a chapter link was a way
+  of joining a long story part-way, and wrong now that chapters are how the tour is offered. It says
+  "step 1 of 9" instead: the chapter you chose, and how long it is. Watching the whole tour still
+  counts across the whole tour, including the part played on the client's phone.
+
 - **The welcome screen offers the tour as its chapters too** (§73.9). The **Guided walkthrough**
   button above the list started the same tour at the same first chapter, so it is gone and the list
   is the offer. The welcome screen now presents three things: explore with demo data, the tour's

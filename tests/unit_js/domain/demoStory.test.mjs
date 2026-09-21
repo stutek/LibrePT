@@ -181,18 +181,27 @@ test("a step knows its place in the whole story, not in the run it happens to be
 });
 
 test("the client's own page continues the story's count instead of restarting it", () => {
-  const [clientStep] = storyStepsFor(HANDOVER_STORY, "intake", { surface: "client" });
+  // The handover hands over the STORY, naming no chapter — the surface filter finds her page on its
+  // own — so the count carries across the two phones.
+  const [clientStep] = storyStepsFor(HANDOVER_STORY, null, { surface: "client" });
 
   assert.equal(clientStep.storyPosition.number, 3);
   assert.equal(clientStep.storyPosition.count, 4);
 });
 
-test("a chapter opened straight from a link is numbered where it belongs", () => {
-  // A link to one chapter is a person joining the story part-way, not starting a shorter one — the
-  // count tells them how much of it they are seeing.
+test("a chapter chosen by name counts inside itself, not across the story", () => {
+  // Reported 2026-09-21, once the chapters became the way in: someone who chose one chapter is
+  // watching that chapter, and "step 4 of 4" measured them against a story they did not ask for.
   const [step] = storyStepsFor(HANDOVER_STORY, "review");
 
-  assert.equal(step.storyPosition.number, 4);
+  assert.equal(step.storyPosition.number, 1);
+  assert.equal(step.storyPosition.count, 1);
+});
+
+test("a two-step chapter chosen by name counts one then two", () => {
+  const numbers = storyStepsFor(HANDOVER_STORY, "arrive").map((step) => step.storyPosition.number);
+
+  assert.deepEqual(numbers, [1, 2]);
 });
 
 // The table of contents the splash and the sandbox card draw (asked for 2026-09-21). What it

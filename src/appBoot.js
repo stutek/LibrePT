@@ -429,7 +429,10 @@ async function bootIntakeStoryChapter({ shareDemo, shareChapter, t, lang } = {})
       import("./domain/demoStory.js"),
     ]);
 
-  const steps = story.storyStepsFor(DEMO_STORY, shareChapter || "intake", {
+  // No chapter by default: the handover hands over the whole story, and the surface filter finds
+  // the client's own chapters on its own. A link that DOES name one plays just that chapter, and
+  // counts inside it.
+  const steps = story.storyStepsFor(DEMO_STORY, shareChapter, {
     surface: "client",
     t,
   });

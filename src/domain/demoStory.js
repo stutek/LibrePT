@@ -89,7 +89,16 @@ export function storyStepsFor(
   // number both boots can agree on while sharing no state at all: it is a property of the script,
   // which both of them have. Keyed by step id, which `validateStory` already requires to be unique.
   const everyStep = chapters.flatMap((chapter) => chapter.steps || []);
-  const storyPlaces = new Map(everyStep.map((step, index) => [step.id, index + 1]));
+  // A run that NAMED a chapter is that chapter, and counts inside it: someone who chose "Running the
+  // session and adjusting it" is watching a nine-step chapter, and telling them they are on step 18
+  // of 41 measures them against four minutes they did not ask for (reported 2026-09-21).
+  //
+  // The whole story still counts across its own length, handover included — that is §38.9 and it has
+  // not changed: the story crosses to the client's own page half way through, each side is a
+  // separate boot, and a count that restarted there made the viewer watch "step 10 of 41" become
+  // "step 1 of 8". What decides is which of the two is playing, and nothing else.
+  const counted = wanted ? wanted.steps || [] : everyStep;
+  const storyPlaces = new Map(counted.map((step, index) => [step.id, index + 1]));
   // A chapter that happens on the CLIENT's own page is not part of the trainer's run: it lives in a
   // different boot, on a different device in the story, and flattening it in would leave the guide
   // pointing at a form that is not on screen. The story crosses to it by handing over the browser,
@@ -108,7 +117,7 @@ export function storyStepsFor(
         {
           ...step,
           chapterId: chapter.id,
-          storyPosition: { number: storyPlaces.get(step.id), count: everyStep.length },
+          storyPosition: { number: storyPlaces.get(step.id), count: counted.length },
         },
         t,
       ),

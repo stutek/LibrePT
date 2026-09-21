@@ -457,7 +457,11 @@ const ARRIVE_CHAPTER = {
       // The way on IS this journey, so it is the guide's own Next that makes it, wearing the words
       // for what it does. A second button beside a Next that quietly skipped the whole chapter was
       // the thing reported.
-      advanceTo: "intake?demo=story&chapter=intake&theme=midnight",
+      // The STORY, not the chapter: naming a chapter would make the client's page count inside that
+      // chapter (domain/demoStory.js), and the crossing is the one place where a restarting count
+      // is the §38.9 defect. Her page is the only client chapter there is, so the surface filter
+      // finds it without being told.
+      advanceTo: "intake?demo=story&theme=midnight",
       nextLabelKey: "story_open_client_phone",
       caption: "story_step_handover",
       showMe: false,

@@ -5053,6 +5053,11 @@ Closed — the names and their English are in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#739-x-the-splashs-walkthrough-button-went-the-same-way--shipped-2026-09-21).
 
+### 73.10 [x] A chosen chapter counts inside itself — fixed 2026-09-21
+
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#7310-x-a-chosen-chapter-counts-inside-itself--fixed-2026-09-21).
+The whole story still counts across its own length, handover included; §38.9 keeps that half.
+
 ### 73.7 [ ] Two chapters the story does not have yet
 
 Proposed by Simon 2026-09-21, alongside the names of the four that exist:

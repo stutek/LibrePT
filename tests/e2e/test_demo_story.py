@@ -474,12 +474,13 @@ def test_the_trainer_reads_what_ana_sent_and_she_lands_in_the_register(
 
 def test_one_chapter_can_be_walked_on_its_own(page, local_server):
     """Chapters exist because nobody watches five unbroken minutes of software they do not use yet,
-    so a link naming one has to open that one.
+    so a link naming one has to open that one — and COUNT inside it.
 
-    It opens where that chapter SITS in the story, not at "1 of its own length" (§38.9): someone
-    handed a link to the gym chapter is joining a story part-way, and the count is what tells them
-    so. The whole story opened from the top still reads step 1, which is what makes this a place
-    rather than an offset.
+    The count was the story's whole length until 2026-09-21, which was right while a chapter link was
+    a way of joining a long story part-way. Now the chapters are how the tour is offered at all, so a
+    viewer who chose one is watching that chapter: "step 1 of 9", not "step 18 of 41", which measured
+    them against four minutes they never asked for. The whole story still counts across its own
+    length, handover included — that is §38.9 and it is the test below this one.
     """
     chapters = _chapter_ids()
     assert chapters, "the story declares no chapters"
@@ -494,10 +495,10 @@ def test_one_chapter_can_be_walked_on_its_own(page, local_server):
 
     expect(page.locator(PANEL)).to_be_visible()
     chapter_step, chapter_total = _step_numbers(page)
-    assert chapter_total == story_length, (
-        f"the chapter reports a story {chapter_total} steps long, the story itself {story_length}"
+    assert chapter_step == 1, "a chosen chapter opens at its own first step"
+    assert chapter_total < story_length, (
+        f"the chapter reports {chapter_total} steps, which is the whole story's {story_length}"
     )
-    assert 1 <= chapter_step <= story_length
 
 
 @pytest.mark.clean_start

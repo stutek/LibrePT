@@ -123,6 +123,33 @@ empty app. The list's heading carries the offer the button used to make.
 
 ---
 
+### 73.10 [x] A chosen chapter counts inside itself — fixed 2026-09-21
+
+Reported by Simon 2026-09-21: "številčenje ni prilagojeno poglavjem, včasih je bilo to zahtevano,
+sedaj pa naj bodo številke omejene na velikost poglavja."
+
+He is right about both halves. Counting across the whole story WAS the requirement, and the reason
+still stands where it was made: the story crosses to the client's own page half way through, each
+side is a separate boot, and a count that restarted there made the viewer watch "step 10 of 41"
+become "step 1 of 8" and then "step 11 of 41", as if they had wandered into something else.
+
+What changed underneath it is what a chapter IS. It used to be a way of joining a long story
+part-way, so its number was a place in that story. Since the table of contents shipped it is how the
+tour is offered at all — a viewer picks a chapter and watches that chapter, and "step 18 of 41"
+measures them against four minutes they never asked for.
+
+So the count is scoped to what is PLAYING, and to nothing else: a run that named a chapter counts
+inside that chapter, a whole-story run counts across the whole story.
+
+That made the handover a decision rather than a detail. It used to navigate to
+`intake?demo=story&chapter=intake`, which under the new rule would have made the client's page count
+inside her own chapter — the exact §38.9 defect. It now hands over the story and names no chapter;
+her page is the only client-surface chapter there is, so the surface filter finds it without being
+told, and the count carries across the two phones. A link that does name `chapter=intake` still
+plays just that chapter, counting inside it, which is what such a link now means everywhere.
+
+---
+
 ### 72. [x] Should every evening of a repeating session be stored? — decided 2026-09-21: no
 
 Asked by Simon 2026-09-21, after reading §70's rollback walk-through: does schema 4 have to store a
