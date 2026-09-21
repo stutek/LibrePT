@@ -258,10 +258,21 @@
   flex: 0 0 auto;
 }
 
-/* Wide enough for one line: the header stops stacking and everything this screen offers — title,
-   day buttons, three filters — sits on a single row (asked 2026-09-11). Below this it stacks,
-   because measured at 390px the one-row version wrapped into three. */
-@media (min-width: 600px) {
+/* Wide enough for one line: the header stops stacking and everything this screen offers — the title
+   and the three filters — sits on a single row (asked 2026-09-11). Below this it stacks, because
+   measured at 390px the one-row version wrapped into three.
+
+   Measured against THE HEADER'S OWN WIDTH, not the window's (§74.1, fixed 2026-09-21). This was a
+   `@media (min-width: 600px)` query, and on a desktop the board is a 480px column beside the other
+   views: the window was 1440px, the header said "plenty of room", and the three chips landed on two
+   rows — Datumi and Stranka at y=75, Lokacija at y=112, in a header grown to 99px. A component
+   asked about the screen it was on instead of the space it had. The container is the view, because a
+   container query styles what is INSIDE the container and never the container itself. */
+#view-clients {
+  container-type: inline-size;
+  container-name: sessions-view;
+}
+@container sessions-view (min-width: 560px) {
   .sessions-title-bar {
     flex-direction: row;
     align-items: center;

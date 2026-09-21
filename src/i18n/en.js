@@ -250,6 +250,8 @@ export const en = {
   filter_clear: "Clear filters",
   filter_from: "From",
   filter_to: "To",
+  filter_month: "Month",
+  filter_year: "Year",
   filter_prev_month: "Previous month",
   filter_next_month: "Next month",
   no_sessions_for_filters: "No sessions match these filters. Clear them to see the whole board.",

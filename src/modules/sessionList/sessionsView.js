@@ -11,7 +11,6 @@ import { activeSessionFilters, renderSessionFilterBar } from "./sessionFilterBar
 import {
   formatCalendarDayLabel,
   getSessionDayDate,
-  renderSessionsTitleBar,
   sessionDayTemporal,
   syncSessionTimelineAfterRender,
 } from "./sessionTimeline.js";
@@ -256,8 +255,6 @@ export function renderSessions({
 }) {
   const container = document.getElementById("sessions-categories-grid");
   if (!container) return;
-
-  renderSessionsTitleBar();
 
   // Resolved ONCE and used twice: the filter row offers what is on the board, and the board shows
   // what survives the filters. Asking for it separately expanded every repeating series a second

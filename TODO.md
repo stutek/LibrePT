@@ -5087,37 +5087,21 @@ decision needed is **which languages** and **who translates them**, before any f
 
 Four things Simon reported on 2026-09-21, all on the board and its date filter.
 
-### 74.1 [ ] The filter chips break into two rows on a desktop
+### 74.1 [x] The filter chips break into two rows on a desktop — fixed 2026-09-21
 
-**Measured at 1440px wide:** the board's column is 480px, the header gives the chips 274px of it, and
-the three chips land on two rows — *Datumi* and *Stranka* at y=75, *Lokacija* at y=112. The header
-grows to 99px to hold them.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#741-x-the-filter-chips-break-into-two-rows-on-a-desktop--fixed-2026-09-21).
 
-The cause is a media query reading the wrong width.
-[sessionsView.css](src/modules/sessionList/sessionsView.css) flips the header from a column to a row
-above 600px so the chips sit beside the title — but 600px is the VIEWPORT, and on a desktop this
-component lives in a 480px column beside the other views. A component asked about the window it is
-in rather than the space it has.
+### 74.2 [x] Today belongs in the calendar — shipped 2026-09-21
 
-### 74.2 [ ] Today belongs in the calendar
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#742-x-today-belongs-in-the-calendar--shipped-2026-09-21).
 
-Asked 2026-09-21: move the *Danes* button out of the title row and into the date filter's calendar
-panel. It is the one control that means a day, and the calendar is where days are chosen — the same
-argument that removed the old *jump to date* button in §45.6.
+### 74.3 [x] The calendar's month and year are chosen, not stepped to — shipped 2026-09-21
 
-Its act does not change: it takes the board to today. In the calendar it should also bring the grid
-back to the current month, or it would be a control that moves one of the two things on screen.
-
-### 74.3 [ ] The calendar's month and year are not selectable
-
-Only the days can be tapped; the month and year are a label between two arrows. Choosing a session
-three months out is three taps of an arrow, and a session next year is twelve.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#743-x-the-calendars-month-and-year-are-chosen-not-stepped-to--shipped-2026-09-21).
 
 ### 74.4 [ ] Nineteen characters the app writes are in no font it ships
 
-Reported as "missing glyphs". **Measured, in the browser, against the fonts actually loaded:** every
-one of the 93 Font Awesome icons the app uses has a glyph — that half is sound. What has no glyph is
-the app's own text: of 21 symbol and emoji characters written into user-visible strings, 19 are
+Reported as "missing glyphs". **Measured in the browser against the fonts actually loaded:** of 21 symbol and emoji characters written into user-visible strings, 19 are
 absent from the vendored typefaces — ☰ ✕ ⋯ ✎ ⚠ ▾ ↔ ✓ ≤ and the emoji 👋 🧪 📅 ⏱ 🔥 💪 📖 🚀 🔬. Only
 • ↑ ↓ are really there.
 

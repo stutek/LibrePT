@@ -263,6 +263,8 @@ export const sl = {
   filter_clear: "Počisti filtre",
   filter_from: "Od",
   filter_to: "Do",
+  filter_month: "Mesec",
+  filter_year: "Leto",
   filter_prev_month: "Prejšnji mesec",
   filter_next_month: "Naslednji mesec",
   no_sessions_for_filters:

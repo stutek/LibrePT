@@ -165,7 +165,6 @@ import { openSessionInviteDialog } from "./modules/session/sessionInviteDialog.j
 import { renderSessionTitle } from "./modules/session/sessionTitleBar.js";
 import {
   focusSessionsColumn,
-  renderSessionsTitleBar,
   scheduleTimelineSettle,
   setupSessionsDayNav,
 } from "./modules/sessionList/sessionTimeline.js";
@@ -198,7 +197,6 @@ function applyTranslations(lang = resolveLang(getState().lang)) {
   applyThemeSwitcherLabels(lang);
   applyStaticDOMMappings(dictionaryFor(lang));
 
-  renderSessionsTitleBar();
   renderNotificationArea();
 }
 

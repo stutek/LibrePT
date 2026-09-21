@@ -150,6 +150,55 @@ plays just that chapter, counting inside it, which is what such a link now means
 
 ---
 
+### 74.1 [x] The filter chips break into two rows on a desktop — fixed 2026-09-21
+
+**Measured at 1440px wide before the fix:** the board's column is 480px, the header gave the chips
+274px of it, and the three chips landed on two rows — *Datumi* and *Stranka* at y=75, *Lokacija* at
+y=112, in a header grown to 99px.
+
+The cause was a media query reading the wrong width. The header flipped from a column to a row above
+600px so the chips could sit beside the title — but 600px was the VIEWPORT, and on a desktop this
+component lives in a 480px column beside the other views. A component asked about the screen it was
+on instead of the space it had.
+
+It is a container query now, on the view around it, because a container query styles what is INSIDE
+the container and never the container itself. Measured after: one row of chips at 1440px, 1024px and
+390px.
+
+The header is 103px instead of 99px, and that is the trade: the title takes a row of its own so the
+three chips can share one. At 480px they cannot do both — the title and the chips together need
+479px before any gap.
+
+### 74.2 [x] Today belongs in the calendar — shipped 2026-09-21
+
+*Danes* left the title row for the date filter's calendar panel. It is the one control that means a
+day, and the calendar is where days are chosen — the same argument that removed the old *jump to
+date* button in §45.6.
+
+It moves BOTH things on screen: the board to today, and the grid back to this month. Moving one
+would be a control that half works — the trainer would be looking at this month's grid over a board
+still showing March.
+
+It lost its disabled state, which used to say "you are already on today". That state lived on a
+button in the title row that knew which day the board had scrolled to; the filter row does not, and
+teaching it would be coupling bought for a greyed-out button. In the calendar the control always has
+something to do, because it moves the grid as well.
+
+`renderSessionsTitleBar()` went with it — the button was the only thing it drew, so it was a
+function that did nothing, in three call sites.
+
+### 74.3 [x] The calendar's month and year are chosen, not stepped to — shipped 2026-09-21
+
+The month and year were a label between two arrows, so a session three months out was three taps and
+one next year was twelve. They are native `<select>`s now, for the same reason the client and
+location chips are: the phone's own list beats any popover written here, and it costs nothing.
+
+The year list is bounded — last year through the year after next, plus wherever the arrows have
+taken the grid, so the control never shows a value it does not hold. A trainer schedules within
+about a year either way, and a select holding a century is a scroll on a phone held in one hand.
+
+---
+
 ### 72. [x] Should every evening of a repeating session be stored? — decided 2026-09-21: no
 
 Asked by Simon 2026-09-21, after reading §70's rollback walk-through: does schema 4 have to store a

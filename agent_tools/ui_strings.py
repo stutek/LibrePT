@@ -34,8 +34,10 @@ SRC = REPO_ROOT / "src"
 # `aria-label` (TODO §39.6), then the day's expand-all control, whose label the timeline sets
 # from the dictionary in both directions (TODO §42.4), then the setup form's participant picker,
 # whose checkbox wall became a search field with two fewer hardcoded strings (TODO §46.2), then the
-# theme picker, whose options are built from theme.js's label table instead of the markup (§49.2).
-BASELINE = 271
+# theme picker, whose options are built from theme.js's label table instead of the markup (§49.2),
+# then the board's Today button, which moved into the date filter's calendar and left its English
+# title and label behind with it (§74.2).
+BASELINE = 269
 
 # Upstream files and the dictionaries themselves: the first are not ours to translate, the second
 # ARE the translations.

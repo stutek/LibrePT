@@ -109,20 +109,6 @@ export function formatCalendarDayLabel(isoDate) {
   };
 }
 
-export function renderSessionsTitleBar() {
-  const todayBtn = document.getElementById("btn-sessions-today");
-  if (!todayBtn) return;
-
-  const { temporal } = formatCalendarDayLabel(focusedSessionDate);
-
-  // The Today control doubles as the "current day" indicator: it resets the timeline to today, and
-  // is disabled while today is already focused.
-  const todayLabel = todayBtn.querySelector(".today-btn-label");
-  if (todayLabel) todayLabel.textContent = deps.t("today");
-  todayBtn.title = deps.t("today");
-  todayBtn.disabled = temporal === "today";
-}
-
 // Scrolls the timeline to a given ISO date (or the literal string "today"). Every existing call
 // site was written for the old 4-bucket model and only ever passes "today" — kept as a sentinel so
 // none of those callers (routerController.js, activeSessionController.js, editSessionControl.js)
@@ -142,7 +128,6 @@ export function focusSessionsColumn(isoDateOrToday, behavior = "smooth") {
   if (!target) return;
 
   focusedSessionDate = target.dataset.date;
-  renderSessionsTitleBar();
 
   // Only reflect the focused date in the URL while the timeline IS the active route — see
   // focusSessionsColumn's original note: a background renderSessions() must not bounce the URL off
@@ -196,7 +181,6 @@ function observeSessionTimelineGroups() {
       const isoDate = focused.dataset.date;
       if (isoDate && isoDate !== focusedSessionDate) {
         focusedSessionDate = isoDate;
-        renderSessionsTitleBar();
         if (deps.activeRouteName?.() === "sessions.day") {
           deps.pushRoute(deps.urlFor("sessions.day", { isoDate }));
         }
@@ -297,30 +281,23 @@ export function syncSessionTimelineAfterRender() {
   scheduleTimelineSettle(focusedSessionDate, "auto");
 }
 
-// The date-picker's own markup (the Today control) — index.html only holds the empty
-// #sessions-date-picker slot; this module owns what goes inside it, the same way sessionsView.js
-// owns #sessions-categories-grid's contents. Text/titles are placeholders here and get their real
-// (translated) values from renderSessionsTitleBar() right after.
+/** The title row's controls — all three of which have now moved or gone, so it renders nothing.
+ *
+ * Today moved into the date filter's calendar on 2026-09-21 (§74.2): it is the one control that
+ * means a day, and the calendar is where days are chosen. The jump-to-date button went the same way
+ * on 2026-09-11 (§45.6) — the date chip filters to a day, which says the same thing more strongly —
+ * and the expand-all control went with §45.16, when session cards became one design that shows
+ * everything they have.
+ *
+ * Kept as an empty render rather than deleted: the slot is where a control belonging to the TITLE
+ * rather than to a filter would go, and the board's header measures it either way.
+ */
 export function renderSessionsDatePicker() {
   const container = document.getElementById("sessions-date-picker");
   if (!container) return;
-  container.innerHTML = `
-    <button id="btn-sessions-today" class="sessions-today-btn" type="button" title="Today">
-      <i class="fa-solid fa-calendar-day"></i><span class="today-btn-label">Today</span>
-    </button>
-    <!-- The jump-to-date button was here until 2026-09-11. It opened the OS date picker and
-         SCROLLED the board to a day; the filter row's date chip now filters to that day instead,
-         which says the same thing more strongly (TODO §45.6). One control, not two that both
-         mean "a day". -->
-    <!-- The expand-all control was here until 2026-09-11 (TODO §45.16). Session cards became one
-         design that shows everything they have, so there was nothing left to open — the same reason
-         §42.14 removed the clipboard's copy of this setting. -->
-  `;
+  container.replaceChildren();
 }
 
 export function setupSessionsDayNav() {
   renderSessionsDatePicker();
-
-  const todayBtn = document.getElementById("btn-sessions-today");
-  if (todayBtn) todayBtn.addEventListener("click", () => focusSessionsColumn("today"));
 }

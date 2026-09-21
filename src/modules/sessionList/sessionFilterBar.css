@@ -82,12 +82,56 @@
   justify-content: space-between;
   gap: 8px;
   margin-bottom: 10px;
+  /* Five controls now, and a phone is narrower than they are: they wrap onto a second line rather
+     than squeezing the month name to nothing. */
+  flex-wrap: wrap;
 }
 
-.filter-month-label {
+/* The month and the year are chosen from the phone's own list, so they wear the app's select look
+   and keep the 44px height the arrows beside them have — a row of controls that are not the same
+   height reads as one of them being broken. The month takes the slack, because its names vary in
+   length between languages while a year is always four digits. */
+.filter-month-select {
+  min-height: 44px;
+  padding: 0 8px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--border-radius-sm);
+  background: var(--bg-color);
+  color: var(--text-main);
+  font-family: inherit;
   font-weight: 600;
   font-size: 15px;
+  cursor: pointer;
+}
+
+.filter-month-select[data-jump="month"] {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Today sits with the month controls (asked 2026-09-21): it moves the grid and the board to the
+   same day, so it belongs beside what it moves rather than in the title row above. */
+.filter-today-btn {
+  flex: 0 0 auto;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  background: transparent;
   color: var(--text-main);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-today-btn:hover {
+  background: var(--border-color);
+  color: var(--primary);
+  border-color: var(--primary);
 }
 
 /* 44px, because this is a control tapped one-handed while somebody waits. */

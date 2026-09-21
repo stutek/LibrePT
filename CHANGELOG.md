@@ -22,6 +22,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ## 2026-09-21 — The guided tour can be started at any of its chapters
 
+### Changed
+
+- **The session board's date filter carries Today, and its month and year are chosen from a list**
+  (§74.2, §74.3). *Danes* left the title row for the calendar, where days are already chosen, and it
+  now moves the board and the grid together. The month and the year were a label between two arrows,
+  so a session next year was twelve taps; they are lists you pick from.
+
+### Fixed
+
+- **The filters no longer break into two rows on a desktop** (§74.1). The header asked how wide the
+  SCREEN was and then had to fit three filters into a 480px column, so one of them wrapped onto a
+  second line. It asks how much room it actually has.
+
 ### Added
 
 - **The guided tour lists its chapters, and any one of them starts it** (§73.1). The tour follows

@@ -97,9 +97,6 @@ def test_sessions_day_navigation(page, local_server):
     # Dashboard opens focused on today
     page.wait_for_timeout(900)
     assert _route_path(page).endswith(today_iso)
-    assert page.locator("#btn-sessions-today").is_disabled(), (
-        "the Today control disables itself once today is already focused"
-    )
 
     # Scrolling the timeline to another day-group must retitle the URL to the date it settles on
     tomorrow = frozen_today() + datetime.timedelta(days=1)
@@ -113,7 +110,6 @@ def test_sessions_day_navigation(page, local_server):
     )
     page.wait_for_timeout(900)
     assert _route_path(page).endswith(tomorrow_iso)
-    assert not page.locator("#btn-sessions-today").is_disabled()
 
     # Going home via the logo pulls focus back to today
     page.locator("#logo-area").click()
@@ -129,10 +125,12 @@ def test_sessions_day_navigation(page, local_server):
         tomorrow_iso,
     )
     page.wait_for_timeout(900)
-    page.locator("#btn-sessions-today").click()
+    # Today lives in the date filter's calendar since 2026-09-21 (§74.2), so reaching it is two
+    # taps: the date chip opens the calendar, and Today is in its header beside the month.
+    page.locator("#filter-chip-dates").click()
+    page.locator(".filter-today-btn").click()
     page.wait_for_timeout(900)
     assert _route_path(page).endswith(today_iso)
-    assert page.locator("#btn-sessions-today").is_disabled()
 
 
 def test_scrolling_the_timeline_updates_the_focused_day(page, local_server):

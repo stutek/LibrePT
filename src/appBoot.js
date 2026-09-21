@@ -75,7 +75,7 @@ import { initSessionBar, renderClipboardBarShell } from "./modules/session/sessi
 import { initSessionInviteDialog } from "./modules/session/sessionInviteDialog.js";
 import { initSessionTitleBar } from "./modules/session/sessionTitleBar.js";
 import { initSessionFilterBar } from "./modules/sessionList/sessionFilterBar.js";
-import { initSessionTimeline } from "./modules/sessionList/sessionTimeline.js";
+import { focusSessionsColumn, initSessionTimeline } from "./modules/sessionList/sessionTimeline.js";
 import { dismissSplashWhenReady } from "./modules/splash/splashScreen.js";
 import { BUILD_INFO } from "./version.js";
 
@@ -229,6 +229,10 @@ export function bootSessionTimeline(deps) {
     lang: () => resolveLang(deps.getState().lang),
     clients: () => deps.getState().clients || [],
     onChange: () => deps.rerenderSessions(),
+    // Today, from inside the calendar (TODO §74.2). Injected rather than imported for the reason
+    // every other act in this row is: the filter row decides nothing about the board, it says what
+    // was tapped.
+    onToday: () => focusSessionsColumn("today"),
   });
 }
 

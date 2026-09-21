@@ -23,7 +23,7 @@
 // neither show a range nor take two taps, so a range needs a month grid of our own — the largest
 // part of this section, and the reason nothing else here is allowed to grow.
 //
-// Injected dependencies: `t`, `lang()`, `clients()`, `onChange()`. The board's own list is PASSED to
+// Injected dependencies: `t`, `lang()`, `clients()`, `onChange()`, `onToday()`. The board's own list is PASSED to
 // `renderSessionFilterBar(sessions)` rather than fetched here: resolving it means expanding every
 // repeating series over the visible window, and the caller has just done that — asking for it again
 // did the same work twice on every render of the board.
@@ -94,8 +94,38 @@ function gridStart(first) {
   return start;
 }
 
-function monthLabel(date, lang) {
-  return new Intl.DateTimeFormat(lang, { month: "long", year: "numeric" }).format(date);
+/** The twelve month names in the app's language, as `{ value, label }` for a `<select>`.
+ *
+ * 2026 is a leap-agnostic choice — the 1st of every month exists in every year — and a fixed year
+ * keeps the names from shifting with the day the app is opened. The LANGUAGE is the app's, never the
+ * device's: a Slovenian app on a US-set phone must not name its months in English.
+ */
+function monthOptions(lang) {
+  const format = new Intl.DateTimeFormat(lang, { month: "long" });
+  return Array.from({ length: 12 }, (_, index) => ({
+    value: String(index),
+    label: format.format(new Date(2026, index, 1)),
+  }));
+}
+
+/** The years the picker offers: last year through the year after next, plus wherever the arrows
+ *  have taken the grid.
+ *
+ *  Bounded on purpose. A trainer schedules within about a year either way, and a select holding a
+ *  century is a scroll on a phone held in one hand. The arrows still reach any month there is, and
+ *  the year they land on joins the list so the control never shows a value it does not hold.
+ */
+function yearOptions(visibleYear, today = new Date()) {
+  const years = new Set([
+    today.getFullYear() - 1,
+    today.getFullYear(),
+    today.getFullYear() + 1,
+    today.getFullYear() + 2,
+  ]);
+  years.add(visibleYear);
+  return [...years]
+    .sort((a, b) => a - b)
+    .map((year) => ({ value: String(year), label: String(year) }));
 }
 
 function weekdayLabels(lang) {
@@ -148,14 +178,27 @@ function calendarHTML() {
     .map((name) => `<span class="filter-weekday">${escapeHTML(name)}</span>`)
     .join("");
 
+  // The month and the year are CHOSEN, not stepped to (asked 2026-09-21). They were a label between
+  // two arrows, which made a session three months out three taps and one next year twelve. Native
+  // `<select>`s for the same reason the client and location chips are: the phone's own list beats
+  // any popover written here, and it costs nothing.
+  const months = optionsHTML(monthOptions(lang()), String(first.getMonth()), null);
+  const years = optionsHTML(yearOptions(first.getFullYear()), String(first.getFullYear()), null);
+
   // The two arming chips live in the calendar's own header, not in the row above: they are only
   // meaningful while the grid is open, and putting them in the filter row would have added two more
   // chips to a row that is read at a glance.
+  //
+  // Today lives here too (asked 2026-09-21). It is the one control that means a day, and this is
+  // where days are chosen — the same argument that took the old "jump to date" button out of the
+  // title row in §45.6.
   return `
     <div class="filter-calendar-head">
       <button type="button" class="filter-month-nav" data-month="-1" aria-label="${escapeHTML(t("filter_prev_month"))}"><i class="fa-solid fa-chevron-left"></i></button>
-      <span class="filter-month-label">${escapeHTML(monthLabel(first, lang()))}</span>
+      <select class="filter-month-select" data-jump="month" aria-label="${escapeHTML(t("filter_month"))}">${months}</select>
+      <select class="filter-month-select" data-jump="year" aria-label="${escapeHTML(t("filter_year"))}">${years}</select>
       <button type="button" class="filter-month-nav" data-month="1" aria-label="${escapeHTML(t("filter_next_month"))}"><i class="fa-solid fa-chevron-right"></i></button>
+      <button type="button" class="filter-today-btn" data-today="1">${escapeHTML(t("today"))}</button>
     </div>
     <div class="filter-arm-row">
       <button type="button" class="chip${armedEnd === "from" ? " active" : ""}" data-arm="from" aria-pressed="${armedEnd === "from"}">${escapeHTML(t("filter_from"))}</button>
@@ -165,8 +208,10 @@ function calendarHTML() {
     <div class="filter-days">${cells.join("")}</div>`;
 }
 
+/** `placeholder` null means the control has no empty state: the month and year always have a value,
+ *  while client and location can be "any". */
 function optionsHTML(rows, selected, placeholder) {
-  const head = `<option value="">${escapeHTML(placeholder)}</option>`;
+  const head = placeholder === null ? "" : `<option value="">${escapeHTML(placeholder)}</option>`;
   return (
     head +
     rows
@@ -265,6 +310,27 @@ function wire() {
       // and a shared mutable date would drift by a month per render.
       const step = Number(button.dataset.month);
       visibleMonth = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() + step, 1);
+      deps.onChange();
+    });
+  }
+
+  for (const select of calendar.querySelectorAll("[data-jump]")) {
+    select.addEventListener("change", (event) => {
+      const value = Number(event.target.value);
+      const year = event.target.dataset.jump === "year" ? value : visibleMonth.getFullYear();
+      const month = event.target.dataset.jump === "month" ? value : visibleMonth.getMonth();
+      visibleMonth = new Date(year, month, 1);
+      deps.onChange();
+    });
+  }
+
+  // Today moves BOTH things on screen: the grid back to this month, and the board to today. Moving
+  // only one would be a control that half works — the trainer would be looking at this month's grid
+  // over a board still showing March.
+  for (const button of calendar.querySelectorAll("[data-today]")) {
+    button.addEventListener("click", () => {
+      visibleMonth = monthStart(isoOf(new Date()));
+      deps.onToday?.();
       deps.onChange();
     });
   }
