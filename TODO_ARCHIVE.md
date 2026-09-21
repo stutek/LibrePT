@@ -110,6 +110,19 @@ the list, once by the viewer who chose it.
 
 ---
 
+### 73.9 [x] The splash's walkthrough button went the same way — shipped 2026-09-21
+
+Not asked for in as many words: Simon's instruction named the message feed's *Razglej se*. The splash
+carried the identical redundancy — a **Guided walkthrough** button directly above a list whose first
+line starts the same tour at its first chapter — so the rule he gave for one surface decides the
+other, and it was done rather than asked about: where the choice is between wordings or approaches,
+the agent picks one and reports what it picked over what.
+
+The onboarding offer is now three things: explore with demo data, the tour's chapters, start with an
+empty app. The list's heading carries the offer the button used to make.
+
+---
+
 ### 72. [x] Should every evening of a repeating session be stored? — decided 2026-09-21: no
 
 Asked by Simon 2026-09-21, after reading §70's rollback walk-through: does schema 4 have to store a

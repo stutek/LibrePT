@@ -5049,6 +5049,10 @@ what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 Closed — the names and their English are in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#738-x-the-chapters-carry-simons-own-names--shipped-2026-09-21).
 
+### 73.9 [x] The splash's walkthrough button went the same way — shipped 2026-09-21
+
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#739-x-the-splashs-walkthrough-button-went-the-same-way--shipped-2026-09-21).
+
 ### 73.7 [ ] Two chapters the story does not have yet
 
 Proposed by Simon 2026-09-21, alongside the names of the four that exist:

@@ -312,9 +312,6 @@ function revealOnboarding(splash, resolve, mountTrainerDetails, chapters, t) {
   document.getElementById("splash-load-demo")?.addEventListener("click", () => {
     window.location.assign(demoDataUrl());
   });
-  document.getElementById("splash-walkthrough")?.addEventListener("click", () => {
-    window.location.assign(guidedDemoUrl());
-  });
   fillChapterIndex(chapters, t);
   document.getElementById("splash-start-empty")?.addEventListener("click", () => {
     fadeOut(splash, resolve);

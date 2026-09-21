@@ -44,6 +44,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   list does. Every card that offers the tour now shows the chapters straight away and no button
   beside them, including on installs where that button was saved into the database months ago.
 
+- **The welcome screen offers the tour as its chapters too** (§73.9). The **Guided walkthrough**
+  button above the list started the same tour at the same first chapter, so it is gone and the list
+  is the offer. The welcome screen now presents three things: explore with demo data, the tour's
+  chapters, or start with an empty app.
+
 - **The tour's chapters are named for what happens in them** (§73.8): *Enter your own details*,
   *Taking on three new clients*, *Running the session and adjusting it*, *Reviewing the notes and
   preparing sessions*. A chapter's name is also the heading on the card that opens it, so it is read

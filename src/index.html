@@ -149,16 +149,9 @@
         <i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i>
         <span data-i18n="splash_load_demo">Explore with demo data</span>
       </button>
-      <!-- Enabled 2026-08-17 (TODO §9.5 shipped). It was deliberately the only place the walkthrough
-           was ever promised; the promise is now kept, so the "soon" marker is gone rather than
-           reworded. -->
-      <button type="button" id="splash-walkthrough" class="app-splash-action">
-        <i class="fa-solid fa-circle-play" aria-hidden="true"></i>
-        <span data-i18n="walkthrough_title">Guided walkthrough</span>
-      </button>
-      <!-- The walkthrough's table of contents, OPEN (asked for 2026-09-21): it says what the four
-           to six minutes contain, and every line of it starts the tour at that chapter. A fold would
-           be an offer nobody can see. Empty in the markup and filled by splashScreen.js from the
+      <!-- The guided walkthrough, offered as its chapters and OPEN (asked for 2026-09-21). It
+           replaced a "Guided walkthrough" button that did exactly what the first line of this list
+           does; a fold, or a button beside it, is one control too many for one act. Empty in the markup and filled by splashScreen.js from the
            story itself — the chapters are the story's own data (domain/demoStory.js's
            storyChapterIndex), and a second list written here would be right only on the day it was
            written. -->

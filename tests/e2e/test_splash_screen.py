@@ -109,8 +109,9 @@ def test_splash_offers_onboarding_while_the_database_is_empty(page, local_server
     assert page.locator("#splash-load-demo").is_visible()
     assert page.locator("#splash-start-empty").is_visible()
     # Built since 2026-08-17 (TODO §9.5). It was the last control in the app announcing something
-    # that did not exist, so "enabled" is the assertion that promise is now kept.
-    assert page.locator("#splash-walkthrough").is_enabled()
+    # that did not exist; since 2026-09-21 the promise is kept by the chapter list rather than by a
+    # button, so what must be here is a chapter to tap.
+    assert page.locator(".app-splash-chapter").first.is_enabled()
 
     page.wait_for_timeout(1500)
     assert onboarding.is_visible(), "the offer must wait for a choice, not expire"
@@ -139,7 +140,7 @@ def test_choosing_slovenian_translates_the_offer_it_leads_to(page, local_server)
             );
             return {
                 demo: TRANSLATIONS.sl.splash_load_demo,
-                walkthrough: TRANSLATIONS.sl.walkthrough_title,
+                walkthrough: TRANSLATIONS.sl.walkthrough_chapters_heading,
                 empty: TRANSLATIONS.sl.splash_start_empty,
                 tagline: TRANSLATIONS.sl.splash_tagline,
             };
@@ -148,7 +149,7 @@ def test_choosing_slovenian_translates_the_offer_it_leads_to(page, local_server)
 
     assert page.locator("#splash-load-demo").inner_text().strip() == expected["demo"]
     assert (
-        page.locator("#splash-walkthrough").inner_text().strip()
+        page.locator(".app-splash-chapters-heading").inner_text().strip()
         == expected["walkthrough"]
     )
     assert page.locator("#splash-start-empty").inner_text().strip() == expected["empty"]
@@ -231,19 +232,23 @@ def test_demo_data_choice_loads_the_dataset_and_stops_offering(page, local_serve
 def test_walkthrough_choice_arrives_with_data_to_walk_through(page, local_server):
     """The guided demo drives the seeded sessions, so its entry point has to bring the dataset
     with it. A guide started on the empty app a first-run trainer is looking at would be a
-    panel pointing at nothing — which is why this button opens the sandbox too (TODO §40.9), rather
+    panel pointing at nothing — which is why this offer opens the sandbox too (TODO §40.9), rather
     than only setting ?demo=. The sandbox is seeded on first entry, so the data is there by the time
     the first step looks for it.
 
-    It names the script, not just "some demo": until 2026-08-25 this button started the four-step
+    It names the script, not just "some demo": until 2026-08-25 this offer started the four-step
     gym-floor tour instead of the story the demo now is (reported for the message feed's copy of the
-    same offer)."""
+    same offer). Since 2026-09-21 the offer is the chapter list itself, and its first line is what
+    the "Guided walkthrough" button used to be."""
     page.goto(local_server)
     _answer_language_step(page)
-    page.locator("#splash-walkthrough").click(timeout=15000)
+    page.locator("#app-splash-onboarding").wait_for(state="visible", timeout=15000)
+    assert page.locator("#splash-walkthrough").count() == 0
+    page.locator(".app-splash-chapter").first.click(timeout=15000)
 
     page.wait_for_url("**workspace=sandbox**", timeout=15000)
     assert "demo=story" in page.url
+    assert "chapter=" in page.url
     page.locator("#walkthrough-overlay").wait_for(state="visible", timeout=20000)
 
 
@@ -421,7 +426,7 @@ def test_a_leftover_splash_off_does_not_skip_the_first_run(page, local_server):
     _answer_language_step(page)
     page.locator("#app-splash-onboarding").wait_for(state="visible", timeout=15000)
     assert page.locator("#splash-load-demo").is_visible()
-    assert page.locator("#splash-walkthrough").is_visible()
+    assert page.locator("#splash-chapters").is_visible()
 
 
 @pytest.mark.keep_splash
