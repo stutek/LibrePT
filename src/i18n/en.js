@@ -470,7 +470,7 @@ export const en = {
   // where it is on screen — the panel is read on a phone whose layout is not the one this was
   // written on.
   walkthrough_title: "Guided walkthrough",
-  walkthrough_chapters_summary: "Start at a chapter",
+  walkthrough_chapters_heading: "Guided tour: choose a chapter",
   walkthrough_progress: "Step {step} of {count}",
   walkthrough_back: "Back",
   walkthrough_show: "Show me",
@@ -545,7 +545,7 @@ export const en = {
   menu_sandbox_enter: "Enter the sandbox",
   notif_sandbox_title: "🧪 Sandbox — a place to try things and learn",
   notif_sandbox_desc:
-    "These clients, plans and sessions are a sample gym. Try anything: nothing you do in here can reach your business data. To go back to your own work, open the menu ☰ at the top right and choose Leave the sandbox — you will land where you left off. To be walked through the app step by step, tap Show me around below. Start at a chapter opens the list of chapters; tap one to start the walkthrough there.",
+    "These clients, plans and sessions are a sample gym. Try anything: nothing you do in here can reach your business data. To go back to your own work, open the menu ☰ at the top right and choose Leave the sandbox — you will land where you left off. To be walked through the app step by step, tap a chapter in the list below: the tour starts at the chapter you tap.",
   sync_sandbox_note: "You are in the sandbox: this syncs the sandbox's own copy, not your work.",
   restore_refused_sandbox_file:
     "This file was made in the sandbox, so it cannot be restored into your own work. Open the sandbox and restore it there.",
@@ -870,12 +870,11 @@ export const en = {
   notif_empty_desc: "You're all caught up — there's nothing here right now.",
   notif_seed_demo_title: "👋 Welcome to LibrePT",
   notif_seed_demo_desc:
-    "Nothing is saved here yet. To see what the app does, tap Show me around: a guided walkthrough that follows three new clients, from the first invitation to a session in the gym. To try things for yourself, tap Enter the sandbox — a separate copy of the app, where nothing you do changes the records you keep here.",
+    "Nothing is saved here yet. To see what the app does, tap a chapter in the list below: it is a guided tour that follows three new clients, from the first invitation to a session in the gym, and it starts at the chapter you tap. To try things for yourself, tap Enter the sandbox — a separate copy of the app, where nothing you do changes the records you keep here.",
   notif_demo_mode_title: "⚠️ Demo mode — sample data loaded",
   notif_demo_mode_desc:
     "This app is running on sample clients, routines and sessions. Clear them before you use it for real work: clearing lists exactly what it removes and keeps the movement catalog, so anything you have built on top of it keeps working.",
   filter_participants_placeholder: "Find a client by name...",
-  notif_demo_walkthrough_btn: "Show me around",
   notif_demo_mode_reset_btn: "Clear Demo Data & Exit Demo Mode",
   notif_welcome_title: "👋 You're exploring with sample data",
   notif_welcome_desc:

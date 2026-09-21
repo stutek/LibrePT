@@ -35,7 +35,7 @@ const t = (key) => TRANSLATIONS.en[key] || key;
 const state = {state_js};
 
 window.__navigated = [];
-window.__walkthroughStarted = 0;
+window.__walkthroughStarted = [];
 window.__sandboxEntered = 0;
 
 bootNotificationArea({{
@@ -45,7 +45,15 @@ bootNotificationArea({{
   escapeHTML,
   navigateToPath: (path) => window.__navigated.push(path),
   openSessionFromHistory: () => {{}},
-  startWalkthrough: () => {{ window.__walkthroughStarted += 1; }},
+  startWalkthrough: (chapter) => {{ window.__walkthroughStarted.push(chapter ?? null); }},
+  // The chapters the app boots with, handed in exactly as app.js hands them in: the real list comes
+  // from the story script, which this component may not reach across to.
+  storyChapters: [
+    {{ id: 'trainer-details', titleKey: 'story_chapter_trainer_details' }},
+    {{ id: 'arrive', titleKey: 'story_chapter_arrive' }},
+    {{ id: 'gym', titleKey: 'story_chapter_gym' }},
+    {{ id: 'evening', titleKey: 'story_chapter_evening' }},
+  ],
   enterSandbox: () => {{ window.__sandboxEntered += 1; }},
 }});
 renderNotificationArea();
@@ -105,13 +113,19 @@ def test_an_empty_database_is_invited_to_the_walkthrough_and_to_the_sandbox(
     """What an empty app offers, asked for 2026-09-11: be shown the app, or go and try it where
     nothing can be spoilt. Both land in the sandbox, so neither writes a sample person into the
     records the trainer is about to start keeping — which is what the single button here used to do.
-    """
+
+    Since 2026-09-21 the tour is offered as its CHAPTERS rather than as one "show me around" button,
+    so being shown the app means naming where to start."""
     load_with_stub(page, local_server, stub(EMPTY_DATABASE))
     page.wait_for_selector("#notification-area")
     expand_feed(page)
 
-    page.locator("#btn-first-run-walkthrough").click()
-    assert page.evaluate("() => window.__walkthroughStarted") == 1
+    assert page.locator("#btn-first-run-walkthrough").count() == 0
+    chapters = page.locator(".notification-chapter")
+    assert chapters.count() == 4, chapters.all_inner_texts()
+
+    chapters.nth(2).click()
+    assert page.evaluate("() => window.__walkthroughStarted") == ["gym"]
 
     page.locator("#btn-first-run-sandbox").click()
     assert page.evaluate("() => window.__sandboxEntered") == 1
@@ -129,7 +143,7 @@ def test_a_gym_with_real_clients_is_never_offered_the_first_run_card(
     page.wait_for_selector("#notification-area")
     expand_feed(page)
 
-    assert page.locator("#btn-first-run-walkthrough").count() == 0
+    assert page.locator(".notification-chapter").count() == 0
     assert page.locator("#btn-first-run-sandbox").count() == 0
     assert (
         "caught up" in page.locator("#notification-list-container").inner_text().lower()
@@ -226,31 +240,38 @@ WALKTHROUGH_NOT_READY = """{
 }"""
 
 
-def test_the_demo_card_offers_to_start_the_walkthrough(page, local_server):
+def test_the_demo_card_offers_the_walkthrough_by_chapter(page, local_server):
     """TODO §28.14: the splash offers the walkthrough on a first run, and a trainer who dismissed it
     had nowhere else to find it. The demo card is where they are already being told they are looking
-    at sample data."""
+    at sample data.
+
+    Offered as the tour's CHAPTERS since 2026-09-21, open and with no button above them: the button
+    did what the first line of the list does, and two controls for one act is one to mis-tap. The
+    stored notice still carries that action on installs seeded by earlier builds, so the card
+    dropping it is part of the promise."""
     load_with_stub(page, local_server, stub(WALKTHROUGH_READY))
     page.wait_for_selector("#notification-area")
     expand_feed(page)
 
-    walkthrough = page.locator("button[data-action-walkthrough]")
-    assert walkthrough.count() == 1
-    assert walkthrough.is_visible()
+    assert page.locator("button[data-action-walkthrough]").count() == 0
+    chapters = page.locator(".notification-chapter")
+    assert chapters.count() == 4, chapters.all_inner_texts()
+    assert chapters.first.is_visible(), "the list is read without a tap"
 
-    walkthrough.click()
-    assert page.evaluate("() => window.__walkthroughStarted") == 1
+    chapters.last.click()
+    assert page.evaluate("() => window.__walkthroughStarted") == ["evening"]
 
 
-def test_no_walkthrough_button_when_the_data_it_needs_is_gone(page, local_server):
+def test_no_chapters_offered_when_the_data_the_tour_needs_is_gone(page, local_server):
     """Offered against a store that cannot satisfy the steps, the guide stops on its first one — in
     front of the person being shown the product. Which shapes qualify is pinned in
-    tests/unit_js/domain/walkthroughReadiness.test.mjs; this is the button obeying it."""
+    tests/unit_js/domain/walkthroughReadiness.test.mjs; this is the offer obeying it — and a LIST of
+    chapters would be several offers the app cannot honour instead of one."""
     load_with_stub(page, local_server, stub(WALKTHROUGH_NOT_READY))
     page.wait_for_selector("#notification-area")
     expand_feed(page)
 
-    assert page.locator("button[data-action-walkthrough]").count() == 0
+    assert page.locator(".notification-chapter").count() == 0
     # The card itself stays — the trainer still needs to be told they are on demo data.
     assert page.locator(".notification-card.demo-mode").count() == 1
 
@@ -260,22 +281,23 @@ def test_the_destructive_action_is_not_thumb_adjacent_to_the_one_you_want(
 ):
     """Reported 2026-08-18: "show me around button in the message is too close to delete demo data".
 
-    The two actions on the demo card are the friendliest and the most destructive things the feed
-    offers, 8px apart. The app already has a rule for this shape — a destructive action sharing a row
+    The two offers on the demo card are the friendliest and the most destructive things the feed
+    makes, 8px apart. The app already has a rule for this shape — a destructive action sharing a row
     takes the far end of it (`.modal-actions .danger-link-btn`) — and this is the same shape in a
-    different component.
+    different component. Since 2026-09-21 the friendly half is the chapter list rather than one
+    button, so the row that must not be thumb-adjacent is the chapter nearest it.
     """
     load_with_stub(page, local_server, stub(WALKTHROUGH_READY))
     page.wait_for_selector("#notification-area")
     expand_feed(page)
 
-    walkthrough = page.locator("button[data-action-walkthrough]").bounding_box()
+    walkthrough = page.locator(".notification-chapter").last.bounding_box()
     reset = page.locator("button[data-action-reset]").bounding_box()
 
     on_the_same_line = abs(walkthrough["y"] - reset["y"]) < 8
     if on_the_same_line:
         gap = reset["x"] - (walkthrough["x"] + walkthrough["width"])
-        assert gap >= 24, f"only {gap}px between 'show me around' and 'clear demo data'"
+        assert gap >= 24, f"only {gap}px between the last chapter and 'clear demo data'"
     else:
         # Its own line is the stronger answer, and the one this card takes: a row apart cannot be
         # mis-hit while reaching for the button above it. The margin still has to be real, though —

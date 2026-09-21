@@ -365,12 +365,13 @@
 }
 
 /* The guided walkthrough's table of contents, under the button that starts it from the beginning
-   (asked for 2026-09-21). Folded shut by default, so the three choices above it stay the first thing
-   read; open, it is a numbered list of the story's chapters, each one a way in.
+   (asked for 2026-09-21). Open, never folded: it says what the four to six minutes contain, and a
+   fold would be an offer nobody can see.
 
    The rows are full-width 44px targets for the same reason the buttons above them are 48px: this is
    a phone, held in one hand. The numbers come from the <ol>, so the list says how long the story is
-   without a word about it. */
+   without a word about it. The list scrolls inside the splash rather than pushing the three choices
+   above it off the top. */
 .app-splash-chapters {
   width: 100%;
   text-align: left;
@@ -380,12 +381,12 @@
   display: none;
 }
 
-.app-splash-chapters-summary {
-  padding: 10px 4px;
+.app-splash-chapters-heading {
+  margin: 0;
+  padding: 10px 4px 4px;
   color: var(--text-muted);
   font-size: 14px;
   font-weight: 600;
-  cursor: pointer;
 }
 
 .app-splash-chapter-list {
@@ -394,6 +395,8 @@
   gap: 4px;
   margin: 0;
   padding: 0 0 0 22px;
+  max-height: 38vh;
+  overflow-y: auto;
 }
 
 .app-splash-chapter {

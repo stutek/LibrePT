@@ -499,7 +499,7 @@ const DEMO_NOTICE = {
   actions: [{ labelKey: "notif_demo_walkthrough_btn", startWalkthrough: true }],
 };
 
-test("the sandbox card carries the story's chapters, in the order they play", () => {
+test("the card carries the story's chapters, in the order they play", () => {
   const [card] = resolveNotificationItems(storeTheGuideCanRun([DEMO_NOTICE]), t, [], null, {
     sandbox: true,
     chapters: CHAPTERS,
@@ -508,9 +508,33 @@ test("the sandbox card carries the story's chapters, in the order they play", ()
   assert.deepEqual(card.chapters, CHAPTERS);
 });
 
+test("the chapters replace the button rather than standing beside it", () => {
+  // Asked for 2026-09-21. One "show me around" was one way in: the beginning. The chapters are
+  // named instead, every one of them a way in, and the button does exactly what the first line of
+  // the list does — two controls for one act is one to mis-tap.
+  const [card] = resolveNotificationItems(storeTheGuideCanRun([DEMO_NOTICE]), t, [], null, {
+    sandbox: true,
+    chapters: CHAPTERS,
+  });
+
+  assert.ok(!card.actions.some((action) => action.startWalkthrough));
+});
+
+test("a notice written by an earlier build loses its button too", () => {
+  // The action is stored IN the trainer's database (tests/fixtures/devices/p_era_install.json has
+  // it), so dropping it where the notice is written would leave it on every install that already
+  // has one. Resolving is the one place that sees both.
+  const [card] = resolveNotificationItems(storeTheGuideCanRun([DEMO_NOTICE]), t, [], null, {
+    chapters: CHAPTERS,
+  });
+
+  assert.ok(!card.actions.some((action) => action.startWalkthrough));
+  assert.deepEqual(card.chapters, CHAPTERS);
+});
+
 test("no chapters are offered where the walkthrough itself cannot be", () => {
-  // A store missing what the steps need has the offer withheld (TODO §28.14). An index of its
-  // chapters would then be six offers the app cannot honour.
+  // A store missing what the steps need has the offer withheld (TODO §28.14). A list of chapters
+  // would then be several offers the app cannot honour instead of one.
   const [card] = resolveNotificationItems({ notifications: [DEMO_NOTICE] }, t, [], null, {
     sandbox: true,
     chapters: CHAPTERS,
@@ -518,12 +542,4 @@ test("no chapters are offered where the walkthrough itself cannot be", () => {
 
   assert.ok(!card.actions.some((action) => action.startWalkthrough));
   assert.deepEqual(card.chapters, []);
-});
-
-test("outside the sandbox the card is left as it was stored", () => {
-  const [card] = resolveNotificationItems(storeTheGuideCanRun([DEMO_NOTICE]), t, [], null, {
-    chapters: CHAPTERS,
-  });
-
-  assert.equal(card.chapters, undefined);
 });

@@ -230,7 +230,7 @@ function revealLanguageChoice(splash, { onChooseLanguage, afterChoice, languages
 }
 
 /**
- * Fill the walkthrough's table of contents, and show it (§35's chapters, asked for 2026-09-21).
+ * Fill the walkthrough's table of contents, and show it, open (§35's chapters, asked 2026-09-21).
  *
  * The chapters are HANDED IN as `{ id, titleKey }`, in playing order — the splash may not import the
  * story any more than it may import the identity store, and the story is a quarter of a megabyte of
@@ -238,13 +238,13 @@ function revealLanguageChoice(splash, { onChooseLanguage, afterChoice, languages
  * is in the language the trainer chose two taps ago; `data-i18n` goes on as well, so a later
  * language switch repaints it the same way it repaints every other label.
  *
- * Nothing is shown when there are no chapters to show: an empty index is a fold with nothing under
- * it, and a trainer who opens it has been told nothing.
+ * Nothing is shown when there are no chapters to show: a heading over an empty list tells a trainer
+ * nothing at all.
  */
 function fillChapterIndex(chapters, t) {
-  const details = document.getElementById(CHAPTERS_ID);
+  const index = document.getElementById(CHAPTERS_ID);
   const list = document.getElementById(CHAPTER_LIST_ID);
-  if (!details || !list || !chapters?.length) return;
+  if (!index || !list || !chapters?.length) return;
 
   list.replaceChildren();
   for (const { id, titleKey } of chapters) {
@@ -261,7 +261,7 @@ function fillChapterIndex(chapters, t) {
     item.append(button);
     list.append(item);
   }
-  details.hidden = false;
+  index.hidden = false;
 }
 
 /**

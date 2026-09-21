@@ -79,6 +79,7 @@ import {
   switchWorkspace,
 } from "./data/stateStore.js";
 import { SANDBOX, isSandbox } from "./data/workspace.js";
+import { DEMO_NOTICE_TYPE } from "./domain/notificationItems.js";
 import { repsPresetsDatalistHTML } from "./domain/repsAndLoad.js";
 import { applyStaticDOMMappings } from "./i18n/domMappings.js";
 import {
@@ -237,17 +238,25 @@ let storyChapters = [];
 
 /** Load them from the story script itself, so there is no second list of chapters to keep true.
  *
- * Only where one is about to be OFFERED: in the sandbox, whose message card is the trainer's way
- * into the story, and on an empty app, whose splash offers the same thing. Everywhere else this is
- * empty — the script it comes from is a quarter of a megabyte of steps, and a boot into a working
- * database must not fetch it to draw six titles.
+ * Only where one is about to be OFFERED — `anIndexIsOffered` above says where. Everywhere else this
+ * is empty: the script it comes from is a quarter of a megabyte of steps, and a boot into a working
+ * database with no demo data in it must not fetch that to draw a handful of titles.
  *
  * A failure is reported and swallowed: the story is a marketing asset, and an index that could not
  * be built must cost the trainer nothing more than an offer they never saw. The surfaces show
  * nothing rather than an empty fold.
  */
+function anIndexIsOffered(state) {
+  // The empty app's own invitation card, and the sandbox, whose card is the trainer's way into the
+  // story.
+  if (isSandbox() || !stateHasData(state)) return true;
+  // And the demo-data notice on a working database, which is where the "show me around" button used
+  // to be: it now offers the chapters instead, so its card needs them too.
+  return (state.notifications || []).some((notification) => notification.type === DEMO_NOTICE_TYPE);
+}
+
 async function loadStoryChapters(state) {
-  if (!isSandbox() && stateHasData(state)) return [];
+  if (!anIndexIsOffered(state)) return [];
   try {
     const [{ DEMO_STORY: story }, { storyChapterIndex }] = await Promise.all([
       import("./modules/demo/storyTour.js"),

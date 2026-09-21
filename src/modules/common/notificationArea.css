@@ -549,21 +549,26 @@ body:has(#active-session-overlay:not(.hidden))
   opacity: 0.75;
 }
 
-/* The guided story's table of contents, inside the sandbox card (asked for 2026-09-21).
+/* The guided story's table of contents, on the cards that offer the tour (asked for 2026-09-21).
 
-   Folded shut: the card's own words say what the sandbox is and how to leave it, and six chapter
-   rows standing open would push that off a phone screen. Open, each chapter is a full-width 40px
-   target — a row, not a chip, because they are read down the list rather than scanned across it. */
+   Always open: it is the only way into the guide now that the "show me around" button is gone, and a
+   fold is an offer nobody can see. Each chapter is a full-width 40px target — a row, not a chip,
+   because they are read down the list rather than scanned across it. Its own line above the
+   destructive "clear demo data", never beside it. */
 .notification-chapters {
   margin-top: 10px;
+  /* The gap the destructive "clear demo data" below it needs: a chapter row and that button are the
+     friendliest and the most destructive things this card offers, and 8px between them is one thumb
+     width (reported 2026-08-18, re-measured against the list 2026-09-21). */
+  margin-bottom: 14px;
 }
 
-.notification-chapters-summary {
+.notification-chapters-heading {
+  margin: 0;
   padding: 6px 0;
   color: var(--text-muted);
   font-size: 12px;
   font-weight: 600;
-  cursor: pointer;
 }
 
 .notification-chapter-list {

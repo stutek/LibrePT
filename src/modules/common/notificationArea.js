@@ -116,8 +116,8 @@ function renderFirstRunInvitation(container, t, escapeHTML, summaryEls, deps) {
         <div class="notification-card-content">
           <h4 class="notification-card-title">${escapeHTML(t("notif_seed_demo_title"))} <span class="unread-dot" title="Unread"></span></h4>
           <p class="notification-card-desc">${escapeHTML(t("notif_seed_demo_desc"))}</p>
+          ${buildChapterIndexHTML(deps.storyChapters, t, escapeHTML)}
           <div class="notification-actions">
-            <button type="button" class="notification-btn primary" id="btn-first-run-walkthrough">${escapeHTML(t("notif_demo_walkthrough_btn"))}</button>
             <button type="button" class="notification-btn" id="btn-first-run-sandbox">${escapeHTML(t("menu_sandbox_enter"))}</button>
           </div>
         </div>
@@ -125,23 +125,19 @@ function renderFirstRunInvitation(container, t, escapeHTML, summaryEls, deps) {
     </div>
   `;
 
-  container.querySelector("#btn-first-run-walkthrough")?.addEventListener("click", (e) => {
-    e.stopPropagation();
-    deps.startWalkthrough?.();
-  });
   container.querySelector("#btn-first-run-sandbox")?.addEventListener("click", (e) => {
     e.stopPropagation();
     deps.enterSandbox?.();
   });
+  // This card is rendered on its own path, outside the resolved feed, so it wires its own chapters
+  // too — the same listener wireNotificationCardActions puts on the cards below.
+  wireChapterIndex(container, deps);
 }
 
 function buildNotificationActionHTML(act, itemId, escapeHTML) {
   const primaryCls = act.primary ? "primary" : "";
   if (act.resetDemo) {
     return `<button type="button" class="notification-btn ${primaryCls}" data-action-reset="true" data-action-id="${escapeHTML(itemId)}">${escapeHTML(act.label)}</button>`;
-  }
-  if (act.startWalkthrough) {
-    return `<button type="button" class="notification-btn ${primaryCls}" data-action-walkthrough="true" data-action-id="${escapeHTML(itemId)}">${escapeHTML(act.label)}</button>`;
   }
   if (act.resumePlanId) {
     return `<button type="button" class="notification-btn ${primaryCls}" data-action-resume="${escapeHTML(act.resumePlanId)}" data-action-id="${escapeHTML(itemId)}">${escapeHTML(act.label)}</button>`;
@@ -152,28 +148,41 @@ function buildNotificationActionHTML(act, itemId, escapeHTML) {
   return `<button type="button" class="notification-btn ${primaryCls}" data-nav-target="${escapeHTML(act.view || "")}" data-action-id="${escapeHTML(itemId)}">${escapeHTML(act.label)}</button>`;
 }
 
-/** The walkthrough's table of contents, drawn under the card's buttons.
+/** The guided story's table of contents: how the walkthrough is offered here, in full.
  *
- * Folded shut. The card is already a paragraph of prose and a row of buttons, and a list of six
- * chapters opened by default would push the way OUT of the sandbox off the screen — which is the one
- * thing this card exists to say. `<details>` and not a menu: it opens in place, on a tap, with
- * nothing floating over the app.
+ * OPEN, never folded (asked for 2026-09-21). A fold is an offer nobody can see, and this list is the
+ * only way into the guide now that the "show me around" button is gone — the button did what the
+ * first line of the list does, and two controls for one act is one to mis-tap.
  *
  * `t` is applied here rather than stored in the item, so the list is in the language on screen when
  * it is drawn — the feed is redrawn on a language switch.
  */
-function buildChapterIndexHTML(item, t, escapeHTML) {
-  if (!item.chapters?.length) return "";
-  const rows = item.chapters
+function buildChapterIndexHTML(chapters, t, escapeHTML) {
+  if (!chapters?.length) return "";
+  const rows = chapters
     .map(
       ({ id, titleKey }) =>
         `<li><button type="button" class="notification-chapter" data-action-chapter="${escapeHTML(id)}">${escapeHTML(t(titleKey))}</button></li>`,
     )
     .join("");
-  return `<details class="notification-chapters">
-          <summary class="notification-chapters-summary">${escapeHTML(t("walkthrough_chapters_summary"))}</summary>
+  return `<div class="notification-chapters">
+          <p class="notification-chapters-heading">${escapeHTML(t("walkthrough_chapters_heading"))}</p>
           <ol class="notification-chapter-list">${rows}</ol>
-        </details>`;
+        </div>`;
+}
+
+/** Start the guided story at one named chapter (TODO §28.14, §73.1).
+ *
+ * `startWalkthrough` is injected rather than imported: the guide reloads the app with its own deep
+ * link, and that URL is built in modules/splash — which this module may not reach across.
+ */
+function wireChapterIndex(container, deps) {
+  for (const btn of container.querySelectorAll("button[data-action-chapter]")) {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      deps.startWalkthrough?.(btn.getAttribute("data-action-chapter"));
+    });
+  }
 }
 
 function buildNotificationCardHTML(item, escapeHTML, t) {
@@ -194,8 +203,8 @@ function buildNotificationCardHTML(item, escapeHTML, t) {
         <div class="notification-card-content">
           <h4 class="notification-card-title">${escapeHTML(item.title)} ${unreadDot}</h4>
           <p class="notification-card-desc">${escapeHTML(item.description)}</p>
+          ${buildChapterIndexHTML(item.chapters, t, escapeHTML)}
           ${actionsHTML}
-          ${buildChapterIndexHTML(item, t, escapeHTML)}
         </div>
       </div>
     `;
@@ -228,32 +237,7 @@ function wireNotificationCardActions(container, deps, t, readIds) {
     });
   }
 
-  // Start the guided walkthrough (TODO §28.14). Injected rather than imported: the walkthrough
-  // reloads the app with its own deep link, and that URL is built in modules/splash — which this
-  // module may not reach across.
-  for (const btn of container.querySelectorAll("button[data-action-walkthrough]")) {
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      deps.startWalkthrough?.();
-    });
-  }
-
-  // Opening the index must not reach the card behind it. An unread card marks itself read on any
-  // tap and REDRAWS the whole feed to move the dot, which would throw away the `<details>` the
-  // trainer just opened — the fold would snap shut under their thumb. So the toggle stops here, and
-  // the card is marked read by the tap that actually chooses something.
-  for (const summary of container.querySelectorAll(".notification-chapters-summary")) {
-    summary.addEventListener("click", (e) => e.stopPropagation());
-  }
-
-  // The same guide, started at one named chapter. The tap on the summary that OPENS the index must
-  // not also close the feed, so the listener sits on the chapter buttons and stops there.
-  for (const btn of container.querySelectorAll("button[data-action-chapter]")) {
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      deps.startWalkthrough?.(btn.getAttribute("data-action-chapter"));
-    });
-  }
+  wireChapterIndex(container, deps);
 
   // Resume a planning-mode draft straight from the feed (the "unscheduled plans" item's actions):
   // reopens via the SAME reconstruction openSessionFromHistory already does for a real past

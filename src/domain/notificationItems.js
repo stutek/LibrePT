@@ -229,7 +229,7 @@ const SCHEDULE_CHURN_TYPES = new Set(["reservation", "cancellation"]);
 // they must answer, plans they owe someone — and reading any of it before knowing it is a fiction
 // is reading it wrong. It is also the collapsed drawer's summary line and the only way back to the
 // guided demo and the cleanup screen, so burying it under a demo-generated booking hides both.
-const DEMO_NOTICE_TYPE = "demo-mode";
+export const DEMO_NOTICE_TYPE = "demo-mode";
 
 /**
  * Every booking and cancellation folded into one item, taking the place of the FIRST of them.
@@ -276,20 +276,37 @@ function groupScheduleChurn(resolved) {
  * the only thing that can tell them: it names the menu and the item, because a step that asks for an
  * action says the action and names the control.
  */
-function forSandbox(item, t, chapters) {
-  // The destructive one goes; "show me around" stays, because the sandbox is where it belongs.
-  const actions = (item.actions || []).filter((action) => !action.resetDemo);
+function forSandbox(item, t) {
   return {
     ...item,
     title: t("notif_sandbox_title") || item.title,
     description: t("notif_sandbox_desc") || item.description,
-    actions,
-    // The story's chapters, offered under that button as a table of contents (asked for
-    // 2026-09-21): the story is six chapters and four to six minutes, and a trainer who wants to see
-    // the evening after a session should not have to watch the morning first. Only alongside the
-    // button itself — where the walkthrough cannot run at all, an index of its chapters would be six
-    // offers the app cannot honour.
-    chapters: actions.some((action) => action.startWalkthrough) ? chapters : [],
+    // The destructive one goes: clearing demo data in here would empty the very thing the trainer
+    // came to look at.
+    actions: (item.actions || []).filter((action) => !action.resetDemo),
+  };
+}
+
+/**
+ * The guided story, offered as its CHAPTERS and not as a button (asked for 2026-09-21).
+ *
+ * One "show me around" was one way in: the beginning, four to six minutes of it. The chapters are
+ * named instead, every one of them a way in, and the button goes — it did exactly what the first
+ * line of the list does, and two controls for one act is one to mis-tap.
+ *
+ * The action is dropped here rather than where the notice is written (data/messages.js), because a
+ * notice written by an earlier build is already sitting in the trainer's database with that action
+ * on it. Resolving is the one place that sees both.
+ *
+ * No chapters where the walkthrough cannot run: on a store missing what its steps need the guide
+ * stops on its first one, in front of the person being shown the product (TODO §28.14), and a list
+ * of chapters would be several offers the app cannot honour instead of one.
+ */
+function withChapterIndex(item, chapters, canWalkThrough) {
+  return {
+    ...item,
+    actions: (item.actions || []).filter((action) => !action.startWalkthrough),
+    chapters: canWalkThrough ? chapters : [],
   };
 }
 
@@ -319,15 +336,11 @@ export function resolveNotificationItems(
   // being shown the product (TODO §28.14).
   const canWalkThrough = walkthroughDataPresent(state);
   const stored = groupScheduleChurn(
-    (state.notifications || [])
-      .map((notification) => resolveStoredItem(notification, t, readIds))
-      .map((item) => ({
-        ...item,
-        actions: item.actions.filter((action) => canWalkThrough || !action.startWalkthrough),
-      })),
+    (state.notifications || []).map((notification) => resolveStoredItem(notification, t, readIds)),
   );
   const demoNotice = stored
     .filter((item) => item.type === DEMO_NOTICE_TYPE)
-    .map((item) => (sandbox ? forSandbox(item, t, chapters) : item));
+    .map((item) => (sandbox ? forSandbox(item, t) : item))
+    .map((item) => withChapterIndex(item, chapters, canWalkThrough));
   return [...demoNotice, ...synthetic, ...stored.filter((item) => item.type !== DEMO_NOTICE_TYPE)];
 }

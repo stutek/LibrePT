@@ -441,7 +441,7 @@ export const sl = {
   trainer_details_splash_lede:
     "Neobvezno, lahko tudi pozneje prek menija. Tvoje ime podpiše povabila, ki jih pošlješ strankam, telefon in e-pošta pa sta pot, po kateri ti stranka odgovori.",
   walkthrough_title: "Vodeni ogled",
-  walkthrough_chapters_summary: "Začni pri poglavju",
+  walkthrough_chapters_heading: "Vodeni ogled: izberi poglavje",
   walkthrough_progress: "Korak {step} od {count}",
   walkthrough_back: "Nazaj",
   walkthrough_show: "Pokaži mi",
@@ -508,7 +508,7 @@ export const sl = {
   menu_sandbox_enter: "Vstopi v peskovnik",
   notif_sandbox_title: "🧪 Peskovnik — prostor za učenje in preizkušanje",
   notif_sandbox_desc:
-    "Te stranke, načrti in treningi so vzorčna telovadnica. Preizkusi karkoli: nič, kar narediš tukaj, ne more doseči tvojih poslovnih podatkov. Za vrnitev k svojemu delu odpri meni ☰ zgoraj desno in izberi Zapusti peskovnik — pristaneš tam, kjer si ostal(-a). Za vodeni ogled aplikacije po korakih spodaj pritisni Razglej se. Začni pri poglavju odpre seznam poglavij; pritisni poglavje in ogled se začne tam.",
+    "Te stranke, načrti in treningi so vzorčna telovadnica. Preizkusi karkoli: nič, kar narediš tukaj, ne more doseči tvojih poslovnih podatkov. Za vrnitev k svojemu delu odpri meni ☰ zgoraj desno in izberi Zapusti peskovnik — pristaneš tam, kjer si ostal(-a). Za vodeni ogled aplikacije po korakih pritisni poglavje v spodnjem seznamu: ogled se začne pri poglavju, ki ga pritisneš.",
   sync_sandbox_note: "V peskovniku si: to sinhronizira peskovnikovo kopijo, ne tvojega dela.",
   restore_refused_sandbox_file:
     "Ta datoteka je nastala v peskovniku, zato je ni mogoče obnoviti v tvoje delo. Odpri peskovnik in jo obnovi tam.",
@@ -809,12 +809,11 @@ export const sl = {
   notif_empty_desc: "Vse je pregledano — trenutno tukaj ni ničesar.",
   notif_seed_demo_title: "👋 Dobrodošel(-la) v LibrePT",
   notif_seed_demo_desc:
-    "Tukaj še ni ničesar shranjenega. Če želiš videti, kaj aplikacija zna, pritisni Razglej se: to je vodeni ogled, ki pelje skozi zgodbo treh novih strank, od prvega povabila do treninga v telovadnici. Če želiš preizkušati sam(-a), pritisni Vstopi v peskovnik — to je ločena kopija aplikacije, kjer nič, kar narediš, ne spremeni zapisov, ki jih hraniš tukaj.",
+    "Tukaj še ni ničesar shranjenega. Če želiš videti, kaj aplikacija zna, pritisni poglavje v spodnjem seznamu: to je vodeni ogled, ki pelje skozi zgodbo treh novih strank, od prvega povabila do treninga v telovadnici, in se začne pri poglavju, ki ga pritisneš. Če želiš preizkušati sam(-a), pritisni Vstopi v peskovnik — to je ločena kopija aplikacije, kjer nič, kar narediš, ne spremeni zapisov, ki jih hraniš tukaj.",
   notif_demo_mode_title: "⚠️ Predstavitveni način — naloženi vzorčni podatki",
   notif_demo_mode_desc:
     "Aplikacija deluje na vzorčnih strankah, rutinah in treningih. Počisti jih, preden jo uporabiš za resnično delo: čiščenje natančno našteje, kaj odstrani, in ohrani katalog vaj, tako da vse, kar si zgradil na njem, še naprej deluje.",
   filter_participants_placeholder: "Poišči stranko po imenu...",
-  notif_demo_walkthrough_btn: "Razglej se",
   notif_demo_mode_reset_btn: "Počisti podatke in zapusti predstavitveni način",
   notif_welcome_title: "👋 Raziskujete z vzorčnimi podatki",
   notif_welcome_desc:

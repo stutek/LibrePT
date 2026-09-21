@@ -156,16 +156,16 @@
         <i class="fa-solid fa-circle-play" aria-hidden="true"></i>
         <span data-i18n="walkthrough_title">Guided walkthrough</span>
       </button>
-      <!-- The walkthrough's table of contents. The button above starts at the beginning; this says
-           what the four to six minutes contain and lets any one chapter be started on its own. Empty
-           in the markup and filled by splashScreen.js from the story itself — the chapters are the
-           story's own data (domain/demoStory.js's storyChapterIndex), and a second list written here
-           would be right only on the day it was written. Folded shut so the three choices above it
-           stay the first thing read. -->
-      <details id="splash-chapters" class="app-splash-chapters" hidden>
-        <summary class="app-splash-chapters-summary" data-i18n="walkthrough_chapters_summary">Start at a chapter</summary>
+      <!-- The walkthrough's table of contents, OPEN (asked for 2026-09-21): it says what the four
+           to six minutes contain, and every line of it starts the tour at that chapter. A fold would
+           be an offer nobody can see. Empty in the markup and filled by splashScreen.js from the
+           story itself — the chapters are the story's own data (domain/demoStory.js's
+           storyChapterIndex), and a second list written here would be right only on the day it was
+           written. -->
+      <div id="splash-chapters" class="app-splash-chapters" hidden>
+        <p class="app-splash-chapters-heading" data-i18n="walkthrough_chapters_heading">Guided tour: choose a chapter</p>
         <ol id="splash-chapter-list" class="app-splash-chapter-list"></ol>
-      </details>
+      </div>
       <button type="button" id="splash-start-empty" class="app-splash-skip" data-i18n="splash_start_empty">Start with an empty app</button>
       <!-- The trainer's own details, offered here as well as in the ☰ menu (asked 2026-09-11).
            EMPTY in the markup and filled by modules/common/trainerDetailsDialog.js, so one module

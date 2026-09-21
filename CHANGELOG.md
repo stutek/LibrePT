@@ -39,6 +39,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Changed
 
+- **The chapter list is open, and the "show me around" button is gone** (§73.6). The list arrived
+  folded, which is an offer nobody can see, and the button above it did what the first line of the
+  list does. Every card that offers the tour now shows the chapters straight away and no button
+  beside them, including on installs where that button was saved into the database months ago.
+
 - **The language choice is built from the languages the app actually has** (§73.4). The welcome
   screen's language question and the language list in the ☰ menu were each written out by hand, so a
   new language would have appeared in neither. Both now come from the app's own set of translations,

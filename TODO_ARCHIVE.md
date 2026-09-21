@@ -71,6 +71,27 @@ the app does not speak shows English behind it, which is a promise the first scr
 
 ---
 
+### 73.6 [x] The index is open, and the "show me around" button is gone — shipped 2026-09-21
+
+Asked by Simon 2026-09-21: "kazalo poglavij ne sme biti skrčeno" and "razglej se gumb odstrani".
+
+The table of contents shipped folded (§73.1), which is an offer nobody can see, and the button above
+it did exactly what the first line of the list does — two controls for one act, one of them to
+mis-tap. So the list is drawn open on every surface that offers the tour, and the button is gone
+from all of them: the sandbox card, the demo-data card on a working database, and the empty app's
+invitation card.
+
+Dropped where the notice is RESOLVED, not where it is written. The action is stored in the trainer's
+own database — `tests/fixtures/devices/p_era_install.json` has two of them — so removing it from
+`data/messages.js` alone would have left the button standing on every install that already had one.
+
+The list moved ABOVE the card's actions in the same change. Rendered below them it put the
+friendliest offer on the card directly under the most destructive one, *clear demo data*, which is
+the 2026-08-18 report all over again in a new shape; the medium test that measured that gap now
+measures it from the last chapter row.
+
+---
+
 ### 72. [x] Should every evening of a repeating session be stored? — decided 2026-09-21: no
 
 Asked by Simon 2026-09-21, after reading §70's rollback walk-through: does schema 4 have to store a

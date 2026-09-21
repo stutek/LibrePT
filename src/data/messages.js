@@ -23,19 +23,10 @@ export const DEFAULT_MESSAGES = [
     titleKey: "notif_demo_mode_title",
     descKey: "notif_demo_mode_desc",
     actions: [
-      // The guided walkthrough (TODO §28.14). The splash offers it on a first run and a trainer who
-      // dismissed that had nowhere else to find it — and this card is where they are already being
-      // told they are looking at sample data. An earlier "Explore Walkthrough" action was removed
-      // when it navigated to /clients standing in for an engine that did not exist; the engine
-      // shipped 2026-08-17, so the reason expired.
-      //
-      // Dropped by notificationItems.js when the store cannot satisfy the tour's steps, which is
-      // why the record may declare it unconditionally.
-      {
-        labelKey: "notif_demo_walkthrough_btn",
-        startWalkthrough: true,
-        primary: true,
-      },
+      // No "show me around" button here any more (asked for 2026-09-21). The guided tour is offered
+      // on this card as its CHAPTERS, each one a way in — domain/notificationItems.js attaches that
+      // list, and drops this action from notices written by earlier builds, which are sitting in
+      // trainers' databases with it on them.
       {
         labelKey: "notif_demo_mode_reset_btn",
         resetDemo: true,

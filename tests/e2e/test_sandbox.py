@@ -360,20 +360,34 @@ def test_the_sandbox_pill_breathes_and_stops_for_reduced_motion(page, local_serv
 def test_the_sandbox_card_lists_the_chapters_of_the_guided_story(page, local_server):
     """Asked for 2026-09-21. The story is six chapters and four to six minutes, and the card offered
     one way into it: the beginning. A trainer who wants to see the evening after a session should be
-    able to start there, so the card carries the whole table of contents and every line of it is a
-    way in."""
+    able to start there, so the card carries the whole table of contents, open, and every line of it
+    is a way in."""
     page.goto(f"{local_server}?init=demo_data_load&lang=en")
     page.wait_for_selector(".session-card")
     _switch(page, "sandbox")
 
     page.wait_for_selector("#notification-area .notification-card", timeout=10000)
-    page.locator("#notification-grabber-btn").click()
-    page.locator(".notification-chapters-summary").first.click()
+    # Opened through the component, not by tapping the handle (the idiom
+    # tests/e2e/test_messages_pane_navigation.py already uses): when one of the sandbox's seeded
+    # sessions happens to be LIVE at the hour the suite runs, the clipboard bar takes the middle of
+    # the handle and the grabber underneath it cannot be tapped. That is the handle's own business,
+    # not this card's.
+    page.evaluate(
+        """async () => {
+            const area = await import(new URL('modules/common/notificationArea.js', document.baseURI).href);
+            area.toggleNotificationArea(true);
+        }"""
+    )
+    page.wait_for_timeout(400)
 
     chapters = page.locator(".notification-chapter")
-    # Every chapter of the trainer's own walk, named — not a count, which nobody can choose from.
+    # Every chapter of the trainer's own walk, named — not a count, which nobody can choose from —
+    # and READ WITHOUT A TAP (asked for 2026-09-21): a fold is an offer nobody can see.
     assert chapters.count() >= 4, chapters.all_inner_texts()
+    assert chapters.first.is_visible()
     assert any(text.strip() for text in chapters.all_inner_texts())
+    # The list is the offer now; the button that used to sit above it did what its first line does.
+    assert page.locator("button[data-action-walkthrough]").count() == 0
 
     chapters.last.click()
     page.wait_for_url("**chapter=**", timeout=10000)

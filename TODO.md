@@ -5040,6 +5040,11 @@ sandbox opens in.
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#734-x-the-language-choice-is-built-from-the-shipped-dictionaries--shipped-2026-09-21);
 what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
+### 73.6 [x] The index is open, and the "show me around" button is gone — shipped 2026-09-21
+
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#736-x-the-index-is-open-and-the-show-me-around-button-is-gone--shipped-2026-09-21);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
+
 ### 73.5 [ ] Which official European languages, and translated by whom
 
 Open, and the reason §73.4 stopped at the structure. Each language is 6xx keys. Machine translation
