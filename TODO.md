@@ -4761,6 +4761,36 @@ and a feature writing ahead of **every** schema would be silently dropped instea
 Blocks: nothing now — §50.3's record badges are unblocked by §60 and go into `SCHEMA_PREVIEW`. What
 this blocks is the first field that actually stages there reaching a trainer's backup correctly.
 
+### 58.1 [ ] Removing a field is not expressible, and trimming alone does not make it so
+
+Asked 2026-09-21 (Simon): how does the star write handle schema 5 removing a field while schema 4,
+still live, has to go on writing it? Read from the code the same day (Claude):
+
+**It cannot be expressed today.** `starWrite` in [stateStore.js](src/data/stateStore.js) projects
+once, OUTSIDE the loop over schemas — `const projected = projectCollection(collection, record)`,
+then the same object is `put` into every target store. A schema decides only **whether** a record
+reaches a store, by collection; never **what shape** it arrives in.
+
+**The model forbids the case rather than answering it.** `docs/DATA_MODEL.md`'s star-write
+invariants say schema changes are expand-first, so no projection is ever lossy, and
+[starWriteInvariants.test.mjs](tests/unit_js/data/starWriteInvariants.test.mjs) asserts that no
+field is dropped between live schemas. So a field is removable only once every schema declaring it
+has been RETIRED — which is exactly the deliberate decision §60 introduced. §60's retirement clause
+is therefore the mechanism for removal, and nothing else is.
+
+**Trimming (above) does not by itself allow removal while both are live.** The star projects from
+the live domain object, so a field the app has stopped maintaining cannot be invented for schema 4's
+store. "Schema 5 removes the field" means *schema 5 stops storing it*, not *the app stops producing
+it*: while schema 4 is live and declares it, the app must keep producing a field none of its own
+code uses. That cost is why expand-first exists, and it should be stated before anyone plans a
+removal.
+
+**One direction is unguarded.** §62's store guard uses `undeclaredFields`, which finds EXTRA fields,
+not missing required ones — so an app that stopped producing a field schema 4 requires would not be
+caught there. It is caught one level up, by `every live writer shape validates against every live
+schema` in the same test file, which checks the write path's literals against every live schema.
+Worth knowing which check actually holds this, because the obvious one does not.
+
 **Proposed with it (Simon), not ruled: write the preview schema as `PREVIEW` instead of `P`**, so the
 stored value says what it is. Found against it (Claude): `P` is stored, not only named — in every
 preview database's `schemaVersion`, in the `schemaP` store name, and in a backup's `runtimeSchema` —
