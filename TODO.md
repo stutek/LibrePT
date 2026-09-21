@@ -4883,3 +4883,75 @@ rolls back, edits, rolls forward and asserts nothing was lost.
 
 Blocks: any live schema that is not a superset of every other — so it blocks schema 5 if schema 5
 removes or renames anything, and it blocks reviving schema 3 as a live shape.
+
+## 71. [ ] Nothing detects when the code stops supporting a live schema with the right data
+
+Asked 2026-09-21 (Simon): *"potrebujeva mehanizem, ki zazna neskladje — dokler je shema živa, jo mora
+koda podpirati s pravimi podatki"*, with the example of a field renamed AND retyped between schema 4
+and 5, which must be converted correctly and written into both. **Settled with it (Simon, same day):
+that means two records, one per store** — one domain object, two projections — not one record
+carrying both field names. The domain keeps one representation; the conversion lives in the
+projector.
+
+This is the mechanism §58's trimming is only the first step of. Four questions the code has to be
+able to answer, and today it answers none:
+
+**1. Who converts.** Nobody. `projectCollection` is `{ ...domainObject, collection }` and the
+fan-out projects ONCE, outside the loop over schemas, so a schema decides whether a record reaches a
+store, never what shape it arrives in. A conversion function per schema is the precondition for
+everything below.
+
+**2. Does it fit.** `every live writer shape validates against every live schema` in
+[starWriteInvariants.test.mjs](tests/unit_js/data/starWriteInvariants.test.mjs) already walks every
+live schema. Today it validates the same untransformed object against all of them, which passes only
+because every shape is a superset. It is the first thing that fails the day a rename exists — so it
+is the detector, and it needs the per-schema projector under it to mean anything.
+
+**3. Is it still the same thing.** Question 2 catches a missing or wrongly-typed field. It does NOT
+catch a wrongly CONVERTED one: an instant shifted by a day is a perfectly valid string. What catches
+that is the round trip — project the domain object into schema N, read it back, and require the
+original. `projections are idempotent and invertible` is where this goes, generalised. **Cost to
+state plainly: this needs a READER per schema, not only a writer** — `toDomainObject` today merely
+drops the `collection` key, so a rename means two functions per schema.
+
+**4. Can the shape language even see it.** No, and here is the proof, measured 2026-09-21 (Claude)
+rather than argued:
+
+- `sessions.startDate` is an INSTANT — `start.toISOString()` in [sessions.js](src/data/sessions.js).
+- `sessionSeries.startDate` is a LOCAL CALENDAR DAY — `calendarDate(...)` in
+  [sessionSeriesSeed.js](src/data/sessionSeriesSeed.js), read back through `atMidnight` in
+  [sessionSeries.js](src/domain/sessionSeries.js), which builds the date with the LOCAL constructor
+  precisely so a series never drifts a day east or west of UTC.
+
+**The same field name already means two different kinds in two collections**, and `SCHEMA_4`
+declares both as `{ type: "string" }`. `fieldIssues` knows only JS types, so no check in this
+repository can tell them apart, and a conversion that treated one as the other would pass everything.
+
+`docs/DATA_MODEL.md` §1 already carries the vocabulary — *instant* is ISO-8601 UTC, *calendar date*
+is a local `YYYY-MM-DD`, and the rule of thumb is that "at" is UTC and "on" is local. It also records
+the bug that proves the distinction is not academic: `toISOString()` on the consent date filed a
+trainer who ticked the box at 00:30 in Ljubljana as having signed *yesterday*. **Proposed (Claude),
+not ruled:** a field descriptor carries that kind alongside its JS type, so question 2 can see a
+retype at all.
+
+### 71.1 [ ] Schema 3 is the test subject, and stays test-only — ruled 2026-09-21, not yet built
+
+Asked by Simon whether schema 3 could be made, and whether old backups exist. Both answered the same
+day (Claude): schema 3 already exists as a step in the migration chain, and
+`tests/fixtures/backups/` holds one frozen file per schema, 0 to 4.
+
+**Schema 2 against schema 3 is the maintainer's own example, from this project's history.** The
+schema 2 session carries `day: "today"` and `time: "09:00 - 10:00"` and no absolute time; the schema
+3 session adds `startDate: "2026-08-10T05:00:00.000Z"`. A local bucket plus a text range became an
+absolute instant. The rename half is in the history too: schema 4 still declares BOTH `titles` (an
+array, from schema 1 rows) and `title` (a string) — a rename with a type change that never got a
+migration step, which is exactly what §60 now forbids.
+
+**Ruled 2026-09-21 (Simon): schema 3 is for TESTING ONLY.** It is declared as a shape the mechanism
+above is proved against, and it is **not** registered in `LIVE_SCHEMAS` — no store, no place in the
+fan-out, no cost carried for ever under §60's "every numbered schema stays live". Reviving it as a
+live shape would also have needed §70 settled first, since schema 3 is narrower than schema 4.
+
+Red team, recorded so it is not rediscovered: as a product capability a rollback to schema 3 was
+never wanted anyway — schema 3 has no `alias`, no `invites` and no `sessionSeries`, so a trainer
+arriving there would lose their repeating sessions and invitations.
