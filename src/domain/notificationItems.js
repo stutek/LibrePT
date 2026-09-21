@@ -276,13 +276,20 @@ function groupScheduleChurn(resolved) {
  * the only thing that can tell them: it names the menu and the item, because a step that asks for an
  * action says the action and names the control.
  */
-function forSandbox(item, t) {
+function forSandbox(item, t, chapters) {
+  // The destructive one goes; "show me around" stays, because the sandbox is where it belongs.
+  const actions = (item.actions || []).filter((action) => !action.resetDemo);
   return {
     ...item,
     title: t("notif_sandbox_title") || item.title,
     description: t("notif_sandbox_desc") || item.description,
-    // The destructive one goes; "show me around" stays, because the sandbox is where it belongs.
-    actions: (item.actions || []).filter((action) => !action.resetDemo),
+    actions,
+    // The story's chapters, offered under that button as a table of contents (asked for
+    // 2026-09-21): the story is six chapters and four to six minutes, and a trainer who wants to see
+    // the evening after a session should not have to watch the morning first. Only alongside the
+    // button itself — where the walkthrough cannot run at all, an index of its chapters would be six
+    // offers the app cannot honour.
+    chapters: actions.some((action) => action.startWalkthrough) ? chapters : [],
   };
 }
 
@@ -291,7 +298,7 @@ export function resolveNotificationItems(
   t,
   readIds = [],
   syncFailure = null,
-  { crashes = [], repoUrl = "", sandbox = false, testRun = false } = {},
+  { crashes = [], repoUrl = "", sandbox = false, testRun = false, chapters = [] } = {},
 ) {
   const synthetic = [
     // A fault leads: it is the only item here reporting that something the trainer asked for did
@@ -321,6 +328,6 @@ export function resolveNotificationItems(
   );
   const demoNotice = stored
     .filter((item) => item.type === DEMO_NOTICE_TYPE)
-    .map((item) => (sandbox ? forSandbox(item, t) : item));
+    .map((item) => (sandbox ? forSandbox(item, t, chapters) : item));
   return [...demoNotice, ...synthetic, ...stored.filter((item) => item.type !== DEMO_NOTICE_TYPE)];
 }

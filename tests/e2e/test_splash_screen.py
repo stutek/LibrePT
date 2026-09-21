@@ -436,3 +436,32 @@ def test_a_furnished_link_still_gets_the_boot_it_asked_for(page, local_server):
 
     page.locator("#app-splash").wait_for(state="hidden", timeout=20000)
     assert page.locator("#app-splash-language").is_hidden()
+
+
+@pytest.mark.clean_start
+@pytest.mark.keep_splash
+def test_the_offer_says_what_the_walkthrough_contains_and_starts_at_any_chapter(
+    page, local_server
+):
+    """Asked for 2026-09-21. The button above it starts the story at the beginning; this says what
+    the four to six minutes are made of, and lets any one chapter be the way in.
+
+    Folded shut, because the three choices above it are what a first-run trainer is here to make."""
+    page.goto(local_server)
+    _answer_language_step(page)
+    page.locator("#app-splash-onboarding").wait_for(state="visible", timeout=15000)
+
+    chapters = page.locator("#splash-chapters")
+    chapters.wait_for(state="visible", timeout=15000)
+    assert not page.locator(".app-splash-chapter").first.is_visible(), (
+        "the index opens on a tap; it must not push the three choices off the screen"
+    )
+
+    page.locator(".app-splash-chapters-summary").click()
+    entries = page.locator(".app-splash-chapter")
+    assert entries.count() >= 4, entries.all_inner_texts()
+
+    entries.first.click()
+    page.wait_for_url("**chapter=**", timeout=15000)
+    assert "demo=story" in page.url, page.url
+    assert "workspace=sandbox" in page.url, page.url

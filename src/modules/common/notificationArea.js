@@ -152,7 +152,31 @@ function buildNotificationActionHTML(act, itemId, escapeHTML) {
   return `<button type="button" class="notification-btn ${primaryCls}" data-nav-target="${escapeHTML(act.view || "")}" data-action-id="${escapeHTML(itemId)}">${escapeHTML(act.label)}</button>`;
 }
 
-function buildNotificationCardHTML(item, escapeHTML) {
+/** The walkthrough's table of contents, drawn under the card's buttons.
+ *
+ * Folded shut. The card is already a paragraph of prose and a row of buttons, and a list of six
+ * chapters opened by default would push the way OUT of the sandbox off the screen — which is the one
+ * thing this card exists to say. `<details>` and not a menu: it opens in place, on a tap, with
+ * nothing floating over the app.
+ *
+ * `t` is applied here rather than stored in the item, so the list is in the language on screen when
+ * it is drawn — the feed is redrawn on a language switch.
+ */
+function buildChapterIndexHTML(item, t, escapeHTML) {
+  if (!item.chapters?.length) return "";
+  const rows = item.chapters
+    .map(
+      ({ id, titleKey }) =>
+        `<li><button type="button" class="notification-chapter" data-action-chapter="${escapeHTML(id)}">${escapeHTML(t(titleKey))}</button></li>`,
+    )
+    .join("");
+  return `<details class="notification-chapters">
+          <summary class="notification-chapters-summary">${escapeHTML(t("walkthrough_chapters_summary"))}</summary>
+          <ol class="notification-chapter-list">${rows}</ol>
+        </details>`;
+}
+
+function buildNotificationCardHTML(item, escapeHTML, t) {
   const iconClass = item.icon || "fa-solid fa-bell";
   const actionsHTML =
     item.actions && item.actions.length > 0
@@ -171,6 +195,7 @@ function buildNotificationCardHTML(item, escapeHTML) {
           <h4 class="notification-card-title">${escapeHTML(item.title)} ${unreadDot}</h4>
           <p class="notification-card-desc">${escapeHTML(item.description)}</p>
           ${actionsHTML}
+          ${buildChapterIndexHTML(item, t, escapeHTML)}
         </div>
       </div>
     `;
@@ -210,6 +235,23 @@ function wireNotificationCardActions(container, deps, t, readIds) {
     btn.addEventListener("click", (e) => {
       e.stopPropagation();
       deps.startWalkthrough?.();
+    });
+  }
+
+  // Opening the index must not reach the card behind it. An unread card marks itself read on any
+  // tap and REDRAWS the whole feed to move the dot, which would throw away the `<details>` the
+  // trainer just opened — the fold would snap shut under their thumb. So the toggle stops here, and
+  // the card is marked read by the tap that actually chooses something.
+  for (const summary of container.querySelectorAll(".notification-chapters-summary")) {
+    summary.addEventListener("click", (e) => e.stopPropagation());
+  }
+
+  // The same guide, started at one named chapter. The tap on the summary that OPENS the index must
+  // not also close the feed, so the listener sits on the chapter buttons and stops there.
+  for (const btn of container.querySelectorAll("button[data-action-chapter]")) {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      deps.startWalkthrough?.(btn.getAttribute("data-action-chapter"));
     });
   }
 
@@ -306,6 +348,10 @@ export function renderNotificationArea() {
     // can know (TODO §46.7). The browser suite puts the switch on every navigation, so the escaped
     // test-data alarm stays silent there and speaks on a trainer's install, where it never appears.
     testRun: getShareParams().init === INIT_DEMO_DATA,
+    // The guided story's chapters, so the sandbox card can offer any one of them rather than only
+    // the beginning. Injected like the walkthrough's own deep link and for the same reason: they
+    // come from the story script, which this module may not reach across to.
+    chapters: deps.storyChapters || [],
   });
   paintFeedCounts(items, t);
 
@@ -330,7 +376,9 @@ export function renderNotificationArea() {
     firstItem.icon || "fa-solid fa-bell",
   );
 
-  container.innerHTML = items.map((item) => buildNotificationCardHTML(item, escapeHTML)).join("");
+  container.innerHTML = items
+    .map((item) => buildNotificationCardHTML(item, escapeHTML, t))
+    .join("");
 
   wireNotificationCardActions(container, deps, t, readIds);
   syncNotificationBarState();

@@ -25,6 +25,24 @@ export function chapterTitleKeys(story) {
   return (story?.chapters || []).map((chapter) => chapter.titleKey);
 }
 
+/** The chapters a table of contents may offer, in playing order: each one's id and its title key.
+ *
+ * `surface` is what keeps the list honest. A chapter that happens on the CLIENT's own page — Ana
+ * filling in her form on her phone — is not a place the trainer can be sent: the story reaches it
+ * by handing the browser over, and a link that named it from the trainer's app would start a guide
+ * on a page that is not open. So the trainer's index lists the trainer's chapters, which is the same
+ * rule `storyStepsFor` already plays a whole story by.
+ *
+ * Ids and title keys and nothing else: an index that carried the titles themselves would hold the
+ * words of whichever language was current when it was built, and the feed and the splash both
+ * redraw on a language change.
+ */
+export function storyChapterIndex(story, { surface = "trainer" } = {}) {
+  return (story?.chapters || [])
+    .filter((chapter) => (chapter.surface || "trainer") === surface)
+    .map(({ id, titleKey }) => ({ id, titleKey }));
+}
+
 /** The steps a link asks for: one named chapter, or the whole story flattened in order.
  *
  * An UNKNOWN chapter plays the whole story rather than nothing. These links are pasted into chat

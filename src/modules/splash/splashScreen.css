@@ -356,3 +356,56 @@
     transition: none;
   }
 }
+
+/* The guided walkthrough's table of contents, under the button that starts it from the beginning
+   (asked for 2026-09-21). Folded shut by default, so the three choices above it stay the first thing
+   read; open, it is a numbered list of the story's chapters, each one a way in.
+
+   The rows are full-width 44px targets for the same reason the buttons above them are 48px: this is
+   a phone, held in one hand. The numbers come from the <ol>, so the list says how long the story is
+   without a word about it. */
+.app-splash-chapters {
+  width: 100%;
+  text-align: left;
+}
+
+.app-splash-chapters[hidden] {
+  display: none;
+}
+
+.app-splash-chapters-summary {
+  padding: 10px 4px;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.app-splash-chapter-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0 0 0 22px;
+}
+
+.app-splash-chapter {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: none;
+  color: var(--text-main);
+  font-family: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.12s ease, background 0.12s ease;
+}
+
+.app-splash-chapter:hover,
+.app-splash-chapter:focus-visible {
+  border-color: var(--card-border);
+  background: var(--card-bg);
+}

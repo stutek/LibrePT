@@ -472,3 +472,58 @@ test("demo rows are not an escape, and neither is a clean store", () => {
     null,
   );
 });
+
+// The sandbox card's table of contents (asked for 2026-09-21). The card is how a trainer inside the
+// sandbox reaches the guided story; listing its chapters is what lets them start at the one they
+// came for instead of watching four to six minutes from the top.
+const CHAPTERS = [
+  { id: "arrive", titleKey: "story_chapter_arrive" },
+  { id: "gym", titleKey: "story_chapter_gym" },
+];
+
+// A store the walkthrough can actually run on: two participants and a plan with a circuit
+// (domain/walkthroughReadiness.js). Without it the offer is withheld, which is the case the second
+// test below pins.
+function storeTheGuideCanRun(notifications) {
+  return {
+    notifications,
+    sessions: [{ id: "s1", routineId: "r1", participants: ["c1", "c2"] }],
+    routines: [{ id: "r1", exercises: [{ id: "e1", circuitId: "circ" }] }],
+  };
+}
+
+const DEMO_NOTICE = {
+  id: "demo-mode",
+  type: "demo-mode",
+  titleKey: "notif_demo_title",
+  actions: [{ labelKey: "notif_demo_walkthrough_btn", startWalkthrough: true }],
+};
+
+test("the sandbox card carries the story's chapters, in the order they play", () => {
+  const [card] = resolveNotificationItems(storeTheGuideCanRun([DEMO_NOTICE]), t, [], null, {
+    sandbox: true,
+    chapters: CHAPTERS,
+  });
+
+  assert.deepEqual(card.chapters, CHAPTERS);
+});
+
+test("no chapters are offered where the walkthrough itself cannot be", () => {
+  // A store missing what the steps need has the offer withheld (TODO §28.14). An index of its
+  // chapters would then be six offers the app cannot honour.
+  const [card] = resolveNotificationItems({ notifications: [DEMO_NOTICE] }, t, [], null, {
+    sandbox: true,
+    chapters: CHAPTERS,
+  });
+
+  assert.ok(!card.actions.some((action) => action.startWalkthrough));
+  assert.deepEqual(card.chapters, []);
+});
+
+test("outside the sandbox the card is left as it was stored", () => {
+  const [card] = resolveNotificationItems(storeTheGuideCanRun([DEMO_NOTICE]), t, [], null, {
+    chapters: CHAPTERS,
+  });
+
+  assert.equal(card.chapters, undefined);
+});

@@ -18,6 +18,7 @@ import { test } from "node:test";
 
 import {
   demoDataUrl,
+  guidedChapterUrl,
   guidedDemoUrl,
   isSplashDisabled,
   remainingHoldMs,
@@ -159,4 +160,34 @@ test("a guided-demo link starts there too — its first step looks for a session
   // The STORY, named exactly: both offers ran the four-step gym-floor tour until 2026-08-25, and
   // asserting only that SOME `?demo=` value is set is what let that pass unnoticed.
   assert.equal(url.searchParams.get("demo"), "story");
+});
+
+test("a chapter link starts that chapter, and nowhere else in the story", () => {
+  // The story is six chapters and four to six minutes; the table of contents exists so a trainer can
+  // watch the one they came for.
+  const url = new URL(
+    guidedChapterUrl("evening", "https://app.example.test/LibrePT/clients/c2?lang=sl", "/LibrePT/"),
+  );
+
+  assert.equal(url.pathname, "/LibrePT/");
+  assert.equal(url.searchParams.get("demo"), "story");
+  assert.equal(url.searchParams.get("chapter"), "evening");
+  assert.equal(url.searchParams.get("workspace"), "sandbox");
+  assert.equal(url.searchParams.get("lang"), "sl");
+});
+
+test("a chapter link drops the step a running story left in the address bar", () => {
+  // Every step of a playing story writes its own id into the URL. Built from that address, a link to
+  // another chapter would carry a step of the chapter being LEFT — and the guide, handed one
+  // chapter's steps and another chapter's starting id, would begin wherever it could.
+  const url = new URL(
+    guidedChapterUrl(
+      "gym",
+      "https://app.example.test/LibrePT/?demo=story&chapter=arrive&step=arrive-open",
+      "/LibrePT/",
+    ),
+  );
+
+  assert.equal(url.searchParams.get("chapter"), "gym");
+  assert.equal(url.searchParams.get("step"), null);
 });

@@ -3,11 +3,13 @@
 // onboarding entry point.
 //
 // Injected dependencies: `offerOnboarding` (whether the database is still empty — the caller owns
-// that question, see data/stateStore.js's stateHasData) and `mountTrainerDetails(container)`, which
-// fills the details form beside the onboarding choices (TODO §45.2). Everything else it needs is its
-// own markup and the URL, so it stays mountable without the rest of the app — and that is why the
-// details form arrives as a callback rather than an import: it reads and writes the identity store,
-// which the file that paints before the app exists must not reach into.
+// that question, see data/stateStore.js's stateHasData), `mountTrainerDetails(container)`, which
+// fills the details form beside the onboarding choices (TODO §45.2), and `chapters` + `t` (the demo
+// story's table of contents, and the words for it). Everything else it needs is its own markup and
+// the URL, so it stays mountable without the rest of the app — and that is why all three arrive as
+// parameters rather than imports: the details form reads and writes the identity store and the
+// chapters come from a quarter of a megabyte of demo script, and the file that paints before the app
+// exists must reach into neither.
 //
 // The splash is in the STATIC HTML and visible by default, not created here — it has to be on
 // screen from first paint, and a module that runs after app.js parses would appear too late to
@@ -16,7 +18,7 @@
 // The `?demo=` value is imported rather than spelled again here: the splash writes the link and
 // app.js's boot step reads it, and a typo in either would produce a button that silently starts
 // nothing.
-import { DEMO_STORY } from "../common/shareLink.js";
+import { DEMO_STORY, SHARE_CHAPTER_PARAM, SHARE_STEP_PARAM } from "../common/shareLink.js";
 
 // How long the mark stays up, measured from navigation start rather than from the moment boot
 // finishes: a slow cold boot should be absorbed by this window, not added on top of it. So the
@@ -35,6 +37,8 @@ const PROGRESS_ID = "app-splash-progress";
 const ONBOARDING_ID = "app-splash-onboarding";
 const TRAINER_DETAILS_ID = "splash-trainer-details";
 const LANGUAGE_ID = "app-splash-language";
+const CHAPTERS_ID = "splash-chapters";
+const CHAPTER_LIST_ID = "splash-chapter-list";
 const DISMISSING_CLASS = "is-dismissing";
 const ONBOARDING_CLASS = "is-onboarding";
 
@@ -155,6 +159,28 @@ export function guidedDemoUrl(href = window.location.href, rootPath = appRootPat
   return url.toString();
 }
 
+/** The same guided link, aimed at ONE chapter of the story (§35's `?demo=story&chapter=…`).
+ *
+ *  This is what a table of contents links to: the story is six chapters and four to six minutes, and
+ *  a trainer who wants to see the evening after a session should not have to watch the morning
+ *  first.
+ *
+ *  It drops `?step=`, and that is not tidying. Every step of a running story writes its own id into
+ *  the URL (appBoot.js's `rememberStep`), so a link built from the current address while the story
+ *  is playing would carry a step of the chapter being LEFT — and the guide, handed a step list for
+ *  the chosen chapter and a start id from another one, would begin wherever it could. Naming a
+ *  chapter means starting at its first step. */
+export function guidedChapterUrl(
+  chapterId,
+  href = window.location.href,
+  rootPath = appRootPathname(),
+) {
+  const url = new URL(guidedDemoUrl(href, rootPath));
+  url.searchParams.set(SHARE_CHAPTER_PARAM, chapterId);
+  url.searchParams.delete(SHARE_STEP_PARAM);
+  return url.toString();
+}
+
 /** The app's own root, read from the `<base>` the server rewrites per deployment. Null where there
  * is no document at all (the Node unit tests), so a caller passing an explicit href there keeps the
  * path it passed rather than having one invented for it. */
@@ -200,7 +226,42 @@ function revealLanguageChoice(splash, { onChooseLanguage, afterChoice }) {
   }
 }
 
-function revealOnboarding(splash, resolve, mountTrainerDetails) {
+/**
+ * Fill the walkthrough's table of contents, and show it (§35's chapters, asked for 2026-09-21).
+ *
+ * The chapters are HANDED IN as `{ id, titleKey }`, in playing order — the splash may not import the
+ * story any more than it may import the identity store, and the story is a quarter of a megabyte of
+ * script it must never wait for. Their words are looked up at the moment they are drawn, so the list
+ * is in the language the trainer chose two taps ago; `data-i18n` goes on as well, so a later
+ * language switch repaints it the same way it repaints every other label.
+ *
+ * Nothing is shown when there are no chapters to show: an empty index is a fold with nothing under
+ * it, and a trainer who opens it has been told nothing.
+ */
+function fillChapterIndex(chapters, t) {
+  const details = document.getElementById(CHAPTERS_ID);
+  const list = document.getElementById(CHAPTER_LIST_ID);
+  if (!details || !list || !chapters?.length) return;
+
+  list.replaceChildren();
+  for (const { id, titleKey } of chapters) {
+    const item = document.createElement("li");
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "app-splash-chapter";
+    button.dataset.splashChapter = id;
+    button.dataset.i18n = titleKey;
+    button.textContent = t(titleKey);
+    button.addEventListener("click", () => {
+      window.location.assign(guidedChapterUrl(id));
+    });
+    item.append(button);
+    list.append(item);
+  }
+  details.hidden = false;
+}
+
+function revealOnboarding(splash, resolve, mountTrainerDetails, chapters, t) {
   const onboarding = document.getElementById(ONBOARDING_ID);
   // Never trap the trainer behind a panel that failed to render: fall back to just leaving.
   if (!onboarding) return fadeOut(splash, resolve);
@@ -223,6 +284,7 @@ function revealOnboarding(splash, resolve, mountTrainerDetails) {
   document.getElementById("splash-walkthrough")?.addEventListener("click", () => {
     window.location.assign(guidedDemoUrl());
   });
+  fillChapterIndex(chapters, t);
   document.getElementById("splash-start-empty")?.addEventListener("click", () => {
     fadeOut(splash, resolve);
   });
@@ -242,6 +304,11 @@ export function dismissSplashWhenReady({
   linkBringsContent = false,
   onChooseLanguage = () => {},
   mountTrainerDetails = null,
+  // Which chapters this build's demo story has, handed in for the same reason the trainer's details
+  // form is: this module paints before the app exists, so it reaches for its own markup and the URL
+  // and nothing else.
+  chapters = [],
+  t = (key) => key,
 } = {}) {
   const splash = document.getElementById(SPLASH_ID);
   if (!splash) return Promise.resolve();
@@ -278,7 +345,7 @@ export function dismissSplashWhenReady({
       // counts towards it — answering a prompt is not made to be followed by a wait.
       const remaining = remainingHoldMs(minimumVisibleMs, performance.now());
       const holdTimer = window.setTimeout(() => {
-        if (onboarding) revealOnboarding(splash, resolve, mountTrainerDetails);
+        if (onboarding) revealOnboarding(splash, resolve, mountTrainerDetails, chapters, t);
         else fadeOut(splash, resolve);
       }, remaining);
 

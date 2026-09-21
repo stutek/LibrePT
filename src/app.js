@@ -168,7 +168,7 @@ import {
   renderSessions as sessionsViewRender,
   seedDemoActiveSession as sessionsViewSeedDemo,
 } from "./modules/sessionList/sessionsView.js";
-import { guidedDemoUrl } from "./modules/splash/splashScreen.js";
+import { guidedChapterUrl, guidedDemoUrl } from "./modules/splash/splashScreen.js";
 
 function t(key) {
   // resolveLang, not `|| "en"`: an unchosen language is null and must still render in English
@@ -224,6 +224,35 @@ onStateSaved(() => renderBuildStateBadge(getState()));
 
 window.resetLibrePTData = resetLibrePTData;
 window.stateHasData = () => stateHasData(getState());
+
+// The chapters of the guided story, as `{ id, titleKey }` in playing order — what the two tables of
+// contents draw, and what a tap on one of them names in the URL.
+let storyChapters = [];
+
+/** Load them from the story script itself, so there is no second list of chapters to keep true.
+ *
+ * Only where one is about to be OFFERED: in the sandbox, whose message card is the trainer's way
+ * into the story, and on an empty app, whose splash offers the same thing. Everywhere else this is
+ * empty — the script it comes from is a quarter of a megabyte of steps, and a boot into a working
+ * database must not fetch it to draw six titles.
+ *
+ * A failure is reported and swallowed: the story is a marketing asset, and an index that could not
+ * be built must cost the trainer nothing more than an offer they never saw. The surfaces show
+ * nothing rather than an empty fold.
+ */
+async function loadStoryChapters(state) {
+  if (!isSandbox() && stateHasData(state)) return [];
+  try {
+    const [{ DEMO_STORY: story }, { storyChapterIndex }] = await Promise.all([
+      import("./modules/demo/storyTour.js"),
+      import("./domain/demoStory.js"),
+    ]);
+    return storyChapterIndex(story);
+  } catch (error) {
+    console.warn("[story] the chapter index could not be built:", error);
+    return [];
+  }
+}
 
 /** Whether this arrival was FURNISHED by its link: the demo seed, the walkthrough, or an invitation
  * being answered. Those links get exactly the boot they asked for, first run or not (TODO §28.11).
@@ -340,6 +369,10 @@ async function init() {
   // alone by all of this: it still seeds whichever workspace is open, which is what the whole e2e
   // suite runs on (TODO §40.7).
   await ensureSandboxSeeded();
+
+  // The demo story's table of contents. Read once here, because both surfaces that draw it — the
+  // sandbox's message card and the splash — draw synchronously.
+  storyChapters = await loadStoryChapters(state);
 
   if (shareInit === INIT_DEMO_DATA && !stateHasData(state)) {
     // Stamped as TEST rather than demo (TODO §46.7). `?init=` is the switch the browser suite puts
@@ -602,7 +635,13 @@ async function init() {
     // The guided demo runs from a deep link and a reload, exactly as the splash's own offer does
     // (TODO §28.14) — the same URL builder, so the two entry points cannot drift into starting
     // different things.
-    startWalkthrough: () => window.location.assign(guidedDemoUrl()),
+    startWalkthrough: (chapterId) =>
+      window.location.assign(chapterId ? guidedChapterUrl(chapterId) : guidedDemoUrl()),
+    // The story's table of contents, so the card can offer any one chapter instead of only the
+    // beginning (asked for 2026-09-21). Empty outside the sandbox and outside a first run: the
+    // chapters come from the story script, which is a quarter of a megabyte the ordinary boot must
+    // not wait for.
+    storyChapters,
   });
 
   // After bootNotificationArea: the clipboard bar mounts into the notification area's handle bar,
@@ -972,6 +1011,10 @@ function setupActiveSession({ linkBringsContent } = {}) {
         // in rather than imported by the splash, which owns nothing but its markup and the URL — and
         // it is the same module the ☰ menu opens, so there is one form and one validation rule.
         mountTrainerDetails: mountTrainerDetailsOnSplash,
+        // The demo story's chapters, handed in for the reason the details form is: the splash
+        // paints before the app exists and reaches for nothing but its own markup and the URL.
+        chapters: storyChapters,
+        t,
       })
       // Only once the splash is actually gone: a submission shared into the app opens a modal, and a
       // modal makes the page under it inert — splash included (§38.22).

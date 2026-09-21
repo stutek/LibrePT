@@ -11,6 +11,7 @@ import { test } from "node:test";
 import {
   chapterTitleKeys,
   storyChapterIds,
+  storyChapterIndex,
   storyStepsFor,
   validateStory,
 } from "../../../src/domain/demoStory.js";
@@ -192,4 +193,37 @@ test("a chapter opened straight from a link is numbered where it belongs", () =>
   const [step] = storyStepsFor(HANDOVER_STORY, "review");
 
   assert.equal(step.storyPosition.number, 4);
+});
+
+// The table of contents the splash and the sandbox card draw (asked for 2026-09-21). What it
+// promises is that every entry is a place the viewer can actually be sent to, in the order the story
+// plays them.
+test("the index names every chapter of the trainer's own walk, in playing order", () => {
+  assert.deepEqual(storyChapterIndex(HANDOVER_STORY), [
+    { id: "arrive", titleKey: "k" },
+    { id: "review", titleKey: "k" },
+  ]);
+});
+
+test("a chapter played on the client's phone is not offered as a starting point", () => {
+  // The story reaches it by handing the browser over. A link naming it from the trainer's app would
+  // start a guide on a page that is not open, so the trainer's index must not list it.
+  assert.ok(!storyChapterIndex(HANDOVER_STORY).some((chapter) => chapter.id === "intake"));
+  // It is still a chapter, and the client's own boot is where it is offered.
+  assert.deepEqual(storyChapterIndex(HANDOVER_STORY, { surface: "client" }), [
+    { id: "intake", titleKey: "k" },
+  ]);
+});
+
+test("the index carries keys, not words", () => {
+  // The feed and the splash are redrawn on a language switch and translate as they draw. An index
+  // holding the titles themselves would hold whichever language was current when it was built.
+  for (const chapter of storyChapterIndex(STORY)) {
+    assert.deepEqual(Object.keys(chapter).sort(), ["id", "titleKey"]);
+  }
+});
+
+test("a story with no chapters yields no index rather than throwing", () => {
+  assert.deepEqual(storyChapterIndex(undefined), []);
+  assert.deepEqual(storyChapterIndex({ id: "x" }), []);
 });

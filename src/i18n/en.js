@@ -470,6 +470,7 @@ export const en = {
   // where it is on screen — the panel is read on a phone whose layout is not the one this was
   // written on.
   walkthrough_title: "Guided walkthrough",
+  walkthrough_chapters_summary: "Start at a chapter",
   walkthrough_progress: "Step {step} of {count}",
   walkthrough_back: "Back",
   walkthrough_show: "Show me",
@@ -544,7 +545,7 @@ export const en = {
   menu_sandbox_enter: "Enter the sandbox",
   notif_sandbox_title: "🧪 Sandbox — a place to try things and learn",
   notif_sandbox_desc:
-    "These clients, plans and sessions are a sample gym. Try anything: nothing you do in here can reach your business data. To go back to your own work, open the menu ☰ at the top right and choose Leave the sandbox — you will land where you left off. To be walked through the app step by step, tap Show me around below.",
+    "These clients, plans and sessions are a sample gym. Try anything: nothing you do in here can reach your business data. To go back to your own work, open the menu ☰ at the top right and choose Leave the sandbox — you will land where you left off. To be walked through the app step by step, tap Show me around below. Start at a chapter opens the list of chapters; tap one to start the walkthrough there.",
   sync_sandbox_note: "You are in the sandbox: this syncs the sandbox's own copy, not your work.",
   restore_refused_sandbox_file:
     "This file was made in the sandbox, so it cannot be restored into your own work. Open the sandbox and restore it there.",

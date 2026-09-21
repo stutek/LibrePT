@@ -354,3 +354,27 @@ def test_the_sandbox_pill_breathes_and_stops_for_reduced_motion(page, local_serv
         "() => getComputedStyle(document.getElementById('preview-badge')).animationName"
     )
     assert still == "none", f"the breath ignores a request for less motion: {still}"
+
+
+@pytest.mark.clean_start
+def test_the_sandbox_card_lists_the_chapters_of_the_guided_story(page, local_server):
+    """Asked for 2026-09-21. The story is six chapters and four to six minutes, and the card offered
+    one way into it: the beginning. A trainer who wants to see the evening after a session should be
+    able to start there, so the card carries the whole table of contents and every line of it is a
+    way in."""
+    page.goto(f"{local_server}?init=demo_data_load&lang=en")
+    page.wait_for_selector(".session-card")
+    _switch(page, "sandbox")
+
+    page.wait_for_selector("#notification-area .notification-card", timeout=10000)
+    page.locator("#notification-grabber-btn").click()
+    page.locator(".notification-chapters-summary").first.click()
+
+    chapters = page.locator(".notification-chapter")
+    # Every chapter of the trainer's own walk, named — not a count, which nobody can choose from.
+    assert chapters.count() >= 4, chapters.all_inner_texts()
+    assert any(text.strip() for text in chapters.all_inner_texts())
+
+    chapters.last.click()
+    page.wait_for_url("**chapter=**", timeout=10000)
+    assert "demo=story" in page.url, page.url
