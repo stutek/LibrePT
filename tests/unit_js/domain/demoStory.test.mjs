@@ -227,3 +227,29 @@ test("a story with no chapters yields no index rather than throwing", () => {
   assert.deepEqual(storyChapterIndex(undefined), []);
   assert.deepEqual(storyChapterIndex({ id: "x" }), []);
 });
+
+test("a chapter that needs the ones before it is not offered as a way in", () => {
+  // Measured, not assumed (2026-09-21): the story's programme chapter opens on the trainer reading
+  // what Ana sent, and her submission reaches the store from HER phone. Walked on its own from a
+  // freshly seeded sandbox it stops with nothing to review. It still plays inside the whole story.
+  const story = {
+    id: "s",
+    chapters: [
+      ...STORY.chapters,
+      {
+        id: "programme",
+        titleKey: "k",
+        needsEarlierChapters: true,
+        steps: [{ id: "p1", target: ".p", expect: { selector: ".p" } }],
+      },
+    ],
+  };
+
+  assert.ok(!storyChapterIndex(story).some((chapter) => chapter.id === "programme"));
+  // Named by a link it still plays, and the whole story still contains it.
+  assert.deepEqual(
+    storyStepsFor(story, "programme").map((step) => step.id),
+    ["p1"],
+  );
+  assert.ok(storyStepsFor(story).some((step) => step.id === "p1"));
+});

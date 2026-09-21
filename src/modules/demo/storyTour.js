@@ -597,6 +597,17 @@ const REVIEW_STEPS = [
 const PROGRAMME_CHAPTER = {
   id: "programme",
   titleKey: "story_chapter_programme",
+  // NOT a place the story can be joined, so no table of contents offers it (§35, measured
+  // 2026-09-21). It opens on REVIEW_STEPS — the trainer reading what Ana sent — and Ana's
+  // submission reaches the store from HER phone, in the client chapter's own boot. A trainer's
+  // sandbox that has played none of the earlier chapters holds nothing to review, so the guide
+  // stops on "Tap Add to my clients" with nothing to add. Replaying the story's earlier steps does
+  // not help either: the crossing to her phone is not something this boot can perform.
+  //
+  // It plays as part of the whole story, which is where it belongs. To make it an entry point, the
+  // sandbox's seed would have to carry a submission from Ana already waiting — a change to what
+  // every trainer sees on entering the sandbox, and so a decision rather than a fix.
+  needsEarlierChapters: true,
   steps: foldCards([
     ...REVIEW_STEPS,
     narration("programme-open", "chapter", "story_chapter_programme", "story_programme_open_body", {

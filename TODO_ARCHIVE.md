@@ -20,6 +20,57 @@ Read [CHANGELOG.md](CHANGELOG.md) for what shipped and when. This file is why.
 
 ---
 
+### 73.1 [x] A table of contents on both surfaces — shipped 2026-09-21
+
+Both places that offered the guided story offered one way in: its beginning. Four to six minutes, and
+a trainer who wanted the evening after a session had to watch the morning first.
+
+The sandbox card and the splash now carry a folded list — *Start at a chapter* — and every line of it
+starts the guide at that chapter. The chapters come from the story script itself through
+`storyChapterIndex` in [demoStory.js](src/domain/demoStory.js), so there is no second list to keep
+true, and the link a line follows drops the `?step=` a running story leaves in the address bar:
+handed one chapter's steps and another chapter's starting id, the guide would begin wherever it
+could.
+
+The story script is imported only where an index is about to be shown — in the sandbox, and on an
+app with nothing saved — so an ordinary boot does not fetch a quarter of a megabyte of demo steps to
+draw a handful of titles.
+
+### 73.2 [x] Only a chapter that actually runs from cold is offered — measured 2026-09-21
+
+The index is a promise about every line of it, so it is gated by a walk rather than by reasoning:
+`test_every_offered_chapter_can_be_walked_from_a_cold_start` in
+[test_demo_story.py](tests/e2e/test_demo_story.py) opens each offered chapter on a freshly seeded
+sandbox and walks it to its end with *Show me*.
+
+Four of the five trainer chapters pass. **The programme chapter does not**, and it is now marked
+`needsEarlierChapters` in [storyTour.js](src/modules/demo/storyTour.js) and left out of the index. It
+opens on the trainer reading what Ana sent, and her submission reaches the store from HER phone, in
+the client chapter's own boot — a sandbox that has played none of the earlier chapters has nothing to
+review, so the guide stops on *Tap Add to my clients* with nothing to add. Starting the whole story
+at that step instead was measured too, and fails identically: the crossing to her phone is not
+something the trainer's boot can perform.
+
+It still plays as part of the whole story. It is only not a way in. §73.3 is what would change that.
+
+### 73.4 [x] The language choice is built from the shipped dictionaries — shipped 2026-09-21
+
+The splash's language step and the ☰ menu's language `<select>` each carried two hand-written
+buttons; a third dictionary would have appeared in neither, and the splash's language step is the one
+screen where a language nobody can find is fatal — there is nothing else on it to read.
+
+Both are now built from `TRANSLATIONS` in [index.js](src/i18n/index.js), and each language is named
+by its own `language_name` key — written in that language and never translated, because someone
+looking for their language on a screen they cannot read has only the name to go by. The splash's row
+of buttons became a wrapping grid that scrolls inside the splash, so two names and twenty-four both
+fit on a phone without pushing the question off the top.
+
+No new dictionary shipped with it. That was the ruling (Simon, 2026-09-21): a button for a language
+the app does not speak shows English behind it, which is a promise the first screen then breaks.
+§73.5 is the open half — which languages, and who translates them.
+
+---
+
 ### 72. [x] Should every evening of a repeating session be stored? — decided 2026-09-21: no
 
 Asked by Simon 2026-09-21, after reading §70's rollback walk-through: does schema 4 have to store a

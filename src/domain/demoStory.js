@@ -33,6 +33,12 @@ export function chapterTitleKeys(story) {
  * on a page that is not open. So the trainer's index lists the trainer's chapters, which is the same
  * rule `storyStepsFor` already plays a whole story by.
  *
+ * A chapter marked `needsEarlierChapters` is left out for the same reason, measured rather than
+ * assumed: walked on its own from a freshly seeded sandbox it stops on a step it cannot perform,
+ * because the state it opens on was made by a chapter before it
+ * (tests/e2e/test_demo_story.py walks every offered chapter from cold to prove the rest do not).
+ * Such a chapter still plays as part of the whole story; it is only not a way IN.
+ *
  * Ids and title keys and nothing else: an index that carried the titles themselves would hold the
  * words of whichever language was current when it was built, and the feed and the splash both
  * redraw on a language change.
@@ -40,6 +46,7 @@ export function chapterTitleKeys(story) {
 export function storyChapterIndex(story, { surface = "trainer" } = {}) {
   return (story?.chapters || [])
     .filter((chapter) => (chapter.surface || "trainer") === surface)
+    .filter((chapter) => !chapter.needsEarlierChapters)
     .map(({ id, titleKey }) => ({ id, titleKey }));
 }
 

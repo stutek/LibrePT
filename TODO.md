@@ -5008,3 +5008,40 @@ arriving there would lose their repeating sessions and invitations.
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#72-x-should-every-evening-of-a-repeating-session-be-stored--decided-2026-09-21-no).
 The model stays: the rule is stored once, and an evening becomes a stored record only when the
 trainer opens, moves, cancels, starts or edits the plan of it.
+
+## 73. [~] The guided story is offered by chapter, and the language choice comes from the registry
+
+Asked for 2026-09-21 (Simon): the sandbox's message card and the splash should carry the whole table
+of contents of the guided walkthrough, with any chapter clickable; and the splash should be ready to
+offer any official European language.
+
+### 73.1 [x] A table of contents on both surfaces — shipped 2026-09-21
+
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#731-x-a-table-of-contents-on-both-surfaces--shipped-2026-09-21);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
+
+### 73.2 [x] Only a chapter that actually runs from cold is offered — measured 2026-09-21
+
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#732-x-only-a-chapter-that-actually-runs-from-cold-is-offered--measured-2026-09-21).
+The programme chapter is not an entry point; §73.3 is the open decision that would make it one.
+
+### 73.3 [ ] Decide whether the sandbox seed should carry a submission already waiting
+
+What would make §73.2's programme chapter an entry point: the sandbox's seed holding a signup from
+Ana that has not been reviewed yet. That is a change to what EVERY trainer sees on first entering the
+sandbox — a pending submission in the feed — and it would also change what the arrive chapter
+demonstrates, since that chapter delivers the same submission again.
+
+**Simon's call**, not a fix: it trades one line of the table of contents against the state the
+sandbox opens in.
+
+### 73.4 [x] The language choice is built from the shipped dictionaries — shipped 2026-09-21
+
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#734-x-the-language-choice-is-built-from-the-shipped-dictionaries--shipped-2026-09-21);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
+
+### 73.5 [ ] Which official European languages, and translated by whom
+
+Open, and the reason §73.4 stopped at the structure. Each language is 6xx keys. Machine translation
+is a guess, and this app's own rule is that a guess is not reported as a measurement — so the
+decision needed is **which languages** and **who translates them**, before any file is added.

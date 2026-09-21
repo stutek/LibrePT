@@ -638,3 +638,48 @@ def test_crossing_to_the_client_phone_carries_the_language(page, local_server):
     assert "/intake" in page.url, page.url
     # Her own page, in her own language — the button she is about to tap says it.
     expect(page.locator("#intake-send")).to_have_text("Deli s trenerjem")
+
+
+# The chapters the app OFFERS as starting points, read from the shipped script through the same
+# function the two tables of contents draw from (domain/demoStory.js). Read in the browser rather
+# than by a regex over the source: the promise being tested is about what the index lists, and a
+# second reading of the script is a second thing that can be wrong.
+CHAPTER_INDEX = """async () => {
+    const [{ DEMO_STORY }, { storyChapterIndex }] = await Promise.all([
+      import(new URL('modules/demo/storyTour.js', document.baseURI).href),
+      import(new URL('domain/demoStory.js', document.baseURI).href),
+    ]);
+    return storyChapterIndex(DEMO_STORY).map((chapter) => chapter.id);
+}"""
+
+
+def test_every_offered_chapter_can_be_walked_from_a_cold_start(page, local_server):
+    """The sandbox card and the splash list the chapters and let any one of them be the way in
+    (2026-09-21). That is a promise about EVERY line of the list: tapped on a freshly seeded
+    sandbox, the chapter has to run to its end.
+
+    A chapter that assumes what an earlier one did — a client who has already filled in her form, a
+    plan that was already written — stops the guide on a step it cannot perform, in front of the
+    person being shown the product. This walks each one on its own, from a store that has seen none
+    of the others, and names the chapter that broke.
+    """
+    _open_story(page, local_server)
+    chapters = page.evaluate(CHAPTER_INDEX)
+    assert chapters, "the index offers no chapters"
+
+    broken = {}
+    for chapter in chapters:
+        _open_story(
+            page, local_server, f"?init=demo_data_load&demo=story&chapter={chapter}"
+        )
+        try:
+            assert _walk_the_whole_story(page), "the chapter opened on nothing"
+            expect(page.locator(PANEL)).to_be_hidden()
+        except AssertionError as stuck:
+            # Every chapter is walked, not just the ones before the first failure: the list is what
+            # the trainer is shown, so what they need to know is which LINES of it are broken.
+            broken[chapter] = str(stuck)
+
+    assert not broken, "\n\n".join(
+        f"=== {chapter} ===\n{why}" for chapter, why in broken.items()
+    )

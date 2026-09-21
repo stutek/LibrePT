@@ -20,6 +20,35 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-09-21 — The guided tour can be started at any of its chapters
+
+### Added
+
+- **The guided tour lists its chapters, and any one of them starts it** (§73.1). The tour follows
+  three friends from a leaflet to their second session and takes four to six minutes. Until now both
+  places that offered it — the message card inside the sandbox, and the welcome screen — offered one
+  way in: the beginning. Under the button that starts it there is now a folded line, *Start at a
+  chapter*; opening it lists the chapters by name, and tapping one starts the tour there.
+
+  The list is only what works. Every chapter on it is opened on a fresh sandbox and walked to its end
+  by the build, so a line that would stop the guide in front of a visitor cannot appear on it. The
+  chapter about writing the programme is therefore not on the list: it begins with the trainer
+  reading what Ana sent, and her form is filled in on her own phone earlier in the story, so on a
+  sandbox that has not played those chapters there is nothing to read. It still plays as part of the
+  whole tour (§73.2, §73.3).
+
+### Changed
+
+- **The language choice is built from the languages the app actually has** (§73.4). The welcome
+  screen's language question and the language list in the ☰ menu were each written out by hand, so a
+  new language would have appeared in neither. Both now come from the app's own set of translations,
+  and each language is named in itself — the menu says English and Slovenščina where it used to say
+  EN and SL. The welcome screen's row of buttons now wraps and scrolls, so it stays readable on a
+  phone however many languages there are. No new language came with this; that decision is open
+  (§73.5).
+
+---
+
 ## 2026-09-21 — A data format that cannot quietly change under a trainer
 
 ### Changed
