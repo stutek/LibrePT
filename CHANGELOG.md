@@ -35,6 +35,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   SCREEN was and then had to fit three filters into a 480px column, so one of them wrapped onto a
   second line. It asks how much room it actually has.
 
+- **The app now carries the symbols and emoji it writes** (§74.4). ☰, ✕, the pencil, the warning
+  sign, the waving hand — fifteen characters that appear in the app's own sentences were drawn by
+  whatever font the phone happened to have, and on a phone without one they were empty boxes. One of
+  them is the ☰ that the sandbox card names as the way out. They are part of the app now, 17KB for
+  all of them, and available offline like everything else. The build checks it by loading the app on
+  a browser with no fonts of its own.
+
 - **Four icons drew a crossed box instead of themselves** (§74.5): both arrows that move the
   calendar a month, the card beside *My details* in the ☰ menu, and the paperclip on the tour's
   attachment. The app's icon file was a month older than those controls, so their symbols were never

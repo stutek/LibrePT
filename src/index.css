@@ -7,10 +7,14 @@
 /* Design system shared, non-theme tokens (fonts, layout heights, blur) */
 :root {
   /* Typography — geometric display headers, humanist body, mono for numbers */
-  --font-sans: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
-    sans-serif;
+  /* "LibrePT Symbols" sits after the text face and BEFORE the system names: it carries only the
+     handful of symbols and emoji the app writes into its own sentences (fonts/fonts.css), so it is
+     reached for exactly those characters and never for a letter. Before the system names, because
+     the point of it is that the device no longer decides whether ☰ has a shape. */
+  --font-sans: "DM Sans", "LibrePT Symbols", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
   --font-header: "Outfit", var(--font-sans);
-  --font-mono: "JetBrains Mono", monospace;
+  --font-mono: "JetBrains Mono", "LibrePT Symbols", monospace;
 
   /* Layout tokens (shared across themes) */
   --app-max-width: 480px;

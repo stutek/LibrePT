@@ -41,6 +41,30 @@ modification; no glyph outlines were altered.
 Licence text: <https://openfontlicense.org> (SIL OFL 1.1). Each upstream repository ships the full
 `OFL.txt`, which is the authoritative copy.
 
+## Symbols and emoji the app writes into its own text
+
+Vendored 2026-09-21 as [`src/fonts/librept-symbols.woff2`](src/fonts/librept-symbols.woff2) and
+[`src/fonts/librept-emoji.woff2`](src/fonts/librept-emoji.woff2), cut by
+[`agent_tools/text_glyphs.py`](agent_tools/text_glyphs.py). Fifteen characters in all — ☰ ✕ ✎ ⚠ ▾ ⋯ →
+✓ and seven emoji — which the app's sentences use and no other vendored face carries
+([TODO §74.4](TODO.md)).
+
+| Source | Copyright | Licence | Upstream |
+| :--- | :--- | :--- | :--- |
+| DejaVu Sans | Bitstream Vera Fonts Copyright 2003 Bitstream, Inc.; DejaVu changes public domain | Bitstream Vera Fonts Licence | <https://dejavu-fonts.github.io> |
+| Noto Color Emoji | Copyright Google Inc. | SIL OFL 1.1 | <https://github.com/googlefonts/noto-emoji> |
+
+Both licences permit subsetting and redistribution, and both reserve their names — the Bitstream
+licence forbids "Bitstream Vera", OFL clause 3 forbids the Reserved Font Name. The cut faces are
+therefore renamed to **LibrePT Symbols**, and each file carries its own copyright and a pointer to
+this document in its name table, where subsetting tools would otherwise have left nothing. No glyph
+outline was altered; glyphs were only removed.
+
+DejaVu Sans is committed unmodified under
+[`assets/dejavu-upstream/`](assets/dejavu-upstream/README.md) so a re-cut needs nothing but this
+repository. Noto Color Emoji is not: it is 11MB, so its exact file is recorded by sha256 in the tool
+instead.
+
 ## qrcode-generator 1.5.2 — MIT
 
 Copyright (c) 2009 Kazuhiko Arase. Vendored as [`src/vendor/qrcode.js`](src/vendor/qrcode.js),
@@ -101,4 +125,5 @@ plus `librept-icons.woff2` and `librept-icons-brands.woff2`, which are **subsets
 
 - [LICENSE](LICENSE) — LibrePT's own licence (MIT)
 - [src/fonts/fonts.css](src/fonts/fonts.css) — the vendored webfont declarations
+- [assets/dejavu-upstream/README.md](assets/dejavu-upstream/README.md) — the symbols source, unmodified
 - [TODO.md](TODO.md) — §12.6 covers the icon-font vendoring and the subsetting constraints

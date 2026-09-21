@@ -256,7 +256,7 @@ export function renderClipboardEditor(container, deps) {
         i++;
       }
     }
-    opts.push(`<option value="__new__">＋ ${tr("circuit_new", "New circuit")}</option>`);
+    opts.push(`<option value="__new__">+ ${tr("circuit_new", "New circuit")}</option>`);
     return `<select class="editor-row-circuit-select" aria-label="${tr("circuit", "Circuit")}">${opts.join("")}</select>`;
   };
 

@@ -311,6 +311,10 @@ self.swCacheManifest = (() => {
     "./fonts/fontawesome.css",
     "./fonts/librept-icons.woff2",
     "./fonts/librept-icons-brands.woff2",
+    // The symbols and emoji the app writes into its own sentences (TODO §74.4). Offline like
+    // everything else here: a trainer with no signal must still see the ☰ the sandbox card names.
+    "./fonts/librept-symbols.woff2",
+    "./fonts/librept-emoji.woff2",
   ];
 
   // Every asset is same-origin since Font Awesome was vendored (TODO §12.6), so the whole list IS

@@ -70,6 +70,17 @@ component test can run that same sweep on itself in one line —
 buys **attribution**: the route walk says which route broke, the scoped sweep says which component
 did, in the test that can fix it. Neither replaces the other, for the composition reason above.
 
+**Two e2e files ask the browser about FONTS rather than about behaviour.**
+[test_icons_render.py](e2e/test_icons_render.py) draws every icon the app uses and fails on one that
+draws nothing, draws the font's missing-glyph box, or draws another icon's picture;
+[test_text_glyphs_render.py](e2e/test_text_glyphs_render.py) does the same for the symbols and emoji
+the app writes into its own sentences, and takes the device's fonts away first — it launches its own
+browser against a fontconfig holding one Latin face, so a character that appears can only have come
+from a file the app ships. Neither claim can be made below this tier: what a glyph looks like is
+something only a real font stack in a real page can answer, and both are claims the build has to
+hold rather than diagnostics someone remembers to run ([TODO §74.4](../TODO.md),
+[§74.5](../TODO.md)).
+
 **The other geometry test sits one tier down**:
 [medium/test_clipboard_deck_legibility.py](medium/test_clipboard_deck_legibility.py) asserts that a
 collapsed deck card's peeking first line is not swallowed by the card stacked on top of it. Same kind

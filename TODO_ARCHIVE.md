@@ -199,6 +199,54 @@ about a year either way, and a select holding a century is a scroll on a phone h
 
 ---
 
+### 74.4 [x] The app ships the symbols and emoji it writes — shipped 2026-09-21
+
+Reported by Simon as part of "manjkajo glyphi v aplikaciji", and separate from §74.5: that one was
+four Font Awesome icons, this one is the app's own TEXT.
+
+**Measured against the font files themselves:** of the eighteen characters above Latin that `src/`
+can print, fifteen were in no file the app ships — ☰ ✕ ✎ ⚠ ▾ ⋯ → ✓ and the emoji 👋 🧪 📅 🚀 🔬 🔥 💪.
+Only the em dash, the en dash and the ellipsis were there. They rendered on a developer's machine
+because the SYSTEM supplied them, which is the one thing this app relies on nowhere else: every
+typeface and every icon is vendored so a first load in a basement gym needs no network and no host
+font. On a phone with a thin font set they are empty boxes, and one of them is the ☰ that the sandbox
+card names as the way out.
+
+**Ruled by Simon, 2026-09-21: the characters stay.** The cheaper way was to take them out of the
+sentences and let the icon font draw them — cheaper because it ships no font, wrong because an icon
+is an element while a translated string reaches the screen as text (`textContent`, or escaped), so
+an icon cannot sit inside a sentence. Every such sentence would have had to be rewritten in both
+languages to say the shape in words: "Pritisni ☰ — tri vodoravne črtice" becomes "Pritisni gumb s
+tremi vodoravnimi črticami". That is a rewrite of his copy, not a technical change.
+
+**So they are vendored, 17KB for the pair**: `librept-symbols.woff2` (1.3KB, cut from DejaVu Sans)
+and `librept-emoji.woff2` (16.1KB, cut from Noto Color Emoji, in colour). One family name in the font
+stack, two files behind it split by `unicode-range`, so the emoji file is fetched only by a page that
+shows an emoji. Both are precached with the rest of the shell, because a trainer with no signal must
+still see that ☰.
+
+One character had no source at all: `＋`, the fullwidth plus, in the "new circuit" option of a
+`<select>`. A `<select>` cannot hold an icon, so a character is the only mark available there — it is
+now the ordinary `+`, which every face already carries.
+
+**The check is a browser with no fonts of its own.** Comparing renderings on a normal machine cannot
+answer this question: the subsets are cut from DejaVu and Noto, which are exactly what a Linux box
+falls back to, so "the app drew it" and "the system drew it" are the same pixels — measured. So
+tests/e2e/test_text_glyphs_render.py launches its own browser against a fontconfig holding one Latin
+face (`tests/fixtures/fonts/thin-device-latin.ttf`, DejaVu cut to bare ASCII), where a character that
+appears can only have come from a file the app ships. It was proved to fail in both directions before
+it was believed: remove the symbols file and it names the seven symbols, remove the emoji file and it
+names the eight emoji.
+
+**Three measurements were wrong before one was right**, and each error is worth keeping because each
+has already been made twice today. A box is ink, so "did it draw something" says yes for a missing
+glyph. A face is fetched when something LAYS IT OUT, and a canvas drawing is not that, so an untouched
+face measures as missing. And `document.fonts.check()` answers about the loaded face and its declared
+`unicode-range`, not about whether the glyph is in the file — it said all eighteen characters were
+fine while seven of them were not.
+
+---
+
 ### 74.5 [x] Four icons had no glyph, and the check could not see it — fixed 2026-09-21
 
 Reported by Simon as "manjkajo glyphi v aplikaciji". Four icons drew a crossed box instead of

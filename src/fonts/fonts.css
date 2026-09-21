@@ -125,3 +125,34 @@
   unicode-range:
     U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
+
+/* The symbols and emoji the app writes into its own SENTENCES (TODO §74.4). Every typeface and every
+   icon here is vendored so a first load in a basement gym needs no network and no host font — and
+   these characters were the one exception, supplied by whatever the device happened to have. On a
+   phone with a thin font set they were empty boxes, ☰ among them, which is the character the sandbox
+   card names as the way out.
+
+   ONE family, two files, split by `unicode-range` — which is what unicode-range is for: the browser
+   fetches the emoji file only for a page that shows an emoji, and a second family name would be a
+   second thing every font stack has to remember. The ranges are printed by
+   `python -m agent_tools.text_glyphs --build`, never typed from memory.
+
+   Cut from DejaVu Sans and Noto Color Emoji; both permit subsetting and reserve their names, so the
+   faces are renamed and carry their own copyright in their name tables. See THIRD_PARTY_NOTICES.md. */
+@font-face {
+  font-family: "LibrePT Symbols";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(./librept-symbols.woff2) format("woff2");
+  unicode-range: U+2192, U+22EF, U+25BE, U+2630, U+270E, U+2713, U+2715;
+}
+
+@font-face {
+  font-family: "LibrePT Symbols";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(./librept-emoji.woff2) format("woff2");
+  unicode-range: U+26A0, U+1F44B, U+1F4AA, U+1F4C5, U+1F525, U+1F52C, U+1F680, U+1F9EA;
+}

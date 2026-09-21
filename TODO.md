@@ -5105,26 +5105,10 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#745-x-four-icon
 This was the reported "missing glyphs": both calendar chevrons, `id-card` and `paperclip` drew a
 crossed box. §74.4 below is the other half and is still open.
 
-### 74.4 [ ] Nineteen characters the app writes are in no font it ships
+### 74.4 [x] The app ships the symbols and emoji it writes — shipped 2026-09-21
 
-Also reported as "missing glyphs", and separate from §74.5. **Measured in the browser against the
-fonts actually loaded:** of 21 symbol and emoji characters written into user-visible strings, 19 are
-absent from the vendored typefaces — ☰ ✕ ⋯ ✎ ⚠ ▾ ↔ ✓ ≤ and the emoji 👋 🧪 📅 ⏱ 🔥 💪 📖 🚀 🔬. Only
-• ↑ ↓ are really there.
-
-They render on a developer's machine because the SYSTEM supplies them, which is exactly what this
-app does not rely on anywhere else: every typeface and every icon is vendored so a first load in a
-basement gym needs no network and no host font. On a phone without an emoji font — or any device
-with a thin font set — these are empty boxes, and one of them is the ☰ that a sandbox card names as
-the way out.
-
-**Two ways, and they are not equivalent.** Vendor a symbol subset the way the icons are vendored,
-which costs a font file, a licence note and a place in the render baseline; or take the characters
-out of the strings and let the icon font do the drawing, which is cheaper but rewrites copy in both
-languages, and cannot be done inside a sentence such as "open the menu ☰ at the top right" without
-rewording it.
-
-**Not started.**
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#744-x-the-app-ships-the-symbols-and-emoji-it-writes--shipped-2026-09-21);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ## 75. [ ] The displayed date format should be the trainer's choice
 
