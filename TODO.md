@@ -732,11 +732,18 @@ simplifies the deck/tabs/title-bar wiring and unifies router handling.
 ### 11.3 [ ] The ☰ menu is where everything without a home ended up
 
 **Reported 2026-09-11 (Simon):** *"☰ je natlačen morala bova zgostiti in prioritizirati, morda celo
-narediti podskupine"*.
+narediti podskupine"*. **Raised again 2026-09-21 (Simon): the menu is too long and too complex, and
+wants reorganising.** Same section, nothing new to decide — what it is waiting on is below.
 
 **Counted, not estimated: 21 rows plus 2 selects** in one dropdown
 ([applicationHeader.js](src/modules/common/applicationHeader.js)) — language, theme, the trainer's
 details, the sandbox pair, five views, five data actions, and six support/legal rows.
+
+**Re-measured 2026-09-21 (Claude): 19 rows carrying `session-menu-item`** in that file, one of them
+(`menu-sandbox-reset`) hidden by default, plus the same 2 selects. That is two fewer than the count
+above and the difference has NOT been traced — the file's last commit is e1490a5 (2026-09-13,
+§49.2's Spreadsheet theme), which is not an obvious cause. Trace it before quoting either number as
+the baseline for a fold.
 
 **Five of those rows are §11.1 arriving as a bill.** Clients, Routines, Exercises and History are
 NAVIGATION; they live here because the footer nav was replaced and they were never given a new home.
