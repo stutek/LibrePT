@@ -77,6 +77,10 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
   inconsistencies rather than transcribing them, and say what you changed.
 - Answer a question; never record it as a decision, and never return with a plan for one they have
   already made.
+- **Choose, do not offer a menu.** Where the options are wordings or approaches, pick the best one,
+  do it, and report in a few lines what was chosen over what and why — a question costs a round trip
+  they would rather spend correcting a concrete result. Ask only where proceeding either way would
+  waste real work. The red-team verdict stays: that is judgement, not a question.
 - Read a message for ALL of its items before acting on any, and name them back.
 - Report what a person would SEE, not the mechanism. Quote a new or changed rule verbatim. Say which
   numbers were measured; `git ls-files` is the honest denominator.
