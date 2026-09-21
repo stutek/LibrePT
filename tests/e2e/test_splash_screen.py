@@ -465,3 +465,29 @@ def test_the_offer_says_what_the_walkthrough_contains_and_starts_at_any_chapter(
     page.wait_for_url("**chapter=**", timeout=15000)
     assert "demo=story" in page.url, page.url
     assert "workspace=sandbox" in page.url, page.url
+
+
+@pytest.mark.clean_start
+@pytest.mark.keep_splash
+def test_the_language_step_offers_every_dictionary_the_build_ships(page, local_server):
+    """TODO: the step is built from the registry of shipped dictionaries (src/i18n/index.js) rather
+    than from two buttons written into the markup, so a language arrives by adding its file.
+
+    Each name is written IN its own language: a trainer looking for theirs on a screen they cannot
+    read has only the name to go by. What is pinned is the rule, not today's two — the count comes
+    from the registry itself."""
+    page.goto(local_server)
+    step = page.locator("#app-splash-language")
+    step.wait_for(state="visible", timeout=20000)
+
+    shipped = page.evaluate(
+        """async () => {
+            const i18n = await import(new URL('i18n/index.js', document.baseURI).href);
+            return Object.entries(i18n.TRANSLATIONS).map(([code, dict]) => [code, dict.language_name]);
+        }"""
+    )
+    buttons = page.locator("#app-splash-language [data-splash-lang]")
+    assert buttons.count() == len(shipped), buttons.all_inner_texts()
+    for code, name in shipped:
+        assert name, f"{code} ships no name of its own"
+        assert page.locator(f"[data-splash-lang='{code}']").inner_text().strip() == name

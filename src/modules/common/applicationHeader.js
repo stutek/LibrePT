@@ -23,7 +23,7 @@ import { driveSyncStatus } from "../../data/driveSyncService.js";
 import { ISSUE_TRACKER_URL } from "../../data/publicUrls.js";
 import { isDemoOnlyStore } from "../../data/seedProvenance.js";
 import { SANDBOX, WORKING, isSandbox } from "../../data/workspace.js";
-import { resolveLang } from "../../i18n/index.js";
+import { TRANSLATIONS, dictionaryFor, resolveLang } from "../../i18n/index.js";
 import { isGuideSurface, renderMarkupOnce } from "./dom.js";
 import { syncGlyphFor } from "./syncStatusGlyph.js";
 import { setupThemeSwitcher } from "./theme.js";
@@ -413,10 +413,10 @@ export function renderHeaderShell() {
                    header bar stays compact. Same <select> elements as before, just relocated. -->
               <div class="menu-control-row">
                 <label class="menu-control-label" for="lang-switcher"><i class="fa-solid fa-language" aria-hidden="true"></i> <span id="menu-label-lang">Language</span></label>
-                <select id="lang-switcher" class="form-control menu-select" aria-label="Switch Language / Zamenjaj jezik">
-                  <option value="en">EN</option>
-                  <option value="sl">SL</option>
-                </select>
+                <!-- Options come from the registry of shipped dictionaries (i18n/index.js), the same
+                     way the theme options come from theme.js: a language is added by adding its
+                     file, and this menu has nothing to remember. -->
+                <select id="lang-switcher" class="form-control menu-select" aria-label="Switch Language / Zamenjaj jezik"></select>
               </div>
               <div class="menu-control-row">
                 <label class="menu-control-label" for="theme-switcher"><i class="fa-solid fa-palette" aria-hidden="true"></i> <span id="menu-label-theme">Theme</span></label>
@@ -573,6 +573,16 @@ export function setupApplicationHeader() {
   // Language switcher setup
   const langSwitcher = document.getElementById("lang-switcher");
   if (langSwitcher) {
+    // Each language named in ITSELF, never translated: a trainer looking for their own language in
+    // a menu written in one they cannot read has only the name to go by. Same rule as the splash's
+    // language step.
+    langSwitcher.replaceChildren();
+    for (const code of Object.keys(TRANSLATIONS)) {
+      const option = document.createElement("option");
+      option.value = code;
+      option.textContent = dictionaryFor(code).language_name || code.toUpperCase();
+      langSwitcher.append(option);
+    }
     // resolveLang, not the raw value: an unchosen language is null, and assigning null to a
     // <select> leaves it showing nothing at all.
     langSwitcher.value = resolveLang(deps.getState().lang);

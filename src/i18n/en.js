@@ -785,6 +785,11 @@ export const en = {
   failure_reps_placeholder: "Max",
 
   // Application (☰) header menu + About / Terms modals
+  // This dictionary's own name, written IN this language and never translated: it is what the
+  // splash's language step and the ☰ menu put on the button, and a trainer looking for their
+  // language in a screen they cannot read has only that name to go by. Every dictionary carries
+  // one, so adding a language is adding its file and nothing else.
+  language_name: "English",
   menu_language: "Language",
   menu_theme: "Theme",
   menu_clients_register: "Clients Directory",

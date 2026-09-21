@@ -187,14 +187,21 @@
   color: var(--text-muted);
 }
 
+/* Sized for a registry, not for two. Two languages sit side by side; twenty-four wrap into a grid
+   that scrolls inside the splash instead of pushing the prompt off the top of a phone. The minimum
+   column is wide enough for the longest language name written in itself, and the maximum height
+   leaves the prompt above it on screen at all times. */
 .app-splash-language-options {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 10px;
+  max-height: 46vh;
+  overflow-y: auto;
 }
 
-/* Side by side while there are two; each still gets a full-height target. */
+/* Each still gets a full-height target, whatever the column count is. */
 .app-splash-language-options .app-splash-action {
-  flex: 1;
+  width: 100%;
 }
 
 /* Onboarding entry point — replaces the progress sweep once the hold is over and the trainer has

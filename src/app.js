@@ -81,7 +81,13 @@ import {
 import { SANDBOX, isSandbox } from "./data/workspace.js";
 import { repsPresetsDatalistHTML } from "./domain/repsAndLoad.js";
 import { applyStaticDOMMappings } from "./i18n/domMappings.js";
-import { dictionaryFor, hasChosenLanguage, isSupportedLang, resolveLang } from "./i18n/index.js";
+import {
+  TRANSLATIONS,
+  dictionaryFor,
+  hasChosenLanguage,
+  isSupportedLang,
+  resolveLang,
+} from "./i18n/index.js";
 import {
   renderClientsList as clientsViewRender,
   showClientDetails as clientsViewShowDetails,
@@ -252,6 +258,20 @@ async function loadStoryChapters(state) {
     console.warn("[story] the chapter index could not be built:", error);
     return [];
   }
+}
+
+/** Every language this build ships, each named in its own language, in the registry's order.
+ *
+ * Read from the dictionaries rather than written out here, so a language arrives complete: its file
+ * is added to i18n/index.js, and the splash and the ☰ menu offer it without being touched. The name
+ * is `language_name`, which every dictionary carries about ITSELF — a list of names held anywhere
+ * else would be a second place to remember, and the one nobody would remember.
+ */
+function shippedLanguages() {
+  return Object.keys(TRANSLATIONS).map((code) => ({
+    code,
+    label: dictionaryFor(code).language_name || code.toUpperCase(),
+  }));
 }
 
 /** Whether this arrival was FURNISHED by its link: the demo seed, the walkthrough, or an invitation
@@ -1011,8 +1031,10 @@ function setupActiveSession({ linkBringsContent } = {}) {
         // in rather than imported by the splash, which owns nothing but its markup and the URL — and
         // it is the same module the ☰ menu opens, so there is one form and one validation rule.
         mountTrainerDetails: mountTrainerDetailsOnSplash,
-        // The demo story's chapters, handed in for the reason the details form is: the splash
-        // paints before the app exists and reaches for nothing but its own markup and the URL.
+        // The languages this build actually ships, each named in itself, and the demo story's
+        // chapters. Both handed in for the reason the details form is: the splash paints before the
+        // app exists and reaches for nothing but its own markup and the URL.
+        languages: shippedLanguages(),
         chapters: storyChapters,
         t,
       })

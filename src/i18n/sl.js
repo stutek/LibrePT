@@ -727,6 +727,11 @@ export const sl = {
   failure_reps_placeholder: "Maks.",
 
   // Application (☰) header menu + About / Terms modals
+  // This dictionary's own name, written IN this language and never translated: it is what the
+  // splash's language step and the ☰ menu put on the button, and a trainer looking for their
+  // language in a screen they cannot read has only that name to go by. Every dictionary carries
+  // one, so adding a language is adding its file and nothing else.
+  language_name: "Slovenščina",
   menu_language: "Jezik",
   menu_theme: "Tema",
   menu_clients_register: "Seznam strank (klientov)",

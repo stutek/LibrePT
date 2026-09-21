@@ -4,12 +4,13 @@
 //
 // Injected dependencies: `offerOnboarding` (whether the database is still empty — the caller owns
 // that question, see data/stateStore.js's stateHasData), `mountTrainerDetails(container)`, which
-// fills the details form beside the onboarding choices (TODO §45.2), and `chapters` + `t` (the demo
-// story's table of contents, and the words for it). Everything else it needs is its own markup and
-// the URL, so it stays mountable without the rest of the app — and that is why all three arrive as
-// parameters rather than imports: the details form reads and writes the identity store and the
-// chapters come from a quarter of a megabyte of demo script, and the file that paints before the app
-// exists must reach into neither.
+// fills the details form beside the onboarding choices (TODO §45.2), `languages` (every dictionary
+// this build ships, each named in itself) and `chapters` + `t` (the demo story's table of contents,
+// and the words for it). Everything else it needs is its own markup and the URL, so it stays
+// mountable without the rest of the app — and that is why all four arrive as parameters rather than
+// imports: the details form reads and writes the identity store, the languages come from the i18n
+// registry and the chapters from a quarter of a megabyte of demo script, and the file that paints
+// before the app exists must reach into none of them.
 //
 // The splash is in the STATIC HTML and visible by default, not created here — it has to be on
 // screen from first paint, and a module that runs after app.js parses would appear too late to
@@ -204,9 +205,11 @@ function fadeOut(splash, resolve) {
  * would show is in a language nobody has chosen, so there is nothing useful to dismiss TO. It is
  * also two taps at most, once ever.
  */
-function revealLanguageChoice(splash, { onChooseLanguage, afterChoice }) {
+function revealLanguageChoice(splash, { onChooseLanguage, afterChoice, languages }) {
   const languageStep = document.getElementById(LANGUAGE_ID);
   if (!languageStep) return afterChoice();
+
+  fillLanguageChoices(languageStep, languages);
 
   document.getElementById(PROGRESS_ID)?.setAttribute("hidden", "");
   document.getElementById(DISMISS_ID)?.setAttribute("hidden", "");
@@ -261,6 +264,34 @@ function fillChapterIndex(chapters, t) {
   details.hidden = false;
 }
 
+/**
+ * Put the language buttons up from the registry of dictionaries the build actually ships.
+ *
+ * `languages` is `{ code, label }` in the order they are offered, and each label is that language's
+ * name IN ITSELF — the choice has to be legible to someone who cannot read the language currently on
+ * screen. Adding a language is then adding its dictionary and nothing else; nobody has to remember
+ * this screen.
+ *
+ * An empty list leaves the markup's own two buttons alone. That is the fallback, not the path: a
+ * splash whose buttons were replaced by nothing would be a screen with no way out at all, and this
+ * one deliberately has no X.
+ */
+function fillLanguageChoices(languageStep, languages) {
+  const options = languageStep.querySelector(".app-splash-language-options");
+  if (!options || !languages?.length) return;
+
+  options.replaceChildren();
+  for (const { code, label } of languages) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "app-splash-action";
+    button.dataset.splashLang = code;
+    button.lang = code;
+    button.textContent = label;
+    options.append(button);
+  }
+}
+
 function revealOnboarding(splash, resolve, mountTrainerDetails, chapters, t) {
   const onboarding = document.getElementById(ONBOARDING_ID);
   // Never trap the trainer behind a panel that failed to render: fall back to just leaving.
@@ -304,9 +335,10 @@ export function dismissSplashWhenReady({
   linkBringsContent = false,
   onChooseLanguage = () => {},
   mountTrainerDetails = null,
-  // Which chapters this build's demo story has, handed in for the same reason the trainer's details
-  // form is: this module paints before the app exists, so it reaches for its own markup and the URL
-  // and nothing else.
+  // Which languages this build ships, and which chapters its demo story has. Both are handed in for
+  // the same reason the trainer's details form is: this module paints before the app exists, so it
+  // reaches for its own markup and the URL and nothing else.
+  languages = [],
   chapters = [],
   t = (key) => key,
 } = {}) {
@@ -362,7 +394,11 @@ export function dismissSplashWhenReady({
     };
 
     if (askForLanguage) {
-      revealLanguageChoice(splash, { onChooseLanguage, afterChoice: continueAfterLanguage });
+      revealLanguageChoice(splash, {
+        onChooseLanguage,
+        afterChoice: continueAfterLanguage,
+        languages,
+      });
     } else {
       continueAfterLanguage();
     }
