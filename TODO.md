@@ -4853,9 +4853,19 @@ a field, or an older numbered schema is made live again.
   in-memory state is therefore shaped by the schema this install READS.
 - `starWrite` then writes `currentState[collection]` into **every** live store.
 
-So an install that rolls back to a narrower schema loses the wider schema's fields from memory, and
-the very next save writes those narrowed records over the wider store. The rollback is not
-reversible: rolling forward again returns to a store that has been stripped.
+What that does to a trainer, step by step:
+
+1. They switch back to the older schema.
+2. Their repeating sessions disappear from the screen. **This part is expected** — the older schema
+   does not know that collection.
+3. They change something unrelated. Adding one client is enough.
+4. On save, the app writes what it holds in memory into EVERY live store. Memory no longer holds the
+   repeating sessions, because the older schema never read them.
+5. The newer store loses them too.
+
+Steps 2 and 5 are the whole point. That the trainer cannot SEE those sessions while on the older
+schema is what a rollback means. That they are DESTROYED is not, and the rollback is then not
+reversible: switching forward again returns to a store that has been stripped.
 
 **It does not bite today**, and that is why nobody has seen it: `SCHEMA_PREVIEW` is `SCHEMA_4` plus
 one collection, so every live shape is a superset, and the preview store is rebuilt from schema 4 on
@@ -4951,13 +4961,25 @@ and west of UTC, a missing field and an empty string. The first and third are ex
 `sessions.startDate` (an instant) and `sessionSeries.startDate` (a local calendar day) would be
 confused.
 
-**One production check IS earned, and it is a different one.** At the seams where data crosses a
-schema boundary and the app legitimately stops to speak: a restore from a file, which already asks
-before replacing and names what would be lost, and a rollback to another schema (§70). There the
-honest action is obvious — tell the trainer what this schema cannot carry. That is a one-time
-reconciliation at an event, not a round trip on every save. `backupHealth.js` is the precedent for
-the shape of it: in production it keeps a cheap per-record fingerprint rather than a snapshot,
-because the answer has to be free on a phone.
+**One production check IS earned, and it is a different check.** It runs at the two moments when
+data crosses a schema boundary and the app stops to speak to the trainer anyway: restoring a file,
+which already asks before it replaces anything and names what would be lost, and switching to
+another schema (§70).
+
+What the trainer sees at that moment is one sentence, before anything changes, saying what the
+schema they are moving to cannot hold and how many records that is — for example, that this schema
+cannot hold repeating sessions, that they have three of them, and that they will not see them while
+they are on it. Then they choose.
+
+That happens a handful of times in the life of an install, not on every save, so it is allowed to be
+slow. The round trip above is the opposite: it would run on every save, on a phone, mid-session, and
+would have nothing it could do when it failed.
+
+`backupHealth.js` is the precedent for what such a check may cost, not for what it does. To answer
+"how many records changed since the last backup" it would have to keep a whole second copy of the
+database to compare against. Instead it keeps one short number per record, computed from that
+record's contents — a few dozen bytes each. Change the record and the number changes. On a phone the
+answer has to be that cheap.
 
 ### 71.1 [ ] Schema 3 is the test subject, and stays test-only — ruled 2026-09-21, not yet built
 
